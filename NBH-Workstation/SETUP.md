@@ -2955,7 +2955,7 @@ The one-file editions now carry the 31 forms and are about 3.7 MB each.
 | Fields the polish script could not classify, across the 31 forms | 0 |
 | Script errors opening every form on its own and every view, desktop and phone | none, over 544 screenshots |
 | Fullscreen on and off by button, Escape, Escape from inside a form, and the shortcut from both; the hidden list and its memory | pass |
-| The workstation's views at 1440, 1024 and 390px wide; every view of every form at 1440 and 390px, looked at | __VISUAL__ |
+| The workstation's views at 1440, 1024 and 390px wide; every view of every form at 1440 and 390px, looked at | 545 screenshots, every view of every form at 1440 and 390px, each form read by its own reviewer and every reported regression checked by a second: 28 confirmed, all of one of six kinds (a row-header cell painted only in a table’s first row; an underlined dropdown shorter than the underlined field beside it; one dropdown too tight for its text; a button shorter than the field beside it; the card’s corners on a phone; the view control wrapping on a phone), all fixed and looked at again |
 
 The checks are in `qa/` in the repository, with a README; `qa/printbase.js`
 keeps each form's data between runs so the before and after PDFs are made
