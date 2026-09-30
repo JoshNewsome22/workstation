@@ -2933,11 +2933,11 @@ marked `data-nbh-screen` and the one line that collects styles skips it).
 
 | Check | Result |
 |---|---|
-| Every form printed on its own from the same data, before and after (31 PDFs) | __PRINT_FORMS__ |
-| The master print of all 31 forms from the same case file, before and after | __PRINT_MASTER__ |
-| axe-core, WCAG 2.1 A and AA: the workstation empty, with a form open, fullscreen, Help open; every form with its simulation loaded (before and after) | __A11Y__ |
+| Every form printed on its own from the same data, before and after (31 PDFs) | 29 of 31 byte-identical; ABC-1 and CR-1 differ only in the clock time each stamps on the page (a new incident’s start time; "Statuses as of") |
+| The master print of all 31 forms from the same case file, before and after | 372 pages, identical apart from those two clock times |
+| axe-core, WCAG 2.1 A and AA: the workstation empty, with a form open, fullscreen, Help open; every form with its simulation loaded (before and after) | 0 violations before, 0 after |
 | Fields the polish script could not classify, across the 31 forms | 0 |
-| Script errors opening every form on its own and every view, desktop and phone | __ERRORS__ |
+| Script errors opening every form on its own and every view, desktop and phone | none, over 544 screenshots |
 | Fullscreen on and off by button, Escape, Escape from inside a form, and the shortcut from both; the hidden list and its memory | pass |
 | The workstation's views at 1440, 1024 and 390px wide; every view of every form at 1440 and 390px, looked at | __VISUAL__ |
 
