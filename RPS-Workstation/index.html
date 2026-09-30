@@ -191,7 +191,7 @@ body.ws-full .crumb .fs-logo{display:block}
 body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 
 /* ---- the list can be put away on a wide window ---- */
-@media (min-width:1181px){
+@media (min-width:1180.02px){
   body.rail-hidden nav.rail{display:none}
   body.rail-hidden #railToggle{display:inline-flex}
 }
@@ -226,6 +226,8 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
   header.top .who,header.top #whoTake{display:none}
   #barToggle{display:inline-flex;max-width:44vw}
   #barToggle .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #barToggle.who-found .lbl{font-style:italic}
+  body.bar-open header.top #whoTake:not([hidden]){display:inline-flex}
   #barToggle svg{transition:transform .15s}
   body.bar-open #barToggle svg{transform:rotate(180deg)}
   .bar{display:none}
@@ -545,7 +547,7 @@ $('#rail').addEventListener('click',e=>{
 /* the form list as a drawer on a narrow window (see the CSS for why) */
 const NARROW=window.matchMedia('(max-width:1180px)');
 function setRail(open,focus){
-  const on=!!open&&NARROW.matches;
+  const on=!!open&&NARROW.matches&&!fullOn();
   document.body.classList.toggle('rail-open',on);
   $('#railScrim').hidden=!on;
   $('#railToggle').setAttribute('aria-expanded',String(on));
@@ -594,7 +596,7 @@ function setFull(on){
 $('#fullBtn').addEventListener('click',()=>setFull(!fullOn()));
 /* the browser's own fullscreen on top of ours, where the browser allows it */
 $('#fillBtn').addEventListener('click',()=>{
-  try{ if(document.fullscreenElement)document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){}
+  try{ const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen(); if(p&&p.catch)p.catch(()=>{}); }catch(e){}
 });
 document.addEventListener('fullscreenchange',()=>{
   const on=!!document.fullscreenElement,b=$('#fillBtn');
@@ -611,10 +613,10 @@ $('#barToggle').addEventListener('click',()=>{
   if(on)setTimeout(()=>{try{$('#pClient').focus({preventScroll:true});}catch(e){}},50);
 });
 $('#railScrim').addEventListener('click',()=>setRail(false,true));
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&document.body.classList.contains('rail-open')){ setRail(false,true); }
-});
-const onNarrow=()=>{ if(!NARROW.matches) setRail(false); else if(!state.cur) setRail(true); };
+const onNarrow=()=>{
+  if(!NARROW.matches){ setRail(false); $('#railToggle').setAttribute('aria-expanded',String(!railHidden())); }
+  else setRail(!state.cur);
+};
 if(NARROW.addEventListener) NARROW.addEventListener('change',onNarrow); else if(NARROW.addListener) NARROW.addListener(onNarrow);
 $('#tickUsed').addEventListener('click',()=>{
   ALL.forEach(([id])=>{const st=state.status[id];state.ticked[id]=!!(st&&st.filled>4);});
@@ -771,7 +773,7 @@ function who(){
   }
   nm.textContent=p.client||found||'No student loaded';
   nm.classList.toggle('who-found',!p.client&&!!found);
-  const bt=$('#barToggle .lbl'); if(bt)bt.textContent=p.client||found||'Packet';
+  const bt=$('#barToggle .lbl'); if(bt){bt.textContent=p.client||found||'Packet';$('#barToggle').classList.toggle('who-found',!p.client&&!!found);}
   /* the form that holds the name usually holds the ID, grade and school too;
      show them, and take them with the name, into whichever bar fields are empty */
   const det=(found&&!p.client&&state.details&&state.details[src])||{};
@@ -2095,7 +2097,8 @@ document.addEventListener('keydown',e=>{
     return;
   }
   if(e.key==='Escape'&&$('#dlg').open){$('#dlg').close();return;}
-  if(e.key==='Escape'&&fullOn()&&!document.body.classList.contains('rail-open')){setFull(false);return;}
+  if(e.key==='Escape'&&document.body.classList.contains('rail-open')){setRail(false,true);return;}
+  if(e.key==='Escape'&&fullOn()){setFull(false);return;}
   if(mod&&e.shiftKey&&e.key.toLowerCase()==='f'){e.preventDefault();setFull(!fullOn());return;}
   if(mod&&e.key.toLowerCase()==='s'){e.preventDefault();$('#saveCase').click();return;}
   if(mod&&e.shiftKey&&e.key.toLowerCase()==='p'){e.preventDefault();$('#masterPrint').click();return;}
