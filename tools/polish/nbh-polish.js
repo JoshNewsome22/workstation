@@ -45,9 +45,13 @@
       if (t.rows.length < 5) { t.removeAttribute('data-nbh-z'); continue; }   /* looked at again once rows are added */
       if (t.closest(SKIP) || t.closest('table table')) continue;
       if (/\b(scatter|iv|grid|heat|matrix|cal)\b/i.test(t.className)) continue;
+      /* a painted row, or a painted cell other than a row's label cell, means the table colours its own */
       var painted = false, cells = t.querySelectorAll('td'), rows = t.rows, k;
       for (k = 0; k < rows.length && !painted; k++) if (alpha(getComputedStyle(rows[k]).backgroundColor) > 0.05) painted = true;
-      for (k = 0; k < cells.length && k < 80 && !painted; k++) if (alpha(getComputedStyle(cells[k]).backgroundColor) > 0.05) painted = true;
+      for (k = 0; k < cells.length && k < 120 && !painted; k++) {
+        if (cells[k].cellIndex === 0) continue;
+        if (alpha(getComputedStyle(cells[k]).backgroundColor) > 0.05) painted = true;
+      }
       if (!painted) t.classList.add('nbh-zebra');
     }
   }
