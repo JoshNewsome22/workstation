@@ -1953,7 +1953,7 @@ refresh();
   }
   /* every <style> in the document, concatenated - the shell scopes it */
   function styles(){
-    return Array.prototype.map.call(document.querySelectorAll('style'),
+    return Array.prototype.map.call(document.querySelectorAll('style:not([data-nbh-screen])'),
       function(s){ return s.textContent; }).join('\n');
   }
   /* The printable body. Forms in this set are built two ways: a single
@@ -3289,6 +3289,200 @@ const ST=window.NBHStories;const F=(base,...over)=>Object.assign({},base,...over
 })();
 })();
 
+</script>
+<style id="nbh-polish-css" data-nbh-screen>
+/* ---- polish: the screen look every form shares ------------------------------
+   Every rule here sits inside "@media screen", so nothing on paper changes: a
+   form prints, on its own or in the master print, exactly as it did before.
+   The script beside this block reads each form's own style for every field and
+   marks it boxed (a bordered box), underlined (a line to write on) or bare (a
+   cell in a grid, or a line inside a bordered row), so the polish fits the
+   field it is applied to instead of forcing one shape on all of them. */
+@media screen{
+:root{--nbh-focus:#2f7fa8;--nbh-focus-soft:rgba(47,127,168,.26);--nbh-focus-wash:#f2f8fb;
+  --nbh-field:#b7c8c5;--nbh-field-hover:#8aa6a3;--nbh-radius:6px;--nbh-zebra:#f6f9f8}
+html{background:var(--nbh-paper)}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:rgba(118,162,163,.35)}
+
+/* ---- the sheet reads as one clean card on a calm page ---- */
+.sheet:not(table):not(.nbh-flush){border-radius:8px;
+  box-shadow:0 0 0 1px #dde6e4,0 1px 2px rgba(24,46,67,.04),0 14px 34px -18px rgba(24,46,67,.28)}
+.sheet:not(table).nbh-flush{box-shadow:0 0 0 1px #dde6e4,0 1px 2px rgba(24,46,67,.04),0 14px 34px -18px rgba(24,46,67,.28)}
+.nbh-band{border-radius:0 6px 6px 0}
+
+/* ---- fields ---- */
+.nbh-fld{transition:border-color .12s ease,box-shadow .12s ease,background-color .12s ease}
+.nbh-fld::placeholder{color:#6f8087;opacity:1}
+/* a boxed field: taller, a clear border, rounded, and unmistakable when it has focus.
+   A textarea keeps its own padding: the field-care script measures its height on screen and keeps it as an
+   inline style that the master print carries, so padding added here would print taller boxes in the packet. */
+input.nbh-fld.nbh-box,select.nbh-fld.nbh-box,textarea.nbh-fld.nbh-box{
+  border:1px solid var(--nbh-field);border-radius:var(--nbh-radius);background-color:#fff;color:var(--nbh-ink);
+  box-shadow:inset 0 1px 1px rgba(24,46,67,.04)}
+input.nbh-fld.nbh-box:not(.nbh-intd),select.nbh-fld.nbh-box:not(.nbh-intd){min-height:38px;padding-left:10px;padding-right:10px}
+input[type=number].nbh-fld.nbh-box:not(.nbh-intd){padding-left:8px;padding-right:6px}
+input.nbh-fld.nbh-box.nbh-intd,select.nbh-fld.nbh-box.nbh-intd{min-height:32px;padding-left:7px;padding-right:7px}
+.nbh-fld.nbh-box:hover{border-color:var(--nbh-field-hover)}
+.nbh-fld.nbh-box:focus{outline:none;border-color:var(--nbh-focus);box-shadow:0 0 0 3px var(--nbh-focus-soft)}
+/* a boxed dropdown gets one chevron instead of whatever the platform draws */
+select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:30px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:12px 8px}
+/* an underlined field keeps its line, drawn a little more surely, and lights up under the cursor */
+input.nbh-fld.nbh-ul,select.nbh-fld.nbh-ul,textarea.nbh-fld.nbh-ul{border-bottom-color:var(--nbh-field);border-radius:3px 3px 0 0}
+input.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
+.nbh-fld.nbh-ul:hover{border-bottom-color:var(--nbh-field-hover);background-color:#f8fbfa}
+.nbh-fld.nbh-ul:focus{outline:none;border-bottom-color:var(--nbh-focus);box-shadow:inset 0 -2px 0 var(--nbh-focus);background-color:var(--nbh-focus-wash)}
+/* a bare field - a grid cell, a line inside a bordered row - shows only where the cursor is */
+.nbh-fld.nbh-bare:hover{background-color:rgba(118,162,163,.09)}
+.nbh-fld.nbh-bare:focus{outline:none;box-shadow:inset 0 0 0 2px var(--nbh-focus);background-color:var(--nbh-focus-wash)}
+.nbh-fld:disabled,.nbh-fld.nbh-box[readonly]{background-color:var(--nbh-shade);color:var(--nbh-muted)}
+.nbh-fld.nbh-ul[readonly]{color:var(--nbh-muted)}
+input[type=checkbox],input[type=radio]{accent-color:var(--nbh-navy);cursor:pointer}
+input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
+label{cursor:default}
+
+/* ---- buttons: one family for the tools inside a sheet and the actions above it ---- */
+.sheet button.tool,.sheet button.rm,.sheet button.addRow,.sheet button.delObs,.sheet button.nbh-tool,
+.nbh-btn,.nbh-btn-secondary,.nbh-btn-primary,.nbh-btn-danger,.nbh-actions button{
+  font-family:var(--nbh-sans);font-size:13px;font-weight:600;line-height:1.2;min-height:34px;padding:7px 14px;
+  border-radius:var(--nbh-radius);border:1px solid var(--nbh-rule2);background:#fff;color:var(--nbh-navy);
+  box-shadow:0 1px 1px rgba(24,46,67,.05);cursor:pointer;transition:background-color .12s,border-color .12s,box-shadow .12s}
+.sheet button.tool:hover,.sheet button.addRow:hover,.sheet button.nbh-tool:hover,.nbh-btn:hover,.nbh-btn-secondary:hover,.nbh-actions button:hover{
+  background:var(--nbh-mist);border-color:var(--nbh-teal)}
+.nbh-btn-primary,.nbh-actions button.nbh-btn-primary{background:var(--nbh-navy);color:#fff;border-color:var(--nbh-navy)}
+.nbh-btn-primary:hover,.nbh-actions button.nbh-btn-primary:hover{background:var(--nbh-slate);border-color:var(--nbh-slate)}
+.sheet button.tool[id^="del"],.sheet button.rm,.sheet button.delObs,.nbh-btn-danger,.nbh-actions button.nbh-btn-danger{
+  background:#fff;color:var(--nbh-red);border-color:#d9bcbc}
+.sheet button.tool[id^="del"]:hover,.sheet button.rm:hover,.sheet button.delObs:hover,.nbh-btn-danger:hover,.nbh-actions button.nbh-btn-danger:hover{
+  background:#fbf1f1;border-color:#c99a9a}
+.sheet button.rm{font-size:12px;font-weight:600;min-height:26px;padding:3px 10px}
+.sheet button.tool:disabled,.nbh-btn:disabled{opacity:.5;cursor:default;box-shadow:none}
+.sheet button.tool:active,.nbh-btn:active,.nbh-actions button:active{box-shadow:inset 0 1px 2px rgba(24,46,67,.12)}
+
+/* ---- the control bar over a sheet ---- */
+.toolbar{box-shadow:0 1px 0 rgba(0,0,0,.18),0 6px 16px -10px rgba(24,46,67,.45)}
+.toolbar button{border-radius:var(--nbh-radius);min-height:32px;padding:6px 12px;font-weight:500}
+.toolbar button.primary{font-weight:600}
+.toolbar select,.toolbar input[type=number]{border-radius:var(--nbh-radius);min-height:32px}
+.toolbar .seg{border-radius:var(--nbh-radius);overflow:hidden}
+.toolbar .seg button{border-radius:0;min-height:32px;padding:6px 12px}
+.toolbar .seg button:hover:not([aria-pressed=true]){background:#2f5568}
+.toolbar .seg button[aria-pressed=true]{font-weight:600}
+.toolbar :focus-visible{outline:3px solid #8fd0ee;outline-offset:1px}
+
+/* ---- view tabs on the forms built as tabs ---- */
+.nbh-tabs{box-shadow:0 1px 0 var(--nbh-rule)}
+.nbh-tabs button[role=tab]{min-height:44px;padding:12px 14px 9px;border-radius:6px 6px 0 0;border-bottom-width:3px}
+.nbh-tabs button[role=tab]:hover{color:var(--nbh-navy);background:var(--nbh-shade);border-bottom-color:var(--nbh-mint)}
+.nbh-tabs button[role=tab][aria-selected="true"]{color:var(--nbh-navy);border-bottom-color:var(--nbh-navy);background:none}
+.nbh-tabs button[role=tab]:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:-3px}
+
+/* ---- tables: headers that read as headers, light row shading, figures that line up ---- */
+table{font-variant-numeric:tabular-nums}
+:where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(thead th,tr:first-child>th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
+:where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
+
+/* ---- keyboard focus everywhere else: one ring, easy to see ---- */
+a:focus-visible,button:focus-visible,[role=tab]:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
+a{text-underline-offset:2px}
+}
+/* on a phone, 16px text in a field stops the screen zooming in when it is tapped,
+   and the row of actions over a form keeps to a size the screen can hold */
+@media screen and (max-width:600px){
+  input.nbh-fld:not(.nbh-intd),select.nbh-fld:not(.nbh-intd),textarea.nbh-fld:not(.nbh-intd){font-size:16px}
+  .nbh-actions button,.nbh-btn,.nbh-btn-secondary,.nbh-btn-primary,.nbh-btn-danger{min-height:32px;padding:6px 11px;font-size:12.5px}
+  .nbh-actions{gap:6px}
+}
+</style>
+<script id="nbh-polish">
+/* ---- polish: the one part that needs script -----------------------------------
+   Thirty-one forms draw their fields three ways: as a bordered box, as a line to
+   write on, or as a bare control inside a grid cell or a bordered row. A single
+   style forced on all three would break the grids and double the borders, so
+   each field is read from the form's own stylesheet and marked for the polish
+   that fits it. Tables with enough rows to lose one's place in get a class for
+   light row shading; a table that colours its own cells is left alone. Inside
+   the workstation, Escape and the fullscreen key are passed up to it.
+   Nothing here touches what prints: the marks are classes the print styles
+   never mention. */
+(function () {
+  var SKIP = '.toolbar,.nbh-mast,.nbh-tabs,nav.tabs,dialog,.nbh-pm';
+  function alpha(c) { var m = /rgba?\(([^)]+)\)/.exec(c || ''); if (!m) return c === 'transparent' ? 0 : 1; var p = m[1].split(','); return p.length > 3 ? parseFloat(p[3]) : 1; }
+  function isField(e) {
+    if (!e || !e.tagName) return false;
+    if (e.tagName === 'SELECT' || e.tagName === 'TEXTAREA') return true;
+    if (e.tagName !== 'INPUT') return false;
+    return !/^(hidden|checkbox|radio|file|button|submit|reset|image|range|color)$/i.test(e.type || '');
+  }
+  function classify(e) {
+    if (e.closest(SKIP)) { e.classList.add('nbh-skip'); return; }
+    var cs = getComputedStyle(e);
+    var t = parseFloat(cs.borderTopWidth) || 0, b = parseFloat(cs.borderBottomWidth) || 0,
+        l = parseFloat(cs.borderLeftWidth) || 0, r = parseFloat(cs.borderRightWidth) || 0;
+    var seen = function (side) { return alpha(cs['border' + side + 'Color']) > 0.05; };
+    var kind;
+    if (t && b && l && r && (seen('Top') || seen('Bottom') || seen('Left'))) kind = 'nbh-box';
+    else if (b && !t && !l && !r && seen('Bottom')) kind = 'nbh-ul';
+    else kind = 'nbh-bare';
+    if (e.classList.contains(kind) && e.classList.contains('nbh-fld')) return;
+    e.classList.remove('nbh-box', 'nbh-ul', 'nbh-bare');
+    e.classList.add('nbh-fld', kind);
+    if (e.closest('td,th')) e.classList.add('nbh-intd');
+  }
+  function fields(root) {
+    var list = (root || document).querySelectorAll('input:not(.nbh-fld):not(.nbh-skip),select:not(.nbh-fld):not(.nbh-skip),textarea:not(.nbh-fld):not(.nbh-skip)');
+    for (var i = 0; i < list.length; i++) if (isField(list[i])) classify(list[i]);
+  }
+  /* light shading on every other row, only where the table does not colour its own */
+  function zebra(root) {
+    var tables = (root || document).querySelectorAll('table:not([data-nbh-z])');
+    for (var i = 0; i < tables.length; i++) {
+      var t = tables[i];
+      t.setAttribute('data-nbh-z', '1');
+      if (t.closest(SKIP) || t.closest('table table') || t.rows.length < 5) continue;
+      if (/\b(scatter|iv|grid|heat|matrix|cal)\b/i.test(t.className)) continue;
+      var painted = false, cells = t.querySelectorAll('td'), rows = t.rows, k;
+      for (k = 0; k < rows.length && !painted; k++) if (alpha(getComputedStyle(rows[k]).backgroundColor) > 0.05) painted = true;
+      for (k = 0; k < cells.length && k < 80 && !painted; k++) if (alpha(getComputedStyle(cells[k]).backgroundColor) > 0.05) painted = true;
+      if (!painted) t.classList.add('nbh-zebra');
+    }
+  }
+  /* a sheet with no padding of its own is a frame around cards, not a page: no rounded corner on it */
+  function sheets() {
+    var s = document.querySelectorAll('.sheet:not(table)');
+    for (var i = 0; i < s.length; i++) {
+      if ((parseFloat(getComputedStyle(s[i]).paddingTop) || 0) < 8) s[i].classList.add('nbh-flush');
+    }
+  }
+  function run(root) { try { fields(root); zebra(root); if (!root) sheets(); } catch (e) {} }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { run(); });
+  else run();
+  window.addEventListener('load', function () { run(); });
+  /* rows, respondents and sessions are added by script; mark those too */
+  var t = null;
+  try {
+    new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { run(); }, 80); })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+  /* inside the workstation: Escape leaves its fullscreen view, and the fullscreen key toggles it */
+  var framed = false;
+  try { framed = window.top !== window.self; } catch (e) { framed = true; }
+  if (framed) {
+    document.addEventListener('keydown', function (e) {
+      if (e.defaultPrevented) return;
+      if (e.key === 'Escape') {
+        if (document.querySelector('dialog[open]')) return;
+        try { window.parent.postMessage({ nbh: 'key', key: 'Escape' }, '*'); } catch (x) {}
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && !e.altKey && String(e.key || '').toLowerCase() === 'f') {
+        e.preventDefault();
+        try { window.parent.postMessage({ nbh: 'key', key: 'F', mod: true, shift: true }, '*'); } catch (x) {}
+      }
+    });
+  }
+  window.nbhPolish = { run: run };
+})();
 </script>
 </body>
 </html>

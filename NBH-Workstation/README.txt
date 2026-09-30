@@ -11,6 +11,10 @@ Double-click index.html. Everything runs from this folder.
   - Tick the forms this student needs. "Build master print" gathers exactly
     those into one document with a cover sheet and contents list, each form
     starting on a new page. Unticked forms are not included.
+  - Fullscreen (above the open form, or Ctrl+Shift+F) puts away the heading,
+    the student bar and the list so only the form is showing; Esc brings them
+    back. On a wide window the list can also be hidden from its own corner and
+    brought back with Forms. On a phone the student bar folds behind Packet.
 
 Save case (top bar) writes one file holding every open form and the student
 details; Open case brings it all back. Work is also kept on this computer as a

@@ -9,42 +9,70 @@
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
   --paper:#f1f4f3; --ink:#1a2933; --muted:#54676f; --rule:#cfdad8; --rule2:#93aead;
-  --flag:#9b4e15; --ok:#2f6b37; --red:#8e2a2a;
+  --flag:#9b4e15; --ok:#2f6b37; --red:#8e2a2a; --focus:#2f7fa8;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
   --sans:"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
-  --rail:310px;
+  --rail:322px; --radius:6px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:var(--sans);color:var(--ink);background:var(--paper);display:flex;flex-direction:column;overflow:hidden}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);display:flex;flex-direction:column;overflow:hidden;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:rgba(118,162,163,.35)}
 
-/* White heading with dark lettering, like the heading of every form opened on
-   its own; the dark student bar beneath it gives it its lower edge. The logo is
-   drawn on white, so it sits on the heading as it is; its tile and padding stay
-   so that its place in the row is unchanged. */
-header.top{background:#fff;color:var(--ink);padding:9px 16px;display:flex;align-items:center;gap:16px;flex:0 0 auto}
+/* ---- the heading: white with dark lettering, like the heading of every form on its own ---- */
+header.top{background:#fff;color:var(--ink);padding:8px 16px;display:flex;align-items:center;gap:14px;flex:0 0 auto;min-height:56px}
 header.top img{height:30px;width:auto;display:block;background:#fff;padding:4px 8px;border-radius:3px;box-sizing:content-box}
-header.top h1{font-family:var(--serif);font-size:18px;margin:0;font-weight:600;letter-spacing:.01em;color:var(--navy)}
+header.top h1{font-family:var(--serif);font-size:18px;margin:0;font-weight:600;letter-spacing:.01em;color:var(--navy);min-width:0}
 header.top .sp{flex:1}
-header.top .who{font-size:12px;color:var(--muted);text-align:right;line-height:1.35}
-header.top .who b{display:block;font-size:13.5px;color:var(--navy)}
+header.top .who{font-size:12px;color:var(--muted);text-align:right;line-height:1.35;min-width:0}
+header.top .who b{display:block;font-size:14px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the name the workstation read out of an open form, offered rather than assumed */
+header.top .who b.who-found{font-style:italic}
+header.top #whoTake{white-space:nowrap;flex:0 0 auto}
+header.top #whoTake[hidden]{display:none}
+#barToggle{display:none}
 
-.bar{background:var(--slate);color:#fff;padding:7px 16px;display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+/* ---- buttons: one family ---- */
+button{font-family:var(--sans);font-size:12.5px;font-weight:500;line-height:1.2;padding:6px 12px;min-height:32px;
+  border:1px solid var(--rule2);background:#fff;color:var(--navy);border-radius:var(--radius);cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;vertical-align:middle;
+  transition:background-color .12s,border-color .12s,box-shadow .12s}
+button:hover{background:var(--mist);border-color:var(--teal)}
+button:active{box-shadow:inset 0 1px 2px rgba(24,46,67,.14)}
+button:disabled{opacity:.55;cursor:default}
+button.primary{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
+button.primary:hover{background:var(--slate);border-color:var(--slate)}
+button.sm{font-size:12px;padding:5px 10px;min-height:30px}
+button svg{width:16px;height:16px;flex:0 0 auto;display:block}
+button.icon{padding:5px 8px;min-width:32px}
+
+/* ---- the packet bar: the student once, and what you do with the case ---- */
+.bar{background:var(--slate);color:#fff;padding:8px 16px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
 .bar .grp{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap}
-.bar .fld{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
-.bar .pair{display:inline-flex;gap:6px;align-items:center;margin-right:6px}
-.bar label{font-size:11px;opacity:.85}
-.bar input{font:inherit;font-size:12.5px;padding:4px 7px;border:1px solid #3e6070;background:#1d3a48;color:#f1f6f5;border-radius:2px;width:150px;min-height:28px}
+.bar .fld{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.bar .pair{display:inline-flex;align-items:center;margin-right:4px}
+.bar .pair button:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
+.bar .pair button+button{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-1px}
+.bar .pair button:hover{position:relative;z-index:1}
+.bar label{font-size:11.5px;color:#cfe0dd;font-weight:500}
+.bar input{font:inherit;font-size:13px;padding:5px 9px;border:1px solid #476c7e;background:#1d3a48;color:#f1f6f5;
+  border-radius:var(--radius);width:150px;min-height:32px;transition:border-color .12s,box-shadow .12s}
+.bar input::placeholder{color:#8fa8b0}
+.bar input:hover{border-color:#6a92a4}
+.bar input:focus{outline:none;border-color:#8fd0ee;box-shadow:0 0 0 3px rgba(143,208,238,.28);background:#20404f}
 .bar .sp{flex:1}
-.bar button{min-height:28px;white-space:nowrap}
-button{font-family:var(--sans);font-size:12.5px;padding:5px 11px;border:1px solid var(--rule2);
-  background:#fff;color:var(--ink);border-radius:2px;cursor:pointer}
-button:hover{background:var(--mist)}
-button.primary{background:var(--navy);color:#fff;border-color:var(--navy)}
-button.primary:hover{background:var(--slate)}
-.bar button{border-color:#3e6070;background:#20404f;color:#eaf2f0}
-.bar button:hover{background:#2b5265}
-.bar button.primary{background:#eaf2f0;color:var(--navy);border-color:#eaf2f0}
+.bar button{border-color:#476c7e;background:#20404f;color:#eaf2f0;white-space:nowrap}
+.bar button:hover{background:#2b5265;border-color:#6a92a4}
+.bar button.primary{background:#eaf2f0;color:var(--navy);border-color:#eaf2f0;font-weight:600}
+.bar button.primary:hover{background:#fff;border-color:#fff}
+/* ---- autosave chip ---- */
+.bar button.chip{font-size:11.5px;padding:4px 11px 4px 9px;background:#1d3a48;border-color:#476c7e;color:#cfe0dd;border-radius:999px}
+.bar button.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:#8fa8b0;flex:0 0 auto}
+.bar button.chip.on{color:#bfe3cf;border-color:#3f7a56}
+.bar button.chip.on::before{background:#5fbf82}
+.bar button.chip.off{color:#e8c9b4;border-color:#7a5a3f}
+.bar button.chip.off::before{background:#d59a67}
 
 main{flex:1;display:flex;min-height:0}
 
@@ -52,106 +80,128 @@ main{flex:1;display:flex;min-height:0}
 .pal-back{position:fixed;inset:0;background:rgba(24,46,67,.34);display:none;z-index:60}
 .pal-back.on{display:block}
 .pal{position:fixed;z-index:61;top:12vh;left:50%;transform:translateX(-50%);width:min(620px,92vw);
-  background:#fff;border:1px solid var(--rule2);border-radius:4px;box-shadow:0 18px 60px rgba(24,46,67,.35);
+  background:#fff;border:1px solid var(--rule2);border-radius:10px;box-shadow:0 24px 60px -12px rgba(24,46,67,.45);
   display:none;overflow:hidden}
 .pal.on{display:block}
-.pal input{width:100%;font:inherit;font-size:15px;padding:13px 16px;border:0;border-bottom:1px solid var(--rule);
+.pal input{width:100%;font:inherit;font-size:15px;padding:14px 18px;border:0;border-bottom:1px solid var(--rule);
   color:var(--ink);background:#fff}
 .pal input:focus{outline:none}
 .pal .res{max-height:52vh;overflow-y:auto}
-.pal .r{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-bottom:1px solid #f1f5f4}
+.pal .r{display:flex;align-items:center;gap:10px;padding:9px 18px;cursor:pointer;border-bottom:1px solid #f1f5f4}
 .pal .r[aria-selected=true]{background:var(--navy);color:#fff}
 .pal .r[aria-selected=true] .rid,.pal .r[aria-selected=true] .rsub{color:#bcd9d4}
-.pal .rid{font-size:10.5px;font-weight:600;color:var(--muted);width:44px;flex:0 0 44px}
+.pal .rid{font-size:10.5px;font-weight:700;color:var(--muted);width:44px;flex:0 0 44px;letter-spacing:.02em}
 .pal .rnm{flex:1;font-size:13px}
 .pal .rsub{font-size:10.5px;color:var(--muted);flex:0 0 auto}
-.pal .foot{padding:7px 16px;font-size:11px;color:var(--muted);background:var(--shade);border-top:1px solid var(--rule)}
-.pal kbd{font:inherit;font-size:10.5px;background:#fff;border:1px solid var(--rule);border-bottom-width:2px;
-  border-radius:3px;padding:0 4px;margin:0 2px}
-.pal .none{padding:18px 16px;font-size:12.5px;color:var(--muted)}
+.pal .foot{padding:8px 18px;font-size:11px;color:var(--muted);background:var(--shade);border-top:1px solid var(--rule)}
+.pal kbd,dialog kbd{font:inherit;font-size:10.5px;background:#fff;border:1px solid var(--rule);border-bottom-width:2px;
+  border-radius:4px;padding:0 5px;margin:0 2px;color:var(--navy)}
+.pal .none{padding:18px;font-size:12.5px;color:var(--muted)}
 
 /* ---- identity alert ---- */
-.alertbar{background:#fbf0e6;color:#7a3a10;border-bottom:1px solid #e0c3a4;padding:6px 16px;
-  font-size:12px;display:none;align-items:center;gap:10px;flex:0 0 auto}
+.alertbar{background:#fbf0e6;color:#7a3a10;border-bottom:1px solid #e0c3a4;padding:7px 16px;
+  font-size:12.5px;display:none;align-items:center;gap:10px;flex:0 0 auto}
 .alertbar.on{display:flex}
 .alertbar b{color:#9b4e15}
 .alertbar .sp{flex:1}
-.alertbar button{font-size:11.5px;padding:4px 10px;min-height:28px;background:#fff;border-color:#e0c3a4}
-
-/* ---- rail extras ---- */
-.stage .cnt{float:right;letter-spacing:0;text-transform:none;font-size:10px;color:var(--muted)}
-.bar2{height:3px;background:var(--rule);border-radius:2px;overflow:hidden;margin:5px 0 0}
-.bar2 i{display:block;height:100%;background:var(--teal)}
-.item .dirty{color:var(--flag);font-weight:700;margin-left:-4px}
-
-/* ---- autosave chip ---- */
-.bar button.chip{font-size:11.5px;padding:4px 10px;background:#1d3a48;border-color:#3e6070;color:#cfe0dd}
-.bar button.chip.on{color:#bfe3cf;border-color:#3f7a56}
-.bar button.chip.off{color:#e8c9b4;border-color:#7a5a3f}
+.alertbar button{font-size:11.5px;padding:4px 10px;min-height:28px;background:#fff;border-color:#e0c3a4;color:#7a3a10}
+.alertbar button:hover{background:#fff7f0;border-color:#c9955e}
 
 /* ---- keyboard focus, WCAG 2.1 AA 2.4.7 ---- */
-:focus-visible{outline:3px solid #2f7fa8;outline-offset:1px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .bar :focus-visible{outline-color:#8fd0ee}
-/* the name the workstation read out of an open form, offered rather than assumed */
-header.top .who b.who-found{font-style:italic}
-header.top #whoTake{font-size:11.5px;padding:4px 9px;border:1px solid var(--rule2);border-radius:5px;
-  background:#fff;color:var(--navy);cursor:pointer;white-space:nowrap;flex:0 0 auto}
-header.top #whoTake:hover{background:var(--mist)}
-header.top #whoTake[hidden]{display:none}
 .skip{position:absolute;left:-9999px;top:0;z-index:99;background:#fff;color:var(--navy);
-  padding:9px 14px;border:2px solid var(--navy);font-size:13px}
+  padding:9px 14px;border:2px solid var(--navy);font-size:13px;border-radius:var(--radius)}
 .skip:focus{left:8px;top:8px}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
   clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---- the list of forms ---- */
 nav.rail{width:var(--rail);flex:0 0 var(--rail);background:#fff;border-right:1px solid var(--rule);
   overflow-y:auto;display:flex;flex-direction:column}
-.railhead{padding:9px 12px;border-bottom:1px solid var(--rule);background:var(--shade);font-size:11.5px;color:var(--muted)}
-.railhead b{color:var(--navy);font-size:12.5px}
-.stage{padding:8px 12px 3px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--shade);border-top:1px solid var(--rule)}
+.railhead{padding:10px 10px 10px 14px;border-bottom:1px solid var(--rule);background:#fff;font-size:12px;color:var(--muted);line-height:1.45}
+.railhead .rh-row{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.railhead .rh-row b{color:var(--navy);font-family:var(--serif);font-size:16px;font-weight:600}
+.railhead .rh-row .sp{flex:1}
+.railhead .rh-tools{display:flex;gap:6px;margin-top:8px}
+.railhead .find{display:flex;width:100%;align-items:center;gap:8px;margin:6px 0 8px;padding:5px 8px 5px 10px;min-height:32px;
+  background:var(--shade);border:1px solid var(--rule);color:var(--muted);font-weight:400;font-size:12px;text-align:left;justify-content:flex-start;border-radius:var(--radius)}
+.railhead .find:hover{background:#fff;border-color:var(--rule2);color:var(--navy)}
+.railhead .find span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.railhead .find kbd{font:inherit;font-size:10.5px;background:#fff;border:1px solid var(--rule);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--navy)}
+.railhead button.sm{font-size:11.5px;padding:4px 9px;min-height:28px}
+.railhead #railHide{min-height:28px;padding:3px 6px;color:var(--muted);border-color:transparent;background:none}
+.railhead #railHide:hover{background:var(--mist);color:var(--navy);border-color:var(--rule2)}
+.stage{padding:9px 14px 4px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:var(--muted);
+  background:var(--shade);border-top:1px solid var(--rule);border-bottom:1px solid #e6ecea;position:sticky;top:0;z-index:2}
+.stage .cnt{float:right;letter-spacing:0;text-transform:none;font-size:10.5px;font-weight:500;color:var(--muted)}
 #rail ul.stagelist{list-style:none;margin:0;padding:0}
-.item{display:flex;align-items:center;gap:8px;padding:5px 12px;border-bottom:1px solid #eef2f0;cursor:pointer}
-.item:hover{background:var(--mist)}
+.item{display:flex;align-items:center;gap:8px;padding:0 10px 0 12px;min-height:40px;border-bottom:1px solid #eef2f0;cursor:pointer;position:relative}
+.item:hover{background:var(--shade)}
 .item.cur{background:var(--navy);color:#fff}
+.item.cur::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--teal)}
 .item.cur .fid{color:#bcd9d4}
-.item.cur .st{color:#bcd9d4}
-.item input[type=checkbox]{flex:0 0 auto;margin:0;cursor:pointer}
+.item.cur .st{color:#dbe9e6}
+.item input[type=checkbox]{flex:0 0 auto;margin:0;cursor:pointer;width:15px;height:15px;accent-color:var(--navy)}
+.item.cur input[type=checkbox]{accent-color:#fff}
 /* the row's text is a button that opens the form, drawn as the row itself */
-.item button.open{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:24px;
-  margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
-.item button.open:hover{background:none}
-.item button.open:focus-visible{outline:3px solid #2f7fa8;outline-offset:2px}
+.item button.open{display:flex;align-items:center;gap:8px;flex:1;min-width:0;min-height:40px;
+  margin:0;padding:0;border:0;border-radius:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;justify-content:flex-start;transition:none}
+.item button.open:hover{background:none;border-color:transparent}
+.item button.open:focus-visible{outline:3px solid var(--focus);outline-offset:-3px}
 .item.cur button.open:focus-visible{outline-color:#8fd0ee}
-.item .fid{font-size:10.5px;color:var(--muted);width:40px;flex:0 0 40px;font-weight:600}
+.item .fid{font-size:10.5px;color:var(--muted);width:40px;flex:0 0 40px;font-weight:700;letter-spacing:.02em}
 .item .nm{flex:1;font-size:12.5px;line-height:1.3}
 .item .st{font-size:10.5px;color:var(--muted);flex:0 0 auto;font-variant-numeric:tabular-nums}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--rule2);flex:0 0 auto}
+.item .st.has{background:var(--shade);border-radius:999px;padding:1px 7px;font-weight:600}
+.item.cur .st.has{background:rgba(255,255,255,.14)}
+.item .dirty{color:var(--flag);font-weight:700;margin-left:-4px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--rule2);flex:0 0 auto}
 .dot.open{background:var(--flag)}
 .dot.done{background:var(--ok)}
+.item.cur .dot{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
 
+/* ---- the stage: the bar over the form, and the form ---- */
 section.stagew{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--paper)}
-.crumb{padding:6px 14px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--rule);background:#fff;display:flex;gap:10px;align-items:center;min-height:41px}
-.crumb b{color:var(--navy);font-size:13px}
+.crumb{padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--rule);background:#fff;
+  display:flex;gap:8px;align-items:center;min-height:46px}
+.crumb b{color:var(--navy);font-size:14.5px;font-family:var(--serif);font-weight:600}
 .crumb .sp{flex:1}
-/* the bar over the form: one line at any width - the name gives way first,
-   then the file name drops out, and the buttons never break onto two lines */
+/* one line at any width - the name gives way first, then the file name drops out,
+   and the buttons never break onto two lines */
 .crumb #crumbTitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
-.crumb #crumbId{white-space:nowrap;flex:0 0 auto}
-/* quiet, but still 4.5:1 against white: it was the muted grey at 60% opacity, which is not */
-.crumb #crumbFile{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#5f727a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 3 auto}
-.crumb #crumbStatus{min-width:0}
+.crumb .sp{flex:1 1 0;min-width:4px}
+.crumb #crumbId{white-space:nowrap;flex:0 0 auto;background:var(--mist);color:var(--slate);border-radius:999px;padding:2px 9px;font-size:11px;font-weight:600}
+.crumb #crumbId:empty{display:none}
+/* quiet, but still 4.5:1 against white */
+.crumb #crumbFile{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#5f727a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 30 auto}
+.crumb #crumbStatus{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 8 auto}
+.crumb .acts{display:flex;gap:6px;flex:0 0 auto;margin-left:auto}
 .crumb button{flex:0 0 auto;white-space:nowrap}
-button.sm{font-size:11.5px;padding:4px 10px;min-height:28px}
-.railhead button.sm{font-size:11px;padding:4px 9px}
+.crumb .fs-logo{display:none;height:22px;width:auto}
+.crumb button svg[hidden]{display:none}
+/* with nothing open, the buttons that act on the open form have nothing to act on */
+body:not(.has-form) #printOne,body:not(.has-form) #popOut,body:not(.has-form) #closeForm,body:not(.has-form) #fullBtn{display:none}
+#railToggle,.railonly,#fillBtn{display:none}
+#fillBtn.avail{display:inline-flex}
+
+/* ---- fullscreen: the form, the bar above it, and nothing else ---- */
+body.ws-full header.top,body.ws-full .bar,body.ws-full nav.rail,body.ws-full .rail-scrim,body.ws-full #railToggle{display:none!important}
+body.ws-full .crumb .fs-logo{display:block}
+body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
+
+/* ---- the list can be put away on a wide window ---- */
+@media (min-width:1181px){
+  body.rail-hidden nav.rail{display:none}
+  body.rail-hidden #railToggle{display:inline-flex}
+}
 /* ---- the form list as a drawer on a narrow window ----
    Beside a 310px list, a form had about 700px on a tablet - less than the sheet
    itself - so every form scrolled sideways. Below 1180px the list slides over
    the form when asked for and gets out of the way once a form is picked. */
-/* with nothing open, the buttons that act on the open form have nothing to act on */
-body:not(.has-form) #printOne,body:not(.has-form) #popOut,body:not(.has-form) #closeForm{display:none}
-#railToggle,.railonly{display:none}
 @media (max-width:1180px){
   main{position:relative}
-  #railToggle{display:inline-block}
+  #railToggle{display:inline-flex}
   .railonly{display:block}
   #crumbFile{display:none}
   nav.rail{position:absolute;top:0;bottom:0;left:0;z-index:40;width:min(340px,88vw);flex:none;
@@ -162,26 +212,67 @@ body:not(.has-form) #printOne,body:not(.has-form) #popOut,body:not(.has-form) #c
   body.rail-open #railToggle{background:var(--navy);color:#fff;border-color:var(--navy)}
 }
 .rail-scrim[hidden]{display:none}
-@media (prefers-reduced-motion:reduce){nav.rail{transition:none!important}}
+@media (prefers-reduced-motion:reduce){nav.rail,button,.bar input{transition:none!important}}
+/* the labels leave the buttons over the form when there is no room for them; the icons and their names stay */
+@media (max-width:1280px){#crumbFile{display:none}}
+@media (max-width:1000px){
+  .crumb .acts button .lbl,#railToggle .lbl{display:none}
+  .crumb .acts button,#railToggle{padding:5px 8px;min-width:32px}
+}
+/* a phone: the packet bar folds behind a button in the heading, and the bar over the form keeps to its essentials */
+@media (max-width:720px){
+  header.top{padding:8px 12px;gap:10px;min-height:52px}
+  header.top h1{font-size:15px;line-height:1.15}
+  header.top .who,header.top #whoTake{display:none}
+  #barToggle{display:inline-flex;max-width:44vw}
+  #barToggle .lbl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #barToggle svg{transition:transform .15s}
+  body.bar-open #barToggle svg{transform:rotate(180deg)}
+  .bar{display:none}
+  body.bar-open .bar{display:flex}
+  .bar .fld{flex:1 1 auto}
+  .bar .fld input{flex:1;width:auto;min-width:0}
+  .crumb{padding:6px 8px;gap:6px}
+  .crumb #crumbStatus,.crumb #crumbId{display:none}
+  .crumb .acts{gap:4px}
+}
 .frames{flex:1;position:relative;min-height:0}
-.frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--paper)}
 .frames iframe[hidden]{display:none}
-.blank{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;text-align:center}
-.blank div{max-width:560px}
-.blank h2{font-family:var(--serif);color:var(--navy);font-size:22px;margin:0 0 10px}
-.blank p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:8px 0}
 
-dialog{border:1px solid var(--rule2);border-radius:3px;padding:0;max-width:760px;width:92%;box-shadow:0 10px 40px rgba(24,46,67,.3)}
+/* ---- the start screen ---- */
+.blank{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:auto}
+.blank .card{max-width:680px;width:100%;background:#fff;border:1px solid var(--rule);border-radius:12px;padding:34px 38px 30px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.6),0 18px 40px -22px rgba(24,46,67,.35)}
+.blank h2{font-family:var(--serif);color:var(--navy);font-size:24px;margin:0 0 8px}
+.blank p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:8px 0}
+.blank .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:22px 0 4px;text-align:left}
+.blank .step{background:var(--shade);border:1px solid #e6ecea;border-radius:8px;padding:12px 14px}
+.blank .step i{display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--navy);color:#fff;font-style:normal;
+  font-size:12px;font-weight:700;align-items:center;justify-content:center;margin-bottom:8px}
+.blank .step > b{display:block;color:var(--navy);font-size:13px;margin-bottom:3px}
+.blank .step p b{color:var(--navy)}
+.blank .step p{margin:0;font-size:12px;line-height:1.5}
+.blank .railonly{margin:14px 0 4px}
+@media (max-width:720px){
+  .blank{padding:14px;align-items:flex-start}
+  .blank .card{padding:22px 18px}
+  .blank .steps{grid-template-columns:1fr;gap:8px}
+}
+
+dialog{border:1px solid var(--rule2);border-radius:10px;padding:0;max-width:760px;width:92%;box-shadow:0 30px 70px -24px rgba(24,46,67,.55)}
 dialog::backdrop{background:rgba(24,46,67,.45)}
-dialog .dh{background:var(--navy);color:#fff;padding:9px 14px;font-family:var(--serif);font-size:16px}
-dialog .db{padding:14px;max-height:62vh;overflow:auto;font-size:13px;line-height:1.55}
-dialog .df{padding:10px 14px;border-top:1px solid var(--rule);display:flex;gap:8px;justify-content:flex-end;background:var(--shade)}
-dialog table{border-collapse:collapse;width:100%;font-size:12.5px}
-dialog th,dialog td{border:1px solid var(--rule);padding:5px 8px;text-align:left;vertical-align:top}
-dialog th{background:var(--shade)}
+dialog .dh{background:var(--navy);color:#fff;padding:12px 18px;font-family:var(--serif);font-size:17px;border-radius:9px 9px 0 0}
+dialog .db{padding:16px 18px;max-height:62vh;overflow:auto;font-size:13px;line-height:1.55}
+dialog .db > :first-child{margin-top:0}
+dialog .df{padding:10px 18px;border-top:1px solid var(--rule);display:flex;gap:8px;justify-content:flex-end;background:var(--shade);border-radius:0 0 9px 9px}
+dialog table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+dialog th,dialog td{border:1px solid var(--rule);padding:6px 9px;text-align:left;vertical-align:top}
+dialog th{background:var(--mist);color:var(--navy)}
+dialog tr:nth-child(even) td{background:#fafcfb}
 /* ---- bookmarking a saved packet ---- */
-dialog .dropzone{display:block;width:100%;margin:12px 0 6px;padding:24px 16px;border:2px dashed var(--rule2);
-  border-radius:3px;background:var(--shade);color:var(--slate);font-size:13px;text-align:center}
+dialog .dropzone{display:block;width:100%;margin:12px 0 6px;padding:26px 16px;border:2px dashed var(--rule2);
+  border-radius:8px;background:var(--shade);color:var(--slate);font-size:13px;text-align:center;min-height:0}
 dialog .dropzone:hover,dialog .dropzone.over{border-color:var(--navy);background:var(--mist)}
 dialog .bm-sum{margin:12px 0 8px}
 dialog .bm-sum b{color:var(--navy)}
@@ -189,8 +280,8 @@ dialog .bm-act{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10
 dialog .bm-opt{display:flex;align-items:center;gap:7px;margin:12px 0 4px;font-size:12.5px}
 dialog .bm-act span{font-size:12px;color:var(--muted)}
 dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
-.note{background:var(--mist);border-left:3px solid var(--teal);padding:9px 12px;margin:8px 0;font-size:12.5px;line-height:1.5}
-.warnbox{background:#fbeedb;border-left:3px solid var(--flag);padding:9px 12px;margin:8px 0;font-size:12.5px;line-height:1.5}
+.note{background:var(--mist);border-left:3px solid var(--teal);padding:10px 13px;margin:8px 0;font-size:12.5px;line-height:1.5;border-radius:0 6px 6px 0}
+.warnbox{background:#fbeedb;border-left:3px solid var(--flag);padding:10px 13px;margin:8px 0;font-size:12.5px;line-height:1.5;border-radius:0 6px 6px 0}
 @media (max-width:900px){:root{--rail:250px}}
 /* Printed from the browser's own menu, the workstation would put its bars, the
    form list and a window-sized slice of one form on paper. Say how to print. */
@@ -215,10 +306,11 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   <h1>FBA and BIP Workstation</h1>
   <div class="sp"></div>
   <div class="who"><b id="whoName">No student loaded</b><span id="whoSub">Enter the packet details to begin</span></div>
-  <button id="whoTake" hidden>Use this name</button>
+  <button id="whoTake" class="sm" hidden>Use this name</button>
+  <button id="barToggle" class="sm" aria-controls="bar" aria-expanded="false" title="Show or hide the packet bar"><span class="lbl">Packet</span><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg></button>
 </header>
 
-<div class="bar">
+<div class="bar" id="bar">
   <!-- The student's details on one row, each label kept with its own box when
        the window is narrow; what you do with the packet and the case below. -->
   <div class="grp det" role="group" aria-label="Packet details">
@@ -255,9 +347,11 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
 <main>
   <nav class="rail" id="railNav" aria-label="Forms in this packet">
     <div class="railhead">
-      <b>Packet</b><br>
+      <div class="rh-row"><b>Packet</b><span class="sp"></span>
+        <button id="railHide" class="sm icon" title="Hide the list of forms" aria-label="Hide the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11M11.5 6.5 10 8l1.5 1.5"/></svg></button></div>
+      <button id="railFind" class="find" title="Find a form or run a command (Ctrl K)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><span>Find a form or command&hellip;</span><kbd>&#8984;K</kbd></button>
       Tick a form to include it in the master print. <span id="tickCount">0 of 31 ticked</span>.
-      <div style="margin-top:6px;display:flex;gap:6px">
+      <div class="rh-tools">
         <button id="tickUsed" class="sm">Tick the ones I've used</button>
         <button id="tickNone" class="sm">Clear</button>
       </div>
@@ -267,22 +361,31 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
 
   <section class="stagew">
     <div class="crumb">
-      <button id="railToggle" class="sm" aria-controls="railNav" aria-expanded="false" title="Show the list of forms">Forms</button>
+      <button id="railToggle" class="sm" aria-controls="railNav" aria-expanded="false" aria-label="Show the list of forms" title="Show the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11"/></svg><span class="lbl">Forms</span></button>
+      <img class="fs-logo" id="fsLogo" alt="" aria-hidden="true">
       <b id="crumbTitle">Nothing open</b>
       <span id="crumbId"></span>
       <span id="crumbFile"></span>
       <div class="sp"></div>
       <span id="crumbStatus"></span>
-      <button id="printOne" class="sm">Print this form</button>
-      <button id="popOut" class="sm">Open in its own tab</button>
-      <button id="closeForm" class="sm">Close</button>
+      <div class="acts">
+        <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
+        <button id="popOut" class="sm" aria-label="Open in its own tab" title="Open in its own tab"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M6 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10"/></svg><span class="lbl">Own tab</span></button>
+        <button id="fullBtn" class="sm" aria-pressed="false" aria-label="Fullscreen: only the form" title="Fullscreen: only the form (Ctrl+Shift+F)"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true" hidden fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg><span class="lbl">Fullscreen</span></button>
+        <button id="fillBtn" class="sm" aria-pressed="false" aria-label="Fill the whole screen" title="Use the whole screen: the browser's own bars go too"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg><span class="lbl">Fill screen</span></button>
+        <button id="closeForm" class="sm" aria-label="Close this form" title="Close this form"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg><span class="lbl">Close</span></button>
+      </div>
     </div>
     <div class="frames" id="frames">
-      <div class="blank" id="blank"><div>
+      <div class="blank" id="blank"><div class="card">
         <h2>Pick a form from the list</h2>
+        <p>Every form opens here and stays loaded while you work, so you can move between them without losing anything.</p>
         <p class="railonly"><button type="button" id="railShow" class="primary">Show the list of forms</button></p>
-        <p>Every form opens here and stays loaded while you work, so you can move between them without losing anything. Enter the student's details in the bar above once and they go into each form as you open it.</p>
-        <p>Your work stays in this window, and Autosave keeps a safety copy in this browser. <b>Save case</b> keeps everything in one file, and the master print gathers whichever forms you tick into one document.</p>
+        <div class="steps">
+          <div class="step"><i>1</i><b>Enter the student once</b><p>The details in the bar above go into each form as you open it, filling only fields that are still empty.</p></div>
+          <div class="step"><i>2</i><b>Work in any form</b><p>Your work stays in this window, and Autosave keeps a safety copy in this browser. <b>Save case</b> keeps everything in one file.</p></div>
+          <div class="step"><i>3</i><b>Tick and print</b><p>Tick the forms this student needs and <b>Build master print</b> gathers them into one document with a cover and contents.</p></div>
+        </div>
       </div></div>
     </div>
   </section>
@@ -413,7 +516,7 @@ function railHTML(){
         <input type="checkbox" data-tick="${id}" ${state.ticked[id]?'checked':''} aria-label="Include Form ${id} in the master print">
         <button type="button" class="open" data-open="${id}" tabindex="${stop?0:-1}"${cur?' aria-current="true"':''}>
         <span class="dot ${cls}" aria-hidden="true"></span>${odd}
-        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st">${lab}${st?'<span class="sr"> fields filled</span>':'<span class="sr">not opened</span>'}</span></button></li>`;
+        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st${st?' has':''}">${lab}${st?'<span class="sr"> fields filled</span>':'<span class="sr">not opened</span>'}</span></button></li>`;
     }).join('')+'</ul>';
   }).join('');
 }
@@ -448,8 +551,65 @@ function setRail(open,focus){
   $('#railToggle').setAttribute('aria-expanded',String(on));
   if(focus){ try{ (on?railButton():$('#railToggle')).focus({preventScroll:true}); }catch(e){} }
 }
-$('#railToggle').addEventListener('click',()=>setRail(!document.body.classList.contains('rail-open'),true));
-$('#railShow').addEventListener('click',()=>setRail(true,true));
+/* On a wide window the list can be put away, so the form has the whole width; the
+   choice is remembered. The Forms button in the bar over the form brings it back. */
+const RAILKEY='nbh.ws.rail';
+function railHidden(){try{return localStorage.getItem(RAILKEY)==='hidden';}catch(e){return false;}}
+function setRailHidden(h,focus){
+  document.body.classList.toggle('rail-hidden',!!h);
+  try{localStorage.setItem(RAILKEY,h?'hidden':'shown');}catch(e){}
+  if(!NARROW.matches)$('#railToggle').setAttribute('aria-expanded',String(!h));
+  if(focus){ try{ (h?$('#railToggle'):railButton()).focus({preventScroll:true}); }catch(e){} }
+  say(h?'Form list hidden':'Form list shown');
+}
+$('#railToggle').addEventListener('click',()=>{
+  if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);
+  else setRailHidden(false,true);
+});
+$('#railHide').addEventListener('click',()=>{ if(NARROW.matches)setRail(false,true); else setRailHidden(true,true); });
+$('#railFind').addEventListener('click',()=>palOpen());
+$('#railShow').addEventListener('click',()=>{ if(NARROW.matches)setRail(true,true); else setRailHidden(false,true); });
+if(railHidden())document.body.classList.add('rail-hidden');
+if(!NARROW.matches)$('#railToggle').setAttribute('aria-expanded',String(!railHidden()));
+
+/* ---- fullscreen: the form, the bar above it, and nothing else ----
+   The heading, the packet bar and the list go; the form takes the window. Escape
+   brings them back, from the form as well as from this page, and so does the button. */
+function fullOn(){return document.body.classList.contains('ws-full');}
+function setFull(on){
+  on=!!on&&!!state.cur;
+  if(on===fullOn()&&!on)return;
+  document.body.classList.toggle('ws-full',on);
+  const b=$('#fullBtn');
+  b.setAttribute('aria-pressed',String(on));
+  b.querySelector('.i-on').hidden=on; b.querySelector('.i-off').hidden=!on;
+  b.querySelector('.lbl').textContent=on?'Exit':'Fullscreen';
+  b.setAttribute('aria-label',on?'Leave fullscreen':'Fullscreen: only the form');
+  b.title=on?'Leave fullscreen (Esc)':'Fullscreen: only the form (Ctrl+Shift+F)';
+  $('#fillBtn').classList.toggle('avail',on&&!!document.fullscreenEnabled);
+  if(!on&&document.fullscreenElement){try{document.exitFullscreen();}catch(e){}}
+  if(on)setRail(false);
+  say(on?'Fullscreen: only the form is showing. Press Escape to bring the rest back.':'Left fullscreen');
+}
+$('#fullBtn').addEventListener('click',()=>setFull(!fullOn()));
+/* the browser's own fullscreen on top of ours, where the browser allows it */
+$('#fillBtn').addEventListener('click',()=>{
+  try{ if(document.fullscreenElement)document.exitFullscreen(); else document.documentElement.requestFullscreen(); }catch(e){}
+});
+document.addEventListener('fullscreenchange',()=>{
+  const on=!!document.fullscreenElement,b=$('#fillBtn');
+  b.setAttribute('aria-pressed',String(on));
+  b.querySelector('.lbl').textContent=on?'Leave screen':'Fill screen';
+  b.title=on?'Give the browser its bars back':'Use the whole screen: the browser\'s own bars go too';
+});
+try{$('#fsLogo').src=$('#logo').src;}catch(e){}
+/* on a phone the packet bar folds behind the Packet button in the heading */
+$('#barToggle').addEventListener('click',()=>{
+  const on=!document.body.classList.contains('bar-open');
+  document.body.classList.toggle('bar-open',on);
+  $('#barToggle').setAttribute('aria-expanded',String(on));
+  if(on)setTimeout(()=>{try{$('#pClient').focus({preventScroll:true});}catch(e){}},50);
+});
 $('#railScrim').addEventListener('click',()=>setRail(false,true));
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&document.body.classList.contains('rail-open')){ setRail(false,true); }
@@ -503,6 +663,7 @@ $('#closeForm').addEventListener('click',()=>{
   delete state.status[state.cur];
   state.cur=null;$('#blank').style.display='';
   document.body.classList.remove('has-form');
+  setFull(false);
   setRail(true);
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';
   $('#crumbFile').textContent='';clearTimeout(state.watch);
@@ -610,6 +771,7 @@ function who(){
   }
   nm.textContent=p.client||found||'No student loaded';
   nm.classList.toggle('who-found',!p.client&&!!found);
+  const bt=$('#barToggle .lbl'); if(bt)bt.textContent=p.client||found||'Packet';
   /* the form that holds the name usually holds the ID, grade and school too;
      show them, and take them with the name, into whichever bar fields are empty */
   const det=(found&&!p.client&&state.details&&state.details[src])||{};
@@ -684,6 +846,13 @@ window.addEventListener('message',ev=>{
   /* v21.22 relay: a form asking for another open form's data; the protocol is at relay() above. It comes
      first because an ask carries no form id, and the file check's filter below would drop it. */
   if(d.nbh==='ask'){relay(ev,d);return;}
+  /* Escape and the fullscreen key, pressed while working inside a form */
+  if(d.nbh==='key'){
+    if(!relayFrom(ev.source))return;
+    if(d.key==='Escape'&&fullOn())setFull(false);
+    else if(d.key==='F'&&d.mod&&d.shift)setFull(!fullOn());
+    return;
+  }
   /* the file check loads forms in hidden frames; their replies are not real status */
   if(state.probing&&!state.frames[d.id])return;
   if(d.nbh==='pong'||d.nbh==='status'){
@@ -1362,7 +1531,8 @@ $('#help').addEventListener('click',()=>{
    (EMBED?'<div class="warnbox" style="background:#eaf2f0;border-color:#a0c9c3"><b>This is the one-file edition.</b> All 31 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it; in Chrome and Edge each later save goes back into that same file. Keep those files where the student\u2019s records live. This file itself stays empty and is the one to open for a new student.</div>':'')+
    '<p><b>The case file.</b> <b>Save case</b> writes every form you have open into one file, together with the student details. <b>Open case</b> loads it back, opening each form and filling it. It is one file to keep or hand over instead of a folder of separate ones. Each form\u2019s own <b>Save data</b> button is untouched and still works exactly as before.</p>'+
    '<p><b>Two students at once.</b> Every open form reports the student name it is holding. If one of them differs from the name on the bar \u2014 a form left over from the last case, most often \u2014 an amber strip names it before anything reaches paper.</p>'+
-   '<p><b>Keyboard.</b> <kbd>\u2318K</kbd> (or <kbd>Ctrl K</kbd>) opens a box you can type into to jump to any form or run any command. <kbd>\u2191</kbd> and <kbd>\u2193</kbd> move between forms, <kbd>\u2318S</kbd> saves the case, <kbd>\u2318P</kbd> prints the open form and <kbd>\u2318\u21e7P</kbd> builds the master print. On Windows use <kbd>Ctrl</kbd> for <kbd>\u2318</kbd>.</p>'+
+   '<p><b>The screen.</b> <b>Fullscreen</b>, above an open form, puts away the heading, the packet bar and the list so only the form is showing; <kbd>Esc</kbd> or the same button brings them back, and <b>Fill the screen</b> beside it also takes the browser\u2019s own bars away where the browser allows that. On a wide window the list can be hidden from its own corner and brought back with <b>Forms</b>; the choice is remembered. On a phone the packet bar folds behind <b>Packet</b> in the heading.</p>'+
+   '<p><b>Keyboard.</b> <kbd>\u2318K</kbd> (or <kbd>Ctrl K</kbd>) opens a box you can type into to jump to any form or run any command. <kbd>\u2191</kbd> and <kbd>\u2193</kbd> move between forms, <kbd>\u2318S</kbd> saves the case, <kbd>\u2318P</kbd> prints the open form and <kbd>\u2318\u21e7P</kbd> builds the master print. <kbd>\u2318\u21e7F</kbd> shows only the form and <kbd>Esc</kbd> brings the rest back. On Windows use <kbd>Ctrl</kbd> for <kbd>\u2318</kbd>.</p>'+
    '<div class="warnbox" style="background:#fbf0e6;border-color:#e0c3a4"><b>Closing the tab.</b> Work that is not in a saved case file is at risk when the window closes, so the browser stops and asks first, unless you have saved the case and changed nothing since.</div>'+
    '<div class="note">Each of the 31 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
 });
@@ -1866,6 +2036,8 @@ const CMDS=[
   {k:'fill open forms',n:'Fill open forms with the packet',s:'command',go:()=>$('#pushPacket').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
+  {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
+  {k:'hide show form list sidebar',n:'Show or hide the form list',s:'view',go:()=>{if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);else setRailHidden(!railHidden(),true);}},
   {k:'tick used',n:'Tick the forms I have used',s:'command',go:()=>$('#tickUsed').click()},
   {k:'clear ticks',n:'Clear all ticks',s:'command',go:()=>$('#tickNone').click()}
 ];
@@ -1923,6 +2095,8 @@ document.addEventListener('keydown',e=>{
     return;
   }
   if(e.key==='Escape'&&$('#dlg').open){$('#dlg').close();return;}
+  if(e.key==='Escape'&&fullOn()&&!document.body.classList.contains('rail-open')){setFull(false);return;}
+  if(mod&&e.shiftKey&&e.key.toLowerCase()==='f'){e.preventDefault();setFull(!fullOn());return;}
   if(mod&&e.key.toLowerCase()==='s'){e.preventDefault();$('#saveCase').click();return;}
   if(mod&&e.shiftKey&&e.key.toLowerCase()==='p'){e.preventDefault();$('#masterPrint').click();return;}
   /* the browser's own print would put the workstation - bars, list and a
