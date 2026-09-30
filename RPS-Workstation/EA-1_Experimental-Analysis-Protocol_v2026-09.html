@@ -4437,6 +4437,9 @@ table{font-variant-numeric:tabular-nums}
 :where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
 :where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
 
+/* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
+.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)}
+
 /* ---- keyboard focus everywhere else: one ring, easy to see ---- */
 a:focus-visible,button:focus-visible,[role=tab]:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
 a{text-underline-offset:2px}
@@ -4520,7 +4523,27 @@ a{text-underline-offset:2px}
       if (!s[i].classList.contains('nbh-flush') && (parseFloat(getComputedStyle(s[i]).paddingTop) || 0) < 8) s[i].classList.add('nbh-flush');
     }
   }
-  function run(root) { try { fields(root); zebra(root); if (!root) sheets(); } catch (e) {} }
+  /* The forms cap their instruction text at 60 to 80 characters, a print measure
+     that reads as a narrow column on a wide screen. On screen the cap is lifted
+     to what the sheet allows (about 140 characters at most); paper keeps its own.
+     Only leaf text blocks are marked: a wrapper with blocks inside keeps its width. */
+  var INLINE = /^(A|B|I|EM|STRONG|SPAN|KBD|CODE|BR|SMALL|SUB|SUP|ABBR|MARK|U|S|Q|CITE|TIME|WBR|SVG|INPUT|SELECT|BUTTON|LABEL)$/;
+  function prose(root) {
+    var list = (root || document).querySelectorAll('p:not(.nbh-wide),li:not(.nbh-wide),dd:not(.nbh-wide),dt:not(.nbh-wide),div:not(.nbh-wide),figcaption:not(.nbh-wide),blockquote:not(.nbh-wide),small:not(.nbh-wide),h1:not(.nbh-wide),h2:not(.nbh-wide),h3:not(.nbh-wide),h4:not(.nbh-wide)');
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      if (el.closest('.toolbar,dialog,table,svg,.nbh-pm') || !(el.textContent || '').trim()) continue;
+      var leaf = true;
+      for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (!INLINE.test(c.tagName)) { leaf = false; break; }
+      if (!leaf) continue;
+      var mw = getComputedStyle(el).maxWidth;
+      if (!/px$/.test(mw)) continue;
+      var px = parseFloat(mw);
+      if (!(px >= 160 && px <= 1400)) continue;
+      el.classList.add('nbh-wide');
+    }
+  }
+  function run(root) { try { fields(root); zebra(root); prose(root); if (!root) sheets(); } catch (e) {} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { run(); });
   else run();
   window.addEventListener('load', function () { run(); });
