@@ -2895,6 +2895,13 @@ prints exactly as it did.
 - **Tabs.** The view tabs on the five tab-built forms are 44px tall with a
   navy underline on the open one; the segmented view control on the other
   26 keeps its white pressed state with rounded ends.
+- **Instruction text uses the width the screen has.** The forms cap their
+  guidance paragraphs at 60 to 80 characters, a print measure that read as a
+  narrow column on a wide screen, the more so with the sheet scaled up. The
+  script marks each leaf text block that carries such a cap (`nbh-wide`) and
+  on screen the cap becomes the sheet's own width, 140 characters at most;
+  paper keeps the form's measure. Wrappers with blocks inside keep their
+  width, so cards and grids are untouched.
 - **The sheet** reads as one card: 8px corners and a soft shadow on a calm
   page. **Focus** is one 3px blue ring on every button, link, tab and
   checkbox (WCAG 2.4.7); the fields have their own, above.
