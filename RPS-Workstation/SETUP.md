@@ -2859,3 +2859,88 @@ restraint.
   blank.
 - **Rounding.** Where rounding to two decimals would carry a figure across the
   criterion, the exact fraction is written instead (for example "2/3").
+
+## Design Pass on Screen, Fullscreen and the Form List (v21.25)
+
+Every form and the workstation were looked at again on a laptop, a tablet and a
+phone, with one rule: nothing on paper changes. What changed on screen:
+
+### The forms
+
+Each of the 31 forms carries one more shared block, `nbh-polish-css` and
+`nbh-polish` (in `tools/polish/`, put into every form by
+`tools/apply-polish.py`). Every rule sits inside `@media screen`, so a form
+prints exactly as it did.
+
+- **Fields.** The forms draw their fields three ways: as a bordered box, as a
+  line to write on, or as a bare control inside a grid cell or a bordered
+  row. A single style forced on all three would break the grids, so the
+  script reads each field's own style and marks it `nbh-box`, `nbh-ul` or
+  `nbh-bare` (and `nbh-intd` inside a table cell). A boxed field is taller
+  (38px; 32px in a table), rounded, with a clear border and one chevron on
+  every dropdown; a line keeps its line, drawn more surely; and all three
+  light up the same way under the cursor: a blue border or underline and a
+  soft ring, so the field being typed in is unmistakable. On a phone a
+  field's text is 16px, which stops the screen zooming in when it is
+  tapped. Placeholders are darker (4.5:1). Checkboxes and radios are navy.
+- **Buttons.** The tools inside a sheet, the actions above a tab-built form
+  and the toolbar's controls share one family: 34px tall (32px in the
+  toolbar), 6px corners, navy for the main action, white with a rule for the
+  rest, red for taking something away, and one focus ring.
+- **Tables.** Header cells are mist with navy text in every table; a table
+  with five rows or more that does not colour its own cells gets light
+  shading on every other row (`nbh-zebra`), and figures line up
+  (`tabular-nums`). Grids that colour their cells (the scatter plot, the
+  interval sheets, the heat map) are left exactly as they were.
+- **Tabs.** The view tabs on the five tab-built forms are 44px tall with a
+  navy underline on the open one; the segmented view control on the other
+  26 keeps its white pressed state with rounded ends.
+- **The sheet** reads as one card: 8px corners and a soft shadow on a calm
+  page. **Focus** is one 3px blue ring on every button, link, tab and
+  checkbox (WCAG 2.4.7); the fields have their own, above.
+
+The bridge inside each form hands every `<style>` to the master print; the
+polish is screen-only and is kept out of the packet (the style block is
+marked `data-nbh-screen` and the one line that collects styles skips it).
+
+### The workstation
+
+- **Fullscreen.** A button above the open form (and Ctrl+Shift+F, ⌘⇧F on a
+  Mac, from the page or from inside the form) puts away the heading, the
+  packet bar and the list, leaving the form under a slim bar that carries the
+  logo, the form's name, its id, the field count and the same buttons. Esc
+  brings everything back, from inside the form too; so does the button. Where
+  the browser allows it, **Fill screen** beside it takes the browser's own
+  bars away as well.
+- **The list can be hidden** on a wide window from the corner of its own
+  head, and brought back with **Forms** above the form; the choice is
+  remembered (`nbh.ws.rail`). On a narrow window the list is a drawer, as
+  before, and that button closes it.
+- **A phone.** The packet bar folds behind a button in the heading that
+  carries the student's name once one is known; the buttons over the form
+  show their icons and keep their names for a screen reader; nothing runs
+  off the edge any more (the bar over a form used to).
+- **The rest.** The list's rows are 40px, the open form has a teal edge and
+  its field count in a pill, the stage headings stay put while the list
+  scrolls; the packet bar's Save/Open pairs are joined; the autosave chip is
+  a pill with a dot; the start screen is a card with the three steps; the
+  dialogs, the command palette and the help are on the same 6px/10px
+  corners. The palette (⌘K) knows "Fullscreen" and "Show or hide the form
+  list"; Help describes them. CSS and script in `index.html` only; the
+  forms' bridge is unchanged.
+
+### What was checked
+
+| Check | Result |
+|---|---|
+| Every form printed on its own from the same data, before and after (31 PDFs) | __PRINT_FORMS__ |
+| The master print of all 31 forms from the same case file, before and after | __PRINT_MASTER__ |
+| axe-core, WCAG 2.1 A and AA: the workstation empty, with a form open, fullscreen, Help open; every form with its simulation loaded (before and after) | __A11Y__ |
+| Fields the polish script could not classify, across the 31 forms | 0 |
+| Script errors opening every form on its own and every view, desktop and phone | __ERRORS__ |
+| Fullscreen on and off by button, Escape, Escape from inside a form, and the shortcut from both; the hidden list and its memory | pass |
+| The workstation's views at 1440, 1024 and 390px wide; every view of every form at 1440 and 390px, looked at | __VISUAL__ |
+
+The checks are in `qa/` in the repository, with a README; `qa/printbase.js`
+keeps each form's data between runs so the before and after PDFs are made
+from the same entries.
