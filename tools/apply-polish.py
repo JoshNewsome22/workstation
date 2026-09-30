@@ -21,6 +21,11 @@ STYLE_RE = re.compile(r'<style id="nbh-polish-css"[^>]*>.*?</style>\n', re.S)
 SCRIPT_RE = re.compile(r'<script id="nbh-polish">.*?</script>\n', re.S)
 OLD_COLLECT = "return Array.prototype.map.call(document.querySelectorAll('style'),"
 NEW_COLLECT = "return Array.prototype.map.call(document.querySelectorAll('style:not([data-nbh-screen])'),"
+# the packet reads the form with the phone text size stepped aside (see nbh-polish.js, plain)
+BRANCH = "    } else if (d.nbh === 'collect') {\n"
+PLAIN_ON = "      if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(true);   /* nbh-polish */\n"
+PLAIN_OFF = "      if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(false);  /* nbh-polish */\n"
+REPLY_RE = re.compile(r"( +css: styles\(\), html: [^\n]*who: who\(\) \}\);\n)")
 
 def main(folder):
     done = 0
@@ -37,6 +42,11 @@ def main(folder):
             s = s.replace(OLD_COLLECT, NEW_COLLECT)
         if NEW_COLLECT not in s:
             sys.exit(f'{fn}: the bridge does not collect styles the way this script expects')
+        s = s.replace(PLAIN_ON, '').replace(PLAIN_OFF, '')
+        if s.count(BRANCH) != 1 or len(REPLY_RE.findall(s)) != 1:
+            sys.exit(f'{fn}: the bridge does not answer collect the way this script expects')
+        s = s.replace(BRANCH, BRANCH + PLAIN_ON)
+        s = REPLY_RE.sub(lambda m: m.group(1) + PLAIN_OFF, s)
         s = s.replace('</body>', BLOCK + '</body>', 1)
         open(p, 'w', encoding='utf-8').write(s)
         done += 1

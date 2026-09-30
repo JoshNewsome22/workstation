@@ -42,7 +42,8 @@
     for (var i = 0; i < tables.length; i++) {
       var t = tables[i];
       t.setAttribute('data-nbh-z', '1');
-      if (t.closest(SKIP) || t.closest('table table') || t.rows.length < 5) continue;
+      if (t.rows.length < 5) { t.removeAttribute('data-nbh-z'); continue; }   /* looked at again once rows are added */
+      if (t.closest(SKIP) || t.closest('table table')) continue;
       if (/\b(scatter|iv|grid|heat|matrix|cal)\b/i.test(t.className)) continue;
       var painted = false, cells = t.querySelectorAll('td'), rows = t.rows, k;
       for (k = 0; k < rows.length && !painted; k++) if (alpha(getComputedStyle(rows[k]).backgroundColor) > 0.05) painted = true;
@@ -54,18 +55,43 @@
   function sheets() {
     var s = document.querySelectorAll('.sheet:not(table)');
     for (var i = 0; i < s.length; i++) {
-      if ((parseFloat(getComputedStyle(s[i]).paddingTop) || 0) < 8) s[i].classList.add('nbh-flush');
+      if (!s[i].classList.contains('nbh-flush') && (parseFloat(getComputedStyle(s[i]).paddingTop) || 0) < 8) s[i].classList.add('nbh-flush');
     }
   }
   function run(root) { try { fields(root); zebra(root); if (!root) sheets(); } catch (e) {} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { run(); });
   else run();
   window.addEventListener('load', function () { run(); });
-  /* rows, respondents and sessions are added by script; mark those too */
+  /* rows, respondents and sessions are added by script; a new field is marked at
+     once, so it never shows the form's own style for a moment, and the tables
+     are looked at again shortly after */
   var t = null;
   try {
-    new MutationObserver(function () { clearTimeout(t); t = setTimeout(function () { run(); }, 80); })
-      .observe(document.documentElement, { childList: true, subtree: true });
+    new MutationObserver(function (recs) {
+      for (var i = 0; i < recs.length; i++) {
+        var added = recs[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var n = added[j];
+          if (n.nodeType !== 1) continue;
+          try { if (isField(n) && !n.classList.contains('nbh-fld') && !n.classList.contains('nbh-skip')) classify(n); else fields(n); } catch (e) {}
+        }
+      }
+      clearTimeout(t); t = setTimeout(function () { run(); }, 80);
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+  /* While a print is taken, or the master print reads the form, the phone text
+     size steps aside and every textarea is measured again by the field-care
+     script, so the heights it keeps inline are the ones the paper had before. */
+  function plain(on) {
+    document.documentElement.classList.toggle('nbh-plain', !!on);
+    try { if (window.nbhFieldCare && window.nbhFieldCare.grow) window.nbhFieldCare.grow(); } catch (e) {}
+  }
+  window.addEventListener('beforeprint', function () { plain(true); });
+  window.addEventListener('afterprint', function () { plain(false); });
+  try {
+    var mq = window.matchMedia('print');
+    var mh = function (e) { plain(!!e.matches); };
+    if (mq.addEventListener) mq.addEventListener('change', mh); else if (mq.addListener) mq.addListener(mh);
   } catch (e) {}
   /* inside the workstation: Escape leaves its fullscreen view, and the fullscreen key toggles it */
   var framed = false;
@@ -82,5 +108,5 @@
       }
     });
   }
-  window.nbhPolish = { run: run };
+  window.nbhPolish = { run: run, plain: plain };
 })();
