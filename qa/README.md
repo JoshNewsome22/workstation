@@ -25,7 +25,7 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node shots.js after` | Screen captures of the workstation and four forms at desktop, tablet and phone sizes. |
 | `node formshots.js after http://127.0.0.1:8123` | Every view of every form at desktop and phone sizes, for a visual review. |
 | `node shell-check.js after` | Fullscreen on and off (button, Escape, Escape from inside a form, the keyboard shortcut from both), the hidden form list and its memory, the phone packet bar. |
-| `node phoneprint.js PR-1,IN-1,IC-1,CT-1` | Prints those forms from a 390px-wide window, from the kept snapshots, and compares each PDF with the desktop baseline: the phone text size must not reach paper. |
+| `node phoneprint.js PR-1,IN-1,IC-1,CT-1 phone-after` (and `phone-before` against the earlier release's URL) | Prints those forms from a 390px-wide window, from the kept snapshots; `compare-print.py print/phone-before print/phone-after` must find them identical, so the phone text size never reaches paper. |
 | `node determinism.js DD-1 TI-1` | Whether a form's simulation loads the same data twice (DD-1 does not; the print check restores a kept snapshot instead). |
 
 To compare against an earlier release, serve that folder on a second port and pass its URL

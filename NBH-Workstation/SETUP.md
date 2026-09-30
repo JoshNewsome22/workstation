@@ -2910,8 +2910,8 @@ textarea's padding alone, and while a print is taken or the packet reads the
 form (`window.nbhPolish.plain`, called from the bridge's collect branch and
 on beforeprint) the phone text size steps aside and every textarea is
 measured again, so the heights on paper are the ones it had before. Verified
-by printing PR-1, IN-1, IC-1 and CT-1 from a 390px-wide window: identical to
-the desktop baseline.
+by printing PR-1, IN-1, IC-1 and CT-1 from a 390px-wide window before and
+after the pass: the four pairs of PDFs are byte-identical.
 
 The one-file editions now carry the 31 forms and are about 3.7 MB each.
 
