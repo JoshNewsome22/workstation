@@ -3019,18 +3019,19 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 input.nbh-fld.nbh-box,select.nbh-fld.nbh-box,textarea.nbh-fld.nbh-box{
   border:1px solid var(--nbh-field);border-radius:var(--nbh-radius);background-color:#fff;color:var(--nbh-ink);
   box-shadow:inset 0 1px 1px rgba(24,46,67,.04)}
-input.nbh-fld.nbh-box:not(.nbh-intd),select.nbh-fld.nbh-box:not(.nbh-intd){min-height:38px;padding-left:10px;padding-right:10px}
+input.nbh-fld.nbh-box:not(.nbh-intd){min-height:36px;padding-left:10px;padding-right:10px}
+select.nbh-fld.nbh-box:not(.nbh-intd){min-height:36px;padding-left:8px;padding-right:8px}
 input[type=number].nbh-fld.nbh-box:not(.nbh-intd){padding-left:8px;padding-right:6px}
 input.nbh-fld.nbh-box.nbh-intd,select.nbh-fld.nbh-box.nbh-intd{min-height:32px;padding-left:7px;padding-right:7px}
 .nbh-fld.nbh-box:hover{border-color:var(--nbh-field-hover)}
 .nbh-fld.nbh-box:focus{outline:none;border-color:var(--nbh-focus);box-shadow:0 0 0 3px var(--nbh-focus-soft)}
 /* a boxed dropdown gets one chevron instead of whatever the platform draws */
-select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:30px;
+select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:24px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center;background-size:12px 8px}
+  background-repeat:no-repeat;background-position:right 7px center;background-size:12px 8px}
 /* an underlined field keeps its line, drawn a little more surely, and lights up under the cursor */
 input.nbh-fld.nbh-ul,select.nbh-fld.nbh-ul,textarea.nbh-fld.nbh-ul{border-bottom-color:var(--nbh-field);border-radius:3px 3px 0 0}
-input.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
+input.nbh-fld.nbh-ul:not(.nbh-intd),select.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
 .nbh-fld.nbh-ul:hover{border-bottom-color:var(--nbh-field-hover);background-color:#f8fbfa}
 .nbh-fld.nbh-ul:focus{outline:none;border-bottom-color:var(--nbh-focus);box-shadow:inset 0 -2px 0 var(--nbh-focus);background-color:var(--nbh-focus-wash)}
 /* a bare field - a grid cell, a line inside a bordered row - shows only where the cursor is */
@@ -3045,7 +3046,7 @@ label{cursor:default}
 /* ---- buttons: one family for the tools inside a sheet and the actions above it ---- */
 .sheet button.tool,.sheet button.rm,.sheet button.addRow,.sheet button.delObs,.sheet button.nbh-tool,
 .nbh-btn,.nbh-btn-secondary,.nbh-btn-primary,.nbh-btn-danger,.nbh-actions button{
-  font-family:var(--nbh-sans);font-size:13px;font-weight:600;line-height:1.2;min-height:34px;padding:7px 14px;
+  font-family:var(--nbh-sans);font-size:13px;font-weight:600;line-height:1.2;min-height:36px;padding:7px 14px;
   border-radius:var(--nbh-radius);border:1px solid var(--nbh-rule2);background:#fff;color:var(--nbh-navy);
   box-shadow:0 1px 1px rgba(24,46,67,.05);cursor:pointer;transition:background-color .12s,border-color .12s,box-shadow .12s}
 .sheet button.tool:hover,.sheet button.addRow:hover,.sheet button.nbh-tool:hover,.nbh-btn:hover,.nbh-btn-secondary:hover,.nbh-actions button:hover{
@@ -3057,6 +3058,8 @@ label{cursor:default}
 .sheet button.tool[id^="del"]:hover,.sheet button.rm:hover,.sheet button.delObs:hover,.nbh-btn-danger:hover,.nbh-actions button.nbh-btn-danger:hover{
   background:#fbf1f1;border-color:#c99a9a}
 .sheet button.rm{font-size:12px;font-weight:600;min-height:26px;padding:3px 10px}
+/* a button standing beside a field is as tall as the field, whatever the form calls it */
+:where(.sheet,main) button:not(td button,th button,.rm,.sm,.toolbar button,.nbh-tabs button,.nbh-mast button,.tool,.nbh-btn,.nbh-btn-secondary,.nbh-btn-primary,.nbh-btn-danger){min-height:36px}
 .sheet button.tool:disabled,.nbh-btn:disabled{opacity:.5;cursor:default;box-shadow:none}
 .sheet button.tool:active,.nbh-btn:active,.nbh-actions button:active{box-shadow:inset 0 1px 2px rgba(24,46,67,.12)}
 
@@ -3080,7 +3083,7 @@ label{cursor:default}
 
 /* ---- tables: headers that read as headers, light row shading, figures that line up ---- */
 table{font-variant-numeric:tabular-nums}
-:where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(thead th,tr:first-child>th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
+:where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
 :where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
 
 /* ---- keyboard focus everywhere else: one ring, easy to see ---- */
@@ -3096,6 +3099,7 @@ a{text-underline-offset:2px}
   html:not(.nbh-plain) input.nbh-fld:not(.nbh-intd),html:not(.nbh-plain) select.nbh-fld:not(.nbh-intd),html:not(.nbh-plain) textarea.nbh-fld:not(.nbh-intd){font-size:16px}
   .nbh-actions button,.nbh-btn,.nbh-btn-secondary,.nbh-btn-primary,.nbh-btn-danger{min-height:32px;padding:6px 11px;font-size:12.5px}
   .nbh-actions{gap:6px}
+  .sheet:not(table):not(.nbh-flush){border-radius:0}
 }
 </style>
 <script id="nbh-polish">
@@ -3146,9 +3150,13 @@ a{text-underline-offset:2px}
       if (t.rows.length < 5) { t.removeAttribute('data-nbh-z'); continue; }   /* looked at again once rows are added */
       if (t.closest(SKIP) || t.closest('table table')) continue;
       if (/\b(scatter|iv|grid|heat|matrix|cal)\b/i.test(t.className)) continue;
+      /* a painted row, or a painted cell other than a row's label cell, means the table colours its own */
       var painted = false, cells = t.querySelectorAll('td'), rows = t.rows, k;
       for (k = 0; k < rows.length && !painted; k++) if (alpha(getComputedStyle(rows[k]).backgroundColor) > 0.05) painted = true;
-      for (k = 0; k < cells.length && k < 80 && !painted; k++) if (alpha(getComputedStyle(cells[k]).backgroundColor) > 0.05) painted = true;
+      for (k = 0; k < cells.length && k < 120 && !painted; k++) {
+        if (cells[k].cellIndex === 0) continue;
+        if (alpha(getComputedStyle(cells[k]).backgroundColor) > 0.05) painted = true;
+      }
       if (!painted) t.classList.add('nbh-zebra');
     }
   }

@@ -2903,6 +2903,18 @@ The bridge inside each form hands every `<style>` to the master print; the
 polish is screen-only and is kept out of the packet (the style block is
 marked `data-nbh-screen` and the one line that collects styles skips it).
 
+Two things on screen can still reach paper, and both are handled. The
+field-care script measures each textarea's height on screen and keeps it as
+an inline style, which a print and the packet carry: so the polish leaves a
+textarea's padding alone, and while a print is taken or the packet reads the
+form (`window.nbhPolish.plain`, called from the bridge's collect branch and
+on beforeprint) the phone text size steps aside and every textarea is
+measured again, so the heights on paper are the ones it had before. Verified
+by printing PR-1, IN-1, IC-1 and CT-1 from a 390px-wide window before and
+after the pass: the four pairs of PDFs are byte-identical.
+
+The one-file editions now carry the 31 forms and are about 3.7 MB each.
+
 ### The workstation
 
 - **Fullscreen.** A button above the open form (and Ctrl+Shift+F, ⌘⇧F on a
@@ -2914,10 +2926,13 @@ marked `data-nbh-screen` and the one line that collects styles skips it).
   bars away as well.
 - **The list can be hidden** on a wide window from the corner of its own
   head, and brought back with **Forms** above the form; the choice is
-  remembered (`nbh.ws.rail`). On a narrow window the list is a drawer, as
+  remembered (`nbh.ws.rail`, a view preference shared by both editions like
+  `nbh.fitScreen`). A **Find a form or command** control at the top of the
+  list opens the palette. On a narrow window the list is a drawer, as
   before, and that button closes it.
 - **A phone.** The packet bar folds behind a button in the heading that
-  carries the student's name once one is known; the buttons over the form
+  carries the student's name once one is known (in italics, with **Use this
+  name** beside it, while the name is only one read out of an open form); the buttons over the form
   show their icons and keep their names for a screen reader; nothing runs
   off the edge any more (the bar over a form used to).
 - **The rest.** The list's rows are 40px, the open form has a teal edge and
@@ -2925,7 +2940,8 @@ marked `data-nbh-screen` and the one line that collects styles skips it).
   scrolls; the packet bar's Save/Open pairs are joined; the autosave chip is
   a pill with a dot; the start screen is a card with the three steps; the
   dialogs, the command palette and the help are on the same 6px/10px
-  corners. The palette (⌘K) knows "Fullscreen" and "Show or hide the form
+  corners. Escape closes, in order, the palette, a dialog, the drawer, then
+  fullscreen; the drawer never opens over fullscreen. The palette (⌘K) knows "Fullscreen" and "Show or hide the form
   list"; Help describes them. CSS and script in `index.html` only; the
   forms' bridge is unchanged.
 
