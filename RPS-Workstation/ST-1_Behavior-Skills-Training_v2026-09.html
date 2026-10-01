@@ -399,6 +399,11 @@ tr.isCrit td.stepno{background:#DCE6EE;box-shadow:inset 3px 0 0 var(--rule)}
 .v-ok{background:#E3EFE0;border-left:3px solid #2F6B37}
 .v-mid{background:#FBEEDB;border-left:3px solid #9B4E15}
 .v-no{background:#F6E0E0;border-left:3px solid #8E2A2A}
+/* v2026-10 fidelity (F): component tags and the consequence gate */
+.st-cmp-b{display:inline-block;font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:3px;padding:0 5px;margin:0 0 2px;border:1px solid var(--rule-2);color:var(--ink-soft);background:var(--wash);line-height:1.5}
+.st-cmp-con{color:#7E2222;border-color:#D9A3A3;background:#FBF1F1}
+.st-hc th label{font-weight:600;display:flex;gap:6px;align-items:flex-start;cursor:pointer}
+.st-hc th label input{margin-top:3px;flex:0 0 auto}
 table.rt{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:12.5px}
 table.rt th,table.rt td{border:1px solid var(--rule-2);padding:6px 8px;text-align:left;vertical-align:top}
 table.rt thead th{background:var(--wash);text-align:center}
@@ -895,12 +900,22 @@ button.st-ti-rm:hover{background:#fbf1f1}
         &nbsp;&nbsp;<input data-m="c_situ_how" style="width:64%" placeholder="Unannounced probe in the classroom with the actual student — record on Form TI-1"></div></div>
     </div>
     <p class="hint" style="margin-top:8px">Role-play mastery is not competence. The in-situ probe is what licenses the trainee to run the plan without the trainer present, and it is scored on TI-1 rather than here.</p>
+
+    <h2 class="nbh-band" style="margin-top:18px">Hard Cases Rehearsed</h2>
+    <p class="hint">Rehearsal should include the moments that produce consequence errors: a resetting DRO or a delay needs continuous monitoring, timer resets and reinforcer delivery with no natural prompt, so an omitted reinforcer after a successful interval and a reinforcer delivered after the target behavior are the likely error forms, above all for an implementer whose attention is divided (O&rsquo;Neill et al., 2026); in discrimination training the consequence that follows an incorrect response is the critical risk point (Burlison et al., 2026). How often each error occurs in practice has not been described, so tick what was rehearsed and note the rounds; the Role-play with error arrangement is where these belong.</p>
+    <table class="rt st-hc">
+      <tr><th style="width:32%"><label><input type="checkbox" data-m="hc_after"> The moment just after the target behavior</label></th><td><input data-m="hc_after_how" style="width:100%" placeholder="e.g., the student protests during the delay or the interval: hold the delay, reset the timer, withhold the reinforcer" aria-label="The moment just after the target behavior: how it was rehearsed"></td></tr>
+      <tr><th><label><input type="checkbox" data-m="hc_divided"> Divided attention during an interval</label></th><td><input data-m="hc_divided_how" style="width:100%" placeholder="e.g., a second student needs help, or data must be recorded, while the interval or the delay runs" aria-label="Divided attention during an interval: how it was rehearsed"></td></tr>
+      <tr><th><label><input type="checkbox" data-m="hc_earned"> An earned reinforcer that is easy to miss</label></th><td><input data-m="hc_earned_how" style="width:100%" placeholder="e.g., the interval ends while the trainee is mid-task: the reinforcer or the break is due now" aria-label="An earned reinforcer that is easy to miss: how it was rehearsed"></td></tr>
+      <tr><th><label><input type="checkbox" data-m="hc_wrong"> The trial right after an incorrect response</label></th><td><input data-m="hc_wrong_how" style="width:100%" placeholder="Skill programs: the error-correction trial, where a wrong response is most at risk of being reinforced" aria-label="The trial right after an incorrect response: how it was rehearsed"></td></tr>
+      <tr><th>Rounds in which these arose</th><td><input data-m="hc_rounds" style="width:100%" placeholder="e.g., R2 (Role-play with error), R4 and R5" aria-label="Rounds in which the hard cases arose"></td></tr>
+    </table>
   </section>
 
   <!-- ============================ STEPS ============================ -->
   <section class="only-steps">
     <h2 class="nbh-band">Protocol Steps</h2>
-    <p class="hint">Enter the same step list used on the integrity form so the two records line up. Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol; mastery is judged on critical steps separately.</p>
+    <p class="hint">Enter the same step list used on the integrity form so the two records line up. Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol; mastery is judged on critical steps separately. Tag each step&rsquo;s <b>component</b> as on TI-1: a step tagged Consequence is marked critical as it is tagged, and the competency decision holds consequence steps to 100% in the decision rounds (the consequence gate).</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addStep">Add step</button>
       <button class="tool" id="addFive">Add 5 steps</button>
@@ -909,7 +924,7 @@ button.st-ti-rm:hover{background:#fbf1f1}
     </div>
     <p class="st-ti-done noprint" id="stTiDoneSteps" role="status" aria-live="polite"></p>
     <div class="grid-wrap"><table class="rt" id="stepTbl"><thead><tr>
-      <th style="width:52px">Step</th><th style="text-align:left">Description of the step, as written in the protocol</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:52px">Step</th><th style="text-align:left">Description of the step, as written in the protocol</th><th style="width:124px">Component</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
     <div class="st-ti-rec" id="stTiStepsRec" hidden></div>
   </section>
 
@@ -928,6 +943,7 @@ button.st-ti-rm:hover{background:#fbf1f1}
       <span><i class="swatch v-EC"></i> Commission &mdash; error of commission: attempted, done wrong</span>
       <span><i class="swatch v-EO"></i> Omission &mdash; error of omission: not attempted</span>
       <span><i class="swatch v-NA"></i> N/A &mdash; step did not arise in this round</span>
+      <span>Steps tagged on the Protocol steps sheet carry their component above the description; consequence steps must be correct on every opportunity in the decision rounds.</span>
     </div>
     <div class="grid-wrap"><table class="pi" id="piTbl"></table></div>
     <h3 style="margin-top:14px">Feedback Given After Each Round</h3>
@@ -969,9 +985,11 @@ button.st-ti-rm:hover{background:#fbf1f1}
     <table class="rt">
       <tr><th style="width:22%">Outcome</th><td colspan="3"><select data-m="outcome" style="width:60%"><option></option><option>Competent &mdash; may run the plan without the trainer present</option><option>Competent in rehearsal &mdash; in-situ probe still required</option><option>Not yet &mdash; further rehearsal scheduled</option></select></td></tr>
       <tr><th>Next review due</th><td><input data-m="review" style="width:100%"></td><th style="width:18%">Refresher interval</th><td><input data-m="refresh" style="width:100%" placeholder="e.g., each semester, or on any plan revision"></td></tr>
+      <tr><th>First TI-1 re-check due</th><td><input data-m="recheck1" style="width:100%" placeholder="Early in independent implementation: an unannounced TI-1 observation, date or window"></td><th>Re-check focus</th><td><input data-m="recheck1_focus" style="width:100%" placeholder="The consequence steps, above all any with a commission error in rehearsal"></td></tr>
       <tr><th>Trainee signature</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
       <tr><th>Trainer signature</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
+    <p class="hint" style="margin-top:8px">Schedule the first unannounced TI-1 observation early in independent implementation. Burlison et al. (2026) name consequence delivery, and error reinforcement in particular, as the component to monitor especially when a task is first being learned, and ask that the error be identified and corrected quickly as part of regular supervision; neither that study nor O&rsquo;Neill et al. (2026) gives an interval, and reaching criterion in rehearsal was not shown to predict fidelity in situ.</p>
   </section>
 
   <!-- ============================ GUIDE ============================ -->
@@ -979,6 +997,7 @@ button.st-ti-rm:hover{background:#fbf1f1}
     <h2 class="nbh-band">How This Form Is Meant to Run</h2>
     <p>Behavior skills training is a package: describe the skill, model it, have the trainee rehearse it, and give immediate feedback, repeating the rehearsal-and-feedback loop until a stated criterion is met. The criterion is the point of the procedure. Training that ends when the session ends, rather than when performance reaches a standard, is what produces staff who have been trained and still cannot run the plan.</p>
     <p>The rehearsal grid uses the same four codes as the integrity form, so the same protocol is scored the same way whether the trainee is role-playing or working with the student. Errors of commission and omission are separated for the same reason as on TI-1: a step that is attempted incorrectly needs more rehearsal, while a step that is never attempted usually needs a cue.</p>
+    <p>The rehearsal criterion has two parts. The overall criterion, the percentage and the consecutive rounds set in the toolbar (90% across two rounds by default), is this form&rsquo;s convention. The <b>consequence gate</b> is stricter: every step tagged Consequence on the Protocol steps sheet must be scored and correct on every opportunity in the decision rounds, with zero commission errors, before the trainee runs the plan without the trainer present. The gate follows the direction of the evidence rather than a tested training variable: in a parametric test of consequence errors during discrimination training, reinforcing a wrong response was the more detrimental error, with a 0.24&ndash;0.29 probability of a correct response on the next trial against 0.46&ndash;0.63 after earned reinforcement was withheld, and the authors recommend evidence-based preservice training and ongoing coaching so that critical components are not delivered with low and varying fidelity (Burlison et al., 2026); in DRO, commission errors were more detrimental than omission errors, and experiencing full fidelity before reduced fidelity, and gradual rather than abrupt reductions, had a protective effect (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026); in DRA, programmed errors were less detrimental when the procedure had first been run with perfect fidelity (St. Peter Pipkin et al., 2010, as summarized by Burlison et al., 2026). Learners with a history of consequence errors still mastered the task once the errors were corrected (Burlison et al., 2026), so a trainee found in error on TI-1 is retrained on this form, not taken off the plan. Neither study tested a 100% rehearsal criterion, or behavior skills training itself, and a trainee at criterion in rehearsal has not been shown to hold fidelity in situ, which is why the in-situ probe and the early TI-1 re-check remain.</p>
     <p>Sign-off ends the training, not the supervision: &ldquo;Competent&rdquo; on this form means the trainee may run the plan without the trainer present. For an RBT, the RBT Ethics Code also requires that behavior-technician services be provided only after the supervisor confirms the RBT has demonstrated competence, and only within a clearly defined role under close, ongoing supervision (Behavior Analyst Certification Board, 2021, standards 1.06 and 1.03).</p>
     <!-- v21.24: the rehearsal runner and the import from Form TI-1 -->
     <h2 class="nbh-band" style="margin-top:16px">The Rehearsal Runner</h2>
@@ -993,16 +1012,21 @@ button.st-ti-rm:hover{background:#fbf1f1}
       <tr><th>Critical-step accuracy</th><td>The same calculation restricted to steps marked critical, pooled across the decision rounds: once the criterion has been met, the latest rounds it counts (the latest two when it asks for two consecutive rounds); before that, every scored round.</td></tr>
       <tr><th>Rounds to criterion</th><td>The number of scored rounds up to and including the round in which the criterion was first met on the required number of consecutive rounds. The card and the verdict name that round as it is labelled on the grid.</td></tr>
       <tr><th>Per-step accuracy</th><td>For each step, the percentage of rounds in which it was performed correctly, out of the rounds where it applied.</td></tr>
+      <tr><th>Consequence gate</th><td>Over the decision rounds, for the steps tagged Consequence: each must be scored there and correct every time (100%, zero commission and zero omission errors). A consequence step not scored in those rounds has not been shown, and the decision says so. The gate is this form&rsquo;s convention, informed by Burlison et al. (2026), O&rsquo;Neill et al. (2026) and the work they summarize; the card on the Competency sheet also shows commission errors on consequence steps across every round.</td></tr>
       <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> an unannounced in-situ probe recorded with the integrity obtained on TI-1 at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest a mastery criterion under which critical steps are performed at 100%; holding the in-situ probe to the rehearsal percentage is this form&rsquo;s convention. When the critical-step integrity obtained on TI-1 is recorded for the probe (Import From TI-1 fills it), it must be 100%: every critical step scored on the probe correct, as in the decision rounds. That, too, is this form&rsquo;s convention.</td></tr>
     </table>
     <p class="hint" style="margin-top:10px">Sources for the procedure: Parsons, Rollyson &amp; Reid (2012) on an evidence-based staff training protocol; Ward-Horner &amp; Sturmey (2012) on the component analysis of behavior skills training; Himle et al. (2004) and Miltenberger et al. (2005) on in-situ training and the gap between role-play and the natural setting (both with children learning safety skills); Gresham (1989) and DiGennaro Reed &amp; Codding (2011) on the integrity measurement this form feeds. These are the empirical sources for the method; the criterion values and the sign-off rule on this form are a working convention, not a finding, apart from holding critical steps at 100% (Parsons, Rollyson &amp; Reid, 2012).</p>
     <p class="hint" id="stRefs"><b>Reference list.</b>
     Behavior Analyst Certification Board. (2021). <em>RBT ethics code (2.0)</em>. &bull;
+    Burlison, S., Brand, D., Wittman, M. R., Bensemann, J., McKeown, C. A., Miguel, C. F., &amp; Moo, H. N. (2026). A parametric analysis of varying levels of consequence-based procedural fidelity errors when learning new tasks. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70084. https://doi.org/10.1002/jaba.70084 &bull;
     DiGennaro Reed, F. D., &amp; Codding, R. S. (2011). Intervention integrity assessment. In J. K. Luiselli (Ed.), <em>Teaching and behavior support for children and adults with autism spectrum disorder: A practitioner&rsquo;s guide</em> (pp. 38&ndash;47). Oxford University Press. &bull;
     Gresham, F. M. (1989). Assessment of treatment integrity in school consultation and prereferral intervention. <em>School Psychology Review, 18</em>(1), 37&ndash;50. &bull;
     Himle, M. B., Miltenberger, R. G., Flessner, C., &amp; Gatheridge, B. (2004). Teaching safety skills to children to prevent gun play. <em>Journal of Applied Behavior Analysis, 37</em>(1), 1&ndash;9. &bull;
+    Hronek, L. M., &amp; Kestner, K. M. (2025). A human-operant evaluation of commission and omission errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 58</em>(2), 401&ndash;421. https://doi.org/10.1002/jaba.70003 &bull;
     Miltenberger, R. G., Gatheridge, B. J., Satterlund, M., Egemo-Helm, K. R., Johnson, B. M., Jostad, C., Kelso, P., &amp; Flessner, C. A. (2005). Teaching safety skills to children to prevent gun play: An evaluation of in situ training. <em>Journal of Applied Behavior Analysis, 38</em>(3), 395&ndash;398. &bull;
+    O&rsquo;Neill, P., Rey, C. N., Eilers, T., &amp; Craig, A. R. (2026). Parametric evaluation of procedural fidelity level with combined errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70077. https://doi.org/10.1002/jaba.70077 &bull;
     Parsons, M. B., Rollyson, J. H., &amp; Reid, D. H. (2012). Evidence-based staff training: A guide for practitioners. <em>Behavior Analysis in Practice, 5</em>(2), 2&ndash;11. &bull;
+    St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70. https://doi.org/10.1901/jaba.2010.43-47 &bull;
     Ward-Horner, J., &amp; Sturmey, P. (2012). Component analysis of behavior skills training in functional analysis. <em>Behavioral Interventions, 27</em>(2), 75&ndash;92.</p>
   </section>
 </main>
@@ -1046,7 +1070,12 @@ function ensure(){
   if(!S.cells||typeof S.cells!=='object')S.cells={};
   Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m||+m[1]>=S.steps.length||+m[2]>=S.nRounds)delete S.cells[k];});
   if(S.meta&&S.meta.outcome===OUT_OLD)S.meta.outcome=OUT_NEW;
+  /* v2026-10 fidelity (F): each step carries a component tag (ant = antecedent, con = consequence), as on TI-1 */
+  S.steps.forEach(st=>{st.cmp=st.cmp==='con'||st.cmp==='ant'?st.cmp:'';});
 }
+const CMP=[['',''],['ant','Antecedent'],['con','Consequence']];
+const cmpLabel=v=>v==='con'?'Consequence':v==='ant'?'Antecedent':'';
+const cmpBadge=st=>st&&st.cmp?`<span class="st-cmp-b${st.cmp==='con'?' st-cmp-con':''}">${cmpLabel(st.cmp)}</span>`:'';
 const key=(s,o)=>s+'_'+o;
 const code=(s,o)=>S.cells[key(s,o)]||'';
 const scored=v=>v==='C'||v==='EC'||v==='EO';
@@ -1058,11 +1087,14 @@ function renderSteps(){
   $('#stepTbl tbody').innerHTML=S.steps.map((st,i)=>
     `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
      <td><textarea data-s="${i}" data-f="d" rows="2" style="width:100%;border:0;background:transparent;font:inherit;resize:vertical">${esc(st.d)}</textarea>${/* v21.24 rehearsal runner: the Retrain mark of Import From TI-1 */typeof stTiMark==='function'?stTiMark(i):''}</td>
-     <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''}></td></tr>`).join('');
+     <td style="text-align:center"><select data-s="${i}" data-f="cmp" aria-label="Step ${i+1} component">${CMP.map(([k,l])=>`<option value="${k}"${st.cmp===k?' selected':''}>${l}</option>`).join('')}</select></td>
+     <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td></tr>`).join('');
 }
 ['input','change'].forEach(ev=>$('#stepTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
-  S.steps[+el.dataset.s][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;
-  if(el.type==='checkbox')renderAll();}));
+  const st=S.steps[+el.dataset.s],f=el.dataset.f,v=el.type==='checkbox'?el.checked:el.value;st[f]=v;
+  /* a step tagged Consequence is marked critical as it is tagged (the trainer may untick it afterwards) */
+  if(f==='cmp'&&v==='con'&&!st.crit)st.crit=true;
+  if(el.type==='checkbox'||(f==='cmp'&&ev==='change'))renderAll();}));
 $('#addStep').addEventListener('click',()=>{S.steps.push({d:'',crit:false});renderAll();});
 $('#addFive').addEventListener('click',()=>{for(let i=0;i<5;i++)S.steps.push({d:'',crit:false});renderAll();});
 $('#delStep').addEventListener('click',()=>{if(S.steps.length>1){const i=S.steps.length-1;
@@ -1086,7 +1118,7 @@ function renderGrid(){
     const vals=S.rounds.map((_,j)=>code(i,j));
     const c=vals.filter(v=>v==='C').length, sc=vals.filter(scored).length;
     h+=`<tr class="${st.crit?'isCrit':''}"><td class="stepno">${i+1}</td>
-      <td class="desc"><textarea data-s="${i}" data-f="d" rows="2">${esc(st.d)}</textarea></td>
+      <td class="desc">${cmpBadge(st)}<textarea data-s="${i}" data-f="d" rows="2">${esc(st.d)}</textarea></td>
       <td class="crit"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''}></td>
       ${vals.map((v,j)=>`<td class="obs"><select class="v-${esc(v||'x')}" data-s="${i}" data-o="${j}">${optsFor(v)}</select></td>`).join('')}
       <td class="pct">${fmt(c,sc)}</td></tr>`;
@@ -1153,7 +1185,15 @@ function metrics(){
   const critM={c:cc,n:cn,marked:marked.length,unseen,ok:!marked.length||(!unseen.length&&cc===cn)};
   const tot={c:ind.reduce((a,b)=>a+b.c,0),n:ind.reduce((a,b)=>a+b.s,0)};
   const ec=stepRows.reduce((a,b)=>a+b.ec,0),eo=stepRows.reduce((a,b)=>a+b.eo,0);
-  return {ind,used,stepRows,critM,tot,toCrit,ec,eo,win,holds};
+  /* v2026-10 fidelity (F): the consequence gate. Every step tagged Consequence must be scored in the decision rounds
+     and correct every time there: zero commission and zero omission errors. Across every round, the commission
+     errors on consequence steps are counted for the card. */
+  const conIdx=S.steps.map((st,i)=>st.cmp==='con'?i:-1).filter(i=>i>=0);
+  let gc=0,gn=0,gec=0,geo=0;const gUnseen=[],gBad=[];
+  conIdx.forEach(i=>{let seen=0;win.forEach(x=>{const v=code(i,x.j);if(scored(v)){gn++;seen++;if(v==='C')gc++;else{if(v==='EC')gec++;else geo++;if(!gBad.includes(i))gBad.push(i);}}});if(!seen)gUnseen.push(i);});
+  const conG={tagged:conIdx.length,c:gc,n:gn,ec:gec,eo:geo,unseen:gUnseen,bad:gBad,ok:!conIdx.length||(!gUnseen.length&&gc===gn)};
+  const conAll=conIdx.reduce((a,i)=>{const r=stepRows[i];a.c+=r.c;a.n+=r.s;a.ec+=r.ec;a.eo+=r.eo;if(r.ec)a.ecSteps.push(i);return a;},{c:0,n:0,ec:0,eo:0,ecSteps:[]});
+  return {ind,used,stepRows,critM,tot,toCrit,ec,eo,win,holds,conG,conAll};
 }
 
 function drawAcq(M){
@@ -1207,7 +1247,9 @@ function renderSummary(){
     card('Critical-step accuracy',M.critM.n?fmt(M.critM.c,M.critM.n):'',critSub)+
     card('Rounds to criterion',M.toCrit?M.toCrit:'',M.toCrit?`${rnd(S.critN)} at or above ${esc(S.crit)}%, met at ${metAt}`:'Criterion not yet met')+
     card('Errors of commission',M.ec||'0',M.ec?'attempted but done wrong':'none recorded')+
-    card('Errors of omission',M.eo||'0',M.eo?'not attempted':'none recorded');
+    card('Errors of omission',M.eo||'0',M.eo?'not attempted':'none recorded')+
+    card('Consequence gate',!M.conG.tagged?'':M.conG.n?fmt(M.conG.c,M.conG.n):'',!M.conG.tagged?'No step tagged Consequence':M.conG.n?`${M.conG.c} of ${M.conG.n} ${where}; ${M.conG.ec} commission, ${M.conG.eo} omission`+(M.conG.unseen.length?`; ${stepList(M.conG.unseen)} not scored`:''):`Consequence steps not scored ${M.toCrit?where:'yet'}`)+
+    card('Commission on consequence steps',M.conG.tagged&&M.conAll.n?fmt(M.conAll.ec,M.conAll.n):'',!M.conG.tagged?'No step tagged Consequence':M.conAll.n?`${M.conAll.ec} of ${M.conAll.n} opportunities across every round`+(M.conAll.ecSteps.length?` (${stepList(M.conAll.ecSteps)})`:''):'No consequence step scored yet');
 
   /* v21.16 audit (F5-F9). The decision, in order: something scored; the criterion met; still met in the
      latest rounds it counts; every critical step scored there and correct; an in-situ probe dated, with the
@@ -1224,6 +1266,9 @@ function renderSummary(){
   if(!M.used.length){cls='v-mid';txt=`No rehearsal round has been scored yet. The decision is made from the codes entered on the Rehearsal sheet.`;}
   else if(!M.toCrit){cls='v-no';txt=`Not yet competent: the criterion of ${esc(S.crit)}% across ${rnd(S.critN)} has not been met. Schedule further rehearsal on the steps listed below.`;}
   else if(!M.holds){cls='v-mid';txt=`The criterion was met at ${metAt}, but it does not hold in the latest ${M.win.length>1?M.win.length+' rounds':'round'} (${M.win.map(x=>R(x)+' '+fmt(x.c,x.s)).join(', ')}). Rehearse until ${S.critN>1?'the latest '+esc(S.critN)+' rounds are all':'the latest round is'} at or above ${esc(S.crit)}% ${later}.`;}
+  else if(!M.conG.ok&&M.conG.unseen.length){cls='v-mid';txt=`Criterion ${held}, but ${stepList(M.conG.unseen)} tagged Consequence ${M.conG.unseen.length>1?'were':'was'} not scored in ${winLab}, so the consequence gate has not been shown: every consequence step must be correct on every opportunity there. Rehearse a round in which ${M.conG.unseen.length>1?'they arise':'it arises'} ${later}.`;}
+  else if(!M.conG.ok){cls='v-no';const errs=[M.conG.ec?M.conG.ec+' commission error'+(M.conG.ec===1?'':'s'):'',M.conG.eo?M.conG.eo+' omission'+(M.conG.eo===1?'':'s'):''].filter(Boolean).join(' and ');
+    txt=`Not yet competent: the consequence gate is not met. In ${winLab}, consequence ${stepList(M.conG.bad)} had ${errs} (${fmt(M.conG.c,M.conG.n)} correct); consequence steps must be correct on every opportunity in the decision rounds, with zero commission errors${M.conG.ec?', because delivering a reinforcer after the behavior the plan puts on extinction, or after a wrong response, is the error class most consistently linked to loss of treatment effect (Burlison et al., 2026; O\u2019Neill et al., 2026)':''}. Rehearse ${stepList(M.conG.bad)} with the moment just after the target behavior or a wrong response as the scenario, until ${S.critN>1?'the latest '+esc(S.critN)+' rounds are':'the latest round is'} clean ${later}.`;}
   else if(!M.critM.ok&&un.length){cls='v-mid';txt=`Criterion ${held}, but ${stepList(un)} marked critical ${unPl?'were':'was'} not scored in ${winLab}, so ${unPl?'they have':'it has'} not been shown. Rehearse a round in which ${unPl?'they arise':'it arises'} ${later}.`;}
   else if(!M.critM.ok){cls='v-mid';txt=`Criterion ${held}, but critical-step accuracy in ${winLab} is ${fmt(M.critM.c,M.critM.n)}; every critical step must be correct in those rounds. Rehearse the critical steps ${later}.`;}
   else if(!situ){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}. An unannounced in-situ probe with the student is still required before sign-off — score it on Form TI-1 and record its date and the integrity obtained below.`;}
@@ -1232,7 +1277,9 @@ function renderSummary(){
   else if(sp<S.crit){cls='v-no';txt=`Not yet competent in the classroom: the rehearsal criterion was ${held}, but the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity, below the ${esc(S.crit)}% criterion. Train in the classroom and probe again ${later}.`;}
   else if(scp!==null&&!(scp>=0&&scp<=100)){cls='v-mid';txt=`Rehearsal criterion ${held}${withCrit}, and the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity. The critical-step integrity entered for the probe (\u201c${esc(S.meta.situ_crit)}\u201d) is not a percentage from 0 to 100 \u2014 enter the figure obtained on Form TI-1, or leave it blank when no critical step came due.`;}
   else if(scp!==null&&scp<100){cls='v-no';txt=`Not yet competent in the classroom: the rehearsal criterion was ${held}, and the in-situ probe on ${esc(situ)} obtained ${pf(sp)} integrity, but its critical-step integrity was ${pf(scp)}; every critical step must be correct. Train the critical steps in the classroom and probe again ${later}.`;}
-  else {cls='v-ok';txt=`Competent: criterion ${held}, ${M.critM.marked?`critical steps at ${fmt(M.critM.c,M.critM.n)}`:'no steps marked critical'}, and an in-situ probe on ${esc(situ)} at ${pf(sp)} integrity${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`;}
+  else {cls='v-ok';const rc=String(S.meta.recheck1||'').trim();
+    txt=`Competent: criterion ${held}, ${M.critM.marked?`critical steps at ${fmt(M.critM.c,M.critM.n)}`:'no steps marked critical'}${M.conG.tagged?`, consequence gate met (${fmt(M.conG.c,M.conG.n)} in ${winLab})`:''}, and an in-situ probe on ${esc(situ)} at ${pf(sp)} integrity${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`+
+      (rc?` First unannounced TI-1 re-check due ${esc(rc)}.`:' Set the first unannounced TI-1 re-check under Sign-off, early in independent implementation: consequence errors mattered most while a task was first being learned (Burlison et al., 2026).');}
   $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
 
   drawAcq(M);
@@ -1241,7 +1288,8 @@ function renderSummary(){
   $('#weakTbl').innerHTML='<thead><tr><th style="width:52px">Step</th><th style="text-align:left">Description</th><th style="width:60px">Crit.</th><th style="width:84px">Per-step %</th><th style="width:110px">Last scored round</th><th style="width:240px">Next rehearsal focus</th></tr></thead><tbody>'+
     (weak.length?weak.map(r=>{
       const last={C:'Correct',EC:'Commission',EO:'Omission'}[r.last]||'&mdash;';
-      const foc=r.ec&&!r.eo?'Rehearse the step itself; the form is wrong, not the timing'
+      const foc=S.steps[r.i].cmp==='con'&&r.ec?'Rehearse the moment just after the target behavior or a wrong response: a commission error here delivers what the plan withholds (consequence gate)'
+        :r.ec&&!r.eo?'Rehearse the step itself; the form is wrong, not the timing'
         :r.eo&&!r.ec?'Rehearse the cue that signals the step is due'
         :r.ec&&r.eo?'Re-teach the step and when it applies'
         :'One more rehearsal round to confirm';
@@ -1286,10 +1334,10 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const rows=[['Step','Description','Critical',...S.rounds.map((r,j)=>`R${j+1} ${r.date||''} ${r.type||''}`),'Per-step %']];
+  const rows=[['Step','Description','Component','Critical',...S.rounds.map((r,j)=>`R${j+1} ${r.date||''} ${r.type||''}`),'Per-step %']];
   S.steps.forEach((st,i)=>{const vals=S.rounds.map((_,j)=>code(i,j));
     const c=vals.filter(v=>v==='C').length,sc=vals.filter(scored).length;
-    rows.push([i+1,st.d,st.crit?'Y':'',...vals,fmt(c,sc)]);});
+    rows.push([i+1,st.d,cmpLabel(st.cmp),st.crit?'Y':'',...vals,fmt(c,sc)]);});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='ST-1_rehearsal.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1304,14 +1352,21 @@ function loadSim(){
     src:'BIP dated '+D(60)+'; components built on Form TD-1',
     trainee:'Simulated RBT',pos:'Registered Behavior Technician',
     trainer:'Joshua Newsome, M.A., BCBA',client:'SIMULATED \u2013 Sample Student',
-    why:'Integrity re-check on Form TI-1 fell to 76.9% on an unannounced observation, with steps 8 and 10 failing',
-    targeted:'All 14 steps rehearsed; steps 8 and 10 are the retraining targets carried over from TI-1',
+    why:'Integrity re-check on Form TI-1 fell to 76.9% on an unannounced observation: step 8, a consequence step, with commission errors (the delay ended early when the student protested, so protest was reinforced), and step 10 omitted',
+    targeted:'All 14 steps rehearsed; steps 8 (first: commission on a consequence step) and 10 are the retraining targets carried over from TI-1',
     dates:D(2)+' (two sessions, same day)',mins:'55',
     c_inst:true,c_inst_how:'Written protocol read through; rationale given for why the delay is held and why the card is re-presented',
     c_mod:true,c_mod_how:'Trainer modeled steps 5\u201311 live, then modeled the two known errors deliberately so the trainee could name them',
     c_reh:true,c_reh_how:'Five role-play rounds, trainer acting as the student, escalating protest across rounds',
     c_fb:true,c_fb_how:'Immediate after each round: two specific strengths, then one correction, then an immediate re-run of the failed step',
     c_situ:true,c_situ_how:'Unannounced probe scheduled for the independent writing block; scored on Form TI-1',
+    hc_after:true,hc_after_how:'Trainer protested and reached for the materials during the delay in R2, R4 and R5: the delay was held, the timer paused, nothing said',
+    hc_divided:true,hc_divided_how:'In R4 and R5 a second adult asked the trainee a question mid-delay; the timer stayed in view and the break was delivered on time',
+    hc_earned:true,hc_earned_how:'R3 to R5: the timer ran out while the trainee was recording data; the break was delivered within 2 s with the stated phrase',
+    hc_wrong:false,hc_wrong_how:'Not a skill program; no error-correction trial in this protocol',
+    hc_rounds:'R2 (Role-play with error), R4 and R5 (escalating protest, second adult present)',
+    recheck1:D(-10)+' (unannounced TI-1 observation, within the first two weeks of running the plan alone)',
+    recheck1_focus:'Steps 8 and 11: holding the delay through protest, and withholding escape after aggression',
     situ_date:D(0),situ_pct:'95.5',
     situ_cond:'Actual student, independent writing block, no advance notice, usual staffing',
     situ_note:'Both target steps ran correctly. The delay was held to the full 90 s through one protest, and the card was re-presented after the denied request without a prompt from the observer.',
@@ -1322,23 +1377,23 @@ function loadSim(){
         'Note on the record: the criterion was first reached at round 3 with one critical step \u2014 re-presenting the break card after a denied request \u2014 omitted inside that window, '+
         'so rounds 4 and 5 were run to show every critical step correct before the in-situ probe.'};
   S.steps=[
-    {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false},
-    {d:'States the contingency once, in the wording written in the plan.',crit:false},
-    {d:'Presents the task materials within 5 s of the statement.',crit:false},
-    {d:'Remains within 1 m and neutral while the student begins, without adding prompts.',crit:false},
-    {d:'Honors an independent break-card exchange within 2 s by starting the programmed delay, not by ending the demand.',crit:true},
-    {d:'Starts the visual timer where the student can see it and states the delay length once.',crit:false},
-    {d:'Presents the intervening activity during the delay.',crit:false},
-    {d:'Holds the delay to its full programmed length, pausing rather than restarting the timer if the student disengages.',crit:true},
-    {d:'Delivers the break immediately at the end of the delay with the stated phrase.',crit:true},
-    {d:'Re-presents the break card after a denied or interrupted request rather than removing it.',crit:true},
-    {d:'Withholds escape following aggression: continues the demand and blocks without comment.',crit:true},
-    {d:'Records the trial on the data sheet before the next demand is presented.',crit:false},
-    {d:'Returns the student to the task within 10 s of the break ending.',crit:false},
-    {d:'At the end of the block, states the closing phrase and removes the materials.',crit:false}
+    {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false,cmp:'ant'},
+    {d:'States the contingency once, in the wording written in the plan.',crit:false,cmp:'ant'},
+    {d:'Presents the task materials within 5 s of the statement.',crit:false,cmp:'ant'},
+    {d:'Remains within 1 m and neutral while the student begins, without adding prompts.',crit:false,cmp:'ant'},
+    {d:'Honors an independent break-card exchange within 2 s by starting the programmed delay, not by ending the demand.',crit:true,cmp:'con'},
+    {d:'Starts the visual timer where the student can see it and states the delay length once.',crit:false,cmp:'ant'},
+    {d:'Presents the intervening activity during the delay.',crit:false,cmp:'ant'},
+    {d:'Holds the delay to its full programmed length, pausing rather than restarting the timer if the student disengages.',crit:true,cmp:'con'},
+    {d:'Delivers the break immediately at the end of the delay with the stated phrase.',crit:true,cmp:'con'},
+    {d:'Re-presents the break card after a denied or interrupted request rather than removing it.',crit:true,cmp:'ant'},
+    {d:'Withholds escape following aggression: continues the demand and blocks without comment.',crit:true,cmp:'con'},
+    {d:'Records the trial on the data sheet before the next demand is presented.',crit:false,cmp:''},
+    {d:'Returns the student to the task within 10 s of the break ending.',crit:false,cmp:'ant'},
+    {d:'At the end of the block, states the closing phrase and removes the materials.',crit:false,cmp:'ant'}
   ];
   S.rounds=[
-    {date:D(2),type:'Role-play',fb:'Setup and contingency statement were exact. Correction: the timer was restarted rather than paused when the student turned away — re-ran step 8 twice immediately.'},
+    {date:D(2),type:'Role-play',fb:'Setup and contingency statement were exact. Correction: the timer was restarted rather than paused when the student turned away — a commission error on a consequence step, so the consequence gate stays open until the decision rounds are clean. Re-ran step 8 twice immediately.'},
     {date:D(2),type:'Role-play with error',fb:'Step 8 held correctly this time. Correction: the break card was picked up and put in a pocket after the denied request; it has to stay available. Re-ran step 10.'},
     {date:D(2),type:'Role-play',fb:'Both target steps correct. Correction: the closing phrase was paraphrased — small, but the plan specifies wording. Praised the recovery on step 11.'},
     {date:D(2),type:'Role-play',fb:'All steps correct under escalating protest. Nothing to correct; named what the trainee did on step 8 so it is repeatable.'},
@@ -1362,7 +1417,7 @@ function loadSim(){
   ];
   plan.forEach((row,i)=>row.forEach((v,j)=>{S.cells[key(i,j)]=v;}));
   renderAll();setView('sum');
-  alert('Simulated training record loaded: 14 steps, 5 rehearsal rounds, acquisition curve, and a competency decision with the in-situ probe recorded.');
+  alert('Simulated training record loaded: 14 steps tagged by component, 5 rehearsal rounds with the hard cases noted, acquisition curve, the consequence gate, and a competency decision with the in-situ probe and the first TI-1 re-check recorded.');
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -1656,6 +1711,10 @@ function scrollRow(i){const li=byId('rrRow'+i);if(!li||!li.getClientRects().leng
   const tb=q('.toolbar'),st=q('.rr-status',box),sticky=st&&getComputedStyle(st).position==='sticky',r=li.getBoundingClientRect();
   const top=Math.max(0,tb?tb.getBoundingClientRect().bottom:0,sticky?st.getBoundingClientRect().bottom:0);
   if(r.top<top+6)window.scrollBy(0,r.top-top-6);else if(r.bottom>window.innerHeight-6)window.scrollBy(0,r.bottom-window.innerHeight+6);}
+/* v2026-10 fidelity (F): the consequence steps in the round, for the gate the decision applies (steps tagged on this form) */
+function conLine(){const idx=scopeIdx().filter(i=>S.steps[i]&&S.steps[i].cmp==='con');if(!idx.length)return'';let c=0,ec=0,eo=0;const bad=[];
+  idx.forEach(i=>{const r=roll(i);c+=r.c;ec+=r.ec;eo+=r.eo;if(r.ec)bad.push(i+1);});const n=c+ec+eo;if(!n)return'none came due in this round';
+  return n+' opportunit'+(n===1?'y':'ies')+': '+c+' correct, '+ec+' commission, '+eo+' omission'+(ec?' (commission on step'+(bad.length>1?'s ':' ')+list(bad.map(String))+': the consequence gate needs zero in the decision rounds)':'');}
 function renderReview(){const f=figs(),j=R.round,k=critNum(),multi=[];scopeIdx().forEach(i=>{const r=roll(i);if(r.n>1)multi.push([i,r]);});
   const row=(a,b)=>'<tr><th scope="row">'+esc(a)+'<\/th><td>'+esc(b)+'<\/td><\/tr>';
   const jumps=(arr,lab)=>'<div class="rr-jumps">'+arr.map(i=>'<button type="button" data-act="jump" data-i="'+i+'">'+esc(lab(i))+'<\/button>').join('')+'<\/div>';
@@ -1663,7 +1722,7 @@ function renderReview(){const f=figs(),j=R.round,k=critNum(),multi=[];scopeIdx()
     '<table class="rr-sum"><tbody>'+row('Round',whatLine())+row('Round time',clock(R.acc))+
     row('Accuracy',f.s?pct(f.c,f.s)+' ('+f.c+' of '+plural(f.s,'scored step')+')'+(k==null?'':', '+vsCrit(f.c,f.s)):'no step scored')+
     row('Critical steps',f.cs?f.cc+' of '+f.cs+' correct'+(f.cc===f.cs?'':'; each critical step must be correct in the rounds the decision is made on'):
-      (f.anyCrit?'no critical step scored':'no step in this round is marked critical'))+'<\/tbody><\/table>';
+      (f.anyCrit?'no critical step scored':'no step in this round is marked critical'))+(conLine()?row('Consequence steps',conLine()):'')+'<\/tbody><\/table>';
   if(R.scope==='targets'){const out=[];for(let i=0;i<nSteps();i++)if(!inScope(i))out.push(i);
     if(out.length)h+='<p class="rr-info">Not in this round, and left blank in R'+(j+1)+': '+esc(stepsWord(out))+'.<\/p>';}
   h+=f.unc.length?'<div class="rr-check rr-need"><p><b>Steps not coded ('+f.unc.length+'):<\/b> they stay blank in the grid. Choose one to code it.<\/p>'+jumps(f.unc,i=>'Step '+(i+1))+'<\/div>'
@@ -1916,7 +1975,7 @@ function readSaved(d){
   const nO=+S1.nObs,nObs=Number.isInteger(nO)&&nO>=2&&nO<=8?nO:4;
   const crit=+S1.crit>=50&&+S1.crit<=100?+S1.crit:90;
   const cN=+S1.critN,critN=Number.isInteger(cN)&&cN>=1&&cN<=5?cN:2;
-  let steps=(Array.isArray(S1.steps)?S1.steps:[]).slice(0,2000).map(x=>{x=obj(x)||{};return{d:x.d==null?'':String(x.d).slice(0,20000),crit:!!x.crit};});
+  let steps=(Array.isArray(S1.steps)?S1.steps:[]).slice(0,2000).map(x=>{x=obj(x)||{};return{d:x.d==null?'':String(x.d).slice(0,20000),crit:!!x.crit,cmp:x.cmp==='con'||x.cmp==='ant'?x.cmp:''};});
   if(!steps.length)steps=Array.from({length:8},()=>({d:'',crit:false}));
   const obs=(Array.isArray(S1.obs)?S1.obs:[]).slice(0,nObs).map(x=>obj(x)||{});while(obs.length<nObs)obs.push({});
   const cells=obj(S1.cells)||{},m=obj(S1.meta)||{},code=(i,j)=>{const v=cells[i+'_'+j];return typeof v==='string'?v:'';};
@@ -2216,7 +2275,7 @@ choose.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('
 goBtn.addEventListener('click',()=>{if(!T.rec||!T.ch)return;const P=plan();if(P.need.length){paintGo(P);return;}
   const x=T.rec,ch=T.ch,when=isoDay(new Date()),base={src:x.src,file:x.file||'',kind:x.kind,when,saved:x.saved||'',student:x.student,int:x.int};
   const ti=Object.assign({},obj(S.ti)||{}),done=[];
-  if(P.steps.take){const prior=P.steps.empty?0:nSt();S.steps=x.steps.map(st=>({d:st.d,crit:!!st.crit}));window.renderAll();
+  if(P.steps.take){const prior=P.steps.empty?0:nSt();S.steps=x.steps.map(st=>({d:st.d,crit:!!st.crit,cmp:st.cmp||''}));window.renderAll();
     ti.steps=Object.assign({},base,{n:x.steps.length,prior});done.push('the '+plural(x.steps.length,'step')+' and their critical marks');}
   if(P.tg.take){let written='';const el=q('[data-m="targeted"]');
     if(el&&(P.tg.field==='fill'||(P.tg.field==='conflict'&&ch.kr.targeted==='replace'))){setField(el,P.tg.text);written=P.tg.text;}
@@ -3592,6 +3651,18 @@ table{font-variant-numeric:tabular-nums}
 /* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
 .nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)!important}
 
+/* ---- Previous and Next at the foot of the page (the script builds the bar) ---- */
+.nbh-pagenav{display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;max-width:100%;margin:14px auto 30px;padding:0 2px;font-family:var(--nbh-sans)}
+.nbh-pagenav[hidden]{display:none}
+.nbh-pagenav button{font-family:var(--nbh-sans);font-size:13.5px;font-weight:600;line-height:1.2;min-height:40px;padding:8px 18px;
+  border-radius:var(--nbh-radius);border:1px solid var(--nbh-rule2);background:#fff;color:var(--nbh-navy);
+  box-shadow:0 1px 1px rgba(24,46,67,.05);cursor:pointer;display:inline-flex;align-items:center;gap:8px;max-width:48%;text-align:left}
+.nbh-pagenav button:hover{background:var(--nbh-mist);border-color:var(--nbh-teal)}
+.nbh-pagenav .nbh-pn-next{background:var(--nbh-navy);color:#fff;border-color:var(--nbh-navy)}
+.nbh-pagenav .nbh-pn-next:hover{background:var(--nbh-slate);border-color:var(--nbh-slate)}
+.nbh-pagenav button:disabled{visibility:hidden}
+.nbh-pagenav .nbh-pn-where{font-size:12.5px;color:var(--nbh-muted);text-align:center;flex:1 1 auto;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.nbh-pagenav{margin:10px auto 22px;padding:0 10px}.nbh-pagenav .nbh-pn-where{display:none}.nbh-pagenav button{max-width:none;flex:1 1 0;justify-content:center}}
 /* ---- keyboard focus everywhere else: one ring, easy to see ---- */
 a:focus-visible,button:focus-visible,[role=tab]:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
 a{text-underline-offset:2px}
@@ -3721,6 +3792,7 @@ a{text-underline-offset:2px}
      script, so the heights it keeps inline are the ones the paper had before. */
   function plain(on) {
     document.documentElement.classList.toggle('nbh-plain', !!on);
+    try { pnPlain(!!on); } catch (e) {}
     try { if (window.nbhFieldCare && window.nbhFieldCare.grow) window.nbhFieldCare.grow(); } catch (e) {}
   }
   window.addEventListener('beforeprint', function () { plain(true); });
@@ -3745,6 +3817,90 @@ a{text-underline-offset:2px}
       }
     });
   }
+  /* Previous and Next at the foot of the page. A form's pages are the buttons of
+     its view control (#viewSeg) or its tab row ([role=tab]); the bar below the
+     sheet steps through them so the next page is a click away without a scroll
+     back to the top. Screen only: the bar is taken out of the document while a
+     print or the packet reads it, and never reaches paper. */
+  var pn = null, pnHome = null;
+  function pnButtons() {
+    var seg = document.querySelector('#viewSeg');
+    var b = seg ? seg.querySelectorAll('button[data-view]') : document.querySelectorAll('[role=tab]');
+    var out = [];
+    for (var i = 0; i < b.length; i++) if (!b[i].disabled && !b[i].hidden) out.push(b[i]);
+    return out;
+  }
+  function pnCurrent(b) {
+    for (var i = 0; i < b.length; i++) if (b[i].getAttribute('aria-pressed') === 'true' || b[i].getAttribute('aria-selected') === 'true') return i;
+    return -1;
+  }
+  function pnLabel(b) {
+    var t = '';
+    for (var n = b.firstChild; n; n = n.nextSibling) {
+      var s = n.textContent || '';
+      if (n.nodeType === 1 && /^\s*\d+\s*$/.test(s)) continue; /* a step number badge */
+      t += s;
+    }
+    return t.replace(/\s+/g, ' ').trim();
+  }
+  /* the pages themselves: the sheets, or the main element, or the tab panels */
+  function pnPages() {
+    var s = document.querySelectorAll('.sheet:not(table)');
+    if (!s.length) s = document.querySelectorAll('main');
+    if (!s.length) s = document.querySelectorAll('[role=tabpanel]');
+    return s;
+  }
+  function pnUpdate() {
+    if (!pn) return;
+    var b = pnButtons(), i = pnCurrent(b);
+    var prev = pn.querySelector('.nbh-pn-prev'), next = pn.querySelector('.nbh-pn-next'), where = pn.querySelector('.nbh-pn-where');
+    if (b.length < 2 || i < 0) { pn.hidden = true; return; }
+    pn.hidden = false;
+    prev.disabled = i <= 0; next.disabled = i >= b.length - 1;
+    prev.innerHTML = i > 0 ? '<span aria-hidden="true">&larr;</span> ' + esc(pnLabel(b[i - 1])) : '';
+    next.innerHTML = i < b.length - 1 ? 'Next: ' + esc(pnLabel(b[i + 1])) + ' <span aria-hidden="true">&rarr;</span>' : '';
+    where.textContent = 'Page ' + (i + 1) + ' of ' + b.length + ' · ' + pnLabel(b[i]);
+    var s = pnPages(), last = null;
+    for (var k = s.length - 1; k >= 0; k--) if (s[k].offsetParent !== null) { last = s[k]; break; }
+    if (last) {
+      var r = last.getBoundingClientRect(), vw = document.documentElement.clientWidth || r.width;
+      /* a page with no sheet of its own (its main element spans the window) keeps a gutter */
+      if (r.width > 200) pn.style.width = (r.width >= vw - 2 && vw > 700 ? r.width - 40 : r.width) + 'px';
+    }
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pnGo(d) {
+    var b = pnButtons(), i = pnCurrent(b), t = b[i + d];
+    if (!t) return;
+    t.click();
+    setTimeout(function () { try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); } pnUpdate(); }, 0);
+  }
+  function pagenav() {
+    if (pn || pnButtons().length < 2) return;
+    var s = pnPages(), last = s[s.length - 1];
+    if (!last || !last.parentNode) return;
+    pn = document.createElement('nav');
+    pn.className = 'nbh-pagenav noprint';
+    pn.setAttribute('aria-label', 'Form pages');
+    pn.setAttribute('data-nbh-screen', '');
+    pn.innerHTML = '<button type="button" class="nbh-pn-prev"></button><span class="nbh-pn-where" aria-live="polite"></span><button type="button" class="nbh-pn-next"></button>';
+    pn.querySelector('.nbh-pn-prev').addEventListener('click', function () { pnGo(-1); });
+    pn.querySelector('.nbh-pn-next').addEventListener('click', function () { pnGo(1); });
+    pnHome = last;
+    last.parentNode.insertBefore(pn, last.nextSibling);
+    var seg = document.querySelector('#viewSeg') || document.querySelector('[role=tablist]') || document.body;
+    try { new MutationObserver(function () { pnUpdate(); }).observe(seg, { attributes: true, subtree: true, attributeFilter: ['aria-pressed', 'aria-selected', 'disabled', 'hidden'] }); } catch (e) {}
+    window.addEventListener('resize', function () { pnUpdate(); });
+    pnUpdate();
+  }
+  function pnPlain(on) {
+    if (!pn) return;
+    if (on) { if (pn.parentNode) pn.parentNode.removeChild(pn); }
+    else if (!pn.parentNode && pnHome && pnHome.parentNode) { pnHome.parentNode.insertBefore(pn, pnHome.nextSibling); pnUpdate(); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { pagenav(); });
+  else pagenav();
+  window.addEventListener('load', function () { pagenav(); pnUpdate(); });
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>

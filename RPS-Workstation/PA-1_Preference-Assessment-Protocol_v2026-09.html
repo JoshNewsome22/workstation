@@ -362,13 +362,31 @@ table.grid td input:focus,table.grid td select:focus{background:var(--wash);outl
 .f select{font:inherit;font-size:13px;flex:1;min-width:0;border:0;border-bottom:1px solid var(--rule-2);background:transparent;color:var(--ink);padding:1px 2px}
 .f select:focus{border-bottom-color:var(--rule);background:var(--wash);outline:none}
 .warn.verdict{margin:8px 0 10px}
+.csa-chk{display:flex;flex-wrap:wrap;gap:4px 14px;padding:5px 8px;font-size:12.5px;line-height:1.45}
+.csa-chk b{font-family:var(--sans);font-size:11px;color:var(--ink-soft);align-self:center}
+.csa-chk label{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.csa-chk input[type=checkbox]{width:auto;margin:0}
+.defs .dval.csa-txt,.f span.csa-txt{display:block;padding:5px 8px;font-size:13px}
+.f span.csa-txt{padding:1px 2px;flex:1;border-bottom:1px solid var(--rule-2);min-height:19px}
+.ident.csa2{grid-template-columns:repeat(2,1fr)}
+.csa-ord{font-size:11.5px}.csa-ord button.tool{margin-left:8px;font-size:11px;padding:1px 7px}
+#csa .gridwrap{overflow-x:auto}
+#csa table.grid td.lab{white-space:normal;min-width:70px}
+#csa table.grid td.c input[type=number]{width:42px;padding:1px 0}
+#csa table.grid th.c .sub2{font-weight:500;font-size:9.5px;color:var(--ink-soft)}
+.csa-ml{display:flex;flex-direction:column;gap:1px;align-items:center}
+.csa-ml label{display:flex;align-items:center;gap:3px;font-family:var(--sans);font-size:9.5px;color:var(--ink-soft);white-space:nowrap}
+.csa-ml label span{width:18px;text-align:right}
+@media print{#csa .gridwrap{overflow:visible}}
+#csaAug h4{font-family:var(--sans);font-size:11.5px;font-weight:600;color:var(--ink);margin:12px 0 4px}
+#csaAug .flagline{font-size:11.5px;color:#9b4e15;margin:2px 0 6px}
 .warn.verdict ul.rules li{margin:4px 0}
 .stat span{font-size:16px}
 table.rank#ioaTbl td input{width:60px;border:0;border-bottom:1px solid var(--rule-2);background:transparent;font:inherit;font-size:12px;text-align:center}
 table.rank#ioaTbl td input:focus{background:var(--wash);outline:none}
 /* Figures print one below the other: side by side, each had half the page and
    its axis labels came out at 4pt. Stacked, they print near 8pt. */
-@media print{.figure{page-break-inside:avoid}.twoup.figs{display:grid;grid-template-columns:1fr!important;gap:10px}.sim-banner{width:auto;margin:0 0 10px;border:1px solid var(--nbh-flag)}input[type=date]::-webkit-calendar-picker-indicator{display:none}#ecoMatTbl,#ecoAttrTbl,#csaTbl,#stabTbl{page-break-inside:avoid}#monTbl tr,#ecoObsTbl tr{page-break-inside:avoid}}
+@media print{.figure{page-break-inside:avoid}.twoup.figs{display:grid;grid-template-columns:1fr!important;gap:10px}.sim-banner{width:auto;margin:0 0 10px;border:1px solid var(--nbh-flag)}input[type=date]::-webkit-calendar-picker-indicator{display:none}#ecoMatTbl,#ecoAttrTbl,#csaTbl,#csaAugSum,#csaRetestTbl,#stabTbl{page-break-inside:avoid}#csaAug .csa-cond{page-break-inside:avoid}#csaAug h4{page-break-after:avoid}#monTbl tr,#ecoObsTbl tr{page-break-inside:avoid}}
 
 /* ---- numeric entry: no spinner arrows ----
    They overflow narrow columns, and the scroll wheel can silently change a
@@ -932,7 +950,7 @@ body.view-walk #walk{display:block}
     <div class="q">6. Where will the reinforcer be used, and what will it compete with there?</div>
     <div class="a">Complete the Ecological sheet: inventory the settings and routines, mark where each stimulus can be delivered, rate its practical attributes, and observe what the student approaches in real settings. In a preliminary study, free access to the reinforcer after sessions was generally associated with less responding than session-only access (Roane, Call, &amp; Falcomata, 2005); restrict access rather than drop the item.</div>
     <div class="q">7. Is the target behavior hypothesized to be automatically maintained?</div>
-    <div class="a">Add a competing stimulus assessment (Piazza et al., 1998, 2000): a stimulus that the student engages with <em>and</em> that reduces the behavior below its control level is a competing item; a stimulus that is merely preferred is not.</div>
+    <div class="a">Add a competing stimulus assessment (Piazza et al., 1998, 2000): a no-stimulus control trial at the start of each series, then each stimulus alone in a randomized order, with the target behavior recorded in every trial and engagement in every test trial (Breeman et al., 2026; Frank-Crawford et al., 2026). &ldquo;Stimuli should be selected based on their ability to produce at least an 80% reduction in challenging behavior relative to the no-stimulus control condition in the CSA&rdquo;; whether to select on engagement &ldquo;remains unclear&rdquo;, since reductions occurred without corresponding engagement (Breeman et al., 2026). A stimulus that is merely preferred is not a competing item, and one under which the behavior increases is contraindicated. Expect the assessment to fail sometimes: at least one HC stimulus was identified in 59.77% of published applications (Breeman et al., 2026) and 47.20% of consecutive clinical cases (Laureano et al., 2023, as cited in Breeman et al., 2026); for automatically maintained behavior the augmented conditions on the sheet are the next step. For a socially maintained target the published CSAs arranged the functional-analysis contingency during every trial, which this sheet does not do; for excessive functional communication responses in schedule thinning, Frank-Crawford et al. (2026) ran the CSA against the FCR under extinction (see TD-1).</div>
     <div class="q">8. Are results ambiguous, tied, or contradicted by the treatment data?</div>
     <div class="a">Add a duration-based measure (DeLeon et al., 1999; Kodak et al., 2009) or run a reinforcer assessment. Reassess on a schedule: preferences stay stable for some individuals and shift for others over months (Zhou et al., 2001; Hanley et al., 2006; Ciccone et al., 2007), and on days when a brief MSWO run before work sessions disagreed with the pretreatment assessment, its top item generally drew more responding (DeLeon et al., 2001). The Monitoring sheet logs each brief MSWO and each use of an item, and flags rising latency to approach, falling engagement, rejections, and staff-noted signs before the hierarchy itself changes; reinforcers lose their effectiveness when they are presented repeatedly (Murphy et al., 2003).</div>
   </div>
@@ -970,7 +988,7 @@ body.view-walk #walk{display:block}
     <li><b>Paired stimulus.</b> Generate the trial list first; the panel presents it in order with its sides. <b>Left</b> or <b>Right</b> starts the access period for that item; with no selection in 30 s the trial is scored <b>Neither</b>. <b>Both</b> means block the reach and present the same pair again as a new trial: the pair&rsquo;s row records the outcome of that re-presentation, and the panel reports how many times Both was blocked.</li>
     <li><b>MSWO / MSW.</b> Set out the array in the order shown and tap the item chosen. After the access period (or <b>Done early</b>, for an edible consumed quickly), the panel removes the item (MSWO) or returns it (MSW), moves the item at the left end to the right end, and shows the new order. No selection in 30 s ends the session. Each session starts one position further along the pool than the last, and each trial goes into that session&rsquo;s column.</li>
     <li><b>Free operant and single-stimulus engagement.</b> In a free-operant session, tap the item the student is engaged with and <b>None</b> when the student is engaged with nothing; choose <b>Several at once</b> when the student can engage with two items together. The seconds for every item, including 0, go into the session&rsquo;s column. Single-stimulus engagement presents each item alone for the set time, twice in rotated order, with <b>Engaged</b> on and off.</li>
-    <li><b>Competing stimulus.</b> Run the two control sessions first, then each item for two sessions. Tap <b>Target behavior</b> at each occurrence and <b>Engaged</b> on and off; at the end the panel converts both to the percentage of intervals with the behavior or with engagement (partial interval, at the interval size on the sheet) and writes them into the row.</li>
+    <li><b>Competing stimulus.</b> The panel follows the sheet&rsquo;s series: the control trial first, then each item in the randomized order printed under the table; free access first, then each augmented condition switched on. Tap <b>Target behavior</b> at each occurrence and <b>Engaged</b> on and off (<b>Prompt</b> and <b>Block</b> in the augmented conditions); at the end the panel writes engagement as the percentage of intervals and the target behavior in the sheet&rsquo;s unit (percentage of partial intervals, or responses per minute) into the row.</li>
     <li><b>Ecological, in-context observation.</b> During free time, tap the item the student approaches (or type an activity under <b>Not in pool</b>); <b>Approach over</b> stops the time, and <b>Save</b> writes one row with the date, setting, seconds and who initiated. Tapping the next item saves the last one first.</li>
     <li><b>Save, discard and pause.</b> <b>Save and next</b> writes the finished trial or session and moves on; <b>Discard</b> writes nothing, so the trial can be run again. <b>Pause</b> stops every clock, for example when the student leaves the table. The runner always works on the first empty cell in its order, so a trial can be run again by clearing its cell. A blank date on the sheet is filled when you start.</li>
     <li><b>Alerts and keys.</b> Each end of a window, access period or session sounds a tone, flashes the edge of the screen and, on a phone or tablet, vibrates; each can be turned off, and <b>Test alert</b> plays one. The screen is kept awake while a runner is running. One runner runs at a time: the pool size, the settings it uses and Load simulation, Open data and Clear all are locked until it ends, and a button in the corner leads back to it from any other sheet. Each panel lists its keyboard keys.</li>
@@ -1431,16 +1449,17 @@ body.view-walk #walk{display:block}
     <div><b>Date / assessor</b><span><input class="inline" data-meta="csaDate" placeholder="date"> &nbsp;<input class="inline" data-meta="csaBy" placeholder="assessor"></span></div>
   </div>
   <div class="pa-run noprint" id="pa-run-csa" role="region" aria-labelledby="pa-run-csa-h">
-    <div class="pa-run-hd"><h3 class="pa-run-title" id="pa-run-csa-h">Run This Assessment</h3><span class="pa-run-hint">Times each control or stimulus session, counts the target behavior, times engagement with the item, and writes the percentages of intervals into the table below.</span></div>
+    <div class="pa-run-hd"><h3 class="pa-run-title" id="pa-run-csa-h">Run This Assessment</h3><span class="pa-run-hint">Follows the series on the sheet (control trial first, then each item in its randomized order), counts the target behavior, times engagement with the item, tallies prompts and blocks in the augmented conditions, and writes each trial into the table below in the sheet&rsquo;s unit.</span></div>
     <div class="pa-run-set">
-      <label for="pa-run-csa-cond">Condition<select id="pa-run-csa-cond"></select></label>
-      <label for="pa-run-csa-ses">Session<select id="pa-run-csa-ses"><option value="1">Session 1</option><option value="2">Session 2</option></select></label>
+      <label for="pa-run-csa-blk">Condition<select id="pa-run-csa-blk"><option value="fa">Free access</option></select></label>
+      <label for="pa-run-csa-ses">Series<select id="pa-run-csa-ses"><option value="1">Series 1</option></select></label>
+      <label for="pa-run-csa-cond">Trial<select id="pa-run-csa-cond"></select></label>
       <div class="pa-run-fix"><span>Session length</span><b id="pa-run-csa-len">300 s</b><small id="pa-run-csa-lens">from the sheet</small></div>
       <div class="pa-run-fix"><span>Intervals</span><b id="pa-run-csa-iv">10 s</b><small id="pa-run-csa-ivs">from the sheet</small></div>
     </div>
     <div class="pa-run-main">
       <div class="pa-run-stage" id="pa-run-csa-stage" tabindex="-1">
-        <div class="pa-run-count" id="pa-run-csa-count">Control session 1</div>
+        <div class="pa-run-count" id="pa-run-csa-count">Free access &middot; series 1 &middot; control</div>
         <div class="pa-run-item" id="pa-run-csa-item">Control (no items)</div>
         <div class="pa-run-sub" id="pa-run-csa-sub"></div>
       </div>
@@ -1453,6 +1472,8 @@ body.view-walk #walk{display:block}
     <div class="pa-run-rec">
       <button type="button" class="pa-run-rej" id="pa-run-csa-pb" disabled>Target behavior <span id="pa-run-csa-pbn">0</span></button>
       <button type="button" id="pa-run-csa-eng" aria-pressed="false" disabled>Engaged <span id="pa-run-csa-engs">0 s</span></button>
+      <button type="button" id="pa-run-csa-pr" disabled hidden>Prompt <span id="pa-run-csa-prn">0</span></button>
+      <button type="button" id="pa-run-csa-bl" disabled hidden>Block <span id="pa-run-csa-bln">0</span></button>
       <button type="button" id="pa-run-csa-undo" disabled>Undo</button>
     </div>
     <div class="pa-run-ctl">
@@ -1471,21 +1492,76 @@ body.view-walk #walk{display:block}
     </div>
     <div class="pa-run-msg" id="pa-run-csa-msg" aria-live="polite"></div>
     <div class="pa-run-sum" id="pa-run-csa-sum" hidden></div>
-    <div class="pa-run-keys">Keys: <b>Space</b> start, pause or resume &middot; <b>X</b> target behavior &middot; <b>E</b> engaged on or off &middot; <b>Z</b> undo the last target behavior &middot; <b>S</b> or <b>Enter</b> save and next.</div>
+    <div class="pa-run-keys">Keys: <b>Space</b> start, pause or resume &middot; <b>X</b> target behavior &middot; <b>E</b> engaged on or off &middot; <b>R</b> prompt and <b>B</b> block (augmented conditions) &middot; <b>Z</b> undo the last target behavior &middot; <b>S</b> or <b>Enter</b> save and next.</div>
   </div>
 
   <div class="warn"><b>Procedure</b>
-    Use when the target behavior is hypothesized (EA-1) to be automatically maintained. Run two <b>control</b> sessions with no items available and record the percentage of 10-s intervals with the target behavior. Then present each stimulus alone for two sessions of the same length (5 min is this form's default; published assessments have sampled 30 s to 10 min, DeLeon et al., 2005) and record the percentage of intervals with engagement and the percentage with the target behavior. Deliver no attention and no other consequences during any session. A stimulus competes when the student engages with it and the target behavior falls well below its control level; items that produce high engagement without reducing the behavior are preferred but not competing.</div>
-  <div class="ident" style="grid-template-columns:repeat(3,1fr)">
+    Use when the target behavior is hypothesized (EA-1) to be automatically maintained. Run the assessment in <b>series</b>: each series begins with a <b>control</b> trial with no items available, then presents each stimulus alone, one at a time, in a randomized order (three series is this form's default; published assessments ran one to six series, median three, with trials of 1 to 10 min, median 4 min: Breeman, Irwin Helvey, &amp; Greer, 2026; Frank-Crawford, Cavanaugh, Piersma, &amp; Sauter, 2026). Record the target behavior in every trial and engagement (or contact) with the stimulus in every test trial; all trials the same length (5 min is this form's default). Deliver no attention and no other consequences during any trial, and have only the test stimulus present. A stimulus is <b>high competition (HC)</b> when the target behavior is reduced by at least 80% from the mean of the control trials; engagement is reported alongside, not required. Items that produce high engagement without reducing the behavior are preferred but not competing, and an item under which the behavior rises above its control level is contraindicated as a competing item regardless of preference.</div>
+  <div class="ident">
     <div class="f"><label for="csaLen">Session length (s)</label><input id="csaLen" data-meta="csaLen" placeholder="300"></div>
     <div class="f"><label for="csaInt">Interval size</label><input id="csaInt" data-meta="csaInt" placeholder="10-s partial interval"></div>
     <div class="f"><label for="csaHyp">Hypothesis source</label><input id="csaHyp" data-meta="csaHyp" placeholder="e.g., EA-1 alone/ignore condition, 9/2026"></div>
+    <div class="f"><label for="csaSeries">Series (1&ndash;6)</label><input id="csaSeries" type="number" min="1" max="6" value="3"></div>
+    <div class="f"><label for="csaUnit">Target-behavior unit</label><select id="csaUnit" data-meta="csaUnit"><option value="pct">% of intervals (partial interval)</option><option value="rpm">Responses per minute</option></select></div>
+    <div class="f"><label for="csaMeasure">Stimulus measure</label><select id="csaMeasure" data-meta="csaMeasure"><option value="">Engagement</option><option value="Contact">Contact</option></select></div>
+    <div class="f" style="grid-column:1/3"><label for="csaEngDef">Engagement / contact definition</label><input id="csaEngDef" data-meta="csaEngDef" placeholder="e.g., any manipulation of the item that is not harmful to the student or others" style="flex:1"></div>
+    <div class="f"><label for="csaSubtype">Subtype (EA-1, if recorded)</label><select id="csaSubtype" data-meta="csaSubtype"><option value="">Not recorded</option><option>Subtype 1</option><option>Subtype 2</option><option>Subtype 3</option><option>Social</option><option>Mixed</option></select></div>
+    <div class="f"><label for="csaCrit">HC criterion</label><select id="csaCrit" data-meta="csaCrit"><option value="80">80% reduction vs control (modal in the literature; no consensus)</option><option value="80e50">80% reduction and 50% engagement (Thomas et al., 2022, as cited in Breeman et al., 2026)</option><option value="e75p15">75% engagement and &lt; 15% intervals with the behavior (Leif et al., 2020, as cited in Breeman et al., 2026)</option></select></div>
+    <div class="f"><label for="csaEngCut">High-engagement cut-off (%)</label><input id="csaEngCut" data-meta="csaEngCut" type="number" min="0" max="100" placeholder="50"></div>
   </div>
+  <p class="method"><b>Measures.</b> <em>Engagement</em>: the student actively manipulates the stimulus in a manner not consistent with the target behavior; <em>contact</em>: the student maintains physical contact with it (the definitions used by the review: Breeman et al., 2026, who found 6.89% of applications measured contact only). Engagement is always written as the percentage of intervals. The target behavior is written in the unit chosen above; keep the same unit from this assessment to the treatment check, since a validation whose measure changed between assessment and treatment could not be scored for predictive validity (Breeman et al., 2026). The 10-s partial interval is kept for continuity with EA-1; neither unit is prescribed by the literature. <b>Formula.</b> Reduction % = (control mean &minus; stimulus mean) &divide; control mean &times; 100; a negative value means the behavior increased. <b>Subtype yield</b> (Laureano et al., 2023, as cited in Breeman et al., 2026): at least one HC stimulus was found in 66.7% of applications for Subtype 1, 45.0% for Subtype 2, 25.0% for Subtype 3, 60.0% for social and 36.4% for mixed function; use it to set expectations and to decide whether to plan for augmentation from the start.<span id="csaSubHint"></span></p>
+  <div class="defs">
+    <div class="drow"><div class="dlab">Selection basis</div><div class="dval csa-chk"><label><input type="checkbox" data-meta="csaSelPA">Preference assessment result</label><label><input type="checkbox" data-meta="csaSelNom">Clinician nomination</label><label><input type="checkbox" data-meta="csaSelRAISD">RAISD</label><label><input type="checkbox" data-meta="csaSelMatched">Hypothesized sensory consequence (matched)</label><label><input type="checkbox" data-meta="csaSelCare">Caregiver interview</label><label><input type="checkbox" data-meta="csaSelObs">Direct observation</label><label><input type="checkbox" data-meta="csaSelCtx">Contexts of use</label></div></div>
+    <div class="drow"><div class="dlab">Number of stimuli</div><div class="dval csa-txt" id="csaNStim"></div></div>
+    <div class="drow"><div class="dlab">Pre-session sampling</div><div class="dval csa-chk"><label><input type="checkbox" data-meta="csaSampled">Done: each test stimulus presented and described, engagement modeled, up to 30 s to engage, with the functional reinforcer absent (Frank-Crawford et al., 2026)</label></div></div>
+  </div>
+  <p class="method">Sources used to pick the stimuli in the review&rsquo;s 87 applications: preference assessment results (47.13%), clinician nominations (42.53%), the RAISD (35.63%), the hypothesized sensory consequence of the behavior (27.59%); pools held four to 16 stimuli, and only the test stimuli were present during the assessment (Breeman et al., 2026). Frank-Crawford et al. (2026) chose 8&ndash;14 stimuli from preference assessment outcomes, caregiver report and direct observation, and their pools included an attention trial, tasks and another functional reinforcer; the pool here may likewise include a social, activity or edible item.</p>
   <div class="readout" id="csaReadout"></div>
   <div class="gridwrap"><table class="grid" id="csaTbl"></table></div>
+  <p class="method csa-ord" id="csaOrdLine"></p>
   <div class="figure" id="csaFig"></div>
-  <p class="method">Category (working convention for this practice): <b>Competing</b> when mean engagement &ge; 50% of intervals and the target behavior is reduced by &ge; 80% from the control mean; <b>Partly competing</b> when engagement &ge; 50% and the reduction is 50&ndash;79%; otherwise <b>Not competing</b>. A control mean below 20% of intervals makes reductions hard to detect; extend the control sessions or run the assessment when the behavior is more likely.</p>
-  <div class="cite">Competing stimulus assessment after Piazza, Fisher, Hanley, LeBlanc, Worsdell, Lindauer, and Keeney (1998, <em>JABA, 31</em>, 165&ndash;189) and Piazza, Adelinis, Hanley, Goh, and Delia (2000, <em>JABA, 33</em>, 13&ndash;27), who identified stimuli that both produced engagement and reduced automatically maintained behavior. Haddock and Hagopian (2020, <em>JABA, 53</em>, 1982&ndash;2001) reviewed the method and its criteria; Hagopian, Rooker, and Zarcone (2015, <em>JABA, 48</em>, 523&ndash;543) describe subtypes of automatically maintained self-injury that differ in response to competing stimuli. The 50% / 80% criteria are this form's conventions.</div>
+  <p class="method">Category: <b>HC</b> under the criterion chosen above (80% reduction from the control mean is the criterion 72.41% of published applications used, Breeman et al., 2026, and this form&rsquo;s default; there is no consensus definition, Frank-Crawford et al., 2026); <b>Increased</b> when the stimulus mean exceeds the control mean (27.70% of stimuli tested for automatic function did so in the review, sometimes with high engagement); <b>Partly competing</b> at a 50&ndash;79% reduction and the <b>high-engagement</b> cut-off are this form&rsquo;s conventions. Engagement is reported, not required: &ldquo;stimuli should be selected based on their ability to produce at least an 80% reduction in challenging behavior relative to the no-stimulus control condition&rdquo;, and several stimuli in the review produced complete reductions with minimal engagement (Breeman et al., 2026). A high-engagement item that is not HC is tagged <b>HP, not competing</b> (the comparison stimulus of Frank-Crawford et al., 2026). A control mean below 20% of intervals makes reductions hard to detect (this form&rsquo;s convention); the review cautions that motivation for both the behavior and engagement may fluctuate within an assessment and recommends repeated testing across days with the interval specified (Breeman et al., 2026).</p>
+
+  <h3 class="sub">Augmented Conditions (A-CSA): Only as Necessary</h3>
+  <div class="warn"><b>When</b>
+    Free access first. If it identifies no or few HC stimuli, add <b>prompted engagement</b>, then <b>prompted engagement with response blocking</b> as necessary, and check maintenance with a <b>repeated free-access</b> condition (the sequence of Hagopian et al., 2020, as cited in Breeman et al., 2026, who report that augmentations always identified a greater percentage of HC stimuli, that A-CSA procedures can improve outcomes for Subtypes 2 and 3, and that gains were largely maintained during repeated free access). Every published A-CSA in the review targeted automatically maintained behavior; the procedure is not validated for socially maintained or mixed-function behavior. Each condition has its own control trials and its own 80% line. A stimulus that reaches the criterion only with blocking or protective equipment is <b>HC with disruption</b>, not HC: reductions under blocking cannot be isolated from the effect of the stimulus (Breeman et al., 2026), and it is not shown to compete without the blocking.</div>
+  <div class="csa-chk" id="csaRunSet"><b>Conditions run</b> <label><input type="checkbox" data-run="pe">Prompted engagement</label><label><input type="checkbox" data-run="pb">Prompted engagement + response blocking</label><label><input type="checkbox" data-run="rfa">Repeated free access (maintenance check)</label></div>
+  <div class="ident">
+    <div class="f"><label for="csaPromptForm">Prompt form</label><select id="csaPromptForm" data-meta="csaPromptForm"><option value=""></option><option>Vocal</option><option>Model</option><option>Physical</option><option>Vocal, then physical</option></select></div>
+    <div class="f"><label for="csaBlockForm">Blocking form</label><select id="csaBlockForm" data-meta="csaBlockForm"><option value=""></option><option>Therapist blocking</option><option>Protective equipment (noncontingent)</option><option>Both</option></select></div>
+    <div class="f"><label for="csaOtherMod">Other modifications</label><input id="csaOtherMod" data-meta="csaOtherMod" placeholder="e.g., DRA or praise for engagement; blocking another behavior; equipment applied"></div>
+  </div>
+  <p class="method">Prompting: Frank-Crawford et al. (2026) gave a 3&ndash;5-s vocal redirection after 10 s without engagement (vocal for a participant who followed vocal prompts, physical for one who ignored them); the runner&rsquo;s 10-s prompt alert uses that parameter. Tally every prompt and block for fidelity. Of the review&rsquo;s blocking procedures, three of 18 were noncontingent protective equipment rather than therapist blocking; note which was used. Prompting with differential reinforcement of engagement (Leif et al., 2020, as cited) is a different procedure from prompting with blocking and the two are not interchangeable.</p>
+  <div id="csaAug"></div>
+  <div class="readout" id="csaAugReadout"></div>
+  <div class="gridwrap"><table class="grid" id="csaAugSum"></table></div>
+
+  <h3 class="sub">Validation and Consistency</h3>
+  <p class="method">Predictive validity in the review: the CSA reduction minus the reduction in the validation condition, with <b>correspondence</b> defined as a difference of 10 percentage points or fewer; 17 of 19 HC-stimulus validations (89.47%) corresponded, 13 of 14 for automatic function and 3 of 4 for social function, but only seven validations used schedule thinning and 17 of 32 tested stimulus sets, which makes a set&rsquo;s result hard to attribute to any single item (Breeman et al., 2026). Compare the treatment condition with the same contingencies and no stimulus; inside a package, compare identical conditions with and without the stimulus.</p>
+  <div class="ident">
+    <div class="f"><label for="csaValItem">Stimulus used in treatment</label><select id="csaValItem" data-meta="csaValItem"></select></div>
+    <div class="f"><label for="csaValForm">Form</label><select id="csaValForm" data-meta="csaValForm"><option value=""></option><option>Single stimulus</option><option>Stimulus set</option><option>Rotated</option></select></div>
+    <div class="f"><label for="csaValCtx">Treatment context</label><select id="csaValCtx" data-meta="csaValCtx"><option value=""></option><option>Alone (noncontingent access)</option><option>Package: FCT</option><option>Package: DRA</option><option>Package: prompting</option><option>Package: blocking or protective equipment</option><option>Schedule thinning</option></select></div>
+    <div class="f"><label for="csaValCond">CSA condition compared</label><select id="csaValCond" data-meta="csaValCond"><option value="fa">Free access</option><option value="pe">Prompted engagement</option><option value="pb">Prompted + blocking</option><option value="rfa">Repeated free access</option></select></div>
+    <div class="f"><label for="csaValRed">Treatment reduction (%)</label><input id="csaValRed" data-meta="csaValRed" type="number" min="-1000" max="100" placeholder="%"></div>
+    <div class="f"><label for="csaValNote">Note</label><input id="csaValNote" data-meta="csaValNote" placeholder="dates, sessions, what else changed"></div>
+  </div>
+  <p class="method" id="csaValOut"></p>
+  <div class="ident csa2">
+    <div class="f"><label for="csaValHP">Comparison HP stimulus</label><select id="csaValHP" data-meta="csaValHP"></select></div>
+    <div class="f"><label for="csaValHPRed">Its treatment reduction (%)</label><input id="csaValHPRed" data-meta="csaValHPRed" type="number" min="-1000" max="100" placeholder="%"></div>
+    <div class="f"><label for="csaValNon">Non-indicated stimulus checked</label><select id="csaValNon" data-meta="csaValNon"></select></div>
+    <div class="f"><label for="csaValNonRed">Its treatment reduction (%)</label><input id="csaValNonRed" data-meta="csaValNonRed" type="number" min="-1000" max="100" placeholder="%"></div>
+  </div>
+  <p class="method" id="csaValOut2"></p>
+  <div class="ident">
+    <div class="f"><label for="csaRetestDate">Re-test date</label><input id="csaRetestDate" data-meta="csaRetestDate" placeholder="date"></div>
+    <div class="f"><label>Days since first administration</label><span class="csa-txt" id="csaRetestDays"></span></div>
+    <div class="f"><label for="csaRetestNote">Re-test note</label><input id="csaRetestNote" data-meta="csaRetestNote" placeholder="same stimuli and length; what differed"></div>
+  </div>
+  <div class="gridwrap"><table class="grid" id="csaRetestTbl"></table></div>
+  <p class="method">Consistency across repeated administrations was evaluated in 5.75% of the review&rsquo;s applications; across 13 participants with repeat applications the percentage of HC stimuli rose for four, fell for four, stayed the same for two and remained at zero for three, so stability is not assumed. The review recommends repeating the test across days and specifying the interval. Comparing the HC stimulus with an equally engaging HP stimulus in treatment (Frank-Crawford et al., 2026, for two participants) attributes the effect to competition rather than preference; checking one non-indicated stimulus tests for false negatives, which the review found done in only four validations (Breeman et al., 2026).</p>
+  <div class="cite">Competing stimulus assessment after Piazza, Fisher, Hanley, LeBlanc, Worsdell, Lindauer, and Keeney (1998, <em>JABA, 31</em>, 165&ndash;189) and Piazza, Adelinis, Hanley, Goh, and Delia (2000, <em>JABA, 33</em>, 13&ndash;27). Haddock and Hagopian (2020, <em>JABA, 53</em>, 1982&ndash;2001) reviewed the method and its criteria; Hagopian, Rooker, and Zarcone (2015, <em>JABA, 48</em>, 523&ndash;543) describe subtypes of automatically maintained self-injury that differ in response to competing stimuli. The series structure, the control-relative reduction, the 80% criterion as the modal published convention, the engagement and contact definitions, the &ldquo;HC with disruption&rdquo; label, the augmented sequence and the predictive-validity figures follow Breeman, Irwin Helvey, and Greer (2026, <em>JABA, 59</em>(4), e70074) and Frank-Crawford, Cavanaugh, Piersma, and Sauter (2026, <em>JABA, 59</em>(4), e70078). The augmented sequence is that of Hagopian, Frank-Crawford, Javed, Fisher, Dillon, Zarcone, and Rooker (2020, <em>JABA, 53</em>, 2172&ndash;2185), the subtype yields those of Laureano, Fernandez, and Hagopian (2023, <em>JABA, 56</em>, 428&ndash;441), and the alternative criteria those of Thomas et al. (2022) and Leif et al. (2020), all as cited in Breeman et al. (2026). The 50&ndash;79% &ldquo;Partly competing&rdquo; band, the high-engagement cut-off and the 20% low-control flag are this form&rsquo;s conventions.</div>
 </div>
 
 <!-- ================================================================ MONITORING -->
@@ -1576,6 +1652,7 @@ body.view-walk #walk{display:block}
   <div class="cite">
     <b>Reference list.</b>
     Albin, R. W., Lucyshyn, J. M., Horner, R. H., &amp; Flannery, K. B. (1996). Contextual fit for behavioral support plans. In L. K. Koegel, R. L. Koegel, &amp; G. Dunlap (Eds.), <em>Positive behavioral support</em> (pp. 81&ndash;98). Brookes. &bull;
+    Breeman, S. L., Irwin Helvey, C., &amp; Greer, B. D. (2026). Recent developments and future directions for competing stimulus assessments. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70074. https://doi.org/10.1002/jaba.70074 &bull;
     Brown, L., Branston, M. B., Hamre-Nietupski, S., Pumpian, I., Certo, N., &amp; Gruenewald, L. (1979). A strategy for developing chronological-age-appropriate and functional curricular content for severely handicapped adolescents and young adults. <em>Journal of Special Education, 13</em>(1), 81&ndash;90. &bull;
     Carr, J. E., Nicolson, A. C., &amp; Higbee, T. S. (2000). Evaluation of a brief multiple-stimulus preference assessment in a naturalistic context. <em>Journal of Applied Behavior Analysis, 33</em>(3), 353&ndash;357. &bull;
     Ciccone, F. J., Graff, R. B., &amp; Ahearn, W. H. (2007). Long-term stability of edible preferences in individuals with developmental disabilities. <em>Behavioral Interventions, 22</em>(3), 223&ndash;228. &bull;
@@ -1589,10 +1666,12 @@ body.view-walk #walk{display:block}
     DeLeon, I. G., Toole, L. M., Gutshall, K. A., &amp; Bowman, L. G. (2005). Individualized sampling parameters for behavioral observations: Enhancing the predictive validity of competing stimulus assessments. <em>Research in Developmental Disabilities, 26</em>(5), 440&ndash;455. &bull;
     Fisher, W. W., Piazza, C. C., Bowman, L. G., &amp; Amari, A. (1996). Integrating caregiver report with a systematic choice assessment to enhance reinforcer identification. <em>American Journal on Mental Retardation, 101</em>(1), 15&ndash;25. &bull;
     Fisher, W. W., Piazza, C. C., Bowman, L. G., Hagopian, L. P., Owens, J. C., &amp; Slevin, I. (1992). A comparison of two approaches for identifying reinforcers for persons with severe and profound disabilities. <em>Journal of Applied Behavior Analysis, 25</em>(2), 491&ndash;498. &bull;
+    Frank-Crawford, M. A., Cavanaugh, M. E. W., Piersma, D. E., &amp; Sauter, S. (2026). A clinical evaluation and validation of a competing stimulus assessment targeting excessive functional communication responses. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70078. https://doi.org/10.1002/jaba.70078 &bull;
     Gottschalk, J. M., Libby, M. E., &amp; Graff, R. B. (2000). The effects of establishing operations on preference assessment outcomes. <em>Journal of Applied Behavior Analysis, 33</em>(1), 85&ndash;88. &bull;
     Graff, R. B., &amp; Karsten, A. M. (2012). Assessing preferences of individuals with developmental disabilities: A survey of current practices. <em>Behavior Analysis in Practice, 5</em>(2), 37&ndash;48. &bull;
     Green, C. W., Reid, D. H., White, L. K., Halford, R. C., Brittain, D. P., &amp; Gardner, S. M. (1988). Identifying reinforcers for persons with profound handicaps: Staff opinion versus systematic assessment of preferences. <em>Journal of Applied Behavior Analysis, 21</em>(1), 31&ndash;43. &bull;
     Haddock, J. N., &amp; Hagopian, L. P. (2020). Competing stimulus assessments: A systematic review. <em>Journal of Applied Behavior Analysis, 53</em>(4), 1982&ndash;2001. &bull;
+    Hagopian, L. P., Frank-Crawford, M. A., Javed, N., Fisher, A. B., Dillon, C. M., Zarcone, J. R., &amp; Rooker, G. W. (2020). Initial outcomes of an augmented competing stimulus assessment. <em>Journal of Applied Behavior Analysis, 53</em>(4), 2172&ndash;2185. https://doi.org/10.1002/jaba.725 (as cited in Breeman et al., 2026) &bull;
     Hagopian, L. P., Rooker, G. W., &amp; Zarcone, J. R. (2015). Delineating subtypes of self-injurious behavior maintained by automatic reinforcement. <em>Journal of Applied Behavior Analysis, 48</em>(3), 523&ndash;543. &bull;
     Hagopian, L. P., Rush, K. S., Lewin, A. B., &amp; Long, E. S. (2001). Evaluating the predictive validity of a single stimulus engagement preference assessment. <em>Journal of Applied Behavior Analysis, 34</em>(4), 475&ndash;485. &bull;
     Hanley, G. P., Iwata, B. A., Lindberg, J. S., &amp; Conners, J. (2003). Response-restriction analysis: I. Assessment of activity preferences. <em>Journal of Applied Behavior Analysis, 36</em>(1), 47&ndash;58. &bull;
@@ -1603,6 +1682,8 @@ body.view-walk #walk{display:block}
     Kelly, M. A., Roscoe, E. M., Hanley, G. P., &amp; Schlichenmeyer, K. (2014). Evaluation of assessment methods for identifying social reinforcers. <em>Journal of Applied Behavior Analysis, 47</em>(1), 113&ndash;135. &bull;
     Kern, L., Vorndran, C. M., Hilt, A., Ringdahl, J. E., Adelman, B. E., &amp; Dunlap, G. (1998). Choice as an intervention to improve behavior: A review of the literature. <em>Journal of Behavioral Education, 8</em>(2), 151&ndash;169. &bull;
     Kodak, T., Fisher, W. W., Kelley, M. E., &amp; Kisamore, A. (2009). Comparing preference assessments: Selection- versus duration-based preference assessment procedures. <em>Research in Developmental Disabilities, 30</em>(5), 1068&ndash;1077. &bull;
+    Laureano, B., Fernandez, N., &amp; Hagopian, L. P. (2023). Efficacy of competing stimulus assessments: A summary of 35 consecutively encountered cases. <em>Journal of Applied Behavior Analysis, 56</em>(2), 428&ndash;441. https://doi.org/10.1002/jaba.979 (as cited in Breeman et al., 2026) &bull;
+    Leif, E. S., Roscoe, E. M., Ahearn, W. H., Rogalski, J. P., &amp; Morrison, H. (2020). Increasing item engagement and decreasing automatically reinforced problem behavior within a modified competing stimulus assessment. <em>Journal of Applied Behavior Analysis, 53</em>(3), 1638&ndash;1659. https://doi.org/10.1002/jaba.695 (as cited in Breeman et al., 2026) &bull;
     McAdam, D. B., Klatt, K. P., Koffarnus, M., Dicesare, A., Solberg, K., Welch, C., &amp; Murphy, S. (2005). The effects of establishing operations on preferences for tangible items. <em>Journal of Applied Behavior Analysis, 38</em>(1), 107&ndash;110. &bull;
     Murphy, E. S., McSweeney, F. K., Smith, R. G., &amp; McComas, J. J. (2003). Dynamic changes in reinforcer effectiveness: Theoretical, methodological, and practical implications for applied research. <em>Journal of Applied Behavior Analysis, 36</em>(4), 421&ndash;438. &bull;
     Northup, J. (2000). Further evaluation of the accuracy of reinforcer surveys: A systematic replication. <em>Journal of Applied Behavior Analysis, 33</em>(3), 335&ndash;338. &bull;
@@ -1615,6 +1696,7 @@ body.view-walk #walk{display:block}
     Roane, H. S., Call, N. A., &amp; Falcomata, T. S. (2005). A preliminary analysis of adaptive responding under open and closed economies. <em>Journal of Applied Behavior Analysis, 38</em>(3), 335&ndash;348. &bull;
     Roane, H. S., Vollmer, T. R., Ringdahl, J. E., &amp; Marcus, B. A. (1998). Evaluation of a brief stimulus preference assessment. <em>Journal of Applied Behavior Analysis, 31</em>(4), 605&ndash;620. &bull;
     Roscoe, E. M., Iwata, B. A., &amp; Kahng, S. (1999). Relative versus absolute reinforcement effects: Implications for preference assessments. <em>Journal of Applied Behavior Analysis, 32</em>(4), 479&ndash;493. &bull;
+    Thomas, B. R., White, K. M., Clayborne, J. C., &amp; O'Connor, J. T. (2022). Parent-conducted competing stimulus assessment and treatment of challenging behavior by a girl with Kleefstra syndrome. <em>Child &amp; Family Behavior Therapy, 44</em>(4), 259&ndash;280. (as cited in Breeman et al., 2026) &bull;
     Tullis, C. A., Cannella-Malone, H. I., Basbigill, A. R., Yeager, A., Fleming, C. V., Payne, D., &amp; Wu, P.-F. (2011). Review of the choice and preference assessment literature for individuals with severe to profound disabilities. <em>Education and Training in Autism and Developmental Disabilities, 46</em>(4), 576&ndash;595. &bull;
     Verriden, A. L., &amp; Roscoe, E. M. (2016). A comparison of preference-assessment methods. <em>Journal of Applied Behavior Analysis, 49</em>(2), 265&ndash;285. &bull;
     Viru&eacute;s-Ortega, J., Pritchard, K., Grant, R. L., North, S., Hurtado-Parrado, C., Lee, M. S. H., Temple, B., Julio, F., &amp; Yu, C. T. (2014). Clinical decision making and preference assessment for individuals with intellectual and developmental disabilities. <em>American Journal on Intellectual and Developmental Disabilities, 119</em>(2), 151&ndash;170. &bull;
@@ -1751,8 +1833,8 @@ body.view-walk #walk{display:block}
 </section>
 
 <section class="proc" id="wk-csa" aria-labelledby="wk-csa-h">
-  <div class="wk-band"><h3 id="wk-csa-h">F. Competing Stimulus Assessment</h3><div class="when">Competing stimulus &middot; for behavior hypothesized to be automatically maintained &middot; control sessions, then each item alone</div></div>
-  <p class="wk-lead">Not which item the student prefers, but which item competes with automatically maintained behavior: engagement with it, and the target behavior well below its control level.</p>
+  <div class="wk-band"><h3 id="wk-csa-h">F. Competing Stimulus Assessment</h3><div class="when">Competing stimulus &middot; for behavior hypothesized to be automatically maintained &middot; each series: a control trial, then each item alone in a randomized order</div></div>
+  <p class="wk-lead">Not which item the student prefers, but which item competes with automatically maintained behavior: the target behavior at least 80% below its control level, with engagement reported alongside.</p>
   <div class="story" data-story="csa" data-rec-label="On Competing stimulus">
     <div class="stage"><div class="scene"></div></div>
     <div class="wk-ctl"><button type="button" data-act="back">Back</button><button type="button" class="wk-primary" data-act="next">Next step</button><button type="button" data-act="play">Play all</button><span class="wk-at"></span></div>
@@ -1760,12 +1842,12 @@ body.view-walk #walk{display:block}
     <ol class="storysteps"></ol>
   </div>
   <div class="script">
-    <div><h4>What You Say and Do</h4><ul><li>Two control sessions with no items; then each item alone for two sessions of the same length. On the panel: Condition and Session, then Start session.</li><li>No attention and no other consequences in any session.</li><li>Tap Target behavior at each occurrence (Undo takes back the last) and Engaged on and off; the panel converts both to the percentage of 10-s intervals.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Target behavior, Session length (s), Interval size, Hypothesis source.</li><li>Save and next writes Control (no items): Ses 1 % PB and Ses 2 % PB; for each item Ses 1 % eng, Ses 1 % PB, Ses 2 % eng, Ses 2 % PB.</li><li>Mean eng, Mean PB, PB vs control and the Category are computed.</li></ul></div>
+    <div><h4>What You Say and Do</h4><ul><li>Three series (the sheet’s Series field): each begins with a control trial with no items, then each item alone, in the randomized order printed under the table, all trials the same length. On the panel: Condition, Series and Trial, then Start trial.</li><li>No attention and no other consequences in any trial; only the test stimulus present.</li><li>Tap Target behavior at each occurrence (Undo takes back the last) and Engaged on and off; the panel writes engagement as the percentage of 10-s intervals and the target behavior in the sheet’s unit. Free access first; prompted engagement, then prompting with blocking, only as necessary, with Prompt and Block tallied.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Target behavior, Session length (s), Interval size, Hypothesis source, Series, Target-behavior unit, Stimulus measure (engagement or contact), HC criterion.</li><li>Save and next writes Control (no items): PB in the Series 1, 2 and 3 columns; for each item eng and PB in each series column (and pr and bl, prompts and blocks, in the augmented conditions).</li><li>Mean eng, Mean PB, Reduction and the Category are computed; the treatment check scores correspondence.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> Competing when mean engagement is at least 50% of intervals and the target behavior is reduced by at least 80% from the control mean; Partly competing at 50–79%; otherwise Not competing (this form’s conventions). A control mean below 20% of intervals makes reductions hard to detect: extend the control sessions, or run the assessment when the behavior is more likely.</div>
+  <div class="decide"><b>Decision.</b> High competition (HC) when the target behavior is reduced by at least 80% from the control mean (the criterion of 72.41% of published applications, Breeman et al., 2026; no consensus exists), engagement reported alongside; Increased when the item’s mean is above the control mean; Partly competing at 50–79% (this form’s convention); otherwise Not competing. An item that reaches the criterion only with blocking is HC with disruption, not HC. A control mean below 20% of intervals makes reductions hard to detect (this form’s convention).</div>
   <h4 class="flowhead">The Sheet’s Procedure, Word for Word</h4>
-  <div class="wk-quote"><b>Competing stimulus assessment</b>Use when the target behavior is hypothesized (EA-1) to be automatically maintained. Run two control sessions with no items available and record the percentage of 10-s intervals with the target behavior. Then present each stimulus alone for two sessions of the same length (…) and record the percentage of intervals with engagement and the percentage with the target behavior. Deliver no attention and no other consequences during any session. A stimulus competes when the student engages with it and the target behavior falls well below its control level; items that produce high engagement without reducing the behavior are preferred but not competing.</div>
+  <div class="wk-quote"><b>Competing stimulus assessment</b>Use when the target behavior is hypothesized (EA-1) to be automatically maintained. Run the assessment in series: each series begins with a control trial with no items available, then presents each stimulus alone, one at a time, in a randomized order (three series is this form's default; published assessments ran one to six series, median three, with trials of 1 to 10 min, median 4 min: Breeman, Irwin Helvey, &amp; Greer, 2026; Frank-Crawford, Cavanaugh, Piersma, &amp; Sauter, 2026). Record the target behavior in every trial and engagement (or contact) with the stimulus in every test trial; all trials the same length (5 min is this form's default). Deliver no attention and no other consequences during any trial, and have only the test stimulus present. A stimulus is high competition (HC) when the target behavior is reduced by at least 80% from the mean of the control trials; engagement is reported alongside, not required. Items that produce high engagement without reducing the behavior are preferred but not competing, and an item under which the behavior rises above its control level is contraindicated as a competing item regardless of preference.</div>
 </section>
 
 <section class="proc" id="wk-sum" aria-labelledby="wk-sum-h">
@@ -1848,9 +1930,9 @@ body.view-walk #walk{display:block}
     <div><dt>Contextual fit</dt><dd>The Ecological sheet’s score of an item’s practical attributes, as a percentage of 7: Good ≥ 75%, Fair 50–74%, Poor &lt; 50%. A working convention with no empirical validation.</dd></div>
     <div><dt>Restricted access (closed economy)</dt><dd>The remedy for a preferred item that is freely available elsewhere or fits poorly: it goes into the plan under a rule that restricts access to it, rather than being dropped.</dd></div>
     <div><dt>In-context observation</dt><dd>Free time in natural settings with no prompts: what the student approaches, for how long, and who initiated. Items outside the pool are candidates for the next pool.</dd></div>
-    <div><dt>Competing, partly competing</dt><dd>A competing stimulus produces engagement and reduces automatically maintained behavior below its control level: mean engagement ≥ 50% of intervals and a reduction ≥ 80% (partly competing: 50–79%), this form’s conventions.</dd></div>
+    <div><dt>High competition (HC), partly competing, HC with disruption</dt><dd>An HC stimulus reduces the target behavior by at least 80% from the mean of the no-stimulus control trials, the criterion most published assessments used (Breeman et al., 2026); engagement is reported alongside and a high-engagement item that is not HC is “HP, not competing”. Partly competing (a 50–79% reduction) is this form’s convention. HC with disruption: the criterion reached only with response blocking or protective equipment, where the stimulus’s own effect cannot be isolated.</dd></div>
     <div><dt>Run This Assessment</dt><dd>The panel at the top of each method’s sheet: it keeps the order the sheet uses, times the response window and the access period (or the session), and writes each trial or session into the sheet’s own fields. It never prints.</dd></div>
-    <div><dt>Control sessions</dt><dd>In the competing stimulus assessment, two sessions with no items; their mean percentage of intervals with the target behavior is the level each item is compared with.</dd></div>
+    <div><dt>Control trials, series</dt><dd>In the competing stimulus assessment, each series begins with a trial with no items, followed by every item once in a randomized order; the mean of the control trials is the level each item is compared with (reduction = (control − item) ÷ control × 100, negative when the behavior increased).</dd></div>
     <div><dt>Brief MSWO log and reinforcer-use log</dt><dd>The Monitoring sheet’s two logs: the top three of each brief MSWO by date, and each use of an item as a reinforcer, with latency, engagement, rate, rejection and signs.</dd></div>
     <div><dt>Watch and Shifted</dt><dd>Monitoring verdicts: one flag on one item is Watch; two or more flags, or the item out of the top three on two consecutive brief MSWOs, is Shifted.</dd></div>
     <div><dt>Motivating operation</dt><dd>An environmental variable that momentarily alters an item’s effectiveness as a reinforcer (deprivation raises it, satiation lowers it) and the current frequency of the behavior that has produced the item. On the Monitoring sheet: a slow approach after a meal, after free access at home, or late in a long session may be a satiation effect rather than a preference change.</dd></div>
@@ -1879,10 +1961,10 @@ const TYPES=['','Edible','Leisure item','Activity','Social','Sensory','Other'];
 /* ---------------- state ---------------- */
 let S=blank();
 function blank(){
-  return {form:'PA-1',rev:'2026-09b',n:6,access:30,ssTrials:5,psRep:1,msMode:'mswo',msSessions:5,foLen:300,ssdLen:120,nStab:8,nMon:12,
+  return {form:'PA-1',rev:'2026-09b',n:6,access:30,ssTrials:5,psRep:1,msMode:'mswo',msSessions:5,foLen:300,ssdLen:120,nStab:8,nMon:12,csaSeries:3,
     meta:{},stim:[],prereq:[Array(10).fill(''),Array(10).fill('')],
     ss:[],ps:{seed:1,trials:[]},ms:[],fo:[],ssd:[],raisd:[],
-    eco:{settings:[],matrix:{},attrs:[],obs:[]},csa:{ctrl:['',''],rows:[]},stab:[],mon:[],ioa:[]};
+    eco:{settings:[],matrix:{},attrs:[],obs:[]},csa:{ctrl:['','',''],rows:[],aug:{},run:{},ord:{}},stab:[],mon:[],ioa:[]};
 }
 function ensure(){
   const n=S.n;
@@ -1905,7 +1987,17 @@ function ensure(){
   while(S.eco.settings.length<6)S.eco.settings.push({name:'',time:'',staff:'',avail:'',choice:'',comp:'',demand:''});S.eco.settings.length=6;
   while(S.eco.attrs.length<n)S.eco.attrs.push({port:'',cons:'',sat:'',staff:'',age:'',interf:'',open:''});S.eco.attrs.length=n;
   while(S.eco.obs.length<8)S.eco.obs.push({date:'',set:'',item:'',other:'',dur:'',init:'',note:''});S.eco.obs.length=8;
-  if(!S.csa)S.csa={ctrl:['',''],rows:[]};while(S.csa.rows.length<n)S.csa.rows.push({e1:'',p1:'',e2:'',p2:''});S.csa.rows.length=n;
+  /* competing stimulus: the free-access condition (ctrl, rows: e1,p1 ... per series), the augmented
+     conditions (aug.pe, aug.pb, aug.rfa, each with its own ctrl and rows; prompts n1.. and blocks b1..),
+     which conditions are switched on (run) and the randomized order of items in each series (ord) */
+  if(!S.csa)S.csa={ctrl:[],rows:[]};S.csaSeries=Math.min(6,Math.max(1,Math.round(+S.csaSeries)||3));const NS=S.csaSeries;
+  const csaFix=(c,keys)=>{if(!Array.isArray(c.ctrl))c.ctrl=[];while(c.ctrl.length<NS)c.ctrl.push('');c.ctrl.length=NS;if(!Array.isArray(c.rows))c.rows=[];while(c.rows.length<n)c.rows.push({});c.rows.length=n;
+    c.rows.forEach((r,i)=>{if(!r||typeof r!=='object')r=c.rows[i]={};for(let s=1;s<=NS;s++)keys.forEach(k=>{if(r[k+s]==null)r[k+s]='';});if(r.rt==null)r.rt='';});};
+  csaFix(S.csa,['e','p']);if(!S.csa.aug||typeof S.csa.aug!=='object')S.csa.aug={};if(!S.csa.run||typeof S.csa.run!=='object')S.csa.run={};if(!S.csa.ord||typeof S.csa.ord!=='object')S.csa.ord={};
+  CSA_AUG.forEach(k=>{if(!S.csa.aug[k])S.csa.aug[k]={ctrl:[],rows:[]};csaFix(S.csa.aug[k],k==='pb'?['e','p','n','b']:k==='pe'?['e','p','n']:['e','p']);});
+  ['fa'].concat(CSA_AUG).forEach(k=>{let o=S.csa.ord[k];if(!Array.isArray(o))o=[];o=o.slice(0,NS);while(o.length<NS)o.push(null);
+    S.csa.ord[k]=o.map(a=>{const ok=Array.isArray(a)&&a.length===n&&a.every(v=>Number.isInteger(+v)&&+v>=0&&+v<n)&&new Set(a.map(Number)).size===n;return ok?a.map(Number):csaShuffle(n);});});
+  ['csaValItem','csaValHP','csaValNon'].forEach(k=>{if(S.meta[k]!=null&&S.meta[k]!==''&&!inPool(S.meta[k]))S.meta[k]='';});
   if(!S.stab)S.stab=[];S.nStab=S.nStab||8;while(S.stab.length<S.nStab)S.stab.push({date:'',r1:'',r2:'',r3:'',ses:'',pb:false,note:''});S.stab.length=S.nStab;
   if(!S.mon)S.mon=[];S.nMon=S.nMon||12;while(S.mon.length<S.nMon)S.mon.push({date:'',item:'',ctx:'',lat:'',eng:'',rate:'',rej:false,sign:'',note:''});S.mon.length=S.nMon;
   if(!S.ioa)S.ioa=[];while(S.ioa.length<7)S.ioa.push({s:'',a:'',d:''});S.ioa.length=7;
@@ -1922,11 +2014,11 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 function bindNum(id,key,after){const e=$('#'+id);e.value=S[key];e.addEventListener('change',()=>{const v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){e.value=S[key];return;}S[key]=v;ensure();after();});}
 function bindSeg(id,attr,key,after){$$('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{S[key]=isNaN(+b.dataset[attr])?b.dataset[attr]:+b.dataset[attr];syncSeg(id,attr,key);ensure();after();}));}
 function syncSeg(id,attr,key){$$('#'+id+' button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[attr])===String(S[key])?'true':'false'));}
-function syncToolbar(){['nStim:n','accessS:access','ssTrials:ssTrials','msSessions:msSessions','foLen:foLen','ssdLen:ssdLen','nStab:nStab','nMon:nMon'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});syncSeg('psRepSeg','rep','psRep');syncSeg('msModeSeg','mode','msMode');}
+function syncToolbar(){['nStim:n','accessS:access','ssTrials:ssTrials','msSessions:msSessions','foLen:foLen','ssdLen:ssdLen','nStab:nStab','nMon:nMon','csaSeries:csaSeries'].forEach(p=>{const [id,k]=p.split(':');$('#'+id).value=S[k];});syncSeg('psRepSeg','rep','psRep');syncSeg('msModeSeg','mode','msMode');}
 
 /* ---------------- meta fields ---------------- */
 function bindMeta(){
-  $$('[data-meta]').forEach(el=>{const k=el.dataset.meta;el.value=S.meta[k]||'';el.addEventListener('input',()=>{S.meta[k]=el.value;echo();});});
+  $$('[data-meta]').forEach(el=>{const k=el.dataset.meta;if(el.type==='checkbox'){el.checked=!!S.meta[k];el.addEventListener('change',()=>{S.meta[k]=el.checked?'1':'';echo();});return;}el.value=S.meta[k]||'';el.addEventListener('input',()=>{S.meta[k]=el.value;echo();});});
   $$('#raisdTbl textarea').forEach((t,i)=>{t.value=S.raisd[i]||'';t.addEventListener('input',()=>{S.raisd[i]=t.value;});});
   echo();
 }
@@ -2195,18 +2287,91 @@ function computeEco(){
   $('#ecoObsFig').innerHTML=rows?barFig('In-context observation: total seconds approached',[...seen.sort((a,b)=>b.d-a.d).map(t=>({label:name(t.i),v:t.d,txt:t.d+' s ('+t.n+'×)',col:INK})),...oth.sort((a,b)=>b[1].d-a[1].d).map(([k,v])=>({label:k+' (not in pool)',v:v.d,txt:v.d+' s ('+v.n+'×)',col:FLAG}))],{max:maxD,cap:'Orange bars are items the student approached that are not in the assessed pool.'}):'';}
 
 /* ================= competing stimulus ================= */
+const CSA_AUG=['pe','pb','rfa'];
+const CSA_K={fa:'Free access',pe:'Prompted engagement',pb:'Prompted engagement + response blocking',rfa:'Repeated free access'};
+const CSA_HC={fa:'HC',pe:'HC (prompting)',pb:'HC with disruption',rfa:'HC (repeated free access)'};
+const csaUnit=()=>S.meta.csaUnit==='rpm'?'rpm':'pct';
+const csaPBlbl=()=>csaUnit()==='rpm'?'PB/min':'% PB';
+const csaCut=()=>{const v=parseFloat(S.meta.csaEngCut);return isFinite(v)&&v>=0&&v<=100?v:50;};
+const csaCrit=()=>['80','80e50','e75p15'].includes(S.meta.csaCrit)?S.meta.csaCrit:'80';
+const csaCritTxt=()=>({'80':'80% reduction vs control','80e50':'80% reduction and 50% engagement (Thomas et al., 2022, as cited)','e75p15':'75% engagement and < 15% intervals (Leif et al., 2020, as cited)'})[csaCrit()];
+const csaCond=k=>k==='fa'?S.csa:S.csa.aug[k];
+const csaOn=k=>k==='fa'||!!S.csa.run[k];
+function csaShuffle(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function csaReshuffle(k){S.csa.ord[k]=Array.from({length:S.csaSeries},()=>csaShuffle(S.n));}
+const csaFmtV=v=>v==null?'':(csaUnit()==='rpm'?(Math.round(v*10)/10)+'/min':Math.round(v)+'%');
+const csaFmtRed=r=>r==null?'':(r<0?'−'+Math.abs(r)+'% (increased)':r+'%');
+/* reduction = (control mean − stimulus mean) / control mean × 100, negative when the behavior increased;
+   HC by the convention chosen on the sheet; engagement reported alongside with its own tag */
+function csaCondStats(k){const c=csaCond(k),NS=S.csaSeries,cv=c.ctrl.slice(0,NS).filter(x=>x!=='').map(Number),ctrl=cv.length?cv.reduce((a,b)=>a+b,0)/cv.length:null,cut=csaCut(),crit=csaCrit();
+  const rows=c.rows.map((r,i)=>{const es=[],ps=[];let pr=0,bl=0,np=0,nb=0;for(let s=1;s<=NS;s++){es.push(r['e'+s]==null?'':r['e'+s]);ps.push(r['p'+s]==null?'':r['p'+s]);if(r['n'+s]!=null&&r['n'+s]!==''){pr+=+r['n'+s]||0;np++;}if(r['b'+s]!=null&&r['b'+s]!==''){bl+=+r['b'+s]||0;nb++;}}
+    const e=mean(es),p=mean(ps),red=(ctrl!=null&&ctrl>0&&p!=null)?Math.round(100*(ctrl-p)/ctrl):null;
+    const hc=red==null?false:crit==='80e50'?(red>=80&&e!=null&&e>=50):crit==='e75p15'?(e!=null&&e>=75&&p<15):red>=80;
+    const inc=red!=null&&red<0;const cat=red==null?'':hc?'HC':inc?'Increased':red>=80?'Reduced ≥ 80%, below the engagement criterion':red>=50?'Partly competing':'Not competing';
+    const hiE=e!=null&&e>=cut;return {i,e,p,red,cat,hc,inc,hiE,hp:hiE&&red!=null&&!hc,pr:np?pr:null,bl:nb?bl:null,n:ps.filter(x=>x!=='').length};});
+  return {k,ctrl,cmin:cv.length?Math.min(...cv):null,cmax:cv.length?Math.max(...cv):null,nc:cv.length,rows};}
+function csaStats(){return csaCondStats('fa');}
+function csaCatHTML(r,k){if(!r.cat)return '';let h=r.hc?`<span class="tag ok">${CSA_HC[k]}</span>`:r.inc?'<span class="tag no">Increased</span>':r.cat==='Not competing'?'<span class="tag no">Not competing</span>':`<span class="tag mid">${esc(r.cat)}</span>`;
+  if(r.hiE)h+=r.hc?' <span class="tag mid">High engagement</span>':' <span class="tag mid">HP, not competing</span>';return h;}
+function csaTable(k){const c=csaCond(k),NS=S.csaSeries,keys=k==='pb'?['e','p','n','b']:k==='pe'?['e','p','n']:['e','p'],lb={e:'eng',p:'PB',n:'pr',b:'bl'},mx=csaUnit()==='rpm'?'':' max="100"',id=k==='fa'?'csaTbl':'csaTbl-'+k;
+  const ttl={e:'% of intervals with engagement',p:csaUnit()==='rpm'?'target behavior per minute':'% of intervals with the target behavior',n:'prompts for engagement',b:'response blocks'};
+  let h=`<thead><tr><th class="lab">Stimulus</th>`;for(let s=1;s<=NS;s++)h+=`<th class="c">Series ${s}<br><span class="sub2">${keys.map(f=>lb[f]).join(' / ')}</span></th>`;
+  h+=`<th class="c">Mean eng</th><th class="c">Mean ${csaPBlbl()}</th><th class="c">Reduction</th>${keys.includes('n')?'<th class="c">Prompts</th>':''}${keys.includes('b')?'<th class="c">Blocks</th>':''}<th>Category</th></tr></thead><tbody>`;
+  h+=`<tr><td class="lab">Control (no items)</td>`;for(let s=1;s<=NS;s++)h+=`<td class="c"><div class="csa-ml"><label><span>PB</span><input type="number" min="0"${mx} data-c="${s-1}" value="${esc(c.ctrl[s-1])}" title="Control trial of series ${s}: ${ttl.p}"></label></div></td>`;
+  h+=`<td class="c">&mdash;</td><td class="c calc" id="${id}-CM"></td><td class="c" id="${id}-CR">&mdash;</td>${keys.includes('n')?'<td class="c">&mdash;</td>':''}${keys.includes('b')?'<td class="c">&mdash;</td>':''}<td></td></tr>`;
+  c.rows.forEach((r,i)=>{h+=`<tr><td class="lab" data-lbl="${i}">${esc(name(i))}</td>`;for(let s=1;s<=NS;s++){h+=`<td class="c"><div class="csa-ml">`;keys.forEach(f=>{h+=`<label><span>${lb[f]}</span><input type="number" min="0"${f==='e'||(f==='p'&&mx)?' max="100"':''} data-i="${i}" data-f="${f}${s}" value="${esc(r[f+s]==null?'':r[f+s])}" title="${esc(name(i))}, series ${s}: ${ttl[f]}"></label>`;});h+='</div></td>';}
+    h+=`<td class="c calc" id="${id}-E${i}"></td><td class="c calc" id="${id}-P${i}"></td><td class="c calc" id="${id}-R${i}"></td>${keys.includes('n')?`<td class="c calc" id="${id}-N${i}"></td>`:''}${keys.includes('b')?`<td class="c calc" id="${id}-B${i}"></td>`:''}<td id="${id}-C${i}"></td></tr>`;});
+  return h+'</tbody>';}
+function csaOrdHTML(k){const o=S.csa.ord[k]||[];return `<span id="csaOrd-${k}" data-ord="${esc(o.map(a=>a.join(',')).join('|'))}"><b>Order run</b> (control first, then the items in a randomized order, drawn for each series): ${o.map((a,s)=>`Series ${s+1}: control, ${a.map(i=>esc(name(i))).join(', ')}`).join(' &middot; ')}</span><button type="button" class="tool noprint" data-reshuffle="${k}">Reshuffle</button>`;}
+function csaPoolSel(id,cur){const el=$('#'+id);if(!el)return;el.innerHTML='<option value=""></option>'+S.stim.map((_,i)=>`<option value="${i}">${esc(name(i))}</option>`).join('');el.value=cur==null?'':String(cur);if(el.value!==String(cur==null?'':cur))el.value='';}
 function renderCSA(){
-  const c=S.csa;let h=`<thead><tr><th class="lab">Stimulus</th><th class="c">Ses 1 % eng</th><th class="c">Ses 1 % PB</th><th class="c">Ses 2 % eng</th><th class="c">Ses 2 % PB</th><th class="c">Mean eng</th><th class="c">Mean PB</th><th class="c">PB vs control</th><th>Category</th></tr></thead><tbody>`;
-  h+=`<tr><td class="lab">Control (no items)</td><td class="c">&mdash;</td><td class="c"><input type="number" min="0" max="100" data-c="0" value="${esc(c.ctrl[0])}"></td><td class="c">&mdash;</td><td class="c"><input type="number" min="0" max="100" data-c="1" value="${esc(c.ctrl[1])}"></td><td class="c">&mdash;</td><td class="c calc" id="csaCtrlM"></td><td class="c">&mdash;</td><td></td></tr>`;
-  c.rows.forEach((r,i)=>{h+=`<tr><td class="lab" data-lbl="${i}">${esc(name(i))}</td>${['e1','p1','e2','p2'].map(f=>`<td class="c"><input type="number" min="0" max="100" data-i="${i}" data-f="${f}" value="${esc(r[f])}"></td>`).join('')}<td class="c calc" id="csaE${i}"></td><td class="c calc" id="csaP${i}"></td><td class="c calc" id="csaR${i}"></td><td id="csaC${i}"></td></tr>`;});
-  $('#csaTbl').innerHTML=h+'</tbody>';computeCSA();}
-$('#csaTbl').addEventListener('input',e=>{const el=e.target;if(el.dataset.c!=null)S.csa.ctrl[+el.dataset.c]=el.value;else if(el.dataset.f)S.csa.rows[+el.dataset.i][el.dataset.f]=el.value;else return;computeCSA();});
-const mean=a=>{const v=a.filter(x=>x!=='').map(Number);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};
-function csaStats(){const ctrl=mean(S.csa.ctrl);return {ctrl,rows:S.csa.rows.map((r,i)=>{const e=mean([r.e1,r.e2]),p=mean([r.p1,r.p2]);const red=(ctrl&&p!=null)?Math.round(100*(ctrl-p)/ctrl):null;const cat=e==null||p==null?'':(e>=50&&red>=80)?'Competing':(e>=50&&red>=50)?'Partly competing':'Not competing';return {i,e,p,red,cat};})};}
-function computeCSA(){const {ctrl,rows}=csaStats();$('#csaCtrlM').textContent=ctrl==null?'':Math.round(ctrl)+'%';
-  rows.forEach(r=>{$('#csaE'+r.i).textContent=r.e==null?'':Math.round(r.e)+'%';$('#csaP'+r.i).textContent=r.p==null?'':Math.round(r.p)+'%';$('#csaR'+r.i).textContent=r.red==null?'':(r.red>=0?'\u2212':'+')+Math.abs(r.red)+'%';$('#csaC'+r.i).innerHTML=r.cat==='Competing'?'<span class="tag ok">Competing</span>':r.cat==='Partly competing'?'<span class="tag mid">Partly competing</span>':r.cat?'<span class="tag no">Not competing</span>':'';});
-  const done=rows.filter(r=>r.e!=null);$('#csaReadout').textContent=ctrl==null?'Enter the control sessions first.':`Control mean ${Math.round(ctrl)}% of intervals${ctrl<20?' (low: reductions will be hard to detect)':''}; ${done.length} stimuli assessed; ${rows.filter(r=>r.cat==='Competing').length} competing.`;
-  $('#csaFig').innerHTML=done.length?barFig('Engagement (dark) and target behavior (orange) by stimulus, with control level',done.sort((a,b)=>(b.e-a.e)).map(r=>({label:name(r.i),v:Math.round(r.e),v2:Math.round(r.p),cat:r.cat==='Competing'?'HP':r.cat==='Partly competing'?'MP':'LP'})),{refline:ctrl==null?null:Math.round(ctrl),cap:'Dashed line: mean target behavior in the control sessions. A competing item has a long dark bar and a short orange bar.'}):'';}
+  $('#csaTbl').innerHTML=csaTable('fa');$('#csaOrdLine').innerHTML=csaOrdHTML('fa');
+  $$('#csaRunSet input[data-run]').forEach(cb=>{cb.checked=!!S.csa.run[cb.dataset.run];});
+  $('#csaAug').innerHTML=CSA_AUG.filter(csaOn).map(k=>`<div class="csa-cond"><h4>${CSA_K[k]}</h4><div class="flagline" id="csaFlag-${k}"></div><div class="gridwrap"><table class="grid" id="csaTbl-${k}">${csaTable(k)}</table></div><p class="method csa-ord">${csaOrdHTML(k)}</p></div>`).join('');
+  csaPoolSel('csaValItem',S.meta.csaValItem);csaPoolSel('csaValHP',S.meta.csaValHP);csaPoolSel('csaValNon',S.meta.csaValNon);
+  $('#csaRetestTbl').innerHTML=`<thead><tr><th class="lab">Stimulus</th><th class="c">Free-access reduction</th><th class="c">Re-test reduction (%)</th><th class="c">Difference</th><th class="c">Re-test category</th></tr></thead><tbody>`+S.csa.rows.map((r,i)=>`<tr><td class="lab">${esc(name(i))}</td><td class="c calc" id="csaRt-A${i}"></td><td class="c"><input type="number" min="-1000" max="100" data-rt="${i}" value="${esc(r.rt)}"></td><td class="c calc" id="csaRt-D${i}"></td><td id="csaRt-C${i}"></td></tr>`).join('')+'</tbody>';
+  computeCSA();}
+$('#csa').addEventListener('input',e=>{const el=e.target,t=el.closest('table');
+  if(t&&/^csaTbl/.test(t.id)){const k=t.id==='csaTbl'?'fa':t.id.slice(7),c=csaCond(k);if(el.dataset.c!=null)c.ctrl[+el.dataset.c]=el.value;else if(el.dataset.f)c.rows[+el.dataset.i][el.dataset.f]=el.value;else return;computeCSA();return;}
+  if(t&&t.id==='csaRetestTbl'&&el.dataset.rt!=null){S.csa.rows[+el.dataset.rt].rt=el.value;computeCSA();return;}
+  if(el.dataset.run){S.csa.run[el.dataset.run]=el.checked;renderCSA();return;}
+  if(el.dataset.meta){if(el.dataset.meta==='csaUnit')renderCSA();else computeCSA();}});
+$('#csa').addEventListener('change',e=>{const el=e.target;if(el.dataset.run){S.csa.run[el.dataset.run]=el.checked;renderCSA();}else if(el.type==='checkbox'&&el.dataset.meta)computeCSA();});
+$('#csa').addEventListener('click',e=>{const b=e.target.closest('button[data-reshuffle]');if(!b)return;csaReshuffle(b.dataset.reshuffle);renderCSA();});
+const mean=a=>{const v=a.filter(x=>x!==''&&x!=null).map(Number);return v.length?v.reduce((x,y)=>x+y,0)/v.length:null;};
+const csaDate=s=>{s=String(s||'').trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);if(m)return new Date(+m[1],+m[2]-1,+m[3]);m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/.exec(s);if(m)return new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[1]-1,+m[2]);return null;};
+function csaFillCond(k,st){const id=k==='fa'?'csaTbl':'csaTbl-'+k;const u=csaUnit()==='rpm';
+  $('#'+id+'-CM').textContent=st.ctrl==null?'':csaFmtV(st.ctrl)+(st.nc>1&&st.cmin!==st.cmax?' ('+csaFmtV(st.cmin).replace('/min','')+'–'+csaFmtV(st.cmax)+')':'');
+  st.rows.forEach(r=>{$('#'+id+'-E'+r.i).textContent=r.e==null?'':Math.round(r.e)+'%';$('#'+id+'-P'+r.i).textContent=csaFmtV(r.p);$('#'+id+'-R'+r.i).textContent=csaFmtRed(r.red);
+    const n=$('#'+id+'-N'+r.i),b=$('#'+id+'-B'+r.i);if(n)n.textContent=r.pr==null?'':String(r.pr);if(b)b.textContent=r.bl==null?'':String(r.bl);$('#'+id+'-C'+r.i).innerHTML=csaCatHTML(r,k);});}
+function computeCSA(){const fa=csaStats(),{ctrl,rows}=fa,u=csaUnit()==='rpm';csaFillCond('fa',fa);
+  const done=rows.filter(r=>r.p!=null),nHC=rows.filter(r=>r.hc).length,nInc=rows.filter(r=>r.inc).length;
+  $('#csaNStim').textContent=`${S.n} in the pool, ${S.stim.filter(s=>s.name.trim()).length} named (published pools: four to 16, Breeman et al., 2026; 8–14, Frank-Crawford et al., 2026).`;
+  const sub=S.meta.csaSubtype||'';$('#csaSubHint').textContent=sub?' Recorded here: '+sub+'.':'';
+  $('#csaReadout').textContent=ctrl==null?'Enter the control trials first (one at the start of each series).':`Control mean ${csaFmtV(ctrl)}${u?'':' of intervals'} across ${fa.nc} of ${S.csaSeries} control trials${fa.nc>1?' (range '+csaFmtV(fa.cmin)+'–'+csaFmtV(fa.cmax)+')':''}${!u&&ctrl<20?' (low: below 20% of intervals reductions are hard to detect; this form’s convention)':''}; ${done.length} stimuli assessed; ${nHC} HC by ${csaCritTxt()}; ${nInc} increased the behavior.`;
+  $('#csaFig').innerHTML=done.length?barFig(u?'Engagement by stimulus (target behavior per minute in the label)':'Engagement (dark) and target behavior (orange) by stimulus, with control level',done.slice().sort((a,b)=>(b.e||0)-(a.e||0)).map(r=>({label:name(r.i),v:Math.round(r.e||0),v2:u?null:Math.round(r.p),txt:u?Math.round(r.e||0)+'% / '+csaFmtV(r.p):null,cat:r.hc?'HP':r.inc||r.cat==='Not competing'?'LP':'MP'})),{refline:(u||ctrl==null)?null:Math.round(ctrl),cap:u?'Dark bars: engagement. HC items are the darkest; the reduction is in the table.':'Dashed line: mean target behavior in the control trials. An HC item has a short orange bar whatever the length of its dark bar.'}):'';
+  /* augmented conditions: their own control, flagged when it sits above the free-access control */
+  const aug={};CSA_AUG.filter(csaOn).forEach(k=>{const st=csaCondStats(k);aug[k]=st;csaFillCond(k,st);const f=$('#csaFlag-'+k);if(f)f.textContent=(st.ctrl!=null&&ctrl!=null&&st.ctrl>ctrl)?`This condition’s control (${csaFmtV(st.ctrl)}) is above the free-access control (${csaFmtV(ctrl)}): an 80% reduction here leaves a higher absolute level than the same percentage under free access, so read the mean ${csaPBlbl()} column as well as the reduction (Frank-Crawford et al., 2026).`:'';});
+  const ks=Object.keys(aug);$('#csaAugReadout').textContent=ks.length?ks.map(k=>`${CSA_K[k]}: control ${aug[k].ctrl==null?'—':csaFmtV(aug[k].ctrl)}, ${aug[k].rows.filter(r=>r.hc).length} ${k==='pb'?'HC with disruption':'HC'}, ${aug[k].rows.filter(r=>r.inc).length} increased`).join('; ')+'.':'';
+  $('#csaAugSum').innerHTML=ks.length?`<thead><tr><th class="lab">Stimulus</th><th class="c">Free access</th>${ks.map(k=>`<th class="c">${CSA_K[k]}</th>`).join('')}<th>Best augmented condition</th></tr></thead><tbody>`+rows.map(r=>{const best=ks.filter(k=>k!=='rfa'&&aug[k].rows[r.i].red!=null).sort((a,b)=>aug[b].rows[r.i].red-aug[a].rows[r.i].red)[0];const br=best&&aug[best].rows[r.i];
+    return `<tr><td class="lab">${esc(name(r.i))}</td><td class="c">${csaFmtRed(r.red)||'—'} ${csaCatHTML(r,'fa')}</td>${ks.map(k=>{const x=aug[k].rows[r.i];return `<td class="c">${csaFmtRed(x.red)||'—'}${x.pr!=null?' · '+x.pr+' prompts':''}${x.bl!=null?' · '+x.bl+' blocks':''} ${csaCatHTML(x,k)}</td>`;}).join('')}<td>${br?`${CSA_K[best]}: ${csaFmtRed(br.red)} ${br.hc?'<span class="tag ok">'+CSA_HC[best]+'</span>':''}`:'—'}</td></tr>`;}).join('')+'</tbody>':'';
+  /* validation: correspondence within 10 percentage points (Breeman et al., 2026) */
+  const vi=S.meta.csaValItem,vk=['fa','pe','pb','rfa'].includes(S.meta.csaValCond)?S.meta.csaValCond:'fa',vr=parseFloat(S.meta.csaValRed);
+  let h='';if(vi===''||vi==null)h='Pick the stimulus checked in treatment, the CSA condition it was identified in, and its reduction in treatment against the same contingencies without it.';
+  else{const st=(vk==='fa'?fa:csaOn(vk)?csaCondStats(vk):null),r=st&&st.rows[+vi];const cr=r?r.red:null;h=`<b>${esc(name(+vi))}</b>, ${CSA_K[vk]}: CSA reduction ${cr==null?'not available (condition not run or no data)':csaFmtRed(cr)}${r&&r.cat?' ('+(r.hc?CSA_HC[vk]:r.cat)+')':''}`;
+    if(cr!=null&&isFinite(vr)){const d=cr-vr;h+=`; treatment ${vr}%; difference (CSA − treatment) ${d>0?'+':''}${Math.round(d)} points `+(Math.abs(d)<=10?'<span class="tag ok">Corresponds (≤ 10 points)</span>':'<span class="tag no">Does not correspond (&gt; 10 points)</span>');}
+    else if(cr!=null)h+='; enter the % reduction in treatment to score correspondence';
+    if(/set|Rotated/i.test(S.meta.csaValForm||''))h+=(/\.$/.test(h)?' ':'. ')+'A set’s result does not validate any single item in it (Breeman et al., 2026).';
+    if(/^Package/.test(S.meta.csaValCtx||''))h+=(/\.$/.test(h)?' ':'. ')+'Inside a package the comparison must be identical conditions with and without the stimulus, or the stimulus’s own effect is not isolated (Breeman et al., 2026).';
+    if(/thinning/i.test(S.meta.csaValCtx||''))h+=(/\.$/.test(h)?' ':'. ')+'The review’s predictive-validity figures rest on only seven validations that used schedule thinning (Breeman et al., 2026).';
+    if(vk==='pb')h+=(/\.$/.test(h)?' ':'. ')+'Identified with blocking: HC with disruption, so the treatment check must keep the blocking.';if(!/(\.|<\/span>)$/.test(h))h+='.';}
+  $('#csaValOut').innerHTML=h;
+  let h2=[];const hp=S.meta.csaValHP,hpr=parseFloat(S.meta.csaValHPRed);if(hp!==''&&hp!=null){const r=rows[+hp];h2.push(`<b>HP comparison, ${esc(name(+hp))}</b>: engagement ${r.e==null?'—':Math.round(r.e)+'%'}, reduction ${csaFmtRed(r.red)||'—'}${r.hp?' (meets this form’s HP definition: engagement at or above the cut-off, not HC)':r.hc?' (this item is HC, not an HP comparison)':' (engagement below the cut-off: not a matched HP comparison)'}${isFinite(hpr)?`; in treatment ${hpr}%`+(isFinite(vr)?` against ${vr}% with the HC stimulus`:''):''}.`);}
+  const nn=S.meta.csaValNon,nnr=parseFloat(S.meta.csaValNonRed);if(nn!==''&&nn!=null){const r=rows[+nn];h2.push(`<b>Non-indicated check, ${esc(name(+nn))}</b>: CSA reduction ${csaFmtRed(r.red)||'—'}${r.hc?' (this item was HC; a non-indicated check uses one that was not)':''}${isFinite(nnr)?`; in treatment ${nnr}%`+(nnr>=80?' (reduced in treatment although not indicated: a false negative for the assessment)':''):''}.`);}
+  $('#csaValOut2').innerHTML=h2.join(' ');
+  const d0=csaDate(S.meta.csaDate),d1=csaDate(S.meta.csaRetestDate);$('#csaRetestDays').textContent=(d0&&d1)?Math.round((d1-d0)/864e5)+' days':'';
+  rows.forEach(r=>{const rt=S.csa.rows[r.i].rt,v=rt===''?null:+rt;$('#csaRt-A'+r.i).textContent=csaFmtRed(r.red);$('#csaRt-D'+r.i).textContent=(r.red!=null&&v!=null)?((v-r.red>0?'+':'')+Math.round(v-r.red)+' points'):'';
+    $('#csaRt-C'+r.i).innerHTML=v==null?'':(v>=80?'<span class="tag ok">HC</span>':v<0?'<span class="tag no">Increased</span>':v>=50?'<span class="tag mid">Partly competing</span>':'<span class="tag no">Not competing</span>')+(r.red!=null&&Math.abs(v-r.red)<=10?' <span class="tag mid">Within 10 points</span>':'');});}
 
 /* ================= monitoring ================= */
 const CTX=['','Session','Classroom','Break','Home report','Other'],SIGNS=['','None','Slow to approach','Stops early','Pushes away / refuses','Seeks other item','Uses then leaves','Problem behavior on delivery'];
@@ -2296,7 +2461,16 @@ function simBase(names,types,w,opts={}){
   S.mon=[];const it=top[0];for(let d=0;d<12;d++){const p=d/11;const sh=opts.shift?p:0;S.mon.push({date:dAgo(24-d*2),item:String(it),ctx:d%3===0?'Classroom':'Session',lat:String(Math.round(2+sh*12+rnd()*2)),eng:String(Math.round(clamp(S.access*(0.9-0.75*sh)+(rnd()-0.5)*5,0,S.access))),rate:(4.5-3*sh+(rnd()-0.5)*0.6).toFixed(1),rej:opts.shift&&d>=9&&rnd()<0.8,sign:opts.shift?(d<5?'None':d<8?'Slow to approach':d<10?'Stops early':'Pushes away / refuses'):'None',note:opts.shift&&d===7?'Right after lunch':opts.shift&&d===10?'Reached for musical toy instead':''});}
   while(S.mon.length<S.nMon)S.mon.push({date:'',item:'',ctx:'',lat:'',eng:'',rate:'',rej:false,sign:'',note:''});
   S.ioa=[{s:'1',a:'28',d:'2'},{s:'1',a:'14',d:'1'},{s:'2',a:'11',d:'1'},{s:'1',a:'5',d:'1'},{s:'',a:'',d:''},{s:opts.csa?'1':'',a:opts.csa?'27':'',d:opts.csa?'3':''},{s:'',a:'',d:''}];
-  if(opts.csa){S.csa.ctrl=['62','58'];S.stim.forEach((_,i)=>{const e=clamp(w[i]*95+(rnd()-0.5)*10,0,100),red=opts.csaRed[i];const p=clamp(60*(1-red)+(rnd()-0.5)*8,0,100);S.csa.rows[i]={e1:String(Math.round(e)),p1:String(Math.round(p)),e2:String(Math.round(clamp(e+(rnd()-0.5)*10,0,100))),p2:String(Math.round(clamp(p+(rnd()-0.5)*8,0,100)))};});S.meta.csaBeh='Hand mouthing (TB-1)';S.meta.csaDate=fmtD(dAgo(5));S.meta.csaBy='JN';S.meta.csaLen='300';S.meta.csaInt='10-s partial interval';S.meta.csaHyp='EA-1 alone condition, '+fmtD(dAgo(14));}
+  if(opts.csa){S.csaSeries=3;ensure();const jit=(v,a)=>String(Math.round(clamp(v+(rnd()-0.5)*a,0,100)));
+    /* three series, a control first in each; items as % of 30 intervals; the engagement weights w[]
+       and the reductions csaRed[] (negative: the behavior rose) per condition */
+    const fill=(c,ctrl,red,eng,pr,bl)=>{c.ctrl=ctrl.slice();S.stim.forEach((_,i)=>{const cm=ctrl.reduce((a,b)=>a+ +b,0)/ctrl.length;const r={};for(let s=1;s<=3;s++){r['e'+s]=jit(eng[i]*100,10);r['p'+s]=jit(cm*(1-red[i]),8);if(pr)r['n'+s]=String(Math.round(pr[i]*(0.8+rnd()*0.4)));if(bl)r['b'+s]=String(Math.round(bl[i]*(0.8+rnd()*0.4)));}c.rows[i]=Object.assign(c.rows[i]||{},r);});};
+    const eng=w.map(v=>v*0.95);fill(S.csa,['62','58','60'],opts.csaRed,eng);
+    if(opts.csaAug){S.csa.run={pe:true,pb:true,rfa:false};fill(S.csa.aug.pe,['55','60','57'],opts.csaAug.pe,eng.map((v,i)=>Math.min(0.97,v+0.15)),[1,1,0,3,5,6]);fill(S.csa.aug.pb,['54','58','55'],opts.csaAug.pb,eng.map((v,i)=>Math.min(0.98,v+0.25)),[1,1,0,2,4,5],[0,0,3,2,9,1]);
+      S.meta.csaPromptForm='Vocal';S.meta.csaBlockForm='Therapist blocking';S.meta.csaOtherMod='None';}
+    S.csa.rows.forEach((r,i)=>{r.rt=opts.csaRt?String(Math.round(opts.csaRt[i]*100)):'';});
+    Object.assign(S.meta,{csaBeh:'Hand mouthing (TB-1)',csaDate:fmtD(dAgo(12)),csaBy:'JN',csaLen:'300',csaInt:'10-s partial interval',csaHyp:'EA-1 alone condition, '+fmtD(dAgo(16)),csaUnit:'pct',csaMeasure:'',csaEngDef:'Hands on the item and manipulating it; not consistent with hand mouthing',csaSubtype:'Subtype 1',csaCrit:'80',csaEngCut:'50',csaSelPA:'1',csaSelMatched:'1',csaSelCare:'1',csaSelNom:'',csaSelRAISD:'',csaSelObs:'1',csaSelCtx:'',csaSampled:'1',
+      csaValItem:'0',csaValForm:'Single stimulus',csaValCtx:'Alone (noncontingent access)',csaValCond:'fa',csaValRed:'88',csaValNote:'Three 5-min probes, '+fmtD(dAgo(3)),csaValHP:'2',csaValHPRed:'10',csaValNon:'3',csaValNonRed:'45',csaRetestDate:fmtD(dAgo(2)),csaRetestNote:'Same six items and length, mid-morning'});}
 }
 const SIMS={
  clear:{desc:'Six leisure items with a clear hierarchy; paired stimulus and MSWO agree, free operant confirms the top item, monitoring is stable.',view:'summary',run:()=>simBase(LEIS,['Leisure item','Leisure item','Leisure item','Leisure item','Leisure item','Leisure item'],[0.95,0.75,0.55,0.35,0.25,0.15],{ssd:true})},
@@ -2304,7 +2478,7 @@ const SIMS={
  sidebias:{desc:'Paired stimulus with 85% of selections to the left: the side-bias flag fires and the PS hierarchy disagrees with MSWO.',view:'ps',run:()=>simBase(LEIS,['Leisure item','Leisure item','Leisure item','Leisure item','Leisure item','Leisure item'],[0.9,0.7,0.5,0.4,0.3,0.2],{sideBias:true,skipFO:true})},
  fodom:{desc:'Free operant dominated by the tablet (over 80% of the session); the remainder of that hierarchy is unassessed and the sheet says so.',view:'fo',run:()=>simBase(LEIS,['Leisure item','Leisure item','Leisure item','Leisure item','Leisure item','Leisure item'],[0.95,0.6,0.5,0.4,0.3,0.2],{foDom:0,ssd:true})},
  nonsel:{desc:'A student who does not make a selection response: single stimulus only, with most items approached on nearly every trial and the hierarchy recovered from engagement duration.',view:'ss',run:()=>simBase(LEIS,['Leisure item','Leisure item','Leisure item','Leisure item','Leisure item','Leisure item'],[0.9,0.8,0.7,0.6,0.35,0.2],{ssCeil:true,skipPS:true,skipMS:true,skipFO:true,ssd:true,purpose:'Identify leisure reinforcers; student does not select between two items (simulated)'})},
- auto:{desc:'Hand mouthing hypothesized automatic (EA-1): a competing stimulus assessment shows two items that produce engagement and reduce the behavior below control, and two that are preferred but do not compete.',view:'csa',run:()=>simBase(['Vibrating tube','Chewy necklace','Tablet (video)','Squeeze ball','Picture book','Bubbles'],['Sensory','Sensory','Leisure item','Leisure item','Leisure item','Leisure item'],[0.8,0.75,0.95,0.5,0.3,0.4],{pool:'Sensory items',csa:true,csaRed:[0.9,0.85,0.15,0.55,0.1,0.3],skipFO:true})},
+ auto:{desc:'Hand mouthing hypothesized automatic (EA-1): a three-series competing stimulus assessment finds two HC items with high engagement, one HC item with little engagement (bubbles), a tablet that is preferred but not competing, a picture book under which the behavior increases, and a squeeze ball that reaches the criterion only with prompting; a prompted-plus-blocking condition and a treatment check that corresponds within 10 points are filled in.',view:'csa',run:()=>simBase(['Vibrating tube','Chewy necklace','Tablet (video)','Squeeze ball','Picture book','Bubbles'],['Sensory','Sensory','Leisure item','Leisure item','Leisure item','Leisure item'],[0.8,0.75,0.95,0.5,0.3,0.25],{pool:'Sensory items',csa:true,csaRed:[0.9,0.85,0.15,0.55,-0.25,0.85],csaAug:{pe:[0.92,0.88,0.3,0.83,-0.1,0.87],pb:[0.95,0.9,0.84,0.86,0.2,0.9]},csaRt:[0.88,0.8,0.2,0.5,-0.15,0.72],skipFO:true})},
  shift:{desc:'Preference shift over four weeks: the tablet drops from #1 to out of the top three on the brief-MSWO log while its use log shows rising latency, falling engagement, rejections, and staff-noted signs. The verdict is Shifted, with a motivating-operation note to rule out first.',view:'monitor',run:()=>simBase(LEIS,['Leisure item','Leisure item','Leisure item','Leisure item','Leisure item','Leisure item'],[0.95,0.75,0.55,0.35,0.25,0.15],{shift:true,ssd:true})}
 };
 function loadSim(){const key=$('#simScenario').value,sc=SIMS[key];sc.run();renderAll();$('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView(sc.view);}
@@ -2315,6 +2489,7 @@ function computeAll(){computeSS();computePS();computeMS();computeFO();computeEco
 function renderAll(){ensure();syncToolbar();renderPrereq();renderPool();renderSS();renderPS();renderMS();renderFO();renderEco();renderCSA();renderStab();renderMon();renderIOA();renderSummary();bindMeta();}
 bindNum('nStim','n',()=>{renderPool();renderSS();renderPS();renderMS();renderFO();renderEco();renderCSA();renderStab();renderMon();renderSummary();});
 bindNum('nStab','nStab',renderStab);
+bindNum('csaSeries','csaSeries',renderCSA);
 bindNum('nMon','nMon',renderMon);
 bindNum('accessS','access',()=>{renderSS();renderMS();});
 bindNum('ssTrials','ssTrials',renderSS);
@@ -2332,7 +2507,7 @@ function restorePb(d){if(d&&Array.isArray(d.ssPb))S.ss.forEach((r,i)=>{if(Array.
 /* save / load / print / clear */
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(saveable())],{type:'application/json'}));a.download=`PA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
-$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='PA-1')throw 0;S=Object.assign(blank(),d);restorePb(d);renderAll();$('#simBanner').hidden=!/^SIMULATED/.test(S.meta.client||'');}catch(err){alert('That file is not a saved copy of Form PA-1.');}};rd.readAsText(f);e.target.value='';});
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='PA-1')throw 0;S=Object.assign(blank(),d);if(d.csaSeries==null)S.csaSeries=2;restorePb(d);renderAll();$('#simBanner').hidden=!/^SIMULATED/.test(S.meta.client||'');}catch(err){alert('That file is not a saved copy of Form PA-1.');}};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on every sheet? Unsaved work will be lost.'))return;S=blank();renderAll();$('#simBanner').hidden=true;});
 window.addEventListener('beforeprint',()=>{computeAll();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
@@ -2855,68 +3030,97 @@ const FO=byId('pa-run-fo')&&(function(){
 })();
 
 /* ---------------- competing stimulus ----------------
-   Two control sessions with no items, then each stimulus alone for two sessions of the same length.
-   Target behavior is tallied and engagement timed; both are converted to the percentage of intervals
-   (partial interval) the sheet records: an interval counts when the behavior, or engagement, occurred
-   at any time in it. */
+   Series: each begins with a no-stimulus control trial, then each stimulus alone in the randomized
+   order the sheet shows (Breeman, Irwin Helvey, & Greer, 2026; Frank-Crawford, Cavanaugh, Piersma,
+   & Sauter, 2026). Free access first, then each augmented condition the sheet has switched on, each
+   with its own control trials. Target behavior is tallied and engagement timed; the target behavior
+   is written in the sheet's unit (percentage of partial intervals, or responses per minute) and
+   engagement as the percentage of intervals. Prompts and blocks are tallied in the augmented
+   conditions; after 10 s without engagement in those conditions the runner says to prompt (the
+   parameter of Frank-Crawford et al., 2026). */
+const CSA_BLK=['fa','pe','pb','rfa'],CSA_BN={fa:'Free access',pe:'Prompted engagement',pb:'Prompted engagement + response blocking',rfa:'Repeated free access'};
 const csaLen=()=>{const v=parseFloat(String((byId('csaLen')||{}).value||'').replace(/[^\d.]/g,''));return isFinite(v)&&v>=10&&v<=3600?v:300;};
 const csaIv=()=>{const m=/(\d+(?:\.\d+)?)/.exec(String((byId('csaInt')||{}).value||''));const v=m?+m[1]:NaN;return isFinite(v)&&v>=1&&v<=300?v:10;};
-const csaIn=(c,s,f)=>c==='c'?q('#csaTbl input[data-c="'+(s-1)+'"]'):q('#csaTbl input[data-i="'+c+'"][data-f="'+f+s+'"]');
-const csaEmpty=(c,s)=>c==='c'?!((csaIn('c',s)||{}).value):!((csaIn(c,s,'e')||{}).value)&&!((csaIn(c,s,'p')||{}).value);
-function csaOrder(){const n=names().length,o=[['c',1],['c',2]];for(let s=1;s<=2;s++)for(let i=0;i<n;i++)o.push([String(i),s]);return o;}
-function csaNext(){const x=csaOrder().find(([c,s])=>csaEmpty(c,s));return x?{c:x[0],s:x[1]}:null;}
+const csaNS=()=>{const v=parseInt((byId('csaSeries')||{}).value,10);return isFinite(v)&&v>=1&&v<=6?v:3;};
+const csaUnitR=()=>((q('[data-meta="csaUnit"]')||{}).value==='rpm')?'rpm':'pct';
+const csaBlkOn=k=>k==='fa'||!!((q('#csaRunSet input[data-run="'+k+'"]')||{}).checked);
+const csaTblOf=k=>byId(k==='fa'?'csaTbl':'csaTbl-'+k);
+const csaIn=(k,c,s,f)=>{const t=csaTblOf(k);if(!t)return null;return c==='c'?q('input[data-c="'+(s-1)+'"]',t):q('input[data-i="'+c+'"][data-f="'+f+s+'"]',t);};
+const csaEmpty=(k,c,s)=>c==='c'?!((csaIn(k,'c',s)||{}).value):!((csaIn(k,c,s,'e')||{}).value)&&!((csaIn(k,c,s,'p')||{}).value);
+/* the randomized order of each series, as the sheet printed it */
+const csaOrd=k=>{const el=byId('csaOrd-'+k),n=names().length,NS=csaNS();const ser=el?String(el.getAttribute('data-ord')||'').split('|').map(x=>x.split(',').filter(y=>y!=='').map(Number).filter(i=>i>=0&&i<n)):[];
+  const out=[];for(let s=0;s<NS;s++)out.push(ser[s]&&ser[s].length===n?ser[s]:[...Array(n).keys()]);return out;};
+function csaOrder(k){const o=[],ord=csaOrd(k),NS=csaNS();for(let s=1;s<=NS;s++){o.push(['c',s]);ord[s-1].forEach(i=>o.push([String(i),s]));}return o;}
+function csaNext(){for(const k of CSA_BLK){if(!csaBlkOn(k)||!csaTblOf(k))continue;const x=csaOrder(k).find(([c,s])=>csaEmpty(k,c,s));if(x)return {k,c:x[0],s:x[1]};}return null;}
 /* all in ms: the session run, the interval, the target-behavior times and the engagement spans */
 function csaIvs(len,iv,times,spans){const n=Math.max(1,Math.ceil(len/iv-1e-9)),pb=new Set(times.map(t=>Math.min(n-1,Math.floor(t/iv)))),en=new Set();
   spans.forEach(([a,b])=>{if(b<=a)return;for(let j=Math.floor(a/iv);j<n&&j*iv<b;j++)en.add(j);});return {n,pb:pb.size,eng:en.size};}
 const CSA=byId('pa-run-csa')&&(function(){
-  const r=sessionBase('csa','csa','Competing stimulus',['#csaLen','#csaInt']),$=r.$;let times=[],eng=new Track(),userPick=false;
+  const r=sessionBase('csa','csa','Competing stimulus',['#csaLen','#csaInt','#csaSeries']),$=r.$;let times=[],eng=new Track(),prompts=[],blocks=[],promptDue=false,userPick=false;
   const condName=c=>c==='c'?'Control (no items)':nameOf(+c);
-  r.len=csaLen;r.sigf=()=>names().length+'|'+csaLen()+'|'+csaIv();
-  r.unit=()=>r.cur?(r.cur.c==='c'?'control':nameOf(+r.cur.c).toLowerCase())+' session '+r.cur.s:'';
-  r.reset=()=>{times=[];eng=new Track();};
+  const augK=k=>k==='pe'||k==='pb';
+  r.len=csaLen;r.sigf=()=>names().length+'|'+csaLen()+'|'+csaIv()+'|'+csaNS()+'|'+csaUnitR()+'|'+CSA_BLK.map(k=>csaBlkOn(k)?1:0).join('');
+  r.unit=()=>r.cur?CSA_BN[r.cur.k].toLowerCase()+', series '+r.cur.s+', '+(r.cur.c==='c'?'control':nameOf(+r.cur.c).toLowerCase()):'';
+  r.reset=()=>{times=[];eng=new Track();prompts=[];blocks=[];promptDue=false;};
   r.next=csaNext;
-  r.target=()=>({c:$('cond').value,s:+$('ses').value});
-  r.none=()=>'Pick a condition.';
+  r.target=()=>({k:$('blk').value||'fa',s:+$('ses').value||1,c:$('cond').value});
+  r.none=()=>'Pick a condition, a series and a trial.';
   r.stopAll=t=>eng.off(t);
   r.prep=()=>{fillMeta('csaDate',todayUS());fillMeta('csaLen',String(csaLen()));fillMeta('csaInt',csaIv()+'-s partial interval');};
-  r.begin=c=>{
-    r.note(c.c==='c'?'Control session: no items available, no attention, no other consequences. Tap Target behavior at each occurrence.':'Present '+nameOf(+c.c)+' alone. No attention or other consequences. Tap Target behavior at each occurrence, and Engaged on and off as the student engages with the item.');};
-  r.done=()=>r.note((r.early?'Ended early at '+fmt(r.el())+'; the percentages are of the intervals actually run. ':'Session over. ')+'Check the summary, then Save and next.',r.early);
-  r.tally=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the session first.',true);return;}times.push(r.el());const b=$('pb');b.classList.add('pa-run-picked');setTimeout(()=>b.classList.remove('pa-run-picked'),150);r.paint();};
+  r.begin=c=>{const k=c.k;
+    r.note(c.c==='c'?'Control trial, series '+c.s+' ('+CSA_BN[k]+'): no items available, no attention, no other consequences. Tap Target behavior at each occurrence.':
+      'Present '+nameOf(+c.c)+' alone ('+CSA_BN[k]+', series '+c.s+'). No attention or other consequences. Tap Target behavior at each occurrence, and Engaged on and off as the student engages with the item.'+
+      (augK(k)?' Tap Prompt at each prompt for engagement (the runner says when 10 s pass without engagement).':'')+(k==='pb'?' Tap Block at each response block.':''));};
+  r.done=()=>r.note((r.early?'Ended early at '+fmt(r.el())+'; the values are for the time actually run. ':'Trial over. ')+'Check the summary, then Save and next.',r.early);
+  const flash=b=>{b.classList.add('pa-run-picked');setTimeout(()=>b.classList.remove('pa-run-picked'),150);};
+  r.tally=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the trial first.',true);return;}times.push(r.el());flash($('pb'));r.paint();};
   r.undo=()=>{if(r.st==='idle'||!times.length){r.note('No target behavior to undo.',true);return;}times.pop();r.note('Last target behavior removed.');};
-  r.engage=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the session first.',true);return true;}if(r.cur&&r.cur.c==='c'){r.note('No items are available in a control session.',true);return true;}
-    const e=r.el();if(eng.isOn())eng.off(e);else eng.on(e);r.paint();return true;};
-  const stats=()=>{const t=r.st==='idle'?0:r.el();return Object.assign(csaIvs(Math.max(t,1),csaIv()*1000,times,eng.spans(t)),{len:t,count:times.length,engMs:eng.total(t)});};
-  r.targets=()=>{if(r.st==='idle'||!r.cur)return [];const c=r.cur;return c.c==='c'?[csaIn('c',c.s)]:[csaIn(c.c,c.s,'e'),csaIn(c.c,c.s,'p')];};
-  r.write=()=>{const c=r.cur,S=stats(),p=pct(S.pb,S.n),en=pct(S.eng,S.n);
-    if(!csaEmpty(c.c,c.s)&&!confirm(condName(c.c)+', session '+c.s+' already has data on the sheet. Replace it?'))return false;
-    if(c.c==='c'){if(!setField(csaIn('c',c.s),String(p)))return false;userPick=false;return 'Saved control session '+c.s+': target behavior in '+S.pb+' of '+S.n+' intervals ('+p+'%).';}
-    if(!setField(csaIn(c.c,c.s,'e'),String(en))||!setField(csaIn(c.c,c.s,'p'),String(p)))return false;userPick=false;
-    return 'Saved '+nameOf(+c.c)+', session '+c.s+': engagement '+en+'%, target behavior '+p+'% of '+S.n+' intervals.';};
-  r.after=()=>{const c=r.cur;if(c){pick(c);return 'Next: '+condName(c.c)+', session '+c.s+'.';}return 'Every control and stimulus session has data.';};
-  function fillCond(){const s=$('cond'),cur=s.value,h='<option value="c">Control (no items)</option>'+names().map((x,i)=>'<option value="'+i+'">'+esc(x)+'</option>').join('');setHTML(s,h);if(cur&&qa('option',s).some(o=>o.value===cur))s.value=cur;}
-  function pick(c){fillCond();if(c){$('cond').value=c.c;$('ses').value=String(c.s);}}
+  r.engage=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the trial first.',true);return true;}if(r.cur&&r.cur.c==='c'){r.note('No items are available in a control trial.',true);return true;}
+    const e=r.el();if(eng.isOn())eng.off(e);else{eng.on(e);promptDue=false;}r.paint();return true;};
+  r.prompt=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the trial first.',true);return;}if(!r.cur||!augK(r.cur.k)||r.cur.c==='c'){r.note('Prompts are tallied in the prompted conditions, in stimulus trials.',true);return;}prompts.push(r.el());promptDue=false;flash($('pr'));r.note('Prompt '+prompts.length+' tallied.');};
+  r.block=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('Start the trial first.',true);return;}if(!r.cur||r.cur.k!=='pb'||r.cur.c==='c'){r.note('Blocks are tallied in the blocking condition, in stimulus trials.',true);return;}blocks.push(r.el());flash($('bl'));r.note('Block '+blocks.length+' tallied.');};
+  const rpm=(n,ms)=>ms>0?Math.round(10*n/(ms/60000))/10:0;
+  const stats=()=>{const t=r.st==='idle'?0:r.el();return Object.assign(csaIvs(Math.max(t,1),csaIv()*1000,times,eng.spans(t)),{len:t,count:times.length,engMs:eng.total(t),npr:prompts.length,nbl:blocks.length});};
+  const pbVal=S=>csaUnitR()==='rpm'?rpm(S.count,S.len):pct(S.pb,S.n);
+  const pbTxt=S=>csaUnitR()==='rpm'?plural(S.count,'response')+' in '+fmt(S.len)+' ('+pbVal(S)+' per min)':plural(S.count,'response')+'; '+S.pb+' of '+S.n+' intervals ('+pbVal(S)+'%)';
+  r.targets=()=>{if(r.st==='idle'||!r.cur)return [];const c=r.cur;return c.c==='c'?[csaIn(c.k,'c',c.s)]:[csaIn(c.k,c.c,c.s,'e'),csaIn(c.k,c.c,c.s,'p'),csaIn(c.k,c.c,c.s,'n'),csaIn(c.k,c.c,c.s,'b')].filter(Boolean);};
+  r.write=()=>{const c=r.cur,S=stats(),p=pbVal(S),en=pct(S.eng,S.n),where=CSA_BN[c.k]+', series '+c.s;
+    if(!csaTblOf(c.k))return (r.note('That condition is no longer on the sheet.',true),false);
+    if(!csaEmpty(c.k,c.c,c.s)&&!confirm(condName(c.c)+' ('+where+') already has data on the sheet. Replace it?'))return false;
+    if(c.c==='c'){if(!setField(csaIn(c.k,'c',c.s),String(p)))return false;userPick=false;return 'Saved the control trial of '+where+': '+pbTxt(S)+'.';}
+    if(!setField(csaIn(c.k,c.c,c.s,'e'),String(en))||!setField(csaIn(c.k,c.c,c.s,'p'),String(p)))return false;
+    if(augK(c.k))setField(csaIn(c.k,c.c,c.s,'n'),String(S.npr));if(c.k==='pb')setField(csaIn(c.k,c.c,c.s,'b'),String(S.nbl));userPick=false;
+    return 'Saved '+nameOf(+c.c)+' ('+where+'): engagement '+en+'% of intervals, target behavior '+pbTxt(S)+(augK(c.k)?', '+plural(S.npr,'prompt'):'')+(c.k==='pb'?', '+plural(S.nbl,'block'):'')+'.';};
+  r.after=()=>{const c=r.cur;if(c){pick(c);return 'Next: '+CSA_BN[c.k]+', series '+c.s+', '+condName(c.c)+'.';}return 'Every control and stimulus trial of every condition switched on has data.';};
+  function fillCond(){const b=$('blk'),bc=b.value,s=$('ses'),sc=s.value,t=$('cond'),tc=t.value;
+    setHTML(b,CSA_BLK.filter(csaBlkOn).map(k=>'<option value="'+k+'">'+CSA_BN[k]+'</option>').join(''));if(bc&&qa('option',b).some(o=>o.value===bc))b.value=bc;
+    const NS=csaNS();setHTML(s,Array.from({length:NS},(_,i)=>'<option value="'+(i+1)+'">Series '+(i+1)+'</option>').join(''));if(sc&&+sc<=NS)s.value=sc;
+    setHTML(t,'<option value="c">Control (no items)</option>'+names().map((x,i)=>'<option value="'+i+'">'+esc(x)+'</option>').join(''));if(tc&&qa('option',t).some(o=>o.value===tc))t.value=tc;}
+  function pick(c){fillCond();if(c){$('blk').value=c.k;$('ses').value=String(c.s);$('cond').value=c.c;}}
   r.key=(K,k)=>{if(k===' '){r.primary();return true;}if(K==='P'){if(r.st==='run'||r.st==='paused')r.primary();return true;}
-    if(K==='S'||k==='Enter'){r.save();return true;}if(K==='X'){r.tally();return true;}if(K==='E'){r.engage();return true;}if(K==='Z'){r.undo();return true;}return false;};
+    if(K==='S'||k==='Enter'){r.save();return true;}if(K==='X'){r.tally();return true;}if(K==='E'){r.engage();return true;}if(K==='R'){r.prompt();return true;}if(K==='B'){r.block();return true;}if(K==='Z'){r.undo();return true;}return false;};
   r.refresh=()=>{fillCond();if(r.st==='idle'&&!userPick){r.cur=r.next();pick(r.cur);}r.paint();};
-  r.paint=()=>{if(!r.box)return;const st=r.st,e=r.el(),c=st==='idle'?r.target():r.cur,ctl=c&&c.c==='c',S=stats();
-    dis($('cond'),st!=='idle');dis($('ses'),st!=='idle');
+  r.paint=()=>{if(!r.box)return;const st=r.st,e=r.el(),c=st==='idle'?r.target():r.cur,ctl=c&&c.c==='c',k=c?c.k:'fa',S=stats(),u=csaUnitR();
+    dis($('blk'),st!=='idle');dis($('cond'),st!=='idle');dis($('ses'),st!=='idle');
     setText($('len'),csaLen()+' s');setText($('lens'),byId('csaLen')&&byId('csaLen').value.trim()?'from the sheet':'default; set on the sheet');
-    setText($('iv'),csaIv()+' s');setText($('ivs'),byId('csaInt')&&byId('csaInt').value.trim()?'partial interval, from the sheet':'default; set on the sheet');
-    setText($('count'),c?(ctl?'Control':'Stimulus')+' session '+c.s+(csaEmpty(c.c,c.s)?'':' · has data: saving replaces it'):'');
+    setText($('iv'),csaIv()+' s');setText($('ivs'),(byId('csaInt')&&byId('csaInt').value.trim()?'partial interval, from the sheet':'default; set on the sheet')+(u==='rpm'?'; target behavior per minute':''));
+    setText($('count'),c?CSA_BN[k]+' · series '+c.s+' · '+(ctl?'control':'stimulus')+(csaTblOf(k)&&!csaEmpty(k,c.c,c.s)?' · has data: saving replaces it':''):'');
     setText($('item'),c?condName(c.c):'—');
-    setText($('sub'),st==='idle'?(ctl?'No items; record the target behavior':'Item alone; record engagement and the target behavior'):
-      'Target behavior '+S.count+' ('+S.pb+' of '+S.n+' intervals)'+(ctl?'':' · engaged '+secs(S.engMs)+' s ('+S.eng+' of '+S.n+' intervals)'));
+    setText($('sub'),st==='idle'?(ctl?'No items; record the target behavior':'Item alone; record engagement and the target behavior'+(augK(k)?', and each prompt':'')+(k==='pb'?' and each block':'')):
+      'Target behavior '+S.count+(u==='rpm'?' ('+rpm(S.count,Math.max(S.len,1))+' per min)':' ('+S.pb+' of '+S.n+' intervals)')+(ctl?'':' · engaged '+secs(S.engMs)+' s ('+S.eng+' of '+S.n+' intervals)')+(augK(k)&&!ctl?' · prompts '+S.npr:'')+(k==='pb'&&!ctl?' · blocks '+S.nbl:''));
     const live=st==='run'||st==='paused';dis($('pb'),!live);dis($('undo'),!live||!times.length);dis($('eng'),!live||ctl);show($('eng'),!ctl);
+    show($('pr'),augK(k)&&!ctl);dis($('pr'),!live);show($('bl'),k==='pb'&&!ctl);dis($('bl'),!live);setText($('prn'),String(S.npr));setText($('bln'),String(S.nbl));
     pressed($('eng'),eng.isOn());setText($('pbn'),String(times.length));setText($('engs'),secs(S.engMs)+' s');
-    paintSession(r,'Start session');
+    /* the prompt alert: 10 s without engagement since the trial began, the last engagement or the last prompt */
+    if(st==='run'&&augK(k)&&!ctl&&!eng.isOn()&&!promptDue){const sp=eng.sp,last=Math.max(sp.length?sp[sp.length-1][1]:0,prompts.length?prompts[prompts.length-1]:0);if(e-last>=10000){promptDue=true;cue('window');r.msg='10 s without engagement: prompt now (R). The 10-s parameter is from Frank-Crawford et al. (2026).';r.warn=true;}}
+    paintSession(r,'Start trial');
     const sum=$('sum');
-    if(st==='done'){const p=pct(S.pb,S.n),en=pct(S.eng,S.n);setHTML(sum,'<b>Session summary</b><table><tr><td>Condition</td><td>'+esc(condName(c.c))+', session '+c.s+'</td></tr><tr><td>Length</td><td>'+fmt(S.len)+' ('+S.n+' intervals of '+csaIv()+' s)</td></tr><tr><td>Target behavior</td><td>'+plural(S.count,'response')+'; '+S.pb+' of '+S.n+' intervals ('+p+'%)</td></tr>'+(ctl?'':'<tr><td>Engagement</td><td>'+secs(S.engMs)+' s; '+S.eng+' of '+S.n+' intervals ('+en+'%)</td></tr>')+'<tr><td>Written to the sheet</td><td>'+(ctl?'% PB '+p:'% eng '+en+', % PB '+p)+'</td></tr></table>');show(sum,true);}
+    if(st==='done'){const en=pct(S.eng,S.n);setHTML(sum,'<b>Trial summary</b><table><tr><td>Condition</td><td>'+esc(CSA_BN[k])+', series '+c.s+', '+esc(condName(c.c))+'</td></tr><tr><td>Length</td><td>'+fmt(S.len)+' ('+S.n+' intervals of '+csaIv()+' s)</td></tr><tr><td>Target behavior</td><td>'+pbTxt(S)+'</td></tr>'+(ctl?'':'<tr><td>Engagement</td><td>'+secs(S.engMs)+' s; '+S.eng+' of '+S.n+' intervals ('+en+'%)</td></tr>')+(augK(k)&&!ctl?'<tr><td>Prompts</td><td>'+S.npr+'</td></tr>':'')+(k==='pb'&&!ctl?'<tr><td>Blocks</td><td>'+S.nbl+'</td></tr>':'')+'<tr><td>Written to the sheet</td><td>'+(ctl?(u==='rpm'?'PB/min ':'% PB ')+pbVal(S):'% eng '+en+', '+(u==='rpm'?'PB/min ':'% PB ')+pbVal(S)+(augK(k)?', prompts '+S.npr:'')+(k==='pb'?', blocks '+S.nbl:''))+'</td></tr></table>');show(sum,true);}
     else show(sum,false);
     fixFocus(r);};
   wireSession(r);
-  $('pb').addEventListener('click',()=>r.tally());$('undo').addEventListener('click',()=>r.undo());$('eng').addEventListener('click',()=>r.engage());
-  $('cond').addEventListener('change',()=>{userPick=true;r.paint();});$('ses').addEventListener('change',()=>{userPick=true;r.paint();});
+  $('pb').addEventListener('click',()=>r.tally());$('undo').addEventListener('click',()=>r.undo());$('eng').addEventListener('click',()=>r.engage());$('pr').addEventListener('click',()=>r.prompt());$('bl').addEventListener('click',()=>r.block());
+  ['blk','cond','ses'].forEach(p=>$(p).addEventListener('change',()=>{userPick=true;r.paint();}));
   return r;
 })();
 
@@ -4667,10 +4871,10 @@ const PA_EX={
   /* competing stimulus assessment: hand mouthing, % of 10-s intervals. A 300-s session has 30 of them,
      so every session's percentage is one the runner can write: a whole number of intervals of 30 */
   csaPool:['Vibrating tube','Chewy necklace','Tablet (video)','Squeeze ball','Picture book','Bubbles'],
-  csaCtrl:['63','57'],
-  csa:[['87','3','93','7'],['80','7','83','10'],['93','50','97','53'],['60','23','63','20'],['30','50','27','47'],['47','30','40','33']],
-  csaOut:[['Vibrating tube','90%','5%','−92%','Competing'],['Chewy necklace','82%','9%','−86%','Competing'],['Tablet (video)','95%','52%','−14%','Not competing'],
-    ['Squeeze ball','62%','22%','−64%','Partly competing'],['Picture book','29%','49%','−19%','Not competing'],['Bubbles','44%','32%','−48%','Not competing']],
+  csaCtrl:['63','57','60'],
+  csa:[['87','3','93','7','90','5'],['80','7','83','10','83','10'],['93','50','97','53','95','53'],['60','23','63','20','63','23'],['30','50','27','47','30','50'],['47','30','40','33','45','33']],
+  csaOut:[['Vibrating tube','90%','5%','92%','HC'],['Chewy necklace','82%','9%','86%','HC'],['Tablet (video)','95%','52%','14%','HP, not competing'],
+    ['Squeeze ball','62%','22%','64%','Partly competing'],['Picture book','29%','49%','19%','Not competing'],['Bubbles','44%','32%','48%','Not competing']],
   /* monitoring: eight brief MSWOs (top three) and twelve uses of the tablet */
   stab:[['2026-09-01','Tablet (video)','Bubbles','Squeeze ball'],['2026-09-04','Tablet (video)','Bubbles','Squeeze ball'],['2026-09-08','Tablet (video)','Squeeze ball','Bubbles'],['2026-09-11','Tablet (video)','Bubbles','Squeeze ball'],
     ['2026-09-15','Bubbles','Tablet (video)','Musical toy'],['2026-09-18','Bubbles','Musical toy','Tablet (video)'],['2026-09-22','Bubbles','Musical toy','Squeeze ball'],['2026-09-25','Musical toy','Bubbles','Squeeze ball']],
@@ -4781,11 +4985,11 @@ function paBoard(k){
     paBars(178,52,190,[{l:'Tablet (video)',v:380,t:'380 s (2×)',c:'pb-b1'},{l:'Musical toy',v:90,t:'90 s (1×)',c:'pb-b1'},{l:'Bubbles',v:60,t:'60 s (1×)',c:'pb-b1'},
       {l:'Sitting with J. (not in pool)',v:300,t:'300 s (1×)',c:'pb-b4'},{l:'Swing (not in pool)',v:240,t:'240 s (1×)',c:'pb-b4'}],{rh:22,max:400,ticks:false})+
     T(0,182,'Items outside the pool are candidates for the next pool.','pb-v pb-okf');
-  if(k==='csaTbl'){const cc=v=>v==='Competing'?'pb-hp':v==='Partly competing'?'pb-mp':'pb-lp';
+  if(k==='csaTbl'){const cc=v=>v==='HC'?'pb-hp':v==='Partly competing'?'pb-mp':'pb-lp';
     return T(0,14,'Competing Stimulus Assessment: Hand Mouthing','pb-t')+
-      paTable(38,[[0],[176,'middle'],[238,'middle'],[310,'middle'],[W,'end']],['Stimulus','Mean eng','Mean PB','PB vs control','Category'],
+      paTable(38,[[0],[176,'middle'],[238,'middle'],[300,'middle'],[W,'end']],['Stimulus','Mean eng','Mean PB','Reduction','Category'],
         [['Control (no items)','—','60%','—','']].concat(E.csaOut.map(r=>[r[0],r[1],r[2],r[3],[r[4],cc(r[4])]])),{rh:18,cls:(ri,ci)=>ci===0?'pb-v':'pb-l'})+
-      T(0,191,'Competing: engagement ≥ 50% and the target down ≥ 80%;','pb-s')+T(0,206,'Partly competing: down 50–79% (working conventions)','pb-s');}
+      T(0,191,'HC: the target down ≥ 80% from the control mean (modal published criterion);','pb-s')+T(0,206,'engagement reported alongside; Partly competing 50–79% (working convention)','pb-s');}
   if(k==='sumTbl'||k==='sumTblMT'||k==='sumTblFit')
     return T(0,14,'Summary: Combined Hierarchy','pb-t')+T(0,32,'Methods completed: '+E.methods,'pb-s')+
       paTable(56,[[0],[118,'middle'],[164,'middle'],[214,'middle'],[264,'middle'],[322,'middle'],[378,'middle'],[W,'end']],['Stimulus',['Informant','rank'],['PS %','selected'],['MSWO %','selected'],['FO %','engaged'],['Mean rank','(direct)'],'Composite','Fit'],
@@ -5202,22 +5406,22 @@ S.eco=[
 
 S.csa=[
  {s:'mouth',pb:true,a:'rest',look:'down',obs:O('Control session 1','2:20','target in 10 of 16 intervals','rec'),does:'Mouths their hand',
-  cap:'Use when the target behavior is hypothesized (EA-1) to be automatically maintained, here hand mouthing. First, two control sessions with no items available. On the panel: Control (no items), Start session, and Target behavior at each occurrence; the panel converts the taps to the percentage of 10-s intervals with the behavior.',
-  rec:[['Condition','Control (no items)'],['Start session'],['Target behavior']]},
+  cap:'Use when the target behavior is hypothesized (EA-1) to be automatically maintained, here hand mouthing. Each of the three series begins with a control trial with no items available. On the panel: Free access, Series 1, Control (no items), Start trial, and Target behavior at each occurrence; the panel converts the taps to the percentage of 10-s intervals with the behavior.',
+  rec:[['Condition','Free access'],['Series','1'],['Trial','Control (no items)'],['Start trial'],['Target behavior']]},
  {s:'mouth',pb:true,a:'rest',look:'down',obs:O('Control session 2','Session over','target in 17 of 30 intervals','ok'),does:'Mouths their hand',
-  cap:'Save and next writes each control session as a percentage of its 30 intervals: 63% (19 of 30), then 57% (17 of 30), a control mean of 60%, the level each item is compared with. No attention and no other consequences are delivered during any session.',
-  rec:[['Save and next'],['Control (no items) · Ses 1 % PB','63'],['Ses 2 % PB','57']]},
+  cap:'Save and next writes each control trial as a percentage of its 30 intervals: 63% (19 of 30) in series 1, 57% (17 of 30) in series 2, 60% in series 3, a control mean of 60%, the level each item is compared with. No attention and no other consequences are delivered during any trial.',
+  rec:[['Save and next'],['Control (no items) · Series 1 PB','63'],['Series 2 PB','57'],['Series 3 PB','60']]},
  {held:'tube',s:'hold',fx:'buzz',a:'rest',look:'down',obs:O('Vibrating tube · session 1','Session over','eng 87% · target 3%','ok'),does:'Holds the buzzing tube',
-  cap:'Then each stimulus alone, for two sessions of the same length (5 min is this form’s default; published assessments have sampled 30 s to 10 min, DeLeon et al., 2005), with Engaged on and off and Target behavior tapped. The vibrating tube: engaged in 87% of intervals, mouthing in 3%.',
-  rec:[['Engaged'],['Save and next'],['Vibrating tube · Ses 1 % eng','87'],['Ses 1 % PB','3']]},
+  cap:'Then each stimulus alone, once per series in the randomized order printed under the table, all trials the same length (5 min is this form’s default; published trials ran 1 to 10 min, median 4, Breeman et al., 2026), with Engaged on and off and Target behavior tapped. The vibrating tube in series 1: engaged in 87% of intervals, mouthing in 3%.',
+  rec:[['Engaged'],['Save and next'],['Vibrating tube · Series 1 eng','87'],['Series 1 PB','3']]},
  {held:'tab',s:'hold',fMouth:true,pb:true,a:'rest',look:'down',obs:O('Tablet (video) · session 1','Session over','eng 93% · target 50%','ok'),does:'Watches, a hand in the mouth',
-  cap:'The tablet: engaged in 93% of intervals, and mouthing in 50%. High engagement without a reduction in the behavior means preferred, but not competing.',
-  rec:[['Tablet (video) · Ses 1 % eng','93'],['Ses 1 % PB','50']]},
+  cap:'The tablet: engaged in 93% of intervals, and mouthing in 50%. High engagement without a reduction in the behavior means preferred, but not competing (HP, not competing).',
+  rec:[['Tablet (video) · Series 1 eng','93'],['Series 1 PB','50']]},
  {held:'ball',s:'hold',a:'rest',look:'down',obs:O('Squeeze ball · session 1','Session over','eng 60% · target 23%','ok'),does:'Squeezes the ball',
-  cap:'The squeeze ball: engaged in 60% of intervals, mouthing in 23%. The category comes from the means of the two sessions.',
-  rec:[['Squeeze ball · Ses 1 % eng','60'],['Ses 1 % PB','23']]},
- F(BRD,{pboard:'csaTbl',does:'Two competing items',
-  cap:'Categories (working conventions): Competing when mean engagement is at least 50% of intervals and the target behavior is reduced by at least 80% from the control mean; Partly competing when engagement is at least 50% and the reduction is 50–79%; otherwise Not competing. A control mean below 20% of intervals makes reductions hard to detect.',
+  cap:'The squeeze ball: engaged in 60% of intervals, mouthing in 23%. The category comes from the means of the three series: reduction = (control mean − item mean) ÷ control mean × 100.',
+  rec:[['Squeeze ball · Series 1 eng','60'],['Series 1 PB','23']]},
+ F(BRD,{pboard:'csaTbl',does:'Two HC items',
+  cap:'Categories: HC when the target behavior is reduced by at least 80% from the control mean (the criterion of most published assessments, Breeman et al., 2026; this form’s default, with no consensus in the literature), engagement reported alongside; Increased when the item’s mean is above the control; Partly competing at 50–79% (this form’s convention); otherwise Not competing. If free access finds no HC item, the augmented conditions follow, and an item found only with blocking is HC with disruption.',
   rec:[]})
 ];
 
@@ -5383,9 +5587,9 @@ const Q=[
     ['As unassessed: run single-stimulus engagement or MSWO for the remaining items',1],['As low preference: the items were there and not used',0],['As a finished hierarchy',0]],
     why:'<b>One item absorbing the session leaves the rest unassessed.</b> The duration sheet: “If one item consumes most of the free-operant session, treat the rest of that hierarchy as unassessed and run single-stimulus engagement or MSWO for the remaining items.” Its graph draws the line at 70%. A response-restriction analysis, withdrawing the top item and repeating the session, is the other route to a full hierarchy (Hanley et al., 2003).'},
   {w:'F · Competing stimulus',f:S.csa[3],
-    q:'Competing stimulus assessment. Across its two sessions with the tablet, the student is engaged in a mean of 95% of intervals, and hand mouthing falls only from the control mean of 60% to 52%. What is the tablet?',o:[
-    ['Preferred, but not competing',1],['Competing: engagement is above 50%',0],['Partly competing',0]],
-    why:'<b>A competing item must reduce the behavior.</b> The sheet: “items that produce high engagement without reducing the behavior are preferred but not competing.” A 14% reduction is far from the 80% this form’s convention asks for Competing, or the 50% for Partly competing.'},
+    q:'Competing stimulus assessment. Across its three series with the tablet, the student is engaged in a mean of 95% of intervals, and hand mouthing falls only from the control mean of 60% to 52%. What is the tablet?',o:[
+    ['Preferred, but not competing (HP)',1],['HC: engagement is above the cut-off',0],['Partly competing',0]],
+    why:'<b>A competing item must reduce the behavior.</b> The sheet: “items that produce high engagement without reducing the behavior are preferred but not competing.” A 14% reduction is far from the 80% HC criterion (the one most published assessments used, Breeman et al., 2026) or the 50% of this form’s Partly competing convention; engagement is reported alongside, not required.'},
   {w:'H · Monitoring',f:S.mon[4],
     q:'Monitoring. The tablet’s slowest approach this week came just after the student had the tablet through lunch. What comes first?',o:[
     ['Check the motivating operation: note the time since that access, and read one slow approach after free access as a possible satiation effect until it repeats',1],['Log it as a preference shift',0],['Replace the tablet in the plan',0]],
@@ -5488,17 +5692,17 @@ const Q=[
      decide:'<b>Decision.</b> A highly preferred item with poor fit is a candidate for a restricted-access (closed-economy) arrangement rather than for exclusion. Items approached outside the pool are candidates for the next pool. The fit score is this form’s convention.',
      checks:[['Inventory and fit',['Every setting in which the plan will operate listed','Each stimulus rated Y, A or N in each setting','All seven practical attributes rated for each stimulus']],['In-context observation',['Free time in a natural setting','No prompts to approach any item','Each approach timed from arrival to leaving','Who initiated recorded','Items outside the pool written in']]]},
     {key:'csa',title:'Competing Stimulus Assessment',when:'Competing stimulus · the Run This Assessment panel',
-     lead:'Which items compete with automatically maintained behavior: engagement with the item, and the target behavior well below its control level.',
-     setup:['The hypothesis source (EA-1) and the target behavior as defined on TB-1','Session length (s) and Interval size on the sheet: the form’s defaults are 300 s and a 10-s partial interval','Each item alone; nothing else within reach'],
-     say:['Two control sessions with no items; then each item alone for two sessions of the same length','No attention and no other consequences in any session','Target behavior at each occurrence, Engaged on and off, then Save and next'],
-     sheet:['Control (no items): Ses 1 % PB, Ses 2 % PB','Each item: Ses 1 % eng, Ses 1 % PB, Ses 2 % eng, Ses 2 % PB','Mean eng, Mean PB, PB vs control and the Category are computed'],
-     frames:[['csa',0,'Two control sessions first, with no items available: Condition, Start session, then Target behavior at each occurrence.'],
-       ['csa',1,'Save and next writes each control session’s % of intervals with the target behavior; their mean is the control level.'],
-       ['csa',2,'Then each item alone for two sessions of the same length: Engaged on and off, Target behavior at each occurrence.'],
-       ['csa',3,'High engagement with the target behavior near its control level: preferred, but not competing.'],
-       ['csa',4,'The category comes from the means of the two sessions. Competing: engagement ≥ 50% and the target down ≥ 80%.']],
-     decide:'<b>Decision.</b> Competing: mean engagement ≥ 50% of intervals and the target behavior reduced ≥ 80% from the control mean; Partly competing: 50–79% (this form’s conventions). A control mean below 20% makes reductions hard to detect.',
-     checks:[['Competing stimulus',['Two control sessions run first, with no items available','Each item presented alone, for two sessions','All sessions the same length','No attention or other consequences in any session','Target behavior recorded at each occurrence','Engagement recorded on and off, as defined']]]},
+     lead:'Which items compete with automatically maintained behavior: the target behavior at least 80% below its control level, with engagement reported alongside.',
+     setup:['The hypothesis source (EA-1) and the target behavior as defined on TB-1','Session length (s), Interval size, Series, the target-behavior unit and the stimulus measure on the sheet: the form’s defaults are 300 s, a 10-s partial interval, three series, % of intervals and engagement','Each item alone; nothing else within reach; pre-session sampling done'],
+     say:['Each series: a control trial with no items, then each item alone in the randomized order under the table, all trials the same length','No attention and no other consequences in any trial','Target behavior at each occurrence, Engaged on and off (Prompt and Block in the augmented conditions), then Save and next'],
+     sheet:['Control (no items): PB in each Series column','Each item: eng and PB in each Series column; pr and bl (prompts and blocks) in the augmented conditions','Mean eng, Mean PB, Reduction and the Category are computed; the treatment check scores correspondence within 10 points'],
+     frames:[['csa',0,'Each series begins with a control trial with no items available: Condition, Series, Trial, Start trial, then Target behavior at each occurrence.'],
+       ['csa',1,'Save and next writes each control trial’s % of intervals with the target behavior; their mean is the control level.'],
+       ['csa',2,'Then each item alone, once per series in the randomized order under the table, all trials the same length: Engaged on and off, Target behavior at each occurrence.'],
+       ['csa',3,'High engagement with the target behavior near its control level: preferred, but not competing (HP, not competing).'],
+       ['csa',4,'The category comes from the means across series. High competition: the target down ≥ 80% from the control; engagement reported alongside.']],
+     decide:'<b>Decision.</b> HC: the target behavior reduced ≥ 80% from the control mean (the modal published criterion; no consensus), engagement reported alongside; Increased when the item’s mean is above the control; Partly competing: 50–79% (this form’s convention). Found only with blocking: HC with disruption. A control mean below 20% makes reductions hard to detect (convention).',
+     checks:[['Competing stimulus',['Control trial at the start of each series, with no items available','Items in randomized order within each series, each presented alone','All trials the same length','No attention or other consequences in any trial; only the test stimulus present','Target behavior recorded at each occurrence, in the sheet’s unit','Engagement (or contact) recorded on and off, as defined','Condition recorded (free access / prompted / prompted + blocking), with prompts and blocks tallied','Same measure of the target behavior planned for the treatment check']]]},
     {key:'mon',title:'Monitoring Preference over Time',when:'Monitoring · the brief MSWO log · the reinforcer-use log',
      lead:'The top three of each brief MSWO, and every use of an item as a reinforcer: the earliest signs of a change are in the student’s behavior toward the item, not in the hierarchy.',
      setup:['Brief MSWO: daily before sessions for edibles, weekly or at plan review for leisure items','A clock for the latency and the engagement','The Note column for the motivating operation'],
@@ -5526,7 +5730,7 @@ const Q=[
     ['Summary composite','mean rank, thirds of the pool','top third','middle third','bottom third']];
   const CONV=['Side bias: about 75% or more of paired-stimulus selections to one side; the hierarchy then reflects position, not preference.',
     'Free operant: one item over 70% of the session leaves the rest of that hierarchy unassessed.',
-    'Competing stimulus: Competing when mean engagement ≥ 50% of intervals and the target behavior is reduced by ≥ 80% from the control mean; Partly competing at 50–79%; a control mean below 20% makes reductions hard to detect.',
+    'Competing stimulus: HC when the target behavior is reduced by ≥ 80% from the control mean (the criterion most published assessments used, Breeman et al., 2026; no consensus); Partly competing at 50–79%, the high-engagement cut-off and the 20% low-control flag are this form’s conventions.',
     'Contextual fit: Good ≥ 75%, Fair 50–74%, Poor < 50%, with no empirical validation.',
     'Interobserver agreement: 80% is the working minimum for a hierarchy written into a plan.',
     'Pictorial or verbal formats: 10 matching trials in each direction, each passed at ≥ 90%.',
@@ -5700,6 +5904,18 @@ table{font-variant-numeric:tabular-nums}
 /* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
 .nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)!important}
 
+/* ---- Previous and Next at the foot of the page (the script builds the bar) ---- */
+.nbh-pagenav{display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;max-width:100%;margin:14px auto 30px;padding:0 2px;font-family:var(--nbh-sans)}
+.nbh-pagenav[hidden]{display:none}
+.nbh-pagenav button{font-family:var(--nbh-sans);font-size:13.5px;font-weight:600;line-height:1.2;min-height:40px;padding:8px 18px;
+  border-radius:var(--nbh-radius);border:1px solid var(--nbh-rule2);background:#fff;color:var(--nbh-navy);
+  box-shadow:0 1px 1px rgba(24,46,67,.05);cursor:pointer;display:inline-flex;align-items:center;gap:8px;max-width:48%;text-align:left}
+.nbh-pagenav button:hover{background:var(--nbh-mist);border-color:var(--nbh-teal)}
+.nbh-pagenav .nbh-pn-next{background:var(--nbh-navy);color:#fff;border-color:var(--nbh-navy)}
+.nbh-pagenav .nbh-pn-next:hover{background:var(--nbh-slate);border-color:var(--nbh-slate)}
+.nbh-pagenav button:disabled{visibility:hidden}
+.nbh-pagenav .nbh-pn-where{font-size:12.5px;color:var(--nbh-muted);text-align:center;flex:1 1 auto;font-variant-numeric:tabular-nums}
+@media (max-width:600px){.nbh-pagenav{margin:10px auto 22px;padding:0 10px}.nbh-pagenav .nbh-pn-where{display:none}.nbh-pagenav button{max-width:none;flex:1 1 0;justify-content:center}}
 /* ---- keyboard focus everywhere else: one ring, easy to see ---- */
 a:focus-visible,button:focus-visible,[role=tab]:focus-visible,[tabindex]:focus-visible,summary:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
 a{text-underline-offset:2px}
@@ -5829,6 +6045,7 @@ a{text-underline-offset:2px}
      script, so the heights it keeps inline are the ones the paper had before. */
   function plain(on) {
     document.documentElement.classList.toggle('nbh-plain', !!on);
+    try { pnPlain(!!on); } catch (e) {}
     try { if (window.nbhFieldCare && window.nbhFieldCare.grow) window.nbhFieldCare.grow(); } catch (e) {}
   }
   window.addEventListener('beforeprint', function () { plain(true); });
@@ -5853,6 +6070,90 @@ a{text-underline-offset:2px}
       }
     });
   }
+  /* Previous and Next at the foot of the page. A form's pages are the buttons of
+     its view control (#viewSeg) or its tab row ([role=tab]); the bar below the
+     sheet steps through them so the next page is a click away without a scroll
+     back to the top. Screen only: the bar is taken out of the document while a
+     print or the packet reads it, and never reaches paper. */
+  var pn = null, pnHome = null;
+  function pnButtons() {
+    var seg = document.querySelector('#viewSeg');
+    var b = seg ? seg.querySelectorAll('button[data-view]') : document.querySelectorAll('[role=tab]');
+    var out = [];
+    for (var i = 0; i < b.length; i++) if (!b[i].disabled && !b[i].hidden) out.push(b[i]);
+    return out;
+  }
+  function pnCurrent(b) {
+    for (var i = 0; i < b.length; i++) if (b[i].getAttribute('aria-pressed') === 'true' || b[i].getAttribute('aria-selected') === 'true') return i;
+    return -1;
+  }
+  function pnLabel(b) {
+    var t = '';
+    for (var n = b.firstChild; n; n = n.nextSibling) {
+      var s = n.textContent || '';
+      if (n.nodeType === 1 && /^\s*\d+\s*$/.test(s)) continue; /* a step number badge */
+      t += s;
+    }
+    return t.replace(/\s+/g, ' ').trim();
+  }
+  /* the pages themselves: the sheets, or the main element, or the tab panels */
+  function pnPages() {
+    var s = document.querySelectorAll('.sheet:not(table)');
+    if (!s.length) s = document.querySelectorAll('main');
+    if (!s.length) s = document.querySelectorAll('[role=tabpanel]');
+    return s;
+  }
+  function pnUpdate() {
+    if (!pn) return;
+    var b = pnButtons(), i = pnCurrent(b);
+    var prev = pn.querySelector('.nbh-pn-prev'), next = pn.querySelector('.nbh-pn-next'), where = pn.querySelector('.nbh-pn-where');
+    if (b.length < 2 || i < 0) { pn.hidden = true; return; }
+    pn.hidden = false;
+    prev.disabled = i <= 0; next.disabled = i >= b.length - 1;
+    prev.innerHTML = i > 0 ? '<span aria-hidden="true">&larr;</span> ' + esc(pnLabel(b[i - 1])) : '';
+    next.innerHTML = i < b.length - 1 ? 'Next: ' + esc(pnLabel(b[i + 1])) + ' <span aria-hidden="true">&rarr;</span>' : '';
+    where.textContent = 'Page ' + (i + 1) + ' of ' + b.length + ' · ' + pnLabel(b[i]);
+    var s = pnPages(), last = null;
+    for (var k = s.length - 1; k >= 0; k--) if (s[k].offsetParent !== null) { last = s[k]; break; }
+    if (last) {
+      var r = last.getBoundingClientRect(), vw = document.documentElement.clientWidth || r.width;
+      /* a page with no sheet of its own (its main element spans the window) keeps a gutter */
+      if (r.width > 200) pn.style.width = (r.width >= vw - 2 && vw > 700 ? r.width - 40 : r.width) + 'px';
+    }
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pnGo(d) {
+    var b = pnButtons(), i = pnCurrent(b), t = b[i + d];
+    if (!t) return;
+    t.click();
+    setTimeout(function () { try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); } pnUpdate(); }, 0);
+  }
+  function pagenav() {
+    if (pn || pnButtons().length < 2) return;
+    var s = pnPages(), last = s[s.length - 1];
+    if (!last || !last.parentNode) return;
+    pn = document.createElement('nav');
+    pn.className = 'nbh-pagenav noprint';
+    pn.setAttribute('aria-label', 'Form pages');
+    pn.setAttribute('data-nbh-screen', '');
+    pn.innerHTML = '<button type="button" class="nbh-pn-prev"></button><span class="nbh-pn-where" aria-live="polite"></span><button type="button" class="nbh-pn-next"></button>';
+    pn.querySelector('.nbh-pn-prev').addEventListener('click', function () { pnGo(-1); });
+    pn.querySelector('.nbh-pn-next').addEventListener('click', function () { pnGo(1); });
+    pnHome = last;
+    last.parentNode.insertBefore(pn, last.nextSibling);
+    var seg = document.querySelector('#viewSeg') || document.querySelector('[role=tablist]') || document.body;
+    try { new MutationObserver(function () { pnUpdate(); }).observe(seg, { attributes: true, subtree: true, attributeFilter: ['aria-pressed', 'aria-selected', 'disabled', 'hidden'] }); } catch (e) {}
+    window.addEventListener('resize', function () { pnUpdate(); });
+    pnUpdate();
+  }
+  function pnPlain(on) {
+    if (!pn) return;
+    if (on) { if (pn.parentNode) pn.parentNode.removeChild(pn); }
+    else if (!pn.parentNode && pnHome && pnHome.parentNode) { pnHome.parentNode.insertBefore(pn, pnHome.nextSibling); pnUpdate(); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { pagenav(); });
+  else pagenav();
+  window.addEventListener('load', function () { pagenav(); pnUpdate(); });
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
