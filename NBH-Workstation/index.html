@@ -352,7 +352,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
       <div class="rh-row"><b>Packet</b><span class="sp"></span>
         <button id="railHide" class="sm icon" title="Hide the list of forms" aria-label="Hide the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11M11.5 6.5 10 8l1.5 1.5"/></svg></button></div>
       <button id="railFind" class="find" title="Find a form or run a command (Ctrl K)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><span>Find a form or command&hellip;</span><kbd>&#8984;K</kbd></button>
-      Tick a form to include it in the master print. <span id="tickCount">0 of 31 ticked</span>.
+      Tick a form to include it in the master print. <span id="tickCount">0 of 32 ticked</span>.
       <div class="rh-tools">
         <button id="tickUsed" class="sm">Tick the ones I've used</button>
         <button id="tickNone" class="sm">Clear</button>
@@ -432,6 +432,7 @@ const FORMS=[
   ['CF-1','Contextual Fit','CF-1_Contextual-Fit-Assessment_v2026-09.html'],
   ['ST-1','Staff Training and Competency','ST-1_Behavior-Skills-Training_v2026-09.html'],
   ['TI-1','Treatment Integrity','TI-1_Treatment-Integrity-Observation_v2026-09.html'],
+  ['PD-1','Performance Diagnostic Checklist','PD-1_Performance-Diagnostic-Checklist_v2026-09.html'],
   ['RM-1','Relapse and Inoculation','RM-1_Relapse-Mitigation-Behavioral-Inoculation_v2026-09.html'],
   ['PR-1','Periodic Review and Exit','PR-1_Periodic-Plan-Review_v2026-09.html'],
   ['CR-1','Crisis Plan and Debriefing','CR-1_Crisis-Intervention-Plan_v2026-09.html'],
@@ -448,7 +449,7 @@ const ALL=FORMS.flatMap(g=>g[1]);
 const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:''};
 
 /* ================= the one-file edition =================
-   build-single.py packs the 31 forms, the PDF tools and a copy of this page
+   build-single.py packs the 32 forms, the PDF tools and a copy of this page
    into this one file, gzip-compressed and base64-encoded in text blocks at
    the end of the body. When those blocks are present the forms are opened
    from them, and a case is kept as one HTML file: this page, the same blocks,
@@ -1530,13 +1531,13 @@ $('#help').addEventListener('click',()=>{
    '<p><b>The master print.</b> Tick the forms this student needs and press <b>Build master print</b>. The workstation asks each ticked form for its current contents and assembles one document with a cover sheet and contents list, each form starting on a new page. Forms you leave unticked are simply not included.</p>'+
    '<p>A ticked form you have not opened will print blank, and the workstation warns you before it does that.</p>'+
    '<p><b>Finishing the PDF.</b> A PDF saved from the print window has no bookmark panel, and its contents page has no page numbers, because nothing can know what page a form will land on until the PDF exists. Press <b>Finish PDF</b> and give it that file: you get a copy with a bookmark for every form and each form\u2019s page number printed beside its entry in the contents. Nothing already on a page is changed. It needs the PDF saved from Chrome or Edge, which keep the markers it reads.</p>'+
-   (EMBED?'<div class="warnbox" style="background:#eaf2f0;border-color:#a0c9c3"><b>This is the one-file edition.</b> All 31 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it; in Chrome and Edge each later save goes back into that same file. Keep those files where the student\u2019s records live. This file itself stays empty and is the one to open for a new student.</div>':'')+
+   (EMBED?'<div class="warnbox" style="background:#eaf2f0;border-color:#a0c9c3"><b>This is the one-file edition.</b> All 32 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it; in Chrome and Edge each later save goes back into that same file. Keep those files where the student\u2019s records live. This file itself stays empty and is the one to open for a new student.</div>':'')+
    '<p><b>The case file.</b> <b>Save case</b> writes every form you have open into one file, together with the student details. <b>Open case</b> loads it back, opening each form and filling it. It is one file to keep or hand over instead of a folder of separate ones. Each form\u2019s own <b>Save data</b> button is untouched and still works exactly as before.</p>'+
    '<p><b>Two students at once.</b> Every open form reports the student name it is holding. If one of them differs from the name on the bar \u2014 a form left over from the last case, most often \u2014 an amber strip names it before anything reaches paper.</p>'+
    '<p><b>The screen.</b> <b>Fullscreen</b>, above an open form, puts away the heading, the packet bar and the list so only the form is showing; <kbd>Esc</kbd> or the same button brings them back, and <b>Fill the screen</b> beside it also takes the browser\u2019s own bars away where the browser allows that. On a wide window the list can be hidden from its own corner and brought back with <b>Forms</b>; the choice is remembered. On a phone the packet bar folds behind <b>Packet</b> in the heading.</p>'+
    '<p><b>Keyboard.</b> <kbd>\u2318K</kbd> (or <kbd>Ctrl K</kbd>) opens a box you can type into to jump to any form or run any command. <kbd>\u2191</kbd> and <kbd>\u2193</kbd> move between forms, <kbd>\u2318S</kbd> saves the case, <kbd>\u2318P</kbd> prints the open form and <kbd>\u2318\u21e7P</kbd> builds the master print. <kbd>\u2318\u21e7F</kbd> shows only the form and <kbd>Esc</kbd> brings the rest back. On Windows use <kbd>Ctrl</kbd> for <kbd>\u2318</kbd>.</p>'+
    '<div class="warnbox" style="background:#fbf0e6;border-color:#e0c3a4"><b>Closing the tab.</b> Work that is not in a saved case file is at risk when the window closes, so the browser stops and asks first, unless you have saved the case and changed nothing since.</div>'+
-   '<div class="note">Each of the 31 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
+   '<div class="note">Each of the 32 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
 });
 
 /* ================= bookmarking a saved packet =================

@@ -108,6 +108,7 @@
      script, so the heights it keeps inline are the ones the paper had before. */
   function plain(on) {
     document.documentElement.classList.toggle('nbh-plain', !!on);
+    try { pnPlain(!!on); } catch (e) {}
     try { if (window.nbhFieldCare && window.nbhFieldCare.grow) window.nbhFieldCare.grow(); } catch (e) {}
   }
   window.addEventListener('beforeprint', function () { plain(true); });
@@ -132,5 +133,89 @@
       }
     });
   }
+  /* Previous and Next at the foot of the page. A form's pages are the buttons of
+     its view control (#viewSeg) or its tab row ([role=tab]); the bar below the
+     sheet steps through them so the next page is a click away without a scroll
+     back to the top. Screen only: the bar is taken out of the document while a
+     print or the packet reads it, and never reaches paper. */
+  var pn = null, pnHome = null;
+  function pnButtons() {
+    var seg = document.querySelector('#viewSeg');
+    var b = seg ? seg.querySelectorAll('button[data-view]') : document.querySelectorAll('[role=tab]');
+    var out = [];
+    for (var i = 0; i < b.length; i++) if (!b[i].disabled && !b[i].hidden) out.push(b[i]);
+    return out;
+  }
+  function pnCurrent(b) {
+    for (var i = 0; i < b.length; i++) if (b[i].getAttribute('aria-pressed') === 'true' || b[i].getAttribute('aria-selected') === 'true') return i;
+    return -1;
+  }
+  function pnLabel(b) {
+    var t = '';
+    for (var n = b.firstChild; n; n = n.nextSibling) {
+      var s = n.textContent || '';
+      if (n.nodeType === 1 && /^\s*\d+\s*$/.test(s)) continue; /* a step number badge */
+      t += s;
+    }
+    return t.replace(/\s+/g, ' ').trim();
+  }
+  /* the pages themselves: the sheets, or the main element, or the tab panels */
+  function pnPages() {
+    var s = document.querySelectorAll('.sheet:not(table)');
+    if (!s.length) s = document.querySelectorAll('main');
+    if (!s.length) s = document.querySelectorAll('[role=tabpanel]');
+    return s;
+  }
+  function pnUpdate() {
+    if (!pn) return;
+    var b = pnButtons(), i = pnCurrent(b);
+    var prev = pn.querySelector('.nbh-pn-prev'), next = pn.querySelector('.nbh-pn-next'), where = pn.querySelector('.nbh-pn-where');
+    if (b.length < 2 || i < 0) { pn.hidden = true; return; }
+    pn.hidden = false;
+    prev.disabled = i <= 0; next.disabled = i >= b.length - 1;
+    prev.innerHTML = i > 0 ? '<span aria-hidden="true">&larr;</span> ' + esc(pnLabel(b[i - 1])) : '';
+    next.innerHTML = i < b.length - 1 ? 'Next: ' + esc(pnLabel(b[i + 1])) + ' <span aria-hidden="true">&rarr;</span>' : '';
+    where.textContent = 'Page ' + (i + 1) + ' of ' + b.length + ' · ' + pnLabel(b[i]);
+    var s = pnPages(), last = null;
+    for (var k = s.length - 1; k >= 0; k--) if (s[k].offsetParent !== null) { last = s[k]; break; }
+    if (last) {
+      var r = last.getBoundingClientRect(), vw = document.documentElement.clientWidth || r.width;
+      /* a page with no sheet of its own (its main element spans the window) keeps a gutter */
+      if (r.width > 200) pn.style.width = (r.width >= vw - 2 && vw > 700 ? r.width - 40 : r.width) + 'px';
+    }
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function pnGo(d) {
+    var b = pnButtons(), i = pnCurrent(b), t = b[i + d];
+    if (!t) return;
+    t.click();
+    setTimeout(function () { try { window.scrollTo({ top: 0, behavior: 'auto' }); } catch (e) { window.scrollTo(0, 0); } pnUpdate(); }, 0);
+  }
+  function pagenav() {
+    if (pn || pnButtons().length < 2) return;
+    var s = pnPages(), last = s[s.length - 1];
+    if (!last || !last.parentNode) return;
+    pn = document.createElement('nav');
+    pn.className = 'nbh-pagenav noprint';
+    pn.setAttribute('aria-label', 'Form pages');
+    pn.setAttribute('data-nbh-screen', '');
+    pn.innerHTML = '<button type="button" class="nbh-pn-prev"></button><span class="nbh-pn-where" aria-live="polite"></span><button type="button" class="nbh-pn-next"></button>';
+    pn.querySelector('.nbh-pn-prev').addEventListener('click', function () { pnGo(-1); });
+    pn.querySelector('.nbh-pn-next').addEventListener('click', function () { pnGo(1); });
+    pnHome = last;
+    last.parentNode.insertBefore(pn, last.nextSibling);
+    var seg = document.querySelector('#viewSeg') || document.querySelector('[role=tablist]') || document.body;
+    try { new MutationObserver(function () { pnUpdate(); }).observe(seg, { attributes: true, subtree: true, attributeFilter: ['aria-pressed', 'aria-selected', 'disabled', 'hidden'] }); } catch (e) {}
+    window.addEventListener('resize', function () { pnUpdate(); });
+    pnUpdate();
+  }
+  function pnPlain(on) {
+    if (!pn) return;
+    if (on) { if (pn.parentNode) pn.parentNode.removeChild(pn); }
+    else if (!pn.parentNode && pnHome && pnHome.parentNode) { pnHome.parentNode.insertBefore(pn, pnHome.nextSibling); pnUpdate(); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { pagenav(); });
+  else pagenav();
+  window.addEventListener('load', function () { pagenav(); pnUpdate(); });
   window.nbhPolish = { run: run, plain: plain };
 })();
