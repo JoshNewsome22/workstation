@@ -404,6 +404,20 @@ tr.isCrit td.stepno{background:#DCE6EE;box-shadow:inset 3px 0 0 var(--rule)}
 .v-ok{background:#E3EFE0;border-left:3px solid #2F6B37}
 .v-mid{background:#FBEEDB;border-left:3px solid #9B4E15}
 .v-no{background:#F6E0E0;border-left:3px solid #8E2A2A}
+/* v2026-10 fidelity (F): component tags, opportunity counts on consequence steps, error classes and fidelity bands */
+.ti-cmp-b{display:inline-block;font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border-radius:3px;padding:0 5px;margin:0 0 2px;border:1px solid var(--rule-2);color:var(--ink-soft);background:var(--wash);line-height:1.5}
+.ti-cmp-con{color:#7E2222;border-color:#D9A3A3;background:#FBF1F1}
+table.rt.ti-opp td.oc{padding:3px 4px;white-space:nowrap}
+table.rt.ti-opp td.oc label{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;color:var(--ink-soft);margin-right:4px}
+table.rt.ti-opp td.oc label:last-child{margin-right:0}
+table.rt.ti-opp td.oc input{width:38px;border:1px solid var(--rule-2);border-radius:2px;font:inherit;font-size:11.5px;padding:2px 3px;text-align:center;background:#fff}
+.ti-few{font-family:var(--sans);font-size:10.5px;color:#9B4E15;display:block}
+.ti-band{margin:8px 0 6px}
+.ti-band .verdict b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;margin-bottom:2px}
+.ti-flag{background:#F6E0E0;border-left:3px solid #8E2A2A;padding:7px 12px;font-family:var(--sans);font-size:12.5px;margin:4px 0 6px}
+.ti-flag.ti-flag-om{background:#FBEEDB;border-left-color:#9B4E15}
+.ti-flag b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;margin-bottom:2px}
+.ti-ev{margin-top:4px}
 table.rt{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:12.5px}
 table.rt th,table.rt td{border:1px solid var(--rule-2);padding:6px 8px;text-align:left}
 table.rt thead th{background:var(--wash)}
@@ -775,7 +789,10 @@ input[data-m],textarea[data-m]{font:inherit}
           <th>Hypothesized function</th><td><input data-m="fn" style="width:100%"></td></tr>
       <tr><th>Date range</th><td><input data-m="range" style="width:100%"></td>
           <th>Prepared</th><td><input data-m="prep" style="width:100%"></td></tr>
+      <tr><th>Plan type</th><td><select data-m="ptype" style="width:100%" aria-label="Plan type"><option value=""></option><option>Behavior reduction</option><option>Skill acquisition</option></select></td>
+          <th>Program phase</th><td><select data-m="phase" style="width:100%" aria-label="Program phase"><option value=""></option><option>Acquisition</option><option>Maintenance</option></select></td></tr>
     </table>
+    <p class="hint" style="margin-top:6px">Plan type sets how the Summary reads the 80&ndash;89% fidelity band; program phase is carried to the retraining list, because consequence errors matter most while a task is first being learned (Burlison et al., 2026).</p>
 
     <h2 class="nbh-band" style="margin-top:18px">How to Score</h2>
     <table class="rt">
@@ -783,18 +800,20 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Commission</th><td>Error of commission &mdash; the step was attempted but implemented incorrectly. Something happened that should not have.</td></tr>
       <tr><th>Omission</th><td>Error of omission &mdash; the step was not attempted at all. Something that should have happened did not.</td></tr>
       <tr><th>N/A</th><td>The step did not apply during this observation, because the condition that calls for it never arose. N/A is excluded from every integrity denominator; the agreement check (IOA) compares N/A codes like any other code.</td></tr>
+      <tr><th>Component</th><td>On the Protocol Steps table, tag each step <b>Antecedent</b> (what is arranged, presented or prompted before the behavior) or <b>Consequence</b> (what follows the target behavior, the alternative behavior or a correct response, including withholding a consequence). Tagging a step Consequence marks it critical by default; untick the mark if the plan says otherwise. Consequence steps get their own figures on the Summary: delivering a reinforcer after the behavior that should be on extinction, or after a wrong response, is the error class most consistently linked to loss of treatment effect in the parametric studies (Burlison et al., 2026; O&rsquo;Neill et al., 2026). Antecedent errors were not tested in those studies, so the tag says where an error sits, not that it matters less.</td></tr>
+      <tr><th>Opportunities</th><td>A step can come due more than once in an observation. The sheet holds one code per step per observation (Commission if any time was a commission error, otherwise Omission, otherwise Correct). For consequence steps the Scoring sheet also takes the counts &mdash; correct, commission, omission &mdash; for every time the step came due, so that fidelity can be stated per opportunity and N/A when there was none, as O&rsquo;Neill et al. (2026) report it. The live runner writes the counts; by hand, count them from the session.</td></tr>
     </table>
     <p class="hint" style="margin-top:8px">Run both announced and unannounced observations. The summary compares them, because a difference between the two is a measure of reactivity, not of skill.</p>
 
     <h2 class="nbh-band" style="margin-top:18px">Protocol Steps</h2>
-    <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol &mdash; typically the reinforcement contingency, an extinction component, or a safety step. Critical steps are scored separately, because an overall figure in the nineties can hide a failure on the one step that carries the contingency.</p>
+    <p class="hint">Mark a step <b>critical</b> when an error on it defeats the purpose of the protocol &mdash; typically the reinforcement contingency, an extinction component, or a safety step. Critical steps are scored separately, because an overall figure in the nineties can hide a failure on the one step that carries the contingency. Tag the <b>component</b> of each step; a step tagged Consequence is marked critical as it is tagged.</p>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addStep">Add step</button>
       <button class="tool" id="addFive">Add 5 steps</button>
       <button class="tool" id="delStep">Remove last step</button>
     </div>
     <div class="grid-wrap"><table class="rt" id="stepTbl"><thead><tr>
-      <th style="width:52px">Step</th><th>Description of the step, as written in the protocol</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:52px">Step</th><th>Description of the step, as written in the protocol</th><th style="width:124px">Component</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <!-- ============================ SCORING ============================ -->
@@ -813,18 +832,26 @@ input[data-m],textarea[data-m]{font:inherit}
       <span><i class="swatch v-EO"></i> Omission &mdash; error of omission: not attempted</span>
       <span><i class="swatch v-NA"></i> N/A &mdash; step did not apply</span>
       <span>Critical steps are marked with a bar on the step number.</span>
+      <span>Steps tagged on the Setup sheet carry their component above the description; consequence steps also take opportunity counts in the table below the grid.</span>
     </div>
     <div class="grid-wrap"><table class="pi" id="piTbl"></table></div>
     <p class="hint" style="margin-top:8px">The per-step column on the right is the percentage of <i>scored</i> observations on which that step was correct. A blank means the step has no scored observation: it never applied, or it has not been coded yet.</p>
+    <h3 style="margin-top:14px">Opportunities on Consequence Steps</h3>
+    <p class="hint">For each consequence step and observation: how many times the step came due and was done correctly (<b>C</b>), done as a commission error (<b>Com</b> &mdash; the consequence delivered when the plan withholds it, or the wrong consequence delivered) or omitted (<b>Om</b> &mdash; the earned consequence withheld). Opportunity fidelity is correct &divide; (correct + commission + omission), N/A when the step never came due. A step with a code but no counts counts as one opportunity. A figure from fewer than 5 opportunities is flagged: with one or two opportunities a single outcome gives 100% or 0% whatever the interventionist usually does (O&rsquo;Neill et al., 2026). The number 5 is this form&rsquo;s convention; the studies set none.</p>
+    <div class="grid-wrap"><table class="rt ti-opp" id="oppTbl"></table></div>
   </section>
 
   <!-- ============================ SUMMARY ============================ -->
   <section class="only-sum">
     <h2 class="nbh-band">Integrity Summary</h2>
     <div id="verdictBox"></div>
+    <div id="bandBox"></div>
     <div class="metrics" id="metricWrap"></div>
     <h3 style="margin-top:14px">Where the Errors Were</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Where the errors were"><table class="rt" id="errTbl"></table></div>
+    <h3 style="margin-top:14px">Errors by Component and Class</h3>
+    <p class="hint">Three figures, never one: the overall percentage of steps correct, the share of consequence-step opportunities with a commission error, and the share with an omission error. Opportunities are the counts entered for consequence steps; a step with a code but no counts is one opportunity. Global percentages can hide the one error that matters (Cook et al., 2015).</p>
+    <div class="grid-wrap" tabindex="0" role="region" aria-label="Errors by component and class"><table class="rt" id="classTbl"></table></div>
     <h3 style="margin-top:14px">Announced Against Unannounced</h3>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Announced against unannounced"><table class="rt" id="reactTbl"></table></div>
     <p class="hint">A large drop from announced to unannounced means the score is measuring the observer's presence rather than the interventionist's usual practice. Treat the unannounced figure as the estimate of what the student actually receives.</p>
@@ -837,7 +864,7 @@ input[data-m],textarea[data-m]{font:inherit}
   <!-- ============================ RETRAINING ============================ -->
   <section class="only-rt">
     <h2 class="nbh-band">Retraining List</h2>
-    <p class="hint">Generated from the scoring sheet. Any step below the criterion, and any step with a commission error at all, is listed. Carry these step numbers into Form ST-1 as the training targets.</p>
+    <p class="hint">Generated from the scoring sheet, in priority order: first any consequence step with a commission error, then any critical step below the criterion, then any consequence step with an omission, then every other step below the criterion or with a commission error. The order follows the direction of the evidence (commission on consequence steps was the more damaging class in Burlison et al., 2026, and in the DRO and DRA work they and O&rsquo;Neill et al., 2026, review); no study tested a retraining order. Carry these step numbers into Form ST-1 as the training targets.</p>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Retraining list"><table class="rt" id="rtTbl"></table></div>
     <!-- v21.22: the retraining list as a file for Form ST-1 (screen only) -->
     <div class="ti-handoff noprint" id="tiHandoff">
@@ -868,6 +895,11 @@ input[data-m],textarea[data-m]{font:inherit}
       <tr><th>Reactivity</th><td>Integrity pooled across the announced observations (their correct steps &divide; their scored steps) minus the same figure for the unannounced observations, in percentage points.</td></tr>
       <tr><th>Trend</th><td>Least-squares slope of individual trial integrity across the scored observations, taken in column order (an observation with no scored step is skipped), in percentage points per observation.</td></tr>
       <tr><th>IOA</th><td>Point-by-point agreement on the integrity codes themselves: steps coded identically by both observers &divide; steps coded by both, &times; 100, with N/A counted as a code. Shown for each IOA observation and pooled across them.</td></tr>
+      <tr><th>Opportunity fidelity (consequence steps)</th><td>For a step tagged Consequence: correct opportunities &divide; (correct + commission + omission) across the observations, from the counts on the Scoring sheet; a scored code with no counts is one opportunity; N/A when the step never came due. Flagged when fewer than 5 opportunities stand behind it (a form convention).</td></tr>
+      <tr><th>Commission rate, omission rate</th><td>On consequence steps: commission opportunities &divide; all opportunities, and omission opportunities &divide; all opportunities. These are reported beside the overall figure, never in place of it.</td></tr>
+      <tr><th>Weighted integrity</th><td>Correct &divide; (correct + omission + 2 &times; commission), over every step&rsquo;s opportunities. Counting a commission error twice is this form&rsquo;s convention, chosen because commission errors were the more damaging class in the studies; no study quantifies the relative weight.</td></tr>
+      <tr><th>Lowest step, range</th><td>The lowest per-step percentage among scored steps, and the lowest and highest individual trial integrity across the scored observations. Fidelity varies between observations and implementers, and performance after a drop in fidelity depended on the preceding level in Burlison et al. (2026), so the spread is recorded, not only the mean.</td></tr>
+      <tr><th>Fidelity band</th><td>Pooled integrity on the observations the verdict is judged on (all scored observations when no unannounced one is scored), placed in one of four bands: 90% and above; 80&ndash;89%; 60&ndash;79%; below 60%. The bands are this form&rsquo;s working convention, informed by the parametric studies but not set by them.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:18px">The Live Observation Runner</h2>
     <p>On the Scoring sheet, <b>Set up an observation</b> offers the next empty column and fills in the date and start time from this device&rsquo;s calendar and clock; choose announced or unannounced. The form has no time field, so the start time and the minutes observed are written after the activity in the column&rsquo;s context. Code each step as it comes due with <b>Correct</b>, <b>Commission</b>, <b>Omission</b> or <b>N/A</b>, one step at a time or with all steps listed (keys C, M, O and N; the arrow keys move between steps, Z undoes the last code, and Space or P pauses), with this observation&rsquo;s integrity and critical-step integrity shown against the toolbar&rsquo;s percentage.</p>
@@ -877,12 +909,22 @@ input[data-m],textarea[data-m]{font:inherit}
     <h2 class="nbh-band" style="margin-top:18px">Why These Distinctions Matter</h2>
     <p>Commission and omission errors are not interchangeable. An omitted step usually means the interventionist did not know it was due, or was taken up with something else when it came due (a step whose condition never arose is N/A, not an omission); a commission error means the step was attempted and performed wrongly, which is a discrimination or fluency problem. The first is often solved by a prompt or a checklist, the second by rehearsal with feedback. Recording only a single integrity percentage discards the information that decides which.</p>
     <p>A single aggregate figure also hides where the failure sits. Ninety-three percent integrity on a fourteen-step protocol is a different clinical situation depending on whether the missed step was a greeting or the reinforcement contingency, which is why critical steps are scored on their own.</p>
+    <h2 class="nbh-band" style="margin-top:18px">Error Classes, Opportunities and Fidelity Bands</h2>
+    <p>Score every protocol step on each opportunity. Record whether an error was an omission (a prescribed step not done) or a commission (a non-prescribed action done, e.g., delivering the reinforcer after the target behavior). Mark consequence-delivery steps as critical by default. Parametric studies of DRO and of discrimination training show that reinforcing the behavior that should be on extinction is the error class most strongly linked to loss of treatment effect, that effects of combined consequence errors were comparable to full fidelity at 80% and for most participants at 60%, were degraded at 40%, and were absent at 20% (O&rsquo;Neill et al., 2026), and that acquisition of a new discrimination was blocked for 5 of 6 learners when consequences averaged about 67% fidelity (Burlison et al., 2026). These were analog studies with adult volunteers; treat the bands on this form as clinical conventions, not validated cut-offs.</p>
+    <p>The bands the Summary applies: <b>90% and above</b>, acceptable, routine monitoring. <b>80&ndash;89%</b>, acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. <b>60&ndash;79%</b>, caution: effects were degraded for some learners at these levels, so any consequence step in error is retrained. <b>Below 60%</b>, not acceptable: the student&rsquo;s data are not read as a test of the plan, and retraining comes before the plan continues. No band is an empirically validated safe threshold, and 80% is not a standard the research sets: in earlier DRO work commission errors were harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026), and at 60% three of eleven participants in O&rsquo;Neill et al. (2026) lost the treatment effect, which is why those authors call their findings tentative.</p>
+    <p>Why the split by error class: in Burlison et al. (2026) the probability of a correct response on the next trial was 0.29 (in 33% blocks) and 0.24 (in 67% blocks) after a wrong response had been reinforced, against 0.46 and 0.63 after earned reinforcement had been withheld, and the authors conclude that error reinforcement was the more detrimental type of error. Omission errors are the less damaging class, not a harmless one: the condition in which every consequence was wrong blocked learning entirely, and omission-only errors raised responding for some participants in the DRO work summarized by O&rsquo;Neill et al. (2026). The weighted figure counts a commission error twice as a convention of this form; neither study quantifies the weight. Opportunity counts follow O&rsquo;Neill et al. (2026), who report obtained fidelity separately for each error type as correct opportunities over all opportunities, with N/A when a phase offered none, and who note that with a single opportunity one outcome yields 100% or 0% regardless of the implementer&rsquo;s typical behavior.</p>
+    <p>What this form does not claim: that antecedent or prompting errors matter less (neither study tested them); that variable fidelity is worse than steady fidelity at the same mean (not compared); that these results were obtained with staff or parents implementing plans with clients (both studies used computer-delivered errors with adult volunteers, 11 and 6 of them); or that any of its bands, weights or minimum counts were derived from the studies. Once errors are corrected, learners with a history of them can still master the task (all six did in Burlison et al., 2026), so detected low fidelity is a reason to retrain, not to abandon the plan.</p>
     <p class="hint">Sources for the procedure: Gresham (1989) on treatment integrity as a condition for interpreting outcome; Ward-Horner &amp; Sturmey (2010) on component analysis; DiGennaro Reed &amp; Codding (2011) on integrity measurement and its relation to student outcome; Parsons, Rollyson &amp; Reid (2012) on the training that follows from it; Fallon et al. (2015) on performance feedback to raise educators&rsquo; treatment fidelity. These are the sources for the method; the decision rules on this form are a working convention, not a finding.</p>
     <p class="hint" id="tiRefs"><b>Reference list.</b>
+    Burlison, S., Brand, D., Wittman, M. R., Bensemann, J., McKeown, C. A., Miguel, C. F., &amp; Moo, H. N. (2026). A parametric analysis of varying levels of consequence-based procedural fidelity errors when learning new tasks. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70084. https://doi.org/10.1002/jaba.70084 &bull;
+    Cook, J. E., Subramaniam, S., Brunson, L. Y., Larson, N. A., Poe, S. G., &amp; St. Peter, C. C. (2015). Global measures of treatment integrity may mask important errors in discrete-trial training. <em>Behavior Analysis in Practice, 8</em>(1), 37&ndash;47. &bull;
     DiGennaro Reed, F. D., &amp; Codding, R. S. (2011). Intervention integrity assessment. In J. K. Luiselli (Ed.), <em>Teaching and behavior support for children and adults with autism spectrum disorder: A practitioner&rsquo;s guide</em> (pp. 38&ndash;47). Oxford University Press. &bull;
     Fallon, L. M., Collier-Meek, M. A., Maggin, D. M., Sanetti, L. M. H., &amp; Johnson, A. H. (2015). Is performance feedback for educators an evidence-based practice? A systematic review and evaluation based on single-case research. <em>Exceptional Children, 81</em>(2), 227&ndash;246. &bull;
     Gresham, F. M. (1989). Assessment of treatment integrity in school consultation and prereferral intervention. <em>School Psychology Review, 18</em>(1), 37&ndash;50. &bull;
+    Hronek, L. M., &amp; Kestner, K. M. (2025). A human-operant evaluation of commission and omission errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 58</em>(2), 401&ndash;421. https://doi.org/10.1002/jaba.70003 &bull;
+    O&rsquo;Neill, P., Rey, C. N., Eilers, T., &amp; Craig, A. R. (2026). Parametric evaluation of procedural fidelity level with combined errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70077. https://doi.org/10.1002/jaba.70077 &bull;
     Parsons, M. B., Rollyson, J. H., &amp; Reid, D. H. (2012). Evidence-based staff training: A guide for practitioners. <em>Behavior Analysis in Practice, 5</em>(2), 2&ndash;11. &bull;
+    St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70. https://doi.org/10.1901/jaba.2010.43-47 &bull;
     Ward-Horner, J., &amp; Sturmey, P. (2010). Component analyses using single-subject experimental designs: A review. <em>Journal of Applied Behavior Analysis, 43</em>(4), 685&ndash;704.</p>
   </section>
 </main>
@@ -898,7 +940,15 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const fmt=(a,b)=>b>0?(100*a/b).toFixed(2)+'%':'';
 
 function blank(){return{meta:{},nObs:4,crit:90,critN:2,
-  steps:[],obs:[],cells:{},ioa:{}};}
+  steps:[],obs:[],cells:{},ioa:{},opp:{}};}
+/* v2026-10 fidelity (F): each step carries a component tag (ant = antecedent, con = consequence); consequence steps
+   take opportunity counts per observation in S.opp["step_obs"] = {c, ec, eo}. */
+const CMP=[['',''],['ant','Antecedent'],['con','Consequence']];
+const cmpLabel=v=>v==='con'?'Consequence':v==='ant'?'Antecedent':'';
+const cmpBadge=st=>st&&st.cmp?`<span class="ti-cmp-b${st.cmp==='con'?' ti-cmp-con':''}">${cmpLabel(st.cmp)}</span>`:'';
+function setStepField(i,f,v){const st=S.steps[i];if(!st)return;st[f]=v;
+  /* a step tagged Consequence is marked critical as it is tagged (the observer may untick it afterwards) */
+  if(f==='cmp'&&v==='con'&&!st.crit)st.crit=true;}
 let S=blank();
 
 function ensure(){
@@ -910,12 +960,21 @@ function ensure(){
   while(S.obs.length<S.nObs)S.obs.push({date:'',type:'',ctx:'',ioa:false});
   S.obs.length=S.nObs;
   if(!S.steps.length)for(let i=0;i<8;i++)S.steps.push({d:'',crit:false});
+  S.steps.forEach(st=>{st.cmp=st.cmp==='con'||st.cmp==='ant'?st.cmp:'';});
+  if(!S.opp||typeof S.opp!=='object'||Array.isArray(S.opp))S.opp={};
+  Object.keys(S.opp).forEach(k=>{const o=S.opp[k],num=x=>Number.isInteger(+x)&&+x>=0?+x:0;
+    if(!o||typeof o!=='object'){delete S.opp[k];return;}o.c=num(o.c);o.ec=num(o.ec);o.eo=num(o.eo);if(!(o.c+o.ec+o.eo))delete S.opp[k];});
 }
+/* the opportunities behind one cell: the counts when there are any, else the code as one opportunity */
+function oppOf(i,j){const o=S.opp[key(i,j)],v=code(i,j);
+  if(o&&(o.c+o.ec+o.eo)>0)return{c:o.c,ec:o.ec,eo:o.eo,n:o.c+o.ec+o.eo,src:'count'};
+  if(scored(v))return{c:v==='C'?1:0,ec:v==='EC'?1:0,eo:v==='EO'?1:0,n:1,src:'code'};
+  return{c:0,ec:0,eo:0,n:0,src:''};}
 const key=(s,o)=>s+'_'+o;
 const code=(s,o)=>S.cells[key(s,o)]||'';
 const scored=v=>v==='C'||v==='EC'||v==='EO';
 /* v21.16 audit (F1, F2): remove both observers' codes wherever test(step, observation) holds */
-function dropCodes(test){[S.cells,S.ioa].forEach(m=>Object.keys(m).forEach(k=>{const p=k.split('_');if(test(+p[0],+p[1]))delete m[k];}));}
+function dropCodes(test){[S.cells,S.ioa,S.opp].forEach(m=>Object.keys(m).forEach(k=>{const p=k.split('_');if(test(+p[0],+p[1]))delete m[k];}));}
 
 /* ---------------- views ---------------- */
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
@@ -926,12 +985,13 @@ function renderSteps(){
   $('#stepTbl tbody').innerHTML=S.steps.map((st,i)=>
     `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
      <td><textarea data-s="${i}" data-f="d" rows="2" style="width:100%;border:0;background:transparent;font:inherit;resize:vertical" aria-label="Step ${i+1} description">${esc(st.d)}</textarea></td>
+     <td style="text-align:center"><select data-s="${i}" data-f="cmp" aria-label="Step ${i+1} component">${CMP.map(([k,l])=>`<option value="${k}"${st.cmp===k?' selected':''}>${l}</option>`).join('')}</select></td>
      <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td></tr>`).join('');
 }
 $('#stepTbl').addEventListener('input',e=>{const el=e.target;if(el.dataset.s===undefined)return;
-  S.steps[+el.dataset.s][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;renderAll();});
+  setStepField(+el.dataset.s,el.dataset.f,el.type==='checkbox'?el.checked:el.value);renderAll();});
 $('#stepTbl').addEventListener('change',e=>{const el=e.target;if(el.dataset.s===undefined)return;
-  S.steps[+el.dataset.s][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;renderAll();});
+  setStepField(+el.dataset.s,el.dataset.f,el.type==='checkbox'?el.checked:el.value);renderAll();});
 /* v21.16 audit (F1): a removed step's codes stayed in the record under its number, so a step added afterwards
    showed them and they counted in every figure. They now go with the step, after asking when the step holds
    anything; a new step starts with no codes. */
@@ -939,7 +999,7 @@ function addBlankStep(){const i=S.steps.length;dropCodes(s=>s===i);S.steps.push(
 $('#addStep').addEventListener('click',()=>{addBlankStep();renderAll();});
 $('#addFive').addEventListener('click',()=>{for(let i=0;i<5;i++)addBlankStep();renderAll();});
 $('#delStep').addEventListener('click',()=>{if(S.steps.length<2)return;
-  const i=S.steps.length-1,st=S.steps[i],held=[S.cells,S.ioa].some(m=>Object.keys(m).some(k=>+k.split('_')[0]===i&&m[k]));
+  const i=S.steps.length-1,st=S.steps[i],held=[S.cells,S.ioa,S.opp].some(m=>Object.keys(m).some(k=>+k.split('_')[0]===i&&m[k]));
   if((String(st.d||'').trim()||st.crit||held)&&!confirm('Step '+(i+1)+' has a description, a critical mark or scored codes. Remove it, with its codes on every observation?'))return;
   S.steps.pop();dropCodes(s=>s===i);renderAll();});
 
@@ -970,7 +1030,7 @@ function renderGrid(){
     const vals=S.obs.map((_,j)=>code(i,j));
     const c=vals.filter(v=>v==='C').length, sc=vals.filter(scored).length;
     h+=`<tr class="${st.crit?'isCrit':''}"><td class="stepno">${i+1}</td>
-        <td class="desc"><textarea data-s="${i}" data-f="d" rows="2" aria-label="Step ${i+1} description">${esc(st.d)}</textarea></td>
+        <td class="desc">${cmpBadge(st)}<textarea data-s="${i}" data-f="d" rows="2" aria-label="Step ${i+1} description">${esc(st.d)}</textarea></td>
         <td class="crit"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td>
         ${vals.map((v,j)=>`<td class="obs"><select class="v-${esc(v||'x')}" data-s="${i}" data-o="${j}" aria-label="Step ${i+1}, observation #${j+1}">${optsFor(v)}</select></td>`).join('')}
         <td class="pct">${fmt(c,sc)}</td></tr>`;
@@ -988,8 +1048,35 @@ function renderGrid(){
 $('#piTbl').addEventListener('change',e=>{const el=e.target;
   if(el.dataset.o!==undefined&&el.dataset.s===undefined){S.obs[+el.dataset.o][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;renderAll();return;}
   if(el.dataset.s!==undefined&&el.dataset.o!==undefined){S.cells[key(+el.dataset.s,+el.dataset.o)]=el.value;renderAll();return;}
-  if(el.dataset.s!==undefined){S.steps[+el.dataset.s][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;renderAll();}
+  if(el.dataset.s!==undefined){setStepField(+el.dataset.s,el.dataset.f,el.type==='checkbox'?el.checked:el.value);renderAll();}
 });
+/* ---------------- opportunity counts on consequence steps (v2026-10 fidelity, F) ---------------- */
+function renderOpp(){
+  const rows=S.steps.map((st,i)=>({st,i})).filter(x=>x.st.cmp==='con');
+  if(!rows.length){$('#oppTbl').innerHTML='<tbody><tr><td class="hint">No step is tagged Consequence on the Setup sheet, so there are no opportunity counts to take. The Summary counts each scored code as one opportunity.</td></tr></tbody>';return;}
+  const inp=(i,j,k,lab,v)=>`<label>${lab} <input type="number" min="0" step="1" data-s="${i}" data-o="${j}" data-k="${k}" value="${v?v:''}" aria-label="Step ${i+1}, observation #${j+1}, ${lab==='C'?'correct':lab==='Com'?'commission':'omission'} opportunities"></label>`;
+  let h=`<thead><tr><th style="width:52px">Step</th><th>Consequence step</th>${S.obs.map((o,j)=>`<th style="min-width:188px">#${j+1}${o.date?' <small style="font-weight:400">'+esc(o.date)+'</small>':''}</th>`).join('')}<th style="width:118px">Opportunity fidelity</th></tr></thead><tbody>`;
+  rows.forEach(({st,i})=>{
+    h+=`<tr${st.crit?' class="isCrit"':''}><td class="stepno" style="text-align:center;font-weight:600">${i+1}</td><td style="font-size:11.5px">${esc(st.d)||'<i>(no description)</i>'}</td>`;
+    S.obs.forEach((_,j)=>{const o=S.opp[key(i,j)]||{c:0,ec:0,eo:0};
+      h+=`<td class="oc">${inp(i,j,'c','C',o.c)}${inp(i,j,'ec','Com',o.ec)}${inp(i,j,'eo','Om',o.eo)}</td>`;});
+    h+=`<td class="pct">${oppCell(i)}</td></tr>`;});
+  $('#oppTbl').innerHTML=h+'</tbody>';
+}
+function oppCell(i){let c=0,n=0;S.obs.forEach((_,j)=>{const x=oppOf(i,j);c+=x.c;n+=x.n;});
+  return `${n?fmt(c,n)+' <small>('+c+' of '+n+')</small>':'N/A'}${n&&n<5?'<span class="ti-few">few opportunities ('+n+'): unstable</span>':''}${!n?'<span class="ti-few" style="color:var(--ink-soft)">no opportunity</span>':''}`;}
+/* a count typed in is kept in place: the row's fidelity cell, the Summary and the Retraining list are redrawn, the
+   table itself is not, so the keyboard can move from C to Com to Om */
+function oppInput(el){if(el.dataset.k===undefined||el.dataset.s===undefined||el.dataset.o===undefined)return false;
+  const i=+el.dataset.s,k=key(i,+el.dataset.o),o=S.opp[k]||(S.opp[k]={c:0,ec:0,eo:0}),v=Math.floor(+el.value);
+  o[el.dataset.k]=Number.isFinite(v)&&v>0?v:0;if(!(o.c+o.ec+o.eo))delete S.opp[k];
+  const tr=el.closest('tr'),td=tr&&tr.querySelector('td.pct');if(td)td.innerHTML=oppCell(i);
+  renderSummary();renderRT();return true;}
+$('#oppTbl').addEventListener('input',e=>{oppInput(e.target);});
+$('#oppTbl').addEventListener('change',e=>{oppInput(e.target);});
+/* the plan type and phase change the Summary's reading of the band and the retraining list */
+document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset||!(el.dataset.m==='ptype'||el.dataset.m==='phase'))return;
+  S.meta[el.dataset.m]=el.value;renderSummary();renderRT();});
 $('#piTbl').addEventListener('input',e=>{const el=e.target;
   if(el.dataset.s!==undefined&&el.dataset.o===undefined&&el.dataset.f==='d'){S.steps[+el.dataset.s].d=el.value;}
   if(el.dataset.o!==undefined&&el.dataset.s===undefined&&el.dataset.f==='ctx'){S.obs[+el.dataset.o].ctx=el.value;}
@@ -1024,8 +1111,28 @@ function metrics(){
   if(pts.length>=3){const mx=pts.reduce((a,b)=>a+b.x,0)/pts.length,my=pts.reduce((a,b)=>a+b.y,0)/pts.length;
     const num=pts.reduce((a,p)=>a+(p.x-mx)*(p.y-my),0),den=pts.reduce((a,p)=>a+(p.x-mx)**2,0);
     slope=den?num/den:null;}
-  return {global,ind,aonT,stepRows,aonS,critM,ec,eo,ann,unann,slope,used};
+  /* v2026-10 fidelity (F): opportunities by component and error class, the weighted figure, lowest step and range */
+  const stepOpp=stepRows.map(r=>{let c=0,ec2=0,eo2=0,n=0;for(let j=0;j<nO;j++){const x=oppOf(r.i,j);c+=x.c;ec2+=x.ec;eo2+=x.eo;n+=x.n;}
+    return{i:r.i,c,ec:ec2,eo:eo2,n,cmp:S.steps[r.i].cmp||'',crit:r.crit};});
+  const byCmp={};['con','ant',''].forEach(k=>{const rs=stepOpp.filter(x=>x.cmp===k);
+    byCmp[k]={steps:rs.length,scored:rs.filter(x=>x.n>0).length,c:rs.reduce((a,b)=>a+b.c,0),ec:rs.reduce((a,b)=>a+b.ec,0),eo:rs.reduce((a,b)=>a+b.eo,0),n:rs.reduce((a,b)=>a+b.n,0),
+      ecSteps:rs.filter(x=>x.ec>0).map(x=>x.i),eoSteps:rs.filter(x=>x.eo>0).map(x=>x.i)};});
+  const tot={c:stepOpp.reduce((a,b)=>a+b.c,0),ec:stepOpp.reduce((a,b)=>a+b.ec,0),eo:stepOpp.reduce((a,b)=>a+b.eo,0)};
+  const weighted={c:tot.c,n:tot.c+tot.eo+2*tot.ec};
+  let lowest=null;stUsed.forEach(r=>{const p=100*r.c/r.s;if(!lowest||p<lowest.pct)lowest={i:r.i,pct:p,c:r.c,s:r.s};});
+  const indPct=used.map(x=>100*x.c/x.s),range=indPct.length?{lo:Math.min(...indPct),hi:Math.max(...indPct),n:indPct.length}:null;
+  return {global,ind,aonT,stepRows,aonS,critM,ec,eo,ann,unann,slope,used,stepOpp,byCmp,weighted,lowest,range,tot:{c:tot.c,ec:tot.ec,eo:tot.eo,n:tot.c+tot.ec+tot.eo}};
 }
+/* the fidelity band: this form's working convention (see the Guide); the studies set no threshold */
+function bandOf(p,ptype){
+  if(p==null)return{cls:'v-mid',name:'No band yet',txt:'No scored observation to place in a band.'};
+  const acq=ptype==='Skill acquisition',red=ptype==='Behavior reduction';
+  if(p>=90)return{cls:'v-ok',name:'90% and above',txt:'Acceptable: routine monitoring.'};
+  if(p>=80)return{cls:acq?'v-mid':'v-ok',name:'80–89%',txt:red?'Acceptable for a behavior-reduction plan in this evidence base; schedule a re-check.':
+    acq?'Caution for a skill-acquisition program: consequences delivered at about 67% fidelity on average prevented mastery for 5 of 6 learners (Burlison et al., 2026); schedule a re-check and retrain any consequence step in error.':
+    'Acceptable for a behavior-reduction plan in this evidence base, with a re-check scheduled; for a skill-acquisition program, a caution. Set the plan type on the Setup sheet.'};
+  if(p>=60)return{cls:'v-mid',name:'60–79%',txt:'Caution: effects were degraded for some learners at these levels. Retrain any consequence step in error before the next observation.'};
+  return{cls:'v-no',name:'Below 60%',txt:'Not acceptable: do not interpret the student’s data as a test of the plan; retrain before continuing.'};}
 
 function renderSummary(){
   const M=metrics();
@@ -1039,7 +1146,12 @@ function renderSummary(){
     card('Errors of omission',M.eo||'0',M.eo?'step never attempted':'none recorded')+
     card('Trend',M.slope==null?'':(M.slope>=0?'+':'')+M.slope.toFixed(1)+' pts',M.slope==null?'Needs 3 scored observations':'per observation')+
     card('Reactivity',(M.ann.s&&M.unann.s)?((100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s>=0?'+':'')+(100*M.ann.c/M.ann.s-100*M.unann.c/M.unann.s).toFixed(1)+' pts'):'',
-         (M.ann.s&&M.unann.s)?'announced minus unannounced':'Needs both observation types');
+         (M.ann.s&&M.unann.s)?'announced minus unannounced':'Needs both observation types')+
+    card('Commission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.ec,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.ec} of ${M.byCmp.con.n} opportunities: reinforcer delivered when the plan withholds it`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
+    card('Omission on consequence steps',M.byCmp.con.n?fmt(M.byCmp.con.eo,M.byCmp.con.n):'',M.byCmp.con.n?`${M.byCmp.con.eo} of ${M.byCmp.con.n} opportunities: earned consequence withheld`:(M.byCmp.con.steps?'No consequence step scored yet':'No step tagged Consequence'))+
+    card('Weighted integrity',fmt(M.weighted.c,M.weighted.n),M.weighted.n?'commission counted twice: a form convention, not an empirical weight':'No opportunity scored')+
+    card('Lowest step',M.lowest?fmt(M.lowest.c,M.lowest.s):'',M.lowest?`step ${M.lowest.i+1}: ${M.lowest.c} of ${M.lowest.s} scored`:'No step scored yet')+
+    card('Range across observations',M.range?(M.range.n>1?M.range.lo.toFixed(1)+'–'+M.range.hi.toFixed(1)+'%':M.range.lo.toFixed(1)+'%'):'',M.range?`individual trial integrity, ${M.range.n} scored observation${M.range.n===1?'':'s'}`:'No observation scored yet');
 
   /* verdict against the mastery criterion */
   const un=S.obs.map((o,j)=>({o,j})).filter(x=>x.o.type==='Unannounced');
@@ -1061,6 +1173,18 @@ function renderSummary(){
     else if(!cn&&S.steps.some(st=>st.crit))txt+=' No step marked critical came due on those observations, so they say nothing about the critical steps.';}
   $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
 
+  /* v2026-10 fidelity (F): the band, judged on the same observations as the verdict, with the consequence-step flag
+     and the evidence sentences beside it */
+  const bj=lastJ.length?lastJ:null;let bc=0,bs=0;
+  (bj||M.used.map(x=>x.j)).forEach(j=>{S.steps.forEach((_,i)=>{const v=code(i,j);if(scored(v)){bs++;if(v==='C')bc++;}});});
+  const bp=bs?100*bc/bs:null,B=bandOf(bp,S.meta.ptype||''),con=M.byCmp.con;
+  const judged=bs?(bj?`judged on observation${bj.length>1?'s ':' '}${bj.map(j=>'#'+(j+1)).join(', ')}, the ${bj.length>1?'ones':'one'} the verdict uses`:'judged on every scored observation, as no unannounced observation is scored yet'):'';
+  let flag='';
+  if(con.ec)flag=`<div class="ti-flag"><b>Integrity errors fell on consequence steps</b>${con.ec} commission error${con.ec===1?'':'s'} on consequence step${con.ecSteps.length===1?'':'s'} ${con.ecSteps.map(i=>i+1).join(', ')}: a reinforcer delivered when the plan withholds it, or the wrong consequence delivered. This is the error class most consistently linked to loss of treatment effect in the parametric studies of DRO, DRA and discrimination training (Burlison et al., 2026; O&rsquo;Neill et al., 2026). These steps head the retraining list.</div>`;
+  else if(con.eo)flag=`<div class="ti-flag ti-flag-om"><b>Omissions on consequence steps</b>${con.eo} omission${con.eo===1?'':'s'} on consequence step${con.eoSteps.length===1?'':'s'} ${con.eoSteps.map(i=>i+1).join(', ')}: an earned consequence withheld. The less damaging class in the studies, but not a harmless one (every consequence wrong blocked learning entirely in Burlison et al., 2026); listed for retraining.</div>`;
+  $('#bandBox').innerHTML=`<div class="ti-band"><div class="verdict ${B.cls}"><b>Fidelity band: ${B.name}${bs?' ('+fmt(bc,bs)+', '+bc+' of '+bs+' scored steps; '+judged+')':''} &mdash; a form convention</b>${B.txt}</div>${flag}`+
+    `<p class="hint ti-ev"><b>Evidence behind the bands.</b> In a parametric test of DRO with combined commission and omission errors, treatment effects were comparable at 100, 80 and 60% fidelity, degraded at 40% (median 54.5% reduction against about 93% at 100%; a large effect size) and generally absent at 20% (median 5.5% reduction); even at 60%, 3 of 11 participants lost the treatment effect (O&rsquo;Neill et al., 2026; 11 adult volunteers, analog task). During acquisition of a matching task, consequences delivered at an average of about 67% fidelity prevented mastery for 5 of 6 learners, although all 6 mastered the task once errors were corrected (Burlison et al., 2026). Earlier DRO work found commission errors harmful for some participants even at 80% fidelity (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026). Both studies used computer-delivered errors with adult volunteers and neither sets a validated threshold: the bands are this form&rsquo;s clinical conventions, not cut-offs from the research, and no band treats omission errors as harmless.</p></div>`;
+
   /* error table */
   let h='<thead><tr><th style="width:52px">Step</th><th>Description</th><th style="width:60px">Crit.</th><th style="width:74px">Correct</th><th style="width:84px">Commission</th><th style="width:74px">Omission</th><th style="width:80px">Per-step %</th></tr></thead><tbody>';
   const bad=M.stepRows.filter(r=>r.s>0&&(r.ec||r.eo));
@@ -1070,6 +1194,13 @@ function renderSummary(){
       <td style="text-align:center">${fmt(r.c,r.s)}</td></tr>`).join('')
     :'<tr><td colspan="7" class="hint">No errors recorded on any scored step.</td></tr>';
   $('#errTbl').innerHTML=h+'</tbody>';
+
+  /* errors by component and class */
+  const CL=[['con','Consequence steps'],['ant','Antecedent steps'],['','Untagged steps']];
+  $('#classTbl').innerHTML='<thead><tr><th>Component</th><th style="width:60px">Steps</th><th style="width:96px">Opportunities</th><th style="width:70px">Correct</th><th style="width:90px">Commission</th><th style="width:80px">Omission</th><th style="width:84px">% correct</th><th style="width:110px">Commission rate</th><th style="width:100px">Omission rate</th></tr></thead><tbody>'+
+    CL.map(([k,lab])=>{const x=M.byCmp[k];if(!x.steps)return'';
+      return `<tr><td>${lab}</td><td style="text-align:center">${x.steps}</td><td style="text-align:center">${x.n||''}</td><td style="text-align:center">${x.n?x.c:''}</td><td style="text-align:center">${x.n?x.ec:''}</td><td style="text-align:center">${x.n?x.eo:''}</td><td style="text-align:center">${fmt(x.c,x.n)}</td><td style="text-align:center">${fmt(x.ec,x.n)}</td><td style="text-align:center">${fmt(x.eo,x.n)}</td></tr>`;}).join('')+
+    `<tr class="totrow"><td>All steps</td><td style="text-align:center">${M.stepOpp.length}</td><td style="text-align:center">${M.tot.n||''}</td><td style="text-align:center">${M.tot.n?M.tot.c:''}</td><td style="text-align:center">${M.tot.n?M.tot.ec:''}</td><td style="text-align:center">${M.tot.n?M.tot.eo:''}</td><td style="text-align:center">${fmt(M.tot.c,M.tot.n)}</td><td style="text-align:center">${fmt(M.tot.ec,M.tot.n)}</td><td style="text-align:center">${fmt(M.tot.eo,M.tot.n)}</td></tr></tbody>`;
 
   /* reactivity table */
   $('#reactTbl').innerHTML='<thead><tr><th>Observation type</th><th style="width:110px">Observations</th><th style="width:110px">Steps scored</th><th style="width:110px">Integrity</th></tr></thead><tbody>'+
@@ -1105,20 +1236,32 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset&&el.dataset.ioa){S.ioa[key(+el.dataset.s,+el.dataset.o)]=el.value;renderIOA();}});
 
 /* ---------------- retraining list ---------------- */
+/* v2026-10 fidelity (F): the list is ordered by error class. 1: commission on a consequence step; 2: a critical step
+   below the criterion; 3: omission on a consequence step; 4: any other step below the criterion or with a commission
+   error. The order follows the direction of the evidence; no study tested a retraining order. */
+function rtPriority(r){const con=(S.steps[r.i].cmp||'')==='con';
+  if(con&&r.ec)return 1;if(r.crit&&100*r.c/r.s<S.crit)return 2;if(con&&r.eo)return 3;return 4;}
+const RT_PRI={1:'1 — commission on a consequence step',2:'2 — critical step below criterion',3:'3 — omission on a consequence step',4:'4 — below criterion or commission error'};
 function renderRT(){
-  const M=metrics();
-  const flagged=M.stepRows.filter(r=>r.s>0&&((100*r.c/r.s)<S.crit||r.ec>0));
-  let h='<thead><tr><th style="width:52px">Step</th><th>Description</th><th style="width:64px">Crit.</th><th style="width:88px">Per-step %</th><th style="width:150px">Error pattern</th><th style="width:230px">What that calls for</th></tr></thead><tbody>';
+  const M=metrics(),acq=S.meta.phase==='Acquisition';
+  const flagged=M.stepRows.filter(r=>r.s>0&&((100*r.c/r.s)<S.crit||r.ec>0||(r.eo>0&&(S.steps[r.i].cmp||'')==='con')))
+    .map(r=>Object.assign({p:rtPriority(r),op:M.stepOpp[r.i]},r)).sort((a,b)=>a.p-b.p||a.i-b.i);
+  let h='<thead><tr><th style="width:150px">Priority</th><th style="width:52px">Step</th><th>Description</th><th style="width:96px">Component</th><th style="width:56px">Crit.</th><th style="width:88px">Per-step %</th><th style="width:170px">Error pattern</th><th style="width:230px">What that calls for</th></tr></thead><tbody>';
   h+= flagged.length?flagged.map(r=>{
-    const pat=r.ec&&r.eo?'Both':r.ec?'Commission':r.eo?'Omission':'Below criterion';
-    const rec=r.ec&&r.eo?'Re-teach the step and add a prompt for when it is due'
+    const con=(S.steps[r.i].cmp||'')==='con',op=r.op,counted=op&&op.src!=='code'&&op.n>r.s;
+    let pat=r.ec&&r.eo?'Both':r.ec?'Commission':r.eo?'Omission':'Below criterion';
+    if(op&&op.n&&(r.ec||r.eo))pat+=`: ${[r.ec?op.ec+' commission':'',r.eo?op.eo+' omission':''].filter(Boolean).join(', ')} in ${op.n} opportunit${op.n===1?'y':'ies'}`;
+    const rec=r.p===1?'Retrain first (Form ST-1): rehearse to zero commission errors on this step, with the moment right after the target behavior or a wrong response as the scenario'+(acq?'; the program is in acquisition, where consequence errors mattered most':'')
+      :r.p===2?'Retrain: the step carries the contingency and is below criterion'+(r.ec?'; rehearsal with feedback, since the step is attempted but performed incorrectly':r.eo?'; a cue for when the step is due, then rehearsal':'')
+      :r.p===3?'Retrain, second priority: a cue for when the earned consequence is due, then rehearsal to criterion'
+      :r.ec&&r.eo?'Re-teach the step and add a prompt for when it is due'
       :r.ec?'Rehearsal with feedback: the step is attempted but performed incorrectly'
       :r.eo?'A cue or checklist: the step is not being started when its condition arises'
       :'Review with the interventionist';
-    return `<tr><td style="text-align:center">${r.i+1}</td><td>${esc(S.steps[r.i].d)||'<i>(no description)</i>'}</td>
-      <td style="text-align:center">${r.crit?'&#10003;':''}</td><td style="text-align:center">${fmt(r.c,r.s)}</td>
+    return `<tr><td>${RT_PRI[r.p]}</td><td style="text-align:center">${r.i+1}</td><td>${esc(S.steps[r.i].d)||'<i>(no description)</i>'}</td>
+      <td>${cmpLabel(S.steps[r.i].cmp)||'<i>untagged</i>'}</td><td style="text-align:center">${r.crit?'&#10003;':''}</td><td style="text-align:center">${fmt(r.c,r.s)}</td>
       <td>${pat}</td><td>${rec}</td></tr>`;}).join('')
-    :`<tr><td colspan="6" class="hint">No step falls below ${S.crit}% and no commission errors were recorded.</td></tr>`;
+    :`<tr><td colspan="8" class="hint">No step falls below ${S.crit}%, no commission error was recorded, and no consequence step was omitted.</td></tr>`;
   $('#rtTbl').innerHTML=h+'</tbody>';
 }
 
@@ -1131,7 +1274,7 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
     const td=el.closest('td'),th=td&&td.previousElementSibling;
     if(th&&th.tagName==='TH'&&!el.getAttribute('aria-label'))el.setAttribute('aria-label',th.textContent.trim());}});}
 
-function renderAll(){ensure();renderSteps();renderGrid();renderSummary();renderRT();bindMeta();
+function renderAll(){ensure();renderSteps();renderGrid();renderOpp();renderSummary();renderRT();bindMeta();
   $('#nObs').value=S.nObs;$('#critPct').value=S.crit;$('#critN').value=S.critN;}
 
 /* ---------------- toolbar ---------------- */
@@ -1146,7 +1289,7 @@ $('#nObs').addEventListener('change',e=>{const v=+e.target.value;
   if(!(Number.isInteger(v)&&v>=2&&v<=8)){e.target.value=S.nObs;return;}
   if(v<S.nObs){
     const held=S.obs.some((o,j)=>j>=v&&(o.date||o.type||String(o.ctx||'').trim()||o.ioa))||
-      [S.cells,S.ioa].some(m=>Object.keys(m).some(k=>{const p=k.split('_');return +p[1]>=v&&+p[0]<S.steps.length&&m[k];}));
+      [S.cells,S.ioa,S.opp].some(m=>Object.keys(m).some(k=>{const p=k.split('_');return +p[1]>=v&&+p[0]<S.steps.length&&m[k];}));
     if(held&&!confirm((S.nObs-v>1?'Observations #'+(v+1)+' to #'+S.nObs+' hold':'Observation #'+S.nObs+' holds')+' codes or details. Reducing to '+v+' observations removes them. Continue?')){e.target.value=S.nObs;return;}
     dropCodes((s,j)=>j>=v);S.obs.length=v;}
   else dropCodes((s,j)=>j>=S.nObs&&j<v);
@@ -1167,10 +1310,11 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const rows=[['Step','Description','Critical',...S.obs.map((o,j)=>`#${j+1} ${o.date||''} ${o.type||''}`),'Per-step %']];
+  const rows=[['Step','Description','Component','Critical',...S.obs.map((o,j)=>`#${j+1} ${o.date||''} ${o.type||''}`),'Per-step %','Opportunities C/Com/Om','Opportunity fidelity']];
   S.steps.forEach((st,i)=>{const vals=S.obs.map((_,j)=>code(i,j));
     const c=vals.filter(v=>v==='C').length,sc=vals.filter(scored).length;
-    rows.push([i+1,st.d,st.crit?'Y':'',...vals,fmt(c,sc)]);});
+    let oc=0,oe=0,oo=0,on=0;S.obs.forEach((_,j)=>{const x=oppOf(i,j);oc+=x.c;oe+=x.ec;oo+=x.eo;on+=x.n;});
+    rows.push([i+1,st.d,cmpLabel(st.cmp),st.crit?'Y':'',...vals,fmt(c,sc),st.cmp==='con'?`${oc}/${oe}/${oo}`:'',st.cmp==='con'?(on?fmt(oc,on):'N/A'):'']);});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='TI-1_scoring.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1188,26 +1332,27 @@ function loadSim(){
     obs:'Joshua Newsome, M.A., BCBA',setting:'Room 12, independent work table',
     beh:'Aggression toward staff (simulated)',fn:'Escape from independent academic demands',
     range:D(48)+' \u2013 '+D(3),prep:new Date().toLocaleDateString(),
-    notes:'Integrity is high on most antecedent and instructional steps, with one omission each on steps 4 and 7, and breaks down on the two consequence steps: the delay is ended early when the student protests, and the break card is not re-presented after a denied request.',
+    ptype:'Behavior reduction',phase:'Acquisition',
+    notes:'Integrity is high on most antecedent and instructional steps, with one omission each on steps 4 and 7, and breaks down on two critical steps. Step 8 is a commission error on a consequence step: the delay is ended early when the student protests, so protest is reinforced on 4 of the 10 unannounced opportunities. Step 10, an antecedent step, is omitted: the break card is not re-presented after a denied request. Step 11 came due once in four observations, so its 100% rests on one opportunity.',
     barrier:'The two consequence-step errors occur when the classroom is short one adult and the interventionist is covering two students. The plan is not complex; the conditions for running it are not reliably present.',
-    action:'Scheduled a booster on steps 8 and 10 using Form ST-1, added a checklist cue for steps 4 and 7, and asked the team to protect one adult for the independent work block.',
+    action:'Scheduled a booster on step 8 first (commission on a consequence step), then step 10, using Form ST-1 with a rehearsal gate of zero commission errors on the consequence steps; added a checklist cue for steps 4 and 7; asked the team to protect one adult for the independent work block.',
     recheck:'Unannounced re-check in 10 school days',
-    effect:'The behavior data for this period should be read with the integrity figure attached. The two failing steps carry the escape contingency, so a flat trend cannot be read as the plan not working.'};
+    effect:'The behavior data for this period should be read with the integrity figure attached. Overall fidelity sits in the 80–89% band, but the commission errors fall on the step that carries the escape contingency, so a flat trend cannot be read as the plan not working.'};
   S.steps=[
-    {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false},
-    {d:'States the contingency once, in the wording written in the plan: \u201cFirst these two problems, then your break.\u201d',crit:false},
-    {d:'Presents the task materials within 5 s of the statement.',crit:false},
-    {d:'Remains within 1 m and neutral while the student begins, without adding prompts.',crit:false},
-    {d:'Honors an independent break-card exchange within 2 s by starting the programmed delay, not by ending the demand.',crit:true},
-    {d:'Starts the visual timer where the student can see it and states the delay length once.',crit:false},
-    {d:'Presents the intervening activity (two mastered maintenance problems) during the delay.',crit:false},
-    {d:'Holds the delay to its full programmed length, pausing rather than restarting the timer if the student disengages.',crit:true},
-    {d:'Delivers the break immediately at the end of the delay with the stated phrase, \u201cNice waiting \u2014 break time.\u201d',crit:true},
-    {d:'Re-presents the break card after a denied or interrupted request rather than removing it.',crit:true},
-    {d:'Withholds escape following aggression: continues the demand and blocks without comment.',crit:true},
-    {d:'Records the trial on the data sheet before the next demand is presented.',crit:false},
-    {d:'Returns the student to the task within 10 s of the break ending, with the contingency restated.',crit:false},
-    {d:'At the end of the block, states \u201cYou\u2019re all done with work\u201d and removes the materials.',crit:false}
+    {d:'Sets up the work area with the task, the break card, and the visual timer in the student\u2019s line of sight.',crit:false,cmp:'ant'},
+    {d:'States the contingency once, in the wording written in the plan: \u201cFirst these two problems, then your break.\u201d',crit:false,cmp:'ant'},
+    {d:'Presents the task materials within 5 s of the statement.',crit:false,cmp:'ant'},
+    {d:'Remains within 1 m and neutral while the student begins, without adding prompts.',crit:false,cmp:'ant'},
+    {d:'Honors an independent break-card exchange within 2 s by starting the programmed delay, not by ending the demand.',crit:true,cmp:'con'},
+    {d:'Starts the visual timer where the student can see it and states the delay length once.',crit:false,cmp:'ant'},
+    {d:'Presents the intervening activity (two mastered maintenance problems) during the delay.',crit:false,cmp:'ant'},
+    {d:'Holds the delay to its full programmed length, pausing rather than restarting the timer if the student disengages.',crit:true,cmp:'con'},
+    {d:'Delivers the break immediately at the end of the delay with the stated phrase, \u201cNice waiting \u2014 break time.\u201d',crit:true,cmp:'con'},
+    {d:'Re-presents the break card after a denied or interrupted request rather than removing it.',crit:true,cmp:'ant'},
+    {d:'Withholds escape following aggression: continues the demand and blocks without comment.',crit:true,cmp:'con'},
+    {d:'Records the trial on the data sheet before the next demand is presented.',crit:false,cmp:''},
+    {d:'Returns the student to the task within 10 s of the break ending, with the contingency restated.',crit:false,cmp:'ant'},
+    {d:'At the end of the block, states \u201cYou\u2019re all done with work\u201d and removes the materials.',crit:false,cmp:'ant'}
   ];
   S.obs=[
     {date:D(48),type:'Announced',ctx:'independent math',ioa:true},
@@ -1234,12 +1379,19 @@ function loadSim(){
     ['C','C','C','C']        /* 14 */
   ];
   plan.forEach((row,i)=>row.forEach((v,j)=>{S.cells[key(i,j)]=v;}));
+  /* opportunity counts on the four consequence steps: step 8's delay is ended early on 1, 1 and 2 of its unannounced
+     opportunities; step 11 came due once in all four observations */
+  const opp={'4_0':[3,0,0],'4_1':[2,0,0],'4_2':[4,0,0],'4_3':[3,0,0],
+    '7_0':[3,0,0],'7_1':[2,1,0],'7_2':[3,1,0],'7_3':[1,2,0],
+    '8_0':[3,0,0],'8_1':[3,0,0],'8_2':[4,0,0],'8_3':[3,0,0],
+    '10_2':[1,0,0]};
+  Object.keys(opp).forEach(k=>{S.opp[k]={c:opp[k][0],ec:opp[k][1],eo:opp[k][2]};});
   /* second observer agrees except on two codes, giving a realistic IOA */
   [0,2].forEach(j=>S.steps.forEach((_,i)=>{S.ioa[key(i,j)]=code(i,j);}));
   S.ioa[key(7,2)]='EO';   /* disagreement: commission vs omission on step 8 */
   S.ioa[key(10,2)]='NA';  /* disagreement: scored vs not applicable on step 11 */
   renderAll();setView('sum');
-  alert('Simulated integrity check loaded: 14 steps, 4 observations, 5 critical steps, and IOA on two of them. Step through Scoring sheet, Summary, and Retraining.');
+  alert('Simulated integrity check loaded: 14 steps tagged by component, 4 observations, 5 critical steps, opportunity counts on the 4 consequence steps, and IOA on two observations. Step through Scoring sheet, Summary, and Retraining.');
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -1429,6 +1581,12 @@ function scrollRow(i){const li=byId('tiRunRow'+i);if(!li||!li.getClientRects().l
   const tb=q('.toolbar'),st=q('.ti-run-status',box),sticky=st&&getComputedStyle(st).position==='sticky',r=li.getBoundingClientRect();
   const top=Math.max(0,tb?tb.getBoundingClientRect().bottom:0,sticky?st.getBoundingClientRect().bottom:0);
   if(r.top<top+6)window.scrollBy(0,r.top-top-6);else if(r.bottom>window.innerHeight-6)window.scrollBy(0,r.bottom-window.innerHeight+6);}
+/* v2026-10 fidelity (F): the consequence steps' opportunities, as the counts will be written */
+function conSteps(){const out=[];for(let i=0;i<nSteps();i++)if(S.steps[i]&&S.steps[i].cmp==='con')out.push(i);return out;}
+function conText(){const cs=conSteps();if(!cs.length)return'no step is tagged Consequence';let c=0,ec=0,eo=0;const bad=[];
+  cs.forEach(i=>{const r=roll(i);c+=r.c;ec+=r.ec;eo+=r.eo;if(r.ec)bad.push(i+1);});const n=c+ec+eo;
+  if(!n)return'none came due';
+  return n+' opportunit'+(n===1?'y':'ies')+': '+c+' correct, '+ec+' commission, '+eo+' omission'+(bad.length?' (commission on step'+(bad.length>1?'s ':' ')+list(bad.map(String))+': retrain first)':'')+'; the counts are written to the sheet';}
 function renderReview(){const f=figs(),j=R.col,n=nSteps(),multi=[];for(let i=0;i<n;i++){const r=roll(i);if(r.n>1)multi.push([i,r]);}
   const row=(a,b)=>'<tr><th scope="row">'+esc(a)+'<\/th><td>'+esc(b)+'<\/td><\/tr>';
   const jumps=(arr,lab)=>'<div class="ti-run-jumps">'+arr.map(i=>'<button type="button" data-act="jump" data-i="'+i+'">'+esc(lab(i))+'<\/button>').join('')+'<\/div>';
@@ -1436,6 +1594,7 @@ function renderReview(){const f=figs(),j=R.col,n=nSteps(),multi=[];for(let i=0;i
     '<table class="ti-run-sum"><tbody>'+row('Observation',whatLine())+row('Time observed',clock(R.acc))+
     row('Integrity',f.s?pct(f.c,f.s)+' ('+f.c+' of '+plural(f.s,'scored step')+'), '+against(f.c,f.s):'no step scored')+
     row('Critical-step integrity',f.cs?pct(f.cc,f.cs)+' ('+f.cc+' of '+f.cs+'), '+against(f.cc,f.cs):(f.anyCrit?'no critical step scored':'no step is marked critical'))+
+    row('Consequence steps',conText())+
     row('Context written',ctxText()||'(none)')+'<\/tbody><\/table>';
   h+=f.unc.length?'<div class="ti-run-check ti-run-need"><p><b>Steps not coded ('+f.unc.length+'):<\/b> they stay blank on the sheet. Tap one to code it.<\/p>'+jumps(f.unc,i=>'Step '+(i+1))+'<\/div>'
     :'<div class="ti-run-check ti-run-done"><p><b>Every step is coded.<\/b><\/p><\/div>';
@@ -1544,6 +1703,10 @@ function save(){
     const put=(k,v)=>{if(String((S.obs[j]||{})[k]||'')===v)return;const el=q('#piTbl [data-o="'+j+'"][data-f="'+k+'"]');
       if(!el)throw new Error('observation #'+(j+1)+' has no '+k+' field');setField(el,v);};
     put('date',date);put('type',type);put('ctx',ctx);
+    /* the opportunity counts of the consequence steps, through the Scoring sheet's own count fields */
+    conSteps().forEach(i=>{const r=roll(i);[['c',r.c],['ec',r.ec],['eo',r.eo]].forEach(([k,v])=>{
+      const el=q('#oppTbl input[data-s="'+i+'"][data-o="'+j+'"][data-k="'+k+'"]');if(!el)throw new Error('step '+(i+1)+' has no count field in column #'+(j+1));
+      const want=v?String(v):'';if(String(el.value||'')!==want)setField(el,want);});});
     if(addNote){const el=q('[data-m="notes"]'),old=String((S.meta||{}).notes||''),line='Observation #'+(j+1)+(date?' ('+usDay(date)+')':'')+', coded live: '+multi.join('; ')+'.';
       if(el)setField(el,old.trim()?old.replace(/\s+$/,'')+'\n'+line:line);}
   }catch(e){err=String(e&&e.message||e);}
@@ -1598,8 +1761,15 @@ function retrainData(){const dec=deciding(),crit=S.crit;
     const o=S.obs[r.j]||{};return{col:r.j+1,date:isISO(o.date)?String(o.date):null,type:String(o.type||'').toLowerCase(),integrity:r2(100*r.c/r.s),critical:cs?r2(100*cc/cs):null};});
   const steps=[];S.steps.forEach((st,i)=>{const codes=dec.map(r=>{const v=cell(i,r.j);return VALID(v)?v:'';});let c=0,s=0,ec=0,eo=0;
     codes.forEach(v=>{if(SCD(v)){s++;if(v==='C')c++;else if(v==='EC')ec++;else eo++;}});
-    if(s&&(100*c/s<crit||ec||eo))steps.push({n:i+1,text:String(st&&st.d||'').trim(),critical:!!(st&&st.crit),codes,commission:ec,omission:eo,pct:r2(100*c/s)});});
-  return{dec,obs,steps};}
+    if(s&&(100*c/s<crit||ec||eo)){const cmp=st&&st.cmp==='con'?'consequence':st&&st.cmp==='ant'?'antecedent':'';
+      let oc=0,oe=0,oo=0;dec.forEach(r=>{const x=oppOf(i,r.j);oc+=x.c;oe+=x.ec;oo+=x.eo;});
+      const priority=cmp==='consequence'&&ec?1:(st&&st.crit&&100*c/s<crit)?2:cmp==='consequence'&&eo?3:4;
+      steps.push({n:i+1,text:String(st&&st.d||'').trim(),critical:!!(st&&st.crit),component:cmp,priority,codes,commission:ec,omission:eo,pct:r2(100*c/s),opportunities:{correct:oc,commission:oe,omission:oo}});}});
+  steps.sort((a,b)=>a.priority-b.priority||a.n-b.n);
+  /* the error classes on the consequence steps across the deciding observations */
+  let kc=0,ke=0,ko=0;S.steps.forEach((st,i)=>{if(st&&st.cmp==='con')dec.forEach(r=>{const x=oppOf(i,r.j);kc+=x.c;ke+=x.ec;ko+=x.eo;});});
+  const classes={consequence:{opportunities:kc+ke+ko,correct:kc,commission:ke,omission:ko,commissionPct:kc+ke+ko?r2(100*ke/(kc+ke+ko)):null,omissionPct:kc+ke+ko?r2(100*ko/(kc+ke+ko)):null}};
+  return{dec,obs,steps,classes};}
 function handoffNote(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1)),few=d.length<S.critN,st=x.steps.map(s=>String(s.n));
   if(!d.length)return'No unannounced observation has scored steps yet, so there is no observation to take the file from.';
   return'The file is taken from observation'+(d.length>1?'s ':' ')+list(cols)+
@@ -1615,7 +1785,7 @@ function handoffSave(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1));
   const out={form:'TI-1-RETRAIN',rev:'2026-09',saved:new Date().toISOString(),
     student:{name:t(m.client),id:t(m.sid),setting:t(m.setting)},protocol:{skill:t(m.skill),source:t(m.src)},
     interventionist:{name:t(m.int),position:t(m.pos)},observer:{name:t(m.obs)},
-    criterion:{pct:S.crit,n:S.critN},observations:x.obs,steps:x.steps};
+    criterion:{pct:S.crit,n:S.critN},plan:{type:t(m.ptype),phase:t(m.phase)},observations:x.obs,classes:x.classes,steps:x.steps};
   const name='TI-1-RETRAIN_'+String(m.client||'student').replace(/[^\w-]+/g,'_')+'_'+isoDay(new Date())+'.json';
   const a=D.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(out,null,1)],{type:'application/json'}));a.download=name;
   D.body.appendChild(a);a.click();a.remove();
