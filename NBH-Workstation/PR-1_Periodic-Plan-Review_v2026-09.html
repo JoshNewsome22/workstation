@@ -558,6 +558,18 @@ dialog.pr-dlg::backdrop{background:rgba(24,46,67,.45)}
 .pr-dlg-src,.pr-dlg-row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
 .pr-dlg-msg{margin:6px 0;font-size:12.5px;color:var(--nbh-ink);min-height:1.2em}
 .pr-dlg-msg.pr-dlg-bad{color:#8E2A2A;font-weight:600}
+/* ---- v2026-10 fidelity (F): the plan-run gate, fidelity beside outcome, the import from Form TI-1 ---- */
+.pr-tirec{font-family:var(--nbh-sans);font-size:12px;line-height:1.5;margin:8px 0 0;color:var(--nbh-ink)}
+.pr-tirec p{margin:4px 0}
+.pr-fidwrap{overflow-x:auto;margin:6px 0 4px}
+table.pr-fid{font-size:12px}
+table.pr-fid th,table.pr-fid td{padding:4px 7px}
+table.pr-fid td.n{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pr-fid-low{color:#8E2A2A;font-weight:600}
+.pr-fid-mid{color:#8A4412;font-weight:600}
+.pr-fid-ok{color:#2F6B37}
+.pr-tibar{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pr-tibar .hint{margin:0}
 .pr-dlg fieldset{border:1px solid var(--nbh-rule);border-radius:3px;margin:10px 0;padding:6px 12px 10px;min-width:0}
 .pr-dlg legend{font-family:var(--nbh-serif);font-weight:600;font-size:15px;color:var(--nbh-navy);padding:0 4px}
 .pr-dd-pick{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center}
@@ -672,6 +684,22 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Contextual fit, if measured (Form CF-1)</th><td><input type="number" step="any" min="1" max="6" data-m="cf" data-calc="1" placeholder="of 6"></td>
           <th>Staff trained to criterion (Form ST-1)</th><td><select data-m="trained"><option></option><option>All</option><option>Some</option><option>None</option></select></td></tr>
     </table>
+    <div class="pr-tibar noprint"><button class="tool" id="tiBtn" type="button">Import From TI-1</button><span class="hint" id="tiMsg" role="status" aria-live="polite">Fills the figures above and below from Form TI-1: inside the workstation, from the TI-1 open there; anywhere, from a data file TI-1 saved.</span><input type="file" id="tiFile" accept=".json,application/json" hidden aria-label="A file Form TI-1 saved"></div>
+    <h3 style="margin-top:12px">Across the Review Period (Form TI-1)</h3>
+    <p class="hint">The most recent observation says whether the plan is running now; the period&rsquo;s figures say whether the outcome data were collected under the plan. Consequence steps are the steps TI-1 tags Consequence; a commission error there delivers a reinforcer the plan withholds, after the target behavior or a wrong response.</p>
+    <table class="rt">
+      <tr><th style="width:26%">TI-1 observations in the period</th><td><input type="number" min="0" step="1" data-m="intN" data-calc="1"></td>
+          <th style="width:16%">Mean integrity across them</th><td style="width:16%"><input type="number" step="any" min="0" max="100" data-m="intMean" data-calc="1" placeholder="%"></td></tr>
+      <tr><th>Lowest integrity in the period</th><td><input type="number" step="any" min="0" max="100" data-m="intLow" data-calc="1" placeholder="%"></td>
+          <th>Lowest consequence step</th><td><input type="number" step="any" min="0" max="100" data-m="intConLow" data-calc="1" placeholder="% of opportunities"></td></tr>
+      <tr><th>Commission on consequence steps</th><td><input type="number" step="any" min="0" max="100" data-m="intConCom" data-calc="1" placeholder="% of opportunities"></td>
+          <th>Omission on consequence steps</th><td><input type="number" step="any" min="0" max="100" data-m="intConOm" data-calc="1" placeholder="% of opportunities"></td></tr>
+      <tr><th>By implementer and observation</th><td colspan="3"><textarea data-m="intImpl" rows="1" class="pr-line" placeholder="e.g., RBT A: #1 100% (announced), #2 76.9%, #3 85.7% (unannounced); aide B: 62% on one check"></textarea></td></tr>
+      <tr><th>Did fidelity drop abruptly in the period?</th><td><select data-m="intDrop"><option></option><option>No</option><option>Yes</option><option>Not known</option></select></td>
+          <th>When, and what changed</th><td><textarea data-m="intDropNote" rows="1" class="pr-line" placeholder="e.g., staff change in week 3; 100% to 62% between observations #2 and #3"></textarea></td></tr>
+    </table>
+    <p class="hint">Performance in the period right after a drop in fidelity is likely to be worse than the new fidelity level alone would predict; conversely, a period at full fidelity immediately before may mask low current fidelity. In Burlison et al. (2026) accuracy fell 35 points when fidelity went from 100% to 33% between blocks and rose 42 points on the way back, and a full-fidelity block scored 9 points lower after a 33% block than after a 67% one; the authors call these sequence effects preliminary. Fidelity also varies between implementers and within one over time, and a global figure can hide the one error that matters (Cook et al., 2015, as cited by Burlison et al., 2026), which is why the figures are recorded by implementer and observation.</p>
+    <div class="pr-tirec" id="tiRec"></div>
     <div id="intVerdict"></div>
 
     <h2 class="nbh-band" style="margin-top:16px">2. What Did the Behavior Do?</h2>
@@ -681,11 +709,14 @@ table.pr-ddprev{min-width:600px}
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Review periods table"><table class="rt pr-grid" id="dataTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:16%">Period</th><th style="width:13%">Target behavior</th>
-      <th style="width:13%">Replacement</th><th style="width:11%">Integrity %</th><th>Note</th></tr>
+      <th style="width:13%">Replacement</th><th style="width:11%">Integrity %</th><th style="width:12%">Commission on consequence steps %</th><th>Note</th></tr>
       <!-- v21.22 (DD-1 import): each column's unit, typed or written by Import From DD-1 -->
-      <tr class="pr-unitrow"><th scope="row">Unit</th><td></td><td><textarea data-m="tUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Target behavior column"></textarea></td><td><textarea data-m="rUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Replacement column"></textarea></td><td class="pr-unitpct">percent</td><td></td></tr></thead><tbody></tbody></table></div>
+      <tr class="pr-unitrow"><th scope="row">Unit</th><td></td><td><textarea data-m="tUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Target behavior column"></textarea></td><td><textarea data-m="rUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Replacement column"></textarea></td><td class="pr-unitpct">percent</td><td class="pr-unitpct">percent of opportunities</td><td></td></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap pr-plotwrap" tabindex="0" role="region" aria-label="Graph of the review periods" style="margin-top:10px"><svg id="prPlot" viewBox="0 0 900 320" role="img" aria-label="Target and replacement across review periods"></svg></div>
     <div class="metrics" id="dataMetrics"></div>
+    <h3 style="margin-top:12px">Fidelity Beside Outcome</h3>
+    <p class="hint">Each period&rsquo;s behavior figures next to the fidelity it was delivered with. A period below 80% integrity, or with reinforcers delivered after the target behavior on more than 10% of consequence-step opportunities, is read as a test of the implementation, not of the plan; a fall of 15 points or more from the period before is marked for the sequence note above. The cut-offs are this form&rsquo;s conventions.</p>
+    <div class="pr-fidwrap" tabindex="0" role="region" aria-label="Fidelity beside outcome"><table class="rt pr-grid pr-fid" id="fidTbl"></table></div>
     <div class="pr-ddpanel" id="ddPanel"></div>
 
     <h2 class="nbh-band" style="margin-top:16px">3. Is the Replacement Established?</h2>
@@ -776,12 +807,20 @@ table.pr-ddprev{min-width:600px}
     <p class="pr-keep">The suggested decision on the Decision sheet, the check under it and the Exit Readiness verdict apply the rules below. They are this form's working convention for organizing a review, not findings.</p>
     <table class="rt pr-rules">
       <tr><th>Integrity</th><td>Below 90%, or critical-step integrity below 90%: the plan is not running as written, and the suggestion is to continue and address implementation. 90% or above on both: the plan is running as written. This is the integrity criterion Forms TI-1 and TD-1 use, so one figure means the same thing on every form. 90% is a convention, not a finding. It is set high because St. Peter Pipkin, Vollmer and Sloman (2010) found, in a human operant model, that errors reinforcing the problem behavior were more detrimental than failing to reinforce the alternative alone; a few such errors can sit inside an overall figure that looks acceptable, which is why critical steps are checked separately against the same percentage. A figure outside 0 to 100% is not used.</td></tr>
+      <tr><th>Plan-run gate</th><td>The review may conclude that the plan is not working (modify, or return to assessment) only when the period passes the gate: a TI-1 observation was completed in the period, the most recent observation is at or above the 90% criterion on both figures, mean integrity across the period&rsquo;s observations is 80% or above, no consequence step ran below 80% of its opportunities, and reinforcers were delivered after the target behavior or a wrong response on 10% or fewer of consequence-step opportunities. Otherwise the review records that the plan was not run as written, the period&rsquo;s outcome data are not a test of the plan, and the route is retraining (Form ST-1), a new observation (Form TI-1) and a new review before any plan change. The 80% and 10% figures are this form&rsquo;s conventions, informed by the parametric studies but not set by them; a period that passes the gate is not thereby proven interpretable, since in earlier DRO work commission errors were harmful for some participants even at 80% (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026). A figure left blank is not tested.</td></tr>
+      <tr><th>Fidelity beside outcome</th><td>The table under the graph places each period&rsquo;s integrity and consequence-step commission figure next to its behavior figures, marks a period below 80% or above 10% commission, and marks a fall of 15 points or more from the period before. The figures by implementer and observation are recorded as text, because a mean across implementers can hide one who is not running the plan.</td></tr>
+      <tr><th>Sequence</th><td>With Did fidelity drop abruptly answered Yes, the verdict asks that the period after the drop be read on its own. Sequence effects are preliminary in Burlison et al. (2026) and summarized from Hronek &amp; Kestner (2025) by O&rsquo;Neill et al. (2026); they are a reason for caution, not a finding this form applies as a rule.</td></tr>
       <tr><th>Contextual fit</th><td>A mean below 4 of 6 is poor fit on Form CF-1's bands (below 3, very poor) and is noted under the integrity verdict. A figure outside 1 to 6 is not used.</td></tr>
       <tr><th>Change from baseline</th><td>(most recent period &minus; baseline) &divide; baseline. The baseline is the BL row; the most recent period is the last row below it with a target value. The change is not computed when the baseline is blank or 0. The suggestion reads this one comparison, not the trend or the variability across periods, which the graph shows; it points out a most recent period higher than the one before it.</td></tr>
       <tr><th>Suggested decision, plan running as written</th><td>60% or more below baseline: begin fading, or exit if the exit conditions are met. With the replacement recorded as &ldquo;Prompted only&rdquo; or &ldquo;Not yet&rdquo; under Used independently: continue, and do not begin fading. With it independent only with trained staff or in one setting: begin fading; exit waits for the exit conditions. 25% or more below, but less than 60%: continue unchanged. From less than 25% below to less than 10% above: modify the plan. 10% or more above: return to assessment.</td></tr>
-      <tr><th>Decision check</th><td>Flags an exit recorded before Exit Readiness is complete; fading or exit recorded while the replacement is not used independently; a decision to modify, reassess, fade or exit recorded while integrity is below 90% or not recorded; and a decision that differs from the suggestion with no reasoning written.</td></tr>
+      <tr><th>Decision check</th><td>Flags an exit recorded before Exit Readiness is complete; fading or exit recorded while the replacement is not used independently; a decision to modify, reassess, fade or exit recorded while integrity is below 90%, not recorded, or the period fails the plan-run gate; and a decision that differs from the suggestion with no reasoning written.</td></tr>
       <tr><th>Exit readiness</th><td>A condition that refers to an entry on the Fading and exit sheet (a criterion, the maintaining contingency, the person who will notice, the re-entry threshold) counts only with that entry written. All nine met, with the monitoring after exit recorded: the plan can stop. One or two open: close them before exit. Three or more open: not ready.</td></tr>
     </table>
+    <h2 class="nbh-band" style="margin-top:16px">Reading Fidelity Before Outcome</h2>
+    <p>Before judging the plan, check how it was delivered. If TI-1 shows overall fidelity below 80%, any critical consequence step below 80%, or reinforcers delivered after the target behavior, treat the period&rsquo;s outcome data as a test of the implementation, not of the plan: in parametric studies a DRO that worked for all participants at full fidelity worked in about a third of sessions at 40% fidelity and almost never at 20% (O&rsquo;Neill et al., 2026), and a teaching procedure mastered by every learner at full fidelity was mastered by one of six when consequences averaged about 67% fidelity, with all six mastering it once errors were corrected (Burlison et al., 2026). Retrain (ST-1), re-observe (TI-1), then re-review.</p>
+    <p>The figures behind that rule: in O&rsquo;Neill et al. (2026), 11 adult volunteers in an analog DRO task, the treatment reduced responding in every participant at 100% fidelity, in 35% of sessions at 40% and in 9% at 20%; even at 60%, 3 of 11 lost the effect. In Burlison et al. (2026), 6 adult volunteers in a computerized matching task, 6 of 6 mastered the set taught at 100% fidelity, 1 of 6 the set taught at about 67% on average, and 0 of 6 the set taught with every consequence wrong; all 6 then mastered the previously error-laden set within 3 to 9 blocks once the errors stopped. Both studies used computer-delivered errors with adult volunteers, not staff with clients, and neither sets a clinical threshold: the gate on this form is a working convention. Recovery after retraining is the direction of the evidence, not a guarantee, and it was neither immediate nor free of prior full-fidelity exposure in that study. Reinforcing the behavior that should be on extinction, or a wrong response, was the more damaging error class (Burlison et al., 2026; St. Peter Pipkin et al., 2010), and omission errors were less damaging but not harmless.</p>
+    <h2 class="nbh-band" style="margin-top:16px">Importing From Form TI-1</h2>
+    <p>Import From TI-1, under question 1, reads Form TI-1&rsquo;s record: inside the workstation, from the TI-1 open there, through the workstation&rsquo;s relay; anywhere, from a data file TI-1 saved with Save data. A file saved by any other form is refused, and nothing on this form changes. TI-1 is another file and cannot be called, so its rules are applied here as TI-1 applies them: the deciding observations are the unannounced observations with scored steps, as many as its criterion counts, and the most recent of them gives the integrity, the critical-step integrity, the date and the type above; every observation with scored steps counts toward the period figures, with its integrity the correct steps over the scored steps; the consequence-step figures use TI-1&rsquo;s opportunity counts where it holds them and otherwise each scored code as one opportunity. The figures by implementer and observation list TI-1&rsquo;s interventionist with each observation; the largest fall between consecutive observations is written beside the sequence question, which is left for the reviewer to answer. No entry is overwritten without asking. Where the figures came from and the date of the import are recorded under the table and saved with the form.</p>
     <h2 class="nbh-band" style="margin-top:16px">Importing From Form DD-1</h2>
     <p>Import From DD-1, above the table under What Did the Behavior Do?, fills the table from Form DD-1&rsquo;s daily data rather than having it retyped. Inside the workstation it reads the DD-1 open there; anywhere, it opens a data file DD-1 saved with Save data, or a case file saved by the workstation (a .json file, or the one-file edition&rsquo;s .case.html). A file saved by any other form is refused, and nothing on this form changes.</p>
     <p>Choose DD-1&rsquo;s reduction target and, to fill the Replacement column too, a second behavior. The periods are either DD-1&rsquo;s conditions, the first on the BL row and each later condition a review period, or date ranges you set, the first again on the BL row. In each period every day on DD-1&rsquo;s sheet with a date and a value counts, with the value DD-1 graphs for that day: the count, the rate per hour from the count and the minutes observed, the minutes, the percentage or the prompt level. The level written into the table is the mean of those days. Beside the table the form shows each period&rsquo;s days with data, level, standard deviation and range, and its trend: the least-squares line through the period&rsquo;s days, DD-1&rsquo;s default method, with its slope per day on DD-1&rsquo;s sheet, called flat (zero-celerating) when the slope is under 1% of the period&rsquo;s mean per day, or under 0.01, as DD-1 does. These are DD-1&rsquo;s own computations; its Sources for the Indices gives their sources.</p>
@@ -792,9 +831,13 @@ table.pr-ddprev{min-width:600px}
     <p class="hint" style="margin-top:10px">Sources: Gresham (1989) and DiGennaro Reed &amp; Codding (2011) on integrity as a condition for interpreting outcome; St. Peter Pipkin, Vollmer &amp; Sloman (2010) on integrity errors that reinforce the problem behavior; Stokes &amp; Baer (1977) on transfer to natural contingencies; Briggs et al. (2018) on resurgence during schedule thinning and Kimball et al. (2023) on relapse at treatment challenges, both carried on Form RM-1. The decision rules and the readiness checklist here are a working convention for organizing a review, not findings.</p>
     <p class="hint" id="prRefs"><b>Reference list.</b>
     Briggs, A. M., Fisher, W. W., Greer, B. D., &amp; Kimball, R. T. (2018). Prevalence of resurgence of destructive behavior when thinning reinforcement schedules during functional communication training. <em>Journal of Applied Behavior Analysis, 51</em>(3), 620&ndash;633. &bull;
+    Burlison, S., Brand, D., Wittman, M. R., Bensemann, J., McKeown, C. A., Miguel, C. F., &amp; Moo, H. N. (2026). A parametric analysis of varying levels of consequence-based procedural fidelity errors when learning new tasks. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70084. https://doi.org/10.1002/jaba.70084 &bull;
+    Cook, J. E., Subramaniam, S., Brunson, L. Y., Larson, N. A., Poe, S. G., &amp; St. Peter, C. C. (2015). Global measures of treatment integrity may mask important errors in discrete-trial training. <em>Behavior Analysis in Practice, 8</em>(1), 37&ndash;47. &bull;
     DiGennaro Reed, F. D., &amp; Codding, R. S. (2011). Intervention integrity assessment. In J. K. Luiselli (Ed.), <em>Teaching and behavior support for children and adults with autism spectrum disorder: A practitioner's guide</em> (pp. 38&ndash;47). Oxford University Press. &bull;
     Gresham, F. M. (1989). Assessment of treatment integrity in school consultation and prereferral intervention. <em>School Psychology Review, 18</em>(1), 37&ndash;50. &bull;
+    Hronek, L. M., &amp; Kestner, K. M. (2025). A human-operant evaluation of commission and omission errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 58</em>(2), 401&ndash;421. https://doi.org/10.1002/jaba.70003 &bull;
     Kimball, R. T., Greer, B. D., Fuhrman, A. M., &amp; Lambert, J. M. (2023). Relapse and its mitigation: Toward behavioral inoculation. <em>Journal of Applied Behavior Analysis, 56</em>(2), 282&ndash;301. &bull;
+    O&rsquo;Neill, P., Rey, C. N., Eilers, T., &amp; Craig, A. R. (2026). Parametric evaluation of procedural fidelity level with combined errors during differential reinforcement of other behavior. <em>Journal of Applied Behavior Analysis, 59</em>(4), e70077. https://doi.org/10.1002/jaba.70077 &bull;
     Stokes, T. F., &amp; Baer, D. M. (1977). An implicit technology of generalization. <em>Journal of Applied Behavior Analysis, 10</em>(2), 349&ndash;367. &bull;
     St. Peter Pipkin, C., Vollmer, T. R., &amp; Sloman, K. N. (2010). Effects of treatment integrity failures during differential reinforcement of alternative behavior: A translational model. <em>Journal of Applied Behavior Analysis, 43</em>(1), 47&ndash;70.</p>
   </section>
@@ -836,7 +879,7 @@ const READY=[
    record that is opened keeps the rows it was saved with. ensure() padded every record to those numbers, so rows
    removed before saving came back after Open data or a workstation restore. It now keeps only the least that
    "Remove last" leaves: the baseline and one period, one action, one fading step. */
-const ROW=()=>({p:'',t:'',r:'',i:'',n:''}),ACT=()=>({a:'',f:'',w:'',b:'',s:''}),FADE=()=>({s:'',c:'',d:'',m:'',w:''});
+const ROW=()=>({p:'',t:'',r:'',i:'',cc:'',n:''}),ACT=()=>({a:'',f:'',w:'',b:'',s:''}),FADE=()=>({s:'',c:'',d:'',m:'',w:''});
 function blank(){return{meta:{},rows:[ROW(),ROW(),ROW(),ROW()],act:[ACT(),ACT(),ACT()],fade:[FADE(),FADE(),FADE()],ready:{}};}
 let S=blank();
 function ensure(){while(S.rows.length<2)S.rows.push(ROW());
@@ -855,6 +898,8 @@ function fromFile(d){
   /* v21.22 (DD-1 import): what was imported from Form DD-1, read part by part and checked for type (the units are
      meta.tUnit and meta.rUnit, read with the rest of meta) */
   const dd=ddFromFile(x.dd);if(dd)s.dd=dd;
+  /* v2026-10 fidelity (F): what was imported from Form TI-1, read part by part */
+  const ti=tiFromFile(x.ti);if(ti)s.ti=ti;
   return s;}
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -867,6 +912,7 @@ function renderData(){
     <td><input type="number" step="any" data-r="${i}" data-f="t" value="${esc(r.t)}"></td>
     <td><input type="number" step="any" data-r="${i}" data-f="r" value="${esc(r.r)}"></td>
     <td><input type="number" step="any" data-r="${i}" data-f="i" value="${esc(r.i)}"></td>
+    <td><input type="number" step="any" min="0" max="100" data-r="${i}" data-f="cc" value="${esc(r.cc)}" aria-label="Period ${i===0?'BL':i}, commission on consequence steps, percent of opportunities"></td>
     <td><textarea data-r="${i}" data-f="n" rows="1" class="pr-line">${esc(r.n)}</textarea></td></tr>`).join('');
   renderCourse();
 }
@@ -898,7 +944,30 @@ function renderCourse(){
     card('Most recent',C.last?f2(C.last.t):'\u2014',C.last?'target behavior, period '+C.last.n+uS:'')+
     card('Change',C.pct==null?'\u2014':pctTxt(C.pct),C.pct!=null?'most recent period against baseline':C.b===0&&C.last?'not computed: the baseline is 0':'against baseline')+
     card('Periods',C.per.length,'after baseline, with a target value');
-  drawPlot();ddPanel();
+  drawPlot();renderFid();ddPanel();
+}
+/* v2026-10 fidelity (F): fidelity beside outcome, one row per period, with the period's reading */
+const FID_LOW=80,FID_COM=10,FID_FALL=15;
+function renderFid(){
+  const box=$('#fidTbl');if(!box)return;
+  const rows=S.rows.map((r,k)=>({k,p:r.p,t:num(r.t),r:num(r.r),i:num(r.i),cc:num(r.cc)}));
+  if(!rows.some(r=>r.i!=null||r.cc!=null)){box.innerHTML='<tbody><tr><td class="hint">No period holds an integrity figure yet. Enter each period\u2019s integrity (and, where TI-1 tags consequence steps, its commission figure) in the table above.</td></tr></tbody>';return;}
+  const uT=String(S.meta.tUnit||'').trim(),uR=String(S.meta.rUnit||'').trim();
+  let h=`<thead><tr><th style="width:44px">#</th><th>Period</th><th style="width:96px">Target${uT?' <small>('+esc(uT)+')</small>':''}</th><th style="width:96px">Replacement${uR?' <small>('+esc(uR)+')</small>':''}</th><th style="width:88px">Integrity %</th><th style="width:110px">Commission on consequence steps %</th><th>Reading</th></tr></thead><tbody>`;
+  let prev=null;
+  rows.forEach(r=>{const parts=[];let cls='';
+    const bad=v=>v!=null&&!(v>=0&&v<=100);
+    if(bad(r.i)||bad(r.cc))parts.push('a figure outside 0 to 100 is not used');
+    const I=bad(r.i)?null:r.i,CC=bad(r.cc)?null:r.cc;
+    if(I!=null){if(I<60){cls='pr-fid-low';parts.push('below 60%: not a test of the plan');}
+      else if(I<FID_LOW){cls='pr-fid-low';parts.push('60\u201379%: below the gate; a test of the implementation');}
+      else if(I<INT_CRIT){cls='pr-fid-mid';parts.push('80\u201389%: below the 90% criterion on the most recent observation; re-check');}
+      else{if(!cls)cls='pr-fid-ok';parts.push('at or above 90%');}}
+    if(CC!=null&&CC>FID_COM){cls='pr-fid-low';parts.push('reinforcer delivered after the target behavior or a wrong response on '+CC+'% of consequence-step opportunities, above '+FID_COM+'%');}
+    if(I!=null&&prev!=null&&prev-I>=FID_FALL){if(cls!=='pr-fid-low')cls='pr-fid-mid';parts.push('fell '+(Math.round((prev-I)*10)/10)+' points from the period before: performance right after a drop may be worse than the level alone predicts');}
+    if(I!=null)prev=I;
+    h+=`<tr><td class="n" style="font-weight:600">${r.k===0?'BL':r.k}</td><td>${esc(r.p)||(r.k===0?'<i>Baseline</i>':'')}</td><td class="n">${r.t==null?'\u2014':f2(r.t)}</td><td class="n">${r.r==null?'\u2014':f2(r.r)}</td><td class="n ${cls}">${I==null?'\u2014':I}</td><td class="n">${CC==null?'\u2014':CC}</td><td class="${cls}">${parts.length?esc(parts.join('; ')):(r.k===0?'before the plan':'')}</td></tr>`;});
+  box.innerHTML=h+'</tbody>';
 }
 /* v21.16 audit (F2b-e): the legend has the top row to itself (the phase labels ran into it: "target
    behavibaseline"); no data path crosses the phase-change line; each point carries its own row's number (a blank
@@ -1015,10 +1084,32 @@ function renderVerdicts(){
   if(!inR(i,0,100)){bad.push('integrity');i=null;}
   if(!inR(c,0,100)){bad.push('critical-step integrity');c=null;}
   if(!inR(cf,1,6)){bad.push('contextual fit');cf=null;}
+  /* v2026-10 fidelity (F): the plan-run gate across the period, a form convention (see the Guide). A blank figure is
+     not tested; a figure outside its range is set aside. */
+  let gN=num(m.intN),gMean=num(m.intMean),gLow=num(m.intLow),gConLow=num(m.intConLow),gConCom=num(m.intConCom),gConOm=num(m.intConOm);
+  if(gN!=null&&!(Number.isInteger(gN)&&gN>=0)){bad.push('TI-1 observations in the period');gN=null;}
+  if(!inR(gMean,0,100)){bad.push('mean integrity');gMean=null;}
+  if(!inR(gLow,0,100)){bad.push('lowest integrity');gLow=null;}
+  if(!inR(gConLow,0,100)){bad.push('lowest consequence step');gConLow=null;}
+  if(!inR(gConCom,0,100)){bad.push('commission on consequence steps');gConCom=null;}
+  if(!inR(gConOm,0,100)){bad.push('omission on consequence steps');gConOm=null;}
+  const fails=[];
+  if(gN!=null&&gN<1)fails.push('no TI-1 observation was completed in the period');
+  if(gMean!=null&&gMean<FID_LOW)fails.push('mean integrity across the period is '+gMean+'%, below '+FID_LOW+'%');
+  if(gConLow!=null&&gConLow<FID_LOW)fails.push('a consequence step ran at '+gConLow+'% of its opportunities, below '+FID_LOW+'%');
+  if(gConCom!=null&&gConCom>FID_COM)fails.push('reinforcers were delivered after the target behavior or a wrong response on '+gConCom+'% of consequence-step opportunities, above '+FID_COM+'%');
+  const gateBlank=gMean==null&&gConLow==null&&gConCom==null;
+  const drop=String(m.intDrop||''),dropNote=String(m.intDropNote||'').trim();
   let h='';
   if(i==null)h='<div class="verdict v-mid"><b>Integrity not recorded.</b> Until it is, the behavior data below cannot distinguish a plan that does not work from one that was not run. Form TI-1.</div>';
   else if(i<INT_CRIT||(c!=null&&c<INT_CRIT))h=`<div class="verdict v-no"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''}.</b> Below the ${INT_CRIT}% criterion, so the plan is not running as written. Treat the behavior data as uninterpretable and make this review about implementation: retrain on Form ST-1, and check Form CF-1 for whether the plan fits the conditions it has to run in.</div>`;
-  else h=`<div class="verdict v-ok"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''}.</b> At or above the ${INT_CRIT}% criterion, so the plan is running as written and the behavior data below speak to the plan itself.</div>`;
+  else if(fails.length)h=`<div class="verdict v-no"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''} on the most recent observation, but the period does not pass the plan-run gate:</b> ${fails.join('; ')}. The plan was not run as written across the period, so its outcome data are not a test of the plan. Retrain on Form ST-1, re-observe on Form TI-1, then review again; do not revise the plan on these data. Once consequence errors were corrected, every learner in Burlison et al. (2026) went on to master the task.</div>`;
+  else h=`<div class="verdict v-ok"><b>Integrity ${i.toFixed(1)}%${c!=null?', critical steps '+c.toFixed(1)+'%':''}.</b> At or above the ${INT_CRIT}% criterion, so the plan is running as written and the behavior data below speak to the plan itself.${gateBlank?'':' The period passes the plan-run gate'+[gMean!=null?'mean integrity '+gMean+'%':'',gConLow!=null?'lowest consequence step '+gConLow+'%':'',gConCom!=null?'commission on consequence steps '+gConCom+'%':''].filter(Boolean).reduce((a,b,k)=>a+(k?', ':' (')+b,'')+(gMean!=null||gConLow!=null||gConCom!=null?')':'')+'; passing the gate does not prove the data interpretable, since commission errors harmed some participants even at 80% in earlier DRO work (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026).'}</div>`;
+  if(i!=null&&gateBlank)h+=`<div class="verdict v-mid">The period&rsquo;s figures (mean integrity, consequence-step commission, lowest consequence step) are not recorded, so the gate is judged on the most recent observation alone. Import From TI-1 fills them, or enter them from TI-1&rsquo;s Summary.</div>`;
+  if(drop==='Yes')h+=`<div class="verdict v-mid"><b>Fidelity dropped abruptly during the period${dropNote?': '+esc(dropNote):''}.</b> Read the period after the drop on its own: performance right after a drop is likely to be worse than the new fidelity level alone would predict, and a stretch at full fidelity just before may mask low current fidelity (preliminary sequence effects in Burlison et al., 2026; Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026).</div>`;
+  else if(drop==='Not known')h+=`<div class="verdict v-mid">Whether fidelity dropped abruptly in the period is not known. Check TI-1&rsquo;s observations in order, and the figures by implementer, before reading the behavior data as a single period.</div>`;
+  else if(!drop&&i!=null){const fl=[];let pv=null;S.rows.forEach((r,k)=>{const v=num(r.i);if(v==null||!(v>=0&&v<=100))return;if(pv!=null&&pv.v-v>=FID_FALL)fl.push('period '+(k===0?'BL':k)+' is '+(Math.round((pv.v-v)*10)/10)+' points below '+(pv.k===0?'the baseline row':'period '+pv.k));pv={v,k};});
+    if(fl.length)h+=`<div class="verdict v-mid">In the Integrity column, ${fl.join('; ')}. Answer Did fidelity drop abruptly in the period above before reading the behavior data as one course.</div>`;}
   if(cf!=null&&cf<4)h+=`<div class="verdict v-mid">Contextual fit is ${cf.toFixed(2)} of 6. Below 4 is poor fit on Form CF-1 (below 3, very poor): the plan as written does not fit the conditions it has to run in. Change the plan or its supports there, not only the training.</div>`;
   if(bad.length)h=`<div class="verdict v-mid"><b>Not used, outside its range: ${bad.join(', ')}.</b> Integrity figures are percentages from 0 to 100; contextual fit is a mean rating from 1 to 6 (Form CF-1).</div>`+h;
   $('#intVerdict').innerHTML=h;
@@ -1031,11 +1122,11 @@ function renderVerdicts(){
      replacement recorded as "Not yet"). The wording now says what was compared: a 24% reduction was described as no
      movement, a comparison of two figures as a trend, and a cause was claimed that a comparison with baseline cannot
      show. */
-  const C=course(),ok=i!=null&&i>=INT_CRIT&&!(c!=null&&c<INT_CRIT),REP=String(m.repInd||'');
+  const C=course(),ok=i!=null&&i>=INT_CRIT&&!(c!=null&&c<INT_CRIT)&&!fails.length,REP=String(m.repInd||'');
   const notInd=REP==='Prompted only'||REP==='Not yet';
   let sug='',cls='v-na',opts=[];
   if(i==null||C.b==null||!C.last)sug='Record the integrity figure, the baseline (BL row) and at least one review period to get a suggested decision.';
-  else if(!ok){cls='v-no';opts=['Continue and address implementation'];sug=`<b>Suggested: continue and address implementation.</b> ${i<INT_CRIT?'Integrity':'Critical-step integrity'} is below ${INT_CRIT}%, so nothing about the plan itself is being tested yet.`;}
+  else if(!ok){cls='v-no';opts=['Continue and address implementation'];sug=`<b>Suggested: continue and address implementation.</b> ${i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'Critical-step integrity is below '+INT_CRIT+'%':'The period does not pass the plan-run gate ('+fails.join('; ')+')'}, so nothing about the plan itself is being tested yet. Retrain (Form ST-1), re-observe (Form TI-1), then review again: the plan is not revised on these data.`;}
   else if(C.pct==null){cls='v-mid';sug='<b>No suggestion from the change.</b> The baseline is 0, so the change cannot be expressed as a percentage of it. Read the graph, and record the decision and why.';}
   else if(C.pct<=-60){const lead=`The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written.`;
     if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} The replacement is recorded as \u201c${esc(REP)}\u201d under Used independently: fading before it is established risks returning the behavior (see the Guide).`;}
@@ -1053,7 +1144,7 @@ function renderVerdicts(){
   const dec=String(m.dec||''),why=String(m.decWhy||'').trim(),E=exitState(),chk=[];
   if(dec==='Exit the plan'&&!E.ready)chk.push(`Exit is recorded, but Exit Readiness on the Fading and exit sheet is not complete (${E.n} of ${E.d} conditions met${E.post?'':'; the monitoring after exit is not recorded'}).`);
   if((dec==='Begin fading'||dec==='Exit the plan')&&notInd)chk.push(`The replacement is recorded as \u201c${esc(REP)}\u201d under Used independently; fading before it is established risks returning the behavior.`);
-  if(['Modify the plan','Return to assessment','Begin fading','Exit the plan'].includes(dec)&&!ok)chk.push(`${i==null?'Integrity is not recorded':i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':'Critical-step integrity is below '+INT_CRIT+'%'}, so the behavior data cannot show whether the plan works; a decision about the plan itself needs another reason, recorded under Reasoning.`);
+  if(['Modify the plan','Return to assessment','Begin fading','Exit the plan'].includes(dec)&&!ok)chk.push(`${i==null?'Integrity is not recorded':i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'Critical-step integrity is below '+INT_CRIT+'%':'The period does not pass the plan-run gate'}, so the behavior data cannot show whether the plan works; a decision about the plan itself needs another reason, recorded under Reasoning. The route this form states is retrain (ST-1), re-observe (TI-1), re-review.`);
   if(dec&&opts.length&&!opts.includes(dec)&&!why)chk.push('The decision differs from the suggestion above; say why under Reasoning.');
   $('#decCheck').innerHTML=chk.length?`<div class="verdict v-mid"><b>Check the decision.</b> ${chk.join(' ')}</div>`:'';
 }
@@ -1485,6 +1576,9 @@ function loadSim(){
     team:'Classroom teacher, both aides, SLP, assistant principal, parent, case BCBA',
     beh:'Aggression toward staff (simulated)',fn:'Escape from independent academic demands',
     intPct:'95.5',intDate:D(3),intCrit:'92.0',intType:'Unannounced',cf:'5.20',trained:'All',
+    intN:'3',intMean:'93.2',intLow:'90.9',intConLow:'90.0',intConCom:'2.4',intConOm:'0',
+    intImpl:'Simulated RBT: #1 90.9% (unannounced, '+D(28)+'), #2 93.3% (announced, '+D(14)+'), #3 95.5% (unannounced, '+D(3)+'); the substitute aide was not observed this period',
+    intDrop:'No',intDropNote:'No fall between consecutive observations this period; across periods integrity rose 78% \u2192 88% \u2192 95.5%, so no stretch at full fidelity masks a lower current level',
     rep:'Hands the break card and waits through the programmed delay',
     repInd:'Yes, but only with trained staff',repSched:'90 s delay, multiple schedule with S\u0394 card',
     repTerm:'4 min S\u0394 periods across the full independent block',
@@ -1505,10 +1599,10 @@ function loadSim(){
     post:'Rate checked monthly for one term, then at the annual review',
     back:'Two or more occurrences in any week, or any restraint. Re-entry does not require a crisis first.'};
   S.rows=[
-    {p:'Baseline',t:'4.2',r:'0',i:'',n:'Before the plan (Form DD-1)'},
-    {p:D(105)+' \u2013 '+D(71),t:'2.1',r:'3.4',i:'78',n:'Plan starts; integrity low in the first weeks'},
-    {p:D(70)+' \u2013 '+D(36),t:'0.8',r:'6.1',i:'88',n:'After BST on Form ST-1; includes the substitute days'},
-    {p:D(35)+' \u2013 '+D(0),t:'0.3',r:'7.4',i:'95.5',n:'Contextual fit addressed (Form CF-1)'}
+    {p:'Baseline',t:'4.2',r:'0',i:'',cc:'',n:'Before the plan (Form DD-1)'},
+    {p:D(105)+' \u2013 '+D(71),t:'2.1',r:'3.4',i:'78',cc:'14.3',n:'Plan starts; integrity low in the first weeks: the delay ended early on 1 in 7 consequence-step opportunities, so this period tests the implementation'},
+    {p:D(70)+' \u2013 '+D(36),t:'0.8',r:'6.1',i:'88',cc:'6.5',n:'After BST on Form ST-1; includes the substitute days'},
+    {p:D(35)+' \u2013 '+D(0),t:'0.3',r:'7.4',i:'95.5',cc:'2.4',n:'Contextual fit addressed (Form CF-1)'}
   ];
   S.act=[
     {a:'Brief and train the substitute pool so the replacement is tested against untrained adults',f:'ST-1 (training)',w:'J. Newsome',b:D(-14),s:'Open'},
@@ -1532,9 +1626,103 @@ function loadSim(){
   [3,6,7].forEach(i=>{S.ready[i]=true;});
   S.meta.dec='Continue unchanged';
   renderAll();setView('dec');
-  alert('Simulated review loaded: integrity read before the behavior data, the baseline and three review periods graphed, a suggested decision, the fading sequence, and the exit readiness check.');
+  alert('Simulated review loaded: integrity read before the behavior data with the plan-run gate across the period, fidelity beside each period\u2019s outcome, the baseline and three review periods graphed, a suggested decision, the fading sequence, and the exit readiness check.');
 }
 $('#simBtn').addEventListener('click',loadSim);
+
+/* ===================== v2026-10 fidelity (F): Import From TI-1 =====================
+   The figures under question 1 can be filled from Form TI-1's record instead of being retyped. TI-1's record is read
+   (1) inside the workstation, from the TI-1 open there, through the workstation's relay (this form posts
+       {nbh:'ask', want:'TI-1'} to its parent and takes {nbh:'answer', want:'TI-1', ok, title, snap | why} only from
+       that parent, only while it is waiting; snap.own is TI-1's own saved file), and
+   (2) anywhere, from a data file TI-1 saved with Save data ({form:'TI-1', S}).
+   A file saved by any other form is refused, and nothing changes. TI-1 is another file and cannot be called, so its
+   rules are applied here as TI-1 applies them (its Guide): an observation's integrity is its correct steps over its
+   scored steps (Correct, Commission, Omission; N/A excluded); the deciding observations are the unannounced ones with
+   scored steps, in column order, the last as many as its criterion counts, and the latest of them is the most recent
+   observation above; the consequence steps are those TI-1 tags Consequence, with its opportunity counts where it holds
+   them and otherwise each scored code as one opportunity. Every field is written through its own control, so the
+   verdicts recalculate as for typing, and nothing is replaced without asking. */
+const TI={waiting:0,timer:0,fileMode:false};
+const tiMsgEl=$('#tiMsg');
+function tiMsg(t,bad){if(!tiMsgEl)return;tiMsgEl.textContent=t||'';tiMsgEl.style.color=bad?'#8E2A2A':'';}
+const tiPad=n=>String(n).padStart(2,'0'),tiISO=d=>d.getFullYear()+'-'+tiPad(d.getMonth()+1)+'-'+tiPad(d.getDate());
+const tiUS=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(s||'');};
+const tiR1=x=>Math.round(x*10)/10;
+/* TI-1's saved record, read as TI-1 reads one */
+function tiRead(d){
+  const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null,o=obj(d);if(!o||o.form!=='TI-1')return null;const S1=obj(o.S);if(!S1)return null;
+  const nO=+S1.nObs,nObs=Number.isInteger(nO)&&nO>=2&&nO<=8?nO:4;const cN=+S1.critN,critN=Number.isInteger(cN)&&cN>=1&&cN<=5?cN:2;
+  let steps=(Array.isArray(S1.steps)?S1.steps:[]).slice(0,2000).map(x=>{x=obj(x)||{};return{crit:!!x.crit,cmp:x.cmp==='con'||x.cmp==='ant'?x.cmp:''};});
+  if(!steps.length)steps=Array.from({length:8},()=>({crit:false,cmp:''}));
+  const obs=(Array.isArray(S1.obs)?S1.obs:[]).slice(0,nObs).map(x=>obj(x)||{});while(obs.length<nObs)obs.push({});
+  const cells=obj(S1.cells)||{},opp=obj(S1.opp)||{},m=obj(S1.meta)||{};
+  const code=(i,j)=>{const v=cells[i+'_'+j];return typeof v==='string'?v:'';},SCD=v=>v==='C'||v==='EC'||v==='EO';
+  const oppOf=(i,j)=>{const x=obj(opp[i+'_'+j]),k=v=>Number.isInteger(+v)&&+v>=0?+v:0;
+    if(x&&(k(x.c)+k(x.ec)+k(x.eo))>0)return{c:k(x.c),ec:k(x.ec),eo:k(x.eo)};const v=code(i,j);
+    return SCD(v)?{c:v==='C'?1:0,ec:v==='EC'?1:0,eo:v==='EO'?1:0}:{c:0,ec:0,eo:0};};
+  const rows=[];obs.forEach((ob,j)=>{let c=0,s=0,cc=0,cs=0;steps.forEach((st,i)=>{const v=code(i,j);if(!SCD(v))return;s++;if(v==='C')c++;if(st.crit){cs++;if(v==='C')cc++;}});
+    if(s)rows.push({j,c,s,cc,cs,pct:100*c/s,crit:cs?100*cc/cs:null,type:String(ob.type||''),date:/^\d{4}-\d{2}-\d{2}$/.test(String(ob.date||''))?String(ob.date):''});});
+  if(!rows.length)return{empty:true};
+  const dec=rows.filter(r=>r.type==='Unannounced').slice(-critN),latest=dec.length?dec[dec.length-1]:rows[rows.length-1];
+  const con=steps.map((st,i)=>st.cmp==='con'?i:-1).filter(i=>i>=0);let kc=0,ke=0,ko=0,conLow=null;
+  con.forEach(i=>{let c=0,n=0;rows.forEach(r=>{const x=oppOf(i,r.j);c+=x.c;n+=x.c+x.ec+x.eo;kc+=x.c;ke+=x.ec;ko+=x.eo;});if(n&&(conLow==null||100*c/n<conLow))conLow=100*c/n;});
+  const kn=kc+ke+ko,mean=rows.reduce((a,r)=>a+r.pct,0)/rows.length,low=Math.min(...rows.map(r=>r.pct));
+  let fall=null;for(let k=1;k<rows.length;k++){const f=rows[k-1].pct-rows[k].pct;if(f>0&&(!fall||f>fall.f))fall={f,a:rows[k-1].j+1,b:rows[k].j+1};}
+  const who=String(m.int||'').trim()||'interventionist';
+  const impl=who+': '+rows.map(r=>'#'+(r.j+1)+' '+tiR1(r.pct)+'% ('+(r.type==='Announced'?'announced':r.type==='Unannounced'?'unannounced':'type not recorded')+(r.date?', '+tiUS(r.date):'')+')').join(', ');
+  return{student:String(m.client||'').trim(),int:who,skill:String(m.skill||'').trim(),n:rows.length,conSteps:con.length,
+    latest:{col:latest.j+1,date:latest.date,type:latest.type,pct:latest.pct,crit:latest.crit,deciding:dec.includes(latest)},
+    fig:{intPct:String(tiR1(latest.pct)),intCrit:latest.crit==null?'':String(tiR1(latest.crit)),intDate:latest.date?tiUS(latest.date):'',intType:latest.type==='Announced'?'Announced':latest.type==='Unannounced'?'Unannounced':'',
+      intN:String(rows.length),intMean:String(tiR1(mean)),intLow:String(tiR1(low)),
+      intConLow:con.length&&conLow!=null?String(tiR1(conLow)):'',intConCom:con.length&&kn?String(tiR1(100*ke/kn)):'',intConOm:con.length&&kn?String(tiR1(100*ko/kn)):'',
+      intImpl:impl,intDropNote:fall?'Largest fall between consecutive observations on TI-1: '+tiR1(fall.f)+' points (#'+fall.a+' to #'+fall.b+')':'No fall between consecutive observations on TI-1'},
+    conNote:con.length?kn+' consequence-step opportunit'+(kn===1?'y':'ies')+' on '+con.length+' step'+(con.length===1?'':'s'):'no step tagged Consequence on TI-1, so the consequence figures are left blank'};}
+const TI_LAB={intPct:'Integrity, most recent',intCrit:'Critical-step integrity',intDate:'Date observed',intType:'Announced or unannounced',intN:'TI-1 observations in the period',intMean:'Mean integrity across them',
+  intLow:'Lowest integrity in the period',intConLow:'Lowest consequence step',intConCom:'Commission on consequence steps',intConOm:'Omission on consequence steps',intImpl:'By implementer and observation',intDropNote:'When, and what changed'};
+function tiSet(el,v){el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
+function tiApply(x,src,file){
+  if(!x){tiMsg('That is not a file Form TI-1 saved. Nothing was imported.',true);return false;}
+  if(x.empty){tiMsg('Form TI-1\u2019s record holds no scored observation yet. Nothing was imported.',true);return false;}
+  const keys=Object.keys(x.fig).filter(k=>x.fig[k]!==''),diff=keys.filter(k=>String(S.meta[k]||'').trim()&&String(S.meta[k]||'').trim()!==String(x.fig[k]).trim());
+  if(diff.length&&!confirm('Replace '+diff.map(k=>TI_LAB[k]+' (now \u201c'+String(S.meta[k]).slice(0,60)+'\u201d, TI-1 gives \u201c'+x.fig[k].slice(0,60)+'\u201d)').join('; ')+'?\n\nCancel keeps every entry; nothing is imported.')){tiMsg('Nothing was imported; every entry was kept.');return false;}
+  keys.forEach(k=>{const el=$('[data-m="'+k+'"]');if(el)tiSet(el,x.fig[k]);});
+  S.ti={src:src==='workstation'?'workstation':'file',file:String(file||'').slice(0,300),when:tiISO(new Date()),student:x.student.slice(0,300),int:x.int.slice(0,300),skill:x.skill.slice(0,300),
+    n:x.n,conSteps:x.conSteps,latest:{col:x.latest.col,date:x.latest.date,type:x.latest.type,pct:tiR1(x.latest.pct),crit:x.latest.crit==null?null:tiR1(x.latest.crit),deciding:!!x.latest.deciding},written:Object.assign({},x.fig),conNote:x.conNote};
+  renderTiRec();renderVerdicts();
+  tiMsg('Imported from Form TI-1: '+keys.length+' figures from '+x.n+' scored observation'+(x.n===1?'':'s')+'.');return true;}
+function tiFromFile(x){const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null,o=obj(x);if(!o)return null;const str=v=>v==null||typeof v==='object'?'':String(v).slice(0,600);
+  const fin=v=>typeof v==='number'&&isFinite(v)?v:null,l=obj(o.latest)||{},w=obj(o.written)||{},written={};Object.keys(TI_LAB).forEach(k=>{if(typeof w[k]==='string')written[k]=w[k].slice(0,2000);});
+  return{src:o.src==='workstation'?'workstation':'file',file:str(o.file),when:/^\d{4}-\d{2}-\d{2}$/.test(str(o.when))?str(o.when):'',student:str(o.student),int:str(o.int),skill:str(o.skill),
+    n:Number.isInteger(o.n)&&o.n>=0?o.n:0,conSteps:Number.isInteger(o.conSteps)&&o.conSteps>=0?o.conSteps:0,
+    latest:{col:Number.isInteger(l.col)&&l.col>=1&&l.col<=8?l.col:null,date:/^\d{4}-\d{2}-\d{2}$/.test(str(l.date))?str(l.date):'',type:str(l.type),pct:fin(l.pct),crit:fin(l.crit),deciding:l.deciding===true},written,conNote:str(o.conNote)};}
+function renderTiRec(){
+  const box=$('#tiRec');if(!box)return;const T=S.ti;if(!T){box.innerHTML='';return;}
+  const src=T.src==='workstation'?'the TI-1 open in the workstation':'the file \u201c'+esc(T.file)+'\u201d';
+  const flags=[];Object.keys(T.written||{}).forEach(k=>{const w=String(T.written[k]||'').trim(),cur=String(S.meta[k]||'').trim();if(w&&cur!==w)flags.push(TI_LAB[k]+' now reads '+(cur?'\u201c'+esc(cur)+'\u201d':'nothing'));});
+  box.innerHTML='<p><b>From Form TI-1:</b> '+(T.n?T.n+' scored observation'+(T.n===1?'':'s'):'the record')+(T.int?' of '+esc(T.int):'')+(T.student?' with '+esc(T.student):'')+(T.skill?' on \u201c'+esc(T.skill)+'\u201d':'')+
+    (T.latest&&T.latest.col?'; most recent'+(T.latest.deciding?' deciding':'')+' observation #'+T.latest.col+(T.latest.date?' ('+esc(tiUS(T.latest.date))+')':'')+(T.latest.type?', '+esc(T.latest.type.toLowerCase()):'')+(T.latest.pct!=null?', '+T.latest.pct+'%':'')+(T.latest.crit!=null?', critical steps '+T.latest.crit+'%':', no critical step scored'):'')+
+    '; '+esc(T.conNote||'')+'. Imported '+esc(tiUS(T.when))+' from '+src+'.'+(flags.length?' <span class="pr-ddflag">Changed by hand since: '+flags.join('; ')+'.</span>':'')+
+    ' <button type="button" class="tool noprint" id="tiRm">Remove this note</button></p>';
+  const b=$('#tiRm');if(b)b.addEventListener('click',()=>{if(confirm('Remove the note of the import from Form TI-1? The figures on this form keep what they hold.')){delete S.ti;renderTiRec();}});}
+function tiAsk(){
+  TI.waiting=Date.now();clearTimeout(TI.timer);tiMsg('Asking the workstation for Form TI-1\u2019s record\u2026');
+  TI.timer=setTimeout(()=>{if(!TI.waiting)return;TI.waiting=0;TI.fileMode=true;tiMsg('The workstation did not answer. Click Import From TI-1 again to open a file TI-1 saved.',true);},15000);
+  try{window.parent.postMessage({nbh:'ask',want:'TI-1'},'*');}catch(e){TI.waiting=0;clearTimeout(TI.timer);TI.fileMode=true;tiMsg('The workstation could not be asked. Click Import From TI-1 again to open a file TI-1 saved.',true);}}
+window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d!=='object'||d.nbh!=='answer'||d.want!=='TI-1')return;
+  if(window.parent===window||ev.source!==window.parent||!TI.waiting)return;
+  TI.waiting=0;clearTimeout(TI.timer);
+  if(d.ok!==true){TI.fileMode=true;tiMsg(d.why==='not open'?'Form TI-1 is not open in this workstation. Open it from the list of forms, or click Import From TI-1 again to open a file TI-1 saved.':'Form TI-1 is open but did not give its record. Wait for it to finish loading, then try again.',true);return;}
+  let o=null;try{o=JSON.parse(d.snap&&d.snap.own);}catch(e){o=null;}
+  if(!tiApply(tiRead(o),'workstation',''))tiMsg(tiMsgEl.textContent||'Form TI-1 in this workstation gave a record this form could not read. Nothing was imported.',true);});
+$('#tiBtn').addEventListener('click',()=>{if(window.parent!==window&&!TI.fileMode){tiAsk();return;}TI.fileMode=false;$('#tiFile').click();});
+$('#tiFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const name=String(f.name||'').slice(0,300),r=new FileReader();
+  r.onload=()=>{let o=null;try{o=JSON.parse(String(r.result||''));}catch(x){o=null;}
+    if(o&&typeof o==='object'&&o.form!=='TI-1'){const other=typeof o.form==='string'&&/^[A-Z]{2,7}(-\d+)?$/.test(o.form)?o.form:'';tiMsg(other?'That file was saved by '+(other==='PACKET'?'Save packet':'Form '+other)+', not by Form TI-1. Nothing was imported.':'That file could not be read as a file Form TI-1 saved. Nothing was imported.',true);return;}
+    tiApply(tiRead(o),'file',name);};
+  r.onerror=()=>tiMsg('That file could not be read. Nothing was imported.',true);r.readAsText(f);e.target.value='';});
+const tiBaseRender=renderAll;renderAll=function(){tiBaseRender();renderTiRec();};
+
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 </script>
