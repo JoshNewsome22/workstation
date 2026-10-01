@@ -3195,3 +3195,46 @@ document while a print or the packet reads the form, so paper is unchanged.
 | The master print of all 33 forms from a case file built from every simulation | 33 sections, 547 pages, no script errors, no page bar on any page; TI-1's wider opportunity table and one SV-1 table are scaled to fit as the master print does for wide parts |
 | PR-1's Import from TI-1 through the workstation relay, with TI-1 open and its simulation loaded | 12 figures and the record written |
 | The one-file editions: PD-1, SV-1 and TD-1 opened inside each, with the page bar | pass, no script errors |
+
+## The Walkthrough Scenes Redrawn (v21.27)
+
+The six forms with a walkthrough (PA-1, RA-1, EA-1, ABC-1, AD-1 and the Delay
+Tolerance Toolkit, 50 stories between them) draw their scenes with a new engine,
+`tools/scene/scene2-core.js`, assembled into each form by
+`tools/scene/build-scene2.py` with the form's own board code (`*-boards.js`)
+and, where it needs one, an extension module (`ext-*.js`: PA-1's item row,
+plan box, tray and timer; the cropped two-person room for AD-1 and the
+toolkit). The stories themselves are unchanged: the engine reads the same
+frame objects the first one did.
+
+- **People with joints.** Each figure has a shoulder, elbow, wrist, neck and
+  hip; the hand goes where the pose says and the elbow follows by two-bone
+  inverse kinematics, so a reach is an arc and a long reach leans the body.
+  Legs sit under the table, feet on the floor; a standing student stands.
+  Faces have eyes that blink, brows, a nose and a mouth that opens to speak;
+  the gaze follows the hands or turns away.
+- **A step is choreographed**, read from the difference between one frame and
+  the next: the student picks a block from the tray, carries it over the
+  station and lets it go, and the block falls into the bin, which then shows
+  one more; an item the adult holds crosses the table and the student reaches
+  and takes it; a high five meets in the middle; the stations' labels fade
+  and return when they rotate; the tablet's screen lights and its access
+  ring runs down while the collector's screen says Access; the data
+  collector taps when the screen changes. The story player waits 3.6 s per
+  step in Play mode so a sequence finishes before the next begins.
+- **The room.** A lit wall, a baseboard and floor, a plant, a picture that
+  gives way to a speech bubble, a table with a top face and a front edge,
+  chairs, and soft shadows under people and props. Between steps the figures
+  breathe and blink, only while the scene is on screen.
+- **What does not change.** Reduced motion jumps to each step's final state
+  and nothing idles. The job-aid stills are the same first frame of each
+  step. Printing is untouched: the scenes sit in screen-only sections.
+
+### What was checked
+
+| Check | Result |
+|---|---|
+| Every story of the six forms stepped through on the new engine (50 stories), the drill scenes drawn | 0 script errors |
+| The concurrent-operants story frame by frame: the stations' counts after every step, cancelling a step mid-way, the blink loop, reduced motion | as designed |
+| The six forms printed from the stored data, against the previous run | identical apart from the date (PA-1's page 15 differs only in the competing-stimulus order, which is drawn at random when a record has none) |
+| The page bar and every view of the six forms; the walkthrough at 390px | pass |
