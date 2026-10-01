@@ -3170,6 +3170,10 @@ them, on Wolf's (1978) three levels, quoted word for word with page numbers.
   thresholds for forceful topographies. FS-1 states what the report carries
   for both formats and prints it in the report.
 
+The one-file editions now carry 33 forms and are about 4.1 MB each; the
+Royal Palm School edition is rebuilt from the same files (139 logos, 34
+titles).
+
 ### The page bar
 
 Every form now ends with a **Previous / Next** bar under its last page, built
@@ -3183,8 +3187,11 @@ document while a print or the packet reads the form, so paper is unchanged.
 
 | Check | Result |
 |---|---|
-| Every form printed on its own from the same data as the v21.25 run, after the page bar and the literature pass | <!--PRINT--> |
+| Every form printed on its own from the same data as the v21.25 run, after the page bar and the literature pass | 21 untouched forms: every page identical apart from the printed date and the clock stamps ABC-1, CR-1 and GB-1 write (checked line by line and pixel by pixel); the 10 extended forms print their new sections (page counts rise, e.g. TD-1 32 to 39, RM-1 10 to 15); PD-1 and SV-1 print from their simulations, every page read |
 | axe-core, WCAG 2.1 A and AA: the workstation (empty, with a form open, fullscreen, Help) and every form with its simulation loaded, with the page bar | 0 violations |
 | PD-1: skip rules, progress count, simulation, every view at 1440 and 390px, save/open round trip (identical), a CF-1 file refused, CSV, print, inside the workstation | pass, 0 script errors |
 | Each extended form: inline scripts parse, simulation loaded, every view screenshotted and read, save/open round trip of every new field, print, 390px | pass for each (reports in the session) |
 | The page bar on all forms: present, steps through every page, hidden in print, inside the workstation frame and on a phone | 33 of 33 |
+| The master print of all 33 forms from a case file built from every simulation | 33 sections, 547 pages, no script errors, no page bar on any page; TI-1's wider opportunity table and one SV-1 table are scaled to fit as the master print does for wide parts |
+| PR-1's Import from TI-1 through the workstation relay, with TI-1 open and its simulation loaded | 12 figures and the record written |
+| The one-file editions: PD-1, SV-1 and TD-1 opened inside each, with the page bar | pass, no script errors |

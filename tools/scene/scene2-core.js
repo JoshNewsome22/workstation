@@ -49,6 +49,9 @@ function clockHands(s){const m=/^(\d{1,2}):(\d{2})/.exec(s||'');if(!m)return [0,
 function raBinX(f,i){const xs=RA_BX[f.bins]||RA_BX[1];return xs[Math.max(0,Math.min(xs.length-1,i||0))];}
 const f1=v=>(+v).toFixed(1);
 /*BOARDS*/
+/*EXT*/
+const X=(typeof EXT==='object'&&EXT)||{};
+if(X.poseA)Object.assign(POSE_A,X.poseA);if(X.poseS)Object.assign(POSE_S,X.poseS);
 
 /* ---- the people: proportions, drawn once, moved by the rig ----
    A figure faces right (the adult) or left (the student, the observers). Its shoulder
@@ -126,7 +129,7 @@ function observerSVG(cls){
   '</g>';
 }
 function svg(){return `
-<svg viewBox="0 0 880 316" class="tbl v2" role="img" aria-label="${ALT}">
+<svg viewBox="${X.viewBox||'0 0 880 316'}" class="tbl v2" role="img" aria-label="${X.alt||ALT}">
   <defs>
     <linearGradient id="v2wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8faf9"/><stop offset="1" stop-color="#e6ecea"/></linearGradient>
     <linearGradient id="v2floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6ded9"/><stop offset="1" stop-color="#c3cdc7"/></linearGradient>
@@ -154,6 +157,7 @@ function svg(){return `
     .v2 .leg{fill:var(--adultc)} .v2 .student .leg,.v2 .peerfig .leg{fill:var(--childc)} .v2 .observer .leg{fill:var(--obsc)} .v2 .obs2 .leg{fill:var(--obs2c)} .v2 .leg.far{opacity:.6} .v2 .shoe{fill:#2a2a2e} .v2 .shoe.far{opacity:.6}
     .v2 .clip path{fill:var(--surface);stroke:var(--rule2);stroke-width:1.5} .v2 .clip .lines{fill:none;stroke:var(--rule)}
     .v2 .pb path{fill:var(--red)} .v2 .pb text{font:700 14px var(--sans);fill:#fff} .v2 .motion path{stroke:var(--red);stroke-width:2;stroke-linecap:round;fill:none} .v2 .impact path{fill:none;stroke:var(--red);stroke-width:2.4;stroke-linecap:round}
+    .v2 .peerfig .helmet,.v2 .peerfig .tears,.v2 .peerfig .pb,.v2 .peerfig .motion,.v2 .peerfig .impact{display:none}
     .v2 .tears path{fill:#8fc3e6} .v2 .helmet .hm{fill:#c9d4e3} .v2 .helmet .hb{stroke:#7a8aa0;stroke-width:3;fill:none}
     .v2 .otab .bz{fill:var(--navy)} .v2 .otab .scr{fill:var(--sage)} .v2 .otab .glow{fill:#fff;opacity:0} .v2 .otab.alert .scr{fill:#f0c89c;animation:wkflash 1.1s ease-in-out infinite} .v2 .otab.rec .glow{opacity:.12}
     .v2 .snd path,.v2 .vib path{fill:none;stroke:var(--amber);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
@@ -226,7 +230,9 @@ function svg(){return `
   <g class="prop note"><rect x="-38" y="-22" width="76" height="44" rx="2"/><text class="n1" x="-31" y="-5"></text><text class="n2" x="-31" y="11"></text></g>
   <g class="prop toys"><g class="lots"><rect class="b1" x="414" y="170" width="15" height="15" rx="2"/><rect class="b2" x="416" y="156" width="12" height="14" rx="2"/><rect class="b3" x="431" y="176" width="14" height="10" rx="2"/></g><circle class="ball" cx="458" cy="181" r="9"/><path class="bl" d="M449 181 q9 -5 18 0"/><path class="car" d="M486 190 l0 -9 q2 -6 9 -6 l12 0 q7 0 9 6 l4 1 l0 8 z"/><circle class="wh" cx="494" cy="191" r="4"/><circle class="wh" cx="513" cy="191" r="4"/><rect class="cw" x="496" y="178" width="9" height="5" rx="1"/></g>
   <g class="prop mag"><path class="pg" d="M-17 -15 l17 4 l0 22 l-17 -4 z"/><path class="pg" d="M0 -11 l17 -4 l0 22 l-17 4 z"/><path class="ln" d="M-13 -9 l9 2 M-13 -4 l9 2 M-13 1 l9 2 M4 -8 l9 -2 M4 -3 l9 -2 M4 2 l9 -2"/></g>
+  ${X.svgBack?X.svgBack():''}
   <g class="student-at">${figureSVG('student')}</g>
+  ${X.svgFront?X.svgFront():''}
   <!-- what is carried: the block in hand, a block in flight, the chew, the high five, the ratio row, the tablet -->
   <g class="prop tablet"><rect class="bz" x="-18" y="-13" width="36" height="26" rx="3"/><rect class="scr" x="-14" y="-9" width="28" height="18" rx="1"/><g class="vid"><rect x="-11" y="-5" width="9" height="3"/><rect x="-11" y="0" width="14" height="3"/><rect x="-11" y="5" width="7" height="2"/></g><path class="ra-play" d="M-4 -5 l9 5 l-9 5 z"/><circle class="ring" cx="8" cy="3" r="4" stroke-dasharray="25" stroke-dashoffset="0"/></g>
   <g class="ra-held"><rect class="k2" x="-5" y="-5" width="10" height="10" rx="1.5"/><rect class="kt" x="-5" y="-5" width="10" height="3" rx="1"/></g>
@@ -274,11 +280,12 @@ function make(root){
     clock:q('.abcw .clock'),hh:q('.abcw .clock .hh'),mh:q('.abcw .clock .mh'),clockT:q('.abcw .clock .ct'),fov:q('.abcw .fov'),door:q('.abcw .door'),alarm:q('.abcw .alarm'),screen:q('.abcw .screen'),sc:q('.abcw .screen .sc'),
     fmat:q('.eaw .fmat'),board:q('.eaw .board'),bc:q('.eaw .board .bc'),fov2:q('.eaw .fov2'),wall1:q('.eaw .wall1'),
     obs:q('.observer'),otab:q('.observer .otab'),oArmN:q('.observer .arm.near .lower'),snd:q('.observer .snd'),vib:q('.observer .vib'),obs2:q('.obs2'),callR:q('.obsc.R'),callL:q('.obsc.L'),
-    frame:q('.frame'),plant:q('.plant')
+    frame:q('.frame'),plant:q('.plant'),table:q('.tablegrp')
   };
   const show=(node,on)=>{if(node)node.style.display=on?'':'none';};
+  if(X.refs)X.refs(el,q,qa);
   /* ---- state: every number the drawing reads ---- */
-  const cur={aHx:168,aHy:214,sHx:526,sHy:196,fHx:616,fHy:200,fEx:590,fEy:186,adx:0,sdx:0,sdy:0,aGaze:0,sGaze:0,aTilt:0,sTilt:0,aLean:0,sLean:0,
+  const cur={magx:0,magy:0,aHx:168,aHy:214,sHx:526,sHy:196,fHx:616,fHy:200,fEx:590,fEy:186,adx:0,sdx:0,sdy:0,aGaze:0,sGaze:0,aTilt:0,sTilt:0,aLean:0,sLean:0,
     tf:0,timx:HOME.timer.x,timy:HOME.timer.y,spin:0,tabx:HOME.tabletTable.x,taby:HOME.tabletTable.y,tabTilt:0,grx:HOME.green.x,gry:HOME.green.y,brx:HOME.brkDesk.x,bry:HOME.brkDesk.y,
     hbx:0,hby:0,chx:240,chy:176,cpx:0,cpy:0,cpa:0,flyx:0,flyy:0,flyOn:0,flyRot:0,oTap:0,binx:330,biny:180,notex:391,notey:176,shx:488,shy:176,shr:0,breath:0,amouth:0};
   let asx=1;                  // the adult faces right (1) or is mirrored (-1)
@@ -294,8 +301,9 @@ function make(root){
     if(near&&F.thumb){const dx=H.x-r.ex,dy=H.y-r.ey,d=Math.hypot(dx,dy)||1;F.thumb.setAttribute('d','M'+f1(H.x-dy/d*3)+' '+f1(H.y+dx/d*3)+' l'+f1(dx/d*5-dy/d*3)+' '+f1(dy/d*5+dx/d*3));}
     return r;
   }
-  function legsDraw(F,cfg,dy){
-    const s=cfg.face,hip={x:cfg.hip.x,y:cfg.hip.y},k={x:cfg.knee.x,y:cfg.knee.y},ft={x:cfg.foot.x,y:cfg.foot.y};
+  function legsDraw(F,cfg,stand){
+    const s=cfg.face,hip={x:cfg.hip.x,y:cfg.hip.y};
+    const k=stand?{x:cfg.hip.x-s*4,y:234}:{x:cfg.knee.x,y:cfg.knee.y},ft=stand?{x:cfg.hip.x-s*6,y:cfg.foot.y}:{x:cfg.foot.x,y:cfg.foot.y};
     F.legN.setAttribute('d',limb(hip.x,hip.y,k.x,k.y,cfg.w1+6,cfg.w1+2)+' '+limb(k.x,k.y,ft.x,ft.y,cfg.w1+1,cfg.w1-3));
     F.legF.setAttribute('d',limb(hip.x-s*8,hip.y+2,k.x-s*10,k.y+2,cfg.w1+4,cfg.w1)+' '+limb(k.x-s*10,k.y+2,ft.x-s*12,ft.y,cfg.w1-1,cfg.w1-4));
     F.shoeN.setAttribute('d','M'+(ft.x-s*8)+' 258 q'+(s*2)+' -10 '+(s*18)+' -9 l'+(s*4)+' 9 z');
@@ -324,7 +332,7 @@ function make(root){
     headDraw(el.A,FIG.adult,c.aGaze,c.aTilt,c.breath*0.6);headDraw(el.S,FIG.student,c.sGaze,c.sTilt,c.breath*0.5);
     el.A.head.setAttribute('transform',el.A.head.getAttribute('transform')+' translate('+f1(rA.lean*rA.ux*0.9)+' '+f1(rA.lean*rA.uy*0.5)+')');
     el.S.head.setAttribute('transform',el.S.head.getAttribute('transform')+' translate('+f1(rS.lean*rS.ux*0.9)+' '+f1(rS.lean*rS.uy*0.5)+')');
-    legsDraw(el.A,FIG.adult,0);legsDraw(el.S,FIG.student,0);
+    legsDraw(el.A,FIG.adult,false);legsDraw(el.S,FIG.student,!!el.standS);
     el.wedge.setAttribute('d',wedgePath(c.tf));
     el.timer.setAttribute('transform','translate('+f1(c.timx)+' '+f1(c.timy)+')');
     el.spinner.setAttribute('transform','translate('+HOME.timer.x+' '+HOME.timer.y+')');el.needle.setAttribute('transform','rotate('+f1(c.spin)+')');
@@ -341,6 +349,8 @@ function make(root){
     el.raChew.setAttribute('transform','translate('+f1(c.chx)+' '+f1(c.chy)+')');
     el.raClap.setAttribute('transform','translate('+f1(c.cpx)+' '+f1(c.cpy)+') scale('+f1(0.6+c.cpa*0.6)+')');el.raClap.style.opacity=f1(c.cpa);
     el.oArmN.setAttribute('transform','rotate('+f1(c.oTap*16)+' 776 178)');
+    el.mag.setAttribute('transform','translate('+f1(c.magx)+' '+f1(c.magy)+')');
+    if(X.draw)X.draw(c,el);
   }
   function wedgePath(f){if(f<=0)return '';if(f>=1)return 'M0 -19 A19 19 0 1 1 -0.01 -19 Z';const a=f*2*Math.PI,x=19*Math.sin(a),y=-19*Math.cos(a);return 'M0 0 L0 -19 A19 19 0 '+(f>0.5?1:0)+' 1 '+x.toFixed(2)+' '+y.toFixed(2)+' Z';}
   /* ---- targets: the numbers a frame asks for ---- */
@@ -353,7 +363,7 @@ function make(root){
     let ap=f.ap||'seat';if(f.peer&&ap==='seat')ap='mid';
     const at=AT_A[ap]||AT_A.seat;t.adx=at[0];asx=at[1];
     const AX=x=>asx<0?t.adx+244-x:t.adx+x,side=asx<0?-1:1;
-    const st=f.sp==='stand';t.sdx=st?8:0;t.sdy=st?-26:0;
+    const st=f.sp==='stand';t.sdx=st?8:0;t.sdy=st?-26:0;el.standS=st;
     const tab=f.tablet;
     t.tabx=tab==='adult'?AX(pa[2]+16):tab==='student'?ps[2]-14+t.sdx:tab==='near'?HOME.tabletNear.x:HOME.tabletTable.x;
     t.taby=tab==='adult'?pa[3]-8:tab==='student'?ps[3]-8+t.sdy:tab==='near'?HOME.tabletNear.y:HOME.tabletTable.y;
@@ -364,6 +374,9 @@ function make(root){
     if(sa==='pushed'){t.shx=414;t.shy=178;t.shr=-9;}else if(sa==='adult'){t.shx=AX(pa[2])+side*8;t.shy=pa[3]-10;t.shr=-16*side;}else if(sa==='floor'){t.shx=462;t.shy=252;t.shr=6;}else if(sa==='aside'){t.shx=420;t.shy=184;t.shr=0;}else{t.shx=HOME.sheet.x;t.shy=HOME.sheet.y;t.shr=0;}
     const held=f.bin==='adult';t.binx=held?AX(pa[2]):330;t.biny=held?pa[3]-18:180;
     const nh=!!(f.note&&f.note.at!=='table');t.notex=nh?AX(pa[2])+side*30:391;t.notey=nh?pa[3]-20:176;
+    t.magx=AX(pa[2])+(asx<0?-14:14);t.magy=pa[3]-6;
+    if(f.sheetAt==='far'){t.shx=392;t.shy=182;t.shr=0;}
+    if(f.look==='away'){t.aGaze=-1;}else if(f.look==='down'){t.aTilt=7;}
     /* RA-1: a hand at a station, a hand reaching for what the adult holds, what the hands hold */
     if(f.s==='place'&&(f.bins||f.button)){const bx=f.bins?raBinX(f,f.at):436;t.sHx=bx+4;t.sHy=f.bins?158:176;}
     if(f.s==='pick'){t.sHx=TRAY.x-4;t.sHy=TRAY.y-6;}
@@ -378,7 +391,8 @@ function make(root){
     if(f.s==='place'||f.s==='pick'||f.s==='takeit')t.sGaze=0.6;
     if(f.tablet==='student'||f.s==='holdTablet')t.sGaze=0.3;
     if(f.a==='pointBin'||f.a==='hand'||f.a==='give'||f.a==='hi5')t.aGaze=0.5;
-    if(f.say)t.aGaze=0.7;
+    if(f.say&&!f.look)t.aGaze=0.7;
+    if(X.target)X.target(f,t,{AX,adx:t.adx,asx,pa,ps,side});
     return t;
   }
   /* ---- what is shown or hidden ---- */
@@ -411,10 +425,10 @@ function make(root){
     show(el.board,!!f.board);if(f.board&&el.board.getAttribute('data-k')!==f.board){el.bc.innerHTML=BOARD(f.board);el.board.setAttribute('data-k',f.board);}
     show(el.laptop,!!f.laptop);show(el.bin,!!f.bin);show(el.note,!!f.note);if(f.note){el.n1.textContent=f.note.t1||'';el.n2.textContent=f.note.t2||'';}
     show(el.toys,!!f.toys);show(el.lots,f.toys==='lots');show(el.mag,!!f.mag);
-    show(el.frame,!f.board&&!f.screen);show(el.plant,!f.obs2&&!f.noPlant);
+    show(el.frame,!f.board&&!f.screen&&!f.pboard&&!f.say);show(el.plant,!f.obs2&&!f.noPlant&&!X.noPlant);show(el.table,!f.noTable);
     /* the data collector and the second observer */
     const o=f.noObs?null:(f.obs||null);
-    show(el.obs,!f.noObs);call(el.callR,o);el.otab.classList.toggle('alert',!!(o&&o.k==='alert'));el.otab.classList.toggle('rec',!!(o&&o.k==='rec'));
+    show(el.obs,!f.noObs&&!(X.obsOnlyWhenNamed&&!o));call(el.callR,o);el.otab.classList.toggle('alert',!!(o&&o.k==='alert'));el.otab.classList.toggle('rec',!!(o&&o.k==='rec'));
     show(el.snd,!!(o&&o.snd));show(el.vib,!!(o&&o.vib));
     show(el.obs2,!!f.obs2);call(el.callL,f.obs2||null);
     /* RA-1 props */
@@ -422,7 +436,8 @@ function make(root){
     show(el.raHeld,f.hold==='block');show(el.raChew,!!f.chew);show(el.raClap,!!f.clap);
     show(el.raLad,!!f.lad);el.raLad.innerHTML=f.lad?LADDER(f.lad):'';
     ['gray','gold','red','blue','green'].forEach(k=>el.pm.classList.toggle(k,f.pm===k));show(el.pm,!!f.pm);
-    el.svg.setAttribute('aria-label',f.alt||ALT);
+    if(X.discrete)X.discrete(f,el,show);
+    el.svg.setAttribute('aria-label',f.alt||X.alt||ALT);
   }
   const access=f=>!!(f.obs&&/Access/.test(f.obs.t2||''))&&!!f.tablet;
   function call(g,o){const on=!!(o&&(o.t1||o.t2));g.style.display=on?'':'none';if(!on)return;
@@ -546,4 +561,4 @@ function make(root){
   draw(cur);
   return {set,countdown,spinTo,el};
 }
-return {make};
+return Object.assign({make},X.exports||{});
