@@ -2920,7 +2920,7 @@ measured again, so the heights on paper are the ones it had before. Verified
 by printing PR-1, IN-1, IC-1 and CT-1 from a 390px-wide window before and
 after the pass: the four pairs of PDFs are byte-identical.
 
-The one-file editions now carry the 31 forms and are about 3.7 MB each.
+The one-file editions carry every form and are about 3.8 MB each.
 
 ### The workstation
 
