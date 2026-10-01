@@ -2920,7 +2920,7 @@ measured again, so the heights on paper are the ones it had before. Verified
 by printing PR-1, IN-1, IC-1 and CT-1 from a 390px-wide window before and
 after the pass: the four pairs of PDFs are byte-identical.
 
-The one-file editions now carry the 31 forms and are about 3.7 MB each.
+The one-file editions carry every form and are about 3.8 MB each.
 
 ### The workstation
 
@@ -2967,3 +2967,224 @@ The one-file editions now carry the 31 forms and are about 3.7 MB each.
 The checks are in `qa/` in the repository, with a README; `qa/printbase.js`
 keeps each form's data between runs so the before and after PDFs are made
 from the same entries.
+
+## Form PD-1, Form SV-1, the 2026 Literature Pass and the Page Bar (v21.26)
+
+Two forms are new and ten were extended from a set of 2026 papers and the
+PDC-HS materials. Every research statement printed on a form was written
+from reading notes that quote the source, with the citation beside it, and
+each form's Guide says in its own words what the sources do not support.
+Where a number is needed that no source fixes (a cut-off, a band, a count of
+sessions), the form states it as its own working convention.
+
+### Form PD-1, Performance Diagnostic Checklist (new)
+
+`PD-1_Performance-Diagnostic-Checklist_v2026-09.html`, listed under
+Implementation after TI-1. It is for the moment a plan component is not being
+run by the adult who is meant to run it, and asks why before deciding what to
+do: performance analysis is the organizational equivalent of the functional
+assessment of problem behavior (Brand, Sellers, Wilder & Carr, 2022).
+
+- **The instrument.** The PDC-HS (Carr, Wilder, Majdalany, Mathisen & Strain,
+  2013) in its 1.1 revision, reproduced word for word: 22 items in four
+  domains (Training; Task Clarification and Prompting; Resources, Materials
+  and Processes; Performance Consequences, Effort and Competition), the
+  training sub-items 1a to 1d with their method boxes, every follow-up (when
+  trained, reminder frequency, the four-row material, time, task, employee
+  and competing-task lists, monitoring frequency, feedback by whom, how often,
+  how long after, focus and type, effects seen), the NO-versus-N/A rule and
+  the direct-observation tips. The instrument's skip rules are applied: the
+  sub-items appear only when item 1 is Yes; resources items 3 to 5 are set to
+  N/A when item 2 is N/A; item 7 is N/A when item 6 is Yes. The eight
+  asterisked items carry a "Verified by" choice (direct observation, employee
+  interview, both, not yet). Seven supplementary items from the business PDC
+  (Austin, 2000; ABA Technologies, 2020) are offered at the end, labelled as
+  such and never scored.
+- **Setup** records the staff member, role, supervisor, assessor, student and
+  plan, how it was administered (interview of the direct supervisor, as the
+  instrument requires; self-completion is flagged as valid only for a trained
+  supervisor; a separate staff interview is supplementary) and the one
+  performance concern as a deficit or excess, with a four-box pinpoint check,
+  the current level, whether the pattern is consistent, whether others see it
+  and the permanent products reviewed. The scoring is marked not ready until
+  the concern and its type are entered.
+- **Observations** logs up to six observations (date, typical conditions,
+  items informed, what was seen, reactivity) and the optional staff
+  interview, with the reasons verification matters stated from Brand et al.
+  (2022).
+- **Scoring** computes, per domain, the NO count, items answered, N/A and open
+  items, % NO of answered, % NO of all items (the figure Wilder, Lipschultz &
+  Gehrman, 2018, used), the NO item numbers and a rank by count with ties
+  broken by percentage, in cards, a table and a bar chart; it lists the
+  unanswered items, the asterisked items answered without a verification
+  method, a count-versus-percentage disagreement, a single-instance concern
+  and a blank or self-completed administration. No cut-off exists in any
+  source and none is shown.
+- **Plan** generates one row per NO item with the sample intervention and the
+  citations from the instrument's own planning table (behavioral skills
+  training, enhanced written instructions, task clarification and checklists,
+  prompts, change the task location, adjust staffing, improve access to,
+  redesign or reorganize materials, reassess the process, supervisor
+  presence, performance feedback, highlight outcomes, reduce effort, reduce
+  competing tasks; two rows are marked assessor judgement where the table has
+  none), a tick and a "what it will look like here" box per row, the
+  concurrent-or-consecutive choice (consecutive preferred where staff
+  resources are limited), priority and rationale, the single-critical-NO
+  override (Brand et al., 2022), owner, the performance measure to be tracked,
+  the reassessment date, an optional acceptability rating by the supervisor
+  and the staff member on Wolf's (1978) three levels, and the follow-up
+  (result at reassessment; pattern across staff, the systems-level reading).
+- **Guide** states what the evidence supports (each domain can be the cause;
+  the indicated intervention worked where a guessed one did not, with the
+  figures from Wilder et al., 2018; 100% scoring agreement there; use by
+  supervisors without behavior-analytic training; the second-hand school
+  reports and their non-responders), how the figures are calculated, and
+  what the form does not claim (no clinically significant score, not
+  validated for schools, not better than every alternative, no student
+  outcome evidence, 1.1 unpublished). Reference list in the form's style.
+- **Save, open, CSV, print, simulation.** A saved PD-1 file is read value by
+  value into a fresh record; other forms' files are refused by name. CSV
+  carries every item with its answer, verification and note, then the domain
+  table. The simulation is the "trained three months ago" case from the
+  PDC-HS training materials moved into a classroom (a paraeducator who runs
+  the FCT practice trials on fewer than half the scheduled blocks), with 17
+  NO answers, a count-versus-percentage disagreement, two observations, a
+  staff interview and a consecutive plan starting with the materials.
+- **Built with `tools/new-form.py`**, which assembles a new form from CF-1's
+  shared parts (stylesheet, brand system, masthead, print head, packet map,
+  bridge, tail blocks) and the new form's own parts (`meta.json`, `own.css`,
+  `toolbar.html`, `body.html`, `script.js`), so a new form starts with the
+  same save, packet and workstation behaviour as the rest.
+
+### Form SV-1, Social Validity (new)
+
+`SV-1_Social-Validity_v2026-09.html`, listed under Implementation after CF-1.
+Contextual fit (CF-1) asks the implementers whether they can and will run the
+plan; SV-1 asks the consumers, the student and the caregiver included, whether
+the plan is aimed at the right thing, done in an acceptable way, and worked for
+them, on Wolf's (1978) three levels, quoted word for word with page numbers.
+
+- **Setup** holds the student, the plan, when the pre and post rounds were
+  taken, the respondents (student, caregiver, implementers, administrator,
+  each with a mode such as read aloud, interview or pictorial, an anonymity
+  flag, dates and, for implementers, their own CF-1 values-domain means) and
+  the four conditions of administration per round (options explained, no
+  coercion, anonymity, the open question first). A missing student or
+  caregiver row is flagged, not blocked, and the reason recorded.
+- **Goals** (pre and post) and **Procedures** (pre and post; ethics, cost,
+  practicality, the alternative, the reinforcers) ask an open item first,
+  then rate on the 1 to 6 scale CF-1 uses, with student-worded items for the
+  student and the cost items for the administrator. **Effects** (post only)
+  asks what is better or worse before any rating, and reverse-scores "something
+  has got worse".
+- **Summary** computes means per section, round and role group, the paired
+  pre-to-post change per item, items at or below the toolbar threshold, items
+  on which the roles disagree, the concordance of the consumers' effect
+  ratings with the PR-1 change figure and the independent-use answer (which
+  never upgrades PR-1's suggestion), each implementer's CF-1 values mean
+  beside their SV-1 procedures mean, a checks list, and copy-ready text for
+  FS-1 (a source with no tier, no function and no strength, not counted
+  toward convergence) and for PR-1 section 4. The verdict labels are the
+  form's working conventions and the Guide says so.
+- **Guide** carries the three levels, who judges, the boundary with CF-1,
+  when to administer, how the figures are calculated and Wolf's cautions:
+  that subjective data are risky data, the Berleman et al. example of high
+  satisfaction with no measured effect, the ways situational contingencies
+  distort a rating, and that satisfaction never replaces outcome data.
+- Save, open, CSV (long format), print with both rounds captioned, and a
+  simulation (a teacher, a paraeducator, a parent interviewed by phone and
+  the student rating by a pictorial scale, two rounds, a flagged unplanned
+  negative effect at home) as on PD-1. Built with `tools/new-form.py`.
+
+### Forms extended from the 2026 papers
+
+- **PA-1, competing stimulus sheet** (Breeman, Irwin Helvey & Greer, 2026;
+  Frank-Crawford, Cavanaugh, Piersma & Sauter, 2026). Series with a
+  no-stimulus control trial first and a randomized order (1 to 6 series,
+  three by default); engagement or contact as the measure, in percent of
+  intervals or responses per minute; the reduction formula with an increase
+  reported as such; the published high-competition criteria as selectable
+  conventions, 80% reduction the default and labelled the modal criterion
+  with no consensus; high competition decoupled from engagement; augmented
+  conditions (prompted engagement, prompting with blocking as necessary,
+  repeated free access) with prompt and block tallies and "HC with
+  disruption" labels, restricted to automatic function; a validation and
+  consistency block (treatment-check correspondence within 10 points, the
+  high-preference and non-indicated comparisons, a re-test table); the runner
+  follows the series and conditions; guide, walkthrough and references.
+- **RA-1, concurrent operants sheet** (Randall & Kranak, 2026). An
+  Arrangement switch adds a condition-comparison mode: stopwatches for each
+  side, neither and refusing, a condition library tagged by stimulus class, a
+  pairing table that derives the constant and test variables, a
+  counterbalanced session grid with the tutorial's side-duration formula, a
+  phase-lined allocation graph with problem-behavior bars, the decision rules
+  (60% majority for three consecutive sessions, no majority after five,
+  flip-flop, side bias, problem-behavior and refusal barriers, isolated before
+  synthesized), per-condition verdicts that reach the summary as relative
+  evidence, three guide questions, a walkthrough example and the reference.
+  The guide states that a COA identifies reinforcers for choice, not the
+  function of the target behavior. Station mode is unchanged.
+- **RM-1** (Mitteer, Fisher, Greer & Helvey, 2026). Setup gains the
+  imminent-harm, precursor, baseline-schedule, onset-schedule and
+  thinning-start fields; the inoculation plan's lean-baseline, lean
+  alternative and extended-duration rows carry the pooled clinical results
+  and a combined-package row is listed so it is ruled out deliberately; a
+  table of the four momentum-informed strategies in pooled clinical tests
+  and a table of working conventions for choosing among them; the challenge
+  log defines the baseline mean; the analysis reports peak and mean raw rate
+  beside proportion of baseline; six references added.
+- **TD-1** (Lemons & Wilder, 2026; Fergus, Ahearn, Matthews & Pandola, 2026;
+  Bann & Morris, 2026). A High-Probability Sequence Planner on the
+  Antecedents sheet (target instruction, high-p pool with probe cooperation,
+  sequence set and order, the study's timing values as starting values, a
+  13-step fidelity checklist) with the A_HIGHP card rewritten; assessment
+  add-ons on Setup (A-CSA phase, process-versus-product, component FA); a
+  higher-level RRB route in the automatic selection model with five build
+  cards (three competing stimuli, prompted engagement, response blocking with
+  restoration and redirection, preferred-product placement, FCT keyed to a
+  component-FA result), a competing-stimulus package planner with its own
+  fidelity checklist and a thinning ladder; the escape, attention and
+  tangible models ask whether the function came from a component FA; guide
+  evidence, references and an `auto_rrb` simulation scenario.
+- **TI-1, ST-1, PR-1** (O'Neill et al., 2026; Burlison et al., 2026). TI-1
+  tags each protocol step as an antecedent or consequence component, counts
+  opportunities on consequence steps, separates commission from omission
+  errors, bands fidelity and orders retraining by error class; its hand-off
+  to ST-1 carries the component, priority and counts. ST-1 rehearses the
+  hard cases (the moment after the target behavior, divided attention, an
+  easily missed earned reinforcer, the trial after an error) and adds a
+  zero-commission gate on consequence steps before competency, with a first
+  TI-1 re-check date. PR-1 imports a TI-1 record (in the workstation or from
+  its file), carries fidelity across the review period beside outcome, and
+  applies a plan-run gate (a form convention) before a plan is judged, with
+  a retrain-before-revise route when it fails.
+- **EA-1, TB-1, FS-1** (Bann & Morris, 2026; Fergus et al., 2026). EA-1 gains
+  the component functional analysis (24-trial grid, evocative and reinforcing
+  probabilities, cut-offs, confirmation by a multielement FA) and the
+  higher-level RRB analysis (baited room, no-interaction series, the four
+  reading rules, the process-versus-product and augmented
+  competing-stimulus follow-ons as printed protocols with result fields),
+  two simulator scenarios and a criterion selector on the interpretation
+  sheet. TB-1 gains the arranging-and-ordering definition template with a
+  load-into-target tool, collateral measures, safety flags and distance
+  thresholds for forceful topographies. FS-1 states what the report carries
+  for both formats and prints it in the report.
+
+### The page bar
+
+Every form now ends with a **Previous / Next** bar under its last page, built
+by the polish script from the form's own view control (the segmented views or
+the tab row): it names the page before and after, shows "Page n of N", and a
+click opens that page and returns to the top, so the next page is a click away
+without scrolling back up. It is screen-only: the bar is taken out of the
+document while a print or the packet reads the form, so paper is unchanged.
+
+### What was checked
+
+| Check | Result |
+|---|---|
+| Every form printed on its own from the same data as the v21.25 run, after the page bar and the literature pass | <!--PRINT--> |
+| axe-core, WCAG 2.1 A and AA: the workstation (empty, with a form open, fullscreen, Help) and every form with its simulation loaded, with the page bar | 0 violations |
+| PD-1: skip rules, progress count, simulation, every view at 1440 and 390px, save/open round trip (identical), a CF-1 file refused, CSV, print, inside the workstation | pass, 0 script errors |
+| Each extended form: inline scripts parse, simulation loaded, every view screenshotted and read, save/open round trip of every new field, print, 390px | pass for each (reports in the session) |
+| The page bar on all forms: present, steps through every page, hidden in print, inside the workstation frame and on a phone | 33 of 33 |
