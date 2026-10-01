@@ -490,6 +490,75 @@ td input,td select{max-width:100%}
 }
 @media print{.ra-run,.ra-run-flash,.ra-run-pill{display:none!important}}
 </style>
+<style id="ra-coa-css">
+/* ============ RA-1 condition-comparison (COA, duration) mode (v21.22) ============
+   A second mode of the Concurrent operants sheet after Randall & Kranak (2026).
+   html.co-coa is set from the sheet's Arrangement select; .co-st-only is the
+   stations content, .co-coa-only the condition-comparison content. */
+html.co-coa .co-st-only{display:none!important}
+html:not(.co-coa) .co-coa-only{display:none!important}
+#co .coa-ident{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin:4px 0 14px}
+#co .coa-ident .f input{font-size:13px;max-width:64px;text-align:center;flex:0 0 auto}
+#co .coa-ident .f span.coa-echo{font-size:13px;font-variant-numeric:tabular-nums}
+#co .defs .dval select.inline{margin:3px 6px;font-size:13px;max-width:100%}
+#co .defs .dval label.coa-chk{font-size:12px;font-family:var(--sans);color:var(--ink-soft);margin:3px 6px;display:inline-block}
+#co .defs .dval .coa-sub{display:block;font-size:11px;font-family:var(--sans);color:var(--ink-soft);margin:0 6px 2px}
+#co .coa-grid{overflow-x:auto}
+#co button.tool{font:600 11.5px var(--sans);padding:4px 10px;border-radius:4px;border:1px solid var(--rule);background:#fff;color:var(--ink);cursor:pointer;margin:4px 6px 10px 0}
+#co button.tool:hover{background:var(--wash)}
+#co button.rm{font:600 11px var(--sans);padding:1px 7px;border-radius:3px;border:1px solid var(--rule-2);background:transparent;color:var(--ink-soft);cursor:pointer;white-space:nowrap}
+#co button.rm:hover{background:#faf0e6;color:#9b4e15}
+#co table.rank td.coa-calc{background:var(--wash);font-size:11px;line-height:1.4}
+#co table.rank#coaLib th:nth-child(2){width:20%}
+#co table.rank#coaLib th:nth-child(7){width:14%}
+#co table.rank#coaPairs{table-layout:fixed}
+#co table.rank#coaPairs th:nth-child(1){width:3%}#co table.rank#coaPairs th:nth-child(2),#co table.rank#coaPairs th:nth-child(3){width:10%}
+#co table.rank#coaPairs th:nth-child(4){width:9%}#co table.rank#coaPairs th:nth-child(5){width:10%}#co table.rank#coaPairs th:nth-child(6){width:16%}
+#co table.rank#coaPairs th:nth-child(7){width:9%}#co table.rank#coaPairs th:nth-child(8){width:7%}#co table.rank#coaPairs th:nth-child(9){width:12%}
+#co table.rank#coaPairs th:nth-child(10){width:6%}#co table.rank#coaPairs th:nth-child(11){width:8%}
+#co table.rank#coaPairs th,#co table.rank#coaPairs td{padding-left:4px;padding-right:4px}
+#co table.rank#coaPairs td{overflow-wrap:anywhere;overflow:hidden}#co table.rank#coaPairs .tag{white-space:normal;overflow-wrap:normal;padding:1px 4px}
+#co table.rank#coaPairs td select,#co table.rank#coaPairs td input{min-width:0;width:100%;box-sizing:border-box;padding-left:0;padding-right:0}
+#co table.rank#coaPairs button.rm{padding:1px 4px}
+#co table.rank#coaPairs td.coa-calc,#co table.rank#coaSum td{vertical-align:top}
+#co table.rank#coaLib td input,#co table.rank#coaPairs td input,#co table.rank#coaConf td input{min-width:60px}
+#co table.rank#coaLib td select,#co table.rank#coaPairs td select,#co table.rank#coaConf td select{min-width:72px}
+#co table.rank#coaLib td.coa-who input{min-width:50px;font-size:11px}
+#co table.grid#coaTbl td.c input[type=number]{width:46px}
+#co table.grid#coaTbl td.c input.coa-txt{width:64px;border:0;background:transparent;font:inherit;font-size:11px;padding:2px 0}
+#co table.grid#coaTbl td.c input.coa-txt.coa-note{width:120px;text-align:left}
+#co table.grid#coaTbl td.c input.coa-txt:focus{background:var(--wash);outline:none}
+#co table.grid#coaTbl td.c select{max-width:96px}
+#co .coa-flag{color:#9b4e15;font-size:10.5px;font-family:var(--sans)}
+#co .coa-rule{border:1px solid var(--rule-2);padding:8px 12px;margin:0 0 8px;font-size:12.5px;line-height:1.5}
+#co .coa-rule b.coa-ph{font-family:var(--sans);font-size:11.5px;color:var(--ink)}
+#co .coa-rule .coa-fl{display:block;margin-top:3px;color:#7a3c0f}
+#co .coa-rule .coa-fl.coa-order{color:var(--ink-soft)}
+#co .coa-rule .coa-an{display:block;margin-top:3px;color:var(--ink-soft)}
+#co .coa-class{border:1px solid var(--rule-2);padding:8px 12px;margin:0 0 12px;font-size:12.5px;line-height:1.5}
+#co .coa-class b{font-family:var(--sans);font-size:11.5px;color:var(--ink);display:inline-block;min-width:150px}
+#co .coa-class div{margin-bottom:3px}
+.figure svg .coa-pb{fill:#cdd5d9}
+.figure svg .coa-thr{stroke:var(--ink-soft);stroke-width:1;stroke-dasharray:2 3}
+#co .sumhead > div{min-width:0}
+#co .sumhead select.inline{max-width:100%;min-width:0}
+@media (max-width:620px){
+  #co .coa-ident{grid-template-columns:minmax(0,1fr)}
+  #co table.rank#coaConf,#co table.rank#coaLib,#co table.rank#coaPairs,#co table.rank#coaSum{display:block;overflow-x:auto;max-width:100%}
+  #co .coa-rule,#co .coa-class{overflow-wrap:anywhere}
+}
+@media print{
+  #co table.grid#coaTbl{font-size:8.5px}
+  #co table.grid#coaTbl td.c input[type=number]{width:30px;font-size:8.5px}
+  #co table.grid#coaTbl td.c input.coa-txt{width:40px;font-size:8.5px}
+  #co table.grid#coaTbl td.c input.coa-txt.coa-note{width:70px}
+  #co table.grid#coaTbl td.c input.dt{width:52px;font-size:8.5px}
+  #co table.grid#coaTbl td.c select{font-size:8.5px;max-width:60px}
+  #co .coa-grid{overflow:visible}
+  #co .coa-rule,#co .coa-class{break-inside:avoid;page-break-inside:avoid}
+  #co table.rank#coaConf,#co table.rank#coaLib,#co table.rank#coaPairs,#co table.rank#coaSum{display:table;overflow:visible}
+}
+</style>
 <style id="wk-css">
 /* ===== Form RA-1 walkthrough: the seventh view. Scoped to #walk; the brand tokens are the form's ===== */
 body.view-walk #walk{display:block}
@@ -897,6 +966,12 @@ body.view-walk #walk{display:block}
     <div class="a">Deliver the interaction itself as the consequence and use a response that does not already produce attention (a practice rule of this form). Kelly et al. (2014) assessed preference among photographed forms of attention, with a control card that produced nothing, and then tested the forms as reinforcers for mands. For escape as a reinforcer, the consequence is a break from the task and the control condition is the task with no break; document that arrangement in the setup.</div>
     <div class="q">6. Is a stimulus that the plan depends on losing effect?</div>
     <div class="a">Re-run the progressive-ratio test and compare break points to the earlier ones. A falling break point with stable preference points to satiation or a magnitude problem; a falling preference rank points to a need to rotate stimuli (practice rules of this form). Hanley, Iwata, and Roscoe (2006) found preferences relatively stable over 3 to 6 months for 80% of participants, showed that extended daily access to a high-preference item could shift preference, and suggested varying reinforcers and assessing preference frequently.</div>
+    <div class="q">7. When should I run the condition-comparison (COA) mode instead of stations?</div>
+    <div class="a">Stations test <b>which stimulus</b> the student works for when the work is identical. A condition comparison (COA; Randall &amp; Kranak, 2026) tests <b>which contingency</b> the student stays in when two are available at once, measured as the share of the session spent on each side. Use the COA mode when a functional analysis is not feasible in the setting (for example, district policy) or was undifferentiated after modifications such as a pairwise FA, extended sessions or additional reinforcers, and the question is which classes of reinforcer (attention, tangibles, escape from a demand) the student will allocate behavior toward; practitioners who can run an FA are encouraged to do that first (pp. 781&ndash;782). The prerequisite is that the student makes discriminated choices; diagnosis and verbal repertoire are not the inclusion criteria. If that is uncertain, run a pre-assessment first: no stimuli versus all stimuli on the two halves, or equal stimuli on both halves. A student who switches often between equal sides or allocates to the empty side may not yet have the repertoire (p. 782); the fallback is a free-operant arrangement with stimulus fading, 10 items then fewer and further apart. A COA does not show what maintains the target behavior; it identifies reinforcers for choice-making, which the replacement behavior can be reinforced with (p. 780). The tutorial assumes a socially mediated function; suspected automatic function calls for a competing-stimulus assessment first. It is not suitable when the student cannot scan, select and engage with two concurrently available conditions (p. 794).</div>
+    <div class="q">8. How do I read a COA pairing?</div>
+    <div class="a">A COA compares two test conditions, not a test against a control, so what a pairing can show depends on what the two conditions share and what only one of them has (p. 787). Classes present in both conditions at the same level are <b>constant variables</b> and allow no specific determination; a class present in one condition only is the <b>test variable</b>. Attention plus tangibles versus academic worksheets alone tests attention, tangibles and escape; the same attention plus tangibles versus high-preferred toys alone no longer tests escape. Tag demands as potentially aversive stimuli, not escape: escape is read from allocation <b>away</b> from that side (p. 786). The sheet derives the constant and test variables for each pairing and prints what allocation toward each side is evidence for. Weight later pairings more than earlier ones and read the cumulative pattern rather than any one pairing (p. 792); then confirm the chosen reinforcer in the single-operant or progressive-ratio sheet before it is written into the plan (p. 792; Randall et al., 2025, as cited in Randall &amp; Kranak, 2026). Preferences shift over time, so replicate and re-check (Hanley et al., 2006).</div>
+    <div class="q">9. What do I do if the student will not choose, or problem behavior occurs during a COA?</div>
+    <div class="a"><b>Problem behavior.</b> Some pairings, such as two non-preferred demand conditions, can occasion problem behavior. Allow the student to avoid making either choice (for example, reinforce the problem behavior with escape), collect data on the time spent avoiding a choice and on the problem behavior, and redesign so that any evocative choice is presented with an option that has not produced problem behavior in the past; if problem behavior continues to occur frequently and the COA was chosen because an FA failed to evoke it, progress to an FA (pp. 789&ndash;790). <b>Refusal to choose.</b> Remove the instruction, or offer a third option in which no choice is required between the two primary options and keep that option for the rest of the assessment; if refusal persists even after teaching tolerance of choice-making, discontinue the COA (p. 790). <b>Automatically maintained behavior that disrupts sessions.</b> First identify stimuli that could mitigate it, for example with an augmented competing stimulus assessment (Frank-Crawford et al., 2023, as cited in Randall &amp; Kranak, 2026).</div>
   </div>
 
   <h3 class="sub">Design Comparison</h3>
@@ -906,6 +981,7 @@ body.view-walk #walk{display:block}
       <tr><td>Single operant, reversal (A-B-A-B)</td><td>Absolute reinforcement effect of one stimulus</td><td>Baseline: response available, no consequence. Reinforcement: same response, stimulus on FR 1 (or the plan's schedule). Alternate phases until the effect replicates.</td><td>Slow when several stimuli must be tested; a stimulus that reinforces here may not be chosen when a better one is available. Baseline rates near zero for arbitrary responses can make small effects look large.</td><td>Roscoe et al., 1999</td></tr>
       <tr><td>Single operant, multielement</td><td>Absolute effects of several stimuli, each in its own sessions</td><td>Sessions alternate among a no-consequence control and one stimulus per session, signaled by a distinct card or setting. Compare rates across conditions.</td><td>Carryover between sessions; requires discriminable signals; results depend on session order early in the assessment.</td><td>This form's arrangement, applying the single-schedule test of Roscoe et al., 1999</td></tr>
       <tr><td>Concurrent operants</td><td>Relative effect: which stimulus is chosen when both are available for equal work</td><td>Two or three identical responses (same effort) in fixed positions, each producing a different stimulus or nothing. Record responses to each option; rotate positions across sessions.</td><td>Sensitive to relative, not absolute, value: a less preferred stimulus can show zero allocation and still reinforce alone. Position bias must be checked. Responses that differ in effort confound the comparison.</td><td>Fisher et al., 1992; Piazza et al., 1996; Roscoe et al., 1999; Francisco et al., 2008</td></tr>
+      <tr><td>Condition comparison (COA)</td><td>Relative effect: which of two concurrently available contingencies (conditions) the student stays in; the classes of social reinforcer (attention, tangibles, escape from a demand) the student allocates behavior toward</td><td>Divide the space in half with a distinct signal per side. Two conditions at a time, counterbalanced across sides; several consecutive sessions of equal length (5 min in the tutorial&rsquo;s examples); record seconds on each side; a majority at or above 60% for at least 3 consecutive sessions before the next pairing; isolated conditions before synthesized ones; graph as a simultaneous-treatment design with problem behavior per minute.</td><td>Identifies reinforcers for choice, not the function of the target behavior. Conclusions depend on the pairing. Few published studies, and their procedures differ; agreement with FA outcomes is reported but concurrent validity has not been evaluated explicitly. Not suitable when the student cannot make selections between two concurrently available conditions. Assumes a socially mediated function. Some pairings can evoke problem behavior. Preferences shift over time; side bias and unequal space can bias allocation. Interactions among reinforcers are an open question. A tutorial, not a manualized approach; its training materials have not been empirically validated.</td><td>Randall &amp; Kranak, 2026, following Harding et al., 1999; Berg et al., 2007; Lloyd et al., 2020 (as cited there)</td></tr>
       <tr><td>Progressive ratio</td><td>Potency: the largest ratio the stimulus will maintain (break point)</td><td>Ratio increases after each reinforcer by a fixed step. Session ends when no response occurs for the stop interval. Break point = last completed ratio. Run a no-reinforcer control session and 2&ndash;3 sessions per stimulus.</td><td>Break points can change with the stop interval, session cap, and magnitude, and the number of ratios completed falls as step size grows, so results are only comparable within the same parameters. Ratio strain and problem behavior can occur at high ratios; set a session cap. A single break point is unstable.</td><td>Stafford &amp; Branch, 1998; Roane et al., 2001; Penrod et al., 2008; Trosclair-Lasserre et al., 2008; DeLeon et al., 2009; Poling, 2010</td></tr>
     </tbody>
   </table>
@@ -929,12 +1005,13 @@ body.view-walk #walk{display:block}
     <li><b>Access periods.</b> When a reinforcer is due, the runner cues it; for a timed item it counts the access down and cues the end, when you remove the item. A response during an access period is counted, but it does not count toward the next reinforcer or ratio.</li>
     <li><b>Single operant.</b> Tap <b>Response</b> for every response. In a stimulus condition the runner counts toward the schedule (FR 1 unless you set another <b>Schedule (FR)</b> to test a plan schedule) and cues the reinforcer each time the requirement is met; in Control the response produces nothing. <b>Minutes on the sheet</b> writes the minutes run, or, when access time is subtracted, the minutes run less the access time. In a reversal design the runner ticks Phase start when the condition differs from the session before.</li>
     <li><b>Concurrent operants.</b> Set <b>Option A position</b> (the runner suggests the next position in the rotation), then prompt one response at each station and deliver its consequence before pressing <b>Start session</b>; those responses are not counted. Tap the button for the station the student responds at (keys 1, 2, 3, in the order of the sheet's columns). Each stimulus option runs its own schedule and access time; the control option produces nothing. The summary also shows changeovers for reference; the sheet has no column for them.</li>
+    <li><b>Condition comparison (COA).</b> With <b>Arrangement</b> on the Concurrent operants sheet set to Condition comparison, the sheet opens a different runner. Choose the pairing and the side of Condition 1 (the runner suggests the side opposite the pairing&rsquo;s last session), place the student at the neutral spot, give the contingency overview, then press <b>Start session</b> and tap <b>Side 1</b>, <b>Neither</b> or <b>Side 2</b> as the student moves (keys 1, 0, 2); each is a stopwatch and only one runs at a time. <b>Refusing to choose</b> (R) is a sub-timer under Neither, <b>Problem behavior</b> (P) counts instances, and <b>Prompt to choose</b> (C) logs each prompt with its time. The session ends at the toolbar length or with <b>End session</b>, and <b>Save to the sheet</b> writes the durations, problem behavior, prompts and the side of Condition 1 to the next empty row of the session grid.</li>
     <li><b>Progressive ratio.</b> The runner shows the ratio in effect and the responses toward it. When the ratio is met it cues the reinforcer, times the access, and moves to the next ratio in the progression. The stop-interval clock restarts with each response and at the end of each access period, and it waits while an item is being accessed; the session ends when the stop interval runs out or at the session cap. <b>Save to the sheet</b> ticks the completed ratios, and the sheet computes the break point, responses, and ratios completed from the ticks. In a control session the same progression runs and completing a ratio produces nothing. If Setup has no session cap, the runner uses 20 min and enters it in Setup when you save, so the printed parameters show the cap that was used.</li>
     <li><b>Problem behavior.</b> Tap <b>Problem behavior</b> for each instance. The sheet records whether problem behavior occurred in the session; the runner shows Setup's stop rule, and <b>End session</b> ends the session early when the rule applies.</li>
     <li><b>Mistakes and interruptions.</b> <b>Undo</b> removes the last tap and cancels the access period that tap started; once that access period is over, the tap can no longer be undone in the runner, so correct the row on the sheet after saving. <b>Pause</b> stops the clock, the stop interval, and any access time; <b>Resume</b> goes on. <b>Discard</b> throws the session away without writing anything. One session runs at a time; on the other views a pill in the corner shows it and returns to it.</li>
     <li><b>Alerts and keys.</b> A rising tone, an amber flash around the screen edge, and a vibration on a phone or tablet mean deliver the reinforcer now; a falling tone means access is over; a longer tone and a green flash mean the session is over; a soft tone marks a completed ratio in a progressive-ratio control session. <b>Alerts on</b>, <b>Sound</b>, <b>Flash</b>, and <b>Vibrate</b> turn them on or off, and <b>Test alert</b> plays one. Keys while a session runs: Space or R for a response (1, 2, 3 on the concurrent-operants sheet), P for problem behavior, Z to undo. Keep the form in front during a session; the screen is kept awake where the browser allows it.</li>
   </ul>
-  <div class="cite">Decision rules synthesize Fisher et al. (1992), Piazza et al. (1996), Roscoe et al. (1999), Roane et al. (2001), and the cautions in Poling's (2010) commentary. Full references are on the summary sheet.</div>
+  <div class="cite">Decision rules synthesize Fisher et al. (1992), Piazza et al. (1996), Roscoe et al. (1999), Roane et al. (2001), and the cautions in Poling's (2010) commentary; the condition-comparison (COA) mode follows Randall and Kranak (2026). Full references are on the summary sheet.</div>
 </div>
 
 <!-- ================================================================ SETUP -->
@@ -1057,7 +1134,7 @@ body.view-walk #walk{display:block}
     <div class="nbh-print-meta"><div class="nbh-print-title">Reinforcer Assessment Protocol</div><div>Form RA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Concurrent-Operants Assessment</div>
-  <div class="ra-run noprint" id="ra-run-co" data-ra-view="co" role="region" aria-label="Concurrent-operants session runner">
+  <div class="ra-run noprint co-st-only" id="ra-run-co" data-ra-view="co" role="region" aria-label="Concurrent-operants session runner">
     <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Times the session at the toolbar length, counts responses at each station, runs each option's schedule and access time, and writes the next row of the sheet below.</span></div>
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-co-pos">Option A position</label><select id="ra-run-co-pos"><option value="">Not recorded</option><option value="L">L</option><option value="M">M</option><option value="R">R</option></select><span class="ra-run-src" id="ra-run-co-possrc"></span></div>
@@ -1103,17 +1180,107 @@ body.view-walk #walk{display:block}
   <div class="sumhead">
     <div><b>Student</b><span class="echo-client"></span></div>
     <div><b>Response</b><span class="echo-response"></span></div>
-    <div><b>Options per session</b><span><select class="inline" data-meta="coOpts" id="coOpts"><option value="2">2 (stimulus vs. stimulus)</option><option value="3">3 (two stimuli + control)</option><option value="c">stimulus vs. control</option></select></span></div>
+    <div class="co-st-only"><b>Options per session</b><span><select class="inline" data-meta="coOpts" id="coOpts"><option value="2">2 (stimulus vs. stimulus)</option><option value="3">3 (two stimuli + control)</option><option value="c">stimulus vs. control</option></select></span></div>
+    <div><b>Arrangement</b><span><select class="inline" data-meta="coMode" id="coMode"><option value="st">Stimulus stations (responses)</option><option value="coa">Condition comparison, COA (duration)</option></select></span></div>
   </div>
-  <div class="warn"><b>Procedure</b>
+  <p class="method co-mode-note">Stations test <em>which stimulus</em> the student works for when the work is identical. A condition comparison (COA; Randall &amp; Kranak, 2026) tests <em>which contingency</em> the student stays in when both are available at once, measured as the share of the session spent on each side. Use the COA mode when a functional analysis is not allowed in the setting or was undifferentiated, and the question is which classes of reinforcer (attention, tangibles, escape from a demand) the student will allocate behavior toward. A COA does not show what maintains the target behavior; it shows what the replacement behavior can be reinforced with (p. 780).</p>
+  <div class="warn co-st-only"><b>Procedure</b>
     Set out two or three identical response stations, equally spaced. Each station produces a different consequence: one stimulus each, and, when included, a control station that produces nothing. Before each session, prompt one response at every station and deliver its consequence so the student contacts each contingency. Then run the session without prompts and record responses at each station. Rotate station positions every session and record the position of Option A. Compare allocation across stations.</div>
-  <div class="readout" id="coReadout"></div>
-  <div class="gridwrap"><table class="grid" id="coTbl"></table></div>
-  <div class="figure"><h3>Proportion of Responses Allocated to Each Option</h3><p class="cap">One line per option; the control option, when used, is dashed. A stimulus option that stays above the control across position rotations is preferred relative to the alternatives in that session.</p><svg id="coPlot" viewBox="0 0 640 220"></svg></div>
-  <h3 class="sub">Allocation Summary</h3>
-  <table class="rank" id="coRank"><thead><tr><th>Option</th><th class="n">Sessions</th><th class="n">Total responses</th><th class="n">Mean % allocation</th><th class="n">Sessions with most responses</th><th class="n">Position effect</th><th>Relative standing</th></tr></thead><tbody></tbody></table>
-  <p class="method">Verdict labels are working conventions, applied in this order: <b>Preferred</b> = mean allocation &ge; 60% and the most responses (or a tie for the most) in more than half the sessions; <b>Comparable</b> = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; <b>Not chosen</b> = mean allocation &lt; 20%; <b>Lower</b> = any other option: 20% or more of the responses, but more than 20 points below the leader. "Position effect" is computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions, None otherwise (&mdash; until it has been scored in two positions; n/a for the other options). A stimulus that is "not chosen" here can still be a reinforcer; that is the single-operant question.</p>
-  <div class="cite">Concurrent-operants arrangement after Fisher et al. (1992, <em>JABA, 25</em>, 491&ndash;498) and Piazza, Fisher, Hagopian, Bowman, and Toole (1996, <em>JABA, 29</em>, 1&ndash;9), who used it to show that high-preference stimuli functioned as reinforcers relative to lower-preference ones. Roscoe et al. (1999) and Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) showed the arrangement measures relative value and can mask absolute effects.</div>
+  <div class="readout co-st-only" id="coReadout"></div>
+  <div class="gridwrap co-st-only"><table class="grid" id="coTbl"></table></div>
+  <div class="figure co-st-only"><h3>Proportion of Responses Allocated to Each Option</h3><p class="cap">One line per option; the control option, when used, is dashed. A stimulus option that stays above the control across position rotations is preferred relative to the alternatives in that session.</p><svg id="coPlot" viewBox="0 0 640 220"></svg></div>
+  <h3 class="sub co-st-only">Allocation Summary</h3>
+  <table class="rank co-st-only" id="coRank"><thead><tr><th>Option</th><th class="n">Sessions</th><th class="n">Total responses</th><th class="n">Mean % allocation</th><th class="n">Sessions with most responses</th><th class="n">Position effect</th><th>Relative standing</th></tr></thead><tbody></tbody></table>
+  <p class="method co-st-only">Verdict labels are working conventions, applied in this order: <b>Preferred</b> = mean allocation &ge; 60% and the most responses (or a tie for the most) in more than half the sessions; <b>Comparable</b> = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; <b>Not chosen</b> = mean allocation &lt; 20%; <b>Lower</b> = any other option: 20% or more of the responses, but more than 20 points below the leader. "Position effect" is computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions, None otherwise (&mdash; until it has been scored in two positions; n/a for the other options). A stimulus that is "not chosen" here can still be a reinforcer; that is the single-operant question.</p>
+  <div class="cite co-st-only">Concurrent-operants arrangement after Fisher et al. (1992, <em>JABA, 25</em>, 491&ndash;498) and Piazza, Fisher, Hagopian, Bowman, and Toole (1996, <em>JABA, 29</em>, 1&ndash;9), who used it to show that high-preference stimuli functioned as reinforcers relative to lower-preference ones. Roscoe et al. (1999) and Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) showed the arrangement measures relative value and can mask absolute effects.</div>
+  <!-- ======== Condition comparison (COA, duration) mode, v21.22: Randall & Kranak (2026) ======== -->
+  <div class="co-coa-only" id="coaBlock">
+  <div class="ra-run noprint" id="ra-coa-run" role="region" aria-label="Condition-comparison session runner">
+    <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Times the session at the toolbar length, runs one stopwatch per side (Side 1, Neither, Side 2) with a Refusing sub-timer under Neither, counts problem behavior and prompts to choose, and writes the next row of the session grid below.</span></div>
+    <div class="ra-run-set">
+      <div class="ra-run-f"><label for="ra-coa-pair">Pairing</label><select id="ra-coa-pair"></select></div>
+      <div class="ra-run-f"><label for="ra-coa-side">Side of Condition 1</label><select id="ra-coa-side"><option value="">Not recorded</option><option value="L">L</option><option value="R">R</option></select><span class="ra-run-src" id="ra-coa-sidesrc"></span></div>
+    </div>
+    <p class="ra-run-info" id="ra-coa-info"></p>
+    <div class="ra-run-main">
+      <div class="ra-run-clock">
+        <div class="ra-run-cap">Time left</div>
+        <div class="ra-run-big" id="ra-coa-left">5:00</div>
+        <div class="ra-run-sub"><b id="ra-coa-state">Ready</b> <span id="ra-coa-el">0:00 elapsed</span></div>
+        <div class="ra-run-bar" aria-hidden="true"><span id="ra-coa-bar"></span></div>
+      </div>
+      <div class="ra-run-cue" id="ra-coa-cue"><b id="ra-coa-cueh">Ready</b><span id="ra-coa-cuet">Place the student at the neutral spot, give the contingency overview, answer questions, then press Start session. The Neither timer runs until you tap a side.</span></div>
+    </div>
+    <div class="ra-run-rec" id="ra-coa-rec">
+      <button type="button" class="ra-run-opt" id="ra-coa-s1" data-side="1" aria-pressed="false" disabled>Side 1<span class="ra-run-n" id="ra-coa-t1">0:00</span><span class="ra-run-k" id="ra-coa-l1">Condition 1</span></button>
+      <button type="button" class="ra-run-opt ra-run-ctlopt" id="ra-coa-s0" data-side="0" aria-pressed="false" disabled>Neither<span class="ra-run-n" id="ra-coa-t0">0:00</span><span class="ra-run-k">on the line or at the neutral spot</span></button>
+      <button type="button" class="ra-run-opt" id="ra-coa-s2" data-side="2" aria-pressed="false" disabled>Side 2<span class="ra-run-n" id="ra-coa-t2">0:00</span><span class="ra-run-k" id="ra-coa-l2">Condition 2</span></button>
+      <button type="button" class="ra-run-pb" id="ra-coa-ref" aria-pressed="false" disabled>Refusing to choose<span class="ra-run-n" id="ra-coa-tref">0:00</span><span class="ra-run-k">counts under Neither</span></button>
+      <button type="button" class="ra-run-pb" id="ra-coa-pb" disabled>Problem behavior<span class="ra-run-n" id="ra-coa-pbn">0</span></button>
+      <button type="button" class="ra-run-undo" id="ra-coa-prompt" disabled>Prompt to choose<span class="ra-run-n" id="ra-coa-prn">0</span></button>
+    </div>
+    <p class="ra-run-keys">Keys while the session runs: <b>1</b> Side 1, <b>0</b> Neither, <b>2</b> Side 2, <b>R</b> refusing on or off, <b>P</b> problem behavior, <b>C</b> prompt to choose.</p>
+    <div class="ra-run-ctl">
+      <button type="button" class="ra-run-go" id="ra-coa-start">Start session</button>
+      <button type="button" id="ra-coa-end" disabled>End session</button>
+      <button type="button" id="ra-coa-save" disabled>Save to the sheet</button>
+      <button type="button" id="ra-coa-discard" disabled>Discard</button>
+      <span class="ra-run-gap"></span>
+      <button type="button" class="ra-run-tog" id="ra-coa-sound" aria-pressed="true">Sound</button>
+    </div>
+    <div class="ra-run-msg" id="ra-coa-msg" role="status" aria-live="polite"></div>
+  </div>
+  <div class="warn"><b>Procedure (condition comparison, COA)</b>
+    Divide the space in half with tape and post a distinct signal on each side (a lettered colored sheet or poster); keep the halves equal in space. Present two conditions at a time. Start the student at the neutral spot on the line, give the contingency overview or the exposure the setup specifies, and begin once there are no questions. Time the seconds the student spends on each side under the choice definition; both side timers pause on the line. Run the same pairing in consecutive sessions of equal length, moving each condition to the other side in its next session, until a majority at or above the threshold holds for the set number of consecutive sessions; then move to the next pairing. Test isolated conditions before synthesized ones. Record problem behavior and time refusing to choose in every session.</div>
+
+  <h3 class="sub">COA Setup</h3>
+  <div class="defs">
+    <div class="drow"><div class="dlab">Entry reason</div><div class="dval"><select class="inline" data-meta="coa_entry"><option value=""></option><option>FA not feasible in this setting</option><option>FA undifferentiated after modifications</option><option>Other</option></select><span class="coa-sub">If the FA was undifferentiated, list the modifications tried (pairwise FA, extended sessions, additional reinforcers) before concluding it failed to evoke:</span><textarea data-meta="coa_mods" placeholder="e.g., pairwise FA, 10-min sessions, harder demands, varied HP stimuli" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Choice repertoire check</div><div class="dval"><select class="inline" data-meta="coa_rep"><option value=""></option><option>Not needed (known)</option><option>Pre-assessment: no stimuli vs all stimuli</option><option>Pre-assessment: equal stimuli both sides</option><option>Free operant with stimulus fading</option></select><span class="coa-sub">Result. A student who switches often between equal sides or allocates to the no-stimuli side may not yet have the repertoire for choice making; the COA is not yet valid (p. 782).</span><textarea data-meta="coa_repres" placeholder="e.g., stayed on the stimulus side 94% of the session; no switching with equal stimuli" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Instruction to choose</div><div class="dval"><select class="inline" data-meta="coa_instr"><option value=""></option><option>Vocal contingency overview</option><option>Brief exposure to each side, then return to neutral</option><option>Concurrent-chain exposure (select the signal, then access)</option><option>No instruction (free operant)</option></select><span class="coa-sub">Script for the overview:</span><textarea data-meta="coa_script" placeholder="On this side is choice A, where you can ... On this side is choice B, where you can ... You can go back and forth as much as you like, but [person or materials] must stay on their side." class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Arrangement</div><div class="dval"><select class="inline" data-meta="coa_arr"><option value=""></option><option>Whole room, tape down the middle</option><option>Desk, tape down the center</option><option>Table-top, two sides (non-ambulatory)</option></select><label class="coa-chk"><input type="checkbox" data-meta="coa_equal"> Halves are equal in space</label><span class="coa-sub">Signal per side (letter or color; 8.5 x 11 in sheet or poster):</span><textarea data-meta="coa_sd" placeholder="e.g., left: blue sheet, letter A; right: yellow sheet, letter B" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Choice definition</div><div class="dval"><textarea data-meta="coa_choice" placeholder="Most of the body (arms, legs and torso) on one side of the line, no part touching the line. The timer for a side runs only while that definition is met; both timers pause when the student is on the line or in the neutral spot." class="nbh-line" rows="1"></textarea><button type="button" class="tool noprint" data-coafill="room">Fill: whole room</button><button type="button" class="tool noprint" data-coafill="desk">Fill: desk</button></div></div>
+    <div class="drow"><div class="dlab">Session length</div><div class="dval"><span class="coa-sub" id="coaLenEcho"></span></div></div>
+    <div class="drow"><div class="dlab">Primary implementer</div><div class="dval"><textarea data-meta="coa_impl" placeholder="Gives the overview, runs the timers, collects primary and procedural-fidelity data" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Materials</div><div class="dval"><textarea data-meta="coa_mat" placeholder="From PA-1 or interview: high, moderate and low-preferred items; mark items that displace other preferences (tablet, food)" class="nbh-line" rows="1"></textarea></div></div>
+  </div>
+  <table class="rank" id="coaConf"><thead><tr><th>Confederate (name or initials)</th><th>Role</th><th>Why included</th><th class="n">BST done</th><th>BST date</th><th class="noprint"></th></tr></thead><tbody></tbody></table>
+  <button type="button" class="tool noprint" id="coaConfAdd">Add confederate</button>
+
+  <div class="ident coa-ident">
+    <div class="f"><label for="coaThr">Majority threshold (%)</label><input type="number" id="coaThr" data-coa="thr" min="51" max="100"></div>
+    <div class="f"><label for="coaK">Consecutive sessions for Stable</label><input type="number" id="coaK" data-coa="k" min="1" max="10"></div>
+    <div class="f"><label for="coaNomaj">Sessions without a majority = No majority</label><input type="number" id="coaNomaj" data-coa="nomaj" min="2" max="20"></div>
+    <div class="f"><label for="coaPbceil">Problem-behavior ceiling (per min)</label><input type="number" id="coaPbceil" data-coa="pbceil" min="0" max="60" step="0.1"></div>
+    <div class="f"><label for="coaN">Session rows</label><input type="number" id="coaN" data-coa="nSess" min="2" max="60"></div>
+  </div>
+
+  <h3 class="sub">Condition Library</h3>
+  <p class="method">Write the situations informants describe (IN-1, IA-1) as conditions; include all the combinations you might need and isolate later (p. 785). Tag the classes present; tag demands as potentially aversive, not escape: escape is read from allocation <em>away</em> from that side (p. 786). Condition A, no reinforcers and no potentially aversive stimuli, is included in both of the tutorial&rsquo;s examples like an alone condition in an FA. Link a condition to one of the stimuli in Setup when it tests that stimulus, so the summary sheet can carry its verdict.</p>
+  <table class="rank" id="coaLib"><thead><tr><th class="n">Letter</th><th>Narrative description</th><th>Attention</th><th>Tangible</th><th>Potentially aversive stimuli</th><th class="n">Isolated or synthesized</th><th>Purpose</th><th>Linked stimulus</th><th class="noprint"></th></tr></thead><tbody></tbody></table>
+  <button type="button" class="tool noprint" id="coaLibAdd">Add condition</button>
+
+  <h3 class="sub">Pairings</h3>
+  <p class="method">For each pairing the sheet derives the constant variables (present at the same level in both conditions; they allow no specific determination) and the test variables (present in one condition only), and prints what allocation toward each side is evidence for (p. 787). Pairings run in the order listed; the sheet flags a synthesized condition scheduled before each of its classes has been tested alone against the no-reinforcer condition (p. 786). Give the reason in the note when that order is intended: the tutorial allows synthesis to resolve problem behavior or to make final rankings.</p>
+  <table class="rank" id="coaPairs"><thead><tr><th class="n">Pair</th><th>Condition 1</th><th>Condition 2</th><th>Constant variables</th><th>Test variables</th><th>What this pairing can show</th><th class="n">Status</th><th class="n">Sessions</th><th>Result</th><th>Note or override reason</th><th class="noprint"></th></tr></thead><tbody></tbody></table>
+  <button type="button" class="tool noprint" id="coaPairAdd">Add pairing</button>
+
+  <h3 class="sub">Sessions</h3>
+  <div class="readout" id="coaReadout"></div>
+  <div class="gridwrap coa-grid"><table class="grid" id="coaTbl"></table></div>
+  <p class="method">% Condition 1 = duration on Condition 1 &divide; (duration on Condition 1 + duration on Condition 2) &times; 100, the Step 7 formula (p. 792); the Step 2 formula is printed inverted in the article (p. 784). When Neither or Refusing time is recorded, the share of the whole session is shown beneath the primary percentage. Problem behavior per minute uses the recorded total, or the toolbar session length when the total is blank. Checks: a total more than 5 s from the toolbar session length (session length must be comparable across all comparisons, p. 788), and the same side as the previous session of the same pairing (counterbalance, p. 789). A session ended early for problem behavior is excluded from the stability count.</p>
+
+  <div class="figure"><h3>Percent Allocation by Pairing</h3><p class="cap">Simultaneous-treatment display: one phase per pairing (dashed vertical lines mark a new pairing), circles for Condition 1 and squares (dashed line) for Condition 2 of that pairing; a filled marker means Condition 1 was on the right, a hollow one on the left, so a side bias is visible. Grey bars are problem behavior per minute on the right axis; the dotted line is the majority threshold.</p><svg id="coaPlot" viewBox="0 0 640 240"></svg></div>
+
+  <h3 class="sub">Decision Rules by Pairing</h3>
+  <div id="coaRules"></div>
+
+  <h3 class="sub">COA Summary by Condition</h3>
+  <table class="rank" id="coaSum"><thead><tr><th>Condition</th><th>Pairs appeared in</th><th class="n">Sessions</th><th class="n">Mean % allocation when present</th><th class="n">Won / lost / no majority</th><th class="n">Beats A?</th><th>Cumulative reading</th><th>COA verdict</th></tr></thead><tbody></tbody></table>
+  <div class="coa-class" id="coaClass"></div>
+  <p class="method" id="coaMethod"></p>
+  <div class="cite">Condition-comparison arrangement after Randall and Kranak (2026, <em>Behavior Analysis in Practice, 19</em>, 779&ndash;797), following Harding et al. (1999), Berg et al. (2007), Lloyd et al. (2020) and Randall, Long, and Bulla (2025), as cited there; simultaneous-treatments design per Kazdin and Hartmann (1978), as cited there. The COA identifies reinforcers for choice-making, not the function of the target behavior (p. 780). The tutorial reports agreement between COA and FA outcomes (Berg et al., 2007, as cited) but states that concurrent validity has not been evaluated explicitly, that few published studies exist and their procedures differ, and that it is not a manualized approach (pp. 781, 794).</div>
+  </div>
 </div>
 
 <!-- ================================================================ PROGRESSIVE RATIO -->
@@ -1200,6 +1367,12 @@ body.view-walk #walk{display:block}
   <p class="method">The reinforcer verdict is a working convention, applied in this order: <b>Confirmed</b> when the single-operant verdict is Clear, or the progressive-ratio potency is High, or the potency is Moderate and no plan ratio is entered, or the single-operant verdict is Probable and the potency Moderate; <b>Relative only</b> when the stimulus is Preferred or Comparable under concurrent operants, its single-operant verdict is not None and its potency is not Low; <b>Probable</b> when the single-operant verdict is Probable or the potency is Moderate; <b>Not supported</b> when the single-operant verdict is None or the potency is Low; <b>Untested</b> when no design has a result for the stimulus, or its only result is a concurrent-operants standing of Lower or Not chosen, which cannot show that a stimulus is not a reinforcer. The single-operant route does not check the plan ratio: a Clear effect is evidence at the schedule tested (Guide, rule 3).</p>
   <p class="method">The design columns carry each sheet&rsquo;s labels. SO verdict: <b>Clear</b> = ratio to control &ge; 2 and no overlap across at least 3 sessions per condition; <b>Probable</b> = ratio &ge; 1.5 or overlap &le; 25%; <b>None</b> otherwise. CO standing: <b>Preferred</b>, <b>Comparable</b> and <b>Not chosen</b> as defined on the concurrent-operants sheet; <b>Lower</b> = 20% or more of the responses, but more than 20 points below the leading option. PR potency: <b>High</b>, <b>Moderate</b> and <b>Low</b> as defined on the progressive-ratio sheet.</p>
 
+  <div class="co-coa-only" id="sumCoaBlock">
+  <h3 class="sub">Condition Comparison (COA) Verdicts</h3>
+  <table class="rank" id="sumCoa"><thead><tr><th>Condition</th><th>Classes present</th><th>Linked stimulus</th><th class="n">Pairings</th><th class="n">Sessions</th><th class="n">Mean % allocation</th><th class="n">Won / lost / no majority</th><th class="n">Beats the no-reinforcer condition?</th><th>COA verdict</th></tr></thead><tbody></tbody></table>
+  <p class="method">In the condition-comparison mode the CO columns above carry the condition linked to each stimulus in the condition library: its mean % allocation across the pairings it appeared in and its COA verdict, which the reinforcer verdict treats as relative evidence (Relative only, as for a Preferred or Comparable station result; Undifferentiated and Not preferred carry no support). A COA result is evidence for a <b>choice reinforcer</b>; confirm it in the single-operant or progressive-ratio sheet before it is written into the plan (Randall &amp; Kranak, 2026, p. 792; Randall et al., 2025, as cited there). A COA identifies reinforcers for choice-making, not the function of the target behavior (p. 780).</p>
+  </div>
+
   <h3 class="sub">Recommendations for the Behavior Plan</h3>
   <div class="defs">
     <div class="drow"><div class="dlab">Reinforcer(s) selected and why</div><div class="dval"><textarea data-meta="recs" class="nbh-line" rows="1"></textarea></div></div>
@@ -1226,6 +1399,7 @@ body.view-walk #walk{display:block}
     Penrod, B., Wallace, M. D., &amp; Dyer, E. J. (2008). Assessing potency of high- and low-preference reinforcers with respect to response rate and response patterns. <em>Journal of Applied Behavior Analysis, 41</em>(2), 177&ndash;188. &bull;
     Piazza, C. C., Fisher, W. W., Hagopian, L. P., Bowman, L. G., &amp; Toole, L. (1996). Using a choice assessment to predict reinforcer effectiveness. <em>Journal of Applied Behavior Analysis, 29</em>(1), 1&ndash;9. &bull;
     Poling, A. (2010). Progressive-ratio schedules and applied behavior analysis. <em>Journal of Applied Behavior Analysis, 43</em>(2), 347&ndash;349. &bull;
+    Randall, K. R., &amp; Kranak, M. P. (2026). A clinical tutorial on using a concurrent operant analysis in the assessment and treatment of problem behavior. <em>Behavior Analysis in Practice, 19</em>, 779&ndash;797. https://doi.org/10.1007/s40617-025-01088-3 &bull;
     Roane, H. S., Lerman, D. C., &amp; Vorndran, C. M. (2001). Assessing reinforcers under progressive schedule requirements. <em>Journal of Applied Behavior Analysis, 34</em>(2), 145&ndash;167. &bull;
     Roscoe, E. M., Iwata, B. A., &amp; Kahng, S. (1999). Relative versus absolute reinforcement effects: Implications for preference assessments. <em>Journal of Applied Behavior Analysis, 32</em>(4), 479&ndash;493. &bull;
     Stafford, D., &amp; Branch, M. N. (1998). Effects of step size and break-point criterion on progressive-ratio performance. <em>Journal of the Experimental Analysis of Behavior, 70</em>(2), 123&ndash;138. &bull;
@@ -1291,6 +1465,11 @@ body.view-walk #walk{display:block}
     <div><h4>What Goes on the Sheet</h4><ul><li>Save to the sheet writes Date, Option A position, the responses at each option and PB.</li><li>Total and each option’s share are computed.</li><li>The Allocation Summary: Mean % allocation, Sessions with most responses, Position effect, Relative standing.</li></ul></div>
   </div>
   <div class="decide"><b>Decision.</b> RA-1’s working conventions, applied in this order: Preferred = mean allocation ≥ 60% and the most responses (or a tie for the most) in more than half the sessions; Comparable = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; Not chosen = mean allocation &lt; 20%; Lower = any other option: 20% or more of the responses, but more than 20 points below the leader. A stimulus that is “not chosen” here can still be a reinforcer; that is the single-operant question.</div>
+  <h4 class="flowhead">A Second Example: the Condition-Comparison (COA) Mode</h4>
+  <div class="script">
+    <div><h4>Julia, from the tutorial</h4><ul><li>A 12-year-old whose school does not allow functional analyses (entry reason 1). Her desk is split with tape, a lettered colored placemat on each side; the teacher is the confederate; puzzles, Wikki Stix and coloring pages are the tangibles (Randall &amp; Kranak, 2026).</li><li>Seven conditions: A nothing; B academic demands alone; C demands plus teacher assistance; D high-preferred tangibles, no attention; E tangibles plus teacher attention; F teacher attention alone; G low-preferred tangibles. Pairings in order: A vs B, A vs C, C vs D, D vs E, E vs F, D vs G.</li><li>First session, A vs B: about 40% of the 5 minutes in B and 60% in A, switching about halfway. The sides are swapped and the pairing is run again until the same majority holds for three consecutive sessions.</li></ul></div>
+    <div><h4>What the Sheet Decides</h4><ul><li>A over B and A over C: evidence for escape from the demand. D over C: tangibles beat attention plus demands. E over D and E over F: tangibles plus attention preferred.</li><li>D vs G went back and forth, with no majority even after five sessions: the sheet labels the pairing No majority. The tutorial read this as possibly no discriminable difference and rotated the high- and low-preferred tangibles for variety.</li><li>The tutorial&rsquo;s conclusion: escape sensitivity plus tangible (and attention) reinforcers to test in a differential-reinforcement arrangement for work completion. The COA identifies reinforcers for choice; it does not show the function of the disruptive behavior. Load the simulation and switch Arrangement to Condition comparison to see this record on the sheet.</li></ul></div>
+  </div>
   <h4 class="flowhead">The Sheet’s Procedure, Word for Word</h4>
   <div class="card4"><div class="c-co"><b>Concurrent-Operants Assessment</b>Set out two or three identical response stations, equally spaced. Each station produces a different consequence: one stimulus each, and, when included, a control station that produces nothing. Before each session, prompt one response at every station and deliver its consequence so the student contacts each contingency. Then run the session without prompts and record responses at each station. Rotate station positions every session and record the position of Option A. Compare allocation across stations.</div></div>
 </section>
@@ -1408,13 +1587,14 @@ const TYPES=['','Edible','Leisure item','Activity','Social / attention','Token',
 
 let S=blank();
 function blank(){return {form:'RA-1',n:3,sessMin:5,nSess:16,nCoSess:10,prStep:'a1',prStart:1,prStop:120,
-  meta:{},stim:[],so:[],co:[],pr:[]};}
+  meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa()};}
 function ensure(){
   const n=S.n;
   while(S.stim.length<n)S.stim.push({name:'',type:'',pa:'',mag:''});S.stim.length=n;
   while(S.so.length<S.nSess)S.so.push({date:'',cond:'',resp:'',min:'',pb:false,phase:false});S.so.length=S.nSess;
   while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',r:['','',''],pb:false});S.co.length=S.nCoSess;
   const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:''});S.pr.length=prN;
+  ensureCoa();
 }
 const name=i=>S.stim[i]&&S.stim[i].name.trim()?S.stim[i].name.trim():'Stimulus '+CODES[i];
 const condLabel=c=>c==='ctl'?'Control':c===''?'':name(+c);
@@ -1429,7 +1609,7 @@ function syncToolbar(){['nStim:n','sessMin:sessMin','nSess:nSess','nCoSess:nCoSe
 
 /* meta */
 function bindMeta(){$$('[data-meta]').forEach(el=>{const k=el.dataset.meta;if(el.type==='checkbox')el.checked=!!S.meta[k];else el.value=S.meta[k]||'';
-  el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;echo();if(k==='coOpts'){renderCO();renderSummary();}if(k==='planRatio'){computePR();renderSummary();}});});echo();}
+  el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',()=>{S.meta[k]=el.type==='checkbox'?el.checked:el.value;echo();if(k==='coOpts'){renderCO();renderSummary();}if(k==='coMode'){applyCoMode();renderCOA();renderSummary();}if(k==='planRatio'){computePR();renderSummary();}});});echo();}
 function echo(){$$('.echo-client').forEach(e=>e.textContent=S.meta.client||'');$$('.echo-response').forEach(e=>e.textContent=S.meta.response||'');}
 
 /* stimuli */
@@ -1527,6 +1707,325 @@ function plotCO(st,rows){
   $('#coPlot').innerHTML=g+legend;
 }
 
+/* ---------- condition comparison (COA, duration) mode: v21.22 ----------
+   Randall & Kranak (2026). A second mode of the Concurrent operants sheet: the
+   student's time is allocated between two contingencies (conditions) on two
+   sides of a line, measured in seconds per side. State lives in S.coa; the
+   setup fields are data-meta keys (coa_*); the mode itself is data-meta coMode
+   ('st' stations, the original sheet, or 'coa'). The stations mode is untouched. */
+const COA_AV={'':'none',academic:'academic demand',chore:'chore demand',loss:'loss of winning',other:'other aversive stimulus'};
+const coaL=i=>i<26?String.fromCharCode(65+i):'C'+(i+1);
+function blankCoa(){return {thr:60,k:3,nomaj:5,pbceil:0,nSess:12,lib:[],pairs:[],conf:[],sess:[]};}
+function coaBlankSess(){return {date:'',pair:'',side:'',d1:'',d2:'',nei:'',ref:'',pb:'',prompt:false,early:'',fid:'',ioa:'',note:''};}
+function ensureCoa(){
+  if(!S.coa||typeof S.coa!=='object')S.coa=blankCoa();
+  const d=blankCoa();Object.keys(d).forEach(k=>{if(S.coa[k]==null)S.coa[k]=d[k];});
+  const c=S.coa;
+  ['lib','pairs','conf','sess'].forEach(k=>{if(!Array.isArray(c[k]))c[k]=[];});
+  c.lib=c.lib.map(x=>Object.assign({desc:'',att:'',attWho:'',tan:'',tanWhat:'',av:'',avWhat:'',purpose:'',link:''},x));
+  c.pairs=c.pairs.map(x=>Object.assign({c1:'',c2:'',note:''},x));
+  c.conf=c.conf.map(x=>Object.assign({name:'',role:'',why:'',bst:false,bstDate:''},x));
+  c.sess=c.sess.map(x=>Object.assign(coaBlankSess(),x));
+  c.nSess=Math.max(2,Math.min(60,+c.nSess||12));
+  while(c.sess.length<c.nSess)c.sess.push(coaBlankSess());c.sess.length=c.nSess;
+}
+function applyCoMode(){document.documentElement.classList.toggle('co-coa',S.meta.coMode==='coa');}
+const coaThr=()=>Math.min(100,Math.max(51,+S.coa.thr||60));
+const coaNClass=c=>(c.att?1:0)+(c.tan?1:0)+(c.av?1:0);
+const coaIsNone=c=>!c.att&&!c.tan&&!c.av;
+const coaLvl=v=>v==='hp'?'high-preference':v==='lp'?'low-preference':'';
+function coaClassText(c){const o=[];if(c.att)o.push('attention'+(c.attWho.trim()?' ('+c.attWho.trim()+')':c.att==='lp'?' (low-preferred person)':''));if(c.tan)o.push(coaLvl(c.tan)+' tangibles'+(c.tanWhat.trim()?' ('+c.tanWhat.trim()+')':''));if(c.av)o.push('potentially aversive: '+COA_AV[c.av]+(c.avWhat.trim()?' ('+c.avWhat.trim()+')':''));return o.length?o.join('; '):'none';}
+function coaCondOpt(i){const c=S.coa.lib[i];const d=(c.desc||'').trim();return coaL(i)+(d?' · '+(d.length>34?d.slice(0,34)+'…':d):'');}
+function coaPairLabel(i){const p=S.coa.pairs[i];if(!p)return '';const a=p.c1===''?'?':coaL(+p.c1),b=p.c2===''?'?':coaL(+p.c2);return (i+1)+': '+a+' vs '+b;}
+
+/* Step 4 logic (p. 787): constant versus test variables of a pairing */
+function coaPairAnalysis(a,b){
+  const L1=coaL(a.i),L2=coaL(b.i);const c1=a.c,c2=b.c;
+  const constant=[],test=[],for1=[],for2=[];
+  if(c1.att&&c2.att){const w1=c1.attWho.trim(),w2=c2.attWho.trim();
+    if(c1.att===c2.att&&w1.toLowerCase()===w2.toLowerCase())constant.push('attention'+(w1?' from '+w1:''));
+    else{test.push('whose attention ('+L1+': '+(w1||coaLvl(c1.att)+' person')+' vs '+L2+': '+(w2||coaLvl(c2.att)+' person')+')');for1.push('attention from '+(w1||'the '+coaLvl(c1.att)+' person'));for2.push('attention from '+(w2||'the '+coaLvl(c2.att)+' person'));}}
+  else if(c1.att){test.push('attention ('+L1+')');for1.push('attention'+(c1.attWho.trim()?' from '+c1.attWho.trim():''));}
+  else if(c2.att){test.push('attention ('+L2+')');for2.push('attention'+(c2.attWho.trim()?' from '+c2.attWho.trim():''));}
+  if(c1.tan&&c2.tan){
+    if(c1.tan===c2.tan)constant.push(coaLvl(c1.tan)+' tangibles');
+    else{test.push('high- vs low-preference tangibles ('+L1+': '+coaLvl(c1.tan)+', '+L2+': '+coaLvl(c2.tan)+')');for1.push(coaLvl(c1.tan)+' tangibles');for2.push(coaLvl(c2.tan)+' tangibles');}}
+  else if(c1.tan){test.push('tangibles ('+L1+')');for1.push(coaLvl(c1.tan)+' tangibles');}
+  else if(c2.tan){test.push('tangibles ('+L2+')');for2.push(coaLvl(c2.tan)+' tangibles');}
+  if(c1.av&&c2.av)constant.push('potentially aversive stimuli ('+COA_AV[c1.av]+' / '+COA_AV[c2.av]+'); escape is not tested');
+  else if(c1.av){test.push('escape (read as allocation away from '+L1+')');for2.push('escape from the '+COA_AV[c1.av]+' in '+L1);}
+  else if(c2.av){test.push('escape (read as allocation away from '+L2+')');for1.push('escape from the '+COA_AV[c2.av]+' in '+L2);}
+  const text=test.length?'Tests: '+test.join('; ')+'. Held constant: '+(constant.length?constant.join('; '):'nothing')+'. Toward '+L1+': evidence for '+(for1.length?for1.join(' + '):'nothing tagged')+'; toward '+L2+': evidence for '+(for2.length?for2.join(' + '):'nothing tagged')+'.':'No test variable: the two conditions do not differ in any tagged class.';
+  return {constant,test,for1,for2,text,bothAv:!!(c1.av&&c2.av)};
+}
+
+function coaSessRows(){
+  const c=S.coa,thr=coaThr(),secs=S.sessMin*60;const num=v=>v===''||v==null?null:+v;
+  const rows=c.sess.map((s,k)=>{
+    const d1=num(s.d1),d2=num(s.d2),nei=num(s.nei)||0,ref=num(s.ref)||0,pb=num(s.pb)||0;
+    const pi=s.pair===''?null:+s.pair;const pair=pi!=null?c.pairs[pi]:null;
+    const done=!!(pair&&d1!=null&&d2!=null);
+    const tot=done?d1+d2+nei+ref:null;
+    const alloc=done&&d1+d2>0?100*d1/(d1+d2):null;
+    const maj=alloc==null?null:alloc>=thr?1:alloc<=100-thr?2:0;
+    const pbpm=done?pb/((tot>0?tot:secs)/60):null;
+    const flags=[];
+    if(done&&tot>secs+5)flags.push('Longer than the session length ('+tot+' s vs '+secs+' s): keep session length comparable across all comparisons.');
+    if(done&&tot<secs-5&&!s.early)flags.push('Shorter than the session length ('+tot+' s vs '+secs+' s) with no early end recorded.');
+    return {k,s,pi,pair,done,d1,d2,nei,ref,pb,tot,alloc,maj,pbpm,flags,side:s.side,early:s.early,valid:done&&s.early!=='PB'};
+  });
+  const lastSide={};
+  rows.forEach(r=>{if(!r.done)return;if(r.side&&lastSide[r.pi]===r.side)r.flags.push('Same side as the previous session of this pairing: counterbalance, the condition goes to the other side in its next session.');if(r.side)lastSide[r.pi]=r.side;});
+  return rows;
+}
+
+function coaStats(){
+  const c=S.coa,thr=coaThr(),K=Math.max(1,+c.k||3),NM=Math.max(1,+c.nomaj||5),ceil=+c.pbceil||0,secs=S.sessMin*60;
+  const rows=coaSessRows();const lib=c.lib;const aIdx=lib.findIndex(coaIsNone);
+  const pairs=c.pairs.map((p,i)=>{
+    const i1=p.c1===''?null:+p.c1,i2=p.c2===''?null:+p.c2;
+    const c1=i1!=null?lib[i1]:null,c2=i2!=null?lib[i2]:null;
+    const ok=!!(c1&&c2&&i1!==i2);
+    const an=ok?coaPairAnalysis({i:i1,c:c1},{i:i2,c:c2}):null;
+    const sess=rows.filter(r=>r.pi===i&&r.done);const valid=sess.filter(r=>r.valid);const n=valid.length;
+    let status='planned',winner=null,meanWin=null,counter=true;const flags=[];
+    if(!ok)status='invalid';
+    else if(n){
+      status='running';
+      const last=valid.slice(-K);
+      if(last.length===K&&last.every(r=>r.maj&&r.maj===last[0].maj)){
+        winner=last[0].maj;status='stable';meanWin=mean(last.map(r=>winner===1?r.alloc:100-r.alloc));
+        const sides=new Set(last.map(r=>r.side).filter(Boolean));counter=sides.size>=2;if(!counter)status='stable-nc';}
+      if(status==='running'){
+        if(n>=NM)status='nomaj';
+        else{const l3=valid.slice(-3);if(l3.length>=3&&l3.every(r=>r.maj)&&l3.every((r,j)=>j===0||r.maj!==l3[j-1].maj))status='flip';}}
+    }
+    if(ok){
+      const majRows=valid.filter(r=>r.maj&&r.side);
+      if(majRows.length>=3){const winSide=r=>r.maj===1?r.side:(r.side==='L'?'R':'L');const ws=new Set(majRows.map(winSide)),arr=new Set(majRows.map(r=>r.side));
+        if(ws.size===1&&arr.size>=2)flags.push({t:'side',m:'Suspected side bias: the majority follows the '+[...ws][0]+' side, not the condition. Check that the halves are equal; alternate sides; consider a pre-assessment with equal stimuli on both sides.'});}
+      if(an.bothAv&&sess.some(r=>r.pbpm!=null&&r.pbpm>ceil))flags.push({t:'pb',m:'Evocative pairing: both conditions carry potentially aversive stimuli and problem behavior occurred'+(ceil?' above '+ceil+' per min':'')+'. Options (pp. 789–790): allow the student to avoid both choices and record the time; re-pair each aversive condition with a condition that has not produced problem behavior; if problem behavior keeps occurring and the COA was chosen because an FA failed to evoke it, consider an FA.'});
+      else if(sess.some(r=>r.early==='PB'))flags.push({t:'pb',m:'A session ended early for problem behavior and is excluded from the stability count.'});
+      if(sess.filter(r=>r.ref>0.5*secs).length>=2)flags.push({t:'ref',m:'Refusal: refusing to choose took more than half the session in 2 or more sessions. Add a third “no choice required” option and keep it for the rest of the assessment, remove the instruction to choose, or teach tolerance; if refusal persists, discontinue (p. 790).'});
+      [c1,c2].filter(x=>coaNClass(x)>1).forEach(x=>{['att','tan','av'].filter(cl=>x[cl]).forEach(cl=>{
+        const tested=c.pairs.slice(0,i).some(q=>{if(q.c1===''||q.c2==='')return false;const a=lib[+q.c1],b=lib[+q.c2];if(!a||!b)return false;const none=coaIsNone(a)?a:coaIsNone(b)?b:null;const other=none===a?b:none===b?a:null;return !!(none&&other&&coaNClass(other)===1&&other[cl]);});
+        if(!tested)flags.push({t:'order',m:'Isolated before synthesized (p. 786): '+coaL(lib.indexOf(x))+' is synthesized, and its '+(cl==='att'?'attention':cl==='tan'?'tangible':'potentially aversive')+' class has not been tested alone against the no-reinforcer condition in an earlier pairing. Give the reason in the note if this order is intended.'});});});}
+    let result='';
+    if(!ok)result='Choose two different conditions.';
+    else if(status==='planned')result='Planned.';
+    else if(status==='stable')result=coaL(winner===1?i1:i2)+' preferred ('+Math.round(meanWin)+'% of allocation, n = '+K+' consecutive). Proceed to the next pairing.';
+    else if(status==='stable-nc')result=coaL(winner===1?i1:i2)+' preferred ('+Math.round(meanWin)+'%, n = '+K+' consecutive) but not yet counterbalanced: run one more with sides swapped.';
+    else if(status==='nomaj')result='No discriminable difference between '+coaL(i1)+' and '+coaL(i2)+': '+n+' sessions without '+K+' consecutive majorities. The tutorial’s response was to treat them as equivalent (rotate for variety) or modify a condition, e.g., change the confederate (p. 789).';
+    else if(status==='flip')result='Allocation flip-flops between '+coaL(i1)+' and '+coaL(i2)+'. Continue the same pairing until a consistent pattern emerges (p. 789).';
+    else result='Running: '+n+' session'+(n===1?'':'s')+'; '+K+' consecutive majorities needed.';
+    return {i,p,i1,i2,c1,c2,ok,an,sess,valid,n,status,winner,meanWin,counter,flags,result};
+  });
+  const conds=lib.map((cd,i)=>{
+    const inPairs=pairs.filter(p=>p.ok&&(p.i1===i||p.i2===i));
+    const shares=[];inPairs.forEach(p=>p.sess.forEach(r=>{if(r.alloc!=null)shares.push(p.i1===i?r.alloc:100-r.alloc);}));
+    let won=0,lost=0,nomaj=0,beatsA='';const reading=[];
+    inPairs.forEach(p=>{const st=p.status,other=p.i1===i?p.i2:p.i1;
+      if(st==='stable'||st==='stable-nc'){const w=p.winner===1?p.i1:p.i2;if(w===i){won++;reading.push('over '+coaL(other)+' (pair '+(p.i+1)+')');}else{lost++;reading.push('under '+coaL(other)+' (pair '+(p.i+1)+')');}if(other===aIdx)beatsA=w===i?'yes':'no';}
+      else if(st==='nomaj'||st==='flip'){nomaj++;reading.push('no majority vs '+coaL(other)+' (pair '+(p.i+1)+')');if(other===aIdx&&!beatsA)beatsA='undiff';}});
+    let verdict;
+    if(coaIsNone(cd))verdict='control';
+    else if(!inPairs.some(p=>p.n))verdict='untested';
+    else if(beatsA==='yes'&&lost===0&&won>=2)verdict='choice';
+    else if(beatsA==='yes')verdict='relative';
+    else if(beatsA==='no')verdict='notnothing';
+    else if(won===0&&lost>0)verdict='lower';
+    else if(won===0&&nomaj>0)verdict='undiff';
+    else if(won>0&&lost===0)verdict='relative';
+    else if(won>0)verdict='mixed';
+    else verdict='running';
+    return {i,cd,inPairs,n:shares.length,mean:mean(shares),won,lost,nomaj,beatsA,reading,verdict};
+  });
+  return {rows,pairs,conds,thr,K,NM,secs,aIdx};
+}
+function coaVerdictTag(v){return v==='choice'?'<span class="tag ok">Choice reinforcer</span>':v==='relative'?'<span class="tag mid">Choice reinforcer (relative)</span>':v==='notnothing'?'<span class="tag no">Not chosen over nothing</span>':v==='undiff'?'<span class="tag na">Undifferentiated</span>':v==='lower'?'<span class="tag na">Not preferred (relative)</span>':v==='mixed'?'<span class="tag mid">Mixed (relative)</span>':v==='control'?'<span class="tag na">No-reinforcer condition</span>':v==='running'?'<span class="tag na">Running</span>':'<span class="tag na">Untested</span>';}
+function coaStatusTag(s){return s==='stable'?'<span class="tag ok">Stable</span>':s==='stable-nc'?'<span class="tag mid">Stable, not counterbalanced</span>':s==='nomaj'?'<span class="tag no">No majority</span>':s==='flip'?'<span class="tag mid">Flip-flop</span>':s==='running'?'<span class="tag na">Running</span>':s==='invalid'?'<span class="tag no">Incomplete</span>':'<span class="tag na">Planned</span>';}
+
+/* ---- rendering ---- */
+function renderCOA(){
+  const c=S.coa;
+  if(S.meta.coMode==='coa'&&!c.lib.length)c.lib.push({desc:'No reinforcers, no potentially aversive stimuli',att:'',attWho:'',tan:'',tanWhat:'',av:'',avWhat:'',purpose:'Alone-like control for sensitivity to social reinforcers',link:''});
+  $$('#co [data-coa]').forEach(e=>{e.value=c[e.dataset.coa];});
+  renderCoaConf();renderCoaLib();renderCoaPairs();renderCoaSess();computeCOA();
+}
+function renderCoaConf(){
+  const roles=['','Teacher','Paraprofessional','RBT','Caregiver','Other'],whys=['','Suspected reinforcer','Part of the student’s programming','Suspected avoidance'];
+  $('#coaConf tbody').innerHTML=S.coa.conf.map((f,i)=>`<tr><td><input data-i="${i}" data-f="name" value="${esc(f.name)}"></td><td><select data-i="${i}" data-f="role">${roles.map(r=>`<option${r===f.role?' selected':''}>${r}</option>`).join('')}</select></td><td><select data-i="${i}" data-f="why">${whys.map(r=>`<option${r===f.why?' selected':''}>${r}</option>`).join('')}</select></td><td class="n"><input type="checkbox" data-i="${i}" data-f="bst"${f.bst?' checked':''}></td><td><input data-i="${i}" data-f="bstDate" value="${esc(f.bstDate)}" placeholder="date"></td><td class="noprint"><button type="button" class="rm" data-rm="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="6" class="coa-calc">No confederates entered. Confederates are the people incorporated into the conditions; pick those whose attention is suspected to reinforce, who are part of the student’s programming, or whose attention the student may avoid (p. 785).</td></tr>';
+}
+function renderCoaLib(){
+  const lvl=[['',''],['hp','High-preference'],['lp','Low-preference']];
+  $('#coaLib tbody').innerHTML=S.coa.lib.map((x,i)=>`<tr><td class="n"><b>${coaL(i)}</b></td><td><input data-i="${i}" data-f="desc" value="${esc(x.desc)}" placeholder="narrative description"></td><td class="coa-who"><select data-i="${i}" data-f="att">${lvl.map(([v,t])=>`<option value="${v}"${v===x.att?' selected':''}>${t||'none'}</option>`).join('')}</select><input data-i="${i}" data-f="attWho" value="${esc(x.attWho)}" placeholder="who"></td><td class="coa-who"><select data-i="${i}" data-f="tan">${lvl.map(([v,t])=>`<option value="${v}"${v===x.tan?' selected':''}>${t||'none'}</option>`).join('')}</select><input data-i="${i}" data-f="tanWhat" value="${esc(x.tanWhat)}" placeholder="which"></td><td class="coa-who"><select data-i="${i}" data-f="av">${Object.keys(COA_AV).map(v=>`<option value="${v}"${v===x.av?' selected':''}>${COA_AV[v]}</option>`).join('')}</select><input data-i="${i}" data-f="avWhat" value="${esc(x.avWhat)}" placeholder="which"></td><td class="n coa-calc" id="coaIso${i}"></td><td><input data-i="${i}" data-f="purpose" value="${esc(x.purpose)}" placeholder="why this condition exists"></td><td><select class="condsel" data-i="${i}" data-f="link"><option value="">none</option>${S.stim.map((s,j)=>`<option value="${j}"${String(j)===x.link?' selected':''}>${esc(name(j))}</option>`).join('')}</select></td><td class="noprint"><button type="button" class="rm" data-rm="${i}">Remove</button></td></tr>`).join('');
+}
+function renderCoaPairs(){
+  const opts=sel=>'<option value=""></option>'+S.coa.lib.map((x,i)=>`<option value="${i}"${String(i)===sel?' selected':''}>${esc(coaCondOpt(i))}</option>`).join('');
+  $('#coaPairs tbody').innerHTML=S.coa.pairs.map((p,i)=>`<tr><td class="n"><b>${i+1}</b></td><td><select data-i="${i}" data-f="c1">${opts(p.c1)}</select></td><td><select data-i="${i}" data-f="c2">${opts(p.c2)}</select></td><td class="coa-calc" id="coaPc${i}"></td><td class="coa-calc" id="coaPt${i}"></td><td class="coa-calc" id="coaPw${i}"></td><td class="n coa-calc" id="coaPs${i}"></td><td class="n coa-calc" id="coaPn${i}"></td><td class="coa-calc" id="coaPr${i}"></td><td><input data-i="${i}" data-f="note" value="${esc(p.note)}"></td><td class="noprint"><button type="button" class="rm" data-rm="${i}">Remove</button></td></tr>`).join('')||'<tr><td colspan="11" class="coa-calc">No pairings yet. The tutorial recommends beginning with two conditions, isolating single test variables before conditions with several, and pairing attention and tangibles against each other once both beat the no-reinforcer condition (pp. 788, 790).</td></tr>';
+  const rs=$('#ra-coa-pair');if(rs){const cur=rs.value;rs.innerHTML='<option value="">Choose a pairing</option>'+S.coa.pairs.map((p,i)=>`<option value="${i}">${esc(coaPairLabel(i))}</option>`).join('');if(cur&&S.coa.pairs[+cur])rs.value=cur;}
+}
+function renderCoaSess(){
+  const c=S.coa;const popts=sel=>'<option value=""></option>'+c.pairs.map((p,i)=>`<option value="${i}"${String(i)===sel?' selected':''}>${esc(coaPairLabel(i))}</option>`).join('');
+  let h='<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Pair</th><th class="c">Side of<br><span class="sub2">Condition 1</span></th><th class="c">Condition 1<br><span class="sub2">s</span></th><th class="c">Condition 2<br><span class="sub2">s</span></th><th class="c">Neither<br><span class="sub2">s</span></th><th class="c">Refusing<br><span class="sub2">s</span></th><th class="c">PB<br><span class="sub2">count</span></th><th class="c">PB<br><span class="sub2">per min</span></th><th class="c">% C1</th><th class="c">% C2</th><th class="c">Majority</th><th class="c">Prompted<br><span class="sub2">to choose</span></th><th class="c">Ended early</th><th class="c">Fidelity<br><span class="sub2">%</span></th><th class="c">IOA<br><span class="sub2">%</span></th><th class="c">Note</th><th class="c">Checks</th></tr></thead><tbody>';
+  c.sess.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="pair">${popts(s.pair)}</select></td><td class="c"><select data-k="${k}" data-f="side"><option value=""></option><option${s.side==='L'?' selected':''}>L</option><option${s.side==='R'?' selected':''}>R</option></select></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="d1" value="${esc(s.d1)}"></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="d2" value="${esc(s.d2)}"></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="nei" value="${esc(s.nei)}"></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="ref" value="${esc(s.ref)}"></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="pb" value="${esc(s.pb)}"></td><td class="c calc" id="coaPM${k}"></td><td class="c calc" id="coaA1${k}"></td><td class="c calc" id="coaA2${k}"></td><td class="c calc" id="coaMj${k}"></td><td class="c"><input type="checkbox" data-k="${k}" data-f="prompt"${s.prompt?' checked':''}></td><td class="c"><select data-k="${k}" data-f="early"><option value=""></option><option value="PB"${s.early==='PB'?' selected':''}>Problem behavior</option><option value="Refusal"${s.early==='Refusal'?' selected':''}>Refusal</option><option value="Other"${s.early==='Other'?' selected':''}>Other</option></select></td><td class="c"><input type="text" class="coa-txt" data-k="${k}" data-f="fid" value="${esc(s.fid)}"></td><td class="c"><input type="text" class="coa-txt" data-k="${k}" data-f="ioa" value="${esc(s.ioa)}"></td><td class="c"><input type="text" class="coa-txt coa-note" data-k="${k}" data-f="note" value="${esc(s.note)}"></td><td class="c calc" id="coaFl${k}"></td></tr>`;});
+  $('#coaTbl').innerHTML=h+'</tbody>';
+}
+function computeCOA(){
+  const st=coaStats();const c=S.coa;const secs=st.secs;
+  const le=$('#coaLenEcho');if(le)le.textContent=S.sessMin+' min per session, from the toolbar; the same length for every pairing (the tutorial’s examples use 5 min). Change it in the toolbar.';
+  c.lib.forEach((x,i)=>{const e=$('#coaIso'+i);if(e)e.textContent=coaIsNone(x)?'none':coaNClass(x)>1?'Synthesized':'Isolated';});
+  st.pairs.forEach(p=>{const set=(id,v)=>{const e=$('#'+id+p.i);if(e)e.innerHTML=v;};
+    set('coaPc',p.ok?(p.an.constant.length?esc(p.an.constant.join('; ')):'none'):'');
+    set('coaPt',p.ok?(p.an.test.length?esc(p.an.test.join('; ')):'none'):'');
+    set('coaPw',p.ok?esc(p.an.text):'');
+    set('coaPs',coaStatusTag(p.status));set('coaPn',p.sess.length?p.sess.length+(p.valid.length<p.sess.length?' ('+p.valid.length+' count)':''):'');
+    set('coaPr',esc(p.result)+(p.flags.length?' <span class="coa-flag">'+[...new Set(p.flags.map(f=>f.t==='side'?'Side bias?':f.t==='pb'?'PB':f.t==='ref'?'Refusal':'Order'))].join(' · ')+'</span>':''));});
+  const flagged=[];
+  st.rows.forEach(r=>{const set=(id,v)=>{const e=$('#'+id+r.k);if(e)e.innerHTML=v;};
+    set('coaPM',r.pbpm==null?'':r.pbpm.toFixed(1));
+    const sub=r.done&&(r.nei+r.ref)>0&&r.tot>0?`<br><span class="sub2">${Math.round(100*r.d1/r.tot)}% of session</span>`:'';
+    const sub2=r.done&&(r.nei+r.ref)>0&&r.tot>0?`<br><span class="sub2">${Math.round(100*r.d2/r.tot)}% of session</span>`:'';
+    set('coaA1',r.alloc==null?'':Math.round(r.alloc)+'%'+sub);set('coaA2',r.alloc==null?'':Math.round(100-r.alloc)+'%'+sub2);
+    set('coaMj',r.maj==null?'':r.maj===1?coaL(st.pairs[r.pi].i1):r.maj===2?coaL(st.pairs[r.pi].i2):'<span class="tag na">No majority</span>');
+    set('coaFl',r.flags.length?'<span class="coa-flag" title="'+esc(r.flags.join(' '))+'">'+(r.flags.some(f=>/Longer|Shorter/.test(f))?'Length':'')+(r.flags.some(f=>/Same side/.test(f))?(r.flags.length>1?' · ':'')+'Side':'')+'</span>':'');
+    if(r.flags.length)flagged.push('Session '+(r.k+1)+': '+r.flags.join(' '));});
+  const done=st.rows.filter(r=>r.done).length;
+  $('#coaReadout').textContent=(done?done+' session'+(done===1?'':'s')+' scored across '+st.pairs.filter(p=>p.sess.length).length+' pairing'+(st.pairs.filter(p=>p.sess.length).length===1?'':'s')+'.':'No sessions scored yet.')+(flagged.length?' '+flagged.join(' '):'');
+  $('#coaRules').innerHTML=st.pairs.length?st.pairs.map(p=>`<div class="coa-rule"><b class="coa-ph">Pairing ${p.i+1}: ${p.ok?coaL(p.i1)+' vs '+coaL(p.i2):'incomplete'}</b> ${coaStatusTag(p.status)} ${esc(p.result)}${p.ok?'<span class="coa-an">'+esc(p.an.text)+'</span>':''}${p.flags.map(f=>'<span class="coa-fl'+(f.t==='order'?' coa-order':'')+'">'+esc(f.m)+'</span>').join('')}</div>`).join(''):'<p class="method">Add pairings above; each gets its status, result and checks here.</p>';
+  $('#coaSum tbody').innerHTML=st.conds.map(x=>`<tr><td><b>${coaL(x.i)}</b> ${esc((x.cd.desc||'').trim())}<br><span class="sub2">${esc(coaClassText(x.cd))}</span></td><td>${x.inPairs.length?esc(x.inPairs.map(p=>p.i+1).join(', ')):'&mdash;'}</td><td class="n">${x.n||''}</td><td class="n">${x.mean==null?'&mdash;':Math.round(x.mean)+'%'}</td><td class="n">${x.inPairs.length?x.won+' / '+x.lost+' / '+x.nomaj:''}</td><td class="n">${x.i===st.aIdx?'&mdash;':x.beatsA==='yes'?'Yes':x.beatsA==='no'?'No':x.beatsA==='undiff'?'No majority':'Not paired'}</td><td>${x.reading.length?esc(x.reading.join('; ')):'&mdash;'}</td><td>${coaVerdictTag(x.verdict)}</td></tr>`).join('');
+  renderCoaClass(st);
+  $('#coaMethod').innerHTML=`Decision rules, applied per pairing. <b>Majority</b> = at least ${st.thr}% of the side time on one condition in a session (the tutorial’s suggested 60%, editable above). <b>Stable</b> = the same majority for the last ${st.K} consecutive sessions (the tutorial’s at least three), and the preferred condition has won on both sides; otherwise run one more with sides swapped. <b>No majority</b> = ${st.NM} or more sessions without ${st.K} consecutive majorities, a working convention taken from the tutorial’s example in which five sessions without a majority ended the pairing. <b>Flip-flop</b> (majorities alternating across the last three sessions), <b>side bias</b> (the majority follows the side across both arrangements), the <b>problem-behavior rule</b> (both conditions aversive and problem behavior above the ceiling) and the <b>refusal rule</b> (refusing for more than half of two sessions) are working conventions of this form that apply the tutorial’s text (pp. 788–790). Verdict labels, applied in this order: <b>Choice reinforcer</b> = won every pairing it appeared in, against the no-reinforcer condition and at least one other condition, each stable; <b>Choice reinforcer (relative)</b> = a stable win against the no-reinforcer condition only, or stable wins without a pairing against it; <b>Not chosen over nothing</b> = the no-reinforcer condition was preferred over it; <b>Undifferentiated</b> = no majority in its pairings; <b>Not preferred (relative)</b> = lost every stable pairing without facing the no-reinforcer condition; <b>Mixed (relative)</b> = won some and lost some without facing it; <b>Untested</b>. Weight later pairings more than earlier ones and read the cumulative pattern, not one pairing (p. 792). A COA result is evidence for a choice reinforcer; confirm it in the single-operant or progressive-ratio sheet before it is written into the plan (p. 792; Randall et al., 2025, as cited there).`;
+  plotCOA(st);
+  coaRunnerSync&&coaRunnerSync(st);
+}
+function renderCoaClass(st){
+  const out={att:[],tan:[],esc:[],syn:[]};const lib=S.coa.lib;
+  st.pairs.filter(p=>p.status==='stable'||p.status==='stable-nc').forEach(p=>{
+    const wi=p.winner===1?p.i1:p.i2,li=p.winner===1?p.i2:p.i1;const w=lib[wi],l=lib[li];
+    const forW=p.winner===1?p.an.for1:p.an.for2;
+    const line=coaL(wi)+' over '+coaL(li)+' (pairing '+(p.i+1)+(p.status==='stable-nc'?', not yet counterbalanced':'')+')';
+    forW.forEach(f=>{if(/^attention/.test(f))out.att.push(line+': '+f);else if(/tangibles/.test(f))out.tan.push(line+': '+f);else if(/^escape/.test(f))out.esc.push(line+': '+f);});
+    if(w.av&&(w.att||w.tan))out.syn.push(line+': tolerance of the '+COA_AV[w.av]+' when paired with '+[w.att?'attention'+(w.attWho.trim()?' from '+w.attWho.trim():''):'',w.tan?coaLvl(w.tan)+' tangibles':''].filter(Boolean).join(' + '));
+  });
+  const hpLp=st.pairs.filter(p=>p.ok&&p.c1.tan&&p.c2.tan&&p.c1.tan!==p.c2.tan&&p.n);
+  if(hpLp.length)out.tan.push('High- vs low-preference tangibles: '+hpLp.map(p=>p.status==='stable'||p.status==='stable-nc'?'discriminated in pairing '+(p.i+1)+' ('+coaL(p.winner===1?p.i1:p.i2)+' preferred)':p.status==='nomaj'?'not discriminated in pairing '+(p.i+1):'pairing '+(p.i+1)+' still running').join('; '));
+  const row=(lab,a)=>`<div><b>${lab}</b> ${a.length?esc(a.join('. '))+'.':'no stable evidence yet'}</div>`;
+  $('#coaClass').innerHTML=row('Attention (whose)',out.att)+row('Tangibles',out.tan)+row('Escape (allocation away from demands)',out.esc)+row('Synthesized tolerance',out.syn);
+}
+function plotCOA(st){
+  const svg=$('#coaPlot');if(!svg)return;
+  const pts=st.rows.filter(r=>r.done);
+  const L=44,R=46,T=24,B=36,W=640-L-R,H=240-T-B;const n=Math.max(pts.length,1);
+  const x=i=>L+W*((i+0.5)/n),y=v=>T+H-H*v/100;
+  const pbMax=Math.max(1,...pts.map(r=>r.pbpm||0));const yr=v=>T+H-H*v/pbMax;
+  let g='';
+  for(let t=0;t<=5;t++){const yy=T+H-H*t/5;g+=`<line x1="${L}" x2="${L+W}" y1="${yy}" y2="${yy}" class="grid"/><text x="${L-6}" y="${yy+3}" text-anchor="end" class="tick">${t*20}</text>`;}
+  for(let t=0;t<=2;t++){const v=pbMax*t/2;g+=`<text x="${L+W+6}" y="${yr(v)+3}" text-anchor="start" class="tick">${v.toFixed(pbMax>=10?0:1)}</text>`;}
+  g+=`<line x1="${L}" x2="${L}" y1="${T}" y2="${T+H}" class="axis"/><line x1="${L}" x2="${L+W}" y1="${T+H}" y2="${T+H}" class="axis"/><line x1="${L+W}" x2="${L+W}" y1="${T}" y2="${T+H}" class="axis"/>`;
+  g+=`<text x="${L+W/2}" y="236" text-anchor="middle" class="lbl">Session</text><text transform="translate(11 ${T+H/2}) rotate(-90)" text-anchor="middle" class="lbl">% of allocation</text><text transform="translate(634 ${T+H/2}) rotate(90)" text-anchor="middle" class="lbl">Problem behavior per min</text>`;
+  g+=`<line x1="${L}" x2="${L+W}" y1="${y(st.thr)}" y2="${y(st.thr)}" class="coa-thr"/><text x="${L+W-2}" y="${y(st.thr)-3}" text-anchor="end" class="tick">${st.thr}% majority</text>`;
+  const bw=Math.min(14,W/n*0.5);
+  pts.forEach((r,i)=>{if(r.pbpm>0)g+=`<rect x="${x(i)-bw/2}" y="${yr(r.pbpm)}" width="${bw}" height="${T+H-yr(r.pbpm)}" class="coa-pb"/>`;});
+  let i=0;while(i<pts.length){let j=i;while(j+1<pts.length&&pts[j+1].pi===pts[i].pi)j++;const seg=pts.slice(i,j+1);const p=st.pairs[pts[i].pi];
+    if(i>0){const xx=(x(i-1)+x(i))/2;g+=`<line x1="${xx}" x2="${xx}" y1="${T}" y2="${T+H}" class="phase"/>`;}
+    let d1='',d2='';seg.forEach((r,m)=>{if(r.alloc==null)return;const X=x(i+m);d1+=(d1?'L':'M')+X+' '+y(r.alloc)+' ';d2+=(d2?'L':'M')+X+' '+y(100-r.alloc)+' ';});
+    g+=`<path d="${d1}" class="series"/><path d="${d2}" class="series ctl"/>`;
+    seg.forEach((r,m)=>{if(r.alloc==null)return;const X=x(i+m);const f=r.side==='R';g+=marker('circle',X,y(r.alloc),f)+marker('square',X,y(100-r.alloc),f);});
+    if(p&&p.ok)g+=`<text x="${x(i)-4}" y="${T-6}" class="tick" text-anchor="start">○ ${coaL(p.i1)}  □ ${coaL(p.i2)}</text>`;
+    i=j+1;}
+  pts.forEach((r,i)=>{if((i+1)%2===0||i===0||n<=10)g+=`<text x="${x(i)}" y="${T+H+13}" text-anchor="middle" class="tick">${r.k+1}</text>`;});
+  if(!pts.length)g+=`<text x="${L+W/2}" y="${T+H/2}" text-anchor="middle" class="tick">No sessions scored yet.</text>`;
+  svg.innerHTML=g;
+}
+/* summary bridge: in COA mode the summary's CO columns carry the condition linked to each stimulus */
+function coaSumStats(){
+  const st=coaStats();
+  const rank={choice:6,relative:5,mixed:4,running:3,undiff:2,lower:1,notnothing:0,untested:-1,control:-2};
+  const map={choice:'preferred',relative:'comparable',mixed:'lower',running:'',undiff:'lower',lower:'lower',notnothing:'notchosen',untested:'',control:''};
+  const out=S.stim.map((s,i)=>{const linked=st.conds.filter(c=>c.cd.link===String(i));if(!linked.length)return null;linked.sort((a,b)=>rank[b.verdict]-rank[a.verdict]);const b=linked[0];return {key:String(i),mean:b.n?b.mean:null,stand:map[b.verdict],coaTag:coaVerdictTag(b.verdict),cond:b};}).filter(Boolean);
+  return {st:out,coa:st};
+}
+function renderSumCoa(){
+  const tb=$('#sumCoa tbody');if(!tb)return;
+  if(S.meta.coMode!=='coa'){tb.innerHTML='';return;}
+  const st=coaStats();
+  tb.innerHTML=st.conds.length?st.conds.map(x=>`<tr><td><b>${coaL(x.i)}</b> ${esc((x.cd.desc||'').trim())}</td><td>${esc(coaClassText(x.cd))}</td><td>${x.cd.link!==''&&S.stim[+x.cd.link]?esc(name(+x.cd.link)):'&mdash;'}</td><td class="n">${x.inPairs.length||''}</td><td class="n">${x.n||''}</td><td class="n">${x.mean==null?'&mdash;':Math.round(x.mean)+'%'}</td><td class="n">${x.inPairs.length?x.won+' / '+x.lost+' / '+x.nomaj:''}</td><td class="n">${x.i===st.aIdx?'&mdash;':x.beatsA==='yes'?'Yes':x.beatsA==='no'?'No':x.beatsA==='undiff'?'No majority':'Not paired'}</td><td>${coaVerdictTag(x.verdict)}</td></tr>`).join(''):'<tr><td colspan="9">No conditions entered on the concurrent-operants sheet.</td></tr>';
+}
+
+/* ---- input wiring ---- */
+$('#coaConf').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i;if(isNaN(i)||!el.dataset.f)return;S.coa.conf[i][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;});
+$('#coaConf').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;S.coa.conf.splice(+b.dataset.rm,1);renderCoaConf();});
+$('#coaConfAdd').addEventListener('click',()=>{S.coa.conf.push({name:'',role:'',why:'',bst:false,bstDate:''});renderCoaConf();});
+$('#coaLib').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i,f=el.dataset.f;if(isNaN(i)||!f)return;S.coa.lib[i][f]=el.value;if(f==='desc'){renderCoaPairs();renderCoaSess();}computeCOA();renderSummary();});
+$('#coaLib').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!confirm('Remove condition '+coaL(i)+'? Pairings that use it are cleared.'))return;S.coa.lib.splice(i,1);
+  S.coa.pairs.forEach(p=>{['c1','c2'].forEach(k=>{if(p[k]==='')return;const v=+p[k];if(v===i)p[k]='';else if(v>i)p[k]=String(v-1);});});renderCoaLib();renderCoaPairs();renderCoaSess();computeCOA();renderSummary();});
+$('#coaLibAdd').addEventListener('click',()=>{S.coa.lib.push({desc:'',att:'',attWho:'',tan:'',tanWhat:'',av:'',avWhat:'',purpose:'',link:''});renderCoaLib();renderCoaPairs();computeCOA();});
+$('#coaPairs').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i,f=el.dataset.f;if(isNaN(i)||!f)return;S.coa.pairs[i][f]=el.value;if(f!=='note')renderCoaSess();computeCOA();renderSummary();});
+$('#coaPairs').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!confirm('Remove pairing '+(i+1)+'? Sessions that use it lose their pairing.'))return;S.coa.pairs.splice(i,1);
+  S.coa.sess.forEach(s=>{if(s.pair==='')return;const v=+s.pair;if(v===i)s.pair='';else if(v>i)s.pair=String(v-1);});renderCoaPairs();renderCoaSess();computeCOA();renderSummary();});
+$('#coaPairAdd').addEventListener('click',()=>{S.coa.pairs.push({c1:'',c2:'',note:''});renderCoaPairs();renderCoaSess();computeCOA();});
+$('#coaTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k,f=el.dataset.f;if(isNaN(k)||!f)return;S.coa.sess[k][f]=el.type==='checkbox'?el.checked:el.value;computeCOA();renderSummary();});
+$$('#co [data-coa]').forEach(e=>e.addEventListener('change',()=>{const k=e.dataset.coa;const v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){e.value=S.coa[k];return;}S.coa[k]=v;if(k==='nSess'){ensureCoa();renderCoaSess();}computeCOA();renderSummary();}));
+$$('#co [data-coafill]').forEach(b=>b.addEventListener('click',()=>{const t=$('#co textarea[data-meta="coa_choice"]');if(!t)return;t.value=b.dataset.coafill==='desk'?'Chair and body moved to one side of the desk. Within 3 in of the center line = neither: pause both timers and prompt a choice.':'Most of the body (arms, legs and torso) on one side of the line, no part touching the line. The timer for a side runs only while that definition is met; both timers pause when the student is on the line or in the neutral spot.';S.meta.coa_choice=t.value;t.dispatchEvent(new Event('input',{bubbles:true}));}));
+
+/* ---- COA runner: three mutually exclusive stopwatches, a refusing sub-timer, PB and prompt counts ---- */
+let coaRunnerSync=null;
+(function(){
+  const C={st:'ready',side:null,ref:false,acc:[0,0,0],refAcc:0,pb:0,prompts:[],last:0,run:0,tick:null,pair:'',sideC1:''};
+  const el=id=>document.getElementById('ra-coa-'+id);
+  const mmss=ms=>{const s=Math.max(0,Math.round(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+  const msg=(t,warn)=>{const m=el('msg');m.textContent=t;m.classList.toggle('ra-run-warn',!!warn);};
+  const beep=(f,ms)=>{if(el('sound').getAttribute('aria-pressed')!=='true')return;try{const ac=new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.value=.12;o.start();o.stop(ac.currentTime+ms/1000);setTimeout(()=>ac.close&&ac.close(),ms+100);}catch(e){}};
+  const lenMs=()=>S.sessMin*60*1000;
+  function paint(){
+    el('t1').textContent=mmss(C.acc[1]);el('t0').textContent=mmss(C.acc[0]);el('t2').textContent=mmss(C.acc[2]);el('tref').textContent=mmss(C.refAcc);
+    el('pbn').textContent=C.pb;el('prn').textContent=C.prompts.length;
+    el('left').textContent=mmss(Math.max(0,lenMs()-C.run));el('el').textContent=mmss(C.run)+' elapsed';
+    el('bar').style.width=Math.min(100,100*C.run/lenMs())+'%';
+    [1,0,2].forEach(s=>el('s'+s).setAttribute('aria-pressed',C.side===s?'true':'false'));el('ref').setAttribute('aria-pressed',C.ref?'true':'false');
+    const run=C.st==='run';['s1','s0','s2','ref','pb','prompt','end'].forEach(id=>el(id).disabled=!run);
+    el('start').disabled=run||C.st==='done';el('save').disabled=C.st!=='done';el('discard').disabled=C.st==='ready';
+    el('pair').disabled=run||C.st==='done';el('side').disabled=run||C.st==='done';
+    el('state').textContent=C.st==='run'?'Running':C.st==='done'?'Ended':'Ready';
+  }
+  function tick(){const now=Date.now();const dt=now-C.last;C.last=now;C.run+=dt;const s=C.side==null?0:C.side;C.acc[s]+=dt;if(s===0&&C.ref)C.refAcc+=dt;
+    if(C.run>=lenMs()){C.run=lenMs();end('Session length reached.');return;}paint();}
+  function end(why){if(C.st!=='run')return;clearInterval(C.tick);C.st='done';beep(440,500);
+    const tot=C.acc[1]+C.acc[2];const pct=tot?Math.round(100*C.acc[1]/tot):null;
+    el('cueh').textContent='Session over';el('cuet').textContent=why+' Condition 1 '+(pct==null?'—':pct+'%')+' of side time. Save to the sheet writes it to the next empty row.';el('cue').classList.add('ra-run-soft');paint();}
+  function reset(){clearInterval(C.tick);Object.assign(C,{st:'ready',side:null,ref:false,acc:[0,0,0],refAcc:0,pb:0,prompts:[],run:0});el('cueh').textContent='Ready';el('cuet').textContent='Place the student at the neutral spot, give the contingency overview, answer questions, then press Start session. The Neither timer runs until you tap a side.';el('cue').classList.remove('ra-run-soft','ra-run-now');paint();}
+  el('start').addEventListener('click',()=>{if(S.meta.coMode!=='coa')return;const pi=el('pair').value;if(pi===''||!S.coa.pairs[+pi]){msg('Choose a pairing first.',true);return;}
+    const p=coaStats().pairs[+pi];if(!p.ok){msg('Pairing '+(+pi+1)+' needs two different conditions.',true);return;}
+    C.pair=pi;C.sideC1=el('side').value;C.st='run';C.last=Date.now();C.side=null;C.tick=setInterval(tick,250);beep(660,180);
+    el('cueh').textContent='Session running';el('cuet').textContent='Tap the side the student is on as they move; both side timers are paused while Neither is selected.';el('cue').classList.add('ra-run-now');msg('Session started. Keys 1, 0, 2; R refusing; P problem behavior; C prompt.');paint();});
+  [1,0,2].forEach(s=>el('s'+s).addEventListener('click',()=>{if(C.st!=='run')return;tick();C.side=s;if(s!==0)C.ref=false;paint();}));
+  el('ref').addEventListener('click',()=>{if(C.st!=='run')return;tick();C.ref=!C.ref;if(C.ref)C.side=0;paint();});
+  el('pb').addEventListener('click',()=>{if(C.st!=='run')return;C.pb++;paint();});
+  el('prompt').addEventListener('click',()=>{if(C.st!=='run')return;C.prompts.push(mmss(C.run));paint();msg('Prompt to choose logged at '+C.prompts[C.prompts.length-1]+'.');});
+  el('end').addEventListener('click',()=>{tick();end('Ended by the implementer.');});
+  el('discard').addEventListener('click',()=>{if(C.st==='run'&&!confirm('Discard the running session?'))return;reset();msg('Session discarded.');});
+  el('sound').addEventListener('click',()=>el('sound').setAttribute('aria-pressed',el('sound').getAttribute('aria-pressed')==='true'?'false':'true'));
+  el('save').addEventListener('click',()=>{if(C.st!=='done')return;const c=S.coa;let k=c.sess.findIndex(s=>s.pair===''&&s.d1===''&&s.d2==='');if(k<0){c.nSess=Math.min(60,c.nSess+1);ensureCoa();k=c.sess.length-1;if(c.sess[k].d1!==''){msg('The session grid is full (60 rows).',true);return;}}
+    const d=new Date();const r=c.sess[k];const rd=v=>String(Math.round(v/1000));
+    Object.assign(r,{date:(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear(),pair:C.pair,side:C.sideC1,d1:rd(C.acc[1]),d2:rd(C.acc[2]),nei:rd(C.acc[0]-C.refAcc),ref:rd(C.refAcc),pb:String(C.pb),prompt:C.prompts.length>0,note:(C.prompts.length?'Prompts at '+C.prompts.join(', ')+'. ':'')+(C.run<lenMs()-1000?'Ended early by the implementer. ':'')});
+    renderCoaSess();computeCOA();renderSummary();
+    const other=C.sideC1==='L'?'R':C.sideC1==='R'?'L':'';if(other)el('side').value=other;
+    reset();msg('Saved as session '+(k+1)+'.'+(other?' Next session of this pairing: put Condition 1 on the '+other+' side.':''));});
+  el('pair').addEventListener('change',()=>coaRunnerSync());
+  document.addEventListener('keydown',e=>{if(C.st!=='run')return;const t=e.target;if(t&&/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))return;const k=e.key.toLowerCase();
+    if(k==='1')el('s1').click();else if(k==='0')el('s0').click();else if(k==='2')el('s2').click();else if(k==='r')el('ref').click();else if(k==='p')el('pb').click();else if(k==='c')el('prompt').click();else return;e.preventDefault();});
+  coaRunnerSync=function(st){
+    if(C.st==='run')return;st=st||coaStats();
+    const pi=el('pair').value;const p=pi===''?null:st.pairs[+pi];
+    el('l1').textContent=p&&p.ok?coaL(p.i1)+' · Condition 1':'Condition 1';el('l2').textContent=p&&p.ok?coaL(p.i2)+' · Condition 2':'Condition 2';
+    if(p&&p.ok){const last=p.sess[p.sess.length-1];const sug=last&&last.side?(last.side==='L'?'R':'L'):'';el('sidesrc').textContent=sug?'Suggested: '+sug+' (opposite the last session of this pairing)':'';if(sug&&C.st==='ready'&&!el('side').value)el('side').value=sug;
+      el('info').innerHTML='<b>'+esc(coaPairLabel(+pi))+'.</b> '+esc(p.an.text)+(S.meta.coa_script?' <b>Overview:</b> '+esc(S.meta.coa_script):'');}
+    else{el('sidesrc').textContent='';el('info').textContent='Choose a pairing; the runner reads the two conditions from the Pairings table and the session length from the toolbar.';}
+    paint();};
+  paint();
+})();
+
 /* ---------- progressive ratio ---------- */
 function prLadder(k=14){const out=[];let v=S.prStart;const std=[1,2,5,10,20,30,40,50,60,70,80,90,100,120,140,160,180,200];
   for(let i=0;i<k;i++){if(S.prStep==='std'){out.push(std[i]!=null?std[i]:std[std.length-1]+20*(i-std.length+1));continue;}
@@ -1576,7 +2075,7 @@ function plotPR(st){
 
 /* ---------- summary ---------- */
 function renderSummary(){
-  const so=soStats(),co=coStats(),pr=prStats();
+  const so=soStats(),co=S.meta.coMode==='coa'?coaSumStats():coStats(),pr=prStats();
   const tagV=v=>v==='clear'?'<span class="tag ok">Clear</span>':v==='probable'?'<span class="tag mid">Probable</span>':v==='none'?'<span class="tag no">None</span>':'&mdash;';
   const tagS=s=>s==='preferred'?'<span class="tag ok">Preferred</span>':s==='comparable'?'<span class="tag mid">Comparable</span>':s==='notchosen'?'<span class="tag no">Not chosen</span>':s==='lower'?'<span class="tag na">Lower</span>':'&mdash;';
   const tagP=p=>p==='high'?'<span class="tag ok">High</span>':p==='moderate'?'<span class="tag mid">Moderate</span>':p==='low'?'<span class="tag no">Low</span>':'&mdash;';
@@ -1590,13 +2089,14 @@ function renderSummary(){
     else if(a.verdict==='probable'||(p&&p.pot==='moderate'))v='<span class="tag mid">Probable</span>';
     else if(a.verdict==='none'||(p&&p.pot==='low'))v='<span class="tag no">Not supported</span>';
     else v='<span class="tag na">Untested</span>';
-    return `<tr><td>${esc(name(i))}</td><td class="n">${esc(s.pa)||'&mdash;'}</td><td class="n">${a.ratio==null?'&mdash;':a.ratio===Infinity?'&infin;':a.ratio.toFixed(2)}</td><td class="n">${tagV(a.verdict)}</td><td class="n">${c&&c.mean!=null?Math.round(c.mean)+'%':'&mdash;'}</td><td class="n">${c?tagS(c.stand):'&mdash;'}</td><td class="n">${p?f1(p.mean):'&mdash;'}</td><td class="n">${p?tagP(p.pot):'&mdash;'}</td><td>${v}</td></tr>`;}).join('');
+    return `<tr><td>${esc(name(i))}</td><td class="n">${esc(s.pa)||'&mdash;'}</td><td class="n">${a.ratio==null?'&mdash;':a.ratio===Infinity?'&infin;':a.ratio.toFixed(2)}</td><td class="n">${tagV(a.verdict)}</td><td class="n">${c&&c.mean!=null?Math.round(c.mean)+'%':'&mdash;'}</td><td class="n">${c?(c.coaTag||tagS(c.stand)):'&mdash;'}</td><td class="n">${p?f1(p.mean):'&mdash;'}</td><td class="n">${p?tagP(p.pot):'&mdash;'}</td><td>${v}</td></tr>`;}).join('');
+  renderSumCoa();
 }
 
 function computeAll(){computeSO();computeCO();computePR();renderSummary();}
-function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderPR();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';}
-bindNum('nStim','n',()=>{renderStim();renderSO();renderCO();renderPR();renderSummary();});
-bindNum('sessMin','sessMin',()=>{renderSO();});
+function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
+bindNum('nStim','n',()=>{renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();});
+bindNum('sessMin','sessMin',()=>{renderSO();computeCOA();});
 bindNum('nSess','nSess',renderSO);
 bindNum('nCoSess','nCoSess',renderCO);
 bindNum('prStart','prStart',renderPR);
@@ -1701,9 +2201,47 @@ function loadSim(){
     S.pr[k]={date:D(12-Math.floor(k/4)*2), cond:c, done, resp:String(resp), pb:false};
   }
 
+
+  /* ---- condition comparison (COA) mode, v21.22: the same student, worked like the tutorial's Julia example
+     (Randall & Kranak, 2026, pp. 783-792). Seven conditions, six pairings in the tutorial's order, 5-min sessions,
+     sides counterbalanced. Numbers follow the example: 60/40 in the first A vs B session, then three consecutive
+     majorities per pairing, and D vs G going back and forth with no majority after five sessions. The sheet opens
+     in the stations mode; switch Arrangement on the concurrent-operants sheet to see this record. */
+  S.coa=blankCoa();S.coa.nSess=20;ensureCoa();
+  Object.assign(S.meta,{coMode:'st',
+    coa_entry:'FA not feasible in this setting',coa_mods:'',
+    coa_rep:'Pre-assessment: no stimuli vs all stimuli',coa_repres:'Stayed on the stimulus side 96% of a 5-min session; no switching once there',
+    coa_instr:'Vocal contingency overview',
+    coa_script:'On this side is choice A, where you can sit by yourself. On this side is choice B, where you can have the worksheet. You can go back and forth as much as you like, but the worksheet and Ms. Ortiz stay on their side.',
+    coa_arr:'Desk, tape down the center',coa_equal:true,coa_sd:'Lettered colored placemats, one per side (blue A, yellow B), swapped with the conditions',
+    coa_choice:'Chair and body moved to one side of the desk. Within 3 in of the center line = neither: pause both timers and prompt a choice.',
+    coa_impl:'Joshua Newsome (BCBA): overview, timers, fidelity data',
+    coa_mat:'From PA-1: tablet (HP, displacing item; present only where it is the test variable), fruit chew (MP), picture book (LP, rank 6)'});
+  S.coa.conf=[{name:'Ms. Ortiz',role:'Teacher',why:'Suspected reinforcer',bst:true,bstDate:D(12)}];
+  const cond=(desc,att,attWho,tan,tanWhat,av,avWhat,purpose,link)=>({desc,att,attWho,tan,tanWhat,av,avWhat,purpose,link});
+  S.coa.lib=[
+    cond('No reinforcers, no potentially aversive stimuli','','','','','','','Alone-like control for sensitivity to social reinforcers',''),
+    cond('Independent sorting worksheet alone, no help','','','','','academic','sorting worksheet','Escape test against A',''),
+    cond('Worksheet with teacher assistance','hp','Ms. Ortiz','','','academic','sorting worksheet','Does attention offset the demand',''),
+    cond('Tablet (video), no attention','','','hp','tablet','','','High-preference tangible alone','0'),
+    cond('Tablet with teacher attention','hp','Ms. Ortiz','hp','tablet','','','Synthesized positive reinforcers',''),
+    cond('Teacher attention alone','hp','Ms. Ortiz','','','','','Attention alone','2'),
+    cond('Picture book (low-preference), no attention','','','lp','picture book','','','High- vs low-preference tangibles','')];
+  S.coa.pairs=[['0','1',''],['0','2','Order as in the tutorial: attention tested with the demand present before attention alone'],['2','3','Tangibles against the attention + demand condition, as in the tutorial'],['3','4','Synthesized pairing for the final ranking (p. 790)'],['4','5','Synthesized pairing for the final ranking (p. 790)'],['3','6','']].map(([c1,c2,note])=>({c1,c2,note}));
+  const coaRows=[
+    [0,'L',180,120,1],[0,'R',222,78,0],[0,'L',240,60,0],
+    [1,'L',195,105,1],[1,'R',210,90,0],[1,'L',228,72,0],
+    [2,'L',60,240,0],[2,'R',45,255,0],[2,'L',30,270,0],
+    [3,'L',90,210,0],[3,'R',75,225,0],[3,'L',66,234,0],
+    [4,'L',240,60,0],[4,'R',255,45,0],[4,'L',261,39,0],
+    [5,'L',165,135,0],[5,'R',120,180,0],[5,'L',190,110,0],[5,'R',130,170,0],[5,'L',150,150,0]];
+  const ioaSeq={1:'97',4:'95',7:'98',10:'96',13:'100',16:'94'};
+  coaRows.forEach(([pair,side,d1,d2,pb],k)=>{S.coa.sess[k]={date:D(10-Math.floor(k/4)),pair:String(pair),side,d1:String(d1),d2:String(d2),nei:'0',ref:'0',pb:String(pb),
+    prompt:k===0,early:'',fid:'100',ioa:ioaSeq[k]||'',note:k===0?'Switched sides about halfway; prompted once at the line':k===19?'Back and forth all session':''};});
+
   renderAll();
   setView('setup');
-  alert('Simulated data loaded on every sheet. Use the view buttons to step through setup, single operant, concurrent operants, progressive ratio, and the summary.');
+  alert('Simulated data loaded on every sheet. Use the view buttons to step through setup, single operant, concurrent operants, progressive ratio, and the summary. On the concurrent-operants sheet, switch Arrangement to Condition comparison (COA) to see the same student worked as a condition comparison.');
 }
 
 $('#simBtn').addEventListener('click',loadSim);
