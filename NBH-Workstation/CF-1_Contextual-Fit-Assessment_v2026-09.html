@@ -401,6 +401,13 @@ body.view-guide .only-setup,body.view-guide .only-rate,body.view-guide .only-bar
   .sheet{box-shadow:none}
 }
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -615,7 +622,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr>
       <th style="width:6%">#</th><th style="width:22%">Name or initials</th><th style="width:22%">Role</th>
-      <th style="width:26%">When they run the plan</th><th>Months with this student</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:26%">When they run the plan</th><th>Months with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <!-- ===================== RATINGS ===================== -->
@@ -659,7 +666,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="enhTbl"><thead><tr>
       <th style="width:5%">Item</th><th style="width:14%">Domain</th><th style="width:22%">Barrier as stated</th>
-      <th style="width:12%">Response type</th><th>What changes</th><th style="width:11%">Who</th><th style="width:9%">By when</th><th style="width:9%">Status</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:12%">Response type</th><th>What changes</th><th style="width:11%">Who</th><th style="width:9%">By when</th><th style="width:9%">Status</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint" id="enhCheck"></p>
     <table class="rt" style="margin-top:14px">
       <tr><th style="width:22%">What the team decided not to change, and why</th><td><textarea data-m="accepted" rows="3" placeholder="Record accepted risks explicitly. They belong in the integrity discussion later."></textarea></td></tr>
@@ -774,8 +781,19 @@ function renderR(){
     <td><input data-i="${i}" data-f="name" value="${esc(r.name)}"></td>
     <td><input data-i="${i}" data-f="role" value="${esc(r.role)}"></td>
     <td><input data-i="${i}" data-f="when" value="${esc(r.when)}" placeholder="which periods"></td>
-    <td><input data-i="${i}" data-f="mo" value="${esc(r.mo)}"></td></tr>`).join('');
+    <td><input data-i="${i}" data-f="mo" value="${esc(r.mo)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this respondent" aria-label="Delete respondent ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a respondent can be deleted anywhere in the list. Their ratings in both rounds go with them, and
+   the ratings of the respondents after them are re-keyed so none moves to another respondent. */
+function delRater(j){const r=S.raters[j];if(!r)return;
+  const has=['name','role','when','mo'].some(f=>String(r[f]||'').trim())||[1,2].some(n=>ITEMS.some((_,i)=>val(i,j,n)!=null));
+  if(has&&!confirm('Delete respondent '+(j+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'? Their details and their ratings in both rounds will be deleted.'))return;
+  S.raters.splice(j,1);
+  [1,2].forEach(n=>{const o=S.scores[n]||{},nw={};Object.keys(o).forEach(key=>{const m=/^(\d+)_(\d+)$/.exec(key);if(!m)return;const jj=+m[2];
+    if(jj===j)return;nw[m[1]+'_'+(jj>j?jj-1:jj)]=o[key];});S.scores[n]=nw;});
+  if(!S.raters.length)S.raters.push({name:'',role:'',when:'',mo:''});
+  renderAll();}
+$('#rTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delRater(+b.dataset.di);});
 $('#rTbl').addEventListener('input',e=>{const el=e.target;if(el.dataset.i===undefined)return;
   S.raters[+el.dataset.i][el.dataset.f]=el.value;
   /* v21.16 audit (F6): the Barriers sheet names respondents too, and kept the old name until something redrew it */
@@ -953,8 +971,8 @@ function renderEnh(){
     <td><textarea data-i="${i}" data-f="what" rows="2">${esc(r.what)}</textarea></td>
     <td><input data-i="${i}" data-f="who" value="${esc(r.who)}"></td>
     <td><input data-i="${i}" data-f="by" value="${esc(r.by)}"></td>
-    <td><select data-i="${i}" data-f="st"><option></option>${opt(['Open','Done','Not doing'],r.st)}</select></td></tr>`).join('')
-    ||'<tr><td colspan="8" class="hint">No rows yet. Use the button above to generate them from the items flagged in round 1.</td></tr>';
+    <td><select data-i="${i}" data-f="st"><option></option>${opt(['Open','Done','Not doing'],r.st)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('')
+    ||'<tr><td colspan="9" class="hint">No rows yet. Use the button above to generate them from the items flagged in round 1.</td></tr>';
   /* v21.16 audit (F13): each item flagged in round 1 becomes a decision, the form says; name any without a row */
   const A1=analyse(1),fl=A1.items.filter(x=>x.flag).map(x=>String(x.i+1)),miss=fl.filter(n=>!S.enh.some(e=>e.item===n));
   $('#enhCheck').textContent=!A1.n?'':!fl.length?`No item is flagged in round 1 (threshold ${S.thr}).`
@@ -974,6 +992,11 @@ $('#genEnh').addEventListener('click',()=>{
   renderAll();setView('enh');
 });
 $('#addE').addEventListener('click',()=>{S.enh.push({item:'',dom:'',bar:'',type:'',what:'',who:'',by:'',st:'Open'});renderEnh();renderSum();});
+/* v21.33 (R): an enhancement row can be deleted anywhere in the list */
+function delEnh(i){const r=S.enh[i];if(!r)return;
+  if(['item','dom','bar','type','what','who','by'].some(f=>String(r[f]||'').trim())&&!confirm('Delete this row'+(r.item?' (item '+r.item+')':'')+'? What was entered in it will be deleted.'))return;
+  S.enh.splice(i,1);renderEnh();renderSum();}
+$('#enhTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delEnh(+b.dataset.di);});
 $('#delE').addEventListener('click',()=>{if(!S.enh.length)return;const r=S.enh[S.enh.length-1];
   /* v21.16 audit (F13): a row that holds a decision is removed only after a question; (F7) the Summary follows */
   if(['type','what','who','by'].some(f=>String(r[f]||'').trim())&&!confirm('Remove the last enhancement row'+(r.item?' (item '+r.item+')':'')+'? What was entered in it will be deleted.'))return;

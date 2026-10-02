@@ -449,6 +449,13 @@ body.view-guide .only-setup,body.view-guide .only-goals,body.view-guide .only-pr
   .sheet{box-shadow:none}
 }
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -643,7 +650,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr>
       <th style="width:4%">#</th><th style="width:15%">Name or initials</th><th style="width:14%">Role</th><th style="width:11%">Mode</th>
       <th style="width:9%">Anonymous to the rated staff?</th><th style="width:9%">Pre date</th><th style="width:9%">Post date</th>
-      <th style="width:7%">Contextual fit values, round 1</th><th style="width:7%">Contextual fit values, round 2</th><th>Note (adaptation, who read it aloud, consent)</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:7%">Contextual fit values, round 1</th><th style="width:7%">Contextual fit values, round 2</th><th>Note (adaptation, who read it aloud, consent)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">Roles missing, and why</th><td><textarea data-m="missing_why" rows="2" placeholder="e.g., no caregiver reachable this round; administrator to rate at the next review"></textarea></td></tr>
     </table>
@@ -896,8 +903,20 @@ function renderResp(){
     <td><input data-ri="${i}" data-f="post" value="${esc(r.post)}" aria-label="Respondent ${i+1} post date"></td>
     <td><input data-ri="${i}" data-f="cf1" value="${esc(r.cf1)}" aria-label="Respondent ${i+1} contextual fit values mean round 1"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
     <td><input data-ri="${i}" data-f="cf2" value="${esc(r.cf2)}" aria-label="Respondent ${i+1} contextual fit values mean round 2"${IMPL(r.role)?'':' disabled placeholder="—"'}></td>
-    <td><input data-ri="${i}" data-f="note" value="${esc(r.note)}" aria-label="Respondent ${i+1} note"></td></tr>`).join('');
+    <td><input data-ri="${i}" data-f="note" value="${esc(r.note)}" aria-label="Respondent ${i+1} note"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this respondent" aria-label="Delete respondent ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a respondent can be deleted anywhere in the list. Their ratings and open-item answers in both rounds
+   go with them, and those of the respondents after them are re-keyed so none moves to another respondent. */
+function delResp(i){const r=S.resp[i];if(!r)return;
+  const held=['pre','post'].some(rd=>[S.rat[rd],S.open[rd]].some(o=>Object.keys(o||{}).some(k=>k.endsWith('_'+i)&&String(o[k]||'').trim())));
+  const has=Object.keys(r).some(f=>String(r[f]||'').trim())||held;
+  if(has&&!confirm('Delete respondent '+(i+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'? Their details, their ratings and their open-item answers in both rounds will be deleted.'))return;
+  S.resp.splice(i,1);
+  ['pre','post'].forEach(rd=>[['rat',S.rat],['open',S.open]].forEach(([nm,M])=>{const o=M[rd]||{},nw={};Object.keys(o).forEach(k=>{const m=/^(\w+)_(\d+)$/.exec(k);
+    if(!m){nw[k]=o[k];return;}const j=+m[2];if(j===i)return;nw[m[1]+'_'+(j>i?j-1:j)]=o[k];});M[rd]=nw;}));
+  if(!S.resp.length)S.resp.push(newResp());
+  renderAll();}
+$('#rTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delResp(+b.dataset.di);});
 $('#addR').addEventListener('click',()=>{S.resp.push(newResp());renderAll();});
 $('#delR').addEventListener('click',()=>{if(S.resp.length>1){S.resp.pop();ensure();renderAll();}});
 const rlabel=(r,i)=>`${esc(r.name||'Respondent '+(i+1))}<span class="rl">${esc(r.role||'role not set')}</span>`;

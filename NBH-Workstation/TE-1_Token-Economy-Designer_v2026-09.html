@@ -387,6 +387,13 @@ body.view-guide .only-setup,body.view-guide .only-sch,body.view-guide .only-gen,
 @media print{.only-setup,.only-sch,.only-gen,.only-aud,.only-guide{display:block!important}.sheet{box-shadow:none}
   table.rt td select{-webkit-appearance:none;appearance:none}}
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -616,7 +623,7 @@ td input,td select{max-width:100%}
     <p class="hint">Thin one schedule at a time and record which. Response rates vary inversely with both the token-production and the exchange-production ratio, and the two interact (Bullock &amp; Hackenberg, 2006), so raising both at once makes the effect uninterpretable. Each step shows its responses per exchange: the token-production ratio times the exchange-production ratio.</p>
     <div class="grid-wrap"><table class="rt" id="thinTbl"><thead><tr>
       <th style="width:44px">Step</th><th style="width:13%">Date</th><th style="width:15%">Schedule thinned</th>
-      <th style="width:12%">Token prod.</th><th style="width:12%">Exch. prod.</th><th style="width:11%">Responses per exchange</th><th>Criterion to advance / what happened</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:12%">Token prod.</th><th style="width:12%">Exch. prod.</th><th style="width:11%">Responses per exchange</th><th>Criterion to advance / what happened</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addThin">Add step</button><button class="tool" id="delThin">Remove last</button>
     </div>
@@ -636,7 +643,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="bkTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:22%">Backup reinforcer</th><th style="width:16%">Class</th>
-      <th style="width:12%">Token cost</th><th style="width:14%">Preference (PA-1)</th><th style="width:12%">Confirmed reinforcer (RA-1)</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:12%">Token cost</th><th style="width:14%">Preference (PA-1)</th><th style="width:12%">Confirmed reinforcer (RA-1)</th><th>Notes</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="genMetrics"></div>
     <div id="genVerdict"></div>
     <table class="rt" style="margin-top:12px">
@@ -757,8 +764,14 @@ function renderSch(){
       <td><input type="number" step="any" data-t="${i}" data-f="tp" value="${esc(r.tp)}"></td>
       <td><input type="number" step="any" data-t="${i}" data-f="ep" value="${esc(r.ep)}"></td>
       <td class="rpe" style="text-align:center;font-weight:600">${thinCell(r)}</td>
-      <td><textarea data-t="${i}" data-f="crit" rows="2">${esc(r.crit)}</textarea></td></tr>`).join('');
+      <td><textarea data-t="${i}" data-f="crit" rows="2">${esc(r.crit)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a thinning step can be deleted anywhere in the record; the steps after it move up one, and the
+   record keeps the form's three blank rows at least (ensure), as it does when a file is opened */
+function delThinAt(i){const r=S.thin[i];if(!r)return;
+  if(['d','w','tp','ep','crit'].some(f=>String(r[f]||'').trim())&&!confirm('Delete step '+(i+1)+'? What was entered in it will be deleted, and the steps after it move up one.'))return;
+  S.thin.splice(i,1);ensure();renderSch();}
+$('#thinTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delThinAt(+b.dataset.di);});
 /* v21.16 audit (F5): an entry in the thinning record updates only its own step's figure. The table was redrawn on
    every keystroke, which replaced the number box being typed in, and the caret came back at the start: 12 was
    stored as 21. */
@@ -777,9 +790,14 @@ function renderGen(){
     <td><input data-k="${i}" data-f="cost" value="${esc(r.cost)}"></td>
     <td><input data-k="${i}" data-f="pref" value="${esc(r.pref)}"></td>
     <td><select data-k="${i}" data-f="conf"><option value=""></option>${opt(['Yes','No','Not tested'],r.conf)}</select></td>
-    <td><input data-k="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`).join('');
+    <td><input data-k="${i}" data-f="note" value="${esc(r.note)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this backup" aria-label="Delete backup ${i+1}">&times;</button></td></tr>`).join('');
   renderGenSummary();
 }
+/* v21.33 (R): a backup can be deleted anywhere in the menu */
+function delBkAt(i){const r=S.bk[i];if(!r)return;
+  if(['n','c','cost','pref','conf','note'].some(f=>String(r[f]||'').trim())&&!confirm('Delete backup '+(i+1)+(String(r.n||'').trim()?' ('+String(r.n).trim()+')':'')+'? What was entered in it will be deleted.'))return;
+  S.bk.splice(i,1);ensure();renderGen();}
+$('#bkTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delBkAt(+b.dataset.di);});
 /* v21.16 audit (F2, F3, F4). The counts and the verdict are redrawn from the record on every edit, a backup's name
    included (a menu typed from scratch read "No backups listed yet"). A class counts only if it is one of the form's
    classes, and a backup listed without one is named as such: with none recorded the verdict said "Every backup
