@@ -50,6 +50,7 @@ button.icon{padding:5px 8px;min-width:32px}
 /* ---- the packet bar: the student once, and what you do with the case ---- */
 .bar{background:var(--slate);color:#fff;padding:8px 16px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
 .bar .grp{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap}
+.bar .facts{font-size:12px;color:#cfe0dd;line-height:1.4}.bar .facts .lbl{font-weight:600;color:#fff;letter-spacing:.02em}.bar .facts b{color:#fff;font-weight:600}.bar .facts i{font-style:normal;color:#9fb6bd}
 .bar .fld{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .bar .pair{display:inline-flex;align-items:center;margin-right:4px}
 .bar .pair button:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
@@ -272,6 +273,26 @@ dialog table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-n
 dialog th,dialog td{border:1px solid var(--rule);padding:6px 9px;text-align:left;vertical-align:top}
 dialog th{background:var(--mist);color:var(--navy)}
 dialog tr:nth-child(even) td{background:#fafcfb}
+/* the case map (v21.31) */
+.cm-lead{color:var(--muted);margin:0 0 10px}
+.cm-stage{display:grid;grid-template-columns:34px 1fr;gap:4px 12px;padding:10px 0;border-top:1px solid var(--rule)}
+.cm-stage:first-of-type{border-top:0}
+.cm-n{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:13px;grid-row:span 3}
+.cm-stage h3{margin:0;font-family:var(--serif);font-size:15px;color:var(--navy)}
+.cm-when{margin:0;color:var(--muted);font-size:12.5px}
+.cm-forms{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 0}
+.cm-forms button{font:inherit;font-size:12px;padding:4px 9px 4px 7px;border:1px solid var(--rule2);border-radius:999px;background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.3;text-align:left}
+.cm-forms button b{font-family:var(--mono,ui-monospace,monospace);font-size:11px;color:var(--navy);background:var(--mist);border-radius:999px;padding:1px 6px}
+.cm-forms button:hover{border-color:var(--navy);background:var(--shade)}
+.cm-forms button.on{border-color:#3f7a56;background:#eef7f1}
+.cm-forms button.on b{background:#d6ead9;color:#1f6b4a}
+.cm-forms button i{font-style:normal;color:var(--muted)}
+.cm-box{border:1px solid var(--rule);border-radius:8px;padding:10px 14px;margin:12px 0 0;background:var(--shade)}
+.cm-box h3{margin:0 0 6px;font-family:var(--serif);font-size:14.5px;color:var(--navy)}
+.cm-box ul{margin:0;padding-left:18px}
+.cm-box li{margin:2px 0}
+.cm-path{font-size:12.5px;line-height:1.7}
+.cm-path b{font-family:var(--mono,ui-monospace,monospace);font-size:11.5px;color:var(--navy);background:var(--mist);border-radius:999px;padding:1px 6px;white-space:nowrap}
 /* ---- bookmarking a saved packet ---- */
 dialog .dropzone{display:block;width:100%;margin:12px 0 6px;padding:26px 16px;border:2px dashed var(--rule2);
   border-radius:8px;background:var(--shade);color:var(--slate);font-size:13px;text-align:center;min-height:0}
@@ -323,6 +344,11 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
   </div>
+  <!-- v21.31 the case: what the shell has read from Forms TB-1, FS-1, GB-1 and PA-1, carried to every open form -->
+  <div class="grp facts" id="factsRow" hidden>
+    <span class="lbl">The case</span><span id="factsTxt" role="status" aria-live="polite"></span>
+    <button id="factsSend" class="sm" title="Read the target behaviors, function, goals and reinforcer menu from the forms that hold them and send them to every open form">Send to open forms</button>
+  </div>
   <div class="grp acts">
     <span class="pair"><button id="savePacket">Save packet</button>
     <button id="openPacket">Open packet</button></span>
@@ -330,7 +356,8 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="pair"><button id="saveCase">Save case</button>
     <button id="openCase">Open case</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
-    <span class="pair"><button id="diag">Diagnostics</button>
+    <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
+    <button id="diag">Diagnostics</button>
     <button id="help">Help</button></span>
     <div class="sp"></div>
     <button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
@@ -477,8 +504,12 @@ const EMBED=(()=>{
     const st=new Blob([bytes(t)]).stream().pipeThrough(new DecompressionStream('gzip'));
     return await new Response(st).text();
   }
-  E.ready=(async()=>{E.forms=JSON.parse(await inflate('nbh-embed-forms')||'{}');return E;})();
-  E.form=file=>{const h=E.forms&&E.forms[file];return h?h.split('@@NBH-LOGO@@').join(E.logo):null;};
+  /* v21.31: the pictogram library (Forms SM-1 and VS-1) is one block, put into a form's <script src> as it opens */
+  E.ready=(async()=>{const [f,pic]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null)]);E.forms=JSON.parse(f||'{}');E.pictos=pic||'';return E;})();
+  const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
+  E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo);
+    if(PICTAG.test(h))h=h.replace(PICTAG,E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
+    return h;};
   E.pdf=async()=>{if(!E._pdf)E._pdf=JSON.parse(await inflate('nbh-embed-pdf')||'{}');return E._pdf;};
   E.shell=()=>inflate('nbh-embed-shell');
   E.case=()=>{try{const c=el('nbh-case');const t=c?c.textContent:'';return t.trim()?JSON.parse(t):null;}catch(e){return null;}};
@@ -648,7 +679,7 @@ function openForm(id,keepRail){
     fr=document.createElement('iframe');
     fr.title=rec[1]+' (Form '+id+')';
     loadFrame(fr,rec[2]);
-    fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); });
+    fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); setTimeout(()=>pushFactsTo(fr),1100); });
     $('#frames').appendChild(fr);
     state.frames[id]=fr;
   }
@@ -738,6 +769,7 @@ $('#pushPacket').addEventListener('click',()=>{
   const n=Object.keys(state.frames).length;
   if(!n){alert('No form is open yet. Open one and the details go in automatically.');return;}
   Object.values(state.frames).forEach(pushPacketTo);
+  gatherFacts(true);   /* v21.31 the case goes with the details */
   setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),400);
   alert('Sent to '+n+' open form'+(n===1?'':'s')+'. Fields already holding a different value are left alone.');
 });
@@ -747,7 +779,7 @@ $('#savePacket').addEventListener('click',()=>{
   const nm=(p.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'PACKET',rev:'2026-09',
-    saved:new Date().toISOString(),packet:p},null,1)],{type:'application/json'}));
+    saved:new Date().toISOString(),packet:p,facts:state.facts||undefined},null,1)],{type:'application/json'}));
   a.download='PACKET_'+nm+'.json';document.body.appendChild(a);a.click();a.remove();
 });
 $('#openPacket').addEventListener('click',()=>$('#packetFile').click());
@@ -757,6 +789,7 @@ $('#packetFile').addEventListener('change',e=>{
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
     $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
     Object.values(state.frames).forEach(pushPacketTo);
+    if(d.facts)setFacts(d.facts,true);   /* v21.31 the case travels in the packet file */
   }catch(err){alert('That file could not be read as a student packet.');}};
   r.readAsText(f);e.target.value='';
 });
@@ -852,6 +885,82 @@ async function relay(ev,d){
   else{const open=!!state.frames[want];relayNote(from,want,open?'no answer':'not open');answer({ok:false,why:open?'no answer':'not open'});}
 }
 
+/* ================= the case: facts that flow between forms (v21.31) =================
+   The target behaviors are defined once, on Form TB-1; the function is concluded on Form FS-1, the
+   goals written on Form GB-1 and the reinforcer menu ranked on Form PA-1. Every other form used to
+   have them typed in again. The shell now reads them from whichever of those four forms is open
+   (the facts? verb, answered from the form's own structure), keeps them as one object, state.facts,
+   and hands it to every open form (the facts verb), where it fills empty fields and empty behavior
+   tables and nothing else; each form's toolbar also gets a "From the case" button to pick from.
+   Sources are re-read whenever their value signature changes (the status every form reports), so a
+   target renamed on TB-1 reaches the other forms within a few seconds. The facts travel in the
+   packet and case files, so they survive the session; a source form that is not open keeps its
+   last reading. */
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu'};
+state.facts=null;state.factsSig='';state.factSrcSig={};
+let factsTimer=null,factsBusy=false,factsAgain=false;
+function noteFactSource(id,st){
+  const sig=(st&&st.sig)||'';
+  if(state.factSrcSig[id]===sig)return;
+  state.factSrcSig[id]=sig;
+  clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
+}
+function hasFacts(f){return !!(f&&((f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu]):'';}
+async function gatherFacts(push){
+  if(factsBusy){factsAgain=true;return;}
+  factsBusy=true;
+  try{
+    const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
+    const drop=k=>{delete f[k];delete f.src[k];};
+    for(const id of Object.keys(FACT_SRC)){
+      if(!state.frames[id])continue;
+      const r=await grab(id,'facts?',null,4000),out=(r&&r.facts)||null;
+      if(id==='TB-1'){if(out&&out.behaviors){f.behaviors=out.behaviors;f.src.behaviors='TB-1';}else if(f.src.behaviors==='TB-1')drop('behaviors');}
+      if(id==='FS-1'){
+        if(out&&out.fn){f.fn=out.fn;f.src.fn='FS-1';}else if(f.src.fn==='FS-1')drop('fn');
+        if(out&&out.behaviorsFS&&f.src.behaviors!=='TB-1'){f.behaviors=out.behaviorsFS;f.src.behaviors='FS-1';}
+        else if(f.src.behaviors==='FS-1'&&!(out&&out.behaviorsFS))drop('behaviors');
+      }
+      if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
+      if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
+    }
+    const sig=factsSig(f);
+    if(sig!==state.factsSig){
+      state.factsSig=sig;f.when=new Date().toISOString();
+      state.facts=hasFacts(f)?f:null;paintFacts();
+      if(push)pushFactsToAll();
+    }
+  }finally{factsBusy=false;if(factsAgain){factsAgain=false;setTimeout(()=>gatherFacts(push),300);}}
+}
+function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig(state.facts);paintFacts();if(push)pushFactsToAll();}
+function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
+function pushFactsToAll(){Object.values(state.frames).forEach(pushFactsTo);}
+function paintFacts(){
+  const row=$('#factsRow'),t=$('#factsTxt');if(!row)return;
+  const f=state.facts;row.hidden=!f;if(!f)return;
+  const s=f.src||{},bits=[];
+  if((f.behaviors||[]).length)bits.push('<b>Target behaviors:</b> '+esc(f.behaviors.map(b=>b.label).join(', '))+' <i>('+esc(s.behaviors||'')+')</i>');
+  if(f.fn&&(f.fn.label||f.fn.key))bits.push('<b>Function:</b> '+esc(f.fn.label||f.fn.key)+' <i>('+esc(s.fn||'')+')</i>');
+  const g=f.goals||{},nr=(g.red||[]).length,na=(g.acq||[]).length;
+  if(nr||na)bits.push('<b>Goals:</b> '+[nr?nr+' reduction':'',na?na+' acquisition':''].filter(Boolean).join(', ')+' <i>('+esc(s.goals||'')+')</i>');
+  if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
+  t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
+}
+$('#factsSend').addEventListener('click',async()=>{
+  const open=Object.keys(FACT_SRC).filter(id=>state.frames[id]);
+  await gatherFacts(false);
+  if(!state.facts){
+    alert(open.length?'Nothing to send yet: '+open.map(x=>'Form '+x).join(', ')+' hold'+(open.length===1?'s':'')+' no target behavior, function, goal or reinforcer yet.'
+                     :'Open Form TB-1, FS-1, GB-1 or PA-1 first: the case is read from them.');
+    return;
+  }
+  pushFactsToAll();
+  const n=Object.keys(state.frames).length;
+  alert('Sent to '+n+' open form'+(n===1?'':'s')+'. Empty fields and empty behavior tables take them; anything already typed is left alone. The “From the case” button on each form’s toolbar lets you pick more.');
+});
+
 /* ---------------- messages back from forms ---------------- */
 const pending={};
 window.addEventListener('message',ev=>{
@@ -870,11 +979,12 @@ window.addEventListener('message',ev=>{
   if(state.probing&&!state.frames[d.id])return;
   if(d.nbh==='pong'||d.nbh==='status'){
     state.status[d.id]=d.status;
+    if(FACT_SRC[d.id])noteFactSource(d.id,d.status);   /* v21.31 the case */
     if(d.details){state.details=state.details||{};state.details[d.id]=d.details;}
     noteWho(d.id,d.who);
     renderRail();
     if(state.cur===d.id)$('#crumbStatus').textContent=d.status.filled+' fields filled';
-  } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'){
+  } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'){
     if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;noteWho(d.id,d.who);renderRail();}
     /* answered in the order asked, per form and per kind of answer */
     const q=pending[d.id+'|'+d.nbh];
@@ -1518,6 +1628,7 @@ $('#diag').addEventListener('click',()=>{
    ['Forms responding',String(Object.keys(state.status).length),'Each open form answers a status ping every few seconds'],
    ['Packet page headers',heads,'The practice, the student and "Page N of M" on every sheet of the master print need Chrome or Edge 131 or later. Anything else prints the pages without them.'],
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
+   ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1 and VS-1 (photos work without it)','diagPic'],
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
   ];
   dialog('Diagnostics',
@@ -1530,13 +1641,57 @@ $('#diag').addEventListener('click',()=>{
     '<button id="btnFileCheck">Check all '+ALL.length+' files are here</button>'+
     '<div id="fileOut"></div>');
   $('#btnFileCheck').addEventListener('click',checkFiles);
+  if(!EMBED)fetch('nbh-pictos.js',{method:'HEAD'}).then(r=>{const c=$('#diagPic');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}})
+    .catch(()=>{const c=$('#diagPic');if(c){c.textContent='could not check (open the folder over http, or open Form SM-1 and look for pictures)';}});
   pdfTools().then(()=>{const c=$('#diagPdf');if(c)c.textContent='present';})
     .catch(e=>{const c=$('#diagPdf');if(c){c.textContent='missing: '+e.message;c.style.color='#a8321e';}});
 });
+/* ================= the case map (v21.31) =================
+   One page that says which form when. The stages are the order a school FBA and BIP actually run
+   in; the forms inside a stage are listed in the order they are usually reached, and any of them
+   can be skipped when the case does not need it. A button opens the form (and marks the ones
+   already open). The box underneath says what the workstation carries from one form to the next,
+   so nothing is typed twice, and the last line is the shortest defensible path through a case. */
+const CASE_MAP=[
+ ['Before anything','The referral is received; nothing is assessed until consent is on file.',
+  [['DM-1','who the student is, services, team, contacts'],['IC-1','informed consent for the FBA and the BIP; assent is planned on SI-1'],['RR-1','what the records already say: history, prior plans, medical, discipline']]],
+ ['Define what is being assessed','In the first days. The targets defined here carry to every other form.',
+  [['TB-1','candidates to targets: definitions, examples, clusters, replacement'],['SI-1','the student’s own account, assent plan, treatment preference'],['IN-1','teacher, parent and staff interviews'],['IA-1','indirect functional assessment instruments, scored and compared']]],
+ ['Observe and measure','Across the first one to two weeks; DD-1 starts the baseline that runs for the rest of the case.',
+  [['OB-1','direct observation record'],['ABC-1','ABC recording and conditional probabilities'],['SP-1','scatter plot: when and where it happens'],['MT-1','discontinuous measurement when counting is not possible'],['DD-1','daily data and the graph: baseline, then treatment']]],
+ ['Test what you think','When the descriptive data leave the function open, or the stakes call for it; reinforcers are assessed here either way.',
+  [['EA-1','experimental (functional) analysis and its variants'],['VI-1','isolate one variable'],['DA-1','which demands, when escape is the hypothesis'],['PA-1','preference assessment: the ranked menu carries forward'],['RA-1','confirm the preferred items reinforce']]],
+ ['Conclude','One report, with the hypothesis, what was ruled out, and what would change the conclusion.',
+  [['FS-1','FBA summary report: the function carries forward']]],
+ ['Plan','Function first, then goals, then the components the case needs; contextual fit before anyone is trained.',
+  [['TD-1','function-based treatment: antecedent, teaching, consequence, crisis'],['GB-1','goals and objectives: they carry forward'],['CF-1','contextual fit with the people who will run it'],['SV-1','social validity before (and again after)'],['SA-1','skill-acquisition data for the replacement skill'],['SM-1','self-monitoring, point systems, behavioral contract'],['SR-1','the schedule of reinforcement, designed and thinned'],['TE-1','token economy'],['GC-1','class-wide and group contingencies'],['VS-1','visual supports and communication boards'],['CR-1','crisis plan and debriefing, when the behavior is dangerous'],['DT-1','delay tolerance'],['AD-1','accumulated or distributed reinforcement'],['BC-1','behavioral contrast across settings'],['MS-1','medication side effects, when medication changes']]],
+ ['Train and run it','Before the start date, then every week.',
+  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['CT-1','caregiver training'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged']]],
+ ['Review and exit','At each review date, and whenever the graph says so.',
+  [['PR-1','periodic review: continue, change, fade, exit'],['RM-1','relapse mitigation and inoculation before fading'],['SV-1','social validity after'],['DD-1','the graph decides']]]
+];
+function caseMapHtml(){
+  const f=(id,why)=>`<button type="button" class="${state.frames[id]?'on':''}" data-open="${id}" title="Open Form ${id}"><b>${id}</b><span>${esc((ALL.find(x=>x[0]===id)||[,id])[1])}</span><i>&middot; ${esc(why)}</i></button>`;
+  return '<p class="cm-lead">Which form when, from referral to exit. Any form can be skipped when the case does not need it; a button opens the form. The ones already open are marked.</p>'+
+    CASE_MAP.map((s,i)=>`<div class="cm-stage"><div class="cm-n">${i+1}</div><h3>${esc(s[0])}</h3><p class="cm-when">${esc(s[1])}</p><div class="cm-forms">${s[2].map(x=>f(x[0],x[1])).join('')}</div></div>`).join('')+
+    '<div class="cm-box"><h3>What carries forward on its own</h3><ul>'+
+    '<li><b>The student’s details</b> on the packet bar go into every form as it opens, into empty fields only.</li>'+
+    '<li><b>The target behaviors</b> defined on TB-1 go to every form that holds a behavior: the tables on DD-1, HD-1, FS-1, GB-1 and SM-1, and the behavior line on OB-1, ABC-1, MT-1, SA-1, SR-1, DA-1, CN-1, TD-1, TI-1 and the rest. Rename one on TB-1 and the others follow.</li>'+
+    '<li><b>The function</b> concluded on FS-1 goes to every function field; <b>the goals</b> written on GB-1 to SA-1, SM-1, CN-1 and the aims on DD-1; <b>the reinforcer menu</b> ranked on PA-1 to SM-1, SA-1 and SR-1.</li>'+
+    '<li><b>The plan</b> on TD-1 (baseline, criteria, replacement) goes to GB-1 and EB-1; PR-1 reads the graph on DD-1 and ST-1 reads the integrity scores on TI-1 when they are open.</li>'+
+    '<li>Everything above fills empty fields and empty tables only. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. The case travels in the packet and case files.</li></ul></div>'+
+    '<div class="cm-box"><h3>The shortest defensible path</h3><p class="cm-path"><b>DM-1</b> → <b>IC-1</b> → <b>TB-1</b> → <b>IA-1</b> + <b>OB-1</b> or <b>ABC-1</b> (and <b>DD-1</b> baseline) → <b>FS-1</b> → <b>TD-1</b> → <b>GB-1</b> → <b>CF-1</b> → <b>ST-1</b> → <b>DD-1</b> + <b>TI-1</b> → <b>PR-1</b>. '+
+    'Add <b>SI-1</b> whenever the student can be interviewed, <b>EA-1</b> when the function is still open, <b>PA-1</b> before any reinforcement-based component, and <b>CR-1</b> the moment the behavior is dangerous.</p></div>';
+}
+$('#caseMap').addEventListener('click',()=>dialog('The case, start to finish',caseMapHtml()));
+$('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('button[data-open]');if(!b)return;$('#dlg').close();openForm(b.dataset.open);});
+
 $('#help').addEventListener('click',()=>{
   dialog('How this works',
    '<p>Every form opens inside this window and <b>stays loaded</b> while you work, so you can move between them and come back without losing anything. On a narrow window or a tablet, the list of forms opens from the <b>Forms</b> button above the form and closes again once you pick one.</p>'+
    '<div class="warnbox"><b>Where your work is kept.</b> Entries live in this open window. <b>Autosave</b> also keeps a working copy on this computer, in this browser, and offers it back the next time you open the workstation; press the Autosave button in the top bar to switch it off or clear it. That copy is a safety net, not the record: <b>Save case</b>, or each form\u2019s own <b>Save data</b>, is the file you keep.</div>'+
+   '<p><b>Which form when.</b> <b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case and what the workstation carries from one form to the next.</p>'+
+   '<p><b>The case.</b> The target behaviors (Form TB-1), the function (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1) are read from those forms while they are open and go into every other open form, into empty fields and empty behavior tables only; the line under the packet bar shows what has been read. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. They are saved in the packet and case files.</p>'+
    '<p><b>The student packet.</b> Fill the bar at the top once. Those details go into each form as you open it, and into fields that are still empty only \u2014 a form already holding a different value is left alone.</p>'+
    '<p><b>The master print.</b> Tick the forms this student needs and press <b>Build master print</b>. The workstation asks each ticked form for its current contents and assembles one document with a cover sheet and contents list, each form starting on a new page. Forms you leave unticked are simply not included.</p>'+
    '<p>A ticked form you have not opened will print blank, and the workstation warns you before it does that.</p>'+
@@ -1815,6 +1970,7 @@ async function loadCase(d,how){
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
     $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
   }
+  if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   const ids=Object.keys(d.forms),notes=[];
   for(const id of ids){
     if(!ALL.find(x=>x[0]===id)){notes.push(id+': not in this workstation');continue;}
@@ -1897,7 +2053,7 @@ function caseSig(){
    waiting request with the other: the packet then waited for an answer that
    had already gone elsewhere, and sat at "Collecting..." for good. Each kind
    of answer now has its own queue, and every request its own time limit. */
-const REPLY={snapshot:'snapshot',restore:'restored',collect:'payload'};
+const REPLY={snapshot:'snapshot',restore:'restored',collect:'payload','facts?':'facts-out',facts:'facts-applied'};
 async function grab(id,verb,extra,ms,frame){
   const fr=frame||state.frames[id]; if(!fr)return null;
   const key=id+'|'+(REPLY[verb]||verb);
@@ -1916,10 +2072,10 @@ async function caseHtml(p,forms){
   const shell=await EMBED.shell();
   if(!shell)throw new Error('This file does not carry a copy of the workstation page, so it cannot write a case file.');
   const id=state.caseId||(state.caseId=caseUid());
-  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms};
+  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined};
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
-  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-pdf','nbh-embed-shell'].forEach(bid=>{
+  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-shell'].forEach(bid=>{
     const el=document.getElementById(bid);if(el)blocks+=block(bid,el.textContent);});
   /* "</" inside the JSON would end the block early; \/ is the same character to JSON */
   blocks+='<script type="application/json" id="nbh-case">'+JSON.stringify(data).replace(/<\//g,'<\\/')+'<\/script>\n';
@@ -1973,7 +2129,7 @@ $('#saveCase').addEventListener('click',async()=>{
   }
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(
-    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms},null,1)],
+    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined},null,1)],
     {type:'application/json'}));
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
@@ -2047,6 +2203,7 @@ const CMDS=[
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
   {k:'open packet',n:'Open packet',s:'command',go:()=>$('#openPacket').click()},
   {k:'fill open forms',n:'Fill open forms with the packet',s:'command',go:()=>$('#pushPacket').click()},
+  {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},

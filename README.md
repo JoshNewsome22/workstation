@@ -1,10 +1,10 @@
 # FBA and BIP Workstation
 
-Two editions of the same workstation, 31 forms each, and the tools that build them.
+Two editions of the same workstation, 42 forms each, and the tools that build them.
 
 | Folder | What it is |
 |---|---|
-| `NBH-Workstation/` | The Newsome Behavioral Health edition: `index.html`, the 31 forms, the PDF tools, and the documentation (`README.txt`, `SETUP.md`, `HOSTING.md`). This is the folder that is edited. |
+| `NBH-Workstation/` | The Newsome Behavioral Health edition: `index.html`, the 42 forms, the PDF tools, the picture library (`nbh-pictos.js`), and the documentation (`README.txt`, `SETUP.md`, `HOSTING.md`). This is the folder that is edited. |
 | `RPS-Workstation/` | The Royal Palm School edition, generated from the NBH folder by `tools/build-rps.py`. Never edited by hand. |
 | `deliver/` | The one-file editions (`NBH-Workstation.html`, `RPS-Workstation.html`): the whole workstation, forms inside, built by `tools/build-single.py`. |
 | `tools/` | The build scripts, and `polish/`, the screen polish every form carries (applied by `tools/apply-polish.py`). |

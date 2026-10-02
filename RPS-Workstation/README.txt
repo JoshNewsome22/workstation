@@ -1,7 +1,7 @@
 FBA/BIP Workstation - Royal Palm School
 =======================================
 
-This is the Royal Palm School edition. It is the same workstation and the same 31
+This is the Royal Palm School edition. It is the same workstation and the same 42
 forms as the Newsome Behavioral Health edition; only the logo and name differ, and
 it keeps its own autosave, so both can be used in one browser without mixing.
 
@@ -12,6 +12,11 @@ Double-click index.html. Everything runs from this folder.
     so you can move between forms and come back without losing work.
   - Fill the student bar at the top once. Those details go into each form as
     you open it, filling only fields that are still empty.
+  - The case flows too: the target behaviors defined on TB-1, the function
+    from FS-1, the goals from GB-1 and the reinforcer menu from PA-1 go into
+    every other open form, into empty fields and empty behavior tables only.
+    "From the case" on a form's toolbar lets you pick any of it into a form
+    that already has entries. "Case map" in the bar says which form when.
   - Tick the forms this student needs. "Build master print" gathers exactly
     those into one document with a cover sheet and contents list, each form
     starting on a new page. Unticked forms are not included.
@@ -110,3 +115,6 @@ control chart of its own, on the same days, and they all print together. Its
 Marking setting in the toolbar chooses between the slash / shaded (low / high
 rate) marks and plain shaded-or-blank marks.
 
+Keep nbh-pictos.js in this folder with the forms: it holds the pictures Forms
+SM-1 and VS-1 put on sheets and boards. Without it those two forms still work,
+with photos and words.
