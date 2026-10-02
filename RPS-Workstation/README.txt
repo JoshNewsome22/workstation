@@ -1,5 +1,9 @@
-NBH FBA/BIP Workstation
-=======================
+FBA/BIP Workstation - Royal Palm School
+=======================================
+
+This is the Royal Palm School edition. It is the same workstation and the same 31
+forms as the Newsome Behavioral Health edition; only the logo and name differ, and
+it keeps its own autosave, so both can be used in one browser without mixing.
 
 Double-click index.html. Everything runs from this folder.
 
