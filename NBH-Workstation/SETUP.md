@@ -3238,3 +3238,89 @@ frame objects the first one did.
 | The concurrent-operants story frame by frame: the stations' counts after every step, cancelling a step mid-way, the blink loop, reduced motion | as designed |
 | The six forms printed from the stored data, against the previous run | identical apart from the date (PA-1's page 15 differs only in the competing-stimulus order, which is drawn at random when a record has none) |
 | The page bar and every view of the six forms; the walkthrough at 390px | pass |
+
+## Form SM-1: Self-Monitoring and Point Systems (v21.28)
+
+Form SM-1 (`SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html`) designs a
+self-monitoring or point system for one student and prints the sheet the
+student holds. It is the 34th form, listed after PD-1 in the workstation,
+and it is built the same way as PD-1 and SV-1: parts assembled onto the CF-1
+shell by `tools/new-form.py`, then polished.
+
+Eight pages, in the order the work happens:
+
+- **Setup.** Student and team, the readiness checks (discrimination of the
+  target from its absence, performance deficit or skill deficit, reading or
+  pictures, reinforcer assessment on PA-1 or RA-1, days of teacher-only
+  baseline, history with point systems) and a verdict that says what to teach
+  first and how much the teacher must match at the start.
+- **Targets.** Up to six target behaviors in the student's words, each with a
+  one-line cue, a picture from a built-in icon set, and a per-target goal for
+  the sheets that show one.
+- **System.** Six arrangements, chosen by radio card, each with its own
+  fields: Self & Match (Yes/No ratings, teacher match, editable 2-1-0 points,
+  text or pictorial), a self-monitoring contract (student checks, teacher
+  initials), a rubric point sheet (five editable levels, the school's 1 to 5
+  point sheet), cued intervals (self-monitoring of attention with a tactile,
+  audible, visual or silent cue, fixed or variable timing), an interlocking
+  session sheet (the school's Royal Palm manual pp. 64 to 70: items required
+  change with minutes elapsed, in either direction, with a floor and a
+  ceiling), and the school's expectations-and-earns sheet (smiley faces,
+  "2 in a row, I can earn", totals and percent per expectation, end-of-day
+  tiers). Periods or activities are a table with times and pictures.
+- **Reinforcement.** Goal as a percent of points possible with the points
+  possible and the goal number computed live; the goal sentence for the
+  sheet; the reward menu; when the reward is delivered; the match bonus;
+  what never happens (points are never removed); the home note; an optional
+  group contingency; and the changing-criterion rule (step, days to hold,
+  when to lower).
+- **Teach and fade.** Discrimination and rating practice (examples and
+  non-examples, role-play, accuracy criterion before points depend on the
+  match, rule for disagreements), the matching ladder (teacher only; every
+  period matched; half; random; spot checks; student alone, after Rhode,
+  Morgan and Young, 1983), a nine-step staff fidelity checklist that TI-1
+  can score, and the generalization and ending plan.
+- **Sheet.** The student's sheet, generated from the pages above, with the
+  date, a title, and the day's reward; a weekly layout where it fits; faces
+  and pictures when the pictorial option is on. "Print the student sheet"
+  prints the sheet alone, landscape, on one page; the ordinary print button
+  prints the whole form as every other form does.
+- **Record.** This week period by period (the grid totals and percents per
+  expectation), the day log (phase, goal, points, possible, matches, met),
+  a percent-of-points chart with phase lines, baseline mean and suggested
+  first goal, and the decision rules applied to the last five days (raise
+  on 4 of 5; lower on fewer than 2 of 5; step down the ladder when agreement
+  is under 80%; step up at 90% and 4 of 5), all labelled working conventions.
+- **Guide.** What the form builds, what the research supports, what the
+  schedule does, how the figures are calculated, what keeps a sheet honest,
+  and the reference list.
+
+The guide draws on the papers supplied with the request and on the
+literature behind them: Rhode, Morgan and Young (1983) for matching and its
+fading; Salter and Croce (2006) for Self & Match; Bulla and Frieder (2017)
+for Self & Match applied to vocal stereotypy with mixed functions; Rafferty,
+Arroyo, Ginnane and Wilczynski (2011) for cued self-monitoring of attention
+in general education and the nine planning steps; Farrell and McDougall
+(2008) for self-monitoring of pace; Craig (2010) and Ruby and DiGennaro
+Reed (2022) on the accuracy of the record; Justus, Hott and Heiniger (2023)
+on teachers self-monitoring; Hallahan, Lloyd and Stoller (1982),
+Amato-Zech, Hoff and Doepke (2006), Lloyd et al. (1989), Maag, Reid and
+DiGangi (1993), Koegel et al. (1992), Reid, Trout and Schartz (2005);
+the reviews by Briesch and Chafouleas (2009), Bruhn, McDaniel and Kreigh
+(2015), Smith et al. (2022) and Vannest et al. (2010); Ivy et al. (2017)
+and Hackenberg (2018) on token economies; Hartmann and Hall (1976) on the
+changing criterion; and, for the schedule section, Ferster and Skinner
+(1957), Berryman and Nevin (1962) on interlocking schedules, and Catania's
+(2007) table of schedule combinations. Bird et al. (2022), on psychotropic
+medication monitoring, was read and is not cited here; it belongs with
+MS-1.
+
+Data model: `S = {meta, chk, sys, tg[], per[], lv[5], lad[6], fid[9], log[],
+wk{}}`, saved as `{form:'SM-1', v, S}`; files from other forms are refused.
+CSV export writes the day log. "Fill with sample data" loads a 21-day
+example (three targets, six periods, Self & Match) that exercises every
+page.
+
+Other changes in this version: the index lists 34 forms; `tools/build-rps.py`
+and `tools/build-single.py` expect 34; the one-file editions and the RPS
+edition are rebuilt.
