@@ -17,6 +17,9 @@ Double-click index.html. Everything runs from this folder.
     every other open form, into empty fields and empty behavior tables only.
     "From the case" on a form's toolbar lets you pick any of it into a form
     that already has entries. "Case map" in the bar says which form when.
+  - Two or three open forms can show at once: "Side by side" above the form.
+    For an observation, OB-1, MT-1 and ABC-1 together put the narrative, the
+    interval sample and the ABC record on one screen.
   - Tick the forms this student needs. "Build master print" gathers exactly
     those into one document with a cover sheet and contents list, each form
     starting on a new page. Unticked forms are not included.

@@ -515,6 +515,40 @@ body.view-setup   #obsPages,body.view-setup   #summary,body.view-setup   #guide{
 body.view-obs     #setup,   body.view-obs     #summary,body.view-obs     #guide{display:none}
 body.view-summary #setup,   body.view-summary #obsPages,body.view-summary #guide{display:none}
 body.view-guide   #setup,   body.view-guide   #obsPages,body.view-guide   #summary{display:none}
+/* v21.32 OB-1: the Log view; the other views hide it, and it never prints (the sheets are the record) */
+body.view-log #setup,body.view-log #obsPages,body.view-log #summary,body.view-log #guide{display:none}
+body.view-setup #obsLog,body.view-obs #obsLog,body.view-summary #obsLog,body.view-guide #obsLog{display:none}
+@media print{#obsLog{display:none!important}}
+/* v21.32 OB-1: a line can be deleted; the Time column is a time picker */
+table.grid.narr th.nx,table.grid.narr td.nx{width:30px;text-align:center;padding:0}
+table.grid.narr .delRow{border:0;background:transparent;color:#8FA3B4;font:16px/1 var(--nbh-sans,sans-serif);cursor:pointer;padding:6px 8px;border-radius:3px}
+table.grid.narr .delRow:hover{background:#fbe9e5;color:#a8321e}
+table.grid.narr .nt[type="time"]{font-size:12px;padding:4px 4px}
+@media print{table.grid.narr th.nx,table.grid.narr td.nx{display:none}}
+/* v21.32 OB-1: the live note box */
+.obr-note{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:10px;padding:10px 12px;border:1px solid var(--nbh-mist,#eaf2f0);border-radius:6px;background:#f7f9f8}
+.obr-note .obr-nlab{flex:1 1 100%;font-size:11.5px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.obr-note input[type="time"]{font:13px var(--nbh-sans,sans-serif);border:1px solid var(--nbh-slate,#254657);border-radius:4px;padding:5px 6px;background:#fff;color:var(--nbh-ink,#1a2933)}
+.obr-note #obrNoteW{flex:1 1 320px;min-width:200px;font:13.5px var(--nbh-sans,sans-serif);border:1px solid var(--nbh-slate,#254657);border-radius:4px;padding:6px 8px;background:#fff;color:var(--nbh-ink,#1a2933)}
+.obr-note button{font:12.5px var(--nbh-sans,sans-serif);padding:6px 10px;border:1px solid var(--nbh-slate,#254657);border-radius:4px;background:#fff;color:var(--nbh-ink,#1a2933);cursor:pointer}
+.obr-note button.primary{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43);font-weight:600}
+.obr-note .obr-nhint{flex:1 1 100%;font-size:11.5px;color:var(--ink-soft,#5b6770);margin:0}
+.obr-note .obr-nlast{flex:1 1 100%;font-size:12px;color:var(--nbh-navy,#182e43)}
+/* v21.32 OB-1: the Log */
+#obsLog .logwrap{overflow-x:auto}
+table.grid.oblog{min-width:1120px;table-layout:fixed}
+table.grid.oblog th.n{width:28px}table.grid.oblog th.d{width:124px}table.grid.oblog th.t{width:102px}table.grid.oblog th.m{width:44px}
+table.grid.oblog th.s{width:130px}table.grid.oblog th.k{width:52px}table.grid.oblog th.act{width:84px}
+table.grid.oblog td{word-wrap:break-word;vertical-align:top}
+table.grid.oblog td.act button{display:block;width:100%;margin:0 0 4px}
+table.grid.oblog input{width:100%;border:0;background:transparent;font:inherit;font-size:12px;padding:3px 4px;color:var(--ink)}
+table.grid.oblog input:focus{background:var(--wash);outline:none}
+table.grid.oblog td.c{text-align:center}
+table.grid.oblog td.lines{font-size:11.5px;color:var(--ink-soft);max-width:260px}
+table.grid.oblog button{font:12px var(--nbh-sans,sans-serif);padding:4px 8px;border:1px solid #c9d4d2;border-radius:3px;background:#fff;cursor:pointer;white-space:nowrap}
+table.grid.oblog button.rm:hover{background:#fbe9e5;color:#a8321e}
+.logtop{margin:0 0 10px}
+.logtop .stat{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:6px}
 
 /* Each observation is its own piece of paper: it is filed, read and sometimes
    handed over on its own, and a record that runs across a page break loses the
@@ -604,6 +638,7 @@ button.iv{min-width:24px}
   body.view-obs #setup,body.view-obs #summary,body.view-obs #guide,
   body.view-summary #setup,body.view-summary #obsPages,body.view-summary #guide,
   body.view-guide #setup,body.view-guide #obsPages,body.view-guide #summary{display:block !important}
+  body.view-log #setup,body.view-log #obsPages,body.view-log #summary,body.view-log #guide{display:block !important}
   #summary,#guide{page-break-before:always}
   button.iv{color:#8FA3B4}
   .checks{grid-template-columns:1fr}
@@ -761,6 +796,7 @@ body.view-obs #obRec{display:block}
     <div class="seg" id="viewSeg">
       <button data-view="setup" aria-pressed="true">Setup</button>
       <button data-view="obs" aria-pressed="false">Observations</button>
+      <button data-view="log" aria-pressed="false">Log</button>
       <button data-view="summary" aria-pressed="false">Summary</button>
       <button data-view="guide" aria-pressed="false">Guide</button>
     </div></div></div>
@@ -905,6 +941,16 @@ body.view-obs #obRec{display:block}
     <button type="button" class="obr-tog" data-obr="vib" aria-pressed="true">Vibrate</button>
     <button type="button" id="obrTest">Test alert</button>
   </div>
+  <!-- v21.32 OB-1: a note typed as it happens goes straight into the narrative of the observation being recorded, in time order -->
+  <div class="obr-note" id="obrNote">
+    <span class="obr-nlab">Note what happens, as it happens</span>
+    <input type="time" id="obrNoteT" aria-label="Time of the note">
+    <button type="button" id="obrNoteNow" title="Set the time to now">Now</button>
+    <input id="obrNoteW" placeholder="what was seen, written as it happened" aria-label="What was seen" autocomplete="off">
+    <button type="button" class="primary" id="obrNoteAdd">Add to the narrative</button>
+    <p class="obr-nhint">Each note is added to the narrative of the observation chosen under Save into (the next empty one, or a new one, when none is chosen), in time order; Enter adds it too. The lines stay editable on the sheet below.</p>
+    <div class="obr-nlast" id="obrNoteLast" hidden></div>
+  </div>
   <p class="obr-keys">Keys while recording: <b>1</b> counts the student and <b>Shift+1</b> the peer; <b>2</b> and <b>3</b> score the
     student&rsquo;s interval + and &minus;, <b>Shift+2</b> and <b>Shift+3</b> the peer&rsquo;s, and <b>4</b> scores &minus; for both;
     <b>Space</b> pauses or resumes; <b>Z</b> and <b>Shift+Z</b> undo the last count, <b>X</b> the last mark.</p>
@@ -915,6 +961,15 @@ body.view-obs #obRec{display:block}
 <button type="button" class="obr-pill noprint" id="obrPill" hidden><span aria-hidden="true">&#9679; </span><span id="obrPillT">Recording</span></button>
 
 <div id="obsPages"></div>
+
+<!-- ===================================================== LOG (v21.32) -->
+<div class="sheet" id="obsLog">
+  <div class="bar nbh-band">Observation Log</div>
+  <p class="method">Every observation in this file, one row each, newest at the foot. The date, times, setting and activity can be
+    edited here; everything else on an observation is edited on its own sheet (Open). Nothing here prints: the sheets are the record.</p>
+  <div class="logtop"><button class="noprint" id="logAdd">Add an observation</button><span class="stat" id="logStat"></span></div>
+  <div class="logwrap" id="logBody"></div>
+</div>
 
 <!-- ===================================================== SUMMARY -->
 <div class="sheet" id="summary">
@@ -1179,6 +1234,115 @@ function blank(){
            count:"", peerCount:"", iv:[], peerIv:[], ivUsed:false, notes:"" };
 }
 
+/* ---------------------------------------------------- v21.32 OB-1: times, lines, the note box, the Log */
+/* A narrative time is kept as HH:MM (24-hour), what the time picker gives. Older files hold "9:14" or
+   "12:22" typed by hand: a bare hour from 1 to 6 is read as afternoon, since school observations run
+   between about 7 am and 6 pm; "am" or "pm" written after the time is honoured. */
+function toHM24(v){
+  const t = String(v == null ? "" : v).trim().toLowerCase(); if(!t) return "";
+  if(/^\d{2}:\d{2}$/.test(t)) return t;
+  const m = /^(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?$/.exec(t); if(!m) return "";
+  let h = +m[1], mi = m[2] ? +m[2] : 0;
+  if(h > 23 || mi > 59) return "";
+  if(m[3] === "p" && h < 12) h += 12; else if(m[3] === "a" && h === 12) h = 0;
+  else if(!m[3] && h >= 1 && h <= 6) h += 12;
+  return String(h).padStart(2, "0") + ":" + String(mi).padStart(2, "0");
+}
+function hm12(v){ const t = toHM24(v); if(!t) return ""; const h = +t.slice(0,2); return ((h % 12) || 12) + ":" + t.slice(3) + (h < 12 ? " am" : " pm"); }
+function nowHM(){ const d = new Date(); return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); }
+/* a line goes in after the last line whose time is at or before it; lines without a time stay where they are */
+function addLine(i, t, w){
+  const o = state.obs[i]; if(!o) return -1;
+  const row = {t: toHM24(t), w: String(w || "").trim()};
+  /* a blank line (no time, no words) is used before a new one is made */
+  let at = o.narrative.findIndex(r => !String(r.t||"").trim() && !String(r.w||"").trim());
+  if(at >= 0 && row.t){
+    const later = o.narrative.findIndex((r, k) => k !== at && toHM24(r.t) && toHM24(r.t) > row.t);
+    if(later >= 0 && later < at){ o.narrative.splice(at, 1); at = -1; }
+  }
+  if(at >= 0){ o.narrative[at] = row; return at; }
+  let pos = o.narrative.length;
+  if(row.t) for(let k = o.narrative.length - 1; k >= 0; k--){ const tk = toHM24(o.narrative[k].t); if(tk && tk > row.t) pos = k; }
+  o.narrative.splice(pos, 0, row);
+  return pos;
+}
+/* the observation a live note belongs to: the one chosen under Save into, else the first with no counts, times
+   or marks yet (the one the recorder will save into), else a new one */
+function noteTarget(){
+  const sel = $("#obrInto");
+  if(sel && sel.value !== "" && state.obs[+sel.value]) return +sel.value;
+  const empty = o => !String(o.start||"").trim() && !String(o.end||"").trim() && !String(o.count||"").trim()
+    && !String(o.peerCount||"").trim() && !(o.iv||[]).some(Boolean) && !(o.peerIv||[]).some(Boolean);
+  let i = state.obs.findIndex(empty);
+  if(i < 0){ state.obs.push(blank()); i = state.obs.length - 1; }
+  return i;
+}
+function addNote(){
+  const tEl = $("#obrNoteT"), wEl = $("#obrNoteW"), last = $("#obrNoteLast");
+  const w = wEl.value.trim();
+  if(!w){ wEl.focus(); return; }
+  const i = noteTarget(), t = tEl.value || nowHM();
+  addLine(i, t, w);
+  render();
+  wEl.value = ""; tEl.value = nowHM();
+  if(last){ last.hidden = false; last.textContent = "Added at " + hm12(t) + " to observation " + (i + 1) + ": " + (w.length > 90 ? w.slice(0, 90) + "\u2026" : w); }
+  wEl.focus();
+}
+(function wireNote(){
+  const tEl = $("#obrNoteT"), wEl = $("#obrNoteW"); if(!tEl || !wEl) return;
+  tEl.value = nowHM();
+  $("#obrNoteNow").addEventListener("click", () => { tEl.value = nowHM(); wEl.focus(); });
+  $("#obrNoteAdd").addEventListener("click", addNote);
+  wEl.addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); addNote(); } });
+  wEl.addEventListener("focus", () => { if(!wEl.value.trim()) tEl.value = nowHM(); });
+})();
+/* the Log: one row per observation; the context fields edit in place through the same data-obs/data-field path */
+function renderLog(){
+  const host = $("#logBody"), stat = $("#logStat"); if(!host) return;
+  const ivN = state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0;
+  if(!state.obs.length){ host.innerHTML = '<p class="method">No observation yet. Add one here, or on the Observations page.</p>'; if(stat) stat.textContent = ""; return; }
+  const inp = (i, field, type, aria) => '<input' + (type ? ' type="' + type + '"' : '') + ' data-obs="' + i + '" data-field="' + field + '" value="' + esc(state.obs[i][field]||"") + '" aria-label="' + esc(aria) + '">';
+  let h = '<table class="grid oblog"><thead><tr><th class="n">#</th><th class="d">Date</th><th class="t">Start</th><th class="t">End</th><th class="c m">Min</th>'
+    + '<th class="s">Setting</th><th class="s">Activity</th><th class="c k">Count</th><th class="c k">Peer</th>' + (ivN ? '<th class="c k">Intervals</th>' : '') + '<th>Narrative</th><th class="noprint act"></th></tr></thead><tbody>';
+  state.obs.forEach((o, i) => {
+    const mins = minutesOf(o), lines = o.narrative.filter(r => String(r.w||"").trim()), first = lines[0];
+    const k = ivN ? pct(ivCount(o.iv, ivN), ivN) : null;
+    h += '<tr><td class="c">' + (i + 1) + '</td><td>' + inp(i, "date", "date", "Date, observation " + (i+1)) + '</td>'
+      + '<td>' + inp(i, "start", "time", "Start, observation " + (i+1)) + '</td><td>' + inp(i, "end", "time", "End, observation " + (i+1)) + '</td>'
+      + '<td class="c">' + (mins === null ? "" : mins) + '</td>'
+      + '<td>' + inp(i, "setting", "", "Setting, observation " + (i+1)) + '</td><td>' + inp(i, "activity", "", "Activity, observation " + (i+1)) + '</td>'
+      + '<td class="c">' + esc(o.count) + '</td><td class="c">' + esc(o.peerCount) + '</td>'
+      + (ivN ? '<td class="c">' + (k === null ? "" : k + "%") + '</td>' : '')
+      + '<td class="lines">' + lines.length + (lines.length === 1 ? ' line' : ' lines') + (first ? ': ' + esc((first.t ? hm12(first.t) + ' ' : '') + (first.w.length > 70 ? first.w.slice(0, 70) + '\u2026' : first.w)) : '') + '</td>'
+      + '<td class="noprint act"><button type="button" class="logOpen" data-obs="' + i + '">Open</button><button type="button" class="rm delObs" data-obs="' + i + '">Remove</button></td></tr>';
+  });
+  host.innerHTML = h + '</tbody></table>';
+  if(stat){ const dated = state.obs.filter(o => o.date).length, lines = state.obs.reduce((a, o) => a + o.narrative.filter(r => String(r.w||"").trim()).length, 0);
+    stat.textContent = state.obs.length + (state.obs.length === 1 ? ' observation' : ' observations') + ', ' + dated + ' dated, ' + lines + ' narrative ' + (lines === 1 ? 'line' : 'lines') + ' in all'; }
+}
+document.addEventListener("click", e => {
+  const del = e.target.closest("button.delRow");
+  if(del){
+    const o = state.obs[+del.dataset.obs]; if(!o) return;
+    const j = +del.dataset.row, r = o.narrative[j]; if(!r) return;
+    if(String(r.w||"").trim() && !confirm("Delete this line?\n\n" + (r.t ? hm12(r.t) + "  " : "") + r.w.slice(0, 160))) return;
+    o.narrative.splice(j, 1);
+    if(!o.narrative.length) o.narrative.push({t:"", w:""});
+    render();
+    return;
+  }
+  const open = e.target.closest("button.logOpen");
+  if(open){
+    const i = +open.dataset.obs;
+    const b = document.querySelector('#viewSeg [data-view="obs"]'); if(b) b.click();
+    const pg = $$("#obsPages .obs-page")[i]; if(pg) try{ pg.scrollIntoView({block:"start"}); }catch(err){}
+    return;
+  }
+  if(e.target.closest("#logAdd")){ const add = $("#addObs"); if(add) add.click(); return; }
+});
+/* a context field changed in the Log redraws the sheets, so both show the same value */
+document.addEventListener("change", e => { if(e.target.closest && e.target.closest("#obsLog") && e.target.dataset.field) render(); });
+
 /* ---------------------------------------------------- interval scoring */
 function ivCount(arr, n){
   let k = 0;
@@ -1253,13 +1417,15 @@ function obsHTML(o, i, n){
 
   /* --- narrative --- */
   h += '<h3 class="sub">What Happened</h3>'
-     + '<table class="grid narr"><thead><tr><th style="width:74px">Time</th>'
-     + '<th>What was seen — written as it happened, not as a conclusion</th></tr></thead><tbody>';
+     + '<table class="grid narr"><thead><tr><th style="width:96px">Time</th>'
+     + '<th>What was seen — written as it happened, not as a conclusion</th><th class="nx noprint"></th></tr></thead><tbody>';
   o.narrative.forEach((r, j) => {
-    h += '<tr><td><input class="nt" data-obs="' + i + '" data-row="' + j + '" data-field="t" value="'
-       + esc(r.t) + '" placeholder="9:14" aria-label="Time, entry ' + (j+1) + '"></td>'
+    /* v21.32 OB-1: the time is picked, not typed; a line can be deleted */
+    h += '<tr><td><input class="nt" type="time" data-obs="' + i + '" data-row="' + j + '" data-field="t" value="'
+       + esc(toHM24(r.t)) + '" aria-label="Time, entry ' + (j+1) + '"></td>'
        + '<td><textarea class="nw" rows="2" data-obs="' + i + '" data-row="' + j + '" data-field="w" '
-       + 'aria-label="What happened, entry ' + (j+1) + '">' + esc(r.w) + '</textarea></td></tr>';
+       + 'aria-label="What happened, entry ' + (j+1) + '">' + esc(r.w) + '</textarea></td>'
+       + '<td class="nx noprint"><button type="button" class="delRow" data-obs="' + i + '" data-row="' + j + '" title="Delete this line" aria-label="Delete line ' + (j+1) + '">&times;</button></td></tr>';
   });
   h += '</tbody></table>'
      + '<p class="method noprint"><button class="addRow" data-obs="' + i + '">Add a line</button></p>';
@@ -1365,6 +1531,7 @@ function render(){
   renderMeta();
   renderSummary();
   planNote();
+  renderLog();   /* v21.32 OB-1 */
 }
 function renderMeta(){
   $$("[data-meta]").forEach(e => { if(e.value !== (state.meta[e.dataset.meta]||"")) e.value = state.meta[e.dataset.meta]||""; });
@@ -2327,7 +2494,7 @@ render();
         const pg = page(i), b = pg && pg.querySelector('button.iv[data-obs="' + i + '"][data-field="' + f + '"][data-iv="' + k + '"]');
         if(b && (b.getAttribute('aria-pressed') === 'true') !== want) b.click();
       } });
-    narrWrite(i, sample ? hm(W(S.wall)) : '', sample ? sampleLine() : '');
+    narrWrite(i, sample ? hhmm(W(S.wall)) : '', sample ? sampleLine() : '');   /* v21.32 OB-1: HH:MM for the time picker */
     notesWrite(i, noteLines(sample, miss));
   }
   function save(){

@@ -4165,3 +4165,70 @@ error), `qa/casemap-test.js`, and `qa/single-pictos.js` (the one-file
 edition carries the library and both forms find 227 pictures) all pass;
 the SM-1 and VS-1 form tests pass with the external library.
 
+## Form OB-1 Narrative Tools and Log; Forms Side by Side (v21.32)
+
+Four things asked for after a live observation on an iPad.
+
+### Form OB-1
+
+- **A line can be deleted.** Each narrative row ends in a small "x"
+  (`button.delRow`, not printed); a line with words asks first. An
+  observation always keeps at least one blank line.
+- **The Time column is a time picker** (`input type="time"`), the native
+  wheel on iPad and the clock pop-up on a computer, so a time is tapped,
+  not typed. A narrative time is now kept as HH:MM (24-hour), as the
+  picker gives it; older files holding "9:14" or "12:22" typed by hand are
+  read through `toHM24()`, which takes a bare hour from 1 to 6 as
+  afternoon (school observations run between about 7 am and 6 pm) and
+  honours "am" or "pm" when written. The Live Recorder writes its own
+  sample-start line in the same HH:MM form (`hhmm`, not `hm`).
+- **A note box in the Live Recorder.** Under the recorder's controls:
+  a time (set to now, with a Now button), a text box and "Add to the
+  narrative" (Enter adds too). The note goes into the narrative of the
+  observation chosen under "Save into"; when none is chosen, the first
+  observation with no times, counts or marks yet (the one the recorder
+  will save into), else a new one. `addLine()` places it in time order,
+  using a blank line first, and `render()` redraws, so the line appears
+  on the sheet below at once and stays editable there. A one-line
+  confirmation under the box says where it went. The recorder's keyboard
+  shortcuts already ignore keys typed into a field.
+- **A Log view** (`body.view-log`, `#obsLog`) between Observations and
+  Summary: one row per observation with the date, start, end, minutes,
+  setting, activity, counts, interval percentage and the narrative line
+  count with its first line; "Open" switches to the sheet and scrolls to
+  it, "Remove" is the same removal as on the sheet, "Add an observation"
+  the same as the toolbar's. The date, times, setting and activity are
+  inputs bound by the same `data-obs`/`data-field` path as the sheet, so
+  an edit in the Log is the observation's own value; a change redraws
+  the sheets. The Log never prints (`@media print{#obsLog{display:none}}`):
+  the sheets are the record, and the printed form is unchanged.
+
+### Side by side (index.html)
+
+Every open form already sits in its own frame and stays loaded, so
+showing two or three at once is a layout. "Side by side" in the bar above
+the form (and in the command palette) opens a chooser of the open forms;
+tick two or three and they show as equal columns (stacked on a screen
+under 900 px), with a pane bar above naming each one, with Print and a
+button that takes the form out of the view. `state.split` holds the ids
+in column order; `layoutFrames()` applies it; `setSplit(ids)` sets it. A
+form opened from the list while the view is split takes a column (a
+third while there is room, else the column of the current form); closing
+a form leaves the others; the current form, the one the crumb's own
+buttons act on, follows a click in the pane bar or focus inside a frame.
+Fullscreen hides the chrome over the columns as it does over one form.
+For an observation, OB-1, MT-1 and ABC-1 together put the narrative, the
+interval sample and the ABC record on one screen; the case facts and the
+packet reach every column as before, since each column is an ordinary
+open form.
+
+### Checks
+
+`qa/ob1-split-test.js`: the narrative inputs are time pickers, the
+conversion of hand-typed times, deleting a line, two notes added out of
+order landing in time order in the chosen observation, the Log's rows,
+an edit in the Log reaching the sheet, Open from the Log, the Log and the
+delete column absent in print; in the shell, three forms side by side,
+a fourth opened taking a column, a pane closed, a form closed, back to
+one, the chooser, and stacking at 820 px.
+
