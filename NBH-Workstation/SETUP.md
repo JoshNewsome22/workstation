@@ -3334,3 +3334,84 @@ page.
 Other changes in this version: the index lists 34 forms; `tools/build-rps.py`
 and `tools/build-single.py` expect 34; the one-file editions and the RPS
 edition are rebuilt.
+
+## Form SR-1: Schedules of Reinforcement (v21.29)
+
+Form SR-1 (`SR-1_Schedules-of-Reinforcement_v2026-10.html`) is a reference
+and a design tool for schedules of reinforcement, listed after SM-1 as the
+35th form. It is built from parts on the CF-1 shell like PD-1, SV-1 and
+SM-1.
+
+Six pages:
+
+- **Catalogue.** Forty-one entries in five families: basic (continuous
+  reinforcement, extinction, FR, VR, RR, FI, VI, RI, limited hold,
+  progressive ratio, adjusting, and the laboratory arrangements
+  interpolated, superimposed and yoked), time-based (FT, VT, NCR),
+  differential reinforcement (DRO with its whole-interval, momentary,
+  variable-momentary, resetting and non-resetting variants; DRL in its
+  full-session, interval and spaced-responding forms; DRD; DRH; DRP; DRA;
+  DRI; FCT; DNRA/DNRO; lag schedules; percentile schedules), compound
+  (multiple, mixed, chained, tandem, concurrent, conjoint, alternative,
+  conjunctive, interlocking, second-order, concurrent chains) and applied
+  arrangements (token economies, schedule thinning after FCT or DRA,
+  delayed reinforcement and delay fading, resistance to change). Each entry
+  gives the notation, the definition in the words of the source that
+  defined it, how it is programmed, what it produces, where the applied
+  literature has used it, what goes wrong, a school example, a notes box
+  that saves with the form, and its references. The family filter and the
+  search box narrow the list; printing opens every entry.
+- **Patterns.** Ten stylized cumulative records drawn by rule (FR, VR,
+  FI, VI, extinction after CRF and after VR, spaced-responding DRL, DRH,
+  progressive ratio, DRO on a target behavior) with a table on reading a
+  record.
+- **Choose.** Six questions (goal, how the behavior occurs, function, who
+  delivers, stage, whether extinction is possible) produce a ranked list
+  of schedules with a reason each, linked to the catalogue entry.
+- **Design.** Student and behavior fields, then one of eleven designers:
+  DRO from the baseline (interval from the mean IRT, type, resetting,
+  step table to a terminal interval), DRL/DRD (full-session, interval or
+  spaced-responding limits stepping down from baseline), VI/VR series
+  (Fleshler-Hoffman constant-probability progression, shuffled arithmetic
+  series, or random RI/RR), NCR (interval from the baseline IRT with
+  omission rule and thinning), progressive ratio (sequence and breakpoint
+  table), token economy (the three schedules and the price of each
+  back-up, with a warning on large exchange requirements),
+  multiple-schedule thinning (S+ held, S- multiplied to a terminal value
+  with criteria and step-back rule), chained schedule with demand fading,
+  interlocking schedule (requirement by minute), limited hold, and lag.
+  Each writes the notation, the settings, the step table and the rule in
+  plain words.
+- **Card.** A one-page schedule card for the people who run it: the rule,
+  the settings, the steps with a date-reached column, data to keep, what
+  never happens, cautions and sign-off lines. "Print the schedule card"
+  prints it alone; the ordinary print prints the whole form, catalogue
+  open.
+- **Guide.** How to read the notation, where the catalogue comes from,
+  what the chooser and the designers assume (every formula and default
+  stated), and the reference list, generated from the same list the
+  catalogue cites so the two cannot drift apart.
+
+Sources: Ferster and Skinner (1957) for the basic and combined schedules,
+quoted from the Skinner Foundation e-book; Catania's (2007) tables of basic
+schedules and schedule combinations as reproduced in DeLeon, Bullock and
+Catania (2013); Zeiler (1977); Lattal and Neef (1996); Vollmer and Iwata
+(1992) for the differential-reinforcement family; and the Journal of
+Applied Behavior Analysis and Behavior Analysis in Practice studies named
+in each entry (Deitz and Repp, Repp et al., Lindberg et al., Mazaleski et
+al., Vollmer et al., Hagopian et al., Hanley et al., Greer et al., Fisher
+et al., Lalli et al., Roane et al., Lee et al., Cammilleri and Hanley,
+Galbicka, Athens et al., Neef et al., Borrero and Vollmer, Tiger and
+Hanley, Saini et al., Lerman and colleagues, Iwata et al., and others).
+Where an entry cites a study through a review rather than directly, the
+entry says so.
+
+Data model: `S = {meta, notes}`, saved as `{form:'SR-1', v, S}`; the
+chooser answers and the design parameters live in `meta`, the catalogue
+notes in `notes` keyed by entry id. Files from other forms are refused.
+CSV export writes the catalogue (with the notes) as a spreadsheet. "Load
+simulation" fills a DRO design for calling out, the chooser, and two
+notes.
+
+Other changes: the index lists 35 forms; `tools/build-rps.py` and
+`tools/build-single.py` expect 35; both editions rebuilt.
