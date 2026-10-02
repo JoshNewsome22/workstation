@@ -3311,7 +3311,12 @@ the reviews by Briesch and Chafouleas (2009), Bruhn, McDaniel and Kreigh
 and Hackenberg (2018) on token economies; Hartmann and Hall (1976) on the
 changing criterion; and, for the schedule section, Ferster and Skinner
 (1957), Berryman and Nevin (1962) on interlocking schedules, and Catania's
-(2007) table of schedule combinations. Bird et al. (2022), on psychotropic
+(2007) table of schedule combinations. The schedule section quotes Ferster
+and Skinner from the Skinner Foundation e-book supplied with the request
+(Chapters 1 to 5 and the opening of Chapter 6 were readable through the
+Drive connector; the later chapters, the glossary and the index were not,
+so the guide cites chapters, not pages, and makes no claim about the
+chapters it could not read). Bird et al. (2022), on psychotropic
 medication monitoring, was read and is not cited here; it belongs with
 MS-1.
 
