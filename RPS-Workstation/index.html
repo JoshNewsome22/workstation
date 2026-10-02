@@ -242,6 +242,22 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 .frames{flex:1;position:relative;min-height:0}
 .frames iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--paper)}
 .frames iframe[hidden]{display:none}
+/* ---- side by side (v21.32): the open frames become equal columns; the pane bar names each one ---- */
+#paneBar{display:none}
+body.ws-split #paneBar{display:flex;align-items:stretch;background:var(--shade);border-bottom:1px solid var(--rule)}
+#paneBar .pane{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:12px;color:var(--muted);border-left:1px solid var(--rule);cursor:pointer}
+#paneBar .pane:first-child{border-left:0}
+#paneBar .pane b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--navy);background:var(--mist);border-radius:999px;padding:1px 7px;flex:0 0 auto}
+#paneBar .pane .nm{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+#paneBar .pane.cur{background:#fff;box-shadow:inset 0 -2px 0 var(--navy)}
+#paneBar .pane button{font-size:11.5px;padding:3px 8px;flex:0 0 auto}
+body.ws-split .frames{display:flex;align-items:stretch}
+body.ws-split .frames iframe{position:static;flex:1 1 0;min-width:0;height:auto;border-left:1px solid var(--rule)}
+body.ws-split .frames iframe[hidden]{display:none}
+@media (max-width:900px){
+  body.ws-split .frames{flex-direction:column}
+  body.ws-split .frames iframe{border-left:0;border-top:1px solid var(--rule);min-height:0}
+}
 
 /* ---- the start screen ---- */
 .blank{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;overflow:auto}
@@ -273,6 +289,11 @@ dialog table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-n
 dialog th,dialog td{border:1px solid var(--rule);padding:6px 9px;text-align:left;vertical-align:top}
 dialog th{background:var(--mist);color:var(--navy)}
 dialog tr:nth-child(even) td{background:#fafcfb}
+/* side by side (v21.32): the chooser */
+.sb-list{display:flex;flex-direction:column;gap:2px;margin:6px 0 8px}
+.sb-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--rule);border-radius:6px;cursor:pointer}
+.sb-row b{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--navy);background:var(--mist);border-radius:999px;padding:1px 7px}
+.sb-note{color:var(--muted);margin:0 0 8px}
 /* the case map (v21.31) */
 .cm-lead{color:var(--muted);margin:0 0 10px}
 .cm-stage{display:grid;grid-template-columns:34px 1fr;gap:4px 12px;padding:10px 0;border-top:1px solid var(--rule)}
@@ -400,11 +421,13 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
       <div class="acts">
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
         <button id="popOut" class="sm" aria-label="Open in its own tab" title="Open in its own tab"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M6 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10"/></svg><span class="lbl">Own tab</span></button>
+        <button id="splitBtn" class="sm" aria-pressed="false" aria-label="Side by side: two or three forms at once" title="Side by side: show two or three open forms at once"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="5.5" height="11" rx="1"/><rect x="9" y="2.5" width="5.5" height="11" rx="1"/></svg><span class="lbl">Side by side</span></button>
         <button id="fullBtn" class="sm" aria-pressed="false" aria-label="Fullscreen: only the form" title="Fullscreen: only the form (Ctrl+Shift+F)"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true" hidden fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg><span class="lbl">Fullscreen</span></button>
         <button id="fillBtn" class="sm" aria-pressed="false" aria-label="Fill the whole screen" title="Use the whole screen: the browser's own bars go too"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg><span class="lbl">Fill screen</span></button>
         <button id="closeForm" class="sm" aria-label="Close this form" title="Close this form"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg><span class="lbl">Close</span></button>
       </div>
     </div>
+    <div id="paneBar" role="group" aria-label="Forms side by side"></div>
     <div class="frames" id="frames">
       <div class="blank" id="blank"><div class="card">
         <h2>Pick a form from the list</h2>
@@ -669,6 +692,7 @@ $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
 /* ---------------- frames ---------------- */
 function openForm(id,keepRail){
   const rec=ALL.find(f=>f[0]===id); if(!rec)return;
+  const prevCur=state.cur;   /* v21.32 side by side */
   state.cur=id;
   if(!keepRail) setRail(false);
   document.body.classList.add('has-form');
@@ -687,6 +711,15 @@ function openForm(id,keepRail){
   $('#crumbTitle').textContent=rec[1];
   $('#crumbId').textContent='Form '+id;
   $('#crumbFile').textContent=rec[2];
+  /* v21.32 side by side: a form opened while two or three are showing takes a column (a third column
+     while there is room, else the column of the form that was current) */
+  if(splitOn()){
+    if(!state.split.includes(id)){
+      const k=state.split.indexOf(prevCur);
+      if(state.split.length<3)state.split.push(id); else state.split[k>=0?k:state.split.length-1]=id;
+    }
+    layoutFrames();
+  }
   /* A browser shows its own "not found" page inside the frame and tells us nothing
      about it. If the form has not answered a status ping by now, the usual cause is
      that the file is not in this folder, or is named differently. */
@@ -705,6 +738,7 @@ $('#closeForm').addEventListener('click',()=>{
   const fr=state.frames[state.cur];
   if(fr){fr.remove();delete state.frames[state.cur];}
   delete state.status[state.cur];
+  const rest=state.split.filter(x=>x!==state.cur);state.split=[];   /* v21.32 side by side */
   state.cur=null;$('#blank').style.display='';
   document.body.classList.remove('has-form');
   setFull(false);
@@ -712,6 +746,7 @@ $('#closeForm').addEventListener('click',()=>{
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';
   $('#crumbFile').textContent='';clearTimeout(state.watch);
   renderRail();
+  if(rest.length){openForm(rest[0],true);setSplit(rest);}   /* v21.32 side by side */
 });
 $('#popOut').addEventListener('click',()=>{
   if(!state.cur)return;
@@ -719,6 +754,66 @@ $('#popOut').addEventListener('click',()=>{
   if(EMBED){const h=EMBED.form(rec[2]);if(h)window.open(URL.createObjectURL(new Blob([h],{type:'text/html'})),'_blank');return;}
   window.open(rec[2],'_blank');
 });
+
+/* ================= side by side (v21.32) =================
+   Every open form already sits in its own frame and stays loaded, so showing two or three at once
+   is a layout: the chosen frames become equal columns (stacked on a narrow screen), with a pane bar
+   above naming each one. state.split holds the ids in column order and is empty when one form shows.
+   The current form (state.cur) is the one the crumb's own buttons act on: it follows a click in the
+   pane bar or focus inside a frame. A form opened from the list while the view is split takes a
+   column; closing one leaves the others. Fullscreen works the same way over the columns. The order
+   of a case is unchanged: nothing here touches what the forms hold. */
+state.split=[];
+function splitOn(){return state.split.length>1;}
+function layoutFrames(){
+  const on=splitOn();
+  document.body.classList.toggle('ws-split',on);
+  Object.entries(state.frames).forEach(([id,fr])=>{
+    const show=on?state.split.includes(id):id===state.cur;
+    fr.hidden=!show;fr.style.order=on?String(state.split.indexOf(id)):'';
+  });
+  $('#paneBar').innerHTML=on?state.split.map(id=>{const rec=ALL.find(f=>f[0]===id);
+    return '<div class="pane'+(id===state.cur?' cur':'')+'" data-pane="'+id+'"><b>'+esc(id)+'</b><span class="nm">'+esc(rec?rec[1]:id)+'</span>'+
+      '<button type="button" class="sm" data-pane-print="'+id+'" title="Print this form">Print</button>'+
+      '<button type="button" class="sm" data-pane-close="'+id+'" title="Take this form out of the side-by-side view (it stays open)" aria-label="Take Form '+esc(id)+' out of the side-by-side view">&times;</button></div>';}).join(''):'';
+  if(on){$('#crumbTitle').textContent='Side by side';$('#crumbId').textContent=state.split.map(x=>'Form '+x).join(' \u00b7 ');$('#crumbFile').textContent='';}
+  const b=$('#splitBtn');b.setAttribute('aria-pressed',String(on));b.querySelector('.lbl').textContent=on?'Side by side: '+state.split.length:'Side by side';
+}
+function setSplit(ids){
+  const want=(ids||[]).filter((id,i,a)=>state.frames[id]&&a.indexOf(id)===i).slice(0,3);
+  state.split=want.length>1?want:[];
+  if(splitOn()&&!state.split.includes(state.cur))state.cur=state.split[0];
+  layoutFrames();
+  if(!splitOn()&&state.cur)openForm(state.cur,true);
+  renderRail();
+  say(splitOn()?'Side by side: '+state.split.map(x=>'Form '+x).join(', '):'One form at a time');
+}
+$('#splitBtn').addEventListener('click',()=>{
+  const open=ALL.map(f=>f[0]).filter(id=>state.frames[id]);
+  if(open.length<2){alert('Open a second form first: pick it from the list, then press Side by side. Two or three open forms can show at once, each with its own timer, counts and save.');return;}
+  const checked=splitOn()?state.split:[state.cur].filter(Boolean);
+  dialog('Side by side',
+    '<p>Tick two or three of the open forms. They show as columns, each working on its own; a form opened from the list while the view is split takes a column. For an observation, OB-1, MT-1 and ABC-1 together let the narrative, the interval sample and the ABC record run from one screen.</p>'+
+    '<div class="sb-list">'+open.map(id=>{const rec=ALL.find(f=>f[0]===id);return '<label class="sb-row"><input type="checkbox" value="'+id+'"'+(checked.includes(id)?' checked':'')+'> <b>'+esc(id)+'</b> '+esc(rec[1])+'</label>';}).join('')+'</div>'+
+    '<p class="sb-note" id="sbNote"></p>'+
+    '<p><button type="button" class="primary" id="sbGo">Show side by side</button> '+(splitOn()?'<button type="button" id="sbOne">Back to one form</button>':'')+'</p>');
+  const note=()=>{const n=Array.from(document.querySelectorAll('#dlgBody .sb-row input:checked')).length;$('#sbNote').textContent=n<2?'Tick at least two.':n>3?'At most three fit: untick one.':n+' forms will show side by side.';$('#sbGo').disabled=n<2||n>3;};
+  note();Array.from(document.querySelectorAll('#dlgBody .sb-row input')).forEach(c=>c.addEventListener('change',note));
+  $('#sbGo').addEventListener('click',()=>{const ids=Array.from(document.querySelectorAll('#dlgBody .sb-row input:checked')).map(c=>c.value);$('#dlg').close();setSplit(ids);});
+  const one=$('#sbOne');if(one)one.addEventListener('click',()=>{$('#dlg').close();setSplit([]);});
+});
+$('#paneBar').addEventListener('click',e=>{
+  const pr=e.target.closest('[data-pane-print]'),cl=e.target.closest('[data-pane-close]'),pn=e.target.closest('.pane');
+  if(pr){state.cur=pr.dataset.panePrint;layoutFrames();renderRail();$('#printOne').click();return;}
+  if(cl){const id=cl.dataset.paneClose;const rest=state.split.filter(x=>x!==id);if(state.cur===id)state.cur=rest[0]||id;setSplit(rest);return;}
+  if(pn){state.cur=pn.dataset.pane;layoutFrames();renderRail();}
+});
+/* focus moving into one of the columns makes that form the current one */
+window.addEventListener('blur',()=>{setTimeout(()=>{
+  if(!splitOn())return;const a=document.activeElement;if(!a||a.tagName!=='IFRAME')return;
+  const id=Object.keys(state.frames).find(k=>state.frames[k]===a);
+  if(id&&id!==state.cur){state.cur=id;layoutFrames();renderRail();}
+},0);});
 
 /* ---------------- packet ---------------- */
 function packet(){
@@ -1699,6 +1794,7 @@ $('#help').addEventListener('click',()=>{
    (EMBED?'<div class="warnbox" style="background:#eaf2f0;border-color:#a0c9c3"><b>This is the one-file edition.</b> All 42 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it; in Chrome and Edge each later save goes back into that same file. Keep those files where the student\u2019s records live. This file itself stays empty and is the one to open for a new student.</div>':'')+
    '<p><b>The case file.</b> <b>Save case</b> writes every form you have open into one file, together with the student details. <b>Open case</b> loads it back, opening each form and filling it. It is one file to keep or hand over instead of a folder of separate ones. Each form\u2019s own <b>Save data</b> button is untouched and still works exactly as before.</p>'+
    '<p><b>Two students at once.</b> Every open form reports the student name it is holding. If one of them differs from the name on the bar \u2014 a form left over from the last case, most often \u2014 an amber strip names it before anything reaches paper.</p>'+
+   '<p><b>Side by side.</b> With two or more forms open, <b>Side by side</b> above the form shows two or three of them as columns, each working on its own: for an observation, OB-1, MT-1 and ABC-1 together put the narrative, the interval sample and the ABC record on one screen. A form opened from the list takes a column; the small bar above the columns names each one, prints it, or takes it out of the view.</p>'+
    '<p><b>The screen.</b> <b>Fullscreen</b>, above an open form, puts away the heading, the packet bar and the list so only the form is showing; <kbd>Esc</kbd> or the same button brings them back, and <b>Fill the screen</b> beside it also takes the browser\u2019s own bars away where the browser allows that. On a wide window the list can be hidden from its own corner and brought back with <b>Forms</b>; the choice is remembered. On a phone the packet bar folds behind <b>Packet</b> in the heading.</p>'+
    '<p><b>Keyboard.</b> <kbd>\u2318K</kbd> (or <kbd>Ctrl K</kbd>) opens a box you can type into to jump to any form or run any command. <kbd>\u2191</kbd> and <kbd>\u2193</kbd> move between forms, <kbd>\u2318S</kbd> saves the case, <kbd>\u2318P</kbd> prints the open form and <kbd>\u2318\u21e7P</kbd> builds the master print. <kbd>\u2318\u21e7F</kbd> shows only the form and <kbd>Esc</kbd> brings the rest back. On Windows use <kbd>Ctrl</kbd> for <kbd>\u2318</kbd>.</p>'+
    '<div class="warnbox" style="background:#fbf0e6;border-color:#e0c3a4"><b>Closing the tab.</b> Work that is not in a saved case file is at risk when the window closes, so the browser stops and asks first, unless you have saved the case and changed nothing since.</div>'+
@@ -2207,6 +2303,7 @@ const CMDS=[
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
+  {k:'side by side two three forms split columns at once',n:'Side by side: two or three forms at once',s:'view',go:()=>$('#splitBtn').click()},
   {k:'hide show form list sidebar',n:'Show or hide the form list',s:'view',go:()=>{if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);else setRailHidden(!railHidden(),true);}},
   {k:'tick used',n:'Tick the forms I have used',s:'command',go:()=>$('#tickUsed').click()},
   {k:'clear ticks',n:'Clear all ticks',s:'command',go:()=>$('#tickNone').click()}
