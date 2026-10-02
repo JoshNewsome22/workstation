@@ -2991,7 +2991,7 @@ function saveGraphPng(svgEl,beh){
   svg.setAttribute('font-family',ddSans()); svg.removeAttribute('class');
   const src=new XMLSerializer().serializeToString(svg);
   const img=new Image(), scale=2;
-  const student=String((S.meta&&S.meta.client)||'student').trim().replace(/\s+/g,'_').replace(/[^\w-]+/g,'')||'student';
+  const student=String((S.meta&&S.meta.client)||'student').trim().replace(/\s+/g,'_').replace(/[^\w-]+/g,'').replace(/_+/g,'_')||'student';
   const name='DD-1_graph_'+student+'_'+localISO(new Date())+'.png';
   img.onload=()=>{
     const c=document.createElement('canvas'); c.width=W*scale; c.height=H*scale;
