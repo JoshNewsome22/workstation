@@ -24,6 +24,12 @@ Double-click index.html. Everything runs from this folder.
     details opens it).
   - Save case above the form shows a dot while the case holds unsaved work.
     Autosave is a safety net in this browser only; the case file is the record.
+  - The bar shows what is due: review dates and next steps the open forms
+    hold, within two weeks or past (PR-1, SA-1, SM-1, ST-1, CN-1 and others).
+    Help, in the bar, is a short page with the detail folded underneath.
+  - Load simulation on a form fills it with a worked example and says so in
+    one line; the form's Guide explains what the example shows. Nothing in a
+    simulation is a real student record.
   - Two or three open forms can show at once: "Side by side" above the form.
     For an observation, OB-1, MT-1 and ABC-1 together put the narrative, the
     interval sample and the ABC record on one screen.
