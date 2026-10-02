@@ -425,6 +425,13 @@ body.view-guide .only-setup,body.view-guide .only-steps,body.view-guide .only-tr
   .sheet{box-shadow:none}
 }
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -924,7 +931,7 @@ button.st-ti-rm:hover{background:#fbf1f1}
     </div>
     <p class="st-ti-done noprint" id="stTiDoneSteps" role="status" aria-live="polite"></p>
     <div class="grid-wrap"><table class="rt" id="stepTbl"><thead><tr>
-      <th style="width:52px">Step</th><th style="text-align:left">Description of the step, as written in the protocol</th><th style="width:124px">Component</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:52px">Step</th><th style="text-align:left">Description of the step, as written in the protocol</th><th style="width:124px">Component</th><th style="width:74px">Critical</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="st-ti-rec" id="stTiStepsRec" hidden></div>
   </section>
 
@@ -1088,8 +1095,23 @@ function renderSteps(){
     `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
      <td><textarea data-s="${i}" data-f="d" rows="2" style="width:100%;border:0;background:transparent;font:inherit;resize:vertical">${esc(st.d)}</textarea>${/* v21.24 rehearsal runner: the Retrain mark of Import From TI-1 */typeof stTiMark==='function'?stTiMark(i):''}</td>
      <td style="text-align:center"><select data-s="${i}" data-f="cmp" aria-label="Step ${i+1} component">${CMP.map(([k,l])=>`<option value="${k}"${st.cmp===k?' selected':''}>${l}</option>`).join('')}</select></td>
-     <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td></tr>`).join('');
+     <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a step can be deleted anywhere in the list. Its codes in every round go with it, and the codes of
+   the steps after it are re-keyed so none moves to another step. The steps to retrain imported from Form TI-1
+   are TI-1's record and keep TI-1's step numbers: the confirm says that the ones after a deleted step lose their
+   Retrain mark until the two lists line up again. */
+function delStepAt(i){const st=S.steps[i];if(!st)return;
+  const lock=$('#delStep');if(lock&&lock.disabled){alert(lock.title||'Locked while a round is open in the rehearsal runner.');return;}
+  const tg=typeof stTiTargets==='function'?stTiTargets():[],later=tg.some(t=>t.i>i),mine=tg.some(t=>t.i===i);
+  const has=(st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j))||later||mine;
+  const extra=(mine?' It is a step to retrain from Form TI-1.':'')+(later?' The steps to retrain from Form TI-1 after it are matched by step number, so they lose their Retrain mark until the two lists line up again.':'');
+  if(has&&!confirm('Delete step '+(i+1)+'? Its description and its codes in every round will be deleted, and the steps after it move up one.'+extra))return;
+  S.steps.splice(i,1);
+  const nw={};Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const s=+m[1];if(s===i)return;nw[(s>i?s-1:s)+'_'+m[2]]=S.cells[k];});S.cells=nw;
+  if(!S.steps.length)S.steps.push({d:'',crit:false});
+  renderAll();}
+$('#stepTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delStepAt(+b.dataset.di);});
 ['input','change'].forEach(ev=>$('#stepTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
   const st=S.steps[+el.dataset.s],f=el.dataset.f,v=el.type==='checkbox'?el.checked:el.value;st[f]=v;
   /* a step tagged Consequence is marked critical as it is tagged (the trainer may untick it afterwards) */
@@ -3006,7 +3028,7 @@ paintRecords();
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -3118,6 +3140,74 @@ paintRecords();
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

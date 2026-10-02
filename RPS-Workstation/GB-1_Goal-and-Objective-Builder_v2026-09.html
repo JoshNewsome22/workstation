@@ -531,6 +531,7 @@ td input,td select{max-width:100%}
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
     <button id="saveBtn">Save data</button>
+    <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="clearBtn">Clear all</button>
@@ -594,6 +595,15 @@ span.gap{border-left:0;margin:0;font-family:inherit;font-size:inherit}
 .gb-chk{font-family:var(--sans);font-size:11.5px;line-height:1.45;color:#8e2a2a;margin-top:4px}
 ol.gs{list-style:none;padding-left:0}
 ol.gs .gs-id{font-family:var(--sans);font-weight:600;margin-right:3px}
+
+/* v21.33 (B) Copy for the BIP: the toolbar's confirmation and the fallback dialog */
+.toolbar .bip-msg{font:12px/1.3 var(--sans,sans-serif);color:#f1f6f5;align-self:center;padding:0 4px}
+.toolbar .bip-msg:empty{display:none}
+#bipDlg{width:min(760px,92vw);border:1px solid #c9d3d9;border-radius:3px;padding:14px 16px;font-family:var(--sans,sans-serif);color:#1a2933}
+#bipDlg::backdrop{background:rgba(24,46,67,.35)}
+#bipDlg p{margin:0 0 8px;font-size:13px}
+#bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
+#bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
 <main class="sheet">
 <div class="nbh-print-head">
@@ -1286,6 +1296,45 @@ window.__nbhFactsPick=function(sel){
   if(sel.fn&&window.nbhCase){const e=$('[name="m.fn"]');if(e&&window.nbhCase.put(e,e.tagName==='SELECT'?(sel.fn.key||sel.fn.label):sel.fn.label,true))n++;}
   render();return {filled:n};
 };
+
+/* ---------- v21.33 (B) Copy for the BIP ----------
+   The plan's text, composed from the record in the shape the district's BIP document takes (uppercase
+   section headings, "Label: value" lines, "- item" lists, a blank line between sections, empty fields left
+   out), goes to the clipboard. When the browser refuses the clipboard the text is shown in a dialog,
+   selected, to copy by hand. Guide text, instructions and empty rows are not part of it. */
+const bipTxt=v=>String(v==null?'':v).replace(/\r\n?/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+const bipLine=(l,v)=>{v=bipTxt(v);return v?l+': '+v:'';};
+const bipHead=(parts)=>parts.filter(p=>bipTxt(p[1])).map(p=>p[0]+': '+bipTxt(p[1])).join(' · ');
+/* strip markup and decode entities: the sentences and verdicts are built as HTML with values written through esc() */
+function bipPlain(h){const t=document.createElement('textarea');t.innerHTML=String(h==null?'':h).replace(/<[^>]+>/g,'');return bipTxt(t.value);}
+/* blocks: [heading or null, ...lines]; a block with no line is dropped, so an empty section never prints */
+function bipCompose(blocks){const out=[];blocks.forEach(b=>{if(!b)return;const lines=b.slice(1).filter(x=>x!=null&&bipTxt(x)!=='').map(bipTxt);if(!lines.length)return;out.push((b[0]?[b[0]]:[]).concat(lines).join('\n'));});return out.join('\n\n')+'\n';}
+function bipStatus(msg){const el=document.getElementById('bipMsg');if(!el)return;el.textContent=msg;clearTimeout(el._t);el._t=setTimeout(()=>{el.textContent='';},6000);}
+function bipShow(text){let d=document.getElementById('bipDlg');
+  if(!d){d=document.createElement('dialog');d.id='bipDlg';d.className='noprint';d.setAttribute('aria-label','Text for the BIP');
+    d.innerHTML='<p>The browser refused the clipboard. The text is selected below: copy it with Ctrl+C (Cmd+C on a Mac) and paste it into the BIP.</p><textarea readonly rows="18" aria-label="Text for the BIP"></textarea><div class="bip-row"><button type="button" class="tool" id="bipClose">Close</button></div>';
+    document.body.appendChild(d);d.querySelector('#bipClose').addEventListener('click',()=>d.close());}
+  const ta=d.querySelector('textarea');ta.value=text;if(typeof d.showModal==='function'){if(!d.open)d.showModal();}else d.setAttribute('open','');ta.focus();ta.select();}
+function bipCopy(text){const n=text.split('\n').length;
+  const ok=()=>bipStatus('Copied for the BIP: '+n+' lines on the clipboard.');
+  const fail=()=>{bipShow(text);bipStatus('The clipboard was refused: the text is shown to copy by hand.');};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(ok,fail);else fail();}catch(err){fail();}}
+window.__bipText=bipText;
+document.getElementById('bipBtn').addEventListener('click',()=>bipCopy(bipText()));
+
+function bipText(){
+  /* the sentence as the goal sheet writes it, with an unfilled part shown as [...] */
+  const sentence=h=>bipPlain(String(h).replace(/<span class="gap">[^<]*<\/span>/g,'[...]'));
+  const B=[[null,'FORM GB-1 · GOALS AND OBJECTIVES',bipHead([['Student',val('m.client')],['ID',val('m.sid')],['Date',fmtDate(val('m.date'))]])]];
+  B.push(['PLAN',bipLine('Setting / classroom',val('m.setting')),bipLine('Author',val('m.assessor')),bipLine('IEP / plan review date',fmtDate(val('m.review'))),bipLine('Progress reports',val('m.progress'))]);
+  const reds=$$('#redWrap .card').map(c=>idxOf(c,'red')).filter(i=>i>=0&&['beh','dir','meas','cur','ml','tgt','ctx','crit','meth','date','pair','note'].some(k=>val('red['+i+'].'+k)));
+  reds.forEach((i,k)=>{const g=n=>val('red['+i+'].'+n);
+    B.push([k?null:'REDUCTION OBJECTIVES','R'+(i+1)+'. '+sentence(redSentence(i)),bipLine('Paired with',g('pair')),bipLine('Note',g('note'))].concat(redChecks(i).map(x=>'Check: '+bipPlain(x))));});
+  const acqs=$$('#acqWrap .card').map(c=>idxOf(c,'acq')).filter(i=>i>=0&&['beh','cond','crit','n','unit','meth','date','pair','note'].some(k=>val('acq['+i+'].'+k)));
+  acqs.forEach((i,k)=>{const g=n=>val('acq['+i+'].'+n);
+    B.push([k?null:'ACQUISITION OBJECTIVES','A'+(i+1)+'. '+sentence(acqSentence(i)),bipLine('Replaces',g('pair')),bipLine('Note',g('note'))]);});
+  return bipCompose(B);
+}
 </script>
 <script>
 
@@ -1986,7 +2035,7 @@ window.__nbhFactsPick=function(sel){
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -2098,6 +2147,74 @@ window.__nbhFactsPick=function(sel){
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

@@ -1754,7 +1754,7 @@ window.__nbhFactsPick=function(sel){
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -1866,6 +1866,74 @@ window.__nbhFactsPick=function(sel){
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

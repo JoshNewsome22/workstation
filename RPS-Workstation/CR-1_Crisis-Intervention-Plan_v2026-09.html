@@ -651,6 +651,23 @@ td input,td select{max-width:100%}
   .crc-ph{break-after:avoid;page-break-after:avoid}
   .crc-pt{font-size:9.5pt}
 }
+
+/* v21.33 (R) a row can be deleted anywhere, not only the last one */
+table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px;min-height:0;box-shadow:none}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:focus-visible{outline:2px solid #54676f;outline-offset:1px}
+@media print{td.nx,th.nx,.rowDel{display:none!important}}
+.crc-arow .rowDel,.crc-zrow .rowDel{align-self:center}
+
+/* v21.33 (B) Copy for the BIP: the toolbar's confirmation and the fallback dialog */
+.toolbar .bip-msg{font:12px/1.3 var(--sans,sans-serif);color:#f1f6f5;align-self:center;padding:0 4px}
+.toolbar .bip-msg:empty{display:none}
+#bipDlg{width:min(760px,92vw);border:1px solid #c9d3d9;border-radius:3px;padding:14px 16px;font-family:var(--sans,sans-serif);color:#1a2933}
+#bipDlg::backdrop{background:rgba(24,46,67,.35)}
+#bipDlg p{margin:0 0 8px;font-size:13px}
+#bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
+#bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
 </head>
 <body class="view-setup">
@@ -684,6 +701,7 @@ td input,td select{max-width:100%}
     <button id="simBtn">Load simulation</button>
     <button class="primary" id="printBtn">Print / Save as PDF</button>
     <button id="saveBtn">Save data</button>
+    <button id="bipBtn" title="Compose the plan text from this form and copy it to the clipboard, to paste into the BIP">Copy for the BIP</button><span id="bipMsg" class="bip-msg noprint" role="status" aria-live="polite"></span>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="clearBtn">Clear all</button>
@@ -721,7 +739,7 @@ td input,td select{max-width:100%}
     <p class="hint">&sect; 1003.573(6)(a) names &ldquo;the student&rsquo;s parent or guardian, school personnel, and applicable physical and behavioral health professionals.&rdquo; This form always requires a behavioral health professional, because the plan addresses dangerous behavior, and requires a physical health professional when section 2 of the plan records a physical health concern or a medical alert. Record who filled each group, and where a role is unfilled say so rather than leaving it blank &mdash; a plan written without the parent is not the plan the statute describes.</p>
     <div class="grid-wrap"><table class="rt" id="teamTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:24%">Name</th><th style="width:24%">Role</th>
-      <th style="width:22%">Statutory group</th><th>Present at the meeting</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:22%">Statutory group</th><th>Present at the meeting</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addTeam">Add member</button><button class="tool" id="delTeam">Remove last</button>
     </div>
@@ -742,7 +760,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="pbisTbl"><thead><tr>
       <th style="width:44px">Order</th><th style="width:16%">Stage</th><th style="width:28%">What staff do</th>
-      <th style="width:20%">What tells you to move on</th><th>Who</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:20%">What tells you to move on</th><th>Who</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band" style="margin-top:16px">2. Health Concerns Limiting the Use of Restraint</h2>
     <div class="statute"><b>&sect; 1003.573(6)(b)2.</b> The plan must include known physical and behavioral health concerns that will limit the use of restraint for this student.</div>
@@ -813,7 +831,7 @@ td input,td select{max-width:100%}
     <p class="hint">A debriefing that changes nothing is a record of an event rather than a reduction activity. At least one line here should be a change to the plan, the environment, or the supports.</p>
     <div class="grid-wrap"><table class="rt" id="actTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:20%">Change</th><th style="width:22%">Where it lands</th>
-      <th style="width:14%">Who</th><th style="width:12%">By when</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:14%">Who</th><th style="width:12%">By when</th><th>Status</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="row" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addAct">Add action</button><button class="tool" id="delAct">Remove last</button>
     </div>
@@ -834,7 +852,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="logTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:11%">Date</th><th style="width:9%">Duration</th>
       <th style="width:16%">Setting and activity</th><th style="width:14%">Staff involved</th>
-      <th style="width:11%">Report filed</th><th style="width:11%">Debrief done</th><th>Precipitating event</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:11%">Report filed</th><th style="width:11%">Debrief done</th><th>Precipitating event</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="logMetrics"></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:26%">Reduction goal for this student</th><td><textarea data-m="goal" rows="2" placeholder="A number and a date, not an aspiration"></textarea></td></tr>
@@ -937,7 +955,7 @@ function renderTeam(){
     <td><input data-t="${i}" data-f="n" value="${esc(r.n)}"></td>
     <td><input data-t="${i}" data-f="r" value="${esc(r.r)}"></td>
     <td><select data-t="${i}" data-f="g">${opt(GROUPS,r.g)}${groupOld(r.g)}</select></td>
-    <td><select data-t="${i}" data-f="p"><option value=""></option>${opt(['Yes','No','Invited, did not attend'],r.p)}</select></td></tr>`).join('');
+    <td><select data-t="${i}" data-f="p"><option value=""></option>${opt(['Yes','No','Invited, did not attend'],r.p)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="team" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
   teamVerdict();
 }
 /* v21.16 audit (F4). The verdict followed only a change of group: a name typed after the group was chosen, or an
@@ -975,7 +993,7 @@ function renderPbis(){
     <td><select data-p="${i}" data-f="s">${opt(STAGES,r.s)}</select></td>
     <td><textarea data-p="${i}" data-f="do" rows="2">${esc(r.do)}</textarea></td>
     <td><textarea data-p="${i}" data-f="next" rows="2">${esc(r.next)}</textarea></td>
-    <td><input data-p="${i}" data-f="who" value="${esc(r.who)}"></td></tr>`).join('');
+    <td><input data-p="${i}" data-f="who" value="${esc(r.who)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="pbis" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
 }
 function renderAct(){
   $('#actTbl tbody').innerHTML=S.act.map((r,i)=>`<tr>
@@ -984,7 +1002,7 @@ function renderAct(){
     <td><select data-a="${i}" data-f="w"><option value=""></option>${opt(['This crisis plan','The BIP (Form TD-1)','The FBA (Form FS-1)','Staff training (Form ST-1)','The environment','Staffing or schedule','Nothing changes'],r.w)}</select></td>
     <td><input data-a="${i}" data-f="who" value="${esc(r.who)}"></td>
     <td><input data-a="${i}" data-f="by" value="${esc(r.by)}"></td>
-    <td><select data-a="${i}" data-f="st"><option value=""></option>${opt(['Open','Done','Not doing'],r.st)}</select></td></tr>`).join('');
+    <td><select data-a="${i}" data-f="st"><option value=""></option>${opt(['Open','Done','Not doing'],r.st)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="act" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
   actVerdict();
 }
 /* v21.16 audit (F5). The verdict followed only "Where it lands": a change typed after it was chosen left the verdict
@@ -1007,7 +1025,7 @@ function renderLog(){
     <td><input data-l="${i}" data-f="staff" value="${esc(r.staff)}"></td>
     <td><select data-l="${i}" data-f="rep"><option value=""></option>${opt(['Yes','Late','No'],r.rep)}</select></td>
     <td><select data-l="${i}" data-f="deb"><option value=""></option>${opt(['Yes','No'],r.deb)}</select></td>
-    <td><input data-l="${i}" data-f="pre" value="${esc(r.pre)}"></td></tr>`).join('');
+    <td><input data-l="${i}" data-f="pre" value="${esc(r.pre)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-rdel="log" data-i="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
   /* v21.22: the clock's editor follows the rows of the log */
   crcRender();
   logMetrics();
@@ -1514,7 +1532,8 @@ function crcCard(r,i){
       '<input type="time" data-ca="'+P+'" data-f="t" value="'+esc(a.t)+'" aria-label="'+an+'time">'+
       '<select data-ca="'+P+'" data-f="m" aria-label="'+an+'telephone or e-mail">'+crcOpts(CRC_METHODS,a.m)+'<\/select>'+
       '<input type="text" class="crc-out" data-ca="'+P+'" data-f="o" list="crcOutList" value="'+esc(a.o)+'" aria-label="'+an+'outcome" placeholder="Outcome">'+
-      '<button type="button" class="crc-now" data-canow="'+P+'" aria-label="'+an+'fill in the date and time now">Now<\/button><\/div>';}).join('');
+      '<button type="button" class="crc-now" data-canow="'+P+'" aria-label="'+an+'fill in the date and time now">Now<\/button>'+
+      '<button type="button" class="rowDel noprint" data-cadelx="'+P+'" title="Delete this attempt" aria-label="'+an+'delete this attempt">&times;<\/button><\/div>';}).join('');
   return '<div class="crc-r" id="crcR'+i+'">'+
     '<div class="crc-rh"><div class="crc-rt" role="heading" aria-level="3" tabindex="-1">Restraint '+n+'<\/div><span class="crc-rlog" id="crcRL'+i+'"><\/span><span class="crc-pills" id="crcRP'+i+'"><\/span><\/div>'+
     '<div class="crc-msgs" id="crcRM'+i+'"><\/div>'+
@@ -1546,7 +1565,8 @@ function crcZRow(z,k){
   return '<div class="crc-zrow"><span class="crc-an" aria-hidden="true">'+(k+1)+'<\/span>'+
     '<label class="crc-zl">First day<input type="date" data-cz="'+k+'" data-f="a" value="'+esc(z.a)+'" aria-label="'+P+'first day"><\/label>'+
     '<label class="crc-zl">Last day, for a break<input type="date" data-cz="'+k+'" data-f="b" value="'+esc(z.b)+'" aria-label="'+P+'last day, for a break"><\/label>'+
-    '<label class="crc-zl crc-zw">What<input type="text" data-cz="'+k+'" data-f="w" value="'+esc(z.w)+'" aria-label="'+P+'what it is" placeholder="Holiday, planning day, closure"><\/label><\/div>';
+    '<label class="crc-zl crc-zw">What<input type="text" data-cz="'+k+'" data-f="w" value="'+esc(z.w)+'" aria-label="'+P+'what it is" placeholder="Holiday, planning day, closure"><\/label>'+
+    '<button type="button" class="rowDel noprint" data-czdelx="'+k+'" title="Delete this row" aria-label="'+P+'delete this row">&times;<\/button><\/div>';
 }
 function crcRender(){
   const rows=document.getElementById('crcRows'),zr=document.getElementById('crcZRows');if(!rows||!zr)return;
@@ -1751,6 +1771,78 @@ document.addEventListener('keydown',e=>{
   setInterval(crcTick,1000);
   window.crcClock={states:n=>crcStates(n),update:()=>crcUpdate(),render:()=>crcRender(),mdy:crcMDY,sig:()=>crcSig};
 })();
+
+/* v21.33 (R): any row of the team, the interventions, the debriefing's changes and the restraint log can be
+   deleted, not only the last; a row that holds an entry asks first; ensure() keeps each table's minimum by
+   adding a blank row at the end. The debriefing names its restraint by its number on the log (S.meta.dbRow):
+   deleting a restraint above it moves the number down, and deleting the one it names clears the choice, which
+   the question says. A restraint's attempts and no-school days are deleted the same way inside the clock. */
+const CR_ROWS={team:{a:()=>S.team,redraw:()=>renderTeam()},pbis:{a:()=>S.pbis,redraw:()=>{renderPbis();renderTrig();}},act:{a:()=>S.act,redraw:()=>renderAct()},log:{a:()=>S.log,redraw:()=>{renderLog();renderTrig();}}};
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button.rowDel'):null;if(!b)return;const d=b.dataset;
+  if(d.rdel!==undefined){const R=CR_ROWS[d.rdel];if(!R)return;const arr=R.a(),i=+d.i,r=arr[i];if(!r)return;
+    const v=crcTxt(S.meta.dbRow).trim(),n=/^\d+$/.test(v)?+v:0;
+    let q='Delete this row?';if(d.rdel==='log'&&n===i+1)q+=' The debriefing sheet names this restraint; that choice will be cleared.';
+    if(crcFilled(r)&&!confirm(q))return;
+    arr.splice(i,1);
+    if(d.rdel==='log'){if(n===i+1)S.meta.dbRow='';else if(n>i+1)S.meta.dbRow=String(n-1);}
+    ensure();R.redraw();return;}
+  if(d.cadelx!==undefined){const p=String(d.cadelx).split('.'),r=S.log[+p[0]],k=+p[1];if(!r||!Array.isArray(r.att)||!r.att[k])return;
+    if(crcFilled(r.att[k])&&!confirm('Delete this row? Attempt '+(k+1)+' of restraint '+(+p[0]+1)+' will be deleted.'))return;
+    r.att.splice(k,1);if(!r.att.length)r.att.push({d:'',t:'',m:'',o:''});crcRender();renderTrig();return;}
+  if(d.czdelx!==undefined){crcShape();const k=+d.czdelx,z=S.closed[k];if(!z)return;
+    if(crcFilled(z)&&!confirm('Delete this row? No-school day '+(k+1)+' will no longer count for the deadlines.'))return;
+    S.closed.splice(k,1);crcShape();crcRender();renderTrig();}
+});
+
+/* ---------- v21.33 (B) Copy for the BIP ----------
+   The plan's text, composed from the record in the shape the district's BIP document takes (uppercase
+   section headings, "Label: value" lines, "- item" lists, a blank line between sections, empty fields left
+   out), goes to the clipboard. When the browser refuses the clipboard the text is shown in a dialog,
+   selected, to copy by hand. Guide text, instructions and empty rows are not part of it. */
+const bipTxt=v=>String(v==null?'':v).replace(/\r\n?/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+const bipLine=(l,v)=>{v=bipTxt(v);return v?l+': '+v:'';};
+const bipHead=(parts)=>parts.filter(p=>bipTxt(p[1])).map(p=>p[0]+': '+bipTxt(p[1])).join(' · ');
+/* strip markup and decode entities: the sentences and verdicts are built as HTML with values written through esc() */
+function bipPlain(h){const t=document.createElement('textarea');t.innerHTML=String(h==null?'':h).replace(/<[^>]+>/g,'');return bipTxt(t.value);}
+/* blocks: [heading or null, ...lines]; a block with no line is dropped, so an empty section never prints */
+function bipCompose(blocks){const out=[];blocks.forEach(b=>{if(!b)return;const lines=b.slice(1).filter(x=>x!=null&&bipTxt(x)!=='').map(bipTxt);if(!lines.length)return;out.push((b[0]?[b[0]]:[]).concat(lines).join('\n'));});return out.join('\n\n')+'\n';}
+function bipStatus(msg){const el=document.getElementById('bipMsg');if(!el)return;el.textContent=msg;clearTimeout(el._t);el._t=setTimeout(()=>{el.textContent='';},6000);}
+function bipShow(text){let d=document.getElementById('bipDlg');
+  if(!d){d=document.createElement('dialog');d.id='bipDlg';d.className='noprint';d.setAttribute('aria-label','Text for the BIP');
+    d.innerHTML='<p>The browser refused the clipboard. The text is selected below: copy it with Ctrl+C (Cmd+C on a Mac) and paste it into the BIP.</p><textarea readonly rows="18" aria-label="Text for the BIP"></textarea><div class="bip-row"><button type="button" class="tool" id="bipClose">Close</button></div>';
+    document.body.appendChild(d);d.querySelector('#bipClose').addEventListener('click',()=>d.close());}
+  const ta=d.querySelector('textarea');ta.value=text;if(typeof d.showModal==='function'){if(!d.open)d.showModal();}else d.setAttribute('open','');ta.focus();ta.select();}
+function bipCopy(text){const n=text.split('\n').length;
+  const ok=()=>bipStatus('Copied for the BIP: '+n+' lines on the clipboard.');
+  const fail=()=>{bipShow(text);bipStatus('The clipboard was refused: the text is shown to copy by hand.');};
+  try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(ok,fail);else fail();}catch(err){fail();}}
+window.__bipText=bipText;
+document.getElementById('bipBtn').addEventListener('click',()=>bipCopy(bipText()));
+
+function bipText(){
+  const m=S.meta;
+  const B=[[null,'FORM CR-1 · CRISIS INTERVENTION PLAN',bipHead([['Student',m.client],['ID',m.sid],['Date',m.date]])]];
+  B.push(['STUDENT AND TRIGGER',bipLine('Date of birth',m.dob),bipLine('Grade / classroom',m.grade),bipLine('School or setting',m.site),bipLine('Case BCBA',m.bcba),bipLine('Semester',m.sem),
+    bipLine('Restraints this semester',m.nRest),bipLine('Date of the second restraint',m.d2),bipLine('Related plans in force',m.related)]);
+  B.push(['TEAM'].concat(S.team.filter(t=>bipTxt(t.n)).map(t=>'- '+bipTxt(t.n)+(bipTxt(t.r)?', '+bipTxt(t.r):'')+(t.g?' ('+t.g+')':'')+(t.p?' — present at the meeting: '+t.p:''))));
+  B.push(['POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS',bipLine('Dangerous behavior this plan addresses',m.dbeh),bipLine('What counts as imminent risk of serious injury for this student',m.imminent),bipLine('Earliest reliable precursor',m.precursor)]);
+  S.pbis.filter(r=>crcFilled(r)).forEach((r,k)=>{B.push(['STAGE '+(k+1)+(r.s?': '+r.s.toUpperCase():''),bipLine('What staff do',r.do),bipLine('What tells you to move on',r.next),bipLine('Who',r.who)]);});
+  B.push(['HEALTH CONCERNS LIMITING THE USE OF RESTRAINT',bipLine('Physical health concerns',m.hPhys),bipLine('Behavioral health concerns',m.hBeh),bipLine('Positions, holds, or contact to avoid entirely',m.hAvoid),bipLine('Who provided this and when',m.hSource),bipLine('Medical alert to review before any restraint',m.hAlert)]);
+  B.push(['IF RESTRAINT NONETHELESS OCCURS',bipLine('Trained staff authorized to restrain',m.rStaff),bipLine('Discontinuation rule',m.rStop),bipLine('Medical monitoring during and after',m.rMed),bipLine('Who is called, and in what order',m.rCall)]);
+  B.push(['REVIEW TIMETABLE',bipLine('Review schedule',m.revSched),bipLine('Last reviewed',m.revLast),bipLine('Next review due',m.revNext),bipLine('Changes recommended at the last review',m.revChanges),bipLine('Copy provided to the parent or guardian',bipPlain(m.parentCopy)+(bipTxt(m.parentCopyHow)?(m.parentCopy?'. ':'')+bipTxt(m.parentCopyHow):''))]);
+  B.push(['POST-INCIDENT DEBRIEFING',bipLine('Incident date and time',m.dbDate),bipLine('Debriefing date',m.dbWhen),bipLine('Facilitated by',m.dbBy),bipLine('District incident report completed',bipPlain(m.dbReport)),bipLine('Restraint on the log',m.dbRow?'Restraint '+m.dbRow:''),
+    bipLine('Who took part',m.dbWho),bipLine('What was happening before it started',m.dbContext),bipLine('The behavior leading up to the decision to restrain',m.dbLead),bipLine('Why there was an imminent risk of serious injury',m.dbRisk),
+    bipLine('Which interventions from the plan were used, and in what order',m.dbPbis),bipLine('Was the plan followed as written',bipPlain(m.dbFollowed)+(bipTxt(m.dbFollowedWhy)?(m.dbFollowed?'. ':'')+bipTxt(m.dbFollowedWhy):'')),
+    bipLine('What happened immediately after the restraint ended',m.dbAfter),bipLine('Injuries, marks, or medical concerns',m.dbInjury),bipLine('The student’s account',m.dbStudent),bipLine('Staff experience',m.dbStaff)]);
+  B.push(['WHAT CHANGES AS A RESULT'].concat(S.act.filter(a=>bipTxt(a.c)).map(a=>'- '+bipTxt(a.c)+(a.w?' — '+a.w:'')+(bipTxt(a.who)?'; '+bipTxt(a.who):'')+(bipTxt(a.by)?', by '+bipTxt(a.by):'')+(a.st?' ('+a.st+')':''))));
+  /* the readiness check: an item the debriefed restraint's notice log records is given from it, as on screen; otherwise its tick */
+  const states=crcStates(),v=crcTxt(m.dbRow).trim(),nr=/^\d+$/.test(v)?+v:0,st=nr>=1&&nr<=states.length?states[nr-1]:null;
+  B.push(['PARENT NOTIFICATION AND REPORTING'].concat(NOTIFY.map((t,k)=>{const e=st?crcNItem(st,k):null;return e?'- '+t+' — '+bipPlain(e.label)+': '+bipPlain(e.text):S.notify[k]?'- '+t+' — confirmed':'';})));
+  B.push(['RESTRAINT LOG AND REDUCTION GOAL'].concat(S.log.filter(crcDated).map((r,k)=>{const s=states[S.log.indexOf(r)];const when=s&&s.began?crcDT(s.began):s&&s.bDay?crcD(s.bDay):bipTxt(r.d);
+    return '- Restraint '+(k+1)+(when?', '+when:'')+(bipTxt(r.dur)?', '+bipTxt(r.dur):'')+(bipTxt(r.set)?', '+bipTxt(r.set):'')+(bipTxt(r.staff)?' ('+bipTxt(r.staff)+')':'')+(bipTxt(r.pre)?': '+bipTxt(r.pre).replace(/[.]$/,''):'')+'.'+(r.rep?' Report filed: '+r.rep+'.':'')+(r.deb?' Debriefed: '+r.deb+'.':'');}),
+    [bipLine('Reduction goal for this student',m.goal),bipLine('Activities, skills, and resources needed',m.goalHow),bipLine('Is the restraint concentrated in a setting or time',m.pattern),bipLine('Has the FBA or BIP been updated in response',m.fbaUpdate)]));
+  return bipCompose(B);
+}
 renderAll();
 </script>
 
@@ -2444,7 +2536,7 @@ renderAll();
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -2556,6 +2648,74 @@ renderAll();
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

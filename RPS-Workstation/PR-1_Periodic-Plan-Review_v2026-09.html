@@ -383,6 +383,13 @@ body.view-guide .only-setup,body.view-guide .only-ev,body.view-guide .only-dec,b
 @media print{.only-setup,.only-ev,.only-dec,.only-exit,.only-guide{display:block!important}.sheet{box-shadow:none}
   table.rt td select{-webkit-appearance:none;appearance:none}}
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -709,9 +716,9 @@ table.pr-ddprev{min-width:600px}
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Review periods table"><table class="rt pr-grid" id="dataTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:16%">Period</th><th style="width:13%">Target behavior</th>
-      <th style="width:13%">Replacement</th><th style="width:11%">Integrity %</th><th style="width:12%">Commission on consequence steps %</th><th>Note</th></tr>
+      <th style="width:13%">Replacement</th><th style="width:11%">Integrity %</th><th style="width:12%">Commission on consequence steps %</th><th>Note</th><th class="nx noprint"></th></tr>
       <!-- v21.22 (DD-1 import): each column's unit, typed or written by Import From DD-1 -->
-      <tr class="pr-unitrow"><th scope="row">Unit</th><td></td><td><textarea data-m="tUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Target behavior column"></textarea></td><td><textarea data-m="rUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Replacement column"></textarea></td><td class="pr-unitpct">percent</td><td class="pr-unitpct">percent of opportunities</td><td></td></tr></thead><tbody></tbody></table></div>
+      <tr class="pr-unitrow"><th scope="row">Unit</th><td></td><td><textarea data-m="tUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Target behavior column"></textarea></td><td><textarea data-m="rUnit" rows="1" class="pr-line" placeholder="e.g., per day" aria-label="Unit of the Replacement column"></textarea></td><td class="pr-unitpct">percent</td><td class="pr-unitpct">percent of opportunities</td><td></td><td class="nx noprint"></td></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap pr-plotwrap" tabindex="0" role="region" aria-label="Graph of the review periods" style="margin-top:10px"><svg id="prPlot" viewBox="0 0 900 320" role="img" aria-label="Target and replacement across review periods"></svg></div>
     <div class="metrics" id="dataMetrics"></div>
     <h3 style="margin-top:12px">Fidelity Beside Outcome</h3>
@@ -757,7 +764,7 @@ table.pr-ddprev{min-width:600px}
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Actions table"><table class="rt pr-grid" id="actTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:34%">Action</th><th style="width:18%">Form it lands on</th>
-      <th style="width:14%">Who</th><th style="width:12%">By when</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:14%">Who</th><th style="width:12%">By when</th><th>Status</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3 style="margin-top:14px">Sign-off</h3>
     <table class="rt">
       <tr><th style="width:22%">Case BCBA</th><td class="sigline"></td><th style="width:12%">Date</th><td class="sigline"></td></tr>
@@ -785,7 +792,7 @@ table.pr-ddprev{min-width:600px}
     </div>
     <div class="grid-wrap" tabindex="0" role="region" aria-label="Fading sequence table"><table class="rt pr-grid" id="fadeTbl"><thead><tr>
       <th style="width:44px">Step</th><th style="width:26%">Support faded</th><th style="width:20%">Criterion to advance</th>
-      <th style="width:11%">Date started</th><th style="width:11%">Criterion met</th><th>What happened</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:11%">Date started</th><th style="width:11%">Criterion met</th><th>What happened</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3 style="margin-top:14px">Transfer to Natural Contingencies</h3>
     <table class="rt">
       <tr><th style="width:26%">What maintains the replacement once the plan stops</th><td><textarea data-m="nat" rows="3" placeholder="Name the contingency that will operate without the plan. If the answer is only the plan, the plan cannot stop yet &mdash; that is a finding, not a failure."></textarea></td></tr>
@@ -913,9 +920,23 @@ function renderData(){
     <td><input type="number" step="any" data-r="${i}" data-f="r" value="${esc(r.r)}"></td>
     <td><input type="number" step="any" data-r="${i}" data-f="i" value="${esc(r.i)}"></td>
     <td><input type="number" step="any" min="0" max="100" data-r="${i}" data-f="cc" value="${esc(r.cc)}" aria-label="Period ${i===0?'BL':i}, commission on consequence steps, percent of opportunities"></td>
-    <td><textarea data-r="${i}" data-f="n" rows="1" class="pr-line">${esc(r.n)}</textarea></td></tr>`).join('');
+    <td><textarea data-r="${i}" data-f="n" rows="1" class="pr-line">${esc(r.n)}</textarea></td>${i===0
+      ?'<td class="nx noprint"><button type="button" class="rowDel noprint" data-di="0" title="Clear the baseline row (the BL row is always the first and cannot be deleted)" aria-label="Clear the baseline row">&times;</button></td>'
+      :`<td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this period" aria-label="Delete period ${i}">&times;</button></td>`}</tr>`).join('');
   renderCourse();
 }
+/* v21.33 (R): a period can be deleted anywhere in the table (the BL row is cleared instead, since the baseline is
+   always the first row). The periods after it move up one, and the figures imported from Form DD-1 (S.dd), which
+   are kept by row number, are re-numbered with them. */
+function delPeriodAt(i){const r=S.rows[i];if(!r)return;
+  if(i===0){if(filledRow(r)&&!confirm('Clear the baseline row? Its entries will be deleted. (The BL row stays: the baseline is always the first row.)'))return;
+    S.rows[0]=ROW();renderData();renderVerdicts();return;}
+  const dd=S.dd||{},ddLater=['t','r'].some(c=>dd[c]&&Array.isArray(dd[c].rows)&&dd[c].rows.some(x=>x.k>=i));
+  if((filledRow(r)||ddLater)&&!confirm('Delete period '+i+'? Its entries will be deleted, and the periods after it move up one.'+(ddLater?' The figures imported from Form DD-1 for this and the later periods are re-numbered with them; the ones for this period are dropped.':'')))return;
+  S.rows.splice(i,1);
+  ['t','r'].forEach(c=>{const z=dd[c];if(!z||!Array.isArray(z.rows))return;z.rows=z.rows.filter(x=>x.k!==i).map(x=>Object.assign({},x,{k:x.k>i?x.k-1:x.k}));});
+  ensure();renderData();renderVerdicts();}
+$('#dataTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delPeriodAt(+b.dataset.di);});
 /* v21.16 audit (F1b): the change from baseline, read one way on the cards, the graph and the suggestion. The
    baseline is the BL row, not the first row holding a number (with BL blank, period 1 was shown and used as the
    baseline); the most recent period is the last row after it with a target value. With no baseline value, or a
@@ -1028,8 +1049,13 @@ function renderAct(){
     <td><select data-a="${i}" data-f="f"><option value=""></option>${opt(['TD-1 (the plan)','GB-1 (goals)','ST-1 (training)','TI-1 (integrity)','CF-1 (contextual fit)','RM-1 (relapse)','FS-1 (assessment)','CR-1 (crisis)','CT-1 (caregivers)','None \u2014 this form'],r.f)}</select></td>
     <td><input data-a="${i}" data-f="w" value="${esc(r.w)}"></td>
     <td><input data-a="${i}" data-f="b" value="${esc(r.b)}"></td>
-    <td><select data-a="${i}" data-f="s"><option value=""></option>${opt(['Open','Done','Not doing'],r.s)}</select></td></tr>`).join('');
+    <td><select data-a="${i}" data-f="s"><option value=""></option>${opt(['Open','Done','Not doing'],r.s)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this action" aria-label="Delete action ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): an action can be deleted anywhere in the list */
+function delActAt(i){const r=S.act[i];if(!r)return;
+  if(filledRow(r)&&!confirm('Delete action '+(i+1)+'? Its entries will be deleted.'))return;
+  S.act.splice(i,1);ensure();renderAct();}
+$('#actTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delActAt(+b.dataset.di);});
 function renderFade(){
   $('#fadeTbl tbody').innerHTML=S.fade.map((r,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
@@ -1037,8 +1063,13 @@ function renderFade(){
     <td><textarea data-d="${i}" data-f="c" rows="1" class="pr-line">${esc(r.c)}</textarea></td>
     <td><input data-d="${i}" data-f="d" value="${esc(r.d)}"></td>
     <td><select data-d="${i}" data-f="m"><option value=""></option>${opt(['Yes','No','In progress'],r.m)}</select></td>
-    <td><textarea data-d="${i}" data-f="w" rows="1" class="pr-line">${esc(r.w)}</textarea></td></tr>`).join('');
+    <td><textarea data-d="${i}" data-f="w" rows="1" class="pr-line">${esc(r.w)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a fading step can be deleted anywhere in the sequence; the steps after it move up one */
+function delFadeAt(i){const r=S.fade[i];if(!r)return;
+  if(filledRow(r)&&!confirm('Delete step '+(i+1)+'? Its entries will be deleted, and the steps after it move up one.'))return;
+  S.fade.splice(i,1);ensure();renderFade();}
+$('#fadeTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delFadeAt(+b.dataset.di);});
 function renderReady(){
   $('#exitWrap').innerHTML=READY.map((t,i)=>
     `<label class="chk"><input type="checkbox" data-k="${i}"${S.ready[i]?' checked':''}>${t}</label>`).join('');
@@ -2417,7 +2448,7 @@ renderAll();
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -2529,6 +2560,74 @@ renderAll();
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 
