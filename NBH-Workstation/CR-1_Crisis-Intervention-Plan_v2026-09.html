@@ -914,6 +914,8 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>Readiness check and cards</th><td>With the debriefed restraint chosen on the Debriefing sheet, each readiness item the notice log records is read from it; an item it does not record keeps its tick, so a record made before the log existed reads as it always did. The cards count from the times entered where they decide a deadline, and from the log&rsquo;s Report filed column otherwise.</td></tr>
     </table>
     <p class="hint">The clinical content of this form &mdash; the intervention sequence, the precursor, the debriefing questions, and which health professionals the team must include &mdash; is a working convention. The statutory requirements quoted above are the law as retrieved; everything else is practice.</p>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p class="hint">Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, a debriefing, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.</p>
   </section>
 </main>
 
@@ -1263,7 +1265,7 @@ async function loadSim(){
   /* the notice log of the debriefed restraint answers readiness items 1 to 5; the two it does not record are ticked */
   [5,6].forEach(i=>{S.notify[i]=true;});
   renderAll();setView('plan');
-  alert('Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, a debriefing, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.');
+  nbhUI.toast('Simulation loaded: a simulated crisis intervention plan with debriefing and restraint log.', {kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));

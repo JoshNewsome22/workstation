@@ -1126,6 +1126,9 @@ body.view-obs #obRec{display:block}
       and X undo.</li>
   </ul>
 
+  <h3 class="sub">About the simulation</h3>
+  <p class="method"><b>Load simulation</b> (toolbar) fills the record with simulated observations; none of it is a real student record. Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced. The summary and the FS-1 statement are both filled in &mdash; use the view buttons to step through them.</p>
+
   <div class="cite">
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em>
     (3rd ed.). Pearson. &bull; Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability
@@ -2111,7 +2114,7 @@ async function loadSim(){
   if(el){ el.value = draft(); state.meta.carry = el.value; }
   document.body.className = "view-summary";
   $$("#viewSeg button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.view === "summary")));
-  alert("Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced. The summary and the FS-1 statement are both filled in — use the view buttons to step through them.");
+  nbhUI.toast('Simulation loaded: ' + 'three simulated observations in one classroom, across independent work and a small group.', {kind:'ok'});
 }
 $("#simBtn").addEventListener("click", loadSim);
 
