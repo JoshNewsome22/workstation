@@ -50,6 +50,30 @@ button.icon{padding:5px 8px;min-width:32px}
 /* ---- the packet bar: the student once, and what you do with the case ---- */
 .bar{background:var(--slate);color:#fff;padding:8px 16px;display:flex;flex-direction:column;gap:7px;flex:0 0 auto}
 .bar .grp{display:flex;gap:8px 10px;align-items:center;flex-wrap:wrap}
+/* v21.34: the folded packet bar */
+.bar .sum{font-size:13px;color:#cfe0dd;line-height:1.4}
+.bar .sum b{color:#fff;font-size:14px;font-family:var(--serif);font-weight:600}
+.bar .sum span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bar .sum #sumCase{color:#9fb6bd;flex:1 1 200px}
+body.bar-folded .bar .det,body.bar-folded .bar .facts{display:none}
+body.bar-folded #barSum{display:flex}
+/* v21.34: toasts and the question dialog */
+#wsToasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9000;pointer-events:none;max-width:min(560px,calc(100% - 32px))}
+.ws-toast{pointer-events:auto;background:#16242e;color:#f1f6f5;font-size:13.5px;line-height:1.45;padding:10px 16px;border-radius:8px;box-shadow:0 12px 30px -12px rgba(22,36,46,.6);display:flex;gap:12px;align-items:flex-start}
+.ws-toast.warn{background:#7a2e1a}.ws-toast.ok{background:#1f5b3f}
+.ws-toast button{margin-left:auto;border:0;background:transparent;color:#cfe0dd;font:inherit;cursor:pointer;padding:0 2px;line-height:1;min-height:0}
+#cfDlg{max-width:520px}
+#cfDlg .db{white-space:pre-line}
+#cfDlg .df button.danger{background:#a8321e;color:#fff;border-color:#a8321e;font-weight:600}
+/* v21.34: touch */
+@media (pointer:coarse){
+  button.sm{min-height:40px;padding:8px 12px}
+  .bar button,.crumb button,#paneBar .pane button{min-height:40px}
+  .crumb .acts button{min-width:40px}
+  .rail .item{min-height:46px}
+  .rail .item input[type=checkbox]{width:22px;height:22px}
+  #cfDlg .df button,#dlg .df button{min-height:44px}
+}
 .bar .facts{font-size:12px;color:#cfe0dd;line-height:1.4}.bar .facts .lbl{font-weight:600;color:#fff;letter-spacing:.02em}.bar .facts b{color:#fff;font-weight:600}.bar .facts i{font-style:normal;color:#9fb6bd}
 .bar .fld{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .bar .pair{display:inline-flex;align-items:center;margin-right:4px}
@@ -361,6 +385,12 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
 </header>
 
 <div class="bar" id="bar">
+  <!-- v21.34: once the student is loaded the details fold to this one line; Edit opens them again -->
+  <div class="grp sum" id="barSum" hidden>
+    <b id="sumName"></b><span id="sumDet"></span><span id="sumCase"></span>
+    <div class="sp"></div>
+    <button id="barEdit" class="sm" title="Show the packet details and the case line">Edit details</button>
+  </div>
   <!-- The student's details on one row, each label kept with its own box when
        the window is narrow; what you do with the packet and the case below. -->
   <div class="grp det" role="group" aria-label="Packet details">
@@ -370,6 +400,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="fld"><label for="pSite">School</label><input id="pSite"></span>
     <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
+    <button id="barFold" class="sm" hidden title="Fold the details to one line">Done</button>
   </div>
   <!-- v21.31 the case: what the shell has read from Forms TB-1, FS-1, GB-1 and PA-1, carried to every open form -->
   <div class="grp facts" id="factsRow" hidden>
@@ -459,6 +490,9 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     &nbsp;&middot;&nbsp; <kbd>&#8984;K</kbd> opens this from anywhere</div>
 </div>
 
+<dialog id="cfDlg" aria-labelledby="cfTitle"><div class="dh" id="cfTitle">&nbsp;</div><div class="db" id="cfBody"></div>
+  <div class="df" id="cfFoot"></div></dialog>
+<div id="wsToasts" role="status" aria-live="polite"></div>
 <dialog id="dlg" aria-labelledby="dlgTitle"><div class="dh" id="dlgTitle">&nbsp;</div><div class="db" id="dlgBody"></div>
   <div class="df"><button id="dlgClose">Close</button></div></dialog>
 
@@ -739,9 +773,11 @@ function openForm(id,keepRail){
   setTimeout(()=>pushPlanTo(id),1800);
   renderRail();
 }
-$('#closeForm').addEventListener('click',()=>{
+$('#closeForm').addEventListener('click',async()=>{
   if(!state.cur)return;
-  if(!confirm('Close '+state.cur+'? Anything not saved to a file in that form will be lost.'))return;
+  const closing=state.cur;
+  if(!(await wsUI.confirm('Close Form '+closing+'?\nAnything not saved to a file in that form will be lost.',{ok:'Close',danger:true})))return;
+  if(state.cur!==closing)return;
   const fr=state.frames[state.cur];
   if(fr){fr.remove();delete state.frames[state.cur];}
   delete state.status[state.cur];
@@ -761,6 +797,51 @@ $('#popOut').addEventListener('click',()=>{
   if(EMBED){const h=EMBED.form(rec[2]);if(h)window.open(URL.createObjectURL(new Blob([h],{type:'text/html'})),'_blank');return;}
   window.open(rec[2],'_blank');
 });
+
+/* ================= notices, questions, the folded bar (v21.34) =================
+   The browser's alert() and confirm() were the shell's only voice: unstyled, "this site says", and a stop to
+   the whole screen on an iPad. wsUI.toast shows a short message at the foot of the window without
+   stopping anything; wsUI.alert sends a short message there and a long one to a styled notice;
+   wsUI.confirm asks a styled question and resolves true or false. window.alert is routed through
+   wsUI.alert; the four confirms are awaited. Once the student is loaded the packet details fold to one
+   line (name, ID, grade, school, and what the case holds), with Edit details to open them again. */
+const wsUI=(()=>{
+  const U={};
+  U.toast=(text,opt)=>{opt=opt||{};const h=$('#wsToasts'),t=document.createElement('div');t.className='ws-toast'+(opt.kind?' '+opt.kind:'');
+    const sp=document.createElement('span');sp.textContent=String(text);t.appendChild(sp);
+    const x=document.createElement('button');x.type='button';x.setAttribute('aria-label','Dismiss');x.innerHTML='&times;';t.appendChild(x);
+    const gone=()=>{if(t.parentNode)t.parentNode.removeChild(t);};x.addEventListener('click',gone);h.appendChild(t);
+    while(h.children.length>3)h.removeChild(h.firstChild);setTimeout(gone,opt.ms||Math.min(12000,3500+String(text).length*35));return t;};
+  const split=text=>{const s=String(text==null?'':text).trim();const i=s.indexOf('\n');let head=i>=0?s.slice(0,i).trim():s,body=i>=0?s.slice(i+1).trim():'';
+    if(i<0&&head.length>120){const j=head.indexOf('. ');if(j>20&&j<110){body=head.slice(j+2);head=head.slice(0,j+1);}}return {head,body};};
+  const ask=(text,opt,question)=>new Promise(res=>{const d=$('#cfDlg'),p=split(text);$('#cfTitle').textContent=p.head;$('#cfBody').textContent=p.body;$('#cfBody').style.display=p.body?'':'none';
+    const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{d.close();}catch(e){}res(v);};
+    if(question){const c=document.createElement('button');c.type='button';c.textContent=opt.cancel||'Cancel';c.addEventListener('click',()=>done(false));f.appendChild(c);}
+    const ok=document.createElement('button');ok.type='button';ok.className=opt.danger?'danger':'primary';ok.textContent=opt.ok||'OK';ok.addEventListener('click',()=>done(true));f.appendChild(ok);
+    d.oncancel=ev=>{ev.preventDefault();done(false);};d.showModal();ok.focus();});
+  U.alert=text=>{const s=String(text==null?'':text);if(s.length<=160&&s.indexOf('\n')<0){U.toast(s);return Promise.resolve();}return ask(s,{ok:'OK'},false);};
+  U.confirm=(text,opt)=>ask(text,opt||{},true);
+  return U;})();
+window.alert=m=>{wsUI.alert(m);};
+function paintSum(){
+  const p=packet(),row=$('#barSum');if(!row)return;
+  const has=!!p.client.trim();
+  $('#barFold').hidden=!has;
+  if(!has){document.body.classList.remove('bar-folded');row.hidden=true;return;}
+  $('#sumName').textContent=p.client;
+  $('#sumDet').textContent=[p.sid,p.grade?'Grade '+p.grade:'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
+  const f=state.facts,bits=[];
+  if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
+    const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');}
+  $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
+  row.hidden=!document.body.classList.contains('bar-folded');
+}
+function foldBar(on){document.body.classList.toggle('bar-folded',!!on&&!!packet().client.trim());paintSum();if(!on){const e=$('#pClient');if(e)try{e.focus({preventScroll:true});}catch(err){}}}
+$('#barEdit').addEventListener('click',()=>foldBar(false));
+$('#barFold').addEventListener('click',()=>foldBar(true));
+/* folded on its own the first time a name arrives from a packet, a case or the forms; typing keeps it open */
+state.barAuto=false;
+function barAutoFold(){if(state.barAuto)return;if(!packet().client.trim())return;state.barAuto=true;foldBar(true);}
 
 /* ================= save protection (v21.33) =================
    Autosave is a safety net in this browser; the record is the case file. The crumb's Save case button
@@ -919,6 +1000,7 @@ $('#packetFile').addEventListener('change',e=>{
     $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
     Object.values(state.frames).forEach(pushPacketTo);
     if(d.facts)setFacts(d.facts,true);   /* v21.31 the case travels in the packet file */
+    barAutoFold();
   }catch(err){alert('That file could not be read as a student packet.');}};
   r.readAsText(f);e.target.value='';
 });
@@ -945,6 +1027,7 @@ function who(){
     if(seen.size===1){const v=seen.values().next().value;found=v.name;src=v.ids[0];}
   }
   nm.textContent=p.client||found||'No student loaded';
+  if(typeof paintSum==='function')paintSum();
   nm.classList.toggle('who-found',!p.client&&!!found);
   const bt=$('#barToggle .lbl'); if(bt){bt.textContent=p.client||found||'Packet';$('#barToggle').classList.toggle('who-found',!p.client&&!!found);}
   /* the form that holds the name usually holds the ID, grade and school too;
@@ -967,9 +1050,10 @@ $('#whoTake').addEventListener('click',()=>{
   [['sid','#pSid'],['grade','#pGrade'],['site','#pSite'],['bcba','#pBcba']].forEach(([k,sel])=>{
     if(det[k]&&!$(sel).value.trim())$(sel).value=det[k];
   });
-  who(); checkIdentity();
+  who(); checkIdentity(); barAutoFold();
 });
 ['pClient','pSid','pGrade','pSite','pBcba'].forEach(id=>$('#'+id).addEventListener('input',who));
+$('#pClient').addEventListener('change',()=>{if(packet().client.trim()&&!state.barAuto){state.barAuto=true;}});   /* typed by hand: stays open until Done */
 
 /* ================= relay: a form reads another open form (v21.22 relay) =================
    Protocol, for any form that needs another open form's data (Form PR-1 reads Form DD-1 this way; Form ST-1 is to
@@ -1067,6 +1151,7 @@ function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
 function pushFactsToAll(){Object.values(state.frames).forEach(pushFactsTo);}
 function paintFacts(){
+  if(typeof paintSum==='function')paintSum();
   const row=$('#factsRow'),t=$('#factsTxt');if(!row)return;
   const f=state.facts;row.hidden=!f;if(!f)return;
   const s=f.src||{},bits=[];
@@ -1362,9 +1447,8 @@ $('#masterPrint').addEventListener('click',async()=>{
   const notOpen=chosen.filter(([id])=>!state.frames[id]);
   const names=notOpen.map(f=>f[0]).join(', ');
   if(notOpen.length&&state.blankOk!==names){
-    if(!confirm(notOpen.length+' ticked form'+(notOpen.length===1?' is':'s are')+
-      ' not open yet ('+names+'), so '+(notOpen.length===1?'it':'they')+
-      ' would print blank.\n\nOpen them first for their data to appear, or continue to include blanks?'))return;
+    if(!(await wsUI.confirm(notOpen.length+' ticked form'+(notOpen.length===1?' is':'s are')+' not open yet: print '+(notOpen.length===1?'it':'them')+' blank?\n'+
+      names+'. Open them first for their data to appear, or continue to include blank pages.',{ok:'Include blanks'})))return;
   }
   /* Open the print window now, while the click still counts as the user's own.
      Opened after the forms were collected - several seconds later with a full
@@ -1828,6 +1912,7 @@ $('#help').addEventListener('click',()=>{
    (EMBED?'<div class="warnbox" style="background:#eaf2f0;border-color:#a0c9c3"><b>This is the one-file edition.</b> All 42 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it; in Chrome and Edge each later save goes back into that same file. Keep those files where the student\u2019s records live. This file itself stays empty and is the one to open for a new student.</div>':'')+
    '<p><b>The case file.</b> <b>Save case</b> writes every form you have open into one file, together with the student details. <b>Open case</b> loads it back, opening each form and filling it. It is one file to keep or hand over instead of a folder of separate ones. Each form\u2019s own <b>Save data</b> button is untouched and still works exactly as before.</p>'+
    '<p><b>Two students at once.</b> Every open form reports the student name it is holding. If one of them differs from the name on the bar \u2014 a form left over from the last case, most often \u2014 an amber strip names it before anything reaches paper.</p>'+
+   '<p><b>The bar.</b> Once a student is loaded the packet details fold to one line; <b>Edit details</b> opens them, <b>Done</b> folds them again. Messages appear briefly at the foot of the window instead of in browser pop-ups, and a question that loses work (closing a form, printing a blank page) is asked in the workstation\u2019s own dialog.</p>'+
    '<p><b>Saving.</b> <b>Save case</b> above the form carries a dot while the case holds work not yet written to a file, and pulses after twenty minutes of it. Autosave is a safety net in this browser only; on an iPad the browser can drop a tab or clear its storage, so the case file is the record. A form opened on its own, outside the workstation, now asks before its tab closes with unsaved entries.</p>'+
    '<p><b>Side by side.</b> With two or more forms open, <b>Side by side</b> above the form shows two or three of them as columns, each working on its own: for an observation, OB-1, MT-1 and ABC-1 together put the narrative, the interval sample and the ABC record on one screen. A form opened from the list takes a column; the small bar above the columns names each one, prints it, or takes it out of the view.</p>'+
    '<p><b>The screen.</b> <b>Fullscreen</b>, above an open form, puts away the heading, the packet bar and the list so only the form is showing; <kbd>Esc</kbd> or the same button brings them back, and <b>Fill the screen</b> beside it also takes the browser\u2019s own bars away where the browser allows that. On a wide window the list can be hidden from its own corner and brought back with <b>Forms</b>; the choice is remembered. On a phone the packet bar folds behind <b>Packet</b> in the heading.</p>'+
@@ -2102,6 +2187,7 @@ async function loadCase(d,how){
     $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
   }
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
+  barAutoFold();
   const ids=Object.keys(d.forms),notes=[];
   for(const id of ids){
     if(!ALL.find(x=>x[0]===id)){notes.push(id+': not in this workstation');continue;}
@@ -2225,7 +2311,7 @@ $('#saveCase').addEventListener('click',async()=>{
   const open=Object.keys(state.frames);
   if(!open.length){alert('No form is open yet. A case file holds the forms you have open.');return;}
   const p=packet();
-  if(!p.client){if(!confirm('No student name is entered. Save the case file anyway?'))return;}
+  if(!p.client){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return;}
   /* the one-file edition asks where to write before anything else: a browser
      shows the picker only while the click is still fresh. Once a file has been
      chosen, every later save in this session goes back into it without asking. */
@@ -2276,8 +2362,8 @@ async function openCaseText(text,handle){
     }
     const ids=Object.keys(d.forms);
     if(Object.keys(state.frames).length&&
-       !confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+
-                ' will be loaded and filled, replacing what is open now.'))return;
+       !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be loaded and filled.\n'+
+                'What is open now is replaced.',{ok:'Open case'})))return;
     const btn=$('#openCase');btn.textContent='Opening\u2026';btn.disabled=true;
     state.restoring=true;
     const notes=await loadCase(d,'file');
