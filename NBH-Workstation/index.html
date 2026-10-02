@@ -884,6 +884,7 @@ function paintDue(){
   const list=state.due.slice(0,4);
   const h=list.length?'<b>Due:</b> '+list.map(x=>esc(x.id)+' '+esc(x.what)+' '+dueText(x.d)).join(' \u00b7 ')+(state.due.length>4?' \u00b7 and '+(state.due.length-4)+' more':''):'';
   const a=$('#sumDue'),b=$('#factsDue');if(a)a.innerHTML=h;if(b)b.innerHTML=h;
+  const row=$('#factsRow');if(row){row.hidden=!state.facts&&!list.length;$('#factsSend').hidden=!state.facts;}
 }
 function noteDue(){clearTimeout(dueTimer);dueTimer=setTimeout(gatherDue,1500);}
 
@@ -1197,7 +1198,8 @@ function pushFactsToAll(){Object.values(state.frames).forEach(pushFactsTo);}
 function paintFacts(){
   if(typeof paintSum==='function')paintSum();
   const row=$('#factsRow'),t=$('#factsTxt');if(!row)return;
-  const f=state.facts;row.hidden=!f;if(!f)return;
+  const f=state.facts,due=(state.due||[]).length>0;row.hidden=!f&&!due;$('#factsSend').hidden=!f;   /* v21.35 the row also shows for what is due alone */
+  if(!f){t.innerHTML='';return;}
   const s=f.src||{},bits=[];
   if((f.behaviors||[]).length)bits.push('<b>Target behaviors:</b> '+esc(f.behaviors.map(b=>b.label).join(', '))+' <i>('+esc(s.behaviors||'')+')</i>');
   if(f.fn&&(f.fn.label||f.fn.key))bits.push('<b>Function:</b> '+esc(f.fn.label||f.fn.key)+' <i>('+esc(s.fn||'')+')</i>');

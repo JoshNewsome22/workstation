@@ -672,7 +672,7 @@ td input,td select{max-width:100%}
       <tr><th>Applied evidence is limited</th><td>Despite decades of basic research, contrast has remained largely unstudied by applied researchers (Boyle, Hoffmann, &amp; Lambert, 2018). Board Certified Behavior Analysts surveyed by Boyle, Uribe-Zarain, and Powell (2023) reported that contrast led to conversations with stakeholders and affected buy-in and rapport; the authors noted that researchers had not identified common methods of mitigating it in applied settings.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="hint">Simulated case loaded: 6 baseline and 12 post-change sessions in both components, with the direction test and the course across sessions computed.</p>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded: 6 baseline and 12 post-change sessions in both components, with the direction test and the course across sessions computed.</p>
     <p class="hint" style="margin-top:10px">Sources: Reynolds (1961a, <i>Behavioral contrast</i>; 1961b, <i>Contrast, generalization, and the process of discrimination</i>); Reynolds &amp; Catania (1961); Catania (1961); Nevin &amp; Shettleworth (1966); Bloomfield (1966, 1967); Terrace (1966); Williams (1983, 2002) for the later reviews; Lattal &amp; Miles (2024) for the relation to resurgence; Boyle, Hoffmann, &amp; Lambert (2018) and Boyle, Uribe-Zarain, &amp; Powell (2023) for contrast in applied settings, the second for practitioner reports. The direction test on this form is described above. The 10% band used to call a change negligible, the thirds of the changed phase used for the course across sessions and the 60% used to call it declining are working conventions, not findings; the minimum of three sessions per phase follows Kratochwill et al. (2010).</p>
     <p class="hint" id="bcRefs"><b>Reference list.</b>
     Bloomfield, T. M. (1966). Two types of behavioral contrast in discrimination learning. <em>Journal of the Experimental Analysis of Behavior, 9</em>(2), 155&ndash;161. &bull;
@@ -1643,8 +1643,9 @@ renderAll();
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

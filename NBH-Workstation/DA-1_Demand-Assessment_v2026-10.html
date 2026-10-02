@@ -1737,8 +1737,9 @@ window.__nbhFactsPick=function(sel){
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

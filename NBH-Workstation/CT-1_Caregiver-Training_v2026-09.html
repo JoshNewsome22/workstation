@@ -931,7 +931,7 @@ td input,td select{max-width:100%}
       <tr><th>Competency decision</th><td>Criterion met on the required consecutive rounds and still met in the latest rounds it counts, <i>and</i> every step marked critical scored in those rounds and correct every time, <i>and</i> the relapse response rehearsed under a hard condition, <i>and</i> an in-home probe recorded with the steps correct on it at or above the criterion percentage. Parsons, Rollyson &amp; Reid (2012) suggest that where the mastery criterion is a lower percentage than 100%, certain critical steps be identified that must be performed at 100%; holding the in-home probe to the rehearsal percentage is this form&rsquo;s convention, as it is on Form ST-1. When the critical steps correct on the probe are recorded (the rehearsal runner fills them from a round set up as Home probe), every critical step scored on the probe must have been correct, as in the decision rounds. That, too, is this form&rsquo;s convention, as on Form ST-1.</td></tr>
     </table>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="hint">Simulated caregiver training loaded: the family&rsquo;s own priorities, the home fit check, four rehearsal rounds, the relapse response, and the competency decision.</p>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated caregiver training loaded: the family&rsquo;s own priorities, the home fit check, four rehearsal rounds, the relapse response, and the competency decision.</p>
     <p class="hint" style="margin-top:10px">Sources: Parsons, Rollyson &amp; Reid (2012) and Ward-Horner &amp; Sturmey (2012) on the behavior skills training package; Himle et al. (2004) and Miltenberger et al. (2005) on in-situ training and the gap between rehearsal and the natural setting (both with children learning safety skills); Briggs et al. (2018) on the prevalence and course of resurgence during schedule thinning; Kimball, Greer, Fuhrman &amp; Lambert (2023) on the prevalence of resurgence across studies and on how few relapse-mitigation procedures have been evaluated for caregiver behavior; Albin et al. (1996) on contextual fit, adapted here to the home. The criterion values and the fit questions are a working convention, not findings, apart from holding critical steps at 100% (Parsons, Rollyson &amp; Reid, 2012).</p>
     <p class="hint" id="ctRefs"><b>Reference list.</b>
     Albin, R. W., Lucyshyn, J. M., Horner, R. H., &amp; Flannery, K. B. (1996). Contextual fit for behavioral support plans: A model for &ldquo;goodness of fit.&rdquo; In L. K. Koegel, R. L. Koegel, &amp; G. Dunlap (Eds.), <em>Positive behavioral support: Including people with difficult behavior in the community</em> (pp. 81&ndash;98). Paul H. Brookes. &bull;
@@ -2471,8 +2471,9 @@ render();
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

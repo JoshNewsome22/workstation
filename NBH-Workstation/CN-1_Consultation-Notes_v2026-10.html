@@ -973,7 +973,7 @@ window.__nbhFactsPick=function(sel){
 };
 
 /* v21.35 what is due: the open next steps of every note, by their dates, for the workstation's due line */
-window.__nbhDue=function(){const out=[];(S.notes||[]).forEach(n=>(n.next||[]).forEach(x=>{if(x.done||!x.when||!x.what)return;out.push({what:(x.what+(x.who?' ('+x.who+')':'')).slice(0,60),date:x.when});}));return out;};
+window.__nbhDue=function(){const out=[];(S.notes||[]).forEach(n=>(n.next||[]).forEach(x=>{if(x.done||!x.when||!x.what)return;out.push({what:(x.what+(x.who?' ('+x.who+')':'')).slice(0,60).trim(),date:x.when});}));return out;};
 </script>
 
 <script>
@@ -1653,8 +1653,9 @@ window.__nbhDue=function(){const out=[];(S.notes||[]).forEach(n=>(n.next||[]).fo
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

@@ -1031,7 +1031,7 @@ td input,td select{max-width:100%}
   </ul>
 
   <h3>About the simulation</h3>
-  <p>Simulated case loaded across Tabs 1&ndash;8 &mdash; preassessment, discounting probes, fading ladder, session sheet, progress graph, integrity and IOA, and generalization.</p>
+  <p>Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded across Tabs 1&ndash;8 &mdash; preassessment, discounting probes, fading ladder, session sheet, progress graph, integrity and IOA, and generalization.</p>
 
   <h3>Reference List</h3>
   <ol class="refs" id="dt1-refs">
@@ -2539,8 +2539,9 @@ for(let i=0;i<10;i++)addRow('tbIOA');
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

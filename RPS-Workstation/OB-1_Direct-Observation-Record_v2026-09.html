@@ -1126,6 +1126,9 @@ body.view-obs #obRec{display:block}
       and X undo.</li>
   </ul>
 
+  <h3 class="sub">About the simulation</h3>
+  <p class="method"><b>Load simulation</b> (toolbar) fills the record with simulated observations; none of it is a real student record. Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced. The summary and the FS-1 statement are both filled in &mdash; use the view buttons to step through them.</p>
+
   <div class="cite">
     Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em>
     (3rd ed.). Pearson. &bull; Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability
@@ -2111,7 +2114,7 @@ async function loadSim(){
   if(el){ el.value = draft(); state.meta.carry = el.value; }
   document.body.className = "view-summary";
   $$("#viewSeg button").forEach(x => x.setAttribute("aria-pressed", String(x.dataset.view === "summary")));
-  alert("Three simulated observations loaded, all in one classroom, across independent work and a small group, one of them unannounced. The summary and the FS-1 statement are both filled in — use the view buttons to step through them.");
+  nbhUI.toast('Simulation loaded: ' + 'three simulated observations in one classroom, across independent work and a small group.', {kind:'ok'});
 }
 $("#simBtn").addEventListener("click", loadSim);
 
@@ -3413,7 +3416,31 @@ render();
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;

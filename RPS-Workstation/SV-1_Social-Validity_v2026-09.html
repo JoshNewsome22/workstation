@@ -802,6 +802,7 @@ td input,td select{max-width:100%}
       <li>Do not conclude from a low student rating that the student &ldquo;cannot judge&rdquo;; Wolf rejects that explanation as &ldquo;unacceptable&rdquo; (p. 213) and asks instead for better ways of teaching people to observe and report.</li>
       <li>Do not call a plan socially valid on one post administration; consumer feedback was designed as ongoing quality control (p. 211).</li>
     </ol></div>
+    <p class="hint"><b>About the simulation.</b> Load simulation fills every sheet with a simulated administration that describes no real student, family or staff: a second post round on an escape-maintained desk-tipping plan, rated by the teacher, the paraeducator, the mother and the student, with the pre round from target selection and plan sign-off. The data improved 38% on PR-1; the staff and the data agree, the mother is less sure and reports a new problem with homework, and the administrator has not yet rated. Use Clear all before entering a case.</p>
     <p class="hint" id="svRefs"><b>Reference list.</b>
     Wolf, M. M. (1978). Social validity: The case for subjective measurement or how applied behavior analysis is finding its heart. <em>Journal of Applied Behavior Analysis, 11</em>(2), 203&ndash;214. https://doi.org/10.1901/jaba.1978.11-203 &bull;
     Cited as in Wolf (1978), and not consulted directly for this form: Berleman, Seaberg &amp; Steinburn (1972), satisfaction without measured effect (Wolf, p. 212); Braukmann, Fixsen, Kirigin, Phillips, Phillips &amp; Wolf (1975), consumer feedback as quality control (p. 211); Foxx &amp; Azrin (1972) and Porterfield, Herbert-Jackson &amp; Risley (1976), <em>Journal of Applied Behavior Analysis, 9</em>, 55&ndash;64, acceptability of procedures to caregivers (p. 210); Kent &amp; O&rsquo;Leary (1976) and Brigham, Graubard &amp; Stans (1972), subjective ratings against objective change (p. 210); Levi &amp; Anderson (1975), each individual as the best judge of his own situation (p. 213); Minkin et al. (1976), <em>Journal of Applied Behavior Analysis, 9</em>, 127&ndash;140, the four-step validation method (pp. 209&ndash;210); Willner et al. (1977), <em>Journal of Applied Behavior Analysis, 10</em>, 219&ndash;230, youth-rated teaching-parent behaviors (pp. 208&ndash;209).
@@ -1179,7 +1180,7 @@ async function loadSim(){
   say('post',3,{Go:'To finish my work and go to recess.',P7c:'Nothing now.',E8c:'Better: I do not get sent out. I get my break. Worse: homework. I do not want to do it at home.'});
   S.round='post';
   renderAll();setView('sum');
-  alert('Simulated administration loaded: a second post round on an escape-maintained desk-tipping plan, rated by the teacher, the paraeducator, the mother and the student, with the pre round from target selection and plan sign-off. The data improved 38% on PR-1; the staff and the data agree, the mother is less sure and reports a new problem with homework, and the administrator has not yet rated.');
+  nbhUI.toast('Simulation loaded: a simulated administration, pre and post rounds on a desk-tipping plan, four respondents.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -1850,7 +1851,31 @@ renderAll();
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;

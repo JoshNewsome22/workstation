@@ -812,7 +812,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:16px">What This Form Does Not Claim</h2>
     <p class="hint">That any domain score is clinically significant; that the PDC&ndash;HS is validated for schools or teachers; that the indicated intervention is better than every alternative; that running it changes student outcomes (no study measured the student); that the supplementary PDC items are part of the PDC&ndash;HS; or that supervisor self-administration or staff self-report has been validated. Those are open questions in the sources, and the form is written so that it cannot be read as answering them.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="hint">Simulated administration loaded: the &ldquo;trained three months ago&rdquo; case from the PDC-HS training materials, moved into a classroom. 22 items, 17 answered No, two observations, a staff interview, and a consecutive plan starting with the materials.</p>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated administration loaded: the &ldquo;trained three months ago&rdquo; case from the PDC-HS training materials, moved into a classroom. 22 items, 17 answered No, two observations, a staff interview, and a consecutive plan starting with the materials.</p>
     <p class="hint" id="pdRefs"><b>Reference list.</b>
     ABA Technologies, Inc. (2020). <em>3.2: Performance Diagnostic Checklist (PDC)</em> [OBM Specialist Certificate course handout]. ABA Technologies. &bull;
     Austin, J. (2000). Performance analysis and performance diagnostics. In J. Austin &amp; J. E. Carr (Eds.), <em>Handbook of applied behavior analysis</em> (pp. 321&ndash;349). Context Press. &bull;
@@ -1776,8 +1776,9 @@ renderAll();
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };
