@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Pack a workstation folder into one file: index.html with the 42 forms and the two PDF-tool
-scripts inside it, gzip-compressed and base64-encoded in text blocks at the top of the body.
+"""Pack a workstation folder into one file: index.html with the 42 forms, the two PDF-tool
+scripts and the pictogram library inside it, gzip-compressed and base64-encoded in text blocks at the top of the body.
 
 The shared logo is kept once (every form carries it several times), the forms as JSON with the
 logo cut out, the PDF scripts as JSON, and a copy of index.html itself - which Save case uses to
@@ -24,12 +24,14 @@ for fn in files:
         sys.exit(f'{fn} does not carry the logo index.html carries')
     forms[fn] = s.replace(logo, '@@NBH-LOGO@@')
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
+# v21.31: the pictogram library (Forms SM-1 and VS-1 load it by <script src>) travels once, as its own block
+pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
 def pack(text):
     return base64.b64encode(gzip.compress(text.encode('utf-8'), compresslevel=9, mtime=0)).decode('ascii')
 def block(bid, text):
     return f'<script type="text/plain" id="{bid}">{text}</script>\n'
 blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', pack(json.dumps(forms, ensure_ascii=False))) +
-          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-shell', pack(idx)))
+          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)

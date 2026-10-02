@@ -1134,6 +1134,20 @@ $('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on e
 window.addEventListener('beforeprint',()=>{buildQC();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 restore({counts:{}});
+
+/* v21.31 the case: hooks. The target behaviors defined on sheet 4 (or, before sheet 4 is written, the
+   candidates marked Target on sheet 1) are what the other forms of this case receive. */
+window.__nbhFactsOut=function(){
+  const key=s=>window.nbhCase?window.nbhCase.fnKeyOf(s):'';
+  const out=[];const n=+(($('#nTgt')||{}).value)||0;
+  for(let t=0;t<n;t++){const g=k=>val(`tgt[${t}].${k}`);const lab=g('lab');if(!lab)continue;
+    const isRep=/replacement|alternative/i.test(g('type')),rep=isRep||/^\s*([\u2014\u2013-]|see\b|this is\b|n\/a\b)/i.test(g('rep'))?'':g('rep');
+    out.push({label:lab,def:g('def'),ex:g('ex'),nex:g('nex'),type:g('type'),isRep,fn:g('fn'),fnKey:key(g('fn')),dim:g('dim'),unit:g('unit'),
+      rep,ctx:g('ctx'),urg:g('urg'),tops:g('tops'),excl:g('excl'),src:'TB-1'});}
+  if(!out.length){for(let i=0;i<candN;i++){const g=k=>val(`cand[${i}].${k}`);const beh=g('beh');if(!beh||!/^Target/.test(g('dec')))continue;
+    out.push({label:beh,def:'',rate:g('rate'),type:g('dec').replace(/^Target\s*[–-]\s*/,''),urg:g('urg'),src:'TB-1 (candidate)'});}}
+  return out.length?{behaviors:out}:null;
+};
 })();
 </script>
 
@@ -1679,6 +1693,13 @@ restore({counts:{}});
                 : restoreData(d.snap));
       });
       else done(restoreData(d.snap));
+    } else if (d.nbh === 'facts?') {
+      /* v21.31 the case: this form's part of the case, when it holds one (see the nbh-case block) */
+      reply({ nbh:'facts-out', id: formId(), facts: (window.nbhCase && window.nbhCase.out()) || null });
+    } else if (d.nbh === 'facts' && d.facts) {
+      /* v21.31 the case: the facts read from the other forms, placed into this form's empty fields */
+      var frep = window.nbhCase ? window.nbhCase.apply(d.facts) : null;
+      reply({ nbh:'facts-applied', id: formId(), report: frep });
     } else if (d.nbh === 'packet' && d.packet) {
       var btn = Array.prototype.filter.call(document.querySelectorAll('button'),
         function(b){ return b.textContent.trim() === 'Open packet'; })[0];
@@ -1692,6 +1713,252 @@ restore({counts:{}});
       if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(false);  /* nbh-polish */
     }
   });
+})();
+</script>
+
+<style id="nbh-case-css">
+/* the case: the toolbar group and the picker (v21.31) */
+.nbh-case-grp[hidden]{display:none!important}
+.nbh-case-grp button.nbhc-on{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+#nbhCaseDlg{border:1px solid #c9d4d2;border-radius:6px;padding:0;max-width:680px;width:calc(100% - 32px);font-family:var(--sans,system-ui,sans-serif);font-size:13px;color:#16242e;background:#fff}
+#nbhCaseDlg::backdrop{background:rgba(22,36,46,.38)}
+.nbhc-h{padding:12px 16px 10px;border-bottom:1px solid #e3eae8;font-weight:600;font-size:14.5px}
+.nbhc-src{font-size:11.5px;color:#5b6770;font-weight:400;margin-top:3px;line-height:1.4}
+.nbhc-b{padding:6px 16px 4px;max-height:60vh;overflow:auto}
+.nbhc-s{margin:8px 0 12px}
+.nbhc-s h4{margin:0 0 2px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#5b6770;font-weight:600}
+.nbhc-s label{display:flex;gap:9px;align-items:flex-start;padding:5px 0;border-top:1px solid #eef2f1;cursor:pointer;line-height:1.4}
+.nbhc-s label:first-of-type{border-top:0}
+.nbhc-s label input{margin:3px 0 0;flex:0 0 auto}
+.nbhc-s label b{font-weight:600}
+.nbhc-s label small{display:block;color:#5b6770;font-size:11.5px;line-height:1.38;margin-top:1px}
+.nbhc-s p{margin:2px 0 0;color:#16242e;line-height:1.45}
+.nbhc-s p small{color:#5b6770}
+.nbhc-f{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;padding:10px 16px;border-top:1px solid #e3eae8;background:#f7f9f8}
+.nbhc-f button{font:inherit;font-size:12.5px;padding:6px 12px;border:1px solid #c9d4d2;border-radius:3px;background:#fff;color:#16242e;cursor:pointer}
+.nbhc-f button.primary{background:#182e43;color:#fff;border-color:#182e43;font-weight:600}
+.nbhc-f .nbhc-note{margin-right:auto;font-size:11.5px;color:#5b6770;line-height:1.35}
+.nbhc-done{font-size:12px;color:#1f6b4a;padding:0 16px 8px}
+.nbhc-empty{color:#5b6770;padding:12px 0}
+@media print{#nbhCaseDlg,.nbh-case-grp{display:none!important}}
+</style>
+<script id="nbh-case-flow">
+/* ===================== the case: facts that flow between forms (v21.31) =====================
+   The target behaviors (Form TB-1), the function (Form FS-1), the goals (Form GB-1) and the
+   reinforcer menu (Form PA-1) are typed once. The workstation shell reads them from whichever of
+   those forms is open and hands them to every other open form as one object, the case:
+     { behaviors:[{label, def, ex, nex, type, fn, fnKey, dim, unit, rep, ctx, ...}],
+       fn:{key, label, statements:[...], perBehavior:[...]},
+       goals:{red:[{beh, dir, meas, cur, ml, tgt, ctx, crit, meth, date, pair, text}],
+              acq:[{beh, cond, crit, n, unit, meth, date, pair, text}]},
+       menu:[{name, type, rank, tier, mean, methods, informant}],
+       src:{behaviors:'TB-1', fn:'FS-1', goals:'GB-1', menu:'PA-1'}, when }
+   A form that holds any of these defines window.__nbhFactsOut(), returning its part. A form
+   that uses them may define window.__nbhFactsIn(facts), which places them into the empty parts
+   of its own structure and returns {filled:n}, and window.__nbhFactsPick(selection), which
+   takes the items a person ticks under the "From the case" button on the toolbar. A form
+   without those hooks has its behavior and function fields (the ones the packet map already
+   names) filled when they are empty. Nothing already typed is overwritten unless it is picked.
+   Nothing is stored in the browser: the case travels in the packet and case files. */
+(function(){
+  var C = { facts: null, last: null };
+  function q(s){ return document.querySelector(s); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function fire(el){ ['input','change'].forEach(function(t){ try { el.dispatchEvent(new Event(t, {bubbles:true})); } catch(e){} }); }
+  function findField(key){
+    var M = window.__nbhPacketMap || {}, sels = M[key] || [];
+    for (var i = 0; i < sels.length; i++) { var el = document.querySelector(sels[i]); if (el && el.tagName !== 'BUTTON') return el; }
+    return null;
+  }
+  function empty(el){ return !el || !String(el.value || '').trim(); }
+  /* the option of a select that names a function: by key (escape, attention, tangible, automatic,
+     multiple, unknown) or by the label's words */
+  var FNWORDS = { escape:/escape|avoid/i, attention:/attention/i, tangible:/tangible|activity/i,
+                  automatic:/automatic|nonsocial|sensory/i, multiple:/more than one|multiple|multiply/i, unknown:/unknown|not assessed|undetermined/i };
+  C.fnKeyOf = function(s){
+    s = String(s || '').toLowerCase(); if (!s) return '';
+    for (var k in FNWORDS) if (FNWORDS[k].test(s)) return k;
+    return 'multiple';
+  };
+  C.optionFor = function(sel, want){
+    if (!sel || sel.tagName !== 'SELECT' || !want) return '';
+    var key = FNWORDS[want] ? want : C.fnKeyOf(want), re = FNWORDS[key], hit = null, w = String(want).toLowerCase();
+    Array.prototype.forEach.call(sel.options, function(o){
+      if (hit || !o.value && !o.textContent.trim()) return;
+      var t = (o.textContent + ' ' + o.value);
+      if (t.toLowerCase() === w || (re && re.test(t))) hit = o;
+    });
+    return hit ? hit.value : '';
+  };
+  function put(el, v, force){
+    if (!el || !v) return false;
+    if (!force && !empty(el)) return false;
+    if (el.tagName === 'SELECT') { var ov = C.optionFor(el, v); if (!ov) return false; el.value = ov; }
+    else el.value = v;
+    fire(el); return true;
+  }
+  C.put = put;
+  C.behaviors = function(){ return (C.facts && C.facts.behaviors) || []; };
+  C.primary = function(){ return C.behaviors()[0] || null; };
+  C.fn = function(){ return (C.facts && C.facts.fn) || null; };
+  C.goals = function(){ var g = (C.facts && C.facts.goals) || {}; return { red: g.red || [], acq: g.acq || [] }; };
+  C.menu = function(){ return (C.facts && C.facts.menu) || []; };
+  C.line = function(b, withDef){ if (!b) return ''; return withDef && b.def ? (b.label + ': ' + b.def) : (b.label || ''); };
+  C.menuLine = function(items, n){ return (items || []).filter(function(m){ return m.tier !== 'LP'; }).slice(0, n || 5).map(function(m){ return m.name; }).join(', '); };
+  C.has = function(f){ f = f || C.facts; return !!(f && ((f.behaviors && f.behaviors.length) || (f.fn && (f.fn.key || f.fn.label)) ||
+    (f.goals && ((f.goals.red || []).length || (f.goals.acq || []).length)) || (f.menu && f.menu.length))); };
+  /* the fields the packet map names: the first behavior and the function, when the field is empty */
+  C.generic = function(f, force){
+    var n = 0, b = (f.behaviors || [])[0], be = findField('beh'), fe = findField('fn');
+    if (b && be && put(be, be.tagName === 'TEXTAREA' ? C.line(b, true) : b.label, force)) n++;
+    if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
+    return { filled: n, generic: true };
+  };
+  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  C.apply = function(f){
+    if (!f || typeof f !== 'object') return null;
+    C.facts = f; var rep = null;
+    try { if (window.__nbhFactsIn) rep = window.__nbhFactsIn(f); } catch(e) { rep = { error: String(e) }; }
+    if (!rep) rep = C.generic(f, false);
+    C.last = rep; C.paint(); return rep;
+  };
+
+  /* ---- the toolbar group and the picker ---- */
+  function summary(f){
+    var bits = [];
+    if (f.behaviors && f.behaviors.length) bits.push(f.behaviors.length + (f.behaviors.length === 1 ? ' behavior' : ' behaviors'));
+    if (f.fn && (f.fn.key || f.fn.label)) bits.push(f.fn.key || f.fn.label);
+    var g = f.goals || {}, gn = (g.red || []).length + (g.acq || []).length;
+    if (gn) bits.push(gn + (gn === 1 ? ' goal' : ' goals'));
+    if (f.menu && f.menu.length) bits.push(f.menu.length + ' reinforcers');
+    return bits.join(' · ');
+  }
+  function srcLine(f){
+    var s = f.src || {}, parts = [];
+    if (f.behaviors && f.behaviors.length) parts.push('target behaviors from Form ' + (s.behaviors || 'TB-1'));
+    if (f.fn && (f.fn.key || f.fn.label)) parts.push('function from Form ' + (s.fn || 'FS-1'));
+    var g = f.goals || {}; if ((g.red || []).length || (g.acq || []).length) parts.push('goals from Form ' + (s.goals || 'GB-1'));
+    if (f.menu && f.menu.length) parts.push('reinforcer menu from Form ' + (s.menu || 'PA-1'));
+    return parts.join(' · ');
+  }
+  C.paint = function(){
+    var grp = q('.nbh-case-grp');
+    if (!grp) {
+      var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
+      var tb = q('.toolbar');
+      if (tb) {
+        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
+        tb.appendChild(grp);
+      } else {
+        /* the older forms keep their buttons in a .nbh-actions row (or beside the simulation button) */
+        var sim = q('#simBtn,#btnSim,#load-demo,#btnLoadExample');
+        var host = q('.nbh-actions') || (sim && sim.parentElement);
+        if (!host) return;
+        grp = document.createElement('span'); grp.className = 'nbh-case-grp';
+        grp.innerHTML = '<button type="button" id="nbhCaseBtn" class="' + (sim ? sim.className : 'tool nbh-btn nbh-btn-secondary') + '" title="' + TITLE + '">From the case</button>';
+        host.appendChild(grp);
+      }
+      grp.querySelector('#nbhCaseBtn').addEventListener('click', C.open);
+    }
+    var f = C.facts, ok = C.has(f);
+    grp.hidden = !ok;
+    if (ok) { var b = grp.querySelector('#nbhCaseBtn'); b.textContent = 'From the case: ' + summary(f); b.classList.toggle('nbhc-on', !!(C.last && C.last.filled)); }
+  };
+  function dlg(){
+    var d = q('#nbhCaseDlg');
+    if (d) return d;
+    d = document.createElement('dialog'); d.id = 'nbhCaseDlg'; d.setAttribute('aria-labelledby', 'nbhcTitle');
+    d.innerHTML = '<div class="nbhc-h" id="nbhcTitle">From the case<div class="nbhc-src" id="nbhcSrc"></div></div>' +
+      '<div class="nbhc-b" id="nbhcBody"></div><div class="nbhc-done" id="nbhcDone" hidden></div>' +
+      '<div class="nbhc-f"><span class="nbhc-note" id="nbhcNote"></span>' +
+      '<button type="button" id="nbhcCopy">Copy as text</button>' +
+      '<button type="button" class="primary" id="nbhcUse">Use the ticked items here</button>' +
+      '<button type="button" id="nbhcClose">Close</button></div>';
+    document.body.appendChild(d);
+    d.querySelector('#nbhcClose').addEventListener('click', function(){ d.close(); });
+    d.querySelector('#nbhcUse').addEventListener('click', C.useTicked);
+    d.querySelector('#nbhcCopy').addEventListener('click', function(){
+      var t = C.asText(C.facts);
+      var done = function(){ var e = q('#nbhcDone'); e.hidden = false; e.textContent = 'Copied: paste it where it belongs.'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, function(){ window.prompt('Copy this text:', t); });
+      else window.prompt('Copy this text:', t);
+    });
+    return d;
+  }
+  function item(kind, i, title, sub, checked){
+    return '<label><input type="checkbox" data-kind="' + kind + '" data-i="' + i + '"' + (checked ? ' checked' : '') + '><span><b>' + esc(title) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span></label>';
+  }
+  C.open = function(){
+    var f = C.facts; if (!C.has(f)) return;
+    var d = dlg(), h = '';
+    q('#nbhcSrc').textContent = srcLine(f) + (f.when ? ' · read ' + new Date(f.when).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}) : '');
+    if (f.behaviors && f.behaviors.length) {
+      h += '<div class="nbhc-s"><h4>Target behaviors</h4>' + f.behaviors.map(function(b, i){
+        var sub = [b.type, b.fn, b.dim].filter(Boolean).join(' · ');
+        return item('beh', i, b.label, (b.def ? b.def + (sub ? ' — ' : '') : '') + sub + (b.rep ? ' · replacement: ' + b.rep : ''), i === 0);
+      }).join('') + '</div>';
+    }
+    if (f.fn && (f.fn.key || f.fn.label)) {
+      h += '<div class="nbhc-s"><h4>Function</h4>' + item('fn', 0, f.fn.label || f.fn.key, (f.fn.statements || []).join(' '), true) + '</div>';
+    }
+    var g = f.goals || {};
+    if ((g.red || []).length || (g.acq || []).length) {
+      h += '<div class="nbhc-s"><h4>Goals and objectives</h4>' +
+        (g.red || []).map(function(r, i){ return item('red', i, 'Reduce: ' + r.beh, r.text); }).join('') +
+        (g.acq || []).map(function(a, i){ return item('acq', i, 'Teach: ' + a.beh, a.text); }).join('') + '</div>';
+    }
+    if (f.menu && f.menu.length) {
+      h += '<div class="nbhc-s"><h4>Reinforcer menu, in rank order</h4>' + f.menu.map(function(m, i){
+        var sub = [m.tier ? m.tier + (m.tier === 'HP' ? ' (high preference)' : m.tier === 'MP' ? ' (middle)' : ' (low)') : 'not yet ranked', m.type, m.mean != null ? 'mean rank ' + Number(m.mean).toFixed(1) + ' across ' + m.methods + (m.methods === 1 ? ' method' : ' methods') : ''].filter(Boolean).join(' · ');
+        return item('menu', i, (m.rank ? m.rank + '. ' : '') + m.name, sub, m.tier === 'HP');
+      }).join('') + '</div>';
+    }
+    q('#nbhcBody').innerHTML = h || '<div class="nbhc-empty">Nothing has been read yet.</div>';
+    q('#nbhcDone').hidden = true;
+    q('#nbhcNote').textContent = window.__nbhFactsPick ? 'The ticked items go into this form’s own rows and fields.' :
+      (findField('beh') || findField('fn') ? 'The first ticked behavior and the function go into this form’s behavior and function fields.' : 'This form has no field for these; copy the text instead.');
+    q('#nbhcUse').hidden = !(window.__nbhFactsPick || findField('beh') || findField('fn'));
+    d.showModal();
+  };
+  C.selection = function(){
+    var f = C.facts || {}, sel = { behaviors: [], goals: { red: [], acq: [] }, menu: [], fn: null, facts: f };
+    Array.prototype.forEach.call(document.querySelectorAll('#nbhcBody input:checked'), function(cb){
+      var i = +cb.dataset.i, k = cb.dataset.kind;
+      if (k === 'beh') sel.behaviors.push(f.behaviors[i]);
+      else if (k === 'fn') sel.fn = f.fn;
+      else if (k === 'red') sel.goals.red.push(f.goals.red[i]);
+      else if (k === 'acq') sel.goals.acq.push(f.goals.acq[i]);
+      else if (k === 'menu') sel.menu.push(f.menu[i]);
+    });
+    return sel;
+  };
+  C.useTicked = function(){
+    var sel = C.selection(), rep = null;
+    try {
+      if (window.__nbhFactsPick) rep = window.__nbhFactsPick(sel);
+      else rep = C.generic({ behaviors: sel.behaviors, fn: sel.fn }, true);
+    } catch(e) { rep = { error: String(e) }; }
+    var e = q('#nbhcDone'); e.hidden = false;
+    e.textContent = rep && rep.error ? 'Could not place them: ' + rep.error :
+      rep && rep.filled ? 'Placed ' + rep.filled + (rep.filled === 1 ? ' item' : ' items') + ' on this form.' + (rep.note ? ' ' + rep.note : '') :
+      'Nothing to place: ' + ((rep && rep.note) || 'the matching fields already hold a value, or nothing was ticked.');
+    C.last = rep; C.paint();
+  };
+  C.asText = function(f){
+    if (!f) return '';
+    var L = [];
+    (f.behaviors || []).forEach(function(b, i){ L.push('Target behavior ' + (i + 1) + ': ' + b.label + (b.def ? '\n  Definition: ' + b.def : '') + (b.ex ? '\n  Examples: ' + b.ex.replace(/\n/g, '; ') : '') + (b.nex ? '\n  Non-examples: ' + b.nex.replace(/\n/g, '; ') : '') + (b.fn ? '\n  Hypothesized function: ' + b.fn : '') + (b.rep ? '\n  Replacement: ' + b.rep : '')); });
+    if (f.fn && (f.fn.label || f.fn.key)) L.push('Function: ' + (f.fn.label || f.fn.key) + ((f.fn.statements || []).length ? '\n  ' + f.fn.statements.join('\n  ') : ''));
+    var g = f.goals || {};
+    (g.red || []).forEach(function(r, i){ L.push('Reduction objective ' + (i + 1) + ': ' + r.text); });
+    (g.acq || []).forEach(function(a, i){ L.push('Acquisition objective ' + (i + 1) + ': ' + a.text); });
+    if (f.menu && f.menu.length) L.push('Reinforcer menu: ' + f.menu.map(function(m){ return (m.rank ? m.rank + '. ' : '') + m.name + (m.tier ? ' (' + m.tier + ')' : ''); }).join('; '));
+    return L.join('\n');
+  };
+  window.nbhCase = C;
+  /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
 })();
 </script>
 

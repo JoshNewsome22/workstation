@@ -4016,3 +4016,152 @@ per note with every field, the computed minutes and the next steps joined.
 "Load simulation" fills a case with six notes over five weeks (two
 observations with TI-1 scores, a phone call, a parent meeting, an IEP
 meeting and a consultation).
+
+## The Case Flows Between Forms, the Case Map, and the Picture Library Beside the Forms (v21.31)
+
+Four things typed once now reach every other form: the target behaviors
+defined on Form TB-1, the function concluded on Form FS-1, the goals and
+objectives written on Form GB-1, and the reinforcer menu ranked on Form
+PA-1. The index also gains a one-page case map (which form when), the
+pictogram library moves out of Forms SM-1 and VS-1 into one file beside
+them, nine reference claims found wrong or loose in a web spot-check are
+corrected, and the six forms built in v21.30 passed a visual pass with
+nothing to fix.
+
+### The case (index.html and every form)
+
+The shell keeps one object, `state.facts`:
+
+    { behaviors:[{label, def, ex, nex, type, isRep, fn, fnKey, dim, unit, rep, ctx, urg, src}],
+      fn:{key, label, statements:[...], perBehavior:[...]},
+      goals:{red:[{beh, dir, meas, cur, ml, tgt, ctx, crit, meth, date, pair, text}],
+             acq:[{beh, cond, crit, n, unit, meth, date, pair, text}]},
+      menu:[{name, type, rank, tier, mean, methods, informant}],
+      src:{behaviors:'TB-1', fn:'FS-1', goals:'GB-1', menu:'PA-1'}, when }
+
+Two verbs are added to the workstation bridge every form carries
+(`facts?`, answered `facts-out`, and `facts`, answered `facts-applied`),
+and a shared block, `<script id="nbh-case-flow">` with its stylesheet
+`nbh-case-css`, sits after the bridge in all 42 forms (so
+`tools/new-form.py` carries it into any form assembled from the CF-1
+template). The block defines `window.nbhCase`:
+
+- `out()` calls the form's `window.__nbhFactsOut()` when it has one. TB-1
+  returns its sheet-4 targets (or, before sheet 4 is written, the sheet-1
+  candidates marked Target); a target of the type "Replacement /
+  alternative behavior" is flagged `isRep`, and a "paired replacement"
+  entry that is a note rather than a behavior (a dash, "see ...", "this
+  is ...") is dropped. FS-1 returns the function with the summary
+  statements, and its own behavior list as `behaviorsFS`, which the shell
+  uses only while TB-1 is not open. GB-1 returns each objective with its
+  composed sentence. PA-1 returns the stimulus pool in the Summary's order,
+  the same arithmetic as `renderSummary` (mean rank across the direct
+  methods completed, then the HP/MP/LP third of the pool).
+- `apply(facts)` calls the form's `window.__nbhFactsIn(facts)` when it has
+  one, else the generic fill: the behavior and function fields the packet
+  map already names (`beh`, `fn`) take the first behavior (label, or
+  label and definition in a textarea) and the function (a select is
+  matched by its words), when empty. Form-specific intake, all into empty
+  rows and fields only: SM-1 (the acquisition objectives and the paired
+  replacements become the self-monitoring targets, since those are stated
+  positively; the problem behaviors go on the "reduction target" line, the
+  function to its select, the HP/MP items to the reward menu), HD-1 (the
+  behavior table), DD-1 (a record still holding the three example
+  behaviors and no data takes the targets, each paired replacement as a
+  replacement row, the aim from GB-1), FS-1 (an empty report takes the
+  targets), GB-1 (reduction objectives per target, acquisition objectives
+  per paired replacement, adding cards when the existing ones are full),
+  SA-1 (skill, goal and SD from the first acquisition objective, the
+  reinforcer line from the menu), SR-1 (behavior, short name, alternative,
+  function, reinforcer), DA-1 (target line, hypothesis from the summary
+  statement), CN-1 (the "primary target and goal" line composed from the
+  behavior and the reduction objective naming it), SI-1 (nothing on its
+  own: the interview keeps the student's words). ABC-1's packet map gains
+  `#h-target` so its header takes the behavior too.
+- `paint()` adds a "From the case" group to the toolbar (or, in the five
+  older forms without a `.toolbar`, a button in the `.nbh-actions` row),
+  hidden until the case holds something, with a count of what it holds.
+  The button opens a picker listing the behaviors, the function, the
+  objectives and the ranked menu with checkboxes; "Use the ticked items
+  here" calls `window.__nbhFactsPick(selection)` where the form defines
+  it (the forms above add the ticked items as rows or replace the field),
+  else fills the behavior and function fields with the first ticked
+  behavior, overwriting. "Copy as text" puts the whole case on the
+  clipboard for a form with no field for it.
+
+The shell reads the four source forms whenever the value signature in a
+form's status reply changes (the status every form reports every four
+seconds), debounced, so a target renamed on TB-1 reaches the other open
+forms within a few seconds; a source that is not open keeps its last
+reading. Facts go to a form as it opens (after the packet), to every open
+form when they change, and with "Fill open forms". A line under the packet
+bar ("The case") shows what has been read and from which form, with "Send
+to open forms". The facts travel in the packet file (`facts`), the case
+file and the one-file case, so they survive the session; `loadCase` and
+Open packet restore them. Nothing is stored in the browser.
+
+### The case map (index.html)
+
+"Case map" in the bar (and in the command palette) opens one page: eight
+stages from referral to exit, each with the forms usually reached in it
+and one line on when, every form a button that opens it (open ones are
+marked); a box on what carries forward on its own; and the shortest
+defensible path through a case. The content is `CASE_MAP` in index.html.
+Help gains two paragraphs, on the map and on the case.
+
+### The picture library beside the forms (`nbh-pictos.js`)
+
+Forms SM-1 and VS-1 each carried the 648 KB pictogram library inline
+(about 1 MB per form, 5.3 MB in the one-file edition). The library is now
+one file, `nbh-pictos.js`, beside the forms (a copy of
+`tools/pictos/nbh-pictos.js`), loaded by `<script src="nbh-pictos.js">`
+at the top of each form's toolbar; SM-1 is 411 KB and VS-1 302 KB. A
+guard at the top of each form's script defines empty tables and a no-op
+`picto()` when the file is missing, sets `NBH_PICTOS_MISSING`, and the
+picture chooser then says the file is not beside the form; photos still
+work. `tools/build-single.py` packs the library once as the block
+`nbh-embed-pictos`; `EMBED.ready` inflates it with the forms and
+`EMBED.form()` puts it in place of the `<script src>` tag as a form opens
+(pop-out and the one-file case use the same path; `caseHtml` copies the
+block). Diagnostics gains a "Picture library" row (a HEAD request in the
+folder edition; "inside this file" in the one-file edition).
+`tools/build-rps.py` copies the file with the folder. Anyone hosting the
+folder uploads `nbh-pictos.js` with the forms.
+
+### Reference corrections (web spot-check of 70 references)
+
+70 references across SA-1, GC-1, SI-1, DA-1, HD-1, CN-1, VS-1, SM-1 and
+SR-1 were checked against the web; 61 were correct as written. Corrected:
+GC-1, Bowman-Perrott et al. (2016) (the effect was largest for students
+with or at risk for EBD, not independent of disability; TauU = .82 across
+21 studies); GC-1, Donaldson et al. (2011) (disruption fell while the
+game was on and did not carry over, rather than "the teachers kept it
+going"); GC-1, Tanol et al. (2010) (teacher preference only, not the
+children's); SA-1, Richling, Williams and Carr (2019) (criteria of 60%,
+80% and 100%, each across three sessions; only 100% x 3 reliably
+maintained; the Setup hint said "80% in a single session"); SA-1, Lerman
+et al. (2011) (first-trial data frequently indicated mastery prematurely
+and were insensitive to early change); CN-1, Noell et al. (2005) (45
+elementary students referred for consultation, not 45 teachers); VS-1,
+Tiger, Hanley and Hernandez (2006) (3 of 6 preschoolers consistently
+preferred choice; preference grew with more items); SM-1, Smith,
+Thompson and Maynard (2022) (Kim is on the 2025 meta-analysis, not the
+2022 review); SM-1, the Royal Palm School manual is labelled an
+unpublished program manual. Kern et al. (1994) in SI-1 is confirmed as
+Diagnostique, 19, 29-39.
+
+### Visual pass (SA-1, GC-1, SI-1, DA-1, HD-1, CN-1)
+
+Each form's simulated views, printed sheets and home sheets were viewed
+page by page; nothing needed changing.
+
+### Checks
+
+`qa/case-test.js` (the four simulations flow into thirteen consumers, the
+picker places a ticked behavior, the packet carries the facts, a rename
+on TB-1 reaches the others), `qa/all-forms-shell.js` (all 42 forms open
+in the shell, answer `facts?` and `facts`, show the button, no script
+error), `qa/casemap-test.js`, and `qa/single-pictos.js` (the one-file
+edition carries the library and both forms find 227 pictures) all pass;
+the SM-1 and VS-1 form tests pass with the external library.
+

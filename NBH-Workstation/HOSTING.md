@@ -21,6 +21,7 @@ point a subdomain at it from GoDaddy's DNS.
 2. Create a folder, for example `workstation`, and open it.
 3. **Upload** the zip, then select it and choose **Extract**. Delete the zip.
    The files land directly in `workstation` (`public_html/workstation/index.html`);
+   upload the whole folder, `nbh-pictos.js` included (Forms SM-1 and VS-1 load their pictures from it);
    the zip has no folder inside it, so there is nothing to move.
 4. **First time only:** turn on *Settings → Show Hidden Files*, then *+ File*,
    name it `.htaccess`, select it, *Edit*, and paste:
