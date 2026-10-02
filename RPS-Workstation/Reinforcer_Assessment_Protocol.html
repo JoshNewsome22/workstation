@@ -1011,6 +1011,8 @@ body.view-walk #walk{display:block}
     <li><b>Mistakes and interruptions.</b> <b>Undo</b> removes the last tap and cancels the access period that tap started; once that access period is over, the tap can no longer be undone in the runner, so correct the row on the sheet after saving. <b>Pause</b> stops the clock, the stop interval, and any access time; <b>Resume</b> goes on. <b>Discard</b> throws the session away without writing anything. One session runs at a time; on the other views a pill in the corner shows it and returns to it.</li>
     <li><b>Alerts and keys.</b> A rising tone, an amber flash around the screen edge, and a vibration on a phone or tablet mean deliver the reinforcer now; a falling tone means access is over; a longer tone and a green flash mean the session is over; a soft tone marks a completed ratio in a progressive-ratio control session. <b>Alerts on</b>, <b>Sound</b>, <b>Flash</b>, and <b>Vibrate</b> turn them on or off, and <b>Test alert</b> plays one. Keys while a session runs: Space or R for a response (1, 2, 3 on the concurrent-operants sheet), P for problem behavior, Z to undo. Keep the form in front during a session; the screen is kept awake where the browser allows it.</li>
   </ul>
+  <h3 class="sub">About the simulation</h3>
+  <div class="a">Load simulation fills every sheet with simulated data that describe no real student. Use the view buttons to step through setup, single operant, concurrent operants, progressive ratio, and the summary. On the concurrent-operants sheet, switch Arrangement to Condition comparison (COA) to see the same student worked as a condition comparison. Use Clear all before entering a case.</div>
   <div class="cite">Decision rules synthesize Fisher et al. (1992), Piazza et al. (1996), Roscoe et al. (1999), Roane et al. (2001), and the cautions in Poling's (2010) commentary; the condition-comparison (COA) mode follows Randall and Kranak (2026). Full references are on the summary sheet.</div>
 </div>
 
@@ -2241,7 +2243,7 @@ async function loadSim(){
 
   renderAll();
   setView('setup');
-  alert('Simulated data loaded on every sheet. Use the view buttons to step through setup, single operant, concurrent operants, progressive ratio, and the summary. On the concurrent-operants sheet, switch Arrangement to Condition comparison (COA) to see the same student worked as a condition comparison.');
+  nbhUI.toast('Simulation loaded: simulated data on every sheet.',{kind:'ok'});
 }
 
 $('#simBtn').addEventListener('click',loadSim);
@@ -3466,7 +3468,31 @@ renderAll();
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;

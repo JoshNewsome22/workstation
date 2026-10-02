@@ -1069,6 +1069,8 @@ td input,td select{max-width:100%}
       <tr><th>Not for behavior that already happens</th><td>The one consistent finding in the overjustification literature is that added rewards can lower behavior that already occurs at a high level without them (DeLeon et al., 2013). The performance-deficit check on the Setup sheet is there so the sheet pays for a behavior that is in the repertoire but not yet frequent, not for one the student already does freely.</td></tr>
       <tr><th>Record first, then rate</th><td>Most self-monitoring errors are missed recordings, not wrong ones (Ruby &amp; DiGennaro Reed, 2022). The cue, the sheet on the desk, and the one prompt in the fidelity checklist are there so the record is made at all.</td></tr>
     </table>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated system is a third-grader&rsquo;s pictorial Self &amp; Match sheet with three targets over six periods, a 4-day teacher-only baseline, three weeks of self-rating with the goal stepped from 70 to 80, and the matching ladder at phase 1.</p>
     <p class="hint" id="smRefs" style="margin-top:10px"><b>Reference list.</b>
     Berryman, R., &amp; Nevin, J. A. (1962). Interlocking schedules of reinforcement. <em>Journal of the Experimental Analysis of Behavior, 5</em>(2), 213&ndash;223. https://doi.org/10.1901/jeab.1962.5-213 &bull;
     Amato-Zech, N. A., Hoff, K. E., &amp; Doepke, K. J. (2006). Increasing on-task behavior in the classroom: Extension of self-monitoring strategies. <em>Psychology in the Schools, 43</em>(2), 211&ndash;221. &bull;
@@ -1668,7 +1670,7 @@ async function loadSim(){
   S.log=days.map((d,i)=>{const pts=Math.round(36*d[2]/100);const tp=[Math.min(100,d[2]+8),Math.max(0,d[2]-10),Math.min(100,d[2]+4)];return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',m:d[4]==null?'':String(d[4]),n:d[5]==null?'':String(d[5]),met:d[1]!=='0'&&pts/36*100>=d[0],tgp:tp.join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':''};});
   S.meta.goal='80';
   renderAll();setView('sheet');
-  alert('Simulated system loaded: a third-grader’s pictorial Self & Match sheet with three targets over six periods, a 4-day teacher-only baseline, three weeks of self-rating with the goal stepped from 70 to 80, and the matching ladder at phase 1.');
+  nbhUI.toast('Simulation loaded: '+'a simulated third-grader’s pictorial Self & Match sheet with three targets over six periods.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -2369,7 +2371,31 @@ window.__nbhFactsPick=function(sel){
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;

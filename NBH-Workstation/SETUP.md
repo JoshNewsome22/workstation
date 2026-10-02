@@ -4455,3 +4455,119 @@ earlier checks (`all-forms-shell`, `case-test`, `ob1-split-test`,
 `guard-test`, `bip4-test`, `rowdel-test`, `v2133-test`, the form
 tests) all pass; the shell tests answer the close question through
 `#cfFoot button.danger` now.
+
+## Reference Audit of the Older Forms, Quiet Simulations, a Short Help, and What Is Due (v21.35)
+
+### Reference audit (33 forms)
+
+Every form whose references had not been checked in v21.31 (the nine
+forms built in v21.30 were) had its reference list and every in-text
+citation extracted and checked: the citation itself (authors, year,
+title, journal, volume, pages) and the claim the form attaches to it
+(sample sizes, percentages, direction of effect). Sources were journal
+records, PubMed and PMC records, publisher pages, the full texts held
+locally (the 2026 JABA papers, the PDC-HS papers, Wolf 1978) and the
+reference lists of those papers. A log per form sits beside the work,
+one row per reference and one per claim, with the evidence for each.
+
+Nothing checked was found wrong except one sentence. PD-1's Guide said
+Brand et al. (2022) cite Wilder et al. (2019) and Cymbal et al. (2020)
+for the tool's reliability and validity; Brand's text refers the
+reader to the review by Wilder, Cymbal and Villacorta (2020), JABA
+53(2), 1170-1176, and the sentence now says so, with the two studies
+named as the ones not reproduced on the form.
+
+The check did not reach everything. The session's web-search
+allowance ran out, and the environment's network policy denies direct
+reads of the bibliographic hosts (PMC, Crossref, DOI, the Wiley,
+Springer and SAGE sites, Google Scholar, the Florida statute and rule
+sites), so the entries reached last are marked "unverified" in the
+logs rather than guessed at. The counts:
+
+| Group | Forms | Entries | Confirmed | Unverified | Corrected |
+|---|---|---|---|---|---|
+| 1 | DM-1 IC-1 RR-1 TB-1 IA-1 IN-1 OB-1 ABC-1 SP-1 DD-1 MT-1 | 168 | 116 | 52 | 0 |
+| 2 | PA-1 RA-1 EA-1 VI-1 FS-1 TD-1 GB-1 CF-1 SV-1 ST-1 TI-1 | 449 | 23 | 426 | 0 |
+| 3 | PD-1 RM-1 PR-1 CR-1 CT-1 EB-1 DT-1 AD-1 TE-1 BC-1 MS-1 | 164 | 97 | 67 | 1 claim |
+
+Group 2's large lists (TD-1 alone holds 251 entries) were reached
+after the allowance was spent; its offline checks (volume against year
+for the JABA, BAP and JEAB entries, in-text against list, the same
+paper across forms) found no contradiction. Statute and rule citations
+(34 CFR 300, Fla. Stat. 1003.573, rule 6A-6.03028, FERPA) were checked
+against the official text where a search returned it and are otherwise
+unverified.
+
+Flagged in the logs for a later check, left as written: CF-1's
+"Coyle et al., 2022, examined a 12-item adaptation" (the record shows
+12 sites and 128 respondents and gives no item count); AD-1's
+Frank-Crawford et al. (2021) counts (a search paraphrase reports 3 of
+5 for accumulated food and 3 of 5 for the break, where the form says 2
+of 5 and 4 of 5; a paraphrase is not enough to change a count); TD-1
+spells the DeLeon et al. (2001) co-authors "Catter, V. R." where PA-1
+and RA-1 have "Rodriguez-Catter, V."; IA-1's Paclawskyj 2001
+percentages and FAST category correspondences are full-text figures
+no record showed; PR-1's "42% of thinning steps" (Briggs). Uncited
+list entries (PA-1 DeLeon 2005; EA-1 Kazdin 2011; VI-1 Bijou 1968,
+Hanley 2012, Iwata & Dozier 2008, Laraway 2003; FS-1 Rodriguez 2012;
+TD-1 Querim 2013) and two in-text citations with no entry (DT-1 Bloh
+2010, Evenden & Ryan) are noted, not changed.
+
+### The simulation loads quietly (every form)
+
+Thirty-eight forms ended "Load simulation" with a long explanation,
+which v21.34 had turned into a notice to dismiss. Each now shows one
+toast, "Simulation loaded: ..." with a sentence that says "simulated",
+and the full explanation sits in the form's Guide under "About the
+simulation", before the reference list, in the guide's own prose
+style, opening with the line that nothing in it is a real student
+record. Forms whose simulation already loaded quietly (PA-1, EA-1,
+TD-1, GB-1, DM-1, IC-1, RR-1, IA-1, ABC-1, EB-1, AD-1, MS-1, SR-1) are
+unchanged; DD-1's toast now says "simulated". SP-1 has no Guide, so
+its note is on the Control chart view's methods block, screen only.
+Blank prints are unchanged on every form; the printed Guide of SI-1,
+PR-1 and SV-1 runs one page longer because of the added paragraph.
+
+### Help (index.html)
+
+The Help dialog had grown to 1,160 words of release notes. It is now a
+three-line lead, five numbered steps for the first five minutes, and
+the detail folded under five headings (the case and the case map;
+saving, autosave and closing the tab; printing and the PDF; side by
+side, fullscreen and the screen; keyboard), with the one-file note
+where that edition is running. About 210 words show before anything is
+opened.
+
+### What is due (index.html and the nbh-case block)
+
+Review dates and next steps sit on PR-1, SA-1, SM-1, ST-1, TE-1, RM-1,
+SV-1, GB-1 and CN-1 under their own names. The nbh-case block now
+answers the `facts?` verb with a `due` list as well: a form's own
+`window.__nbhDue()` when it has one (CN-1 returns the open next steps
+of every note with their dates and owners), else every date field
+whose label says review, target date, due, next, re-survey or
+follow-up and whose value holds a date. The shell (`gatherDue`) asks
+every open form whenever a form's value signature changes, keeps the
+items within `DUE_DAYS` (14) or past, sorts them, and shows up to four
+in the bar (`#sumDue` on the folded line, `#factsDue` on the case
+line), overdue ones marked, "and n more" after the fourth; the case
+row shows for the due line alone when no source form is open. Date fields
+on the toolbar and the recorder are ignored, and so are plain "Date"
+and date-of-birth fields; a date followed by a note ("2026-11-16
+(mid-semester)") is read.
+
+### The bar
+
+`.bar [hidden]` now hides: the bar's flex rules had outranked the
+`hidden` attribute, so the empty summary row and its Done button showed
+before a student was loaded.
+
+### Checks
+
+`qa/due-test.js` (PR-1, SA-1, CN-1, SM-1 and ST-1 simulations put
+their review dates and next steps on the due line, in date order,
+overdue and "today" marked), the agents' simulation sweeps (every
+converted form: the toast shows, no notice is open, no error, print
+page counts as above), and the earlier checks (`all-forms-shell`,
+`case-test`, `ob1-split-test`, `guard-test`, `bip4-test`, `u-test`,
+the form tests) all pass.

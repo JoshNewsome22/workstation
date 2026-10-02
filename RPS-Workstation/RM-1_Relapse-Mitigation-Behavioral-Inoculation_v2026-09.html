@@ -806,6 +806,8 @@ td input,td select{max-width:100%}
     <p><b>Context theory.</b> Bouton's account holds that extinction learning is relatively specific to the context in which it occurs (Bouton et al., 2011), which is why renewal happens and why increasing similarity between treatment and non-treatment settings helps. It is not quantitatively formalized, contextual change tends to be inferred from behavior change, and Craig and Shahan (2016) found patterns it also does not predict.</p>
     <p><b>Resurgence as choice.</b> Shahan and Craig (2017) recast resurgence as a choice phenomenon: it occurs when the relative value of a historically effective target option rises because a more recently effective alternative has been devalued, with recent reinforcement weighted more heavily than remote reinforcement. The model accounts for the reinforcement-rate effects that defeated momentum theory, and extends in principle to magnitude, quality, punishment, satiation, and DRO. Shahan, Browning, and Nall (2020) added a contextual layer to explain why cycling alternative reinforcement on and off during treatment reduces later resurgence.</p>
     <p><b>Resurgence as an instance of behavioral contrast.</b> Lattal and Miles (2024) conclude that, with certain caveats, resurgence appears to be an instance of behavioral contrast measured against an extinction baseline, and they report considerable overlap in the controlling variables of the two. One practical consequence is worth carrying into a plan: the contrast literature shows that target responding need not be near zero to change when conditions elsewhere worsen. Increases during thinning are therefore not confined to behavior that has been fully eliminated.</p>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated case loaded: exposure rated across all four relapse types, eleven mitigation procedures selected, and nine treatment challenges scored against the published detection criterion.</p>
     <p class="hint">These are the empirical and theoretical sources. The exposure indicators, risk bands, and evidence tags on this form are a working convention for organizing that literature into a plan; they are not themselves findings, and no model listed above currently accounts for the full pattern of results.</p>
     <p class="hint" id="rmRefs"><b>Reference list.</b>
     Athens, E. S., &amp; Vollmer, T. R. (2010). An investigation of differential reinforcement of alternative behavior without extinction. <em>Journal of Applied Behavior Analysis, 43</em>(4), 569&ndash;589. &bull;
@@ -1378,7 +1380,7 @@ async function loadSim(){
      a:'0, 0, 0, 0, 0',b:'1, 0, 0',resp:'Met criterion, one session. Resumed at the previous step rather than stepping back.'}
   ];
   renderAll();setView('an');
-  alert('Simulated case loaded: exposure rated across all four relapse types, eleven mitigation procedures selected, and nine treatment challenges scored against the published detection criterion.');
+  nbhUI.toast('Simulation loaded: a simulated case with exposure rated across all four relapse types.', {kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -2049,7 +2051,31 @@ renderAll();
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;

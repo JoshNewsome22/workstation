@@ -915,7 +915,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     </table>
     <p class="hint">The clinical content of this form &mdash; the intervention sequence, the precursor, the debriefing questions, and which health professionals the team must include &mdash; is a working convention. The statutory requirements quoted above are the law as retrieved; everything else is practice.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="hint">Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, a debriefing, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.</p>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, a debriefing, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.</p>
   </section>
 </main>
 
@@ -2519,8 +2519,9 @@ renderAll();
       lab = String(lab).replace(/\s+/g, ' ').trim();
       if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
       if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
       var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
-      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60), date: v });
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
     }
     return out;
   };

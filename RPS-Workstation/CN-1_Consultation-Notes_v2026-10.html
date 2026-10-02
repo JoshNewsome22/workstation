@@ -703,6 +703,8 @@ td input,td select{max-width:100%}
       <tr><th>The note cites its data</th><td>Which forms, which dates. The note does not repeat the graph; it says where the graph is.</td></tr>
       <tr><th>Nothing about third parties that is not needed</th><td>Other students are not named; a peer is &ldquo;a peer&rdquo;. Staff are named with their role because the plan assigns them steps.</td></tr>
     </table>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated case is six notes over five weeks (two observations with TI-1 scores, a phone call, a parent meeting, an IEP meeting and a consultation), with next steps, time by category and the hours log.</p>
     <p class="hint" id="cnRefs" style="margin-top:10px"><b>Reference list.</b>
     Behavior Analyst Certification Board. (2020). <em>Ethics code for behavior analysts</em>. Author. &bull;
     Bergan, J. R., &amp; Kratochwill, T. R. (1990). <em>Behavioral consultation and therapy</em>. Plenum. &bull;
@@ -945,7 +947,7 @@ async function loadSim(){
       t_cons:'35',t_train:'5',t_doc:'10',t_travel:'25',next:[{what:'Para scores TI-1 during independent work',who:'J. Ortiz',when:Y(fwd(d6,4)),done:false},{what:'Confirm week four under goal and schedule PR-1',who:'J. Newsome',when:Y(fwd(d6,7)),done:false}]})
   ];
   cur=S.notes.length-1;renderAll();setView('log');
-  alert('Simulated case loaded: six notes over five weeks (two observations with TI-1 scores, a phone call, a parent meeting, an IEP meeting and a consultation), with next steps, time by category and the hours log.');
+  nbhUI.toast('Simulation loaded: '+'a simulated case of six notes over five weeks, with next steps, time by category and the hours log.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -969,6 +971,9 @@ window.__nbhFactsPick=function(sel){
   const m=S.meta;let n=0;const t=nbhCnGoalLine(sel.behaviors,sel.goals.red);if(t){m.goal=t;n++;}
   if(n)renderAll();return {filled:n};
 };
+
+/* v21.35 what is due: the open next steps of every note, by their dates, for the workstation's due line */
+window.__nbhDue=function(){const out=[];(S.notes||[]).forEach(n=>(n.next||[]).forEach(x=>{if(x.done||!x.when||!x.what)return;out.push({what:(x.what+(x.who?' ('+x.who+')':'')).slice(0,60).trim(),date:x.when});}));return out;};
 </script>
 
 <script>
@@ -1634,7 +1639,31 @@ window.__nbhFactsPick=function(sel){
     if (f.fn && (f.fn.key || f.fn.label) && fe && put(fe, fe.tagName === 'SELECT' ? (f.fn.key || f.fn.label) : f.fn.label, force)) n++;
     return { filled: n, generic: true };
   };
-  C.out = function(){ try { return window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { return null; } };
+  /* what is due (v21.35): the form's own list when it has one (window.__nbhDue), else every date field whose
+     label says review, target date, due or next; the shell keeps the ones within two weeks or past */
+  C.due = function(){
+    try { if (window.__nbhDue) return window.__nbhDue(); } catch (e) {}
+    var out = [], seen = {};
+    var list = document.querySelectorAll('input[type="date"],input[data-m="review"],input[data-m="next"],input[name="m.review"],input[name="m.next"]');
+    for (var i = 0; i < list.length; i++) {
+      var e = list[i], v = String(e.value || '').trim(); if (!v || e.closest('.toolbar,.obr')) continue;
+      var lab = '';
+      if (e.labels && e.labels.length) lab = e.labels[0].textContent;
+      if (!lab) { var p = e.closest('div,td,label'); var l = p && (p.querySelector('label') || (p.previousElementSibling && p.previousElementSibling.tagName === 'TH' ? p.previousElementSibling : null)); lab = l ? l.textContent : (e.getAttribute('aria-label') || e.placeholder || ''); }
+      lab = String(lab).replace(/\s+/g, ' ').trim();
+      if (!/review|target date|due|next|re-survey|follow-up/i.test(lab)) continue;
+      if (/^(date|date written|date signed|date of birth|dob)$/i.test(lab)) continue;
+      if (!/\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}/.test(v)) continue;   /* a text field named next ("Next target") is not a date */
+      var k = lab + '|' + v; if (seen[k]) continue; seen[k] = 1;
+      out.push({ what: lab.replace(/\s*\(.*?\)\s*$/, '').slice(0, 60).trim(), date: v });
+    }
+    return out;
+  };
+  C.out = function(){
+    var o = null; try { o = window.__nbhFactsOut ? window.__nbhFactsOut() : null; } catch(e) { o = null; }
+    var d = C.due(); if (d && d.length) { o = o || {}; o.due = d; }
+    return o;
+  };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
     C.facts = f; var rep = null;
