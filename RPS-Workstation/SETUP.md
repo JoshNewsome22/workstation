@@ -3318,7 +3318,12 @@ Drive connector; the later chapters, the glossary and the index were not,
 so the guide cites chapters, not pages, and makes no claim about the
 chapters it could not read). Bird et al. (2022), on psychotropic
 medication monitoring, was read and is not cited here; it belongs with
-MS-1.
+MS-1. Two chapters on arranging reinforcement, DeLeon, Bullock and Catania
+(2013) and DeLeon, Graff, Frank-Crawford, Rooker and Bullock (2014), gave
+the Reinforcement sheet three rows (class of back-up in the chapters'
+selection order, whether the reward is available elsewhere, what grows as
+the schedule thins) and the guide its rows on token loss, delay, interval
+versus ratio stability, bribes and overjustification.
 
 Data model: `S = {meta, chk, sys, tg[], per[], lv[5], lad[6], fid[9], log[],
 wk{}}`, saved as `{form:'SM-1', v, S}`; files from other forms are refused.
