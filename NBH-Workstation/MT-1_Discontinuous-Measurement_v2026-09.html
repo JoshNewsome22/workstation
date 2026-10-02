@@ -981,8 +981,8 @@ $('#delSess').addEventListener('click',()=>{if(S.sess.length>1){S.sess.pop();ren
    still empty is filled rather than left blank above the first real session. */
 const emptyRow=r=>!['d','m','r','len','n','p','chg','ph','note'].some(k=>String(r[k]||'').trim());
 /* v21.33 (R): any session can be deleted, not only the last; the log keeps at least one (blank) row */
-$('#sessTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,r=S.sess[i];if(!r)return;
-  if(!emptyRow(r)&&!confirm('Delete this row?'))return;
+$('#sessTbl').addEventListener('click',async e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,r=S.sess[i];if(!r)return;
+  if(!emptyRow(r)&&!(await nbhUI.confirm('Delete this row?\nThe session logged on it is deleted from the log.',{ok:'Delete',danger:true})))return;
   S.sess.splice(i,1);ensure();renderSess();});
 function captureSheet(goToLog){
   const p=params();let plus=0,scored=0;
@@ -1000,8 +1000,8 @@ function captureSheet(goToLog){
 }
 $('#capture').addEventListener('click',()=>captureSheet(true));
 $('#captureSheet').addEventListener('click',()=>captureSheet(false));
-$('#clearSheet').addEventListener('click',()=>{
-  if(!confirm('Clear the marks, the start time, the change marker and the notes for the next session?\n\nThe student, the behavior, the settings, the date, the condition and the session log stay.'))return;
+$('#clearSheet').addEventListener('click',async()=>{
+  if(!(await nbhUI.confirm('Clear the sheet for the next session?\nThe marks, the start time, the change marker and the notes are cleared. The student, the behavior, the settings, the date, the condition and the session log stay.',{ok:'Clear the sheet',danger:true})))return;
   S.marks={};S.ioa={};S.meta.start='';S.meta.notes='';S.meta.chg='';
   bindMeta();const chgSel=$('[data-m="chg"]');if(chgSel)chgSel.value='';renderGrid();renderSum();
   const msg=$('#capMsg');if(msg){msg.textContent='Sheet cleared for the next session. The session log is unchanged.';msg.classList.add('done');}
@@ -1059,10 +1059,10 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   else if(el.type==='time'){S.meta[k]=toHM24(S.meta[k]);el.value=S.meta[k];}
   else el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
-    el.addEventListener(ev,()=>{
+    el.addEventListener(ev,async()=>{
       if(RESCORE[k]&&el.value!==String(S.meta[k]==null?'':S.meta[k])&&anyMarks()){
         const p=params();
-        if(!confirm('The marks on this sheet were scored as '+String(S.meta.method||'').toLowerCase()+' with '+p.ivSec+'-second intervals. A different '+RESCORE[k]+' changes what each mark means, so the marks cannot carry over.\n\nClear the marks of both observers and change the '+RESCORE[k]+'? The session log is not affected.')){el.value=S.meta[k];return;}
+        if(!(await nbhUI.confirm('Clear the marks and change the '+RESCORE[k]+'?\nThe marks on this sheet were scored as '+String(S.meta.method||'').toLowerCase()+' with '+p.ivSec+'-second intervals. A different '+RESCORE[k]+' changes what each mark means, so the marks cannot carry over: the marks of both observers are cleared. The session log is not affected.',{ok:'Clear and change',danger:true}))){el.value=S.meta[k];return;}
         S.marks={};S.ioa={};
       }
       S.meta[k]=el.value;
@@ -1070,8 +1070,8 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
 function renderAll(){ensure();renderSetup();bindMeta();renderSetup();renderGrid();renderSum();renderSess();}
 
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#blankBtn').addEventListener('click',()=>{
-  if(!confirm('Clear the marks and print an empty sheet at the current settings?'))return;
+$('#blankBtn').addEventListener('click',async()=>{
+  if(!(await nbhUI.confirm('Print an empty sheet?\nThe marks are cleared, and the sheet prints empty at the current settings.',{ok:'Clear and print',danger:true})))return;
   S.marks={};S.ioa={};renderGrid();renderSum();setTimeout(()=>window.print(),150);});
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
@@ -1087,10 +1087,10 @@ $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).r
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='MT-1_intervals.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form, including the session log? Unsaved work will be lost.\n\n(To start the next session and keep the log, use "Clear sheet for the next session" on the data sheet.)')){S=blank();renderAll();resetTimer();setView('sheet');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form, including the session log?\nUnsaved work will be lost. To start the next session and keep the log, use "Clear sheet for the next session" on the data sheet instead.',{ok:'Clear all',danger:true})){S=blank();renderAll();resetTimer();setView('sheet');}});
 
-function loadSim(){
-  if(!confirm('Load a simulated observation and fill every sheet? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated observation?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',obs:'Aide A (simulated)',date:D(2),
@@ -1255,7 +1255,7 @@ renderAll();
     paintGrid();
   }
   function hardReset(){stopLoops();unsched();wakeOff();T.state='ready';T.acc=0;T.last=0;T.geo=null;T.msg='';lock(false);paint();paintGrid();}
-  function reset(){if((T.state==='run'||T.state==='pause')&&!confirm('Reset the timer to 0:00? Marks already scored stay on the sheet.'))return;hardReset();}
+  async function reset(){if((T.state==='run'||T.state==='pause')&&!(await nbhUI.confirm('Reset the timer to 0:00?\nMarks already scored stay on the sheet.',{ok:'Reset'})))return;hardReset();}
 
   /* ---- screen awake while running ---- */
   async function wakeOn(){try{if('wakeLock' in navigator&&!T.wake){T.wake=await navigator.wakeLock.request('screen');T.wake.addEventListener('release',()=>{T.wake=null;});}}catch(e){T.wake=null;}}
@@ -1322,7 +1322,7 @@ renderAll();
     note('Test alert'+(pr.sound?'':' (sound is off)')+'. If you heard nothing, check the device volume and silent mode.');});
   const cs=el('clearSheet');if(cs)cs.addEventListener('click',()=>hardReset());
   document.addEventListener('keydown',e=>{
-    if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||!box.offsetParent)return;
+    if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||!box.offsetParent||document.querySelector('dialog[open]'))return;
     const t=e.target,tag=(t&&t.tagName)||'';
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable))return;
     if(e.key===' '){if(tag!=='BUTTON'&&(T.state==='run'||T.state==='pause')){e.preventDefault();startPause();}return;}

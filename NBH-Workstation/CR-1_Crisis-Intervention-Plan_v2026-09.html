@@ -1112,8 +1112,8 @@ function renderTrig(){
 $('#addTeam').addEventListener('click',()=>{S.team.push({n:'',r:'',g:'',p:''});renderTeam();});
 /* v21.16 audit (F13): "Remove last" deleted the last row whatever it held, a logged restraint included, with no
    question; a row that holds an entry is removed only after one */
-function dropLast(arr,what,redraw){if(arr.length<=1)return;const r=arr[arr.length-1];
-  if(crcFilled(r)&&!confirm('Remove '+what+' '+arr.length+'? Its entries will be deleted.'))return;
+async function dropLast(arr,what,redraw){if(arr.length<=1)return;const r=arr[arr.length-1];
+  if(crcFilled(r)&&!(await nbhUI.confirm('Remove '+what+' '+arr.length+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
   arr.pop();redraw();}
 $('#delTeam').addEventListener('click',()=>dropLast(S.team,'team member',renderTeam));
 $('#addPbis').addEventListener('click',()=>{S.pbis.push({s:'',do:'',next:'',who:''});renderPbis();});
@@ -1167,10 +1167,10 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const why=d===undefined?'it is not a readable data file':crRefuse(d);
     if(why){alert('That file could not be opened on this form: '+why+'. Nothing was changed.');return;}
     S=crRecord(d.S);renderAll();};r.readAsText(f);e.target.value='';});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
-function loadSim(){
-  if(!confirm('Load a simulated case and fill every sheet? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   /* v21.16 audit (F3). The case sits inside one semester, on school days (Monday to Friday) and on the local
      calendar. T is today or, when today is too early in a semester for the case to fit (its first restraint is 28
      school days before T) or falls between semesters, the last day of the latest window in which it fits (fall:
@@ -1735,22 +1735,22 @@ function crcTick(){
   else{if(d.n!==undefined)crcNotify();return;}
   renderTrig();}));
 function crcFire(el,v){if(!el)return;el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));}
-document.addEventListener('click',e=>{
+document.addEventListener('click',async e=>{
   const b=e.target&&e.target.closest?e.target.closest('button'):null;if(!b||!b.closest('#crc'))return;const d=b.dataset,q=s=>document.querySelector(s);
   if(d.cnow!==undefined||d.canow!==undefined){
     const now=new Date(),els=d.cnow!==undefined?String(d.k).split(',').map(f=>q('[data-c="'+d.cnow+'"][data-f="'+f+'"]')):['d','t'].map(f=>q('[data-ca="'+d.canow+'"][data-f="'+f+'"]'));
-    if(els.some(x=>x&&x.value)&&!confirm('Replace the date and time already entered with the date and time now?'))return;
+    if(els.some(x=>x&&x.value)&&!(await nbhUI.confirm('Replace the date and time already entered?\nThey are replaced with the date and time now.',{ok:'Replace'})))return;
     els.forEach(x=>{if(x)crcFire(x,x.type==='time'?crcTimeStr(now):crcDateStr(now));});
   }else if(d.cconv!==undefined){crcFire(q('[data-c="'+d.cconv+'"][data-f="rd"]'),d.key||'');const t=q('[data-c="'+d.cconv+'"][data-f="rt"]');if(t)t.focus();}
   else if(d.csame!==undefined){const i=d.csame,r=S.log[+i];if(!r)return;crcFire(q('[data-c="'+i+'"][data-f="xd"]'),r.rd);const t=q('[data-c="'+i+'"][data-f="xt"]');if(t)t.focus();}
   else if(d.cadd!==undefined){const i=+d.cadd,r=S.log[i];if(!r)return;crcRow(r);r.att.push({d:'',t:'',m:'',o:''});crcRender();
     const f=q('[data-ca="'+i+'.'+(r.att.length-1)+'"][data-f="d"]');if(f)f.focus();}
   else if(d.cdel!==undefined){const i=+d.cdel,r=S.log[i];if(!r||!Array.isArray(r.att)||r.att.length<=1)return;
-    if(crcFilled(r.att[r.att.length-1])&&!confirm('Remove attempt '+r.att.length+' of restraint '+(i+1)+'? Its entries will be deleted.'))return;
+    if(crcFilled(r.att[r.att.length-1])&&!(await nbhUI.confirm('Remove attempt '+r.att.length+' of restraint '+(i+1)+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
     r.att.pop();crcRender();renderTrig();const a=q('[data-cadd="'+i+'"]');if(a)a.focus();}
   else if(b.id==='crcZAdd'){crcShape();S.closed.push({a:'',b:'',w:''});crcRender();renderTrig();const f=q('[data-cz="'+(S.closed.length-1)+'"][data-f="a"]');if(f)f.focus();}
   else if(b.id==='crcZDel'){crcShape();if(S.closed.length<=1)return;
-    if(crcFilled(S.closed[S.closed.length-1])&&!confirm('Remove no-school day '+S.closed.length+'? Its entries will be deleted.'))return;
+    if(crcFilled(S.closed[S.closed.length-1])&&!(await nbhUI.confirm('Remove no-school day '+S.closed.length+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
     S.closed.pop();crcRender();renderTrig();b.focus();}
 });
 /* keyboard: N in a date or time field of the clock fills in now (today, in a date on its own) */
@@ -1778,19 +1778,19 @@ document.addEventListener('keydown',e=>{
    deleting a restraint above it moves the number down, and deleting the one it names clears the choice, which
    the question says. A restraint's attempts and no-school days are deleted the same way inside the clock. */
 const CR_ROWS={team:{a:()=>S.team,redraw:()=>renderTeam()},pbis:{a:()=>S.pbis,redraw:()=>{renderPbis();renderTrig();}},act:{a:()=>S.act,redraw:()=>renderAct()},log:{a:()=>S.log,redraw:()=>{renderLog();renderTrig();}}};
-document.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button.rowDel'):null;if(!b)return;const d=b.dataset;
+document.addEventListener('click',async e=>{const b=e.target&&e.target.closest?e.target.closest('button.rowDel'):null;if(!b)return;const d=b.dataset;
   if(d.rdel!==undefined){const R=CR_ROWS[d.rdel];if(!R)return;const arr=R.a(),i=+d.i,r=arr[i];if(!r)return;
     const v=crcTxt(S.meta.dbRow).trim(),n=/^\d+$/.test(v)?+v:0;
-    let q='Delete this row?';if(d.rdel==='log'&&n===i+1)q+=' The debriefing sheet names this restraint; that choice will be cleared.';
-    if(crcFilled(r)&&!confirm(q))return;
+    let q='Delete this row?\nIts entries will be deleted.';if(d.rdel==='log'&&n===i+1)q+=' The debriefing sheet names this restraint; that choice will be cleared.';
+    if(crcFilled(r)&&!(await nbhUI.confirm(q,{ok:'Delete',danger:true})))return;
     arr.splice(i,1);
     if(d.rdel==='log'){if(n===i+1)S.meta.dbRow='';else if(n>i+1)S.meta.dbRow=String(n-1);}
     ensure();R.redraw();return;}
   if(d.cadelx!==undefined){const p=String(d.cadelx).split('.'),r=S.log[+p[0]],k=+p[1];if(!r||!Array.isArray(r.att)||!r.att[k])return;
-    if(crcFilled(r.att[k])&&!confirm('Delete this row? Attempt '+(k+1)+' of restraint '+(+p[0]+1)+' will be deleted.'))return;
+    if(crcFilled(r.att[k])&&!(await nbhUI.confirm('Delete this row?\nAttempt '+(k+1)+' of restraint '+(+p[0]+1)+' will be deleted.',{ok:'Delete',danger:true})))return;
     r.att.splice(k,1);if(!r.att.length)r.att.push({d:'',t:'',m:'',o:''});crcRender();renderTrig();return;}
   if(d.czdelx!==undefined){crcShape();const k=+d.czdelx,z=S.closed[k];if(!z)return;
-    if(crcFilled(z)&&!confirm('Delete this row? No-school day '+(k+1)+' will no longer count for the deadlines.'))return;
+    if(crcFilled(z)&&!(await nbhUI.confirm('Delete this row?\nNo-school day '+(k+1)+' will no longer count for the deadlines.',{ok:'Delete',danger:true})))return;
     S.closed.splice(k,1);crcShape();crcRender();renderTrig();}
 });
 

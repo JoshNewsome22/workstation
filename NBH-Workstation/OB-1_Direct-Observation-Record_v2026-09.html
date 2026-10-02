@@ -1320,12 +1320,12 @@ function renderLog(){
   if(stat){ const dated = state.obs.filter(o => o.date).length, lines = state.obs.reduce((a, o) => a + o.narrative.filter(r => String(r.w||"").trim()).length, 0);
     stat.textContent = state.obs.length + (state.obs.length === 1 ? ' observation' : ' observations') + ', ' + dated + ' dated, ' + lines + ' narrative ' + (lines === 1 ? 'line' : 'lines') + ' in all'; }
 }
-document.addEventListener("click", e => {
+document.addEventListener("click", async e => {
   const del = e.target.closest("button.delRow");
   if(del){
     const o = state.obs[+del.dataset.obs]; if(!o) return;
     const j = +del.dataset.row, r = o.narrative[j]; if(!r) return;
-    if(String(r.w||"").trim() && !confirm("Delete this line?\n\n" + (r.t ? hm12(r.t) + "  " : "") + r.w.slice(0, 160))) return;
+    if(String(r.w||"").trim() && !(await nbhUI.confirm("Delete this line?\n" + (r.t ? hm12(r.t) + "  " : "") + r.w.slice(0, 160), {ok:"Delete", danger:true}))) return;
     o.narrative.splice(j, 1);
     if(!o.narrative.length) o.narrative.push({t:"", w:""});
     render();
@@ -1880,7 +1880,7 @@ function refreshLight(i){
   refreshHeads(); renderSummary(); planNote();
 }
 
-document.addEventListener("click", e => {
+document.addEventListener("click", async e => {
   const iv = e.target.closest("button.iv");
   if(iv){
     const o = state.obs[+iv.dataset.obs]; if(!o) return;
@@ -1904,7 +1904,7 @@ document.addEventListener("click", e => {
   const del = e.target.closest("button.delObs");
   if(del){
     const i = +del.dataset.obs;
-    if(!confirm("Remove observation " + (i+1) + "? Everything recorded on it is lost."))return;
+    if(!(await nbhUI.confirm("Remove observation " + (i+1) + "?\nEverything recorded on it is lost.", {ok:"Remove", danger:true})))return;
     state.obs.splice(i,1);
     render();
     return;
@@ -1934,15 +1934,14 @@ $("#addObs").addEventListener("click", () => {
 });
 
 ["ivLen","ivMethod","ivN"].forEach(id => {
-  $("#"+id).addEventListener("change", () => {
+  $("#"+id).addEventListener("change", async () => {
     const next = cleanCfg({ ivLen:+$("#ivLen").value, ivMethod:$("#ivMethod").value, ivN:$("#ivN").value });
     /* v21.17: the setting labels every observation's sample, the ones already scored too, so it is
        not changed under marked intervals without asking */
     const marked = state.obs.some(o => (o.iv||[]).some(Boolean) || (o.peerIv||[]).some(Boolean));
     const same = next.ivLen === state.cfg.ivLen && next.ivMethod === state.cfg.ivMethod && next.ivN === state.cfg.ivN;
-    if(marked && !same && !confirm("Intervals are already marked on this record, scored as " + cfgText(state.cfg)
-        + ". The setting applies to every observation, so they would be read as " + cfgText(next)
-        + ". Change the setting?")){
+    if(marked && !same && !(await nbhUI.confirm("Change the interval setting?\nIntervals are already marked on this record, scored as " + cfgText(state.cfg)
+        + ". The setting applies to every observation, so they would be read as " + cfgText(next) + ".", {ok:"Change"}))){
       $("#ivLen").value = state.cfg.ivLen; $("#ivMethod").value = state.cfg.ivMethod; $("#ivN").value = state.cfg.ivN;
       return;
     }
@@ -1958,17 +1957,17 @@ $("#viewSeg").addEventListener("click", e => {
   $$("#viewSeg button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
 });
 
-$("#draftBtn").addEventListener("click", () => {
+$("#draftBtn").addEventListener("click", async () => {
   const el = document.querySelector('[data-meta="carry"]');
-  if(el.value.trim() && !confirm("Replace what is written here with a fresh draft?")) return;
+  if(el.value.trim() && !(await nbhUI.confirm("Replace what is written here with a fresh draft?", {ok:"Replace"}))) return;
   el.value = draft();
   state.meta.carry = el.value;
 });
 
 $("#printBtn").addEventListener("click", () => window.print());
 
-$("#clearBtn").addEventListener("click", () => {
-  if(!confirm("Clear every observation on this form, and the FS-1 statement drawn from them? The student, observer and setup details stay."))return;
+$("#clearBtn").addEventListener("click", async () => {
+  if(!(await nbhUI.confirm("Clear every observation on this form?\nThe FS-1 statement drawn from them is cleared with them. The student, observer and setup details stay.", {ok:"Clear all", danger:true})))return;
   state.obs = [];
   state.meta.carry = "";          /* v21.17: it described the observations just cleared */
   render();
@@ -2038,8 +2037,8 @@ $("#csvBtn").addEventListener("click", () => {
    least one occurrence: so the student is marked in no more intervals than the occurrences counted
    over the whole observation (2 of 7, none of 0, 2 of 6) and the peer in no more than the peer's
    count (none of 1, none of 0, 1 of 1). The third observation ends when the student leaves the room. */
-function loadSim(){
-  if(!confirm("Load a simulated student with three observations in one classroom, across independent work and a small group? Anything already entered will be replaced."))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm("Load the simulated student?\nThree observations in one classroom, across independent work and a small group. Anything already entered will be replaced.", {ok:"Load"})))return;
   /* the date n school days before today, as the date field holds it */
   const iso = n => { const d = new Date(); let k = 0;
     while(k < n){ d.setDate(d.getDate()-1); if(d.getDay() % 6) k++; }
@@ -2285,17 +2284,18 @@ render();
       + '. Check the summary below, then Save to the record, or Discard.');
     calm(E.obrSave);
   }
-  function endNow(){
+  async function endNow(){
     if(R.state !== 'run' && R.state !== 'pause') return;
     const e = el(), wall = Date.now(), p = passedOf(e);
-    let msg = 'End the observation now? Its minutes will be the ' + clock(e) + ' observed.';
+    let msg = 'End the observation now?\nIts minutes will be the ' + clock(e) + ' observed.';
     if(S && p < S.n) msg += ' The interval sample is at interval ' + (p + 1) + ' of ' + S.n + ': the ' + plural(S.n - p, 'interval') + ' not reached will read as not marked.';
-    if(!confirm(msg)) return;
+    if(!(await nbhUI.confirm(msg, {ok:'End now'}))) return;
     finish('end', e, wall);
   }
-  function discard(){
+  async function discard(){
     if(R.state === 'ready') return;
-    if(!confirm('Discard this recording? Nothing from it is written to the record.')) return;
+    if(!(await nbhUI.confirm('Discard this recording?\nNothing from it is written to the record.', {ok:'Discard', danger:true}))) return;
+    if(R.state === 'ready') return;
     reset(); note('Recording discarded. Nothing was written to the record.'); calm(E.obrStart);
   }
   function reset(){
@@ -2372,8 +2372,8 @@ render();
     note('Mark undone: interval ' + (x.k + 1) + (gone.length ? ' is unscored again for ' + names(gone) : '')
       + (kept.length ? (gone.length ? ', and' : '') + ' stays + for ' + names(kept) + ', where an occurrence was counted' : '') + '.');
   }
-  function sampleBtn(){
-    if(S){ if(!confirm('Cancel the interval sample? Its marks are dropped; the counts and the clock go on.')) return;
+  async function sampleBtn(){
+    if(S){ if(!(await nbhUI.confirm('Cancel the interval sample?\nIts marks are dropped; the counts and the clock go on.', {ok:'Drop the sample', cancel:'Keep it', danger:true})) || !S) return;
       S = null; lockCfg(false); buildStrip(); sched(); if(R.state === 'ended') summaryBox();
       note('Interval sample cancelled.' + (R.state === 'ended' ? '' : ' Press Start sample to run it again.')); return; }
     if(R.state !== 'run'){ note(R.state === 'pause' ? 'Resume first, then start the sample.' : R.state === 'ended' ? 'The observation has ended.'
@@ -2497,23 +2497,26 @@ render();
     narrWrite(i, sample ? hhmm(W(S.wall)) : '', sample ? sampleLine() : '');   /* v21.32 OB-1: HH:MM for the time picker */
     notesWrite(i, noteLines(sample, miss));
   }
-  function save(){
+  async function save(){
     if(R.state !== 'ended') return;
     const c = cfgNow();
     let sample = !!S;
     if(S && !sameCfg(c)){
-      if(!confirm('The interval sample was scored as ' + cfgText(S) + ', but the record is now set to ' + (c.n ? cfgText(c) : 'no interval sample')
-        + '. Its marks cannot be saved under that setting. Save the times and the counts without the sample?')) return;
+      if(!(await nbhUI.confirm('Save without the interval sample?\nThe interval sample was scored as ' + cfgText(S) + ', but the record is now set to ' + (c.n ? cfgText(c) : 'no interval sample')
+        + '. Its marks cannot be saved under that setting; the times and the counts can.', {ok:'Save without it'}))) return;
+      if(R.state !== 'ended') return;
       sample = false;
     }
     const miss = sample ? unscored() : {s:0, p:0};
     if(miss.s || miss.p){
-      if(!confirm('The interval sample has ' + missText(miss) + ' not scored. The sheet shows an interval only as marked or not, so they will read as not marked, and a note on the sheet will say so. Save anyway?')) return;
+      if(!(await nbhUI.confirm('Save with intervals not scored?\nThe interval sample has ' + missText(miss) + ' not scored. The sheet shows an interval only as marked or not, so they will read as not marked, and a note on the sheet will say so.', {ok:'Save anyway'}))) return;
+      if(R.state !== 'ended') return;
     }
     let i = resolveInto();
     if(i >= 0){ const had = existing(state.obs[i]);
-      if(had.length && !confirm('Observation ' + (i + 1) + ' already has ' + andList(had) + '. Replace ' + (had.length > 1 ? 'them' : 'it')
-        + ' with this recording? Its setting, activity, narrative, checklists and notes stay; the recording adds its own lines to the narrative and the notes.')) return; }
+      if(had.length && !(await nbhUI.confirm('Replace what observation ' + (i + 1) + ' holds?\nObservation ' + (i + 1) + ' already has ' + andList(had) + '. ' + (had.length > 1 ? 'They are' : 'It is')
+        + ' replaced with this recording. Its setting, activity, narrative, checklists and notes stay; the recording adds its own lines to the narrative and the notes.', {ok:'Replace', danger:true}))) return;
+      if(R.state !== 'ended') return; }
     else { const add = byId('addObs'); if(add) add.click(); i = state.obs.length - 1;
       if(i < 0 || !page(i)){ note('A new observation could not be added, so nothing was written.', true); return; } }
     write(i, sample, miss);
@@ -2686,7 +2689,7 @@ render();
     if(t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') return true;
     return t.tagName === 'INPUT' && TEXTY.test((t.getAttribute('type') || '').toLowerCase()); }
   document.addEventListener('keydown', e => {
-    if(R.state === 'ready' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target)) return;
+    if(R.state === 'ready' || e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || typing(e.target) || document.querySelector('dialog[open]')) return;
     const code = e.code || '', key = e.key || '', sh = e.shiftKey, SH = '!@#$';
     let act = null;
     if(code === 'Space' || key === ' '){ if(R.state === 'ended') return; act = startPause; }

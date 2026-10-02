@@ -1027,13 +1027,13 @@ function renderSteps(){
 }
 /* v21.33 (R): a routine or a step can be deleted anywhere in its list. A deleted step's codes in every round go
    with it, and the codes of the steps after it are re-keyed so none moves to another step. */
-function delGoalAt(i){const g=S.goals[i];if(!g)return;
-  if(['r','now','want','p','t'].some(k=>String(g[k]||'').trim())&&!confirm('Delete routine '+(i+1)+'? What was entered for it will be deleted.'))return;
+async function delGoalAt(i){const g=S.goals[i];if(!g)return;
+  if(['r','now','want','p','t'].some(k=>String(g[k]||'').trim())&&!(await nbhUI.confirm('Delete routine '+(i+1)+'?\nWhat was entered for it will be deleted.',{ok:'Delete',danger:true})))return;
   S.goals.splice(i,1);if(!S.goals.length)S.goals.push({r:'',now:'',want:'',p:'',t:''});renderGoals();}
 $('#goalTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delGoalAt(+b.dataset.di);});
-function delStepAt(i){const st=S.steps[i];if(!st)return;
+async function delStepAt(i){const st=S.steps[i];if(!st)return;
   const lock=$('#delStep');if(lock&&lock.disabled){alert(lock.title||'Locked while a round is open in the rehearsal runner.');return;}
-  if(((st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j)))&&!confirm('Delete step '+(i+1)+'? Its description and its codes in every round will be deleted, and the steps after it move up one.'))return;
+  if(((st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j)))&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nIts description and its codes in every round will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
   S.steps.splice(i,1);
   const nw={};Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const s=+m[1];if(s===i)return;nw[(s>i?s-1:s)+'_'+m[2]]=S.cells[k];});S.cells=nw;
   if(!S.steps.length)S.steps.push({d:'',crit:false});
@@ -1179,21 +1179,21 @@ function renderSum(){
 $('#addGoal').addEventListener('click',()=>{S.goals.push({r:'',now:'',want:'',p:'',t:''});renderGoals();});
 /* v21.16 audit (F3): a routine, a step or rounds that hold entries are removed only after a question, and a
    removed step's or round's codes go with it (they came back on the next one added) */
-$('#delGoal').addEventListener('click',()=>{if(S.goals.length>1){const n=S.goals.length,g=S.goals[n-1];
-  if(['r','now','want','p','t'].some(k=>String(g[k]||'').trim())&&!confirm('Remove routine '+n+'? What was entered for it will be deleted.'))return;
+$('#delGoal').addEventListener('click',async()=>{if(S.goals.length>1){const n=S.goals.length,g=S.goals[n-1];
+  if(['r','now','want','p','t'].some(k=>String(g[k]||'').trim())&&!(await nbhUI.confirm('Remove routine '+n+'?\nWhat was entered for it will be deleted.',{ok:'Remove',danger:true})))return;
   S.goals.pop();renderGoals();}});
 $('#addStep').addEventListener('click',()=>{S.steps.push({d:'',crit:false});renderSteps();renderGrid();});
-$('#delStep').addEventListener('click',()=>{if(S.steps.length>1){const i=S.steps.length-1;
-  if(((S.steps[i].d||'').trim()||S.rounds.some((_,j)=>code(i,j)))&&!confirm('Remove step '+(i+1)+'? Its description and its codes in every round will be deleted.'))return;
+$('#delStep').addEventListener('click',async()=>{if(S.steps.length>1){const i=S.steps.length-1;
+  if(((S.steps[i].d||'').trim()||S.rounds.some((_,j)=>code(i,j)))&&!(await nbhUI.confirm('Remove step '+(i+1)+'?\nIts description and its codes in every round will be deleted.',{ok:'Remove',danger:true})))return;
   S.steps.pop();ensure();renderSteps();renderGrid();renderSum();}});
 /* v21.16 audit (F3, F4): each setting takes only a value inside its stated range (whole numbers for the
    counts) and otherwise puts the current value back. 2.5 rehearsals stopped the page with an error; 0%
    silently became 80%, and 30%, 150%, -1, 2.5 or 9 consecutive rounds were taken. */
-$('#nRounds').addEventListener('change',e=>{const v=+e.target.value;
+$('#nRounds').addEventListener('change',async e=>{const v=+e.target.value;
   if(!(e.target.value!==''&&Number.isInteger(v)&&v>=1&&v<=8)){e.target.value=S.nRounds;return;}
   if(v<S.nRounds){const lost=[];
     for(let j=v;j<S.nRounds;j++){const r=S.rounds[j]||{};if(r.date||r.type||(r.fb||'').trim()||S.steps.some((_,i)=>code(i,j)))lost.push('R'+(j+1));}
-    if(lost.length&&!confirm('Reduce the record to '+v+' rehearsal round'+(v>1?'s':'')+'? '+lost.join(', ')+(lost.length>1?' hold':' holds')+' entries (date, arrangement, codes or feedback) that will be deleted.')){e.target.value=S.nRounds;return;}}
+    if(lost.length&&!(await nbhUI.confirm('Reduce the record to '+v+' rehearsal round'+(v>1?'s':'')+'?\n'+lost.join(', ')+(lost.length>1?' hold':' holds')+' entries (date, arrangement, codes or feedback) that will be deleted.',{ok:'Reduce',danger:true}))){e.target.value=S.nRounds;return;}}
   S.nRounds=v;renderAll();});
 $('#critPct').addEventListener('change',e=>{const v=+e.target.value;if(e.target.value!==''&&v>=50&&v<=100){S.crit=v;renderSum();}else e.target.value=S.crit;});
 $('#critN').addEventListener('change',e=>{const v=+e.target.value;if(e.target.value!==''&&Number.isInteger(v)&&v>=1&&v<=4){S.critN=v;renderSum();}else e.target.value=S.critN;});
@@ -1225,10 +1225,10 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     try{S=Object.assign(blank(),d.S);renderAll();}
     catch(err){S=prev;renderAll();alert('That file could not be read as a saved CT-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
-function loadSim(){
-  if(!confirm('Load a simulated training record and fill every sheet? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated training record?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   /* v21.16 audit (F1): dates on the local calendar and on school days. day(n) is n school days before today
      (before the last school day when today is not one): a school day is a weekday that is not a school holiday
      set by rule (Labor Day, Veterans Day, Thanksgiving and the day after, 24 December to 1 January, Martin
@@ -1695,9 +1695,9 @@ function end(){if(!live())return;R.acc=elapsed();R.st='review';tickOff();wakeOff
 function back(i){if(R.st!=='review')return;readReview();if(i!=null&&inScope(i)&&i>=0&&i<nSteps())R.cur=i;R.t0=now();R.st='run';tickOn();wakeOn();setTop();
   note(i!=null?'Back to coding at step '+(i+1)+'.':'Back to coding.');render();focusWork();}
 function reset(){tickOff();wakeOff();lockOff();Object.assign(R,{st:'idle',round:-1,ev:[],stack:[],acc:0,cur:0,sRef:null,stageH:'',listSig:'',fb:'',fbEdited:false,comp:{},pk:{}});}
-function discard(){if(!active())return;if(!confirm('Discard this round? Nothing is written to the grid.'))return;
+async function discard(){if(!active())return;if(!(await nbhUI.confirm('Discard this round?\nNothing is written to the grid.',{ok:'Discard',danger:true})))return;if(!active())return;
   reset();R.after='';note('Round discarded. Nothing was written to the grid.');render();focusEl(byId('rrOpen'));}
-function save(){
+async function save(){
   if(R.st!=='review')return;readReview();const n=nSteps(),j=R.round,f=figs();
   if(!f.coded){note('Nothing is coded yet. Keep coding, or discard the round.',true);return;}
   if(!(j>=0&&j<CFG.max&&j<=S.nRounds)){note('This round can no longer be saved to R'+(j+1)+': discard it and set it up again.',true);return;}
@@ -1705,9 +1705,10 @@ function save(){
   const writeFb=fbWritten(),fb=String(R.fb||'').trim(),date=isISO(R.date)?R.date:'',arr=ARR_OK(R.arr)?R.arr:'';
   const c=j<S.nRounds?roundInfo(j):null;
   const Rj='R'+(j+1)+RSQ+'s';
-  if(c&&!c.empty&&!confirm('R'+(j+1)+' already holds '+holds(c)+'.\n\nSave this round over it? This round'+RSQ+'s codes, date and arrangement replace '+Rj+
-    (writeFb?', and its feedback replaces '+Rj+' feedback.':c.fb?'; '+Rj+' feedback is kept.':'.'))){
+  if(c&&!c.empty&&!(await nbhUI.confirm('Save this round over R'+(j+1)+'?\nR'+(j+1)+' already holds '+holds(c)+'. This round'+RSQ+'s codes, date and arrangement replace '+Rj+
+    (writeFb?', and its feedback replaces '+Rj+' feedback.':c.fb?'; '+Rj+' feedback is kept.':'.'),{ok:'Replace',danger:true}))){
     note('Nothing was saved, and R'+(j+1)+' is unchanged.');return;}
+  if(R.st!=='review')return;
   const codes=[];for(let i=0;i<n;i++)codes.push(inScope(i)?roll(i).code:'');
   const comps=compChosen(),pr=probePlan();let err='';
   lockOff();R.writing=true;

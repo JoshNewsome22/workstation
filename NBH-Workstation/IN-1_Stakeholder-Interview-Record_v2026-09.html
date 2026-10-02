@@ -827,12 +827,15 @@ const mine=(o,i)=>Object.keys(o).filter(k=>k.split('_')[0]===String(i));
 const hasEntries=i=>mine(S.ans,i).some(k=>String(S.ans[k]).trim())||mine(S.mx,i).some(k=>(S.mx[k]||[]).some(Boolean));
 const dropAnswers=i=>{[S.ans,S.mx].forEach(o=>mine(o,i).forEach(k=>{delete o[k];}));};
 const SETNAME=q=>q===Q_PARENT?'parent':q===Q_STUDENT?'student':'school';
-['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(el.dataset.r===undefined)return;
+['input','change'].forEach(ev=>document.addEventListener(ev,async e=>{const el=e.target;if(el.dataset.r===undefined)return;
   const i=+el.dataset.r,f=el.dataset.f,r=S.resp[i];if(!r)return;
   if(f==='role'){
     if(el.value===r.role||!ROLE_LIST.includes(el.value))return;
     if(ROLES[el.value]!==ROLES[r.role]){
-      if(hasEntries(i)&&!confirm(`Change respondent ${i+1} from ${r.role} to ${el.value}? That role is asked the ${SETNAME(ROLES[el.value])} question set, so the answers recorded on the ${SETNAME(ROLES[r.role])} set will be deleted.`)){el.value=r.role;return;}
+      /* v21.34: a select fires input and then change; the question is asked once, and the second event waits it out */
+      if(el._asking)return;
+      if(hasEntries(i)){el._asking=true;let ok=false;try{ok=await nbhUI.confirm(`Change respondent ${i+1} from ${r.role} to ${el.value}?\nThat role is asked the ${SETNAME(ROLES[el.value])} question set, so the answers recorded on the ${SETNAME(ROLES[r.role])} set will be deleted.`,{ok:'Change',danger:true});}finally{el._asking=false;}
+        if(!ok){el.value=r.role;return;}}
       dropAnswers(i);}
     r.role=el.value;renderResp();renderInt();renderConv();return;}
   r[f]=el.value;renderRespCard();renderIntHead(i);renderConv();}));
@@ -842,15 +845,15 @@ $('#addTea').addEventListener('click',()=>addR('Teacher'));
 $('#addSta').addEventListener('click',()=>addR('Staff member'));
 $('#addRsp').addEventListener('click',()=>addR('Related service provider'));
 $('#addStu').addEventListener('click',()=>addR('Student'));
-$('#delResp').addEventListener('click',()=>{if(S.resp.length<2)return;const i=S.resp.length-1,r=S.resp[i];
-  if(([r.n,r.rel,r.d,r.by,r.fmt].some(v=>String(v||'').trim())||hasEntries(i))&&!confirm(`Remove respondent ${i+1} (${r.n.trim()||r.role})? Their details and every answer recorded for them will be deleted.`))return;
+$('#delResp').addEventListener('click',async()=>{if(S.resp.length<2)return;const i=S.resp.length-1,r=S.resp[i];
+  if(([r.n,r.rel,r.d,r.by,r.fmt].some(v=>String(v||'').trim())||hasEntries(i))&&!(await nbhUI.confirm(`Remove respondent ${i+1} (${r.n.trim()||r.role})?\nTheir details and every answer recorded for them will be deleted.`,{ok:'Remove',danger:true})))return;
   dropAnswers(i);S.resp.pop();S.cur=Math.min(S.cur,S.resp.length-1);renderResp();renderInt();renderConv();});
 /* v21.33 (R): any respondent can be deleted, not only the last. Answers are keyed by the respondent's position,
    so the answers of every respondent after the deleted one move up one place; the last respondent is cleared
    rather than removed, so the record keeps one row. */
-function removeResp(i){const r=S.resp[i];if(!r)return;
+async function removeResp(i){const r=S.resp[i];if(!r)return;
   const held=[r.n,r.rel,r.d,r.by,r.fmt].some(v=>String(v||'').trim())||hasEntries(i);
-  if(held&&!confirm(`Delete respondent ${i+1} (${r.n.trim()||r.role})? Their details and every answer recorded for them will be deleted.`))return;
+  if(held&&!(await nbhUI.confirm(`Delete respondent ${i+1} (${r.n.trim()||r.role})?\nTheir details and every answer recorded for them will be deleted.`,{ok:'Delete',danger:true})))return;
   dropAnswers(i);
   if(S.resp.length<2){S.resp[0]=newR(r.role);S.cur=0;renderResp();renderInt();renderConv();return;}
   [S.ans,S.mx].forEach(o=>{for(let k=i+1;k<S.resp.length;k++)mine(o,k).forEach(key=>{const v=o[key];delete o[key];o[akey(k-1,key.split('_')[1])]=v;});});
@@ -982,10 +985,10 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     try{S=Object.assign(blank(),JSON.parse(JSON.stringify(d.S)));renderAll();}
     catch(err){S=prev;renderAll();alert('That file could not be read as a saved IN-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
-function loadSim(){
-  if(!confirm('Load a simulated set of interviews and fill every sheet? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated set of interviews?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   /* v21.16 audit (F6): the interviews fall on past school days of the local calendar. They were calendar days
      back from today, so the parent's fell on a Saturday when the simulation was loaded today, and a teacher's
      on a Sunday when it was loaded on a Sunday evening. A school day is a weekday that is not a school holiday

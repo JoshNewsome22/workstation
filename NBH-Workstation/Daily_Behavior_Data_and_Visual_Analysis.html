@@ -44,7 +44,24 @@ header.masthead{
 }
 .masthead-row{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:space-between}
 .masthead-row .sub{color:var(--ink-soft);font-size:13px;margin-top:3px;max-width:62ch}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* ---- toolbar (v21.34): the View segment and the sheet actions the other forms share. The old tab row stays in
+   the document, hidden, because the walkthrough and the live panel click its buttons; the segment mirrors it. ---- */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--nbh-navy,#182e43);color:#E7EDF2;font-family:var(--nbh-sans,system-ui,sans-serif);font-size:12.5px;padding:10px 18px;margin:0;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.tgroup{display:flex;flex-direction:column;gap:4px}
+.tgroup > span{font-size:10.5px;letter-spacing:.04em;color:var(--nbh-sage,#9FB3C2)}
+.tgroup .row{display:flex;gap:6px;align-items:center}
+.toolbar select,.toolbar input[type=number]{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#31414F);color:#f1f6f5;border:1px solid #3e6070;border-radius:2px;padding:4px 6px}
+.toolbar input[type=number]{width:62px}
+.toolbar button{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#3C5061);color:#f1f6f5;border:1px solid #3e6070;border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.toolbar button:hover{background:#2f5568}
+.toolbar button.primary{background:#fff;color:var(--nbh-navy,#182e43);border-color:#fff;font-weight:600}
+.toolbar button.primary:hover{background:var(--nbh-mint,#bcd9d4)}
+.seg{display:flex;border:1px solid #3e6070;border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--nbh-slate,#31414F);padding:5px 10px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--nbh-navy,#182e43);font-weight:600}
+.toolbar :focus-visible{outline:2px solid var(--nbh-sage,#a0c9c3)}
+nav.nbh-tabs.nbh-tabs-old{display:none!important}
+@media print{.toolbar{display:none!important}}
 nav.tabs{display:flex;gap:2px;margin-top:12px;flex-wrap:wrap}
 nav.tabs button{
   background:transparent;border:1px solid transparent;border-bottom:none;
@@ -797,21 +814,24 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
         <h1>Daily Target Behavior Data Sheet &amp; Visual Analysis</h1>
         <p class="nbh-sub">Record daily data by behavior, mark phase changes, and produce line graphs with within- and across-condition visual analysis. The Live Recording panel on the Daily data tab times a session at the table and writes its row for you.</p>
       </div>
-      <div class="nbh-actions">
-        <button class="tool nbh-btn nbh-btn-secondary" id="btnLoadExample">Load simulation</button>
-        <button class="tool nbh-btn nbh-btn-primary" id="btnPrintTop">Print / Save as PDF</button>
-        <button class="tool nbh-btn nbh-btn-secondary" id="btnSave">Save data</button>
-        <label class="tool nbh-btn nbh-btn-secondary filebtn">Open data<input type="file" id="fileImport" accept="application/json,.json" hidden></label>
-        <button class="tool nbh-btn nbh-btn-secondary" id="btnCsv">Export CSV</button>
-        <button class="tool nbh-btn nbh-btn-danger" id="btnClearAll">Clear all</button>
-      </div>
     </div>
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
   </div>
 </header>
 <!-- the tabs sit under the masthead's rule, as on the other tabbed forms, and
      stay at the top of the window while the page scrolls -->
-<nav class="tabs nbh-tabs" role="tablist">
+<div class="toolbar noprint">
+  <div class="tgroup"><span>View</span><div class="row">
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="setup" aria-pressed="true">Client &amp; behaviors</button>
+      <button type="button" data-view="data" aria-pressed="false">Daily data</button>
+      <button type="button" data-view="results" aria-pressed="false">Graphs &amp; analysis</button>
+    </div></div></div>
+  <div class="tgroup"><span>Sheet actions</span><div class="row">
+    <button type="button" id="btnLoadExample">Load simulation</button><button type="button" class="primary" id="btnPrintTop">Print / Save as PDF</button><button type="button" id="btnSave">Save data</button><button type="button" id="btnLoad">Open data</button><input type="file" id="fileImport" accept="application/json,.json" hidden><button type="button" id="btnCsv">Export CSV</button><button type="button" id="btnClearAll">Clear all</button>
+  </div></div>
+</div>
+<nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
     <button role="tab" data-tab="setup" aria-selected="true"><span class="n">1</span>Client &amp; behaviors</button>
     <button role="tab" data-tab="data" aria-selected="false"><span class="n">2</span>Daily data</button>
@@ -827,7 +847,7 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
   </div>
   <div class="print-head" id="printHead"></div>
   <!-- ============ SETUP ============ -->
-  <section id="tab-setup">
+  <section id="tab-setup" data-panel="setup">
     <div class="panel">
       <h2>Client and program information</h2>
       <p class="hint no-print">Everything you enter stays in this file on your computer. Nothing is uploaded anywhere. Use the save button in the header to keep a copy you can reopen later.</p>
@@ -886,7 +906,7 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
   </section>
 
   <!-- ============ DATA ============ -->
-  <section id="tab-data" class="hidden">
+  <section id="tab-data" class="hidden" data-panel="data">
     <!-- Live recording at the table: a session timer and one control per behavior. It writes the day's row only when
          Save to the sheet is pressed. None of its controls has a name, so none is a record field, and none of it prints. -->
     <section class="ddl noprint no-print" id="ddLive" data-s="ready" aria-labelledby="ddlTitle">
@@ -1036,7 +1056,7 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
   <div class="blankform" id="blankForm"></div>
 
   <!-- ============ RESULTS ============ -->
-  <section id="tab-results" class="hidden">
+  <section id="tab-results" class="hidden" data-panel="results">
     <div class="panel no-print">
       <h2>Analysis options</h2>
       <div class="inline-controls">
@@ -3292,6 +3312,23 @@ function showTab(name){
   if(name==="results") renderResults();
 }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>showTab(b.dataset.tab)));
+/* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
+   walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
+   carries view-<key> like the other forms. ---- */
+(function(){
+  var seg=document.getElementById('viewSeg'),nav=document.querySelector('nav.nbh-tabs');if(!seg||!nav)return;
+  var tabs=Array.prototype.slice.call(nav.querySelectorAll('[role=tab]'));
+  var keyOf=function(t){return t.dataset.tab||'';};
+  function sync(){
+    var cur=tabs.filter(function(t){return t.getAttribute('aria-selected')==='true';})[0],k=cur?keyOf(cur):'';
+    seg.querySelectorAll('button[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===k));});
+    if(k){var cl=document.body.classList;Array.prototype.slice.call(cl).forEach(function(c){if(c.indexOf('view-')===0)cl.remove(c);});cl.add('view-'+k);}
+  }
+  seg.querySelectorAll('button[data-view]').forEach(function(b){b.addEventListener('click',function(){
+    var t=tabs.filter(function(x){return keyOf(x)===b.dataset.view;})[0];if(t)t.click();sync();});});
+  try{new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['aria-selected']});}catch(e){}
+  sync();
+})();
 
 // meta fields
 const metaMap={m_client:"client",m_id:"id",m_age:"age",m_school:"school",m_class:"classroom",
@@ -3337,11 +3374,11 @@ $("#behTable").addEventListener("input",e=>{
   if(f==="definition"||f==="obsLength"){ renderData(); renderIntervalPanel(); }
   renderResults();
 });
-$("#behTable").addEventListener("click",e=>{
+$("#behTable").addEventListener("click",async e=>{
   if(e.target.dataset.act!=="delBeh") return;
   const tr=e.target.closest("tr"); const id=tr.dataset.b;
   const b=S.behaviors.find(x=>x.id===id);
-  if(!confirm(`Remove "${b&&b.name?b.name:"this behavior"}" and its data from every row?`)) return;
+  if(!(await nbhUI.confirm(`Remove "${b&&b.name?b.name:"this behavior"}"?\nThe behavior and its data are removed from every row.`,{ok:"Remove",danger:true}))) return;
   S.behaviors=S.behaviors.filter(x=>x.id!==id);
   S.rows.forEach(r=>{
     delete r.values[id]; delete r.values[OPP(id)];
@@ -3365,9 +3402,9 @@ $("#photoSlot").addEventListener("drop",e=>{ const f=e.dataTransfer&&e.dataTrans
 // data sheet
 $("#btnAddDays").addEventListener("click",addDays);
 $("#btnAddOne").addEventListener("click",()=>{ S.rows.push(newRow("")); renderData(); renderIntervalPanel(); });
-$("#btnClearRows").addEventListener("click",()=>{
+$("#btnClearRows").addEventListener("click",async ()=>{
   if(!S.rows.length) return;
-  if(!confirm("Delete every data row? Behaviors and client information are kept.")) return;
+  if(!(await nbhUI.confirm("Delete every data row?\nBehaviors and client information are kept.",{ok:"Delete all",danger:true}))) return;
   S.rows=[]; selectedDay=null; renderData(); renderIntervalPanel(); renderResults();
 });
 $("#dataTable").addEventListener("input",e=>{
@@ -3823,15 +3860,16 @@ $("#btnPrintTop").addEventListener("click",()=>{
                results:"Graphs and visual analysis"}[active?active.dataset.tab:"data"];
   printTab(label||"Daily data sheet");
 });
-$("#btnClearAll").addEventListener("click",()=>{
-  if(confirm("Clear all entries on this form? Anything you have not saved to a file will be lost."))
+$("#btnClearAll").addEventListener("click",async ()=>{
+  if(await nbhUI.confirm("Clear all entries on this form?\nAnything you have not saved to a file will be lost.",{ok:"Clear all",danger:true}))
     location.reload();
 });
 $("#btnSave").addEventListener("click",saveFile);
 $("#btnCsv").addEventListener("click",exportCsv);
 $("#fileImport").addEventListener("change",e=>{ if(e.target.files[0]) openFile(e.target.files[0]); e.target.value=""; });
-$("#btnLoadExample").addEventListener("click",()=>{
-  if(S.rows.length && !confirm("Replace the current sheet with example data?")) return;
+$("#btnLoad").addEventListener("click",()=>$("#fileImport").click());
+$("#btnLoadExample").addEventListener("click",async ()=>{
+  if(S.rows.length && !(await nbhUI.confirm("Replace the current sheet with example data?",{ok:"Replace"}))) return;
   loadExample();
 });
 
@@ -4051,9 +4089,10 @@ function reset(){
   E.date.value=today();
   locks(); wakeSync(); whereSync(); paint();
 }
-function discard(){
+async function discard(){
   if(L.state==="ready") return;
-  if(!confirm("Discard this session? Nothing from it has been written to the sheet, and it cannot be brought back.")) return;
+  if(!(await nbhUI.confirm("Discard this session?\nNothing from it has been written to the sheet, and it cannot be brought back.",{ok:"Discard",danger:true}))) return;
+  if(L.state==="ready") return;
   reset(); note("Session discarded. Nothing was written.");
 }
 
@@ -4106,7 +4145,7 @@ D.addEventListener("visibilitychange",()=>{ if(D.visibilityState!=="visible") re
 const LOCKED=[];
 function locks(){
   const on=L.state!=="ready";
-  const want=on?["#btnLoadExample","#btnClearAll","#fileImport"].map(s=>D.querySelector(s)).concat([...D.querySelectorAll('#behTable select[data-f="measure"]')]).filter(Boolean):[];
+  const want=on?["#btnLoadExample","#btnClearAll","#fileImport","#btnLoad"].map(s=>D.querySelector(s)).concat([...D.querySelectorAll('#behTable select[data-f="measure"]')]).filter(Boolean):[];
   const why="Locked while a live session is open. Save or discard the session first.";
   for(let i=LOCKED.length-1;i>=0;i--){ const x=LOCKED[i]; if(want.indexOf(x.el)<0||!x.el.isConnected){
     x.el.disabled=x.dis; if(x.title===null) x.el.removeAttribute("title"); else x.el.title=x.title; x.el.classList.remove("ddl-locked");
