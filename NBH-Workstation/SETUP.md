@@ -4232,3 +4232,124 @@ delete column absent in print; in the shell, three forms side by side,
 a fourth opened taking a column, a pane closed, a form closed, back to
 one, the chooser, and stacking at 820 px.
 
+## Rows, Times, Graphs, the BIP Text, and Saving (v21.33)
+
+Three of the improvements listed after v21.32: any row can be deleted and
+clock times are picked across the forms; the plan's text comes out of the
+forms for the district BIP document, and graphs come out as images; and
+unsaved work is harder to lose.
+
+### Saving (index.html and every form)
+
+- **Save case on the crumb bar.** The button beside Print carries an
+  orange dot while the case holds entries changed since the last file
+  save (`caseDirty()`: a form with more than three filled fields and a
+  signature that differs from `state.lastSig`, the same test the unload
+  guard makes). Its title says how long. After `NUDGE_MIN` (20) minutes of
+  unsaved work the button pulses three times and the live region says so,
+  once per stretch. `paintSave()` runs every five seconds. Help gains a
+  paragraph.
+- **The unload guard in every form** (`<script id="nbh-guard">`, inserted
+  before the toolbar-width style in all 42 forms by
+  `scratchpad/guard/patch-guard.py`, so new forms carry it from the CF-1
+  template). A form opened on its own keeps nothing in the browser, so the
+  block tracks whether any field changed since the last Save data (an
+  opened file, Save data and Clear all reset it) and asks before the tab
+  closes or reloads while it holds unsaved entries
+  (`beforeunload`). Inside the workstation (`window.parent !== window`)
+  it stays quiet: the shell has its own guard and the autosave.
+  `window.nbhGuard.isDirty()` and `.clean()` are exposed.
+- **Save data in the compact toolbar.** With the toolbar folded (More
+  controls, the state an iPad opens in), a `Save data` button sits beside
+  More controls and clicks the form's own save; it is bold while the form
+  holds unsaved changes. It is hidden when the full toolbar shows.
+- **Spell-check on.** The same block sets `spellcheck="true"` on every
+  textarea and text input, including ones rendered later (a mutation
+  observer), since the browser default differs by platform.
+- The "From the case" toolbar group is now kept in the compact toolbar
+  (`tg-keep`), so the case picker is reachable on an iPad without
+  unfolding the controls.
+
+### Any row can be deleted (33 forms)
+
+Tables that offered "Add a row" and "Remove last" now end each row in a
+small "x" (`button.rowDel` in `td.nx`, not printed): a row with an entry
+asks first, an empty one goes silently, the form's minimum is kept as a
+blank row, and "Remove last" stays. Where other data is keyed by the
+row's position it is re-keyed or dropped, and the confirm says so:
+respondent ratings (CF-1, SV-1); step cells, IOA and opportunities
+(TI-1), step cells (CT-1, ST-1; ST-1's TI-1 retrain record is matched by
+number and text, so a mismatch shows as "reads differently", never as a
+silent shift); the DD-1 import record and period rows on PR-1 (the
+baseline row is cleared, not deleted); thinning and backup rows (TE-1);
+FS-1's sources, hypotheses and the target bar (`S.cur` follows); CR-1's
+team, interventions, actions, restraint log (the debriefed restraint's
+number re-keyed or cleared), attempts and no-school days; CN-1 next
+steps; SA-1 codes (cells scored with a deleted letter count as prompted),
+steps (task-analysis levels spliced in every session) and probes; GC-1
+expectations, menu, teams (per-team log scores spliced and padded),
+record days and fidelity entries; DA-1 tasks (sessions and probes using
+the task dropped, indexes re-keyed), sessions and probes; HD-1 behaviors
+and routines (week cells and agreement checks re-keyed), checklist steps
+and checks; SI-1 hard activities, assent behaviors, assent log,
+components and choices (pairs re-keyed); VS-1 cards, rules and schedule
+steps; SM-1 targets (per-target log points spliced), periods (week
+levels re-keyed) and record days; MT-1 sessions; IN-1 respondents
+(answers keyed `respondent_question` moved up); BC-1 rates; RM-1
+challenges. Left alone, by design: fixed catalogues (rubrics, fidelity
+items, mitigation and readiness lists), generated tables, the interval
+grids, and the forms that already deleted any row by id (DD-1, ABC-1,
+SP-1, OB-1 since v21.32, GB-1's cards). Sessions on SA-1 are columns,
+so their "x" sits in the column header.
+
+### Clock times are picked (CN-1, SM-1, MT-1, OB-1)
+
+Single clock-time text fields are `type="time"`: CN-1 start and end
+(`toMin()` accepts HH:MM and keeps the add-twelve-hours heuristic only
+for typed text; the printed note shows "9:00 am to 10:30 am"), SM-1
+period times (shown as "8:30 am Arrival" on the sheet), MT-1 start (the
+timer stamp writes HH:MM) and OB-1's narrative (v21.32). Each form
+carries `toHM24()` to read older files' typed times (a bare hour 1 to 6
+is afternoon; am/pm honoured). Ranges ("7:00 to 8:00"), mixed
+placeholders and dates were left as text.
+
+### Graphs as images (DD-1, SA-1, GC-1, DA-1, SM-1)
+
+"Save graph as image" (not printed) under each graph a BCBA puts in a
+report: the SVG is cloned with its namespace, size and font, serialised,
+drawn on a canvas at 2x and downloaded as
+`<Form>_graph_<student>_<date>.png` (DD-1: one button per behavior
+graph; GC-1 names the file by class; SM-1's sheet self-graphs save as
+`_graph_sheet_`). Verified downloads of 80 to 160 KB, 1960 x 880 for
+DD-1.
+
+### Copy for the BIP (FS-1, TD-1, GB-1, CR-1)
+
+`Copy for the BIP` (`#bipBtn`, Sheet actions) composes plain text from
+the form's state, uppercase section headings, `Label: value` lines,
+`- item` lists, empty fields and blocks dropped, and puts it on the
+clipboard (`#bipMsg` reports the line count; when the clipboard is
+refused, a dialog shows the text selected). FS-1: student and
+assessment, each target with definition, dimension, level, function,
+setting event, antecedent, consequence and the summary statement
+(`stmtText`), the level of evidence, sources, hypotheses considered,
+recommendation, limitations and what would change the conclusion. TD-1:
+target and function, baseline and criteria, then the Final plan's groups
+with each component's parameters, materials and numbered staff steps,
+the positioning rules, prompt hierarchy, response to precursor and
+target, the crisis procedure, the thinning ladder, generalization, and
+data and decision rules. GB-1: the plan, each objective as its sentence
+(gaps as `[...]`), pairing, notes and checks. CR-1: trigger, team,
+supports, each stage, restraint health limits and rules, review
+timetable, debrief, changes, notification and the restraint log. Guide
+text, instructions and the training and social-validity tables are
+left out. `qa/bip4-test.js` checks all four (108 assertions).
+
+### Checks
+
+`qa/all-forms-shell.js` (42 forms open, answer, no errors),
+`qa/case-test.js`, `qa/ob1-split-test.js`, `qa/guard-test.js`,
+`qa/bip4-test.js`, `qa/rowdel-test.js` (CF-1, SV-1, TE-1, CT-1, TI-1,
+ST-1, PR-1), `qa/v2133-test.js` (MT-1, IN-1, BC-1, RM-1, DD-1, ABC-1,
+SP-1), the nine parts-form tests, `pnav-test.js` over all 42 and the
+one-file checks all pass.

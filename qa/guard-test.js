@@ -1,0 +1,23 @@
+const {chromium,BASE,wire,sleep}=require('./lib');
+(async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();wire(page,log);
+ await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
+ console.log('clean',await page.evaluate(()=>({dirty:$('#saveQuick').classList.contains('dirty'),title:$('#saveQuick').title})));
+ await page.evaluate(()=>openForm('TB-1'));await page.waitForFunction(()=>!!state.status['TB-1'],null,{timeout:20000});
+ const fr=page.frames().find(f=>f.url().includes('TB-1_'));await fr.evaluate(()=>document.querySelector('#simBtn').click());await sleep(5500);
+ await page.evaluate(()=>paintSave());
+ console.log('after sim',await page.evaluate(()=>({dirty:$('#saveQuick').classList.contains('dirty'),title:$('#saveQuick').title})));
+ await page.evaluate(()=>{state.dirtySince=Date.now()-21*60000;paintSave();});
+ console.log('nudge',await page.evaluate(()=>({nudge:$('#saveQuick').classList.contains('nudge'),live:$('#live').textContent})));
+ await page.evaluate(()=>{state.lastSig=caseSig();paintSave();});
+ console.log('after save',await page.evaluate(()=>({dirty:$('#saveQuick').classList.contains('dirty')})));
+ /* the form guard, standalone */
+ const p2=await ctx.newPage();wire(p2,log);await p2.goto(BASE+'/NBH-Workstation/DM-1_Student-Demographics-and-Profile_v2026-09.html');await sleep(600);
+ const g=await p2.evaluate(()=>({has:!!window.nbhGuard,dirty:window.nbhGuard&&window.nbhGuard.isDirty(),spell:document.querySelector('textarea')&&document.querySelector('textarea').getAttribute('spellcheck'),quick:!!document.querySelector('#nbhSaveQuick'),compact:document.documentElement.classList.contains('nbh-compact'),quickShown:document.querySelector('#nbhSaveQuick')&&getComputedStyle(document.querySelector('#nbhSaveQuick')).display}));
+ console.log('guard load',JSON.stringify(g));
+ await p2.evaluate(()=>{const t=document.querySelector('input,textarea');t.value='x';t.dispatchEvent(new Event('input',{bubbles:true}));});
+ console.log('after typing dirty',await p2.evaluate(()=>window.nbhGuard.isDirty()));
+ p2.on('dialog',d=>{console.log('beforeunload dialog:',d.type());d.dismiss().catch(()=>{});});
+ const nav=await p2.evaluate(()=>{const ev=new Event('beforeunload',{cancelable:true});window.dispatchEvent(ev);return ev.defaultPrevented;});
+ console.log('beforeunload prevented',nav);
+ await p2.evaluate(()=>document.querySelector('#saveBtn').click());await sleep(500);console.log('after save dirty',await p2.evaluate(()=>window.nbhGuard.isDirty()));
+ console.log('LOG',JSON.stringify(log).slice(0,300));await br.close();})();

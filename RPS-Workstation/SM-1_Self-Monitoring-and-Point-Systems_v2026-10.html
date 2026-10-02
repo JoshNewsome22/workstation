@@ -537,6 +537,13 @@ body.view-guide .only-setup,body.view-guide .only-targets,body.view-guide .only-
   body.sm-bc-only #bcOut{break-before:auto;padding:0;max-width:none}
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+.graph .sm-png{margin-top:6px}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -739,7 +746,7 @@ td input,td select{max-width:100%}
     <p class="hint">Two to four targets, each stated as something the student does (not stops doing), in the student&rsquo;s own words on the sheet and in observable terms for the adults. Pair each reduction target with the replacement behavior the plan teaches. The cue line prints under the question on the sheet; the examples and non-examples are the teaching set for the discrimination practice.</p>
     <div class="tools"><button class="tool" id="addT">Add a target</button><button class="tool" id="delT">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="tTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:20%">On the sheet (student&rsquo;s words)</th><th style="width:22%">Definition for the adults</th><th style="width:16%">Cue line (short)</th><th style="width:14%">Example</th><th style="width:14%">Non-example</th><th style="width:12%">Picture and goal</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:20%">On the sheet (student&rsquo;s words)</th><th style="width:22%">Definition for the adults</th><th style="width:16%">Cue line (short)</th><th style="width:14%">Example</th><th style="width:14%">Non-example</th><th style="width:12%">Picture and goal</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint">Pictures come from the shared pictogram library (OpenMoji, CC BY-SA 4.0) or from a photo you upload; a photo is stored inside the saved file, resized to a thumbnail. A pictorial sheet reads best with four targets or fewer; the form warns above that.</p>
     <table class="rt" style="margin-top:12px">
       <tr><th style="width:28%">Reduction target these replace (from the BIP)</th><td><input data-m="t_reduce" placeholder="the behavior the plan reduces, and the replacement each target stands for"></td></tr>
@@ -764,7 +771,7 @@ td input,td select{max-width:100%}
     <h3>Periods or Activities</h3>
     <p class="hint">The rows of the sheet. Use the student&rsquo;s own day: a time and a label, and a picture for a pictorial sheet. For a weekly contract these are the classes of each day.</p>
     <div class="tools"><button class="tool" id="addP">Add a period</button><button class="tool" id="delP">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="pTbl"><thead><tr><th style="width:5%">#</th><th style="width:22%">Time</th><th style="width:38%">Label</th><th>Picture</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="pTbl"><thead><tr><th style="width:5%">#</th><th style="width:22%">Time</th><th style="width:38%">Label</th><th>Picture</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="ckrow" style="margin-top:8px">
       <label class="ck"><input type="checkbox" data-c="weekly"> Weekly sheet (Monday to Friday on one page) rather than one sheet per day</label>
       <label class="ck"><input type="checkbox" data-c="pict"> Pictorial sheet: faces to circle and a picture per period</label>
@@ -982,10 +989,11 @@ td input,td select{max-width:100%}
     <div class="metrics" id="tgMetrics"></div>
     <div class="tools"><button class="tool" id="addL">Add a day</button><button class="tool" id="delL">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="lTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:8%">Phase</th><th style="width:8%">Goal %</th><th style="width:8%">Points</th><th style="width:8%">Possible</th><th style="width:8%">%</th><th style="width:8%">Matches</th><th style="width:8%">Ratings</th><th style="width:8%">Agree %</th><th style="width:7%">Goal met</th><th style="width:11%">Per target %</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:8%">Phase</th><th style="width:8%">Goal %</th><th style="width:8%">Points</th><th style="width:8%">Possible</th><th style="width:8%">%</th><th style="width:8%">Matches</th><th style="width:8%">Ratings</th><th style="width:8%">Agree %</th><th style="width:7%">Goal met</th><th style="width:11%">Per target %</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint">Per target: the percent earned on each target that day, in target order, separated by commas (for example 80,67,100). The chart draws a thin line per target and the metrics give each target&rsquo;s mean over the last five days.</p>
     <h3 style="margin-top:14px">Percent of Points by Day</h3>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Percent of points by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="Percent of points earned per day with the goal line"></svg></div>
+    <div class="tools noprint"><button class="tool" id="smPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
     <h3 style="margin-top:14px">Decisions</h3>
     <div id="logRules"></div>
     <table class="rt" style="margin-top:10px">
@@ -1121,6 +1129,26 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const num=v=>{const n=parseFloat(String(v==null?'':v).replace('%',''));return isFinite(n)?n:null;};
 const pct=v=>v==null?'—':(Math.round(v*10)/10).toFixed(0)+'%';
 
+/* ---- v21.33: clock times are picked (type="time", stored HH:MM). Older files with typed text are converted. ---- */
+function toHM24(v){const t=String(v==null?"":v).trim().toLowerCase();if(!t)return "";if(/^\d{2}:\d{2}$/.test(t))return t;
+  const m=/^(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?$/.exec(t);if(!m)return "";let h=+m[1],mi=m[2]?+m[2]:0;if(h>23||mi>59)return "";
+  if(m[3]==="p"&&h<12)h+=12;else if(m[3]==="a"&&h===12)h=0;else if(!m[3]&&h>=1&&h<=6)h+=12;return String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0");}
+function fmtHM(v){const t=toHM24(v);if(!t)return String(v==null?'':v);let h=+t.slice(0,2);const ap=h>=12?'pm':'am';h=h%12||12;return h+':'+t.slice(3)+' '+ap;}
+
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
+/* ---- v21.33: save a graph as a PNG (the SVG serialised and drawn on a canvas at 2x) ---- */
+function graphFile(id,who){const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');return id+'_graph_'+((String(who||'').trim()||'student').replace(/\s+/g,'_').replace(/[^\w-]+/g,'').replace(/_+/g,'_')||'student')+'_'+ymd+'.png';}
+function svgToPng(svg,fname){if(!svg)return;const vb=(svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);const W=vb[2]||svg.clientWidth||900,H=vb[3]||svg.clientHeight||320;
+  const c=svg.cloneNode(true);c.setAttribute('width',W);c.setAttribute('height',H);c.removeAttribute('id');c.removeAttribute('class');c.removeAttribute('style');if(!c.getAttribute('font-family'))c.setAttribute('font-family','system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif');
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(c)],{type:'image/svg+xml;charset=utf-8'}));const im=new Image();
+  im.onload=()=>{const cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+    cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),0);},'image/png');};
+  im.onerror=()=>{URL.revokeObjectURL(url);alert('The graph could not be drawn as an image.');};im.src=url;}
+
 /* ---- the pictures a sheet can carry: the shared pictogram library (window.NBH_PICTOS) or an uploaded photo ---- */
 const ICON_KEYS=window.NBH_PICTO_ORDER||[];
 const icon=(k,cls)=>window.NBH_PICTOS&&window.NBH_PICTOS[k]?picto(k,cls||'ic'):'';
@@ -1206,6 +1234,7 @@ function ensure(){
   if(!S.wk||typeof S.wk!=='object')S.wk={};
   while(S.tg.length<2)S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});
   while(S.per.length<4)S.per.push({t:'',label:'',icon:'',img:''});
+  S.per.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});
 }
 
 /* ---------------- views ---------------- */
@@ -1223,13 +1252,13 @@ function renderT(){
     <td><input data-r="tg" data-i="${i}" data-f="cue" value="${esc(r.cue)}" placeholder="Bottom on the chair"></td>
     <td><input data-r="tg" data-i="${i}" data-f="ex" value="${esc(r.ex)}"></td>
     <td><input data-r="tg" data-i="${i}" data-f="nex" value="${esc(r.nex)}"></td>
-    <td>${pickCell('tg',i,r)}<input data-r="tg" data-i="${i}" data-f="goal" value="${esc(r.goal||'')}" placeholder="goal % (school sheet)" style="margin-top:4px;font-size:11px"></td></tr>`).join('');
+    <td>${pickCell('tg',i,r)}<input data-r="tg" data-i="${i}" data-f="goal" value="${esc(r.goal||'')}" placeholder="goal % (school sheet)" style="margin-top:4px;font-size:11px"></td>${delCell('tg',i,'target')}</tr>`).join('');
 }
 function renderP(){
   const tb=$('#pTbl tbody');tb.innerHTML=S.per.map((r,i)=>`<tr><td class="num">${i+1}</td>
-    <td><input data-r="per" data-i="${i}" data-f="t" value="${esc(r.t)}" placeholder="9:15"></td>
+    <td><input type="time" data-r="per" data-i="${i}" data-f="t" value="${esc(toHM24(r.t)||r.t)}" aria-label="Period ${i+1} time"></td>
     <td><input data-r="per" data-i="${i}" data-f="label" value="${esc(r.label)}" placeholder="Reading"></td>
-    <td>${pickCell('per',i,r)}</td></tr>`).join('');
+    <td>${pickCell('per',i,r)}</td>${delCell('per',i,'period')}</tr>`).join('');
 }
 function renderRub(){
   $('#rubTbl tbody').innerHTML=S.lv.map((l,i)=>`<tr><td class="num">${i+1}</td><td><input data-r="lv" data-i="${i}" data-f="pts" value="${esc(l.pts)}" style="text-align:center"></td><td><input data-r="lv" data-i="${i}" data-f="desc" value="${esc(l.desc)}"></td></tr>`).join('');
@@ -1250,13 +1279,13 @@ function renderFid(){
 }
 function renderL(){
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const p=num(r.pts),q=num(r.poss),m=num(r.m),n=num(r.n);
-    return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num"><input type="checkbox" data-r="log" data-i="${i}" data-f="met"${r.met?' checked':''} aria-label="Goal met on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`;}).join('');
+    return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td><td><input data-r="log" data-i="${i}" data-f="ph" value="${esc(r.ph)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="goal" value="${esc(r.goal)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="pts" value="${esc(r.pts)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="poss" value="${esc(r.poss)}" style="text-align:center"></td><td class="num">${p!=null&&q?pct(p/q*100):'—'}</td><td><input data-r="log" data-i="${i}" data-f="m" value="${esc(r.m)}" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="n" value="${esc(r.n)}" style="text-align:center"></td><td class="num">${m!=null&&n?pct(m/n*100):'—'}</td><td class="num"><input type="checkbox" data-r="log" data-i="${i}" data-f="met"${r.met?' checked':''} aria-label="Goal met on day ${i+1}"></td><td><input data-r="log" data-i="${i}" data-f="tgp" value="${esc(r.tgp||'')}" placeholder="80,67,100" style="text-align:center"></td><td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
 }
 function renderWk(){
   const t=$('#wkTbl');if(S.sys!=='rubric'){t.innerHTML='';return;}
   const maxp=Math.max(...S.lv.map(l=>num(l.pts)||0));
   let h='<thead><tr><th style="width:16%">Period</th>'+DAYS.map(d=>'<th>'+d+'</th>').join('')+'</tr></thead><tbody>';
-  S.per.forEach((p,pi)=>{h+='<tr><td class="lk">'+esc(p.t||'')+' '+esc(p.label||('Period '+(pi+1)))+'</td>'+DAYS.map((d,di)=>{const k='d'+di+'_p'+pi,v=S.wk[k]||'';
+  S.per.forEach((p,pi)=>{h+='<tr><td class="lk">'+esc(p.t?fmtHM(p.t):'')+' '+esc(p.label||('Period '+(pi+1)))+'</td>'+DAYS.map((d,di)=>{const k='d'+di+'_p'+pi,v=S.wk[k]||'';
     return '<td><select data-wk="'+k+'" aria-label="'+d+' period '+(pi+1)+'"><option value=""></option>'+S.lv.map((l,li)=>'<option value="'+(li+1)+'"'+(String(li+1)===String(v)?' selected':'')+'>'+(li+1)+' · '+esc(l.desc.slice(0,38))+'</option>').join('')+'</select></td>';}).join('')+'</tr>';});
   const tot=DAYS.map((d,di)=>{let pts=0,n=0;const cnt=[0,0,0,0,0];S.per.forEach((p,pi)=>{const v=num(S.wk['d'+di+'_p'+pi]);if(v){pts+=num(S.lv[v-1].pts)||0;n++;cnt[v-1]++;}});return{pts,n,cnt};});
   h+='<tr><td class="lk">Total points</td>'+tot.map(t=>'<td class="num"><b>'+t.pts+'</b> of '+(t.n*maxp)+(t.n?' ('+pct(t.pts/(t.n*maxp)*100)+')':'')+'</td>').join('')+'</tr>';
@@ -1292,6 +1321,21 @@ $('#wkAdd').addEventListener('click',()=>{const maxp=Math.max(...S.lv.map(l=>num
   renderL();renderRecord();if(!added)alert('No period has a level yet.');});
 $('#wkClear').addEventListener('click',()=>{if(confirm('Clear the week grid?')){S.wk={};renderWk();}});
 function curPhase(){const i=S.lad.findIndex(x=>x.on);return i<0?'':LADDER[i].ph;}
+/* the Record's per-target percents (tgp) are a comma list in target order and the week grid is keyed d<day>_p<period>,
+   so deleting a target or a period drops its own values and re-keys the rest */
+function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  if(r==='tg'){const n=S.log.filter(x=>{const a=String(x.tgp||'').split(',');return a.length>i&&String(a[i]).trim()!=='';}).length;
+    if((row.word||row.def||row.cue||row.ex||row.nex||row.icon||row.img||row.goal||n)&&!confirm('Delete this target?'+(n?' Its per-target percent on '+n+' day'+(n===1?'':'s')+' of the Record will be dropped; later targets move up.':'')))return;
+    S.tg.splice(i,1);S.log.forEach(x=>{if(!x.tgp)return;const a=String(x.tgp).split(',');if(a.length>i){a.splice(i,1);x.tgp=a.join(',');}});
+    if(!S.tg.length)S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});renderT();renderL();renderSheet();renderPoints();renderSetup();renderRecord();}
+  else if(r==='per'){const n=Object.keys(S.wk).filter(k=>{const m=/^d\d_p(\d+)$/.exec(k);return m&&+m[1]===i&&S.wk[k];}).length;
+    if((row.t||row.label||row.icon||row.img||n)&&!confirm('Delete this period?'+(n?' Its '+n+' level'+(n===1?'':'s')+' in the week grid will be dropped; later periods move up.':'')))return;
+    S.per.splice(i,1);const w={};Object.keys(S.wk).forEach(k=>{const m=/^(d\d)_p(\d+)$/.exec(k);if(!m){w[k]=S.wk[k];return;}const pi=+m[2];if(pi===i)return;w[m[1]+'_p'+(pi>i?pi-1:pi)]=S.wk[k];});S.wk=w;
+    if(!S.per.length)S.per.push({t:'',label:'',icon:'',img:''});renderP();renderSheet();renderPoints();renderWk();}
+  else if(r==='log'){if((row.date||row.pts||row.m||row.tgp||row.note)&&!confirm('Delete this row?'))return;S.log.splice(i,1);renderL();renderRecord();}
+}
+$('#smPngBtn').addEventListener('click',()=>svgToPng($('#logPlot'),graphFile('SM-1',S.meta.client)));
+document.addEventListener('click',e=>{const b=e.target.closest('button.sm-png');if(!b)return;svgToPng(b.parentNode.querySelector('svg'),graphFile('SM-1',S.meta.client).replace('_graph_','_graph_sheet_'));});
 
 /* ---------------- points ---------------- */
 function mp(){return{yy:num(S.meta.mp_yy)??2,nn:num(S.meta.mp_nn)??1,yn:num(S.meta.mp_yn)??0,ny:num(S.meta.mp_ny)??0};}
@@ -1342,7 +1386,7 @@ function renderSetup(){
 function sheetTitle(){if(S.meta.sh_title)return S.meta.sh_title;const n=S.meta.nick||S.meta.client||'My';const poss=n==='My'?'My':n+'’s';
   return{match:poss+' Self & Match Sheet',contract:poss+' Self-Monitoring Contract',rubric:poss+' Point Sheet',interval:poss+' On-Task Check',interlock:'Self-Monitoring with an Interlocking Schedule',smiley:poss+' Self-Monitoring',perf:poss+' Work Count',cico:poss+' Daily Progress Report'}[S.sys]||poss+' Sheet';}
 function tgHead(t,i,span){const q=S.tg[i];return '<th class="q" colspan="'+(span||1)+'">'+(S.chk.pict&&!S.chk.pocket?pic(q,'ic'):'')+'<b>'+esc(q.word||('Target '+(i+1)))+'</b>'+(q.cue?'<span class="cue">• '+esc(q.cue)+'</span>':'')+'</th>';}
-function perCell(p,i){return '<td class="per">'+esc(p.t?p.t+' ':'')+esc(p.label||('Period '+(i+1)))+(S.chk.pict&&!S.chk.pocket?pic(p,'ic'):'')+'</td>';}
+function perCell(p,i){return '<td class="per">'+esc(p.t?fmtHM(p.t)+' ':'')+esc(p.label||('Period '+(i+1)))+(S.chk.pict&&!S.chk.pocket?pic(p,'ic'):'')+'</td>';}
 const yn=()=>S.chk.pict&&!S.chk.pocket?face(true)+face(false):'<div class="yn">YES<br>NO</div>';
 const circles=n=>Array.from({length:n},(_,i)=>'<span class="circ">'+(i+1)+'</span>').join('');
 function sheetHead(extra){const m=S.meta,p=possible();
@@ -1359,7 +1403,7 @@ function graphStrip(){ /* a bar per day the student colors in; the goal line dra
   [0,25,50,75,100].forEach(p=>{s+='<line x1="'+L+'" y1="'+Y(p)+'" x2="'+(W-10)+'" y2="'+Y(p)+'" stroke="#bbb" stroke-width="1"/><text x="'+(L-4)+'" y="'+(Y(p)+4)+'" font-size="10" text-anchor="end" fill="#333" font-family="system-ui,sans-serif">'+p+'%</text>';});
   DAYS.forEach((d,i)=>{s+='<rect x="'+(X(i)+5)+'" y="'+T+'" width="'+bw+'" height="'+(H-T-B)+'" fill="#fff" stroke="#111" stroke-width="1.5"/><text x="'+(X(i)+5+bw/2)+'" y="'+(H-6)+'" font-size="11" text-anchor="middle" fill="#111" font-family="system-ui,sans-serif">'+d.slice(0,3)+'</text>';});
   if(g!=null)s+='<line x1="'+L+'" y1="'+Y(g)+'" x2="'+(W-10)+'" y2="'+Y(g)+'" stroke="#9b4e15" stroke-width="2.5" stroke-dasharray="6 4"/><text x="'+(W-12)+'" y="'+(Y(g)-4)+'" font-size="10" text-anchor="end" fill="#9b4e15" font-family="system-ui,sans-serif">my goal '+g+'%</text>';
-  return '<div class="graph"><b>My week: color the bar up to my percent</b>'+s+'</svg></div>';}
+  return '<div class="graph"><b>My week: color the bar up to my percent</b>'+s+'</svg><button type="button" class="tool noprint sm-png">Save graph as image</button></div>';}
 function evalBox(){return '<div class="evalbox"><b>My goal today:</b> <span class="bl" style="min-width:240px">'+esc(S.meta.smp_goal||'')+'</span> &nbsp; <b>I met it:</b> &nbsp;YES &nbsp;/&nbsp; NO<br><b>What helped me:</b> <span class="bl" style="min-width:60%"></span><br><b>Next time I will:</b> <span class="bl" style="min-width:60%"></span></div>';}
 function tearOff(){const m=S.meta;return '<div class="tear"><span class="cut">✂ tear here, send home, bring back signed</span><br><b>Home note</b> &nbsp; '+esc(m.client||'')+' &nbsp; Date: <span class="bl" style="min-width:90px"></span><br>Today I earned <span class="bl" style="min-width:50px"></span> of <span class="bl" style="min-width:50px"></span> '+esc(possible().unit)+'. I <b>did</b> / <b>did not</b> meet my goal. My reward was: <span class="bl" style="min-width:160px"></span><br>Teacher: <span class="bl" style="min-width:140px"></span> &nbsp; Parent signature: <span class="bl" style="min-width:160px"></span> &nbsp; One good thing from today: <span class="bl" style="min-width:220px"></span></div>';}
 function sheetFoot(opts){const m=S.meta,p=possible();const g=p.g!=null?'GOAL: '+pct(p.g):'';opts=opts||{};
@@ -1443,7 +1487,7 @@ function renderSheet(){
       '<div class="sm-dir">When the timer rings, count your '+esc(what)+', write the number, and color the bar on the graph up to that number. Then circle whether you reached your goal.</div>'+
       '<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap"><table class="sm" style="flex:1;min-width:280px"><thead><tr><th style="width:26%">'+(week?'Day':'Session')+'</th><th>Minutes</th><th>'+esc(what)+' done</th>'+(corr?'<th>Correct</th>':'')+'<th>Goal reached?</th><th class="t">Teacher check</th></tr></thead><tbody>'+
       labels.map(d=>'<tr><td class="per">'+esc(d)+'</td><td>'+esc(mins)+'</td><td style="height:30px"></td>'+(corr?'<td></td>':'')+'<td class="yn">YES &nbsp; NO</td><td class="t"></td></tr>').join('')+
-      '<tr class="totals"><td>Sessions at goal</td><td class="w" colspan="'+(corr?5:4)+'">____ of '+n+'</td></tr></tbody></table><div class="graph" style="flex:1;min-width:300px;margin-top:0"><b>My graph: color each bar up to my count</b>'+g+'</div></div>'+sheetFoot({unit:'sessions at goal'});
+      '<tr class="totals"><td>Sessions at goal</td><td class="w" colspan="'+(corr?5:4)+'">____ of '+n+'</td></tr></tbody></table><div class="graph" style="flex:1;min-width:300px;margin-top:0"><b>My graph: color each bar up to my count</b>'+g+'<button type="button" class="tool noprint sm-png">Save graph as image</button></div></div>'+sheetFoot({unit:'sessions at goal'});
   }else if(S.sys==='cico'){
     const key=S.meta.ci_key||'2 = Yes, met the expectation · 1 = Partly, with a reminder · 0 = No',goal=num(S.meta.ci_goal)??80,poss=P.length*T.length*2;
     h=sheetHead('<table class="key"><tr><th>Points</th><td style="text-align:left">'+esc(key)+'</td></tr><tr><th>Daily goal</th><td>'+goal+'% ('+Math.ceil(poss*goal/100)+' of '+poss+' points)</td></tr><tr><th>Mentor</th><td>'+esc(S.meta.ci_mentor||'')+'</td></tr></table>')+
@@ -2358,7 +2402,7 @@ window.__nbhFactsPick=function(sel){
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -2470,6 +2514,74 @@ window.__nbhFactsPick=function(sel){
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

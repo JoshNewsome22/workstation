@@ -17,6 +17,12 @@ Double-click index.html. Everything runs from this folder.
     every other open form, into empty fields and empty behavior tables only.
     "From the case" on a form's toolbar lets you pick any of it into a form
     that already has entries. "Case map" in the bar says which form when.
+  - Any row of a table can be deleted (the small x at its end); clock times
+    are picked, not typed; graphs save as images (the button under each);
+    FS-1, TD-1, GB-1 and CR-1 have "Copy for the BIP", which puts the plan's
+    text on the clipboard for the district document.
+  - Save case above the form shows a dot while the case holds unsaved work.
+    Autosave is a safety net in this browser only; the case file is the record.
   - Two or three open forms can show at once: "Side by side" above the form.
     For an observation, OB-1, MT-1 and ABC-1 together put the narrative, the
     interval sample and the ABC record on one screen.

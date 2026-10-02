@@ -404,6 +404,12 @@ body.view-guide .only-inventory,body.view-guide .only-assessment,body.view-guide
   #daChart{max-height:4.2in}
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -587,7 +593,7 @@ td input,td select{max-width:100%}
     <p class="hint">Walk the student&rsquo;s schedule with the people who present the work and list the demands, from the ones they expect to be worst to the ones the student does without trouble. Include at least two tasks the team thinks the student does readily; the assessment needs high-probability demands to compare against and the fading plan needs somewhere to start (working convention). The rating in the last column is the informant&rsquo;s guess at how aversive the task is, 1 (not at all) to 5 (very); the Results sheet shows where the guesses and the data disagree. Up to 12 tasks.</p>
     <div class="tools"><button class="tool" id="addTask">Add a task</button><button class="tool" id="delTask">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="taskTbl"><thead><tr>
-      <th style="width:3%">#</th><th style="width:18%">Task (what is asked)</th><th style="width:12%">Setting and time in the schedule</th><th style="width:5%">Usual length (min)</th><th style="width:7%">Response effort</th><th style="width:8%">Difficulty relative to the student&rsquo;s skills</th><th style="width:7%">Novelty</th><th style="width:9%">How it is prompted</th><th style="width:9%">How it is presented</th><th style="width:7%">Can the student do it?</th><th style="width:5%">Rated aversive (1 to 5)</th><th>Notes</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:3%">#</th><th style="width:18%">Task (what is asked)</th><th style="width:12%">Setting and time in the schedule</th><th style="width:5%">Usual length (min)</th><th style="width:7%">Response effort</th><th style="width:8%">Difficulty relative to the student&rsquo;s skills</th><th style="width:7%">Novelty</th><th style="width:9%">How it is prompted</th><th style="width:9%">How it is presented</th><th style="width:7%">Can the student do it?</th><th style="width:5%">Rated aversive (1 to 5)</th><th>Notes</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="invVerdict"></div>
   </section>
 
@@ -607,7 +613,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="tools"><button class="tool" id="genOrder">Write the alternating order</button><button class="tool" id="addSess">Add a session</button><button class="tool" id="delSess">Remove last</button><span class="hint" id="orderHint"></span></div>
     <div class="grid-wrap"><table class="rt wide" id="sessTbl"><thead><tr>
-      <th style="width:3%">#</th><th style="width:21%">Task</th><th style="width:7%">Date</th><th style="width:6%">Minutes</th><th style="width:7%">Instructions given</th><th style="width:7%">Complied</th><th style="width:7%">Compliance</th><th style="width:8%">Latency to first PB (s)</th><th style="width:6%">PB count</th><th style="width:7%">PB per min</th><th style="width:10%">Affect (1 to 5)</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:3%">#</th><th style="width:21%">Task</th><th style="width:7%">Date</th><th style="width:6%">Minutes</th><th style="width:7%">Instructions given</th><th style="width:7%">Complied</th><th style="width:7%">Compliance</th><th style="width:8%">Latency to first PB (s)</th><th style="width:6%">PB count</th><th style="width:7%">PB per min</th><th style="width:10%">Affect (1 to 5)</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Per-Task Means</h3>
     <p class="hint">Computed from the sessions above. A session with no problem behavior counts toward the mean latency at the full session length, the convention of latency-based analyses in which the session ends when the response occurs or the time runs out (Thomason-Sassi, Iwata, Neidert &amp; Roscoe, 2011); it is a floor on the true latency, so the table also shows in how many sessions problem behavior occurred at all.</p>
     <div class="grid-wrap"><table class="rt mid" id="meanTbl"><thead><tr>
@@ -616,7 +622,7 @@ td input,td select{max-width:100%}
     <p class="hint">Offer two tasks at once, with their materials in view, and ask the student to pick one to do next; record the pick. Five to ten probes with the pairs spread across the tasks give a rough preference ranking; the Results sheet reports how often each task was chosen when offered.</p>
     <div class="tools"><button class="tool" id="addProbe">Add a probe</button><button class="tool" id="delProbe">Remove last</button></div>
     <div class="grid-wrap"><table class="rt" id="probeTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:26%">Task A</th><th style="width:26%">Task B</th><th style="width:16%">Picked</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:26%">Task A</th><th style="width:26%">Task B</th><th style="width:16%">Picked</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
   </section>
 
   <!-- ===================== RESULTS ===================== -->
@@ -635,6 +641,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band" style="margin-top:16px">Recommendations</h2>
     <p class="hint">Computed from the ranking and the inventory. Each is a starting point for the team, not a decision; the reasons are given so they can be argued with.</p>
     <div id="recOut"></div>
+    <div class="tools noprint"><button class="tool" id="daPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
     <h3>Plan for Form TD-1</h3>
     <div class="tools"><button class="tool" id="draftPlan">Draft the plan from the results</button><span class="hint">Writes a draft into the box; edit it freely. Carry it into the antecedent section of the treatment developer.</span></div>
     <textarea class="plan" data-m="plan" placeholder="Tasks for the demand condition of EA-1; where demand fading starts and the step rule; the antecedent modifications to try, task by task; what the choice probes showed; what to re-check."></textarea>
@@ -718,6 +725,20 @@ const f1=v=>v==null?'—':(Math.round(v*100)/100).toFixed(2);
 const f0=v=>v==null?'—':String(Math.round(v));
 const mean=a=>{const b=a.filter(x=>x!=null);return b.length?b.reduce((s,x)=>s+x,0)/b.length:null;};
 
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
+/* ---- v21.33: save a graph as a PNG (the SVG serialised and drawn on a canvas at 2x) ---- */
+function graphFile(id,who){const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');return id+'_graph_'+((String(who||'').trim()||'student').replace(/\s+/g,'_').replace(/[^\w-]+/g,'').replace(/_+/g,'_')||'student')+'_'+ymd+'.png';}
+function svgToPng(svg,fname){if(!svg)return;const vb=(svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);const W=vb[2]||svg.clientWidth||900,H=vb[3]||svg.clientHeight||320;
+  const c=svg.cloneNode(true);c.setAttribute('width',W);c.setAttribute('height',H);c.removeAttribute('id');c.removeAttribute('class');c.removeAttribute('style');if(!c.getAttribute('font-family'))c.setAttribute('font-family','system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif');
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(c)],{type:'image/svg+xml;charset=utf-8'}));const im=new Image();
+  im.onload=()=>{const cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+    cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),0);},'image/png');};
+  im.onerror=()=>{URL.revokeObjectURL(url);alert('The graph could not be drawn as an image.');};im.src=url;}
+
 /* ---------------- option sets ---------------- */
 const EFFORT=['Low','Medium','High'];
 const DIFF=['Below skills','At skills','Above skills','Unknown'];
@@ -760,7 +781,7 @@ function renderTasks(){
     <td>${sel('tasks',i,'pres',PRES,r.pres,'Presentation, task '+(i+1))}</td>
     <td>${sel('tasks',i,'cando',CANDO,r.cando,'Can the student do task '+(i+1))}</td>
     <td>${sel('tasks',i,'rating',['1','2','3','4','5'],r.rating,'Aversive rating, task '+(i+1))}</td>
-    <td><input data-r="tasks" data-i="${i}" data-f="note" value="${esc(r.note)}" placeholder="what the informant said"></td></tr>`).join('');
+    <td><input data-r="tasks" data-i="${i}" data-f="note" value="${esc(r.note)}" placeholder="what the informant said"></td>${delCell('tasks',i,'task')}</tr>`).join('');
 }
 function renderInv(){
   const el=$('#invVerdict');const T=S.tasks.filter(t=>t.name);
@@ -796,13 +817,13 @@ function renderSess(){
     <td><input data-r="sess" data-i="${i}" data-f="pb" value="${esc(r.pb)}" style="text-align:center"></td>
     <td class="num">${f1(c.rate)}</td>
     <td>${selV('sess',i,'aff',AFF.map((a,k)=>[k?String(k):'',a]),r.aff,'Affect, session '+(i+1))}</td>
-    <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`;}).join('');
+    <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>`;}).join('');
   const n=S.sess.length;$('#orderHint').textContent=n?n+' session'+(n===1?'':'s')+' · '+S.sess.filter(s=>num(s.given)!=null||num(s.pb)!=null||s.lat).length+' with data':'';
 }
 function updateSessRow(i){const tr=$('#sessTbl tbody').rows[i];if(!tr)return;const c=sessCalc(S.sess[i]);tr.children[6].textContent=pct(c.comp);tr.children[9].textContent=f1(c.rate);}
 function renderProbes(){
   $('#probeTbl tbody').innerHTML=S.probes.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${taskOpts('probes',i,'a',r.a,'Task A, probe '+(i+1))}</td><td>${taskOpts('probes',i,'b',r.b,'Task B, probe '+(i+1))}</td>
-    <td>${selV('probes',i,'pick',[['',''],['a','Task A'],['b','Task B'],['none','Neither']],r.pick,'Picked, probe '+(i+1))}</td><td><input data-r="probes" data-i="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`).join('');
+    <td>${selV('probes',i,'pick',[['',''],['a','Task A'],['b','Task B'],['none','Neither']],r.pick,'Picked, probe '+(i+1))}</td><td><input data-r="probes" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('probes',i,'probe')}</tr>`).join('');
 }
 
 /* ---------------- computation ---------------- */
@@ -932,6 +953,18 @@ $('#delSess').addEventListener('click',()=>{if(!S.sess.length)return;const r=S.s
 $('#addProbe').addEventListener('click',()=>{if(S.probes.length>=60)return;S.probes.push(newProbe());renderProbes();});
 $('#delProbe').addEventListener('click',()=>{if(!S.probes.length)return;S.probes.pop();renderProbes();renderResultsSoon();});
 $('#draftPlan').addEventListener('click',draftPlan);
+function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  if(r==='tasks'){const ns=S.sess.filter(s=>String(s.t)===String(i)).length,np=S.probes.filter(p=>String(p.a)===String(i)||String(p.b)===String(i)).length;
+    const has=Object.keys(row).some(k=>row[k]);
+    if((has||ns||np)&&!confirm('Delete this task?'+(ns||np?' The '+[ns?ns+' session'+(ns===1?'':'s'):'',np?np+' choice probe'+(np===1?'':'s'):''].filter(Boolean).join(' and ')+' that use it will be deleted too; later tasks are renumbered.':'')))return;
+    S.tasks.splice(i,1);const rk=v=>v===''?'':String(+v>i?+v-1:+v);
+    S.sess=S.sess.filter(s=>String(s.t)!==String(i));S.sess.forEach(s=>{s.t=rk(s.t);});
+    S.probes=S.probes.filter(p=>String(p.a)!==String(i)&&String(p.b)!==String(i));S.probes.forEach(p=>{p.a=rk(p.a);p.b=rk(p.b);});
+    if(!S.tasks.length)S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderMeans();renderResults();}
+  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.note)&&!confirm('Delete this row?'))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
+  else if(r==='probes'){if((row.a!==''||row.b!==''||row.pick||row.note)&&!confirm('Delete this row?'))return;S.probes.splice(i,1);renderProbes();renderMeans();renderResults();}
+}
+$('#daPngBtn').addEventListener('click',()=>svgToPng($('#daChart'),graphFile('DA-1',S.meta.client)));
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});if($('#chartSel')&&!S.meta.chart)$('#chartSel').value='rate';}
@@ -1721,7 +1754,7 @@ window.__nbhFactsPick=function(sel){
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -1833,6 +1866,74 @@ window.__nbhFactsPick=function(sel){
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 

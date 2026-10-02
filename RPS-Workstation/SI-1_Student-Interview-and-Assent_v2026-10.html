@@ -458,6 +458,12 @@ body.view-guide .only-interview,body.view-guide .only-assent,body.view-guide .on
   body.si-sum-only #sumOut .hyp{font-size:10.5px}
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -657,7 +663,7 @@ td input,td select{max-width:100%}
     <p class="hint">One row per class, activity or time of day the student names. The reasons are the ones the student gives; mark every one that applies. In the younger version the student points to a face for each row.</p>
     <div class="tools"><button class="tool" id="addH">Add a row</button><button class="tool" id="delH">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="hardTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:20%">Class, activity or time of day</th><th class="for-young" style="width:12%">How is it for you?</th><th style="width:7%">Too hard</th><th style="width:7%">Too long</th><th style="width:7%">Boring</th><th style="width:7%">Noisy</th><th style="width:7%">People</th><th>What the student said</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:20%">Class, activity or time of day</th><th class="for-young" style="width:12%">How is it for you?</th><th style="width:7%">Too hard</th><th style="width:7%">Too long</th><th style="width:7%">Boring</th><th style="width:7%">Noisy</th><th style="width:7%">People</th><th>What the student said</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band">Right Before, and What Usually Happens After</h2>
     <div id="qBefore"></div>
@@ -700,9 +706,9 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">Assent Behaviors and Withdrawal-of-Assent Behaviors, for This Student</h2>
     <p class="hint">Observable, so that two adults would agree. Assent is what the student does that means &ldquo;yes, keep going&rdquo;; withdrawal is what the student does that means &ldquo;no, not now&rdquo;. Include the quiet forms (turning away, going still, a long pause) as well as the loud ones.</p>
     <div class="tools"><button class="tool" id="addAB">Add assent behavior</button><button class="tool" id="delAB">Remove last</button></div>
-    <table class="rt" id="abTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Assent behavior (observable)</th><th>Example seen with this student</th></tr></thead><tbody></tbody></table>
+    <table class="rt" id="abTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Assent behavior (observable)</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
     <div class="tools"><button class="tool" id="addWB">Add withdrawal behavior</button><button class="tool" id="delWB">Remove last</button></div>
-    <table class="rt" id="wbTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Withdrawal-of-assent behavior (observable)</th><th>Example seen with this student</th></tr></thead><tbody></tbody></table>
+    <table class="rt" id="wbTbl"><thead><tr><th style="width:4%">#</th><th style="width:40%">Withdrawal-of-assent behavior (observable)</th><th>Example seen with this student</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table>
 
     <h2 class="nbh-band">What Staff Do When Assent Is Withdrawn</h2>
     <div class="ckrow">
@@ -723,7 +729,7 @@ td input,td select{max-width:100%}
     <p class="hint">One row per session. Assent obtained means the student showed an assent behavior at the start. Withdrawn at minute is left blank when the student did not withdraw. A session the student declined at the start counts as a withdrawal.</p>
     <div class="tools"><button class="tool" id="addAL">Add a session</button><button class="tool" id="delAL">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="alTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:18%">Session (activity, setting)</th><th style="width:11%">Assent obtained</th><th style="width:11%">Withdrawn at minute</th><th style="width:22%">What was changed</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:18%">Session (activity, setting)</th><th style="width:11%">Assent obtained</th><th style="width:11%">Withdrawn at minute</th><th style="width:22%">What was changed</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="alMetrics"></div>
     <div id="assentVerdict"></div>
   </section>
@@ -736,13 +742,13 @@ td input,td select{max-width:100%}
     </div>
     <div class="tools"><button class="tool" id="addPC">Add a component</button><button class="tool" id="delPC">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="pcTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:22%">Component (TD-1)</th><th style="width:22%">In the student&rsquo;s words</th><th style="width:12%">Student&rsquo;s stated rank (1 = most liked)</th><th>What the student said about it</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:22%">Component (TD-1)</th><th style="width:22%">In the student&rsquo;s words</th><th style="width:12%">Student&rsquo;s stated rank (1 = most liked)</th><th>What the student said about it</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band">Choices Between Pairs</h2>
     <p class="hint">A concurrent-chains style record: each row is one offer. The student picked A, B, or neither. Date and a note on how the sample was shown (a card, a two-minute try, a demonstration).</p>
     <div class="tools"><button class="tool" id="addPR">Add a choice</button><button class="tool" id="delPR">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="prTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:22%">Offered A</th><th style="width:22%">Offered B</th><th style="width:11%">Chose</th><th>How it was shown, and what the student said</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:22%">Offered A</th><th style="width:22%">Offered B</th><th style="width:11%">Chose</th><th>How it was shown, and what the student said</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h2 class="nbh-band">Result</h2>
     <div id="prefOut"></div>
@@ -824,6 +830,11 @@ const pct=v=>v==null?'–':(Math.round(v*10)/10).toFixed(0)+'%';
 const NONE='–';
 const unq=s=>String(s==null?'':s).trim().replace(/^["\u201c\u201d]+/,'').replace(/["\u201c\u201d]+$/,'');
 
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
 /* ---- the three faces: no external images ---- */
 const FACE_FILL=['#f0cfcf','#f3e8c6','#c9e6c6'],FACE_MOUTH=['M7.5 16.5 q4.5 -4.5 9 0','M7.5 15.5 h9','M7.5 14.5 q4.5 4.5 9 0'];
 const face=(k,cls)=>'<svg class="'+(cls||'face')+'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="'+FACE_FILL[k-1]+'" stroke="#333" stroke-width="1.4"/><circle cx="8.5" cy="10" r="1.4" fill="#333"/><circle cx="15.5" cy="10" r="1.4" fill="#333"/><path d="'+FACE_MOUTH[k-1]+'" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -900,7 +911,7 @@ function renderHard(){
   $('#hardTbl tbody').innerHTML=S.hard.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="hard" data-i="'+i+'" data-f="act" value="'+esc(r.act)+'" placeholder="Math, after lunch, the bus"></td>'+
     '<td class="for-young">'+facepick(r.rate,SCALES.feel,'data-hard="'+i+'"')+'</td>'+
     ['hard','long','boring','noisy','people'].map(f=>'<td class="ck"><input type="checkbox" data-r="hard" data-i="'+i+'" data-f="'+f+'"'+(r[f]?' checked':'')+' aria-label="'+f+' row '+(i+1)+'"></td>').join('')+
-    '<td><input data-r="hard" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td></tr>').join('');
+    '<td><input data-r="hard" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('hard',i)+'</tr>').join('');
 }
 function renderLists(){
   const mk=(list,box)=>{$('#'+box).innerHTML=list.map(o=>'<label class="ck"><input type="checkbox" data-c="'+o.id+'"'+(S.chk[o.id]?' checked':'')+'><span>'+esc(wordFor(o))+(o.f?'<span class="tag">'+FN[o.f]+'</span>':'<span class="tag">not counted</span>')+'</span></label>').join('');};
@@ -933,13 +944,13 @@ function renderHyp(){
 
 /* ---------------- assent ---------------- */
 function renderAB(){
-  $('#abTbl tbody').innerHTML=S.ab.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="ab" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says yes or nods when asked; picks up the materials; walks to the table"></td><td><input data-r="ab" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td></tr>').join('');
-  $('#wbTbl tbody').innerHTML=S.wb.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="wb" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says no or stop; pushes the materials away; turns away for more than 10 seconds; covers ears"></td><td><input data-r="wb" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td></tr>').join('');
+  $('#abTbl tbody').innerHTML=S.ab.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="ab" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says yes or nods when asked; picks up the materials; walks to the table"></td><td><input data-r="ab" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('ab',i)+'</tr>').join('');
+  $('#wbTbl tbody').innerHTML=S.wb.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="wb" data-i="'+i+'" data-f="beh" value="'+esc(r.beh)+'" placeholder="Says no or stop; pushes the materials away; turns away for more than 10 seconds; covers ears"></td><td><input data-r="wb" data-i="'+i+'" data-f="ex" value="'+esc(r.ex)+'"></td>'+delCell('wb',i)+'</tr>').join('');
 }
 function renderAL(){
   $('#alTbl tbody').innerHTML=S.al.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="al" data-i="'+i+'" data-f="date" value="'+esc(r.date)+'"></td><td><input data-r="al" data-i="'+i+'" data-f="sess" value="'+esc(r.sess)+'"></td>'+
     '<td><select data-r="al" data-i="'+i+'" data-f="got" aria-label="Assent obtained, session '+(i+1)+'"><option value=""></option><option'+(r.got==='Y'?' selected':'')+'>Y</option><option'+(r.got==='N'?' selected':'')+'>N</option></select></td>'+
-    '<td><input data-r="al" data-i="'+i+'" data-f="wmin" value="'+esc(r.wmin)+'" style="text-align:center"></td><td><input data-r="al" data-i="'+i+'" data-f="changed" value="'+esc(r.changed)+'"></td><td><input data-r="al" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td></tr>').join('');
+    '<td><input data-r="al" data-i="'+i+'" data-f="wmin" value="'+esc(r.wmin)+'" style="text-align:center"></td><td><input data-r="al" data-i="'+i+'" data-f="changed" value="'+esc(r.changed)+'"></td><td><input data-r="al" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('al',i,'session')+'</tr>').join('');
 }
 const isSess=r=>!!(r.date||r.sess||r.got);
 const isWd=r=>r.got==='N'||num(r.wmin)!=null;
@@ -965,7 +976,7 @@ function renderAssent(){
 
 /* ---------------- preference ---------------- */
 function renderPC(){
-  $('#pcTbl tbody').innerHTML=S.pc.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="pc" data-i="'+i+'" data-f="name" value="'+esc(r.name)+'" placeholder="Break card (FCT); first-then schedule; token board"></td><td><input data-r="pc" data-i="'+i+'" data-f="words" value="'+esc(r.words)+'" placeholder="&ldquo;the break card&rdquo;"></td><td><input data-r="pc" data-i="'+i+'" data-f="rank" value="'+esc(r.rank)+'" style="text-align:center"></td><td><input data-r="pc" data-i="'+i+'" data-f="say" value="'+esc(r.say)+'"></td></tr>').join('');
+  $('#pcTbl tbody').innerHTML=S.pc.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="pc" data-i="'+i+'" data-f="name" value="'+esc(r.name)+'" placeholder="Break card (FCT); first-then schedule; token board"></td><td><input data-r="pc" data-i="'+i+'" data-f="words" value="'+esc(r.words)+'" placeholder="&ldquo;the break card&rdquo;"></td><td><input data-r="pc" data-i="'+i+'" data-f="rank" value="'+esc(r.rank)+'" style="text-align:center"></td><td><input data-r="pc" data-i="'+i+'" data-f="say" value="'+esc(r.say)+'"></td>'+delCell('pc',i,'component')+'</tr>').join('');
 }
 const compName=i=>{const c=S.pc[+i];return c?(c.words||c.name||('Component '+(+i+1))):'';};
 function renderPR(){
@@ -973,7 +984,7 @@ function renderPR(){
   $('#prTbl tbody').innerHTML=S.pr.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="pr" data-i="'+i+'" data-f="date" value="'+esc(r.date)+'"></td>'+
     '<td><select data-r="pr" data-i="'+i+'" data-f="a" aria-label="Offered A, choice '+(i+1)+'">'+opts(r.a)+'</select></td><td><select data-r="pr" data-i="'+i+'" data-f="b" aria-label="Offered B, choice '+(i+1)+'">'+opts(r.b)+'</select></td>'+
     '<td><select data-r="pr" data-i="'+i+'" data-f="chose" aria-label="Chose, choice '+(i+1)+'"><option value=""></option>'+['A','B','Neither'].map(x=>'<option'+(r.chose===x?' selected':'')+'>'+x+'</option>').join('')+'</select></td>'+
-    '<td><input data-r="pr" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td></tr>').join('');
+    '<td><input data-r="pr" data-i="'+i+'" data-f="note" value="'+esc(r.note)+'"></td>'+delCell('pr',i,'choice')+'</tr>').join('');
 }
 function prefStats(){
   const st=S.pc.map((c,i)=>({i,name:c.words||c.name,off:0,ch:0,rank:num(c.rank)}));
@@ -1063,6 +1074,14 @@ $('#addWB').addEventListener('click',addRow('wb',()=>({beh:'',ex:''}),8,renderAB
 $('#addAL').addEventListener('click',addRow('al',alRow,200,renderAL));$('#delAL').addEventListener('click',delRow('al',1,()=>{renderAL();renderAssent();renderSummary();}));
 $('#addPC').addEventListener('click',addRow('pc',()=>({name:'',words:'',rank:'',say:''}),8,()=>{renderPC();renderPR();}));$('#delPC').addEventListener('click',delRow('pc',1,()=>{renderPC();renderPR();renderPref();renderSummary();}));
 $('#addPR').addEventListener('click',addRow('pr',prRow,60,renderPR));$('#delPR').addEventListener('click',delRow('pr',1,()=>{renderPR();renderPref();renderSummary();}));
+function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  const has={hard:x=>x.act||x.note||x.rate||['hard','long','boring','noisy','people'].some(f=>x[f]),ab:x=>x.beh||x.ex,wb:x=>x.beh||x.ex,al:x=>x.date||x.sess||x.got||x.wmin||x.changed||x.note,pc:x=>x.name||x.words||x.rank||x.say,pr:x=>x.date||x.a!==''||x.b!==''||x.chose||x.note}[r];if(!has)return;
+  let msg='Delete this row?';const n=r==='pc'?S.pr.filter(p=>String(p.a)===String(i)||String(p.b)===String(i)).length:0;
+  if(n)msg='Delete this component? '+n+' choice'+(n===1?'':'s')+' that offered it will lose that side; later components are renumbered.';
+  if((has(row)||n)&&!confirm(msg))return;S[r].splice(i,1);
+  if(r==='pc')S.pr.forEach(p=>['a','b'].forEach(k=>{if(p[k]==='')return;const v=+p[k];if(v===i)p[k]='';else if(v>i)p[k]=String(v-1);}));
+  if(!S[r].length)S[r].push({hard:hardRow,ab:()=>({beh:'',ex:''}),wb:()=>({beh:'',ex:''}),al:alRow,pc:()=>({name:'',words:'',rank:'',say:''}),pr:prRow}[r]());
+  ({hard:()=>{renderHard();renderSummary();},ab:()=>{renderAB();renderSummary();},wb:()=>{renderAB();renderSummary();},al:()=>{renderAL();renderAssent();renderSummary();},pc:()=>{renderPC();renderPR();renderPref();renderSummary();},pr:()=>{renderPR();renderPref();renderSummary();}})[r]();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1851,7 +1870,7 @@ window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {fille
       var TITLE = 'Target behaviors, function, goals and reinforcers carried from the other forms of this case';
       var tb = q('.toolbar');
       if (tb) {
-        grp = document.createElement('div'); grp.className = 'tgroup nbh-case-grp';
+        grp = document.createElement('div'); grp.className = 'tgroup tg-keep nbh-case-grp';
         grp.innerHTML = '<span>The case</span><div class="row"><button type="button" id="nbhCaseBtn" title="' + TITLE + '">From the case</button></div>';
         tb.appendChild(grp);
       } else {
@@ -1963,6 +1982,74 @@ window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {fille
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();
+})();
+</script>
+
+<style id="nbh-guard-css">
+/* the quick Save in the compact toolbar (v21.33): shown only while the rest of the toolbar is folded away */
+#nbhSaveQuick{display:none}
+html.nbh-compact #nbhSaveQuick{display:inline-block}
+#nbhSaveQuick.dirty{background:#E7EDF2;color:var(--ink,#16242e);border-color:#E7EDF2;font-weight:600}
+</style>
+<script id="nbh-guard">
+/* ===================== leaving with unsaved work (v21.33) =====================
+   A form keeps nothing in the browser, by design, so the only copy of what was typed is the open
+   window until Save data writes a file. Opened on its own (not inside the workstation, which keeps
+   its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
+   entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
+   explicitly for every text field, since the browser default differs by platform, and the compact
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+(function(){
+  var dirty = false;
+  function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
+  function saveButton(){
+    return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
+      Array.prototype.filter.call(document.querySelectorAll('button'), function(b){ return /^\s*save data\s*$/i.test(b.textContent); })[0] || null;
+  }
+  document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
+  document.addEventListener('change', function(e){
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (isField(e.target)) dirty = true;
+    paint();
+  }, true);
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
+    if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+  }, true);
+  window.addEventListener('beforeunload', function(ev){
+    if (window.parent !== window) return;
+    if (!dirty) return;
+    ev.preventDefault(); ev.returnValue = '';
+  });
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  setInterval(paint, 2000);
+  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+
+  /* the quick Save beside More controls */
+  function addQuick(){
+    if (document.getElementById('nbhSaveQuick')) return true;
+    var more = document.getElementById('nbhMoreBtn'); if (!more || !more.parentNode) return false;
+    var sb = saveButton(); if (!sb) return true;
+    var q = document.createElement('button'); q.type = 'button'; q.id = 'nbhSaveQuick'; q.textContent = 'Save data';
+    q.title = 'Save this form to a file (the same as Save data under More controls)';
+    q.addEventListener('click', function(){ sb.click(); });
+    more.parentNode.insertBefore(q, more);
+    paint(); return true;
+  }
+  var tries = 0, t = setInterval(function(){ if (addQuick() || ++tries > 20) clearInterval(t); }, 250);
+
+  /* spell-check on, explicitly */
+  function spell(root){
+    var list = (root.querySelectorAll ? root : document).querySelectorAll('textarea,input[type="text"],input:not([type])');
+    for (var i = 0; i < list.length; i++) if (!list[i].hasAttribute('spellcheck')) list[i].setAttribute('spellcheck', 'true');
+  }
+  spell(document);
+  try {
+    new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
+      .observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 </script>
 
