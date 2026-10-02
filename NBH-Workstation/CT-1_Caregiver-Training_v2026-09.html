@@ -412,6 +412,13 @@ body.view-guide .only-setup,body.view-guide .only-goals,body.view-guide .only-tr
 @media print{.only-setup,.only-goals,.only-train,.only-sum,.only-guide{display:block!important}.sheet{box-shadow:none}
   table.rt td select,table.pi td.r select{-webkit-appearance:none;appearance:none}}
 
+/* ---- v21.33 (R): a row can be deleted anywhere, not only the last one ---- */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+.rowDel:disabled{color:#c9d2da;cursor:not-allowed;background:transparent}
+@media print{td.nx,th.nx{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -814,7 +821,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="goalTbl"><thead><tr>
       <th style="width:44px">#</th><th style="width:20%">Routine or time of day</th><th style="width:24%">What happens now</th>
-      <th style="width:20%">What the family wants instead</th><th style="width:11%">Priority</th><th>Targeted now?</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:20%">What the family wants instead</th><th style="width:11%">Priority</th><th>Targeted now?</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="goalVerdict"></div>
 
     <h2 class="nbh-band" style="margin-top:16px">Whether This Can Run at Home</h2>
@@ -852,7 +859,7 @@ td input,td select{max-width:100%}
       <button class="tool" id="addStep">Add step</button><button class="tool" id="delStep">Remove last</button>
     </div>
     <div class="grid-wrap"><table class="rt" id="stepTbl"><thead><tr>
-      <th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:74px">Critical</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:74px">Critical</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h2 class="nbh-band" style="margin-top:16px">Rehearsal</h2>
     <p class="hint">Same four codes as Forms TI-1 and ST-1, so a protocol scores the same way whoever is running it: Correct; Commission, an error of commission (attempted but done wrong); Omission, an error of omission (not attempted); N/A, the step did not arise in the round (left out of every percentage, as a blank is).</p>
     <div class="grid-wrap"><table class="pi" id="piTbl"></table></div>
@@ -986,7 +993,7 @@ function renderGoals(){
     <td><textarea data-g="${i}" data-f="now" rows="2">${esc(r.now)}</textarea></td>
     <td><textarea data-g="${i}" data-f="want" rows="2">${esc(r.want)}</textarea></td>
     <td><select data-g="${i}" data-f="p"><option value=""></option>${opt(['1 (highest)','2','3','4'],r.p)}</select></td>
-    <td><select data-g="${i}" data-f="t"><option value=""></option>${opt(['Yes','Later','No'],r.t)}</select></td></tr>`).join('');
+    <td><select data-g="${i}" data-f="t"><option value=""></option>${opt(['Yes','Later','No'],r.t)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this routine" aria-label="Delete routine ${i+1}">&times;</button></td></tr>`).join('');
   const top=S.goals.filter(g=>g.p==='1 (highest)'&&g.r.trim());
   const targeted=top.filter(g=>g.t==='Yes').length;
   $('#goalVerdict').innerHTML = !top.length
@@ -1016,8 +1023,22 @@ function renderSteps(){
   $('#stepTbl tbody').innerHTML=S.steps.map((st,i)=>`<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><textarea data-s="${i}" data-f="d" rows="2">${esc(st.d)}</textarea></td>
-    <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''}></td></tr>`).join('');
+    <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''}></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
+/* v21.33 (R): a routine or a step can be deleted anywhere in its list. A deleted step's codes in every round go
+   with it, and the codes of the steps after it are re-keyed so none moves to another step. */
+function delGoalAt(i){const g=S.goals[i];if(!g)return;
+  if(['r','now','want','p','t'].some(k=>String(g[k]||'').trim())&&!confirm('Delete routine '+(i+1)+'? What was entered for it will be deleted.'))return;
+  S.goals.splice(i,1);if(!S.goals.length)S.goals.push({r:'',now:'',want:'',p:'',t:''});renderGoals();}
+$('#goalTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delGoalAt(+b.dataset.di);});
+function delStepAt(i){const st=S.steps[i];if(!st)return;
+  const lock=$('#delStep');if(lock&&lock.disabled){alert(lock.title||'Locked while a round is open in the rehearsal runner.');return;}
+  if(((st.d||'').trim()||st.crit||S.rounds.some((_,j)=>code(i,j)))&&!confirm('Delete step '+(i+1)+'? Its description and its codes in every round will be deleted, and the steps after it move up one.'))return;
+  S.steps.splice(i,1);
+  const nw={};Object.keys(S.cells).forEach(k=>{const m=/^(\d+)_(\d+)$/.exec(k);if(!m)return;const s=+m[1];if(s===i)return;nw[(s>i?s-1:s)+'_'+m[2]]=S.cells[k];});S.cells=nw;
+  if(!S.steps.length)S.steps.push({d:'',crit:false});
+  ensure();renderSteps();renderGrid();renderSum();}
+$('#stepTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delStepAt(+b.dataset.di);});
 function optsFor(v){return CODES.map(([k,l])=>`<option value="${k}"${v===k?' selected':''}>${l}</option>`).join('');}
 function renderGrid(){
   const n=S.nRounds;
