@@ -1703,8 +1703,8 @@ function refreshCondNames(){condNames().forEach(c=>{const t=$('#condTtl'+c.i);if
  $$('select.cond').forEach(sel=>{const cur=sel.value;sel.innerHTML='<option value=""></option>'+condNames().map(c=>`<option value="${c.i}">${esc(c.name)}</option>`).join('');sel.value=cur;});renderTrials(true);}
 document.addEventListener('input',e=>{if(e.target.dataset.cond)refreshCondNames();});
 document.addEventListener('change',e=>{if(e.target.dataset.cond)refreshCondNames();});
-function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Choose a variant first.');return;}const t=TPL[k];const conds=t.conds||TPL.standard.conds;
- if(!quiet&&!confirm('Replace the condition cards with the '+REC[k].t+' template?'))return;
+async function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Choose a variant first.');return;}const t=TPL[k];const conds=t.conds||TPL.standard.conds;
+ if(!quiet&&!(await nbhUI.confirm('Replace the condition cards?\nThey are replaced with the '+REC[k].t+' template.',{ok:'Replace',danger:true})))return;
  $('#nCond').value=conds.length;renderConds();
  conds.forEach((c,i)=>{Object.keys(c).forEach(f=>setv(`c[${i}].${f}`,c[f]));if(t.dur&&!t.conds)setv(`c[${i}].dur`,t.dur);if(k==='precursor')setv(`c[${i}].cons`,c.cons.replace('contingent on each target','contingent on each PRECURSOR'));});
  setv('v.design',t.design);if(k==='latency')setv('m.measure','latency');else if(k==='trial')setv('m.measure','trial');else setv('m.measure','rate');
@@ -1879,8 +1879,8 @@ const DESIGNS={
  combo:{note:'Multielement to identify the effective treatment, then an ABAB reversal of that treatment to demonstrate control (the sequence Vollmer et al., 1993, used for functional analyses: multielement, then reversal).',phases:[['ME','Multielement comparison',5,'separation'],['A','Baseline',5,'stable'],['B1','Best treatment',5,'change'],['A2','Baseline',5,'return'],['B2','Best treatment',5,'replicates']]}
 };
 function phaseRow(i,p){const tr=document.createElement('tr');tr.innerHTML=`<td class="n">${i+1}</td><td><input name="ph[${i}].lab" value="${esc(p?p[0]:'')}" data-tx="1"></td><td><input name="ph[${i}].cond" value="${esc(p?p[1]:'')}"></td><td class="n"><input name="ph[${i}].min" value="${p?p[2]:''}" data-tx="1"></td><td><input name="ph[${i}].rule" value="${esc(p?p[3]:'')}"></td><td><input name="ph[${i}].tier"></td>`;return tr;}
-function loadDesign(quiet){const k=val('t.design');const d=DESIGNS[k];$('#dsgnNote').innerHTML='<b>Design requirements</b>'+(d?d.note:'Choose a design to see its phase plan, demonstrations of effect, and threats to address.');
- if(!d)return;const b=$('#phaseBody');if(!quiet&&b.children.length&&!confirm('Replace the phase plan with the '+k.toUpperCase()+' template?'))return;b.innerHTML='';d.phases.forEach((p,i)=>b.appendChild(phaseRow(i,p)));renderTx();}
+async function loadDesign(quiet){const k=val('t.design');const d=DESIGNS[k];$('#dsgnNote').innerHTML='<b>Design requirements</b>'+(d?d.note:'Choose a design to see its phase plan, demonstrations of effect, and threats to address.');
+ if(!d)return;const b=$('#phaseBody');if(!quiet&&b.children.length&&!(await nbhUI.confirm('Replace the phase plan?\nIt is replaced with the '+k.toUpperCase()+' template.',{ok:'Replace',danger:true})))return;b.innerHTML='';d.phases.forEach((p,i)=>b.appendChild(phaseRow(i,p)));renderTx();}
 $('#addPhase').addEventListener('click',()=>{const b=$('#phaseBody');b.appendChild(phaseRow(b.children.length));});
 document.addEventListener('change',e=>{if(e.target.name==='t.design')loadDesign(false);});
 function txRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="tx[${i}].d"></td><td><input class="txt" name="tx[${i}].p" data-tx="1"></td><td><input class="txt" name="tx[${i}].tier" data-tx="1"></td><td class="c"><input class="num" name="tx[${i}].v" data-tx="1"></td><td class="c"><input class="num" name="tx[${i}].ioa" data-tx="1"></td><td class="c"><input class="num" name="tx[${i}].fid" data-tx="1"></td><td><input class="txt" name="tx[${i}].n"></td>`;return tr;}
@@ -2081,7 +2081,7 @@ $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student'
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='EA-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form EA-1.');}};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on every sheet? Unsaved work will be lost.'))return;restore({counts:{}});$('#simBanner').hidden=true;setView('setup');});
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});$('#simBanner').hidden=true;setView('setup');});
 window.addEventListener('beforeprint',()=>{renderGraph();renderTrialFig();renderAnalysis();renderTx();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 cfaInit();restore({counts:{}});
@@ -2240,7 +2240,7 @@ cfaInit();restore({counts:{}});
     R.state='done';R.term=!!term;R.why=why||'';stop();wakeOff();lock(false);cue('end');summary();
     note(term?'Session ended: '+why+'. Check the summary, then Save to the log.':'Session over. Check the summary, then Save to the log.',term);
   }
-  function endEarly(){if(R.state!=='run'&&R.state!=='pause')return;if(!confirm('End this session now and mark it terminated?'))return;
+  async function endEarly(){if(R.state!=='run'&&R.state!=='pause')return;if(!(await nbhUI.confirm('End this session now?\nIt is marked terminated.',{ok:'End now'})))return;if(R.state!=='run'&&R.state!=='pause')return;
     if(R.state==='pause'){R.state='run';R.t0=now();}finish(true,'ended early at '+fmt(el()));}
 
   /* ---- results ---- */
@@ -2332,7 +2332,7 @@ cfaInit();restore({counts:{}});
   byId('eaStart').addEventListener('click',start);
   byId('eaEnd').addEventListener('click',endEarly);
   byId('eaSave').addEventListener('click',save);
-  byId('eaDiscard').addEventListener('click',()=>{if(R.state!=='done'&&!confirm('Discard this session?'))return;reset(false);note('Session discarded.');});
+  byId('eaDiscard').addEventListener('click',async()=>{if(R.state!=='done'&&!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;reset(false);note('Session discarded.');});
   byId('eaTarget').addEventListener('click',()=>tap('tgt'));
   byId('eaPre').addEventListener('click',()=>tap('pre'));
   byId('eaUndo').addEventListener('click',undo);
@@ -2340,7 +2340,7 @@ cfaInit();restore({counts:{}});
   byId('eaTest').addEventListener('click',()=>{if(!PR.on){note('Alerts are off. Turn them on to test.',true);return;}cue('cons');note('Test alert'+(PR.sound?'':' (sound is off)')+'. If you heard nothing, check the device volume and silent mode.');});
   if(pill)pill.addEventListener('click',()=>{const b=q('[data-view="sessions"]');if(b)b.click();setTimeout(()=>box.scrollIntoView({block:'start'}),50);});
   document.addEventListener('keydown',e=>{
-    if(R.state!=='run'||e.ctrlKey||e.metaKey||e.altKey)return;const t=e.target,tag=(t&&t.tagName)||'';
+    if(R.state!=='run'||e.ctrlKey||e.metaKey||e.altKey||document.querySelector('dialog[open]'))return;const t=e.target,tag=(t&&t.tagName)||'';
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable))return;
     if(e.key===' '&&t&&t.id==='eaTarget')return;   /* the focused Target button records it through its own click */
     if(e.key===' '||e.key==='t'||e.key==='T'){e.preventDefault();tap('tgt');}

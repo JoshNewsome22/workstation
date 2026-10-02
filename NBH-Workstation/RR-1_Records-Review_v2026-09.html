@@ -1082,12 +1082,12 @@ const ROWSET={nInc:['#incTbl tbody','ic','incident row'],nInt:['#intTbl tbody','
 function rowCount(id){return id==='nBeh'?$('#behWrap').querySelectorAll('.card').length:$(ROWSET[id][0]).children.length;}
 function rowsLost(id,v){const [sel,p]=ROWSET[id],re=new RegExp('^'+p+'\\[(\\d+)\\]'),hit=new Set();
  $(sel).querySelectorAll('[name]').forEach(el=>{const m=re.exec(el.name);if(m&&+m[1]>=v&&(el.type==='checkbox'?el.checked:String(el.value).trim()!==''))hit.add(+m[1]);});return hit.size;}
-function bindNum(id,fn){const e=$('#'+id);e.addEventListener('change',()=>{let v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){v=Math.min(+e.max,Math.max(+e.min,v||+e.min));e.value=v;}
+function bindNum(id,fn){const e=$('#'+id);e.addEventListener('change',async()=>{let v=+e.value;if(!isFinite(v)||v<+e.min||v>+e.max){v=Math.min(+e.max,Math.max(+e.min,v||+e.min));e.value=v;}
  /* v21.22: a count equal to the rows already drawn redraws nothing. The workstation's field-by-field restore sets
     the counts before the rows, and a redraw here replaced every row it was about to fill. */
  if(v===rowCount(id))return;
  const lost=rowsLost(id,v),what=ROWSET[id][2];
- if(lost&&!confirm('Reduce to '+v+' '+what+(v===1?'':'s')+'? '+lost+' '+what+(lost===1?' that holds':'s that hold')+' entries will be deleted.')){e.value=rowCount(id);return;}
+ if(lost&&!(await nbhUI.confirm('Reduce to '+v+' '+what+(v===1?'':'s')+'?\n'+lost+' '+what+(lost===1?' that holds':'s that hold')+' entries will be deleted.',{ok:'Reduce',danger:true}))){e.value=rowCount(id);return;}
  fn();refresh();});}
 bindNum('nInc',renderInc);bindNum('nInt',renderInt);bindNum('nBeh',renderBeh);
 
@@ -1435,14 +1435,14 @@ function lgEdit(e){const el=e.target;if(!el||!el.dataset||!el.dataset.k)return;c
  else if(yr){const y=yr.dataset.y;if(!/^\d{4}$/.test(y))return;o=LG.yr[y]||(LG.yr[y]=lgYr());}
  if(!o||!Object.prototype.hasOwnProperty.call(o,k)||/^(inc|src|was)$/.test(k))return;o[k]=String(el.value);lgStore();}
 $('#removals').addEventListener('input',lgEdit);$('#removals').addEventListener('change',lgEdit);
-$('#removals').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+$('#removals').addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
  if(b.id==='rlAdd'){if(LG.rows.length>=200)return;LG.rows.push(lgNewRow());lgRenderRows();lgStore();refresh();lgFocus('#rlRows .rl-row:last-child [data-k="s"]');lgSay('Removal '+LG.rows.length+' added.');return;}
  if(b.id==='rlNsAdd'){if(LG.ns.length>=300)return;LG.ns.push({s:'',e:'',l:''});lgRenderNs();lgStore();refresh();lgFocus('#rlNsEdit .rl-ns:last-child [data-k="s"]');return;}
  if(b.dataset.act==='del'){const i=+b.closest('.rl-row').dataset.r,r=LG.rows[i];if(!r)return;
-  if(['s','e','p','t','o','ow','c','cr','g','n'].some(k=>String(r[k]).trim())&&!confirm('Remove removal '+(i+1)+' from the ledger? Its dates, school days, and classification will be deleted.'))return;
+  if(['s','e','p','t','o','ow','c','cr','g','n'].some(k=>String(r[k]).trim())&&!(await nbhUI.confirm('Remove removal '+(i+1)+' from the ledger?\nIts dates, school days, and classification will be deleted.',{ok:'Remove',danger:true})))return;
   LG.rows.splice(i,1);lgRenderRows();lgStore();refresh();lgFocus(LG.rows.length?'#rlRows .rl-row:nth-child('+Math.min(i+1,LG.rows.length)+') [data-k="s"]':'#rlAdd');lgSay('Removal '+(i+1)+' removed.');return;}
  if(b.dataset.act==='nsdel'){const i=+b.closest('.rl-ns').dataset.n,x=LG.ns[i];if(!x)return;
-  if((x.s||x.e||x.l.trim())&&!confirm('Remove this no-school entry? The school-day counts will change.'))return;
+  if((x.s||x.e||x.l.trim())&&!(await nbhUI.confirm('Remove this no-school entry?\nThe school-day counts will change.',{ok:'Remove',danger:true})))return;
   LG.ns.splice(i,1);lgRenderNs();lgStore();refresh();lgFocus(LG.ns.length?'#rlNsEdit .rl-ns:nth-child('+Math.min(i+1,LG.ns.length)+') [data-k="s"]':'#rlNsAdd');}});
 function lgGo(i){const li=LG.rows.findIndex(r=>r.inc===i);if(li<0)return;setView('removals');
  const card=document.querySelector('#rlRows .rl-row[data-r="'+li+'"]');if(!card)return;card.scrollIntoView({block:'center'});const f=card.querySelector('[data-k="e"]');if(f)f.focus({preventScroll:true});}
@@ -1625,9 +1625,9 @@ function simCase(key){
    'b[0].label':'Aggression toward peers','b[0].ant':'1 referral; insufficient','b[0].con':'Conference','b[0].se':'','b[0].fn.unk':1,'b[0].agree':'low','b[0].hyp':'No records-based hypothesis; begin with DD-1 baseline, SP-1, and IA-1 with parent and prior teacher (phone).','b[1].label':'','y.suff':'no','y.pa':'','y.obtain':'Prior IEP, FBA, BIP, evaluation reports, health record from prior district (requested '+MD(r1)+', '+MD(r2)+'); parent input form','y.questions':'What did the prior school try?\nWhat does the student do at home when told no?\nHow does the student communicate wants?'},
   ['iep','odr','att','comm'],{iep:iiep,odr:B(3)},
   {piep:'Not available: requested '+MD(r1),elig:'Not available: requested',fba:'Not available',bip:'Not available',bipdata:'Not available',prog:'Not available',health:'Partial: immunizations only',meds:'Not available',outside:'Not available',transfer:'Requested '+MD(r1)+' and '+MD(r2)+'; not received',parent:'Enrollment form only'});}
-function loadSim(){
+async function loadSim(){
  /* v21.16 audit (F3): loading replaced every entry on every sheet without a question */
- if(($$('[name]').some(el=>el.type==='checkbox'?el.checked:String(el.value).trim()!=='')||lgHas())&&!confirm('Load a simulated case? Every entry on every sheet will be replaced.'))return;
+ if(($$('[name]').some(el=>el.type==='checkbox'?el.checked:String(el.value).trim()!=='')||lgHas())&&!(await nbhUI.confirm('Load a simulated case?\nEvery entry on every sheet will be replaced.',{ok:'Load'})))return;
  const key=$('#simScenario').value,sc=simCase(key);restore({counts:{}});
  Object.keys(sc.set).forEach(k=>setv(k,sc.set[k]));setv('h.bcba',val('h.bcba')||'Joshua Newsome, M.A., BCBA');
  sc.src.forEach(([k,d])=>{setv(`src.${k}.r`,true);setv(`src.${k}.d`,ymd(d));setv(`src.${k}.w`,'District system (simulated)');setv(`src.${k}.n`,'Reviewed; see sheets (simulated)');});
@@ -1666,7 +1666,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
  const why=rrRefuse(d);if(why){alert('That file could not be opened on this form: '+why+'. Nothing was changed.');return;}
  restore(d);$('#simBanner').hidden=!/^SIMULATED/.test(String(d.fields['h.client']||''));};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on every sheet? Unsaved work will be lost.'))return;restore({counts:{}});$('#simBanner').hidden=true;setView('sources');});
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;restore({counts:{}});$('#simBanner').hidden=true;setView('sources');});
 /* v21.16 audit (F12): the printed date was set when the form was opened; it is set when it is printed. An empty date
    field printed its "mm/dd/yyyy" pattern, which reads as an entry; it prints blank. */
 window.addEventListener('beforeprint',()=>{$$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));$$('input[type=date]').forEach(e=>e.classList.toggle('rr-nodate',!e.value));refresh();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});

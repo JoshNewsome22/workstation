@@ -785,9 +785,9 @@ function renderR(){
 }
 /* v21.33 (R): a respondent can be deleted anywhere in the list. Their ratings in both rounds go with them, and
    the ratings of the respondents after them are re-keyed so none moves to another respondent. */
-function delRater(j){const r=S.raters[j];if(!r)return;
+async function delRater(j){const r=S.raters[j];if(!r)return;
   const has=['name','role','when','mo'].some(f=>String(r[f]||'').trim())||[1,2].some(n=>ITEMS.some((_,i)=>val(i,j,n)!=null));
-  if(has&&!confirm('Delete respondent '+(j+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'? Their details and their ratings in both rounds will be deleted.'))return;
+  if(has&&!(await nbhUI.confirm('Delete respondent '+(j+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'?\nTheir details and their ratings in both rounds will be deleted.',{ok:'Delete',danger:true})))return;
   S.raters.splice(j,1);
   [1,2].forEach(n=>{const o=S.scores[n]||{},nw={};Object.keys(o).forEach(key=>{const m=/^(\d+)_(\d+)$/.exec(key);if(!m)return;const jj=+m[2];
     if(jj===j)return;nw[m[1]+'_'+(jj>j?jj-1:jj)]=o[key];});S.scores[n]=nw;});
@@ -799,10 +799,10 @@ $('#rTbl').addEventListener('input',e=>{const el=e.target;if(el.dataset.i===unde
   /* v21.16 audit (F6): the Barriers sheet names respondents too, and kept the old name until something redrew it */
   if(el.dataset.f==='name'){renderGrid();renderBarriers();}});
 $('#addR').addEventListener('click',()=>{S.raters.push({name:'',role:'',when:'',mo:''});renderAll();});
-$('#delR').addEventListener('click',()=>{if(S.raters.length<=1)return;const j=S.raters.length-1,r=S.raters[j];
+$('#delR').addEventListener('click',async()=>{if(S.raters.length<=1)return;const j=S.raters.length-1,r=S.raters[j];
   /* v21.16 audit (F5): removing a respondent who holds entries asks first; their ratings go with them */
   const has=['name','role','when','mo'].some(f=>String(r[f]||'').trim())||[1,2].some(n=>ITEMS.some((_,i)=>val(i,j,n)!=null));
-  if(has&&!confirm('Remove respondent '+(j+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'? Their details and their ratings in both rounds will be deleted.'))return;
+  if(has&&!(await nbhUI.confirm('Remove respondent '+(j+1)+(String(r.name||'').trim()?' ('+String(r.name).trim()+')':'')+'?\nTheir details and their ratings in both rounds will be deleted.',{ok:'Remove',danger:true})))return;
   S.raters.pop();renderAll();});
 
 /* ---------------- rating grid ---------------- */
@@ -993,13 +993,13 @@ $('#genEnh').addEventListener('click',()=>{
 });
 $('#addE').addEventListener('click',()=>{S.enh.push({item:'',dom:'',bar:'',type:'',what:'',who:'',by:'',st:'Open'});renderEnh();renderSum();});
 /* v21.33 (R): an enhancement row can be deleted anywhere in the list */
-function delEnh(i){const r=S.enh[i];if(!r)return;
-  if(['item','dom','bar','type','what','who','by'].some(f=>String(r[f]||'').trim())&&!confirm('Delete this row'+(r.item?' (item '+r.item+')':'')+'? What was entered in it will be deleted.'))return;
+async function delEnh(i){const r=S.enh[i];if(!r)return;
+  if(['item','dom','bar','type','what','who','by'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete this row'+(r.item?' (item '+r.item+')':'')+'?\nWhat was entered in it will be deleted.',{ok:'Delete',danger:true})))return;
   S.enh.splice(i,1);renderEnh();renderSum();}
 $('#enhTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delEnh(+b.dataset.di);});
-$('#delE').addEventListener('click',()=>{if(!S.enh.length)return;const r=S.enh[S.enh.length-1];
+$('#delE').addEventListener('click',async()=>{if(!S.enh.length)return;const r=S.enh[S.enh.length-1];
   /* v21.16 audit (F13): a row that holds a decision is removed only after a question; (F7) the Summary follows */
-  if(['type','what','who','by'].some(f=>String(r[f]||'').trim())&&!confirm('Remove the last enhancement row'+(r.item?' (item '+r.item+')':'')+'? What was entered in it will be deleted.'))return;
+  if(['type','what','who','by'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Remove the last enhancement row'+(r.item?' (item '+r.item+')':'')+'?\nWhat was entered in it will be deleted.',{ok:'Remove',danger:true})))return;
   S.enh.pop();renderEnh();renderSum();});
 
 /* ---------------- summary ---------------- */
@@ -1096,11 +1096,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='CF-1_ratings.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated administration and fill every sheet with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated administration?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   /* v21.16 audit (F1): D(n) is n school days before the last school day on or before today, on the local calendar:
      Monday to Friday, less the federal holidays US schools close for, the Friday after Thanksgiving and the winter
      break (December 24 to January 2). Calendar days put the TI-1 observation on a Saturday and deadlines on a

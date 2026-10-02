@@ -928,11 +928,11 @@ function renderData(){
 /* v21.33 (R): a period can be deleted anywhere in the table (the BL row is cleared instead, since the baseline is
    always the first row). The periods after it move up one, and the figures imported from Form DD-1 (S.dd), which
    are kept by row number, are re-numbered with them. */
-function delPeriodAt(i){const r=S.rows[i];if(!r)return;
-  if(i===0){if(filledRow(r)&&!confirm('Clear the baseline row? Its entries will be deleted. (The BL row stays: the baseline is always the first row.)'))return;
+async function delPeriodAt(i){const r=S.rows[i];if(!r)return;
+  if(i===0){if(filledRow(r)&&!(await nbhUI.confirm('Clear the baseline row?\nIts entries will be deleted. The BL row stays: the baseline is always the first row.',{ok:'Clear',danger:true})))return;
     S.rows[0]=ROW();renderData();renderVerdicts();return;}
   const dd=S.dd||{},ddLater=['t','r'].some(c=>dd[c]&&Array.isArray(dd[c].rows)&&dd[c].rows.some(x=>x.k>=i));
-  if((filledRow(r)||ddLater)&&!confirm('Delete period '+i+'? Its entries will be deleted, and the periods after it move up one.'+(ddLater?' The figures imported from Form DD-1 for this and the later periods are re-numbered with them; the ones for this period are dropped.':'')))return;
+  if((filledRow(r)||ddLater)&&!(await nbhUI.confirm('Delete period '+i+'?\nIts entries will be deleted, and the periods after it move up one.'+(ddLater?' The figures imported from Form DD-1 for this and the later periods are re-numbered with them; the ones for this period are dropped.':''),{ok:'Delete',danger:true})))return;
   S.rows.splice(i,1);
   ['t','r'].forEach(c=>{const z=dd[c];if(!z||!Array.isArray(z.rows))return;z.rows=z.rows.filter(x=>x.k!==i).map(x=>Object.assign({},x,{k:x.k>i?x.k-1:x.k}));});
   ensure();renderData();renderVerdicts();}
@@ -1052,8 +1052,8 @@ function renderAct(){
     <td><select data-a="${i}" data-f="s"><option value=""></option>${opt(['Open','Done','Not doing'],r.s)}</select></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this action" aria-label="Delete action ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): an action can be deleted anywhere in the list */
-function delActAt(i){const r=S.act[i];if(!r)return;
-  if(filledRow(r)&&!confirm('Delete action '+(i+1)+'? Its entries will be deleted.'))return;
+async function delActAt(i){const r=S.act[i];if(!r)return;
+  if(filledRow(r)&&!(await nbhUI.confirm('Delete action '+(i+1)+'?\nIts entries will be deleted.',{ok:'Delete',danger:true})))return;
   S.act.splice(i,1);ensure();renderAct();}
 $('#actTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delActAt(+b.dataset.di);});
 function renderFade(){
@@ -1066,8 +1066,8 @@ function renderFade(){
     <td><textarea data-d="${i}" data-f="w" rows="1" class="pr-line">${esc(r.w)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): a fading step can be deleted anywhere in the sequence; the steps after it move up one */
-function delFadeAt(i){const r=S.fade[i];if(!r)return;
-  if(filledRow(r)&&!confirm('Delete step '+(i+1)+'? Its entries will be deleted, and the steps after it move up one.'))return;
+async function delFadeAt(i){const r=S.fade[i];if(!r)return;
+  if(filledRow(r)&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nIts entries will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
   S.fade.splice(i,1);ensure();renderFade();}
 $('#fadeTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delFadeAt(+b.dataset.di);});
 function renderReady(){
@@ -1188,16 +1188,16 @@ function renderVerdicts(){
 $('#addRow').addEventListener('click',()=>{S.rows.push(ROW());renderData();});
 /* v21.16 audit (F3d): "Remove last" deleted a row holding entries without a word; it now asks first */
 const filledRow=o=>Object.keys(o).some(k=>String(o[k]||'').trim());
-$('#delRow').addEventListener('click',()=>{if(S.rows.length>2){const k=S.rows.length-1;
-  if(filledRow(S.rows[k])&&!confirm('Remove period '+k+'? Its entries will be deleted.'))return;
+$('#delRow').addEventListener('click',async()=>{if(S.rows.length>2){const k=S.rows.length-1;
+  if(filledRow(S.rows[k])&&!(await nbhUI.confirm('Remove period '+k+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
   S.rows.pop();renderData();renderVerdicts();}});
 $('#addAct').addEventListener('click',()=>{S.act.push(ACT());renderAct();});
-$('#delAct').addEventListener('click',()=>{if(S.act.length>1){const k=S.act.length;
-  if(filledRow(S.act[k-1])&&!confirm('Remove action '+k+'? Its entries will be deleted.'))return;
+$('#delAct').addEventListener('click',async()=>{if(S.act.length>1){const k=S.act.length;
+  if(filledRow(S.act[k-1])&&!(await nbhUI.confirm('Remove action '+k+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
   S.act.pop();renderAct();}});
 $('#addFade').addEventListener('click',()=>{S.fade.push(FADE());renderFade();});
-$('#delFade').addEventListener('click',()=>{if(S.fade.length>1){const k=S.fade.length;
-  if(filledRow(S.fade[k-1])&&!confirm('Remove step '+k+'? Its entries will be deleted.'))return;
+$('#delFade').addEventListener('click',async()=>{if(S.fade.length>1){const k=S.fade.length;
+  if(filledRow(S.fade[k-1])&&!(await nbhUI.confirm('Remove step '+k+'?\nIts entries will be deleted.',{ok:'Remove',danger:true})))return;
   S.fade.pop();renderFade();}});
 
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;el.value=S.meta[k]||'';
@@ -1227,7 +1227,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
       return;}
     S=fromFile(d);renderAll();};
   r.readAsText(f);e.target.value='';});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ===================== v21.22 (DD-1 import): Import From DD-1 =====================
    The periods table can be filled from Form DD-1's daily data instead of being retyped. DD-1's record is read
@@ -1588,8 +1588,8 @@ ddDlg.addEventListener('change',ddChanged);
 $('#ddGo').addEventListener('click',ddApply);
 window.addEventListener('message',ddAnswer);
 
-function loadSim(){
-  if(!confirm('Load a simulated review and fill every sheet? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated review?\nEvery sheet is filled. Anything already entered will be replaced.',{ok:'Load'})))return;
   /* v21.16 audit (F8): D(n) is n school days before the last school day on or before today, on the local
      calendar; a negative n counts forward, for dates due. A school day is a weekday outside the summer break (taken
      as 1 June to 9 August) and the winter break (22 December to 2 January). Calendar days put the review, the
@@ -1712,11 +1712,11 @@ function tiRead(d){
 const TI_LAB={intPct:'Integrity, most recent',intCrit:'Critical-step integrity',intDate:'Date observed',intType:'Announced or unannounced',intN:'TI-1 observations in the period',intMean:'Mean integrity across them',
   intLow:'Lowest integrity in the period',intConLow:'Lowest consequence step',intConCom:'Commission on consequence steps',intConOm:'Omission on consequence steps',intImpl:'By implementer and observation',intDropNote:'When, and what changed'};
 function tiSet(el,v){el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
-function tiApply(x,src,file){
+async function tiApply(x,src,file){
   if(!x){tiMsg('That is not a file Form TI-1 saved. Nothing was imported.',true);return false;}
   if(x.empty){tiMsg('Form TI-1\u2019s record holds no scored observation yet. Nothing was imported.',true);return false;}
   const keys=Object.keys(x.fig).filter(k=>x.fig[k]!==''),diff=keys.filter(k=>String(S.meta[k]||'').trim()&&String(S.meta[k]||'').trim()!==String(x.fig[k]).trim());
-  if(diff.length&&!confirm('Replace '+diff.map(k=>TI_LAB[k]+' (now \u201c'+String(S.meta[k]).slice(0,60)+'\u201d, TI-1 gives \u201c'+x.fig[k].slice(0,60)+'\u201d)').join('; ')+'?\n\nCancel keeps every entry; nothing is imported.')){tiMsg('Nothing was imported; every entry was kept.');return false;}
+  if(diff.length&&!(await nbhUI.confirm('Replace the figures already entered?\n'+diff.map(k=>TI_LAB[k]+' (now \u201c'+String(S.meta[k]).slice(0,60)+'\u201d, TI-1 gives \u201c'+x.fig[k].slice(0,60)+'\u201d)').join('; ')+'.\nCancel keeps every entry; nothing is imported.',{ok:'Replace'}))){tiMsg('Nothing was imported; every entry was kept.');return false;}
   keys.forEach(k=>{const el=$('[data-m="'+k+'"]');if(el)tiSet(el,x.fig[k]);});
   S.ti={src:src==='workstation'?'workstation':'file',file:String(file||'').slice(0,300),when:tiISO(new Date()),student:x.student.slice(0,300),int:x.int.slice(0,300),skill:x.skill.slice(0,300),
     n:x.n,conSteps:x.conSteps,latest:{col:x.latest.col,date:x.latest.date,type:x.latest.type,pct:tiR1(x.latest.pct),crit:x.latest.crit==null?null:tiR1(x.latest.crit),deciding:!!x.latest.deciding},written:Object.assign({},x.fig),conNote:x.conNote};
@@ -1735,17 +1735,17 @@ function renderTiRec(){
     (T.latest&&T.latest.col?'; most recent'+(T.latest.deciding?' deciding':'')+' observation #'+T.latest.col+(T.latest.date?' ('+esc(tiUS(T.latest.date))+')':'')+(T.latest.type?', '+esc(T.latest.type.toLowerCase()):'')+(T.latest.pct!=null?', '+T.latest.pct+'%':'')+(T.latest.crit!=null?', critical steps '+T.latest.crit+'%':', no critical step scored'):'')+
     '; '+esc(T.conNote||'')+'. Imported '+esc(tiUS(T.when))+' from '+src+'.'+(flags.length?' <span class="pr-ddflag">Changed by hand since: '+flags.join('; ')+'.</span>':'')+
     ' <button type="button" class="tool noprint" id="tiRm">Remove this note</button></p>';
-  const b=$('#tiRm');if(b)b.addEventListener('click',()=>{if(confirm('Remove the note of the import from Form TI-1? The figures on this form keep what they hold.')){delete S.ti;renderTiRec();}});}
+  const b=$('#tiRm');if(b)b.addEventListener('click',async()=>{if(await nbhUI.confirm('Remove the note of the import from Form TI-1?\nThe figures on this form keep what they hold.',{ok:'Remove',danger:true})){delete S.ti;renderTiRec();}});}
 function tiAsk(){
   TI.waiting=Date.now();clearTimeout(TI.timer);tiMsg('Asking the workstation for Form TI-1\u2019s record\u2026');
   TI.timer=setTimeout(()=>{if(!TI.waiting)return;TI.waiting=0;TI.fileMode=true;tiMsg('The workstation did not answer. Click Import From TI-1 again to open a file TI-1 saved.',true);},15000);
   try{window.parent.postMessage({nbh:'ask',want:'TI-1'},'*');}catch(e){TI.waiting=0;clearTimeout(TI.timer);TI.fileMode=true;tiMsg('The workstation could not be asked. Click Import From TI-1 again to open a file TI-1 saved.',true);}}
-window.addEventListener('message',ev=>{const d=ev.data;if(!d||typeof d!=='object'||d.nbh!=='answer'||d.want!=='TI-1')return;
+window.addEventListener('message',async ev=>{const d=ev.data;if(!d||typeof d!=='object'||d.nbh!=='answer'||d.want!=='TI-1')return;
   if(window.parent===window||ev.source!==window.parent||!TI.waiting)return;
   TI.waiting=0;clearTimeout(TI.timer);
   if(d.ok!==true){TI.fileMode=true;tiMsg(d.why==='not open'?'Form TI-1 is not open in this workstation. Open it from the list of forms, or click Import From TI-1 again to open a file TI-1 saved.':'Form TI-1 is open but did not give its record. Wait for it to finish loading, then try again.',true);return;}
   let o=null;try{o=JSON.parse(d.snap&&d.snap.own);}catch(e){o=null;}
-  if(!tiApply(tiRead(o),'workstation',''))tiMsg(tiMsgEl.textContent||'Form TI-1 in this workstation gave a record this form could not read. Nothing was imported.',true);});
+  if(!(await tiApply(tiRead(o),'workstation','')))tiMsg(tiMsgEl.textContent||'Form TI-1 in this workstation gave a record this form could not read. Nothing was imported.',true);});
 $('#tiBtn').addEventListener('click',()=>{if(window.parent!==window&&!TI.fileMode){tiAsk();return;}TI.fileMode=false;$('#tiFile').click();});
 $('#tiFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const name=String(f.name||'').slice(0,300),r=new FileReader();
   r.onload=()=>{let o=null;try{o=JSON.parse(String(r.result||''));}catch(x){o=null;}

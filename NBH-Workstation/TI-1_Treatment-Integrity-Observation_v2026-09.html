@@ -997,10 +997,10 @@ function renderSteps(){
 }
 /* v21.33 (R): a step can be deleted anywhere in the list. Its codes, both observers' codes and its opportunity
    counts go with it, and those of the steps after it are re-keyed so none moves to another step. */
-function delStepAt(i){const st=S.steps[i];if(!st)return;
+async function delStepAt(i){const st=S.steps[i];if(!st)return;
   const lock=$('#delStep');if(lock&&lock.disabled){alert(lock.title||'Locked while an observation is open in the runner.');return;}
   const held=[S.cells,S.ioa,S.opp].some(m=>Object.keys(m).some(k=>+k.split('_')[0]===i&&m[k]));
-  if((String(st.d||'').trim()||st.crit||held)&&!confirm('Step '+(i+1)+' has a description, a critical mark or scored codes. Delete it, with its codes on every observation? The steps after it move up one.'))return;
+  if((String(st.d||'').trim()||st.crit||held)&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nIt has a description, a critical mark or scored codes. It is deleted with its codes on every observation, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
   S.steps.splice(i,1);
   [S.cells,S.ioa,S.opp].forEach(m=>{const nw={};Object.keys(m).forEach(k=>{const p=k.split('_'),s=+p[0];if(s===i)return;nw[(s>i?s-1:s)+'_'+p[1]]=m[k];});
     Object.keys(m).forEach(k=>{delete m[k];});Object.assign(m,nw);});
@@ -1017,9 +1017,9 @@ $('#stepTbl').addEventListener('change',e=>{const el=e.target;if(el.dataset.s===
 function addBlankStep(){const i=S.steps.length;dropCodes(s=>s===i);S.steps.push({d:'',crit:false});}
 $('#addStep').addEventListener('click',()=>{addBlankStep();renderAll();});
 $('#addFive').addEventListener('click',()=>{for(let i=0;i<5;i++)addBlankStep();renderAll();});
-$('#delStep').addEventListener('click',()=>{if(S.steps.length<2)return;
+$('#delStep').addEventListener('click',async()=>{if(S.steps.length<2)return;
   const i=S.steps.length-1,st=S.steps[i],held=[S.cells,S.ioa,S.opp].some(m=>Object.keys(m).some(k=>+k.split('_')[0]===i&&m[k]));
-  if((String(st.d||'').trim()||st.crit||held)&&!confirm('Step '+(i+1)+' has a description, a critical mark or scored codes. Remove it, with its codes on every observation?'))return;
+  if((String(st.d||'').trim()||st.crit||held)&&!(await nbhUI.confirm('Remove step '+(i+1)+'?\nIt has a description, a critical mark or scored codes. It is removed with its codes on every observation.',{ok:'Remove',danger:true})))return;
   S.steps.pop();dropCodes(s=>s===i);renderAll();});
 
 /* ---------------- scoring grid ---------------- */
@@ -1304,12 +1304,12 @@ function renderAll(){ensure();renderSteps();renderGrid();renderOpp();renderSumma
    F3: only whole numbers of observations (2-8), 50-100% and a whole number of 1-5 unannounced observations are
    kept; anything else goes back to the value in use. A fractional count stopped the page with an error, and the
    criterion took 150%, 30%, -1 or 2.5. */
-$('#nObs').addEventListener('change',e=>{const v=+e.target.value;
+$('#nObs').addEventListener('change',async e=>{const v=+e.target.value;
   if(!(Number.isInteger(v)&&v>=2&&v<=8)){e.target.value=S.nObs;return;}
   if(v<S.nObs){
     const held=S.obs.some((o,j)=>j>=v&&(o.date||o.type||String(o.ctx||'').trim()||o.ioa))||
       [S.cells,S.ioa,S.opp].some(m=>Object.keys(m).some(k=>{const p=k.split('_');return +p[1]>=v&&+p[0]<S.steps.length&&m[k];}));
-    if(held&&!confirm((S.nObs-v>1?'Observations #'+(v+1)+' to #'+S.nObs+' hold':'Observation #'+S.nObs+' holds')+' codes or details. Reducing to '+v+' observations removes them. Continue?')){e.target.value=S.nObs;return;}
+    if(held&&!(await nbhUI.confirm('Reduce to '+v+' observations?\n'+(S.nObs-v>1?'Observations #'+(v+1)+' to #'+S.nObs+' hold':'Observation #'+S.nObs+' holds')+' codes or details, which are removed with them.',{ok:'Reduce',danger:true}))){e.target.value=S.nObs;return;}
     dropCodes((s,j)=>j>=v);S.obs.length=v;}
   else dropCodes((s,j)=>j>=S.nObs&&j<v);
   S.nObs=v;renderAll();});
@@ -1337,11 +1337,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='TI-1_scoring.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated protocol and fill every sheet with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated protocol?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};   /* v21.21 cross-form (X1): local date, not UTC */
   S=blank();S.nObs=4;S.crit=90;S.critN=2;
   S.meta={skill:'Break-card FCT with delay tolerance, independent work context',
@@ -1701,16 +1701,17 @@ function end(){if(R.st!=='run'&&R.st!=='pause')return;R.acc=elapsed();R.st='revi
 function back(i){if(R.st!=='review')return;if(i!=null&&i>=0&&i<nSteps())R.cur=i;R.t0=now();R.st='run';tickOn();wakeOn();setTop();
   note(i!=null?'Back to coding at step '+(i+1)+'.':'Back to coding.');render();focusWork();}
 function reset(){tickOff();wakeOff();lockOff();Object.assign(R,{st:'idle',col:-1,ev:[],stack:[],acc:0,cur:0,sRef:null,stageH:'',listSig:''});}
-function discard(){if(!active())return;if(!confirm('Discard this observation? Nothing is written to the sheet.'))return;
+async function discard(){if(!active())return;if(!(await nbhUI.confirm('Discard this observation?\nNothing is written to the sheet.',{ok:'Discard',danger:true})))return;if(!active())return;
   reset();note('Observation discarded. Nothing was written to the sheet.');render();focusEl(byId('tiRunOpen'));}
 function multiLines(){const out=[];for(let i=0;i<nSteps();i++){const r=roll(i);if(r.n>1)out.push('step '+(i+1)+' came due '+r.n+' times ('+parts(r)+'; written as '+LABEL[r.code]+')');}return out;}
-function save(){
+async function save(){
   if(R.st!=='review')return;const n=nSteps(),j=R.col,f=figs();
   if(!f.coded){note('Nothing is coded yet. Keep coding, or discard the observation.',true);return;}
   if(!(j>=0&&j<MAXOBS)){note('Choose an observation column first: discard this observation and set it up again.',true);return;}
   const c=j<S.nObs?colInfo(j):null;
-  if(c&&!c.empty&&!confirm('Observation #'+(j+1)+' already holds '+holds(c)+'. Replace them with this observation'+RSQ+'s codes, date, type and context?')){
+  if(c&&!c.empty&&!(await nbhUI.confirm('Replace what observation #'+(j+1)+' holds?\nObservation #'+(j+1)+' already holds '+holds(c)+'. They are replaced with this observation'+RSQ+'s codes, date, type and context.',{ok:'Replace',danger:true}))){
     note('Nothing was saved, and observation #'+(j+1)+' is unchanged.');return;}
+  if(R.st!=='review')return;
   const codes=[];for(let i=0;i<n;i++)codes.push(roll(i).code);
   const ctx=ctxText(),multi=multiLines(),chk=byId('tiRunNoteChk'),addNote=!!(multi.length&&(!chk||chk.checked));
   const date=isISO(R.date)?R.date:'',type=R.type;let err='';
@@ -1756,7 +1757,7 @@ box.addEventListener('change',e=>{if(R.st!=='setup')return;const t=e.target;
 box.addEventListener('input',e=>{if(R.st!=='setup')return;const t=e.target;
   if(t.id==='tiRunCtx')R.ctx=t.value;else if(t.id==='tiRunDate')R.date=t.value;else if(t.id==='tiRunTime')R.time=t.value;});
 D.addEventListener('keydown',e=>{
-  if((R.st!=='run'&&R.st!=='pause')||e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||!box.offsetParent)return;
+  if((R.st!=='run'&&R.st!=='pause')||e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||!box.offsetParent||D.querySelector('dialog[open]'))return;
   const t=e.target,tag=(t&&t.tagName)||'';
   if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable))return;
   if((e.key===' '||e.key==='Enter')&&/^(BUTTON|A|SUMMARY)$/.test(tag))return;   /* the focused control acts on its own */
@@ -1795,11 +1796,11 @@ function handoffNote(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1)),
     (few?', the only unannounced observation'+(d.length>1?'s':'')+' with scored steps so far (the criterion counts '+S.critN+')':', the '+(d.length>1?'ones':'one')+' the verdict is judged on')+': '+
     (st.length?(st.length>1?'steps ':'step ')+list(st)+', below '+S.crit+'% or with an error there.':'no step is below '+S.crit+'% or has an error there.');}
 function handoffPaint(){if(hNote)setText(hNote,handoffNote());if(hSaved)setText(hSaved,'');}
-function handoffSave(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1));
+async function handoffSave(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1));
   if(!d.length){alert('There is nothing to save yet. The retraining list for ST-1 is taken from the observations the verdict is judged on, the last '+
     plural(S.critN,'unannounced observation')+' with scored steps, and no unannounced observation has scored steps yet.');return;}
-  if(d.length<S.critN&&!confirm('The mastery criterion counts '+plural(S.critN,'unannounced observation')+', and only '+d.length+' '+(d.length===1?'has':'have')+
-    ' scored steps so far ('+list(cols)+'). Save the retraining list from '+(d.length===1?'that observation':'those observations')+'?'))return;
+  if(d.length<S.critN&&!(await nbhUI.confirm('Save the retraining list from '+(d.length===1?'that one observation':'those '+d.length+' observations')+'?\nThe mastery criterion counts '+plural(S.critN,'unannounced observation')+', and only '+d.length+' '+(d.length===1?'has':'have')+
+    ' scored steps so far ('+list(cols)+').',{ok:'Save'})))return;
   const m=S.meta||{},t=v=>String(v==null?'':v).trim();
   const out={form:'TI-1-RETRAIN',rev:'2026-09',saved:new Date().toISOString(),
     student:{name:t(m.client),id:t(m.sid),setting:t(m.setting)},protocol:{skill:t(m.skill),source:t(m.src)},

@@ -16,7 +16,24 @@ header.mast{padding:26px 34px 20px;border-bottom:2px solid var(--ink)}
 .who b{display:block;color:var(--ink);font-size:14px}
 h1{font-family:"Iowan Old Style",Charter,Georgia,serif;font-weight:600;font-size:27px;line-height:1.15;margin:14px 0 6px;max-width:24ch}
 .mast p.sub{margin:0;color:var(--muted);font-size:14px;max-width:74ch}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+/* ---- toolbar (v21.34): the View segment and the sheet actions the other forms share. The old tab row stays in
+   the document, hidden, because the walkthrough and the live panel click its buttons; the segment mirrors it. ---- */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--nbh-navy,#182e43);color:#E7EDF2;font-family:var(--nbh-sans,system-ui,sans-serif);font-size:12.5px;padding:10px 18px;margin:0;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.tgroup{display:flex;flex-direction:column;gap:4px}
+.tgroup > span{font-size:10.5px;letter-spacing:.04em;color:var(--nbh-sage,#9FB3C2)}
+.tgroup .row{display:flex;gap:6px;align-items:center}
+.toolbar select,.toolbar input[type=number]{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#31414F);color:#f1f6f5;border:1px solid #3e6070;border-radius:2px;padding:4px 6px}
+.toolbar input[type=number]{width:62px}
+.toolbar button{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#3C5061);color:#f1f6f5;border:1px solid #3e6070;border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.toolbar button:hover{background:#2f5568}
+.toolbar button.primary{background:#fff;color:var(--nbh-navy,#182e43);border-color:#fff;font-weight:600}
+.toolbar button.primary:hover{background:var(--nbh-mint,#bcd9d4)}
+.seg{display:flex;border:1px solid #3e6070;border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--nbh-slate,#31414F);padding:5px 10px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--nbh-navy,#182e43);font-weight:600}
+.toolbar :focus-visible{outline:2px solid var(--nbh-sage,#a0c9c3)}
+nav.nbh-tabs.nbh-tabs-old{display:none!important}
+@media print{.toolbar{display:none!important}}
 button.tool{font:inherit;font-size:13px;padding:6px 13px;border:1px solid var(--rule2);background:var(--paper);color:var(--ink);border-radius:2px;cursor:pointer}
 button.tool:hover{background:var(--accent-soft);border-color:var(--accent)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -552,12 +569,29 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
         <h1>Accumulated vs. Distributed Reinforcement: Efficacy, Preference &amp; Implementation</h1>
         <p class="nbh-sub">An assessment-to-implementation packet for deciding how a student’s reinforcement should be delivered: in small amounts right after each response (distributed), or banked across the work and delivered in one uninterrupted block at the end (accumulated). It tests what each arrangement does to work, learning and problem behavior, asks the student which one they choose, counts the time each one costs, and then builds the chosen arrangement into daily programming. Work the tabs in order; each carries forward decisions from the last.</p>
       </div>
-      <div class="nbh-actions"><button class="tool nbh-btn nbh-btn-secondary" id="btnSim">Load simulation</button><button class="tool nbh-btn nbh-btn-primary" id="btnPrint">Print / Save as PDF</button><button class="tool nbh-btn nbh-btn-secondary" id="btnSave">Save data</button><button class="tool nbh-btn nbh-btn-secondary" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json,application/json" hidden><button class="tool nbh-btn nbh-btn-secondary" id="btnClear">Clear all</button></div>
     </div>
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
   </div>
 </header>
-<nav class="tabs nbh-tabs" role="tablist">
+<div class="toolbar noprint">
+  <div class="tgroup"><span>View</span><div class="row">
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="p1" aria-pressed="true">Student &amp; question</button>
+      <button type="button" data-view="p2" aria-pressed="false">Preassessment</button>
+      <button type="button" data-view="p3" aria-pressed="false">Arrangement builder</button>
+      <button type="button" data-view="p4" aria-pressed="false">Efficacy data</button>
+      <button type="button" data-view="p5" aria-pressed="false">Preference</button>
+      <button type="button" data-view="p6" aria-pressed="false">Integrity &amp; IOA</button>
+      <button type="button" data-view="p7" aria-pressed="false">Decision &amp; plan</button>
+      <button type="button" data-view="p8" aria-pressed="false">Generalization &amp; validity</button>
+      <button type="button" data-view="p9" aria-pressed="false">Evidence guide</button>
+      <button type="button" data-view="p10" aria-pressed="false">Walkthrough</button>
+    </div></div></div>
+  <div class="tgroup"><span>Sheet actions</span><div class="row">
+    <button type="button" id="btnSim">Load simulation</button><button type="button" class="primary" id="btnPrint">Print / Save as PDF</button><button type="button" id="btnSave">Save data</button><button type="button" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json,application/json" hidden><button type="button" id="btnClear">Clear all</button>
+  </div></div>
+</div>
+<nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
   <button class="tab" role="tab" data-p="p1"><span class="n">1</span>Student &amp; question</button>
   <button class="tab" role="tab" data-p="p2"><span class="n">2</span>Preassessment</button>
@@ -581,7 +615,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </div>
 
 <!-- ===== 1 STUDENT & QUESTION ===== -->
-<section class="panel" id="p1" role="tabpanel">
+<section class="panel" id="p1" role="tabpanel" data-panel="p1">
   <h2 class="nbh-band">Student, Clinical Question, and Reinforcers</h2>
   <p class="lede">Complete before any data are taken. The clinical question chosen here decides which measures Tab 4 emphasizes and which studies in the evidence guide are the closest match to this student.</p>
   <div class="grid g4">
@@ -642,7 +676,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 2 PREASSESSMENT ===== -->
-<section class="panel" id="p2" role="tabpanel">
+<section class="panel" id="p2" role="tabpanel" data-panel="p2">
   <h2 class="nbh-band">Preassessment Battery</h2>
   <p class="lede">Five checks before the comparison starts. A and B confirm the reinforcer works at all; C and D confirm the student can use the materials an accumulated arrangement depends on; E measures what each removal of the reinforcer costs. A comparison run without them can fail for reasons that have nothing to do with the arrangement.</p>
   <p><button type="button" class="tool wk-go" data-go="setup">See the table set up in the walkthrough &rarr;</button></p>
@@ -677,7 +711,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 3 ARRANGEMENT BUILDER ===== -->
-<section class="panel" id="p3" role="tabpanel">
+<section class="panel" id="p3" role="tabpanel" data-panel="p3">
   <h2 class="nbh-band">Arrangement Builder</h2>
   <p class="lede">Write every parameter down before the first session. The comparison is only interpretable if the arrangements differ in when and how much reinforcement arrives, and in nothing else.</p>
 
@@ -777,7 +811,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 4 EFFICACY DATA ===== -->
-<section class="panel" id="p4" role="tabpanel">
+<section class="panel" id="p4" role="tabpanel" data-panel="p4">
   <h2 class="nbh-band">Efficacy Data: Session Log, Graph, and Comparison</h2>
   <p class="lede">One row per session, in the order run. Record work time and total time separately, so rate can be read on work time and cost on total time. The graph and the comparison below update from the rows.</p>
   <p><button type="button" class="tool wk-go" data-go="dis">See a distributed and an accumulated session run in the walkthrough &rarr;</button></p>
@@ -799,7 +833,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 5 PREFERENCE ===== -->
-<section class="panel" id="p5" role="tabpanel">
+<section class="panel" id="p5" role="tabpanel" data-panel="p5">
   <h2 class="nbh-band">Preference: Concurrent-Chains Assessment</h2>
   <p class="lede">The student chooses the arrangement. Each arrangement has its card (the initial link); touching a card starts a session run under that arrangement (the terminal link). All five studies that measured choice used concurrent chains; Gingras (2022) asked with a questionnaire instead (Tab 8).</p>
   <p><button type="button" class="tool wk-go" data-go="choice">See a choice trial in the walkthrough &rarr;</button></p>
@@ -828,7 +862,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 6 INTEGRITY & IOA ===== -->
-<section class="panel" id="p6" role="tabpanel">
+<section class="panel" id="p6" role="tabpanel" data-panel="p6">
   <h2 class="nbh-band">Procedural Integrity and Interobserver Agreement</h2>
   <p class="lede">Only three of the six works reported procedural integrity (Robinson &amp; St. Peter, 2019: 100%; Gingras, 2022: 100%; Mandel, 2021: means of 99.5% and 97.6%). An arrangement comparison is especially exposed to drift: a distributed unit that stretches from 30 s to 50 s, or an accumulated block cut short, changes the very variable being compared.</p>
   <h3>A. Integrity Checklist</h3>
@@ -850,7 +884,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 7 DECISION & PLAN ===== -->
-<section class="panel" id="p7" role="tabpanel">
+<section class="panel" id="p7" role="tabpanel" data-panel="p7">
   <h2 class="nbh-band">Decision and Implementation Plan</h2>
   <p class="lede">What this student’s data say, the decision the team makes from them, and the written plan for using the chosen arrangement every day.</p>
   <h3>A. This Student’s Evidence</h3>
@@ -918,7 +952,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 8 GENERALIZATION & VALIDITY ===== -->
-<section class="panel" id="p8" role="tabpanel">
+<section class="panel" id="p8" role="tabpanel" data-panel="p8">
   <h2 class="nbh-band">Generalization, Maintenance, and Social Validity</h2>
   <p class="lede">The evaluation ran under controlled conditions. The arrangement now has to work with other staff, other tasks and other settings, keep working over weeks, and be acceptable to the people who run it.</p>
   <div><label class="f">Generalization plan (staff, settings, tasks, reinforcers)</label><textarea name="g_plan"></textarea></div>
@@ -942,7 +976,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
-<section class="panel" id="p9" role="tabpanel">
+<section class="panel" id="p9" role="tabpanel" data-panel="p9">
   <h2 class="nbh-band">Evidence Guide</h2>
   <p class="lede">What the six works in this packet found, kept apart from what their authors made of it and from this form’s own guidance. Page numbers are the journal’s printed pages, or the thesis’s or dissertation’s printed pages. Quotations are verbatim.</p>
   <div class="evkey"><span><b class="tagx find">Finding</b> what was observed, with the numbers the authors reported</span><span><b class="tagx expl">Explanation</b> an account the authors offered; not tested</span><span><b class="tagx auth">Authors</b> an applied implication the authors drew</span><span><b class="tagx nbh">NBH</b> this form’s synthesis or guidance</span></div>
@@ -1106,7 +1140,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   </ul>
 </section>
 
-<section class="panel noprint" id="p10" role="tabpanel">
+<section class="panel noprint" id="p10" role="tabpanel" data-panel="p10">
   <h2 class="nbh-band">Walkthrough: Running the Arrangement Comparison</h2>
   <div class="wk-top"><p>What each part of the evaluation looks like at the table: the adult and the student drawn step by step, what is said, what the student does, and what goes on the sheet. The student is this form’s simulated example. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" class="tool nbh-btn nbh-btn-secondary" id="wkPrintBtn" title="Prints one sheet per procedure: setup, the drawn steps, the words, what to record, and an observer’s integrity checklist">Print the job aids</button></div>
@@ -1272,6 +1306,23 @@ const tabs=$$('.tab');
 function show(id){tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.p===id));$$('.panel').forEach(p=>p.classList.toggle('on',p.id===id));window.scrollTo({top:0});}
 tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
 show('p1');
+/* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
+   walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
+   carries view-<key> like the other forms. ---- */
+(function(){
+  var seg=document.getElementById('viewSeg'),nav=document.querySelector('nav.nbh-tabs');if(!seg||!nav)return;
+  var tabs=Array.prototype.slice.call(nav.querySelectorAll('[role=tab]'));
+  var keyOf=function(t){return t.dataset.p||'';};
+  function sync(){
+    var cur=tabs.filter(function(t){return t.getAttribute('aria-selected')==='true';})[0],k=cur?keyOf(cur):'';
+    seg.querySelectorAll('button[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===k));});
+    if(k){var cl=document.body.classList;Array.prototype.slice.call(cl).forEach(function(c){if(c.indexOf('view-')===0)cl.remove(c);});cl.add('view-'+k);}
+  }
+  seg.querySelectorAll('button[data-view]').forEach(function(b){b.addEventListener('click',function(){
+    var t=tabs.filter(function(x){return keyOf(x)===b.dataset.view;})[0];if(t)t.click();sync();});});
+  try{new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['aria-selected']});}catch(e){}
+  sync();
+})();
 
 /* ---------- arrangements ---------- */
 const CONDS=['Baseline / control','Distributed','Accumulated','Accumulated + tokens','Intermediate'];
@@ -1563,9 +1614,9 @@ function integrity(){
 /* ---------- tab 7 ---------- */
 function stepCalc(){rows('tbStep').forEach((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);const r=num(v[0]);const m=String(v[1]).match(/([\d.]+)\s*(s|sec|seconds?|min|minutes?|pieces?|tokens?)?/i);let t='—';
   if(r&&m){const a=parseFloat(m[1]);const u=(m[2]||'s').toLowerCase();t=/^min/.test(u)?fmt(r*a,1)+' min':/^piece/.test(u)?plural(r*a,'piece'):/^token/.test(u)?plural(r*a,'token'):mmss(r*a)}tr.cells[3].textContent=t})}
-$('#btnLadder').addEventListener('click',()=>{const r=num(val('pl_req'))||num(val('w_req'))||10;const u=val('pl_unit')||(val('r_unit')?val('r_unit')+(val('r_utype')==='pieces'?' pieces':' s'):'30 s');
+$('#btnLadder').addEventListener('click',async ()=>{const r=num(val('pl_req'))||num(val('w_req'))||10;const u=val('pl_unit')||(val('r_unit')?val('r_unit')+(val('r_utype')==='pieces'?' pieces':' s'):'30 s');
   const adv='3 consecutive sessions at or above the evaluation rate, with problem behavior at or below the evaluation level',back='2 consecutive sessions with problem behavior at 50% or more of the baseline mean';
-  if(rows('tbStep').some(tr=>vals(tr).some(x=>x))&&!confirm('Replace the steps already entered?'))return;
+  if(rows('tbStep').some(tr=>vals(tr).some(x=>x))&&!(await nbhUI.confirm('Replace the steps already entered?',{ok:'Replace',danger:true})))return;
   document.getElementById('tbStep').innerHTML='';[1,1.5,2,3].forEach((f,i)=>addRow('tbStep',[String(Math.round(r*f)),String(u).replace(/ per.*$/,''),i===3?'Hold; review at the next plan review':adv,back]));refresh()});
 function decision(sx,pf,ig,sv){
   const L=[];const pm=MEAS[primary()];
@@ -1609,7 +1660,7 @@ $('#btnLoad').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{restore(JSON.parse(r.result))}catch(err){alert('Could not open that file: '+err.message)}};r.readAsText(f);e.target.value=''});
 $('#btnPrint').addEventListener('click',()=>{refresh();window.print()});
 window.addEventListener('beforeprint',refresh);
-$('#btnClear').addEventListener('click',()=>{if(confirm('Clear every field on this form? Unsaved entries will be lost.'))location.reload()});
+$('#btnClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every field on this form?\nUnsaved entries will be lost.',{ok:'Clear all',danger:true}))location.reload()});
 
 /* ---------- simulation ------------------------------------------------
    One worked case, consistent across every tab: a 9-year-old whose tablet
@@ -1670,7 +1721,7 @@ function loadSim(){
   t.tbMaint=[['2026-10-06','2','Rate; problem behavior','2.3 per min; 0','Board at 15 problems'],['2026-10-20','4','Rate; problem behavior','2.2 per min; 1','Board at 20 problems']];
   restore({version:'AD-1 2026-09',fields:f,tables:t});
 }
-$('#btnSim').addEventListener('click',()=>{if(rows('tbSess').length&&!confirm('Replace the entries on this form with the simulated case?'))return;loadSim()});
+$('#btnSim').addEventListener('click',async ()=>{if(rows('tbSess').length&&!(await nbhUI.confirm('Replace the entries on this form with the simulated case?',{ok:'Replace'})))return;loadSim()});
 refresh();
 })();
 </script>

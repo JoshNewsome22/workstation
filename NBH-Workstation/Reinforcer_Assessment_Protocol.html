@@ -1958,11 +1958,11 @@ $('#coaConf').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i;if(
 $('#coaConf').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;S.coa.conf.splice(+b.dataset.rm,1);renderCoaConf();});
 $('#coaConfAdd').addEventListener('click',()=>{S.coa.conf.push({name:'',role:'',why:'',bst:false,bstDate:''});renderCoaConf();});
 $('#coaLib').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i,f=el.dataset.f;if(isNaN(i)||!f)return;S.coa.lib[i][f]=el.value;if(f==='desc'){renderCoaPairs();renderCoaSess();}computeCOA();renderSummary();});
-$('#coaLib').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!confirm('Remove condition '+coaL(i)+'? Pairings that use it are cleared.'))return;S.coa.lib.splice(i,1);
+$('#coaLib').addEventListener('click',async e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!(await nbhUI.confirm('Remove condition '+coaL(i)+'?\nPairings that use it are cleared.',{ok:'Remove',danger:true})))return;S.coa.lib.splice(i,1);
   S.coa.pairs.forEach(p=>{['c1','c2'].forEach(k=>{if(p[k]==='')return;const v=+p[k];if(v===i)p[k]='';else if(v>i)p[k]=String(v-1);});});renderCoaLib();renderCoaPairs();renderCoaSess();computeCOA();renderSummary();});
 $('#coaLibAdd').addEventListener('click',()=>{S.coa.lib.push({desc:'',att:'',attWho:'',tan:'',tanWhat:'',av:'',avWhat:'',purpose:'',link:''});renderCoaLib();renderCoaPairs();computeCOA();});
 $('#coaPairs').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i,f=el.dataset.f;if(isNaN(i)||!f)return;S.coa.pairs[i][f]=el.value;if(f!=='note')renderCoaSess();computeCOA();renderSummary();});
-$('#coaPairs').addEventListener('click',e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!confirm('Remove pairing '+(i+1)+'? Sessions that use it lose their pairing.'))return;S.coa.pairs.splice(i,1);
+$('#coaPairs').addEventListener('click',async e=>{const b=e.target.closest('button[data-rm]');if(!b)return;const i=+b.dataset.rm;if(!(await nbhUI.confirm('Remove pairing '+(i+1)+'?\nSessions that use it lose their pairing.',{ok:'Remove',danger:true})))return;S.coa.pairs.splice(i,1);
   S.coa.sess.forEach(s=>{if(s.pair==='')return;const v=+s.pair;if(v===i)s.pair='';else if(v>i)s.pair=String(v-1);});renderCoaPairs();renderCoaSess();computeCOA();renderSummary();});
 $('#coaPairAdd').addEventListener('click',()=>{S.coa.pairs.push({c1:'',c2:'',note:''});renderCoaPairs();renderCoaSess();computeCOA();});
 $('#coaTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k,f=el.dataset.f;if(isNaN(k)||!f)return;S.coa.sess[k][f]=el.type==='checkbox'?el.checked:el.value;computeCOA();renderSummary();});
@@ -2004,7 +2004,7 @@ let coaRunnerSync=null;
   el('pb').addEventListener('click',()=>{if(C.st!=='run')return;C.pb++;paint();});
   el('prompt').addEventListener('click',()=>{if(C.st!=='run')return;C.prompts.push(mmss(C.run));paint();msg('Prompt to choose logged at '+C.prompts[C.prompts.length-1]+'.');});
   el('end').addEventListener('click',()=>{tick();end('Ended by the implementer.');});
-  el('discard').addEventListener('click',()=>{if(C.st==='run'&&!confirm('Discard the running session?'))return;reset();msg('Session discarded.');});
+  el('discard').addEventListener('click',async()=>{if(C.st==='run'&&!(await nbhUI.confirm('Discard the running session?\nNothing from it is written to the sheet.',{ok:'Discard',danger:true})))return;reset();msg('Session discarded.');});
   el('sound').addEventListener('click',()=>el('sound').setAttribute('aria-pressed',el('sound').getAttribute('aria-pressed')==='true'?'false':'true'));
   el('save').addEventListener('click',()=>{if(C.st!=='done')return;const c=S.coa;let k=c.sess.findIndex(s=>s.pair===''&&s.d1===''&&s.d2==='');if(k<0){c.nSess=Math.min(60,c.nSess+1);ensureCoa();k=c.sess.length-1;if(c.sess[k].d1!==''){msg('The session grid is full (60 rows).',true);return;}}
     const d=new Date();const r=c.sess[k];const rd=v=>String(Math.round(v/1000));
@@ -2013,7 +2013,7 @@ let coaRunnerSync=null;
     const other=C.sideC1==='L'?'R':C.sideC1==='R'?'L':'';if(other)el('side').value=other;
     reset();msg('Saved as session '+(k+1)+'.'+(other?' Next session of this pairing: put Condition 1 on the '+other+' side.':''));});
   el('pair').addEventListener('change',()=>coaRunnerSync());
-  document.addEventListener('keydown',e=>{if(C.st!=='run')return;const t=e.target;if(t&&/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))return;const k=e.key.toLowerCase();
+  document.addEventListener('keydown',e=>{if(C.st!=='run'||document.querySelector('dialog[open]'))return;const t=e.target;if(t&&/^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))return;const k=e.key.toLowerCase();
     if(k==='1')el('s1').click();else if(k==='0')el('s0').click();else if(k==='2')el('s2').click();else if(k==='r')el('ref').click();else if(k==='p')el('pb').click();else if(k==='c')el('prompt').click();else return;e.preventDefault();});
   coaRunnerSync=function(st){
     if(C.st==='run')return;st=st||coaStats();
@@ -2101,7 +2101,7 @@ bindNum('nSess','nSess',renderSO);
 bindNum('nCoSess','nCoSess',renderCO);
 bindNum('prStart','prStart',renderPR);
 bindNum('prStop','prStop',renderPR);
-$('#prStep').addEventListener('change',e=>{if(S.pr.some(s=>s.done.some(Boolean))&&!confirm('Changing the progression changes the ratio columns; ticks already entered will map to the new ratios. Continue?')){e.target.value=S.prStep;return;}S.prStep=e.target.value;renderPR();renderSummary();});
+$('#prStep').addEventListener('change',async e=>{if(S.pr.some(s=>s.done.some(Boolean))&&!(await nbhUI.confirm('Change the progression?\nThe ratio columns change, and the ticks already entered will map to the new ratios.',{ok:'Change'}))){e.target.value=S.prStep;return;}S.prStep=e.target.value;renderPR();renderSummary();});
 
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download=`RA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
@@ -2116,8 +2116,8 @@ $('#printBtn').addEventListener('click',()=>window.print());
    operants and reaches FR 7 to 9 (High potency at the plan ratio of FR 5);
    and praise does not function as a reinforcer (single-operant verdict
    None, potency Low). */
-function loadSim(){
-  if(!confirm('Load a simulated student and fill every sheet with example data? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated student?\nEvery sheet is filled with example data. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=(n)=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();};
   const jit=(v,p)=>Math.max(0,Math.round(v+(Math.random()*2-1)*p));
 
@@ -2245,7 +2245,7 @@ function loadSim(){
 }
 
 $('#simBtn').addEventListener('click',loadSim);
-$('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on every sheet? Unsaved work will be lost.'))return;S=blank();renderAll();});
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;S=blank();renderAll();});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 })();
@@ -2489,11 +2489,13 @@ renderAll();
      never to a field on the sheet, and never away from a field the user is typing in elsewhere */
   function calm(R,to){const a=document.activeElement;if(!to||(a&&a!==document.body&&!R.box.contains(a)))return;
     if(to.tagName!=='BUTTON'&&!to.hasAttribute('tabindex'))to.setAttribute('tabindex','-1');try{to.focus({preventScroll:true});}catch(e){}}
-  function endNow(R){if(R.state!=='run'&&R.state!=='pause')return;
-    if(!confirm(R.v==='pr'?'End the session now? The break point will be the last completed ratio.':'End the session now? The minutes on the sheet will be the time actually run.'))return;
+  async function endNow(R){if(R.state!=='run'&&R.state!=='pause')return;
+    if(!(await nbhUI.confirm(R.v==='pr'?'End the session now?\nThe break point will be the last completed ratio.':'End the session now?\nThe minutes on the sheet will be the time actually run.',{ok:'End now'})))return;
+    if(R.state!=='run'&&R.state!=='pause')return;
     finish(R,'ended',el(R));}
-  function discard(R){if(R.state==='ready')return;
-    if(!confirm('Discard this session? Nothing from it is written to the sheet.'))return;
+  async function discard(R){if(R.state==='ready')return;
+    if(!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the sheet.',{ok:'Discard',danger:true})))return;
+    if(R.state==='ready')return;
     const was=R.state;stopLoops();unsched();wakeOff();fresh(R);$(R,'sum').hidden=true;lock(R);sync(R,false);
     note(R,was==='done'?'Session discarded.':'Session discarded. Nothing was written to the sheet.');paintAll();calm(R,$(R,'start'));}
 
@@ -2770,7 +2772,7 @@ renderAll();
         ctx();cue('sr');note(R,'Test alert'+(PR.sound?'':' (sound is off)')+'. If you heard nothing, check the device volume and silent mode.');}});
     const vb=q('.ra-run-tog[data-ra="vib"]',R.box);if(vb&&!touch)vb.hidden=true;});
   document.addEventListener('keydown',e=>{
-    const R=active();if(!R||e.ctrlKey||e.metaKey||e.altKey||e.repeat||!shown(R))return;
+    const R=active();if(!R||e.ctrlKey||e.metaKey||e.altKey||e.repeat||!shown(R)||document.querySelector('dialog[open]'))return;
     const t=e.target,tag=(t&&t.tagName)||'';
     if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable))return;
     const k=e.key;

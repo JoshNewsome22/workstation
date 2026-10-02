@@ -2083,7 +2083,7 @@ function genPS(){
   for(let k=pairs.length-1;k>0;k--){const m=Math.floor(r()*(k+1));[pairs[k],pairs[m]]=[pairs[m],pairs[k]];}
   S.ps.trials=pairs.map(p=>({l:p.l,r:p.r,sel:'',pb:false}));
 }
-$('#psGen').addEventListener('click',()=>{if(S.ps.trials.some(t=>t.sel)&&!confirm('Regenerating the list clears the scored trials on this sheet. Continue?'))return;S.ps.seed=+$('#psSeed').value||1;genPS();renderPS();});
+$('#psGen').addEventListener('click',async()=>{if(S.ps.trials.some(t=>t.sel)&&!(await nbhUI.confirm('Regenerate the trial list?\nThe scored trials on this sheet are cleared.',{ok:'Regenerate',danger:true})))return;S.ps.seed=+$('#psSeed').value||1;genPS();renderPS();});
 function renderPS(){
   $('#psSeed').value=S.ps.seed;
   const tr=S.ps.trials;const np=S.n*(S.n-1)/2;
@@ -2496,7 +2496,7 @@ bindNum('ssTrials','ssTrials',renderSS);
 bindNum('msSessions','msSessions',renderMS);
 bindNum('foLen','foLen',renderFO);
 bindNum('ssdLen','ssdLen',renderFO);
-bindSeg('psRepSeg','rep','psRep',()=>{if(S.ps.trials.length){if(confirm('Changing presentations regenerates the paired-stimulus trial list and clears its scores. Continue?'))genPS();else{syncSeg('psRepSeg','rep','psRep');}}renderPS();});
+bindSeg('psRepSeg','rep','psRep',async()=>{if(S.ps.trials.length){if(await nbhUI.confirm('Change the presentations?\nThe paired-stimulus trial list is regenerated and its scores are cleared.',{ok:'Change',danger:true}))genPS();else{syncSeg('psRepSeg','rep','psRep');}}renderPS();});
 bindSeg('msModeSeg','mode','msMode',renderMS);
 
 /* v21.16 (F1): the single-stimulus "PB trials" count sits on each stimulus's row of trials, which is an
@@ -2509,7 +2509,7 @@ $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='PA-1')throw 0;S=Object.assign(blank(),d);if(d.csaSeries==null)S.csaSeries=2;restorePb(d);renderAll();$('#simBanner').hidden=!/^SIMULATED/.test(S.meta.client||'');}catch(err){alert('That file is not a saved copy of Form PA-1.');}};rd.readAsText(f);e.target.value='';});
 $('#printBtn').addEventListener('click',()=>window.print());
-$('#clearBtn').addEventListener('click',()=>{if(!confirm('Clear every entry on every sheet? Unsaved work will be lost.'))return;S=blank();renderAll();$('#simBanner').hidden=true;});
+$('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clear every entry on every sheet?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})))return;S=blank();renderAll();$('#simBanner').hidden=true;});
 window.addEventListener('beforeprint',()=>{computeAll();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
@@ -2731,7 +2731,7 @@ function trialRunner(spec){
   r.discard=()=>{if(!(inTrial()||r.st==='done')){r.note('There is no trial to discard.',true);return;}
     r.clk.reset();r.out=null;r.eng=new Track();if(!spec.pbPerSession)r.pb=false;spec.onDiscard&&spec.onDiscard(r.cur);r.st='ready';
     r.note('Trial discarded; nothing was written. Present it again and press Start trial.');sync();stageFocus(r);};
-  r.end=()=>{if(r.st==='idle')return;if(r.st!=='ready'&&!confirm('End the run now? The trial in progress is not saved.'))return;
+  r.end=async()=>{if(r.st==='idle')return;if(r.st!=='ready'&&!(await nbhUI.confirm('End the run now?\nThe trial in progress is not saved.',{ok:'End the run'})))return;if(r.st==='idle')return;
     r.stop((spec.endMsg?spec.endMsg(r):'Run ended.')+' Everything saved so far is on the sheet.');};
   r.pillText=()=>{const e=el(),p=phase();
     if(r.st==='done')return 'trial over: save it';if(r.st==='paused')return 'paused';
@@ -2947,12 +2947,12 @@ function sessionBase(kind,view,label,locks){
   };
   r.step=()=>{if(r.st==='run'&&r.clk.el()>=r.dur)r.finish(r.dur,false);};
   r.finish=(t,early)=>{r.clk.stop();r.clk.acc=t;r.stopAll(t);r.early=!!early;r.st='done';if(!early)cue('end');r.done();sync();stageFocus(r);};
-  r.endEarly=()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('No session is running.',true);return;}
-    if(!confirm('End this session now? The time run so far is kept for saving.'))return;r.finish(r.el(),true);};
-  r.discard=()=>{if(r.st==='idle'){r.note('There is no session to discard.',true);return;}
-    if(r.st!=='done'&&!confirm('Discard this session? Nothing is written.'))return;r.stop('Session discarded; nothing was written.');};
-  r.save=()=>{if(r.st!=='done'){r.note(r.st==='idle'?'There is no finished session to save.':'The session is still running. Let it finish, or use End early.',true);return;}
-    const m=r.write();if(m===false)return;r.clk.reset();r.st='idle';r.reset();r.cur=r.next();release(r);r.note(m+' '+r.after());stageFocus(r);};
+  r.endEarly=async()=>{if(r.st!=='run'&&r.st!=='paused'){r.note('No session is running.',true);return;}
+    if(!(await nbhUI.confirm('End this session now?\nThe time run so far is kept for saving.',{ok:'End now'})))return;if(r.st!=='run'&&r.st!=='paused')return;r.finish(r.el(),true);};
+  r.discard=async()=>{if(r.st==='idle'){r.note('There is no session to discard.',true);return;}
+    if(r.st!=='done'&&!(await nbhUI.confirm('Discard this session?\nNothing is written.',{ok:'Discard',danger:true})))return;if(r.st==='idle')return;r.stop('Session discarded; nothing was written.');};
+  r.save=async()=>{if(r.st!=='done'){r.note(r.st==='idle'?'There is no finished session to save.':'The session is still running. Let it finish, or use End early.',true);return;}
+    const m=await r.write();if(m===false||r.st!=='done')return;r.clk.reset();r.st='idle';r.reset();r.cur=r.next();release(r);r.note(m+' '+r.after());stageFocus(r);};
   r.pillText=()=>r.st==='done'?'session over: save it':r.st==='paused'?'paused':r.unit()+', '+down(r.dur-r.el())+' left';
   return r;
 }
@@ -3001,10 +3001,10 @@ const FO=byId('pa-run-fo')&&(function(){
   r.engage=()=>{if(mode()!=='ssd')return false;if(r.st!=='run'&&r.st!=='paused'){r.note('Start the presentation first.',true);return true;}
     const e=r.el();if(one.isOn())one.off(e);else one.on(e);r.paint();return true;};
   r.targets=()=>{if(r.st==='idle'||!r.cur)return [];return mode()==='ssd'?[ssdCell(r.cur.i,r.cur.p)]:names().map((_,i)=>foCell(i,r.cur.k));};
-  r.write=()=>{const L=r.len(),e=r.el();
+  r.write=async()=>{const L=r.len(),e=r.el();
     if(mode()==='ssd'){const c=r.cur,x=ssdCell(c.i,c.p);if(!x){r.note('That presentation is no longer on the sheet.',true);return false;}
       const s=Math.min(L,secs(one.total(e)));setField(x,String(s));return 'Saved '+nameOf(c.i)+', presentation '+(c.p+1)+': engaged '+s+' s of '+L+' ('+pct(s,L)+'%).';}
-    const k=r.cur.k;if(!foColEmpty(k)&&!confirm('Session '+(k+1)+' already has times on the sheet. Replace them?'))return false;
+    const k=r.cur.k;if(!foColEmpty(k)&&!(await nbhUI.confirm('Replace the times of session '+(k+1)+'?\nSession '+(k+1)+' already has times on the sheet.',{ok:'Replace',danger:true})))return false;
     const parts=names().map((nm,i)=>{const s=Math.min(L,secs(tr[i]?tr[i].total(e):0));setField(foCell(i,k),String(s));return s?nm+' '+s+' s':'';}).filter(Boolean);
     userSes=false;return 'Saved free-operant session '+(k+1)+': '+(parts.join(', ')||'no engagement')+'.';};
   r.after=()=>{const c=r.cur;if(mode()==='ssd')return c?'Next: '+nameOf(c.i)+', presentation '+(c.p+1)+'.':'All presentations are scored.';
@@ -3103,9 +3103,9 @@ const CSA=byId('pa-run-csa')&&(function(){
   const pbVal=S=>csaUnitR()==='rpm'?rpm(S.count,S.len):pct(S.pb,S.n);
   const pbTxt=S=>csaUnitR()==='rpm'?plural(S.count,'response')+' in '+fmt(S.len)+' ('+pbVal(S)+' per min)':plural(S.count,'response')+'; '+S.pb+' of '+S.n+' intervals ('+pbVal(S)+'%)';
   r.targets=()=>{if(r.st==='idle'||!r.cur)return [];const c=r.cur;return c.c==='c'?[csaIn(c.k,'c',c.s)]:[csaIn(c.k,c.c,c.s,'e'),csaIn(c.k,c.c,c.s,'p'),csaIn(c.k,c.c,c.s,'n'),csaIn(c.k,c.c,c.s,'b')].filter(Boolean);};
-  r.write=()=>{const c=r.cur,S=stats(),p=pbVal(S),en=pct(S.eng,S.n),where=CSA_BN[c.k]+', series '+c.s;
+  r.write=async()=>{const c=r.cur,S=stats(),p=pbVal(S),en=pct(S.eng,S.n),where=CSA_BN[c.k]+', series '+c.s;
     if(!csaTblOf(c.k))return (r.note('That condition is no longer on the sheet.',true),false);
-    if(!csaEmpty(c.k,c.c,c.s)&&!confirm(condName(c.c)+' ('+where+') already has data on the sheet. Replace it?'))return false;
+    if(!csaEmpty(c.k,c.c,c.s)&&!(await nbhUI.confirm('Replace the data of '+condName(c.c)+'?\n'+condName(c.c)+' ('+where+') already has data on the sheet.',{ok:'Replace',danger:true})))return false;
     if(c.c==='c'){if(!setField(csaIn(c.k,'c',c.s),String(p)))return false;userPick=false;return 'Saved the control trial of '+where+': '+pbTxt(S)+'.';}
     if(!setField(csaIn(c.k,c.c,c.s,'e'),String(en))||!setField(csaIn(c.k,c.c,c.s,'p'),String(p)))return false;
     if(augK(c.k))setField(csaIn(c.k,c.c,c.s,'n'),String(S.npr));if(c.k==='pb')setField(csaIn(c.k,c.c,c.s,'b'),String(S.nbl));userPick=false;
@@ -3190,7 +3190,7 @@ const ECO=byId('pa-run-eco')&&(function(){
   r.discard=()=>{if(r.ap){r.note('Approach to '+apName(r.ap)+' discarded.');r.ap=null;return;}if(r.pend){r.note('Approach to '+apName(r.pend)+' discarded.');r.pend=null;return;}r.note('There is nothing to discard.',true);};
   function endObs(auto){if(r.ap)endAp(auto?r.plan:el());r.clk.stop();if(auto)r.clk.acc=r.plan;const L=el();r.st='idle';release(r);
     if(auto)cue('end');r.note('Observation '+(auto?'over':'ended')+' at '+fmt(L)+'.'+(r.pend?' The last approach is waiting: Save or Discard it.':''));stageFocus(r);}
-  r.end=()=>{if(r.st==='idle')return;if(r.ap&&!confirm('End the observation? The approach being timed stops now and waits to be saved.'))return;endObs(false);};
+  r.end=async()=>{if(r.st==='idle')return;if(r.ap&&!(await nbhUI.confirm('End the observation?\nThe approach being timed stops now and waits to be saved.',{ok:'End'})))return;if(r.st==='idle')return;endObs(false);};
   r.step=()=>{if(r.st==='obs'&&r.plan&&el()>=r.plan)endObs(true);};
   r.pillText=()=>r.st==='paused'?'paused':fmt(el())+(r.ap?', timing '+apName(r.ap)+' '+fmt(el()-r.ap.t0):'');
   r.key=(K,k)=>{if(/^[1-9]$/.test(k)){const i=+k-1;if(i<names().length)r.tap(i);return true;}
@@ -3230,7 +3230,7 @@ D.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.pa-r
 D.addEventListener('click',e=>{if(!(e.detail>0))return;const b=e.target.closest&&e.target.closest('.pa-run button');if(!b)return;
   const r=ALL.find(x=>x.box.contains(b));if(r)stageFocus(r,true);});
 D.addEventListener('keydown',e=>{
-  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+  if(e.defaultPrevented||e.ctrlKey||e.metaKey||e.altKey||e.repeat||D.querySelector('dialog[open]'))return;
   const t=e.target,tag=(t&&t.tagName)||'';
   if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||(t&&t.isContentEditable))return;
   if((e.key===' '||e.key==='Enter')&&/^(BUTTON|A|SUMMARY)$/.test(tag))return;   /* the focused control acts on its own */

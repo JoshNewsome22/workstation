@@ -839,8 +839,8 @@ $('#addSrc').addEventListener('click',()=>{S.src.push({form:'',method:'',dates:'
 $('#delSrc').addEventListener('click',()=>{if(S.src.length>1){S.src.pop();renderAll();}});
 /* v21.33 (R): any row can be deleted; a row that holds an entry asks first; the table keeps one row */
 const rowHas=r=>Object.keys(r).some(k=>String(r[k]==null?'':r[k]).trim()!=='');
-$('#srcTbl').addEventListener('click',e=>{const b=e.target.closest('button.rowDel');if(!b)return;const i=+b.dataset.del,r=S.src[i];if(!r)return;
-  if(rowHas(r)&&!confirm('Delete this row?'))return;S.src.splice(i,1);if(!S.src.length)S.src.push({form:'',method:'',dates:'',who:'',contrib:'',fn:'',str:''});renderAll();});
+$('#srcTbl').addEventListener('click',async e=>{const b=e.target.closest('button.rowDel');if(!b)return;const i=+b.dataset.del,r=S.src[i];if(!r)return;
+  if(rowHas(r)&&!(await nbhUI.confirm('Delete this row?\nThe source entered on it is deleted.',{ok:'Delete',danger:true})))return;S.src.splice(i,1);if(!S.src.length)S.src.push({form:'',method:'',dates:'',who:'',contrib:'',fn:'',str:''});renderAll();});
 
 function renderHyp(){
   $('#hypTbl tbody').innerHTML=S.hyp.map((r,i)=>`<tr>
@@ -854,8 +854,8 @@ function renderHyp(){
   S.hyp[+el.dataset.i][el.dataset.f]=el.value;renderReport();}));
 $('#addHyp').addEventListener('click',()=>{S.hyp.push({h:'',how:'',out:'',what:''});renderAll();});
 $('#delHyp').addEventListener('click',()=>{if(S.hyp.length>1){S.hyp.pop();renderAll();}});
-$('#hypTbl').addEventListener('click',e=>{const b=e.target.closest('button.rowDel');if(!b)return;const i=+b.dataset.del,r=S.hyp[i];if(!r)return;
-  if(rowHas(r)&&!confirm('Delete this row?'))return;S.hyp.splice(i,1);if(!S.hyp.length)S.hyp.push({h:'',how:'',out:'',what:''});renderAll();});
+$('#hypTbl').addEventListener('click',async e=>{const b=e.target.closest('button.rowDel');if(!b)return;const i=+b.dataset.del,r=S.hyp[i];if(!r)return;
+  if(rowHas(r)&&!(await nbhUI.confirm('Delete this row?\nThe hypothesis entered on it is deleted.',{ok:'Delete',danger:true})))return;S.hyp.splice(i,1);if(!S.hyp.length)S.hyp.push({h:'',how:'',out:'',what:''});renderAll();});
 
 /* -------------------- convergence -------------------- */
 /* v21.16 audit. What counts toward convergence and the level of evidence; the Guide ("How the Level of
@@ -914,8 +914,8 @@ function renderBehBar(){
 document.addEventListener('click',e=>{const d=e.target.closest('.behbar button.rowDel');if(d){delBeh(+d.dataset.delb);return;}
   const b=e.target.closest('.behbar button');if(!b||b.dataset.b===undefined)return;S.cur=+b.dataset.b;renderAll();});
 /* a target that holds an entry asks first; the list keeps one target, and the open target (S.cur) follows the deletion */
-function delBeh(i){const b=S.beh[i];if(!b)return;
-  if(Object.keys(b).some(k=>String(b[k]==null?'':b[k]).trim()!=='')&&!confirm('Delete this target'+(b.lab?' ('+b.lab+')':'')+'? Its definition, summary statement and pathway will be deleted.'))return;
+async function delBeh(i){const b=S.beh[i];if(!b)return;
+  if(Object.keys(b).some(k=>String(b[k]==null?'':b[k]).trim()!=='')&&!(await nbhUI.confirm('Delete this target'+(b.lab?' ('+b.lab+')':'')+'?\nIts definition, summary statement and pathway will be deleted.',{ok:'Delete',danger:true})))return;
   S.beh.splice(i,1);if(!S.beh.length)S.beh.push(newBeh());
   if(S.cur>i)S.cur--;if(S.cur>=S.beh.length)S.cur=S.beh.length-1;renderAll();}
 $('#addBeh').addEventListener('click',()=>{S.beh.push(newBeh());S.cur=S.beh.length-1;renderAll();});
@@ -1208,11 +1208,11 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.S)throw 0;S=Object.assign(blank(),d.S);renderAll();}
     catch(err){alert('That file could not be read as a saved FS-1 report.');}};
   r.readAsText(f);e.target.value='';});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this report? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this report?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* -------------------- simulation -------------------- */
-function loadSim(){
-  if(!confirm('Load a simulated assessment and fill every sheet with a worked report? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated assessment?\nEvery sheet is filled with a worked report. Anything already entered will be replaced.',{ok:'Load'})))return;
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',dob:'4/18/2014',

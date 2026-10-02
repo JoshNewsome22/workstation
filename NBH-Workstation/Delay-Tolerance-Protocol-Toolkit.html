@@ -16,7 +16,24 @@ header.mast{padding:26px 34px 20px;border-bottom:2px solid var(--ink)}
 .who b{display:block;color:var(--ink);font-size:14px}
 h1{font-family:"Iowan Old Style",Charter,Georgia,serif;font-weight:600;font-size:27px;line-height:1.15;margin:14px 0 6px;max-width:24ch}
 .mast p.sub{margin:0;color:var(--muted);font-size:14px;max-width:74ch}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+/* ---- toolbar (v21.34): the View segment and the sheet actions the other forms share. The old tab row stays in
+   the document, hidden, because the walkthrough and the live panel click its buttons; the segment mirrors it. ---- */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--nbh-navy,#182e43);color:#E7EDF2;font-family:var(--nbh-sans,system-ui,sans-serif);font-size:12.5px;padding:10px 18px;margin:0;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.tgroup{display:flex;flex-direction:column;gap:4px}
+.tgroup > span{font-size:10.5px;letter-spacing:.04em;color:var(--nbh-sage,#9FB3C2)}
+.tgroup .row{display:flex;gap:6px;align-items:center}
+.toolbar select,.toolbar input[type=number]{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#31414F);color:#f1f6f5;border:1px solid #3e6070;border-radius:2px;padding:4px 6px}
+.toolbar input[type=number]{width:62px}
+.toolbar button{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#3C5061);color:#f1f6f5;border:1px solid #3e6070;border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.toolbar button:hover{background:#2f5568}
+.toolbar button.primary{background:#fff;color:var(--nbh-navy,#182e43);border-color:#fff;font-weight:600}
+.toolbar button.primary:hover{background:var(--nbh-mint,#bcd9d4)}
+.seg{display:flex;border:1px solid #3e6070;border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--nbh-slate,#31414F);padding:5px 10px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--nbh-navy,#182e43);font-weight:600}
+.toolbar :focus-visible{outline:2px solid var(--nbh-sage,#a0c9c3)}
+nav.nbh-tabs.nbh-tabs-old{display:none!important}
+@media print{.toolbar{display:none!important}}
 button.tool{font:inherit;font-size:13px;padding:6px 13px;border:1px solid var(--rule2);background:var(--paper);color:var(--ink);border-radius:2px;cursor:pointer}
 button.tool:hover{background:var(--accent-soft);border-color:var(--accent)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -504,12 +521,29 @@ td input,td select{max-width:100%}
         <h1>Delay Discounting, Self-Control Training &amp; Delay Tolerance Protocol</h1>
         <p class="nbh-sub">An assessment-to-treatment packet for students whose choice allocation favors smaller-sooner reinforcers, or who cannot tolerate delays to reinforcement without challenging behavior. Work the tabs in order; each carries forward decisions from the last.</p>
       </div>
-      <div class="nbh-actions"><button class="tool nbh-btn nbh-btn-secondary" id="btnSim">Load simulation</button><button class="tool nbh-btn nbh-btn-primary" id="btnPrint">Print / Save as PDF</button><button class="tool nbh-btn nbh-btn-secondary" id="btnSave">Save data</button><button class="tool nbh-btn nbh-btn-secondary" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json" hidden><button class="tool nbh-btn nbh-btn-danger" id="btnClear">Clear all</button></div>
     </div>
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
   </div>
 </header>
-<nav class="tabs nbh-tabs" role="tablist">
+<div class="toolbar noprint">
+  <div class="tgroup"><span>View</span><div class="row">
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="p1" aria-pressed="true">Student &amp; setup</button>
+      <button type="button" data-view="p2" aria-pressed="false">Preassessment</button>
+      <button type="button" data-view="p3" aria-pressed="false">Discounting probe</button>
+      <button type="button" data-view="p4" aria-pressed="false">Protocol builder</button>
+      <button type="button" data-view="p5" aria-pressed="false">Session data</button>
+      <button type="button" data-view="p6" aria-pressed="false">Progress</button>
+      <button type="button" data-view="p7" aria-pressed="false">Integrity &amp; IOA</button>
+      <button type="button" data-view="p8" aria-pressed="false">Generalization &amp; maintenance</button>
+      <button type="button" data-view="p9" aria-pressed="false">Evidence guide</button>
+      <button type="button" data-view="p10" aria-pressed="false">Walkthrough</button>
+    </div></div></div>
+  <div class="tgroup"><span>Sheet actions</span><div class="row">
+    <button type="button" id="btnSim">Load simulation</button><button type="button" class="primary" id="btnPrint">Print / Save as PDF</button><button type="button" id="btnSave">Save data</button><button type="button" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json" hidden><button type="button" id="btnClear">Clear all</button>
+  </div></div>
+</div>
+<nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
   <button class="tab" role="tab" data-p="p1"><span class="n">1</span>Student &amp; setup</button>
   <button class="tab" role="tab" data-p="p2"><span class="n">2</span>Preassessment</button>
@@ -535,7 +569,7 @@ td input,td select{max-width:100%}
 
 
 <!-- ===== 1 SETUP ===== -->
-<section class="panel" id="p1" role="tabpanel">
+<section class="panel" id="p1" role="tabpanel" data-panel="p1">
   <h2 class="nbh-band">Student, Context, and Case Formulation</h2>
   <p class="lede">Complete before any data are taken. The arrangement selected here determines which preassessments in Tab 2 apply and which evidence table in Tab 4 governs component selection.</p>
   <div class="grid g4">
@@ -604,7 +638,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 2 PREASSESSMENT ===== -->
-<section class="panel" id="p2" role="tabpanel">
+<section class="panel" id="p2" role="tabpanel" data-panel="p2">
   <h2 class="nbh-band">Preassessment Battery</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="dim">How each of these looks at the table, step by step &rarr; Walkthrough</a></p>
   <p class="lede">Run what the case calls for. The choice baseline is required: it is the one measure used in every experiment reviewed, and without it there is no demonstration that impulsive choice existed before treatment.</p>
@@ -648,7 +682,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 3 DISCOUNTING PROBE ===== -->
-<section class="panel" id="p3" role="tabpanel">
+<section class="panel" id="p3" role="tabpanel" data-panel="p3">
   <h2 class="nbh-band">Delay Discounting Probe</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="dd">How the titration is run at the table &rarr; Walkthrough</a></p>
   <p class="lede">Optional. It converts "he can't wait" into a quantity you can re-measure after treatment. Enter the indifference point at each delay (the immediate amount the student treats as equal to the delayed amount) and the sheet computes area under the curve and a hyperbolic <em>k</em>.</p>
@@ -714,7 +748,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 4 PROTOCOL BUILDER ===== -->
-<section class="panel" id="p4" role="tabpanel">
+<section class="panel" id="p4" role="tabpanel" data-panel="p4">
   <h2 class="nbh-band">Training Protocol Builder</h2>
   <p class="lede">Select components, set the terminal delay, and generate fading steps. Success rates are application-level counts from the 25 experiments reviewed by Finch et al. (2024). They are descriptive, not effect sizes; the review did not weight studies by design strength.</p>
 
@@ -806,7 +840,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 5 SESSION DATA ===== -->
-<section class="panel" id="p5" role="tabpanel">
+<section class="panel" id="p5" role="tabpanel" data-panel="p5">
   <h2 class="nbh-band">Session Data Sheet</h2>
   <p class="wk-go-line"><a href="#" class="wk-go" data-go="train">What one delay trial looks like, and how its row is scored &rarr; Walkthrough</a></p>
   <p class="lede">One sheet per session. Print blank copies for paper collection or enter live; the summary computes on the fly. Score the obtained delay for every trial; programmed-versus-obtained delay is your integrity measure (Leon et al. reported mean obtained delay and mean differential per phase).</p>
@@ -841,7 +875,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 6 PROGRESS ===== -->
-<section class="panel" id="p6" role="tabpanel">
+<section class="panel" id="p6" role="tabpanel" data-panel="p6">
   <h2 class="nbh-band">Progress Monitoring</h2>
   <p class="lede">One row per session. The chart draws percent self-control choice (left axis) and the delay achieved (right axis) so both dependent variables are visible together; add the phase label and the graph will mark phase changes.</p>
   <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
@@ -857,7 +891,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 7 INTEGRITY & IOA ===== -->
-<section class="panel" id="p7" role="tabpanel">
+<section class="panel" id="p7" role="tabpanel" data-panel="p7">
   <h2 class="nbh-band">Treatment Integrity and Interobserver Agreement</h2>
   <p class="lede">The review noted that integrity and IOA reporting were not required for inclusion and were not evaluated. Do not let that be true of your own case file. Two integrity measures matter here: whether the steps were done, and whether the delay that was programmed is the delay the student actually experienced.</p>
 
@@ -907,7 +941,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 8 GENERALIZATION & MAINTENANCE ===== -->
-<section class="panel" id="p8" role="tabpanel">
+<section class="panel" id="p8" role="tabpanel" data-panel="p8">
   <h2 class="nbh-band">Generalization, Maintenance, and Social Validity</h2>
   <div class="caution"><p><b>This is the weakest part of the published literature, so it has to be the strongest part of your file.</b> In the 25 experiments reviewed by Finch et al. (2024), generalization was assessed in 3 and maintenance in 2; neither was assessed in any negative-reinforcement study, and the longest follow-up was 6 months (Benedick &amp; Dixon, 2009). No study measured social validity. The review's authors were direct about it: there is little evidence that tolerating a 400-s delay with a programmed activity and a clinician nearby transfers to the delays of days or weeks a student meets outside the session. Plan the probes before training starts and put them on the calendar.</p></div>
 
@@ -952,7 +986,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
-<section class="panel" id="p9" role="tabpanel">
+<section class="panel" id="p9" role="tabpanel" data-panel="p9">
   <h2 class="nbh-band">Evidence Guide</h2>
   <p class="lede">What the source literature does and does not support, in the order you will need it. Findings are stated as reported; applied implications are marked as such.</p>
 
@@ -1041,7 +1075,7 @@ td input,td select{max-width:100%}
   <p class="small">Prepared by Joshua Newsome, M.A., BCBA. Percentages and counts attributed to Finch et al. (2024) are taken from that review's Tables 3&ndash;6 and Figures 2&ndash;3; individual-study values are as reported by the cited authors.</p>
 </section>
 
-<section class="panel noprint" id="p10" role="tabpanel">
+<section class="panel noprint" id="p10" role="tabpanel" data-panel="p10">
   <h2 class="nbh-band">Walkthrough: Running the Delay Assessments</h2>
   <div class="wk-top"><p>What each assessment looks like at the table: the adult and the student drawn step by step, what is said, what the student does, and what goes on the sheet. The student is this form’s simulated example. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" class="tool nbh-btn nbh-btn-secondary" id="wkPrintBtn" title="Prints one sheet per procedure: setup, script, the drawn steps, what to record, and an observer’s integrity checklist">Print the job aids</button></div>
@@ -1250,6 +1284,23 @@ const tabs=$$('.tab');
 function show(id){tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.p===id));$$('.panel').forEach(p=>p.classList.toggle('on',p.id===id));window.scrollTo({top:0});}
 tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
 show('p1');
+/* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
+   walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
+   carries view-<key> like the other forms. ---- */
+(function(){
+  var seg=document.getElementById('viewSeg'),nav=document.querySelector('nav.nbh-tabs');if(!seg||!nav)return;
+  var tabs=Array.prototype.slice.call(nav.querySelectorAll('[role=tab]'));
+  var keyOf=function(t){return t.dataset.p||'';};
+  function sync(){
+    var cur=tabs.filter(function(t){return t.getAttribute('aria-selected')==='true';})[0],k=cur?keyOf(cur):'';
+    seg.querySelectorAll('button[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===k));});
+    if(k){var cl=document.body.classList;Array.prototype.slice.call(cl).forEach(function(c){if(c.indexOf('view-')===0)cl.remove(c);});cl.add('view-'+k);}
+  }
+  seg.querySelectorAll('button[data-view]').forEach(function(b){b.addEventListener('click',function(){
+    var t=tabs.filter(function(x){return keyOf(x)===b.dataset.view;})[0];if(t)t.click();sync();});});
+  try{new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['aria-selected']});}catch(e){}
+  sync();
+})();
 
 /* ---------- row templates ---------- */
 const T=(...cells)=>cells.join('');
@@ -1403,13 +1454,13 @@ function drawDD(pts,A,dmax,k){
 }
 
 /* ---------- fading step generator ---------- */
-$('#btnFade').addEventListener('click',()=>{
+$('#btnFade').addEventListener('click',async ()=>{
   const st=num($('#fdStart').value)||0,en=num($('#fdEnd').value)||0,mode=$('#fdMode').value,inc=num($('#fdInc').value)||15;
   /* v21.16 audit (F3): a hand-typed ladder is not regenerated, and a table holding dates or notes is replaced only
      after a question */
   if(mode==='custom'){alert('Custom ladder: type each delay into the table, and use Add step for another row. Generate steps writes a ladder for the other three patterns.');return}
   if(en<=st){alert('Terminal delay must exceed the starting delay.');return}
-  if(rows('tbFade').some(tr=>vals(tr).slice(1).some(v=>String(v).trim()))&&!confirm('Replace the fading steps? The criterion dates and notes already in the table will be cleared.'))return;
+  if(rows('tbFade').some(tr=>vals(tr).slice(1).some(v=>String(v).trim()))&&!(await nbhUI.confirm('Replace the fading steps?\nThe criterion dates and notes already in the table will be cleared.',{ok:'Replace',danger:true})))return;
   let steps=[];
   if(mode==='double'){let d=Math.max(st,1);while(d<en){steps.push(d);d*=2}steps.push(en)}
   else if(mode==='applied'){[3,6,10,20,60,120,180,300,600,900,1200,1800,3600].forEach(d=>{if(d>st&&d<en)steps.push(d)});if(st>0)steps.unshift(st);steps.push(en)}
@@ -1523,8 +1574,8 @@ $('#btnPrint').addEventListener('click',()=>window.print());
    Every tab is populated and the numbers are consistent across them —
    the preassessment justifies the protocol, the trial log produces the
    progress graph, and the fading ladder matches the session data. */
-function loadSim(){
-  if(!confirm('Load a simulated student and fill every tab with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load the simulated student?\nEvery tab is filled with a worked example; anything already entered is replaced.',{ok:'Replace'})))return;
   /* v21.16 audit (F2): dates on the local calendar and on school days. D(n) is n school days (Monday to Friday)
      before today, or before the last school day when today is a weekend; D(-n) is n school days ahead, for
      the maintenance probes still to come. The UTC date put an evening's entries on tomorrow's date, and
@@ -1789,7 +1840,7 @@ function loadSim(){
 }
 
 $('#btnSim').addEventListener('click',loadSim);
-$('#btnClear').addEventListener('click',()=>{if(confirm('Clear every field on this form? Unsaved entries will be lost.'))location.reload()});
+$('#btnClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every field on this form?\nUnsaved entries will be lost.',{ok:'Clear all',danger:true}))location.reload()});
 
 /* ---------- starter rows ---------- */
 ['tbPref','tbMag','tbBase','tbWait','tbNat','tbAv','tbDDlog','tbDA','tbQlog','tbGen'].forEach(id=>{addRow(id);addRow(id)});

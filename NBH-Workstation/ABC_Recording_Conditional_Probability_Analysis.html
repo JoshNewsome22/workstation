@@ -432,6 +432,24 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 /* never let a fixed-width numeric input overflow a narrow column */
 td input,td select{max-width:100%}
+/* ---- toolbar (v21.34): the View segment and the sheet actions the other forms share. The old tab row stays in
+   the document, hidden, because the walkthrough and the live panel click its buttons; the segment mirrors it. ---- */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--nbh-navy,#182e43);color:#E7EDF2;font-family:var(--nbh-sans,system-ui,sans-serif);font-size:12.5px;padding:10px 18px;margin:0;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.tgroup{display:flex;flex-direction:column;gap:4px}
+.tgroup > span{font-size:10.5px;letter-spacing:.04em;color:var(--nbh-sage,#9FB3C2)}
+.tgroup .row{display:flex;gap:6px;align-items:center}
+.toolbar select,.toolbar input[type=number]{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#31414F);color:#f1f6f5;border:1px solid #3e6070;border-radius:2px;padding:4px 6px}
+.toolbar input[type=number]{width:62px}
+.toolbar button{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#3C5061);color:#f1f6f5;border:1px solid #3e6070;border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.toolbar button:hover{background:#2f5568}
+.toolbar button.primary{background:#fff;color:var(--nbh-navy,#182e43);border-color:#fff;font-weight:600}
+.toolbar button.primary:hover{background:var(--nbh-mint,#bcd9d4)}
+.seg{display:flex;border:1px solid #3e6070;border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--nbh-slate,#31414F);padding:5px 10px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--nbh-navy,#182e43);font-weight:600}
+.toolbar :focus-visible{outline:2px solid var(--nbh-sage,#a0c9c3)}
+nav.nbh-tabs.nbh-tabs-old{display:none!important}
+@media print{.toolbar{display:none!important}}
 </style>
 <style id="wk-css">
 /* ===== Form ABC-1 walkthrough. Scoped to its own panel; the brand tokens are the form's ===== */
@@ -789,7 +807,22 @@ td input,td select{max-width:100%}
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
   </div>
 </header>
-<nav class="tabs nbh-tabs" role="tablist">
+<div class="toolbar noprint">
+  <div class="tgroup"><span>View</span><div class="row">
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="record" aria-pressed="true">Record</button>
+      <button type="button" data-view="incidents" aria-pressed="false">Incidents</button>
+      <button type="button" data-view="background" aria-pressed="false">Background samples</button>
+      <button type="button" data-view="analysis" aria-pressed="false">Analysis</button>
+      <button type="button" data-view="methods" aria-pressed="false">Methods &amp; references</button>
+      <button type="button" data-view="data" aria-pressed="false">Data file</button>
+      <button type="button" data-view="walk" aria-pressed="false">Walkthrough</button>
+    </div></div></div>
+  <div class="tgroup"><span>Sheet actions</span><div class="row">
+    <button type="button" id="load-demo">Load simulation</button><button type="button" class="primary" id="printBtn">Print / Save as PDF</button><button type="button" id="dl-json">Save data</button><button type="button" id="up-json">Open data</button><input type="file" id="file-input" accept=".json,application/json" hidden><button type="button" id="dl-csv">Export incidents CSV</button><button type="button" id="dl-matrix">Export analysis CSV</button><button type="button" id="clear-all">Clear all</button>
+  </div></div>
+</div>
+<nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
       <button class="tab" role="tab" id="tab-record" aria-controls="panel-record" aria-selected="true"><span class="n">1</span>Record</button>
       <button class="tab" role="tab" id="tab-incidents" aria-controls="panel-incidents" aria-selected="false"><span class="n">2</span>Incidents</button>
@@ -824,7 +857,7 @@ td input,td select{max-width:100%}
 <div class="printonly" id="print-header"></div>
 
 <!-- ============================ RECORD ============================ -->
-<section class="panel" id="panel-record" role="tabpanel" aria-labelledby="tab-record">
+<section class="panel" id="panel-record" role="tabpanel" aria-labelledby="tab-record" data-panel="record">
   <p class="wk-go-line noprint"><a href="#wk-incident" class="wk-go" data-go="incident">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
 
   <div class="card">
@@ -970,7 +1003,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ============================ INCIDENTS ============================ -->
-<section class="panel" id="panel-incidents" role="tabpanel" aria-labelledby="tab-incidents" hidden>
+<section class="panel" id="panel-incidents" role="tabpanel" aria-labelledby="tab-incidents" data-panel="incidents" hidden>
   <div class="card">
     <header class="nbh-band"><h2>Logged incidents</h2><span class="hint" id="inc-count"></span></header>
     <div class="filters noprint">
@@ -991,7 +1024,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ============================ BACKGROUND ============================ -->
-<section class="panel" id="panel-background" role="tabpanel" aria-labelledby="tab-background" hidden>
+<section class="panel" id="panel-background" role="tabpanel" aria-labelledby="tab-background" data-panel="background" hidden>
   <p class="wk-go-line noprint"><a href="#wk-check" class="wk-go" data-go="check">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
   <div class="card">
     <header class="nbh-band"><h2>Background (response-independent) samples</h2><span class="hint">Optional, but required for contingency strength</span></header>
@@ -1034,7 +1067,7 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ============================ ANALYSIS ============================ -->
-<section class="panel" id="panel-analysis" role="tabpanel" aria-labelledby="tab-analysis" hidden>
+<section class="panel" id="panel-analysis" role="tabpanel" aria-labelledby="tab-analysis" data-panel="analysis" hidden>
   <p class="wk-go-line noprint"><a href="#wk-read" class="wk-go" data-go="read">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
   <div class="filters card noprint" style="margin-bottom:0;padding:0">
     <div class="filters" style="width:100%;border-bottom:0">
@@ -1062,23 +1095,16 @@ td input,td select{max-width:100%}
 </section>
 
 <!-- ============================ METHODS ============================ -->
-<section class="panel" id="panel-methods" role="tabpanel" aria-labelledby="tab-methods" hidden>
+<section class="panel" id="panel-methods" role="tabpanel" aria-labelledby="tab-methods" data-panel="methods" hidden>
   <div id="methods-out"></div>
 </section>
 
 <!-- ============================ DATA ============================ -->
-<section class="panel" id="panel-data" role="tabpanel" aria-labelledby="tab-data" hidden>
+<section class="panel" id="panel-data" role="tabpanel" aria-labelledby="tab-data" data-panel="data" hidden>
   <div class="card">
     <header class="nbh-band"><h2>Save, reopen, and export</h2><span class="hint">Nothing leaves this file unless you export it</span></header>
     <div class="body">
       <p class="note lead">All records live in this page. Download the data file at the end of every observation session and keep it with the rest of the assessment record; opening this page fresh starts an empty file unless you load one back in. Handle exports as protected student records.</p>
-      <div class="btnrow" style="background:transparent;border:0;padding:0;margin-top:10px">
-        <button class="btn" id="dl-json">Save data</button>
-        <button class="btn ghost" id="dl-csv">Download incidents (.csv)</button>
-        <button class="btn ghost" id="dl-matrix">Download analysis table (.csv)</button>
-        <button class="btn quiet" id="up-json">Open data</button>
-        <input type="file" id="file-input" accept=".json,application/json" hidden>
-      </div>
       <p class="note" id="data-status" aria-live="polite"></p>
     </div>
   </div>
@@ -1086,16 +1112,12 @@ td input,td select{max-width:100%}
     <header class="nbh-band"><h2>Try it with simulated data</h2><span class="hint">For training and calibration only</span></header>
     <div class="body">
       <p class="note lead">Loads 46 fabricated incidents and 60 background samples built around a known escape-maintained pattern, so you can see what every graph does before you take the sheet into a classroom. These are not real observations and must never be presented as student data.</p>
-      <div class="btnrow" style="background:transparent;border:0;padding:0;margin-top:10px">
-        <button class="btn ghost" id="load-demo">Load simulation</button>
-        <button class="btn quiet" id="clear-all">Clear all</button>
-      </div>
     </div>
   </div>
 </section>
 
 <!-- ============================ WALKTHROUGH ============================ -->
-<section class="panel noprint" id="panel-walk" role="tabpanel" aria-labelledby="tab-walk" hidden>
+<section class="panel noprint" id="panel-walk" role="tabpanel" aria-labelledby="tab-walk" data-panel="walk" hidden>
   <h2 class="nbh-band wk-title">Walkthrough: Recording ABC Data and Reading the Analysis</h2>
   <div class="wk-top"><p>What each part of the recording looks like in the room: the teacher, the student and the observer drawn step by step, what is said, what the student does, and what goes on the sheet. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" id="wk-print" title="Prints a cover and one sheet per procedure: the setup, the drawn steps, the words, what to record, and an observer’s fidelity checklist">Print the job aids</button></div>
@@ -3299,9 +3321,9 @@ function init(){
     flash($("#bg-status"), "Sample saved \u2014 " + state.samples.length + " on file.");
     refreshAll();
   });
-  $("#bg-delete-all").addEventListener("click", () => {
+  $("#bg-delete-all").addEventListener("click", async () => {
     if(!state.samples.length) return;
-    if(confirm("Delete all " + state.samples.length + " background samples? This cannot be undone.")){
+    if(await nbhUI.confirm("Delete all " + state.samples.length + " background samples?\nThis cannot be undone.", {ok:"Delete", danger:true})){
       state.samples = []; refreshAll();
     }
   });
@@ -3316,21 +3338,22 @@ function init(){
     $("#a-activity").value=""; $("#a-function").value=""; state.faFunction=""; renderAnalysis();
   });
 
-  document.addEventListener("click", e => {
+  document.addEventListener("click", async e => {
     const ed = e.target.closest("[data-edit]"), dl = e.target.closest("[data-del]"), ds = e.target.closest("[data-delsample]");
     if(ed){ const en = state.entries.find(x => x.id === ed.dataset.edit); if(en) loadIntoForm(en); }
     if(dl){ const i = state.entries.findIndex(x => x.id === dl.dataset.del);
-            if(i >= 0 && confirm("Delete this incident?")){ state.entries.splice(i,1); refreshAll(); } }
+            if(i >= 0 && await nbhUI.confirm("Delete this incident?", {ok:"Delete", danger:true})){ state.entries.splice(i,1); refreshAll(); } }
     if(ds){ const i = state.samples.findIndex(x => x.id === ds.dataset.delsample);
             if(i >= 0){ state.samples.splice(i,1); refreshAll(); } }
   });
 
-  $("#delete-all").addEventListener("click", () => {
+  $("#delete-all").addEventListener("click", async () => {
     if(!state.entries.length) return;
-    if(confirm("Delete all " + state.entries.length + " incidents? Export the data file first if you need it.")){
+    if(await nbhUI.confirm("Delete all " + state.entries.length + " incidents?\nExport the data file first if you need it.", {ok:"Delete", danger:true})){
       state.entries = []; refreshAll();
     }
   });
+  $("#printBtn").addEventListener("click", () => window.print());
   $("#print-record").addEventListener("click", () => window.print());
   $("#print-analysis").addEventListener("click", () => window.print());
   window.addEventListener("beforeprint", fillPrintHeader);
@@ -3341,8 +3364,8 @@ function init(){
   $("#up-json").addEventListener("click", () => $("#file-input").click());
   $("#file-input").addEventListener("change", e => { if(e.target.files[0]) importJSON(e.target.files[0]); e.target.value = ""; });
   $("#load-demo").addEventListener("click", loadDemo);
-  $("#clear-all").addEventListener("click", () => {
-    if(confirm("Clear all incidents, samples, header fields, and the function established by FA?")){
+  $("#clear-all").addEventListener("click", async () => {
+    if(await nbhUI.confirm("Clear all?\nIncidents, samples, the header fields and the function established by FA are cleared.", {ok:"Clear all", danger:true})){
       state.entries = []; state.samples = [];
       writeHeader({client:"",observer:"",location:"",start:"",end:"",target:""});
       /* v21.21 cross-form (X2): the function is saved with the record now, so it is cleared with it */
@@ -3361,6 +3384,23 @@ function init(){
   refreshAll();
 }
 document.addEventListener("DOMContentLoaded", init);
+/* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
+   walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
+   carries view-<key> like the other forms. ---- */
+(function(){
+  var seg=document.getElementById('viewSeg'),nav=document.querySelector('nav.nbh-tabs');if(!seg||!nav)return;
+  var tabs=Array.prototype.slice.call(nav.querySelectorAll('[role=tab]'));
+  var keyOf=function(t){return (t.id||'').replace(/^tab-/,'');};
+  function sync(){
+    var cur=tabs.filter(function(t){return t.getAttribute('aria-selected')==='true';})[0],k=cur?keyOf(cur):'';
+    seg.querySelectorAll('button[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===k));});
+    if(k){var cl=document.body.classList;Array.prototype.slice.call(cl).forEach(function(c){if(c.indexOf('view-')===0)cl.remove(c);});cl.add('view-'+k);}
+  }
+  seg.querySelectorAll('button[data-view]').forEach(function(b){b.addEventListener('click',function(){
+    var t=tabs.filter(function(x){return keyOf(x)===b.dataset.view;})[0];if(t)t.click();sync();});});
+  try{new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['aria-selected']});}catch(e){}
+  sync();
+})();
 </script>
 <script id="abc-tmr">
 /* ============ ABC-1 observation timer and incident stopwatch (v21.14) ============
@@ -3465,9 +3505,10 @@ document.addEventListener("DOMContentLoaded", init);
     if(T.ac&&T.ac.state!=='running')T.ac.resume().then(()=>{if(T.state==='run')sched();}).catch(()=>{});
     wakeOn();setTop();loops();note(T.acc>0?'Resumed.':'Observation started. '+(T.nextAt?'First background check at '+fmt(T.nextAt)+'.':'No background checks scheduled.'));renderLog();
   }
-  function end(auto){
+  async function end(auto){
     if(T.state==='ready'||T.state==='ended')return;
-    if(!auto&&!confirm('End the observation now?'))return;
+    if(!auto&&!(await nbhUI.confirm('End the observation now?',{ok:'End'})))return;
+    if(T.state==='ready'||T.state==='ended')return;
     T.acc=auto&&T.plan?T.plan:elapsed();T.state='ended';stopLoops();unsched();wakeOff();
     if(T.open&&!(T.pend&&T.pend.c===T.open)){T.open.outcome='missed';T.open=null;}
     if(!byId('h-end').value)setVal('h-end',iso(new Date()));
@@ -3476,8 +3517,8 @@ document.addEventListener("DOMContentLoaded", init);
     note('Observation ended at '+fmt(T.acc)+'. Background checks: '+c.recorded+' recorded, '+c.skipped+' skipped, '+c.missed+' missed.');
     renderLog();
   }
-  function reset(){
-    if(T.state!=='ready'&&!confirm('Reset the timer and clear its check log? Incidents and samples stay as they are.'))return;
+  async function reset(){
+    if(T.state!=='ready'&&!(await nbhUI.confirm('Reset the timer?\nIts check log is cleared. Incidents and samples stay as they are.',{ok:'Reset',danger:true})))return;
     stopLoops();unsched();wakeOff();Object.assign(T,{state:'ready',acc:0,checks:[],open:null,pend:null,lastAt:0,nextAt:0,msg:''});renderLog();paint();
   }
   function count(){const c={recorded:0,skipped:0,missed:0,open:0};T.checks.forEach(x=>{c[x.outcome]=(c[x.outcome]||0)+1;});return c;}
@@ -3545,7 +3586,7 @@ document.addEventListener("DOMContentLoaded", init);
     tb.innerHTML=T.checks.map(c=>'<tr><td>'+c.k+'</td><td>'+clock(c.from)+'–'+clock(c.to)+'</td><td>'+c.mins+'</td><td class="o-'+c.outcome+'">'+word[c.outcome]+(c.why?': '+c.why:'')+'</td></tr>').join('');
     paint();
   }
-  function setTop(){const nv=q('nav.nbh-tabs');bar.style.setProperty('--obs-top',((nv&&nv.offsetHeight)||0)+'px');}
+  function setTop(){const nv=q('.toolbar')||q('nav.nbh-tabs');bar.style.setProperty('--obs-top',((nv&&nv.offsetHeight)||0)+'px');}
 
   /* ---- wiring ---- */
   byId('obsStart').addEventListener('click',startPause);
