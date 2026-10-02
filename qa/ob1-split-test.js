@@ -4,7 +4,7 @@ const OUT='/tmp/';
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:1000}});await ctx.addInitScript(()=>{window.print=function(){};});
  const page=await ctx.newPage();wire(page,log);
  /* --- OB-1 on its own --- */
- await page.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(700);
+ await page.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(700);await page.evaluate(()=>{window.confirm=m=>{(window.__dlg=window.__dlg||[]).push(String(m));return true;};});   /* v21.34: the forms ask through nbhUI.confirm, which honours a stubbed window.confirm */
  await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
  const r1=await page.evaluate(()=>{const o=state.obs[0];return {types:[...new Set([...document.querySelectorAll('input.nt')].map(e=>e.type))],t0:o.narrative.map(r=>r.t).slice(0,4),vals:[...document.querySelectorAll('.obs-page')][0].querySelectorAll('input.nt').length,dels:document.querySelectorAll('button.delRow').length,conv:[toHM24('9:14'),toHM24('12:20'),toHM24('1:05'),toHM24('7:30'),toHM24('3:15 pm'),toHM24('13:05'),hm12('13:05')]};});
  console.log('OB1 narrative',JSON.stringify(r1));
@@ -45,7 +45,7 @@ const OUT='/tmp/';
  await page.evaluate(()=>openForm('TB-1'));await sleep(300);console.log('open TB-1 while split',JSON.stringify(await vis()));
  await page.evaluate(()=>document.querySelector('#paneBar [data-pane-close="TB-1"]').click());await sleep(300);console.log('close pane TB-1',JSON.stringify(await vis()));
  await page.evaluate(()=>document.querySelector('#paneBar [data-pane="MT-1"]').click());await sleep(200);console.log('click pane MT-1',JSON.stringify(await vis()));
- await page.evaluate(()=>{window.confirm=()=>true;document.querySelector('#closeForm').click();});await sleep(400);console.log('close MT-1',JSON.stringify(await vis()));
+ await page.evaluate(()=>document.querySelector('#closeForm').click());await sleep(300);await page.evaluate(()=>document.querySelector('#cfFoot button.danger').click());await sleep(400);console.log('close MT-1',JSON.stringify(await vis()));
  await page.evaluate(()=>setSplit([]));await sleep(300);console.log('one form',JSON.stringify(await vis()));
  await page.click('#splitBtn');await sleep(300);console.log('chooser',await page.evaluate(()=>({open:document.querySelector('#dlg').open,rows:document.querySelectorAll('.sb-row').length,note:document.querySelector('#sbNote').textContent})));
  await page.screenshot({path:OUT+'chooser.png'});

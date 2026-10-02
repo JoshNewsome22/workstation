@@ -17,6 +17,11 @@ Double-click index.html. Everything runs from this folder.
     are picked, not typed; graphs save as images (the button under each);
     FS-1, TD-1, GB-1 and CR-1 have "Copy for the BIP", which puts the plan's
     text on the clipboard for the district document.
+  - Messages appear briefly at the foot of the window; a question that loses
+    work is asked in the workstation's own dialog. Each View button carries a
+    dot: empty, partly filled, or filled. On a touch screen the small controls
+    grow. Once a student is loaded the packet bar folds to one line (Edit
+    details opens it).
   - Save case above the form shows a dot while the case holds unsaved work.
     Autosave is a safety net in this browser only; the case file is the record.
   - Two or three open forms can show at once: "Side by side" above the form.

@@ -16,7 +16,24 @@ header.mast{padding:26px 34px 20px;border-bottom:2px solid var(--ink)}
 .who b{display:block;color:var(--ink);font-size:14px}
 h1{font-family:"Iowan Old Style",Charter,Georgia,serif;font-weight:600;font-size:27px;line-height:1.15;margin:14px 0 6px;max-width:24ch}
 .mast p.sub{margin:0;color:var(--muted);font-size:14px;max-width:74ch}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+/* ---- toolbar (v21.34): the View segment and the sheet actions the other forms share. The old tab row stays in
+   the document, hidden, because the walkthrough and the live panel click its buttons; the segment mirrors it. ---- */
+.toolbar{position:sticky;top:0;z-index:20;background:var(--nbh-navy,#182e43);color:#E7EDF2;font-family:var(--nbh-sans,system-ui,sans-serif);font-size:12.5px;padding:10px 18px;margin:0;display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-end;box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.tgroup{display:flex;flex-direction:column;gap:4px}
+.tgroup > span{font-size:10.5px;letter-spacing:.04em;color:var(--nbh-sage,#9FB3C2)}
+.tgroup .row{display:flex;gap:6px;align-items:center}
+.toolbar select,.toolbar input[type=number]{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#31414F);color:#f1f6f5;border:1px solid #3e6070;border-radius:2px;padding:4px 6px}
+.toolbar input[type=number]{width:62px}
+.toolbar button{font:inherit;font-family:var(--nbh-sans,system-ui,sans-serif);background:var(--nbh-slate,#3C5061);color:#f1f6f5;border:1px solid #3e6070;border-radius:3px;padding:5px 11px;cursor:pointer;font-weight:500}
+.toolbar button:hover{background:#2f5568}
+.toolbar button.primary{background:#fff;color:var(--nbh-navy,#182e43);border-color:#fff;font-weight:600}
+.toolbar button.primary:hover{background:var(--nbh-mint,#bcd9d4)}
+.seg{display:flex;border:1px solid #3e6070;border-radius:3px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--nbh-slate,#31414F);padding:5px 10px}
+.seg button[aria-pressed=true]{background:#fff;color:var(--nbh-navy,#182e43);font-weight:600}
+.toolbar :focus-visible{outline:2px solid var(--nbh-sage,#a0c9c3)}
+nav.nbh-tabs.nbh-tabs-old{display:none!important}
+@media print{.toolbar{display:none!important}}
 button.tool{font:inherit;font-size:13px;padding:6px 13px;border:1px solid var(--rule2);background:var(--paper);color:var(--ink);border-radius:2px;cursor:pointer}
 button.tool:hover{background:var(--accent-soft);border-color:var(--accent)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -552,12 +569,29 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
         <h1>Accumulated vs. Distributed Reinforcement: Efficacy, Preference &amp; Implementation</h1>
         <p class="nbh-sub">An assessment-to-implementation packet for deciding how a student’s reinforcement should be delivered: in small amounts right after each response (distributed), or banked across the work and delivered in one uninterrupted block at the end (accumulated). It tests what each arrangement does to work, learning and problem behavior, asks the student which one they choose, counts the time each one costs, and then builds the chosen arrangement into daily programming. Work the tabs in order; each carries forward decisions from the last.</p>
       </div>
-      <div class="nbh-actions"><button class="tool nbh-btn nbh-btn-secondary" id="btnSim">Load simulation</button><button class="tool nbh-btn nbh-btn-primary" id="btnPrint">Print / Save as PDF</button><button class="tool nbh-btn nbh-btn-secondary" id="btnSave">Save data</button><button class="tool nbh-btn nbh-btn-secondary" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json,application/json" hidden><button class="tool nbh-btn nbh-btn-secondary" id="btnClear">Clear all</button></div>
     </div>
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
   </div>
 </header>
-<nav class="tabs nbh-tabs" role="tablist">
+<div class="toolbar noprint">
+  <div class="tgroup"><span>View</span><div class="row">
+    <div class="seg" id="viewSeg">
+      <button type="button" data-view="p1" aria-pressed="true">Student &amp; question</button>
+      <button type="button" data-view="p2" aria-pressed="false">Preassessment</button>
+      <button type="button" data-view="p3" aria-pressed="false">Arrangement builder</button>
+      <button type="button" data-view="p4" aria-pressed="false">Efficacy data</button>
+      <button type="button" data-view="p5" aria-pressed="false">Preference</button>
+      <button type="button" data-view="p6" aria-pressed="false">Integrity &amp; IOA</button>
+      <button type="button" data-view="p7" aria-pressed="false">Decision &amp; plan</button>
+      <button type="button" data-view="p8" aria-pressed="false">Generalization &amp; validity</button>
+      <button type="button" data-view="p9" aria-pressed="false">Evidence guide</button>
+      <button type="button" data-view="p10" aria-pressed="false">Walkthrough</button>
+    </div></div></div>
+  <div class="tgroup"><span>Sheet actions</span><div class="row">
+    <button type="button" id="btnSim">Load simulation</button><button type="button" class="primary" id="btnPrint">Print / Save as PDF</button><button type="button" id="btnSave">Save data</button><button type="button" id="btnLoad">Open data</button><input type="file" id="fileIn" accept=".json,application/json" hidden><button type="button" id="btnClear">Clear all</button>
+  </div></div>
+</div>
+<nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
   <button class="tab" role="tab" data-p="p1"><span class="n">1</span>Student &amp; question</button>
   <button class="tab" role="tab" data-p="p2"><span class="n">2</span>Preassessment</button>
@@ -581,7 +615,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </div>
 
 <!-- ===== 1 STUDENT & QUESTION ===== -->
-<section class="panel" id="p1" role="tabpanel">
+<section class="panel" id="p1" role="tabpanel" data-panel="p1">
   <h2 class="nbh-band">Student, Clinical Question, and Reinforcers</h2>
   <p class="lede">Complete before any data are taken. The clinical question chosen here decides which measures Tab 4 emphasizes and which studies in the evidence guide are the closest match to this student.</p>
   <div class="grid g4">
@@ -642,7 +676,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 2 PREASSESSMENT ===== -->
-<section class="panel" id="p2" role="tabpanel">
+<section class="panel" id="p2" role="tabpanel" data-panel="p2">
   <h2 class="nbh-band">Preassessment Battery</h2>
   <p class="lede">Five checks before the comparison starts. A and B confirm the reinforcer works at all; C and D confirm the student can use the materials an accumulated arrangement depends on; E measures what each removal of the reinforcer costs. A comparison run without them can fail for reasons that have nothing to do with the arrangement.</p>
   <p><button type="button" class="tool wk-go" data-go="setup">See the table set up in the walkthrough &rarr;</button></p>
@@ -677,7 +711,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 3 ARRANGEMENT BUILDER ===== -->
-<section class="panel" id="p3" role="tabpanel">
+<section class="panel" id="p3" role="tabpanel" data-panel="p3">
   <h2 class="nbh-band">Arrangement Builder</h2>
   <p class="lede">Write every parameter down before the first session. The comparison is only interpretable if the arrangements differ in when and how much reinforcement arrives, and in nothing else.</p>
 
@@ -777,7 +811,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 4 EFFICACY DATA ===== -->
-<section class="panel" id="p4" role="tabpanel">
+<section class="panel" id="p4" role="tabpanel" data-panel="p4">
   <h2 class="nbh-band">Efficacy Data: Session Log, Graph, and Comparison</h2>
   <p class="lede">One row per session, in the order run. Record work time and total time separately, so rate can be read on work time and cost on total time. The graph and the comparison below update from the rows.</p>
   <p><button type="button" class="tool wk-go" data-go="dis">See a distributed and an accumulated session run in the walkthrough &rarr;</button></p>
@@ -799,7 +833,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 5 PREFERENCE ===== -->
-<section class="panel" id="p5" role="tabpanel">
+<section class="panel" id="p5" role="tabpanel" data-panel="p5">
   <h2 class="nbh-band">Preference: Concurrent-Chains Assessment</h2>
   <p class="lede">The student chooses the arrangement. Each arrangement has its card (the initial link); touching a card starts a session run under that arrangement (the terminal link). All five studies that measured choice used concurrent chains; Gingras (2022) asked with a questionnaire instead (Tab 8).</p>
   <p><button type="button" class="tool wk-go" data-go="choice">See a choice trial in the walkthrough &rarr;</button></p>
@@ -828,7 +862,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 6 INTEGRITY & IOA ===== -->
-<section class="panel" id="p6" role="tabpanel">
+<section class="panel" id="p6" role="tabpanel" data-panel="p6">
   <h2 class="nbh-band">Procedural Integrity and Interobserver Agreement</h2>
   <p class="lede">Only three of the six works reported procedural integrity (Robinson &amp; St. Peter, 2019: 100%; Gingras, 2022: 100%; Mandel, 2021: means of 99.5% and 97.6%). An arrangement comparison is especially exposed to drift: a distributed unit that stretches from 30 s to 50 s, or an accumulated block cut short, changes the very variable being compared.</p>
   <h3>A. Integrity Checklist</h3>
@@ -850,7 +884,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 7 DECISION & PLAN ===== -->
-<section class="panel" id="p7" role="tabpanel">
+<section class="panel" id="p7" role="tabpanel" data-panel="p7">
   <h2 class="nbh-band">Decision and Implementation Plan</h2>
   <p class="lede">What this student’s data say, the decision the team makes from them, and the written plan for using the chosen arrangement every day.</p>
   <h3>A. This Student’s Evidence</h3>
@@ -918,7 +952,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 8 GENERALIZATION & VALIDITY ===== -->
-<section class="panel" id="p8" role="tabpanel">
+<section class="panel" id="p8" role="tabpanel" data-panel="p8">
   <h2 class="nbh-band">Generalization, Maintenance, and Social Validity</h2>
   <p class="lede">The evaluation ran under controlled conditions. The arrangement now has to work with other staff, other tasks and other settings, keep working over weeks, and be acceptable to the people who run it.</p>
   <div><label class="f">Generalization plan (staff, settings, tasks, reinforcers)</label><textarea name="g_plan"></textarea></div>
@@ -942,7 +976,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
 </section>
 
 <!-- ===== 9 EVIDENCE GUIDE ===== -->
-<section class="panel" id="p9" role="tabpanel">
+<section class="panel" id="p9" role="tabpanel" data-panel="p9">
   <h2 class="nbh-band">Evidence Guide</h2>
   <p class="lede">What the six works in this packet found, kept apart from what their authors made of it and from this form’s own guidance. Page numbers are the journal’s printed pages, or the thesis’s or dissertation’s printed pages. Quotations are verbatim.</p>
   <div class="evkey"><span><b class="tagx find">Finding</b> what was observed, with the numbers the authors reported</span><span><b class="tagx expl">Explanation</b> an account the authors offered; not tested</span><span><b class="tagx auth">Authors</b> an applied implication the authors drew</span><span><b class="tagx nbh">NBH</b> this form’s synthesis or guidance</span></div>
@@ -1106,7 +1140,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   </ul>
 </section>
 
-<section class="panel noprint" id="p10" role="tabpanel">
+<section class="panel noprint" id="p10" role="tabpanel" data-panel="p10">
   <h2 class="nbh-band">Walkthrough: Running the Arrangement Comparison</h2>
   <div class="wk-top"><p>What each part of the evaluation looks like at the table: the adult and the student drawn step by step, what is said, what the student does, and what goes on the sheet. The student is this form’s simulated example. Press <b>Play all</b> in any section to watch it run, then try the practice at the end.</p>
     <button type="button" class="tool nbh-btn nbh-btn-secondary" id="wkPrintBtn" title="Prints one sheet per procedure: setup, the drawn steps, the words, what to record, and an observer’s integrity checklist">Print the job aids</button></div>
@@ -1272,6 +1306,23 @@ const tabs=$$('.tab');
 function show(id){tabs.forEach(t=>t.setAttribute('aria-selected',t.dataset.p===id));$$('.panel').forEach(p=>p.classList.toggle('on',p.id===id));window.scrollTo({top:0});}
 tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
 show('p1');
+/* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
+   walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
+   carries view-<key> like the other forms. ---- */
+(function(){
+  var seg=document.getElementById('viewSeg'),nav=document.querySelector('nav.nbh-tabs');if(!seg||!nav)return;
+  var tabs=Array.prototype.slice.call(nav.querySelectorAll('[role=tab]'));
+  var keyOf=function(t){return t.dataset.p||'';};
+  function sync(){
+    var cur=tabs.filter(function(t){return t.getAttribute('aria-selected')==='true';})[0],k=cur?keyOf(cur):'';
+    seg.querySelectorAll('button[data-view]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.view===k));});
+    if(k){var cl=document.body.classList;Array.prototype.slice.call(cl).forEach(function(c){if(c.indexOf('view-')===0)cl.remove(c);});cl.add('view-'+k);}
+  }
+  seg.querySelectorAll('button[data-view]').forEach(function(b){b.addEventListener('click',function(){
+    var t=tabs.filter(function(x){return keyOf(x)===b.dataset.view;})[0];if(t)t.click();sync();});});
+  try{new MutationObserver(sync).observe(nav,{attributes:true,subtree:true,attributeFilter:['aria-selected']});}catch(e){}
+  sync();
+})();
 
 /* ---------- arrangements ---------- */
 const CONDS=['Baseline / control','Distributed','Accumulated','Accumulated + tokens','Intermediate'];
@@ -1563,9 +1614,9 @@ function integrity(){
 /* ---------- tab 7 ---------- */
 function stepCalc(){rows('tbStep').forEach((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);const r=num(v[0]);const m=String(v[1]).match(/([\d.]+)\s*(s|sec|seconds?|min|minutes?|pieces?|tokens?)?/i);let t='—';
   if(r&&m){const a=parseFloat(m[1]);const u=(m[2]||'s').toLowerCase();t=/^min/.test(u)?fmt(r*a,1)+' min':/^piece/.test(u)?plural(r*a,'piece'):/^token/.test(u)?plural(r*a,'token'):mmss(r*a)}tr.cells[3].textContent=t})}
-$('#btnLadder').addEventListener('click',()=>{const r=num(val('pl_req'))||num(val('w_req'))||10;const u=val('pl_unit')||(val('r_unit')?val('r_unit')+(val('r_utype')==='pieces'?' pieces':' s'):'30 s');
+$('#btnLadder').addEventListener('click',async ()=>{const r=num(val('pl_req'))||num(val('w_req'))||10;const u=val('pl_unit')||(val('r_unit')?val('r_unit')+(val('r_utype')==='pieces'?' pieces':' s'):'30 s');
   const adv='3 consecutive sessions at or above the evaluation rate, with problem behavior at or below the evaluation level',back='2 consecutive sessions with problem behavior at 50% or more of the baseline mean';
-  if(rows('tbStep').some(tr=>vals(tr).some(x=>x))&&!confirm('Replace the steps already entered?'))return;
+  if(rows('tbStep').some(tr=>vals(tr).some(x=>x))&&!(await nbhUI.confirm('Replace the steps already entered?',{ok:'Replace',danger:true})))return;
   document.getElementById('tbStep').innerHTML='';[1,1.5,2,3].forEach((f,i)=>addRow('tbStep',[String(Math.round(r*f)),String(u).replace(/ per.*$/,''),i===3?'Hold; review at the next plan review':adv,back]));refresh()});
 function decision(sx,pf,ig,sv){
   const L=[];const pm=MEAS[primary()];
@@ -1609,7 +1660,7 @@ $('#btnLoad').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{restore(JSON.parse(r.result))}catch(err){alert('Could not open that file: '+err.message)}};r.readAsText(f);e.target.value=''});
 $('#btnPrint').addEventListener('click',()=>{refresh();window.print()});
 window.addEventListener('beforeprint',refresh);
-$('#btnClear').addEventListener('click',()=>{if(confirm('Clear every field on this form? Unsaved entries will be lost.'))location.reload()});
+$('#btnClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every field on this form?\nUnsaved entries will be lost.',{ok:'Clear all',danger:true}))location.reload()});
 
 /* ---------- simulation ------------------------------------------------
    One worked case, consistent across every tab: a 9-year-old whose tablet
@@ -1670,7 +1721,7 @@ function loadSim(){
   t.tbMaint=[['2026-10-06','2','Rate; problem behavior','2.3 per min; 0','Board at 15 problems'],['2026-10-20','4','Rate; problem behavior','2.2 per min; 1','Board at 20 problems']];
   restore({version:'AD-1 2026-09',fields:f,tables:t});
 }
-$('#btnSim').addEventListener('click',()=>{if(rows('tbSess').length&&!confirm('Replace the entries on this form with the simulated case?'))return;loadSim()});
+$('#btnSim').addEventListener('click',async ()=>{if(rows('tbSess').length&&!(await nbhUI.confirm('Replace the entries on this form with the simulated case?',{ok:'Replace'})))return;loadSim()});
 refresh();
 })();
 </script>
@@ -2555,6 +2606,178 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
       .observe(document.documentElement, { childList: true, subtree: true });
   } catch (e) {}
+})();
+</script>
+
+<style id="nbh-ui-css">
+/* ===== the form's own messages, touch targets and view progress (v21.34) ===== */
+/* toasts: short messages that do not stop the work */
+#nbhToasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9000;pointer-events:none;max-width:min(560px,calc(100% - 32px))}
+.nbh-toast{pointer-events:auto;background:#16242e;color:#f1f6f5;font:13.5px/1.45 var(--nbh-sans,system-ui,sans-serif);padding:10px 16px;border-radius:8px;box-shadow:0 12px 30px -12px rgba(22,36,46,.6);display:flex;gap:12px;align-items:flex-start;animation:nbhToastIn .18s ease-out}
+.nbh-toast.warn{background:#7a2e1a}
+.nbh-toast.ok{background:#1f5b3f}
+.nbh-toast button{margin-left:auto;border:0;background:transparent;color:#cfe0dd;font:inherit;cursor:pointer;padding:0 2px;line-height:1}
+@keyframes nbhToastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* the styled confirm and notice */
+#nbhUiDlg{border:1px solid #c9d4d2;border-radius:8px;padding:0;max-width:560px;width:calc(100% - 32px);font-family:var(--nbh-sans,system-ui,sans-serif);font-size:14px;color:#16242e;background:#fff;box-shadow:0 30px 70px -24px rgba(24,46,67,.55)}
+#nbhUiDlg::backdrop{background:rgba(22,36,46,.38)}
+#nbhUiDlg .u-h{padding:14px 18px 10px;font-weight:600;font-size:15.5px;line-height:1.35;font-family:var(--nbh-serif,Georgia,serif);color:#182e43}
+#nbhUiDlg .u-b{padding:0 18px 14px;line-height:1.5;white-space:pre-line;color:#2b3a44;max-height:50vh;overflow:auto}
+#nbhUiDlg .u-f{display:flex;gap:8px;justify-content:flex-end;padding:10px 18px;border-top:1px solid #e3eae8;background:#f7f9f8;border-radius:0 0 8px 8px}
+#nbhUiDlg .u-f button{font:inherit;font-size:13.5px;padding:8px 16px;min-height:40px;border:1px solid #c9d4d2;border-radius:4px;background:#fff;color:#16242e;cursor:pointer}
+#nbhUiDlg .u-f button.primary{background:#182e43;color:#fff;border-color:#182e43;font-weight:600}
+#nbhUiDlg .u-f button.danger{background:#a8321e;color:#fff;border-color:#a8321e;font-weight:600}
+@media print{#nbhToasts,#nbhUiDlg{display:none!important}}
+/* view progress: a dot after each view's name */
+#viewSeg button[data-nbh-fill]::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;border:1px solid rgba(255,255,255,.55);background:transparent}
+#viewSeg button[data-nbh-fill="part"]::after{background:#e3b341;border-color:#e3b341}
+#viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
+#viewSeg button[data-nbh-fill="none"]::after{display:none}
+/* touch: on a device without a fine pointer, the small controls grow */
+@media (pointer:coarse){
+  .rowDel,.delRow,button.rowDel{font-size:22px!important;padding:8px 12px!important;min-width:44px!important;min-height:44px!important}
+  td.nx,th.nx,table.grid.narr th.nx,table.grid.narr td.nx{width:48px!important}
+  input[type="checkbox"],input[type="radio"]{width:22px!important;height:22px!important;min-width:22px!important}
+  .checks label,.chk label{padding:6px 0!important;min-height:36px}
+  button.iv{height:36px!important}
+  .toolbar button,.toolbar select,.toolbar input{min-height:40px!important;padding-top:8px!important;padding-bottom:8px!important}
+  .sheet input:not([type="checkbox"]):not([type="radio"]),.sheet select{min-height:38px!important}
+  .sheet textarea{min-height:44px!important}
+  .sheet button,.tool,.nbh-btn{min-height:40px!important}
+  .nbh-pagenav button{min-height:44px!important}
+  #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
+}
+</style>
+<script id="nbh-ui">
+/* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
+   Until now every notice was the browser's alert() and every question its confirm(): unstyled, "this site
+   says", and on an iPad a stop to the whole screen. This block gives each form:
+     nbhUI.toast(text, {kind:'ok'|'warn'|'', ms})   a short message at the foot of the window
+     nbhUI.alert(text)                              a toast for a short message, a styled notice for a long one
+     nbhUI.confirm(text, {ok, cancel, danger})      a styled question; resolves true or false
+   window.alert is routed through nbhUI.alert, so existing calls change on their own. window.confirm stays
+   the browser's, because a synchronous answer cannot be styled; the forms' own code calls
+   nbhUI.confirm instead (await it). A test that replaces window.confirm with its own function is
+   honoured: nbhUI.confirm then returns that function's answer at once, so checks that auto-accept keep
+   working. The block also marks each view button with a dot (empty, partly filled, filled) from the
+   fields that view shows, and grows the small controls on a touch screen (the CSS above). */
+(function(){
+  var U = {}, nativeConfirm = window.confirm, nativeAlert = window.alert;
+  function q(s){ return document.querySelector(s); }
+  function host(){ var h = q('#nbhToasts'); if (!h) { h = document.createElement('div'); h.id = 'nbhToasts'; h.setAttribute('role', 'status'); h.setAttribute('aria-live', 'polite'); document.body.appendChild(h); } return h; }
+  U.toast = function(text, opt){
+    opt = opt || {}; var h = host(), t = document.createElement('div');
+    t.className = 'nbh-toast' + (opt.kind ? ' ' + opt.kind : '');
+    var s = document.createElement('span'); s.textContent = String(text); t.appendChild(s);
+    var x = document.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.innerHTML = '&times;'; t.appendChild(x);
+    var gone = function(){ if (t.parentNode) t.parentNode.removeChild(t); };
+    x.addEventListener('click', gone);
+    h.appendChild(t);
+    while (h.children.length > 3) h.removeChild(h.firstChild);
+    setTimeout(gone, opt.ms || Math.min(12000, 3500 + String(text).length * 35));
+    return t;
+  };
+  function dlg(){
+    var d = q('#nbhUiDlg');
+    if (d) return d;
+    d = document.createElement('dialog'); d.id = 'nbhUiDlg'; d.className = 'noprint';
+    d.innerHTML = '<div class="u-h" id="nbhUiH"></div><div class="u-b" id="nbhUiB"></div><div class="u-f" id="nbhUiF"></div>';
+    document.body.appendChild(d);
+    return d;
+  }
+  function split(text){
+    var s = String(text == null ? '' : text).trim(), i = s.indexOf('\n');
+    var first = i >= 0 ? s.slice(0, i).trim() : s, rest = i >= 0 ? s.slice(i + 1).trim() : '';
+    if (first.length > 120 && i < 0) { var j = first.indexOf('. '); if (j > 20 && j < 110) { rest = first.slice(j + 2); first = first.slice(0, j + 1); } }
+    return { head: first, body: rest };
+  }
+  function ask(text, opt, question){
+    opt = opt || {};
+    return new Promise(function(res){
+      var d = dlg(), p = split(text);
+      q('#nbhUiH').textContent = p.head; q('#nbhUiB').textContent = p.body; q('#nbhUiB').style.display = p.body ? '' : 'none';
+      var f = q('#nbhUiF'); f.innerHTML = '';
+      var done = function(v){ try { d.close(); } catch (e) {} res(v); };
+      if (question) { var c = document.createElement('button'); c.type = 'button'; c.textContent = opt.cancel || 'Cancel'; c.addEventListener('click', function(){ done(false); }); f.appendChild(c); }
+      var ok = document.createElement('button'); ok.type = 'button'; ok.className = opt.danger ? 'danger' : 'primary'; ok.textContent = opt.ok || (question ? 'OK' : 'OK');
+      ok.addEventListener('click', function(){ done(true); }); f.appendChild(ok);
+      d.oncancel = function(ev){ ev.preventDefault(); done(false); };
+      if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+      ok.focus();
+    });
+  }
+  U.alert = function(text){
+    var s = String(text == null ? '' : text);
+    if (s.length <= 160 && s.indexOf('\n') < 0) { U.toast(s); return Promise.resolve(); }
+    return ask(s, { ok: 'OK' }, false);
+  };
+  U.confirm = function(text, opt){
+    if (window.confirm !== nativeConfirm) { var v; try { v = !!window.confirm(String(text)); } catch (e) { v = false; } return Promise.resolve(v); }
+    return ask(text, opt || {}, true);
+  };
+  U.native = { alert: nativeAlert, confirm: nativeConfirm };
+  window.alert = function(m){ U.alert(m); };
+
+  /* ---- view progress ---- */
+  var MAP = null, timer = null;
+  function fields(root){
+    var out = [], list = root.querySelectorAll('input,select,textarea');
+    for (var i = 0; i < list.length; i++) { var e = list[i]; if (e.type === 'file' || e.type === 'hidden' || e.type === 'button' || e.type === 'submit' || e.closest('.toolbar,#nbhCaseDlg,#nbhUiDlg,.nbh-pagenav,.obr')) continue; out.push(e); }
+    return out;
+  }
+  function vis(e){ return !!(e.offsetParent || (e.getClientRects && e.getClientRects().length)); }
+  function buildMap(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll('#viewSeg button[data-view]'));
+    if (!btns.length) return null;
+    var m = {}, keys = btns.map(function(b){ return b.dataset.view; });
+    var direct = keys.every(function(k){ return document.querySelector('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]'); });
+    if (direct) {
+      keys.forEach(function(k){ var out = []; document.querySelectorAll('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]').forEach(function(s){ out = out.concat(fields(s)); }); m[k] = out; });
+      return m;
+    }
+    /* measure: each view's class on the body, in turn, and the fields it shows; fields shown by every view are shared and left out */
+    var body = document.body, was = body.className, seen = {};
+    keys.forEach(function(k){
+      var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + k); body.className = cls.join(' ');
+      var out = fields(document).filter(vis);
+      out.forEach(function(e){ seen[e.__nbhId || (e.__nbhId = Math.random().toString(36).slice(2))] = (seen[e.__nbhId] || 0) + 1; });
+      m[k] = out;
+    });
+    body.className = was;
+    keys.forEach(function(k){ m[k] = m[k].filter(function(e){ return seen[e.__nbhId] < keys.length; }); });
+    return m;
+  }
+  function filled(e){ return (e.type === 'checkbox' || e.type === 'radio') ? e.checked : !!String(e.value || '').trim(); }
+  U.progress = function(){
+    if (!MAP) MAP = buildMap();
+    if (!MAP) return null;
+    var out = {};
+    Object.keys(MAP).forEach(function(k){
+      var list = MAP[k].filter(function(e){ return e.isConnected; }), n = 0;
+      list.forEach(function(e){ if (filled(e)) n++; });
+      out[k] = { filled: n, total: list.length };
+      var b = document.querySelector('#viewSeg button[data-view="' + k + '"]');
+      if (b) {
+        var st = !list.length ? 'none' : n === 0 ? 'empty' : n >= Math.max(1, Math.round(list.length * 0.8)) ? 'done' : 'part';
+        if (b.dataset.nbhFill !== st) b.dataset.nbhFill = st;
+        var tip = list.length ? n + ' of ' + list.length + ' fields filled' : '';
+        if (b.title !== tip) b.title = tip;
+      }
+    });
+    return out;
+  };
+  U.remap = function(){ MAP = null; U.progress(); };
+  function soon(ms){ clearTimeout(timer); timer = setTimeout(function(){ try { U.progress(); } catch (e) {} }, ms || 400); }
+  document.addEventListener('input', function(){ soon(500); }, true);
+  document.addEventListener('change', function(){ soon(300); }, true);
+  var remapTimer = null, lastCount = -1;
+  function maybeRemap(){
+    clearTimeout(remapTimer);
+    remapTimer = setTimeout(function(){ var n = document.querySelectorAll('input,select,textarea').length; if (n !== lastCount) { lastCount = n; MAP = null; } try { U.progress(); } catch (e) {} }, 900);
+  }
+  try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  window.nbhUI = U;
 })();
 </script>
 
