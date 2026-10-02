@@ -357,6 +357,11 @@ table.rt th,table.rt td{border:1px solid var(--rule-2);padding:6px 8px;text-alig
 table.rt thead th{background:var(--wash);text-align:center;font-size:11.5px}
 table.rt td input,table.rt td select,table.rt td textarea{width:100%;border:0;background:transparent;font:inherit;resize:vertical}
 table.rt td select{border:1px solid transparent}
+/* v21.33 (R): a row can be deleted anywhere */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx{display:none}}
 table.mx{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:12px;margin:6px 0}
 table.mx th,table.mx td{border:1px solid var(--rule-2);padding:4px 7px}
 table.mx thead th{background:var(--wash);text-align:center;font-size:11px}
@@ -607,7 +612,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="respTbl"><thead><tr>
       <th style="width:38px">#</th><th style="width:22%">Name of person interviewed</th><th style="width:19%">Role</th>
       <th style="width:16%">Relationship / position</th><th style="width:11%">Date</th>
-      <th style="width:13%">Interviewer</th><th style="width:9%">Format</th><th style="width:9%">Complete</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:13%">Interviewer</th><th style="width:9%">Format</th><th style="width:9%">Complete</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="respVerdict"></div>
   </section>
 
@@ -792,7 +797,8 @@ function renderRespRows(){
     <td><input data-r="${i}" data-f="d" value="${esc(r.d)}"></td>
     <td><input data-r="${i}" data-f="by" value="${esc(r.by)}"></td>
     <td><select data-r="${i}" data-f="fmt"><option value=""></option>${opt(['Face to face','Virtual','Telephone'],r.fmt)}</select></td>
-    <td style="text-align:center;font-weight:600">${pct(i)}%</td></tr>`).join('');
+    <td style="text-align:center;font-weight:600">${pct(i)}%</td>
+    <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this respondent" aria-label="Delete respondent ${i+1}">&times;</button></td></tr>`).join('');
 }
 function renderRespCard(){
   const roles=S.resp.filter(r=>r.n.trim()).map(r=>r.role);
@@ -839,6 +845,17 @@ $('#addStu').addEventListener('click',()=>addR('Student'));
 $('#delResp').addEventListener('click',()=>{if(S.resp.length<2)return;const i=S.resp.length-1,r=S.resp[i];
   if(([r.n,r.rel,r.d,r.by,r.fmt].some(v=>String(v||'').trim())||hasEntries(i))&&!confirm(`Remove respondent ${i+1} (${r.n.trim()||r.role})? Their details and every answer recorded for them will be deleted.`))return;
   dropAnswers(i);S.resp.pop();S.cur=Math.min(S.cur,S.resp.length-1);renderResp();renderInt();renderConv();});
+/* v21.33 (R): any respondent can be deleted, not only the last. Answers are keyed by the respondent's position,
+   so the answers of every respondent after the deleted one move up one place; the last respondent is cleared
+   rather than removed, so the record keeps one row. */
+function removeResp(i){const r=S.resp[i];if(!r)return;
+  const held=[r.n,r.rel,r.d,r.by,r.fmt].some(v=>String(v||'').trim())||hasEntries(i);
+  if(held&&!confirm(`Delete respondent ${i+1} (${r.n.trim()||r.role})? Their details and every answer recorded for them will be deleted.`))return;
+  dropAnswers(i);
+  if(S.resp.length<2){S.resp[0]=newR(r.role);S.cur=0;renderResp();renderInt();renderConv();return;}
+  [S.ans,S.mx].forEach(o=>{for(let k=i+1;k<S.resp.length;k++)mine(o,k).forEach(key=>{const v=o[key];delete o[key];o[akey(k-1,key.split('_')[1])]=v;});});
+  S.resp.splice(i,1);S.cur=S.cur>i?S.cur-1:Math.min(S.cur,S.resp.length-1);renderResp();renderInt();renderConv();}
+$('#respTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)removeResp(+b.dataset.del);});
 
 function renderBar(){
   $('#rbar').innerHTML=S.resp.map((r,i)=>

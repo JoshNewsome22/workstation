@@ -441,6 +441,12 @@ body.view-guide .only-setup,body.view-guide .only-sheets,body.view-guide .only-e
   /* the portrait @page rule is added by the button's script while it prints, so the whole-form print is untouched */
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -622,17 +628,17 @@ td input,td select{max-width:100%}
     <p class="hint">One to four behaviors from Forms TB-1 and TD-1, written as the family would say them. One example and one non-example each, so two people watching the same thing would mark it the same way. The measure decides what the sheet asks for: a tally mark each time, a yes or no for each routine, how many minutes, or a 0 to 3 rating. The last column is the one line from the plan that tells the family what to do when it happens; it prints on every sheet.</p>
     <div class="tools"><button class="tool" id="addB">Add a behavior</button><button class="tool" id="delB">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="bTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:17%">Behavior (plain words)</th><th style="width:17%">Counts as one (example)</th><th style="width:17%">Does not count (non-example)</th><th style="width:15%">How the family measures it</th><th>What to do when it happens (one line from the plan)</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:17%">Behavior (plain words)</th><th style="width:17%">Counts as one (example)</th><th style="width:17%">Does not count (non-example)</th><th style="width:15%">How the family measures it</th><th>What to do when it happens (one line from the plan)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h3>Routines of the Day the Family Will Watch</h3>
     <p class="hint">The rows of the tally sheet and the checklist. Use the family&rsquo;s own day, in their order. Untick a routine to leave it off the sheets without losing it.</p>
     <div class="tools"><button class="tool" id="addR">Add a routine</button><button class="tool" id="delR">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr><th style="width:5%">#</th><th style="width:30%">Routine</th><th style="width:25%">Usual time</th><th style="width:12%">On the sheets</th><th>Note for the family (optional, prints under the routine)</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr><th style="width:5%">#</th><th style="width:30%">Routine</th><th style="width:25%">Usual time</th><th style="width:12%">On the sheets</th><th>Note for the family (optional, prints under the routine)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h3>Steps the Family Runs and Skills the Child Uses (for the checklist)</h3>
     <p class="hint">The routine checklist asks a yes or no for each of these, in each routine, each day: the plan steps the family agreed to run (Form TD-1) and the replacement skills the child is learning (Form GB-1). Write each as one short sentence the family can read at a glance. A step marked <b>Any</b> prints under every routine.</p>
     <div class="tools"><button class="tool" id="addK">Add a step</button><button class="tool" id="delK">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="kTbl"><thead><tr><th style="width:5%">#</th><th>Step or skill (plain words)</th><th style="width:16%">Who does it</th><th style="width:22%">In which routine</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="kTbl"><thead><tr><th style="width:5%">#</th><th>Step or skill (plain words)</th><th style="width:16%">Who does it</th><th style="width:22%">In which routine</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
     <h3>Which Sheets Go Home</h3>
     <div class="ckrow">
@@ -694,7 +700,7 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:14px">Agreement Check</h3>
     <p class="hint">When a staff member (or the BCBA on a home visit) watched the same routine the family was marking, enter both values. Agreement is the smaller value divided by the larger (a Y/N pair agrees or it does not). A mean at or above 80% is treated as acceptable, as a working convention; below it, re-teach the definitions with the family before using the data for decisions.</p>
     <div class="tools"><button class="tool" id="addAg">Add a check</button><button class="tool" id="delAg">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt wide" id="agTbl"><thead><tr><th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:15%">Routine</th><th style="width:18%">Behavior</th><th style="width:10%">Staff saw</th><th style="width:10%">Family wrote</th><th style="width:10%">Agreement</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt wide" id="agTbl"><thead><tr><th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:15%">Routine</th><th style="width:18%">Behavior</th><th style="width:10%">Staff saw</th><th style="width:10%">Family wrote</th><th style="width:10%">Agreement</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="agMetrics"></div>
 
     <h3 style="margin-top:14px">Sheets Returned</h3>
@@ -763,6 +769,11 @@ const num=v=>{const n=parseFloat(String(v==null?'':v).replace('%',''));return is
 const pct=v=>v==null?'—':(Math.round(v*10)/10).toFixed(0)+'%';
 const r1=v=>v==null?'—':(Math.round(v*10)/10).toFixed(1);
 
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
 /* ---- defaults the sheets ship with ---- */
 const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],DAYL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const ROUT=[{label:'Morning',time:'getting up to leaving'},{label:'Meals',time:'breakfast and dinner'},{label:'Homework',time:'after school'},{label:'Bedtime',time:'bath to lights out'},{label:'Outings',time:'store, car, visits'}];
@@ -800,20 +811,20 @@ function renderB(){
     <td><input data-r="bh" data-i="${i}" data-f="ex" value="${esc(r.ex)}" placeholder="an open or closed hand lands on a person"></td>
     <td><input data-r="bh" data-i="${i}" data-f="nex" value="${esc(r.nex)}" placeholder="hitting a pillow or the table"></td>
     <td><select data-r="bh" data-i="${i}" data-f="ms" aria-label="Measure for behavior ${i+1}">${Object.keys(MEAS).map(k=>`<option value="${k}"${r.ms===k?' selected':''}>${MEAS[k]}</option>`).join('')}</select></td>
-    <td><input data-r="bh" data-i="${i}" data-f="todo" value="${esc(r.todo)}" placeholder="Block, say “hands down”, help with the next step; no talking about it after"></td></tr>`).join('');
+    <td><input data-r="bh" data-i="${i}" data-f="todo" value="${esc(r.todo)}" placeholder="Block, say “hands down”, help with the next step; no talking about it after"></td>${delCell('bh',i,'behavior')}</tr>`).join('');
 }
 function renderR(){
   $('#rTbl tbody').innerHTML=S.rt.map((r,i)=>`<tr><td class="num">${i+1}</td>
     <td><input data-r="rt" data-i="${i}" data-f="label" value="${esc(r.label)}" placeholder="Morning"></td>
     <td><input data-r="rt" data-i="${i}" data-f="time" value="${esc(r.time)}" placeholder="7:00 to 8:00"></td>
     <td class="num"><input type="checkbox" data-r="rt" data-i="${i}" data-f="on"${r.on?' checked':''} aria-label="Routine ${i+1} on the sheets"></td>
-    <td><input data-r="rt" data-i="${i}" data-f="note" value="${esc(r.note||'')}" placeholder="e.g., count from the first “time to get up” to the car"></td></tr>`).join('');
+    <td><input data-r="rt" data-i="${i}" data-f="note" value="${esc(r.note||'')}" placeholder="e.g., count from the first “time to get up” to the car"></td>${delCell('rt',i,'routine')}</tr>`).join('');
 }
 function renderK(){
   $('#kTbl tbody').innerHTML=S.sk.map((r,i)=>`<tr><td class="num">${i+1}</td>
     <td><input data-r="sk" data-i="${i}" data-f="label" value="${esc(r.label)}" placeholder="Show the picture schedule before the routine starts"></td>
     <td><select data-r="sk" data-i="${i}" data-f="who" aria-label="Who does step ${i+1}"><option${r.who==='Adult'?' selected':''}>Adult</option><option${r.who==='Child'?' selected':''}>Child</option></select></td>
-    <td><select data-r="sk" data-i="${i}" data-f="rt" aria-label="Routine for step ${i+1}"><option value="">Any (every routine)</option>${S.rt.map((x,ri)=>`<option value="${ri}"${String(r.rt)===String(ri)?' selected':''}>${esc(x.label||('Routine '+(ri+1)))}</option>`).join('')}</select></td></tr>`).join('');
+    <td><select data-r="sk" data-i="${i}" data-f="rt" aria-label="Routine for step ${i+1}"><option value="">Any (every routine)</option>${S.rt.map((x,ri)=>`<option value="${ri}"${String(r.rt)===String(ri)?' selected':''}>${esc(x.label||('Routine '+(ri+1)))}</option>`).join('')}</select></td>${delCell('sk',i,'step')}</tr>`).join('');
 }
 function renderAg(){
   $('#agTbl tbody').innerHTML=S.ag.map((r,i)=>{const a=agree(r);
@@ -821,7 +832,7 @@ function renderAg(){
     <td><select data-r="ag" data-i="${i}" data-f="rt" aria-label="Routine of check ${i+1}"><option value=""></option>${S.rt.map((x,ri)=>`<option value="${ri}"${String(r.rt)===String(ri)?' selected':''}>${esc(x.label)}</option>`).join('')}</select></td>
     <td><select data-r="ag" data-i="${i}" data-f="bh" aria-label="Behavior of check ${i+1}"><option value=""></option>${S.bh.map((x,bi)=>`<option value="${bi}"${String(r.bh)===String(bi)?' selected':''}>${esc(x.name||('Behavior '+(bi+1)))}</option>`).join('')}</select></td>
     <td><input data-r="ag" data-i="${i}" data-f="staff" value="${esc(r.staff)}" style="text-align:center"></td><td><input data-r="ag" data-i="${i}" data-f="home" value="${esc(r.home)}" style="text-align:center"></td>
-    <td class="num">${a==null?'—':pct(a)}</td><td><input data-r="ag" data-i="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`;}).join('');
+    <td class="num">${a==null?'—':pct(a)}</td><td><input data-r="ag" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('ag',i,'check')}</tr>`;}).join('');
 }
 function agree(r){const b=S.bh[+r.bh];if(!b||r.staff===''||r.home===''||r.staff==null||r.home==null)return null;
   if(b.ms==='yn'){const s=String(r.staff).trim().toUpperCase()[0],h=String(r.home).trim().toUpperCase()[0];if(!/[YN]/.test(s||'')||!/[YN]/.test(h||''))return null;return s===h?100:0;}
@@ -997,6 +1008,22 @@ $('#addK').addEventListener('click',()=>{if(S.sk.length>=12)return;S.sk.push({la
 $('#delK').addEventListener('click',()=>{if(S.sk.length<=1)return;const r=S.sk[S.sk.length-1];if(r.label&&!confirm('Remove the last step?'))return;S.sk.pop();renderK();renderSheets();renderSetup();});
 $('#addAg').addEventListener('click',()=>{S.ag.push({date:'',rt:'',bh:'',staff:'',home:'',note:''});renderAg();renderAgM();});
 $('#delAg').addEventListener('click',()=>{if(!S.ag.length)return;const r=S.ag[S.ag.length-1];if((r.date||r.staff)&&!confirm('Remove the last check?'))return;S.ag.pop();renderAg();renderAgM();});
+/* the week cells are keyed b<behavior>_r<routine>_d<day>, the checklist steps and agreement checks by routine and
+   behavior index, so a deletion drops the dependent cells and re-keys the rest instead of letting them shift */
+function cellCount(part,i){let n=0;S.wk.forEach(w=>Object.keys(w.cells).forEach(k=>{const m=/^b(\d+)_r(\d+)_d\d$/.exec(k);if(m&&+m[part==='b'?1:2]===i&&String(w.cells[k]).trim()!=='')n++;}));return n;}
+function rekeyCells(part,i){S.wk.forEach(w=>{const c={};Object.keys(w.cells).forEach(k=>{const m=/^b(\d+)_r(\d+)_(d\d)$/.exec(k);if(!m){c[k]=w.cells[k];return;}let b=+m[1],r=+m[2];if(part==='b'){if(b===i)return;if(b>i)b--;}else{if(r===i)return;if(r>i)r--;}c['b'+b+'_r'+r+'_'+m[3]]=w.cells[k];});w.cells=c;});}
+function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  if(r==='bh'){const cells=cellCount('b',i),ag=S.ag.filter(a=>String(a.bh)===String(i)).length;
+    if((row.name||row.ex||row.nex||row.todo||cells||ag)&&!confirm('Delete this behavior?'+(cells?' Its '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(ag?' '+ag+' agreement check'+(ag===1?'':'s')+' for it will be removed.':'')+(cells||ag?' Later behaviors move up.':'')))return;
+    S.bh.splice(i,1);rekeyCells('b',i);S.ag=S.ag.filter(a=>String(a.bh)!==String(i));S.ag.forEach(a=>{if(a.bh!==''&&+a.bh>i)a.bh=String(+a.bh-1);});
+    if(!S.bh.length)S.bh.push({name:'',ex:'',nex:'',ms:'tally',todo:''});renderB();renderAg();renderEnt();renderSheets();renderSetup();}
+  else if(r==='rt'){const cells=cellCount('r',i),sk=S.sk.filter(s=>String(s.rt)===String(i)).length;
+    if((row.label||row.note||cells||sk)&&!confirm('Delete this routine?'+(cells?' Its '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(sk?' '+sk+' checklist step'+(sk===1?'':'s')+' tied to it will apply to every routine.':'')+(cells||sk?' Later routines move up.':'')))return;
+    S.rt.splice(i,1);rekeyCells('r',i);const rk=o=>{if(o.rt===''||o.rt==null)return;const v=+o.rt;if(v===i)o.rt='';else if(v>i)o.rt=String(v-1);};S.sk.forEach(rk);S.ag.forEach(rk);
+    if(!S.rt.length)S.rt.push({label:'',time:'',on:true,note:''});renderR();renderK();renderAg();renderEnt();renderSheets();renderSetup();}
+  else if(r==='sk'){if(row.label&&!confirm('Delete this row?'))return;S.sk.splice(i,1);if(!S.sk.length)S.sk.push({label:'',who:'Adult',rt:''});renderK();renderSheets();renderSetup();}
+  else if(r==='ag'){if((row.date||row.staff||row.home||row.note)&&!confirm('Delete this row?'))return;S.ag.splice(i,1);renderAg();renderAgM();}
+}
 $('#wkSel').addEventListener('change',e=>{curWk=+e.target.value;bindWeek();renderEnt();});
 $('#addWk').addEventListener('click',()=>{if(S.wk.length>=26)return;S.wk.push(newWeek());curWk=S.wk.length-1;renderWkSel();bindWeek();renderEnt();});
 $('#delWk').addEventListener('click',()=>{if(S.wk.length<=1){if(confirm('Clear this week?')){S.wk[0]=newWeek();renderWkSel();bindWeek();renderEnt();}return;}if(!confirm('Remove week '+(curWk+1)+' and everything typed into it?'))return;S.wk.splice(curWk,1);curWk=Math.max(0,curWk-1);renderWkSel();bindWeek();renderEnt();});

@@ -511,6 +511,9 @@ a{color:var(--nbh-slate)}
 .panel{border-color:var(--nbh-rule)}
 .metric{border-left-color:var(--nbh-teal)}
 .narrative{border-left-color:var(--nbh-teal)}
+/* v21.33 (G): the graph can be saved as a PNG for the report */
+.dd-graphsave{display:flex;justify-content:flex-end;margin:4px 0 0}
+@media print{.dd-graphsave{display:none !important}}
 
 
 </style>
@@ -2961,6 +2964,7 @@ function renderResults(){
       <div class="empty dd-line">${conds.length>1?"No two adjacent conditions both have data for this behavior, so there is no comparison to show.":"Mark a full phase change on the data sheet to generate across-condition comparisons."}<\/div>`;
     html+=`<div class="panel behavior-report"><div class="dd-keep">${kindHead}${head}
       <div class="chartbox">${chart}<\/div>
+      <div class="dd-graphsave noprint no-print"><button type="button" class="btn ghost sm" data-act="saveGraph" data-b="${esc(beh.id)}" title="Download this graph as a PNG image, at twice the screen resolution">Save graph as image<\/button><\/div>
       <div class="legend">${legend}<\/div>
       ${dr.cond?`<p class="hint" style="margin-top:8px">Conditional changes marked: ${condMarks.map(m=>`${esc(m.label)} (${esc(fmtDate(rows[m.x].date))})`).join("; ")}. These events are annotated inside the condition and do not split it for analysis.<\/p>`:""}
       ${ddNoteHtml(notes)}${ddClipHtml(dr)}<\/div>
@@ -2976,6 +2980,35 @@ function renderResults(){
   out.innerHTML=html+sourcesPanel();
   ddScrollers(out);
 }
+/* v21.33 (G): Save graph as image. The behavior's main graph is serialised as it is drawn (its colors and sizes
+   are attributes; only the font was inherited from the page, so it is set on the root), drawn on a canvas at
+   twice its size and downloaded as DD-1_graph_<student>_<date>.png. One button per behavior graph. */
+function saveGraphPng(svgEl,beh){
+  const svg=svgEl.cloneNode(true);
+  const vb=(svg.getAttribute('viewBox')||'0 0 980 440').split(/\s+/).map(Number), W=vb[2]||980, H=vb[3]||440;
+  svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  svg.setAttribute('width',String(W)); svg.setAttribute('height',String(H));
+  svg.setAttribute('font-family',ddSans()); svg.removeAttribute('class');
+  const src=new XMLSerializer().serializeToString(svg);
+  const img=new Image(), scale=2;
+  const student=String((S.meta&&S.meta.client)||'student').trim().replace(/\s+/g,'_').replace(/[^\w-]+/g,'')||'student';
+  const name='DD-1_graph_'+student+'_'+localISO(new Date())+'.png';
+  img.onload=()=>{
+    const c=document.createElement('canvas'); c.width=W*scale; c.height=H*scale;
+    const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height); ctx.drawImage(img,0,0,c.width,c.height);
+    const done=blob=>{ if(!blob){ toast('The graph could not be saved as an image.'); return; }
+      const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},400); toast('Graph saved as '+name+'.'); };
+    if(c.toBlob) c.toBlob(done,'image/png'); else { try{ const d=c.toDataURL('image/png'); const a=document.createElement('a'); a.href=d; a.download=name; document.body.appendChild(a); a.click(); a.remove(); toast('Graph saved as '+name+'.'); }catch(e){ done(null); } }
+  };
+  img.onerror=()=>toast('The graph could not be saved as an image.');
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(src);
+}
+$('#resultsOut').addEventListener('click',e=>{
+  const btn=e.target.closest('[data-act="saveGraph"]'); if(!btn) return;
+  const rep=btn.closest('.behavior-report'), svg=rep&&rep.querySelector('svg.graph'); if(!svg) return;
+  saveGraphPng(svg,S.behaviors.find(b=>b.id===btn.dataset.b));
+});
 /* v21.16 audit: a graph or table that scrolls sideways (a phone, a narrow window) can be reached and scrolled
    from the keyboard; one that fits stays out of the tab order */
 function ddScrollers(root){

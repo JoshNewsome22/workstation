@@ -357,6 +357,11 @@ table.rt th,table.rt td{border:1px solid var(--rule-2);padding:6px 8px;text-alig
 table.rt thead th{background:var(--wash);text-align:center;font-size:11.5px}
 table.rt td input,table.rt td select,table.rt td textarea{width:100%;border:0;background:transparent;font:inherit;resize:vertical}
 table.rt td select{border:1px solid transparent}
+/* v21.33 (R): a row can be deleted anywhere */
+td.nx,th.nx{width:30px;text-align:center;padding:0}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx{display:none}}
 .ivgrid{display:grid;gap:10px 14px;align-items:start}
 table.iv{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:11.5px}
 table.iv th,table.iv td{border:1px solid var(--rule-2);padding:2px 4px}
@@ -657,7 +662,7 @@ td input,td select{max-width:100%}
       <div><label>Observer</label><input data-m="obs"></div>
       <div><label>Date</label><input data-m="date"></div>
       <div><label>Location</label><input data-m="loc"></div>
-      <div><label>Start time</label><input data-m="start"></div>
+      <div><label>Start time</label><input type="time" data-m="start"></div>
       <div><label>Second observer (IOA)</label><input data-m="obs2"></div>
     </div>
     <table class="rt" style="margin-bottom:4px">
@@ -743,7 +748,7 @@ td input,td select{max-width:100%}
     <div class="grid-wrap"><table class="rt" id="sessTbl"><thead><tr>
       <th style="width:38px">#</th><th style="width:10%">Date</th><th style="width:14%">Method</th><th style="width:7%">Ratio</th>
       <th style="width:8%">Length</th><th style="width:8%">Intervals</th><th style="width:8%">% occur</th>
-      <th style="width:14%">Change at this session</th><th style="width:14%">Condition or change label</th><th>Note</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:14%">Change at this session</th><th style="width:14%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Session graph" style="margin-top:12px"><svg id="mtPlot" viewBox="0 0 900 320" aria-label="Percentage of intervals across sessions"></svg></div>
   </section>
 
@@ -816,6 +821,11 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
    observation timer, as Clear sheet does; it kept running over the new record when that record had the
    same length and ratio */
 function resetTimer(){try{if(window.mtTimer)window.mtTimer.reset();}catch(e){}}
+/* v21.33 (T): the start time is a time picker (HH:MM); a typed time in an older file is converted */
+function toHM24(v){const t=String(v==null?"":v).trim().toLowerCase();if(!t)return "";if(/^\d{2}:\d{2}$/.test(t))return t;
+  const m=/^(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?$/.exec(t);if(!m)return "";let h=+m[1],mi=m[2]?+m[2]:0;if(h>23||mi>59)return "";
+  if(m[3]==="p"&&h<12)h+=12;else if(m[3]==="a"&&h===12)h=0;else if(!m[3]&&h>=1&&h<=6)h+=12;return String(h).padStart(2,"0")+":"+String(mi).padStart(2,"0");}
+
 
 /* ---------- the ratio: minutes of observation : seconds of interval ---------- */
 function params(){
@@ -957,7 +967,8 @@ function renderSess(){
     <td><select data-s="${i}" data-f="chg"><option value=""></option>${
       ['Full phase change','Conditional change'].map(o=>`<option${r.chg===o?' selected':''}>${o}</option>`).join('')}</select></td>
     <td><input data-s="${i}" data-f="ph" value="${esc(r.ph)}" placeholder="${i===0?'e.g., Baseline':''}"></td>
-    <td><input data-s="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`).join('');
+    <td><input data-s="${i}" data-f="note" value="${esc(r.note)}"></td>
+    <td class="nx noprint"><button type="button" class="rowDel noprint" data-del="${i}" title="Delete this row" aria-label="Delete row ${i+1}">&times;</button></td></tr>`).join('');
   drawPlot();
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
@@ -969,6 +980,10 @@ $('#delSess').addEventListener('click',()=>{if(S.sess.length>1){S.sess.pop();ren
    graph is read, not only on the sheet it was scored on. A first row that is
    still empty is filled rather than left blank above the first real session. */
 const emptyRow=r=>!['d','m','r','len','n','p','chg','ph','note'].some(k=>String(r[k]||'').trim());
+/* v21.33 (R): any session can be deleted, not only the last; the log keeps at least one (blank) row */
+$('#sessTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,r=S.sess[i];if(!r)return;
+  if(!emptyRow(r)&&!confirm('Delete this row?'))return;
+  S.sess.splice(i,1);ensure();renderSess();});
 function captureSheet(goToLog){
   const p=params();let plus=0,scored=0;
   for(let i=0;i<p.total;i++){const v=S.marks[i];if(v==='1'){plus++;scored++;}else if(v==='0')scored++;}
@@ -1041,6 +1056,7 @@ const RESCORE={method:'method',mins:'observation length',ratio:'ratio'};
 const anyMarks=()=>[S.marks,S.ioa].some(o=>Object.values(o||{}).some(Boolean));
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;
   if(el.tagName==='SELECT'){const v=S.meta[k]==null?'':String(S.meta[k]);if([...el.options].some(o=>o.value===v))el.value=v;}
+  else if(el.type==='time'){S.meta[k]=toHM24(S.meta[k]);el.value=S.meta[k];}
   else el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
     el.addEventListener(ev,()=>{
@@ -1078,7 +1094,7 @@ function loadSim(){
   const D=n=>{const d=new Date();d.setDate(d.getDate()-n);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
   S.meta={client:'SIMULATED \u2013 Sample Student',obs:'Aide A (simulated)',date:D(2),
-    loc:'Room 12, independent writing block',start:'1:30 PM',obs2:'Joshua Newsome, M.A., BCBA',
+    loc:'Room 12, independent writing block',start:'13:30',obs2:'Joshua Newsome, M.A., BCBA',
     beh:'On-task: eyes and hands oriented to the assigned materials',
     ttype:'Acquisition target',
     def:'Eyes directed at the assigned materials and at least one hand in contact with them or with the writing tool. Looking at the adult while being spoken to counts. Looking away, leaving the seat, or hands idle does not.',
@@ -1220,7 +1236,8 @@ renderAll();
     f.value=v;f.dispatchEvent(new Event(f.tagName==='SELECT'?'change':'input',{bubbles:true}));}
   function stamp(){const d=new Date();
     setField('date',(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2));
-    setField('start',d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}));}
+    /* v21.33 (T): the field is a time picker, so the stamp is HH:MM */
+    setField('start',String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'));}
   function lock(on){LOCK.forEach(k=>{const s=document.querySelector('[data-m="'+k+'"]');if(s){s.disabled=on;s.title=on?'Reset the timer to change this':'';}});}
   function startPause(){
     if(T.state==='run'){T.acc=elapsed();T.state='pause';stopLoops();unsched();wakeOff();note('Paused at '+up(T.acc)+'. The clock is stopped; press Resume to go on.');paintGrid();return;}
