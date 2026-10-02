@@ -3415,3 +3415,604 @@ notes.
 
 Other changes: the index lists 35 forms; `tools/build-rps.py` and
 `tools/build-single.py` expect 35; both editions rebuilt.
+
+## Seven New Forms, SM-1 Rebuilt, and the Pictogram Library (v21.30)
+
+This version adds seven forms (42 in all), rebuilds Form SM-1 with new
+systems and sheet designs, and gives the workstation a shared pictogram
+library with photo upload. The index lists SI-1 after IN-1, DA-1 after
+RA-1, SA-1 after GB-1, GC-1 and VS-1 after SR-1, HD-1 after CT-1 and
+CN-1 after PR-1; `tools/build-rps.py` and `tools/build-single.py` expect
+42 forms; both editions are rebuilt.
+
+### The pictogram library (`tools/pictos/`)
+
+`tools/pictos/pictos.json` names 227 pictograms in twelve categories
+(people, needs, personal hygiene, school, expectations, feelings, places,
+activities and rewards, communication, time and order, home and chores,
+food and drink). `build-pictos.py` builds `nbh-pictos.js` from the
+OpenMoji package (CC BY-SA 4.0, downloaded from the npm registry), plus a
+few pictograms composed from OpenMoji parts (sitting, waiting, stay in my
+area, line up, ask for help, first, then, countdown, and the hygiene items
+OpenMoji lacks). The library is concatenated in front of the form script
+when SM-1 and VS-1 are assembled (`cat tools/pictos/nbh-pictos.js
+script-main.js > script.js`), so the forms stay standalone files. Both
+forms also accept uploaded photos: a photo is resized to a thumbnail on a
+canvas and stored as a data URL inside the saved JSON, validated on load.
+A photo is the most concrete picture type and the first step of the
+picture hierarchy; the pictograms are the drawings.
+
+### SM-1 rebuilt
+
+Two new systems: the check-in / check-out card (the Behavior Education
+Program 0-1-2 daily progress report with check-in and check-out boxes,
+mentor initials, a daily goal and a home copy) and the performance count
+with a self-graph (items done or correct per timed session against a goal,
+with a bar graph the student colors). Layout options: student-size print
+(large faces and circles, big type, two pages allowed), a self-graph strip
+for the week, self-evaluation lines, a pocket card (index-card version,
+two to a page, for middle and high school), and teacher matching of the
+rubric rating (two rows of circles and a match box). The weekly contract is
+a periods-by-days grid with a numbered box per target; the rubric sheet
+prints circles 1 to 5 per period; the Self & Match sheet carries a key for
+the R R reminder marks; the interlocking sheet has an items-done column;
+the home note is a tear-off strip; the sheet prints portrait or landscape
+by style. Pictures for targets and periods come from the library or a
+photo through a picker dialog. The Teach page adds the rest of the
+self-management package (goal set with the student, self-evaluation,
+self-instruction script, self-reinforcement) and a six-step schedule for
+fading the sheet itself. The Record adds per-target percents per day, a
+thin line per target on the chart, and per-target means over the last five
+days. A new Contract page writes a contingency contract (parties, task,
+criterion, when and where, who records, the adults' commitments, reward,
+bonus, no-penalty default, renegotiation rule), checks it against Homme and
+colleagues' ten rules, and prints the signed document alone. The guide and
+reference list add the CICO literature (Crone, Hawken & Horner, 2010;
+Hawken & Horner, 2003; Todd et al., 2008; Hawken et al., 2014; Maggin et
+al., 2015; Campbell & Anderson, 2011; March & Horner, 2002), self-monitoring
+of performance and self-graphing (Harris et al., 2005; DiGangi, Maag &
+Rutherford, 1991), contracting (Homme et al., 1970; DeRisi & Butz, 1975;
+Cantrell et al., 1969; Kelley & Stokes, 1982; Miller & Kelley, 1994;
+Mruzek, Cohen & Smith, 2007; Bowman-Perrott et al., 2015), and the
+self-management package (Meichenbaum & Goodman, 1971; Cooper, Heron &
+Heward, 2020). Data model additions: `tg[].img`, `per[].img`, `fade[6]`,
+`bck[10]`, `log[].tgp`; systems `perf` and `cico`; the SR-1 token designer
+now points to TE-1 for the full economy.
+
+## Form VS-1: Visual Supports and Communication Boards (v21.30)
+
+Form VS-1 (`VS-1_Visual-Supports_v2026-10.html`) builds and prints the
+visuals a plan needs at true size (CSS inches, previewed at the printed
+size). Pages: **Board** (a communication board in the style of the school's
+boards: rows by columns, a category band top or bottom in a chosen color,
+a velcro dot in each cell, labels below or above, faded pictures when the
+card sits on top, fill-from-category, letter landscape or portrait);
+**Card sheets** (repeated picture cards for cutting at 1 to 3 inches with
+the word above or below, cut guides, a count per card and the pages
+computed); **Rule cards** (sixteen default expectations such as safe hands,
+walking feet, sitting, waiting, quiet voice, listening ears, raise my hand,
+ask for help, take a break, stay in my area, calm body, each with a short
+pre-correction sentence, printed full, half or quarter page, and an
+expectations poster of the ticked rules); **Strips and boards** (first-then,
+a vertical or horizontal visual schedule with a Done column, a choice board,
+a token board with ghosted tokens and the reward picture, a wait card with a
+countdown, a five-level feelings scale with what-I-can-do lines, and
+break/help/all-done/more cards); **Pictures** (the library by category and
+search, and the student's own photos with labels); **Guide** (PECS and
+aided AAC: Bondy & Frost, 1994; Charlop-Christy et al., 2002; Flippin et
+al., 2010; Ganz et al., 2012; activity schedules: MacDuff et al., 1993;
+Lequia et al., 2012; Knight et al., 2015; transitions: Dettmer et al., 2000;
+choice: Shogren et al., 2004; Tiger et al., 2006; precorrection: Colvin,
+Sugai & Patching, 1993; Premack, 1959; tokens: Hackenberg, 2018; delay
+tolerance: Hanley et al., 2014; the evidence-based practice review:
+Steinbrenner et al., 2020; and the feelings scale's limited evidence:
+Buron & Curtis, 2003). "Print the visuals" prints the current page's
+outputs alone, one visual per page, with the board's orientation. Data
+model: `S = {meta, chk, photos[], board[], cards[], rules[], ft[2],
+sched[], choice[], tk[2], fs[5]}`, each picture a `{k, ph, l}` triple
+(pictogram key, photo id, label); saved as `{form:'VS-1', v, S}`; files
+from other forms are refused.
+
+## Form SA-1: Skill Acquisition Data (v21.30)
+
+Form SA-1 (`SA-1_Skill-Acquisition-Data_v2026-10.html`) is the teaching
+record for one skill-acquisition goal: the goal comes from Form GB-1, the
+replacement skill from the plan on Form TD-1, the reinforcement schedule is
+named from Form SR-1, and this form holds the program description and the
+trial-by-trial or step-by-step data judged against the mastery criterion.
+It is built from parts on the CF-1 shell like PD-1, SV-1, SM-1 and SR-1.
+
+Six pages:
+
+- **Setup.** Student, program name, goal (GB-1), plan (TD-1), setting,
+  instructors with initials, dates; the target skill with its operational
+  definition, the discriminative stimulus, the response time allowed, the
+  materials and the prerequisites; the mastery criterion (percent
+  independent, consecutive sessions, instructors, settings, an optional
+  first-trial requirement) with the reason recorded; the teaching format
+  (discrete-trial, natural environment, task-analysis chaining with
+  forward, backward or total-task presentation), trials per session, the
+  prompt hierarchy (least-to-most, most-to-least, graduated guidance,
+  constant and progressive time delay), the delay, the inter-trial
+  interval, the fading rule and the probe rule; an editable table of the
+  prompt-level codes used on the sheet (I, G, V, P, F and the error code by
+  default), each marked as independent, prompted or error; the
+  error-correction procedure chosen from the procedures Carroll et al.
+  (2015) compared, the reinforcement for independent and for prompted
+  responses, the reinforcer and its source (PA-1), interspersed
+  maintenance trials, and the generalization plan. A verdict lists what is
+  still missing before two instructors can run the same trial.
+- **Trials.** Sessions as columns, trials as rows, each cell a code from
+  the hierarchy, colored by what it counts as; a date, phase (B baseline or
+  probe, T teaching, M maintenance), instructor and note per session; the
+  first trial of each session marked; footer rows for independent count,
+  percent independent, percent correct with prompts, and the first-trial
+  code; metrics; and the blank trial sheet for the clipboard with the
+  student, program, S-D, definition, error correction, reinforcement and
+  codes key printed, which "Print the trial sheet" prints alone on one
+  landscape page.
+- **Steps.** The task analysis as an editable list of steps with a status
+  per step (mastered, training step, last code); the chaining type and an
+  override for the current training step; a step-by-step record (steps as
+  rows, sessions as columns, a prompt level per step) with percent of steps
+  independent per session; metrics; and the blank task-analysis sheet,
+  printed alone by its button.
+- **Graph.** An SVG line graph of percent independent per session from the
+  trial grid or the task analysis (following the teaching format, or chosen
+  by hand), with the mastery line, dashed phase-change lines labelled
+  baseline, teaching and maintenance, the line broken at phase changes,
+  points filled green at or above criterion and hollow in baseline, an
+  optional gray line of percent correct with prompts, and the first-trial
+  code under each session. Metrics give the baseline mean, the teaching
+  mean, sessions at criterion in the window and instructors in the window.
+  The decision rules are applied and listed: mastered when the last N
+  teaching sessions are at or above the criterion with the required number
+  of distinct instructors (and independent first trials when ticked); no
+  change over the last five teaching sessions (none at criterion, less than
+  a 10-point gain from the first to the last) calls for a change of
+  procedure; three sessions under 50% correct with prompts under
+  least-to-most suggests most-to-least or a delayed prompt; a maintenance
+  session below criterion calls for boosters. All are labelled working
+  conventions. Fields record the decision, the change made and the next
+  target.
+- **Probes.** Maintenance and generalization probes with date, type, the
+  dimension changed (people, setting, materials, time of day, instruction
+  wording), the condition, trials, independent responses, percent and a
+  pass at the criterion level; the maintenance schedule and the dimensions
+  planned; metrics for maintenance probes passed and generalization
+  dimensions probed and passed; a verdict naming the failed probes and the
+  dimensions not yet probed; what happens when a probe fails; program
+  closure.
+- **Guide.** What the form builds, what the research supports, how every
+  figure is calculated, running the sheet, and the reference list.
+
+Sources: Smith (2001) and Green (2001) on discrete-trial teaching and
+stimulus control; Touchette and Howard (1984) on delayed prompting and the
+transfer of stimulus control; Libby, Weiss, Bancroft and Ahearn (2008) on
+most-to-least against least-to-most prompting; Slocum and Tiger (2011) on
+forward and backward chaining; Lerman, Dittlinger, Fentress and Lanagan
+(2011) and Cummings and Carr (2009) on trial-by-trial against first-trial
+data; Fuller and Fienup (2018) and Richling, Williams and Carr (2019) on
+mastery criteria and maintenance; Carroll, Joachim, St. Peter and Robinson
+(2015) on error-correction procedures; Stokes and Baer (1977) on
+generalization; Horner and Baer (1978) on the multiple-probe technique;
+Grow and LeBlanc (2013) on receptive-language instruction; Wolery, Ault and
+Doyle (1992) on the response-prompting procedures; and Cooper, Heron and
+Heward (2020) for definitions.
+
+Data model: `S = {meta, chk, codes, sess, steps, tas, probes}`, saved as
+`{form:'SA-1', rev:'2026-10', saved, S}`. `meta` holds every text field
+(student, program, skill, S-D, criterion, format, hierarchy, procedures,
+decisions); `chk` the checkboxes (first-trial requirement, graph options);
+`codes` the prompt-level codes `{c, label, kind}` with kind independent,
+prompted or error; `sess` the trial sessions `{date, ph, inst, tr[], note}`
+with one code per trial; `steps` the task analysis `{text}`; `tas` the
+step sessions `{date, ph, inst, lv[], note}` with one code per step; and
+`probes` `{date, type, dim, desc, n, k, note}`. Files from other forms are
+refused by name. CSV export writes one row per trial session, task-analysis
+session and probe with the codes, counts and percents. "Load simulation"
+fills a break-request (FCT) program taught by discrete trials with
+most-to-least prompting (two baseline probes, nine teaching sessions rising
+to criterion with two instructors, one maintenance session), an eight-step
+hand-washing task analysis in forward chaining, and four probes, one below
+criterion.
+
+## Form GC-1: Group Contingencies and Class-Wide Systems (v21.30)
+
+Form GC-1 (`GC-1_Group-Contingencies_v2026-10.html`) designs a class-wide
+behavior system, prints the poster the class sees, and keeps the daily
+record beside it. It is listed after SR-1 as the 36th form and is built
+from parts on the CF-1 shell like PD-1, SV-1, SM-1 and SR-1
+(`tools/new-form.py`, then polished).
+
+Six pages:
+
+- **Setup.** Class, teacher, grade, number of students, when it runs, who
+  runs it, tier, the problem as the teacher states it, students with an
+  individual plan in the room; three to five class-wide expectations
+  (positively stated, with a "looks like" line that earns a point and a
+  "does not look like" line that becomes the foul), with a verdict that
+  flags prohibitions; the baseline (measure, observer, definitions) with
+  the mean, range and suggested starting criterion computed from the phase
+  B rows on the Record; and the class reinforcer menu (activities,
+  privileges and social items by default; a verdict when everything is
+  edible).
+- **Design.** Eight arrangements chosen by radio card, each with its own
+  fields: independent, dependent (with five safeguards, four required
+  before the verdict calls it ready) and interdependent group contingencies
+  (Litow and Pumroy, 1975; with a saboteur rule); the Good Behavior Game
+  (fouls, how a team wins, timing, prize, who records, fading); CW-FIT
+  (the three skills, timer interval, points, goal, praise statement, tier
+  2 cards); randomized components and the mystery motivator (which
+  components are drawn, the jars, the chart); class-wide self-monitoring at
+  a cue; and tootling. Shared fields: direction of the criterion (ceiling
+  or floor), starting criterion, unit, period length, reward, delivery,
+  how the result is announced, what never happens; two to four teams with
+  a color each; the rule written out in plain words from the fields; a
+  verdict on the design; and the changing-criterion and fading rules
+  (tighten on 3 of 4, step, terminal value, relax on fewer than 2 of 4; a
+  four-phase table from daily and immediate to unannounced and delayed),
+  all labelled working conventions.
+- **Poster.** Three printable pages built from the sheets above: the
+  expectations, the scoreboard (teams by days with the goal row and a
+  winners row), and the rules card (the Good Behavior Game card with the
+  fouls, how to win and the prize; the rule and "how we earn" for the other
+  arrangements). "Print the poster" prints the pages alone; the ordinary
+  print button prints the whole form.
+- **Record.** One row per game period with phase (B or 1 to 4), criterion,
+  a column per team (or one for the class), the computed met column, the
+  reward and a note; baseline mean, mean with the game on, days met of the
+  last four, current criterion; a score-by-day chart (one color and marker
+  per team, the criterion as a stepped line, phase lines); and the decision
+  rules applied to the last four game days, with team-specific warnings
+  when one team keeps losing and when a reward was earned but not
+  delivered.
+- **Fidelity.** A ten-step implementation checklist for an observer
+  (expectations posted and reviewed, criterion announced, timer, points or
+  fouls recorded at once, praise with each point, no extra consequences,
+  nothing removed, scores read and winners named, reward delivered the same
+  day, data entered), the percent, a verdict at 90 and 80, and a log of
+  past observations.
+- **Guide.** What the form builds, what the research supports, how the
+  figures are calculated, ethical cautions for dependent and
+  interdependent arrangements, and the reference list.
+
+Sources: Litow and Pumroy (1975) for the three kinds; Barrish, Saunders
+and Wolf (1969), Medland and Stachnik (1972), Harris and Sherman (1973),
+Tingstrom, Sterling-Turner and Wilczynski (2006), Bowman-Perrott et al.
+(2016), Joslyn, Donaldson, Austin and Vollmer (2019), Donaldson et al.
+(2011), Lannie and McCurdy (2007), Pennington and McComas (2017), Tanol et
+al. (2010) and Wright and McCurdy (2012) on the Good Behavior Game and its
+variants; Kellam et al. (1994, 2008) and Embry (2002) on the long-term
+trial; Wills et al. (2010) and Kamps et al. (2011, 2015) on CW-FIT; Moore
+et al. (1994), Kelshaw-Levering et al. (2000) and Theodore et al. (2001)
+on randomized components and the mystery motivator; Skinner, Cashwell and
+Skinner (2000), Cihak, Kirk and Boon (2009) and Lambert et al. (2015) on
+tootling; Gresham and Gresham (1982), Stage and Quiroz (1997), Maggin et
+al. (2012) and Little, Akin-Little and O'Neill (2015) for the comparisons
+and reviews; Hartmann and Hall (1976) on the changing criterion; and
+Cooper, Heron and Heward (2020).
+
+Data model: `S = {meta, chk, type, exp[], menu[], teams[], fade[4], log[],
+fid[10], fl[]}`, saved as `{form:'GC-1', rev, saved, S}`; a log row is
+`{date, ph, crit, v[4], rw, note}`. Files from other forms are refused.
+CSV export writes the day log with a column per team. "Load simulation"
+fills a second-grade Good Behavior Game (two teams, four baseline days,
+eleven game days with the criterion stepped from 5 to 4 to 3 fouls, the
+poster, two fidelity observations).
+
+
+## Form SI-1: Student Interview, Assent and Treatment Preference (v21.30)
+
+Form SI-1 (`SI-1_Student-Interview-and-Assent_v2026-10.html`) puts the
+student's own voice into the FBA and the BIP: a functional assessment
+interview in the student's words, the student's own hypothesis for Form
+FS-1, an assent plan with a session log, a treatment preference record,
+and a one-page summary for the file. It is built from parts on the CF-1
+shell like PD-1, SV-1, SM-1 and SR-1.
+
+Five pages:
+
+- **Interview.** Who asked, where, date, length, language, whether the
+  parent is aware (IC-1), and how the student responded (spoke, pointed,
+  wrote, device, read aloud, took a break). A switch between the reading
+  version (middle and high school) and the younger-student version, which
+  shortens every question and adds a three-face scale drawn inline (no
+  images) to the questions where a feeling or a degree is asked. Nine
+  question cards in the student-assisted and student-directed interview
+  tradition: what the student likes and does well; which classes or
+  activities are hard and why (a table with too hard, too long, boring,
+  noisy, people, and the student's words; a face per row in the younger
+  version); what happens right before and what usually happens after,
+  each with a checklist of things students say, tagged with the function
+  each points to; what the student would rather do or have; what helps
+  when upset and what makes it worse; who helps; what the student wants
+  to change; a goal in the student's own words; what would be worth
+  working for. The page ends with the student's hypothesis: counts per
+  function from the tagged lines and a summary sentence labelled as the
+  student's report, written for the FS-1 student-interview field.
+- **Assent.** How assent is asked for, how sessions are explained, who
+  asks, when, and whether it covers assessment, treatment or both; assent
+  behaviors and withdrawal-of-assent behaviors defined in observable
+  terms for this student, each with an example seen; what staff do when
+  assent is withdrawn (pause, offer a choice, end the session, note it,
+  tell the BCBA, nothing is lost for saying no) with the steps in the
+  words staff will use; and an assent log (date, session, assent obtained
+  Y/N, withdrawn at minute, what was changed, note). The metrics give
+  sessions, withdrawals, the share with withdrawal (all sessions and the
+  last ten) and the review threshold; the verdict flags a share above the
+  threshold (25%, editable) or three withdrawals in a row, both labelled
+  working conventions.
+- **Preference.** The plan's components from TD-1, each with a name in
+  the student's words, the student's stated rank and comment; a
+  concurrent-chains style choice record (date, offered A, offered B,
+  chose A, B or neither, how it was shown); and the result: times
+  offered, times chosen, percent chosen, rank by choice against stated
+  rank, with a preferred component named when chosen on two thirds or
+  more of at least three offers (working convention), what the student
+  said about the plan as a whole, what was changed because of it (and
+  what could not be, with the reason), and when to repeat.
+- **Summary.** One page built from the other three: the interview
+  answers as quotes, the hard activities with their reasons, the
+  hypothesis line, the assent plan and log so far, the preference table
+  and result, and signature lines. "Print the summary page" prints it
+  alone on one Letter page; the ordinary print button prints the whole
+  form with every section open.
+- **Guide.** What the form builds, what the research supports, how the
+  figures are calculated, what keeps the interview honest, and the
+  reference list.
+
+Sources: Kern, Dunlap, Clarke and Childs (1994) for the student-assisted
+functional assessment interview and Kern, Childs, Dunlap, Clarke and Falk
+(1994) for its use in an assessment-based curricular intervention; Reed,
+Thomas, Sprague and Horner (1997) for the student-guided interview and
+student-teacher agreement; O'Neill, Albin, Storey, Horner and Sprague
+(2015) for the student-directed interview in the standard handbook;
+Dunlap et al. (1994) and Shogren, Faggella-Luby, Bae and Wehmeyer (2004)
+on choice; Hanley, Piazza, Fisher, Contrucci and Maglieri (1997) and
+Hanley, Piazza, Fisher and Maglieri (2005) on client preference between
+function-based treatment packages measured by concurrent chains; Morris,
+Detrick and Peterson (2021) on assent and withdrawal of assent; Rajaraman,
+Austin, Gover, Cammilleri, Donnelly and Hanley (2022) on trauma-informed
+behavior analysis and Rajaraman, Hanley, Gover, Staubitz, Staubitz, Simcoe
+and Metras (2022) on the enhanced choice model; the BACB (2020) Ethics
+Code on assent; Wolf (1978), Schwartz and Baer (1991) and Hanley (2010)
+on social validity from the person served; Cooper, Heron and Heward (2020)
+on the place of indirect assessment.
+
+Data model: `S = {meta, chk, iv{}, hard[], ab[], wb[], al[], pc[], pr[]}`,
+saved as `{form:'SI-1', rev, saved, S}`; `meta` holds every text field
+including the version (`ver`: read or young), `chk` the response modes,
+the before and after checklist lines and the withdrawal steps, `iv` the
+nine answers (text and face), `hard` the hard-activity rows, `ab` and `wb`
+the assent and withdrawal behaviors, `al` the assent log, `pc` the
+components and `pr` the paired choices. Files from other forms are
+refused. CSV export writes the assent log, the choice record and the
+component result. "Load simulation" fills a sixth-grader's interview, a
+twelve-session assent log with three withdrawals, and nine paired choices
+among four components.
+
+`tools/build-rps.py` and `tools/build-single.py` expect one more form; both
+editions rebuilt.
+
+## Form DA-1: Demand Assessment (v21.30)
+
+Form DA-1 (`DA-1_Demand-Assessment_v2026-10.html`) is a demand assessment
+for behavior thought to be maintained by escape: it finds out which of the
+student's demands evoke the behavior and why, so that the demand condition
+of Form EA-1 presents tasks the student actually escapes from and the
+treatment on Form TD-1 starts demand fading and task modification from the
+right place. It is built from parts on the CF-1 shell like PD-1, SV-1, SM-1
+and SR-1.
+
+Four pages:
+
+- **Inventory.** Student, target behavior, the hypothesis that sent the
+  team here, informants, who runs the sessions, and the working
+  conventions held constant across tasks: session length (5 minutes, 2 to
+  5), sessions per task (3), instruction pacing, the prompting sequence
+  (three-step vocal, model, physical guidance, as in the Iwata et al.
+  demand condition), what follows problem behavior inside a session, and
+  what counts as compliance. Then the demand inventory, drawn from the
+  schedule with the people who present the work: up to twelve tasks, each
+  with its setting and time, usual length, response effort, difficulty
+  relative to the student's skills, novelty, how it is prompted, how it is
+  presented, whether the student can do it, and the informant's 1 to 5
+  rating of how aversive it seems. A verdict counts the easy and hard
+  tasks, estimates the session time, and says what is missing (fewer than
+  two easy tasks, no hard task, tasks above skill level, novel tasks,
+  blank columns).
+- **Assessment.** The procedure in five steps, then the trial record: one
+  row per session with the task, date, minutes, instructions given and
+  complied with (compliance computed), latency in seconds to the first
+  problem behavior (blank when none), count (rate per minute computed),
+  affect on a 1 to 5 scale, and a note. "Write the alternating order"
+  appends a block-randomized sequence of sessions-per-task times tasks in
+  which no task follows itself. A per-task means table (compliance,
+  latency with no-behavior sessions floored at the session length,
+  sessions with problem behavior, rate, affect) updates as rows are typed.
+  Optional task-choice probes record which of two offered tasks the
+  student picked.
+- **Results.** Metrics, a differentiation verdict, and the ranked table
+  (by mean rate, then shorter latency, then lower compliance) with each
+  task's class: low-probability demand (problem behavior in at least half
+  the sessions or compliance at or below 40%), high-probability demand
+  (problem behavior in at most a quarter of sessions and compliance at or
+  above 80%; the 80 and 40 are Mace et al.'s 1988 cutoffs), or mixed. An
+  SVG bar chart shows rate, latency or compliance by task in rank order,
+  colored by class. Recommendations are computed: up to three tasks for
+  the EA-1 demand condition; the fading sequence for TD-1 (high-probability
+  tasks first, then mixed, with the low-probability tasks as terminal
+  steps, or a note to start from no demands when nothing qualifies);
+  candidate antecedent modifications per evocative task from its inventory
+  features and session data (easier materials or prerequisite teaching,
+  shorten the task and schedule breaks, choice and interspersal with the
+  high-probability set, pre-teaching for novel tasks, reduced response
+  effort, a change of presentation or prompt, keep as a choice option);
+  and where the informant ratings and the data disagree. "Draft the plan
+  from the results" writes a plan text for TD-1 into an editable box.
+- **Guide.** What the form builds, what the research supports, how every
+  figure is calculated (each cutoff labelled a working convention),
+  cautions, and the reference list.
+
+Sources: Roscoe, Rooker, Pence and Longworth (2009) and Call, Pabico and
+Lomas (2009) for the demand assessment and the latency measure;
+Thomason-Sassi, Iwata, Neidert and Roscoe (2011) on latency as an index of
+response strength; Weeks and Gaylord-Ross (1981) and Carr and Durand (1985)
+on task difficulty; Smith, Iwata, Goh and Shore (1995) on novelty, duration
+and pace as establishing operations; Pace et al. (1993) and Zarcone et al.
+(1994) on instructional fading; Mace et al. (1988) and Horner et al. (1991)
+on high-probability sequences and interspersed requests; Dunlap et al.
+(1991), Kern et al. (1994), Dyer, Dunlap and Winterling (1990) and Kern et
+al. (1998) on curricular revision and choice; Fisher et al. (1998) and
+McComas et al. (2000) on the form of the instruction; Vollmer, Marcus and
+Ringdahl (1995) on noncontingent escape; Geiger, Carr and LeBlanc (2010) for
+the treatment-selection model TD-1 follows; Iwata et al. (1982/1994) and
+Hanley, Iwata and McCord (2003) for the functional analysis; Cooper, Heron
+and Heward (2020).
+
+Data model: `S = {meta, tasks[], sess[], probes[]}`, saved as
+`{form:'DA-1', rev:'2026-10', saved, S}`; sessions and probes refer to tasks
+by index, and files from other forms are refused. CSV export writes the
+sessions with the computed compliance and rate, then the per-task means
+with class and rank. "Load simulation" fills six tasks from a third-grader's
+schedule, three 5-minute sessions each in alternating order over two
+mornings, ten choice probes, and the draft plan.
+
+editions to be rebuilt. These were not done in this pass.
+
+## Form HD-1: Home Data Sheets (v21.30)
+
+Form HD-1 (`HD-1_Home-Data-Sheets_v2026-10.html`) designs the data a
+family can keep at home, prints the sheets for them in large plain type,
+and takes the returned sheets back in as data. It is built from parts on
+the CF-1 shell like SM-1 and SR-1.
+
+Four pages:
+
+- **Setup.** Student, caregivers, language at home, the plan the sheets
+  serve (TD-1), the question the home data answer, dates and review. The
+  behaviors in the family's words (up to six), each with one example, one
+  non-example, the measure the family uses (tally mark, yes or no per
+  routine, minutes, or a 0 to 3 rating) and the one line from the plan that
+  says what to do when it happens. The routines of the day (morning, meals,
+  homework, bedtime, outings by default; up to ten, each on or off the
+  sheets). The steps the family runs and the skills the child uses for the
+  checklist (adult or child; one routine or every routine). Which sheets go
+  home, the ABC tick-box lists (defaults supplied), how often the sheet
+  comes back and how, who to call and when to call right away, how the
+  family was taught the sheet, and what they get back. A verdict lists what
+  is still missing before printing.
+- **Home sheets.** The sheets the family holds, generated from Setup in
+  16px sans type with every instruction on the page: a weekly tally sheet
+  (behavior by day with a row per routine, cells marked for the measure),
+  a routine checklist (Y or N per step per routine per day), an ABC note
+  sheet (tick boxes for before, the behavior, and after, with one free
+  line; three blocks per sheet by default) and a sleep log (lights out,
+  fell asleep, night wakings, wake-up, nap, notes). Each sheet has a plain
+  instruction box, a worked example row or block, the plan lines, a
+  signature line, the return instructions and the number to call. Monday
+  to Sunday, Monday to Friday, or weekends only. "Print the home sheets"
+  prints the sheets alone, portrait, one sheet per page; the ordinary print
+  prints the whole form.
+- **Entry.** One week at a time: the sheets that came back, counts of ABC
+  notes and nights logged, a note on completeness, and the week grid
+  (behavior by routine by day) typed exactly as the family marked it. Day
+  totals and week totals per behavior (sum, Y of N, minutes, or mean
+  rating), completeness (cells written over cells asked for, with a verdict
+  at 50% and 80%), a small-multiples SVG graph by day across all weeks in
+  date order with a gap for a missing day, an agreement table for days when
+  a staff observation overlapped a home one (smaller over larger, or match
+  for Y/N; mean reported against an 80% working convention), a sheets-
+  returned table by week, and rows for the decision taken and what the
+  family said (SV-1).
+- **Guide.** What the form builds, what the research supports, how the
+  figures are calculated, what keeps the sheets coming back, and the
+  reference list.
+
+The guide draws on Bearss et al. (2015) for parent training against parent
+education; Hieneman, Childs and Sergay (2006) and Lucyshyn, Dunlap and
+Albin (2002) for family positive behavior support organized by routine;
+Kazdin (2005) for parent management training's reliance on home records;
+Lerman, Swiezy, Perkins-Parks and Roane (2000) on skill type and
+instructional format in parent training; Sheridan, Kratochwill and Bergan
+(1996) for conjoint behavioral consultation; Wolf (1978) on social
+validity; and Cooper, Heron and Heward (2020) for the measurement rules.
+Every threshold on the form (50% and 80% completeness, 80% agreement, four
+behaviors at most, one practice day) is labelled a working convention.
+
+Data model: `S = {meta, chk, bh[], rt[], sk[], wk[], ag[]}` where `bh` is
+the behaviors (`name, ex, nex, ms, todo`), `rt` the routines (`label, time,
+on, note`), `sk` the checklist steps (`label, who, rt`), `wk` the weeks
+(`start, r_tally, r_check, r_abc, r_sleep, n_abc, n_sleep, note, cells{}`
+with cells keyed `b<i>_r<j>_d<k>`), and `ag` the agreement checks (`date,
+rt, bh, staff, home, note`); saved as `{form:'HD-1', rev, saved, S}`. Files
+from other forms are refused. CSV export writes the entries in long format
+(week, day, behavior, routine, value, with day totals) and the agreement
+checks. "Load simulation" fills a second-grader with three behaviors across
+five routines, four sheets, three weeks typed in and four agreement checks.
+
+## Form CN-1: Consultation and Session Notes (v21.30)
+
+Form CN-1 (`CN-1_Consultation-Notes_v2026-10.html`) is the BCBA's record of
+each school visit, consultation, training, direct session, parent meeting,
+IEP meeting, phone call or record review for one student, with a log of
+every note and the hours they add up to. It is built from parts on the CF-1
+shell like SM-1, SR-1 and HD-1.
+
+Three pages:
+
+- **Note.** The case (student, school, BCBA, the plan in force as a TD-1
+  version and date, the service agreement, the primary target and goal),
+  entered once and carried into every note. Then the editor for the current
+  note, chosen from a list with New, New like this one, and Delete: date,
+  start and end times with the duration computed, type, setting, who was
+  present, the plan in force at that visit, purpose; the data reviewed
+  (which forms and dates), the week's rate against the goal with the unit
+  and the direction of the goal and a one-line verdict (met, close within
+  25%, or not), what was seen, the TI-1 integrity score with its date and
+  the steps missed and a verdict at 90% and 80%; problems identified,
+  recommendations given, changes made to the plan and the authority for
+  them (none, within the plan's own adjustments, PR-1 team decision, IC-1
+  consent, IEP team, or recommended only), training delivered, materials
+  left; next steps each with an owner, a date and a done box; time by
+  category in minutes (observation, consultation, training, direct
+  service, meeting, documentation, travel) checked against the duration
+  within 5 minutes; signature, date signed and the date the note was
+  written. A verdict names what the note still lacks (date, times, type,
+  people, a change without its authority, recommendations without a next
+  step, a signature). Below the editor the note renders as it prints, and
+  "Print this note" prints that one note alone; the ordinary print prints
+  the whole form with the open note.
+- **Log.** Every note newest first with a search box and type and month
+  filters; a click opens the note. Metrics for the count of notes, hours
+  in all, hours this month, notes recording a plan change, and open next
+  steps with the overdue count. Hours by month and type from the computed
+  durations, with the time by category across all notes at the foot, and a
+  table of every open next step in date order flagged when overdue.
+- **Guide.** What the form keeps, what the research and the standards
+  support, how the figures are calculated, what makes a note hold up, and
+  the reference list.
+
+The guide draws on Bergan and Kratochwill (1990) for the four-stage
+consultation sequence; Sheridan, Kratochwill and Bergan (1996) for its
+conjoint form; Erchul and Martens (2010) for the evidence on school
+consultation; Noell et al. (2005) for performance feedback as the follow-up
+that sustains implementation; the Behavior Analyst Certification Board's
+(2020) Ethics Code for the documentation, record-keeping, accurate
+reporting and continual evaluation provisions; and Cooper, Heron and Heward
+(2020) for data-based decisions. The thresholds (5 minutes on the time
+check, 25% for "close" to the goal, 90% and 80% on integrity) are labelled
+working conventions.
+
+Data model: `S = {meta, notes[]}`; each note holds the editor's fields
+(`date, start, end, type, setting, present, plan, purpose, data_forms,
+data_rate, data_goal, data_unit, data_dir, observed, integ, integ_date,
+integ_note, problems, recs, changes, authority, training, materials, t_obs,
+t_cons, t_train, t_direct, t_meet, t_doc, t_travel, sig, sig_date, written`)
+and `next[]` of `{what, who, when, done}`; saved as `{form:'CN-1', rev,
+saved, S}`. Files from other forms are refused. CSV export writes one row
+per note with every field, the computed minutes and the next steps joined.
+"Load simulation" fills a case with six notes over five weeks (two
+observations with TI-1 scores, a phone call, a parent meeting, an IEP
+meeting and a consultation).

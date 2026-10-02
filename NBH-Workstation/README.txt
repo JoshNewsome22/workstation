@@ -24,7 +24,7 @@ its own Save data button.
 A ticked form you have never opened prints blank; the workstation warns you
 before that happens.
 
-If anything here misbehaves, each of the 35 forms also works on its own:
+If anything here misbehaves, each of the 42 forms also works on its own:
 double-click its file and it saves, opens and prints exactly as it does inside
 the workstation.
 
@@ -50,7 +50,7 @@ in IA-1's toolbar. Each response becomes an informant column and the worksheet
 does the scoring.
 
 One file instead of a folder: NBH-Workstation.html (RPS-Workstation.html for
-the school edition) is the whole workstation in a single file, the 35 forms
+the school edition) is the whole workstation in a single file, the 42 forms
 inside it. Keep it on the district drive and
 double-click it. Its Save case writes the case as one file of its own,
 Student.case.html, which opens the workstation with that case already in it
