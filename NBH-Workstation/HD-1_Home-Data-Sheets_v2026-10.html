@@ -1001,32 +1001,32 @@ document.addEventListener('change',e=>{const el=e.target;
 });
 let shT=0,enT=0;function renderSheetsSoon(){clearTimeout(shT);shT=setTimeout(()=>{renderSheets();renderSetup();},250);}function renderEntSoon(){clearTimeout(enT);enT=setTimeout(()=>{renderEnt();renderAg();},400);}
 $('#addB').addEventListener('click',()=>{if(S.bh.length>=6)return;S.bh.push({name:'',ex:'',nex:'',ms:'tally',todo:''});renderB();renderAg();renderEnt();renderSheets();renderSetup();});
-$('#delB').addEventListener('click',()=>{if(S.bh.length<=1)return;const r=S.bh[S.bh.length-1];if((r.name||r.ex)&&!confirm('Remove the last behavior?'))return;S.bh.pop();renderB();renderAg();renderEnt();renderSheets();renderSetup();});
+$('#delB').addEventListener('click',async ()=>{if(S.bh.length<=1)return;const r=S.bh[S.bh.length-1];if((r.name||r.ex)&&!(await nbhUI.confirm('Remove the last behavior?\nIts name, examples and the cells recorded for it are deleted.',{ok:'Remove',danger:true})))return;S.bh.pop();renderB();renderAg();renderEnt();renderSheets();renderSetup();});
 $('#addR').addEventListener('click',()=>{if(S.rt.length>=10)return;S.rt.push({label:'',time:'',on:true,note:''});renderR();renderK();renderAg();renderEnt();renderSheets();});
-$('#delR').addEventListener('click',()=>{if(S.rt.length<=1)return;const r=S.rt[S.rt.length-1];if(r.label&&!confirm('Remove the last routine?'))return;S.rt.pop();renderR();renderK();renderAg();renderEnt();renderSheets();});
+$('#delR').addEventListener('click',async ()=>{if(S.rt.length<=1)return;const r=S.rt[S.rt.length-1];if(r.label&&!(await nbhUI.confirm('Remove the last routine?\nIts label and the cells recorded for it are deleted.',{ok:'Remove',danger:true})))return;S.rt.pop();renderR();renderK();renderAg();renderEnt();renderSheets();});
 $('#addK').addEventListener('click',()=>{if(S.sk.length>=12)return;S.sk.push({label:'',who:'Adult',rt:''});renderK();renderSheets();});
-$('#delK').addEventListener('click',()=>{if(S.sk.length<=1)return;const r=S.sk[S.sk.length-1];if(r.label&&!confirm('Remove the last step?'))return;S.sk.pop();renderK();renderSheets();renderSetup();});
+$('#delK').addEventListener('click',async ()=>{if(S.sk.length<=1)return;const r=S.sk[S.sk.length-1];if(r.label&&!(await nbhUI.confirm('Remove the last step?\nThe checklist step is deleted.',{ok:'Remove',danger:true})))return;S.sk.pop();renderK();renderSheets();renderSetup();});
 $('#addAg').addEventListener('click',()=>{S.ag.push({date:'',rt:'',bh:'',staff:'',home:'',note:''});renderAg();renderAgM();});
-$('#delAg').addEventListener('click',()=>{if(!S.ag.length)return;const r=S.ag[S.ag.length-1];if((r.date||r.staff)&&!confirm('Remove the last check?'))return;S.ag.pop();renderAg();renderAgM();});
+$('#delAg').addEventListener('click',async ()=>{if(!S.ag.length)return;const r=S.ag[S.ag.length-1];if((r.date||r.staff)&&!(await nbhUI.confirm('Remove the last check?\nThe agreement check and its two counts are deleted.',{ok:'Remove',danger:true})))return;S.ag.pop();renderAg();renderAgM();});
 /* the week cells are keyed b<behavior>_r<routine>_d<day>, the checklist steps and agreement checks by routine and
    behavior index, so a deletion drops the dependent cells and re-keys the rest instead of letting them shift */
 function cellCount(part,i){let n=0;S.wk.forEach(w=>Object.keys(w.cells).forEach(k=>{const m=/^b(\d+)_r(\d+)_d\d$/.exec(k);if(m&&+m[part==='b'?1:2]===i&&String(w.cells[k]).trim()!=='')n++;}));return n;}
 function rekeyCells(part,i){S.wk.forEach(w=>{const c={};Object.keys(w.cells).forEach(k=>{const m=/^b(\d+)_r(\d+)_(d\d)$/.exec(k);if(!m){c[k]=w.cells[k];return;}let b=+m[1],r=+m[2];if(part==='b'){if(b===i)return;if(b>i)b--;}else{if(r===i)return;if(r>i)r--;}c['b'+b+'_r'+r+'_'+m[3]]=w.cells[k];});w.cells=c;});}
-function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
   if(r==='bh'){const cells=cellCount('b',i),ag=S.ag.filter(a=>String(a.bh)===String(i)).length;
-    if((row.name||row.ex||row.nex||row.todo||cells||ag)&&!confirm('Delete this behavior?'+(cells?' Its '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(ag?' '+ag+' agreement check'+(ag===1?'':'s')+' for it will be removed.':'')+(cells||ag?' Later behaviors move up.':'')))return;
+    if((row.name||row.ex||row.nex||row.todo||cells||ag)&&!(await nbhUI.confirm('Delete this behavior?'+(cells?'\nIts '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(ag?' '+ag+' agreement check'+(ag===1?'':'s')+' for it will be removed.':'')+(cells||ag?' Later behaviors move up.':''),{ok:'Delete',danger:true})))return;
     S.bh.splice(i,1);rekeyCells('b',i);S.ag=S.ag.filter(a=>String(a.bh)!==String(i));S.ag.forEach(a=>{if(a.bh!==''&&+a.bh>i)a.bh=String(+a.bh-1);});
     if(!S.bh.length)S.bh.push({name:'',ex:'',nex:'',ms:'tally',todo:''});renderB();renderAg();renderEnt();renderSheets();renderSetup();}
   else if(r==='rt'){const cells=cellCount('r',i),sk=S.sk.filter(s=>String(s.rt)===String(i)).length;
-    if((row.label||row.note||cells||sk)&&!confirm('Delete this routine?'+(cells?' Its '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(sk?' '+sk+' checklist step'+(sk===1?'':'s')+' tied to it will apply to every routine.':'')+(cells||sk?' Later routines move up.':'')))return;
+    if((row.label||row.note||cells||sk)&&!(await nbhUI.confirm('Delete this routine?'+(cells?'\nIts '+cells+' typed-in cell'+(cells===1?'':'s')+' in the week grids will be removed.':'')+(sk?' '+sk+' checklist step'+(sk===1?'':'s')+' tied to it will apply to every routine.':'')+(cells||sk?' Later routines move up.':''),{ok:'Delete',danger:true})))return;
     S.rt.splice(i,1);rekeyCells('r',i);const rk=o=>{if(o.rt===''||o.rt==null)return;const v=+o.rt;if(v===i)o.rt='';else if(v>i)o.rt=String(v-1);};S.sk.forEach(rk);S.ag.forEach(rk);
     if(!S.rt.length)S.rt.push({label:'',time:'',on:true,note:''});renderR();renderK();renderAg();renderEnt();renderSheets();renderSetup();}
-  else if(r==='sk'){if(row.label&&!confirm('Delete this row?'))return;S.sk.splice(i,1);if(!S.sk.length)S.sk.push({label:'',who:'Adult',rt:''});renderK();renderSheets();renderSetup();}
-  else if(r==='ag'){if((row.date||row.staff||row.home||row.note)&&!confirm('Delete this row?'))return;S.ag.splice(i,1);renderAg();renderAgM();}
+  else if(r==='sk'){if(row.label&&!(await nbhUI.confirm('Delete this row?\nThe checklist step it holds is deleted.',{ok:'Delete',danger:true})))return;S.sk.splice(i,1);if(!S.sk.length)S.sk.push({label:'',who:'Adult',rt:''});renderK();renderSheets();renderSetup();}
+  else if(r==='ag'){if((row.date||row.staff||row.home||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe agreement check it holds is deleted.',{ok:'Delete',danger:true})))return;S.ag.splice(i,1);renderAg();renderAgM();}
 }
 $('#wkSel').addEventListener('change',e=>{curWk=+e.target.value;bindWeek();renderEnt();});
 $('#addWk').addEventListener('click',()=>{if(S.wk.length>=26)return;S.wk.push(newWeek());curWk=S.wk.length-1;renderWkSel();bindWeek();renderEnt();});
-$('#delWk').addEventListener('click',()=>{if(S.wk.length<=1){if(confirm('Clear this week?')){S.wk[0]=newWeek();renderWkSel();bindWeek();renderEnt();}return;}if(!confirm('Remove week '+(curWk+1)+' and everything typed into it?'))return;S.wk.splice(curWk,1);curWk=Math.max(0,curWk-1);renderWkSel();bindWeek();renderEnt();});
+$('#delWk').addEventListener('click',async ()=>{if(S.wk.length<=1){if(await nbhUI.confirm('Clear this week?\nEverything typed into the week grid is removed.',{ok:'Clear',danger:true})){S.wk[0]=newWeek();renderWkSel();bindWeek();renderEnt();}return;}const k=curWk;if(!(await nbhUI.confirm('Remove week '+(k+1)+'?\nEverything typed into it is deleted.',{ok:'Remove',danger:true})))return;S.wk.splice(k,1);curWk=Math.max(0,k-1);renderWkSel();bindWeek();renderEnt();});
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
@@ -1071,11 +1071,11 @@ $('#csvBtn').addEventListener('click',()=>{
   out.push([]);out.push(['Agreement check','Date','Routine','Behavior','Staff saw','Family wrote','Agreement %','Note']);
   S.ag.forEach((r,i)=>{const a=agree(r);out.push([i+1,r.date,(S.rt[+r.rt]||{}).label||'',(S.bh[+r.bh]||{}).name||'',r.staff,r.home,a==null?'':a.toFixed(1),r.note]);});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='HD-1_home-data.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();curWk=0;renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();curWk=0;renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated family and fill every page with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated family?\nEvery page is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const mon=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)-7*n);return d;};
   const Y=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);const off=(d,k)=>{const x=new Date(d);x.setDate(x.getDate()+k);return x;};
   S=blank();curWk=0;

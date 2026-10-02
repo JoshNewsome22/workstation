@@ -899,7 +899,7 @@ function renderCodes(){
   const key=S.codes.map(c=>`<span><b>${esc(c.c)}</b>${esc(c.label)}</span>`).join('');$('#codeKey').innerHTML=key;$('#codeKey2').innerHTML=key;
 }
 $('#addCode').addEventListener('click',()=>{if(S.codes.length>=10)return;S.codes.push({c:'',label:'',kind:'pr'});renderCodes();renderGrids();});
-$('#delCode').addEventListener('click',()=>{if(S.codes.length<=2)return;const c=S.codes[S.codes.length-1];if((c.c||c.label)&&!confirm('Remove the last code?'))return;S.codes.pop();renderCodes();renderGrids();});
+$('#delCode').addEventListener('click',async ()=>{if(S.codes.length<=2)return;const c=S.codes[S.codes.length-1];if((c.c||c.label)&&!(await nbhUI.confirm('Remove the last code?\nIts letter and label are deleted from the hierarchy.',{ok:'Remove',danger:true})))return;S.codes.pop();renderCodes();renderGrids();});
 function cellSel(r,i,f,v,label){const k=kindOf(v);return `<select class="cell" data-r="${r}" data-i="${i}" data-f="${f}" aria-label="${esc(label)}"><option value=""></option>${S.codes.map(c=>`<option value="${esc(c.c)}"${c.c===v?' selected':''}>${esc(c.c)}</option>`).join('')}${v&&!S.codes.some(c=>c.c===v)?`<option value="${esc(v)}" selected>${esc(v)}</option>`:''}</select>`;}
 const kcls=v=>{const k=kindOf(v);return k?' class="k-'+k+'"':'';};
 
@@ -928,7 +928,7 @@ function renderTr(){
     <div class="metric"><b>First trial independent</b><div class="val">${f5.length?fi+' of '+f5.length:'—'}</div><div class="sub">last ${f5.length||5} sessions with a first trial scored</div></div>`;
 }
 $('#addS').addEventListener('click',()=>{if(S.sess.length>=60)return;const prev=S.sess[S.sess.length-1];S.sess.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',tr:[],note:''});renderTr();renderGraph();});
-$('#delS').addEventListener('click',()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!confirm('Remove the last session?'))return;S.sess.pop();renderTr();renderGraph();});
+$('#delS').addEventListener('click',async ()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and scores are deleted.',{ok:'Remove',danger:true})))return;S.sess.pop();renderTr();renderGraph();});
 
 /* ---------------- task analysis ---------------- */
 function renderSteps(){
@@ -951,9 +951,9 @@ function renderSteps(){
     <div class="metric"><b>Sessions</b><div class="val">${S.tas.length}</div><div class="sub">${S.tas.filter(s=>s.ph==='B').length} baseline · ${S.tas.filter(s=>s.ph==='T').length} teaching · ${S.tas.filter(s=>s.ph==='M').length} maintenance</div></div>`;
 }
 $('#addStep').addEventListener('click',()=>{if(S.steps.length>=30)return;S.steps.push({text:''});renderSteps();renderTaSheet();});
-$('#delStep').addEventListener('click',()=>{if(S.steps.length<=1)return;const s=S.steps[S.steps.length-1];if(s.text&&!confirm('Remove the last step?'))return;S.steps.pop();renderSteps();renderTaSheet();renderGraph();});
+$('#delStep').addEventListener('click',async ()=>{if(S.steps.length<=1)return;const s=S.steps[S.steps.length-1];if(s.text&&!(await nbhUI.confirm('Remove the last step?\nIts text and its scores in the task-analysis sessions are deleted.',{ok:'Remove',danger:true})))return;S.steps.pop();renderSteps();renderTaSheet();renderGraph();});
 $('#addTS').addEventListener('click',()=>{if(S.tas.length>=60)return;const prev=S.tas[S.tas.length-1];S.tas.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',lv:[],note:''});renderSteps();renderGraph();});
-$('#delTS').addEventListener('click',()=>{if(!S.tas.length)return;const s=S.tas[S.tas.length-1];if((s.date||s.lv.some(x=>x))&&!confirm('Remove the last session?'))return;S.tas.pop();renderSteps();renderGraph();});
+$('#delTS').addEventListener('click',async ()=>{if(!S.tas.length)return;const s=S.tas[S.tas.length-1];if((s.date||s.lv.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and step scores are deleted.',{ok:'Remove',danger:true})))return;S.tas.pop();renderSteps();renderGraph();});
 
 /* ---------------- probes ---------------- */
 function probeRows(){const m=mc();return S.probes.map(p=>{const n=num(p.n),k=num(p.k);const pc=n&&k!=null?k/n*100:null;return{...p,nn:n,kk:k,pc,pass:pc==null?null:pc>=m.pct};});}
@@ -978,21 +978,21 @@ function renderPr(){
   else v.innerHTML='<div class="verdict v-ok"><b>Every scored probe at or above '+m.pct+'%.</b>'+(untested.length?' Not yet probed: '+untested.join(', ')+'.':' All four dimensions probed.')+'</div>';
 }
 $('#addPr').addEventListener('click',()=>{if(S.probes.length>=60)return;S.probes.push({date:'',type:S.probes.length?'Generalization':'Maintenance',dim:'',desc:'',n:String(ntr()),k:'',note:''});renderPr();});
-$('#delPr').addEventListener('click',()=>{if(!S.probes.length)return;const p=S.probes[S.probes.length-1];if((p.date||p.k)&&!confirm('Remove the last probe?'))return;S.probes.pop();renderPr();});
-function rowDel(r,i){
+$('#delPr').addEventListener('click',async ()=>{if(!S.probes.length)return;const p=S.probes[S.probes.length-1];if((p.date||p.k)&&!(await nbhUI.confirm('Remove the last probe?\nIts date and result are deleted.',{ok:'Remove',danger:true})))return;S.probes.pop();renderPr();});
+async function rowDel(r,i){
   if(r==='codes'){const c=S.codes[i];if(!c)return;if(S.codes.length<=2){alert('The hierarchy keeps at least two codes; edit this one instead.');return;}
     const used=!!c.c&&(S.sess.some(s=>s.tr.includes(c.c))||S.tas.some(s=>s.lv.includes(c.c)));
-    if((c.c||c.label)&&!confirm('Delete this code?'+(used?' Cells scored with it keep the letter but count as prompted until a code with that letter exists again.':'')))return;
+    if((c.c||c.label)&&!(await nbhUI.confirm('Delete this code?'+(used?'\nCells scored with it keep the letter but count as prompted until a code with that letter exists again.':''),{ok:'Delete',danger:true})))return;
     S.codes.splice(i,1);renderCodes();renderGrids();}
   else if(r==='sess'||r==='tas'){const s=S[r][i];if(!s)return;const cells=(r==='sess'?s.tr:s.lv).some(x=>x);
-    if((s.date||s.note||cells)&&!confirm('Delete this session?'+(cells?' Its scores go with it; later sessions move left.':'')))return;
+    if((s.date||s.note||cells)&&!(await nbhUI.confirm('Delete this session?'+(cells?'\nIts scores go with it; later sessions move left.':''),{ok:'Delete',danger:true})))return;
     S[r].splice(i,1);if(r==='sess')renderTr();else renderSteps();renderGraph();}
   else if(r==='steps'){const s=S.steps[i];if(!s)return;const scored=S.tas.filter(t=>t.lv[i]).length;
-    if((s.text||scored)&&!confirm('Delete this step?'+(scored?' Its scores in '+scored+' task-analysis session'+(scored===1?'':'s')+' will be removed; later steps move up.':'')))return;
+    if((s.text||scored)&&!(await nbhUI.confirm('Delete this step?'+(scored?'\nIts scores in '+scored+' task-analysis session'+(scored===1?'':'s')+' will be removed; later steps move up.':''),{ok:'Delete',danger:true})))return;
     S.steps.splice(i,1);S.tas.forEach(t=>{if(t.lv.length>i)t.lv.splice(i,1);});
     const o=num(S.meta.ta_cur);if(o!=null){const k=Math.round(o)-1;if(k===i)S.meta.ta_cur='';else if(k>i)S.meta.ta_cur=String(k);$$('[data-m="ta_cur"]').forEach(x=>{x.value=S.meta.ta_cur;});}
     if(!S.steps.length)S.steps.push({text:''});renderSteps();renderTaSheet();renderGraph();}
-  else if(r==='probes'){const p=S.probes[i];if(!p)return;if((p.date||p.k||p.desc||p.note)&&!confirm('Delete this row?'))return;S.probes.splice(i,1);renderPr();}
+  else if(r==='probes'){const p=S.probes[i];if(!p)return;if((p.date||p.k||p.desc||p.note)&&!(await nbhUI.confirm('Delete this row?\nThe probe it holds is deleted.',{ok:'Delete',danger:true})))return;S.probes.splice(i,1);renderPr();}
 }
 $('#saPngBtn').addEventListener('click',()=>svgToPng($('#saPlot'),graphFile('SA-1',S.meta.client)));
 
@@ -1153,11 +1153,11 @@ $('#csvBtn').addEventListener('click',()=>{
   S.tas.forEach((s,i)=>{const x=taStats(s);out.push(['Task analysis',i+1,s.date,s.ph,s.inst,'',S.steps.map((st,k)=>s.lv[k]||'').join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),'',s.note]);});
   probeRows().forEach((p,i)=>{out.push(['Probe',i+1,p.date,p.type,p.dim,p.desc,'',p.n,p.k,p.pc==null?'':p.pc.toFixed(1),'',p.pass==null?'':p.pass?'pass':'below',p.note]);});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SA-1_'+(S.meta.program||'program').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated program and fill every page with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated program?\nEvery page is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const off=x=>{const m=x.getMonth(),d=x.getDate(),w=x.getDay(),n=Math.ceil(d/7),last=d+7>new Date(x.getFullYear(),m+1,0).getDate();
     return !(w%6)||(m===0&&(d<=2||(w===1&&n===3)))||(m===1&&w===1&&n===3)||(m===4&&w===1&&last)||(m===5&&d===19)||(m===6&&d===4)||(m===8&&w===1&&n===1)||(m===10&&(d===11||(w===4&&n===4)||(w===5&&d>=23&&d<=29)))||(m===11&&d>=24);};
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};

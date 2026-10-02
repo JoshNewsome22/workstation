@@ -890,9 +890,9 @@ function renderResults(){
   if(rec.flags.length)h+='<div class="recbox"><h4>4. Where the informants and the data disagree</h4><ul class="reclist">'+rec.flags.map(f=>'<li>'+f+'</li>').join('')+'</ul></div>';
   O.innerHTML=h;drawChart(R);
 }
-function draftPlan(){
+async function draftPlan(){
   const R=stats(),rec=recommend(R);if(!R.ranked.length){alert('There are no sessions yet; nothing to draft from.');return;}
-  if(S.meta.plan&&!confirm('Replace the plan text with a fresh draft?'))return;
+  if(S.meta.plan&&!(await nbhUI.confirm('Replace the plan text with a fresh draft?\nThe plan text already written is replaced by a draft from the results.',{ok:'Replace'})))return;
   const strip=s=>String(s).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&rsquo;|’/g,"'");
   const L=[];L.push('Demand assessment, '+(S.meta.client||'student')+(S.meta.dates?', sessions '+S.meta.dates:'')+'. '+R.ranked.length+' tasks, '+S.sess.filter(s=>s.t!=='').length+' sessions of '+sessLen()+' min. Verdict: '+strip(rec.verdict[1]));
   L.push('Demand condition (EA-1): '+(rec.fa.length?rec.fa.map(o=>strip(o.name)).join('; '):'no task qualified; see the Results sheet')+'.');
@@ -938,31 +938,31 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();}
 });
 $('#addTask').addEventListener('click',()=>{if(S.tasks.length>=12)return;S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderResultsSoon();});
-$('#delTask').addEventListener('click',()=>{if(S.tasks.length<=1)return;const i=S.tasks.length-1,used=S.sess.some(s=>String(s.t)===String(i))||S.probes.some(p=>String(p.a)===String(i)||String(p.b)===String(i));
-  if((S.tasks[i].name||used)&&!confirm('Remove the last task'+(used?' and the sessions and probes that use it':'')+'?'))return;
+$('#delTask').addEventListener('click',async ()=>{if(S.tasks.length<=1)return;const i=S.tasks.length-1,used=S.sess.some(s=>String(s.t)===String(i))||S.probes.some(p=>String(p.a)===String(i)||String(p.b)===String(i));
+  if((S.tasks[i].name||used)&&!(await nbhUI.confirm('Remove the last task?'+(used?'\nThe sessions and choice probes that use it are deleted with it.':''),{ok:'Remove',danger:true})))return;
   S.tasks.pop();S.sess=S.sess.filter(s=>String(s.t)!==String(i));S.probes=S.probes.filter(p=>String(p.a)!==String(i)&&String(p.b)!==String(i));renderTasks();renderSess();renderProbes();renderInv();renderResultsSoon();});
-$('#genOrder').addEventListener('click',()=>{const T=S.tasks.map((t,i)=>i).filter(i=>S.tasks[i].name);if(T.length<2){alert('Name at least two tasks on the Inventory sheet first.');return;}
-  if(S.sess.length&&!confirm('Add '+(T.length*nPer())+' sessions in alternating order after the existing ones?'))return;
+$('#genOrder').addEventListener('click',async ()=>{const T=S.tasks.map((t,i)=>i).filter(i=>S.tasks[i].name);if(T.length<2){alert('Name at least two tasks on the Inventory sheet first.');return;}
+  if(S.sess.length&&!(await nbhUI.confirm('Add '+(T.length*nPer())+' sessions?\nThey are added in alternating order after the existing sessions.',{ok:'Add'})))return;
   let prev=S.sess.length?S.sess[S.sess.length-1].t:null;
   for(let b=0;b<nPer();b++){const blockArr=T.slice();for(let k=blockArr.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[blockArr[k],blockArr[j]]=[blockArr[j],blockArr[k]];}
     if(String(blockArr[0])===String(prev)&&blockArr.length>1)[blockArr[0],blockArr[1]]=[blockArr[1],blockArr[0]];
     blockArr.forEach(i=>{S.sess.push(newSess(i));prev=String(i);});}
   renderSess();renderResultsSoon();});
 $('#addSess').addEventListener('click',()=>{if(S.sess.length>=200)return;S.sess.push(newSess(null));renderSess();});
-$('#delSess').addEventListener('click',()=>{if(!S.sess.length)return;const r=S.sess[S.sess.length-1];if((r.given||r.pb||r.lat)&&!confirm('Remove the last session?'))return;S.sess.pop();renderSess();renderResultsSoon();});
+$('#delSess').addEventListener('click',async ()=>{if(!S.sess.length)return;const r=S.sess[S.sess.length-1];if((r.given||r.pb||r.lat)&&!(await nbhUI.confirm('Remove the last session?\nIts task, date and scores are deleted.',{ok:'Remove',danger:true})))return;S.sess.pop();renderSess();renderResultsSoon();});
 $('#addProbe').addEventListener('click',()=>{if(S.probes.length>=60)return;S.probes.push(newProbe());renderProbes();});
 $('#delProbe').addEventListener('click',()=>{if(!S.probes.length)return;S.probes.pop();renderProbes();renderResultsSoon();});
 $('#draftPlan').addEventListener('click',draftPlan);
-function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
   if(r==='tasks'){const ns=S.sess.filter(s=>String(s.t)===String(i)).length,np=S.probes.filter(p=>String(p.a)===String(i)||String(p.b)===String(i)).length;
     const has=Object.keys(row).some(k=>row[k]);
-    if((has||ns||np)&&!confirm('Delete this task?'+(ns||np?' The '+[ns?ns+' session'+(ns===1?'':'s'):'',np?np+' choice probe'+(np===1?'':'s'):''].filter(Boolean).join(' and ')+' that use it will be deleted too; later tasks are renumbered.':'')))return;
+    if((has||ns||np)&&!(await nbhUI.confirm('Delete this task?'+(ns||np?'\nThe '+[ns?ns+' session'+(ns===1?'':'s'):'',np?np+' choice probe'+(np===1?'':'s'):''].filter(Boolean).join(' and ')+' that use it will be deleted too; later tasks are renumbered.':''),{ok:'Delete',danger:true})))return;
     S.tasks.splice(i,1);const rk=v=>v===''?'':String(+v>i?+v-1:+v);
     S.sess=S.sess.filter(s=>String(s.t)!==String(i));S.sess.forEach(s=>{s.t=rk(s.t);});
     S.probes=S.probes.filter(p=>String(p.a)!==String(i)&&String(p.b)!==String(i));S.probes.forEach(p=>{p.a=rk(p.a);p.b=rk(p.b);});
     if(!S.tasks.length)S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderMeans();renderResults();}
-  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.note)&&!confirm('Delete this row?'))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
-  else if(r==='probes'){if((row.a!==''||row.b!==''||row.pick||row.note)&&!confirm('Delete this row?'))return;S.probes.splice(i,1);renderProbes();renderMeans();renderResults();}
+  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe session it holds is deleted.',{ok:'Delete',danger:true})))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
+  else if(r==='probes'){if((row.a!==''||row.b!==''||row.pick||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe choice probe it holds is deleted.',{ok:'Delete',danger:true})))return;S.probes.splice(i,1);renderProbes();renderMeans();renderResults();}
 }
 $('#daPngBtn').addEventListener('click',()=>svgToPng($('#daChart'),graphFile('DA-1',S.meta.client)));
 
@@ -1005,11 +1005,11 @@ $('#csvBtn').addEventListener('click',()=>{
   out.push([]);out.push(['Task #','Task','Sessions','Mean compliance %','Mean latency (s)','Sessions with PB','Mean PB per min','Mean affect','Chosen','Offered','Class','Rank']);
   const R=stats();R.all.filter(o=>o.t.name||o.n).forEach(o=>out.push([o.i+1,o.name,o.n,o.comp==null?'':o.comp.toFixed(1),o.lat==null?'':o.lat.toFixed(0),o.pbN,o.rate==null?'':o.rate.toFixed(3),o.aff==null?'':o.aff.toFixed(2),o.picked,o.offered,o.cls,o.rank||'']));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='DA-1_sessions.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('inventory');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('inventory');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated demand assessment and fill every sheet with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated demand assessment?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const off=x=>{const w=x.getDay();return w===0||w===6;};
   const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
   const Y=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);},D=n=>{const d=step(n,-1);return (d.getMonth()+1)+'/'+d.getDate();};

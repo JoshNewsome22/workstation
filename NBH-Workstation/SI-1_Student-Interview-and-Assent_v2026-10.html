@@ -1074,11 +1074,11 @@ $('#addWB').addEventListener('click',addRow('wb',()=>({beh:'',ex:''}),8,renderAB
 $('#addAL').addEventListener('click',addRow('al',alRow,200,renderAL));$('#delAL').addEventListener('click',delRow('al',1,()=>{renderAL();renderAssent();renderSummary();}));
 $('#addPC').addEventListener('click',addRow('pc',()=>({name:'',words:'',rank:'',say:''}),8,()=>{renderPC();renderPR();}));$('#delPC').addEventListener('click',delRow('pc',1,()=>{renderPC();renderPR();renderPref();renderSummary();}));
 $('#addPR').addEventListener('click',addRow('pr',prRow,60,renderPR));$('#delPR').addEventListener('click',delRow('pr',1,()=>{renderPR();renderPref();renderSummary();}));
-function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
   const has={hard:x=>x.act||x.note||x.rate||['hard','long','boring','noisy','people'].some(f=>x[f]),ab:x=>x.beh||x.ex,wb:x=>x.beh||x.ex,al:x=>x.date||x.sess||x.got||x.wmin||x.changed||x.note,pc:x=>x.name||x.words||x.rank||x.say,pr:x=>x.date||x.a!==''||x.b!==''||x.chose||x.note}[r];if(!has)return;
-  let msg='Delete this row?';const n=r==='pc'?S.pr.filter(p=>String(p.a)===String(i)||String(p.b)===String(i)).length:0;
-  if(n)msg='Delete this component? '+n+' choice'+(n===1?'':'s')+' that offered it will lose that side; later components are renumbered.';
-  if((has(row)||n)&&!confirm(msg))return;S[r].splice(i,1);
+  let msg='Delete this row?\nWhat was entered in it is deleted.';const n=r==='pc'?S.pr.filter(p=>String(p.a)===String(i)||String(p.b)===String(i)).length:0;
+  if(n)msg='Delete this component?\n'+n+' choice'+(n===1?'':'s')+' that offered it will lose that side; later components are renumbered.';
+  if((has(row)||n)&&!(await nbhUI.confirm(msg,{ok:'Delete',danger:true})))return;S[r].splice(i,1);
   if(r==='pc')S.pr.forEach(p=>['a','b'].forEach(k=>{if(p[k]==='')return;const v=+p[k];if(v===i)p[k]='';else if(v>i)p[k]=String(v-1);}));
   if(!S[r].length)S[r].push({hard:hardRow,ab:()=>({beh:'',ex:''}),wb:()=>({beh:'',ex:''}),al:alRow,pc:()=>({name:'',words:'',rank:'',say:''}),pr:prRow}[r]());
   ({hard:()=>{renderHard();renderSummary();},ab:()=>{renderAB();renderSummary();},wb:()=>{renderAB();renderSummary();},al:()=>{renderAL();renderAssent();renderSummary();},pc:()=>{renderPC();renderPR();renderPref();renderSummary();},pr:()=>{renderPR();renderPref();renderSummary();}})[r]();}
@@ -1122,11 +1122,11 @@ $('#csvBtn').addEventListener('click',()=>{
   S.pr.filter(r=>r.a!==''||r.b!==''||r.chose).forEach((r,i)=>out.push(['Choice',i+1,r.date,compName(r.a),compName(r.b),r.chose,r.note,'']));
   prefStats().used.forEach((c,i)=>out.push(['Component result',i+1,'',c.name,'offered '+c.off,'chosen '+c.ch,c.p==null?'':c.p.toFixed(1)+'%','stated rank '+(c.rank==null?'':c.rank)]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SI-1_assent-and-preference.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('interview');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('interview');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated interview, assent plan and preference record? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated interview?\nThe interview, assent plan and preference record are filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const off=x=>{const m=x.getMonth(),d=x.getDate(),w=x.getDay(),n=Math.ceil(d/7),last=d+7>new Date(x.getFullYear(),m+1,0).getDate();
     return !(w%6)||(m===0&&(d<=2||(w===1&&n===3)))||(m===1&&w===1&&n===3)||(m===4&&w===1&&last)||(m===5&&d===19)||(m===6&&d===4)||(m===8&&w===1&&n===1)||(m===10&&(d===11||(w===4&&n===4)||(w===5&&d>=23&&d<=29)))||(m===11&&d>=24);};
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
