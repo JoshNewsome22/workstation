@@ -3195,3 +3195,132 @@ document while a print or the packet reads the form, so paper is unchanged.
 | The master print of all 33 forms from a case file built from every simulation | 33 sections, 547 pages, no script errors, no page bar on any page; TI-1's wider opportunity table and one SV-1 table are scaled to fit as the master print does for wide parts |
 | PR-1's Import from TI-1 through the workstation relay, with TI-1 open and its simulation loaded | 12 figures and the record written |
 | The one-file editions: PD-1, SV-1 and TD-1 opened inside each, with the page bar | pass, no script errors |
+
+## The Walkthrough Scenes Redrawn (v21.27)
+
+The six forms with a walkthrough (PA-1, RA-1, EA-1, ABC-1, AD-1 and the Delay
+Tolerance Toolkit, 50 stories between them) draw their scenes with a new engine,
+`tools/scene/scene2-core.js`, assembled into each form by
+`tools/scene/build-scene2.py` with the form's own board code (`*-boards.js`)
+and, where it needs one, an extension module (`ext-*.js`: PA-1's item row,
+plan box, tray and timer; the cropped two-person room for AD-1 and the
+toolkit). The stories themselves are unchanged: the engine reads the same
+frame objects the first one did.
+
+- **People with joints.** Each figure has a shoulder, elbow, wrist, neck and
+  hip; the hand goes where the pose says and the elbow follows by two-bone
+  inverse kinematics, so a reach is an arc and a long reach leans the body.
+  Legs sit under the table, feet on the floor; a standing student stands.
+  Faces have eyes that blink, brows, a nose and a mouth that opens to speak;
+  the gaze follows the hands or turns away.
+- **A step is choreographed**, read from the difference between one frame and
+  the next: the student picks a block from the tray, carries it over the
+  station and lets it go, and the block falls into the bin, which then shows
+  one more; an item the adult holds crosses the table and the student reaches
+  and takes it; a high five meets in the middle; the stations' labels fade
+  and return when they rotate; the tablet's screen lights and its access
+  ring runs down while the collector's screen says Access; the data
+  collector taps when the screen changes. The story player waits 3.6 s per
+  step in Play mode so a sequence finishes before the next begins.
+- **The room.** A lit wall, a baseboard and floor, a plant, a picture that
+  gives way to a speech bubble, a table with a top face and a front edge,
+  chairs, and soft shadows under people and props. Between steps the figures
+  breathe and blink, only while the scene is on screen.
+- **What does not change.** Reduced motion jumps to each step's final state
+  and nothing idles. The job-aid stills are the same first frame of each
+  step. Printing is untouched: the scenes sit in screen-only sections.
+
+### What was checked
+
+| Check | Result |
+|---|---|
+| Every story of the six forms stepped through on the new engine (50 stories), the drill scenes drawn | 0 script errors |
+| The concurrent-operants story frame by frame: the stations' counts after every step, cancelling a step mid-way, the blink loop, reduced motion | as designed |
+| The six forms printed from the stored data, against the previous run | identical apart from the date (PA-1's page 15 differs only in the competing-stimulus order, which is drawn at random when a record has none) |
+| The page bar and every view of the six forms; the walkthrough at 390px | pass |
+
+## Form SM-1: Self-Monitoring and Point Systems (v21.28)
+
+Form SM-1 (`SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html`) designs a
+self-monitoring or point system for one student and prints the sheet the
+student holds. It is the 34th form, listed after PD-1 in the workstation,
+and it is built the same way as PD-1 and SV-1: parts assembled onto the CF-1
+shell by `tools/new-form.py`, then polished.
+
+Eight pages, in the order the work happens:
+
+- **Setup.** Student and team, the readiness checks (discrimination of the
+  target from its absence, performance deficit or skill deficit, reading or
+  pictures, reinforcer assessment on PA-1 or RA-1, days of teacher-only
+  baseline, history with point systems) and a verdict that says what to teach
+  first and how much the teacher must match at the start.
+- **Targets.** Up to six target behaviors in the student's words, each with a
+  one-line cue, a picture from a built-in icon set, and a per-target goal for
+  the sheets that show one.
+- **System.** Six arrangements, chosen by radio card, each with its own
+  fields: Self & Match (Yes/No ratings, teacher match, editable 2-1-0 points,
+  text or pictorial), a self-monitoring contract (student checks, teacher
+  initials), a rubric point sheet (five editable levels, the school's 1 to 5
+  point sheet), cued intervals (self-monitoring of attention with a tactile,
+  audible, visual or silent cue, fixed or variable timing), an interlocking
+  session sheet (the school's Royal Palm manual pp. 64 to 70: items required
+  change with minutes elapsed, in either direction, with a floor and a
+  ceiling), and the school's expectations-and-earns sheet (smiley faces,
+  "2 in a row, I can earn", totals and percent per expectation, end-of-day
+  tiers). Periods or activities are a table with times and pictures.
+- **Reinforcement.** Goal as a percent of points possible with the points
+  possible and the goal number computed live; the goal sentence for the
+  sheet; the reward menu; when the reward is delivered; the match bonus;
+  what never happens (points are never removed); the home note; an optional
+  group contingency; and the changing-criterion rule (step, days to hold,
+  when to lower).
+- **Teach and fade.** Discrimination and rating practice (examples and
+  non-examples, role-play, accuracy criterion before points depend on the
+  match, rule for disagreements), the matching ladder (teacher only; every
+  period matched; half; random; spot checks; student alone, after Rhode,
+  Morgan and Young, 1983), a nine-step staff fidelity checklist that TI-1
+  can score, and the generalization and ending plan.
+- **Sheet.** The student's sheet, generated from the pages above, with the
+  date, a title, and the day's reward; a weekly layout where it fits; faces
+  and pictures when the pictorial option is on. "Print the student sheet"
+  prints the sheet alone, landscape, on one page; the ordinary print button
+  prints the whole form as every other form does.
+- **Record.** This week period by period (the grid totals and percents per
+  expectation), the day log (phase, goal, points, possible, matches, met),
+  a percent-of-points chart with phase lines, baseline mean and suggested
+  first goal, and the decision rules applied to the last five days (raise
+  on 4 of 5; lower on fewer than 2 of 5; step down the ladder when agreement
+  is under 80%; step up at 90% and 4 of 5), all labelled working conventions.
+- **Guide.** What the form builds, what the research supports, what the
+  schedule does, how the figures are calculated, what keeps a sheet honest,
+  and the reference list.
+
+The guide draws on the papers supplied with the request and on the
+literature behind them: Rhode, Morgan and Young (1983) for matching and its
+fading; Salter and Croce (2006) for Self & Match; Bulla and Frieder (2017)
+for Self & Match applied to vocal stereotypy with mixed functions; Rafferty,
+Arroyo, Ginnane and Wilczynski (2011) for cued self-monitoring of attention
+in general education and the nine planning steps; Farrell and McDougall
+(2008) for self-monitoring of pace; Craig (2010) and Ruby and DiGennaro
+Reed (2022) on the accuracy of the record; Justus, Hott and Heiniger (2023)
+on teachers self-monitoring; Hallahan, Lloyd and Stoller (1982),
+Amato-Zech, Hoff and Doepke (2006), Lloyd et al. (1989), Maag, Reid and
+DiGangi (1993), Koegel et al. (1992), Reid, Trout and Schartz (2005);
+the reviews by Briesch and Chafouleas (2009), Bruhn, McDaniel and Kreigh
+(2015), Smith et al. (2022) and Vannest et al. (2010); Ivy et al. (2017)
+and Hackenberg (2018) on token economies; Hartmann and Hall (1976) on the
+changing criterion; and, for the schedule section, Ferster and Skinner
+(1957), Berryman and Nevin (1962) on interlocking schedules, and Catania's
+(2007) table of schedule combinations. Bird et al. (2022), on psychotropic
+medication monitoring, was read and is not cited here; it belongs with
+MS-1.
+
+Data model: `S = {meta, chk, sys, tg[], per[], lv[5], lad[6], fid[9], log[],
+wk{}}`, saved as `{form:'SM-1', v, S}`; files from other forms are refused.
+CSV export writes the day log. "Fill with sample data" loads a 21-day
+example (three targets, six periods, Self & Match) that exercises every
+page.
+
+Other changes in this version: the index lists 34 forms; `tools/build-rps.py`
+and `tools/build-single.py` expect 34; the one-file editions and the RPS
+edition are rebuilt.

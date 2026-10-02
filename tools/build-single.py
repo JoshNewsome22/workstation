@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack a workstation folder into one file: index.html with the 33 forms and the two PDF-tool
+"""Pack a workstation folder into one file: index.html with the 34 forms and the two PDF-tool
 scripts inside it, gzip-compressed and base64-encoded in text blocks at the top of the body.
 
 The shared logo is kept once (every form carries it several times), the forms as JSON with the
@@ -15,8 +15,8 @@ idx = open(os.path.join(SRC, 'index.html'), encoding='utf-8').read()
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)
 m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
 files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
-if len(files) != 33:
-    sys.exit(f'expected 33 forms in index.html, found {len(files)}')
+if len(files) != 34:
+    sys.exit(f'expected 34 forms in index.html, found {len(files)}')
 forms = {}
 for fn in files:
     s = open(os.path.join(SRC, fn), encoding='utf-8').read()
