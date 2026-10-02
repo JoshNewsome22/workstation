@@ -899,7 +899,7 @@ function renderCodes(){
   const key=S.codes.map(c=>`<span><b>${esc(c.c)}</b>${esc(c.label)}</span>`).join('');$('#codeKey').innerHTML=key;$('#codeKey2').innerHTML=key;
 }
 $('#addCode').addEventListener('click',()=>{if(S.codes.length>=10)return;S.codes.push({c:'',label:'',kind:'pr'});renderCodes();renderGrids();});
-$('#delCode').addEventListener('click',()=>{if(S.codes.length<=2)return;const c=S.codes[S.codes.length-1];if((c.c||c.label)&&!confirm('Remove the last code?'))return;S.codes.pop();renderCodes();renderGrids();});
+$('#delCode').addEventListener('click',async ()=>{if(S.codes.length<=2)return;const c=S.codes[S.codes.length-1];if((c.c||c.label)&&!(await nbhUI.confirm('Remove the last code?\nIts letter and label are deleted from the hierarchy.',{ok:'Remove',danger:true})))return;S.codes.pop();renderCodes();renderGrids();});
 function cellSel(r,i,f,v,label){const k=kindOf(v);return `<select class="cell" data-r="${r}" data-i="${i}" data-f="${f}" aria-label="${esc(label)}"><option value=""></option>${S.codes.map(c=>`<option value="${esc(c.c)}"${c.c===v?' selected':''}>${esc(c.c)}</option>`).join('')}${v&&!S.codes.some(c=>c.c===v)?`<option value="${esc(v)}" selected>${esc(v)}</option>`:''}</select>`;}
 const kcls=v=>{const k=kindOf(v);return k?' class="k-'+k+'"':'';};
 
@@ -928,7 +928,7 @@ function renderTr(){
     <div class="metric"><b>First trial independent</b><div class="val">${f5.length?fi+' of '+f5.length:'—'}</div><div class="sub">last ${f5.length||5} sessions with a first trial scored</div></div>`;
 }
 $('#addS').addEventListener('click',()=>{if(S.sess.length>=60)return;const prev=S.sess[S.sess.length-1];S.sess.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',tr:[],note:''});renderTr();renderGraph();});
-$('#delS').addEventListener('click',()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!confirm('Remove the last session?'))return;S.sess.pop();renderTr();renderGraph();});
+$('#delS').addEventListener('click',async ()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and scores are deleted.',{ok:'Remove',danger:true})))return;S.sess.pop();renderTr();renderGraph();});
 
 /* ---------------- task analysis ---------------- */
 function renderSteps(){
@@ -951,9 +951,9 @@ function renderSteps(){
     <div class="metric"><b>Sessions</b><div class="val">${S.tas.length}</div><div class="sub">${S.tas.filter(s=>s.ph==='B').length} baseline · ${S.tas.filter(s=>s.ph==='T').length} teaching · ${S.tas.filter(s=>s.ph==='M').length} maintenance</div></div>`;
 }
 $('#addStep').addEventListener('click',()=>{if(S.steps.length>=30)return;S.steps.push({text:''});renderSteps();renderTaSheet();});
-$('#delStep').addEventListener('click',()=>{if(S.steps.length<=1)return;const s=S.steps[S.steps.length-1];if(s.text&&!confirm('Remove the last step?'))return;S.steps.pop();renderSteps();renderTaSheet();renderGraph();});
+$('#delStep').addEventListener('click',async ()=>{if(S.steps.length<=1)return;const s=S.steps[S.steps.length-1];if(s.text&&!(await nbhUI.confirm('Remove the last step?\nIts text and its scores in the task-analysis sessions are deleted.',{ok:'Remove',danger:true})))return;S.steps.pop();renderSteps();renderTaSheet();renderGraph();});
 $('#addTS').addEventListener('click',()=>{if(S.tas.length>=60)return;const prev=S.tas[S.tas.length-1];S.tas.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',lv:[],note:''});renderSteps();renderGraph();});
-$('#delTS').addEventListener('click',()=>{if(!S.tas.length)return;const s=S.tas[S.tas.length-1];if((s.date||s.lv.some(x=>x))&&!confirm('Remove the last session?'))return;S.tas.pop();renderSteps();renderGraph();});
+$('#delTS').addEventListener('click',async ()=>{if(!S.tas.length)return;const s=S.tas[S.tas.length-1];if((s.date||s.lv.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and step scores are deleted.',{ok:'Remove',danger:true})))return;S.tas.pop();renderSteps();renderGraph();});
 
 /* ---------------- probes ---------------- */
 function probeRows(){const m=mc();return S.probes.map(p=>{const n=num(p.n),k=num(p.k);const pc=n&&k!=null?k/n*100:null;return{...p,nn:n,kk:k,pc,pass:pc==null?null:pc>=m.pct};});}
@@ -978,21 +978,21 @@ function renderPr(){
   else v.innerHTML='<div class="verdict v-ok"><b>Every scored probe at or above '+m.pct+'%.</b>'+(untested.length?' Not yet probed: '+untested.join(', ')+'.':' All four dimensions probed.')+'</div>';
 }
 $('#addPr').addEventListener('click',()=>{if(S.probes.length>=60)return;S.probes.push({date:'',type:S.probes.length?'Generalization':'Maintenance',dim:'',desc:'',n:String(ntr()),k:'',note:''});renderPr();});
-$('#delPr').addEventListener('click',()=>{if(!S.probes.length)return;const p=S.probes[S.probes.length-1];if((p.date||p.k)&&!confirm('Remove the last probe?'))return;S.probes.pop();renderPr();});
-function rowDel(r,i){
+$('#delPr').addEventListener('click',async ()=>{if(!S.probes.length)return;const p=S.probes[S.probes.length-1];if((p.date||p.k)&&!(await nbhUI.confirm('Remove the last probe?\nIts date and result are deleted.',{ok:'Remove',danger:true})))return;S.probes.pop();renderPr();});
+async function rowDel(r,i){
   if(r==='codes'){const c=S.codes[i];if(!c)return;if(S.codes.length<=2){alert('The hierarchy keeps at least two codes; edit this one instead.');return;}
     const used=!!c.c&&(S.sess.some(s=>s.tr.includes(c.c))||S.tas.some(s=>s.lv.includes(c.c)));
-    if((c.c||c.label)&&!confirm('Delete this code?'+(used?' Cells scored with it keep the letter but count as prompted until a code with that letter exists again.':'')))return;
+    if((c.c||c.label)&&!(await nbhUI.confirm('Delete this code?'+(used?'\nCells scored with it keep the letter but count as prompted until a code with that letter exists again.':''),{ok:'Delete',danger:true})))return;
     S.codes.splice(i,1);renderCodes();renderGrids();}
   else if(r==='sess'||r==='tas'){const s=S[r][i];if(!s)return;const cells=(r==='sess'?s.tr:s.lv).some(x=>x);
-    if((s.date||s.note||cells)&&!confirm('Delete this session?'+(cells?' Its scores go with it; later sessions move left.':'')))return;
+    if((s.date||s.note||cells)&&!(await nbhUI.confirm('Delete this session?'+(cells?'\nIts scores go with it; later sessions move left.':''),{ok:'Delete',danger:true})))return;
     S[r].splice(i,1);if(r==='sess')renderTr();else renderSteps();renderGraph();}
   else if(r==='steps'){const s=S.steps[i];if(!s)return;const scored=S.tas.filter(t=>t.lv[i]).length;
-    if((s.text||scored)&&!confirm('Delete this step?'+(scored?' Its scores in '+scored+' task-analysis session'+(scored===1?'':'s')+' will be removed; later steps move up.':'')))return;
+    if((s.text||scored)&&!(await nbhUI.confirm('Delete this step?'+(scored?'\nIts scores in '+scored+' task-analysis session'+(scored===1?'':'s')+' will be removed; later steps move up.':''),{ok:'Delete',danger:true})))return;
     S.steps.splice(i,1);S.tas.forEach(t=>{if(t.lv.length>i)t.lv.splice(i,1);});
     const o=num(S.meta.ta_cur);if(o!=null){const k=Math.round(o)-1;if(k===i)S.meta.ta_cur='';else if(k>i)S.meta.ta_cur=String(k);$$('[data-m="ta_cur"]').forEach(x=>{x.value=S.meta.ta_cur;});}
     if(!S.steps.length)S.steps.push({text:''});renderSteps();renderTaSheet();renderGraph();}
-  else if(r==='probes'){const p=S.probes[i];if(!p)return;if((p.date||p.k||p.desc||p.note)&&!confirm('Delete this row?'))return;S.probes.splice(i,1);renderPr();}
+  else if(r==='probes'){const p=S.probes[i];if(!p)return;if((p.date||p.k||p.desc||p.note)&&!(await nbhUI.confirm('Delete this row?\nThe probe it holds is deleted.',{ok:'Delete',danger:true})))return;S.probes.splice(i,1);renderPr();}
 }
 $('#saPngBtn').addEventListener('click',()=>svgToPng($('#saPlot'),graphFile('SA-1',S.meta.client)));
 
@@ -1153,11 +1153,11 @@ $('#csvBtn').addEventListener('click',()=>{
   S.tas.forEach((s,i)=>{const x=taStats(s);out.push(['Task analysis',i+1,s.date,s.ph,s.inst,'',S.steps.map((st,k)=>s.lv[k]||'').join(' '),x.sc,x.ind,x.pi==null?'':x.pi.toFixed(1),x.pc==null?'':x.pc.toFixed(1),'',s.note]);});
   probeRows().forEach((p,i)=>{out.push(['Probe',i+1,p.date,p.type,p.dim,p.desc,'',p.n,p.k,p.pc==null?'':p.pc.toFixed(1),'',p.pass==null?'':p.pass?'pass':'below',p.note]);});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='SA-1_'+(S.meta.program||'program').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated program and fill every page with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated program?\nEvery page is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const off=x=>{const m=x.getMonth(),d=x.getDate(),w=x.getDay(),n=Math.ceil(d/7),last=d+7>new Date(x.getFullYear(),m+1,0).getDate();
     return !(w%6)||(m===0&&(d<=2||(w===1&&n===3)))||(m===1&&w===1&&n===3)||(m===4&&w===1&&last)||(m===5&&d===19)||(m===6&&d===4)||(m===8&&w===1&&n===1)||(m===10&&(d===11||(w===4&&n===4)||(w===5&&d>=23&&d<=29)))||(m===11&&d>=24);};
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};
@@ -2096,6 +2096,178 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     new MutationObserver(function(ms){ for (var i = 0; i < ms.length; i++) { var a = ms[i].addedNodes; for (var j = 0; j < a.length; j++) if (a[j].nodeType === 1) spell(a[j]); } })
       .observe(document.documentElement, { childList: true, subtree: true });
   } catch (e) {}
+})();
+</script>
+
+<style id="nbh-ui-css">
+/* ===== the form's own messages, touch targets and view progress (v21.34) ===== */
+/* toasts: short messages that do not stop the work */
+#nbhToasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9000;pointer-events:none;max-width:min(560px,calc(100% - 32px))}
+.nbh-toast{pointer-events:auto;background:#16242e;color:#f1f6f5;font:13.5px/1.45 var(--nbh-sans,system-ui,sans-serif);padding:10px 16px;border-radius:8px;box-shadow:0 12px 30px -12px rgba(22,36,46,.6);display:flex;gap:12px;align-items:flex-start;animation:nbhToastIn .18s ease-out}
+.nbh-toast.warn{background:#7a2e1a}
+.nbh-toast.ok{background:#1f5b3f}
+.nbh-toast button{margin-left:auto;border:0;background:transparent;color:#cfe0dd;font:inherit;cursor:pointer;padding:0 2px;line-height:1}
+@keyframes nbhToastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* the styled confirm and notice */
+#nbhUiDlg{border:1px solid #c9d4d2;border-radius:8px;padding:0;max-width:560px;width:calc(100% - 32px);font-family:var(--nbh-sans,system-ui,sans-serif);font-size:14px;color:#16242e;background:#fff;box-shadow:0 30px 70px -24px rgba(24,46,67,.55)}
+#nbhUiDlg::backdrop{background:rgba(22,36,46,.38)}
+#nbhUiDlg .u-h{padding:14px 18px 10px;font-weight:600;font-size:15.5px;line-height:1.35;font-family:var(--nbh-serif,Georgia,serif);color:#182e43}
+#nbhUiDlg .u-b{padding:0 18px 14px;line-height:1.5;white-space:pre-line;color:#2b3a44;max-height:50vh;overflow:auto}
+#nbhUiDlg .u-f{display:flex;gap:8px;justify-content:flex-end;padding:10px 18px;border-top:1px solid #e3eae8;background:#f7f9f8;border-radius:0 0 8px 8px}
+#nbhUiDlg .u-f button{font:inherit;font-size:13.5px;padding:8px 16px;min-height:40px;border:1px solid #c9d4d2;border-radius:4px;background:#fff;color:#16242e;cursor:pointer}
+#nbhUiDlg .u-f button.primary{background:#182e43;color:#fff;border-color:#182e43;font-weight:600}
+#nbhUiDlg .u-f button.danger{background:#a8321e;color:#fff;border-color:#a8321e;font-weight:600}
+@media print{#nbhToasts,#nbhUiDlg{display:none!important}}
+/* view progress: a dot after each view's name */
+#viewSeg button[data-nbh-fill]::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;border:1px solid rgba(255,255,255,.55);background:transparent}
+#viewSeg button[data-nbh-fill="part"]::after{background:#e3b341;border-color:#e3b341}
+#viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
+#viewSeg button[data-nbh-fill="none"]::after{display:none}
+/* touch: on a device without a fine pointer, the small controls grow */
+@media (pointer:coarse){
+  .rowDel,.delRow,button.rowDel{font-size:22px!important;padding:8px 12px!important;min-width:44px!important;min-height:44px!important}
+  td.nx,th.nx,table.grid.narr th.nx,table.grid.narr td.nx{width:48px!important}
+  input[type="checkbox"],input[type="radio"]{width:22px!important;height:22px!important;min-width:22px!important}
+  .checks label,.chk label{padding:6px 0!important;min-height:36px}
+  button.iv{height:36px!important}
+  .toolbar button,.toolbar select,.toolbar input{min-height:40px!important;padding-top:8px!important;padding-bottom:8px!important}
+  .sheet input:not([type="checkbox"]):not([type="radio"]),.sheet select{min-height:38px!important}
+  .sheet textarea{min-height:44px!important}
+  .sheet button,.tool,.nbh-btn{min-height:40px!important}
+  .nbh-pagenav button{min-height:44px!important}
+  #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
+}
+</style>
+<script id="nbh-ui">
+/* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
+   Until now every notice was the browser's alert() and every question its confirm(): unstyled, "this site
+   says", and on an iPad a stop to the whole screen. This block gives each form:
+     nbhUI.toast(text, {kind:'ok'|'warn'|'', ms})   a short message at the foot of the window
+     nbhUI.alert(text)                              a toast for a short message, a styled notice for a long one
+     nbhUI.confirm(text, {ok, cancel, danger})      a styled question; resolves true or false
+   window.alert is routed through nbhUI.alert, so existing calls change on their own. window.confirm stays
+   the browser's, because a synchronous answer cannot be styled; the forms' own code calls
+   nbhUI.confirm instead (await it). A test that replaces window.confirm with its own function is
+   honoured: nbhUI.confirm then returns that function's answer at once, so checks that auto-accept keep
+   working. The block also marks each view button with a dot (empty, partly filled, filled) from the
+   fields that view shows, and grows the small controls on a touch screen (the CSS above). */
+(function(){
+  var U = {}, nativeConfirm = window.confirm, nativeAlert = window.alert;
+  function q(s){ return document.querySelector(s); }
+  function host(){ var h = q('#nbhToasts'); if (!h) { h = document.createElement('div'); h.id = 'nbhToasts'; h.setAttribute('role', 'status'); h.setAttribute('aria-live', 'polite'); document.body.appendChild(h); } return h; }
+  U.toast = function(text, opt){
+    opt = opt || {}; var h = host(), t = document.createElement('div');
+    t.className = 'nbh-toast' + (opt.kind ? ' ' + opt.kind : '');
+    var s = document.createElement('span'); s.textContent = String(text); t.appendChild(s);
+    var x = document.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.innerHTML = '&times;'; t.appendChild(x);
+    var gone = function(){ if (t.parentNode) t.parentNode.removeChild(t); };
+    x.addEventListener('click', gone);
+    h.appendChild(t);
+    while (h.children.length > 3) h.removeChild(h.firstChild);
+    setTimeout(gone, opt.ms || Math.min(12000, 3500 + String(text).length * 35));
+    return t;
+  };
+  function dlg(){
+    var d = q('#nbhUiDlg');
+    if (d) return d;
+    d = document.createElement('dialog'); d.id = 'nbhUiDlg'; d.className = 'noprint';
+    d.innerHTML = '<div class="u-h" id="nbhUiH"></div><div class="u-b" id="nbhUiB"></div><div class="u-f" id="nbhUiF"></div>';
+    document.body.appendChild(d);
+    return d;
+  }
+  function split(text){
+    var s = String(text == null ? '' : text).trim(), i = s.indexOf('\n');
+    var first = i >= 0 ? s.slice(0, i).trim() : s, rest = i >= 0 ? s.slice(i + 1).trim() : '';
+    if (first.length > 120 && i < 0) { var j = first.indexOf('. '); if (j > 20 && j < 110) { rest = first.slice(j + 2); first = first.slice(0, j + 1); } }
+    return { head: first, body: rest };
+  }
+  function ask(text, opt, question){
+    opt = opt || {};
+    return new Promise(function(res){
+      var d = dlg(), p = split(text);
+      q('#nbhUiH').textContent = p.head; q('#nbhUiB').textContent = p.body; q('#nbhUiB').style.display = p.body ? '' : 'none';
+      var f = q('#nbhUiF'); f.innerHTML = '';
+      var done = function(v){ try { d.close(); } catch (e) {} res(v); };
+      if (question) { var c = document.createElement('button'); c.type = 'button'; c.textContent = opt.cancel || 'Cancel'; c.addEventListener('click', function(){ done(false); }); f.appendChild(c); }
+      var ok = document.createElement('button'); ok.type = 'button'; ok.className = opt.danger ? 'danger' : 'primary'; ok.textContent = opt.ok || (question ? 'OK' : 'OK');
+      ok.addEventListener('click', function(){ done(true); }); f.appendChild(ok);
+      d.oncancel = function(ev){ ev.preventDefault(); done(false); };
+      if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+      ok.focus();
+    });
+  }
+  U.alert = function(text){
+    var s = String(text == null ? '' : text);
+    if (s.length <= 160 && s.indexOf('\n') < 0) { U.toast(s); return Promise.resolve(); }
+    return ask(s, { ok: 'OK' }, false);
+  };
+  U.confirm = function(text, opt){
+    if (window.confirm !== nativeConfirm) { var v; try { v = !!window.confirm(String(text)); } catch (e) { v = false; } return Promise.resolve(v); }
+    return ask(text, opt || {}, true);
+  };
+  U.native = { alert: nativeAlert, confirm: nativeConfirm };
+  window.alert = function(m){ U.alert(m); };
+
+  /* ---- view progress ---- */
+  var MAP = null, timer = null;
+  function fields(root){
+    var out = [], list = root.querySelectorAll('input,select,textarea');
+    for (var i = 0; i < list.length; i++) { var e = list[i]; if (e.type === 'file' || e.type === 'hidden' || e.type === 'button' || e.type === 'submit' || e.closest('.toolbar,#nbhCaseDlg,#nbhUiDlg,.nbh-pagenav,.obr')) continue; out.push(e); }
+    return out;
+  }
+  function vis(e){ return !!(e.offsetParent || (e.getClientRects && e.getClientRects().length)); }
+  function buildMap(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll('#viewSeg button[data-view]'));
+    if (!btns.length) return null;
+    var m = {}, keys = btns.map(function(b){ return b.dataset.view; });
+    var direct = keys.every(function(k){ return document.querySelector('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]'); });
+    if (direct) {
+      keys.forEach(function(k){ var out = []; document.querySelectorAll('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]').forEach(function(s){ out = out.concat(fields(s)); }); m[k] = out; });
+      return m;
+    }
+    /* measure: each view's class on the body, in turn, and the fields it shows; fields shown by every view are shared and left out */
+    var body = document.body, was = body.className, seen = {};
+    keys.forEach(function(k){
+      var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + k); body.className = cls.join(' ');
+      var out = fields(document).filter(vis);
+      out.forEach(function(e){ seen[e.__nbhId || (e.__nbhId = Math.random().toString(36).slice(2))] = (seen[e.__nbhId] || 0) + 1; });
+      m[k] = out;
+    });
+    body.className = was;
+    keys.forEach(function(k){ m[k] = m[k].filter(function(e){ return seen[e.__nbhId] < keys.length; }); });
+    return m;
+  }
+  function filled(e){ return (e.type === 'checkbox' || e.type === 'radio') ? e.checked : !!String(e.value || '').trim(); }
+  U.progress = function(){
+    if (!MAP) MAP = buildMap();
+    if (!MAP) return null;
+    var out = {};
+    Object.keys(MAP).forEach(function(k){
+      var list = MAP[k].filter(function(e){ return e.isConnected; }), n = 0;
+      list.forEach(function(e){ if (filled(e)) n++; });
+      out[k] = { filled: n, total: list.length };
+      var b = document.querySelector('#viewSeg button[data-view="' + k + '"]');
+      if (b) {
+        var st = !list.length ? 'none' : n === 0 ? 'empty' : n >= Math.max(1, Math.round(list.length * 0.8)) ? 'done' : 'part';
+        if (b.dataset.nbhFill !== st) b.dataset.nbhFill = st;
+        var tip = list.length ? n + ' of ' + list.length + ' fields filled' : '';
+        if (b.title !== tip) b.title = tip;
+      }
+    });
+    return out;
+  };
+  U.remap = function(){ MAP = null; U.progress(); };
+  function soon(ms){ clearTimeout(timer); timer = setTimeout(function(){ try { U.progress(); } catch (e) {} }, ms || 400); }
+  document.addEventListener('input', function(){ soon(500); }, true);
+  document.addEventListener('change', function(){ soon(300); }, true);
+  var remapTimer = null, lastCount = -1;
+  function maybeRemap(){
+    clearTimeout(remapTimer);
+    remapTimer = setTimeout(function(){ var n = document.querySelectorAll('input,select,textarea').length; if (n !== lastCount) { lastCount = n; MAP = null; } try { U.progress(); } catch (e) {} }, 900);
+  }
+  try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  window.nbhUI = U;
 })();
 </script>
 

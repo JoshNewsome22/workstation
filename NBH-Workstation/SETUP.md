@@ -4353,3 +4353,105 @@ left out. `qa/bip4-test.js` checks all four (108 assertions).
 ST-1, PR-1), `qa/v2133-test.js` (MT-1, IN-1, BC-1, RM-1, DD-1, ABC-1,
 SP-1), the nine parts-form tests, `pnav-test.js` over all 42 and the
 one-file checks all pass.
+
+## Design Pass: Notices and Questions, Touch Targets, View Progress, the Folded Bar, One Toolbar (v21.34)
+
+Six design gaps found after v21.33, all about interaction rather than
+looks. The printed forms are unchanged.
+
+### Notices and questions (every form, and the shell)
+
+The browser's `alert()` and `confirm()` were the only voice the forms
+had: unstyled, "this site says" on the hosted edition, and a stop to the
+whole screen on an iPad. A shared block, `<script id="nbh-ui">` with its
+stylesheet `nbh-ui-css` (inserted before the toolbar-width style in all
+42 forms by `scratchpad/ui/patch-ui.py`, carried by the CF-1 template),
+defines `window.nbhUI`:
+
+- `nbhUI.toast(text, {kind, ms})`: a short message at the foot of the
+  window, dismissable, at most three stacked, gone after a few seconds.
+- `nbhUI.alert(text)`: a toast for a message under 160 characters on one
+  line, a styled notice dialog (title from the first line, body from the
+  rest) for a longer one. `window.alert` is routed through it, so every
+  existing alert changed on its own.
+- `nbhUI.confirm(text, {ok, cancel, danger})`: a styled question,
+  resolved true or false; the first line is the question, the rest the
+  detail; `danger` makes the OK button red. `window.confirm` stays the
+  browser's (a synchronous answer cannot be styled); every `confirm(`
+  in the forms' own code was rewritten as `await nbhUI.confirm(...)`
+  with the enclosing handler made async, the message split into
+  question and detail, and the button named for the action ("Delete",
+  "Replace", "Clear all"). A test that stubs `window.confirm` is
+  honoured: `nbhUI.confirm` returns that stub's answer at once.
+
+The shell has the same in `wsUI` (toasts under `#wsToasts`, questions in
+`#cfDlg`); its four confirms (close a form, print ticked forms that are
+not open, save a case without a name, open a case over open forms) are
+awaited, and `window.alert` is routed to toasts and notices.
+
+### Touch targets
+
+Under `@media (pointer:coarse)` the small controls grow: the row-delete
+"x" to 44 px, checkboxes and radios to 22 px, the interval cells on OB-1
+to 36 px, toolbar buttons and the page bar to 40 to 44 px, sheet inputs
+to 38 px and textareas to 44 px; in the shell, the bar, crumb and pane
+buttons to 40 px and the form-list rows to 46 px. A mouse user sees no
+change.
+
+### View progress
+
+Each View button in a form's toolbar carries a dot after its name:
+none for an empty view, amber for a partly filled one, green at 80% or
+more of its fields, hidden where the view has no fields (a guide). The
+title says "12 of 40 fields filled". The block finds a view's fields
+through `section.only-<key>`, `#panel-<key>` or `[data-panel="<key>"]`
+when every view has one, else by setting `body.view-<key>` for each
+view in turn and taking the fields it shows, leaving out fields shown by
+every view (the measurement keeps the body's other classes and runs once,
+again when the number of fields changes). Counts refresh on input.
+
+### The folded bar (index.html)
+
+Once a student is loaded (a packet, a case, a name taken from a form)
+the packet details and the case line fold to one line, `#barSum`: the
+name, ID, grade, school and BCBA, and what the case holds; `Edit
+details` opens the rows, `Done` folds them. A name typed by hand keeps
+the rows open until Done. The bar is two rows instead of four above the
+form.
+
+### One toolbar
+
+ABC-1, DD-1, VI-1, DT-1 and AD-1 carried the previous generation's
+numbered tab row and action buttons. They now have the toolbar and View
+segment the other 37 forms share, driving their existing panels
+(`data-panel` keys), with their action buttons in the Sheet actions
+group under the same ids, so the quick Save, the unload guard, the case
+picker, the page bar and the progress dots all work there too.
+
+Per form, the conversions: 107 questions on OB-1, PR-1, PA-1, CT-1,
+CR-1, TI-1, ST-1, RA-1, MT-1, CF-1, RR-1, IN-1, FS-1 and EA-1 (the
+recorders and runners re-check their state after each await, and their
+keyboard shortcuts ignore keys while a dialog is open; IN-1's role
+change asks once although a select fires input and change); 36 on
+TE-1, SP-1, RM-1, TB-1, SV-1, IC-1, DM-1, BC-1, PD-1, MS-1, EB-1, TD-1,
+IA-1 and GB-1 (SP-1's retime keeps its revert-on-cancel); 67 on the nine
+parts-built forms; 19 on the five forms that also gained the toolbar.
+A simulation's closing explanation, which was a long alert, now appears
+as the styled notice. GB-1's objective wraps carry `data-panel` keys so
+the progress dots find their fields.
+
+### Checks
+
+`qa/ui-test.js` (toasts, the notice, the question dialog and its
+answer, a stubbed confirm honoured, progress dots after a simulation,
+touch sizes), `qa/ui-sweep.js` (the dots on every form),
+`qa/shell-ui-test.js` (the shell's toasts, the close question, the bar
+fold, touch sizes), `qa/u-test.js` and `qa/u-check.js` (every form:
+simulation through the dialog, a middle row deleted through it, Cancel
+keeps the row, Clear all through it, no native dialog, no error),
+`qa/u-recorder.js` (the OB-1, EA-1, MT-1, RA-1 and TI-1 runners through
+the dialog), `qa/v2134-verify.js` (the five rebuilt toolbars), and the
+earlier checks (`all-forms-shell`, `case-test`, `ob1-split-test`,
+`guard-test`, `bip4-test`, `rowdel-test`, `v2133-test`, the form
+tests) all pass; the shell tests answer the close question through
+`#cfFoot button.danger` now.

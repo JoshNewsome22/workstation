@@ -14,5 +14,5 @@ const {chromium,BASE,wire,sleep,forms,loadSim}=require('./lib');
   if(!ok||errs.length||!r.applied)bad.push({id:f.id,ok,errs,r});
   console.log(f.id.padEnd(6),ok?'ok ':'NO ',r.out?'out':'   ',r.applied?'in ':'   ',r.rep.padEnd(50),btn.slice(0,40),errs.length?'ERR '+errs[0].slice(0,80):'');n++;
   /* close it so the shell does not hold 42 frames */
-  await page.evaluate(()=>$('#closeForm').click());await sleep(150);}
+  await page.evaluate(()=>$('#closeForm').click());await sleep(150);await page.evaluate(()=>{const b=document.querySelector('#cfFoot button.danger');if(b)b.click();});await sleep(150);}
  console.log('forms',n,'bad',JSON.stringify(bad).slice(0,600));await br.close();})();
