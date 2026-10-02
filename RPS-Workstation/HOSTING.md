@@ -1,9 +1,5 @@
 # Putting the workstation on a website
 
-*Royal Palm School edition.* It lives in its own folder, `workstation-rps`, beside the
-Newsome Behavioral Health one in `workstation`, with its own password; its autosave is
-kept apart from the other edition's. Each folder needs its own `.htaccess` (step 4).
-
 The workstation is a folder of files that run entirely in the browser. A web
 host only hands the files to the browser; nothing typed into a form is ever sent
 back to it. Hosted, the tool works exactly as it does from a folder, with two
@@ -22,9 +18,9 @@ point a subdomain at it from GoDaddy's DNS.
 ## On GoDaddy Web Hosting (cPanel)
 
 1. In cPanel, open **File Manager** and go to `public_html`.
-2. Create a folder, for example `workstation-rps`, and open it.
+2. Create a folder, for example `workstation`, and open it.
 3. **Upload** the zip, then select it and choose **Extract**. Delete the zip.
-   The files land directly in `workstation-rps` (`public_html/workstation-rps/index.html`);
+   The files land directly in `workstation` (`public_html/workstation/index.html`);
    the zip has no folder inside it, so there is nothing to move.
 4. **First time only:** turn on *Settings → Show Hidden Files*, then *+ File*,
    name it `.htaccess`, select it, *Edit*, and paste:
@@ -39,7 +35,7 @@ point a subdomain at it from GoDaddy's DNS.
    It tells browsers to check for a newer copy of each form on every visit,
    and keeps the folder out of search engines. The zip deliberately does not
    contain this file (see *Updating*).
-5. Open `https://yourdomain/workstation-rps/` (plain `http://` until the certificate
+5. Open `https://yourdomain/workstation/` (plain `http://` until the certificate
    below is in). Press **Diagnostics**: *Page origin* should show your domain,
    and *PDF tools* should say present.
 
@@ -50,7 +46,7 @@ code as text); 21.5 and later are unaffected.
 ## Two settings worth turning on
 
 **A password on the folder.** In cPanel, *Directory Privacy* → `public_html` →
-`workstation-rps` → tick *Password protect this directory*, save, then create a user
+`workstation` → tick *Password protect this directory*, save, then create a user
 below. Until a user exists nobody, including you, can open the folder. The tool
 holds no student data, but it is a working tool for your staff, and the forms
 carry your practice's clinical content. Share the one login with the people
@@ -78,11 +74,11 @@ crosses the network unencrypted.
   redirect is applied by the server before the password is asked for, so the
   login never travels over `http://`. Do not add a redirect rule to
   `.htaccess` instead: rules there run after the password prompt.
-- Check: `http://yourdomain/workstation-rps/` should jump to `https://` with a
+- Check: `http://yourdomain/workstation/` should jump to `https://` with a
   padlock before it asks for the password, and Diagnostics should show
   *Secure context* `true`.
 - If the password was ever used over plain `http://`, change it now
-  (*Directory Privacy* → `workstation-rps` → the user).
+  (*Directory Privacy* → `workstation` → the user).
 - **Before the first year ends,** decide between renewing the certificate and
   upgrading to Deluxe, whose AutoSSL removes the yearly step. Compare GoDaddy's
   prices at the time.
@@ -102,7 +98,7 @@ crosses the network unencrypted.
 
 ## Updating
 
-Upload the new zip into `workstation-rps`, **Extract** it there, and delete the
+Upload the new zip into `workstation`, **Extract** it there, and delete the
 zip. The new files replace the old ones of the same name, and that is the
 whole update. The zip holds only the workstation's own files, so it never
 touches `.htaccess` - which is where cPanel keeps the folder's password
@@ -127,6 +123,6 @@ To publish or update it: File Manager → `public_html` → **Upload**
 placeholder may be its own file in `public_html` (`default.htm`, `index.php`
 or similar); if the placeholder still shows after the upload and a hard reload,
 delete that file. Force HTTPS and the certificate already cover the page. The
-footer's *Staff sign-in* link goes to `/workstation-rps/`, which keeps its own
+footer's *Staff sign-in* link goes to `/workstation/`, which keeps its own
 password.
 
