@@ -850,11 +850,11 @@ let selT=0,outT=0;function renderNoteSelSoon(){clearTimeout(selT);selT=setTimeou
 $('#noteSel').addEventListener('change',e=>{cur=+e.target.value;renderNote();});
 $('#newNote').addEventListener('click',()=>{if(S.notes.length>=400)return;S.notes.push(newNote());cur=S.notes.length-1;renderNote();$('[data-n="date"]').focus();});
 $('#dupNote').addEventListener('click',()=>{if(S.notes.length>=400)return;const o=note(),n=newNote();['type','setting','present','plan','purpose','sig'].forEach(f=>{n[f]=o[f];});S.notes.push(n);cur=S.notes.length-1;renderNote();$('[data-n="date"]').focus();});
-$('#delNote').addEventListener('click',()=>{const n=note();if((n.date||n.observed||n.problems)&&!confirm('Delete note '+(cur+1)+' ('+(n.date||'no date')+')? This cannot be undone.'))return;S.notes.splice(cur,1);cur=Math.max(0,cur-1);renderNote();});
+$('#delNote').addEventListener('click',async ()=>{const n=note(),k=cur;if((n.date||n.observed||n.problems)&&!(await nbhUI.confirm('Delete note '+(k+1)+' ('+(n.date||'no date')+')?\nThe note and its next steps are deleted; this cannot be undone.',{ok:'Delete',danger:true})))return;S.notes.splice(k,1);cur=Math.max(0,k-1);renderNote();});
 $('#addNx').addEventListener('click',()=>{if(note().next.length>=12)return;note().next.push({what:'',who:'',when:'',done:false});renderNx();});
-$('#delNx').addEventListener('click',()=>{const nx=note().next;if(nx.length<=1)return;if(nx[nx.length-1].what&&!confirm('Remove the last step?'))return;nx.pop();renderNx();renderComputed();});
-function rowDel(r,i){
-  if(r==='nx'){const nx=note().next,st=nx[i];if(!st)return;if((st.what||st.who||st.when)&&!confirm('Delete this row?'))return;nx.splice(i,1);if(!nx.length)nx.push({what:'',who:'',when:'',done:false});renderNx();renderComputed();}
+$('#delNx').addEventListener('click',async ()=>{const nx=note().next;if(nx.length<=1)return;if(nx[nx.length-1].what&&!(await nbhUI.confirm('Remove the last step?\nThe next step, its owner and its date are deleted.',{ok:'Remove',danger:true})))return;nx.pop();renderNx();renderComputed();});
+async function rowDel(r,i){
+  if(r==='nx'){const nx=note().next,st=nx[i];if(!st)return;if((st.what||st.who||st.when)&&!(await nbhUI.confirm('Delete this row?\nThe next step it holds is deleted.',{ok:'Delete',danger:true})))return;nx.splice(i,1);if(!nx.length)nx.push({what:'',who:'',when:'',done:false});renderNx();renderComputed();}
 }
 
 /* ---------------- meta + render ---------------- */
@@ -895,11 +895,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const head=['#','Date','Start','End','Minutes','Type','Setting','Present','Plan in force','Purpose','Data reviewed','Rate','Goal','Unit','Direction','Observed','Integrity %','Integrity date','Integrity note','Problems','Recommendations','Changes','Authority','Training','Materials','Next steps','Observation min','Consultation min','Training min','Direct min','Meeting min','Documentation min','Travel min','Signed','Date signed','Written on'];
   const out=[head];noteRows().reverse().forEach(r=>{const n=r.n;out.push([r.i+1,n.date,n.start,n.end,r.dur==null?'':r.dur,n.type,n.setting,n.present,n.plan,n.purpose,n.data_forms,n.data_rate,n.data_goal,n.data_unit,n.data_dir==='up'?'higher is better':'lower is better',n.observed,n.integ,n.integ_date,n.integ_note,n.problems,n.recs,n.changes,n.authority,n.training,n.materials,n.next.filter(s=>s.what).map(s=>s.what+' ('+s.who+(s.when?', by '+s.when:'')+(s.done?', done':'')+')').join('; '),n.t_obs,n.t_cons,n.t_train,n.t_direct,n.t_meet,n.t_doc,n.t_travel,n.sig,n.sig_date,n.written]);});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='CN-1_log.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();cur=0;renderAll();setView('note');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated case with six notes over five weeks? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated case?\nSix notes over five weeks are filled in as a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const day=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-n);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);return d;};
   const Y=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);const fwd=(d,k)=>{const x=new Date(d);x.setDate(x.getDate()+k);return x;};
   S=blank();cur=0;

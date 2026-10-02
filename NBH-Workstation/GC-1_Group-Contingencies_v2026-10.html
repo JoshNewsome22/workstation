@@ -1078,24 +1078,24 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderRule();renderPoster();renderRecord();renderBase();renderL();}
 });
 $('#addE').addEventListener('click',()=>{if(S.exp.length>=5)return;S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderPoster();});
-$('#delE').addEventListener('click',()=>{if(S.exp.length<=1)return;const r=S.exp[S.exp.length-1];if((r.text||r.looks)&&!confirm('Remove the last expectation?'))return;S.exp.pop();renderE();renderExp();renderPoster();});
+$('#delE').addEventListener('click',async ()=>{if(S.exp.length<=1)return;const r=S.exp[S.exp.length-1];if((r.text||r.looks)&&!(await nbhUI.confirm('Remove the last expectation?\nIts text and examples are deleted.',{ok:'Remove',danger:true})))return;S.exp.pop();renderE();renderExp();renderPoster();});
 $('#addM').addEventListener('click',()=>{if(S.menu.length>=12)return;S.menu.push({item:'',kind:'',amt:'',how:''});renderM();renderMenu();});
-$('#delM').addEventListener('click',()=>{if(S.menu.length<=1)return;const r=S.menu[S.menu.length-1];if(r.item&&!confirm('Remove the last item?'))return;S.menu.pop();renderM();renderMenu();});
+$('#delM').addEventListener('click',async ()=>{if(S.menu.length<=1)return;const r=S.menu[S.menu.length-1];if(r.item&&!(await nbhUI.confirm('Remove the last item?\nIts name, amount and delivery are deleted from the menu.',{ok:'Remove',danger:true})))return;S.menu.pop();renderM();renderMenu();});
 $('#addTm').addEventListener('click',()=>{if(S.teams.length>=4)return;S.teams.push({name:'',members:''});renderTm();renderL();renderRule();renderPoster();renderRecord();});
-$('#delTm').addEventListener('click',()=>{if(!S.teams.length)return;const r=S.teams[S.teams.length-1];if((r.name||r.members)&&!confirm('Remove the last team? Its column on the Record is hidden, not deleted.'))return;S.teams.pop();renderTm();renderL();renderRule();renderPoster();renderRecord();});
+$('#delTm').addEventListener('click',async ()=>{if(!S.teams.length)return;const r=S.teams[S.teams.length-1];if((r.name||r.members)&&!(await nbhUI.confirm('Remove the last team?\nIts column on the Record is hidden, not deleted.',{ok:'Remove',danger:true})))return;S.teams.pop();renderTm();renderL();renderRule();renderPoster();renderRecord();});
 $('#addL').addEventListener('click',()=>{const last=S.log[S.log.length-1];const ph=last?last.ph:(S.log.length?'1':'B');S.log.push({date:'',ph,crit:ph==='B'?'':(last&&last.ph!=='B'?last.crit:S.meta.crit||''),v:['','','',''],rw:'',note:''});renderL();renderRecord();renderBase();});
-$('#delL').addEventListener('click',()=>{if(!S.log.length)return;const r=S.log[S.log.length-1];if((r.date||r.v.some(x=>x))&&!confirm('Remove the last day?'))return;S.log.pop();renderL();renderRecord();renderBase();});
+$('#delL').addEventListener('click',async ()=>{if(!S.log.length)return;const r=S.log[S.log.length-1];if((r.date||r.v.some(x=>x))&&!(await nbhUI.confirm('Remove the last day?\nIts date and scores are deleted from the Record.',{ok:'Remove',danger:true})))return;S.log.pop();renderL();renderRecord();renderBase();});
 $('#fidAdd').addEventListener('click',()=>{const f=fidStats();if(f.n===0){alert('Score at least one step first.');return;}
   S.fl.push({date:S.meta.f_date||'',who:S.meta.f_who||'',pct:String(Math.round(f.pct)),missed:f.missed.join(', ')});renderFl();});
-$('#flDel').addEventListener('click',()=>{if(!S.fl.length)return;if(!confirm('Remove the last log entry?'))return;S.fl.pop();renderFl();});
-function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
-  if(r==='exp'){if((row.text||row.looks||row.nex)&&!confirm('Delete this row?'))return;S.exp.splice(i,1);if(!S.exp.length)S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderRule();renderPoster();}
-  else if(r==='menu'){if((row.item||row.amt||row.how)&&!confirm('Delete this row?'))return;S.menu.splice(i,1);if(!S.menu.length)S.menu.push({item:'',kind:'',amt:'',how:''});renderM();renderMenu();}
+$('#flDel').addEventListener('click',async ()=>{if(!S.fl.length)return;if(!(await nbhUI.confirm('Remove the last log entry?\nThe fidelity check it holds is deleted.',{ok:'Remove',danger:true})))return;S.fl.pop();renderFl();});
+async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  if(r==='exp'){if((row.text||row.looks||row.nex)&&!(await nbhUI.confirm('Delete this row?\nThe expectation it holds is deleted.',{ok:'Delete',danger:true})))return;S.exp.splice(i,1);if(!S.exp.length)S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderRule();renderPoster();}
+  else if(r==='menu'){if((row.item||row.amt||row.how)&&!(await nbhUI.confirm('Delete this row?\nThe menu item it holds is deleted.',{ok:'Delete',danger:true})))return;S.menu.splice(i,1);if(!S.menu.length)S.menu.push({item:'',kind:'',amt:'',how:''});renderM();renderMenu();}
   else if(r==='teams'){const n=S.log.filter(x=>x.v[i]).length;
-    if((row.name||row.members||n)&&!confirm('Delete this team?'+(n?' Its scores on '+n+' day'+(n===1?'':'s')+' of the Record will be removed; later teams move left.':'')))return;
+    if((row.name||row.members||n)&&!(await nbhUI.confirm('Delete this team?'+(n?'\nIts scores on '+n+' day'+(n===1?'':'s')+' of the Record will be removed; later teams move left.':''),{ok:'Delete',danger:true})))return;
     S.teams.splice(i,1);S.log.forEach(x=>{x.v.splice(i,1);x.v.push('');});renderTm();renderL();renderRule();renderPoster();renderRecord();renderBase();}
-  else if(r==='log'){if((row.date||row.note||row.v.some(x=>x))&&!confirm('Delete this row?'))return;S.log.splice(i,1);renderL();renderRecord();renderBase();}
-  else if(r==='fl'){if(!confirm('Delete this row?'))return;S.fl.splice(i,1);renderFl();}
+  else if(r==='log'){if((row.date||row.note||row.v.some(x=>x))&&!(await nbhUI.confirm('Delete this row?\nThe day it holds is deleted from the Record.',{ok:'Delete',danger:true})))return;S.log.splice(i,1);renderL();renderRecord();renderBase();}
+  else if(r==='fl'){if(!(await nbhUI.confirm('Delete this row?\nThe fidelity check it holds is deleted.',{ok:'Delete',danger:true})))return;S.fl.splice(i,1);renderFl();}
 }
 $('#gcPngBtn').addEventListener('click',()=>svgToPng($('#logPlot'),graphFile('GC-1',S.meta.cls)));
 let poT=0;function renderPosterSoon(){clearTimeout(poT);poT=setTimeout(renderPoster,250);}
@@ -1302,11 +1302,11 @@ $('#csvBtn').addEventListener('click',()=>{
   const out=[['Day','Date','Phase','Criterion'].concat(Array.from({length:n},(_,i)=>colName(i))).concat(['Met','Reward','Note'])];
   S.log.forEach((r,i)=>{const m=rowMet(r);out.push([i+1,r.date,r.ph,r.ph==='B'?'':r.crit].concat(r.v.slice(0,n)).concat([m===true?'yes':m===false?'no':'',r.rw,r.note]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='GC-1_record.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
 /* ---------------- simulation ---------------- */
-function loadSim(){
-  if(!confirm('Load a simulated class and fill every sheet with a worked example? Anything already entered will be replaced.'))return;
+async function loadSim(){
+  if(!(await nbhUI.confirm('Load a simulated class?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const off=x=>{const m=x.getMonth(),d=x.getDate(),w=x.getDay(),n=Math.ceil(d/7),last=d+7>new Date(x.getFullYear(),m+1,0).getDate();
     return !(w%6)||(m===0&&(d<=2||(w===1&&n===3)))||(m===1&&w===1&&n===3)||(m===4&&w===1&&last)||(m===5&&d===19)||(m===6&&d===4)||(m===8&&w===1&&n===1)||(m===10&&(d===11||(w===4&&n===4)||(w===5&&d>=23&&d<=29)))||(m===11&&d>=24);};
   const fmt=d=>(d.getMonth()+1)+'/'+d.getDate();const step=(n,dir)=>{const d=new Date();d.setHours(12,0,0,0);while(off(d))d.setDate(d.getDate()-1);for(let k=n;k>0;){d.setDate(d.getDate()+dir);if(!off(d))k--;}return d;};

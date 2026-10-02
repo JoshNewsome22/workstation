@@ -1523,7 +1523,7 @@ $('#csvBtn').addEventListener('click',()=>{
   const rows=[['family','name','abbreviation','notation','one line','definition','how it is programmed','what it produces','where it has been used','what goes wrong','in a school','our use','references']];
   CAT.forEach(c=>rows.push([FAM[c.fam],c.name,c.abbr,c.nota,c.one,c.def,c.prog,c.prod,c.used,c.pit,c.ex,S.notes[c.id]||'',c.refs.map(k=>REFS[k]).join(' | ')]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv'}));a.download='SR-1_schedules-of-reinforcement.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear everything on this form (the student, the chooser answers, the design and the catalogue notes)?')){S=blank();renderAll();}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe student, the chooser answers, the design and the catalogue notes are all cleared.',{ok:'Clear all',danger:true})){S=blank();renderAll();}});
 function loadSim(){S=blank();Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'000000',date:'2026-10-02',bcba:'J. Newsome, BCBA',plan:'BIP dated 8/5/26 (Form TD-1)',setting:'Resource room, independent work',who:'Ms. Lee (teacher); Mr. Ortiz (aide)',beh:'Calling out: any vocalization above conversational volume directed at the teacher without a raised hand',alt:'Raising a hand and waiting to be called on',sr:'Teacher attention: being called on within 10 s, with a comment on the answer',func:'Attention',behs:'calling out',alts:'a raised hand',srs:'being called on',
     q_goal:'red',q_free:'free',q_func:'att',q_who:'cont',q_stage:'start',q_ext:'yes',
     ds_sel:'dro',dro_n:'24',dro_min:'60',dro_type:'whole',dro_reset:'reset',dro_share:'75',dro_step:'33',dro_term:'15',dro_crit:'80% of intervals earned on 3 consecutive days',dro_back:'fewer than 50% earned on 2 days: return to the previous interval',
@@ -1546,7 +1546,8 @@ renderAll();
 window.__nbhFactsIn=function(f){
   const m=S.meta;let n=0;const b=(f.behaviors||[])[0],a=((f.goals&&f.goals.acq)||[])[0];
   if(b){if(!m.beh){m.beh=nbhCase.line(b,true);n++;}if(!m.behs){m.behs=b.label;n++;}if(!m.alt&&b.rep){m.alt=b.rep;n++;}}
-  if(!m.alt&&a){m.alt=a.beh;n++;}
+  const rp=(f.behaviors||[]).find(x=>x.isRep);
+  if(!m.alt&&(a||rp)){m.alt=a?a.beh:rp.label;n++;}
   if(!m.func&&f.fn){const v=nbhCase.optionFor(document.querySelector('[data-m="func"]'),f.fn.key||f.fn.label);if(v){m.func=v;n++;}}
   if(!m.sr&&(f.menu||[]).length){m.sr=nbhCase.menuLine(f.menu,3)+' (Form PA-1)';n++;}
   if(n)renderAll();return {filled:n};

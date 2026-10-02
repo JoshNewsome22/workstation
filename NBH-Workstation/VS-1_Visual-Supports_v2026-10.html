@@ -860,7 +860,7 @@ function renderLib(){
 }
 $('#libCat').addEventListener('change',renderLib);$('#libQ').addEventListener('input',renderLib);
 $('#photos').addEventListener('input',e=>{const i=e.target.closest('input[data-phl]');if(i){const p=photo(i.dataset.phl);if(p)p.label=i.value.slice(0,30);}});
-$('#photos').addEventListener('click',e=>{const b=e.target.closest('button[data-phdel]');if(!b)return;if(!confirm('Remove this photo? Any visual using it loses the picture.'))return;const id=b.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['board','cards','rules','ft','sched','choice','tk','fs'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));renderAll();});
+$('#photos').addEventListener('click',async e=>{const b=e.target.closest('button[data-phdel]');if(!b)return;if(!(await nbhUI.confirm('Remove this photo?\nAny visual using it loses the picture.',{ok:'Remove',danger:true})))return;const id=b.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['board','cards','rules','ft','sched','choice','tk','fs'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));renderAll();});
 
 /* ---------------- outputs at true size ---------------- */
 function cellHtml(o,size,opt){ /* size in inches; opt: {label:'below'|'above'|'none', dot:'yes'|'small'|'no', dim, radius, border} */
@@ -914,15 +914,15 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(b_rows|b_cols|ch_n)$/.test(el.dataset.m)){ensure();renderBoardTbl();renderStripTbls();}renderOut();}});
 $('#bFill').addEventListener('click',()=>{const c=$('#bFillCat').value;const ks=KEYS.filter(k=>P[k].c===c&&!S.board.some(o=>o.k===k));let j=0;S.board.forEach(o=>{if(!(o.k||o.ph)&&j<ks.length){o.k=ks[j++];}});renderBoardTbl();renderOut();});
-$('#bClear').addEventListener('click',()=>{if(confirm('Empty every cell of the board?')){S.board.forEach(o=>{o.k='';o.ph='';o.l='';});renderBoardTbl();renderOut();}});
+$('#bClear').addEventListener('click',async ()=>{if(await nbhUI.confirm('Empty every cell of the board?\nEvery symbol, photo and label on the board is removed.',{ok:'Empty',danger:true})){S.board.forEach(o=>{o.k='';o.ph='';o.l='';});renderBoardTbl();renderOut();}});
 $('#cAdd').addEventListener('click',()=>{if(S.cards.length>=30)return;S.cards.push({k:'',ph:'',l:'',qty:'20'});renderCardsTbl();});
 $('#cDel').addEventListener('click',()=>{if(S.cards.length<=1)return;S.cards.pop();renderCardsTbl();renderOut();});
 $('#rAdd').addEventListener('click',()=>{if(S.rules.length>=24)return;S.rules.push({on:true,k:'',ph:'',l:'',say:''});renderRulesTbl();});
 $('#rDel').addEventListener('click',()=>{if(S.rules.length<=1)return;S.rules.pop();renderRulesTbl();renderOut();});
 $('#scAdd').addEventListener('click',()=>{if(S.sched.length>=14)return;S.sched.push(cello());renderStripTbls();});
 $('#scDel').addEventListener('click',()=>{if(S.sched.length<=1)return;S.sched.pop();renderStripTbls();renderOut();});
-function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched'].includes(r))return;
-  if((o.k||o.ph||o.l||o.say)&&!confirm('Delete this row?'))return;S[r].splice(i,1);
+async function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched'].includes(r))return;
+  if((o.k||o.ph||o.l||o.say)&&!(await nbhUI.confirm('Delete this row?\nWhat was entered in it is deleted.',{ok:'Delete',danger:true})))return;S[r].splice(i,1);
   if(!S[r].length)S[r].push(r==='cards'?{k:'',ph:'',l:'',qty:'20'}:r==='rules'?{on:true,k:'',ph:'',l:'',say:''}:cello());
   if(r==='cards')renderCardsTbl();else if(r==='rules')renderRulesTbl();else renderStripTbls();renderOut();}
 function renderOut(){renderBoard();renderCards();renderRules();renderStrips();}
@@ -965,8 +965,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const out=[['Visual','Position','Picture','Label','Count or note']];S.board.forEach((o,i)=>out.push(['Board',i+1,o.ph?'photo':o.k,lbl(o),'']));S.cards.forEach((o,i)=>out.push(['Card',i+1,o.ph?'photo':o.k,lbl(o),o.qty]));S.rules.forEach((o,i)=>out.push(['Rule',i+1,o.ph?'photo':o.k,o.l,o.on?o.say:'(off) '+o.say]));S.sched.forEach((o,i)=>out.push(['Schedule',i+1,o.ph?'photo':o.k,lbl(o),'']));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='VS-1_visuals.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',()=>{if(confirm('Clear every entry on this form? Unsaved work will be lost.')){S=blank();renderAll();setView('board');}});
-function loadSim(){if(!confirm('Load a simulated set of visuals? Anything already entered will be replaced.'))return;S=blank();
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('board');}});
+async function loadSim(){if(!(await nbhUI.confirm('Load a simulated set of visuals?\nEvery visual is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
   S.meta={client:'SIMULATED – Sample Student',b_title:'NEEDS',b_bandpos:'bottom',b_color:'#cfe3cf',b_rows:'3',b_cols:'4',b_page:'land',b_dot:'yes',b_label:'below',b_dim:'full',c_size:'2',c_label:'above',c_cut:'yes',c_round:'yes',r_size:'half',r_title:'Our Classroom Expectations',r_what:'both',ft_words:'yes',sc_dir:'v',sc_size:'2',sc_title:'Sam’s Schedule',ch_title:'I want…',ch_n:'4',tk_n:'5',tk_title:'I am working for…',w_n:'5',w_words:'Wait. It is coming.',fs_title:'How big is my feeling?'};
   S.chk={s_ft:true,s_sched:true,s_choice:true,s_token:true,s_wait:true,s_scale:true,s_break:true};
   ensure();['toilet','eat','drink','walk','phone','sleep','clothes','computer','doctor','family','home','help'].forEach((k,i)=>{S.board[i]=cello(k);});
