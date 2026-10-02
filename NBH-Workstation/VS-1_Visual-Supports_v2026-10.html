@@ -456,6 +456,12 @@ body.view-guide .only-board,body.view-guide .only-cards,body.view-guide .only-ru
   body.vs-out-only .out{margin:0}
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -650,7 +656,7 @@ td input,td select{max-width:100%}
       <div><label>Corner style</label><select data-m="c_round"><option value="yes">Rounded</option><option value="no">Square</option></select></div>
     </div>
     <div class="tools"><button class="tool" id="cAdd">Add a card</button><button class="tool" id="cDel">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="cTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Word on the card</th><th style="width:14%">How many</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="cTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Word on the card</th><th style="width:14%">How many</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="cardsVerdict"></div>
     <div class="out" id="cardsOut"></div>
   </section>
@@ -665,7 +671,7 @@ td input,td select{max-width:100%}
       <div><label>Print</label><select data-m="r_what"><option value="both">Cards and poster</option><option value="cards">Cards only</option><option value="poster">Poster only</option></select></div>
     </div>
     <div class="tools"><button class="tool" id="rAdd">Add a rule</button><button class="tool" id="rDel">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr><th style="width:5%">On</th><th style="width:24%">Picture</th><th style="width:24%">Rule (two or three words)</th><th>What the adult says (pre-correction)</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr><th style="width:5%">On</th><th style="width:24%">Picture</th><th style="width:24%">Rule (two or three words)</th><th>What the adult says (pre-correction)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="out" id="rulesOut"></div>
   </section>
 
@@ -695,7 +701,7 @@ td input,td select{max-width:100%}
       <div><label>Title</label><input data-m="sc_title" placeholder="My Schedule"></div>
     </div>
     <div class="tools"><button class="tool" id="scAdd">Add a step</button><button class="tool" id="scDel">Remove last</button></div>
-    <div class="grid-wrap"><table class="rt" id="scTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Label</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="scTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Label</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Choice board</h3>
     <div class="fieldgrid">
       <div><label>Header</label><input data-m="ch_title" placeholder="I want…"></div>
@@ -785,6 +791,11 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 const num=v=>{const n=parseFloat(String(v==null?'':v));return isFinite(n)?n:null;};
 const KEYS=window.NBH_PICTO_ORDER||[],P=window.NBH_PICTOS||{},CATS=window.NBH_PICTO_CATS||{};
 
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
 /* ---------------- state ---------------- */
 const RULES0=[['safehands','Safe hands','Hands to myself and gentle with things.',1],['walkingfeet','Walking feet','In the hallway we walk.',1],['sitting','Sitting','Bottom on the chair, feet on the floor.',1],['waiting','Waiting','My turn is coming. Hands in my lap.',1],['quiet','Quiet voice','Inside voice, so everyone can work.',1],['listening','Listening ears','Eyes on the speaker, mouth quiet.',0],['raisehand','Raise my hand','Hand up and wait to be called on.',0],['askhelp','Ask for help','Hand up, or the help card.',0],['takebreak','Take a break','Use the break card, then come back.',0],['stayarea','Stay in my area','In my space until the teacher says.',0],['calm','Calm body','Still body, slow breath.',0],['eyes','Eyes on the teacher','Look at the teacher when she talks.',0],['kindwords','Kind words','Say it kindly or ask for help.',0],['lineup','Line up','Walking feet to my spot in line.',0],['cleanup','Clean up','Put things back where they go.',0],['stop','Stop','Stop and look at the adult.',0]];
 const FS0=[['calmface','Calm','I am ready to learn.'],['ok','A little upset','Take three slow breaths.'],['worried','Upset','Ask for a break with my card.'],['frustrated','Very upset','Go to the calm corner; squeeze the ball.'],['angry','Too big','Get an adult. Use my words or my card.']];
@@ -832,12 +843,12 @@ function curView(){const m=/view-(\w+)/.exec(document.body.className);return m?m
 /* ---------------- tables ---------------- */
 function renderBoardTbl(){$('#bTbl tbody').innerHTML=S.board.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('board',i,o)+'</td><td><input data-r="board" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph})||'(empty cell)')+'"></td></tr>').join('');
   const sel=$('#bFillCat');if(sel&&!sel.options.length)sel.innerHTML=Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('');}
-function renderCardsTbl(){$('#cTbl tbody').innerHTML=S.cards.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('cards',i,o)+'</td><td><input data-r="cards" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td><td><input data-r="cards" data-i="'+i+'" data-f="qty" value="'+esc(o.qty)+'" style="text-align:center"></td></tr>').join('');}
-function renderRulesTbl(){$('#rTbl tbody').innerHTML=S.rules.map((o,i)=>'<tr><td class="num"><input type="checkbox" data-r="rules" data-i="'+i+'" data-f="on"'+(o.on?' checked':'')+' aria-label="Rule '+(i+1)+' on"></td><td>'+pickCell('rules',i,o)+'</td><td><input data-r="rules" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'"></td><td><input data-r="rules" data-i="'+i+'" data-f="say" value="'+esc(o.say)+'"></td></tr>').join('');}
+function renderCardsTbl(){$('#cTbl tbody').innerHTML=S.cards.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('cards',i,o)+'</td><td><input data-r="cards" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td><td><input data-r="cards" data-i="'+i+'" data-f="qty" value="'+esc(o.qty)+'" style="text-align:center"></td>'+delCell('cards',i,'card')+'</tr>').join('');}
+function renderRulesTbl(){$('#rTbl tbody').innerHTML=S.rules.map((o,i)=>'<tr><td class="num"><input type="checkbox" data-r="rules" data-i="'+i+'" data-f="on"'+(o.on?' checked':'')+' aria-label="Rule '+(i+1)+' on"></td><td>'+pickCell('rules',i,o)+'</td><td><input data-r="rules" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'"></td><td><input data-r="rules" data-i="'+i+'" data-f="say" value="'+esc(o.say)+'"></td>'+delCell('rules',i,'rule')+'</tr>').join('');}
 function renderStripTbls(){
   $('#ftFirst').outerHTML=pickCell('ft',0,S.ft[0]).replace('class="pick"','class="pick" id="ftFirst"');$('#ftThen').outerHTML=pickCell('ft',1,S.ft[1]).replace('class="pick"','class="pick" id="ftThen"');
   $('#tkPic').outerHTML=pickCell('tk',0,S.tk[0]).replace('class="pick"','class="pick" id="tkPic"');$('#tkRw').outerHTML=pickCell('tk',1,S.tk[1]).replace('class="pick"','class="pick" id="tkRw"');
-  $('#scTbl tbody').innerHTML=S.sched.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('sched',i,o)+'</td><td><input data-r="sched" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td></tr>').join('');
+  $('#scTbl tbody').innerHTML=S.sched.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('sched',i,o)+'</td><td><input data-r="sched" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td>'+delCell('sched',i,'step')+'</tr>').join('');
   const n=num(S.meta.ch_n)||4;$('#chTbl tbody').innerHTML=S.choice.slice(0,n).map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('choice',i,o)+'</td><td><input data-r="choice" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph}))+'"></td></tr>').join('');
   $('#fsTbl tbody').innerHTML=S.fs.map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell('fs',i,o)+'</td><td><input data-r="fs" data-i="'+i+'" data-f="l" value="'+esc(o.l)+'"></td><td><input data-r="fs" data-i="'+i+'" data-f="d" value="'+esc(o.d)+'"></td></tr>').join('');
 }
@@ -910,6 +921,10 @@ $('#rAdd').addEventListener('click',()=>{if(S.rules.length>=24)return;S.rules.pu
 $('#rDel').addEventListener('click',()=>{if(S.rules.length<=1)return;S.rules.pop();renderRulesTbl();renderOut();});
 $('#scAdd').addEventListener('click',()=>{if(S.sched.length>=14)return;S.sched.push(cello());renderStripTbls();});
 $('#scDel').addEventListener('click',()=>{if(S.sched.length<=1)return;S.sched.pop();renderStripTbls();renderOut();});
+function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched'].includes(r))return;
+  if((o.k||o.ph||o.l||o.say)&&!confirm('Delete this row?'))return;S[r].splice(i,1);
+  if(!S[r].length)S[r].push(r==='cards'?{k:'',ph:'',l:'',qty:'20'}:r==='rules'?{on:true,k:'',ph:'',l:'',say:''}:cello());
+  if(r==='cards')renderCardsTbl();else if(r==='rules')renderRulesTbl();else renderStripTbls();renderOut();}
 function renderOut(){renderBoard();renderCards();renderRules();renderStrips();}
 function bindMeta(){$$('[data-m]').forEach(el=>{if(S.meta[el.dataset.m]!==undefined)el.value=S.meta[el.dataset.m];else if(el.tagName==='SELECT')S.meta[el.dataset.m]=el.value;else el.value='';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
 function renderAll(){ensure();bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}

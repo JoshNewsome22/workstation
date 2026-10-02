@@ -444,6 +444,12 @@ body.view-guide .only-setup,body.view-guide .only-design,body.view-guide .only-p
   body.gc-poster-only #posterOut .po-page:first-child{break-before:auto}
 }
 
+/* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
+table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
+.rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
+.rowDel:hover{background:#fbe9e5;color:#a8321e}
+@media print{td.nx,th.nx,.rowDel{display:none}}
+
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
   --nbh-navy:#182e43; --nbh-slate:#254657; --nbh-teal:#76a2a3; --nbh-sage:#a0c9c3;
@@ -630,7 +636,7 @@ td input,td select{max-width:100%}
     <p class="hint">Three to five, each stated as what students do (not what they stop doing), in words the class can repeat. The second column is what the teacher will point to when a point is given; the third is what counts against the class, and in the Good Behavior Game it becomes the list of fouls. An expectation that begins with No, Don&rsquo;t or Stop is flagged below.</p>
     <div class="tools"><button class="tool" id="addE">Add an expectation</button><button class="tool" id="delE">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="eTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:26%">Expectation (positively stated)</th><th style="width:35%">What it looks like (earns a point)</th><th style="width:35%">What it does not look like (a foul)</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:26%">Expectation (positively stated)</th><th style="width:35%">What it looks like (earns a point)</th><th style="width:35%">What it does not look like (a foul)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="expVerdict"></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Baseline</h2>
@@ -648,7 +654,7 @@ td input,td select{max-width:100%}
     <p class="hint">Activities and privileges by default: a few minutes of free choice, a game, music during work, extra recess, a class job, the teacher doing something silly. The class votes on the menu where it can. Edibles are last and need family agreement; a prize is small enough to give daily. The menu feeds the Design sheet and the poster.</p>
     <div class="tools"><button class="tool" id="addM">Add an item</button><button class="tool" id="delM">Remove last</button></div>
     <div class="grid-wrap"><table class="rt wide" id="mTbl"><thead><tr>
-      <th style="width:4%">#</th><th style="width:36%">Item</th><th style="width:20%">Kind</th><th style="width:16%">Minutes or amount</th><th style="width:24%">How it was chosen</th></tr></thead><tbody></tbody></table></div>
+      <th style="width:4%">#</th><th style="width:36%">Item</th><th style="width:20%">Kind</th><th style="width:16%">Minutes or amount</th><th style="width:24%">How it was chosen</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div id="menuVerdict"></div>
   </section>
 
@@ -682,7 +688,7 @@ td input,td select{max-width:100%}
     <div class="only-ct for-teams"><h3>Teams</h3>
       <p class="hint">Two to four teams, mixed so each holds about the same share of the students the system is for. The team names go on the poster and the record. Leave the table empty for a whole-class arrangement without teams.</p>
       <div class="tools"><button class="tool" id="addTm">Add a team</button><button class="tool" id="delTm">Remove last</button></div>
-      <div class="grid-wrap"><table class="rt" id="tmTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Team name</th><th>Members (first names or seat rows)</th></tr></thead><tbody></tbody></table></div>
+      <div class="grid-wrap"><table class="rt" id="tmTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Team name</th><th>Members (first names or seat rows)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div class="only-ct for-indep"><h3>Independent Contingency</h3>
@@ -822,6 +828,7 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:14px">Score by Day</h3>
     <div class="legend" id="plotLegend"></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Score by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="Fouls or points per team per day with the criterion line"></svg></div>
+    <div class="tools noprint"><button class="tool" id="gcPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
     <h3 style="margin-top:14px">Decisions</h3>
     <div id="logRules"></div>
     <table class="rt" style="margin-top:10px">
@@ -846,7 +853,7 @@ td input,td select{max-width:100%}
     <div id="fidVerdict"></div>
     <div class="tools"><button class="tool" id="fidAdd">Add this observation to the fidelity log</button></div>
     <h3>Fidelity Log</h3>
-    <div class="grid-wrap"><table class="rt" id="flTbl"><thead><tr><th style="width:5%">#</th><th style="width:18%">Date</th><th style="width:22%">Observer</th><th style="width:12%">Percent</th><th>Steps missed</th></tr></thead><tbody></tbody></table></div>
+    <div class="grid-wrap"><table class="rt" id="flTbl"><thead><tr><th style="width:5%">#</th><th style="width:18%">Date</th><th style="width:22%">Observer</th><th style="width:12%">Percent</th><th>Steps missed</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="tools"><button class="tool" id="flDel">Remove last log entry</button></div>
   </section>
 
@@ -929,6 +936,20 @@ const num=v=>{const n=parseFloat(String(v==null?'':v).replace('%',''));return is
 const fmt1=v=>v==null?'—':(Math.round(v*10)/10).toString();
 const pct=v=>v==null?'—':Math.round(v)+'%';
 
+/* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
+   the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
+const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="rowDel noprint" data-del="'+r+'" data-i="'+i+'" title="Delete this '+(what||'row')+'" aria-label="Delete '+(what||'row')+' '+(i+1)+'">&times;</button></td>';
+document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[data-del]');if(!b)return;e.preventDefault();rowDel(b.dataset.del,+b.dataset.i);});
+
+/* ---- v21.33: save a graph as a PNG (the SVG serialised and drawn on a canvas at 2x) ---- */
+function graphFile(id,who){const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');return id+'_graph_'+((String(who||'').trim()||'student').replace(/\s+/g,'_').replace(/[^\w-]+/g,'').replace(/_+/g,'_')||'student')+'_'+ymd+'.png';}
+function svgToPng(svg,fname){if(!svg)return;const vb=(svg.getAttribute('viewBox')||'').split(/[\s,]+/).map(Number);const W=vb[2]||svg.clientWidth||900,H=vb[3]||svg.clientHeight||320;
+  const c=svg.cloneNode(true);c.setAttribute('width',W);c.setAttribute('height',H);c.removeAttribute('id');c.removeAttribute('class');c.removeAttribute('style');if(!c.getAttribute('font-family'))c.setAttribute('font-family','system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif');
+  const url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(c)],{type:'image/svg+xml;charset=utf-8'}));const im=new Image();
+  im.onload=()=>{const cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);URL.revokeObjectURL(url);
+    cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fname;document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),0);},'image/png');};
+  im.onerror=()=>{URL.revokeObjectURL(url);alert('The graph could not be drawn as an image.');};im.src=url;}
+
 /* ---------------- fixed text ---------------- */
 const TYPES={indep:'Independent group contingency',dep:'Dependent group contingency',interdep:'Interdependent group contingency',gbg:'The Good Behavior Game',cwfit:'CW-FIT',random:'Randomized interdependent contingency',selfmon:'Class-wide self-monitoring at a cue',tootle:'Tootling'};
 const TEAMCOL=['#1f6fa8','#c47a2c','#7b5bb5','#3c8a4a'];
@@ -995,7 +1016,7 @@ function renderE(){
   $('#eTbl tbody').innerHTML=S.exp.map((r,i)=>`<tr><td class="num">${i+1}</td>
     <td><input data-r="exp" data-i="${i}" data-f="text" value="${esc(r.text)}" placeholder="${['Hands up to talk','Stay in your seat','Hands and feet to yourself','Follow directions the first time','Use kind words'][i]||''}"></td>
     <td><input data-r="exp" data-i="${i}" data-f="looks" value="${esc(r.looks)}" placeholder="${['hand raised, voice off until called on','bottom on the chair, chair on the floor','hands on your own desk and work','started within 10 seconds','please, thank you, a compliment'][i]||''}"></td>
-    <td><input data-r="exp" data-i="${i}" data-f="nex" value="${esc(r.nex)}" placeholder="${['talking without a hand up','out of seat without permission','touching others or their things','not started after 10 seconds','name-calling, teasing'][i]||''}"></td></tr>`).join('');
+    <td><input data-r="exp" data-i="${i}" data-f="nex" value="${esc(r.nex)}" placeholder="${['talking without a hand up','out of seat without permission','touching others or their things','not started after 10 seconds','name-calling, teasing'][i]||''}"></td>${delCell('exp',i,'expectation')}</tr>`).join('');
 }
 function renderM(){
   const K=['','Activity','Privilege','Social','Tangible (not edible)','Edible (family agreement)'];
@@ -1003,19 +1024,19 @@ function renderM(){
     <td><input data-r="menu" data-i="${i}" data-f="item" value="${esc(r.item)}" placeholder="${['Five minutes of free choice','Music during independent work','Extra recess on Friday'][i]||''}"></td>
     <td><select data-r="menu" data-i="${i}" data-f="kind" aria-label="Kind of item ${i+1}">${K.map(k=>`<option value="${esc(k)}"${r.kind===k?' selected':''}>${esc(k)}</option>`).join('')}</select></td>
     <td><input data-r="menu" data-i="${i}" data-f="amt" value="${esc(r.amt)}"></td>
-    <td><input data-r="menu" data-i="${i}" data-f="how" value="${esc(r.how)}" placeholder="class vote; teacher&rsquo;s choice"></td></tr>`).join('');
+    <td><input data-r="menu" data-i="${i}" data-f="how" value="${esc(r.how)}" placeholder="class vote; teacher&rsquo;s choice"></td>${delCell('menu',i,'item')}</tr>`).join('');
 }
 function renderTm(){
   $('#tmTbl tbody').innerHTML=S.teams.map((r,i)=>`<tr><td class="num"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${TEAMCOL[i]};vertical-align:-1px"></span> ${i+1}</td>
     <td><input data-r="teams" data-i="${i}" data-f="name" value="${esc(r.name)}" placeholder="${['Blue Jays','Cardinals','Falcons','Owls'][i]}"></td>
-    <td><input data-r="teams" data-i="${i}" data-f="members" value="${esc(r.members)}" placeholder="rows 1 and 2; or the names"></td></tr>`).join('');
+    <td><input data-r="teams" data-i="${i}" data-f="members" value="${esc(r.members)}" placeholder="rows 1 and 2; or the names"></td>${delCell('teams',i,'team')}</tr>`).join('');
 }
 function renderFade(){
   $('#fadeTbl tbody').innerHTML=FADE.map((f,i)=>`<tr><td class="num">${f.ph}</td><td>${f.freq}</td><td>${f.rw}</td><td><input data-r="fade" data-i="${i}" data-f="crit" value="${esc(S.fade[i].crit)}" placeholder="${i===0?'start':i===FADE.length-1?'terminal':'stepped'}" style="text-align:center"></td><td>${f.move}</td><td><input data-r="fade" data-i="${i}" data-f="date" value="${esc(S.fade[i].date)}"></td></tr>`).join('');
 }
 function renderL(){
   const n=ncol();
-  $('#lTbl thead').innerHTML='<tr><th style="width:4%">#</th><th style="width:10%">Date</th><th style="width:8%">Phase</th><th style="width:9%">Criterion</th>'+Array.from({length:n},(_,i)=>'<th style="width:9%"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+TEAMCOL[i]+';margin-right:4px"></span>'+esc(colName(i))+'</th>').join('')+'<th style="width:7%">Met</th><th style="width:12%">Reward</th><th>Note</th></tr>';
+  $('#lTbl thead').innerHTML='<tr><th style="width:4%">#</th><th style="width:10%">Date</th><th style="width:8%">Phase</th><th style="width:9%">Criterion</th>'+Array.from({length:n},(_,i)=>'<th style="width:9%"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+TEAMCOL[i]+';margin-right:4px"></span>'+esc(colName(i))+'</th>').join('')+'<th style="width:7%">Met</th><th style="width:12%">Reward</th><th>Note</th><th class="nx noprint"></th></tr>';
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const m=rowMet(r);
     return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td>
     <td><select data-r="log" data-i="${i}" data-f="ph" aria-label="Phase on day ${i+1}">${['B','1','2','3','4'].map(p=>`<option value="${p}"${r.ph===p?' selected':''}>${p==='B'?'B (baseline)':p}</option>`).join('')}</select></td>
@@ -1023,13 +1044,13 @@ function renderL(){
     ${Array.from({length:n},(_,k)=>`<td><input data-r="log" data-i="${i}" data-f="v${k}" value="${esc(r.v[k])}" style="text-align:center" aria-label="${esc(colName(k))} on day ${i+1}"></td>`).join('')}
     <td class="met ${m===true?'y':m===false?'n':''}">${m===true?'Yes':m===false?'No':'—'}</td>
     <td><select data-r="log" data-i="${i}" data-f="rw" aria-label="Reward on day ${i+1}"><option value=""></option>${['Delivered','Not earned','Earned, not delivered'].map(o=>`<option${r.rw===o?' selected':''}>${o}</option>`).join('')}</select></td>
-    <td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td></tr>`;}).join('');
+    <td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
 }
 function renderFid(){
   $('#fidTbl tbody').innerHTML=FID.map((t,i)=>`<tr><td class="num">${i+1}</td><td>${t}</td><td><select data-r="fid" data-i="${i}" data-f="in" aria-label="Step ${i+1} seen"><option value=""></option>${['Yes','No','N/A'].map(o=>`<option${S.fid[i].in===o?' selected':''}>${o}</option>`).join('')}</select></td><td><input data-r="fid" data-i="${i}" data-f="note" value="${esc(S.fid[i].note)}"></td></tr>`).join('');
 }
 function renderFl(){
-  $('#flTbl tbody').innerHTML=S.fl.length?S.fl.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${esc(r.date)}</td><td>${esc(r.who)}</td><td class="num">${esc(r.pct)}${r.pct===''?'':'%'}</td><td>${esc(r.missed)||'none'}</td></tr>`).join(''):'<tr><td colspan="5" class="hint">No observations logged yet.</td></tr>';
+  $('#flTbl tbody').innerHTML=S.fl.length?S.fl.map((r,i)=>`<tr><td class="num">${i+1}</td><td>${esc(r.date)}</td><td>${esc(r.who)}</td><td class="num">${esc(r.pct)}${r.pct===''?'':'%'}</td><td>${esc(r.missed)||'none'}</td>${delCell('fl',i,'log entry')}</tr>`).join(''):'<tr><td colspan="6" class="hint">No observations logged yet.</td></tr>';
 }
 
 /* ---------------- events ---------------- */
@@ -1067,6 +1088,16 @@ $('#delL').addEventListener('click',()=>{if(!S.log.length)return;const r=S.log[S
 $('#fidAdd').addEventListener('click',()=>{const f=fidStats();if(f.n===0){alert('Score at least one step first.');return;}
   S.fl.push({date:S.meta.f_date||'',who:S.meta.f_who||'',pct:String(Math.round(f.pct)),missed:f.missed.join(', ')});renderFl();});
 $('#flDel').addEventListener('click',()=>{if(!S.fl.length)return;if(!confirm('Remove the last log entry?'))return;S.fl.pop();renderFl();});
+function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
+  if(r==='exp'){if((row.text||row.looks||row.nex)&&!confirm('Delete this row?'))return;S.exp.splice(i,1);if(!S.exp.length)S.exp.push({text:'',looks:'',nex:''});renderE();renderExp();renderRule();renderPoster();}
+  else if(r==='menu'){if((row.item||row.amt||row.how)&&!confirm('Delete this row?'))return;S.menu.splice(i,1);if(!S.menu.length)S.menu.push({item:'',kind:'',amt:'',how:''});renderM();renderMenu();}
+  else if(r==='teams'){const n=S.log.filter(x=>x.v[i]).length;
+    if((row.name||row.members||n)&&!confirm('Delete this team?'+(n?' Its scores on '+n+' day'+(n===1?'':'s')+' of the Record will be removed; later teams move left.':'')))return;
+    S.teams.splice(i,1);S.log.forEach(x=>{x.v.splice(i,1);x.v.push('');});renderTm();renderL();renderRule();renderPoster();renderRecord();renderBase();}
+  else if(r==='log'){if((row.date||row.note||row.v.some(x=>x))&&!confirm('Delete this row?'))return;S.log.splice(i,1);renderL();renderRecord();renderBase();}
+  else if(r==='fl'){if(!confirm('Delete this row?'))return;S.fl.splice(i,1);renderFl();}
+}
+$('#gcPngBtn').addEventListener('click',()=>svgToPng($('#logPlot'),graphFile('GC-1',S.meta.cls)));
 let poT=0;function renderPosterSoon(){clearTimeout(poT);poT=setTimeout(renderPoster,250);}
 
 /* ---------------- setup verdicts ---------------- */
