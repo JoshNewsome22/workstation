@@ -5896,3 +5896,17 @@ the framed and plain QR codes module for module, and, where python3
 has zxing-cpp (`pip install zxing-cpp`), decodes both codes from the
 printed PDF.
 
+
+### Text sizes on the iPad (v21.42c)
+
+On the iPad the book's text came out about 1.6 times too big: the tab
+letters overlapped, the Board title ran into First and Then, the
+captions spilled out of the slots, and the backs split onto extra
+continuation pages. The boxes were the right size. Safari does not
+apply the preview's zoom, or the polish layer's fit-to-screen zoom,
+to a font size written as `calc(... * var(--s))`, while Chrome does.
+Every font size and line height in TK-1 is now a plain point value,
+with the 11 in page and Fill the Letter page given the same sizes
+enlarged by 1.2472 (`.pg.big`). Text autosizing is also switched off
+on the book (`text-size-adjust: 100%`). In Chrome the printed pages
+are pixel for pixel unchanged.
