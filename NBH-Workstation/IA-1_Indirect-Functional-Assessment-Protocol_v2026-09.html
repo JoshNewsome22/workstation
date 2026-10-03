@@ -436,7 +436,15 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
 .gf-warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 10px;font-size:12.5px;margin:8px 0}
 .gf-banner{width:8.5in;max-width:100%;margin:18px auto -6px;padding:9px 14px;background:var(--nbh-mist);border-left:4px solid var(--nbh-teal);color:var(--nbh-ink);font-family:var(--sans);font-size:12.5px;line-height:1.45;box-sizing:border-box}
 @media print{dialog.gf,.gf-banner,.rp-word{display:none}}
-.rp-word{margin:14px 0 10px}.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.rp-grid textarea{width:100%;box-sizing:border-box;font-size:12px}.rp-count{font-weight:400;color:var(--ink-soft)}#rpDlg textarea,#rpDlg input{font-family:var(--sans);font-size:13px}.rp-tt input,.rp-tt textarea{width:100%;box-sizing:border-box}.rp-hint{font-weight:400;color:var(--ink-soft);font-size:11px}.rp-prev{font-size:12.5px;margin:4px 0 0}.rp-prev div{margin:2px 0}.rp-other button{margin-left:8px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
+.rp-word{margin:14px 0 10px}.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.rp-grid textarea{width:100%;box-sizing:border-box;font-size:12px}.rp-count{font-weight:400;color:var(--ink-soft)}#rpDlg textarea,#rpDlg input{font-family:var(--sans);font-size:13px}.rp-tt input,.rp-tt textarea{width:100%;box-sizing:border-box}
+.rp-tt{table-layout:fixed;width:100%}.rp-tt td{vertical-align:top;overflow-wrap:anywhere}
+.rp-tt th:nth-child(1),.rp-tt td:nth-child(1){width:34%}.rp-tt th:nth-child(2),.rp-tt td:nth-child(2),.rp-tt th:nth-child(3),.rp-tt td:nth-child(3){width:17%}
+.rp-tt textarea{min-height:64px}
+#rpDlg button.off{opacity:.45;cursor:not-allowed}
+@keyframes rpflash{0%{outline:3px solid #b9672d}100%{outline:3px solid transparent}}.rp-flash{animation:rpflash 1s ease-out}
+.rp-linkbox{width:100%;box-sizing:border-box;margin:8px 0 0;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+dialog.rp-prevdlg{width:min(980px,96vw);max-height:none;height:92vh;padding:0;overflow:hidden}
+dialog.rp-prevdlg iframe{display:block;width:100%;height:calc(92vh - 44px);border:0;background:#f1f4f3}.rp-hint{font-weight:400;color:var(--ink-soft);font-size:11px}.rp-prev{font-size:12.5px;margin:4px 0 0}.rp-prev div{margin:2px 0}.rp-other button{margin-left:8px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
 .twoup{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
 .twoup > *{min-width:0}
 .twoup.figs{margin-top:14px}
@@ -596,7 +604,12 @@ td input,td select{max-width:100%}
     <div class="gf-note"><b>The first items as the page will read them:</b><div id="rpPrev" class="rp-prev"></div></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
     <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="method" id="rpNote" style="margin:0"></span></div>
+    <textarea id="rpLinkBox" class="rp-linkbox" rows="3" readonly hidden aria-label="The link to copy"></textarea>
   </div>
+</dialog>
+<dialog id="rpPrevDlg" class="gf rp-prevdlg" aria-label="Preview of the respondent page">
+  <div class="gf-head"><b>Preview: the page as the respondent sees it</b><button type="button" id="rpPrevClose" aria-label="Close">&#x2715;</button></div>
+  <iframe id="rpPrevFrame" title="Respondent page preview"></iframe>
 </dialog>
 <dialog id="rcDlg" class="gf" aria-labelledby="rcTitle">
   <form method="dialog" class="gf-head"><b id="rcTitle">Collect responses</b><button value="close" aria-label="Close">&#x2715;</button></form>
@@ -1453,8 +1466,12 @@ document.addEventListener('input',e=>{if(e.target&&e.target.name&&e.target.name.
 function rpInitials(){const nm=val('m.client').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=val('m.sid');return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
 function rpFirstName(){const nm=val('m.client').trim();if(!nm)return '';const parts=nm.split(/\s*,\s*/);return (parts.length>1?parts[1]:parts[0]).split(/\s+/)[0];}
 /* the targets a page can be about: this form's own, then the case's (Form TB-1), replacements left out */
-function rpTargets(){const out=[];const own=val('m.beh').trim();if(own)out.push({label:own,def:val('m.def').trim(),src:'this form'});
-  const cs=(window.nbhCase&&nbhCase.behaviors&&nbhCase.behaviors())||[];cs.forEach(b=>{if(!b||!b.label||b.isRep||/replacement|alternative/i.test(b.type||''))return;if(out.some(o=>o.label.trim().toLowerCase()===b.label.trim().toLowerCase()))return;out.push({label:b.label.trim(),def:(b.def||'').trim(),src:b.src||'the case'});});
+function rpTargets(){const out=[];let own=val('m.beh').trim(),ownDef=val('m.def').trim();
+  const cs=(window.nbhCase&&nbhCase.behaviors&&nbhCase.behaviors())||[];
+  if(own){const m=!ownDef&&own.match(/^([^:]{2,70}):\s*(.+)$/s);if(m){own=m[1].trim();ownDef=m[2].trim();}   /* the case bridge writes "Label: definition" into one field */
+    if(!ownDef){const c=cs.find(b=>b&&b.label&&b.label.trim().toLowerCase()===own.toLowerCase());if(c&&c.def)ownDef=String(c.def).trim();}
+    out.push({label:own,def:ownDef,src:'this form'});}
+  cs.forEach(b=>{if(!b||!b.label||b.isRep||/replacement|alternative/i.test(b.type||''))return;if(out.some(o=>o.label.trim().toLowerCase()===b.label.trim().toLowerCase()))return;out.push({label:b.label.trim(),def:(b.def||'').trim(),src:b.src||'the case'});});
   return out;}
 function rpTermsStore(){try{return JSON.parse(val('rp.terms')||'{}')||{};}catch(e){return {};}}
 function rpTermsSave(o){const e=document.querySelector('[name="rp.terms"]');if(e){e.value=JSON.stringify(o);e.dispatchEvent(new Event('input',{bubbles:true}));}}
@@ -1491,7 +1508,7 @@ function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpEx
   if(!ts.length)bad.push('Name a target behavior on the Setup sheet (or open Form TB-1 in the workstation so the case supplies them).');
   if($('#rpConfirm').checked&&ts.some(t=>!t.def))bad.push('The definition question needs a definition: write one in the table above for each target, or untick the question.');
   st.hidden=!bad.length;st.innerHTML=bad.map(gfEsc).join('<br>');$('#rpFxRow').style.display=key==='fast'?'':'none';
-  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
+  ['rpSave','rpLink','rpPreview'].forEach(id=>{const b=$('#'+id);b.classList.toggle('off',!!bad.length);b.setAttribute('aria-disabled',bad.length?'true':'false');});
   const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
   $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
 function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t=>{st[t.label.toLowerCase()]={sing:t.sing,plur:t.plur,def:t.def};});rpTermsSave(st);
@@ -1512,11 +1529,18 @@ $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStuden
 $('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
 $('#rpTarget').addEventListener('change',()=>{rpRenderTargets();rpStatus();});
 $('#rpTargets').addEventListener('input',()=>{rpRemember();rpStatus();});   /* typed terms survive a change of target */
-$('#rpSave').addEventListener('click',rpFile);
-$('#rpPreview').addEventListener('click',()=>{rpRemember();const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
-$('#rpLink').addEventListener('click',async()=>{rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
-  const ls=rpLinks();const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');
-  try{await navigator.clipboard.writeText(text);$('#rpNote').textContent=(ls.length===1?'Link copied ('+text.length+' characters; paste it into the email as a link, not typed out).':ls.length+' links copied, one line per target behavior.');}catch(e){$('#rpNote').textContent=text;}});
+function rpOff(){if(!$('#rpSave').classList.contains('off'))return false;const st=$('#rpStatus');st.classList.remove('rp-flash');void st.offsetWidth;st.classList.add('rp-flash');st.scrollIntoView({block:'nearest'});return true;}
+$('#rpSave').addEventListener('click',()=>{if(rpOff())return;rpFile();});
+/* the preview opens inside the form (an iframe in a dialog): a new tab with a blob address is blocked or blank on iPad */
+$('#rpPreview').addEventListener('click',()=>{if(rpOff())return;rpRemember();const html=NBH_RESPOND.pageHTML(rpPayload());$('#rpPrevFrame').srcdoc=html;$('#rpPrevDlg').showModal();});
+$('#rpPrevClose').addEventListener('click',()=>$('#rpPrevDlg').close());
+$('#rpPrevDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+/* the link is shown in a box as well as copied: the clipboard is refused on some tablets */
+$('#rpLink').addEventListener('click',async()=>{if(rpOff())return;rpRemember();const box=$('#rpLinkBox');if(!/^https?:$/.test(location.protocol)){box.hidden=true;$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+  const ls=rpLinks();const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
+  let copied=false;try{await navigator.clipboard.writeText(text);copied=true;}catch(e){copied=false;}
+  $('#rpNote').textContent=copied?(ls.length===1?'Link copied ('+text.length+' characters; paste it into the email as a link, not typed out). It is also in the box below.':ls.length+' links copied, one line per target behavior; they are also in the box below.'):'The clipboard was refused: select the link in the box below and copy it.';
+  try{box.focus();box.setSelectionRange(0,box.value.length);}catch(e){}});
 $('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* collecting */
 let rcData=null;
