@@ -1,12 +1,17 @@
-/* Form TK-1, the token board book: setup fields save and reopen; the token count rewrites the captions and the
-   slots; the name form; the QR code only with a link, and its modules agree with the same library run in node
-   (no independent decoder is available offline); the case prefills the targets and choices; the picker places a
-   pictogram and a photo; the print page counts of every order; print colours; the shell over the form; no errors. */
+/* Form TK-1, the token board book: the page laid out from the assessor's Illustrator files (8.82 x 5.82 in, centred on
+   Letter with trim marks; the 11 in page and Fill the Letter page); setup fields save and reopen; the token count
+   rewrites the captions and the slots; the name form; the QR code only with a link, its modules equal to the same library
+   run in node, and decoded from the printed page by zxing-cpp where python3 has it (pip install zxing-cpp); the default
+   texts fit their backs; the case prefills the targets and choices; the picker places a pictogram and a photo; the print
+   page counts of every order; print colours; the shell over the form; no errors. */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/tk1/shots';fs.mkdirSync(OUT,{recursive:true});
 const URL=BASE+'/NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html';const cp=require('child_process');
 const qrlib=require(__dirname+'/../tools/vendor/qrcode-generator/qrcode.js');
 let fails=0;const check=(name,ok,detail)=>{console.log((ok?'PASS ':'FAIL ')+name+(detail?' ('+detail+')':''));if(!ok)fails++;};
+const zx=(()=>{try{cp.execSync('python3 -c "import zxingcpp, pymupdf"',{stdio:'ignore'});return true;}catch(e){return false;}})();
+/* the QR codes zxing-cpp finds on one page of a PDF, rendered at the given resolution */
+const decode=(f,i,dpi)=>cp.execSync(`python3 -c "import pymupdf,zxingcpp;from PIL import Image;d=pymupdf.open('${f}');pm=d[${i}].get_pixmap(dpi=${dpi});im=Image.frombytes('RGB',(pm.width,pm.height),pm.samples);print('|'.join(b.text for b in zxingcpp.read_barcodes(im)))"`).toString().trim();
 const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');print(d.page_count,[(round(p.rect.width/72,1),round(p.rect.height/72,1)) for p in d][:2])"`).toString().trim();
 (async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
   await page.goto(URL);await sleep(600);await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});
@@ -17,16 +22,23 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   /* blank book: the default order is "all" with the how-to off: 8 + 3 card sheets */
   const blank=await pdf('blank');check('blank print: 11 landscape sheets (4 fronts, 4 backs, 3 card sheets)',blank.startsWith('11 [(11.0, 8.5)'),blank);
   check('blank Board prints a line to write the name on',await page.evaluate(()=>!!document.querySelector('#book .pg[data-kind="bd"] .ttl .blank')));
-  check('the 11 x 7.33 in page is centred on Letter with four corner trim marks; the frame band is 0.22 in',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="ch"]');const cv=p.querySelector('.cv'),f=p.querySelector('.frame'),pn=p.querySelector('.panel');const r=x=>Math.round(x/96*100)/100;return p.querySelectorAll('.trim').length===8&&r(cv.offsetTop)===0.58&&r(cv.offsetHeight)===7.33&&r(f.offsetLeft)===0.45&&r(pn.offsetLeft)===0.3&&r(pn.offsetTop)===0.3;}));
-  check('Choices and Targets boxes 2.85 x 2.55 in with 0.6 in dots; the panel light grey by default',await page.evaluate(()=>{const b=document.querySelector('#book .pg[data-kind="ch"] .bx'),d=b.querySelector('.dot');const r=x=>Math.round(x/96*100)/100;return r(b.offsetWidth)===2.85&&r(b.offsetHeight)===2.55&&r(d.offsetWidth)===0.6&&getComputedStyle(document.querySelector('#book .pg[data-kind="ch"] .panel')).backgroundColor==='rgb(243, 244, 245)';}));
-  check('token slots 1.95 x 1.8 in on a band exactly tall enough',await page.evaluate(()=>{const s=document.querySelector('#book .pg[data-kind="bd"] .slot'),st=document.querySelector('#book .pg[data-kind="bd"] .strip');const r=x=>Math.round(x/96*100)/100;return r(s.offsetWidth)===1.95&&r(s.offsetHeight)===1.8&&r(st.offsetHeight)===2.04;}));
+  const geo=()=>page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="ch"]');const cv=p.querySelector('.cv'),b=p.querySelector('.band'),pn=p.querySelector('.panel'),bx=p.querySelector('.bx');const i=x=>Math.round(x/96*100)/100;
+    /* points of the page, from the drawn rectangles (offsetWidth is whole pixels): the page box is 635.04 pt times the page's scale */
+    const cr=cv.getBoundingClientRect(),k=635.04*parseFloat(getComputedStyle(p).getPropertyValue('--s'))/cr.width,q=x=>Math.round(x*k*10)/10;
+    return {left:i(cv.offsetLeft),top:i(cv.offsetTop),w:i(cv.offsetWidth),h:i(cv.offsetHeight),band:q(b.getBoundingClientRect().width),panelL:q(pn.getBoundingClientRect().left-cr.left),trims:p.querySelectorAll('.trim').length,box:q(bx.getBoundingClientRect().width),dot:q(bx.querySelector('.dot').getBoundingClientRect().width),boxIn:Math.round(bx.getBoundingClientRect().width*k/72*100)/100,bg:getComputedStyle(pn).backgroundColor};});
+  let g=await geo();
+  check('the 8.82 x 5.82 in page sits centred on Letter (1.09 in in, 1.34 in down) with four corner trim marks; the band 616.2 pt, the panel 15.4 pt in from the bound edge',g.left===1.09&&g.top===1.34&&g.w===8.82&&g.h===5.82&&g.trims===8&&g.band===616.2&&g.panelL===15.4,JSON.stringify(g));
+  check('Choices boxes 146.88 pt plus their 2 pt edge, the dots 18 pt in radius plus the stroke; the panel #f5f5f5 as in the file',g.box===148.9&&g.dot===37&&g.bg==='rgb(245, 245, 245)',JSON.stringify(g));
+  check('token slots 110.53 pt plus the edge on a band 126.61 pt below the panel, as in the file',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="bd"]'),s=p.querySelector('.slot'),st=p.querySelector('.strip');const k=635.04/p.querySelector('.cv').getBoundingClientRect().width,q=x=>Math.round(x*k*10)/10;return q(s.getBoundingClientRect().width)===112.5&&q(st.getBoundingClientRect().height)===126.6;}));
+  check('the Token Economy back carries the assessor\u2019s resources line by default, and the backs carry no picture',await page.evaluate(()=>{const c=document.querySelector('#book .pg[data-kind="tk"][data-side="back"] .credit');return !!c&&/To find more resources and information visit/.test(c.textContent)&&/www\.Behavior-Charts\.com/.test(c.textContent)&&document.querySelectorAll('#book .pg.back img').length===0;}));
+  check('the default texts fit their backs with the credit line (no continuation page, the body at 11 pt or more)',await page.evaluate(()=>!document.querySelector('#book .pg.contd')&&[...document.querySelectorAll('#book .pg.back .bbody')].every(b=>parseFloat(getComputedStyle(b).fontSize)*72/96>=10.99)),await page.evaluate(()=>[...document.querySelectorAll('#book .pg.back .bbody')].map(b=>(parseFloat(getComputedStyle(b).fontSize)*72/96).toFixed(2)+'pt').join(' ')+(document.querySelector('#book .pg.back.compact')?', the credit on one line':'')));
   check('no QR code without a link',await page.evaluate(()=>document.querySelectorAll('#book .qr').length===0));
   /* setup fields, typed, then saved and reopened */
   await page.click('#viewSeg button[data-view="setup"]');
   await page.fill('[data-m="client"]','Test Student');await page.fill('[data-m="first"]','Ana');await page.fill('[data-m="qr"]','https://example.org/tk');await page.fill('[data-m="credit"]','Made for the Test team');
   await page.selectOption('[data-m="n"]','7');await sleep(300);
   check('token count 7 writes seven captions',await page.evaluate(()=>S.caps.length===7&&S.caps[2].b==='Just 5 More!'&&S.caps[6].b==='Just 1 More!'&&S.caps[0].b==='Your First Star!'&&S.caps[0].a==='Hurry and Get'),await page.evaluate(()=>S.caps.map(c=>c.b).join(' | ')));
-  check('seven slots on the Board in two rows and seven park boxes',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="bd"] .slot').length===7&&document.querySelectorAll('#book .pg[data-kind="bd"] .srow').length===2&&document.querySelectorAll('#book .pg[data-kind="tk"] .ybx').length===7));
+  check('seven slots on the Board in two rows and seven park boxes',await page.evaluate(()=>{const s=[...document.querySelectorAll('#book .pg[data-kind="bd"] .slot')];return s.length===7&&new Set(s.map(e=>e.style.top)).size===2&&document.querySelectorAll('#book .pg[data-kind="tk"] .ybx').length===7;}));
   await page.fill('#capTbl input[data-i="1"][data-f="b"]','Nice!');await sleep(300);
   check('a caption edit reaches the Board',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="bd"] .slot .cb')[1].textContent==='Nice!'));
   check('"Ana’s Chart" with the default possessive',await page.evaluate(()=>document.querySelector('#book .pg[data-kind="bd"] .ttl').textContent.includes('Ana’s Chart')));
@@ -36,16 +48,24 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   check('Rules-row layout: "James’ Bus Chart", one photo, an Earn box, the strip',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="bd"]');return p.querySelector('.ttl').textContent.includes('James’ Bus Chart')&&p.querySelectorAll('.bd-photo').length===1&&!!p.querySelector('.earn .bx.green')&&p.querySelectorAll('.slot').length===7;}));
   await page.selectOption('[data-m="layout"]','ft');await sleep(200);
   /* the QR code: present with a link; its modules agree with the same library run in node */
-  const qr=await page.evaluate(()=>{const s=document.querySelector('#book .pg[data-kind="ch"] .qr svg');if(!s)return null;const d=s.querySelector('path').getAttribute('d');const cells=new Set();d.replace(/M(\d+) (\d+)h1v1h-1z/g,(m,x,y)=>{cells.add((x-2)+','+(y-2));return '';});return {n:+s.dataset.modules,cells:[...cells].sort()};});
-  const q=qrlib(0,'M');q.addData('https://example.org/tk');q.make();const n=q.getModuleCount(),cells=[];for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))cells.push(c+','+r);cells.sort();
-  check('QR code appears with a link, '+n+' modules (type '+((n-17)/4)+', M), and matches the node run of the same library cell for cell',!!qr&&qr.n===n&&qr.cells.length===cells.length&&qr.cells.every((v,i)=>v===cells[i]),qr?qr.n+' modules on the page':'none');
-  check('QR modules follow 21 + 4 (type - 1) for the type the library chose',!!qr&&(qr.n-17)%4===0&&qr.n===21+4*((n-17)/4-1));
-  console.log('   (no independent QR decoder is available offline; the check is the same library in node and the module count)');
+  const qrOf=()=>page.evaluate(()=>{const s=document.querySelector('#book .pg[data-kind="ch"] .qr svg');if(!s)return null;const d=s.querySelector('path.mod').getAttribute('d');const cells=new Set();d.replace(/M(\d+) (\d+)h1v1h-1z/g,(m,x,y)=>{cells.add((x-2)+','+(y-2));return '';});return {n:+s.dataset.modules,ec:s.dataset.ec,mid:s.dataset.mid,cells:[...cells].sort(),finders:s.querySelectorAll('rect.fd').length};});
+  /* the same library in node: every dark module, less the finders and the middle square when the code is framed */
+  const same=(qr,ec)=>{const q=qrlib(0,ec);q.addData('https://example.org/tk');q.make();const n=q.getModuleCount(),cells=[];const fr=ec==='H';const [c0,w]=fr&&qr&&qr.mid?qr.mid.split(',').map(Number):[0,0];
+    const skip=(r,c)=>fr&&((r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7)||(r>=c0&&r<c0+w&&c>=c0&&c<c0+w));for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c)&&!skip(r,c))cells.push(c+','+r);cells.sort();
+    return {n,ok:!!qr&&qr.n===n&&qr.ec===ec&&qr.cells.length===cells.length&&qr.cells.every((v,i)=>v===cells[i])};};
+  let qr=await qrOf(),cmp=same(qr,'H');
+  check('QR code with a link, in the assessor\u2019s SCAN ME style by default: level H, '+cmp.n+' modules, three rounded finders, the data modules equal to the node run of the same library',cmp.ok&&qr.finders===6,qr?qr.n+' modules, level '+qr.ec:'none');
+  await page.evaluate(()=>{const e=document.querySelector('[data-c="qrframe"]');e.checked=false;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(250);qr=await qrOf();cmp=same(qr,'M');const n=cmp.n;
+  check('untick the style: a plain black code, level M, '+n+' modules (type '+((n-17)/4)+'), every module equal to the node run',cmp.ok&&qr.finders===0,qr?qr.n+' modules, level '+qr.ec:'none');
+  check('QR modules follow 21 + 4 (type - 1) for the type the library chose',(n-17)%4===0&&n===21+4*((n-17)/4-1));
+  await page.evaluate(()=>{const e=document.querySelector('[data-c="qrframe"]');e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(250);
   check('every printed page carries the QR code (four fronts)',await page.evaluate(()=>document.querySelectorAll('#book .pg.front[data-kind]:not([data-kind^="cards"]):not([data-kind^="how"]) .qr').length===4));
   await page.selectOption('[data-m="panel"]','grey');await sleep(200);check('the mid-grey panel is an option',await page.evaluate(()=>getComputedStyle(document.querySelector('#book .pg[data-kind="tg"] .panel')).backgroundColor==='rgb(217, 221, 225)'));
-  await page.evaluate(()=>{const e=document.querySelector('[data-c="fill"]');e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(250);await page.click('#viewSeg button[data-view="preview"]');await sleep(150);
-  check('Fill the Letter page: the page grows to 8.5 in, no trim marks, the boxes keep their size',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="ch"]');const r=x=>Math.round(x/96*100)/100;return r(p.querySelector('.cv').offsetHeight)===8.5&&p.querySelectorAll('.trim').length===0&&r(p.querySelector('.bx').offsetHeight)===2.55;}));
-  await page.evaluate(()=>{const e=document.querySelector('[data-c="fill"]');e.checked=false;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(200);await page.click('#viewSeg button[data-view="setup"]');
+  await page.selectOption('[data-m="pagesize"]','11');await sleep(250);await page.click('#viewSeg button[data-view="preview"]');await sleep(150);g=await geo();
+  check('the 11 in page: the same page scaled 1.247 to 11 x 7.26 in, with trim marks',g.w===11&&g.h===7.26&&g.trims===8&&g.boxIn===2.58,JSON.stringify(g));
+  await page.click('#viewSeg button[data-view="setup"]');await page.selectOption('[data-m="pagesize"]','fill');await sleep(250);await page.click('#viewSeg button[data-view="preview"]');await sleep(150);g=await geo();
+  check('Fill the Letter page: 11 x 8.5 in, no trim marks, the boxes keep the 11 in page\u2019s size',g.w===11&&g.h===8.5&&g.trims===0&&g.boxIn===2.58,JSON.stringify(g));
+  await page.click('#viewSeg button[data-view="setup"]');await page.selectOption('[data-m="pagesize"]','8.82');await sleep(200);
   /* save, clear, reopen */
   await page.evaluate(()=>{const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};});
   await page.evaluate(()=>document.querySelector('#saveBtn').click());await sleep(300);const saved=await page.evaluate(()=>window.__saved);const before=await page.evaluate(()=>JSON.stringify(S));
@@ -74,15 +94,16 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   /* the student photo and the token */
   await page.click('#viewSeg button[data-view="setup"]');await page.click('#phPick button[data-pick]');await sleep(150);await page.selectOption('#pdCat','_photos');await sleep(100);await page.click('#pdGrid button[data-ph]');await sleep(250);
   check('the photo replaces the avatar in both Board corners',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="bd"] .bd-photo img').length===2));
+  check('the default token is the assessor\u2019s star art in the Tokens corners and on the token cards',await page.evaluate(()=>S.tok[0].k==='tk:star'&&document.querySelectorAll('#book .pg[data-kind="tk"] .tkcorner .card.tok img').length===2&&document.querySelectorAll('#book .pg[data-kind="cards-tk"] .card.tok img').length===5));
   await page.click('#tokPick button[data-pick]');await sleep(150);await page.click('#pdGrid button[data-k="tk:heart"]');await sleep(300);
   check('the heart token renames the first caption and prints on the Tokens corners and the token cards',await page.evaluate(()=>S.caps[0].b==='Your First Heart!'&&document.querySelectorAll('#book .pg[data-kind="tk"] .tkcorner svg').length===2&&document.querySelectorAll('#book .pg[data-kind="cards-tk"] .card.tok').length===5));
   /* the backs and the how-to text */
   await page.click('#viewSeg button[data-view="backs"]');await page.fill('textarea[data-b="cb"]','## My heading\nFirst line **bold** and __under__.\n\nSecond paragraph with {n} boxes and a {token}.');await sleep(300);
-  check('the back text renders the markup and the placeholders',await page.evaluate(()=>{const b=document.querySelector('#book .pg[data-kind="ch"][data-side="back"] .bbody');return !!b&&b.querySelector('h4').textContent==='My heading'&&!!b.querySelector('b')&&!!b.querySelector('u')&&/five boxes and a Heart/.test(b.textContent);}));
-  check('the Token Economy back carries the credit line beside the logo',await page.evaluate(()=>{S.meta.credit='Credit here';renderOut();const c=document.querySelector('#book .pg[data-kind="tk"][data-side="back"] .credit');return !!c&&c.textContent.trim()==='Credit here'&&c.querySelector('img').getAttribute('src').startsWith('data:image');}));
-  /* a back too long for 15 pt continues on a second back page, after a blank sheet in a duplex order */
+  check('the back text renders the markup and the placeholders',await page.evaluate(()=>{const b=document.querySelector('#book .pg[data-kind="ch"][data-side="back"] .bbody');return !!b&&b.querySelector('h4').textContent==='My heading'&&!!b.querySelector('b')&&!!b.querySelector('u')&&/five boxes and a heart\./.test(b.textContent);}));
+  check('an edited credit line prints on the Token Economy back; a cleared one prints nothing',await page.evaluate(()=>{S.meta.credit='Credit here';renderOut();const c=document.querySelector('#book .pg[data-kind="tk"][data-side="back"] .credit');const ok=!!c&&c.textContent.trim()==='Credit here';S.meta.credit='';renderOut();return ok&&!document.querySelector('#book .pg[data-kind="tk"][data-side="back"] .credit');}));
+  /* a back too long for 11 pt continues on a second back page, after a blank sheet in a duplex order; the first part keeps its size */
   await page.evaluate(()=>{window.__tb=S.txt.tb;S.txt.tb=S.txt.tb+'\n\n'+S.txt.te;S.meta.order='duplex';renderAll();});await sleep(300);
-  check('a long back continues on a second back page with a blank sheet before it (duplex 8 -> 10)',await page.evaluate(()=>{const k=[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind+'/'+(p.dataset.side||'x')).join(' ');const body=document.querySelector('#book .pg[data-kind="bd"][data-side="back"] .bbody');return k==='ch/front ch/back tg/front tg/back bd/front bd/back blank/x bd/back tk/front tk/back'&&parseFloat(body.style.fontSize)>=15&&!!document.querySelector('#book .pg.contd .cont');}),await page.evaluate(()=>[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind).join(' ')));
+  check('a long back continues on a second back page with a blank sheet before it (duplex 8 -> 10)',await page.evaluate(()=>{const k=[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind+'/'+(p.dataset.side||'x')).join(' ');const body=document.querySelector('#book .pg[data-kind="bd"][data-side="back"] .bbody');return k==='ch/front ch/back tg/front tg/back bd/front bd/back blank/x bd/back tk/front tk/back'&&parseFloat(body.style.fontSize)>=11&&body.dataset.fixed===body.style.fontSize&&!!document.querySelector('#book .pg.contd .cont');}),await page.evaluate(()=>[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind).join(' ')));
   await page.evaluate(()=>{S.txt.tb=window.__tb;renderAll();});
   /* print orders and page counts */
   await page.evaluate(()=>{document.querySelector('#simBtn').click();});await sleep(600);
@@ -103,17 +124,23 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
 import pymupdf
 d=pymupdf.open('${OUT}/sim.pdf');p=d[0];pm=p.get_pixmap(dpi=72)
 def at(x,y): return pm.pixel(int(x*72),int(y*72))
-print(at(0.55,4.0),at(10.62,1.0),at(10.8,8.3))
-p=d[4];pm=p.get_pixmap(dpi=72);print(at(7.3,3.3))"`).toString().trim();
+print(at(1.2,4.12),at(9.77,2.715),at(10.8,8.3))
+p=d[4];pm=p.get_pixmap(dpi=72);print(at(6.65,3.42))"`).toString().trim();
   const cols=px.match(/\((\d+), (\d+), (\d+)\)/g).map(s=>s.match(/\d+/g).map(Number));
   const near=(c,ref,tol)=>c.every((v,i)=>Math.abs(v-ref[i])<=tol);
-  check('print colours are real: slate band, green CHOICES tab, white below the trim, green Then box',near(cols[0],[105,140,168],12)&&near(cols[1],[174,213,158],14)&&near(cols[2],[255,255,255],2)&&near(cols[3],[184,224,168],14),px);
+  check('print colours are the files\u2019: slate band #698da9, green CHOICES tab #acd69b, white outside the trim, green Then box #acd69a',near(cols[0],[105,141,169],6)&&near(cols[1],[172,214,155],6)&&near(cols[2],[255,255,255],2)&&near(cols[3],[172,214,154],6),px);
+  /* the QR codes read back from the printed page */
+  if(zx){const a=decode(`${OUT}/sim.pdf`,0,300),b=decode(`${OUT}/sim.pdf`,0,150);const want=await page.evaluate(()=>S.meta.qr);
+    check('zxing-cpp reads the SCAN ME code from the printed Choices page at 300 and 150 dpi',a===want&&b===want,a+' / '+b);
+    await page.evaluate(()=>{S.chk.qrframe=false;renderOut();});await pdf('sim-plain');const c=decode(`${OUT}/sim-plain.pdf`,0,150);
+    check('zxing-cpp reads the plain code at 150 dpi',c===want,c);await page.evaluate(()=>{S.chk.qrframe=true;renderOut();});}
+  else console.log('   (zxing-cpp is not installed for python3; the printed QR codes were not decoded)');
   /* the simulator fills the book */
   check('the simulator: six choices, six targets, star, QR link, how-to on',await page.evaluate(()=>S.ch.every(o=>o.k)&&S.tg.every(o=>o.k)&&S.tok[0].k==='tk:star'&&!!S.meta.qr&&S.chk.pg_how===true&&S.meta.first==='Sam'));
   for(const v of views){await page.click(`#viewSeg button[data-view="${v}"]`);await sleep(200);await page.screenshot({path:`${OUT}/sim-${v}.png`,fullPage:true});}
   /* backs fit the page: no body overflows after the fit */
   await page.click('#viewSeg button[data-view="preview"]');await sleep(200);await page.evaluate(()=>fitAll());
-  check('every back and how-to page fits its panel after the fit',await page.evaluate(()=>[...document.querySelectorAll('#book .fit')].every(e=>e.scrollHeight<=e.clientHeight+2)),await page.evaluate(()=>[...document.querySelectorAll('#book .fit')].map(e=>e.style.fontSize||'16pt').join(' ')));
+  check('every back and how-to page fits its panel after the fit (print layout)',await page.evaluate(()=>[...document.querySelectorAll('#book .fit')].every(e=>e.scrollHeight<=e.clientHeight+2)),await page.evaluate(()=>[...document.querySelectorAll('#book .fit')].map(e=>e.style.fontSize||'16pt').join(' ')));
   /* csv */
   await page.evaluate(()=>{window.__saved=null;document.querySelector('#csvBtn').click();});await sleep(200);const csv=await page.evaluate(()=>window.__saved);
   check('csv: header + 6 choices + 6 targets + 2 board + 5 slots = 20 lines',csv.split('\n').length===20,csv.split('\n').length);
