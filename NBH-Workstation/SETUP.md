@@ -5995,3 +5995,34 @@ joins the picks. The picker opened from one card's own Choose button
 has the same "Choose several" switch, which fills that card and the
 ones after it. Without the switch a tap still sets one card and closes
 the picker. The token, photo and background pickers have no switch.
+
+### Printing from the iPad (v21.42h)
+
+A book printed from Safari on the iPad came out at two thirds of its
+size, on portrait sheets, with every back split over three pages and
+the student's photo as a grey ball. The causes and the fixes:
+
+- Safari ignores a page's request for landscape paper and prints on
+  portrait Letter inside its own margins (about 0.5 in, with the address
+  and date at the foot, which a page cannot turn off). The print layout
+  was 11 in wide, so Safari shrank everything to fit. Setup now has
+  **Sheets**: Automatic (the default: portrait with the page turned on
+  an iPad or iPhone, landscape on a computer), Landscape sheets, or
+  Portrait sheets, page turned. Turned, the form asks for portrait paper
+  with 0.5 in margins. Each book page is printed on its side at full
+  size inside a frame (6.4 by 9.4 in for the 8.82 in page). Fronts turn
+  clockwise and backs the other way, so a long-edge two-sided print puts
+  each back the right way up behind its front. The card sheets, the
+  token sheet and the sheet of one card are laid out portrait in the
+  same area, so the cards keep the size of the boxes. Each frame is
+  fully contained (`contain: strict`), so the turned page inside it
+  does not make the browser shrink the print. On the 11 in page and
+  Fill the Letter page the turned pages are scaled to fit, so use the
+  8.82 in page on the iPad.
+- The backs split because the earlier screen preview set their text too
+  large on the iPad (fixed in v21.42f).
+- The photo circle used a mask to clip an enlarged photo, which Safari
+  printed as a shaded grey ball. It now uses `clip-path: circle(50%)`.
+
+`qa/tk1-test.js` prints the turned book with a 1 in square beside it and
+checks that the square prints at 1 in, on 13 portrait pages.

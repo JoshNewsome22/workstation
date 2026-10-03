@@ -142,7 +142,16 @@ p=d[4];pm=p.get_pixmap(dpi=72);print(at(6.65,3.42))"`).toString().trim();
     await page.evaluate(()=>{S.chk.qrframe=false;renderOut();});await pdf('sim-plain');const c=decode(`${OUT}/sim-plain.pdf`,0,150);
     check('zxing-cpp reads the plain code at 150 dpi',c===want,c);await page.evaluate(()=>{S.chk.qrframe=true;renderOut();});}
   else console.log('   (zxing-cpp is not installed for python3; the printed QR codes were not decoded)');
-  /* the simulator fills the book */
+  /* iPad and iPhone printing: portrait sheets with each book page turned, at full size (a 1 in square prints 1 in) */
+  await page.evaluate(()=>{S.meta.sheets='turn';renderOut();const r=document.createElement('div');r.id='ref1in';r.style.cssText='position:absolute;left:0;top:0;width:1in;height:1in;background:#f00;z-index:9';document.querySelector('#book').prepend(r);});
+  r=await pdf('turned');
+  const sq=cp.execSync(`python3 -c "
+import pymupdf
+d=pymupdf.open('${OUT}/turned.pdf');pm=d[0].get_pixmap(dpi=72);xs=[x for y in range(pm.height) for x in range(pm.width) if pm.pixel(x,y)[0]>240 and pm.pixel(x,y)[1]<20 and pm.pixel(x,y)[2]<20]
+print(round((max(xs)-min(xs)+1)/72,2))"`).toString().trim();
+  check('portrait sheets, page turned: 13 portrait pages, nothing shrunk (a 1 in square prints '+sq+' in), fronts turned one way and backs the other, the card sheets portrait',r.startsWith('13 [(8.5, 11.0)')&&sq==='1.0'&&await page.evaluate(()=>{const w=[...document.querySelectorAll('#book .pgw>.pg')];return w.length===10&&w.filter(p=>/rotate\(90deg\)/.test(p.style.transform)).length>=4&&w.some(p=>/rotate\(-90deg\)/.test(p.style.transform))&&document.querySelectorAll('#book > .pg.tsheet').length===3;}),r);
+  await page.evaluate(()=>{document.getElementById('ref1in').remove();S.meta.sheets='land';renderOut();});
+
   check('the simulator: six choices, six targets, star, QR link, how-to on',await page.evaluate(()=>S.ch.every(o=>o.k)&&S.tg.every(o=>o.k)&&S.tok[0].k==='tk:star'&&!!S.meta.qr&&S.chk.pg_how===true&&S.meta.first==='Sam'));
   for(const v of views){await page.click(`#viewSeg button[data-view="${v}"]`);await sleep(200);await page.screenshot({path:`${OUT}/sim-${v}.png`,fullPage:true});}
   /* backs fit the page: no body overflows after the fit */
