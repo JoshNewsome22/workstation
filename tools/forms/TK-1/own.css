@@ -101,8 +101,8 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 /* a Tokens page with a full bottom row: the code beside the right-hand corner token */
 .panel>.qr.up{bottom:auto;top:calc(16pt*var(--s));right:calc(92pt*var(--s))}
 /* the Board */
-.bd-photo{position:absolute;top:calc(6pt*var(--s));width:calc(68pt*var(--s));height:calc(68pt*var(--s));border-radius:50%;overflow:hidden;background:#eef1f4;z-index:2;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
-/* (the mask makes Safari clip an enlarged photo to the circle) */
+.bd-photo{position:absolute;top:calc(6pt*var(--s));width:calc(68pt*var(--s));height:calc(68pt*var(--s));border-radius:50%;overflow:hidden;background:#eef1f4;z-index:2;clip-path:circle(50%)}
+/* (v21.42h: clip-path keeps an enlarged photo in its circle; the earlier mask printed as a grey ball in Safari) */
 .bd-photo.l{left:calc(8pt*var(--s))}.bd-photo.r{right:calc(8pt*var(--s))}
 .bd-photo img,.bd-photo svg{width:100%;height:100%;object-fit:cover;display:block}
 .ftlab{position:absolute;top:calc(79.12pt*var(--s));width:calc(200pt*var(--s));margin-left:calc(-100pt*var(--s));text-align:center;font:400 41.1pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
@@ -214,3 +214,13 @@ body.view-guide .only-setup,body.view-guide .only-choices,body.view-guide .only-
 .out,.book,.pg{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* (v21.42f) no font shorthand in this form names its typeface through a variable: Safari on the iPad did not apply the preview zoom
    to the size in a font shorthand that contains var(), so the text came out 1.6 times too big while the boxes were right */
+/* (v21.42h) portrait sheets with the page turned (iPad and iPhone printing): the frames, and the card sheets laid out portrait. A frame is
+   fully contained, so the turned page inside it (wider than the paper before it is turned) does not make the browser shrink the print to fit */
+.pg.tsheet{width:7.4in;height:9.4in}
+.book.turned>.pgw{position:relative;overflow:hidden;contain:strict;margin:0 auto 18px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.book.turned>.pgw>.pg{position:absolute;left:50%;top:50%;margin:0;box-shadow:none}
+@media print{
+  .book.turned>.pgw{margin:0 auto;box-shadow:none;break-after:page;page-break-after:always;break-inside:avoid}
+  .book.turned>.pgw:last-child{break-after:auto;page-break-after:auto}
+  .book.turned>.pgw>.pg{page-break-after:auto;break-after:auto}
+}

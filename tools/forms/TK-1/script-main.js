@@ -162,6 +162,12 @@ function qrBox(){const u=String(S.meta.qr||'').trim(),fr=!!S.chk.qrframe;if(!u)r
    artboard scaled by 0.9904 to it). --s scales the page: 1 for 8.82 in, 1.2472 for the 11 in wide page and for
    "Fill the Letter page", where the page is 8.5 in tall and only the white space between the elements grows. */
 const PW=635.04,PH=419.04,BW=616.22,PANW=597.64,PANH=410.72,BDH=288.31,STRIP=126.61;
+/* (v21.42h) Safari on the iPad and iPhone ignores the request for landscape paper and prints inside its own margins (about 0.5 in, with
+   the address and date at the foot). On those devices each book page is printed turned on its side on a portrait sheet, at full size inside
+   that area; the card sheets are laid out portrait in it, so the cards keep the size of the boxes. Setup can force either way. */
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const TW=7.4,TH=9.45;
+function turned(){const m=S.meta.sheets||'auto';return m==='turn'||(m==='auto'&&IOS);}
 function pageMode(){const m=S.meta.pagesize;return m==='11'||m==='fill'?m:'8.82';}
 function scl(){return pageMode()==='8.82'?1:11*72/PW;}
 const IN=v=>v.toFixed(3)+'in';
@@ -222,15 +228,17 @@ function pagesHowto(){return '<div class="pg front" data-kind="how1"><div class=
 function sheetGrid(cols,rows,w,h,gap,pageW,pageH,inner,cls){const W=cols*w+(cols-1)*gap,H=rows*h+(rows-1)*gap;
   return '<div class="cardsheet'+(cls?' '+cls:'')+'" style="left:'+IN((pageW-W)/2)+';top:'+IN(Math.max(.3,(pageH-H)/2))+';width:'+IN(W)+';height:'+IN(H)+';grid-template-columns:repeat('+cols+','+IN(w)+');grid-auto-rows:'+IN(h)+';gap:'+IN(gap)+';background-image:linear-gradient(to right,#c4c4c4 1px,transparent 1px),linear-gradient(to bottom,#c4c4c4 1px,transparent 1px);background-size:'+IN(w+gap)+' '+IN(h+gap)+';background-position:'+IN(w+gap/2)+' '+IN(h+gap/2)+'">'+inner+'</div>';}
 const cardIn=()=>148.88*scl()/72, tokIn=()=>108.01*scl()/72;
-function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';const sz=cardIn();const cards=list.map(o=>cardHtml(o,sz,{ul})).concat([cardHtml(null,sz,{ul,other:true})]);const cols=Math.max(1,Math.floor((10.4+.12)/(sz+.12)));
-  return '<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="cards-'+kind+'" style="--s:'+scl().toFixed(4)+'">'+sheetGrid(cols,Math.ceil(cards.length/cols),sz,sz,.12,11,8.5,cards.join(''),'top')+'</div>';}
-function sheetTokens(){const d=strip(),sz=tokIn();return '<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="cards-tk" style="--s:'+scl().toFixed(4)+'">'+sheetGrid(5,Math.ceil(d.n/5),sz,sz,.15,11,8.5,Array.from({length:d.n},()=>tokCard(sz)).join(''),'top')+'</div>';}
+function sheetOpen(kind){return turned()?'<div class="pg port front tsheet'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">':'<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">';}
+function sheetDims(){return turned()?[TW,TH,TW-.2,TH-.2]:[11,8.5,10.4,7.9];}
+function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';const sz=cardIn();const cards=list.map(o=>cardHtml(o,sz,{ul})).concat([cardHtml(null,sz,{ul,other:true})]);const [pw,ph,aw]=sheetDims();const cols=Math.max(1,Math.floor((aw+.12)/(sz+.12)));
+  return sheetOpen('cards-'+kind)+sheetGrid(cols,Math.ceil(cards.length/cols),sz,sz,.12,pw,ph,cards.join(''),'top')+'</div>';}
+function sheetTokens(){const d=strip(),sz=tokIn(),[pw,ph,aw]=sheetDims(),cols=Math.min(5,Math.max(1,Math.floor((aw+.15)/(sz+.15))));return sheetOpen('cards-tk')+sheetGrid(cols,Math.ceil(d.n/cols),sz,sz,.15,pw,ph,Array.from({length:d.n},()=>tokCard(sz)).join(''),'top')+'</div>';}
 function spareCard(){const v=S.meta.sp_card||'ch:0';if(v==='tok')return{tok:true};if(v==='own')return{o:{k:S.sp[0].k,ph:S.sp[0].ph,l:S.meta.sp_label||''}};const m=/^(ch|tg):(\d)$/.exec(v);return{o:m?S[m[1]][+m[2]]:S.ch[0]};}
-function sheetSpare(){const big=S.meta.sp_size!=='small',cols=big?5:6,sz=big?1.5:1.25,gap=.06,rows=Math.floor((10.4+gap)/(sz+gap)),c=spareCard();
+function sheetSpare(){const big=S.meta.sp_size!=='small',T=turned(),sz=big?1.5:1.25,gap=.06,cols=T?Math.floor((TW-.2+gap)/(sz+gap)):big?5:6,rows=Math.floor(((T?TH-.2:10.4)+gap)/(sz+gap)),c=spareCard();
   /* an empty card (an empty slot, or a card made on the spot with no label and no picture) prints write-in lines, not a blank box */
   const empty=!c.tok&&(!c.o||(!has(c.o)&&!String(lbl(c.o)||'').trim()));
   const one=c.tok?tokCard(sz):cardHtml(c.o,sz,{ul:true,cls:'sp',blank:empty});
-  return '<div class="pg port front" data-kind="spare" style="--s:1">'+sheetGrid(cols,rows,sz,sz,gap,8.5,11,Array.from({length:cols*rows},()=>one).join(''),'spare')+'</div>';}
+  return '<div class="pg port front'+(T?' tsheet':'')+'" data-kind="spare" style="--s:1">'+sheetGrid(cols,rows,sz,sz,gap,T?TW:8.5,T?TH:11,Array.from({length:cols*rows},()=>one).join(''),'spare')+'</div>';}
 function pageFront(kind){return kind==='ch'||kind==='tg'?pageGrid(kind):kind==='bd'?pageBoard():pageTokens();}
 const PGNAME={ch:'Choices',tg:'Targets',bd:'Board',tk:'Tokens'};
 function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.map(t=>t[0]).filter(k=>c['pg_'+k]);const pages=[];
@@ -256,6 +264,19 @@ function paginate(root,dup){let guard=0;
     const tmp=document.createElement('div');tmp.innerHTML=(dup?'<div class="pg front blank" data-kind="blank" data-label="blank sheet (keeps the next back on the reverse of its front)"></div>':'')+pageBack(pg.dataset.kind,moved.map(e=>e.outerHTML).join(''));
     const nodes=[...tmp.children];nodes[nodes.length-1].dataset.label=pg.dataset.label+', continued';let after=pg;nodes.forEach(n=>{after.insertAdjacentElement('afterend',n);after=n;});}
 }
+/* each landscape page in its own portrait frame: the page box (with its trim marks) turned a quarter, fronts clockwise and backs the other
+   way so that a long-edge flip puts each back the right way up behind its front; scaled down only if it would not fit the printable area */
+/* the paper the form asks for: landscape with no margin (the stylesheet), or, turned, portrait with Safari's own half-inch margins, so the
+   print layout is no wider than the paper Safari uses and nothing is shrunk to fit */
+function pageRule(){let st=document.getElementById('tkPageRule');if(!st){st=document.createElement('style');st.id='tkPageRule';}document.body.appendChild(st);st.textContent=turned()?'@page{size:letter portrait;margin:.5in}':'';}
+function turnPages(){pageRule();const b=$('#book');if(!b)return;b.classList.toggle('turned',turned());if(!turned())return;
+  [...b.querySelectorAll(':scope > .pg:not(.port)')].forEach(pg=>{const cv=pg.querySelector('.cv'),m=pg.querySelector('.trim')?.3:0;
+    let w=cv?cv.offsetWidth/96:8.82,h=cv?cv.offsetHeight/96:5.82;if(!cv&&!pg.classList.contains('blank')){w=11;h=8.5;}
+    /* the page box shrinks to the book page and its trim marks, so nothing is wider than the frame it is turned in */
+    if(cv||pg.classList.contains('blank')){const cx=cv?parseFloat(cv.style.left)||0:0,cy=cv?parseFloat(cv.style.top)||0:0;pg.style.width=(w+2*m)+'in';pg.style.height=(h+2*m)+'in';
+      if(cv){cv.style.left=m+'in';cv.style.top=m+'in';}pg.querySelectorAll('.trim').forEach(t=>{t.style.left=(parseFloat(t.style.left)-cx+m)+'in';t.style.top=(parseFloat(t.style.top)-cy+m)+'in';});}
+    const W=h+2*m,H=w+2*m,k=Math.min(1,TW/W,TH/H);const wr=document.createElement('div');wr.className='pgw';wr.style.width=(W*k).toFixed(3)+'in';wr.style.height=(H*k).toFixed(3)+'in';
+    pg.style.transform='translate(-50%,-50%) rotate('+(pg.classList.contains('back')?-90:90)+'deg)'+(k<1?' scale('+k.toFixed(4)+')':'');pg.parentNode.insertBefore(wr,pg);wr.appendChild(pg);});}
 function relabel(root){root.querySelectorAll('.pglabel').forEach(e=>e.remove());const pgs=[...root.querySelectorAll('.pg')];
   pgs.forEach((p,i)=>{const l=document.createElement('p');l.className='pglabel';l.textContent='Sheet '+(i+1)+' of '+pgs.length+': '+(p.dataset.label||'');p.insertAdjacentElement('beforebegin',l);});return pgs.length;}
 function renderOut(){
@@ -263,9 +284,9 @@ function renderOut(){
   $('#book').innerHTML=pages.map(p=>p.html.replace(/^<div class="pg /,'<div data-label="'+esc(p.label)+'" class="pg ')).join('');
   $('#chOut').innerHTML='<div class="book">'+pageGrid('ch')+'</div>';$('#tgOut').innerHTML='<div class="book">'+pageGrid('tg')+'</div>';$('#bdOut').innerHTML='<div class="book">'+pageBoard()+'</div>';
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
-  const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
+  const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);const r=relabel($('#book'));turnPages();return r;});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
-  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42g.)';
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42h.)';
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
   const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
@@ -281,7 +302,9 @@ function measured(fn){const secs=['preview','backs','choices','targets','board']
 /* "too full" keeps 3 % in hand: the fit runs on the zoomed screen preview, and the printed page lays the same lines out a few pixels taller */
 function tooFull(el){const r=el.getBoundingClientRect();if(!r.height)return false;const k=r.height/(el.offsetHeight||1)||1,cs=getComputedStyle(el);let bottom=r.top;for(const c of el.children){const cb=c.getBoundingClientRect().bottom+(parseFloat(getComputedStyle(c).marginBottom)||0)*k;if(cb>bottom)bottom=cb;}const limit=r.bottom-((parseFloat(cs.borderBottomWidth)||0)+(parseFloat(cs.paddingBottom)||0)+Math.max(2,el.clientHeight*.03))*k;return bottom>limit;}
 function fitOne(el){if(!el.clientHeight)return;if(el.dataset.fixed){el.style.fontSize=el.dataset.fixed;return;}el.style.fontSize='';const min=num(el.dataset.min)||8;let fs=parseFloat(getComputedStyle(el).fontSize)*72/96,g=0;while(tooFull(el)&&fs>min&&g++<30){fs=Math.max(min,fs-.25);el.style.fontSize=fs+'pt';}}
-function fitAll(){
+function fitAll(){const tb=$('#book'),tu=tb&&tb.classList.contains('turned');const rot=tu?[...tb.querySelectorAll('.pgw>.pg')].map(p=>[p,p.style.transform]):[];
+  if(tu){tb.classList.remove('turned');rot.forEach(([p])=>p.style.transform='');}try{fitAll0();}finally{if(tu){tb.classList.add('turned');rot.forEach(([p,t])=>p.style.transform=t);}}}
+function fitAll0(){
   $$('.fit').forEach(fitOne);
   $$('.ttl[data-frac]').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';const cs=getComputedStyle(el);const room=(el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))*(num(el.dataset.frac)||.8);let fs=parseFloat(cs.fontSize),g=0;/* the text's width in the title's own layout units: the range is measured on screen, so divide out any zoom in effect (the book's preview zoom, the polish layer's fit-to-window) */const w=()=>{const r=document.createRange();r.selectNodeContents(el);const k=el.getBoundingClientRect().width/(el.offsetWidth||1)||1;return r.getBoundingClientRect().width/k;};while(w()>room&&fs>16&&g++<80){fs-=1;el.style.fontSize=fs+'px';}});
   $$('.card .cl').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;while(el.scrollWidth>el.clientWidth+1&&fs>8&&g++<40){fs-=1;el.style.fontSize=fs+'px';}});
