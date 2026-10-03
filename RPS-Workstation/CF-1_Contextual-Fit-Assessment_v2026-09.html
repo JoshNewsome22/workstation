@@ -590,6 +590,8 @@ td input,td select{max-width:100%}
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="csvBtn">Export CSV</button>
+    <button id="rpBtn" title="Make a one-page questionnaire (a file or a link) for one respondent and one round, answered on any phone or computer and sent back by email">Respondent pages</button>
+    <button id="rcBtn" title="Read the answer codes the respondent pages sent back and place them into the respondent columns">Collect responses</button>
     <button id="clearBtn">Clear all</button>
   </div></div>
 </div>
@@ -609,6 +611,7 @@ td input,td select{max-width:100%}
       <div><label>Plan assessed</label><input data-m="plan" placeholder="e.g., BIP dated 8/12/26; Form TD-1"></div>
       <div><label>Setting</label><input data-m="setting"></div>
       <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Case BCBA email (respondent pages reply here)</label><input data-m="email" type="email" autocomplete="off"></div>
       <div><label>Date administered</label><input data-m="date"></div>
     </div>
     <table class="rt" style="margin-top:10px">
@@ -694,6 +697,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">What Contextual Fit Is, and What It Is Not</h2>
     <p>Contextual fit is the extent to which a support plan matches the values, skills, and resources of the people who will run it and the settings where it will run. It is a property of the relationship between a plan and a context, not a property of the plan and not a judgment of the staff. A technically excellent plan can have poor contextual fit, and fit affects whether a plan is run as written: after a protocol designed to improve fit was introduced, implementation fidelity rose and problem behavior fell (Monzalve &amp; Horner, 2021, with four participants). Poor fit is therefore one likely reason a well-designed plan produces no change.</p>
     <p>This form is not a satisfaction survey and not an evaluation of the implementer. It asks what would have to be true for the plan to actually run, and records where those conditions are absent. The answer to a low score is a change to the plan or to the supports around it, not pressure on the person who gave the score.</p>
+    <p class="hint rp-guide"><b>Respondent pages.</b> Ratings given independently are the point of this form, and <b>Respondent pages</b> in the toolbar makes that easy: a one-page questionnaire with the 21 items for one respondent and one round, as a file to attach to an email or as a link when the workstation is on a website. The respondent answers on any phone or computer and presses Send; an email to the case BCBA opens with the answers as a code, and <b>Collect responses</b> reads the codes back into that respondent&rsquo;s column and round here, with their name, role and periods. The page shows the student as initials and ID only and sends nothing anywhere but the email the respondent chooses to send.</p>
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
       <tr><th style="width:28%">Item mean</th><td>The mean rating across respondents who answered that item.</td></tr>
@@ -715,7 +719,60 @@ td input,td select{max-width:100%}
   </section>
 </main>
 
+<!-- v21.39: respondent pages and Collect responses (the dialogs and their rules; nothing here prints) -->
+<style id="cf1-respond-css">
+dialog.gf{border:0;border-radius:4px;padding:0;width:min(880px,94vw);box-shadow:0 20px 60px rgba(24,46,67,.35);font-family:var(--sans);color:var(--ink)}
+dialog.gf::backdrop{background:rgba(24,46,67,.45)}
+.gf-head{display:flex;align-items:center;justify-content:space-between;background:var(--nbh-navy);color:#fff;padding:9px 14px;font-family:var(--nbh-serif);font-size:16px;margin:0}
+.gf-head button{background:transparent;border:0;color:#fff;font-size:16px;cursor:pointer;padding:2px 8px;line-height:1}
+.gf-body{padding:14px 16px 16px;overflow:auto;max-height:calc(90vh - 60px)}
+.gf-body p.hint{margin:0 0 8px;line-height:1.5}
+.gf-body textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:6px;border:1px solid var(--rule-2);border-radius:2px;resize:vertical}
+.gf-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.gf-body button{font-family:var(--sans);font-size:12.5px;padding:5px 11px;border:1px solid var(--rule-2);background:#fff;color:var(--ink);border-radius:2px;cursor:pointer;min-height:30px}
+.gf-body button:hover{background:var(--wash)}
+.gf-body button.primary{background:var(--nbh-navy);color:#fff;border-color:var(--nbh-navy)}
+.gf-body button.primary:hover{background:var(--nbh-slate)}
+.gf-body button:disabled{opacity:.5;cursor:default}
+table.gf-t{border-collapse:collapse;width:100%;font-size:12px;margin:8px 0}
+table.gf-t th,table.gf-t td{border:1px solid var(--rule-2);padding:4px 6px;text-align:left;vertical-align:top}
+table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
+.gf-note{display:block;font-size:12px;color:var(--ink-soft);margin:6px 0}
+.gf-warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 10px;font-size:12.5px;margin:8px 0}
+#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+#rpDlg .f label{display:block;font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:6px 0 2px}
+#rpDlg .f input,#rpDlg .f select,#rpDlg .f textarea{width:100%;box-sizing:border-box;font:inherit;font-family:var(--sans);font-size:13px;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;background:#fff;color:var(--ink)}
+@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}
+@media print{dialog.gf{display:none!important}}
+</style>
+<dialog id="rpDlg" class="gf noprint" aria-labelledby="rpTitle">
+  <form method="dialog" class="gf-head"><b id="rpTitle">Respondent pages</b><button value="close" aria-label="Close">&#x2715;</button></form>
+  <div class="gf-body">
+    <p class="hint">One page per respondent and round, with the 21 items. Send it as a file (attach it to an email; it opens in any browser, nothing to install) or, when the workstation is on a website, as a link. The respondent answers and presses Send; an email to you opens with the answers as a short code, which <b>Collect responses</b> places into that respondent&rsquo;s column and round. Keep the student&rsquo;s full name out of it: the page shows the label below.</p>
+    <div class="grid2">
+      <div class="f"><label for="rpRole">Respondent role (the page names it; the respondent can correct it)</label><select id="rpRole"><option value="teacher" selected>Classroom teacher</option><option value="para">Paraprofessional</option><option value="rsp">Related-service provider</option><option value="other">Other</option></select></div>
+      <div class="f"><label for="rpRound">Round</label><select id="rpRound"><option value="1">Round 1, before enhancement</option><option value="2">Round 2, after enhancement</option></select></div>
+      <div class="f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
+      <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
+      <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
+    </div>
+    <div id="rpStatus" class="gf-warn" hidden></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
+  </div>
+</dialog>
+<dialog id="rcDlg" class="gf noprint" aria-labelledby="rcTitle">
+  <form method="dialog" class="gf-head"><b id="rcTitle">Collect responses</b><button value="close" aria-label="Close">&#x2715;</button></form>
+  <div class="gf-body">
+    <p class="hint">Paste the emails the respondent pages sent you (whole messages are fine; only the codes starting <b>NBH1.</b> are read), or choose the files respondents saved. Each response goes into the column of the respondent with that name (so round 2 lands beside the same person&rsquo;s round 1), or into the next empty row of the Respondents table, in the round the page was made for.</p>
+    <textarea id="rcText" rows="5" placeholder="Paste the emails or the codes here" spellcheck="false" aria-label="Pasted responses"></textarea>
+    <div class="gf-row"><button type="button" id="rcRead">Read what I pasted</button><button type="button" id="rcFileBtn">Choose files</button><input type="file" id="rcFile" accept=".txt,.nbhr.txt,.json,text/plain,application/json" multiple hidden><span id="rcStatus" class="hint"></span></div>
+    <div id="rcOut"></div>
+  </div>
+</dialog>
+
+<script src="nbh-respond.js"></script>
 <script>
+if(!window.NBH_RESPOND){window.NBH_RESPOND_MISSING=true;}
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const f1=v=>v==null?'\u2014':v.toFixed(1);
@@ -1197,6 +1254,79 @@ async function loadSim(){
   nbhUI.toast('Simulation loaded: a simulated administration with 21 items, 4 respondents and two rounds.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
+
+/* ---------- respondent pages and collected responses (v21.39) ----------
+   A respondent page is a self-contained HTML questionnaire with the 21 items for one respondent and one round (the
+   library nbh-respond.js builds it; the one-file edition carries the library). The respondent answers on any phone
+   or computer and presses Send, which opens an email to the case BCBA with the answers as one code (NBH1....).
+   Collect responses reads those codes (pasted emails or saved files) and places each into the column of the
+   respondent with that name, or the next empty column, in the round the page was made for. */
+const RP_ROLES=[['teacher','Classroom teacher'],['para','Paraprofessional'],['rsp','Related-service provider'],['other','']];
+const RP_ROLE=k=>{const r=RP_ROLES.find(x=>x[0]===k);return r?r[1]:null;};
+function rpParse(inst){const m=/^([a-z]+)-r([12])$/.exec(String(inst||''));if(!m||RP_ROLE(m[1])==null)return null;return {rk:m[1],role:RP_ROLE(m[1]),round:+m[2]};}
+function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=String(S.meta.sid||'').trim();return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
+function rpPayload(){const rk=$('#rpRole').value,round=+$('#rpRound').value,role=RP_ROLE(rk),plan=String(S.meta.plan||'').trim(),bcba=String(S.meta.bcba||'').trim()||'the BCBA';
+  return {v:1,form:'CF-1',inst:rk+'-r'+round,title:'Contextual fit, round '+round,heading:'Contextual Fit: Round '+round+(round===1?' (before enhancement)':' (after enhancement)'),
+    student:$('#rpStudent').value.trim(),bcba,email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
+    sub:'For '+(role?'a '+role.toLowerCase():'someone')+' who will run the plan'+(plan?' ('+plan+')':'')+'. Do you know it, can you do it, do you believe in it, and do you have the time and backing to carry it out? Rated alone, not in a meeting: the disagreements are what the form is for.',
+    instructions:'Rate each statement from your own view, 1 (strongly disagree) to 6 (strongly agree); there is no midpoint, and no statement is skipped. A low rating changes the plan or the supports around it, not what is expected of you. When you have finished, press Send: your email program opens with a message to '+bcba+' ready to go.',
+    items:ITEMS.map(([d,txt],i)=>({n:i+1,text:txt})),scale:{kind:'num',min:1,max:6,anchors:['1 strongly disagree','2 disagree','3 slightly disagree','4 slightly agree','5 agree','6 strongly agree']},
+    extras:[{id:'name',label:'Your name',req:true},{id:'role',label:'Your role (teacher, paraprofessional, SLP...)'},{id:'when',label:'When you run the plan (which periods)'},{id:'mo',label:'Months with this student'}],
+    itemsHeading:'The statements',subject:'Contextual fit round '+round+' answers for Form CF-1'};}
+function rpStatus(){const st=$('#rpStatus'),bad=[];
+  if(window.NBH_RESPOND_MISSING)bad.push('The file nbh-respond.js is not beside this form, so no page can be built. Keep the workstation folder together.');
+  if(!$('#rpEmail').value.trim())bad.push('Enter your email: the answers are sent to it.');
+  st.hidden=!bad.length;st.innerHTML=bad.map(esc).join('<br>');
+  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
+  const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this questionnaire':'A link works when the workstation is on a website; opened from a folder, send the file';
+  $('#rpNote').textContent=bad.length?'':ITEMS.length+' items, round '+$('#rpRound').value+'.'+(served?'':' Opened from a folder: send the file; the link needs the workstation on a website.');}
+function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='CF-1_'+p.inst+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  if(window.nbhUI)nbhUI.toast('Respondent page saved: '+name+'. Attach it to an email to the respondent.',{kind:'ok'});return name;}
+function rpLinkUrl(){const p=rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
+$('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=String(S.meta.email||'').trim();
+  $('#rpRound').value=String(S.round);rpStatus();$('#rpDlg').showModal();});
+['rpRole','rpRound','rpEmail','rpStudent'].forEach(id=>{$('#'+id).addEventListener('input',rpStatus);$('#'+id).addEventListener('change',rpStatus);});
+$('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();S.meta.email=e.value;}});
+$('#rpSave').addEventListener('click',rpFile);
+$('#rpPreview').addEventListener('click',()=>{const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
+$('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+  try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
+$('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+/* collecting: the slot is the column of the respondent with that name, else the next empty column, else a new one */
+let rcData=null;
+const rpBlankRater=(r,j)=>!['name','role','when','mo'].some(f=>String(r[f]||'').trim())&&![1,2].some(n=>ITEMS.some((_,i)=>val(i,j,n)!=null));
+function rpSlot(o,taken){const nm=String(o.name||'').trim().toLowerCase();
+  let j=S.raters.findIndex((r,i)=>!taken.includes(i)&&nm&&String(r.name||'').trim().toLowerCase()===nm);
+  if(j<0)j=S.raters.findIndex((r,i)=>!taken.includes(i)&&rpBlankRater(r,i));
+  return j;}
+function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEach(o=>found.push(o)));
+  const mine=found.filter(o=>o.form==='CF-1'&&rpParse(o.inst));const out=$('#rcOut');rcData=null;
+  if(!mine.length){out.innerHTML='<div class="gf-warn">'+(found.length?'The codes found belong to another form ('+esc([...new Set(found.map(o=>o.form))].join(', '))+'), not CF-1.':'No answer code (NBH1....) was found in what was pasted or chosen.')+'</div>';return;}
+  let h='<p class="hint" style="margin:6px 0"><b>'+mine.length+' response'+(mine.length===1?'':'s')+' found.</b> Ticked responses are placed in order; a response from a respondent already listed goes into their column.</p>';
+  h+='<table class="gf-t"><thead><tr><th></th><th>Respondent</th><th>Role</th><th>Round</th><th>Sent</th><th>Answers</th><th>Goes to</th></tr></thead><tbody>';
+  mine.forEach((o,i)=>{const P=rpParse(o.inst),k=(o.ans||[]).filter(x=>/^[1-6]$/.test(String(x))).length,fit=(o.ans||[]).length===ITEMS.length;
+    h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(fit?' checked':' disabled')+' aria-label="Place this response"></td><td>'+(esc(o.name)||'<i>no name</i>')+'</td><td>'+esc(String(o.role||'').trim()||P.role||'')+'</td><td>'+P.round+'</td><td>'+esc(o.date||'')+'</td><td>'+k+' of '+ITEMS.length+'</td><td class="gf-slot">'+(fit?'':'<i>cannot be placed: the page carried '+(o.ans||[]).length+' items where this form has '+ITEMS.length+'</i>')+'</td></tr>';});
+  h+='</tbody></table><div class="gf-row"><button type="button" class="primary" id="rcGo">Place into the respondent columns</button><span class="hint">Ratings already in that column for that round are replaced; name, role, periods and months fill where the row is empty.</span></div>';
+  out.innerHTML=h;rcData={list:mine};
+  const slots=()=>{const taken=[];let added=0;$$('#rcOut tbody tr').forEach((tr,i)=>{const cb=tr.querySelector('[data-rc]'),td=tr.querySelector('.gf-slot');if(cb.disabled)return;if(!cb.checked){td.textContent='';return;}
+    const j=rpSlot(mine[i],taken);if(j>=0){taken.push(j);td.textContent='Respondent '+(j+1)+(String(S.raters[j].name||'').trim()?' ('+S.raters[j].name+')':' (empty row)');}else{added++;td.textContent='New row '+(S.raters.length+added);}});};
+  slots();$$('#rcOut [data-rc]').forEach(cb=>cb.addEventListener('change',slots));
+  $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>a.list[+cb.dataset.rc]);if(!picked.length){alert('Tick at least one response.');return;}
+    const taken=[],where=[];let cells=0;
+    picked.forEach(o=>{const P=rpParse(o.inst);let j=rpSlot(o,taken);if(j<0){S.raters.push({name:'',role:'',when:'',mo:''});j=S.raters.length-1;}taken.push(j);
+      const r=S.raters[j];if(!String(r.name||'').trim())r.name=String(o.name||'').trim();if(!String(r.role||'').trim())r.role=String(o.role||'').trim()||P.role||'';
+      if(!String(r.when||'').trim())r.when=String(o.when||'').trim();if(!String(r.mo||'').trim())r.mo=String(o.mo||'').trim();
+      ITEMS.forEach((_,i)=>{const v=String((o.ans||[])[i]==null?'':(o.ans||[])[i]);if(/^[1-6]$/.test(v)){S.scores[P.round][k(i,j)]=v;cells++;}else delete S.scores[P.round][k(i,j)];});
+      where.push((r.name||'respondent '+(j+1))+' (round '+P.round+')');});
+    S.round=rpParse(picked[picked.length-1].inst).round;renderAll();$('#rcDlg').close();setView('rate');
+    if(window.nbhUI)nbhUI.toast('Collected '+picked.length+' response'+(picked.length===1?'':'s')+' from respondent pages: '+cells+' ratings placed for '+where.join('; ')+'. Check the Respondents table on Setup, then the ratings.',{kind:'ok'});});}
+$('#rcBtn').addEventListener('click',()=>{$('#rcText').value='';$('#rcOut').innerHTML='';$('#rcStatus').textContent='';rcData=null;$('#rcDlg').showModal();$('#rcText').focus();});
+$('#rcRead').addEventListener('click',()=>rcRead([$('#rcText').value]));
+$('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
+$('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
+$('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:rpPayload};   /* for the checks */
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
