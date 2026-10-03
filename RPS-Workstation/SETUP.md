@@ -4655,7 +4655,9 @@ and again before printing. The master print, which takes each form's
 sheet from the live page, still carries the image in every section.
 TD-1 went from 1,305 KB to 598 KB, PA-1 from 1,270 KB to 727 KB, EA-1
 from 1,054 KB to 620 KB, and the 42 forms with the index from 20.6 MB
-to 14.7 MB; the one-file editions shrink with it.
+to 14.6 MB. The one-file editions stay at 5.6 MB: their packing already
+compressed the repeated image to nothing, so the saving is in the
+folder editions and in what the browser parses per form.
 `tools/build-rps.py` now expects the logo in 43 places (once per form,
 once in the index). `$S/logo/dedupe.py` did it and is idempotent;
 `new-form.py` copies the script from the template's head, so a rebuilt
@@ -4675,3 +4677,247 @@ parsed; the forms' helpers restored and no download fired from them;
 the bar button downloads `CASE_Sample_Student_date.xlsx`), the DA-1 and
 OB-1 form tests, the shell screenshots of CF-1, SM-1 and TD-1 with the
 light toolbar, and the earlier checks all pass.
+
+## The Workshop Committed (v21.36a)
+
+The sources behind the forms had lived only in the working session: the
+parts of the nine forms built from parts, the three shared block sources
+and their patchers, the per-form case hooks, the post-build polish, the
+logo de-duplication and most of the checks. They are now in the
+repository: `tools/forms/<ID>/` (the parts; rebuilding each from them
+reproduces the shipped file byte for byte, checked for all nine),
+`tools/blocks/` (the blocks, the patchers, the hooks), `tools/polish-one.py`,
+`tools/dedupe-logo.py`, `tools/rps-assets/` (the school lockup and tab
+icon the RPS build needs), `tools/history/` (the one-shot scripts that
+produced earlier versions of the index, kept as a record) and `qa/` (the
+checks, with their outputs under `qa/out/`, ignored by git, and their
+paths relative to the repository). `tools/README.md` says what each is
+and gives the rebuild, refresh, build and check commands. Nothing in the
+shipped editions changed.
+
+## Every Procedure Runnable: the Yoked Control, and an Audit of the Forms' Procedures (v21.37)
+
+The question for this version was whether every procedure a form
+names, in a Select variant control, a condition card, a runner mode, a
+Design page or a Guide sentence, can be run on that form: the sheet
+with the fields the procedure produces, the timing read from the card,
+the computation the interpretation needs, the print, the simulation,
+and a Guide that promises nothing the form does not do. EA-1's yoked
+control was the case that prompted it; three agents then drove every
+procedure on the other 29 forms that carry one (the document forms
+DM-1, IC-1, RR-1, EB-1, FS-1, CF-1, SV-1, PD-1, TB-1, IN-1, CN-1 and
+VS-1 name none). Fourteen gaps were fixed in place and fourteen
+additions built where a procedure had no sheet, no figure or no log.
+Every blank print is unchanged; a simulation print grows only where a
+new table now prints (TD-1, VI-1 and OB-1 by one page each).
+
+### The yoked control runs on EA-1's runner
+
+EA-1 described the yoked control (a master session in which the
+reinforcer follows the target, a yoked session in which the same
+reinforcer arrives at the master's recorded times whatever the student
+is doing) and its card told the data collector to record every
+delivery time, but the runner discarded those times at Save to the
+log and had no way to replay them. Now:
+
+- A session run on the runner keeps the time of every contingent
+  delivery (each consequence period it opened) in its log row, in a
+  hidden text field `s[i].y` (`v1;cons=30;min=10;t=12.4,33.0,...`) that
+  saves with the file and never prints; the Notes say "n deliveries,
+  times kept for a yoked session" and the session summary shows the
+  count.
+- The runner's settings gain **Replay deliveries from**, shown once any
+  row holds a record, listing those sessions (number, date, condition,
+  deliveries). Picking one sets the length and the consequence period
+  to the master's, switches off any attention schedule, and during the
+  session cues each delivery at its recorded time (the consequence cue,
+  "Delivery 2 of 3: deliver the reinforcer now, whatever the student is
+  doing") and opens the consequence period; nothing follows the target
+  (`reinforce` returns at once while a record is in play). The cue box
+  counts down to the next delivery.
+- The summary adds "Replayed deliveries n of m from session k" and
+  "Within 3 s of a target", the count of deliveries that landed within
+  3 s of a target, which is the record Church's (1964) caveat asks for;
+  the Notes carry both. A yoked session keeps no record of its own.
+- A condition card named "Yoked" preselects the latest record; any
+  condition can be yoked to any recorded session (an NCR control
+  matched to a test session, the comparison SR-1 describes). "No
+  consequence follows the target" on a card now reads as none, so the
+  yoked card no longer inherits a 30-s period.
+- The cards and the Guide say what the runner does; the Guide's "On
+  this form" paragraph sits before the known-limitation warning.
+
+`qa/ea1-yoke-test.js` runs the runner's clock at twenty times real
+time: a one-minute master session with targets at 5, 20, 24 and 35 s
+records three deliveries (the target inside a period makes none), the
+row keeps the record, the yoked card preselects it and takes its
+settings, the yoked session cues the three deliveries at their times
+with no consequence after a target, two land within 3 s of a target,
+the Notes say so, the file saves and reopens with the record, an
+ordinary card is unaffected, and the blank print page count is
+unchanged (18). Fifteen checks pass.
+
+### Assessment protocols (RA-1, PA-1, DA-1, DT-1, AD-1, VI-1)
+
+Every runner and sheet on these six forms was driven: RA-1's single
+operant (reversal and multielement), concurrent operants, condition
+comparison and progressive ratio; PA-1's eleven assessment runners
+from the prerequisite check to the competing-stimulus variants and the
+monitoring log; DA-1's alternating order, sessions and ranking; DT-1's
+eight tabs from the dimension check through discounting to hand-off;
+AD-1's eight sections; VI-1's nine tabs. Found and fixed: RA-1's
+condition-comparison runner saved a session ended early with the Ended
+early column blank, so the grid's own check then flagged it; PA-1's
+monitoring verdict ignored the Guide's second rule (an item leaving
+the top three on two consecutive brief MSWOs) although the log
+computed it; DA-1's Guide said the sessions record instruction pacing
+(one Inventory setting held constant) and omitted two of the
+modifications the code proposes; DT-1's progress and delay-accuracy
+rows had to be copied from the session sheet by hand, and a Carry
+button now writes them; AD-1's skill-acquisition question promised
+minutes to mastery with and without reinforcer time and gave only
+sessions; VI-1's candidate labels, which the register says head the
+ledger columns, had to be typed again, and are now mirrored while the
+header is blank.
+
+Built where a procedure had no sheet or no computation:
+
+- **DT-1 aversiveness verification (2E)** has a selection-rounds grid
+  under its table (one row per round, the rank picked per task); mean
+  selection rank and % selected are computed into the table, which
+  goes read-only while a round holds a value; saved as `avr`, printed
+  once a round is entered. The simulation's five rounds now compute
+  the figures its summary used to carry as typed numbers. **DT-1 2A**
+  shows, beside the checkbox, whether table A meets "80% in two
+  consecutive sessions" and on which sessions.
+- **VI-1 joint method** is computed: a matched non-occurrence ledger
+  under the pairs table codes each pair's non-occurrence P/A per
+  candidate under the Tab 4 labels; present-in-all comes from Tab 4,
+  absent-in-all from the ledger (Yes, Mostly at two thirds, No), pairs
+  implicating from the codes, and the verdict (Strongly implicated,
+  Implicated by difference only, Eliminated, Retained: insufficient
+  pairs); the typed cells remain the fallback when nothing is coded.
+  The simulation codes its eight pairs and computes to the answer its
+  Guide states. A **contingency-space plot** (P(C|B) against P(C|not
+  B), the no-contingency diagonal, one point per consequence row) sits
+  under the contingency table and prints with it when a row computes.
+- **AD-1's classroom question** labels the log, caption, graph axis,
+  comparison and decision lines as intervals observed and intervals
+  on task.
+- `qa/ra1-regress.js` writes its print snapshot on a first run
+  (`qa/data/RA-1.snap.json`) and compares on later runs.
+
+### Treatment design forms (SR-1, TD-1, TE-1, RM-1, PR-1, GB-1, CR-1, BC-1, GC-1, SM-1)
+
+Every schedule designer, component card, thinning ladder, decision rule
+and record on these ten forms was driven against what its Guide
+promises. Found and fixed: SR-1's Guide gave the arithmetic VI series as
+2T/N, 4T/N when the designer uses 2T/(N+1) (which averages T), and said
+the token designer warns "when the exchange-production requirement is
+large" where the code's rule is more than 50 responses per exchange,
+now stated as a working convention; the card put a "Date reached"
+column and the heading "Steps" on the progressive-ratio breakpoints,
+the token back-ups and the interlocking minute table, which now carry
+their own headings; SM-1's Record applied the teacher-match agreement
+rules to systems that have no teacher match (contract, expectations,
+CICO, performance), and its "Points possible" row omitted the
+expectations-and-earns system; TD-1's thinning ladder for NCE, NCR and
+DRO gave "FT × 2 / × 4" with no seconds, and now reads the card's own
+initial interval ("FT below mean IRT (19 s on the card)", "FT × 2
+(38 s)"); TE-1's unit-price bands (low to 10, moderate to 40, high
+above 40 responses per back-up) were nowhere named as the form's own
+convention; RM-1's plan sheet said a low proportion with a high raw
+rate "triggers" the safety row when the form fixes no raw-rate
+threshold. PR-1, GB-1, CR-1 and BC-1 matched their Guides on every
+rule driven (the plan-run gate, the fidelity-beside-outcome marks, the
+exit readiness check, the deadline clock, the direction test's four
+branches).
+
+Built where a procedure had no sheet:
+
+- **TD-1 high-p trial sheet.** The high-p sequence planner gave the
+  Guide's 40% identification and 80% re-verify rules nothing to read.
+  The Antecedents sheet now has a per-session trial sheet under the
+  planner (date, order used, trials 1 to 5 with high-p 1, 2, 3 and the
+  low-p instruction each Y/N), computing low-p cooperation per session
+  against the 40% figure and each high-p instruction's cooperation
+  against 80%, flagging an instruction to re-verify on ten probe trials
+  or replace; an All row pools the sessions. It saves with the file
+  (`ant.hp.t[s].*`, `counts.hp`), prints with the planner only when
+  filled (the blank print is unchanged at 39 pages; the escape-FCT
+  simulation, which fills four sessions, prints one page more), and
+  the Guide names it.
+- **TE-1 thinning record** has a Backups per exchange column, so a
+  step on the exchange schedule is numeric and each step's unit price
+  shows beside its responses per exchange.
+- **GC-1 Record** names the winning team(s) per day when a "fewest
+  fouls wins" option is chosen (lowest score, ties both, and teams at
+  or under the criterion when that option says so), and tootling has a
+  cumulative goal with a running Total column and a decision rule that
+  reads progress to the goal (days on this count, mean per game day,
+  days still needed) instead of a per-day met.
+- **SR-1's card** names the workstation forms that hold the data
+  sheets its schedules need (DD-1 for counts and intervals per session,
+  SM-1 for the interlocking session sheet, MT-1 for interval samples)
+  in place of a "DRO interval log" that was no workstation form.
+
+### Measurement and training forms (OB-1, MT-1, ABC-1, DD-1, SP-1, SA-1, HD-1, TI-1, ST-1, CT-1, MS-1, SI-1, IA-1)
+
+Every recording method, runner mode, agreement figure, scoring rule
+and decision rule on these thirteen forms was driven against its
+Guide: the three interval methods and the Live Recorder on OB-1, MT-1's
+runner and its three agreement figures, ABC-1's timed checks and the
+2 by 2 with Camp's criteria, DD-1's four entry modes and its
+within-condition and between-condition statistics, SP-1's control
+chart on Wheeler's four criteria, SA-1's trial grid, prompting rules,
+three chaining methods and probes, TI-1's runner with the repeated-step
+roll-up, ST-1's rehearsal runner, competency gates and the import from
+TI-1, CT-1's home probe, MS-1's AIMS summary rules and weekly grid,
+SI-1's assent log, and IA-1's five instruments. All matched. One gap
+fixed: SA-1's Setup asks for the settings or material sets the mastery
+criterion requires and nothing counted them; the probe metrics now
+count a passed generalization probe once per distinct setting or
+material condition against that number, and the probes sheet re-reads
+the criterion when Setup changes.
+
+Built where a procedure had no field, figure or log:
+
+- **ABC-1** holds the consequence window and the background check
+  interval in the Observation header (saved, printed, and taken by
+  the timer as its setting), where the walkthrough had said they were
+  "written down" with nowhere to write them.
+- **OB-1** computes scored-interval and unscored-interval IOA from
+  the two observers' marks (the stricter checks for a rare and a
+  frequent behavior respectively), flags each below 80%, carries both
+  in the CSV, and its Guide no longer says the form does not compute
+  them.
+- **MT-1** carries the three agreement figures (point-by-point,
+  occurrence, non-occurrence) into the session log at Capture, and
+  its CSV lists the log after the intervals.
+- **MS-1** has a Screens on File log on the EPS sheet (date,
+  occasion, rater, AIMS total, Schooler-Kane, observer ratings) with
+  Log this screen, and the baseline, three-month and six-monthly due
+  dates run from the antipsychotic's start date, marked logged or not;
+  every simulation holds two screens.
+- **SA-1** shows a Delay (s) or level row under the trial grid when
+  the hierarchy is constant or progressive time delay (or Setup names
+  a delay), prints it on the trial sheet, and applies a time-delay
+  rule in the decision rules (a 0-s session with every trial correct
+  moves to the delay; more than 20% errors at a delay returns to 0 s
+  for a session; under progressive delay a criterion session with no
+  error lengthens the delay), labelled working conventions after
+  Wolery, Ault and Doyle (1992), already on its list.
+
+### Checks
+
+`qa/ea1-yoke-test.js` (fifteen checks, above), the agents' Playwright
+drives of every runner mode and procedure on the 29 forms (each
+ending with no console or page error; outputs under the scratch
+folder's protocols, design and measure groups), the form tests
+(`sm1`, `sa1`, `gc1`, `si1`, `da1`, `hd1`, `cn1`, `sr1`, `vs1`, `pd1`,
+`ob1-ioa`, `ob1-split`), `all-forms-shell`, `u-check`, `u-recorder`,
+`case-test`, `xlsx-test`, `logo-test`, `due-test`, `bip4-test`,
+`guard-test`, `rowdel-test`, `v2133-test`, `ui-sweep` and
+`shell-ui-test` all pass. `qa/sm1-test.js` asked for a PDF it never
+wrote and now reads the one it does; `qa/ra1-regress.js` writes its
+snapshot on a first run.

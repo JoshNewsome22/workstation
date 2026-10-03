@@ -33,6 +33,11 @@ Double-click index.html. Everything runs from this folder.
   - Load simulation on a form fills it with a worked example and says so in
     one line; the form's Guide explains what the example shows. Nothing in a
     simulation is a real student record.
+  - Every procedure a form names can be run on it: the yoked control on EA-1
+    replays a master session's deliveries from the runner; the high-p trial
+    sheet on TD-1, the selection rounds on DT-1, the computed joint method on
+    VI-1, the screening log on MS-1 and the stricter agreement checks on OB-1
+    are among the sheets added so the Guides' rules have data to read.
   - Two or three open forms can show at once: "Side by side" above the form.
     For an observation, OB-1, MT-1 and ABC-1 together put the narrative, the
     interval sample and the ABC record on one screen.

@@ -622,10 +622,10 @@ td input,td select{max-width:100%}
     <div id="upVerdict"></div>
 
     <h3 style="margin-top:14px">Thinning Plan</h3>
-    <p class="hint">Thin one schedule at a time and record which. Response rates vary inversely with both the token-production and the exchange-production ratio, and the two interact (Bullock &amp; Hackenberg, 2006), so raising both at once makes the effect uninterpretable. Each step shows its responses per exchange: the token-production ratio times the exchange-production ratio.</p>
+    <p class="hint">Thin one schedule at a time and record which. Response rates vary inversely with both the token-production and the exchange-production ratio, and the two interact (Bullock &amp; Hackenberg, 2006), so raising both at once makes the effect uninterpretable. Each step shows its responses per exchange, the token-production ratio times the exchange-production ratio, and, where the backups per exchange are entered, its unit price (responses per backup delivery), so a step that thins the token-exchange schedule is numeric too.</p>
     <div class="grid-wrap"><table class="rt" id="thinTbl"><thead><tr>
-      <th style="width:44px">Step</th><th style="width:13%">Date</th><th style="width:15%">Schedule thinned</th>
-      <th style="width:12%">Token prod.</th><th style="width:12%">Exch. prod.</th><th style="width:11%">Responses per exchange</th><th>Criterion to advance / what happened</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:44px">Step</th><th style="width:11%">Date</th><th style="width:14%">Schedule thinned</th>
+      <th style="width:9%">Token prod.</th><th style="width:9%">Exch. prod.</th><th style="width:9%">Backups per exch.</th><th style="width:9%">Responses per exchange</th><th style="width:8%">Unit price</th><th>Criterion to advance / what happened</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addThin">Add step</button><button class="tool" id="delThin">Remove last</button>
     </div>
@@ -681,7 +681,7 @@ td input,td select{max-width:100%}
     <p>Hackenberg (2009) analyses token systems into three schedules. The <b>token-production schedule</b> specifies what the student does to earn a token. The <b>exchange-production schedule</b> specifies when an exchange opportunity is made available: in Bullock and Hackenberg (2006), and on this form, after a fixed number of tokens has been earned. The <b>token-exchange schedule</b> specifies how tokens are exchanged for backup reinforcers during that opportunity; in that study it was held at FR 1, and each token bought one food delivery (Hackenberg, 2009). In most classroom systems all three are collapsed and only one is ever adjusted, which is why thinning a token board so often produces an effect nobody can explain.</p>
     <p>Bullock and Hackenberg (2006) manipulated the first two independently under second-order schedules. Response rates varied inversely with the token-production ratio at every exchange-production ratio, and inversely with the exchange-production ratio at every token-production ratio, most clearly at the higher token-production values. At higher values of both, responding increased in the segments closer to the exchange period &mdash; the chained character of the arrangement showing through, with rate rising as the backup came nearer.</p>
     <h2 class="nbh-band" style="margin-top:16px">Unit Price</h2>
-    <p>Unit price expresses the cost of a reinforcer in responses: total responses divided by the reinforcers obtained. In a token system it is the token-production ratio multiplied by the exchange-production ratio, divided by the number of backup deliveries an exchange yields, each counted in one fixed unit, since unit price is responses per unit of reinforcer (Hackenberg, 2009): five stars exchanged at one minute of tablet per star are five one-minute deliveries. Two systems with very different-looking boards can impose the same unit price, and two that look similar can differ several-fold. This form computes it so the comparison is available before a thinning step rather than after. Bullock and Hackenberg (2006), however, found only some of their results consistent with unit price; most were well accounted for by the number of responses required to produce an exchange period, without regard to the amount of reinforcement available during it. The form shows that figure, responses per exchange, beside the unit price and for each step of the thinning record; the unit price of a past step would need the number of backup deliveries its exchange yielded, which the record does not hold.</p>
+    <p>Unit price expresses the cost of a reinforcer in responses: total responses divided by the reinforcers obtained. In a token system it is the token-production ratio multiplied by the exchange-production ratio, divided by the number of backup deliveries an exchange yields, each counted in one fixed unit, since unit price is responses per unit of reinforcer (Hackenberg, 2009): five stars exchanged at one minute of tablet per star are five one-minute deliveries. Two systems with very different-looking boards can impose the same unit price, and two that look similar can differ several-fold. This form computes it so the comparison is available before a thinning step rather than after; the band it puts under the figure (low to 10, moderate to 40, high above 40 responses per backup delivery) is a working convention of this form, not a threshold from the sources. Bullock and Hackenberg (2006), however, found only some of their results consistent with unit price; most were well accounted for by the number of responses required to produce an exchange period, without regard to the amount of reinforcement available during it. The form shows that figure, responses per exchange, beside the unit price and for each step of the thinning record; the unit price of a past step is shown when the record holds the number of backup deliveries its exchange yielded (the Backups per exchange column).</p>
     <h2 class="nbh-band" style="margin-top:16px">Generalized Conditioned Reinforcement</h2>
     <p>DeFulio, Yankelevitz, Bullock, and Hackenberg (2014) ran pigeons in a token economy where tokens bought food on one side of the chamber and water on the other, under separate food and water restriction. A third, generalized token type could be exchanged for either. The number of tokens accumulated before exchange rose as the exchange-production schedule was raised, and pigeons produced more generalized than specific tokens, suggesting enhanced reinforcing efficacy of generalized tokens. When the token-production price of each type was changed, production of specific and generalized tokens changed in opposite directions, indicating substitutability. The demonstration matters for practice because it separates a token that works for one backup from a token that holds its value across establishing operations &mdash; which is what a classroom system needs if it is to survive a student who is not hungry today.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
@@ -720,7 +720,7 @@ const AUDIT=[
 ];
 function blank(){return{meta:{},thin:[],bk:[],aud:{}};}
 let S=blank();
-function ensure(){while(S.thin.length<3)S.thin.push({d:'',w:'',tp:'',ep:'',crit:''});
+function ensure(){while(S.thin.length<3)S.thin.push({d:'',w:'',tp:'',ep:'',te:'',crit:''});
   while(S.bk.length<4)S.bk.push({n:'',c:'',cost:'',pref:'',conf:'',note:''});}
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -760,6 +760,9 @@ function renderSchSummary(){
   $('#upVerdict').innerHTML=v;
 }
 function thinCell(r){const x=perExchange(r.tp,r.ep);return x==null?'\u2014':fmtN(x);}
+/* a step's unit price, shown when its backups per exchange are entered (a blank is not assumed to be 1 here: the
+   figure is a record of the step, not an estimate) */
+function upCell(r){const x=num(r.te)?unitPrice(r.tp,r.ep,r.te):null;return x==null?'\u2014':x.toFixed(1);}
 function renderSch(){
   renderChain();renderSchSummary();
   $('#thinTbl tbody').innerHTML=S.thin.map((r,i)=>`<tr><td style="text-align:center;font-weight:600">${i+1}</td>
@@ -767,13 +770,15 @@ function renderSch(){
       <td><select data-t="${i}" data-f="w"><option value=""></option>${['Token production','Exchange production','Token exchange','Both ratios'].map(o=>`<option${r.w===o?' selected':''}>${o}</option>`).join('')}</select></td>
       <td><input type="number" step="any" data-t="${i}" data-f="tp" value="${esc(r.tp)}"></td>
       <td><input type="number" step="any" data-t="${i}" data-f="ep" value="${esc(r.ep)}"></td>
+      <td><input type="number" step="any" data-t="${i}" data-f="te" value="${esc(r.te||'')}" aria-label="Step ${i+1} backups per exchange"></td>
       <td class="rpe" style="text-align:center;font-weight:600">${thinCell(r)}</td>
+      <td class="upc" style="text-align:center;font-weight:600">${upCell(r)}</td>
       <td><textarea data-t="${i}" data-f="crit" rows="2">${esc(r.crit)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): a thinning step can be deleted anywhere in the record; the steps after it move up one, and the
    record keeps the form's three blank rows at least (ensure), as it does when a file is opened */
 async function delThinAt(i){const r=S.thin[i];if(!r)return;
-  if(['d','w','tp','ep','crit'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nWhat was entered in it will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
+  if(['d','w','tp','ep','te','crit'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nWhat was entered in it will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
   S.thin.splice(i,1);ensure();renderSch();}
 $('#thinTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delThinAt(+b.dataset.di);});
 /* v21.16 audit (F5): an entry in the thinning record updates only its own step's figure. The table was redrawn on
@@ -781,8 +786,8 @@ $('#thinTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');i
    stored as 21. */
 ['input','change'].forEach(ev=>$('#thinTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.t===undefined)return;
   const r=S.thin[+el.dataset.t];if(!r)return;r[el.dataset.f]=el.value;
-  if(el.dataset.f==='tp'||el.dataset.f==='ep'){const c=el.closest('tr').querySelector('td.rpe');if(c)c.textContent=thinCell(r);}}));
-$('#addThin').addEventListener('click',()=>{S.thin.push({d:'',w:'',tp:'',ep:'',crit:''});renderSch();});
+  if(el.dataset.f==='tp'||el.dataset.f==='ep'||el.dataset.f==='te'){const tr=el.closest('tr'),c=tr.querySelector('td.rpe'),u=tr.querySelector('td.upc');if(c)c.textContent=thinCell(r);if(u)u.textContent=upCell(r);}}));
+$('#addThin').addEventListener('click',()=>{S.thin.push({d:'',w:'',tp:'',ep:'',te:'',crit:''});renderSch();});
 $('#delThin').addEventListener('click',()=>{if(S.thin.length>1){S.thin.pop();renderSch();}});
 
 function renderGen(){
@@ -883,7 +888,7 @@ function fromFile(x){
   const obj=v=>!!v&&typeof v==='object'&&!Array.isArray(v),str=v=>v==null||typeof v==='object'?'':String(v);
   const rec=blank();
   if(obj(x.meta))Object.keys(x.meta).forEach(k=>{rec.meta[k]=str(x.meta[k]);});
-  if(Array.isArray(x.thin))rec.thin=x.thin.filter(obj).map(r=>({d:str(r.d),w:str(r.w),tp:str(r.tp),ep:str(r.ep),crit:str(r.crit)}));
+  if(Array.isArray(x.thin))rec.thin=x.thin.filter(obj).map(r=>({d:str(r.d),w:str(r.w),tp:str(r.tp),ep:str(r.ep),te:str(r.te),crit:str(r.crit)}));
   if(Array.isArray(x.bk))rec.bk=x.bk.filter(obj).map(r=>({n:str(r.n),c:str(r.c),cost:str(r.cost),pref:str(r.pref),conf:str(r.conf),note:str(r.note)}));
   if(obj(x.aud))Object.keys(x.aud).forEach(k=>{if(/^\d+$/.test(k)&&+k<AUDIT.length&&x.aud[k]===true)rec.aud[k]=true;});
   return rec;
@@ -929,10 +934,10 @@ async function loadSim(){
     audAction:'Three items outstanding. The stars have not been tested as reinforcers apart from the backups \u2014 a test goes on the next reinforcer assessment (Form RA-1). The student cannot yet request an exchange independently \u2014 a request card goes in this week. Integrity has not been observed since the schedule was thinned; a TI-1 check is scheduled within ten school days.',
     review:D(-20)};
   S.thin=[
-    {d:D(33),w:'Exchange production',tp:'5',ep:'1',crit:'Establishing the token. Exchange after every star. Advanced after two sessions at 80% independent placement.'},
-    {d:D(28),w:'Exchange production',tp:'5',ep:'2',crit:'Advanced after two consecutive sessions at criterion. Rate held.'},
-    {d:D(20),w:'Exchange production',tp:'5',ep:'5',crit:'Rate dipped for one session then recovered. Held here for two weeks before touching the other ratio.'},
-    {d:D(8),w:'Token production',tp:'10',ep:'5',crit:'First change to the token-production ratio. Rate fell about 20% and has not fully recovered \u2014 holding here rather than thinning further.'}
+    {d:D(33),w:'Exchange production',tp:'5',ep:'1',te:'1',crit:'Establishing the token. Exchange after every star. Advanced after two sessions at 80% independent placement.'},
+    {d:D(28),w:'Exchange production',tp:'5',ep:'2',te:'2',crit:'Advanced after two consecutive sessions at criterion. Rate held.'},
+    {d:D(20),w:'Exchange production',tp:'5',ep:'5',te:'5',crit:'Rate dipped for one session then recovered. Held here for two weeks before touching the other ratio.'},
+    {d:D(8),w:'Token production',tp:'10',ep:'5',te:'5',crit:'First change to the token-production ratio. Rate fell about 20% and has not fully recovered \u2014 holding here rather than thinning further.'}
   ];
   S.bk=[
     {n:'Tablet, video clips',c:'Leisure item',cost:'1 star = 1 min',pref:'92% MSWO',conf:'Yes',note:'Confirmed on RA-1: PR break point 15.7'},

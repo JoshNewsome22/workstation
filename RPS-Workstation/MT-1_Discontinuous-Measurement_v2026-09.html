@@ -736,7 +736,7 @@ td input,td select{max-width:100%}
     <div class="capbar noprint">
       <button class="tool" id="captureSheet">Capture this session to the log</button>
       <button class="tool" id="clearSheet">Clear sheet for the next session</button>
-      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; date, method, ratio, length, intervals and the percentage &mdash; with the condition, the change and the notes above. Clear sheet empties the marks, the start time, the change and the notes; the student, the behavior, the settings, the date and the log stay.</span>
+      <span class="hint" id="capMsg">Capture adds one row to the session log &mdash; date, method, ratio, length, intervals, the percentage and, with an IOA column scored, the three agreement figures &mdash; with the condition, the change and the notes above. Clear sheet empties the marks, the start time, the change and the notes; the student, the behavior, the settings, the date and the log stay.</span>
     </div>
   </section>
 
@@ -749,8 +749,9 @@ td input,td select{max-width:100%}
     </div>
     <div class="grid-wrap"><table class="rt" id="sessTbl"><thead><tr>
       <th style="width:38px">#</th><th style="width:10%">Date</th><th style="width:14%">Method</th><th style="width:7%">Ratio</th>
-      <th style="width:8%">Length</th><th style="width:8%">Intervals</th><th style="width:8%">% occur</th>
-      <th style="width:14%">Change at this session</th><th style="width:14%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:8%">Length</th><th style="width:7%">Intervals</th><th style="width:7%">% occur</th>
+      <th style="width:11%" title="Point-by-point / occurrence / non-occurrence agreement, as captured from the sheet">IOA % (pt / occ / non)</th>
+      <th style="width:12%">Change at this session</th><th style="width:12%">Condition or change label</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Session graph" style="margin-top:12px"><svg id="mtPlot" viewBox="0 0 900 320" aria-label="Percentage of intervals across sessions"></svg></div>
   </section>
 
@@ -798,7 +799,7 @@ td input,td select{max-width:100%}
     </table>
     <h2 class="nbh-band" style="margin-top:16px">Agreement</h2>
     <p>Interval data support point-by-point agreement directly: the number of intervals both observers scored the same way, divided by the number of intervals both observers scored + or &minus;, times 100. Occurrence agreement is the intervals both scored + divided by the intervals either scored +; non-occurrence agreement is the same for &minus;. Overall agreement is hard to interpret when the behavior is scored in very few or very many intervals, so report occurrence agreement for a behavior scored in few intervals and non-occurrence agreement for one scored in most &mdash; two observers who both score mostly zeros will produce a high overall figure that says nothing about whether they agree on the behavior, and so will two who both score mostly plus marks.</p>
-    <p>An interval either observer marked N/A, or that only one observer scored, is left out of all three figures: N/A means the observer could not see, so it is neither an agreement nor a disagreement. The sheet flags occurrence or non-occurrence agreement below 80% and names the figure to act on: occurrence agreement when fewer than half of the two observers' marks in the intervals compared are +, non-occurrence agreement when more than half are. The 80% cut-off is this form's convention, not a finding.</p>
+    <p>An interval either observer marked N/A, or that only one observer scored, is left out of all three figures: N/A means the observer could not see, so it is neither an agreement nor a disagreement. The sheet flags occurrence or non-occurrence agreement below 80% and names the figure to act on: occurrence agreement when fewer than half of the two observers' marks in the intervals compared are +, non-occurrence agreement when more than half are. The 80% cut-off is this form's convention, not a finding. Capture carries the three figures to the session log&rsquo;s IOA column, as point-by-point / occurrence / non-occurrence, and the CSV lists the log after the intervals.</p>
     <p class="hint">Sources: Cooper, Heron, &amp; Heward (2020) on discontinuous measurement and its biases; Powell, Martindale, &amp; Kulp (1975) and Powell et al. (1977) on the estimation properties of momentary, partial, and whole interval recording; Meany-Daboul et al. (2007) comparing the treatment interpretations drawn from momentary time sampling and partial-interval recording with those drawn from continuous recording; Rapp et al. (2008) on interval size and the detection of changes in behavior; Hopkins &amp; Hermann (1977) on overall, occurrence, and non-occurrence agreement for interval data. The ratio convention on this form follows the sheet it was modelled on and is a formatting convention, not a finding.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
     <p><b>Load simulation</b> (toolbar) fills the data sheet and the session log with simulated scores; none of it is a real student record. Simulated observation loaded: whole interval, 10 minutes at a 1:2 ratio &mdash; 30 intervals of 20 seconds &mdash; with a second observer and a seven-session log.</p>
@@ -818,7 +819,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;',
 function blank(){return{meta:{method:'Momentary time sampling',mins:'5',ratio:'1:1',cols:'4',ioaOn:'No'},
   marks:{},ioa:{},sess:[]};}
 let S=blank();
-function ensure(){if(!S.sess.length)S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',chg:'',ph:'',note:''});}
+function ensure(){if(!S.sess.length)S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});}
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 /* v21.16 audit (F6): a new record (Clear all, Open data, Load simulation) stops and resets a running
@@ -937,13 +938,7 @@ function renderSum(){
      marks in the intervals compared are +, non-occurrence agreement when more than half are (Bijou et al.,
      1968, as reported by Hopkins & Hermann, 1977). Only the occurrence figure used to be checked and named. */
   if(S.meta.ioaOn!=='Yes'){$('#ioaOut').innerHTML='';return;}
-  const pm=v=>v==='1'||v==='0';
-  let agree=0,tot=0,occA=0,occT=0,nonA=0,nonT=0,plusN=0,left=0;
-  for(let i=0;i<p.total;i++){const a=S.marks[i],b=S.ioa[i];
-    if(!pm(a)||!pm(b)){if(a||b)left++;continue;}
-    tot++;if(a===b)agree++;plusN+=(a==='1')+(b==='1');
-    if(a==='1'||b==='1'){occT++;if(a===b)occA++;}
-    if(a==='0'||b==='0'){nonT++;if(a===b)nonA++;}}
+  const {agree,tot,occA,occT,nonA,nonT,plusN,left}=ioaFigs(p);
   const f=(a,b)=>b?(100*a/b).toFixed(1)+'%':'\u2014';
   const c2=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
   const low=[occT&&occA/occT<.8?'Occurrence':'',nonT&&nonA/nonT<.8?'Non-occurrence':''].filter(Boolean);
@@ -958,6 +953,19 @@ function renderSum(){
     (low.length?`<div class="verdict v-mid">${low.length>1?'Occurrence and non-occurrence agreement are':low[0]+' agreement is'} below 80%. ${act}</div>`:'');
 }
 
+/* v21.37: the three agreement figures, counted once for the sheet and for the capture to the session log */
+function ioaFigs(p){const pm=v=>v==='1'||v==='0';
+  let agree=0,tot=0,occA=0,occT=0,nonA=0,nonT=0,plusN=0,left=0;
+  for(let i=0;i<p.total;i++){const a=S.marks[i],b=S.ioa[i];
+    if(!pm(a)||!pm(b)){if(a||b)left++;continue;}
+    tot++;if(a===b)agree++;plusN+=(a==='1')+(b==='1');
+    if(a==='1'||b==='1'){occT++;if(a===b)occA++;}
+    if(a==='0'||b==='0'){nonT++;if(a===b)nonA++;}}
+  return{agree,tot,occA,occT,nonA,nonT,plusN,left};}
+/* the log's IOA cell: point-by-point / occurrence / non-occurrence, each as a percentage or a dash */
+function ioaCell(p){if(S.meta.ioaOn!=='Yes')return'';const g=ioaFigs(p);if(!g.tot)return'';
+  const f=(a,b)=>b?(100*a/b).toFixed(1):'\u2014';return f(g.agree,g.tot)+' / '+f(g.occA,g.occT)+' / '+f(g.nonA,g.nonT);}
+
 /* ---------- session log ---------- */
 function renderSess(){
   $('#sessTbl tbody').innerHTML=S.sess.map((r,i)=>`<tr>
@@ -968,6 +976,7 @@ function renderSess(){
     <td><input data-s="${i}" data-f="len" value="${esc(r.len)}"></td>
     <td><input data-s="${i}" data-f="n" value="${esc(r.n)}"></td>
     <td><input type="number" step="any" data-s="${i}" data-f="p" value="${esc(r.p)}"></td>
+    <td><input data-s="${i}" data-f="ioa" value="${esc(r.ioa||'')}" title="Point-by-point / occurrence / non-occurrence"></td>
     <td><select data-s="${i}" data-f="chg"><option value=""></option>${
       ['Full phase change','Conditional change'].map(o=>`<option${r.chg===o?' selected':''}>${o}</option>`).join('')}</select></td>
     <td><input data-s="${i}" data-f="ph" value="${esc(r.ph)}" placeholder="${i===0?'e.g., Baseline':''}"></td>
@@ -977,13 +986,13 @@ function renderSess(){
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(el.dataset.s===undefined)return;
   S.sess[+el.dataset.s][el.dataset.f]=el.value;if(el.dataset.f==='p'||el.dataset.f==='ph'||el.dataset.f==='chg')drawPlot();}));
-$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',chg:'',ph:'',note:''});renderSess();});
+$('#addSess').addEventListener('click',()=>{S.sess.push({d:'',m:'',r:'',len:'',n:'',p:'',ioa:'',chg:'',ph:'',note:''});renderSess();});
 $('#delSess').addEventListener('click',()=>{if(S.sess.length>1){S.sess.pop();renderSess();}});
 /* The sheet's condition, its change marker and its notes go with the numbers:
    a session in which a procedure was used should say so on the log, where the
    graph is read, not only on the sheet it was scored on. A first row that is
    still empty is filled rather than left blank above the first real session. */
-const emptyRow=r=>!['d','m','r','len','n','p','chg','ph','note'].some(k=>String(r[k]||'').trim());
+const emptyRow=r=>!['d','m','r','len','n','p','ioa','chg','ph','note'].some(k=>String(r[k]||'').trim());
 /* v21.33 (R): any session can be deleted, not only the last; the log keeps at least one (blank) row */
 $('#sessTbl').addEventListener('click',async e=>{const b=e.target.closest('.rowDel');if(!b)return;const i=+b.dataset.del,r=S.sess[i];if(!r)return;
   if(!emptyRow(r)&&!(await nbhUI.confirm('Delete this row?\nThe session logged on it is deleted from the log.',{ok:'Delete',danger:true})))return;
@@ -993,7 +1002,7 @@ function captureSheet(goToLog){
   for(let i=0;i<p.total;i++){const v=S.marks[i];if(v==='1'){plus++;scored++;}else if(v==='0')scored++;}
   if(!scored){alert('Score some intervals on the data sheet first.');return;}
   const row={d:S.meta.date||'',m:S.meta.method,r:S.meta.ratio,len:p.mins+' min',
-    n:String(scored),p:(100*plus/scored).toFixed(1),chg:S.meta.chg||'',ph:S.meta.cond||'',note:S.meta.notes||''};
+    n:String(scored),p:(100*plus/scored).toFixed(1),ioa:ioaCell(p),chg:S.meta.chg||'',ph:S.meta.cond||'',note:S.meta.notes||''};   /* v21.37: the IOA figures go with the session */
   if(S.sess.length===1&&emptyRow(S.sess[0]))S.sess[0]=row;else S.sess.push(row);
   /* a phase change belongs to the one session it was made at */
   S.meta.chg='';const chgSel=$('[data-m="chg"]');if(chgSel)chgSel.value='';
@@ -1088,6 +1097,9 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
   const p=params();const rows=[['Interval','Time','Observer 1','Observer 2']];
   for(let i=0;i<p.total;i++)rows.push([i+1,mmss((i+1)*p.ivSec),S.marks[i]||'',S.ioa[i]||'']);
+  /* v21.37: the session log follows the intervals, one row per session, the IOA figures as the log holds them */
+  if(S.sess.some(r=>!emptyRow(r))){rows.push([]);rows.push(['Session','Date','Method','Ratio','Length','Intervals','% occur','IOA % (point-by-point / occurrence / non-occurrence)','Change at this session','Condition or change label','Note']);
+    S.sess.forEach((r,i)=>{if(!emptyRow(r))rows.push([i+1,r.d,r.m,r.r,r.len,r.n,r.p,r.ioa||'',r.chg,r.ph,r.note]);});}
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   a.download='MT-1_intervals.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1113,14 +1125,15 @@ async function loadSim(){
   for(let i=0;i<p.total;i++)S.ioa[i]=S.marks[i];
   S.ioa[4]='0';S.ioa[13]='0';S.ioa[22]='1';
   S.sess=[
-    {d:D(16),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'33.3',chg:'',ph:'Baseline',note:'Before the plan'},
+    {d:D(16),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'33.3',ioa:'93.3 / 81.8 / 95.2',chg:'',ph:'Baseline',note:'Before the plan'},
     {d:D(13),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'30.0',ph:'Baseline',note:''},
     {d:D(11),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'36.7',ph:'Baseline',note:''},
-    {d:D(9),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'46.7',chg:'Full phase change',ph:'Plan',note:'Break card and delay introduced'},
+    {d:D(9),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'46.7',ioa:'90.0 / 85.7 / 88.2',chg:'Full phase change',ph:'Plan',note:'Break card and delay introduced'},
     {d:D(7),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'53.3',ph:'Plan',note:''},
     {d:D(5),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'60.0',chg:'Conditional change',ph:'Aide B covering',note:'Staffing change inside the same condition \u2014 the condition is not split'},
     {d:D(2),m:'Whole interval',r:'1:2',len:'10 min',n:'30',p:'70.0',ph:'Plan',note:'This sheet'}
   ];
+  S.sess[S.sess.length-1].ioa=ioaCell(p);   /* v21.37: this sheet's own agreement figures, as Capture writes them */
   renderAll();resetTimer();setView('sheet');
   nbhUI.toast('Simulation loaded: ' + 'simulated whole-interval observation, 10 minutes at a 1:2 ratio, with a second observer.', {kind:'ok'});
 }
