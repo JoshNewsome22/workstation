@@ -5509,3 +5509,99 @@ IA-1 says so on the PBQ sheet, and when the gain column leads in
 18-item mode the verdict notes that the published PBQ has no tangible
 scale and points to the QABF and FAST tangible items for
 confirmation.
+
+## The Elopement Interview as a Fifth Instrument, and What Is Not Here (v21.41)
+
+### The WEFA in IA-1
+
+The Wandering and Elopement Functional Assessment Interview (WEFA;
+Honsberger, 2011, as adapted in the assessor's copy) is a scored
+rating scale, not an open interview: eighteen true or false statements
+in four sets, each set read on its own by the count of TRUE answers
+(0 to 1 not likely, 2 to 3 moderately likely, 4 to 5 likely), with a
+header of elopement details (how the student communicates and how
+reliably; what they seek out, such as water, vehicles, trains, parks
+or being chased; where and how often they elope, and in which school
+contexts; what they usually leave; and when). It therefore joined IA-1
+beside the FAST, QABF, MAS and PBQ, and gets everything they have.
+
+- **Worksheet** "WEFA" with informant columns, true or false only (the
+  paper form has no N/A), item numbers with a cue naming each item's
+  set and no item wording; items 1 and 8 belong to two sets as
+  printed and count in both; set counts with the form's likelihood
+  labels; the counted outcome for convergence is the set with the
+  most TRUE answers, a tie or nothing endorsed is no outcome, and a
+  one-item margin is a caution, this form's rule, as for the FAST;
+  agreement between informants item by item; a details block per
+  informant with the ten header fields and the fill-ins for items 7,
+  10 and 12, saved, printed and cleared with the form.
+- **Convergence, m.fn, the hypothesis draft and the informant dates**
+  take the WEFA through the instrument table with no special case.
+  Attention, tangibles, escape and sensory map to the common
+  categories attention, tangible, escape and automatic.
+- **Setup** has the plan row and the wording box (18 items, pasted
+  once, remembered on the device). The Guide has the glance row and a
+  method paragraph that says plainly that no published reliability
+  or validity data are in hand and that the single counted outcome is
+  this form's rule, since the form labels each set on its own.
+- **Respondent pages** offer the WEFA with True and False and no N/A
+  (the library takes `scale.labels`, a null third label removing the
+  N/A choice); the header details are asked first; Collect responses
+  places TRUE as Y and FALSE as N and writes the details into the
+  block. The Google Forms import does not read the WEFA.
+- The simulation fills the WEFA for each scenario.
+
+Blank print 20 pages before, 23 after: the new sheet prints as its
+own pages, as the FAST sheet does. `qa/ia1-wefa-test.js` (38 checks);
+the audit, iPad and respondent tests unchanged and passing.
+
+### What indirect instruments the workstation holds, and what it does not
+
+Taken against the instruments a school BCBA is likely to meet, with
+the assessor's own Drive folder of forms as the second yardstick.
+
+Held, as scored worksheets in IA-1: the FAST (Iwata, DeLeon and
+Roscoe, 2013), the QABF (Matson and Vollmer, 1995), the MAS (Durand
+and Crimmins, 1988), the PBQ (Lewis, Scott and Sugai, 1994; 15 items,
+or the circulating 18-item adaptation) and, from this version, the
+WEFA for elopement (Honsberger, 2011, as adapted in the assessor's
+copy). Held as interviews: the FACTS, the Functional Assessment
+Interview (O'Neill et al.) and Hanley's open-ended interview as
+summary cards in IA-1 (routine analysis and summary statement), and
+as question sets in IN-1 (parent, school, student), which after
+v21.40 cover what the FAI and the open-ended interview ask. Held
+elsewhere: the student-directed interview (Kern et al., 1994) in
+SI-1; the RAISD preference interview (Fisher et al., 1996) in PA-1;
+records review in RR-1.
+
+Not held, and whether it matters:
+
+- **A setting-events inventory.** The Contextual Assessment Inventory
+  (McAtee, Carr and Schulte, 2004) and the Setting Events Checklist
+  (Gardner, Cole, Davidson and Karan, 1986) rate the distal
+  conditions (sleep, illness, medication, conflict, schedule) that
+  the function scales only touch. The workstation has the PBQ's
+  setting-events column, the FACTS card's setting-events field and
+  IN-1's setting-event checklist rows, which cover the common
+  school conditions but are not a published inventory. Worth adding
+  as an IA-1 instrument if the assessor has a copy; the item wording
+  would be pasted like the others.
+- **The FAIR-T** (Functional Assessment Informant Record for
+  Teachers; Edwards, 2002). A structured teacher record that overlaps
+  the FACTS almost entirely. Not needed while the FACTS card and
+  IN-1's school set exist.
+- **Hanley's twenty questions as a set.** IA-1 holds the open-ended
+  interview as a summary card and IN-1 asks its content in its own
+  words. The assessor's copy of the 2009 revision could be added to
+  IN-1 as a fourth set, verbatim, so that respondent pages can send
+  it; it is a judgement call, not a gap.
+- **Severity and topography scales** such as the Behavior Problems
+  Inventory (Rojahn et al., 2001) and the Aberrant Behavior Checklist
+  (Aman et al., 1985) are not functional assessments; they rate how
+  much and how severe. IM-1 covers self-injury severity with the
+  SIT; nothing covers the others, by design.
+- **The older 27-item "Functional Assessment Screening Tool"** in the
+  assessor's folder is a three-part forerunner of the FAST (Florida
+  Center on Self-Injury) with a different key. IA-1 scores the
+  published 16-item FAST and should not also score this one; the two
+  would be confused in reports.
