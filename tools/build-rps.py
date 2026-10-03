@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the Royal Palm School edition of the workstation from the Newsome Behavioral Health one.
 
-Same forms, same code. Changed: the logo (157 places), the tab icon, the organisation name where it
+Same forms, same code. Changed: the logo (43 places: once per form, once in the index), the tab icon, the organisation name where it
 is printed or shown, and the autosave keys - both editions live on one website, and a browser keeps
 one localStorage per website, so without its own keys each would offer to restore the other's work.
 
@@ -22,7 +22,7 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 
 # (old, new, how many times it must be replaced across all files)
 EXPECT = [
-  (old_logo, new_logo, 157),
+  (old_logo, new_logo, 43),    # v21.36: once per form (the nbh-logo script) and once in index.html
   (old_fav, new_fav, 1),
   ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 158),   # 157 logos + the packet cover's
   ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 43),
