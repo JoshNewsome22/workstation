@@ -590,7 +590,7 @@ td input,td select{max-width:100%}
       <div class="f"><label for="rpStudent">Student label in the header (initials and ID)</label><input id="rpStudent"></div>
     </div>
     <div id="rpTargets"></div>
-    <label class="gf-note"><input type="checkbox" id="rpConfirm" checked> Show the definition and ask the respondent to confirm they have read it before answering</label>
+    <label class="gf-note"><input type="checkbox" id="rpConfirm" checked> Show the definition and ask "Do you understand this definition? Yes / No / Unsure" before the items (required; No and Unsure are reported back to you)</label>
     <label class="gf-note" id="rpFxRow"><input type="checkbox" id="rpFx" checked> FAST only: ask the open-ended questions too (most and least likely situations, what happens before and after, current treatments)</label>
     <div class="gf-note"><b>The first items as the page will read them:</b><div id="rpPrev" class="rp-prev"></div></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
@@ -1414,7 +1414,7 @@ function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpEx
   else if(!ok)bad.push(n+' lines of wording for the '+INST[key].title+' where '+rpExpected(key).join(' or ')+' items are expected: check the Setup sheet.');
   if(!email)bad.push('Enter your email: the answers are sent to it.');
   if(!ts.length)bad.push('Name a target behavior on the Setup sheet (or open Form TB-1 in the workstation so the case supplies them).');
-  if($('#rpConfirm').checked&&ts.some(t=>!t.def))bad.push('The confirmation needs a definition: write one in the table above for each target, or untick the confirmation.');
+  if($('#rpConfirm').checked&&ts.some(t=>!t.def))bad.push('The definition question needs a definition: write one in the table above for each target, or untick the question.');
   st.hidden=!bad.length;st.innerHTML=bad.map(gfEsc).join('<br>');$('#rpFxRow').style.display=key==='fast'?'':'none';
   $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
   const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
@@ -1461,7 +1461,7 @@ function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEa
     if(!own&&useKey)h+='<p class="method" style="margin:6px 0">This form has no target named yet: it takes <b>'+gfEsc(behOf(list[0]))+'</b> from the responses.</p>';
     h+='<p class="method" style="margin:6px 0"><b>'+gfEsc(INST[key].title)+'</b> about <b>'+gfEsc(behOf(list[0])||val('m.beh'))+'</b>: '+list.length+' response'+(list.length===1?'':'s')+' found'+(keys.length>1?' (also '+keys.slice(1).map(k=>INST[k].title).join(', ')+': import the '+INST[key].title+' first, then paste again for the others)':'')+'.</p>';
     h+='<table class="gf-t"><thead><tr><th></th><th>Informant</th><th>Relationship</th><th>Sent</th><th>Answers</th><th>Read the definition</th><th>Goes to</th></tr></thead><tbody>';
-    list.forEach((o,i)=>{const k=(o.ans||[]).filter(x=>x!=='').length;h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(i<5?' checked':'')+' aria-label="Import this response"></td><td>'+(gfEsc(o.name)||'<i>no name</i>')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td>'+(o.confirmed===true?'confirmed':o.confirmed===false?'<span class="tag na">not confirmed</span>':'—')+'</td><td class="gf-slot"></td></tr>';});
+    list.forEach((o,i)=>{const k=(o.ans||[]).filter(x=>x!=='').length;h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(i<5?' checked':'')+' aria-label="Import this response"></td><td>'+(gfEsc(o.name)||'<i>no name</i>')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td>'+(o.confirmed==='yes'||o.confirmed===true?'understood':o.confirmed==='no'||o.confirmed===false?'<span class="tag na">did not understand</span>':o.confirmed==='unsure'?'<span class="tag na">unsure</span>':'—')+'</td><td class="gf-slot"></td></tr>';});
     h+='</tbody></table><label class="gf-note"><input type="checkbox" id="rcInf" checked> Fill the informant table (name, relationship, months known, daily contact, setting) from the responses</label>';
     if(key==='fast')h+='<label class="gf-note"><input type="checkbox" id="rcFx" checked> Copy the open-ended answers into FAST Section 1 where it is empty</label>';
     h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the worksheet</button><span class="method" style="margin:0">Ticked responses become informants A to E in order, up to five. Answers already on the worksheet for those columns are replaced.</span></div>';}

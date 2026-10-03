@@ -1,5 +1,5 @@
 /* v21.39: respondent pages for IN-1's question sets (open-ended answers), the answer code they send back by email or
-   as a file when it is too long for an email link, and Collect responses into a respondent's interview record */
+   as a file when it is too long for an email link (the library holds it back), and Collect responses into a respondent's interview record */
 const {chromium,fs,BASE,ROOT,wire,sleep}=require(__dirname+'/lib.js');
 const FILE='NBH-Workstation/IN-1_Stakeholder-Interview-Record_v2026-09.html',URL=BASE+'/'+FILE;
 /* the pre-edit form for the print-page comparison: a copy set aside (IN1_PRE), else the committed version */
@@ -24,30 +24,30 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  const stu=await page.evaluate(()=>({on:!rpSave.disabled,q:__rp.payload().open.map(o=>o.label).join('\n')}));
  ok('student set: the word replaces [target behavior], 11 answers',stu.on&&/when you hit\./.test(stu.q)&&!/\[target behavior\]/.test(stu.q)&&stu.q.split('\n').length===11,stu.q.slice(0,120));
  await page.evaluate(()=>{rpInst.value='parent';rpInst.dispatchEvent(new Event('change'));rpDue.value='10/10/2026';});
- const pay=await page.evaluate(()=>{const p=__rp.payload();return {form:p.form,inst:p.inst,items:p.items.length,open:p.open.length,yns:p.open.filter(o=>o.yns).length,heads:p.open.filter(o=>o.q).length,first:p.open[0].label,email:p.email,due:p.due};});
- ok('parent payload: form IN-1, no items, 30 answers (15 checklist rows under 2 question heads)',pay.form==='IN-1'&&pay.inst==='parent'&&pay.items===0&&pay.open===30&&pay.yns===15&&pay.heads===2&&/^1\. Describe your child/.test(pay.first)&&pay.email==='bcba@example.org'&&pay.due==='10/10/2026',pay);
+ const pay=await page.evaluate(()=>{const p=__rp.payload();return {form:p.form,inst:p.inst,items:p.items.length,open:p.open.length,yns:p.open.filter(o=>o.type==='yns').length,heads:p.open.filter(o=>o.type==='yns'&&/^\d+\. /.test(o.label)).length,max:p.open.filter(o=>o.max===1500).length,first:p.open[0].label,email:p.email,due:p.due,mailMax:p.mailMax};});
+ ok('parent payload: form IN-1, no items, 30 answers (15 yns checklist rows under 2 question heads, 15 text answers of 1500), mailMax 1800',pay.form==='IN-1'&&pay.inst==='parent'&&pay.items===0&&pay.open===30&&pay.yns===15&&pay.heads===2&&pay.max===15&&/^1\. Describe your child/.test(pay.first)&&pay.email==='bcba@example.org'&&pay.due==='10/10/2026'&&pay.mailMax===1800,pay);
  /* the page as a file */
  const html=await grab(page,()=>__rp.file());
- ok('page file named and self-contained, with the page\'s own additions and the mailto hold',/^IN-1_Parent_respondent_S\.S\._ID_12345_\.html$/.test(html.name)&&/NBH_RESPOND_RUNTIME/.test(html.text)&&/NBH_IN1_PAGE/.test(html.text)&&/NBH_IN1\.hold\(ml\.href\)/.test(html.text)&&/What are your child/.test(html.text)&&!/Sample Student/.test(html.text),html.name);
+ ok('page file named and self-contained',/^IN-1_Parent_respondent_S\.S\._ID_12345_\.html$/.test(html.name)&&/NBH_RESPOND_RUNTIME/.test(html.text)&&/What are your child/.test(html.text)&&!/Sample Student/.test(html.text),html.name);
  const link=await page.evaluate(()=>__rp.link());
  ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#p=[A-Za-z0-9_-]{100,}$/.test(link),link.slice(0,80));
  /* the parent answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(html.text,{waitUntil:'load'});await sleep(300);
- const r1=await rp.evaluate(()=>{const vis=e=>e.offsetParent!==null;return {items:document.querySelectorAll('li.it').length,itemsCard:vis(document.querySelector('.prog')),tas:document.querySelectorAll('textarea:not(.code)').length,visTas:Array.from(document.querySelectorAll('textarea:not(.code)')).filter(vis).length,
-   opts:document.querySelectorAll('.opts').length,heads:document.querySelectorAll('.in1-q').length,student:document.querySelector('.def').textContent,count:Array.from(document.querySelectorAll('.prog')).filter(vis).map(p=>p.textContent).join('|'),inputs:document.querySelectorAll('input[type=text]:not(.in1-note)').length};});
- ok('respondent page: no items card, 30 answers (15 typed, 15 as Yes / No / Sometimes), 2 question heads, the student label, 0 of 30',r1.items===0&&!r1.itemsCard&&r1.tas===30&&r1.visTas===15&&r1.opts===15&&r1.heads===2&&/S\.S\. \(ID 12345\)/.test(r1.student)&&r1.count==='0 of 30 answered'&&r1.inputs===2,r1);
+ const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,prog:!!document.querySelector('.prog'),tas:document.querySelectorAll('textarea:not(.code)').length,maxl:document.querySelector('textarea:not(.code)').getAttribute('maxlength'),
+   yns:document.querySelectorAll('.yns').length,choice:document.querySelectorAll('.yns .opts label').length,notes:document.querySelectorAll('.yns input[type=text]').length,heads:Array.from(document.querySelectorAll('label.f')).filter(l=>/^5\. Do you believe .* \u2014 Currently on medication\?$/.test(l.textContent)||/^8\. Does the problem behavior occur more often when: \u2014 A certain type/.test(l.textContent)).length,
+   student:document.querySelector('.def').textContent,extras:document.querySelectorAll('.grid2 input[type=text]').length}));
+ ok('respondent page: no items card, 30 answers (15 typed at 1500, 15 as Yes / No / Sometimes with a note), 2 question heads, the student label',r1.items===0&&!r1.prog&&r1.tas===15&&r1.maxl==='1500'&&r1.yns===15&&r1.choice===45&&r1.notes===15&&r1.heads===2&&/S\.S\. \(ID 12345\)/.test(r1.student)&&r1.extras===2,r1);
  await rp.evaluate(()=>{document.querySelector('button:not(.ghost)').click();});await sleep(100);
  ok('send without a name asks first',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/Your name/.test(document.querySelector('.warn').textContent)));
  const LONG='He is funny and affectionate and very into his tablet; he is easier at home than at school as long as the day is predictable and nobody rushes him.';
- await rp.evaluate((LONG)=>{const inp=document.querySelectorAll('input[type=text]:not(.in1-note)');inp[0].value='Ms. Rivera';inp[1].value='Mother';
-   const vis=e=>e.offsetParent!==null;Array.from(document.querySelectorAll('textarea:not(.code)')).filter(vis).forEach((t,i)=>{t.value=(i+1)+'. '+LONG;t.dispatchEvent(new Event('input'));});
-   document.querySelectorAll('.opts').forEach((o,i)=>{o.querySelector('input[value="'+(i%3===0?'Yes':i%3===1?'No':'Sometimes')+'"]').click();});
-   const note=document.querySelector('.in1-note');note.value='since March';note.dispatchEvent(new Event('input'));},LONG);
- const before=await rp.evaluate(()=>Array.from(document.querySelectorAll('.prog')).filter(e=>e.offsetParent!==null)[0].textContent);
+ await rp.evaluate((LONG)=>{const inp=document.querySelectorAll('.grid2 input[type=text]');inp[0].value='Ms. Rivera';inp[1].value='Mother';
+   document.querySelectorAll('textarea:not(.code)').forEach((t,i)=>{t.value=(i+1)+'. '+LONG;});
+   document.querySelectorAll('.yns').forEach((y,i)=>{y.querySelectorAll('.opts label')[i%3].click();});
+   document.querySelector('.yns input[type=text]').value='since March';},LONG);
  await rp.evaluate(()=>{document.querySelector('button:not(.ghost)').click();});await sleep(300);
- const sent=await rp.evaluate(()=>({code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),mailShown:document.querySelector('#nbhr-mail').offsetParent!==null,done:document.querySelector('.done').textContent,
-   order:Array.from(document.querySelector('#nbhr-mail').parentNode.querySelectorAll('button')).map(b=>b.textContent),hold:document.querySelector('.done').classList.contains('in1-hold')}));
- ok('30 of 30 answered; Send gives a code too long for an email link: held, said so, Save as a file then Copy the code lead',/30 of 30/.test(before)&&/^NBH1\./.test(sent.code)&&sent.mail.length>1800&&sent.hold&&/longer than an email link can carry/.test(sent.done)&&/bcba@example\.org/.test(sent.done)&&sent.order[0]==='Save as a file'&&sent.order[1]==='Copy the code'&&!sent.mailShown,{before,len:sent.mail.length,order:sent.order,done:sent.done.slice(0,80)});
+ const sent=await rp.evaluate(()=>{const sc=Array.from(document.querySelectorAll('.nr-card')).pop(),row2=document.querySelector('#nbhr-mail').parentNode;return {code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),mailHidden:document.querySelector('#nbhr-mail').hidden,
+   done:Array.from(sc.querySelectorAll('.warn,.done')).filter(e=>!e.hidden).map(e=>e.textContent).join(' | '),order:Array.from(row2.querySelectorAll('button')).map(b=>b.textContent),lead:row2.querySelector('button').className};});
+ ok('Send gives a code too long for an email link: held by the page, said so, Save as a file (primary) then Copy the code lead, the mail link hidden',/^NBH1\./.test(sent.code)&&sent.mail.length>1800&&/longer than an email link can carry/.test(sent.done)&&/bcba@example\.org/.test(sent.done)&&sent.order[0]==='Save as a file'&&sent.order[1]==='Copy the code'&&sent.lead===''&&sent.mailHidden,{len:sent.mail.length,order:sent.order,lead:sent.lead,done:sent.done.slice(0,80)});
  const dec=await rp.evaluate(c=>{const o=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(c.slice(5).replace(/-/g,'+').replace(/_/g,'/')),ch=>ch.charCodeAt(0))));return {form:o.form,inst:o.inst,name:o.name,role:o.role,q4_0:o.open.q4_0,q4_1:o.open.q4_1,q0:o.open.q0.slice(0,20),n:Object.keys(o.open).length};},sent.code);
  ok('the code carries the set, the name, the relationship, each checklist row with its note and every answer',dec.form==='IN-1'&&dec.inst==='parent'&&dec.name==='Ms. Rivera'&&dec.role==='Mother'&&dec.q4_0==='Yes; since March'&&dec.q4_1==='No'&&dec.q0==='1. He is funny and a'&&dec.n===30,dec);
  const saved=await grab(rp,()=>{Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Save as a file').click();return 'x';});
@@ -73,8 +73,8 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  await page.evaluate(()=>{rpInst.value='school';rpInst.dispatchEvent(new Event('change'));});
  const link2=await page.evaluate(()=>__rp.link());
  await rp.goto(link2);await sleep(500);
- const r2=await rp.evaluate(()=>({tas:document.querySelectorAll('textarea:not(.code)').length,items:document.querySelectorAll('li.it').length,first:document.querySelector('label.f').textContent,student:document.querySelector('.def').textContent,band:document.querySelector('h1').textContent}));
- ok('respond.html renders the school set from the link: 14 answers, no items, the student label',r2.tas===14&&r2.items===0&&/S\.S\. \(ID 12345\)/.test(r2.student)&&/Teacher, Staff Member/.test(r2.band),r2);
+ const r2=await rp.evaluate(()=>({tas:document.querySelectorAll('textarea:not(.code)').length,items:document.querySelectorAll('li.it').length,prog:!!document.querySelector('.prog'),first:document.querySelector('label.f').textContent,student:document.querySelector('.def').textContent,band:document.querySelector('h1').textContent}));
+ ok('respond.html renders the school set from the link like the file: 14 answers, no items card, the student label',r2.tas===14&&r2.items===0&&!r2.prog&&/S\.S\. \(ID 12345\)/.test(r2.student)&&/Teacher, Staff Member/.test(r2.band),r2);
  await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='5th grade teacher';document.querySelectorAll('textarea:not(.code)').forEach((t,i)=>{t.value='Short answer '+(i+1);});document.querySelector('button:not(.ghost)').click();});await sleep(300);
  const sent2=await rp.evaluate(()=>({code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:document.querySelector('.done').textContent}));
  ok('short answers: Send gives a code and a mailto to the interviewer that fits an email link',/^NBH1\./.test(sent2.code)&&/^mailto:bcba%40example\.org\?subject=Teacher%20and%20staff%20questions%20for%20Form%20IN-1/.test(sent2.mail)&&sent2.mail.length<1900&&/email program should open/.test(sent2.done),{len:sent2.mail.length,mail:sent2.mail.slice(0,90)});
