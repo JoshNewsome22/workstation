@@ -1,11 +1,11 @@
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:1000}});wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
  await page.click('#caseMap');await sleep(400);
  console.log('open',await page.evaluate(()=>document.querySelector('#dlg').open),'stages',await page.evaluate(()=>document.querySelectorAll('.cm-stage').length),'buttons',await page.evaluate(()=>document.querySelectorAll('.cm-forms button').length),'ids ok',await page.evaluate(()=>[...document.querySelectorAll('.cm-forms button')].every(b=>ALL.some(f=>f[0]===b.dataset.open))));
- await page.screenshot({path:'/tmp/casemap.png'});
+ await page.screenshot({path:__dirname+'/out/case/casemap.png'});
  await page.evaluate(()=>document.querySelector('#dlgBody').scrollTo(0,99999));await sleep(200);
- await page.screenshot({path:'/tmp/casemap2.png'});
+ await page.screenshot({path:__dirname+'/out/case/casemap2.png'});
  await page.click('.cm-forms button[data-open="TB-1"]');await sleep(1500);
  console.log('after click: dlg open',await page.evaluate(()=>document.querySelector('#dlg').open),'cur',await page.evaluate(()=>state.cur));
  await page.click('#caseMap');await sleep(300);console.log('TB-1 marked open',await page.evaluate(()=>document.querySelector('.cm-forms button[data-open="TB-1"]').classList.contains('on')));

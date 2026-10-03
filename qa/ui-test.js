@@ -1,4 +1,4 @@
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{const log=[];const br=await chromium.launch();
  for(const [file,view] of [['CF-1_Contextual-Fit-Assessment_v2026-09.html','rate'],['OB-1_Direct-Observation-Record_v2026-09.html','obs'],['SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html','targets'],['TB-1_Target-Behavior-Development_v2026-09.html','']]){
   const page=await br.newPage({viewport:{width:1200,height:900}});wire(page,log);
