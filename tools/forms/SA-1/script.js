@@ -134,9 +134,12 @@ function renderPr(){
   const R=probeRows(),m=mc(),mt=R.filter(p=>p.type==='Maintenance'&&p.pc!=null),gn=R.filter(p=>p.type==='Generalization'&&p.pc!=null);
   const dims={};gn.forEach(p=>{const d=p.dim||'Other';if(!dims[d])dims[d]={n:0,pass:0};dims[d].n++;if(p.pass)dims[d].pass++;});
   const dk=Object.keys(dims);
+  /* v21.37: the settings or material sets the criterion asks for (Setup) are counted here, as the Setup field says: a passed
+     generalization probe whose dimension is Setting or Materials counts once per distinct condition */
+  const sets=new Set(gn.filter(p=>p.pass&&(p.dim==='Setting'||p.dim==='Materials')).map(p=>p.dim+':'+String(p.desc||'').trim().toLowerCase())).size,needSets=Math.max(0,Math.round(num(S.meta.mc_sets)??0));
   $('#prMetrics').innerHTML=`<div class="metric"><b>Maintenance probes</b><div class="val">${mt.length?mt.filter(p=>p.pass).length+' of '+mt.length:'—'}</div><div class="sub">passed at ${m.pct}%${mt.length?' · latest '+pct(mt[mt.length-1].pc):''}</div></div>
     <div class="metric"><b>Generalization dimensions probed</b><div class="val">${dk.length}</div><div class="sub">${dk.length?dk.map(d=>d+' '+dims[d].pass+'/'+dims[d].n).join(' · '):'people, setting, materials, time'}</div></div>
-    <div class="metric"><b>Generalization probes</b><div class="val">${gn.length?gn.filter(p=>p.pass).length+' of '+gn.length:'—'}</div><div class="sub">passed</div></div>`;
+    <div class="metric"><b>Generalization probes</b><div class="val">${gn.length?gn.filter(p=>p.pass).length+' of '+gn.length:'—'}</div><div class="sub">passed${needSets?' · settings or material sets passed: '+sets+' of '+needSets+' (Setup)':''}</div></div>`;
   const v=$('#prVerdict');if(!R.length){v.innerHTML='<div class="verdict v-mid"><b>No probes yet.</b> After mastery, probe maintenance on the schedule above and generalization across each dimension in the plan.</div';return;}
   const fails=R.filter(p=>p.pass===false),untested=['People','Setting','Materials','Time of day'].filter(d=>!dims[d]);
   if(fails.length)v.innerHTML='<div class="verdict v-no"><b>'+fails.length+' probe'+(fails.length===1?'':'s')+' below criterion.</b> '+esc(fails.map(p=>(p.type||'probe')+(p.dim?' ('+p.dim+')':'')+' on '+(p.date||'?')+' at '+pct(p.pc)).join('; '))+'. Teach in that condition with the same procedure and re-probe.</div>';
