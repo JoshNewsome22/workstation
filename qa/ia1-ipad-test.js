@@ -26,5 +26,15 @@ let fails=0;const ok=(n,c,x)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.
  await page.evaluate(()=>{navigator.clipboard.writeText=()=>Promise.reject(new Error('refused'));document.querySelector('#rpLink').click();});await sleep(300);
  const lk=await page.evaluate(()=>({hidden:document.querySelector('#rpLinkBox').hidden,val:document.querySelector('#rpLinkBox').value,note:document.querySelector('#rpNote').textContent}));
  ok('Copy a link with the clipboard refused: the link is in the box with a note to copy it from there',!lk.hidden&&/respond\.html#p=[A-Za-z0-9_-]{40,}/.test(lk.val)&&/select the link in the box/.test(lk.note),lk);
+ /* the wording, the link and the email are remembered on this device and fill a fresh form */
+ await page.evaluate(()=>{document.querySelector('#rpDlg').close();const e=document.querySelector('[name="rp.video"]');e.value='https://youtu.be/x1';e.dispatchEvent(new Event('input',{bubbles:true}));});
+ const dev1=await page.evaluate(()=>({note:document.querySelector('#rpDevNote').hidden?'':document.querySelector('#rpDevText').textContent,store:Object.keys(JSON.parse(localStorage.getItem('nbh.ia1.respondent')||'{}'))}));
+ ok('the Setup sheet says what this device remembers',/Remembered on this device: the FAST wording, the instructions link, your email/.test(dev1.note)&&dev1.store.sort().join()==='m.email,rp.video,rp.w.fast',dev1);
+ await page.goto(URL);await sleep(900);await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});
+ const dev2=await page.evaluate(()=>({w:document.querySelector('[name="rp.w.fast"]').value.split('\n').length,v:document.querySelector('[name="rp.video"]').value,m:document.querySelector('[name="m.email"]').value,count:document.querySelector('[data-rpw="fast"]').textContent}));
+ ok('a fresh IA-1 on this device carries the wording, the link and the email',dev2.w===16&&dev2.v==='https://youtu.be/x1'&&dev2.m==='bcba@example.org'&&/16 pasted/.test(dev2.count),dev2);
+ await page.evaluate(()=>document.querySelector('#rpDevForget').click());
+ const dev3=await page.evaluate(()=>({hidden:document.querySelector('#rpDevNote').hidden,store:localStorage.getItem('nbh.ia1.respondent')}));
+ ok('Forget on this device clears the memory and the note',dev3.hidden&&dev3.store===null,dev3);
  ok('no console or page error',log.length===0,log);
  console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');await br.close();process.exit(fails?1:0);})().catch(e=>{console.error('FAIL',e);process.exit(1);});
