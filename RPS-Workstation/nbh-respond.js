@@ -55,6 +55,7 @@
       '.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
       '.nr .done{background:#e8f3ec;border-left:4px solid #2f6b37;padding:10px 12px;margin:10px 0}.nr .code{width:100%;font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:90px}'+
       '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
+      '.nr .links{margin:10px 0 0;font-size:15px}.nr .links a{color:var(--navy);font-weight:600;text-decoration:underline}'+
       '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:15px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
       '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
@@ -69,16 +70,20 @@
       var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Do you understand the definition'}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
       [['yes','Yes'],['no','No'],['unsure','Unsure']].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){conf=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');w.classList.remove('missing');
-          note.hidden=conf==='yes';note.textContent=conf==='yes'?'':'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.';});
+          note.hidden=conf==='yes';note.textContent=conf==='yes'?'':conf==='no'?'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.':'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.';});
         opts.appendChild(lab);});
       w.appendChild(opts);w.appendChild(note);return w;}
+    /* links the assessor adds: an instructions video or page (http and https only) */
+    function linksBlock(){var ls=(P.links||[]).filter(function(l){return l&&/^https?:\/\//i.test(l.url||'');});if(!ls.length)return null;
+      var w=h('p',{'class':'links'});ls.forEach(function(l,i){if(i)w.appendChild(d.createTextNode(' \u00b7 '));var a=h('a',{href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.label||'Instructions'});w.appendChild(a);});return w;}
     /* head */
     var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?'Form '+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||'Questionnaire')}),
       h('p',{'class':'sub',text:(P.sub||'')}),
       h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
       P.confirm?confBlock():null,
       h('p',{'class':'sub',text:P.instructions||'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send: your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'}),
-      P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null]);
+      P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null,
+      linksBlock()]);
     root.appendChild(card);
     /* respondent */
     var who=h('div',{'class':'nr-card'});who.appendChild(h('div',{'class':'band',text:'About you'}));var g=h('div',{'class':'grid2'});
@@ -120,20 +125,22 @@
     sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
-      if(P.confirm)r.confirmed=conf;
+      if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-    var lastCode='';
+    var lastCode='',warnedMiss='';
     function mailto(code){var subj=(P.subject||((P.title||P.inst)+' answers'))+(P.student?' · '+P.student:'');
       var body='Answers from the respondent page, for Form '+(P.form||'')+'. Paste this whole message into "Collect responses" on the form.\n\n'+code+'\n\n'+(ex.name&&ex.name.value?'From: '+ex.name.value+'\n':'')+'Sent '+new Date().toLocaleDateString();
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
     send.addEventListener('click',function(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
       var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;});
       if(P.confirm&&!conf){need.push('whether you understand the definition');var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
+      if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML='You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+' to explain the definition; when it is clear, change your answer to Yes and press Send again.';var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
-      if(need.length||miss.length){warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. Answer each one (N/A counts) and press Send again.':'');
-        if(need.length||miss.length>Math.max(0,items.length-1))return;}
-      else warn.hidden=true;
+      if(need.length||miss.length){var again=!need.length&&miss.length<items.length&&warnedMiss===miss.join(',');
+        warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+(scale.kind==='yn'||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
+        warnedMiss=need.length?'':miss.join(',');if(!again)return;}
+      else{warn.hidden=true;warnedMiss='';}
       lastCode=encode(response());codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
       done.innerHTML='<b>Your email program should open now</b> with the message to '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+'. Press Send there. If nothing opened, copy the code below and paste it into an email to '+esc(P.email||'the BCBA')+', or save it as a file and attach it.';
       ml.href=mailto(lastCode);

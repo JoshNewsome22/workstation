@@ -5213,3 +5213,179 @@ the one-file editions carry both inside. The shell's Diagnostics shows
 library keeps its buttons but refuses with "The file nbh-respond.js is
 not beside this form".
 
+## The Indirect Assessments Looked At Again (v21.40)
+
+Two changes to the respondent pages asked for after v21.39, then an
+audit of Forms IA-1 and IN-1 as indirect assessments.
+
+### The definition question decides whether the page sends
+
+A respondent who answers **No** to "Do you understand this definition
+of <behavior>?" cannot send: the page says so in the question's note
+and again at Send, names the assessor and the reply email, and asks
+them to have the definition explained and change the answer to Yes.
+**Unsure** still sends, with its note, and is reported in Collect
+responses as before. The reasoning is simple: ratings of a behavior
+the rater says they do not recognize are not data; a rater who is
+unsure is told what to do and is flagged for you.
+
+### An instructions video or page on the respondent page
+
+The IA-1 dialog has **Instructions video or page**: a link (http or
+https only) that the page shows as "Watch the instructions" under the
+instructions, opening in a new tab. It is remembered with the file
+(`rp.video`) so every page of the case carries it. The library takes
+`links: [{url, label}]` in any payload, so the other forms' dialogs
+can offer the same when wanted.
+
+`qa/respond-test.js` grew two checks (the link on the page; No blocks
+Send and names the assessor) and the saved-and-reopened check now
+carries the link.
+
+### Unanswered items stop the first Send
+
+The page said every item was required but sent anyway when some were
+blank. Now the first Send with gaps stops, names the unanswered items
+and says how to send with them blank on purpose: press Send once more
+without changing anything. The second press sends and says "Sending
+with n left blank, as you chose". A respondent who means to skip an
+item (CF-1 has no N/A) can; one who missed it is caught. The answer
+code also carries `sig`, the start of item 1's wording as the assessor
+pasted it, so IA-1's collector can notice a page built from a
+differently ordered copy of an instrument.
+
+### IA-1: the audit and what it changed
+
+An audit of IA-1 as an indirect assessment confirmed the item keys of
+the FAST (items 1 to 4, 5 to 8, 9 to 12, 13 to 16), the QABF (five
+subscales of five items) and the MAS (four of four) against the
+published forms, the scale anchors, the Guide's framing (indirect
+data generate hypotheses; the functional analysis tests them) and
+the FA correspondence record. It found two things that were wrong
+and a longer list that was unlabelled, missing or unused.
+
+- **The FAST had a margin rule it does not have.** A one-item margin
+  between the top two categories was called "weak differentiation"
+  and the outcome was left out of the consensus. The published FAST
+  scores the category with the most Yes answers, and most FAST
+  outcomes that matched a functional analysis in Iwata et al. (2013)
+  were decided by one item. Now only a tie or nothing endorsed is "no
+  outcome" on the FAST; a one-item margin is a caution tag and the
+  outcome counts. The Guide and the figure captions say so.
+- **Consensus was counted in outcomes, not informants.** One
+  informant who completed three instruments could make a
+  "consensus". Each informant now casts one vote, their modal
+  category across the instruments and interview cards they
+  completed (a tie is no vote, except an attention/tangible tie made
+  only of FAST social-positive outcomes, which agrees with either);
+  the label reads "k of n informants" first, then "k of n counted
+  outcomes"; fewer than three informants with an outcome gives no
+  consensus label (this form's rule); the Smith et al. (2012) 4-of-5
+  sentence appears only when four or more informants agree at that
+  level on one instrument.
+- **Completeness.** The MAS mean divides by the items answered, not
+  by four; an incomplete subscale (MAS, QABF, PBQ) is flagged "k of n
+  answered" and cannot lead silently. The QABF's endorsement count is
+  used: a leading subscale with fewer than four of its five items
+  endorsed is tagged weak support (this form's rule). The QABF
+  respondent page offers "X: does not apply", left blank on import as
+  the worksheet says.
+- **House rules named as such** on the sheets and in the Guide: the
+  MAS 10% margin, the one-third-of-maximum rule for Likert scales, the
+  12-of-18 setting-events threshold, "setting events are conditions,
+  not a function", and the PBQ's sum-and-rank reading. The 18-item PBQ
+  is named the local adaptation of the district form, with no
+  published key or reliability; 15 items stay the default.
+- **Chance agreement lines** in Figure 2 are computed from the scale
+  (exact 1/k, within one (3k-2)/k² for k points; QABF 25.0% and
+  62.5%, MAS and PBQ 14.3% and 38.8%) and worded "chance under uniform
+  responding". A sentence that attributed a 50% figure to Iwata et
+  al. (2013) is gone.
+- **Transcribed figures.** The Guide now says, where the Evidence
+  boxes are introduced, in the Figure 3 caption and in the Pub.
+  column, that their figures are transcribed from the articles'
+  tables and should be confirmed against the full text before being
+  quoted in a report. Nothing was removed or changed.
+- **The hypothesis reaches the packet.** The Convergence sheet has
+  **Indirect hypothesis carried to the packet** (`m.fn`), set from the
+  leading category when empty and never overwriting a choice; the
+  packet bridge carries it to the forms with a function field. The
+  Hypothesis Statement has **Draft from the convergence sheet**, which
+  fills only empty fields: the leading category as a hypothesis with
+  its counts, the second or tied category as the alternative, PBQ
+  setting-event items at or above the threshold and the interview
+  setting events, the idiosyncratic notes, and the behavior.
+- **Informant dates.** The informant table has "Date given"; a note
+  appears when informants were assessed more than three days apart;
+  Collect responses and the Google Forms import write the response
+  date into an empty slot.
+- **Smaller.** Clear all keeps the pasted item wording, the respondent
+  terms and the video link (its confirm says so). Lowering the
+  informant count asks before dropping columns that hold scores. A
+  response whose wording signature differs from this form's pasted
+  item 1 is marked "check the item order" and left unticked. The
+  consensus tag says how many FAST social-positive outcomes it
+  includes. The Setup sheet says one IA-1 file per target behavior.
+
+Blank print 19 pages before and after; the simulated case 21 before
+and after. `qa/ia1-audit-test.js` (50 checks) covers each item.
+
+### IN-1: what the interviews did not ask
+
+Set against the Functional Assessment Interview (O'Neill et al., 2015)
+and the open-ended interview (Hanley, 2012), the three question sets
+covered topography, rate, triggers, precursors, consequences, home
+setting events, the respondent's view of the function (school), prior
+strategies, strengths and the student's own account, and missed six
+things a replacement behavior and a plan depend on. Each set now ends
+with them (appended, not inserted, so a record saved before this
+version keeps its numbering):
+
+- **Communication**, all three sets: how the student usually
+  communicates and how they ask for help, a break, something they
+  want, or attention (the student's version: "When you need help or
+  want a break, what do you do?").
+- **Reinforcers**, school set: what the student works for, chooses in
+  free time and asks for; it meets the student's own answer in the
+  convergence table.
+- **History**, parent and school: when it started, better or worse,
+  what earlier plans did.
+- **Alone or unattended**, parent and school: Hanley's screen for
+  automatic reinforcement.
+- **Intensity and duration**, parent and school.
+- **School setting events** as a checklist row (poor sleep, missed meal
+  or medication, schedule change, substitute or staffing change, a
+  conflict earlier in the day, illness) with a note, the shape of the
+  parent checklists.
+- The parent is now asked why they think their child does this, so
+  the parent's view reaches the function row of the convergence table
+  beside the school's. The student's reward answer and the parent's
+  "what do they lose", "who is present" and rate answers have rows of
+  their own.
+
+The parent set has 20 questions, the school set 20, the student set
+12. The blank print grows from six pages to seven: the empty parent
+interview on it carries the five added questions.
+
+Also on IN-1: the Format list has **Written (respondent page)**, set on
+every response Collect responses places; the respondent pages ask the
+definition question (the behavior's short name is read from the text
+before the first colon of the sheet's behavior field, editable in the
+dialog) and Collect shows understood / did not understand / unsure,
+kept on the respondent's record and on the interview heading; the
+Convergence sheet has **Interview hypothesis carried to the packet**
+(`data-m="fn"`, the interviewer's choice: the interviews do not score),
+which the packet bridge carries to the forms that take a function; the
+Guide's five purposes carry their citation. The simulation answers
+every new question. `qa/in1-audit-test.js` (34 checks) covers it, and
+`qa/in1-respond-test.js` (26) was updated for the new counts and the
+definition question.
+
+### Checked
+
+`qa/respond-test.js` (20), `qa/sv1-respond-test.js` (24),
+`qa/cf1-respond-test.js` (26), `qa/in1-respond-test.js` (26),
+`qa/ia1-audit-test.js` (50), `qa/in1-audit-test.js` (34), the shell
+test over all 43 forms, the shared-block check and the one-file check
+pass. Blank prints: IA-1 unchanged at 19 pages; IN-1 six to seven
+pages for the reason above; SV-1, CF-1 unchanged.
