@@ -5929,3 +5929,37 @@ with three write-in lines, like the "Other" card (v21.42c).
   with a small circle showing the result and "Re-centre the photo".
   A new photo starts 35 percent down, where a portrait's face usually
   is. The circle also clips an enlarged photo in Safari.
+
+### Audit of TK-1 over every setting (v21.42e)
+
+`qa/tk1-audit.js` renders the book in print layout over 73 combinations
+(both layouts, 3 to 10 tokens, the three page sizes, blank and long
+names, long card, rule and caption text, presets, a custom token name,
+a long credit, a long QR link, the grey panel and watermark, the how-to
+insert, every print order and the spare sheets) and measures every page
+for text outside its container, collisions, clipped text and pieces off
+the sheet. What it found, now fixed:
+
+- A fixed First or Then picture printed as a dot in the box corner (the
+  card was drawn 0 by 0). It now fills the box.
+- A Rules-row label that wrapped to three lines lost its first line
+  ("Raise my hand" printed as "my hand"); the overflow went upwards
+  where the fit could not see it. Labels now fit two lines, shrinking
+  to 55 percent.
+- The QR code covered a park box on a Tokens page with six or more
+  tokens; it now sits beside the right-hand corner token. On the Rules
+  row it covered the Earn box; it now sits in the Earn box's corner,
+  sized to clear the dot, as in box 6 of the Choices page.
+- A long first name ran into both Board photos; the title now keeps
+  clear of them.
+- Long captions, or a long token name in "Your First ...!", ran out of
+  their slots; captions now shrink to fit.
+- On "Fill the Letter page" with six or more tokens the Rules row rose
+  into the title (its height ignored the second token row).
+- A long credit line was cut off with an ellipsis, and a very long one
+  pushed the conditioning steps onto a second back. The credit now
+  wraps, shrinks to one line when the steps need the room, and the
+  body measures the room it takes.
+
+Every view also has no sideways scrolling at iPad widths (768, 1024 and
+1366 px) and no script errors.

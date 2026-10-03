@@ -439,6 +439,8 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .qr svg{width:100%;height:100%;display:block}
 .bx .qr{right:calc(1.9pt*var(--s));bottom:calc(3.3pt*var(--s))}
 .panel>.qr{right:calc(8pt*var(--s));bottom:calc(8pt*var(--s))}
+/* a Tokens page with a full bottom row: the code beside the right-hand corner token */
+.panel>.qr.up{bottom:auto;top:calc(16pt*var(--s));right:calc(92pt*var(--s))}
 /* the Board */
 .bd-photo{position:absolute;top:calc(6pt*var(--s));width:calc(68pt*var(--s));height:calc(68pt*var(--s));border-radius:50%;overflow:hidden;background:#eef1f4;z-index:2;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 /* (the mask makes Safari clip an enlarged photo to the circle) */
@@ -457,6 +459,7 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .rulesrow .rr{display:flex;gap:calc(10pt*var(--s));align-items:flex-end;flex:0 0 auto}
 .rule{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:0 0 auto}
 .rule .rl{font:700 19pt/1.05 var(--nbh-sans);color:#111;text-align:center;margin-bottom:calc(6pt*var(--s));width:100%;min-height:2.1em;max-height:3.2em;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.rule .rl span{display:block;width:100%}
 .rule .rp{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .rule .rp img{width:100%;height:100%;object-fit:cover;display:block}
 .rule .rp svg{width:100%;height:100%;display:block}
@@ -493,7 +496,7 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .bk .bbody p:last-child{margin-bottom:0}
 .bk .bbody h4{text-align:center;font:700 14.3pt/1.2 var(--bk);text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto;margin:calc(2pt*var(--s)) 0 calc(6pt*var(--s))}
 .bk .credit{position:absolute;left:calc(26pt*var(--s));right:calc(26pt*var(--s));bottom:calc(28.87pt*var(--s));text-align:center;font:400 15.2pt/22.35pt var(--bk);color:#231f20}
-.bk.compact .credit{bottom:calc(9pt*var(--s));font:italic 400 10.5pt/13pt var(--bk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bk.compact .credit{bottom:calc(9pt*var(--s));font:italic 400 10.5pt/13pt var(--bk)}
 .bk.compact .credit br{display:none}
 .pg.back[data-kind="bd"] .bbody,.pg.back[data-kind="tk"] .bbody{top:calc(55.68pt*var(--s))}
 .pg.back[data-kind="tg"] .bttl,.pg.back[data-kind="tk"] .bttl{top:calc(12.67pt*var(--s))}
@@ -3356,7 +3359,7 @@ function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];
   return '<div class="pg '+side+(side==='back'?' bk':'')+(s!==1?' big':'')+(cls?' '+cls:'')+'" data-kind="'+kind+'" data-side="'+side+'" style="--s:'+s.toFixed(4)+'">'+trim+'<div class="cv" style="left:'+IN(cx)+';top:'+IN(cy)+';height:'+IN(hIn)+'"><div class="tab" style="top:'+pt(i*104.76)+';background:'+esc(col)+'">'+letters+'</div><div class="band" style="background:'+esc(S.meta.c_frame||DEF.c_frame)+'">';}
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(30,num(S.meta.wm)||20))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
-function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=(opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):'width:'+IN(size)+';height:'+IN(size));
+function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):size?'width:'+IN(size)+';height:'+IN(size):'';
   return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
 function tokCard(size){return '<div class="card tok" style="width:'+IN(size)+';height:'+IN(size)+'"><div class="cp">'+pic(S.tok[0],'')+'</div></div>';}
 function pageGrid(kind){const bg=S.bg[kind==='ch'?0:1];const pcls=S.meta.panel==='grey'?'grey':'light';
@@ -3376,16 +3379,16 @@ function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' 
 function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
   if(S.meta.layout==='rules'){const rules=S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
-    const k=rules.length,ph=panelH||(612/scl()-STRIP-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
-    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl">'+esc(lbl(o))+'</div><div class="rp" style="height:'+pt(rp)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span></div></div></div>';}
-  else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".8"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
-  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+qrBox()+'</div>'+stripHtml()+pgClose;}
+    const k=rules.length,ph=panelH||(612/scl()-d.band-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
+  else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
+  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(S.meta.layout==='rules'?'':qrBox())+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
 function pageTokens(){const n=nTok(),rows=parkRows(n);const sz=112.53;
   const xs=k=>{if(k===1)return[(PANW-sz)/2];const pitch=k<=3?226.1:(PANW-16-sz)/(k-1);const w=(k-1)*pitch+sz;return Array.from({length:k},(_,i)=>(PANW-w)/2+i*pitch);};
   let boxes='';rows.forEach((k,r)=>{const anchor=rows.length===1?'top:'+pt(147.5):r===0?'top:'+pt(107.22):'bottom:'+pt(38.12);xs(k).forEach(x=>{boxes+='<div class="ybx" style="left:'+pt(x)+';'+anchor+'"><span class="dot"></span></div>';});});
   const corner=S.tok[0].k==='tk:star'||has(S.tok[0])?tokCard(55*scl()/72):'';
-  return pgOpen('tk','front')+'<div class="panel"><div class="tkcorner l">'+corner+'</div><div class="tkcorner r">'+corner+'</div><div class="ttl tk" data-frac=".8"><span class="ul">Tokens!!!</span></div>'+boxes+'<div class="foot">See Instructions On The Back</div>'+qrBox()+'</div>'+pgClose;}
+  return pgOpen('tk','front')+'<div class="panel"><div class="tkcorner l">'+corner+'</div><div class="tkcorner r">'+corner+'</div><div class="ttl tk" data-frac=".8"><span class="ul">Tokens!!!</span></div>'+boxes+'<div class="foot">See Instructions On The Back</div>'+(rows[rows.length-1]>=3?qrBox().replace('class="qr"','class="qr up"'):qrBox())+'</div>'+pgClose;}
 const BACKT={ch:['cb','Choice Board'],tg:['tt','Teaching Targets'],bd:['tb','Token Board'],tk:['te','Token Economy']};
 function inline(s){s=esc(s);return s.replace(/\*\*\*(.+?)\*\*\*/g,'<b><i>$1</i></b>').replace(/__(.+?)__/g,'<u>$1</u>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>');}
 function fill(t){const n=nTok(),tn=tokName();return String(t||'').replace(/\{n\}th/g,WORDS[n]==='one'?'first':WORDS[n]==='two'?'second':WORDS[n]==='three'?'third':WORDS[n]==='five'?'fifth':WORDS[n]==='eight'?'eighth':WORDS[n]==='nine'?'ninth':WORDS[n]+'th').replace(/\{n\}/g,WORDS[n]).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn.toLowerCase());}
@@ -3422,9 +3425,10 @@ function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.ma
 function paginate(root,dup){let guard=0;
   for(let pg=root.querySelector('.pg.back');pg&&guard++<40;pg=pg.nextElementSibling){
     if(!pg.classList.contains('back'))continue;const body=pg.querySelector('.bbody');if(!body)continue;
+    const cr=pg.querySelector('.credit');const room=()=>{if(cr)body.style.paddingBottom=(cr.offsetHeight+(pg.classList.contains('compact')?14:34)*scl()*96/72)+'px';};room();
     fitOne(body);if(!tooFull(body))continue;
     /* the credit line gives way first: one small line at the foot, and the text gets the room back */
-    if(pg.querySelector('.credit')&&!pg.classList.contains('compact')){pg.classList.add('compact');body.style.paddingBottom=pt(26);fitOne(body);if(!tooFull(body))continue;}
+    if(pg.querySelector('.credit')&&!pg.classList.contains('compact')){pg.classList.add('compact');{let f=10.5;const one=13*scl()*96/72*1.4;while(cr.offsetHeight>one&&f>8){f-=.25;cr.style.fontSize=(f*scl())+'pt';}}room();fitOne(body);if(!tooFull(body))continue;}
     body.dataset.fixed=body.style.fontSize||getComputedStyle(body).fontSize;
     const kids=[...body.children].filter(e=>!e.classList.contains('cont'));const moved=[];
     while(tooFull(body)&&kids.length>1){const k=kids.pop();moved.unshift(k);k.remove();}
@@ -3460,7 +3464,11 @@ function fitAll(){
   $$('.fit').forEach(fitOne);
   $$('.ttl[data-frac]').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';const cs=getComputedStyle(el);const room=(el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))*(num(el.dataset.frac)||.8);let fs=parseFloat(cs.fontSize),g=0;/* the text's width in the title's own layout units: the range is measured on screen, so divide out any zoom in effect (the book's preview zoom, the polish layer's fit-to-window) */const w=()=>{const r=document.createRange();r.selectNodeContents(el);const k=el.getBoundingClientRect().width/(el.offsetWidth||1)||1;return r.getBoundingClientRect().width/k;};while(w()>room&&fs>16&&g++<80){fs-=1;el.style.fontSize=fs+'px';}});
   $$('.card .cl').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;while(el.scrollWidth>el.clientWidth+1&&fs>8&&g++<40){fs-=1;el.style.fontSize=fs+'px';}});
-  $$('.rule .rl').forEach(el=>{if(!el.clientHeight)return;el.style.fontSize='';el.style.maxHeight='2.1em';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.77;while(el.scrollHeight>el.clientHeight+1&&fs>lo&&g++<20){fs-=1;el.style.fontSize=fs+'px';}if(el.scrollHeight>el.clientHeight+1)el.style.maxHeight='';});
+  /* a rules-row label: at most two lines, shrinking to 55 % of its size; the label is bottom-aligned, so its overflow goes upwards where
+     scrollHeight cannot see it: the span inside is measured instead */
+  $$('.rule .rl').forEach(el=>{if(!el.clientHeight)return;const sp=el.firstElementChild;if(!sp)return;el.style.fontSize='';const two=()=>sp.offsetHeight<=parseFloat(getComputedStyle(el).fontSize)*1.05*2+2;const wide=()=>sp.scrollWidth<=el.clientWidth+1;let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.55;while((!two()||!wide())&&fs>lo&&g++<40){fs-=.5;el.style.fontSize=fs+'px';}});
+  /* token-slot captions shrink to their slot (a long caption, or a long token name in "Your First ...!") */
+  $$('.slot .ca,.slot .cb').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';const w=()=>{const r=document.createRange();r.selectNodeContents(el);const k=el.getBoundingClientRect().width/(el.offsetWidth||1)||1;return r.getBoundingClientRect().width/k;};let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.5;while(w()>el.clientWidth-6&&fs>lo&&g++<40){fs-=.25;el.style.fontSize=fs+'px';}});
 }
 window.addEventListener('beforeprint',fitAll);
 /* after the sheet of one card has printed, the print order goes back to what it was, so the Preview shows the whole book again */
