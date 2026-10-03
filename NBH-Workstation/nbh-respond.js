@@ -13,6 +13,24 @@
   U.decode=function(code){try{var m=/NBH1\.([A-Za-z0-9_-]+)/.exec(String(code||''));if(!m)return null;var o=JSON.parse(unb64u(m[1]));return (o&&o.v===1&&o.form&&o.inst)?o:null;}catch(e){return null;}};
   U.find=function(text){var out=[],seen={},re=/NBH1\.[A-Za-z0-9_-]{16,}/g,m;
     while((m=re.exec(String(text||'')))){if(seen[m[0]])continue;seen[m[0]]=1;var o=U.decode(m[0]);if(o)out.push(o);}return out;};
+  /* ---- personalizing a pasted item: "the student" -> the name, "he or she" -> the pronouns, "the problem behavior" -> the behavior's term ---- */
+  var PRON={he:{s:'he',o:'him',p:'his',r:'himself'},she:{s:'she',o:'her',p:'her',r:'herself'},they:{s:'they',o:'them',p:'their',r:'themselves'}};
+  function cap(src,rep){return /^[A-Z]/.test(src)?rep.charAt(0).toUpperCase()+rep.slice(1):rep;}
+  U.personalize=function(text,o){o=o||{};var t=String(text==null?'':text);var pr=PRON[o.pron]||null;
+    if(o.name){t=t.replace(/\b(the|your|this|that|my)\s+(student|client|individual|person|child|pupil|learner|consumer)(['’]s)?\b/gi,function(m,a,b,pos){return cap(m,o.name+(pos?'’s':''));});}
+    if(pr){t=t.replace(/\b(himself\s+or\s+herself|herself\s+or\s+himself|himself\s*\/\s*herself)\b/gi,function(m){return cap(m,pr.r);})
+      .replace(/\b(his\s+or\s+her|her\s+or\s+his|his\s*\/\s*hers?)\b/gi,function(m){return cap(m,pr.p);})
+      .replace(/\b(him\s+or\s+her|her\s+or\s+him|him\s*\/\s*her)\b/gi,function(m){return cap(m,pr.o);})
+      .replace(/\b(he\s+or\s+she|she\s+or\s+he|he\s*\/\s*she|s\/he)\b/gi,function(m){return cap(m,pr.s);});
+      if(o.pron==='they'){var V={is:'are',was:'were',has:'have',does:'do','doesn’t':'don’t',"doesn't":"don't","isn't":"aren't","isn’t":"aren’t","wasn't":"weren't","hasn't":"haven't"};
+        t=t.replace(/\b(they)\s+(is|was|has|does|doesn't|doesn’t|isn't|isn’t|wasn't|hasn't)\b/gi,function(m,a,b){return a+' '+(V[b.toLowerCase()]||b);});}}
+    if(o.behs){t=t.replace(/\b(the|this|that|these|those)\s+(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
+      .replace(/\b(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
+      .replace(/\b(the|these|those)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);});}
+    if(o.beh){t=t.replace(/\b(the|this|that)\s+(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);})
+      .replace(/\b(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);})
+      .replace(/\b(the|this)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);});}
+    return t;};
   U.payloadToHash=function(payload){return '#p='+b64u(JSON.stringify(payload));};
   U.payloadFromHash=function(){try{var m=/[#&]p=([A-Za-z0-9_-]+)/.exec(location.hash);return m?JSON.parse(unb64u(m[1])):null;}catch(e){return null;}};
 
@@ -36,6 +54,8 @@
       '.nr button{font:inherit;font-size:16px;padding:12px 18px;border-radius:8px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;min-height:48px}.nr button.ghost{background:#fff;color:var(--navy)}'+
       '.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
       '.nr .done{background:#e8f3ec;border-left:4px solid #2f6b37;padding:10px 12px;margin:10px 0}.nr .code{width:100%;font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:90px}'+
+      '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
+      '.nr label.conf{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:15px;cursor:pointer}.nr label.conf input{width:22px;height:22px;margin:2px 0 0;flex:0 0 auto}'+
       '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     root.innerHTML='';root.className='nr';
@@ -46,7 +66,8 @@
     /* head */
     var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?'Form '+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||'Questionnaire')}),
       h('p',{'class':'sub',text:(P.sub||'')}),
-      h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')}),
+      h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
+      P.confirm?h('label',{'class':'conf',id:'nbhr-conf'},[h('input',{type:'checkbox',id:'nbhr-confirm'}),' I have read the definition of '+(P.beh||'the behavior')+' above, I understand it, and my answers below are about that behavior only.']):null,
       h('p',{'class':'sub',text:P.instructions||'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send: your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'}),
       P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null]);
     root.appendChild(card);
@@ -64,16 +85,21 @@
     var ol=h('ol',{'class':'items'});
     items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+(it.n||i+1)+'.</b> '+esc(it.text||'')}));
       var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Item '+(it.n||i+1)});var choices;
-      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);}
+      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||'Can\u2019t judge','']);}
       else choices=[['Y','Yes',''],['N','No',''],['NA','N/A',''] ];
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){ans[i]=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');li.classList.remove('missing');paint();});
         opts.appendChild(lab);});
       li.appendChild(opts);ol.appendChild(li);});
-    ic.appendChild(ol);root.appendChild(ic);
-    /* open-ended */
-    var op={};if(opens.length){var oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||'In your own words'}));
-      opens.forEach(function(o){var lab=h('label',{'class':'f',text:o.label});var ta=h('textarea',{maxlength:'600'});op[o.id]=ta;oc.appendChild(lab);oc.appendChild(ta);});root.appendChild(oc);}
+    ic.appendChild(ol);
+    /* open-ended, after the items unless the payload asks for them first */
+    var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||'In your own words'}));
+      opens.forEach(function(o){var lab=h('label',{'class':'f',text:o.label});oc.appendChild(lab);
+        if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||'Add a note if you wish','aria-label':'Note for '+o.label});
+          (o.choices||['Yes','No','Sometimes']).forEach(function(c){var l=h('label',{text:c});l.addEventListener('click',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
+          wrap.appendChild(opts);wrap.appendChild(note);oc.appendChild(wrap);op[o.id]={get value(){return pick?pick+(note.value.trim()?'; '+note.value.trim():''):note.value.trim();}};}
+        else{var ta=h('textarea',{maxlength:String(o.max||600)});op[o.id]=ta;oc.appendChild(ta);}});}
+    if(oc&&P.openFirst)root.appendChild(oc);if(items.length)root.appendChild(ic);if(oc&&!P.openFirst)root.appendChild(oc);
     /* send */
     var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:'Send your answers'}));
     var warn=h('div',{'class':'warn'});warn.hidden=true;sc.appendChild(warn);
@@ -84,7 +110,8 @@
     row2.appendChild(cp);row2.appendChild(sv);row2.appendChild(ml);sc.appendChild(row2);
     sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
     root.appendChild(sc);
-    function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
+    function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
+      if(P.confirm)r.confirmed=!!(d.getElementById('nbhr-confirm')&&d.getElementById('nbhr-confirm').checked);
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
     var lastCode='';
@@ -93,13 +120,17 @@
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
     send.addEventListener('click',function(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
       var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;});
+      if(P.confirm&&!(d.getElementById('nbhr-confirm')&&d.getElementById('nbhr-confirm').checked))need.push('the confirmation that you have read the definition');
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
       if(need.length||miss.length){warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. Answer each one (N/A counts) and press Send again.':'');
         if(need.length||miss.length>Math.max(0,items.length-1))return;}
       else warn.hidden=true;
       lastCode=encode(response());codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
       done.innerHTML='<b>Your email program should open now</b> with the message to '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+'. Press Send there. If nothing opened, copy the code below and paste it into an email to '+esc(P.email||'the BCBA')+', or save it as a file and attach it.';
-      ml.href=mailto(lastCode);window.location.href=ml.href;});
+      ml.href=mailto(lastCode);
+      if(ml.href.length>(P.mailMax||1800)){done.className='warn';done.innerHTML='<b>Your answers are longer than an email link can carry</b> ('+ml.href.length.toLocaleString()+' characters, where about '+(P.mailMax||1800).toLocaleString()+' fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to '+esc(P.email||'the BCBA')+', or <b>Copy the code</b> and paste it into the message.';
+        row2.insertBefore(sv,cp);ml.hidden=true;sv.className='';cp.className='ghost';return;}
+      done.className='done';ml.hidden=false;window.location.href=ml.href;});
     cp.addEventListener('click',function(){codeBox.select();try{navigator.clipboard.writeText(lastCode);}catch(e){d.execCommand('copy');}cp.textContent='Copied';setTimeout(function(){cp.textContent='Copy the code';},1500);});
     sv.addEventListener('click',function(){var blob=new Blob([lastCode+'\n'],{type:'text/plain'}),a=h('a',{href:URL.createObjectURL(blob),download:(P.form||'form')+'_'+(P.inst||'answers')+'_'+((ex.name&&ex.name.value)||'respondent').replace(/[^\w.-]+/g,'_')+'.nbhr.txt'});d.body.appendChild(a);a.click();a.remove();});
     ml.addEventListener('click',function(e){if(!lastCode){e.preventDefault();}});

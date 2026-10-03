@@ -513,6 +513,33 @@ input[type=number]{appearance:textfield;-moz-appearance:textfield}
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 td input,td select{max-width:100%}
+
+/* ---- respondent pages and collected responses (v21.39): the dialogs and the banner, screen only ---- */
+dialog.gf{border:0;border-radius:4px;padding:0;width:min(880px,94vw);box-shadow:0 20px 60px rgba(24,46,67,.35);font-family:var(--sans);color:var(--ink)}
+dialog.gf::backdrop{background:rgba(24,46,67,.45)}
+.gf-head{display:flex;align-items:center;justify-content:space-between;background:var(--nbh-navy);color:#fff;padding:9px 14px;font-family:var(--nbh-serif);font-size:16px;margin:0}
+.gf-head button{background:transparent;border:0;color:#fff;font-size:16px;cursor:pointer;padding:2px 8px;line-height:1}
+.gf-body{padding:14px 16px 16px;overflow:auto;max-height:calc(90vh - 60px)}
+.gf-body textarea{width:100%;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:6px;border:1px solid var(--rule-2);border-radius:2px;resize:vertical}
+.gf-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}@media(max-width:700px){.gf-grid{grid-template-columns:1fr}}
+.gf-f{display:flex;flex-direction:column;gap:2px;margin:4px 0}.gf-f label{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft)}
+.gf-f input,.gf-f select{font:inherit;font-size:13px;padding:4px 6px;border:1px solid var(--rule-2);border-radius:2px;background:#fff;color:var(--ink)}
+.gf-f textarea{font:inherit;font-size:13px}
+.gf-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.gf-body button{font-family:var(--sans);font-size:12.5px;padding:5px 11px;border:1px solid var(--rule-2);background:#fff;color:var(--ink);border-radius:2px;cursor:pointer;min-height:30px}
+.gf-body button:hover{background:var(--wash)}.gf-body button:disabled{opacity:.5;cursor:default}
+.gf-body button.primary{background:var(--nbh-navy);color:#fff;border-color:var(--nbh-navy)}
+.gf-body button.primary:hover{background:var(--nbh-slate)}
+table.gf-t{border-collapse:collapse;width:100%;font-size:12px;margin:8px 0}
+table.gf-t th,table.gf-t td{border:1px solid var(--rule-2);padding:4px 6px;text-align:left;vertical-align:top}
+table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
+table.gf-t select{font:inherit;font-size:12px;max-width:100%}
+.gf-note{display:block;font-size:12px;color:var(--ink-soft);margin:6px 0}
+.gf-body .gf-p{font-family:var(--sans);font-size:12px;line-height:1.55;color:var(--ink-soft);margin:6px 0}.gf-body .gf-p b{color:var(--ink)}
+.gf-warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 10px;font-size:12.5px;margin:8px 0}
+.gf-banner{width:11.5in;max-width:100%;margin:18px auto -6px;padding:9px 14px;background:var(--nbh-mist);border-left:4px solid var(--nbh-teal);color:var(--nbh-ink);font-family:var(--sans);font-size:12.5px;line-height:1.45;box-sizing:border-box}
+.gf-banner[hidden]{display:none}
+@media print{dialog.gf,.gf-banner{display:none}}
 </style>
 <style id="in1-audit-css">
 /* v21.16 audit (F3, F11). Every interview is in the page: the one selected is shown on screen and all of them
@@ -574,7 +601,12 @@ td input,td select{max-width:100%}
     <input type="file" id="fileIn" accept="application/json" hidden>
     <button id="clearBtn">Clear all</button>
   </div></div>
+  <div class="tgroup"><span>Away from the table</span><div class="row">
+    <button id="rpBtn" title="Make a one-page copy of a question set (a file or a link) that a respondent answers in writing on any phone or computer and sends back">Respondent pages</button>
+    <button id="rcBtn" title="Read the answers the respondent pages sent back (files or emails) into a respondent's interview record">Collect responses</button>
+  </div></div>
 </div>
+<div class="gf-banner noprint" id="rcBanner" hidden></div>
 
 <main class="sheet">
   <div class="nbh-print-head">
@@ -595,6 +627,7 @@ td input,td select{max-width:100%}
         <option>9th</option><option>10th</option><option>11th</option><option>12th</option></select></div>
       <div><label>Student's age</label><input data-m="age"></div>
       <div><label>Person conducting the interviews</label><input data-m="bcba"></div>
+      <div><label>Interviewer's email (respondent pages reply here)</label><input data-m="email" type="email" autocomplete="off"></div>
     </div>
     <table class="rt" style="margin-top:8px">
       <tr><th style="width:22%">Problem behavior</th><td><textarea data-m="beh" rows="2" placeholder="Name the target behavior and provide an operational definition"></textarea></td></tr>
@@ -667,6 +700,7 @@ td input,td select{max-width:100%}
       <tr><th>Student</th><td>First person and strengths-first, asked in plain language. Preferences and dislikes, what is easy and hard, when things go best, what they want to work for, what happens around the behavior, what they notice beforehand, and what helps them calm down. Replace the words <i>[target behavior]</i> with the student's own word for it before asking.</td></tr>
     </table>
     <p class="hint" style="margin-top:8px">Sources: the question sets follow the interview forms in use at the School District of Palm Beach County, reproduced here. The structure draws on the Functional Assessment Interview of O'Neill et al. (2015) and the open-ended interview described by Hanley (2012). The convergence table and the tier note are a working convention, not a finding.</p>
+    <p class="hint" style="margin-top:8px" id="rpGuide"><b>Respondent pages.</b> When someone cannot be interviewed in person, <b>Respondent pages</b> (toolbar) makes a one-page copy of their question set, as a file to attach to an email or as a link when the workstation is on a website, that they answer in writing on any phone or computer. Short answers come back by email as a code, longer ones as a file the page saves, and <b>Collect responses</b> reads either into a new or chosen respondent's record and the Respondents table. The page shows the student as initials and ID only and sends nothing anywhere but the email the respondent chooses to send. A written answer is not an interview: follow up where you can, and record that the set was answered in writing.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="hint"><b>Load simulation</b> (toolbar) fills the form with simulated interviews; none of it is a real student record. Simulated interviews loaded: parent, teacher, paraprofessional, related service provider, and the student, with the convergence table built from their answers.</p>
     <p class="hint" id="inRefs"><b>Reference list.</b>
@@ -675,7 +709,36 @@ td input,td select{max-width:100%}
   </section>
 </main>
 
+<dialog id="rpDlg" class="gf" aria-labelledby="rpTitle">
+  <form method="dialog" class="gf-head"><b id="rpTitle">Respondent pages</b><button value="close" aria-label="Close">&#x2715;</button></form>
+  <div class="gf-body">
+    <p class="gf-p" style="margin:0 0 8px">One page per question set, for a respondent who cannot be interviewed in person: send it as a file (attach it to an email; it opens in any browser, nothing to install) or, when the workstation is on a website, as a link. The respondent answers in writing and presses Send. Short answers come back in an email as a code; long ones, which an email link cannot carry, come back as a file the page saves. <b>Collect responses</b> reads either into a respondent's interview record. Keep the student's full name out of it: the page shows the label below. A written answer is not an interview: ask follow-up questions where you can.</p>
+    <div class="gf-grid">
+      <div class="gf-f"><label for="rpInst">Question set</label><select id="rpInst"><option value="parent">Parent or guardian (15 questions, two checklists)</option><option value="school">Teacher, staff member, related service provider (14 questions)</option><option value="student">Student (11 questions)</option></select></div>
+      <div class="gf-f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
+      <div class="gf-f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
+      <div class="gf-f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
+    </div>
+    <div class="gf-f"><label for="rpBeh">The behavior as the page states it (the label and the definition shown to every respondent)</label><textarea id="rpBeh" rows="3"></textarea></div>
+    <div class="gf-f" id="rpWordRow"><label for="rpWord">Student set only: the student's own word for the behavior (replaces <i>[target behavior]</i> in the questions)</label><input id="rpWord" placeholder="e.g., hit, get mad, run out"></div>
+    <div id="rpStatus" class="gf-warn" hidden></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="gf-p" id="rpNote" style="margin:0"></span></div>
+  </div>
+</dialog>
+<dialog id="rcDlg" class="gf" aria-labelledby="rcTitle">
+  <form method="dialog" class="gf-head"><b id="rcTitle">Collect responses</b><button value="close" aria-label="Close">&#x2715;</button></form>
+  <div class="gf-body">
+    <p class="gf-p" style="margin:0 0 8px">Choose the files the respondent pages saved (the usual route: an interview's answers are longer than an email link carries), or paste the emails they sent (whole messages are fine; only the codes starting <b>NBH1.</b> are read). Each response goes into a respondent's interview record: a new respondent, or one already on the Setup sheet.</p>
+    <div class="gf-row"><button type="button" class="primary" id="rcFileBtn">Choose files</button><input type="file" id="rcFile" accept=".txt,.nbhr.txt,.json,text/plain,application/json" multiple hidden><span id="rcStatus" class="gf-p" style="margin:0"></span></div>
+    <textarea id="rcText" rows="4" placeholder="Or paste the emails or the codes here" spellcheck="false" aria-label="Pasted responses"></textarea>
+    <div class="gf-row"><button type="button" id="rcRead">Read what I pasted</button></div>
+    <div id="rcOut"></div>
+  </div>
+</dialog>
+
+<script src="nbh-respond.js"></script>
 <script>
+if(!window.NBH_RESPOND){window.NBH_RESPOND_MISSING=true;}
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const YNS=['','Yes','No','Sometimes'];
@@ -1093,6 +1156,135 @@ async function loadSim(){
   renderAll();setView('conv');
   nbhUI.toast('Simulation loaded: ' + 'simulated interviews with the parent, teacher, paraprofessional, provider and student.', {kind:'ok'});
 }
+/* ---------- respondent pages and collected responses (v21.39) ----------
+   A respondent page is a self-contained HTML copy of one question set (parent, school or student) that a
+   respondent answers in writing on any phone or computer when an interview cannot be held in person; the
+   library nbh-respond.js builds it (the one-file edition carries the library). The answers come back as one
+   code (NBH1....): a short set by email, a long one as the file the page saves, since an email link carries
+   only about 1,800 characters and an interview's answers usually run past that. Collect responses reads the
+   codes (chosen files or pasted emails) into a new or chosen respondent's interview record. The page shows
+   the student as initials and ID only. A checklist row travels as its own answer (Yes, No or Sometimes, with
+   anything the respondent added after a semicolon); the page shows it as three choices and a note. */
+const RP_MAIL_MAX=1800;
+const RP_SETS={
+  parent:{q:Q_PARENT,file:'Parent',title:'Parent or guardian questions',role:'Parent or guardian',heading:'Stakeholder Interview: Parent or Guardian',sub:'The questions a parent or guardian is asked about the student at home, answered in writing'},
+  school:{q:Q_SCHOOL,file:'School',title:'Teacher and staff questions',role:'Staff member',heading:'Stakeholder Interview: Teacher, Staff Member or Related Service Provider',sub:'The questions school staff are asked about the student at school, answered in writing'},
+  student:{q:Q_STUDENT,file:'Student',title:'Student questions',role:'Student',heading:'Some Questions About School',sub:'Questions for the student, in plain language, answered in writing'}};
+const rpSetOf=role=>ROLES[role]===Q_PARENT?'parent':ROLES[role]===Q_STUDENT?'student':'school';
+function rpInitials(){const nm=String(S.meta.client||'').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=String(S.meta.sid||'').trim();return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
+/* the questions of one set as the page's open answers: a checklist question becomes one answer per row (Yes, No or
+   Sometimes), the first row carrying the question, then a note; every other question is one answer */
+function rpOpen(set,word){const out=[];RP_SETS[set].q.forEach((qq,j)=>{let t=qq.q;if(set==='student'&&word)t=t.split('[target behavior]').join(word);
+  if(qq.mx){qq.mx.forEach((row,ri)=>out.push(Object.assign({id:'q'+j+'_'+ri,label:(ri?'':(j+1)+'. '+t+' \u2014 ')+row+' (Yes, No or Sometimes)',row,yns:true},ri?{}:{q:(j+1)+'. '+t})));out.push({id:'q'+j,label:'Anything to add to question '+(j+1)});}
+  else out.push({id:'q'+j,label:(j+1)+'. '+t+(qq.ex?' ('+qq.ex+')':'')});});return out;}
+function rpPayload(){const set=$('#rpInst').value,info=RP_SETS[set],bcba=String(S.meta.bcba||'').trim()||'the interviewer';
+  const extras=set==='student'?[{id:'name',label:'Your name',req:true}]:[{id:'name',label:'Your name',req:true},{id:'role',label:'Your relationship to the student (mother, 5th grade teacher, SLP)'}];
+  return {v:1,form:'IN-1',inst:set,title:info.title,heading:info.heading,sub:info.sub,student:$('#rpStudent').value.trim(),beh:$('#rpBeh').value.trim(),bcba,email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
+    items:[],scale:{kind:'yn'},extras,open:rpOpen(set,$('#rpWord').value.trim()),openHeading:'The questions',subject:info.title+' for Form IN-1',
+    instructions:'Answer in your own words, about the student and the behavior named above, from what you have seen yourself; skip anything you are not in a position to know. When you have finished, press Send: short answers go in an email to '+bcba+'; longer ones are saved as a file for you to attach to an email.'};}
+function rpStatus(){const set=$('#rpInst').value,st=$('#rpStatus'),bad=[];
+  if(window.NBH_RESPOND_MISSING)bad.push('The file nbh-respond.js is not beside this form, so no page can be built. Keep the workstation folder together.');
+  if(!$('#rpEmail').value.trim())bad.push('Enter your email: the answers are sent to it.');
+  if(set==='student'&&!$('#rpWord').value.trim())bad.push('Enter the student’s own word for the behavior: the student set says [target behavior] until you do.');
+  st.hidden=!bad.length;st.innerHTML=bad.map(esc).join('<br>');$('#rpWordRow').style.display=set==='student'?'':'none';
+  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
+  const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this question set':'A link works when the workstation is on a website; opened from a folder, send the file';
+  $('#rpNote').textContent=served?'The file is the better route for a full set of answers: the link opens the questions on respond.html, which sends by email only (about 1,800 characters).':'Opened from a folder: send the file. The link needs the workstation on a website.';}
+/* what the page adds to the library's runtime: the empty items card goes, the checklist rows become three choices, the
+   answers are counted, and an answer code too long for an email link is held back with the file and the code led */
+function NBH_IN1_PAGE(root,P,MAX){
+  var d=document,opens=P.open||[],tas=Array.prototype.filter.call(root.querySelectorAll('textarea'),function(t){return !t.classList.contains('code');});
+  function h(tag,attrs,text){var e=d.createElement(tag);if(attrs)for(var k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;return e;}
+  var st=h('style');st.textContent='.nr .in1-q{font-size:16px;margin:14px 0 2px;padding-top:12px;border-top:1px solid #cfdad8}.nr .in1-row{font-size:14.5px;color:#1a2933;margin:8px 0 4px}.nr .in1-note{font-size:14px;color:#54676f;margin:4px 0 8px}.nr .in1-hold{background:#fdf3ec;border-left:4px solid #b9672d}';d.head.appendChild(st);
+  var prog=root.querySelector('.prog');if(prog&&!(P.items||[]).length){var ic=prog.parentNode;if(ic&&ic.classList.contains('nr-card'))ic.style.display='none';}
+  var oc=tas.length?tas[0].parentNode:null,count=h('div',{'class':'prog'});if(oc)oc.insertBefore(count,oc.children[1]||null);
+  function paint(){var k=0;tas.forEach(function(t){if((t.value||'').trim())k++;});count.innerHTML='<b>'+k+' of '+tas.length+'</b> answered';}
+  opens.forEach(function(o,i){var ta=tas[i];if(!ta)return;var lab=ta.previousElementSibling;
+    if(o.q&&lab){lab.parentNode.insertBefore(h('p',{'class':'in1-q'},o.q),lab);}
+    if(o.yns){if(lab){lab.className='in1-row';lab.textContent=o.row||o.label;}ta.style.display='none';var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':o.label}),note=h('input',{type:'text','class':'in1-note',placeholder:'Anything to add about this one (optional)','aria-label':o.label+': anything to add'});
+      var pick='';function sync(){ta.value=pick?pick+((note.value||'').trim()?'; '+note.value.trim():''):'';paint();}
+      ['Yes','No','Sometimes'].forEach(function(v){var l=h('label'),r=h('input',{type:'radio',name:'in1_'+i,value:v});l.appendChild(r);l.appendChild(d.createTextNode(v));
+        r.addEventListener('change',function(){pick=v;Array.prototype.forEach.call(opts.querySelectorAll('label'),function(x){x.classList.remove('on');});l.classList.add('on');sync();});opts.appendChild(l);});
+      note.addEventListener('input',sync);ta.parentNode.insertBefore(opts,ta);ta.parentNode.insertBefore(note,ta);}
+    else{ta.setAttribute('maxlength','1500');ta.addEventListener('input',paint);}});
+  paint();
+  var ml=root.querySelector('#nbhr-mail'),row2=ml&&ml.parentNode,done=root.querySelector('.done'),held=false;
+  function hold(n){held=true;if(!row2)return;var sv=null,cp=null;Array.prototype.forEach.call(row2.querySelectorAll('button'),function(b){if(/Save as a file/.test(b.textContent))sv=b;if(/Copy the code/.test(b.textContent))cp=b;});
+    if(sv)row2.insertBefore(sv,row2.firstChild);if(cp&&sv)row2.insertBefore(cp,sv.nextSibling);ml.style.display='none';
+    done.classList.add('in1-hold');var fmt=function(x){return String(x).replace(/\B(?=(\d{3})+(?!\d))/g,',');};
+    done.innerHTML='<b>Your answers are longer than an email link can carry</b> ('+fmt(n)+' characters, where about '+fmt(MAX)+' fit), so no email was opened and nothing has been sent. Press <b>Save as a file</b> and attach the file to an email to '+esc(P.bcba||'the interviewer')+(P.email?' ('+esc(P.email)+')':'')+', or <b>Copy the code</b> and paste it into the message. The code is also shown below.';}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  window.NBH_IN1={hold:function(href){held=false;if(href.length<=MAX)return false;hold(href.length);return true;},max:MAX};
+  var send=root.querySelector('.row button:not(.ghost)');if(send)send.addEventListener('click',function(){if(!held&&ml&&ml.getAttribute('href')&&ml.getAttribute('href').length>MAX)hold(ml.getAttribute('href').length);});
+}
+function rpPage(p){let html=NBH_RESPOND.pageHTML(p);const A='window.location.href=ml.href;';
+  if(html.indexOf(A)>=0)html=html.replace(A,'if(!(window.NBH_IN1&&NBH_IN1.hold(ml.href)))'+A);
+  const extra='<script>\n'+NBH_IN1_PAGE.toString()+'\nNBH_IN1_PAGE(document.getElementById("nbhr"),JSON.parse(document.getElementById("nbhr-payload").textContent),'+RP_MAIL_MAX+');\n<\/script>';
+  const k=html.lastIndexOf('</body>');return k<0?html+extra:html.slice(0,k)+extra+'\n'+html.slice(k);}
+function rpFile(){const p=rpPayload();const html=rpPage(p);const name='IN-1_'+RP_SETS[p.inst].file+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  if(window.nbhUI)nbhUI.toast('Respondent page saved: '+name+'. Attach it to an email to the respondent.',{kind:'ok'});return name;}
+function rpLinkUrl(){const p=rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
+$('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=S.meta.email||'';
+  if(!$('#rpBeh').value)$('#rpBeh').value=S.meta.beh||'';rpStatus();$('#rpDlg').showModal();});
+['rpInst','rpEmail','rpStudent','rpWord'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));$('#rpInst').addEventListener('change',rpStatus);
+$('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();e.dispatchEvent(new Event('input',{bubbles:true}));}});
+$('#rpSave').addEventListener('click',rpFile);
+$('#rpPreview').addEventListener('click',()=>{window.open(URL.createObjectURL(new Blob([rpPage(rpPayload())],{type:'text/html'})),'_blank');});
+$('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+  try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
+$('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+/* collecting: each response names the respondent it goes to (one on the Setup sheet whose role is asked that set, or a
+   new one); the default is the respondent of that name, else an empty respondent of that set, else a new one */
+let rcData=null;
+const rcDate=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1].slice(2):String(d||'');};
+function rcGuessRole(o){if(o.inst==='parent')return 'Parent or guardian';if(o.inst==='student')return 'Student';const r=String(o.role||'');
+  if(/teacher/i.test(r))return 'Teacher';if(/slp|speech|language|occupational|physical|therap|psych|counsel|social work|nurse|provider|bcba|analyst/i.test(r))return 'Related service provider';return 'Staff member';}
+function rcTargets(o,taken){const set=o.inst,opts=[];
+  S.resp.forEach((r,i)=>{if(rpSetOf(r.role)===set)opts.push({v:String(i),t:(i+1)+'. '+(r.n.trim()||r.role)+(r.n.trim()||hasEntries(i)?'':' (empty)')});});
+  (set==='school'?['Teacher','Staff member','Related service provider']:[RP_SETS[set].role]).forEach(role=>opts.push({v:'new:'+role,t:'New respondent: '+role}));
+  const nm=String(o.name||'').trim().toLowerCase();let def=null;
+  const same=nm?S.resp.findIndex(r=>rpSetOf(r.role)===set&&r.n.trim().toLowerCase()===nm):-1;
+  if(same>=0&&!taken.has(String(same)))def=String(same);
+  else{const empty=S.resp.findIndex((r,i)=>rpSetOf(r.role)===set&&!r.n.trim()&&!hasEntries(i)&&!taken.has(String(i)));def=empty>=0?String(empty):'new:'+rcGuessRole(o);}
+  if(/^\d+$/.test(def))taken.add(def);return {opts,def};}
+function rcRead(texts){const found=[],seen=new Set();texts.forEach(t=>NBH_RESPOND.find(t).forEach(o=>{const k=JSON.stringify(o);if(!seen.has(k)){seen.add(k);found.push(o);}}));
+  const mine=found.filter(o=>o.form==='IN-1'&&RP_SETS[o.inst]&&o.open&&typeof o.open==='object');const out=$('#rcOut');rcData=null;
+  if(!mine.length){out.innerHTML='<div class="gf-warn">'+(found.length?'The codes found belong to another form ('+esc([...new Set(found.map(o=>o.form))].join(', '))+'), not IN-1.':'No answer code (NBH1....) was found in what was chosen or pasted.')+'</div>';return;}
+  const taken=new Set();const rows=mine.map(o=>Object.assign({o},rcTargets(o,taken)));
+  let h='<p class="gf-p" style="margin:6px 0"><b>'+rows.length+' response'+(rows.length===1?'':'s')+' found.</b> Each goes into the respondent chosen in the last column.</p>';
+  h+='<table class="gf-t"><thead><tr><th></th><th>Respondent</th><th>Relationship</th><th>Question set</th><th>Sent</th><th>Answers</th><th>Goes to</th></tr></thead><tbody>';
+  rows.forEach((x,i)=>{const o=x.o,keys=Object.keys(o.open),k=keys.filter(key=>String(o.open[key]||'').trim()).length;
+    h+='<tr><td><input type="checkbox" data-rc="'+i+'" checked aria-label="Import this response"></td><td>'+(esc(o.name)||'<i>no name</i>')+'</td><td>'+esc(o.inst==='student'?'Self':(o.role||''))+'</td><td>'+esc(RP_SETS[o.inst].title)+'</td><td>'+esc(rcDate(o.date))+'</td><td>'+k+' of '+keys.length+'</td>'+
+      '<td><select data-rcto="'+i+'" aria-label="Respondent this response goes to">'+x.opts.map(p=>'<option value="'+esc(p.v)+'"'+(p.v===x.def?' selected':'')+'>'+esc(p.t)+'</option>').join('')+'</select></td></tr>';});
+  h+='</tbody></table><span class="gf-note">An answer in the code replaces what the record holds for that question; a question left blank on the page leaves the record as it is. The respondent’s name, relationship and the date are filled where the record has none, and the interviewer is set to the person conducting the interviews.</span>';
+  h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the record</button></div>';
+  out.innerHTML=h;rcData={rows};
+  $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>({o:a.rows[+cb.dataset.rc].o,to:$('#rcOut [data-rcto="'+cb.dataset.rc+'"]').value}));
+    if(!picked.length){alert('Tick at least one response.');return;}
+    const placed=[];let cells=0;picked.forEach(x=>{const r=rcPlace(x.o,x.to);if(r){placed.push(r.i);cells+=r.cells;}});
+    renderAll();if(placed.length)S.cur=placed[placed.length-1];renderBar();showCur();
+    const names=placed.map(i=>'respondent '+(i+1)+' ('+(S.resp[i].n.trim()||S.resp[i].role)+')');
+    const b=$('#rcBanner');b.textContent='Collected '+placed.length+' response'+(placed.length===1?'':'s')+' from respondent pages into '+(names.join(', ')||'no record')+': '+cells+' answers. Check the Respondents table on Setup, then the interview. These answers were written, not interviewed.';b.hidden=false;
+    if(window.nbhUI)nbhUI.toast('Collected '+placed.length+' response'+(placed.length===1?'':'s')+' into the record.',{kind:'ok'});
+    $('#rcDlg').close();setView('int');});}
+function rcPlace(o,to){let i;if(String(to).indexOf('new:')===0){const role=to.slice(4);if(!ROLE_LIST.includes(role))return null;dropAnswers(S.resp.length);S.resp.push(newR(role));i=S.resp.length-1;}else i=+to;
+  const r=S.resp[i];if(!r||rpSetOf(r.role)!==o.inst)return null;
+  if(o.name&&!r.n.trim())r.n=String(o.name);if(!r.rel.trim())r.rel=o.inst==='student'?'Self':String(o.role||'');if(o.date&&!r.d.trim())r.d=rcDate(o.date);if(!r.by.trim())r.by=String(S.meta.bcba||'');
+  const v=o.open,q=qs(i);let cells=0;
+  q.forEach((qq,j)=>{const note=[];
+    if(qq.mx){const arr=(S.mx[akey(i,j)]||[]).slice();qq.mx.forEach((row,ri)=>{const t=String(v['q'+j+'_'+ri]||'').trim();if(!t)return;const m=/^(yes|no|sometimes)\b[\s;,.:—–-]*([\s\S]*)$/i.exec(t);
+        const lab=row.replace(/\?$/,'');if(m){arr[ri]=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase();cells++;if(m[2].trim())note.push(lab+': '+m[2].trim());}else note.push(lab+': '+t);});
+      S.mx[akey(i,j)]=qq.mx.map((_,ri)=>arr[ri]||'');}
+    const t=String(v['q'+j]||'').trim();if(t){note.push(t);cells++;}
+    if(note.length)S.ans[akey(i,j)]=note.join('\n');});
+  return {i,cells};}
+$('#rcBtn').addEventListener('click',()=>{$('#rcText').value='';$('#rcOut').innerHTML='';$('#rcStatus').textContent='';rcData=null;$('#rcDlg').showModal();});
+$('#rcRead').addEventListener('click',()=>rcRead([$('#rcText').value]));
+$('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
+$('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
+$('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
+window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:rpPayload,page:rpPage};   /* for the checks */
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();

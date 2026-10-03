@@ -436,7 +436,7 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
 .gf-warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 10px;font-size:12.5px;margin:8px 0}
 .gf-banner{width:8.5in;max-width:100%;margin:18px auto -6px;padding:9px 14px;background:var(--nbh-mist);border-left:4px solid var(--nbh-teal);color:var(--nbh-ink);font-family:var(--sans);font-size:12.5px;line-height:1.45;box-sizing:border-box}
 @media print{dialog.gf,.gf-banner,.rp-word{display:none}}
-.rp-word{margin:14px 0 10px}.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.rp-grid textarea{width:100%;box-sizing:border-box;font-size:12px}.rp-count{font-weight:400;color:var(--ink-soft)}#rpDlg textarea,#rpDlg input{font-family:var(--sans);font-size:13px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
+.rp-word{margin:14px 0 10px}.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.rp-grid textarea{width:100%;box-sizing:border-box;font-size:12px}.rp-count{font-weight:400;color:var(--ink-soft)}#rpDlg textarea,#rpDlg input{font-family:var(--sans);font-size:13px}.rp-tt input,.rp-tt textarea{width:100%;box-sizing:border-box}.rp-hint{font-weight:400;color:var(--ink-soft);font-size:11px}.rp-prev{font-size:12.5px;margin:4px 0 0}.rp-prev div{margin:2px 0}.rp-other button{margin-left:8px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
 .twoup{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
 .twoup > *{min-width:0}
 .twoup.figs{margin-top:14px}
@@ -579,15 +579,20 @@ td input,td select{max-width:100%}
 <dialog id="rpDlg" class="gf" aria-labelledby="rpTitle">
   <form method="dialog" class="gf-head"><b id="rpTitle">Respondent pages</b><button value="close" aria-label="Close">&#x2715;</button></form>
   <div class="gf-body">
-    <p class="method" style="margin:0 0 8px">One page per instrument. Send it as a file (attach it to an email; it opens in any browser, nothing to install) or, when the workstation is on a website, as a link. The informant answers and presses Send; an email to you opens with the answers as a short code, which <b>Collect responses</b> reads back onto the worksheet. Keep the student's full name out of it: the page shows the label below.</p>
+    <p class="method" style="margin:0 0 8px">One page per instrument and per target behavior. Send it as a file (attach it to an email; it opens in any browser) or, when the workstation is on a website, as a link. The informant reads the definition, confirms it, answers and presses Send; an email to you opens with the answers as a short code, which <b>Collect responses</b> reads back onto the worksheet. The items are personalized: the generic words of the pasted instrument become the student's name, pronouns and the behavior's own terms.</p>
     <div class="grid2">
       <div class="f"><label for="rpInst">Instrument</label><select id="rpInst"><option value="fast">FAST (16 items, yes / no)</option><option value="qabf">QABF (25 items, 0 to 3)</option><option value="mas">MAS (16 items, 0 to 6)</option><option value="pbq">PBQ (0 to 6)</option></select></div>
-      <div class="f"><label for="rpStudent">Student label on the page (initials and ID, not the full name)</label><input id="rpStudent"></div>
+      <div class="f"><label for="rpTarget">Target behavior (from this form and the case)</label><select id="rpTarget"></select></div>
+      <div class="f"><label for="rpName">The student's name as the page uses it (first name; leave blank for "the student")</label><input id="rpName"></div>
+      <div class="f"><label for="rpPron">Pronouns in the items</label><select id="rpPron"><option value="">as pasted (he or she)</option><option value="he">he / him / his</option><option value="she">she / her / her</option><option value="they">they / them / their</option></select></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
+      <div class="f"><label for="rpStudent">Student label in the header (initials and ID)</label><input id="rpStudent"></div>
     </div>
-    <div class="f"><label for="rpBeh">The behavior as the page states it (the label and the definition read to every informant)</label><textarea id="rpBeh" rows="3"></textarea></div>
+    <div id="rpTargets"></div>
+    <label class="gf-note"><input type="checkbox" id="rpConfirm" checked> Show the definition and ask the respondent to confirm they have read it before answering</label>
     <label class="gf-note" id="rpFxRow"><input type="checkbox" id="rpFx" checked> FAST only: ask the open-ended questions too (most and least likely situations, what happens before and after, current treatments)</label>
+    <div class="gf-note"><b>The first items as the page will read them:</b><div id="rpPrev" class="rp-prev"></div></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
     <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="method" id="rpNote" style="margin:0"></span></div>
   </div>
@@ -693,6 +698,7 @@ td input,td select{max-width:100%}
   <div class="rp-word noprint" id="rpWording">
     <h3 class="sub">Item Wording for Respondent Pages</h3>
     <p class="method" style="margin-top:0">A respondent page carries the items of one instrument so an informant can answer it away from this form. The instruments are published forms, so the wording is not built into the workstation: paste each instrument's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go. The wording saves with this file and travels into every case file saved from it, so it is pasted once per instrument.</p>
+    <input type="text" name="rp.name" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.pron" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.terms" hidden aria-hidden="true" tabindex="-1">
     <div class="grid2 rp-grid">
       <div class="f"><label for="rpwFast">FAST, 16 items <span class="rp-count" data-rpw="fast"></span></label><textarea id="rpwFast" name="rp.w.fast" rows="4" spellcheck="false" placeholder="1. ...&#10;2. ..."></textarea></div>
       <div class="f"><label for="rpwQabf">QABF, 25 items <span class="rp-count" data-rpw="qabf"></span></label><textarea id="rpwQabf" name="rp.w.qabf" rows="4" spellcheck="false"></textarea></div>
@@ -1373,57 +1379,103 @@ function rpExpected(key){return key==='pbq'?[15,18]:[INST[key].items];}
 function rpCounts(){$$('.rp-count').forEach(el=>{const k=el.dataset.rpw,n=rpWording(k).length,ok=rpExpected(k).indexOf(n)>=0;el.textContent=n?'('+n+' pasted'+(ok?'':', expected '+rpExpected(k).join(' or '))+')':'';el.style.color=n&&!ok?'#a8321e':'';});}
 document.addEventListener('input',e=>{if(e.target&&e.target.name&&e.target.name.indexOf('rp.w.')===0)rpCounts();});
 function rpInitials(){const nm=val('m.client').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=val('m.sid');return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
-function rpPayload(){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key];
-  const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:$('#rpStudent').value.trim(),beh:$('#rpBeh').value.trim(),bcba:val('m.assessor')||'the BCBA',email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
-    sub:'Indirect functional assessment: '+INST[key].title+' answered by someone who sees the behavior',items:items.map((t,i)=>({n:i+1,text:t})),scale:info.scale,extras:RP_EXTRAS,
-    subject:INST[key].title+' answers for Form IA-1'};
-  if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label}));
+function rpFirstName(){const nm=val('m.client').trim();if(!nm)return '';const parts=nm.split(/\s*,\s*/);return (parts.length>1?parts[1]:parts[0]).split(/\s+/)[0];}
+/* the targets a page can be about: this form's own, then the case's (Form TB-1), replacements left out */
+function rpTargets(){const out=[];const own=val('m.beh').trim();if(own)out.push({label:own,def:val('m.def').trim(),src:'this form'});
+  const cs=(window.nbhCase&&nbhCase.behaviors&&nbhCase.behaviors())||[];cs.forEach(b=>{if(!b||!b.label||b.isRep||/replacement|alternative/i.test(b.type||''))return;if(out.some(o=>o.label.trim().toLowerCase()===b.label.trim().toLowerCase()))return;out.push({label:b.label.trim(),def:(b.def||'').trim(),src:b.src||'the case'});});
+  return out;}
+function rpTermsStore(){try{return JSON.parse(val('rp.terms')||'{}')||{};}catch(e){return {};}}
+function rpTermsSave(o){const e=document.querySelector('[name="rp.terms"]');if(e){e.value=JSON.stringify(o);e.dispatchEvent(new Event('input',{bubbles:true}));}}
+function rpTermsOf(t){const st=rpTermsStore()[t.label.toLowerCase()]||{};const lab=t.label.trim();const low=/^[A-Z][a-z]/.test(lab)?lab.charAt(0).toLowerCase()+lab.slice(1):lab;
+  return {sing:st.sing||low,plur:st.plur||low,def:st.def!=null?st.def:t.def};}
+function rpChosen(){const v=$('#rpTarget').value,all=rpTargets();if(v==='*')return all;const i=+v;return all[i]?[all[i]]:[];}
+function rpFillTargets(){const sel=$('#rpTarget'),cur=sel.value,all=rpTargets();
+  sel.innerHTML=all.map((t,i)=>'<option value="'+i+'">'+gfEsc(t.label)+' ('+gfEsc(t.src)+')</option>').join('')+(all.length>1?'<option value="*">Every target above (one page each)</option>':'')+(all.length?'':'<option value="">No target behavior yet: enter one on Setup, or open Form TB-1 in the workstation</option>');
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;}
+function rpRenderTargets(){const list=rpChosen(),box=$('#rpTargets');
+  box.innerHTML=list.length?'<table class="gf-t rp-tt"><thead><tr><th>Target behavior</th><th>Term in a sentence<br><span class="rp-hint">"How often does ___ occur?"</span></th><th>Plural phrase<br><span class="rp-hint">"How severe are ___ when they occur?"</span></th><th>Definition the page shows</th></tr></thead><tbody>'+
+    list.map((t,k)=>{const o=rpTermsOf(t);return '<tr><td><b>'+gfEsc(t.label)+'</b><br><span class="rp-hint">'+gfEsc(t.src)+'</span></td><td><input data-rt="sing" data-k="'+k+'" value="'+gfEsc(o.sing)+'"></td><td><input data-rt="plur" data-k="'+k+'" value="'+gfEsc(o.plur)+'"></td><td><textarea data-rt="def" data-k="'+k+'" rows="2">'+gfEsc(o.def)+'</textarea></td></tr>';}).join('')+'</tbody></table>':'';}
+function rpTermsFromTable(){const list=rpChosen();return list.map((t,k)=>{const g=f=>{const e=document.querySelector('#rpTargets [data-rt="'+f+'"][data-k="'+k+'"]');return e?e.value.trim():'';};return {label:t.label,sing:g('sing')||t.label,plur:g('plur')||g('sing')||t.label,def:g('def')};});}
+function rpPerson(t){return {name:$('#rpName').value.trim(),pron:$('#rpPron').value,beh:t.sing,behs:t.plur};}
+function rpPayloadFor(t){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key],per=rpPerson(t),P=s=>NBH_RESPOND.personalize(s,per);
+  const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:$('#rpStudent').value.trim(),beh:t.label,behLabel:t.label,def:t.def,confirm:$('#rpConfirm').checked&&!!t.def,bcba:val('m.assessor')||'the BCBA',email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
+    sub:'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(per.name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:info.scale,extras:RP_EXTRAS,
+    subject:INST[key].title+' answers for Form IA-1 · '+t.label};
+  if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));
   if(key==='pbq')p.pbqVer=String(items.length);
   return p;}
+function rpPayload(){const ts=rpTermsFromTable();return rpPayloadFor(ts[0]||{label:'',sing:'the behavior',plur:'the behaviors',def:''});}
+function rpPreviewText(){const ts=rpTermsFromTable(),key=$('#rpInst').value,items=rpWording(key);if(!ts.length||!items.length){$('#rpPrev').innerHTML='';return;}
+  const per=rpPerson(ts[0]);$('#rpPrev').innerHTML=items.slice(0,3).map((x,i)=>'<div><b>'+(i+1)+'.</b> '+gfEsc(NBH_RESPOND.personalize(x,per))+'</div>').join('')+(ts.length>1?'<div class="rp-hint">and the same for '+(ts.length-1)+' more target'+(ts.length>2?'s':'')+'</div>':'');}
 function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpExpected(key).indexOf(n)>=0,st=$('#rpStatus');
-  const email=$('#rpEmail').value.trim();const bad=[];
+  const email=$('#rpEmail').value.trim(),ts=rpTermsFromTable();const bad=[];
   if(window.NBH_RESPOND_MISSING)bad.push('The file nbh-respond.js is not beside this form, so no page can be built. Keep the workstation folder together.');
   if(!n)bad.push('No wording for the '+INST[key].title+' is on the Setup sheet yet: paste its items there (Item Wording for Respondent Pages), then come back.');
   else if(!ok)bad.push(n+' lines of wording for the '+INST[key].title+' where '+rpExpected(key).join(' or ')+' items are expected: check the Setup sheet.');
   if(!email)bad.push('Enter your email: the answers are sent to it.');
+  if(!ts.length)bad.push('Name a target behavior on the Setup sheet (or open Form TB-1 in the workstation so the case supplies them).');
+  if($('#rpConfirm').checked&&ts.some(t=>!t.def))bad.push('The confirmation needs a definition: write one in the table above for each target, or untick the confirmation.');
   st.hidden=!bad.length;st.innerHTML=bad.map(gfEsc).join('<br>');$('#rpFxRow').style.display=key==='fast'?'':'none';
   $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
-  const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this questionnaire':'A link works when the workstation is on a website; opened from a folder, send the file';
-  $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';}
-function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='IA-1_'+INST[p.inst].title+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-  if(window.nbhUI)nbhUI.toast('Respondent page saved: '+name+'. Attach it to an email to each informant.',{kind:'ok'});return name;}
-function rpLinkUrl(){const p=rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
+  const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
+  $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
+function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t=>{st[t.label.toLowerCase()]={sing:t.sing,plur:t.plur,def:t.def};});rpTermsSave(st);
+  const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);
+  const em=document.querySelector('[name="m.email"]');if(em&&!em.value){em.value=$('#rpEmail').value.trim();em.dispatchEvent(new Event('input',{bubbles:true}));}}
+function rpFileName(p){return 'IA-1_'+INST[p.inst].title+'_'+(p.behLabel||'behavior').replace(/[^\w.-]+/g,'_').slice(0,40)+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';}
+function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
+  ts.forEach((t,i)=>{setTimeout(()=>{const p=rpPayloadFor(t);const html=NBH_RESPOND.pageHTML(p);const name=rpFileName(p);names.push(name);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    if(i===ts.length-1&&window.nbhUI)nbhUI.toast(ts.length===1?'Respondent page saved: '+name+'. Attach it to an email to each informant.':ts.length+' respondent pages saved, one per target behavior. Attach them to the emails.',{kind:'ok'});},i*500);});
+  return rpFileName(rpPayloadFor(ts[0]));}
+function rpLinkUrl(t){const p=t?rpPayloadFor(t):rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
+function rpLinks(){return rpTermsFromTable().map(t=>({label:t.label,url:rpLinkUrl(t)}));}
 $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=val('m.email');
-  if(!$('#rpBeh').value){const b=val('m.beh'),d=val('m.def');$('#rpBeh').value=b&&d?b+': '+d:(b||d);}
-  rpCounts();rpStatus();$('#rpDlg').showModal();});
-['rpInst','rpEmail','rpStudent'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));$('#rpInst').addEventListener('change',rpStatus);
-$('#rpEmail').addEventListener('change',()=>{const e=document.querySelector('[name="m.email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();e.dispatchEvent(new Event('input',{bubbles:true}));}});
+  if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpFirstName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');
+  rpCounts();rpFillTargets();rpRenderTargets();rpStatus();$('#rpDlg').showModal();});
+['rpEmail','rpStudent','rpName'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));
+$('#rpInst').addEventListener('change',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
+$('#rpTarget').addEventListener('change',()=>{rpRenderTargets();rpStatus();});
+$('#rpTargets').addEventListener('input',rpStatus);
 $('#rpSave').addEventListener('click',rpFile);
-$('#rpPreview').addEventListener('click',()=>{const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
-$('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
-  try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
+$('#rpPreview').addEventListener('click',()=>{rpRemember();const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
+$('#rpLink').addEventListener('click',async()=>{rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+  const ls=rpLinks();const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');
+  try{await navigator.clipboard.writeText(text);$('#rpNote').textContent=(ls.length===1?'Link copied ('+text.length+' characters; paste it into the email as a link, not typed out).':ls.length+' links copied, one line per target behavior.');}catch(e){$('#rpNote').textContent=text;}});
 $('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* collecting */
 let rcData=null;
 function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEach(o=>found.push(o)));
   const mine=found.filter(o=>o.form==='IA-1'&&INST[o.inst]);const out=$('#rcOut');rcData=null;
   if(!mine.length){out.innerHTML='<div class="gf-warn">'+(found.length?'The codes found belong to another form ('+gfEsc([...new Set(found.map(o=>o.form))].join(', '))+'), not IA-1.':'No answer code (NBH1....) was found in what was pasted or chosen.')+'</div>';return;}
-  const keys=[...new Set(mine.map(o=>o.inst))];const key=keys[0];const list=mine.filter(o=>o.inst===key);
-  const n=list[0].n||list[0].ans.length;
-  let h='<p class="method" style="margin:6px 0"><b>'+gfEsc(INST[key].title)+'</b>: '+list.length+' response'+(list.length===1?'':'s')+' found'+(keys.length>1?' (also '+keys.slice(1).map(k=>INST[k].title).join(', ')+': import the '+INST[key].title+' first, then paste again for the others)':'')+'.</p>';
-  h+='<table class="gf-t"><thead><tr><th></th><th>Informant</th><th>Relationship</th><th>Sent</th><th>Answers</th><th>Goes to</th></tr></thead><tbody>';
-  list.forEach((o,i)=>{const k=(o.ans||[]).filter(x=>x!=='').length;h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(i<5?' checked':'')+' aria-label="Import this response"></td><td>'+(gfEsc(o.name)||'<i>no name</i>')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td class="gf-slot"></td></tr>';});
-  h+='</tbody></table><label class="gf-note"><input type="checkbox" id="rcInf" checked> Fill the informant table (name, relationship, months known, daily contact, setting) from the responses</label>';
-  if(key==='fast')h+='<label class="gf-note"><input type="checkbox" id="rcFx" checked> Copy the open-ended answers into FAST Section 1 where it is empty</label>';
-  h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the worksheet</button><span class="method" style="margin:0">Ticked responses become informants A to E in order, up to five. Answers already on the worksheet for those columns are replaced.</span></div>';
-  out.innerHTML=h;rcData={key,n,list};
+  /* this form is about one target behavior: responses about another are held, not placed */
+  const own=val('m.beh').trim().toLowerCase();const behOf=o=>String(o.beh||'').trim();
+  const groups={};mine.forEach(o=>{const k=behOf(o).toLowerCase();(groups[k]=groups[k]||[]).push(o);});const gk=Object.keys(groups);
+  let useKey=own&&groups[own]?own:(!own&&gk.length===1?gk[0]:(groups['']?'':null));
+  if(useKey===null&&gk.length===1&&!own)useKey=gk[0];
+  const list0=useKey===null?[]:groups[useKey];const others=gk.filter(k=>k!==useKey);
+  let h='';
+  if(!list0.length){h+='<div class="gf-warn">These responses are about '+gfEsc(gk.map(k=>behOf(groups[k][0])||'(no behavior named)').join(', '))+'; this form is about '+(own?'<b>'+gfEsc(val('m.beh'))+'</b>':'no target yet')+'. Open the IA-1 file for that behavior and paste them there'+(own?'':', or name this form’s target on Setup')+'.</div>';}
+  const keys=[...new Set(list0.map(o=>o.inst))];const key=keys[0];const list=list0.filter(o=>o.inst===key);
+  if(list.length){const n=list[0].n||list[0].ans.length;
+    if(!own&&useKey)h+='<p class="method" style="margin:6px 0">This form has no target named yet: it takes <b>'+gfEsc(behOf(list[0]))+'</b> from the responses.</p>';
+    h+='<p class="method" style="margin:6px 0"><b>'+gfEsc(INST[key].title)+'</b> about <b>'+gfEsc(behOf(list[0])||val('m.beh'))+'</b>: '+list.length+' response'+(list.length===1?'':'s')+' found'+(keys.length>1?' (also '+keys.slice(1).map(k=>INST[k].title).join(', ')+': import the '+INST[key].title+' first, then paste again for the others)':'')+'.</p>';
+    h+='<table class="gf-t"><thead><tr><th></th><th>Informant</th><th>Relationship</th><th>Sent</th><th>Answers</th><th>Read the definition</th><th>Goes to</th></tr></thead><tbody>';
+    list.forEach((o,i)=>{const k=(o.ans||[]).filter(x=>x!=='').length;h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(i<5?' checked':'')+' aria-label="Import this response"></td><td>'+(gfEsc(o.name)||'<i>no name</i>')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td>'+(o.confirmed===true?'confirmed':o.confirmed===false?'<span class="tag na">not confirmed</span>':'—')+'</td><td class="gf-slot"></td></tr>';});
+    h+='</tbody></table><label class="gf-note"><input type="checkbox" id="rcInf" checked> Fill the informant table (name, relationship, months known, daily contact, setting) from the responses</label>';
+    if(key==='fast')h+='<label class="gf-note"><input type="checkbox" id="rcFx" checked> Copy the open-ended answers into FAST Section 1 where it is empty</label>';
+    h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the worksheet</button><span class="method" style="margin:0">Ticked responses become informants A to E in order, up to five. Answers already on the worksheet for those columns are replaced.</span></div>';}
+  others.forEach(k=>{const g=groups[k];h+='<div class="gf-note rp-other"><b>'+g.length+' response'+(g.length===1?'':'s')+' about '+gfEsc(behOf(g[0])||'(no behavior named)')+'</b> ('+[...new Set(g.map(o=>INST[o.inst].title))].join(', ')+'): held for that behavior’s IA-1. <button type="button" data-copy="'+gfEsc(k)+'">Copy those codes</button></div>';});
+  out.innerHTML=h;rcData=list.length?{key,n:list[0].n||list[0].ans.length,list,beh:behOf(list[0])}:null;
+  $$('#rcOut [data-copy]').forEach(b=>b.addEventListener('click',async()=>{const txt=groups[b.dataset.copy].map(o=>NBH_RESPOND.encode(o)).join('\n');try{await navigator.clipboard.writeText(txt);b.textContent='Copied';}catch(e){b.textContent='Could not copy';}}));
+  if(!list.length)return;
   const slots=()=>{let k=0;$$('#rcOut tbody tr').forEach(tr=>{const cb=tr.querySelector('[data-rc]'),td=tr.querySelector('.gf-slot');if(cb.checked){td.textContent=k<5?'Informant '+CODES[k]:'— (limit is five)';k++;}else td.textContent='';});};
   slots();$$('#rcOut [data-rc]').forEach(cb=>cb.addEventListener('change',slots));
   $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>a.list[+cb.dataset.rc]).slice(0,5);if(!picked.length){alert('Tick at least one response.');return;}
     const rows=picked.map(o=>({raw:(o.ans||[]).map(x=>x==null?'':String(x)),name:o.name||'',role:o.role||'',mo:gfMonths(o.mo||''),daily:o.daily||'',set:o.set||'',ts:o.date||'',fx:o.open?{ml:o.open.ml||'',ll:o.open.ll||'',before:o.open.before||'',after:o.open.after||'',tx:o.open.tx||''}:null}));
     const {cells,unread}=importResponses(a.key,a.n,rows,{inf:$('#rcInf')&&$('#rcInf').checked,fx:$('#rcFx')&&$('#rcFx').checked});
-    const b=$('#gfBanner');b.textContent='Collected '+picked.length+' '+INST[a.key].title+' response'+(picked.length===1?'':'s')+' from respondent pages into informant'+(picked.length===1?' A':'s A to '+CODES[picked.length-1])+': '+cells+' answers'+(unread?'; '+unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet.';b.hidden=false;
+    if(!val('m.beh')&&a.beh){const e=document.querySelector('[name="m.beh"]');e.value=a.beh;e.dispatchEvent(new Event('input',{bubbles:true}));}
+    const b=$('#gfBanner');b.textContent='Collected '+picked.length+' '+INST[a.key].title+' response'+(picked.length===1?'':'s')+(a.beh?' about '+a.beh:'')+' from respondent pages into informant'+(picked.length===1?' A':'s A to '+CODES[picked.length-1])+': '+cells+' answers'+(unread?'; '+unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet.';b.hidden=false;
     $('#rcDlg').close();setView(a.key);});}
 $('#rcBtn').addEventListener('click',()=>{$('#rcText').value='';$('#rcOut').innerHTML='';$('#rcStatus').textContent='';rcData=null;$('#rcDlg').showModal();$('#rcText').focus();});
 $('#rcRead').addEventListener('click',()=>rcRead([$('#rcText').value]));
@@ -1431,7 +1483,7 @@ $('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
 $('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
 $('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 rpCounts();
-window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:rpPayload};   /* for the checks */
+window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable};   /* for the checks */
 
 restore({counts:{}});
 })();
