@@ -76,23 +76,36 @@ function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);r
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(has(o)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
 function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('dialog');d.id='pickDlg';
-  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option><option value="_photos">My photos</option><option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
+  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option><option value="_photos">My photos</option><option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button><label class="pd-multi" id="pdMultiLab"><input type="checkbox" id="pdMulti"> Choose several</label><div class="pd-bar" id="pdBar"><span id="pdCount"></span><button type="button" id="pdUndo">Clear the picks</button><button type="button" class="pd-go" id="pdGo">Put them on the cards</button></div></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     const ownList=PICK&&PICK.first==='tok'?[['tk:',TOK],['av:',AV]]:[['av:',AV],['tk:',TOK]];
     if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+p.id+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'<span class="pd-x" data-phdel="'+p.id+'" title="Remove this photo" role="button" style="display:block;color:#8E2A2A;font-size:10px">remove</span></button>').join('');
     if(!c||c==='_own')ownList.forEach(([pre,set])=>{h+=Object.entries(set).filter(([k,v])=>!q||v.l.toLowerCase().includes(q)).map(([k,v])=>'<button type="button" data-k="'+pre+k+'">'+own(v,'')+esc(v.l)+'</button>').join('');});
     if(c!=='_photos'&&c!=='_own')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+'</button>').join('');
-    $('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no library pictures are listed. Put it in the same folder as the form, or use a photo or one of the pictures drawn here.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');};
+    const out=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no library pictures are listed. Put it in the same folder as the form, or use a photo or one of the pictures drawn here.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');$('#pdGrid').innerHTML=out;marks();};
+  /* several at once: each tap adds the picture to the picks (a second tap takes it out); the picks go on the cards in the order tapped */
+  const keyOf=b=>b.dataset.k?'k:'+b.dataset.k:'ph:'+b.dataset.ph;
+  const room=()=>PICK?PICK.arr.length-PICK.i:0;
+  const marks=()=>{const m=!!(PICK&&PICK.multi);d.classList.toggle('multi',m);$('#pdMulti',d).checked=m;$('#pdMultiLab',d).style.display=PICK&&PICK.canMulti?'':'none';
+    $$('#pdGrid button[data-k],#pdGrid button[data-ph]').forEach(b=>{const n=m?PICK.sel.indexOf(keyOf(b)):-1;b.classList.toggle('on',n>=0);if(n>=0)b.dataset.n=n+1;else delete b.dataset.n;});
+    if(m){const n=PICK.sel.length,r=room();$('#pdCount',d).textContent=n?n+' of '+r+' picked: they go on '+(n===1?'card '+(PICK.i+1):'cards '+(PICK.i+1)+' to '+(PICK.i+n))+', in the order tapped':'Tap up to '+r+' pictures, in the order you want them on cards '+(PICK.i+1)+' to '+PICK.arr.length+'.';$('#pdGo',d).disabled=!n;}};
+  d.marks=marks;
+  const putIn=()=>{PICK.sel.forEach((key,j)=>{const o=PICK.arr[PICK.i+j];if(!o)return;const [t,v]=[key.slice(0,key.indexOf(':')),key.slice(key.indexOf(':')+1)];if(t==='k'){o.k=v;o.ph='';}else{o.ph=v;o.k='';}o.l='';});d.close();const dn=PICK.done;PICK=null;dn();};
+  $('#pdMulti',d).addEventListener('change',e=>{if(!PICK)return;PICK.multi=e.target.checked;PICK.sel=[];marks();});
+  $('#pdUndo',d).addEventListener('click',()=>{if(PICK){PICK.sel=[];marks();}});
+  $('#pdGo',d).addEventListener('click',()=>{if(PICK&&PICK.sel.length)putIn();});
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
   $('#pdGrid',d).addEventListener('click',async e=>{const x=e.target.closest('[data-phdel]');
     if(x){e.preventDefault();e.stopPropagation();if(!(await nbhUI.confirm('Remove this photo?\nAnything using it loses the picture.',{ok:'Remove',danger:true})))return;const id=x.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['photo','tok','bg','sp','ch','tg','ft'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));grid();renderAll();return;}
-    const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
+    const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;
+    if(PICK.multi){const key=keyOf(b),at=PICK.sel.indexOf(key);if(at>=0)PICK.sel.splice(at,1);else if(PICK.sel.length<room())PICK.sel.push(key);marks();return;}
+    const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
   $('#pdNone',d).addEventListener('click',()=>{if(PICK){PICK.arr[PICK.i].k='';PICK.arr[PICK.i].ph='';d.close();PICK.done();}});
   $('#pdClose',d).addEventListener('click',()=>d.close());
   $('#pdPhoto',d).addEventListener('click',()=>$('#photoIn').click());
   d.grid=grid;return d;}
-function openPick(arr,i,done,first){PICK={arr,i,done,first};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done,first,multi){PICK={arr,i,done,first,canMulti:arr===S.ch||arr===S.tg,multi:!!multi,sel:[]};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 /* v21.42a: pictures keep print quality. An SVG is kept as the vector it is (it prints sharp at any size); a photo or PNG is kept at up to
    1200 px on its long side, which is 300 dpi on a 4 in card and about 420 dpi on the 2.85 in boxes, as a JPEG at 0.86 (PNG when it has transparency). */
 function addPhoto(file,cb){const mk=(img,label)=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:(label||'photo').replace(/\.[^.]+$/,'').slice(0,30),img});
@@ -101,7 +114,7 @@ function addPhoto(file,cb){const mk=(img,label)=>({id:'p'+Date.now().toString(36
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,1200/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
     let alpha=false;if(/png|gif|webp/i.test(file.type)){try{const d=g.getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=Math.max(4,Math.floor(d.length/4000)*4)){if(d[i]<250){alpha=true;break;}}}catch(e){}}
     const p=mk(alpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.86),name);S.photos.push(p);cb(p);};im.src=r.result;};r.readAsDataURL(file);}
-$('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;addPhoto(f,p=>{if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}else renderAll();});});
+$('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;addPhoto(f,p=>{if(PICK&&PICK.multi){const d=$('#pickDlg');if(PICK.sel.length<PICK.arr.length-PICK.i)PICK.sel.push('ph:'+p.id);if(d)d.grid();return;}if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}else renderAll();});});
 document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>{if(r==='tok')recaps(false);renderAll();},r==='tok'?'tok':r==='photo'?'av':'');});
 
 /* ---------------- views ---------------- */
@@ -252,7 +265,7 @@ function renderOut(){
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
-  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42f.)';
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42g.)';
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
   const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
@@ -310,6 +323,7 @@ $('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restor
 $('#chClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six choices?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.ch=Array.from({length:6},()=>cello());renderAll();}});
 $('#tgClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six targets?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.tg=Array.from({length:6},()=>cello());renderAll();}});
 function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;if(S.meta.order!=='spare')S.meta.prevOrder=S.meta.order||'all';S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
+$('#chSix').addEventListener('click',()=>openPick(S.ch,0,()=>renderAll(),'',true));$('#tgSix').addEventListener('click',()=>openPick(S.tg,0,()=>renderAll(),'',true));
 $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgSpare').addEventListener('click',()=>spare('tg',$('#tgSpareSel')));
 
 /* ---------------- meta + render ---------------- */
