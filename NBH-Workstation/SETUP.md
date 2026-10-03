@@ -4677,3 +4677,21 @@ parsed; the forms' helpers restored and no download fired from them;
 the bar button downloads `CASE_Sample_Student_date.xlsx`), the DA-1 and
 OB-1 form tests, the shell screenshots of CF-1, SM-1 and TD-1 with the
 light toolbar, and the earlier checks all pass.
+
+## The Workshop Committed (v21.36a)
+
+The sources behind the forms had lived only in the working session: the
+parts of the nine forms built from parts, the three shared block sources
+and their patchers, the per-form case hooks, the post-build polish, the
+logo de-duplication and most of the checks. They are now in the
+repository: `tools/forms/<ID>/` (the parts; rebuilding each from them
+reproduces the shipped file byte for byte, checked for all nine),
+`tools/blocks/` (the blocks, the patchers, the hooks), `tools/polish-one.py`,
+`tools/dedupe-logo.py`, `tools/rps-assets/` (the school lockup and tab
+icon the RPS build needs), `tools/history/` (the one-shot scripts that
+produced earlier versions of the index, kept as a record) and `qa/` (the
+checks, with their outputs under `qa/out/`, ignored by git, and their
+paths relative to the repository). `tools/README.md` says what each is
+and gives the rebuild, refresh, build and check commands. Nothing in the
+shipped editions changed.
+

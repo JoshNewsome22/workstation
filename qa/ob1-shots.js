@@ -1,0 +1,15 @@
+const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
+const OUT=__dirname+'/out/ob1-ioa/';
+(async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1280,height:1000}});
+ await page.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(500);
+ await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();});await sleep(500);
+ await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="obs"]').click();});await sleep(300);
+ const pg=(await page.$$('.obs-page'))[1];await page.evaluate(()=>window.scrollTo(0,document.querySelectorAll('.obs-page')[1].getBoundingClientRect().top+window.scrollY-70));await sleep(200);
+ const box=await pg.boundingBox();await page.screenshot({path:OUT+'sheet2-screen.png',clip:{x:box.x,y:box.y,width:box.width,height:Math.min(box.height,1150)}});
+ await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="summary"]').click();});await sleep(300);
+ const sb=await page.$('#sumBox');await sb.scrollIntoViewIfNeeded();const b2=await sb.boundingBox();await page.screenshot({path:OUT+'sumbox.png',clip:{x:b2.x,y:b2.y,width:b2.width,height:b2.height}});
+ await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="guide"]').click();});await sleep(300);
+ const g=await page.evaluateHandle(()=>[...document.querySelectorAll('#guide .warn')].find(e=>/How the form computes/.test(e.textContent)));await g.scrollIntoViewIfNeeded();const b3=await g.boundingBox();await page.screenshot({path:OUT+'guide-para.png',clip:{x:b3.x-10,y:b3.y-10,width:b3.width+20,height:b3.height+20}});
+ await page.setViewportSize({width:420,height:900});await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="obs"]').click();});await sleep(400);
+ const pg2=(await page.$$('.obs-page'))[1];await pg2.scrollIntoViewIfNeeded();const b4=await pg2.boundingBox();await page.screenshot({path:OUT+'sheet2-phone.png',clip:{x:0,y:b4.y,width:420,height:900}});
+ await br.close();})();

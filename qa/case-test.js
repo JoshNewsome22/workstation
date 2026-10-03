@@ -1,11 +1,11 @@
 /* v21.31 the case: TB-1/FS-1/GB-1/PA-1 simulations flow into the consuming forms through the shell */
-const {chromium,fs,BASE,wire,sleep}=require('./lib');
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{
   const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:1000}});wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(800);
   const open=async id=>{await page.evaluate(id=>openForm(id),id);
     const fr=await page.waitForSelector(`iframe[title*="Form ${id})"]`,{timeout:8000});await sleep(1200);return (await fr.contentFrame());};
-  const sim=async(id)=>{const f=await open(id);await f.evaluate(()=>document.querySelector('#simBtn').click());await sleep(900);return f;};
+  const sim=async(id)=>{const f=await open(id);await f.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();});   /* v21.34: nbhUI.confirm honours the stub */await sleep(900);return f;};
   /* the sources */
   const tb=await sim('TB-1'),fs1=await sim('FS-1'),gb=await sim('GB-1'),pa=await sim('PA-1');
   await sleep(7000);   /* status poll (4 s) notices the new signatures, the shell re-reads the four forms */
@@ -37,7 +37,7 @@ const {chromium,fs,BASE,wire,sleep}=require('./lib');
   await sm.evaluate(()=>{document.querySelectorAll('#nbhcBody input').forEach(c=>c.checked=false);document.querySelector('#nbhcBody input[data-kind="beh"]').checked=true;});
   await sm.evaluate(()=>document.querySelector('#nbhcUse').click());await sleep(300);
   console.log('PICK',JSON.stringify({dlgOpen,done:await sm.evaluate(()=>document.querySelector('#nbhcDone').textContent),tg:await sm.evaluate(()=>S.tg.map(t=>t.word))}));
-  await page.screenshot({path:'/tmp/sm1-picker.png'});
+  await page.screenshot({path:__dirname+'/out/case/sm1-picker.png'});
   /* the packet file carries the facts */
   const pk=await page.evaluate(()=>{$('#pClient').value='Sample';return JSON.parse(JSON.stringify({form:'PACKET',packet:packet(),facts:state.facts})).facts.behaviors.length;});
   console.log('PACKET facts behaviors',pk);
@@ -45,7 +45,7 @@ const {chromium,fs,BASE,wire,sleep}=require('./lib');
   await tb.evaluate(()=>{const e=document.querySelector('[name="tgt[0].lab"]');e.value='Hitting (renamed)';e.dispatchEvent(new Event('input',{bubbles:true}));});
   await sleep(7000);
   console.log('RENAME',JSON.stringify(await page.evaluate(()=>state.facts.behaviors.map(b=>b.label))),'SM-1 button:',await sm.evaluate(()=>document.querySelector('#nbhCaseBtn').textContent));
-  await page.screenshot({path:'/tmp/shell.png'});
+  await page.screenshot({path:__dirname+'/out/case/shell.png'});
   console.log('LOG',JSON.stringify(log.slice(0,12)));
   await br.close();
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

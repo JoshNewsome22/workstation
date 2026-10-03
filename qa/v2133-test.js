@@ -1,6 +1,6 @@
 const {chromium,fs,BASE,wire,sleep}=require('./lib');
 const path=require('path');
-const DL='/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/qa/dl-v2133';
+const DL=__dirname+'/out/dl-v2133';
 fs.mkdirSync(DL,{recursive:true});
 const out=[];const say=(...a)=>{const s=a.join(' ');out.push(s);console.log(s);};
 async function dl(page,trigger){const [d]=await Promise.all([page.waitForEvent('download',{timeout:8000}),trigger()]);const p=path.join(DL,d.suggestedFilename());await d.saveAs(p);return {name:d.suggestedFilename(),size:fs.statSync(p).size,path:p};}

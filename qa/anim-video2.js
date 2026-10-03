@@ -1,0 +1,11 @@
+const {chromium,sleep}=require(__dirname+'/lib.js');
+const fs=require('fs');const DIR=__dirname+'/out/anim/video2';fs.mkdirSync(DIR,{recursive:true});
+const [file,story,name,view]=process.argv.slice(2);
+(async()=>{const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:900,height:420},recordVideo:{dir:DIR,size:{width:900,height:420}}});const page=await ctx.newPage();
+ await page.goto('http://127.0.0.1:8123/NBH-Workstation/'+file);await sleep(600);
+ const tab=await page.$('#viewSeg button[data-view="walk"], [role=tab]:has-text("Walkthrough")');if(tab)await tab.click();await sleep(400);
+ const root=await page.$(`.story[data-story="${story}"]`);
+ await page.evaluate(r=>{const sc=r.querySelector('.scene');const y=sc.getBoundingClientRect().top+window.scrollY-6;window.scrollTo(0,y);document.querySelectorAll('.toolbar,.nbh-tabs,nav.tabs').forEach(t=>t.style.visibility='hidden');},root);
+ await sleep(800);const n=await root.$$eval('ol.storysteps li',l=>l.length);
+ const play=await root.$('[data-act="play"]');await play.click();await sleep(n*3600+800);
+ await ctx.close();const v=fs.readdirSync(DIR).find(f=>f.endsWith('.webm'));fs.renameSync(DIR+'/'+v,DIR+'/'+name+'.webm');console.log(name,fs.statSync(DIR+'/'+name+'.webm').size);await br.close();})();

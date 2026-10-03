@@ -1,0 +1,157 @@
+  <!-- ===================== BOARD ===================== -->
+  <section class="only-board">
+    <h2 class="nbh-band">Communication Board</h2>
+    <p class="hint">A grid of picture cells on a board with a category band, in the style of the school&rsquo;s boards: a light board, white cells with rounded corners, and an optional velcro dot in the centre of each cell for the exchange cards. Leave cells empty for a blank board the cards attach to. The preview is drawn at the printed size.</p>
+    <div class="fieldgrid">
+      <div><label>Student (for the file)</label><input data-m="client"></div>
+      <div><label>Board title (prints in the band)</label><input data-m="b_title" placeholder="NEEDS"></div>
+      <div><label>Band position</label><select data-m="b_bandpos"><option value="bottom">Bottom</option><option value="top">Top</option><option value="none">No band</option></select></div>
+      <div><label>Band color</label><select data-m="b_color"><option value="#cfe3cf">Green</option><option value="#cddbe8">Blue</option><option value="#e6d7ee">Purple</option><option value="#f6e2c6">Orange</option><option value="#f4d6d6">Red</option><option value="#f8f0c4">Yellow</option><option value="#e8e8e8">Grey</option></select></div>
+      <div><label>Rows</label><select data-m="b_rows"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></div>
+      <div><label>Columns</label><select data-m="b_cols"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+      <div><label>Page</label><select data-m="b_page"><option value="land">Letter landscape</option><option value="port">Letter portrait</option></select></div>
+      <div><label>Velcro dot in each cell</label><select data-m="b_dot"><option value="yes">Yes, 0.6 inch</option><option value="small">Yes, 0.4 inch</option><option value="no">No</option></select></div>
+      <div><label>Labels</label><select data-m="b_label"><option value="below">Below the picture</option><option value="above">Above the picture</option><option value="none">Pictures only</option></select></div>
+      <div><label>Picture style on the board</label><select data-m="b_dim"><option value="full">Full strength</option><option value="dim">Faded (the card sits on top)</option></select></div>
+    </div>
+    <div class="tools"><button class="tool" id="bFill">Fill empty cells from a category</button><select id="bFillCat" aria-label="Category to fill from"></select><button class="tool" id="bClear">Empty every cell</button></div>
+    <div class="grid-wrap"><table class="rt" id="bTbl"><thead><tr><th style="width:6%">Cell</th><th style="width:30%">Picture</th><th>Label on the board (blank for the picture&rsquo;s name)</th></tr></thead><tbody></tbody></table></div>
+    <div class="out" id="boardOut"></div>
+  </section>
+
+  <!-- ===================== CARD SHEETS ===================== -->
+  <section class="only-cards">
+    <h2 class="nbh-band">Picture Cards for Cutting</h2>
+    <p class="hint">Sheets of repeated cards, like the Writing and Shopping sheets: a picture with its word, a fixed number of each, cut lines between them. Laminate, cut, and put velcro on the back. Two inches is the usual exchange-card size; one inch suits a schedule strip; three inches suits a first-then board.</p>
+    <div class="fieldgrid">
+      <div><label>Card size</label><select data-m="c_size"><option value="1">1 inch</option><option value="1.5">1.5 inch</option><option value="2" selected>2 inch</option><option value="2.5">2.5 inch</option><option value="3">3 inch</option></select></div>
+      <div><label>Label</label><select data-m="c_label"><option value="above">Word above the picture</option><option value="below">Word below the picture</option><option value="none">Picture only</option></select></div>
+      <div><label>Cut lines</label><select data-m="c_cut"><option value="yes">Yes</option><option value="no">No (cards touch)</option></select></div>
+      <div><label>Corner style</label><select data-m="c_round"><option value="yes">Rounded</option><option value="no">Square</option></select></div>
+    </div>
+    <div class="tools"><button class="tool" id="cAdd">Add a card</button><button class="tool" id="cDel">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt" id="cTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Word on the card</th><th style="width:14%">How many</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div id="cardsVerdict"></div>
+    <div class="out" id="cardsOut"></div>
+  </section>
+
+  <!-- ===================== RULE CARDS ===================== -->
+  <section class="only-rules">
+    <h2 class="nbh-band">Rule Cards and the Expectations Poster</h2>
+    <p class="hint">Large cards for the expectations a plan teaches: a picture, the rule in two or three words, and a short sentence the adult says when pre-correcting. Tick the rules this student needs; each prints at the size chosen. The poster puts the ticked rules on one page for the wall. Keep the wording positive, what to do rather than what to stop.</p>
+    <div class="fieldgrid">
+      <div><label>Card size</label><select data-m="r_size"><option value="full">Full page</option><option value="half" selected>Half page (two per sheet)</option><option value="quarter">Quarter page (four per sheet)</option></select></div>
+      <div><label>Poster title</label><input data-m="r_title" placeholder="Our Classroom Expectations"></div>
+      <div><label>Print</label><select data-m="r_what"><option value="both">Cards and poster</option><option value="cards">Cards only</option><option value="poster">Poster only</option></select></div>
+    </div>
+    <div class="tools"><button class="tool" id="rAdd">Add a rule</button><button class="tool" id="rDel">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt" id="rTbl"><thead><tr><th style="width:5%">On</th><th style="width:24%">Picture</th><th style="width:24%">Rule (two or three words)</th><th>What the adult says (pre-correction)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="out" id="rulesOut"></div>
+  </section>
+
+  <!-- ===================== STRIPS AND BOARDS ===================== -->
+  <section class="only-strips">
+    <h2 class="nbh-band">Strips and Small Boards</h2>
+    <p class="hint">The everyday visuals: first-then, a visual schedule, a choice board, a token board, a wait card with a countdown, and a feelings scale. Tick the ones to print; each prints on its own page at true size.</p>
+    <div class="ckrow">
+      <label class="ck"><input type="checkbox" data-c="s_ft"> First-then board</label>
+      <label class="ck"><input type="checkbox" data-c="s_sched"> Visual schedule</label>
+      <label class="ck"><input type="checkbox" data-c="s_choice"> Choice board</label>
+      <label class="ck"><input type="checkbox" data-c="s_token"> Token board</label>
+      <label class="ck"><input type="checkbox" data-c="s_wait"> Wait card and countdown</label>
+      <label class="ck"><input type="checkbox" data-c="s_scale"> Feelings scale</label>
+      <label class="ck"><input type="checkbox" data-c="s_break"> Break and help cards</label>
+    </div>
+    <h3>First-then</h3>
+    <div class="fieldgrid">
+      <div><label>First (the task)</label><div class="pick" data-r="ft" data-i="0" id="ftFirst"></div></div>
+      <div><label>Then (what follows)</label><div class="pick" data-r="ft" data-i="1" id="ftThen"></div></div>
+      <div><label>Words under the pictures</label><select data-m="ft_words"><option value="yes">Yes</option><option value="no">No</option></select></div>
+    </div>
+    <h3>Visual schedule</h3>
+    <div class="fieldgrid">
+      <div><label>Layout</label><select data-m="sc_dir"><option value="v">Vertical strip with a Done column</option><option value="h">Horizontal strip</option></select></div>
+      <div><label>Card size</label><select data-m="sc_size"><option value="1.5">1.5 inch</option><option value="2" selected>2 inch</option></select></div>
+      <div><label>Title</label><input data-m="sc_title" placeholder="My Schedule"></div>
+    </div>
+    <div class="tools"><button class="tool" id="scAdd">Add a step</button><button class="tool" id="scDel">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt" id="scTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Label</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <h3>Choice board</h3>
+    <div class="fieldgrid">
+      <div><label>Header</label><input data-m="ch_title" placeholder="I want…"></div>
+      <div><label>Choices shown</label><select data-m="ch_n"><option>2</option><option>3</option><option selected>4</option><option>6</option></select></div>
+    </div>
+    <div class="grid-wrap"><table class="rt" id="chTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Picture</th><th>Label</th></tr></thead><tbody></tbody></table></div>
+    <h3>Token board</h3>
+    <div class="fieldgrid">
+      <div><label>Tokens to earn</label><select data-m="tk_n"><option>3</option><option selected>5</option><option>8</option><option>10</option></select></div>
+      <div><label>Token picture</label><div class="pick" data-r="tk" data-i="0" id="tkPic"></div></div>
+      <div><label>Working for (picture)</label><div class="pick" data-r="tk" data-i="1" id="tkRw"></div></div>
+      <div><label>Header</label><input data-m="tk_title" placeholder="I am working for…"></div>
+    </div>
+    <h3>Wait card and countdown</h3>
+    <div class="fieldgrid">
+      <div><label>Countdown squares</label><select data-m="w_n"><option>3</option><option selected>5</option></select></div>
+      <div><label>Wait card words</label><input data-m="w_words" placeholder="Wait. It is coming."></div>
+    </div>
+    <h3>Feelings scale</h3>
+    <div class="fieldgrid"><div><label>Title</label><input data-m="fs_title" placeholder="How big is my feeling?"></div></div>
+    <div class="grid-wrap"><table class="rt" id="fsTbl"><thead><tr><th style="width:6%">Level</th><th style="width:22%">Picture</th><th style="width:28%">Word</th><th>What I can do</th></tr></thead><tbody></tbody></table></div>
+    <div class="out" id="stripsOut"></div>
+  </section>
+
+  <!-- ===================== LIBRARY ===================== -->
+  <section class="only-library">
+    <h2 class="nbh-band">Pictures</h2>
+    <p class="hint">The shared pictogram library (OpenMoji, CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts), and this student&rsquo;s own photos. A photo is resized to a thumbnail and stored inside the saved file, so a real toilet, the student&rsquo;s own water bottle or the actual bus can stand in for the drawing wherever a picture is used. Real photos are the most concrete picture type and the first step of the picture hierarchy; line drawings are more abstract.</p>
+    <h3>My photos</h3>
+    <div class="tools"><button class="tool" id="phAdd">Upload a photo</button></div>
+    <div class="photos" id="photos"></div>
+    <h3>The library</h3>
+    <div class="tools"><select id="libCat" aria-label="Category"></select><input id="libQ" placeholder="search" aria-label="Search the library" style="font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px"></div>
+    <div class="libgrid" id="libGrid"></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Builds</h2>
+    <p>Visual supports are an evidence-based practice for learners with autism in the National Clearinghouse review (Steinbrenner et al., 2020), and most of what this form prints has its own line of research. The communication board and the picture cards are the materials of the Picture Exchange Communication System (Bondy &amp; Frost, 1994): the learner hands a picture to a partner to request, and the system moves through six phases from a single exchange to sentences and comments. Charlop-Christy, Carpenter, Le, LeBlanc and Kellet (2002) taught PECS to three children with autism and saw gains in speech and social behavior and reductions in problem behavior alongside the exchanges; Flippin, Reszka and Watson (2010) meta-analyzed the communication effects, and Ganz et al. (2012) the broader aided-AAC literature. The board is a tool, not a program: the teaching protocol, the partner training and the data belong on Forms SA-1 and TD-1.</p>
+    <p>The visual schedule and the first-then board rest on the activity-schedule research: MacDuff, Krantz and McClannahan (1993) taught children with autism to follow photographic schedules through long chains of activities with maintenance and generalization; Lequia, Machalicek and Rispoli (2012) reviewed activity schedules for challenging behavior, and Knight, Sartini and Spriggs (2015) judged visual activity schedules an evidence-based practice. Dettmer, Simpson, Myles and Ganz (2000) showed visual supports easing transitions. The first-then board is the Premack principle made visible (Premack, 1959): the preferred activity follows the less preferred one. The choice board rests on the choice-making literature (Shogren, Faggella-Luby, Bae &amp; Wehmeyer, 2004); the token board on token reinforcement (Hackenberg, 2018; Form TE-1); the wait card and countdown on delay-tolerance teaching (Hanley, Jin, Vanselow &amp; Hanratty, 2014; Form DT-1). Rule cards are the materials of precorrection (Colvin, Sugai &amp; Patching, 1993): the adult shows the card and states the expectation before the situation that evokes the problem, then reinforces the expected behavior. The feelings scale follows a widely used program (Buron &amp; Curtis, 2003) whose peer-reviewed evidence is limited; it is here as a teaching visual, with the plan&rsquo;s coping responses written beside each level.</p>
+    <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Picture exchange teaches requesting</th><td>In PECS the learner initiates by giving a picture, which is why the cards are loose and the board is velcro: the picture has to travel. Phase I is a single exchange with two trainers (one prompting from behind), Phase II adds distance and persistence, Phase III discrimination between pictures, Phase IV sentence strips, Phases V and VI answering and commenting (Bondy &amp; Frost, 1994). Charlop-Christy et al. (2002) report all three children reaching Phase VI with collateral gains; Flippin et al. (2010) find small to moderate effects on communication across the single-case studies and note that speech gains are variable.</td></tr>
+      <tr><th>Schedules build independence</th><td>MacDuff et al. (1993) used graduated guidance to teach photographic schedules and faded all prompts; the children moved through chains of leisure and homework activities on their own and kept doing so with new photographs. Knight et al. (2015) rated visual activity schedules evidence-based on the single-case literature, and Lequia et al. (2012) found reductions in challenging behavior across the studies they reviewed, with on-schedule behavior and transitions the usual targets.</td></tr>
+      <tr><th>Transitions go better with a visual</th><td>Dettmer et al. (2000) added visual schedules and transition cues for two children with autism and recorded shorter transition latencies and fewer physical prompts.</td></tr>
+      <tr><th>Choice itself matters</th><td>Shogren et al. (2004) meta-analyzed choice-making as an intervention for problem behavior and found reductions across studies; a choice board gives the choice a form a non-speaking student can use. Tiger, Hanley and Hernandez (2006) found that some preschoolers (3 of 6) consistently preferred having a choice even when the outcomes were the same, and that the preference for choice grew when more items were offered.</td></tr>
+      <tr><th>Precorrection with a card</th><td>Colvin et al. (1993) set out precorrection: identify the context, state the expected behavior, modify the context, rehearse, reinforce, prompt, monitor. The rule card is the prompt and the rehearsal aid; the poster is the context modification.</td></tr>
+      <tr><th>Tokens and waiting</th><td>Token boards carry the token-production and exchange schedules Hackenberg (2018) reviews; the token board here shows the student the count, which Ferster and Skinner&rsquo;s analysis of the count as a stimulus argues for (Form SR-1). Hanley et al. (2014) taught tolerance of denial and delay with a signal and something to do during the wait; the wait card and countdown are those signals.</td></tr>
+      <tr><th>Picture type</th><td>Photographs are more concrete than line drawings and are the usual first step for a learner new to pictures; a drawing generalizes across the many toilets and buses a photo does not show. The library gives both: the student&rsquo;s own photos and the pictograms.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">Making and Using the Visuals</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Sizes</th><td>Exchange cards 2 inches; schedule cards 1.5 to 2 inches; first-then cards 3 inches; rule cards half a page for a desk, a full page for the wall. The preview is drawn at the printed size.</td></tr>
+      <tr><th>Printing</th><td>Print at 100%, not &ldquo;fit to page&rdquo;. Laminate boards and cards; put the hook side of the velcro on the board dots and the loop side on the cards so cards do not catch on clothing.</td></tr>
+      <tr><th>Teaching</th><td>A visual that is handed to a student without teaching is decoration. Each visual has a teaching procedure in the research named above; write it on Form SA-1 or TD-1, and prompt from behind the student when the visual is for communication.</td></tr>
+      <tr><th>Wording</th><td>Rules say what to do. Labels are the student&rsquo;s words. One picture means one thing: do not reuse a picture for two labels.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated visuals are a NEEDS board, three card sheets, five rule cards with the poster, and every strip.</p>
+    <p class="hint" id="vsRefs" style="margin-top:10px"><b>Reference list.</b>
+    Bondy, A. S., &amp; Frost, L. A. (1994). The Picture Exchange Communication System. <em>Focus on Autistic Behavior, 9</em>(3), 1&ndash;19. &bull;
+    Buron, K. D., &amp; Curtis, M. (2003). <em>The incredible 5-point scale</em>. Autism Asperger Publishing. &bull;
+    Charlop-Christy, M. H., Carpenter, M., Le, L., LeBlanc, L. A., &amp; Kellet, K. (2002). Using the Picture Exchange Communication System (PECS) with children with autism: Assessment of PECS acquisition, speech, social-communicative behavior, and problem behavior. <em>Journal of Applied Behavior Analysis, 35</em>(3), 213&ndash;231. &bull;
+    Colvin, G., Sugai, G., &amp; Patching, B. (1993). Precorrection: An instructional approach for managing predictable problem behaviors. <em>Intervention in School and Clinic, 28</em>(3), 143&ndash;150. &bull;
+    Dettmer, S., Simpson, R. L., Myles, B. S., &amp; Ganz, J. B. (2000). The use of visual supports to facilitate transitions of students with autism. <em>Focus on Autism and Other Developmental Disabilities, 15</em>(3), 163&ndash;169. &bull;
+    Flippin, M., Reszka, S., &amp; Watson, L. R. (2010). Effectiveness of the Picture Exchange Communication System (PECS) on communication and speech for children with autism spectrum disorders: A meta-analysis. <em>American Journal of Speech-Language Pathology, 19</em>(2), 178&ndash;195. &bull;
+    Ganz, J. B., Earles-Vollrath, T. L., Heath, A. K., Parker, R. I., Rispoli, M. J., &amp; Duran, J. B. (2012). A meta-analysis of single case research studies on aided augmentative and alternative communication systems with individuals with autism spectrum disorders. <em>Journal of Autism and Developmental Disorders, 42</em>(1), 60&ndash;74. &bull;
+    Hackenberg, T. D. (2018). Token reinforcement: Translational research and application. <em>Journal of Applied Behavior Analysis, 51</em>(2), 393&ndash;435. &bull;
+    Hanley, G. P., Jin, C. S., Vanselow, N. R., &amp; Hanratty, L. A. (2014). Producing meaningful improvements in problem behavior of children with autism via synthesized analyses and treatments. <em>Journal of Applied Behavior Analysis, 47</em>(1), 16&ndash;36. &bull;
+    Knight, V., Sartini, E., &amp; Spriggs, A. D. (2015). Evaluating visual activity schedules as evidence-based practice for individuals with autism spectrum disorders. <em>Journal of Autism and Developmental Disorders, 45</em>(1), 157&ndash;178. &bull;
+    Lequia, J., Machalicek, W., &amp; Rispoli, M. J. (2012). Effects of activity schedules on challenging behavior exhibited in children with autism spectrum disorders: A systematic review. <em>Research in Autism Spectrum Disorders, 6</em>(1), 480&ndash;492. &bull;
+    MacDuff, G. S., Krantz, P. J., &amp; McClannahan, L. E. (1993). Teaching children with autism to use photographic activity schedules: Maintenance and generalization of complex response chains. <em>Journal of Applied Behavior Analysis, 26</em>(1), 89&ndash;97. &bull;
+    Premack, D. (1959). Toward empirical behavior laws: I. Positive reinforcement. <em>Psychological Review, 66</em>(4), 219&ndash;233. &bull;
+    Shogren, K. A., Faggella-Luby, M. N., Bae, S. J., &amp; Wehmeyer, M. L. (2004). The effect of choice-making as an intervention for problem behavior: A meta-analysis. <em>Journal of Positive Behavior Interventions, 6</em>(4), 228&ndash;237. &bull;
+    Steinbrenner, J. R., Hume, K., Odom, S. L., Morin, K. L., Nowell, S. W., Tomaszewski, B., Szendrey, S., McIntyre, N. S., Yücesoy-Özkan, S., &amp; Savage, M. N. (2020). <em>Evidence-based practices for children, youth, and young adults with autism</em>. FPG Child Development Institute, National Clearinghouse on Autism Evidence and Practice. &bull;
+    Tiger, J. H., Hanley, G. P., &amp; Hernandez, E. (2006). An evaluation of the value of choice with preschool children. <em>Journal of Applied Behavior Analysis, 39</em>(1), 1&ndash;16.</p>
+    <p class="hint">Pictures are OpenMoji (openmoji.org), CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts.</p>
+  </section>

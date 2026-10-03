@@ -12,7 +12,7 @@ Serve the repository root (any static server), for example from the repository r
 
     npx http-server . -p 8123 -s -c-1
 
-Every script takes the folder to test from `WS_ROOT` (default `/home/user/workstation`)
+Every script takes the folder to test from `WS_ROOT` (default: the repository root, found from `qa/lib.js`)
 and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in `lib.js`.
 
 | Script | What it does |

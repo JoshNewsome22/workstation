@@ -101,9 +101,9 @@ async function pages(page){const pdf=await page.pdf({preferCSSPageSize:true});co
   // compact toolbar: the quick save shows
   const q=await page.evaluate(()=>{const q=document.getElementById('nbhSaveQuick');return q?getComputedStyle(q).display:'missing';});
   say('  quick save display (compact',await page.evaluate(()=>document.documentElement.classList.contains('nbh-compact')),'):',q);
-  await page.screenshot({path:'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/qa/v2134/'+F.id+'-verify.png'});
+  await page.screenshot({path:__dirname+'/out/v2134/'+F.id+'-verify.png'});
   const errs=log.filter(l=>l.type!=='warning');say('  errors:',JSON.stringify(errs).slice(0,400));if(errs.length)bad('errors');
   await page.close();}
  await br.close();say('FAILS',fails);
- fs.writeFileSync('/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/qa/v2134/verify.out',out.join('\n')+'\n');
+ fs.writeFileSync(__dirname+'/out/v2134/verify.out',out.join('\n')+'\n');
  process.exit(fails?1:0);})().catch(e=>{console.error('CRASH',e);process.exit(2);});

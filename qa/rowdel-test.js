@@ -1,4 +1,4 @@
-const {chromium,fs,BASE,wire,sleep}=require('./lib');
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const FORMS={
   'CF-1':{file:'CF-1_Contextual-Fit-Assessment_v2026-09.html',tables:[
     {id:'rTbl',arr:'raters',view:'setup',dep:p=>p.evaluate(()=>JSON.stringify(S.scores))},
@@ -25,6 +25,7 @@ const only=process.argv[2];
     const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
     const dialogs=[];page.removeAllListeners('dialog');page.on('dialog',d=>{dialogs.push(d.message());d.accept().catch(()=>{});});
     await page.goto(BASE+'/NBH-Workstation/'+F.file);await sleep(400);
+    await page.evaluate(()=>{window.confirm=m=>{(window.__dlg=window.__dlg||[]).push(String(m));return true;};window.alert=m=>{(window.__alerts=window.__alerts||[]).push(String(m));};});   /* v21.34: the forms ask through nbhUI.confirm, which honours a stubbed window.confirm; a long alert would open the styled notice, which stays open until closed */
     const blankHead=await page.$$eval('th.nx',t=>t.length);
     await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);
     const out=[`${id}: th.nx=${blankHead}`];
@@ -87,7 +88,7 @@ const only=process.argv[2];
     await page.emulateMedia({media:'print'});
     const printed=await page.$$eval('th.nx,td.nx',c=>c.filter(x=>getComputedStyle(x).display!=='none').length);
     await page.emulateMedia({media:'screen'});
-    out.push(`  print: nx cells visible=${printed}  dialogs=${dialogs.length}  LOG=${JSON.stringify(log)}`);
+    out.push(`  print: nx cells visible=${printed}  dialogs=${dialogs.length+await page.evaluate(()=>(window.__dlg||[]).length)}  LOG=${JSON.stringify(log)}`);
     if(printed||log.length)fails++;
     console.log(out.join('\n'));
     await page.close();

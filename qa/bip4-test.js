@@ -6,7 +6,7 @@ const FORMS={
   'GB-1':{file:'GB-1_Goal-and-Objective-Builder_v2026-09.html',heads:['FORM GB-1','REDUCTION OBJECTIVES','ACQUISITION OBJECTIVES'],first:'R1. SIMULATED – Sample Student will decrease their rate per minute of Aggression toward staff (simulated) from 1.4 per minute to no more than 0.2 per minute in the self-contained ESE classroom'},
   'CR-1':{file:'CR-1_Crisis-Intervention-Plan_v2026-09.html',heads:['FORM CR-1','TEAM','POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS','STAGE 1: PREVENTION (BEFORE ANY SIGN)','STAGE 5: RECOVERY','IF RESTRAINT NONETHELESS OCCURS','POST-INCIDENT DEBRIEFING','WHAT CHANGES AS A RESULT','PARENT NOTIFICATION AND REPORTING'],first:'Dangerous behavior this plan addresses: Aggression toward staff'}
 };
-const OUT='/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/b4/out';fs.mkdirSync(OUT,{recursive:true});
+const OUT=__dirname+'/out/b4/out';fs.mkdirSync(OUT,{recursive:true});
 let fails=0;const check=(c,msg)=>{console.log((c?'  ok   ':'  FAIL ')+msg);if(!c)fails++;};
 async function saveNoErr(page,log){const n0=log.length;await page.evaluate(()=>{const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};});
   await page.evaluate(()=>document.querySelector('#saveBtn').click());await sleep(400);const s=await page.evaluate(()=>window.__saved);
