@@ -801,6 +801,7 @@ td input,td select{max-width:100%}
       <tr><th>Mastery rule</th><td>The last N teaching-phase sessions (N from the criterion) all at or above the criterion percent, with at least the set number of different instructor initials among them (and, if ticked, an independent first trial in each). Maintenance-phase and baseline-phase sessions are not counted.</td></tr>
       <tr><th>No-change rule</th><td>At least five teaching sessions, none of the last five at criterion, and the last of the five fewer than 10 percentage points above the first of the five: the form says to change the procedure. The five-session window and the 10-point margin are working conventions.</td></tr>
       <tr><th>Error rule</th><td>When the last three teaching sessions average under 50% correct (prompted included) under a least-to-most hierarchy, the form suggests a most-to-least or delayed-prompt arrangement (Libby et al., 2008; Touchette &amp; Howard, 1984). The 50% figure is a working convention.</td></tr>
+      <tr><th>Time-delay rule</th><td>Under constant or progressive time delay the Delay row under the trial grid says the delay each session ran, and the form reads the latest teaching session: a 0-s session with every trial correct moves to the delay, a delayed session with more than 20% of trials in error returns to 0 s for a session, and under progressive delay a session at or above the criterion percent correct with no error lengthens the delay by its next step (working conventions after Wolery, Ault, &amp; Doyle, 1992).</td></tr>
       <tr><th>Maintenance rule</th><td>A maintenance-phase session or a maintenance probe below the criterion percent calls for booster sessions.</td></tr>
       <tr><th>Probe result</th><td>Independent &divide; trials &times; 100, passed at or above the criterion percent (working convention). The metrics count maintenance probes passed, the generalization dimensions probed and passed, and the settings or material sets passed against the number on the Setup page: a passed generalization probe whose dimension is Setting or Materials counts once per distinct condition.</td></tr>
       <tr><th>Instructor count</th><td>Distinct non-blank initials in the instructor row of the sessions in the mastery window. Blank initials count as no instructor, so the mastery verdict says when initials are missing.</td></tr>
@@ -884,7 +885,9 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 
 /* ---------------- statistics ---------------- */
 function sessStats(s){const n=ntr();let sc=0,ind=0,cor=0;for(let i=0;i<n;i++){const c=s.tr[i]||'';if(!c)continue;sc++;const k=kindOf(c);if(k==='ind'){ind++;cor++;}else if(k==='pr')cor++;}
-  const f=s.tr[0]||'';return{sc,ind,cor,pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:f,firstInd:kindOf(f)==='ind'};}
+  const f=s.tr[0]||'';return{sc,ind,cor,err:sc-cor,dl:String(s.dl||''),pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:f,firstInd:kindOf(f)==='ind'};}
+/* v21.37: the Delay row under the trial grid is shown under a time-delay procedure, or when the Setup page names a delay */
+const tdOn=()=>S.meta.hier==='ctd'||S.meta.hier==='ptd'||!!String(S.meta.delay||'').trim();
 function taStats(s){let sc=0,ind=0,cor=0;S.steps.forEach((st,i)=>{const c=s.lv[i]||'';if(!c)return;sc++;const k=kindOf(c);if(k==='ind'){ind++;cor++;}else if(k==='pr')cor++;});
   return{sc,ind,cor,pi:sc?ind/sc*100:null,pc:sc?cor/sc*100:null,first:'',firstInd:false};}
 function stepMastered(i){const scored=S.tas.filter(s=>s.lv[i]);if(scored.length<2)return false;const last=scored.slice(-2);return last.every(s=>kindOf(s.lv[i])==='ind');}
@@ -895,7 +898,7 @@ function curStep(){const o=num(S.meta.ta_cur);if(o!=null&&o>=1&&o<=S.steps.lengt
   if(t==='backward'){for(let i=m.length-1;i>=0;i--)if(!m[i])return{i,how:'backward chaining: the last step not yet mastered'};return{i:-2,how:'every step mastered'};}
   for(let i=0;i<m.length;i++)if(!m[i])return{i,how:(t==='forward'?'forward chaining: ':'')+'the first step not yet mastered'};return{i:-2,how:'every step mastered'};}
 function srcIsTA(){const g=S.meta.g_src;if(g==='steps')return true;if(g==='trials')return false;return S.meta.format==='ta';}
-function series(){const ta=srcIsTA();const arr=ta?S.tas:S.sess;return arr.map((s,i)=>{const st=ta?taStats(s):sessStats(s);return{i,date:s.date||'',ph:s.ph||'',inst:(s.inst||'').trim(),note:s.note||'',...st};});}
+function series(){const ta=srcIsTA();const arr=ta?S.tas:S.sess;return arr.map((s,i)=>{const st=ta?taStats(s):sessStats(s);return{i,date:s.date||'',ph:s.ph||'',inst:(s.inst||'').trim(),note:s.note||'',dl:String(s.dl||''),...st};});}
 
 /* ---------------- codes ---------------- */
 function renderCodes(){
@@ -923,6 +926,7 @@ function renderTr(){
   h+='<tr class="sum"><td class="lk">% independent</td>'+st.map(x=>'<td>'+pct(x.pi)+'</td>').join('')+'</tr>';
   h+='<tr class="sum"><td class="lk">% correct (any prompt)</td>'+st.map(x=>'<td>'+pct(x.pc)+'</td>').join('')+'</tr>';
   h+='<tr class="sum"><td class="lk">First trial</td>'+st.map(x=>'<td'+(x.first?' class="k-'+kindOf(x.first)+'"':'')+'>'+(x.first?esc(x.first):'—')+'</td>').join('')+'</tr>';
+  if(tdOn())h+='<tr><td class="lk">Delay (s) or level</td>'+S.sess.map((s,i)=>`<td><input data-r="sess" data-i="${i}" data-f="dl" value="${esc(s.dl||'')}" aria-label="Session ${i+1} delay or prompt level" placeholder="0, 2, 4"></td>`).join('')+'</tr>';   /* v21.37 */
   h+='<tr><td class="lk">Note</td>'+S.sess.map((s,i)=>`<td class="note"><input data-r="sess" data-i="${i}" data-f="note" value="${esc(s.note)}" aria-label="Session ${i+1} note" placeholder="prompt level, delay, change"></td>`).join('')+'</tr></tbody>';
   t.innerHTML=h;
   const M=$('#trMetrics'),T=st.filter((x,i)=>S.sess[i].ph==='T'&&x.pi!=null),last=st.filter(x=>x.pi!=null).slice(-1)[0],f5=st.filter(x=>x.first).slice(-5),fi=f5.filter(x=>x.firstInd).length;
@@ -1022,6 +1026,13 @@ function renderGraph(){
   else if(T.length)rules.push(['mid',T.length+' teaching session'+(T.length===1?'':'s')+' so far: no decision until five.']);
   else rules.push(['mid','Baseline only ('+B.length+' probe'+(B.length===1?'':'s')+', mean '+pct(bm)+'). Begin teaching when two probes are in (working convention).']);
   if(T.length>=3&&S.meta.hier==='ltm'){const l3=T.slice(-3),pcm=l3.reduce((a,r)=>a+(r.pc||0),0)/3;if(pcm<50){rules.push(['no','Errors: the last 3 teaching sessions average '+pct(pcm)+' correct even with prompts under least-to-most prompting. Consider most-to-least or a delayed prompt (Libby et al., 2008; Touchette & Howard, 1984).']);if(state!=='ok')state='no';}}
+  /* v21.37: the time-delay rule reads the Delay row of the latest teaching session (working conventions after Wolery, Ault, & Doyle, 1992) */
+  if(!ta&&(S.meta.hier==='ctd'||S.meta.hier==='ptd')&&T.length){const ptd=S.meta.hier==='ptd',lt=T[T.length-1],d=num(lt.dl),err=lt.sc-lt.cor,ep=lt.sc?err/lt.sc*100:0;
+    if(d==null)rules.push(['mid','Time delay: write the delay the latest teaching session ran (seconds) in the Delay row under the trial grid; the time-delay rule reads it.']);
+    else if(d===0)rules.push(err===0&&lt.sc?['ok','Time delay: the latest session ran at 0 s with every trial correct; the next session runs at the '+(ptd?'first ':'')+'delay (working convention).']:['mid','Time delay: at 0 s with '+err+' error'+(err===1?'':'s')+': stay at 0 s until a session has every trial correct.']);
+    else if(ep>20){rules.push(['no','Time delay: '+pct(ep)+' of trials in error at the '+d+'-s delay: return to 0 s for a session, then resume the delay (working convention).']);if(state!=='ok')state='no';}
+    else if(ptd&&err===0&&lt.pc!=null&&lt.pc>=m.pct)rules.push(['ok','Time delay: at '+d+' s with no error and '+pct(lt.pc)+' correct: lengthen the delay by the next step.']);
+    else rules.push(['mid','Time delay: at '+d+' s, '+pct(lt.pi)+' independent and '+pct(ep)+' in error: continue at this delay.']);}
   if(MT.length){const lm=MT[MT.length-1];if(lm.pi<m.pct){rules.push(['no','Maintenance session on '+(lm.date||'?')+' at '+pct(lm.pi)+', below the criterion: run booster teaching sessions and re-probe.']);if(state!=='ok')state='no';}else rules.push(['ok','Maintenance holding: latest maintenance session '+pct(lm.pi)+'.']);}
   if(!ta){const f=T.filter(r=>r.first).slice(-5);if(f.length>=3){const fi=f.filter(r=>r.firstInd).length;rules.push([fi>=f.length-1?'ok':'mid','First-trial check: '+fi+' of the last '+f.length+' teaching sessions began with an independent response'+(fi<f.length-1?'; the first-trial record would say the skill is weaker than the full record does.':'.')]);}}
   M.innerHTML=`<div class="metric"><b>Baseline mean</b><div class="val">${pct(bm)}</div><div class="sub">${B.length} probe session${B.length===1?'':'s'}</div></div>
@@ -1029,7 +1040,7 @@ function renderGraph(){
     <div class="metric"><b>At criterion</b><div class="val">${win.filter(r=>r.pi>=m.pct).length} of ${m.n}</div><div class="sub">last ${m.n} teaching sessions at ${m.pct}%</div></div>
     <div class="metric"><b>Instructors in the window</b><div class="val">${insts.size}</div><div class="sub">of ${m.inst} required${insts.size?' · '+[...insts].join(', '):''}</div></div>`;
   v.innerHTML='<div class="verdict v-'+state+'"><b>'+scored.length+' session'+(scored.length===1?'':'s')+' scored ('+(ta?'task analysis':'trial grid')+').</b> '+esc(rules[0][1])+'</div>';
-  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+esc(r[1])+'</li>').join('')+'</ul><p class="hint">The rules (criterion of '+m.pct+'% across '+m.n+' sessions and '+m.inst+' instructors; no change over 5 sessions with less than a 10-point gain; 50% correct under least-to-most; booster when maintenance falls below criterion) are this form’s working conventions, set on the Setup page and in the Guide.</p>';
+  RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+esc(r[1])+'</li>').join('')+'</ul><p class="hint">The rules (criterion of '+m.pct+'% across '+m.n+' sessions and '+m.inst+' instructors; no change over 5 sessions with less than a 10-point gain; 50% correct under least-to-most; the time-delay rule under a delay procedure; booster when maintenance falls below criterion) are this form’s working conventions, set on the Setup page and in the Guide.</p>';
   draw(R,m);
 }
 function draw(R,m){
@@ -1065,7 +1076,7 @@ function sheetHead(title,ta){const m=S.meta;
 function sheetFoot(){return '<div class="bs-foot"><span>Score the response to the S<sup>D</sup> before any correction. Phase: B baseline/probe, T teaching, M maintenance.</span><span>Form SA-1 · '+esc(S.meta.program||'')+'</span></div>';}
 function renderTrialSheet(){const cols=Math.max(1,Math.min(20,Math.round(num(S.meta.bs_cols)??10))),n=ntr();
   let h=sheetHead('Trial Sheet')+'<table class="bs"><thead><tr><th class="l">Session</th>'+Array.from({length:cols},(_,i)=>'<th>'+(i+1)+'</th>').join('')+'</tr></thead><tbody>';
-  ['Date','Instructor','Phase'].forEach(l=>{h+='<tr class="hd"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
+  ['Date','Instructor','Phase'].concat(tdOn()?['Delay (s) or level']:[]).forEach(l=>{h+='<tr class="hd"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
   for(let k=0;k<n;k++)h+='<tr'+(k===0?' class="first"':'')+'><td class="l">Trial '+(k+1)+'</td>'+'<td></td>'.repeat(cols)+'</tr>';
   ['Independent','% independent','% correct'].forEach(l=>{h+='<tr class="sum"><td class="l">'+l+'</td>'+'<td></td>'.repeat(cols)+'</tr>';});
   h+='<tr class="hd"><td class="l">Note</td>'+'<td></td>'.repeat(cols)+'</tr></tbody></table>'+sheetFoot();
@@ -1113,7 +1124,7 @@ function renderTrSoon(){clearTimeout(tA);tA=setTimeout(()=>{renderTr();renderGra
 function renderTaSoon(){clearTimeout(tB);tB=setTimeout(()=>{renderSteps();renderGraph();},200);}
 function renderPrSoon(){clearTimeout(tC);tC=setTimeout(renderPr,250);}
 function renderSoon(){clearTimeout(tD);tD=setTimeout(()=>{renderGrids();renderSetup();},300);}
-function renderSheetsSoon(){clearTimeout(tE);tE=setTimeout(()=>{renderTrialSheet();renderTaSheet();renderSetup();renderGraph();renderPr();},300);}   /* v21.37: the probes read the criterion too */
+function renderSheetsSoon(){clearTimeout(tE);tE=setTimeout(()=>{if(tdOn()!==!!$('#trTbl input[data-f="dl"]'))renderTr();renderTrialSheet();renderTaSheet();renderSetup();renderGraph();renderPr();},300);}   /* v21.37: the probes read the criterion too; the Delay row follows the hierarchy */
 function renderTaSheetSoon(){clearTimeout(tE);tE=setTimeout(()=>{renderTaSheet();renderSteps();},300);}
 
 /* ---------------- meta + render ---------------- */
@@ -1190,7 +1201,8 @@ async function loadSim(){
   const tr=['––––––––––','–––I––––––','FFIFPFPIFP','PIPFIPPIPP','PIIPVIIPIV','IVIIPIVIIV','IIVIIVIIIV','IIIVIIIVII','IIIIVIIIII','IIIIIIII–I','IIIIIIIIII','IIIII–IIII'];
   const ph=['B','B','T','T','T','T','T','T','T','T','T','M'],inst=['JN','JN','JN','JN','JN','MR','JN','MR','JN','MR','JN','MR'];
   const notes=['probe: card on the table, no prompts','probe','full physical from the start (most-to-least)','partial physical','partial physical; verbal model on the last trials','faded to verbal model; MR’s first session','verbal model with a 2-s delay','2-s delay','first session at criterion','at criterion with MR','mastered: 3 sessions at or above 90% with JN and MR','maintenance, 1 week after mastery; break shortened to 1 minute'];
-  S.sess=tr.map((t,i)=>({date:D(tr.length-1-i+2),ph:ph[i],inst:inst[i],tr:Array.from(t),note:notes[i]}));
+  const dls=['','','0','0','0','0','2','2','2','2','2','2'];   /* v21.37: the delay row, as the notes already describe it */
+  S.sess=tr.map((t,i)=>({date:D(tr.length-1-i+2),ph:ph[i],inst:inst[i],tr:Array.from(t),dl:dls[i],note:notes[i]}));
   S.steps=['Turns on the water','Wets both hands','Pumps the soap once','Rubs hands together for 10 s (front, back, between fingers)','Rinses both hands','Turns off the water','Pulls one paper towel','Dries hands and drops the towel in the bin'].map(t=>({text:t}));
   const lv=['–I––I–––','PIFFIFPF','VIFFIFPF','IIPFIFPF','IIVFIFPF','IIIPIFPF','IIIVIVPF','IIIIIVPF'];
   const tph=['B','T','T','T','T','T','T','T'],tin=['JN','JN','MR','JN','MR','JN','MR','JN'];
