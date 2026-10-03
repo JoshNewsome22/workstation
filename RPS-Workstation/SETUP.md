@@ -5640,6 +5640,8 @@ WEFA is a sheet inside IA-1 (View, WEFA), not a form of its own.
 `qa/ia1-photo-test.js` (9 checks).
 ## Form TK-1, the Token Board Book (v21.42)
 
+*v21.42b replaces this section's page size (now 8.82 by 5.82 in), type sizes, colours, QR style and Token Economy credit; see "TK-1 from the Illustrator files" below.*
+
 A new form, the forty-fourth, built from parts in `tools/forms/TK-1/`
 and placed beside VS-1 and SM-1 in the Implementation group. It prints
 the assessor's four-page token board book, the one made until now in
@@ -5776,3 +5778,121 @@ previous 480 pixels gave about 170), as a JPEG, or a PNG when the
 picture has transparency. Save files grow with the pictures they
 hold; a photo of a few hundred kilobytes each is the price of a
 sharp card.
+
+## TK-1 from the Illustrator files, and the instructions checked against the literature (v21.42b)
+
+The assessor sent the Illustrator originals as SVG (the four fronts and
+the four backs on one artboard each, the finished Choices page with its
+tab, the ten-token board and the sheet of star tokens) and said every
+part of the book is their own work. TK-1 now takes its measurements
+from those files instead of from photographs.
+
+### The page
+
+- **Size.** The book page is 8.82 by 5.82 in, the trimmed size of the
+  Choices file, centred on Letter landscape with trim marks (cut 1.09 in
+  off the sides and 1.34 in off the top and bottom; a Board with six to
+  ten tokens is 7.46 in tall). Setup offers the same page enlarged to
+  the full 11 in width (11 by 7.26 in) and "Fill the Letter page".
+- **Geometry.** Every rectangle, radius, stroke and baseline is in page
+  points from the files, scaled by the page size chosen. Checked by
+  measuring the rendered form against the file coordinates: the titles,
+  First and Then, the six boxes, the Board boxes, the token slots and
+  their captions and dots, the Tokens page's park boxes, corners and
+  foot line, and the backs' title band, title and body all land within
+  0.02 pt of the files. The earlier build was 1.5 to 5 pt off in places
+  (half a stroke measured from the wrong edge; baselines set against a
+  stand-in font).
+- **Type.** Georgia throughout the book (bold and italic where the files
+  use them), the tab letters in School Book where it is installed, then
+  Georgia Bold. Underlines come from the font's own metrics, as
+  Illustrator draws them. The back titles are letter-spaced .06 em, as
+  in the files.
+- **Colours.** The files' own: band #698da9, CHOICES tab #acd69b,
+  TARGETS #e3c5e8, BOARD #aac4dd (the photographs had made it a darker
+  slate), TOKENS #f9e988, First box #f0f1f1, Then box #acd69a, panel
+  #f5f5f5. "Colours as the Illustrator files" restores them.
+- **Token art.** The default token is the assessor's smiling star,
+  taken from the token sheet at its own resolution.
+- **QR code.** The "SCAN ME" style copies the code on the assessor's
+  Choices page: slate modules, rounded slate finder rings with green
+  centres, SCAN ME in a clear square in the middle, error correction
+  level H. The finder centres are a deeper green (#6aa55a) than the
+  tab, because a pale centre is read as white by decoders. zxing-cpp
+  decodes it from the printed page at 300 and 150 dpi; unticking the
+  style gives a plain black code (level M). The assessor's own code
+  links to https://qrco.de/bchWXG, a short link from a QR service;
+  paste it into the QR link field to reuse it.
+- **Credit line.** The Token Economy back carries the assessor's line
+  from the file, "To find more resources and information visit
+  www.Behavior-Charts.com", editable or clearable. The barcode is left
+  out. When the instructions need the room, the credit drops to one
+  small italic line at the foot rather than pushing the steps off the
+  page.
+
+### Fits that hold on paper
+
+Two faults found while matching the files are fixed:
+
+- The title fit compared a zoomed text width with an unzoomed box
+  width, so a title could shrink (or fail to) depending on the preview
+  zoom and the polish layer's fit-to-window zoom. It now divides the
+  zoom out.
+- The backs were fitted on the zoomed screen preview, where the same
+  text sets a few pixels shorter than on paper; three backs overflowed
+  by 3 to 4 px in print. The fit now keeps 3 percent in hand and
+  measures the bottom of the text itself. A back that has to continue
+  keeps the size it was split at.
+
+All four default backs now fit one page each at 11 pt or more (Choice
+Board 11.3, Teaching Targets 12.3, Token Board 11.55, Token Economy
+11.05 with the credit on one line).
+
+### The instructions, checked against the literature
+
+The assessor asked that the back texts be checked against peer-reviewed
+consensus. The structure, headings and voice are kept; what changed:
+
+- **Token Board.** First-Then is stated as the Premack principle with
+  its condition: it works when the THEN item is available only through
+  the board (response deprivation, Timberlake and Allison, 1974). Tokens
+  are given right after the behavior with brief praise, and the exchange
+  is kept immediate while the board is new (Hackenberg, 2018). "Not So
+  FAST" now says what to do when a step up fails: go back one step
+  (ratio strain).
+- **Choice Board.** Choice is described as the evidence has it: learners
+  often prefer to choose and choosing has lowered problem behavior
+  (Tiger, Hanley and Hernandez, 2006; Dyer, Dunlap and Winterling,
+  1990), but choice among items does not make a weak item strong
+  (Lerman et al., 1997). The pictures should come from a preference
+  assessment and change as preferences change, since freely available
+  items lose value. The test of a reinforcer is that the behavior it
+  follows increases.
+- **Token Economy.** One token exchanges for many backup reinforcers,
+  which keeps it valuable when one item has lost its appeal (a
+  generalized conditioned reinforcer; Russell, Ingvarsson, Haggar and
+  Jessel, 2018). The three conditioning steps (sampling, coaching,
+  conditioning) each end with an immediate exchange, and the last
+  begins asking for more tokens per exchange. The check that it worked
+  is that the behavior earning tokens goes up.
+- **Teaching Targets.** A replacement behavior should serve the same
+  function as the problem behavior and be easier to do (Horner and Day,
+  1991); one target at a time, with an agreed definition so every adult
+  gives the token for the same thing.
+
+The Guide lists all ten sources in full: Cooper, Heron and Heward
+(2020); Dyer, Dunlap and Winterling (1990); Hackenberg (2018); Horner
+and Day (1991); Ivy, Meindl, Overley and Robson (2017); Lerman, Iwata,
+Rainville, Adelinis, Crosland and Kogan (1997); Premack (1959); Russell,
+Ingvarsson, Haggar and Jessel (2018); Tiger, Hanley and Hernandez
+(2006); Timberlake and Allison (1974).
+
+### Tests
+
+`qa/tk1-test.js` (60 checks) now measures the page in points against
+the files, checks the 11 in page and Fill the Letter page, the default
+credit and its compact form, that the default texts fit their backs,
+the framed and plain QR codes module for module, and, where python3
+has zxing-cpp (`pip install zxing-cpp`), decodes both codes from the
+printed PDF.
+
