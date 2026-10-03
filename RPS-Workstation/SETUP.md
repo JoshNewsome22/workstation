@@ -5963,3 +5963,23 @@ the sheet. What it found, now fixed:
 
 Every view also has no sideways scrolling at iPad widths (768, 1024 and
 1366 px) and no script errors.
+
+### Text sizes on the iPad, second fix (v21.42f)
+
+After v21.42c the iPad still showed the book's text about 1.6 times too
+big. Two further changes remove every dependence on CSS zoom for text:
+
+- No font shorthand in TK-1 names its typeface through a CSS variable
+  any more (`font: 700 11.9pt/1 Georgia, ...` instead of
+  `font: 700 11.9pt/1 var(--bk)`). Safari can skip the zoom on the size
+  in such a declaration while it zooms the boxes.
+- The screen preview no longer uses `zoom` at all: each book is drawn at
+  its true size and shrunk to the width of its box with a transform,
+  which scales text and boxes together in every browser. The preview is
+  also larger than before (it fills its box).
+
+The Preview line now ends with "Form build v21.42f" and a text check.
+The check compares a 72 pt line of text with a 1 in box, and should read
+1.00. A higher number means the browser is enlarging text, which tells us
+what the iPad does. In Chrome the printed pages are pixel for pixel
+unchanged.

@@ -2407,7 +2407,7 @@ $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.v
 document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>{if(r==='tok')recaps(false);renderAll();},r==='tok'?'tok':r==='photo'?'av':'');});
 
 /* ---------------- views ---------------- */
-function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});fitAll();}
+function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});fitAll();scaleBooks();}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------------- the editing tables ---------------- */
@@ -2554,10 +2554,11 @@ function renderOut(){
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
-  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%.';
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42f.)';
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
   const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
+  setTimeout(()=>{scaleBooks();const pl=$('#prevLine');if(pl&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+textCheck().toFixed(2)+'.';},0);
   syncState();
 }
 /* the fits need the pages laid out: the sections that hold a book are shown off screen while measuring when their view is not the current one */
@@ -2580,6 +2581,14 @@ function fitAll(){
   $$('.slot .ca,.slot .cb').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';const w=()=>{const r=document.createRange();r.selectNodeContents(el);const k=el.getBoundingClientRect().width/(el.offsetWidth||1)||1;return r.getBoundingClientRect().width/k;};let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.5;while(w()>el.clientWidth-6&&fs>lo&&g++<40){fs-=.25;el.style.fontSize=fs+'px';}});
 }
 window.addEventListener('beforeprint',fitAll);
+/* the screen preview: each book drawn at its true size and shrunk to the width of its box by a transform (its layout box is pulled in by
+   negative margins so nothing scrolls sideways); the page labels are drawn at a size that stays readable */
+function scaleBooks(){$$('.out').forEach(out=>{const b=out.querySelector('.book');if(!b||!out.clientWidth)return;b.style.transform='';b.style.marginRight='';b.style.marginBottom='';
+  const avail=out.clientWidth-28,w=b.scrollWidth,h=b.offsetHeight;if(!w)return;const k=Math.min(1,avail/w);b.style.transform='scale('+k+')';b.style.marginRight=(-(w*(1-k)))+'px';b.style.marginBottom=(-(h*(1-k)))+'px';
+  b.querySelectorAll('.pglabel').forEach(l=>{l.style.fontSize=(12/k).toFixed(1)+'px';});});}
+/* a check that text and boxes scale together: a 72 pt line box inside a page should be as tall as a 1 in box is wide */
+function textCheck(){const pg=$('#book .pg');if(!pg)return 1;const d=document.createElement('div');d.style.cssText='position:absolute;left:0;top:0;width:1in;height:1px;visibility:hidden';const t=document.createElement('span');t.textContent='M';t.style.cssText='position:absolute;left:0;top:0;font:400 72pt/1 Georgia,serif;visibility:hidden';pg.appendChild(d);pg.appendChild(t);const r=t.getBoundingClientRect().height/(d.getBoundingClientRect().width||1);d.remove();t.remove();return r;}
+let tSc=0;window.addEventListener('resize',()=>{clearTimeout(tSc);tSc=setTimeout(scaleBooks,150);});
 /* after the sheet of one card has printed, the print order goes back to what it was, so the Preview shows the whole book again */
 function restoreOrder(){if(S.meta.order==='spare'&&S.meta.prevOrder){S.meta.order=S.meta.prevOrder;delete S.meta.prevOrder;renderAll();}}
 window.addEventListener('afterprint',()=>setTimeout(restoreOrder,300));
