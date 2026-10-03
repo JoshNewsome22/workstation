@@ -5605,3 +5605,36 @@ Not held, and whether it matters:
   Center on Self-Injury) with a different key. IA-1 scores the
   published 16-item FAST and should not also score this one; the two
   would be confused in reports.
+
+### The student's photo, every pronoun form, and links past the staff password (v21.41b)
+
+Three things seen in use on the hosted edition.
+
+- **A photo of the student on the respondent page.** The IA-1 dialog
+  takes a photo; the device shrinks it to a small JPEG (224 pixels on
+  the long side) that is kept in the form (`rp.photo`, saved with the
+  file, cleared by Clear all, never remembered on the device) and
+  shown at the top of the page beside the student label. It travels
+  inside the page file only. A link never carries it: a link with a
+  picture in it is too long for mail programs, and a link is the
+  route most likely to be forwarded. The dialog says so when a photo
+  is set. The assessor decides who receives a page with a face in it.
+- **"(s)he", "he/she", "him/her", "him/herself", "her/him", "she/he"**
+  and the "or" forms now all become the chosen pronoun; "(S)he" keeps
+  its capital. With "they" the verb that follows loses its third-person
+  ending ("they like", "they try", "they watch"), also across an
+  adverb ("they always do"); adverbs and nouns ending in s are left
+  alone. `qa/personalize-test.js` (7 checks) covers it.
+- **Links that asked for a password.** On newsomebh.com the
+  workstation folder keeps the staff password, so a respondent link
+  into it asked every informant to sign in (it opened on the
+  assessor's own computer only because that browser had the password
+  cached). The dialog has **Address of respond.html for links**: put
+  `respond.html` and `nbh-respond.js` in a public folder (HOSTING.md
+  says how) and enter its address once; it is remembered on the device
+  and saved with the file, and links then open without a sign-in
+  while the workstation keeps its password.
+
+Also: the shell's case map names IA-1's five instruments, since the
+WEFA is a sheet inside IA-1 (View, WEFA), not a form of its own.
+`qa/ia1-photo-test.js` (9 checks).

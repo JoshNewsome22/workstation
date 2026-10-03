@@ -18,12 +18,16 @@
   function cap(src,rep){return /^[A-Z]/.test(src)?rep.charAt(0).toUpperCase()+rep.slice(1):rep;}
   U.personalize=function(text,o){o=o||{};var t=String(text==null?'':text);var pr=PRON[o.pron]||null;
     if(o.name){t=t.replace(/\b(the|your|this|that|my)\s+(student|client|individual|person|child|pupil|learner|consumer)(['’]s)?\b/gi,function(m,a,b,pos){return cap(m,o.name+(pos?'’s':''));});}
-    if(pr){t=t.replace(/\b(himself\s+or\s+herself|herself\s+or\s+himself|himself\s*\/\s*herself)\b/gi,function(m){return cap(m,pr.r);})
-      .replace(/\b(his\s+or\s+her|her\s+or\s+his|his\s*\/\s*hers?)\b/gi,function(m){return cap(m,pr.p);})
-      .replace(/\b(him\s+or\s+her|her\s+or\s+him|him\s*\/\s*her)\b/gi,function(m){return cap(m,pr.o);})
-      .replace(/\b(he\s+or\s+she|she\s+or\s+he|he\s*\/\s*she|s\/he)\b/gi,function(m){return cap(m,pr.s);});
+    if(pr){t=t.replace(/\b(himself\s+or\s+herself|herself\s+or\s+himself|himself\s*\/\s*herself|herself\s*\/\s*himself|him\s*\/\s*herself|her\s*\/\s*himself|\(s\)he\s*self|them\s*\/\s*self)\b/gi,function(m){return cap(m,pr.r);})
+      .replace(/\b(his\s+or\s+her|her\s+or\s+his|his\s*\/\s*hers?|her\s*\/\s*his|hers?\s*\/\s*his)\b/gi,function(m){return cap(m,pr.p);})
+      .replace(/\b(him\s+or\s+her|her\s+or\s+him|him\s*\/\s*her|her\s*\/\s*him)\b/gi,function(m){return cap(m,pr.o);})
+      .replace(/(\bhe\s+or\s+she\b|\bshe\s+or\s+he\b|\bhe\s*\/\s*she\b|\bshe\s*\/\s*he\b|\bs\/he\b|\(s\)he\b|\(S\)he\b)/gi,function(m){return cap(m.replace(/^\((s)\)/i,'$1'),pr.s);});
       if(o.pron==='they'){var V={is:'are',was:'were',has:'have',does:'do','doesn’t':'don’t',"doesn't":"don't","isn't":"aren't","isn’t":"aren’t","wasn't":"weren't","hasn't":"haven't"};
-        t=t.replace(/\b(they)\s+(is|was|has|does|doesn't|doesn’t|isn't|isn’t|wasn't|hasn't)\b/gi,function(m,a,b){return a+' '+(V[b.toLowerCase()]||b);});}}
+        t=t.replace(/\b(they(?:\s+(?:always|usually|often|never|sometimes|rarely|seldom|still|also|just|only|frequently|typically|generally|really|even))?)\s+(is|was|has|does|doesn't|doesn’t|isn't|isn’t|wasn't|hasn't)\b/gi,function(m,a,b){return a+' '+(V[b.toLowerCase()]||b);});
+        /* a third-person verb right after "they" loses its -s (likes -> like, tries -> try, watches -> watch); adverbs and nouns that end in s are left */
+        var STOP=/^(always|sometimes|perhaps|yes|this|thus|plus|his|hers|its|us|as|towards|afterwards|besides|nowadays|anyways|was|is|has|does|gets)$/;
+        t=t.replace(/\b(they(?:\s+(?:always|usually|often|never|sometimes|rarely|seldom|still|also|just|only|frequently|typically|generally|really|even))?)\s+([a-z]+s)\b/g,function(m,a,v){if(STOP.test(v)||/(ss|ous|ious|eous)$/.test(v))return m;var w=v;
+          if(/ies$/.test(w))w=w.replace(/ies$/,'y');else if(/(ch|sh|x|z|o|ss)es$/.test(w))w=w.replace(/es$/,'');else w=w.replace(/s$/,'');return a+' '+w;});}}
     if(o.behs){t=t.replace(/\b(the|this|that|these|those)\s+(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
       .replace(/\b(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
       .replace(/\b(the|these|those)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);});}
@@ -43,7 +47,7 @@
       '.nr{max-width:760px;margin:0 auto;padding:16px}.nr-card{background:#fff;border:1px solid var(--rule);border-radius:8px;padding:18px 20px;margin:0 0 14px;box-shadow:0 1px 3px rgba(24,46,67,.06)}'+
       '.nr h1{font:600 22px/1.25 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--navy);margin:0 0 4px}.nr .sub{color:var(--muted);font-size:14px;margin:0 0 10px}'+
       '.nr .band{display:inline-block;background:var(--mist);color:var(--navy);border-left:4px solid var(--teal);padding:2px 10px;font-size:13px;margin:0 0 10px}'+
-      '.nr .def{background:var(--mist);border-radius:6px;padding:10px 12px;font-size:14.5px;margin:10px 0}.nr .def b{color:var(--navy)}'+
+      '.nr .def{background:var(--mist);border-radius:6px;padding:10px 12px;font-size:14.5px;margin:10px 0}.nr img.photo{float:right;width:112px;height:112px;object-fit:cover;border-radius:10px;border:2px solid var(--teal);margin:0 0 8px 14px}.nr .def b{color:var(--navy)}'+
       '.nr label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 2px}.nr input[type=text],.nr textarea,.nr select{width:100%;font:inherit;font-size:16px;padding:9px 10px;border:1px solid #b7c8c5;border-radius:6px;background:#fff;color:var(--ink)}'+
       '.nr textarea{min-height:70px;resize:vertical}.nr .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:560px){.nr .grid2{grid-template-columns:1fr}}'+
       '.nr ol.items{list-style:none;padding:0;margin:0}.nr li.it{border-top:1px solid var(--rule);padding:14px 0}.nr li.it .q{font-size:16px;margin:0 0 8px}.nr li.it .q b{color:var(--navy);margin-right:6px}'+
@@ -79,6 +83,7 @@
     /* head */
     var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?'Form '+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||'Questionnaire')}),
       h('p',{'class':'sub',text:(P.sub||'')}),
+      P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:'Photo of the student'}):null,
       h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
       P.confirm?confBlock():null,
       h('p',{'class':'sub',text:P.instructions||'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send: your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'}),
