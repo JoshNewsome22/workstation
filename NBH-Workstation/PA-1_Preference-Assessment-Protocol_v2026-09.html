@@ -2047,7 +2047,10 @@ function renderPool(){
     <td><input data-f="note" data-i="${i}" value="${esc(s.note)}"></td></tr>`).join('');
 }
 $('#poolTbl').addEventListener('input',e=>{const el=e.target;if(!el.dataset.f)return;S.stim[+el.dataset.i][el.dataset.f]=el.value;if(el.dataset.f==='name')relabel();else if(el.dataset.f==='rank')renderSummary();});
-function relabel(){$$('[data-lbl]').forEach(e=>e.textContent=name(+e.dataset.lbl));$$('select[data-items]').forEach(sel=>{Array.from(sel.options).forEach(o=>{if(o.value!==''&&o.value!=='none')o.textContent=name(+o.value);});});computeAll();}
+function relabel(){$$('[data-lbl]').forEach(e=>e.textContent=name(+e.dataset.lbl));$$('select[data-items]').forEach(sel=>{Array.from(sel.options).forEach(o=>{if(o.value!==''&&o.value!=='none')o.textContent=name(+o.value);});});
+  /* v21.38: the competing-stimulus sheet (its order line, re-test table and validation selects) and the monitoring graph's item select carry the names too */
+  if(typeof renderCSA==='function')renderCSA();const mi=$('#monItem');if(mi){const cur=mi.value;mi.innerHTML=`<option value="">(item with most entries)</option>`+S.stim.map((_,i)=>`<option value="${i}">${esc(name(i))}</option>`).join('');mi.value=cur;}
+  computeAll();}
 
 /* ---------------- single stimulus ---------------- */
 function renderSS(){
