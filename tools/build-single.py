@@ -26,12 +26,14 @@ for fn in files:
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
 # v21.31: the pictogram library (Forms SM-1 and VS-1 load it by <script src>) travels once, as its own block
 pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
+# v21.39: the respondent-page library (Form IA-1 loads it by <script src>) travels once too
+respond = open(os.path.join(SRC, 'nbh-respond.js'), encoding='utf-8').read()
 def pack(text):
     return base64.b64encode(gzip.compress(text.encode('utf-8'), compresslevel=9, mtime=0)).decode('ascii')
 def block(bid, text):
     return f'<script type="text/plain" id="{bid}">{text}</script>\n'
 blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', pack(json.dumps(forms, ensure_ascii=False))) +
-          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-shell', pack(idx)))
+          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)
