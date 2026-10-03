@@ -622,6 +622,8 @@ function renderDesign(){
 }
 
 /* ---------------- the card ---------------- */
+/* the workstation form that holds the schedule's data sheet, named when Data sheet used is left blank */
+function sheetFor(o){if(o.id==='interlock')return 'Form SM-1 (the interlocking session sheet)';if(o.id==='dro'&&(S.meta.dro_type||'whole')!=='whole')return 'Form MT-1 (the momentary checks, as interval samples); Form DD-1 (occurrences per session)';if(o.id==='thin')return 'Form DD-1 (requests and problem behavior per session); Form MT-1 (the S+ and S&minus; periods, as interval samples)';return 'Form DD-1 (counts and intervals per session)';}
 function renderCard(){
   const m=S.meta,o=design(),out=$('#cardOut');
   if(!o){out.innerHTML='<p class="hint">Design a schedule first; the card is written from it.</p>';return;}
@@ -632,7 +634,7 @@ function renderCard(){
   if(o.params.length)h+='<h3>Settings</h3><table class="ct">'+o.params.map(p=>'<tr><th style="width:30%">'+p[0]+'</th><td>'+p[1]+'</td></tr>').join('')+'</table>';
   if(o.steps){const dated=o.stepsHead[0]==='Step';/* a step table gets a Date reached column; the PR breakpoints, the token prices and the interlocking minutes do not */
     h+='<h3>'+(o.id==='pr'?'Breakpoints':o.id==='token'?'Back-ups':o.id==='interlock'?'Requirement by minute':'Steps')+'</h3><table class="ct"><tr>'+o.stepsHead.map(x=>'<th>'+x+'</th>').join('')+(dated?'<th style="width:14%">Date reached</th>':'')+'</tr>'+o.steps.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+(dated?'<td></td>':'')+'</tr>').join('')+'</table>';}
-  h+='<h3>Data to keep</h3><ul>'+o.data.map(d=>'<li>'+d+'</li>').join('')+(m.cd_data?'<li>On: '+esc(m.cd_data)+'</li>':'')+'</ul>';
+  h+='<h3>Data to keep</h3><ul>'+o.data.map(d=>'<li>'+d+'</li>').join('')+'<li>On: '+(m.cd_data?esc(m.cd_data):sheetFor(o))+'</li></ul>';
   h+='<h3>What never happens</h3><ul><li>'+esc(nm(m.beh,m.behs,'The behavior'))+' is never argued with, lectured about, or given the reinforcer by accident; if it happens, the rule above says exactly what to do.</li><li>The schedule is not changed by anyone during the day; steps are taken on the data, by the person named on the plan.</li><li>Nothing already earned is taken away.</li></ul>';
   if(o.warn.length)h+='<h3>Cautions</h3><ul>'+o.warn.map(w=>'<li>'+w+'</li>').join('')+'</ul>';
   h+='<div class="c-foot"><div>Step in force today: '+bl+' &nbsp; Initials: '+bl+'</div><div>Review: '+esc(m.cd_review||'')+' &nbsp; BCBA: '+esc(m.bcba||'')+'<br><span style="font-size:10.5px;color:#444">Form SR-1</span></div></div>';
@@ -683,7 +685,7 @@ function loadSim(){S=blank();Object.assign(S.meta,{client:'SIMULATED – Sample 
     th_splus:'green card on the desk',th_sminus:'red card on the desk',th_pdur:'60',th_m0:'15',th_mT:'240',th_mult:'2',th_crit:'problem behavior at or under 10% of baseline and the request under S+ on 80% of opportunities, 2 consecutive sessions',th_back:'problem behavior above 20% of baseline for 2 sessions: previous step',th_comp:'a fidget from PA-1; a task at the student’s level',
     ch_sig:'green card',ch_start:'1',ch_end:'10',ch_step:'1',ch_crit:'no problem behavior and the request used appropriately in 2 consecutive sessions',ch_task:'one worksheet item',
     il_dir:'dec',il_init:'20',il_step:'2',il_every:'2',il_len:'16',il_floor:'6',il_cap:'20',lh_sched:'VI 120 s',lh_hold:'10',lh_sig:'the teacher looks up and says the student’s name',lag_n:'2',lag_class:'answers to “tell me about your weekend”',lag_diff:'a different activity named',lag_never:'off-topic or inappropriate answers',
-    cd_title:'Sam’s calling-out schedule (DRO)',cd_data:'DRO interval log; Form AB-1 scatterplot',cd_review:'2026-10-16'});
+    cd_title:'Sam’s calling-out schedule (DRO)',cd_data:'Form DD-1 (intervals run and earned per session; occurrences against baseline)',cd_review:'2026-10-16'});
   S.notes.dro='Used with Sam from 10/5; started at 2 min; at 3 min by 10/12.';S.notes.fct='Hand-raise FCR taught 9/28; honored every time in week 1.';renderAll();}
 $('#simBtn').addEventListener('click',loadSim);
 /* reference list */

@@ -69,7 +69,16 @@ function ncol(){return Math.max(1,Math.min(4,S.teams.length));}
 function colName(i){const t=S.teams[i];return S.teams.length?((t&&t.name)||('Team '+(i+1))):'Class';}
 function rowCrit(r){return r.ph==='B'?null:num(r.crit);}
 function cellMet(r,i){const c=rowCrit(r),v=num(r.v[i]);if(c==null||v==null)return null;return dir()==='low'?v<=c:v>=c;}
-function rowMet(r){let any=false,all=true;for(let i=0;i<ncol();i++){const m=cellMet(r,i);if(m===null)continue;any=true;if(!m)all=false;}return any?all:null;}
+/* the Good Behavior Game won by the fewest fouls: the lowest score wins, ties both; one option also pays any team at or
+   under the criterion */
+function winMode(){return S.type==='gbg'&&/fewest fouls/.test(S.meta.g_win||'');}
+function winners(r){if(r.ph==='B')return [];const v=[];for(let i=0;i<ncol();i++){const x=num(r.v[i]);if(x!=null)v.push([i,x]);}if(!v.length)return [];const lo=Math.min(...v.map(x=>x[1]));const w=v.filter(x=>x[1]===lo).map(x=>x[0]);
+  if(/at or under the criterion/.test(S.meta.g_win||''))v.forEach(x=>{if(cellMet(r,x[0])&&!w.includes(x[0]))w.push(x[0]);});return w.sort((a,b)=>a-b);}
+/* tootling: a running total toward the cumulative goal, restarted the day it is reached */
+function tootMode(){return S.type==='tootle';}
+function tootGoal(){return num(S.meta.t_goaln);}
+function tootCum(){const g=tootGoal();let cum=0;return S.log.map(r=>{if(r.ph==='B')return null;const x=num(r.v[0]);if(x==null)return null;cum+=x;const reached=g!=null&&g>0&&cum>=g;const o={cum,reached:g!=null&&g>0?reached:null};if(reached)cum=0;return o;});}
+function rowMet(r){if(tootMode()){const c=tootCum()[S.log.indexOf(r)];return c?c.reached:null;}let any=false,all=true;for(let i=0;i<ncol();i++){const m=cellMet(r,i);if(m===null)continue;any=true;if(!m)all=false;}return any?all:null;}
 function vals(r){const o=[];for(let i=0;i<ncol();i++){const v=num(r.v[i]);if(v!=null)o.push(v);}return o;}
 function baseStats(){const B=S.log.filter(r=>r.ph==='B'),xs=[];B.forEach(r=>xs.push(...vals(r)));
   const mean=xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:null;
@@ -104,13 +113,14 @@ function renderFade(){
 }
 function renderL(){
   const n=ncol();
-  $('#lTbl thead').innerHTML='<tr><th style="width:4%">#</th><th style="width:10%">Date</th><th style="width:8%">Phase</th><th style="width:9%">Criterion</th>'+Array.from({length:n},(_,i)=>'<th style="width:9%"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+TEAMCOL[i]+';margin-right:4px"></span>'+esc(colName(i))+'</th>').join('')+'<th style="width:7%">Met</th><th style="width:12%">Reward</th><th>Note</th><th class="nx noprint"></th></tr>';
+  $('#lTbl thead').innerHTML='<tr><th style="width:4%">#</th><th style="width:10%">Date</th><th style="width:8%">Phase</th><th style="width:9%">Criterion</th>'+Array.from({length:n},(_,i)=>'<th style="width:9%"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:'+TEAMCOL[i]+';margin-right:4px"></span>'+esc(colName(i))+'</th>').join('')+(tootMode()?'<th style="width:8%">Total</th>':'')+'<th style="width:7%">Met</th>'+(winMode()?'<th style="width:12%">Won</th>':'')+'<th style="width:12%">Reward</th><th>Note</th><th class="nx noprint"></th></tr>';
+  const cum=tootMode()?tootCum():null;
   $('#lTbl tbody').innerHTML=S.log.map((r,i)=>{const m=rowMet(r);
     return `<tr><td class="num">${i+1}</td><td><input data-r="log" data-i="${i}" data-f="date" value="${esc(r.date)}"></td>
     <td><select data-r="log" data-i="${i}" data-f="ph" aria-label="Phase on day ${i+1}">${['B','1','2','3','4'].map(p=>`<option value="${p}"${r.ph===p?' selected':''}>${p==='B'?'B (baseline)':p}</option>`).join('')}</select></td>
     <td><input data-r="log" data-i="${i}" data-f="crit" value="${esc(r.crit)}" style="text-align:center"${r.ph==='B'?' disabled placeholder="—"':''}></td>
     ${Array.from({length:n},(_,k)=>`<td><input data-r="log" data-i="${i}" data-f="v${k}" value="${esc(r.v[k])}" style="text-align:center" aria-label="${esc(colName(k))} on day ${i+1}"></td>`).join('')}
-    <td class="met ${m===true?'y':m===false?'n':''}">${m===true?'Yes':m===false?'No':'—'}</td>
+    ${cum?`<td class="num tot">${cum[i]?cum[i].cum+(tootGoal()?' of '+tootGoal():''):'—'}</td>`:''}<td class="met ${m===true?'y':m===false?'n':''}">${m===true?'Yes':m===false?'No':'—'}</td>${winMode()?`<td class="won">${esc(winners(r).map(colName).join(' and ')||'—')}</td>`:''}
     <td><select data-r="log" data-i="${i}" data-f="rw" aria-label="Reward on day ${i+1}"><option value=""></option>${['Delivered','Not earned','Earned, not delivered'].map(o=>`<option${r.rw===o?' selected':''}>${o}</option>`).join('')}</select></td>
     <td><input data-r="log" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('log',i,'day')}</tr>`;}).join('');
 }
@@ -126,14 +136,14 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){
     const r=el.dataset.r,i=+el.dataset.i,f=el.dataset.f;
     if(r==='log'&&/^v\d$/.test(f))S.log[i].v[+f.slice(1)]=el.value;else S[r][i][f]=el.value;
-    if(r==='log'){const tr=el.closest('tr'),m=rowMet(S.log[i]),td=tr.querySelector('td.met');td.className='met '+(m===true?'y':m===false?'n':'');td.textContent=m===true?'Yes':m===false?'No':'—';renderRecord();renderBase();}
+    if(r==='log'){if(tootMode()){const cum=tootCum();$$('#lTbl tbody tr').forEach((tr,k)=>{const c=cum[k],m=S.log[k]&&rowMet(S.log[k]),td=tr.querySelector('td.met'),tt=tr.querySelector('td.tot');if(tt)tt.textContent=c?c.cum+(tootGoal()?' of '+tootGoal():''):'—';if(td){td.className='met '+(m===true?'y':m===false?'n':'');td.textContent=m===true?'Yes':m===false?'No':'—';}});}else{const tr=el.closest('tr'),m=rowMet(S.log[i]),td=tr.querySelector('td.met');td.className='met '+(m===true?'y':m===false?'n':'');td.textContent=m===true?'Yes':m===false?'No':'—';const w=tr.querySelector('td.won');if(w)w.textContent=winners(S.log[i]).map(colName).join(' and ')||'—';}renderRecord();renderBase();}
     else if(r==='exp'){renderExp();renderPoster();}
     else if(r==='menu'){renderMenu();}
     else if(r==='teams'){renderPosterSoon();renderRule();renderLegend();}
     return;}
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;
     if(/^(crit|unit|mins|reward|rw_when|cls|teacher|grade|g_|c_|dp_|id_|r_|s_|t_|in_|po_|announce|never|when)/.test(el.dataset.m)){renderRule();renderPosterSoon();}
-    if(/^(crit|cc_|dir)/.test(el.dataset.m))renderRecord();}
+    if(/^(crit|cc_|dir|t_goaln)/.test(el.dataset.m)){renderRecord();if(el.dataset.m==='t_goaln')renderL();}}
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){
@@ -210,7 +220,7 @@ function ruleText(){
     case 'random':{const d=[];if(S.chk.r_crit)d.push('the criterion');if(S.chk.r_beh)d.push('the expectation that counts');if(S.chk.r_stu)d.push('the students whose scores count');if(S.chk.r_rw)d.push('the reward');
       return `${T.length?team:'The class'} play${when}${mins} under every expectation. After the period ${d.length?d.join(', ')+' are drawn from the jar':'[what is drawn] is drawn from the jar'}; the class earns ${S.chk.r_rw?'what the slip or the mystery envelope says':rw}${rwWhen} when the drawn criterion is met${c!=null?' (the written criterion is '+critPhrase(c)+')':''}.`;}
     case 'selfmon':return `At ${m.s_cue?m.s_cue.charAt(0).toLowerCase()+m.s_cue.slice(1):'the cue'}${m.s_int?' about every '+m.s_int+' minutes':''}${when}${mins}, each student answers &ldquo;${m.s_q||'Was I meeting the expectation?'}&rdquo; ${m.s_how?'('+m.s_how+')':''}. The class earns ${rw}${rwWhen} when ${m.s_crit||critPhrase(c)}. ${m.s_chk?'Teacher check: '+m.s_chk+'.':''}`;
-    case 'tootle':return `Students write a tootle when they see ${m.t_what||'a classmate doing something kind or helpful'}${m.t_how?' ('+m.t_how+')':''}. ${m.t_read?m.t_read+'.':'The teacher counts them and reads some aloud.'} The class earns ${rw}${rwWhen} when ${m.t_goal||critPhrase(c)}.`;
+    case 'tootle':return `Students write a tootle when they see ${m.t_what||'a classmate doing something kind or helpful'}${m.t_how?' ('+m.t_how+')':''}. ${m.t_read?m.t_read+'.':'The teacher counts them and reads some aloud.'} The class earns ${rw}${rwWhen} when ${m.t_goal||(tootGoal()?'the class total reaches '+tootGoal()+' tootles':critPhrase(c))}.`;
     default:return '';
   }
 }
@@ -279,6 +289,16 @@ function renderRecord(){
     <div class="metric"><b>Current criterion</b><div class="val">${cur!=null?cur:'—'}</div><div class="sub">${ph?'phase '+esc(ph)+' · ':''}${dir()==='low'?'at most':'at least'} · terminal ${esc(S.meta.cc_end||'—')}</div></div>`;
   if(!S.log.length){v.innerHTML='<div class="verdict v-mid"><b>No days yet.</b> Enter the baseline days as phase B; the Setup sheet will suggest a starting criterion.</div>';RU.innerHTML='';drawLog();return;}
   const step=num(S.meta.cc_step)??1,end=num(S.meta.cc_end),rules=[];
+  if(tootMode()){const g=tootGoal(),cum=tootCum(),rowsT=S.log.map((r,k)=>({r,c:cum[k]})).filter(x=>x.c);const n=rowsT.length,mean=n?rowsT.reduce((a,x)=>a+num(x.r.v[0]),0)/n:null;
+    const reached=rowsT.filter(x=>x.c.reached).length;let run=0;for(let k=rowsT.length-1;k>=0&&!rowsT[k].c.reached;k--)run++;const last=n?rowsT[n-1]:null;
+    if(g==null||g<=0)rules.push(['mid','No cumulative goal on the Design sheet (Tootling: cumulative goal); the total cannot be read against a goal.']);
+    else if(!n)rules.push(['mid','No game days with a count yet.']);
+    else if(last.c.reached){const t=end!=null?Math.min(end,g+step):g+step;rules.push(['ok','The class reached the goal of '+g+' tootles on '+esc(last.r.date||'the last game day')+(reached>1?' (reached '+reached+' times so far)':'')+': deliver the reward and raise the goal by the step, from '+g+' to '+t+(end!=null?' (terminal '+end+')':'')+'. The count starts again at zero.']);}
+    else{const left=g-last.c.cum,days=mean?Math.ceil(left/mean):null;const txt='Total so far '+last.c.cum+' of '+g+' ('+Math.round(100*last.c.cum/g)+'%) after '+run+' game day'+(run===1?'':'s')+' on this count; mean '+fmt1(mean)+' tootles per game day'+(days!=null?', so the goal in about '+days+' more game day'+(days===1?'':'s')+' at that rate':'')+'.';
+      if(run>=10)rules.push(['no',txt+' No goal reached in ten game days: lower the goal to within reach, re-teach what a tootle is, and re-vote the reward (working convention).']);else rules.push(['mid',txt+(reached?' Reached '+reached+' time'+(reached===1?'':'s')+' so far.':'')]);}
+    v.innerHTML='<div class="verdict '+(rules.some(r=>r[0]==='no')?'v-no':rules.some(r=>r[0]==='ok')?'v-ok':'v-mid')+'"><b>'+(ph?'Phase '+esc(ph)+' · ':'')+S.log.length+' day'+(S.log.length===1?'':'s')+' recorded ('+G.length+' with the game on).</b> '+rules[0][1]+'</div>';
+    RU.innerHTML='<ul style="font-family:var(--sans);font-size:12.5px;margin:4px 0 4px 18px">'+rules.map(r=>'<li>'+r[1]+'</li>').join('')+'</ul><p class="hint">The tootling rules (raise by the step when the goal is reached, lower after ten game days without it) are working conventions; the step and the terminal goal are on the Design sheet.</p>';
+    drawLog();return;}
   const tighten=cur==null?null:dir()==='low'?(end!=null?Math.max(end,cur-step):cur-step):(end!=null?Math.min(end,cur+step):cur+step);
   const atEnd=cur!=null&&end!=null&&cur===end;
   if(!G.length)rules.push(['mid',b.days+' baseline day'+(b.days===1?'':'s')+' entered'+(b.sug!=null?'; the suggested starting criterion is '+b.sug+' '+esc(unitWord()):'')+'. No game days yet.']);
@@ -367,8 +387,9 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';const n=ncol();
-  const out=[['Day','Date','Phase','Criterion'].concat(Array.from({length:n},(_,i)=>colName(i))).concat(['Met','Reward','Note'])];
-  S.log.forEach((r,i)=>{const m=rowMet(r);out.push([i+1,r.date,r.ph,r.ph==='B'?'':r.crit].concat(r.v.slice(0,n)).concat([m===true?'yes':m===false?'no':'',r.rw,r.note]));});
+  const cum=tootMode()?tootCum():null,wm=winMode();
+  const out=[['Day','Date','Phase','Criterion'].concat(Array.from({length:n},(_,i)=>colName(i))).concat(cum?['Total']:[]).concat(['Met']).concat(wm?['Won']:[]).concat(['Reward','Note'])];
+  S.log.forEach((r,i)=>{const m=rowMet(r);out.push([i+1,r.date,r.ph,r.ph==='B'?'':r.crit].concat(r.v.slice(0,n)).concat(cum?[cum[i]?cum[i].cum:'']:[]).concat([m===true?'yes':m===false?'no':'']).concat(wm?[winners(r).map(colName).join(' and ')]:[]).concat([r.rw,r.note]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='GC-1_record.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 
