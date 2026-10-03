@@ -872,8 +872,15 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
         <label class="field">Observation start<input id="h-start" type="date"></label>
         <label class="field">Observation end<input id="h-end" type="date"></label>
         <label class="field">Target behavior under assessment<input id="h-target" type="text" placeholder="Optional: primary topography"></label>
+        <!-- v21.37: the consequence window and the check interval, fixed before the first observation (Walkthrough), travel with the file -->
+        <label class="field">Consequence window (seconds)<input id="h-window" type="number" min="1" max="600" step="1" placeholder="e.g. 10"></label>
+        <label class="field">Background check interval<select id="h-checks">
+          <option value="">Not fixed yet</option>
+          <option value="fixed:5">Every 5 minutes</option><option value="fixed:10">Every 10 minutes</option><option value="fixed:15">Every 15 minutes</option>
+          <option value="rand:5">Random, about every 5 minutes</option><option value="rand:10">Random, about every 10 minutes</option><option value="off">No background checks</option>
+        </select></label>
       </div>
-      <p class="note">Header fields travel with exported data and print at the top of the record. They do not affect any calculation.</p>
+      <p class="note">Header fields travel with exported data and print at the top of the record. They do not affect any calculation. The consequence window and the check interval are the ones fixed before the first observation: the Observation Timer takes the check interval as its setting whenever it is ready to start, and names the window when an incident starts.</p>
     </div>
   </div>
 
@@ -1135,13 +1142,13 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   <div class="keyrow"><span><i class="k-adult"></i>Teacher</span><span><i class="k-student"></i>Student</span><span><i class="k-peer"></i>Peer</span><span><i class="k-obs"></i>Observer</span><span><i class="k-screen"></i>The observer’s screen, drawn large</span></div>
   <div class="script">
     <div><h4>What You Say and Do</h4><ul><li>Before you start, ask staff to carry on exactly as they would without you. Then say nothing to the student or to staff until the observation ends.</li><li>Start the Observation timer when the observation starts, and let it run to the end.</li><li>Keep the definition, the consequence window and the check interval the same in every session.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>The Observation header: Student / client, Observer, Setting / location, Observation start and end, Target behavior under assessment. It travels with the file and changes no calculation.</li><li>Recording format: Coded + narrative, unless a second observer is running narrative alongside you or the codes genuinely capture what happened.</li><li>At the end: Save data on the Data file tab. Handle the file as a protected student record.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>The Observation header: Student / client, Observer, Setting / location, Observation start and end, Target behavior under assessment, Consequence window and Background check interval. It travels with the file and changes no calculation; the timer takes the check interval as its setting.</li><li>Recording format: Coded + narrative, unless a second observer is running narrative alongside you or the codes genuinely capture what happened.</li><li>At the end: Save data on the Data file tab. Handle the file as a protected student record.</li></ul></div>
   </div>
   <div class="decide"><b>Decision.</b> Fix three things before the first observation and hold them for every session and every observer: the target behavior’s definition, the consequence window, and the check interval. Two observers, a fixed target definition, and a fixed consequence window matter more to the quality of these numbers than the number of incidents collected.</div>
   <h4 class="flowhead">Which Parts, in What Order</h4>
   <p class="wk-lead" style="margin-bottom:0">Solid boxes are part of every assessment; the dashed one is part of at least a third of sessions.</p>
   <div class="flow">
-    <div><b>Before the First Observation</b>The target behavior defined in observable terms; the consequence window and the check interval chosen.<span class="go"><i>Written down</i> &rarr; the same for every session and every observer.</span></div>
+    <div><b>Before the First Observation</b>The target behavior defined in observable terms; the consequence window and the check interval chosen.<span class="go"><i>Written down</i> &rarr; the same for every session and every observer; the Observation header holds the window and the interval, so they travel with the file.</span></div>
     <div><b>Every Observation (S, A, B)</b>The Observation timer running; an incident for each occurrence; a background sample at each check without one.<span class="go"><i>Save data</i> at the end of every session.</span></div>
     <div class="wk-opt"><b>A Second Observer (D)</b>Independent recording through the same period, compared incident by incident.<span class="go"><i>Occurrence agreement</i> read first. <em>Weak</em> &rarr; tighten the definition.</span></div>
     <div class="stop"><b>Reading the Analysis (E)</b>Conditional probabilities at once; contingency strength once 10 or more background samples are on file.<span class="go"><i>Hypotheses ranked</i> for the functional analysis, not a function statement.</span></div>
@@ -1455,7 +1462,7 @@ const EO_MATCH = { attention:"attention", tangible:"tangible", escape:"escape", 
    2. STATE
    ===================================================================== */
 const state = {
-  header:{ client:"", observer:"", location:"", start:"", end:"", target:"" },
+  header:{ client:"", observer:"", location:"", start:"", end:"", target:"", window:"", checks:"" },
   mode:"both",
   entries:[],
   samples:[],
@@ -1819,7 +1826,8 @@ function readHeader(){
   state.header = {
     client:$("#h-client").value.trim(), observer:$("#h-observer").value.trim(),
     location:$("#h-location").value.trim(), start:$("#h-start").value,
-    end:$("#h-end").value, target:$("#h-target").value.trim()
+    end:$("#h-end").value, target:$("#h-target").value.trim(),
+    window:$("#h-window").value.trim(), checks:$("#h-checks").value
   };
   return state.header;
 }
@@ -1828,7 +1836,11 @@ function writeHeader(h){
   $("#h-client").value=h.client||""; $("#h-observer").value=h.observer||"";
   $("#h-location").value=h.location||""; $("#h-start").value=h.start||"";
   $("#h-end").value=h.end||""; $("#h-target").value=h.target||"";
+  $("#h-window").value=(h.window==null||h.window==="")?"":String(h.window);
+  $("#h-checks").value=h.checks||""; if($("#h-checks").value!==(h.checks||""))$("#h-checks").value="";
   state.header = h;
+  /* v21.37: the timer takes the header's check interval as its setting while it is ready */
+  $("#h-checks").dispatchEvent(new Event("change",{bubbles:true}));
 }
 function download(name, text, type){
   const blob = new Blob([text], {type:type||"text/plain;charset=utf-8"});
@@ -3233,7 +3245,7 @@ function loadDemo(){
   sortEntries();
   writeHeader({ client:"SIMULATED \u2014 not a student record", observer:"Training data",
                 location:"Example classroom", start:days[0], end:days[days.length-1],
-                target:"Screaming/yelling, aggression to staff" });
+                target:"Screaming/yelling, aggression to staff", window:"10", checks:"fixed:10" });
   /* set the analysis up the way the dataset is meant to be read, rather than
      leaving the reader to find the right comparison themselves */
   $("#a-function").value = "escape";
@@ -3274,6 +3286,8 @@ window.nbhPrintNodes = function(){
     .map(s => document.querySelector(s)).filter(Boolean);
 };
 
+/* v21.37: the check interval as the header's select names it */
+function checksLabel(v){ const o = v ? $("#h-checks").querySelector('option[value="'+v+'"]') : null; return o ? o.textContent : ""; }
 function fillPrintHeader(){
   const h = readHeader();
   /* each label travels with its value: loose in a three-column grid, six labels
@@ -3284,7 +3298,8 @@ function fillPrintHeader(){
   $("#print-header").innerHTML =
     `<dl>${row("Student / client", h.client)}${row("Observer", h.observer)}${row("Setting", h.location)}
      ${row("Observation period", period)}${row("Target behavior", h.target)}
-     ${row("Printed", new Date().toLocaleDateString())}</dl>
+     ${row("Printed", new Date().toLocaleDateString())}
+     ${row("Consequence window", h.window ? h.window+" s" : "")}${row("Background check interval", checksLabel(h.checks))}</dl>
      <div style="font-size:9.5pt;color:#4b5765;margin-top:4px">${state.entries.length} incidents, ${state.samples.length} background samples on file.</div>`;
 }
 
@@ -3369,14 +3384,14 @@ function init(){
   $("#clear-all").addEventListener("click", async () => {
     if(await nbhUI.confirm("Clear all?\nIncidents, samples, the header fields and the function established by FA are cleared.", {ok:"Clear all", danger:true})){
       state.entries = []; state.samples = [];
-      writeHeader({client:"",observer:"",location:"",start:"",end:"",target:""});
+      writeHeader({client:"",observer:"",location:"",start:"",end:"",target:"",window:"",checks:""});
       /* v21.21 cross-form (X2): the function is saved with the record now, so it is cleared with it */
       $("#a-function").value = ""; state.faFunction = "";
       clearForm(); refreshAll();
       $("#data-status").textContent = "Everything cleared.";
     }
   });
-  ["#h-client","#h-observer","#h-location","#h-start","#h-end","#h-target"].forEach(s =>
+  ["#h-client","#h-observer","#h-location","#h-start","#h-end","#h-target","#h-window","#h-checks"].forEach(s =>
     $(s).addEventListener("change", readHeader));
 
   window.addEventListener("beforeunload", e => {
@@ -3530,10 +3545,12 @@ document.addEventListener("DOMContentLoaded", init);
     if(!SW.on){SW.on=true;SW.t0=Date.now();const d=new Date(SW.t0);setVal('e-date',iso(d));setVal('e-time',hm(d));
       clearInterval(SW.iv);SW.iv=setInterval(swPaint,250);
       if(typeof switchTab==='function'&&byId('panel-record')&&byId('panel-record').hidden)switchTab('record');
-      note('Incident started at '+clock(SW.t0)+'. Code it as it unfolds; press Incident over when it ends.');}
+      note('Incident started at '+clock(SW.t0)+'. Code it as it unfolds'+cwin()+'; press Incident over when it ends.');}
     else swStop(true);
     sched();swPaint();
   }
+  /* v21.37: the consequence window from the header, named as the incident is coded */
+  function cwin(){const w=+((byId('h-window')||{}).value||0);return w>0?' and record the consequence within the '+w+'-second window':'';}
   function swStop(say){if(!SW.on)return;const ms=Date.now()-SW.t0;SW.on=false;clearInterval(SW.iv);
     setVal('e-dur',String(Math.max(1,Math.round(ms/60000))));
     if(say)note('Incident lasted '+fmt(ms)+'; duration set to '+byId('e-dur').value+' min (whole minutes, as the sheet records it).');swPaint();sched();}
@@ -3604,6 +3621,10 @@ document.addEventListener("DOMContentLoaded", init);
     T.mode=byId('obsChecks').value;const e=elapsed();T.nextAt=nextFrom(T.lastAt);if(T.nextAt&&T.nextAt<e+1000)T.nextAt=e+1000;
     if(T.state==='run')sched();note(T.nextAt?'Next check at '+fmt(T.nextAt)+'.':'Background checks are off.');});
   byId('obsPlan').addEventListener('change',paint);
+  /* v21.37: the header's check interval is the timer's setting whenever the timer is ready; a running
+     observation keeps the schedule it started with */
+  byId('h-checks').addEventListener('change',()=>{const v=byId('h-checks').value;if(!v||T.state!=='ready')return;
+    const o=byId('obsChecks');if(o.value===v)return;o.value=v;if(o.value!==v){o.value='fixed:5';}paint();});
   card.addEventListener('click',e=>{const b=e.target.closest('.obs-tog');if(!b)return;const k=b.dataset.obs;PR[k]=PR[k]?0:1;paint();if(T.state==='run')sched();});
   byId('obsTest').addEventListener('click',()=>{if(!PR.on){note('Alerts are off. Turn them on to test.',true);return;}
     ctx();const keepAt=T.schedAt;T.schedAt=-1;alertNow(false);T.schedAt=keepAt;

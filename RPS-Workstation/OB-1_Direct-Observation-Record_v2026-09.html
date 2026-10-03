@@ -652,6 +652,7 @@ button.iv{min-width:24px}
 .obs-page .f.obs2chk label{font-size:12px;color:var(--ink-soft);white-space:normal}
 .f input.obs-agree.calc{background:var(--wash);color:var(--ink-soft)}
 p.method.ioa{margin:-8px 0 12px;color:var(--ink);font-variant-numeric:tabular-nums}
+p.method.ioa2{margin:-8px 0 12px;color:var(--ink);font-variant-numeric:tabular-nums}   /* v21.37 */
 table.grid.obs-count th.o2{color:var(--ink-soft)}
 table.grid.obs-count.two td.lab{white-space:normal}
 /* six columns at phone width share the sheet's width instead of running off it */
@@ -659,6 +660,7 @@ table.grid.obs-count.two td.lab{white-space:normal}
   table.grid.obs-count.two th,table.grid.obs-count.two td{overflow-wrap:anywhere;font-size:11.5px}}
 @media print{
   .obs-page p.method.ioa{font-size:10.5px;line-height:1.35;margin:-7px 0 3px}
+  .obs-page p.method.ioa2{font-size:10.5px;line-height:1.3;margin:-5px 0 0}
   /* four interval rows keep to the sheet's page */
   .obs-page table.ivgrid.four td.ivcell,.obs-page table.ivgrid.four button.iv{height:18px}
   /* the Guide gained a paragraph (section 1); its print spacing is tightened so it stays on two pages */
@@ -1078,8 +1080,10 @@ body.view-obs #obRec{display:block}
   total count IOA is the smaller count divided by the larger, times 100, and interval-by-interval IOA is the
   intervals both observers scored alike (both marked or both unmarked) divided by the intervals sampled, times
   100 (Cooper, Heron, &amp; Heward, 2020). Interval-by-interval agreement is inflated when the behavior is very
-  frequent or very rare; scored-interval or unscored-interval IOA is then the stricter check, which the form
-  does not compute. The Agreement (%) field stays typed for an agreement computed elsewhere.</div>
+  frequent or very rare, so the form also computes scored-interval IOA (intervals both scored over intervals
+  either scored), the stricter check for a rare behavior, and unscored-interval IOA (both unscored over either
+  unscored), the stricter check for a frequent one; each is flagged below 80%. The Agreement (%) field stays
+  typed for an agreement computed elsewhere.</div>
   <div class="warn"><b>Applied guidance</b>Bring the definition from Form TB-1 and read it once
   before starting. Agree with the teacher beforehand where you will sit, that you will not respond to
   the student, and what you will do if the student approaches you. Tell the teacher you are recording
@@ -1388,7 +1392,10 @@ function pct(k, n){ return n ? Math.round(k*1000/n)/10 : null; }
    zero agree); interval-by-interval IOA is the intervals both observers scored alike (both marked or both
    unmarked) divided by the intervals sampled, times 100 (Cooper, Heron, & Heward, 2020). The Agreement (%)
    field then holds the interval figure when the sample is on, else the count figure; with no second record
-   it is typed, for an agreement computed elsewhere. */
+   it is typed, for an agreement computed elsewhere.
+   v21.37: scored-interval IOA (both scored / either scored) and unscored-interval IOA (both unscored / either
+   unscored), the stricter checks for a rare and a frequent behavior, are computed from the same marks and
+   shown on a second line with an 80% flag; the Agreement (%) field keeps the interval-by-interval figure. */
 const AGREE_TIP = "computed from the second observer's record";
 function ivNow(){ return state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0; }
 function obs2Any(o){
@@ -1407,12 +1414,23 @@ function ivIOA(a, b, n){
   for(let j=0;j<n;j++) if(!!(a && a[j]) === !!(b && b[j])) k++;
   return { p: Math.round(k*1000/n)/10, k, n };
 }
+/* v21.37: scored-interval IOA counts only the intervals either observer scored; unscored-interval IOA only
+   those either left unscored. Each is null when no interval qualifies. */
+function suIOA(a, b, n){
+  if(!n) return null;
+  let bs = 0, es = 0, bu = 0, eu = 0;
+  for(let j=0;j<n;j++){ const x = !!(a && a[j]), y = !!(b && b[j]);
+    if(x || y) es++; if(x && y) bs++; if(!x || !y) eu++; if(!x && !y) bu++; }
+  return { scored: es ? { p: Math.round(bs*1000/es)/10, k:bs, n:es } : null,
+           unscored: eu ? { p: Math.round(bu*1000/eu)/10, k:bu, n:eu } : null };
+}
 function ioa(o){
   if(!obs2Any(o)) return null;
   const n = ivNow();
   const r = { count: countIOA(o.count, o.count2), peerCount: countIOA(o.peerCount, o.peerCount2),
               iv: n ? ivIOA(o.iv||[], o.iv2||[], n) : null, peerIv: n ? ivIOA(o.peerIv||[], o.peerIv2||[], n) : null };
   r.agree = r.iv ? r.iv.p : (r.count ? r.count.p : null);
+  r.su = n ? suIOA(o.iv||[], o.iv2||[], n) : null; r.peerSu = n ? suIOA(o.peerIv||[], o.peerIv2||[], n) : null;   /* v21.37 */
   return r;
 }
 /* the agreement a sheet carries: computed from the second record where there is one, else as typed */
@@ -1427,7 +1445,17 @@ function ioaText(o){
   return "Agreement: " + (parts.length ? parts.join("; ") : "nothing to compute yet (a count is a whole number)");
 }
 const IOA_EMPTY = "Agreement: enter the second observer's count, or mark the second observer's intervals.";
-function ioaLine(o){ const t = ioaText(o); return '<p class="method ioa' + (t ? '' : ' noprint') + '">' + esc(t || IOA_EMPTY) + '</p>'; }
+function ioaLine(o){ const t = ioaText(o); return '<p class="method ioa' + (t ? '' : ' noprint') + '">' + esc(t || IOA_EMPTY) + '</p>' + ioaLine2(o); }
+/* v21.37: the stricter checks on their own line, each flagged below 80% */
+function suFig(x){ return x ? x.p + "% (" + x.k + " of " + x.n + ")" + (x.p < 80 ? ", below 80%" : "") : "none to count"; }
+function ioaText2(o){
+  const a = ioa(o); if(!a || !a.su) return "";
+  const parts = ["scored-interval " + suFig(a.su.scored) + " (the check for a rare behavior)",
+                 "unscored-interval " + suFig(a.su.unscored) + " (for a frequent one)"];
+  if(a.peerSu && (a.peerSu.scored || a.peerSu.unscored)) parts.push("peer scored-interval " + suFig(a.peerSu.scored), "peer unscored-interval " + suFig(a.peerSu.unscored));
+  return "Stricter checks: " + parts.join("; ") + ".";
+}
+function ioaLine2(o){ const t = ioaText2(o); return '<p class="method ioa2' + (t ? '' : ' noprint') + '">' + esc(t) + '</p>'; }
 function agreeField(o, i){
   const a = ioa(o), auto = !!(a && a.agree !== null);
   return '<div class="f"><label for="o' + i + 'agree">Agreement (%)</label>'
@@ -1440,6 +1468,8 @@ function refreshIOA(pg, i){
   const o = state.obs[i]; if(!pg || !o) return;
   const line = pg.querySelector("p.ioa");
   if(line){ const t = ioaText(o); line.textContent = t || IOA_EMPTY; line.classList.toggle("noprint", !t); }
+  const line2 = pg.querySelector("p.ioa2");   /* v21.37 */
+  if(line2){ const t = ioaText2(o); line2.textContent = t; line2.classList.toggle("noprint", !t); }
   const ag = pg.querySelector('input[data-field="agree"]'); if(!ag) return;
   const a = ioa(o), auto = !!(a && a.agree !== null);
   if(auto){ ag.readOnly = true; ag.title = AGREE_TIP; ag.classList.add("calc"); ag.value = a.agree; }
@@ -2146,6 +2176,8 @@ $("#csvBtn").addEventListener("click", () => {
     "Intervals sampled","Conditions present","What followed","Conclusion",
     "Peer per hour","Interval method","Interval length (s)","Second observer","Agreement (%)",
     "Limits on this record",
+    /* v21.37 OB-1: the stricter interval checks; blank without a second record */
+    "Scored-interval IOA (%)","Unscored-interval IOA (%)",
     /* v21.36 OB-1: the second observer's record and the agreement computed from it; blank without one */
     "Student count (obs 2)","Peer count (obs 2)","Count IOA (%)","Interval IOA (%)"];
   const out = [head.map(q).join(",")];
@@ -2156,6 +2188,7 @@ $("#csvBtn").addEventListener("click", () => {
       on(ANTE, r.o.ante), on(CONS, r.o.cons), r.o.conclusion,
       r.peerRate, d.ivN ? METHODS[state.cfg.ivMethod] : "", d.ivN ? state.cfg.ivLen : "",
       r.o.secondObs, raw(agreeOf(r.o)), r.o.notes,
+      r.ioa && r.ioa.su && r.ioa.su.scored ? r.ioa.su.scored.p : "", r.ioa && r.ioa.su && r.ioa.su.unscored ? r.ioa.su.unscored.p : "",
       r.o.obs2On ? raw(r.o.count2) : "", r.o.obs2On ? raw(r.o.peerCount2) : "",
       r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].map(q).join(","));
   });

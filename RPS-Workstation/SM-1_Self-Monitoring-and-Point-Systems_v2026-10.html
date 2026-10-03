@@ -1048,13 +1048,13 @@ td input,td select{max-width:100%}
     </table>
     <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
     <table class="rt">
-      <tr><th style="width:28%">Points possible</th><td>Self &amp; Match: periods &times; targets &times; the highest match value. Contract: periods &times; targets. Rubric: periods &times; the top level&rsquo;s points. Cued intervals: the number of intervals. Interlocking: the session is met or not.</td></tr>
+      <tr><th style="width:28%">Points possible</th><td>Self &amp; Match: periods &times; targets &times; the highest match value. Contract: periods &times; targets. Rubric: periods &times; the top level&rsquo;s points. Cued intervals: the number of intervals. Expectations and earns: periods &times; targets (one face each). Interlocking: the session is met or not.</td></tr>
       <tr><th>Points goal</th><td>The goal percent of the points possible, rounded up; this is the number on the sheet (&ldquo;If I earn 39 of 48 points&hellip;&rdquo;).</td></tr>
       <tr><th>Percent of points</th><td>Points earned &divide; points possible &times; 100, per day.</td></tr>
       <tr><th>Agreement</th><td>Ratings on which the student and the teacher agreed &divide; ratings both made &times; 100. Only matched ratings count; a period the teacher did not rate is left out.</td></tr>
       <tr><th>Baseline mean</th><td>The mean percent over the teacher-only days (phase 0). The suggested first goal is that mean plus 10 points, rounded to 5, between 50 and 80: a working convention.</td></tr>
       <tr><th>Share at each level (rubric)</th><td>Periods at the level &divide; periods rated that day &times; 100, as the school&rsquo;s point sheet shows.</td></tr>
-      <tr><th>Decision rules</th><td>Written on the Reinforcement sheet and applied to the last five days: raise the goal when it was met on 4 of 5; lower it or revisit the reinforcer when met on fewer than 2 of 5; move down the matching ladder when agreement over the last five days is below 80%; move up when it is at or above 90% and the goal was met on 4 of 5. All four are working conventions of this form, not published thresholds.</td></tr>
+      <tr><th>Decision rules</th><td>Written on the Reinforcement sheet and applied to the last five days: raise the goal when it was met on 4 of 5; lower it or revisit the reinforcer when met on fewer than 2 of 5; move down the matching ladder when agreement over the last five days is below 80%; move up when it is at or above 90% and the goal was met on 4 of 5. The two agreement rules apply only to a system with a teacher match (Self &amp; Match, cued intervals, the interlocking session, the rubric with the teacher matching). All four are working conventions of this form, not published thresholds.</td></tr>
       <tr><th>Performance sheet</th><td>Points possible are the sessions on the sheet; a session counts as met when the count reaches the goal; the goal percent is the share of sessions met. The graph top is the number entered; the goal line is drawn at the goal count.</td></tr>
       <tr><th>Check-in / check-out</th><td>Points possible are periods &times; expectations &times; 2; the daily percent is points earned over points possible, against the goal entered on the System sheet (80% is the program&rsquo;s usual starting goal and a working convention here).</td></tr>
       <tr><th>Interlocking requirement</th><td>Starting at the initial requirement, the figure changes by the step every N minutes in the chosen direction, between the floor and the ceiling. The sheet lists the requirement at each minute; the session ends when the items are done and both engagement checks at that minute are Yes.</td></tr>
@@ -1545,7 +1545,12 @@ function renderRecord(){
     else if(met<2)rules.push(['no','Goal met on '+met+' of the last 5 days: lower the goal to a level the student has reached, re-check the reward with a brief MSWO, and look at fidelity before anything else.']);
     else rules.push(['mid','Goal met on '+met+' of the last 5 days: hold the goal.']);
   }else rules.push(['mid','Fewer than five days since self-rating began: no decision yet.']);
-  if(agm!=null){
+  /* agreement is judged only where the system has a teacher match: Self & Match, cued intervals, the interlocking
+     session, and the rubric with the teacher matching; a contract, the expectations sheet, check-in/check-out and the
+     performance count have no second rating */
+  const matched=['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);
+  if(!matched){}
+  else if(agm!=null){
     if(agm<80)rules.push(['no','Agreement '+pct(agm)+' over the last five days: move back one phase on the matching ladder and re-run the rating practice.']);
     else if(agm>=90&&met>=4)rules.push(['ok','Agreement '+pct(agm)+' and the goal met on 4 of 5: the next phase of the matching ladder is due.']);
     else rules.push(['mid','Agreement '+pct(agm)+': stay on the current phase.']);

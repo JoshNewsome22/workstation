@@ -2403,8 +2403,12 @@ function renderMon(){
   computeMon();}
 $('#monTbl').addEventListener('input',e=>{const el=e.target;if(!el.dataset.f)return;S.mon[+el.dataset.i][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeMon();});
 $('#monItem').addEventListener('change',computeMon);
+/* v21.37: the Decision Rules' second Shifted test, the item out of the top three on the last two brief MSWOs logged after ranking in it earlier, is read from the brief MSWO log and counts with the use-log flags */
+function monDropped(i){const logs=S.stab.filter(r=>r.date&&(r.r1!==''||r.r2!==''||r.r3!=='')).sort((a,b)=>a.date<b.date?-1:1);const inTop=r=>['r1','r2','r3'].some(f=>String(r[f])===String(i));
+  return logs.length>=3&&!inTop(logs[logs.length-1])&&!inTop(logs[logs.length-2])&&logs.slice(0,-2).some(inTop)?logs.slice(-2).map(r=>fmtD(r.date)):null;}
 function monFlags(i){
-  const rows=S.mon.filter(r=>String(r.item)===String(i)&&r.date).sort((a,b)=>a.date<b.date?-1:1);if(rows.length<3)return {rows,flags:[],status:rows.length?'Too few entries':''};
+  const rows=S.mon.filter(r=>String(r.item)===String(i)&&r.date).sort((a,b)=>a.date<b.date?-1:1);const drop=monDropped(i);
+  if(rows.length<3)return {rows,flags:drop?[`Out of the top three on the last two brief MSWOs (${drop.join(' and ')}) after ranking in it earlier.`]:[],status:drop?'Shifted':rows.length?'Too few entries':''};
   const half=Math.floor(rows.length/2);const m=(arr,f)=>{const v=arr.map(r=>r[f]).filter(x=>x!=='').map(Number);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
   const lat1=m(rows.slice(0,half),'lat'),lat2=m(rows.slice(-half),'lat'),eng1=m(rows.slice(0,half),'eng'),eng2=m(rows.slice(-half),'eng'),rate1=m(rows.slice(0,half),'rate'),rate2=m(rows.slice(-half),'rate');
   const last5=rows.slice(-5),rej=last5.filter(r=>r.rej).length,signs=last5.filter(r=>r.sign&&r.sign!=='None').length;
@@ -2414,8 +2418,9 @@ function monFlags(i){
   if(rate1!=null&&rate2!=null&&rate1>0&&rate2<=0.6*rate1)flags.push(`Response rate under the schedule fell ${Math.round(100*(1-rate2/rate1))}%: ${rate1.toFixed(1)} to ${rate2.toFixed(1)} per min.`);
   if(rej>=2)flags.push(`${rej} rejections in the last ${last5.length} uses.`);
   if(signs>=3)flags.push(`Signs recorded on ${signs} of the last ${last5.length} uses: ${[...new Set(last5.filter(r=>r.sign&&r.sign!=='None').map(r=>r.sign))].join(', ')}.`);
+  if(drop)flags.push(`Out of the top three on the last two brief MSWOs (${drop.join(' and ')}) after ranking in it earlier.`);
   const mo=last5.filter(r=>/meal|lunch|snack|free access|home|tablet at home|late/i.test(r.note)).length;
-  return {rows,flags,status:flags.length>=2?'Shifted':flags.length===1?'Watch':'Stable',mo,lat1,lat2,eng1,eng2};}
+  return {rows,flags,status:flags.length>=2||drop?'Shifted':flags.length===1?'Watch':'Stable',mo,lat1,lat2,eng1,eng2};}
 function computeMon(){
   let i=$('#monItem').value;if(i===''){const counts={};S.mon.forEach(r=>{if(r.item!==''&&r.date)counts[r.item]=(counts[r.item]||0)+1;});i=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];}
   const v=$('#monVerdict');
@@ -2424,7 +2429,7 @@ function computeMon(){
   $('#monFigLat').innerHTML=f.rows.length?lineFig(`${esc(name(+i))}: latency to approach (s)`,[{vals:f.rows.map(r=>r.lat===''?null:+r.lat),col:INK}],labels,{ylabel:'seconds'}):'';
   $('#monFigEng').innerHTML=f.rows.length?lineFig(`${esc(name(+i))}: engagement (s) and rejections`,[{name:'engaged (s)',vals:f.rows.map(r=>r.eng===''?null:+r.eng),col:TEAL},{name:'rejected',vals:f.rows.map(r=>r.rej?0:null),col:FLAG}],labels,{ymax:Math.max(S.access,...f.rows.map(r=>+r.eng||0))*1.1,ylabel:'seconds'}):'';
   const all=S.stim.map((_,k)=>({k,f:monFlags(k)})).filter(x=>x.f.rows.length>=3);
-  v.innerHTML=(f.rows.length?`<div class="warn verdict"><b>${esc(name(+i))}: ${esc(f.status)}</b>${f.flags.length?'<ul class="rules">'+f.flags.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':(f.rows.length>=3?'Latency, engagement, rate, rejections, and signs are within the item\'s own baseline (working thresholds: latency doubled, engagement halved, rate down 40%, 2 rejections or 3 sign entries in the last 5 uses).':'Three or more dated entries are needed before flags are computed.')}${f.mo?`<div class="method" style="margin-top:6px">${f.mo} of the last ${Math.min(5,f.rows.length)} notes mention a meal, free access, or late-session timing: rule out a motivating-operation effect before acting on the flags.</div>`:''}</div>`:'')+
+  v.innerHTML=(f.rows.length?`<div class="warn verdict"><b>${esc(name(+i))}: ${esc(f.status)}</b>${f.flags.length?'<ul class="rules">'+f.flags.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':(f.rows.length>=3?'Latency, engagement, rate, rejections, and signs are within the item\'s own baseline, and the item is still in the top three of the brief MSWO log (working thresholds: latency doubled, engagement halved, rate down 40%, 2 rejections or 3 sign entries in the last 5 uses; out of the top three on the last two brief MSWOs).':'Three or more dated entries are needed before the use-log flags are computed; the brief MSWO log is read on its own.')}${f.mo?`<div class="method" style="margin-top:6px">${f.mo} of the last ${Math.min(5,f.rows.length)} notes mention a meal, free access, or late-session timing: rule out a motivating-operation effect before acting on the flags.</div>`:''}</div>`:'')+
     (all.length>1?`<table class="rank" style="margin-top:8px"><thead><tr><th>Item</th><th class="n">Uses logged</th><th class="n">Latency, first → last half</th><th class="n">Engagement, first → last half</th><th>Status</th></tr></thead><tbody>${all.map(x=>`<tr><td>${esc(name(x.k))}</td><td class="n">${x.f.rows.length}</td><td class="n">${x.f.lat1==null?'&mdash;':x.f.lat1.toFixed(1)+' → '+x.f.lat2.toFixed(1)+' s'}</td><td class="n">${x.f.eng1==null?'&mdash;':x.f.eng1.toFixed(0)+' → '+x.f.eng2.toFixed(0)+' s'}</td><td>${x.f.status==='Shifted'?'<span class="tag no">Shifted</span>':x.f.status==='Watch'?'<span class="tag mid">Watch</span>':'<span class="tag ok">Stable</span>'}</td></tr>`).join('')}</tbody></table>`:'');}
 
 /* ================= IOA ================= */
