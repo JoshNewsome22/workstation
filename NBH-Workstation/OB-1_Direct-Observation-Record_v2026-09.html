@@ -645,6 +645,13 @@ button.iv{min-width:24px}
   table.grid.narr .nw{min-height:0;resize:none}
   .ivwrap{overflow:visible}
 }
+/* v21.36 OB-1: the second observer's record, and the agreement computed from it */
+.obs-page .f.obs2chk{grid-column:1/-1;margin-top:2px}
+.obs-page .f.obs2chk label{font-size:12px;color:var(--ink-soft);white-space:normal}
+.f input.obs-agree.calc{background:var(--wash);color:var(--ink-soft)}
+p.method.ioa{margin:-8px 0 12px;color:var(--ink);font-variant-numeric:tabular-nums}
+table.grid.obs-count tr.obs2row td.lab{font-weight:500;color:var(--ink-soft)}
+@media print{.obs-page p.method.ioa{font-size:10.5px;line-height:1.35;margin:-4px 0 6px}}
 
 </style>
 <style id="ob1-rec-css">
@@ -1054,6 +1061,17 @@ body.view-obs #obRec{display:block}
   which is not the same as accurate. Agreement of 80% has long been used as the minimum acceptable
   level, and low agreement can reflect an unclear definition or recording system, observers not yet
   trained to it, or observer drift (Cooper, Heron, &amp; Heward, 2020).</div>
+  <div class="warn"><b>How the form computes agreement</b>When a second observer&rsquo;s record is entered on a
+  sheet, the form computes total count IOA as the smaller count divided by the larger count, times 100, and,
+  when the interval sample is on, interval-by-interval IOA as the number of intervals both observers scored
+  alike (both marked or both unmarked) divided by the number of intervals, times 100 (Cooper, Heron, &amp;
+  Heward, 2020). Interval-by-interval agreement is inflated when the behavior is very frequent or very rare,
+  because the observers then agree on most intervals whatever they saw; in those cases scored-interval IOA
+  (agreement on the intervals at least one observer marked) or unscored-interval IOA (agreement on the
+  intervals at least one observer left unmarked) is the stricter check, and the form does not compute it. The
+  Agreement (%) field remains for an agreement computed elsewhere: it is typed when no second record is
+  entered, and holds the computed figure (interval-by-interval when the sample is on, total count otherwise)
+  when one is.</div>
   <div class="warn"><b>Applied guidance</b>Bring the definition from Form TB-1 and read it once
   before starting. Agree with the teacher beforehand where you will sit, that you will not respond to
   the student, and what you will do if the student approaches you. Tell the teacher you are recording
@@ -1234,7 +1252,9 @@ function blank(){
            adults:"", students:"", announced:"", secondObs:"", agree:"",
            narrative:[{t:"",w:""},{t:"",w:""},{t:"",w:""}],
            ante:{}, cons:{}, conclusion:"",
-           count:"", peerCount:"", iv:[], peerIv:[], ivUsed:false, notes:"" };
+           count:"", peerCount:"", iv:[], peerIv:[], ivUsed:false, notes:"",
+           /* v21.36 OB-1: a second observer's record, shown when obs2On */
+           obs2On:false, count2:"", peerCount2:"", iv2:[], peerIv2:[] };
 }
 
 /* ---------------------------------------------------- v21.32 OB-1: times, lines, the note box, the Log */
@@ -1354,6 +1374,70 @@ function ivCount(arr, n){
 }
 function pct(k, n){ return n ? Math.round(k*1000/n)/10 : null; }
 
+/* ---------------------------------------------------- v21.36 OB-1: interobserver agreement */
+/* A second observer's record (counts, and the interval marks when the sample is on) is kept beside the first
+   observer's on the sheet. Total count IOA is the smaller count divided by the larger, times 100 (two counts of
+   zero agree); interval-by-interval IOA is the intervals both observers scored alike (both marked or both
+   unmarked) divided by the intervals sampled, times 100 (Cooper, Heron, & Heward, 2020). The Agreement (%)
+   field then holds the interval figure when the sample is on, else the count figure; with no second record
+   it is typed, for an agreement computed elsewhere. */
+const AGREE_TIP = "computed from the second observer's record";
+function ivNow(){ return state.cfg.ivLen ? Math.max(0, +state.cfg.ivN||0) : 0; }
+function obs2Any(o){
+  return !!(o && o.obs2On && (String(o.count2==null?"":o.count2).trim() !== "" || String(o.peerCount2==null?"":o.peerCount2).trim() !== ""
+    || (o.iv2||[]).some(Boolean) || (o.peerIv2||[]).some(Boolean)));
+}
+function countIOA(a, b){
+  const x = cnt(a), y = cnt(b);
+  if(x === null || y === null || Number.isNaN(x) || Number.isNaN(y)) return null;
+  const hi = Math.max(x, y);
+  return { p: hi ? Math.round(Math.min(x, y)/hi*1000)/10 : 100, a:x, b:y };
+}
+function ivIOA(a, b, n){
+  if(!n) return null;
+  let k = 0;
+  for(let j=0;j<n;j++) if(!!(a && a[j]) === !!(b && b[j])) k++;
+  return { p: Math.round(k*1000/n)/10, k, n };
+}
+function ioa(o){
+  if(!obs2Any(o)) return null;
+  const n = ivNow();
+  const r = { count: countIOA(o.count, o.count2), peerCount: countIOA(o.peerCount, o.peerCount2),
+              iv: n ? ivIOA(o.iv||[], o.iv2||[], n) : null, peerIv: n ? ivIOA(o.peerIv||[], o.peerIv2||[], n) : null };
+  r.agree = r.iv ? r.iv.p : (r.count ? r.count.p : null);
+  return r;
+}
+/* the agreement a sheet carries: computed from the second record where there is one, else as typed */
+function agreeOf(o){ const a = ioa(o); return a && a.agree !== null ? String(a.agree) : String(o.agree==null?"":o.agree); }
+function ioaText(o){
+  const a = ioa(o); if(!a) return "";
+  const parts = [];
+  if(a.count) parts.push("count " + a.count.p + "% (" + a.count.a + " and " + a.count.b + ")");
+  if(a.iv) parts.push("intervals " + a.iv.p + "% (" + a.iv.k + " of " + a.iv.n + ")");
+  if(a.peerCount) parts.push("peer count " + a.peerCount.p + "% (" + a.peerCount.a + " and " + a.peerCount.b + ")");
+  if(a.peerIv) parts.push("peer intervals " + a.peerIv.p + "% (" + a.peerIv.k + " of " + a.peerIv.n + ")");
+  return "Agreement: " + (parts.length ? parts.join("; ") : "nothing to compute yet (a count is a whole number)");
+}
+const IOA_EMPTY = "Agreement: enter the second observer's count, or mark the second observer's intervals.";
+function ioaLine(o){ const t = ioaText(o); return '<p class="method ioa' + (t ? '' : ' noprint') + '">' + esc(t || IOA_EMPTY) + '</p>'; }
+function agreeField(o, i){
+  const a = ioa(o), auto = !!(a && a.agree !== null);
+  return '<div class="f"><label for="o' + i + 'agree">Agreement (%)</label>'
+       + '<input id="o' + i + 'agree" type="number" data-obs="' + i + '" data-field="agree" class="obs-agree' + (auto ? ' calc' : '') + '"'
+       + (auto ? ' readonly title="' + esc(AGREE_TIP) + '"' : '')
+       + ' value="' + esc(auto ? a.agree : (o.agree||"")) + '"></div>';
+}
+/* the agreement line and the Agreement (%) field follow the second record without redrawing the sheet */
+function refreshIOA(pg, i){
+  const o = state.obs[i]; if(!pg || !o) return;
+  const line = pg.querySelector("p.ioa");
+  if(line){ const t = ioaText(o); line.textContent = t || IOA_EMPTY; line.classList.toggle("noprint", !t); }
+  const ag = pg.querySelector('input[data-field="agree"]'); if(!ag) return;
+  const a = ioa(o), auto = !!(a && a.agree !== null);
+  if(auto){ ag.readOnly = true; ag.title = AGREE_TIP; ag.classList.add("calc"); ag.value = a.agree; }
+  else if(ag.readOnly){ ag.readOnly = false; ag.title = ""; ag.classList.remove("calc"); ag.value = o.agree == null ? "" : o.agree; }
+}
+
 /* ---------------------------------------------------- one observation sheet */
 function obsHTML(o, i, n){
   const mins = minutesOf(o);
@@ -1382,7 +1466,10 @@ function obsHTML(o, i, n){
     + f(i,"students","Students present","number")
     + sel(i,"announced","Announced", ["Announced","Unannounced"])
     + f(i,"secondObs","Second observer")
-    + f(i,"agree","Agreement (%)","number")
+    + agreeField(o, i)
+    /* v21.36 OB-1: ticked, the sheet shows the second observer's counts and interval rows */
+    + '<div class="f obs2chk noprint"><label class="chk"><input type="checkbox" data-obs="' + i + '" data-field="obs2On"'
+      + (o.obs2On ? ' checked' : '') + '> A second observer scored this observation</label></div>'
     + '</div>';
 
   /* --- counts and the peer --- */
@@ -1395,9 +1482,17 @@ function obsHTML(o, i, n){
      + '<td class="c"><input class="num" data-obs="' + i + '" data-field="peerCount" inputmode="numeric" value="'
        + esc(o.peerCount) + '" aria-label="Occurrences, peer"></td>'
      + '<td class="howc">' + esc(howCount(mins)) + '</td></tr>';
+  if(o.obs2On){
+    h += '<tr class="obs2row"><td class="lab">Occurrences counted, observer 2</td>'
+       + '<td class="c"><input class="num" data-obs="' + i + '" data-field="count2" inputmode="numeric" value="'
+         + esc(o.count2) + '" aria-label="Occurrences, student, observer 2"></td>'
+       + '<td class="c"><input class="num" data-obs="' + i + '" data-field="peerCount2" inputmode="numeric" value="'
+         + esc(o.peerCount2) + '" aria-label="Occurrences, peer, observer 2"></td>'
+       + '<td>Second observer&rsquo;s whole count, same definition and minutes</td></tr>';
+  }
   if(ivN){
     const k  = ivCount(o.iv, ivN), pk = ivCount(o.peerIv, ivN);
-    h += '<tr><td class="lab">' + esc(METHODS[state.cfg.ivMethod]) + '</td>'
+    h += '<tr class="ivpct"><td class="lab">' + esc(METHODS[state.cfg.ivMethod]) + '</td>'
        + '<td class="c"><b>' + (pct(k,ivN)===null?"":pct(k,ivN)+"%") + '</b><br><span class="small">'
        + k + ' of ' + ivN + '</span></td>'
        + '<td class="c"><b>' + (pct(pk,ivN)===null?"":pct(pk,ivN)+"%") + '</b><br><span class="small">'
@@ -1405,16 +1500,20 @@ function obsHTML(o, i, n){
        + '<td>' + ivN + ' × ' + state.cfg.ivLen + ' s intervals, scored below</td></tr>';
   }
   h += '</tbody></table>';
+  if(o.obs2On) h += ioaLine(o);
 
   /* --- the interval strip --- */
   if(ivN){
     h += '<h3 class="sub">Concurrent Interval Sample</h3>'
       + '<p class="method ivrule">' + esc(METHODS[state.cfg.ivMethod] + ": " + RULES[state.cfg.ivMethod] + ".")
       + ' The top row is the student and the row below the comparison peer, scored in the same intervals'
-      + ' on the same definition.<span class="noprint"> Click an interval to mark it.</span></p>'
+      + ' on the same definition.' + (o.obs2On ? ' The two rows under them are the second observer&rsquo;s, scored at the same intervals.' : '')
+      + '<span class="noprint"> Click an interval to mark it.</span></p>'
       + '<div class="ivwrap"><table class="ivgrid"><tbody>'
       + ivRow(o.iv, i, "iv", "Student", ivN)
       + ivRow(o.peerIv, i, "peerIv", "Peer", ivN)
+      + (o.obs2On ? ivRow(o.iv2 || (o.iv2 = []), i, "iv2", "Student (observer 2)", ivN)
+                  + ivRow(o.peerIv2 || (o.peerIv2 = []), i, "peerIv2", "Peer (observer 2)", ivN) : '')
       + '</tbody></table></div>';
   }
 
@@ -1607,6 +1706,7 @@ function summary(){
       typed: tm !== null && !Number.isNaN(tm), badM: Number.isNaN(tm),
       rate: (c !== null && mins) ? r1(c/mins*60) : null,
       peerRate: (pc !== null && mins) ? r1(pc/mins*60) : null,
+      ioa: ioa(o),   /* v21.36 OB-1 */
       any: (c !== null && c > 0) || (k !== null && k > 0) };
   });
   const totalMin = r1(rows.reduce((a,r) => a + (r.mins||0), 0));   /* v21.23: typed minutes can be decimals */
@@ -1633,11 +1733,13 @@ function summary(){
   const ivPTot= rows.reduce((a,r) => a + (r.pk||0), 0);
   const ivAll = ivN * rows.length;
   /* agreement with a second observer, where one was recorded: a percentage from 0 to 100 */
-  const agree = rows.map(r => ({ i:r.i, t:String(r.o.agree==null?"":r.o.agree).trim() }))
+  /* v21.36 OB-1: computed from the second observer's record where one is held, else as typed */
+  const agree = rows.map(r => ({ i:r.i, t:agreeOf(r.o).trim() }))
     .filter(a => a.t !== "")
     .map(a => ({ i:a.i, t:a.t, v:+a.t, ok:/^\d+(\.\d+)?$/.test(a.t) && +a.t <= 100 }));
+  const computed = rows.filter(r => r.ioa && r.ioa.agree !== null).length;
   return { rows, totalMin, withAny, ante, cons, totC, totPC, counted:counted.length, pCounted:pCounted.length,
-           paired:paired.length, rateAll, peerRateAll, ivTot, ivPTot, ivAll, ivN, agree };
+           paired:paired.length, rateAll, peerRateAll, ivTot, ivPTot, ivAll, ivN, agree, computed };
 }
 /* the agreements recorded, as "90%" or "75% to 90%" */
 function agreeRange(list){
@@ -1765,6 +1867,9 @@ function renderSummary(){
     const okA = d.agree.filter(a => a.ok);
     if(okA.length) parts.push("Agreement with a second observer was recorded for " + okA.length + " of "
       + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (" + agreeRange(okA) + ").");
+    /* v21.36 OB-1 */
+    if(d.computed) parts.push("Agreement was computed from a second observer\u2019s record in " + d.computed + " of "
+      + state.obs.length + " observation" + (state.obs.length===1?"":"s") + " (interval-by-interval for the interval sample, total count otherwise).");
     okA.filter(a => a.v < 80).forEach(a => parts.push("Observation " + (a.i+1) + ": agreement " + a.v
       + "%, below the 80% long used as the minimum (Guide, section 1). Check the definition and the observers’ training before relying on this observation."));
     d.agree.filter(a => !a.ok).forEach(a => parts.push("Observation " + (a.i+1) + ": the agreement “" + a.t + "” is not a percentage from 0 to 100."));
@@ -1829,6 +1934,7 @@ document.addEventListener("input", e => {
   const oi = t.dataset && t.dataset.obs;
   if(oi === undefined) return;
   const o = state.obs[+oi]; if(!o) return;
+  if(t.type === "checkbox") return;   /* v21.36 OB-1: obs2On is handled on change */
   if(t.dataset.row !== undefined){
     o.narrative[+t.dataset.row][t.dataset.field] = t.value;
     return;
@@ -1849,6 +1955,13 @@ document.addEventListener("change", e => {
     o[t.dataset.group] = o[t.dataset.group] || {};
     o[t.dataset.group][t.dataset.key] = t.checked;
     renderSummary();
+    return;
+  }
+  /* v21.36 OB-1: the second observer's record is shown or hidden; what it holds is kept either way */
+  if(t.dataset && t.dataset.field === "obs2On" && t.dataset.obs !== undefined){
+    const o = state.obs[+t.dataset.obs]; if(!o) return;
+    o.obs2On = !!t.checked;
+    render();
     return;
   }
   /* v21.23: a Minutes box left empty goes back to the minutes from the times */
@@ -1879,6 +1992,7 @@ function refreshLight(i){
       box.classList.toggle("calc", !typed);
       if(!typed && document.activeElement !== box) box.value = mins===null ? "" : mins;
     }
+    refreshIOA(pg, i);   /* v21.36 OB-1 */
   }
   refreshHeads(); renderSummary(); planNote();
 }
@@ -1887,14 +2001,14 @@ document.addEventListener("click", async e => {
   const iv = e.target.closest("button.iv");
   if(iv){
     const o = state.obs[+iv.dataset.obs]; if(!o) return;
-    const arr = o[iv.dataset.field], j = +iv.dataset.iv;
+    const arr = o[iv.dataset.field] || (o[iv.dataset.field] = []), j = +iv.dataset.iv;
     arr[j] = !arr[j];
     iv.classList.toggle("on", !!arr[j]);
     iv.setAttribute("aria-pressed", String(!!arr[j]));
     renderSummary();
     /* the two rows of totals above the strip move with it */
     const pg = iv.closest(".obs-page");
-    if(pg) refreshCounts(pg, +iv.dataset.obs);
+    if(pg){ refreshCounts(pg, +iv.dataset.obs); refreshIOA(pg, +iv.dataset.obs); }
     return;
   }
   const add = e.target.closest("button.addRow");
@@ -1917,11 +2031,11 @@ function refreshCounts(pg, i){
   const o = state.obs[i];
   const ivN = state.cfg.ivLen ? Math.max(0,+state.cfg.ivN||0) : 0;
   if(!ivN) return;
-  const tb = pg.querySelector("table.obs-count tbody");
-  if(!tb || tb.rows.length < 2) return;
+  const row = pg.querySelector("table.obs-count tbody tr.ivpct");   /* v21.36 OB-1: found by class, not position */
+  if(!row) return;
   const k = ivCount(o.iv, ivN), pk = ivCount(o.peerIv, ivN);
-  tb.rows[1].cells[1].innerHTML = "<b>" + pct(k,ivN) + "%</b><br><span class='small'>" + k + " of " + ivN + "</span>";
-  tb.rows[1].cells[2].innerHTML = "<b>" + pct(pk,ivN) + "%</b><br><span class='small'>" + pk + " of " + ivN + "</span>";
+  row.cells[1].innerHTML = "<b>" + pct(k,ivN) + "%</b><br><span class='small'>" + k + " of " + ivN + "</span>";
+  row.cells[2].innerHTML = "<b>" + pct(pk,ivN) + "%</b><br><span class='small'>" + pk + " of " + ivN + "</span>";
 }
 
 $("#addObs").addEventListener("click", () => {
@@ -2017,7 +2131,9 @@ $("#csvBtn").addEventListener("click", () => {
     "Announced","Count","Per hour","Peer count","Intervals scored","Peer intervals",
     "Intervals sampled","Conditions present","What followed","Conclusion",
     "Peer per hour","Interval method","Interval length (s)","Second observer","Agreement (%)",
-    "Limits on this record"];
+    "Limits on this record",
+    /* v21.36 OB-1: the second observer's record and the agreement computed from it; blank without one */
+    "Student count (obs 2)","Peer count (obs 2)","Count IOA (%)","Interval IOA (%)"];
   const out = [head.map(q).join(",")];
   d.rows.forEach(r => {
     const on = (list, held) => list.filter(([k]) => held && held[k]).map(([,l]) => l).join("; ");
@@ -2025,7 +2141,9 @@ $("#csvBtn").addEventListener("click", () => {
       r.o.announced, raw(r.o.count), r.rate, raw(r.o.peerCount), r.k, r.pk, d.ivN,
       on(ANTE, r.o.ante), on(CONS, r.o.cons), r.o.conclusion,
       r.peerRate, d.ivN ? METHODS[state.cfg.ivMethod] : "", d.ivN ? state.cfg.ivLen : "",
-      r.o.secondObs, raw(r.o.agree), r.o.notes].map(q).join(","));
+      r.o.secondObs, raw(agreeOf(r.o)), r.o.notes,
+      r.o.obs2On ? raw(r.o.count2) : "", r.o.obs2On ? raw(r.o.peerCount2) : "",
+      r.ioa && r.ioa.count ? r.ioa.count.p : "", r.ioa && r.ioa.iv ? r.ioa.iv.p : ""].map(q).join(","));
   });
   const blob = new Blob([out.join("\n")], {type:"text/csv"});
   const a = document.createElement("a");
@@ -2091,7 +2209,7 @@ async function loadSim(){
       ante:{},
       cons:{},
       conclusion:"No occurrence across forty minutes of continuous adult attention and short, supported turns.",
-      notes:"" }),
+      notes:"The paraprofessional, scoring alongside, recorded two contacts that were not audible and left no mark; under the definition they do not count. Her record is kept as the second observer's." }),
     mk(2, 1, { date:iso(2), start:"13:05", end:"13:33", setting:"Room 12", activity:"Writing — independent",
       arrange:"Independent work", adults:"1", students:"8", announced:"Unannounced", count:"6", peerCount:"1",
       narrative:[
@@ -2105,6 +2223,11 @@ async function loadSim(){
       conclusion:"Same pattern as the first observation, and unannounced. Removal from the room ended the episode, which is a consequence that would maintain escape-maintained behavior.",
       notes:"Only one adult in the room for this block. The observation ended at 1:33, when the student left the room." })
   ];
+  /* v21.36 OB-1: the second observation carries a second observer's record. The counts disagree outright
+     (0 and 2) while interval-by-interval agreement is 90% (18 of 20): the inflation the Guide warns of when
+     the behavior is rare, since both observers leave most intervals unmarked. */
+  Object.assign(state.obs[1], { secondObs:"Paraprofessional (simulated)", obs2On:true, count2:"2", peerCount2:"0",
+    iv2: Array.from({length:20}, (_, j) => j === 6 || j === 13), peerIv2: Array.from({length:20}, () => false) });
   $("#ivLen").value = state.cfg.ivLen;
   $("#ivMethod").value = state.cfg.ivMethod;
   $("#ivN").value = state.cfg.ivN;
