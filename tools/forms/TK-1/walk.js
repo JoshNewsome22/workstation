@@ -8,7 +8,7 @@
    with the First-Then layout and the 8.82 in page for the walkthrough only; the book itself (S) is never changed. */
 (function(){
 'use strict';
-const SW=1280,SH=720,PX=96/72,PAUSE=.6,CPT=138,TPT=104;
+const SW=1280,SH=720,PX=96/72,PAUSE=.45,CPT=138,TPT=104;
 const LIST=['intro','ch_show','ch_pick','tg_show','tg_pick','bd_place','tk_page','rule','start','tok_first','tok_none','tok_more','tok_last','exchange','reset','tips','outro'];
 const OPT={tk_page:1,tok_none:1};
 const CHOF={intro:'book',ch_show:'choices',ch_pick:'choices',tg_show:'targets',tg_pick:'targets',bd_place:'board',tk_page:'board',rule:'session',start:'session',tok_first:'session',tok_none:'session',tok_more:'session',tok_last:'session',tok_last_term:'session',exchange:'exchange',reset:'exchange',tips:'tips',outro:'tips'};
@@ -16,28 +16,31 @@ const CHAPS=[['book','The book'],['choices','Choices'],['targets','Targets'],['b
 /* the narration as written in walk-script.json, used only when walk-audio.js is not in the build (its texts always win) */
 const FB={
   intro:'This is your token board book. Four laminated pages are bound on the left, with a tab for each: Choices, Targets, Board, and Tokens.',
-  ch_show:'Page one is the Choices page. Show it to your learner before the task begins. Every picture should be something your learner values.',
-  ch_pick:'Your learner looks over the pictures and picks one to work for. Prompt gently if needed.',
-  tg_show:'Page two is the Targets page. Here, you choose what to teach: a new skill, or a replacement behavior from the behavior plan.',
+  ch_show:'Page one is the Choices page. Show it before the task begins. Every picture should be something your learner values right now, not something they can get any time, or have just had plenty of.',
+  ch_pick:'Your learner looks over the pictures and picks one to work for. If needed, help with the pointing, but let your learner make the choice.',
+  tg_show:'Page two is the Targets page, where you choose what to teach: a new skill, or a better way to get what a problem behavior was getting.',
   tg_pick:'Choose one target at a time. Agree with the other adults on exactly what counts, so everyone gives tokens for the same thing.',
-  bd_place:'Page three is the Board. Place the target under First, and the chosen item under Then. Now your learner can see the plan: first the work, then the item.',
-  tk_page:'Page four is the Tokens page, where the tokens wait. The empty slots on the Board show your learner how many are left.',
-  rule:'Before you start, decide how much behavior earns one token. In this example, your learner earns a token for every two minutes of working.',
-  start:'Now start the session. Point to the board: first work, then the item. The ring shows each interval, sped up for this video.',
-  tok_first:'The interval is over, and your learner kept working. Give a token right away, with brief, specific praise, like "Great working!" Your learner places it in the first slot.',
-  tok_none:'If your learner was not working during an interval, no token is given. Stay calm and simply start the next interval.',
-  tok_more:'Each interval of working earns another token, given right away with a few words of praise. The board fills up, one slot at a time.',
-  tok_last_term:'This last token looks different: it is the terminal token. It shows your learner that the board is finished and the item comes next.',
-  tok_last:'The last token fills the board. Your learner has earned the item they chose.',
-  exchange:'The board is full, so make the exchange right away, especially while the board is new. Give the Then item for the time you planned.',
-  reset:'When the time is up, put the tokens back on the Tokens page and the cards back on their pages. Then your learner chooses again, for the next round.',
-  tips:'A few tips. Make tokens valuable first: give one and exchange it right away, several times. Start with a small requirement and raise it slowly; if the behavior falls apart, go back a step. Keep the item available only through the board.',
-  outro:'That’s the whole cycle: choose, set the target, earn the tokens, and exchange. The back of each page tells you more.'
+  bd_place:'Page three is the Board. Place the target under First, and the chosen item under Then. Your learner can now see the plan: first the target, then the item.',
+  tk_page:'Page four is the Tokens page, where the tokens wait. The empty slots on the board show your learner how many are left to earn. Make new tokens valuable first; the tips at the end show how.',
+  rule:'Before you start, decide how much of the target behavior earns a token: how many times, or how long. Keep it small, so your learner can succeed. This example uses one token for every two minutes.',
+  start:'Now start the session. Point to the board and name both pictures: first the target, then the item. The ring counts down each two-minute interval, sped up for this video.',
+  tok_first:'The interval is over, and your learner kept up the target behavior the whole time. Give a token right away, with brief praise that names what they did. Your learner places it in the first slot.',
+  tok_none:'If the behavior stops during an interval, give no token, but leave the earned tokens on the board. Calmly remind your learner what to do, and start the next interval.',
+  tok_more:'Each interval with the target behavior earns another token, given right away with a few words of praise. The board fills up, one slot at a time.',
+  tok_last_term:'One more interval earns the last token. It looks different: this is the terminal token, earned just like the others. With practice, it tells your learner that the board is finished and the item comes next.',
+  tok_last:'One more interval with the target behavior, and the last token goes in. Now the board is full, and your learner has earned the item they chose.',
+  exchange:'The board is full, so make the exchange right away, especially while the board is new: your learner gets the Then item, for a time or amount set before the session.',
+  reset:'When the time with the item is up, put the tokens back on the Tokens page, and the pictures back on their pages. After that, your learner chooses again for the next round.',
+  tips:'Three tips. Make the tokens valuable first: give one and trade it for the item right away, again and again, until your learner reaches for the token. Start with a small requirement and few tokens, and raise them slowly; if the behavior falls apart, go back a step. Keep the item available only through the board.',
+  outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
 /* the simulator's pictures, shown when a page's six cards are empty */
 const SAMPLE={ch:[['ipad','Tablet'],['puzzle','Puzzle'],['ball','Ball'],['bubbles','Bubbles'],['lego','Building blocks'],['drawing','Drawing']],
   tg:[['sitting','Sitting'],['raisehand','Raise hand'],['writing','Writing'],['waiting','Waiting'],['alldone','All done'],['reading','Reading']]};
-const PRAISE=['Nice working!','Way to keep working!','Good working!','You kept working!','Super working!','Great job working!','Keep it up!','Nice job!'];
+/* brief praise that names the behavior: the target's own name when it reads as one (Sitting: "Great sitting!"), else general praise */
+function praiseFor(label){const l=String(label||'').trim().toLowerCase();const ger=/^[a-z]+ing\b/.test(l)&&l.length<=20;
+  return{ger,name:l,first:ger?'Great '+l+'!':'Great job!',last:ger?'You did it! Great '+l+'!':'You did it! Great job!',
+    more:ger?['Nice '+l+'!','Way to keep '+l+'!','Good '+l+'!','You kept '+l+'!','Super '+l+'!','Great job '+l+'!','Keep it up!','Nice job!']:['Nice work!','Way to go!','Good job!','Keep it up!','Super job!','Great work!','Nice job!','You are doing it!']};}
 
 /* ---------------- small helpers ---------------- */
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -126,7 +129,8 @@ function compose(D){
     return{pg:{ch:pageGrid('ch'),tg:pageGrid('tg'),bd:pageBoard(),tk:pageTokens()},
       ch:S.ch.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),tg:S.tg.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),
       tok:Array.from({length:n},(_,i)=>tokCard(tpt,i===n-1)),chipTok:tokCard(.6,false),n,term:termOn(),pick:pk,
-      itemPic:pic(S.ch[pk.ch],''),itemLbl:String(lbl(S.ch[pk.ch])||'').trim()};});
+      itemPic:pic(S.ch[pk.ch],''),itemLbl:String(lbl(S.ch[pk.ch])||'').trim(),tgLbl:String(lbl(S.tg[pk.tg])||'').trim()};});
+  const PR=praiseFor(F.tgLbl);
   const notes=[];
   if(S.meta.layout==='rules')notes.push('This book’s Board uses the Rules row; the walkthrough shows the First-Then Board, which is used the same way.');
   if(emptySix(S.ch)&&emptySix(S.tg))notes.push('The Choices and Targets are still empty, so the walkthrough shows sample pictures.');
@@ -180,7 +184,7 @@ function compose(D){
   const sBd=Math.min(.8,520/PG.bd.h),sTk=.52;
   const BDS={x:26,y:30,s:sBd},TKS={x:SW-26-pw*sTk,y:Math.min(300,604-PG.tk.h*sTk),s:sTk};
   const RC={x:TKS.x+pw*sTk/2,y:Math.max(150,TKS.y-112)};
-  const HO={x:(BDS.x+pw*sBd+TKS.x)/2,y:Math.min(500,BDS.y+PG.bd.h*sBd+10)};
+  const HO={x:(BDS.x+pw*sBd+TKS.x)/2,y:Math.max(220,TKS.y-24)};   /* where the teacher holds a token out: in the gap between the Board and the Tokens page */
   const at=(L,c)=>({x:L.x+L.s*c.x,y:L.y+L.s*c.y});
   const s0=sBk*.93;
   Object.keys(PG).forEach(k=>{const b=BOOK(k,s0,(SW-pw*s0)/2,by+ph*(sBk-s0)/2);PG[k].tr=new Track({x:b.x,y:b.y,s:b.s,ry:0,o:1});PG[k].el.style.zIndex=String(10-DEPTH[k]);});
@@ -194,12 +198,13 @@ function compose(D){
   const ringBox={x:RC.x-74,y:RC.y-74,w:148,h:148};
   const ringEl=mkFx('wk-ring','<svg viewBox="0 0 200 200" aria-hidden="true"><circle class="bg" cx="100" cy="100" r="84"/><circle class="fg" cx="100" cy="100" r="84" transform="rotate(-90 100 100)"/></svg><div class="wk-rt">2:00</div><div class="wk-rl">sped up for this video</div>',ringBox,{s:.7});
   const ring={fx:ringEl,fg:ringEl.el.querySelector('.fg'),t:ringEl.el.querySelector('.wk-rt'),ints:[],C:2*Math.PI*84};
-  const chip=mkFx('wk-chip','<span class="wk-ct">'+F.chipTok+'</span><span><b>1 token</b> for every<br><b>2 minutes</b> of working</span>',{x:RC.x-185,y:12,w:370},{s:.8});
-  const noTok=mkFx('wk-note2','No token this interval:<br>the ring starts again',{x:RC.x-84-236,y:RC.y-44,w:236},{s:.9});
-  const bubbles=[];const bubble=(i,text,t0,dur)=>{const c=at(BDS,ctr(M.slot[i]));const b=mkFx('wk-bub',esc(text),{x:clamp(c.x-150,10,SW-310),y:c.y-M.slot[i].h*sBd/2-112,w:300},{s:.6,dy:12});
+  const chip=mkFx('wk-chip','<span class="wk-ct">'+F.chipTok+'</span><span><b>1 token</b> for every<br><b>2 minutes</b> of '+(PR.ger?esc(PR.name):'the target')+'</span>',{x:RC.x-185,y:12,w:370},{s:.8});
+  const noTok=mkFx('wk-note2','<b>No token</b> this interval.<br>Earned tokens stay.',{x:RC.x-84-262,y:RC.y-44,w:262},{s:.9});
+  /* the praise bubble: over the token the teacher holds out (between the Board and the Tokens page), not over the pictures */
+  const bubbles=[];const bubble=(i,text,t0,dur)=>{const b=mkFx('wk-bub',esc(text),{x:clamp(HO.x-150,10,SW-310),y:HO.y-TW*sBd/2-128,w:300},{s:.6,dy:12});
     b.tr.move(t0,t0+.3,{o:1,s:1,dy:0},0,easeOut);b.tr.move(t0+dur-.3,t0+dur,{o:0,dy:-8});bubbles.push(b);return b;};
-  const tipsCard=mkFx('wk-tips','<h3>Three tips</h3>'+'<div class="wk-tip" data-i="0"><b>1</b><p><strong>Make the tokens valuable first.</strong> Give a token and exchange it right away, several times, before you ask for any work.</p></div>'
-    +'<div class="wk-tip" data-i="1"><b>2</b><p><strong>Start small.</strong> Ask for a little behavior per token, then raise it slowly; if the behavior falls apart, go back a step.</p></div>'
+  const tipsCard=mkFx('wk-tips','<h3>Three tips</h3>'+'<div class="wk-tip" data-i="0"><b>1</b><p><strong>Make the tokens valuable first.</strong> Give a token and trade it for the item right away, again and again, until your learner reaches for the token.</p></div>'
+    +'<div class="wk-tip" data-i="1"><b>2</b><p><strong>Start small.</strong> Ask for a little behavior and use few tokens, then raise them slowly; if the behavior falls apart, go back a step.</p></div>'
     +'<div class="wk-tip" data-i="2"><b>3</b><p><strong>Only through the board.</strong> Keep the Then item put away at other times.</p></div>',{x:520,y:44,w:720},{dy:16});
   const tipRows=[...tipsCard.el.querySelectorAll('.wk-tip')].map(e=>{const fx={el:e,tr:new Track({o:0,s:1,dy:14})};fxs.push(fx);return fx;});
   const cyc=mkFx('wk-cyc','',{x:90,y:478,w:1100});
@@ -212,10 +217,11 @@ function compose(D){
   const offFrom=(p,sx,sy)=>{const dx=sx-p.x,dy=sy-p.y,len=Math.hypot(dx,dy)||1,k=(SH+330-p.y)/Math.max(.2,dy/len);return{x:p.x+dx/len*k,y:p.y+dy/len*k};};
   const enter=(h,t0,t1,p,pose,sh)=>{const o=offFrom(p,sh[0],sh[1]);h.tr.set(t0,{x:o.x,y:o.y,sx:sh[0],sy:sh[1],s:1});h.pose.set(t0,pose);h.tr.move(t0,t1,{x:p.x,y:p.y},.04);};
   const leave=(h,t0,t1)=>{const s=h.tr.at(t0);const o=offFrom(s,s.sx,s.sy);h.tr.move(t0,t1,{x:o.x,y:o.y},0);};
-  const take=(c,h,t)=>{const cp=c.tr.at(t),hp=h.tr.at(t);c.fol.push({t0:t,t1:1e9,h,dx:cp.x-hp.x,dy:cp.y-hp.y});c.where.set(t,'fly');};
-  const release=(c,t)=>{const f=c.fol[c.fol.length-1];if(!f||f.t1<1e9)return;f.t1=t;const hp=f.h.tr.at(t);c.tr.set(t,{x:hp.x+f.dx,y:hp.y+f.dy});};
-  const carryTo=(c,h,t0,t1,dst,arc)=>{const f=c.fol[c.fol.length-1];handTo(h,t0,t1,{x:dst.x-f.dx,y:dst.y-f.dy},arc==null?.18:arc);};
-  const cardPos=(c,t)=>{for(const f of c.fol)if(t>=f.t0&&t<f.t1){const hp=f.h.tr.at(t);return{x:hp.x+f.dx,y:hp.y+f.dy};}return c.tr.at(t);};
+  /* a held card keeps the same point under the fingers: the offset from the hand scales with the card */
+  const take=(c,h,t)=>{const cp=cardPos(c,t),hp=h.tr.at(t);c.fol.push({t0:t,t1:1e9,h,dx:cp.x-hp.x,dy:cp.y-hp.y,s0:c.tr.at(t).s||1});c.where.set(t,'fly');};
+  const release=(c,t)=>{const f=c.fol[c.fol.length-1];if(!f||f.t1<1e9)return;const p=folPos(c,f,t);f.t1=t;c.tr.set(t,{x:p.x,y:p.y});};
+  const carryTo=(c,h,t0,t1,dst,arc)=>{const f=c.fol[c.fol.length-1],k=(c.tr.at(t1).s||1)/f.s0;handTo(h,t0,t1,{x:dst.x-f.dx*k,y:dst.y-f.dy*k},arc==null?.18:arc);};
+  const cardPos=(c,t)=>cardPosOf(c,t);
   const pageTurn=(k,t0,t1,back)=>{const p=PG[k];if(back){p.tr.set(t0,{o:1});p.tr.move(t0,t1,{ry:0},0,easeOut);}else{p.tr.move(t0,t1,{ry:-90},0,u=>u*u*(3-2*u));p.tr.set(t1,{o:0});}};
   const stackTo=(t0,t1,fn)=>{['tk','bd','tg','ch'].forEach((k,i)=>PG[k].tr.move(t0+(3-i)*.03,t1,fn(k)));};
   let session=false,ringPending=null;
@@ -225,14 +231,15 @@ function compose(D){
   /* a token from the Tokens page to the Board: the teacher's hand takes it and holds it out with praise; the learner's hand takes it and puts it in its slot */
   const SHT=[1130,SH+480],SHL=[300,SH+480];
   const deliver=(i,o)=>{const c=TK[i],src=at(TKS,ctr(M.ybx[i])),dst=at(BDS,ctr(M.slot[i]));
-    enter(HT,o.t0,o.grab,grip(c,src,sTk,'teacher'),'pinch',SHT);
+    /* o.tIn / o.lIn: that hand is still in the frame from the token before, and moves on from there; o.stay: both hands stay for the next token */
+    if(o.tIn)handTo(HT,o.t0,o.grab,grip(c,src,sTk,'teacher'),.12);else enter(HT,o.t0,o.grab,grip(c,src,sTk,'teacher'),'pinch',SHT);
     c.tr.set(o.grab,{x:src.x,y:src.y,s:sTk,l:0,o:1});take(c,HT,o.grab);c.tr.move(o.grab,o.grab+.25,{l:1});c.tr.move(o.grab+.25,o.atHO,{s:sBd});
     carryTo(c,HT,o.grab+.05,o.atHO,HO,.16);
     if(o.text)bubble(i,o.text,o.bub==null?o.atHO:o.bub,o.bubDur||2.2);
-    const tk=o.take;const hp=grip(c,cardPos(c,tk),sBd,'learner');enter(HL,tk-(o.lin||.75),tk,hp,'pinch',SHL);
-    release(c,tk);take(c,HL,tk);leave(HT,tk+.08,tk+.8);
+    const tk=o.take;const hp=grip(c,cardPos(c,tk),sBd,'learner');if(o.lIn)handTo(HL,tk-(o.lin||.75),tk,hp,.1);else enter(HL,tk-(o.lin||.75),tk,hp,'pinch',SHL);
+    release(c,tk);take(c,HL,tk);if(!o.stay)leave(HT,tk+.08,tk+.8);
     carryTo(c,HL,tk+.05,o.place,dst);release(c,o.place);c.tr.move(o.place,o.place+.22,{l:0});c.where.set(o.place+.22,'bd');
-    leave(HL,o.place+.3,o.place+1);return o.place+1;};
+    if(o.stay)return o.place+.3;leave(HL,o.place+.3,o.place+1);return o.place+1;};
 
   /* ---- the scenes, one per narration line; each returns the time its animation needs ---- */
   const SC={};
@@ -259,7 +266,7 @@ function compose(D){
   SC.tg_show=K=>{pageTurn('ch',K.t+.15,K.t+1.05);glowAt(BOOK('tg'),M.tab.tg,5,K.t+.9,1.6);
     const ids=TG.map((c,i)=>c?i:-1).filter(i=>i>=0);ids.forEach((i,j)=>{TG[i].pops.tg=(TG[i].pops.tg||[]).concat(K.t+1.2+(K.d-1.2)*(.3+.55*j/Math.max(1,ids.length)));});return Math.max(K.d,2);};
   SC.tg_pick=K=>{const L=BOOK('tg'),c=cT,sh=[380,SH+480];const P0=at(L,ctr(M.tg[F.pick.tg]));
-    const other=[1,3].filter(i=>TG[i]&&i!==F.pick.tg)[0];const tp=Math.max(K.t+2.6,K.at('one target',.12)+1.4);
+    const other=[1,3].filter(i=>TG[i]&&i!==F.pick.tg)[0];const tp=Math.max(K.t+2.2,K.at('one target',.12)+1.0);
     if(other!=null){enter(HT,K.t+.2,K.t+1.1,pointAt(at(L,ctr(M.tg[other])),L.s),'point',sh);handTo(HT,tp-.8,tp-.05,grip(c,P0,L.s,'teacher'),.12);}
     else enter(HT,tp-1,tp-.05,grip(c,P0,L.s,'teacher'),'point',sh);
     HT.pose.set(tp-.2,'pinch');c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HT,tp);c.tr.move(tp,tp+.35,{l:1});
@@ -271,30 +278,40 @@ function compose(D){
     const t2=Math.max(t1+1.6,K.at('chosen item',.42)-.2);
     enter(HL,t2-.9,t2,grip(cC,TR,L.s,'learner'),'pinch',shL);take(cC,HL,t2);cC.tr.move(t2,t2+.3,{l:1});
     const dT=at(L,ctr(M.then));carryTo(cC,HL,t2+.3,t2+1.35,dT);release(cC,t2+1.35);cC.tr.move(t2+1.35,t2+1.6,{l:0});cC.where.set(t2+1.6,'bd');leave(HL,t2+1.7,t2+2.5);
-    const g1=Math.max(t2+1.8,K.at('first the work',.8)),g2=Math.max(g1+.7,K.at('then the item',.9));glowAt(L,M.first,6,g1,1.5);glowAt(L,M.then,6,g2,1.5);
+    const g1=Math.max(t2+1.8,K.at('first the target',.8)),g2=Math.max(g1+.7,K.at('then the item',.9));glowAt(L,M.first,6,g1,1.5);glowAt(L,M.then,6,g2,1.5);
     return Math.max(t2+2.6,g2+1.5)-K.t;};
   SC.tk_page=K=>{toSession(K.t+.15,1.4);const t1=Math.max(K.t+1.7,K.at('where the tokens wait',.4));
     TK.forEach((c,i)=>{c.pops.tk=[t1+i*.18];});const t2=Math.max(t1+.4+n*.18,K.at('empty slots',.62));
     M.slot.forEach((r,i)=>glowAt(BDS,r,4,t2+i*.2,1.3));return Math.max(K.d,t2+n*.2+1.3-K.t);};
-  SC.rule=K=>{let t=K.t;if(!session){toSession(t+.1,1.4);t+=1.4;}chip.tr.move(t+.3,t+.7,{o:1,s:1},0,easeOut);return t+1-K.t;};
+  SC.rule=K=>{let t=K.t;if(!session){toSession(t+.1,1.4);t+=1.4;}const tc=Math.max(t+.3,K.at('this example',.8)-.2);chip.tr.move(tc,tc+.4,{o:1,s:1},0,easeOut);return tc+.7-K.t;};
   SC.start=K=>{const sh=[1110,SH+480];const pF=pointAt(at(BDS,ctr(M.first)),sBd),pT=pointAt(at(BDS,ctr(M.then)),sBd);
-    const tp1=Math.max(K.t+1,K.at('point to the board',.25)+.5),tp2=Math.max(tp1+1,K.at('then the item',.45));
+    const tp1=Math.max(K.t+1,K.at('first the target',.42)),tp2=Math.max(tp1+1,K.at('then the item',.52));
     enter(HT,tp1-.9,tp1,pF,'point',sh);handTo(HT,tp2-.6,tp2,pT,.12);leave(HT,tp2+.6,tp2+1.4);
     glowAt(BDS,M.first,6,tp1-.1,1.3);glowAt(BDS,M.then,6,tp2-.1,1.3);
     const tr0=Math.max(tp2+.3,K.at('the ring',.62));ringEl.tr.move(tr0,tr0+.45,{o:1,s:1},0,easeOut);ringPending=tr0+.6;
     return tr0+1.6-K.t;};
   SC.tok_first=K=>{const tEnd=K.t+.6;ringInt(ringPending==null?K.t-3:ringPending,tEnd,true);ringPending=null;
-    const grab=tEnd+.75,atHO=grab+1;const bub=Math.max(atHO+.1,K.at('great working',.62)-.3);const tk=Math.max(bub+1.1,K.at('places it',.86));
-    const end=deliver(0,{t0:tEnd-.1,grab,atHO,text:'Great working!',bub,bubDur:Math.max(2.4,tk-bub+.6),take:tk,place:tk+1,lin:.9});
+    const grab=Math.max(tEnd+.75,K.at('give a token',.35)),atHO=grab+1;const bub=Math.max(atHO+.1,K.at('brief praise',.55)-.2);const tk=Math.max(bub+1.1,K.at('your learner places',.8)+.3);
+    const end=deliver(0,{t0:grab-.85,grab,atHO,text:PR.first,bub,bubDur:Math.max(2.4,tk-bub+.6),take:tk,place:tk+1,lin:.9});
     return end-K.t+.2;};
-  SC.tok_none=K=>{const t1=K.t+.3+Math.min(3.6,Math.max(2.4,K.d*.45));ringInt(K.t+.3,t1,false);noTok.tr.move(t1,t1+.3,{o:1,s:1},0,easeOut);noTok.tr.move(t1+2.4,t1+2.8,{o:0});return Math.max(K.d,t1+2.9-K.t);};
+  /* the ring runs out without the behavior: no token; the earned token stays (it glows); the teacher points to the target; the next interval starts */
+  SC.tok_none=K=>{const t1=Math.max(K.t+2.4,Math.min(K.t+3.6,K.at('give no token',.4)-.2));ringInt(K.t+.3,t1,false);noTok.tr.move(t1,t1+.3,{o:1,s:1},0,easeOut);
+    const te=Math.max(t1+.6,K.at('earned tokens',.5));for(let i=0;i<Math.min(1,n);i++)glowAt(BDS,M.slot[i],5,te,1.6);
+    const tr=Math.max(te+1.4,K.at('remind your learner',.62));const pF=pointAt(at(BDS,ctr(M.first)),sBd);enter(HT,tr-.8,tr,pF,'point',[1110,SH+480]);glowAt(BDS,M.first,6,tr,1.4);
+    const tn=Math.max(tr+1.2,K.at('start the next interval',.85));leave(HT,tn-.2,tn+.6);noTok.tr.move(Math.max(tr+.2,tn-.5),tn-.1,{o:0});ringPending=tn;
+    return Math.max(K.d,tn+.8-K.t);};
   SC.tok_more=K=>{const idx=[];for(let i=1;i<n-1;i++)idx.push(i);if(!idx.length)return K.d;
-    const cy=clamp((K.d+.4)/idx.length,2.9,4),ri=cy-1.4;let T=K.t+.25,end=K.t;
-    idx.forEach((i,j)=>{ringInt(T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.05,grab:D+.5,atHO:D+1.05,text:PRAISE[j%PRAISE.length],bubDur:1.7,take:D+1.25,place:D+1.85,lin:.7});T+=cy;});
+    const want=(K.d+.4)/idx.length;let T=K.t+.25,end=K.t;
+    if(want>=2.4){const cy=Math.min(4,want),ri=cy-1.4;   /* a few tokens: each one in full, the hands come in and go */
+      idx.forEach((i,j)=>{ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.05,grab:D+.5,atHO:D+1.05,text:PR.more[j%PR.more.length],bubDur:1.7,take:D+1.25,place:D+1.85,lin:.7});T+=cy;});}
+    else{const cy=Math.max(1.75,want),ri=cy-.5;   /* a big board: the intervals follow one another and both hands stay in the frame from token to token */
+      idx.forEach((i,j)=>{const last=j===idx.length-1;ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;
+        end=deliver(i,{t0:D-.05,grab:D+.45,atHO:D+.95,text:PR.more[j%PR.more.length],bubDur:Math.min(1.6,cy-.1),take:D+1.2,place:D+1.75,lin:.6,tIn:j>0,lIn:j>0,stay:!last});T+=cy;});}
+    ringPending=null;
     return end-K.t+.1;};
-  SC.tok_last=K=>{const i=n-1,T=K.t+.2,ri=2.2;ringInt(T,T+ri,true);const D=T+ri;
+  SC.tok_last=K=>{const i=n-1,T=K.t+.2,ri=2.2;ringInt(ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);ringPending=null;const D=T+ri;
     const tk=F.term?Math.max(D+2.6,K.at('board is finished',.6)):D+1.6;
-    const end=deliver(i,{t0:D-.05,grab:D+.55,atHO:D+1.2,text:'You did it! Great working!',bub:F.term?tk-.2:D+1.2,bubDur:2.6,take:tk,place:tk+.9,lin:.8});
+    const end=deliver(i,{t0:D-.05,grab:D+.55,atHO:D+1.2,text:PR.last,bub:D+1.3,bubDur:F.term?Math.max(2.6,tk-D-.7):2.6,take:tk,place:tk+.9,lin:.8});
     if(F.term){const c=TK[i];c.glowT=[D+.6,tk+1.6];glowAt(BDS,M.slot[i],8,tk+.9,2,true);}
     else M.slot.forEach((r,j)=>glowAt(BDS,r,4,tk+1+j*.08,1.4));
     ringEl.tr.move(end+.2,end+.7,{o:0,s:.9});return end-K.t+.8;};
@@ -302,23 +319,24 @@ function compose(D){
     const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:292},big=sBd*1.5;
     c.tr.set(t+.3,{x:P0.x,y:P0.y,s:sBd,l:0,o:1});c.where.set(t+.3,'fly');c.tr.move(t+.3,t+.65,{l:1});c.tr.move(t+.65,t+1.6,{x:CEN.x,y:CEN.y,s:big},.1);
     const is=big*CW/IW;item.tr.set(t+1.45,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(t+1.45,'fly');item.tr.move(t+1.45,t+2.05,{o:1});c.tr.move(t+1.45,t+2.05,{o:0});c.where.set(t+2.1,'none');
-    const tg=Math.max(t+2.8,K.at('right away',.35));const PALM={x:590,y:452};
+    const tg=Math.max(t+2.8,K.at('your learner gets',.62)-1.1);const PALM={x:640,y:372};
     enter(HT,tg-.9,tg,grip(item,CEN,is,'teacher'),'pinch',[1110,SH+480]);take(item,HT,tg);
     const pa=ART.learner.open;enter(HL,tg-.3,tg+.7,PALM,'open',[300,SH+480]);
-    const drop={x:PALM.x+4,y:PALM.y-4};item.tr.move(tg,tg+1.2,{s:.54});carryTo(item,HT,tg+.1,tg+1.2,drop);
+    const drop={x:PALM.x+2,y:PALM.y+12};item.tr.move(tg,tg+1.2,{s:.8});carryTo(item,HT,tg+.1,tg+1.2,drop);
     release(item,tg+1.2);item.tr.move(tg+1.2,tg+1.45,{l:.25});take(item,HL,tg+1.25);leave(HT,tg+1.35,tg+2.1);
     return Math.max(K.d,tg+2.4-K.t);};
   SC.reset=K=>{const r=K.t;leave(HL,r+.2,r+1.1);item.where.set(r+1.15,'none');veil.tr.move(r+.2,r+.8,{o:0});
-    const gap=Math.min(.22,1.6/n);TK.forEach((c,i)=>{const ts=r+1+i*gap,sp=at(BDS,ctr(M.slot[i])),dp=at(TKS,ctr(M.ybx[i]));c.tr.set(ts,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(ts,'fly');
+    const gap=Math.min(.22,1.6/n),r1=Math.max(r+1,K.at('put the tokens back',.3)-.5);TK.forEach((c,i)=>{const ts=r1+i*gap,sp=at(BDS,ctr(M.slot[i])),dp=at(TKS,ctr(M.ybx[i]));c.tr.set(ts,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(ts,'fly');
       c.tr.move(ts,ts+.2,{l:1});c.tr.move(ts+.2,ts+.85,{x:dp.x,y:dp.y,s:sTk},.22);c.tr.move(ts+.85,ts+1,{l:0});c.where.set(ts+1,'tk');});
-    let t=r+1+(n-1)*gap+1.1;toBook(t,1.1);t+=1.15;
+    let t=r1+(n-1)*gap+1.1;toBook(t,1.1);t+=1.15;
     const fB=at(BOOK('bd'),ctr(M.first));cT.tr.set(t,{x:fB.x,y:fB.y,s:sBk,l:0,o:1});cT.where.set(t,'fly');cT.tr.move(t,t+.25,{l:1});cT.tr.move(t+.25,t+.9,{x:TL.x,y:TL.y},.15);
     cC.tr.set(t,{x:TR.x+60,y:SH+170,s:sBk,l:1,o:1});cC.where.set(t,'fly');cC.tr.move(t+.1,t+.9,{x:TR.x,y:TR.y},.1);
-    t+=.95;pageTurn('tg',t,t+.85,true);t+=.9;
-    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg]));cT.tr.move(t,t+.7,{x:pT.x,y:pT.y},.15);cT.tr.move(t+.7,t+.9,{l:0});cT.where.set(t+.9,'tg');t+=.95;
-    pageTurn('ch',t,t+.85,true);t+=.9;
-    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));cC.tr.move(t,t+.7,{x:pC.x,y:pC.y},.15);cC.tr.move(t+.7,t+.9,{l:0});cC.where.set(t+.9,'ch');t+=1;
-    const L=BOOK('ch'),pts=[2,F.pick.ch,4].filter(i=>CH[i]).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
+    pageTurn('tg',t+.5,t+1.35,true);
+    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg]));cT.tr.move(t+1.4,t+2.1,{x:pT.x,y:pT.y},.15);cT.tr.move(t+2.1,t+2.3,{l:0});cT.where.set(t+2.3,'tg');
+    pageTurn('ch',t+2.3,t+3.1,true);
+    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));cC.tr.move(t+3.1,t+3.8,{x:pC.x,y:pC.y},.15);cC.tr.move(t+3.8,t+4,{l:0});cC.where.set(t+4,'ch');t+=3.95;
+    /* the learner looks over the choices again */
+    const L=BOOK('ch'),pts=[2,4].filter(i=>CH[i]&&i!==F.pick.ch).concat([F.pick.ch]).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
     if(pts.length){enter(HL,t,t+.8,pts[0],'point',[820,SH+480]);for(let j=1;j<pts.length;j++)handTo(HL,t+.8+(j-1)*.75+.15,t+.8+j*.75,pts[j]);t+=.8+(pts.length-1)*.75+.3;leave(HL,t,t+.8);t+=.8;}
     return Math.max(K.d,t-K.t);};
   SC.tips=K=>{const t=K.t;stackTo(t,t+1,k=>BOOK(k,.52,40,170));tipsCard.tr.move(t+.5,t+1,{o:1,dy:0},0,easeOut);
@@ -373,7 +391,8 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
   let ct='';if(cue){for(const ch of cue.chunks)if(ch.t<=t+.001)ct=ch.text;}
   txt(B.cap,ct);css(B.cap,'visibility',ct?'visible':'hidden');const D=dom();if(D&&D.cap2)txt(D.cap2,ct);
   B.t=t;}
-function cardPosOf(c,t){for(const f of c.fol)if(t>=f.t0&&t<f.t1){const hp=f.h.tr.at(t);return{x:hp.x+f.dx,y:hp.y+f.dy};}return c.tr.at(t);}
+function folPos(c,f,t){const hp=f.h.tr.at(t),k=(c.tr.at(t).s||1)/(f.s0||1);return{x:hp.x+f.dx*k,y:hp.y+f.dy*k};}
+function cardPosOf(c,t){for(const f of c.fol)if(t>=f.t0&&t<f.t1)return folPos(c,f,t);return c.tr.at(t);}
 
 /* ---------------- the player: clock, narration, controls ---------------- */
 let pos=0,playing=false,want=false,raf=0,soundOn=true,capsOn=true,busy=false;
