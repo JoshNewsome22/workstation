@@ -916,6 +916,7 @@ body.view-walk #walk{display:block}
 
   <h3 class="sb">2b. Yoked Controls: Separating the Contingency from the Delivery</h3>
 <div class="warn ev"><b>Evidence</b>A yoked control asks whether the <i>contingency</i> matters or only the reinforcer arriving. In the master session the consequence follows the target behaviour and every delivery time is recorded; in the yoked session the same reinforcer is delivered at those recorded times, response-independently. If responding is maintained in the master session and falls in the yoked session, the response&ndash;reinforcer dependency is doing the work. Rescorla and Skucy (1969) examined response-independent reinforcer delivery during extinction; Halliday and Boakes (1971) found behavioural contrast in pigeons exposed to extinction but in none for whom a variable-time schedule replaced the variable-interval schedule at the same rate and distribution, so removing the dependency without changing reinforcement rate was not sufficient to produce contrast; Lieving and Lattal (2003, Experiment 3) found resurgence failed to develop when a variable-interval alternative schedule was changed to an otherwise identical variable-time schedule, but occurred in every pigeon once the reinforcer was removed altogether. Killeen (1972) used a yoked-chamber arrangement to compare concurrent and multiple schedules directly.</div>
+<div class="warn"><b>On this form.</b> The session runner carries the procedure. A master session run on it keeps the time of every contingent delivery in its log row (the Notes say how many; the times travel with the file). For the yoked session, <b>Replay deliveries from</b> lists those sessions; picking one sets the length and the consequence period to the master&rsquo;s, switches off any attention schedule, cues each delivery at its recorded time and opens the consequence period, and lets nothing follow the target. The summary and the Notes record how many deliveries landed within 3 s of a target, the record the caveat below asks for; read a yoked difference beside that count.</div>
 <div class="warn"><b>Known limitation.</b> Yoked designs are not a clean control. Church (1964) showed that a yoked group can differ from its master group for reasons unrelated to the contingency: random error, that is, individual differences in how subjects respond to the same events, produces systematic differences between the master and yoked conditions. In addition, the master animal’s behaviour determines <i>when</i> reinforcers arrive, so in the yoked session those deliveries land on whatever the yoked subject happens to be doing, and can adventitiously reinforce something. Treat a yoked difference as consistent with a contingency effect rather than as proof of one, and record which behaviours the response-independent deliveries actually followed.</div>
 <div class="warn"><b>Applied use.</b> The practical question this answers is whether a procedure works because of what it makes contingent or because of what it delivers. It bears directly on noncontingent reinforcement, on whether a reward chart is doing anything beyond providing the item, and on the response-independent option in the relapse literature (Form RM-1).</div>
 <h3 class="sub">3. Undifferentiated Results</h3>
@@ -1072,7 +1073,7 @@ body.view-walk #walk{display:block}
   <p class="wk-go-line noprint"><a href="#wk-att" class="wk-go" data-go="att">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
   <p class="method" style="margin:0 0 8px">Enter sessions in order. Condition names come from the conditions sheet. Change the phase label when the design changes (for example, "FA", "Ext. alone", "Pairwise", "Reversal"); the graph draws a phase line wherever the label changes. Rate is computed from count and minutes. Set the number of rows in the toolbar.</p>
   <div class="ea-run noprint" id="eaRun" role="region" aria-label="Session runner">
-    <div class="ea-hd"><b>Run a Session</b><span class="ea-hint">Times the session, cues the consequence periods, the attention schedule and the prompt steps, counts the target, and writes the next row of the log below.</span></div>
+    <div class="ea-hd"><b>Run a Session</b><span class="ea-hint">Times the session, cues the consequence periods, the attention schedule and the prompt steps, counts the target, and writes the next row of the log below. For a yoked control it replays a master session&rsquo;s deliveries.</span></div>
     <div class="ea-set">
       <label class="ea-wide" for="eaCond">Condition<select id="eaCond"></select></label>
       <label for="eaMode">Session type<select id="eaMode"><option value="session">Timed session</option><option value="latency">Latency: ends at the first target</option><option value="trial">Trial: control, then test segment</option></select></label>
@@ -1084,6 +1085,7 @@ body.view-walk #walk{display:block}
       <label for="eaHold">Hold after a target (s)<input id="eaHold" type="number" min="0" max="60" step="1"></label>
       <label for="eaPrompt">Prompt step every (s)<input id="eaPrompt" type="number" min="0" max="60" step="1"></label>
       <label for="eaCrit">End at this count<input id="eaCrit" type="number" min="0" step="1" placeholder="no limit"></label>
+      <label class="ea-wide" for="eaYoke" id="eaYokeL" hidden title="A yoked control: this session delivers the reinforcer at the times a master session earned it, whatever the student is doing">Replay deliveries from<select id="eaYoke"><option value="">None: the consequence follows the response</option></select></label>
     </div>
     <div class="ea-script" id="eaScript"></div>
     <div class="ea-main">
@@ -1646,11 +1648,11 @@ const TPL={
   {name:'Contingent (master)',type:'test',eo:'The establishing operation for the hypothesised reinforcer is in place, arranged as in the corresponding test condition',
    sd:'Distinct placemat or shirt colour',mat:'As in the test condition',
    beh:'Run exactly as the test condition: the consequence follows the target behaviour',
-   cons:'The reinforcer is delivered contingent on each target response. Record the time of every delivery \u2014 this record is what the yoked session replays.',
+   cons:'The reinforcer is delivered contingent on each target response. The session runner records the time of every delivery \u2014 that record is what the yoked session replays.',
    other:'No consequence for other behaviour',dur:'10 min'},
   {name:'Yoked (response-independent)',type:'test',eo:'Identical establishing operation to the master session',
    sd:'A different placemat or shirt colour, so the two are discriminable',mat:'Identical to the master session',
-   beh:'Deliver the reinforcer at the recorded times from the matching master session, whatever the student is doing. Never contingent on the target.',
+   beh:'Deliver the reinforcer at the recorded times from the matching master session, whatever the student is doing: pick that session under Replay deliveries from in the runner and it cues each one. Never contingent on the target.',
    cons:'No consequence follows the target behaviour. The reinforcer arrives on the replayed schedule only.',
    other:'No consequence for other behaviour',dur:'Same duration as the matched master session'},
   {name:'Play (control)',type:'control',eo:'Reinforcers freely available, no demands',
@@ -1716,7 +1718,7 @@ async function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Ch
 $('#loadTpl').addEventListener('click',()=>loadTpl(false));
 
 /* ---------- sessions ---------- */
-function sessRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="s[${i}].d"></td><td class="c"><select class="cond" name="s[${i}].c" data-sess="1"></select></td><td><input class="txt" name="s[${i}].p" data-sess="1" placeholder="FA"></td><td class="c"><input class="num" name="s[${i}].m" data-sess="1"></td><td class="c"><input class="num" name="s[${i}].v" data-sess="1"></td><td class="c calc" id="sRate${i}"></td><td class="c"><input class="num" name="s[${i}].ioa" data-sess="1"></td><td class="c"><input type="checkbox" name="s[${i}].t" data-sess="1" title="Session terminated per criteria"></td><td><input class="txt" name="s[${i}].n"></td>`;return tr;}
+function sessRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="s[${i}].d"></td><td class="c"><select class="cond" name="s[${i}].c" data-sess="1"></select></td><td><input class="txt" name="s[${i}].p" data-sess="1" placeholder="FA"></td><td class="c"><input class="num" name="s[${i}].m" data-sess="1"></td><td class="c"><input class="num" name="s[${i}].v" data-sess="1"></td><td class="c calc" id="sRate${i}"></td><td class="c"><input class="num" name="s[${i}].ioa" data-sess="1"></td><td class="c"><input type="checkbox" name="s[${i}].t" data-sess="1" title="Session terminated per criteria"></td><td><input class="txt" name="s[${i}].n"><input type="text" class="yk" name="s[${i}].y" hidden aria-hidden="true" tabindex="-1" title="delivery times kept for a yoked session"></td>`;return tr;}
 function renderSess(){const n=+$('#nSess').value,b=$('#sessBody');while(b.children.length>n)b.lastChild.remove();for(let i=b.children.length;i<n;i++)b.appendChild(sessRow(i));refreshCondNames();
  const mz=val('m.measure');$('#thVal').textContent=mz==='latency'?'Latency s':mz==='pct'?'% int.':mz==='count'?'Count':mz==='trial'?'0/1':'Count';renderGraph();}
 function sessData(){const mz=val('m.measure');const rows=[];$$('#sessBody tr').forEach((tr,i)=>{const c=val(`s[${i}].c`);const v=num(`s[${i}].v`);if(c===''||v==null)return;const m=num(`s[${i}].m`)||num('m.sessmin')||10;let y=v;if(mz==='rate')y=m?v/m:v;
@@ -2105,6 +2107,7 @@ cfaInit();restore({counts:{}});
   const V=n=>{const e=q('[name="'+n+'"]');return e?String(e.type==='checkbox'?(e.checked?'1':''):e.value||'').trim():'';};
   const PR={on:1,sound:1,flash:1,vib:1};
   const R={state:'ready',t0:0,acc:0,dur:600000,mode:'session',c:null,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,
+           del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,   /* v21.37 yoked: the deliveries made, and the record replayed */
            term:false,why:'',seg:'',segAt:0,ctl:null,tst:null,ac:null,wake:null,raf:0,tick:0,msg:'',warn:false,msgAt:0,ft:0,mt:0,cueFlash:0};
   const now=()=>performance.now();
   const el=()=>R.acc+(R.state==='run'?now()-R.t0:0);
@@ -2125,7 +2128,7 @@ cfaInit();restore({counts:{}});
   const secsIn=t=>{const m=String(t||'').match(/(\d+(?:\.\d+)?)\s*[-–]?\s*(?:s|sec|secs|seconds?)\b/i);return m?+m[1]:0;};
   const minsIn=t=>{const m=String(t||'').match(/(\d+(?:\.\d+)?)\s*min/i);return m?+m[1]:0;};
   function defaults(c){
-    const test=c.type!=='control',none=/^\s*none\b/i.test(c.cons)||!c.cons;
+    const test=c.type!=='control',none=/^\s*(none|no consequence|nothing)\b/i.test(c.cons)||!c.cons;   /* v21.37: "No consequence follows the target" is none */
     const d={min:minsIn(c.dur)||parseFloat(V('m.sessmin'))||10,cons:0,ncr:0,hold:0,prompt:0};
     if(test&&!none){const f=String(c.beh).match(/for\s*(\d+)\s*s\b/i);d.cons=secsIn(c.cons)||(f?+f[1]:0)||(/attention/i.test(c.cons)?10:30);}
     if(!test&&/every|schedule/i.test(c.beh))d.ncr=secsIn(c.beh)||30;
@@ -2149,6 +2152,7 @@ cfaInit();restore({counts:{}});
     byId('eaFollow').value=/precursor/i.test(V('v.chosen'))&&!/target/i.test(c.cons)?'pre':/precursor/i.test(c.cons)?'any':'tgt';
     byId('eaCons').value=String(d.cons);byId('eaNcr').value=String(d.ncr);byId('eaHold').value=String(d.hold);byId('eaPrompt').value=String(d.prompt);
     if(!byId('eaPhase').value)byId('eaPhase').value=lastPhase();
+    fillYoke();const yr=yokeRecs();if(/yoked/i.test(c.name)&&yr.length&&!byId('eaYoke').value){byId('eaYoke').value=String(yr[yr.length-1].k);applyYoke();}   /* v21.37 */
     script();reset(true);
   }
   function script(){const c=R.c;if(!c){byId('eaScript').innerHTML='';return;}
@@ -2178,9 +2182,9 @@ cfaInit();restore({counts:{}});
   }
 
   /* ---- run ---- */
-  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null});
+  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null});
     byId('eaSum').hidden=true;if(!quiet)R.msg='';lock(false);paint();}
-  function lock(on){['eaCond','eaMode','eaMin','eaFollow'].forEach(id=>byId(id).disabled=on);}
+  function lock(on){['eaCond','eaMode','eaMin','eaFollow','eaYoke'].forEach(id=>byId(id).disabled=on);}
   function start(){
     if(R.state==='run'){R.acc=el();R.state='pause';stop();wakeOff();note('Paused at '+fmt(R.acc)+'. The clock and the cues wait.');return;}
     if(R.state==='done')return;
@@ -2188,6 +2192,7 @@ cfaInit();restore({counts:{}});
     if(R.state==='ready'){
       if(!R.c)pick();R.mode=byId('eaMode').value;R.dur=Math.max(0.5,num('eaMin'))*60000;R.acc=0;R.ev=[];R.pre=[];
       const ncr=num('eaNcr'),pr=num('eaPrompt');R.ncrNext=ncr>0?ncr*1000:0;R.prNext=pr>0?pr*1000:0;
+      R.del=[];R.yokeI=0;R.yokeN=0;R.yokeHit=0;R.yoke=R.mode==='session'?yokeRec(byId('eaYoke').value):null;if(R.yoke)R.ncrNext=0;   /* v21.37 yoked: the replayed record, and no schedule of its own */
       if(R.mode==='trial'){R.seg='ctl';R.segAt=0;}
       R.msg='';
     }
@@ -2205,6 +2210,7 @@ cfaInit();restore({counts:{}});
         if(num('eaPrompt')>0)R.prNext=e+num('eaPrompt')*1000;
         note(R.c&&/task|demand|break/i.test(R.c.cons)?'Consequence period over: re-present the task.':R.c&&/item|tangible|returned|access/i.test(R.c.cons)?'Consequence period over: take the item back.':'Consequence period over: return to the condition.');}
       if(R.ncrNext&&e>=R.ncrNext){cue('ncr');R.ncrN++;R.ncrNext+=Math.max(1,num('eaNcr'))*1000;}
+      if(R.yoke&&R.yokeI<R.yoke.t.length&&e>=R.yoke.t[R.yokeI]*1000){yokeDeliver(e);}   /* v21.37 yoked */
       if(R.prNext&&!inCons(e)&&e>=R.prNext){cue('prompt');R.prN++;R.prNext+=Math.max(1,num('eaPrompt'))*1000;}
       if(R.mode==='trial'){const segDur=R.dur;if(e-R.segAt>=segDur){segEnd(0);}}
       else if(e>=R.dur){finish(false,'');return;}
@@ -2225,7 +2231,8 @@ cfaInit();restore({counts:{}});
     paint();
   }
   /* the consequence period after the response the condition reinforces; in a control condition, attention is held back after it */
-  function reinforce(e){const cons=num('eaCons');if(cons>0&&R.c&&R.c.type!=='control'&&!inCons(e)){R.consUntil=e+cons*1000;R.prNext=0;}
+  function reinforce(e){if(R.yoke)return;   /* v21.37 yoked: nothing follows the response; the record decides */
+    const cons=num('eaCons');if(cons>0&&R.c&&R.c.type!=='control'&&!inCons(e)){R.consUntil=e+cons*1000;R.prNext=0;R.del.push(e);}
     const hold=num('eaHold');if(hold>0&&R.ncrNext&&R.ncrNext-e<hold*1000)R.ncrNext=e+hold*1000;}
   function segEnd(hit){
     const e=el(),lat=e-R.segAt;
@@ -2235,6 +2242,22 @@ cfaInit();restore({counts:{}});
       const cons=num('eaCons');if(hit&&cons>0){R.consUntil=0;}
       finish(false,hit?'target in the test segment':'test segment over with no target');}
   }
+  /* v21.37 yoked control: the record a log row keeps (v1;cons=30;min=10;t=12.4,33.0,...), the picker, and a cued delivery */
+  const YK=/^v1;cons=([\d.]+);min=([\d.]+);t=([\d.,]*)$/;
+  function yokeRecs(){const n=+byId('nSess').value,cs=conds(),out=[];
+    for(let i=0;i<n;i++){const m=YK.exec(V('s['+i+'].y'));if(!m)continue;const c=cs.find(x=>String(x.i)===V('s['+i+'].c'));
+      out.push({k:i,cons:+m[1],min:+m[2],t:m[3]?m[3].split(',').map(Number).filter(x=>!isNaN(x)):[],cond:c?c.name:'',date:V('s['+i+'].d')});}
+    return out;}
+  function yokeRec(v){if(v==='')return null;return yokeRecs().find(r=>String(r.k)===String(v))||null;}
+  function fillYoke(){const sel=byId('eaYoke'),cur=sel.value,recs=yokeRecs();
+    sel.innerHTML='<option value="">None: the consequence follows the response</option>'+recs.map(r=>'<option value="'+r.k+'">Session '+(r.k+1)+(r.date?' ('+escT(r.date)+')':'')+(r.cond?' · '+escT(r.cond):'')+' · '+r.t.length+' deliver'+(r.t.length===1?'y':'ies')+'</option>').join('');
+    if(recs.some(r=>String(r.k)===cur))sel.value=cur;byId('eaYokeL').hidden=!recs.length;}
+  function applyYoke(){const r=yokeRec(byId('eaYoke').value);if(!r)return;
+    byId('eaMin').value=String(r.min);byId('eaCons').value=String(r.cons);byId('eaNcr').value='0';
+    note('Session '+(r.k+1)+' will be replayed: '+r.t.length+' deliver'+(r.t.length===1?'y':'ies')+(r.t.length?' at '+r.t.map(t=>fmt(t*1000)).join(', '):'')+'. No consequence follows the target.');paint();}
+  function yokeDeliver(e){R.yokeI++;R.yokeN++;const last=R.ev.length?R.ev[R.ev.length-1]:-1e9;if(e-last<=3000)R.yokeHit++;
+    const cons=num('eaCons');if(cons>0){R.consUntil=e+cons*1000;R.prNext=0;}
+    cue('cons');note('Delivery '+R.yokeI+' of '+R.yoke.t.length+': deliver the reinforcer now, whatever the student is doing.');}
   function undo(){if(R.state!=='run'&&R.state!=='pause')return;if(R.mode!=='session'){note('Undo is for timed sessions.',true);return;}
     if(R.ev.length){R.ev.pop();note('Last target removed.');}paint();}
   function finish(term,why){
@@ -2263,6 +2286,7 @@ cfaInit();restore({counts:{}});
     else rows=[['Condition',R.c.name],['Length',fmt(R.acc)+' ('+(Math.round(r.min*100)/100)+' min)'],['Target responses',String(r.n)],['Rate',(Math.round(r.rate*100)/100)+' per min'],
       ['Latency to first target',r.lat==null?'no target':Math.round(r.lat*10)/10+' s'],['Intervals with a target',Math.round(r.pct*10)/10+'% of '+r.nIv+' ('+r.ivs+'-s)'],
       r.pre?['Precursors',String(r.pre)]:null,R.consN?['Consequence periods run',String(R.consN)]:null,R.ncrN?['Attention deliveries cued',String(R.ncrN)]:null,
+      R.yoke?['Replayed deliveries',R.yokeN+' of '+R.yoke.t.length+' from session '+(R.yoke.k+1)]:null,R.yoke?['Within 3 s of a target',String(R.yokeHit)]:null,(!R.yoke&&R.del.length)?['Deliveries recorded',R.del.length+' (times kept for a yoked session)']:null,
       ['Written to the log',(m==='latency'?'latency '+value(r)+' s':m==='pct'?value(r)+'% of intervals':'count '+value(r))+(prePrimary()&&m!=='latency'?' (precursors; targets go in the notes)':'')+(R.term?', terminated':'')]].filter(Boolean);
     s.innerHTML='<b>Session summary</b><table>'+rows.map(x=>'<tr><td>'+x[0]+'</td><td>'+escT(x[1])+'</td></tr>').join('')+'</table>';s.hidden=false;}
 
@@ -2282,9 +2306,12 @@ cfaInit();restore({counts:{}});
     if(i<0){note('The log is full (80 rows).',true);return;}
     const notes=[];if(prePrimary()&&measure()!=='latency')notes.push('targets '+r.n);else if(r.pre)notes.push('precursors '+r.pre);if(measure()!=='latency'&&r.lat!=null)notes.push('latency '+Math.round(r.lat)+' s');
     if(R.term)notes.push(R.why);if(R.mode==='latency'&&!R.ev.length)notes.push('no target: latency is the session length');
+    if(R.yoke)notes.push('yoked to session '+(R.yoke.k+1)+': '+R.yokeN+' of '+R.yoke.t.length+' deliveries replayed, '+R.yokeHit+' within 3 s of a target');
+    else if(R.del.length)notes.push(R.del.length+' deliver'+(R.del.length===1?'y':'ies')+', times kept for a yoked session');
     setF('s['+i+'].d',new Date().toLocaleDateString());setF('s['+i+'].c',String(c.i));setF('s['+i+'].p',byId('eaPhase').value.trim()||'FA');
     setF('s['+i+'].m',String(Math.round(r.min*100)/100));setF('s['+i+'].v',String(value(r)));setF('s['+i+'].t',R.term);
     if(notes.length&&!V('s['+i+'].n'))setF('s['+i+'].n',notes.join('; '));
+    if(!R.yoke&&R.del.length)setF('s['+i+'].y','v1;cons='+num('eaCons')+';min='+(Math.round(r.min*100)/100)+';t='+R.del.map(t=>(t/1000).toFixed(1)).join(','));   /* v21.37: the record a yoked session replays */
     note('Saved as session '+(i+1)+'. '+(measure()==='latency'?'':'Rate '+(Math.round(r.rate*100)/100)+' per min.'));next();
   }
   function next(){const s=byId('eaCond'),o=Array.from(s.options),j=o.findIndex(x=>x.value===s.value);if(o.length)s.value=o[(j+1)%o.length].value;R.c=null;
@@ -2314,6 +2341,7 @@ cfaInit();restore({counts:{}});
     const cueBox=byId('eaCue');let html='',hot=false;
     if(run&&inCons(e)){html='<b>Consequence period '+down(R.consUntil-e)+'</b><br>'+(R.c?escT(R.c.cons):'');hot=true;}
     else if(run&&R.mode==='trial')html='<b>'+(R.seg==='ctl'?'Control segment':'Test segment')+'</b><br>'+(R.seg==='ctl'?'Establishing operation absent. A target ends the segment.':'Establishing operation present. A target ends the segment and gets the consequence.');
+    else if(run&&R.yoke)html=R.yokeI<R.yoke.t.length?'<b>Next delivery in '+down(R.yoke.t[R.yokeI]*1000-e)+'</b><br>Replayed from session '+(R.yoke.k+1)+': deliver it then, whatever the student is doing ('+R.yokeI+' of '+R.yoke.t.length+' made). No consequence follows the target.':'<b>All '+R.yoke.t.length+' deliveries made</b><br>No more arrive in this session. No consequence follows the target.';
     else if(run&&R.ncrNext)html='<b>Attention in '+down(R.ncrNext-e)+'</b><br>Noncontingent: deliver it on the schedule, whatever the student is doing'+(num('eaHold')>0?' (held '+num('eaHold')+' s after a target).':'.');
     else if(run&&R.prNext)html='<b>Next prompt step in '+down(R.prNext-e)+'</b><br>Vocal, then model, then physical, each after the step interval.';
     else if(run)html=R.c&&R.c.type!=='control'?'<b>Test condition</b><br>'+escT(R.c.cons||'Deliver the programmed consequence after each target.'):'<b>Running</b><br>No programmed cue in this condition.';
@@ -2328,7 +2356,8 @@ cfaInit();restore({counts:{}});
   }
 
   /* ---- wiring ---- */
-  byId('eaCond').addEventListener('change',()=>{R.c=null;pick();});
+  byId('eaCond').addEventListener('change',()=>{R.c=null;byId('eaYoke').value='';pick();});
+  byId('eaYoke').addEventListener('change',()=>{if(byId('eaYoke').value)applyYoke();else if(R.c){const d=defaults(R.c);byId('eaCons').value=String(d.cons);byId('eaNcr').value=String(d.ncr);paint();}});
   byId('eaMode').addEventListener('change',()=>{if(byId('eaMode').value==='trial'&&R.c)byId('eaMin').value=String(minsIn(R.c.dur)||1);paint();});
   ['eaMin','eaCons','eaNcr','eaHold','eaPrompt','eaCrit'].forEach(id=>byId(id).addEventListener('input',paint));
   byId('eaStart').addEventListener('click',start);
@@ -2351,10 +2380,10 @@ cfaInit();restore({counts:{}});
   });
   const vib=box.querySelector('[data-ea="vib"]');if(vib&&!('vibrate' in navigator&&window.matchMedia&&matchMedia('(pointer:coarse)').matches))vib.hidden=true;
   /* keep the condition list in step with the cards */
-  const refresh=()=>{if(R.state==='ready'||R.state==='done'){fillConds(true);if(!R.c)pick();else{const c=conds().find(x=>x.i===R.c.i);if(c){R.c=c;script();}}}};
+  const refresh=()=>{if(R.state==='ready'||R.state==='done'){fillConds(true);fillYoke();if(!R.c)pick();else{const c=conds().find(x=>x.i===R.c.i);if(c){R.c=c;script();}}}};
   document.addEventListener('change',e=>{if(e.target&&e.target.closest&&e.target.closest('#condWrap,#nCond,[name="v.chosen"],[name="m.measure"]'))setTimeout(refresh,0);});
   document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('[data-view="sessions"],#simBtn,#loadTpl,#clearBtn'))setTimeout(()=>{R.c=null;refresh();},60);});
-  window.eaRunner={state:()=>R.state,count:()=>R.ev.length,elapsed:()=>el(),results:()=>results(),mode:()=>R.mode,cons:()=>R.consUntil,ncr:()=>R.ncrNext};
+  window.eaRunner={state:()=>R.state,count:()=>R.ev.length,elapsed:()=>el(),results:()=>results(),mode:()=>R.mode,cons:()=>R.consUntil,ncr:()=>R.ncrNext,yoke:()=>({on:!!R.yoke,i:R.yokeI,n:R.yokeN,hit:R.yokeHit,del:R.del.slice(),recs:yokeRecs()})};
   fillConds(false);pick();paint();
 })();
 </script>
