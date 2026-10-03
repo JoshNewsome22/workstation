@@ -35,8 +35,8 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#p=[A-Za-z0-9_-]{100,}$/.test(link),link.slice(0,80));
  /* the teacher answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(file.text,{waitUntil:'load'});await sleep(300);
- const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,opts:document.querySelectorAll('li.it .opts label').length,open:document.querySelectorAll('textarea:not(.code)').length,student:document.querySelector('.def').textContent,key:document.querySelector('.key').textContent,first:document.querySelector('li.it .q').textContent}));
- ok('respondent page renders 11 items with 1 to 6, the two open items, the student label and the anchors',r1.items===11&&r1.opts===66&&r1.open===2&&/S\.S\. \(ID 12345\)/.test(r1.student)&&/Tipping the desk/.test(r1.student)&&/strongly disagree/.test(r1.key)&&/^G1\./.test(r1.first),r1);
+ const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,opts:document.querySelectorAll('li.it .opts label').length,open:document.querySelectorAll('textarea:not(.code)').length,student:document.querySelector('.def').textContent,key:document.querySelector('.key').textContent,first:document.querySelector('li.it .q').textContent,na:document.querySelector('li.it .opts label:last-child input').value,openFirst:!!(document.querySelector('textarea').compareDocumentPosition(document.querySelector('ol.items'))&Node.DOCUMENT_POSITION_FOLLOWING)}));
+ ok('respondent page renders 11 items with 1 to 6 and N/A, the two open items first, the student label and the anchors',r1.items===11&&r1.opts===77&&r1.open===2&&r1.na==='NA'&&r1.openFirst&&/S\.S\. \(ID 12345\)/.test(r1.student)&&/Tipping the desk/.test(r1.student)&&/strongly disagree/.test(r1.key)&&/^G1\./.test(r1.first),r1);
  await answer(rp,'Ms. Rivera','on my own',i=>String(6-(i%3)),['Fewer blow-ups during independent work.','No.']);await sleep(300);
  const sent=await rp.evaluate(()=>({prog:document.querySelector('.prog').textContent,code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:!document.querySelector('.done').hidden}));
  ok('11 of 11 answered, then Send gives a code and a mailto to the case BCBA',/11 of 11/.test(sent.prog)&&/^NBH1\./.test(sent.code)&&/^mailto:bcba%40example\.org\?subject=Social%20validity%20pre-round%20answers/.test(sent.mail)&&sent.mail.indexOf(encodeURIComponent(sent.code))>0&&sent.done,{prog:sent.prog,mail:sent.mail.slice(0,90)});
@@ -56,14 +56,14 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  await rp.goto(link2);await sleep(500);
  const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.band').textContent,sub:document.querySelector('.sub').textContent}));
  ok('respond.html renders the caregiver pre page from the link: 11 items',r2.items===11&&/Form SV-1/.test(r2.band)&&/caregiver, pre round/.test(r2.sub),r2);
- await answer(rp,'Mother (D. S.)','interview',i=>i===2?'':String(3+(i%2)),['That the school stops calling me at work.','']);await sleep(300);
+ await answer(rp,'Mother (D. S.)','interview',i=>i===2?'NA':String(3+(i%2)),['That the school stops calling me at work.','']);await sleep(300);
  const code2=await rp.evaluate(()=>document.querySelector('.code').value);
  await page.evaluate(()=>document.querySelector('#rcBtn').click());await sleep(100);await page.evaluate(c=>{rcText.value=c;__rp.read([c]);},code2);await sleep(100);
  const f2=await page.evaluate(()=>document.querySelector('#rcOut').textContent);
- ok('the second respondent goes to respondent 2 (10 of 11 answered: one left blank)',/Respondent 2 \(empty row\)/.test(f2)&&/10 of 11/.test(f2),f2.slice(0,300));
+ ok('the second respondent goes to respondent 2 (11 of 11 answered, one of them N/A)',/Respondent 2 \(empty row\)/.test(f2)&&/11 of 11/.test(f2),f2.slice(0,300));
  await page.evaluate(()=>document.querySelector('#rcGo').click());await sleep(300);
- const p2=await page.evaluate(()=>({n:S.resp.length,r:S.resp[1],g1:S.rat.pre.G1_1,g3:S.rat.pre.G3_1,go:S.open.pre.Go_1,r0:S.resp[0].name}));
- ok('caregiver placed in row 2 with Interview mode; the blank item stays blank; row 1 untouched',p2.n===4&&p2.r.name==='Mother (D. S.)'&&p2.r.role==='Caregiver'&&p2.r.mode==='Interview'&&p2.g1==='3'&&p2.g3===undefined&&/calling me at work/.test(p2.go)&&p2.r0==='Ms. Rivera',p2);
+ const p2=await page.evaluate(()=>({n:S.resp.length,r:S.resp[1],g1:S.rat.pre.G1_1,g3:S.rat.pre.G3_1,go:S.open.pre.Go_1,r0:S.resp[0].name,cell:document.querySelector('#gTbl_pre select[data-k="G3_1"]').value}));
+ ok('caregiver placed in row 2 with Interview mode; N/A placed as the form\'s N/A; row 1 untouched',p2.n===4&&p2.r.name==='Mother (D. S.)'&&p2.r.role==='Caregiver'&&p2.r.mode==='Interview'&&p2.g1==='3'&&p2.g3==='NA'&&/calling me at work/.test(p2.go)&&p2.r0==='Ms. Rivera'&&p2.cell==='NA',p2);
  /* the teacher's post round lands in the teacher's own row */
  await page.evaluate(()=>{document.querySelector('#rpBtn').click();rpRole.value='teacher';rpRound.value='post';rpRole.dispatchEvent(new Event('change'));});
  const link3=await page.evaluate(()=>__rp.link());await page.evaluate(()=>document.querySelector('#rpDlg').close());

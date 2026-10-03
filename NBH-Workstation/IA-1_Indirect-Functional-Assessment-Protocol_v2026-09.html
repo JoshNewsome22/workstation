@@ -1436,7 +1436,7 @@ $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStuden
 ['rpEmail','rpStudent','rpName'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));
 $('#rpInst').addEventListener('change',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
 $('#rpTarget').addEventListener('change',()=>{rpRenderTargets();rpStatus();});
-$('#rpTargets').addEventListener('input',rpStatus);
+$('#rpTargets').addEventListener('input',()=>{rpRemember();rpStatus();});   /* typed terms survive a change of target */
 $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{rpRemember();const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
 $('#rpLink').addEventListener('click',async()=>{rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
