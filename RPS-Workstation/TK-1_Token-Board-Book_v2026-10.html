@@ -440,7 +440,8 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .bx .qr{right:calc(1.9pt*var(--s));bottom:calc(3.3pt*var(--s))}
 .panel>.qr{right:calc(8pt*var(--s));bottom:calc(8pt*var(--s))}
 /* the Board */
-.bd-photo{position:absolute;top:calc(6pt*var(--s));width:calc(68pt*var(--s));height:calc(68pt*var(--s));border-radius:50%;overflow:hidden;background:#eef1f4;z-index:2}
+.bd-photo{position:absolute;top:calc(6pt*var(--s));width:calc(68pt*var(--s));height:calc(68pt*var(--s));border-radius:50%;overflow:hidden;background:#eef1f4;z-index:2;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+/* (the mask makes Safari clip an enlarged photo to the circle) */
 .bd-photo.l{left:calc(8pt*var(--s))}.bd-photo.r{right:calc(8pt*var(--s))}
 .bd-photo img,.bd-photo svg{width:100%;height:100%;object-fit:cover;display:block}
 .ftlab{position:absolute;top:calc(79.12pt*var(--s));width:calc(200pt*var(--s));margin-left:calc(-100pt*var(--s));text-align:center;font:400 41.1pt/1 var(--bk);color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
@@ -728,6 +729,10 @@ td input,td select{max-width:100%}
       <div><label>Setting word in the Board title (Rules row layout; blank gives &ldquo;&rsquo;s Chart&rdquo;)</label><input data-m="setting" name="m.setting" placeholder="Bus"></div>
       <div><label>Board layout</label><select data-m="layout" name="m.layout"><option value="ft">First-Then (two boxes)</option><option value="rules">Rules row (a row of targets and an Earn box)</option></select></div>
       <div><label>Student photo (round, in the top corners of the Board)</label><div class="pick" data-r="photo" data-i="0" id="phPick"></div></div>
+      <div><label>Photo in its circle: left &harr; right <span id="phXv"></span></label><input type="range" min="0" max="100" step="1" data-m="ph_x" name="m.ph_x" value="50"></div>
+      <div><label>Photo in its circle: up &harr; down <span id="phYv"></span></label><input type="range" min="0" max="100" step="1" data-m="ph_y" name="m.ph_y" value="35"></div>
+      <div><label>Photo in its circle: size <span id="phZv"></span></label><input type="range" min="100" max="300" step="5" data-m="ph_z" name="m.ph_z" value="100"></div>
+      <div><label>&nbsp;</label><button class="tool" id="phReset" type="button">Re-centre the photo</button> <span class="bd-photo" id="phLook" style="position:relative;display:inline-block;vertical-align:middle;width:56px;height:56px;margin-left:8px;top:0"></span></div>
       <div><label>When there is no photo</label><select data-m="avatar" name="m.avatar"><option value="av:boy">Boy avatar</option><option value="av:girl">Girl avatar</option><option value="av:child">Neutral child avatar</option><option value="student">Library: Student</option><option value="me">Library: Me</option></select></div>
     </div>
     <div id="setupVerdict"></div>
@@ -841,6 +846,7 @@ td input,td select{max-width:100%}
   <section class="only-preview">
     <h2 class="nbh-band tkPrev">Preview: the Book as It Prints</h2>
     <p class="hint tkPrev" id="prevLine"></p>
+    <p class="tkPrev" id="wholeRow" style="display:none"><button class="tool" id="wholeBtn" type="button">Show the whole book</button> <span class="hint">The Preview shows only part of the book (the print order on Setup).</span></p>
     <div class="out" id="bookOut"><div class="book" id="book"></div></div>
   </section>
 
@@ -3363,7 +3369,9 @@ function stripHtml(){const d=strip();const per=Math.ceil(d.n/d.rows);let h='<div
   return h+'</div>';}
 function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.poss==='bare'&&/s$/i.test(f)?'’':'’s';const st=String(S.meta.setting||'').trim();
   return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(S.meta.layout==='rules'&&st?esc(st)+' ':'')+'Chart';}
-function photoHtml(side){const o=S.photo[0];const inner=has(o)?pic(o,''):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
+/* the student's photo is cropped to the circle at the position and size set on Setup (a portrait's face sits above its middle, so it starts at 35 % down) */
+function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Math.max(0,Math.min(100,num(S.meta.ph_y)??35)),z=Math.max(100,Math.min(300,num(S.meta.ph_z)??100))/100;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')';}
+function photoHtml(side){const o=S.photo[0];const inner=has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
 function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
@@ -3434,6 +3442,9 @@ function renderOut(){
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
   $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%.';
+  const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
+  const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
+  const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
   syncState();
 }
 /* the fits need the pages laid out: the sections that hold a book are shown off screen while measuring when their view is not the current one */
@@ -3452,6 +3463,9 @@ function fitAll(){
   $$('.rule .rl').forEach(el=>{if(!el.clientHeight)return;el.style.fontSize='';el.style.maxHeight='2.1em';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.77;while(el.scrollHeight>el.clientHeight+1&&fs>lo&&g++<20){fs-=1;el.style.fontSize=fs+'px';}if(el.scrollHeight>el.clientHeight+1)el.style.maxHeight='';});
 }
 window.addEventListener('beforeprint',fitAll);
+/* after the sheet of one card has printed, the print order goes back to what it was, so the Preview shows the whole book again */
+function restoreOrder(){if(S.meta.order==='spare'&&S.meta.prevOrder){S.meta.order=S.meta.prevOrder;delete S.meta.prevOrder;renderAll();}}
+window.addEventListener('afterprint',()=>setTimeout(restoreOrder,300));
 
 /* ---------------- events ---------------- */
 let tOut=0;function renderOutSoon(){clearTimeout(tOut);tOut=setTimeout(renderOut,180);}
@@ -3463,13 +3477,15 @@ document.addEventListener('input',e=>{const el=e.target;
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='tkState')return;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();return;}
   if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='sp_card'||k==='layout'||k==='avatar')renderTbls();renderOut();}});
+$('#wholeBtn').addEventListener('click',()=>{S.meta.order='all';delete S.meta.prevOrder;renderAll();});
+$('#phReset').addEventListener('click',()=>{S.meta.ph_x='50';S.meta.ph_y='35';S.meta.ph_z='100';renderAll();});
 $('#capReset').addEventListener('click',()=>{recaps(true);renderAll();});
 $('#colReset').addEventListener('click',()=>{Object.assign(S.meta,DEF);renderAll();});
 $('#bkReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default text of the four backs?\nYour edits to them are replaced.',{ok:'Restore',danger:true})){['tb','cb','te','tt'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
 $('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default how-to text?\nYour edits to the three steps are replaced.',{ok:'Restore',danger:true})){['h1','h2','h3'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
 $('#chClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six choices?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.ch=Array.from({length:6},()=>cello());renderAll();}});
 $('#tgClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six targets?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.tg=Array.from({length:6},()=>cello());renderAll();}});
-function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
+function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;if(S.meta.order!=='spare')S.meta.prevOrder=S.meta.order||'all';S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
 $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgSpare').addEventListener('click',()=>spare('tg',$('#tgSpareSel')));
 
 /* ---------------- meta + render ---------------- */

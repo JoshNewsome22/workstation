@@ -5915,3 +5915,17 @@ A sheet of one card made from an empty card (an empty Choices or
 Targets slot, or "A card made on the spot" with no label and no
 picture) used to print thirty blank boxes. It now prints each card
 with three write-in lines, like the "Other" card (v21.42c).
+
+### The Preview after a sheet of one card, and the student photo (v21.42d)
+
+- "Print a sheet of this card" switched the print order to that one
+  sheet and left it there, so the Preview afterwards showed only the
+  sheet of cards. The order now returns to what it was once the sheet
+  has printed, and whenever the Preview shows only part of the book a
+  "Show the whole book" button sits above it.
+- The student's photo was cropped from its exact centre, which in a
+  portrait leaves the face high and off centre. Setup now has three
+  sliders, left and right, up and down, and size (100 to 300 percent),
+  with a small circle showing the result and "Re-centre the photo".
+  A new photo starts 35 percent down, where a portrait's face usually
+  is. The circle also clips an enlarged photo in Safari.
