@@ -100,7 +100,7 @@
     items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+(it.n||i+1)+'.</b> '+esc(it.text||'')}));
       var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Item '+(it.n||i+1)});var choices;
       if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||'Can\u2019t judge','']);}
-      else choices=[['Y','Yes',''],['N','No',''],['NA','N/A',''] ];
+      else{var L=scale.labels||['Yes','No','N/A'];choices=[['Y',L[0]||'Yes',''],['N',L[1]||'No','']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){ans[i]=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');li.classList.remove('missing');paint();});
         opts.appendChild(lab);});
@@ -138,7 +138,7 @@
       if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML='You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+' to explain the definition; when it is clear, change your answer to Yes and press Send again.';var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
       if(need.length||miss.length){var again=!need.length&&miss.length<items.length&&warnedMiss===miss.join(',');
-        warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+(scale.kind==='yn'||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
+        warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+((scale.kind==='yn'&&!(scale.labels&&(scale.labels[2]===null||scale.labels[2]==='')))||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
         warnedMiss=need.length?'':miss.join(',');if(!again)return;}
       else{warn.hidden=true;warnedMiss='';}
       lastCode=encode(response());codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
