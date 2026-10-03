@@ -166,8 +166,8 @@ function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];
   return '<div class="pg '+side+(side==='back'?' bk':'')+(s!==1?' big':'')+(cls?' '+cls:'')+'" data-kind="'+kind+'" data-side="'+side+'" style="--s:'+s.toFixed(4)+'">'+trim+'<div class="cv" style="left:'+IN(cx)+';top:'+IN(cy)+';height:'+IN(hIn)+'"><div class="tab" style="top:'+pt(i*104.76)+';background:'+esc(col)+'">'+letters+'</div><div class="band" style="background:'+esc(S.meta.c_frame||DEF.c_frame)+'">';}
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(30,num(S.meta.wm)||20))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
-function cardHtml(o,size,opts){opts=opts||{};const other=opts.other;const st=(opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):'width:'+IN(size)+';height:'+IN(size));
-  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+esc(other?'Other':(lbl(o)||''))+'</div><div class="cp">'+(other?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
+function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=(opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):'width:'+IN(size)+';height:'+IN(size));
+  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
 function tokCard(size){return '<div class="card tok" style="width:'+IN(size)+';height:'+IN(size)+'"><div class="cp">'+pic(S.tok[0],'')+'</div></div>';}
 function pageGrid(kind){const bg=S.bg[kind==='ch'?0:1];const pcls=S.meta.panel==='grey'?'grey':'light';
   const title=kind==='ch'?'<span class="ul">What Are You Earning?</span>':'<span class="ul">First:</span> Teaching Targets';
@@ -212,7 +212,9 @@ function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kin
 function sheetTokens(){const d=strip(),sz=tokIn();return '<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="cards-tk" style="--s:'+scl().toFixed(4)+'">'+sheetGrid(5,Math.ceil(d.n/5),sz,sz,.15,11,8.5,Array.from({length:d.n},()=>tokCard(sz)).join(''),'top')+'</div>';}
 function spareCard(){const v=S.meta.sp_card||'ch:0';if(v==='tok')return{tok:true};if(v==='own')return{o:{k:S.sp[0].k,ph:S.sp[0].ph,l:S.meta.sp_label||''}};const m=/^(ch|tg):(\d)$/.exec(v);return{o:m?S[m[1]][+m[2]]:S.ch[0]};}
 function sheetSpare(){const big=S.meta.sp_size!=='small',cols=big?5:6,sz=big?1.5:1.25,gap=.06,rows=Math.floor((10.4+gap)/(sz+gap)),c=spareCard();
-  const one=c.tok?tokCard(sz):cardHtml(c.o,sz,{ul:true,cls:'sp'});
+  /* an empty card (an empty slot, or a card made on the spot with no label and no picture) prints write-in lines, not a blank box */
+  const empty=!c.tok&&(!c.o||(!has(c.o)&&!String(lbl(c.o)||'').trim()));
+  const one=c.tok?tokCard(sz):cardHtml(c.o,sz,{ul:true,cls:'sp',blank:empty});
   return '<div class="pg port front" data-kind="spare" style="--s:1">'+sheetGrid(cols,rows,sz,sz,gap,8.5,11,Array.from({length:cols*rows},()=>one).join(''),'spare')+'</div>';}
 function pageFront(kind){return kind==='ch'||kind==='tg'?pageGrid(kind):kind==='bd'?pageBoard():pageTokens();}
 const PGNAME={ch:'Choices',tg:'Targets',bd:'Board',tk:'Tokens'};
