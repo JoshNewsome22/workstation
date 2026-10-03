@@ -45,7 +45,7 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 
     python3 tools/blocks/patch-ui.py tools/blocks/nbh-ui.html NBH-Workstation/[A-Z]*.html
 
-The glob `[A-Z]*.html` is the 42 forms without `index.html`. Each patcher prints
+The glob `[A-Z]*.html` is the 43 forms without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
 

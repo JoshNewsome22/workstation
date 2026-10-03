@@ -37,6 +37,9 @@ Double-click index.html. Everything runs from this folder.
   - Load simulation on a form fills it with a worked example and says so in
     one line; the form's Guide explains what the example shows. Nothing in a
     simulation is a real student record.
+  - IM-1 records self-injury on a body map: the Self-Injury Trauma Scale
+    (Iwata et al., 1990) scored as published, every administration kept,
+    the indices graphed over time, the nurse's checks logged beside them.
   - Every procedure a form names can be run on it: the yoked control on EA-1
     replays a master session's deliveries from the runner; the high-p trial
     sheet on TD-1, the selection rounds on DT-1, the computed joint method on
@@ -61,7 +64,7 @@ its own Save data button.
 A ticked form you have never opened prints blank; the workstation warns you
 before that happens.
 
-If anything here misbehaves, each of the 42 forms also works on its own:
+If anything here misbehaves, each of the 43 forms also works on its own:
 double-click its file and it saves, opens and prints exactly as it does inside
 the workstation.
 
@@ -87,7 +90,7 @@ in IA-1's toolbar. Each response becomes an informant column and the worksheet
 does the scoring.
 
 One file instead of a folder: NBH-Workstation.html (RPS-Workstation.html for
-the school edition) is the whole workstation in a single file, the 42 forms
+the school edition) is the whole workstation in a single file, the 43 forms
 inside it. Keep it on the district drive and
 double-click it. Its Save case writes the case as one file of its own,
 Student.case.html, which opens the workstation with that case already in it
