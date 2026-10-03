@@ -5418,3 +5418,14 @@ relationship, years and months known, daily contact, situations,
 frequency, severity, most and least likely situations by days and
 times, settings and activities and persons present, before, after and
 current treatments are all present.
+
+The same was done for Smith, Smith, Dracobly and Pace (2012) once the
+article arrived: five respondents, 42 target behaviors, agreement of
+at least 4 of 5 on the primary maintaining consequence for 52% (22
+of 42) on the MAS and 57% (24 of 42) on the QABF, 26% on both;
+functional-analysis correspondence in 6 of 7 QABF cases and 4 of 7
+MAS cases. All match, and the Evidence box now also carries the
+article's caution that the QABF's edge in agreement came with more
+within-rater ties (27 against 20 on the MAS). The 4-of-5 level, as
+the article defines it, is agreement among respondents on one
+instrument, which is how the Convergence sheet applies it.
