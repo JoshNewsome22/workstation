@@ -125,10 +125,10 @@
     sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
-      if(P.confirm)r.confirmed=conf;
+      if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-    var lastCode='';
+    var lastCode='',warnedMiss='';
     function mailto(code){var subj=(P.subject||((P.title||P.inst)+' answers'))+(P.student?' · '+P.student:'');
       var body='Answers from the respondent page, for Form '+(P.form||'')+'. Paste this whole message into "Collect responses" on the form.\n\n'+code+'\n\n'+(ex.name&&ex.name.value?'From: '+ex.name.value+'\n':'')+'Sent '+new Date().toLocaleDateString();
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
@@ -137,9 +137,10 @@
       if(P.confirm&&!conf){need.push('whether you understand the definition');var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
       if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML='You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+' to explain the definition; when it is clear, change your answer to Yes and press Send again.';var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
-      if(need.length||miss.length){warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. Answer each one (N/A counts) and press Send again.':'');
-        if(need.length||miss.length>Math.max(0,items.length-1))return;}
-      else warn.hidden=true;
+      if(need.length||miss.length){var again=!need.length&&miss.length<items.length&&warnedMiss===miss.join(',');
+        warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+(scale.kind==='yn'||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
+        warnedMiss=need.length?'':miss.join(',');if(!again)return;}
+      else{warn.hidden=true;warnedMiss='';}
       lastCode=encode(response());codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
       done.innerHTML='<b>Your email program should open now</b> with the message to '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+'. Press Send there. If nothing opened, copy the code below and paste it into an email to '+esc(P.email||'the BCBA')+', or save it as a file and attach it.';
       ml.href=mailto(lastCode);

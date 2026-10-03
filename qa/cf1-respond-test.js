@@ -58,6 +58,9 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,band:document.querySelector('.band').textContent,sub:document.querySelector('.sub').textContent}));
  ok('respond.html renders the paraprofessional round 1 page from the link',r2.items===21&&/Form CF-1/.test(r2.band)&&/a paraprofessional who will run the plan/.test(r2.sub),r2);
  await answer(rp,['Aide B','','Afternoon writing','3'],i=>i===11?'':String(2+(i%2)));await sleep(300);
+ ok('one item left blank: the first Send stops and names it; the second press sends on purpose',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/Unanswered item: <span class="miss">12<\/span>/.test(document.querySelector('.warn').innerHTML)&&/press Send once more/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden));
+ await rp.evaluate(()=>document.querySelector('button:not(.ghost)').click());await sleep(300);
+ ok('the second press sends with the gap stated',await rp.evaluate(()=>/Sending with 1 left blank/.test(document.querySelector('.warn').textContent)&&!document.querySelector('.code').hidden));
  const code2=await rp.evaluate(()=>document.querySelector('.code').value);
  await page.evaluate(()=>document.querySelector('#rcBtn').click());await sleep(100);await page.evaluate(c=>{rcText.value=c;__rp.read([c]);},code2);await sleep(100);
  const f2=await page.evaluate(()=>document.querySelector('#rcOut').textContent);
