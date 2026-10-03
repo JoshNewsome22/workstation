@@ -21,7 +21,7 @@ label.ck{font-family:var(--sans);font-size:12px;display:inline-flex;align-items:
 label.ck input{width:auto!important;margin:0}
 .instr{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:8px 12px;margin:8px 0 14px;font-family:var(--sans);font-size:12.5px;line-height:1.45}
 .instr p{margin:4px 0}
-textarea.bk{width:100%;min-height:150px;font:13px/1.45 var(--sans);border:1px solid var(--rule-2);border-radius:2px;padding:6px 8px;resize:vertical;background:#fff}
+textarea.bk{width:100%;min-height:150px;font:13px/1.45 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;border:1px solid var(--rule-2);border-radius:2px;padding:6px 8px;resize:vertical;background:#fff}
 #tkState{display:none}
 /* the picker (as Form VS-1) */
 .pick{display:flex;align-items:center;gap:6px}
@@ -46,9 +46,10 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 /* ---- the book, laid out from the assessor's Illustrator files (tools/forms/TK-1: the measurements are in page points
    of the trimmed 8.82 x 5.82 in page, the Choices file; --s scales them to the page size chosen on Setup). One sheet per
    page in print, reduced on screen. The page sits centred on Letter landscape with trim marks unless it fills the sheet. ---- */
-.out{background:#e9edf0;border:1px solid var(--rule-2);padding:14px;margin-top:10px;overflow:auto;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#111}
-.book{zoom:.62}
-.book .pglabel{font:12px/1.3 var(--sans);color:#333;margin:0 0 4px;zoom:1.4}
+.out{background:#e9edf0;border:1px solid var(--rule-2);padding:14px;margin-top:10px;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#111}
+.book{transform-origin:0 0;width:max-content}
+/* (v21.42f) the screen preview is shrunk by a transform set from the script (scaleBooks), not by zoom: a transform scales text and boxes as one picture in every browser */
+.book .pglabel{font:12px/1.3 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;color:#333;margin:0 0 4px}
 .pg{--s:1;--bk:Georgia,"Georgia Pro","Times New Roman",serif;position:relative;box-sizing:border-box;width:11in;height:8.5in;margin:0 auto 18px;background:#fff;overflow:hidden;break-after:page;break-inside:avoid;box-shadow:0 1px 4px rgba(0,0,0,.25);font-family:var(--bk);color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .pg.port{width:8.5in;height:11in}
 .pg *{box-sizing:border-box}
@@ -66,7 +67,7 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .wm{position:absolute;left:0;right:0;top:calc(80pt*var(--s));bottom:0;display:flex;align-items:center;justify-content:center;overflow:hidden;pointer-events:none}
 .wm svg,.wm img{width:100%;height:100%;object-fit:cover;display:block}
 /* titles: Georgia, #1d4a77 with a .25 pt black edge, underlined; sizes and baselines from the files */
-.ttl{position:absolute;left:0;right:0;text-align:center;font:400 51.29pt/1 var(--bk);color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;white-space:nowrap;top:calc(8.95pt*var(--s))}
+.ttl{position:absolute;left:0;right:0;text-align:center;font:400 51.29pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;white-space:nowrap;top:calc(8.95pt*var(--s))}
 /* underlines from the font's own metrics, as Illustrator draws them */
 .ttl .ul{text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
 .ttl.bd{font-size:49.5pt;top:calc(11.69pt*var(--s))}
@@ -93,9 +94,9 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 /* (the mask makes Safari clip an enlarged photo to the circle) */
 .bd-photo.l{left:calc(8pt*var(--s))}.bd-photo.r{right:calc(8pt*var(--s))}
 .bd-photo img,.bd-photo svg{width:100%;height:100%;object-fit:cover;display:block}
-.ftlab{position:absolute;top:calc(79.12pt*var(--s));width:calc(200pt*var(--s));margin-left:calc(-100pt*var(--s));text-align:center;font:400 41.1pt/1 var(--bk);color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
+.ftlab{position:absolute;top:calc(79.12pt*var(--s));width:calc(200pt*var(--s));margin-left:calc(-100pt*var(--s));text-align:center;font:400 41.1pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
 .strip{position:absolute;left:0;right:0;bottom:0}
-.slot{position:absolute;background:#fff;border:calc(2pt*var(--s)) solid #231f20;border-radius:calc(11.7pt*var(--s));text-align:center;font:700 11.9pt/1 var(--bk);color:#231f20}
+.slot{position:absolute;background:#fff;border:calc(2pt*var(--s)) solid #231f20;border-radius:calc(11.7pt*var(--s));text-align:center;font:700 11.9pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#231f20}
 .slot .ca{position:absolute;left:0;right:0;top:calc(3.1pt*var(--s));white-space:nowrap}
 .slot .cb{position:absolute;left:0;right:0;top:calc(95.33pt*var(--s));white-space:nowrap;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
 .slot .dot{position:absolute;left:50%;top:calc(54.99pt*var(--s));width:calc(29pt*var(--s));height:calc(28.4pt*var(--s));transform:translate(-50%,-50%);border:calc(1pt*var(--s)) solid #0e2845;border-radius:50%;background:rgba(239,240,240,.5)}
@@ -105,23 +106,23 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .rulesrow{position:absolute;left:calc(14pt*var(--s));right:calc(8pt*var(--s));bottom:calc(10pt*var(--s));display:flex;align-items:flex-end;justify-content:space-between}
 .rulesrow .rr{display:flex;gap:calc(10pt*var(--s));align-items:flex-end;flex:0 0 auto}
 .rule{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;flex:0 0 auto}
-.rule .rl{font:700 19pt/1.05 var(--nbh-sans);color:#111;text-align:center;margin-bottom:calc(6pt*var(--s));width:100%;min-height:2.1em;max-height:3.2em;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.rule .rl{font:700 19pt/1.05 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;color:#111;text-align:center;margin-bottom:calc(6pt*var(--s));width:100%;min-height:2.1em;max-height:3.2em;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
 .rule .rl span{display:block;width:100%}
 .rule .rp{width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .rule .rp img{width:100%;height:100%;object-fit:cover;display:block}
 .rule .rp svg{width:100%;height:100%;display:block}
 .earn{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;position:relative}
-.earn .lab{font:400 36pt/1 var(--bk);color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto;margin-bottom:calc(8pt*var(--s))}
+.earn .lab{font:400 36pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;-webkit-text-stroke:calc(.25pt*var(--s)) #000;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto;margin-bottom:calc(8pt*var(--s))}
 .earn .bx{position:relative;top:auto;left:auto}
 /* the Tokens page: park boxes 110.53 pt at 50 % #ffde17, corner boxes 71 x 69 pt in #f1f2f2, the foot in Georgia Italic */
 .tkcorner{position:absolute;top:calc(6.49pt*var(--s));width:calc(73.31pt*var(--s));height:calc(71.19pt*var(--s));border:calc(2pt*var(--s)) solid #231f20;border-radius:calc(3.6pt*var(--s));background:#f1f2f2;display:flex;align-items:center;justify-content:center;overflow:hidden;z-index:2}
 .tkcorner.l{left:calc(9.59pt*var(--s))}.tkcorner.r{right:calc(8.03pt*var(--s))}
 .ybx{position:absolute;width:calc(112.53pt*var(--s));height:calc(112.53pt*var(--s));background:rgba(255,222,23,.5);border:calc(2pt*var(--s)) solid #231f20;border-radius:calc(11.5pt*var(--s))}
 .ybx .dot{position:absolute;left:50%;top:50%;width:calc(28.6pt*var(--s));height:calc(28.6pt*var(--s));transform:translate(-50%,-50%);border:calc(1pt*var(--s)) solid #0e2845;border-radius:50%;background:#fff}
-.foot{position:absolute;left:0;right:0;bottom:calc(4.64pt*var(--s));text-align:center;font:italic 400 10.8pt/1 var(--bk);color:#231f20;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
+.foot{position:absolute;left:0;right:0;bottom:calc(4.64pt*var(--s));text-align:center;font:italic 400 10.8pt/1 Georgia,"Georgia Pro","Times New Roman",serif;color:#231f20;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto}
 /* the cards: sized to the boxes; the token card as in tokens.svg (108 pt, a 6.5 pt #ffe100 frame, the star inside) */
 .card{position:relative;background:#fff;border:calc(1.5pt*var(--s)) solid #141414;border-radius:calc(11.7pt*var(--s));display:flex;flex-direction:column;align-items:center;overflow:hidden;font-family:var(--bk)}
-.card .cl{flex:0 0 auto;width:100%;text-align:center;font:700 22pt/1.1 var(--bk);color:#1d4a77;padding:calc(4pt*var(--s)) calc(4pt*var(--s)) 0;white-space:nowrap;overflow:hidden}
+.card .cl{flex:0 0 auto;width:100%;text-align:center;font:700 22pt/1.1 Georgia,"Georgia Pro","Times New Roman",serif;color:#1d4a77;padding:calc(4pt*var(--s)) calc(4pt*var(--s)) 0;white-space:nowrap;overflow:hidden}
 .card.ul .cl{text-decoration:underline;text-decoration-thickness:calc(1.5pt*var(--s));text-underline-offset:calc(2pt*var(--s))}
 .card .cp{flex:1 1 auto;width:100%;min-height:0;display:flex;align-items:center;justify-content:center;padding:calc(4pt*var(--s)) calc(7pt*var(--s)) calc(7pt*var(--s));overflow:hidden}
 .card .cp svg,.card .cp img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block}
@@ -137,23 +138,23 @@ dialog#pickDlg::backdrop{background:rgba(20,40,50,.45)}
 .cardsheet{position:absolute;display:grid;align-content:start;justify-content:start;background-repeat:repeat}
 /* the backs: the band with a 3 pt edge, the light title band 70 % #f1f2f2, the white body, Georgia Bold title letter-spaced */
 .bk .tband{position:absolute;left:calc(-2.27pt*var(--s));top:calc(1.32pt*var(--s));width:calc(601.88pt*var(--s));bottom:calc(-1pt*var(--s));background:rgba(241,242,242,.7);border:calc(3pt*var(--s)) solid #000;border-radius:calc(21.3pt*var(--s))}
-.bk .bttl{position:absolute;left:calc(-2.27pt*var(--s));width:calc(601.88pt*var(--s));top:calc(12.13pt*var(--s));text-align:center;text-indent:.06em;font:700 41.1pt/1 var(--bk);letter-spacing:.06em;color:#231f20;-webkit-text-stroke:calc(.25pt*var(--s)) #000}
-.bk .bbody{position:absolute;left:calc(-2.27pt*var(--s));top:calc(61.37pt*var(--s));width:calc(601.87pt*var(--s));bottom:calc(-1pt*var(--s));background:#fff;border:calc(3pt*var(--s)) solid #000;border-radius:calc(23.4pt*var(--s));padding:calc(13pt*var(--s)) calc(28pt*var(--s)) calc(10pt*var(--s));font:400 12.3pt/1.5 var(--bk);color:#231f20;overflow:hidden}
+.bk .bttl{position:absolute;left:calc(-2.27pt*var(--s));width:calc(601.88pt*var(--s));top:calc(12.13pt*var(--s));text-align:center;text-indent:.06em;font:700 41.1pt/1 Georgia,"Georgia Pro","Times New Roman",serif;letter-spacing:.06em;color:#231f20;-webkit-text-stroke:calc(.25pt*var(--s)) #000}
+.bk .bbody{position:absolute;left:calc(-2.27pt*var(--s));top:calc(61.37pt*var(--s));width:calc(601.87pt*var(--s));bottom:calc(-1pt*var(--s));background:#fff;border:calc(3pt*var(--s)) solid #000;border-radius:calc(23.4pt*var(--s));padding:calc(13pt*var(--s)) calc(28pt*var(--s)) calc(10pt*var(--s));font:400 12.3pt/1.5 Georgia,"Georgia Pro","Times New Roman",serif;color:#231f20;overflow:hidden}
 .bk .bbody p{margin:0 0 calc(7pt*var(--s))}
 .bk .bbody p:last-child{margin-bottom:0}
-.bk .bbody h4{text-align:center;font:700 14.3pt/1.2 var(--bk);text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto;margin:calc(2pt*var(--s)) 0 calc(6pt*var(--s))}
-.bk .credit{position:absolute;left:calc(26pt*var(--s));right:calc(26pt*var(--s));bottom:calc(28.87pt*var(--s));text-align:center;font:400 15.2pt/22.35pt var(--bk);color:#231f20}
-.bk.compact .credit{bottom:calc(9pt*var(--s));font:italic 400 10.5pt/13pt var(--bk)}
+.bk .bbody h4{text-align:center;font:700 14.3pt/1.2 Georgia,"Georgia Pro","Times New Roman",serif;text-decoration:underline;text-decoration-thickness:from-font;text-underline-position:from-font;text-underline-offset:auto;margin:calc(2pt*var(--s)) 0 calc(6pt*var(--s))}
+.bk .credit{position:absolute;left:calc(26pt*var(--s));right:calc(26pt*var(--s));bottom:calc(28.87pt*var(--s));text-align:center;font:400 15.2pt/22.35pt Georgia,"Georgia Pro","Times New Roman",serif;color:#231f20}
+.bk.compact .credit{bottom:calc(9pt*var(--s));font:italic 400 10.5pt/13pt Georgia,"Georgia Pro","Times New Roman",serif}
 .bk.compact .credit br{display:none}
 .pg.back[data-kind="bd"] .bbody,.pg.back[data-kind="tk"] .bbody{top:calc(55.68pt*var(--s))}
 .pg.back[data-kind="tg"] .bttl,.pg.back[data-kind="tk"] .bttl{top:calc(12.67pt*var(--s))}
-.bk .cont{font:italic 10pt/1.3 var(--bk);color:#555;margin:0 0 calc(4pt*var(--s))}
+.bk .cont{font:italic 10pt/1.3 Georgia,"Georgia Pro","Times New Roman",serif;color:#555;margin:0 0 calc(4pt*var(--s))}
 /* the how-to insert */
-.howto{padding:.55in .7in .5in;font:13.5pt/1.45 var(--bk);color:#111}
-.howto .h1{text-align:center;font:700 24pt/1.2 var(--nbh-sans);letter-spacing:.01em;margin:0 0 .15in}
+.howto{padding:.55in .7in .5in;font:13.5pt/1.45 Georgia,"Georgia Pro","Times New Roman",serif;color:#111}
+.howto .h1{text-align:center;font:700 24pt/1.2 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;letter-spacing:.01em;margin:0 0 .15in}
 .howto .cols{display:flex;gap:.5in}
 .howto .col{flex:1 1 0;min-width:0}
-.howto .step{font:700 17pt/1.25 var(--nbh-sans);color:#1f3fb0;margin:0 0 .1in;text-transform:uppercase}
+.howto .step{font:700 17pt/1.25 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;color:#1f3fb0;margin:0 0 .1in;text-transform:uppercase}
 .howto p{margin:0 0 .12in}
 .howto .bbody{overflow:hidden}
 /* views */
@@ -164,14 +165,14 @@ body.view-board .only-setup,body.view-board .only-choices,body.view-board .only-
 body.view-backs .only-setup,body.view-backs .only-choices,body.view-backs .only-targets,body.view-backs .only-board,body.view-backs .only-preview,body.view-backs .only-guide{display:none}
 body.view-preview .only-setup,body.view-preview .only-choices,body.view-preview .only-targets,body.view-preview .only-board,body.view-preview .only-backs,body.view-preview .only-guide{display:none}
 body.view-guide .only-setup,body.view-guide .only-choices,body.view-guide .only-targets,body.view-guide .only-board,body.view-guide .only-backs,body.view-guide .only-preview{display:none}
-@media (max-width:640px){.out{overflow-x:auto}.book{zoom:.4}}
+
 @media print{
   /* only the book prints: the masthead, print head, toolbar, Setup, the editing views and the Guide stay off paper */
   .nbh-mast,.nbh-print-head,.nbh-print-foot,.toolbar,.nbh-pagenav,.only-setup,.only-choices,.only-targets,.only-board,.only-backs,.only-guide,.tkPrev{display:none!important}
   .only-preview{display:block!important}
   .sheet{width:auto;margin:0;padding:0;box-shadow:none;background:#fff}
   .out{border:0;padding:0;margin:0;background:#fff;overflow:visible}
-  .book{zoom:1}
+  .book{zoom:1;transform:none!important;margin:0!important}
   .book .pglabel{display:none}
   .pg{margin:0;box-shadow:none;page-break-after:always;break-after:page}
   .pg:last-child{page-break-after:auto;break-after:auto}
@@ -181,22 +182,24 @@ body.view-guide .only-setup,body.view-guide .only-choices,body.view-guide .only-
    so the text came out 1.6 times too big. The 11 in page and Fill the Letter page (scale 1.2472) get the same sizes enlarged. */
 .pg.big .tab{font:700 16.09pt/1 "School Book","LDFNH W+ School Book",Georgia,serif}
 .pg.big .tab i{line-height:14.84pt}
-.pg.big .ttl{font:400 63.97pt/1 var(--bk)}
+.pg.big .ttl{font:400 63.97pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
 .pg.big .ttl.bd{font-size:61.73pt}
 .pg.big .ttl.tk{font-size:70.84pt}
 .pg.big .ttl.rules{font-size:54.88pt}
-.pg.big .ftlab{font:400 51.26pt/1 var(--bk)}
-.pg.big .slot{font:700 14.84pt/1 var(--bk)}
+.pg.big .ftlab{font:400 51.26pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
+.pg.big .slot{font:700 14.84pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
 .pg.big .slot.sm{font-size:11.72pt}
-.pg.big .rule .rl{font:700 23.7pt/1.05 var(--nbh-sans)}
-.pg.big .earn .lab{font:400 44.9pt/1 var(--bk)}
-.pg.big .foot{font:italic 400 13.47pt/1 var(--bk)}
-.pg.big .card .cl{font:700 27.44pt/1.1 var(--bk)}
+.pg.big .rule .rl{font:700 23.7pt/1.05 "Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif}
+.pg.big .earn .lab{font:400 44.9pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
+.pg.big .foot{font:italic 400 13.47pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
+.pg.big .card .cl{font:700 27.44pt/1.1 Georgia,"Georgia Pro","Times New Roman",serif}
 .pg.big .card.sp .cl{font-size:18.71pt}
-.big.bk .bttl{font:700 51.26pt/1 var(--bk)}
-.big.bk .bbody{font:400 15.34pt/1.5 var(--bk)}
-.big.bk .bbody h4{font:700 17.83pt/1.2 var(--bk)}
-.big.bk .credit{font:400 18.96pt/27.87pt var(--bk)}
-.big.bk.compact .credit{font:italic 400 13.1pt/16.21pt var(--bk)}
-.big.bk .cont{font:italic 12.47pt/1.3 var(--bk)}
+.big.bk .bttl{font:700 51.26pt/1 Georgia,"Georgia Pro","Times New Roman",serif}
+.big.bk .bbody{font:400 15.34pt/1.5 Georgia,"Georgia Pro","Times New Roman",serif}
+.big.bk .bbody h4{font:700 17.83pt/1.2 Georgia,"Georgia Pro","Times New Roman",serif}
+.big.bk .credit{font:400 18.96pt/27.87pt Georgia,"Georgia Pro","Times New Roman",serif}
+.big.bk.compact .credit{font:italic 400 13.1pt/16.21pt Georgia,"Georgia Pro","Times New Roman",serif}
+.big.bk .cont{font:italic 12.47pt/1.3 Georgia,"Georgia Pro","Times New Roman",serif}
 .out,.book,.pg{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* (v21.42f) no font shorthand in this form names its typeface through a variable: Safari on the iPad did not apply the preview zoom
+   to the size in a font shorthand that contains var(), so the text came out 1.6 times too big while the boxes were right */
