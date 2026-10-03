@@ -258,7 +258,7 @@ table.grid.inner td{height:24px}
 
 /* ---- Form RA-1 additions ---- */
 body[class^="view-"] .sheet{display:none}
-body.view-guide #guide,body.view-setup #setup,body.view-fast #fast,body.view-qabf #qabf,body.view-mas #mas,body.view-pbq #pbq,body.view-interview #interview,body.view-summary #summary{display:block}
+body.view-guide #guide,body.view-setup #setup,body.view-fast #fast,body.view-qabf #qabf,body.view-mas #mas,body.view-pbq #pbq,body.view-wefa #wefa,body.view-interview #interview,body.view-summary #summary{display:block}
 .chkrow{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;margin:4px 0}
 .chkrow label{display:flex;gap:6px;align-items:center}
 table.grid td.c input.dt{width:74px;text-align:center;border:0;background:transparent;font:inherit;font-size:11px;padding:2px 0}
@@ -407,9 +407,12 @@ table.grid td.c select{border:0;background:transparent;font:inherit;font-size:11
 table.grid td.c select:focus{background:var(--wash);outline:none}
 table.grid td.lab.c{text-align:center;min-width:0;width:34px}
 table.grid tbody td{height:22px}
-#fastTot,#qabfTot,#masTot,#pbqTot{table-layout:fixed}
-#fastTot td.lab,#qabfTot td.lab,#masTot td.lab,#pbqTot td.lab{width:36%;white-space:normal;min-width:0}
-#fastTot td,#qabfTot td,#masTot td,#pbqTot td{vertical-align:middle;overflow:hidden}
+#fastTot,#qabfTot,#masTot,#pbqTot,#wefaTot{table-layout:fixed}
+#fastTot td.lab,#qabfTot td.lab,#masTot td.lab,#pbqTot td.lab,#wefaTot td.lab{width:36%;white-space:normal;min-width:0}
+#fastTot td,#qabfTot td,#masTot td,#pbqTot td,#wefaTot td{vertical-align:middle;overflow:hidden}
+/* v21.41: the WEFA header details, one column per informant */
+#wefaDet td.lab{white-space:normal;font-weight:400;font-size:10.5px;width:32%;min-width:0;color:var(--ink-soft)}
+#wefaDet td input{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--rule-2);background:transparent;font:inherit;font-size:11px;padding:2px 3px}
 table.rank.glance{table-layout:fixed}
 table.rank.glance .tag,#convTbl .tag{white-space:normal;display:inline;line-height:1.4}
 #convTbl{table-layout:fixed}#convTbl td{white-space:normal;min-width:0}
@@ -448,7 +451,7 @@ dialog.rp-prevdlg iframe{display:block;width:100%;height:calc(92vh - 44px);borde
 .twoup{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
 .twoup > *{min-width:0}
 .twoup.figs{margin-top:14px}
-table.grid#fastGrid,table.grid#qabfGrid,table.grid#masGrid,table.grid#pbqGrid{table-layout:fixed;width:100%}
+table.grid#fastGrid,table.grid#qabfGrid,table.grid#masGrid,table.grid#pbqGrid,table.grid#wefaGrid{table-layout:fixed;width:100%}
 table.grid td.catcell{color:var(--ink-soft);font-size:10.5px;line-height:1.3;white-space:normal;padding:2px 5px}
 table.grid td.c select{width:100%;max-width:44px}
 table.grid td.agr{font-size:10.5px;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
@@ -513,7 +516,7 @@ td input,td select{max-width:100%}
     <div class="nbh-titlerow">
       <div class="nbh-titleblock">
         <h1>Indirect Functional Assessment Protocol</h1>
-        <p class="nbh-sub">Plans, scores, and cross-checks informant-report instruments (FAST, QABF, MAS, PBQ) and structured interviews (FAI, FACTS, open-ended) for one target behavior. Each worksheet computes category totals, informant agreement, and differentiation; the convergence sheet combines every informant and instrument into one hypothesis and routes it to descriptive assessment (Forms ABC-1, SP-1) or functional analysis. Item text is not reproduced here: administer each instrument from its published form and enter scores by item number.</p>
+        <p class="nbh-sub">Plans, scores, and cross-checks informant-report instruments (FAST, QABF, MAS, PBQ, WEFA) and structured interviews (FAI, FACTS, open-ended) for one target behavior. Each worksheet computes category totals, informant agreement, and differentiation; the convergence sheet combines every informant and instrument into one hypothesis and routes it to descriptive assessment (Forms ABC-1, SP-1) or functional analysis. Item text is not reproduced here: administer each instrument from its published form and enter scores by item number.</p>
       </div>
     </div>
     <p class="nbh-savenote">Nothing is stored in the browser. Entries live in this open window only until you save a file; close the tab and they are gone. Save to the district drive, not a personal device.</p>
@@ -531,6 +534,7 @@ td input,td select{max-width:100%}
         <button data-view="qabf" aria-pressed="false">QABF</button>
         <button data-view="mas" aria-pressed="false">MAS</button>
         <button data-view="pbq" aria-pressed="false">PBQ</button>
+        <button data-view="wefa" aria-pressed="false">WEFA</button>
         <button data-view="interview" aria-pressed="false">Interviews</button>
         <button data-view="summary" aria-pressed="false">Convergence</button>
       </div>
@@ -589,7 +593,7 @@ td input,td select{max-width:100%}
   <div class="gf-body">
     <p class="method" style="margin:0 0 8px">One page per instrument and per target behavior. Send it as a file (attach it to an email; it opens in any browser) or, when the workstation is on a website, as a link. The informant reads the definition, confirms it, answers and presses Send; an email to you opens with the answers as a short code, which <b>Collect responses</b> reads back onto the worksheet. The items are personalized: the generic words of the pasted instrument become the student's name, pronouns and the behavior's own terms.</p>
     <div class="grid2">
-      <div class="f"><label for="rpInst">Instrument</label><select id="rpInst"><option value="fast">FAST (16 items, yes / no)</option><option value="qabf">QABF (25 items, 0 to 3)</option><option value="mas">MAS (16 items, 0 to 6)</option><option value="pbq">PBQ (0 to 6)</option></select></div>
+      <div class="f"><label for="rpInst">Instrument</label><select id="rpInst"><option value="fast">FAST (16 items, yes / no)</option><option value="qabf">QABF (25 items, 0 to 3)</option><option value="mas">MAS (16 items, 0 to 6)</option><option value="pbq">PBQ (0 to 6)</option><option value="wefa">WEFA (18 items, true / false)</option></select></div>
       <div class="f"><label for="rpTarget">Target behavior (from this form and the case)</label><select id="rpTarget"></select></div>
       <div class="f"><label for="rpName">The student's name as the page uses it (first name; leave blank for "the student")</label><input id="rpName"></div>
       <div class="f"><label for="rpPron">Pronouns in the items</label><select id="rpPron"><option value="">as pasted (he or she)</option><option value="he">he / him / his</option><option value="she">she / her / her</option><option value="they">they / them / their</option></select></div>
@@ -655,10 +659,12 @@ td input,td select{max-width:100%}
       <tr><td><b>QABF</b><br><span class="tag na">Matson &amp; Vollmer, 1995; Paclawskyj et al., 2000</span></td><td>25 items, 0 to 3 (never to often); 5 items per subscale, max 15</td><td>Attention; escape; nonsocial (automatic); physical (discomfort); tangible</td><td>Factors matching the five subscales (Paclawskyj et al., 2000; Nicholson et al., 2006, who found a sixth, single-item factor); interrater .46 to .60 (Shogren &amp; Rojahn, 2003), median item agreement 78% (Nicholson et al., 2006); FA correspondence 56.3% (Paclawskyj et al., 2001), 6 of 7 with 4-of-5 informant agreement (Smith et al., 2012); treatment utility (Matson et al., 1999).</td><td>Separates tangible from attention; best-supported rating scale for correspondence with FA</td></tr>
       <tr><td><b>MAS</b><br><span class="tag na">Durand &amp; Crimmins, 1988</span></td><td>16 items, 0 to 6 (never to always); 4 items per subscale; mean and rank</td><td>Sensory; escape; attention; tangible</td><td>Original interrater .66 to .92 not replicated: item agreement 41% to 63% across four independent samples; FA correspondence 43.8% (Paclawskyj et al., 2001), 4 of 7 with 4-of-5 agreement (Smith et al., 2012).</td><td>Familiar to school teams; use only alongside the QABF or FAST, never alone</td></tr>
       <tr><td><b>PBQ</b><br><span class="tag na">Lewis, Scott, &amp; Sugai, 1994</span></td><td>15 items (or 18 in the 18-item adaptation that circulates with its own profile sheet: key from its profile sheet, no published reliability), 0 to 6 (never to always); 3 items per column. The 18-item form holds all 15 published items in their published order plus three gain-item items (3, 10, 18): its other five columns are the published profile, and the gain column is the adaptation's addition</td><td>Peer attention; peer escape; adult attention; adult escape; setting events; gain item or activity (18-item adaptation)</td><td>Developed for general-education teachers; distinguishes peer from adult contingencies. Item-level agreement data not reported (Iwata et al., 2013, Table 2).</td><td>Classroom behavior where peer contingencies are plausible; setting-event screen</td></tr>
+      <tr><td><b>WEFA</b><br><span class="tag na">Honsberger, 2011, as adapted in the assessor's copy</span></td><td>18 items, true / false; count of TRUE per set of 5 items; items 1 and 8 are printed in two sets</td><td>Attention; tangibles; escape or avoidance; sensory (automatic)</td><td>No published reliability or validity data in hand. The form labels each set from its count (0 to 1 not likely, 2 to 3 moderately likely, 4 to 5 likely) and names no single outcome; the counted outcome on the convergence sheet is this form's rule.</td><td>Wandering and elopement; its header records how the student communicates, what the student seeks out, and where and how the student leaves</td></tr>
       <tr><td><b>FACTS</b><br><span class="tag na">March et al., 2000; McIntosh et al., 2008</span></td><td>Semi-structured teacher interview; routine analysis, then summary statement with confidence rating (1 to 6)</td><td>Setting event, antecedent, behavior, maintaining consequence, by routine</td><td>Test&ndash;retest .62 (setting events) to .92 (function); agreement across 5 to 8 informants .50 to .88; moderate-to-strong convergence with observation and FA across 10 studies; treatment utility (McIntosh et al., 2008).</td><td>School routines; produces the summary statement the BIP needs</td></tr>
       <tr><td><b>FAI / open-ended</b><br><span class="tag na">O'Neill et al., 2015; Hanley, 2012</span></td><td>Structured (FAI) or open-ended (Hanley) interview; no numeric score</td><td>Idiosyncratic antecedents, consequences, and synthesized contingencies</td><td>Not psychometrically scored; Hanley (2012) uses the interview to design the test conditions of an analysis rather than to conclude function.</td><td>When standard categories miss the picture; input to FA design</td></tr>
     </tbody>
   </table></div>
+  <p class="method" style="margin:8px 0 0"><b>WEFA.</b> The Wandering and Elopement Functional Assessment Interview (Honsberger, 2011, as adapted in the assessor's copy) is an 18-item true / false interview about elopement, with four sets of five items: attention, tangibles, escape or avoidance, and sensory. Items 1 and 8 are printed in two sets, so the sets overlap on those two items. The form gives each set its own likelihood label from its count of TRUE boxes (0 to 1 Not likely, 2 to 3 Moderately likely, 4 to 5 Likely) and names no single outcome. No published reliability or validity data for the WEFA are in hand. Counting the set with the most TRUE boxes as the outcome for the convergence sheet is this form's own rule, handled as the FAST is: a tie or nothing endorsed is no outcome, and a one-item margin is a caution.</p>
   <div class="cite">Reliability comparisons follow Table 2 of Iwata, DeLeon, and Roscoe (2013, <em>JABA, 46</em>, 271&ndash;284). Convergence figures are from Paclawskyj et al. (2001, <em>JIDR, 45</em>, 484&ndash;494) and Smith et al. (2012, <em>JABA, 45</em>, 779&ndash;795). FACTS figures are from McIntosh et al. (2008, <em>JPBI, 10</em>, 33&ndash;45). The verification sequence and the differentiation thresholds are practice rules of this form, not findings of any single study.</div>
 </div>
 
@@ -702,6 +708,7 @@ td input,td select{max-width:100%}
       <tr><td>QABF</td><td><select name="plan.qabf.u" aria-label="QABF: used?"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="plan.qabf.who" aria-label="QABF: administered to (codes)"></td><td><select name="plan.qabf.mode" aria-label="QABF: mode"><option value=""></option><option>Interview</option><option>Self-administered</option></select></td><td><input name="plan.qabf.d" aria-label="QABF: dates"></td><td><input name="plan.qabf.n" aria-label="QABF: notes (version, language, who read items aloud)"></td></tr>
       <tr><td>MAS</td><td><select name="plan.mas.u" aria-label="MAS: used?"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="plan.mas.who" aria-label="MAS: administered to (codes)"></td><td><select name="plan.mas.mode" aria-label="MAS: mode"><option value=""></option><option>Interview</option><option>Self-administered</option></select></td><td><input name="plan.mas.d" aria-label="MAS: dates"></td><td><input name="plan.mas.n" aria-label="MAS: notes (version, language, who read items aloud)"></td></tr>
       <tr><td>PBQ</td><td><select name="plan.pbq.u" aria-label="PBQ: used?"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="plan.pbq.who" aria-label="PBQ: administered to (codes)"></td><td><select name="plan.pbq.mode" aria-label="PBQ: mode"><option value=""></option><option>Interview</option><option>Self-administered</option></select></td><td><input name="plan.pbq.d" aria-label="PBQ: dates"></td><td><input name="plan.pbq.n" aria-label="PBQ: notes (version, language, who read items aloud)"></td></tr>
+      <tr><td>WEFA</td><td><select name="plan.wefa.u" aria-label="WEFA: used?"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="plan.wefa.who" aria-label="WEFA: administered to (codes)"></td><td><select name="plan.wefa.mode" aria-label="WEFA: mode"><option value=""></option><option>Interview</option><option>Self-administered</option></select></td><td><input name="plan.wefa.d" aria-label="WEFA: dates"></td><td><input name="plan.wefa.n" aria-label="WEFA: notes (version, language, who read items aloud)"></td></tr>
       <tr><td>FACTS / FAI / open-ended</td><td><select name="plan.int.u" aria-label="FACTS, FAI or open-ended interview: used?"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="plan.int.who" aria-label="FACTS, FAI or open-ended interview: administered to (codes)"></td><td><select name="plan.int.mode" aria-label="FACTS, FAI or open-ended interview: mode"><option value=""></option><option>Interview</option></select></td><td><input name="plan.int.d" aria-label="FACTS, FAI or open-ended interview: dates"></td><td><input name="plan.int.n" aria-label="FACTS, FAI or open-ended interview: notes (version, language, who read items aloud)"></td></tr>
     </tbody>
   </table></div>
@@ -720,6 +727,7 @@ td input,td select{max-width:100%}
       <div class="f"><label for="rpwQabf">QABF, 25 items <span class="rp-count" data-rpw="qabf"></span></label><textarea id="rpwQabf" name="rp.w.qabf" rows="4" spellcheck="false"></textarea></div>
       <div class="f"><label for="rpwMas">MAS, 16 items <span class="rp-count" data-rpw="mas"></span></label><textarea id="rpwMas" name="rp.w.mas" rows="4" spellcheck="false"></textarea></div>
       <div class="f"><label for="rpwPbq">PBQ, 15 items (18 in the 18-item adaptation) <span class="rp-count" data-rpw="pbq"></span></label><textarea id="rpwPbq" name="rp.w.pbq" rows="4" spellcheck="false"></textarea></div>
+      <div class="f"><label for="rpwWefa">WEFA, 18 items <span class="rp-count" data-rpw="wefa"></span></label><textarea id="rpwWefa" name="rp.w.wefa" rows="4" spellcheck="false"></textarea></div>
     </div>
   </div>
   <div class="cite">Administration to several informants who interact with the student frequently follows the FAST instructions, and independent completion follows the method of Iwata et al. (2013); agreement on the definition before scoring follows the QABF administration guidance (Matson &amp; Vollmer, 1995). Recording informant contact follows McIntosh et al. (2008).</div>
@@ -816,6 +824,28 @@ td input,td select{max-width:100%}
   <div class="cite">Scoring profile after Lewis, Scott, and Sugai (1994, <em>Diagnostique, 19</em>, 103&ndash;115), who designed the PBQ for general-education teachers and separated peer from adult contingencies. Iwata et al. (2013) list no published item-level agreement for the PBQ, so no reliability benchmark is applied here beyond the agreement computed between this student's informants. The 18-item version is a 18-item adaptation that circulates with its own profile sheet with no published reliability: it adds a "gain item or activity" column and renumbers the items, and its key is read from its profile sheet. Choose it under Questionnaire version above and the sheet scores it with that version's item map; its gain item or activity column counts as tangible on the convergence sheet. The sum-and-rank reading of either version is this form's rule.</div>
 </div>
 
+<!-- ================================================================ WEFA (v21.41) -->
+<div class="sheet" id="wefa">
+  <div class="nbh-print-head">
+    <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
+    <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+  </div>
+  <div class="bar nbh-band">WEFA Scoring Worksheet</div>
+  <p class="method" style="margin:0 0 10px">Wandering and Elopement Functional Assessment Interview (Honsberger, 2011, as adapted in the assessor's copy). Enter each informant's answer by item number: Y for TRUE, N for FALSE; the paper form has no N/A. Sets: Attention 1, 2, 3, 4, 5; Tangibles 6, 7, 8, 9, 10; Escape / avoidance 1, 8, 11, 12, 13; Sensory 14, 15, 16, 17, 18. Items 1 and 8 belong to two sets as printed, so the sets overlap on those two items: a TRUE answer there counts in both. Each set's count of TRUE boxes gets the form's own likelihood label (0 to 1 Not likely, 2 to 3 Moderately likely, 4 to 5 Likely); each set is labelled on its own, and more than one set can be Likely. For the convergence sheet the counted outcome is the set with the most TRUE boxes; a tie or nothing endorsed is no outcome, and a one-item margin is noted as a caution (this form's rule, as for the FAST). Item wording is not reproduced: the category column shows each item's sets and a short cue, and the items or task named in items 7, 10 and 12 go in the details block below.</p>
+  <div class="twoup">
+    <div class="nbh-scrollx"><table class="grid item" id="wefaGrid"></table></div>
+    <div>
+      <table class="grid" id="wefaTot"></table>
+      <div class="warn verdict" id="wefaVerdict"><b>Outcome and agreement</b>Enter answers to compute.</div>
+    </div>
+  </div>
+  <div class="twoup figs"><div class="figure" id="wefaFig1"></div><div class="figure" id="wefaFig2"></div></div>
+  <h3 class="sub">WEFA Student Information and Behavior Details</h3>
+  <p class="method" style="margin-top:0">The header of the WEFA, one column per informant: how the student communicates and how reliably, what the student enjoys or seeks out, the settings where the student elopes and how often (with the school contexts), what the student usually leaves, when the student usually elopes, and the items or task named in items 7, 10 and 12. Collect responses fills these from the respondent page.</p>
+  <div class="nbh-scrollx"><table class="grid" id="wefaDet"></table></div>
+  <div class="cite">Sets, likelihood labels and header fields follow the Wandering and Elopement Functional Assessment Interview as held in the assessor's copy (adapted from Honsberger, 2011). No published reliability or validity data for the WEFA are in hand, so no benchmark is applied beyond the agreement computed between this student's informants. The form gives each set its own likelihood label and names no single outcome; the counted outcome used on the convergence sheet (the set with the most TRUE boxes) is this form's rule. Item text is not reproduced.</div>
+</div>
+
 <!-- ================================================================ INTERVIEWS -->
 <div class="sheet" id="interview">
   <div class="nbh-print-head">
@@ -841,7 +871,7 @@ td input,td select{max-width:100%}
     <div><b>Assessor</b><span id="sumAssessor"></span></div>
   </div>
   <h3 class="sub" style="margin-top:0">Outcomes by Instrument and Informant</h3>
-  <p class="method" style="margin-top:0">Each row is one informant's highest category on one instrument, mapped to a common category set (attention, tangible, escape, automatic, physical). FAST social-positive matches either attention or tangible. Rows flagged weak are excluded. Consensus is counted by informant (this form's rule): each informant's most frequent common category across the instruments and interview they completed is one vote, an informant whose categories tie casts none, and at least 3 informants with an outcome are needed before any consensus label. The count of outcomes is shown as a second line.</p>
+  <p class="method" style="margin-top:0">Each row is one informant's highest category on one instrument, mapped to a common category set (attention, tangible, escape, automatic, physical). FAST social-positive matches either attention or tangible. The WEFA row is the set with the most TRUE boxes (this form's rule; the WEFA itself labels each set on its own). Rows flagged weak are excluded. Consensus is counted by informant (this form's rule): each informant's most frequent common category across the instruments and interview they completed is one vote, an informant whose categories tie casts none, and at least 3 informants with an outcome are needed before any consensus label. The count of outcomes is shown as a second line.</p>
   <div class="nbh-scrollx" tabindex="0" role="region" aria-label="Outcomes by instrument and informant"><table class="grid" id="convTbl"></table></div>
   <div class="warn verdict" id="convVerdict"><b>Consensus</b>Complete the worksheets to compute.</div>
   <div class="ident" style="margin:4px 0 10px"><div class="f"><label for="mFn">Indirect hypothesis carried to the packet</label><select id="mFn" name="m.fn"><option value="">not yet</option><option value="attention">Attention</option><option value="tangible">Tangible</option><option value="escape">Escape</option><option value="automatic">Automatic</option><option value="physical">Physical (pain or medical)</option><option value="multiple">Multiple</option><option value="undetermined">Undetermined</option></select></div></div>
@@ -890,6 +920,7 @@ td input,td select{max-width:100%}
     Floyd, R. G., Phaneuf, R. L., &amp; Wilczynski, S. M. (2005). Measurement properties of indirect assessment methods for functional behavioral assessment: A review of research. <em>School Psychology Review, 34</em>(1), 58&ndash;73. &bull;
     Hall, S. S. (2005). Comparing descriptive, experimental and informant-based assessments of problem behaviors. <em>Research in Developmental Disabilities, 26</em>(6), 514&ndash;526. &bull;
     Hanley, G. P. (2012). Functional assessment of problem behavior: Dispelling myths, overcoming implementation obstacles, and developing new lore. <em>Behavior Analysis in Practice, 5</em>(1), 54&ndash;72. &bull;
+    Honsberger, T. (2011). <em>Wandering and Elopement Functional Assessment Interview</em>. Two-page form, as adapted in the assessor's copy (the book appendix it was printed in is not identified in the copy). &bull;
     Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. <em>Journal of Applied Behavior Analysis, 46</em>(1), 271&ndash;284. &bull;
     Iwata, B. A., Dorsey, M. F., Slifer, K. J., Bauman, K. E., &amp; Richman, G. S. (1994). Toward a functional analysis of self-injury. <em>Journal of Applied Behavior Analysis, 27</em>(2), 197&ndash;209. (Reprinted from <em>Analysis and Intervention in Developmental Disabilities, 2</em>, 3&ndash;20, 1982) &bull;
     Iwata, B. A., &amp; Dozier, C. L. (2008). Clinical application of functional analysis methodology. <em>Behavior Analysis in Practice, 1</em>(1), 3&ndash;9. &bull;
@@ -949,8 +980,24 @@ const INST={
    ['Peer attention',[4,7,11],['attention'],'PeerAtt'],
    ['Adult escape',[1,9,13],['escape'],'AdultEsc'],
    ['Adult attention',[2,6,12],['attention'],'AdultAtt'],
-   ['Setting events',[5,8,15],[],'SE']]}
+   ['Setting events',[5,8,15],[],'SE']]},
+ /* v21.41: WEFA (Honsberger, 2011, as adapted in the assessor's copy). TRUE is entered as Y, FALSE as N; no N/A on the paper
+    form. Items 1 and 8 are printed in two sets and count in both. The cue column names each item's sets and the fill-ins. */
+ wefa:{title:'WEFA',items:18,scale:'yn',max:5,noNA:true,likely:v=>v<=1?'Not likely':v<=3?'Moderately likely':'Likely',cats:[
+   ['Attention (access to social attention)',[1,2,3,4,5],['attention'],'Att'],
+   ['Tangibles (access to items or activities)',[6,7,8,9,10],['tangible'],'Tang'],
+   ['Escape / avoidance',[1,8,11,12,13],['escape'],'Esc'],
+   ['Sensory (automatic reinforcement)',[14,15,16,17,18],['automatic'],'Sens']],
+  cue:{1:'attention, escape',2:'attention',3:'attention',4:'attention',5:'attention',6:'tangible',7:'tangible; item named',8:'tangible, escape',9:'tangible',10:'tangible; item named',11:'escape',12:'escape; task named',13:'escape',14:'sensory',15:'sensory',16:'sensory',17:'sensory',18:'sensory'}}
 };
+/* v21.41: the WEFA header details kept per informant (named wefa[r].<id>; the respondent page asks them as open questions with the same ids) */
+const WEFA_DET=[['comm','Communication: how (verbally, exchange of pictures, sign language, gestures, none)'],['commrel','Communication: how reliably (reliably, somewhat reliably, unreliably)'],
+ ['seeks','Enjoys or seeks out (water; automobiles; trains or train tracks; parks or playgrounds; social attention)'],['settings','Settings where the student elopes and how often (home, community, school: hourly, daily, weekly, monthly)'],
+ ['school','School contexts (transitions, hallway, structured environment, unstructured environment, other)'],['leaves','Usually leaves (the room; the building; the grounds, campus or yard; the safe proximity of an adult; other)'],
+ ['when','Usually elopes (in a lapse of supervision; when left alone; right in front of me; during a transition; other)'],['i7','Item 7: the item named'],['i10','Item 10: the item named'],['i12','Item 12: the task named']];
+function renderWefaDet(){const n=nInf(),el=$('#wefaDet');if(!el)return;let h='<thead><tr><th class="lab">Detail</th>'+CODES.slice(0,n).map(c=>`<th class="c">${c}</th>`).join('')+'</tr></thead><tbody>';
+ WEFA_DET.forEach(([id,lab])=>{h+=`<tr><td class="lab">${lab}</td>`+CODES.slice(0,n).map((c,r)=>`<td><input name="wefa[${r}].${id}" aria-label="WEFA, informant ${c}: ${lab}"></td>`).join('')+'</tr>';});
+ el.innerHTML=h+'</tbody>';}
 /* The PBQ also circulates as an 18-item version that adds a gain-item / activity
    scale (items 3, 10, 18) and renumbers the rest; it holds all 15 published items in
    their published order, so its other five columns are the published profile. Same scoring rule, 3 items per
@@ -976,16 +1023,17 @@ function renderInf(){const n=nInf(),body=$('#infBody');while(body.children.lengt
  for(let i=body.children.length;i<n;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="n"><b>${CODES[i]}</b></td><td><input name="inf[${i}].name" aria-label="Informant ${CODES[i]}: name"></td><td><input name="inf[${i}].role" aria-label="Informant ${CODES[i]}: role" placeholder="teacher, para, parent"></td><td><input name="inf[${i}].date" aria-label="Informant ${CODES[i]}: date the instruments were given (m/d/yyyy)" placeholder="m/d/yyyy"></td><td><input name="inf[${i}].mo" aria-label="Informant ${CODES[i]}: months known"></td><td><select name="inf[${i}].daily" aria-label="Informant ${CODES[i]}: daily contact"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="inf[${i}].hrs" aria-label="Informant ${CODES[i]}: hours per week in target routines"></td><td><select name="inf[${i}].train" aria-label="Informant ${CODES[i]}: behavior-analytic training"><option value=""></option><option>None</option><option>In-service only</option><option>RBT</option><option>BCaBA / BCBA</option></select></td><td><input name="inf[${i}].set" aria-label="Informant ${CODES[i]}: settings observed in"></td>`;body.appendChild(tr);}}
 
 /* ---------- item grids ---------- */
-function ynOpts(){return '<option value=""></option><option>Y</option><option>N</option><option>NA</option>';}
+function ynOpts(noNA){return '<option value=""></option><option>Y</option><option>N</option>'+(noNA?'':'<option>NA</option>');}
 function numOpts(max){let s='<option value=""></option>';for(let k=0;k<=max;k++)s+=`<option>${k}</option>`;return s;}
 function catOf(key,item){const d=INST[key];for(let c=0;c<d.cats.length;c++)if(d.cats[c][1].includes(item))return c;return -1;}
+function catsOf(key,item){const d=INST[key],o=[];for(let c=0;c<d.cats.length;c++)if(d.cats[c][1].includes(item))o.push(c);return o;}   /* v21.41: every set an item is printed in */
 const FAST_PUB={1:70.8,2:78.6,3:66.5,4:84.5,5:70.6,6:67.9,7:67.5,8:75.9,9:77.4,10:71.1,11:69.1,12:53.3,13:70.2,14:80.3,15:69.9,16:75.0};
 function renderGrid(key){const d=INST[key],n=nInf(),g=$('#'+key+'Grid');const pub=key==='fast';
  const agrW=n>1?1:0;
  let cg='<colgroup><col style="width:30px"><col>'+CODES.slice(0,n).map(()=>'<col style="width:40px">').join('')+(agrW?'<col style="width:44px">':'')+(pub?'<col style="width:40px">':'')+'</colgroup>';
  let h='<thead><tr><th class="lab c">Item</th><th style="font-weight:500">Category</th>'+CODES.slice(0,n).map(c=>`<th class="c">${c}</th>`).join('')+(agrW?`<th class="c" title="Percentage of informant pairs agreeing on this item${d.scale==='yn'?'':' (within 1 point)'}">Agree</th>`:'')+(pub?'<th class="c" title="Published item agreement, Iwata et al. (2013), Table 3. Table 3 values checked against the article (October 2026).">Pub.</th>':'')+'</tr></thead><tbody>';
- for(let it=1;it<=d.items;it++){const c=catOf(key,it);h+=`<tr><td class="lab c">${it}</td><td class="catcell">${d.cats[c][0]}</td>`;
-  for(let r=0;r<n;r++){const nm=`${key}[${r}][${it}]`;h+=`<td class="c"><select name="${nm}" data-inst="${key}" aria-label="${d.title} item ${it}, informant ${CODES[r]}">${d.scale==='yn'?ynOpts():numOpts(d.scale)}</select></td>`;}
+ for(let it=1;it<=d.items;it++){const c=catOf(key,it);h+=`<tr><td class="lab c">${it}</td><td class="catcell">${d.cue?d.cue[it]:d.cats[c][0]}</td>`;
+  for(let r=0;r<n;r++){const nm=`${key}[${r}][${it}]`;h+=`<td class="c"><select name="${nm}" data-inst="${key}" aria-label="${d.title} item ${it}, informant ${CODES[r]}">${d.scale==='yn'?ynOpts(d.noNA):numOpts(d.scale)}</select></td>`;}
   if(agrW)h+=`<td class="c agr" id="${key}ag${it}">—</td>`;
   if(pub)h+=`<td class="c agr pub">${FAST_PUB[it].toFixed(1)}</td>`;
   h+='</tr>';}
@@ -1023,9 +1071,10 @@ function groupedBars(el,o){ /* o: title, cap, groups:[{label,values:[]}], series
 
 /* ---------- scoring ---------- */
 function score(key,r){const d=INST[key];const tot=d.cats.map(()=>0),endorse=d.cats.map(()=>0),answered=d.cats.map(()=>0);let any=false;
- for(let it=1;it<=d.items;it++){const v=val(`${key}[${r}][${it}]`);if(v==='')continue;const c=catOf(key,it);
-  if(d.scale==='yn'){if(v==='NA')continue;answered[c]++;any=true;if(v==='Y'){tot[c]++;endorse[c]++;}}
-  else{answered[c]++;any=true;tot[c]+=+v;if(+v>0)endorse[c]++;}}
+ for(let it=1;it<=d.items;it++){const v=val(`${key}[${r}][${it}]`);if(v==='')continue;
+  catsOf(key,it).forEach(c=>{   /* v21.41: an item printed in two sets (WEFA items 1 and 8) counts in each */
+  if(d.scale==='yn'){if(v==='NA')return;answered[c]++;any=true;if(v==='Y'){tot[c]++;endorse[c]++;}}
+  else{answered[c]++;any=true;tot[c]+=+v;if(+v>0)endorse[c]++;}});}
  return {tot,endorse,answered,any};}
 function topInfo(key,s){const d=INST[key];const scorable=d.cats.map((c,i)=>c[2].length?i:-1).filter(i=>i>=0);
  const vals=scorable.map(i=>s.tot[i]);const mx=Math.max(...vals);const tops=scorable.filter(i=>s.tot[i]===mx);
@@ -1056,6 +1105,7 @@ function renderTot(key){const d=INST[key],n=nInf(),S=[];for(let r=0;r<n;r++)S.pu
  d.cats.forEach((c,i)=>{h+=`<tr><td class="lab" style="white-space:normal">${c[3]}<br><span style="font-weight:400;color:var(--ink-soft);font-size:10px">${c[0]}<br>items ${c[1].join(', ')}</span></td>`;
   for(let r=0;r<n;r++){const s=S[r];const t=topInfo(key,s);const isTop=t.tops.includes(i)&&c[2].length&&s.any&&t.mx>0;
    let cell=d.scale==='yn'?`${s.tot[i]} / ${s.answered[i]}`:`${s.tot[i]}`;
+   if(d.likely&&s.any)cell+=`<br><span style="font-weight:400;font-size:10px">${d.likely(s.tot[i])}</span>`;   /* v21.41: the WEFA's own label per set */
    if(d.mean)cell+=`<br><span style="font-weight:400;font-size:10px">M ${(s.answered[i]?s.tot[i]/s.answered[i]:0).toFixed(2)}</span>`;   /* v21.40 (5): over the items answered */
    if(d.scale!=='yn'&&s.any&&s.answered[i]<c[1].length)cell+=`<br><span style="font-weight:400;font-size:10px;color:var(--nbh-flag)">${s.answered[i]} of ${c[1].length} answered</span>`;
    if(d.scale!=='yn'&&key==='qabf')cell+=`<br><span style="font-weight:400;font-size:10px">${s.endorse[i]} endorsed</span>`;
@@ -1067,7 +1117,8 @@ function renderTot(key){const d=INST[key],n=nInf(),S=[];for(let r=0;r<n;r++)S.pu
  for(let r=0;r<n;r++){const s=S[r];if(!s.any){lines.push(['mid',`${CODES[r]}: no scores entered.`]);continue;}const t=topInfo(key,s);
   const names=t.mx===0?'no category endorsed':t.tops.map(i=>d.cats[i][0]).join(' / ');outs.push({r,t});
   if(t.weak)lines.push(['mid',`${CODES[r]}: highest ${names} (${t.mx}); second ${t.second}; margin ${t.margin}: weak differentiation (${t.why}).`]);
-  else lines.push([t.notes.length?'mid':'ok',`${CODES[r]}: ${names} (${t.mx}); second ${t.second}; margin ${t.margin}.${t.notes.length?' Caution: '+t.notes.join('; ')+'.':''}`]);}
+  else lines.push([t.notes.length?'mid':'ok',`${CODES[r]}: ${names} (${t.mx}); second ${t.second}; margin ${t.margin}.${t.notes.length?' Caution: '+t.notes.join('; ')+'.':''}`]);
+  if(d.likely)lines.push(['na',`${CODES[r]} by set: ${d.cats.map((c,i)=>`${c[0]} ${s.tot[i]} of ${c[1].length}, ${d.likely(s.tot[i])}`).join('; ')}. Each set is labelled on its own, as the form does; the counted outcome above is this form's rule.`,'Sets']);}
  /* pairwise agreement */
  let pairs=0,exSum=0,adjSum=0,outAg=0,outN=0,tieN=0;
  for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const g=agree(key,a,b);if(!g.n)continue;pairs++;exSum+=g.ex/g.n;adjSum+=g.adj/g.n;
@@ -1078,25 +1129,25 @@ function renderTot(key){const d=INST[key],n=nInf(),S=[];for(let r=0;r<n;r++)S.pu
   const pct=100*(d.scale==='yn'?ia.ex:ia.adj)/ia.pairs;cell.textContent=pct.toFixed(0)+'%';cell.className='c agr '+(pct>=80?'hi':pct>=60?'md':'lo');cell.title=d.scale==='yn'?`${ia.ex} of ${ia.pairs} pairs agree`:`within 1: ${ia.adj} of ${ia.pairs}; exact: ${ia.ex}`;}
  /* figures */
  const catNames=d.cats.map(c=>c[3]);
- groupedBars($('#'+key+'Fig1'),{title:`${d.title}: category totals by informant`,cap:d.scale==='yn'?'Count of yes answers per category (maximum 4). The outcome is the tallest bar, as on the published FAST; a one-item margin to the next bar is counted and noted as a caution.':`Subscale totals per informant (maximum ${d.max}). The outcome is the tallest bar; the margin to the next bar is the differentiation.`,
+ groupedBars($('#'+key+'Fig1'),{title:`${d.title}: category totals by informant`,cap:d.likely?`Count of TRUE answers per set (maximum ${d.max}). The form labels each set on its own; for the convergence sheet the outcome is the tallest bar (this form's rule), and a one-item margin to the next bar is noted as a caution.`:d.scale==='yn'?'Count of yes answers per category (maximum 4). The outcome is the tallest bar, as on the published FAST; a one-item margin to the next bar is counted and noted as a caution.':`Subscale totals per informant (maximum ${d.max}). The outcome is the tallest bar; the margin to the next bar is the differentiation.`,
   groups:d.cats.map((c,i)=>({label:c[3],values:S.map(s=>s.any?s.tot[i]:null)})),series:CODES.slice(0,n).map((c,r)=>{const t=infName(r);return t.length>40?t.slice(0,39)+'…':t;}),max:d.max,ticks:d.scale==='yn'?4:5,legend:true});
  const pairG=[];for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const g=agree(key,a,b);if(!g.n)continue;pairG.push({label:`${CODES[a]}–${CODES[b]}`,values:d.scale==='yn'?[100*g.ex/g.n]:[100*g.ex/g.n,100*g.adj/g.n]});}
- const bench={fast:{y:71.5,label:'FAST study mean 71.5%'},qabf:{y:78,label:'QABF median 78% (Nicholson et al., 2006)'},mas:{y:63.3,label:'MAS highest published value 63.3% (Duker &amp; Sigafoos, 1998)'},pbq:{y:null}}[key];
+ const bench={fast:{y:71.5,label:'FAST study mean 71.5%'},qabf:{y:78,label:'QABF median 78% (Nicholson et al., 2006)'},mas:{y:63.3,label:'MAS highest published value 63.3% (Duker &amp; Sigafoos, 1998)'},pbq:{y:null},wefa:{y:null}}[key];
  /* v21.40 (6): chance agreement under uniform responding on a k-point scale: exact 1/k, within 1 (3k-2)/k^2 */
  const kp=d.scale==='yn'?2:d.scale+1,chEx=100/kp,chAdj=d.scale==='yn'?null:100*(3*kp-2)/(kp*kp);
- groupedBars($('#'+key+'Fig2'),{title:`${d.title}: item-by-item agreement between informant pairs`,cap:(d.scale==='yn'?'Percentage of items answered the same by both informants (N/A excluded). ':'Exact agreement and agreement within 1 scale point (the adjacent criterion Iwata et al., 2013, used to compare Likert scales). ')+'Dashed lines: 80% direct-observation criterion; chance under uniform responding on '+(d.scale==='yn'?'a yes/no item (50%)':`a ${kp}-point scale (exact ${chEx.toFixed(1)}%, within 1 ${chAdj.toFixed(1)}%)`)+(bench.y!=null?'; and the published benchmark.':'.')+(d.scale==='yn'?'':' Iwata et al. (2013) described within-1 agreement on a 6-point range as about 50% chance, equivalent to a yes/no item; the exact value under uniform responding is drawn here.'),
+ groupedBars($('#'+key+'Fig2'),{title:`${d.title}: item-by-item agreement between informant pairs`,cap:(d.scale==='yn'?'Percentage of items answered the same by both informants'+(d.noNA?'. ':' (N/A excluded). '):'Exact agreement and agreement within 1 scale point (the adjacent criterion Iwata et al., 2013, used to compare Likert scales). ')+'Dashed lines: 80% direct-observation criterion; chance under uniform responding on '+(d.scale==='yn'?'a yes/no item (50%)':`a ${kp}-point scale (exact ${chEx.toFixed(1)}%, within 1 ${chAdj.toFixed(1)}%)`)+(bench.y!=null?'; and the published benchmark.':'.')+(d.scale==='yn'?'':' Iwata et al. (2013) described within-1 agreement on a 6-point range as about 50% chance, equivalent to a yes/no item; the exact value under uniform responding is drawn here.'),
   groups:pairG,series:d.scale==='yn'?['Item agreement']:['Exact','Within 1'],max:100,fmt:v=>Math.round(v)+'%',refs:[{y:80,label:'80% criterion'},d.scale==='yn'?{y:50,label:'50% chance',dash:'2 3'}:{y:chAdj,label:`within-1 chance ${Math.round(chAdj)}%`,dash:'2 3'},d.scale==='yn'?{y:null}:{y:chEx,label:`exact chance ${Math.round(chEx)}%`,dash:'2 3'},bench],legend:d.scale!=='yn'});
  if(key==='fast'){const itemG=[];for(let it=1;it<=16;it++){const ia=itemAgree('fast',it);itemG.push({label:String(it),values:[ia.pairs?100*ia.ex/ia.pairs:null,FAST_PUB[it]]});}
   groupedBars($('#fastFig3'),{title:'FAST: agreement on each item, this case versus the published sample',cap:'Solid bars: percentage of this student\'s informant pairs agreeing on the item. Teal bars: agreement for the same item across 196 pairs of FASTs in Iwata et al. (2013), Table 3. Items below the published value are the ones to revisit in a follow-up interview. Table 3 values checked against the article (October 2026).',
    groups:itemG,series:['This case','Published (2013)'],max:100,fmt:v=>Math.round(v)+'%',refs:[{y:80,label:'80% criterion'}],labels:false,h:210});}
  let head='';
  if(pairs){const mEx=100*exSum/pairs;const mAdj=100*adjSum/pairs;
-  const ref=d.scale==='yn'?`Mean item agreement ${mEx.toFixed(1)}% (FAST study mean 71.5%; 80% criterion for direct observation).`:`Mean exact agreement ${mEx.toFixed(1)}%, adjacent ${mAdj.toFixed(1)}%.`;
+  const ref=d.scale==='yn'?`Mean item agreement ${mEx.toFixed(1)}% (${key==='fast'?'FAST study mean 71.5%; ':''}80% criterion for direct observation${key==='fast'?'':'; no published agreement data for this instrument are in hand'}).`:`Mean exact agreement ${mEx.toFixed(1)}%, adjacent ${mAdj.toFixed(1)}%.`;
   const oa=outN?` Outcome agreement ${outAg} of ${outN} pairs${tieN?` (${tieN} involving a tie, scored as agreement if either highest matched)`:''}.`:'';
   const key80=d.scale==='yn'?mEx:mAdj;head=`<span class="tag ${key80>=80?'ok':key80>=60?'mid':'no'}">${ref}${oa}</span>`;}
  else if(n>1)head='<span class="tag na">Enter two informants to compute agreement.</span>';
- $('#'+key+'Verdict').innerHTML='<b>Outcome and agreement</b>'+head+'<ul class="rules" style="margin-top:6px">'+lines.map(l=>`<li><span class="tag ${l[0]}">${l[0]==='ok'?'Clear':l[0]==='mid'?'Check':l[0]==='no'?'Low':'Pair'}</span> ${l[1]}</li>`).join('')+'</ul>';}
-function renderInst(key){renderGrid(key);renderTot(key);}
+ $('#'+key+'Verdict').innerHTML='<b>Outcome and agreement</b>'+head+'<ul class="rules" style="margin-top:6px">'+lines.map(l=>`<li><span class="tag ${l[0]}">${l[2]||(l[0]==='ok'?'Clear':l[0]==='mid'?'Check':l[0]==='no'?'Low':'Pair')}</span> ${l[1]}</li>`).join('')+'</ul>';}
+function renderInst(key){renderGrid(key);if(key==='wefa')renderWefaDet();renderTot(key);}
 document.addEventListener('change',e=>{const k=e.target.dataset.inst;if(k)renderTot(k);});
 /* v21.17 (F1): the convergence sheet recomputes after every entry, not only when its view is opened, so the
    packet the workstation prints carries the current outcomes; and it recomputes at once when the workstation
@@ -1243,7 +1294,7 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,Math.round(x)));
 const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
 function simItem(key,c,targetCats,reliab,flat){const d=INST[key];const cat=d.cats[c];const isTarget=!flat&&cat[2].some(x=>targetCats.includes(x));
  const noise=(1-reliab)*2;
- if(d.scale==='yn'){const p=flat?0.5:isTarget?0.85-noise*0.2:0.15+noise*0.2;return rnd()<0.04?'NA':(rnd()<p?'Y':'N');}
+ if(d.scale==='yn'){const p=flat?0.5:isTarget?0.85-noise*0.2:0.15+noise*0.2;return (!d.noNA&&rnd()<0.04)?'NA':(rnd()<p?'Y':'N');}
  if(d.scale===3){const m=flat?1.5:isTarget?2.5:0.5;return String(clamp(m+gauss()*(flat?0.35:0.5+noise),0,3));}
  const m6=flat?3:isTarget?5:1.3;return String(clamp(m6+gauss()*(flat?0.35:0.9+noise),0,6));}
 /* v21.17 (F6): each simulated profile shows what its scenario describes on every draw. tc is the category that
@@ -1272,7 +1323,7 @@ function loadSim(){const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,
  set('m.med',T==='physical'?'Nurse note: recurrent ear infections; episodes cluster on days of reported discomfort (simulated).':'No active medical concern reported (simulated)');
  const infs=[['Teacher (simulated)','classroom teacher','24','Yes','18','classroom, specials','In-service only'],['Paraprofessional (simulated)','paraprofessional','8','Yes','25','classroom, lunch, bus line','RBT'],['Parent (simulated)','parent','all','No','2','home; school events','None']];
  infs.forEach((x,i)=>{set(`inf[${i}].name`,x[0]);set(`inf[${i}].role`,x[1]);set(`inf[${i}].mo`,x[2]);set(`inf[${i}].daily`,x[3]);set(`inf[${i}].hrs`,x[4]);set(`inf[${i}].set`,x[5]);set(`inf[${i}].train`,x[6]);});
- ['fast','qabf','mas','pbq','int'].forEach(k=>{set(`plan.${k}.u`,'Yes');set(`plan.${k}.who`,k==='int'?(sc.dissent?'A, '+CODES[sc.dissent.who]:'A, B'):'A, B, C');set(`plan.${k}.mode`,'Interview');set(`plan.${k}.d`,new Date().toLocaleDateString());set(`plan.${k}.n`,'simulated');});
+ ['fast','qabf','mas','pbq','wefa','int'].forEach(k=>{set(`plan.${k}.u`,'Yes');set(`plan.${k}.who`,k==='int'?(sc.dissent?'A, '+CODES[sc.dissent.who]:'A, B'):'A, B, C');set(`plan.${k}.mode`,'Interview');set(`plan.${k}.d`,new Date().toLocaleDateString());set(`plan.${k}.n`,'simulated');});
  set('setup.indep',true);set('setup.samedef',true);set('setup.official',true);
  for(let r=0;r<3;r++){const rel=sc.inf[r];
   Object.keys(INST).forEach(key=>{const d=INST[key];let cats=T?[T]:[];
@@ -1282,7 +1333,8 @@ function loadSim(){const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,
     for(let it=1;it<=d.items;it++)set(`pbq[${r}][${it}]`,simPBQ(mode,catOf('pbq',it),rel));
     simShape('pbq',r,mode==='adult_att'||mode==='adult_esc'?d.cats.findIndex(c=>c[3]===(mode==='adult_att'?'AdultAtt':'AdultEsc')):null);return;}
    const hasTarget=d.cats.some(c=>c[2].some(x=>cats.includes(x)));const flat=(!T&&!(sc.dissent&&sc.dissent.who===r))||!hasTarget;
-   for(let it=1;it<=d.items;it++){const c=catOf(key,it);let v=simItem(key,c,cats,rel,flat);
+   for(let it=1;it<=d.items;it++){const cs=catsOf(key,it),ct=cs.find(i=>d.cats[i][2].some(x=>cats.includes(x)));const c=ct==null?cs[0]:ct;   /* v21.41: an item in two sets is drawn for the target set when it is one of them */
+    let v=simItem(key,c,cats,rel,flat);
     if(sc.second&&!flat&&d.cats[c][2].includes(sc.second)&&!cats.includes(sc.second)){ /* secondary category slightly elevated */
      if(d.scale==='yn'){if(v==='N'&&rnd()<0.15)v='Y';}else v=String(clamp(+v+1,0,d.scale));}
     set(`${key}[${r}][${it}]`,v);}
@@ -1290,6 +1342,11 @@ function loadSim(){const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,
    if(key==='fast'&&sc.dissent&&sc.dissent.who===r){set(`fast[${r}][6]`,'N');set(`fast[${r}][7]`,'N');}
    simShape(key,r,flat?null:d.cats.findIndex(c=>c[2].includes(cats[0])));});}
  set('fast.ml_t',T==='automatic'?'afternoons, unstructured time':'mid-morning academics');set('fast.ml_s',{escape:'independent worksheets',attention:'teacher working with other students',tangible:'tablet put away',automatic:'no activity in progress',physical:'days the student is unwell'}[T]||'no clear pattern');set('fast.ml_p',T==='automatic'?'anyone or no one':'classroom teacher present');set('fast.ll_t','arrival; preferred activity block');set('fast.ll_s',T==='automatic'?'preferred sensory activities':'one-to-one preferred activity');set('fast.ll_p','one-to-one staff');set('fast.before',{attention:'teacher turns to help another student',tangible:'tablet is taken away',escape:'worksheet is placed on the desk',automatic:'nothing in particular; often alone',physical:'complains of ear pain'}[T]||'varies (simulated)');set('fast.after',{attention:'staff talk to the student and redirect',tangible:'item is returned after a delay',escape:'work is removed; sent to calm corner',automatic:'no consistent response',physical:'sent to nurse; demands removed'}[T]||'varies (simulated)');set('fast.tx','none listed (simulated)');set('fast.incons',sc.dissent?'Informant C answered No to items 6 and 7 but wrote that the behavior starts when worksheets are handed out; ask C about item 6 in follow-up. (Simulated.)':'None noted. (Simulated.)');
+ /* v21.41: the WEFA header details, consistent with the scenario's target */
+ const wd={comm:'verbally; gestures (simulated)',commrel:'Somewhat reliably',seeks:{attention:'social attention (chase, tickles)',tangible:'parks or playgrounds; the tablet',automatic:'water (pools, canals)',escape:'none noted',physical:'none noted'}[T]||'none noted',
+  settings:'school: daily; home: weekly; community: monthly (simulated)',school:T==='escape'?'structured environment; transitions':'unstructured environment; hallway',leaves:T==='automatic'?'the grounds, campus or yard':'the room; the safe proximity of an adult',
+  when:{attention:'right in front of me',escape:'during a transition; when work is presented',tangible:'when a preferred item is put away',automatic:'in a lapse of supervision; when left alone'}[T]||'in a lapse of supervision',i7:T==='tangible'?'tablet':'none named',i10:T==='tangible'?'playground swing':'none named',i12:T==='escape'?'independent math worksheet':'none named'};
+ for(let r=0;r<3;r++)Object.keys(wd).forEach(k=>set(`wefa[${r}].${k}`,wd[k]+(/simulated/.test(wd[k])?'':' (simulated)')));
  const intFn=[T||'multiple',(sc.dissent?sc.dissent.cat:T)||'multiple'];
  for(let i=0;i<2;i++){set(`int[${i}].inst`,i?'Open-ended (Hanley)':'FACTS');set(`int[${i}].who`,i?(sc.dissent?CODES[sc.dissent.who]:'B'):'A');set(`int[${i}].d`,new Date().toLocaleDateString());
   set(`int[${i}].routine`,T==='automatic'?'unstructured time 1:30–2:00; arrival':'independent math work 10:15–10:45; transition from recess');set(`int[${i}].routineLow`,'preferred activity with one-to-one staff');
@@ -1310,7 +1367,7 @@ function renderAllInst(){Object.keys(INST).forEach(renderInst);}
 let nInfPrev=3;
 /* v21.40 (19): fewer informants drops the last columns; when they hold scores the form asks first and keeps the count on cancel */
 bindNum('nInf',async()=>{const nv=nInf();
- if(nv<nInfPrev){const held=[];for(let r=nv;r<nInfPrev;r++)if($$(`[name^="fast[${r}]"],[name^="qabf[${r}]"],[name^="mas[${r}]"],[name^="pbq[${r}]"]`).some(e=>String(e.value).trim()!==''))held.push(CODES[r]);
+ if(nv<nInfPrev){const held=[];for(let r=nv;r<nInfPrev;r++)if($$(Object.keys(INST).map(k=>`[name^="${k}[${r}]"]`).join(',')).some(e=>String(e.value).trim()!==''))held.push(CODES[r]);
   if(held.length){const q=`Informant${held.length>1?'s':''} ${held.join(', ')} hold${held.length>1?'':'s'} scores on the worksheets.\nDrop ${held.length>1?'these columns':'this column'} and the scores?`;
    const ok=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm(q,{ok:'Drop',danger:true}):window.confirm(q);if(!ok){$('#nInf').value=nInfPrev;return;}}}
  nInfPrev=nv;const saved=snapshot();renderInf();renderAllInst();applyFields(saved);renderAllTot();renderSummary();});
@@ -1364,6 +1421,7 @@ function gfMonths(t){const s=String(t||'').trim();if(!s)return '';const m=/(\d+(
 function gfValue(key,raw){ /* a cell as Google Forms exports it -> the worksheet's value; null = could not read */
   const s=String(raw==null?'':raw).trim();if(!s)return '';const l=s.toLowerCase();
   if(key==='fast'){if(/^n\s*\/?\s*a\b|not applicable|unsure|uncertain|don.?t know/.test(l))return 'NA';if(/^y/.test(l))return 'Y';if(/^n/.test(l))return 'N';return null;}
+  if(key==='wefa'){if(/^t|^y/.test(l))return 'Y';if(/^f|^n/.test(l))return 'N';return null;}   /* v21.41: TRUE -> Y, FALSE -> N */
   const max=INST[key].scale;const m=/^(\d)(?!\d)/.exec(l);if(m&&+m[1]<=max)return m[1];
   if(key==='qabf'){if(/^x\b|does not apply|n\/?a\b/.test(l))return '';const w=[['never',0],['rarely',1],['some',2],['often',3]];   /* 'some' also reads 'sometimes' */for(const [k,v] of w)if(l.indexOf(k)===0)return String(v);return null;}
   if(key==='pbq'){const w=[['never',0],['always',6],['all of the time',6],['10',1],['25',2],['50',3],['75',4],['90',5]];for(const [k,v] of w)if(l.indexOf(k)>=0)return String(v);return null;}
@@ -1419,7 +1477,7 @@ function importResponses(key,n,picked,opt){
   const saved=snapshot();delete saved['pbq.ver'];
   if(key==='pbq'){$('#pbqVer').value=String(n);setPbqVer(String(n));}
   /* the informant count follows the responses unless later columns already hold something */
-  const used=from=>{for(let r=from;r<5;r++)if($$('[name^="inf['+r+'].'+'"],[name^="fast['+r+']"],[name^="qabf['+r+']"],[name^="mas['+r+']"],[name^="pbq['+r+']"]').some(e=>String(e.value).trim()!==''))return true;return false;};
+  const used=from=>{for(let r=from;r<5;r++)if($$('[name^="inf['+r+'].'+'"]'+Object.keys(INST).map(k=>',[name^="'+k+'['+r+']"]').join('')).some(e=>String(e.value).trim()!==''))return true;return false;};
   if(picked.length>nInf()||(picked.length<nInf()&&!used(picked.length)))$('#nInf').value=picked.length;nInfPrev=nInf();
   renderInf();renderAllInst();applyFields(saved);
   const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e)e.value=v;};
@@ -1433,6 +1491,7 @@ function importResponses(key,n,picked,opt){
   if(key==='fast'&&opt.fx){
     const join=k=>picked.map((r,idx)=>r.fx&&r.fx[k]?CODES[idx]+': '+r.fx[k]:'').filter(Boolean).join('\n');
     [['ml','fast.ml_s'],['ll','fast.ll_s'],['before','fast.before'],['after','fast.after'],['tx','fast.tx']].forEach(([k,n])=>{if(!val(n)&&join(k))put(n,join(k));});}
+  if(key==='wefa')picked.forEach((r,idx)=>{if(!r.det)return;WEFA_DET.forEach(([id])=>{if(r.det[id])put('wefa['+idx+'].'+id,String(r.det[id]));});});   /* v21.41: the header details */
   renderAllTot();renderSummary();
   return {cells,unread};}
 function gfImport(){const a=gfData;if(!a)return;
@@ -1460,7 +1519,17 @@ const RP_INFO={
   fast:{heading:'Functional Analysis Screening Tool (FAST)',scale:{kind:'yn'},open:[['ml','In what situations or activities is the behavior most likely to occur?'],['ll','In what situations or activities is it least likely to occur?'],['before','What usually happens right before the behavior?'],['after','What usually happens right after the behavior?'],['tx','Current treatments or medications, if any']]},
   qabf:{heading:'Questions About Behavioral Function (QABF)',scale:{kind:'num',min:0,max:3,anchors:['0 never','1 rarely','2 some','3 often'],na:true,naLabel:'X: does not apply'}},   /* v21.40 (12): the collector maps NA to blank through gfValue */
   mas:{heading:'Motivation Assessment Scale (MAS)',scale:{kind:'num',min:0,max:6,anchors:['0 never','1 almost never','2 seldom','3 half the time','4 usually','5 almost always','6 always']}},
-  pbq:{heading:'Problem Behavior Questionnaire (PBQ)',scale:{kind:'num',min:0,max:6,anchors:['0 never','1 about 10% of the time','2 about 25%','3 about 50%','4 about 75%','5 about 90%','6 always']}}};
+  pbq:{heading:'Problem Behavior Questionnaire (PBQ)',scale:{kind:'num',min:0,max:6,anchors:['0 never','1 about 10% of the time','2 about 25%','3 about 50%','4 about 75%','5 about 90%','6 always']}},
+  /* v21.41: WEFA, true / false with no N/A (the library takes labels; a null third label removes the N/A choice); the header details are asked first */
+  wefa:{heading:'Wandering and Elopement Functional Assessment Interview (WEFA)',scale:{kind:'yn',labels:['True','False',null]},openFirst:true,openHeading:'About the student and the elopement',open:[
+    {id:'comm',label:'How does the student communicate? (verbally, exchange of pictures, sign language, gestures, none; name each that applies)',max:200},
+    {id:'commrel',label:'How reliably does the student communicate?',type:'yns',choices:['Reliably','Somewhat reliably','Unreliably']},
+    {id:'seeks',label:'The student enjoys or may seek out (name each that applies): water (pools, lakes, canals), automobiles (cars, trucks), trains or train tracks, parks or playgrounds, social attention (chase, tickles)',max:300},
+    {id:'settings',label:'Where does the student elope or try to, and about how often in each place (hourly, daily, weekly, monthly)? Home, community, school',max:300},
+    {id:'school',label:'At school, in which contexts? (transitions, hallway, structured environment, unstructured environment, other)',max:200},
+    {id:'leaves',label:'When the student elopes, he or she usually leaves (name each that applies): the room, the building, the grounds, campus or yard, the safe proximity of an adult or caregiver, other',max:300},
+    {id:'when',label:'The student usually elopes (name each that applies): in a lapse of supervision, when left alone, right in front of me, during a transition, other',max:300},
+    {id:'i7',label:'Item 7 asks about an item: which item?',max:120},{id:'i10',label:'Item 10 asks about an item: which item?',max:120},{id:'i12',label:'Item 12 asks about a task: which task?',max:120}]}};
 const RP_EXTRAS=[{id:'name',label:'Your name',req:true},{id:'role',label:'Your relationship to the student (teacher, para, parent)'},{id:'mo',label:'How long have you known the student? (months)'},{id:'daily',label:'Do you see the student daily?',type:'yn'},{id:'set',label:'In what settings or activities do you see the student?'}];
 function rpWording(key){const t=val('rp.w.'+key);if(!t)return [];
   return t.split(/\r?\n/).map(x=>x.replace(/^\s*(?:item\s*)?\d+\s*[.):\-]\s*/i,'').trim()).filter(Boolean);}
@@ -1506,6 +1575,7 @@ function rpPayloadFor(t){const key=$('#rpInst').value,items=rpWording(key),info=
     subject:INST[key].title+' answers for Form IA-1 · '+t.label};
   const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:'Watch the instructions'}];
   if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));
+  if(key==='wefa'){p.open=info.open.map(o=>Object.assign({},o,{label:P(o.label)}));p.openFirst=true;p.openHeading=info.openHeading;}   /* v21.41 */
   if(key==='pbq')p.pbqVer=String(items.length);
   p.sig=rpSig(key);   /* v21.40 (21): the response carries it back; Collect responses compares it with this form's wording */
   return p;}
@@ -1586,7 +1656,7 @@ function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEa
   const slots=()=>{let k=0;$$('#rcOut tbody tr').forEach(tr=>{const cb=tr.querySelector('[data-rc]'),td=tr.querySelector('.gf-slot');if(cb.checked){td.textContent=k<5?'Informant '+CODES[k]:'— (limit is five)';k++;}else td.textContent='';});};
   slots();$$('#rcOut [data-rc]').forEach(cb=>cb.addEventListener('change',slots));
   $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>a.list[+cb.dataset.rc]).slice(0,5);if(!picked.length){alert('Tick at least one response.');return;}
-    const rows=picked.map(o=>({raw:(o.ans||[]).map(x=>x==null?'':String(x)),name:o.name||'',role:o.role||'',mo:gfMonths(o.mo||''),daily:o.daily||'',set:o.set||'',ts:o.date||'',fx:o.open?{ml:o.open.ml||'',ll:o.open.ll||'',before:o.open.before||'',after:o.open.after||'',tx:o.open.tx||''}:null}));
+    const rows=picked.map(o=>({raw:(o.ans||[]).map(x=>x==null?'':String(x)),name:o.name||'',role:o.role||'',mo:gfMonths(o.mo||''),daily:o.daily||'',set:o.set||'',ts:o.date||'',fx:o.open?{ml:o.open.ml||'',ll:o.open.ll||'',before:o.open.before||'',after:o.open.after||'',tx:o.open.tx||''}:null,det:o.open||null}));
     const {cells,unread}=importResponses(a.key,a.n,rows,{inf:$('#rcInf')&&$('#rcInf').checked,fx:$('#rcFx')&&$('#rcFx').checked});
     if(!val('m.beh')&&a.beh){const e=document.querySelector('[name="m.beh"]');e.value=a.beh;e.dispatchEvent(new Event('input',{bubbles:true}));}
     const b=$('#gfBanner');b.textContent='Collected '+picked.length+' '+INST[a.key].title+' response'+(picked.length===1?'':'s')+(a.beh?' about '+a.beh:'')+' from respondent pages into informant'+(picked.length===1?' A':'s A to '+CODES[picked.length-1])+': '+cells+' answers'+(unread?'; '+unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet.';b.hidden=false;
