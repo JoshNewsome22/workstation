@@ -1,7 +1,7 @@
 /* v21.34 Task U: the styled question dialog on the 14 converted forms.
    For each: the simulation loads through the dialog; a middle row of one table is deleted through it
    (Cancel leaves the row, the .danger button deletes it); Clear all through it works; no console or page error. */
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const FORMS=[
  {id:'OB-1',file:'OB-1_Direct-Observation-Record_v2026-09.html',view:'obs',del:'.obs-page button.delRow[data-obs="0"][data-row="1"]',len:'state.obs[0].narrative.length',cleared:'state.obs.length===0'},
  {id:'PR-1',file:'PR-1_Periodic-Plan-Review_v2026-09.html',view:'dec',del:'#actTbl .rowDel[data-di="1"]',len:'S.act.length'},

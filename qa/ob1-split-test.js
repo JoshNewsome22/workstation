@@ -1,6 +1,6 @@
 /* v21.32: OB-1 narrative tools and the Log; the shell's side-by-side mode */
-const {chromium,BASE,wire,sleep}=require('./lib');
-const OUT='/tmp/';
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const OUT=__dirname+'/out/split/';
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:1000}});await ctx.addInitScript(()=>{window.print=function(){};});
  const page=await ctx.newPage();wire(page,log);
  /* --- OB-1 on its own --- */

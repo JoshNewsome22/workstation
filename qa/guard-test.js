@@ -1,4 +1,4 @@
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:900}});const page=await ctx.newPage();wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
  console.log('clean',await page.evaluate(()=>({dirty:$('#saveQuick').classList.contains('dirty'),title:$('#saveQuick').title})));

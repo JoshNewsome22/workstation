@@ -1,4 +1,4 @@
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
  const r1=await page.evaluate(()=>{alert('short');const t=document.querySelectorAll('.ws-toast').length;alert('Long notice.\n\nSecond paragraph.');return {toasts:t,cfOpen:$('#cfDlg').open,title:$('#cfTitle').textContent};});
@@ -14,7 +14,7 @@ const {chromium,BASE,wire,sleep}=require('./lib');
  console.log('fold before',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sum:$('#barSum').hidden})));
  await page.evaluate(()=>{$('#pClient').value='Sample Student';$('#pSid').value='123';$('#pGrade').value='7';$('#pSite').value='Royal Palm School';who();barAutoFold();});await sleep(200);
  console.log('fold after',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sumHidden:$('#barSum').hidden,name:$('#sumName').textContent,det:$('#sumDet').textContent,detHidden:getComputedStyle($('#bar .det')).display})));
- await page.screenshot({path:'/tmp/bar-folded.png'});
+ await page.screenshot({path:__dirname+'/out/ui/bar-folded.png'});
  await page.click('#barEdit');await sleep(200);console.log('edit',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),foldBtn:$('#barFold').hidden})));
  await page.click('#barFold');await sleep(200);console.log('done',await page.evaluate(()=>document.body.classList.contains('bar-folded')));
  /* touch */

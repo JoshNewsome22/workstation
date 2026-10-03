@@ -1,6 +1,6 @@
-const {chromium,sleep}=require('./lib');
+const {chromium,sleep}=require(__dirname+'/lib.js');
 (async()=>{const br=await chromium.launch();const page=await br.newPage();const log=[];page.on('pageerror',e=>log.push(String(e.message)));page.on('console',m=>{if(m.type()==='error')log.push(m.text().slice(0,200));});
- await page.goto('file://'+require('path').resolve(__dirname,'../deliver/NBH-Workstation.html')+'');await sleep(1500);
+ await page.goto('file:///tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/dist/NBH-Workstation-one-file.html');await sleep(1500);
  await page.evaluate(()=>EMBED.ready);console.log('pictos block chars',await page.evaluate(()=>EMBED.pictos.length));
  for(const id of ['SM-1','VS-1']){await page.evaluate(i=>openForm(i),id);await page.waitForFunction(i=>!!state.status[i],id,{timeout:30000}).catch(()=>{});await sleep(800);
   const fr=page.frames().find(f=>f!==page.mainFrame()&&f.name()!==''||f.url().startsWith('about:srcdoc'));

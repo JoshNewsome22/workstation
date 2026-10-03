@@ -1,7 +1,7 @@
 /* v21.34 Task U: the nine parts-built forms ask through nbhUI.confirm (the styled #nbhUiDlg), not window.confirm.
    For each: the simulation loads through the dialog, a middle row of one table is deleted through the dialog's
    danger button, Cancel leaves the row, Clear all through the dialog empties the form, and nothing errors. */
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const FORMS=[
   {id:'SM-1',file:'SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html',arr:'log',len:'S.log.length'},
   {id:'SA-1',file:'SA-1_Skill-Acquisition-Data_v2026-10.html',arr:'probes',len:'S.probes.length'},

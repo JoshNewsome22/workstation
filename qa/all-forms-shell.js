@@ -1,5 +1,5 @@
 /* every form opens in the shell, answers status, takes a simulation, answers facts? and facts without a script error */
-const {chromium,BASE,wire,sleep,forms,loadSim}=require('./lib');
+const {chromium,BASE,wire,sleep,forms,loadSim}=require(__dirname+'/lib.js');
 (async()=>{const ed=process.argv[2]||'NBH-Workstation';const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
  const page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ed+'/index.html');await sleep(700);
  const F=forms(ed);const bad=[];let n=0;

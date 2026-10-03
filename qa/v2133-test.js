@@ -1,4 +1,4 @@
-const {chromium,fs,BASE,wire,sleep}=require('./lib');
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const path=require('path');
 const DL=__dirname+'/out/dl-v2133';
 fs.mkdirSync(DL,{recursive:true});
@@ -10,7 +10,7 @@ const click=(page,sel)=>page.evaluate(s=>{const el=document.querySelector(s);if(
 (async()=>{
  const br=await chromium.launch();
  const ctx=await br.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
- async function open(file){const log=[];const page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/NBH-Workstation/'+file);await sleep(600);return {page,log};}
+ async function open(file){const log=[];const page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/NBH-Workstation/'+file);await sleep(600);await page.evaluate(()=>{window.confirm=m=>{(window.__dlg=window.__dlg||[]).push(String(m));return true;};window.alert=m=>{(window.__alerts=window.__alerts||[]).push(String(m));};});   /* v21.34: the forms ask through nbhUI.confirm, which honours a stubbed window.confirm; a long alert would open the styled notice, which stays open until closed */return {page,log};}
  const errs=l=>l.filter(x=>x.type!=='warning');
 
  /* ---------- MT-1 ---------- */

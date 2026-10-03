@@ -13,9 +13,10 @@ function forms(edition){
 }
 async function loadSim(target){
   const ids=['#simBtn','#btnSim','#load-demo','#btnLoadExample'];
-  for(const s of ids){const el=await target.$(s); if(el){ await el.click({force:true}).catch(()=>{}); return s; }}
+  /* a DOM click: the button may be folded under "More controls" (hidden), where a Playwright click, even forced, does nothing */
+  for(const s of ids){const el=await target.$(s); if(el){ await el.evaluate(e=>e.click()).catch(()=>{}); return s; }}
   const b=await target.$$('button');
-  for(const el of b){const t=((await el.textContent())||'').trim(); if(/simulat|example|demo/i.test(t)){await el.click({force:true}).catch(()=>{});return t;}}
+  for(const el of b){const t=((await el.textContent())||'').trim(); if(/simulat|example|demo/i.test(t)){await el.evaluate(e=>e.click()).catch(()=>{});return t;}}
   return null;
 }
 function wire(page,log){

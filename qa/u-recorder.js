@@ -1,6 +1,6 @@
 /* v21.34 Task U: the recorders' state machines around the awaited question dialog, and the IN-1 role change
    (a select fires input then change: one question only). */
-const {chromium,BASE,wire,sleep}=require('./lib');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 let fails=0;const check=(c,m)=>{console.log((c?'  ok   ':'  FAIL ')+m);if(!c)fails++;};
 const dlg=p=>p.evaluate(()=>{const d=document.querySelector('#nbhUiDlg');if(!d||!d.open)return null;return {head:d.querySelector('#nbhUiH').textContent,btns:[...d.querySelectorAll('#nbhUiF button')].map(b=>b.className+':'+b.textContent)};});
 const press=(p,sel)=>p.evaluate(s=>{const b=document.querySelector('#nbhUiDlg '+s);if(!b)throw new Error('no dialog button '+s);b.click();},sel);

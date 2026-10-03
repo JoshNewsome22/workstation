@@ -1,5 +1,5 @@
 /* v21.33: Copy for the BIP on FS-1, TD-1, GB-1, CR-1; per-row deletion on FS-1 and CR-1; a save without console errors */
-const {chromium,fs,BASE,wire,sleep}=require('./lib');
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const FORMS={
   'FS-1':{file:'FS-1_FBA-Summary-Report_v2026-09.html',heads:['FORM FS-1','TARGET BEHAVIOR 1: Aggression toward staff','LEVEL OF EVIDENCE','SOURCES OF EVIDENCE','HYPOTHESES CONSIDERED','LIMITATIONS','WHAT WOULD CHANGE THIS CONCLUSION'],first:'Definition: Forceful contact'},
   'TD-1':{file:'TD-1_Function-Based-Treatment-Developer_v2026-09.html',heads:['FORM TD-1','TARGET BEHAVIOR AND FUNCTION','BASELINE AND CRITERIA','TEACHING THE REPLACEMENT AND SKILL TARGETS','RESPONDING TO THE PRECURSOR AND THE TARGET BEHAVIOR','DATA, INTEGRITY, AND DECISION RULES'],first:'Target behavior: '},
@@ -15,9 +15,12 @@ async function openFile(page,text){await page.evaluate(async t=>{const dt=new Da
 (async()=>{
   const br=await chromium.launch();
   const ctx=await br.newContext({viewport:{width:1440,height:900}});await ctx.grantPermissions(['clipboard-read','clipboard-write'],{origin:BASE});
+  const only=process.argv[2];
   for(const id of Object.keys(FORMS)){
+    if(only&&only!==id)continue;
     const F=FORMS[id];console.log('\n=== '+id);const log=[];const page=await ctx.newPage();wire(page,log);
     await page.goto(BASE+'/NBH-Workstation/'+F.file);await sleep(600);
+    await page.evaluate(()=>{window.confirm=m=>{(window.__dlg=window.__dlg||[]).push(String(m));return true;};window.alert=m=>{(window.__alerts=window.__alerts||[]).push(String(m));};});   /* v21.34: the forms ask through nbhUI.confirm, which honours a stubbed window.confirm; a long alert would open the styled notice, which stays open until closed */
     check(await page.$('#bipBtn')!==null,'bipBtn present in the toolbar');
     check(await page.evaluate(()=>!!document.querySelector('#bipBtn').closest('.tgroup')&&/Sheet actions/.test(document.querySelector('#bipBtn').closest('.tgroup').textContent)),'bipBtn sits in the Sheet actions group');
     /* empty form: the text has only the title line */
@@ -57,7 +60,8 @@ async function openFile(page,text){await page.evaluate(async t=>{const dt=new Da
       const h1=await page.evaluate(()=>S.hyp[1].h);await page.evaluate(()=>document.querySelector('#hypTbl .rowDel[data-del="0"]').click());await sleep(200);
       check(await page.evaluate(()=>S.hyp[0].h)===h1,'hypotheses: row 1 deleted');
       /* delete every hypothesis: one blank row stays */
-      await page.evaluate(()=>{while(S.hyp.length>0){document.querySelector('#hypTbl .rowDel[data-del="0"]').click();if(S.hyp.length===1&&!S.hyp[0].h)break;}});await sleep(200);
+      /* v21.34: the delete handler awaits the styled question, so each click settles before the next */
+      for(let k=0;k<20;k++){if(await page.evaluate(()=>S.hyp.length===1&&!S.hyp[0].h))break;await page.evaluate(()=>document.querySelector('#hypTbl .rowDel[data-del="0"]').click());await sleep(80);}await sleep(200);
       check(await page.evaluate(()=>S.hyp.length===1&&!S.hyp[0].h),'hypotheses: one blank row kept');
       /* targets: with target 2 open, delete target 1: the open target follows */
       await page.evaluate(()=>document.querySelector('#viewSeg button[data-view="beh"]').click());await sleep(100);
@@ -81,6 +85,7 @@ async function openFile(page,text){await page.evaluate(async t=>{const dt=new Da
       /* delete the restraint the debriefing names: the confirm text says so and the choice is cleared */
       let dlg='';page.once('dialog',d=>{dlg=d.message();});
       await page.evaluate(()=>document.querySelector('#logTbl .rowDel[data-rdel="log"][data-i="0"]').click());await sleep(300);
+      dlg=dlg||await page.evaluate(()=>(window.__dlg||[]).slice(-1)[0]||'');
       check(/debriefing sheet names this restraint/.test(dlg),'log: confirm warns about the debriefing: '+dlg.slice(0,90));
       check(await page.evaluate(()=>S.meta.dbRow===''&&S.log.length===2&&S.log[0].d===window.__d3&&document.querySelector('select[data-m="dbRow"]').value===''),'log: the choice is cleared and the minimum of two rows is kept');
       /* attempts */
