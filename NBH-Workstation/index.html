@@ -1211,7 +1211,20 @@ $('#pClient').addEventListener('change',()=>{if(packet().client.trim()&&!state.b
      the existing snapshot verb, which asks nothing in turn. Asks that arrive while the same form is being read for
      the same asker share that one reading. A form asks only when a person asks it to.
    - The existing verbs (ping, status, snapshot, restore, collect, packet, plan) are unchanged.
-   - state.relayLog keeps the last 40 decisions ({from, want, did}; form ids only, no data), for diagnosis. */
+   - state.relayLog keeps the last 40 decisions ({from, want, did}; form ids only, no data), for diagnosis.
+   Opening the partner (v21.44, the link between Form TK-1 and Form TE-1, and only that pair):
+     form  -> shell   {nbh:'open', want:'<form id>', beside:true}       posted to window.parent
+     shell -> form    {nbh:'opened', want:'<form id>', ok:true}
+                      {nbh:'opened', want:'<form id>', ok:false, why:'busy'}
+   - It is the only message by which a form opens a form. It opens and reads nothing; the form then asks for its
+     partner through the relay above, as it would for any compare.
+   - The shell honours it only from the window of one of its own form frames, only when want is that form's
+     partner in OPEN_PAIR (TK-1 opens TE-1, TE-1 opens TK-1) and is in ALL, and at most once a second per asking
+     form. Anything else is ignored and gets no answer. While a case or an autosave is being restored it answers
+     ok:false, why:'busy'.
+   - beside, with one form showing, puts the asker and its partner side by side; with two or three showing, the
+     partner takes a column the way openForm gives one (with three, the column next to the asker's, never the
+     asker's own). An older shell does not answer, and the form tells the user to pick the form from the list. */
 function relayFrom(src){
   if(!src)return null;
   for(const id of Object.keys(state.frames)){const fr=state.frames[id];if(fr&&fr.contentWindow===src)return id;}
@@ -1232,6 +1245,22 @@ async function relay(ev,d){
   if(relayFrom(src)!==from){relayNote(from,want,'not answered: the asking form was closed');return;}
   if(r&&r.snap){relayNote(from,want,'answered');answer({ok:true,title:String(r.title||''),snap:r.snap});}
   else{const open=!!state.frames[want];relayNote(from,want,open?'no answer':'not open');answer({ok:false,why:open?'no answer':'not open'});}
+}
+const OPEN_PAIR={'TK-1':'TE-1','TE-1':'TK-1'};
+function openFor(ev,d){
+  const from=relayFrom(ev.source),want=typeof d.want==='string'?d.want:'',
+        reply=m=>{try{ev.source.postMessage(Object.assign({nbh:'opened',want},m),'*');}catch(e){}};
+  if(!from){relayNote('',want,'open ignored: not a form frame');return;}
+  if(OPEN_PAIR[from]!==want||!ALL.some(f=>f[0]===want)){relayNote(from,want,'open ignored: not its pair');return;}
+  if(state.restoring){relayNote(from,want,'open refused: restoring');reply({ok:false,why:'busy'});return;}
+  const t=Date.now(),o=state.openAt||(state.openAt={});
+  if(t-(o[from]||0)<1000){relayNote(from,want,'open ignored: too soon');return;}
+  o[from]=t;
+  /* three columns showing: the partner takes the column next to the asker, not the asker's own */
+  if(splitOn()&&!state.split.includes(want)&&state.split.length>=3){const k=state.split.indexOf(from);if(k>=0)state.cur=state.split[k<state.split.length-1?k+1:k-1];}
+  openForm(want,true);
+  if(d.beside&&!splitOn())setSplit([from,want]);
+  relayNote(from,want,'opened');reply({ok:true});
 }
 
 /* ================= the case: facts that flow between forms (v21.31) =================
@@ -1319,6 +1348,7 @@ window.addEventListener('message',ev=>{
   /* v21.22 relay: a form asking for another open form's data; the protocol is at relay() above. It comes
      first because an ask carries no form id, and the file check's filter below would drop it. */
   if(d.nbh==='ask'){relay(ev,d);return;}
+  if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.44 Form TK-1 or TE-1 opening its partner; at openFor() */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
     if(!relayFrom(ev.source))return;
@@ -2032,7 +2062,8 @@ function caseMapHtml(){
     '<li><b>The target behaviors</b> defined on TB-1 go to every form that holds a behavior: the tables on DD-1, HD-1, FS-1, GB-1 and SM-1, and the behavior line on OB-1, ABC-1, MT-1, SA-1, SR-1, DA-1, CN-1, TD-1, TI-1 and the rest. Rename one on TB-1 and the others follow.</li>'+
     '<li><b>The function</b> concluded on FS-1 goes to every function field; <b>the goals</b> written on GB-1 to SA-1, SM-1, CN-1 and the aims on DD-1; <b>the reinforcer menu</b> ranked on PA-1 to SM-1, SA-1 and SR-1.</li>'+
     '<li><b>The plan</b> on TD-1 (baseline, criteria, replacement) goes to GB-1 and EB-1; PR-1 reads the graph on DD-1 and ST-1 reads the integrity scores on TI-1 when they are open.</li>'+
-    '<li>Everything above fills empty fields and empty tables only. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. The case travels in the packet and case files.</li></ul></div>'+
+    '<li>Everything above fills empty fields and empty tables only. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. The case travels in the packet and case files.</li>'+
+    '<li><b>TE-1 and TK-1</b>, when linked: each compares with the other on a click and takes what you tick.</li></ul></div>'+
     '<div class="cm-box"><h3>The shortest defensible path</h3><p class="cm-path"><b>DM-1</b> → <b>IC-1</b> → <b>TB-1</b> → <b>IA-1</b> + <b>OB-1</b> or <b>ABC-1</b> (and <b>DD-1</b> baseline) → <b>FS-1</b> → <b>TD-1</b> → <b>GB-1</b> → <b>CF-1</b> → <b>ST-1</b> → <b>DD-1</b> + <b>TI-1</b> → <b>PR-1</b>. '+
     'Add <b>SI-1</b> whenever the student can be interviewed, <b>EA-1</b> when the function is still open, <b>PA-1</b> before any reinforcement-based component, and <b>CR-1</b> the moment the behavior is dangerous.</p></div>';
 }

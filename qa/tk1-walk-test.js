@@ -2,7 +2,8 @@
    TKWALK and its timeline (duration, the cues in the narration's order, the terminal or the plain last-token line as the
    book has it); the state at points of the timeline (the cards on their boxes, the chosen card under Then and the target
    under First, the tokens in their slots, the last one the terminal token, the slots empty after the reset); renderAt is a
-   pure function of time; building it changes nothing in the book (S) or in print; leaving the view pauses; reduced motion
+   pure function of time; sync (what a line says happens while that line plays; no overlapping lines, short pauses); the
+   build's own narration and hand drawings are used; building it changes nothing in the book (S) or in print; leaving the view pauses; reduced motion
    cuts each cue to its end; the controls have names; no sideways scroll on the iPad and a phone; a picture of the stage at
    the middle of every cue (TK1_WALK_SHOTS, default qa/out/tk1-walk/). */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
@@ -72,6 +73,16 @@ async function states(page,label,r){
   s=await P(end('exchange'));check(label+': after the exchange the Then box is empty and the item is shown',!s.cards.some(c=>inside(c,s.then,10))&&s.cards.some(c=>c.id==='item'));
   s=await P(end('reset'));check(label+': after the reset the slots are empty and the tokens are back on the Tokens page',inSlots(s).length===0&&s.cards.filter(c=>/^tok/.test(c.id)&&s.ybx.some(b=>inside(c,b,2.5))).length===r.n);
   check(label+': after the reset the book is back on the Choices page with every card on its box',s.pages.ch&&s.cards.filter(c=>/^ch\d$/.test(c.id)).every(c=>inside(c,s.chBx[+c.id.slice(2)])));
+  /* sync: what a line says happens while that line plays (checked at the end of its narration), the lines never overlap, the pauses stay short */
+  const nEnd=id=>cue(id).start+cue(id).narr;
+  s=await P(nEnd('ch_pick'));check(label+': sync: the chosen card is off the page before ch_pick’s line ends',s.cards.some(c=>c.fly&&/^ch/.test(c.id)&&!s.chBx.some(b=>inRect(c,b))));
+  s=await P(nEnd('bd_place'));check(label+': sync: both cards are in their boxes before bd_place’s line ends',s.cards.some(c=>/^tg/.test(c.id)&&inside(c,s.first,2.5))&&s.cards.some(c=>/^ch/.test(c.id)&&inside(c,s.then,2.5)));
+  s=await P(nEnd('tok_first'));check(label+': sync: the first token is in its slot before tok_first’s line ends',inSlots(s).length===1);
+  s=await P(nEnd(LAST));check(label+': sync: the last token is in its slot before '+LAST+'’s line ends',inSlots(s).length===r.n);
+  s=await P(nEnd('reset'));check(label+': sync: the cards are back on their pages before reset’s line ends',s.pages.ch&&s.cards.filter(c=>/^ch\d$/.test(c.id)).every(c=>inside(c,s.chBx[+c.id.slice(2)])));
+  const gaps=r.cues.map(c=>c.dur-c.narr);check(label+': no overlapping narration, at least 0.3 s between lines',gaps.every(g=>g>=.3),'shortest '+Math.min(...gaps).toFixed(2)+' s');
+  const longGaps=r.cues.filter(c=>c.dur-c.narr>(c.id==='tok_more'?99:2.5)).map(c=>c.id+' '+(c.dur-c.narr).toFixed(1));
+  check(label+': no long silence after a line (tok_more on big boards excepted)',!longGaps.length,longGaps.join(', ')||'longest '+Math.max(...r.cues.filter(c=>c.id!=='tok_more').map(c=>c.dur-c.narr)).toFixed(2)+' s');
   /* captions: the narrated text, a piece at a time */
   let capOk=true;for(const c of r.cues){const cp=(await P(c.start+Math.min(.3,c.narr/3))).cap;if(!cp||!c.text.startsWith(cp.slice(0,Math.min(20,cp.length))))capOk=false;}
   check(label+': each cue opens with the start of its narrated text as the caption',capOk);}
@@ -161,6 +172,9 @@ async function states(page,label,r){
     await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
     const lens=await page.evaluate(()=>{const L=WALK_AUDIO.lines;return TKWALK.cues.every(c=>Math.abs(c.narr-L[c.id].d)<1e-9&&c.text===L[c.id].t);});
     check('narration'+(built?'':' (test tones)')+': each cue takes its length and its caption from WALK_AUDIO',lens);
+    if(built){const real=await page.evaluate(()=>({note:document.getElementById('wkNote').textContent,
+        hands:typeof WALK_HANDS==='object'&&['learner','teacher'].every(w=>['point','pinch','open'].every(p=>{const e=document.querySelector('#wkStage .wk-hand.wk-'+w+' .wk-pose:nth-child('+(['point','pinch','open'].indexOf(p)+1)+')');return e&&e.innerHTML.length>1000&&e.innerHTML.replace(/\s/g,'').slice(0,200)===WALK_HANDS[w][p].svg.replace(/\s/g,'').slice(0,200);}))}));
+      check('the build’s own files are used: the drawn hands are WALK_HANDS (no placeholders) and no note about missing narration',real.hands&&!/narration is not/.test(real.note),real.note.slice(0,80));}
     await page.click('#wkPlay');await sleep(1500);
     const a=await page.evaluate(()=>({m:TKWALK.audioMode,p:TKWALK.playing,t:TKWALK.time}));
     check('narration: Play starts the Web Audio clock (the audio context is the timeline clock)',a.m==='web'&&a.p&&a.t>.3,a.m+' at '+a.t.toFixed(2)+' s');
