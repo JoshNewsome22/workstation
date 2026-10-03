@@ -1,0 +1,14 @@
+/* the respondent library's personalizer: names, pronoun forms, behavior terms */
+global.window={};require('../NBH-Workstation/nbh-respond.js');const U=window.NBH_RESPOND;
+let fails=0;const ok=(n,c,x)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.stringify(x||'')));if(!c)fails++;};
+const P=(t,o)=>U.personalize(t,o);
+const she={name:'Ana',pron:'she',beh:'self-injury',behs:'self-injurious behaviors'};
+const they={name:'Sam',pron:'they',beh:'elopement',behs:'elopement'};
+ok('(s)he -> she',P('Is the person usually well behaved when (s)he is getting lots of attention?',she)==='Is Ana usually well behaved when she is getting lots of attention?',P('Is the person usually well behaved when (s)he is getting lots of attention?',she));
+ok('he/she, him/her, him/herself, her/him, she/he',P('Engages in the behavior because he/she likes to be reprimanded; to draw attention to him/herself; when you take something away from him/her; bothering her/him; because she/he is uncomfortable.',she)==='Engages in self-injury because she likes to be reprimanded; to draw attention to herself; when you take something away from her; bothering her; because she is uncomfortable.',P('Engages in the behavior because he/she likes to be reprimanded; to draw attention to him/herself; when you take something away from him/her; bothering her/him; because she/he is uncomfortable.',she));
+ok('he or she / him or her / his or her (MAS)',P('told that he or she can’t have; to get him or her to do what you ask; his or her favorite',she)==='told that she can’t have; to get her to do what you ask; her favorite',P('told that he or she can’t have; to get him or her to do what you ask; his or her favorite',she));
+ok('they: (s)he is -> they are; he/she likes -> they like; he/she tries -> they try; he/she watches -> they watch; he/she always -> they always',P('when (s)he is ill; because he/she likes it; he/she tries; he/she watches; he/she always does',they)==='when they are ill; because they like it; they try; they watch; they always do',P('when (s)he is ill; because he/she likes it; he/she tries; he/she watches; he/she always does',they));
+ok('capitals kept: (S)he at a sentence start',P('(S)he often engages in the behavior.',she)==='She often engages in self-injury.',P('(S)he often engages in the behavior.',she));
+ok('the student -> name; the problem behavior -> term; the problem behaviors -> plural',P('How often does the problem behavior occur? How severe are the problem behaviors when the student shows them?',she)==='How often does self-injury occur? How severe are self-injurious behaviors when Ana shows them?',P('How often does the problem behavior occur? How severe are the problem behaviors when the student shows them?',she));
+ok('no pronoun chosen: forms left as pasted',P('when (s)he is ill; him/her',{name:'Ana'})==='when (s)he is ill; him/her');
+console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);

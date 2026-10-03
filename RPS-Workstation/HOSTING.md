@@ -133,3 +133,21 @@ delete that file. Force HTTPS and the certificate already cover the page. The
 footer's *Staff sign-in* link goes to `/workstation-rps/`, which keeps its own
 password.
 
+
+## Respondent links when `/workstation-rps/` has a password
+
+A respondent link points at `respond.html` beside the forms. If the
+workstation folder is behind cPanel's Directory Privacy (the staff
+password), everyone who opens such a link is asked for that password,
+which informants do not have; on the assessor's own computer the
+browser has the password cached, so the link appears to work there.
+Fix: make a public folder, for example `public_html/respond/`, upload
+only `respond.html` and `nbh-respond.js` into it (no student data is
+ever in those two files; the questionnaire travels in the link
+itself), and in Form IA-1's Respondent pages dialog enter its address
+in **Address of respond.html for links**, for example
+`https://newsomebh.com/respond/respond.html`. The address is
+remembered on the device and saved with the file. Links then open
+without a sign-in; the workstation folder keeps its password. Update
+the two files in the public folder whenever a new edition is
+uploaded. Page files (Save the page as a file) need no hosting.

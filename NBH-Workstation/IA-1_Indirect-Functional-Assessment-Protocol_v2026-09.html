@@ -445,6 +445,7 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
 .rp-tt textarea{min-height:64px}
 #rpDlg button.off{opacity:.45;cursor:not-allowed}
 @keyframes rpflash{0%{outline:3px solid #b9672d}100%{outline:3px solid transparent}}.rp-flash{animation:rpflash 1s ease-out}
+.rp-photo-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}#rpPhotoThumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid var(--teal)}
 .rp-linkbox{width:100%;box-sizing:border-box;margin:8px 0 0;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
 dialog.rp-prevdlg{width:min(980px,96vw);max-height:none;height:92vh;padding:0;overflow:hidden}
 dialog.rp-prevdlg iframe{display:block;width:100%;height:calc(92vh - 44px);border:0;background:#f1f4f3}.rp-hint{font-weight:400;color:var(--ink-soft);font-size:11px}.rp-prev{font-size:12.5px;margin:4px 0 0}.rp-prev div{margin:2px 0}.rp-other button{margin-left:8px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
@@ -600,6 +601,9 @@ td input,td select{max-width:100%}
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
       <div class="f"><label for="rpVideo">Instructions video or page (a link the page shows; optional)</label><input id="rpVideo" type="url" placeholder="https://youtu.be/..."></div>
+      <div class="f"><label for="rpBase">Address of respond.html for links (only if the workstation folder needs a sign-in; otherwise leave blank)</label><input id="rpBase" type="url" placeholder="https://newsomebh.com/respond/respond.html"></div>
+      <div class="f"><label for="rpPhoto">Student photo (optional; shown at the top of the page so the respondent knows the student; travels inside the page file, not in a link)</label>
+        <div class="rp-photo-row"><input id="rpPhoto" type="file" accept="image/*"><img id="rpPhotoThumb" alt="" hidden><button type="button" id="rpPhotoDrop" class="ghost" hidden>Remove the photo</button></div></div>
       <div class="f"><label for="rpStudent">Student label in the header (initials and ID)</label><input id="rpStudent"></div>
     </div>
     <div id="rpTargets"></div>
@@ -721,7 +725,7 @@ td input,td select{max-width:100%}
     <h3 class="sub">Item Wording for Respondent Pages</h3>
     <p class="method" style="margin-top:0">A respondent page carries the items of one instrument so an informant can answer it away from this form. The instruments are published forms, so the wording is not built into the workstation: paste each instrument's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go. The wording saves with this file and travels into every case file saved from it, and this device remembers it (browser storage, no student information), so a new IA-1 opened here already carries it: it is pasted once per instrument, not once per case.</p>
     <p class="method rp-dev" id="rpDevNote" hidden style="margin-top:0"><span id="rpDevText"></span> <button type="button" id="rpDevForget" class="ghost" style="font-size:12px;padding:2px 8px">Forget on this device</button></p>
-    <input type="text" name="rp.name" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.pron" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.video" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.terms" hidden aria-hidden="true" tabindex="-1">
+    <input type="text" name="rp.name" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.pron" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.video" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.base" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.photo" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.terms" hidden aria-hidden="true" tabindex="-1">
     <div class="grid2 rp-grid">
       <div class="f"><label for="rpwFast">FAST, 16 items <span class="rp-count" data-rpw="fast"></span></label><textarea id="rpwFast" name="rp.w.fast" rows="4" spellcheck="false" placeholder="1. ...&#10;2. ..."></textarea></div>
       <div class="f"><label for="rpwQabf">QABF, 25 items <span class="rp-count" data-rpw="qabf"></span></label><textarea id="rpwQabf" name="rp.w.qabf" rows="4" spellcheck="false"></textarea></div>
@@ -1378,7 +1382,7 @@ function renderAllTot(){Object.keys(INST).forEach(renderTot);}
 function snapshot(){const f={};$$('[name]').forEach(el=>{f[el.name]=el.type==='checkbox'?el.checked:el.value;});return f;}
 function applyFields(f){Object.keys(f).forEach(k=>{const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});}
 function collect(){return {form:'IA-1',rev:'2026-09',saved:new Date().toISOString(),counts:{inf:nInf(),int:+$('#nInt').value},fields:snapshot()};}
-function reset(){$('#infBody').innerHTML='';$('#intWrap').innerHTML='';$$('[name^="m."],[name^="plan."],[name^="hyp."],[name^="dec."],[name^="fast."],[name^="setup."],[name^="fa."],[name="rp.name"],[name="rp.pron"]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else el.value='';});}   /* v21.40 (9): rp.w.*, rp.terms and rp.video stay across Clear all */
+function reset(){$('#infBody').innerHTML='';$('#intWrap').innerHTML='';$$('[name^="m."],[name^="plan."],[name^="hyp."],[name^="dec."],[name^="fast."],[name^="setup."],[name^="fa."],[name="rp.name"],[name="rp.pron"],[name="rp.photo"]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else el.value='';});}   /* v21.40 (9): rp.w.*, rp.terms and rp.video stay across Clear all */
 function restore(d){reset();$('#gfBanner').hidden=true;setTimeout(()=>{if(typeof rpCounts==='function')rpCounts();},0);const c=d.counts||{};$('#nInf').value=c.inf||3;nInfPrev=nInf();$('#nInt').value=(c.int==null?2:c.int);const pv=String((d.fields||{})['pbq.ver']||'15');$('#pbqVer').value=pv;setPbqVer(pv);renderInf();renderAllInst();renderInt();applyFields(d.fields||{});renderAllTot();renderSummary();setTimeout(()=>{if(typeof rpDevFill==='function')rpDevFill();},0);}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`IA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
@@ -1538,7 +1542,7 @@ function rpCounts(){$$('.rp-count').forEach(el=>{const k=el.dataset.rpw,n=rpWord
 document.addEventListener('input',e=>{if(e.target&&e.target.name&&e.target.name.indexOf('rp.w.')===0)rpCounts();});
 /* v21.40d: the pasted wording, the instructions link and the reply email are remembered on this device (browser storage; no student
    information) and fill a fresh IA-1 where its fields are empty, so the wording is pasted once per instrument, not once per case */
-const RP_DEV='nbh.ia1.respondent',RP_DEV_SEL='[name^="rp.w."],[name="rp.video"],[name="m.email"]';
+const RP_DEV='nbh.ia1.respondent',RP_DEV_SEL='[name^="rp.w."],[name="rp.video"],[name="rp.base"],[name="m.email"]';
 function rpDevSave(){try{const o={};$$(RP_DEV_SEL).forEach(e=>{if(e.value.trim())o[e.name]=e.value;});if(Object.keys(o).length)localStorage.setItem(RP_DEV,JSON.stringify(o));else localStorage.removeItem(RP_DEV);rpDevNote();}catch(e){}}
 function rpDevFill(){try{const o=JSON.parse(localStorage.getItem(RP_DEV)||'{}');let n=0;Object.keys(o).forEach(k=>{const e=document.querySelector('[name="'+k+'"]');if(e&&!e.value.trim()){e.value=o[k];n++;}});if(n)rpCounts();rpDevNote();}catch(e){}}
 function rpDevNote(){const p=$('#rpDevNote');if(!p)return;let o={};try{o=JSON.parse(localStorage.getItem(RP_DEV)||'{}');}catch(e){}
@@ -1569,11 +1573,12 @@ function rpRenderTargets(){const list=rpChosen(),box=$('#rpTargets');
     list.map((t,k)=>{const o=rpTermsOf(t);return '<tr><td><b>'+gfEsc(t.label)+'</b><br><span class="rp-hint">'+gfEsc(t.src)+'</span></td><td><input data-rt="sing" data-k="'+k+'" value="'+gfEsc(o.sing)+'"></td><td><input data-rt="plur" data-k="'+k+'" value="'+gfEsc(o.plur)+'"></td><td><textarea data-rt="def" data-k="'+k+'" rows="2">'+gfEsc(o.def)+'</textarea></td></tr>';}).join('')+'</tbody></table>':'';}
 function rpTermsFromTable(){const list=rpChosen();return list.map((t,k)=>{const g=f=>{const e=document.querySelector('#rpTargets [data-rt="'+f+'"][data-k="'+k+'"]');return e?e.value.trim():'';};return {label:t.label,sing:g('sing')||t.label,plur:g('plur')||g('sing')||t.label,def:g('def')};});}
 function rpPerson(t){return {name:$('#rpName').value.trim(),pron:$('#rpPron').value,beh:t.sing,behs:t.plur};}
-function rpPayloadFor(t){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key],per=rpPerson(t),P=s=>NBH_RESPOND.personalize(s,per);
+function rpPayloadFor(t,opt){const key=$('#rpInst').value,items=rpWording(key),info=RP_INFO[key],per=rpPerson(t),P=s=>NBH_RESPOND.personalize(s,per);
   const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:$('#rpStudent').value.trim(),beh:t.label,behLabel:t.label,def:t.def,confirm:$('#rpConfirm').checked&&!!t.def,bcba:val('m.assessor')||'the BCBA',email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
     sub:'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(per.name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:info.scale,extras:RP_EXTRAS,
     subject:INST[key].title+' answers for Form IA-1 · '+t.label};
   const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:'Watch the instructions'}];
+  if(!(opt&&opt.link)){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}   /* v21.41b: the photo travels in the page file, never in a link */
   if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));
   if(key==='wefa'){p.open=info.open.map(o=>Object.assign({},o,{label:P(o.label)}));p.openFirst=true;p.openHeading=info.openHeading;}   /* v21.41 */
   if(key==='pbq')p.pbqVer=String(items.length);
@@ -1594,9 +1599,9 @@ function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpEx
   st.hidden=!bad.length;st.innerHTML=bad.map(gfEsc).join('<br>');$('#rpFxRow').style.display=key==='fast'?'':'none';
   ['rpSave','rpLink','rpPreview'].forEach(id=>{const b=$('#'+id);b.classList.toggle('off',!!bad.length);b.setAttribute('aria-disabled',bad.length?'true':'false');});
   const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
-  $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
+  $('#rpNote').textContent=served?(/^data:image\//.test(val('rp.photo'))?'The photo is in the page file; a link does not carry it.':''):'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
 function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t=>{st[t.label.toLowerCase()]={sing:t.sing,plur:t.plur,def:t.def};});rpTermsSave(st);
-  const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);put('rp.video',$('#rpVideo').value.trim());
+  const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);put('rp.video',$('#rpVideo').value.trim());put('rp.base',$('#rpBase').value.trim());
   const em=document.querySelector('[name="m.email"]');if(em&&!em.value){em.value=$('#rpEmail').value.trim();em.dispatchEvent(new Event('input',{bubbles:true}));}}
 function rpFileName(p){return 'IA-1_'+INST[p.inst].title+'_'+(p.behLabel||'behavior').replace(/[^\w.-]+/g,'_').slice(0,40)+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';}
 function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
@@ -1604,13 +1609,21 @@ function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     if(i===ts.length-1&&window.nbhUI)nbhUI.toast(ts.length===1?'Respondent page saved: '+name+'. Attach it to an email to each informant.':ts.length+' respondent pages saved, one per target behavior. Attach them to the emails.',{kind:'ok'});},i*500);});
   return rpFileName(rpPayloadFor(ts[0]));}
-function rpLinkUrl(t){const p=t?rpPayloadFor(t):rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
+function rpBaseUrl(){let b=($('#rpBase')?$('#rpBase').value:'').trim()||val('rp.base').trim();if(/^https?:\/\//i.test(b)){if(!/respond\.html$/i.test(b))b=b.replace(/\/?$/,'/')+'respond.html';return b;}
+  return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';}
+function rpLinkUrl(t){const p=t?rpPayloadFor(t,{link:true}):rpPayloadFor(rpTermsFromTable()[0]||{label:'',sing:'the behavior',plur:'the behaviors',def:''},{link:true});return rpBaseUrl()+NBH_RESPOND.payloadToHash(p);}
 function rpLinks(){return rpTermsFromTable().map(t=>({label:t.label,url:rpLinkUrl(t)}));}
 $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=val('m.email');
-  if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpFirstName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');if(!$('#rpVideo').value&&val('rp.video'))$('#rpVideo').value=val('rp.video');
+  if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpFirstName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');if(!$('#rpVideo').value&&val('rp.video'))$('#rpVideo').value=val('rp.video');if(!$('#rpBase').value&&val('rp.base'))$('#rpBase').value=val('rp.base');rpPhotoShow();
   rpCounts();rpFillTargets();rpRenderTargets();rpStatus();$('#rpDlg').showModal();});
 ['rpEmail','rpStudent','rpName'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));
-$('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
+$('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpBase').addEventListener('input',()=>{rpRemember();rpStatus();});
+function rpPhotoShow(){const ph=val('rp.photo'),ok=/^data:image\//.test(ph);$('#rpPhotoThumb').hidden=!ok;$('#rpPhotoDrop').hidden=!ok;if(ok)$('#rpPhotoThumb').src=ph;}
+function rpPhotoSet(v){const e=document.querySelector('[name="rp.photo"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));rpPhotoShow();rpStatus();}
+$('#rpPhoto').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const img=new Image();const url=URL.createObjectURL(f);
+  img.onload=()=>{const M=224,k=Math.min(1,M/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*k)),hh=Math.max(1,Math.round(img.height*k));const c=document.createElement('canvas');c.width=w;c.height=hh;c.getContext('2d').drawImage(img,0,0,w,hh);
+    URL.revokeObjectURL(url);rpPhotoSet(c.toDataURL('image/jpeg',0.72));e.target.value='';};img.onerror=()=>{URL.revokeObjectURL(url);$('#rpNote').textContent='That file is not an image the browser can read.';};img.src=url;});
+$('#rpPhotoDrop').addEventListener('click',()=>rpPhotoSet(''));$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
 $('#rpTarget').addEventListener('change',()=>{rpRenderTargets();rpStatus();});
 $('#rpTargets').addEventListener('input',()=>{rpRemember();rpStatus();});   /* typed terms survive a change of target */
 function rpOff(){if(!$('#rpSave').classList.contains('off'))return false;const st=$('#rpStatus');st.classList.remove('rp-flash');void st.offsetWidth;st.classList.add('rp-flash');st.scrollIntoView({block:'nearest'});return true;}
