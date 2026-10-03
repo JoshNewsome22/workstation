@@ -40,7 +40,7 @@ const TXT0={
   h2:'STEP 2 : YOU SELECT WHAT TO TEACH YOUR LEARNER\n**Teaching Targets:** This page is for selecting which behaviors you target for acquisition skills or replacement behaviors for your learner. **This page is where you choose what to teach your learner!**\n\n**Prerequisite Skills:** Ensure the learner has mastered the necessary prerequisite skills required for a new skill before working on teaching that new skill. For example, ensure that the learner can “attend” to an instructor (aka pay attention) for a designated amount of time before working on teaching academic skills that require the student to attend for an extended period and then answer complex questions. Another Example: If teaching a learner how to raise their hand, select a picture, or make a gesture for attention, ensure that the learner has the physical capabilities required to make the necessary movements before attempting to teach the new skill.\n\n__**Steps:**__\n1. Select the skill you would like to teach your learner from the list of choices on the front of this page. If none of the options listed on the front of this page are skills that you are working on, write the name of the skill on the blank picture.\n2. Now, place the picture of the skill you would like your student to learn in the gray box on the next page under the word “First.”',
   h3:'STEP 3 : DELIVER TOKEN ({TOKENS}), REINFORCE BEHAVIOR\nPlace the picture of the skill you are teaching your learner under the word **FIRST**. The activity that your learner will earn should be placed under the word **THEN**.\n\n__**Tokens**__:\nThis page is where your learner will also place their earned tokens in the corresponding boxes once they have earned them. There are {n} boxes, so once your learner earns {n} tokens, they should receive the item they were working for, located under the **THEN** box.\n\n__**Not So FAST**__: Before starting, decide how long you would like your learner to display the behavior or how many responses you would like to occur before they receive a token. For example, would you like your learner to answer three problems and then receive one token or work for five minutes and then receive a token? These rules are known as the schedule of reinforcement, and it is essential to ensure that you are not requiring too much and setting the bar too high for your learner. A good rule of thumb is that when teaching a brand new skill, it’s best to initially provide a token after each desired behavior. When maintaining a skill, you can require more responses or use “time intervals” to earn the token.'
 };
-function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:'av:boy',n:'5',wm:'12',order:'all',sp_card:'ch:0',sp_size:'large'},DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true},photos:[],photo:[cello()],tok:[cello('tk:star')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
+function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:'av:boy',n:'5',wm:'12',order:'all',sp_card:'ch:0',sp_size:'large',panel:'light'},DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true},photos:[],photo:[cello()],tok:[cello('tk:star')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
 let S=blank();
 const nTok=()=>Math.max(3,Math.min(10,Math.round(num(S.meta.n)||5)));
 function ensure(){
@@ -121,53 +121,64 @@ function qrSvg(url){url=String(url||'').trim();if(!url||typeof qrcode!=='functio
 let QRC={url:null,svg:''};
 function qrBox(){const u=String(S.meta.qr||'').trim();if(!u)return '';if(QRC.url!==u){QRC={url:u,svg:qrSvg(u)};}return QRC.svg?'<div class="qr">'+QRC.svg+'</div>':'';}
 
-/* ---------------- the pages ---------------- */
+/* ---------------- the pages ----------------
+   The book page is 11 x 7.33 in (the samples' size), drawn centred on Letter landscape with trim marks, or
+   stretched to the full Letter page (only the white space grows) when "Fill the Letter page" is ticked. */
 const IN=v=>v.toFixed(3)+'in';
+const CANVAS_H=()=>S.chk.fill?8.5:7.33, FRAME_W=10.1, PANEL_W=9.5;
+const frameH=()=>CANVAS_H()-.24, panelH=()=>frameH()-.6;
+function trimMarks(){if(S.chk.fill)return '';const h=CANVAS_H(),y0=(8.5-h)/2,y1=y0+h;let o='';
+  [[0,y0],[11-.3,y0],[0,y1],[11-.3,y1]].forEach(([x,y])=>{o+='<i class="trim h" style="left:'+IN(x)+';top:'+IN(y)+'"></i>';});
+  [[0,y0-.3],[11-.01,y0-.3],[0,y1],[11-.01,y1]].forEach(([x,y])=>{o+='<i class="trim v" style="left:'+IN(x)+';top:'+IN(y)+'"></i>';});return o;}
 function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];const col=S.meta[t[2]]||DEF[t[2]];
-  return '<div class="pg '+side+(side==='back'?' bk':'')+(cls?' '+cls:'')+'" data-kind="'+kind+'" data-side="'+side+'"><div class="area"><div class="tab" style="top:calc('+(i*25)+'% + .04in);height:calc(25% - .08in);background:'+esc(col)+'"><span>'+t[1]+'</span></div><div class="frame" style="background:'+esc(S.meta.c_frame||DEF.c_frame)+'">';}
+  return '<div class="pg '+side+(side==='back'?' bk':'')+(S.chk.fill?' fill':'')+(cls?' '+cls:'')+'" data-kind="'+kind+'" data-side="'+side+'">'+trimMarks()+'<div class="cv"><div class="tab" style="top:calc('+(i*25)+'% + .05in);height:calc(25% - .1in);background:'+esc(col)+'"><span>'+t[1]+'</span></div><div class="frame" style="background:'+esc(S.meta.c_frame||DEF.c_frame)+'">';}
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(25,num(S.meta.wm)||12))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
-function cardHtml(o,size,opts){opts=opts||{};const fs=(opts.fs||size*10.4).toFixed(1);const other=opts.other;
-  return '<div class="card'+(opts.ul?' ul':'')+'" style="width:'+IN(size)+';height:'+IN(size)+';font-size:'+fs+'pt"><div class="cl">'+esc(other?'Other':(lbl(o)||''))+'</div><div class="cp">'+(other?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
+function cardHtml(o,size,opts){opts=opts||{};const other=opts.other;const st=(opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):'width:'+IN(size)+';height:'+IN(size));
+  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+esc(other?'Other':(lbl(o)||''))+'</div><div class="cp">'+(other?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
 function tokCard(size){return '<div class="card tok" style="width:'+IN(size)+';height:'+IN(size)+'"><div class="cp">'+pic(S.tok[0],'')+'</div></div>';}
-function pageGrid(kind){const bg=S.bg[kind==='ch'?0:1],wm=has(bg);
-  const title=kind==='ch'?'<span class="ul">What Are You Earning?</span>':'<span class="ul">First: Teaching Targets</span>';
-  return pgOpen(kind,'front')+'<div class="panel'+(wm?'':' grey')+'"'+(wm?' style="background:#f3f4f6"':'')+'>'+wmHtml(bg)+'<div class="ttl">'+title+'</div><div class="grid6">'+Array.from({length:6},()=>'<div class="bx"><span class="dot"></span></div>').join('')+'</div>'+qrBox()+'</div>'+pgClose;}
-function slotDims(){const n=nTok(),rows=n>5?2:1,sz=rows===1?1.75:1.5;return{n,rows,sz,card:sz-.03,park:sz+.05,h:rows*sz+(rows-1)*.1+.22};}
-function stripHtml(){const d=slotDims();const per=Math.ceil(d.n/d.rows);let h='<div class="strip" style="height:'+IN(d.h)+'">';
-  for(let r=0;r<d.rows;r++){h+='<div class="srow">'+S.caps.slice(r*per,(r+1)*per).map(c=>'<div class="slot'+(d.rows>1?' sm':'')+'" style="width:'+IN(d.sz)+';height:'+IN(d.sz)+'"><span class="ca">'+esc(c.a)+'</span><span class="dot"></span><span class="cb">'+esc(c.b)+'</span></div>').join('')+'</div>';}
+function pageGrid(kind){const bg=S.bg[kind==='ch'?0:1],wm=has(bg);const pcls=S.meta.panel==='grey'?'grey':'light';
+  const title=kind==='ch'?'What Are You Earning?':'First: Teaching Targets';
+  return pgOpen(kind,'front')+'<div class="panel '+pcls+'">'+wmHtml(bg)+'<div class="ttl" data-frac=".8"><span class="ul">'+esc(title)+'</span></div><div class="grid6">'+Array.from({length:6},()=>'<div class="bx"><span class="dot"></span></div>').join('')+'</div>'+qrBox()+'</div>'+pgClose;}
+/* the token strip: 1.95 x 1.8 in slots in one row of up to five; six to ten tokens wrap to two rows of 1.95 x 1.45 */
+function slotDims(){const n=nTok(),rows=n>5?2:1,w=1.95,h=rows===1?1.8:1.45;return{n,rows,w,h,card:1.72,band:rows*h+(rows-1)*.1+.24};}
+function stripHtml(){const d=slotDims();const per=Math.ceil(d.n/d.rows);let h='<div class="strip" style="height:'+IN(d.band)+'">';
+  for(let r=0;r<d.rows;r++){h+='<div class="srow">'+S.caps.slice(r*per,(r+1)*per).map(c=>'<div class="slot'+(d.rows>1?' sm':'')+'" style="width:'+IN(d.w)+';height:'+IN(d.h)+'"><span class="ca">'+esc(c.a)+'</span><span class="dot"></span><span class="cb">'+esc(c.b)+'</span></div>').join('')+'</div>';}
   return h+'</div>';}
 function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.poss==='bare'&&/s$/i.test(f)?'’':'’s';const st=String(S.meta.setting||'').trim();
   return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(S.meta.layout==='rules'&&st?esc(st)+' ':'')+'Chart';}
-function photoHtml(side){const o=S.photo[0];const inner=has(o)?pic(o,''):(()=>{const a=S.meta.avatar||'av:boy';return pic({k:a},'');})();return '<div class="bd-photo '+side+'">'+inner+'</div>';}
-function presetBox(o,cls,ul){return '<div class="bx '+cls+'">'+(has(o)?cardHtml(o,2.5,{ul}):'<span class="dot"></span>')+'</div>';}
-function pageBoard(){const d=slotDims();
+function photoHtml(side){const o=S.photo[0];const inner=has(o)?pic(o,''):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
+function presetBox(o,cls,ul,sz){return '<div class="bx sq '+cls+'" style="width:'+IN(sz)+';height:'+IN(sz)+'">'+(has(o)?cardHtml(o,sz,{ul}):'<span class="dot"></span>')+'</div>';}
+function pageBoard(){const d=slotDims(),ph=frameH()-.3-d.band;   /* the panel's height on the Board */
   let inner;
   if(S.meta.layout==='rules'){const rules=S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
-    const k=rules.length,rw=Math.min(1.7,(8.5-2.5-.2-(k-1)*.12)/k),rh=rw*1.41;
-    inner=photoHtml('r')+'<div class="ttl sm rules" style="padding-right:1.3in"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+IN(rw)+';font-size:'+Math.max(14,Math.min(24,rw*13.5)).toFixed(1)+'pt"><div class="rl">'+esc(lbl(o))+'</div><div class="rp" style="width:'+IN(rw)+';height:'+IN(rh)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx green"><span class="dot"></span></div></div></div>';}
-  else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl sm"><span class="ul">'+nameTitle()+'</span></div><div class="ftrow"><div class="ftcol"><span class="lab">First</span>'+presetBox(S.ft[0],'grey',false)+'</div><div class="ftcol"><span class="lab">Then</span>'+presetBox(S.ft[1],'green',true)+'</div></div>';
-  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+IN(d.h)+'">'+inner+qrBox()+'</div>'+stripHtml()+pgClose;}
+    const k=rules.length,cw=(PANEL_W-2.6-.3-(k-1)*.15)/k,bx=Math.min(2.6,ph-2.1),rp=Math.min(2.4,ph-2.05);   /* the Earn column and the pictures shrink when a two-row strip leaves the panel short */
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+IN(cw)+'"><div class="rl">'+esc(lbl(o))+'</div><div class="rp" style="height:'+IN(rp)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div>'+presetBox(null,'green',false,bx)+'</div></div>';}
+  else{const bx=Math.min(2.6,ph-1.0-.72-.12);
+    inner=photoHtml('l')+photoHtml('r')+'<div class="ttl sm" data-frac=".7"><span class="ul">'+nameTitle()+'</span></div><div class="ftrow"><div class="ftcol"><span class="lab">First</span>'+presetBox(S.ft[0],'grey',false,bx)+'</div><div class="ftcol"><span class="lab">Then</span>'+presetBox(S.ft[1],'green',true,bx)+'</div></div>';}
+  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+IN(d.band)+'">'+inner+qrBox()+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
-function pageTokens(){const d=slotDims(),rows=parkRows(d.n);
-  return pgOpen('tk','front')+'<div class="panel"><div class="tkcorner l">'+pic(S.tok[0],'')+'</div><div class="tkcorner r">'+pic(S.tok[0],'')+'</div><div class="ttl sm"><span class="ul">Tokens!!!</span></div><div class="park">'+rows.map(k=>'<div class="prow'+(k<=3&&d.n<=6?' wide':'')+'">'+Array.from({length:k},()=>'<div class="ybx" style="width:'+IN(d.park)+';height:'+IN(d.park)+'"><span class="dot"></span></div>').join('')+'</div>').join('')+'</div><div class="foot">See Instructions On The Back</div>'+qrBox()+'</div>'+pgClose;}
+function pageTokens(){const n=nTok(),rows=parkRows(n),per=Math.max(...rows),sz=Math.min(2.2,(PANEL_W-.6-(per-1)*.3)/per);
+  return pgOpen('tk','front')+'<div class="panel"><div class="tkcorner l">'+pic(S.tok[0],'')+'</div><div class="tkcorner r">'+pic(S.tok[0],'')+'</div><div class="ttl sm" data-frac=".8"><span class="ul">Tokens!!!</span></div><div class="park">'+rows.map(k=>'<div class="prow'+(k<=3&&n<=6?' wide':'')+'">'+Array.from({length:k},()=>'<div class="ybx" style="width:'+IN(sz)+';height:'+IN(sz)+'"><span class="dot"></span></div>').join('')+'</div>').join('')+'</div><div class="foot">See Instructions On The Back</div>'+qrBox()+'</div>'+pgClose;}
 const BACKT={ch:['cb','Choice Board'],tg:['tt','Teaching Targets'],bd:['tb','Token Board'],tk:['te','Token Economy']};
 function inline(s){s=esc(s);return s.replace(/\*\*\*(.+?)\*\*\*/g,'<b><i>$1</i></b>').replace(/__(.+?)__/g,'<u>$1</u>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\*(.+?)\*/g,'<i>$1</i>');}
 function fill(t){const n=nTok(),tn=tokName();return String(t||'').replace(/\{n\}/g,WORDS[n]).replace(/\{TOKENS\}/g,plural(tn).toUpperCase()).replace(/\{tokens\}/g,plural(tn)).replace(/\{token\}/g,tn);}
 function md(t){return fill(t).replace(/\r/g,'').split(/\n\s*\n/).map(p=>{p=p.trim();if(!p)return '';let h='';if(/^##\s*/.test(p)){const i=p.indexOf('\n');h='<h4>'+inline((i<0?p:p.slice(0,i)).replace(/^##\s*/,''))+'</h4>';p=i<0?'':p.slice(i+1).trim();}return h+(p?'<p>'+inline(p).replace(/\n/g,'<br>')+'</p>':'');}).join('');}
-function pageBack(kind){const [key,title]=BACKT[kind];const credit=kind==='tk';
-  return pgOpen(kind,'back')+'<div class="band"><div class="bttl">'+esc(title)+'</div><div class="bbody fit"'+(credit?' style="padding-bottom:.8in"':'')+'>'+md(S.txt[key])+(credit?'<div class="credit"><img src="'+(window.NBH_LOGO||'')+'" alt=""><span>'+esc(S.meta.credit||'')+'</span></div>':'')+'</div></div>'+pgClose;}
+function pageBack(kind,cont){const [key,title]=BACKT[kind];const credit=kind==='tk'&&!cont;
+  return pgOpen(kind,'back',cont?'contd':'')+'<div class="band"><div class="bttl">'+esc(title)+'</div><div class="bbody fit" data-min="15">'+(cont?'<p class="cont">'+esc(title)+', continued</p>'+cont:md(S.txt[key]))+'</div>'+(credit?'<div class="credit"><img src="'+(window.NBH_LOGO||'')+'" alt=""><span>'+esc(S.meta.credit||'')+'</span></div>':'')+'</div>'+pgClose;}
 function stepHtml(key){const t=fill(S.txt[key]||'').replace(/\r/g,'');const i=t.indexOf('\n');const head=i<0?t:t.slice(0,i),body=i<0?'':t.slice(i+1);return '<div class="step">'+esc(head.trim())+'</div>'+md(body);}
 function pagesHowto(){return '<div class="pg front" data-kind="how1"><div class="howto"><div class="h1">HOW TO USE</div><div class="cols"><div class="col bbody fit" style="height:6.6in">'+stepHtml('h1')+'</div><div class="col bbody fit" style="height:6.6in">'+stepHtml('h2')+'</div></div></div></div>'+
   '<div class="pg front" data-kind="how2"><div class="howto"><div class="h1">HOW TO USE</div><div class="bbody fit" style="height:6.6in;max-width:8.2in;margin:0 auto">'+stepHtml('h3')+'</div></div></div>';}
-function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';
-  if(!list.length&&!true)return '';
-  return '<div class="pg front" data-kind="cards-'+kind+'"><div class="cardsheet" style="grid-template-columns:repeat(4,2.5in);gap:.12in">'+list.map(o=>cardHtml(o,2.5,{ul})).join('')+cardHtml(null,2.5,{ul,other:true})+'</div></div>';}
-function sheetTokens(){const d=slotDims();return '<div class="pg front" data-kind="cards-tk"><div class="cardsheet" style="grid-template-columns:repeat(5,'+IN(d.card)+');gap:.15in">'+Array.from({length:d.n},()=>tokCard(d.card)).join('')+'</div></div>';}
+/* card sheets: a grid of cards with light grey cut lines in the gaps (the lines sit at the gap centres) */
+function sheetGrid(cols,rows,w,h,gap,pageW,pageH,inner,cls){const W=cols*w+(cols-1)*gap,H=rows*h+(rows-1)*gap;
+  return '<div class="cardsheet'+(cls?' '+cls:'')+'" style="left:'+IN((pageW-W)/2)+';top:'+IN(Math.max(.3,(pageH-H)/2))+';right:auto;bottom:auto;width:'+IN(W)+';height:'+IN(H)+';grid-template-columns:repeat('+cols+','+IN(w)+');grid-auto-rows:'+IN(h)+';gap:'+IN(gap)+';background-image:linear-gradient(to right,#c4c4c4 1px,transparent 1px),linear-gradient(to bottom,#c4c4c4 1px,transparent 1px);background-size:'+IN(w+gap)+' '+IN(h+gap)+';background-position:'+IN(w+gap/2)+' '+IN(h+gap/2)+'">'+inner+'</div>';}
+function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';const cards=list.map(o=>cardHtml(o,2.5,{ul})).concat([cardHtml(null,2.5,{ul,other:true})]);
+  return '<div class="pg front" data-kind="cards-'+kind+'">'+sheetGrid(4,Math.ceil(cards.length/4),2.5,2.5,.12,11,8.5,cards.join(''),'top')+'</div>';}
+function sheetTokens(){const d=slotDims();return '<div class="pg front" data-kind="cards-tk">'+sheetGrid(5,Math.ceil(d.n/5),d.card,d.card,.15,11,8.5,Array.from({length:d.n},()=>tokCard(d.card)).join(''),'top')+'</div>';}
 function spareCard(){const v=S.meta.sp_card||'ch:0';if(v==='tok')return{tok:true};if(v==='own')return{o:{k:S.sp[0].k,ph:S.sp[0].ph,l:S.meta.sp_label||''}};const m=/^(ch|tg):(\d)$/.exec(v);return{o:m?S[m[1]][+m[2]]:S.ch[0]};}
 function sheetSpare(){const big=S.meta.sp_size!=='small',cols=big?5:6,sz=big?1.5:1.25,gap=.06,rows=Math.floor((10.4+gap)/(sz+gap)),c=spareCard();
-  const one=c.tok?tokCard(sz):cardHtml(c.o,sz,{ul:true});
-  return '<div class="pg port front" data-kind="spare"><div class="cardsheet spare" style="grid-template-columns:repeat('+cols+','+IN(sz)+');gap:'+IN(gap)+'">'+Array.from({length:cols*rows},()=>one).join('')+'</div></div>';}
+  const one=c.tok?tokCard(sz):cardHtml(c.o,sz,{ul:true,cls:'sp'});
+  return '<div class="pg port front" data-kind="spare">'+sheetGrid(cols,rows,sz,sz,gap,8.5,11,Array.from({length:cols*rows},()=>one).join(''),'spare')+'</div>';}
 function pageFront(kind){return kind==='ch'||kind==='tg'?pageGrid(kind):kind==='bd'?pageBoard():pageTokens();}
 const PGNAME={ch:'Choices',tg:'Targets',bd:'Board',tk:'Tokens'};
 function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.map(t=>t[0]).filter(k=>c['pg_'+k]);const pages=[];
@@ -177,16 +188,42 @@ function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.ma
   const cards=()=>{if(c.cs_ch)pages.push({label:'Card sheet: the choices',html:sheetCards('ch')});if(c.cs_tg)pages.push({label:'Card sheet: the targets',html:sheetCards('tg')});if(c.cs_tk)pages.push({label:'Card sheet: the tokens',html:sheetTokens()});};
   if(order==='fronts')fronts();else if(order==='duplex'){duplex();howto();}else if(order==='cards')cards();else if(order==='spare')pages.push({label:'A sheet of one card (portrait)',html:sheetSpare()});else{duplex();howto();cards();}
   return pages;}
+/* a back whose text does not fit at 15 pt continues on a second back page; in a duplex order a blank sheet keeps
+   every back on the reverse of its front */
+function paginate(root,dup){let guard=0;
+  for(let pg=root.querySelector('.pg.back');pg&&guard++<40;pg=pg.nextElementSibling){
+    if(!pg.classList.contains('back'))continue;const body=pg.querySelector('.bbody');if(!body)continue;
+    fitOne(body);if(body.scrollHeight<=body.clientHeight+1)continue;
+    const kids=[...body.children].filter(e=>!e.classList.contains('credit')&&!e.classList.contains('cont'));const moved=[];
+    while(body.scrollHeight>body.clientHeight+1&&kids.length>1){const k=kids.pop();moved.unshift(k);k.remove();}
+    if(!moved.length)continue;
+    const tmp=document.createElement('div');tmp.innerHTML=(dup?'<div class="pg front blank" data-kind="blank" data-label="blank sheet (keeps the next back on the reverse of its front)"></div>':'')+pageBack(pg.dataset.kind,moved.map(e=>e.outerHTML).join(''));
+    const nodes=[...tmp.children];nodes[nodes.length-1].dataset.label=pg.dataset.label+', continued';let after=pg;nodes.forEach(n=>{after.insertAdjacentElement('afterend',n);after=n;});}
+}
+function relabel(root){root.querySelectorAll('.pglabel').forEach(e=>e.remove());const pgs=[...root.querySelectorAll('.pg')];
+  pgs.forEach((p,i)=>{const l=document.createElement('p');l.className='pglabel';l.textContent='Sheet '+(i+1)+' of '+pgs.length+': '+(p.dataset.label||'');p.insertAdjacentElement('beforebegin',l);});return pgs.length;}
 function renderOut(){
-  const pages=bookPages();
-  $('#book').innerHTML=pages.map((p,i)=>'<p class="pglabel">Sheet '+(i+1)+' of '+pages.length+': '+esc(p.label)+'</p>'+p.html).join('');
-  const kinds=TABS.map(t=>t[0]).filter(k=>S.chk['pg_'+k]).length,order=S.meta.order||'all';
-  $('#prevLine').textContent=pages.length+' sheet'+(pages.length===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Landscape Letter'+(order==='spare'?' except this sheet, which is portrait':'')+'; print at 100%.';
+  const pages=bookPages(),order=S.meta.order||'all';
+  $('#book').innerHTML=pages.map(p=>p.html.replace(/^<div class="pg /,'<div data-label="'+esc(p.label)+'" class="pg ')).join('');
   $('#chOut').innerHTML='<div class="book">'+pageGrid('ch')+'</div>';$('#tgOut').innerHTML='<div class="book">'+pageGrid('tg')+'</div>';$('#bdOut').innerHTML='<div class="book">'+pageBoard()+'</div>';
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
-  syncState();fitAll();
+  const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape')+(S.chk.fill||order==='spare'||order==='cards'?'':', the 11 x 7.33 in page centred with trim marks')+'; print at 100%.';
+  syncState();
 }
-function fitAll(){$$('.fit').forEach(el=>{if(!el.clientHeight)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize)*72/96;let guard=0;while(el.scrollHeight>el.clientHeight+1&&fs>8&&guard++<30){fs-=.5;el.style.fontSize=fs+'pt';}});}
+/* the fits need the pages laid out: the sections that hold a book are shown off screen while measuring when their view is not the current one */
+function measured(fn){const secs=['preview','backs','choices','targets','board'].map(v=>$('section.only-'+v)).filter(Boolean);const forced=secs.filter(s=>getComputedStyle(s).display==='none');
+  forced.forEach(s=>{s.style.cssText='display:block!important;position:absolute;left:-30000px;top:0;width:12in;visibility:hidden';});
+  try{return fn();}finally{forced.forEach(s=>{s.style.cssText='';});}}
+/* fits measured on the laid-out page: a title to a share of the panel width, a rules-row label to two lines
+   (26 pt down to 20 pt), a back's text to its panel (16 pt down to its minimum) */
+function fitOne(el){if(!el.clientHeight)return;el.style.fontSize='';const min=num(el.dataset.min)||8;let fs=parseFloat(getComputedStyle(el).fontSize)*72/96,g=0;while(el.scrollHeight>el.clientHeight+1&&fs>min&&g++<30){fs=Math.max(min,fs-.5);el.style.fontSize=fs+'pt';}}
+function fitAll(){
+  $$('.fit').forEach(fitOne);
+  $$('.ttl[data-frac]').forEach(el=>{const sp=el.firstElementChild;if(!sp||!el.clientWidth)return;el.style.fontSize='';const cs=getComputedStyle(el);const room=(el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))*(num(el.dataset.frac)||.8);let fs=parseFloat(cs.fontSize),g=0;while(sp.offsetWidth>room&&fs>24&&g++<60){fs-=2;el.style.fontSize=fs+'px';}});
+  $$('.card .cl').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;while(el.scrollWidth>el.clientWidth+1&&fs>10&&g++<30){fs-=1;el.style.fontSize=fs+'px';}});   /* a long card label shrinks rather than clips */
+  $$('.rule .rl').forEach(el=>{if(!el.clientHeight)return;el.style.fontSize='';el.style.maxHeight='2.1em';let fs=26;while(el.scrollHeight>el.clientHeight+1&&fs>20){fs-=1;el.style.fontSize=fs+'pt';}if(el.scrollHeight>el.clientHeight+1)el.style.maxHeight='';});   /* two lines, 26 pt down to 20; a third line only when 20 pt still needs it */
+}
 window.addEventListener('beforeprint',fitAll);
 
 /* ---------------- events ---------------- */
