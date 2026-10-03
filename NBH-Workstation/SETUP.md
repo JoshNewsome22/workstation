@@ -5389,3 +5389,32 @@ definition question.
 test over all 43 forms, the shared-block check and the one-file check
 pass. Blank prints: IA-1 unchanged at 19 pages; IN-1 six to seven
 pages for the reason above; SV-1, CF-1 unchanged.
+
+### The Iwata et al. (2013) figures, checked against the article
+
+With the article in hand, every figure IA-1 quotes from Iwata,
+DeLeon and Roscoe (2013) was checked: 151 individuals and 196 pairs
+of FASTs; item-by-item agreement 71.5% (28.6% to 100%); outcome
+agreement 64.8%, 67.1% single-function and 63.3% multiple-function;
+the sixteen Table 3 item values behind the Pub. column and Figure 3;
+antecedent items 78.9% against consequence items 67.7%; the Table 2
+summary of the MAS (41% to 63%) and QABF (median 78%); 59 individuals
+and 69 functional analyses, correspondence 63.8% (social-positive
+77.8%, social-negative 56.0%, automatic-positive 61.5%), 70.8% with
+informant agreement and 100% for social-positive, 54.6% for
+social-negative; N/A items excluded from agreement; the same day or
+within 2 to 3 days, 15 to 20 minutes; the 1, .5, 0 correspondence
+score; the open-ended section as a check for inconsistencies; and the
+sentence that most matching FAST outcomes were decided by a
+one-question difference. All match. One sentence the audit had
+removed was put back in accurate form: the article does describe
+within-1 agreement on a 6-point range as about 50% chance, equivalent
+to a yes/no item; the captions now say so and still draw the exact
+value under uniform responding. The Guide's flag now reads that the
+Iwata figures were checked and the other studies' figures remain
+transcribed. The FAST form itself (Florida Center on Self-Injury,
+2005) was compared with IA-1's Section 1 and informant fields: the
+relationship, years and months known, daily contact, situations,
+frequency, severity, most and least likely situations by days and
+times, settings and activities and persons present, before, after and
+current treatments are all present.
