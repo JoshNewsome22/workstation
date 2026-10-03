@@ -91,7 +91,14 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   await page.click('#chTbl .pick[data-i="5"] button[data-pick]');await sleep(150);
   await page.evaluate(()=>{const c=document.createElement('canvas');c.width=90;c.height=60;const x=c.getContext('2d');x.fillStyle='#36c';x.fillRect(0,0,90,60);c.toBlob(b=>{const dt=new DataTransfer();dt.items.add(new File([b],'bus.png',{type:'image/png'}));const i=document.querySelector('#photoIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));});});await sleep(600);
   check('an uploaded photo becomes choice 6 and prints on the card sheet',await page.evaluate(()=>S.photos.length===1&&S.ch[5].ph===S.photos[0].id&&S.photos[0].label==='bus'&&!!document.querySelector('#book .pg[data-kind="cards-ch"] .card:nth-child(6) img')));
-  /* the student photo and the token */
+  /* several pictures at once: "Choose the six pictures", tapped in order, go on cards 1 to 6 with their own names */
+  await page.click('#chSix');await sleep(250);
+  const six=await page.evaluate(()=>[...document.querySelectorAll('#pdGrid button[data-k]')].map(b=>b.dataset.k).filter(k=>!k.includes(':')).slice(40,46));
+  for(const k of six){await page.click('#pdGrid button[data-k="'+k+'"]');await sleep(40);}
+  const badges=await page.evaluate(()=>[...document.querySelectorAll('#pdGrid button.on')].length);
+  await page.click('#pdGo');await sleep(300);
+  check('several at once: six pictures tapped in order fill choices 1 to 6, labels cleared to the pictures\u2019 names',badges===6&&await page.evaluate(k=>S.ch.every((o,i)=>o.k===k[i]&&!o.l),six),six.join(' '));
+
   await page.click('#viewSeg button[data-view="setup"]');await page.click('#phPick button[data-pick]');await sleep(150);await page.selectOption('#pdCat','_photos');await sleep(100);await page.click('#pdGrid button[data-ph]');await sleep(250);
   check('the photo replaces the avatar in both Board corners',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="bd"] .bd-photo img').length===2));
   check('the default token is the assessor\u2019s star art in the Tokens corners and on the token cards',await page.evaluate(()=>S.tok[0].k==='tk:star'&&document.querySelectorAll('#book .pg[data-kind="tk"] .tkcorner .card.tok img').length===2&&document.querySelectorAll('#book .pg[data-kind="cards-tk"] .card.tok img').length===5));

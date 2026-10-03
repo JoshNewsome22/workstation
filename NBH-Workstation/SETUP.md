@@ -5983,3 +5983,15 @@ The check compares a 72 pt line of text with a 1 in box, and should read
 1.00. A higher number means the browser is enlarging text, which tells us
 what the iPad does. In Chrome the printed pages are pixel for pixel
 unchanged.
+
+### Choosing several pictures at once (v21.42g)
+
+Choices and Targets each have a "Choose the six pictures" button. It
+opens the picture picker with "Choose several" ticked. Each tap adds a
+picture to the picks and shows its number, a second tap takes it out,
+and "Put them on the cards" places them on cards 1 to 6 in the order
+tapped, each labelled with its own name. A photo uploaded while picking
+joins the picks. The picker opened from one card's own Choose button
+has the same "Choose several" switch, which fills that card and the
+ones after it. Without the switch a tap still sets one card and closes
+the picker. The token, photo and background pickers have no switch.
