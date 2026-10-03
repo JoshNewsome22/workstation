@@ -135,7 +135,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
     return r;},TE);
   const NO=' Nothing was changed.';
   ok('readText: the partner\'s own file',RT.own.ok&&RT.own.S.meta.beh==='Sits'&&RT.own.saved===TE.saved&&RT.own.file==='TE-1_Sam_2026-10-03.json',RT.own);
-  ok('readText: this form\'s own file refused',!RT.mine.ok&&RT.mine.msg==="That is a file this form saved, not Form TE-1's."+NO,RT.mine);
+  ok('readText: this form\'s own file refused',!RT.mine.ok&&RT.mine.msg==="That is a file this form saved, not Form TE-1\u2019s."+NO,RT.mine);
   ok('readText: packet refused',!RT.packet.ok&&RT.packet.msg==='That file is a student packet, not a file Form TE-1 saved.'+NO,RT.packet);
   ok('readText: another form refused',!RT.sm.ok&&RT.sm.msg==='That file was saved by Form SM-1, not by Form TE-1.'+NO,RT.sm);
   ok('readText: unreadable refused',[RT.noS,RT.garbage,RT.empty,RT.caseBad,RT.htmlNo].every(x=>!x.ok&&x.msg==='That file could not be read as a file Form TE-1 saved.'+NO),[RT.noS,RT.garbage,RT.empty,RT.caseBad,RT.htmlNo]);
@@ -181,7 +181,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   await page.click('[data-lk="on"]');
   s=await A(()=>({st:nbhLink.state(),lk:F.S.meta.lk,vis:['compare','file','beside','unlink'].map(k=>!document.querySelector('[data-lk="'+k+'"]').hidden),sib:document.querySelector('.lk-sib').hidden,
     status:document.querySelector('.lk-status').textContent,role:document.querySelector('.lk-status').getAttribute('role'),next:document.querySelector('.lk-next').textContent}));
-  ok('Link: on, not compared yet',s.st.on&&s.lk==='{"v":1,"base":{},"on":1}'&&s.status==='Linked with Form TE-1 · not compared yet.'&&s.role==='status'&&s.next==='Changes made on Form TE-1 after this show at the next compare.',s);
+  ok('Link: on, not compared yet',s.st.on&&s.lk==='{"v":1,"base":{},"on":1}'&&s.status==='Linked with Form TE-1 · not compared yet.'&&s.role==='status'&&s.next==='Outside the workstation, this book reads Form TE-1 from a file: press Save data on Form TE-1, then Open a file Form TE-1 saved, here. Changes made there since then show only when you compare again.',s);
   ok('alone: Compare and Open beside hidden, file button shown, no sibling link on about:',JSON.stringify(s.vis)==='[false,true,false,true]'&&s.sib===true,s);
 
   /* compare reads only */
@@ -204,7 +204,11 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   await page.click('tr[data-key="n"] button[data-act="keep"]');const x2=await ap('n');
   await page.click('tr[data-key="n"] button[data-act="keep"]');const x3=await ap('n');
   const kl=await A(()=>document.querySelector('tr[data-key="n"] button[data-act="keep"]').textContent);
-  ok('Take/Keep: aria-pressed and exclusive',JSON.stringify([x0,x1,x2,x3])==='[["false","false"],["true","false"],["false","true"],["false","false"]]'&&kl==="Keep this book's",[x0,x1,x2,x3,kl]);
+  ok('Take/Keep: aria-pressed and exclusive',JSON.stringify([x0,x1,x2,x3])==='[["false","false"],["true","false"],["false","true"],["false","false"]]'&&kl==="Keep this book\u2019s",[x0,x1,x2,x3,kl]);
+  const nm=await A(()=>Array.from(document.querySelectorAll('tr[data-key="n"] button')).map(b=>b.getAttribute('aria-label')));
+  ok('Take/Keep: each button names its row',JSON.stringify(nm)===JSON.stringify(['Take: Tokens to earn','Keep this book\u2019s: Tokens to earn']),nm);
+  const tick=await A(()=>{const b=document.querySelector('tr[data-key="who"] button[data-act="take"]');return {p:b.getAttribute('aria-pressed'),before:getComputedStyle(b,'::before').content,legend:document.querySelector('.lk-legend').textContent};});
+  ok('a ticked button shows a tick, and the legend says so',tick.p==='true'&&/\u2713/.test(tick.before)&&/^Dark buttons with a \u2713 are ticked\./.test(tick.legend),tick);
   const tokB=await A(()=>document.querySelectorAll('tr[data-key="tok"] button').length);
   ok('a row in step has no buttons',tokB===0,tokB);
   await page.click('tr[data-key="n"] button[data-act="take"]');await page.click('tr[data-key="card"] button[data-act="take"]');await page.click('tr[data-key="sched"] button[data-act="take"]');
@@ -223,6 +227,23 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   await page.click('[data-lk="undo"]');
   const u=await A(()=>({S:JSON.stringify(F.S),undo:!document.querySelector('.lk-undo').hidden,table:nbhLink.state().table}));
   ok('Undo restores S exactly and removes the button',u.S===pre&&!u.undo&&!u.table,u);
+  /* Undo is withdrawn as soon as the record changes after the take: an edit, or another record opened */
+  const uw=await A(async T=>{F.S=F.blank();nbhLink.link();nbhLink.compareWith(T,{via:'file'});await nbhLink.apply();const a=nbhLink.state().undo;
+    F.S.meta.client='Someone else';const i=document.createElement('input');document.body.appendChild(i);i.dispatchEvent(new Event('input',{bubbles:true}));await new Promise(z=>setTimeout(z,30));
+    const b=nbhLink.state().undo,hid=document.querySelector('.lk-undo').hidden,r=nbhLink.undo();i.remove();return {a,b,hid,r,client:F.S.meta.client};},TE);
+  ok('Undo: withdrawn by an edit after the take, and the edit stays',uw.a&&!uw.b&&uw.hid&&uw.r===false&&uw.client==='Someone else',uw);
+  const uw2=await A(async T=>{F.S=F.blank();nbhLink.link();nbhLink.compareWith(T,{via:'file'});await nbhLink.apply();const a=nbhLink.state().undo;
+    F.S=F.blank();F.S.meta.client='Other file';F.S.meta.lk=NBHLink.pack({v:1,on:1,base:{}});nbhLink.render();const r=nbhLink.undo();return {a,b:nbhLink.state().undo,r,client:F.S.meta.client};},TE);
+  ok('Undo: withdrawn when the record is replaced (Open data of another file)',uw2.a&&!uw2.b&&uw2.r===false&&uw2.client==='Other file',uw2);
+  /* a value typed here after the compare: that row is neither taken nor kept, and is named */
+  const sl=await A(async T=>{F.S=F.blank();F.calls=[];nbhLink.link();nbhLink.compareWith(T,{via:'file'});nbhLink.press('n','take');F.S.n='6';
+    const res=await nbhLink.apply();const st=nbhLink.state();return {res,calls:F.calls.slice(),n:F.S.n,toast:st.toast,msg:st.msg,row:nbhLink.rows().find(r=>r.key==='n')};},TE);
+  ok('Apply: a row changed here after the compare is skipped and named',sl.res.stale===1&&sl.n==='6'&&!sl.calls.includes('n')&&sl.res.taken===2&&
+    /Nothing else changed\. Not taken, because this book changed after the compare: Tokens to earn\. The table now shows it as it is\.$/.test(sl.toast)&&/^Not taken/.test(sl.msg)&&sl.row.here==='6',sl);
+  /* the took line is cut at an item, never inside a word */
+  const tl=await A(async T=>{F.S=F.blank();nbhLink.link();nbhLink.compareWith(T,{via:'file'});['card','n','sched'].forEach(k=>nbhLink.press(k,'take'));
+    const rows=nbhLink.rows();await nbhLink.apply();return NBHLink.readLk(F.S.meta.lk).took;},te({exWhen:'x'.repeat(10)}));
+  ok('took line: 160 characters at most, whole items',typeof tl==='string'&&tl.length<=160&&/^Taken .+: /.test(tl)&&(!/\u2026$/.test(tl)||/; \u2026$/.test(tl)),tl);
 
   /* a cancelled take keeps its base; the rest goes in */
   await A(()=>{F.S=F.blank();F.calls=[];nbhLink.link();});
@@ -283,7 +304,20 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   ok('Leave: closes the table, writes nothing',lv.lk===lv0&&!lv.table&&lv.hidden,lv);
   /* no board in a TK-1 file (the view is null) */
   const nv=await A(T=>{F.noView=true;const r=nbhLink.compareWith(T,{via:'file'});F.noView=false;return {r,msg:nbhLink.state().msg};},TE);
-  ok('no view: the link-off message',nv.r===false&&nv.msg==="Form TE-1's link is off, so its file does not name its cards. Turn on Link with Form TK-1 on TE-1's Setup page, then compare again.",nv);
+  ok('no view: the link-off message',nv.r===false&&nv.msg==="Form TE-1\u2019s link is off, so its file does not name its cards. Turn on Link with Form TK-1 on TE-1\u2019s Setup page, then compare again.",nv);
+  /* a record whose result fails the check claims no state; a board count outside 1-10 is dropped */
+  const jr=await A(()=>{const keep=F.S.meta.lk;F.S.meta.lk=JSON.stringify({v:1,on:1,last:{when:'2026-10-03T12:00:00Z',res:'look 9999'},board:{n:'0'}});nbhLink.leave();
+    const r={status:document.querySelector('.lk-status').textContent,n0:NBHLink.readLk(F.S.meta.lk).board.n,n99:NBHLink.readLk(JSON.stringify({v:1,board:{n:'99'}})).board.n,n10:NBHLink.readLk(JSON.stringify({v:1,board:{n:'10'}})).board.n};F.S.meta.lk=keep;nbhLink.render();return r;});
+  ok('junk result: "compared", never "in step"; board.n only 1-10',!/in step/.test(jr.status)&&/^Linked with Form TE-1 \u00b7 compared .+\.$/.test(jr.status)&&jr.n0===''&&jr.n99===''&&jr.n10==='10',jr);
+  /* the partner's file is not this form's saved state: its change event does not reach the document (nbh-guard) */
+  const gd=await A(T=>new Promise(res=>{let seen=0;const h=e=>{if(e.target&&e.target.classList&&e.target.classList.contains('lk-fileIn'))seen++;};document.addEventListener('change',h,true);
+    const fi=document.querySelector('.lk-fileIn'),dt=new DataTransfer();dt.items.add(new File([JSON.stringify(T)],'TE-1_x.json'));fi.files=dt.files;fi.dispatchEvent(new Event('change',{bubbles:true}));
+    setTimeout(()=>{document.removeEventListener('change',h,true);const tb=nbhLink.state().table;nbhLink.leave();res({seen,table:tb});},200);}),TE);
+  ok('file input: the change stays inside the panel and still compares',gd.seen===0&&gd.table,gd);
+  /* smart punctuation is the same student */
+  const sp=await A(()=>{const N=NBHLink;return {q:N.norm('Liam O\u2019Brien')===N.norm("Liam O'Brien"),d:N.norm('SIMULATED \u2013 Sample')===N.norm('SIMULATED - Sample'),
+    w:N.whoRow({client:'Sam K'},{client:'Sam K.'}).block,w2:N.whoRow({client:'Liam O\u2019Brien'},{client:"Liam O'Brien"}).block,w3:N.whoRow({client:'Sam'},{client:'Jordan'}).block};});
+  ok('norm: curly quotes and dashes; a trailing period is the same student',sp.q&&sp.d&&!sp.w&&!sp.w2&&sp.w3,sp);
   /* spoofed answers, alone */
   const ig0=await A(()=>nbhLink.ignored());
   await A(T=>{window.postMessage({nbh:'answer',want:'TE-1',ok:true,snap:{own:JSON.stringify(T)}},'*');window.postMessage({nbh:'opened',want:'TE-1',ok:true},'*');window.postMessage({nbh:'facts'},'*');},TE);await sleep(150);
@@ -335,6 +369,13 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   await pg.evaluate(own=>{document.getElementById('A').contentWindow.postMessage({nbh:'answer',want:'TE-1',ok:true,snap:{own}},'*');},JSON.stringify(te({epN:'4'})));await sleep(150);
   const w3=await fa.evaluate(()=>({ig:nbhLink.ignored(),n:nbhLink.rows().find(r=>r.key==='n')}));
   ok('shell: the parent\'s answer while waiting is taken; a second one is ignored',!w2.waiting&&w2.ig===w1.ig&&w2.n.there==='9'&&w3.ig===w2.ig+1&&w3.n.there==='9',{w2,w3});
+  /* a file opened while the relay is still asking wins: the late answer is ignored */
+  await pg.evaluate(()=>{P.mode='hold';});
+  await fa.click('[data-lk="compare"]');await sleep(100);
+  const la0=await fa.evaluate(async own=>{const w=nbhLink.state().waiting;F.S.meta.client='';nbhLink.fromFile(own,'TE-1_late.json');await nbhLink.apply();return {w,ig:nbhLink.ignored(),undo:nbhLink.state().undo};},JSON.stringify(te({epN:'8'})));
+  await pg.evaluate(own=>{document.getElementById('A').contentWindow.postMessage({nbh:'answer',want:'TE-1',ok:true,snap:{own}},'*');},JSON.stringify(te({epN:'3'})));await sleep(150);
+  const la=await fa.evaluate(()=>({ig:nbhLink.ignored(),undo:nbhLink.state().undo,via:NBHLink.readLk(F.S.meta.lk).last.via,file:NBHLink.readLk(F.S.meta.lk).last.file}));
+  ok('shell: a late answer after a file compare is ignored; Undo and the file compare stay',la0.w&&la0.undo&&la.ig===la0.ig+1&&la.undo&&la.via==='file'&&la.file==='TE-1_late.json',{la0,la});
   /* not open */
   await pg.evaluate(()=>{P.mode='notopen';});await fa.click('[data-lk="compare"]');await sleep(150);
   const no=await fa.evaluate(()=>({msg:nbhLink.state().msg,table:nbhLink.state().table}));
