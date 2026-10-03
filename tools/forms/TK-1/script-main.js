@@ -76,7 +76,7 @@ function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);r
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(has(o)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
 function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('dialog');d.id='pickDlg';
-  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option><option value="_photos">My photos</option><option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button><label class="pd-multi" id="pdMultiLab"><input type="checkbox" id="pdMulti"> Choose several</label><div class="pd-bar" id="pdBar"><span id="pdCount"></span><button type="button" id="pdUndo">Clear the picks</button><button type="button" class="pd-go" id="pdGo">Put them on the cards</button></div></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
+  d.innerHTML='<div class="pd-head"><div class="pd-top"><b id="pdTitle">Choose a picture</b><div class="pd-seg" id="pdMultiLab" role="group" aria-label="How many pictures"><button type="button" id="pdOne" aria-pressed="true">One picture</button><button type="button" id="pdMulti" aria-pressed="false">Several at once</button></div></div><select id="pdCat" aria-label="Picture category"><option value="">All</option><option value="_photos">My photos</option><option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button><div class="pd-bar" id="pdBar"><span id="pdCount"></span><button type="button" id="pdUndo">Clear the picks</button><button type="button" class="pd-go" id="pdGo">Put them on the cards</button></div></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     const ownList=PICK&&PICK.first==='tok'?[['tk:',TOK],['av:',AV]]:[['av:',AV],['tk:',TOK]];
@@ -87,12 +87,14 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   /* several at once: each tap adds the picture to the picks (a second tap takes it out); the picks go on the cards in the order tapped */
   const keyOf=b=>b.dataset.k?'k:'+b.dataset.k:'ph:'+b.dataset.ph;
   const room=()=>PICK?PICK.arr.length-PICK.i:0;
-  const marks=()=>{const m=!!(PICK&&PICK.multi);d.classList.toggle('multi',m);$('#pdMulti',d).checked=m;$('#pdMultiLab',d).style.display=PICK&&PICK.canMulti?'':'none';
+  const marks=()=>{const m=!!(PICK&&PICK.multi);d.classList.toggle('multi',m);$('#pdMulti',d).setAttribute('aria-pressed',String(m));$('#pdOne',d).setAttribute('aria-pressed',String(!m));$('#pdMultiLab',d).style.display=PICK&&PICK.canMulti?'':'none';$('#pdTitle',d).textContent=PICK&&PICK.canMulti?(m?'Choose pictures for cards '+(PICK.i+1)+' to '+PICK.arr.length:'Choose a picture for card '+(PICK.i+1)):'Choose a picture';$('#photoIn').multiple=m;
     $$('#pdGrid button[data-k],#pdGrid button[data-ph]').forEach(b=>{const n=m?PICK.sel.indexOf(keyOf(b)):-1;b.classList.toggle('on',n>=0);if(n>=0)b.dataset.n=n+1;else delete b.dataset.n;});
     if(m){const n=PICK.sel.length,r=room();$('#pdCount',d).textContent=n?n+' of '+r+' picked: they go on '+(n===1?'card '+(PICK.i+1):'cards '+(PICK.i+1)+' to '+(PICK.i+n))+', in the order tapped':'Tap up to '+r+' pictures, in the order you want them on cards '+(PICK.i+1)+' to '+PICK.arr.length+'.';$('#pdGo',d).disabled=!n;}};
   d.marks=marks;
   const putIn=()=>{PICK.sel.forEach((key,j)=>{const o=PICK.arr[PICK.i+j];if(!o)return;const [t,v]=[key.slice(0,key.indexOf(':')),key.slice(key.indexOf(':')+1)];if(t==='k'){o.k=v;o.ph='';}else{o.ph=v;o.k='';}o.l='';});d.close();const dn=PICK.done;PICK=null;dn();};
-  $('#pdMulti',d).addEventListener('change',e=>{if(!PICK)return;PICK.multi=e.target.checked;PICK.sel=[];marks();});
+  /* the choice of one or several is remembered for the rest of the session */
+  const setMulti=m=>{if(!PICK||PICK.multi===m)return;PICK.multi=m;PICK_MULTI=m;PICK.sel=[];marks();};
+  $('#pdMulti',d).addEventListener('click',()=>setMulti(true));$('#pdOne',d).addEventListener('click',()=>setMulti(false));
   $('#pdUndo',d).addEventListener('click',()=>{if(PICK){PICK.sel=[];marks();}});
   $('#pdGo',d).addEventListener('click',()=>{if(PICK&&PICK.sel.length)putIn();});
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
@@ -105,7 +107,8 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   $('#pdClose',d).addEventListener('click',()=>d.close());
   $('#pdPhoto',d).addEventListener('click',()=>$('#photoIn').click());
   d.grid=grid;return d;}
-function openPick(arr,i,done,first,multi){PICK={arr,i,done,first,canMulti:arr===S.ch||arr===S.tg,multi:!!multi,sel:[]};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+let PICK_MULTI=false;
+function openPick(arr,i,done,first,multi){const can=arr===S.ch||arr===S.tg;PICK={arr,i,done,first,canMulti:can,multi:can&&(multi===undefined?PICK_MULTI&&i<arr.length-1:!!multi),sel:[]};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 /* v21.42a: pictures keep print quality. An SVG is kept as the vector it is (it prints sharp at any size); a photo or PNG is kept at up to
    1200 px on its long side, which is 300 dpi on a 4 in card and about 420 dpi on the 2.85 in boxes, as a JPEG at 0.86 (PNG when it has transparency). */
 function addPhoto(file,cb){const mk=(img,label)=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:(label||'photo').replace(/\.[^.]+$/,'').slice(0,30),img});
@@ -114,7 +117,7 @@ function addPhoto(file,cb){const mk=(img,label)=>({id:'p'+Date.now().toString(36
   const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,1200/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
     let alpha=false;if(/png|gif|webp/i.test(file.type)){try{const d=g.getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=Math.max(4,Math.floor(d.length/4000)*4)){if(d[i]<250){alpha=true;break;}}}catch(e){}}
     const p=mk(alpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.86),name);S.photos.push(p);cb(p);};im.src=r.result;};r.readAsDataURL(file);}
-$('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;addPhoto(f,p=>{if(PICK&&PICK.multi){const d=$('#pickDlg');if(PICK.sel.length<PICK.arr.length-PICK.i)PICK.sel.push('ph:'+p.id);if(d)d.grid();return;}if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}else renderAll();});});
+$('#photoIn').addEventListener('change',e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;if(PICK&&PICK.multi){fs.forEach(f=>addPhoto(f,p=>{const d=$('#pickDlg');if(PICK&&PICK.sel.length<PICK.arr.length-PICK.i)PICK.sel.push('ph:'+p.id);if(d)d.grid();}));return;}const f=fs[0];addPhoto(f,p=>{if(PICK&&PICK.multi){const d=$('#pickDlg');if(PICK.sel.length<PICK.arr.length-PICK.i)PICK.sel.push('ph:'+p.id);if(d)d.grid();return;}if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}else renderAll();});});
 document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>{if(r==='tok')recaps(false);renderAll();},r==='tok'?'tok':r==='photo'?'av':'');});
 
 /* ---------------- views ---------------- */
@@ -122,7 +125,7 @@ function setView(v){document.body.className=document.body.className.replace(/\bv
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------------- the editing tables ---------------- */
-function rowsTbl(k){const id=k==='ch'?'#chTbl':'#tgTbl';$(id+' tbody').innerHTML=S[k].map((o,i)=>'<tr><td class="num">'+(i+1)+'</td><td>'+pickCell(k,i,o)+'</td><td><input data-r="'+k+'" data-i="'+i+'" data-f="l" name="'+k+'.'+i+'.l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph})||'(empty box)')+'" aria-label="Label '+(i+1)+'"></td></tr>').join('');
+function rowsTbl(k){const id=k==='ch'?'#chTbl':'#tgTbl';$(id+' tbody').innerHTML=S[k].map((o,i)=>'<tr><td class="num">'+(i+1)+'<span class="mv"><button type="button" data-mv="'+k+':'+i+':-1" aria-label="Move card '+(i+1)+' up"'+(i?'':' disabled')+'>&#9650;</button><button type="button" data-mv="'+k+':'+i+':1" aria-label="Move card '+(i+1)+' down"'+(i<S[k].length-1?'':' disabled')+'>&#9660;</button></span></td><td>'+pickCell(k,i,o)+'</td><td><input data-r="'+k+'" data-i="'+i+'" data-f="l" name="'+k+'.'+i+'.l" value="'+esc(o.l)+'" placeholder="'+esc(lbl({k:o.k,ph:o.ph})||'(empty box)')+'" aria-label="Label '+(i+1)+'"></td></tr>').join('');
   const sel=$(k==='ch'?'#chSpareSel':'#tgSpareSel'),v=sel.value;sel.innerHTML=S[k].map((o,i)=>'<option value="'+i+'">'+(i+1)+'. '+esc(lbl(o)||'(empty)')+'</option>').join('');if(v)sel.value=v;}
 function renderTbls(){
   rowsTbl('ch');rowsTbl('tg');
@@ -133,15 +136,20 @@ function renderTbls(){
   $('#wmPct').textContent=String(Math.max(5,Math.min(25,num(S.meta.wm)||12)));
   renderSetup();
 }
-function renderSetup(){const m=S.meta,v=$('#setupVerdict');const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
+function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
   if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.</div>';return;}
   const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:m.avatar||'av:boy'})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(ntg<6)miss.push((6-ntg)+' of the six targets');
+  /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
+  const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
+  const dup=twice('ch','choices').concat(twice('tg','targets'));if(dup.length)miss.push('the same picture on '+dup.join(', ')+' (change one, unless that is meant)');
   v.innerHTML='<div class="verdict '+(miss.length?'v-mid':'v-ok')+'"><b>'+(miss.length?'Still open:':'Set up.')+'</b> '+(miss.length?miss.join('; ')+'.':'')+' '+nTok()+' '+esc(plural(tokName()).toLowerCase())+' to earn; '+(m.layout==='rules'?'Rules-row':'First-Then')+' board'+(m.qr?'; QR code on every page':'; no QR code')+'.</div>';}
 
 /* ---------------- the QR code (qrcode-generator, inlined above; type 0 = automatic, error correction M) ---------------- */
 /* the QR code, made here by qrcode-generator. Plain: black modules, level M. Framed (the default, the assessor's style from the
    Choices file): slate modules, rounded slate finder rings with a green core, SCAN ME in a clear square in the middle, level H
    so the words cost nothing. The core is a deeper green than the tab (#6aa55a): a pale core is read as white by decoders. */
+/* the build of this copy of the form, shown on Setup and on the Preview so it is easy to check that the uploaded file is the new one */
+const BUILD='v21.42i';
 const QR_SLATE='#698da9',QR_CORE='#6aa55a';
 function qrSvg(url,frame){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const ec=frame?'H':'M';const q=qrcode(0,ec);q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';
@@ -200,7 +208,10 @@ function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.pos
   return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(S.meta.layout==='rules'&&st?esc(st)+' ':'')+'Chart';}
 /* the student's photo is cropped to the circle at the position and size set on Setup (a portrait's face sits above its middle, so it starts at 35 % down) */
 function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Math.max(0,Math.min(100,num(S.meta.ph_y)??35)),z=Math.max(100,Math.min(300,num(S.meta.ph_z)??100))/100;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')';}
-function photoHtml(side){const o=S.photo[0];const inner=has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
+/* (v21.42i) the two photos face each other: one of them prints mirrored (the samples mirror the right one) */
+function flipSide(){const f=S.meta.ph_flip||'r';return f==='l'||f==='none'?f:'r';}
+function photoInner(){const o=S.photo[0];return has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:S.meta.avatar||'av:boy'},'');}
+function photoHtml(side){return '<div class="bd-photo '+side+(flipSide()===side?' flip':'')+'">'+photoInner()+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
 function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
@@ -231,7 +242,9 @@ const cardIn=()=>148.88*scl()/72, tokIn=()=>108.01*scl()/72;
 function sheetOpen(kind){return turned()?'<div class="pg port front tsheet'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">':'<div class="pg front'+(scl()!==1?' big':'')+'" data-kind="'+kind+'" style="--s:'+scl().toFixed(4)+'">';}
 function sheetDims(){return turned()?[TW,TH,TW-.2,TH-.2]:[11,8.5,10.4,7.9];}
 function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kind==='ch';const sz=cardIn();const cards=list.map(o=>cardHtml(o,sz,{ul})).concat([cardHtml(null,sz,{ul,other:true})]);const [pw,ph,aw]=sheetDims();const cols=Math.max(1,Math.floor((aw+.12)/(sz+.12)));
-  return sheetOpen('cards-'+kind)+sheetGrid(cols,Math.ceil(cards.length/cols),sz,sz,.12,pw,ph,cards.join(''),'top')+'</div>';}
+  /* (v21.42i) the cards keep the size of the boxes, so the larger pages' cards can need a second portrait sheet on the iPad */
+  const per=cols*Math.max(1,Math.floor((ph-.5+.12)/(sz+.12))),out=[];for(let i=0;i<cards.length;i+=per){const c=cards.slice(i,i+per);out.push(sheetOpen('cards-'+kind)+sheetGrid(cols,Math.ceil(c.length/cols),sz,sz,.12,pw,ph,c.join(''),'top')+'</div>');}
+  return out;}
 function sheetTokens(){const d=strip(),sz=tokIn(),[pw,ph,aw]=sheetDims(),cols=Math.min(5,Math.max(1,Math.floor((aw+.15)/(sz+.15))));return sheetOpen('cards-tk')+sheetGrid(cols,Math.ceil(d.n/cols),sz,sz,.15,pw,ph,Array.from({length:d.n},()=>tokCard(sz)).join(''),'top')+'</div>';}
 function spareCard(){const v=S.meta.sp_card||'ch:0';if(v==='tok')return{tok:true};if(v==='own')return{o:{k:S.sp[0].k,ph:S.sp[0].ph,l:S.meta.sp_label||''}};const m=/^(ch|tg):(\d)$/.exec(v);return{o:m?S[m[1]][+m[2]]:S.ch[0]};}
 function sheetSpare(){const big=S.meta.sp_size!=='small',T=turned(),sz=big?1.5:1.25,gap=.06,cols=T?Math.floor((TW-.2+gap)/(sz+gap)):big?5:6,rows=Math.floor(((T?TH-.2:10.4)+gap)/(sz+gap)),c=spareCard();
@@ -245,7 +258,7 @@ function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.ma
   const fronts=()=>kinds.forEach(k=>pages.push({label:PGNAME[k]+' (front)',html:pageFront(k)}));
   const duplex=()=>kinds.forEach(k=>{pages.push({label:PGNAME[k]+' (front)',html:pageFront(k)});pages.push({label:PGNAME[k]+' (back: '+BACKT[k][1]+')',html:pageBack(k)});});
   const howto=()=>{if(c.pg_how){const h=pagesHowto().split('</div></div></div>');pages.push({label:'How to use, Steps 1 and 2',html:h[0]+'</div></div></div>'});pages.push({label:'How to use, Step 3',html:h[1]+'</div></div></div>'});}};
-  const cards=()=>{if(c.cs_ch)pages.push({label:'Card sheet: the choices',html:sheetCards('ch')});if(c.cs_tg)pages.push({label:'Card sheet: the targets',html:sheetCards('tg')});if(c.cs_tk)pages.push({label:'Card sheet: the tokens',html:sheetTokens()});};
+  const cards=()=>{const add=(k,name)=>{const h=sheetCards(k);h.forEach((x,i)=>pages.push({label:'Card sheet: '+name+(h.length>1?' ('+(i+1)+' of '+h.length+')':''),html:x}));};if(c.cs_ch)add('ch','the choices');if(c.cs_tg)add('tg','the targets');if(c.cs_tk)pages.push({label:'Card sheet: the tokens',html:sheetTokens()});};
   if(order==='fronts')fronts();else if(order==='duplex'){duplex();howto();}else if(order==='cards')cards();else if(order==='spare')pages.push({label:'A sheet of one card (portrait)',html:sheetSpare()});else{duplex();howto();cards();}
   return pages;}
 /* a back whose text does not fit at the floor size continues on a second back page; in a duplex order a blank sheet keeps
@@ -286,10 +299,10 @@ function renderOut(){
   $('#bkOut').innerHTML='<div class="book">'+TABS.map(t=>pageBack(t[0])).join('')+pagesHowto()+'</div>';
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);const r=relabel($('#book'));turnPages();return r;});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
-  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%. (Form build v21.42h.)';
+  $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':turned()?' portrait, each book page turned on its side at full size ('+size.replace(/ centred with trim marks$/,'')+', with trim marks), for Safari on the iPad and iPhone, which prints portrait only':' landscape, '+size)+'; print at 100%. (Form build '+BUILD+'.)';
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
-  const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
+  const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules';lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
   setTimeout(()=>{scaleBooks();const pl=$('#prevLine');if(pl&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+textCheck().toFixed(2)+'.';},0);
   syncState();
 }
@@ -346,7 +359,9 @@ $('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restor
 $('#chClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six choices?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.ch=Array.from({length:6},()=>cello());renderAll();}});
 $('#tgClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six targets?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.tg=Array.from({length:6},()=>cello());renderAll();}});
 function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;if(S.meta.order!=='spare')S.meta.prevOrder=S.meta.order||'all';S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
-$('#chSix').addEventListener('click',()=>openPick(S.ch,0,()=>renderAll(),'',true));$('#tgSix').addEventListener('click',()=>openPick(S.tg,0,()=>renderAll(),'',true));
+$$('[data-six]').forEach(b=>b.addEventListener('click',()=>{openPick(S[b.dataset.six],0,()=>renderAll(),'',true);}));
+/* the arrows on a row move its card (picture and label) up or down the six */
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-mv]');if(!b)return;const [k,i,d]=b.dataset.mv.split(':'),a=S[k],j=+i+(+d);if(!a||j<0||j>=a.length)return;[a[+i],a[j]]=[a[j],a[+i]];rowsTbl(k);renderOut();const nb=$('#'+k+'Tbl button[data-mv="'+k+':'+j+':'+d+'"]')||$('#'+k+'Tbl button[data-mv^="'+k+':'+j+':"]');if(nb)nb.focus();});
 $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgSpare').addEventListener('click',()=>spare('tg',$('#tgSpareSel')));
 
 /* ---------------- meta + render ---------------- */
