@@ -1,0 +1,320 @@
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">Class, Team, and the Problem the System Answers</h2>
+    <div class="fieldgrid">
+      <div><label>Class</label><input data-m="cls" placeholder="Room 12; Period 3 science"></div>
+      <div><label>Teacher</label><input data-m="teacher"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>Number of students</label><input data-m="nstud" inputmode="numeric" placeholder="22"></div>
+      <div><label>School</label><input data-m="site"></div>
+      <div><label>When it runs (period, time, activity)</label><input data-m="when" placeholder="Math block, 9:15 to 9:45; later the whole morning"></div>
+      <div><label>Who runs it</label><select data-m="runs"><option></option><option>The classroom teacher</option><option>The teacher, with a paraeducator keeping the score</option><option>A paraeducator, with the teacher announcing the result</option><option>The BCBA runs the first week, then the teacher</option></select></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Date designed</label><input data-m="date"></div>
+      <div><label>Start date</label><input data-m="start"></div>
+      <div><label>First review date</label><input data-m="review"></div>
+      <div><label>Tier</label><select data-m="tier"><option></option><option>Universal: the whole class, no individual plan behind it</option><option>Class-wide support around one or more students with a BIP</option><option>A bridge while an FBA is completed</option></select></div>
+    </div>
+    <table class="rt" style="margin-top:8px">
+      <tr><th style="width:26%">The problem, as the teacher states it</th><td><textarea data-m="problem" rows="2" placeholder="what happens, when, how often, which students it comes from, what has been tried"></textarea></td></tr>
+      <tr><th>Students with an individual plan in the room</th><td><input data-m="plans" placeholder="initials and the form that holds the plan (TD-1); how the class system fits with each plan"></td></tr>
+      <tr><th>What the teacher wants to see instead</th><td><input data-m="goal_txt" placeholder="the class working through the first 20 minutes of math with two or fewer interruptions"></td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:18px">Class-Wide Expectations</h2>
+    <p class="hint">Three to five, each stated as what students do (not what they stop doing), in words the class can repeat. The second column is what the teacher will point to when a point is given; the third is what counts against the class, and in the Good Behavior Game it becomes the list of fouls. An expectation that begins with No, Don&rsquo;t or Stop is flagged below.</p>
+    <div class="tools"><button class="tool" id="addE">Add an expectation</button><button class="tool" id="delE">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="eTbl"><thead><tr>
+      <th style="width:4%">#</th><th style="width:26%">Expectation (positively stated)</th><th style="width:35%">What it looks like (earns a point)</th><th style="width:35%">What it does not look like (a foul)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div id="expVerdict"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Baseline</h2>
+    <p class="hint">Three to five observations before the system starts, in the period it will run, with the measure the record will keep. The days go on the Record as phase B; the mean and range below are computed from them and set the first criterion.</p>
+    <div class="fieldgrid">
+      <div><label>Measure</label><select data-m="measure"><option></option><option>Disruptions per 10 minutes (class count)</option><option>Percent of students on task at timed checks</option><option>Fouls per team per game period</option><option>Points per team per period</option><option>Other (name it in the note)</option></select></div>
+      <div><label>Observer</label><input data-m="b_who"></div>
+      <div><label>Dates</label><input data-m="b_dates"></div>
+      <div><label>How a disruption or an on-task check is defined</label><input data-m="b_def" placeholder="talking out, out of seat without permission, touching others; on task = eyes on the work or the speaker"></div>
+      <div><label>Note</label><input data-m="b_note"></div>
+    </div>
+    <div class="metrics" id="baseMetrics"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Reinforcer Menu for the Class</h2>
+    <p class="hint">Activities and privileges by default: a few minutes of free choice, a game, music during work, extra recess, a class job, the teacher doing something silly. The class votes on the menu where it can. Edibles are last and need family agreement; a prize is small enough to give daily. The menu feeds the Design sheet and the poster.</p>
+    <div class="tools"><button class="tool" id="addM">Add an item</button><button class="tool" id="delM">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="mTbl"><thead><tr>
+      <th style="width:4%">#</th><th style="width:36%">Item</th><th style="width:20%">Kind</th><th style="width:16%">Minutes or amount</th><th style="width:24%">How it was chosen</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div id="menuVerdict"></div>
+  </section>
+
+  <!-- ===================== DESIGN ===================== -->
+  <section class="only-design">
+    <h2 class="nbh-band">The Contingency</h2>
+    <p class="hint">Litow and Pumroy (1975) sorted class-wide systems by whose behavior earns the consequence: each student&rsquo;s own (independent), one student&rsquo;s or a few students&rsquo; for everyone (dependent), or the group&rsquo;s together (interdependent). The named programs below are interdependent arrangements with their own rules. Pick one; its fields open underneath and the rule is written out at the bottom.</p>
+    <div class="sysopt" id="ctOpt">
+      <label data-ct="indep"><input type="radio" name="ct" value="indep"><span class="fam">Group-oriented contingency</span><b>Independent</b>The same rule for everyone, but each student earns on their own behavior alone. The lightest arrangement; nobody depends on anyone else, and nobody can pull the group down.</label>
+      <label data-ct="dep"><input type="radio" name="ct" value="dep"><span class="fam">Group-oriented contingency</span><b>Dependent</b>The whole class earns when one student, or a small group, meets the criterion. Powerful where peers can support the student; needs safeguards so the student is a hero, not a target.</label>
+      <label data-ct="interdep"><input type="radio" name="ct" value="interdep"><span class="fam">Group-oriented contingency</span><b>Interdependent</b>The class, or each team, earns on the group&rsquo;s performance: every student meets the criterion, or the class total or mean does. Peers support each other; a saboteur rule is written in advance.</label>
+      <label data-ct="gbg"><input type="radio" name="ct" value="gbg"><span class="fam">Named program</span><b>The Good Behavior Game</b>Barrish, Saunders and Wolf (1969): teams, a short list of fouls, a mark against the team for each foul, and every team at or under the criterion wins the prize. Daily at first; faded to intermittent games and delayed prizes.</label>
+      <label data-ct="cwfit"><input type="radio" name="ct" value="cwfit"><span class="fam">Named program</span><b>CW-FIT</b>Class-Wide Function-Related Intervention Teams (Wills et al., 2010; Kamps et al., 2011): three skills taught, teams, a timer, points to every team showing the skills when it sounds, praise with each point, and a goal the teams reach.</label>
+      <label data-ct="random"><input type="radio" name="ct" value="random"><span class="fam">Variation</span><b>Randomized components</b>The criterion, the behavior that counts, the students whose scores count, or the reward is drawn from a jar after the period (Kelshaw-Levering et al., 2000); the mystery motivator keeps the reward in a sealed envelope (Moore et al., 1994).</label>
+      <label data-ct="selfmon"><input type="radio" name="ct" value="selfmon"><span class="fam">Variation</span><b>Class-wide self-monitoring at a cue</b>At a signal every few minutes each student records whether they were meeting the expectation; the class earns when the share recording Yes reaches the criterion, and the teacher checks a sample.</label>
+      <label data-ct="tootle"><input type="radio" name="ct" value="tootle"><span class="fam">Variation</span><b>Tootling</b>Students write down classmates&rsquo; prosocial behavior on cards (the opposite of tattling); the class earns when the count of tootles reaches the goal (Skinner, Cashwell &amp; Skinner, 2000).</label>
+    </div>
+
+    <h3>The Rule, Shared by Every Arrangement</h3>
+    <table class="rt">
+      <tr><th style="width:28%">What the record counts</th><td><select data-m="dir" style="width:70%"><option></option><option value="low">Fouls or disruptions: the criterion is a ceiling (at most N)</option><option value="high">Points, tootles or percent on task: the criterion is a floor (at least N)</option></select></td></tr>
+      <tr><th>Starting criterion (number)</th><td><input data-m="crit" inputmode="numeric" placeholder="from the baseline: just inside what the class already does on a good day" style="width:30%"></td></tr>
+      <tr><th>Unit of the criterion</th><td><input data-m="unit" placeholder="fouls per team per game; points per team; percent of students; tootles per day" style="width:60%"></td></tr>
+      <tr><th>Length of one period of the game</th><td><input data-m="mins" inputmode="numeric" placeholder="20 to 30 minutes to start, as a working convention" style="width:30%"></td></tr>
+      <tr><th>Reward for meeting it</th><td><input data-m="reward" placeholder="from the menu: 5 minutes of free choice at the end of the day; a game on Friday"></td></tr>
+      <tr><th>When the reward is delivered</th><td><select data-m="rw_when" style="width:70%"><option></option><option>Right after the game period</option><option>At the end of the same day</option><option>At the end of the week, from daily wins</option><option>When the class reaches a cumulative total</option></select></td></tr>
+      <tr><th>How the class learns the result</th><td><input data-m="announce" placeholder="the scoreboard is read at the end of the game; winners named; no comment on the losing team"></td></tr>
+      <tr><th>What never happens</th><td><input data-m="never" placeholder="no points or marks are taken away as a punishment; a losing team is not scolded; the game is not stopped early to punish"></td></tr>
+    </table>
+
+    <div class="only-ct for-teams"><h3>Teams</h3>
+      <p class="hint">Two to four teams, mixed so each holds about the same share of the students the system is for. The team names go on the poster and the record. Leave the table empty for a whole-class arrangement without teams.</p>
+      <div class="tools"><button class="tool" id="addTm">Add a team</button><button class="tool" id="delTm">Remove last</button></div>
+      <div class="grid-wrap"><table class="rt" id="tmTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Team name</th><th>Members (first names or seat rows)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="only-ct for-indep"><h3>Independent Contingency</h3>
+      <table class="rt">
+        <tr><th style="width:28%">How each student&rsquo;s behavior is tracked</th><td><select data-m="in_track" style="width:70%"><option></option><option>A point card on the desk, marked by the teacher</option><option>A class chart with a row per student</option><option>Each student self-monitors at the cue (teacher checks a sample)</option><option>A ticket given with praise, dropped in a jar</option></select></td></tr>
+        <tr><th>Criterion per student</th><td><input data-m="in_crit" placeholder="4 of 5 checks met; 3 tickets in the period"></td></tr>
+        <tr><th>Students who do not earn</th><td><input data-m="in_miss" placeholder="nothing happens; they try again next period; the teacher checks the expectation was taught"></td></tr>
+      </table>
+      <p class="hint">An independent contingency is a class-wide token or point system with one rule for everyone; it does not use peer influence and is the first choice when a dependent or interdependent arrangement would put a student at risk. Form TE-1 designs the token side in detail.</p>
+    </div>
+
+    <div class="only-ct for-dep"><h3>Dependent Contingency</h3>
+      <table class="rt">
+        <tr><th style="width:28%">Student(s) whose behavior earns for the class</th><td><input data-m="dp_who" placeholder="initials only on this form; the poster names no student"></td></tr>
+        <tr><th>The behavior and its criterion</th><td><input data-m="dp_beh" placeholder="hand raised before speaking in 8 of 10 opportunities, from the student&rsquo;s plan"></td></tr>
+        <tr><th>Is the student named to the class?</th><td><select data-m="dp_named" style="width:70%"><option></option><option>No: the class is told that one or more classmates will earn for everyone (names not given)</option><option>Yes, with the student&rsquo;s agreement, and framed as the student earning for the class</option><option>The students whose scores count are drawn at random each day (see Randomized components)</option></select></td></tr>
+      </table>
+      <p class="hint" style="margin-top:8px"><b>Safeguards.</b> The ones ticked print on the Design sheet; the verdict asks for the first four before the rule is called ready.</p>
+      <div class="ckcol">
+        <label class="ck"><input type="checkbox" data-c="dp_agree"> The student agreed to the arrangement and chose the reward with the class (or the names are drawn at random).</label>
+        <label class="ck"><input type="checkbox" data-c="dp_reach"> The criterion is one the student already meets on a good day (from the student&rsquo;s own baseline), so the class wins often at the start.</label>
+        <label class="ck"><input type="checkbox" data-c="dp_peers"> Peers were taught what to do: encourage, remind once, and say nothing when it is missed; any pressure, blame or threat ends the arrangement for the day.</label>
+        <label class="ck"><input type="checkbox" data-c="dp_exit"> There is an exit rule: if the student is targeted or the class turns on them, the arrangement changes to interdependent or independent the same day.</label>
+        <label class="ck"><input type="checkbox" data-c="dp_own"> The student also earns on their own plan, so a day the class does not earn is not a day the student loses.</label>
+      </div>
+    </div>
+
+    <div class="only-ct for-interdep"><h3>Interdependent Contingency</h3>
+      <table class="rt">
+        <tr><th style="width:28%">Who earns together</th><td><select data-m="id_unit" style="width:70%"><option></option><option>The whole class, as one group</option><option>Teams, each on its own score (every team can win)</option><option>Teams, the best team wins (ties both win)</option></select></td></tr>
+        <tr><th>How the group&rsquo;s performance is judged</th><td><select data-m="id_rule" style="width:70%"><option></option><option>Every student meets the criterion</option><option>The class total or mean meets the criterion</option><option>The score of the lowest student meets the criterion</option><option>The score of one or more students drawn at random meets the criterion</option></select></td></tr>
+        <tr><th>Saboteur rule</th><td><input data-m="id_sab" placeholder="a student who repeatedly costs the group is moved to a team of one for the game, with the same rule and the same prize, and returns when the criterion is met for 3 days"></td></tr>
+        <tr><th>What peers may and may not do</th><td><input data-m="id_peers" placeholder="encourage and remind once; no blame, no threats, no reporting on a classmate; the teacher keeps the score"></td></tr>
+      </table>
+    </div>
+
+    <div class="only-ct for-gbg"><h3>The Good Behavior Game</h3>
+      <table class="rt">
+        <tr><th style="width:28%">The fouls (rules of the game)</th><td><textarea data-m="g_fouls" rows="3" placeholder="one per line; left empty, the poster uses the third column of the expectations table (out of seat without permission; talking without a hand up; touching others or their things)"></textarea></td></tr>
+        <tr><th>How a team wins</th><td><select data-m="g_win" style="width:70%"><option></option><option>Every team with no more than the criterion number of fouls wins (all teams can win)</option><option>The team with the fewest fouls wins, and any team at or under the criterion also wins</option><option>The team with the fewest fouls wins (ties both win)</option></select></td></tr>
+        <tr><th>Game timing</th><td><input data-m="g_time" placeholder="daily during the math block, 9:15 to 9:45; later a second game in the afternoon"></td></tr>
+        <tr><th>Prize</th><td><input data-m="g_prize" placeholder="from the menu: a victory tag and 5 minutes of free choice at the end of the day; Friday, the week&rsquo;s winners choose a game"></td></tr>
+        <tr><th>Who records the fouls</th><td><input data-m="g_rec" placeholder="the teacher, with a tally mark on the board and the team named, in a neutral voice, without stopping the lesson"></td></tr>
+        <tr><th>Fading plan</th><td><input data-m="g_fade" placeholder="see the fading table below: daily to 3 days a week to unannounced; the prize from right after the game to the end of the day to the end of the week"></td></tr>
+      </table>
+      <p class="hint">In the original game the class was divided into two teams, a mark went against a team each time one of its members broke a rule, and both teams won if both stayed under the criterion (Barrish et al., 1969). Later studies ran the game with a criterion as low as five marks in a class period, with a winning team announced each day, and found it works across grades from kindergarten to high school (Tingstrom et al., 2006). Donaldson et al. (2011) showed teachers could run it in kindergarten with a brief training; Joslyn et al. (2019) note that the same results have been obtained with a few minutes of teacher training.</p>
+    </div>
+
+    <div class="only-ct for-cwfit"><h3>CW-FIT</h3>
+      <table class="rt">
+        <tr><th style="width:28%">The skills taught (one per line)</th><td><textarea data-m="c_skills" rows="3" placeholder="How to get the teacher&rsquo;s attention (look, raise your hand, wait, ask in a calm voice)&#10;How to follow directions the first time&#10;How to ignore inappropriate behavior"></textarea></td></tr>
+        <tr><th>Timer interval</th><td><input data-m="c_int" inputmode="numeric" placeholder="2 to 5 minutes; the published program uses about 3 (working convention)" style="width:50%"></td></tr>
+        <tr><th>Points per team per interval</th><td><input data-m="c_pts" inputmode="numeric" placeholder="1 point when every member is using the skills" style="width:50%"></td></tr>
+        <tr><th>Goal the teams reach</th><td><input data-m="c_goal" placeholder="set so that about 80% of the possible points wins at the start; e.g., 8 of 10 intervals" style="width:70%"></td></tr>
+        <tr><th>The praise statement with each point</th><td><input data-m="c_praise" placeholder="Team 2, you all raised your hands and waited; that is a point"></td></tr>
+        <tr><th>Self-management or help cards for students who need more</th><td><input data-m="c_tier2" placeholder="two students self-monitor on a card at the timer and earn for their team twice (Form SM-1)"></td></tr>
+      </table>
+      <p class="hint">CW-FIT teaches the three skills as lessons with examples and practice, then runs the game with a timer: when it sounds, every team whose members are all showing the skills gets a point and a specific praise statement; teams meeting the goal earn the reward. Attention to inappropriate behavior is removed by the ignoring skill. On-task behavior rose and disruptions fell in the urban classrooms of Kamps et al. (2011), and the group-level effects held in a randomized trial (Kamps et al., 2015).</p>
+    </div>
+
+    <div class="only-ct for-random"><h3>Randomized Components and the Mystery Motivator</h3>
+      <p class="hint">Randomizing a component means the class cannot tell before the period which behavior, criterion, students or reward will count, so every student has to meet every expectation all period. Tick what is drawn and write the jar contents.</p>
+      <div class="ckrow">
+        <label class="ck"><input type="checkbox" data-c="r_crit"> The criterion is drawn</label>
+        <label class="ck"><input type="checkbox" data-c="r_beh"> The expectation that counts is drawn</label>
+        <label class="ck"><input type="checkbox" data-c="r_stu"> The students whose scores count are drawn</label>
+        <label class="ck"><input type="checkbox" data-c="r_rw"> The reward is drawn, or sealed in the mystery envelope</label>
+      </div>
+      <table class="rt" style="margin-top:8px">
+        <tr><th style="width:28%">Criterion jar</th><td><input data-m="r_critjar" placeholder="slips with 2, 3, 3, 4, 4, 5 fouls or with 70, 80, 80, 90 percent; most slips are ones the class already meets"></td></tr>
+        <tr><th>Behavior jar</th><td><input data-m="r_behjar" placeholder="one slip per expectation, plus one slip for all of them"></td></tr>
+        <tr><th>Student jar</th><td><input data-m="r_stujar" placeholder="every name, drawn after the period; a drawn name is never read aloud when the criterion was missed"></td></tr>
+        <tr><th>Reward jar or mystery envelope</th><td><input data-m="r_rwjar" placeholder="the menu items, with the better ones on fewer slips; or one envelope with the reward written inside, opened only when the class earns"></td></tr>
+        <tr><th>Mystery-motivator chart</th><td><input data-m="r_chart" placeholder="a calendar with the reward marked on 3 of 5 days in invisible ink; the class earns the chance to reveal the day when the criterion is met"></td></tr>
+      </table>
+    </div>
+
+    <div class="only-ct for-selfmon"><h3>Class-Wide Self-Monitoring at a Cue</h3>
+      <table class="rt">
+        <tr><th style="width:28%">The cue</th><td><select data-m="s_cue" style="width:70%"><option></option><option>A timer at fixed intervals</option><option>A timer at variable intervals around the average</option><option>A recorded tone or chime</option><option>The teacher&rsquo;s signal</option></select></td></tr>
+        <tr><th>Average interval</th><td><input data-m="s_int" inputmode="numeric" placeholder="3 to 5 minutes (working convention)" style="width:40%"></td></tr>
+        <tr><th>The question each student answers</th><td><input data-m="s_q" placeholder="Was I working? Was I following the expectation on the board?"></td></tr>
+        <tr><th>How students record</th><td><input data-m="s_how" placeholder="a Yes or No on a strip taped to the desk; thumbs up counted by the teacher"></td></tr>
+        <tr><th>Class criterion</th><td><input data-m="s_crit" placeholder="80% of students record Yes at 8 of 10 cues (working convention)"></td></tr>
+        <tr><th>Teacher check</th><td><input data-m="s_chk" placeholder="the teacher scans at the cue and records the share on task; a day with a large gap between the students&rsquo; record and the teacher&rsquo;s is re-taught"></td></tr>
+      </table>
+    </div>
+
+    <div class="only-ct for-tootle"><h3>Tootling</h3>
+      <table class="rt">
+        <tr><th style="width:28%">What counts as a tootle</th><td><input data-m="t_what" placeholder="a classmate seen helping, sharing, including someone, or using kind words, written with the name, what they did, and when"></td></tr>
+        <tr><th>How and when students write them</th><td><input data-m="t_how" placeholder="index cards on each desk; written at any time; collected at the end of the day"></td></tr>
+        <tr><th>Who reads them and how</th><td><input data-m="t_read" placeholder="the teacher reads a few aloud each morning and adds the count to the chart"></td></tr>
+        <tr><th>Class goal</th><td><input data-m="t_goal" placeholder="a cumulative count: 100 tootles earns the reward, then the goal rises; the chart shows the total" style="width:70%"></td></tr>
+        <tr><th>Training</th><td><input data-m="t_train" placeholder="examples and non-examples of a tootle; practice writing one; the difference from tattling"></td></tr>
+      </table>
+      <p class="hint">Tootling pairs peer reporting of prosocial behavior with an interdependent contingency on the count of reports. Skinner, Cashwell and Skinner (2000) raised the reports of fourth-graders with a cumulative class goal and a group reward; later studies (Cihak, Kirk &amp; Boon, 2009; Lambert et al., 2015) found disruptive behavior fell and appropriate behavior rose while the tootling ran.</p>
+    </div>
+
+    <h3>The Rule in Plain Words</h3>
+    <div id="ruleOut"></div>
+    <div id="designVerdict"></div>
+
+    <h3>Changing the Criterion and Fading the Game</h3>
+    <p class="hint">The criterion starts where the class already is on a good day, tightens on a rule written in advance, and the game itself is faded from daily to intermittent and the reward from immediate to delayed, so the expectations hold up without the game running every period. The Record applies the rows below and says when a step is due. Every default is a working convention.</p>
+    <table class="rt">
+      <tr><th style="width:28%">Tighten the criterion when</th><td><input data-m="cc_up" placeholder="met by every team on 3 of the last 4 game days (working convention)"></td></tr>
+      <tr><th>Tighten it by</th><td><input data-m="cc_step" inputmode="numeric" placeholder="1 foul, 1 point or 5 percentage points (working convention)" style="width:40%"></td></tr>
+      <tr><th>Terminal criterion</th><td><input data-m="cc_end" inputmode="numeric" placeholder="the level the class holds for good: 1 or 2 fouls; 90 percent" style="width:40%"></td></tr>
+      <tr><th>Relax it or revisit the reward when</th><td><input data-m="cc_down" placeholder="met on fewer than 2 of the last 4 game days: step back one, check fidelity, re-vote the menu (working convention)"></td></tr>
+    </table>
+    <div class="grid-wrap"><table class="rt wide" id="fadeTbl" style="margin-top:10px"><thead><tr>
+      <th style="width:6%">Phase</th><th style="width:20%">How often the game runs</th><th style="width:20%">When the reward comes</th><th style="width:14%">Criterion</th><th style="width:22%">Move on when</th><th>Date reached</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <!-- ===================== POSTER ===================== -->
+  <section class="only-poster">
+    <h2 class="nbh-band">The Poster</h2>
+    <p class="hint noprint">Three pages built from the Setup and Design sheets: the expectations, the scoreboard with the day&rsquo;s criterion, and the rules card (the Good Behavior Game card when that is the arrangement). <b>Print the poster</b> in the toolbar prints these pages alone, without the form around them. Change an expectation, a team or the criterion and they redraw.</p>
+    <table class="rt noprint" style="margin-bottom:8px">
+      <tr><th style="width:24%">Title on the poster</th><td><input data-m="po_title" placeholder="filled from the class; e.g., Room 12 Expectations" style="width:60%"></td></tr>
+      <tr><th>Days across the scoreboard</th><td><select data-m="po_days" style="width:40%"><option value="">5 (Monday to Friday)</option><option value="5">5 (Monday to Friday)</option><option value="4">4 (Monday to Thursday)</option><option value="3">3 (Monday, Wednesday, Friday)</option><option value="1">1 (today)</option></select></td></tr>
+      <tr><th>Pages</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="po_exp"> Expectations</label><label class="ck"><input type="checkbox" data-c="po_score"> Scoreboard</label><label class="ck"><input type="checkbox" data-c="po_rules"> Rules card</label></div><span class="hint">All three print when none is ticked.</span></td></tr>
+    </table>
+    <div id="posterOut"></div>
+  </section>
+
+  <!-- ===================== RECORD ===================== -->
+  <section class="only-record">
+    <h2 class="nbh-band">The Record</h2>
+    <div id="logVerdict"></div>
+    <div class="metrics" id="logMetrics"></div>
+    <h3>Days</h3>
+    <p class="hint">One row per game period. Phase B is baseline (no criterion; the class or each team is counted anyway); phases 1 to 4 follow the fading table. A team&rsquo;s cell holds its fouls or points; a whole-class arrangement uses the first column. The met column is computed from the criterion and the direction on the Design sheet.</p>
+    <div class="tools"><button class="tool" id="addL">Add a day</button><button class="tool" id="delL">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="lTbl"><thead></thead><tbody></tbody></table></div>
+    <h3 style="margin-top:14px">Score by Day</h3>
+    <div class="legend" id="plotLegend"></div>
+    <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Score by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="Fouls or points per team per day with the criterion line"></svg></div>
+    <div class="tools noprint"><button class="tool" id="gcPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
+    <h3 style="margin-top:14px">Decisions</h3>
+    <div id="logRules"></div>
+    <table class="rt" style="margin-top:10px">
+      <tr><th style="width:24%">Decision taken</th><td><textarea data-m="decision" rows="2"></textarea></td></tr>
+      <tr><th>Students the system is not reaching</th><td><input data-m="notreach" placeholder="initials; what the data show; whether an individual plan (Form TD-1) or a team of one is needed"></td></tr>
+      <tr><th>What the class says about it (Form SV-1)</th><td><input data-m="sv" placeholder="whether students like the game, want the prize, feel pressured"></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== FIDELITY ===================== -->
+  <section class="only-fidelity">
+    <h2 class="nbh-band">Implementation Checklist</h2>
+    <p class="hint">For an observer watching one game period. Each step is scored Yes, No or N/A; the percent is Yes over the applicable steps. Below 80% the record cannot be read as a test of the system (working convention; Form TI-1 holds the general procedure).</p>
+    <div class="fieldgrid">
+      <div><label>Observer</label><input data-m="f_who"></div>
+      <div><label>Date</label><input data-m="f_date"></div>
+      <div><label>Period observed</label><input data-m="f_per"></div>
+      <div><label>Minutes observed</label><input data-m="f_min" inputmode="numeric"></div>
+    </div>
+    <div class="grid-wrap"><table class="rt" id="fidTbl"><thead><tr><th style="width:5%">#</th><th>Step</th><th style="width:12%">Seen</th><th style="width:30%">Notes</th></tr></thead><tbody></tbody></table></div>
+    <div class="metrics" id="fidMetrics"></div>
+    <div id="fidVerdict"></div>
+    <div class="tools"><button class="tool" id="fidAdd">Add this observation to the fidelity log</button></div>
+    <h3>Fidelity Log</h3>
+    <div class="grid-wrap"><table class="rt" id="flTbl"><thead><tr><th style="width:5%">#</th><th style="width:18%">Date</th><th style="width:22%">Observer</th><th style="width:12%">Percent</th><th>Steps missed</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="tools"><button class="tool" id="flDel">Remove last log entry</button></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Builds</h2>
+    <p>A group contingency makes a consequence for the group depend on behavior, and the three kinds differ in whose behavior. Litow and Pumroy (1975) named them: in an <b>independent</b> group-oriented contingency the same rule applies to every student but each earns on their own behavior; in a <b>dependent</b> one the whole group earns on the behavior of one student or a few; in an <b>interdependent</b> one the group earns on the group&rsquo;s performance, judged by every member meeting the criterion, by the group&rsquo;s total or mean, or by the score of a single member chosen in advance or at random. Cooper, Heron and Heward (2020) keep the same three terms and the same cautions. The programs with names, the Good Behavior Game, CW-FIT, the mystery motivator, randomized interdependent contingencies and tootling, are interdependent arrangements with particular rules, and the form holds each with its own fields so the rule can be written out, posted, and recorded against.</p>
+    <p>The Good Behavior Game is the oldest and best studied of them. Barrish, Saunders and Wolf (1969) divided a fourth-grade class into two teams, put a mark on the board against a team whenever a member was out of seat or talking out, and let both teams win privileges when both stayed under the criterion; out-of-seat and talking-out fell from most of the intervals to a few, in math and in reading, in a reversal design. Medland and Stachnik (1972) and Harris and Sherman (1973) replicated the effect and examined which parts of the game carried it. Tingstrom, Sterling-Turner and Wilczynski (2006) reviewed the game&rsquo;s first 33 years and found it effective across ages, settings and behaviors; Bowman-Perrott et al. (2016) pooled 21 single-case studies and reported a large effect (TauU = .82), largest for students with or at risk for emotional and behavioral disorders; Joslyn, Donaldson, Austin and Vollmer (2019) summarized the behavior-analytic studies and what is known about its components. Kellam and colleagues (1994, 2008) ran the game in first-grade classrooms in a randomized prevention trial and followed the children into middle school and young adulthood, with lower aggression and lower rates of later problems among the boys who had been most aggressive at the start.</p>
+    <p>CW-FIT (Wills et al., 2010; Kamps et al., 2011, 2015) adds to the game what a behavior analyst would add: the skills are taught first (getting the teacher&rsquo;s attention appropriately, following directions, ignoring inappropriate behavior), points are given with praise to every team meeting the expectation when a timer sounds, attention to inappropriate behavior is withheld, and students who need more get self-management cards or help cards. Randomizing the criterion, the behavior, the students or the reward (Kelshaw-Levering, Sterling-Turner, Henry &amp; Skinner, 2000; Theodore, Bray, Kehle &amp; Jenson, 2001) and keeping the reward in a sealed envelope (Moore, Waguespack, Wickstrom, Witt &amp; Gaydos, 1994) are ways to keep every expectation in force all period and to keep a reward from losing its pull. Tootling (Skinner, Cashwell &amp; Skinner, 2000) is a peer-reporting arrangement in which the class earns on the count of classmates&rsquo; prosocial behaviors written down, and the later studies found the disruptive behavior of the class fell while it ran (Cihak, Kirk &amp; Boon, 2009; Lambert, Tingstrom, Sterling, Dufrene &amp; Lynne, 2015).</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
+    <table class="rt">
+      <tr><th style="width:28%">The three kinds, and which to choose</th><td>Litow and Pumroy (1975) reviewed the classroom studies to that date and found support for all three arrangements. Gresham and Gresham (1982) compared them directly in a special class and found the interdependent and dependent arrangements reduced disruption more than the independent one. The reviews since (Maggin, Johnson, Chafouleas, Ruberto &amp; Berggren, 2012; Little, Akin-Little &amp; O&rsquo;Neill, 2015) find group contingencies effective across grades and behaviors, with interdependent arrangements the most studied. The choice on this form is by risk as much as effect: independent where peer pressure would harm a student, dependent only with the safeguards, interdependent with a saboteur rule.</td></tr>
+      <tr><th>The Good Behavior Game</th><td>Barrish et al. (1969): two teams, marks for fouls, both teams win under the criterion, privileges as prizes; disruptive behavior fell in a reversal design in a general-education fourth grade. Tingstrom et al. (2006): effective from preschool through high school, in general and special education, with teachers as the implementers in most studies. Bowman-Perrott et al. (2016): across 21 single-case studies the effect was large (TauU = .82) and was largest for students with or at risk for emotional and behavioral disorders. Lannie and McCurdy (2007) ran it in an urban first grade and measured the teacher&rsquo;s behavior too: student on-task behavior rose and disruptions fell while teacher praise barely changed, which is why this form pairs the game with praise rather than assuming it. Pennington and McComas (2017) found the reduction in disruptive behavior was specific to the classroom context in which the game was played, which is why the fading table starts the game in one period and adds the others on purpose.</td></tr>
+      <tr><th>Kindergarten and brief teacher training</th><td>Donaldson, Vollmer, Krous, Downs and Berard (2011) ran the game in five kindergarten classrooms after a brief teacher training; disruptive behavior fell in every class while the game was on, and did not carry over to the periods before or after it. Joslyn et al. (2019) note the same finding across the behavior-analytic studies: the game is simple enough that a short training produces the effect.</td></tr>
+      <tr><th>Rule following or rule violation</th><td>Tanol, Johnson, McComas and Cote (2010) compared a version of the game that marks rule violations with one that gives points for rule following in kindergarten; both reduced rule violations, the reinforcement version gave comparable or lower levels, and the teachers preferred the positive version. Wright and McCurdy (2012) compared the game with the Caught Being Good Game and found both effective. The form lets the team choose: a GBG with fouls (lower is better) or a point version (higher is better); the direction is set on the Design sheet and the record follows it.</td></tr>
+      <tr><th>CW-FIT</th><td>Wills et al. (2010) describe the program and its first results; Kamps et al. (2011) ran it in six urban elementary classrooms with a multiple-baseline design and found on-task behavior rose and disruptions fell for the class and for the students at risk; Kamps et al. (2015) reported a randomized trial across schools with the same direction of effects. The skills, the timer, the praise and the ignoring are the parts; the form holds each.</td></tr>
+      <tr><th>Randomized components</th><td>Kelshaw-Levering et al. (2000) randomized the criterion, the target behaviors and the reward in a second-grade class and found disruption fell under randomized interdependent contingencies, and that randomizing the behavior and criterion kept students from working to a known minimum. Theodore et al. (2001) randomized the contingency and the reward with adolescents in a self-contained class and found disruptive behavior fell. Moore et al. (1994) used the mystery motivator, a reward sealed in an envelope with a chart marking the days it is available, and reduced disruption in a general-education class with little teacher time.</td></tr>
+      <tr><th>Tootling</th><td>Skinner, Cashwell and Skinner (2000) taught fourth-graders to record classmates&rsquo; prosocial behavior and set a cumulative class goal with a group reward; reports rose when the contingency was in place. Cihak et al. (2009) and Lambert et al. (2015) extended it to classroom behavior and found disruption fell and appropriate behavior rose for elementary students with and without disabilities.</td></tr>
+      <tr><th>Long-term outcomes</th><td>Kellam et al. (1994) ran the Good Behavior Game in first-grade classrooms in Baltimore with random assignment and found lower aggressive behavior in sixth grade for the boys who had been most aggressive in first grade. Kellam et al. (2008) followed the same cohort to ages 19 to 21 and reported lower rates of drug and alcohol disorders, antisocial behavior and other outcomes among the young men who had been in game classrooms. Embry (2002) summarized the evidence and called the game a universal behavioral vaccine; the form treats it as a class-wide system and does not claim the long-term outcomes for any one classroom.</td></tr>
+      <tr><th>What goes wrong</th><td>The cautions in the literature are the ones on the Design sheet: a student who cannot meet the criterion, or who finds it reinforcing to cost the group, can spoil an interdependent arrangement, and the fix used from the first study on is a team of one (Barrish et al., 1969; Tingstrom et al., 2006); a dependent arrangement can make a student a target rather than a hero unless peers are taught what to do and the criterion is within reach (Litow &amp; Pumroy, 1975; Cooper et al., 2020); a criterion set from a wish rather than a baseline produces a class that never wins; and a game run without praise reduces fouls without teaching anything (Lannie &amp; McCurdy, 2007). Stage and Quiroz (1997) found group contingencies among the most effective interventions for disruptive classroom behavior in their meta-analysis, but the effect depends on the game being run as written, which is what the Fidelity sheet checks.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Met</th><td>A team&rsquo;s cell is met when its value is at or under the criterion (fouls, disruptions) or at or over it (points, tootles, percent), by the direction set on the Design sheet. A day is met when every team with a value is met. A row with no criterion is baseline and is never met.</td></tr>
+      <tr><th>Baseline mean and suggested criterion</th><td>The mean of every value in phase B rows. The suggested starting criterion is about half the baseline mean for a ceiling (the game reduces fouls sharply from the first day, so a ceiling at baseline asks nothing of the class, and the original game used a criterion far below baseline), or the mean rounded up for a floor; the team edits it. The Design sheet warns when a ceiling is under a quarter of the baseline mean or above it, or when a floor is more than a quarter above the mean. All of this is a working convention.</td></tr>
+      <tr><th>Decision rules (working conventions)</th><td>Over the last four game days: met on three or more, tighten the criterion by the step toward the terminal value (and when the terminal value has been held for five game days, move to the next fading phase); met on fewer than two, relax the criterion by one step and check fidelity and the reward; otherwise hold. Fewer than four game days gives no decision. The thresholds are editable on the Design sheet and are reported with every verdict.</td></tr>
+      <tr><th>The graph</th><td>One series per team (or one for the class), with a different color and marker for each; the criterion as a stepped line; phase changes as dashed vertical lines. The y-axis scales to the data and the criterion.</td></tr>
+      <tr><th>Fidelity percent</th><td>Yes divided by (Yes plus No); N/A is excluded. At or over 90 the game ran as written; 80 to 89 is a note to the teacher; under 80 the record from that period is not a test of the system (working convention).</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Ethical Cautions</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Dependent contingencies</th><td>One student carries the class. The arrangement is used only with the student&rsquo;s agreement, with a criterion the student already meets on a good day, with peers taught to encourage and never to pressure, and with an exit rule the teacher applies the same day if the student is blamed. The poster never names the student. Where the student&rsquo;s plan already has its own reinforcement, the two should not conflict: the student is not made to lose twice.</td></tr>
+      <tr><th>Interdependent contingencies</th><td>Peer pressure is the mechanism and the hazard. The teacher keeps the score, peers do not report on each other, and a student who repeatedly costs the group, whether from an inability to meet the criterion or because the group&rsquo;s reaction is itself reinforcing, is moved to a team of one with the same rule and the same prize rather than left to be the reason the class lost. A student with a BIP in the room competes under the criterion in their plan, not the class criterion, when the two differ.</td></tr>
+      <tr><th>Fouls and marks</th><td>A mark against a team is information, recorded in a neutral voice without a lecture, and marks are never removed as a reward or added as a punishment for something outside the rules. The game does not take away anything the class already had. A losing team gets no consequence beyond not earning.</td></tr>
+      <tr><th>Rewards</th><td>Activities and privileges the class chose; edibles only with family agreement and as the last choice. Nothing on the menu is something students are entitled to anyway (recess, lunch, a bathroom break).</td></tr>
+      <tr><th>Fading</th><td>A game that runs every period forever is a sign that the expectations were never taught; the fading table moves the game to intermittent and the reward to delayed on a rule, with the data saying when.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated class is a second-grade Good Behavior Game with two teams, four baseline days, eleven game days with the criterion stepped from 5 to 4 to 3 fouls, the poster, two fidelity observations and the decision rules applied.</p>
+    <p class="hint" id="gcRefs" style="margin-top:10px"><b>Reference list.</b>
+    Barrish, H. H., Saunders, M., &amp; Wolf, M. M. (1969). Good behavior game: Effects of individual contingencies for group consequences on disruptive behavior in a classroom. <em>Journal of Applied Behavior Analysis, 2</em>(2), 119&ndash;124. https://doi.org/10.1901/jaba.1969.2-119 &bull;
+    Bowman-Perrott, L., Burke, M. D., Zaini, S., Zhang, N., &amp; Vannest, K. (2016). Promoting positive behavior using the Good Behavior Game: A meta-analysis of single-case research. <em>Journal of Positive Behavior Interventions, 18</em>(3), 180&ndash;190. &bull;
+    Cihak, D. F., Kirk, E. R., &amp; Boon, R. T. (2009). Effects of classwide positive peer &ldquo;tootling&rdquo; to reduce the disruptive classroom behaviors of elementary students with and without disabilities. <em>Journal of Behavioral Education, 18</em>(4), 267&ndash;278. &bull;
+    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Donaldson, J. M., Vollmer, T. R., Krous, T., Downs, S., &amp; Berard, K. P. (2011). An evaluation of the Good Behavior Game in kindergarten classrooms. <em>Journal of Applied Behavior Analysis, 44</em>(3), 605&ndash;609. https://doi.org/10.1901/jaba.2011.44-605 &bull;
+    Embry, D. D. (2002). The Good Behavior Game: A best practice candidate as a universal behavioral vaccine. <em>Clinical Child and Family Psychology Review, 5</em>(4), 273&ndash;297. &bull;
+    Gresham, F. M., &amp; Gresham, G. N. (1982). Interdependent, dependent, and independent group contingencies for controlling disruptive behavior. <em>The Journal of Special Education, 16</em>(1), 101&ndash;110. &bull;
+    Harris, V. W., &amp; Sherman, J. A. (1973). Use and analysis of the &ldquo;Good Behavior Game&rdquo; to reduce disruptive classroom behavior. <em>Journal of Applied Behavior Analysis, 6</em>(3), 405&ndash;417. https://doi.org/10.1901/jaba.1973.6-405 &bull;
+    Hartmann, D. P., &amp; Hall, R. V. (1976). The changing criterion design. <em>Journal of Applied Behavior Analysis, 9</em>(4), 527&ndash;532. https://doi.org/10.1901/jaba.1976.9-527 &bull;
+    Joslyn, P. R., Donaldson, J. M., Austin, J. L., &amp; Vollmer, T. R. (2019). The Good Behavior Game: A brief review. <em>Journal of Applied Behavior Analysis, 52</em>(3), 811&ndash;815. https://doi.org/10.1002/jaba.572 &bull;
+    Kamps, D., Wills, H. P., Heitzman-Powell, L., Laylin, J., Szoke, C., Petrillo, T., &amp; Culey, A. (2011). Class-Wide Function-Related Intervention Teams: Effects of group contingency programs in urban classrooms. <em>Journal of Positive Behavior Interventions, 13</em>(3), 154&ndash;167. &bull;
+    Kamps, D., Wills, H., Dawson-Bannister, H., Heitzman-Powell, L., Kottwitz, E., Hansen, B., &amp; Fleming, K. (2015). Class-Wide Function-Related Intervention Teams &ldquo;CW-FIT&rdquo; efficacy trial outcomes. <em>Journal of Positive Behavior Interventions, 17</em>(3), 134&ndash;145. &bull;
+    Kellam, S. G., Rebok, G. W., Ialongo, N., &amp; Mayer, L. S. (1994). The course and malleability of aggressive behavior from early first grade into middle school: Results of a developmental epidemiologically-based preventive trial. <em>Journal of Child Psychology and Psychiatry, 35</em>(2), 259&ndash;281. &bull;
+    Kellam, S. G., Brown, C. H., Poduska, J. M., Ialongo, N. S., Wang, W., Toyinbo, P., Petras, H., Ford, C., Windham, A., &amp; Wilcox, H. C. (2008). Effects of a universal classroom behavior management program in first and second grades on young adult behavioral, psychiatric, and social outcomes. <em>Drug and Alcohol Dependence, 95</em>(Suppl. 1), S5&ndash;S28. &bull;
+    Kelshaw-Levering, K., Sterling-Turner, H. E., Henry, J. R., &amp; Skinner, C. H. (2000). Randomized interdependent group contingencies: Group reinforcement with a twist. <em>Psychology in the Schools, 37</em>(6), 523&ndash;533. &bull;
+    Lambert, A. M., Tingstrom, D. H., Sterling, H. E., Dufrene, B. A., &amp; Lynne, S. (2015). Effects of tootling on classwide disruptive and appropriate behavior of upper-elementary students. <em>Behavior Modification, 39</em>(3), 413&ndash;430. &bull;
+    Lannie, A. L., &amp; McCurdy, B. L. (2007). Preventing disruptive behavior in the urban classroom: Effects of the Good Behavior Game on student and teacher behavior. <em>Education and Treatment of Children, 30</em>(1), 85&ndash;98. &bull;
+    Litow, L., &amp; Pumroy, D. K. (1975). A brief review of classroom group-oriented contingencies. <em>Journal of Applied Behavior Analysis, 8</em>(3), 341&ndash;347. https://doi.org/10.1901/jaba.1975.8-341 &bull;
+    Little, S. G., Akin-Little, A., &amp; O&rsquo;Neill, K. (2015). Group contingency interventions with children, 1980&ndash;2010: A meta-analysis. <em>Behavior Modification, 39</em>(2), 322&ndash;341. &bull;
+    Maggin, D. M., Johnson, A. H., Chafouleas, S. M., Ruberto, L. M., &amp; Berggren, M. (2012). A systematic evidence review of school-based group contingency interventions for students with challenging behavior. <em>Journal of School Psychology, 50</em>(5), 625&ndash;654. &bull;
+    Medland, M. B., &amp; Stachnik, T. J. (1972). Good-behavior game: A replication and systematic analysis. <em>Journal of Applied Behavior Analysis, 5</em>(1), 45&ndash;51. https://doi.org/10.1901/jaba.1972.5-45 &bull;
+    Moore, L. A., Waguespack, A. M., Wickstrom, K. F., Witt, J. C., &amp; Gaydos, G. R. (1994). Mystery motivator: An effective and time efficient intervention. <em>School Psychology Review, 23</em>(1), 106&ndash;118. &bull;
+    Pennington, B., &amp; McComas, J. J. (2017). Effects of the Good Behavior Game across classroom contexts. <em>Journal of Applied Behavior Analysis, 50</em>(1), 176&ndash;180. https://doi.org/10.1002/jaba.357 &bull;
+    Skinner, C. H., Cashwell, T. H., &amp; Skinner, A. L. (2000). Increasing tootling: The effects of a peer-monitored group contingency program on students&rsquo; reports of peers&rsquo; prosocial behaviors. <em>Psychology in the Schools, 37</em>(3), 263&ndash;270. &bull;
+    Stage, S. A., &amp; Quiroz, D. R. (1997). A meta-analysis of interventions to decrease disruptive classroom behavior in public education settings. <em>School Psychology Review, 26</em>(3), 333&ndash;368. &bull;
+    Tanol, G., Johnson, L., McComas, J., &amp; Cote, E. (2010). Responding to rule violations or rule following: A comparison of two versions of the Good Behavior Game with kindergarten students. <em>Journal of School Psychology, 48</em>(5), 337&ndash;355. &bull;
+    Theodore, L. A., Bray, M. A., Kehle, T. J., &amp; Jenson, W. R. (2001). Randomization of group contingencies and reinforcers to reduce classroom disruptive behavior. <em>Journal of School Psychology, 39</em>(3), 267&ndash;277. &bull;
+    Tingstrom, D. H., Sterling-Turner, H. E., &amp; Wilczynski, S. M. (2006). The Good Behavior Game: 1969&ndash;2002. <em>Behavior Modification, 30</em>(2), 225&ndash;253. &bull;
+    Wills, H. P., Kamps, D., Hansen, B., Conklin, C., Bellinger, S., Neaderhiser, J., &amp; Nsubuga, B. (2010). The classwide function-based intervention team program. <em>Preventing School Failure, 54</em>(3), 164&ndash;171. &bull;
+    Wright, R. A., &amp; McCurdy, B. L. (2012). Class-wide positive behavior support and group contingencies: Examining a positive variation of the Good Behavior Game. <em>Journal of Positive Behavior Interventions, 14</em>(3), 173&ndash;180.</p>
+  </section>

@@ -1,0 +1,16 @@
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+(async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
+ await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(600);
+ await page.evaluate(()=>openForm('TI-1'));await page.waitForFunction(()=>!!state.status['TI-1'],null,{timeout:20000});await sleep(500);
+ const ti=page.frames().find(f=>/TI-1/.test(f.url()));
+ await ti.evaluate(()=>document.querySelector('#simBtn').click());await sleep(800);
+ console.log('TI-1 sim loaded, fields filled:',await page.evaluate(()=>document.body.innerText.match(/\d+ fields filled/)?.[0]));
+ await page.evaluate(()=>openForm('PR-1'));await page.waitForFunction(()=>!!state.status['PR-1'],null,{timeout:20000});await sleep(800);
+ const pr=page.frames().find(f=>/PR-1/.test(f.url()));
+ const btn=await pr.$('#tiBtn');console.log('tiBtn present:',!!btn);
+ pr.page().on('dialog',d=>{console.log('dialog:',d.message().slice(0,160));d.accept();});
+ await pr.evaluate(()=>document.querySelector('#tiBtn').click());await sleep(1500);
+ const vals=await pr.evaluate(()=>['intPct','intCrit','intDate','intN','intMean','intLow','intConLow','intConCom'].map(k=>k+'='+(document.querySelector(`[data-m="${k}"]`)||{}).value));
+ console.log(vals.join(' | '));
+ console.log('tiRec:',(await pr.evaluate(()=>document.querySelector('#tiRec')?.innerText.slice(0,200)))||'none');
+ console.log('LOG',JSON.stringify(log).slice(0,400));await br.close();})();

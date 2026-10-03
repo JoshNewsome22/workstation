@@ -1,6 +1,8 @@
 let chromium;try{({chromium}=require("playwright"));}catch(e){({chromium}=require("/opt/node22/lib/node_modules/playwright"));}
 const fs=require('fs'),path=require('path');
-const ROOT=process.env.WS_ROOT||'/home/user/workstation';
+/* the output folders a test names (qa/out/<name>/...) are created before it runs; qa/out is not in git */
+try{const _fs=require('fs'),_p=require('path');_fs.mkdirSync(_p.join(__dirname,'out'),{recursive:true});const _src=_fs.readFileSync(require.main.filename,'utf8');for(const m of _src.matchAll(/\/out\/([\w.-]+)\//g))_fs.mkdirSync(_p.join(__dirname,'out',m[1]),{recursive:true});}catch(e){}
+const ROOT=process.env.WS_ROOT||require('path').resolve(__dirname,'..');
 const BASE=process.env.WS_URL||'http://127.0.0.1:8123';
 function forms(edition){
   edition=edition||'NBH-Workstation';

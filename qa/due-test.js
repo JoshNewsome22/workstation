@@ -1,5 +1,5 @@
 /* v21.35 what is due: PR-1, SA-1 and CN-1 simulations put review dates and next steps on the shell's due line */
-const {chromium,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{
   const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:1000}});wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(800);
@@ -10,7 +10,7 @@ const {chromium,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
   console.log('FORM DUE',JSON.stringify(out,null,1));
   await sleep(7000);
   console.log('SHELL',JSON.stringify(await page.evaluate(()=>({n:state.due.length,items:state.due.map(x=>x.id+' '+x.what+' '+x.n),sum:$('#sumDue').textContent,facts:$('#factsDue').textContent}))));
-  await page.screenshot({path:'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/due/shell-due.png'});
+  await page.screenshot({path:__dirname+'/out/due/shell-due.png'});
   console.log('LOG',JSON.stringify(log.slice(0,12)));
   await br.close();
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

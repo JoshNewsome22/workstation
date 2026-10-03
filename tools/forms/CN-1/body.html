@@ -1,0 +1,133 @@
+  <!-- ===================== NOTE ===================== -->
+  <section class="only-note">
+    <h2 class="nbh-band">The Case</h2>
+    <p class="hint">Entered once; every note carries it. The plan in force is the version and date of the Form TD-1 plan the notes are written against; change it here when a new version is adopted, and the notes written before keep the version they recorded.</p>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>School and district</label><input data-m="school"></div>
+      <div><label>Case BCBA (name and credentials)</label><input data-m="bcba"></div>
+      <div><label>Plan in force (Form TD-1 version and date)</label><input data-m="plan" placeholder="e.g., BIP v2, dated 8/24/26"></div>
+      <div><label>Service agreement (hours, frequency, payer)</label><input data-m="service" placeholder="e.g., 4 hours a month of consultation under the district contract; parent consent on IC-1"></div>
+      <div><label>Primary target and goal (Form GB-1)</label><input data-m="goal" placeholder="e.g., elopement; goal under 1 per day for 4 weeks"></div>
+    </div>
+
+    <h2 class="nbh-band" style="margin-top:18px">This Note</h2>
+    <div class="tools"><label class="hint" for="noteSel">Note</label><select id="noteSel"></select><button class="tool" id="newNote">New note</button><button class="tool" id="dupNote">New note like this one</button><button class="tool" id="delNote">Delete this note</button></div>
+    <div class="fieldgrid">
+      <div><label>Date</label><input data-n="date" placeholder="m/d/yy"></div>
+      <div><label>Start time</label><input type="time" data-n="start"></div>
+      <div><label>End time</label><input type="time" data-n="end"></div>
+      <div><label>Duration (computed)</label><input id="durOut" readonly tabindex="-1" aria-label="Duration computed from the times"></div>
+      <div><label>Type</label><select data-n="type"><option></option><option>Observation</option><option>Consultation</option><option>Training</option><option>Direct session</option><option>Parent meeting</option><option>IEP or team meeting</option><option>Phone or video call</option><option>Record review</option></select></div>
+      <div><label>Setting</label><input data-n="setting" placeholder="e.g., Room 12 and the cafeteria; conference room; by phone"></div>
+      <div style="grid-column:1/-1"><label>Who was present (name and role)</label><input data-n="present" placeholder="e.g., Ms. R. (teacher), J. Ortiz (paraeducator), the student; parent by phone"></div>
+      <div><label>Plan in force at this visit</label><input data-n="plan" placeholder="filled from the case when the note is created"></div>
+      <div><label>Purpose of the contact</label><input data-n="purpose" placeholder="e.g., scheduled monthly observation and data review"></div>
+    </div>
+
+    <h3>What Was Observed and Reviewed</h3>
+    <div class="grid-wrap"><table class="rt">
+      <tr><th style="width:26%">Data reviewed: which forms, which dates</th><td><input data-n="data_forms" placeholder="e.g., Daily Behavior Data 9/8 to 9/19; TI-1 of 9/16; SM-1 record"></td></tr>
+      <tr><th>The week&rsquo;s rate</th><td><div class="ckrow"><input data-n="data_rate" placeholder="e.g., 1.4" style="width:90px;text-align:center"><span class="hint">against goal</span><input data-n="data_goal" placeholder="e.g., 1.0" style="width:90px;text-align:center"><select data-n="data_unit" style="width:170px"><option></option><option>per day</option><option>per hour</option><option>per session</option><option>percent of intervals</option><option>percent of opportunities</option><option>minutes per day</option></select><select data-n="data_dir" style="width:230px"><option value="">behavior to reduce (lower is better)</option><option value="up">skill to build (higher is better)</option></select></div><div id="rateOut"></div></td></tr>
+      <tr><th>What was seen (observation in plain terms)</th><td><textarea data-n="observed" rows="3" placeholder="what the student and the adults did, in the order it happened; what the data looked like against the last review"></textarea></td></tr>
+      <tr><th>Integrity observed (Form TI-1)</th><td><div class="ckrow"><input data-n="integ" placeholder="score %" style="width:90px;text-align:center"><span class="hint">TI-1 date</span><input data-n="integ_date" style="width:110px"><input data-n="integ_note" placeholder="which steps were missed, by whom" style="flex:1;min-width:200px"></div><div id="integOut"></div></td></tr>
+    </table></div>
+
+    <h3>Findings, Recommendations, and Changes</h3>
+    <div class="grid-wrap"><table class="rt">
+      <tr><th style="width:26%">Problems identified</th><td><textarea data-n="problems" rows="3" placeholder="one per line: what is not working, with the evidence"></textarea></td></tr>
+      <tr><th>Recommendations given</th><td><textarea data-n="recs" rows="3" placeholder="one per line: what was recommended, to whom"></textarea></td></tr>
+      <tr><th>Changes made to the plan</th><td><textarea data-n="changes" rows="2" placeholder="exactly what changed, from what to what; or “none”"></textarea></td></tr>
+      <tr><th>Authority for the change</th><td><select data-n="authority" style="width:80%"><option></option><option>No change to the plan</option><option>Within the adjustments the plan already allows (BCBA)</option><option>Team decision recorded on Form PR-1</option><option>Parent or guardian consent obtained (Form IC-1)</option><option>IEP team decision (meeting of this date)</option><option>Recommended only; awaiting the team</option></select></td></tr>
+      <tr><th>Training delivered</th><td><textarea data-n="training" rows="2" placeholder="what skill, to whom, by what method (instruction, model, rehearsal, feedback: Form ST-1), to what criterion"></textarea></td></tr>
+      <tr><th>Materials left</th><td><input data-n="materials" placeholder="e.g., printed TI-1 checklist, a laminated break card, the SM-1 sheet for the week"></td></tr>
+    </table></div>
+
+    <h3>Next Steps</h3>
+    <p class="hint">Each with an owner and a date. Tick a step when it is done; the Log counts the open ones and flags those past their date.</p>
+    <div class="tools"><button class="tool" id="addNx">Add a step</button><button class="tool" id="delNx">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt" id="nxTbl"><thead><tr><th style="width:5%">#</th><th>What</th><th style="width:22%">Who</th><th style="width:13%">By when</th><th style="width:8%">Done</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+
+    <h3>Time by Category (minutes)</h3>
+    <div class="timegrid">
+      <div><label>Observation</label><input data-n="t_obs" inputmode="numeric"></div>
+      <div><label>Consultation</label><input data-n="t_cons" inputmode="numeric"></div>
+      <div><label>Training</label><input data-n="t_train" inputmode="numeric"></div>
+      <div><label>Direct service</label><input data-n="t_direct" inputmode="numeric"></div>
+      <div><label>Meeting</label><input data-n="t_meet" inputmode="numeric"></div>
+      <div><label>Documentation</label><input data-n="t_doc" inputmode="numeric"></div>
+      <div><label>Travel</label><input data-n="t_travel" inputmode="numeric"></div>
+    </div>
+    <div id="timeOut"></div>
+    <div class="fieldgrid">
+      <div><label>Signed (name and credentials)</label><input data-n="sig" placeholder="filled from the case BCBA when the note is created"></div>
+      <div><label>Date signed</label><input data-n="sig_date"></div>
+      <div><label>Note written on</label><input data-n="written" placeholder="the date the note was written, if not the date of the contact"></div>
+    </div>
+    <div id="noteVerdict"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">The Note as It Prints</h2>
+    <p class="hint noprint"><b>Print this note</b> in the toolbar prints this one note alone. The ordinary print prints the whole form: the case, the open note, the log and the guide.</p>
+    <div id="noteOut"></div>
+  </section>
+
+  <!-- ===================== LOG ===================== -->
+  <section class="only-log">
+    <h2 class="nbh-band">Log of Every Note</h2>
+    <div class="metrics" id="logMetrics"></div>
+    <div class="tools noprint"><input type="search" id="logSearch" placeholder="search the notes" aria-label="Search the notes"><select id="logType" aria-label="Filter by type"><option value="">All types</option></select><select id="logMonth" aria-label="Filter by month"><option value="">All months</option></select><span class="hint" id="logCount"></span></div>
+    <p class="hint">Newest first. Click a row to open that note on the Note page. Minutes are the computed duration; the time by category is in the hours table below.</p>
+    <div class="grid-wrap"><table class="rt wide" id="logTbl"><thead><tr><th style="width:4%">#</th><th style="width:8%">Date</th><th style="width:11%">Type</th><th style="width:7%">Minutes</th><th style="width:13%">Setting</th><th style="width:15%">Present</th><th style="width:7%">Rate / goal</th><th style="width:6%">TI-1</th><th>Problems and changes</th><th style="width:8%">Next steps</th></tr></thead><tbody></tbody></table></div>
+    <h3 style="margin-top:14px">Hours by Month and Type</h3>
+    <p class="hint">From the computed duration of each note (start to end), in hours to two decimals; the row at the foot gives the time by category across the same notes. The filters above do not apply here.</p>
+    <div class="grid-wrap"><table class="rt" id="hoursTbl"></table></div>
+    <h3 style="margin-top:14px">Open Next Steps</h3>
+    <div class="grid-wrap"><table class="rt" id="openTbl"><thead><tr><th style="width:9%">From note</th><th>What</th><th style="width:20%">Who</th><th style="width:12%">By when</th><th style="width:10%">Status</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Keeps</h2>
+    <p>A consultation note is the record that a service happened and what it consisted of. It has to serve three readers at once: the BCBA a month later, who needs to know what was recommended and whether anyone did it; the team, who need the changes to the plan and the authority behind them; and anyone who later audits the service, who needs the date, the time, the people, the setting and the signature. The note on this form is arranged in the order of a visit (who and where, what was looked at, what was found, what was advised, what was changed, what was taught, what comes next) so that writing it is a matter of filling the rows, and the log makes every note findable.</p>
+    <p>Two things on the note are computed rather than written. The duration comes from the start and end times, and the time by category must add up to it, which keeps the categories honest. The week&rsquo;s rate is compared with the goal in the direction the goal runs, so the note says in one line whether the plan is working on its own terms. The integrity score links the note to the Form TI-1 observation it rests on, since a recommendation to change a plan that is not being run is a different recommendation from one about a plan that is.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">What the Research and the Standards Support</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Consultation is a problem-solving sequence with data at each stage</th><td>Bergan and Kratochwill (1990) describe behavioral consultation as four stages (problem identification, problem analysis, plan implementation, plan evaluation), each carried by an interview with a defined purpose and each ending in a decision made on data. The note&rsquo;s order follows that sequence: what the data show, what the problem is, what the plan change is, what is evaluated next. Erchul and Martens (2010) review the evidence for the model in schools and the conditions under which consultee behavior changes; the training and next-steps rows are where those conditions are recorded.</td></tr>
+      <tr><th>The family belongs in the sequence</th><td>Conjoint behavioral consultation (Sheridan, Kratochwill &amp; Bergan, 1996) runs the same four stages with the parent and the teacher together. A parent meeting on this form is a note of the same shape as a school consultation, so a home decision and a school decision sit in one log.</td></tr>
+      <tr><th>Recommendations without follow-up are not implemented</th><td>Noell et al. (2005) followed the plans written for 45 elementary students referred for consultation, each with their teacher, and compared weekly follow-up meetings, a commitment emphasis, and performance feedback on the teacher&rsquo;s own implementation data. Implementation held up only under performance feedback, and student outcomes followed. On this form the integrity score, the next steps with owner and date, and the open-steps table on the Log are the performance-feedback loop; a note that records a recommendation without a date and an owner has, on this evidence, recorded a wish.</td></tr>
+      <tr><th>The Ethics Code requires the record</th><td>The Behavior Analyst Certification Board&rsquo;s (2020) <em>Ethics Code for Behavior Analysts</em> requires behavior analysts to create and maintain documentation of their professional work, to protect and retain it, to report their services accurately, and to collect data and evaluate interventions continually (sections 2.05, 2.06, 2.17 and 2.18 in the Code&rsquo;s numbering). The date, times, setting, people, signature and time-by-category rows exist so that each note satisfies those provisions on its face, and the log keeps the retention record.</td></tr>
+      <tr><th>Decisions are made on the data, in the direction of the goal</th><td>Cooper, Heron and Heward (2020) set out data-based decision making: a measure compared with a criterion, a trend read before a change, and the change recorded with its date so the graph can show what it did. The rate-against-goal line and the plan-in-force row are the note&rsquo;s share of that record; the graphs themselves live on the data forms the note cites.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Duration</th><td>End time minus start time, in minutes. Times are read as h:mm with an optional am or pm; a time without am or pm is read on the 24-hour clock, and an end time earlier than the start is taken as the afternoon of the same day.</td></tr>
+      <tr><th>Time by category</th><td>The seven category fields are summed and compared with the duration. A sum within 5 minutes of the duration is accepted; otherwise the note says by how much the two differ (a working convention; travel and documentation are often outside the start-to-end span, and the note says so when they are).</td></tr>
+      <tr><th>Rate against goal</th><td>For a behavior to reduce, the goal is met when the rate is at or below it; for a skill to build, when the rate is at or above it. &ldquo;Close&rdquo; means within 25% of the goal on the wrong side (a working convention).</td></tr>
+      <tr><th>Integrity</th><td>The TI-1 score as a percent: 90% and above is treated as acceptable, 80% to 89% as needing a retraining step, below 80% as a plan that is not being run (working conventions, the same as Form TI-1 uses).</td></tr>
+      <tr><th>Hours by month</th><td>Each note&rsquo;s duration, in hours to two decimals, summed by the month of its date and by its type. Notes without a readable date are listed under &ldquo;undated&rdquo;.</td></tr>
+      <tr><th>Open next steps</th><td>Steps not ticked done, from every note; a step is overdue when its date is before today.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">What Makes a Note Hold Up</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Written the same day</th><td>A note written from memory a week later is weaker as a record and less useful as a plan. The &ldquo;note written on&rdquo; row is there so a late note says it is late.</td></tr>
+      <tr><th>Observation separated from judgment</th><td>&ldquo;What was seen&rdquo; is what happened, in order; &ldquo;Problems identified&rdquo; is what it means. A reader should be able to disagree with the second while accepting the first.</td></tr>
+      <tr><th>Changes name their authority</th><td>A plan change inside the adjustments the plan already allows is the BCBA&rsquo;s call; one outside them is the team&rsquo;s (Form PR-1) or needs consent (Form IC-1). The note says which, every time.</td></tr>
+      <tr><th>Every recommendation has a next step</th><td>A recommendation that nobody owns by a date is recorded as &ldquo;recommended only; awaiting the team&rdquo; and reappears on the open-steps table until it is either adopted or dropped.</td></tr>
+      <tr><th>The note cites its data</th><td>Which forms, which dates. The note does not repeat the graph; it says where the graph is.</td></tr>
+      <tr><th>Nothing about third parties that is not needed</th><td>Other students are not named; a peer is &ldquo;a peer&rdquo;. Staff are named with their role because the plan assigns them steps.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated case is six notes over five weeks (two observations with TI-1 scores, a phone call, a parent meeting, an IEP meeting and a consultation), with next steps, time by category and the hours log.</p>
+    <p class="hint" id="cnRefs" style="margin-top:10px"><b>Reference list.</b>
+    Behavior Analyst Certification Board. (2020). <em>Ethics code for behavior analysts</em>. Author. &bull;
+    Bergan, J. R., &amp; Kratochwill, T. R. (1990). <em>Behavioral consultation and therapy</em>. Plenum. &bull;
+    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Erchul, W. P., &amp; Martens, B. K. (2010). <em>School consultation: Conceptual and empirical bases of practice</em> (3rd ed.). Springer. &bull;
+    Noell, G. H., Witt, J. C., Slider, N. J., Connell, J. E., Gatti, S. L., Williams, K. L., Koenig, J. L., Resetar, J. L., &amp; Duhon, G. J. (2005). Treatment implementation following behavioral consultation in schools: A comparison of three follow-up strategies. <em>School Psychology Review, 34</em>(1), 87&ndash;106. &bull;
+    Sheridan, S. M., Kratochwill, T. R., &amp; Bergan, J. R. (1996). <em>Conjoint behavioral consultation: A procedural manual</em>. Plenum.</p>
+  </section>

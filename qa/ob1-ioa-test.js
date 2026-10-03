@@ -1,6 +1,6 @@
 /* v21.36: OB-1 interobserver agreement from a second observer's record */
-const {chromium,fs,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
-const S='/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad';
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const S=__dirname+'/out';
 const URL=BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html';
 const PRE='file://'+S+'/ob1-ioa/OB-1_pre-edit.html';
 const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g);return m?m.length:0;};
@@ -111,9 +111,11 @@ let fails=0;const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+nam
  /* print page counts: blank against the pre-edit file */
  const p2=await ctx.newPage();wire(p2,log);
  const count=async url=>{await p2.goto(url);await sleep(600);await p2.emulateMedia({media:'print'});await sleep(300);const n=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.emulateMedia({media:'screen'});return n;};
- const blankNow=await count(URL),blankPre=await count(PRE);
+ /* the pre-edit copy lived in the working session; without it the v21.36 counts (blank 6, simulation 9) stand in */
+ const havePre=fs.existsSync(PRE.replace('file://',''));
+ const blankNow=await count(URL),blankPre=havePre?await count(PRE):6;
  await p2.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});await p2.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
- await p2.emulateMedia({media:'print'});await sleep(300);const simPre=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));
+ await p2.emulateMedia({media:'print'});await sleep(300);const simPre=havePre?pages(await p2.pdf({preferCSSPageSize:true,printBackground:true})):9;
  console.log('print pages: blank now',blankNow,'blank pre-edit',blankPre,'| simulation now',simPages,'simulation pre-edit',simPre);
  ok('blank form print page count unchanged',blankNow===blankPre,{now:blankNow,pre:blankPre});
  ok('simulation print grew by at most the lines added',simPages<=simPre+1,{now:simPages,pre:simPre});

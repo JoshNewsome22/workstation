@@ -1,6 +1,6 @@
 /* v21.36: the case as a spreadsheet: CSV-exporting forms give their CSV, the others every field by name */
-const {chromium,fs,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
-const OUT='/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/qa/v2136/';
+const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const OUT=__dirname+'/out/v2136/';
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1366,height:900},acceptDownloads:true});const page=await ctx.newPage();wire(page,log);
  const downloads=[];page.on('download',d=>downloads.push(d.suggestedFilename()));
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);

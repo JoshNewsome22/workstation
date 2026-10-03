@@ -1,0 +1,10 @@
+const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
+const OUT=__dirname+'/out/ob1-ioa/';
+(async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:420,height:900}});
+ await page.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(500);
+ await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();});await sleep(500);
+ await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="obs"]').click();});await sleep(300);
+ await page.evaluate(()=>{const t=document.querySelectorAll('.obs-page')[1].querySelector('table.obs-count');window.scrollTo(0,t.getBoundingClientRect().top+window.scrollY-140);});await sleep(300);
+ await page.screenshot({path:OUT+'sheet2-phone.png'});
+ console.log(await page.evaluate(()=>({docW:document.documentElement.scrollWidth,vw:innerWidth,tblW:document.querySelectorAll('.obs-page')[1].querySelector('table.obs-count').getBoundingClientRect().width})));
+ await br.close();})();

@@ -1,0 +1,10 @@
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+(async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1100,height:850}});wire(page,[]);
+await page.goto(BASE+'/NBH-Workstation/SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html');await sleep(400);
+await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(300);
+await page.click('#viewSeg button[data-view="sheet"]');await sleep(200);
+const scr=await page.evaluate(()=>[...document.querySelectorAll('#sheetOut table.sm tr')].map(r=>Math.round(r.getBoundingClientRect().height)));
+console.log('screen row heights',scr.join(','));
+await page.emulateMedia({media:'print'});await page.evaluate(()=>document.body.classList.add('sm-sheet-only'));await sleep(200);
+const pr=await page.evaluate(()=>{const rows=[...document.querySelectorAll('#sheetOut table.sm tr')];const r=rows[2];const td=r&&r.cells[1];const cs=e=>{const c=getComputedStyle(e);return {h:c.height,minH:c.minHeight,bi:c.breakInside,ba:c.breakAfter,bb:c.breakBefore,disp:c.display}};return {heights:rows.map(x=>Math.round(x.getBoundingClientRect().height)),tr:r&&cs(r),td:td&&cs(td),face:td&&td.querySelector('.face')&&cs(td.querySelector('.face')),tbl:cs(document.querySelector('#sheetOut table.sm')),sheetOut:cs(document.querySelector('#sheetOut')),sheet:cs(document.querySelector('.sheet')),body:cs(document.body)}});
+console.log(JSON.stringify(pr,null,1));await br.close();})();

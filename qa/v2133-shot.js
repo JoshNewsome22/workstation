@@ -1,0 +1,14 @@
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+(async()=>{const br=await chromium.launch();
+ const page=await br.newPage({viewport:{width:1200,height:900}});wire(page,[]);
+ await page.goto(BASE+'/NBH-Workstation/IN-1_Stakeholder-Interview-Record_v2026-09.html');await sleep(500);
+ await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);
+ console.log('view after sim',await page.evaluate(()=>document.body.className));await page.evaluate(()=>document.querySelector('[data-view="setup"]').click());await sleep(300);
+ const r=await page.evaluate(()=>{const b=document.querySelector('#respTbl .rowDel');const rc=b.getBoundingClientRect();const td=b.closest('td').getBoundingClientRect();return {btn:[rc.x,rc.y,rc.width,rc.height],td:[td.x,td.y,td.width,td.height],vis:getComputedStyle(b).visibility,op:getComputedStyle(b).opacity,hidden:b.closest('[hidden]')?1:0};});
+ console.log(JSON.stringify(r));
+ const el=await page.$('#respTbl');await el.screenshot({path:'in1-resp.png'});
+ await page.goto(BASE+'/NBH-Workstation/MT-1_Discontinuous-Measurement_v2026-09.html');await sleep(500);
+ await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);
+ await page.evaluate(()=>document.querySelector('[data-view="log"]').click());await sleep(300);
+ const el2=await page.$('#sessTbl');await el2.screenshot({path:'mt1-sess.png'});
+ await br.close();})();

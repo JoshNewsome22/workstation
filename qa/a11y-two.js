@@ -1,0 +1,4 @@
+const L=require('./lib');const AXE=L.fs.readFileSync(require.resolve('axe-core/axe.min.js'),'utf8');
+(async()=>{const br=await L.chromium.launch();for(const f of ['SR-1_Schedules-of-Reinforcement_v2026-10.html','CN-1_Consultation-Notes_v2026-10.html']){const p=await br.newPage({viewport:{width:1440,height:900}});L.wire(p,[]);await p.goto(L.BASE+'/NBH-Workstation/'+f);await L.sleep(600);await L.loadSim(p);await L.sleep(1200);await p.addScriptTag({content:AXE});
+ const r=await p.evaluate(async()=>{const r=await axe.run(document,{runOnly:{type:'tag',values:['wcag2aa']},iframes:false});return r.violations.map(v=>({id:v.id,nodes:v.nodes.slice(0,6).map(n=>({t:n.target.join(' '),s:(n.any[0]&&n.any[0].message||'').slice(0,140)}))}));});
+ console.log(f.slice(0,4),JSON.stringify(r,null,1).slice(0,2500));await p.close();}await br.close();})();

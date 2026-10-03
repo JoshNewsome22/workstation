@@ -1,5 +1,5 @@
 /* v21.36: the letterhead image once per form; every logo image is filled, on screen, in print and in the master print */
-const {chromium,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1300,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
  const page=await ctx.newPage();wire(page,log);
  for(const f of ['CF-1_Contextual-Fit-Assessment_v2026-09.html','TD-1_Function-Based-Treatment-Developer_v2026-09.html','SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html']){

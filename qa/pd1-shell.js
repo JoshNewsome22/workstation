@@ -1,0 +1,11 @@
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+(async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
+ await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(600);
+ const link=await page.$('text=Performance Diagnostic Checklist');console.log('listed:',!!link);
+ await link.click();await sleep(1500);
+ const fr=page.frames().find(f=>/PD-1/.test(f.url()));console.log('frame:',!!fr);
+ await page.evaluate(()=>{const i=document.querySelector('#barName,#pktName,input[name="name"]');});
+ const ids=await page.$$eval('input',els=>els.map(e=>e.id).filter(Boolean).slice(0,30));console.log('shell inputs:',ids.join(','));
+ const txt=await page.evaluate(()=>document.body.innerText.match(/\d+ of \d+ ticked/)?.[0]);console.log('tick text:',txt);
+ await page.screenshot({path:__dirname+'/out/pd1/shots/shell.png'});
+ console.log('LOG',JSON.stringify(log));await br.close();})();

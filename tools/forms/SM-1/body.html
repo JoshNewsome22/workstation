@@ -1,0 +1,409 @@
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">Student, Plan, and the Shape of the System</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>How the student is named on the sheet</label><input data-m="nick" placeholder="first name, or “I”"></div>
+      <div><label>Plan this serves</label><input data-m="plan" placeholder="e.g., BIP dated 8/5/26 (Form TD-1); replacement skills from GB-1"></div>
+      <div><label>Function of the target behavior (Form FS-1)</label><select data-m="func"><option></option><option>Attention</option><option>Escape or avoidance</option><option>Tangible</option><option>Automatic</option><option>More than one</option><option>Not assessed</option></select></div>
+      <div><label>Setting(s)</label><input data-m="setting" placeholder="general education classroom, resource room, specials"></div>
+      <div><label>Who rates and matches</label><input data-m="rater" placeholder="classroom teacher; paraeducator in specials"></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Date designed</label><input data-m="date"></div>
+      <div><label>Start date</label><input data-m="start"></div>
+      <div><label>First review date</label><input data-m="review"></div>
+    </div>
+    <h2 class="nbh-band" style="margin-top:18px">Is the Student Ready to Self-Monitor?</h2>
+    <p class="hint">Self-monitoring asks the student to notice their own behavior and record it. The checks below decide what has to be taught first and how much the teacher must match at the start. None of them rules a student out; they change the design.</p>
+    <table class="rt">
+      <tr><th style="width:30%">Can the student discriminate the target behavior from its absence when shown examples and non-examples?</th><td><select data-m="r_disc" style="width:60%"><option></option><option>Yes, reliably</option><option>With practice (teach first with examples and non-examples)</option><option>Not yet (start with teacher rating only)</option></select></td></tr>
+      <tr><th>Is this a performance deficit? (The student has done the behavior before, at least sometimes; the sheet pays for doing it more.)</th><td><select data-m="r_perf" style="width:60%"><option></option><option>Yes: the behavior is in the repertoire</option><option>Partly: teach the skill alongside the sheet</option><option>No: teach the skill first; the sheet comes later</option></select></td></tr>
+      <tr><th>Can the student read the sheet, or does it need pictures?</th><td><select data-m="r_read" style="width:60%"><option></option><option>Reads the sheet</option><option>Needs pictures and faces</option><option>Needs the sheet read aloud</option></select></td></tr>
+      <tr><th>Has a reinforcer assessment been done (Form PA-1 or RA-1)?</th><td><select data-m="r_pa" style="width:60%"><option></option><option>Yes, menu carried in below</option><option>Informal only</option><option>No</option></select></td></tr>
+      <tr><th>Baseline: how many days of teacher-only rating before the student rates?</th><td><input data-m="r_base" placeholder="3 to 5 school days, as a working convention" style="width:60%"></td></tr>
+      <tr><th>History with point systems</th><td><textarea data-m="r_hist" rows="2" placeholder="What has been tried, what the student said about it, whether points were ever lost as a punishment"></textarea></td></tr>
+    </table>
+    <div id="setupVerdict"></div>
+  </section>
+
+  <!-- ===================== TARGETS ===================== -->
+  <section class="only-targets">
+    <h2 class="nbh-band">What the Student Rates</h2>
+    <p class="hint">Two to four targets, each stated as something the student does (not stops doing), in the student&rsquo;s own words on the sheet and in observable terms for the adults. Pair each reduction target with the replacement behavior the plan teaches. The cue line prints under the question on the sheet; the examples and non-examples are the teaching set for the discrimination practice.</p>
+    <div class="tools"><button class="tool" id="addT">Add a target</button><button class="tool" id="delT">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="tTbl"><thead><tr>
+      <th style="width:4%">#</th><th style="width:20%">On the sheet (student&rsquo;s words)</th><th style="width:22%">Definition for the adults</th><th style="width:16%">Cue line (short)</th><th style="width:14%">Example</th><th style="width:14%">Non-example</th><th style="width:12%">Picture and goal</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Pictures come from the shared pictogram library (OpenMoji, CC BY-SA 4.0) or from a photo you upload; a photo is stored inside the saved file, resized to a thumbnail. A pictorial sheet reads best with four targets or fewer; the form warns above that.</p>
+    <table class="rt" style="margin-top:12px">
+      <tr><th style="width:28%">Reduction target these replace (from the BIP)</th><td><input data-m="t_reduce" placeholder="the behavior the plan reduces, and the replacement each target stands for"></td></tr>
+      <tr><th>Reminder rule</th><td><select data-m="t_rem" style="width:70%"><option></option><option>A Yes needs no reminder</option><option>A Yes allows one reminder (the teacher tallies reminders in the R R box)</option><option>Reminders are not counted</option></select></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== SYSTEM ===================== -->
+  <section class="only-system">
+    <h2 class="nbh-band">The System</h2>
+    <p class="hint">Pick the arrangement that fits the student and the setting. The sheet the form prints, the points it counts and the record it keeps all follow this choice.</p>
+    <div class="sysopt" id="sysOpt">
+      <label data-sys="match"><input type="radio" name="sys" value="match"><b>Self &amp; Match</b>The student rates each target each period, the teacher rates it too, and points come from the match: both Yes 2, both No 1, a mismatch 0 (the points are editable). Honesty earns as much as the behavior; the teacher&rsquo;s rating stands.</label>
+      <label data-sys="contract"><input type="radio" name="sys" value="contract"><b>Self-monitoring contract</b>The student checks each target each period; the teacher initials the row. Points are the checks the teacher confirms. The lightest arrangement, for a student who already rates accurately or is being faded.</label>
+      <label data-sys="rubric"><input type="radio" name="sys" value="rubric"><b>Rubric point sheet</b>One rating per period on a 1 to 5 scale, each level described in terms of prompts needed and time out of class (or whatever the plan measures). Points add across the day and the week; the record shows the share of periods at each level.</label>
+      <label data-sys="interval"><input type="radio" name="sys" value="interval"><b>Cued intervals (on-task)</b>A timer or tactile prompt cues the student every few minutes to answer one question (&ldquo;Was I working?&rdquo;) with a Yes or No; the teacher matches a sample of the intervals. For attention during independent work.</label>
+      <label data-sys="smiley"><input type="radio" name="sys" value="smiley"><b>Expectations and earns</b>The school&rsquo;s sheet: a face per expectation per period, a mid-day earn when a run of periods is met (&ldquo;2 in a row, I can earn&hellip;&rdquo;), a percent and a goal per expectation, and end-of-day reward tiers by faces earned.</label>
+      <label data-sys="cico"><input type="radio" name="sys" value="cico"><b>Check-in / check-out card (0-1-2)</b>The Tier 2 daily progress report: a 0, 1 or 2 per expectation per period, a morning check-in and an afternoon check-out with a mentor, a daily percent against the goal, and a copy home. For attention-maintained behavior and students who need adult contact at both ends of the day.</label>
+      <label data-sys="perf"><input type="radio" name="sys" value="perf"><b>Performance count with self-graph</b>Self-monitoring of performance: the student counts items done (or done correctly) in each timed session against a goal, and colors a bar on the sheet&rsquo;s own graph. For fluency and productivity; the count is the measure, not an on-task judgment.</label>
+      <label data-sys="interlock"><input type="radio" name="sys" value="interlock"><b>Interlocking schedule session</b>One work session: every minute the student and the teacher each score engagement, and the number of items (or minutes) required to earn the reinforcer changes with the time elapsed. Decreasing requirements prevent ratio strain and favour quality; increasing ones build fluency.</label>
+    </div>
+    <h3>Periods or Activities</h3>
+    <p class="hint">The rows of the sheet. Use the student&rsquo;s own day: a time and a label, and a picture for a pictorial sheet. For a weekly contract these are the classes of each day.</p>
+    <div class="tools"><button class="tool" id="addP">Add a period</button><button class="tool" id="delP">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt" id="pTbl"><thead><tr><th style="width:5%">#</th><th style="width:22%">Time</th><th style="width:38%">Label</th><th>Picture</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="ckrow" style="margin-top:8px">
+      <label class="ck"><input type="checkbox" data-c="weekly"> Weekly sheet (Monday to Friday on one page) rather than one sheet per day</label>
+      <label class="ck"><input type="checkbox" data-c="pict"> Pictorial sheet: faces to circle and a picture per period</label>
+      <label class="ck"><input type="checkbox" data-c="home"> Home note: a tear-off strip at the foot of the sheet that goes home and comes back signed</label>
+      <label class="ck"><input type="checkbox" data-c="big"> Student-size print: large faces and circles, big type (for younger students; the sheet may run to two pages)</label>
+      <label class="ck"><input type="checkbox" data-c="graph"> Self-graph strip: a bar for each day of the week the student colors to the day&rsquo;s percent, with the goal line drawn</label>
+      <label class="ck"><input type="checkbox" data-c="eval"> Self-evaluation lines: my goal, did I meet it, what helped, next time I will</label>
+      <label class="ck"><input type="checkbox" data-c="pocket"> Pocket card: an index-card version with no pictures, two to a page (for middle and high school; Self &amp; Match, contract and check-in/check-out)</label>
+      <label class="ck"><input type="checkbox" data-c="rubmatch"> Teacher matches the rating (rubric point sheet: a student row and a teacher row of circles, and a match box)</label>
+    </div>
+    <div id="sysVerdict"></div>
+
+    <div class="only-sys for-match"><h3>Match Points</h3>
+      <table class="rt" style="max-width:560px"><thead><tr><th>Student says</th><th>Teacher says</th><th>Points</th></tr></thead><tbody>
+        <tr><td class="num">Yes</td><td class="num">Yes</td><td class="num"><input data-m="mp_yy" placeholder="2" style="text-align:center"></td></tr>
+        <tr><td class="num">No</td><td class="num">No</td><td class="num"><input data-m="mp_nn" placeholder="1" style="text-align:center"></td></tr>
+        <tr><td class="num">Yes</td><td class="num">No</td><td class="num"><input data-m="mp_yn" placeholder="0" style="text-align:center"></td></tr>
+        <tr><td class="num">No</td><td class="num">Yes</td><td class="num"><input data-m="mp_ny" placeholder="0" style="text-align:center"></td></tr>
+      </tbody></table>
+      <p class="hint">The published arrangement gives a point for an honest No, so that a student who had a hard period and says so still earns. A No followed by a teacher Yes is a mismatch too; some teams give it 1 so the student is not punished for modesty. Record the rule and keep it.</p>
+    </div>
+    <div class="only-sys for-rubric"><h3>The Rubric</h3>
+      <p class="hint">Describe each level in the terms the plan measures: prompts needed to finish the task, minutes out of class, late arrivals. The level a period earns is the lowest line it meets. The descriptions print on the sheet.</p>
+      <div class="grid-wrap"><table class="rt" id="rubTbl"><thead><tr><th style="width:8%">Level</th><th style="width:10%">Points</th><th>Description</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="only-sys for-interval"><h3>The Intervals</h3>
+      <div class="fieldgrid">
+        <div><label>Question on the sheet</label><input data-m="iv_q" placeholder="Was I working?"></div>
+        <div><label>Interval length (minutes)</label><input data-m="iv_len" placeholder="3"></div>
+        <div><label>Number of intervals</label><input data-m="iv_n" placeholder="10"></div>
+        <div><label>Cue</label><select data-m="iv_cue"><option></option><option>Tactile timer (vibrating prompt)</option><option>Audible beep</option><option>Teacher&rsquo;s silent signal</option><option>Visual timer</option></select></div>
+        <div><label>Cue timing</label><select data-m="iv_timing"><option></option><option>Fixed: every interval the same length</option><option>Variable: the length varies around the average, so the cue cannot be predicted</option></select></div>
+        <div><label>Teacher matches</label><select data-m="iv_match"><option></option><option>Every interval</option><option>Half of the intervals, chosen beforehand</option><option>Two intervals a session</option><option>None (student alone)</option></select></div>
+        <div><label>Activity</label><input data-m="iv_act" placeholder="independent math practice"></div>
+      </div>
+      <p class="hint">A cue at a predictable time sets up the fixed-interval pattern Ferster and Skinner (1957) describe: little behavior early in the interval and a burst just before the check. A variable cue (an average of 3 minutes, from 1 to 6, as the teachers&rsquo; timer was set in Bulla &amp; Frieder, 2017) keeps the behavior steady across the interval. Start fixed while the student learns to rate; go variable once agreement holds.</p>
+    </div>
+    <div class="only-sys for-smiley"><h3>Earns and Tiers</h3>
+      <div class="fieldgrid">
+        <div><label>Periods in a row to earn</label><input data-m="sm_inrow" placeholder="2"></div>
+        <div style="grid-column:span 2"><label>&ldquo;I can earn&hellip;&rdquo; (one per line; short, immediate, chosen by the student)</label><textarea data-m="sm_earn" rows="4" placeholder="Show my work&#10;Share my interest&#10;Take a walk&#10;Draw a picture&#10;Teacher helper&#10;Class thumbs up"></textarea></div>
+        <div><label>End-of-day tiers (faces then reward, one per line)</label><textarea data-m="sm_tiers" rows="3" placeholder="10+ Free time&#10;16+ Play a game"></textarea></div>
+      </div>
+      <p class="hint">The in-a-row earn is a small reinforcer inside the day, so the sheet pays before the end of the day; the tiers make a bigger day worth more without making a bad start pointless. The per-expectation goal prints under each column from the Targets sheet.</p>
+    </div>
+    <div class="only-sys for-perf"><h3>The Count and the Graph</h3>
+      <div class="fieldgrid">
+        <div><label>What is counted</label><input data-m="pf_what" placeholder="math problems completed; words written; items of the routine done"></div>
+        <div><label>Count what</label><select data-m="pf_kind"><option value="done">Items done</option><option value="correct">Items done and items correct</option></select></div>
+        <div><label>Sessions per sheet</label><input data-m="pf_n" placeholder="5"></div>
+        <div><label>Minutes per session</label><input data-m="pf_min" placeholder="10"></div>
+        <div><label>Goal per session (count)</label><input data-m="pf_goal" placeholder="12"></div>
+        <div><label>Top of the graph (count)</label><input data-m="pf_max" placeholder="20"></div>
+        <div><label>Sheet covers</label><select data-m="pf_span"><option value="day">One day (sessions in a day)</option><option value="week">One week (one session a day)</option></select></div>
+      </div>
+      <p class="hint">The goal is a number the student met on some baseline sessions and the graph top is a little above the best session; the student plots each session&rsquo;s count, which is the self-graphing that added to the reactive effect in DiGangi, Maag and Rutherford (1991) and that Farrell and McDougall (2008) built fluency with. Points possible are the sessions; the goal percent is the share of sessions at or above the count.</p>
+    </div>
+    <div class="only-sys for-cico"><h3>Check-In, Check-Out</h3>
+      <div class="fieldgrid">
+        <div><label>Scale key on the card</label><input data-m="ci_key" placeholder="2 = Yes, met the expectation · 1 = Partly, with a reminder · 0 = No"></div>
+        <div><label>Mentor (check-in and check-out adult)</label><input data-m="ci_mentor" placeholder="Ms. Ortiz, front office"></div>
+        <div><label>Check-in time and routine</label><input data-m="ci_in" placeholder="8:10; greet, card out, goal said aloud, materials check"></div>
+        <div><label>Check-out time and routine</label><input data-m="ci_out" placeholder="2:55; total the points, praise or problem-solve, card copy home"></div>
+        <div><label>Daily goal (percent of points)</label><input data-m="ci_goal" placeholder="80"></div>
+        <div><label>Home copy</label><select data-m="ci_home"><option>Yes, signed and returned next morning</option><option>Yes, not returned</option><option>No home copy</option></select></div>
+      </div>
+      <p class="hint">The Behavior Education Program card (Crone, Hawken &amp; Horner, 2010): teacher feedback after each period on a 0-1-2 scale, adult contact at both ends of the day, and a home copy. Hawken and colleagues&rsquo; reviews report consistent reductions in problem behavior, most reliably when the behavior is maintained by adult attention (Hawken et al., 2014; Maggin et al., 2015); Campbell and Anderson (2011) showed in a component analysis that the periodic teacher feedback carried the effect for the students studied. Points possible are periods &times; expectations &times; 2.</p>
+    </div>
+    <div class="only-sys for-interlock"><h3>The Interlocking Schedule</h3>
+      <p class="hint">From the school&rsquo;s session sheet: a stopwatch starts when the student begins; at the end of each minute the student and the staff member each circle Yes or No for engagement; the number of items required to earn the reinforcer changes with the minutes elapsed; the session ends, with praise and the reinforcer, when the student has completed the items required at that minute and both engagement checks were Yes.</p>
+      <div class="fieldgrid">
+        <div><label>Direction</label><select data-m="il_dir"><option></option><option value="dec">Decreasing: the requirement falls as time passes (prevents ratio strain, favours quality)</option><option value="inc">Increasing: the requirement rises as time passes (prevents slow responding, builds fluency)</option></select></div>
+        <div><label>Requirement counts</label><select data-m="il_unit"><option></option><option value="items">Items completed</option><option value="min">Minutes of engagement</option></select></div>
+        <div><label>Initial requirement</label><input data-m="il_init" placeholder="20"></div>
+        <div><label>Change by</label><input data-m="il_step" placeholder="2"></div>
+        <div><label>Every (minutes)</label><input data-m="il_every" placeholder="2"></div>
+        <div><label>Session length (minutes)</label><input data-m="il_len" placeholder="16"></div>
+        <div><label>Check every (minutes)</label><input data-m="il_chk" placeholder="1"></div>
+        <div><label>Task</label><input data-m="il_task" placeholder="math worksheet, problems 1 to 20"></div>
+        <div><label>Lowest requirement (floor)</label><input data-m="il_floor" placeholder="6"></div>
+        <div><label>Highest requirement (ceiling)</label><input data-m="il_cap" placeholder="20"></div>
+      </div>
+      <div id="ilPreview" class="hint"></div>
+    </div>
+  </section>
+
+  <!-- ===================== REINFORCEMENT ===================== -->
+  <section class="only-reinf">
+    <h2 class="nbh-band">Goal, Points, and What They Buy</h2>
+    <div class="metrics" id="ptMetrics"></div>
+    <table class="rt">
+      <tr><th style="width:28%">Goal (percent of points possible)</th><td><input data-m="goal" placeholder="70 to 80 to start, as a working convention; the record suggests one from baseline" style="width:40%"></td></tr>
+      <tr><th>Goal statement on the sheet</th><td><input data-m="goal_txt" placeholder="filled from the goal; e.g., If I earn 39 of 48 points, I earn my reward"></td></tr>
+      <tr><th>Reward menu (from Form PA-1)</th><td><textarea data-m="menu" rows="2" placeholder="three to five items the student chooses from each morning; write them in the form they are delivered"></textarea></td></tr>
+      <tr><th>When the reward is delivered</th><td><select data-m="when" style="width:70%"><option></option><option>Same day, at the end of the sheet</option><option>At the end of the morning block, then again at the end of the day</option><option>At the end of each period that meets the goal</option><option>Weekly, from daily points (with a daily reward too)</option></select></td></tr>
+      <tr><th>Bonus for matching</th><td><input data-m="bonus" placeholder="e.g., 1 bonus point when every rating in a period matches; a “100% match” sticker"></td></tr>
+      <tr><th>What never happens</th><td><input data-m="never" placeholder="points are never taken away; the sheet is never used as a punishment; a bad period does not cancel earlier points"></td></tr>
+      <tr><th>Home component</th><td><input data-m="homeNote" placeholder="what goes home, who signs, what the family does with a goal day (praise, not a second reward unless agreed)"></td></tr>
+      <tr><th>Group or class contingency (optional)</th><td><input data-m="group" placeholder="e.g., the class earns 5 minutes when the student meets the goal 4 days in a week"></td></tr>
+      <tr><th>What the points buy (class of back-up)</th><td><select data-m="rf_class" style="width:70%"><option></option><option>Social: praise, attention, a job or role (tried first)</option><option>Activities and privileges (free time, a game, a walk, helper)</option><option>Nonedible tangibles (stickers, small items, a prize box)</option><option>Edibles (last resort, with family agreement)</option><option>A mixed menu across classes</option></select></td></tr>
+      <tr><th>Is the reward available anywhere else in the day?</th><td><select data-m="rf_closed" style="width:70%"><option></option><option>No: only through the sheet (closed)</option><option>Sometimes, at set times the student knows</option><option>Yes, freely (open: expect the points to buy less)</option></select></td></tr>
+      <tr><th>As the schedule thins</th><td><input data-m="rf_mag" placeholder="what gets bigger or better as matching fades and the goal rises: longer access, a better item, accumulated time at the end of the week"></td></tr>
+    </table>
+    <p class="hint">The order in the first row is the reinforcer-selection flowchart in DeLeon, Bullock and Catania (2013), reproduced in DeLeon et al. (2014): test social consequences first because they fit the classroom best, then nonedible tangibles, then edibles, each assessed inside the token system; if the points do not work, deliver the reinforcer directly after smaller pieces of work. The second row is the open-versus-closed-economy point from the same chapter: a reward the student can also get free is worth less at each step up in the goal. The third row applies their note that magnitude should be adjusted as reinforcement becomes less frequent.</p>
+    <h3>Changing the Criterion</h3>
+    <p class="hint">Start where the student can succeed, then step the goal up on a rule written in advance. The record applies the rule and says when a step is due.</p>
+    <table class="rt">
+      <tr><th style="width:28%">Raise the goal when</th><td><input data-m="cc_up" placeholder="met on 4 of the last 5 school days (working convention)"></td></tr>
+      <tr><th>Raise it by</th><td><input data-m="cc_step" placeholder="5 to 10 percentage points, to a ceiling of 90 (working convention)"></td></tr>
+      <tr><th>Lower the goal or revisit the reinforcer when</th><td><input data-m="cc_down" placeholder="met on fewer than 2 of 5 days, or the student stops choosing a reward"></td></tr>
+      <tr><th>Ceiling</th><td><input data-m="cc_cap" placeholder="90" style="width:30%"></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== TEACH AND FADE ===================== -->
+  <section class="only-teach">
+    <h2 class="nbh-band">Teaching the Student to Rate, and Fading the Checks</h2>
+    <h3>Discrimination and Rating Practice</h3>
+    <table class="rt">
+      <tr><th style="width:28%">Examples and non-examples</th><td><textarea data-m="tr_ex" rows="2" placeholder="For each target: three examples and three non-examples acted out or shown on video, until the student labels 9 of 10 correctly"></textarea></td></tr>
+      <tr><th>Practice the sheet</th><td><textarea data-m="tr_prac" rows="2" placeholder="Role-play two periods; the student rates, the adult rates, they compare; praise honest Nos as warmly as Yeses"></textarea></td></tr>
+      <tr><th>Accuracy criterion before points depend on the match</th><td><input data-m="tr_acc" placeholder="agreement at or above 80% on 3 practice days (working convention)"></td></tr>
+      <tr><th>Rule for disagreements</th><td><input data-m="tr_dis" placeholder="the teacher’s rating stands; the student may ask once what the teacher saw; no argument on the sheet"></td></tr>
+      <tr><th>Who taught it, when</th><td><input data-m="tr_who"></td></tr>
+    </table>
+    <h3>The Matching Ladder</h3>
+    <p class="hint">The sequence from the matching studies: the teacher rates first, the student joins and matches every period, matches become a sample, then a check now and then, until the student rates alone with occasional surprise checks. Move on the criterion; move back when agreement drops. Tick the phase in use.</p>
+    <div class="grid-wrap"><table class="rt wide" id="ladTbl"><thead><tr><th style="width:5%">Phase</th><th style="width:5%">Now</th><th style="width:34%">Arrangement</th><th style="width:28%">Move on when</th><th>Dates and notes</th></tr></thead><tbody></tbody></table></div>
+    <h3>Staff Fidelity (for Form TI-1)</h3>
+    <p class="hint">What the adults do every day the sheet runs. Observe it as a treatment-integrity check; the sheet only works when the matching and the reward are as reliable as the rating.</p>
+    <div class="grid-wrap"><table class="rt" id="fidTbl"><thead><tr><th style="width:5%">#</th><th>Step</th><th style="width:14%">In the plan</th><th style="width:30%">Notes</th></tr></thead><tbody></tbody></table></div>
+    <h3>The Rest of the Self-Management Package</h3>
+    <p class="hint">Self-monitoring is one component. The package in the literature adds self-evaluation against a goal the student helped set, self-instruction (what the student says to themselves at the moment it matters), and self-reinforcement (the student delivers the reward, checked by the adult). Each has its own evidence (Meichenbaum &amp; Goodman, 1971; Rhode, Morgan &amp; Young, 1983; Koegel et al., 1992; Cooper, Heron &amp; Heward, 2020). Fill in what this student&rsquo;s system includes; the sheet prints the self-evaluation lines when that option is ticked.</p>
+    <table class="rt">
+      <tr><th style="width:28%">Goal set with the student</th><td><input data-m="smp_goal" placeholder="the student’s own words for the goal, and how they chose it (from two options the team offered)"></td></tr>
+      <tr><th>Self-evaluation</th><td><input data-m="smp_eval" placeholder="at the end of the day the student circles whether the goal was met and writes one thing that helped"></td></tr>
+      <tr><th>Self-instruction script</th><td><input data-m="smp_instr" placeholder="what the student says quietly at the cue: “Am I working? Yes, keep going.” Taught by modelling aloud, then whispering, then silently"></td></tr>
+      <tr><th>Self-reinforcement</th><td><input data-m="smp_selfr" placeholder="the student takes the reward from the menu when the total meets the goal; the teacher initials the total first"></td></tr>
+    </table>
+    <h3>Fading the Sheet Itself</h3>
+    <p class="hint">The matching ladder fades the teacher&rsquo;s checks. This table fades the sheet: fewer ratings, a longer unit, a later reward, then a verbal report and no sheet. Move on the criterion; move back when the data slip. The steps and criteria are working conventions, in the order Rhode, Morgan and Young (1983) used to carry gains into the regular classroom.</p>
+    <div class="grid-wrap"><table class="rt wide" id="fadeTbl"><thead><tr><th style="width:5%">Step</th><th style="width:5%">Now</th><th style="width:36%">What the sheet becomes</th><th style="width:26%">Move on when</th><th>Dates and notes</th></tr></thead><tbody></tbody></table></div>
+    <h3>Generalization and Ending</h3>
+    <table class="rt">
+      <tr><th style="width:28%">Carry to other settings</th><td><textarea data-m="gen_set" rows="2" placeholder="which classes next, who rates there, whether the same sheet travels"></textarea></td></tr>
+      <tr><th>Thinning the sheet</th><td><textarea data-m="gen_thin" rows="2" placeholder="fewer periods rated, a weekly goal, a verbal self-report in place of the sheet"></textarea></td></tr>
+      <tr><th>Exit criterion</th><td><input data-m="gen_exit" placeholder="goal at ceiling for 4 weeks with checks faded; the behavior holds on Form PR-1"></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== CONTRACT ===================== -->
+  <section class="only-bc">
+    <h2 class="nbh-band">The Behavioral Contract</h2>
+    <p class="hint">A contingency contract is a written agreement between the student and the adults: a task described in observable terms, a reward described just as exactly, and a record of both. Homme, Csanyi, Gonzales and Rechs (1970) set out the form; Kelley and Stokes (1982) and Miller and Kelley (1994) tested it in the Journal of Applied Behavior Analysis; Bowman-Perrott, Burke, de Marin, Zhang and Davis (2015) meta-analyzed the single-case research. The contract can stand on its own or sit on top of the point sheet (the task is then &ldquo;earn the goal on the sheet&rdquo;). The document prints from <b>Print the contract</b>.</p>
+    <h3>The Parties</h3>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="bc_student" placeholder="filled from Setup if blank"></div>
+      <div><label>Teacher or staff member</label><input data-m="bc_teacher"></div>
+      <div><label>Parent or caregiver (if a party)</label><input data-m="bc_parent"></div>
+      <div><label>Date the contract starts</label><input data-m="bc_start"></div>
+      <div><label>Review date (renegotiate or renew)</label><input data-m="bc_review" placeholder="two weeks from the start, as a working convention"></div>
+      <div><label>Who wrote the wording</label><select data-m="bc_voice"><option></option><option>The student, with the adult writing it down</option><option>Negotiated line by line</option><option>Drafted by the adult, read and changed by the student</option></select></div>
+    </div>
+    <h3>The Task</h3>
+    <table class="rt">
+      <tr><th style="width:28%">What the student will do (observable)</th><td><textarea data-m="bc_task" rows="2" placeholder="e.g., Hand in the completed math practice sheet to Ms. R. before the bell; or: Earn the goal on my point sheet"></textarea></td></tr>
+      <tr><th>How much, how well (the criterion)</th><td><input data-m="bc_how" placeholder="e.g., at least 8 of 10 problems attempted, work shown; at least 4 of 5 school days"></td></tr>
+      <tr><th>When and where</th><td><input data-m="bc_when" placeholder="e.g., every school day, math block, Room 12"></td></tr>
+      <tr><th>Who records it, and where</th><td><input data-m="bc_record" placeholder="Ms. R. ticks the task record on the contract each day the task is done"></td></tr>
+      <tr><th>What the adults will do</th><td><textarea data-m="bc_adult" rows="2" placeholder="e.g., Ms. R. will check the sheet at 10:40 and give the reward the same day; Dad will ask about the contract at dinner and sign on Friday"></textarea></td></tr>
+    </table>
+    <h3>The Reward</h3>
+    <table class="rt">
+      <tr><th style="width:28%">What the student earns</th><td><input data-m="bc_rw" placeholder="chosen by the student from the Reinforcement menu"></td></tr>
+      <tr><th>How much</th><td><input data-m="bc_rwmuch" placeholder="e.g., 10 minutes; one pass; one item from the box"></td></tr>
+      <tr><th>When it is delivered</th><td><input data-m="bc_rwwhen" placeholder="e.g., the same day at 2:40; Friday for a weekly task"></td></tr>
+      <tr><th>Who delivers it</th><td><input data-m="bc_rwwho"></td></tr>
+      <tr><th>Bonus clause (optional)</th><td><input data-m="bc_bonus" placeholder="e.g., five days in a row earns a lunch with a friend"></td></tr>
+      <tr><th>Penalty clause</th><td><select data-m="bc_pen" style="width:70%"><option>None: a day the task is not done earns nothing, and nothing is lost</option><option>A stated consequence (write it below; use with caution)</option></select><input data-m="bc_pentext" placeholder="if a penalty is used: exactly what, and only what was agreed" style="margin-top:4px"></td></tr>
+      <tr><th>Renegotiation rule</th><td><input data-m="bc_renego" placeholder="either party may ask for a meeting; the contract is rewritten, never changed by one side"></td></tr>
+    </table>
+    <h3>Checking the Contract Against the Rules</h3>
+    <p class="hint">Homme and colleagues&rsquo; rules for a contract that works, as summarized in Cooper, Heron and Heward (2020). Tick each one before the student signs.</p>
+    <div class="grid-wrap"><table class="rt" id="bcTbl"><thead><tr><th style="width:5%">#</th><th>Rule</th><th style="width:12%">Met</th><th style="width:30%">Note</th></tr></thead><tbody></tbody></table></div>
+    <div id="bcVerdict"></div>
+    <h3>The Document</h3>
+    <div id="bcOut"></div>
+  </section>
+
+  <!-- ===================== SHEET ===================== -->
+  <section class="only-sheet">
+    <h2 class="nbh-band">The Student&rsquo;s Sheet</h2>
+    <p class="hint noprint">Generated from the system above. <b>Print the student sheet</b> in the toolbar prints this page alone, landscape, without the form around it. Change the targets, periods, points or goal and it redraws.</p>
+    <table class="rt noprint" style="margin-bottom:8px">
+      <tr><th style="width:24%">Date and day on the sheet</th><td><input data-m="sh_date" placeholder="leave blank for a line to write on" style="width:40%"></td></tr>
+      <tr><th>Title</th><td><input data-m="sh_title" placeholder="filled from the system; e.g., My Morning Check-In"></td></tr>
+      <tr><th>Reward chosen today</th><td><input data-m="sh_reward" placeholder="leave blank for a line to write on" style="width:60%"></td></tr>
+    </table>
+    <div id="sheetOut"></div>
+  </section>
+
+  <!-- ===================== RECORD ===================== -->
+  <section class="only-log">
+    <h2 class="nbh-band">The Record</h2>
+    <div id="logVerdict"></div>
+    <div class="metrics" id="logMetrics"></div>
+    <div class="only-sys for-rubric">
+      <h3>This Week, Period by Period</h3>
+      <p class="hint">The level each period earned, Monday to Friday. Totals and the share of periods at each level follow. <b>Add the week to the days</b> writes a row per day into the table below.</p>
+      <div class="grid-wrap"><table class="rt wide" id="wkTbl"></table></div>
+      <div class="tools"><button class="tool" id="wkAdd">Add the week to the days</button><button class="tool" id="wkClear">Clear the week</button></div>
+    </div>
+    <h3>Days</h3>
+    <p class="hint">One row per sheet. Points earned and possible give the percent; matches and ratings give agreement. The phase is the matching ladder&rsquo;s. Tick the goal-met column from the sheet.</p>
+    <div class="metrics" id="tgMetrics"></div>
+    <div class="tools"><button class="tool" id="addL">Add a day</button><button class="tool" id="delL">Remove last</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="lTbl"><thead><tr>
+      <th style="width:4%">#</th><th style="width:11%">Date</th><th style="width:8%">Phase</th><th style="width:8%">Goal %</th><th style="width:8%">Points</th><th style="width:8%">Possible</th><th style="width:8%">%</th><th style="width:8%">Matches</th><th style="width:8%">Ratings</th><th style="width:8%">Agree %</th><th style="width:7%">Goal met</th><th style="width:11%">Per target %</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Per target: the percent earned on each target that day, in target order, separated by commas (for example 80,67,100). The chart draws a thin line per target and the metrics give each target&rsquo;s mean over the last five days.</p>
+    <h3 style="margin-top:14px">Percent of Points by Day</h3>
+    <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Percent of points by day"><svg id="logPlot" viewBox="0 0 900 320" aria-label="Percent of points earned per day with the goal line"></svg></div>
+    <div class="tools noprint"><button class="tool" id="smPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
+    <h3 style="margin-top:14px">Decisions</h3>
+    <div id="logRules"></div>
+    <table class="rt" style="margin-top:10px">
+      <tr><th style="width:24%">Decision taken</th><td><textarea data-m="decision" rows="2"></textarea></td></tr>
+      <tr><th>Student&rsquo;s view of the sheet (Form SV-1)</th><td><input data-m="sv" placeholder="what the student says about the sheet, the goal and the reward"></td></tr>
+    </table>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Builds</h2>
+    <p>A self-monitoring system is a self-management package: the student observes and records their own behavior at set moments, an adult checks the record, and the record earns something. Reviews of classroom self-management interventions report consistent gains in on-task and appropriate behavior and reductions in disruption across grade levels and settings (Briesch &amp; Chafouleas, 2009; Bruhn, McDaniel &amp; Kreigh, 2015), and the daily behavior report card, the teacher-rated cousin of these sheets, has a meta-analysis behind it (Vannest, Davis, Davis, Mason &amp; Burke, 2010). The two mechanisms the research keeps finding are the recording itself, which is reactive, and the consequences attached to the record. Both are arranged on this form. DeLeon, Bullock and Catania (2013) add a caution and a reason the arrangement works: human performances under schedules often look different from the laboratory patterns because people describe their own behavior, and in verbally able children &ldquo;it is often easier to shape verbal behavior related to performance than to directly shape the performance itself.&rdquo; A self-monitoring sheet shapes exactly that description, and the match keeps it true.</p>
+    <p>The matching procedure comes from Rhode, Morgan and Young (1983): students rated their own behavior on a scale each period, the teacher rated it too, a match earned the points plus a bonus, and the teacher&rsquo;s matching was faded from every period to a random sample to none as agreement held; the gains carried into the regular classroom. Salter and Croce&rsquo;s Self &amp; Match system (2006) is a published form of the same arrangement with Yes/No ratings and the 2-1-0 match points the sheets here reproduce. The cued-interval sheet is self-monitoring of attention (Hallahan, Lloyd &amp; Stoller, 1982), with a tactile prompt where a beep would disturb the class (Amato-Zech, Hoff &amp; Doepke, 2006); Reid, Trout and Schartz (2005) review it alongside self-monitoring of performance for students with ADHD. The interlocking-schedule session sheet is the school&rsquo;s own (Royal Palm School manual, pp. 64&ndash;70): an interlocking schedule, in Ferster and Skinner&rsquo;s (1957) term, makes the response requirement depend on the time elapsed, so the requirement can fall to protect quality or rise to build fluency. Goal stepping follows the changing-criterion logic (Hartmann &amp; Hall, 1976).</p>
+    <p>Every point sheet is also a schedule of reinforcement, and the vocabulary for it is Ferster and Skinner&rsquo;s (1957): the rating at the end of each period is an interval arrangement, the points needed for the reward are a ratio, and the end-of-day exchange makes the points conditioned reinforcers in a chain that ends at the back-up. Ferster and Skinner define the interlocking schedule as one in which &ldquo;the organism is reinforced upon completion of a number of responses; but this number changes during the interval which follows the previous reinforcement&rdquo; (Chapter 2); their example is a requirement of 300 that falls in a straight line to 1 over 10 minutes, and the school&rsquo;s sheet, 20 items falling by 2 every 2 minutes, is the same schedule with smaller numbers. Catania&rsquo;s (2007) table of schedule combinations gives the same definition in the company of the other combined schedules. The section &ldquo;What the Schedule Does&rdquo; below says what follows from each for the design.</p>
+    <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Self-monitoring works, and the recording is part of why</th><td>Across the school literature from 1988 to 2008, self-observation and recording of a predefined behavior are the cornerstones of the interventions that worked, with and without reinforcement attached (Briesch &amp; Chafouleas, 2009); the systematic reviews since report the same for students with behavior problems (Bruhn et al., 2015) and for reducing challenging behavior (Smith, Thompson, Maynard &amp; Kim, 2022). Reactivity is real but not reliable on its own, which is why this form attaches consequences from the first day.</td></tr>
+      <tr><th>Attention or performance: both work</th><td>Students who recorded whether they were paying attention and students who recorded how much work they finished both improved on on-task behavior and productivity (Lloyd, Bateman, Landrum &amp; Hallahan, 1989; Maag, Reid &amp; DiGangi, 1993). Pick the question the plan needs answered: the cued-interval sheet asks about attention; a count of items finished asks about performance; the interlocking sheet asks both at once.</td></tr>
+      <tr><th>Matching, with points for the match, generalizes</th><td>Rhode, Morgan and Young (1983) had six students rate their own behavior and work each period on a 0 to 5 scale, matched by the teacher with bonus points for a match within one point; matching was faded from every period to random and then to none, and the gains moved into the regular classroom with a reduced form of the procedure. The matching ladder on the Teach sheet is that sequence.</td></tr>
+      <tr><th>Self-management reaches social behavior and autism</th><td>Children with autism taught to self-monitor appropriate responses to questions with a wrist counter and a token exchange improved their social behavior and reduced disruption in settings where no adult was treating them (Koegel, Koegel, Hurley &amp; Frea, 1992).</td></tr>
+      <tr><th>A home component strengthens a report card</th><td>Across 17 daily-behavior-report-card studies and 228 students the mean improvement-rate difference was .61, and higher home involvement and use across the whole day went with stronger effects (Vannest et al., 2010). The home note and the whole-day sheet are on this form for that reason.</td></tr>
+      <tr><th>The points are a token economy</th><td>A token economy has six procedural parts: the target responses, a token that works as a conditioned reinforcer, the back-up reinforcers, and three schedules (token production, exchange production, exchange) (Ivy, Meindl, Overley &amp; Robson, 2017). Hackenberg&rsquo;s (2018) review of token reinforcement sets out how exchange schedules and token-production schedules change the value of a point; the Reinforcement sheet names each of the six parts so none is left to chance.</td></tr>
+      <tr><th>Self &amp; Match has an applied test with mixed functions</th><td>Bulla and Frieder (2017) used the Self &amp; Match system with attention extinction for a student with autism whose vocal stereotypy was maintained by attention and possibly by automatic reinforcement. Each interval the student circled a happy or sad face to &ldquo;Was I quiet?&rdquo;, the adult circled one too, a matched happy face earned a star, and four or five stars of six bought the reward he had chosen. Stereotypy fell from 80% of intervals to between 2% and 13% once the interval was lengthened from 10 to 15 and then 20 seconds (at 10 seconds he could not get into his work and aggression rose); the system was then faded into the class token economy with a variable-time praise timer, and the behavior stayed low (10%), with partial maintenance four months later (31%, still below baseline). The lessons on this form: the interval must be long enough to work in, criteria move on the data, and fading is planned.</td></tr>
+      <tr><th>Cued self-monitoring of attention in general education</th><td>Rafferty, Arroyo, Ginnane and Wilczynski (2011) taught three fifth-grade students with ADHD to answer a cued &ldquo;Was I paying attention?&rdquo; during spelling practice. On-task behavior rose from 38&ndash;52% to 80&ndash;88%, two of the three reached the level of their peers in the same room, and weekly spelling accuracy rose by 15 to 33 points. Their nine planning steps (define, choose a measure, three to five baseline occasions, check for a performance deficit, design the materials and cue, teach with modelling and guided and independent practice, monitor, fade and check maintenance) are the Setup and Teach sheets of this form.</td></tr>
+      <tr><th>Self-monitoring of performance builds fluency</th><td>Farrell and McDougall (2008) combined a vibrating cue, a visual cue, self-graphing and a range-bound goal for five high-school students with disabilities during 3-minute math warm-ups. Correct digits rose by 77% over five weeks against 12% for 23 classmates, with accuracy held at 98%; the students liked it and named the vibrating timer as what they liked best. The increasing interlocking sheet and the performance count on the Targets sheet are the same arrangement: pace and quality together.</td></tr>
+      <tr><th>Accuracy is checked, not assumed</th><td>Craig (2010) ran a self-administered DRO with self-monitoring for his own nail biting and had a second person check photographs against the record; the check kept the record honest and the biting fell from 16.5 to under 2 episodes a day. Ruby and DiGennaro Reed (2022) found group-home staff self-monitoring with accuracies of 21&ndash;68%, and most of the errors were failures to record at all rather than wrong records, although the target behavior still improved. The teacher&rsquo;s independent rating on this form is the check; a cue to record is the answer to the omissions.</td></tr>
+      <tr><th>Adults can self-monitor too</th><td>Justus, Hott and Heiniger (2023) had three elementary teachers count their own behavior-specific praise on a hand counter, with nothing else added; praise rose during instruction and rose further during transitions. Ruby and DiGennaro Reed (2022) raised positive staff&ndash;consumer interactions with tablet self-monitoring, alone for one of three staff and with text-message feedback for the other two. When the Staff Fidelity checklist shows the adult side slipping, hand the adult a counter (Forms PD-1 and TI-1).</td></tr>
+      <tr><th>What the chapters on arranging reinforcement add</th><td>DeLeon, Bullock and Catania (2013) and DeLeon, Graff, Frank-Crawford, Rooker and Bullock (2014) review the reinforcer side of an arrangement like this one. Choice among reinforcers is itself preferred and varied reinforcers hold up where a constant one declines; praise is the cheapest and best-fitting consequence but is not a reinforcer for everyone and must be tested; praise for effort rather than ability leads children to choose harder tasks; a reward the student can get free elsewhere buys less as the price rises; a reward delivered without any earning requirement loses value; and students often prefer, and work as well for, access accumulated to the end of the work over the same amount handed out in pieces. The Reinforcement sheet&rsquo;s menu, delivery choice, back-up class, open-or-closed question and thinning row come from these findings.</td></tr>
+      <tr><th>Token loss is punishment</th><td>Behavior kept up by tokens behaves like behavior kept up by money, and taking tokens away works as a punisher that reduces responding (Raiff, Bullock &amp; Hackenberg, 2008, reviewed in DeLeon et al., 2013). That is the evidence behind the rule that points are never removed: a response-cost sheet is a different intervention with different side effects, and it is not what this form builds.</td></tr>
+      <tr><th>Tokens bridge the delay</th><td>Reinforcers that are exchanged later, such as money, lose value with delay more slowly than reinforcers that are consumed at once (Charlton &amp; Fantino, 2008, in DeLeon et al., 2013), and token systems &ldquo;mediate delays between responding and reinforcer delivery&rdquo; and resist satiation when they buy several things (DeLeon et al., 2014). The point earned at 9:15 carries the morning&rsquo;s behavior to the 2:30 exchange; the more the menu offers, the better it carries.</td></tr>
+      <tr><th>Check-in / check-out has its own evidence</th><td>The Behavior Education Program (Crone, Hawken &amp; Horner, 2010) adds a morning check-in and an afternoon check-out with one adult to a 0-1-2 daily card. Hawken and Horner (2003) and Todd, Campbell, Meyer and Horner (2008) showed reductions in problem behavior in elementary schools; Hawken, Bundock, Kladis, O&rsquo;Keeffe and Barrett (2014) and Maggin, Zurheide, Pickett and Johnson (2015) reviewed the single-case literature and found consistent effects, strongest for students whose behavior is maintained by adult attention. Campbell and Anderson (2011) took the program apart and found that the teacher feedback after each period was the component that mattered for the students in their study. The card here is that card; the function question on Setup is there because March and Horner (2002) found the program worked best when the function fit.</td></tr>
+      <tr><th>Self-monitoring of performance, and graphing it</th><td>Harris, Friedlander, Saddler, Frizzelle and Graham (2005) compared self-monitoring of attention with self-monitoring of performance for students with ADHD during spelling practice: both raised on-task behavior, and performance monitoring was at least as good for the work itself. DiGangi, Maag and Rutherford (1991) added self-graphing to self-monitoring and found the reactive effect on on-task behavior and academic performance grew. The performance sheet counts the work and gives the student the bar to color.</td></tr>
+      <tr><th>Contracts work, with the terms exact</th><td>Kelley and Stokes (1982) raised the classroom work of disadvantaged youths with contingency contracts for daily academic output; Miller and Kelley (1994) combined goal setting and contracting and improved children&rsquo;s homework accuracy and on-task behavior; Cantrell, Cantrell, Huddleston and Wooldridge (1969) reported the earliest school cases in the Journal of Applied Behavior Analysis; Mruzek, Cohen and Smith (2007) used contracts with students with autism in a public school. Bowman-Perrott et al. (2015) meta-analyzed the single-case research and found moderate effects on behavioral and academic outcomes. The Contract page follows Homme et al.&rsquo;s (1970) form and rules.</td></tr>
+      <tr><th>The whole package, not just the recording</th><td>Self-management packages in the school literature combine self-monitoring with goal setting, self-evaluation, self-instruction and self-reinforcement (Cooper, Heron &amp; Heward, 2020). Meichenbaum and Goodman (1971) trained impulsive children to talk themselves through tasks; Rhode, Morgan and Young (1983) had students evaluate themselves against a standard; Koegel et al. (1992) let children with autism deliver their own token rewards. The Teach page writes each component so the sheet is not the only part of the system.</td></tr>
+      <tr><th>Goals are stepped, not set once</th><td>Hartmann and Hall (1976) describe the changing-criterion design: a criterion raised in steps, each held until performance meets it, so the student is always within reach of the next reward. The record applies the rule written in advance.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">What the Schedule Does</h2>
+    <p class="hint">Ferster and Skinner (1957) recorded, schedule by schedule, what each arrangement of reinforcement does to behavior. The definitions below are from their Chapter 2 (&ldquo;Schedules of reinforcement studied&rdquo;) and the patterns from Chapters 4 and 5 (fixed ratio, fixed interval) and the opening of Chapter 6 (variable interval); the family of combined schedules is set out in Catania (2007). The quotations are from the B. F. Skinner Foundation e-book of the 1957 text.</p>
+    <table class="rt">
+      <tr><th style="width:28%">The post-reinforcement pause and ratio strain</th><td>In a fixed ratio &ldquo;a response is never reinforced just after a previous reinforcement,&rdquo; so the reinforcer itself becomes the signal for a low rate: the pause after reinforcement, which lengthens as the ratio grows. Raise the ratio too far and the performance is &ldquo;strained&rdquo;: Chapter 4 shows a bird on FR 120 pausing for up to two hours after each reinforcement before running the ratio. Two findings from the same chapter matter for a point sheet. When a large ratio was reduced, the pauses &ldquo;do not disappear immediately&rdquo;; and when it was raised again they did not return at once either. So a lowered goal needs a few days to show its effect, and a raised one may look fine for a while before the strain appears. A points goal is a ratio: it is raised only by the step written in advance, only after 4 of 5 days, and lowered on fewer than 2 of 5; the decreasing interlocking sheet exists to prevent the strain on a long task (its own title says so).</td></tr>
+      <tr><th>The fixed-interval scallop</th><td>A fixed-interval schedule &ldquo;normally generates a stable state in which a pause follows each reinforcement, after which the rate accelerates to a terminal value&rdquo; (Chapter 5): the scallop. Because reinforcement is timed, the schedule differentially reinforces responses that follow pauses, &ldquo;the longer the interval since the last response, the more likely the next response is to be reinforced.&rdquo; A rating at the end of every period can shape the same thing: work in the last minutes, drift in the first. The answers on this form are shorter periods, a rating of the whole period rather than its end, and a variable cue for the interval sheet. (Ruby and DiGennaro Reed, 2022, looked for this scalloping in staff interactions and did not find it; it is a pattern to watch for, not a certainty.)</td></tr>
+      <tr><th>Variable schedules hold steady</th><td>The variable-interval schedule &ldquo;is designed to produce a constant rate by not permitting any feature of the bird&rsquo;s behavior to acquire discriminative properties,&rdquo; and its shortest interval is set near zero &ldquo;to prevent the development of a pause after reinforcement&rdquo; (Chapter 6). The matching ladder thins the teacher&rsquo;s matching from every period to a random sample, as Rhode, Morgan and Young (1983) did, which makes the match bonus a variable schedule; the sample must be genuinely unpredictable to the student, and it should sometimes include the period right after a reward.</td></tr>
+      <tr><th>Differential reinforcement of rate</th><td>Ferster and Skinner arrange differential reinforcement of low rates with &ldquo;a timer which is reset by each response&rdquo; that sets up reinforcement when it runs out, and note that reinforcing high rates is best done by taking &ldquo;several responses into account in measuring the rate&rdquo; rather than one fast pair (Chapter 3). The decreasing interlocking sheet pays for taking the time to do the work well; the increasing one pays for pace measured over whole minutes, which is what Farrell and McDougall (2008) built fluency with.</td></tr>
+      <tr><th>Interlocking: responses and time combined</th><td>In Ferster and Skinner&rsquo;s example the number required &ldquo;may be set at 300 immediately after reinforcement, but it is reduced linearly, reaching 1 after 10 minutes. If the organism responds very rapidly, it will have to emit nearly 300 responses for reinforcement. If it responds at an intermediate rate, it will be reinforced after a smaller number&hellip; Many different cases are possible, depending upon the way in which the number changes with time&rdquo; (Chapter 2). Berryman and Nevin (1962) ran rats along a continuum from a fixed ratio of 36 to a fixed interval of 2 minutes through such schedules and found performance changed continuously along it. The school&rsquo;s sheet is the schedule written as a column, the items required at each minute, and the Direction field is the &ldquo;different cases&rdquo; clause.</td></tr>
+      <tr><th>Adjusting schedules: the changing criterion</th><td>Ferster and Skinner also define the adjusting schedule, &ldquo;in which the value of the interval or ratio is changed in some systematic way after reinforcement as a function of the immediately preceding performance,&rdquo; and point out that the interlocking change happens between reinforcements while the adjusting change happens after them (Chapter 2). The session sheet adjusts within a session; the goal-stepping rule on the Reinforcement sheet adjusts across days. Both are written in advance so the adjustment is a rule, not a mood.</td></tr>
+      <tr><th>The count is a stimulus: show the points</th><td>Chapter 4 argues that the number of responses since reinforcement is itself a discriminative stimulus and a conditioned reinforcer: a count of zero just after reinforcement &ldquo;is the occasion upon which a response is never reinforced,&rdquo; and each response is reinforced in part because it &ldquo;advances this stimulus toward the reinforced end of the continuum.&rdquo; Their added-counter experiments made the count visible and changed the pattern. On a point sheet the running total, the per-period match points, and the &ldquo;2 in a row, I can earn&rdquo; line are that counter; a sheet that hides the total until the end throws the effect away.</td></tr>
+      <tr><th>Delayed reinforcement reaches back</th><td>A reinforcer strengthens not only the response that produced it but the responses before it, with less effect the further back they are; &ldquo;if an error is immediately followed by a reinforced correct response&hellip; that reinforcer will probably strengthen the error along with the correct response&rdquo; (DeLeon, Bullock &amp; Catania, 2013). A match point given right after a rough minute pays for the rough minute too. Rate the whole period, and when a period ends badly let the rating say so.</td></tr>
+      <tr><th>Interval schedules are steadier than ratios</th><td>When a ratio slips, reinforcers come less often, which slows responding further, which slows reinforcement further; interval schedules hold more stable responding because a wide range of rates earns about the same reinforcement (DeLeon et al., 2013, after Nevin &amp; Grace, 2000). The period rating is an interval arrangement and is the steadier part of the sheet; the points goal is the ratio and is the part that can spiral, which is what the lower-on-fewer-than-2-of-5 rule is for.</td></tr>
+      <tr><th>Chained schedules and the value of a point</th><td>In a chained schedule the stimulus produced by finishing the first component &ldquo;as a conditioned reinforcer, reinforces a response to the first stimulus&rdquo;; conditioned reinforcers such as a light or buzzer &ldquo;are useful because they can be made contingent on a particular form of a response&rdquo; (Chapter 2). A point is such a stimulus, given for exactly the behavior named on the sheet; Hackenberg (2018) treats token economies as second-order schedules of this kind. The point keeps its value only while it reliably leads to the back-up, so an exchange that is skipped, delayed, or made unaffordable weakens every point before it.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Points possible</th><td>Self &amp; Match: periods &times; targets &times; the highest match value. Contract: periods &times; targets. Rubric: periods &times; the top level&rsquo;s points. Cued intervals: the number of intervals. Interlocking: the session is met or not.</td></tr>
+      <tr><th>Points goal</th><td>The goal percent of the points possible, rounded up; this is the number on the sheet (&ldquo;If I earn 39 of 48 points&hellip;&rdquo;).</td></tr>
+      <tr><th>Percent of points</th><td>Points earned &divide; points possible &times; 100, per day.</td></tr>
+      <tr><th>Agreement</th><td>Ratings on which the student and the teacher agreed &divide; ratings both made &times; 100. Only matched ratings count; a period the teacher did not rate is left out.</td></tr>
+      <tr><th>Baseline mean</th><td>The mean percent over the teacher-only days (phase 0). The suggested first goal is that mean plus 10 points, rounded to 5, between 50 and 80: a working convention.</td></tr>
+      <tr><th>Share at each level (rubric)</th><td>Periods at the level &divide; periods rated that day &times; 100, as the school&rsquo;s point sheet shows.</td></tr>
+      <tr><th>Decision rules</th><td>Written on the Reinforcement sheet and applied to the last five days: raise the goal when it was met on 4 of 5; lower it or revisit the reinforcer when met on fewer than 2 of 5; move down the matching ladder when agreement over the last five days is below 80%; move up when it is at or above 90% and the goal was met on 4 of 5. All four are working conventions of this form, not published thresholds.</td></tr>
+      <tr><th>Performance sheet</th><td>Points possible are the sessions on the sheet; a session counts as met when the count reaches the goal; the goal percent is the share of sessions met. The graph top is the number entered; the goal line is drawn at the goal count.</td></tr>
+      <tr><th>Check-in / check-out</th><td>Points possible are periods &times; expectations &times; 2; the daily percent is points earned over points possible, against the goal entered on the System sheet (80% is the program&rsquo;s usual starting goal and a working convention here).</td></tr>
+      <tr><th>Interlocking requirement</th><td>Starting at the initial requirement, the figure changes by the step every N minutes in the chosen direction, between the floor and the ceiling. The sheet lists the requirement at each minute; the session ends when the items are done and both engagement checks at that minute are Yes.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">What Keeps a Sheet Honest, and What Breaks It</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Points are never removed</th><td>A sheet that takes points away becomes a punishment card; students stop rating honestly and start arguing. Mismatches earn nothing; they do not cost anything already earned.</td></tr>
+      <tr><th>Honest No pays</th><td>The 2-1-0 arrangement pays a point for an agreed No. Praise the honest No out loud; it is the behavior that makes the rest of the system work.</td></tr>
+      <tr><th>The reward is chosen, and soon</th><td>Choice from a menu each morning keeps the reinforcer current; delivery the same day, within the student&rsquo;s reach at the start (a goal met on fewer than half of baseline days is too far away).</td></tr>
+      <tr><th>The teacher rates first</th><td>A few days of teacher-only rating give the baseline and the goal, and let the adults practise the rating before the student watches them do it.</td></tr>
+      <tr><th>Fade on the data</th><td>Matching is faded as agreement holds, not on the calendar; a drop in agreement is the signal to step back, and nothing is lost by doing so.</td></tr>
+      <tr><th>The sheet is not the plan</th><td>Self-monitoring tracks and rewards the replacement behaviors the plan teaches; it does not replace teaching them. A behavior with an automatic component needs the FBA first and a component that competes with the behavior alongside the sheet: Bulla and Frieder (2017) paired Self &amp; Match with attention extinction and a chosen reward for stereotypy that was partly automatic, and it worked only once the interval was long enough for the student to get into his work.</td></tr>
+      <tr><th>The rule lives on the sheet, not in the adult&rsquo;s mouth</th><td>A bribe is a contingency announced at the moment of a request; the child learns to comply only when the offer is made (DeLeon et al., 2013). The goal sentence is written on the sheet once and read at the start of the day; nobody says &ldquo;do this and you get your point&rdquo; before each task.</td></tr>
+      <tr><th>Not for behavior that already happens</th><td>The one consistent finding in the overjustification literature is that added rewards can lower behavior that already occurs at a high level without them (DeLeon et al., 2013). The performance-deficit check on the Setup sheet is there so the sheet pays for a behavior that is in the repertoire but not yet frequent, not for one the student already does freely.</td></tr>
+      <tr><th>Record first, then rate</th><td>Most self-monitoring errors are missed recordings, not wrong ones (Ruby &amp; DiGennaro Reed, 2022). The cue, the sheet on the desk, and the one prompt in the fidelity checklist are there so the record is made at all.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated system is a third-grader&rsquo;s pictorial Self &amp; Match sheet with three targets over six periods, a 4-day teacher-only baseline, three weeks of self-rating with the goal stepped from 70 to 80, and the matching ladder at phase 1.</p>
+    <p class="hint" id="smRefs" style="margin-top:10px"><b>Reference list.</b>
+    Berryman, R., &amp; Nevin, J. A. (1962). Interlocking schedules of reinforcement. <em>Journal of the Experimental Analysis of Behavior, 5</em>(2), 213&ndash;223. https://doi.org/10.1901/jeab.1962.5-213 &bull;
+    Amato-Zech, N. A., Hoff, K. E., &amp; Doepke, K. J. (2006). Increasing on-task behavior in the classroom: Extension of self-monitoring strategies. <em>Psychology in the Schools, 43</em>(2), 211&ndash;221. &bull;
+    Briesch, A. M., &amp; Chafouleas, S. M. (2009). Review and analysis of literature on self-management interventions to promote appropriate classroom behaviors (1988&ndash;2008). <em>School Psychology Quarterly, 24</em>(2), 106&ndash;118. &bull;
+    Bulla, A. J., &amp; Frieder, J. E. (2017). Self-and-match system suppresses vocal stereotypy during independent work. <em>Behavior Analysis: Research and Practice, 17</em>(3), 274&ndash;285. https://doi.org/10.1037/bar0000063 &bull;
+    Bowman-Perrott, L., Burke, M. D., de Marin, S., Zhang, N., &amp; Davis, H. (2015). A meta-analysis of single-case research on behavior contracts: Effects on behavioral and academic outcomes among children and youth. <em>Behavior Modification, 39</em>(2), 247&ndash;269. &bull;
+    Bruhn, A., McDaniel, S., &amp; Kreigh, C. (2015). Self-monitoring interventions for students with behavior problems: A systematic review of current research. <em>Behavioral Disorders, 40</em>(2), 102&ndash;121. &bull;
+    Campbell, A., &amp; Anderson, C. M. (2011). Check-in/check-out: A systematic evaluation and component analysis. <em>Journal of Applied Behavior Analysis, 44</em>(2), 315&ndash;326. &bull;
+    Cantrell, R. P., Cantrell, M. L., Huddleston, C. M., &amp; Wooldridge, R. L. (1969). Contingency contracting with school problems. <em>Journal of Applied Behavior Analysis, 2</em>(3), 215&ndash;220. &bull;
+    Catania, A. C. (2007). <em>Learning</em> (4th interim ed.). Sloan. (Table 11-1, schedule combinations.) &bull;
+    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Craig, A. R. (2010). Self-administered behavior modification to reduce nail biting: Incorporating simple technology to ensure treatment integrity. <em>Behavior Analysis in Practice, 3</em>(2), 38&ndash;41. &bull;
+    DeLeon, I. G., Bullock, C. E., &amp; Catania, A. C. (2013). Arranging reinforcement contingencies in applied settings: Fundamentals and implications of recent basic and applied research. In G. J. Madden (Ed.), <em>APA handbook of behavior analysis: Vol. 2. Translating principles into practice</em> (pp. 47&ndash;75). American Psychological Association. https://doi.org/10.1037/13938-003 &bull;
+    DeLeon, I. G., Graff, R. B., Frank-Crawford, M. A., Rooker, G. W., &amp; Bullock, C. E. (2014). Reinforcement arrangements for learners with autism spectrum disorder. In J. Tarbox, D. R. Dixon, P. Sturmey &amp; J. L. Matson (Eds.), <em>Handbook of early intervention for autism spectrum disorders</em> (pp. 205&ndash;228). Springer. https://doi.org/10.1007/978-1-4939-0401-3_11 &bull;
+    Crone, D. A., Hawken, L. S., &amp; Horner, R. H. (2010). <em>Responding to problem behavior in schools: The Behavior Education Program</em> (2nd ed.). Guilford. &bull;
+    DeRisi, W. J., &amp; Butz, G. (1975). <em>Writing behavioral contracts: A case simulation practice manual</em>. Research Press. &bull;
+    DiGangi, S. A., Maag, J. W., &amp; Rutherford, R. B. (1991). Self-graphing of on-task behavior: Enhancing the reactive effects of self-monitoring on on-task behavior and academic performance. <em>Learning Disability Quarterly, 14</em>(3), 221&ndash;230. &bull;
+    Farrell, A., &amp; McDougall, D. (2008). Self-monitoring of pace to improve math fluency of high school students with disabilities. <em>Behavior Analysis in Practice, 1</em>(2), 26&ndash;35. &bull;
+    Ferster, C. B., &amp; Skinner, B. F. (1957). <em>Schedules of reinforcement</em>. Appleton-Century-Crofts. (Quoted from the B. F. Skinner Foundation e-book reprint; chapter numbers are given rather than pages.) &bull;
+    Hackenberg, T. D. (2018). Token reinforcement: Translational research and application. <em>Journal of Applied Behavior Analysis, 51</em>(2), 393&ndash;435. https://doi.org/10.1002/jaba.439 &bull;
+    Harris, K. R., Friedlander, B. D., Saddler, B., Frizzelle, R., &amp; Graham, S. (2005). Self-monitoring of attention versus self-monitoring of academic performance: Effects among students with ADHD in the general education classroom. <em>The Journal of Special Education, 39</em>(3), 145&ndash;156. &bull;
+    Hallahan, D. P., Lloyd, J. W., &amp; Stoller, L. (1982). <em>Improving attention with self-recording of behavior: Teacher&rsquo;s manual</em>. University of Virginia Learning Disabilities Research Institute. &bull;
+    Hartmann, D. P., &amp; Hall, R. V. (1976). The changing criterion design. <em>Journal of Applied Behavior Analysis, 9</em>(4), 527&ndash;532. &bull;
+    Hawken, L. S., &amp; Horner, R. H. (2003). Evaluation of a targeted intervention within a schoolwide system of behavior support. <em>Journal of Behavioral Education, 12</em>(3), 225&ndash;240. &bull;
+    Hawken, L. S., Bundock, K., Kladis, K., O&rsquo;Keeffe, B., &amp; Barrett, C. A. (2014). Systematic review of the check-in, check-out intervention for students at risk for emotional and behavioral disorders. <em>Education and Treatment of Children, 37</em>(4), 635&ndash;658. &bull;
+    Homme, L., Csanyi, A. P., Gonzales, M. A., &amp; Rechs, J. R. (1970). <em>How to use contingency contracting in the classroom</em>. Research Press. &bull;
+    Ivy, J. W., Meindl, J. N., Overley, E., &amp; Robson, K. M. (2017). Token economy: A systematic review of procedural descriptions. <em>Behavior Modification, 41</em>(5), 708&ndash;737. &bull;
+    Justus, J., Hott, B. L., &amp; Heiniger, S. (2023). Using self-monitoring to increase behavior specific praise in elementary classrooms. <em>Behavior Analysis in Practice, 16</em>(3), 885&ndash;891. https://doi.org/10.1007/s40617-023-00810-3 &bull;
+    Kelley, M. L., &amp; Stokes, T. F. (1982). Contingency contracting with disadvantaged youths: Improving classroom performance. <em>Journal of Applied Behavior Analysis, 15</em>(3), 447&ndash;454. &bull;
+    Koegel, L. K., Koegel, R. L., Hurley, C., &amp; Frea, W. D. (1992). Improving social skills and disruptive behavior in children with autism through self-management. <em>Journal of Applied Behavior Analysis, 25</em>(2), 341&ndash;353. &bull;
+    Lloyd, J. W., Bateman, D. F., Landrum, T. J., &amp; Hallahan, D. P. (1989). Self-recording of attention versus productivity. <em>Journal of Applied Behavior Analysis, 22</em>(3), 315&ndash;323. &bull;
+    Maag, J. W., Reid, R., &amp; DiGangi, S. A. (1993). Differential effects of self-monitoring attention, accuracy, and productivity. <em>Journal of Applied Behavior Analysis, 26</em>(3), 329&ndash;344. &bull;
+    Maggin, D. M., Zurheide, J., Pickett, K. C., &amp; Johnson, S. J. (2015). A systematic evidence review of the check-in/check-out program for reducing student challenging behaviors. <em>Journal of Positive Behavior Interventions, 17</em>(4), 197&ndash;208. &bull;
+    March, R. E., &amp; Horner, R. H. (2002). Feasibility and contributions of functional behavioral assessment in schools. <em>Journal of Emotional and Behavioral Disorders, 10</em>(3), 158&ndash;170. &bull;
+    Meichenbaum, D. H., &amp; Goodman, J. (1971). Training impulsive children to talk to themselves: A means of developing self-control. <em>Journal of Abnormal Psychology, 77</em>(2), 115&ndash;126. &bull;
+    Miller, D. L., &amp; Kelley, M. L. (1994). The use of goal setting and contingency contracting for improving children&rsquo;s homework performance. <em>Journal of Applied Behavior Analysis, 27</em>(1), 73&ndash;84. &bull;
+    Mruzek, D. W., Cohen, C., &amp; Smith, T. (2007). Contingency contracting with students with autism spectrum disorders in a public school setting. <em>Journal of Developmental and Physical Disabilities, 19</em>(2), 103&ndash;114. &bull;
+    Rafferty, L. A., Arroyo, J., Ginnane, S., &amp; Wilczynski, K. (2011). Self-monitoring during spelling practice: Effects on spelling accuracy and on-task behavior of three students diagnosed with attention deficit hyperactivity disorder. <em>Behavior Analysis in Practice, 4</em>(1), 37&ndash;45. &bull;
+    Reid, R., Trout, A. L., &amp; Schartz, M. (2005). Self-regulation interventions for children with attention deficit/hyperactivity disorder. <em>Exceptional Children, 71</em>(4), 361&ndash;377. &bull;
+    Rhode, G., Morgan, D. P., &amp; Young, K. R. (1983). Generalization and maintenance of treatment gains of behaviorally handicapped students from resource rooms to regular classrooms using self-evaluation procedures. <em>Journal of Applied Behavior Analysis, 16</em>(2), 171&ndash;188. &bull;
+    Royal Palm School. (n.d.). <em>Self-monitoring with interlocking schedule of reinforcement</em> (unpublished program manual, pp. 64&ndash;70; the source of the interlocking-schedule sheet, not a peer-reviewed study). &bull;
+    Ruby, S. A., &amp; DiGennaro Reed, F. D. (2022). Evaluating the effects of technology-based self-monitoring on positive staff&ndash;consumer interactions in group homes. <em>Behavior Analysis in Practice, 15</em>(3), 804&ndash;814. https://doi.org/10.1007/s40617-021-00651-y &bull;
+    Salter, J., &amp; Croce, K. (2006). <em>Self &amp; Match: Systematic use of self-monitoring as a behavioral intervention</em>. Self &amp; Match Educational Consultation. &bull;
+    Smith, T. E., Thompson, A. M., &amp; Maynard, B. R. (2022). Self-management interventions for reducing challenging behaviors among school-age students: A systematic review. <em>Campbell Systematic Reviews, 18</em>(1), e1223. &bull;
+    Todd, A. W., Campbell, A. L., Meyer, G. G., &amp; Horner, R. H. (2008). The effects of a targeted intervention to reduce problem behaviors: Elementary school implementation of check in&ndash;check out. <em>Journal of Positive Behavior Interventions, 10</em>(1), 46&ndash;55. &bull;
+    Vannest, K. J., Davis, J. L., Davis, C. R., Mason, B. A., &amp; Burke, M. D. (2010). Effective intervention for behavior with a daily behavior report card: A meta-analysis. <em>School Psychology Review, 39</em>(4), 654&ndash;672.</p>
+    <p class="hint">Pictures on the sheets are OpenMoji (openmoji.org), CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts; photos uploaded by the team stay inside the saved file.</p>
+  </section>
