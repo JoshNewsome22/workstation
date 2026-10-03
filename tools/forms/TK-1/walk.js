@@ -18,34 +18,42 @@ const FB={
   intro:'This is your token board book. Four laminated pages are bound on the left, with a tab for each: Choices, Targets, Board, and Tokens.',
   ch_show:'Page one is the Choices page. Show it before the task begins. Every picture should be something your learner values right now, not something they can get any time, or have just had plenty of.',
   ch_pick:'Your learner looks over the pictures and picks one to work for. If needed, help with the pointing, but let your learner make the choice.',
-  tg_show:'Page two is the Targets page, where you choose what to teach: a new skill, or a better way to get what a problem behavior was getting.',
+  tg_show:'Page two is the Targets page, where you choose what to teach: a new skill, or a replacement behavior from the behavior plan. If the target is asking for something, like a break, still give what was asked for, every time.',
   tg_pick:'Choose one target at a time. Agree with the other adults on exactly what counts, so everyone gives tokens for the same thing.',
   bd_place:'Page three is the Board. Place the target under First, and the chosen item under Then. Your learner can now see the plan: first the target, then the item.',
   tk_page:'Page four is the Tokens page, where the tokens wait. The empty slots on the board show your learner how many are left to earn. Make new tokens valuable first; the tips at the end show how.',
   rule:'Before you start, decide how much of the target behavior earns a token: how many times, or how long. Keep it small, so your learner can succeed. This example uses one token for every two minutes.',
   start:'Now start the session. Point to the board and name both pictures: first the target, then the item. The ring counts down each two-minute interval, sped up for this video.',
-  tok_first:'The interval is over, and your learner kept up the target behavior the whole time. Give a token right away, with brief praise that names what they did. Your learner places it in the first slot.',
-  tok_none:'If the behavior stops during an interval, give no token, but leave the earned tokens on the board. Calmly remind your learner what to do, and start the next interval.',
+  tok_first:'The interval is over, and your learner kept up the target behavior the whole time. Give a token right away, with brief praise that names what they did. Let your learner put it in the next slot.',
+  tok_none:'If the behavior stops, there is no token for that interval, but the earned tokens stay on the board. Calmly remind your learner what to do right away, and start the interval over when they begin again.',
   tok_more:'Each interval with the target behavior earns another token, given right away with a few words of praise. The board fills up, one slot at a time.',
   tok_last_term:'One more interval earns the last token. It looks different: this is the terminal token, earned just like the others. With practice, it tells your learner that the board is finished and the item comes next.',
   tok_last:'One more interval with the target behavior, and the last token goes in. Now the board is full, and your learner has earned the item they chose.',
-  exchange:'The board is full, so make the exchange right away, especially while the board is new: your learner gets the Then item, for a time or amount set before the session.',
-  reset:'When the time with the item is up, put the tokens back on the Tokens page, and the pictures back on their pages. After that, your learner chooses again for the next round.',
+  exchange:'The board is full, so trade the tokens for the Then item right away, especially while the board is new. Your learner gets it for the time or amount set before the session.',
+  reset:'When the time with the item is up, put it away, and return the pictures to their pages. Then your learner chooses again for the next round.',
   tips:'Three tips. Make the tokens valuable first: give one and trade it for the item right away, again and again, until your learner reaches for the token. Start with a small requirement and few tokens, and raise them slowly; if the behavior falls apart, go back a step. Keep the item available only through the board.',
   outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
 /* the simulator's pictures, shown when a page's six cards are empty */
 const SAMPLE={ch:[['ipad','Tablet'],['puzzle','Puzzle'],['ball','Ball'],['bubbles','Bubbles'],['lego','Building blocks'],['drawing','Drawing']],
   tg:[['sitting','Sitting'],['raisehand','Raise hand'],['writing','Writing'],['waiting','Waiting'],['alldone','All done'],['reading','Reading']]};
-/* brief praise that names the behavior: the target's own name when it reads as one (Sitting: "Great sitting!"), else general praise */
-function praiseFor(label){const l=String(label||'').trim().toLowerCase();const ger=/^[a-z]+ing\b/.test(l)&&l.length<=20;
-  return{ger,name:l,first:ger?'Great '+l+'!':'Great job!',last:ger?'You did it! Great '+l+'!':'You did it! Great job!',
-    more:ger?['Nice '+l+'!','Way to keep '+l+'!','Good '+l+'!','You kept '+l+'!','Super '+l+'!','Great job '+l+'!','Keep it up!','Nice job!']:['Nice work!','Way to go!','Good job!','Keep it up!','Super job!','Great work!','Nice job!','You are doing it!']};}
+/* brief praise that names the behavior: an ongoing behavior named by its -ing word reads as itself (Sitting: "Great sitting!");
+   any other target is named after the praise ("Great job: raise hand!"), so the praise always says what was done */
+const NOTGER=/^(bring|sing|ring|string|swing|thing|king|spring|sting|wing|sling|cling|fling|bling|ping)$/;
+function gerund(label){const l=String(label||'').trim().toLowerCase();const w=(l.match(/^[a-z]+/)||[''])[0];return w.length>=5&&/ing$/.test(w)&&!NOTGER.test(w)&&l.length<=20;}
+function praiseFor(label){const raw=String(label||'').trim().replace(/[.!?]+$/,''),l=raw.toLowerCase(),ger=gerund(l);
+  const nm=raw?(/^[A-Z][a-z]/.test(raw)?raw[0].toLowerCase()+raw.slice(1):raw):'';
+  if(ger)return{ger,name:l,first:'Great '+l+'!',last:'You did it! Great '+l+'!',
+    more:['Nice '+l+'!','Way to keep '+l+'!','Good '+l+'!','You kept '+l+'!','Super '+l+'!','Great job '+l+'!','Nice job '+l+'!','Still '+l+'!']};
+  if(!nm)return{ger,name:'',first:'Great job!',last:'You did it! Great job!',more:['Nice work!','Way to go!','Good job!','Keep it up!','Super job!','Great work!','Nice job!','You are doing it!']};
+  return{ger,name:nm,first:'Great job: '+nm+'!',last:'You did it! Great job: '+nm+'!',
+    more:['Nice work: '+nm+'!','Way to go: '+nm+'!','Good job: '+nm+'!','Super job: '+nm+'!','Great work: '+nm+'!','Nice job: '+nm+'!','Yes: '+nm+'!','Well done: '+nm+'!']};}
 
 /* ---------------- small helpers ---------------- */
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const ease=u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2;
 const easeOut=u=>1-Math.pow(1-u,3);
+const easeIn=u=>u*u;
 const bump=(t,t0,d)=>{const u=(t-t0)/d;return u<=0||u>=1?0:Math.sin(Math.PI*u);};
 const f2=v=>(Math.round(v*100)/100).toString();
 function div(cls,html){const d=document.createElement('div');if(cls)d.className=cls;if(html)d.innerHTML=html;return d;}
@@ -55,6 +63,16 @@ const audioLines=()=>(typeof WALK_AUDIO!=='undefined'&&WALK_AUDIO&&WALK_AUDIO.li
 const handArt=()=>(typeof WALK_HANDS!=='undefined'&&WALK_HANDS&&WALK_HANDS.learner&&WALK_HANDS.teacher)?WALK_HANDS:placeholderHands();
 function line(id){const L=audioLines();const l=L&&L[id];const t=String((l&&l.t)||FB[id]||'');const words=t.split(/\s+/).filter(Boolean).length;
   const d=l&&+l.d>0?+l.d:Math.max(1.5,words*.4);return{t,d,a:l&&typeof l.a==='string'?l.a:''};}
+/* where each phrase starts in its recording (seconds from the start of the clip, by the character it starts at), measured from the
+   voice (the start of each caption piece, each clause, and each phrase an action is tied to); a line whose text has changed since
+   it was measured falls back to its share of the characters. Made with the voice by a script outside the repo; keyed by a hash of the text. */
+/* MK:BEGIN */const MK={};/* MK:END */
+const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
+/* the time (s into the clip) the voice reaches character i: the measured marks, joined by straight lines */
+function onsetFn(id,text,d){const m=MK[id];const pts=[[0,.05]];
+  if(m&&m.h===hash(text))m.o.forEach(p=>{if(p[0]>0&&p[0]<text.length&&p[1]>pts[pts.length-1][1])pts.push(p);});
+  pts.push([text.length,Math.max(pts[pts.length-1][1]+.1,d-.15)]);pts.sort((a,b)=>a[0]-b[0]);
+  return i=>{if(i<=0)return pts[0][1];for(let k=1;k<pts.length;k++){const a=pts[k-1],b=pts[k];if(i<=b[0])return a[1]+(b[1]-a[1])*(i-a[0])/Math.max(1,b[0]-a[0]);}return pts[pts.length-1][1];};}
 function present(id){const L=audioLines();return L?!!L[id]:id in FB;}
 
 /* ---------------- keyframe tracks: numeric states eased in and out, moves along a gentle arc ---------------- */
@@ -122,34 +140,38 @@ const chapsOut=()=>B?B.chapters.map(c=>({id:c.id,label:c.label,start:c.start})):
 function compose(D){
   const st=D.stage;st.innerHTML='';
   const layer=c=>{const d=div('wk-L '+(c||''));st.appendChild(d);return d;};
-  const Lp=layer('wk-pages'),Lveil=layer('wk-veil'),Lfly=layer(),Lhl=layer('wk-hl'),Litem=layer(),Lht=layer('wk-ht'),Lfx=layer('wk-fx');
+  const Lp=layer('wk-pages'),Lveil=layer('wk-veil'),Lfly=layer(),Lhl=layer('wk-hl'),Lht=layer('wk-ht'),Lfx=layer('wk-fx');
   const cap=div('wk-cap');st.appendChild(cap);
   /* the book, drawn from the forced copy of the state */
-  const F=forced(()=>{const pk={ch:firstUsed(S.ch),tg:firstUsed(S.tg)},n=nTok(),cpt=CPT/72,tpt=TPT/72;
-    return{pg:{ch:pageGrid('ch'),tg:pageGrid('tg'),bd:pageBoard(),tk:pageTokens()},
+  /* the demo target: the first one that is an ongoing behavior (an -ing word, which suits a two-minute interval), else the first */
+  const F=forced(()=>{const used=o=>has(o)||String(o.l||'').trim();const gi=S.tg.findIndex(o=>used(o)&&gerund(lbl(o)));
+    const pk={ch:firstUsed(S.ch),tg:gi>=0?gi:firstUsed(S.tg)},n=nTok(),cpt=CPT/72,tpt=TPT/72;
+    return{pg:{ch:pageGrid('ch'),tg:pageGrid('tg'),bd:pageBoard(),tk:pageTokens(),chb:pageBack('ch')},
       ch:S.ch.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),tg:S.tg.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),
       tok:Array.from({length:n},(_,i)=>tokCard(tpt,i===n-1)),chipTok:tokCard(.6,false),n,term:termOn(),pick:pk,
       itemPic:pic(S.ch[pk.ch],''),itemLbl:String(lbl(S.ch[pk.ch])||'').trim(),tgLbl:String(lbl(S.tg[pk.tg])||'').trim()};});
   const PR=praiseFor(F.tgLbl);
   const notes=[];
-  if(S.meta.layout==='rules')notes.push('This book’s Board uses the Rules row; the walkthrough shows the First-Then Board, which is used the same way.');
-  if(emptySix(S.ch)&&emptySix(S.tg))notes.push('The Choices and Targets are still empty, so the walkthrough shows sample pictures.');
-  else if(emptySix(S.ch))notes.push('The Choices are still empty, so the walkthrough shows sample pictures for them.');
-  else if(emptySix(S.tg))notes.push('The Targets are still empty, so the walkthrough shows sample pictures for them.');
+  if(S.meta.layout==='rules')notes.push('This book’s Board uses the Rules row (several targets and an Earn box); the walkthrough shows the First-Then Board. Tokens, praise and the exchange work the same way; agree on exactly what earns each token.');
+  const libGone=!!window.NBH_PICTOS_MISSING,sampleWord=libGone?'sample words':'sample pictures';
+  if(libGone&&[...S.ch,...S.tg,S.tok&&S.tok[0]].some(o=>o&&o.k&&!/^(tk|av):/.test(o.k)))notes.push('The picture library (nbh-pictos.js) is not beside this form, so its pictures are missing here and in the book; put it in the same folder.');
+  if(emptySix(S.ch)&&emptySix(S.tg))notes.push('The Choices and Targets are still empty, so the walkthrough shows '+sampleWord+'.');
+  else if(emptySix(S.ch))notes.push('The Choices are still empty, so the walkthrough shows '+sampleWord+' for them.');
+  else if(emptySix(S.tg))notes.push('The Targets are still empty, so the walkthrough shows '+sampleWord+' for them.');
   if(!audioLines())notes.push('The recorded narration is not in this copy of the form: the captions are read by the device’s own voice where it has one.');
   /* the four pages: the page itself (the canvas), no sheet and no trim marks */
-  const PG={};['tk','bd','tg','ch'].forEach(k=>{const el=div('wk-page');el.dataset.pg=k;el.innerHTML=F.pg[k];Lp.appendChild(el);
+  const PG={};['tk','bd','tg','ch','chb'].forEach(k=>{const el=div('wk-page');el.dataset.pg=k;el.innerHTML=F.pg[k];Lp.appendChild(el);
     const pg=el.querySelector('.pg'),cv=pg.querySelector('.cv');pg.querySelectorAll('.trim').forEach(x=>x.remove());cv.style.left='0';cv.style.top='0';
     const lay=div('wk-lay'),shade=div('wk-shade');cv.appendChild(lay);cv.appendChild(shade);PG[k]={k,el,pg,cv,lay,shade};});
   Object.values(PG).forEach(p=>{p.w=p.cv.offsetWidth;p.h=p.cv.offsetHeight;p.el.style.width=p.w+'px';p.el.style.height=p.h+'px';p.pg.style.width=p.w+'px';p.pg.style.height=p.h+'px';
-    p.cv.insertAdjacentHTML('beforeend',coilSvg(p.h));});
+    if(p.k!=='chb')p.cv.insertAdjacentHTML('beforeend',coilSvg(p.h));});
   const rel=(p,el)=>{const r=el.getBoundingClientRect(),c=p.cv.getBoundingClientRect(),k=c.width/(p.cv.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const ctr=r=>({x:r.x+r.w/2,y:r.y+r.h/2});
   const M={ch:[...PG.ch.cv.querySelectorAll('.bx')].map(e=>rel(PG.ch,e)),tg:[...PG.tg.cv.querySelectorAll('.bx')].map(e=>rel(PG.tg,e)),
     first:rel(PG.bd,PG.bd.cv.querySelector('.bx.ft.grey')),then:rel(PG.bd,PG.bd.cv.querySelector('.bx.ft.green')),
     slot:[...PG.bd.cv.querySelectorAll('.slot')].map(e=>rel(PG.bd,e)),ybx:[...PG.tk.cv.querySelectorAll('.ybx')].map(e=>rel(PG.tk,e)),
     tab:{},band:rel(PG.ch,PG.ch.cv.querySelector('.band'))};
-  ['ch','tg','bd','tk'].forEach(k=>{M.tab[k]=rel(PG[k],PG[k].cv.querySelector('.tab'));});
+  M.tabCol={};['ch','tg','bd','tk'].forEach(k=>{const e=PG[k].cv.querySelector('.tab');M.tab[k]=rel(PG[k],e);M.tabCol[k]=getComputedStyle(e).backgroundColor||'#1d4a77';});
   const n=F.n,CW=CPT*PX,TW=TPT*PX;
   /* the in-page copies (a card resting on its page moves and turns with it) */
   const inPage=(p,c,html,w)=>{const e=div('wk-in',html);e.style.left=f2(c.x-w/2)+'px';e.style.top=f2(c.y-w/2)+'px';e.style.width=f2(w)+'px';e.style.height=f2(w)+'px';p.lay.appendChild(e);return e;};
@@ -166,57 +188,82 @@ function compose(D){
     c.inp.tk.dataset.card=c.inp.bd.dataset.card='tok'+i;c.where.set(-1e8,'tk');TK.push(c);}
   const lastTok=TK[n-1];if(F.term){lastTok.glow=div('wk-tglow');lastTok.el.insertBefore(lastTok.glow,lastTok.el.children[1]);}
   /* the item (the Then card grown into the thing itself) */
-  const itemLabel=F.itemLbl?'2 minutes of '+F.itemLbl:'2 minutes with the item';
+  const itemLabel=F.itemLbl?F.itemLbl+', as agreed':'The item, as agreed';   /* the time or amount is set before the session (no number that echoes the interval) */
   const IW=250;const item=mkCard('item','<div class="wk-ipic">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div><div class="wk-ilbl">'+esc(itemLabel)+'</div>',IW,IW,'wk-item');
-  Litem.appendChild(item.el);
   /* the hands */
   const ART=handArt(),hands=[];
-  const mkHand=who=>{const root=div('wk-hand wk-'+who);(who==='teacher'?Lht:Lhl).appendChild(root);const h={who,root,poses:{},base:HS[who],tr:new Track({x:640,y:SH+700,s:1,sx:640,sy:SH+800}),pose:new Steps('point')};
-    ['point','pinch','open'].forEach(p=>{const a=ART[who][p];const an=a[ANCH[p]]||[a.w/2,0];const e=div('wk-pose',a.svg);e.style.width=a.w+'px';e.style.height=a.h+'px';e.style.transformOrigin=f2(an[0])+'px '+f2(an[1])+'px';root.appendChild(e);h.poses[p]={el:e,ax:an[0],ay:an[1]};});
+  const mkHand=who=>{const root=div('wk-hand wk-'+who);(who==='teacher'?Lht:Lhl).appendChild(root);const h={who,root,poses:{},base:HS[who],tr:new Track({x:640,y:SH+700,s:1,sx:640,sy:SH+800}),pose:new Steps('point'),lifts:[]};
+    ['point','pinch','open'].forEach(p=>{const a=ART[who][p];const an=a[ANCH[p]]||[a.w/2,0];const e=div('wk-pose',a.svg);e.style.width=a.w+'px';e.style.height=a.h+'px';e.style.transformOrigin=f2(an[0])+'px '+f2(an[1])+'px';root.appendChild(e);const wr=a.wrist||[a.w/2,a.h*.24];h.poses[p]={el:e,ax:an[0],ay:an[1],wx:wr[0],wy:wr[1]};});
     hands.push(h);return h;};
   const HL=mkHand('learner'),HT=mkHand('teacher');
   /* layouts: the closed book centred; the session (the Board large on the left, the Tokens page smaller on the right) */
   const pw=PG.ch.w,ph=PG.ch.h,maxH=Math.max(PG.ch.h,PG.tg.h,PG.bd.h,PG.tk.h);
   const sBk=Math.min(.86,566/maxH),bx=(SW-pw*sBk)/2,by=30;
-  const DEPTH={ch:0,tg:1,bd:2,tk:3};
+  const DEPTH={chb:0,ch:0,tg:1,bd:2,tk:3};
   const BOOK=(k,s,x,y)=>{s=s||sBk;const X=x==null?(SW-pw*s)/2:x,Y=y==null?by:y;return{x:X+DEPTH[k]*2.2*s/sBk,y:Y+DEPTH[k]*2.6*s/sBk,s};};
-  const TL={x:bx/2,y:by+ph*sBk*.5},TR={x:SW-bx/2,y:by+ph*sBk*.5};
+  /* each person keeps one seat for the whole video: the learner on the left, the teacher on the right; a picked card waits on the
+     table on its own person's side (the chosen item on the left, the target on the right; two places on the right for the reset) */
+  const TL={x:bx/2,y:by+ph*sBk*.5},TR={x:SW-bx/2,y:by+ph*sBk*.5},TRa={x:SW-bx/2,y:by+ph*sBk*.27},TRb={x:SW-bx/2,y:by+ph*sBk*.75};
   const sBd=Math.min(.8,520/PG.bd.h),sTk=.52;
   const BDS={x:26,y:30,s:sBd},TKS={x:SW-26-pw*sTk,y:Math.min(300,604-PG.tk.h*sTk),s:sTk};
   const RC={x:TKS.x+pw*sTk/2,y:Math.max(150,TKS.y-112)};
   const HO={x:(BDS.x+pw*sBd+TKS.x)/2,y:Math.max(220,TKS.y-24)};   /* where the teacher holds a token out: in the gap between the Board and the Tokens page */
   const at=(L,c)=>({x:L.x+L.s*c.x,y:L.y+L.s*c.y});
   const s0=sBk*.93;
-  Object.keys(PG).forEach(k=>{const b=BOOK(k,s0,(SW-pw*s0)/2,by+ph*(sBk-s0)/2);PG[k].tr=new Track({x:b.x,y:b.y,s:b.s,ry:0,o:1});PG[k].el.style.zIndex=String(10-DEPTH[k]);});
+  Object.keys(PG).forEach(k=>{const b=BOOK(k,s0,(SW-pw*s0)/2,by+ph*(sBk-s0)/2);PG[k].tr=new Track({x:b.x,y:b.y,s:b.s,ry:0,o:k==='chb'?0:1,fx:1});PG[k].el.style.zIndex=String(k==='chb'?11:10-DEPTH[k]);});
   /* overlays */
   const fxs=[];
-  const mkFx=(cls,html,box,init)=>{const e=div('wk-o '+cls,html);if(box){e.style.left=f2(box.x)+'px';e.style.top=f2(box.y)+'px';if(box.w!=null)e.style.width=f2(box.w)+'px';if(box.h!=null)e.style.height=f2(box.h)+'px';}Lfx.appendChild(e);
-    const fx={el:e,tr:new Track(Object.assign({o:0,s:1,dy:0},init||{}))};fxs.push(fx);return fx;};
+  const mkFx=(cls,html,box,init,parent)=>{const e=div('wk-o '+cls,html);if(box){e.style.left=f2(box.x)+'px';if(box.b!=null){e.style.top='auto';e.style.bottom=f2(SH-box.b)+'px';}else e.style.top=f2(box.y)+'px';if(box.w!=null)e.style.width=f2(box.w)+'px';if(box.h!=null)e.style.height=f2(box.h)+'px';}(parent||Lfx).appendChild(e);
+    const fx={el:e,tr:new Track(Object.assign({o:0,s:1,dy:0,dx:0},init||{}))};fxs.push(fx);return fx;};
+  const sub=(el,init)=>{const fx={el,tr:new Track(Object.assign({o:0,s:1,dy:0,dx:0},init||{}))};fxs.push(fx);return fx;};
+  /* a glow fades in over 0.3 s: callers start it 0.15 s before the word, so it peaks on the word */
   const pulse=(fx,t0,dur,s)=>{fx.tr.move(t0,t0+.3,{o:1,s:s||1});fx.tr.move(t0+Math.max(.35,dur-.4),t0+dur,{o:0});};
   const glowAt=(L,r,pad,t0,dur,round)=>{const p=pad||6;const g=mkFx('wk-glow'+(round?' round':''),'',{x:L.x+L.s*r.x-p,y:L.y+L.s*r.y-p,w:L.s*r.w+2*p,h:L.s*r.h+2*p});pulse(g,t0,dur);return g;};
-  const veil={el:Lveil,tr:new Track({o:0,s:1,dy:0})};fxs.push(veil);
+  const veil={el:Lveil,tr:new Track({o:0,s:1,dy:0,dx:0})};fxs.push(veil);
+  /* the four tabs named as they are read: a label in each tab's colour beside it */
+  const tabLbl={};[['ch','Choices'],['tg','Targets'],['bd','Board'],['tk','Tokens']].forEach(([k,w])=>{const L=BOOK(k),r=M.tab[k];
+    const fx=mkFx('wk-tabl',esc(w),{x:L.x+L.s*(r.x+r.w)+14,y:L.y+L.s*(r.y+r.h/2)-24},{s:.8,dx:-10});fx.el.style.borderColor=M.tabCol[k];fx.el.style.setProperty('--tc',M.tabCol[k]);tabLbl[k]=fx;});
   const ringBox={x:RC.x-74,y:RC.y-74,w:148,h:148};
   const ringEl=mkFx('wk-ring','<svg viewBox="0 0 200 200" aria-hidden="true"><circle class="bg" cx="100" cy="100" r="84"/><circle class="fg" cx="100" cy="100" r="84" transform="rotate(-90 100 100)"/></svg><div class="wk-rt">2:00</div><div class="wk-rl">sped up for this video</div>',ringBox,{s:.7});
   const ring={fx:ringEl,fg:ringEl.el.querySelector('.fg'),t:ringEl.el.querySelector('.wk-rt'),ints:[],C:2*Math.PI*84};
-  const chip=mkFx('wk-chip','<span class="wk-ct">'+F.chipTok+'</span><span><b>1 token</b> for every<br><b>2 minutes</b> of '+(PR.ger?esc(PR.name):'the target')+'</span>',{x:RC.x-185,y:12,w:370},{s:.8});
+  /* the rule: "1 token for ..." first, then the example filled in */
+  const chip=mkFx('wk-chip','<span class="wk-ct">'+F.chipTok+'</span><span class="wk-cst"><span class="wk-c0"><b>1 token</b> for <span class="wk-blank"></span></span><span class="wk-c1"><b>1 token</b> for every<br><b>2 minutes</b> of '+(PR.ger?esc(PR.name):'the target')+'</span></span>',{x:RC.x-185,y:12,w:370},{s:.8});
+  const chip0=sub(chip.el.querySelector('.wk-c0'),{o:1}),chip1=sub(chip.el.querySelector('.wk-c1'));
+  const ricN=mkFx('wk-ric','<svg viewBox="0 0 64 44" aria-hidden="true"><path d="M8 6v32M18 6v32M28 6v32M38 6v32M2 34L46 10" stroke="#1d4a77" stroke-width="5" stroke-linecap="round" fill="none"/><text x="50" y="40" font-size="0"></text></svg><span>How many times</span>',{x:RC.x-182,y:104,w:172},{s:.7,dy:8});
+  const ricL=mkFx('wk-ric','<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="#fff" stroke="#1d4a77" stroke-width="4.5"/><path d="M22 10v12l8 6" stroke="#ef7d00" stroke-width="4.5" stroke-linecap="round" fill="none"/></svg><span>How long</span>',{x:RC.x+10,y:104,w:172},{s:.7,dy:8});
   const noTok=mkFx('wk-note2','<b>No token</b> this interval.<br>Earned tokens stay.',{x:RC.x-84-262,y:RC.y-44,w:262},{s:.9});
-  /* the praise bubble: over the token the teacher holds out (between the Board and the Tokens page), not over the pictures */
-  const bubbles=[];const bubble=(i,text,t0,dur)=>{const b=mkFx('wk-bub',esc(text),{x:clamp(HO.x-150,10,SW-310),y:HO.y-TW*sBd/2-128,w:300},{s:.6,dy:12});
-    b.tr.move(t0,t0+.3,{o:1,s:1,dy:0},0,easeOut);b.tr.move(t0+dur-.3,t0+dur,{o:0,dy:-8});bubbles.push(b);return b;};
+  /* the praise bubble: over the token the teacher holds out (between the Board and the Tokens page), not over the pictures; its
+     bottom stays put, so a longer name wraps upward; marked, the words that name the behavior are underlined */
+  const bubble=(text,t0,dur,mark)=>{let h=esc(text);if(mark&&PR.name){const e=esc(PR.name),i=h.lastIndexOf(e);if(i>=0)h=h.slice(0,i)+'<span class="wk-nm">'+e+'</span>'+h.slice(i+e.length);}
+    const b=mkFx('wk-bub',h,{x:clamp(HO.x-165,10,SW-340),b:HO.y-TW*sBd/2-50,w:330},{s:.6,dy:12});
+    b.tr.move(t0,t0+.3,{o:1,s:1,dy:0},0,easeOut);b.tr.move(t0+dur-.3,t0+dur,{o:0,dy:-8});return b;};
   const tipsCard=mkFx('wk-tips','<h3>Three tips</h3>'+'<div class="wk-tip" data-i="0"><b>1</b><p><strong>Make the tokens valuable first.</strong> Give a token and trade it for the item right away, again and again, until your learner reaches for the token.</p></div>'
     +'<div class="wk-tip" data-i="1"><b>2</b><p><strong>Start small.</strong> Ask for a little behavior and use few tokens, then raise them slowly; if the behavior falls apart, go back a step.</p></div>'
     +'<div class="wk-tip" data-i="2"><b>3</b><p><strong>Only through the board.</strong> Keep the Then item put away at other times.</p></div>',{x:520,y:44,w:720},{dy:16});
-  const tipRows=[...tipsCard.el.querySelectorAll('.wk-tip')].map(e=>{const fx={el:e,tr:new Track({o:0,s:1,dy:14})};fxs.push(fx);return fx;});
+  const tipRows=[...tipsCard.el.querySelectorAll('.wk-tip')].map(e=>sub(e,{dy:14,h:0}));
+  /* tip one, shown under the book: a token given, then traded for the item at once */
+  const PDX=196;
+  const pair=mkFx('wk-pair','<div class="wk-pt">'+F.chipTok+'</div><div class="wk-pa">→</div><div class="wk-pi">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div>',{x:64,y:478,w:400,h:104});
+  const pTok=sub(pair.el.querySelector('.wk-pt')),pItem=sub(pair.el.querySelector('.wk-pi'),{o:1});
   const cyc=mkFx('wk-cyc','',{x:90,y:478,w:1100});
-  const cycItems=['Choose','Set the target','Earn the tokens','Exchange'].map((w,i)=>{const e=div('wk-cy','<b>'+(i+1)+'</b>'+esc(w));cyc.el.appendChild(e);if(i<3)cyc.el.appendChild(div('wk-cya','→'));const fx={el:e,tr:new Track({o:0,s:.85,dy:10})};fxs.push(fx);return fx;});
+  const cycArr=[];const cycItems=['Choose','Set the target','Earn the tokens','Exchange'].map((w,i)=>{if(i){const a=div('wk-cya','→');cyc.el.appendChild(a);cycArr[i]=sub(a,{dx:-6});}const e=div('wk-cy','<b>'+(i+1)+'</b>'+esc(w));cyc.el.appendChild(e);return sub(e,{s:.85,dy:10});});
 
   /* ---- choreography helpers (stage coordinates) ---- */
-  const grip=(c,p,s,who)=>{const g=who==='learner'?[-.08,.46]:[.08,.46];return{x:p.x+c.w*s*g[0],y:p.y+c.h*s*g[1]};};
+  /* where a hand holds a card (as a share of the card's size from its centre): the teacher, who reaches from the right, by its right
+     edge; the learner, from the left, by its lower left; so at a hand-off the two hands meet on opposite sides */
+  const GR={learner:[-.25,.46],teacher:[.46,.05]};
+  const grip=(c,p,s,who,g)=>{g=g||GR[who];return{x:p.x+c.w*s*g[0],y:p.y+c.h*s*g[1]};};
   const pointAt=(p,s)=>({x:p.x,y:p.y+CW*s*.12});
-  const handTo=(h,t0,t1,p,arc)=>{h.tr.move(t0,t1,{x:p.x,y:p.y},arc==null?.14:arc);};
-  const offFrom=(p,sx,sy)=>{const dx=sx-p.x,dy=sy-p.y,len=Math.hypot(dx,dy)||1,k=(SH+330-p.y)/Math.max(.2,dy/len);return{x:p.x+dx/len*k,y:p.y+dy/len*k};};
-  const enter=(h,t0,t1,p,pose,sh)=>{const o=offFrom(p,sh[0],sh[1]);h.tr.set(t0,{x:o.x,y:o.y,sx:sh[0],sy:sh[1],s:1});h.pose.set(t0,pose);h.tr.move(t0,t1,{x:p.x,y:p.y},.04);};
-  const leave=(h,t0,t1)=>{const s=h.tr.at(t0);const o=offFrom(s,s.sx,s.sy);h.tr.move(t0,t1,{x:o.x,y:o.y},0);};
+  /* a longer move lifts the hand a little off the table (it grows a few per cent and settles) */
+  const lift=(h,t0,t1,d)=>{if(d>150&&t1-t0>.25)h.lifts.push([t0,t1-t0]);};
+  const handTo=(h,t0,t1,p,arc)=>{const a=h.tr.at(t0);lift(h,t0,t1,Math.hypot(p.x-a.x,p.y-a.y));h.tr.move(t0,t1,{x:p.x,y:p.y},arc==null?.14:arc);};
+  /* in and out of the frame: from just below its bottom edge, along the line from the shoulder; the way in takes longer the
+     further it goes (0.8 to 1.3 s) and slows down to land; it starts earlier rather than landing later */
+  const offY=(h,pose)=>SH+34+h.base*h.poses[pose].ay;
+  const offFrom=(p,sx,sy,y)=>{const dx=sx-p.x,dy=sy-p.y,len=Math.hypot(dx,dy)||1,k=(y-p.y)/Math.max(.2,dy/len);return{x:p.x+dx/len*k,y:p.y+dy/len*k};};
+  const enter=(h,t0,t1,p,pose,sh)=>{const o=offFrom(p,sh[0],sh[1],offY(h,pose));const dur=clamp(Math.hypot(p.x-o.x,p.y-o.y)/700,.8,1.3);
+    const st=Math.min(t1-.35,Math.max(Math.min(t0,t1-dur),h.tr.last().t+.02));h.tr.set(st,{x:o.x,y:o.y,sx:sh[0],sy:sh[1],s:1});h.pose.set(st,pose);h.tr.move(st,t1,{x:p.x,y:p.y},.04,easeOut);return st;};
+  const leave=(h,t0,t1)=>{const s=h.tr.at(t0);const o=offFrom(s,s.sx,s.sy,offY(h,h.pose.at(t0).v));h.tr.move(t0,t1,{x:o.x,y:o.y},0,easeIn);};
   /* a held card keeps the same point under the fingers: the offset from the hand scales with the card */
   const take=(c,h,t)=>{const cp=cardPos(c,t),hp=h.tr.at(t);c.fol.push({t0:t,t1:1e9,h,dx:cp.x-hp.x,dy:cp.y-hp.y,s0:c.tr.at(t).s||1});c.where.set(t,'fly');};
   const release=(c,t)=>{const f=c.fol[c.fol.length-1];if(!f||f.t1<1e9)return;const p=folPos(c,f,t);f.t1=t;c.tr.set(t,{x:p.x,y:p.y});};
@@ -227,148 +274,204 @@ function compose(D){
   let session=false,ringPending=null;
   const toSession=(t0,dur)=>{PG.bd.tr.move(t0,t0+dur,BDS);PG.tk.tr.move(t0+.15,t0+dur,TKS,.05);session=true;};
   const toBook=(t0,dur)=>{PG.bd.tr.move(t0,t0+dur,BOOK('bd'));PG.tk.tr.move(t0,t0+dur-.1,BOOK('tk'),.05);session=false;};
-  const ringInt=(t0,t1,ok)=>{ring.ints.push({t0,t1,ok});};
+  /* an interval of the ring: it runs from t0 to t1 (to the share f of the ring when the behavior stopped), then holds its ✓ or – until hold */
+  const ringInt=(t0,t1,ok,o)=>{o=o||{};ring.ints.push({t0,t1,ok,f:o.f||1,hold:o.hold||t1+.8});};
   /* a token from the Tokens page to the Board: the teacher's hand takes it and holds it out with praise; the learner's hand takes it and puts it in its slot */
-  const SHT=[1130,SH+480],SHL=[300,SH+480];
-  const deliver=(i,o)=>{const c=TK[i],src=at(TKS,ctr(M.ybx[i])),dst=at(BDS,ctr(M.slot[i]));
-    /* o.tIn / o.lIn: that hand is still in the frame from the token before, and moves on from there; o.stay: both hands stay for the next token */
-    if(o.tIn)handTo(HT,o.t0,o.grab,grip(c,src,sTk,'teacher'),.12);else enter(HT,o.t0,o.grab,grip(c,src,sTk,'teacher'),'pinch',SHT);
+  const SHT=[1110,SH+480],SHL=[300,SH+480];
+  const deliver=(i,o)=>{const c=TK[i],src=at(TKS,ctr(M.ybx[i])),dst=at(BDS,ctr(M.slot[i])),gp=grip(c,src,sTk,'teacher');
+    /* o.tIn / o.lIn: that hand is still in the frame from the token before, and moves on from there (empty, it points; it pinches again
+       just before it takes); o.stay: both hands stay for the next token */
+    if(o.tIn){handTo(HT,o.t0,o.grab,gp,.12);HT.pose.set(Math.max(o.t0,o.grab-.3),'pinch');}else enter(HT,o.t0,o.grab,gp,'pinch',SHT);
     c.tr.set(o.grab,{x:src.x,y:src.y,s:sTk,l:0,o:1});take(c,HT,o.grab);c.tr.move(o.grab,o.grab+.25,{l:1});c.tr.move(o.grab+.25,o.atHO,{s:sBd});
     carryTo(c,HT,o.grab+.05,o.atHO,HO,.16);
-    if(o.text)bubble(i,o.text,o.bub==null?o.atHO:o.bub,o.bubDur||2.2);
-    const tk=o.take;const hp=grip(c,cardPos(c,tk),sBd,'learner');if(o.lIn)handTo(HL,tk-(o.lin||.75),tk,hp,.1);else enter(HL,tk-(o.lin||.75),tk,hp,'pinch',SHL);
-    release(c,tk);take(c,HL,tk);if(!o.stay)leave(HT,tk+.08,tk+.8);
+    if(o.text)bubble(o.text,o.bub==null?o.atHO:o.bub,o.bubDur||2.2);
+    const tk=o.take,hp=grip(c,cardPos(c,tk),sBd,'learner');
+    if(o.lIn){handTo(HL,tk-(o.lin||.75),tk,hp,.1);HL.pose.set(tk-.3,'pinch');}else enter(HL,tk-Math.max(.9,o.lin||.9),tk,hp,'pinch',SHL);
+    release(c,tk);take(c,HL,tk);if(!o.stay)leave(HT,tk+.08,tk+.8);else HT.pose.set(tk+.06,'point');
     carryTo(c,HL,tk+.05,o.place,dst);release(c,o.place);c.tr.move(o.place,o.place+.22,{l:0});c.where.set(o.place+.22,'bd');
-    if(o.stay)return o.place+.3;leave(HL,o.place+.3,o.place+1);return o.place+1;};
+    if(o.stay){HL.pose.set(o.place+.06,'point');return o.place+.3;}leave(HL,o.place+.3,o.place+1);return o.place+1;};
 
   /* ---- the scenes, one per narration line; each returns the time its animation needs ---- */
   const SC={};
   SC.intro=K=>{stackTo(K.t,K.t+1.6,k=>BOOK(k));
-    const names=[['Choices','ch',.62],['Targets','tg',.72],['Board','bd',.82],['Tokens','tk',.92]];let last=K.t+1.8;
+    const names=[['Choices','ch'],['Targets','tg'],['Board','bd'],['Tokens','tk']];let last=K.t+1.8;
     const after=K.text.toLowerCase().indexOf('tab');
-    names.forEach(([w,k,fr])=>{const t=Math.max(K.t+1.8,K.at(w,fr,after));const L=BOOK(k);glowAt(L,M.tab[k],5,t,1.6);last=Math.max(last,t+1.6);});
-    const tb=Math.max(K.t+1.7,K.at('bound',.35));const L0=BOOK('ch');glowAt({x:L0.x,y:L0.y,s:L0.s},{x:-14,y:0,w:40,h:ph},4,tb,1.8);
-    return last-K.t;};
+    names.forEach(([w,k],j)=>{const t=Math.max(K.t+1.8+j*.3,K.at(w,.62+.1*j,after)-.15);const L=BOOK(k);glowAt(L,M.tab[k],5,t,1.6);
+      tabLbl[k].tr.move(t,t+.3,{o:1,s:1,dx:0},0,easeOut);last=Math.max(last,t+1.6);});
+    Object.values(tabLbl).forEach(fx=>fx.tr.move(last+.4,last+.8,{o:0}));
+    const tb=Math.max(K.t+1.7,K.at('bound',.35)-.15);const L0=BOOK('ch');glowAt({x:L0.x,y:L0.y,s:L0.s},{x:-14,y:0,w:40,h:ph},4,tb,1.8);
+    return last+.8-K.t;};
   SC.ch_show=K=>{glowAt(BOOK('ch'),M.tab.ch,5,K.t+.2,1.6);const ids=CH.map((c,i)=>c?i:-1).filter(i=>i>=0);
     ids.forEach((i,j)=>{CH[i].pops.ch=(CH[i].pops.ch||[]).concat(K.t+K.d*(.3+.55*j/Math.max(1,ids.length)));});return K.d;};
-  SC.ch_pick=K=>{const L=BOOK('ch'),c=cC,sh=[820,SH+480];const P0=at(L,ctr(M.ch[F.pick.ch]));
-    const scan=[4,2,1,5].filter(i=>CH[i]&&i!==F.pick.ch).slice(0,3);
-    const tp=Math.max(K.t+3.4,K.at('picks one',.48));
-    const pts=scan.map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
-    if(pts.length){enter(HL,K.t+.15,K.t+1.05,pts[0],'point',sh);const step=(tp-.7-(K.t+1.05))/pts.length;
-      for(let j=1;j<pts.length;j++)handTo(HL,K.t+1.05+step*(j-1)+.25,K.t+1.05+step*j,pts[j]);
-      handTo(HL,tp-.75,tp-.05,grip(c,P0,L.s,'learner'),.12);}
-    else enter(HL,tp-1,tp-.05,grip(c,P0,L.s,'learner'),'point',sh);
-    HL.pose.set(tp-.2,'pinch');
+  /* the learner looks over two pictures (half-second moves, short stops), then takes the one they chose, as "picks one" is said */
+  SC.ch_pick=K=>{const L=BOOK('ch'),c=cC;const P0=at(L,ctr(M.ch[F.pick.ch]));
+    const scan=[4,2,1,5].filter(i=>CH[i]&&i!==F.pick.ch).slice(0,2);const pts=scan.map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
+    const land=Math.max(K.t+.9,K.at('looks over',.1)+.25);let tq=land;
+    if(pts.length){enter(HL,K.t,land,pts[0],'point',SHL);for(let j=1;j<pts.length;j++){handTo(HL,tq+.3,tq+.8,pts[j]);tq+=.8;}}
+    const gp=grip(c,P0,L.s,'learner'),tp=Math.max(tq+.3+.7,K.at('picks one',.3)+.2);
+    if(pts.length){handTo(HL,tp-.7,tp-.05,gp,.12);HL.pose.set(tp-.7,'pinch');}else enter(HL,tp-1,tp-.05,gp,'pinch',SHL);
     c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HL,tp);c.tr.move(tp,tp+.35,{l:1});
-    carryTo(c,HL,tp+.4,tp+1.7,TR,.2);release(c,tp+1.7);c.tr.move(tp+1.7,tp+1.95,{l:0});
-    leave(HL,tp+2.05,tp+2.85);return tp+2.95-K.t;};
+    carryTo(c,HL,tp+.4,tp+1.5,TL,.2);release(c,tp+1.5);c.tr.move(tp+1.5,tp+1.75,{l:0});
+    leave(HL,tp+1.85,tp+2.6);return tp+2.7-K.t;};
   SC.tg_show=K=>{pageTurn('ch',K.t+.15,K.t+1.05);glowAt(BOOK('tg'),M.tab.tg,5,K.t+.9,1.6);
-    const ids=TG.map((c,i)=>c?i:-1).filter(i=>i>=0);ids.forEach((i,j)=>{TG[i].pops.tg=(TG[i].pops.tg||[]).concat(K.t+1.2+(K.d-1.2)*(.3+.55*j/Math.max(1,ids.length)));});return Math.max(K.d,2);};
-  SC.tg_pick=K=>{const L=BOOK('tg'),c=cT,sh=[380,SH+480];const P0=at(L,ctr(M.tg[F.pick.tg]));
-    const other=[1,3].filter(i=>TG[i]&&i!==F.pick.tg)[0];const tp=Math.max(K.t+2.2,K.at('one target',.12)+1.0);
-    if(other!=null){enter(HT,K.t+.2,K.t+1.1,pointAt(at(L,ctr(M.tg[other])),L.s),'point',sh);handTo(HT,tp-.8,tp-.05,grip(c,P0,L.s,'teacher'),.12);}
-    else enter(HT,tp-1,tp-.05,grip(c,P0,L.s,'teacher'),'point',sh);
-    HT.pose.set(tp-.2,'pinch');c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HT,tp);c.tr.move(tp,tp+.35,{l:1});
-    carryTo(c,HT,tp+.4,tp+1.4,TL,.2);release(c,tp+1.4);c.tr.move(tp+1.4,tp+1.65,{l:0});leave(HT,tp+1.75,tp+2.55);return tp+2.65-K.t;};
+    const ids=TG.map((c,i)=>c?i:-1).filter(i=>i>=0);ids.forEach((i,j)=>{TG[i].pops.tg=(TG[i].pops.tg||[]).concat(K.t+1.2+(K.d*.6-1.2)*(.3+.55*j/Math.max(1,ids.length)));});return Math.max(K.d,2);};
+  SC.tg_pick=K=>{const L=BOOK('tg'),c=cT;const P0=at(L,ctr(M.tg[F.pick.tg]));
+    const other=[1,3,5,0].filter(i=>TG[i]&&i!==F.pick.tg)[0];const tp=Math.max(K.t+2.2,K.at('one target',.12)+.9);const gp=grip(c,P0,L.s,'teacher');
+    if(other!=null){enter(HT,K.t,K.t+1.0,pointAt(at(L,ctr(M.tg[other])),L.s),'point',SHT);handTo(HT,tp-.75,tp-.05,gp,.12);HT.pose.set(tp-.75,'pinch');}
+    else enter(HT,tp-1,tp-.05,gp,'pinch',SHT);
+    c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HT,tp);c.tr.move(tp,tp+.35,{l:1});
+    carryTo(c,HT,tp+.4,tp+1.4,TR,.2);release(c,tp+1.4);c.tr.move(tp+1.4,tp+1.65,{l:0});leave(HT,tp+1.75,tp+2.5);return tp+2.6-K.t;};
   SC.bd_place=K=>{pageTurn('tg',K.t+.15,K.t+1.05);const L=BOOK('bd');glowAt(L,M.tab.bd,5,K.t+.9,1.4);
-    const t1=Math.max(K.t+1.9,K.at('target under first',.2)+.4);const shT=[380,SH+480],shL=[900,SH+480];
-    enter(HT,t1-.9,t1,grip(cT,TL,L.s,'teacher'),'pinch',shT);take(cT,HT,t1);cT.tr.move(t1,t1+.3,{l:1});
-    const dF=at(L,ctr(M.first));carryTo(cT,HT,t1+.3,t1+1.35,dF);release(cT,t1+1.35);cT.tr.move(t1+1.35,t1+1.6,{l:0});cT.where.set(t1+1.6,'bd');leave(HT,t1+1.7,t1+2.5);
-    const t2=Math.max(t1+1.6,K.at('chosen item',.42)-.2);
-    enter(HL,t2-.9,t2,grip(cC,TR,L.s,'learner'),'pinch',shL);take(cC,HL,t2);cC.tr.move(t2,t2+.3,{l:1});
-    const dT=at(L,ctr(M.then));carryTo(cC,HL,t2+.3,t2+1.35,dT);release(cC,t2+1.35);cC.tr.move(t2+1.35,t2+1.6,{l:0});cC.where.set(t2+1.6,'bd');leave(HL,t2+1.7,t2+2.5);
-    const g1=Math.max(t2+1.8,K.at('first the target',.8)),g2=Math.max(g1+.7,K.at('then the item',.9));glowAt(L,M.first,6,g1,1.5);glowAt(L,M.then,6,g2,1.5);
-    return Math.max(t2+2.6,g2+1.5)-K.t;};
-  SC.tk_page=K=>{toSession(K.t+.15,1.4);const t1=Math.max(K.t+1.7,K.at('where the tokens wait',.4));
-    TK.forEach((c,i)=>{c.pops.tk=[t1+i*.18];});const t2=Math.max(t1+.4+n*.18,K.at('empty slots',.62));
-    M.slot.forEach((r,i)=>glowAt(BDS,r,4,t2+i*.2,1.3));return Math.max(K.d,t2+n*.2+1.3-K.t);};
-  SC.rule=K=>{let t=K.t;if(!session){toSession(t+.1,1.4);t+=1.4;}const tc=Math.max(t+.3,K.at('this example',.8)-.2);chip.tr.move(tc,tc+.4,{o:1,s:1},0,easeOut);return tc+.7-K.t;};
-  SC.start=K=>{const sh=[1110,SH+480];const pF=pointAt(at(BDS,ctr(M.first)),sBd),pT=pointAt(at(BDS,ctr(M.then)),sBd);
-    const tp1=Math.max(K.t+1,K.at('first the target',.42)),tp2=Math.max(tp1+1,K.at('then the item',.52));
-    enter(HT,tp1-.9,tp1,pF,'point',sh);handTo(HT,tp2-.6,tp2,pT,.12);leave(HT,tp2+.6,tp2+1.4);
-    glowAt(BDS,M.first,6,tp1-.1,1.3);glowAt(BDS,M.then,6,tp2-.1,1.3);
-    const tr0=Math.max(tp2+.3,K.at('the ring',.62));ringEl.tr.move(tr0,tr0+.45,{o:1,s:1},0,easeOut);ringPending=tr0+.6;
-    return tr0+1.6-K.t;};
-  SC.tok_first=K=>{const tEnd=K.t+.6;ringInt(ringPending==null?K.t-3:ringPending,tEnd,true);ringPending=null;
-    const grab=Math.max(tEnd+.75,K.at('give a token',.35)),atHO=grab+1;const bub=Math.max(atHO+.1,K.at('brief praise',.55)-.2);const tk=Math.max(bub+1.1,K.at('your learner places',.8)+.3);
-    const end=deliver(0,{t0:grab-.85,grab,atHO,text:PR.first,bub,bubDur:Math.max(2.4,tk-bub+.6),take:tk,place:tk+1,lin:.9});
-    return end-K.t+.2;};
-  /* the ring runs out without the behavior: no token; the earned token stays (it glows); the teacher points to the target; the next interval starts */
-  SC.tok_none=K=>{const t1=Math.max(K.t+2.4,Math.min(K.t+3.6,K.at('give no token',.4)-.2));ringInt(K.t+.3,t1,false);noTok.tr.move(t1,t1+.3,{o:1,s:1},0,easeOut);
-    const te=Math.max(t1+.6,K.at('earned tokens',.5));for(let i=0;i<Math.min(1,n);i++)glowAt(BDS,M.slot[i],5,te,1.6);
-    const tr=Math.max(te+1.4,K.at('remind your learner',.62));const pF=pointAt(at(BDS,ctr(M.first)),sBd);enter(HT,tr-.8,tr,pF,'point',[1110,SH+480]);glowAt(BDS,M.first,6,tr,1.4);
-    const tn=Math.max(tr+1.2,K.at('start the next interval',.85));leave(HT,tn-.2,tn+.6);noTok.tr.move(Math.max(tr+.2,tn-.5),tn-.1,{o:0});ringPending=tn;
-    return Math.max(K.d,tn+.8-K.t);};
+    const t1=Math.max(K.t+1.9,K.at('target under first',.2)+.2);
+    enter(HT,t1-.9,t1,grip(cT,TR,L.s,'teacher'),'pinch',SHT);take(cT,HT,t1);cT.tr.move(t1,t1+.3,{l:1});
+    const dF=at(L,ctr(M.first));carryTo(cT,HT,t1+.3,t1+1.3,dF);release(cT,t1+1.3);cT.tr.move(t1+1.3,t1+1.55,{l:0});cT.where.set(t1+1.55,'bd');leave(HT,t1+1.65,t1+2.4);
+    const t2=Math.max(t1+1.5,K.at('chosen item',.42)+.1);
+    enter(HL,t2-.9,t2,grip(cC,TL,L.s,'learner'),'pinch',SHL);take(cC,HL,t2);cC.tr.move(t2,t2+.3,{l:1});
+    const dT=at(L,ctr(M.then));carryTo(cC,HL,t2+.3,t2+1.3,dT);release(cC,t2+1.3);cC.tr.move(t2+1.3,t2+1.55,{l:0});cC.where.set(t2+1.55,'bd');leave(HL,t2+1.65,t2+2.4);
+    const g1=Math.max(t2+1.6,K.at('first the target',.8)-.15),g2=Math.max(g1+.7,K.at('then the item',.9)-.15);glowAt(L,M.first,6,g1,1.5);glowAt(L,M.then,6,g2,1.5);
+    return Math.max(t2+2.5,g2+1.5)-K.t;};
+  SC.tk_page=K=>{toSession(K.t+.15,1.4);const t1=Math.max(K.t+1.7,K.at('where the tokens wait',.4)-.1);
+    TK.forEach((c,i)=>{c.pops.tk=[t1+i*.18];});const t2=Math.max(t1+.4+n*.18,K.at('empty slots',.62)-.15);
+    M.slot.forEach((r,i)=>glowAt(BDS,r,4,t2+i*.2,1.3));
+    const t3=Math.max(t2+n*.2+1,K.at('valuable first',.8)-.15);TK.forEach((c,i)=>{c.pops.tk.push(t3+i*.06);});
+    return Math.max(K.d,t2+n*.2+1.3-K.t);};
+  /* the rule: what earns a token (how many times, or how long), then the example filled in */
+  SC.rule=K=>{let t=K.t;if(!session){toSession(t+.1,1.4);t+=1.4;}
+    const tc=Math.max(t+.3,K.at('decide how much',.2)-.1);chip.tr.move(tc,tc+.4,{o:1,s:1},0,easeOut);
+    const ti=Math.max(tc+.5,K.at('how many times',.45)-.15),tl=Math.max(ti+.5,K.at('how long',.52)-.15);
+    ricN.tr.move(ti,ti+.35,{o:1,s:1,dy:0},0,easeOut);ricL.tr.move(tl,tl+.35,{o:1,s:1,dy:0},0,easeOut);
+    const tk=Math.max(tl+.8,K.at('keep it small',.6)-.15);glowAt(BDS,M.slot[0],4,tk,1.6);
+    const tf=Math.max(tk+.6,K.at('this example',.8)-.15);chip0.tr.move(tf,tf+.3,{o:0});chip1.tr.move(tf+.1,tf+.45,{o:1});chip.tr.move(tf,tf+.2,{s:1.06});chip.tr.move(tf+.2,tf+.45,{s:1});
+    ricN.tr.move(tf,tf+.4,{o:0,s:.8});glowAt({x:0,y:0,s:1},{x:RC.x+10,y:104,w:172,h:96},4,tf,1.3);ricL.tr.move(tf+1.2,tf+1.6,{o:0,s:.8});
+    return tf+1.7-K.t;};
+  /* the session starts: the ring shows 2:00; the teacher points to the board and names both pictures; the ring counts down */
+  SC.start=K=>{ringEl.tr.move(K.t+.15,K.t+.6,{o:1,s:1},0,easeOut);
+    const pF=pointAt(at(BDS,ctr(M.first)),sBd),pT=pointAt(at(BDS,ctr(M.then)),sBd);
+    const tp0=Math.max(K.t+1,K.at('point to the board',.25)+.25);enter(HT,tp0-.9,tp0,pF,'point',SHT);
+    const tp1=Math.max(tp0,K.at('first the target',.42)),tp2=Math.max(tp1+.9,K.at('then the item',.52));
+    handTo(HT,tp2-.5,tp2,pT,.12);leave(HT,tp2+.7,tp2+1.45);
+    glowAt(BDS,M.first,6,tp1-.15,1.3);glowAt(BDS,M.then,6,tp2-.15,1.3);
+    const tr0=Math.max(tp2+.3,K.at('the ring',.62));ringPending=tr0;const ts=Math.max(tr0+.5,K.at('sped up',.85)-.15);ringEl.tr.move(ts,ts+.2,{s:1.06});ringEl.tr.move(ts+.2,ts+.45,{s:1});
+    return tr0+1.2-K.t;};
+  /* the first token comes as the interval ends (the reach starts just before), not when the line gets to it; the ring keeps its ✓ until
+     the token is in its slot; the praise is shown again with the behavior's name marked as the line says so; the slot glows as it is named */
+  SC.tok_first=K=>{const tEnd=K.t+.6,grab=tEnd+.45,atHO=grab+.8,tk=atHO+.9,place=tk+.8;
+    ringInt(ringPending==null?K.t-3:ringPending,tEnd,true,{hold:place});ringPending=null;
+    deliver(0,{t0:tEnd-.4,grab,atHO,text:PR.first,bub:atHO,bubDur:2.4,take:tk,place,lin:.9});
+    const tb=Math.max(atHO+2.5,K.at('brief praise',.5)-.15);bubble(PR.first,tb,2.8,true);
+    const ts=Math.max(tb+.5,K.at('put it in the next slot',.85)-.15);glowAt(BDS,M.slot[0],5,ts,1.8);
+    return Math.max(place+1,ts+1.8)-K.t;};
+  /* the behavior stops part way: the ring stops and turns grey, no token; the reminder comes at once; the earned token stays (it glows);
+     the interval starts over when the learner begins again */
+  SC.tok_none=K=>{const ts=Math.max(K.t+1.4,K.at('stops',.12)+.35),tn=Math.max(ts+4,K.at('start the interval over',.8)-.1);
+    ringInt(K.t+.2,ts,false,{f:.4,hold:tn});noTok.tr.move(ts,ts+.3,{o:1,s:1},0,easeOut);
+    const pF=pointAt(at(BDS,ctr(M.first)),sBd);enter(HT,ts-.5,ts+.45,pF,'point',SHT);glowAt(BDS,M.first,6,ts+.3,1.4);
+    const te=Math.max(ts+.6,K.at('earned tokens',.5)-.15);glowAt(BDS,M.slot[0],5,te,1.6);
+    const tr=Math.max(te+.8,K.at('remind your learner',.62)-.15);glowAt(BDS,M.first,6,tr,1.4);handTo(HT,tr,tr+.18,{x:pF.x,y:pF.y+12},0);handTo(HT,tr+.18,tr+.4,pF,0);
+    leave(HT,tn-.3,tn+.5);noTok.tr.move(tn-.5,tn-.1,{o:0});ringPending=tn;
+    return Math.max(K.d,tn+.6-K.t);};
   SC.tok_more=K=>{const idx=[];for(let i=1;i<n-1;i++)idx.push(i);if(!idx.length)return K.d;
     const want=(K.d+.4)/idx.length;let T=K.t+.25,end=K.t;
     if(want>=2.4){const cy=Math.min(4,want),ri=cy-1.4;   /* a few tokens: each one in full, the hands come in and go */
-      idx.forEach((i,j)=>{ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.05,grab:D+.5,atHO:D+1.05,text:PR.more[j%PR.more.length],bubDur:1.7,take:D+1.25,place:D+1.85,lin:.7});T+=cy;});}
+      idx.forEach((i,j)=>{ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.4,grab:D+.5,atHO:D+1.05,text:PR.more[j%PR.more.length],bubDur:1.7,take:D+1.25,place:D+1.85,lin:.9});T+=cy;});}
     else{const cy=Math.max(1.75,want),ri=cy-.5;   /* a big board: the intervals follow one another and both hands stay in the frame from token to token */
       idx.forEach((i,j)=>{const last=j===idx.length-1;ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;
         end=deliver(i,{t0:D-.05,grab:D+.45,atHO:D+.95,text:PR.more[j%PR.more.length],bubDur:Math.min(1.6,cy-.1),take:D+1.2,place:D+1.75,lin:.6,tIn:j>0,lIn:j>0,stay:!last});T+=cy;});}
     ringPending=null;
     return end-K.t+.1;};
-  SC.tok_last=K=>{const i=n-1,T=K.t+.2,ri=2.2;ringInt(ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);ringPending=null;const D=T+ri;
-    const tk=F.term?Math.max(D+2.6,K.at('board is finished',.6)):D+1.6;
-    const end=deliver(i,{t0:D-.05,grab:D+.55,atHO:D+1.2,text:PR.last,bub:D+1.3,bubDur:F.term?Math.max(2.6,tk-D-.7):2.6,take:tk,place:tk+.9,lin:.8});
-    if(F.term){const c=TK[i];c.glowT=[D+.6,tk+1.6];glowAt(BDS,M.slot[i],8,tk+.9,2,true);}
-    else M.slot.forEach((r,j)=>glowAt(BDS,r,4,tk+1+j*.08,1.4));
-    ringEl.tr.move(end+.2,end+.7,{o:0,s:.9});return end-K.t+.8;};
-  SC.exchange=K=>{const t=K.t;chip.tr.move(t,t+.5,{o:0});ringEl.tr.move(t,t+.5,{o:0});veil.tr.move(t+.2,t+.8,{o:.32});
-    const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:292},big=sBd*1.5;
-    c.tr.set(t+.3,{x:P0.x,y:P0.y,s:sBd,l:0,o:1});c.where.set(t+.3,'fly');c.tr.move(t+.3,t+.65,{l:1});c.tr.move(t+.65,t+1.6,{x:CEN.x,y:CEN.y,s:big},.1);
-    const is=big*CW/IW;item.tr.set(t+1.45,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(t+1.45,'fly');item.tr.move(t+1.45,t+2.05,{o:1});c.tr.move(t+1.45,t+2.05,{o:0});c.where.set(t+2.1,'none');
-    const tg=Math.max(t+2.8,K.at('your learner gets',.62)-1.1);const PALM={x:640,y:372};
-    enter(HT,tg-.9,tg,grip(item,CEN,is,'teacher'),'pinch',[1110,SH+480]);take(item,HT,tg);
-    const pa=ART.learner.open;enter(HL,tg-.3,tg+.7,PALM,'open',[300,SH+480]);
-    const drop={x:PALM.x+2,y:PALM.y+12};item.tr.move(tg,tg+1.2,{s:.8});carryTo(item,HT,tg+.1,tg+1.2,drop);
-    release(item,tg+1.2);item.tr.move(tg+1.2,tg+1.45,{l:.25});take(item,HL,tg+1.25);leave(HT,tg+1.35,tg+2.1);
-    return Math.max(K.d,tg+2.4-K.t);};
-  SC.reset=K=>{const r=K.t;leave(HL,r+.2,r+1.1);item.where.set(r+1.15,'none');veil.tr.move(r+.2,r+.8,{o:0});
-    const gap=Math.min(.22,1.6/n),r1=Math.max(r+1,K.at('put the tokens back',.3)-.5);TK.forEach((c,i)=>{const ts=r1+i*gap,sp=at(BDS,ctr(M.slot[i])),dp=at(TKS,ctr(M.ybx[i]));c.tr.set(ts,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(ts,'fly');
-      c.tr.move(ts,ts+.2,{l:1});c.tr.move(ts+.2,ts+.85,{x:dp.x,y:dp.y,s:sTk},.22);c.tr.move(ts+.85,ts+1,{l:0});c.where.set(ts+1,'tk');});
-    let t=r1+(n-1)*gap+1.1;toBook(t,1.1);t+=1.15;
-    const fB=at(BOOK('bd'),ctr(M.first));cT.tr.set(t,{x:fB.x,y:fB.y,s:sBk,l:0,o:1});cT.where.set(t,'fly');cT.tr.move(t,t+.25,{l:1});cT.tr.move(t+.25,t+.9,{x:TL.x,y:TL.y},.15);
-    cC.tr.set(t,{x:TR.x+60,y:SH+170,s:sBk,l:1,o:1});cC.where.set(t,'fly');cC.tr.move(t+.1,t+.9,{x:TR.x,y:TR.y},.1);
-    pageTurn('tg',t+.5,t+1.35,true);
-    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg]));cT.tr.move(t+1.4,t+2.1,{x:pT.x,y:pT.y},.15);cT.tr.move(t+2.1,t+2.3,{l:0});cT.where.set(t+2.3,'tg');
-    pageTurn('ch',t+2.3,t+3.1,true);
-    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));cC.tr.move(t+3.1,t+3.8,{x:pC.x,y:pC.y},.15);cC.tr.move(t+3.8,t+4,{l:0});cC.where.set(t+4,'ch');t+=3.95;
+  /* the last token: given at once; the terminal token goes straight into its slot, and sits there, its round slot glowing, while the line
+     says why it looks different; the full board glows as it is named */
+  SC.tok_last=K=>{const i=n-1,T=K.t+.2,ri=2.2,D=T+ri,tk=F.term?D+2.2:D+1.6,place=tk+.9;
+    ringInt(ringPending!=null&&ringPending<T?ringPending:T,D,true,{hold:place});ringPending=null;
+    const end=deliver(i,{t0:D-.4,grab:D+.5,atHO:D+1.2,text:PR.last,bub:D+1.25,bubDur:2.6,take:tk,place,lin:.9});let fin=end;
+    if(F.term){TK[i].glowT=[D+.6,place];const ta=Math.max(place,K.at('looks different',.3)-.15);glowAt(BDS,M.slot[i],8,place,Math.max(4.5,ta+3.2-place),true);
+      const tf=Math.max(place+4.6,K.at('board is finished',.6)-.15);M.slot.forEach((r,j)=>glowAt(BDS,r,4,tf+j*.08,1.4));fin=Math.max(fin,tf+1.5);}
+    else{const tf=Math.max(place+.3,K.at('board is full',.6)-.15);M.slot.forEach((r,j)=>glowAt(BDS,r,4,tf+j*.08,1.4));fin=Math.max(fin,tf+1.5);}
+    ringEl.tr.move(end+.2,end+.7,{o:0,s:.9});return Math.max(end+.8,fin)-K.t;};
+  /* the exchange: the teacher's hand gathers the tokens off the board and takes them back to the Tokens page (the trade); the Then card
+     lifts and grows into the item; the teacher holds it by its right edge, the learner takes it by its left edge and keeps it for the time agreed */
+  const GI_T=[.48,-.12],GI_L=[-.48,.12];
+  SC.exchange=K=>{const t=K.t;chip.tr.move(t,t+.5,{o:0});
+    const tg=Math.max(t+1.1,K.at('trade the tokens',.15)+.15),s0p=at(BDS,ctr(M.slot[0]));
+    const g0=grip(TK[0],s0p,sBd,'teacher');enter(HT,tg-.9,tg,g0,'pinch',SHT);
+    TK.forEach((c,i)=>{const sp=at(BDS,ctr(M.slot[i]));c.tr.set(tg-.3,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(tg-.3,'fly');
+      c.tr.move(tg-.2+i*.03,tg+.45+i*.03,{x:s0p.x+i*2.5,y:s0p.y-i*3,l:.4},.05);});
+    const tgT=tg+.5+n*.03;TK.forEach(c=>take(c,HT,tgT));TK.forEach(c=>c.tr.move(tgT,tgT+1,{s:sTk,l:.8}));
+    const tc=at(TKS,{x:pw/2,y:PG.tk.h*.45});carryTo(TK[0],HT,tgT+.05,tgT+1,tc,.16);
+    TK.forEach((c,i)=>{const dp=at(TKS,ctr(M.ybx[i])),tr=tgT+1+i*.04;release(c,tr);c.tr.move(tr,tr+.45,{x:dp.x,y:dp.y,l:0},.1);c.where.set(tr+.47,'tk');});
+    HT.pose.set(tgT+1.05,'point');leave(HT,tgT+1.15,tgT+1.85);
+    const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:292},big=sBd*1.5,tt=Math.max(tgT+1.2,K.at('then item',.4)-.1);
+    veil.tr.move(tt-.2,tt+.4,{o:.32});
+    c.tr.set(tt,{x:P0.x,y:P0.y,s:sBd,l:0,o:1});c.where.set(tt,'fly');c.tr.move(tt,tt+.35,{l:1});c.tr.move(tt+.35,tt+1.3,{x:CEN.x,y:CEN.y,s:big},.1);
+    const is=big*CW/IW;item.tr.set(tt+1.15,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(tt+1.15,'fly');item.tr.move(tt+1.15,tt+1.75,{o:1});c.tr.move(tt+1.15,tt+1.75,{o:0});c.where.set(tt+1.8,'none');
+    const tgv=Math.max(tt+1.9,K.at('your learner gets',.62)-.3),HOFF={x:560,y:330},si=.75;
+    enter(HT,tgv-.9,tgv,grip(item,CEN,is,'teacher',GI_T),'pinch',SHT);take(item,HT,tgv);item.tr.move(tgv,tgv+1.1,{s:si});carryTo(item,HT,tgv+.1,tgv+1.1,HOFF,.1);
+    const tl=tgv+1.15;enter(HL,tl-.95,tl,grip(item,HOFF,si,'learner',GI_L),'pinch',SHL);release(item,tl);take(item,HL,tl);HT.pose.set(tl+.05,'point');leave(HT,tl+.15,tl+.9);
+    const tw=Math.max(tl+1.1,K.at('for the time',.6)+.2);leave(HL,tw,tw+1.1);release(item,tw+1.12);item.where.set(tw+1.12,'none');
+    return Math.max(K.d,tw+1.2-K.t);};
+  /* the reset: the item comes back in the teacher's hand and turns back into its card; the hand puts the pictures back, each on its
+     own page (the target first, as its page turns back over the Board, then the chosen item); the learner looks over the choices again */
+  SC.reset=K=>{const r=K.t;veil.tr.move(r+.1,r+.7,{o:0});toBook(r+.1,1.1);
+    const QI={x:820,y:300},si=.75,ti=Math.max(r+1.1,K.at('put it away',.3)-.6),gI=grip(item,QI,si,'teacher',GI_T);
+    const st=enter(HT,ti-1,ti,gI,'pinch',SHT),h0=HT.tr.at(st);item.tr.set(st,{x:h0.x+QI.x-gI.x,y:h0.y+QI.y-gI.y,s:si,l:1,o:1});item.where.set(st,'fly');take(item,HT,st);
+    const ts=ti+.05,sc=sBk*CW/IW;item.tr.move(ts,ts+.5,{s:sc});
+    const pI={x:QI.x+(gI.x-QI.x)*(1-sc/si),y:QI.y+(gI.y-QI.y)*(1-sc/si)};   /* where the shrinking item's centre ends up (it keeps its point under the fingers) */
+    cC.tr.set(ts+.4,{x:pI.x,y:pI.y,s:sBk,l:1,o:0});cC.where.set(ts+.4,'fly');take(cC,HT,ts+.4);cC.tr.move(ts+.4,ts+.6,{o:1});item.tr.move(ts+.4,ts+.6,{o:0});release(item,ts+.62);item.where.set(ts+.62,'none');
+    carryTo(cC,HT,ts+.65,ts+1.25,TRa);release(cC,ts+1.25);cC.tr.move(ts+1.25,ts+1.45,{l:0});
+    const fB=at(BOOK('bd'),ctr(M.first));handTo(HT,ts+1.3,ts+1.8,grip(cT,fB,sBk,'teacher'));
+    cT.tr.set(ts+1.8,{x:fB.x,y:fB.y,s:sBk,l:0,o:1});take(cT,HT,ts+1.8);cT.tr.move(ts+1.8,ts+2,{l:1});carryTo(cT,HT,ts+1.95,ts+2.55,TRb);release(cT,ts+2.55);cT.tr.move(ts+2.55,ts+2.7,{l:0});
+    pageTurn('tg',ts+2.55,ts+3.25,true);
+    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg]));take(cT,HT,ts+3.25);cT.tr.move(ts+3.25,ts+3.4,{l:1});carryTo(cT,HT,ts+3.3,ts+3.9,pT,.15);release(cT,ts+3.9);cT.tr.move(ts+3.9,ts+4.05,{l:0});cT.where.set(ts+4.08,'tg');
+    pageTurn('ch',ts+4,ts+4.7,true);handTo(HT,ts+4,ts+4.55,grip(cC,TRa,sBk,'teacher'));
+    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));take(cC,HT,ts+4.72);cC.tr.move(ts+4.72,ts+4.87,{l:1});carryTo(cC,HT,ts+4.77,ts+5.37,pC,.15);release(cC,ts+5.37);cC.tr.move(ts+5.37,ts+5.52,{l:0});cC.where.set(ts+5.55,'ch');
+    leave(HT,ts+5.5,ts+6.2);let t=ts+5.6;
     /* the learner looks over the choices again */
     const L=BOOK('ch'),pts=[2,4].filter(i=>CH[i]&&i!==F.pick.ch).concat([F.pick.ch]).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
-    if(pts.length){enter(HL,t,t+.8,pts[0],'point',[820,SH+480]);for(let j=1;j<pts.length;j++)handTo(HL,t+.8+(j-1)*.75+.15,t+.8+j*.75,pts[j]);t+=.8+(pts.length-1)*.75+.3;leave(HL,t,t+.8);t+=.8;}
+    if(pts.length){const tl=Math.max(t+.4,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
     return Math.max(K.d,t-K.t);};
+  /* the tips: each tip is lit while it is read; the first is shown under the book, a token given and traded for the item at once, twice */
   SC.tips=K=>{const t=K.t;stackTo(t,t+1,k=>BOOK(k,.52,40,170));tipsCard.tr.move(t+.5,t+1,{o:1,dy:0},0,easeOut);
-    const fr=[['valuable',.06],['small requirement',.42],['only through the board',.8]];
-    tipRows.forEach((fx,i)=>{const tt=Math.max(t+.9+i*.4,K.at(fr[i][0],fr[i][1])-.3);fx.tr.move(tt,tt+.45,{o:1,dy:0},0,easeOut);});return Math.max(K.d,2.5);};
-  SC.outro=K=>{const t=K.t;tipsCard.tr.move(t,t+.5,{o:0,dy:10});stackTo(t+.2,t+1.4,k=>BOOK(k,Math.min(.7,430/maxH),null,24));cyc.tr.move(t+.6,t+.9,{o:1});
+    const fr=[['valuable',.06],['start with a small',.42],['keep the item',.8]];const ts=fr.map((f,i)=>Math.max(t+.9+i*.4,K.at(f[0],f[1])-.3));
+    tipRows.forEach((fx,i)=>{const a=ts[i],b=i<2?ts[i+1]:t+K.d;fx.tr.move(a,a+.45,{o:1,dy:0,h:1},0,easeOut);fx.tr.move(b-.1,b+.3,{h:0});});
+    pair.tr.move(ts[0]+.1,ts[0]+.5,{o:1});
+    const trade=a=>{pTok.tr.set(a,{o:0,s:.6,dx:0});pTok.tr.move(a,a+.3,{o:1,s:1},0,easeOut);pTok.tr.move(a+.9,a+1.5,{dx:PDX,s:.5},.0);pTok.tr.move(a+1.35,a+1.5,{o:0});
+      pItem.tr.move(a+1.45,a+1.7,{s:1.18});pItem.tr.move(a+1.7,a+2,{s:1});};
+    const sp=Math.max(2.3,Math.min(3,(ts[1]-ts[0]-.8)/2));trade(ts[0]+.6);trade(ts[0]+.6+sp);
+    return Math.max(K.d,2.5);};
+  /* the end: the book closes, the cycle is named step by step (each arrow comes with the step after it), and the Choices page turns
+     over to show its back as the backs are mentioned */
+  SC.outro=K=>{const t=K.t,sO=Math.min(.7,430/maxH);tipsCard.tr.move(t,t+.5,{o:0,dy:10});pair.tr.move(t,t+.4,{o:0});stackTo(t+.2,t+1.4,k=>BOOK(k,sO,null,24));cyc.tr.move(t+.6,t+.9,{o:1});
     const after=K.text.toLowerCase().indexOf('cycle');const w=[['choose',.3],['set the target',.42],['earn',.55],['exchange',.68]];let last=t+1;
-    cycItems.forEach((fx,i)=>{const tt=Math.max(t+1+i*.35,K.at(w[i][0],w[i][1],after)-.1);fx.tr.move(tt,tt+.4,{o:1,s:1,dy:0},0,easeOut);last=tt;});
-    return Math.max(K.d,last+1.2-K.t);};
+    cycItems.forEach((fx,i)=>{const tt=Math.max(t+1+i*.35,K.at(w[i][0],w[i][1],after)-.15);fx.tr.move(tt,tt+.4,{o:1,s:1,dy:0},0,easeOut);if(cycArr[i])cycArr[i].tr.move(tt-.05,tt+.3,{o:1,dx:0},0,easeOut);last=tt;});
+    const tb=Math.max(last+1.2,K.at('the back of each page',.86)-.1),B0=BOOK('ch',sO,null,24);
+    PG.chb.tr.set(tb,{x:B0.x,y:B0.y,s:B0.s,ry:0,o:0,fx:0});PG.ch.tr.move(tb,tb+.35,{fx:0},0,easeIn);PG.ch.tr.set(tb+.35,{o:0});PG.chb.tr.set(tb+.35,{o:1});PG.chb.tr.move(tb+.35,tb+.75,{fx:1},0,easeOut);
+    return Math.max(K.d,tb+2.4-K.t);};
 
   /* ---- the timeline ---- */
   const ids=LIST.map(id=>id==='tok_last'&&F.term?'tok_last_term':id).filter(id=>!OPT[id]||present(id));
   let T=0;const cues=[];
-  ids.forEach(id=>{const ln=line(id),low=ln.t.toLowerCase();
-    const K={id,t:T,d:ln.d,text:ln.t,at:(ph,fr,from)=>{const i=low.indexOf(String(ph).toLowerCase(),from>0?from:0);return T+ln.d*(i<0?fr:i/Math.max(1,low.length));}};
+  ids.forEach(id=>{const ln=line(id),low=ln.t.toLowerCase(),on=onsetFn(id,ln.t,ln.d),T0=T;
+    const K={id,t:T0,d:ln.d,text:ln.t,at:(ph,fr,from)=>{const i=low.indexOf(String(ph).toLowerCase(),from>0?from:0);if(i>=0&&window.__wkMarkLog)window.__wkMarkLog.push([id,i]);return i<0?T0+ln.d*fr:T0+on(i);}};
     const need=(SC[id==='tok_last_term'?'tok_last':id](K))||0;const dur=Math.max(ln.d+PAUSE,need+.1);
-    cues.push({id,start:T,dur,narr:ln.d,text:ln.t,chapter:CHOF[id],chunks:chunks(ln.t,ln.d,T),a:ln.a});T+=dur;});
+    cues.push({id,start:T0,dur,narr:ln.d,text:ln.t,chapter:CHOF[id],chunks:chunks(id,ln.t,T0,on),a:ln.a});T+=dur;});
   const chapters=CHAPS.map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return{id,label,start:c?c.start:0};});
   return{D:T,cues,chapters,PG,cards,hands,fxs,ring,cap,notes,item,F};
 }
-/* captions: a line in pieces of up to two caption lines, each shown for its share of the narration */
-function chunks(text,d,T){const parts=(text.match(/[^.!?]+[.!?]+["”]?\s*|[^.!?]+$/g)||[text]).map(s=>s.trim()).filter(Boolean);const out=[];
+/* captions: a line in pieces of up to two caption lines; each piece shows a moment before the voice reaches its first word */
+const CAPLEAD=.12;
+function chunks(id,text,T,on){const parts=(text.match(/[^.!?]+[.!?]+["”]?\s*|[^.!?]+$/g)||[text]).map(s=>s.trim()).filter(Boolean);const out=[];
   parts.forEach(p=>{if(p.length<=120){out.push(p);return;}const mid=p.length/2;let best=-1;p.replace(/[,;:] /g,(m,i)=>{if(best<0||Math.abs(i-mid)<Math.abs(best-mid))best=i;return m;});if(best<0){out.push(p);return;}out.push(p.slice(0,best+1));out.push(p.slice(best+2));});
   const merged=[];out.forEach(p=>{const L=merged[merged.length-1];if(L&&(L+' '+p).length<=96)merged[merged.length-1]=L+' '+p;else merged.push(p);});
-  const total=merged.reduce((a,p)=>a+p.length,0)||1;let acc=0;return merged.map(p=>{const c={t:T+d*acc/total,text:p};acc+=p.length;return c;});}
+  let cur=0;return merged.map((p,k)=>{const i=Math.max(cur,text.indexOf(p.slice(0,12),cur));cur=i+1;if(k&&window.__wkMarkLog)window.__wkMarkLog.push([id,i]);return{t:k?T+Math.max(0,on(i)-CAPLEAD):T,text:p};});}
 
 /* ---------------- renderAt: the stage at time t ---------------- */
 let RMQ=null;const reduced=()=>{try{RMQ=RMQ||window.matchMedia('(prefers-reduced-motion: reduce)');return !!RMQ.matches;}catch(e){return false;}};
 function cueAt(t){if(!B)return null;const c=B.cues;let lo=0,hi=c.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(c[m].start<=t)lo=m;else hi=m-1;}return c[lo];}
 function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=cueAt(t);
   const v=reduced()&&cue?Math.min(B.D,cue.start+cue.dur-.02):t;
-  for(const k in B.PG){const p=B.PG[k],s=p.tr.at(v);css(p.el,'transform','translate('+f2(s.x)+'px,'+f2(s.y)+'px) scale('+s.s.toFixed(4)+')'+(s.ry?' rotateY('+f2(s.ry)+'deg)':''));
+  /* a page: placed, scaled, turned over its binding (ry), or flipped over in place (fx: its width shrinks to its middle and back) */
+  for(const k in B.PG){const p=B.PG[k],s=p.tr.at(v),fx=s.fx==null?1:clamp(s.fx,0,1);
+    css(p.el,'transform','translate('+f2(s.x+p.w*s.s*(1-fx)/2)+'px,'+f2(s.y)+'px) scale('+(fx<1?(s.s*fx).toFixed(4)+','+s.s.toFixed(4):s.s.toFixed(4))+')'+(s.ry?' rotateY('+f2(s.ry)+'deg)':''));
     css(p.el,'opacity',f2(s.o));css(p.el,'visibility',s.o>.001&&s.ry>-89.5?'visible':'hidden');css(p.shade,'opacity',f2(clamp(-s.ry/90,0,1)*.5));}
   for(const c of B.cards){const w=c.where.at(v).v;
     for(const k in c.inp){const e=c.inp[k];const on=w===k;css(e,'opacity',on?'1':'0');let sc=1;const pp=c.pops[k];if(on&&pp)for(const p of pp)sc=Math.max(sc,1+.08*bump(v,p,.6));css(e,'transform',sc!==1?'scale('+sc.toFixed(4)+')':'none');}
@@ -377,16 +480,22 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
     css(c.el,'visibility',fl?'visible':'hidden');css(c.el,'opacity',fl?f2(s.o):'0');css(c.el,'transform','translate('+f2(p.x-c.w/2)+'px,'+f2(p.y-c.h/2)+'px) scale('+k.toFixed(4)+')');
     css(c.sh,'transform','translate('+f2(4+14*s.l)+'px,'+f2(5+20*s.l)+'px)');css(c.sh,'opacity',f2(.35+.3*s.l));
     if(c.glow){const g=c.glowT;css(c.glow,'opacity',g&&v>=g[0]&&v<=g[1]?f2(.55+.45*Math.sin((v-g[0])*5)):'0');}}
-  for(const h of B.hands){const s=h.tr.at(v),ps=h.pose.at(v),ang=Math.atan2(s.x-s.sx,s.sy-s.y)*180/Math.PI,sc=h.base*s.s,u=clamp(ps.since/.14,0,1);
-    const vis=s.y<SH+260;
-    for(const name in h.poses){const P=h.poses[name];const o=name===ps.v?(ps.prev===name?1:u):name===ps.prev&&ps.prev!==ps.v?1-u:0;
+  /* the hands: each pose is drawn about the point that touches; while a pose changes, the new drawing starts with its wrist where the
+     old one's wrist is (so the forearms coincide and no second arm shows) and slides onto its own touch point over 0.3 s */
+  for(const h of B.hands){const s=h.tr.at(v),ps=h.pose.at(v),ang=Math.atan2(s.x-s.sx,s.sy-s.y)*180/Math.PI,u=clamp(ps.since/.14,0,1);
+    let lf=0;for(const L of h.lifts)lf=Math.max(lf,bump(v,L[0],L[1]));const sc=h.base*s.s*(1+.05*lf);
+    const vis=s.y<SH+260;let ox=0,oy=0;
+    if(ps.prev!==ps.v&&ps.since<.3&&h.poses[ps.prev]){const r=ang*Math.PI/180,cs=Math.cos(r),sn=Math.sin(r),W=P=>{const dx=(P.wx-P.ax)*sc,dy=(P.wy-P.ay)*sc;return[dx*cs-dy*sn,dx*sn+dy*cs];};
+      const a=W(h.poses[ps.prev]),b=W(h.poses[ps.v]),k=1-ps.since/.3;ox=(a[0]-b[0])*k;oy=(a[1]-b[1])*k;}
+    for(const name in h.poses){const P=h.poses[name];const o=name===ps.v?(ps.prev===name?1:u):name===ps.prev&&ps.prev!==ps.v?1-u:0;const nw=name===ps.v&&ps.prev!==name;
       css(P.el,'opacity',f2(vis?o:0));css(P.el,'visibility',vis&&o>.001?'visible':'hidden');
-      css(P.el,'transform','translate('+f2(s.x-P.ax)+'px,'+f2(s.y-P.ay)+'px) rotate('+f2(ang)+'deg) scale('+sc.toFixed(4)+')');}}
-  for(const fx of B.fxs){const s=fx.tr.at(v);css(fx.el,'opacity',f2(s.o));css(fx.el,'visibility',s.o>.001?'visible':'hidden');css(fx.el,'transform',s.dy||s.s!==1?'translate(0,'+f2(s.dy)+'px) scale('+s.s.toFixed(4)+')':'none');}
+      css(P.el,'transform','translate('+f2(s.x-P.ax+(nw?ox:0))+'px,'+f2(s.y-P.ay+(nw?oy:0))+'px) rotate('+f2(ang)+'deg) scale('+sc.toFixed(4)+')');}}
+  for(const fx of B.fxs){const s=fx.tr.at(v);css(fx.el,'opacity',f2(s.o));css(fx.el,'visibility',s.o>.001?'visible':'hidden');css(fx.el,'transform',s.dy||s.dx||s.s!==1?'translate('+f2(s.dx||0)+'px,'+f2(s.dy)+'px) scale('+s.s.toFixed(4)+')':'none');
+    if(s.h!=null)css(fx.el,'backgroundColor',s.h>.01?'rgba(255,205,90,'+f2(.42*s.h)+')':'transparent');}
   /* the timer ring */
-  const R=B.ring;let p=0,state='idle';for(const I of R.ints){if(v>=I.t0&&v<I.t1){p=(v-I.t0)/(I.t1-I.t0);state='run';break;}if(v>=I.t1&&v<I.t1+.8){p=1;state=I.ok?'ok':'no';}}
+  const R=B.ring;let p=0,state='idle';for(const I of R.ints){if(v>=I.t0&&v<I.t1){p=(v-I.t0)/(I.t1-I.t0)*I.f;state='run';break;}if(v>=I.t1&&v<I.hold){p=I.f;state=I.ok?'ok':'no';}}
   css(R.fg,'strokeDasharray',f2(R.C));css(R.fg,'strokeDashoffset',f2(R.C*(1-p)));css(R.fg,'stroke',state==='ok'?'#2f9e44':state==='no'?'#8c97a1':'#f08c00');
-  const rem=Math.round(120*(1-(state==='run'?p:state==='idle'?0:1)));txt(R.t,state==='ok'?'✓':state==='no'?'–':Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0'));
+  const rem=Math.round(120*(1-(state==='idle'?0:p)));txt(R.t,state==='ok'?'✓':state==='no'?'–':Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0'));
   /* captions follow the real time, also with reduced motion */
   let ct='';if(cue){for(const ch of cue.chunks)if(ch.t<=t+.001)ct=ch.text;}
   txt(B.cap,ct);css(B.cap,'visibility',ct?'visible':'hidden');const D=dom();if(D&&D.cap2)txt(D.cap2,ct);
