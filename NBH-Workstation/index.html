@@ -581,10 +581,12 @@ const EMBED=(()=>{
     return await new Response(st).text();
   }
   /* v21.31: the pictogram library (Forms SM-1 and VS-1) is one block, put into a form's <script src> as it opens */
-  E.ready=(async()=>{const [f,pic]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null)]);E.forms=JSON.parse(f||'{}');E.pictos=pic||'';return E;})();
+  E.ready=(async()=>{const [f,pic,rsp]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null)]);E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
+  const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
   E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo);
     if(PICTAG.test(h))h=h.replace(PICTAG,E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
+    if(RSPTAG.test(h))h=h.replace(RSPTAG,E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
     return h;};
   E.pdf=async()=>{if(!E._pdf)E._pdf=JSON.parse(await inflate('nbh-embed-pdf')||'{}');return E._pdf;};
   E.shell=()=>inflate('nbh-embed-shell');
@@ -1977,6 +1979,7 @@ $('#diag').addEventListener('click',()=>{
    ['Packet page headers',heads,'The practice, the student and "Page N of M" on every sheet of the master print need Chrome or Edge 131 or later. Anything else prints the pages without them.'],
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
    ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1 and VS-1 (photos work without it)','diagPic'],
+   ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
   ];
   dialog('Diagnostics',
@@ -1989,6 +1992,7 @@ $('#diag').addEventListener('click',()=>{
     '<button id="btnFileCheck">Check all '+ALL.length+' files are here</button>'+
     '<div id="fileOut"></div>');
   $('#btnFileCheck').addEventListener('click',checkFiles);
+  if(!EMBED)fetch('nbh-respond.js',{method:'HEAD'}).then(r=>{const c=$('#diagRsp');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}}).catch(()=>{const c=$('#diagRsp');if(c)c.textContent='could not check';});
   if(!EMBED)fetch('nbh-pictos.js',{method:'HEAD'}).then(r=>{const c=$('#diagPic');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}})
     .catch(()=>{const c=$('#diagPic');if(c){c.textContent='could not check (open the folder over http, or open Form SM-1 and look for pictures)';}});
   pdfTools().then(()=>{const c=$('#diagPdf');if(c)c.textContent='present';})
