@@ -15,7 +15,7 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  const dlg=await page.evaluate(()=>({open:document.querySelector('#rpDlg').open,targets:[...rpTarget.options].map(o=>o.textContent),name:rpName.value,student:rpStudent.value,email:rpEmail.value,rows:document.querySelectorAll('#rpTargets tbody tr').length,sing:document.querySelector('#rpTargets [data-rt="sing"]').value,def:document.querySelector('#rpTargets [data-rt="def"]').value,ready:!rpSave.disabled,preview:rpPrev.textContent}));
  ok('dialog: own target first, the case\'s second, "every target"; first name, label; terms and definition prefilled; ready',dlg.open&&dlg.targets.length===3&&/Self-injury \(this form\)/.test(dlg.targets[0])&&/Elopement \(TB-1\)/.test(dlg.targets[1])&&/Every target/.test(dlg.targets[2])&&dlg.name==='Georgi'&&dlg.student==='G.S. (ID 12345)'&&dlg.rows===1&&dlg.sing==='self-injury'&&/Forceful contact/.test(dlg.def)&&dlg.ready,dlg);
  ok('preview personalizes: name and the behavior term',/interact with Georgi\?/.test(dlg.preview)&&/does self-injury occur/.test(dlg.preview),dlg.preview);
- await page.evaluate(()=>{rpPron.value='he';rpPron.dispatchEvent(new Event('change'));document.querySelector('#rpTargets [data-rt="plur"]').value='self-injurious behaviors';document.querySelector('#rpTargets').dispatchEvent(new Event('input',{bubbles:true}));rpDue.value='10/10/2026';});
+ await page.evaluate(()=>{rpPron.value='he';rpPron.dispatchEvent(new Event('change'));document.querySelector('#rpTargets [data-rt="plur"]').value='self-injurious behaviors';document.querySelector('#rpTargets').dispatchEvent(new Event('input',{bubbles:true}));rpDue.value='10/10/2026';rpVideo.value='https://youtu.be/abc123';rpVideo.dispatchEvent(new Event('input'));});
  ok('plural phrase and pronouns in the preview',/How severe are self-injurious behaviors when they occur/.test(await page.evaluate(()=>rpPrev.textContent)));
  /* the page as a file */
  const f1=await grab(page,()=>__rp.file());
@@ -26,7 +26,10 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  ok('page shows the definition, the Yes / No / Unsure question about it, and the personalized items',r1.items===16&&/How often does self-injury occur\?/.test(r1.q2)&&/What counts as Self-injury: Forceful contact/.test(r1.def)&&r1.conf,r1);
  await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Ms. Rivera';inp[1].value='Teacher';inp[2].value='14';document.querySelector('select').value='Yes';inp[3].value='Classroom, lunch';
    const pat=['Y','N','NA','Y','N','Y','Y','N','N','N','Y','NA','N','N','Y','N'];document.querySelectorAll('li.it').forEach((li,i)=>{li.querySelector('input[value="'+pat[i]+'"]').click();});document.querySelectorAll('textarea')[0].value='Independent math work';document.querySelector('button:not(.ghost)').click();});await sleep(150);
+ ok('the page shows the instructions link in a new tab',await rp.evaluate(()=>{const a=document.querySelector('.links a');return !!a&&a.href==='https://youtu.be/abc123'&&a.target==='_blank'&&/Watch the instructions/.test(a.textContent);}));
  ok('send refuses until the definition question is answered',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/understand the definition/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden));
+ await rp.evaluate(()=>{document.querySelector('input[name=nbhr-confirm][value=no]').click();document.querySelector('button:not(.ghost)').click();});await sleep(150);
+ ok('No to the definition question blocks Send, naming the assessor',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/answered <b>No<\/b>/.test(document.querySelector('.warn').innerHTML)&&/bcba@example\.org/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden&&/will not send/.test(document.querySelector('#nbhr-conf-note').textContent)));
  await rp.evaluate(()=>{document.querySelector('input[name=nbhr-confirm][value=yes]').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
  const sent=await rp.evaluate(()=>({code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:!document.querySelector('.done').hidden}));
  const dec=await page.evaluate(c=>NBH_RESPOND.decode(c),sent.code);
@@ -68,11 +71,11 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  ok('PBQ answers placed with the 15-item version; the target named from the response',pbq.ver==='15'&&pbq.a.join()==='0,1,0,0'&&pbq.name==='Mr. Okafor'&&pbq.beh==='Self-injury',pbq);
  /* the wording, the name, the pronouns, the terms and the email save with the file */
  const data=(await grab(page,()=>document.querySelector('#saveBtn').click())).text;
- ok('wording, pronouns, terms and email in the saved file',/rp\.w\.fast/.test(data)&&/"rp\.pron": ?"he"/.test(data)&&/self-injurious behaviors/.test(data)&&/bcba@example\.org/.test(data));
+ ok('wording, pronouns, terms and email in the saved file',/rp\.w\.fast/.test(data)&&/"rp\.pron": ?"he"/.test(data)&&/self-injurious behaviors/.test(data)&&/bcba@example\.org/.test(data)&&/youtu\.be\/abc123/.test(data));
  await page.reload();await sleep(600);await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});
  await (await page.$('#fileIn')).setInputFiles({name:'ia1.json',mimeType:'application/json',buffer:Buffer.from(data)});await sleep(500);
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(150);
- const back=await page.evaluate(()=>({pron:rpPron.value,plur:document.querySelector('#rpTargets [data-rt="plur"]').value,count:document.querySelector('[data-rpw="fast"]').textContent}));
- ok('reopened: pronouns, the plural phrase and the wording count come back',back.pron==='he'&&back.plur==='self-injurious behaviors'&&/16 pasted/.test(back.count),back);
+ const back=await page.evaluate(()=>({pron:rpPron.value,plur:document.querySelector('#rpTargets [data-rt="plur"]').value,count:document.querySelector('[data-rpw="fast"]').textContent,video:rpVideo.value}));
+ ok('reopened: pronouns, the plural phrase and the wording count come back',back.pron==='he'&&back.plur==='self-injurious behaviors'&&/16 pasted/.test(back.count)&&back.video==='https://youtu.be/abc123',back);
  ok('no console or page error on the form or the respondent page',log.length===0&&rlog.length===0,{log,rlog});
  console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');await br.close();process.exit(fails?1:0);})().catch(e=>{console.error('FAIL',e);process.exit(1);});

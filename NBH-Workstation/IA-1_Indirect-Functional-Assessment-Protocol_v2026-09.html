@@ -587,6 +587,7 @@ td input,td select{max-width:100%}
       <div class="f"><label for="rpPron">Pronouns in the items</label><select id="rpPron"><option value="">as pasted (he or she)</option><option value="he">he / him / his</option><option value="she">she / her / her</option><option value="they">they / them / their</option></select></div>
       <div class="f"><label for="rpEmail">Your email (the answers come here)</label><input id="rpEmail" type="email"></div>
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
+      <div class="f"><label for="rpVideo">Instructions video or page (a link the page shows; optional)</label><input id="rpVideo" type="url" placeholder="https://youtu.be/..."></div>
       <div class="f"><label for="rpStudent">Student label in the header (initials and ID)</label><input id="rpStudent"></div>
     </div>
     <div id="rpTargets"></div>
@@ -698,7 +699,7 @@ td input,td select{max-width:100%}
   <div class="rp-word noprint" id="rpWording">
     <h3 class="sub">Item Wording for Respondent Pages</h3>
     <p class="method" style="margin-top:0">A respondent page carries the items of one instrument so an informant can answer it away from this form. The instruments are published forms, so the wording is not built into the workstation: paste each instrument's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go. The wording saves with this file and travels into every case file saved from it, so it is pasted once per instrument.</p>
-    <input type="text" name="rp.name" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.pron" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.terms" hidden aria-hidden="true" tabindex="-1">
+    <input type="text" name="rp.name" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.pron" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.video" hidden aria-hidden="true" tabindex="-1"><input type="text" name="rp.terms" hidden aria-hidden="true" tabindex="-1">
     <div class="grid2 rp-grid">
       <div class="f"><label for="rpwFast">FAST, 16 items <span class="rp-count" data-rpw="fast"></span></label><textarea id="rpwFast" name="rp.w.fast" rows="4" spellcheck="false" placeholder="1. ...&#10;2. ..."></textarea></div>
       <div class="f"><label for="rpwQabf">QABF, 25 items <span class="rp-count" data-rpw="qabf"></span></label><textarea id="rpwQabf" name="rp.w.qabf" rows="4" spellcheck="false"></textarea></div>
@@ -1401,6 +1402,7 @@ function rpPayloadFor(t){const key=$('#rpInst').value,items=rpWording(key),info=
   const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:$('#rpStudent').value.trim(),beh:t.label,behLabel:t.label,def:t.def,confirm:$('#rpConfirm').checked&&!!t.def,bcba:val('m.assessor')||'the BCBA',email:$('#rpEmail').value.trim(),due:$('#rpDue').value.trim(),
     sub:'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(per.name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:info.scale,extras:RP_EXTRAS,
     subject:INST[key].title+' answers for Form IA-1 · '+t.label};
+  const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:'Watch the instructions'}];
   if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));
   if(key==='pbq')p.pbqVer=String(items.length);
   return p;}
@@ -1420,7 +1422,7 @@ function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpEx
   const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
   $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
 function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t=>{st[t.label.toLowerCase()]={sing:t.sing,plur:t.plur,def:t.def};});rpTermsSave(st);
-  const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);
+  const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);put('rp.video',$('#rpVideo').value.trim());
   const em=document.querySelector('[name="m.email"]');if(em&&!em.value){em.value=$('#rpEmail').value.trim();em.dispatchEvent(new Event('input',{bubbles:true}));}}
 function rpFileName(p){return 'IA-1_'+INST[p.inst].title+'_'+(p.behLabel||'behavior').replace(/[^\w.-]+/g,'_').slice(0,40)+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';}
 function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
@@ -1431,10 +1433,10 @@ function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
 function rpLinkUrl(t){const p=t?rpPayloadFor(t):rpPayload();const base=location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';return base+NBH_RESPOND.payloadToHash(p);}
 function rpLinks(){return rpTermsFromTable().map(t=>({label:t.label,url:rpLinkUrl(t)}));}
 $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStudent').value=rpInitials();if(!$('#rpEmail').value)$('#rpEmail').value=val('m.email');
-  if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpFirstName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');
+  if(!$('#rpName').value)$('#rpName').value=val('rp.name')||rpFirstName();if(!$('#rpPron').value&&val('rp.pron'))$('#rpPron').value=val('rp.pron');if(!$('#rpVideo').value&&val('rp.video'))$('#rpVideo').value=val('rp.video');
   rpCounts();rpFillTargets();rpRenderTargets();rpStatus();$('#rpDlg').showModal();});
 ['rpEmail','rpStudent','rpName'].forEach(id=>$('#'+id).addEventListener('input',rpStatus));
-$('#rpInst').addEventListener('change',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
+$('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpPron').addEventListener('change',rpStatus);$('#rpConfirm').addEventListener('change',rpStatus);$('#rpFx').addEventListener('change',rpStatus);
 $('#rpTarget').addEventListener('change',()=>{rpRenderTargets();rpStatus();});
 $('#rpTargets').addEventListener('input',()=>{rpRemember();rpStatus();});   /* typed terms survive a change of target */
 $('#rpSave').addEventListener('click',rpFile);
