@@ -17,6 +17,9 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   /* blank book: the default order is "all" with the how-to off: 8 + 3 card sheets */
   const blank=await pdf('blank');check('blank print: 11 landscape sheets (4 fronts, 4 backs, 3 card sheets)',blank.startsWith('11 [(11.0, 8.5)'),blank);
   check('blank Board prints a line to write the name on',await page.evaluate(()=>!!document.querySelector('#book .pg[data-kind="bd"] .ttl .blank')));
+  check('the 11 x 7.33 in page is centred on Letter with four corner trim marks; the frame band is 0.22 in',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="ch"]');const cv=p.querySelector('.cv'),f=p.querySelector('.frame'),pn=p.querySelector('.panel');const r=x=>Math.round(x/96*100)/100;return p.querySelectorAll('.trim').length===8&&r(cv.offsetTop)===0.58&&r(cv.offsetHeight)===7.33&&r(f.offsetLeft)===0.45&&r(pn.offsetLeft)===0.3&&r(pn.offsetTop)===0.3;}));
+  check('Choices and Targets boxes 2.85 x 2.55 in with 0.6 in dots; the panel light grey by default',await page.evaluate(()=>{const b=document.querySelector('#book .pg[data-kind="ch"] .bx'),d=b.querySelector('.dot');const r=x=>Math.round(x/96*100)/100;return r(b.offsetWidth)===2.85&&r(b.offsetHeight)===2.55&&r(d.offsetWidth)===0.6&&getComputedStyle(document.querySelector('#book .pg[data-kind="ch"] .panel')).backgroundColor==='rgb(243, 244, 245)';}));
+  check('token slots 1.95 x 1.8 in on a band exactly tall enough',await page.evaluate(()=>{const s=document.querySelector('#book .pg[data-kind="bd"] .slot'),st=document.querySelector('#book .pg[data-kind="bd"] .strip');const r=x=>Math.round(x/96*100)/100;return r(s.offsetWidth)===1.95&&r(s.offsetHeight)===1.8&&r(st.offsetHeight)===2.04;}));
   check('no QR code without a link',await page.evaluate(()=>document.querySelectorAll('#book .qr').length===0));
   /* setup fields, typed, then saved and reopened */
   await page.click('#viewSeg button[data-view="setup"]');
@@ -39,6 +42,10 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   check('QR modules follow 21 + 4 (type - 1) for the type the library chose',!!qr&&(qr.n-17)%4===0&&qr.n===21+4*((n-17)/4-1));
   console.log('   (no independent QR decoder is available offline; the check is the same library in node and the module count)');
   check('every printed page carries the QR code (four fronts)',await page.evaluate(()=>document.querySelectorAll('#book .pg.front[data-kind]:not([data-kind^="cards"]):not([data-kind^="how"]) .qr').length===4));
+  await page.selectOption('[data-m="panel"]','grey');await sleep(200);check('the mid-grey panel is an option',await page.evaluate(()=>getComputedStyle(document.querySelector('#book .pg[data-kind="tg"] .panel')).backgroundColor==='rgb(217, 221, 225)'));
+  await page.evaluate(()=>{const e=document.querySelector('[data-c="fill"]');e.checked=true;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(250);await page.click('#viewSeg button[data-view="preview"]');await sleep(150);
+  check('Fill the Letter page: the page grows to 8.5 in, no trim marks, the boxes keep their size',await page.evaluate(()=>{const p=document.querySelector('#book .pg[data-kind="ch"]');const r=x=>Math.round(x/96*100)/100;return r(p.querySelector('.cv').offsetHeight)===8.5&&p.querySelectorAll('.trim').length===0&&r(p.querySelector('.bx').offsetHeight)===2.55;}));
+  await page.evaluate(()=>{const e=document.querySelector('[data-c="fill"]');e.checked=false;e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(200);await page.click('#viewSeg button[data-view="setup"]');
   /* save, clear, reopen */
   await page.evaluate(()=>{const o=URL.createObjectURL;URL.createObjectURL=b=>{b.text().then(t=>{window.__saved=t;});return o(b);};});
   await page.evaluate(()=>document.querySelector('#saveBtn').click());await sleep(300);const saved=await page.evaluate(()=>window.__saved);const before=await page.evaluate(()=>JSON.stringify(S));
@@ -73,6 +80,10 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   await page.click('#viewSeg button[data-view="backs"]');await page.fill('textarea[data-b="cb"]','## My heading\nFirst line **bold** and __under__.\n\nSecond paragraph with {n} boxes and a {token}.');await sleep(300);
   check('the back text renders the markup and the placeholders',await page.evaluate(()=>{const b=document.querySelector('#book .pg[data-kind="ch"][data-side="back"] .bbody');return !!b&&b.querySelector('h4').textContent==='My heading'&&!!b.querySelector('b')&&!!b.querySelector('u')&&/five boxes and a Heart/.test(b.textContent);}));
   check('the Token Economy back carries the credit line beside the logo',await page.evaluate(()=>{S.meta.credit='Credit here';renderOut();const c=document.querySelector('#book .pg[data-kind="tk"][data-side="back"] .credit');return !!c&&c.textContent.trim()==='Credit here'&&c.querySelector('img').getAttribute('src').startsWith('data:image');}));
+  /* a back too long for 15 pt continues on a second back page, after a blank sheet in a duplex order */
+  await page.evaluate(()=>{window.__tb=S.txt.tb;S.txt.tb=S.txt.tb+'\n\n'+S.txt.te;S.meta.order='duplex';renderAll();});await sleep(300);
+  check('a long back continues on a second back page with a blank sheet before it (duplex 8 -> 10)',await page.evaluate(()=>{const k=[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind+'/'+(p.dataset.side||'x')).join(' ');const body=document.querySelector('#book .pg[data-kind="bd"][data-side="back"] .bbody');return k==='ch/front ch/back tg/front tg/back bd/front bd/back blank/x bd/back tk/front tk/back'&&parseFloat(body.style.fontSize)>=15&&!!document.querySelector('#book .pg.contd .cont');}),await page.evaluate(()=>[...document.querySelectorAll('#book .pg')].map(p=>p.dataset.kind).join(' ')));
+  await page.evaluate(()=>{S.txt.tb=window.__tb;renderAll();});
   /* print orders and page counts */
   await page.evaluate(()=>{document.querySelector('#simBtn').click();});await sleep(600);
   const setOrder=async(o,how)=>{await page.click('#viewSeg button[data-view="setup"]');await page.selectOption('[data-m="order"]',o);if(how!==undefined){await page.evaluate(h=>{const e=document.querySelector('[data-c="pg_how"]');e.checked=h;e.dispatchEvent(new Event('change',{bubbles:true}));},how);}await sleep(200);};
@@ -82,7 +93,8 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
   await setOrder('duplex',true);r=await pdf('duplex-how');check('with the how-to insert: 10 pages',r.startsWith('10 ['),r);
   await setOrder('cards');r=await pdf('cards');check('the card sheets: 3 pages (choices with Other, targets with Other, tokens)',r.startsWith('3 [')&&await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="cards-ch"] .card').length===7&&document.querySelectorAll('#book .pg[data-kind="cards-tg"] .card').length===7&&document.querySelectorAll('#book .pg[data-kind="cards-tk"] .card').length===5),r);
   await setOrder('all',true);r=await pdf('all');check('all: 13 pages (8 book, 2 how-to, 3 card sheets)',r.startsWith('13 ['),r);
-  await setOrder('spare');r=await pdf('spare');check('a sheet of one card: 1 portrait page, 30 large cards',r.startsWith('1 [(8.5, 11.0)')&&await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="spare"] .card').length===30),r);
+  await setOrder('spare');r=await pdf('spare');check('card labels shrink to fit the card rather than clip',await page.evaluate(()=>[...document.querySelectorAll('#book .card .cl')].every(e=>e.scrollWidth<=e.clientWidth+1)));
+  check('a sheet of one card: 1 portrait page, 30 large cards',r.startsWith('1 [(8.5, 11.0)')&&await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="spare"] .card').length===30),r);
   await page.evaluate(()=>{S.meta.sp_size='small';renderOut();});r=await pdf('spare-small');check('the small sheet: 42 cards',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="spare"] .card').length===42));
   await page.evaluate(()=>{S.meta.sp_size='large';S.meta.sp_card='tok';renderOut();});check('a sheet of the token',await page.evaluate(()=>document.querySelectorAll('#book .pg[data-kind="spare"] .card.tok').length===30));
   await setOrder('all',true);await pdf('sim');
@@ -91,11 +103,11 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
 import pymupdf
 d=pymupdf.open('${OUT}/sim.pdf');p=d[0];pm=p.get_pixmap(dpi=72)
 def at(x,y): return pm.pixel(int(x*72),int(y*72))
-print(at(0.9,4.0),at(10.55,1.2),at(10.55,7.5))
-p=d[4];pm=p.get_pixmap(dpi=72);print(at(7.9,3.6))"`).toString().trim();
+print(at(0.55,4.0),at(10.62,1.0),at(10.8,8.3))
+p=d[4];pm=p.get_pixmap(dpi=72);print(at(7.3,3.3))"`).toString().trim();
   const cols=px.match(/\((\d+), (\d+), (\d+)\)/g).map(s=>s.match(/\d+/g).map(Number));
   const near=(c,ref,tol)=>c.every((v,i)=>Math.abs(v-ref[i])<=tol);
-  check('print colours are real: slate frame, green CHOICES tab, white where no tab, green Then box',near(cols[0],[105,140,168],12)&&near(cols[1],[174,213,158],14)&&near(cols[2],[255,255,255],2)&&near(cols[3],[184,224,168],14),px);
+  check('print colours are real: slate band, green CHOICES tab, white below the trim, green Then box',near(cols[0],[105,140,168],12)&&near(cols[1],[174,213,158],14)&&near(cols[2],[255,255,255],2)&&near(cols[3],[184,224,168],14),px);
   /* the simulator fills the book */
   check('the simulator: six choices, six targets, star, QR link, how-to on',await page.evaluate(()=>S.ch.every(o=>o.k)&&S.tg.every(o=>o.k)&&S.tok[0].k==='tk:star'&&!!S.meta.qr&&S.chk.pg_how===true&&S.meta.first==='Sam'));
   for(const v of views){await page.click(`#viewSeg button[data-view="${v}"]`);await sleep(200);await page.screenshot({path:`${OUT}/sim-${v}.png`,fullPage:true});}
