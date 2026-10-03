@@ -5910,3 +5910,8 @@ with the 11 in page and Fill the Letter page given the same sizes
 enlarged by 1.2472 (`.pg.big`). Text autosizing is also switched off
 on the book (`text-size-adjust: 100%`). In Chrome the printed pages
 are pixel for pixel unchanged.
+
+A sheet of one card made from an empty card (an empty Choices or
+Targets slot, or "A card made on the spot" with no label and no
+picture) used to print thirty blank boxes. It now prints each card
+with three write-in lines, like the "Other" card (v21.42c).
