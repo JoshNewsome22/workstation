@@ -5476,3 +5476,23 @@ its wording with it. The same prefs mechanism the shared blocks use
 for display settings is used here; a private window or a cleared
 browser simply means pasting again. Three more checks in
 `qa/ia1-ipad-test.js`.
+
+### The QABF, MAS and PBQ forms from the assessor's own folder (v21.40e)
+
+The assessor's Drive folder for the indirect assessments holds the
+QABF (Rev. B, Vollmer and Matson), the Motivation Assessment Scale
+sheet and the Problem Behavior Questionnaire physical form, each with
+its scoring page. Checked against them: IA-1's QABF key (Attention 1,
+6, 11, 16, 21; Escape 2, 7, 12, 17, 22; Non-social 3, 8, 13, 18, 23;
+Physical 4, 9, 14, 19, 24; Tangible 5, 10, 15, 20, 25) and its X, 0 to
+3 scale; the MAS key (Sensory 1, 5, 9, 13; Escape 2, 6, 10, 14;
+Attention 3, 7, 11, 15; Tangible 4, 8, 12, 16) and its 0 to 6 anchors;
+and the 18-item PBQ key (Adult escape 1, 11, 15; Adult attention 2,
+7, 14; Gain item or activity 3, 10, 18; Peer escape 4, 12, 16; Peer
+attention 5, 8, 13; Setting events 6, 9, 17). All match. The 18-item
+PBQ turned out to be a circulated adaptation with its own profile
+sheet rather than a purely local form, so IA-1 now calls it that
+("key from its profile sheet, no published reliability") instead of
+"local adaptation of the district form". The item wording of all
+three was extracted from those forms into paste-ready files for the
+assessor; the workstation still ships none of it.
