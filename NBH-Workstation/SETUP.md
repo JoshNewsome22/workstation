@@ -6026,3 +6026,48 @@ the student's photo as a grey ball. The causes and the fixes:
 
 `qa/tk1-test.js` prints the turned book with a 1 in square beside it and
 checks that the square prints at 1 in, on 13 portrait pages.
+
+### Photos that face each other, several pictures at once (v21.42i)
+
+- **The two Board photos face each other.** Setup has *The two Board
+  photos face each other*: Flip the right photo (the default, as in the
+  assessor's Brayden board, where the right copy of the photo is
+  mirrored), Flip the left photo, or Neither. A student looking to the
+  right in the photo faces in from the left corner, so the mirrored
+  copy on the right faces back. The Rules-row Board has one photo, at
+  the top right, which follows the same setting. Setup shows the pair
+  as it will print, beside *Re-centre the photo*. The mirroring is a
+  CSS transform on the circle, so the position and size sliders still
+  apply (mirrored on the flipped side), and it prints the same from a
+  computer and on the iPad's turned pages.
+- **Several pictures at once, easier to find.** A blue *Choose all six
+  pictures at once* button now sits above the Choices and Targets
+  tables (the old button below them is kept). The picker's top line
+  has a two-way switch, *One picture* or *Several at once*, in place of
+  the small check box. In Several at once each tapped picture shows its
+  number, the picks go on the cards in that order from the row the
+  picker was opened on, and *Put them on the cards* places them. Once
+  Several at once is switched on in the picker it stays on for the
+  other rows until it is switched off. Upload a photo takes several
+  photos in one go in this mode.
+- **Arrows on each row** move a card (its picture and its label) up or
+  down the six, so the order on the page can be changed without
+  choosing again.
+- **Setup names a picture used twice** among the six choices or the six
+  targets.
+- **Build label.** Setup ends with *This copy of the form: build
+  v21.42i*, and the Preview line carries it too, so it is easy to see
+  that the file on the website is the new one.
+- **Card sheets on the iPad at the 11 in size.** The cards keep the size
+  of the boxes, which at the 11 in page and Fill the Letter page is
+  2.58 in; three rows of two do not leave room for the Other card on a
+  portrait sheet, so the cards now continue on a second sheet ("Card
+  sheet: the choices (2 of 2)") instead of running off the first. The
+  Preview line now says when the pages print turned on portrait sheets.
+- Checks: `qa/tk1-audit.js` now covers 83 settings, among them the
+  turned pages at every size (each sheet within Safari's 7.5 by 10 in
+  printable area, each page inside its sheet) and the left-flipped
+  photos. `qa/tk1-test.js` checks the arrows, the switch, the flip
+  (default, left, neither, printed as a mirror), the duplicate notice
+  and the build label. axe (WCAG 2.1 AA) is clean on every TK-1 view
+  and on the open picker.

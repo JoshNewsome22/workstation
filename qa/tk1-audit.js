@@ -1,4 +1,4 @@
-/* qa/tk1-audit.js: TK-1 rendered in print layout over 73 combinations of settings; every page is checked for text outside its container, collisions, clipped text and pieces off the sheet. "First/Then label overlaps a box" is the text box, not the ink, and is ignored; "texts edited long" is meant to continue on a second back. */
+/* qa/tk1-audit.js: TK-1 rendered in print layout over 83 combinations of settings; every page is checked for text outside its container, collisions, clipped text and pieces off the sheet. "First/Then label overlaps a box" is the text box, not the ink, and is ignored; "texts edited long" is meant to continue on a second back. */
 /* TK-1 audit: every scenario rendered in print layout, every page checked for text outside its container, collisions,
    overflow and pieces off the sheet */
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
@@ -36,6 +36,8 @@ const CHECK=()=>{
     pg.querySelectorAll('.foot').forEach(f=>{if(panel&&!inside(T(f),R(panel),tol))add('foot line outside the panel');});
     pg.querySelectorAll('.ttl,.slot .ca,.slot .cb,.card .cl,.foot,.bttl').forEach(e=>{if(e.scrollWidth>e.clientWidth+2&&getComputedStyle(e).overflow!=='visible')add('text cut off: '+name(e));});
   });
+  /* turned (iPad) sheets: each sheet fits Safari's printable area of a portrait Letter page (7.5 x 10 in) and holds its whole page */
+  document.querySelectorAll('#book .pgw').forEach((w,i)=>{const r=w.getBoundingClientRect(),z=parseFloat(getComputedStyle(document.querySelector('#book')).zoom)||1;if(r.width/z>7.5*96+1||r.height/z>10*96+1)out.push((i+1)+': turned sheet larger than the iPad print area');const c=w.querySelector('.cv');if(c&&!inside(R(c),R(w),2))out.push((i+1)+': turned page sticks out of its sheet');});
   if(document.querySelector('#book .pg.contd'))out.push('a back continues on a second page');
   return out;};
 (async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1366,height:1024}});wire(page,log);
@@ -70,6 +72,11 @@ const CHECK=()=>{
   sc.push({name:'spare small token',js:L+'S.meta.order="spare";S.meta.sp_card="tok";S.meta.sp_size="small";'});
   sc.push({name:'spare own long label',js:L+'S.meta.order="spare";S.meta.sp_card="own";S.meta.sp_label="Quiet hands while waiting";'});
   sc.push({name:'only Board page',js:L+'S.chk.pg_ch=false;S.chk.pg_tg=false;S.chk.pg_tk=false;'});
+  for(const size of ['8.82','11','fill'])for(const lay of ['ft','rules'])sc.push({name:`turned ${size} ${lay}`,js:`S.meta.sheets='turn';S.meta.pagesize='${size}';S.meta.layout='${lay}';S.meta.n='10';ensure();recaps(true);S.meta.qr='https://newsomebh.com/workstation-rps/';`});
+  sc.push({name:'turned cards',js:L+'S.meta.sheets="turn";S.meta.order="cards";'});
+  sc.push({name:'turned spare large',js:L+'S.meta.sheets="turn";S.meta.order="spare";S.meta.sp_card="ch:0";S.meta.sp_size="large";'});
+  sc.push({name:'turned duplex how-to',js:L+'S.meta.sheets="turn";S.meta.order="duplex";S.chk.pg_how=true;'});
+  sc.push({name:'photos flipped left, 11 in',js:'S.meta.pagesize="11";S.meta.ph_flip="l";'});
   sc.push({name:'texts edited long',js:L+'S.txt.tb=S.txt.tb+"\\n\\n"+S.txt.tb;'});
   const all={};
   for(const s of sc){await page.evaluate(([b,js])=>{S=JSON.parse(b);new Function(js)();renderAll();setView('preview');},[base,s.js]);await sleep(250);
