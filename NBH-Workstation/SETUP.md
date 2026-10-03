@@ -4571,3 +4571,109 @@ converted form: the toast shows, no notice is open, no error, print
 page counts as above), and the earlier checks (`all-forms-shell`,
 `case-test`, `ob1-split-test`, `guard-test`, `bip4-test`, `u-test`,
 the form tests) all pass.
+
+## One Dark Band, Chart Colours, Agreement on OB-1, the Case as a Spreadsheet, and Lighter Forms (v21.36)
+
+### One dark band (every form, inside the workstation)
+
+Inside the workstation the screen stacked four stripes before the
+first field: the white header, the slate packet bar, the white crumb
+row and the form's own navy toolbar. The form's toolbar now goes light
+when the form is framed (`html.nbh-framed`, which the bridge sets):
+mist background, navy text, white buttons with the field border, the
+pressed View button navy, the primary button navy. The rules sit in
+the shared `nbh-ui-css` block, so a form opened on its own keeps its
+dark toolbar and nothing in the print changes.
+
+### Chart colours (DA-1)
+
+The demand chart told low-probability from high-probability demands
+by red against green, which eight percent of men cannot separate and a
+grayscale print loses. The bars are now blue (low-probability), orange
+with a white diagonal hatch (high-probability) and light grey (mixed);
+the hatch and the tint hold in grayscale. The rank table's row tints
+follow (pale blue, pale orange) and the legend and the hint name the
+new colours. GC-1's teams (orange, purple, green with a brown
+criterion line) were checked and left.
+
+### Interobserver agreement on OB-1
+
+OB-1 took a typed agreement percentage and nothing computed it. Each
+observation sheet now has "A second observer scored this observation";
+ticked, the count table gains a column pair for observer 2 (student
+and peer counts, `count2`, `peerCount2`) and, when the interval sample
+is on, the strip gains two more rows of the same toggles (`iv2`,
+`peerIv2`). The form computes total count IOA (smaller count over the
+larger, times 100) and interval-by-interval IOA (intervals scored
+alike over intervals sampled), for the student and for the peer where
+both records exist, shows them in a line under the table ("Agreement:
+count 0% (0 and 2); intervals 90% (18 of 20); ..."), and fills the
+Agreement field with the interval IOA when the sample is on, else the
+count IOA, read-only and titled as computed. Unticked, the sheet, the
+print, the CSV and the summary are as before, and the typed field
+stays for an agreement computed elsewhere. The summary says in how
+many observations agreement was computed; the CSV gains four columns
+at the end (observer-2 counts, count IOA, interval IOA); the
+simulation's second observation carries a second record that
+disagrees in two intervals, which also shows the Guide's point: an
+outright count disagreement with 90% interval agreement because the
+behavior is rare. The Guide's new paragraph gives both formulas,
+names scored- and unscored-interval IOA as the stricter checks the
+form does not compute, and cites Cooper, Heron and Heward (2020),
+already on the list. Blank print 6 pages and simulation print 9, as
+before; older files open with the new fields empty.
+
+### The case as a spreadsheet (index.html, the bridge)
+
+**Case as spreadsheet** in the bar (and in the command box) writes
+every open form into one workbook, `CASE_Student_date.xlsx`, which
+Excel and Numbers open: a Case sheet (student, ID, grade, school,
+BCBA, date, and a table of the forms with where each sheet came from),
+then a sheet per open form in packet order. A form with a CSV export
+of its own (24 forms, `#csvBtn`, `#dl-csv` or `#btnCsv`) answers the
+new `csv?` verb: the bridge presses that button with the form's
+messages held (`window.__nbhSilent`, honoured by `nbhUI.toast` and
+`nbhUI.alert`), catches the file through `URL.createObjectURL` and the
+anchor's `click`, hands the text back and restores both; nothing is
+downloaded from the form. Any other form gives its snapshot, written
+as a two-column sheet of every field by name (`flattenSnap`). The
+workbook is written in the shell without a library: `xlsxBytes` builds
+the SpreadsheetML parts (inline strings, numbers as numbers, column
+widths from the content) and `zipStore` packs them as a stored zip
+with CRC-32. `parseCsv` reads quoted fields, doubled quotes and
+newlines inside quotes.
+
+### Lighter forms: the letterhead image once per file
+
+Every form carried the same 54 KB letterhead image once in the
+masthead and once in every printed page's head: fourteen copies in
+TD-1 (765 KB of a 1.3 MB file), 157 across the set, 8.6 MB in all.
+The image now sits once per form in `<script id="nbh-logo">` in the
+head (`window.NBH_LOGO`); the `nbh-logo` and `nbh-print-logo` images
+carry `data-nbh-logo` and no `src`, and the script fills them at load
+and again before printing. The master print, which takes each form's
+sheet from the live page, still carries the image in every section.
+TD-1 went from 1,305 KB to 598 KB, PA-1 from 1,270 KB to 727 KB, EA-1
+from 1,054 KB to 620 KB, and the 42 forms with the index from 20.6 MB
+to 14.6 MB. The one-file editions stay at 5.6 MB: their packing already
+compressed the repeated image to nothing, so the saving is in the
+folder editions and in what the browser parses per form.
+`tools/build-rps.py` now expects the logo in 43 places (once per form,
+once in the index). `$S/logo/dedupe.py` did it and is idempotent;
+`new-form.py` copies the script from the template's head, so a rebuilt
+parts form gets it.
+
+The walkthrough engines, which the earlier note blamed for the file
+sizes, are 60 to 146 KB per form and differ between forms (PA-1's
+carries extras), so they were left in place; the image was the weight.
+
+### Checks
+
+`qa/logo-test.js` (every logo image filled on CF-1, TD-1 and SM-1, the
+one data URI per file, the master print section with its image),
+`qa/xlsx-test.js` (six forms with simulations, three with CSV exports
+and three without, into one workbook; the zip verified and each sheet
+parsed; the forms' helpers restored and no download fired from them;
+the bar button downloads `CASE_Sample_Student_date.xlsx`), the DA-1 and
+OB-1 form tests, the shell screenshots of CF-1, SM-1 and TD-1 with the
+light toolbar, and the earlier checks all pass.
