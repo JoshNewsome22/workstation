@@ -1222,7 +1222,8 @@ $('#pClient').addEventListener('change',()=>{if(packet().client.trim()&&!state.b
      partner in OPEN_PAIR (TK-1 opens TE-1, TE-1 opens TK-1) and is in ALL, and at most once a second per asking
      form. Anything else is ignored and gets no answer. While a case or an autosave is being restored it answers
      ok:false, why:'busy'.
-   - beside, with one form showing, puts the asker and its partner side by side; with two or three showing, the
+   - beside, with one form showing, puts the asker and its partner side by side (700 px wide or more; on a phone
+     the partner simply opens); with two or three showing, the
      partner takes a column the way openForm gives one (with three, the column next to the asker's, never the
      asker's own). An older shell does not answer, and the form tells the user to pick the form from the list. */
 function relayFrom(src){
@@ -1259,7 +1260,9 @@ function openFor(ev,d){
   /* three columns showing: the partner takes the column next to the asker, not the asker's own */
   if(splitOn()&&!state.split.includes(want)&&state.split.length>=3){const k=state.split.indexOf(from);if(k>=0)state.cur=state.split[k<state.split.length-1?k+1:k-1];}
   openForm(want,true);
-  if(d.beside&&!splitOn())setSplit([from,want]);
+  /* side by side only where there is room: on a phone the partner opens in place of the asker */
+  let wide=true;try{wide=window.matchMedia('(min-width:700px)').matches;}catch(e){}
+  if(d.beside&&!splitOn()&&wide)setSplit([from,want]);
   relayNote(from,want,'opened');reply({ok:true});
 }
 
@@ -1368,9 +1371,10 @@ window.addEventListener('message',ev=>{
     if(state.cur===d.id)$('#crumbStatus').textContent=d.status.filled+' fields filled';
   } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'||d.nbh==='csv-out'){
     if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;noteWho(d.id,d.who);renderRail();}
-    /* answered in the order asked, per form and per kind of answer */
+    /* answered in the order asked, per form and per kind of answer. v21.44: only by the frame that was asked, so
+       one form cannot answer for another (the relay hands a snapshot on to the asking form as the partner's) */
     const q=pending[d.id+'|'+d.nbh];
-    if(q&&q.length)q.shift()(d);
+    if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}
   }
 });
 setInterval(()=>{Object.entries(state.frames).forEach(([id,fr])=>ask(fr,'status'));},4000);
@@ -2457,6 +2461,7 @@ async function grab(id,verb,extra,ms,frame){
   return await new Promise(res=>{
     let done=false;
     const fin=v=>{ if(done)return; done=true; const q=pending[key]||[]; const i=q.indexOf(fin); if(i>=0)q.splice(i,1); res(v); };
+    try{fin.src=fr.contentWindow||null;}catch(e){fin.src=null;}
     (pending[key]=pending[key]||[]).push(fin);
     ask(fr,verb,extra);
     setTimeout(()=>fin(null),ms||5000);

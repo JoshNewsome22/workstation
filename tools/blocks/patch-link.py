@@ -4,7 +4,11 @@ as <script id="nbh-link">. Unlike patch-case.py it REPLACES an existing copy eve
 nbh-link.js changes; TK-1 gets the same file through tools/forms/TK-1/build.sh. The script's text is the core,
 byte for byte. A new copy goes before the form's first <script> after </main>.
 usage: python3 tools/blocks/patch-link.py"""
-import os, re
+import os, re, sys
+if sys.argv[1:]:
+    if sys.argv[1:] in (['-h'], ['--help']):
+        print(__doc__); sys.exit(0)
+    sys.exit('patch-link.py takes no arguments (it got ' + ' '.join(sys.argv[1:]) + '); see --help')
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 CORE = os.path.join(ROOT, 'tools', 'blocks', 'nbh-link.js')
 FORMS = ['NBH-Workstation/TE-1_Token-Economy-Designer_v2026-09.html']

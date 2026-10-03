@@ -9,7 +9,7 @@ const J=JSON.stringify;
 async function shell(br,viewport){
   const ctx=await br.newContext({viewport});await ctx.addInitScript(()=>{window.print=function(){};});
   const page=await ctx.newPage();const log=[];wire(page,log);
-  await page.goto(BASE+'/NBH-Workstation/index.html');await page.waitForFunction(()=>typeof openForm==='function'&&typeof openFor==='function');await sleep(600);
+  await page.goto(BASE+'/NBH-Workstation/'+(process.env.LINK_SHELL_PAGE||'index.html'));await page.waitForFunction(()=>typeof openForm==='function'&&typeof openFor==='function');await sleep(600);
   return {ctx,page,log};}
 async function frameOf(page,id){const file=await page.evaluate(i=>(ALL.find(f=>f[0]===i)||[])[2]||'',id);return page.frames().find(f=>f.url().includes(file));}
 async function open(page,id){await page.evaluate(i=>openForm(i),id);await page.waitForFunction(i=>!!state.status[i],id,{timeout:20000});await sleep(300);return frameOf(page,id);}
@@ -128,22 +128,43 @@ const errs=log=>log.filter(l=>l.type==='error'||l.type==='pageerror');
   ok(!errs(log).length,'17 no console errors: '+J(errs(log)).slice(0,300));
   await ctx.close();}
 
+ /* ---------- 18b: a reply to the relay's snapshot read counts only from the frame that was asked ---------- */
+ {const {ctx,page,log}=await shell(br,{width:1440,height:900});
+  const tk=await open(page,'TK-1');const sm=await open(page,'SM-1');const te=await open(page,'TE-1');
+  /* the shell's snapshot read of TK-1 is held back for 9 s, so the only snapshot reply for TK-1 the shell sees is SM-1's */
+  await page.evaluate(()=>{const a=ask;ask=function(fr,what,extra){if(what==='snapshot'&&fr===state.frames['TK-1']&&window.__hold)return;return a(fr,what,extra);};window.__hold=1;setTimeout(()=>{window.__hold=0;},9000);});
+  const forged=JSON.stringify({form:'TK-1',rev:'2026-10',S:{meta:{client:'Forged',lk:JSON.stringify({v:1,on:1,base:{},board:{n:'9',tok:'Coin',term:'none',last:'',card:0,cardLabel:'Forged',ch:['Forged card','','','','',''],tg:['Forged','','','','','']}})}}});
+  await te.evaluate(()=>{window.__ans=null;const h=ev=>{const d=ev.data;if(d&&d.nbh==='answer'){removeEventListener('message',h);window.__ans={ok:d.ok,own:d.snap&&typeof d.snap.own==='string'?d.snap.own.slice(0,4000):''};}};
+    addEventListener('message',h);window.parent.postMessage({nbh:'ask',want:'TK-1'},'*');});
+  await sm.evaluate(f=>{window.parent.postMessage({nbh:'snapshot',id:'TK-1',title:'x',snap:{total:1,data:{},own:f}},'*');},forged);   /* SM-1 answers for TK-1 */
+  await te.waitForFunction(()=>!!window.__ans,null,{timeout:14000}).catch(()=>{});
+  const ans=await te.evaluate(()=>window.__ans);
+  ok(ans&&ans.ok===false&&!/Forged/.test(ans.own)&&J(await logSince(page,0)).includes('"did":"no answer"'),'18b a snapshot posted by SM-1 for TK-1 is not passed on as TK-1\'s (the read, unanswered by TK-1, ends as no answer): '+J(ans&&{ok:ans.ok,forged:/Forged/.test(ans.own)}));
+  ok(!errs(log).length,'18b no console errors '+J(errs(log)).slice(0,300));
+  await ctx.close();}
+
  /* ---------- 20: phone width ---------- */
  {const {ctx,page,log}=await shell(br,{width:390,height:844});
   const te=await open(page,'TE-1');
   const over=()=>page.evaluate(()=>({doc:document.documentElement.scrollWidth,body:document.body.scrollWidth,w:window.innerWidth}));
   let o=await over();ok(o.doc<=o.w&&o.body<=o.w,'20 390 px, TE-1 open: no sideways page scroll '+J(o));
-  await post(te,[{nbh:'open',want:'TK-1',beside:true}]);
-  await page.waitForFunction(()=>state.frames['TK-1']&&state.frames['TK-1'].dataset.loaded==='1',null,{timeout:20000}).catch(()=>{});
-  await page.waitForFunction(()=>!!state.status['TK-1'],null,{timeout:20000}).catch(()=>{});await sleep(800);
-  ok(J(await page.evaluate(()=>state.split))===J(['TE-1','TK-1']),'20 390 px: the split is made');
-  o=await over();ok(o.doc<=o.w&&o.body<=o.w,'20 390 px, side by side: no sideways page scroll '+J(o));
-  /* the link panels, where a form already carries one */
-  for(const id of ['TE-1','TK-1']){const fr=await frameOf(page,id);
+  /* the link panels, where a form already carries one, each while it is the form showing */
+  const panelCheck=async id=>{const fr=await frameOf(page,id);
     const p=fr?await fr.evaluate(()=>{const el=document.getElementById('lkPanel');const d=document.documentElement;
       return {panel:!!el,pw:el?el.scrollWidth:0,pc:el?el.clientWidth:0,doc:d.scrollWidth,w:d.clientWidth};}):null;
     if(p&&p.panel)ok(p.pw<=p.pc+1&&p.doc<=p.w+1,'20 390 px: Form '+id+"'s link panel does not scroll sideways "+J(p));
-    else console.log('note '+id+' carries no #lkPanel yet '+J(p));}
+    else console.log('note '+id+' carries no #lkPanel yet '+J(p));};
+  await te.evaluate(()=>{const b=document.querySelector('#lkPanel [data-lk="on"]');if(b)b.click();});await sleep(400);
+  await panelCheck('TE-1');
+  /* on a phone, Open beside does not make a split (two columns of 195 px leave no room for the table): the partner
+     opens in place of the asker */
+  await post(te,[{nbh:'open',want:'TK-1',beside:true}]);
+  await page.waitForFunction(()=>state.frames['TK-1']&&state.frames['TK-1'].dataset.loaded==='1',null,{timeout:20000}).catch(()=>{});
+  await page.waitForFunction(()=>!!state.status['TK-1'],null,{timeout:20000}).catch(()=>{});await sleep(800);
+  const sp=await page.evaluate(()=>({split:state.split,cur:state.cur,tk:!!state.frames['TK-1']}));
+  ok(sp.split.length<2&&sp.cur==='TK-1'&&sp.tk,'20 390 px: Open beside opens Form TK-1 without a split '+J(sp));
+  o=await over();ok(o.doc<=o.w&&o.body<=o.w,'20 390 px, partner open: no sideways page scroll '+J(o));
+  await panelCheck('TK-1');
   ok(!errs(log).length,'20 390 px: no console errors '+J(errs(log)).slice(0,300));
   const warns=log.filter(l=>l.type==='warning');if(warns.length)console.log('note warnings',J(warns).slice(0,300));
   await ctx.close();}
