@@ -179,7 +179,9 @@ function stripHtml(){const d=strip();const per=Math.ceil(d.n/d.rows);let h='<div
   return h+'</div>';}
 function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.poss==='bare'&&/s$/i.test(f)?'’':'’s';const st=String(S.meta.setting||'').trim();
   return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(S.meta.layout==='rules'&&st?esc(st)+' ':'')+'Chart';}
-function photoHtml(side){const o=S.photo[0];const inner=has(o)?pic(o,''):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
+/* the student's photo is cropped to the circle at the position and size set on Setup (a portrait's face sits above its middle, so it starts at 35 % down) */
+function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Math.max(0,Math.min(100,num(S.meta.ph_y)??35)),z=Math.max(100,Math.min(300,num(S.meta.ph_z)??100))/100;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')';}
+function photoHtml(side){const o=S.photo[0];const inner=has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:S.meta.avatar||'av:boy'},'');return '<div class="bd-photo '+side+'">'+inner+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
 function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
@@ -250,6 +252,9 @@ function renderOut(){
   const n=measured(()=>{fitAll();paginate($('#book'),/^(duplex|all)$/.test(order));paginate($('#bkOut'),false);return relabel($('#book'));});
   const size=mode==='fill'?'the full 8.5 in height':mode==='11'?'the 11 x 7.26 in page centred with trim marks':'the 8.82 x 5.82 in page centred with trim marks';
   $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':' landscape, '+size)+'; print at 100%.';
+  const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
+  const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
+  const lk=$('#phLook');if(lk)lk.innerHTML=has(S.photo[0])&&S.photo[0].ph?pic(S.photo[0],'',photoFit()):'';if(lk)lk.style.display=lk.innerHTML?'inline-block':'none';
   syncState();
 }
 /* the fits need the pages laid out: the sections that hold a book are shown off screen while measuring when their view is not the current one */
@@ -268,6 +273,9 @@ function fitAll(){
   $$('.rule .rl').forEach(el=>{if(!el.clientHeight)return;el.style.fontSize='';el.style.maxHeight='2.1em';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;const lo=fs*.77;while(el.scrollHeight>el.clientHeight+1&&fs>lo&&g++<20){fs-=1;el.style.fontSize=fs+'px';}if(el.scrollHeight>el.clientHeight+1)el.style.maxHeight='';});
 }
 window.addEventListener('beforeprint',fitAll);
+/* after the sheet of one card has printed, the print order goes back to what it was, so the Preview shows the whole book again */
+function restoreOrder(){if(S.meta.order==='spare'&&S.meta.prevOrder){S.meta.order=S.meta.prevOrder;delete S.meta.prevOrder;renderAll();}}
+window.addEventListener('afterprint',()=>setTimeout(restoreOrder,300));
 
 /* ---------------- events ---------------- */
 let tOut=0;function renderOutSoon(){clearTimeout(tOut);tOut=setTimeout(renderOut,180);}
@@ -279,13 +287,15 @@ document.addEventListener('input',e=>{const el=e.target;
 document.addEventListener('change',e=>{const el=e.target;if(el.id==='tkState')return;
   if(el.dataset.c!==undefined){S.chk[el.dataset.c]=!!el.checked;renderOut();return;}
   if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n'){if(S.meta.n!==el.value){S.meta.n=el.value;ensure();recaps(true);renderAll();}return;}S.meta[k]=el.value;if(k==='sp_card'||k==='layout'||k==='avatar')renderTbls();renderOut();}});
+$('#wholeBtn').addEventListener('click',()=>{S.meta.order='all';delete S.meta.prevOrder;renderAll();});
+$('#phReset').addEventListener('click',()=>{S.meta.ph_x='50';S.meta.ph_y='35';S.meta.ph_z='100';renderAll();});
 $('#capReset').addEventListener('click',()=>{recaps(true);renderAll();});
 $('#colReset').addEventListener('click',()=>{Object.assign(S.meta,DEF);renderAll();});
 $('#bkReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default text of the four backs?\nYour edits to them are replaced.',{ok:'Restore',danger:true})){['tb','cb','te','tt'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
 $('#howReset').addEventListener('click',async()=>{if(await nbhUI.confirm('Restore the default how-to text?\nYour edits to the three steps are replaced.',{ok:'Restore',danger:true})){['h1','h2','h3'].forEach(k=>{S.txt[k]=TXT0[k];});renderAll();}});
 $('#chClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six choices?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.ch=Array.from({length:6},()=>cello());renderAll();}});
 $('#tgClear').addEventListener('click',async()=>{if(await nbhUI.confirm('Empty the six targets?\nEvery picture and label is removed.',{ok:'Empty',danger:true})){S.tg=Array.from({length:6},()=>cello());renderAll();}});
-function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
+function spare(kind,sel){S.meta.sp_card=kind+':'+sel.value;if(S.meta.order!=='spare')S.meta.prevOrder=S.meta.order||'all';S.meta.order='spare';renderAll();setView('preview');setTimeout(()=>{fitAll();window.print();},80);}
 $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgSpare').addEventListener('click',()=>spare('tg',$('#tgSpareSel')));
 
 /* ---------------- meta + render ---------------- */
