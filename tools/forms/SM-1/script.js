@@ -419,7 +419,12 @@ function renderRecord(){
     else if(met<2)rules.push(['no','Goal met on '+met+' of the last 5 days: lower the goal to a level the student has reached, re-check the reward with a brief MSWO, and look at fidelity before anything else.']);
     else rules.push(['mid','Goal met on '+met+' of the last 5 days: hold the goal.']);
   }else rules.push(['mid','Fewer than five days since self-rating began: no decision yet.']);
-  if(agm!=null){
+  /* agreement is judged only where the system has a teacher match: Self & Match, cued intervals, the interlocking
+     session, and the rubric with the teacher matching; a contract, the expectations sheet, check-in/check-out and the
+     performance count have no second rating */
+  const matched=['match','interval','interlock'].includes(S.sys)||(S.sys==='rubric'&&!!S.chk.rubmatch);
+  if(!matched){}
+  else if(agm!=null){
     if(agm<80)rules.push(['no','Agreement '+pct(agm)+' over the last five days: move back one phase on the matching ladder and re-run the rating practice.']);
     else if(agm>=90&&met>=4)rules.push(['ok','Agreement '+pct(agm)+' and the goal met on 4 of 5: the next phase of the matching ladder is due.']);
     else rules.push(['mid','Agreement '+pct(agm)+': stay on the current phase.']);

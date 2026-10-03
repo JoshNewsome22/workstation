@@ -458,7 +458,7 @@ td input,td select{max-width:100%}
   </div>
 
   <h3>Candidate Register</h3>
-  <p class="small">Transfer the checked items and any others into this register. Give each a short label (used as column headers in Tabs 4&ndash;5). Rate the evidence so far as weak / moderate / strong; this is the prior, before elimination begins.</p>
+  <p class="small">Transfer the checked items and any others into this register. Give each a short label; it is copied to the column headers of the Tab 4 ledger (rows 1&ndash;8) and to the candidate list of the Tab 5 joint-method table (rows 1&ndash;6) while those are blank. Rate the evidence so far as weak / moderate / strong; this is the prior, before elimination begins.</p>
   <div class="tblwrap runs" tabindex="0" role="region" aria-label="Candidate register"><table id="registerTbl">
     <thead><tr><th style="width:5%">#</th><th style="width:22%">Label (short)</th><th style="width:15%">Class</th><th>Definition: what counts as "present"</th><th style="width:15%">Source of evidence</th><th style="width:11%">Prior</th></tr></thead>
     <tbody></tbody>
@@ -828,6 +828,14 @@ td input,td select{max-width:100%}
     tr.lastElementChild.innerHTML=[0,1,2].map(v=>`<label class="rad"><input type="radio" name="hill${i}" value="${v}"> ${v}</label>`).join('');
   });
 
+  /* v21.37: the register's labels head the agreement ledger (V1 to V8) and list the joint-method candidates (rows 1 to 6)
+     while those cells are blank or still carry the label as last copied; a header typed by hand is left alone */
+  const regLabels=()=>$$('#registerTbl tbody tr').map(r=>r.querySelector('td:nth-child(2) input'));
+  function mirrorLabels(){const heads=$$('#agreeTbl thead th.v input'),joint=$$('#jointTbl tbody tr').map(r=>r.querySelector('td:first-child input'));
+    regLabels().forEach((inp,i)=>{const v=inp.value.trim(),was=inp.dataset.was||'';[heads[i],joint[i]].forEach(t=>{if(t&&(t.value.trim()===''||t.value===was))t.value=v;});inp.dataset.was=v;});}
+  const syncLabels=()=>regLabels().forEach(inp=>{inp.dataset.was=inp.value.trim();});
+  $('#registerTbl').addEventListener('input',e=>{if(e.target.matches('td:nth-child(2) input'))mirrorLabels();});
+
   /* tabs */
   const tabs=$$('.tab');
   function show(id){
@@ -1003,7 +1011,7 @@ td input,td select{max-width:100%}
 
   /* save / load / clear */
   const fields=()=>$$('input:not([type=file]):not([type=hidden]),select,textarea');
-  function recalcAll(){calcAgreement();calcCV();calcMatch();calcCon();calcACH();calcHill();}
+  function recalcAll(){syncLabels();calcAgreement();calcCV();calcMatch();calcCon();calcACH();calcHill();}
   /* v21.16 audit (F9, F10, F2a): the one way to empty the record, used by Clear all, Open data and Load simulation.
      Every field returns to its default, the hypothesis headers of the matrix included (Clear all used to skip
      them, so a previous case's hypotheses stayed on screen and in the next saved file). */
