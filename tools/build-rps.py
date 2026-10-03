@@ -22,11 +22,11 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 
 # (old, new, how many times it must be replaced across all files)
 EXPECT = [
-  (old_logo, new_logo, 44),    # v21.36: once per form (the nbh-logo script) and once in index.html
+  (old_logo, new_logo, 45),    # v21.36: once per form (the nbh-logo script) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 161),   # the masthead and print-head images of the 43 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41) + the index + the packet cover
-  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 44),
-  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 45),   # the 43 forms, index.html and respond.html (v21.39)
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 163),   # the masthead and print-head images of the 43 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41) + the index + the packet cover
+  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 45),
+  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 46),   # the 43 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),

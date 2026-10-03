@@ -6,10 +6,11 @@ Paths below are from the repository root. The test server the checks expect:
 
 ## Layout
 
-- `tools/forms/<ID>/` — the source parts of the nine forms built from parts
-  (CN-1, DA-1, GC-1, HD-1, SA-1, SI-1, SM-1, SR-1, VS-1): `meta.json`, `toolbar.html`,
+- `tools/forms/<ID>/` — the source parts of the eleven forms built from parts
+  (CN-1, DA-1, GC-1, HD-1, IM-1, SA-1, SI-1, SM-1, SR-1, TK-1, VS-1): `meta.json`, `toolbar.html`,
   `own.css`, `body.html`, `script.js` (SM-1 and VS-1 keep `script-main.js`, copied to
-  `script.js`). Never edit the built file of one of these forms; edit the parts and rebuild.
+  `script.js`; TK-1 keeps `script-main.js` and its `script.js` is the vendored QR encoder
+  `tools/vendor/qrcode-generator/qrcode.js`, licence header kept, followed by `script-main.js`). Never edit the built file of one of these forms; edit the parts and rebuild.
 - `tools/new-form.py` — assembles a form from CF-1 (the template: its head, generic
   stylesheet, brand system, masthead, print head and shared tail blocks) and a parts folder.
 - `tools/polish-one.py` — the post-build polish for one rebuilt form.
@@ -45,7 +46,7 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 
     python3 tools/blocks/patch-ui.py tools/blocks/nbh-ui.html NBH-Workstation/[A-Z]*.html
 
-The glob `[A-Z]*.html` is the 43 forms without `index.html`. Each patcher prints
+The glob `[A-Z]*.html` is the 44 forms without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
 

@@ -1,0 +1,151 @@
+  <style id="tkPage">@media print{@page{size:letter landscape;margin:0;@top-left{content:none}@top-right{content:none}@bottom-left{content:none}@bottom-right{content:none}}@page tkport{size:letter portrait;margin:0}}</style>
+
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">The Student and the Book</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client" name="m.client"></div>
+      <div><label>Student ID</label><input data-m="sid" name="m.sid"></div>
+      <div><label>Grade</label><input data-m="grade" name="m.grade"></div>
+      <div><label>School or setting</label><input data-m="site" name="m.site"></div>
+      <div><label>Case BCBA</label><input data-m="bcba" name="m.bcba"></div>
+      <div><label>First name, as it prints on the Board (blank prints a line to write on)</label><input data-m="first" name="m.first" placeholder="Sam"></div>
+      <div><label>Possessive</label><select data-m="poss" name="m.poss"><option value="s">&rsquo;s (Sam&rsquo;s Chart)</option><option value="bare">bare apostrophe (James&rsquo; Chart)</option></select></div>
+      <div><label>Setting word in the Board title (Rules row layout; blank gives &ldquo;&rsquo;s Chart&rdquo;)</label><input data-m="setting" name="m.setting" placeholder="Bus"></div>
+      <div><label>Board layout</label><select data-m="layout" name="m.layout"><option value="ft">First-Then (two boxes)</option><option value="rules">Rules row (a row of targets and an Earn box)</option></select></div>
+      <div><label>Student photo (round, in the top corners of the Board)</label><div class="pick" data-r="photo" data-i="0" id="phPick"></div></div>
+      <div><label>When there is no photo</label><select data-m="avatar" name="m.avatar"><option value="av:boy">Boy avatar</option><option value="av:girl">Girl avatar</option><option value="av:child">Neutral child avatar</option><option value="student">Library: Student</option><option value="me">Library: Me</option></select></div>
+    </div>
+    <div id="setupVerdict"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Tokens</h2>
+    <div class="fieldgrid">
+      <div><label>Tokens to earn (slots on the Board)</label><select data-m="n" name="m.n"><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></div>
+      <div><label>Token picture</label><div class="pick" data-r="tok" data-i="0" id="tokPick"></div></div>
+      <div><label>Token name (in the captions: &ldquo;Your First Star!&rdquo;)</label><input data-m="tokname" name="m.tokname" placeholder="Star"></div>
+    </div>
+    <p class="hint">The captions are written for the count: &ldquo;Your First Star!&rdquo;, &ldquo;Keep Going!&rdquo;, then &ldquo;Just <i>k</i> More!&rdquo; down to one. Edit any of them; changing the count or the token name writes them again.</p>
+    <div class="grid-wrap"><table class="rt" id="capTbl"><thead><tr><th style="width:8%">Slot</th><th>Above the slot</th><th>Below the slot</th></tr></thead><tbody></tbody></table></div>
+    <div class="tools"><button class="tool" id="capReset">Write the captions again</button></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Colours, Backgrounds, QR Code and Credit</h2>
+    <div class="fieldgrid">
+      <div><label>Frame</label><input type="color" data-m="c_frame" name="m.c_frame" value="#698ca8"></div>
+      <div><label>CHOICES tab</label><input type="color" data-m="c_ch" name="m.c_ch" value="#aed59e"></div>
+      <div><label>TARGETS tab</label><input type="color" data-m="c_tg" name="m.c_tg" value="#e4c6e8"></div>
+      <div><label>BOARD tab</label><input type="color" data-m="c_bd" name="m.c_bd" value="#7e9cb6"></div>
+      <div><label>TOKENS tab</label><input type="color" data-m="c_tk" name="m.c_tk" value="#f6e27a"></div>
+      <div><label>&nbsp;</label><button class="tool" id="colReset" type="button">Colours as the samples</button></div>
+      <div><label>Background picture behind the Choices boxes (optional)</label><div class="pick" data-r="bg" data-i="0" id="bgChPick"></div></div>
+      <div><label>Background picture behind the Targets boxes (optional)</label><div class="pick" data-r="bg" data-i="1" id="bgTgPick"></div></div>
+      <div><label>Background opacity: <span id="wmPct">12</span>%</label><input type="range" min="5" max="25" step="1" data-m="wm" name="m.wm" value="12"></div>
+      <div><label>QR code link (optional; blank prints no code)</label><input data-m="qr" name="m.qr" placeholder="https://" inputmode="url"></div>
+      <div><label>Credit line (optional, on the Token Economy back)</label><input data-m="credit" name="m.credit" placeholder=""></div>
+    </div>
+
+    <h2 class="nbh-band" style="margin-top:18px">What to Print, and in What Order</h2>
+    <div class="ckrow">
+      <label class="ck"><input type="checkbox" data-c="pg_ch" name="c.pg_ch" checked> Choices page</label>
+      <label class="ck"><input type="checkbox" data-c="pg_tg" name="c.pg_tg" checked> Targets page</label>
+      <label class="ck"><input type="checkbox" data-c="pg_bd" name="c.pg_bd" checked> Board page</label>
+      <label class="ck"><input type="checkbox" data-c="pg_tk" name="c.pg_tk" checked> Tokens page</label>
+      <label class="ck"><input type="checkbox" data-c="pg_how" name="c.pg_how"> How-to insert (two pages after the backs)</label>
+    </div>
+    <div class="fieldgrid">
+      <div><label>Print order</label><select data-m="order" name="m.order"><option value="fronts">Fronts only (one book page per sheet)</option><option value="duplex">Fronts and backs for duplex (front 1, back 1, front 2, back 2 &hellip;)</option><option value="cards">The card sheets only</option><option value="all" selected>All: fronts and backs, the how-to insert if ticked, then the card sheets</option><option value="spare">A sheet of one card (spares)</option></select></div>
+      <div><label>Card sheets to include</label><div class="ckrow"><label class="ck"><input type="checkbox" data-c="cs_ch" name="c.cs_ch" checked> Choices</label><label class="ck"><input type="checkbox" data-c="cs_tg" name="c.cs_tg" checked> Targets</label><label class="ck"><input type="checkbox" data-c="cs_tk" name="c.cs_tk" checked> Tokens</label></div></div>
+      <div><label>Sheet of one card: which card</label><select data-m="sp_card" name="m.sp_card" id="spCard"></select></div>
+      <div><label>Sheet of one card: size</label><select data-m="sp_size" name="m.sp_size"><option value="large">Large, 5 across (about 1.5 in)</option><option value="small">Small, 6 across (about 1.25 in)</option></select></div>
+      <div><label>Sheet of one card: a card made on the spot (label; picture below)</label><input data-m="sp_label" name="m.sp_label" placeholder="label"></div>
+      <div><label>&nbsp;</label><div class="pick" data-r="sp" data-i="0" id="spPick"></div></div>
+    </div>
+    <div class="instr">
+      <p><b>Duplex.</b> The backs are the reverse of the fronts, so print the duplex order on a printer set to <b>two-sided, flip on the long edge</b> (landscape sheets, bound on the short edge; some drivers call it &ldquo;long-edge binding&rdquo;). Test one sheet first: the front&rsquo;s tab is on the right and its back&rsquo;s tab comes out on the left of the same sheet, at the same height. If the back comes out upside down, the driver is flipping on the short edge.</p>
+      <p><b>Scale.</b> Print at 100%, not &ldquo;fit to page&rdquo;: the cards are cut to sit exactly in the boxes. The page keeps a 0.45 in binding margin on the left of every front and the right of every back.</p>
+      <p><b>Spares.</b> The sheet of one card prints a portrait Letter page of that card repeated with cut lines, 5 across at about 1.5 in or 6 across at about 1.25 in: the smaller sizes are the samples&rsquo; own; a Letter sheet holds 6 or 7 rows of them.</p>
+    </div>
+  </section>
+
+  <!-- ===================== CHOICES ===================== -->
+  <section class="only-choices">
+    <h2 class="nbh-band">Choices: What Are You Earning?</h2>
+    <p class="hint">Six picture cards of the student&rsquo;s preferred items. They park on the Choices page; the student picks one and it moves to the Then box on the Board. The reinforcer menu from Form PA-1 fills an empty list through &ldquo;From the case&rdquo; on the toolbar. A card&rsquo;s label prints above its picture, underlined; the picture&rsquo;s own name is used when the label is blank. The card sheet adds an &ldquo;Other&rdquo; card with lines to write on.</p>
+    <div class="grid-wrap"><table class="rt" id="chTbl"><thead><tr><th style="width:6%">#</th><th style="width:30%">Picture</th><th>Label on the card</th></tr></thead><tbody></tbody></table></div>
+    <div class="tools"><button class="tool" id="chClear">Empty the six</button><button class="tool" id="chSpare">Print a sheet of this card</button><select id="chSpareSel" aria-label="Which choice card"></select></div>
+    <div class="out tkPrev" id="chOut"></div>
+  </section>
+
+  <!-- ===================== TARGETS ===================== -->
+  <section class="only-targets">
+    <h2 class="nbh-band">Targets: First, Teaching Targets</h2>
+    <p class="hint">Six picture cards of the skills or replacement behaviors being taught; the chosen one moves to the First box on the Board (or the first ones with pictures form the row of a Rules-row Board). The case&rsquo;s replacement behaviors and acquisition objectives fill an empty list through &ldquo;From the case&rdquo;. Labels print above the picture, not underlined, as in the samples.</p>
+    <div class="grid-wrap"><table class="rt" id="tgTbl"><thead><tr><th style="width:6%">#</th><th style="width:30%">Picture</th><th>Label on the card</th></tr></thead><tbody></tbody></table></div>
+    <div class="tools"><button class="tool" id="tgClear">Empty the six</button><button class="tool" id="tgSpare">Print a sheet of this card</button><select id="tgSpareSel" aria-label="Which target card"></select></div>
+    <div class="out tkPrev" id="tgOut"></div>
+  </section>
+
+  <!-- ===================== BOARD ===================== -->
+  <section class="only-board">
+    <h2 class="nbh-band">The Board</h2>
+    <p class="hint">The student&rsquo;s photo in both top corners (one, at the top right, on the Rules-row layout), &ldquo;First&rdquo; over a grey box and &ldquo;Then&rdquo; over a green box, and the token slots along the bottom. Leave the First and Then boxes empty for the cards, or choose a picture to print in a box as a fixed preset (the picture then prints as a card inside the box).</p>
+    <div class="fieldgrid">
+      <div><label>First (preset, optional)</label><div class="pick" data-r="ft" data-i="0" id="ftFirst"></div></div>
+      <div><label>First label</label><input data-r="ft" data-i="0" data-f="l" name="ft.0.l" placeholder="the picture's name"></div>
+      <div><label>Then (preset, optional)</label><div class="pick" data-r="ft" data-i="1" id="ftThen"></div></div>
+      <div><label>Then label</label><input data-r="ft" data-i="1" data-f="l" name="ft.1.l" placeholder="the picture's name"></div>
+    </div>
+    <div class="out tkPrev" id="bdOut"></div>
+  </section>
+
+  <!-- ===================== BACKS ===================== -->
+  <section class="only-backs">
+    <h2 class="nbh-band">The Instruction Backs</h2>
+    <p class="hint">The text on the back of each page, in the assessor&rsquo;s words. Markup: <code>**bold**</code>, <code>*italic*</code>, <code>__underlined__</code>, <code>## a centred heading</code>; a blank line starts a paragraph; <code>{n}</code> prints the token count in words and <code>{token}</code>, <code>{tokens}</code> and <code>{TOKENS}</code> the token&rsquo;s name. Long text is set smaller to fit the page.</p>
+    <div class="fieldgrid" style="grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr))">
+      <div><label>Back of the Choices page: Choice Board</label><textarea class="bk" data-b="cb" name="b.cb" spellcheck="true"></textarea></div>
+      <div><label>Back of the Targets page: Teaching Targets</label><textarea class="bk" data-b="tt" name="b.tt" spellcheck="true"></textarea></div>
+      <div><label>Back of the Board page: Token Board</label><textarea class="bk" data-b="tb" name="b.tb" spellcheck="true"></textarea></div>
+      <div><label>Back of the Tokens page: Token Economy</label><textarea class="bk" data-b="te" name="b.te" spellcheck="true"></textarea></div>
+    </div>
+    <div class="tools"><button class="tool" id="bkReset">Restore the default text of the backs</button></div>
+    <h3>How to use: the insert</h3>
+    <p class="hint">Three steps in the assessor&rsquo;s words, printed as a two-page insert after the backs when ticked on Setup (Steps 1 and 2 on the first page, Step 3 on the second). The first line of each block is its heading.</p>
+    <div class="fieldgrid" style="grid-template-columns:repeat(auto-fit,minmax(min(380px,100%),1fr))">
+      <div><label>Step 1</label><textarea class="bk" data-b="h1" name="b.h1" spellcheck="true"></textarea></div>
+      <div><label>Step 2</label><textarea class="bk" data-b="h2" name="b.h2" spellcheck="true"></textarea></div>
+      <div><label>Step 3</label><textarea class="bk" data-b="h3" name="b.h3" spellcheck="true"></textarea></div>
+    </div>
+    <div class="tools"><button class="tool" id="howReset">Restore the default how-to text</button></div>
+    <div class="out tkPrev" id="bkOut"></div>
+  </section>
+
+  <!-- ===================== PREVIEW ===================== -->
+  <section class="only-preview">
+    <h2 class="nbh-band tkPrev">Preview: the Book as It Prints</h2>
+    <p class="hint tkPrev" id="prevLine"></p>
+    <div class="out" id="bookOut"><div class="book" id="book"></div></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Makes</h2>
+    <p>A token board book: four laminated landscape pages bound along the left edge, each with a coloured tab on the right so the four show when the book is closed. The <b>Choices</b> page (&ldquo;What Are You Earning?&rdquo;) holds six picture cards of the things the student likes; the <b>Targets</b> page (&ldquo;First: Teaching Targets&rdquo;) holds six cards of the skills or replacement behaviors being taught; the <b>Board</b> carries the student&rsquo;s photo, a First box and a Then box, and a strip of token slots; the <b>Tokens</b> page is where the token cards wait. The back of each page carries its instructions. The adult puts the chosen target card under First and the chosen reward card under Then; the student earns tokens one at a time into the slots and, when the strip is full, gets what is under Then.</p>
+    <p>The arrangement is the <b>Premack principle</b> made visible (Premack, 1959): access to the more probable, preferred activity is made contingent on the less preferred one, which is what &ldquo;First, then&rdquo; says. The tokens are a <b>token reinforcement</b> system (Hackenberg, 2018): the token is a conditioned reinforcer earned on a token-production schedule and exchanged, when the strip is full, for the backup reinforcer under Then. Form TE-1 designs the schedules (how much work earns a token, how many tokens earn the exchange) and Form VS-1 prints the simpler strips; this form prints the book itself.</p>
+    <h2 class="nbh-band" style="margin-top:16px">Making the Book</h2>
+    <table class="rt">
+      <tr><th style="width:24%">1. Fill the pages</th><td>Setup: the student, the first name as it prints, the photo, the token count and picture, the colours and the QR link. Choices and Targets: six pictures each, from the library or the student&rsquo;s own photos (upload one through the picker). Board: leave First and Then empty for the cards, or set a fixed picture. Backs: the text is the assessor&rsquo;s and can be edited. The simulator on the toolbar fills a sample student so the book can be seen at once.</td></tr>
+      <tr><th>2. Print</th><td>Choose the order on Setup. <b>Fronts only</b> gives the four pages; <b>fronts and backs</b> interleaves them for a duplex printer (two-sided, flip on the long edge; test one sheet); <b>card sheets</b> prints the choices, the targets and the tokens with cut lines; <b>all</b> prints everything; <b>a sheet of one card</b> prints spares. Print at 100%. Every page is landscape Letter except the spare sheet, which is portrait.</td></tr>
+      <tr><th>3. Laminate and cut</th><td>Laminate the four pages and the card sheets (5 mil or thicker pouches hold up). Cut the cards on the dashed lines, rounding the corners a little so they do not catch.</td></tr>
+      <tr><th>4. Hook-and-loop dots</th><td>Put the hook side on every circle guide (the six boxes on Choices and on Targets, the First and Then boxes, the token slots, the token park boxes) and the loop side on the back of every card and token, so the cards do not catch on clothing.</td></tr>
+      <tr><th>5. Bind</th><td>Punch and bind along the left edge (spiral or comb) in the order Choices, Targets, Board, Tokens; the backs fall in place. The binding margin is already on the pages.</td></tr>
+      <tr><th>6. Teach it</th><td>Condition the tokens first, as the Token Economy back says: deliver a token and at once the backup reinforcer (sampling), prompt a response and deliver the token (coaching), then deliver the token right after the target response (conditioning). Decide the schedule before starting (the &ldquo;Not So FAST&rdquo; paragraph on the Token Board back): a token after each response for a new skill, thinned as the skill holds. The schedules are written on Form TE-1.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">In the Assessor&rsquo;s Words</h2>
+    <p>From the backs: a token economy &ldquo;is a behavior-based program in which tokens are earned contingent on certain behaviors&rdquo;; token economies &ldquo;help teach &lsquo;waiting&rsquo; and they can help bridge the gap between when desired behaviors occur and when reinforcement is provided&rdquo;; and before starting, &ldquo;decide how long you would like them to display the behavior or how many responses you would like to see before they receive a token&rdquo;, because &ldquo;it is essential to ensure that you are not requiring too much and setting the bar too high for your learner&rdquo;.</p>
+    <h2 class="nbh-band" style="margin-top:16px">About the Simulator</h2>
+    <p>Load simulator (toolbar) replaces every entry with a worked example; nothing in it is real. The sample student is &ldquo;Sam&rdquo;, with six library choices, six library targets, the smiling star as the token and a sample link for the QR code.</p>
+    <p class="hint" id="tkRefs" style="margin-top:10px"><b>Reference list.</b>
+    Hackenberg, T. D. (2018). Token reinforcement: Translational research and application. <em>Journal of Applied Behavior Analysis, 51</em>(2), 393&ndash;435. &bull;
+    Premack, D. (1959). Toward empirical behavior laws: I. Positive reinforcement. <em>Psychological Review, 66</em>(4), 219&ndash;233.</p>
+    <p class="hint">Pictures are OpenMoji (openmoji.org), CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts; the token pictures and the avatars are drawn in this form. The QR code is made inside the form by the qrcode-generator library (Kazuhiko Arase, MIT licence); nothing is sent anywhere.</p>
+  </section>
