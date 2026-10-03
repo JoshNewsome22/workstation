@@ -28,6 +28,9 @@ Double-click index.html. Everything runs from this folder.
     details opens it).
   - Save case above the form shows a dot while the case holds unsaved work.
     Autosave is a safety net in this browser only; the case file is the record.
+  - "Case as spreadsheet" writes every open form into one .xlsx workbook (a
+    sheet per form, from the form's own CSV export where it has one, else every
+    field by name) for a district data request or a research file.
   - The bar shows what is due: review dates and next steps the open forms
     hold, within two weeks or past (PR-1, SA-1, SM-1, ST-1, CN-1 and others).
     Help, in the bar, is a short page with the detail folded underneath.
