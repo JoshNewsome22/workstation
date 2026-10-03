@@ -5429,3 +5429,36 @@ article's caution that the QABF's edge in agreement came with more
 within-rater ties (27 against 20 on the MAS). The 4-of-5 level, as
 the article defines it, is agreement among respondents on one
 instrument, which is how the Convergence sheet applies it.
+
+### Four things seen on the iPad (v21.40c)
+
+Screenshots of the hosted RPS edition on an iPad showed the IA-1
+Respondent pages dialog misbehaving in four ways; all four are fixed.
+
+- **Copy a link and Preview did nothing.** They were disabled because
+  no FAST wording had been pasted yet, but the disabled state did not
+  show on the tablet. The three buttons now stay tappable: when the
+  page cannot be built, a tap flashes the reason in the status box
+  (the wording, the email, a target, a definition) and the buttons
+  are drawn faded.
+- **Preview** opened a new tab at a blob address, which iPad Safari
+  blocks or shows blank. It now opens inside the form, in a dialog
+  with the page in an iframe, exactly as the respondent will see it,
+  with a Close button.
+- **Copy a link** relied on the clipboard, which tablets refuse in
+  some states, and on refusal dumped the whole link into the note
+  line. The link (or one line per target) now also appears in a box
+  under the buttons, selected, with a note saying whether it was
+  copied or should be copied from the box.
+- **The target from TB-1 arrived with its definition in the label.**
+  The case bridge writes "Aggression: Forceful contact ..." into the
+  form's behavior field, so the dialog showed the whole sentence as
+  the label, an empty definition column and the complaint that the
+  definition question needs a definition. The dialog now splits
+  "Label: definition" when the definition field is empty, and takes
+  the case's definition when the case holds the same label. The
+  targets table has fixed column widths so the definition column is
+  no longer squeezed to one word.
+
+`qa/ia1-ipad-test.js` (6 checks) covers them; the respondent and audit
+tests still pass.
