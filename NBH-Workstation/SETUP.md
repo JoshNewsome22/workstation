@@ -5462,3 +5462,17 @@ Respondent pages dialog misbehaving in four ways; all four are fixed.
 
 `qa/ia1-ipad-test.js` (6 checks) covers them; the respondent and audit
 tests still pass.
+
+### Pasted once per instrument, not once per case (v21.40d)
+
+A new case starts from a blank IA-1, which meant pasting the
+instrument wording again. The form now remembers, on the device it
+runs on (browser storage, no student information), the pasted
+wording, the instructions link and the reply email, and fills them
+into a fresh IA-1 whose fields are empty. The Setup sheet says what
+the device remembers and has **Forget on this device**. A case file
+still carries its own copy, so a file opened on another device brings
+its wording with it. The same prefs mechanism the shared blocks use
+for display settings is used here; a private window or a cleared
+browser simply means pasting again. Three more checks in
+`qa/ia1-ipad-test.js`.
