@@ -5638,3 +5638,141 @@ Three things seen in use on the hosted edition.
 Also: the shell's case map names IA-1's five instruments, since the
 WEFA is a sheet inside IA-1 (View, WEFA), not a form of its own.
 `qa/ia1-photo-test.js` (9 checks).
+## Form TK-1, the Token Board Book (v21.42)
+
+A new form, the forty-fourth, built from parts in `tools/forms/TK-1/`
+and placed beside VS-1 and SM-1 in the Implementation group. It prints
+the assessor's four-page token board book, the one made until now in
+Illustrator: a Choices page ("What Are You Earning?"), a Targets page
+("First: Teaching Targets"), the student's Board ("<Name>'s Chart" with
+First, Then and the token slots) and a Tokens page, each with its
+instruction text on the back, plus the picture cards and the tokens to
+cut out. The book page is 11 by 7.33 in, the size of the samples and
+the bound books, printed centred on Letter landscape with trim marks
+at the four corners (cut 0.58 in off the top and bottom); "Fill the
+Letter page" on Setup keeps the full 8.5 in and stretches only the
+white space. A 0.22 in slate band, the white panel 0.08 in inside it
+with a 3 px black edge, a 0.45 in binding margin on the left of every
+front and the right of every back; the tabs are staggered down the
+right edge like a file index (CHOICES at the top, then TARGETS, BOARD,
+TOKENS), each running from the band to the page edge, so all four show
+when the book is closed. The colours, sizes and weights were matched to the
+assessor's pages side by side and the comparison images are in the
+release folder.
+
+### What is on the form
+
+- **Setup.** The student and the packet fields; the first name as it
+  prints, with a bare-apostrophe choice (James' Chart); a Setting word
+  for the Rules-row layout (Sam's Bus Chart); the photo, or an avatar
+  (boy, girl, neutral child, or the library's Student and Me) when
+  there is none; the token count, 3 to 10, with the captions written
+  for it ("Your First Star!", "Keep Going!", then "Just k More!" down
+  to one) and editable; the token picture (the smiling star, a smiley,
+  thumbs up, a check, a coin, a heart, any library picture or a photo);
+  the frame and tab colours; the Choices and Targets panel in light
+  grey (#f3f4f5) or the samples' mid grey (#d9dde1); an optional
+  background picture behind the Choices and Targets boxes at 5 to 25
+  percent; the QR link; a credit
+  line; which pages print and in what order.
+- **Choices and Targets.** Six pictures each from the library or the
+  student's photos, with a label above the picture (underlined on the
+  Choices cards, plain on the Targets cards, as on the samples). An
+  "Other" card with three write-in lines is added to each card sheet.
+  "From the case" fills empty targets from the replacement behaviors
+  on TB-1 and the acquisition objectives on GB-1, and empty choices
+  from the PA-1 reinforcer menu in rank order; a label that names a
+  library picture gets the picture.
+- **Board.** First-Then (the default) or Rules row: one photo at the
+  top right, a row of the first two to five targets with their labels
+  in bold sans, and an Earn box over the strip. First and Then can
+  hold a fixed picture, printed as a card inside the box. Blank name
+  prints a line to write on after laminating. Six to ten tokens wrap
+  the strip to two rows of five.
+- **Backs.** The four instruction texts in the assessor's words (Token
+  Board, Choice Board, Token Economy with Before You Start, Teaching
+  Targets), each editable, with `**bold**`, `*italic*`, `__underline__`,
+  `## heading`, and `{n}`, `{token}`, `{tokens}` and `{TOKENS}` for
+  the count and the token's name. The text is set at 16 pt and never
+  below 15 pt; what does not fit continues on a second back page (in a
+  duplex order a blank sheet is added first so every back stays on the
+  reverse of its front). The
+  three How-to steps are a third block, printed as a two-page insert
+  after the backs when ticked. The barcode, the Behavior-Charts logo
+  and the web address are left out; the Token Economy back carries the
+  edition's own logo and the credit line when one is given. Two obvious
+  typos were fixed in transcription ("leaner", "would your learner" for
+  "would like your learner"), "(see below)" became "(the Choices page)"
+  since the product photo is not printed, and the Token Economy back
+  says the tokens are on the front of its page, as the other version of
+  that text does.
+- **Preview.** The whole book as it prints, at reduced scale, in the
+  order chosen on Setup: fronts only (4), fronts and backs interleaved
+  for a duplex printer with a long-edge flip (8, or 10 with the insert;
+  Setup says which flip to use and to test one sheet), the card sheets
+  (3), all (13 with the insert), or a sheet of one card for spares: any
+  choice, target, the token, or a card made on the spot, repeated on a
+  portrait Letter page, 5 across at about 1.5 in (30) or 6 across at
+  about 1.25 in (42), with light grey cut lines. Nothing else prints;
+  print colours are exact.
+- **Guide.** How the book is assembled (print at 100%, laminate, cut,
+  hook-and-loop dots on the circles, bind on the left), the token
+  economy notes in the assessor's words, and the two references the
+  backs rest on: Premack (1959) for First-Then and Hackenberg (2018)
+  for token reinforcement, as on TE-1 and VS-1.
+
+### Under the hood
+
+- The QR code is made inside the form by the MIT qrcode-generator
+  library (Kazuhiko Arase), vendored at `tools/vendor/qrcode-generator/`
+  and inlined at the top of the form's script with its licence header;
+  type chosen automatically, error correction M, drawn as SVG. Nothing
+  is fetched. A blank link prints no code.
+- Pictures use `nbh-pictos.js` exactly as VS-1 does (the same picker,
+  photos as thumbnails in the saved file); the one-file edition inlines
+  the library for TK-1 as it does for SM-1 and VS-1. The tokens and the
+  avatars are drawn in the form itself, since the library has no star.
+- The whole state, pictures included, is mirrored into a hidden field
+  (`tk.state`) so the shell's autosave and snapshots carry it; restore
+  puts the pictures and captions back.
+- Counts: 44 forms in `index.html`, `README.txt`, `README.md`,
+  `tools/build-single.py` and `tools/README.md`; `build-rps.py` now
+  expects 45 logos, 163 alt texts, 45 top-left page heads and 46 titles.
+- `qa/tk1-test.js` checks the setup fields through save and reopen, the
+  token count against the captions and slots, the page geometry (the
+  centred 11 x 7.33 in page with its trim marks, the band, the box and
+  slot sizes, the fill option, the panel colour), a long back that
+  continues on a second page, the name forms, the QR
+  code (present only with a link; its modules compared cell for cell
+  with the same library run in node, since no independent decoder is
+  available offline), the case prefills, the picker with a pictogram
+  and a photo, every print order's page count, the print colours on the
+  rendered PDF, the shell (status, facts, snapshot and restore) and
+  that there are no console or page errors.
+
+### Known limits
+
+- The spare-card samples are 5 by 8 and 6 by 8 on a sheet taller than
+  Letter; on portrait Letter the same card sizes give 5 by 6 and 6 by 7.
+- The duplex order assumes a long-edge flip; a short-edge flip prints
+  the backs upside down, which the Setup note says to check with one
+  sheet.
+
+The book titles print in the regular weight of the serif, as on the
+assessor's pages, not bold. The QR encoder is the MIT-licensed
+qrcode-generator (Kazuhiko Arase), vendored in
+`tools/vendor/qrcode-generator/` and inlined into the form, so the
+code is drawn without any network access.
+
+### Print quality of the pictures (v21.42a)
+
+Everything TK-1 draws itself (frames, boxes, titles, tabs, dots, QR
+codes, the library's pictograms and the tokens and avatars drawn in
+the form) is vector and prints sharp at any size. Pictures the
+assessor adds are the one place quality can be lost, so the upload
+now keeps an SVG as the vector it is, and keeps a photo or PNG at up
+to 1200 pixels on its long side (about 420 dpi on a 2.85 in box; the
+previous 480 pixels gave about 170), as a JPEG, or a PNG when the
+picture has transparency. Save files grow with the pictures they
+hold; a photo of a few hundred kilobytes each is the price of a
+sharp card.

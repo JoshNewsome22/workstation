@@ -5763,3 +5763,16 @@ assessor's pages, not bold. The QR encoder is the MIT-licensed
 qrcode-generator (Kazuhiko Arase), vendored in
 `tools/vendor/qrcode-generator/` and inlined into the form, so the
 code is drawn without any network access.
+
+### Print quality of the pictures (v21.42a)
+
+Everything TK-1 draws itself (frames, boxes, titles, tabs, dots, QR
+codes, the library's pictograms and the tokens and avatars drawn in
+the form) is vector and prints sharp at any size. Pictures the
+assessor adds are the one place quality can be lost, so the upload
+now keeps an SVG as the vector it is, and keeps a photo or PNG at up
+to 1200 pixels on its long side (about 420 dpi on a 2.85 in box; the
+previous 480 pixels gave about 170), as a JPEG, or a PNG when the
+picture has transparency. Save files grow with the pictures they
+hold; a photo of a few hundred kilobytes each is the price of a
+sharp card.
