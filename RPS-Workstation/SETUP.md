@@ -4921,3 +4921,111 @@ folder's protocols, design and measure groups), the form tests
 `shell-ui-test` all pass. `qa/sm1-test.js` asked for a PDF it never
 wrote and now reads the one it does; `qa/ra1-regress.js` writes its
 snapshot on a first run.
+
+## Form IM-1, the Self-Injury Trauma Scale on a Body Map; PA-1's Item Names (v21.38)
+
+### Form IM-1: Self-Injury Trauma Scale and Injury Monitoring (the 43rd form)
+
+A form for the physical consequences of self-injury over a case: the
+Self-Injury Trauma (SIT) Scale of Iwata, Pace, Kissel, Nau and Farber
+(1990, Journal of Applied Behavior Analysis, 23(1), 99-110)
+administered at intake and at intervals, scored as published, every
+administration kept with its body map, the indices graphed over time,
+and the nurse's checks logged beside them. It is listed under
+Specialist protocols after MS-1 and in the case map under Observe and
+measure. Built from parts (`tools/forms/IM-1/`); the body silhouettes
+are inline SVG generated once by a scratch script and kept static in
+`body.html`.
+
+**Setup.** The student details through the packet map; Part I of the
+scale (the ten topographies and Other; healed injuries at up to five
+sites, which the paper scores once because restraint and medication
+hide current trauma); who administers (examiner, trained by, nurse,
+intake date, every n weeks, time of day); a restraint and injury-report
+event table; a schedule box (the form's own convention) that also
+answers the shell's due line.
+
+**Body map.** Front and back silhouettes and a larger head detail,
+every Part II location a tappable path with its name (31 chart rows,
+29 with a surface; genitalia and rectum come from the chart's list). L
+and R are the student's, labelled on each figure, the student's left
+on the viewer's right on the front view. A tap places a marker at the
+tap point and opens the row; tapping a marker selects it; the same
+location tapped again while selected moves its marker; every path is a
+keyboard target. Markers: a circle for an abrasion or laceration, a
+square for a contusion, the number rank inside, severity 1 amber, 2
+orange with a double ring, 3 red hatched with a heavy ring, so a
+grayscale print still tells them apart.
+
+**Scoring, as published.** Per injured location the number of wounds
+(1 one, 2 two to four, 3 five or more), the type of the worst wound
+(AL: a break in the skin, superficial or deep, from tearing, biting,
+excessive rubbing or a sharp object; CT: a distinct area of abnormal
+discoloration or swelling, with or without tissue rupture, from
+forceful contact) and its severity on the type's own scale (AL 1 red
+or irritated with spotted breaks, 2 distinct but superficial, 3 deep
+or extensive or avulsion; CT 1 local swelling only or discoloration
+without swelling, 2 extensive swelling, 3 disfigurement or tissue
+rupture), the severity list following the type. Part III: the Number
+Index from the number total (0 none; 1 for 1 to 4; 2 for 5 to 8; 3 for
+9 to 12; 4 for 13 to 16; 5 for 17 or more), the Severity Index from
+the severity frequencies (0 none; 1 all 1s; 2 one 2 and no 3s; 3 two
+or more 2s and no 3s; 4 no more than one 3; 5 two or more 3s), and
+the Estimate of Current Risk (Low: no injuries, or any AL-1, CT-1 or
+AL-2 except near the eyes; Moderate: any AL-2 near the eyes or any
+CT-2 except on the head; High: any CT-2 on the head or any AL-3 or
+CT-3), with the rule that set it named. "Near the eyes" is read as the
+Eye and Eye Area locations and "on the head" as any Head-group
+location; a free "kind" note (bite, bruise) sits beside the type.
+
+**History.** Every saved administration (date, examiner, number total,
+NI, SI, injured locations by group, risk and its rule), opened
+read-only or edited, a graph of NI and SI from 0 to 5 with the risk
+band under each date (saved as an image like the other graphs), and
+the nurse log (date, who, findings, action, referral). Save data, Open
+data, CSV (one row per injured location per administration, then the
+nurse rows), Clear all, a simulation (three administrations over six
+weeks, High to Moderate to Low, a nurse check for each, a restraint on
+the schedule), the case hook (the self-injury target from the case
+into the behavior fields), and the standard toolbar. Blank print 8
+pages (the map and chart on one), simulation 9.
+
+**Guide.** The scale's purpose and development, administration (a
+trained examiner, about twelve minutes, repeated examinations at least
+a week apart), the published tables, what High means in the paper and
+that low-risk injuries still require intervention, the published
+interrater agreement (overall 97%, location 99%, type 96%, number
+89%, severity 94%; NI 90%, SI 92%, risk 100%; 50 pairs of records on
+35 subjects aged 3 to 19), the limits (visible damage only; pica,
+vomiting and air swallowing produce damage that is not visible; hair
+pulling produces negligible trauma), and a section naming the form's
+own conventions. References: Iwata et al. (1990), Cooper, Heron and
+Heward (2020), Hagopian, Rooker and Zarcone (2015).
+
+`qa/im1-test.js`: 59 paths and 31 chart rows, three taps placing
+markers and rows, hand checks of NI, SI and risk on four cases, the
+marker recolouring with severity, deletes, save to history, a new
+administration, reopening read-only, the Save data round trip
+identical, the CSV's 19 columns, the simulation's three
+administrations (number totals 8, 4, 1 giving NI 2, 1, 1; SI 3, 3, 1;
+High, Moderate, Low) and its graph, print page counts, the phone width
+without overflow, no console or page error.
+
+Registration: the index's form list and case map, the counts in the
+Help, the READMEs and the build scripts (43 forms), and the RPS build's
+replacement expectations (44 logos, 159 alt texts).
+
+### PA-1: the names typed in the pool reach every sheet
+
+The stimulus pool at the top of PA-1 (the "Item 1, Item 2" rows) fed
+the trial and session sheets through `relabel()`, which rewrote every
+element carrying `data-lbl` and every select carrying `data-items`.
+Two places were outside it: the competing-stimulus sheet (its order
+line, re-test table and three validation selects) and the monitoring
+graph's item select kept "Item n" until the form was reopened.
+`relabel()` now re-renders the competing-stimulus sheet and rebuilds
+that select, keeping its value, so a name typed or changed in the pool
+shows everywhere at once. Verified by typing three names on a blank
+form (no "Item n" text left on any sheet) and renaming an item after
+the simulation (the re-test table, the validation selects and the
+monitoring select follow).

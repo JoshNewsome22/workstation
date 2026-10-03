@@ -1,0 +1,253 @@
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">Student, Behavior, and the Plan</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client"></div>
+      <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Grade</label><input data-m="grade"></div>
+      <div><label>Date of birth</label><input data-m="dob" placeholder="M/D/YYYY"></div>
+      <div><label>School or setting</label><input data-m="site"></div>
+      <div><label>Case BCBA</label><input data-m="bcba"></div>
+      <div><label>Target behavior (the self-injury as defined on Form TB-1)</label><input data-m="beh" placeholder="Self-injury: head hitting, hand biting"></div>
+      <div><label>Definition (Form TB-1)</label><input data-m="behdef" placeholder="forceful contact of the head with a surface from 15 cm or more; closing the teeth on the hand hard enough to leave a mark"></div>
+      <div><label>Crisis plan (Form CR-1, dated)</label><input data-m="plan" placeholder="CR-1 dated 9/2/26; restraint log on CR-1"></div>
+      <div><label>Medical alerts and current medication (Form MS-1)</label><input data-m="medical" placeholder="risperidone since 8/26 (MS-1); no bleeding disorder; latex allergy"></div>
+    </div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Part I. General Description and Summary of Healed Injuries</h2>
+    <p class="hint">As published (Iwata, Pace, Kissel, Nau, &amp; Farber, 1990, Figure 1). Check each type of self-injurious behavior the student exhibits. Only the first five (forceful contact, two types; scratching; biting; eye gouging) produce the surface damage that Part II scores; pica, vomiting and air swallowing produce damage that is not externally visible, and hair pulling produces negligible trauma.</p>
+    <div class="cklist">
+      <label class="ck"><input type="checkbox" data-c="t_head"> Forceful contact with head or face</label>
+      <label class="ck"><input type="checkbox" data-c="t_body"> Forceful contact with other body part</label>
+      <label class="ck"><input type="checkbox" data-c="t_scratch"> Scratching, picking, rubbing skin</label>
+      <label class="ck"><input type="checkbox" data-c="t_bite"> Biting</label>
+      <label class="ck"><input type="checkbox" data-c="t_eye"> Eye gouging</label>
+      <label class="ck"><input type="checkbox" data-c="t_pica"> Ingestion of inedible materials (pica)</label>
+      <label class="ck"><input type="checkbox" data-c="t_vomit"> Vomiting or rumination</label>
+      <label class="ck"><input type="checkbox" data-c="t_aero"> Air swallowing (aerophagia)</label>
+      <label class="ck"><input type="checkbox" data-c="t_hair"> Hair pulling (trichotillomania)</label>
+      <label class="ck"><input type="checkbox" data-c="t_other"> Other:</label>
+    </div>
+    <div class="fieldgrid"><div><label>Other (describe)</label><input data-m="t_other_text"></div></div>
+    <h3>Healed Injuries</h3>
+    <p class="hint">Physical evidence of healed injuries (scars, permanent disfigurement, missing body parts) with the specific site, up to five sites as on the published scale. The paper gives two reasons to record them: a student who is restrained, medicated or closely attended shows less trauma than the behavior would otherwise produce, and a healed injury may point to a form of self-injury that no longer occurs but could return. Healed injuries are documented once, at intake, and do not enter the Part II scoring.</p>
+    <div class="tools"><button class="tool" id="addHealed">Add a site</button></div>
+    <div class="grid-wrap"><table class="rt" id="healedTbl" style="max-width:860px"><thead><tr><th style="width:4%">#</th><th style="width:28%">Site</th><th style="width:22%">Evidence</th><th>Description (size, how old, source of the information)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Who Administers, and the Schedule</h2>
+    <p class="hint">The examiner is trained in the scale and examines the student directly, the school nurse where possible; the same examiner and the same time of day across administrations keep the records comparable. The schedule below is this form&rsquo;s own convention, not part of the published scale: the scale at intake, then every <i>n</i> weeks, and again after any restraint or injury report. Repeated examinations in the paper were at least a week apart.</p>
+    <div class="fieldgrid">
+      <div><label>Examiner (name and role)</label><input data-m="examiner" placeholder="School nurse (RN); or the BCBA trained by the nurse"></div>
+      <div><label>Trained in the scale by, and when</label><input data-m="trained" placeholder="practice scoring with the nurse on two students, agreement checked"></div>
+      <div><label>School nurse</label><input data-m="nurse"></div>
+      <div><label>Intake administration date</label><input data-m="intake" placeholder="M/D/YYYY"></div>
+      <div><label>Then every (weeks)</label><input data-m="every" placeholder="3"></div>
+      <div><label>Time of day for the examination</label><input data-m="tod" placeholder="arrival, before first period (the same time each administration)"></div>
+    </div>
+    <h3>Restraints and Injury Reports Since Intake</h3>
+    <p class="hint">One row per restraint (from the log on Form CR-1) or injury report; each calls for an examination within the next school days, and the schedule below says whether one followed.</p>
+    <div class="tools"><button class="tool" id="addEvent">Add a row</button></div>
+    <div class="grid-wrap"><table class="rt" id="eventTbl" style="max-width:860px"><thead><tr><th style="width:4%">#</th><th style="width:16%">Date</th><th style="width:20%">Event</th><th>Note (what happened, who reported)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="instr imSched" id="imSched"></div>
+    <div id="setupVerdict"></div>
+  </section>
+
+  <!-- ===================== BODY MAP ===================== -->
+  <section class="only-map">
+    <h2 class="nbh-band">Body Map: the Current Administration</h2>
+    <div class="fieldgrid">
+      <div><label>Date of this administration</label><input data-a="date" placeholder="M/D/YYYY"></div>
+      <div><label>Time</label><input type="time" data-a="time"></div>
+      <div><label>Examiner</label><input data-a="examiner"></div>
+      <div><label>Conditions (who was present, what could not be examined, restraint or clothing in the way)</label><input data-a="note"></div>
+    </div>
+    <div class="tools noprint"><button type="button" class="tool imNewAdm">Start a new administration</button><button type="button" class="tool imSaveAdm">Save to history</button><span class="status" id="imAdmStatus"></span></div>
+    <div id="imRoNote"></div>
+    <div class="metrics" id="imIdxMap"></div>
+    <p class="hint noprint">Tap a location to place a marker and open its row; tap a marker to select it; tap the same location again while it is selected to move its marker. Every location is also a keyboard target (Tab to it, Enter to add it), and the Scoring page adds a location from a list. Genitalia and rectum have no surface on the figure and are added from the list. L and R are the student&rsquo;s left and right.</p>
+    <div class="imMapWrap">
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><pattern id="imHatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="4" height="4" fill="#B42318"/><line x1="0" y1="0" x2="0" y2="4" stroke="#fff" stroke-width="1.4"/></pattern></defs></svg>
+      <div class="imMaps" id="imMaps">
+        <figure class="imFigBox"><figcaption>Front <small>student&rsquo;s left on the viewer&rsquo;s right</small></figcaption>
+          <svg class="imFig" id="imFig-front" data-view="front" viewBox="0 0 220 440" role="group" aria-label="Front view">
+            <defs><clipPath id="imClip-front"><path d="M83,46 a27,33 0 1 0 54,0 a27,33 0 1 0 -54,0 z"/></clipPath></defs>
+            <g class="imLocs">
+            <path data-loc="face" data-cx="110" data-cy="66" clip-path="url(#imClip-front)" d="M80,33 h60 a0,0 0 0 1 0,0 v53 a0,0 0 0 1 -0,0 h-60 a0,0 0 0 1 -0,-0 v-53 a0,0 0 0 1 0,-0 z" tabindex="0" role="button" aria-label="Face"><title>Face</title></path>
+            <path data-loc="scalp" data-cx="110" data-cy="24" clip-path="url(#imClip-front)" d="M80,10 h60 a0,0 0 0 1 0,0 v23 a0,0 0 0 1 -0,0 h-60 a0,0 0 0 1 -0,-0 v-23 a0,0 0 0 1 0,-0 z" tabindex="0" role="button" aria-label="Scalp"><title>Scalp</title></path>
+            <path data-loc="eyearea_L" data-cx="121" data-cy="52" d="M112,52 a9,6.5 0 1 0 18,0 a9,6.5 0 1 0 -18,0 z" tabindex="0" role="button" aria-label="Eye area (L)"><title>Eye area (L)</title></path>
+            <path data-loc="eyearea_R" data-cx="99" data-cy="52" d="M90,52 a9,6.5 0 1 0 18,0 a9,6.5 0 1 0 -18,0 z" tabindex="0" role="button" aria-label="Eye area (R)"><title>Eye area (R)</title></path>
+            <path data-loc="eye_L" data-cx="121" data-cy="52" d="M116.5,52 a4.5,2.6 0 1 0 9.0,0 a4.5,2.6 0 1 0 -9.0,0 z" tabindex="0" role="button" aria-label="Eye (L)"><title>Eye (L)</title></path>
+            <path data-loc="eye_R" data-cx="99" data-cy="52" d="M94.5,52 a4.5,2.6 0 1 0 9.0,0 a4.5,2.6 0 1 0 -9.0,0 z" tabindex="0" role="button" aria-label="Eye (R)"><title>Eye (R)</title></path>
+            <path data-loc="nose" data-cx="110" data-cy="57" d="M108,50 h4 a3,3 0 0 1 3,3 v8 a3,3 0 0 1 -3,3 h-4 a3,3 0 0 1 -3,-3 v-8 a3,3 0 0 1 3,-3 z" tabindex="0" role="button" aria-label="Nose"><title>Nose</title></path>
+            <path data-loc="lips" data-cx="110" data-cy="70" d="M101,70 a9,4 0 1 0 18,0 a9,4 0 1 0 -18,0 z" tabindex="0" role="button" aria-label="Lips/tongue"><title>Lips/tongue</title></path>
+            <path data-loc="neck" data-cx="110" data-cy="86" d="M102,76 h16 a4,4 0 0 1 4,4 v12 a4,4 0 0 1 -4,4 h-16 a4,4 0 0 1 -4,-4 v-12 a4,4 0 0 1 4,-4 z" tabindex="0" role="button" aria-label="Neck/throat"><title>Neck/throat</title></path>
+            <path data-loc="chest" data-cx="110" data-cy="141" d="M74,96 L146,96 Q149,96 149,100 L145,152 L144,186 L76,186 L75,152 L71,100 Q71,96 74,96 z" tabindex="0" role="button" aria-label="Chest/stomach"><title>Chest/stomach</title></path>
+            <path data-loc="abdomen" data-cx="110" data-cy="207" d="M76,186 L144,186 L146,222 Q146,228 140,228 L80,228 Q74,228 74,222 z" tabindex="0" role="button" aria-label="Abdomen/pelvis"><title>Abdomen/pelvis</title></path>
+            <path data-loc="hips" data-cx="69" data-cy="207" d="M62,188 L76,186 L74,228 L68,228 Q62,228 62,222 z M158,188 L144,186 L146,228 L152,228 Q158,228 158,222 z" tabindex="0" role="button" aria-label="Hips/buttocks"><title>Hips/buttocks</title></path>
+            <path data-loc="shoulder_L" data-cx="150" data-cy="106" d="M133,106 a17,12 0 1 0 34,0 a17,12 0 1 0 -34,0 z" tabindex="0" role="button" aria-label="Shoulder (L)"><title>Shoulder (L)</title></path>
+            <path data-loc="shoulder_R" data-cx="70" data-cy="106" d="M53,106 a17,12 0 1 0 34,0 a17,12 0 1 0 -34,0 z" tabindex="0" role="button" aria-label="Shoulder (R)"><title>Shoulder (R)</title></path>
+            <path data-loc="uarm_L" data-cx="160" data-cy="154" d="M158,116 h4 a8,8 0 0 1 8,8 v60 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-60 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Upper arm/elbow (L)"><title>Upper arm/elbow (L)</title></path>
+            <path data-loc="uarm_R" data-cx="60" data-cy="154" d="M58,116 h4 a8,8 0 0 1 8,8 v60 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-60 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Upper arm/elbow (R)"><title>Upper arm/elbow (R)</title></path>
+            <path data-loc="larm_L" data-cx="160" data-cy="221" d="M158,192 h4 a7,7 0 0 1 7,7 v44 a7,7 0 0 1 -7,7 h-4 a7,7 0 0 1 -7,-7 v-44 a7,7 0 0 1 7,-7 z" tabindex="0" role="button" aria-label="Lower arm/wrist (L)"><title>Lower arm/wrist (L)</title></path>
+            <path data-loc="larm_R" data-cx="60" data-cy="221" d="M58,192 h4 a7,7 0 0 1 7,7 v44 a7,7 0 0 1 -7,7 h-4 a7,7 0 0 1 -7,-7 v-44 a7,7 0 0 1 7,-7 z" tabindex="0" role="button" aria-label="Lower arm/wrist (R)"><title>Lower arm/wrist (R)</title></path>
+            <path data-loc="hand_L" data-cx="160" data-cy="277" d="M158,250 h4 a8,8 0 0 1 8,8 v38 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-38 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Hand/finger (L)"><title>Hand/finger (L)</title></path>
+            <path data-loc="hand_R" data-cx="60" data-cy="277" d="M58,250 h4 a8,8 0 0 1 8,8 v38 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-38 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Hand/finger (R)"><title>Hand/finger (R)</title></path>
+            <path data-loc="uleg_L" data-cx="127" data-cy="275" d="M122,228 h10 a10,10 0 0 1 10,10 v74 a10,10 0 0 1 -10,10 h-10 a10,10 0 0 1 -10,-10 v-74 a10,10 0 0 1 10,-10 z" tabindex="0" role="button" aria-label="Upper leg/knee (L)"><title>Upper leg/knee (L)</title></path>
+            <path data-loc="uleg_R" data-cx="93" data-cy="275" d="M88,228 h10 a10,10 0 0 1 10,10 v74 a10,10 0 0 1 -10,10 h-10 a10,10 0 0 1 -10,-10 v-74 a10,10 0 0 1 10,-10 z" tabindex="0" role="button" aria-label="Upper leg/knee (R)"><title>Upper leg/knee (R)</title></path>
+            <path data-loc="lleg_L" data-cx="127" data-cy="362" d="M122,322 h10 a8,8 0 0 1 8,8 v64 a8,8 0 0 1 -8,8 h-10 a8,8 0 0 1 -8,-8 v-64 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Lower leg/ankle (L)"><title>Lower leg/ankle (L)</title></path>
+            <path data-loc="lleg_R" data-cx="93" data-cy="362" d="M88,322 h10 a8,8 0 0 1 8,8 v64 a8,8 0 0 1 -8,8 h-10 a8,8 0 0 1 -8,-8 v-64 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Lower leg/ankle (R)"><title>Lower leg/ankle (R)</title></path>
+            <path data-loc="foot_L" data-cx="127" data-cy="415" d="M120,402 h14 a8,8 0 0 1 8,8 v10 a8,8 0 0 1 -8,8 h-14 a8,8 0 0 1 -8,-8 v-10 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Foot/toe (L)"><title>Foot/toe (L)</title></path>
+            <path data-loc="foot_R" data-cx="93" data-cy="415" d="M86,402 h14 a8,8 0 0 1 8,8 v10 a8,8 0 0 1 -8,8 h-14 a8,8 0 0 1 -8,-8 v-10 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Foot/toe (R)"><title>Foot/toe (R)</title></path>
+            <path data-loc="ear_L" data-cx="138" data-cy="50" d="M133,50 a5,8 0 1 0 10,0 a5,8 0 1 0 -10,0 z" tabindex="0" role="button" aria-label="Ear (L)"><title>Ear (L)</title></path>
+            <path data-loc="ear_R" data-cx="82" data-cy="50" d="M77,50 a5,8 0 1 0 10,0 a5,8 0 1 0 -10,0 z" tabindex="0" role="button" aria-label="Ear (R)"><title>Ear (R)</title></path>
+            </g>
+            <g class="imEchoes" id="imEchoes-front"></g>
+            <g class="imMarks" id="imMarks-front"></g>
+            <text class="imSideLbl" x="60" y="330">R</text><text class="imSideLbl" x="160" y="330">L</text>
+          </svg>
+        </figure>
+        <figure class="imFigBox"><figcaption>Back <small>student&rsquo;s left on the viewer&rsquo;s left</small></figcaption>
+          <svg class="imFig" id="imFig-back" data-view="back" viewBox="0 0 220 440" role="group" aria-label="Back view">
+            <defs><clipPath id="imClip-back"><path d="M83,46 a27,33 0 1 0 54,0 a27,33 0 1 0 -54,0 z"/></clipPath></defs>
+            <g class="imLocs">
+            <path data-loc="scalp" data-cx="110" data-cy="40" d="M83,46 a27,33 0 1 0 54,0 a27,33 0 1 0 -54,0 z" tabindex="0" role="button" aria-label="Scalp"><title>Scalp</title></path>
+            <path data-loc="neck" data-cx="110" data-cy="86" d="M102,76 h16 a4,4 0 0 1 4,4 v12 a4,4 0 0 1 -4,4 h-16 a4,4 0 0 1 -4,-4 v-12 a4,4 0 0 1 4,-4 z" tabindex="0" role="button" aria-label="Neck/throat"><title>Neck/throat</title></path>
+            <path data-loc="back" data-cx="110" data-cy="141" d="M74,96 L146,96 Q149,96 149,100 L145,152 L144,186 L76,186 L75,152 L71,100 Q71,96 74,96 z" tabindex="0" role="button" aria-label="Back"><title>Back</title></path>
+            <path data-loc="hips" data-cx="110" data-cy="208" d="M80,186 h60 a14,14 0 0 1 14,14 v16 a14,14 0 0 1 -14,14 h-60 a14,14 0 0 1 -14,-14 v-16 a14,14 0 0 1 14,-14 z" tabindex="0" role="button" aria-label="Hips/buttocks"><title>Hips/buttocks</title></path>
+            <path data-loc="shoulder_R" data-cx="150" data-cy="106" d="M133,106 a17,12 0 1 0 34,0 a17,12 0 1 0 -34,0 z" tabindex="0" role="button" aria-label="Shoulder (R)"><title>Shoulder (R)</title></path>
+            <path data-loc="shoulder_L" data-cx="70" data-cy="106" d="M53,106 a17,12 0 1 0 34,0 a17,12 0 1 0 -34,0 z" tabindex="0" role="button" aria-label="Shoulder (L)"><title>Shoulder (L)</title></path>
+            <path data-loc="uarm_R" data-cx="160" data-cy="154" d="M158,116 h4 a8,8 0 0 1 8,8 v60 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-60 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Upper arm/elbow (R)"><title>Upper arm/elbow (R)</title></path>
+            <path data-loc="uarm_L" data-cx="60" data-cy="154" d="M58,116 h4 a8,8 0 0 1 8,8 v60 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-60 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Upper arm/elbow (L)"><title>Upper arm/elbow (L)</title></path>
+            <path data-loc="larm_R" data-cx="160" data-cy="221" d="M158,192 h4 a7,7 0 0 1 7,7 v44 a7,7 0 0 1 -7,7 h-4 a7,7 0 0 1 -7,-7 v-44 a7,7 0 0 1 7,-7 z" tabindex="0" role="button" aria-label="Lower arm/wrist (R)"><title>Lower arm/wrist (R)</title></path>
+            <path data-loc="larm_L" data-cx="60" data-cy="221" d="M58,192 h4 a7,7 0 0 1 7,7 v44 a7,7 0 0 1 -7,7 h-4 a7,7 0 0 1 -7,-7 v-44 a7,7 0 0 1 7,-7 z" tabindex="0" role="button" aria-label="Lower arm/wrist (L)"><title>Lower arm/wrist (L)</title></path>
+            <path data-loc="hand_R" data-cx="160" data-cy="277" d="M158,250 h4 a8,8 0 0 1 8,8 v38 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-38 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Hand/finger (R)"><title>Hand/finger (R)</title></path>
+            <path data-loc="hand_L" data-cx="60" data-cy="277" d="M58,250 h4 a8,8 0 0 1 8,8 v38 a8,8 0 0 1 -8,8 h-4 a8,8 0 0 1 -8,-8 v-38 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Hand/finger (L)"><title>Hand/finger (L)</title></path>
+            <path data-loc="uleg_R" data-cx="127" data-cy="275" d="M122,228 h10 a10,10 0 0 1 10,10 v74 a10,10 0 0 1 -10,10 h-10 a10,10 0 0 1 -10,-10 v-74 a10,10 0 0 1 10,-10 z" tabindex="0" role="button" aria-label="Upper leg/knee (R)"><title>Upper leg/knee (R)</title></path>
+            <path data-loc="uleg_L" data-cx="93" data-cy="275" d="M88,228 h10 a10,10 0 0 1 10,10 v74 a10,10 0 0 1 -10,10 h-10 a10,10 0 0 1 -10,-10 v-74 a10,10 0 0 1 10,-10 z" tabindex="0" role="button" aria-label="Upper leg/knee (L)"><title>Upper leg/knee (L)</title></path>
+            <path data-loc="lleg_R" data-cx="127" data-cy="362" d="M122,322 h10 a8,8 0 0 1 8,8 v64 a8,8 0 0 1 -8,8 h-10 a8,8 0 0 1 -8,-8 v-64 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Lower leg/ankle (R)"><title>Lower leg/ankle (R)</title></path>
+            <path data-loc="lleg_L" data-cx="93" data-cy="362" d="M88,322 h10 a8,8 0 0 1 8,8 v64 a8,8 0 0 1 -8,8 h-10 a8,8 0 0 1 -8,-8 v-64 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Lower leg/ankle (L)"><title>Lower leg/ankle (L)</title></path>
+            <path data-loc="foot_R" data-cx="127" data-cy="415" d="M120,402 h14 a8,8 0 0 1 8,8 v10 a8,8 0 0 1 -8,8 h-14 a8,8 0 0 1 -8,-8 v-10 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Foot/toe (R)"><title>Foot/toe (R)</title></path>
+            <path data-loc="foot_L" data-cx="93" data-cy="415" d="M86,402 h14 a8,8 0 0 1 8,8 v10 a8,8 0 0 1 -8,8 h-14 a8,8 0 0 1 -8,-8 v-10 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Foot/toe (L)"><title>Foot/toe (L)</title></path>
+            <path data-loc="ear_R" data-cx="138" data-cy="50" d="M133,50 a5,8 0 1 0 10,0 a5,8 0 1 0 -10,0 z" tabindex="0" role="button" aria-label="Ear (R)"><title>Ear (R)</title></path>
+            <path data-loc="ear_L" data-cx="82" data-cy="50" d="M77,50 a5,8 0 1 0 10,0 a5,8 0 1 0 -10,0 z" tabindex="0" role="button" aria-label="Ear (L)"><title>Ear (L)</title></path>
+            </g>
+            <g class="imEchoes" id="imEchoes-back"></g>
+            <g class="imMarks" id="imMarks-back"></g>
+            <text class="imSideLbl" x="60" y="330">L</text><text class="imSideLbl" x="160" y="330">R</text>
+          </svg>
+        </figure>
+        <figure class="imFigBox imHeadBox"><figcaption>Head detail <small>front view</small></figcaption>
+          <svg class="imFig" id="imFig-head" data-view="head" viewBox="0 0 200 230" role="group" aria-label="Head detail, front view">
+            <defs><clipPath id="imClip-head"><path d="M38,95 a62,78 0 1 0 124,0 a62,78 0 1 0 -124,0 z"/></clipPath></defs>
+            <g class="imLocs">
+            <path data-loc="face" data-cx="100" data-cy="140" clip-path="url(#imClip-head)" d="M30,62 h140 a0,0 0 0 1 0,0 v116 a0,0 0 0 1 -0,0 h-140 a0,0 0 0 1 -0,-0 v-116 a0,0 0 0 1 0,-0 z" tabindex="0" role="button" aria-label="Face"><title>Face</title></path>
+            <path data-loc="scalp" data-cx="100" data-cy="40" clip-path="url(#imClip-head)" d="M30,10 h140 a0,0 0 0 1 0,0 v52 a0,0 0 0 1 -0,0 h-140 a0,0 0 0 1 -0,-0 v-52 a0,0 0 0 1 0,-0 z" tabindex="0" role="button" aria-label="Scalp"><title>Scalp</title></path>
+            <path data-loc="eyearea_L" data-cx="126" data-cy="108" d="M105,108 a21,15 0 1 0 42,0 a21,15 0 1 0 -42,0 z" tabindex="0" role="button" aria-label="Eye area (L)"><title>Eye area (L)</title></path>
+            <path data-loc="eyearea_R" data-cx="74" data-cy="108" d="M53,108 a21,15 0 1 0 42,0 a21,15 0 1 0 -42,0 z" tabindex="0" role="button" aria-label="Eye area (R)"><title>Eye area (R)</title></path>
+            <path data-loc="eye_L" data-cx="126" data-cy="108" d="M115,108 a11,6 0 1 0 22,0 a11,6 0 1 0 -22,0 z" tabindex="0" role="button" aria-label="Eye (L)"><title>Eye (L)</title></path>
+            <path data-loc="eye_R" data-cx="74" data-cy="108" d="M63,108 a11,6 0 1 0 22,0 a11,6 0 1 0 -22,0 z" tabindex="0" role="button" aria-label="Eye (R)"><title>Eye (R)</title></path>
+            <path data-loc="nose" data-cx="100" data-cy="118" d="M95,100 h10 a6,6 0 0 1 6,6 v24 a6,6 0 0 1 -6,6 h-10 a6,6 0 0 1 -6,-6 v-24 a6,6 0 0 1 6,-6 z" tabindex="0" role="button" aria-label="Nose"><title>Nose</title></path>
+            <path data-loc="lips" data-cx="100" data-cy="152" d="M80,152 a20,9 0 1 0 40,0 a20,9 0 1 0 -40,0 z" tabindex="0" role="button" aria-label="Lips/tongue"><title>Lips/tongue</title></path>
+            <path data-loc="ear_L" data-cx="165" data-cy="104" d="M155,104 a10,18 0 1 0 20,0 a10,18 0 1 0 -20,0 z" tabindex="0" role="button" aria-label="Ear (L)"><title>Ear (L)</title></path>
+            <path data-loc="ear_R" data-cx="35" data-cy="104" d="M25,104 a10,18 0 1 0 20,0 a10,18 0 1 0 -20,0 z" tabindex="0" role="button" aria-label="Ear (R)"><title>Ear (R)</title></path>
+            <path data-loc="neck" data-cx="100" data-cy="192" d="M80,166 h40 a8,8 0 0 1 8,8 v36 a8,8 0 0 1 -8,8 h-40 a8,8 0 0 1 -8,-8 v-36 a8,8 0 0 1 8,-8 z" tabindex="0" role="button" aria-label="Neck/throat"><title>Neck/throat</title></path>
+            </g>
+            <g class="imEchoes" id="imEchoes-head"></g>
+            <g class="imMarks" id="imMarks-head"></g>
+            <text class="imSideLbl" x="22" y="190">R</text><text class="imSideLbl" x="178" y="190">L</text>
+          </svg>
+        </figure>
+      </div>
+      <div class="imSide noprint" id="imSide"></div>
+    </div>
+    <div class="imKey" id="imKey"></div>
+    <div class="imChips noprint" id="imChips"></div>
+  </section>
+
+  <!-- ===================== SCORING ===================== -->
+  <section class="only-scoring">
+    <h2 class="nbh-band">Part II. Measurement of Surface Trauma</h2>
+    <p class="hint imPub">For each area of the body containing a current (unhealed) injury, identify the location and the number of wounds, and note the type and the severity of the worst wound at that location (Iwata et al., 1990). Number: 1 = one wound, 2 = two to four, 3 = five or more. Type: AL, abrasion or laceration (a break in the skin, superficial or deep, from tearing, biting, excessive rubbing or a sharp object); CT, contusion (a distinct area of abnormal discoloration or swelling, with or without tissue rupture, from forceful contact). Severity is scored on separate criteria for AL and CT; the list follows the type chosen.</p>
+    <div class="hint" id="imAdmLine"></div>
+    <div class="metrics" id="imIdxChart"></div>
+    <div class="tools noprint"><label class="hint" for="imAddLoc">Add a location:</label><select id="imAddLoc" aria-label="Location to add"></select><button type="button" class="tool" id="imAddBtn">Add</button><button type="button" class="tool imNewAdm">Start a new administration</button><button type="button" class="tool imSaveAdm">Save to history</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="imChart"><thead><tr>
+      <th style="width:3%">#</th><th style="width:9%">Group</th><th style="width:14%">Location</th><th style="width:12%">Number</th><th style="width:12%">Type</th><th style="width:17%">Severity</th><th style="width:9%">Kind</th><th>Comment</th><th style="width:6%">Map</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <datalist id="imKinds"><option value="abrasion"><option value="laceration"><option value="bite"><option value="bruise"><option value="scratch"><option value="pick mark"></datalist>
+    <h3 style="margin-top:14px">Part III. Scoring Summary</h3>
+    <div id="imPart3"></div>
+    <h3 style="margin-top:14px">The Published Scoring Tables</h3>
+    <div class="grid-wrap"><table class="rt imRef">
+      <tr><th class="lk">Number Index (NI)</th><td>Part II number total: 0 = no injuries &middot; 1 = 1 to 4 &middot; 2 = 5 to 8 &middot; 3 = 9 to 12 &middot; 4 = 13 to 16 &middot; 5 = 17 or more</td></tr>
+      <tr><th class="lk">Severity Index (SI)</th><td>From the frequency of severity scores: 0 = no injuries &middot; 1 = all severity scores are 1 &middot; 2 = one 2, no 3s &middot; 3 = two or more 2s, no 3s &middot; 4 = no more than one 3 &middot; 5 = two or more 3s</td></tr>
+      <tr><th class="lk">Estimate of Current Risk</th><td><b>Low</b>: no injuries, or any AL-1, CT-1 or AL-2 except near the eyes &middot; <b>Moderate</b>: any AL-2 near the eyes, any CT-2 except on the head &middot; <b>High</b>: any CT-2 on the head, any AL-3 or CT-3. &ldquo;Near the eyes&rdquo; is read as the Eye and Eye area locations and &ldquo;on the head&rdquo; as any Head-group location.</td></tr>
+    </table></div>
+  </section>
+
+  <!-- ===================== HISTORY ===================== -->
+  <section class="only-history">
+    <h2 class="nbh-band">Administrations on File</h2>
+    <p class="hint">Every saved administration with its indices. <b>Open</b> puts it back on the body map read-only; <b>Edit this one</b> opens it for correction and the next save replaces it. The indices are recomputed from the saved rows with the published tables.</p>
+    <div class="grid-wrap"><table class="rt wide" id="imHist"><thead><tr>
+      <th style="width:3%">#</th><th style="width:9%">Date</th><th style="width:13%">Examiner</th><th style="width:6%">Number total</th><th style="width:5%">NI</th><th style="width:5%">SI</th><th style="width:16%">Injured locations</th><th style="width:8%">Risk</th><th>Rule that set the risk</th><th style="width:12%" class="noprint">Open</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div class="instr imSched" id="imSchedHist"></div>
+    <h3 style="margin-top:14px">Number Index and Severity Index over Administrations</h3>
+    <div class="grid-wrap plotwrap" tabindex="0" role="region" aria-label="Number Index and Severity Index by administration"><svg id="imPlot" viewBox="0 0 900 340" aria-label="Number Index and Severity Index per administration, with the Estimate of Current Risk under the axis"></svg></div>
+    <div class="tools noprint"><button class="tool" id="imPngBtn" type="button">Save graph as image</button><span class="hint">A PNG of the graph for the report.</span></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Nurse Checks</h2>
+    <p class="hint">The nurse&rsquo;s own checks between and alongside the administrations: what was found, what was done, and any referral. This log is the form&rsquo;s convention; the paper suggests wound care on a fixed- or variable-time schedule independent of the behavior, so that care does not follow the behavior as attention or escape.</p>
+    <div class="tools"><button class="tool" id="addNurse">Add a check</button></div>
+    <div class="grid-wrap"><table class="rt wide" id="imNurse"><thead><tr>
+      <th style="width:3%">#</th><th style="width:10%">Date</th><th style="width:14%">Who</th><th>Findings</th><th style="width:22%">Action taken</th><th style="width:16%">Referral</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What the SIT Scale Is</h2>
+    <p>The Self-Injury Trauma (SIT) Scale (Iwata, Pace, Kissel, Nau, &amp; Farber, 1990) classifies and quantifies the surface tissue damage caused by self-injurious behavior: the topography of the behavior, the location of each injury on the body, its type, the number of wounds, and an estimate of severity, reduced to three summary scores. It measures the <em>outcome</em> of the behavior, not the behavior. The authors give four uses: an outcome measure beside the rate of the behavior, since a topography at a given rate and intensity should produce damage to count as self-injury and a treated behavior should leave the trauma to disappear; a basis for social validity, because the social relevance of self-injury lies in its traumatic outcome; an estimate of risk, which frequency alone estimates poorly because damage is a function of intensity as well; and a check on reports from others (a parent&rsquo;s or teacher&rsquo;s report of low rates with injuries still present calls for direct verification). In the language of Cooper, Heron and Heward (2020) it is a measure by permanent product; the direct measures of the behavior stay on Form DD-1 and Form OB-1, and the paper is explicit that trauma scores cannot replace them.</p>
+    <p>The scale grew from the trauma scales of emergency medicine, which are built for injuries from minor to fatal and lack the sensitivity to separate the mostly minor injuries of self-injury; from the authors&rsquo; experience with over 200 self-injurious individuals; from pilot use with nine subjects; and from physicians&rsquo; input. Abrasions and lacerations were collapsed into one type because an extensive localized abrasion is functionally a laceration (both are a distinct break in the skin); burns were dropped for their rarity as self-injury; and measurement of length and area was abandoned because depth and swelling could not be measured non-invasively, in favor of described observable states of the wound, written by a physician among the authors.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">Administering It</h2>
+    <table class="rt">
+      <tr><th style="width:26%">Who examines</th><td>Someone trained in the scale, by direct examination of the student. In this practice that is the school nurse where possible, or the BCBA after practice scoring with the nurse; the two examining the same student independently once or twice is the check that the records agree. In the paper the examinations averaged 11.7 minutes.</td></tr>
+      <tr><th>Part I, once</th><td>The topography checklist and the healed injuries are documented at intake as a record of the student&rsquo;s history. The paper notes that restraint, close attendance and medication artificially reduce the observable trauma, so the healed injuries may be the better guide to what the behavior does when unprevented; and that a healed injury may show a form of self-injury that could reappear.</td></tr>
+      <tr><th>Part II, each administration</th><td>For each location, the examiner first notes whether an injury is present, counts the wounds there and assigns the number score (1, 2 or 3); then identifies the most severe injury at that location as AL or CT and gives it a severity score on that type&rsquo;s criteria. Only the worst wound at a location is typed and rated, because lesser wounds do not enter the severity or risk summary. On this form each location is a row of the chart and a region of the body map; the marker carries the number score and the colour of the severity.</td></tr>
+      <tr><th>Repeat administrations</th><td>The paper scheduled repeated examinations at least one week apart (on average 24 days) so that an observer was not scoring the same injuries again. This form&rsquo;s schedule, intake then every <i>n</i> weeks and again after any restraint or injury report, is the practice&rsquo;s convention written on the Setup page, not part of the published scale. Keep the examiner and the time of day the same across administrations.</td></tr>
+      <tr><th>Record keeping</th><td>&ldquo;Save to history&rdquo; files the administration with its map and chart; &ldquo;Start a new administration&rdquo; dates a fresh one. The History page graphs the Number Index and the Severity Index over administrations with the risk under the axis, and the nurse log sits beside them. The data file (Save data) holds everything; the CSV carries one row per injured location per administration plus the nurse log.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Scoring, as Published</h2>
+    <table class="rt">
+      <tr><th style="width:26%">Number (per location)</th><td>1 = one wound; 2 = two to four wounds; 3 = five or more. The authors chose ranks over counts because number is confounded with type (one hard blow leaves one contusion, one bite leaves several small lacerations, an abrasion a dozen small lesions) and because the injury at any one location is usually limited.</td></tr>
+      <tr><th>Type (the worst wound)</th><td><b>AL</b>, abrasion or laceration: a break in the skin, either superficial or deep, caused by tearing, biting, excessive rubbing, or contact with a sharp object. <b>CT</b>, contusion: a distinct area marked by abnormal discoloration or swelling, with or without tissue rupture, caused by forceful contact. The form&rsquo;s &ldquo;kind&rdquo; column (abrasion, laceration, bite, bruise) is a free note beside the type and does not enter the scoring.</td></tr>
+      <tr><th>Severity for AL</th><td>1 = area is red or irritated, with only spotted breaks in the skin; 2 = break in the skin is distinct but superficial, no avulsion; 3 = break in the skin is deep or extensive, or avulsion is present.</td></tr>
+      <tr><th>Severity for CT</th><td>1 = local swelling only, or discoloration without swelling; 2 = extensive swelling; 3 = disfigurement or tissue rupture.</td></tr>
+      <tr><th>Number Index (NI)</th><td>Add the Number column of Part II and rank the total: 0 = no injuries; 1 = 1 to 4; 2 = 5 to 8; 3 = 9 to 12; 4 = 13 to 16; 5 = 17 or more.</td></tr>
+      <tr><th>Severity Index (SI)</th><td>From the frequency of the severity scores: 0 = no injuries; 1 = all severity scores are 1; 2 = one 2 and no 3s; 3 = two or more 2s and no 3s; 4 = no more than one 3; 5 = two or more 3s. Severity scores limited to 1 give an SI of 1, scores of 2 give 2 or 3, scores of 3 give 4 or 5.</td></tr>
+      <tr><th>Estimate of Current Risk</th><td>A conservative estimate from the single occurrence of certain injuries rather than a weighted score. <b>Low</b>: no injuries, or any AL-1, CT-1 or AL-2 except near the eyes. <b>Moderate</b>: any AL-2 near the eyes, any CT-2 except on the head. <b>High</b>: any CT-2 on the head, any AL-3 or CT-3. The form reads &ldquo;near the eyes&rdquo; as the Eye and Eye area locations and &ldquo;on the head&rdquo; as any location in the Head group, and names the injury that set the band.</td></tr>
+      <tr><th>What the bands mean</th><td>In the paper a High estimate (an extensive abrasion or deep laceration, a contusion with skin rupture, extensive swelling on the head) requires immediate medical attention and then prevention or rapid elimination of the behavior; here that is the medical review on Form CR-1, the nurse, and the prescriber where medication is in play. Moderate and Low injuries require medical attention as needed and periodic monitoring, and can usually be allowed to occur during behavioral assessment and treatment; the authors add that low-risk injuries cannot be ignored, since they also require intervention to prevent further and perhaps more serious trauma.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Interrater Agreement Reported for the Scale</h2>
+    <p>Fifty pairs of independently scored records on 35 subjects aged 3 to 19 (each examined one to three times by two observers, the reliability examination immediately after the primary one) gave these mean percentage agreements: overall, across every scorable item of Part II, 97%; location of injury 99%; type 96%; number 89%; severity 94%; and for the summary scores, Number Index 90%, Severity Index 92%, Estimate of Current Risk 100%. The category calculations were stringent (exact agreement on scored locations only, blank-box agreements excluded); the few disagreements on NI and SI were one rank apart, and there were none on risk. In that referred sample most subjects (28 of 35) were judged low or moderate risk, and subjects with more injuries tended to have more serious ones, a relation the authors say is not causal.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">Limits</h2>
+    <table class="rt">
+      <tr><th style="width:26%">Outcome is not behavior</th><td>Trauma is a function of topography, intensity, frequency and location together, so the indices say little about any one dimension and may miss small or short-term changes in the behavior; trauma stays visible for hours or days after the behavior has stopped, and the behavior can rise within limits without producing more trauma. The authors therefore find SIT scores more suitable for follow-up than for short-term treatment effects, and never a substitute for direct observation (Form DD-1, Form OB-1).</td></tr>
+      <tr><th>Externally visible damage only</th><td>The scale is insensitive to internal injury. Pica, vomiting and air swallowing produce damage that is not visible; head banging can produce skull fracture, hemorrhage or retinal damage as well as what shows. A student whose self-injury may affect internal anatomy (aerophagia, chronic vomiting or rumination, pica, forceful contact) is referred to a specialist for evaluation.</td></tr>
+      <tr><th>Risk is read from the past</th><td>The estimate rests on damage from past episodes; it cannot foresee a rise in intensity or a shift in topography (face punching that moves to the eyes). The authors make this the case for continued medical involvement in severe self-injury.</td></tr>
+      <tr><th>Hair pulling</th><td>Classified as self-injury in the research literature but producing negligible trauma; it is recorded in Part I and scored nowhere.</td></tr>
+      <tr><th>Function and the plan</th><td>The scale says nothing about why the behavior occurs. Self-injury maintained by automatic reinforcement is common and often needs a different plan from socially maintained self-injury (Hagopian, Rooker, &amp; Zarcone, 2015 describe its subtypes); the function stays with Form FS-1.</td></tr>
+    </table>
+
+    <h2 class="nbh-band" style="margin-top:16px">Where This Form&rsquo;s Conventions Are Its Own</h2>
+    <p>The body map, its markers and the left-and-right labelling; the re-examination schedule (intake, every <i>n</i> weeks, after a restraint or injury report) and its due dates; the nurse log; the &ldquo;kind&rdquo; note beside the type; the history and the graph; and the reading of &ldquo;near the eyes&rdquo; and &ldquo;on the head&rdquo; stated above. Everything in the scoring itself (the locations, the number ranks, the two types and their severity criteria, the three indices and the risk rule) is the published scale.</p>
+
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated case is a student who hits the head and bites the hand, examined three times over six weeks while a plan takes hold: at intake a contusion with extensive swelling on the scalp sets a High estimate; three weeks later the scalp has settled and a forearm contusion with swelling sets Moderate; at six weeks one small abrasion on the hand is Low. One nurse check accompanies each administration, and a restraint between the first two administrations shows the schedule asking for, and finding, the examination that followed it.</p>
+    <p class="hint" id="imRefs" style="margin-top:10px"><b>Reference list.</b>
+    Cooper, J. O., Heron, T. E., &amp; Heward, W. L. (2020). <em>Applied behavior analysis</em> (3rd ed.). Pearson. &bull;
+    Hagopian, L. P., Rooker, G. W., &amp; Zarcone, J. R. (2015). Delineating subtypes of self-injurious behavior maintained by automatic reinforcement. <em>Journal of Applied Behavior Analysis, 48</em>(3), 523&ndash;543. &bull;
+    Iwata, B. A., Pace, G. M., Kissel, R. C., Nau, P. A., &amp; Farber, J. M. (1990). The Self-Injury Trauma (SIT) Scale: A method for quantifying surface tissue damage caused by self-injurious behavior. <em>Journal of Applied Behavior Analysis, 23</em>(1), 99&ndash;110.</p>
+  </section>

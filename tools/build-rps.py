@@ -22,11 +22,11 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 
 # (old, new, how many times it must be replaced across all files)
 EXPECT = [
-  (old_logo, new_logo, 43),    # v21.36: once per form (the nbh-logo script) and once in index.html
+  (old_logo, new_logo, 44),    # v21.36: once per form (the nbh-logo script) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 158),   # 157 logos + the packet cover's
-  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 43),
-  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 43),
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 160),   # the masthead and print-head images of the 43 forms (several print more than one head) + the index + the packet cover
+  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 44),
+  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 44),
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),
