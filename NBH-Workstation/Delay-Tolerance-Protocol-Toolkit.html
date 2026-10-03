@@ -861,7 +861,7 @@ td input,td select{max-width:100%}
   <table><caption>Trial record. SC = self-control (larger-later) option; IMP = impulsive (smaller-sooner) option; IMM = immediate-reinforcement trial (no delay programmed). On an IMM trial, Choice, Latency, TR and Engaged are left blank: there is no delay to choose, start or wait through.</caption>
     <thead><tr><th class="num" style="width:5%">#</th><th style="width:9%">Trial type</th><th style="width:9%">Choice</th><th class="num" style="width:8%">Prog. delay (s)</th><th class="num" style="width:8%">Obt. delay (s)</th><th class="num" style="width:8%">Latency (s)</th><th style="width:9%">TR</th><th style="width:9%">Engaged</th><th class="num" style="width:7%">Prob. beh.</th><th class="num" style="width:7%">Collat.</th><th>Notes</th></tr></thead>
     <tbody id="tbTrials"></tbody></table>
-  <div class="rowbtns"><button class="tool" data-add="tbTrials">Add trial</button><button class="tool" id="btnTrials10">Add 10 trials</button></div>
+  <div class="rowbtns"><button class="tool" data-add="tbTrials">Add trial</button><button class="tool" id="btnTrials10">Add 10 trials</button><button class="tool" id="btnCarry">Carry this session to Progress and Delay accuracy</button></div>
   <div class="readout">
     <div><span>Self-control choices, delay trials</span><strong id="oSC">&mdash;</strong></div>
     <div><span>Delay trials completed</span><strong id="oDone">&mdash;</strong></div>
@@ -883,7 +883,7 @@ td input,td select{max-width:100%}
   <table><thead><tr><th class="num" style="width:6%">Sess.</th><th style="width:11%">Date</th><th style="width:13%">Phase</th><th class="num" style="width:9%">Prog. delay (s)</th><th class="num" style="width:9%">Delay achieved (s)</th><th class="num" style="width:8%">% SC</th><th class="num" style="width:8%">PB / min</th><th class="num" style="width:8%">% engaged</th><th>Decision</th><th style="width:5%"></th></tr></thead><tbody id="tbProg"></tbody></table>
   <div class="rowbtns"><button class="tool" data-add="tbProg">Add session</button><button class="tool" id="btnPlot">Draw graph</button></div>
   <svg class="plot" id="progPlot" viewBox="0 0 640 240" aria-label="Progress graph"></svg>
-  <p class="small">Solid line: % self-control choice. Dashed line: delay achieved (s). Vertical rules: phase changes. Each row carries its session sheet's figures: % SC on delay trials, the delay achieved as the mean obtained delay on the delay trials completed, problem behavior per minute, and the % of delay trials engaged. Visual analysis per Finch et al.'s scoring rule: an application counts as successful only when there is a systematic change in the intended direction <em>and</em> the design permits confident attribution to the intervention.</p>
+  <p class="small">Solid line: % self-control choice. Dashed line: delay achieved (s). Vertical rules: phase changes. Each row carries its session sheet's figures: % SC on delay trials, the delay achieved as the mean obtained delay on the delay trials completed, problem behavior per minute, and the % of delay trials engaged (the Carry button on Tab 5 writes them). Visual analysis per Finch et al.'s scoring rule: an application counts as successful only when there is a systematic change in the intended direction <em>and</em> the design permits confident attribution to the intervention.</p>
   <h3>Design and Attribution</h3>
   <div class="grid g2">
     <div><label class="f">Experimental design</label><select name="pg_design"><option value=""></option><option>Reversal (ABAB)</option><option>Multiple baseline across settings</option><option>Multiple baseline across participants</option><option>Multielement (condition comparison)</option><option>Changing criterion (fading steps)</option><option>AB, non-experimental</option></select></div>
@@ -1498,8 +1498,29 @@ function summarizeTrials(){
   $('#oObt').textContent=fmt(mean(obt),1);$('#oDiff').textContent=fmt(mean(diff),1);$('#oLat').textContent=fmt(mean(lat),1);
   $('#oTR').textContent=trs.length?pct(trI,trs.length):'\u2014';$('#oEng').textContent=eng.length?pct(engY,eng.length):'\u2014';
   $('#oPB').textContent=R.length?`${pb}${len?' / '+fmt(pb/len,2):''}`:'\u2014';
+  /* v21.37: the figures the Progress table and the Delay accuracy log carry, as the Progress note defines them */
+  const completed=ran.filter(v=>num(v[2])!=null&&num(v[3])>=num(v[2])).map(v=>num(v[3]));
+  return {trials:R.length,delay:delayTrials.length,sc:choiceTrials.length?100*sc/choiceTrials.length:null,obt:mean(obt),achieved:mean(completed),pbm:(R.length&&len)?pb/len:null,eng:eng.length?100*engY/eng.length:null};
 }
 $('[name=ss_len]').addEventListener('input',summarizeTrials);
+/* v21.37: one press carries the session sheet's figures to the Progress table (% SC on delay trials, the delay achieved as the
+   mean obtained delay on the delay trials completed, problem behavior per minute, % of delay trials engaged) and the mean
+   obtained delay to the Delay accuracy log, instead of copying them by hand. A Progress row with the same session number is
+   replaced after a question; the Delay accuracy log gets a new row. */
+$('#btnCarry').addEventListener('click',async ()=>{
+  const o=summarizeTrials();const n=num($('[name=ss_num]').value);
+  if(!o.trials||!n){alert('Enter the session number and at least one trial first.');return}
+  const r1=v=>v==null?'':String(Math.round(v*10)/10),r2=v=>v==null?'':String(Math.round(v*100)/100);
+  const date=$('[name=ss_date]').value,phase=$('[name=ss_phase]').value,prog=$('[name=ss_delay]').value;
+  const vp=[String(n),date,phase,prog,r1(o.achieved),r1(o.sc),r2(o.pbm),r1(o.eng)];
+  const same=rows('tbProg').find(tr=>num(vals(tr)[0])===n);
+  if(same&&!(await nbhUI.confirm('Replace session '+n+' in the Progress table?\nIts row is rewritten from this session sheet; the decision is kept.',{ok:'Replace'})))return;
+  if(same){const f=same.querySelectorAll('input,select');vp.forEach((v,i)=>{f[i].value=v});recalc('tbProg')}
+  else{const empty=rows('tbProg').find(tr=>vals(tr).every(v=>!String(v).trim()));if(empty){const f=empty.querySelectorAll('input,select');vp.forEach((v,i)=>{f[i].value=v});recalc('tbProg')}else addRow('tbProg',vp)}
+  const vd=[date,phase,prog,r1(o.obt)];const emptyD=rows('tbDA').find(tr=>vals(tr).every(v=>!String(v).trim()));
+  if(emptyD){const f=emptyD.querySelectorAll('input,select');vd.forEach((v,i)=>{f[i].value=v});recalc('tbDA')}else addRow('tbDA',vd);
+  alert('Session '+n+' carried: '+(same?'Progress row replaced':'Progress row added')+' and a Delay accuracy row added. Write the decision in Tab 6 and the action in Tab 7.');
+});
 
 /* ---------- progress graph ---------- */
 $('#btnPlot').addEventListener('click',drawProg);
