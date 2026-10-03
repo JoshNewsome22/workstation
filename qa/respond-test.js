@@ -22,20 +22,20 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  ok('page file named by instrument, behavior and label; personalized; no full name',/^IA-1_FAST_Self-injury_respondent_G\.S\._ID_12345_\.html$/.test(f1.r)&&/Does he seem to enjoy self-injury/.test(f1.text)&&/"def":"Forceful contact/.test(f1.text)&&!/Georgi Sample/.test(f1.text),f1.r);
  /* the informant answers it */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(f1.text,{waitUntil:'load'});await sleep(300);
- const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,q2:document.querySelectorAll('li.it .q')[1].textContent,def:document.querySelector('.def').textContent,conf:!!document.querySelector('#nbhr-confirm')}));
- ok('page shows the definition, the confirmation, and the personalized items',r1.items===16&&/How often does self-injury occur\?/.test(r1.q2)&&/What counts as Self-injury: Forceful contact/.test(r1.def)&&r1.conf,r1);
+ const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,q2:document.querySelectorAll('li.it .q')[1].textContent,def:document.querySelector('.def').textContent,conf:document.querySelectorAll('input[name=nbhr-confirm]').length===3&&/Do you understand this definition of Self-injury/.test(document.querySelector('#nbhr-conf').textContent)}));
+ ok('page shows the definition, the Yes / No / Unsure question about it, and the personalized items',r1.items===16&&/How often does self-injury occur\?/.test(r1.q2)&&/What counts as Self-injury: Forceful contact/.test(r1.def)&&r1.conf,r1);
  await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Ms. Rivera';inp[1].value='Teacher';inp[2].value='14';document.querySelector('select').value='Yes';inp[3].value='Classroom, lunch';
    const pat=['Y','N','NA','Y','N','Y','Y','N','N','N','Y','NA','N','N','Y','N'];document.querySelectorAll('li.it').forEach((li,i)=>{li.querySelector('input[value="'+pat[i]+'"]').click();});document.querySelectorAll('textarea')[0].value='Independent math work';document.querySelector('button:not(.ghost)').click();});await sleep(150);
- ok('send refuses until the definition is confirmed',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/confirmation/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden));
- await rp.evaluate(()=>{document.querySelector('#nbhr-confirm').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
+ ok('send refuses until the definition question is answered',await rp.evaluate(()=>!document.querySelector('.warn').hidden&&/understand the definition/.test(document.querySelector('.warn').textContent)&&document.querySelector('.code').hidden));
+ await rp.evaluate(()=>{document.querySelector('input[name=nbhr-confirm][value=yes]').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
  const sent=await rp.evaluate(()=>({code:document.querySelector('.code').value,mail:document.querySelector('#nbhr-mail').getAttribute('href'),done:!document.querySelector('.done').hidden}));
  const dec=await page.evaluate(c=>NBH_RESPOND.decode(c),sent.code);
- ok('Send gives a code carrying the behavior and the confirmation, and a mailto to the assessor',/^NBH1\./.test(sent.code)&&dec.beh==='Self-injury'&&dec.confirmed===true&&dec.ans.length===16&&/^mailto:bcba%40example\.org\?subject=FAST%20answers/.test(sent.mail)&&sent.mail.length<1900,{dec,len:sent.mail.length});
+ ok('Send gives a code carrying the behavior and the definition answer, and a mailto to the assessor',/^NBH1\./.test(sent.code)&&dec.beh==='Self-injury'&&dec.confirmed==='yes'&&dec.ans.length===16&&/^mailto:bcba%40example\.org\?subject=FAST%20answers/.test(sent.mail)&&sent.mail.length<1900,{dec,len:sent.mail.length});
  /* a second respondent's code about the other target, made from the Elopement page */
  await page.evaluate(()=>{rpTarget.value='1';rpTarget.dispatchEvent(new Event('change'));});
  const f2=await grab(page,()=>__rp.file());
  await rp.setContent(f2.text,{waitUntil:'load'});await sleep(200);
- await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='Para';document.querySelectorAll('li.it').forEach(li=>li.querySelector('input[value="N"]').click());document.querySelector('#nbhr-confirm').click();document.querySelector('button:not(.ghost)').click();});await sleep(200);
+ await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='Para';document.querySelectorAll('li.it').forEach(li=>li.querySelector('input[value="N"]').click());document.querySelector('input[name=nbhr-confirm][value=yes]').click();document.querySelector('button:not(.ghost)').click();});await sleep(200);
  const code2=await rp.evaluate(()=>document.querySelector('.code').value);
  ok('the second page is about Elopement with its own definition',/"def":"Leaving the assigned area/.test(f2.text)&&/"behLabel":"Elopement"/.test(f2.text)&&/Elopement_respondent/.test(f2.r),f2.r);
  /* every target at once: two files, two links */
@@ -47,7 +47,7 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  await page.evaluate(()=>document.querySelector('#rcBtn').click());await sleep(150);
  await page.evaluate(({a,b})=>{rcText.value='From: Ms. Rivera\n\n'+a+'\n\n--\n'+b;__rp.read([rcText.value]);},{a:sent.code,b:code2});await sleep(100);
  const found=await page.evaluate(()=>({rows:document.querySelectorAll('#rcOut tbody tr').length,txt:document.querySelector('#rcOut').textContent,held:document.querySelectorAll('.rp-other').length,copy:!!document.querySelector('#rcOut [data-copy]')}));
- ok('one FAST response about Self-injury listed as confirmed; the Elopement one held with a copy button',found.rows===1&&/about Self-injury: 1 response found/.test(found.txt)&&/confirmed/.test(found.txt)&&found.held===1&&/1 response about Elopement/.test(found.txt)&&found.copy,found.txt.slice(0,300));
+ ok('one FAST response about Self-injury listed as understood; the Elopement one held with a copy button',found.rows===1&&/about Self-injury: 1 response found/.test(found.txt)&&/understood/.test(found.txt)&&found.held===1&&/1 response about Elopement/.test(found.txt)&&found.copy,found.txt.slice(0,300));
  await page.evaluate(()=>document.querySelector('#rcGo').click());await sleep(300);
  const placed=await page.evaluate(()=>{const v=n=>document.querySelector('[name="'+n+'"]').value;return {a:[1,2,3,4,16].map(i=>v('fast[0]['+i+']')),name:v('inf[0].name'),role:v('inf[0].role'),mo:v('inf[0].mo'),daily:v('inf[0].daily'),ml:v('fast.ml_s'),banner:document.querySelector('#gfBanner').textContent,view:document.body.className};});
  ok('answers placed on the FAST worksheet, informant table and Section 1',placed.a.join()==='Y,N,NA,Y,N'&&placed.name==='Ms. Rivera'&&placed.role==='Teacher'&&placed.mo==='14'&&placed.daily==='Yes'&&/A: Independent math work/.test(placed.ml)&&/Collected 1 FAST response about Self-injury/.test(placed.banner)&&placed.view==='view-fast',placed);
@@ -58,7 +58,7 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  await rp.goto(link2);await sleep(500);
  const r2=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,nums:document.querySelectorAll('li.it:first-child .opts label').length,key:(document.querySelector('.key')||{}).textContent||''}));
  ok('respond.html renders the PBQ from the link: 15 items, 0 to 6, with the anchors',r2.items===15&&r2.nums===7&&/about 10%/.test(r2.key),r2);
- await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='Para';document.querySelectorAll('li.it').forEach((li,i)=>{li.querySelector('input[value="'+(i%7)+'"]').click();});document.querySelector('#nbhr-confirm').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
+ await rp.evaluate(()=>{const inp=document.querySelectorAll('input[type=text]');inp[0].value='Mr. Okafor';inp[1].value='Para';document.querySelectorAll('li.it').forEach((li,i)=>{li.querySelector('input[value="'+(i%7)+'"]').click();});document.querySelector('input[name=nbhr-confirm][value=yes]').click();document.querySelector('button:not(.ghost)').click();});await sleep(300);
  const code3=await rp.evaluate(()=>document.querySelector('.code').value);
  await page.evaluate(()=>{const e=document.querySelector('[name="m.beh"]');e.value='';e.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#rcBtn').click();});await sleep(100);
  await page.evaluate(c=>{rcText.value=c;__rp.read([c]);},code3);await sleep(100);

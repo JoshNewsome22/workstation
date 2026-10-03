@@ -55,7 +55,7 @@
       '.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
       '.nr .done{background:#e8f3ec;border-left:4px solid #2f6b37;padding:10px 12px;margin:10px 0}.nr .code{width:100%;font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:90px}'+
       '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
-      '.nr label.conf{display:flex;gap:10px;align-items:flex-start;background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0;font-size:15px;cursor:pointer}.nr label.conf input{width:22px;height:22px;margin:2px 0 0;flex:0 0 auto}'+
+      '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:15px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
       '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     root.innerHTML='';root.className='nr';
@@ -63,11 +63,20 @@
     var ans=new Array(items.length).fill(''),prog;
     function answered(){var k=0;ans.forEach(function(a){if(a!=='')k++;});return k;}
     function paint(){prog.innerHTML='<b>'+answered()+' of '+items.length+'</b> answered';}
+    /* the definition question: Yes / No / Unsure, required when the payload asks for it */
+    var conf='';
+    function confBlock(){var w=h('div',{'class':'conf',id:'nbhr-conf'});w.appendChild(h('p',{'class':'q',html:'<b>Do you understand this definition of '+esc(P.beh||'the behavior')+'?</b> <span class="req">*</span>'}));
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Do you understand the definition'}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
+      [['yes','Yes'],['no','No'],['unsure','Unsure']].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
+        r.addEventListener('change',function(){conf=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');w.classList.remove('missing');
+          note.hidden=conf==='yes';note.textContent=conf==='yes'?'':'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.';});
+        opts.appendChild(lab);});
+      w.appendChild(opts);w.appendChild(note);return w;}
     /* head */
     var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?'Form '+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||'Questionnaire')}),
       h('p',{'class':'sub',text:(P.sub||'')}),
       h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
-      P.confirm?h('label',{'class':'conf',id:'nbhr-conf'},[h('input',{type:'checkbox',id:'nbhr-confirm'}),' I have read the definition of '+(P.beh||'the behavior')+' above, I understand it, and my answers below are about that behavior only.']):null,
+      P.confirm?confBlock():null,
       h('p',{'class':'sub',text:P.instructions||'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send: your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'}),
       P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null]);
     root.appendChild(card);
@@ -111,7 +120,7 @@
     sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
-      if(P.confirm)r.confirmed=!!(d.getElementById('nbhr-confirm')&&d.getElementById('nbhr-confirm').checked);
+      if(P.confirm)r.confirmed=conf;
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
     var lastCode='';
@@ -120,7 +129,7 @@
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
     send.addEventListener('click',function(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
       var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;});
-      if(P.confirm&&!(d.getElementById('nbhr-confirm')&&d.getElementById('nbhr-confirm').checked))need.push('the confirmation that you have read the definition');
+      if(P.confirm&&!conf){need.push('whether you understand the definition');var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
       if(need.length||miss.length){warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. Answer each one (N/A counts) and press Send again.':'');
         if(need.length||miss.length>Math.max(0,items.length-1))return;}
