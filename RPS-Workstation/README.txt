@@ -37,6 +37,14 @@ Double-click index.html. Everything runs from this folder.
   - Load simulation on a form fills it with a worked example and says so in
     one line; the form's Guide explains what the example shows. Nothing in a
     simulation is a real student record.
+  - Respondent pages: IA-1 (and SV-1, CF-1, IN-1) make a one-page questionnaire
+    per instrument and per target behavior, personalized with the student's
+    name, pronouns and the behavior's own terms, as a file to attach or a link
+    on the website. The informant confirms the definition, answers and presses
+    Send; an email to you opens with the answers as a code, and "Collect
+    responses" reads the codes back onto the worksheet. The instruments'
+    wording is pasted once on IA-1's Setup sheet from your own copy. Keep
+    nbh-respond.js and respond.html beside the forms.
   - IM-1 records self-injury on a body map: the Self-Injury Trauma Scale
     (Iwata et al., 1990) scored as published, every administration kept,
     the indices graphed over time, the nurse's checks logged beside them.

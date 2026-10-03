@@ -5013,7 +5013,7 @@ without overflow, no console or page error.
 
 Registration: the index's form list and case map, the counts in the
 Help, the READMEs and the build scripts (43 forms), and the RPS build's
-replacement expectations (44 logos, 159 alt texts).
+replacement expectations (44 logos, 160 alt texts).
 
 ### PA-1: the names typed in the pool reach every sheet
 
@@ -5029,3 +5029,187 @@ shows everywhere at once. Verified by typing three names on a blank
 form (no "Item n" text left on any sheet) and renaming an item after
 the simulation (the re-test table, the validation selects and the
 monitoring select follow).
+## Respondent Pages: Questionnaires Sent Out and Collected Back by Email (v21.39)
+
+The indirect assessments are informant reports, and the informants are
+rarely in the room. Form IA-1 could already import the responses
+spreadsheet of a Google Form (v21.2x, `Import Google Forms responses`).
+It can now make its own questionnaires and read them back, with no
+account, no server and nothing installed.
+
+### The shared library (`nbh-respond.js`, `respond.html`)
+
+`nbh-respond.js` sits beside the forms like the picture library (one
+copy; the one-file edition carries it once as `nbh-embed-respond` and
+puts it into a form's `<script src="nbh-respond.js">` tag as the form
+opens; the shell's Diagnostics lists it). It offers `pageHTML(payload)`,
+a self-contained HTML questionnaire (the runtime function's own source
+is copied into the page, so the page needs nothing beside it: it works
+from an email attachment, offline, on a phone); `payloadToHash` and
+`payloadFromHash`, for `respond.html`, a thin hosted page that renders
+the questionnaire carried in the link's `#p=` fragment; and `encode`,
+`decode`, `find`, for the answer code. A payload names the form, the
+instrument, the student label, the behavior, the assessor and the
+reply address, the items with their scale (yes / no / N/A, or a
+numeric range with its anchors), the respondent fields and any
+open-ended questions. The respondent answers (large touch targets, a
+running count, every item required, N/A counting), presses Send, and
+the page builds the answer code (`NBH1.` and the response as
+base64url JSON: form, instrument, student label, the answers, the
+respondent's details, the open answers, the date) and opens the
+assessor's email program with the code in a message to the reply
+address; the page also shows the code (Copy the code) and saves it as
+a small file, for mail systems that strip bodies. The page stores
+nothing and sends nothing on its own; the student appears as initials
+and ID.
+
+### IA-1
+
+- **Setup** gains the assessor's email (`m.email`) and **Item Wording
+  for Respondent Pages**: one box per instrument (FAST 16, QABF 25, MAS
+  16, PBQ 15 or 18), pasted once from the assessor's own copy of the
+  published instrument (the wording is not built into the workstation),
+  numbered or not, counted live, saved with the file (`rp.w.<inst>`)
+  and therefore in every case file; it does not print.
+- **Respondent pages** (toolbar) opens a dialog prefilled with the
+  instrument, the student label (initials and ID from the Setup
+  sheet, editable), the reply email, the behavior (label and
+  definition) and a due date, with the FAST's open-ended questions as
+  an option; it refuses with a reason when the wording is missing or
+  short, the email is empty or the library is absent. **Save the page
+  as a file** downloads `IA-1_<INST>_respondent_<label>.html`; **Copy a
+  link** copies `respond.html#p=...` when the workstation is served
+  from a website (opened from a folder it says to send the file);
+  **Preview** opens the page.
+- **Collect responses** (toolbar) takes pasted emails (whole messages;
+  only the `NBH1.` codes are read) or the respondents' saved files,
+  lists the responses of the instrument found (name, relationship,
+  date, answers read, the informant slot each goes to, up to five), and
+  places them through the step the Google Forms import uses
+  (`importResponses`, now shared): the worksheet's informant columns,
+  the informant table (name, relationship, months known, daily
+  contact, setting) and, for the FAST, Section 1's open answers. Codes
+  from another form are refused by name.
+- The Guide's Informants paragraph says so, with the PHI rule.
+
+`qa/respond-test.js` (eighteen checks): the library beside the form,
+the dialog prefilled, the refusal without wording, the page file (named,
+self-contained, carrying the wording and no full name), the link, the
+page rendering sixteen items with the open questions, the send that
+asks for the name first, the code and the mailto (under 1,900
+characters), the collector finding and placing the response (answers,
+informant table, Section 1), the PBQ through the hosted link with its
+anchors and the 15-item version, the wording and email in the saved
+file and back after reopening, no console or page error.
+
+### One page per target behavior, personalized, with the definition confirmed
+
+- **Targets from the case.** The dialog's Target behavior select lists
+  this form's own target (Setup) and every target the case holds from
+  Form TB-1 (replacements left out), and "Every target above (one page
+  each)". Each chosen target gets a row: the term used in a sentence
+  ("How often does ___ occur?"), the plural phrase ("How severe are
+  ___ when they occur?") and the definition the page shows; the terms
+  are remembered per target (`rp.terms`) with the file.
+- **Personalized wording.** `NBH_RESPOND.personalize(text, {name,
+  pron, beh, behs})` rewrites a pasted item: "the student", "the
+  client", "the individual", "the child" (and their possessives)
+  become the student's first name (`rp.name`, from the Setup name,
+  editable, blank for "the student"); "he or she", "him or her", "his
+  or her", "himself or herself" become the chosen pronouns (`rp.pron`:
+  he, she or they, with the verb after "they" agreed); "the problem
+  behavior", "the target behavior", "the behavior" become the
+  behavior's term and the plural forms its plural phrase, capitalized
+  as the original was. The dialog previews the first three items as
+  the page will read them. So "In what situations do you usually
+  interact with the student?" reads "...with Georgi?", "How often does
+  the problem behavior occur?" reads "How often does self-injury
+  occur?", and "How severe are the problem behaviors when they occur?"
+  reads "How severe are self-injurious behaviors when they occur?".
+- **The definition, confirmed.** The page shows "What counts as
+  <behavior>" with the definition and, when the option is on, a
+  required question in the shape of the Google Form it replaces: "Do
+  you understand this definition of <behavior>? Yes / No / Unsure".
+  Send refuses until it is answered. No or Unsure shows a note asking
+  the respondent to check with the BCBA first (name and email) and to
+  answer only about what matches the definition; they can still send,
+  and the answer travels in the code as `confirmed` (yes / no /
+  unsure), which Collect responses shows per respondent as
+  "understood", "did not understand" or "unsure".
+- **Collect responses by target.** Every code carries its target's
+  label. Responses about this form's target are placed; responses
+  about another target are held with a count and a "Copy those codes"
+  button for that behavior's own IA-1 file (one IA-1 per target, as
+  the form is designed); a form with no target named takes the target
+  from the responses and writes it to Setup.
+- Files are named by instrument, target and label
+  (`IA-1_FAST_Self-injury_respondent_G.S._ID_12345_.html`); "Every
+  target" saves one file per target and copies one link per target.
+
+### SV-1, CF-1 and IN-1
+
+The three other forms that ask other people for their views got the
+same two toolbar buttons, **Respondent pages** and **Collect
+responses**, the same reply-address field on their Setup sheet
+(`email`, saved with the file), a Guide paragraph that does not print,
+and the same shape of dialog: who the page is for, the student as
+initials and ID, the reply email, then **Save the page as a file**,
+**Copy a link** and **Preview**. Each form's collector refuses a code
+from another form by name and places a response by the respondent's
+name when one is already on the sheet (case aside), otherwise into the
+first empty slot, otherwise into a new one. Blank prints are unchanged
+(SV-1 twelve pages, CF-1 six, IN-1 six).
+
+- **SV-1 Social Validity.** One page per respondent type and round
+  (teacher, caregiver, administrator or the student, pre or post), in
+  that type's wording: the student page carries the student items, the
+  adult pages the adult items, the post pages the Effects items (E5
+  reversed on the Summary as before). The 1 to 6 scale carries its
+  anchors and an **N/A** choice ("I cannot judge, or have not seen it
+  run"), placed as the form's own N/A, which the means already leave
+  out. The open items come first on the page, as they do on the sheet.
+  Collect places name, role, mode (Interview when the page was read to
+  the respondent), the round's date, the ratings and the open answers
+  into the respondent's row; a respondent returning for the post round
+  goes beside their pre round.
+- **CF-1 Contextual Fit.** One page per respondent role and round
+  (round 1 or 2) with the 21 items in order on 1 to 6 (no N/A: the
+  scale forces a direction, as the form says) and four questions about
+  the respondent (role as typed, the periods they see the student,
+  months known, daily contact). Collect places the ratings into the
+  respondent's column for that round, so the Barriers sheet flags the
+  low ratings and the Summary compares the rounds. CF-1 is the
+  template every parts-built form is assembled from, so its additions
+  stay in its own body and script: DA-1 rebuilt from the patched CF-1
+  is byte-identical.
+- **IN-1 Stakeholder Interview.** The interview protocols are open
+  prompts, so the pages have no rating items: one page per set (parent
+  or guardian, teacher and staff, the student), every prompt a text
+  box (1,500 characters), the checklist prompts as rows of Yes / No /
+  Sometimes with a note each, and two questions about the respondent
+  (name, relationship). The student set substitutes the student's word
+  for the target behavior, which the dialog asks for. Answers this long
+  exceed what a `mailto:` link carries, so when the code is longer than
+  about 1,800 characters the page says so, opens no email, and leads
+  with **Save as a file** then **Copy the code**; Collect reads the
+  saved `.nbhr.txt` files as well as pasted messages, defaults a new
+  respondent's role from the relationship (Teacher, Staff member or
+  Related service provider for the school set) and places every
+  answer, the checklist rows (a note becomes "Row: text" under the
+  question) and the interview date.
+
+`qa/sv1-respond-test.js` (24 checks), `qa/cf1-respond-test.js` (24) and
+`qa/in1-respond-test.js` (25) cover each form the way the IA-1 test
+does: the dialog, the page file and link, the page's rendering and
+send, the collector's placement over two respondents and two rounds, a
+refused foreign code, the saved file and reopening, no console or page
+error, and the blank print page count against the pre-edit file.
+
+### Hosting
+
+`nbh-respond.js` and `respond.html` go up with the folder (HOSTING.md);
+the one-file editions carry both inside. The shell's Diagnostics shows
+"Respondent pages" as found or missing; a form opened without the
+library keeps its buttons but refuses with "The file nbh-respond.js is
+not beside this form".
+

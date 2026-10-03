@@ -26,7 +26,7 @@ EXPECT = [
   (old_fav, new_fav, 1),
   ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 160),   # the masthead and print-head images of the 43 forms (several print more than one head) + the index + the packet cover
   ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 44),
-  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 44),
+  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 45),   # the 43 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),
