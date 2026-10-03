@@ -5496,3 +5496,16 @@ sheet rather than a purely local form, so IA-1 now calls it that
 "local adaptation of the district form". The item wording of all
 three was extracted from those forms into paste-ready files for the
 assessor; the workstation still ships none of it.
+
+### Fifteen or eighteen PBQ items (v21.40f)
+
+Compared item by item, the 18-item PBQ holds all 15 published items
+(Lewis, Scott and Sugai, 1994) in their published order, with three
+"gain item or activity" items inserted at 3, 10 and 18. Its five other
+columns are therefore the published profile, item for item. The
+working convention: administer the 18-item form, read the five
+published columns as the PBQ and the gain column as an addendum.
+IA-1 says so on the PBQ sheet, and when the gain column leads in
+18-item mode the verdict notes that the published PBQ has no tangible
+scale and points to the QABF and FAST tangible items for
+confirmation.
