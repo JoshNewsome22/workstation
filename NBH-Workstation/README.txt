@@ -68,7 +68,7 @@ its own Save data button.
 A ticked form you have never opened prints blank; the workstation warns you
 before that happens.
 
-If anything here misbehaves, each of the 43 forms also works on its own:
+If anything here misbehaves, each of the 44 forms also works on its own:
 double-click its file and it saves, opens and prints exactly as it does inside
 the workstation.
 
@@ -94,7 +94,7 @@ in IA-1's toolbar. Each response becomes an informant column and the worksheet
 does the scoring.
 
 One file instead of a folder: NBH-Workstation.html (RPS-Workstation.html for
-the school edition) is the whole workstation in a single file, the 43 forms
+the school edition) is the whole workstation in a single file, the 44 forms
 inside it. Keep it on the district drive and
 double-click it. Its Save case writes the case as one file of its own,
 Student.case.html, which opens the workstation with that case already in it
@@ -151,5 +151,5 @@ Marking setting in the toolbar chooses between the slash / shaded (low / high
 rate) marks and plain shaded-or-blank marks.
 
 Keep nbh-pictos.js in this folder with the forms: it holds the pictures Forms
-SM-1 and VS-1 put on sheets and boards. Without it those two forms still work,
+SM-1, VS-1 and TK-1 put on sheets and boards. Without it those forms still work,
 with photos and words.

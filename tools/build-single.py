@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack a workstation folder into one file: index.html with the 43 forms, the two PDF-tool
+"""Pack a workstation folder into one file: index.html with the 44 forms, the two PDF-tool
 scripts and the pictogram library inside it, gzip-compressed and base64-encoded in text blocks at the top of the body.
 
 The shared logo is kept once (every form carries it several times), the forms as JSON with the
@@ -15,8 +15,8 @@ idx = open(os.path.join(SRC, 'index.html'), encoding='utf-8').read()
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)
 m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
 files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
-if len(files) != 43:
-    sys.exit(f'expected 43 forms in index.html, found {len(files)}')
+if len(files) != 44:
+    sys.exit(f'expected 44 forms in index.html, found {len(files)}')
 forms = {}
 for fn in files:
     s = open(os.path.join(SRC, fn), encoding='utf-8').read()
@@ -24,7 +24,7 @@ for fn in files:
         sys.exit(f'{fn} does not carry the logo index.html carries')
     forms[fn] = s.replace(logo, '@@NBH-LOGO@@')
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
-# v21.31: the pictogram library (Forms SM-1 and VS-1 load it by <script src>) travels once, as its own block
+# v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1 load it by <script src>) travels once, as its own block
 pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
 # v21.39: the respondent-page library (Form IA-1 loads it by <script src>) travels once too
 respond = open(os.path.join(SRC, 'nbh-respond.js'), encoding='utf-8').read()
