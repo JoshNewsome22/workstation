@@ -7,7 +7,8 @@
    tools/forms/TK-1/make-walk-video.py lays every narration clip of WALK_AUDIO at its cue start in one 24 kHz mono track,
    muxes it (AAC 96 kbit/s, +faststart) and verifies the result (length, size, frame rate, audio, the audio rising at
    every cue start, frames at five cue midpoints saved as PNG beside the video).
-   usage: node qa/tk1-walk-video.js [--term none|ring|pic] [--n 5] [--out file.mp4] [--frames dir] [--fps 30] [--quality 92] [--keep] [--preview t1,t2,..]
+   usage: node qa/tk1-walk-video.js [--term none|ring|pic] [--n 5] [--out file.mp4] [--frames dir] [--fps 30] [--quality 92] [--keep] [--preview t1,t2,..] [--check]
+          (--check: no rendering; only verify the --out video already made against this book's timeline)
           (--preview: only save the frames at those times, as JPEG, in the --frames folder, and stop)
           (--frames: where the check frames go, default $S/tk1-walk-video-frames/<name of the video>)
    env:   TK1_PY  the Python with numpy, soundfile and imageio-ffmpeg (default $S/tts/venv/bin/python, else python3)
@@ -15,8 +16,8 @@
 const {chromium,fs,path,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const {spawn,execFileSync}=require('child_process');const os=require('os');
 const URL=BASE+'/NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html';
-const A={term:'none',n:5,out:'',frames:'',fps:30,quality:92,keep:false,preview:''};
-const av=process.argv.slice(2);for(let i=0;i<av.length;i++){const k=av[i].replace(/^--/,'');if(k==='keep')A.keep=true;else if(k in A)A[k]=typeof A[k]==='number'?+av[++i]:av[++i];else{console.error('unknown option '+av[i]);process.exit(2);}}
+const A={term:'none',n:5,out:'',frames:'',fps:30,quality:92,keep:false,preview:'',check:false};
+const av=process.argv.slice(2);for(let i=0;i<av.length;i++){const k=av[i].replace(/^--/,'');if(k==='keep')A.keep=true;else if(k==='check')A.check=true;else if(k in A)A[k]=typeof A[k]==='number'?+av[++i]:av[++i];else{console.error('unknown option '+av[i]);process.exit(2);}}
 if(!A.out)A.out=path.join(__dirname,'out','tk1-walk-video','TK-1-Walkthrough'+(A.term==='none'?'':'_terminal-'+(A.term==='pic'?'token':A.term))+'.mp4');
 A.out=path.resolve(A.out);fs.mkdirSync(path.dirname(A.out),{recursive:true});
 const SCR=process.env.S||os.tmpdir();
@@ -62,6 +63,10 @@ const CAPTURE_CSS=`html,body{overflow:hidden!important}
       const p=path.join(A.frames,'preview-'+t.toFixed(2)+'.jpg');await page.screenshot({path:p,type:'jpeg',quality:A.quality,clip:{x:0,y:0,width:W,height:H},scale:'device'});console.log(p);}
     console.log('cues '+info.cues.map(c=>c.id+'@'+c.start.toFixed(2)+'+'+c.dur.toFixed(2)).join(' '));await br.close();fs.rmSync(TMP,{recursive:true,force:true});return;}
   const N=Math.round(info.D*A.fps);
+  if(A.check){await br.close();const job=path.join(TMP,'job.json');
+    fs.writeFileSync(job,JSON.stringify({fps:A.fps,frames:N,duration:info.D,cues:info.cues,chapters:info.chapters,clips:info.clips,term:info.term,n:info.n,encoder:hasX264?'libx264':'mpeg4'}));
+    let code=0;try{execFileSync(PY,[HELPER,job,'--check','--out',A.out,'--ffmpeg',FF,'--tmp',TMP,'--frames',A.frames],{stdio:'inherit'});}catch(e){code=1;}
+    fs.rmSync(TMP,{recursive:true,force:true});process.exit(code);}
   console.log('book term='+info.term+' n='+info.n+'  duration '+info.D.toFixed(3)+' s  frames '+N+' at '+A.fps+' fps  cues '+info.cues.length+'  encoder '+(hasX264?'libx264':'mpeg4'));
   const vid=path.join(TMP,'video.mp4');
   const venc=hasX264?['-c:v','libx264','-preset','medium','-crf','20','-pix_fmt','yuv420p']:['-c:v','mpeg4','-q:v','2','-pix_fmt','yuv420p'];
