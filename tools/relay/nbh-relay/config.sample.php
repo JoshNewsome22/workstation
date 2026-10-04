@@ -57,6 +57,12 @@ return [
     // relay will then use https for the whole site for a year, even when an address is typed without it.
     'HSTS' => false,
 
+    // Only when the website sits behind a proxy that ends https for it and passes the request on over plain http
+    // (GoDaddy's Website Security firewall, a CDN): set this to true, and use the second https rule in
+    // public_html/ai/.htaccess. The proxy says "https" in the X-Forwarded-Proto header; on a plain shared host nothing
+    // sets that header but the caller, so it is not trusted.
+    'TRUST_PROXY_HTTPS' => false,
+
     // Leave these as they are
     'API_BASE_URL' => 'https://api.anthropic.com',
     'REQUIRE_HTTPS' => true,

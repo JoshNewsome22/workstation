@@ -437,15 +437,43 @@ renderAll();
    a label that names a library picture gets the picture. The picker adds what is ticked to the empty slots. */
 function matchPicto(w){const lw=String(w||'').toLowerCase().trim();if(!lw)return '';let k=KEYS.find(k=>P[k].l.toLowerCase()===lw);if(k)return k;k=KEYS.find(k=>P[k].l.length>3&&lw.includes(P[k].l.toLowerCase()));return k||'';}
 function cellFor(w){w=String(w||'').trim();return{k:matchPicto(w),ph:'',l:w.slice(0,40)};}
+/* (v21.43) the view dots (the shared nbh-ui block): a Choices or Targets card is filled when it has a picture or a label (the label
+   is optional: the picture's own name prints when it is blank), so the dot does not read a picked card as empty */
+window.__nbhViewFill=function(v){if(v!=='choices'&&v!=='targets')return null;const a=v==='choices'?S.ch:S.tg;return {filled:a.filter(o=>has(o)||String(o.l||'').trim()).length,total:a.length};};
+/* (v21.43) what the case gives the Targets page, as labels a learner's card can carry: each replacement behavior once. The
+   forms' own marks come out of the text ("(see target 4)", "(replacement)", "(simulated)", "(see Forms EA-1 and TD-1)"), a
+   long one is cut at a word, under 40 characters, with no "from the" left hanging; a problem behavior's replacement that
+   names another target ("see target 4") is that target's card; and two that share most of their words ("Hands a break card
+   and waits", "hand the break card to an adult") are one card. Labels already on the page count as taken. */
+const TSTOP={a:1,an:1,the:1,to:1,and:1,or:1,of:1,for:1,with:1,from:1,in:1,on:1,at:1,by:1,his:1,her:1,their:1,its:1,is:1,are:1,when:1,then:1};
+function tgtClean(w){w=String(w||'').replace(/\([^()]*\)/g,' ').replace(/\([^()]*$/,' ').replace(/\[[^\[\]]*\]/g,' ').replace(/\s+/g,' ').trim().replace(/[\s.,;:!?\u2013\u2014-]+$/,'');
+  if(w.length>40){w=w.slice(0,41);const sp=w.lastIndexOf(' ');w=(sp>12?w.slice(0,sp):w.slice(0,40)).trim();}
+  let ws=w.split(' ');while(ws.length>1&&TSTOP[ws[ws.length-1].toLowerCase()])ws.pop();w=ws.join(' ').replace(/[\s.,;:!?\u2013\u2014-]+$/,'');
+  return w?w.charAt(0).toUpperCase()+w.slice(1):'';}
+function tgtStems(w){return String(w||'').toLowerCase().split(/[^a-z\u00e0-\u024f]+/).filter(x=>x&&!TSTOP[x]).map(x=>x.length>4?x.replace(/(?:ing|ed|es|s)$/,''):x);}
+function tgtSame(A,B){if(!A.length||!B.length)return false;const a=new Set(A),b=new Set(B);let i=0;a.forEach(x=>{if(b.has(x))i++;});const u=a.size+b.size-i;return i/u>.5||i===a.size||i===b.size;}
+/* behaviors: the case's target behaviors (Form TB-1); acq: the acquisition goals (Form GB-1); taken: labels already on the page */
+function caseTargets(behaviors,acq,taken){const groups=[],out=[];let dup=0,skip=0;
+  const groupOf=st=>groups.find(g=>g.some(x=>tgtSame(x,st)));
+  (taken||[]).forEach(l=>{if(String(l||'').trim())groups.push([tgtStems(l)]);});
+  const add=(raw,alias)=>{const lab=tgtClean(alias||raw);if(!lab)return;const st=tgtStems(lab),st2=alias?tgtStems(tgtClean(raw)):null;
+    const g=groupOf(st)||(st2&&groupOf(st2));if(g){if(st2)g.push(st2);g.push(st);dup++;return;}
+    groups.push(st2?[st,st2]:[st]);out.push(lab);};
+  const B=behaviors||[];
+  B.forEach(b=>{if(b.isRep){add(b.label);return;}const w=String(b.rep||'').trim();if(!w){skip++;return;}
+    const m=/\bsee\s+target\s+(\d+)\b/i.exec(w),T=m?B[+m[1]-1]:null;add(w,T&&T.isRep?T.label:'');});
+  (acq||[]).forEach(g=>{if(String(g&&g.beh||'').trim())add(g.beh);});
+  return {list:out,dup,skip};}
 window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l);
-  if(empty(S.tg)){const words=[];(f.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(w&&!words.includes(w))words.push(w);});((f.goals&&f.goals.acq)||[]).forEach(g=>{if(g.beh&&!words.includes(g.beh))words.push(g.beh);});words.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
+  if(empty(S.tg)){caseTargets(f.behaviors,f.goals&&f.goals.acq,[]).list.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
   if(empty(S.ch)&&(f.menu||[]).length){f.menu.slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}
   if(n)renderAll();return {filled:n,note:n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
 /* (v21.43) the Targets page holds skills and replacement behaviors only: a problem behavior goes in as its named replacement
    (or not at all), and a reduction goal never; the note says what was left out and why */
 window.__nbhFactsPick=function(sel){let n=0,skip=0,full=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot){full++;return false;}Object.assign(slot,cellFor(w));return true;};
-  (sel.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(!String(w||'').trim()){skip++;return;}if(put(S.tg,w))n++;});((sel.goals&&sel.goals.acq)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});skip+=((sel.goals&&sel.goals.red)||[]).length;(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
+  const ct=caseTargets(sel.behaviors,sel.goals&&sel.goals.acq,S.tg.filter(o=>has(o)||o.l).map(lbl));skip=ct.skip;ct.list.forEach(w=>{if(put(S.tg,w))n++;});skip+=((sel.goals&&sel.goals.red)||[]).length;(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
   renderAll();const notes=[];if(full)notes.push('the six slots are full; empty one first');if(skip)notes.push((skip===1?'1 item was':skip+' items were')+' left out: a problem behavior or a reduction goal is not a teaching target; its replacement behavior goes on the Targets page');
+  if(ct.dup)notes.push((ct.dup===1?'1 was':ct.dup+' were')+' the same replacement behavior as a card already there');
   return {filled:n,note:notes.join('; ')};};
 
 /* v21.43 the link with Form TE-1 (the token economy plan for the same student). Off until Link with Form TE-1 is pressed

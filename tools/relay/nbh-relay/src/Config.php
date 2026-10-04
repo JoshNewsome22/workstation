@@ -36,6 +36,7 @@ final class Config
         'MAX_OUTPUT_TOKENS' => 0,
         'TIMEOUT_SECONDS' => 50,
         'HSTS' => false,
+        'TRUST_PROXY_HTTPS' => false,
         'API_BASE_URL' => 'https://api.anthropic.com',
         'REQUIRE_HTTPS' => true,
         'BASE_PATH' => '',
@@ -178,7 +179,7 @@ final class Config
         if ($this->values['DATA_DIR'] !== '' && !str_starts_with($this->values['DATA_DIR'], '/')) {
             $this->problems['DATA_DIR'] = 'DATA_DIR must be empty or a full folder path starting with /.';
         }
-        foreach (['REQUIRE_HTTPS', 'HSTS'] as $k) {
+        foreach (['REQUIRE_HTTPS', 'HSTS', 'TRUST_PROXY_HTTPS'] as $k) {
             $b = $this->values[$k];
             if ($b === 1 || $b === 0) {
                 $this->values[$k] = (bool) $b;

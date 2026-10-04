@@ -245,6 +245,10 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 @media (prefers-reduced-motion:reduce){nav.rail,button,.bar input{transition:none!important}}
 /* the labels leave the buttons over the form when there is no room for them; the icons and their names stay */
 @media (max-width:1280px){#crumbFile{display:none}}
+/* v21.43: an iPad held sideways (1180 px; 1133 on the mini): the case buttons give up a little padding, so the autosave
+   chip's time ("Autosaved 10:26 AM" is wider than "Autosave on") cannot push Finish PDF onto a row of its own in the
+   middle of work, moving the form down */
+@media (max-width:1240px){.bar .grp.acts button:not(.chip){padding-left:9px;padding-right:9px}}
 @media (max-width:1000px){
   .crumb .acts button .lbl,#railToggle .lbl{display:none}
   .crumb .acts button,#railToggle{padding:5px 8px;min-width:32px}
@@ -585,11 +589,12 @@ const EMBED=(()=>{
     const st=new Blob([bytes(t)]).stream().pipeThrough(new DecompressionStream('gzip'));
     return await new Response(st).text();
   }
-  /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens */
-  E.ready=(async()=>{const [f,pic,rsp]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null)]);E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';return E;})();
+  /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens;
+     v21.43: so is the writing help, which every form carries (build-single.py keeps one copy, not 44) */
+  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
   const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
-  E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo);
+  E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo).split('@@NBH-WORDING@@').join(E.wording||'');
     if(PICTAG.test(h))h=h.replace(PICTAG,E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
     if(RSPTAG.test(h))h=h.replace(RSPTAG,E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
     return h;};
@@ -2951,7 +2956,8 @@ async function caseHtml(p,forms){
   const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined};
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
-  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-shell'].forEach(bid=>{
+  /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
+  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-respond','nbh-embed-shell'].forEach(bid=>{
     const el=document.getElementById(bid);if(el)blocks+=block(bid,el.textContent);});
   /* "</" inside the JSON would end the block early; \/ is the same character to JSON */
   blocks+='<script type="application/json" id="nbh-case">'+JSON.stringify(data).replace(/<\//g,'<\\/')+'<\/script>\n';

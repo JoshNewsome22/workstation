@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace NBH\Relay;
 
 /**
- * The two calls the forms' panel makes (same contract as tools/blocks/nbh-wording.js):
+ * The calls the forms' panel makes (same contract as tools/blocks/nbh-wording.js):
  *
  *   POST /api/redeem  {code}               -> 200 {token, expires, expires_in}
  *       401 invalid_code (wrong, used or expired: the panel says "not accepted" for all three)
@@ -14,6 +14,7 @@ namespace NBH\Relay;
  *       401 invalid_token | session_expired, 400 bad_request, 413 too_long,
  *       429 session_limit_reached | rate_limited {retry_after}, 422 refused | incomplete,
  *       502 upstream, 503 upstream_busy, 504 upstream_timeout
+ *   POST /api/session/end {token}          -> 200 {ended:true}   (Lock in the panel; the same for a token it does not know)
  *
  * A passcode works once: it is deleted in the same transaction that opens the session. A session token is
  * 32 random bytes, kept only as a hash, and ends after SESSION_HOURS or when the admin ends it.
@@ -77,6 +78,27 @@ final class Api
             Log::event('session_opened', ['session' => $db->lastId(), 'hours' => $cfg->int('SESSION_HOURS')]);
             return Response::json(200, ['token' => $token, 'expires' => App::iso($expires), 'expires_in' => $expires - $now]);
         });
+    }
+
+    /**
+     * Lock in the panel: the session ends here at once, so no other tab that holds the token (one the forms' tab opened,
+     * or one the browser restored) can use it either. The answer is the same whether or not the token was known, so it
+     * says nothing about which tokens exist.
+     *
+     * @param array<string,mixed> $body
+     */
+    public function endSession(Request $req, array $body): Response
+    {
+        $token = $body['token'] ?? null;
+        if (is_string($token) && Crypto::isToken($token)) {
+            $db = $this->app->store();
+            $hash = $this->app->crypto->hash('session', $token);
+            $n = $db->write(fn (): int => $db->run('DELETE FROM sessions WHERE token_hash = ?', [$hash]));
+            if ($n > 0) {
+                Log::event('session_ended_by_tab');
+            }
+        }
+        return Response::json(200, ['ended' => true]);
     }
 
     /**

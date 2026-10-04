@@ -70,7 +70,8 @@ function makeEngine(raw, opts) {
     rules.push({id, cat: str(r.cat), re, why: str(r.why), suggest: str(r.suggest), replace: typeof r.replace === 'string' ? r.replace : null});
   });
   const BLANKRULE = {id: 'blank', cat: 'blank', why: '', suggest: '', replace: null};
-  const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|name \d{1,2})\]$/i;
+  const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2}|(?:email|phone|date|number|address)(?: \d{1,2})?)\]$/i;
+  const NOTBLANK = /^\[(?:expletives?|expletive deleted|profanity|obscenity|inaudible|unintelligible)\]$/i;   /* as the client (v21.43) */
   function quoteSpans(t) {
     const spans = []; let open = -1, kind = '';
     for (let i = 0; i < t.length; i++) {
@@ -125,16 +126,27 @@ function makeEngine(raw, opts) {
       re.lastIndex = 0;
     });
     BLANK.lastIndex = 0; let b;
-    while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
+    while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
     out.sort((a, c) => a.start - c.start || c.end - a.end);
     const seenK = {};
     return out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seenK[k]) return false; seenK[k] = 1; return true; });
+  }
+  /* as fitArticle() in the client (v21.43): "a huge outburst" without "huge" is "an outburst" */
+  function fitArticle(a, b) {
+    const m = /(^|[^A-Za-z\u00C0-\u024F'\u2019])(an?|An?|AN?)$/.exec(a);
+    if (!m || !/^[A-Za-z]/.test(b)) return a;
+    const vow = (/^[aeiou]/i.test(b) && !/^(?:uni|use|usu|uti|ure|one|once|eu)/i.test(b)) || /^(?:hour|honest|honou?r|heir)/i.test(b);
+    const was = m[2], want = vow ? 'an' : 'a';
+    if (was.toLowerCase() === want) return a;
+    const art = was === was.toUpperCase() && was.length > 1 ? want.toUpperCase() : was.charAt(0) === 'A' ? 'A' + want.slice(1) : want;
+    return a.slice(0, a.length - was.length) + art;
   }
   function applyAt(t, f) {
     let a = t.slice(0, f.start), b = t.slice(f.end);
     const rep = str(f.replacement);
     if (!rep) {
       a = a.replace(/[ \t]+$/, ''); b = b.replace(/^[ \t]+/, '');
+      a = fitArticle(a, b);
       if (a && b && !/\n$/.test(a) && !/^[\n,.;:!?)\]]/.test(b)) a += ' ';
     }
     return {text: a + rep + b, at: a.length, len: rep.length};
