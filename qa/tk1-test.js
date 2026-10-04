@@ -132,6 +132,10 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
     if(!ks.every((k,i)=>P[k]&&P[k].l===ls[i]))return false;if(/<image/.test(P.cardmath.s)||!/<polygon/.test(P.cardmath.s)||!/data:image\/webp/.test(P.cardball.s))return false;if(/class=|<style/.test(ks.map(k=>P[k].s).join('')))return false;
     const keep=JSON.stringify(S);ks.forEach((k,i)=>S.tg[i]={k,ph:'',l:''});renderAll();const cards=[...document.querySelectorAll('#book .pg[data-kind="cards-tg"] .card')];
     const ok=ks.every((k,i)=>cards[i].querySelector('.cl').textContent===ls[i]&&!!cards[i].querySelector('.cp svg'));S=JSON.parse(keep);renderAll();return ok;}));
+  check('the library holds the practice\u2019s School Bus, Books, Writing, Reading and All Done cards; each prints under its label',await page.evaluate(()=>{const P=window.NBH_PICTOS||{};const ks=['cardbus','cardbooks','cardwriting','cardreading','cardalldone'],ls=['School Bus','Books','Writing','Reading','All Done'];
+    if(!ks.every((k,i)=>P[k]&&P[k].l===ls[i]&&/data:image\/webp/.test(P[k].s)&&!/class=|<style/.test(P[k].s)))return false;
+    const keep=JSON.stringify(S);ks.forEach((k,i)=>S.tg[i]={k,ph:'',l:''});renderAll();const cards=[...document.querySelectorAll('#book .pg[data-kind="cards-tg"] .card')];
+    const ok=ks.every((k,i)=>cards[i].querySelector('.cl').textContent===ls[i]&&!!cards[i].querySelector('.cp svg image'));S=JSON.parse(keep);renderAll();return ok;}));
   check('From the case: a problem behavior goes on Targets only as its replacement, a reduction goal never, and the note says why',await page.evaluate(()=>{const keep=JSON.stringify(S);S.tg=S.tg.map(()=>cello());renderAll();
     const r=window.__nbhFactsPick({behaviors:[{label:'Elopement',isRep:false,rep:'Asks for a break'},{label:'Hitting',isRep:false,rep:''},{label:'Raises hand',isRep:true}],goals:{acq:[{beh:'Writes name'}],red:[{beh:'Aggression'}]},menu:[]});
     const labs=S.tg.map(o=>o.l).filter(Boolean);const ok=r.filled===3&&labs.join('|')==='Asks for a break|Raises hand|Writes name'&&!labs.some(l=>/Elopement|Hitting|Aggression/.test(l))&&/2 items were left out/.test(r.note)&&!/full/.test(r.note);
