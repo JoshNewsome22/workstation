@@ -2097,7 +2097,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case. The bar also shows what is due: review dates and next steps the open forms hold, within two weeks or past.</p>')+
    fold('Saving, autosave and closing the tab',
      '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> loads it back. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
-     '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the iPad\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, and Safari may clear a site\u2019s storage after 7 days without a visit. Copies are deleted after 14 days, and at most five are kept. A copy is a safety net; the case file is the record.</div>'+
+     '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the iPad\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
@@ -2252,30 +2252,38 @@ async function bmLoad(file){
    IndexedDB cannot be opened), one copy for each student in each tab, with each form's own saved file and its
    pictures. What makes that safe enough for a student record:
      - it is never applied silently, and a copy whose offer has not been answered is never written over: this
-       tab writes only its own copy, and takes over another one only when that one is restored.
+       tab writes only its own copy; Open case and Restore first write the forms open now and then leave that copy
+       alone; a restored copy carries on in a new copy of this tab's own; a copy another open tab is keeping (it
+       holds a lock named after its tab) is never offered as earlier work; and no copy is deleted to make room.
      - it notices taps as well as typing: every form reports a hash of what its Save data would write.
      - it writes at once when the tab is hidden or closed (an iPad discards hidden tabs without asking), and
-       within about ten seconds of a change otherwise.
-     - it expires after AUTO.days, keeps at most AUTO.keep copies, and can be deleted one by one or all at once,
+       within about ten seconds of a change otherwise; a tab being closed also stashes its last word in
+       localStorage at once (autoLast), folded into the store when the workstation next opens.
+     - it expires after AUTO.days, asks the user to delete some when over AUTO.keep copies (it deletes none to
+       make room), and can be deleted one by one or all at once,
        and switched off. A full store is answered by keeping less (no pictures, then not the largest forms),
        with a warning, never by switching Autosave off.
    It is a working copy, not the record. Save case is still what you keep. */
-const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:20000,keep:5};
+const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',pref2:'nbh.ws.autosave.v2',days:14,every:20000,keep:5};
 /* nbh-copies core: begin (tools/blocks/nbh-copies.js, put here by tools/blocks/patch-autosave.py; edit that file, not this copy) */
 /* nbh-copies (v21.44): where Autosave keeps its safety copies. One store for the workstation and for every form opened
    on its own: IndexedDB on this site (localStorage only when IndexedDB cannot be opened), in this browser on this device.
    Nothing here makes a network request. A copy is one record: a case (the student) as one tab saw it, with each form's own
    saved file and its pictures kept as Blobs. Records are scoped to the folder the page was opened from, so two editions on
-   one website never offer each other's work. Copies older than 14 days are dropped when the list is read, and at most five
-   are kept. A full store is answered step by step (without pictures, then without the largest forms), never by turning
-   Autosave off; what was left out is written into the record so the restore can say so.
+   one website never offer each other's work. Copies older than 14 days are dropped when the list is read; no other copy is
+   ever deleted without the user (over five, the user is asked to delete some). A full store is answered step by step
+   (without pictures, then without the largest forms), never by turning Autosave off; what was left out is written into
+   the record so the restore can say so. A page being hidden or closed cannot wait for IndexedDB: its last word goes into
+   a small slot in localStorage at once (stash) and is folded into the store when a page of this folder next opens. A tab
+   holds a lock (and a heartbeat) named after it while it lives, so another tab never offers its copy as earlier work.
    The same text is in every form (tools/blocks/patch-autosave.py) and inside the workstation's autosave section. */
 (function () {
   'use strict';
   if (window.nbhCopies) return;
   var DBN = 'nbh-copies', ST = 'copies', DAYS = 14, KEEP = 5, LSP = 'nbh.copies.v2|', OFF = 'nbh.copies.off|';
   var PIC = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+\/=]{2000,}/gi;
-  var mode = null, blobsOK = true, dbP = null;
+  var mode = null, blobsOK = true, dbP = null, gen = 0, asked = false;
+  var PEND = 'nbh.copies.pend|', HB = 'nbh.copies.hb|', held = {};
 
   function scope() {
     try { var m = /^nbh-(?:own|tab)\|([^|]*)\|/.exec(String(window.name || '')); if (m && m[1]) return decodeURIComponent(m[1]); } catch (e) {}
@@ -2391,8 +2399,10 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
     catch (e) { return Promise.reject(e); }
   }
   function put(rec) {
+    var g = gen;
     return ready().then(function (m) {
       if (!m) return { ok: false, why: 'none' };
+      if (g !== gen) return { ok: false, why: 'cleared' };   /* started before Delete all: not written */
       var ids = Object.keys(rec.forms || {});
       var hasPics = ids.some(function (id) { var o = rec.forms[id].own; return typeof o === 'string' && (PIC.lastIndex = 0, PIC.test(o)); });
       PIC.lastIndex = 0;
@@ -2409,7 +2419,9 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
         var r = {};
         for (var k in rec) if (k !== 'forms') r[k] = rec[k];
         r.v = 2; r.scope = scope(); r.forms = forms; r.dropped = dropped.slice();
+        if (g !== gen) return Promise.resolve({ ok: false, why: 'cleared' });
         return write(r).then(function () {
+          if (!asked) { asked = true; try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {} }
           return { ok: true, full: !dropped.length && !Object.keys(lost).length, picsLost: lost, dropped: dropped.slice(), step: step };
         }, function (e) {
           step++;
@@ -2433,14 +2445,18 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
       return [];
     }).catch(function () { return []; });
   }
-  function age(r) { var t = new Date(r && r.saved).getTime(); return isNaN(t) ? Infinity : (Date.now() - t) / 86400000; }
+  /* a time stamp from a clock that was set ahead counts as now, so it neither stays "newest" nor escapes expiry */
+  function ts(r) { var t = new Date(r && r.saved).getTime(); return isNaN(t) ? NaN : Math.min(t, Date.now()); }
+  function age(r) { var t = ts(r); return isNaN(t) ? Infinity : (Date.now() - t) / 86400000; }
   /* this folder's copies, newest first; expired ones are removed on the way */
+  var folded = null;
   function list() {
     var sc = scope();
-    return all().then(function (rows) {
+    folded = folded || fold();
+    return folded.then(all).then(function (rows) {
       var mine = rows.filter(function (r) { return r && r.scope === sc && r.forms; }), keep = [];
       mine.forEach(function (r) { if (age(r) > DAYS) del(r.key); else keep.push(r); });
-      return keep.sort(function (a, b) { return String(b.saved).localeCompare(String(a.saved)); });
+      return keep.sort(function (a, b) { return (ts(b) || 0) - (ts(a) || 0); });
     });
   }
   function del(key) {
@@ -2449,16 +2465,67 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
       if (m === 'ls') { var s = ls(); if (s) s.removeItem(LSP + scope() + '|' + key); }
     }).then(function () { return true; }, function () { return false; });
   }
-  function clear() { return list().then(function (rows) { return Promise.all(rows.map(function (r) { return del(r.key); })); }); }
-  /* at most KEEP copies: the oldest go first, those already saved to a file before the others; `except` is never removed */
-  function prune(except) {
-    return list().then(function (rows) {
-      if (rows.length <= KEEP) return 0;
-      var cand = rows.filter(function (r) { return (except || []).indexOf(r.key) < 0; })
-        .sort(function (a, b) { return (a.fileAt ? 0 : 1) - (b.fileAt ? 0 : 1) || String(a.saved).localeCompare(String(b.saved)); });
-      var n = rows.length - KEEP, gone = cand.slice(0, n);
-      return Promise.all(gone.map(function (r) { return del(r.key); })).then(function () { return gone.length; });
-    });
+  /* Delete all: a write already on its way is dropped (gen), and this folder's stashed slots go too */
+  function clear() {
+    gen++;
+    var s = ls(), p = PEND + scope() + '|', ks = [];
+    if (s) { for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); } ks.forEach(function (k) { s.removeItem(k); }); }
+    return list().then(function (rows) { return Promise.all(rows.map(function (r) { return del(r.key); })); });
+  }
+  /* how many copies over KEEP: nothing is deleted to make room (an unanswered copy, or one whose file was never
+     confirmed, may be the only place some work is); the pages ask the user to delete what is no longer needed */
+  function over() { return list().then(function (rows) { return Math.max(0, rows.length - KEEP); }, function () { return 0; }); }
+  /* the last word of a page being hidden or closed: the whole record as text, at once */
+  function stash(rec) {
+    var s = ls(); if (!s || !rec || !rec.key || mode === null) return false;
+    var r = {}; for (var k in rec) r[k] = rec[k];
+    r.v = 2; r.scope = scope(); r.stashed = true;
+    try { s.setItem(PEND + r.scope + '|' + r.key, JSON.stringify(r)); return true; } catch (e) { return false; }
+  }
+  /* stashed slots into the store (once per page, before the first list): a slot newer than the copy replaces it */
+  function fold() {
+    var s = ls(); if (!s) return Promise.resolve(0);
+    var p = PEND + scope() + '|', ks = [];
+    for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); }
+    if (!ks.length) return Promise.resolve(0);
+    return all().then(function (rows) {
+      var have = {}; rows.forEach(function (r) { if (r && r.key) have[r.key] = r; });
+      return ks.reduce(function (pr, k) {
+        return pr.then(function (n) {
+          var d = null; try { d = JSON.parse(s.getItem(k) || 'null'); } catch (e) {}
+          if (!d || !d.key || !d.forms || age(d) > DAYS) { s.removeItem(k); return n; }
+          var h = have[d.key];
+          if (h && !((ts(d) || 0) > (ts(h) || 0))) { s.removeItem(k); return n; }   /* the store already holds this or newer */
+          delete d.stashed;
+          return put(d).then(function (r) { if (r.ok) s.removeItem(k); return n + (r.ok ? 1 : 0); });
+        });
+      }, Promise.resolve(0));
+    }).catch(function () { return 0; });
+  }
+  /* which tabs are open now: each holds a lock named after it for as long as it lives (a tab in the background keeps
+     it, one the browser has thrown away does not), and a heartbeat in localStorage where locks are missing */
+  function hold(tab) {
+    if (!tab || held[tab]) return; held[tab] = 1;
+    try { if (navigator.locks && navigator.locks.request) navigator.locks.request('nbh-tab|' + tab, function () { return new Promise(function () {}); }).catch(function () {}); } catch (e) {}
+    var beat = function () { var s = ls(); try { if (s) s.setItem(HB + tab, String(Date.now())); } catch (e) {} };
+    beat(); setInterval(beat, 5000);
+    window.addEventListener('pagehide', function () { var s = ls(); try { if (s) s.removeItem(HB + tab); } catch (e) {} });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) beat(); });
+  }
+  function live() {
+    var out = {}, s = ls(), now = Date.now(), old = [];
+    if (s) for (var i = 0; i < s.length; i++) {
+      var k = s.key(i); if (!k || k.indexOf(HB) !== 0) continue;
+      var t = +s.getItem(k) || 0;
+      if (now - t < 20000) out[k.slice(HB.length)] = 1; else if (now - t > 86400000) old.push(k);
+    }
+    old.forEach(function (k) { try { s.removeItem(k); } catch (e) {} });
+    var q = null;
+    try { if (navigator.locks && navigator.locks.query) q = navigator.locks.query(); } catch (e) {}
+    return Promise.resolve(q).then(function (r) {
+      ((r && r.held) || []).forEach(function (l) { var n = String(l.name || ''); if (n.indexOf('nbh-tab|') === 0) out[n.slice(8)] = 1; });
+      return out;
+    }, function () { return out; });
   }
   function patch(key, fields) {
     return ready().then(function (m) {
@@ -2495,20 +2562,23 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
   function same(a, b) {
     a = String(a || '').toLowerCase().replace(/[^a-z]/g, ''); b = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
     if (!a || !b || a === b) return true;
-    if (a.indexOf(b) === 0 || b.indexOf(a) === 0) return true;   /* a name still being typed */
-    return a.split('').sort().join('') === b.split('').sort().join('');
+    return a.indexOf(b) === 0 || b.indexOf(a) === 0;   /* a name still being typed; "Myra" is not "Mary" */
   }
-  window.nbhCopies = { ready: ready, mode: function () { return mode; }, scope: scope, put: put, list: list, del: del, clear: clear, prune: prune,
+  window.nbhCopies = { ready: ready, mode: function () { return mode; }, scope: scope, put: put, list: list, del: del, clear: clear, over: over,
     patch: patch, unpack: unpack, unpackForm: unpackForm, migrate: migrate, isOff: isOff, setOff: setOff, tabId: tabId, same: same, when: when,
-    DAYS: DAYS, KEEP: KEEP };
+    stash: stash, hold: hold, live: live, DAYS: DAYS, KEEP: KEEP };
 })();
 /* nbh-copies core: end */
 const CP=window.nbhCopies;
 const IOS=/iP(ad|hone|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-state.auto={tab:CP.tabId(),seq:0,key:null,student:'',at:null,warn:'',warnShort:'',busy:false,again:false,last:0,written:'',forms:{},continued:{},fileAt:null};
+state.auto={tab:CP.tabId(),seq:0,key:null,student:'',at:null,warn:'',warnShort:'',busy:false,again:false,last:0,written:'',forms:{},continued:{},fileAt:null,overTold:false};
+CP.hold(state.auto.tab);   /* while this tab lives, other tabs do not offer its copy as earlier work */
 function store(){try{return window.localStorage;}catch(e){return null;}}
-function autoOn(){if(!CP.mode())return false;const s=store();return !(s&&s.getItem(AUTO.pref)==='off');}
-function autoSet(on){const s=store();try{if(s)s.setItem(AUTO.pref,on?'on':'off');}catch(e){}CP.setOff(!on);chip();}
+/* v21.44 the switch has a setting of its own: the old one also said 'off' when an earlier version gave up after a full
+   store, so a browser that still says so is asked once (autoOffer) instead of staying off for good */
+function autoPref(){const s=store();if(!s)return '';const v=s.getItem(AUTO.pref2);if(v)return v;return s.getItem(AUTO.pref)==='off'?'ask':'';}
+function autoOn(){if(!CP.mode())return false;const v=autoPref();return v!=='off'&&v!=='ask';}
+function autoSet(on){const s=store();try{if(s){s.setItem(AUTO.pref2,on?'on':'off');s.removeItem(AUTO.pref);}}catch(e){}CP.setOff(!on);chip();}
 function chip(){
   const c=$('#autoChip');if(!c)return;
   if(!CP.mode()){c.textContent='Autosave unavailable';c.className='chip off';
@@ -2582,27 +2652,68 @@ async function autoSave(force){
     const rec={key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
       packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms};
     const r=await CP.put(rec);
-    if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();CP.prune([key]);}
+    if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
   }catch(e){}
   finally{A.busy=false;chip();if(A.again){const f=A.again==='force';A.again=false;setTimeout(()=>autoSave(f),60);}}
 }
+/* more than AUTO.keep copies: none is deleted to make room (each may be the only place some work is), the user is asked */
+function autoOver(){CP.over().then(n=>{const A=state.auto;if(n>0&&!A.overTold){A.overTold=true;
+  wsUI.toast('Autosave keeps '+(n+AUTO.keep)+' safety copies in this browser. Open Autosave and delete the ones you no longer need; none is deleted without asking, except after '+AUTO.days+' days.',{kind:'warn',ms:12000});}});}
 /* this tab's copy is no longer needed: the case is in a file the browser wrote */
-function autoWipe(){
+function autoWipe(sig){
   const A=state.auto;if(A.key)CP.del(A.key);
-  A.key=null;A.forms={};A.continued={};A.fileAt=null;A.at=null;A.written='';state.autoSig=caseSig();chip();
+  A.key=null;A.forms={};A.continued={};A.fileAt=null;A.at=null;A.written='';state.autoSig=sig||caseSig();chip();
 }
-/* after Save case with every form in the file: a download an iPad cannot confirm keeps the copy, marked */
-function autoFiled(verified){
-  state.savedAt=new Date();state.lastSig=caseSig();
-  if(verified||!IOS){autoWipe();return;}
-  const A=state.auto;A.fileAt=new Date().toISOString();state.autoSig='';
+/* after Save case with every form in the file. sig: the case as the file holds it (from the forms' answers), so an
+   edit made while the file was being written keeps the dot on and the copy; a download an iPad cannot confirm keeps
+   the copy, marked, and the dot, until the user says the file is in Files */
+function autoFiled(verified,sig){
+  state.savedAt=new Date();
+  const A=state.auto,moved=caseSig()!==sig;
+  if(!moved&&(verified||!IOS)){state.lastSig=sig;autoWipe(sig);return 'done';}
+  if(moved){state.lastSig=sig;state.autoSig='';autoSave(true);return 'moved';}
+  A.fileAt=new Date().toISOString();state.autoSig='';
   if(A.key)CP.patch(A.key,{fileAt:A.fileAt});
+  return 'check';
+}
+/* Open case and Restore replace the forms: the copy of what is open now is written first and then left alone (its
+   offer is the user's to answer), and what comes next goes into a copy of its own */
+async function autoSeal(){
+  const A=state.auto,idle=async()=>{for(let i=0;i<80&&A.busy;i++)await new Promise(r=>setTimeout(r,100));};
+  await idle();
+  if(Object.keys(state.frames).length&&autoOn()){A.last=0;await autoSave(true);await idle();}
+  A.seq++;A.key=null;A.student='';A.forms={};A.continued={};A.fileAt=null;A.written='';A.at=null;
+}
+/* a case file just opened is in a file: once the forms have settled, and if none has been changed, that is the saved state */
+function autoBaseline(){
+  setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),4300);
+  setTimeout(()=>{if(!Object.values(state.status).some(s=>s&&s.edited)){state.lastSig=caseSig();state.autoSig=caseSig();}},5200);
+}
+/* the tab is being closed or reloaded: the store's write would not finish, so the forms are read directly (same page
+   origin) and the whole copy is stashed at once; it is folded into the store when the workstation next opens */
+function autoLast(){
+  const A=state.auto;
+  try{
+    if(!autoOn()||state.restoring)return;
+    const forms={};let work=!!A.key;
+    for(const id of Object.keys(state.frames)){
+      let f=null;try{const w=state.frames[id].contentWindow;f=w&&w.nbhState&&w.nbhState.last?w.nbhState.last():null;}catch(e){f=null;}
+      if(f){forms[id]={title:f.title,total:f.total,data:f.data,own:f.own||'',continued:A.continued[id]||null};if(f.edited)work=true;}
+      else if(A.forms[id])forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});
+      if((state.status[id]||{}).edited)work=true;
+    }
+    if(!work||!Object.keys(forms).length)return;
+    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'');
+    if(h===A.written)return;
+    CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
+      packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
+  }catch(e){}
 }
 setInterval(()=>{if(caseSig()!==state.autoSig)autoSave(false);},5000);
 window.addEventListener('blur',()=>autoSave(false));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')autoSave(true);});
-window.addEventListener('pagehide',()=>autoSave(true));
+window.addEventListener('pagehide',()=>{autoLast();autoSave(true);});
 /* Own tab: the new tab is handed the work once its form answers, and this tab's copy notes it */
 function autoTabName(id){return 'nbh-own|'+encodeURIComponent(CP.scope())+'|'+id+'|'+Date.now().toString(36);}
 async function autoHandOff(id,w){
@@ -2630,28 +2741,34 @@ async function autoHandOff(id,w){
 }
 /* the copies, for the restore offer (offer: only other tabs' copies) and the Autosave box (all of them) */
 async function autoDialog(offer){
-  let rows=await CP.list();
+  let rows=await CP.list();const alive=await CP.live();
   const A=state.auto,f=state.autoFile;
-  /* a copy older than the one-file case just opened is that file's own past */
-  if(f&&f.id)rows=rows.filter(r=>{if(r.caseId===f.id&&r.tab!==A.tab&&!(new Date(r.saved)>new Date(f.saved||0))){CP.del(r.key);return false;}return true;});
-  if(offer)rows=rows.filter(r=>r.tab!==A.tab);
+  /* a copy older than the one-file case just opened is probably that file's own past: said, not deleted (it may hold
+     another tab's unsaved work) */
+  if(f&&f.id)rows.forEach(r=>{if(r.caseId===f.id&&r.tab!==A.tab&&!(new Date(r.saved)>new Date(f.saved||0)))r.older=true;});
+  /* a copy another open tab is keeping is that tab's work in progress: never offered as earlier work, and not restored
+     from here (two tabs would then write one copy) */
+  rows.forEach(r=>{if(r.tab!==A.tab&&alive[r.tab])r.live=true;});
+  if(offer)rows=rows.filter(r=>r.tab!==A.tab&&!r.live);
   if(offer&&!rows.length)return chip();
   const on=autoOn(),mine=r=>r.key===A.key&&r.tab===A.tab;
   const item=(r,i)=>{
     const ids=Object.keys(r.forms||{}),notes=[];
     if(r.kind==='form')notes.push('kept by the form on its own');
     if(mine(r))notes.push('this tab');
+    if(r.live)notes.push('open in another tab now');
+    if(r.older)notes.push('older than the case file just opened');
     if(r.fileAt)notes.push('also saved to a file at '+CP.when(r.fileAt));
     const cont=ids.filter(id=>r.forms[id]&&r.forms[id].continued);
     if(cont.length)notes.push('Form'+(cont.length>1?'s ':' ')+cont.join(', ')+' carried on in its own tab');
     if(r.dropped&&r.dropped.length)notes.push('left out for lack of room: '+r.dropped.join(', '));
     return '<li><div><b>'+esc(r.student||'Student not named')+'</b> · '+esc(autoAgo(r.saved))+
       '<br><small>Form'+(ids.length>1?'s ':' ')+esc(ids.join(', '))+(notes.length?' · '+esc(notes.join(' · ')):'')+'</small></div>'+
-      (mine(r)?'':'<button class="primary" data-as="r" data-i="'+i+'">Restore</button>')+
+      (mine(r)||r.live?'':'<button class="primary" data-as="r" data-i="'+i+'">Restore</button>')+
       '<button data-as="d" data-i="'+i+'">Delete</button></li>';
   };
   const list=rows.length?'<ul class="as-list">'+rows.map(item).join('')+'</ul>':'<p><i>No copies are kept in this browser now.</i></p>';
-  const words='<div class="note">Copies stay in this browser on this device and never leave it. They are protected by the iPad’s passcode, not by the workstation: on a shared iPad, delete them or turn Autosave off. The installed app and Safari keep separate copies, and Safari may clear a site’s storage after 7 days without a visit. Copies older than '+AUTO.days+' days are deleted, and at most '+AUTO.keep+' are kept. A copy is a safety net; the case file is the record.</div>';
+  const words='<div class="note">Copies stay in this browser on this device and never leave it. They are protected by the iPad’s passcode, not by the workstation: on a shared iPad, delete them or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site’s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies older than '+AUTO.days+' days are deleted; no other copy is deleted without asking, and over '+AUTO.keep+' you are asked to delete some. A copy is a safety net; the case file is the record.</div>';
   if(offer)dialog('Unsaved work found in this browser',
     '<p>Work from an earlier session is still kept on this device. Restore the one you want, or delete what you do not need.</p>'+list+
     '<div class="note">Closing this box does neither: the copies stay in this browser and are offered again next time.</div>');
@@ -2672,19 +2789,27 @@ async function autoDialog(offer){
     if(on)wsUI.toast('Autosave is off. The copies already kept stay until you delete them or they expire.',{ms:8000});});
   const cl=$('#autoClear');if(cl)cl.addEventListener('click',async()=>{
     if(!(await wsUI.confirm('Delete every copy Autosave keeps in this browser ('+rows.length+')?\nThey cannot be brought back.',{ok:'Delete all',danger:true})))return;
-    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();wsUI.toast('Every copy was deleted from this browser.');chip();});
+    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();wsUI.toast('Every copy this workstation kept in this browser was deleted. A form still open in another tab keeps copying until that tab is closed.',{ms:9000});chip();});
   $('#dlg').addEventListener('close',function onClose(){$('#dlg').removeEventListener('close',onClose);if(!chose)chip();});
 }
 async function autoRestore(r){
   if(Object.keys(state.frames).length&&caseDirty()&&
-     !(await wsUI.confirm('Restore this copy? The forms open now are replaced; their own safety copy stays listed under Autosave.',{ok:'Restore'})))return;
-  state.restoring=true;
+     !(await wsUI.confirm('Restore this copy? The forms open now are replaced; their own safety copy is written now and stays listed under Autosave.',{ok:'Restore'})))return;
   let d=null;
-  try{d=await CP.unpack(r);}catch(e){state.restoring=false;alert('That copy could not be read: '+(e&&e.message||e));return;}
+  try{d=await CP.unpack(r);}catch(e){alert('That copy could not be read: '+(e&&e.message||e));return;}
+  await autoSeal();
+  state.restoring=true;
   const notes=await loadCase(d,'autosave');
   state.restoring=false;
-  /* the restored copy carries on as this tab's copy: its offer has been answered */
-  const A=state.auto;A.key=r.key;A.student=r.student||'';A.forms={};A.continued={};A.fileAt=r.fileAt||null;A.written='';
+  /* the restored copy carries on in a copy of this tab's own, written at once; the one restored is then removed (its
+     offer has been answered and its work is in the new one), so two tabs never write one copy */
+  const A=state.auto;
+  A.student=r.student||'';A.fileAt=r.fileAt||null;A.written='';A.forms={};A.continued={};
+  Object.keys(d.forms).forEach(id=>{const sn=d.forms[id].snap||{};A.forms[id]={title:d.forms[id].title,total:sn.total,data:sn.data||{},own:sn.own||''};if(d.continued&&d.continued[id])A.continued[id]=d.continued[id];});
+  const key=autoKey(A.student),forms={};
+  Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
+  const put=await CP.put({key,kind:'shell',tab:A.tab,student:A.student,who:r.who||null,saved:r.saved,packet:d.packet||packet(),facts:d.facts||null,caseId:r.caseId||null,fileAt:A.fileAt,forms});
+  if(put.ok&&r.key!==key)await CP.del(r.key);
   if(r.caseId)state.caseId=r.caseId;
   chip();
   const all=notes.concat(d.notes||[]);
@@ -2697,7 +2822,12 @@ $('#autoChip').addEventListener('click',async()=>{
 });
 async function autoOffer(){
   await CP.ready();
-  const s=store();CP.setOff(!!(s&&s.getItem(AUTO.pref)==='off'));   /* forms opened on their own follow the switch */
+  if(CP.mode()&&autoPref()==='ask'){
+    chip();
+    const y=await wsUI.confirm('Autosave is off in this browser.\nYou may have turned it off, or an earlier version turned it off by itself when the browser’s storage was full. Turn Autosave back on?',{ok:'Turn Autosave on',cancel:'Keep it off'});
+    autoSet(!!y);
+  }
+  CP.setOff(!autoOn()&&!!CP.mode());   /* forms opened on their own follow the switch */
   if(!autoOn())return chip();
   try{await CP.migrate(AUTO.key);}catch(e){}
   chip();
@@ -2853,28 +2983,41 @@ $('#saveCase').addEventListener('click',async()=>{
   const btn=$('#saveCase'); btn.textContent='Saving\u2026'; btn.disabled=true;
   /* v21.44: every open form, a slow one asked once more with a longer wait; a form still missing is named, and the
      case is marked saved (and this tab's safety copy ended) only when every form is in the file */
-  const forms={},late=[];
+  /* each answer carries the form's state as it was read (status), so the saved mark is the file's, not the moment the
+     last form answered: an edit made while a slow form is waited for stays unsaved */
+  const forms={},late=[],stat={};
   for(const id of open){
     let r=await grab(id,'snapshot');
     if(!(r&&r.snap)){btn.textContent='Waiting for '+id+'\u2026';r=await grab(id,'snapshot',null,20000);}
-    if(r&&r.snap)forms[id]={title:r.title,snap:r.snap};else late.push(id);
+    if(r&&r.snap){forms[id]={title:r.title,snap:r.snap};stat[id]=r.status||state.status[id];}else late.push(id);
   }
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return;}
   const nm=caseName(p);
-  const left=late.length?'\n\nNOT IN THIS FILE: Form'+(late.length>1?'s ':' ')+late.join(', ')+' did not answer in time. The case is not marked saved and the safety copy is kept; press Save case again in a moment.':'';
-  const check=IOS?'\n\nCheck that the file is in Files (Downloads) before you close this tab. The safety copy stays in this browser until you delete it.':'';
+  const fileSig=Object.keys(state.status).sort().map(k=>{const t=stat[k]||state.status[k]||{};return k+':'+t.filled+':'+(t.sig||'');}).join('|');
+  const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
+  const left=late.length?'\n\nNOT IN THIS FILE: Form'+(late.length>1?'s ':' ')+late.join(', ')+' did not answer in time'+late.map(inCopy).join('')+'. The case is not marked saved; press Save case again in a moment.':'';
+  const after=()=>{
+    const ch=Object.keys(stat).filter(k=>{const a=stat[k]||{},b=state.status[k]||{};return a.filled!==b.filled||a.sig!==b.sig;});
+    return ch.length?'\n\nChanged while the file was being written: Form'+(ch.length>1?'s ':' ')+ch.join(', ')+'. Those changes are not in this file; the case stays marked unsaved and the safety copy is kept. Press Save case again.':'';};
+  const check=IOS?'\n\nCheck that the file is in Files (Downloads) before you close this tab. The safety copy stays in this browser until you say the file is there.':'';
+  /* on an iPad the download offers View or Download, so the case is marked saved only when the user says it is in Files:
+     the notice is then a question, and "Not yet" keeps the dot and the copy */
+  const tell=async(how,text)=>{
+    if(how!=='check')return wsUI.alert(text);
+    const y=await wsUI.confirm(text+'\n\nIs the file in Files now? On an iPad the download can be only viewed, not kept. Until you say it is there, Save case keeps its dot and the safety copy stays.',{ok:'It is in Files',cancel:'Not yet'});
+    if(y){autoFiled(true,fileSig);paintSave();}};
   if(EMBED){
     let where=null;
     try{
       const text=await caseHtml(p,forms);
       where=await writeCase(handle,text,nm+'.case.html');
     }catch(e){alert('The case could not be written: '+(e&&e.message||e));return;}
-    if(!late.length)autoFiled(!!where);
-    alert((where?'Case saved to '+where+'.':'Case written to your downloads as '+nm+'.case.html.')+
+    const how=late.length?'late':autoFiled(!!where,fileSig);
+    await tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+nm+'.case.html.')+
       '\n\nDouble-click that file to open the workstation with this case in it \u2014 '+n+' form'+(n===1?'':'s')+', nothing else needed.'+
-      (where?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(where?'':check));
+      (where?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(how==='moved'?after():'')+(where?'':check));
     return;
   }
   const a=document.createElement('a');
@@ -2883,8 +3026,8 @@ $('#saveCase').addEventListener('click',async()=>{
     {type:'application/json'}));
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
-  if(!late.length)autoFiled(false);
-  alert('Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+check+'\n\n'+
+  const how=late.length?'late':autoFiled(false,fileSig);
+  await tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
         'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.');
 });
 async function openCaseText(text,handle){
@@ -2898,11 +3041,12 @@ async function openCaseText(text,handle){
        !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be loaded and filled.\n'+
                 'What is open now is replaced.',{ok:'Open case'})))return;
     const btn=$('#openCase');btn.textContent='Opening\u2026';btn.disabled=true;
+    await autoSeal();   /* v21.44 the copy of what is open now is written and left alone; this case gets a copy of its own */
     state.restoring=true;
     const notes=await loadCase(d,'file');
     state.restoring=false;
     btn.textContent='Open case';btn.disabled=false;
-    state.savedAt=new Date();state.lastSig=caseSig();
+    state.savedAt=new Date();state.lastSig=caseSig();autoBaseline();
     /* a one-file case opened here is the file later saves go back into */
     state.caseHandle=handle||null;
     state.caseId=d.id||null;
@@ -3056,7 +3200,7 @@ async function bootEmbedded(){
     state.restoring=true;
     const notes=await loadCase(c,'file');
     state.restoring=false;
-    state.savedAt=new Date();state.lastSig=caseSig();
+    state.savedAt=new Date();state.lastSig=caseSig();autoBaseline();
     say('Case opened from this file'+(notes.length?' \u2014 '+notes.join('; '):''));
     /* a working copy older than the file is the file's own past; only one saved
        after it - a crash between saves - is worth offering (autoDialog) */
