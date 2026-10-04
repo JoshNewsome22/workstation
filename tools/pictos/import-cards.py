@@ -2,7 +2,8 @@
 """Import picture cards drawn in Illustrator (one card per SVG: a white rounded frame, the label at the top in Georgia,
 the picture below) into the shared picture library.
 
-usage: python3 tools/pictos/import-cards.py CARD.svg KEY "LABEL" CATEGORY AFTER_KEY [CARD.svg KEY "LABEL" CATEGORY AFTER_KEY ...]
+usage: python3 tools/pictos/import-cards.py CARD KEY "LABEL" CATEGORY AFTER_KEY [CARD KEY "LABEL" CATEGORY AFTER_KEY ...]
+       CARD is a card .svg, or a plain picture (.png, .webp, .jpg), which is trimmed, scaled and kept as WebP
 
 For each card it writes tools/pictos/custom/KEY.svg and adds [KEY, LABEL, CATEGORY, "FILE:custom/KEY.svg"] to
 tools/pictos/pictos.json after AFTER_KEY (an entry already there is left as it is). Then rebuild the library:
@@ -127,13 +128,16 @@ def main(argv):
     for i in range(0, len(argv), 5):
         card, key, label, cat, after = argv[i:i + 5]
         if cat not in spec['cats']: raise SystemExit('unknown category ' + cat + ' (one of ' + ', '.join(spec['cats']) + ')')
-        svg = open(card, encoding='utf-8').read()
-        with tempfile.TemporaryDirectory() as d:
-            src = os.path.join(d, 'card.svg'); open(src, 'w', encoding='utf-8').write(svg)
-            if re.search(r'<image\b', svg):
-                png = os.path.join(d, 'pic.png'); node([src, png, 'png']); out = raster_picture(card, png); kind = 'raster'
-            else:
-                js = os.path.join(d, 'box.json'); node([src, js, 'box']); out = vector_picture(svg, open(js).read()); kind = 'vector'
+        if card.lower().endswith(('.png', '.webp', '.jpg', '.jpeg')):
+            out = raster_picture(card, card); kind = 'image'          # a plain picture: trimmed, scaled, WebP
+        else:
+            svg = open(card, encoding='utf-8').read()
+            with tempfile.TemporaryDirectory() as d:
+                src = os.path.join(d, 'card.svg'); open(src, 'w', encoding='utf-8').write(svg)
+                if re.search(r'<image\b', svg):
+                    png = os.path.join(d, 'pic.png'); node([src, png, 'png']); out = raster_picture(card, png); kind = 'raster'
+                else:
+                    js = os.path.join(d, 'box.json'); node([src, js, 'box']); out = vector_picture(svg, open(js).read()); kind = 'vector'
         note = ('<?xml version="1.0" encoding="UTF-8"?>\n<!-- %s: the picture from the user\'s card %s (%s), without the card frame and label;\n'
                 '     written by tools/pictos/import-cards.py. -->\n' % (label, os.path.basename(card), kind))
         open(os.path.join(HERE, 'custom', key + '.svg'), 'w', encoding='utf-8').write(note + out + '\n')
