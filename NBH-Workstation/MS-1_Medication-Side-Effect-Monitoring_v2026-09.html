@@ -2932,7 +2932,9 @@ const SIMS={
   grid:{tremor:[1,1,1,1,1,1,2,2,0,1,1,1,1,1],thirst:[1,1,2,1,2,2,2,2,0,1,1,1,1,1],nausea:[0,0,1,0,0,1,1,2,0,1,0,0,0,0],coarsetremor:[0,0,0,0,0,0,0,2,0,0,0,0,0,0],vomit:[0,0,0,0,0,0,0,2,0,0,0,0,0,0],ataxia:[0,0,0,0,0,0,1,2,0,0,0,0,0,0]},bip:[2,2,1,1,1,1,1,2,0,1,1,0,1,0],
   wts:[47,47.2,47.6],wd:[40,20,0],miss:[9],absent:[8],notes:'D6 ({D6}): dose increased by the prescriber. D8 ({D8}), 10:30: tremor with vomiting and unsteadiness; the nurse was called at once, the parent was reached, and the student was taken for evaluation the same day. D9 ({D9}): absent. D10 ({D10}): lithium held by the prescriber; restarted at the earlier dose on D11 ({D11}).',eps:null}
 };
-function loadSim(){const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});cellState={};
+/* the enhancement sprint (A2): asks first, with the question the other forms use; Cancel changes nothing */
+async function loadSim(){if(!(await nbhUI.confirm('Load the simulated monitoring record?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
+ const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});cellState={};
  const off=d=>{const w=d.getDay(),m=d.getMonth(),t=d.getDate(),nth=Math.ceil(t/7),last=t+7>new Date(d.getFullYear(),m+1,0).getDate();
   return w===0||w===6||(m===8&&w===1&&nth===1)||(m===10&&(t===11||(w===4&&nth===4)||(w===5&&t>=23&&t<=29)))||(m===11&&t>=24)||(m===0&&(t===1||(w===1&&nth===3)))||(m===1&&w===1&&nth===3)||(m===4&&w===1&&last)||m===5||m===6||(m===7&&t<10);};
  const T=new Date();T.setHours(12,0,0,0);do{T.setDate(T.getDate()-1);}while(off(T));
