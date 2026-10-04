@@ -1,18 +1,22 @@
 /* nbh-wording (v21.43): help with the wording of a form's narrative fields.
 
    An "Improve wording" button sits at the corner of every narrative field (a textarea) while the field has
-   focus or text. It opens a panel holding the field's text (or the part of it that was selected) and three
-   ways to improve it:
+   focus or text; from the keyboard, Alt+Enter (Option+Return on a Mac or an iPad) in the field does the same, and
+   Tab goes from field to field as the form has it. It opens a panel holding the field's text (or the part of it
+   that was selected) and three ways to improve it:
      1. Check wording: rule based and offline. It flags words that name a feeling, guess at intent or
         function, label the behavior or leave a count, a time or an intensity vague, says why, and says what
         to write instead; where a rule gives a direct replacement, Apply edits the panel's text. Nothing leaves
         the device. Words inside quotation marks are the learner's own and are not flagged.
      2. Rewrite with Claude: through the relay on the practice's website (tools/relay/), which holds the API
         key. A tab is unlocked once with a single-use passcode from the BCBA; the session token is kept in
-        this tab's sessionStorage only, never in a field or a saved file. Before anything is sent, the
-        learner's name, first name and ID (read from the form's fields, or from the workstation's packet) and
-        any names typed into "Also hide" are replaced by [Student], [ID], [Name 1] ..., and the text exactly
-        as it will be sent is shown first; the placeholders are put back in the answer.
+        sessionStorage, never in a field or a saved file, and lasts until the relay's session time is up or the
+        tab is closed (a tab this one opens, or one the browser restores, can carry it, so the panel offers
+        Lock). Before anything is sent, the learner's name (whole, first, last, each half of a double name) and
+        ID (read from the form's fields, or from the workstation's packet) and any names typed into "Also hide"
+        are replaced by [Student], [ID], [Name 1] ...; the learner's surname after a title or before "family"
+        (a parent) by [Family name]. The text exactly as it will be sent is shown first, with what may still be
+        a name; the placeholders are put back in the answer, each as it was written.
      3. iPad Writing Tools: Apple's own, already in every text box on an iPad with Apple Intelligence; the
         panel only explains it.
    "Use this text" writes the panel's text into the field (or over the part that was selected) and fires
@@ -25,7 +29,8 @@
    most of OB-1's controls have only their place), the form's saved file, the packet print, the progress
    dots and the accessible-name pass are exactly what they were. Key and input events from inside the panel
    stop at that element, so a form's own shortcuts (OB-1's Live Recorder counts on the digit keys) never
-   see typing in the panel. None of it prints. The rules and the relay's address are built in
+   see typing in the panel; keys pressed on a field's button go on, as from any button of the form. None of
+   it prints. The rules and the relay's address are built in
    (tools/blocks/patch-wording.py); nothing here reads them from the page or from storage. */
 (function(){
 'use strict';
@@ -78,8 +83,10 @@ function plural(n, one, many){ return n + ' ' + (n === 1 ? one : many); }
    whole words (checked here, so a rule needs no \b and a word with an accent or a digit is still a word); "flags"
    may add m, s or u. "replace" is the direct replacement, with $1-style groups, or a template with a blank such
    as "[number] times". A rule that does not compile, or that would match nothing at all, is left out and
-   counted (nbhWording.rules().bad). */
-const RS = compile(RAW_RULES);
+   counted (nbhWording.rules().bad). The rules are compiled the first time something is checked, not when the page
+   loads. */
+let RS0 = null;
+function rules(){ return RS0 || (RS0 = compile(RAW_RULES)); }
 function compile(src){
   const out = {version:'', rules:[], bad:[]};
   if (!src || typeof src !== 'object' || !Array.isArray(src.rules)) return out;
@@ -101,7 +108,7 @@ function compile(src){
   return out;
 }
 const BLANKRULE = {id:'blank', cat:'blank', why:'A blank is still to be filled in.', suggest:'Replace the words in brackets with what you saw or counted.', replace:null};
-const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|name \d{1,2})\]$/i;
+const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2})\]$/i;
 /* the learner's own words, in quotation marks, are not the writer's and are not checked */
 function quoteSpans(t){
   const spans = []; let open = -1, kind = '';
@@ -126,12 +133,32 @@ function fitCase(rep, orig){
 function finding(r, t, s, e, m){
   const f = {id:r.id, cat:r.cat, start:s, end:e, text:t.slice(s, e), why:r.why, suggest:r.suggest, replacement:null};
   if (r.replace != null) { const rep = fitCase(expand(r.replace, m), f.text); if (rep !== f.text) f.replacement = rep; }
+  else {
+    /* a rule that reads the word before the phrase (to leave "staff refused" alone) marks the phrase without a joining
+       word: "refused", not "and refused" */
+    const lead = /^(?:and|but|or|then|also|yet)\s+/i.exec(f.text);
+    if (lead && lead[0].length < f.text.length) { f.start += lead[0].length; f.text = f.text.slice(lead[0].length); }
+  }
   return f;
+}
+/* The learner's own words about a feeling, given as what the learner said ("he said he was angry", "the student told
+   staff she felt sad", "she reported feeling anxious"), report what was said, as words in quotation marks do: they
+   are not the writer's guess at a feeling, so the "internal" rules leave them alone. (What someone else said the
+   learner felt is still flagged.) What came before the phrase, in its sentence: */
+const REPORTED = /(?:^|[^\w'\u2019\]])(?:he|she|they|(?:the\s+)?(?:student|learner|child|client)|\[student\])\s+(?:(?:then|also|later|quietly|loudly|calmly|again|finally|first)\s+)?(?:said|says|stated|states|reported|reports|told|tells|explained|explains|shared|shares|answered|answers|replied|replies|wrote|writes|typed|signed|indicated|indicates|complained|complains|admitted|admits|yelled|yells|shouted|shouts|screamed|whispered|mentioned|mentions|announced|exclaimed|expressed|expresses|repeated|repeats)(?:\s+(?:to\s+)?(?:me|us|him|her|them|staff|everyone|(?:the|his|her|their|a|an|my|our)\s+[\w'\u2019-]+|\[[^\]\n]{1,30}\]))?\s*,?\s+(?:that\s+)?(?:(he|she|they|i)\s+((?:was|were|is|am|are|'s|\u2019s|'m|\u2019m|felt|feels|feel|got|gets|get|had\s+been|has\s+been|have\s+been|was\s+feeling|is\s+feeling|were\s+feeling|would\s+be|will\s+be|became|becomes)\s+)?|(?:feeling|being)\s+)(?:(?:very|really|so|too|a\s+little|a\s+bit|kind\s+of|sort\s+of|extremely|super|more|less|quite|pretty)\s+)?$/i;
+function reported(t, s, text){
+  let pre = t.slice(Math.max(0, s - 120), s);
+  const cut = Math.max(pre.lastIndexOf('.'), pre.lastIndexOf('!'), pre.lastIndexOf('?'), pre.lastIndexOf(';'), pre.lastIndexOf('\n'));
+  if (cut >= 0) pre = pre.slice(cut + 1);
+  const m = REPORTED.exec(pre);
+  if (!m) return false;
+  /* "said he" before "was angry": the phrase itself has to start with the verb then */
+  return !(m[1] && !m[2] && !/^(?:was|were|is|am|are|got|gets|felt|feels|became|becomes|had\s+been|has\s+been)\b/i.test(text));
 }
 function check(text){
   const t = str(text), q = quoteSpans(t), out = [];
   const quoted = (s, e) => q.some(p => s >= p[0] && e <= p[1]);
-  RS.rules.forEach(r => {
+  rules().rules.forEach(r => {
     const re = r.re; re.lastIndex = 0; let m, n = 0;
     while ((m = re.exec(t)) !== null) {
       if (++n > 400) break;
@@ -139,6 +166,7 @@ function check(text){
       if (e === s) { re.lastIndex = s + 1; continue; }
       if ((isW(t.charAt(s)) && isW(t.charAt(s - 1))) || (isW(t.charAt(e - 1)) && isW(t.charAt(e)))) { re.lastIndex = s + 1; continue; }
       if (quoted(s, e)) continue;
+      if (r.cat === 'internal' && reported(t, s, m[0])) continue;
       out.push(finding(r, t, s, e, Array.prototype.slice.call(m)));
     }
     re.lastIndex = 0;
@@ -168,7 +196,7 @@ const CATS = [
   [/^(dur|time|timing|when)/i, 'Vague time'],
   [/^(intens|degree|emphasis|severity)/i, 'Vague intensity'],
   [/^(diag|medic|clinic|patho)/i, 'Diagnosis or medical guess'],
-  [/^(charac|judg|moral|person)/i, 'Judgment of character'],
+  [/^(charac|judg|moral|person|opinion)/i, 'Opinion or judgment'],
   [/^blank/i, 'Blank to fill in']
 ];
 function catLabel(c){ for (let i = 0; i < CATS.length; i++) if (CATS[i][0].test(c)) return CATS[i][1]; c = str(c).replace(/[-_]+/g, ' ').trim(); return c ? c.charAt(0).toUpperCase() + c.slice(1) : 'Wording'; }
@@ -255,10 +283,15 @@ function people(){
   return {names: uniqBy(names, normKey), ids: uniqBy(ids, normKey)};
 }
 const TITLE = /^(mr|mrs|ms|miss|mx|dr|prof|coach|sr|jr|ii|iii|iv)\.?$/i;
+/* parts of a surname that are not hidden on their own ("de", "van"): hidden only inside the whole name */
+const PARTICLE = {};
+'de del della der den di da das do dos du la las le les los van von ter ten bin ibn el al y e st'.split(' ').forEach(w => { PARTICLE[w] = 1; });
 function words(s){
   let edge; try { edge = new RegExp('^[^\\p{L}\\p{N}]+|[^\\p{L}\\p{N}]+$', 'gu'); } catch (e) { edge = /^[^A-Za-z0-9\u00C0-\u024F]+|[^A-Za-z0-9\u00C0-\u024F]+$/g; }
   return str(s).split(/[\s,;/()]+/).map(w => w.replace(edge, '')).filter(w => w.length >= 2 && !TITLE.test(w));
 }
+/* a double name's halves: "Alvarez-Rios" is written "Rios" too */
+function halves(w){ const p = w.split(/[-\u2010-\u2015]+/).filter(x => x.length >= 2 && !PARTICLE[x.toLowerCase()]); return p.length > 1 ? p : []; }
 /* "Ellis, Jordan" is written "Jordan Ellis" in a sentence */
 function inOrder(f){ const c = f.indexOf(','); return c > 0 ? clean(f.slice(c + 1) + ' ' + f.slice(0, c)) : f; }
 function firstName(full){ return words(inOrder(clean(full)))[0] || ''; }
@@ -267,13 +300,26 @@ function nameForms(full){
   const order = inOrder(f), out = order !== f ? [f, order] : [f];
   const w = words(order);
   if (w.length >= 2) out.push(w[0] + ' ' + w[w.length - 1]);
-  return out.concat(w);
+  w.forEach((x, i) => { if (i === 0 || !PARTICLE[x.toLowerCase()]) out.push(x); out.push.apply(out, halves(x)); });   /* a first name is hidden even when it is "Al" or "Van" */
+  return out;
+}
+/* the family's name, as in "Mr. Alvarez-Rios" or "the Alvarez family": the learner's surname, its halves, and the
+   words after the first name together ("De La Cruz") */
+function familyForms(full){
+  const w = words(inOrder(clean(full)));
+  if (w.length < 2) return [];
+  const last = w[w.length - 1], out = [];
+  if (w.length > 2) out.push(w.slice(1).join(' '));
+  out.push(last);
+  out.push.apply(out, halves(last));
+  return out.filter(x => !PARTICLE[x.toLowerCase()]);
 }
 function idForms(id){
   const f = clean(id); if (!f) return [];
   const out = [f], compact = f.replace(/[\s\-_./]/g, '');
   if (compact !== f && compact.length >= 3) out.push(compact);
-  (f.match(/\d{4,}/g) || []).forEach(d => out.push(d));
+  /* the digits of an ID on their own, but not a year in it ("2026-0417": 0417, not 2026, which dates carry) */
+  (f.match(/\d{4,}/g) || []).forEach(d => { if (!/^(?:19|20)\d\d$/.test(d)) out.push(d); });
   return out;
 }
 /* A first or last name that is also an everyday word is hidden where it is written with its capital,
@@ -284,15 +330,34 @@ const COMMON = {};
  'gene earl guy harry angel honey crystal amber ruby pearl jade sandy rusty buck fox hawk drew lane reed rush west north south best hardy sharp ' +
  'strong stone wise early fair golden hart lamb nice rice short small smart sweet swift banks brooks rivers waters fields love star storm rain ' +
  'destiny harmony melody liberty patience prince major royal noble saint sage justice').split(' ').forEach(w => { COMMON[w] = 1; });
+/* Who is hidden, and how: the learner ([Student], from the form's fields or the workstation's packet, and any "Also
+   hide" entry marked as the learner), the learner's family name after a title or before "family" ([Family name]),
+   the ID ([ID]), and every other "Also hide" entry ([Name 1], [Name 2] ... numbered later, in the order the text
+   first names them). A form is matched ignoring case, but for an everyday word, matched only with its capital
+   ("auto"); "ci" always ignores case (the person said this is the learner); "cs" is exact (initials). */
 function hideItems(extra){
   const P = people(), items = [];
-  const sf = uniqBy([].concat.apply([], P.names.map(nameForms)), normKey);
-  if (sf.length) items.push({ph:'[Student]', kind:'student', forms:sf, canon: firstName(P.names[0]) || P.names[0]});
+  const list = (extra || []).map(x => typeof x === 'string' ? {v:x} : x).filter(x => x && clean(x.v));
+  const sf = [];
+  P.names.forEach(nm => nameForms(nm).forEach(f => sf.push({f, mode:'auto', src:-1})));
+  list.forEach((x, j) => {
+    if (!x.student) return;
+    const c = clean(x.v, 80);
+    if (x.exact) sf.push({f:c, mode:'cs', src:j});
+    else [c].concat(/\s/.test(c) ? words(c) : []).forEach(f => sf.push({f, mode:'ci', src:j}));
+  });
+  if (sf.length) items.push({ph:'[Student]', kind:'student', forms:sf, canon: firstName(P.names[0] || '') || P.names[0] || clean(list.filter(x => x.student)[0] ? list.filter(x => x.student)[0].v : '')});
+  const ff = uniqBy([].concat.apply([], P.names.map(familyForms)), normKey);
+  if (ff.length) items.push({ph:'[Family name]', kind:'family', forms: ff.map(f => ({f, mode:'auto', src:-1})), canon: ff[ff.length > 1 && /\s/.test(ff[0]) ? 1 : 0]});
   const idf = uniqBy([].concat.apply([], P.ids.map(idForms)), normKey);
-  if (idf.length) items.push({ph:'[ID]', kind:'id', forms:idf, canon:P.ids[0]});
+  if (idf.length) items.push({ph:'[ID]', kind:'id', forms: idf.map(f => ({f, mode:'auto', src:-1})), canon:P.ids[0]});
   /* "Ms. Rivera" hides "Rivera" on its own too; "Ana Rivera" hides "Ana" and "Rivera" */
-  extra.forEach((x, i) => { const c = clean(x); const w = words(c); items.push({ph:'[Name ' + (i + 1) + ']', kind:'name', forms: uniqBy([c].concat(/\s/.test(c) ? w : []), normKey), canon:c}); });
-  return items;
+  list.forEach((x, j) => {
+    if (x.student) return;
+    const c = clean(x.v, 80);
+    items.push({ph:null, kind:'name', entry:j, forms: uniqBy([c].concat(/\s/.test(c) ? words(c) : []), normKey).map(f => ({f, mode:'auto', src:j})), canon:c});
+  });
+  return {items, list};
 }
 function pat(f){
   const one = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')
@@ -300,88 +365,189 @@ function pat(f){
   const d = deaccent(f);
   return '(?:' + one(f) + (d !== f ? '|' + one(d) : '') + ')';
 }
-/* The text as it will be sent, and how to put each placeholder back: the way of naming the person the text
-   used most (the first name when it is a tie), in the spelling of the field or of the "Also hide" entry. */
+/* The text as it will be sent, and how to put each placeholder back: one by one, each as it was written, when the
+   answer keeps the placeholders in the same order (seq); otherwise each as the way of naming that the text used
+   most (back; the shorter when it is a tie), in the spelling of the field or of the "Also hide" entry. */
 function deidentify(text, extra){
-  const items = hideItems(extra || []), byKey = {}, ci = [], cs = [];
-  items.forEach((it, idx) => it.forms.forEach(f => {
-    const k = normKey(f); if (!k || byKey[k]) return;
-    const sens = it.kind !== 'id' && COMMON[k] && f.charAt(0) !== f.charAt(0).toLowerCase();
-    byKey[k] = {f, idx};
+  const H = hideItems(extra || []), items = H.items, byKey = {}, ci = [], cs = [];
+  items.forEach((it, idx) => { if (it.kind === 'family') return; it.forms.forEach(fo => {
+    const f = fo.f, k = normKey(f); if (!k) return;
+    const sens = fo.mode === 'cs' || (fo.mode === 'auto' && it.kind !== 'id' && !!COMMON[k] && f.charAt(0) !== f.charAt(0).toLowerCase());
+    const prev = byKey[k];
+    if (prev) {
+      /* the learner, confirmed in "Also hide": an everyday-word name is then hidden however it is written */
+      if (prev.sens && !sens && prev.idx === idx) { prev.sens = false; prev.src = fo.src; ci.push({f:prev.f, p:pat(prev.f)}); }
+      return;
+    }
+    byKey[k] = {f, idx, sens, src:fo.src};
     (sens ? cs : ci).push({f, p: pat(f)});
-    if (sens && f !== f.toUpperCase()) cs.push({f: f.toUpperCase(), p: pat(f.toUpperCase())});
-  }));
-  const counts = items.map(() => ({}));
-  const A = '\u0001', Z = '\u0002';
+    if (sens && fo.mode === 'auto' && f !== f.toUpperCase()) cs.push({f: f.toUpperCase(), p: pat(f.toUpperCase())});
+  }); });
+  /* every hidden place becomes a mark (two control characters around a private-use one) that no pattern can match */
+  const A = '\u0001', Z = '\u0002', occ = [];
+  const mark = (idx, f, src) => { occ.push({idx, f, src}); return A + String.fromCharCode(0xE000 + occ.length - 1) + Z; };
+  const MK = A + '([\\uE000-\\uF8FF])' + Z, at = ch => ch.charCodeAt(0) - 0xE000;
   let out = str(text);
+  /* the family's name first, where a title or "family" says it is not the learner: "Mr. [Family name]" */
+  const fi = items.findIndex(it => it.kind === 'family');
+  if (fi >= 0) {
+    const fam = items[fi].forms.map(fo => fo.f).sort((a, b) => b.length - a.length), fp = fam.map(pat).join('|'), fk = {};
+    fam.forEach(f => { fk[normKey(f)] = f; });
+    try {
+      out = out.replace(new RegExp('(^|' + NONW + ')((?:mr|mrs|ms|miss|mx|dr|prof)\\.?\\s+)(' + fp + ')(?=' + NONW + '|$)', 'gi' + UFLAG), (all, pre, title, m) => pre + title + mark(fi, fk[normKey(m)] || m, -1));
+      out = out.replace(new RegExp('(^|' + NONW + ')(' + fp + ')(?=\\s+(?:family|families|household|home|parents|residence)(?:' + NONW + '|$))', 'gi' + UFLAG), (all, pre, m) => pre + mark(fi, fk[normKey(m)] || m, -1));
+    } catch (e) { lastErr = 'deidentify: ' + e.message; }
+  }
   const run = (list, flags) => {
     if (!list.length) return;
     list.sort((a, b) => b.f.length - a.f.length);
     let re; try { re = new RegExp('(^|' + NONW + ')(' + list.map(e => e.p).join('|') + ')(?=' + NONW + '|$)', flags); } catch (e) { lastErr = 'deidentify: ' + e.message; return; }
     out = out.replace(re, (all, pre, m) => {
       const hit = byKey[normKey(m)]; if (!hit) return all;
-      counts[hit.idx][hit.f] = (counts[hit.idx][hit.f] || 0) + 1;
-      return pre + A + hit.idx + Z;
+      return pre + mark(hit.idx, hit.f, hit.src);
     });
   };
   run(ci, 'gi' + UFLAG); run(cs, 'g' + UFLAG);
   /* "Jordan E. Ellis" as [Student] E. [Student]: one person, one placeholder */
-  const twice = new RegExp(A + '(\\d+)' + Z + '(?:\\s+[A-Z]\\.?)?\\s+' + A + '\\1' + Z, 'g');
-  for (let i = 0; i < 4 && twice.test(out); i++) { twice.lastIndex = 0; out = out.replace(twice, A + '$1' + Z); }
-  const sent = out.replace(new RegExp(A + '(\\d+)' + Z, 'g'), (a, i) => items[+i].ph);
-  const map = items.map((it, i) => {
-    const c = counts[i], forms = Object.keys(c), n = forms.reduce((a, f) => a + c[f], 0);
-    let back = it.canon;
-    if (forms.length) back = forms.slice().sort((a, b) => c[b] - c[a] || a.length - b.length)[0];
+  const twice = new RegExp(MK + '((?:\\s+[A-Z]\\.?)?\\s+)' + MK, 'g');
+  for (let i = 0; i < 4; i++) {
+    let merged = false;
+    out = out.replace(twice, (all, a, mid, b) => {
+      const x = occ[at(a)], y = occ[at(b)];
+      if (x.idx !== y.idx) return all;
+      merged = true; return mark(x.idx, x.f + mid + y.f, x.src >= 0 ? x.src : y.src);
+    });
+    if (!merged) break;
+  }
+  /* the order the text names them in: [Name n] counts from the first named, and the answer is put back by it */
+  const order = [];
+  out.replace(new RegExp(MK, 'g'), (all, ch) => { order.push(at(ch)); return all; });
+  let nn = 0;
+  order.forEach(k => { const it = items[occ[k].idx]; if (it.kind === 'name' && !it.ph) it.ph = '[Name ' + (++nn) + ']'; });
+  const sent = out.replace(new RegExp(MK, 'g'), (all, ch) => items[occ[at(ch)].idx].ph);
+  const seq = order.map(k => ({ph: items[occ[k].idx].ph, f: occ[k].f}));
+  const map = items.filter(it => it.ph).map(it => {
+    const c = {}, forms = [];
+    seq.forEach(x => { if (x.ph === it.ph) { if (!(x.f in c)) { c[x.f] = 0; forms.push(x.f); } c[x.f]++; } });
+    const n = forms.reduce((a, f) => a + c[f], 0);
+    const back = forms.length ? forms.slice().sort((a, b) => c[b] - c[a] || a.length - b.length)[0] : it.canon;
     return {ph:it.ph, kind:it.kind, n, forms, back};
   });
-  return {text:sent, map};
-}
-function restore(text, map){
-  const unknown = [];
-  const out = str(text).replace(/\[\s*(student|id|name\s*(\d{1,2}))\s*\]/gi, (all, w, n) => {
-    const ph = n ? '[Name ' + (+n) + ']' : /^id$/i.test(w) ? '[ID]' : '[Student]';
-    const m = (map || []).filter(x => x.ph === ph)[0];
-    if (!m || !m.back) { unknown.push(all); return all; }
-    return m.back;
+  /* each "Also hide" entry: the placeholder it became, and how often the text names it */
+  const entries = H.list.map((x, j) => {
+    const it = items.filter(i => i.kind === 'name' && i.entry === j)[0];
+    if (it) return {v:x.v, student:false, ph:it.ph, n: seq.filter(y => y.ph && y.ph === it.ph).length};
+    const keys = {}; (x.exact ? [clean(x.v, 80)] : [clean(x.v, 80)].concat(words(x.v))).forEach(f => { keys[normKey(f)] = 1; });
+    return {v:x.v, student:true, ph:'[Student]', n: seq.filter(y => y.ph === '[Student]' && keys[normKey(y.f)]).length};
   });
-  return {text:out, unknown};
+  return {text:sent, map, seq, entries};
 }
-/* words still in the text that look like names: a capital word that does not start a sentence */
+/* The answer with the names put back. In order when the answer names the placeholders in the order they were sent
+   (a grammar fix always does); otherwise each placeholder is put back as "back", and one that stood for more than
+   one way of naming someone is listed in "mixed", for the panel to say so. */
+function restore(text, prep){
+  const map = (prep && prep.map) || [], seq = (prep && prep.seq) || [], found = [];
+  const re = /\[\s*(student|id|family\s+name|name\s*(\d{1,2}))\s*\]/gi; let m;
+  const t = str(text);
+  while ((m = re.exec(t)) !== null) {
+    const ph = m[2] ? '[Name ' + (+m[2]) + ']' : /^id$/i.test(m[1]) ? '[ID]' : /^family/i.test(m[1]) ? '[Family name]' : '[Student]';
+    found.push({at:m.index, len:m[0].length, raw:m[0], ph});
+  }
+  const inOrder = found.length === seq.length && found.every((x, i) => x.ph === seq[i].ph);
+  const unknown = [], mixed = [];
+  let out = '', a = 0;
+  found.forEach((x, i) => {
+    out += t.slice(a, x.at); a = x.at + x.len;
+    const e = map.filter(y => y.ph === x.ph)[0];
+    if (!e || !e.back) { unknown.push(x.raw); out += x.raw; return; }
+    if (inOrder) { out += seq[i].f; return; }
+    out += e.back;
+    if (e.forms.length > 1 && mixed.indexOf(e) < 0) mixed.push(e);
+  });
+  out += t.slice(a);
+  return {text:out, unknown, inOrder, mixed: mixed.map(e => ({ph:e.ph, forms:e.forms.slice(), back:e.back}))};
+}
+/* words still in the text that look like names: a capital word that is not an ordinary word for a sentence to start
+   with, wherever it is (names start sentences too: "Liam laughed."), and not in capitals throughout (BCBA, IEP) */
 const NOTNAME = {};
 ('i a an the and but or so if then when while after before during until since because monday tuesday wednesday thursday friday saturday sunday ' +
  'january february march april may june july august september october november december math maths reading writing science english spanish ' +
  'history art music pe gym lunch recess library ela ipad lego legos bcba rbt ot pt slp iep bip fba abc ok okay no yes student students teacher ' +
  'teachers paraprofessional para aide staff peer peers adult adults mom dad mother father grandma grandpa room class classroom school bus office ' +
  'nurse principal counselor therapist observer first next today tomorrow yesterday am pm mr mrs ms miss dr coach he she they his her their it ' +
- 'we you this that these those there here what who').split(' ').forEach(w => { NOTNAME[w] = 1; });
+ 'we you this that these those there here what who ' +
+ 'him them us me my mine our ours your yours its himself herself themselves itself ourselves myself whom whose which where why how ' +
+ 'at in on upon of off for from to into onto out over under by with within without about above below behind beside besides between ' +
+ 'among around across along through throughout toward towards per via near inside outside past again also although though however ' +
+ 'once as both each every all some most many several few no none neither either nor other another such same more less much any ' +
+ 'nobody everyone everybody someone somebody something nothing everything anything anyone anybody ' +
+ 'approximately about around overall total totals later finally eventually immediately initially afterwards afterward meanwhile ' +
+ 'still only just even yet already almost nearly instead otherwise therefore thus hence perhaps maybe probably please thank thanks ' +
+ 'second third fourth fifth last previous following prior subsequently additionally consequently ' +
+ 'data behavior behaviors behaviour antecedent antecedents consequence consequences setting settings activity activities observation ' +
+ 'observations session sessions note notes time times interval intervals trial trials task tasks work worksheet worksheets ' +
+ 'centers center circle transition transitions morning afternoon evening night day week weekend hour hours minute minutes ' +
+ 'target targets baseline goal goals plan plans summary hypothesis function functions prompt prompts prompting ' +
+ 'independent independently group groups small whole large partner pair pairs table desk desks floor door chair carpet line hallway ' +
+ 'walked sat ran cried hit threw yelled screamed left returned completed started stopped began refused pushed kicked put went came ' +
+ 'looked said asked answered raised placed picked got took made gave used worked wrote read played stood lay dropped grabbed moved ' +
+ 'followed transitioned entered exited remained continued attempted tried received earned lost needed wanted requested approached ' +
+ 'touched slapped bit spit scratched pinched hugged laughed smiled giggled talked called shouted whispered sang hummed rocked flapped ' +
+ 'spun jumped climbed crawled fell slid tore ripped broke banged tapped kept held carried brought handed showed pointed nodded shook ' +
+ 'waved turned faced leaned rested slept ate drank chewed finished ended prompted redirected praised reminded ignored blocked ' +
+ 'removed offered provided presented delivered modeled demonstrated told instructed directed cued observed noted recorded saw heard ' +
+ 'watched waited paused looks walks sits runs cries hits throws yells screams leaves returns completes starts stops begins refuses ' +
+ 'pushes kicks goes comes says asks answers gets takes makes gives uses works writes reads plays stands drops grabs moves follows ' +
+ 'stay stays stayed sit stand walk run look listen wait stop go come give take let get help work write read play try put keep ' +
+ 'good great nice well wow oh hey hi hello bye sorry fine sure right wrong yeah yep nope ' +
+ 'when whenever wherever whatever whichever whoever unless whether while whilst ' +
+ 'student\'s teacher\'s peer\'s mom\'s dad\'s don\'t can\'t won\'t didn\'t doesn\'t isn\'t wasn\'t weren\'t aren\'t hasn\'t ' +
+ 'haven\'t hadn\'t couldn\'t wouldn\'t shouldn\'t i\'m i\'ve i\'ll i\'d he\'s she\'s it\'s they\'re we\'re you\'re that\'s there\'s what\'s let\'s ' +
+ 'one two three four five six seven eight nine ten eleven twelve twenty thirty forty fifty twice others classmate classmates ' +
+ 'parent parents grandmother grandfather brother sister brothers sisters sibling siblings sub substitute kid kids child children ' +
+ 'boy boys girl girls timer alarm break breaks snack specials earlier shortly unfortunately luckily fortunately suddenly ' +
+ 'family name').split(' ').forEach(w => { NOTNAME[w] = 1; });
 function likelyNames(t){
-  let re; try { re = new RegExp('(\\p{Lu}[\\p{Ll}\'\u2019-]{1,30})', 'gu'); } catch (e) { re = /([A-Z][a-z'\u2019-]{1,30})/g; }
+  let re; try { re = new RegExp('(\\p{Lu}[\\p{L}\'\u2019-]{1,30})', 'gu'); } catch (e) { re = /([A-Z][A-Za-z\u00C0-\u024F'\u2019-]{1,30})/g; }
   const out = [], seen = {}; let m;
-  while ((m = re.exec(t)) !== null && out.length < 6) {
-    const w = m[1], s = m.index, prev = t.charAt(s - 1);
-    if (isW(prev) || prev === '[') continue;
-    const k = w.toLowerCase().replace(/['\u2019].*$/, '');
-    if (NOTNAME[k] || seen[k]) continue;
-    const before = t.slice(Math.max(0, s - 12), s);
-    const titled = /\b(?:Mr|Mrs|Ms|Miss|Mx|Dr|Coach)\.?\s+$/.test(before);
-    const start = /(^|[.!?:;\n]["'\u201D\u2019)]?)\s*["'\u201C\u2018(]?$/.test(before) && !titled;
-    if (start) continue;
+  while ((m = re.exec(t)) !== null && out.length < 10) {
+    const w = m[1].replace(/['\u2019-]+$/, ''), s = m.index, prev = t.charAt(s - 1);
+    if (isW(prev) || prev === '[' || w.length < 2) continue;
+    if (w === w.toUpperCase()) continue;
+    const lw = w.toLowerCase().replace(/\u2019/g, "'"), k = lw.replace(/'s$/, '');
+    if (NOTNAME[k] || NOTNAME[lw] || seen[k]) continue;
     seen[k] = 1; out.push(w.replace(/['\u2019]s$/, ''));
   }
   return out;
 }
-/* other people this form names (a teacher, a parent), offered for "Also hide" with one tap */
+/* the learner's other ways of being written that the text holds but are not hidden: an everyday-word name in lower
+   case ("hunter"), and the initials ("A.L.", "AL"); offered for "Also hide" as the learner */
+function studentHints(t){
+  const P = people(), out = [], seen = {};
+  const has = (f, flags) => { try { return new RegExp('(^|' + NONW + ')' + pat(f) + '(?=' + NONW + '|$)', flags + UFLAG).test(t); } catch (e) { return false; } };
+  P.names.forEach(nm => {
+    const w = words(inOrder(clean(nm))).filter(x => !PARTICLE[x.toLowerCase()]);
+    w.forEach(x => { const k = normKey(x); if (COMMON[k] && !seen[k] && has(k, 'g')) { seen[k] = 1; out.push({v:k, why:'the student\u2019s name in lower case'}); } });
+    if (w.length >= 2) {
+      const a = w[0].charAt(0).toUpperCase(), b = w[w.length - 1].charAt(0).toUpperCase();
+      [a + '.' + b + '.', a + '. ' + b + '.', a + b].forEach(f => { if (!seen[f] && has(f, 'g')) { seen[f] = 1; out.push({v:f, exact:true, why:'the student\u2019s initials'}); } });
+    }
+  });
+  return out.slice(0, 4);
+}
+/* other people and places this form names (a teacher, a parent, the observers, the school), offered for "Also hide"
+   with one tap */
 function formNames(){
-  const out = [], re = /teacher|parent|caregiver|guardian|mother|father|aide|paraprof|sibling/i;
-  document.querySelectorAll('input[data-meta],input[name],input[id]').forEach(e => {
+  const out = [], re = /teacher|parent|caregiver|guardian|mother|father|aide|paraprof|sibling|observer|secondobs|obs2|assessor|school|district|campus|clinic|agency|bcba|therapist|provider|counsel|principal|psycholog|nurse|doctor|physician|interviewer|informant|respondent/i;
+  document.querySelectorAll('input[data-meta],input[data-field],input[name],input[id]').forEach(e => {
     if (e.type && !/^(text|search)$/i.test(e.type)) return;
-    const k = [e.getAttribute('data-meta'), e.name, e.id].join(' ');
-    if (!re.test(k)) return;
-    const v = clean(e.value, 80); if (!v || !/[A-Za-z\u00C0-\u024F]/.test(v)) return;
+    if (e.closest('#nbh-wording-ui')) return;
+    const k = [e.getAttribute('data-meta'), e.getAttribute('data-field'), e.name, e.id].join(' ');
+    if (!re.test(k) || /email|phone|tel\b|date|time|role|count|agree/i.test(k)) return;
+    const v = clean(e.value, 80); if (!v || v.length > 60 || v.split(/\s+/).length > 6 || !/[A-Za-z\u00C0-\u024F]/.test(v)) return;
     out.push({v, why: fieldLabel(e)});
   });
-  return uniqBy(out, x => normKey(x.v)).slice(0, 6);
+  return uniqBy(out, x => normKey(x.v)).slice(0, 8);
 }
 
 /* ------------------------------------------------------------------ the relay */
@@ -517,6 +683,7 @@ function diff(a, b){
 }
 
 /* ------------------------------------------------------------------ look */
+const KEYNAME = 'Alt+Enter (Option+Return on a Mac or iPad)';
 const ICON = '<svg class="ic" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="M4.2 13.6 12.9 4.9a1.7 1.7 0 0 1 2.4 0l.3.3a1.7 1.7 0 0 1 0 2.4l-8.7 8.7H4.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M11.6 6.2l2.6 2.6M11 16.6h5.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 const SANS = 'var(--nbh-sans,"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif)';
 const SERIF = 'var(--nbh-serif,"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif)';
@@ -543,8 +710,8 @@ const CSS = `
 .iw:focus{outline:none}
 .iw:focus-visible .pl{border-color:var(--nbh-focus,#2f7fa8);box-shadow:0 0 0 3px var(--nbh-focus-soft,rgba(47,127,168,.26))}
 .iw.quiet .pl{opacity:.9}
-.iw.quiet.over .pl{opacity:.62}
-.iw.quiet.over:hover .pl,.iw.quiet.over:focus-visible .pl{opacity:1}
+.iw.over .pl{opacity:.62}
+.iw.over:hover .pl,.iw.over:focus-visible .pl{opacity:1}
 .iw.away{opacity:0;pointer-events:none}
 @media (prefers-reduced-motion:reduce){.iw{transition:none}}
 
@@ -606,6 +773,7 @@ ol.fds{list-style:none;margin:0 0 12px;padding:0;display:flex;flex-direction:col
 .fd{padding:10px 12px 11px;border:1px solid #e3eae8;border-left:4px solid var(--nbh-flag,#9b4e15);border-radius:0 8px 8px 0;background:#fff}
 .fd .cat{margin:0 0 3px;font:600 11px/1.3 ${SANS};letter-spacing:.05em;text-transform:uppercase;color:var(--nbh-flag,#9b4e15)}
 .fd .cx{margin:0 0 6px;font-size:14px;line-height:1.5;color:var(--nbh-ink,#1a2933);overflow-wrap:anywhere}
+.fd .more{margin:-2px 0 6px;font-size:12.5px;color:var(--nbh-muted,#54676f)}
 .fd .why{margin:0 0 4px;font-size:13px;color:#2b3a44}
 .fd .sg{margin:0 0 8px;font-size:13px;color:var(--nbh-ink,#1a2933)}
 .fd .sg b{color:var(--nbh-navy,#182e43)}
@@ -640,6 +808,10 @@ ul.chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:8px 0 0;padd
 .chip .cp{font-weight:600;color:var(--nbh-slate,#254657);margin-left:4px;font-size:12px}
 .chip button{width:32px;height:32px;border:0;border-radius:16px;background:none;color:var(--nbh-muted,#54676f);font:400 18px/1 ${SANS};cursor:pointer}
 .chip button:hover{background:#fff;color:var(--nbh-navy,#182e43)}
+.chip .tg{width:auto;height:28px;margin:0 2px 0 6px;padding:0 9px;border:1px solid var(--nbh-rule2,#93aead);border-radius:14px;background:#fff;
+  color:var(--nbh-slate,#254657);font:600 12px/1 ${SANS}}
+.chip .tg[aria-pressed="true"]{background:var(--nbh-slate,#254657);border-color:var(--nbh-slate,#254657);color:#fff}
+.note.warnl{color:var(--nbh-flag,#9b4e15);font-weight:600}
 .sugg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0 0;font-size:12.5px;color:var(--nbh-muted,#54676f)}
 .sugg .b{min-height:34px;padding:5px 10px;font-size:12.5px}
 pre.sent,div.ans{margin:6px 0 10px;padding:10px 12px;border-radius:6px;background:#fff;white-space:pre-wrap;overflow-wrap:anywhere;
@@ -696,18 +868,44 @@ function build(){
   root = host.attachShadow({mode:'open'});
   root.innerHTML = '<style>' + CSS + '</style><div class="lay"></div><div class="mir" aria-hidden="true"></div>';
   lay = root.querySelector('.lay'); mir = root.querySelector('.mir');
+  /* Everything typed in the panel stops here, so the form's own shortcuts never see it. Keys pressed on a field's
+     button go on to the page, as they would from any button of the form (OB-1's Live Recorder counts on 1 to 4 and
+     pauses on Space while its keys are on); the button keeps Tab and Escape for itself. */
   ['keydown','keyup','keypress','input','change','beforeinput','focusin','focusout','compositionstart','compositionupdate','compositionend',
-   'paste','cut','copy','select'].forEach(t => host.addEventListener(t, e => e.stopPropagation()));
+   'paste','cut','copy','select'].forEach(t => host.addEventListener(t, e => {
+    if (/^key/.test(t) && onButton(e)) return;
+    e.stopPropagation();
+  }));
   document.body.appendChild(host);
   return true;
 }
+function onButton(e){
+  const p = typeof e.composedPath === 'function' ? e.composedPath() : [];
+  for (let i = 0; i < p.length && p[i] !== host; i++) if (p[i].classList && p[i].classList.contains('iw')) return true;
+  return false;
+}
 function activeTa(){ const a = document.activeElement; return a && a.tagName === 'TEXTAREA' && eligible(a) ? a : pinned; }
-function countFor(ta){
+/* The checker's count for a field's badge. The field being worked in is counted at once; the others when the page
+   has nothing else to do (a form opened with many notes is not held up by them), and their badges follow. */
+const idleQ = new Set(); let idleH = 0;
+const later = window.requestIdleCallback ? f => window.requestIdleCallback(f, {timeout:1500}) : f => setTimeout(() => f(null), 200);
+function countFor(ta, now){
   const v = ta.value, c = counts.get(ta);
   if (c && c.v === v) return c.n;
+  if (!now) { idleQ.add(ta); if (!idleH) idleH = later(drainCounts); return c ? c.n : 0; }
   const n = /\S/.test(v) ? check(v).length : 0;
   counts.set(ta, {v, n});
   return n;
+}
+function drainCounts(dl){
+  idleH = 0; let did = 0;
+  for (const ta of Array.from(idleQ)) {
+    idleQ.delete(ta);
+    if (ta.isConnected) { countFor(ta, true); did++; }
+    if (dl && typeof dl.timeRemaining === 'function' && dl.timeRemaining() < 4 && idleQ.size) break;
+  }
+  if (idleQ.size) idleH = later(drainCounts);
+  if (did) schedule();
 }
 function clipsOf(ta){
   const out = [];
@@ -719,7 +917,7 @@ function clipsOf(ta){
 }
 function makeBtn(ta){
   const el = document.createElement('button');
-  el.type = 'button'; el.className = 'iw'; el.tabIndex = -1; el.title = 'Improve wording';
+  el.type = 'button'; el.className = 'iw'; el.tabIndex = -1; el.title = 'Improve wording (' + KEYNAME + ' in the text box)';
   el.innerHTML = '<span class="pl">' + ICON + '<span class="lb">Improve wording</span><span class="bd" hidden></span></span>';
   const b = {el, ta, pl:el.firstChild, bd:el.querySelector('.bd'), label:fieldLabel(ta), n:-1, w:0, at:'br', clips:clipsOf(ta), tv:treeV, away:false};
   el.addEventListener('mousedown', e => e.preventDefault());   /* the field keeps its focus and its selection */
@@ -729,17 +927,17 @@ function makeBtn(ta){
   el.addEventListener('blur', () => { setTimeout(() => { if (pinned === ta && root.activeElement !== el) { pinned = null; schedule(); } }, 0); });
   el.addEventListener('keydown', e => {
     if (e.key === 'Tab' && !e.altKey && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
+      e.preventDefault(); e.stopPropagation();
       if (e.shiftKey) { pinned = null; ta.focus(); return; }
       const nx = nextFocusable(ta); pinned = null;
       if (nx) nx.focus(); else el.blur();
-    } else if (e.key === 'Escape') { e.preventDefault(); pinned = null; ta.focus(); }
+    } else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); pinned = null; ta.focus(); }
   });
   lay.appendChild(el);
   if (RO) RO.observe(ta);
   return b;
 }
-/* the control after the field, for Tab from its button: the button sits after its field in the tab order */
+/* the control after the field, for Tab from the button (it has the focus after the panel closes from a tap) */
 function nextFocusable(ta){
   const all = document.querySelectorAll('a[href],button,input,select,textarea,[tabindex],[contenteditable="true"],summary');
   let after = false;
@@ -752,13 +950,17 @@ function nextFocusable(ta){
   }
   return null;
 }
-function paint(b, isAct, r){
-  const n = countFor(b.ta), wide = isAct && r.width >= 300, sm = !isAct || r.height < 40;
+/* The button with its label only while its field has the focus and nothing written yet, where it covers nothing;
+   with words in the field it is the small round one, so it covers no more than the end of a line (and that
+   see-through). "keep" (while typing): the count on the badge waits until typing stops. */
+function paint(b, isAct, r, keep){
+  const n = keep && b.n >= 0 ? b.n : countFor(b.ta, isAct), empty = !/\S/.test(b.ta.value);
+  const wide = isAct && document.activeElement === b.ta && r.width >= 300 && empty, sm = !isAct || r.height < 40 || !empty;
   if (b.n === n && b.wide === wide && b.sm === sm && b.act === isAct) return;
-  b.n = n; b.wide = wide; b.sm = sm; b.act = isAct; b.w = 0;
+  b.n = n; b.wide = wide; b.sm = sm; b.act = isAct; b.w = 0; b.endKey = '';
   b.el.classList.toggle('wide', wide); b.el.classList.toggle('sm', sm); b.el.classList.toggle('quiet', !isAct);
   b.bd.hidden = !n; b.bd.textContent = n ? String(n) : '';
-  b.el.setAttribute('aria-label', 'Improve wording: ' + b.label + (n ? ', ' + plural(n, 'phrase', 'phrases') + ' to look at' : ''));
+  b.el.setAttribute('aria-label', 'Improve wording: ' + b.label + (n ? ', ' + plural(n, 'phrase', 'phrases') + ' to look at' : '') + '. ' + KEYNAME + ' in the field opens it too.');
 }
 const MPROPS = ['boxSizing','width','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','borderStyle','paddingTop','paddingRight',
   'paddingBottom','paddingLeft','fontStyle','fontVariant','fontWeight','fontStretch','fontSize','fontFamily','lineHeight','letterSpacing','wordSpacing',
@@ -780,6 +982,21 @@ function caretRect(ta, r, at){
   return {left:left - 3, right:left + 4 * z + 3, top:top - 2, bottom:top + lh * z + 2};
 }
 function hits(c, s){ return !(c.right < s.x || c.left > s.x + s.w || c.bottom < s.y || c.top > s.y + s.h); }
+/* whether words lie under the button at that corner: on the last row, where the text ends there or runs on below;
+   on the first row, where the text goes on past its first line or reaches the corner */
+function overText(b, r, s, endC){
+  const ta = b.ta, key = ta.value + '|' + Math.round(r.width) + '|' + Math.round(r.height) + '|' + s.at + '|' + ta.scrollTop;
+  if (b.endKey === key) return b.endOver;
+  const c = endC || caretRect(ta, r, ta.value.length);
+  let over = false;
+  if (c) {
+    const tail = {left:c.left - 4, right:c.right, top:c.top, bottom:c.bottom};
+    if (s.at === 'br') over = hits(tail, s) || ta.scrollHeight - ta.scrollTop > ta.clientHeight + 4;
+    else over = hits(tail, s) || c.top > s.y + s.h || ta.scrollTop > 2;
+  }
+  b.endKey = key; b.endOver = over;
+  return over;
+}
 /* the field's first and last rows of text, in screen pixels: the button sits on one of them, so it covers at most
    the end of one line, and nothing when that row is empty */
 function rows(b, r){
@@ -787,27 +1004,32 @@ function rows(b, r){
   if (b.rk === key) return b.rv;
   const ta = b.ta, cs = getComputedStyle(ta), z = r.width / (ta.offsetWidth || r.width), px = v => (parseFloat(v) || 0) * z;
   const lh = px(cs.lineHeight) || px(cs.fontSize) * 1.35;
-  b.rk = key; b.rv = {first: r.top + px(cs.borderTopWidth) + px(cs.paddingTop) + lh / 2, last: r.bottom - px(cs.borderBottomWidth) - px(cs.paddingBottom) - lh / 2};
+  const first = r.top + px(cs.borderTopWidth) + px(cs.paddingTop) + lh / 2, last = r.bottom - px(cs.borderBottomWidth) - px(cs.paddingBottom) - lh / 2;
+  b.rk = key; b.rv = {first, last};
   return b.rv;
 }
 /* At the field's bottom right corner, on its last row; while the caret is under it, at the top right, on the first
-   row; when the caret is under both (a one-line field), out of the way until the caret moves on. */
-function place(b, r, o, vw, typing){
+   row; when the caret is under both (a one-line field), out of the way until the caret moves on. With words selected
+   (nothing is being typed) it stays, at the corner away from the end of the selection. Over words it is
+   see-through. "fast" (while typing): only the caret is measured; the rest waits until typing stops. */
+function place(b, r, o, vw, typing, fast){
   if (!b.w) { b.w = b.el.offsetWidth; b.h = b.el.offsetHeight; b.pw = b.pl.offsetWidth; b.ph = b.pl.offsetHeight; }
   if (!b.w) return;   /* not drawn (printing): measured as nothing, it would be put in the wrong place */
   const IN = 5, x = r.right - IN - b.pw, rv = rows(b, r);
   const yb = Math.max(r.top + 2, Math.min(rv.last - b.ph / 2, r.bottom - 2 - b.ph)), yt = Math.min(Math.max(rv.first - b.ph / 2, r.top + 2), yb);
   const br = {x, y:yb, w:b.pw, h:b.ph, at:'br'}, tr = {x, y:yt, w:b.pw, h:b.ph, at:'tr'};
-  let pick = br, over = false;
+  let pick = br, over = !!b.over;
   if (typing) {
     const c = caretRect(b.ta, r);
-    if (c) { pick = null; const order = b.at === 'tr' ? [tr, br] : [br, tr]; for (let i = 0; i < 2; i++) if (!hits(c, order[i])) { pick = order[i]; break; } }
-  } else {
-    /* not being typed in: at the bottom corner, where a short last line leaves room; over a full one it is see-through */
-    const key = b.ta.value + '|' + Math.round(r.width) + '|' + Math.round(r.height);
-    if (b.endKey !== key) { b.endKey = key; const c = caretRect(b.ta, r, b.ta.value.length); b.endOver = !!c && hits({left:c.left - 4, right:c.right, top:c.top, bottom:c.bottom}, br); }
-    over = b.endOver;
-  }
+    if (c) {
+      /* the bottom corner whenever the caret leaves it room; the top one only while the caret is under the bottom one */
+      pick = null; const order = [br, tr];
+      for (let i = 0; i < 2; i++) if (!hits(c, order[i])) { pick = order[i]; break; }
+      if (!pick && b.ta.selectionStart !== b.ta.selectionEnd) pick = Math.abs((c.top + c.bottom) / 2 - rv.last) <= Math.abs((c.top + c.bottom) / 2 - rv.first) ? tr : br;
+      if (pick && !fast) over = overText(b, r, pick, b.ta.selectionEnd === b.ta.value.length ? c : null);
+    }
+  } else over = overText(b, r, br, null);
+
   if (over !== !!b.over) { b.over = over; b.el.classList.toggle('over', over); }
   const away = !pick;
   if (away !== b.away) { b.away = away; b.el.classList.toggle('away', away); if (away) b.el.setAttribute('aria-hidden', 'true'); else b.el.removeAttribute('aria-hidden'); }
@@ -827,17 +1049,32 @@ function inView(b, r){
   }
   return true;
 }
-function schedule(){ if (sched) return; sched = requestAnimationFrame(() => { sched = 0; try { layout(); } catch (e) { lastErr = 'layout: ' + (e && e.message); } }); }
+function schedule(){ if (sched) return; sched = requestAnimationFrame(() => { sched = 0; fastQ = 0; try { layout(); } catch (e) { lastErr = 'layout: ' + (e && e.message); } }); }
+/* While typing: only the button of the field being typed in moves out of the caret's way, at once; the rest (every
+   other button, the badge's count, whether a button lies over words) waits until typing stops for a moment. */
+let fastQ = 0, fullT = 0;
+function scheduleFast(){
+  clearTimeout(fullT); fullT = setTimeout(schedule, 180);
+  if (fastQ || sched) return;
+  fastQ = requestAnimationFrame(() => { fastQ = 0; try { layout(true); } catch (e) { lastErr = 'layout: ' + (e && e.message); } });
+}
 function soon(){ clearTimeout(moT); moT = setTimeout(() => { treeV++; schedule(); }, 60); }
 /* Never while printing, or while the overlay is hidden for it: its buttons measure as nothing then, and placed by
    that they would hang past the right edge just as the page comes back to the screen, where the form's screen fit
    reads that as a page too wide for the window and shrinks the sheet. */
 const PRINT = window.matchMedia ? window.matchMedia('print') : null;
-function layout(){
+function layout(fast){
   if (!lay || host.style.display === 'none' || (PRINT && PRINT.matches)) return;
   if (panelOpen) { if (!lay.hidden) lay.hidden = true; return; }
   if (lay.hidden) lay.hidden = false;
   const act = activeTa(), o = lay.getBoundingClientRect(), vw = document.documentElement.clientWidth, keep = new Set();
+  if (fast) {
+    const b = act && B.get(act);
+    if (b && b.el.isConnected && document.activeElement === act) {
+      const r = vrect(act);
+      if (r.width >= 48 && r.height >= 18) { paint(b, true, r, true); place(b, r, o, vw, true, true); return; }
+    }
+  }
   const list = document.getElementsByTagName('textarea');
   for (let i = 0; i < list.length; i++) {
     const ta = list[i], isAct = ta === act;
@@ -859,15 +1096,16 @@ function remember(ta){ if (ta && ta.tagName === 'TEXTAREA' && typeof ta.selectio
 function wire(){
   document.addEventListener('focusin', e => { if (e.target && e.target.tagName === 'TEXTAREA') schedule(); }, true);
   document.addEventListener('focusout', e => { if (e.target && e.target.tagName === 'TEXTAREA') { remember(e.target); blur = {ta:e.target, t:Date.now()}; schedule(); } }, true);
-  document.addEventListener('input', e => { if (e.target && e.target.tagName === 'TEXTAREA') schedule(); }, true);
-  document.addEventListener('selectionchange', () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') { remember(a); if (B.has(a)) schedule(); } });
+  document.addEventListener('input', e => { if (e.target && e.target.tagName === 'TEXTAREA') { if (B.has(e.target)) scheduleFast(); else schedule(); } }, true);
+  document.addEventListener('selectionchange', () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') { remember(a); if (B.has(a)) scheduleFast(); } });
   document.addEventListener('scroll', e => { if (e.target !== document) schedule(); }, {capture:true, passive:true});
-  /* Tab from a field with its button showing goes to the button; Tab from there goes on to the next control */
+  /* Tab and Shift+Tab go from field to field as the form has them (the button is not a stop on the way); from the
+     keyboard the panel opens with Alt+Enter (Option+Return on a Mac or an iPad) in the field */
   document.addEventListener('keydown', e => {
-    if (e.key !== 'Tab' || e.shiftKey || e.altKey || e.ctrlKey || e.metaKey || e.defaultPrevented || panelOpen) return;
-    const ta = e.target; if (!ta || ta.tagName !== 'TEXTAREA') return;
-    const b = B.get(ta); if (!b || b.away || !b.el.isConnected) return;
-    e.preventDefault(); pinned = ta; b.el.focus();
+    if (e.key !== 'Enter' || !e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.isComposing || e.defaultPrevented || panelOpen) return;
+    const ta = e.target; if (!ta || ta.tagName !== 'TEXTAREA' || !eligible(ta)) return;
+    e.preventDefault(); e.stopPropagation();
+    remember(ta); openPanel(ta, 'key');
   }, true);
   window.addEventListener('resize', () => { soon(); fitPanel(); if (panelOpen) fitEd(); });
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { schedule(); fitPanel(); });
@@ -932,7 +1170,15 @@ function buildPanel(){
        note:q('ckNote'), tabs:[q('tb1'), q('tb2'), q('tb3')], tps:[q('tp1'), q('tp2'), q('tp3')], fm:q('fm'), use:q('use')};
   q('pnX').addEventListener('click', () => closePanel('cancel'));
   q('cancel').addEventListener('click', () => closePanel('cancel'));
-  P.use.addEventListener('click', () => useText(P.ed.value));
+  P.use.addEventListener('click', () => {
+    /* a suggestion still waiting under Rewrite with Claude is not thrown away without a word */
+    if (S && RW.state === 'answer' && RW.ans && !S.ownOk) {
+      S.ownOk = true;
+      say('A suggestion from Rewrite with Claude has not been used. Press Use this text again to keep your own text, or open Rewrite with Claude to use the suggestion.', true);
+      return;
+    }
+    useText(P.ed.value, 'Use this text');
+  });
   dlg.addEventListener('cancel', e => { e.preventDefault(); closePanel('cancel'); });
   dlg.addEventListener('keydown', e => { if (e.key === 'Escape' && !dlg.showModal) { e.preventDefault(); closePanel('cancel'); } });
   P.undo.addEventListener('click', undo);
@@ -952,6 +1198,14 @@ function buildPanel(){
 function setTab(i){
   P.tabs.forEach((b, j) => { b.setAttribute('aria-selected', String(i === j)); b.tabIndex = i === j ? 0 : -1; P.tps[j].hidden = i !== j; });
   if (i === 1) renderRW();
+  syncUse();
+}
+/* While a suggestion is on screen it has its own Use this; the footer's Use this text (your own text) steps aside so
+   that only one button there says Use */
+function syncUse(){
+  if (!P) return;
+  const hide = RW.state === 'answer' && !!RW.ans && !P.tps[1].hidden;
+  if (P.use.hidden !== hide) P.use.hidden = hide;
 }
 function count(){ const n = P.ed.value.length; P.n.textContent = n ? plural(n, 'character', 'characters') : ''; fitEd(); }
 /* one column (an upright iPad, a phone): the text box is as tall as its text, from five lines to 40% of the screen;
@@ -977,7 +1231,7 @@ function footer(){
   const ch = P.ed.value !== S.original;
   say(ch ? 'Changed here; the field changes when you press Use this text.' : '');
 }
-function openPanel(ta){
+function openPanel(ta, how){
   if (!eligible(ta) || !build()) return false;
   buildPanel();
   if (panelOpen) return false;
@@ -990,7 +1244,7 @@ function openPanel(ta){
   const range = typeof s === 'number' && typeof e === 'number' && e > s && /\S/.test(v.slice(s, e)) ? [s, e] : null;
   const key = fieldKey(ta);
   S = {ta, key, dkey: (key || '') + '|' + (range ? range.join('-') : 'all'), value:v, range, original: range ? v.slice(range[0], range[1]) : v,
-       undo:[], ignored:{}, conflict:false};
+       undo:[], ignored:{}, conflict:false, how: how === 'key' ? 'key' : 'tap'};
   const place = fieldPlace(ta), label = fieldLabel(ta);
   P.s.textContent = [place, label].filter(Boolean).join(' \u00B7 ') + (range ? ' \u00B7 the part you selected' : '');
   P.sel.hidden = !range;
@@ -1015,14 +1269,15 @@ function closePanel(how){
   else if (how === 'used') drafts.delete(S.dkey);
   try { dlg.close(); } catch (e) { dlg.removeAttribute('open'); }
   dlg.classList.remove('fb'); const fbk = root.querySelector('.fbk'); if (fbk) fbk.remove();
-  const back = S.ta, key = S.key;
+  const back = S.ta, key = S.key, via = S.how;
   S = null; panelOpen = false; pinned = null;
   if (RW.state === 'sending') RW.state = 'preview';
   layout();
-  /* back to the field's button, which keeps an iPad's keyboard down; else the field */
+  /* back where it was opened from: the field, from the keyboard; the field's button, from a tap, which keeps an
+     iPad's keyboard down (the button then shows small, and see-through over words) */
   const ta = back.isConnected ? back : twin(key);
   const b = ta && B.get(ta);
-  try { if (b && !b.away) b.el.focus({preventScroll:true}); else if (ta) ta.focus({preventScroll:true}); } catch (e) {}
+  try { if (via !== 'key' && b && !b.away) b.el.focus({preventScroll:true}); else if (ta) ta.focus({preventScroll:true}); } catch (e) {}
 }
 /* on an iPad with the keyboard up, the panel fits the part of the screen left above it */
 function fitPanel(){
@@ -1037,14 +1292,15 @@ function fire(el, type){
   catch (e) { ev = document.createEvent('Event'); ev.initEvent(type, true, false); }
   el.dispatchEvent(ev);
 }
-/* the panel's text into the field, or over the part that was selected */
-function useText(text){
+/* the panel's text into the field, or over the part that was selected; "btn" names the button pressed */
+function useText(text, btn){
   if (!S) return false;
+  btn = btn || 'Use this text';
   /* a blank left to fill in ("[number] times", "[describe what you saw]") is named once before it reaches the record */
   const blanks = uniqBy(str(text).match(BLANK) || [], x => x).filter(x => !OURS.test(x));
   if (blanks.length && S.blanks !== text) {
     S.blanks = text;
-    say('Still to fill in: ' + blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' \u2026' : '') + '. Fill them in, or press Use this text again to use the text as it is.', true);
+    say('Still to fill in: ' + blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' \u2026' : '') + '. Fill them in, or press ' + btn + ' again to use the text as it is.', true);
     return false;
   }
   let ta = S.ta;
@@ -1058,7 +1314,7 @@ function useText(text){
     else { const i = cur.indexOf(S.original); if (i >= 0 && cur.indexOf(S.original, i + 1) < 0) next = cur.slice(0, i) + text + cur.slice(i + S.original.length); }
     if (next === null) { S.conflict = true; say('The field changed while this was open and the part you selected is not in it any more, so nothing was changed. Copy your text from here before you close.', true); return false; }
   } else {
-    if (cur !== S.value && !S.conflict) { S.conflict = true; say('The field changed while this was open. Press Use this text again to replace what it holds now.', true); return false; }
+    if (cur !== S.value && !S.conflict) { S.conflict = true; say('The field changed while this was open. Press ' + btn + ' again to replace what it holds now.', true); return false; }
     next = text;
   }
   if (next === cur) { closePanel('used'); return true; }
@@ -1096,39 +1352,48 @@ function renderCheck(){
   P.tabs[0].setAttribute('aria-label', 'Check wording' + (n ? ', ' + plural(n, 'phrase', 'phrases') + ' to look at' : ''));
   const sum = h('p', null);
   if (!/\S/.test(t)) sum.textContent = 'Nothing written yet. Type here or in the field, then check the wording.';
-  else if (!RS.rules.length) sum.textContent = 'The wording rules are missing from this copy of the form, so only blanks left to fill in are checked.';
+  else if (!rules().rules.length) sum.textContent = 'The wording rules are missing from this copy of the form, so only blanks left to fill in are checked.';
   else if (n) { sum.appendChild(h('b', null, plural(n, 'phrase', 'phrases') + ' to look at.')); sum.appendChild(document.createTextNode(' Each says why, and what to write instead.')); }
   else sum.textContent = 'Nothing to look at: no feelings, guesses at intent, labels or vague amounts were found.' + (hidden ? ' (' + plural(hidden, 'phrase', 'phrases') + ' ignored.)' : '');
   if (P.sum.textContent !== sum.textContent) { P.sum.textContent = ''; while (sum.firstChild) P.sum.appendChild(sum.firstChild); }
+  /* one card per rule: where it applies (the first three places), why once, and one button for all of them */
+  const groups = [], byId = {};
+  list.forEach(f => { let g = byId[f.id]; if (!g) { g = byId[f.id] = {id:f.id, cat:f.cat, why:f.why, suggest:f.suggest, items:[]}; groups.push(g); } g.items.push(f); });
   P.fds.textContent = '';
-  list.forEach((f, i) => {
-    const c = context(t, f);
-    const acts = [];
-    if (f.replacement !== null) acts.push(h('button', {type:'button', class:'b', onclick: () => applyF(f, i)},
-      f.replacement ? 'Replace with \u201C' + clean(f.replacement, 44) + '\u201D' : 'Take out \u201C' + clean(f.text, 30) + '\u201D'));
-    acts.push(h('button', {type:'button', class:'b', onclick: () => ignoreF(f, i), 'aria-label':'Ignore \u201C' + f.text + '\u201D'}, 'Ignore'));
-    acts.push(h('button', {type:'button', class:'lk', onclick: () => findF(f), 'aria-label':'Find \u201C' + f.text + '\u201D in your text'}, 'Find in text'));
-    P.fds.appendChild(h('li', {class:'fd'}, [
-      h('p', {class:'cat'}, catLabel(f.cat)),
-      h('p', {class:'cx'}, [c[0], h('mark', null, c[1]), c[2]]),
-      f.why ? h('p', {class:'why'}, f.why) : null,
-      f.suggest ? h('p', {class:'sg'}, [h('b', null, 'Instead: '), f.suggest]) : null,
+  groups.forEach((g, i) => {
+    const k = g.items.length, f = g.items[0], acts = [];
+    if (g.items.every(x => x.replacement !== null)) {
+      const reps = uniqBy(g.items.map(x => ({r:x.replacement})), x => 'r' + x.r);
+      const label = k === 1 ? (f.replacement ? 'Replace with \u201C' + clean(f.replacement, 44) + '\u201D' : 'Take out \u201C' + clean(f.text, 30) + '\u201D')
+        : reps.length === 1 && !reps[0].r ? 'Take out all ' + k : reps.length === 1 ? 'Replace all ' + k + ' with \u201C' + clean(reps[0].r, 36) + '\u201D' : 'Change all ' + k;
+      acts.push(h('button', {type:'button', class:'b', onclick: () => applyG(g, i)}, label));
+    }
+    acts.push(h('button', {type:'button', class:'b', onclick: () => ignoreG(g, i), 'aria-label': k === 1 ? 'Ignore \u201C' + f.text + '\u201D' : 'Ignore all ' + k + ' like \u201C' + f.text + '\u201D'}, k === 1 ? 'Ignore' : 'Ignore all'));
+    acts.push(h('button', {type:'button', class:'lk', onclick: () => findF(f), 'aria-label':'Find \u201C' + f.text + '\u201D in your text'}, k === 1 ? 'Find in text' : 'Find the first'));
+    const places = g.items.slice(0, 3).map(x => { const c = context(t, x); return h('p', {class:'cx'}, [c[0], h('mark', null, c[1]), c[2]]); });
+    if (k > 3) places.push(h('p', {class:'more'}, 'and ' + (k - 3) + ' more like ' + (k - 3 === 1 ? 'it' : 'them')));
+    P.fds.appendChild(h('li', {class:'fd'}, [h('p', {class:'cat'}, catLabel(g.cat) + (k > 1 ? ' \u00B7 ' + k + ' times' : ''))].concat(places, [
+      g.why ? h('p', {class:'why'}, g.why) : null,
+      g.suggest ? h('p', {class:'sg'}, [h('b', null, 'Instead: '), g.suggest]) : null,
       h('div', {class:'ac'}, acts)
-    ]));
+    ])));
   });
-  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (RS.version ? ' Rules ' + RS.version + '.' : '');
+  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (rules().version ? ' Rules ' + rules().version + '.' : '');
 }
 function refocus(i){ const b = P.fds.children[Math.min(i, P.fds.children.length - 1)]; const t = b && b.querySelector('button'); try { (t || P.sum).focus({preventScroll:false}); } catch (e) {} }
-function applyF(f, i){
-  const t = P.ed.value;
-  if (t.slice(f.start, f.end) !== f.text) { renderCheck(); return; }
-  push('\u201C' + clean(f.text, 30) + '\u201D replaced');
-  P.ed.value = applyAt(t, f).text;
+/* every place of one rule at once, from the last to the first so that each one's place in the text still holds */
+function applyG(g, i){
+  const t = P.ed.value, f = g.items[0], k = g.items.length;
+  if (g.items.some(x => t.slice(x.start, x.end) !== x.text)) { renderCheck(); return; }
+  push(k === 1 ? '\u201C' + clean(f.text, 30) + '\u201D replaced' : k + ' changes for \u201C' + clean(f.text, 24) + '\u201D');
+  let out = t;
+  g.items.slice().sort((a, b) => b.start - a.start).forEach(x => { out = applyAt(out, x).text; });
+  P.ed.value = out;
   changed();
-  say(f.replacement ? 'Replaced \u201C' + clean(f.text, 30) + '\u201D with \u201C' + clean(f.replacement, 40) + '\u201D.' : 'Took out \u201C' + clean(f.text, 30) + '\u201D.');
+  say(k > 1 ? 'Changed ' + k + ' places like \u201C' + clean(f.text, 30) + '\u201D.' : f.replacement ? 'Replaced \u201C' + clean(f.text, 30) + '\u201D with \u201C' + clean(f.replacement, 40) + '\u201D.' : 'Took out \u201C' + clean(f.text, 30) + '\u201D.');
   refocus(i);
 }
-function ignoreF(f, i){ S.ignored[f.id + '|' + f.text.toLowerCase()] = 1; renderCheck(); refocus(i); }
+function ignoreG(g, i){ g.items.forEach(f => { S.ignored[f.id + '|' + f.text.toLowerCase()] = 1; }); renderCheck(); refocus(i); }
 function findF(f){ try { P.ed.focus({preventScroll:true}); P.ed.setSelectionRange(f.start, f.end); } catch (e) {} }
 
 /* ---- 2. Rewrite with Claude */
@@ -1139,14 +1404,17 @@ function renderRW(){
   if (!plan.ok) {
     box.appendChild(h('div', {class:'box'}, planText(plan)));
     box.appendChild(h('p', {class:'note'}, 'Check wording and the iPad\u2019s Writing Tools work without it.'));
+    syncUse();
     return;
   }
   const ses = getSession(plan);
-  if (!ses) { renderLocked(box, plan); return; }
+  if (!ses) { renderLocked(box, plan); syncUse(); return; }
   box.appendChild(h('p', {class:'st'}, [h('span', {class:'dot', 'aria-hidden':'true'}), h('b', null, 'Unlocked'),
     ' in this tab' + (ses.exp ? ' until ' + hm(ses.exp) : '') + '.',
-    h('button', {type:'button', class:'lk', onclick: () => { clearSession(); RW.state = 'ready'; RW.msg = {kind:'ok', text:'Locked. A new passcode is needed to use it again in this tab.'}; renderRW(); }}, 'Lock')]));
-  box.appendChild(h('p', {class:'note'}, 'The session is kept in this tab only and ends when the tab closes; it is never saved with the form.'));
+    h('button', {type:'button', class:'lk', onclick: () => { clearSession(); RW.state = 'ready'; RW.ans = null; RW.msg = {kind:'ok', text:'Locked. A new passcode is needed to use it again in this tab.'}; renderRW(); }}, 'Lock')]));
+  /* sessionStorage ends with the tab, but a tab this one opens (a form opened in a new tab) or one the browser
+     restores can carry it: so the time limit is what bounds it, and Lock ends it at once */
+  box.appendChild(h('p', {class:'note'}, 'It ends then, or when this tab is closed, whichever comes first, and is never saved with the form. On a shared iPad, press Lock when you finish.'));
   if (RW.msg) box.appendChild(msgBox(RW.msg));
   if (RW.state === 'preview') renderPreview(box);
   else if (RW.state === 'sending') {
@@ -1155,25 +1423,29 @@ function renderRW(){
   }
   else if (RW.state === 'answer' && RW.ans) renderAnswer(box);
   else renderStyles(box);
+  syncUse();
 }
 function renderLocked(box, plan){
   if (RW.ended) { box.appendChild(msgBox({kind:'err', text:'This tab\u2019s session ended at ' + hm(RW.ended) + '. Enter a new passcode from your BCBA to go on.'})); RW.ended = 0; }
   if (RW.msg) box.appendChild(msgBox(RW.msg));
   const inp = h('input', {id:'pc', class:'tx code', type:'text', inputmode:'text', autocomplete:'one-time-code', autocapitalize:'characters', autocorrect:'off',
     spellcheck:'false', maxlength:'40', placeholder:'XXX-XXX-XXX-XXX', 'aria-describedby':'pcH'});
+  /* what was typed stays through a wrong try, so a one-letter slip is fixed without typing all twelve again */
+  inp.value = RW.pc || '';
+  inp.addEventListener('input', () => { RW.pc = inp.value; });
   const go = h('button', {type:'submit', class:'b pri'}, RW.busy === 'unlock' ? 'Checking\u2026' : 'Unlock');
   if (RW.busy === 'unlock') { go.disabled = true; inp.disabled = true; }
   const f = h('form', {class:'pc', novalidate:true}, [
     h('label', {class:'fl', for:'pc'}, 'Enter the passcode from your BCBA'),
     h('div', {class:'row'}, [inp, go]),
-    h('p', {class:'note', id:'pcH'}, 'A passcode works once. It unlocks Rewrite with Claude in this tab until the tab is closed or the session ends; the session is kept in this tab only, never in a field or a saved file.')
+    h('p', {class:'note', id:'pcH'}, 'A passcode works once. It unlocks Rewrite with Claude in this tab until the session\u2019s time is up or the tab is closed, and it is never kept in a field or a saved file. Your BCBA makes passcodes on the rewrite service\u2019s page on ' + plan.host + '.')
   ]);
   f.addEventListener('submit', ev => { ev.preventDefault(); unlock(inp.value); });
   box.appendChild(f);
-  box.appendChild(h('p', {class:'note'}, 'Your BCBA creates passcodes on the rewrite service\u2019s page on ' + plan.host + '.'));
 }
 async function unlock(raw){
   const plan = relayPlan(); if (!plan.ok) return;
+  RW.pc = str(raw);
   const code = canonCode(raw);
   if (!code) { RW.msg = {kind:'err', text:'Type the passcode first.'}; renderRW(); focusIn('#pc'); return; }
   if (navigator.onLine === false) { RW.msg = {kind:'err', text:errText({offline:true}, 'redeem')}; renderRW(); focusIn('#pc'); return; }
@@ -1182,16 +1454,19 @@ async function unlock(raw){
   RW.busy = null;
   const tok = r.ok && r.body && typeof r.body.token === 'string' ? r.body.token : '';
   if (tok && tok.length >= 16 && tok.length <= 1024 && setSession(plan, tok, expiryOf(r.body.expires))) {
+    RW.pc = '';
     /* a session that ended while a text was waiting to be sent goes back to that text */
     const back = RW.state === 'preview' && RW.style;
     if (!back) RW.state = 'ready';
-    RW.msg = {kind:'ok', text: back ? 'Unlocked again. Check the text below, then press Send.' : 'Unlocked. Choose how the text should be rewritten.'};
+    RW.msg = back ? {kind:'ok', text:'Unlocked again. Check the text below, then press Send.'} : null;
     if (!S) return;
     renderRW(); focusIn(back ? 'h4' : '.sty .b');
   } else {
+    if (r.status === 429) RW.pc = '';
     RW.msg = {kind:'err', text: r.ok ? 'The rewrite service sent an answer this panel could not read. Try again; if it keeps happening, tell your BCBA.' : (errText(r, 'redeem') || 'Stopped.')};
     if (!S) return;
     renderRW(); focusIn('#pc');
+    const i = P.tps[1].querySelector('#pc'); if (i && i.value) { try { i.select(); } catch (e) {} }
   }
 }
 function focusIn(sel){ const e = P.tps[1].querySelector(sel); if (e) { try { e.focus({preventScroll:false}); } catch (x) {} } }
@@ -1204,59 +1479,77 @@ function renderStyles(box){
 }
 function styleOf(id){ return STYLES.filter(s => s.id === id)[0] || STYLES[0]; }
 function marked(text){
-  const out = [], re = /\[(?:Student|ID|Name \d{1,2})\]/g; let a = 0, m;
+  const out = [], re = /\[(?:Student|ID|Family name|Name \d{1,2})\]/g; let a = 0, m;
   while ((m = re.exec(text)) !== null) { if (m.index > a) out.push(text.slice(a, m.index)); out.push(h('span', {class:'phd'}, m[0])); a = m.index + m[0].length; }
   if (a < text.length) out.push(text.slice(a));
   return out;
 }
+function andList(list){ const q = list.map(x => '\u201c' + x + '\u201d'); return q.length < 2 ? q.join('') : q.slice(0, -1).join(', ') + ' and ' + q[q.length - 1]; }
 function renderPreview(box){
   const prep = RW.prep = deidentify(P.ed.value, RW.hide);
   prep.src = P.ed.value;
   const sty = styleOf(RW.style), tooLong = prep.text.length > MAX_SEND, empty = !/\S/.test(prep.text);
   box.appendChild(h('h4', {tabindex:'-1'}, 'Check what will be sent (' + sty.label + ')'));
-  box.appendChild(h('p', {class:'note'}, 'This is exactly the text that will be sent, with the style. Names and the ID are replaced before anything leaves this device and put back in the answer.'));
+  box.appendChild(h('p', {class:'note'}, 'Only this text and the style are sent, to the rewrite service on ' + relayPlan().host + ', which asks Claude (Anthropic\u2019s API) for the rewrite. Names and the ID are replaced here first and put back in the answer.'));
   box.appendChild(h('pre', {class:'sent', 'aria-label':'The text that will be sent'}, marked(prep.text)));
   const hid = prep.map.filter(m => m.n);
   if (hid.length) box.appendChild(h('p', {class:'hid'}, ['Hidden: '].concat([].concat.apply([], hid.map((m, i) => [i ? '; ' : '', h('b', null, m.ph), ' for ' + m.forms.join(', ')])))));
   const P0 = people();
-  if (!P0.names.length && !P0.ids.length) box.appendChild(msgBox({kind:'err', text:'This form has no student name or ID filled in, so nothing is hidden automatically. Add every name the text uses to Also hide before you send.'}));
-  const maybe = likelyNames(prep.text).filter(w => !RW.hide.some(x => normKey(x) === normKey(w)));
+  if (!P0.names.length && !P0.ids.length && !RW.hide.some(x => x.student)) box.appendChild(msgBox({kind:'err', text:'This form has no student name or ID filled in, so nothing is hidden automatically. Add every name the text uses to Also hide before you send, and mark the student\u2019s with Student.'}));
   const inp = h('input', {id:'also', class:'tx', type:'text', autocomplete:'off', autocorrect:'off', spellcheck:'false', 'aria-describedby':'alsoH'});
-  const add = v => { const list = str(v).split(/[,;\n]/).map(x => clean(x, 80)).filter(x => x.length >= 2);
-    list.forEach(x => { if (!RW.hide.some(y => normKey(y) === normKey(x))) RW.hide.push(x); }); renderRW(); focusIn('#also'); };
+  const has = v => RW.hide.some(y => normKey(y.v) === normKey(v));
+  const add = (v, extra) => { const list = str(v).split(/[,;\n]/).map(x => clean(x, 80)).filter(x => x.length >= 2);
+    list.forEach(x => { if (!has(x)) RW.hide.push(Object.assign({v:x, student:false}, extra || {})); }); renderRW(); focusIn('#also'); };
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(inp.value); } });
   box.appendChild(h('label', {class:'fl', for:'also'}, 'Also hide'));
   box.appendChild(h('div', {class:'row'}, [inp, h('button', {type:'button', class:'b', onclick: () => add(inp.value)}, 'Add')]));
-  box.appendChild(h('p', {class:'note', id:'alsoH'}, 'Other people the text names: classmates, staff, family. Separate names with commas. The list is kept only while this page is open.'));
-  if (RW.hide.length) box.appendChild(h('ul', {class:'chips', 'aria-label':'Also hidden'}, RW.hide.map((x, i) => h('li', {class:'chip'}, [x, h('span', {class:'cp'}, '[Name ' + (i + 1) + ']'),
-    h('button', {type:'button', 'aria-label':'Stop hiding ' + x, onclick: () => { RW.hide.splice(i, 1); renderRW(); focusIn('#also'); }}, '\u00D7')]))));
-  const fromForm = formNames().filter(x => !RW.hide.some(y => normKey(y) === normKey(x.v)));
+  box.appendChild(h('p', {class:'note', id:'alsoH'}, 'Other people the text names: classmates, staff, family; and other ways the student is called (a nickname): add it, then press Student on it. Separate names with commas. The list is kept only while this page is open.'));
+  if (RW.hide.length) box.appendChild(h('ul', {class:'chips', 'aria-label':'Also hidden'}, RW.hide.map((x, i) => {
+    const e = prep.entries[i] || {}, ph = x.student ? '[Student]' : e.ph;
+    return h('li', {class:'chip'}, [x.v, h('span', {class:'cp'}, ph && e.n ? ph : 'not in the text'),
+      h('button', {type:'button', class:'tg', 'aria-pressed': String(!!x.student), title:'Hide it as the student', 'aria-label': x.student ? x.v + ' is hidden as the student; press to hide it as someone else' : 'Hide ' + x.v + ' as the student',
+        onclick: () => { x.student = !x.student; renderRW(); const c = P.tps[1].querySelectorAll('ul.chips .tg')[i]; if (c) { try { c.focus(); } catch (er) {} } }}, 'Student'),
+      h('button', {type:'button', class:'x', 'aria-label':'Stop hiding ' + x.v, onclick: () => { RW.hide.splice(i, 1); renderRW(); focusIn('#also'); }}, '\u00d7')]);
+  })));
+  /* one tap each: what the text still holds that may be a name, the people this form names, and the student's own
+     other ways of being written; a word of a name the form offers is offered once, in the form's way */
+  const fromForm = formNames().filter(x => !has(x.v));
+  const formWords = {}; fromForm.forEach(x => words(x.v).forEach(w => { formWords[normKey(w)] = 1; }));
+  const maybe = likelyNames(prep.text).filter(w => !has(w) && !formWords[normKey(w)]);
+  const hints = studentHints(prep.text).filter(x => !has(x.v));
   if (fromForm.length || maybe.length) {
     const s = h('div', {class:'sugg'}, [h('span', null, maybe.length ? 'Still in the text and may be names:' : 'Named on this form:')]);
     maybe.forEach(w => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(w), 'aria-label':'Hide ' + w}, '+ ' + w)));
     fromForm.forEach(x => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(x.v), 'aria-label':'Hide ' + x.v + ' (' + x.why + ')'}, '+ ' + x.v)));
     box.appendChild(s);
   }
+  if (hints.length) {
+    const s = h('div', {class:'sugg'}, [h('span', null, 'May be the student too:')]);
+    hints.forEach(x => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(x.v, {student:true, exact:!!x.exact}), 'aria-label':'Hide ' + x.v + ' as the student (' + x.why + ')'}, '+ ' + x.v)));
+    box.appendChild(s);
+  }
   if (tooLong) box.appendChild(msgBox({kind:'err', text:'This is ' + prep.text.length + ' characters; at most ' + MAX_SEND + ' can be sent. Select part of the text in the field, then open Improve wording again.'}));
+  const left = maybe.concat(hints.map(x => x.v));
+  if (left.length && !tooLong && !empty) box.appendChild(h('p', {class:'note warnl', style:'margin-top:12px'}, 'Not hidden yet: ' + andList(left.slice(0, 6)) + (left.length > 6 ? ' and others' : '') + '. Hide any that names someone before you send.'));
   const send = h('button', {type:'button', class:'b pri', onclick: send_}, 'Send');
   if (tooLong || empty) send.disabled = true;
-  box.appendChild(h('div', {class:'acts', style:'margin-top:12px'}, [send, h('button', {type:'button', class:'b', onclick: () => { RW.state = 'ready'; RW.prep = null; RW.msg = null; renderRW(); focusIn('.sty .b'); }}, 'Cancel')]));
-  box.appendChild(h('p', {class:'note', style:'margin-top:10px'}, 'Only this text and the style are sent, to the rewrite service on ' + relayPlan().host + ', which asks Claude (Anthropic\u2019s API) for the rewrite. Nothing changes in the form until you choose to use the answer.'));
+  box.appendChild(h('div', {class:'acts', style:'margin-top:12px'}, [send, h('button', {type:'button', class:'b', onclick: () => { RW.state = 'ready'; RW.prep = null; RW.msg = null; renderRW(); focusIn('.sty .b'); }}, 'Back to styles')]));
 }
 async function send_(){
   const plan = relayPlan(), ses = plan.ok ? getSession(plan) : null;
   if (!ses) { renderRW(); return; }
   const prep = RW.prep; if (!prep || prep.text.length > MAX_SEND) return;
   if (navigator.onLine === false) { RW.msg = {kind:'err', text:errText({offline:true}, 'rewrite')}; renderRW(); focusIn('.box'); return; }
-  RW.base = prep.src; RW.sentMap = prep.map; RW.sentStyle = RW.style;
+  RW.base = prep.src; RW.sentPrep = prep; RW.sentStyle = RW.style;
   RW.state = 'sending'; RW.msg = null; renderRW();
   const r = await post(plan, '/api/rewrite', {token:ses.token, text:prep.text, style:RW.style}, 60000);
   if (!S) return;
   if (r.ok) {
     const ans = readAnswer(r.body, RW.sentStyle);
     if (ans) {
-      const back = restore(ans.text, RW.sentMap);
-      RW.ans = {text:back.text, unknown:back.unknown, changes:ans.changes, cautions:ans.cautions, style:RW.sentStyle, map:RW.sentMap.filter(m => m.n)};
+      const back = restore(ans.text, RW.sentPrep);
+      RW.ans = {text:back.text, unknown:back.unknown, mixed:back.mixed, inOrder:back.inOrder, changes:ans.changes, cautions:ans.cautions, style:RW.sentStyle, map:RW.sentPrep.map.filter(m => m.n)};
+      if (S) S.ownOk = false;
       RW.state = 'answer'; renderRW();
       if (P.tps[1].hidden) say('The suggestion is ready under Rewrite with Claude.'); else focusIn('h4');
       return;
@@ -1278,28 +1571,31 @@ function renderAnswer(box){
   if (ops) ops.forEach(o => view.appendChild(o.t === '=' ? document.createTextNode(o.s) : h(o.t === '+' ? 'ins' : 'del', null, o.s)));
   else view.textContent = a.text;
   box.appendChild(view);
-  if (a.map.length) box.appendChild(h('p', {class:'hid'}, 'Put back: ' + a.map.map(m => m.ph + ' \u2192 ' + m.back).join('; ') + '.'));
+  /* each placeholder back as it was written, one by one, when the answer kept their order; otherwise one way of
+     naming each, and a word where that was a choice */
+  if (a.map.length) box.appendChild(h('p', {class:'hid'}, 'Put back: ' + a.map.map(m => m.ph + ' \u2192 ' + (a.inOrder ? m.forms.join(', ') : m.back)).join('; ') + (a.inOrder && a.map.some(m => m.forms.length > 1) ? ', each where it was.' : '.')));
+  if (a.mixed.length) box.appendChild(msgBox({kind:'err', text: a.mixed.map(m => m.ph + ' stood for ' + andList(m.forms) + ' in your text').join('; ') + '. The suggestion does not keep the names in the same order, so ' + (a.mixed.length === 1 ? 'each ' + a.mixed[0].ph + ' became \u201c' + a.mixed[0].back + '\u201d' : 'each became one of them') + '. Check each name before you use it.'}));
   if (a.unknown.length) box.appendChild(msgBox({kind:'err', text:'The answer holds ' + uniqBy(a.unknown, x => x).join(', ') + ', which your text did not have. Check it before you use it.'}));
   if (a.changes.length) { box.appendChild(h('p', {class:'note', style:'margin:8px 0 0'}, h('b', null, 'What changed'))); box.appendChild(h('ul', {class:'li'}, a.changes.map(x => h('li', null, x)))); }
   if (a.cautions.length) { box.appendChild(h('p', {class:'note', style:'margin:8px 0 0'}, h('b', null, 'Check before you use it'))); box.appendChild(h('ul', {class:'li'}, a.cautions.map(x => h('li', null, x)))); }
   box.appendChild(h('div', {class:'acts'}, [
-    h('button', {type:'button', class:'b pri', onclick: () => { push('the suggestion used'); P.ed.value = a.text; useText(a.text); }}, 'Use this'),
+    h('button', {type:'button', class:'b pri', onclick: () => { push('the suggestion used'); P.ed.value = a.text; useText(a.text, 'Use this'); }}, 'Use this'),
     h('button', {type:'button', class:'b', onclick: () => { push('the suggestion used'); P.ed.value = a.text; RW.state = 'ready'; RW.ans = null; RW.msg = null; changed(); setTab(0); say('The suggestion is in Your text; edit it, check it, then press Use this text.'); try { P.tabs[0].focus(); } catch (e) {} }}, 'Use and keep editing'),
     h('button', {type:'button', class:'b', onclick: () => { RW.state = 'ready'; RW.ans = null; RW.msg = {kind:'ok', text:'Kept your text as it is.'}; renderRW(); focusIn('.sty .b'); }}, 'Keep mine')
   ]));
-  box.appendChild(h('p', {class:'note', style:'margin-top:10px'}, 'Read it against what you saw: a rewrite can only use what the text says, and it can still get things wrong.'));
+  box.appendChild(h('p', {class:'note', style:'margin-top:10px'}, 'Read it against what you saw: a rewrite can only use what the text says, and it can still get things wrong. Cancel closes the panel and leaves the field as it was.'));
 }
 
 /* ------------------------------------------------------------------ start */
 function start(){ if (!build()) return; wire(); schedule(); }
 window.nbhWording = Object.freeze({
   version: VERSION,
-  rules: () => ({version:RS.version, count:RS.rules.length, bad:RS.bad.slice()}),
+  rules: () => { const r = rules(); return {version:r.version, count:r.rules.length, bad:r.bad.slice()}; },
   check: t => check(t).map(f => ({id:f.id, cat:f.cat, start:f.start, end:f.end, text:f.text, why:f.why, suggest:f.suggest, replacement:f.replacement})),
   open: ta => openPanel(ta),
   close: () => closePanel('cancel'),
   deidentify: (t, extra) => { const r = deidentify(t, Array.isArray(extra) ? extra : []); return {text:r.text, hidden:r.map.filter(m => m.n).map(m => ({placeholder:m.ph, forms:m.forms.slice()}))}; },
-  status: () => { const p = relayPlan(); return {rules:RS.rules.length, badRules:RS.bad.length, relay: p.ok ? 'ready' : p.why, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; }
+  status: () => { const p = relayPlan(), r = rules(); return {rules:r.rules.length, badRules:r.bad.length, relay: p.ok ? 'ready' : p.why, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; }
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
