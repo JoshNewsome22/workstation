@@ -3,6 +3,8 @@
 
 The voice is Kokoro-82M (Apache-2.0), run offline with kokoro-onnx. Every line becomes a mono MP3 (24 kHz, 32 kbit/s)
 embedded as a data URI, with its text and its length in seconds, so the form plays it with no network access.
+Each line is brought to -16 LUFS (speech on phones and tablets; spec "lufs" overrides) with a gain and a peak limiter at
+-1.5 dBFS whose look-ahead delay is compensated, so the loudness rises and no word moves in time.
 
 Set up once (only package registries are needed):
     mkdir tts && cd tts
@@ -36,6 +38,12 @@ if not os.path.exists(npz):
 from kokoro_onnx import Kokoro
 import soundfile as sf, imageio_ffmpeg
 ff = imageio_ffmpeg.get_ffmpeg_exe()
+LUFS = float(spec.get('lufs', -16))
+def loudness(wav):
+    """integrated loudness of a WAV in LUFS (ffmpeg's EBU R128 meter)"""
+    r = subprocess.run([ff, '-hide_banner', '-nostats', '-i', wav, '-af', 'ebur128', '-f', 'null', '-'], capture_output=True, text=True)
+    m = re.findall(r'I:\s+(-?[0-9.]+) LUFS', r.stderr)
+    return float(m[-1]) if m else None
 k = None
 lines = {}
 for ln in spec['lines']:
@@ -48,10 +56,12 @@ for ln in spec['lines']:
     a = np.concatenate([np.zeros(int(sr * .04), dtype=np.float32), a, np.zeros(int(sr * .12), dtype=np.float32)])
     with tempfile.TemporaryDirectory() as d:
         sf.write(d + '/a.wav', a, sr)
-        subprocess.run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', d + '/a.wav', '-ac', '1', '-ar', '24000', '-b:a', '32k', d + '/a.mp3'], check=True)
+        lu = loudness(d + '/a.wav'); g = 0.0 if lu is None else max(-10.0, min(12.0, LUFS - lu))
+        af = 'volume=%.2fdB,alimiter=limit=0.8414:attack=5:release=50:level=false:latency=true' % g
+        subprocess.run([ff, '-hide_banner', '-loglevel', 'error', '-y', '-i', d + '/a.wav', '-af', af, '-ac', '1', '-ar', '24000', '-b:a', '32k', d + '/a.mp3'], check=True)
         mp3 = open(d + '/a.mp3', 'rb').read()
     lines[lid] = {'t': text, 'd': round(len(a) / sr, 3), 'a': 'data:audio/mpeg;base64,' + base64.b64encode(mp3).decode()}
-    print(f'{lid:>14}  {lines[lid]["d"]:6.2f} s  {len(mp3)//1024:4d} KB  {text[:70]}')
+    print(f'{lid:>14}  {lines[lid]["d"]:6.2f} s  {len(mp3)//1024:4d} KB  {g:+5.1f} dB  {text[:60]}')
 data = {'voice': voice, 'speed': speed, 'lines': lines}
 open(out_js, 'w', encoding='utf-8').write(
     '/* The walkthrough narration, voiced by tools/forms/TK-1/make-narration.py from walk-script.json with the Kokoro-82M voice\n'

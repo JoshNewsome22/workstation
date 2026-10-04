@@ -428,6 +428,9 @@ window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l)
   if(empty(S.tg)){const words=[];(f.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(w&&!words.includes(w))words.push(w);});((f.goals&&f.goals.acq)||[]).forEach(g=>{if(g.beh&&!words.includes(g.beh))words.push(g.beh);});words.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
   if(empty(S.ch)&&(f.menu||[]).length){f.menu.slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}
   if(n)renderAll();return {filled:n,note:n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
-window.__nbhFactsPick=function(sel){let n=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot)return false;Object.assign(slot,cellFor(w));return true;};
-  (sel.behaviors||[]).forEach(b=>{if(put(S.tg,b.isRep?b.label:(b.rep||b.label)))n++;});((sel.goals&&sel.goals.acq)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});((sel.goals&&sel.goals.red)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
-  renderAll();return {filled:n,note:n?'':'the six slots are full; empty one first'};};
+/* (v21.43) the Targets page holds skills and replacement behaviors only: a problem behavior goes in as its named replacement
+   (or not at all), and a reduction goal never; the note says what was left out and why */
+window.__nbhFactsPick=function(sel){let n=0,skip=0,full=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot){full++;return false;}Object.assign(slot,cellFor(w));return true;};
+  (sel.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(!String(w||'').trim()){skip++;return;}if(put(S.tg,w))n++;});((sel.goals&&sel.goals.acq)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});skip+=((sel.goals&&sel.goals.red)||[]).length;(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
+  renderAll();const notes=[];if(full)notes.push('the six slots are full; empty one first');if(skip)notes.push((skip===1?'1 item was':skip+' items were')+' left out: a problem behavior or a reduction goal is not a teaching target; its replacement behavior goes on the Targets page');
+  return {filled:n,note:notes.join('; ')};};

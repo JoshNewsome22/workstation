@@ -51,14 +51,16 @@ COMP = {
 }
 def from_file(rel):
     """an SVG kept in tools/pictos/ (FILE:custom/name.svg), drawn into the 72 x 72 box through its own view box. Only
-    presentation attributes are allowed: a <style>, a class, an id, a script or a link would leak into the page."""
+    presentation attributes are allowed: a <style>, a class, an id, a script or a link would leak into the page; an
+    <image> may carry its picture inline as a data:image/png, jpeg or webp URI."""
     p = os.path.join(os.path.dirname(__file__), rel)
     t = open(p, encoding='utf-8').read()
     t = re.sub(r'<\?xml[^>]*\?>', '', t); t = re.sub(r'<!--.*?-->', '', t, flags=re.S)
     m = re.search(r'<svg[^>]*\sviewBox="([^"]+)"[^>]*>(.*)</svg>', t, re.S)
     if not m: raise SystemExit(rel + ': no <svg viewBox="...">')
     vb, body = m.group(1), m.group(2)
-    if re.search(r'<style|\sclass=|\sid=|<script|href=|\son[a-z]+=', body, re.I): raise SystemExit(rel + ': styles, classes, ids, scripts, links or handlers are not allowed')
+    chk = re.sub(r'\shref="data:image/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+"', '', body)   # embedded pictures only
+    if re.search(r'<style|\sclass=|\sid=|<script|href=|\son[a-z]+=', chk, re.I): raise SystemExit(rel + ': styles, classes, ids, scripts, links or handlers are not allowed')
     body = re.sub(r'\s+', ' ', body).replace('> <', '><').strip()
     return '<svg x="0" y="0" width="72" height="72" viewBox="%s">%s</svg>' % (vb, body)
 items = {}; order = []; total = 0
