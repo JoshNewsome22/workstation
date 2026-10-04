@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '9f913e0de8c7';
+const VERSION = 'd964b16c1146';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -123,6 +123,7 @@ const FILES = [
   'nbh-pictos.js',
   'pdf-lib.min.js',
   'nbh-pdf-tools.js',
+  'nbh-tk1-narration.js',
   'respond.html',
   'icon-192.png',
   'icon-512.png',
