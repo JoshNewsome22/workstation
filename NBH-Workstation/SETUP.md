@@ -6071,3 +6071,52 @@ checks that the square prints at 1 in, on 13 portrait pages.
   (default, left, neither, printed as a mirror), the duplicate notice
   and the build label. axe (WCAG 2.1 AA) is clean on every TK-1 view
   and on the open picker.
+
+## Autosave that holds up on an iPad (v21.44, draft)
+
+Autosave keeps a safety copy of the work in this browser, on this device,
+so a closed tab, a reload or an iPad quietly dropping a background tab does
+not cost the work. What changed:
+
+- **Taps count.** Every form now reports a short fingerprint of what its
+  own Save data would write, so an interval scored with a tap (MT-1), a
+  prerequisite marked (PA-1) or a cell marked on the scatterplot (SP-1)
+  is a change like typing: it reaches the safety copy, shows the dot on
+  Save case, and marks the form unsaved. An autosave never clears that
+  mark.
+- **One copy for each student in each tab.** Copies are kept in the
+  browser's own database (IndexedDB) with each form's file and its
+  pictures, up to five copies, for 14 days. A copy is never written over
+  while its offer has not been answered, so closing the offer box keeps
+  it, and two tabs on two students keep two copies. The Autosave button
+  lists the copies (student, forms, time) with Restore and Delete for
+  each, Delete all, and the switch. The old single copy is moved over
+  once and removed.
+- **Pictures are kept.** When the browser is short of room the copy is
+  kept without pictures, then without the largest forms, with a warning
+  on the Autosave button; Autosave stays on. The restore names any form
+  whose pictures were not kept.
+- **At once when the tab is hidden.** The copy is written as soon as you
+  switch to another tab or app, not only every so often.
+- **Save case waits for every form.** A slow form is asked again with a
+  longer wait. A form still missing is named in the notice, and the case
+  is then not marked saved and the safety copy is kept. On an iPad the
+  notice asks you to check that the file is in Files; the copy stays
+  until you delete it.
+- **Own tab takes the work with it**, and a form opened on its own (its
+  own tab, a direct link) keeps a safety copy too and offers it back when
+  it opens again, in a box in the corner that blocks nothing.
+
+**Where the copies are, and who can see them.** Copies stay in this
+browser on this device and are never sent anywhere. They are protected by
+the iPad's passcode, not by the workstation: anyone who can unlock the iPad
+and open the workstation can see them. On a shared iPad, delete them
+(Autosave button, Delete all) or turn Autosave off. The installed app and
+Safari keep separate copies. Safari may clear a site's storage after 7 days
+without a visit. A copy is a safety net; the case file is the record, so
+keep saving the case.
+
+What could not be checked here: the iPad itself. The checks
+(`qa/autosave-test.js`) run in desktop Chromium with an iPad user agent;
+Safari's handling of a discarded tab, its storage limits and its download
+prompt need a look on the iPad.

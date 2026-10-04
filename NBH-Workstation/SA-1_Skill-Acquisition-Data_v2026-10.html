@@ -3316,7 +3316,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   var framed = (function () { try { return W.parent !== W; } catch (e) { return true; } })();
 
   /* ---- the form's whole state ---- */
-  var H = { own: '', text: null, base: null, saved: null, busy: null, again: false, t: 0, first: 0, frozen: false, saveNext: false, noMark: 0, mut: false };
+  var H = { own: '', text: null, base: null, saved: null, busy: null, again: false, t: 0, first: 0, frozen: false, saveNext: false, noMark: 0, mut: false, gap: 4000, last: 0 };
   var subs = [];
   function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '-' + s.length.toString(36); }
   function norm(t) { return String(t).replace(/"(saved|exported|savedAt|exportedAt)"\s*:\s*"[^"]*"/g, ''); }
@@ -3350,6 +3350,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     var t = e && e.target;
     if (t && t.closest && t.closest('.nbh-as-ui')) return;
     if (!H.frozen && H.base !== null) H.frozen = true;   /* from the first tap or key on, a change is the user's */
+    H.gap = 4000;
     var now = Date.now();
     if (!H.first) H.first = now;
     soon(now - H.first > 2500 ? 0 : 450);
@@ -3359,7 +3360,13 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     new MutationObserver(function () { if (!H.busy && !W.__nbhQuiet) H.mut = true; })
       .observe(D.documentElement, { childList: true, subtree: true, characterData: true });
   } catch (e) {}
-  setInterval(function () { if (H.mut && !D.hidden) { H.mut = false; compute(); } }, 4000);
+  /* a page that keeps changing on its own (a timer, a walkthrough playing) is looked at less and less often while what
+     Save data would write stays the same: every 4 s at first, then up to every 32 s; a tap or a key starts again at 4 s */
+  setInterval(function () {
+    if (!H.mut || D.hidden || Date.now() - H.last < H.gap) return;
+    H.mut = false; H.last = Date.now(); var was = H.own;
+    compute().then(function (s) { H.gap = s === was ? Math.min(H.gap * 2, 32000) : 4000; });
+  }, 4000);
   W.addEventListener('message', function (ev) {
     var d = ev.data || {};
     if (!d || !d.nbh) return;
@@ -3387,8 +3394,7 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
     if (D.getElementById('nbh-autosave-css')) return;
     var s = D.createElement('style'); s.id = 'nbh-autosave-css'; s.setAttribute('data-nbh-screen', '');
     s.textContent = '@media print{.nbh-as-ui,.nbh-as-guide{display:none!important}}' +
-      '.nbh-as-dlg{max-width:560px;width:calc(100% - 32px);border:1px solid #c9d3da;border-radius:6px;padding:18px 20px;color:#16242e;background:#fff;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.18)}' +
-      '.nbh-as-dlg::backdrop{background:rgba(22,36,46,.35)}' +
+      '.nbh-as-dlg{position:fixed;right:16px;bottom:16px;z-index:2147483000;max-width:480px;width:calc(100% - 32px);box-sizing:border-box;max-height:70vh;overflow:auto;border:1px solid #c9d3da;border-radius:6px;padding:14px 16px;color:#16242e;background:#fff;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.18)}' +
       '.nbh-as-dlg h2{font-size:17px;margin:0 0 8px}.nbh-as-dlg ul{list-style:none;padding:0;margin:10px 0}' +
       '.nbh-as-dlg li{border-top:1px solid #e3e8ec;padding:9px 0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}' +
       '.nbh-as-dlg li span{flex:1 1 260px}.nbh-as-dlg small{color:#4a5a66;display:block}' +
@@ -3477,8 +3483,10 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
   }
   function show(rows, id) {
     var old = D.getElementById('nbhAsDlg'); if (old) old.remove();
-    var dl = D.createElement('dialog'); dl.id = 'nbhAsDlg'; dl.className = 'nbh-as-ui nbh-as-dlg noprint';
-    dl.setAttribute('aria-labelledby', 'nbhAsH');
+    /* a panel in the corner, not a modal box: it takes no focus and blocks nothing, so a key pressed for the form can
+       never restore an old copy by accident, and the form can be used while the question waits */
+    var dl = D.createElement('aside'); dl.id = 'nbhAsDlg'; dl.className = 'nbh-as-ui nbh-as-dlg noprint';
+    dl.setAttribute('role', 'region'); dl.setAttribute('aria-labelledby', 'nbhAsH');
     var items = rows.map(function (r, i) {
       var n = Object.keys(r.forms).length, where = r.kind === 'form' ? 'this form on its own' : 'the workstation' + (n > 1 ? ', with ' + (n - 1) + ' other form' + (n === 2 ? '' : 's') : '');
       var note = r.fileAt ? '<small>Also saved to a file at ' + esc(C.when(r.fileAt)) + '.</small>' : '';
@@ -3488,21 +3496,22 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
         '<button type="button" class="pri" data-as="r" data-i="' + i + '">Restore</button>' +
         (canDel ? '<button type="button" data-as="d" data-i="' + i + '">Delete</button>' : '') + '</li>';
     }).join('');
-    dl.innerHTML = '<h2 id="nbhAsH">Unsaved work found in this browser</h2>' +
+    dl.innerHTML = '<h2 id="nbhAsH" style="font-size:16px;margin:0 0 6px">Unsaved work found in this browser</h2>' +
       '<p>A safety copy of this form from an earlier session is still on this device.</p><ul>' + items + '</ul>' +
       '<p class="nbh-as-note">Not now keeps the copies; they are offered again next time. Copies stay in this browser on this device and are deleted after ' + C.DAYS + ' days. A copy is a safety net; Save data writes the record.</p>' +
       '<p><button type="button" data-as="x">Not now</button></p>';
-    D.body.appendChild(dl);
     dl.addEventListener('click', function (e) {
       var t = e.target.closest ? e.target.closest('button[data-as]') : null; if (!t) return;
       var r = rows[+t.getAttribute('data-i')], how = t.getAttribute('data-as');
       if (how === 'x') { close(); return; }
       if (how === 'd') { C.del(r.key).then(function () { rows.splice(rows.indexOf(r), 1); if (rows.length) show(rows, id); else close(); }); return; }
-      close(); restore(r, id);
+      var go = function () { close(); restore(r, id); };
+      /* work done on the form since it opened is replaced by the copy: ask first */
+      if (unsaved() && W.nbhUI && W.nbhUI.confirm) W.nbhUI.confirm('Restore the safety copy?\nWhat is on this form now is replaced by it.', { ok: 'Restore' }).then(function (y) { if (y) go(); });
+      else go();
     });
-    dl.addEventListener('cancel', function () { setTimeout(close, 0); });
-    function close() { try { dl.close(); } catch (e) {} dl.remove(); }
-    try { dl.showModal(); } catch (e) { dl.setAttribute('open', ''); dl.style.position = 'fixed'; dl.style.top = '10%'; dl.style.left = '0'; dl.style.right = '0'; dl.style.zIndex = '99999'; }
+    function close() { dl.remove(); }
+    D.body.appendChild(dl);
   }
   function restore(r, id) {
     var b = B(); if (!b) return;

@@ -576,8 +576,9 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     let tk2=frameOf(TKF),te2=frameOf(TEF);
     ok('19 Open case: both link records come back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE);
     ok('19 Open case: the panels read them',await tk2.evaluate(()=>nbhLink.state().on&&!nbhLink.state().table)&&await te2.evaluate(()=>nbhLink.state().on));
-    await sh.evaluate(()=>{state.autoSig='';});await sh.evaluate(async()=>{await autoSave();});
-    const auto=await sh.evaluate(()=>localStorage.getItem(AUTO.key));
+    /* v21.44 the autosave keeps this tab's copy in nbhCopies (IndexedDB); read it back as the case shape it restores from */
+    await sh.evaluate(()=>{state.autoSig='';});await sh.evaluate(async()=>{await autoSave(true);});
+    const auto=await sh.evaluate(async()=>{const r=(await nbhCopies.list()).find(x=>x.key===state.auto.key);return r?JSON.stringify(await nbhCopies.unpack(r)):null;});
     ok('19 the autosave holds both records',!!auto&&JSON.parse(JSON.parse(auto).forms['TK-1'].snap.own).S.meta.lk===lkTK&&JSON.parse(JSON.parse(auto).forms['TE-1'].snap.own).S.meta.lk===lkTE);
     await sh.evaluate(async t=>{state.restoring=true;try{await loadCase(JSON.parse(t),'autosave');}finally{state.restoring=false;}},auto);await sleep(1500);
     tk2=frameOf(TKF);te2=frameOf(TEF);
