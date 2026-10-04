@@ -31,6 +31,9 @@ Paths below are from the repository root. The test server the checks expect:
   `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`.
 - `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
   tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
+  `nbh-copies.js` + `nbh-autosave.js` + `patch-autosave.py` (v21.44 Autosave: the store of safety copies, the
+  whole-state hash and a form's own copy; it also makes small anchored changes in the bridge and the guard, and
+  refreshes the store's copy inside `index.html`; `--check` says whether every file is current).
 - `tools/dedupe-logo.py` — one letterhead image per form (v21.36); idempotent.
 - `tools/build-rps.py`, `tools/rps-assets/` — the Royal Palm School edition and its lockup
   and tab icon. `tools/build-single.py` — the one-file editions.
