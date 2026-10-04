@@ -19,6 +19,15 @@ usage: build-single.py <folder> <out.html>
 import os, re, sys, json, gzip, base64
 SRC, OUT = sys.argv[1:3]
 idx = open(os.path.join(SRC, 'index.html'), encoding='utf-8').read()
+# v21.43: the block that makes the folder edition an app to install (manifest, icons, the iPad's tags) points at files
+# beside index.html, and the offline worker it goes with is the folder's; the one-file edition has neither, so its page,
+# and the copy of it that Save case writes into a case file, leave the block out. (The shell registers no worker here.)
+PWA = re.compile(r'<!-- nbh-pwa-head[\s\S]*?<!-- /nbh-pwa-head -->\n')
+if len(PWA.findall(idx)) > 1:
+    sys.exit('index.html holds more than one nbh-pwa-head block')
+idx = PWA.sub('', idx)
+if re.search(r'<link rel="(manifest|apple-touch-icon)"', idx):
+    sys.exit('index.html links the manifest or the touch icon outside its nbh-pwa-head block')
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)
 m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
 files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
