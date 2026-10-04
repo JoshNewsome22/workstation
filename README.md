@@ -14,7 +14,7 @@ Two editions of the same workstation, 44 forms each, and the tools that build th
 
     python3 tools/apply-polish.py NBH-Workstation                      # after editing tools/polish/*
     python3 tools/blocks/patch-pwa.py NBH-Workstation                  # the installed app's save block (v21.43)
-    python3 tools/pwa-sw.py NBH-Workstation                            # the offline copy's file list (v21.43)
+    python3 tools/pwa-sw.py NBH-Workstation                            # the offline copy's file list and release.json (v21.43)
     python3 tools/rps-assets.py RPS-Workstation/index.html /tmp/rps    # the school lockup and icon
     python3 tools/build-rps.py NBH-Workstation RPS-Workstation /tmp/rps/rps-lockup.webp /tmp/rps/rps-favicon.png
     python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html

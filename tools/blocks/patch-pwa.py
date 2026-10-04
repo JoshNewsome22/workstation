@@ -11,8 +11,10 @@ the page runs as the workstation installed on an iPad or iPhone (see the comment
 on paper or inside the one-file edition behaves exactly as before.
 
 The source is checked first and nothing is written if it is wrong: it may not contain "</script" or "<!--" (either
-would end or confuse the script element), the practice's name (the school edition build refuses any copy of it) or a
-model ID. Files are read and written without newline translation.
+would end or confuse the script element), "</head>", "</body>" or "</html>" (the tags a host's injector looks for: a
+snippet put inside the block would break it), the practice's name (the school edition build refuses any copy of it) or
+a model ID. Files are read and written without newline translation. After running it, run python3 tools/pwa-sw.py on
+the folder: the release list (release.json) holds every page's hash.
 
 usage: python3 tools/blocks/patch-pwa.py [--check] [FOLDER]      FOLDER defaults to NBH-Workstation
   --check   change nothing; exit 1 unless every page already carries the current copy"""
@@ -70,7 +72,9 @@ def main(argv):
     folder = os.path.abspath(folder or os.path.join(ROOT, 'NBH-Workstation'))
     src = read(SRC)
     low = src.lower()
-    for bad in ('</script', '<!--', 'newsome behavioral health'):
+    # '</script' or '<!--' would end or confuse the script element; '</head>', '</body>' and '</html>' are what GoDaddy's
+    # injector looks for (it puts its snippet before the first of each), so the block may not hold them either
+    for bad in ('</script', '<!--', '</head>', '</body>', '</html>', 'newsome behavioral health'):
         if bad in low:
             fail('nbh-pwa-save.js must not contain ' + repr(bad))
     mid = re.search(r'claude-[a-z]+-\d', src, re.I)
