@@ -3371,8 +3371,9 @@ $('#saveCase').addEventListener('click',async()=>{
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
   /* v21.43 installed on an iPad the click opened the share sheet: saved (and Autosave's copy ended) only once it kept the file */
-  if(typeof PWA!=='undefined'&&PWA.shareKept&&!(await PWA.shareKept(a)))return;
-  const how=late.length?'late':autoFiled(false,fileSig);
+  const shared=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';
+  if(shared==='cancelled')return;
+  const how=late.length?'late':autoFiled(shared==='shared',fileSig);   /* kept by the share sheet: no "Is the file in Files?" */
   await tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
         'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.');
 });
