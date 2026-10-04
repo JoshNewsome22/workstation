@@ -80,6 +80,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(await page.$('[data-m="dbBreath"]')!==null,'debriefing asks about breathing during the hold');
     const first=await text(page,'#crRepFirst');
     check(/make the report first/.test(first)&&/Do not then ask the student or the adults involved about it; investigators do that/.test(first),'the debriefing says: report first, then ask no one about it',first);
+    check(/Write about the report only there: the rest of this sheet prints with the plan\./.test(first),'"report first" says the report is written only in the question, since the rest of the sheet prints',first);
     check(await page.evaluate(()=>{const f=document.querySelector('#crRepFirst'),a=document.querySelector('[data-m="dbStudent"]');return !!(f.compareDocumentPosition(a)&Node.DOCUMENT_POSITION_FOLLOWING);}),'"report first" comes before the student’s account');
     check(await shown(page,'#crRep'),'Does This Need a Report? shows on the debriefing sheet');
     const rp=await text(page,'#crRep');
@@ -135,10 +136,34 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await page.evaluate(()=>{S.meta.dbDate='9/14/26, 1:00 PM';S.meta.rpFor='the incident of 9/14/26, 1:00 PM';renderAll();});
     check(!/These answers were given for/.test(await text(page,'#rpVerdict')),'answers for this debriefing: no warning');
     await setVal(page,'[data-m="dbDate"]','10/1/26, 9:30 AM');await sleep(120);
-    check(/These answers were given for the incident of 9\/14\/26, 1:00 PM/.test(await text(page,'#rpVerdict'))&&/Print the report record of the earlier one first/.test(await text(page,'#rpVerdict')),'the debriefing moves to another incident: the answers are said to belong to the earlier one',await text(page,'#rpVerdict'));
+    check(/These answers were given for the incident of 9\/14\/26, 1:00 PM/.test(await text(page,'#rpVerdict'))&&/If it is another incident, print the report record of the earlier one first/.test(await text(page,'#rpVerdict'))&&/press Clear the answers and answer again for this one/.test(await text(page,'#rpVerdict')),'the debriefing moves to another incident: the answers are said to belong to the earlier one',await text(page,'#rpVerdict'));
     await page.evaluate(()=>document.querySelector('#crRepClear').click());await sleep(200);
     check(await page.evaluate(()=>!S.meta.rpNeed&&!S.meta.rpTo&&!S.meta.rpR5&&!S.meta.rpOn&&!S.meta.rpFor&&!document.querySelector('[data-mc="rpR5"]').checked),'Clear the answers clears them, after asking');
     check(/Not answered yet/.test(await text(page,'#rpVerdict')),'cleared: not answered yet');
+    /* the date counts once it is entered, not at each key; a corrected date or restraint keeps its answers with one tap */
+    await page.evaluate(()=>{S.meta.dbDate='';S.meta.dbRow='';renderAll();});
+    await view(page,'deb');await page.selectOption('[data-m="rpNeed"]','no');await page.fill('[data-m="rpWhy"]','seen by the teacher');
+    await page.click('[data-m="dbDate"]');await page.keyboard.type('9/14/26, 1:00 PM',{delay:15});await sleep(150);
+    check(!/These answers were given for/.test(await text(page,'#rpVerdict'))&&await page.evaluate(()=>S.meta.rpFor==='')&&!(await page.$('#crRepKeep')),'answered first, then the date typed: no warning while it is typed');
+    await page.keyboard.press('Tab');await sleep(150);
+    check(await page.evaluate(()=>S.meta.rpFor==='the incident of 9/14/26, 1:00 PM'&&document.querySelector('[data-m="rpFor"]').value===S.meta.rpFor)&&!/These answers were given for/.test(await text(page,'#rpVerdict')),'the date entered: the answers are for this incident, with no warning');
+    await page.fill('[data-m="dbDate"]','9/14/26, 1:05 PM');await sleep(120);
+    check(!/These answers were given for/.test(await text(page,'#rpVerdict')),'a date being corrected: no warning while it is typed');
+    await page.keyboard.press('Tab');await sleep(150);
+    const kp=await text(page,'#rpVerdict');
+    check(/These answers were given for the incident of 9\/14\/26, 1:00 PM\./.test(kp)&&/If it is another incident, print the report record of the earlier one first/.test(kp)&&/If you only corrected the date or the restraint, keep them/.test(kp)&&!!(await page.$('#crRepKeep')),'a corrected date: the warning offers to keep the answers, or to clear them for another incident',kp);
+    await page.click('#crRepKeep');await sleep(150);
+    check(await page.evaluate(()=>S.meta.rpFor==='the incident of 9/14/26, 1:05 PM'&&S.meta.rpNeed==='no'&&S.meta.rpWhy==='seen by the teacher')&&!/These answers were given for/.test(await text(page,'#rpVerdict')),'Keep the answers for this debriefing: the answers stay, now for this incident');
+    await page.evaluate(()=>{S.log=[{d:'9/1/26'},{d:'9/8/26'},{d:'9/14/26'}];S.meta.dbRow='3';S.meta.rpFor='restraint 3 on the log';renderAll();});await view(page,'log');
+    await page.evaluate(()=>document.querySelector('button.rowDel[data-rdel="log"][data-i="0"]').click());await sleep(300);
+    check(await page.evaluate(()=>S.meta.dbRow==='2'&&S.meta.rpFor==='restraint 2 on the log')&&!/These answers were given for/.test(await text(page,'#rpVerdict')),'a restraint above the debriefed one deleted: the answers follow its new number, with no warning');
+    await page.evaluate(()=>{S.log=[{d:'9/1/26'},{d:'9/8/26'},{d:'9/14/26'}];S.meta.dbRow='3';S.meta.rpFor='restraint 2 on the log';renderAll();});
+    await page.evaluate(()=>document.querySelector('button.rowDel[data-rdel="log"][data-i="1"]').click());await sleep(300);
+    check(await page.evaluate(()=>S.meta.dbRow==='2'&&S.meta.rpFor==='a restraint since deleted from the log')&&/These answers were given for a restraint since deleted from the log/.test(await text(page,'#rpVerdict')),'the restraint the answers were for deleted: the warning still says they belong to another one');
+    await page.evaluate(()=>{S.log=[{d:'9/1/26'},{d:'9/8/26'}];S.meta.dbRow='2';S.meta.rpFor='restraint 2 on the log';S.meta.dbDate='9/8/26';renderAll();});
+    await page.evaluate(()=>document.querySelector('button.rowDel[data-rdel="log"][data-i="1"]').click());await sleep(300);
+    check(await page.evaluate(()=>S.meta.dbRow===''&&S.meta.rpFor==='the incident of 9/8/26')&&!/These answers were given for/.test(await text(page,'#rpVerdict')),'the debriefed restraint deleted: the answers stay with the debriefing');
+    await page.evaluate(()=>{S=blank();renderAll();});
     /* Copy for the BIP: the rule goes in, the report stays out */
     await openText(page,saved);
     const bip=await page.evaluate(()=>window.__bipText());
@@ -151,7 +176,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await view(page,'guide');
     const g=await text(page,'section.only-guide');
     check(g.includes('Breathing and blood flow')&&/may not be used in ways that may obstruct or restrict breathing or blood flow/.test(g)&&/facedown position/.test(g),'the statute summary carries Florida’s breathing clause');
-    check(g.includes('No Hold May Restrict Breathing')&&g.includes('principle 7')&&/checked in October 2026/.test(g)&&!/as retrieved; your district/.test(g),'the Guide explains the breathing rule, its sources and when it was checked');
+    check(g.includes('No Hold May Restrict Breathing')&&g.includes('principle 7')&&/The Breathing and blood flow row of the statute summary above was added in October 2026 from published summaries of the law; check it against the current text\./.test(g)&&!/as retrieved; your district|checked in October 2026/.test(g),'the Guide explains the breathing rule, its sources, and how the statute row was checked');
+    check(/Keep the answers for this debriefing/.test(g)&&/Write about a report only in this question: the rest of the debriefing prints with the plan\./.test(g),'the Guide explains keeping the answers, and where a report is written');
     check(g.includes('Does This Need a Report?')&&/person who suspects/.test(g)&&/Print the report record/.test(g)&&/only that the question was answered, and when/.test(g),'the Guide explains the report question and its record');
     /* the simulation fills the new lines */
     await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(900);
@@ -207,6 +233,19 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(await page.evaluate(()=>document.querySelector('#imCareEdit [data-cd="area"]').value==='buttocks'&&!!document.querySelector('#imCareEdit [data-cd="date"]').value),'the care panel opens with the area and today');
     const panel=await text(page,'#imCareEdit');
     check(/If it needs first aid, the school nurse gives it, as for any injury/.test(panel)&&/do not tell the parent yourself first/.test(panel),'the panel covers first aid and not telling the parent first');
+    check(/This log prints with the form, which the family may read: write about a report only under Does this need a report\?, below\./.test(panel),'the panel says the log prints, so a report is written only in the question',panel.slice(0,200));
+    /* what was seen is written as seen: the writing help offers no rewrite of it (its own opt-out, as on SI-1); without
+       the opt-out the same box would take a button, so the check can tell */
+    const iwNear=async()=>{await page.focus('#imCareEdit [data-cd="seen"]');await page.keyboard.type('A small mark, as seen');await sleep(900);
+      return page.evaluate(()=>{const ta=document.querySelector('#imCareEdit [data-cd="seen"]'),h=document.getElementById('nbh-wording-ui'),r=h&&h.shadowRoot,t=ta.getBoundingClientRect();
+        return r?[...r.querySelectorAll('.iw')].filter(b=>!b.classList.contains('away')&&b.getClientRects().length).filter(b=>{const q=b.getBoundingClientRect();return q.right>=t.left-40&&q.left<=t.right+40&&q.bottom>=t.top-40&&q.top<=t.bottom+40;}).length:0;});};
+    const iwOff=await iwNear();
+    check(await page.evaluate(()=>!!document.querySelector('#imCareEdit').closest('[data-nbh-nowording]'))&&iwOff===0,'the box for what was seen has no Improve wording button: it is written as seen',iwOff);
+    await page.evaluate(()=>{document.querySelector('#imCareEdit').removeAttribute('data-nbh-nowording');S.careDraft.seen='';renderCareEdit();});
+    const iwOn=await iwNear();
+    check(iwOn>0,'(control) without the opt-out the same box would take the button',iwOn);
+    await page.evaluate(()=>{document.querySelector('#imCareEdit').setAttribute('data-nbh-nowording','');S.careDraft.seen='';renderCareEdit();renderCareVerdict();});
+    await page.evaluate(()=>{const e=document.activeElement;if(e&&e.blur)e.blur();});await sleep(300);
     check(await page.evaluate(()=>{const e=document.querySelector('#imCareEdit [data-rs="draft"][data-rk="r3"]');return e.checked&&e.disabled;}),'the private-area box is ticked, and stays ticked');
     const add=async()=>{await page.evaluate(()=>document.querySelector('#imCareAdd').click());await sleep(150);};
     await add();check(await page.evaluate(()=>S.care.length===0)&&/the second adult present, with their role \(or tick that no second adult was present\)/.test(await text(page,'#imCareMiss')),'an empty entry is not added, and says what is missing');
@@ -267,7 +306,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await view(page,'scoring');
     const rq=await text(page,'#imRepCur');
     check((await page.$$('#imRepCur input[type=checkbox][data-rk]')).length===7&&/It is in a private area \(genitals, buttocks, breasts\)\./.test(rq)&&/It is at a place this student has not been seen to injure/.test(rq),'seven reasons, with a private area and an unusual place apart');
-    ['Any of these can be a reason to suspect abuse or neglect','Do you suspect abuse or neglect?','You do not need proof. If you are not sure, report.','right away, as soon as you suspect it','Do not investigate','Print the report record'].forEach(p=>check(rq.includes(p),'administration report question says: '+p));
+    ['Any of these can be a reason to suspect abuse or neglect','Do you suspect abuse or neglect?','You do not need proof. If you are not sure, report.','right away, as soon as you suspect it','Do not investigate','Print the report record','Write about a report only here: the rest of this record prints with the form.'].forEach(p=>check(rq.includes(p),'administration report question says: '+p));
     await page.selectOption('#imChart select[data-f="how"]','unknown');await sleep(150);
     const vu=await text(page,'#imRepCur [data-rv="cur"]');
     check(/How it happened is not known for Lower arm\/wrist \(L\)\. That alone is not a reason to suspect abuse or neglect; look at the list again\./.test(vu)&&!/v-no/.test(await cls(page,'#imRepCur [data-rv="cur"]')),'"Not known" is a prompt, not a reason (not red)',vu);
@@ -313,7 +352,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(rr.after,'after printing, the record is emptied and the page is itself again');
     /* the Guide */
     const g=await text(page,'#imGuideSafety');
-    ['Two adults, always','Ask the student first','What is looked at','Private areas are never examined','Noticed during required care','Does this need a report?','The report record','someone other than the examiner','the chest only at the collar','the side of the hip','the two-adult rule was not met',"your state’s law and your agency’s policy"].forEach(p=>check(g.includes(p),'Guide: '+p));
+    ['Two adults, always','Ask the student first','What is looked at','Private areas are never examined','Noticed during required care','Does this need a report?','The report record','someone other than the examiner','the chest only at the collar','the side of the hip','the two-adult rule was not met',"your state’s law and your agency’s policy",'Write about a report only in the question: the rest of the record, the care log included, prints with the form.','At a home visit, the parent or guardian can be the second adult','its box has no Improve wording button, so what was seen is neither checked nor rewritten'].forEach(p=>check(g.includes(p),'Guide: '+p));
     /* the draft travels with the record */
     await page.evaluate(()=>{document.querySelector('#imCareEdit button[data-carenew]')&&document.querySelector('#imCareEdit button[data-carenew]').click();});await sleep(100);
     await setVal(page,'#imCareEdit [data-cd="seen"]','half-written note');
@@ -334,6 +373,8 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check(await page.evaluate(()=>S.hist.every(h=>!!h.second&&!!h.secondRole&&h.present===true&&h.assent==='yes'&&h.rep.need==='no'&&!!h.rep.on)&&S.meta.consent==='yes'&&S.care.length===1&&S.care[0].rep.need==='yes'&&!!S.care[0].rep.to&&!!S.care[0].rep.on),'the simulation names the second adults, ticks their presence, asks first, answers the question, and has one care entry with its report');
     check(await page.evaluate(()=>!S.hist.some(h=>h.rows.some(isPrivRow))),'the simulation examines no private area');
     check((await text(page,'#imCareVerdict'))==='','the simulated care log has nothing open');
+    const spt=await printedText(page);
+    check(/Told by the principal at 2:30 the same day/.test(spt)&&!/after the report|SIM-0000|State child abuse hotline/.test(spt),'print of the simulation: the care log says who told the parent, and nothing of the report');
     /* files saved before the change */
     await openText(page,JSON.stringify(OLD['IM-1']));
     check(await page.evaluate(()=>S.meta.client==='Old Record Student'&&S.cur.second===''&&S.cur.present===false&&S.cur.assent===''&&S.care.length===0&&S.cur.rows.length===3&&S.cur.rows[0].loc==='genitalia'&&S.cur.rows[0].how===''),'an earlier file opens: its rows kept, the new entries empty');
@@ -388,6 +429,13 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     check((await printShown(page,['#icRevNote']))['#icRevNote'],'print: the note prints with the consent');
     await page.evaluate(()=>{const e=document.querySelector('[name="c.date"]');e.value='2026-09-02';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(100);
     check(await shown(page,'#icRevNote'),'correcting the earlier consent keeps the note');
+    check(/Go over them with the parent, then record the decision on E, initialed and dated, and log .Limits of confidentiality explained. on the Consent record sheet\./.test(await text(page,'#icRevNote')),'the note says what is still to do: the decision on E and the limits logged',await text(page,'#icRevNote'));
+    await setVal(page,'[name="ij.dec"]','no');await setVal(page,'[name="ij.init"]','OP');await setVal(page,'[name="ij.date"]','2026-10-02');await sleep(100);
+    check(/Go over them with the parent, then log .Limits of confidentiality explained./.test(await text(page,'#icRevNote'))&&!/record the decision on E/.test(await text(page,'#icRevNote')),'E decided: the note asks only for the limits to be logged',await text(page,'#icRevNote'));
+    await page.evaluate(()=>{const e=document.querySelector('[name="log[1].ev"]');e.value='Limits of confidentiality explained';e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(100);
+    check(await shown(page,'#icRevNote')&&/Both have since been gone over with the parent: the decision on E is recorded, and .Limits of confidentiality explained. is logged\./.test(await text(page,'#icRevNote')),'both gone over: the note says so instead of asking again',await text(page,'#icRevNote'));
+    await setVal(page,'[name="ij.dec"]','');await setVal(page,'[name="ij.init"]','');await setVal(page,'[name="ij.date"]','');
+    await page.evaluate(()=>{const e=document.querySelector('[name="log[1].ev"]');e.value='';e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(100);
     const pe=await page.evaluate(()=>{const dd=document.querySelector('[name="ij.dec"]').closest('.decide');return dd.classList.contains('ic-dec-empty');});
     check(pe,'an undecided injury check prints its choices as boxes to mark');
     await view(page,'guide');const g=await text(page,'#guide');

@@ -312,7 +312,7 @@ function repVerdictTo(scope){const v=document.querySelector('[data-rv="'+scope+'
 /* what paper and the CSV show of an answer: only that the question was answered, and when */
 const repOn=rep=>rep&&rep.need?(String(rep.on||'').trim()?'answered on '+String(rep.on).trim():'answered'):'not answered';
 const repPaper=rep=>rep&&rep.need?'Does this need a report? Answered'+(String(rep.on||'').trim()?' on '+String(rep.on).trim():'')+'. The answer, and any report, are kept apart from this record and from the student’s file, as your agency’s policy says.':'Does this need a report? Not answered on this record yet.';
-function renderRepCur(){const el=$('#imRepCur');if(el){el.innerHTML='<p>Answer this for the injuries found at this check.</p>'+repHTML('cur',S.cur.rep,!!S.cur.ro)+
+function renderRepCur(){const el=$('#imRepCur');if(el){el.innerHTML='<p>Answer this for the injuries found at this check. Write about a report only here: the rest of this record prints with the form.</p>'+repHTML('cur',S.cur.rep,!!S.cur.ro)+
     '<div class="tools"><button type="button" class="tool imRepPrint">Print the report record</button><span class="hint">Confidential; not part of the student&rsquo;s file; keep it as your agency&rsquo;s policy says. The printed form shows only that this question was answered, and when.</span></div>';repVerdictTo('cur');}
   const p=$('#imRepCurPaper');if(p)p.textContent=repPaper(S.cur.rep);}
 function repInput(el){const sc=el.dataset.rs,rep=sc==='cur'?S.cur.rep:S.careDraft.rep,k=el.dataset.rk;if(!rep||(sc==='cur'&&S.cur.ro))return;
@@ -450,7 +450,7 @@ function renderCareEdit(){const el=$('#imCareEdit');if(!el)return;const d=S.care
     '<div class="ckrow"><label class="ck"><input type="checkbox" data-cd="alone"'+(d.alone?' checked':'')+'> No second adult was present (say why, and who was told at once)</label></div>'+
     (d.alone?'<div class="fieldgrid imCareSeen">'+inp('aloneWhy','Why no second adult was present, and who was told at once')+'</div><div class="verdict v-no">The two-adult rule was not met. The injury is still recorded and the report question still applies.</div>':'')+
     '<div class="fieldgrid two">'+inp('nurse','Passed to the school nurse (who, and when)')+inp('parent','Passed to the parent or guardian (who told them, and when)')+'</div>'+
-    '<p class="hint imCareNote">If you suspect abuse or neglect, do not tell the parent yourself first; your agency&rsquo;s policy says who does, and when.</p>'+
+    '<p class="hint imCareNote">If you suspect abuse or neglect, do not tell the parent yourself first; your agency&rsquo;s policy says who does, and when. This log prints with the form, which the family may read: write about a report only under Does this need a report?, below.</p>'+
     '<div class="rp"><p><b>Does this need a report?</b> Answer it for this injury now.</p>'+repHTML('draft',d.rep,false)+'</div>'+
     '<div class="tools"><button type="button" class="tool" id="imCareAdd">'+(k>=0?'Save changes':'Add to the record')+'</button><button type="button" class="tool" id="imCareClear">'+(k>=0?'Cancel':'Clear')+'</button></div><div id="imCareMiss"></div>';
   repVerdictTo('draft');}
@@ -675,7 +675,7 @@ async function loadSim(){
   S.care=[careCopy({id:uid(),date:Y(8),time:'10:20',area:'buttocks',task:'help with toileting',
     seen:'A bruise about 3 cm across, blue and purple, on the left buttock, seen while helping the student pull up their pants. Nothing more was looked at.',
     by:'Classroom aide (simulated)',byRole:'Paraprofessional',second:'Classroom teacher (simulated)',secondRole:'Teacher',
-    nurse:'Told at 10:35 the same morning (simulated)',parent:'Told as the agency\u2019s policy directs, after the report (simulated)',
+    nurse:'Told at 10:35 the same morning (simulated)',parent:'Told by the principal at 2:30 the same day, as the agency\u2019s policy directs (simulated)',
     rep:Object.assign(repBlank(),{r1:true,r3:true,need:'yes',on:Y(8),when:Y(8)+', 11:05 AM',to:'State child abuse hotline (simulated), reference SIM-0000',by:'Classroom aide (simulated), the person who noticed it',told:'School nurse and the BCBA, the same morning (simulated)'})})];
   S.cur=curFrom(S.hist[2],false);
   S.nurse=[{date:Y(30),who:nurse,findings:'Scalp swelling as scored; no change in pupils or alertness; forearm swollen, full movement',action:'Ice to the scalp and forearm; parent called; the plan reviewed with the BCBA the same day (CR-1 medical review)',referral:'Pediatrician seen '+Y(29)+': no fracture; prescriber told'},
