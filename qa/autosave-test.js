@@ -284,6 +284,12 @@ S.quota = async br => {
   await page.waitForFunction(() => /storage full/.test($('#autoChip').textContent), null, { timeout: 40000 }).catch(() => {});
   const ch3 = await page.evaluate(() => ({ t: $('#autoChip').textContent, pref: localStorage.getItem(AUTO.pref), on: autoOn() }));
   SAY(/storage full/.test(ch3.t) && ch3.on && ch3.pref !== 'off', 'a store that takes nothing: a warning, and Autosave stays on', ch3);
+  /* a store that fails for another reason (closed under the page): said as such, not as "full"; Autosave stays on */
+  await page.evaluate(() => { IDBObjectStore.prototype.put = function () { throw new DOMException('closed', 'InvalidStateError'); }; });
+  await frameOf(page, 'GB-1').evaluate(() => { const t = document.querySelector('textarea,input[type=text]'); t.value += ' y'; t.dispatchEvent(new Event('input', { bubbles: true })); });
+  await page.waitForFunction(() => /not kept/.test($('#autoChip').textContent), null, { timeout: 40000 }).catch(() => {});
+  const ch4 = await page.evaluate(() => ({ t: $('#autoChip').textContent, w: state.auto.warn, on: autoOn() }));
+  SAY(/not kept/.test(ch4.t) && /InvalidStateError/.test(ch4.w) && ch4.on, 'another store error is named as such, and Autosave stays on', ch4);
   await ctx.close();
 };
 S.owntab = async br => {

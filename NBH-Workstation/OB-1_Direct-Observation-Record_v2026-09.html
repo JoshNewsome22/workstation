@@ -6675,7 +6675,8 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
         }, function (e) {
           step++;
           if (blobs && e && (e.name === 'DataCloneError' || e.name === 'UnknownError') && step < 3) { blobs = false; blobsOK = false; return attempt(); }
-          if (!quotaErr(e)) return { ok: false, why: 'error', error: String(e && (e.name || e.message) || e) };
+          /* not a full store (the store closed under the page, say): open it afresh next time */
+          if (!quotaErr(e)) { dbP = null; readyP = null; return { ok: false, why: 'error', error: String(e && (e.name || e.message) || e) }; }
           if (keepPics && hasPics) { keepPics = false; return attempt(); }
           keepPics = false;
           var next = bySize.filter(function (id) { return dropped.indexOf(id) < 0; })[0];
