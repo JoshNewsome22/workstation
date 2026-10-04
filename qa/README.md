@@ -29,6 +29,7 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node determinism.js DD-1 TI-1` | Whether a form's simulation loads the same data twice (DD-1 does not; the print check restores a kept snapshot instead). |
 | `node wording-rollout-test.js [FORM-ID ...]` | The writing help in all 44 forms, each against the same form at the commit before the rollout (`WR_COMMIT`, unpacked into `out/wording-rollout/base/`): no console error, a button on every shown narrative field and nowhere else, Save data the same before and after the panel, the workstation's snapshot the same (an old case restored into both copies), the same printed pages, nothing past the edge at 390 px. Results in `out/wording-rollout/results.md`. |
 | `node wording-client-test.js`, `node wording-rules-test.js` | The writing help's panel (in OB-1, against a stand-in relay) and its wording rules. The relay's own tests: `tools/relay/tests/run.sh`. |
+| `node autosave-test.js [taps,slow,...]` | v21.44 Autosave: taps reach the copy, Save case and a slow form, unanswered offers kept, two students, a photo, a full store, the unsaved mark, Own tab, a form on its own, visibilitychange, the old slot; the review's findings (`race`, `names`, `cap`, `live`, `reload`, `savedalone`, `offpref`); and (`rt`) a save and reopen round trip for all 44 forms. |
 
 To compare against an earlier release, serve that folder on a second port and pass its URL
 (and `WS_ROOT`) to the `before` runs.
