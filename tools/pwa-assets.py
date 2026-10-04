@@ -13,9 +13,12 @@ the organisation's initials and "Workstation", as the apple-mobile-web-app-title
 window of its own (display standalone, start_url and scope ./) and takes its colours from the shell: theme_color the
 white heading, background_color the page (--paper). It has no "id": two editions on one website then stay two apps.
 The output is deterministic: the same lockup and index.html give the same bytes.
+v21.44 --badge (the school edition, chosen by its BCBA): the mark in a white disc ringed in gold on a navy square, so it
+stands out on the Home Screen; the maskable icon keeps the ring inside the circle a launcher may crop to.
 
-usage: python3 tools/pwa-assets.py <edition folder> [--lockup FILE] [--check]
+usage: python3 tools/pwa-assets.py <edition folder> [--lockup FILE] [--badge] [--check]
   --lockup FILE  take the mark from this lockup instead of the edition's index.html
+  --badge        the mark on the badge (navy, a gold ring, a white disc) instead of on white
   --check        change nothing; exit 1 unless the folder's manifest and icons are the ones this would write
 """
 import base64, io, json, math, os, re, sys
@@ -98,6 +101,35 @@ def icon(mark, size, frac, maskable):
     return out.getvalue()
 
 
+BADGE = {'bg': (29, 74, 119), 'ring': (240, 180, 74), 'disc': (255, 255, 255)}
+
+
+def badge_icon(mark, size, maskable):
+    """The mark in a white disc ringed in gold on navy, drawn at four times the size and brought down, for smooth edges."""
+    from PIL import ImageDraw
+    k = 4
+    S = size * k
+    ring = (0.76 if maskable else 0.806) * S        # the ring's outer diameter
+    disc = ring * 0.924                              # the white disc inside it
+    canvas = Image.new('RGB', (S, S), BADGE['bg'])
+    d = ImageDraw.Draw(canvas)
+    c = S / 2
+    d.ellipse((c - ring / 2, c - ring / 2, c + ring / 2, c + ring / 2), fill=BADGE['ring'])
+    d.ellipse((c - disc / 2, c - disc / 2, c + disc / 2, c + disc / 2), fill=BADGE['disc'])
+    mw, mh = mark.size
+    scale = 0.8 * disc / max(mw, mh)                 # the mark large in the disc, its white corners trimmed to the disc
+    tw, th = max(1, round(mw * scale)), max(1, round(mh * scale))
+    clip = Image.new('L', (S, S), 0)
+    ImageDraw.Draw(clip).ellipse((c - disc / 2, c - disc / 2, c + disc / 2, c + disc / 2), fill=255)
+    layer = Image.new('RGB', (S, S), BADGE['disc'])
+    layer.paste(mark.resize((tw, th), Image.LANCZOS), (round(c - tw / 2), round(c - th / 2)))
+    canvas.paste(layer, (0, 0), clip)
+    canvas = canvas.resize((size, size), Image.LANCZOS)
+    out = io.BytesIO()
+    canvas.save(out, 'PNG', optimize=True)
+    return out.getvalue()
+
+
 def manifest(f):
     m = {
         'name': f['title'],
@@ -122,7 +154,7 @@ def manifest(f):
     return (json.dumps(m, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
 
 
-def build(folder, lockup=None):
+def build(folder, lockup=None, badge=False):
     """{file name: bytes} for the folder."""
     f = shell_facts(folder)
     if lockup:
@@ -132,7 +164,7 @@ def build(folder, lockup=None):
     else:
         fail('index.html carries no <img id="logo"> to take the mark from; pass --lockup')
     mark = find_mark(img)
-    out = {name: icon(mark, size, frac, mask) for name, size, frac, mask in ICONS}
+    out = {name: (badge_icon(mark, size, mask) if badge else icon(mark, size, frac, mask)) for name, size, frac, mask in ICONS}
     out['manifest.json'] = manifest(f)
     want = '<meta name="apple-mobile-web-app-title" content="%s">' % f['short']
     if want not in f['html']:
@@ -140,8 +172,8 @@ def build(folder, lockup=None):
     return out
 
 
-def write(folder, lockup=None):
-    files = build(folder, lockup)
+def write(folder, lockup=None, badge=False):
+    files = build(folder, lockup, badge)
     for name, data in files.items():
         with open(os.path.join(folder, name), 'wb') as fh:
             fh.write(data)
@@ -152,7 +184,7 @@ def main(argv):
     if not argv or argv[0] in ('-h', '--help'):
         print(__doc__)
         return 0
-    folder, lockup, check = None, None, False
+    folder, lockup, check, badge = None, None, False, False
     it = iter(argv)
     for a in it:
         if a == '--lockup':
@@ -161,6 +193,8 @@ def main(argv):
                 fail('--lockup needs an image file')
         elif a == '--check':
             check = True
+        elif a == '--badge':
+            badge = True
         elif a.startswith('-'):
             fail('unknown option ' + a)
         elif folder is None:
@@ -170,14 +204,14 @@ def main(argv):
     if not folder or not os.path.isdir(folder):
         fail('name the edition folder, e.g. NBH-Workstation')
     if check:
-        stale = [n for n, d in build(folder, lockup).items()
+        stale = [n for n, d in build(folder, lockup, badge).items()
                  if not os.path.isfile(os.path.join(folder, n)) or open(os.path.join(folder, n), 'rb').read() != d]
         if stale:
             print('pwa-assets.py --check: not current in %s: %s' % (folder, ', '.join(sorted(stale))))
             return 1
         print('pwa-assets.py --check: %s current' % folder)
         return 0
-    print('wrote', ', '.join(write(folder, lockup)), 'in', folder)
+    print('wrote', ', '.join(write(folder, lockup, badge)), 'in', folder)
     return 0
 
 
