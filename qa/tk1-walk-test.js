@@ -244,6 +244,38 @@ async function states(page,label,r){
       const dp=!document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));return{on,inert,off:!p.classList.contains('wk-fs'),dp,still:!!document.querySelector('[inert]')};});
     check('full-screen panel: what is behind it is inert, Escape closes it and is marked handled (the workstation does not also leave full screen)',esc.on&&esc.inert&&esc.off&&esc.dp===true&&!esc.still,JSON.stringify(esc));
     check('review fixes: no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
+  /* ---- the voice, the hands and the pictures for the lines (second check): each caption piece starts where the voice starts
+     again after a pause in its own recording; no hand moves faster than 2600 px/s on the stage; the Targets line shows the request
+     note, tip two its steps, tip three the locked item ---- */
+  if(fs.existsSync(__dirname+'/../tools/forms/TK-1/walk-audio.js')){const page=await br.newPage({viewport:{width:1180,height:820}});const log=[];wire(page,log);
+    await page.goto(URL);await sleep(500);await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
+    await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
+    await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
+    const v=await page.evaluate(async()=>{const AC=window.OfflineAudioContext||window.webkitOfflineAudioContext;const bad=[];let pieces=0;
+      for(const c of TKWALK.cues){const L=WALK_AUDIO.lines[c.id];if(!L||!L.a)continue;
+        const ab=Uint8Array.from(atob(L.a.slice(L.a.indexOf(',')+1)),ch=>ch.charCodeAt(0)).buffer;const buf=await new AC(1,24000,24000).decodeAudioData(ab);const x=buf.getChannelData(0),sr=buf.sampleRate,hop=Math.round(sr*.01);
+        const e=[];for(let i=0;i+hop<=x.length;i+=hop){let s=0;for(let j=i;j<i+hop;j++)s+=x[j]*x[j];e.push(Math.sqrt(s/hop));}
+        const thr=Math.max(.008,[...e].sort((a,b)=>a-b)[Math.floor(e.length*.95)]*.06);const ends=[];for(let i=0;i<e.length;){if(e[i]<thr){let j=i;while(j<e.length&&e[j]<thr)j++;if(j-i>=8&&j<e.length)ends.push(j*.01);i=j;}else i++;}
+        let last=null;for(let t=c.start;t<c.start+c.narr;t+=.02){TKWALK.renderAt(t);const cp=document.querySelector('#wkStage .wk-cap').textContent;
+          if(last!==null&&cp!==last){pieces++;const on=t-c.start+.12;const g=ends.reduce((b,q)=>Math.abs(q-on)<Math.abs(b-on)?q:b,1e9);if(Math.abs(g-on)>.25)bad.push(c.id+' "'+cp.slice(0,24)+'" at '+on.toFixed(2)+' s, voice at '+g.toFixed(2));}last=cp;}}
+      return{bad,pieces};});
+    check('voice: every caption piece after the first starts within 0.25 s of where the voice starts again in its recording',v.pieces>=15&&!v.bad.length,v.bad.join('; ')||v.pieces+' pieces');
+    const hs=await page.evaluate(()=>{const N=['point','pinch','open'],AN={point:'tip',pinch:'grip',open:'palm'};const out={};
+      for(const h of document.querySelectorAll('#wkStage .wk-hand')){const who=/teacher/.test(h.className)?'teacher':'learner',ps=[...h.querySelectorAll('.wk-pose')];let prev=null,peak=[0,0];
+        for(let t=0;t<=TKWALK.duration;t+=1/30){TKWALK.renderAt(t);let b=-1,bo=0;ps.forEach((p,i)=>{const o=p.style.visibility==='visible'?+p.style.opacity:0;if(o>bo){bo=o;b=i;}});if(b<0){prev=null;continue;}
+          const A=WALK_HANDS[who][N[b]],m=/translate\(([-\d.]+)px,\s*([-\d.]+)px\)\s*rotate\(([-\d.]+)deg\)\s*scale\(([-\d.]+)\)/.exec(ps[b].style.transform);if(!m)continue;
+          const an=A[AN[N[b]]],r=+m[3]*Math.PI/180,k=+m[4],dx=(A.wrist[0]-an[0])*k,dy=(A.wrist[1]-an[1])*k,wx=+m[1]+an[0]+dx*Math.cos(r)-dy*Math.sin(r),wy=+m[2]+an[1]+dx*Math.sin(r)+dy*Math.cos(r);
+          if(prev&&wy<720&&prev.wy<720){const sp=Math.hypot(wx-prev.wx,wy-prev.wy)*30;if(sp>peak[0])peak=[sp,t];}prev={wx,wy};}
+        out[who]=[Math.round(peak[0]),+peak[1].toFixed(1)];}
+      return out;});
+    check('hands: no on-screen move of either hand faster than 2600 px/s (the wrist, at 30 frames a second)',hs.learner[0]<=2600&&hs.teacher[0]<=2600,JSON.stringify(hs));
+    const ov=await page.evaluate(()=>{const cue=id=>TKWALK.cues.find(c=>c.id===id);const op=s=>{const e=document.querySelector('#wkStage '+s);return e?+getComputedStyle(e).opacity:-1;};
+      const g=cue('tg_show'),ti=cue('tips');TKWALK.renderAt(g.start+g.narr-.1);const fcr=op('.wk-fcr'),fa=op('.wk-fcr .wk-fa');
+      TKWALK.renderAt(ti.start+ti.narr*.78);const st=op('.wk-stairs'),pr=op('.wk-pair');TKWALK.renderAt(ti.start+ti.dur-.05);const lk=op('.wk-lock'),st2=op('.wk-stairs');
+      const o=cue('outro');TKWALK.renderAt(o.start+2);const lk2=op('.wk-lock');return{fcr,fa,st,pr,lk,st2,lk2};});
+    check('pictures for the lines: the request note (asked for, then given every time) as the Targets line ends; the steps during tip two; the locked item at the end of the tips, gone in the outro',
+      ov.fcr>.95&&ov.fa>.95&&ov.st>.95&&ov.pr<.05&&ov.lk>.95&&ov.st2<.05&&ov.lk2<.05,JSON.stringify(ov));
+    check('voice, hands and pictures: no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
   /* ---- inside a workstation frame: hiding the frame (another form opened) pauses the walkthrough ---- */
   {const page=await br.newPage({viewport:{width:1180,height:820}});const log=[];wire(page,log);await page.goto(BASE+'/qa/');
     await page.evaluate(u=>{document.body.innerHTML='<iframe id="f" src="'+u+'" style="width:1100px;height:800px"></iframe>';},URL);await sleep(1500);
