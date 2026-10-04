@@ -92,13 +92,14 @@ function eaBoard(k){
     let g=T(8,14,'Conditions: each card’s signal and materials','bx-t');
     C.forEach((r,i)=>{const y=42+i*32;g+=r[0]?'<rect x="8" y="'+(y-10)+'" width="14" height="14" rx="2" fill="'+r[0]+'"/>':'<rect x="8.5" y="'+(y-9.5)+'" width="13" height="13" rx="2" fill="#fff" stroke="#54676f" stroke-dasharray="2 2"/>';
       g+=T(30,y,r[1],'bx-v')+T(180,y,r[2],'bx-l')+T(30,y+14,'Materials: '+r[3],'bx-s');});return g;}
-  /* the enhancement sprint (B2): true alone is chosen on Setup & safety only after three steps */
+  /* the enhancement sprint (B2): true alone is chosen on Setup & safety only after four steps */
   if(k==='aloneTrue'){const box=y=>'<rect x="12" y="'+(y-10)+'" width="11" height="11" fill="#fff" stroke="#182e43"/>';
-    return T(8,14,'True alone: only after three steps on Setup & safety','bx-t')+
-    box(42)+T(30,42,'1  Policy check: the district’s, the agency’s and the state’s rules','bx-l')+T(46,56,'on seclusion and isolation allow it for this student and place','bx-s')+
-    box(78)+T(30,78,'2  The stop-or-step-in rule: when to stop, who steps in, and how','bx-l')+
-    box(100)+T(30,100,'3  How the student is watched: without a break, through a window','bx-l')+T(46,114,'or on a live video feed','bx-s')+
-    T(8,138,'The door is never locked or held shut. Until all three are done,','bx-v')+T(8,153,'the form keeps the condition supervised.','bx-v');}
+    return T(8,14,'True alone: only after four steps on Setup & safety','bx-t')+
+    box(36)+T(30,36,'1  Policy check: the rules on seclusion and isolation here allow it,','bx-l')+T(46,49,'and who confirmed them is written down','bx-s')+
+    box(68)+T(30,68,'2  The stop-or-step-in rule: when, the longest time alone, who steps in','bx-l')+
+    box(88)+T(30,88,'3  How the student is watched: without a break, seen and heard','bx-l')+T(46,101,'through a window or on a live video feed with sound','bx-s')+
+    box(120)+T(30,120,'4  The parent told and agreed','bx-l')+
+    T(8,141,'The door is never locked, latched or held shut. Until all four','bx-v')+T(8,155,'are done, the form keeps the condition supervised.','bx-v');}
   if(k==='tang')return T(8,14,'Before a tangible condition goes into the analysis','bx-t')+
     T(8,40,'Add it only when the indirect and descriptive assessments','bx-l')+T(8,55,'indicate that tangible delivery follows the behavior:','bx-l')+
     '<rect x="12" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(30,78,'Form IA-1 (indirect)','bx-l')+'<rect x="182" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(200,78,'Form ABC-1 (descriptive)','bx-l')+
