@@ -286,27 +286,28 @@ function makeScene(stage){
     done(){still.remove();flat.remove();stage.classList.remove('wkv-flat');for(const r of roots)r.removeAttribute('data-wkv');}};}
 
 /* ---------------- the frames, the narration, the file ---------------- */
-async function pickVideo(w,h,fps){for(const codec of ['avc1.640028','avc1.4D4028','avc1.4D401F','avc1.42E01F']){const cfg={codec,width:w,height:h,bitrate:2500000,framerate:fps,avc:{format:'avc'}};
+/* the sharp size: 2.5 Mbit/s (a 3½-minute walkthrough near 57 MB); the smaller one 1.2 Mbit/s (near 32 MB), softer while things move */
+async function pickVideo(w,h,fps,opt_bitrate){for(const codec of ['avc1.640028','avc1.4D4028','avc1.4D401F','avc1.42E01F']){const cfg={codec,width:w,height:h,bitrate:opt_bitrate||2500000,framerate:fps,avc:{format:"avc"}};
   try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return cfg;}catch(e){}}return null;}
 async function pickAudio(){if(typeof AudioEncoder==='undefined')return null;for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){const cfg={codec:c.codec,sampleRate:48000,numberOfChannels:1,bitrate:96000};
   try{const r=await AudioEncoder.isConfigSupported(cfg);if(r&&r.supported)return Object.assign(cfg,{mux:c.mux});}catch(e){}}return null;}
 function dataToAB(u){const b=atob(u.slice(u.indexOf(',')+1));const a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer;}
 /* the narration as one track: each recorded line from its cue's start, as the player plays it */
-async function narration(Dur,sr){const L=typeof WALK_AUDIO!=='undefined'&&WALK_AUDIO&&WALK_AUDIO.lines;if(!L)return null;
+async function narration(Dur,sr){/* Dur: how long the track runs (a line that starts later is left out) */const L=typeof WALK_AUDIO!=='undefined'&&WALK_AUDIO&&WALK_AUDIO.lines;if(!L)return null;
   const OAC=W.OfflineAudioContext||W.webkitOfflineAudioContext;if(!OAC)return null;const n=Math.ceil((Dur+.5)*sr);const oc=new OAC(1,n,sr);let any=false;
-  for(const c of TKWALK.cues){const l=L[c.id];if(!l||!l.a)continue;try{const buf=await new Promise((ok,no)=>{const p=oc.decodeAudioData(dataToAB(l.a),ok,no);if(p&&p.then)p.then(ok,no);});
+  for(const c of TKWALK.cues){const l=L[c.id];if(!l||!l.a||c.start>=Dur)continue;try{const buf=await new Promise((ok,no)=>{const p=oc.decodeAudioData(dataToAB(l.a),ok,no);if(p&&p.then)p.then(ok,no);});
     const s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start(c.start);any=true;}catch(e){}}
   if(!any)return null;return await oc.startRendering();}
 
 async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1280,OH=Math.round(OW*SH/SW/2)*2,on=opt.progress||(()=>{}),stop=opt.signal||{aborted:false};
   if(typeof VideoEncoder==='undefined'||typeof VideoFrame==='undefined')throw new Error('This browser cannot make video files. Use Safari on an iPad with iPadOS 16.4 or later, or Chrome or Edge on a computer.');
   const MX=W.Mp4Muxer;if(!MX)throw new Error('The video maker (nbh-tk1-video.js) did not load completely.');
-  const vcfg=await pickVideo(OW,OH,fps);if(!vcfg)throw new Error('This browser has no H.264 video encoder for '+OW+' x '+OH+'.');
+  const vcfg=await pickVideo(OW,OH,fps,opt.bitrate);if(!vcfg)throw new Error('This browser has no H.264 video encoder for '+OW+' x '+OH+'.');
   const acfg=opt.sound===false?null:await pickAudio();
   const stage=TKWALK.stage;if(!stage)throw new Error('Open the Walkthrough first.');
   TKWALK.pause();const was=TKWALK.time;TKWALK.build();
   const player=stage.closest('.wk-player'),small=player&&player.classList.contains('wk-small');if(small)player.classList.remove('wk-small');const Dur=TKWALK.duration;if(!Dur)throw new Error('The walkthrough is empty.');
-  const N=Math.ceil(Math.min(Dur,opt.until||Dur)*fps);let audio=null;   /* until: only the first seconds (for the checks) */if(acfg){on({phase:'sound',done:0,total:N});audio=await narration(Dur,acfg.sampleRate);}
+  const End=Math.min(Dur,opt.until||Dur),N=Math.ceil(End*fps);let audio=null;   /* until: only the first seconds (for the checks) */if(acfg){on({phase:'sound',done:0,total:N});audio=await narration(End,acfg.sampleRate);}
   const target=new MX.ArrayBufferTarget();
   const mux=new MX.Muxer({target,fastStart:'in-memory',firstTimestampBehavior:'offset',video:{codec:'avc',width:OW,height:OH,frameRate:fps},
     audio:audio?{codec:acfg.mux,numberOfChannels:1,sampleRate:acfg.sampleRate}:undefined});
@@ -322,7 +323,7 @@ async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1280,OH
     for(let i=0;i<N;i++){if(stop.aborted)throw new Error('cancelled');if(err)throw err;
       TKWALK.renderAt(Math.min(Dur,i/fps));await scene.update(R);
       ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#d8c29d';ctx.fillRect(0,0,OW,OH);scene.draw(ctx,OW/SW);
-      const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%(fps*4)===0});vf.close();
+      const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%(fps*(opt.bitrate&&opt.bitrate<2e6?10:4))===0});vf.close();
       while(venc.encodeQueueSize>6){await new Promise(r=>setTimeout(r,4));if(err)throw err;}
       if(i%10===0){on({phase:'video',done:i,total:N,ms:performance.now()-t0});await tick();}}
     await venc.flush();if(err)throw err;mux.finalize();
@@ -350,15 +351,16 @@ function ui(){const btn=D.getElementById('wkVideo');if(!btn)return;const note=D.
     const dlg=D.createElement('dialog');dlg.className='wkv-dlg';dlg.setAttribute('aria-labelledby','wkvT');
     dlg.innerHTML='<h3 id="wkvT">Save the walkthrough as a video</h3><p class="wkv-msg">The video is made here, on this device, from this book: its pictures, photo, names and tokens. Nothing is sent anywhere. It takes a few minutes; keep this page open and the screen on until it is done.</p>'+
       '<p class="wkv-msg wkv-priv">The video shows this student’s book. Share it only through the district’s drive or secure email, as any record about the student.</p>'+
+      '<fieldset class="wkv-size"><legend>Size</legend><label><input type="radio" name="wkvSize" value="sharp" checked> Sharpest (about 55 MB, for the district drive)</label><label><input type="radio" name="wkvSize" value="small"> Smaller (about 30 MB, for email; softer while things move)</label></fieldset>'+
       '<div class="wkv-bar" hidden><div class="wkv-fill"></div></div><p class="wkv-st" role="status" aria-live="polite"></p>'+
       '<div class="wkv-btns"><button type="button" class="wkv-go">Make the video</button><button type="button" class="wkv-x">Cancel</button></div>';
     D.body.appendChild(dlg);const $=s=>dlg.querySelector(s);const ctl={aborted:false};let busy=false,lock=null,url='';
     const close=()=>{ctl.aborted=true;try{lock&&lock.release();}catch(e){}if(url)setTimeout(()=>URL.revokeObjectURL(url),60000);dlg.close();dlg.remove();btn.focus();};
     $('.wkv-x').onclick=()=>{if(busy){ctl.aborted=true;$('.wkv-st').textContent='Stopping…';return;}close();};
     dlg.addEventListener('cancel',e=>{e.preventDefault();$('.wkv-x').click();});
-    $('.wkv-go').onclick=async()=>{busy=true;$('.wkv-go').hidden=true;$('.wkv-bar').hidden=false;$('.wkv-x').textContent='Stop';
+    $('.wkv-go').onclick=async()=>{busy=true;const small=dlg.querySelector('input[name="wkvSize"]:checked').value==='small';$('.wkv-size').disabled=true;$('.wkv-go').hidden=true;$('.wkv-bar').hidden=false;$('.wkv-x').textContent='Stop';
       try{if(navigator.wakeLock)lock=await navigator.wakeLock.request('screen');}catch(e){}
-      try{const r=await make({signal:ctl,progress:p=>{const f=p.total?p.done/p.total:0;$('.wkv-fill').style.width=(100*f).toFixed(1)+'%';
+      try{const r=await make({signal:ctl,bitrate:small?1200000:2500000,progress:p=>{const f=p.total?p.done/p.total:0;$('.wkv-fill').style.width=(100*f).toFixed(1)+'%';
           $('.wkv-st').textContent=p.phase==='sound'?'Preparing the narration…':p.phase==='done'?'Finishing the file…':'Making the video… '+Math.floor(100*f)+'%'+(p.ms&&f>.03?' (about '+mmss(p.ms/1000*(1-f)/f)+' left)':'');}});
         busy=false;const file=new File([r.blob],fileName(),{type:'video/mp4'});url=URL.createObjectURL(r.blob);
         $('.wkv-st').textContent='The video is ready: '+mmss(r.seconds)+', '+(r.blob.size/1048576).toFixed(1)+' MB'+(r.sound?'':' (no sound: this browser has no audio encoder; the captions are in the picture)')+'.';
