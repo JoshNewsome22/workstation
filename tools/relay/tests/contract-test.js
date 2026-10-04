@@ -13,9 +13,12 @@ const src = fs.readFileSync(clientFile, 'utf8');
 const C = JSON.parse(fs.readFileSync(contractFile, 'utf8'));
 
 let pass = 0, fail = 0; const fails = [];
+/* returns whether it held, so a check that needs a recorded answer can be skipped when there is none (as written
+   before v21.43 it returned nothing, so every check behind "if (!ok(...)) continue" was skipped) */
 function ok(cond, name, detail) {
   if (cond) { pass++; console.log('  ok    ' + name); }
   else { fail++; const d = detail === undefined ? '' : ' :: ' + JSON.stringify(detail).slice(0, 400); fails.push(name + d); console.log('  FAIL  ' + name + d); }
+  return !!cond;
 }
 
 /* a top-level function (balanced braces) or a one-line const, as written in the panel's file */
