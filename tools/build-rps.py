@@ -3,7 +3,8 @@
 
 Same forms, same code. Changed: the logo (43 places: once per form, once in the index), the tab icon, the organisation name where it
 is printed or shown, and the autosave keys - both editions live on one website, and a browser keeps
-one localStorage per website, so without its own keys each would offer to restore the other's work.
+one localStorage per website, so without its own keys each would offer to restore the other's work. Since v21.43 also the
+installed app's Home Screen name, manifest.json and icons (from the lockup); sw.js is shared, its caches named after its folder.
 
 usage: build-rps.py <NBH folder> <output folder> <lockup .webp> <favicon .png>
 
@@ -30,6 +31,8 @@ EXPECT = [
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),
+  # v21.43: the name under the icon of the installed app (index.html's head), the same as the manifest's short_name below
+  ('<meta name="apple-mobile-web-app-title" content="NBH Workstation">', '<meta name="apple-mobile-web-app-title" content="RPS Workstation">', 1),
 ]
 done = [0] * len(EXPECT)
 for fn in sorted(os.listdir(OUT)):
@@ -51,6 +54,19 @@ for fn in sorted(os.listdir(OUT)):
             if 'shared form system' not in m.group(0): left.append((fn, m.group(0)))
 if left:
     sys.exit('practice name still visible:\n' + '\n'.join(f'  {f}: {t}' for f, t in left))
+
+# v21.43: the installable app. The copied manifest.json and icons are the practice's: write the school's, from the same
+# lockup the pages now carry (its mark, left of the words) and from the school edition's index.html (name, colours).
+# sw.js is the same file in both editions (its caches are named after the folder it serves); check its list here.
+import importlib.util
+def _tool(name):
+    spec = importlib.util.spec_from_file_location(name.replace('-', '_'), os.path.join(os.path.dirname(os.path.abspath(__file__)), name + '.py'))
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod); return mod
+_tool('pwa-assets').write(OUT, lockup=LOCKUP)
+if 'Newsome Behavioral Health' in open(os.path.join(OUT, 'manifest.json'), encoding='utf-8').read():
+    sys.exit('the school edition\'s manifest.json still names the practice')
+if _tool('pwa-sw').main(['--check', OUT]) != 0:
+    sys.exit('sw.js does not list the files the school edition loads: run python3 tools/pwa-sw.py ' + SRC + ' and build again')
 
 # the documents that travel with it
 rd = os.path.join(OUT, 'README.txt'); s = open(rd, encoding='utf-8').read()
