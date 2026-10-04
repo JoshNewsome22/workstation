@@ -62,8 +62,12 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   /* each recommendation: its code, and its name and reasons one per line (run together, "Noncontingent escape" and
      "Extinction not feasible" would read as "escape extinction") */
   const recs=p=>p.evaluate(()=>[...document.querySelectorAll('#rbRec .rec')].map(r=>({code:r.querySelector('.tag').textContent.trim(),text:[r.querySelector('.rh b'),...r.querySelectorAll('p')].map(x=>x?x.textContent.replace(/\s+/g,' ').trim():'').join('\n')})));
-  const bip=async p=>{await p.evaluate(()=>navigator.clipboard.writeText(''));await click(p,'#bipBtn');await sleep(300);return p.evaluate(()=>navigator.clipboard.readText());};
-  const flow=async p=>{await view(p,'plan');await click(p,'#flowBtn');return p.evaluate(()=>document.querySelector('#flowBlock').innerText);};
+  /* B3 (policy-td1): while escape extinction is not ready (guidance, stop rule, assent, consent), Copy for the BIP and
+     Build staff flowchart ask first; that question is qa/policy-td1-test.js's, so these checks answer it and go ahead.
+     A1's own question (the plan does not follow question 4) is left to the checks below. */
+  const b3go=async p=>{if(await p.evaluate(()=>{const d=document.querySelector('#nbhUiDlg');if(!d||!d.open||!/^(Escape extinction|Physical guidance) is not ready/.test(d.querySelector('#nbhUiH').textContent))return false;const b=[...d.querySelectorAll('#nbhUiF button')].find(x=>/ anyway$/.test(x.textContent));if(b)b.click();return !!b;}))await sleep(300);};
+  const bip=async p=>{await p.evaluate(()=>navigator.clipboard.writeText(''));await click(p,'#bipBtn');await sleep(300);await b3go(p);return p.evaluate(()=>navigator.clipboard.readText());};
+  const flow=async p=>{await view(p,'plan');await click(p,'#flowBtn');await b3go(p);return p.evaluate(()=>document.querySelector('#flowBlock').innerText);};
   const card=(p,code)=>p.evaluate(code=>{const c=document.querySelector(`#compWrap .card[data-code="${code}"]`);if(!c)return null;const i=c.dataset.i;
     return {p0:(document.querySelector(`[name="cp[${i}].p0"]`)||{}).value,steps:[...c.querySelectorAll('ol.steps textarea')].map(t=>t.value)};},code);
   const fields=p=>p.evaluate(()=>{const f={};document.querySelectorAll('[name]').forEach(e=>{f[e.name]=e.type==='checkbox'?e.checked:e.value;});return f;});
@@ -239,6 +243,8 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   const cleanOf=(O,re)=>['bip','flow','fin'].filter(k=>re.test(O[k]));
   const setCard=(p,code,f,v)=>p.evaluate(([code,f,v])=>{const c=document.querySelector(`#compWrap .card[data-code="${code}"]`);const e=c&&document.querySelector(`[name="cp[${c.dataset.i}].${f}"]`);if(!e)return false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));return true;},[code,f,v]);
   const toast=p=>p.evaluate(()=>{const h=document.querySelector('#nbhToasts');return h?h.innerText.replace(/\s+/g,' ').trim():'';});
+  /* the notices but B3's (an older escape plan opened: escape extinction is not ready; qa/policy-td1-test.js checks it) */
+  const toastA1=p=>p.evaluate(()=>[...document.querySelectorAll('#nbhToasts .nbh-toast span')].map(s=>s.textContent).filter(t=>!/^(This plan uses escape extinction|Escape extinction in this plan is not ready|The response to the behavior in this plan calls for hands-on help|Physical guidance in this plan is not ready)/.test(t)).join(' ').replace(/\s+/g,' ').trim());
 
   console.log('\n=== TD-1: the consequence-protocol card follows a change of answer');
   /* 9a: "yes", Send, then "no" */
@@ -339,7 +345,7 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   check(/still the extinction step\. The consequence-protocol card on the build sheet still holds the extinction step \(step 2\); the button puts both right\./.test(n),'10 the note: the step, and the card that holds it too',n);
   await click(p,'#rbUseStep');C=await card(p,'R_PB');
   check(await v(p,'rb.target')===ALT.escape&&cardOk(C)&&!C.steps.includes(GEN)&&C.steps.includes(TGT+ALT.escape),'10 ... the button: the step and the card carry the alternative',C&&C.steps);
-  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);
+  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);await b3go(p);
   check(!(await dlg(p))&&(await p.evaluate(()=>navigator.clipboard.readText())).includes(TGT+ALT.escape),'10 ... and Copy for the BIP then copies without asking');
   await p.close();
   /* unanswered with the step filled in */
@@ -351,8 +357,8 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   await p.close();
   /* a file that follows question 4 */
   p=await open(TD1);await openFile(p,base);
-  check(await toast(p)==='','10 a file that follows question 4: no notice on opening',await toast(p));
-  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);
+  check(await toastA1(p)==='','10 a file that follows question 4: no notice on opening',await toast(p));
+  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);await b3go(p);
   check(!(await dlg(p))&&(await p.evaluate(()=>navigator.clipboard.readText())).includes('FORM TD-1'),'10 ... Copy for the BIP copies without asking');
   await p.close();
 
