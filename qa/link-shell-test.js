@@ -1,4 +1,4 @@
-/* v21.44 the TK-1 / TE-1 link, the shell side: the 'open' message (index.html openFor, OPEN_PAIR).
+/* v21.43 the TK-1 / TE-1 link, the shell side: the 'open' message (index.html openFor, OPEN_PAIR).
    Plan tests 16 (open beside opens the partner and makes the split), 17 (the cases the shell ignores) and
    20 (no console errors, no sideways page scroll at 390 px). The messages are posted from inside the form
    frames, so this runs whether or not the forms carry the link panel yet; replies are caught in the frame. */
@@ -38,7 +38,7 @@ const errs=log=>log.filter(l=>l.type==='error'||l.type==='pageerror');
   ok(J(await lastLog(page))===J({from:'TE-1',want:'TK-1',did:'opened'}),'16 relayLog notes it: '+J(await lastLog(page)));
   await sleep(200);
   const rp=await replies(te);
-  ok(rp.length===1&&rp[0].parent&&J(rp[0].d)===J({nbh:'opened',want:'TK-1',ok:true}),'16 TE-1 is answered once, from its parent: '+J(rp));
+  ok(rp.length===1&&rp[0].parent&&J(rp[0].d)===J({nbh:'opened',want:'TK-1',ok:true,beside:true}),'16 TE-1 is answered once, from its parent, and told the two are side by side: '+J(rp));
   ok(await page.evaluate(()=>document.body.classList.contains('ws-split')&&!state.frames['TE-1'].hidden&&!state.frames['TK-1'].hidden),'16 both frames show side by side');
   const answered=await page.waitForFunction(()=>!!state.status['TK-1'],null,{timeout:20000}).then(()=>true).catch(()=>false);
   ok(answered,'16 the TK-1 frame loads and answers status ('+(Date.now()-t0)+' ms after the ask)');
@@ -163,6 +163,8 @@ const errs=log=>log.filter(l=>l.type==='error'||l.type==='pageerror');
   await page.waitForFunction(()=>!!state.status['TK-1'],null,{timeout:20000}).catch(()=>{});await sleep(800);
   const sp=await page.evaluate(()=>({split:state.split,cur:state.cur,tk:!!state.frames['TK-1']}));
   ok(sp.split.length<2&&sp.cur==='TK-1'&&sp.tk,'20 390 px: Open beside opens Form TK-1 without a split '+J(sp));
+  const rph=(await replies(te)).filter(x=>x.d&&x.d.want==='TK-1').pop();
+  ok(!!rph&&rph.d.ok===true&&rph.d.beside===false,'20 390 px: the answer says beside:false, so the form can say its partner took its place '+J(rph));
   o=await over();ok(o.doc<=o.w&&o.body<=o.w,'20 390 px, partner open: no sideways page scroll '+J(o));
   await panelCheck('TK-1');
   ok(!errs(log).length,'20 390 px: no console errors '+J(errs(log)).slice(0,300));

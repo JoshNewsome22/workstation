@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""v21.44 Put the shared link core (tools/blocks/nbh-link.js) into the forms that carry it outside a build script,
+"""v21.43 Put the shared link core (tools/blocks/nbh-link.js) into the forms that carry it outside a build script,
 as <script id="nbh-link">. Unlike patch-case.py it REPLACES an existing copy every time, so re-run it whenever
 nbh-link.js changes; TK-1 gets the same file through tools/forms/TK-1/build.sh. The script's text is the core,
 byte for byte. A new copy goes before the form's first <script> after </main>.
@@ -31,7 +31,7 @@ for rel in FORMS:
         assert m, (rel, 'no </main>')
         a = s.index('<script>', m.end() - 1)
         s = s[:a] + block + '\n\n' + s[a:]; did = 'inserted'
-    assert s.count(TAG) == 1 and s.count(block) == 1 and s.count('nbh-link (v21.44)') == 1, (rel, 'exactly one copy')
+    assert s.count(TAG) == 1 and s.count(block) == 1 and s.count('nbh-link (v21.43)') == 1, (rel, 'exactly one copy')
     open(path, 'w', encoding='utf-8').write(s)
     print(did, rel)
 print(len(FORMS), 'form' + ('' if len(FORMS) == 1 else 's'))
