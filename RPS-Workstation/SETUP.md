@@ -974,6 +974,17 @@ frames. If the forms are all present and every one still reports *Not answering*
 that is Safari, not the folder: turn on Develop → Developer Settings → Disable
 Local File Restrictions, or open `index.html` in Chrome.
 
+**Not answering, and why (v21.44).** Five seconds after a form is opened without
+answering, the workstation now looks into the form's frame and says which it is:
+another page in the frame, the file missing from the website (404), the form still
+loading (it looks again), the copy on the website not this release's or cut short
+(compared byte for byte with `release.json`), a script this browser refuses (each
+of the form's scripts is read with the browser's own engine), or the form running
+while the browser's messages between it and the workstation do not arrive. In that
+last case the workstation hands its messages to the form directly from then on, and
+the form works. Tap *Why?* beside *Not answering* for the details and a *Load the
+form again* button; a screenshot of that box says what went wrong.
+
 **Pop-ups** must be allowed for the master print, which opens the assembled
 document in a new window. Diagnostics has a one-click test for this.
 
