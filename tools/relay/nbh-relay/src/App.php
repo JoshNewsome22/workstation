@@ -49,6 +49,9 @@ final class App
         $dir = $this->config->str('DATA_DIR');
         $this->dataDir = $dir !== '' ? rtrim($dir, '/') : $root . '/data';
         $this->crypto = new Crypto($this->config->str('PEPPER'));
+        foreach (Setup::tightenPermissions($root, $this->dataDir) as $note) {
+            $this->config->warnings[] = $note;
+        }
     }
 
     public static function main(string $root): void
@@ -66,11 +69,16 @@ final class App
     {
         $this->request = $req;
         try {
-            return $this->dispatch($req);
+            $res = $this->dispatch($req);
         } catch (\Throwable $e) {
             Log::exception('unhandled', $e);
-            return Response::error(500, 'server_error', 'Something went wrong in the rewrite service. Try again later.');
+            $res = Response::error(500, 'server_error', 'Something went wrong in the rewrite service. Try again later.');
         }
+        // HSTS in config.php: browsers that saw this open the whole site with https only, for a year
+        if ($req->https && $this->config->bool('HSTS')) {
+            $res->headers += ['Strict-Transport-Security' => 'max-age=31536000'];
+        }
+        return $res;
     }
 
     private function dispatch(Request $req): Response
@@ -119,7 +127,7 @@ final class App
         }
 
         return match ($handler) {
-            'home' => new Response(302, '', ['Location' => $req->base . '/admin']),
+            'home' => new Response(302, '', ['Location' => $req->linkBase() . '/admin']),
             'adminPage' => (new Admin($this))->page($req),
             'health' => $this->health(),
             'redeem' => (new Api($this))->redeem($req, $body),
@@ -215,7 +223,24 @@ final class App
     /** A rate-limit key for the caller's IP address that does not keep the address itself. */
     public function ipKey(Request $req): string
     {
-        return substr($this->crypto->hash('ip', $req->ip), 0, 32);
+        return substr($this->crypto->hash('ip', self::ipGroup($req->ip)), 0, 32);
+    }
+
+    /**
+     * The address as one caller: an IPv6 address by its /64 network (one home, office or phone is given a whole
+     * /64, so counting single addresses would let one caller spread its tries over millions of them); an IPv4
+     * address, also one written as IPv6 (::ffff:192.0.2.1), as it is.
+     */
+    public static function ipGroup(string $ip): string
+    {
+        $bin = function_exists('inet_pton') ? @inet_pton(trim($ip)) : false;
+        if (!is_string($bin) || strlen($bin) !== 16) {
+            return $bin === false ? $ip : (string) inet_ntop($bin);
+        }
+        if (str_starts_with($bin, str_repeat("\0", 10) . "\xff\xff")) {
+            return (string) inet_ntop(substr($bin, 12));
+        }
+        return bin2hex(substr($bin, 0, 8)) . '::/64';
     }
 
     private function health(): Response

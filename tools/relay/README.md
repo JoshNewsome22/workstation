@@ -66,6 +66,9 @@ Keep `config.php` private: do not email it or copy it anywhere public. It cannot
    `'ADMIN_PASSWORD_HASH'` with the copied line, and save.
 3. Reload the page. It now shows **Sign in**, and the password helper switches itself off.
 
+Do steps 3 to 5 in one sitting: until the admin password line is in `config.php`, anyone who finds the page can
+use the helper too. It changes nothing on the server, and it is limited, but each use costs the server some work.
+
 *If you prefer cPanel's Terminal* (under **Advanced**, when your plan has it):
 `php ~/nbh-relay/make-admin-hash.php --write` asks for the password twice and puts the line in for you. If it
 says the PHP version is too old, run it with a newer one, for example
@@ -76,7 +79,10 @@ Afterwards you may delete `nbh-relay/make-admin-hash.php`; it cannot be run from
 
 In the Console's limits or billing settings, set a **monthly spend limit** for your organization (for example a
 few dollars more than you expect to use). Then a mistake, or a passcode in the wrong hands, can never cost more
-than that. The relay has its own limits as well (below).
+than that. The relay has its own limits as well (below): a rewrite usually costs 1 to 6 cents, but the most one
+can cost is about 21 cents, so the worst possible day under the relay's limits (300 rewrites, all of the
+costliest kind) is about $64, and one passcode in the wrong hands can spend at most its session's 300 rewrites,
+also about $64, before its session ends. The spend limit is what keeps a month safe.
 
 ## 7. Make a passcode and try it
 
@@ -95,22 +101,35 @@ The relay's address, **https://newsomebh.com/ai**, goes into `tools/blocks/nbh-w
 are uploaded to `workstation-rps` as usual. Until then the panel says "Not set up for this copy of the forms."
 Rewrite with Claude works in the forms opened from newsomebh.com (not in copies opened from a file).
 
+## 9. Keep browsers on https (once the whole site is)
+
+When every page of newsomebh.com opens with `https://` (check a few, the home page included), set
+`'HSTS' => true,` in `config.php`. Browsers that have opened the relay then use https for all of newsomebh.com for
+a year, even when someone types the address without it, so a hostile Wi-Fi network cannot show them a fake admin
+page. Leave it `false` while any part of the site still works only with `http://`: those pages would stop opening
+in those browsers.
+
 ---
 
 ## How passcodes and sessions work
 
 * **A passcode works once.** It must be used within the time you chose when you made it (24 hours unless you
   pick another; at most 7 days). Unused passcodes are listed on the admin page, where **Revoke** cancels one.
-* **Using it opens a session in that one browser tab** for 8 hours, with up to 300 rewrites of up to 4,000
-  characters each. The tab keeps the session only while it is open (it is not saved in any form or file); a
-  new tab, or the same tab after closing it, needs a new passcode.
+* **Using it opens a session in that browser tab** for up to 8 hours, with up to 300 rewrites of up to 4,000
+  characters each. The session ends when the tab is closed or when the 8 hours are up, whichever comes first,
+  and it is never saved in a form or a file. A form that the tab opens in a new tab, or a tab the browser
+  restores, can carry the session along, so on a shared iPad press **Lock** in the panel when you finish.
 * **Open sessions** are listed with the passcode's label, when they end and how many rewrites they used.
   **End** stops one at once; **End all sessions** stops all of them (for example if an iPad is lost).
 * **Wrong passcodes** are limited: after 10 wrong tries from one internet address within 15 minutes, that address
-  has to wait; after 50 wrong tries from anywhere, everyone waits. The admin page shows the count, and
-  **Clear the wrong passcode tries** lifts the pause.
-* **The admin page** signs you out after 30 minutes without use, and after 5 wrong passwords it waits 15 minutes.
-* The relay stops at **1,000 rewrites in any 24 hours** for everyone together, and at 10 a minute per session.
+  has to wait; after 2,000 wrong tries from anywhere, everyone waits (a passcode cannot be guessed, so this only
+  stops floods). The admin page shows the count, and **Clear the wrong tries** lifts the pause.
+* **The admin page** signs you out after 30 minutes without use. After 5 wrong passwords from one internet address
+  that address waits 15 minutes; after 20 from everywhere together, signing in waits for everyone except on the
+  devices that have signed in here before, so wrong passwords from strangers cannot lock you out of your own
+  iPad or computer. **Creating a passcode** asks for the password again when it was last typed more than 10
+  minutes ago, so that nothing else running on newsomebh.com can make a passcode in your name.
+* The relay stops at **300 rewrites in any 24 hours** for everyone together, and at 10 a minute per session.
 
 All of these numbers are settings in `config.php`, explained there.
 
@@ -124,9 +143,16 @@ rewrite with notes, plus the model's thinking (about 500 to 2,500 output tokens)
 per rewrite**: a paragraph is near the low end, a full 4,000-character text near the high end. A hundred rewrites a
 month is a few dollars. The Console shows the actual use.
 
+**The worst case.** The relay lets one answer use up to 8,000 output tokens (thinking included), and a text that is
+full of unusual characters can count as many more input tokens than plain English. At most, then, one rewrite costs
+about 21 cents, a session's 300 rewrites about $64, and a day at the relay's limit of 300 rewrites about $64. Text
+written to make the answer as long as possible could get near that; ordinary notes do not.
+
 `EFFORT` in `config.php` is `low`: the model thinks briefly, which suits a short rewrite and keeps answers inside
 the 60 seconds the forms wait. `medium`, `high`, `xhigh` and `max` make it think longer: each step up is slower
-and costs more, and at the higher levels a long text may take longer than the forms wait.
+and costs more, and at the higher levels a long text may take longer than the forms wait. The room for thinking
+grows with it (16,000, 32,000, 48,000 and 64,000 output tokens), so at `max` one rewrite can cost up to about
+$1.30 and the worst cases above grow sixfold.
 
 ## Privacy
 
@@ -158,7 +184,7 @@ and costs more, and at the higher levels a long text may take longer than the fo
 * **Updates.** Upload a newer `nbh-relay-upload.zip` and extract it in the home folder as in step 2. It replaces
   the program files and never touches `config.php` or the `data` folder. Then reload the admin page.
 * **Changing a setting.** Edit `config.php`; the change applies from the next request. Changing `PEPPER` ends
-  every passcode and session.
+  every passcode, session and admin sign-in, and makes every device sign in again with the password.
 
 ## When something does not work
 
@@ -169,17 +195,27 @@ and costs more, and at the higher levels a long text may take longer than the fo
   `upstream_error status=401 ... hint=the_API_key_was_refused...` says what the API answered.
 * **A blank page, or "500 Internal Server Error", just after the upload:** check the PHP version (step 1) and that
   `public_html/ai/.htaccess` is there (step 2).
-* **"Not Found" for addresses under /ai/ although index.php is there:** the server is not using `.htaccess`
-  rewriting. The relay also answers at **https://newsomebh.com/ai/index.php/...**, so the forms can use
+* **"Forbidden" or "Not Found" for every address under /ai/ although index.php is there:** first upload and
+  extract the newest zip again (an older `.htaccess` caused "Forbidden" on cPanel's Apache). If it stays, the
+  server is not using `.htaccess` rewriting; the relay also answers at **https://newsomebh.com/ai/index.php/...**:
+  open the admin page at **https://newsomebh.com/ai/index.php/admin**, and the forms can use
   `https://newsomebh.com/ai/index.php` as the relay's address instead.
 * **Some texts fail while others work**, with a "Forbidden" from the server: GoDaddy's web firewall (ModSecurity)
   may be blocking certain words. Ask GoDaddy support to allow requests to `/ai/` on newsomebh.com.
 * **The forms say their copy cannot reach the service:** the forms must be opened from newsomebh.com (or
   www.newsomebh.com), over https, not from a file on the device.
-* **"Too many passcode tries" for people who typed nothing wrong:** if the site sits behind a firewall or
-  content-delivery service (such as GoDaddy's Website Security), every visitor can appear to come from the same
-  internet address, so one person's wrong tries pause everyone. **Clear the wrong passcode tries** on the admin
-  page lifts the pause.
+* **"Too many passcode tries" for people who typed nothing wrong:** everyone on one school's or office's network
+  usually shares one internet address, so one person's 10 wrong tries make everyone there wait 15 minutes; the
+  same happens for every visitor if the site sits behind a firewall or content-delivery service (such as GoDaddy's
+  Website Security). **Clear the wrong tries** on the admin page lifts the pause.
+* **"Too many wrong passwords" when you sign in:** wait 15 minutes. A device that has signed in here before is
+  not held up by wrong passwords from elsewhere, only by its own. To let a new device in at once, open
+  `config.php`, raise `LOGIN_FAILS_ALL` for a moment (for example to `1000`), sign in, and set it back. If someone
+  else may know the password, choose a new one (step 5).
+* **To end everything at once without signing in** (a lost device with the admin page open, or a password that
+  may be known): change `PEPPER` in `config.php` to another long random text (letters and digits, at least 32).
+  Every passcode, every session, every admin sign-in and every remembered device ends at once; then choose a new
+  admin password if needed (step 5).
 
 ---
 
@@ -190,7 +226,7 @@ and costs more, and at the higher levels a long text may take longer than the fo
 | path | what |
 |---|---|
 | `public_html/ai/index.php` | the only program file in the web folder; requires `dirname(__DIR__, 2).'/nbh-relay/bootstrap.php'` (the path is the setting at its top). Kept to old syntax so an old PHP prints a message. |
-| `public_html/ai/.htaccess` | everything to `index.php` (existing files included), http to https, no listings, every other file refused |
+| `public_html/ai/.htaccess` | everything to `index.php` (existing files included), http to https, no listings; without mod_rewrite, every file but `index.php` refused (only then: Apache checks that refusal before rewriting, for names that are not files too, so with mod_rewrite on it would refuse every address) |
 | `nbh-relay/bootstrap.php` | autoloader for `src/`, the SDK's `vendor/autoload.php`, then `App::main()` |
 | `nbh-relay/src/` | `App` (routes and the checks before every handler), `Api` (redeem, rewrite), `Admin` (admin API and page), `Pages` (HTML, CSS, JS), `Claude` (the API call: model, system prompt, styles, schema, answer checks), `DeadlineTransport` (the SDK's HTTP transport with one deadline), `Config`, `Setup`, `Db` (schema and migrations), `RateLimiter`, `Crypto`, `Log`, `Request`, `Response` |
 | `nbh-relay/config.sample.php` | every setting with its default; copied to `config.php` (with a new `PEPPER`) on the first request |
@@ -212,7 +248,7 @@ relay's own version, 1.0.0, so a reinstall changes nothing that is not a package
 | `POST /ai/api/redeem` | `{code}` | 200 `{token, expires (ISO 8601), expires_in}`; 401 `invalid_code`; 429 `rate_limited` `{retry_after}` + `Retry-After` |
 | `POST /ai/api/rewrite` | `{token, text, style}` (style `objective`, `concise`, `report`, `grammar`) | 200 `{rewrites:[{style,text}], changes:[], cautions:[]}`; 401 `invalid_token` / `session_expired`; 400 `bad_request`; 413 `too_long`; 429 `session_limit_reached` / `rate_limited`; 422 `refused` / `incomplete`; 502 `upstream`; 503 `upstream_busy`; 504 `upstream_timeout` |
 | `GET /ai/admin` | | setup page, sign-in page, or the admin page |
-| `/ai/api/admin/...` | `password-hash`, `login`, `logout`, `state`, `codes`, `codes/revoke`, `sessions/revoke`, `sessions/revoke-all`, `unlock` | cookie `__Secure-nbh_admin` (HttpOnly, Secure, SameSite=Strict, Path=/ai/, 30 minutes sliding, 12 hours at most) and header `X-CSRF-Token` |
+| `/ai/api/admin/...` | `password-hash`, `login`, `logout`, `state`, `codes` (`{label, hours, password?}`: the password again 10 minutes after it was last typed), `codes/revoke`, `sessions/revoke`, `sessions/revoke-all`, `unlock` (both kinds of wrong tries) | cookie `__Secure-nbh_admin` (HttpOnly, Secure, SameSite=Strict, Path=/ai/, 30 minutes sliding, 12 hours at most) and header `X-CSRF-Token`; signing in also sets `__Secure-nbh_device` (180 days, signed with the pepper), which spares that browser the global sign-in pause |
 | `GET /ai/api/health` | | 200 `{ok:true}` when set up, else 503 |
 
 Errors are `{error, message}`; any other path is 404, a known path with another method 405. Also 403 `origin`,

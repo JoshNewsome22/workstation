@@ -28,25 +28,34 @@ return [
     'MAX_REQUESTS_PER_SESSION' => 300,  // rewrites one session can make
     'MAX_CHARS' => 4000,                // the longest text one rewrite takes, in characters
 
-    // Limits that protect the API bill (set a monthly spend limit in the Anthropic Console as well)
+    // Limits that protect the API bill (set a monthly spend limit in the Anthropic Console as well). A rewrite
+    // usually costs 1 to 6 cents; the most one can cost, with a full text and the longest answer, is about
+    // 21 cents at EFFORT 'low', so these limits cap the worst day at about REWRITES_PER_DAY x 21 cents.
     'REWRITES_PER_MINUTE' => 10,        // per session
-    'REWRITES_PER_DAY' => 1000,         // all sessions together, in any 24 hours
+    'REWRITES_PER_DAY' => 300,          // all sessions together, in any 24 hours
 
     // The sites the forms are on. Calls from any other site are refused.
     'ALLOWED_ORIGINS' => ['https://newsomebh.com', 'https://www.newsomebh.com'],
 
     // Wrong tries before a pause of FAIL_WINDOW_MINUTES
     'REDEEM_FAILS_PER_IP' => 10,        // wrong passcodes from one internet address
-    'REDEEM_FAILS_ALL' => 50,           // wrong passcodes from everywhere together
+    'REDEEM_FAILS_ALL' => 2000,         // wrong passcodes from everywhere together (a passcode cannot be guessed)
     'LOGIN_FAILS_PER_IP' => 5,          // wrong admin passwords from one internet address
-    'LOGIN_FAILS_ALL' => 20,            // wrong admin passwords from everywhere together
+    'LOGIN_FAILS_ALL' => 20,            // wrong admin passwords from everywhere together (devices that signed in
+                                        // here before still can; to let a new one in, raise this for a moment)
     'FAIL_WINDOW_MINUTES' => 15,
     'ADMIN_SESSION_MINUTES' => 30,      // the admin page signs out after this long without use
 
     // The rewrite itself
     'EFFORT' => 'low',                  // low, medium, high, xhigh or max: higher thinks longer, so it is slower and costs more
+                                        // (the room for thinking grows with it, from 8,000 to 64,000 tokens: at 'max'
+                                        // one rewrite can cost up to about $1.30, and may take longer than the forms wait)
     'MAX_OUTPUT_TOKENS' => 0,           // 0 = chosen to suit EFFORT
     'TIMEOUT_SECONDS' => 50,            // the forms wait 60 seconds for an answer
+
+    // Once every page of newsomebh.com opens with https://, set this to true: browsers that have opened the
+    // relay will then use https for the whole site for a year, even when an address is typed without it.
+    'HSTS' => false,
 
     // Leave these as they are
     'API_BASE_URL' => 'https://api.anthropic.com',

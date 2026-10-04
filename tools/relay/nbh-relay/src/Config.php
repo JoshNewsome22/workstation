@@ -24,10 +24,10 @@ final class Config
         'MAX_REQUESTS_PER_SESSION' => 300,
         'MAX_CHARS' => 4000,
         'REWRITES_PER_MINUTE' => 10,
-        'REWRITES_PER_DAY' => 1000,
+        'REWRITES_PER_DAY' => 300,
         'ALLOWED_ORIGINS' => ['https://newsomebh.com', 'https://www.newsomebh.com'],
         'REDEEM_FAILS_PER_IP' => 10,
-        'REDEEM_FAILS_ALL' => 50,
+        'REDEEM_FAILS_ALL' => 2000,
         'LOGIN_FAILS_PER_IP' => 5,
         'LOGIN_FAILS_ALL' => 20,
         'FAIL_WINDOW_MINUTES' => 15,
@@ -35,6 +35,7 @@ final class Config
         'EFFORT' => 'low',
         'MAX_OUTPUT_TOKENS' => 0,
         'TIMEOUT_SECONDS' => 50,
+        'HSTS' => false,
         'API_BASE_URL' => 'https://api.anthropic.com',
         'REQUIRE_HTTPS' => true,
         'BASE_PATH' => '',
@@ -177,12 +178,14 @@ final class Config
         if ($this->values['DATA_DIR'] !== '' && !str_starts_with($this->values['DATA_DIR'], '/')) {
             $this->problems['DATA_DIR'] = 'DATA_DIR must be empty or a full folder path starting with /.';
         }
-        $b = $this->values['REQUIRE_HTTPS'];
-        if ($b === 1 || $b === 0) {
-            $this->values['REQUIRE_HTTPS'] = (bool) $b;
-        } elseif (!is_bool($b)) {
-            $this->problems['REQUIRE_HTTPS'] = 'REQUIRE_HTTPS must be true or false (without quotes).';
-            $this->values['REQUIRE_HTTPS'] = true;
+        foreach (['REQUIRE_HTTPS', 'HSTS'] as $k) {
+            $b = $this->values[$k];
+            if ($b === 1 || $b === 0) {
+                $this->values[$k] = (bool) $b;
+            } elseif (!is_bool($b)) {
+                $this->problems[$k] = "$k must be true or false (without quotes).";
+                $this->values[$k] = self::DEFAULTS[$k];
+            }
         }
         $origins = $this->values['ALLOWED_ORIGINS'];
         if (is_string($origins)) {

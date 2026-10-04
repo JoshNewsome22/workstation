@@ -10,7 +10,8 @@ namespace NBH\Relay;
  * $path is the route inside the relay ("/api/redeem", "/admin", ...), worked out from the URL path and the
  * folder the relay's index.php is served from ($base, e.g. "/ai"). A URL outside that folder gets the path
  * "" and is answered 404. Both "/ai/api/redeem" (through .htaccess) and "/ai/index.php/api/redeem" (no
- * mod_rewrite) give "/api/redeem".
+ * mod_rewrite) give "/api/redeem". $link is what the relay's own links and calls start with: "/ai", or
+ * "/ai/index.php" for a page that was itself opened that way (a server without .htaccess rewriting).
  */
 final class Request
 {
@@ -27,7 +28,14 @@ final class Request
         public readonly string $ip,
         public readonly bool $https,
         public readonly string $docRoot = '',
+        public readonly string $link = '',
     ) {
+    }
+
+    /** What the relay's own links and calls start with ("/ai", or "/ai/index.php" when the page was opened that way). */
+    public function linkBase(): string
+    {
+        return $this->link !== '' ? $this->link : $this->base;
     }
 
     /**
@@ -87,7 +95,15 @@ final class Request
             ip: (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
             https: $https,
             docRoot: (string) ($_SERVER['DOCUMENT_ROOT'] ?? ''),
+            link: self::link((string) ($_SERVER['REQUEST_URI'] ?? '/'), $base),
         );
+    }
+
+    /** "/ai/index.php" when the URL itself went through index.php ("/ai/index.php/admin"), else the relay's folder. */
+    public static function link(string $requestUri, string $base): string
+    {
+        $uri = preg_replace('~[?#].*$~s', '', $requestUri) ?? $requestUri;
+        return $uri === $base . '/index.php' || str_starts_with($uri, $base . '/index.php/') ? $base . '/index.php' : $base;
     }
 
     /**

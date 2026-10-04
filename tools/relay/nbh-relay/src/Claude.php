@@ -109,8 +109,31 @@ PROMPT;
     /** The user turn: the style, then the text between tags (a tag inside the text is defused first). */
     public static function userMessage(#[\SensitiveParameter] string $text, string $style): string
     {
-        $safe = preg_replace('~<\s*(/?)\s*' . self::TAG . '~i', "\u{2039}$1" . self::TAG, $text) ?? $text;
-        return 'Style: ' . self::STYLES[$style] . "\n\n<" . self::TAG . ">\n" . $safe . "\n</" . self::TAG . '>';
+        return 'Style: ' . self::STYLES[$style] . "\n\n<" . self::TAG . ">\n" . self::defuse($text) . "\n</" . self::TAG . '>';
+    }
+
+    /**
+     * The text with anything that could pass for the tags around it made harmless: "<" (or a look-alike such
+     * as a full-width or small one), an optional "/", then the tag's name in any case, in full-width letters,
+     * or with spaces, soft hyphens or invisible characters in it, becomes "\u{2039}" (or "\u{2039}/") and the
+     * plain name. Nothing else in the text changes.
+     */
+    public static function defuse(#[\SensitiveParameter] string $text): string
+    {
+        static $pattern = null;
+        if ($pattern === null) {
+            $gap = '[\s\p{Zs}\p{Cf}\x{00AD}\x{034F}\x{115F}\x{1160}\x{3164}\x{FFA0}]*';
+            $name = [];
+            foreach (str_split(self::TAG) as $c) {
+                $name[] = $c === '_'
+                    ? '[_\x{FF3F}\x{2017}\-\x{2010}-\x{2015}\s\p{Zs}]'
+                    : sprintf('[%s%s\x{%04X}\x{%04X}]', $c, strtoupper($c), 0xFF41 + ord($c) - 97, 0xFF21 + ord($c) - 97);
+            }
+            $pattern = '~[<\x{FF1C}\x{FE64}\x{2329}\x{3008}\x{27E8}\x{2039}]' . $gap . '([/\x{FF0F}\x{2044}\x{2215}]?)' . $gap . implode($gap, $name) . '~u';
+        }
+        $out = preg_replace_callback($pattern, static fn (array $m): string => "\u{2039}" . ($m[1] !== '' ? '/' : '') . self::TAG, $text);
+        // only text that is not valid UTF-8 fails here, and the relay never takes such text; refuse every "<" then
+        return $out ?? str_replace('<', "\u{2039}", $text);
     }
 
     /**
