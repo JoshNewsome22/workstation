@@ -257,7 +257,9 @@ async function states(page,label,r){
     const sz=await page.evaluate(()=>[...document.querySelectorAll('#wkPlayer .wk-bar button,#wkPlayer .wk-chaps button,#wkSeek')].map(e=>{const r=e.getBoundingClientRect();return Math.min(r.width,r.height);}));
     check(vp.width+' touch: every control 44 px or more',sz.every(v=>v>=44),Math.min(...sz).toFixed(0)+' px smallest');
     if(vp.width<500){const w=await page.evaluate(()=>{const f=document.getElementById('wkFrame').getBoundingClientRect();return{w:f.width,l:f.left,r:f.right,iw:innerWidth,sw:document.documentElement.scrollWidth};});
-      check('phone: the picture uses the width less 16 px gutters, with no sideways scroll',w.w>=w.iw-34&&w.l>=15&&w.r<=w.iw-15&&w.sw<=w.iw,JSON.stringify(w));}
+      check('phone: the picture uses the width less 16 px gutters, with no sideways scroll',w.w>=w.iw-34&&w.l>=15&&w.r<=w.iw-15&&w.sw<=w.iw,JSON.stringify(w));
+      const ch=await page.evaluate(()=>{const c=document.querySelector('.wk-cap2'),hs=new Set();for(let t=0;t<TKWALK.duration;t+=1){TKWALK.renderAt(t);hs.add(Math.round(c.getBoundingClientRect().height));}TKWALK.renderAt(0);return[...hs];});
+      check('phone: the caption band keeps one height for every caption (the controls under it do not jump)',ch.length===1,JSON.stringify(ch));}
     await ctx.close();}
   /* ---- no sideways scroll on the iPad (both ways) and a phone ---- */
   for(const vp of [{width:820,height:1180},{width:1180,height:820},{width:390,height:844}]){const {page,log}=await open(br,vp,sim);
