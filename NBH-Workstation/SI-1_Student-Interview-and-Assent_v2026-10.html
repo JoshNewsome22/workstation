@@ -675,6 +675,7 @@ label.ck input{width:auto!important;margin:0}
 .conf ul.say{margin:4px 0 6px 20px;padding:0}
 .conf ul.say li{margin:3px 0}
 .conf .fieldgrid{margin:6px 0 4px}
+.conf .conf-adult{font-family:var(--sans);font-size:12px;line-height:1.45;border-top:1px dashed var(--rule-2);margin:6px 0 4px;padding:6px 0 2px;color:var(--ink)}
 /* the interview items: one card per question, the student's words in the box */
 .qcard{border:1px solid var(--rule-2);border-radius:3px;background:#fff;padding:10px 12px;margin:8px 0;break-inside:avoid}
 .qcard .q{font-size:15.5px;line-height:1.4;margin:0 0 6px}
@@ -952,6 +953,8 @@ td input,td select{max-width:100%}
       <div id="siConfText"></div>
       <div class="ckrow"><label class="ck"><input type="checkbox" data-c="conf_read"> Read aloud to the student before the first question</label></div>
       <div class="fieldgrid"><div><label>What the student asked or said about it</label><input data-m="conf_say" placeholder="in the student&rsquo;s words"></div></div>
+      <!-- v21.44 (B5, review): for the adult, not read aloud; a disclosure is never written in the interview. Review this wording. -->
+      <div class="conf-adult" id="siConfAdult"><b>For the adult, not read aloud.</b> If the student tells you someone is hurting them, or that they might hurt themselves or someone else: stay calm, listen, and do not ask for details. Do not write it in this interview, which the family may read. Write the student&rsquo;s exact words on a separate sheet for the report, report it right away, and follow your agency&rsquo;s policy on who tells the family. If the student seems worried, or says they do not want to go on, ask whether they still want to talk today, and note it above.</div>
     </div>
     <div class="instr">
       <p><b>Before the first question.</b> Read the box above aloud, in the version chosen. Then tell the student why you are asking, in one sentence: &ldquo;I want to understand what school is like for you, so we can make it better. There are no wrong answers. You can skip any question, and you can stop any time.&rdquo; Write what the student says, in the student&rsquo;s words. Do not correct an answer and do not suggest one; when the student is stuck, offer two or three examples and let the student pick or say something else. The younger version adds three faces to some questions: the student points, and the words under the face are read aloud. Under &ldquo;How the student responded&rdquo;, mark every way the student answered.</p>
@@ -1100,7 +1103,7 @@ td input,td select{max-width:100%}
     <table class="rt">
       <tr><th style="width:28%">Setting</th><td>Not in front of peers; not right after an incident; the student chooses the room where the choice exists. Someone the student trusts asks, or sits in.</td></tr>
       <!-- v21.44 (B5). Review this wording. -->
-      <tr><th>Who hears the answers</th><td>Before the first question the student is told, in plain words, who will read the answers and what cannot be kept private: the box at the top of the Interview page, read aloud in the version chosen, with a tick when it was read. Promise only what you can keep. The answers go to the team and the parent or guardian. If the student says someone is hurting them, or that they might hurt themselves or someone else, the adult must pass it on to the people whose job is to keep the student safe, and suspected abuse or neglect is reported the same day by the person who hears it, as your state&rsquo;s law and your agency&rsquo;s policy require. If a student tells you something like that: stay calm, listen, do not press for details, write down the student&rsquo;s words, and report it; do not promise to keep it secret. The family hears the same limits on Form IC-1, and the Ethics Code asks for them at the outset (BACB, 2020, Code 3.10).</td></tr>
+      <tr><th>Who hears the answers</th><td>Before the first question the student is told, in plain words, who will read the answers and what cannot be kept private: the box at the top of the Interview page, read aloud in the version chosen, with a tick when it was read. Promise only what you can keep. The answers go to the team and the parent or guardian. If the student says someone is hurting them, or that they might hurt themselves or someone else, the adult must pass it on to the people whose job is to keep the student safe, and suspected abuse or neglect is reported right away by the person who hears it, as your state&rsquo;s law and your agency&rsquo;s policy require. If a student tells you something like that: stay calm, listen, and do not ask for details. Do not write it in this interview, which the family may read. Write the student&rsquo;s exact words on a separate sheet for the report, report it right away, follow your agency&rsquo;s policy on who tells the family, and do not promise to keep it secret. If the student seems worried by the box, or says they do not want to go on, ask whether they still want to talk today, and note it. The family hears the same limits on Form IC-1, and the Ethics Code asks for them at the outset (BACB, 2020, Code 3.10).</td></tr>
       <tr><th>Wording</th><td>The student&rsquo;s word for the behavior, not the plan&rsquo;s. Short questions. Examples offered in threes, never one. The answer written as said, including &ldquo;I don&rsquo;t know&rdquo;.</td></tr>
       <tr><th>Stopping</th><td>The interview is itself a session: assent is asked for at the start, a break is offered, and the student can end it. A stopped interview is recorded as such and tried again another day, not pressed.</td></tr>
       <tr><th>What is done with it</th><td>The student is told what will change and what cannot change, and why. A preference the plan cannot honor is written on the Preference page with the reason, so the student&rsquo;s request is not silently dropped.</td></tr>
@@ -3106,13 +3109,13 @@ const ITEMS=[
 const CONF={read:['Before we start, I want you to know who will hear what you tell me.',
   'I will write down what you say. The adults on your team at school and your parent or guardian may read it. It helps us make school better for you.',
   'This is not about getting you in trouble. I will not share what you say with other students.',
-  'There are a few things I cannot keep private. If you tell me that someone is hurting you, or that you might hurt yourself or someone else, I have to tell the people whose job is to keep you safe, like the school counselor or the principal, and sometimes people outside school whose job is to protect children. The law says I must. If that happens, I will try to tell you first.',
+  'There are a few things I cannot keep private. If you tell me that someone is hurting you, or that you might hurt yourself or someone else, I have to tell people whose job is to keep you safe. That could be the school counselor or the principal, or sometimes people outside school whose job is to protect children. The law and school rules say I must. If that happens, I will try to tell you first.',
   'Do you have any questions about that?'],
  young:['Before we start, here is who hears what you tell me.',
   'I will write down what you say. Your teachers and the grown-ups who take care of you at home may read it. It helps them make school better for you.',
   'This is not to get you in trouble.',
   'If you tell me someone is hurting you, or that you might hurt yourself or someone else, I have to tell a grown-up whose job is to keep kids safe. That is a rule I have to follow.',
-  'Is that OK?']};
+  'Do you want to ask me anything about that?']};
 function renderConf(){const L=CONF[young()?'young':'read'];
   $('#siConfText').innerHTML='<p class="say">'+esc(L[0])+'</p><ul class="say">'+L.slice(1,-1).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul><p class="say">'+esc(L[L.length-1])+'</p>';}
 /* what the student says happens before and after, each tagged with the function it points to */

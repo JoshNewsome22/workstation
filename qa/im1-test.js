@@ -49,8 +49,8 @@ const views=['setup','map','scoring','history','guide'];
   await page.selectOption('#imAddLoc','scalp');await page.click('#imAddBtn');await sleep(100);await setRow('scalp','1','CT','2');
   sc=await page.evaluate(()=>{const s=score(S.cur.rows);return {risk:s.risk,rule:s.rule};});
   console.log('hand check D (CT-2 on the head -> High):',JSON.stringify(sc),'ok:',sc.risk==='High'&&/CT-2 on the head/.test(sc.rule));
-  /* v21.44 (B4): the private areas are not examined: Genitalia and Rectum are on the list but cannot be chosen, and a tap on the buttocks adds no row (qa/policy-safety-test.js covers the care path) */
-  console.log('private areas on the list, disabled:',JSON.stringify(await page.evaluate(()=>['genitalia','rectum','hips'].map(l=>{const o=document.querySelector('#imAddLoc option[value="'+l+'"]');return o?o.disabled:'missing';}))),'rows',await page.evaluate(()=>S.cur.rows.length));
+  /* v21.44 (B4): the private areas are not examined: Genitalia and Rectum are on the list but cannot be chosen; Hips/buttocks adds the side of the hip, and a tap on the buttocks adds no row (qa/policy-safety-test.js covers the care path) */
+  console.log('genitalia, rectum disabled; hips (the side of the hip) enabled [expect true,true,false]:',JSON.stringify(await page.evaluate(()=>['genitalia','rectum','hips'].map(l=>{const o=document.querySelector('#imAddLoc option[value="'+l+'"]');return o?o.disabled:'missing';}))),'rows',await page.evaluate(()=>S.cur.rows.length));
   await page.screenshot({path:`${OUT}/scoring-six.png`,fullPage:true});
   /* a row's delete removes its marker */
   await page.evaluate(()=>{window.confirm=()=>true;});
@@ -58,10 +58,11 @@ const views=['setup','map','scoring','history','guide'];
   console.log('after two deletes: rows',await page.evaluate(()=>S.cur.rows.map(r=>r.loc).join(' ')),'markers',await page.$$eval('#imMaps .imMark',m=>m.length),'tinted paths',await page.$$eval('#imMaps path.has',p=>new Set(p.map(x=>x.dataset.loc)).size));
   /* save to history, start new, reopen */
   await page.evaluate(()=>{document.querySelectorAll('[data-a="date"]')[0].value='9/1/2026';document.querySelectorAll('[data-a="date"]')[0].dispatchEvent(new Event('input',{bubbles:true}));});
-  /* v21.44 (B4): an administration is filed only with two adults named */
+  /* v21.44 (B4): an administration is filed only with two adults named (the second with a role, ticked present) and the student's assent recorded */
   await page.evaluate(()=>document.querySelector('#saveAdmBtn').click());await sleep(300);
   console.log('without the two adults: hist',await page.evaluate(()=>S.hist.length),'(expect 0)');
-  await page.evaluate(()=>{[['examiner','School nurse (test)'],['second','Classroom aide (test)']].forEach(([k,v])=>{const e=document.querySelector('[data-a="'+k+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));});});
+  await page.evaluate(()=>{[['examiner','School nurse (test)'],['second','Classroom aide (test)'],['secondRole','paraprofessional'],['assent','yes']].forEach(([k,v])=>{const e=document.querySelector('[data-a="'+k+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});
+    const p=document.querySelector('[data-a="present"]');p.checked=true;p.dispatchEvent(new Event('change',{bubbles:true}));});
   await page.evaluate(()=>document.querySelector('#saveAdmBtn').click());await sleep(300);
   console.log('saved: hist',await page.evaluate(()=>S.hist.length),'cur id set',await page.evaluate(()=>!!S.cur.id),'same as saved',await page.evaluate(()=>savedSame()));
   await page.evaluate(()=>document.querySelector('#newAdmBtn').click());await sleep(300);
@@ -101,7 +102,7 @@ const views=['setup','map','scoring','history','guide'];
   console.log('still loaded after bad json:',await page.evaluate(()=>S.hist.length));
   await page.evaluate(()=>{window.__saved=null;document.querySelector('#csvBtn').click();});await sleep(200);
   const csv=await page.evaluate(()=>window.__saved);const lines=csv.split('\n');
-  console.log('csv lines:',lines.length,'(expect 1 header + 5+3+1 locations + 3 nurse + 1 noticed during required care = 14)','columns',lines[0].split(',').length,'header:',lines[0].slice(0,120));
+  console.log('csv lines:',lines.length,'(expect 1 header + 5+3+1 locations + 3 nurse + 1 noticed during required care = 14)','columns',lines[0].split(',').length,'(expect 23)','header:',lines[0].slice(0,120));
   console.log('csv row 2:',lines[1].slice(0,160));console.log('csv last:',lines[lines.length-1].slice(0,120),'entities?',/&[a-z]+;/.test(csv));
   /* prints: blank (above) and the simulation */
   await page.emulateMedia({media:'print'});await page.pdf({path:`${OUT}/sim.pdf`,format:'Letter',printBackground:true});await page.emulateMedia({media:'screen'});
