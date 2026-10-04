@@ -48,7 +48,11 @@ const TXT0={
   h3:'STEP 3 : DELIVER TOKEN ({TOKENS}), REINFORCE BEHAVIOR\nPlace the picture of the skill you are teaching your learner under the word **FIRST**. The picture of the activity your learner will earn goes under the word **THEN**.\n\n__**Tokens**__:\nThis page is also where your learner places each {token} as it is earned. Give the {token} right after the behavior, with brief praise, and let the learner put it in the next box. There are {n} boxes, so when the {n}th {token} is earned, your learner gets the THEN item at once.{last} Keep the exchange immediate when the board is new; a longer wait can be built in later.\n\n__**Not So FAST**__: Before starting, decide how much of the behavior earns one {token}: how many responses, or how long. For example, three problems answered, or two minutes of staying seated. This is the schedule of reinforcement, and it must not ask too much. When a skill is brand new, give a {token} after every correct response or every short stretch of the behavior. As the skill becomes reliable, raise the requirement a little at a time; if the behavior falls apart after a step up, you raised it too fast: go back one step.'
 };
 const CREDIT0='To find more resources and information visit\nwww.Behavior-Charts.com';
-function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:'av:boy',n:'5',wm:'20',order:'all',sp_card:'ch:0',sp_size:'large',panel:'light',pagesize:'8.82',credit:CREDIT0},DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true,qrframe:true},photos:[],photo:[cello()],tok:[cello('tk:star')],tokL:[cello('tk:medal')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
+/* v21.44 the avatar a book starts with: the practice's own Boy picture from the library (the drawn boy where the library is
+   not beside the form) */
+const AV0='faceboy2';
+function avKey(){const k=S.meta.avatar||AV0;return /^av:/.test(k)||P[k]?k:'av:boy';}
+function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:AV0,n:'5',wm:'20',order:'all',sp_card:'ch:0',sp_size:'large',panel:'light',pagesize:'8.82',credit:CREDIT0},DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true,qrframe:true},photos:[],photo:[cello()],tok:[cello('tk:star')],tokL:[cello('tk:medal')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
 let S=blank();
 const nTok=()=>Math.max(3,Math.min(10,Math.round(num(S.meta.n)||5)));
 function ensure(){
@@ -143,7 +147,7 @@ function renderTbls(){
 }
 function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
   if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.'+lkPhrase()+'</div>';return;}
-  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:m.avatar||'av:boy'})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(ntg<6)miss.push((6-ntg)+' of the six targets');
+  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(ntg<6)miss.push((6-ntg)+' of the six targets');
   /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
   const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
   const dup=twice('ch','choices').concat(twice('tg','targets'));if(dup.length)miss.push('the same picture on '+dup.join(', ')+' (change one, unless that is meant)');
@@ -219,7 +223,7 @@ function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.pos
 function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Math.max(0,Math.min(100,num(S.meta.ph_y)??35)),z=Math.max(100,Math.min(300,num(S.meta.ph_z)??100))/100;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')';}
 /* (v21.42i) the two photos face each other: one of them prints mirrored (the samples mirror the right one) */
 function flipSide(){const f=S.meta.ph_flip||'r';return f==='l'||f==='none'?f:'r';}
-function photoInner(){const o=S.photo[0];return has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:S.meta.avatar||'av:boy'},'');}
+function photoInner(){const o=S.photo[0];return has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:avKey()},'');}
 function photoHtml(side){return '<div class="bd-photo '+side+(flipSide()===side?' flip':'')+'">'+photoInner()+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
 function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
@@ -423,7 +427,7 @@ $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).r
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='TK-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 async function loadSim(){if(!(await nbhUI.confirm('Load a simulated book?\nEvery page is filled with a sample student. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
-  Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',site:'Elementary, self-contained classroom',first:'Sam',poss:'s',setting:'',layout:'ft',avatar:'av:boy',n:'5',tokname:'',qr:'https://example.org/token-board/how-to-use',credit:CREDIT0,order:'all',sp_card:'ch:0',sp_size:'large'});
+  Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',site:'Elementary, self-contained classroom',first:'Sam',poss:'s',setting:'',layout:'ft',avatar:AV0,n:'5',tokname:'',qr:'https://example.org/token-board/how-to-use',credit:CREDIT0,order:'all',sp_card:'ch:0',sp_size:'large'});
   S.chk.pg_how=true;S.chk.qrframe=true;
   /* the practice's own pictures: the choices and the targets its walkthrough video shows */
   S.ch=['cardcrayons','cardball','cardplayground','cardbreak','youtube','cardipad2'].map(k=>cello(k));S.tg=['cardwriting','cardreading','cardalldone','boyraisehand','cardmath','cardwaiting'].map(k=>cello(k));

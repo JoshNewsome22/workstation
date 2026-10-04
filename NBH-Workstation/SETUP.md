@@ -980,6 +980,14 @@ stayed on Setup and the workstation said *Not answering*. The file on the websit
 not (cut short on the way). The narration is now its own file beside the forms, `nbh-tk1-narration.js` (loaded by the form, packed into the
 one-file edition, saved in the offline copy), and TK-1 is 1.2 MB. `tools/pwa-sw.py` refuses any page of 1.9 MB or more.
 
+**TK-1's walkthrough and avatar (v21.44).** A new book starts with the practice's own Boy picture from the
+library (*Library: Boy (teal shirt)*, now first in *When there is no photo*) in the Board's corners and in the
+walkthrough; the drawn avatars are still there to choose, and the drawn boy stands in where the picture library is not
+beside the form. A book saved earlier keeps the avatar it was saved with. In full screen on an iPad the walkthrough's
+picture is now fitted to the player itself (a form inside the workstation reported a window wider than the screen, and the
+picture was cut off on the right); and every frame carries the credit *Created by Joshua Newsome, BCBA* at the bottom
+right, in the form and in the video files.
+
 **Not answering, and why (v21.44).** Five seconds after a form is opened without
 answering, the workstation now looks into the form's frame and says which it is:
 another page in the frame, the file missing from the website (404), the form still

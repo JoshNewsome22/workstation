@@ -139,11 +139,13 @@ function build(){const D=dom();if(!D)return null;stop(true);
 const cuesOut=()=>B?B.cues.map(c=>({id:c.id,start:c.start,dur:c.dur,narr:c.narr,text:c.text,chapter:c.chapter})):[];
 const chapsOut=()=>B?B.chapters.map(c=>({id:c.id,label:c.label,start:c.start})):[];
 
+const CREDIT_WALK='Created by Joshua Newsome, BCBA';
 function compose(D){
   const st=D.stage;st.innerHTML='';
   const layer=c=>{const d=div('wk-L '+(c||''));st.appendChild(d);return d;};
   const Lp=layer('wk-pages'),Lveil=layer('wk-veil'),Lfly=layer(),Lhl=layer('wk-hl'),Lht=layer('wk-ht'),Lfx=layer('wk-fx');
   const cap=div('wk-cap');st.appendChild(cap);
+  const cred=div('wk-credit');cred.textContent=CREDIT_WALK;st.appendChild(cred);   /* v21.44 the author's credit, on every frame */
   /* the book, drawn from the forced copy of the state */
   /* the demo target: the first one that is an ongoing behavior (an -ing word, which suits a two-minute interval), else the first */
   const F=forced(()=>{const used=o=>has(o)||String(o.l||'').trim();const gi=S.tg.findIndex(o=>used(o)&&gerund(lbl(o)));
@@ -680,12 +682,14 @@ function fullscreen(){const D=dom();if(!D)return;const p=D.player;
   if(isFs()){if(p.classList.contains('wk-fs'))panel(false);else{(document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);}setTimeout(()=>{fit();ui();},60);return;}
   const rq=p.requestFullscreen||p.webkitRequestFullscreen;let ok=false;
   if(rq){try{const r=rq.call(p);ok=true;if(r&&r.catch)r.catch(()=>{panel(true);fit();ui();});}catch(e){ok=false;}}
-  if(!ok)panel(true);setTimeout(()=>{fit();ui();},60);}
+  if(!ok)panel(true);[60,400,1000].forEach(t=>setTimeout(()=>{fit();ui();},t));}
 /* the stage is drawn at 1280 x 720 and scaled to the width of the view (in full screen, to fit the screen) by one transform; in full
    screen a small picture moves the captions under it, so the scale is worked out again with the caption band's height */
 function fit(){const D=dom();if(!D)return;const f=isFs();let k;
   if(f){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||60,chs=D.chaps.offsetHeight||0;
-    const kk=cap=>Math.max(.1,Math.min(window.innerWidth/SW,(window.innerHeight-bar-chs-cap-24)/SH));k=kk(0);D.player.classList.toggle('wk-small',k<.5);
+    /* v21.44 the room is the player's own box: on an iPad a form inside the workstation reports a window as wide as its page,
+       not the screen, and the picture came out wider than the screen in full screen */
+    const R=fsRoom(D),kk=cap=>Math.max(.1,Math.min(R.w/SW,(R.h-bar-chs-cap-12)/SH));k=kk(0);D.player.classList.toggle('wk-small',k<.5);
     if(k<.5&&capsOn&&D.cap2)k=kk(D.cap2.offsetHeight||0);D.frame.style.width=f2(SW*k)+'px';}
   else{const kw=Math.max(.1,(D.player.clientWidth||SW)/SW);k=kw;let small=k<.5;
     /* a short window (an iPad held sideways, the form inside the workstation): the picture is scaled to the height left below the
@@ -697,6 +701,11 @@ function fit(){const D=dom();if(!D)return;const f=isFs();let k;
       else{D.player.classList.add('wk-small');const k2=(h-(capsOn&&D.cap2?D.cap2.offsetHeight||0:0))/SH;if(k2>=.3){k=k2;small=true;}}}
     D.frame.style.width=k<kw-.0005?f2(SW*k)+'px':'';css(D.stage,'transform','scale('+k.toFixed(5)+')');D.frame.style.height=f2(SH*k)+'px';D.player.classList.toggle('wk-small',small);return;}
   css(D.stage,'transform','scale('+k.toFixed(5)+')');D.frame.style.height=f2(SH*k)+'px';D.player.classList.toggle('wk-small',k<.5);}
+/* the inside of the player in full screen (its padding is the screen's safe areas), never more than the window */
+function fsRoom(D){const p=D.player;let w=p.clientWidth||0,h=p.clientHeight||0;
+  try{const cs=getComputedStyle(p);w-=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);h-=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);}catch(e){}
+  const vv=window.visualViewport,W=Math.min(window.innerWidth||Infinity,vv&&vv.width||Infinity),H=Math.min(window.innerHeight||Infinity,vv&&vv.height||Infinity);
+  return {w:w>0?Math.min(w,W):(isFinite(W)?W:SW),h:h>0?Math.min(h,H):(isFinite(H)?H:SH)};}
 /* the height the picture may take outside full screen: the window less the sticky toolbar, the player's controls and its margins */
 function stickyH(){const tb=document.querySelector('.toolbar');let th=0;try{if(tb&&/sticky|fixed/.test(getComputedStyle(tb).position))th=tb.offsetHeight;}catch(e){}return th;}
 function roomH(D){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||0,chs=D.chaps.offsetHeight||0;return (window.innerHeight||0)-stickyH()-bar-chs-30;}
@@ -719,7 +728,7 @@ function wire(){const D=DOM;
   D.snd.addEventListener('click',()=>{soundOn=!soundOn;if(want){const t=clock();seek(t);}else{stopAudio();AU.mode='off';idle();}ui();});
   D.fs.addEventListener('click',fullscreen);
   D.chaps.addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b||!B)return;const c=B.chapters.find(x=>x.id===b.dataset.ch);if(c)seek(c.start);});
-  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{setTimeout(()=>{fit();ui();},30);}));
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{[30,350,900].forEach(t=>setTimeout(()=>{fit();ui();},t));}));
   let lastW=-1;const onSize=()=>{const w=D.player.clientWidth;if(w!==lastW){lastW=w;fit();}};
   if(window.ResizeObserver){new ResizeObserver(onSize).observe(D.player);
     /* the sticky toolbar's height is part of the room the picture fits in (it folds and unfolds, and its rows wrap) */

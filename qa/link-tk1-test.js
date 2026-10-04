@@ -100,6 +100,9 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
 
   /* ---- 1. off by default, against the TK-1 from before the link ---- */
   {const A=await open(ctx,URL0,log),B=await open(ctx,URL1,log);
+    /* the avatar a book starts with changed after the link (v21.44: the practice's Boy picture); the baseline gets the same */
+    const setAv=(P,v)=>P.evaluate(v=>{S.meta.avatar=v;const e=document.querySelector('[data-m="avatar"]');if(e)e.value=v;renderAll();},v);
+    const av0=await A.evaluate(()=>S.meta.avatar);await setAv(B,av0);await sleep(200);
     const a0=await totals(A),b0=await totals(B);
     ok('1 blank: the field totals are the ones from before the link',JSON.stringify(a0)===JSON.stringify(b0),{was:a0,now:b0});
     ok('1 blank: no lk in the record, and the record is the one from before',!('lk' in (await B.evaluate(()=>S.meta)))&&(await sOf(A))===(await sOf(B)));
@@ -112,7 +115,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await sim(A);await sim(B);await sleep(300);
     /* the simulator's cards changed after the link (v21.43: the practice's own pictures); the baseline gets the same cards,
        so this compares the link alone */
-    await A.evaluate(j=>{const o=JSON.parse(j);S.ch=o.ch;S.tg=o.tg;renderAll();},await B.evaluate(()=>JSON.stringify({ch:S.ch,tg:S.tg})));await sleep(200);
+    await A.evaluate(j=>{const o=JSON.parse(j);S.ch=o.ch;S.tg=o.tg;renderAll();},await B.evaluate(()=>JSON.stringify({ch:S.ch,tg:S.tg})));await setAv(B,av0);await sleep(200);
     const a1=await totals(A),b1=await totals(B);
     ok('1 simulator: the same totals, no lk, the same record',JSON.stringify(a1)===JSON.stringify(b1)&&(await sOf(A))===(await sOf(B))&&!('lk' in (await B.evaluate(()=>S.meta))),{was:a1,now:b1});
     ok('1 simulator: the same Setup verdict',(await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
