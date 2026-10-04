@@ -1,0 +1,41 @@
+# NBH writing-help relay (public_html/ai/.htaccess)
+#
+# Every request under /ai/ is answered by index.php, which serves only its own routes:
+#   POST /ai/api/redeem        POST /ai/api/rewrite        GET /ai/api/health
+#   GET  /ai/admin             /ai/api/admin/...           GET /ai/ (sends you to /ai/admin)
+# and answers 404 to anything else. No other file in this folder is ever sent, listed or run.
+
+# No folder listings, no guessing of file names.
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # https only: a plain http address is sent to the same address with https.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+    # index.php itself: leave it be (stops the rewrite repeating).
+    RewriteRule ^index\.php$ - [L]
+
+    # Everything else, whether or not a file of that name exists, goes to index.php.
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Without mod_rewrite (or if a stray file is ever copied here): refuse every file but index.php.
+<FilesMatch "^(?!index\.php$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always unset X-Powered-By
+</IfModule>

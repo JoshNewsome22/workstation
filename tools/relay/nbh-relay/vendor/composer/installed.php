@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'newsomebh/nbh-relay',
-        'pretty_version' => 'dev-claude/design-polish-32-files-smixb9',
-        'version' => 'dev-claude/design-polish-32-files-smixb9',
-        'reference' => '6ace2fe36221c838eee454a0c44be98fedf65133',
+        'pretty_version' => '1.0.0',
+        'version' => '1.0.0.0',
+        'reference' => null,
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -47,9 +47,9 @@
             'dev_requirement' => false,
         ),
         'newsomebh/nbh-relay' => array(
-            'pretty_version' => 'dev-claude/design-polish-32-files-smixb9',
-            'version' => 'dev-claude/design-polish-32-files-smixb9',
-            'reference' => '6ace2fe36221c838eee454a0c44be98fedf65133',
+            'pretty_version' => '1.0.0',
+            'version' => '1.0.0.0',
+            'reference' => null,
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

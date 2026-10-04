@@ -8,6 +8,7 @@ use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Client;
 use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIStatusException;
+use Anthropic\Core\Exceptions\BadRequestException;
 use GuzzleHttp\ClientInterface as GuzzleClient;
 
 /**
@@ -20,7 +21,8 @@ use GuzzleHttp\ClientInterface as GuzzleClient;
  *    model's default) and counts toward max_tokens, which is sized for the effort;
  *  - structured output (a JSON schema) fixes the shape of the answer;
  *  - fallbacks "default" (beta server-side-fallback-2026-07-01): if the model declines for a policy reason,
- *    the API re-runs the request on the model Anthropic recommends for that case, in the same call;
+ *    the API re-runs the request on the model Anthropic recommends for that case, in the same call; should
+ *    the API refuse the opt-in itself (a 400 naming fallbacks), the request is sent once more without it;
  *  - stop_reason is checked before the content: "refusal" (the whole chain declined) and "max_tokens" are
  *    reported, not parsed;
  *  - the SDK retries once on 408/409/429/5xx and connection errors; DeadlineTransport keeps the call and its
@@ -67,7 +69,7 @@ Rules for every style:
 
 Styles:
 - Objective and observable: describe only what could be seen or heard, in the writer's tense. Replace words for inner states and emotions (for example upset, angry, frustrated, anxious, happy, bored, wanted to, tried to), inferred intent or function (on purpose, manipulative, attention-seeking, to get out of work, testing limits), labels (tantrum, meltdown, aggressive, defiant, noncompliant, disruptive, inappropriate, out of control) and judgments of character with the behavior the text itself describes. When the text gives no observable behavior for such a word, write [describe what you saw] in its place. Replace vague amounts, frequencies, durations and intensities (a lot, always, constantly, several times, for a while, very) with the exact figure when the text gives one; otherwise write a blank in square brackets for the writer to fill in, such as [number] times or [how long]. A word that is part of an operational definition stated in the text may stay.
-- Concise: say the same in fewer words, in the writer's tense: remove repetition and filler, use short plain sentences, and keep every fact and every placeholder.
+- Concise: say the same in fewer words, in the writer's tense: remove repetition and filler, use short plain sentences, and keep every fact and every placeholder. Keep the writer's words for inner states, intentions and labels, and name each of them in cautions.
 - Report-ready: complete, formal sentences for a written report, in the past tense, with every fact kept. Use observable wording where the text supports it; where the text uses a word for an inner state, an intention or a label and gives no observable behavior for it, keep the writer's word and name it in cautions. Do not insert blanks.
 - Fix spelling and grammar only: correct spelling, grammar, punctuation and capitalization, and change nothing else: keep the writer's wording, word choice, tense, order and meaning, subjective words included.
 
@@ -132,19 +134,29 @@ PROMPT;
             ],
         );
 
+        $args = [
+            'maxTokens' => $this->config->maxOutputTokens(),
+            'messages' => [['role' => 'user', 'content' => self::userMessage($text, $style)]],
+            'model' => self::MODEL,
+            'outputConfig' => [
+                'effort' => $this->config->str('EFFORT'),
+                'format' => ['type' => 'json_schema', 'schema' => self::schema()],
+            ],
+            'system' => self::systemPrompt(),
+        ];
+        $optIn = ['fallbacks' => 'default', 'betas' => [self::FALLBACK_BETA]];
+
         try {
-            $message = $client->beta->messages->create(
-                maxTokens: $this->config->maxOutputTokens(),
-                messages: [['role' => 'user', 'content' => self::userMessage($text, $style)]],
-                model: self::MODEL,
-                fallbacks: 'default',
-                outputConfig: [
-                    'effort' => $this->config->str('EFFORT'),
-                    'format' => ['type' => 'json_schema', 'schema' => self::schema()],
-                ],
-                system: self::systemPrompt(),
-                betas: [self::FALLBACK_BETA],
-            );
+            try {
+                $message = $client->beta->messages->create(...$args, ...$optIn);
+            } catch (BadRequestException $e) {
+                if (!self::refusesFallbacks($e)) {
+                    throw $e;
+                }
+                // the account or the model does not take the fallback opt-in: the rewrite itself still can
+                Log::event('fallbacks_not_accepted', ['request_id' => $e->getRequestID() ?? '']);
+                $message = $client->beta->messages->create(...$args);
+            }
         } catch (DeadlineExceeded) {
             Log::event('upstream_timeout', ['attempts' => $transport->attempts, 'seconds' => $seconds]);
             return self::fail(504, 'upstream_timeout', 'The rewrite service did not answer in time. Try again in a minute.');
@@ -160,6 +172,13 @@ PROMPT;
         }
 
         return self::read($message, $text);
+    }
+
+    /** A 400 whose message is about the fallbacks parameter or its beta header. */
+    private static function refusesFallbacks(BadRequestException $e): bool
+    {
+        $msg = is_array($e->body) && is_array($e->body['error'] ?? null) ? (string) ($e->body['error']['message'] ?? '') : '';
+        return stripos($msg, 'fallback') !== false;
     }
 
     /**

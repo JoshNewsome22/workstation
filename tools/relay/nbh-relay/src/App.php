@@ -54,6 +54,9 @@ final class App
     public static function main(string $root): void
     {
         $app = new self($root);
+        if (PHP_VERSION_ID >= 80100) {
+            Db::ensureDir($app->dataDir);
+        }
         Log::init($app->dataDir);
         $req = Request::fromGlobals($app->config->maxBodyBytes(), $app->config->str('BASE_PATH'));
         $app->handle($req)->send($req->method === 'HEAD');

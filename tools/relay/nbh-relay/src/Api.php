@@ -138,6 +138,9 @@ final class Api
 
         /** @var string $text */
         /** @var string $style */
+        // PHP's own time limit must not end the request before the call's deadline does (some hosts count
+        // the time spent waiting for the API)
+        @set_time_limit($cfg->int('TIMEOUT_SECONDS') + 30);
         $out = (new Claude($cfg))->rewrite($text, $style);
         if (!$out['ok']) {
             return Response::error($out['status'], $out['error'], $out['message'], $out['extra']);
