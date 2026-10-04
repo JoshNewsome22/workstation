@@ -13,7 +13,8 @@
    it handled a choice button itself. Each row: {key,what,here,there,same?,owner:'there'|'here'|'',pre:['fill'|
    'changed'|'any'],can,keep (false: no Keep button),why,warn,info,preview} plus, where needed, block/fill/fillParts
    (whoRow), mirror (the partner has a matching row), choose {n,value} or {labels,on:[i]} (the choice buttons), seen
-   (menuSeen hashes), took (the words for the took line), rp (pages to reprint), takeLabel. A row with no what is an
+   (menuSeen hashes), took (the words for the took line), rp (pages to reprint), takeLabel. The record's kd and td hold the
+   day a row was kept, or taken in part (a take that left it different). A row with no what is an
    information line. Apply takes or keeps a row only while its value here is still the one the compare showed, and
    Undo is offered only while the record is still the one the take left. */
 (function(){
@@ -59,7 +60,7 @@ function readLk(x){
   if(isObj(o.last)&&typeof o.last.when==='string'&&!isNaN(Date.parse(o.last.when))){const l=o.last;
     r.last={when:cut(l.when,40),via:l.via==='shell'?'shell':'file',file:cut(l.file,120),saved:cut(l.saved,40),res:RES.test(l.res||'')?l.res:'',nm:cut(l.nm,160)};}
   if(isObj(o.base))KEYS.forEach(k=>{const b=o.base[k];if(Array.isArray(b)&&b.length===2&&HEX.test(b[0])&&HEX.test(b[1]))r.base[k]=[b[0],b[1]];});
-  if(isObj(o.kd)){const kd={};KEYS.forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(o.kd[k]||''))kd[k]=o.kd[k];});if(Object.keys(kd).length)r.kd=kd;}
+  ['kd','td'].forEach(f=>{if(!isObj(o[f]))return;const d={};KEYS.forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(o[f][k]||''))d[k]=o[f][k];});if(Object.keys(d).length)r[f]=d;});
   if(Array.isArray(o.menuSeen))r.menuSeen=o.menuSeen.filter(h=>typeof h==='string'&&HEX.test(h)).slice(0,10);
   if(typeof o.took==='string'&&o.took)r.took=o.took.slice(0,160);
   if(Array.isArray(o.rp)){const rp=o.rp.filter(p=>typeof p==='string'&&p).map(p=>p.slice(0,30)).slice(0,8);if(rp.length){r.rp=rp;r.rpd=cut(o.rpd,40);}}
@@ -74,7 +75,7 @@ function pack(obj){const c=JSON.parse(JSON.stringify(isObj(obj)?obj:{}));c.v=1;l
   delete c.took;s=JSON.stringify(c);if(s.length<=MAX)return s;
   if(isObj(c.board)){const b=c.board,c24=v=>typeof v==='string'?v.slice(0,24):v;['tok','last','cardLabel'].forEach(k=>{b[k]=c24(b[k]);});
     ['ch','tg'].forEach(k=>{if(Array.isArray(b[k]))b[k]=b[k].map(c24);});s=JSON.stringify(c);if(s.length<=MAX)return s;}
-  if(isObj(c.last)){delete c.last.nm;c.last.file=cut(c.last.file,40);}delete c.rp;delete c.rpd;delete c.kd;s=JSON.stringify(c);if(s.length<=MAX)return s;
+  if(isObj(c.last)){delete c.last.nm;c.last.file=cut(c.last.file,40);}delete c.rp;delete c.rpd;delete c.kd;delete c.td;s=JSON.stringify(c);if(s.length<=MAX)return s;
   delete c.board;delete c.menuSeen;s=JSON.stringify(c);if(s.length<=MAX)return s;
   return JSON.stringify({v:1,on:c.on===1?1:0,card:okCard(c.card)?c.card:undefined,base:isObj(c.base)?c.base:{}});}
 
@@ -123,7 +124,7 @@ function stateOf(row,base,o){o=o||{};const O='Form '+(o.other||'TE-1');
   if(same)return r(1,'in step');
   if(!b)return r(2,'only here'+(row.mirror?'; '+O+' can take this when it compares':''));
   if(!a||row.fill)return r(3,'empty here',1,0,pre.includes('fill')||pre.includes('any'));
-  if(bs&&bs[0]===ha&&bs[1]===hb)return r(4,'kept different'+(o.kd?' ('+o.kd+')':''),1,1,0);
+  if(bs&&bs[0]===ha&&bs[1]===hb)return r(4,o.td?'taken in part ('+o.td+')':'kept different'+(o.kd?' ('+o.kd+')':''),1,1,0);
   if(bs&&bs[0]===ha)return r(5,'changed on '+O,1,1,row.owner==='there'||pre.includes('changed')||pre.includes('any'));
   if(bs&&bs[1]===hb)return r(6,'changed here; '+O+' can take this when it compares',1,1,0);
   return r(7,'different',1,1,pre.includes('any'));}
@@ -142,6 +143,8 @@ const CSS='.nbh-lk [hidden]{display:none!important}'+
  '.nbh-lk .grid-wrap{max-width:100%;overflow-x:auto}.nbh-lk table.lk-tbl{table-layout:auto}.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{overflow-wrap:anywhere;word-break:normal}'+
  '.nbh-lk .lk-tbl tbody th{text-align:left;font-weight:600}.nbh-lk .lk-tbl td.lk-st{min-width:7.5em}'+
  '.nbh-lk .lk-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.nbh-lk .lk-btns button{margin:0;min-width:0}'+
+ /* numbered choices (the target card, 1 to 6) sit three to a line, so a narrow column never stacks them one by one */
+ '.nbh-lk .lk-btns.lk-num{display:grid;grid-template-columns:repeat(3,max-content)}'+
  '.nbh-lk button[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true]:hover{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43)}'+
  /* a ticked choice shows a tick as well as the dark fill, so it does not read as "press me" */
  '.nbh-lk .lk-tbl button[aria-pressed=true]::before{content:"\\2713\\00a0"}'+
@@ -201,8 +204,8 @@ function mount(ad){
     out.push(framed()?'Changes made on '+O+' since then show only when you compare again.':
       'Outside the workstation, '+meWhat+' reads '+O+' from a file: press Save data on '+O+', then Open a file '+O+' saved, here. Changes made there since then show only when you compare again.');return out;}
   function evalRows(rows,lk,prev){const st={},pressed={};
-    rows.forEach(r=>{if(!r.what||!r.key)return;const kd=lk.kd&&lk.kd[r.key]?day(lk.kd[r.key]):'';
-      const s=stateOf(r,lk.base[r.key],{other,kd});st[r.key]=s;
+    rows.forEach(r=>{if(!r.what||!r.key)return;const kd=lk.kd&&lk.kd[r.key]?day(lk.kd[r.key]):'',td=lk.td&&lk.td[r.key]?day(lk.td[r.key]):'';
+      const s=stateOf(r,lk.base[r.key],{other,kd,td});st[r.key]=s;
       const p=prev&&prev.st[r.key]&&prev.st[r.key].st===s.st?prev.pressed[r.key]:undefined;
       pressed[r.key]=p!==undefined&&((p==='take'&&s.take)||(p==='keep'&&s.keep)||p==='')?p:s.pressed;});
     return {st,pressed};}
@@ -218,7 +221,7 @@ function mount(ad){
     else{if(s.take)b+='<button type="button" class="tool" data-act="take" data-key="'+k+'" aria-pressed="'+(p==='take')+'" aria-label="'+esc(tl+': '+r.what)+'">'+esc(tl)+'</button>';
       if(s.keep)b+='<button type="button" class="tool" data-act="keep" data-key="'+k+'" aria-pressed="'+(p==='keep')+'" aria-label="'+esc(kl+': '+r.what)+'">'+esc(kl)+'</button>';}
     let ch='';if(isObj(r.choose)){const lb=Array.isArray(r.choose.labels)?r.choose.labels.map(str):null,n=Math.max(1,Math.min(10,lb?lb.length:r.choose.n|0||6)),on=Array.isArray(r.choose.on)?r.choose.on:null;
-      ch='<div class="lk-btns" role="group" aria-label="'+esc(r.choose.label||'Card')+'">';
+      ch='<div class="lk-btns'+(lb?'':' lk-num')+'" role="group" aria-label="'+esc(r.choose.label||'Card')+'">';
       for(let i=0;i<n;i++)ch+='<button type="button" class="tool'+(on?' lk-pick':'')+'" data-act="choose" data-key="'+k+'" data-i="'+i+'" aria-pressed="'+(on?on.includes(i):r.choose.value===i)+'">'+esc(lb?lb[i]:String(i+1))+'</button>';ch+='</div>';}
     const notes=[];if(r.why)notes.push('<div class="hint">'+esc(r.why)+'</div>');
     (Array.isArray(r.warn)?r.warn:r.warn?[r.warn]:[]).forEach(w=>notes.push('<div class="lk-warn">'+esc(w)+'</div>'));
@@ -287,7 +290,10 @@ function mount(ad){
       render();return {taken:0,kept:0,stale:stale.length};}
     taken.forEach(([r,res])=>{const nh=typeof res==='string'?res:by[r.key]?val(by[r.key].here):val(r.there);lk.base[r.key]=[hash(norm(nh)),hash(norm(val(r.there)))];
       if(lk.kd)delete lk.kd[r.key];if(Array.isArray(r.seen))lk.menuSeen=r.seen.filter(h=>HEX.test(h)).slice(0,10);(Array.isArray(r.rp)?r.rp:[]).forEach(x=>rp.add(String(x)));});
-    kept.forEach(r=>{lk.base[r.key]=[hash(norm(val(r.here))),hash(norm(val(r.there)))];lk.kd=lk.kd||{};lk.kd[r.key]=ymd(now);});
+    kept.forEach(r=>{lk.base[r.key]=[hash(norm(val(r.here))),hash(norm(val(r.there)))];lk.kd=lk.kd||{};lk.kd[r.key]=ymd(now);if(lk.td)delete lk.td[r.key];});
+    /* a take that leaves its row different (the backups there was room for, the cards picked) reads "taken in part", not "kept" */
+    const ev0=evalRows(fresh,lk,null);taken.forEach(([r])=>{const s=ev0.st[r.key];if(s&&s.st===4){lk.td=lk.td||{};lk.td[r.key]=ymd(now);}else if(lk.td)delete lk.td[r.key];});
+    if(lk.td&&!Object.keys(lk.td).length)delete lk.td;
     /* the took line holds 160 characters; when it is over, whole items are dropped from the end, never half a word */
     if(taken.length){const head='Taken '+fmt(now.toISOString())+': ',words=taken.map(([r])=>str(r.took||r.what.toLowerCase()));let t=head+words.join('; ');
       while(t.length>160&&words.length>1){words.pop();t=head+words.join('; ')+'; \u2026';}
