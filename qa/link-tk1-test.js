@@ -580,7 +580,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     /* a case file just opened is in a file, so the workstation keeps no copy of it until something is changed: a text box
        of TE-1's that its Save data writes (outside the link panel) is changed first */
     const changed=await te2.evaluate(async()=>{const s0=await nbhState.now(),ev=t=>{t.dispatchEvent(new Event('input',{bubbles:true}));t.dispatchEvent(new Event('change',{bubbles:true}));};
-      for(const t of [...document.querySelectorAll('textarea,input[type=text]')].filter(e=>e.offsetParent!==null&&!e.closest('#lkPanel')&&!e.readOnly).slice(0,30)){const v=t.value;t.value=v+' x';ev(t);if((await nbhState.now())!==s0)return true;t.value=v;ev(t);}
+      for(const t of [...document.querySelectorAll('textarea,input[type=text],input:not([type])')].filter(e=>!e.hidden&&!e.closest('#lkPanel')&&!e.readOnly&&e.getAttribute('aria-hidden')!=='true').slice(0,30)){const v=t.value;t.value=v+' x';ev(t);await new Promise(r=>setTimeout(r,700));if((await nbhState.now())!==s0)return true;t.value=v;ev(t);await new Promise(r=>setTimeout(r,700));}
       return false;});
     await sleep(1200);
     const lkTE2=await te2.evaluate(()=>S.meta.lk||'');
