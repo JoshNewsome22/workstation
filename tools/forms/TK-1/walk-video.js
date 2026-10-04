@@ -173,7 +173,9 @@ function boundsOf(L){let x0=0,y0=0,x1=L.w,y1=L.h;const add=(x,y,w,h)=>{x0=Math.m
   return{x:Math.floor(x0),y:Math.floor(y0),w:Math.ceil(x1-x0)+1,h:Math.ceil(y1-y0)+1};}
 
 /* ---------------- painting a display list ---------------- */
+const DRAWS=new Set(['shadow','ishadow','bg','grad','border','img','svg','text','deco']);
 async function paint(L,R){
+  if(!L.ops.some(o=>DRAWS.has(o.k)))return null;   /* a container with nothing of its own to draw */
   const b=boundsOf(L);let k=R;const big=Math.max(b.w,b.h)*k;if(big>4096)k*=4096/big;
   const cv=D.createElement('canvas');cv.width=Math.max(1,Math.ceil(b.w*k));cv.height=Math.max(1,Math.ceil(b.h*k));
   /* the SVG drawings first: they load as images */
@@ -183,13 +185,13 @@ async function paint(L,R){
   for(const o of L.ops){
     switch(o.k){
     case 'grp':{const G=group();stack.push({ctx,G,o});ctx=G.g;break;}
-    case 'end':{const top=stack.pop();if(!top)break;ctx=top.ctx;const {o:go,G}=top;ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha*=go.op;
+    case 'end':{const top=stack.pop();if(!top)break;ctx=top.ctx;const {o:go,G}=top;const free=()=>{G.c.width=0;G.c.height=0;};ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha*=go.op;
       const bl=/blur\(([\d.]+)px\)/.exec(go.flt||''),ds=/drop-shadow\((.*)\)/.exec(go.flt||'');
       if(bl){/* blur: the group's own picture, drawn soft (with canvas filters where there are some, else as its shadow) */
         if('filter' in ctx){ctx.filter='blur('+px(bl[1])*k+'px)';ctx.drawImage(G.c,0,0);}
         else{const F=cv.width+50;ctx.shadowColor=transparentC(go.bg)?'rgba(0,0,0,.35)':go.bg;ctx.shadowBlur=2*px(bl[1])*k;ctx.shadowOffsetX=F;ctx.drawImage(G.c,-F,0);}}
       else{if(ds){const s=shadowsOf(ds[1].replace(/^(.*?\))\s*(.*)$/,'$1 $2'))[0];if(s){ctx.shadowColor=s.c;ctx.shadowBlur=s.b*k;ctx.shadowOffsetX=s.x*k;ctx.shadowOffsetY=s.y*k;}}ctx.drawImage(G.c,0,0);}
-      ctx.restore();break;}
+      ctx.restore();free();break;}
     case 'shadow':{/* an outer shadow shows only outside its box (CSS never draws it under the box) */
       const s=o.s,q=o.r;ctx.save();ctx.beginPath();const E=s.b*2+Math.abs(s.s)+Math.abs(s.x)+Math.abs(s.y)+20;ctx.rect(q.x-E,q.y-E,q.w+2*E,q.h+2*E);
       const r=o.rad;ctx.moveTo(q.x+r[0][0],q.y);ctx.ellipse(q.x+r[0][0],q.y+r[0][1],r[0][0]||.01,r[0][1]||.01,0,-Math.PI/2,-Math.PI,true);ctx.lineTo(q.x,q.y+q.h-r[3][1]);ctx.ellipse(q.x+r[3][0],q.y+q.h-r[3][1],r[3][0]||.01,r[3][1]||.01,0,Math.PI,Math.PI/2,true);
@@ -271,7 +273,7 @@ function makeScene(stage){
         for(const v of dirty)lists.push([v,listOf(v.el,isRoot,R)]);
       }finally{stage.classList.remove('wkv-flat');}
       for(const v of info.values()){const p=v.parent?info.get(v.parent):null;v.L=p?{x:v.box.x-p.box.x,y:v.box.y-p.box.y}:{x:0,y:0};}
-      for(const [v,L] of lists)v.spr=await paint(L,R);
+      for(const [v,L] of lists){const old=v.spr;v.spr=await paint(L,R);if(old&&old.cv){old.cv.width=0;old.cv.height=0;}}
       return dirty.length;},
     draw(ctx,scale){const base=new DOMMatrix([scale,0,0,scale,0,0]);
       const go=(v,M,a)=>{const cs=v.cs;if(cs.display==='none'||cs.visibility==='hidden')return;const op=v===this.root?1:px(cs.opacity===''?1:cs.opacity);const al=a*op;if(al<=0.002)return;
@@ -283,11 +285,12 @@ function makeScene(stage){
         const s=v.spr;if(s){ctx.setTransform(m);ctx.globalAlpha=al;ctx.drawImage(s.cv,s.b.x,s.b.y,s.cv.width/s.k,s.cv.height/s.k);}
         for(const k of kids)if((parseInt(k.cs.zIndex)||0)>=0)go(k,m,al);};
       ctx.save();go(this.root,base,1);ctx.restore();},
-    done(){still.remove();flat.remove();stage.classList.remove('wkv-flat');for(const r of roots)r.removeAttribute('data-wkv');}};}
+    done(){for(const v of info.values())if(v.spr&&v.spr.cv){v.spr.cv.width=0;v.spr.cv.height=0;v.spr=null;}still.remove();flat.remove();stage.classList.remove('wkv-flat');for(const r of roots)r.removeAttribute('data-wkv');}};}
 
 /* ---------------- the frames, the narration, the file ---------------- */
-/* the sharp size: 2.5 Mbit/s (a 3½-minute walkthrough near 57 MB); the smaller one 1.2 Mbit/s (near 32 MB), softer while things move */
-async function pickVideo(w,h,fps,opt_bitrate){for(const codec of ['avc1.640028','avc1.4D4028','avc1.4D401F','avc1.42E01F']){const cfg={codec,width:w,height:h,bitrate:opt_bitrate||2500000,framerate:fps,avc:{format:"avc"}};
+/* 1080p: the sharp size 4.5 Mbit/s (a 3½-minute walkthrough near 100 MB), the smaller one 2.2 Mbit/s (near 50 MB, softer while things
+   move) */
+async function pickVideo(w,h,fps,opt_bitrate){for(const codec of ['avc1.640028','avc1.4D4028','avc1.4D401F','avc1.42E01F']){const cfg={codec,width:w,height:h,bitrate:opt_bitrate||4500000,framerate:fps,avc:{format:"avc"}};
   try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return cfg;}catch(e){}}return null;}
 async function pickAudio(){if(typeof AudioEncoder==='undefined')return null;for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){const cfg={codec:c.codec,sampleRate:48000,numberOfChannels:1,bitrate:96000};
   try{const r=await AudioEncoder.isConfigSupported(cfg);if(r&&r.supported)return Object.assign(cfg,{mux:c.mux});}catch(e){}}return null;}
@@ -299,7 +302,7 @@ async function narration(Dur,sr){/* Dur: how long the track runs (a line that st
     const s=oc.createBufferSource();s.buffer=buf;s.connect(oc.destination);s.start(c.start);any=true;}catch(e){}}
   if(!any)return null;return await oc.startRendering();}
 
-async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1280,OH=Math.round(OW*SH/SW/2)*2,on=opt.progress||(()=>{}),stop=opt.signal||{aborted:false};
+async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1920,OH=Math.round(OW*SH/SW/2)*2,on=opt.progress||(()=>{}),stop=opt.signal||{aborted:false};
   if(typeof VideoEncoder==='undefined'||typeof VideoFrame==='undefined')throw new Error('This browser cannot make video files. Use Safari on an iPad with iPadOS 16.4 or later, or Chrome or Edge on a computer.');
   const MX=W.Mp4Muxer;if(!MX)throw new Error('The video maker (nbh-tk1-video.js) did not load completely.');
   const vcfg=await pickVideo(OW,OH,fps,opt.bitrate);if(!vcfg)throw new Error('This browser has no H.264 video encoder for '+OW+' x '+OH+'.');
@@ -323,7 +326,7 @@ async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1280,OH
     for(let i=0;i<N;i++){if(stop.aborted)throw new Error('cancelled');if(err)throw err;
       TKWALK.renderAt(Math.min(Dur,i/fps));await scene.update(R);
       ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.fillStyle='#d8c29d';ctx.fillRect(0,0,OW,OH);scene.draw(ctx,OW/SW);
-      const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%(fps*(opt.bitrate&&opt.bitrate<2e6?10:4))===0});vf.close();
+      const vf=new VideoFrame(cv,{timestamp:Math.round(i*1e6/fps),duration:Math.round(1e6/fps)});venc.encode(vf,{keyFrame:i%(fps*(opt.bitrate&&opt.bitrate<3e6?10:4))===0});vf.close();
       while(venc.encodeQueueSize>6){await new Promise(r=>setTimeout(r,4));if(err)throw err;}
       if(i%10===0){on({phase:'video',done:i,total:N,ms:performance.now()-t0});await tick();}}
     await venc.flush();if(err)throw err;mux.finalize();
@@ -351,7 +354,7 @@ function ui(){const btn=D.getElementById('wkVideo');if(!btn)return;const note=D.
     const dlg=D.createElement('dialog');dlg.className='wkv-dlg';dlg.setAttribute('aria-labelledby','wkvT');
     dlg.innerHTML='<h3 id="wkvT">Save the walkthrough as a video</h3><p class="wkv-msg">The video is made here, on this device, from this book: its pictures, photo, names and tokens. Nothing is sent anywhere. It takes a few minutes; keep this page open and the screen on until it is done.</p>'+
       '<p class="wkv-msg wkv-priv">The video shows this student’s book. Share it only through the district’s drive or secure email, as any record about the student.</p>'+
-      '<fieldset class="wkv-size"><legend>Size</legend><label><input type="radio" name="wkvSize" value="sharp" checked> Sharpest (about 55 MB, for the district drive)</label><label><input type="radio" name="wkvSize" value="small"> Smaller (about 30 MB, for email; softer while things move)</label></fieldset>'+
+      '<fieldset class="wkv-size"><legend>Size</legend><label><input type="radio" name="wkvSize" value="sharp" checked> 1080p, sharpest (about 100 MB, for the district drive)</label><label><input type="radio" name="wkvSize" value="small"> 1080p, smaller (about 50 MB; softer while things move)</label></fieldset>'+
       '<div class="wkv-bar" hidden><div class="wkv-fill"></div></div><p class="wkv-st" role="status" aria-live="polite"></p>'+
       '<div class="wkv-btns"><button type="button" class="wkv-go">Make the video</button><button type="button" class="wkv-x">Cancel</button></div>';
     D.body.appendChild(dlg);const $=s=>dlg.querySelector(s);const ctl={aborted:false};let busy=false,lock=null,url='';
@@ -360,7 +363,7 @@ function ui(){const btn=D.getElementById('wkVideo');if(!btn)return;const note=D.
     dlg.addEventListener('cancel',e=>{e.preventDefault();$('.wkv-x').click();});
     $('.wkv-go').onclick=async()=>{busy=true;const small=dlg.querySelector('input[name="wkvSize"]:checked').value==='small';$('.wkv-size').disabled=true;$('.wkv-go').hidden=true;$('.wkv-bar').hidden=false;$('.wkv-x').textContent='Stop';
       try{if(navigator.wakeLock)lock=await navigator.wakeLock.request('screen');}catch(e){}
-      try{const r=await make({signal:ctl,bitrate:small?1200000:2500000,progress:p=>{const f=p.total?p.done/p.total:0;$('.wkv-fill').style.width=(100*f).toFixed(1)+'%';
+      try{const r=await make({signal:ctl,bitrate:small?2200000:4500000,progress:p=>{const f=p.total?p.done/p.total:0;$('.wkv-fill').style.width=(100*f).toFixed(1)+'%';
           $('.wkv-st').textContent=p.phase==='sound'?'Preparing the narration…':p.phase==='done'?'Finishing the file…':'Making the video… '+Math.floor(100*f)+'%'+(p.ms&&f>.03?' (about '+mmss(p.ms/1000*(1-f)/f)+' left)':'');}});
         busy=false;const file=new File([r.blob],fileName(),{type:'video/mp4'});url=URL.createObjectURL(r.blob);
         $('.wkv-st').textContent='The video is ready: '+mmss(r.seconds)+', '+(r.blob.size/1048576).toFixed(1)+' MB'+(r.sound?'':' (no sound: this browser has no audio encoder; the captions are in the picture)')+'.';

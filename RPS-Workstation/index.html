@@ -4077,5 +4077,13 @@ const PWA=(()=>{
   return P;
 })();
 </script>
+<script id="nbh-touch-icon">
+/* v21.44 the Home Screen icon: Safari fetches apple-touch-icon.png on its own when Add to Home Screen is tapped, without the
+   folder's password, and a website that asks for one gets a grey letter instead of the icon. The page (which has the password)
+   reads the file and puts the picture itself into the link, so the icon is there when Add to Home Screen asks for it. */
+(function(){var l=document.querySelector('link[rel="apple-touch-icon"]');if(!l||!window.fetch||!window.FileReader||/^data:/.test(l.getAttribute('href')||''))return;
+  fetch('apple-touch-icon.png',{credentials:'include'}).then(function(r){return r.ok&&/image/.test(r.headers.get('Content-Type')||'image')?r.blob():null;}).then(function(b){if(!b)return;
+    var f=new FileReader();f.onload=function(){if(typeof f.result==='string'&&/^data:image\//.test(f.result))l.setAttribute('href',f.result);};f.readAsDataURL(b);}).catch(function(){});})();
+</script>
 </body>
 </html>
