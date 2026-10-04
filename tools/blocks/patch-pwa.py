@@ -3,6 +3,7 @@
 <script id="nbh-pwa-save"> on the line after each page's <title>, the script's text copied byte for byte. Like
 patch-wording.py it REPLACES an existing copy every time, so run it again whenever nbh-pwa-save.js changes, or on a tree
 whose forms were rebuilt or merged; it refuses a page that already holds more than one copy, and never adds a second.
+Every page is worked out before any is written, so a refusal leaves the folder as it was.
 
 The pages are index.html and the 44 forms its FORMS list names (respond.html, the informants' page, is left alone).
 Nothing else in a page changes. The block is a script in the head that wraps nothing and stops at its first test unless
@@ -78,8 +79,8 @@ def main(argv):
     if 'window.nbhShareSave' not in src:
         fail('nbh-pwa-save.js does not look like the save block')
     block = OPEN + src + CLOSE
-    stale, counts = [], {'inserted': 0, 'replaced': 0, 'already current': 0}
-    for name in pages(folder):
+    stale, counts, outs = [], {'inserted': 0, 'replaced': 0, 'already current': 0}, []
+    for name in pages(folder):          # every page is worked out first; nothing is written if one of them is wrong
         path = os.path.join(folder, name)
         s = read(path)
         n = s.count(TAG)
@@ -101,10 +102,12 @@ def main(argv):
             fail(name + ': would not hold exactly one copy')
         if did != 'already current':
             stale.append(name)
-            if not check:
-                write(path, out)
         counts[did] += 1
-        if not check:
+        outs.append((name, path, out, did))
+    if not check:
+        for name, path, out, did in outs:
+            if did != 'already current':
+                write(path, out)
             print(did.ljust(16), name)
     if check:
         if stale:
