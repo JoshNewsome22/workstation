@@ -2,26 +2,34 @@
    (Forms TB-1, DD-1 and FS-1). Based on the audit's reproduction (scratchpad enhance/x_dup.js).
    A. TB-1 passes on clean replacement names: "(see target 4)" and "(see Forms EA-1 and TD-1)" go, "(replacement)" goes
       from the replacement target's name, and the paired replacement that points to target 4 (or reads as the one that
-      does) goes on as "Break request". TB-1's own sheets and saved file keep what was typed.
+      does) goes on as "Break request". TB-1's own sheets and saved file keep what was typed. A bracket with other words
+      in it ("(sheet 2 of the packet)", "(see/say 'break')") stays; "targets 4-5" points to no target; a replacement
+      target named only "(replacement)" names no replacement.
    B. TB-1's simulation in the workstation, then DD-1, TK-1, SM-1, SR-1, FS-1, GB-1 and HD-1 opened fresh: DD-1 has 6
       behavior rows (not 9), one "Break request" row paired with Aggression and holding target 4's definition; TK-1's
       targets and printed target cards have no "(see" text and one break card; SM-1 has no repeated row; SR-1's
       alternative response has no "(see target 4)"; FS-1 has 4 target rows, and its "From the case" list will not take
       the replacement target as a problem behavior.
    C. A GB-1 objective of 5 consecutive measurements gives a fresh DD-1 a criterion of 5 days (aim and days on the
-      target row, and on the skill row from the acquisition objective), and DD-1 shows "Criterion met" only after 5
-      qualifying days.
+      target row, and on the skill row from the acquisition objective, written on the last of the skill's objectives
+      when GB-1 holds several), and DD-1 shows "Criterion met" only after 5 qualifying days.
    D. A DD-1 already in use: the objective's days replace the form's own 3 and its aim fills an empty aim; a value typed
-      in DD-1 is kept; a level that does not fit the row's measure is not carried; "From the case" puts a ticked
-      objective's criterion on its row.
+      in DD-1 is kept; a level that does not fit the row's measure is not carried; a row typed "Hitting" does not take
+      the objective for "Self-injury – head hitting"; a note at the top of DD-1 says what changed until it is dismissed,
+      and is not in the saved file; "From the case" puts a ticked objective's criterion on its row.
    E. Load simulation asks first in DD-1, with the question the other forms use; Cancel keeps every field.
-   F. Files saved before this change still open (scratchpad enhance/oldsave, or OLDSAVE=<folder>).
+   F. Files saved before this change still open (qa/data/sprint-a4/, or OLDSAVE=<folder>; a missing file fails).
+   G. A case saved before this change, opened in the workstation: DD-1 takes the objective's 5 days in place of its 3,
+      and says so in the lasting note (seen when DD-1 is brought up, not printed, gone when the record is replaced)
+      and in a message once the case is open.
    No page or console error anywhere.
    Run: WS_URL=http://127.0.0.1:8304 WS_ROOT=<worktree> node qa/sprint-a4-test.js [edition]
    (the edition folder: NBH-Workstation, the default, or RPS-Workstation) */
 const {chromium,fs,path,BASE,forms,wire,sleep}=require(__dirname+'/lib.js');
 const ED=process.argv[2]||'NBH-Workstation';
-const OLD=process.env.OLDSAVE||'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/enhance/oldsave';
+/* the files saved before this change: the audit's TB-1, DD-1 and FS-1 files, and a case saved by the workstation before
+   it (TB-1 simulated, GB-1's Aggression objective at 5, DD-1 from the case at 3 days with a day of data, FS-1) */
+const OLD=process.env.OLDSAVE||path.join(__dirname,'data','sprint-a4');
 const FILE={};forms(ED).forEach(f=>FILE[f.id]=f.file);
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c||d===undefined?'':' '+JSON.stringify(d).slice(0,900)));if(!c)fails++;};
 const log=[];
@@ -62,6 +70,10 @@ const setGb=(gb,name,v)=>gb.evaluate(([n,v])=>{const e=document.querySelector('[
   e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));return true;},[name,v]);
 const cardOf=(gb,kind,beh)=>gb.evaluate(([k,b])=>{const c=[...document.querySelectorAll('#'+k+'Wrap .card')].find(c=>{const o=c.querySelector('[data-out]');const i=o?o.dataset.out.replace(k,''):'';
   const e=document.querySelector('[name="'+k+'['+i+'].beh"]');return e&&e.value===b;});return c?+c.querySelector('[data-out]').dataset.out.replace(k,''):-1;},[kind,beh]);
+/* every card naming a behavior, in order (GB-1 before package A5 makes one skill objective per paired replacement) */
+const cardsOf=(gb,kind,beh)=>gb.evaluate(([k,b])=>[...document.querySelectorAll('#'+k+'Wrap .card')].map(c=>{const o=c.querySelector('[data-out]');return o?+o.dataset.out.replace(k,''):-1;})
+  .filter(i=>{const e=document.querySelector('[name="'+k+'['+i+'].beh"]');return i>=0&&e&&e.value===b;}),[kind,beh]);
+const noteOf=fr=>fr.evaluate(()=>{const e=document.querySelector('#ddCaseNote');return e?{text:(e.querySelector('span')||e).textContent,cls:e.className,shown:!!e.offsetParent,btn:(e.querySelector('button')||{}).textContent||''}:null;});
 const ddRows=fr=>fr.evaluate(()=>S.behaviors.map(b=>({kind:b.kind,name:b.name,def:b.definition||'',measure:b.measure,aim:b.aim,critDays:b.critDays,
   pair:b.pairWith?((S.behaviors.find(x=>x.id===b.pairWith)||{}).name||'?'):''})));
 /* the "Criterion met" cell of a behavior's Baseline row on DD-1's Graphs & analysis */
@@ -103,6 +115,18 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
     set('tgt[1].rep','Hands a break card and waits');set('tgt[2].rep','Hands a break card and waits');set('tgt[4].rep','Engages with a competing item from the A-CSA list (see Forms EA-1 and TD-1)');return r;});
   ok('A: a pointer alone ("see target 4") goes on as the target\'s name; other words are left apart; a dash note goes',
     JSON.stringify(more)===JSON.stringify(['Break request','Break request','Requests a break (verbal or card)','','Engages with a competing item']),more);
+  /* a bracket is a note only when it begins "see " (or "cf. ", "refer to ") or holds nothing but references */
+  const kept=await p.evaluate(()=>{const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};const r={};
+    for(const v of ["Uses words (see/say 'break')",'Completes worksheet (sheet 2 of the packet)','Requests a break using the card (Form TK-1 board)','Completes the task (targets 4-5)','Requests a break (Form TD-1, sheet 2)']){
+      set('tgt[2].rep',v);r[v]=window.__nbhFactsOut().behaviors[2].rep;}
+    set('tgt[2].rep','Hands a break card and waits');
+    set('tgt[3].lab','(replacement)');const o=window.__nbhFactsOut().behaviors.map(b=>b.label+' | '+b.rep);set('tgt[3].lab','Break request (replacement)');
+    return {r,o,back:window.__nbhFactsOut().behaviors.map(b=>b.rep)};});
+  ok('A: a bracket with other words in it stays part of the name; one holding only references goes; "targets 4-5" points to no target',
+    JSON.stringify(Object.values(kept.r))===JSON.stringify(["Uses words (see/say 'break')",'Completes worksheet (sheet 2 of the packet)','Requests a break using the card (Form TK-1 board)','Completes the task','Requests a break']),kept.r);
+  ok('A: a replacement target named only "(replacement)" gives that text to no replacement that points to it',
+    JSON.stringify(kept.o.slice(0,4))===JSON.stringify(['Aggression | Hands a break card and waits','Self-injury – head hitting | Hands a break card and waits','Elopement | Hands a break card and waits','(replacement) | '])&&
+    JSON.stringify(kept.back)===JSON.stringify(CLEAN.map(b=>b.rep)),kept);
   /* a TB-1 file saved before this change (four targets) */
   const fp=path.join(OLD,'TB-1.json');
   if(fs.existsSync(fp)){await p.setInputFiles('#fileIn',fp);await sleep(1200);
@@ -110,7 +134,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
       out:window.__nbhFactsOut().behaviors.map(b=>b.label+' | '+b.rep)}));
     ok('A: a TB-1 file saved before this change opens as typed, and passes on the cleaned names',o.n===4&&o.rep0==='Hands a break card and waits (see target 4)'&&
       JSON.stringify(o.out)===JSON.stringify(['Aggression | Break request','Self-injury – head hitting | Break request','Elopement | Break request','Break request | ']),o);}
-  else console.log('SKIP A: no saved TB-1 file at '+fp+' (set OLDSAVE)');
+  else ok('A: a TB-1 file saved before this change is at '+fp,false);
   /* a candidate decided "Target – replacement" before sheet 4 is written */
   const cand=await p.evaluate(()=>!!document.querySelector('[name="cand[0].dec"]'));
   if(cand){const r=await p.evaluate(()=>{document.querySelectorAll('#tgtWrap [name$="].lab"]').forEach(e=>{e.value='';e.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -179,8 +203,10 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
  {const {ctx,page}=await shell(br);
   await tb1Sim(page);
   const gb=await fresh(page,'GB-1');
-  const ri=await cardOf(gb,'red','Aggression'),ai=await cardOf(gb,'acq','Break request');
-  ok('C: GB-1 has a reduction objective for Aggression and an acquisition objective for Break request, from the case',ri>=0&&ai>=0,{ri,ai});
+  /* the skill's criterion is written on the last of its objectives: before package A5, GB-1 holds one per paired
+     replacement (four), and DD-1 takes the one that states a criterion, wherever it stands */
+  const ri=await cardOf(gb,'red','Aggression'),all=await cardsOf(gb,'acq','Break request'),ai=all.length?all[all.length-1]:-1;
+  ok('C: GB-1 has a reduction objective for Aggression and an acquisition objective for Break request, from the case ('+all.length+' of them)',ri>=0&&ai>=0,{ri,all});
   await setGb(gb,'red['+ri+'].dir','decrease');await setGb(gb,'red['+ri+'].meas','frequency per school day');await setGb(gb,'red['+ri+'].ml','more');
   await setGb(gb,'red['+ri+'].tgt','2');await setGb(gb,'red['+ri+'].crit','5 consecutive');
   await setGb(gb,'acq['+ai+'].crit','independently in at least 80% of opportunities');await setGb(gb,'acq['+ai+'].n','5');await setGb(gb,'acq['+ai+'].unit','sessions');
@@ -190,7 +216,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   const dd=await fresh(page,'DD-1');const rows=await ddRows(dd);
   const ag=rows.find(r=>r.name==='Aggression')||{},rq=rows.find(r=>r.name==='Break request')||{},el=rows.find(r=>r.name==='Elopement')||{};
   ok('C: DD-1\'s Aggression row takes the objective\'s criterion: aim 2, 5 consecutive days',ag.aim==2&&ag.critDays===5&&ag.measure==='count',ag);
-  ok('C: DD-1\'s Break request row takes the acquisition objective\'s: 80% independent, 5 days',rq.measure==='trials'&&rq.aim==80&&rq.critDays===5,rq);
+  ok('C: DD-1\'s Break request row takes the acquisition objective\'s: 80% independent, 5 days (written on the last of the skill\'s objectives)',rq.measure==='trials'&&rq.aim==80&&rq.critDays===5,rq);
   ok('C: a behavior with no objective starts as before (no aim, 3 days)',el.aim===''&&el.critDays===3,el);
   /* five school days with Aggression at 1 (at or under the aim), entered one at a time on the data sheet */
   await dd.evaluate(()=>{document.querySelector('#d_start').value='2026-09-21';document.querySelector('#d_count').value='5';document.querySelector('#btnAddDays').click();});await sleep(300);
@@ -212,8 +238,9 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   await tb1Sim(page);
   const dd=await fresh(page,'DD-1');
   ok('D: DD-1 opened before GB-1: its rows start with 3 days and no aim',(await ddRows(dd)).every(r=>r.critDays===3&&r.aim===''));
-  /* typed in DD-1: Elopement's days; and a day of data, so the record is in use */
+  /* typed in DD-1: Elopement's days, a row of its own named "Hitting"; and a day of data, so the record is in use */
   await dd.evaluate(()=>{const b=S.behaviors.find(x=>x.name==='Elopement');const e=document.querySelector('#behTable tr[data-b="'+CSS.escape(b.id)+'"] input[data-f="critDays"]');e.value='4';e.dispatchEvent(new Event('input',{bubbles:true}));
+    document.querySelector('#btnAddBeh').click();const h=S.behaviors[S.behaviors.length-1];const n=document.querySelector('#behTable tr[data-b="'+CSS.escape(h.id)+'"] input[data-f="name"]');n.value='Hitting';n.dispatchEvent(new Event('input',{bubbles:true}));
     document.querySelector('#btnAddOne').click();});
   const gb=await fresh(page,'GB-1');
   const ri=await cardOf(gb,'red','Aggression'),ei=await cardOf(gb,'red','Elopement'),si=await cardOf(gb,'red','Self-injury – head hitting');
@@ -227,6 +254,15 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   ok('D: in use, the objective\'s 5 days take the place of the form\'s 3, and its aim fills the empty aim',R('Aggression').critDays===5&&R('Aggression').aim==2,R('Aggression'));
   ok('D: the days typed in DD-1 are kept (4, not the objective\'s 6); the empty aim is filled',R('Elopement').critDays==='4'&&R('Elopement').aim==1,R('Elopement'));
   ok('D: a rate per minute does not go into a count row: no aim, the days still come',R('Self-injury – head hitting').aim===''&&R('Self-injury – head hitting').critDays===4,R('Self-injury – head hitting'));
+  ok('D: a row typed "Hitting" does not take the objective for "Self-injury – head hitting": 3 days, no aim',R('Hitting').critDays===3&&R('Hitting').aim==='',R('Hitting'));
+  ok('D: each objective is on one row: the 4 days only on Self-injury',JSON.stringify(rows.filter(r=>r.critDays===4).map(r=>r.name))===JSON.stringify(['Self-injury – head hitting']),rows.map(r=>r.name+' '+r.critDays));
+  let note=await noteOf(dd);
+  ok('D: a note at the top of DD-1 says what the objectives changed, row by row, and nothing of what was typed',!!note&&
+    /^Form GB-1’s objectives changed the behavior table when the case was read at /.test(note.text)&&/ Aggression: 5 consecutive days \(was 3\), aim 2 \(was blank\)\. /.test(note.text)&&
+    / Self-injury – head hitting: 4 consecutive days \(was 3\)\. /.test(note.text)&&/ Elopement: aim 1 \(was blank\)\. /.test(note.text)&&!/\bHitting:/.test(note.text)&&
+    / Values typed here are kept, and “Criterion met” on Graphs & analysis follows the new values\.$/.test(note.text)&&/\bnoprint\b/.test(note.cls)&&/\bno-print\b/.test(note.cls)&&note.btn==='OK',note);
+  const msg=await dd.evaluate(()=>document.querySelector('#toast').textContent);
+  ok('D: DD-1 also says it in a message',/^Form GB-1’s criterion is now on .+\.$/.test(msg)&&!/(on |, )Hitting\b/.test(msg),msg);
   /* the objective changes: what DD-1 took from it follows; what was typed in DD-1 stays */
   await dd.evaluate(()=>{const b=S.behaviors.find(x=>x.name==='Elopement');const e=document.querySelector('#behTable tr[data-b="'+CSS.escape(b.id)+'"] input[data-f="aim"]');e.value='3';e.dispatchEvent(new Event('input',{bubbles:true}));});
   await setGb(gb,'red['+ri+'].crit','6');await setGb(gb,'red['+ri+'].tgt','1');await setGb(gb,'red['+ei+'].tgt','0');
@@ -235,6 +271,12 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   rows=await ddRows(dd);
   ok('D: a changed objective is followed where DD-1 took its values (6 days, aim 1)',R('Aggression').critDays===6&&R('Aggression').aim==1,R('Aggression'));
   ok('D: an aim typed in DD-1 is kept when the objective changes',R('Elopement').aim==='3'&&R('Elopement').critDays==='4',R('Elopement'));
+  note=await noteOf(dd);
+  ok('D: the note follows: Aggression from 3 days and a blank aim to the objective\'s 6 and 1',!!note&&/ Aggression: 6 consecutive days \(was 3\), aim 1 \(was blank\)\. /.test(note.text),note&&note.text);
+  const file=await caught(dd,'Save data');
+  ok('D: the note is not in DD-1\'s saved file',file.length>100&&!/objectives changed|ddCaseNote/.test(file),file.length);
+  const hadNote=await dd.evaluate(()=>{const b=document.querySelector('#ddCaseNote button');if(b)b.click();return !!b;});
+  ok('D: OK dismisses the note',hadNote&&!(await noteOf(dd)));
   /* From the case: the ticked reduction objective for Self-injury puts its days on the row and says why the aim stays */
   await page.evaluate(()=>openForm('DD-1'));await sleep(300);
   await dd.evaluate(()=>document.querySelector('#nbhCaseBtn').click());await sleep(300);
@@ -246,7 +288,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   ok('D: a ticked objective puts its days on the row it names (typed days give way when picked), and says why the aim is not carried',
     R('Self-injury – head hitting').critDays===4&&R('Self-injury – head hitting').aim===''&&/does not fit the row.s measure, Frequency \(count\)/.test(pick),{row:R('Self-injury – head hitting'),pick});
   await dd.evaluate(()=>document.querySelector('#nbhcClose').click());
-  ok('D: still one row per skill, nothing added by the pushes',rows.length===6,rows.map(r=>r.name));
+  ok('D: still one row per skill, nothing added by the pushes (6, and the row typed here)',rows.length===7,rows.map(r=>r.name));
   await ctx.close();}
 
  /* ---------- E: Load simulation asks first in DD-1 ---------- */
@@ -279,7 +321,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
    ['DD-1','#fileImport',async(p,d)=>{const r=await p.evaluate(()=>({b:S.behaviors.map(b=>b.name+'|'+b.critDays+'|'+b.aim),rows:S.rows.length,client:S.meta.client}));
      return {ok:r.rows===d.rows.length&&r.client===d.meta.client&&JSON.stringify(r.b)===JSON.stringify(d.behaviors.map(b=>b.name+'|'+b.critDays+'|'+b.aim)),r};}],
    ['FS-1','#fileIn',async(p,d)=>{const r=await p.evaluate(()=>({client:S.meta.client,n:S.beh.length}));const s=d.S||{};return {ok:r.client===(s.meta||{}).client&&r.n===Math.max(1,(s.beh||[]).length),r};}]]){
-  const fp=path.join(OLD,id+'.json');if(!fs.existsSync(fp)){console.log('SKIP F '+id+': no saved file at '+fp+' (set OLDSAVE)');continue;}
+  const fp=path.join(OLD,id+'.json');if(!fs.existsSync(fp)){ok('F: a '+id+' file saved before this change is at '+fp,false);continue;}
   const d=JSON.parse(fs.readFileSync(fp,'utf8'));
   const ctx=await br.newContext({viewport:{width:1366,height:1000}});const p=await ctx.newPage();wire(p,log);
   await p.goto(BASE+'/'+ED+'/'+FILE[id]);await sleep(800);
@@ -287,6 +329,39 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   const c=await check(p,d);
   ok('F: a '+id+' file saved before this change opens ('+path.basename(fp)+')',c.ok,c.r);
   await ctx.close();}
+
+ /* ---------- G: a case saved before this change, opened in the workstation ---------- */
+ {const cf=path.join(OLD,'CASE_saved-before-A4.json');
+  if(!fs.existsSync(cf))ok('G: a case saved before this change is at '+cf,false);
+  else{const saved=JSON.parse(fs.readFileSync(cf,'utf8'));
+   const was=JSON.parse(saved.forms['DD-1'].snap.own),{ctx,page}=await shell(br);
+   await page.setInputFiles('#caseFile',cf);
+   /* the message DD-1 shows while the case opens (it waits until the workstation has finished restoring the form) */
+   const t0=Date.now();let shown='',dd=null;
+   while(Date.now()-t0<25000&&!shown){
+     dd=page.frames().find(x=>decodeURIComponent(x.url()).includes(FILE['DD-1']));
+     if(dd)shown=await dd.evaluate(()=>{const t=document.querySelector('#toast.show');return t?t.textContent:'';}).catch(()=>'');
+     await sleep(120);}
+   await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:180000}).catch(()=>{});
+   await sleep(1500);
+   dd=page.frames().find(x=>decodeURIComponent(x.url()).includes(FILE['DD-1']));
+   const ag=await dd.evaluate(()=>({b:S.behaviors.map(b=>b.name+'|'+b.critDays+'|'+b.aim),rows:S.rows.length}));
+   const want=was.behaviors.map(b=>b.name+'|'+(b.name==='Aggression'?5:b.critDays)+'|'+b.aim);
+   ok('G: the case\'s DD-1 (3 days, saved before this change) takes the GB-1 objective\'s 5 days for Aggression; everything else is as saved',
+     JSON.stringify(ag.b)===JSON.stringify(want)&&ag.rows===was.rows.length&&was.behaviors[0].critDays===3,{ag,want});
+   ok('G: DD-1 says so in a message once the case is open',shown==='Form GB-1’s criterion is now on Aggression.',shown);
+   await page.evaluate(()=>openForm('DD-1'));await sleep(500);
+   const note=await noteOf(dd);
+   ok('G: the note at the top of DD-1 is there when DD-1 is brought up, and says what changed',!!note&&note.shown&&/ Aggression: 5 consecutive days \(was 3\)\. /.test(note.text),note);
+   await page.emulateMedia({media:'print'});
+   const onPaper=await dd.evaluate(()=>{const e=document.querySelector('#ddCaseNote');return e?getComputedStyle(e).display:'(no note)';});
+   await page.emulateMedia({media:'screen'});
+   ok('G: the note does not print',onPaper==='none',onPaper);
+   /* the record replaced: the note goes with it */
+   const had=await dd.evaluate(()=>{const b=!!document.querySelector('#ddCaseNote');window.confirm=()=>true;document.querySelector('#btnLoadExample').click();return b;});
+   await dd.waitForFunction(()=>/SIMULATED/.test(S.meta.client),null,{timeout:10000}).catch(()=>{});
+   ok('G: the simulation loaded over the record takes the note away',had&&!(await noteOf(dd))&&await dd.evaluate(()=>/SIMULATED/.test(S.meta.client)));
+   await ctx.close();}}
 
  const errs=log.filter(l=>l.type!=='warning');
  ok('no page or console error in any form or the workstation',errs.length===0,errs.slice(0,6));
