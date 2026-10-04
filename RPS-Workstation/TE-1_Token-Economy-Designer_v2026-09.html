@@ -531,6 +531,13 @@ td input,td select{max-width:100%}
   section > h2.nbh-band + p.hint,section > h3 + p.hint{break-inside:avoid;page-break-inside:avoid}
 }
 </style>
+<style id="te1-link-css">
+/* v21.43 the link with Form TK-1. The print line names the book and when it was compared; it is printed only while
+   the link is on (the panel says the same on screen). The heading prints only while linked, so an unlinked plan
+   prints as it did. */
+#lkPrint{display:none}
+@media print{#lkPrint:not([hidden]){display:block;margin:4px 0 0;font-size:12.5px}h3.lk-head{break-after:avoid;page-break-after:avoid}}
+</style>
 </head>
 <body class="view-setup">
 
@@ -551,6 +558,8 @@ td input,td select{max-width:100%}
 </header>
 
 <div class="toolbar noprint">
+  <!-- v21.43 the link with Form TK-1: its record (S.meta.lk, one JSON string), so the shell's status, snapshots and autosave carry it; never shown -->
+  <textarea id="teLink" name="te.link" data-m="lk" aria-hidden="true" tabindex="-1" hidden></textarea>
   <div class="tgroup"><span>View</span><div class="row">
     <div class="seg" id="viewSeg">
       <button data-view="setup" aria-pressed="true">Setup</button>
@@ -597,6 +606,7 @@ td input,td select{max-width:100%}
       <tr><th>Evidence it functions as a reinforcer</th><td colspan="3"><textarea data-m="tokEvid" rows="2" placeholder="Form RA-1 can test this directly. A board the student ignores is not a token economy."></textarea></td></tr>
       <tr><th>Establishing plan, if being conditioned</th><td colspan="3"><textarea data-m="tokPlan" rows="2" placeholder="Exchange after one token at first, then lengthen the exchange-production requirement"></textarea></td></tr>
     </table>
+    <h3 class="lk-head noprint lk-onlyprint" style="margin-top:14px">Student materials: the token board book (<span style="white-space:nowrap">Form TK-1</span>)</h3><div id="lkPanel" class="noprint"></div><p id="lkPrint" class="lk-print" hidden></p>
   </section>
 
   <!-- ====== SCHEDULES ====== -->
@@ -618,6 +628,7 @@ td input,td select{max-width:100%}
       <tr><th>Exchange period: when and how long</th><td colspan="3"><input data-m="exWhen" placeholder="e.g., end of each work block, 5 min, at the desk"></td></tr>
       <tr><th>Delay between the last token and the exchange</th><td colspan="3"><input data-m="exDelay" placeholder="The shorter this is during acquisition, the better"></td></tr>
     </table>
+    <p class="hint noprint" id="lkHintN" hidden></p>
     <div class="metrics" id="upMetrics"></div>
     <div id="upVerdict"></div>
 
@@ -648,6 +659,7 @@ td input,td select{max-width:100%}
       <th style="width:12%">Token cost</th><th style="width:14%">Preference (PA-1)</th><th style="width:12%">Confirmed reinforcer (RA-1)</th><th>Notes</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="genMetrics"></div>
     <div id="genVerdict"></div>
+    <p class="hint noprint" id="lkHintBk" hidden></p>
     <table class="rt" style="margin-top:12px">
       <tr><th style="width:26%">How the menu is refreshed</th><td><input data-m="refresh" placeholder="e.g., brief MSWO each Monday (Form PA-1)"></td></tr>
       <tr><th>Open or closed economy</th><td><select data-m="econ"><option></option>
@@ -684,6 +696,7 @@ td input,td select{max-width:100%}
     <p>Unit price expresses the cost of a reinforcer in responses: total responses divided by the reinforcers obtained. In a token system it is the token-production ratio multiplied by the exchange-production ratio, divided by the number of backup deliveries an exchange yields, each counted in one fixed unit, since unit price is responses per unit of reinforcer (Hackenberg, 2009): five stars exchanged at one minute of tablet per star are five one-minute deliveries. Two systems with very different-looking boards can impose the same unit price, and two that look similar can differ several-fold. This form computes it so the comparison is available before a thinning step rather than after; the band it puts under the figure (low to 10, moderate to 40, high above 40 responses per backup delivery) is a working convention of this form, not a threshold from the sources. Bullock and Hackenberg (2006), however, found only some of their results consistent with unit price; most were well accounted for by the number of responses required to produce an exchange period, without regard to the amount of reinforcement available during it. The form shows that figure, responses per exchange, beside the unit price and for each step of the thinning record; the unit price of a past step is shown when the record holds the number of backup deliveries its exchange yielded (the Backups per exchange column).</p>
     <h2 class="nbh-band" style="margin-top:16px">Generalized Conditioned Reinforcement</h2>
     <p>DeFulio, Yankelevitz, Bullock, and Hackenberg (2014) ran pigeons in a token economy where tokens bought food on one side of the chamber and water on the other, under separate food and water restriction. A third, generalized token type could be exchanged for either. The number of tokens accumulated before exchange rose as the exchange-production schedule was raised, and pigeons produced more generalized than specific tokens, suggesting enhanced reinforcing efficacy of generalized tokens. When the token-production price of each type was changed, production of specific and generalized tokens changed in opposite directions, indicating substitutability. The demonstration matters for practice because it separates a token that works for one backup from a token that holds its value across establishing operations &mdash; which is what a classroom system needs if it is to survive a student who is not hungry today.</p>
+    <p class="noprint lk-onlyprint"><b>The token board book (Form TK-1).</b> Form TK-1 prints what the student holds: the choice cards, the target cards and the board of token slots. Link with Form TK-1, under Setup, compares this plan&rsquo;s behavior, tokens per exchange, token form and backups with the book&rsquo;s paired target card, token count, token and choice cards, and you choose what to take. A compare only reads: nothing on either form changes until you press Take the ticked items, and neither form writes into the other. This plan is the plan of record, so only the student&rsquo;s name and ID and the token form are ticked for you, and only where the field here is empty (the token form only while the book&rsquo;s count agrees with this plan&rsquo;s); the book&rsquo;s behavior and count are offered into an empty field unticked, and its choice cards come in as new backups only when you tick them. A different token form is offered as Replace but never ticked, a target card that names a behavior to reduce is never offered as this plan&rsquo;s behavior, and nothing here is emptied or deleted. A difference you keep is remembered until either side changes. In the workstation the compare reads the book that is open; on its own, open a file Form TK-1 saved (its link must be on, or its file does not name its cards). Changes made on Form TK-1 after a compare show only when you compare again, and Undo what was just taken is offered only until anything else on this plan changes.</p>
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
     <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated token system loaded: the three schedules with unit price, a four-step thinning record, a generalized backup menu across four classes, and the practice audit.</p>
     <p class="hint" style="margin-top:10px">Sources: Hackenberg (2009) for the framework and the review; Bullock &amp; Hackenberg (2006) for second-order schedules and unit price; DeFulio et al. (2014) for generalized conditioned reinforcement; Fernandez, Argueta, &amp; DeLeon (2023) for the survey of practice; Kelleher (1966) for second-order schedules; Hackenberg (2009, Part II) for the symmetrical treatment of token gain and loss. The audit thresholds (85% or more of the items confirmed, 60% or more, or below 60%; no band while none is confirmed, and not the top band while token loss is in use without a confirmed floor and review) and the unit-price bands (low at 10 or fewer responses per backup delivery, moderate above 10 up to 40, high above 40) on this form are a working convention for organizing that literature, not findings.</p>
@@ -695,6 +708,494 @@ td input,td select{max-width:100%}
     Kelleher, R. T. (1966). Conditioned reinforcement in second-order schedules. <em>Journal of the Experimental Analysis of Behavior, 9</em>(5), 475&ndash;485.</p>
   </section>
 </main>
+
+<script id="nbh-link">/* nbh-link (v21.43): the optional link between Form TK-1 (the token board book) and Form TE-1 (the token economy
+   plan). One copy of this file is built into both forms (tools/forms/TK-1/build.sh, tools/blocks/patch-link.py),
+   so the two cannot drift apart. Each form compares itself with the other when the user clicks (through the
+   shell's read-only relay, or a file the other form saved when it is open alone) and takes only the items the
+   user ticks. Compare only reads; fields change only on "Take the ticked items"; no form writes into the other.
+   The link record is ONE JSON string in the form's own S.meta.lk (1800 characters at most, see pack()).
+   Messages (the asker accepts 'answer' and 'opened' only from window.parent, only while it waits for that reply,
+   and only for its partner; anything else is ignored and counted):
+     form -> shell {nbh:'ask',want}            shell -> form {nbh:'answer',want,ok,title,snap:{total,data,own}}
+     form -> shell {nbh:'open',want,beside}    shell -> form {nbh:'opened',want,ok[,why][,beside]}
+   (beside:false in the 'opened' answer: the partner opened in place of the asker, as on a phone.)
+   The form supplies an adapter to mount(): {me,other,meWhat,otherWhat,sibling,host,get(),set(str),view(otherS),
+   rows(view),take(row),snapshot(),restore(json),after()} and, optionally: choose(key,i,view), which returns true when
+   it handled a choice button itself (the row's tick stays) or 'reset' (handled, and the row's tick is let go);
+   record(lk,{taken,kept,step}), called as the record is written after a compare or an Apply, with the rows taken,
+   kept or found in step, so the form can note what they pair (TK-1's paired target card); noView, the message, or a
+   function (partner's S, source) giving it, when view() refuses the partner; rpLine(pages), the words of the reprint
+   line. Each row: {key,what,here,there,same?,owner:'there'|'here'|'',pre:['fill'|'changed'|'any'],can,keep (false: no
+   Keep button),why,warn,info,preview} plus, where needed, block/fill/fillParts (whoRow), mirror (the partner can take
+   this row's value from this form when it compares), choose {n,value} or {labels,on:[i]} (the choice buttons), seen
+   (menuSeen hashes), took (the words for the took line), rp (pages to reprint), takeLabel, keptLabel (the words for a
+   difference kept: "kept different" unless said), nobase (the record's mark for this key is about another item, so the
+   row is compared without it). The record's kd and td hold the day a row was kept, or taken in part (a take that left
+   it different); pb holds the hashes of the case's problem behaviors seen at a compare, so the problem-behavior guard
+   (problem()) still knows them when the form is open on its own. A row with no what is an information line. Apply
+   takes or keeps a row only while its value here is still the one the compare showed, and Undo is offered only while
+   the record is still the one the take left. A compare that finds another student writes no in-step mark; those are
+   written when "These are the same student" is applied. */
+(function(){
+'use strict';
+if(window.NBHLink)return;
+const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
+const str=v=>v==null||typeof v==='object'?'':String(v);
+const trim=v=>str(v).trim();
+const val=v=>Array.isArray(v)?v.map(str).filter(Boolean).join('; '):str(v);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const HEX=/^[0-9a-f]{8}$/,RES=/^(step|who|empty|look \d{1,3}|kept \d{1,3}( part \d{1,3})?|part \d{1,3})$/,KEYS=['who','card','beh','n','tok','menu','sched'];
+const MAX=1800;
+
+/* NFKC does not fold an iPad's smart punctuation, so curly quotes and the dashes are folded to ' and - here */
+function norm(s){s=str(s);try{s=s.normalize('NFKC');}catch(e){}return s.replace(/[\u2018\u2019\u02bc]/g,"'").replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\s+/g,' ').trim().toLowerCase();}
+/* FNV-1a, 32 bits, as 8 hex characters */
+function hash(s){s=str(s);let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193);}return ('0000000'+(h>>>0).toString(16)).slice(-8);}
+/* a near match: the shorter name (4 characters or more) starts the longer one, followed by a space, comma or "(".
+   An equal pair is not "near"; it is equal. */
+function near(a,b){a=norm(a);b=norm(b);if(!a||!b||a===b)return false;const s=a.length<b.length?a:b,l=s===a?b:a;
+  return s.length>=4&&l.slice(0,s.length)===s&&/[ ,(]/.test(l.charAt(s.length));}
+/* the words that name one of TK-1's drawn tokens */
+const TOKWORD={star:'star',stars:'star',smiley:'smiley',smileys:'smiley',thumb:'thumb',thumbs:'thumb',check:'check',checks:'check',
+  tick:'check',ticks:'check',coin:'coin',coins:'coin',medal:'medal',medals:'medal',trophy:'trophy',trophies:'trophy',heart:'heart',hearts:'heart'};
+function tokKey(text){const w=norm(text).match(/[a-z]+/g)||[];for(const x of w)if(TOKWORD[x])return TOKWORD[x];return '';}
+const plur=w=>/s$/.test(w)?[w]:/[^aeiou]y$/.test(w)?[w,w+'s',w.slice(0,-1)+'ies']:[w,w+'s',w+'es'];
+/* the token form names the token: its name, the plural, or its stem as a whole word, ignoring case */
+function tokSame(form,name,stem){const f=norm(form),n=norm(name),st=norm(stem)||tokKey(name);if(!f||(!n&&!st))return false;
+  const ws=[].concat(n?plur(n):[],st?plur(st):[]);
+  if(st&&tokKey(form)===st)return true;
+  return ws.some(w=>new RegExp('(^|[^\\p{L}\\p{N}])'+escRe(w)+'($|[^\\p{L}\\p{N}])','u').test(f));}
+
+/* ---- the link record ---- */
+const cut=(v,n)=>typeof v==='string'?v.slice(0,n):'';
+const okCard=v=>Number.isInteger(v)&&v>=0&&v<=5;
+const hexes=(a,n)=>(Array.isArray(a)?a:[]).filter(h=>typeof h==='string'&&HEX.test(h)).slice(0,n);
+function readLk(x){
+  if(typeof x!=='string'||!x||x.length>2000)return null;
+  let o=null;try{o=JSON.parse(x);}catch(e){return null;}
+  if(!isObj(o)||o.v!==1)return null;
+  const r={v:1,on:o.on===1?1:0,base:{}};
+  if(okCard(o.card))r.card=o.card;
+  if(isObj(o.last)&&typeof o.last.when==='string'&&!isNaN(Date.parse(o.last.when))){const l=o.last;
+    r.last={when:cut(l.when,40),via:l.via==='shell'?'shell':'file',file:cut(l.file,120),saved:cut(l.saved,40),res:RES.test(l.res||'')?l.res:'',nm:cut(l.nm,160)};}
+  if(isObj(o.base))KEYS.forEach(k=>{const b=o.base[k];if(Array.isArray(b)&&b.length===2&&HEX.test(b[0])&&HEX.test(b[1]))r.base[k]=[b[0],b[1]];});
+  ['kd','td'].forEach(f=>{if(!isObj(o[f]))return;const d={};KEYS.forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(o[f][k]||''))d[k]=o[f][k];});if(Object.keys(d).length)r[f]=d;});
+  if(Array.isArray(o.menuSeen))r.menuSeen=hexes(o.menuSeen,10);
+  {const pb=hexes(o.pb,12);if(pb.length)r.pb=pb;}
+  if(typeof o.took==='string'&&o.took)r.took=o.took.slice(0,160);
+  if(Array.isArray(o.rp)){const rp=o.rp.filter(p=>typeof p==='string'&&p).map(p=>p.slice(0,30)).slice(0,8);if(rp.length){r.rp=rp;r.rpd=cut(o.rpd,40);}}
+  if(isObj(o.board)){const b=o.board,six=a=>{const out=(Array.isArray(a)?a:[]).slice(0,6).map(s=>cut(s,40));while(out.length<6)out.push('');return out;};
+    r.board={n:/^([1-9]|10)$/.test(b.n||'')?b.n:'',tok:cut(b.tok,40),term:['ring','pic'].includes(b.term)?b.term:'none',last:cut(b.last,40),
+      card:okCard(b.card)?b.card:0,cardLabel:cut(b.cardLabel,40),ch:six(b.ch),tg:six(b.tg),paired:b.paired===1?1:0};
+    /* paired: the book's card was paired with the plan's behavior by a Take or a Keep there (or found equal to it);
+       pair: the two hashes of that pairing (the card's label, the behavior), so the plan can tell whether it holds */
+    if(r.board.paired){const p=hexes(b.pair,2);if(p.length===2)r.board.pair=p;}}
+  return r;
+}
+const isOn=x=>{const r=readLk(x);return !!r&&r.on===1;};
+/* the record as one string of 1800 characters or less: took goes first, then the board labels are cut to 24 */
+function pack(obj){const c=JSON.parse(JSON.stringify(isObj(obj)?obj:{}));c.v=1;let s=JSON.stringify(c);if(s.length<=MAX)return s;
+  delete c.took;s=JSON.stringify(c);if(s.length<=MAX)return s;
+  if(isObj(c.board)){const b=c.board,c24=v=>typeof v==='string'?v.slice(0,24):v;['tok','last','cardLabel'].forEach(k=>{b[k]=c24(b[k]);});
+    ['ch','tg'].forEach(k=>{if(Array.isArray(b[k]))b[k]=b[k].map(c24);});s=JSON.stringify(c);if(s.length<=MAX)return s;}
+  if(isObj(c.last)){delete c.last.nm;c.last.file=cut(c.last.file,40);}delete c.rp;delete c.rpd;delete c.kd;delete c.td;s=JSON.stringify(c);if(s.length<=MAX)return s;
+  delete c.board;delete c.menuSeen;s=JSON.stringify(c);if(s.length<=MAX)return s;
+  return JSON.stringify({v:1,on:c.on===1?1:0,card:okCard(c.card)?c.card:undefined,base:isObj(c.base)?c.base:{},pb:Array.isArray(c.pb)&&c.pb.length?hexes(c.pb,12):undefined});}
+
+/* ---- what each form reads from the other ---- */
+function planOf(teS){const S=isObj(teS)?teS:{},m=isObj(S.meta)?S.meta:{},g=k=>trim(m[k]),lk=readLk(m.lk);
+  const bk=(Array.isArray(S.bk)?S.bk:[]).filter(isObj).map(r=>({n:trim(r.n),conf:trim(r.conf)})).filter(r=>r.n);
+  const th=(Array.isArray(S.thin)?S.thin:[]).filter(r=>isObj(r)&&trim(r.ep)),t=th.length?th[th.length-1]:null;
+  const out={bk,thinLast:t?{d:trim(t.d),ep:trim(t.ep)}:null,linkedBack:!!lk&&lk.on===1,pb:lk&&lk.pb?lk.pb.slice():[]};
+  ['client','sid','beh','tp','tpN','ep','epN','te','teN','exWhen','exDelay','tokForm','loss','lossRule'].forEach(k=>{out[k]=g(k);});
+  return out;}
+function boardOf(tkS){const m=isObj(tkS)&&isObj(tkS.meta)?tkS.meta:null;if(!m)return null;const lk=readLk(m.lk);if(!lk||lk.on!==1||!lk.board)return null;
+  return Object.assign({},lk.board,{ch:lk.board.ch.slice(),tg:lk.board.tg.slice(),client:trim(m.client),sid:trim(m.sid),pb:lk.pb?lk.pb.slice():[]});}
+/* the identity row, the same in both forms: client and sid, each compared only when both are filled */
+function whoRow(here,there,o){o=o||{};here=isObj(here)?here:{};there=isObj(there)?there:{};
+  const hc=trim(here.client),hs=trim(here.sid),tc=trim(there.client),ts=trim(there.sid);
+  const dot=t=>/[.!?]$/.test(t)?t:t+'.',show=(c,s)=>c+(s?(c?' (ID '+s+')':'ID '+s):'');
+  const nid=t=>norm(t).replace(/\.$/,''),block=(!!hc&&!!tc&&nid(hc)!==nid(tc))||(!!hs&&!!ts&&nid(hs)!==nid(ts));
+  const fillParts={};if(!hc&&tc)fillParts.client=tc;if(!hs&&ts)fillParts.sid=ts;const fill=!block&&Object.keys(fillParts).length>0;
+  return {key:'who',what:'Student',here:show(hc,hs),there:show(tc,ts),same:()=>!block&&!fill&&!!(tc||ts),owner:'',pre:['fill'],can:!block,block,fill,fillParts,
+    /* the partner takes into its own empty client and sid only */
+    mirror:(!tc&&!!hc)||(!ts&&!!hs),
+    why:block?'Form '+(o.other||'TE-1')+' names '+show(tc,ts)+'; '+(o.meWhat||'this form')+' names '+dot(show(hc,hs)):'',
+    nm:'Form '+(o.other||'TE-1')+' names '+(tc||ts)+'; '+(o.meWhat||'this form')+' names '+dot(hc||hs),took:fill?(fillParts.client&&fillParts.sid?'the student\u2019s name and ID':fillParts.client?'the student\u2019s name':'the student ID'):''};}
+
+/* ---- a behavior to reduce, named where a behavior to increase belongs (the behavior tokens are earned for, a card) ----
+   The case's own list comes first: Form TB-1's problem behaviors (isRep false, or a candidate whose type is not a
+   replacement) and Form FS-1's (it lists problem behaviors only), matched by label; then the problem behaviors seen at
+   an earlier compare (pb: their hashes, kept in a record); then the common words for one, unless a word just before
+   turns it round ("no hitting", "instead of hitting", "appropriate refusal"). The replacement named is the problem
+   behavior's own (Form TB-1's "rep", Form FS-1's alternative, without a "see target 4" cross-reference), else the case's
+   first replacement behavior, so both forms name the same one. */
+const PBW=new RegExp('\\b(aggress(?:ion|ions|ive|ively|ing)|elop(?:e|es|ed|ing|ement|ements)|bolting|(?:runs?|running|ran) away|'+
+  'self[- ]?injur(?:y|ies|ious|ing)|sibs?|self[- ]?harm(?:s|ing)?|head[- ]?bang(?:s|ing)?|hitting|kicking|biting|spitting|scratching|pinching|hair[- ]pulling|'+
+  '(?:hits|kicks|bites|scratches|pinches) (?:others|peers|staff|adults|people|someone|classmates|teachers?|students?|siblings?)|spits (?:at|on)|'+
+  'scream(?:s|ing)|yelling|tantrums?|meltdowns?|property (?:destruction|damage)|destroy(?:s|ing)|destruction|disrupt(?:s|ing|ion|ions|ive)|'+
+  'refusals?|refusing|non-?complian(?:ce|t)|swearing|cursing|profanity|pica|out[- ]of[- ]seat|off[- ]task|throw(?:s|ing) (?:objects|items|materials|things)|without permission)\\b','g');
+const PBNOT=/^(no|not|without|instead|rather|never|avoid|avoids|avoiding|appropriate|appropriately|polite|politely|calm|calmly)$/;
+function pbWord(t){PBW.lastIndex=0;let m;while((m=PBW.exec(t))){const before=t.slice(0,m.index).split(/[^\p{L}\p{N}']+/u).filter(Boolean).slice(-3);
+  if(!before.some(w=>PBNOT.test(w)))return m[1];}return '';}
+const isProb=x=>isObj(x)&&(x.isRep===false||(x.isRep!==true&&(x.src==='FS-1'||(/^TB-1/.test(str(x.src))&&!/replacement|alternative/i.test(str(x.type))))));
+const repClean=s=>trim(s).replace(/\s*\(\s*(?:see|cf\.?)\s[^)]*\)\s*$/i,'').replace(/[\s;,.]*\bsee (?:target|behavior|row) \d+\.?$/i,'').trim();
+function problem(text,o){o=o||{};const t=norm(text);if(!t)return null;const f=Array.isArray(o.facts)?o.facts.filter(isObj):[];
+  const p=f.find(x=>isProb(x)&&norm(x.label)===t);
+  if(p){const r=f.find(x=>x.isRep===true&&trim(x.label));return {src:'case',form:p.src==='FS-1'?'FS-1':'TB-1',rep:repClean(p.rep)||repClean(p.alt)||(r?trim(r.label):'')};}
+  if(hexes(o.seen,99).includes(hash(t)))return {src:'seen',form:'TB-1',rep:''};
+  const w=pbWord(t);return w?{src:'word',word:w}:null;}
+/* the hashes of the case's problem behaviors, for a record's pb */
+function pbOf(facts){const out=[];(Array.isArray(facts)?facts:[]).forEach(x=>{if(isProb(x)&&trim(x.label)){const h=hash(norm(x.label));if(!out.includes(h))out.push(h);}});return out.slice(0,12);}
+/* the warning, worded the same in both forms: o.lead names the item ("Form TE-1's behavior"), o.text is its words, o.fix
+   what to do about it */
+function problemNote(p,o){o=o||{};if(!p)return '';const q='\u201c'+trim(o.text)+'\u201d',lead=o.lead||'The behavior';
+  if(p.src==='word')return lead+', '+q+', names a behavior to reduce (\u201c'+p.word+'\u201d). Tokens are earned for a behavior to increase'+(o.fix?'; '+o.fix:'')+'.';
+  return lead+', '+q+', is a problem behavior on Form '+(p.form||'TB-1')+(p.src==='seen'?' (the case named it at an earlier compare)':'')+'. Tokens are earned for a behavior to increase'+
+    (p.rep?', such as \u201c'+p.rep+'\u201d':'')+(o.fix?'; '+o.fix:'')+'.';}
+
+/* a file the partner saved: its own JSON, a CASE json, or a .case.html. PACKET, this form's own file, other forms'
+   files, a case without the partner and unreadable files are refused. */
+function readText(text,fileName,want,me){const t=str(text),O='Form '+want,no=' Nothing was changed.',bad={ok:false,msg:'That file could not be read as a file '+O+' saved.'+no};
+  let o=null;
+  if(/^\s*[{[]/.test(t)){try{o=JSON.parse(t);}catch(e){o=null;}}
+  else{const m=/\x3cscript type="application\/json" id="nbh-case">([\s\S]*?)\x3c\/script>/.exec(t);if(m){try{o=JSON.parse(m[1]);}catch(e){o=null;}}}
+  if(!isObj(o))return bad;
+  const own=(d,file,saved)=>isObj(d)&&d.form===want&&isObj(d.S)?{ok:true,S:d.S,saved:trim(d.saved)||trim(saved),file:str(file)}:null;
+  if(o.form==='PACKET')return {ok:false,msg:'That file is a student packet, not a file '+O+' saved.'+no};
+  if(o.form==='CASE'||(!o.form&&isObj(o.forms))){const e=isObj(o.forms)?o.forms[want]:null;
+    if(!isObj(e)||!isObj(e.snap))return {ok:false,msg:'That case file holds no '+O+'.'+no};
+    let d=null;try{d=JSON.parse(e.snap.own);}catch(x){d=null;}return own(d,fileName,o.saved)||bad;}
+  if(me&&o.form===me)return {ok:false,msg:'That file was saved by this form (Form '+me+'), not by '+O+'.'+no};
+  const r=own(o,fileName,'');if(r)return r;
+  if(typeof o.form==='string'&&o.form!==want&&/^[A-Z]{2,3}-\d$/.test(o.form))return {ok:false,msg:'That file was saved by Form '+o.form+', not by '+O+'.'+no};
+  return bad;}
+
+/* ---- row states (plan section 3) ---- */
+function stateOf(row,base,o){o=o||{};const O='Form '+(o.other||'TE-1');
+  const here=val(row.here),there=val(row.there),a=norm(here),b=norm(there),ha=hash(a),hb=hash(b);
+  const can=row.can!==false,pre=Array.isArray(row.pre)?row.pre:[],bs=Array.isArray(base)&&base.length===2?base:null;
+  const r=(st,label,take,keep,press)=>({st,label,take:!!take&&can,keep:!!keep&&row.keep!==false,pressed:press&&take&&can?'take':'',ha,hb});
+  /* the promise that the partner can take it is made only for a row the partner can take (mirror) */
+  const ct=row.mirror?'; '+O+' can take this when it compares':'';
+  if(row.block&&!(bs&&bs[0]===ha&&bs[1]===hb))return {st:0,label:'for another student?',take:false,keep:true,block:true,pressed:'',ha,hb};
+  /* nothing on either side is not "in step": there is nothing to compare */
+  if(!a&&!b&&!row.fill)return r(2,'nothing on either side');
+  let same=a===b;if(!same&&typeof row.same==='function'){try{same=!!row.same(here,there);}catch(e){same=false;}}else if(row.same===true)same=true;
+  if(same)return r(1,'in step');
+  if(!b)return r(2,'only here'+ct);
+  if(!a||row.fill)return r(3,'empty here',1,0,pre.includes('fill')||pre.includes('any'));
+  if(bs&&bs[0]===ha&&bs[1]===hb)return Object.assign(r(4,o.td?'taken in part ('+o.td+')':(row.keptLabel||'kept different')+(o.kd?' ('+o.kd+')':''),1,1,0),{part:!!o.td});
+  if(bs&&bs[0]===ha)return r(5,'changed on '+O,1,1,row.owner==='there'||pre.includes('changed')||pre.includes('any'));
+  if(bs&&bs[1]===hb)return r(6,'changed here'+ct,1,1,0);
+  return r(7,'different',1,1,pre.includes('any'));}
+
+const fmt=iso=>{const d=new Date(iso);if(!iso||isNaN(d))return '';try{return d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});}catch(e){return d.toLocaleString();}};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+/* a bare YYYY-MM-DD (kd, td) is a local day; a full timestamp (rpd) is read as the moment it is, so an evening in the
+   Americas is not shown as the next day */
+const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');const d=m?new Date(+m[1],m[2]-1,+m[3]):new Date(s);if(!s||isNaN(d))return '';try{return d.toLocaleDateString(undefined,{day:'numeric',month:'short'});}catch(e){return d.toDateString();}};
+const plural=(n,one,many)=>n+' '+(n===1?one:many);
+const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+function confirmBox(t,o){try{if(window.nbhUI&&window.nbhUI.confirm)return Promise.resolve(window.nbhUI.confirm(t,o||{}));}catch(e){}try{return Promise.resolve(!!window.confirm(t));}catch(e){return Promise.resolve(false);}}
+const CSS='.nbh-lk [hidden]{display:none!important}'+
+ '.nbh-lk .lk-tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}'+
+ '.nbh-lk .lk-tools .tool,.nbh-lk .lk-tools a,.nbh-lk .lk-tools button.tool+button.tool,.nbh-lk .lk-btns button.tool+button.tool{margin:0}.nbh-lk .lk-tools a{font-family:var(--sans,sans-serif);font-size:13px;align-self:center}'+
+ '.nbh-lk .lk-status{font-family:var(--sans,sans-serif);font-size:13px;font-weight:600;margin:6px 0 2px}.nbh-lk p.hint{margin:2px 0}'+
+ '.nbh-lk .lk-status,.nbh-lk p.hint,.nbh-lk .lk-msg,.nbh-lk .lk-warn,.nbh-lk .lk-pre{overflow-wrap:anywhere}'+
+ /* a word breaks only when it is wider than its whole cell, so a value column is never squeezed to a letter */
+ '.nbh-lk .grid-wrap{max-width:100%;overflow-x:auto}.nbh-lk table.lk-tbl{table-layout:auto}.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{overflow-wrap:break-word;word-break:normal}'+
+ '.nbh-lk .lk-tbl td.lk-v{min-width:7em}.nbh-lk .lk-nw{white-space:nowrap}.nbh-lk .lk-none{color:var(--ink-3,#6b7680)}'+
+ '.nbh-lk .lk-tbl tbody th{text-align:left;font-weight:600}.nbh-lk .lk-tbl td.lk-st{min-width:7.5em}'+
+ '.nbh-lk .lk-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.nbh-lk .lk-btns button{margin:0;min-width:0}'+
+ /* numbered choices (the target card, 1 to 6) sit three to a line, so a narrow column never stacks them one by one */
+ '.nbh-lk .lk-btns.lk-num{display:grid;grid-template-columns:repeat(3,max-content)}'+
+ '.nbh-lk button[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true]:hover{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43)}'+
+ /* a ticked Take or Keep shows a tick as well as the dark fill; the tick is decoration, not part of the button's name */
+ '.nbh-lk .lk-tbl button[data-act=take][aria-pressed=true]::before,.nbh-lk .lk-tbl button[data-act=keep][aria-pressed=true]::before{content:"\\2713\\00a0";content:"\\2713\\00a0" / ""}'+
+ /* the choices inside a row (which card is compared, which names a take adds) are light and carry no tick, so only a
+    row's own Take or Keep reads as ticked */
+ '.nbh-lk .lk-tbl button.tool[data-act=choose][aria-pressed=true],.nbh-lk .lk-tbl button.tool[data-act=choose][aria-pressed=true]:hover{background:#E7EDF2;color:var(--ink,#16242e);border-color:var(--nbh-navy,#182e43);font-weight:700}'+
+ '.nbh-lk .lk-tbl button.tool.lk-pick[aria-pressed=false]{border-style:dashed;color:var(--ink-3,#5b6670)}'+
+ '.nbh-lk .lk-warn{color:#7a3d0f;background:#FBEEDB;border-left:3px solid #9B4E15;padding:3px 8px;margin:3px 0}'+
+ '.nbh-lk .lk-pre{white-space:pre-wrap;font-size:12px;border-left:3px solid var(--rule-2,#ccc);padding:3px 8px;margin:3px 0}'+
+ '.nbh-lk .lk-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'+
+ '.nbh-lk .lk-undo .hint{font-size:12px;flex:1 1 16em}'+
+ /* on a narrow screen (a phone, or a narrow column side by side) each row is a card: the item, then this form's value
+    and the partner's, each named, then the state */
+ '@media (max-width:520px){.nbh-lk .lk-tbl{font-size:12.5px}.nbh-lk .lk-tbl thead{display:none}'+
+ '.nbh-lk table.lk-tbl,.nbh-lk .lk-tbl tbody,.nbh-lk .lk-tbl tr,.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{display:block;width:auto!important;min-width:0}'+
+ '.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{padding:5px 8px;overflow-wrap:break-word}.nbh-lk .lk-tbl tbody td{border-top:0}.nbh-lk .lk-tbl tr[data-key]{margin-top:8px}'+
+ '.nbh-lk .lk-tbl td.lk-v{min-width:0}.nbh-lk .lk-tbl td[data-l]::before{content:attr(data-l) ": ";font-weight:600}}@media print{.nbh-lk{display:none!important}}';
+
+/* ---- the panel ---- */
+function mount(ad){
+  const me=ad.me,other=ad.other,O='Form '+other,meWhat=ad.meWhat||'this form',Me=meWhat.charAt(0).toUpperCase()+meWhat.slice(1);
+  const W={cur:null,undo:null,undoAfter:'',undoKeep:null,msg:'',msgKind:'',waitA:0,waitO:0,tA:0,tO:0,ignored:0,busy:false,toast:''};
+  const framed=()=>{try{return window.parent!==window;}catch(e){return true;}};
+  const getLk=()=>{let s='';try{s=ad.get();}catch(e){s='';}return readLk(s);};
+  const setLk=o=>{ad.set(o?pack(o):'');};
+  const sigOf=lk=>lk&&lk.on===1&&lk.last?lk.last.when+JSON.stringify(lk.base):'';
+  const after=()=>{try{if(ad.after)ad.after();}catch(e){if(window.console)console.error(e);}};
+  const record=(lk,a)=>{try{if(ad.record)ad.record(lk,a);}catch(e){if(window.console)console.error(e);}};
+  const toast=(t,kind)=>{W.toast=t;try{if(window.nbhUI&&window.nbhUI.toast){window.nbhUI.toast(t,{kind:kind||'ok'});return;}}catch(e){}};
+  const msg=(t,kind)=>{W.msg=t||'';W.msgKind=kind||'';paintMsg();};
+  if(!document.getElementById('nbh-link-css')){const st=document.createElement('style');st.id='nbh-link-css';st.textContent=CSS;(document.head||document.documentElement).appendChild(st);}
+  const host=typeof ad.host==='string'||!ad.host?document.querySelector(ad.host||'#lkPanel'):ad.host;
+  const OFF={'TK-1':'Link this book with Form TE-1, the token economy plan for the same student. The target card, token count, token and Choices are then compared with the plan\u2019s behavior, tokens per exchange, token form and backups, and you choose what to take. Nothing changes on either form without your click.',
+    'TE-1':'Link this plan with Form TK-1, the token board book for the same student. The behavior, tokens per exchange, token form and backups are then compared with the book\u2019s target card, token count, token and choice cards, and you choose what to take. Nothing changes on either form without your click.'};
+  const T={offText:ad.offText||OFF[me]||'Link '+meWhat+' with '+O+'. Nothing changes on either form without your click.',
+    notOpen:O+' is not open in this workstation. Open it beside '+meWhat+', or open a file it saved.',
+    noAnswer:O+' did not answer in time (it may still be loading). Try Compare again.',
+    noOpen:'This workstation could not open '+O+' from here. Pick it from the list of forms.',
+    noView:typeof ad.noView==='string'&&ad.noView?ad.noView:O+'\u2019s link is off, so its file does not name its cards. Turn on Link with Form '+me+' on '+other+'\u2019s Setup page, then compare again.',
+    unlink:'Unlink from '+O+'?\nNothing on either form changes; the comparison record is removed.'};
+  const Q=s=>host?host.querySelector(s):null;
+  if(host){host.classList.add('nbh-lk');host.innerHTML=
+    '<div class="lk-off" hidden><p class="hint lk-offtxt">'+esc(T.offText)+'</p><div class="lk-tools"><button type="button" class="tool" data-lk="on">Link with '+esc(O)+'</button></div></div>'+
+    '<div class="lk-on" hidden><p class="lk-status" role="status" aria-live="polite"></p><p class="hint lk-next"></p><p class="hint lk-took" hidden></p>'+
+    '<div class="lk-rpw" hidden><p class="hint lk-rp" hidden></p><div class="lk-tools"><button type="button" class="tool" data-lk="printed">These pages are reprinted</button></div></div>'+
+    '<div class="lk-tools"><button type="button" class="tool" data-lk="compare">Compare with '+esc(O)+'</button><button type="button" class="tool" data-lk="file">Open a file '+esc(O)+' saved</button>'+
+    '<button type="button" class="tool" data-lk="beside">Open '+esc(O)+' beside '+esc(meWhat)+'</button><a class="lk-sib" target="_blank" rel="noopener" hidden>Open '+esc(O)+' in a new tab</a>'+
+    '<button type="button" class="tool" data-lk="unlink">Unlink</button><input type="file" class="lk-fileIn" accept=".json,.html" hidden></div>'+
+    '<div class="verdict v-mid lk-msg" role="alert" hidden></div>'+
+    '<div class="lk-cmp" hidden><p class="hint lk-legend">Dark buttons with a \u2713 are ticked. Tap one to tick or untick it, then press Take the ticked items; nothing changes before that. The light buttons beside an item choose which card, or which names, a take uses.</p><div class="grid-wrap"><table class="rt lk-tbl"><thead><tr><th scope="col">What</th><th scope="col">'+esc(Me)+'</th><th scope="col"><span class="lk-nw">'+esc(O)+'</span></th><th scope="col"><span class="lk-vh">State and choice</span></th></tr></thead><tbody></tbody></table></div>'+
+    '<div class="lk-tools lk-foot"><button type="button" class="tool" data-lk="apply">Take the ticked items</button><button type="button" class="tool" data-lk="leave">Leave everything as it is</button></div></div>'+
+    '<div class="lk-tools lk-undo" hidden><button type="button" class="tool" data-lk="undo" title="Puts back what '+esc(meWhat)+' held before the take. Offered only until anything else on '+esc(meWhat)+' changes.">Undo what was just taken</button>'+
+    '<span class="hint">Undo puts back what '+esc(meWhat)+' held before the take. It is offered until anything else on '+esc(meWhat)+' changes.</span></div></div>';}
+  /* the alert is written only when its words change, so a screen reader does not announce it again at every repaint */
+  function paintMsg(){const m=Q('.lk-msg');if(!m)return;if(m.textContent!==W.msg)m.textContent=W.msg;if(m.hidden!==!W.msg)m.hidden=!W.msg;
+    const c='verdict '+(W.msgKind==='ok'?'v-ok':'v-mid')+' lk-msg';if(m.className!==c)m.className=c;}
+  function resWords(L){const k=/kept (\d+)/.exec(L.res),p=/part (\d+)/.exec(L.res),out=[];
+    if(k)out.push(plural(+k[1],'difference','differences')+' kept');if(p)out.push(plural(+p[1],'item','items')+' taken in part');return out.join(', ');}
+  function statusLines(lk){const L=lk.last,out=[];
+    if(!L)out.push('Linked with '+O+' \u00b7 not compared yet.');
+    else{const when=fmt(L.when),sv=fmt(L.saved),src=L.via==='shell'?'with '+O+' (open in this workstation)':(L.file?'with the file '+L.file:'with a file '+O+' saved')+(sv?' (saved '+sv+')':'');
+      const n=+(L.res.split(' ')[1]||0),cmp=' \u00b7 compared '+when+' '+src+'.';
+      if(L.res==='who')out.push('Linked with '+O+' \u00b7 for another student? '+(L.nm||'')+cmp);
+      else if(L.res==='empty')out.push('Linked with '+O+' \u00b7 '+O+' holds nothing to compare yet'+cmp);
+      else if(/^look/.test(L.res))out.push('Linked with '+O+' \u00b7 '+plural(n,'item','items')+' to look at'+(W.cur?' below.':cmp));
+      else if(/^(kept|part)/.test(L.res))out.push('Linked with '+O+' \u00b7 '+resWords(L)+cmp);
+      else if(L.res==='step')out.push('Linked with '+O+' \u00b7 in step'+cmp);
+      else out.push('Linked with '+O+cmp);}
+    out.push(framed()?(L?'Changes made on '+O+' since then show only when you compare again.':''):
+      'Outside the workstation, '+meWhat+' reads '+O+' from a file: press Save data on '+O+', then Open a file '+O+' saved, here.'+(L?' Changes made there since then show only when you compare again.':''));return out;}
+  function evalRows(rows,lk,prev){const st={},pressed={};
+    rows.forEach(r=>{if(!r.what||!r.key)return;const nb=!!r.nobase,kd=!nb&&lk.kd&&lk.kd[r.key]?day(lk.kd[r.key]):'',td=!nb&&lk.td&&lk.td[r.key]?day(lk.td[r.key]):'';
+      const s=stateOf(r,nb?null:lk.base[r.key],{other,kd,td});st[r.key]=s;
+      const p=prev&&prev.st[r.key]&&prev.st[r.key].st===s.st?prev.pressed[r.key]:undefined;
+      pressed[r.key]=p!==undefined&&((p==='take'&&s.take)||(p==='keep'&&s.keep)||p==='')?p:s.pressed;});
+    return {st,pressed};}
+  /* the result of a compare: another student; nothing to compare (every value on the partner's side is empty); items to
+     look at; differences kept and items taken in part; or in step */
+  function resOf(cur,rows){let look=0,kept=0,part=0,who=false;Object.keys(cur.st).forEach(k=>{const s=cur.st[k];if(s.st===0)who=true;else if([3,5,6,7].includes(s.st))look++;else if(s.st===4){if(s.part)part++;else kept++;}});
+    const keyed=(rows||[]).filter(r=>r.what&&r.key);
+    if(who)return 'who';if(keyed.length&&keyed.every(r=>!norm(val(r.there))))return 'empty';
+    return look?'look '+Math.min(look,999):kept||part?(kept?'kept '+Math.min(kept,999):'')+(kept&&part?' ':'')+(part?'part '+Math.min(part,999):''):'step';}
+  const blocked=()=>!!W.cur&&Object.keys(W.cur.st).some(k=>W.cur.st[k].st===0&&W.cur.pressed[k]!=='keep');
+  const anyPressed=()=>!!W.cur&&Object.keys(W.cur.pressed).some(k=>!!W.cur.pressed[k]);
+  const cell=v=>{const t=val(v);return t?esc(t):'<span class="lk-none" aria-hidden="true">\u2014</span><span class="lk-vh">nothing</span>';};
+  function rowHtml(r){
+    if(!r.what){const t=val(r.info);return t?'<tr class="lk-info"><td colspan="4" class="hint">'+esc(t)+'</td></tr>':'';}
+    const s=W.cur.st[r.key],p=W.cur.pressed[r.key],k=esc(r.key);let b='';
+    const tl=r.takeLabel||'Take',kl='Keep '+meWhat+'\u2019s';
+    if(s.block)b='<button type="button" class="tool" data-act="keep" data-key="'+k+'" aria-pressed="'+(p==='keep')+'">These are the same student</button>';
+    else{if(s.take)b+='<button type="button" class="tool" data-act="take" data-key="'+k+'" aria-pressed="'+(p==='take')+'" aria-label="'+esc(tl+': '+r.what)+'">'+esc(tl)+'</button>';
+      if(s.keep)b+='<button type="button" class="tool" data-act="keep" data-key="'+k+'" aria-pressed="'+(p==='keep')+'" aria-label="'+esc(kl+': '+r.what)+'">'+esc(kl)+'</button>';}
+    let ch='';if(isObj(r.choose)){const lb=Array.isArray(r.choose.labels)?r.choose.labels.map(str):null,n=Math.max(1,Math.min(10,lb?lb.length:r.choose.n|0||6)),on=Array.isArray(r.choose.on)?r.choose.on:null,gl=r.choose.label||'Card';
+      ch='<div class="lk-btns'+(lb?'':' lk-num')+'" role="group" aria-label="'+esc(gl)+'">';
+      for(let i=0;i<n;i++)ch+='<button type="button" class="tool'+(on?' lk-pick':'')+'" data-act="choose" data-key="'+k+'" data-i="'+i+'" aria-pressed="'+(on?on.includes(i):r.choose.value===i)+'"'+(lb?'':' aria-label="'+esc(gl+' '+(i+1))+'"')+'>'+esc(lb?lb[i]:String(i+1))+'</button>';ch+='</div>';}
+    const notes=[];if(r.why)notes.push('<div class="hint">'+esc(r.why)+'</div>');
+    (Array.isArray(r.warn)?r.warn:r.warn?[r.warn]:[]).forEach(w=>notes.push('<div class="lk-warn">'+esc(w)+'</div>'));
+    (Array.isArray(r.info)?r.info:r.info?[r.info]:[]).forEach(w=>notes.push('<div class="hint">'+esc(w)+'</div>'));
+    if(r.preview)notes.push('<div class="lk-pre">'+esc(r.preview)+'</div>');
+    return '<tr data-key="'+k+'" class="lk-s'+s.st+'"><th scope="row">'+esc(r.what)+ch+'</th><td class="lk-v" data-l="'+esc(Me)+'">'+cell(r.here)+'</td><td class="lk-v" data-l="'+esc(O)+'">'+cell(r.there)+'</td><td class="lk-st"><span class="lk-lab">'+esc(s.label)+'</span>'+
+      (b?'<div class="lk-btns">'+b+'</div>':'')+'</td></tr>'+(notes.length?'<tr class="lk-note" data-for="'+k+'"><td colspan="4">'+notes.join('')+'</td></tr>':'');}
+  function paintFoot(){const a=Q('[data-lk="apply"]');if(a)a.disabled=blocked()||!anyPressed()||W.busy;}
+  /* Undo belongs to the record the take was made on: anything that changes it afterwards (an edit, Open data of
+     another file, Clear all, the shell's restore) withdraws it, so it can never put one record over another */
+  const snapNow=()=>{try{return str(ad.snapshot());}catch(e){return '';}};
+  const undoOk=()=>!!W.undo&&!!W.undoAfter&&snapNow()===W.undoAfter;
+  const dropUndo=()=>{W.undo=null;W.undoAfter='';W.undoKeep=null;};
+  function render(){if(!host)return;const lk=getLk(),on=!!lk&&lk.on===1;
+    if(W.cur&&(!on||sigOf(lk)!==W.cur.sig))W.cur=null;if(!on||(W.undo&&!undoOk()))dropUndo();
+    Q('.lk-off').hidden=on;Q('.lk-on').hidden=!on;
+    if(on){const L=statusLines(lk);Q('.lk-status').textContent=L[0];const nx=Q('.lk-next');nx.textContent=L[1]||'';nx.hidden=!L[1];
+      const tk=Q('.lk-took');tk.textContent=lk.took||'';tk.hidden=!lk.took;
+      const rp=Q('.lk-rp'),pages=lk.rp||[];let words='';
+      if(pages.length){try{words=ad.rpLine?str(ad.rpLine(pages.slice())):'';}catch(e){words='';}if(!words)words='the '+andList(pages)+(pages.length>1?' pages':' page');}
+      rp.textContent=pages.length?'Reprint: '+words+(lk.rpd&&day(lk.rpd)?' (changed by the link '+day(lk.rpd)+').':'.'):'';rp.hidden=!pages.length;Q('.lk-rpw').hidden=!pages.length;
+      const f=framed();Q('[data-lk="compare"]').hidden=!f;Q('[data-lk="beside"]').hidden=!f;Q('[data-lk="compare"]').disabled=!!W.waitA;Q('[data-lk="beside"]').disabled=!!W.waitO;
+      const a=Q('.lk-sib'),blob=location.protocol==='blob:'||location.href==='about:srcdoc'||location.protocol==='about:';
+      if(ad.sibling)a.setAttribute('href',ad.sibling);a.hidden=f||blob||!ad.sibling;}
+    const cmp=Q('.lk-cmp');cmp.hidden=!(on&&W.cur);
+    if(on&&W.cur){Q('.lk-tbl tbody').innerHTML=W.cur.rows.map(rowHtml).join('');}
+    Q('.lk-undo').hidden=!(on&&W.undo);paintMsg();paintFoot();}
+  /* compare: reads only. It writes lk.last and the in-step marks (the base of each row found in step), except when the
+     compare finds another student: then only lk.last, and the marks wait for "These are the same student" */
+  function compareWith(obj,src){src=isObj(src)?src:{};let S=obj,saved=trim(src.saved);
+    if(isObj(obj)&&isObj(obj.S)&&typeof obj.form==='string'){S=obj.S;saved=saved||trim(obj.saved);}
+    const lk=getLk();if(!lk||lk.on!==1)return false;
+    dropUndo();W.cur=null;let view=null;try{view=ad.view(S);}catch(e){view=null;}
+    if(!view){let t=T.noView;try{if(typeof ad.noView==='function')t=str(ad.noView(S,src))||T.noView;}catch(e){t=T.noView;}msg(t);render();return false;}
+    const rows=(ad.rows(view)||[]).filter(isObj),ev=evalRows(rows,lk,null);
+    const cur={view,rows,st:ev.st,pressed:ev.pressed,src:{via:src.via==='shell'?'shell':'file',file:str(src.file),saved}};
+    const who=rows.find(r=>r.key==='who'&&cur.st.who&&cur.st.who.st===0);cur.held=!!who;
+    if(!who){const step=[];rows.forEach(r=>{const s=r.what&&r.key?cur.st[r.key]:null;if(s&&s.st===1){lk.base[r.key]=[s.ha,s.hb];step.push(r);}});record(lk,{taken:[],kept:[],step});}
+    lk.last={when:new Date().toISOString(),via:cur.src.via,file:cur.src.file,saved,res:resOf(cur,rows),nm:who?str(who.nm||who.why):''};
+    setLk(lk);cur.sig=sigOf(getLk());W.cur=cur;W.msg='';after();render();return true;}
+  function press(key,which){if(!W.cur||!W.cur.st[key])return '';const s=W.cur.st[key],p=W.cur.pressed[key];
+    if(which!=='take'&&which!=='keep')return p;if(which==='take'&&!s.take)return p;if(which==='keep'&&!s.keep)return p;
+    W.cur.pressed[key]=p===which?'':which;
+    const tr=Q('tr[data-key="'+key+'"]');if(tr)tr.querySelectorAll('button[data-act="take"],button[data-act="keep"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.act===W.cur.pressed[key])));
+    paintFoot();return W.cur.pressed[key];}
+  /* a choice button: the adapter handles it (true: the row's tick stays; 'reset': it is let go), or, for an adapter
+     that does not, a card number goes into the record as lk.card. Picking the names a take adds ticks that Take. */
+  function choose(key,i){if(!W.cur)return;let done=false;try{done=ad.choose?ad.choose(key,i,W.cur.view):false;}catch(e){done=false;}
+    const prev={st:Object.assign({},W.cur.st),pressed:Object.assign({},W.cur.pressed)};
+    if(done==='reset')delete prev.st[key];
+    else if(done!==true){const lk=getLk();if(!lk)return;if(key==='card'&&okCard(i))lk.card=i;setLk(lk);delete prev.st[key];}
+    const rows=(ad.rows(W.cur.view)||[]).filter(isObj);
+    const ev=evalRows(rows,getLk(),prev);W.cur.rows=rows;W.cur.st=ev.st;W.cur.pressed=ev.pressed;
+    const r=rows.find(x=>x.key===key);if(done===true&&r&&isObj(r.choose)&&Array.isArray(r.choose.labels)&&ev.st[key]&&ev.st[key].take&&!ev.pressed[key])W.cur.pressed[key]='take';
+    render();}
+  /* Apply: the pressed Takes in the order who, card (beh), n, tok, menu, sched; then the bases, the record, the toast */
+  /* Apply re-reads this form first: a row whose value here changed after the compare (typed while the table was
+     open) is not taken or kept, and is named, so a take never lands on words the compare did not see */
+  async function apply(){if(!W.cur||W.busy||blocked()||!anyPressed())return {taken:0,kept:0,stale:0};
+    const focusIn=!!host&&host.contains(document.activeElement);W.busy=true;paintFoot();const cur=W.cur;let snap=null;try{snap=ad.snapshot();}catch(e){snap=null;}
+    const order=k=>{const i=KEYS.indexOf(k);return i<0?KEYS.length:i;};
+    const live={};((ad.rows(cur.view)||[]).filter(isObj)).forEach(r=>{if(r.key)live[r.key]=r;});
+    const rows=cur.rows.filter(r=>r.what&&r.key&&cur.pressed[r.key]).sort((a,b)=>order(a.key)-order(b.key));
+    const taken=[],kept=[],stale=[],undone=[];
+    try{for(const r of rows){const p=cur.pressed[r.key];
+      if(!live[r.key]||norm(val(live[r.key].here))!==norm(val(r.here))){stale.push(r);continue;}
+      if(p==='take'){let res;try{res=await ad.take(r);}catch(e){res=false;if(window.console)console.error(e);}if(res!==false)taken.push([r,res]);else undone.push(r);}
+      else if(p==='keep')kept.push(r);}}
+    finally{W.busy=false;}
+    const staleTxt=stale.length?'Not taken, because '+meWhat+' changed after the compare: '+andList(stale.map(r=>r.what))+'. The table now shows '+(stale.length===1?'it':'them')+' as '+(stale.length===1?'it is':'they are')+'.':'';
+    /* a take that wrote nothing (a question cancelled, or nothing left to change) is named, never silent */
+    const undoneTxt=undone.length?'Not taken: '+andList(undone.map(r=>r.what))+' (cancelled, or nothing to change; '+(undone.length===1?'it is as it was':'they are as they were')+').':'';
+    const fresh=(ad.rows(cur.view)||[]).filter(isObj),by={};fresh.forEach(r=>{if(r.key)by[r.key]=r;});
+    const lk=getLk()||{v:1,on:1,base:{}},now=new Date(),rp=new Set(lk.rp||[]);lk.base=lk.base||{};
+    if(!taken.length&&!kept.length){
+      if(stale.length||undone.length){const prev={st:cur.st,pressed:Object.assign({},cur.pressed)};undone.forEach(r=>{prev.pressed[r.key]='';});
+        const ev=evalRows(fresh,lk,prev);W.cur={view:cur.view,rows:fresh,st:ev.st,pressed:ev.pressed,src:cur.src,sig:cur.sig,held:cur.held};msg([staleTxt,undoneTxt].filter(Boolean).join(' '),'');}
+      render();return {taken:0,kept:0,stale:stale.length};}
+    taken.forEach(([r,res])=>{const nh=typeof res==='string'?res:by[r.key]?val(by[r.key].here):val(r.there);lk.base[r.key]=[hash(norm(nh)),hash(norm(val(r.there)))];
+      if(lk.kd)delete lk.kd[r.key];if(Array.isArray(r.seen))lk.menuSeen=r.seen.filter(h=>HEX.test(h)).slice(0,10);(Array.isArray(r.rp)?r.rp:[]).forEach(x=>rp.add(String(x)));});
+    kept.forEach(r=>{lk.base[r.key]=[hash(norm(val(r.here))),hash(norm(val(r.there)))];lk.kd=lk.kd||{};lk.kd[r.key]=ymd(now);if(lk.td)delete lk.td[r.key];});
+    /* a compare held for "These are the same student": its in-step marks are written now that it is confirmed */
+    const step=[];if(cur.held&&kept.concat(taken.map(x=>x[0])).some(r=>r.key==='who')){const e=evalRows(fresh,lk,null);
+      fresh.forEach(r=>{const s=r.what&&r.key?e.st[r.key]:null;if(s&&s.st===1&&!taken.some(([t])=>t.key===r.key)&&!kept.some(x=>x.key===r.key)){lk.base[r.key]=[s.ha,s.hb];step.push(r);}});}
+    record(lk,{taken:taken.map(([r])=>r),kept:kept.slice(),step});
+    /* a take that leaves its row different (the backups there was room for, the cards picked) reads "taken in part", not "kept" */
+    const ev0=evalRows(fresh,lk,null);taken.forEach(([r])=>{const s=ev0.st[r.key];if(s&&s.st===4){lk.td=lk.td||{};lk.td[r.key]=ymd(now);}else if(lk.td)delete lk.td[r.key];});
+    if(lk.td&&!Object.keys(lk.td).length)delete lk.td;
+    /* the took line holds 160 characters; when it is over, whole items are dropped from the end, never half a word */
+    if(taken.length){const head='Taken '+fmt(now.toISOString())+': ',words=taken.map(([r])=>str(r.took||r.what.toLowerCase()));let t=head+words.join('; ');
+      while(t.length>160&&words.length>1){words.pop();t=head+words.join('; ')+'; \u2026';}
+      if(t.length>160)t=t.slice(0,159)+'\u2026';lk.took=t;}
+    if(rp.size&&taken.some(([r])=>Array.isArray(r.rp)&&r.rp.length)){lk.rp=Array.from(rp).slice(0,8);lk.rpd=now.toISOString();}
+    const ev=evalRows(fresh,lk,null);
+    lk.last={when:now.toISOString(),via:cur.src.via,file:cur.src.file,saved:cur.src.saved,res:resOf(ev,fresh),nm:''};
+    setLk(lk);
+    /* the table after the take is built again from the record as it now is, so its notes are the new ones; the result
+       is counted on it too, since a pairing the form noted in record() can change which rows use the record's mark */
+    const rows2=(ad.rows(cur.view)||[]).filter(isObj),ev2=evalRows(rows2,getLk()||lk,null),res2=resOf(ev2,rows2);
+    {const l2=getLk();if(l2&&l2.last&&l2.last.res!==res2){l2.last.res=res2;setLk(l2);}}
+    const next={view:cur.view,rows:rows2,st:ev2.st,pressed:{},src:cur.src,held:false};Object.keys(ev2.st).forEach(k=>{next.pressed[k]='';});
+    next.sig=sigOf(getLk());W.cur=next;dropUndo();W.msg=[staleTxt,undoneTxt].filter(Boolean).join(' ');
+    after();
+    if(taken.length&&snap){W.undo=snap;W.undoAfter=snapNow();
+      /* the Keeps of the same Apply changed nothing on this form, so an Undo keeps them */
+      const keepRows=kept.concat(step);if(keepRows.length){W.undoKeep={kept:kept.slice(),step:step.slice(),base:{},kd:{}};keepRows.forEach(r=>{W.undoKeep.base[r.key]=lk.base[r.key];if(lk.kd&&lk.kd[r.key])W.undoKeep.kd[r.key]=lk.kd[r.key];});}}
+    render();
+    const said=[];if(taken.length)said.push((taken.length===1?'1 item':taken.length+' items')+' taken from '+O);if(kept.length)said.push(plural(kept.length,'difference','differences')+' kept');
+    toast(said.join(' and ')+'. '+(taken.length?'Nothing else changed.':'Nothing was changed.')+(W.msg?' '+W.msg:''),'ok');
+    /* the Apply button is disabled now; the keyboard goes on to Undo, or to the status line, brought to the middle of
+       the screen so that a sticky toolbar does not cover it */
+    if(focusIn){const u=Q('[data-lk="undo"]'),st=Q('.lk-status');try{const t=u&&!Q('.lk-undo').hidden?u:st;if(t===st)st.tabIndex=-1;t.focus({preventScroll:true});if(t.scrollIntoView)t.scrollIntoView({block:'center'});}catch(e){}}
+    return {taken:taken.length,kept:kept.length,stale:stale.length};}
+  function undo(){if(!W.undo)return false;
+    if(!undoOk()){dropUndo();msg('Undo is no longer offered: '+meWhat+' has changed since the take.');render();return false;}
+    const j=W.undo,keep=W.undoKeep;dropUndo();W.cur=null;try{ad.restore(j);}catch(e){if(window.console)console.error(e);}
+    if(keep&&Object.keys(keep.base).length){const lk=getLk();if(lk&&lk.on===1){Object.keys(keep.base).forEach(k=>{if(keep.base[k])lk.base[k]=keep.base[k];});
+      if(Object.keys(keep.kd).length)lk.kd=Object.assign(lk.kd||{},keep.kd);record(lk,{taken:[],kept:keep.kept,step:keep.step});setLk(lk);after();}}
+    render();
+    toast('Undone: '+meWhat+' is as it was before the take'+(keep&&keep.kept.length?'; the '+(keep.kept.length===1?'difference':'differences')+' kept then '+(keep.kept.length===1?'is':'are')+' still kept':'')+'.','ok');return true;}
+  function leave(){W.cur=null;W.msg='';render();}
+  /* the reprint line goes only when the user says the pages are printed: a browser reports a cancelled print as a print */
+  function printed(){const lk=getLk();if(!lk||!lk.rp)return false;delete lk.rp;delete lk.rpd;setLk(lk);after();render();toast('The reprint line is cleared.','ok');return true;}
+  async function unlink(){const lk=getLk(),also=[];if(lk&&lk.rp&&lk.rp.length)also.push('the list of pages to reprint');if(lk&&lk.took)also.push('the note of what was last taken');
+    if(!(await confirmBox(T.unlink+(also.length?'\nThat removes '+andList(also)+' too.':''),{ok:'Unlink'})))return false;
+    W.cur=null;dropUndo();W.msg='';setLk(null);after();render();return true;}
+  function link(){const lk=getLk()||{v:1,base:{}};lk.on=1;setLk(lk);W.msg='';after();render();if(framed())ask();}
+  /* the relay */
+  function ask(){if(!framed()||W.waitA)return;W.cur=null;dropUndo();W.waitA=Date.now();clearTimeout(W.tA);
+    W.tA=setTimeout(()=>{if(!W.waitA)return;W.waitA=0;msg(T.noAnswer);render();},12000);
+    msg('Asking the workstation for '+O+'\u2026','ok');render();
+    try{window.parent.postMessage({nbh:'ask',want:other},'*');}catch(e){W.waitA=0;clearTimeout(W.tA);msg(T.noAnswer);render();}}
+  function openBeside(){if(!framed()||W.waitO)return;W.waitO=Date.now();clearTimeout(W.tO);
+    W.tO=setTimeout(()=>{if(!W.waitO)return;W.waitO=0;msg(T.noOpen);render();},2000);render();
+    try{window.parent.postMessage({nbh:'open',want:other,beside:true},'*');}catch(e){W.waitO=0;clearTimeout(W.tO);msg(T.noOpen);render();}}
+  window.addEventListener('message',ev=>{const d=ev.data;if(!isObj(d)||(d.nbh!=='answer'&&d.nbh!=='opened'))return;
+    const parentOk=framed()&&ev.source===window.parent;
+    if(d.nbh==='answer'){
+      if(!parentOk||!W.waitA||d.want!==other){W.ignored++;return;}
+      W.waitA=0;clearTimeout(W.tA);
+      if(d.ok!==true){msg(d.why==='not open'?T.notOpen:T.noAnswer);render();return;}
+      const r=readText(isObj(d.snap)?d.snap.own:'','',other,me);
+      if(!r.ok){msg(r.msg);render();return;}
+      compareWith(r.S,{via:'shell',saved:r.saved});return;}
+    if(!parentOk||!W.waitO||d.want!==other){W.ignored++;return;}
+    W.waitO=0;clearTimeout(W.tO);
+    if(d.ok!==true){msg(T.noOpen);render();return;}
+    /* beside:false: the workstation opened the partner in place of this form (a phone has no room for two) */
+    msg(d.beside===false?O+' opens in place of '+meWhat+', since this screen has no room for both; come back to '+meWhat+' to see the comparison.':
+      O+' is opening beside '+meWhat+'; it is compared in a moment.','ok');render();setTimeout(ask,1500);});
+  /* a saved file */
+  /* a file opened while the relay is still asking wins: the late answer is then ignored, as one not waited for. A file
+     refused leaves the table that was open, and its ticks, as they were. */
+  function fromFile(text,name){if(W.waitA){W.waitA=0;clearTimeout(W.tA);}
+    const r=readText(text,name,other,me);if(!r.ok){msg(r.msg);render();return false;}
+    return compareWith(r.S,{via:'file',file:r.file,saved:r.saved});}
+  /* the keyboard stays where it was: after a button rebuilds the table or hides itself, the focus goes back to that
+     button, else to the next one named, else to the status line (or, unlinked, to Link) */
+  function refocus(){const sels=[].slice.call(arguments);
+    for(const s of sels){const el=s?Q(s):null;if(el&&!el.disabled&&el.getClientRects().length){try{el.focus({preventScroll:true});}catch(e){}return;}}
+    const on=!Q('.lk-on').hidden,t=on?Q('.lk-status'):Q('[data-lk="on"]');if(!t)return;if(on)t.tabIndex=-1;try{t.focus({preventScroll:true});}catch(e){}}
+  if(host){
+    const fi=Q('.lk-fileIn');
+    /* The partner's file is not this form's saved state. The forms' unsaved-work guard (nbh-guard) takes the change
+       of any file input as "a file was just opened, so nothing is unsaved", so the change is caught here, at the
+       window, before it reaches the document, and handled without passing on. */
+    window.addEventListener('change',e=>{if(e.target!==fi)return;e.stopPropagation();const f=fi.files&&fi.files[0];if(!f)return;const rd=new FileReader();
+      rd.onload=()=>{fromFile(rd.result,f.name);};rd.onerror=()=>{msg('That file could not be read as a file '+O+' saved. Nothing was changed.');};rd.readAsText(f);fi.value='';},true);
+    /* the first edit after a take withdraws Undo (see undoOk), and says so */
+    ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(!W.undo||(e.target&&host.contains(e.target)))return;
+      setTimeout(()=>{if(W.undo&&!undoOk()){dropUndo();msg('Undo is no longer offered: '+meWhat+' has changed since the take.');render();}},0);}));
+    host.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!host.contains(b))return;
+      const a=b.dataset.lk,act=b.dataset.act,k=b.dataset.key,i=b.dataset.i;
+      if(a==='on'){link();refocus('[data-lk="compare"]','[data-lk="file"]');}else if(a==='compare')ask();else if(a==='file'){W.msg='';fi.click();}else if(a==='beside')openBeside();
+      else if(a==='unlink')unlink().then(done=>{if(done)refocus('[data-lk="on"]');});else if(a==='apply')apply();else if(a==='leave'){leave();refocus();}else if(a==='undo'){undo();refocus();}
+      else if(a==='printed'){printed();refocus();}
+      else if(act==='take'||act==='keep')press(k,act);else if(act==='choose'){choose(k,+i);refocus('button[data-act="choose"][data-key="'+k+'"][data-i="'+i+'"]');}});}
+  const api={compare(){if(framed())ask();else{const fi=Q('.lk-fileIn');if(fi)fi.click();}},compareWith,render,fromFile,
+    state(){const lk=getLk();return {on:!!lk&&lk.on===1,lk,res:lk&&lk.last?lk.last.res:'',table:!!W.cur,blocked:blocked(),
+      apply:!!W.cur&&!blocked()&&anyPressed()&&!W.busy,undo:!!W.undo,msg:W.msg,toast:W.toast,waiting:!!W.waitA,opening:!!W.waitO,
+      status:lk&&lk.on===1?statusLines(lk):[]};},
+    rows(){return W.cur?W.cur.rows.filter(r=>r.what&&r.key).map(r=>{const s=W.cur.st[r.key];return {key:r.key,what:r.what,here:val(r.here),there:val(r.there),st:s.st,label:s.label,take:s.take,keep:s.keep,pressed:W.cur.pressed[r.key]||''};}):[];},
+    press,apply,undo,leave,link,unlink,choose,printed,ignored:()=>W.ignored};
+  window.nbhLink=api;
+  render();
+  return api;}
+
+window.NBHLink={norm,hash,near,tokSame,tokKey,TOKWORD,readLk,isOn,pack,planOf,boardOf,whoRow,problem,pbOf,problemNote,readText,stateOf,mount,confirm:confirmBox,MAX};
+})();
+</script>
 
 <script>
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -871,7 +1372,7 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;el.value=S.
 /* v21.16 audit (F10): token loss marked in use with no rule recorded is named under the rule, on screen and on paper */
 function renderLoss(){const on=/^Yes/.test(S.meta.loss||''),rule=String(S.meta.lossRule||'').trim();
   $('#lossNote').innerHTML=on&&!rule?'<div class="verdict v-no"><b>Token loss is marked as in use, but no rule is recorded.</b> Token loss is a punishment procedure: state what is lost, for what, the floor below which tokens cannot fall, and the review and approvals obtained.</div>':'';}
-function renderAll(){ensure();renderSch();renderGen();renderAud();renderLoss();bindMeta();}
+function renderAll(){ensure();renderSch();renderGen();renderAud();renderLoss();bindMeta();lkPaint();}
 
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
@@ -952,6 +1453,177 @@ async function loadSim(){
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+
+/* v21.43 the link with Form TK-1 (the token board book). Off until Link with Form TK-1 is pressed on Setup. The
+   shared core (the nbh-link script block, tools/blocks/nbh-link.js, put in by tools/blocks/patch-link.py) owns the
+   panel, the relay ask, the file fallback, the row states, Apply, Leave and Undo; this adapter says what is compared
+   and how a take is written. This plan is the plan of record: the book's entries are offered into empty fields and
+   as new backup rows only, nothing here is emptied or deleted, and the audit is never touched. A behavior to reduce
+   (the case's problem behaviors, those seen at an earlier compare, or the common words for one) is flagged here and is
+   never taken from the book. The record is one JSON string in S.meta.lk (bound to the hidden #teLink in the toolbar,
+   so the shell's status, snapshots and autosave carry it), with the last board read from TK-1 kept in it for the hints
+   and the print line. */
+var lkApi=null,lkNewBoard=null,lkQuiet=false,lkPick={off:{}};
+const lkT=v=>String(v==null?'':v).trim();
+const lkDay=(iso,yr)=>{const d=new Date(iso);if(!iso||isNaN(d))return '';try{return d.toLocaleDateString(undefined,yr?{day:'numeric',month:'short',year:'numeric'}:{day:'numeric',month:'short'});}catch(e){return d.toDateString();}};
+/* plurals of a token's name: Star, Stars; Bus, Buses; Daisy, Daisies; a name already plural is left alone */
+const lkPl=w=>/(ss|us|is|x|z|ch|sh)$/i.test(w)?w+'es':/s$/i.test(w)?w:/[^aeiou]y$/i.test(w)?w.slice(0,-1)+'ies':w+'s';
+const lkOrd=n=>n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th');
+const lkAn=w=>(/^(uni|use|usu|eu|one\b|once)/i.test(w)?'a ':/^([aeiou]|hour|honest|honou?r)/i.test(w)?'an ':'a ')+w;
+/* a picture's name inside a sentence: "Gold medal" is "gold medal"; "TV" stays */
+const lkLow=w=>/^[A-Z][a-z]/.test(w)?w.charAt(0).toLowerCase()+w.slice(1):w;
+const lkQ=w=>'\u201c'+w+'\u201d';
+function lkRec(){return window.NBHLink?NBHLink.readLk(S.meta.lk||''):null;}
+/* the token form written from the book: "Stars on the token board book (Form TK-1); the last one is a gold medal with an
+   orange double border, so the student can see it opens the exchange." The book's count is not written into the free
+   text (tokens per exchange holds the count); the last token is said to open the exchange only while this plan has no
+   count of its own or the same one as the book, so the plan never contradicts itself. */
+const lkSameN=b=>{const ep=lkT(S.meta.epN);return !ep||(!!b.n&&+ep===+b.n);};
+function lkTokText(b){const nm=lkT(b.tok)||'token',p=lkPl(nm),last=lkLow(lkT(b.last)),why=lkSameN(b)?', so the student can see it opens the exchange':'';
+  let t=p.charAt(0).toUpperCase()+p.slice(1)+' on the token board book (Form TK-1)';
+  if(b.term==='pic'&&last)t+='; the last one is '+lkAn(last)+' with an orange double border'+why;
+  else if(b.term==='ring'||b.term==='pic')t+='; the last one has an orange double border'+why;
+  return t+'.';}
+/* the book's choice cards against this menu: matched when equal, or near (shown as ≈): the shared near(), or the
+   card's words (4 characters or more) standing as whole words inside a backup's name ("Magnetic tiles" ≈ "Five minutes
+   with the magnetic tiles"). no: the cards whose backup this plan records as not a reinforcer (RA-1: No). */
+function lkMenu(b){const N=NBHLink,rows=S.bk.filter(r=>lkT(r.n)),names=rows.map(r=>lkT(r.n)),seen={},cards=[];
+  b.ch.map(lkT).filter(Boolean).forEach(c=>{const k=N.norm(c);if(!seen[k]){seen[k]=1;cards.push(c);}});
+  const eq=(x,y)=>N.norm(x)===N.norm(y),words=x=>' '+N.norm(x).replace(/[^\p{L}\p{N}']+/gu,' ').trim()+' ';
+  const inW=(c,n)=>{const a=words(c);return a.trim().length>=4&&!eq(c,n)&&words(n).includes(a);};
+  const nr=(c,n)=>N.near(c,n)||inW(c,n);
+  const missing=cards.filter(c=>!names.some(n=>eq(n,c)||nr(c,n)));
+  const nearP=cards.map(c=>names.some(n=>eq(n,c))?null:(n=>n?[c,n]:null)(names.find(n=>nr(c,n)))).filter(Boolean);
+  const notCards=names.filter(n=>!cards.some(c=>eq(c,n)||nr(c,n)));
+  const no=cards.filter(c=>rows.some(r=>(eq(r.n,c)||nr(c,r.n))&&/^no$/i.test(lkT(r.conf))));
+  return {names,cards,missing,nearP,notCards,no};}
+/* the case's behaviors, when the workstation has sent them (Form TB-1's, or Form FS-1's) */
+function lkFacts(){const C=window.nbhCase,f=C&&C.facts&&Array.isArray(C.facts.behaviors)?C.facts.behaviors:null;return f&&f.length?f:null;}
+/* a behavior to reduce (the core's problem()): the case's problem behaviors (the case fill puts Form TB-1's first
+   behavior here, often the problem behavior), those seen at an earlier compare (this record's pb, and the book's), or
+   the common words for one. It is checked for this plan's behavior and for the book's card offered into it. */
+function lkProblem(t,pb){const lk=lkRec()||{};return NBHLink.problem(t,{facts:lkFacts()||[],seen:[].concat(lk.pb||[],pb||[])});}
+function lkRows(b){const m=S.meta,N=NBHLink,out=[];
+  out.push(N.whoRow({client:m.client,sid:m.sid},{client:b.client,sid:b.sid},{other:'TK-1',meWhat:'this plan'}));
+  /* the behavior against the book's card for it: the card the book paired with this behavior (a Take or a Keep there,
+     or found equal to it), else the card whose label is this behavior (or near it), else none; with no behavior here,
+     the book's paired card, or its first card, offered (unticked) as the words to restate */
+  const beh=lkT(m.beh),prob=lkProblem(beh,b.pb),long=beh.length>40;
+  const pairOk=!!b.paired&&Array.isArray(b.pair)&&N.hash(N.norm(beh))===b.pair[1]&&N.hash(N.norm(b.cardLabel))===b.pair[0];
+  let ci=b.card,cl=lkT(b.cardLabel);
+  if(beh&&!b.paired){ci=b.tg.findIndex(t=>!!lkT(t)&&(N.norm(t)===N.norm(beh)||N.near(t,beh)));cl=ci>=0?lkT(b.tg[ci]):'';}
+  const card='target card '+(ci+1),cprob=!beh&&cl?lkProblem(cl,b.pb):null,bi=[];
+  if(beh&&b.paired)bi.push(pairOk?'The book pairs its '+card+', '+lkQ(cl)+', with this behavior.':
+    'The book\u2019s '+card+', '+lkQ(cl)+', was paired with this plan\u2019s behavior, and one of the two has changed since; Compare on Form TK-1 to pair them again.');
+  else if(!beh&&cl)bi.push('The book\u2019s '+card+' is '+lkQ(cl)+(b.paired?' (paired with the behavior there).':' (not paired with a behavior).'));
+  if(long&&!pairOk&&!N.near(beh,cl))bi.push('A card holds 40 characters; write a short label on Form TK-1\u2019s Targets and press Keep there to pair it with this behavior.');
+  if(!beh&&cl&&!cprob&&!lkFacts())bi.push('This plan cannot see Form TB-1\u2019s problem behaviors here (the workstation sends them with the case), so take it only if it is a behavior to increase.');
+  out.push({key:'beh',what:'Behavior the tokens are earned for',here:beh,there:cl,same:(x,y)=>N.near(x,y)||pairOk,owner:'here',pre:[],can:!beh&&!cprob,mirror:!long&&!prob,
+    keep:prob&&prob.src!=='word'?false:undefined,
+    why:!beh&&cl&&!cprob?'A card label is the child\u2019s word; restate it as a response.':'',
+    warn:[prob?N.problemNote(prob,{lead:'This plan\u2019s behavior',text:beh,fix:'correct it here'}):'',
+      cprob?N.problemNote(cprob,{lead:'The book\u2019s '+card,text:cl,fix:'it is not offered as this plan\u2019s behavior'}):''].filter(Boolean),
+    info:bi,pb:b.pb,took:'the behavior from the book\u2019s '+card});
+  /* the count: 1 or 2 per exchange (establishing the token) and more than 10 are not differences the book can follow
+     (it prints 3 to 10 slots), so they are information, not a row to look at */
+  const ep=lkT(m.epN),bn=lkT(b.n),epI=/^\d+$/.test(ep)?+ep:NaN,odd=!!bn&&epI>=1&&(epI<3||epI>10)&&epI!==+bn,diff=!!ep&&!!bn&&+ep!==+bn;
+  if(odd)out.push({info:epI<3?'This plan opens the exchange after '+epI+(epI===1?' token':' tokens')+' (establishing the token); the book prints 3 to 10 slots (now '+bn+').':
+    'This plan opens the exchange after '+epI+' tokens; the book holds 10 at most (now '+bn+').'});
+  else out.push({key:'n',what:'Tokens per exchange',here:ep,there:bn,same:(x,y)=>x!==''&&y!==''&&+x===+y,owner:'here',pre:[],can:!ep,mirror:true,
+    why:diff?'The book prints '+bn+' slots; this plan opens the exchange after '+ep+'. Change the book on Form TK-1 (Compare there).':'',
+    took:'tokens per exchange '+bn});
+  /* the token form: written for an empty field (ticked only while the book's count agrees with this plan's, since the
+     words then say the last token opens the exchange); a different one is only offered (Replace, never ticked) */
+  const tf=lkT(m.tokForm),tt=lkTokText(b);
+  out.push({key:'tok',what:'Token form',here:tf,there:lkT(b.tok),same:(x,y)=>N.tokSame(x,y),owner:'',pre:lkSameN(b)?['fill']:[],board:b,
+    takeLabel:tf?'Replace':'Take',preview:tf&&N.tokSame(tf,b.tok)?'':(tf?'Replace with: ':'Writes: ')+tt,
+    took:'the token form from the book'+(tf?' (was '+lkQ(tf.length>40?tf.slice(0,39)+'\u2026':tf)+')':''),text:tt});
+  /* the menu: the cards to add can be picked one by one (all are picked at first) */
+  const M=lkMenu(b),info=[],pick=M.missing.filter(c=>!lkPick.off[N.norm(c)]);
+  M.nearP.forEach(([c,n])=>info.push('Card '+lkQ(c)+' \u2248 backup '+lkQ(n)+'.'));
+  if(M.notCards.length)info.push('On this menu but not on a choice card: '+M.notCards.join(', ')+'.');
+  out.push({key:'menu',what:'Backup menu',here:M.names,there:M.cards,same:()=>!M.missing.length&&M.cards.length>0,owner:'here',pre:[],can:pick.length>0,mirror:true,
+    choose:M.missing.length>1?{labels:M.missing,on:M.missing.map((c,i)=>pick.includes(c)?i:-1).filter(i=>i>=0),label:'Choice cards to add'}:null,
+    preview:M.missing.length?(pick.length?'Adds '+(pick.length===1?'a backup row':pick.length+' backup rows')+' (class and cost to fill in): '+pick.join(', ')+'.':'No card is picked to add.')+
+      (M.missing.length>1?' Tap a card\u2019s name above to leave it out or put it back.':''):'',
+    warn:M.no.map(c=>'Card '+lkQ(c)+' is a backup this plan records as not a reinforcer (RA-1).'),
+    info,took:(pick.length===1?'1 choice card':pick.length+' choice cards')+' added to the backup menu',add:pick});
+  if(b.term==='ring'||b.term==='pic')out.push({info:'The book marks the last token: an orange double border'+(b.term==='pic'&&lkT(b.last)?' ('+lkLow(lkT(b.last))+')':'')+'.'});
+  if(b.term!=='none'&&diff&&!odd&&+bn>0)out.push({info:'The book marks its '+lkOrd(+bn)+' token as the last, but this plan opens the exchange after '+ep+'.'});
+  return out;}
+/* a card's name on the menu row: tapping it leaves it out of the take, or puts it back */
+function lkChoose(key,i,b){if(key!=='menu'||!b)return false;const c=lkMenu(b).missing[i];if(!c)return true;const k=NBHLink.norm(c);
+  if(lkPick.off[k])delete lkPick.off[k];else lkPick.off[k]=1;return true;}
+/* each take checks this plan again as it is now; the core has already skipped a row whose value here changed */
+function lkTake(r){const m=S.meta,N=NBHLink;
+  if(r.key==='who'){Object.keys(r.fillParts||{}).forEach(k=>{if(!lkT(m[k]))m[k]=r.fillParts[k];});return;}
+  if(r.key==='beh'){const t=lkT(r.there);if(lkT(m.beh)||!t||lkProblem(t,r.pb))return false;m.beh=t;return;}
+  if(r.key==='n'){if(lkT(m.epN))return false;m.epN=lkT(r.there);return;}
+  if(r.key==='tok'){if(lkT(m.tokForm)!==lkT(r.here))return false;m.tokForm=r.board?lkTokText(r.board):r.text;return;}
+  if(r.key==='menu'){const names=S.bk.map(x=>lkT(x.n)).filter(Boolean),add=(r.add||[]).filter(c=>!names.some(n=>N.norm(n)===N.norm(c)||N.near(n,c)));
+    if(!add.length)return false;
+    add.forEach(n=>{const row={n,c:'',cost:'',pref:'',conf:'',note:'Choice card in the token board book (Form TK-1)'};
+      const i=S.bk.findIndex(x=>['n','c','cost','pref','conf','note'].every(f=>!lkT(x[f])));if(i>=0)S.bk[i]=row;else S.bk.push(row);});return;}
+  return false;}
+/* the hints beside the count and the menu, and the print line, from the record's last board. A compare that found
+   another student shows none of them. */
+function lkHints(){if(!lkApi)return;const lk=lkRec(),on=!!lk&&lk.on===1,L=on?lk.last:null,b=on&&lk.board&&L&&L.res!=='who'?lk.board:null,when=b?lkDay(L.when):'';
+  $$('.lk-onlyprint').forEach(e=>e.classList.toggle('noprint',!on));
+  const hn=$('#lkHintN'),hb=$('#lkHintBk'),pr=$('#lkPrint'),ep=lkT(S.meta.epN);
+  if(b&&b.n){hn.textContent='Form TK-1\u2019s board prints '+b.n+' slots (compared '+when+').'+(ep&&+ep!==+b.n?' This plan opens the exchange after '+ep+'.':'');hn.hidden=false;}else{hn.textContent='';hn.hidden=true;}
+  const M=b?lkMenu(b):null;
+  if(M&&M.cards.length){hb.textContent='Choice cards in the book (compared '+when+'): '+M.cards.join(', ')+'; '+(M.missing.length?(M.missing.length===1?'1 is':M.missing.length+' are')+' not on this menu.':'all are on this menu.')+
+    (M.no.length?' '+M.no.map(lkQ).join(', ')+(M.no.length===1?' is a backup':' are backups')+' this plan records as not a reinforcer (RA-1).':'');hb.hidden=false;}else{hb.textContent='';hb.hidden=true;}
+  /* the print line states what the book holds, under the heading "Student materials: the token board book (Form TK-1)",
+     and says so where the book's count is not this plan's */
+  if(on){let t;
+    if(!L)t='Linked with this plan; not compared yet.';
+    else if(L.res==='who')t='Compared on '+lkDay(L.when,1)+': the book names another student.';
+    else{const f=[],tk=b&&lkT(b.tok)?lkPl(lkLow(lkT(b.tok))):'';
+      if(b&&b.n)f.push(b.n+' slots'+(tk?' of '+tk:'')+(ep&&+ep!==+b.n?' (this plan: '+ep+' per exchange)':''));else if(tk)f.push(tk);
+      if(b&&(b.term==='ring'||b.term==='pic'))f.push('the last one '+(b.term==='pic'&&lkT(b.last)?lkAn(lkLow(lkT(b.last)))+' with':'with')+' an orange double border');
+      if(M&&M.cards.length)f.push('choice cards '+M.cards.join(', '));
+      t='Compared with this plan on '+lkDay(L.when,1)+(f.length?': '+f.join('; '):'')+'.';}
+    pr.textContent=t;pr.hidden=false;}
+  else{pr.textContent='';pr.hidden=true;}}
+/* renderAll ends here; before the panel is mounted (the first renderAll) there is nothing to paint */
+function lkPaint(){if(!lkApi)return;lkHints();lkApi.render();}
+/* a change to the record is unsaved work: the hidden #teLink gets an input event, which the unsaved-work guard
+   counts as an edit (bindMeta writes the same value back; an empty one is removed again) */
+function lkDirty(){const t=$('#teLink');if(!t)return;t.value=S.meta.lk||'';lkQuiet=true;
+  try{t.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}finally{lkQuiet=false;}if(!S.meta.lk)delete S.meta.lk;}
+/* a book that could not be read: an empty one (no student, no cards: open the student's book there first), or one with
+   its link off (in the workstation, "the open Form TK-1"; a file keeps the core's own words) */
+function lkNoView(o,src){const m=o&&typeof o==='object'&&o.meta&&typeof o.meta==='object'?o.meta:{},shell=!!src&&src.via==='shell';
+  const any=a=>Array.isArray(a)&&a.some(x=>x&&typeof x==='object'&&(lkT(x.k)||lkT(x.ph)||lkT(x.l)));
+  if(!lkT(m.client)&&!lkT(m.sid)&&!any(o&&o.ch)&&!any(o&&o.tg))return 'Form TK-1'+(shell?', open in this workstation,':'\u2019s file')+' holds no book yet: open this student\u2019s saved book there (Open data), turn on Link with Form TE-1 on its Setup page, then compare again.';
+  return shell?'The open Form TK-1 has its link off, so it does not name its cards. Turn on Link with Form TE-1 on TK-1\u2019s Setup page, then compare again.':'';}
+if(window.NBHLink){
+  lkApi=NBHLink.mount({me:'TE-1',other:'TK-1',meWhat:'this plan',otherWhat:'the token board book',sibling:'TK-1_Token-Board-Book_v2026-10.html',host:'#lkPanel',
+    get:()=>S.meta.lk||'',
+    /* the board read at this compare goes into the record with it, so the hints and the print line work alone; not
+       while the compare reads as another student's book (it waits for "These are the same student"). The case's
+       problem behaviors, when the workstation has sent them, go in as hashes (pb) for the guard. */
+    set:s=>{if(!s){delete S.meta.lk;lkNewBoard=null;}
+      else{try{const o=JSON.parse(s);let ch=false;
+          if(lkNewBoard&&!(o.last&&o.last.res==='who')){o.board=lkNewBoard;lkNewBoard=null;ch=true;}
+          const f=lkFacts();if(f){const pb=NBHLink.pbOf(f);if(JSON.stringify(o.pb||[])!==JSON.stringify(pb)){if(pb.length)o.pb=pb;else delete o.pb;ch=true;}}
+          if(ch)s=NBHLink.pack(o);}catch(e){}S.meta.lk=s;}
+      lkDirty();},
+    view:o=>{const b=NBHLink.boardOf(o);lkNewBoard=null;lkPick={off:{}};if(!b)return null;
+      lkNewBoard={n:b.n,tok:b.tok,term:b.term,last:b.last,card:b.card,cardLabel:b.cardLabel,ch:b.ch.slice(),tg:b.tg.slice(),paired:b.paired?1:0};
+      if(b.pair)lkNewBoard.pair=b.pair.slice();return b;},
+    noView:lkNoView,
+    rows:lkRows,take:lkTake,choose:lkChoose,snapshot:()=>JSON.stringify(S),
+    /* the snapshot is this form's own S, taken a moment before the take: it goes back as it was */
+    restore:j=>{const o=JSON.parse(j);if(!o||typeof o!=='object'||Array.isArray(o)||!o.meta||typeof o.meta!=='object')throw new Error('not a TE-1 record');
+      S=o;renderAll();lkDirty();},
+    after:()=>{renderAll();}});
+  /* a value placed in the hidden control (the shell's fallback restore) reaches the panel */
+  $('#teLink').addEventListener('input',()=>{if(!lkQuiet)lkPaint();});
+  /* the hints follow the count and the menu as they are typed */
+  ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const t=e.target;if(t&&t.closest&&(t.closest('#bkTbl')||(t.dataset&&t.dataset.m==='epN')))lkHints();}));
+  lkPaint();}
 </script>
 
 <script>
@@ -1135,7 +1807,10 @@ renderAll();
       else if (String(e.value || '').trim()) n++;
     });
     var s = ''; try { s = valueSig(); } catch (err) {}
-    return { filled: n, total: t, sig: s };
+    var st = { filled: n, total: t, sig: s };
+    /* v21.44 the form's whole state (nbh-autosave: a hash of what Save data writes), so a tap counts as a change */
+    try { if (window.nbhState) st = window.nbhState.status(st); } catch (err) {}
+    return st;
   }
   /* The student name this form is holding. The shell compares it against the
      name on the bar, so a form left over from another student is caught before
@@ -1456,8 +2131,14 @@ renderAll();
         inp.files = dt.files;
         inp.dispatchEvent(new Event('change', { bubbles: true }));
       } catch (e) { quiet(false); return res(false); }
-      /* the form reads the file with a FileReader and redraws; give it that time */
-      setTimeout(function(){ quiet(false); res(true); }, 1200);
+      /* the form reads the file with a FileReader and redraws; give it that time. v21.44: a tap or key of the user's
+         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual */
+      var gest = function(){ quiet(false); };
+      document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);
+      setTimeout(function(){
+        document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);
+        quiet(false); res(true);
+      }, 1200);
     });
   }
   /* a short fingerprint of every value, so an edit that changes no count is
@@ -1472,6 +2153,9 @@ renderAll();
     return (h >>> 0).toString(36);
   }
 
+  /* v21.44 what nbh-autosave needs for a form opened on its own: its safety copy and the restore of one */
+  window.nbhBridge = { formId: formId, formTitle: formTitle, who: who, snapshot: snapshot, restoreData: restoreData,
+    ownSave: ownSave, ownOpen: ownOpen, valueSig: valueSig };
   window.addEventListener('message', function(ev){
     var d = ev.data || {};
     if (!d || !d.nbh) return;
@@ -1484,7 +2168,11 @@ renderAll();
       ownSave().then(function(own){
         var snap = snapshot();
         if (own) snap.own = own;
-        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap });
+        /* v21.44 edited: whether this file differs from the form as it was opened (the workstation keeps no copy of a
+           form only opened); status: the form's state as this file holds it, so Save case marks saved exactly what
+           is in the file. Both travel beside the snapshot, never in it, so a case file is unchanged */
+        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap,
+                edited: !!(window.nbhState && window.nbhState.differs(own)), status: filled() });
       });
     } else if (d.nbh === 'restore' && d.snap) {
       var done = function(rep){
@@ -1826,7 +2514,10 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
    entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
    explicitly for every text field, since the browser default differs by platform, and the compact
-   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap.
+   v21.44: the unsaved mark also follows the form's whole state (window.nbhState, the nbh-autosave block), so a tap that
+   changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
+   not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
   var dirty = false;
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
@@ -1836,24 +2527,27 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
   document.addEventListener('click', function(e){
+    if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
-    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
-    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);
   window.addEventListener('beforeunload', function(ev){
     if (window.parent !== window) return;
-    if (!dirty) return;
+    if (!isDirty()) return;
     ev.preventDefault(); ev.returnValue = '';
   });
-  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  function isDirty(){ return dirty || !!(window.nbhState && window.nbhState.unsaved()); }
+  function saved(){ if (window.nbhState) window.nbhState.markSaved(); }
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', isDirty()); }
   setInterval(paint, 2000);
-  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+  window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };
 
   /* the quick Save beside More controls */
   function addQuick(){
@@ -2753,6 +3447,618 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 </script>
 
 
+<script id="nbh-autosave">
+/* nbh-autosave (v21.44): written by tools/blocks/patch-autosave.py from tools/blocks/nbh-copies.js and
+   nbh-autosave.js, each copied byte for byte; change those files and run it again rather than editing this copy. */
+/* nbh-copies (v21.44): where Autosave keeps its safety copies. One store for the workstation and for every form opened
+   on its own: IndexedDB on this site (localStorage only when IndexedDB cannot be opened), in this browser on this device.
+   Nothing here makes a network request. A copy is one record: a case (the student) as one tab saw it, with each form's own
+   saved file and its pictures kept as Blobs. Records are scoped to the folder the page was opened from, so two editions on
+   one website never offer each other's work. Copies older than 14 days are dropped when the list is read; no other copy is
+   ever deleted without the user (over five, the user is asked to delete some). A full store is answered step by step
+   (without pictures, then without the largest forms), never by turning Autosave off; what was left out is written into
+   the record so the restore can say so. A page being hidden or closed cannot wait for IndexedDB: its last word goes into
+   a small slot in localStorage at once (stash) and is folded into the store when a page of this folder next opens. A tab
+   holds a lock (and a heartbeat) named after it while it lives, so another tab never offers its copy as earlier work.
+   The same text is in every form (tools/blocks/patch-autosave.py) and inside the workstation's autosave section. */
+(function () {
+  'use strict';
+  if (window.nbhCopies) return;
+  var DBN = 'nbh-copies', ST = 'copies', DAYS = 14, KEEP = 5, LSP = 'nbh.copies.v2|', OFF = 'nbh.copies.off|';
+  var PIC = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+\/=]{2000,}/gi;
+  var mode = null, blobsOK = true, dbP = null, gen = 0, asked = false;
+  var PEND = 'nbh.copies.pend|', HB = 'nbh.copies.hb|', held = {};
+
+  function scope() {
+    try { var m = /^nbh-(?:own|tab)\|([^|]*)\|/.exec(String(window.name || '')); if (m && m[1]) return decodeURIComponent(m[1]); } catch (e) {}
+    var h = String(location.href).split('#')[0].split('?')[0];
+    if (/^about:/.test(h)) { try { h = String(parent.location.href).split('#')[0].split('?')[0]; } catch (e) { return 'about:'; } }
+    return h.slice(0, h.lastIndexOf('/') + 1);
+  }
+  function ls() { try { var s = window.localStorage; s.setItem('nbh.copies.t', '1'); s.removeItem('nbh.copies.t'); return s; } catch (e) { return null; } }
+  function openDb() {
+    if (dbP) return dbP;
+    dbP = new Promise(function (res) {
+      var r, done = false, fin = function (v) { if (!done) { done = true; res(v); } };
+      try { if (!window.indexedDB) return fin(null); r = indexedDB.open(DBN, 1); } catch (e) { return fin(null); }
+      setTimeout(function () { fin(null); }, 5000);   /* a browser that never answers counts as no store */
+      r.onupgradeneeded = function () { try { var db = r.result; if (!db.objectStoreNames.contains(ST)) db.createObjectStore(ST, { keyPath: 'key' }); } catch (e) {} };
+      r.onsuccess = function () { var db = r.result; try { db.onversionchange = function () { db.close(); dbP = null; }; } catch (e) {} fin(db); };
+      r.onerror = function () { fin(null); };
+    });
+    return dbP;
+  }
+  /* 'idb', 'ls' or null (nothing can be kept here: Autosave is then silently off) */
+  var readyP = null;
+  function ready() {
+    if (readyP) return readyP;
+    readyP = openDb().then(function (db) {
+      if (db) { mode = 'idb'; return mode; }
+      mode = ls() ? 'ls' : null; return mode;
+    }, function () { mode = ls() ? 'ls' : null; return mode; });
+    return readyP;
+  }
+  function quotaErr(e) {
+    var n = e && (e.name || ''), c = e && e.code;
+    return n === 'QuotaExceededError' || n === 'NS_ERROR_DOM_QUOTA_REACHED' || c === 22 || c === 1014;
+  }
+  function tx(kind, fn) {
+    return openDb().then(function (db) {
+      if (!db) throw new Error('no store');
+      return new Promise(function (res, rej) {
+        var t, out;
+        try { t = db.transaction(ST, kind); out = fn(t.objectStore(ST)); }
+        catch (e) { return rej(e); }
+        t.oncomplete = function () { res(out && 'result' in out ? out.result : out); };
+        t.onerror = function () { rej(t.error || (out && out.error) || new Error('store error')); };
+        t.onabort = function () { rej(t.error || (out && out.error) || new Error('store aborted')); };
+      });
+    });
+  }
+  function lsKeys() {
+    var s = ls(), out = [], p = LSP + scope();
+    if (!s) return out;
+    for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) out.push(k); }
+    return out;
+  }
+
+  /* ---- pictures out of the text and back ---- */
+  function toBlob(u) {
+    var i = u.indexOf(','), type = u.slice(5, i).split(';')[0], bin = atob(u.slice(i + 1)), a = new Uint8Array(bin.length);
+    for (var j = 0; j < bin.length; j++) a[j] = bin.charCodeAt(j);
+    return new Blob([a], { type: type });
+  }
+  function readAs(b, how) {
+    if (how === 'text' && b && typeof b.text === 'function') return b.text();
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(fr.result); }; fr.onerror = function () { rej(fr.error); };
+      if (how === 'text') fr.readAsText(b); else fr.readAsDataURL(b);
+    });
+  }
+  /* f: {title, total, data, own (the form's own file, text), continued}; opt: {pics: keep pictures, blobs: as Blobs} */
+  function packForm(f, opt) {
+    var out = { title: f.title || '', total: f.total, data: f.data || {}, pics: [], picsLost: f.picsLost || 0, continued: f.continued || null };
+    var own = typeof f.own === 'string' ? f.own : '', pics = [];
+    if (own) {
+      own = own.replace(PIC, function (m) { pics.push(m); return 'nbh-pic:' + (pics.length - 1) + ':'; });
+      if (opt.pics) out.pics = pics.map(function (u) { if (!opt.blobs) return u; try { return toBlob(u); } catch (e) { return u; } });
+      else out.picsLost += pics.length;
+      out.own = opt.blobs ? new Blob([own], { type: 'application/json' }) : own;
+    } else out.own = null;
+    out.size = own.length + pics.reduce(function (n, u) { return n + u.length; }, 0);
+    return out;
+  }
+  function unpackForm(f) {
+    var own = f.own, pics = f.pics || [];
+    return Promise.resolve(own && typeof own !== 'string' ? readAs(own, 'text') : own).then(function (text) {
+      return Promise.all(pics.map(function (p) { return typeof p === 'string' ? p : readAs(p, 'url').catch(function () { return null; }); }))
+        .then(function (urls) {
+          var lost = f.picsLost || 0;
+          if (text) text = text.replace(/nbh-pic:(\d+):/g, function (m, i) { var u = urls[+i]; if (u == null) { if (!(+i < pics.length)) return ''; lost++; return ''; } return u; });
+          var snap = { total: f.total, data: f.data || {} };
+          if (text) snap.own = text;
+          return { title: f.title || '', snap: snap, picsLost: lost, continued: f.continued || null };
+        });
+    });
+  }
+  /* the whole record back as the workstation's case shape: {packet, facts, forms:{id:{title,snap}}, notes:[...]} */
+  function unpack(rec) {
+    var ids = Object.keys(rec.forms || {}), out = { packet: rec.packet || null, facts: rec.facts || null, forms: {}, notes: [], picsLost: {}, continued: {} };
+    return Promise.all(ids.map(function (id) { return unpackForm(rec.forms[id]).then(function (f) { out.forms[id] = { title: f.title, snap: f.snap }; if (f.picsLost) out.picsLost[id] = f.picsLost; if (f.continued) out.continued[id] = f.continued; }); }))
+      .then(function () {
+        Object.keys(out.picsLost).forEach(function (id) { var n = out.picsLost[id]; out.notes.push('Form ' + id + ': ' + n + (n === 1 ? ' picture' : ' pictures') + ' could not be kept in the safety copy (no room in this browser); add ' + (n === 1 ? 'it' : 'them') + ' again.'); });
+        (rec.dropped || []).forEach(function (id) { out.notes.push('Form ' + id + ' was left out of the safety copy for lack of room; its work is not in it.'); });
+        Object.keys(out.continued).forEach(function (id) { out.notes.push('Form ' + id + ' was carried on in its own tab at ' + when(out.continued[id]) + '; if you kept working there, the copy that tab made may be newer.'); });
+        return out;
+      });
+  }
+  function when(iso) { var t = new Date(iso); return isNaN(t) ? '' : t.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); }
+
+  /* ---- write: the whole record, then without pictures, then without the largest forms ---- */
+  function write(rec) {
+    if (mode === 'idb') return tx('readwrite', function (st) { return st.put(rec); }).then(function () { return true; });
+    var s = ls(); if (!s) return Promise.reject(new Error('no store'));
+    try { s.setItem(LSP + rec.scope + '|' + rec.key, JSON.stringify(rec)); return Promise.resolve(true); }
+    catch (e) { return Promise.reject(e); }
+  }
+  function put(rec) {
+    var g = gen;
+    return ready().then(function (m) {
+      if (!m) return { ok: false, why: 'none' };
+      if (g !== gen) return { ok: false, why: 'cleared' };   /* started before Delete all: not written */
+      var ids = Object.keys(rec.forms || {});
+      var hasPics = ids.some(function (id) { var o = rec.forms[id].own; return typeof o === 'string' && (PIC.lastIndex = 0, PIC.test(o)); });
+      PIC.lastIndex = 0;
+      var bySize = ids.slice().sort(function (a, b) { return String(rec.forms[b].own || '').length - String(rec.forms[a].own || '').length; });
+      var keepPics = true, dropped = [], blobs = m === 'idb' && blobsOK, step = 0;
+      function attempt() {
+        var forms = {}, lost = {};
+        ids.forEach(function (id) {
+          if (dropped.indexOf(id) >= 0) return;
+          var p = packForm(rec.forms[id], { pics: keepPics, blobs: blobs });
+          if (p.picsLost) lost[id] = p.picsLost; delete p.size; forms[id] = p;
+        });
+        if (!Object.keys(forms).length) return Promise.resolve({ ok: false, why: 'quota', dropped: dropped });
+        var r = {};
+        for (var k in rec) if (k !== 'forms') r[k] = rec[k];
+        r.v = 2; r.scope = scope(); r.forms = forms; r.dropped = dropped.slice();
+        if (g !== gen) return Promise.resolve({ ok: false, why: 'cleared' });
+        return write(r).then(function () {
+          if (!asked) { asked = true; try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {} }
+          return { ok: true, full: !dropped.length && !Object.keys(lost).length, picsLost: lost, dropped: dropped.slice(), step: step };
+        }, function (e) {
+          step++;
+          if (blobs && e && (e.name === 'DataCloneError' || e.name === 'UnknownError') && step < 3) { blobs = false; blobsOK = false; return attempt(); }
+          /* not a full store (the store closed under the page, say): open it afresh next time */
+          if (!quotaErr(e)) { dbP = null; readyP = null; return { ok: false, why: 'error', error: String(e && (e.name || e.message) || e) }; }
+          if (keepPics && hasPics) { keepPics = false; return attempt(); }
+          keepPics = false;
+          var next = bySize.filter(function (id) { return dropped.indexOf(id) < 0; })[0];
+          if (!next || dropped.length >= ids.length - 1) return { ok: false, why: 'quota', dropped: dropped };
+          dropped.push(next); return attempt();
+        });
+      }
+      return attempt();
+    });
+  }
+  function all() {
+    return ready().then(function (m) {
+      if (m === 'idb') return tx('readonly', function (st) { return st.getAll ? st.getAll() : st.openCursor(); }).then(function (v) { return Array.isArray(v) ? v : []; });
+      if (m === 'ls') { var s = ls(); return lsKeys().map(function (k) { try { return JSON.parse(s.getItem(k)); } catch (e) { return null; } }).filter(Boolean); }
+      return [];
+    }).catch(function () { return []; });
+  }
+  /* a time stamp from a clock that was set ahead counts as now, so it neither stays "newest" nor escapes expiry */
+  function ts(r) { var t = new Date(r && r.saved).getTime(); return isNaN(t) ? NaN : Math.min(t, Date.now()); }
+  function age(r) { var t = ts(r); return isNaN(t) ? Infinity : (Date.now() - t) / 86400000; }
+  /* this folder's copies, newest first; expired ones are removed on the way */
+  var folded = null;
+  function list() {
+    var sc = scope();
+    folded = folded || fold();
+    return folded.then(all).then(function (rows) {
+      var mine = rows.filter(function (r) { return r && r.scope === sc && r.forms; }), keep = [];
+      mine.forEach(function (r) { if (age(r) > DAYS) del(r.key); else keep.push(r); });
+      return keep.sort(function (a, b) { return (ts(b) || 0) - (ts(a) || 0); });
+    });
+  }
+  function del(key) {
+    return ready().then(function (m) {
+      if (m === 'idb') return tx('readwrite', function (st) { return st.delete(key); });
+      if (m === 'ls') { var s = ls(); if (s) s.removeItem(LSP + scope() + '|' + key); }
+    }).then(function () { return true; }, function () { return false; });
+  }
+  /* Delete all: a write already on its way is dropped (gen), and this folder's stashed slots go too */
+  function clear() {
+    gen++;
+    var s = ls(), p = PEND + scope() + '|', ks = [];
+    if (s) { for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); } ks.forEach(function (k) { s.removeItem(k); }); }
+    return list().then(function (rows) { return Promise.all(rows.map(function (r) { return del(r.key); })); });
+  }
+  /* how many copies over KEEP: nothing is deleted to make room (an unanswered copy, or one whose file was never
+     confirmed, may be the only place some work is); the pages ask the user to delete what is no longer needed */
+  function over() { return list().then(function (rows) { return Math.max(0, rows.length - KEEP); }, function () { return 0; }); }
+  /* the last word of a page being hidden or closed: the whole record as text, at once */
+  function stash(rec) {
+    var s = ls(); if (!s || !rec || !rec.key || mode === null) return false;
+    var r = {}; for (var k in rec) r[k] = rec[k];
+    r.v = 2; r.scope = scope(); r.stashed = true;
+    try { s.setItem(PEND + r.scope + '|' + r.key, JSON.stringify(r)); return true; } catch (e) { return false; }
+  }
+  /* stashed slots into the store (once per page, before the first list): a slot newer than the copy replaces it */
+  function fold() {
+    var s = ls(); if (!s) return Promise.resolve(0);
+    var p = PEND + scope() + '|', ks = [];
+    for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); }
+    if (!ks.length) return Promise.resolve(0);
+    return all().then(function (rows) {
+      var have = {}; rows.forEach(function (r) { if (r && r.key) have[r.key] = r; });
+      return ks.reduce(function (pr, k) {
+        return pr.then(function (n) {
+          var d = null; try { d = JSON.parse(s.getItem(k) || 'null'); } catch (e) {}
+          if (!d || !d.key || !d.forms || age(d) > DAYS) { s.removeItem(k); return n; }
+          var h = have[d.key];
+          if (h && !((ts(d) || 0) > (ts(h) || 0))) { s.removeItem(k); return n; }   /* the store already holds this or newer */
+          delete d.stashed;
+          return put(d).then(function (r) { if (r.ok) s.removeItem(k); return n + (r.ok ? 1 : 0); });
+        });
+      }, Promise.resolve(0));
+    }).catch(function () { return 0; });
+  }
+  /* which tabs are open now: each holds a lock named after it for as long as it lives (a tab in the background keeps
+     it, one the browser has thrown away does not), and a heartbeat in localStorage where locks are missing */
+  function hold(tab) {
+    if (!tab || held[tab]) return; held[tab] = 1;
+    try { if (navigator.locks && navigator.locks.request) navigator.locks.request('nbh-tab|' + tab, function () { return new Promise(function () {}); }).catch(function () {}); } catch (e) {}
+    var beat = function () { var s = ls(); try { if (s) s.setItem(HB + tab, String(Date.now())); } catch (e) {} };
+    beat(); setInterval(beat, 5000);
+    window.addEventListener('pagehide', function () { var s = ls(); try { if (s) s.removeItem(HB + tab); } catch (e) {} });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) beat(); });
+  }
+  function live() {
+    var out = {}, s = ls(), now = Date.now(), old = [];
+    if (s) for (var i = 0; i < s.length; i++) {
+      var k = s.key(i); if (!k || k.indexOf(HB) !== 0) continue;
+      var t = +s.getItem(k) || 0;
+      if (now - t < 20000) out[k.slice(HB.length)] = 1; else if (now - t > 86400000) old.push(k);
+    }
+    old.forEach(function (k) { try { s.removeItem(k); } catch (e) {} });
+    var q = null;
+    try { if (navigator.locks && navigator.locks.query) q = navigator.locks.query(); } catch (e) {}
+    return Promise.resolve(q).then(function (r) {
+      ((r && r.held) || []).forEach(function (l) { var n = String(l.name || ''); if (n.indexOf('nbh-tab|') === 0) out[n.slice(8)] = 1; });
+      return out;
+    }, function () { return out; });
+  }
+  function patch(key, fields) {
+    return ready().then(function (m) {
+      if (m === 'idb') return tx('readwrite', function (st) {
+        var g = st.get(key);
+        g.onsuccess = function () { var r = g.result; if (!r) return; for (var k in fields) r[k] = fields[k]; st.put(r); };
+        return g;
+      });
+      if (m === 'ls') { var s = ls(), k2 = LSP + scope() + '|' + key, r = null; try { r = JSON.parse(s.getItem(k2)); } catch (e) {} if (r) { for (var k in fields) r[k] = fields[k]; s.setItem(k2, JSON.stringify(r)); } }
+    }).then(function () { return true; }, function () { return false; });
+  }
+  /* the workstation's single slot of earlier versions (localStorage, `oldKey` and `oldKey.<case id>`): read once, kept as
+     a copy here, then removed */
+  function migrate(oldKey) {
+    var s = ls(); if (!s || !oldKey) return Promise.resolve(0);
+    var keys = [];
+    for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k === oldKey || (k && k.indexOf(oldKey + '.') === 0)) keys.push(k); }
+    return keys.reduce(function (p, k, n) {
+      return p.then(function (done) {
+        var d = null; try { d = JSON.parse(s.getItem(k) || 'null'); } catch (e) {}
+        if (!d || !d.forms || !Object.keys(d.forms).length || age(d) > DAYS) { s.removeItem(k); return done; }
+        var forms = {};
+        Object.keys(d.forms).forEach(function (id) { var f = d.forms[id] || {}, sn = f.snap || {}; forms[id] = { title: f.title || id, total: sn.total, data: sn.data || {}, own: sn.own || '' }; });
+        var who = (d.packet && d.packet.client) || (d.who && d.who.name) || '';
+        var rec = { key: 'old-' + Date.now().toString(36) + '-' + n, kind: 'shell', tab: 'earlier', student: who, who: d.who || null, saved: d.saved,
+          packet: d.packet || null, facts: d.facts || null, caseId: /\.c[a-z0-9]+$/.test(k) ? k.slice(k.lastIndexOf('.') + 1) : null, forms: forms };
+        return put(rec).then(function (r) { if (r.ok) s.removeItem(k); return done + (r.ok ? 1 : 0); });
+      });
+    }, Promise.resolve(0));
+  }
+  function isOff() { var s = ls(); return !!(s && s.getItem(OFF + scope()) === '1'); }
+  function setOff(off) { var s = ls(); if (!s) return; if (off) s.setItem(OFF + scope(), '1'); else s.removeItem(OFF + scope()); }
+  function tabId() { return Date.now().toString(36).slice(-4) + Math.random().toString(36).slice(2, 8); }
+  function same(a, b) {
+    a = String(a || '').toLowerCase().replace(/[^a-z]/g, ''); b = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
+    if (!a || !b || a === b) return true;
+    return a.indexOf(b) === 0 || b.indexOf(a) === 0;   /* a name still being typed; "Myra" is not "Mary" */
+  }
+  window.nbhCopies = { ready: ready, mode: function () { return mode; }, scope: scope, put: put, list: list, del: del, clear: clear, over: over,
+    patch: patch, unpack: unpack, unpackForm: unpackForm, migrate: migrate, isOff: isOff, setOff: setOff, tabId: tabId, same: same, when: when,
+    stash: stash, hold: hold, live: live, DAYS: DAYS, KEEP: KEEP };
+})();
+/* nbh-autosave (v21.44): what a form changed, and its safety copy when it is opened on its own.
+   - window.nbhState: a short hash of what Save data would write (the bridge's silent save, the time stamp left out), so a
+     tap that changes the record (a scored interval, a ranked item, a mark on a grid) counts as a change exactly as typing
+     does. The bridge adds it to the status every form reports to the workstation (its unsaved dot and its Autosave), and
+     the leave guard and the quick Save use it for this form's own unsaved mark. It is worked out again shortly after a
+     tap, a key or a message from the workstation, and every few seconds while the page is changing on its own.
+   - Opened on its own (its own tab, a direct link, not inside the workstation): the form keeps a safety copy of its work
+     in this browser (window.nbhCopies, the same store the workstation uses) a moment after each change and at once when
+     the tab is hidden or closed, and on opening offers back any copy holding this form. A tab the workstation opened
+     with Own tab is handed the work by the workstation and is not offered anything until it has had the chance.
+   - A paragraph in the form's Guide says where the copies are kept and what they are for.
+   Nothing here makes a network request, changes the saved file, or shows anything while nothing is pending; it prints
+   nothing (its parts carry noprint and are hidden on paper). */
+(function () {
+  'use strict';
+  if (window.nbhState) return;
+  var W = window, D = document, C = W.nbhCopies;
+  function B() { return W.nbhBridge || null; }
+  var framed = (function () { try { return W.parent !== W; } catch (e) { return true; } })();
+
+  /* ---- the form's whole state ---- */
+  var H = { own: '', text: null, base: null, saved: null, busy: null, again: false, t: 0, first: 0, frozen: false, saveNext: false, noMark: 0, mut: false, gap: 4000, last: 0, rebase: 0 };
+  var subs = [];
+  function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36) + '-' + s.length.toString(36); }
+  function norm(t) { return String(t).replace(/"(saved|exported|savedAt|exportedAt)"\s*:\s*"[^"]*"/g, ''); }
+  function compute() {
+    var b = B();
+    if (!b || !b.ownSave) return Promise.resolve(H.own);
+    if (H.busy) { H.again = true; return H.busy; }
+    clearTimeout(H.t); H.first = 0;
+    var p = b.ownSave().then(function (text) {
+      var s = took(text, b);
+      H.busy = null;
+      if (H.again) { H.again = false; soon(60); }
+      return s;
+    }, function () { H.busy = null; return H.own; });
+    H.busy = p;
+    return p;
+  }
+  /* a fresh copy of the file (worked out here, or by the bridge for the workstation) brings the hash up to date */
+  function took(text, b) {
+    var s = text ? hash(norm(text)) : ('v' + (b && b.valueSig ? b.valueSig() : ''));
+    var was = H.own;
+    H.text = text || null; H.own = s;
+    if (!H.frozen || H.base === null || Date.now() < H.rebase) H.base = s;   /* rebase: a case file just opened, not a change */
+    if (!H.frozen || H.saved === null || H.saveNext || Date.now() < H.rebase) { H.saved = s; H.saveNext = false; }
+    if (s !== was) for (var i = 0; i < subs.length; i++) { try { subs[i](s); } catch (e) {} }
+    return s;
+  }
+  function soon(ms) { clearTimeout(H.t); H.t = setTimeout(compute, ms); }
+  function touch(e) {
+    if (W.__nbhQuiet || W.__nbhSilent) return;   /* the bridge's own silent save, or the CSV read */
+    var t = e && e.target;
+    if (t && t.closest && t.closest('.nbh-as-ui')) return;
+    if (!H.frozen && H.base !== null) H.frozen = true;   /* from the first tap or key on, a change is the user's */
+    H.rebase = 0;
+    H.gap = 4000;
+    var now = Date.now();
+    if (!H.first) H.first = now;
+    soon(now - H.first > 2500 ? 0 : 450);
+  }
+  ['input', 'change', 'click', 'keyup', 'drop', 'paste', 'cut'].forEach(function (t) { D.addEventListener(t, touch, true); });
+  try {
+    new MutationObserver(function () { if (!H.busy && !W.__nbhQuiet) H.mut = true; })
+      .observe(D.documentElement, { childList: true, subtree: true, characterData: true });
+  } catch (e) {}
+  /* a page that keeps changing on its own (a timer, a walkthrough playing) is looked at less and less often while what
+     Save data would write stays the same: every 4 s at first, then up to every 32 s; a tap or a key starts again at 4 s */
+  setInterval(function () {
+    if (!H.mut || D.hidden || Date.now() - H.last < H.gap) return;
+    H.mut = false; H.last = Date.now(); var was = H.own;
+    compute().then(function (s) { H.gap = s === was ? Math.min(H.gap * 2, 32000) : 4000; });
+  }, 4000);
+  W.addEventListener('message', function (ev) {
+    var d = ev.data || {};
+    if (!d || !d.nbh) return;
+    /* a safety copy put back is work not in a file; a case file opened is where the form now starts (it is in a file), so
+       the workstation keeps no copy of it until something is changed */
+    if (d.nbh === 'restore' && d.snap) { H.frozen = true; if (d.copy) H.noMark = Date.now() + 5000; else H.rebase = Date.now() + 3600; soon(1600); setTimeout(compute, 3200); }
+    else if (d.nbh === 'facts' || d.nbh === 'packet' || d.nbh === 'plan') soon(1000);
+  });
+  /* what Save data would write, at once: a page being closed cannot wait for the bridge's FileReader, so the text is
+     taken from the Blob as the form makes it. null when the form builds its file some other way (the last hash stands) */
+  function syncText() {
+    var btn = D.querySelector('#saveBtn,#btnSave,#dl-json') || Array.prototype.filter.call(D.querySelectorAll('button'), function (x) { return /^\s*save data\s*$/i.test(x.textContent); })[0];
+    if (!btn || !W.Blob) return null;
+    var RB = W.Blob, mk = URL.createObjectURL, clk = HTMLAnchorElement.prototype.click, al = W.alert, cf = W.confirm, pr = W.prompt, q = W.__nbhQuiet, parts = null;
+    try {
+      W.Blob = function (ps, o) { if (!parts && ps && /json/i.test((o && o.type) || 'json')) parts = Array.prototype.slice.call(ps); return new RB(ps, o); };
+      W.Blob.prototype = RB.prototype;
+      URL.createObjectURL = function () { return 'blob:nbh-held'; };
+      HTMLAnchorElement.prototype.click = function () { if (this.getAttribute('href') === 'blob:nbh-held' || this.hasAttribute('download')) return; return clk.apply(this, arguments); };
+      W.alert = function () {}; W.confirm = function () { return true; }; W.prompt = function () { return ''; };
+      W.__nbhQuiet = true;
+      btn.click();
+    } catch (e) { parts = null; }
+    finally { W.Blob = RB; URL.createObjectURL = mk; HTMLAnchorElement.prototype.click = clk; W.alert = al; W.confirm = cf; W.prompt = pr; W.__nbhQuiet = q; }
+    if (!parts) return null;
+    for (var i = 0; i < parts.length; i++) if (typeof parts[i] !== 'string') return null;
+    var t = parts.join('');
+    return t.length > 2 ? t : null;
+  }
+  /* the form as it is this instant, for the workstation's last word when its tab closes (called from the workstation) */
+  function last() {
+    var b = B(); if (!b) return null;
+    var t = null; try { t = syncText(); } catch (e) {}
+    if (t) took(t, b);
+    if (!H.text) return null;
+    var sn = b.snapshot();
+    return { title: b.formTitle(), total: sn.total, data: sn.data, own: H.text, edited: edited() };
+  }
+  function edited() { return H.base !== null && H.own !== H.base; }
+  function unsaved() { return H.saved !== null && H.own !== H.saved && H.own !== H.base; }
+  W.nbhState = {
+    sig: function () { return H.own; },
+    status: function (st) { st.sig = (st.sig || '') + '.' + H.own; st.edited = edited(); return st; },
+    edited: edited,
+    unsaved: unsaved,
+    markSaved: function () { if (Date.now() < H.noMark) return; H.saveNext = true; compute(); },
+    differs: function (text) { if (text && H.base !== null) took(text, B()); return H.base !== null && H.own !== H.base; },
+    now: compute,
+    last: last,
+    text: function () { return H.text; },
+    on: function (f) { subs.push(f); }
+  };
+  function start() { setTimeout(compute, 250); setTimeout(compute, 1400); guide(); css(); }
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', start); else start();
+
+  /* ---- words in the Guide, and the look of the offer ---- */
+  function css() {
+    if (D.getElementById('nbh-autosave-css')) return;
+    var s = D.createElement('style'); s.id = 'nbh-autosave-css'; s.setAttribute('data-nbh-screen', '');
+    s.textContent = '@media print{.nbh-as-ui,.nbh-as-guide{display:none!important}}' +
+      '.nbh-as-dlg{position:fixed;right:16px;bottom:16px;z-index:2147483000;max-width:480px;width:calc(100% - 32px);box-sizing:border-box;max-height:70vh;overflow:auto;border:1px solid #c9d3da;border-radius:6px;padding:14px 16px;color:#16242e;background:#fff;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.18)}' +
+      '.nbh-as-dlg h2{font-size:17px;margin:0 0 8px}.nbh-as-dlg ul{list-style:none;padding:0;margin:10px 0}' +
+      '.nbh-as-dlg li{border-top:1px solid #e3e8ec;padding:9px 0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}' +
+      '.nbh-as-dlg li span{flex:1 1 260px}.nbh-as-dlg small{color:#4a5a66;display:block}' +
+      '.nbh-as-dlg button{font:inherit;min-height:36px;padding:4px 12px;border:1px solid #9fb0bc;border-radius:4px;background:#fff;color:#16242e;cursor:pointer}' +
+      '.nbh-as-dlg button.pri{background:#16242e;color:#fff;border-color:#16242e}.nbh-as-dlg .nbh-as-note{font-size:12.5px;color:#4a5a66;margin:8px 0 12px}';
+    (D.head || D.documentElement).appendChild(s);
+  }
+  var WORDS = '<b>Autosave.</b> While you work, a safety copy of this form is kept in this browser on this device, also when the form is opened on its own, and offered back if the page closes or reloads before you save. Copies never leave the device. They are protected by the iPad’s passcode, not by the form: on a shared iPad, delete them or turn Autosave off (the Autosave button in the workstation). The installed app and Safari keep separate copies, and Safari may clear a site’s storage after 7 days without a visit. A copy is a safety net; the file Save data writes is the record.';
+  function guide() {
+    var g = D.querySelector('#guide, section.only-guide, [data-pane="guide"], #ddlGuide');
+    if (!g || g.querySelector('.nbh-as-guide')) return;
+    var p = D.createElement('p'); p.className = 'nbh-as-guide noprint'; p.innerHTML = WORDS;
+    g.appendChild(p);
+  }
+
+  /* ---- a form opened on its own keeps its own safety copy ---- */
+  if (framed || !C) return;
+  var tab = C.tabId(), seq = 0, key = 'f-' + tab, student = '', lastSig = '', timer = 0, warned = '', handed = false, asked = false, replaces = '', overTold = false;
+  var ownTab = /^nbh-own\|/.test(String(W.name || ''));
+  var IOS = /iP(ad|hone|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  C.hold(tab);
+  function on() { return !!C.mode() && !C.isOff(); }
+  function tell(msg, warn) {
+    try { if (W.nbhUI && W.nbhUI.toast) { W.nbhUI.toast(msg, { kind: warn ? 'warn' : '' }); return; } } catch (e) {}
+  }
+  function record() {
+    var b = B();
+    if (!b || !on() || !unsaved() || !H.text) return null;   /* only work not yet in a file */
+    var id = b.formId(), who = String(b.who() || '').trim();
+    if (student && who && !C.same(student, who)) { seq++; key = 'f-' + tab + '-' + seq; }   /* another student: a copy of its own */
+    if (who) student = who;
+    var sn = b.snapshot(), forms = {};
+    forms[id] = { title: b.formTitle(), total: sn.total, data: sn.data, own: H.text };
+    return { key: key, kind: 'form', tab: tab, form: id, student: student, saved: new Date().toISOString(), forms: forms };
+  }
+  function write() {
+    if (H.own === lastSig) return Promise.resolve(false);
+    var sig = H.own, rec = record();
+    if (!rec) return Promise.resolve(false);
+    return C.put(rec).then(function (r) {
+      if (r.ok) {
+        lastSig = sig;
+        if (replaces && replaces !== rec.key) { C.del(replaces); replaces = ''; }   /* the copy restored here now lives in this one */
+        C.over().then(function (n) { if (n > 0 && !overTold) { overTold = true; tell('Autosave keeps ' + (n + C.KEEP) + ' safety copies in this browser. Delete the ones you no longer need (the Autosave button in the workstation); none is deleted without asking, except after ' + C.DAYS + ' days.', true); } });
+        var w = Object.keys(r.picsLost || {}).length ? 'pics' : '';
+        if (w && warned !== w) { warned = w; tell('Autosave: this browser is short of room, so the safety copy of this form was kept without its pictures. Save data keeps everything.', true); }
+        if (!w) warned = '';
+      } else if (r.why === 'quota' && warned !== 'full') {
+        warned = 'full'; tell('Autosave could not keep a copy: this browser’s storage is full. Autosave stays on and tries again; Save data keeps your work in a file.', true);
+      }
+      return r.ok;
+    }, function () { return false; });
+  }
+  W.nbhState.on(function () { clearTimeout(timer); timer = setTimeout(write, 1200); });
+  function flush() { clearTimeout(timer); write(); }
+  /* closing or reloading: the store's write would not finish, so the latest text is stashed at once as well */
+  function lastWord() {
+    try { if (!on()) return; var t = syncText(); if (t) took(t, B()); if (H.own === lastSig) return; var rec = record(); if (rec) C.stash(rec); } catch (e) {}
+  }
+  D.addEventListener('visibilitychange', function () { if (D.visibilityState === 'hidden') { flush(); compute().then(write); } });
+  W.addEventListener('pagehide', function () { lastWord(); flush(); });
+  /* the form's own Save data: the copy is no longer needed (on an iPad, where the download cannot be confirmed, it is
+     kept and marked); Open or Clear all: the copy stays as it was and later work goes into a new one */
+  D.addEventListener('click', function (e) {
+    if (W.__nbhQuiet || W.__nbhSilent) return;
+    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b || b.closest('.nbh-as-ui')) return;
+    var save = b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent);
+    var clear = b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent);
+    if (save) setTimeout(function () { clearTimeout(timer); lastSig = H.own; if (IOS) C.patch(key, { fileAt: new Date().toISOString() }); else C.del(key); }, 700);
+    else if (clear) setTimeout(seal, 700);
+  }, true);
+  function seal() { clearTimeout(timer); seq++; key = 'f-' + tab + '-' + seq; lastSig = ''; replaces = ''; }
+  D.addEventListener('change', function (e) {
+    var t = e.target; if (W.__nbhQuiet || !t || t.type !== 'file' || !t.matches('#fileIn,#fileImport,#file-input')) return;
+    lastWord(); flush(); seal();
+  }, true);
+
+  /* the workstation's Own tab: it asks whether this tab is ready, then hands over the work */
+  W.addEventListener('message', function (ev) {
+    var d = ev.data || {};
+    if (!d || (d.nbh !== 'as-hello' && d.nbh !== 'as-take')) return;
+    if (!W.opener || ev.source !== W.opener) return;
+    var b = B(); if (!b) return;
+    var reply = function (m) { try { ev.source.postMessage(m, '*'); } catch (e) {} };
+    if (d.nbh === 'as-hello') { reply({ nbh: 'as-here', id: b.formId() }); return; }
+    if (handed || !d.snap) return;
+    handed = true;
+    H.frozen = true; H.noMark = Date.now() + 5000;
+    var done = function (ok) {
+      try { W.name = 'nbh-tab|' + encodeURIComponent(C.scope()) + '|'; } catch (e) {}
+      lastSig = ''; soon(300); setTimeout(compute, 1700);
+      reply({ nbh: 'as-taken', id: b.formId(), ok: ok });
+    };
+    if (d.snap.own && b.ownOpen) b.ownOpen(d.snap.own).then(function (ok) { if (!ok) b.restoreData(d.snap); done(true); });
+    else { b.restoreData(d.snap); done(true); }
+  });
+
+  function ago(iso) {
+    var t = new Date(iso).getTime(), m = Math.round((Date.now() - t) / 60000);
+    if (isNaN(t)) return '';
+    return m < 1 ? 'just now' : m < 60 ? m + ' minute' + (m === 1 ? '' : 's') + ' ago' : m < 1440 ? Math.round(m / 60) + ' hour' + (Math.round(m / 60) === 1 ? '' : 's') + ' ago' : C.when(iso);
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function offer() {
+    if (asked || handed || !on()) return;
+    asked = true;
+    var b = B(); if (!b) return;
+    var id = b.formId();
+    Promise.all([C.list(), C.live()]).then(function (x) {
+      var rows = x[0], alive = x[1];
+      /* a copy a tab still open is keeping is that tab's work in progress, not earlier work */
+      var mine = rows.filter(function (r) { return r.tab !== tab && !alive[r.tab] && r.forms && r.forms[id]; });
+      if (!mine.length || handed) return;
+      show(mine, id);
+    });
+  }
+  function show(rows, id) {
+    var old = D.getElementById('nbhAsDlg'); if (old) old.remove();
+    /* a panel in the corner, not a modal box: it takes no focus and blocks nothing, so a key pressed for the form can
+       never restore an old copy by accident, and the form can be used while the question waits */
+    var dl = D.createElement('aside'); dl.id = 'nbhAsDlg'; dl.className = 'nbh-as-ui nbh-as-dlg noprint';
+    dl.setAttribute('role', 'region'); dl.setAttribute('aria-labelledby', 'nbhAsH');
+    var items = rows.map(function (r, i) {
+      var n = Object.keys(r.forms).length, where = r.kind === 'form' ? 'this form on its own' : 'the workstation' + (n > 1 ? ', with ' + (n - 1) + ' other form' + (n === 2 ? '' : 's') : '');
+      var note = r.fileAt ? '<small>Also saved to a file at ' + esc(C.when(r.fileAt)) + '.</small>' : '';
+      var canDel = r.kind === 'form' || n === 1;
+      return '<li><span><b>' + esc(r.student || 'Student not named') + '</b> · ' + esc(ago(r.saved)) + '<small>From ' + esc(where) + '.</small>' + note +
+        (canDel ? '' : '<small>Delete it from the Autosave box in the workstation.</small>') + '</span>' +
+        '<button type="button" class="pri" data-as="r" data-i="' + i + '">Restore</button>' +
+        (canDel ? '<button type="button" data-as="d" data-i="' + i + '">Delete</button>' : '') + '</li>';
+    }).join('');
+    dl.innerHTML = '<h2 id="nbhAsH" style="font-size:16px;margin:0 0 6px">Unsaved work found in this browser</h2>' +
+      '<p>A safety copy of this form from an earlier session is still on this device.</p><ul>' + items + '</ul>' +
+      '<p class="nbh-as-note">Not now keeps the copies; they are offered again next time. Copies stay in this browser on this device and never leave it; they are deleted after ' + C.DAYS + ' days. They are protected by the iPad’s passcode, not by the form: on a shared iPad, delete them. In a private window they end when the window closes. A copy is a safety net; Save data writes the record.</p>' +
+      '<p><button type="button" data-as="x">Not now</button></p>';
+    dl.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('button[data-as]') : null; if (!t) return;
+      var r = rows[+t.getAttribute('data-i')], how = t.getAttribute('data-as');
+      if (how === 'x') { close(); return; }
+      if (how === 'd') { C.del(r.key).then(function () { rows.splice(rows.indexOf(r), 1); if (rows.length) show(rows, id); else close(); }); return; }
+      var go = function () { close(); restore(r, id); };
+      /* work done on the form since it opened is replaced by the copy: ask first */
+      if (unsaved() && W.nbhUI && W.nbhUI.confirm) W.nbhUI.confirm('Restore the safety copy?\nWhat is on this form now is replaced by it.', { ok: 'Restore' }).then(function (y) { if (y) go(); });
+      else go();
+    });
+    function close() { dl.remove(); }
+    D.body.appendChild(dl);
+  }
+  function restore(r, id) {
+    var b = B(); if (!b) return;
+    C.unpackForm(r.forms[id]).then(function (f) {
+      H.frozen = true; H.noMark = Date.now() + 5000;
+      var fin = function () {
+        /* carry on in a copy of this tab's own (two tabs never share one); a form's own copy restored here is removed
+           once this tab has written it again */
+        seal(); student = r.student || ''; if (r.kind === 'form') replaces = r.key;
+        lastSig = ''; soon(300); setTimeout(compute, 1700);
+        var msg = 'Restored the safety copy from ' + ago(r.saved) + '.';
+        if (f.picsLost) msg += ' ' + f.picsLost + (f.picsLost === 1 ? ' picture' : ' pictures') + ' could not be kept in the copy (no room in this browser); add ' + (f.picsLost === 1 ? 'it' : 'them') + ' again.';
+        if (f.continued) msg += ' This form was carried on in its own tab at ' + C.when(f.continued) + '; the copy that tab made may be newer.';
+        msg += ' Save data keeps it in a file.';
+        try { if (W.nbhUI && W.nbhUI.alert) W.nbhUI.alert(msg); } catch (e) {}
+      };
+      if (f.snap.own && b.ownOpen) b.ownOpen(f.snap.own).then(function (ok) { if (!ok) b.restoreData(f.snap); fin(); });
+      else { b.restoreData(f.snap); fin(); }
+    });
+  }
+  C.ready().then(function () {
+    if (ownTab && W.opener) setTimeout(offer, 6000);   /* the workstation hands over the work first */
+    else setTimeout(offer, 1200);
+  });
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
