@@ -1,7 +1,7 @@
 # NBH writing-help relay (public_html/ai/.htaccess)
 #
 # Every request under /ai/ is answered by index.php, which serves only its own routes:
-#   POST /ai/api/redeem        POST /ai/api/rewrite        GET /ai/api/health
+#   POST /ai/api/redeem        POST /ai/api/rewrite        POST /ai/api/session/end    GET /ai/api/health
 #   GET  /ai/admin             /ai/api/admin/...           GET /ai/ (sends you to /ai/admin)
 # and answers 404 to anything else. No other file in this folder is ever sent, listed or run.
 
@@ -14,8 +14,12 @@ DirectoryIndex index.php
 
     # https only: a plain http address is sent to the same address with https.
     RewriteCond %{HTTPS} !=on
-    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    # Behind a proxy that ends https for the site and passes requests on over http (GoDaddy's Website Security,
+    # a CDN), the rule above would send every request round again: put a # before its two lines, take the # off
+    # the two below, and set 'TRUST_PROXY_HTTPS' => true in nbh-relay/config.php (the proxy says https in a header).
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
     # index.php itself: leave it be (stops the rewrite repeating).
     RewriteRule ^index\.php$ - [L]

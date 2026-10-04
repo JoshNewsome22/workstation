@@ -155,12 +155,18 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   function filled(e){ return (e.type === 'checkbox' || e.type === 'radio') ? e.checked : !!String(e.value || '').trim(); }
   U.progress = function(){
+    /* (v21.43) a form that draws its rows again (the same number of fields, so the count below does not change) leaves
+       the old ones out of the page: the map is made again, or the dots would count only what was not redrawn */
+    if (MAP && Object.keys(MAP).some(function(k){ return MAP[k].some(function(e){ return !e.isConnected; }); })) MAP = null;
     if (!MAP) MAP = buildMap();
     if (!MAP) return null;
-    var out = {};
+    var out = {}, own = typeof window.__nbhViewFill === 'function' ? window.__nbhViewFill : null;
     Object.keys(MAP).forEach(function(k){
       var list = MAP[k].filter(function(e){ return e.isConnected; }), n = 0;
       list.forEach(function(e){ if (filled(e)) n++; });
+      /* a form can count a view itself (Form TK-1: a card with a picture is filled; its label is optional) */
+      var o = null; if (own) { try { o = own(k); } catch (e) { o = null; } }
+      if (o && typeof o.total === 'number' && typeof o.filled === 'number') { n = o.filled; list = { length: o.total }; }
       out[k] = { filled: n, total: list.length };
       var b = document.querySelector('#viewSeg button[data-view="' + k + '"]');
       if (b) {

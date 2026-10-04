@@ -93,7 +93,7 @@ HTML;
     /**
      * @param list<string> $warnings
      */
-    public static function dashboard(string $base, string $csrf, array $warnings, string $nonce): string
+    public static function dashboard(string $base, array $warnings, string $nonce): string
     {
         $notes = '';
         if ($warnings !== []) {
@@ -103,7 +103,21 @@ HTML;
             }
             $notes .= '</ul></section>';
         }
+        // The admin page's CSRF token is not in this page: the sign-in answer gives it to the tab that signed in, which keeps
+        // it in sessionStorage, so a script elsewhere on the website (which can fetch this page with the cookie) cannot
+        // read it. A tab without it (a new tab, a restored one) is asked for the password again.
         $main = <<<HTML
+<section class="card" id="again" hidden aria-labelledby="h-again">
+  <h2 id="h-again">Sign in again in this tab</h2>
+  <p class="muted">The admin page keeps its sign-in to the browser tab it was made in. Enter the admin password to use this tab.</p>
+  <form id="f-again" novalidate>
+    <label for="pw-again">Admin password</label>
+    <input id="pw-again" type="password" autocomplete="current-password" required>
+    <div class="row"><button type="submit">Sign in</button></div>
+    <p class="msg" id="again-msg" role="status" aria-live="polite"></p>
+  </form>
+</section>
+<div id="dash">
 <section class="card" aria-labelledby="h-new">
   <h2 id="h-new">New passcode</h2>
   <p class="muted">A passcode unlocks "Rewrite with Claude" once, in one browser tab, for the session length shown under Status. Give it to the person yourself (in person, by phone or text), not inside a saved file.</p>
@@ -146,16 +160,16 @@ HTML;
 {$notes}
 <div class="row bar"><button type="button" class="quiet" id="refresh">Refresh</button><button type="button" class="quiet" id="signout">Sign out</button></div>
 <p class="msg" id="page-msg" role="status" aria-live="polite"></p>
+</div>
 HTML;
-        return self::layout('Writing-help relay: admin', 'dashboard', $base, $nonce, $main, $csrf);
+        return self::layout('Writing-help relay: admin', 'dashboard', $base, $nonce, $main);
     }
 
-    private static function layout(string $title, string $mode, string $base, string $nonce, string $main, string $csrf = ''): string
+    private static function layout(string $title, string $mode, string $base, string $nonce, string $main): string
     {
         $t = self::e($title);
         $b = self::e($base);
         $n = self::e($nonce);
-        $c = $csrf !== '' ? '<meta name="nbh-csrf" content="' . self::e($csrf) . '">' : '';
         $css = self::CSS;
         $js = self::JS;
         return <<<HTML
@@ -166,7 +180,6 @@ HTML;
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
-{$c}
 <title>{$t}</title>
 <style nonce="{$n}">{$css}</style>
 </head>
@@ -231,8 +244,14 @@ CSS;
 (function () {
   'use strict';
   var BASE = document.documentElement.getAttribute('data-base') || '';
-  var meta = document.querySelector('meta[name="nbh-csrf"]');
-  var CSRF = meta ? meta.getAttribute('content') : '';
+  /* the CSRF token: from the sign-in answer, kept for this tab only (sessionStorage; where that is refused, it comes
+     along in the address's #fragment once and is taken out of it at once). The page itself never carries it. */
+  var KEY = 'nbh.relay.csrf', CSRF = '';
+  try { CSRF = sessionStorage.getItem(KEY) || ''; } catch (e) {}
+  var hm = /^#t=([A-Za-z0-9_-]{20,100})$/.exec(location.hash || '');
+  if (hm) { CSRF = hm[1]; try { sessionStorage.setItem(KEY, CSRF); } catch (e) {} try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  function keep(t) { CSRF = t || ''; try { if (CSRF) sessionStorage.setItem(KEY, CSRF); else sessionStorage.removeItem(KEY); return !CSRF || sessionStorage.getItem(KEY) === CSRF; } catch (e) { return false; } }
+  function enter(t) { location.replace(BASE + '/admin' + (keep(t) ? '' : '#t=' + t)); }
   function $(id) { return document.getElementById(id); }
   /* every element is built here; text goes in as text, never as HTML */
   function el(tag, props, kids) {
@@ -268,7 +287,7 @@ CSS;
   function problem(r, fallback) {
     if (r.status === 0) return 'The relay could not be reached. Check the connection and try again.';
     if (r.status === 401 && r.data.error === 'signed_out') { setTimeout(function () { location.replace(BASE + '/admin'); }, 1500); return 'You were signed out. Sign in again.'; }
-    if (r.status === 403 && r.data.error === 'csrf') return 'This page is out of date. Reload it and try again.';
+    if (r.status === 403 && r.data.error === 'csrf') { keep(''); setTimeout(function () { location.replace(BASE + '/admin'); }, 1500); return 'This tab is not signed in any more. Sign in again.'; }
     var m = typeof r.data.message === 'string' ? r.data.message : (fallback || 'Something went wrong (error ' + r.status + ').');
     if (r.status === 429 && typeof r.data.retry_after === 'number') m += ' (about ' + minutes(r.data.retry_after) + ')';
     return m;
@@ -313,7 +332,7 @@ CSS;
       busy(btn, true); say('signin-msg', 'Signing in…');
       call('POST', '/api/admin/login', {password: pw}).then(function (r) {
         busy(btn, false);
-        if (r.ok) { $('pw').value = ''; say('signin-msg', 'Signed in.', 'ok'); location.replace(BASE + '/admin'); return; }
+        if (r.ok) { $('pw').value = ''; say('signin-msg', 'Signed in.', 'ok'); enter(r.data.csrf); return; }
         say('signin-msg', problem(r), 'bad'); $('pw').select();
       });
     });
@@ -322,6 +341,22 @@ CSS;
   /* ---------------------------------------------------------------- the admin page */
   function dashboardMode() {
     var state = null;
+    /* a tab with no token of its own (a new tab, a restored one, or one whose token was refused): the password again */
+    if (!CSRF) {
+      $('dash').hidden = true; $('again').hidden = false; $('pw-again').focus();
+      $('f-again').addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var pw = $('pw-again').value, btn = this.querySelector('button[type=submit]');
+        if (!pw) { say('again-msg', 'Enter the admin password.', 'bad'); return; }
+        busy(btn, true); say('again-msg', 'Signing in…');
+        call('POST', '/api/admin/login', {password: pw}).then(function (r) {
+          busy(btn, false);
+          if (r.ok) { $('pw-again').value = ''; say('again-msg', 'Signed in.', 'ok'); enter(r.data.csrf); return; }
+          say('again-msg', problem(r), 'bad'); $('pw-again').select();
+        });
+      });
+      return;
+    }
     function load() {
       return call('GET', '/api/admin/state').then(function (r) {
         if (!r.ok) { say('page-msg', problem(r), 'bad'); return; }
@@ -417,7 +452,7 @@ CSS;
     });
     $('refresh').addEventListener('click', function () { say('page-msg', 'Refreshing…'); load(); });
     $('signout').addEventListener('click', function () {
-      call('POST', '/api/admin/logout', {}).then(function () { location.replace(BASE + '/admin'); });
+      call('POST', '/api/admin/logout', {}).then(function () { keep(''); location.replace(BASE + '/admin'); });
     });
     load();
   }

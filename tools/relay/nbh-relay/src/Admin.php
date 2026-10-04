@@ -10,7 +10,9 @@ namespace NBH\Relay;
  * Signing in sets one cookie: __Secure-nbh_admin, a 32-byte random token (kept only as a hash), HttpOnly,
  * Secure, SameSite=Strict, scoped to the relay's folder, ending ADMIN_SESSION_MINUTES after the last use and
  * at most 12 hours after signing in. Every call but signing in also needs the X-CSRF-Token header, a token
- * derived from the cookie that only the page itself receives; every POST is also origin-checked (App).
+ * derived from the cookie that only the sign-in answer carries (never the admin page's HTML, which a script elsewhere
+ * on the same website could fetch with the cookie): the tab that signed in keeps it in its sessionStorage, and another
+ * tab is asked for the password again. Every POST is also origin-checked (App).
  *
  * Wrong passwords pause signing in, per internet address and for everyone together. A browser that has
  * signed in here before carries a second cookie, __Secure-nbh_device (signed with the pepper, 180 days), and
@@ -59,7 +61,7 @@ final class Admin
         if ($s === null) {
             return Response::html(200, Pages::signIn($req->linkBase(), $nonce), $nonce);
         }
-        $res = Response::html(200, Pages::dashboard($req->linkBase(), $this->app->crypto->csrf($s['token']), $this->app->config->warnings, $nonce), $nonce);
+        $res = Response::html(200, Pages::dashboard($req->linkBase(), $this->app->config->warnings, $nonce), $nonce);
         $res->cookies[] = $this->cookie($req, $s['token'], $s['expires_at'] - $this->app->now);
         return $res;
     }

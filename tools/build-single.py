@@ -7,9 +7,12 @@ logo cut out, the PDF scripts as JSON, and a copy of index.html itself - which S
 write a case file that is the workstation again with the case inside it. index.html knows to read
 these blocks when they are present and does nothing different when they are not.
 
-v21.43: every form carries the writing help (<script id="nbh-wording">, tools/blocks/patch-wording.py) and keeps
-its one copy here: a form with none or with two stops the build, and the packed forms are unpacked again and
-checked against the files before anything is written.
+v21.43: every form carries the writing help (<script id="nbh-wording">, tools/blocks/patch-wording.py), the same
+240 KB in each. The packer's gzip cannot share it between forms (deflate looks back 32 KB, the copies are 300 KB and
+more apart), so 44 copies would cost about 4 MB here: like the logo, it is cut out of every form (@@NBH-WORDING@@)
+and kept once, in a block of its own, which index.html puts back as it opens a form. A form with none or with two
+copies, or with a copy unlike the others' (a form not re-patched), stops the build, and the packed forms are
+unpacked again, the writing help and the logo put back, and checked against the files before anything is written.
 
 usage: build-single.py <folder> <out.html>
 """
@@ -22,15 +25,26 @@ files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
 if len(files) != 44:
     sys.exit(f'expected 44 forms in index.html, found {len(files)}')
 WTAG = '\n<script id="nbh-wording">'
-forms = {}
+WHOLE = '@@NBH-WORDING@@'
+forms, files_in, wording = {}, {}, None
 for fn in files:
     s = open(os.path.join(SRC, fn), encoding='utf-8').read()
+    files_in[fn] = s
     if logo not in s:
         sys.exit(f'{fn} does not carry the logo index.html carries')
     if s.count(WTAG) != 1:
         sys.exit(f'{fn} holds {s.count(WTAG)} copies of the writing help (<script id="nbh-wording">), not one: '
                  f'run python3 tools/blocks/patch-wording.py on it')
-    forms[fn] = s.replace(logo, '@@NBH-LOGO@@')
+    if WHOLE in s:
+        sys.exit(f'{fn} already holds {WHOLE}')
+    a = s.index(WTAG) + len(WTAG); b = s.index('</script>', a)
+    if wording is None:
+        wording = s[a:b]
+    elif s[a:b] != wording:
+        sys.exit(f'{fn} holds another copy of the writing help than the forms before it: run python3 tools/blocks/patch-wording.py on every form')
+    if logo in wording:
+        sys.exit('the writing help holds the logo')
+    forms[fn] = (s[:a] + WHOLE + s[b:]).replace(logo, '@@NBH-LOGO@@')
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
 # v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1 load it by <script src>) travels once, as its own block
 pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
@@ -41,12 +55,16 @@ def pack(text):
 def block(bid, text):
     return f'<script type="text/plain" id="{bid}">{text}</script>\n'
 packed = pack(json.dumps(forms, ensure_ascii=False))
+pwording = pack(wording)
 back = json.loads(gzip.decompress(base64.b64decode(packed)).decode('utf-8'))
-if back != forms or any(f.count(WTAG) != 1 for f in back.values()):
+wback = gzip.decompress(base64.b64decode(pwording)).decode('utf-8')
+# as index.html's EMBED.form() opens a form: the logo back, then the writing help back
+if back != forms or wback != wording or any('@@NBH-LOGO@@' not in back[fn] or back[fn].count(WHOLE) != 1 or
+                                             back[fn].replace('@@NBH-LOGO@@', logo).replace(WHOLE, wback) != files_in[fn] for fn in files):
     sys.exit('the packed forms do not unpack to the files, each with its one copy of the writing help')
-blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) +
+blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) + block('nbh-embed-wording', pwording) +
           block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)
-print('wrote', OUT, f'{os.path.getsize(OUT)/1e6:.1f} MB, {len(forms)} forms, each with the writing help once')
+print('wrote', OUT, f'{os.path.getsize(OUT)/1e6:.1f} MB, {len(forms)} forms; the writing help once ({len(wording)/1e3:.0f} KB), put back into each form as it opens')
