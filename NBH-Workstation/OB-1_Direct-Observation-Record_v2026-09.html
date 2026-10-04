@@ -705,10 +705,20 @@ body.view-obs #obRec{display:block}
 .obr-run button{flex:0 1 auto;min-width:44px;min-height:44px;font:600 13px/1.2 var(--nbh-sans);padding:8px 12px;border-radius:6px;
   border:1px solid var(--nbh-slate,#254657);background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer;touch-action:manipulation}
 .obr-run .obr-go{background:var(--nbh-navy,#182e43);border-color:var(--nbh-navy,#182e43);color:#fff;min-width:96px}
+/* with a mouse, Pause and Resume carry the Space hint where the column has room for it, and the button keeps the width of
+   the widest (Resume Space), so End and Save do not slide when recording starts or pauses; in a narrower window the hint
+   is left to the keys line under the panel */
+@media (pointer:fine) and (min-width:1120px){.obr-run .obr-go{min-width:9.9em}}
+@media (pointer:fine) and (max-width:1119.98px){#obrStartK{display:none}}
 /* once the observation has ended, Save to the record is the step left to take */
 .obr-run #obrSave:not(:disabled){background:var(--nbh-navy,#182e43);border-color:var(--nbh-navy,#182e43);color:#fff}
 .obr-run button:focus-visible{outline:3px solid #8FD0FF;outline-offset:2px}
-.obr-clock .obr-msg{margin-top:8px}
+/* v21.44 (A3, fix pass): the messages keep room for three lines, and the status line for two, so a message or a wrapping status line
+   ("paused 1 time", a planned length, a narrow column) moves nothing: not the tiles where the messages sit above them (a
+   phone), not the interval sample below where the clock's column is the taller one (a mouse, no 44 px boxes). Only the
+   longest message, on switching the comparison peer off with counts taken, can take a fourth line. */
+.obr-clock .obr-msg{margin-top:8px;min-height:4.2em}
+.obr-clock .obr-sub{min-height:2.8em}
 .obr-cap{font-size:11.5px;font-weight:600;color:var(--nbh-muted,#54676f);letter-spacing:.03em}
 .obr-big{font:700 46px/1.05 var(--nbh-sans);font-variant-numeric:tabular-nums;color:var(--nbh-navy,#182e43)}
 .obr-sub{font-size:12.5px;color:var(--nbh-muted,#54676f);margin-top:4px;font-variant-numeric:tabular-nums}
@@ -802,8 +812,7 @@ body.view-obs #obRec{display:block}
 @media (max-width:760px){
   .obr{margin:10px 8px 0;padding:10px}
   .obr-main{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:none;grid-template-areas:"clock clock" "s p" "us up" "note note"}
-  /* v21.44 (A3): the messages sit above the tiles here, so two lines are kept for them and a message never moves a tile */
-  .obr-clock .obr-msg{min-height:2.8em}
+  /* v21.44 (A3): the messages sit above the tiles here, in the room kept for them (.obr-clock .obr-msg, above) */
   .obr-big{font-size:38px}
   .obr-ivbody{grid-template-columns:minmax(0,1fr)}
   .obr-tap{min-height:100px}
@@ -816,10 +825,14 @@ body.view-obs #obRec{display:block}
   /* v21.44 (A3): on a touch screen the recorder's buttons and boxes are at least 44 px tall */
   .obr-undo,.obr-ctl button,.obr-ivhd button,.obr-mk2 button,.obr-set .obr-tog,.obr-about,.obr-note button{min-height:44px}
   #obRec input:not([type="checkbox"]):not([type="radio"]),#obRec select{min-height:44px}
+  /* no Space hint on Pause and Resume without a keyboard, so the button keeps its width and End and Save stay put */
+  #obrStartK{display:none}
 }
-/* v21.44 (A3): a short landscape window (an iPad held sideways, on its own or in the workstation): the explanations fold away
-   behind How it works, and the title, How it works and the settings share one line (wrapping where the panel is narrower),
-   so the clock, Start, the count tiles, End, Save and the note box fit one screen together */
+/* v21.44 (A3): a short landscape window, wider than tall and at most 860 px tall: an iPad held sideways, on its own or in the
+   workstation, but also most laptop windows, and an upright 768 x 1024 iPad inside the workstation, whose form frame is
+   768 x 764. The explanations fold away behind How it works, and the title, How it works and the settings share one line
+   (wrapping where the panel is narrower), so the clock, Start, the count tiles, End, Save and the note box fit one screen
+   together, and the interval sample's marks with them while a sample runs */
 @media (orientation:landscape) and (max-height:860px){
   body.view-obs #obRec{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:8px;padding-top:10px}
   .obr>*{flex:0 0 100%;min-width:0;order:2}
@@ -832,9 +845,28 @@ body.view-obs #obRec{display:block}
   .obr-hint{flex:0 0 100%;order:1}
   .obr:not(.obr-open) .obr-hint,.obr:not(.obr-open) .obr-nhint{display:none}
   .obr-main{margin-top:0;padding-top:8px;border-top:1px solid var(--nbh-mist,#eaf2f0)}
-  .obr-main .obr-note{padding-top:8px;padding-bottom:8px}
+  .obr-main .obr-note{padding-top:6px;padding-bottom:6px}
   /* the line saying where the last note went stays one line, so adding a note never moves what is below */
   .obr-note .obr-nlast{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* v21.44 (A3, fix pass): while a sample runs, its + and − have to be on the same screen too. The tiles are a little
+     shorter and the gaps closer; − for both and Undo mark sit beside the student's and the peer's + and −, with the
+     prompt beside them and the strip under them (the marks keep their 50 px) */
+  .obr-tap{min-height:100px;padding-top:9px;padding-bottom:9px}
+  .obr-iv{margin-top:0;padding-top:4px}
+  .obr-ivbody{grid-template-columns:minmax(0,420px) minmax(0,1fr);grid-template-areas:"mks cue" "strip strip";gap:6px 12px;margin-top:4px}
+  .obr-mks{grid-area:mks;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"ms both" "mp undo";gap:4px 6px}
+  .obr-mks>.obr-mk{grid-area:ms;margin:0}
+  .obr-mks>.obr-mk-p{grid-area:mp}
+  .obr-mk2,.obr-ivright{display:contents}
+  #obrBoth{grid-area:both}
+  #obrUndoM{grid-area:undo}
+  .obr-cue{grid-area:cue}
+  .obr-strip{grid-area:strip;margin-top:0}
+  /* after End, Save into and Discard come up under the working part, next to Save to the record; the Recording Summary
+     follows them, then the interval sample */
+  .obr.obr-ended .obr-ctl{order:2;margin-top:0}
+  .obr.obr-ended .obr-sum,.obr.obr-ended .obr-iv,.obr.obr-ended .obr-keys{order:3}
+  .obr-sum{margin-top:0}
 }
 @media print{#obRec,.obr-flash,.obr-pill{display:none!important}}
 </style>
@@ -4177,6 +4209,10 @@ render();
   const box = byId('obRec');
   if(!box || typeof state !== 'object' || !state || typeof render !== 'function' || typeof METHODS !== 'object') return;
   const flashEl = byId('obrFlash'), pill = byId('obrPill'), pillT = byId('obrPillT');
+  /* v21.44 (A3): the working part (clock, Start, End and Save, the tiles, the note box), its row of buttons, the interval
+     marks, and the form's toolbar, which stays at the top of the window in the workstation */
+  const work = box.querySelector('.obr-main') || box, runRow = box.querySelector('.obr-run'), marksEl = box.querySelector('.obr-mks');
+  const barEl = document.querySelector('.toolbar');
   const MINUS = '−', WHO = {s:'the student', p:'the peer'}, WHOC = {s:'Student', p:'Peer'};
   const now = () => performance.now();
   const pad = n => String(n).padStart(2, '0');
@@ -4425,6 +4461,7 @@ render();
     S = {t:e, wall:Date.now(), L:c.len*1000, n:c.n, m:c.m, len:c.len, marks:{s:[], p:[]}, log:[], last:0};
     lockCfg(true); buildStrip(); sched();
     note('Interval sample started: ' + cfgText(c) + ', ' + (R.peer ? 'the student and the peer in the same intervals.' : 'the student only.'));
+    reveal(false);   /* v21.44 (A3, fix pass): the + and − come into view with the tiles, where they were below the window */
   }
   function peerToggle(){
     R.peer = !R.peer; sched();
@@ -4571,15 +4608,17 @@ render();
   function summaryBox(){
     const mins = r1(R.acc/60000), rate = n => mins > 0 ? ', ' + r1(n/mins*60) + ' per hour' : '';
     const ps = R.pauses.filter(p => p.to), out = [];
+    /* v21.44 (A3, fix pass): where it saves comes first, so it shows beside Save to the record even where the summary
+       runs past the foot of the window */
+    const i = resolveInto();
+    out.push(['Saves into', i >= 0 ? 'observation ' + (i + 1) + (existing(state.obs[i]).length ? ', replacing what it holds (you are asked first)' : '')
+      : 'a new observation (observation ' + (state.obs.length + 1) + ')']);
     out.push(['Observed', clock(R.acc) + ' (' + mins + ' min), ' + hm(W(R.wallStart)) + ' to ' + hm(W(R.wallEnd)) + (ps.length ? ', paused ' + plural(ps.length, 'time') : '')]);
     out.push(['Student', plural(R.taps.s.length, 'occurrence') + rate(R.taps.s.length)]);
     out.push(['Comparison peer', R.peer ? plural(R.taps.p.length, 'occurrence') + rate(R.taps.p.length) : 'switched off: the peer count stays empty']);
     if(S){ const m = unscored(), k = r => { let x = 0; for(let j = 0; j < S.n; j++) if(eff(r, j) === '+') x++; return x; };
       out.push(['Interval sample', cfgText(S) + ': the student marked in ' + k('s') + (R.peer ? ', the peer in ' + k('p') : '') + ' of ' + S.n
         + (m.s || m.p ? '; not scored: ' + missText(m) : '') + (sameCfg(cfgNow()) ? '' : '; the toolbar setting has changed since, so the marks cannot be saved')]); }
-    const i = resolveInto();
-    out.push(['Saves into', i >= 0 ? 'observation ' + (i + 1) + (existing(state.obs[i]).length ? ', replacing what it holds (you are asked first)' : '')
-      : 'a new observation (observation ' + (state.obs.length + 1) + ')']);
     E.obrSum.innerHTML = '<b>Recording Summary<\/b><table>' + out.map(([a, b]) => '<tr><th scope="row">' + H(a) + '<\/th><td>' + H(b) + '<\/td><\/tr>').join('') + '<\/table>';
     hide(E.obrSum, false);
   }
@@ -4640,12 +4679,31 @@ render();
     setText(E.obrCue, t); cls(E.obrCue, 'obr-due', due);
     paintStrip(p, cur);
   }
+  /* v21.44 (A3, fix pass): the height the form's toolbar covers at the top of the window (now, or once it has stuck there) */
+  function barOff(now){ if(!barEl || getComputedStyle(barEl).position !== 'sticky') return 0; return now ? Math.max(0, barEl.getBoundingClientRect().bottom) : barEl.offsetHeight; }
+  function inSight(el, top, vh){ if(!el) return false; const r = el.getBoundingClientRect(); return r.height > 0 && r.bottom > top + 1 && r.top < vh - 1; }
+  /* v21.44 (A3, fix pass): bring the recorder back into view. What has to be seen is the working part, and while a sample
+     runs its + and − as well; the panel's title and settings too when all of it fits the window, or else the working part
+     comes to the top under the toolbar. always = false (Start sample) scrolls only when the marks are below the window,
+     and only as far as that needs, never so far that the working part goes under the toolbar. */
+  function reveal(always){
+    const off = barOff(false), vh = window.innerHeight || document.documentElement.clientHeight, need = (S && marksEl) || work;
+    const bt = box.getBoundingClientRect().top, wt = work.getBoundingClientRect().top, nb = need.getBoundingClientRect().bottom;
+    let dy;
+    if(always) dy = (nb - bt + 16 <= vh - off ? bt : wt) - off - 8;
+    else { if(nb <= vh - 8) return; dy = Math.min(nb - vh + 8, wt - off - 8); if(dy <= 0) return; }
+    window.scrollTo(0, Math.max(0, window.scrollY + dy));
+  }
+  /* the pill shows on the other views, and on this one while what recording uses is out of sight, above (under the
+     toolbar) or below the window: the count tiles and Start, End and Save, and the marks while a sample runs. (It used to
+     wait for the whole panel to go; the working part now sits at the panel's top.) */
   function paintPill(e){
     if(!pill) return;
     let show = false;
     if(R.state !== 'ready'){
       if(!document.body.classList.contains('view-obs')) show = true;
-      else { const r = box.getBoundingClientRect(), vh = window.innerHeight || document.documentElement.clientHeight; show = !(r.bottom > 0 && r.top < vh); } }
+      else { const vh = window.innerHeight || document.documentElement.clientHeight, top = barOff(true);
+        show = !(inSight(E.obrTapS, top, vh) || inSight(runRow, top, vh) || (!!S && inSight(marksEl, top, vh))); } }
     hide(pill, !show); if(!show) return;
     const pend = S ? pending(passedOf(e)) : [];
     const t = R.state === 'ended' ? 'Recording ended, not saved yet'
@@ -4671,7 +4729,7 @@ render();
     dis(E.obrTapS, !run); dis(E.obrTapP, !run || !R.peer);
     dis(E.obrUndoS, st === 'ready' || !R.taps.s.length); dis(E.obrUndoP, st === 'ready' || !R.peer || !R.taps.p.length);
     const pp = String(R.peer); if(E.obrPeer.getAttribute('aria-pressed') !== pp) E.obrPeer.setAttribute('aria-pressed', pp);
-    setText(E.obrPeer, R.peer ? 'Counted' : 'Not counted'); cls(box, 'obr-nopeer', !R.peer);
+    setText(E.obrPeer, R.peer ? 'Counted' : 'Not counted'); cls(box, 'obr-nopeer', !R.peer); cls(box, 'obr-ended', ended);
     paintSample(e);
     setText(E.obrStartT, run ? 'Pause' : st === 'pause' ? 'Resume' : 'Start'); hide(E.obrStartK, !live);
     dis(E.obrStart, ended); dis(E.obrEnd, !live); dis(E.obrSave, !ended); dis(E.obrDiscard, st === 'ready');
@@ -4722,12 +4780,9 @@ render();
     if(R.state === 'ended') summaryBox(); paint(); });
   if(pill) pill.addEventListener('click', () => {
     const b = document.querySelector('#viewSeg [data-view="obs"]'); if(b && !document.body.classList.contains('view-obs')) b.click();
-    const bar = document.querySelector('.toolbar'), off = bar && getComputedStyle(bar).position === 'sticky' ? bar.offsetHeight : 0;
-    /* v21.44 (A3): where the whole panel down to the note box does not fit the window, the settings scroll away above
-       and the working part (the clock, the buttons, the tiles and the note box) comes to the top */
-    const work = box.querySelector('.obr-main'), wr = work ? work.getBoundingClientRect() : null;
-    const to = wr && wr.bottom - box.getBoundingClientRect().top + 16 > (window.innerHeight || 0) - off ? work : box;
-    window.scrollTo(0, Math.max(0, to.getBoundingClientRect().top + window.scrollY - off - 8));
+    /* v21.44 (A3): where the whole panel down to the note box (down to the marks while a sample runs) does not fit the
+       window, the settings scroll away above and the working part comes to the top */
+    reveal(true);
     paint();
     try{ (R.state === 'ended' ? E.obrSave : R.state === 'run' ? E.obrTapS : E.obrStart).focus({preventScroll:true}); }catch(e){}
   });
