@@ -7,8 +7,9 @@ Into every form named (default: the 44 forms, NBH-Workstation/[A-Z]*.html):
      each byte for byte, before the polish layer at the end of the body (tools/apply-polish.py puts the polish back at the
      end of the body, so a rebuilt form keeps the same order and a rebuild from parts stays byte for byte). An existing
      copy is replaced.
-  2. Two small changes in the workstation bridge: the status a form reports carries the hash of its whole state
-     (window.nbhState, so taps count), and the parts the form's own safety copy needs are named on window.nbhBridge.
+  2. Three small changes in the workstation bridge: the status a form reports carries the hash of its whole state
+     (window.nbhState, so taps count), the parts the form's own safety copy needs are named on window.nbhBridge, and
+     the answer to a snapshot says beside it whether the form has been changed since it was opened.
   3. Five small changes in the leave guard (nbh-guard): the bridge's silent save (the workstation's Autosave) is not the
      user's Save and clears nothing, and the unsaved mark, the leave warning and the quick Save follow the whole state.
      The same changes are made in tools/blocks/nbh-guard.html, the guard's source, so tools/blocks/patch-guard.py writes
@@ -45,6 +46,11 @@ BRIDGE = [
      "  window.nbhBridge = { formId: formId, formTitle: formTitle, who: who, snapshot: snapshot, restoreData: restoreData,\n"
      "    ownSave: ownSave, ownOpen: ownOpen, valueSig: valueSig };\n"
      "  window.addEventListener('message', function(ev){\n    var d = ev.data || {};\n    if (!d || !d.nbh) return;\n"),
+    ("        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap });\n",
+     "        /* v21.44 edited: whether this file differs from the form as it was opened (the workstation keeps no copy of a\n"
+     "           form only opened); it travels beside the snapshot, never in it, so a case file is unchanged */\n"
+     "        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap,\n"
+     "                edited: !!(window.nbhState && window.nbhState.differs(own)) });\n"),
 ]
 GUARD = [
     ("   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */\n",

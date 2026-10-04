@@ -29,18 +29,23 @@
     if (H.busy) { H.again = true; return H.busy; }
     clearTimeout(H.t); H.first = 0;
     var p = b.ownSave().then(function (text) {
-      var s = text ? hash(norm(text)) : ('v' + (b.valueSig ? b.valueSig() : ''));
-      var was = H.own;
-      H.text = text || null; H.own = s;
-      if (!H.frozen || H.base === null) H.base = s;
-      if (!H.frozen || H.saved === null || H.saveNext) { H.saved = s; H.saveNext = false; }
+      var s = took(text, b);
       H.busy = null;
       if (H.again) { H.again = false; soon(60); }
-      if (s !== was) for (var i = 0; i < subs.length; i++) { try { subs[i](s); } catch (e) {} }
       return s;
     }, function () { H.busy = null; return H.own; });
     H.busy = p;
     return p;
+  }
+  /* a fresh copy of the file (worked out here, or by the bridge for the workstation) brings the hash up to date */
+  function took(text, b) {
+    var s = text ? hash(norm(text)) : ('v' + (b && b.valueSig ? b.valueSig() : ''));
+    var was = H.own;
+    H.text = text || null; H.own = s;
+    if (!H.frozen || H.base === null) H.base = s;
+    if (!H.frozen || H.saved === null || H.saveNext) { H.saved = s; H.saveNext = false; }
+    if (s !== was) for (var i = 0; i < subs.length; i++) { try { subs[i](s); } catch (e) {} }
+    return s;
   }
   function soon(ms) { clearTimeout(H.t); H.t = setTimeout(compute, ms); }
   function touch(e) {
@@ -72,6 +77,7 @@
     edited: edited,
     unsaved: unsaved,
     markSaved: function () { if (Date.now() < H.noMark) return; H.saveNext = true; compute(); },
+    differs: function (text) { if (text && H.base !== null) took(text, B()); return H.base !== null && H.own !== H.base; },
     now: compute,
     text: function () { return H.text; },
     on: function (f) { subs.push(f); }
@@ -103,7 +109,7 @@
 
   /* ---- a form opened on its own keeps its own safety copy ---- */
   if (framed || !C) return;
-  var tab = C.tabId(), seq = 0, key = 'f-' + tab, student = '', lastSig = '', timer = 0, warned = '', took = false, asked = false;
+  var tab = C.tabId(), seq = 0, key = 'f-' + tab, student = '', lastSig = '', timer = 0, warned = '', handed = false, asked = false;
   var ownTab = /^nbh-own\|/.test(String(W.name || ''));
   function on() { return !!C.mode() && !C.isOff(); }
   function tell(msg, warn) {
@@ -111,7 +117,7 @@
   }
   function write() {
     var b = B();
-    if (!b || !on() || !edited() || !H.text || H.own === lastSig) return Promise.resolve(false);
+    if (!b || !on() || !unsaved() || !H.text || H.own === lastSig) return Promise.resolve(false);   /* only work not yet in a file */
     var id = b.formId(), who = String(b.who() || '').trim(), sig = H.own, text = H.text;
     if (student && who && !C.same(student, who)) { seq++; key = 'f-' + tab + '-' + seq; }   /* another student: a copy of its own */
     if (who) student = who;
@@ -143,8 +149,8 @@
     var b = B(); if (!b) return;
     var reply = function (m) { try { ev.source.postMessage(m, '*'); } catch (e) {} };
     if (d.nbh === 'as-hello') { reply({ nbh: 'as-here', id: b.formId() }); return; }
-    if (took || !d.snap) return;
-    took = true;
+    if (handed || !d.snap) return;
+    handed = true;
     H.frozen = true; H.noMark = Date.now() + 5000;
     var done = function (ok) {
       try { W.name = 'nbh-tab|' + encodeURIComponent(C.scope()) + '|'; } catch (e) {}
@@ -162,13 +168,13 @@
   }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function offer() {
-    if (asked || took || !on()) return;
+    if (asked || handed || !on()) return;
     asked = true;
     var b = B(); if (!b) return;
     var id = b.formId();
     C.list().then(function (rows) {
       var mine = rows.filter(function (r) { return r.tab !== tab && r.forms && r.forms[id]; });
-      if (!mine.length || took) return;
+      if (!mine.length || handed) return;
       show(mine, id);
     });
   }

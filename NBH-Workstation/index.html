@@ -2564,10 +2564,13 @@ async function autoSave(force){
   if(!force&&(sig===state.autoSig||Date.now()-A.last<AUTO.every/2))return;   // nothing new, or written in the last ten seconds
   A.busy=true;A.last=Date.now();
   try{
+    let work=!!A.key;
     for(const id of ids){
       const r=await grab(id,'snapshot',null,force?2500:5000);
       if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||''};
+      if((r&&r.edited)||(state.status[id]||{}).edited)work=true;
     }
+    if(!work){state.autoSig=sig;return;}   // forms only opened, nothing done in them yet: no copy
     Object.keys(A.forms).forEach(id=>{if(!state.frames[id])delete A.forms[id];});   // a form closed since is not in the copy
     const forms={};
     Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
