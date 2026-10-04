@@ -139,19 +139,19 @@ function renderTbls(){
   renderSetup();
 }
 function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
-  if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.</div>';return;}
+  if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.'+lkPhrase()+'</div>';return;}
   const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:m.avatar||'av:boy'})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(ntg<6)miss.push((6-ntg)+' of the six targets');
   /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
   const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
   const dup=twice('ch','choices').concat(twice('tg','targets'));if(dup.length)miss.push('the same picture on '+dup.join(', ')+' (change one, unless that is meant)');
-  v.innerHTML='<div class="verdict '+(miss.length?'v-mid':'v-ok')+'"><b>'+(miss.length?'Still open:':'Set up.')+'</b> '+(miss.length?miss.join('; ')+'.':'')+' '+nTok()+' '+esc(plural(tokName()).toLowerCase())+' to earn'+(termOn()?' (the last one marked'+(termMode()==='pic'?': '+esc(lbl(S.tokL[0])||'its own picture').toLowerCase():'')+')':'')+'; '+(m.layout==='rules'?'Rules-row':'First-Then')+' board'+(m.qr?'; QR code on every page':'; no QR code')+'.</div>';}
+  v.innerHTML='<div class="verdict '+(miss.length?'v-mid':'v-ok')+'"><b>'+(miss.length?'Still open:':'Set up.')+'</b> '+(miss.length?miss.join('; ')+'.':'')+' '+nTok()+' '+esc(plural(tokName()).toLowerCase())+' to earn'+(termOn()?' (the last one marked'+(termMode()==='pic'?': '+esc(lbl(S.tokL[0])||'its own picture').toLowerCase():'')+')':'')+'; '+(m.layout==='rules'?'Rules-row':'First-Then')+' board'+(m.qr?'; QR code on every page':'; no QR code')+'.'+lkPhrase()+'</div>';}
 
 /* ---------------- the QR code (qrcode-generator, inlined above; type 0 = automatic, error correction M) ---------------- */
 /* the QR code, made here by qrcode-generator. Plain: black modules, level M. Framed (the default, the assessor's style from the
    Choices file): slate modules, rounded slate finder rings with a green core, SCAN ME in a clear square in the middle, level H
    so the words cost nothing. The core is a deeper green than the tab (#6aa55a): a pale core is read as white by decoders. */
 /* the build of this copy of the form, shown on Setup and on the Preview so it is easy to check that the uploaded file is the new one */
-const BUILD='v21.42i';
+const BUILD='v21.43';
 const QR_SLATE='#698da9',QR_CORE='#6aa55a';
 function qrSvg(url,frame){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const ec=frame?'H':'M';const q=qrcode(0,ec);q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';
@@ -349,7 +349,7 @@ window.addEventListener('afterprint',()=>setTimeout(restoreOrder,300));
 /* ---------------- events ---------------- */
 let tOut=0;function renderOutSoon(){clearTimeout(tOut);tOut=setTimeout(renderOut,180);}
 document.addEventListener('input',e=>{const el=e.target;
-  if(el.id==='tkState'){restoreState(el.value);return;}
+  if(el.id==='tkState'){if(!lkQuiet)restoreState(el.value);return;}
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined&&el.type!=='checkbox'){const a=S[el.dataset.r];if(!a||!a[+el.dataset.i])return;a[+el.dataset.i][el.dataset.f]=el.value;renderOutSoon();return;}
   if(el.dataset.b!==undefined){S.txt[el.dataset.b]=el.value;renderOutSoon();return;}
   if(el.dataset.m!==undefined){const k=el.dataset.m;if(k==='n')return;S.meta[k]=el.value;if(k==='wm')$('#wmPct').textContent=el.value;if(k==='tokname'){recaps(false);renderTbls();}renderOutSoon();}});
@@ -373,14 +373,16 @@ $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgS
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!==undefined&&(S.meta[k]!==''||k==='credit'))el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range'){S.meta[k]=el.value;}else el.value='';});
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});$$('[data-b]').forEach(el=>{el.value=S.txt[el.dataset.b]||'';});$$('input[data-r="ft"]').forEach(el=>{el.value=S.ft[+el.dataset.i].l||'';});}
-function syncState(){const t=$('#tkState');if(t)t.value=JSON.stringify(S);}
+/* (v21.43) while the link with Form TE-1 is on, the record's board summary is brought up to date first (lkBoard, in the
+   link block), so the shell's status, snapshots and autosave carry it */
+function syncState(){if(S.meta&&S.meta.lk)lkBoard();const t=$('#tkState');if(t)t.value=JSON.stringify(S);}
 function restoreState(v){let d=null;try{d=JSON.parse(v);}catch(e){d=null;}const next=d&&fromFile({form:'TK-1',S:d});if(next){S=next;renderAll();}}
-function renderAll(){ensure();bindMeta();renderTbls();renderOut();}
+function renderAll(){ensure();bindMeta();renderTbls();renderOut();lkPaint();}
 
 /* ---------------- printing ---------------- */
 $('#printBtn').addEventListener('click',()=>{setView('preview');setTimeout(()=>{fitAll();window.print();},80);});
 /* ---------------- save, load, csv, clear, sim ---------------- */
-$('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
+$('#saveBtn').addEventListener('click',()=>{if(S.meta.lk)lkBoard();const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'TK-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
   const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');a.download=`TK-1_${nm}_${ymd}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
@@ -428,3 +430,201 @@ window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l)
 window.__nbhFactsPick=function(sel){let n=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot)return false;Object.assign(slot,cellFor(w));return true;};
   (sel.behaviors||[]).forEach(b=>{if(put(S.tg,b.isRep?b.label:(b.rep||b.label)))n++;});((sel.goals&&sel.goals.acq)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});((sel.goals&&sel.goals.red)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
   renderAll();return {filled:n,note:n?'':'the six slots are full; empty one first'};};
+
+/* v21.43 the link with Form TE-1 (the token economy plan for the same student). Off until Link with Form TE-1 is pressed
+   on Setup (the band under Tokens); an unlinked book saves, prints and counts its fields as before. The shared core
+   (tools/blocks/nbh-link.js, put in above by build.sh, byte for byte the copy Form TE-1 carries) owns the panel, the
+   relay ask, the file fallback, the row states, Apply, Leave and Undo; this adapter says what is compared and how a take
+   is written. Form TE-1 is the plan of record: its behavior, tokens per exchange, backups and schedule are offered to this
+   book, ticked where they fill an empty place or have changed on the plan; the pictures, the token and the last-token
+   marking are this book's own. Nothing is emptied or deleted (the captions are written again only by a count change,
+   after a question when they were edited); class, cost, preference and the RA-1 answer never come into the book, and a
+   backup whose RA-1 answer is No is never offered. The record is one JSON string in S.meta.lk, carried by #tkState, so
+   the shell's status, snapshots and autosave carry it; while the link is on it also holds a short summary of the board
+   (lk.board: the count, the token, the last-token marking, the paired target card and the card labels), which is what
+   Form TE-1 reads, since it cannot read the picture library. These functions are declarations and var, since renderAll
+   and syncState call some of them before this part of the script has run. */
+var lkApi=null,lkQuiet=false,lkS={n:null,pick:null,sel:null,took:false};
+var LK_SCHED=/^\s*\*\*This book[’']s schedule/;
+function lkT(v){return String(v==null?'':v).trim();}
+function lkQ(w){return '“'+w+'”';}
+function lkAnd(a){return a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];}
+function lkOrd(n){return n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10]||'th');}
+/* card numbers: "1 to 4", or "2, 4 and 5" */
+function lkNums(a){const s=a.slice().sort((x,y)=>x-y);return s.length>2&&s.every((v,i)=>!i||v===s[i-1]+1)?s[0]+' to '+s[s.length-1]:lkAnd(s.map(String));}
+function lkRec(){return window.NBHLink?NBHLink.readLk(S.meta.lk||''):null;}
+function lkPaint(){if(lkApi)lkApi.render();}
+/* the board summary Form TE-1 reads (lk.board), written only when it has changed, so an unchanged book keeps its record */
+function lkBoard(){const N=window.NBHLink;if(!N)return;const r=N.readLk(S.meta.lk||'');if(!r||r.on!==1)return;
+  const l=o=>lkT(lbl(o)).slice(0,40),six=a=>{const o=(Array.isArray(a)?a:[]).slice(0,6).map(l);while(o.length<6)o.push('');return o;};
+  const c=Number.isInteger(r.card)?r.card:0,pic=termMode()==='pic'&&Array.isArray(S.tokL)&&has(S.tokL[0]);
+  const b={n:String(nTok()),tok:lkT(tokName()).slice(0,40),term:termMode(),last:pic?l(S.tokL[0]):'',card:c,cardLabel:l((S.tg||[])[c]),ch:six(S.ch),tg:six(S.tg)};
+  if(JSON.stringify(b)===JSON.stringify(r.board))return;r.board=b;S.meta.lk=N.pack(r);}
+/* the last words of the Setup verdict while linked: " Linked with Form TE-1 (compared Oct 3: in step)." */
+function lkPhrase(){const r=lkRec();if(!r||r.on!==1)return '';const L=r.last;if(!L)return ' Linked with Form TE-1 (not compared yet).';
+  let d='';try{d=new Date(L.when).toLocaleDateString(undefined,{day:'numeric',month:'short'});}catch(e){d='';}
+  const n=+(String(L.res||'').split(' ')[1]||0),w=L.res==='step'?'in step':/^look/.test(L.res)?n+(n===1?' item':' items')+' to look at':
+    /^kept/.test(L.res)?n+(n===1?' difference':' differences')+' kept':L.res==='who'?'for another student?':'';
+  return ' Linked with Form TE-1 (compared '+esc(d)+(w?': '+w:'')+').';}
+/* a change to the record is unsaved work: #tkState gets an input event, which the unsaved-work guard counts as an edit
+   (this form's own listener lets it pass while lkQuiet is set) */
+function lkDirty(){const t=$('#tkState');if(!t)return;lkQuiet=true;try{t.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}finally{lkQuiet=false;}}
+/* the target card compared with the plan's behavior: the one picked with the card buttons in this table, else the card
+   whose label matches the behavior, else the card paired before (lk.card), else the first empty card (where the behavior
+   can go), else card 1. With no behavior on the plan, the first card that has a label, so Form TE-1 can take it. */
+function lkCardN(beh,lk){const N=NBHLink;if(lkS.pick!=null)return lkS.pick;const ls=S.tg.map(o=>lkT(lbl(o)));
+  if(beh){const i=ls.findIndex(l=>!!l&&(N.norm(l)===N.norm(beh)||N.near(l,beh)));if(i>=0)return i;}
+  if(lk&&Number.isInteger(lk.card))return lk.card;
+  const e=beh?S.tg.findIndex(o=>!has(o)&&!o.l):ls.findIndex(Boolean);return e>=0?e:0;}
+/* the case's behaviors, when the workstation has sent them: a problem behavior (Form TB-1's isRep false; Form FS-1 lists
+   problem behaviors only) named as the behavior the tokens are earned for is flagged and never becomes a card */
+function lkProblem(beh){const C=window.nbhCase,f=C&&C.facts&&Array.isArray(C.facts.behaviors)?C.facts.behaviors:[],N=NBHLink;if(!beh)return null;
+  const p=f.find(x=>x&&(x.isRep===false||(x.isRep===undefined&&x.src==='FS-1'))&&N.norm(x.label)===N.norm(beh));if(!p)return null;
+  const r=f.find(x=>x&&x.isRep===true&&lkT(x.label));return {rep:lkT(p.rep)||lkT(p.alt)||(r?lkT(r.label):'')};}
+/* the six choice cards against the plan's backups. A backup is matched by a card when the two are equal, or near (shown
+   as ≈): the shared near() ("Tablet" ≈ "Tablet, video clips"), or the card's words (4 characters or more) standing whole
+   inside the backup's name ("Magnetic tiles" ≈ "Five minutes with the magnetic tiles"), the rule Form TE-1 uses, so the
+   two panels agree. Unmatched backups are offered in the plan's order onto the empty cards (as many as there are empty
+   cards; with fewer cards than backups the names tapped last are the ones taken); one whose RA-1 answer is No, one over
+   40 characters, and all of them when no card is empty, are named instead. seen: the names that are on a card once the
+   take is done, for the notice that one has left the plan's menu. */
+function lkMenu(p){const N=NBHLink,lk=lkRec()||{},seen=lk.menuSeen||[];
+  const eq=(x,y)=>N.norm(x)===N.norm(y),words=x=>' '+N.norm(x).replace(/[^\p{L}\p{N}']+/gu,' ').trim()+' ';
+  const inW=(c,n)=>{const a=words(c);return a.trim().length>=4&&!eq(c,n)&&words(n).includes(a);},nr=(c,n)=>N.near(c,n)||inW(c,n);
+  const cards=S.ch.map((o,i)=>({i,l:lkT(lbl(o)),empty:!has(o)&&!o.l})),bk=(p.bk||[]).map(b=>({n:lkT(b.n),no:/^no$/i.test(lkT(b.conf))})).filter(b=>b.n);
+  const M={cards,bk,near:[],un:[],offer:[],pick:[],to:[],cap:0,skip:[],noMatch:[],warn:[],seen:[]};
+  bk.forEach(b=>{const e=cards.find(c=>c.l&&eq(c.l,b.n)),r=e?null:cards.find(c=>c.l&&nr(c.l,b.n));b.card=e||r||null;
+    if(r)M.near.push([r,b]);
+    if(b.card&&b.no)M.warn.push('Card '+(b.card.i+1)+', '+b.card.l+', matches a backup Form TE-1 records as not a reinforcer (RA-1).');
+    if(!b.card){if(b.no)M.skip.push(lkQ(b.n)+' (not a reinforcer on RA-1)');else if(!M.un.some(x=>eq(x.n,b.n)))M.un.push(b);}});
+  const empties=cards.filter(c=>c.empty),fit=[];M.cap=empties.length;
+  M.un.forEach(b=>{if(b.n.length>40)M.skip.push(lkQ(b.n)+' (write a short label on Choices)');else fit.push(b.n);});
+  if(!M.cap)fit.forEach(n=>M.skip.push(lkQ(n)+' (no empty card: empty one on Choices first)'));
+  else{M.offer=fit;M.pick=(lkS.sel?fit.filter(n=>lkS.sel.includes(N.norm(n))):fit).slice(0,M.cap);M.to=empties.slice(0,M.pick.length).map(c=>c.i);}
+  M.noMatch=cards.filter(c=>c.l&&!bk.some(b=>eq(c.l,b.n)||nr(c.l,b.n)));
+  cards.forEach(c=>{if(c.l&&seen.includes(N.hash(N.norm(c.l)))&&!bk.some(b=>eq(b.n,c.l)))M.warn.unshift('Card '+(c.i+1)+', '+c.l+', is no longer on Form TE-1’s menu.');});
+  M.seen=Array.from(new Set(bk.filter(b=>b.card&&eq(b.card.l,b.n)).map(b=>b.n).concat(M.pick).map(n=>N.hash(N.norm(n))))).slice(0,10);
+  return M;}
+/* the plan's schedule as one paragraph of the Token Economy back: "**This book's schedule (Form TE-1):** " + what earns a
+   token + "." + the exchange (when and how long; the delay). The markup characters * _ { } are taken out of the plan's
+   words; {token} is this book's own placeholder and prints the token's name. */
+function lkSchedText(p){const cl=s=>lkT(s).replace(/[*_{}]/g,'').replace(/\s+/g,' ').trim(),stop=s=>s.replace(/[\s.;,:]+$/,'');
+  const tp=cl(p.tp),tpN=lkT(p.tpN),d=/\s[—–-]\s/.exec(tp);let earn=d?tp.slice(d.index+d[0].length).trim():'';
+  if(!earn)earn=/^\d+(\.\d+)?$/.test(tpN)?(+tpN===1?'each response earns one {token}':'every '+tpN+' responses earn one {token}'):tp;
+  earn=stop(earn);const exW=stop(cl(p.exWhen)),exD=stop(cl(p.exDelay));if(!earn&&!exW)return '';
+  return '**This book’s schedule (Form TE-1):** '+(earn?earn+'.':'')+(exW?(earn?' ':'')+'The exchange: '+exW+(exD?'; '+exD:'')+'.':'');}
+function lkParas(t){return String(t||'').split(/(\n[ \t]*\n\s*)/);}
+function lkSchedHere(){const ps=lkParas(S.txt.te);for(let i=0;i<ps.length;i+=2)if(LK_SCHED.test(ps[i]))return ps[i].trim();return '';}
+/* the paragraph as it prints, without its bold opening words: what the table shows and compares */
+function lkPlain(t){return fill(t).replace(/^\s*\*\*This book[’']s schedule[^*]*\*\*\s*/,'').replace(/\*\*\*|\*\*|__|\*/g,'').replace(/\s+/g,' ').trim();}
+/* the pages a take of the count or the token changes, named as the reprint line words them ("Reprint: the Board, Tokens
+   and token-card pages"): the Board and the Tokens page (with their backs), the Targets and Choices pages when their backs
+   print the count or the token's name, the sheet of token cards, and the how-to insert when it prints and names them */
+function lkRp(re){const out=['Board','Tokens'];[['tg','Targets'],['ch','Choices']].forEach(([k,nm])=>{if(re.test(S.txt[BACKT[k][0]]||''))out.push(nm);});
+  out.push('token-card');if(S.chk.pg_how&&['h1','h2','h3'].some(k=>re.test(S.txt[k]||'')))out.push('how-to');return out;}
+/* the rows of the table, in the order who, card, n, tok, menu, sched, then the information lines (plan 2A) */
+function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||{},out=[],st=(r,k)=>N.stateOf(r,base[k],{other:'TE-1'}).st;
+  /* the student: client and sid, each compared only when both are filled; the empty ones here are filled */
+  const who=N.whoRow({client:m.client,sid:m.sid},{client:p.client,sid:p.sid},{other:'TE-1',meWhat:'this book'});who.mirror=true;out.push(who);
+  /* a target card against the behavior the tokens are earned for (40 characters fit on a card) */
+  const beh=lkT(p.beh),n=lkCardN(beh,lk),cur=lkT(lbl(S.tg[n])),prob=lkProblem(beh),long=beh.length>40;lkS.n=n;
+  const card={key:'card',what:'Target card '+(n+1),here:cur,there:beh,same:(x,y)=>N.near(x,y),owner:'there',pre:['fill'],can:!!beh&&!long&&!prob,mirror:true,idx:n,
+    choose:{n:6,value:n,label:'Target card'},took:'target card '+(n+1)+' from the plan’s behavior',rp:['target-card'].concat(m.layout==='rules'?['Board']:[])};
+  if(prob){card.keep=false;card.warn='Form TE-1’s behavior, '+lkQ(beh)+', is a problem behavior on Form TB-1. Tokens are earned for the replacement behavior'+(prob.rep?' (TB-1: '+lkQ(prob.rep)+')':'')+'; correct it on Form TE-1.';}
+  else{const s=st(card,'card');
+    if(long&&s!==1&&s!==4)card.why='Form TE-1’s behavior is '+beh.length+' characters; a card holds 40. '+(cur?'If card '+(n+1)+'’s label stands for it, press Keep to pair them.':'Write a short label on Targets card '+(n+1)+', then compare again and press Keep to pair them.');
+    else if(card.can&&s!==1){const k=matchPicto(beh),o=S.tg[n];card.preview='Writes '+lkQ(beh)+' on target card '+(n+1)+(k&&P[k]?', with the library picture '+lkQ(P[k].l):has(o)?', keeping its picture':', with no picture yet (choose one on Targets)')+'.';}}
+  out.push(card);
+  /* the count: 3 to 10 can be taken; 1 or 2 (establishing the token), more than 10 and no number are information */
+  const ep=lkT(p.epN),epI=/^[1-9]\d*$/.test(ep)?+ep:0,nn=nTok();
+  if(epI>=3&&epI<=10){const def=JSON.stringify(S.caps)===JSON.stringify(defCaps(nn,tokName()));
+    out.push({key:'n',what:'Tokens to earn',here:String(nn),there:ep,same:(x,y)=>x!==''&&y!==''&&+x===+y,owner:'there',pre:[],can:true,mirror:true,v:epI,
+      preview:epI!==nn?'Prints '+epI+' slots on the Board and '+epI+' boxes on the Tokens page; '+(def?'the captions are written for '+epI+'.':'your edited captions are written again for '+epI+' (you are asked first).'):'',
+      took:'tokens to earn '+nn+' → '+epI,rp:lkRp(/\{n\}/)});}
+  else out.push({info:!ep?'Form TE-1 has no tokens per exchange yet; it can take this book’s '+nn+' when it compares.':
+    epI&&epI<3?'Form TE-1 opens the exchange after '+epI+(epI===1?' token':' tokens')+' (establishing the token); the board prints 3 to 10 slots (now '+nn+').':
+    epI>10?'Form TE-1 asks for '+epI+' tokens per exchange; the board holds 10 at most (now '+nn+').':'Form TE-1 has no whole number of tokens per exchange yet.'});
+  /* the token: the same when the token form names it (its name, the plural or its stem); a drawn token named there can be taken */
+  const tf=lkT(p.tokForm),tn=lkT(tokName()),tk=N.tokKey(tf),drawn=!!tk&&!!TOK[tk],tcan=drawn&&S.tok[0].k!=='tk:'+tk;
+  const tok={key:'tok',what:'Token',here:tn,there:tf,same:(x,y)=>N.tokSame(y,x),owner:'here',pre:[],can:tcan,mirror:true,tk:drawn?tk:'',took:drawn?'the token: '+TOK[tk].l.toLowerCase():'the token',rp:lkRp(/\{(token|tokens|TOKENS)\}/)};
+  const ts=st(tok,'tok');
+  if(ts!==1&&ts!==2&&ts!==4){
+    if(tcan){const rn=lkT(m.tokname)&&!N.tokSame(tf,m.tokname);tok.preview='Uses the '+TOK[tk].l.toLowerCase()+' token'+(rn?' and its name, '+lkQ(TOK[tk].l)+',':'')+' on the Board, the Tokens page and the token cards; the “Your First …!” caption follows it.';}
+    else tok.why=drawn?'Form TE-1’s token form names the '+TOK[tk].l.toLowerCase()+' this book shows, which this book calls '+lkQ(tn)+' (Token name on Setup); press Keep to leave it so, or change the name there.':
+      'Form TE-1’s token form names none of the tokens this book draws (star, smiley, thumbs up, check, coin, medal, trophy, heart); if this book’s '+tn.toLowerCase()+' is the token it describes, press Keep.';}
+  out.push(tok);
+  /* the Choices against the backup menu */
+  const M=lkMenu(p),info=[];
+  M.near.forEach(([c,b])=>info.push('Card '+(c.i+1)+' '+lkQ(c.l)+' ≈ backup '+lkQ(b.n)+'.'));
+  if(M.skip.length)info.push('Named on Form TE-1 but not offered: '+M.skip.join('; ')+'.');
+  if(M.noMatch.length)info.push((M.noMatch.length===1?'Card '+(M.noMatch[0].i+1)+' ('+M.noMatch[0].l+') is':'Cards '+lkNums(M.noMatch.map(c=>c.i+1))+' ('+M.noMatch.map(c=>c.l).join(', ')+') are')+
+    ' not on Form TE-1’s menu; Form TE-1 can add '+(M.noMatch.length===1?'it':'them')+' when it compares.');
+  out.push({key:'menu',what:'Choices',here:M.cards.filter(c=>c.l).map(c=>c.l),there:M.bk.map(b=>b.n),same:()=>!M.un.length&&M.bk.some(b=>b.card),owner:'there',pre:['any'],can:M.pick.length>0,mirror:true,
+    choose:M.offer.length>1?{labels:M.offer,on:M.offer.map((x,i)=>M.pick.includes(x)?i:-1).filter(i=>i>=0),label:'Backups to add'}:null,
+    preview:M.offer.length?(M.pick.length?'Puts '+lkAnd(M.pick)+' on '+(M.to.length===1?'card '+(M.to[0]+1):'cards '+lkNums(M.to.map(i=>i+1)))+'.':'No backup is picked to add.')+
+      (M.offer.length>M.cap?' '+(M.cap===1?'One card is':M.cap+' cards are')+' empty: tap the backups to take, above.':M.offer.length>1?' Tap a backup’s name above to leave it out or put it back.':''):'',
+    warn:M.warn,info,seen:M.seen,add:M.pick.slice(),took:'choice '+(M.to.length===1?'card ':'cards ')+lkNums(M.to.map(i=>i+1))+' from the backups',rp:['choice-card']});
+  /* the schedule paragraph of the Token Economy back (a copy into ordinary text, first taken by hand) */
+  const raw=lkSchedText(p),hr=lkSchedHere();
+  const sc={key:'sched',what:'Token Economy back',here:hr?lkPlain(hr):'',there:raw?lkPlain(raw):'',owner:'there',pre:[],can:!!raw,raw,took:'the schedule paragraph on the Token Economy back',rp:['Token Economy back']};
+  const ss=st(sc,'sched');
+  if(raw&&ss!==1&&ss!==2&&ss!==4)sc.info=hr?'Replaces the paragraph “This book’s schedule (Form TE-1)” on the Token Economy back.':
+    'Adds it as the last paragraph of the Token Economy back, after the bold words “This book’s schedule (Form TE-1):”; it is then ordinary text, edited on Backs like the rest. A back that no longer fits goes on to a second back page (the Preview shows it).';
+  out.push(sc);
+  /* information: nothing to take */
+  if(/^yes/i.test(lkT(p.loss))){const lr=lkT(p.lossRule).replace(/\s+/g,' '),c=lr.length>120?lr.slice(0,119).replace(/\s+\S*$/,'')+'…':lr.replace(/[\s.]+$/,'');
+    out.push({info:'Form TE-1 records token loss'+(c?': '+c:'')+'. The book’s backs do not describe it.'});}
+  const nb=v=>/^\d+(\.\d+)?$/.test(lkT(v))?+lkT(v):null,r1=x=>String(Math.round(x*10)/10),tpn=nb(p.tpN),epn=nb(p.epN),ten=nb(p.teN),pr=[];
+  if(tpn!=null)pr.push(r1(tpn)+(tpn===1?' response':' responses')+' per token');if(epn!=null)pr.push(r1(epn)+(epn===1?' token':' tokens')+' per exchange');
+  if(tpn!=null&&epn!=null){pr.push(r1(tpn*epn)+' responses per exchange');pr.push('unit price '+r1(tpn*epn/(ten||1)));}
+  if(pr.length)out.push({info:'Form TE-1: '+pr.join(', ')+'.'});
+  const th=p.thinLast,te=th?nb(th.ep):null;
+  if(te!=null&&te!==epn)out.push({info:'Form TE-1’s thinning record has '+lkT(th.ep)+(te===1?' token':' tokens')+' per exchange '+(th.d?'on '+th.d:'at its last step')+'; a new step means a new Board and Tokens page.'});
+  if(termOn()&&epI>=3&&epI<=10&&epI!==nn)out.push({info:'The book marks its '+lkOrd(nn)+' token as the last, but Form TE-1 opens the exchange after '+epI+'.'});
+  if(!p.linkedBack)out.push({info:'Form TE-1 is not linked back; turn on Link with Form TK-1 there to see this book from the plan.'});
+  return out;}
+/* each take writes into this book only, checking the book as it is now (the core has already set aside a row whose value
+   here changed after the compare); false means nothing was written, and the row keeps its base */
+async function lkTake(r){const m=S.meta,N=NBHLink;
+  if(r.key==='who'){let d=0;Object.keys(r.fillParts||{}).forEach(k=>{if(!lkT(m[k])){m[k]=r.fillParts[k];d++;}});if(!d)return false;}
+  else if(r.key==='card'){const i=r.idx,beh=lkT(r.there);if(!Number.isInteger(i)||!S.tg[i]||!beh||beh.length>40||lkProblem(beh))return false;
+    const k=matchPicto(beh),o=S.tg[i];S.tg[i]=k?{k,ph:'',l:beh}:{k:o.k||'',ph:o.ph||'',l:beh};}
+  else if(r.key==='n'){const v=r.v,was=nTok();if(!(v>=3&&v<=10)||v===was)return false;
+    /* the captions: written again without a question when they are the defaults for the old count */
+    const def=JSON.stringify(S.caps)===JSON.stringify(defCaps(was,tokName()));
+    if(!def&&!(await N.confirm('Change the board to '+v+' tokens?\nYour edited captions are written again for '+v+' slots.',{ok:'Change to '+v})))return false;
+    m.n=String(v);ensure();recaps(true);}
+  else if(r.key==='tok'){const t=r.tk;if(!t||!TOK[t]||S.tok[0].k==='tk:'+t)return false;S.tok[0]=cello('tk:'+t);
+    if(lkT(m.tokname)&&!N.tokSame(r.there,m.tokname))m.tokname=TOK[t].l;recaps(false);}
+  else if(r.key==='menu'){let d=0;(r.add||[]).forEach(nm=>{if(S.ch.some(o=>N.norm(lbl(o))===N.norm(nm)))return;const i=S.ch.findIndex(o=>!has(o)&&!o.l);if(i<0)return;S.ch[i]=cellFor(nm);d++;});if(!d)return false;}
+  else if(r.key==='sched'){if(!r.raw)return false;const ps=lkParas(S.txt.te);let at=-1;for(let i=0;i<ps.length;i+=2)if(LK_SCHED.test(ps[i])){at=i;break;}
+    if(at>=0){ps[at]=r.raw;S.txt.te=ps.join('');}else{const t=String(S.txt.te||'').replace(/\s+$/,'');S.txt.te=(t?t+'\n\n':'')+r.raw;}}
+  else return false;
+  lkS.took=true;}
+/* the buttons inside a row: a target card (1 to 6) for the card row; a backup's name to leave out of the take, or put back */
+function lkChoose(key,i,p){if(key==='card'){if(Number.isInteger(i)&&i>=0&&i<=5){lkS.pick=i;lkS.n=i;}return false;}
+  /* a tap leaves a picked backup out, or picks one; with fewer empty cards than backups, the one picked longest ago gives way */
+  if(key==='menu'){const N=NBHLink,M=lkMenu(p),nm=M.offer[i];if(!nm)return true;const k=N.norm(nm);let sel=lkS.sel?lkS.sel.slice():M.pick.map(x=>N.norm(x));
+    if(sel.includes(k))sel=sel.filter(x=>x!==k);else{sel.push(k);while(sel.length>M.cap)sel.shift();}lkS.sel=sel;return true;}
+  return false;}
+/* once the book has printed, the pages it printed come off the reprint line */
+var LK_PRINTED={Board:/^Board \(/,Tokens:/^Tokens \(/,Targets:/^Targets \(/,Choices:/^Choices \(/,'Token Economy back':/^Tokens \(back/,
+  'token-card':/^Card sheet: the tokens/,'target-card':/^Card sheet: the targets/,'choice-card':/^Card sheet: the choices/,'how-to':/^How to use/};
+window.addEventListener('afterprint',()=>{const N=window.NBHLink,r=lkRec();if(!N||!r||r.on!==1||!r.rp)return;
+  const labs=$$('#book .pg').map(p=>p.dataset.label||''),left=r.rp.filter(x=>!(LK_PRINTED[x]&&labs.some(l=>LK_PRINTED[x].test(l))));
+  if(left.length===r.rp.length)return;if(left.length)r.rp=left;else{delete r.rp;delete r.rpd;}S.meta.lk=N.pack(r);syncState();lkPaint();});
+if(window.NBHLink){
+  lkApi=NBHLink.mount({me:'TK-1',other:'TE-1',meWhat:'this book',otherWhat:'the token economy plan',sibling:'TE-1_Token-Economy-Designer_v2026-09.html',host:'#lkPanel',
+    get:()=>S.meta.lk||'',
+    /* the target card this table compares goes into the record with it, so Form TE-1 reads the same pairing; the board
+       summary is brought up to date as the record goes into #tkState */
+    set:s=>{if(!s){delete S.meta.lk;lkS.n=null;lkS.pick=null;lkS.sel=null;}
+      else{if(lkS.n!=null){const o=NBHLink.readLk(s);if(o&&o.last&&o.card!==lkS.n){o.card=lkS.n;s=NBHLink.pack(o);}}S.meta.lk=s;}
+      syncState();lkDirty();},
+    view:o=>{lkS.pick=null;lkS.sel=null;return NBHLink.planOf(o);},
+    rows:lkRows,take:lkTake,choose:lkChoose,snapshot:()=>JSON.stringify(S),
+    /* Undo: the book exactly as it was a moment before the take (the snapshot is this form's own S) */
+    restore:j=>{const o=JSON.parse(j);if(!o||typeof o!=='object'||Array.isArray(o)||!o.meta||typeof o.meta!=='object')throw new Error('not a TK-1 record');S=o;renderAll();lkDirty();},
+    /* after a take the whole book is drawn again; a compare, a Keep or the link itself changed only the record */
+    after:()=>{if(lkS.took){lkS.took=false;renderAll();}else renderSetup();}});
+}
