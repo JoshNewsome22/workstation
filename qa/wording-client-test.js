@@ -9,7 +9,11 @@
    usage: node qa/wording-client-test.js       (a server on :8123 serving the repository, as for every check here)
    env: WS_URL (default http://localhost:8123; the mock answers CORS for that origin), WORDING_SHOTS (screenshots, default
    qa/out/wording-client), MOCK_PORT (default: any free port), AXE_DIR (a node_modules holding axe-core, for the accessibility
-   pass) */
+   pass), WORDING_ONLY (a comma list of sections to run, e.g. 10,11)
+   sections: 0 the block, 1 the buttons, 2 the saved file and the snapshot, 3 Check wording, the keyboard and the Live
+   Recorder, 4 Rewrite with Claude, 5 where it cannot work, 6 the three widths, 7 print, 8 accessibility, 9 the one-file
+   edition, 10 de-identification and putting names back, 11 Check wording with the rules as built, 12 the button in a
+   two-row field */
 const {chromium, fs, path, ROOT, sleep, wire} = require(__dirname + '/lib.js');
 const {spawn, execFileSync} = require('child_process');
 const os = require('os');
@@ -35,7 +39,10 @@ let failed = 0, passed = 0;
 function ok(cond, msg, extra){ if (cond) passed++; else failed++; console.log((cond ? 'PASS ' : 'FAIL ') + msg + (!cond && extra !== undefined ? '  -- ' + (typeof extra === 'string' ? extra : JSON.stringify(extra)).slice(0, 400) : '')); }
 const J = JSON.stringify;
 /* one section failing (a timeout, a missing element) is reported and the next one still runs */
-async function section(name, fn){ try { await fn(); } catch (e) { ok(false, name + ' stopped: ' + String(e && e.stack || e).split('\n').slice(0, 4).join(' | ')); } }
+async function section(name, fn){
+  if (process.env.WORDING_ONLY && process.env.WORDING_ONLY.split(',').indexOf(name) < 0) return;   /* WORDING_ONLY=10,11: those sections only */
+  try { await fn(); } catch (e) { ok(false, name + ' stopped: ' + String(e && e.stack || e).split('\n').slice(0, 4).join(' | ')); }
+}
 /* the network errors a failing relay call logs on purpose (a 401, a 429, offline) are expected in the error steps */
 const EXPECTED = /Failed to load resource: (the server responded with a status of (401|403|413|429|503)|net::ERR_INTERNET_DISCONNECTED)/;
 function errorsIn(log, from){ return log.slice(from || 0).filter(l => !(l.type === 'error' && EXPECTED.test(l.text))); }
@@ -379,26 +386,51 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       ok((await editor(page)) === 'an edit to keep for later', '3 Bring them back restores them');
       await page.keyboard.press('Escape'); await sleep(300);
       ok(!(await isOpen(page)) && (await page.evaluate(s => document.querySelector(s).value, sel)) === before, '3 Escape closes like Cancel');
-      /* the keyboard */
+      /* the keyboard: Tab is the form's, as without the block; Alt+Enter in the field opens the panel */
       await page.click(sel); await sleep(150); await page.keyboard.press('End');
       await page.keyboard.press('Tab'); await sleep(150);
-      const f1 = await page.evaluate(() => { const a = __w.root().activeElement; return a ? a.className + '|' + a.getAttribute('aria-label') : ''; });
-      ok(/^iw/.test(f1) && /What happened, entry 2/.test(f1), '3 Tab from the field goes to its button', f1);
+      ok(await page.evaluate(s => { const a = document.activeElement; return !!a && a.matches('button.delRow') && a.dataset.row === '1'; }, sel), '3 Tab from the field goes on to the control after it, as without the block (the button is not a stop)',
+        await page.evaluate(() => { const a = document.activeElement; return a ? a.outerHTML.slice(0, 80) : ''; }));
       await page.keyboard.press('Shift+Tab'); await sleep(150);
       ok(await page.evaluate(s => document.activeElement === document.querySelector(s), sel), '3 Shift+Tab goes back to the field');
-      await page.keyboard.press('Tab'); await page.keyboard.press('Enter'); await sleep(350);
-      ok(await isOpen(page) && (await page.evaluate(() => __w.root().activeElement && __w.root().activeElement.id)) === 'pnT', '3 Enter opens the panel with the focus on its title');
+      const bt = await page.evaluate(() => { const b = __w.qa('.iw').filter(x => !x.classList.contains('away'))[0]; return b ? (b.getAttribute('title') || '') + '|' + (b.getAttribute('aria-label') || '') : ''; });
+      ok(/Alt\+Enter/.test(bt), '3 the button names the key that opens it from the field', bt);
+      await page.keyboard.press('Alt+Enter'); await sleep(350);
+      ok(await isOpen(page) && (await page.evaluate(() => __w.root().activeElement && __w.root().activeElement.id)) === 'pnT', '3 Alt+Enter in the field opens the panel with the focus on its title');
       await page.keyboard.press('Escape'); await sleep(300);
-      ok(await page.evaluate(() => { const a = __w.root().activeElement; return !!a && /^iw/.test(a.className); }), '3 closed, the focus is back on the button');
+      ok(!(await isOpen(page)) && await page.evaluate(s => document.activeElement === document.querySelector(s), sel), '3 closed from the keyboard, the focus is back in the field');
+      await clickButtonOf(page, sel); await page.evaluate(() => __w.click('#cancel')); await sleep(300);
+      ok(await page.evaluate(() => { const a = __w.root().activeElement; return !!a && /^iw/.test(a.className); }), '3 closed after a tap, the focus is on the field\'s button (an iPad keyboard stays down)');
       await page.keyboard.press('Tab'); await sleep(150);
       ok(await page.evaluate(s => { const a = document.activeElement; return !!a && a.matches('button.delRow') && a.dataset.row === '1'; }, sel), '3 Tab from the button goes on to the control after the field');
-      /* typing in the panel never reaches the Live Recorder's keys */
+      /* typing through the form with Tab fills one field after another, as before */
+      await view(page, 'setup');
+      await page.click('textarea[data-meta="behavior"]'); await page.keyboard.press('ControlOrMeta+a'); await page.keyboard.type('Hits', {delay:3});
+      await page.keyboard.press('Tab'); await page.keyboard.press('ControlOrMeta+a'); await page.keyboard.type('Open hand strike', {delay:3}); await sleep(250);
+      const tt = await page.evaluate(() => [document.querySelector('textarea[data-meta="behavior"]').value, document.querySelector('textarea[data-meta="definition"]').value]);
+      ok(tt[0] === 'Hits' && tt[1] === 'Open hand strike' && !(await isOpen(page)), '3 type, Tab, type fills the next field (and opens nothing)', tt);
+      await view(page, 'obs');
+      /* typing in the panel never reaches the Live Recorder's keys; keys on a field's button do, as on any button */
       await page.evaluate(() => document.getElementById('obrStart').click()); await sleep(300);
       ok((await page.evaluate(() => obRecorder.state())) === 'run', '3 the Live Recorder is running');
+      await page.evaluate(s => { const t = document.querySelector(s); t.scrollIntoView({block:'center'}); t.focus(); t.setSelectionRange(8, 8); }, sel); await sleep(250);
+      await page.keyboard.press('Tab'); await sleep(150);
+      const r0 = await page.evaluate(() => obRecorder.counts().s);
+      await page.keyboard.press('Digit1'); await page.keyboard.press('Digit1'); await sleep(200);
+      ok((await page.evaluate(() => obRecorder.counts().s)) === r0 + 2, '3 recording: Tab out of a narrative line (caret mid-text), then 1 twice, counts twice', [r0, await page.evaluate(() => obRecorder.counts())]);
+      await clickButtonOf(page, sel); await page.evaluate(() => __w.click('#cancel')); await sleep(300);
+      const r1 = await page.evaluate(() => obRecorder.counts().s);
+      await page.keyboard.press('Digit1'); await sleep(150);
+      ok((await page.evaluate(() => obRecorder.counts().s)) === r1 + 1 && await page.evaluate(() => { const a = __w.root().activeElement; return !!a && /^iw/.test(a.className); }), '3 with the field\'s button focused, 1 is counted');
+      await page.keyboard.press('Space'); await sleep(250);
+      ok((await page.evaluate(() => obRecorder.state())) !== 'run' && !(await isOpen(page)), '3 ... and Space pauses the recorder (the panel does not open)', await page.evaluate(() => obRecorder.state()));
+      await page.keyboard.press('Space'); await sleep(250);
+      ok((await page.evaluate(() => obRecorder.state())) === 'run', '3 ... and Space again goes on recording');
+      const cBefore = await page.evaluate(() => obRecorder.counts());
       await clickButtonOf(page, sel);
       await page.evaluate(() => __w.q('#ed').focus()); await page.keyboard.type(' 1111 2 3 4 z x', {delay:5}); await page.keyboard.press('Shift+Digit1'); await page.keyboard.press('Space'); await sleep(200);
       const rc = await page.evaluate(() => ({c: obRecorder.counts(), s: obRecorder.state()}));
-      ok(rc.c.s === 0 && rc.c.p === 0 && rc.s === 'run', '3 digits, Space and Shift+1 typed in the panel are not counted by the recorder', rc);
+      ok(rc.c.s === cBefore.s && rc.c.p === cBefore.p && rc.s === 'run', '3 digits, Space and Shift+1 typed in the panel are not counted by the recorder', {cBefore, rc});
       await page.evaluate(() => __w.click('#cancel')); await sleep(200);
       await page.evaluate(() => { document.getElementById('obrEnd').click(); }); await sleep(200);
       await page.evaluate(() => { document.getElementById('obrDiscard').click(); }); await sleep(300);
@@ -440,14 +472,17 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       await clickButtonOf(page, sel); await tab(page, 2);
       let t = await page.evaluate(() => __w.tab2());
       ok(/Enter the passcode from your BCBA/.test(t) && await page.evaluate(() => !!__w.q('#pc')), '4 not unlocked: a passcode box', t.slice(0, 120));
-      ok(/kept in this tab only/.test(t), '4 the panel says the session stays in this tab');
+      ok(/in this tab until the session\u2019s time is up or the tab is closed/.test(t), '4 the panel says how long the session lasts, and where', t.slice(0, 400));
       await page.evaluate(() => { const i = __w.q('#pc'); i.value = 'AAA-BBB-CCC-DDD'; __w.q('form.pc').requestSubmit(); });
       t = await waitTab2(page, /not accepted/);
       ok(/That passcode was not accepted/.test(t), '4 a wrong passcode is refused, plainly', t.slice(0, 200));
+      ok((await page.evaluate(() => __w.q('#pc').value)) === 'AAA-BBB-CCC-DDD', '4 ... and stays in the box, to be corrected rather than typed again');
       ok(!(await page.evaluate(() => sessionStorage.getItem('nbh.wording.session'))), '4 ... and nothing is kept');
       await page.evaluate(c => { const i = __w.q('#pc'); i.value = c; __w.q('form.pc').requestSubmit(); }, '7kq m4p 2xd v9h');
       t = await waitTab2(page, /Unlocked/);
       ok(/Unlocked in this tab until/.test(t), '4 the right passcode (typed in lower case with spaces) unlocks this tab', t.slice(0, 160));
+      ok(/ends then, or when this tab is closed/.test(t) && /On a shared iPad, press Lock/.test(t) && !/Choose how the text should be rewritten/.test(t), '4 ... with one note on how long it lasts (and Lock), and no second box saying so', t.slice(0, 400));
+      ok((await page.evaluate(() => __w.q('#pc'))) === null, '4 the passcode box is gone');
       const ss = await page.evaluate(() => sessionStorage.getItem('nbh.wording.session'));
       const token = ss ? JSON.parse(ss).token : '';
       ok(token.length >= 32, '4 the session token is in sessionStorage');
@@ -480,6 +515,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       ok(!/Jordan|Ellis|48213|Rivera|Marcus/.test(J(L)), '4 nothing the relay received holds a name or the ID');
       ok(L.cookies.length === 0 && L.origins.every(o => o === ORIGIN), '4 no cookie was sent (credentials omitted)', L.cookies);
       const ans = await page.evaluate(() => __w.answer());
+      ok(await page.evaluate(() => __w.q('#use').hidden), '4 while the suggestion shows, the footer\'s Use this text steps aside (one Use on screen)');
       ok(/Jordan/.test(ans) && /Ms\. Rivera/.test(ans) && /Marcus/.test(ans) && !/\[Student\]|\[Name \d\]|\[ID\]/.test(ans), '4 the answer has the placeholders put back', ans);
       ok(/Jordan’s head/.test(ans), '4 a placeholder the rewrite moved is put back too ("[Student]’s")', ans);
       ok(/What changed/.test(t) && /Check before you use it/.test(t), '4 the answer lists what changed and what to check');
@@ -502,8 +538,18 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       await page.evaluate(() => __w.click('#tp2 .acts .b.pri', 'Send')); await waitTab2(page, /Suggested/);
       const ans2 = await page.evaluate(() => __w.answer());
       await page.evaluate(() => __w.click('#tp2 .acts .b', 'Use this')); await sleep(250);
-      await page.evaluate(() => __w.click('#use')); await sleep(350);
+      ok(/press Use this again/.test(await page.evaluate(() => __w.text('#fm'))), '4 Use this with blanks in the answer names the blanks, and the button pressed', await page.evaluate(() => __w.text('#fm')));
+      await page.evaluate(() => __w.click('#tp2 .acts .b', 'Use this')); await sleep(350);
       ok(!(await isOpen(page)) && (await page.evaluate(s => document.querySelector(s).value, sel)) === ans2, '4 Use this (and again past its blanks) writes the answer into the field and closes');
+      /* a suggestion not used is not thrown away without a word */
+      await clickButtonOf(page, sel); await tab(page, 2);
+      await page.evaluate(() => __w.click('.sty .b')); await sleep(250);
+      await page.evaluate(() => __w.click('#tp2 .acts .b.pri', 'Send')); await waitTab2(page, /Suggested/);
+      await tab(page, 1);
+      ok(!(await page.evaluate(() => __w.q('#use').hidden)), '4 on Check wording the footer\'s Use this text is back');
+      await page.evaluate(() => __w.click('#use')); await sleep(250);
+      ok(await isOpen(page) && /has not been used/.test(await page.evaluate(() => __w.text('#fm'))), '4 with a suggestion waiting, Use this text asks first', await page.evaluate(() => __w.text('#fm')));
+      await page.evaluate(() => __w.click('#cancel')); await sleep(300);
       /* Keep mine */
       await clickButtonOf(page, sel); await tab(page, 2);
       const mine = await editor(page);
@@ -524,7 +570,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
         if (after) await after();
         const bad = errorsIn(lg, from);
         ok(bad.length === 0, '4 ... and no console error but the expected network one', bad);
-        await page.evaluate(() => { const c = __w.qa('#tp2 .acts .b').filter(b => b.textContent === 'Cancel')[0]; if (c) c.click(); }); await sleep(200);
+        await page.evaluate(() => { const c = __w.qa('#tp2 .acts .b').filter(b => b.textContent === 'Back to styles')[0]; if (c) c.click(); }); await sleep(200);
       };
       await errStep(async () => { await ctx.setOffline(true); }, /offline, so nothing was sent/, 'offline: said so, nothing sent', async () => { await ctx.setOffline(false); });
       await errStep(async () => { await mock('/__mode', {mode:'ratelimit'}); }, /Too many rewrites in a short time\. Wait about a minute/, 'rate limited: said so, with how long to wait');
@@ -691,6 +737,119 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       ok(snap === 169, '9 ... the snapshot there has the same 169 controls', snap);
       ok(errorsIn(lg).length === 0, '9 no console errors', errorsIn(lg));
       await ctx.close(); fs.rmSync(tmp, {recursive:true, force:true});
+    });
+    /* ---- 10. de-identification: who is hidden, how, and how it is put back */
+    await section('10', async () => {
+      await mock('/__reset', {codes:[CODE]});
+      const lg = [], ctx = await context(browser, {relay:RELAY}), page = await openForm(ctx, lg);
+      await sim(page);
+      const meta = (c, id) => page.evaluate(([c, id]) => { for (const [k, v] of [['mClient', c], ['mSid', id]]) { const e = document.getElementById(k); e.value = v; e.dispatchEvent(new Event('input', {bubbles:true})); } }, [c, id]);
+      const dei = (t, extra) => page.evaluate(([t, e]) => nbhWording.deidentify(t, e || []).text, [t, extra || null]);
+      await meta('Mateo Alvarez-Rios', '2026-0417');
+      let t = await dei('Mateo’s dad, Mr. Alvarez-Rios, came at 9:30. Mrs. Rios called. The Alvarez family asked for a meeting. Rios cried. Observed on 10/2/2026 (2026-0417).');
+      ok(t === '[Student]’s dad, Mr. [Family name], came at 9:30. Mrs. [Family name] called. The [Family name] family asked for a meeting. [Student] cried. Observed on 10/2/2026 ([ID]).',
+        '10 a parent named by the family name is [Family name], each half of a double surname is hidden, and the year in a date is not taken for the ID', t);
+      await meta('Ana Lopez', '');
+      t = await dei('Ms. Lopez (mom) arrived. Ana Lopez sat down; Lopez cried.');
+      ok(t === 'Ms. [Family name] (mom) arrived. [Student] sat down; [Student] cried.', '10 "Ms. Lopez (mom)" is not the student', t);
+      await meta('Hunter Brooks', '');
+      ok((await dei('hunter hit a peer. Hunter cried.')) === 'hunter hit a peer. [Student] cried.', '10 an everyday-word name in lower case is not hidden on its own');
+      ok((await dei('hunter hit a peer. Hunter cried.', [{v:'hunter', student:true}])) === '[Student] hit a peer. [Student] cried.', '10 ... but is once marked as the student');
+      ok((await dei('Alex threw it. Alex sat. Liam laughed.', [{v:'Alex', student:true}, 'Liam'])) === '[Student] threw it. [Student] sat. [Name 1] laughed.', '10 a nickname marked as the student is [Student]');
+      ok((await dei('Liam laughed; Ms. Okafor came.', ['Okafor', 'Ms. Okafor', 'Liam'])) === '[Name 1] laughed; [Name 2] came.', '10 [Name n] is numbered by first use in the text, with no gap');
+      /* the panel: what may still be a name, the form's people, the student's other forms; put back one by one */
+      await view(page, 'setup');
+      await meta('Mateo Alvarez-Rios', 'S-48213');
+      await page.evaluate(() => { const e = document.querySelector('[data-meta="teacher"]'); e.value = 'Ms. Okafor'; e.dispatchEvent(new Event('input', {bubbles:true})); });
+      await view(page, 'obs');
+      const sel = '#obsPages textarea[data-obs="0"][data-row="1"]';
+      const TXT = 'Mateo’s dad, Mr. Alvarez-Rios, came at 9:30. Liam took his pencil. Teo then ran to the door and Ms. Okafor blocked it. Mateo Alvarez-Rios was very upset; Mateo sat. M.A. left.';
+      await page.evaluate(([s, v]) => { const e = document.querySelector(s); e.value = v; e.dispatchEvent(new Event('input', {bubbles:true})); }, [sel, TXT]); await sleep(300);
+      await clickButtonOf(page, sel); await tab(page, 2);
+      await page.evaluate(c => { const i = __w.q('#pc'); i.value = c; __w.q('form.pc').requestSubmit(); }, CODE); await waitTab2(page, /Unlocked/);
+      await page.evaluate(() => [...__w.qa('.sty .b')].filter(x => /spelling/.test(x.textContent))[0].click()); await sleep(300);
+      ok((await page.evaluate(() => __w.text('pre.sent'))) === '[Student]’s dad, Mr. [Family name], came at 9:30. Liam took his pencil. Teo then ran to the door and Ms. Okafor blocked it. [Student] was very upset; [Student] sat. M.A. left.', '10 the preview', await page.evaluate(() => __w.text('pre.sent')));
+      const sugg = await page.evaluate(() => __w.qa('.sugg .b').map(b => b.textContent));
+      ok(sugg.includes('+ Liam') && sugg.includes('+ Teo'), '10 a name that starts a sentence is offered too (Liam, Teo)', sugg);
+      ok(sugg.includes('+ Ms. Okafor') && !sugg.includes('+ Okafor'), '10 the teacher is offered once, as the form names her', sugg);
+      ok(sugg.includes('+ M.A.'), '10 the student’s initials are offered, as the student', sugg);
+      const fn = await page.evaluate(() => [...document.querySelectorAll('input[data-field="secondObs"], [data-meta="school"], [data-meta="observer"]')].map(e => e.value).filter(Boolean));
+      ok(fn.length > 0 && fn.every(v => sugg.includes('+ ' + v)), '10 the observers and the school on the form are offered too', {fn, sugg});
+      ok(/Not hidden yet: .*Liam.*Teo/.test(await page.evaluate(() => __w.tab2())), '10 next to Send: what is not hidden yet');
+      for (const n of ['+ Teo', '+ Liam', '+ Ms. Okafor', '+ M.A.']) { await page.evaluate(n => __w.click('.sugg .b', n), n); await sleep(200); }
+      await page.evaluate(() => { const li = __w.qa('ul.chips li').filter(x => x.firstChild.textContent === 'Teo')[0]; li.querySelector('.tg').click(); }); await sleep(250);
+      const sent = await page.evaluate(() => __w.text('pre.sent'));
+      ok(sent === '[Student]’s dad, Mr. [Family name], came at 9:30. [Name 1] took his pencil. [Student] then ran to the door and [Name 2] blocked it. [Student] was very upset; [Student] sat. [Student] left.', '10 Teo marked Student, the initials, the others numbered in order', sent);
+      ok(!/Not hidden yet/.test(await page.evaluate(() => __w.tab2())), '10 ... and nothing is left to point out');
+      await page.evaluate(() => __w.click('#tp2 .acts .b.pri', 'Send')); await waitTab2(page, /Suggested/);
+      const ans = await page.evaluate(() => __w.answer());
+      ok(ans === TXT, '10 a grammar fix keeps the placeholders in order, so each is put back as it was written ("Mr. Alvarez-Rios", "Mateo Alvarez-Rios", "Mateo", "M.A.")', ans);
+      ok(/each where it was/.test(await page.evaluate(() => __w.tab2())), '10 ... and the panel says so');
+      /* an answer that moves the names: each placeholder as the form most used, and a warning where that was a choice */
+      await page.evaluate(() => __w.click('#tp2 .acts .b', 'Keep mine')); await sleep(200);
+      await page.evaluate(() => __w.click('.sty .b')); await sleep(250);
+      await page.evaluate(() => __w.click('#tp2 .acts .b.pri', 'Send')); await sleep(200);
+      const t2 = await waitTab2(page, /Suggested/);
+      ok(/\[Student\] stood for/.test(t2) && /Check each name/.test(t2), '10 when the answer does not keep the order, the panel says which placeholder stood for more than one name', t2.slice(0, 600));
+      ok(errorsIn(lg).length === 0, '10 no console errors', errorsIn(lg));
+      await ctx.close();
+    });
+
+    /* ---- 11. Check wording with the rules as built: one card per rule, headings, the learner's own words */
+    await section('11', async () => {
+      const lg = [], ctx = await context(browser, null), page = await openForm(ctx, lg);
+      await sim(page); await view(page, 'obs');
+      const sel = '#obsPages textarea[data-obs="0"][data-row="1"]';
+      const TXT = 'He was very loud, very close to peers and very upset. He probably wanted the iPad and cried all day. He said no and refused to write. He said he was angry. Mom said he was angry.';
+      await page.evaluate(([s, v]) => { const e = document.querySelector(s); e.value = v; e.dispatchEvent(new Event('input', {bubbles:true})); }, [sel, TXT]); await sleep(300);
+      await clickButtonOf(page, sel);
+      const cards = await page.evaluate(() => __w.cards());
+      const v = cards.filter(c => /^Vague intensity/.test(c.cat));
+      ok(v.length === 1 && /3 times/.test(v[0].cat) && v[0].btns.indexOf('Take out all 3') >= 0, '11 three "very" are one card, with Take out all 3', v);
+      ok(cards.some(c => c.cat.indexOf('Opinion or judgment') === 0 && c.mark === 'probably'), '11 "probably" is headed Opinion or judgment', cards.map(c => c.cat + ':' + c.mark));
+      const allDay = cards.filter(c => c.mark === 'all day')[0];
+      ok(allDay && /^Vague time/.test(allDay.cat) && !allDay.btns.some(b => /^Replace/.test(b)), '11 "all day" is a vague time, with no one-tap replacement', allDay);
+      ok(cards.some(c => c.mark === 'refused'), '11 "refused" is marked without the "and" before it', cards.map(c => c.mark));
+      const angry = await page.evaluate(() => nbhWording.check('He said he was angry. Mom said he was angry.').filter(f => f.id === 'int-angry').map(f => f.start));
+      ok(angry.length === 1 && angry[0] > 20, '11 the learner’s own words about a feeling are not flagged; someone else’s are', angry);
+      await page.evaluate(() => __w.click('#fds li button', 'Take out all 3')); await sleep(250);
+      ok((await editor(page)).indexOf('very') < 0 && (await editor(page)).indexOf('He was loud, close to peers and upset.') === 0, '11 Take out all 3 takes out all three', await editor(page));
+      await page.evaluate(() => __w.click('#undo')); await sleep(200);
+      ok((await editor(page)) === TXT, '11 one Undo puts all three back');
+      await page.evaluate(() => __w.click('#cancel')); await sleep(250);
+      const lim = await page.evaluate(() => { const t = document.querySelector('textarea[data-obs="0"][data-field="notes"]'); return nbhWording.check(t ? t.getAttribute('placeholder') || '' : '').map(f => f.id + ':' + f.text); });
+      ok(lim.length === 0, '11 the limits field’s own example ("student knew I was watching") is not flagged', lim);
+      ok(errorsIn(lg).length === 0, '11 no console errors', errorsIn(lg));
+      await ctx.close();
+    });
+
+    /* ---- 12. the button in a two-row field on an upright iPad: small while words are there, never hidden by a selection */
+    await section('12', async () => {
+      const lg = [], ctx = await context(browser, null, {width:820, height:1180}), page = await openForm(ctx, lg);
+      await sim(page); await view(page, 'obs');
+      const sel = '#obsPages textarea[data-obs="0"][data-row="2"]';
+      await page.evaluate(s => { const e = document.querySelector(s); e.scrollIntoView({block:'center'}); e.value = 'He sat down at 9:02. He was very upset and had a meltdown for a while. He returned to work at 9:20.'; e.dispatchEvent(new Event('input', {bubbles:true})); }, sel);
+      await sleep(300); await page.click(sel); await sleep(300);
+      await page.evaluate(s => { const e = document.querySelector(s), i = e.value.indexOf('He was'); e.setSelectionRange(i, e.value.indexOf(' He returned')); }, sel); await sleep(400);
+      const a = await page.evaluate(s => __w.at(s), sel);
+      ok(!!a, '12 with the middle sentence selected, the button stays (it is not hidden)', a);
+      await page.evaluate(s => { const e = document.querySelector(s); e.setSelectionRange(e.value.length, e.value.length); }, sel); await sleep(200);
+      await page.keyboard.type(' He sat at his desk', {delay:20}); await sleep(450);
+      const g = await page.evaluate(s => { const p = __w.over(document.querySelector(s)); return p ? {h: Math.round(p.q.height), wide: p.b.classList.contains('wide'), over: p.b.classList.contains('over'), op: getComputedStyle(p.b.querySelector('.pl')).opacity} : null; }, sel);
+      ok(g && !g.wide && g.h <= 26, '12 typing in a two-row field: the small button, without its label', g);
+      let cover = 0;
+      for (const w of 'and wrote two words then put the pencil down and looked out of the window for a while'.split(' ')) {
+        await page.keyboard.type(' ' + w, {delay:1}); await sleep(60);
+        const hit = await page.evaluate(s => { const t = document.querySelector(s), c = __w.caret(t), p = __w.over(t); const q = p && p.q; return !!q && !(c.right < q.left || c.left > q.right || c.bottom < q.top || c.top > q.bottom); }, sel);
+        if (hit) cover++;
+      }
+      ok(cover === 0, '12 ... and it never covers the caret', cover);
+      await page.click('#obsPages textarea[data-obs="0"][data-row="0"]'); await sleep(400);
+      const q = await page.evaluate(s => { const p = __w.over(document.querySelector(s)); return p ? {over: p.b.classList.contains('over'), op: +getComputedStyle(p.b.querySelector('.pl')).opacity} : null; }, sel);
+      ok(q && (!q.over || q.op < 0.7), '12 over words, a button is see-through', q);
+      await shot(page, 'two-row-820x1180.png');
+      ok(errorsIn(lg).length === 0, '12 no console errors', errorsIn(lg));
+      await ctx.close();
     });
   } catch (e) {
     ok(false, 'the run stopped: ' + (e && e.stack || e));

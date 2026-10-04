@@ -5,7 +5,10 @@
    engine (tools/blocks/nbh-wording.js, run in a node vm with a stub window, so its compile and check code is the
    code under test) and with a line-for-line port of that engine (the cross-check, and the fallback when the client
    file is missing). The panel matches each rule ignoring case, keeps whole-word matches only, and skips a match
-   that lies wholly inside straight (") or curly (“ ”) double quotes; a quotation left open ends with its line.
+   that lies wholly inside straight (") or curly (“ ”) double quotes; a quotation left open ends with its line. An
+   "internal" rule also skips the learner's own words about a feeling given as what the learner said ("he said he
+   was angry"), and a phrase without a replacement is marked without a joining word in front ("refused", not "and
+   refused").
 
    1. shape: the documented keys, unique ids, known categories, flags only i/m/s/u, a one-sentence why and suggest,
       nothing the patch script refuses ("</script", "<!--", a model ID), no lookbehind, named group or \p{} (older
@@ -90,7 +93,20 @@ function makeEngine(raw, opts) {
   function finding(r, t, s, e, m) {
     const f = {id: r.id, cat: r.cat, start: s, end: e, text: t.slice(s, e), why: r.why, suggest: r.suggest, replacement: null};
     if (r.replace != null) { const rep = fitCase(expand(r.replace, m), f.text); if (rep !== f.text) f.replacement = rep; }
+    else {
+      const lead = /^(?:and|but|or|then|also|yet)\s+/i.exec(f.text);
+      if (lead && lead[0].length < f.text.length) { f.start += lead[0].length; f.text = f.text.slice(lead[0].length); }
+    }
     return f;
+  }
+  const REPORTED = /(?:^|[^\w'\u2019\]])(?:he|she|they|(?:the\s+)?(?:student|learner|child|client)|\[student\])\s+(?:(?:then|also|later|quietly|loudly|calmly|again|finally|first)\s+)?(?:said|says|stated|states|reported|reports|told|tells|explained|explains|shared|shares|answered|answers|replied|replies|wrote|writes|typed|signed|indicated|indicates|complained|complains|admitted|admits|yelled|yells|shouted|shouts|screamed|whispered|mentioned|mentions|announced|exclaimed|expressed|expresses|repeated|repeats)(?:\s+(?:to\s+)?(?:me|us|him|her|them|staff|everyone|(?:the|his|her|their|a|an|my|our)\s+[\w'\u2019-]+|\[[^\]\n]{1,30}\]))?\s*,?\s+(?:that\s+)?(?:(he|she|they|i)\s+((?:was|were|is|am|are|'s|\u2019s|'m|\u2019m|felt|feels|feel|got|gets|get|had\s+been|has\s+been|have\s+been|was\s+feeling|is\s+feeling|were\s+feeling|would\s+be|will\s+be|became|becomes)\s+)?|(?:feeling|being)\s+)(?:(?:very|really|so|too|a\s+little|a\s+bit|kind\s+of|sort\s+of|extremely|super|more|less|quite|pretty)\s+)?$/i;
+  function reported(t, s, text) {
+    let pre = t.slice(Math.max(0, s - 120), s);
+    const cut = Math.max(pre.lastIndexOf('.'), pre.lastIndexOf('!'), pre.lastIndexOf('?'), pre.lastIndexOf(';'), pre.lastIndexOf('\n'));
+    if (cut >= 0) pre = pre.slice(cut + 1);
+    const m = REPORTED.exec(pre);
+    if (!m) return false;
+    return !(m[1] && !m[2] && !/^(?:was|were|is|am|are|got|gets|felt|feels|became|becomes|had\s+been|has\s+been)\b/i.test(text));
   }
   function check(text) {
     const t = str(text), q = quoteSpans(t), out = [];
@@ -103,6 +119,7 @@ function makeEngine(raw, opts) {
         if (e === s) { re.lastIndex = s + 1; continue; }
         if ((isW(t.charAt(s)) && isW(t.charAt(s - 1))) || (isW(t.charAt(e - 1)) && isW(t.charAt(e)))) { re.lastIndex = s + 1; continue; }
         if (quoted(s, e)) continue;
+        if (r.cat === 'internal' && reported(t, s, m[0])) continue;
         out.push(finding(r, t, s, e, Array.prototype.slice.call(m)));
       }
       re.lastIndex = 0;
@@ -149,9 +166,9 @@ function loadClient(raw) {
 
 /* ------------------------------------------------------------------ per-rule examples: [fires, must not fire] */
 const UNITS = {
-  'int-angry': [["He got angry when the timer rang.", "She was mad at her brother.", "He was furious and annoyed.", "He was agitated and irritable after the bus ride.", "Mom said he was muy enojado."], ["She played Angry Birds for 2 minutes.", "The class did Mad Libs.", "He attends anger management group on Tuesdays.", "He pointed to the angry icon on the emotion scale.", "He pointed to mad on his feelings chart.", "Grumpy Monkey was the read-aloud book.", "1 = area is red or irritated, with breaks in the skin.", "Reduced irritability on the ABC-I.", "He correctly labeled mad in 8 of 10 trials."]],
+  'int-angry': [["He got angry when the timer rang.", "She was mad at her brother.", "He was furious and annoyed.", "He was agitated and irritable after the bus ride.", "Mom said he was muy enojado."], ["She played Angry Birds for 2 minutes.", "The class did Mad Libs.", "He attends anger management group on Tuesdays.", "He pointed to the angry icon on the emotion scale.", "He pointed to mad on his feelings chart.", "Grumpy Monkey was the read-aloud book.", "1 = area is red or irritated, with breaks in the skin.", "Reduced irritability on the ABC-I.", "He correctly labeled mad in 8 of 10 trials.", "Student said he was angry.", "He told staff he was mad at the timer."]],
   'int-upset': [["He became upset when the iPad was removed.", "She was upset.", "The change upset him.", "He was upset that his mom left.", "She was upset this morning.", "The noise upset the teacher.", "He showed signs of distress at 10:02."], ["He upset the tray of paint.", "She upset her cup of milk.", "Mom reported an upset stomach.", "What helps you calm down when you are upset?", "He upset the paint tray with his elbow.", "She upset that tall stack of blocks.", "Vitals: in no acute distress per the nurse.", "The milk upset his stomach."]],
-  'int-frustrated': [["He was frustrated with the puzzle.", "Frustration built during math.", "Stu was frusterated w/ the worksheet."], ["Goal: increase frustration tolerance during math."]],
+  'int-frustrated': [["He was frustrated with the puzzle.", "Frustration built during math.", "Stu was frusterated w/ the worksheet."], ["Goal: increase frustration tolerance during math.", "Student stated that he was frustrated with the worksheet.", "He said he was frustrated."]],
   'int-anxious': [["She was anxious before the test.", "He seemed scared of the dog.", "He was worried about the bus.", "He was uncomfortable after the bus ride."], ["Records list an anxiety disorder.", "The science unit covered the nervous system.", "He sat on an uncomfortable chair.", "Menstrual discomfort is listed as a setting event."]],
   'int-happy': [["She was happy during recess.", "He smiled happily.", "He was proud of his drawing.", "He was in a good mood before lunch.", "He seemed relaxed at the calm table."], ["He earned a happy face.", "The class sang Happy Birthday.", "Each interval she circled a happy or sad face.", "He earned a happy rating on his card.", "They sang If You're Happy and You Know It.", "He sat in a comfortable position on the beanbag."]],
   'int-sad': [["He was sad after lunch.", "She looked depressed."], ["She pointed to the sad face on the feelings chart.", "He depressed the button 3 times.", "He correctly labeled happy, sad and mad in 8 of 10 trials.", "Glad Monster, Sad Monster was the read-aloud."]],
@@ -167,7 +184,7 @@ const UNITS = {
   'int-attempted': [["He attempted to leave the room.", "She made an attempt to grab the scissors."], ["Attempted elopement: moving toward the exit within 3 feet of the door.", "Staff will attempt to redirect him once.", "I attempted to block the hit."]],
   'int-enjoyed': [["He enjoyed the game.", "She loves trains.", "He hates math."], ["He chose the trains on 4 of 5 trials.", "Photos of loved ones were on the board.", "Likes: trains, bubbles. Dislikes: loud noises."]],
   'int-seemed': [["He seemed confused.", "She appeared to be asleep.", "He looked upset.", "It looked like he was about to cry."], ["He looked at the board.", "She appeared at the door at 9:05.", "The behavior appears to be maintained by escape from demands (hypothesis).", "Data seem to show a decreasing trend across the last 5 sessions.", "Level appears to be higher in the afternoon sessions (mean 6 vs 2)."]],
-  'int-knew': [["He knew the rule.", "She understood the direction.", "He forgot his homework."], ["He knows better."]],
+  'int-knew': [["He knew the rule.", "She understood the direction.", "He forgot his homework."], ["He knows better.", "Student knew I was watching; the observation ended early because of a fire drill at 9:30.", "e.g. fire drill at 10:20; observation stopped for safety; student knew I was watching", "Student knew 8 of 10 sight words.", "He was aware of the observer."]],
   'int-distracted': [["He was distracted by the window.", "She was not listening.", "He ignored the teacher's directions.", "He checked out during math."], ["Staff used planned ignoring.", "Staff ignored the swearing and praised the next correct answer.", "Staff spaced out the trials by 10 seconds.", "He checked out a book from the library."]],
   'int-needed': [["He needed a break.", "She needs space."], ["He asked for a break.", "Recommendation: he needs a break card taped to his desk."]],
   'int-hadenough': [["He had enough and left.", "She was fed up."], ["He had enough tokens for the trade.", "He stepped over it and kept walking.", "When he was done with it, he put the iPad away."]],
@@ -178,6 +195,7 @@ const UNITS = {
   'intent-manipulative': [["He is manipulative.", "She was manipulating staff.", "She manipulates her mother to get the tablet."], ["He used math manipulatives.", "She manipulated the clay into a ball.", "Delay to the reinforcer is manipulated.", "Engagement is actively manipulating or orienting toward the materials.", "They manipulated staff proximity for one learner.", "It narrows the variables without manipulating them."]],
   'intent-attention': [["He was attention-seeking.", "She yelled to get attention.", "He did it for attention.", "He screams for attention.", "It's all for attention."], ["The teacher said his name to get his attention.", "Does he hit to get attention?", "Someone else got attention.", "Appropriate play gets attention too.", "He emitted 4 mands for attention (tapped my arm).", "He asked for attention by tapping my arm 3 times.", "He was taught to recruit attention by raising his hand.", "Hypothesis: he calls out to gain peer attention; test it in the FA.", "Time-out for attention-maintained behavior only."]],
   'intent-escape': [["He ran out to escape the noise.", "She hid under the table to avoid the worksheet.", "He was avoiding work.", "He hid under the desk to escape.", "He ran out of the classroom to avoid the math test.", "He hid in the bathroom to get out of PE."], ["Mom asked him to get out of the car.", "Staff moved the chair to avoid a fall.", "Does he leave the table to escape the task?", "The assessments point to escape, so test the demands next.", "Hypothesized function: to escape writing demands; to be tested in the FA.", "The data point to escape."]],
+  'func-maintained': [["Aggression is escape-maintained.", "The behavior is maintained by attention from peers.", "His SIB is automatically maintained.", "Elopement is maintained by access to the playground."], ["Aggression may be maintained by escape from demands (to be tested in EA-1).", "The behavior is likely maintained by escape (hypothesis).", "The token board was maintained by the aide.", "Aggression was maintained by escape in the functional analysis.", "Is the behavior maintained by attention?"]],
   'intent-getwhat': [["He screams until he gets what he wants.", "He hit the peer in order to get the toy.", "He hits so that he can leave the table.", "He screamed so that staff would leave him alone."], ["Staff waited in order to get baseline data.", "He used his break card so he could leave the table, as taught.", "Staff gave him a token so he could buy a sticker."]],
   'intent-testing': [["He was testing limits.", "She keeps pushing boundaries."], ["He finished testing at 10:15.", "Teacher read the test rules aloud at 9:00."]],
   'intent-control': [["It turned into a power struggle.", "He did it to get a reaction.", "A peer provoked him."], ["Revisit the baiting and the setting first.", "Staff will avoid power struggles and offer 2 choices.", "Staff will avoid a power struggle by offering choices."]],
@@ -218,15 +236,15 @@ const UNITS = {
   'freq-several': [["He hit the desk several times.", "She needed a couple of prompts.", "He was told many times to sit down.", "He hit peers many times during recess."], ["How many times did he leave the room?", "Count how many times he hits.", "He hit the wall so many times that I stopped counting."]],
   'freq-always': [["He always cries at drop-off.", "She talks constantly.", "He cries every time the bell rings."], ["Duration was recorded continuously for 30 minutes.", "Does he always cry at drop-off?", "Staff will praise him every time he raises his hand.", "He always waited for the timer (6 of 6 trials)."]],
   'freq-never': [["He never finishes his work.", "He never raises his hand in class."], ["The student never left his assigned area during the 20-minute observation."]],
-  'freq-often': [["He often leaves his seat.", "She usually sits with the group.", "At various times he left his seat."], ["A typically developing peer sat nearby.", "He was breathing normally.", "How often does he leave his seat during math?", "Breaks are regularly scheduled every 20 minutes.", "He flipped the light switch on and off 14 times.", "What most often followed was adult redirection or prompt to continue.", "Most often the behavior followed a demand (7 of 9 occurrences).", "Staff checked on him periodically (every 5 min)."]],
+  'freq-often': [["He often leaves his seat.", "She usually sits with the group.", "At various times he left his seat."], ["A typically developing peer sat nearby.", "He was breathing normally.", "How often does he leave his seat during math?", "Breaks are regularly scheduled every 20 minutes.", "He flipped the light switch on and off 14 times.", "What most often followed was adult redirection or prompt to continue.", "Most often the behavior followed a demand (7 of 9 occurrences).", "Staff checked on him periodically (every 5 min).", "He was frequently prompted by the aide (8 verbal prompts in 10 minutes)."]],
   'freq-overandover': [["He hit the desk over and over."], []],
   'freq-repeatedly': [["She repeatedly asked for juice.", "He kept touching peers."], ["Data kept during daily use are graphed weekly."]],
   'freq-allday': [["He cried all day.", "She was out of her seat all morning long.", "He was out of his seat all class."], ["It was present in a clear subset (all morning episodes).", "The class went on an all day field trip."]],
-  'freq-wholeday': [["He screamed the whole period.", "She hummed throughout the lesson.", "She was off task most of the period.", "He cried the whole time we were at centers.", "He was off task the entire class period."], ["He was disruptive to the whole class.", "No SIB occurred during the whole session.", "Throughout the session he stayed in his seat.", "Writing prompt given to the whole class."]],
+  'freq-wholeday': [["He screamed the whole period.", "She hummed throughout the lesson.", "She was off task most of the period.", "He cried the whole time we were at centers.", "He was off task the entire class period."], ["He was disruptive to the whole class.", "No SIB occurred during the whole session.", "Throughout the session he stayed in his seat.", "Writing prompt given to the whole class.", "He stayed in his seat the whole time (30 minutes).", "He stayed in his seat the whole period, from 10:05 to 10:40."]],
   'dur-awhile': [["He cried for a while.", "After a while she sat down.", "For quite a while he sat by the window.", "He hasn't eloped in a while."], []],
   'dur-longtime': [["She cried for a long time.", "It took forever.", "It took some time for him to settle."], ["He had a good time at the park.", "He has done this for a long time (per mom, since age 3).", "At some time before lunch he left the room."]],
   'dur-bit': [["He sat for a bit.", "A little bit later he stood up."], ["He was a bit loud.", "An MO momentarily alters the value of a reinforcer."]],
-  'dur-quickly': [["He quickly ran to the door.", "She eventually sat down."], ["He started as soon as the timer rang.", "He responded quickly (within 3 s) to his name."]],
+  'dur-quickly': [["He quickly ran to the door.", "She eventually sat down."], ["He started as soon as the timer rang.", "He responded quickly (within 3 s) to his name.", "He completed the worksheet quickly, in 4 minutes."]],
   'dur-somepoint': [["At some point he left the room.", "At some time before lunch he left the room.", "At some point we will fade the prompts."], ["Score the interval if the behavior occurred at some point in the interval.", "The behavior occurred at some point in 45% of intervals.", "Score the interval if he is out of seat at some point during the 10-s interval."]],
   'dur-few-units': [["It took a few minutes.", "He cried for several minutes.", "He needed a few min to settle.", "A few hrs later he vomited."], ["Record how many minutes, or a 0 to 3 rating.", "The planned length has to be a number of minutes."]],
   'dur-vaguelength': [["He briefly looked up.", "She had prolonged crying."], ["He gets extended time on tests.", "He looked briefly (2 s) at the peer."]],
@@ -236,7 +254,7 @@ const UNITS = {
   'int-comparison': [["He did a lot better today.", "She was much calmer.", "Dad said the behavior got worse after the move."], []],
   'int-force': [["He hit the table extremely hard.", "She pushed him hard.", "He kicked the door with all his might.", "He bit her hard on the arm.", "Then he bit his own hand hard."], ["He hit the table hard enough to tip the cup.", "He fell and hit the hard floor.", "He hit the ball hard during kickball."]],
   'int-hyperbole': [["He screamed at the top of his lungs.", "She let out a blood-curdling scream.", "It was a huge meltdown."], ["Note the severity of the worst wound."]],
-  'med-because-dx': [["He did it because of his autism.", "It is due to her ADHD."], ["The scale grew from the trauma scales of emergency medicine.", "He walked back from his autism classroom.", "Due to her disability she receives OT 30 min a week.", "He completed part of his odd problems."]],
+  'med-because-dx': [["He did it because of his autism.", "It is due to her ADHD.", "He has ADHD, that is why he cannot sit still."], ["The scale grew from the trauma scales of emergency medicine.", "He walked back from his autism classroom.", "Due to her disability she receives OT 30 min a week.", "He completed part of his odd problems."]],
   'med-casualdx': [["She is so OCD about her desk.", "He was acting psycho.", "He's on a sugar high."], ["He has a diagnosis of ADHD (records, 2024)."]],
   'med-sensory': [["He was sensory seeking.", "She needed sensory input.", "He was stimming at his desk."], ["He used the sensory break card.", "He walked to the sensory room."]],
   'med-sick': [["He was sick this morning.", "She had a headache.", "He cried in pain."], ["He had a cold drink at lunch.", "He was ill-prepared for the quiz.", "Nurse reported he had a fever of 101.2 at 11:15.", "He was sick last week per mom."]],
@@ -422,6 +440,16 @@ function main() {
     }
   }
   console.log('  ' + np + ' examples that must fire their rule, ' + nn + ' near misses that must not');
+  /* the engine's own two refinements, on the rules as built */
+  const ENGINE = [
+    ['the learner\'s own words about a feeling are not flagged', 'He said he was angry at the timer.', fs2 => !fs2.some(f => f.cat === 'internal')],
+    ['... nor in "told staff she felt"', 'She told staff she felt sad.', fs2 => !fs2.some(f => f.cat === 'internal')],
+    ['what someone else said the learner felt still is', 'Mom said he was angry at the timer.', fs2 => fs2.some(f => f.id === 'int-angry')],
+    ['a feeling word that is not reported still is', 'He said no and was angry.', fs2 => fs2.some(f => f.id === 'int-angry')],
+    ['a phrase is marked without a joining word in front ("refused", not "and refused")', 'He said no and refused to write.', fs2 => fs2.some(f => f.id === 'lab-refused' && f.text === 'refused')]
+  ];
+  for (const [what, t, want] of ENGINE) { const got = run(t); if (!want(got)) fail('engine', what + ': ' + t + ' => ' + (got.map(f => f.id + ' "' + f.text + '"').join('; ') || '-')); }
+  console.log('  ' + ENGINE.length + ' checks of the engine itself');
 
   /* 4 ---------------------------------------------------------------- clean */
   const ob1 = ob1Narrative();

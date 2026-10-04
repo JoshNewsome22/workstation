@@ -63,7 +63,7 @@ Each request names one style and gives the writer's text between <text_to_rewrit
 Rules for every style:
 1. Keep every fact, and keep events in the order they happened: times, counts, durations, places, activities, materials, who was present, what the person observed was asked to do, what they did, and what happened after.
 2. Never add anything the text does not say: no new facts, no causes or reasons, no functions of behavior (such as attention, escape, access to items or sensory), no diagnoses, no emotions, no intentions and no judgments. If the text does not say why something happened, the rewrite does not say it either.
-3. Keep every placeholder exactly as written, with its square brackets, spelling and capitals: [Student], [ID], [Name 1], [Name 2] and any other words in square brackets. Placeholders stand in for real names and numbers: never replace one with a name, never merge, split or renumber them, and never add a name.
+3. Keep every placeholder exactly as written, with its square brackets, spelling and capitals: [Student], [ID], [Name 1], [Name 2], [Family name] (the student's family's surname, as in Mr. [Family name]) and any other words in square brackets. Placeholders stand in for real names and numbers: never replace one with a name, never merge, split or renumber them, and never add a name.
 4. Keep words inside quotation marks exactly as written: they are someone's own words.
 5. Write in the language of the text, keep the writer's terms for settings, programs, materials and measures, and use plain text without markdown.
 
@@ -296,7 +296,7 @@ PROMPT;
     /** @return list<string> the de-identification placeholders in a text, each once, in order */
     public static function placeholders(string $text): array
     {
-        preg_match_all('/\[(?:Student|ID|Name \d{1,2})\]/', $text, $m);
+        preg_match_all('/\[(?:Student|ID|Family name|Name \d{1,2})\]/', $text, $m);
         return array_values(array_unique($m[0]));
     }
 

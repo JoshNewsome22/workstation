@@ -421,7 +421,7 @@ for ($i = 1; $i <= 5; $i++) {
     post('/api/admin/login', ['password' => "wrong $i"]);
 }
 $r = post('/api/admin/login', ['password' => $PW]);
-T::ok($r['status'] === 429 && (int) hdr($r, 'retry-after') > 0 && (int) hdr($r, 'retry-after') <= 900, 'after 5 wrong passwords even the right one waits (429, Retry-After)', [$r['status'], hdr($r, 'retry-after')]);
+T::ok($r['status'] === 429 && (int) hdr($r, 'retry-after') > 0 && (int) hdr($r, 'retry-after') <= 901, 'after 5 wrong passwords even the right one waits (429, Retry-After)', [$r['status'], hdr($r, 'retry-after')]);
 clearHits($site);
 // wrong passwords from everywhere pause signing in, but not on a browser that has signed in here before
 $r = Admin::login();

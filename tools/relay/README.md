@@ -157,10 +157,14 @@ $1.30 and the worst cases above grow sixfold.
 ## Privacy
 
 * **What is sent.** Only the text shown in the panel's preview, after de-identification, and the chosen style. The
-  panel replaces the learner's name, first name and ID (from the form) and any names typed under **Also hide**
-  with placeholders such as `[Student]`, `[ID]`, `[Name 1]` before anything leaves the device, and puts the names
-  back on the device when the answer comes. The relay adds its fixed instructions and nothing else: no names, no
-  passcode labels, no internet address.
+  panel replaces the learner's name (whole, first, last, and each half of a double surname) and ID from the form,
+  the family's surname where a title or "family" shows it is a parent (`Mr. [Family name]`), and any names typed
+  under **Also hide** with placeholders such as `[Student]`, `[ID]`, `[Name 1]` before anything leaves the device.
+  The preview points out what may still be a name (a word with a capital, the learner's initials, a nickname
+  marked **Student**) and the people the form itself names, each one tap from being hidden. When the answer
+  comes, the names are put back on the device, each as it was written; if the answer moved them around, the panel
+  says which to check. The relay adds its fixed instructions and nothing else: no names, no passcode labels, no
+  internet address.
 * **What the relay keeps.** No text at all: neither the text sent nor the rewrite is stored or logged. Its
   database (`nbh-relay/data/relay.sqlite`) holds passcodes and sessions (as hashes), their labels and counts, and
   counters for the limits. Its log (`nbh-relay/data/relay-errors.log`) records events such as "a passcode was
