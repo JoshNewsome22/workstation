@@ -124,6 +124,14 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
     const ch=document.querySelectorAll('#book .pg[data-kind="cards-ch"] .card')[0],tg=document.querySelectorAll('#book .pg[data-kind="cards-tg"] .card')[3];
     const ok=ch.querySelector('.cl').textContent==='YouTube'&&!!ch.querySelector('.cp svg')&&tg.querySelector('.cl').textContent==='Waiting'&&tg.querySelector('.cp').innerHTML===''&&!!document.querySelector('#tgTbl .pick[data-i="3"] .pv svg')&&/Google LLC/.test(window.NBH_PICTO_LICENSE);
     S=JSON.parse(keep);renderAll();return ok;}));
+  check('the library holds the practice\u2019s Bike, Playground, Chips and Fruit pictures; each prints on its card as an embedded picture under its label',await page.evaluate(()=>{const P=window.NBH_PICTOS||{};const ks=['cardbike','cardplayground','cardchips','cardfruit'],ls=['Bike','Playground','Chips','Fruit'];
+    if(!ks.every((k,i)=>P[k]&&P[k].l===ls[i]&&/data:image\/webp;base64,/.test(P[k].s)))return false;const keep=JSON.stringify(S);ks.forEach((k,i)=>S.ch[i]={k,ph:'',l:''});renderAll();
+    const cards=[...document.querySelectorAll('#book .pg[data-kind="cards-ch"] .card')];const ok=ks.every((k,i)=>cards[i].querySelector('.cl').textContent===ls[i]&&!!cards[i].querySelector('.cp svg image'));
+    S=JSON.parse(keep);renderAll();return ok;}));
+  check('From the case: a problem behavior goes on Targets only as its replacement, a reduction goal never, and the note says why',await page.evaluate(()=>{const keep=JSON.stringify(S);S.tg=S.tg.map(()=>cello());renderAll();
+    const r=window.__nbhFactsPick({behaviors:[{label:'Elopement',isRep:false,rep:'Asks for a break'},{label:'Hitting',isRep:false,rep:''},{label:'Raises hand',isRep:true}],goals:{acq:[{beh:'Writes name'}],red:[{beh:'Aggression'}]},menu:[]});
+    const labs=S.tg.map(o=>o.l).filter(Boolean);const ok=r.filled===3&&labs.join('|')==='Asks for a break|Raises hand|Writes name'&&!labs.some(l=>/Elopement|Hitting|Aggression/.test(l))&&/2 items were left out/.test(r.note)&&!/full/.test(r.note);
+    S=JSON.parse(keep);renderAll();return ok;}));
   check('the six-at-once buttons sit above each table and below it',await page.evaluate(()=>document.querySelectorAll('[data-six="ch"]').length===2&&document.querySelectorAll('[data-six="tg"]').length===2));
   /* the photos face each other: the right one mirrored by default, the left or neither on request; the one photo of the Rules row follows the right */
   await page.click('#viewSeg button[data-view="board"]');await sleep(150);

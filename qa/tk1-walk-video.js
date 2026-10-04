@@ -118,7 +118,7 @@ const py=(args,opt)=>execFileSync(PY,[HELPER,...args],Object.assign({stdio:'inhe
   const clip={x:0,y:0,width:W,height:H};
   if(A.preview){fs.mkdirSync(A.frames,{recursive:true});for(const t of A.preview.split(',').map(Number)){await page.evaluate(t=>TKWALK.renderAt(t),t);
       const p=path.join(A.frames,'preview-'+t.toFixed(2)+'.jpg');await page.screenshot({path:p,type:'jpeg',quality:A.quality,clip,animations:'disabled',caret:'hide',scale:'device'});console.log(p);}
-    console.log('cues '+info.cues.map(c=>c.id+'@'+c.start.toFixed(2)+'+'+c.dur.toFixed(2)).join(' '));return;}
+    console.log('cues '+info.cues.map(c=>c.id+'@'+c.start.toFixed(2)+'+'+c.dur.toFixed(2)).join(' '));await br.close();br=null;cleanup();process.exit(0);}
   const N=Math.round(info.D*A.fps);
   const job={fps:A.fps,frames:N,duration:info.D,cues:info.cues,chapters:info.chapters,clips:info.clips,voice:info.voice,speed:info.speed,
     term:info.term,n:info.n,encoder:hasX264?'libx264':'mpeg4',title:TITLE,
