@@ -11,6 +11,7 @@ This script:
      frame count; at every cue start the track rises from silence (RMS just before vs. just after); and saves frames at
      five cue midpoints as PNG (--frames) to look at.
 usage: python make-walk-video.py job.json --video picture.mp4 --out final.mp4 --ffmpeg /path/to/ffmpeg [--tmp dir] [--frames dir]
+       python make-walk-video.py job.json --check --out final.mp4 ...   (only the checks, on a video already made)
 Needs numpy and soundfile (and imageio-ffmpeg when --ffmpeg is not given). Prints a JSON report; exits 1 when a check fails.
 """
 import argparse, base64, json, os, re, subprocess, sys, tempfile
@@ -20,7 +21,7 @@ import soundfile as sf
 SR = 24000
 
 ap = argparse.ArgumentParser()
-ap.add_argument('job'); ap.add_argument('--video', required=True); ap.add_argument('--out', required=True)
+ap.add_argument('job'); ap.add_argument('--video'); ap.add_argument('--check', action='store_true'); ap.add_argument('--out', required=True)
 ap.add_argument('--ffmpeg'); ap.add_argument('--tmp'); ap.add_argument('--frames')
 a = ap.parse_args()
 FF = a.ffmpeg
@@ -41,6 +42,7 @@ def decode(path_or_dash, inp=None):
     if r.returncode: raise RuntimeError('ffmpeg could not decode: ' + r.stderr.decode(errors='replace')[:400])
     return np.frombuffer(r.stdout, dtype='<f4').astype(np.float32)
 
+if not a.check and not a.video: sys.exit('--video is needed (or --check to verify an existing --out)')
 # 1. the narration track
 n = int(round(frames / fps * SR))
 track = np.zeros(n, dtype=np.float32)
@@ -63,11 +65,11 @@ if peak > 0.999: track *= 0.999 / peak
 wav = os.path.join(tmp, 'narration.wav')
 sf.write(wav, track, SR, subtype='PCM_16')
 
-# 2. the mux
+# 2. the mux (skipped with --check: only the checks below, on the existing --out)
 os.makedirs(os.path.dirname(os.path.abspath(a.out)), exist_ok=True)
-r = run(['-loglevel', 'error', '-y', '-i', a.video, '-i', wav, '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy',
+r = None if a.check else run(['-loglevel', 'error', '-y', '-i', a.video, '-i', wav, '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy',
          '-c:a', 'aac', '-b:a', '96k', '-ar', str(SR), '-ac', '1', '-movflags', '+faststart', a.out])
-if r.returncode: sys.exit('mux failed: ' + r.stderr.decode(errors='replace'))
+if r is not None and r.returncode: sys.exit('mux failed: ' + r.stderr.decode(errors='replace'))
 
 # 3. the checks
 info = run(['-i', a.out]).stderr.decode(errors='replace')
@@ -75,9 +77,8 @@ dm = re.search(r'Duration: (\d+):(\d+):([\d.]+)', info)
 dur = int(dm.group(1)) * 3600 + int(dm.group(2)) * 60 + float(dm.group(3)) if dm else -1
 vm = re.search(r'Stream #\S+.*?Video: (\w+).*?, (\d+)x(\d+)[, ].*?([\d.]+) fps', info)
 am = re.search(r'Stream #\S+.*?Audio: (\w+).*?(\d+) Hz, (\w+)', info)
-cnt = run(['-i', a.out, '-map', '0:v:0', '-c', 'copy', '-f', 'null', '-']).stderr.decode(errors='replace')
-fm = re.findall(r'frame=\s*(\d+)', cnt)
-nframes = int(fm[-1]) if fm else -1
+cnt = run(['-loglevel', 'error', '-i', a.out, '-map', '0:v:0', '-c', 'copy', '-f', 'framecrc', '-']).stdout.decode(errors='replace')
+nframes = sum(1 for ln in cnt.splitlines() if ln.strip() and not ln.startswith('#'))
 rep = {'file': os.path.abspath(a.out), 'bytes': os.path.getsize(a.out), 'mb': round(os.path.getsize(a.out) / 1048576, 2),
        'duration': round(dur, 3), 'timeline': round(D, 3), 'frames': nframes, 'frames_expected': frames,
        'video': vm and {'codec': vm.group(1), 'w': int(vm.group(2)), 'h': int(vm.group(3)), 'fps': float(vm.group(4))},
