@@ -5,7 +5,11 @@ the library changes. A new copy goes just before the form's main script (the fir
 
 Before anything is written the library is checked: it must parse, hold no "</script" and no "Newsome Behavioral Health"
 (the school edition is built from this one by name), and every entry's type, definition style and dimension must be an
-option of the form's own selects, with its category one of the fourteen. The form must end with exactly one copy.
+option of the form's own selects, with its category one of the fourteen. An entry's functional (outcome-defined) version
+(fdef) may carry its own measurement fields, loaded with it where the measure changes: fdim (an option of the dimension
+select), funit, fon, foff, fex, fnex, fborder, fexcl; they are refused on an entry without fdef. The label (lab) is what
+loads into the card, so a picker qualifier ("cluster", "precursor", "latency") goes in tag, never in the label. The form
+must end with exactly one copy.
 The JSON is written compact, with every "<" as \\u003c and U+2028/U+2029 escaped, so it can never close or confuse
 the script element and it parses as JavaScript in every browser.
 usage: python3 tools/blocks/patch-tb1-library.py"""
@@ -24,7 +28,9 @@ CATS = ["Aggression toward others", "Verbal aggression and threats", "Self-injur
         "Peer and social behavior", "Stereotypy and repetitive behavior", "Feeding and health-related",
         "Body, privacy and hygiene", "Home and sleep", "Precursors"]
 REQUIRED = ['id', 'cat', 'lab', 'type', 'style', 'dim', 'unit', 'def', 'ex', 'nex', 'on', 'off', 'border', 'excl']
-TEXT = REQUIRED + ['fdef', 'tops', 'note']
+FUNC = ['fdim', 'funit', 'fon', 'foff', 'fex', 'fnex', 'fborder', 'fexcl']   # the functional version's own fields
+TEXT = REQUIRED + ['fdef', 'tops', 'note', 'tag'] + FUNC
+TAGWORDS = re.compile(r'\((?:[^()]*\b(?:cluster|precursor|latency|permanent product|momentary time sample)\b[^()]*|% of opportunities)\)\s*$', re.I)
 
 raw = open(LIB, encoding='utf-8').read()
 for bad in ('</script', 'Newsome Behavioral Health'):
@@ -65,6 +71,18 @@ for i, e in enumerate(lib['entries']):
     seen.add(e.get('id'))
     if e.get('type') == 'Replacement / alternative behavior':
         errs.append(where + ': the library holds reduction targets only')
+    for k in FUNC:
+        if k in e and not e.get('fdef'):
+            errs.append(where + ': ' + k + ' without a functional definition (fdef)')
+    if 'fdim' in e and e['fdim'] not in VOC['dim']:
+        errs.append(where + ': fdim ' + repr(e['fdim']) + ' is not one of the form\'s options')
+    for k in ('ex', 'nex', 'fex', 'fnex'):
+        if isinstance(e.get(k), str) and len([x for x in e[k].split('\n') if x.strip()]) < 3:
+            errs.append(where + ': ' + k + ' has fewer than 3 lines')
+    if isinstance(e.get('lab'), str) and TAGWORDS.search(e['lab']):
+        errs.append(where + ': the label carries a picker tag; put it in tag')
+    if 'tag' in e and (not isinstance(e['tag'], str) or not e['tag'].strip() or '(' in e['tag'] or ')' in e['tag']):
+        errs.append(where + ': tag must be short text without brackets')
 if errs:
     sys.exit('refused: %d problem%s in the library\n  ' % (len(errs), '' if len(errs) == 1 else 's') + '\n  '.join(errs[:40]))
 
