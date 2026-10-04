@@ -14,10 +14,14 @@
       this file): the rule ids found against the ids expected, precision and recall; no finding may touch a
       sample's "clear" phrases (the must-not-fire parts);
    3. units: every rule fires on its own examples and not on its near misses;
-   4. clean text: objective notes, OB-1's simulated narrative among them, give no finding at all;
+   4. clean text: objective notes, OB-1's simulated narrative and the sentences of its generated summary (draft())
+      among them, give no finding at all;
    5. robustness: the same findings when every pattern is wrapped in \b(?:...)\b (a client that adds its own word
-      boundaries sees the same thing); replacements expand cleanly and do not set off their own rule again; every
-      pattern runs fast on the patch script's long test strings and on a 4000-character note;
+      boundaries sees the same thing; a finding that opens on a list bullet or a bracket at the start of a line,
+      which a guard rule allows and a word boundary cannot start, is left out of that comparison); replacements
+      expand cleanly and do not set off their own rule again; every pattern runs fast on the patch script's long test
+      strings and on runs that once backtracked (a label then thousands of spaces or newlines, apostrophe-joined
+      letters), and a full check stays fast on a 4000-character note and on those runs;
    6. the client's engine and the port agree on every text.
 
    usage: node qa/wording-rules-test.js [samples.json] [--verbose]      exit code 1 on any failure
@@ -145,103 +149,107 @@ function loadClient(raw) {
 
 /* ------------------------------------------------------------------ per-rule examples: [fires, must not fire] */
 const UNITS = {
-  'int-angry': [["He got angry when the timer rang.", "She was mad at her brother.", "He was furious and annoyed."], ["She played Angry Birds for 2 minutes.", "The class did Mad Libs.", "He attends anger management group on Tuesdays.", "He pointed to the angry icon on the emotion scale.", "He pointed to mad on his feelings chart."]],
-  'int-upset': [["He became upset when the iPad was removed.", "She was upset.", "The change upset him.", "He was upset that his mom left.", "She was upset this morning.", "The noise upset the teacher."], ["He upset the tray of paint.", "She upset her cup of milk.", "Mom reported an upset stomach.", "What helps you calm down when you are upset?", "He upset the paint tray with his elbow.", "She upset that tall stack of blocks."]],
-  'int-frustrated': [["He was frustrated with the puzzle.", "Frustration built during math."], ["Goal: increase frustration tolerance during math."]],
-  'int-anxious': [["She was anxious before the test.", "He seemed scared of the dog.", "He was worried about the bus."], ["Records list an anxiety disorder.", "The science unit covered the nervous system."]],
-  'int-happy': [["She was happy during recess.", "He smiled happily.", "He was proud of his drawing."], ["He earned a happy face.", "The class sang Happy Birthday.", "Each interval she circled a happy or sad face.", "He earned a happy rating on his card."]],
-  'int-sad': [["He was sad after lunch.", "She looked depressed."], ["She pointed to the sad face on the feelings chart.", "He depressed the button 3 times."]],
+  'int-angry': [["He got angry when the timer rang.", "She was mad at her brother.", "He was furious and annoyed.", "He was agitated and irritable after the bus ride.", "Mom said he was muy enojado."], ["She played Angry Birds for 2 minutes.", "The class did Mad Libs.", "He attends anger management group on Tuesdays.", "He pointed to the angry icon on the emotion scale.", "He pointed to mad on his feelings chart.", "Grumpy Monkey was the read-aloud book.", "1 = area is red or irritated, with breaks in the skin.", "Reduced irritability on the ABC-I.", "He correctly labeled mad in 8 of 10 trials."]],
+  'int-upset': [["He became upset when the iPad was removed.", "She was upset.", "The change upset him.", "He was upset that his mom left.", "She was upset this morning.", "The noise upset the teacher.", "He showed signs of distress at 10:02."], ["He upset the tray of paint.", "She upset her cup of milk.", "Mom reported an upset stomach.", "What helps you calm down when you are upset?", "He upset the paint tray with his elbow.", "She upset that tall stack of blocks.", "Vitals: in no acute distress per the nurse.", "The milk upset his stomach."]],
+  'int-frustrated': [["He was frustrated with the puzzle.", "Frustration built during math.", "Stu was frusterated w/ the worksheet."], ["Goal: increase frustration tolerance during math."]],
+  'int-anxious': [["She was anxious before the test.", "He seemed scared of the dog.", "He was worried about the bus.", "He was uncomfortable after the bus ride."], ["Records list an anxiety disorder.", "The science unit covered the nervous system.", "He sat on an uncomfortable chair.", "Menstrual discomfort is listed as a setting event."]],
+  'int-happy': [["She was happy during recess.", "He smiled happily.", "He was proud of his drawing.", "He was in a good mood before lunch.", "He seemed relaxed at the calm table."], ["He earned a happy face.", "The class sang Happy Birthday.", "Each interval she circled a happy or sad face.", "He earned a happy rating on his card.", "They sang If You're Happy and You Know It.", "He sat in a comfortable position on the beanbag."]],
+  'int-sad': [["He was sad after lunch.", "She looked depressed."], ["She pointed to the sad face on the feelings chart.", "He depressed the button 3 times.", "He correctly labeled happy, sad and mad in 8 of 10 trials.", "Glad Monster, Sad Monster was the read-aloud."]],
   'int-bored': [["He was bored during the video.", "She seemed unmotivated."], ["He bored a hole in the eraser with his pencil."]],
   'int-excited': [["He was excited about the field trip."], []],
-  'int-overwhelmed': [["She was overwhelmed by the noise.", "He was dysregulated after recess.", "He shut down during math."], ["She shut down the computer at 10:05.", "Records list disruptive mood dysregulation disorder."]],
+  'int-overwhelmed': [["She was overwhelmed by the noise.", "He was dysregulated after recess.", "He shut down during math.", "He escalated quickly when the sub came in."], ["She shut down the computer at 10:05.", "Records list disruptive mood dysregulation disorder.", "The plan uses escalating prompts.", "Staff escalated the concern to the principal.", "Rehearsal rounds with escalating protest."]],
   'int-calm': [["He calmed down after 5 minutes.", "She was calm during circle.", "He remained calm."], ["He sat in the calm-down corner for 3 minutes.", "Staff told him to calm down."]],
-  'int-tired': [["He seemed tired.", "She was hungry before lunch."], ["His shoes were worn out.", "The class played Hungry Hungry Hippos."]],
-  'int-felt': [["He felt sad.", "She feels like nobody listens.", "I feel that he was ignored."], ["He felt the texture of the sand.", "She felt for the light switch.", "Holds stomach, reports feeling sick, refuses food.", "He said he felt sick."]],
-  'int-feelings': [["Her feelings were hurt.", "He had big feelings at recess.", "She became emotional."], ["He is eligible under emotional disturbance.", "Emotional regulation lesson at 9:00.", "Two students at risk for emotional or behavioral disorders took part."]],
-  'int-wanted': [["He wanted the iPad.", "Then she wanted to go outside.", "The student didn’t want to write.", "He hit the table because he wanted the red marker."], ["Staff asked if he wanted a break.", "She said she wanted to go home.", "The teacher asked what he wanted.", "He told staff he wanted water."]],
-  'int-tried': [["He tried to hit the aide.", "She was trying to leave."], ["He tried the new puzzle.", "She tried on her coat.", "Name the behavior we are trying to reduce."]],
-  'int-attempted': [["He attempted to leave the room.", "She made an attempt to grab the scissors."], ["Attempted elopement: moving toward the exit within 3 feet of the door.", "Staff will attempt to redirect him once."]],
-  'int-enjoyed': [["He enjoyed the game.", "She loves trains.", "He hates math."], ["He chose the trains on 4 of 5 trials.", "Photos of loved ones were on the board."]],
-  'int-seemed': [["He seemed confused.", "She appeared to be asleep.", "He looked upset."], ["He looked at the board.", "She appeared at the door at 9:05."]],
+  'int-tired': [["He seemed tired.", "She was hungry before lunch."], ["His shoes were worn out.", "The class played Hungry Hungry Hippos.", "He selected 'tired' on his feelings chart at check-in.", "Mom stated he was tired this AM, per her report.", "Less restrictive interventions were exhausted before the hold at 10:42.", "He tired to hit the aide.", "They read The Very Hungry Caterpillar."]],
+  'int-felt': [["He felt sad.", "She feels like nobody listens.", "I feel that he was ignored.", "Ramón felt left out at recess.", "Then—he felt like nobody cared.", "(He felt left out.)", "Recess:\n- felt left out at recess"], ["He felt the texture of the sand.", "She felt for the light switch.", "Holds stomach, reports feeling sick, refuses food.", "He said he felt sick.", "During the lesson on feeling frustrated, he named 2 strategies.", "He said he was feeling better at 10:30."]],
+  'int-feelings': [["Her feelings were hurt.", "He had big feelings at recess.", "She became emotional."], ["He is eligible under emotional disturbance.", "Emotional regulation lesson at 9:00.", "Two students at risk for emotional or behavioral disorders took part.", "No emotional responses (crying, whining) were observed."]],
+  'int-wanted': [["He wanted the iPad.", "Then she wanted to go outside.", "The student didn’t want to write.", "He hit the table because he wanted the red marker.", "Jordan wanted the iPad.", "José wanted to play.", "J. wanted the tablet.", "Pt wanted the tablet.", "At 10:42 he wanted the red marker."], ["Staff asked if he wanted a break.", "She said she wanted to go home.", "The teacher asked what he wanted.", "He told staff he wanted water.", "The team wanted to know what would help.", "How does the student communicate wants and needs?", "It fails when the student simply does not want it today."]],
+  'int-tried': [["He tried to hit the aide.", "She was trying to leave.", "He tired to hit the aide.", "- tried to leave the room"], ["He tried the new puzzle.", "She tried on her coat.", "Name the behavior we are trying to reduce.", "Staff tried to redirect him 3 times.", "The para tried to block him."]],
+  'int-attempted': [["He attempted to leave the room.", "She made an attempt to grab the scissors."], ["Attempted elopement: moving toward the exit within 3 feet of the door.", "Staff will attempt to redirect him once.", "I attempted to block the hit."]],
+  'int-enjoyed': [["He enjoyed the game.", "She loves trains.", "He hates math."], ["He chose the trains on 4 of 5 trials.", "Photos of loved ones were on the board.", "Likes: trains, bubbles. Dislikes: loud noises."]],
+  'int-seemed': [["He seemed confused.", "She appeared to be asleep.", "He looked upset.", "It looked like he was about to cry."], ["He looked at the board.", "She appeared at the door at 9:05.", "The behavior appears to be maintained by escape from demands (hypothesis).", "Data seem to show a decreasing trend across the last 5 sessions.", "Level appears to be higher in the afternoon sessions (mean 6 vs 2)."]],
   'int-knew': [["He knew the rule.", "She understood the direction.", "He forgot his homework."], ["He knows better."]],
-  'int-distracted': [["He was distracted by the window.", "She was not listening.", "He ignored the teacher's directions."], ["Staff used planned ignoring.", "Staff ignored the swearing and praised the next correct answer.", "Staff spaced out the trials by 10 seconds."]],
-  'int-needed': [["He needed a break.", "She needs space."], ["He asked for a break."]],
+  'int-distracted': [["He was distracted by the window.", "She was not listening.", "He ignored the teacher's directions.", "He checked out during math."], ["Staff used planned ignoring.", "Staff ignored the swearing and praised the next correct answer.", "Staff spaced out the trials by 10 seconds.", "He checked out a book from the library."]],
+  'int-needed': [["He needed a break.", "She needs space."], ["He asked for a break.", "Recommendation: he needs a break card taped to his desk."]],
   'int-hadenough': [["He had enough and left.", "She was fed up."], ["He had enough tokens for the trade.", "He stepped over it and kept walking.", "When he was done with it, he put the iPad away."]],
-  'int-social': [["She was embarrassed.", "He is shy with adults."], ["The session ran just shy of 20 minutes.", "Neither option is praised or discouraged."]],
+  'int-social': [["She was embarrassed.", "He is shy with adults.", "He was embarassed and dissapointed."], ["The session ran just shy of 20 minutes.", "Neither option is praised or discouraged."]],
   'int-interest': [["He was interested in the map.", "She is obsessed with trains."], []],
   'int-looks': [["He gave her a dirty look.", "She glared at the teacher.", "He smirked."], ["He looked at the teacher for 3 seconds."]],
-  'intent-purpose': [["He dropped the cup on purpose.", "She deliberately knocked over the tower."], ["Staff used deliberate practice with 10 trials."]],
+  'intent-purpose': [["He dropped the cup on purpose.", "She deliberately knocked over the tower.", "He pretended to be asleep.", "He was faking it."], ["Staff used deliberate practice with 10 trials.", "He pretended to feed the doll during pretend play."]],
   'intent-manipulative': [["He is manipulative.", "She was manipulating staff.", "She manipulates her mother to get the tablet."], ["He used math manipulatives.", "She manipulated the clay into a ball.", "Delay to the reinforcer is manipulated.", "Engagement is actively manipulating or orienting toward the materials.", "They manipulated staff proximity for one learner.", "It narrows the variables without manipulating them."]],
-  'intent-attention': [["He was attention-seeking.", "She yelled to get attention.", "He did it for attention."], ["The teacher said his name to get his attention.", "Does he hit to get attention?", "Someone else got attention.", "Appropriate play gets attention too."]],
-  'intent-escape': [["He ran out to escape the noise.", "She hid under the table to avoid the worksheet.", "He was avoiding work."], ["Mom asked him to get out of the car.", "Staff moved the chair to avoid a fall.", "Does he leave the table to escape the task?", "The assessments point to escape, so test the demands next."]],
-  'intent-testing': [["He was testing limits.", "She keeps pushing boundaries."], ["He finished testing at 10:15."]],
-  'intent-control': [["It turned into a power struggle.", "He did it to get a reaction.", "A peer provoked him."], ["Revisit the baiting and the setting first."]],
-  'intent-trigger': [["The bell set him off.", "She was triggered by the noise."], ["The motion sensor triggered the light."]],
-  'intent-decided': [["He decided to leave.", "She chose not to answer."], ["Given 3 options, she chose the library.", "Name the behavior the plan is meant to change."]],
-  'intent-noreason': [["He hit a peer for no reason.", "Out of nowhere she screamed.", "The hit was unprovoked."], ["Intervals were randomly selected.", "Students were randomly assigned to groups.", "The call will either call for everything or for nothing."]],
-  'intent-wouldnt': [["He would not sit down.", "She wouldn’t stop crying."], ["The door would not open."]],
-  'lab-tantrum': [["He had a tantrum at 9:10.", "She had a meltdown.", "He threw a fit in the store."], ["Tantrum: crying with dropping to the floor for 5 s or more.", "Tantrums are defined as screaming for 5 s or more.", "Tantrum minutes fell with it."]],
-  'lab-blewup': [["He lost his temper when the bell rang.", "She freaked out.", "He had an episode at lunch."], ["He blew up a balloon.", "He had a moment to finish before the bell.", "He has an incident report from last week.", "Untick a routine to leave it off without losing it.", "He lost it on the bus and asked for a new one."]],
-  'lab-aggressive': [["He was aggressive with peers.", "She became violent."], ["Aggressive behavior: hitting, kicking or biting with contact.", "Physical aggression occurred 3 times.", "He had two asthma attacks this year.", "Records note a history of domestic violence."]],
-  'lab-defiant': [["He was defiant.", "She was disrespectful to staff.", "He has a bad attitude."], ["Records list oppositional defiant disorder."]],
-  'lab-noncompliant': [["He was noncompliant.", "She was non-compliant with the request."], ["Noncompliance: not starting within 10 s.", "Compliance was 40% of trials."]],
-  'lab-refused': [["He refused to work.", "Work refusal at 10:15."], ["Refusal: saying no or pushing materials away."]],
-  'lab-outburst': [["He had an outburst.", "She exploded at her sister."], ["The class read about a volcanic eruption."]],
-  'lab-actingout': [["He was acting out in class.", "She acted up at dinner."], ["The group acted out the story."]],
+  'intent-attention': [["He was attention-seeking.", "She yelled to get attention.", "He did it for attention.", "He screams for attention.", "It's all for attention."], ["The teacher said his name to get his attention.", "Does he hit to get attention?", "Someone else got attention.", "Appropriate play gets attention too.", "He emitted 4 mands for attention (tapped my arm).", "He asked for attention by tapping my arm 3 times.", "He was taught to recruit attention by raising his hand.", "Hypothesis: he calls out to gain peer attention; test it in the FA.", "Time-out for attention-maintained behavior only."]],
+  'intent-escape': [["He ran out to escape the noise.", "She hid under the table to avoid the worksheet.", "He was avoiding work.", "He hid under the desk to escape.", "He ran out of the classroom to avoid the math test.", "He hid in the bathroom to get out of PE."], ["Mom asked him to get out of the car.", "Staff moved the chair to avoid a fall.", "Does he leave the table to escape the task?", "The assessments point to escape, so test the demands next.", "Hypothesized function: to escape writing demands; to be tested in the FA.", "The data point to escape."]],
+  'intent-getwhat': [["He screams until he gets what he wants.", "He hit the peer in order to get the toy.", "He hits so that he can leave the table.", "He screamed so that staff would leave him alone."], ["Staff waited in order to get baseline data.", "He used his break card so he could leave the table, as taught.", "Staff gave him a token so he could buy a sticker."]],
+  'intent-testing': [["He was testing limits.", "She keeps pushing boundaries."], ["He finished testing at 10:15.", "Teacher read the test rules aloud at 9:00."]],
+  'intent-control': [["It turned into a power struggle.", "He did it to get a reaction.", "A peer provoked him."], ["Revisit the baiting and the setting first.", "Staff will avoid power struggles and offer 2 choices.", "Staff will avoid a power struggle by offering choices."]],
+  'intent-trigger': [["The bell set him off.", "She was triggered by the noise.", "He got triggered when the bell rang."], ["The motion sensor triggered the light.", "The door alarm was triggered at 1:05."]],
+  'intent-decided': [["He decided to leave.", "She chose not to answer.", "- decided to leave the group"], ["Given 3 options, she chose the library.", "Name the behavior the plan is meant to change.", "The IEP team decided to add a token board.", "Para decided to skip centers."]],
+  'intent-noreason': [["He hit a peer for no reason.", "Out of nowhere she screamed.", "The hit was unprovoked."], ["Intervals were randomly selected.", "Students were randomly assigned to groups.", "The call will either call for everything or for nothing.", "Teacher changed the schedule without warning at 10:15."]],
+  'intent-wouldnt': [["He would not sit down.", "She wouldn’t stop crying.", "He was unable to sit still.", "He couldn't stop talking."], ["The door would not open.", "The Chromebook wouldn't work.", "Staff would not give the iPad until he asked.", "He couldn't reach the shelf, so he asked for help."]],
+  'lab-tantrum': [["He had a tantrum at 9:10.", "She had a meltdown.", "He threw a fit in the store.", "He had a meltdown (again) at 10:42.", "He had a berrinche at the store."], ["Tantrum: crying with dropping to the floor for 5 s or more.", "Tantrums are defined as screaming for 5 s or more.", "Tantrum minutes fell with it."]],
+  'lab-blewup': [["He lost his temper when the bell rang.", "She freaked out.", "He had an episode at lunch.", "He lashed out at the aide.", "He snapped at peers."], ["He blew up a balloon.", "He had a moment to finish before the bell.", "He has an incident report from last week.", "Untick a routine to leave it off without losing it.", "He lost it on the bus and asked for a new one.", "He had an episode of vomiting at 10:05.", "He had an incident of SIB at 10:42 (2 hits to head)."]],
+  'lab-aggressive': [["He was aggressive with peers.", "She became violent.", "She was very aggressive (per teacher).", "He was agressive twd para."], ["Aggressive behavior: hitting, kicking or biting with contact.", "Physical aggression occurred 3 times.", "He had two asthma attacks this year.", "Records note a history of domestic violence.", "No aggressive behavior was observed during the observation."]],
+  'lab-defiant': [["He was defiant.", "She was disrespectful to staff.", "He has a bad attitude.", "He was defiant (as usual)."], ["Records list oppositional defiant disorder."]],
+  'lab-noncompliant': [["He was noncompliant.", "She was non-compliant with the request."], ["Noncompliance: not starting within 10 s.", "Compliance was 40% of trials.", "He was compliant with 4 of 5 demands.", "Noncompliance occurred on the 5th demand."]],
+  'lab-refused': [["He refused to work.", "Work refusal at 10:15.", "He refused his lunch."], ["Refusal: saying no or pushing materials away.", "Mom refused consent for the FBA."]],
+  'lab-outburst': [["He had an outburst.", "She exploded at her sister."], ["The class read about a volcanic eruption.", "The model volcano erupted during science."]],
+  'lab-actingout': [["He was acting out in class.", "She acted up at dinner.", "He was acting up in class."], ["The group acted out the story.", "The Smartboard was acting up so the lesson started late."]],
   'lab-outofcontrol': [["He was out of control.", "She went wild at recess."], ["It was crazy hair day.", "We read about wild animals."]],
   'lab-inappropriate': [["He used inappropriate language.", "She played appropriately.", "That is unacceptable."], ["Unsafe behavior: climbing above 3 feet."]],
-  'lab-disruptive': [["He was disruptive.", "She caused a disruption during the lesson."], ["Disruption: any vocalization above conversational volume.", "The fire drill disrupted the lesson at 10:20.", "Putting his trash in the bin without disrupting the activity."]],
+  'lab-disruptive': [["He was disruptive.", "She caused a disruption during the lesson.", "She was disruptive (all day)."], ["Disruption: any vocalization above conversational volume.", "The fire drill disrupted the lesson at 10:20.", "Putting his trash in the bin without disrupting the activity.", "Disruptive behavior occurred in 4 of 20 intervals."]],
   'lab-misbehaved': [["He misbehaved at lunch.", "She behaved well.", "That was bad behavior."], ["The class plays the Good Behavior Game on Fridays."]],
-  'lab-judgment': [["He did fine.", "The transition went well.", "She was good today.", "He did a great job during centers."], ["He was good at puzzles.", "She did well on 4 of 5 items.", "They compared it with the Caught Being Good Game."]],
+  'lab-judgment': [["He did fine.", "The transition went well.", "She was good today.", "He did a great job during centers.", "He did well with the transition.", "He was respectful to staff.", "He was being difficult.", "He was cooperative with staff."], ["He was good at puzzles.", "She did well on 4 of 5 items.", "They compared it with the Caught Being Good Game.", "Mom was fine with the plan.", "We are good to go for Monday.", "Cooperative learning groups met at 10:00."]],
   'lab-goodday': [["She had a rough day.", "He had a great morning."], []],
-  'lab-behaviors': [["He had behaviors today.", "She was having behaviors at lunch."], ["He has a behavior plan.", "He had behaviors such as hitting and kicking."]],
-  'lab-hyper': [["He was hyper.", "She was fidgety during circle."], []],
+  'lab-behaviors': [["He had behaviors today.", "She was having behaviors at lunch.", "He has severe behaviors."], ["He has a behavior plan.", "He had behaviors such as hitting and kicking."]],
+  'lab-hyper': [["He was hyper.", "She was fidgety during circle.", "He was super impulsive."], ["He chose the impulsive option (smaller-sooner) on 8 of 10 trials."]],
+  'lab-functioning': [["He is low-functioning.", "She is high functioning."], ["Adaptive functioning was assessed with the Vineland."]],
   'lab-silly': [["He was being silly.", "She was goofing off."], []],
   'lab-whining': [["He was whining.", "She pouted."], ["He complained of a headache."]],
   'lab-bully': [["He was bullying a peer.", "She was mean to her sister."], ["The class mean was 4.2."]],
-  'lab-stole': [["He stole a peer's pencil.", "She lied about the homework."], ["She lied down on the mat.", "Stealing: taking an item that belongs to someone else without asking."]],
+  'lab-stole': [["He stole a peer's pencil.", "She lied about the homework."], ["She lied down on the mat.", "Stealing: taking an item that belongs to someone else without asking.", "He lied on the floor and kicked for 2 minutes.", "He used his cheat sheet (multiplication chart)."]],
   'lab-trouble': [["He got in trouble.", "She is a troublemaker."], []],
   'lab-consequence': [["He was consequenced.", "She got a consequence."], ["Staff recorded the consequences of each hit.", "Integrity step: the earned consequence withheld."]],
   'lab-badwords': [["He used bad words.", "She used foul language."], ["Profanity: any word on the team's list, counted per word."]],
-  'lab-space': [["He got in her face.", "She invaded his personal space."], []],
+  'lab-space': [["He got in her face.", "She invaded his personal space.", "He yelled in her face."], ["He spit in her face at 9:31.", "He threw sand in the peer's face."]],
   'lab-physical': [["He got physical with a peer.", "She put hands on another student."], ["He put his hands on the table."]],
   'lab-fight': [["He got into a fight.", "There was an altercation at lunch."], []],
-  'lab-threat': [["He threatened a peer.", "She made threats."], ["The team completed a threat assessment.", "Threats to validity are listed in the summary.", "Restraint only for a threat of imminent risk of serious injury."]],
-  'freq-alot': [["He cried a lot."], ["He did a lot better today.", "There were a lot of toys."]],
-  'freq-quantity': [["He threw several books.", "There were lots of toys on the floor."], ["He did it several times."]],
-  'freq-several': [["He hit the desk several times.", "She needed a couple of prompts."], ["How many times did he leave the room?", "Count how many times he hits."]],
-  'freq-always': [["He always cries at drop-off.", "She talks constantly."], ["Duration was recorded continuously for 30 minutes.", "Does he always cry at drop-off?"]],
+  'lab-threat': [["He threatened a peer.", "She made threats.", "He made threats to hurt himself at 12:05."], ["The team completed a threat assessment.", "Threats to validity are listed in the summary.", "Restraint only for a threat of imminent risk of serious injury.", "Severe: significant threat to health or safety."]],
+  'freq-alot': [["He cried a lot."], ["He did a lot better today.", "There were a lot of toys.", "He has a lot on his plate this week."]],
+  'freq-quantity': [["He threw several books.", "There were lots of toys on the floor."], ["He did it several times.", "He took several (4) sips of water."]],
+  'freq-several': [["He hit the desk several times.", "She needed a couple of prompts.", "He was told many times to sit down.", "He hit peers many times during recess."], ["How many times did he leave the room?", "Count how many times he hits.", "He hit the wall so many times that I stopped counting."]],
+  'freq-always': [["He always cries at drop-off.", "She talks constantly.", "He cries every time the bell rings."], ["Duration was recorded continuously for 30 minutes.", "Does he always cry at drop-off?", "Staff will praise him every time he raises his hand.", "He always waited for the timer (6 of 6 trials)."]],
   'freq-never': [["He never finishes his work.", "He never raises his hand in class."], ["The student never left his assigned area during the 20-minute observation."]],
-  'freq-often': [["He often leaves his seat.", "She usually sits with the group."], ["A typically developing peer sat nearby.", "He was breathing normally.", "How often does he leave his seat during math?", "Breaks are regularly scheduled every 20 minutes.", "He flipped the light switch on and off 14 times."]],
+  'freq-often': [["He often leaves his seat.", "She usually sits with the group.", "At various times he left his seat."], ["A typically developing peer sat nearby.", "He was breathing normally.", "How often does he leave his seat during math?", "Breaks are regularly scheduled every 20 minutes.", "He flipped the light switch on and off 14 times.", "What most often followed was adult redirection or prompt to continue.", "Most often the behavior followed a demand (7 of 9 occurrences).", "Staff checked on him periodically (every 5 min)."]],
   'freq-overandover': [["He hit the desk over and over."], []],
-  'freq-repeatedly': [["She repeatedly asked for juice."], []],
-  'freq-allday': [["He cried all day.", "She was out of her seat all morning long."], ["It was present in a clear subset (all morning episodes)."]],
-  'freq-wholeday': [["He screamed the whole period.", "She hummed throughout the lesson.", "She was off task most of the period."], ["He was disruptive to the whole class."]],
-  'dur-awhile': [["He cried for a while.", "After a while she sat down."], []],
-  'dur-longtime': [["She cried for a long time.", "It took forever."], ["He had a good time at the park."]],
+  'freq-repeatedly': [["She repeatedly asked for juice.", "He kept touching peers."], ["Data kept during daily use are graphed weekly."]],
+  'freq-allday': [["He cried all day.", "She was out of her seat all morning long.", "He was out of his seat all class."], ["It was present in a clear subset (all morning episodes).", "The class went on an all day field trip."]],
+  'freq-wholeday': [["He screamed the whole period.", "She hummed throughout the lesson.", "She was off task most of the period.", "He cried the whole time we were at centers.", "He was off task the entire class period."], ["He was disruptive to the whole class.", "No SIB occurred during the whole session.", "Throughout the session he stayed in his seat.", "Writing prompt given to the whole class."]],
+  'dur-awhile': [["He cried for a while.", "After a while she sat down.", "For quite a while he sat by the window.", "He hasn't eloped in a while."], []],
+  'dur-longtime': [["She cried for a long time.", "It took forever.", "It took some time for him to settle."], ["He had a good time at the park.", "He has done this for a long time (per mom, since age 3).", "At some time before lunch he left the room."]],
   'dur-bit': [["He sat for a bit.", "A little bit later he stood up."], ["He was a bit loud.", "An MO momentarily alters the value of a reinforcer."]],
-  'dur-quickly': [["He quickly ran to the door.", "She eventually sat down."], ["He started as soon as the timer rang."]],
-  'dur-somepoint': [["At some point he left the room."], ["Score the interval if the behavior occurred at some point in the interval."]],
-  'dur-few-units': [["It took a few minutes.", "He cried for several minutes."], ["Record how many minutes, or a 0 to 3 rating.", "The planned length has to be a number of minutes."]],
-  'dur-vaguelength': [["He briefly looked up.", "She had prolonged crying."], ["He gets extended time on tests."]],
-  'int-very': [["He was very loud.", "She screamed really loud.", "He was so loud."], ["On the very first trial he was correct.", "At the very end he sat down.", "That changes the very variable being compared.", "Use it only where the target really is waiting."]],
+  'dur-quickly': [["He quickly ran to the door.", "She eventually sat down."], ["He started as soon as the timer rang.", "He responded quickly (within 3 s) to his name."]],
+  'dur-somepoint': [["At some point he left the room.", "At some time before lunch he left the room.", "At some point we will fade the prompts."], ["Score the interval if the behavior occurred at some point in the interval.", "The behavior occurred at some point in 45% of intervals.", "Score the interval if he is out of seat at some point during the 10-s interval."]],
+  'dur-few-units': [["It took a few minutes.", "He cried for several minutes.", "He needed a few min to settle.", "A few hrs later he vomited."], ["Record how many minutes, or a 0 to 3 rating.", "The planned length has to be a number of minutes."]],
+  'dur-vaguelength': [["He briefly looked up.", "She had prolonged crying."], ["He gets extended time on tests.", "He looked briefly (2 s) at the peer."]],
+  'int-notvery': [["He was not very loud.", "He didn't really participate in group."], ["He was very loud."]],
+  'int-very': [["He was very loud.", "She screamed really loud.", "He was so loud.", "He was seriously injured when he fell.", "Stu was realy upset."], ["On the very first trial he was correct.", "At the very end he sat down.", "That changes the very variable being compared.", "Use it only where the target really is waiting.", "He was so upset that he cried.", "He screamed so loud that two peers covered their ears.", "They read The Very Hungry Caterpillar.", "During Super Simple Songs he clapped.", "He stood very close (within 6 in) to the peer.", "He didn't really participate in group."]],
   'int-hedge': [["He was a bit loud.", "She was kind of rough with the toy."], []],
   'int-comparison': [["He did a lot better today.", "She was much calmer.", "Dad said the behavior got worse after the move."], []],
-  'int-force': [["He hit the table extremely hard.", "She pushed him hard.", "He kicked the door with all his might."], ["He hit the table hard enough to tip the cup.", "He fell and hit the hard floor.", "He hit the ball hard during kickball."]],
+  'int-force': [["He hit the table extremely hard.", "She pushed him hard.", "He kicked the door with all his might.", "He bit her hard on the arm.", "Then he bit his own hand hard."], ["He hit the table hard enough to tip the cup.", "He fell and hit the hard floor.", "He hit the ball hard during kickball."]],
   'int-hyperbole': [["He screamed at the top of his lungs.", "She let out a blood-curdling scream.", "It was a huge meltdown."], ["Note the severity of the worst wound."]],
-  'med-because-dx': [["He did it because of his autism.", "It is due to her ADHD."], ["The scale grew from the trauma scales of emergency medicine."]],
+  'med-because-dx': [["He did it because of his autism.", "It is due to her ADHD."], ["The scale grew from the trauma scales of emergency medicine.", "He walked back from his autism classroom.", "Due to her disability she receives OT 30 min a week.", "He completed part of his odd problems."]],
   'med-casualdx': [["She is so OCD about her desk.", "He was acting psycho.", "He's on a sugar high."], ["He has a diagnosis of ADHD (records, 2024)."]],
   'med-sensory': [["He was sensory seeking.", "She needed sensory input.", "He was stimming at his desk."], ["He used the sensory break card.", "He walked to the sensory room."]],
-  'med-sick': [["He was sick this morning.", "She had a headache.", "He cried in pain."], ["He had a cold drink at lunch.", "He was ill-prepared for the quiz."]],
+  'med-sick': [["He was sick this morning.", "She had a headache.", "He cried in pain."], ["He had a cold drink at lunch.", "He was ill-prepared for the quiz.", "Nurse reported he had a fever of 101.2 at 11:15.", "He was sick last week per mom."]],
   'med-meds': [["He was off his meds.", "Her meds wore off by noon."], ["Nurse reports the 8:00 dose was given at 8:05."]],
   'med-trauma': [["It was a trauma response.", "He went into fight or flight."], ["Staff use trauma-informed practices."]],
-  'char-trait': [["He is lazy.", "She is spoiled.", "He is so stubborn."], ["The worksheet was entitled My Family."]],
+  'char-trait': [["He is lazy.", "She is spoiled.", "He is so stubborn."], ["The worksheet was entitled My Family.", "He has a lazy eye and wears a patch."]],
   'char-praise': [["He is a sweet boy.", "She is a pleasure to have in class.", "He was an angel today."], ["Angel hit the table twice."]],
-  'char-choices': [["He made bad choices.", "She knows better."], []],
-  'char-opinion': [["I think he was tired.", "Obviously she wanted attention.", "He must have been tired."], ["He spoke clearly when he asked for help.", "Every critical step must have been correct."]]
+  'char-choices': [["He made bad choices.", "She knows better."], ["He needs to learn to ask for a break."]],
+  'char-opinion': [["I think he was tired.", "Obviously she wanted attention.", "He must have been tired.", "He probably hit the peer because the peer took his spot."], ["He spoke clearly when he asked for help.", "Every critical step must have been correct."]]
 };
 
-/* ------------------------------------------------------------------ objective notes: no finding at all */
+/* ------------------------------------------------------------------ objective notes: no finding at all (the last group:
+   OB-1's generated summary with its own condition and consequence labels, and measured statements from the review) */
 const CLEAN = [
   "9:41 Worksheet re-presented; student completed two items with hand-over-hand prompting and no contact.",
   "At 10:52 she answered twice when called on and waited through two turns without leaving the table.",
@@ -256,7 +264,23 @@ const CLEAN = [
   "Dad turned off the tablet at 7:30; Mia said “I hate you, you're so mean!” and cried for 6 minutes on the couch.",
   "He swung an open hand toward the aide twice (no contact), then sat down 40 seconds later when the timer beeped.",
   "Question: how often does he leave his seat during independent work, and does it happen to escape the task?",
-  "Interval data were recorded continuously; the timer ran from 9:00 to 9:30 without a pause."
+  "Interval data were recorded continuously; the timer ran from 9:00 to 9:30 without a pause.",
+  "The observer conducted 3 direct observations of the student totalling 90 minutes across Classroom, Lunchroom.",
+  "Activities observed: Math worksheet; Read-aloud.",
+  "The behavior was observed in 2 of 3 observations, with 9 occurrences recorded (6 per hour).",
+  "A comparison peer observed over the same minutes had 2 occurrences (1.3 per hour).",
+  "Conditions present in most observations in which the behavior occurred were demand or task placed; illness, pain, hunger, or tiredness noted; peer interaction or peer provocation; noise, crowding, or other sensory load.",
+  "What most often followed was adult redirection or prompt to continue; access to an item, activity, or attention; demand withdrawn, reduced, or delayed; removed from the area, office, or seclusion.",
+  "In a partial-interval sample of 20 × 15-s intervals per observation, the behavior occurred at some point in 45% of intervals, against 10% for a comparison peer scored at the same moments.",
+  "In a whole-interval sample of 20 × 15-s intervals per observation, the behavior lasted the whole of 30% of intervals.",
+  "In a momentary time sample of 20 × 15-s intervals per observation, the behavior was occurring at 25% of the moments sampled.",
+  "Interobserver agreement was assessed in 1 of 3 observations (86%).",
+  "These observations describe when and where the behavior occurred; they do not establish what maintains it.",
+  "He emitted 4 mands for attention (tapped my arm); each time the teacher looked at him within 3 s.",
+  "No aggressive behavior was observed during the 30-minute observation; disruptive behavior occurred in 4 of 20 intervals.",
+  "Staff tried to redirect him 3 times; the para attempted to block once; the team decided to add a token board.",
+  "He spit in her face at 9:31; nurse reported a fever of 101.2 at 11:15; mom refused consent for the FBA.",
+  "He correctly labeled happy, sad and mad in 8 of 10 trials and selected 'tired' on his feelings chart at check-in."
 ];
 
 /* ------------------------------------------------------------------ helpers */
@@ -418,7 +442,10 @@ function main() {
   Object.keys(UNITS).forEach(id => { texts.push(...UNITS[id][0], ...UNITS[id][1]); });
   texts.push(...CLEAN, ...ob1.list);
   let wrapDiff = 0;
-  for (const t of texts) { const a = keys(B.check(t)), b = keys(W.check(t)); if (a !== b) { wrapDiff++; fail('wrap', 'wrapping in \\b(?:...)\\b changes: ' + t + '\n         plain:   ' + a + '\n         wrapped: ' + b); } }
+  /* a guard rule may open its match on a list bullet or a bracket at the start of a line ("- felt left out"), which no
+     pattern wrapped in \b can start; those findings are left out of the comparison, every other one must agree */
+  const WORDC = /[A-Za-z0-9_À-ɏ]/, whole = list => list.filter(f => WORDC.test(f.text.charAt(0)) && WORDC.test(f.text.charAt(f.text.length - 1)));
+  for (const t of texts) { const a = keys(whole(B.check(t))), b = keys(whole(W.check(t))); if (a !== b) { wrapDiff++; fail('wrap', 'wrapping in \\b(?:...)\\b changes: ' + t + '\n         plain:   ' + a + '\n         wrapped: ' + b); } }
   console.log('  ' + texts.length + ' texts: the same findings with every pattern wrapped in \\b(?:...)\\b' + (wrapDiff ? ' except ' + wrapDiff : ''));
   const shown = {};
   let reps = 0;
@@ -440,12 +467,15 @@ function main() {
   /* the patch script's own long strings, each pattern in a vm with a time limit */
   const longs = ['a '.repeat(2000), 'very '.repeat(800), 'x'.repeat(4000), ('was upset and angry, ' + '"quoted" ').repeat(140),
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'.repeat(60), ('tried to ' + 'really '.repeat(30)).repeat(15),
-    ('he said she wanted ' + 'then '.repeat(20)).repeat(40), ('hit the ' + 'big '.repeat(10) + 'table ').repeat(60)];
+    ('he said she wanted ' + 'then '.repeat(20)).repeat(40), ('hit the ' + 'big '.repeat(10) + 'table ').repeat(60),
+    /* runs that backtracked before revision 2 (a label, then a long run of spaces or newlines; letters joined by
+       apostrophes, which a guard word reads as one word) */
+    'tantrum' + ' '.repeat(4000) + 'x', 'aggressive' + '\n'.repeat(4000) + 'x', 'work avoidance' + '\t'.repeat(4000), 'a\u2019'.repeat(2000), "a'".repeat(2000)];
   const RUN = 'let w = 0; for (const s of longs) { const t = Date.now(); re.lastIndex = 0; let m, n = 0;' +
     ' while ((m = re.exec(s)) && n++ < 2000) { if (!m[0]) re.lastIndex++; } w = Math.max(w, Date.now() - t); } w';
   let worst = 0, worstId = '';
   for (const r of rules) {
-    let re; try { re = new RegExp(r.re, 'gi'); } catch (e) { continue; }
+    let re; try { re = new RegExp(r.re, 'gi' + String(r.flags || '').replace(/[^msu]/g, '')); } catch (e) { continue; }
     try { const ms = vm.runInNewContext(RUN, {re, longs, Date}, {timeout: 250}); if (ms > worst) { worst = ms; worstId = r.id; } if (ms > 100) fail('speed', r.id + ' takes ' + ms + ' ms on long text'); }
     catch (e) { fail('speed', r.id + ' runs over 250 ms on long text (backtracking)'); }
   }
@@ -453,6 +483,11 @@ function main() {
   let t0 = process.hrtime.bigint(); for (let i = 0; i < 5; i++) run(note4000); const msFull = Number(process.hrtime.bigint() - t0) / 5e6;
   console.log('  slowest pattern on the long strings: ' + worstId + ' ' + worst + ' ms; a full check of a 4000-character note: ' + msFull.toFixed(1) + ' ms');
   if (msFull > 150) fail('speed', 'a full check of a 4000-character note takes ' + msFull.toFixed(1) + ' ms');
+  /* the whole check (every rule, as the panel runs it on each keystroke) on the runs that once backtracked */
+  let worstRun = 0, worstWhich = '';
+  for (const t of longs.slice(-5)) { run(t); const t1 = process.hrtime.bigint(); run(t); const ms = Number(process.hrtime.bigint() - t1) / 1e6; if (ms > worstRun) { worstRun = ms; worstWhich = JSON.stringify(t.slice(0, 16)) + '...'; } }
+  console.log('  a full check of the slowest of those runs (' + worstWhich + ', ' + longs[longs.length - 5].length + '+ characters): ' + worstRun.toFixed(1) + ' ms');
+  if (worstRun > 150) fail('speed', 'a full check of ' + worstWhich + ' takes ' + worstRun.toFixed(1) + ' ms');
 
   /* 6 ---------------------------------------------------------------- the two engines */
   head('6. The client\'s engine and the port');
@@ -506,7 +541,7 @@ const EMBEDDED_SAMPLES = {"version":"2026-10","samples":[
   {"id": "s24", "setting": "home", "kind": "narrative", "text": "He cried for a long time, then quickly calmed down after a bit.", "expect": ["dur-longtime", "dur-quickly", "int-calm", "dur-bit"]},
   {"id": "s25", "setting": "school", "kind": "narrative", "text": "It took her a few minutes to start, and she worked only briefly before putting her head down.", "expect": ["dur-few-units", "dur-vaguelength"]},
   {"id": "s26", "setting": "school", "kind": "narrative", "text": "He hit the table extremely hard and screamed really loud.", "expect": ["int-force", "int-very"]},
-  {"id": "s27", "setting": "school", "kind": "narrative", "text": "She is so ADHD today, probably because she was off her meds.", "expect": ["med-casualdx", "med-meds"]},
+  {"id": "s27", "setting": "school", "kind": "narrative", "text": "She is so ADHD today, probably because she was off her meds.", "expect": ["med-casualdx", "char-opinion", "med-meds"]},
   {"id": "s28", "setting": "school", "kind": "narrative", "text": "He was sensory seeking and needed input, so he crashed into the mats.", "expect": ["med-sensory"]},
   {"id": "s29", "setting": "school", "kind": "narrative", "text": "He's a lazy kid who knows better and just makes bad choices.", "expect": ["char-trait", "char-choices"]},
   {"id": "s30", "setting": "home", "kind": "narrative", "text": "Obviously she was manipulating staff; I think she is spoiled at home.", "expect": ["char-opinion", "intent-manipulative", "char-trait"]},
@@ -519,7 +554,130 @@ const EMBEDDED_SAMPLES = {"version":"2026-10","samples":[
   {"id": "s37", "setting": "school", "kind": "narrative", "text": "Kayla had a rough day, got in trouble twice, and was consequenced at recess.", "expect": ["lab-goodday", "lab-trouble", "lab-consequence"]},
   {"id": "s38", "setting": "school", "kind": "narrative", "text": "Out of nowhere he started screaming for no reason; the loud bell must have triggered him.", "expect": ["intent-noreason", "intent-trigger"]},
   {"id": "s39", "setting": "school", "kind": "ABC narrative, praise and learner's words in straight quotes", "tricky": true, "text": "10:02 Teacher said \"Great job, you were so good today!\" and handed him 2 tokens; he said \"I'm bored\" and walked to the sink, 12 feet from his desk, returning at 10:04.", "expect": [], "clear": ["so good", "bored"]},
-  {"id": "s40", "setting": "school", "kind": "narrative", "text": "She was testing limits and attention-seeking, deliberately dropping her pencil every few seconds.", "expect": ["intent-testing", "intent-attention", "intent-purpose", "dur-few-units"]}
+  {"id": "s40", "setting": "school", "kind": "narrative", "text": "She was testing limits and attention-seeking, deliberately dropping her pencil every few seconds.", "expect": ["intent-testing", "intent-attention", "intent-purpose", "dur-few-units"]},
+  {"id": "R01", "setting": "school", "kind": "staff note, abbreviations", "text": "10:42 Ss lined up for specials; J. got upset b/c he wasnt line leader and cried approx 3 min.", "expect": ["int-upset"], "clear": ["cried approx 3 min", "10:42"]},
+  {"id": "R02", "setting": "school", "kind": "staff note, abbreviations", "text": "Pt was very agitated & yelling at staff, RBT used planned ignoring x5 min.", "expect": ["int-very", "int-angry"], "clear": ["planned ignoring"]},
+  {"id": "R03", "setting": "school", "kind": "function stated as fact, modifiers before the task word", "text": "Lucas ran out of the classroom to avoid the math test at 10:42 and hid in the bathroom for approx 7 min.", "expect": ["intent-escape"], "clear": ["ran out of the classroom"]},
+  {"id": "R04", "setting": "home", "kind": "caregiver report, source named after the word", "text": "Mom stated he has been sleeping poorly and was tired this AM, per her report.", "expect": [], "clear": ["tired"], "tricky": true},
+  {"id": "R05", "setting": "home", "kind": "a name as the subject", "text": "Jordan wanted the iPad so he grabbed it from a peer and ran to the corner.", "expect": ["int-wanted"]},
+  {"id": "R06", "setting": "school", "kind": "a measured reading", "text": "Nurse reported he had a fever of 101.2 at 11:15 and mom picked him up at 11:40.", "expect": [], "clear": ["had a fever"], "tricky": true},
+  {"id": "R07", "setting": "school", "kind": "a device, not a person, was triggered", "text": "The door alarm was triggered at 1:05 when he left the room; staff followed at 10 ft.", "expect": [], "clear": ["was triggered"], "tricky": true},
+  {"id": "R08", "setting": "school", "kind": "staff and the team decided", "text": "The IEP team decided to add a token board, and staff decided to end the session at 2:10.", "expect": [], "clear": ["decided to add", "decided to end"], "tricky": true},
+  {"id": "R09", "setting": "school", "kind": "where something landed", "text": "He spit in her face at 9:31 after she took his crayon; she wiped her cheek and told the teacher.", "expect": [], "clear": ["in her face"], "tricky": true},
+  {"id": "R10", "setting": "school", "kind": "a device would not work", "text": "The Chromebook wouldn't work so he wrote on paper; he finished 6 of 10 problems.", "expect": [], "clear": ["wouldn't work"], "tricky": true},
+  {"id": "R11", "setting": "school", "kind": "no warning is an antecedent", "text": "Teacher changed the schedule without warning at 10:15 (assembly); he screamed for 40 s.", "expect": [], "clear": ["without warning"], "tricky": true},
+  {"id": "R12", "setting": "school", "kind": "a replacement skill", "text": "He needs to learn to ask for a break using his card instead of leaving the room.", "expect": [], "clear": ["needs to learn to"], "tricky": true},
+  {"id": "R13", "setting": "school", "kind": "a hypothesis labelled and to be tested", "text": "Hypothesis: he calls out to gain peer attention; test it in the FA.", "expect": [], "clear": ["to gain peer attention"], "tricky": true},
+  {"id": "R14", "setting": "school", "kind": "a data statement about a defined target", "text": "No aggressive behavior was observed during the 30-minute observation; 0 elopements.", "expect": [], "clear": ["aggressive behavior"], "tricky": true},
+  {"id": "R15", "setting": "school", "kind": "a data statement about a defined target", "text": "Disruptive behavior occurred in 4 of 20 intervals (20%); peer comparison 1 of 20.", "expect": [], "clear": ["Disruptive behavior"], "tricky": true},
+  {"id": "R16", "setting": "school", "kind": "song and book titles", "text": "During circle they sang If You're Happy and You Know It and read The Very Hungry Caterpillar; he sat for 12 min.", "expect": [], "clear": ["Happy", "Very Hungry"], "tricky": true},
+  {"id": "R18", "setting": "home", "kind": "caregiver report with Spanish", "text": "Mom said he had a berrinche en la tienda and was muy enojado all afternoon.", "expect": ["lab-tantrum", "int-very", "int-angry", "freq-allday"]},
+  {"id": "R20", "setting": "school", "kind": "narrative", "text": "He was off task most of the time and kept calling out during the lesson.", "expect": ["freq-wholeday", "freq-repeatedly"]},
+  {"id": "R21", "setting": "school", "kind": "narrative", "text": "He cried the whole time we were at centers.", "expect": ["freq-wholeday"]},
+  {"id": "R22", "setting": "school", "kind": "accented names as subjects", "text": "Ramón felt left out at recess and José wanted to play with the older kids.", "expect": ["int-felt", "int-wanted"]},
+  {"id": "R23", "setting": "school", "kind": "history and frequency with a while", "text": "He hasn't eloped in a while; once in a while he still runs to the door at dismissal.", "expect": ["dur-awhile"]},
+  {"id": "R24", "setting": "school", "kind": "degree, not count", "text": "His writing has improved a lot since Sept and the visual timer helps a lot.", "expect": ["freq-alot"]},
+  {"id": "R25", "setting": "school", "kind": "negated intensifiers", "text": "He didn't really participate in group and was not very loud when he answered.", "expect": ["int-notvery"]},
+  {"id": "R26", "setting": "school", "kind": "narrative", "text": "He was super impulsive and escalated quickly when the sub came in.", "expect": ["int-very", "lab-hyper", "int-overwhelmed", "dur-quickly"]},
+  {"id": "R28", "setting": "school", "kind": "force with and without its effect", "text": "He bit the aide's forearm hard enough to leave teeth marks, then bit his own hand hard.", "expect": ["int-force"], "clear": ["hard enough"]},
+  {"id": "R29", "setting": "school", "kind": "an emotions program: tacting", "text": "He correctly labeled happy, sad and mad in 8 of 10 trials during the emotions program.", "expect": [], "clear": ["happy", "sad", "mad"], "tricky": true},
+  {"id": "R30", "setting": "school", "kind": "narrative", "text": "He left his seat many times, needed a few min to settle, and did well with the transition.", "expect": ["freq-several", "dur-few-units", "lab-judgment"]},
+  {"id": "P31", "setting": "school", "kind": "misspellings", "text": "Stu was realy frusterated w/ the worksheet & threw it, very agressive twd para.", "expect": ["int-very", "int-frustrated", "lab-aggressive"]},
+  {"id": "P32", "setting": "school", "kind": "narrative", "text": "Student was escalated and needed a break; para said he was fine after 5 min.", "expect": ["int-overwhelmed", "int-needed", "lab-judgment"]},
+  {"id": "P33", "setting": "school", "kind": "a threat of self-harm", "text": "He made threats to hurt himself at 12:05; counselor notified at 12:07.", "expect": ["lab-threat"]},
+  {"id": "P34", "setting": "school", "kind": "narrative", "text": "Before lunch he was in a good mood and cooperative w/ staff.", "expect": ["int-happy", "lab-judgment"]},
+  {"id": "P35", "setting": "school", "kind": "an episode of a named event", "text": "He had an episode of vomiting at 10:05; nurse called mom at 10:09.", "expect": [], "clear": ["had an episode"], "tricky": true},
+  {"id": "P36", "setting": "school", "kind": "literal sense", "text": "The model volcano erupted during science; he clapped 3 times.", "expect": [], "clear": ["erupted"], "tricky": true},
+  {"id": "P37", "setting": "school", "kind": "literal sense", "text": "He used his cheat sheet (multiplication chart) on the quiz and got 18/20.", "expect": [], "clear": ["cheat sheet"], "tricky": true},
+  {"id": "P38", "setting": "school", "kind": "lie/lay usage", "text": "He lied on the floor and kicked for 2 minutes.", "expect": [], "clear": ["lied"], "tricky": true},
+  {"id": "P39", "setting": "school", "kind": "a device acting up", "text": "The Smartboard was acting up so the lesson started late at 9:12.", "expect": [], "clear": ["acting up"], "tricky": true},
+  {"id": "P40", "setting": "school", "kind": "a parent refused consent", "text": "Mom refused consent for the FBA at the 9/30 meeting.", "expect": [], "clear": ["refused"], "tricky": true},
+  {"id": "P41", "setting": "school", "kind": "a schedule disruption with its cause", "text": "Due to a schedule disruption (fire drill), specials were moved to 1:00.", "expect": [], "clear": ["disruption"], "tricky": true},
+  {"id": "P42", "setting": "home", "kind": "literal sense", "text": "He has a lazy eye and wears a patch 2 hrs a day per mom.", "expect": [], "clear": ["lazy"], "tricky": true},
+  {"id": "P43", "setting": "school", "kind": "FCT: recruiting attention is taught", "text": "He was taught to recruit attention by raising his hand; he did it 4 times.", "expect": [], "clear": ["to recruit attention"], "tricky": true},
+  {"id": "P44", "setting": "school", "kind": "a hedged hypothesis", "text": "The behavior appears to be maintained by escape from demands (hypothesis).", "expect": [], "clear": ["appears to be"], "tricky": true},
+  {"id": "P45", "setting": "school", "kind": "a classroom name", "text": "He walked back from his autism classroom at 10:42 with his para.", "expect": [], "clear": ["from his autism"], "tricky": true},
+  {"id": "P46", "setting": "school", "kind": "a break card", "text": "Recommendation: he needs a break card taped to his desk.", "expect": [], "clear": ["needs a break"], "tricky": true},
+  {"id": "P47", "setting": "school", "kind": "compliance as data", "text": "He was compliant with 4 of 5 demands; noncompliance occurred on the 5th (writing).", "expect": [], "clear": ["compliant", "noncompliance"], "tricky": true},
+  {"id": "P48", "setting": "school", "kind": "staff would not", "text": "Staff would not give the iPad until he asked with his words.", "expect": [], "clear": ["would not give"], "tricky": true},
+  {"id": "P49", "setting": "school", "kind": "opinion", "text": "He probably hit the peer because the peer took his spot in line.", "expect": ["char-opinion"]},
+  {"id": "P51", "setting": "home", "kind": "caregiver report, source named after the word", "text": "He was sick last week per mom, so he missed 3 days.", "expect": [], "clear": ["was sick"], "tricky": true},
+  {"id": "P52", "setting": "school", "kind": "a clock time before the subject", "text": "At 10:42 he wanted the red marker.", "expect": ["int-wanted"]},
+  {"id": "P53", "setting": "school", "kind": "a feelings chart in single quotes", "text": "He selected 'tired' on his feelings chart at check-in.", "expect": [], "clear": ["tired"], "tricky": true},
+  {"id": "P54", "setting": "school", "kind": "a bounded session", "text": "Throughout the session he stayed in his seat; no SIB occurred throughout the session.", "expect": [], "clear": ["Throughout the session", "throughout the session"], "tricky": true},
+  {"id": "P55", "setting": "school", "kind": "judgments", "text": "He was respectful to staff and nice to his peers all morning.", "expect": ["lab-judgment", "freq-allday"]},
+  {"id": "P56", "setting": "school", "kind": "a book title", "text": "Grumpy Monkey was the read-aloud book; he turned 6 pages.", "expect": [], "clear": ["Grumpy"], "tricky": true},
+  {"id": "P57", "setting": "school", "kind": "ability judged", "text": "He was unable to sit still and couldn't stop talking.", "expect": ["intent-wouldnt"]},
+  {"id": "P58", "setting": "school", "kind": "labels", "text": "He lashed out at the aide and snapped at peers.", "expect": ["lab-blewup"]},
+  {"id": "P59", "setting": "school", "kind": "labels", "text": "He was being difficult and checked out during math.", "expect": ["lab-judgment", "int-distracted"]},
+  {"id": "P60", "setting": "school", "kind": "labels", "text": "He has severe behaviors and is low-functioning.", "expect": ["lab-behaviors", "lab-functioning"]},
+  {"id": "P61", "setting": "home", "kind": "a generalization", "text": "He cries every time the bell rings.", "expect": ["freq-always"]},
+  {"id": "P62", "setting": "school", "kind": "a dash before the subject", "text": "Then—he felt sad.", "expect": ["int-felt", "int-sad"]},
+  {"id": "P63", "setting": "school", "kind": "a bracket before the subject", "text": "(He felt sad.)", "expect": ["int-felt", "int-sad"]},
+  {"id": "P64", "setting": "school", "kind": "narrative", "text": "He was uncomfortable and irritable after the bus ride.", "expect": ["int-anxious", "int-angry"]},
+  {"id": "P65", "setting": "school", "kind": "narrative", "text": "For quite a while he sat by the window.", "expect": ["dur-awhile"]},
+  {"id": "P66", "setting": "home", "kind": "a duration with its measure beside it", "text": "He has done this for a long time (per mom, since age 3).", "expect": [], "clear": ["a long time"], "tricky": true},
+  {"id": "P67", "setting": "school", "kind": "a vague point in time", "text": "At some time before lunch he left the room.", "expect": ["dur-somepoint"]},
+  {"id": "P68", "setting": "school", "kind": "injury severity", "text": "He was seriously injured when he fell from the climber at 12:20.", "expect": ["int-very"]},
+  {"id": "P69", "setting": "school", "kind": "a vague frequency", "text": "At various times he left his seat.", "expect": ["freq-often"]},
+  {"id": "P70", "setting": "school", "kind": "a frequency with its measure beside it", "text": "Staff checked on him periodically (every 5 min).", "expect": [], "clear": ["periodically"], "tricky": true},
+  {"id": "P71", "setting": "school", "kind": "inferences", "text": "He hit the peer 2x and then pretended to be asleep; it looked like he was about to cry.", "expect": ["intent-purpose", "int-seemed"]},
+  {"id": "P72", "setting": "school", "kind": "a count", "text": "He blurted out 6 times; teacher used the class-wide timer and he waited 2 min.", "expect": [], "clear": ["blurted out 6 times"], "tricky": true},
+  {"id": "P73", "setting": "school", "kind": "where something landed", "text": "He threw sand in the peer's face at recess.", "expect": [], "clear": ["in the peer's face"], "tricky": true},
+  {"id": "P74", "setting": "school", "kind": "test rules", "text": "Teacher read the test rules aloud at 9:00.", "expect": [], "clear": ["test rules"], "tricky": true},
+  {"id": "P75", "setting": "school", "kind": "a plan avoids power struggles", "text": "Staff will avoid power struggles and offer 2 choices.", "expect": [], "clear": ["power struggles"], "tricky": true},
+  {"id": "P76", "setting": "school", "kind": "an incident of a named behavior", "text": "He had an incident of SIB at 10:42 (2 hits to head).", "expect": [], "clear": ["had an incident"], "tricky": true},
+  {"id": "P77", "setting": "school", "kind": "odd-numbered problems", "text": "He completed part of his odd problems before the bell.", "expect": [], "clear": ["part of his odd"], "tricky": true},
+  {"id": "P78", "setting": "home", "kind": "interview headings", "text": "Likes: trains, bubbles, Paw Patrol. Dislikes: loud noises, hand dryers (parent interview).", "expect": [], "clear": ["Likes", "Dislikes"], "tricky": true},
+  {"id": "P79", "setting": "school", "kind": "services", "text": "Due to her disability she receives OT 30 min a week.", "expect": [], "clear": ["Due to her disability"], "tricky": true},
+  {"id": "P80", "setting": "school", "kind": "a hypothesis labelled and to be tested", "text": "Hypothesized function: to escape writing demands; to be tested in the FA.", "expect": [], "clear": ["to escape writing demands"], "tricky": true},
+  {"id": "x01", "setting": "school", "kind": "OB-1's generated summary, partial interval", "text": "In a partial-interval sample of 20 × 15-s intervals per observation, the behavior occurred at some point in 45% of intervals, against 10% for a comparison peer scored at the same moments.", "expect": [], "clear": ["at some point"], "tricky": true},
+  {"id": "x02", "setting": "school", "kind": "a partial-interval definition", "text": "Score the interval if he is out of seat at some point during the 10-s interval.", "expect": [], "clear": ["at some point"], "tricky": true},
+  {"id": "x03", "setting": "school", "kind": "a partial-interval definition", "text": "Partial interval: scored when the behavior occurred at some point in the 15-second interval.", "expect": [], "clear": ["at some point"], "tricky": true},
+  {"id": "x04", "setting": "school", "kind": "a plan without its criterion", "text": "At some point we will fade the prompts.", "expect": ["dur-somepoint"]},
+  {"id": "x05", "setting": "school", "kind": "a result clause holds the measure", "text": "He screamed so loud that two peers covered their ears.", "expect": [], "clear": ["so loud"], "tricky": true},
+  {"id": "x06", "setting": "school", "kind": "a result clause", "text": "He was so upset that he cried.", "expect": ["int-upset"], "clear": ["was so"]},
+  {"id": "x07", "setting": "school", "kind": "a series title", "text": "During Super Simple Songs he clapped 4 times.", "expect": [], "clear": ["Super Simple"], "tricky": true},
+  {"id": "x08", "setting": "school", "kind": "FCT: a mand for attention", "text": "He emitted 4 mands for attention (tapped my arm).", "expect": [], "clear": ["for attention"], "tricky": true},
+  {"id": "x09", "setting": "school", "kind": "FCT: a request for attention", "text": "He asked for attention by tapping my arm 3 times.", "expect": [], "clear": ["for attention"], "tricky": true},
+  {"id": "x10", "setting": "school", "kind": "FCT taught", "text": "FCT: he was taught a request for attention.", "expect": [], "clear": ["for attention"], "tricky": true},
+  {"id": "x11", "setting": "home", "kind": "function stated as fact", "text": "He screams for attention when mom is on the phone.", "expect": ["intent-attention"]},
+  {"id": "x12", "setting": "home", "kind": "a figure of speech", "text": "He has a lot on his plate this week, per mom.", "expect": [], "clear": ["a lot"], "tricky": true},
+  {"id": "x13", "setting": "school", "kind": "history with a while", "text": "It has been a while since his last restraint (March).", "expect": ["dur-awhile"]},
+  {"id": "x14", "setting": "school", "kind": "an all-day event", "text": "The class went on an all day field trip to the zoo.", "expect": [], "clear": ["all day"], "tricky": true},
+  {"id": "x15", "setting": "school", "kind": "a count not taken, said so", "text": "He hit the wall so many times that I stopped counting.", "expect": [], "clear": ["so many times"], "tricky": true},
+  {"id": "x16", "setting": "school", "kind": "labels with asides", "text": "He was defiant (as usual) and had a meltdown (again) at 10:42.", "expect": ["lab-defiant", "lab-tantrum"]},
+  {"id": "x17", "setting": "school", "kind": "labels with asides", "text": "She was very aggressive (per teacher) and disruptive (all day).", "expect": ["int-very", "lab-aggressive", "lab-disruptive", "freq-allday"]},
+  {"id": "x18", "setting": "school", "kind": "function stated as fact", "text": "(he got what he wanted)", "expect": ["intent-getwhat"]},
+  {"id": "x19", "setting": "home", "kind": "function stated as fact", "text": "He screams until he gets what he wants.", "expect": ["intent-getwhat"]},
+  {"id": "x20", "setting": "home", "kind": "function stated as fact", "text": "She cries to get what she wants.", "expect": ["intent-getwhat"]},
+  {"id": "x21", "setting": "school", "kind": "function stated as fact", "text": "He hit the peer in order to get the toy.", "expect": ["intent-getwhat"]},
+  {"id": "x22", "setting": "school", "kind": "function stated as fact", "text": "He hits so that he can leave the table.", "expect": ["intent-getwhat"]},
+  {"id": "x23", "setting": "school", "kind": "function stated as fact", "text": "He screamed so that staff would leave him alone.", "expect": ["intent-getwhat"]},
+  {"id": "x24", "setting": "school", "kind": "function stated as fact", "text": "He hid under the desk to escape.", "expect": ["intent-escape"]},
+  {"id": "x25", "setting": "school", "kind": "function stated as fact", "text": "He hid in the bathroom to get out of PE.", "expect": ["intent-escape"]},
+  {"id": "x26", "setting": "school", "kind": "function stated as fact", "text": "He wanted to avoid the math test.", "expect": ["intent-escape"]},
+  {"id": "x27", "setting": "school", "kind": "a name as the subject", "text": "Maya wanted to go first.", "expect": ["int-wanted"]},
+  {"id": "x28", "setting": "school", "kind": "initials as the subject", "text": "J. wanted the tablet.", "expect": ["int-wanted"]},
+  {"id": "x29", "setting": "clinic", "kind": "Pt and Ss as subjects", "text": "Pt wanted the tablet; later the Ss wanted to go outside.", "expect": ["int-wanted"]},
+  {"id": "x30", "setting": "school", "kind": "a bullet before the phrase", "text": "Recess:\n- felt left out at recess\n- wanted the swing", "expect": ["int-felt", "int-wanted"]},
+  {"id": "x31", "setting": "school", "kind": "data trends", "text": "Data seem to show a decreasing trend across the last 5 sessions; the data appear to be stable (range 2-4 per hour).", "expect": [], "clear": ["seem", "appear to be"], "tricky": true},
+  {"id": "x32", "setting": "school", "kind": "staff tried and attempted", "text": "Staff tried to redirect him 3 times and I attempted to block the hit.", "expect": [], "clear": ["tried to", "attempted to"], "tricky": true},
+  {"id": "x33", "setting": "school", "kind": "restraint documentation", "text": "Less restrictive interventions were exhausted before the hold at 10:42.", "expect": [], "clear": ["exhausted"], "tricky": true},
+  {"id": "x34", "setting": "school", "kind": "a para decided", "text": "Para decided to skip centers at 10:30.", "expect": [], "clear": ["decided to"], "tricky": true},
+  {"id": "x35", "setting": "school", "kind": "recall: anger words", "text": "He was agitated and irritable after the bus ride.", "expect": ["int-angry"]},
+  {"id": "x36", "setting": "school", "kind": "recall: pretending", "text": "He pretended to be asleep and then pretended not to hear me.", "expect": ["intent-purpose"]},
+  {"id": "x37", "setting": "school", "kind": "recall: misspellings", "text": "He was embarassed and dissapointed when he lost.", "expect": ["int-social"]},
+  {"id": "x38", "setting": "school", "kind": "a typo for tried", "text": "He tired to hit the aide.", "expect": ["int-tried"]},
+  {"id": "x39", "setting": "school", "kind": "force", "text": "He bit her hard on the arm.", "expect": ["int-force"]},
+  {"id": "x40", "setting": "school", "kind": "OB-1's generated summary, consequences", "text": "What most often followed was adult redirection or prompt to continue; access to an item, activity, or attention.", "expect": [], "clear": ["most often"], "tricky": true},
+  {"id": "x41", "setting": "school", "kind": "measures beside vague words", "text": "Most often the behavior followed a demand (7 of 9 occurrences); it usually occurred within 30 s of a demand (7 of 9 episodes).", "expect": [], "clear": ["Most often", "usually"], "tricky": true},
+  {"id": "x42", "setting": "school", "kind": "measures beside vague words", "text": "He always waited for the timer (6 of 6 trials), responded quickly (within 3 s), looked briefly (2 s) at the peer and took several (4) sips.", "expect": [], "clear": ["always", "quickly", "briefly", "several"], "tricky": true},
+  {"id": "x43", "setting": "school", "kind": "a measure beside an intensifier", "text": "He stood very close (within 6 in) to the peer.", "expect": [], "clear": ["very close"], "tricky": true},
+  {"id": "x44", "setting": "school", "kind": "a measured collateral target", "text": "No emotional responses (crying, whining) were observed.", "expect": [], "clear": ["emotional", "whining"], "tricky": true},
+  {"id": "x45", "setting": "school", "kind": "nursing phrases", "text": "Vitals: in no acute distress per the nurse; the milk upset his stomach, per mom.", "expect": [], "clear": ["distress", "upset"], "tricky": true},
+  {"id": "x46", "setting": "school", "kind": "judgments with with and to", "text": "He did well with the transition and was nice to his peers.", "expect": ["lab-judgment"]},
+  {"id": "x47", "setting": "home", "kind": "consent and readiness", "text": "Mom was fine with the plan and we are good to go for Monday.", "expect": [], "clear": ["was fine", "good to go"], "tricky": true}
 ]};
 
 main();
