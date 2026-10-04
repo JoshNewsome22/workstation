@@ -2,7 +2,7 @@
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/split/';
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1440,height:1000}});await ctx.addInitScript(()=>{window.print=function(){};});
- const page=await ctx.newPage();wire(page,log);
+ let page=await ctx.newPage();wire(page,log);
  /* --- OB-1 on its own --- */
  await page.goto(BASE+'/NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');await sleep(700);await page.evaluate(()=>{window.confirm=m=>{(window.__dlg=window.__dlg||[]).push(String(m));return true;};});   /* v21.34: the forms ask through nbhUI.confirm, which honours a stubbed window.confirm */
  await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(600);
@@ -36,6 +36,10 @@ const OUT=__dirname+'/out/split/';
  console.log('print: log',await page.evaluate(()=>getComputedStyle(document.querySelector('#obsLog')).display),'delete col',await page.evaluate(()=>getComputedStyle(document.querySelector('td.nx')).display));
  await page.emulateMedia({media:'screen'});
  /* --- side by side in the shell --- */
+ /* (v21.44 Autosave) in a browser profile of its own: OB-1, changed on its own above, keeps a safety copy in this one,
+    which the workstation offers back as it opens ("Unsaved work found in this browser"), and that box is in the way */
+ {const ctx2=await br.newContext({viewport:{width:1440,height:1000}});await ctx2.addInitScript(()=>{window.print=function(){};});
+  await page.close();page=await ctx2.newPage();wire(page,log);}
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
  for(const id of ['OB-1','MT-1','ABC-1','TB-1']){await page.evaluate(i=>openForm(i),id);await page.waitForFunction(i=>!!state.status[i],id,{timeout:20000}).catch(()=>{});}
  await page.evaluate(()=>setSplit(['OB-1','MT-1','ABC-1']));await sleep(500);

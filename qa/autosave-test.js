@@ -37,7 +37,9 @@ const { chromium, fs, path, BASE, sleep } = L;
 const ED = process.env.ED || 'NBH-Workstation';
 const FORMS = L.forms(ED), F = Object.fromEntries(FORMS.map(f => [f.id, f]));
 const OUT = path.join(__dirname, 'out', 'autosave'); fs.mkdirSync(OUT, { recursive: true });
-const IMG = path.join(L.ROOT, 'crops_te1', 'reshot_d0_now.png');
+/* the photo added to TK-1: a screenshot kept as a fixture (it was crops_te1/reshot_d0_now.png, a working file at the
+   repository's root, until v21.43) */
+const IMG = path.join(L.ROOT, 'qa', 'data', 'autosave-photo.png');
 const RES = []; const SAY = (pass, name, detail) => { RES.push({ pass: !!pass, name, detail }); console.log((pass ? 'PASS ' : 'FAIL ') + name + (detail === undefined ? '' : '  ' + JSON.stringify(detail).slice(0, 400))); };
 const IPAD = 'Mozilla/5.0 (iPad; CPU OS 18_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Mobile/15E148 Safari/604.1';
 
