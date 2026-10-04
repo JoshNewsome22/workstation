@@ -37,8 +37,10 @@ async function pdf(page,file){
     sums[f.id]=await pdf(page,L.path.join(DIR,f.id+'.pdf'));
     errs[f.id]=log; await page.close(); process.stderr.write(f.id+' ');
   }
-  /* the master print, from a case file */
-  const log=[]; const page=await ctx.newPage(); L.wire(page,log);
+  /* the master print, from a case file; in a browser profile of its own (v21.44 Autosave: every form above, changed on its
+     own, keeps a safety copy in this one, and the workstation's offer to restore them would stand in the way) */
+  const mctx=await browser.newContext({viewport:{width:1280,height:900}}); await mctx.addInitScript(()=>{window.print=function(){};});
+  const log=[]; let page=await mctx.newPage(); L.wire(page,log);
   const idx=`${L.BASE}/${EDITION}/index.html`;
   await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   const cf=L.path.join(DATA,'case.json');
@@ -54,6 +56,9 @@ async function pdf(page,file){
     await page.evaluate(()=>{for(const [k,v] of [['#pClient','SIMULATED \u2013 Sample Student'],['#pSid','SIM-000']]){const e=$(k);e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}});
     const [dl]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.click('#saveCase')]);
     await dl.saveAs(cf);
+    /* the case is opened in a profile of its own too: this one keeps the session's safety copy, offered back on a reload */
+    const octx=await browser.newContext({viewport:{width:1280,height:900}}); await octx.addInitScript(()=>{window.print=function(){};});
+    await page.close(); page=await octx.newPage(); L.wire(page,log);
     await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   }
   await page.setInputFiles('#caseFile',cf);
