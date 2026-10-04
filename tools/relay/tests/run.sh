@@ -82,7 +82,7 @@ fi
 
 step "admin-browser-test.js (the admin page in Chromium)"
 if command -v node >/dev/null 2>&1 && node -e "require('$REPO/qa/lib.js')" >/dev/null 2>&1; then
-  node "$HERE/admin-browser-test.js" --relay "http://127.0.0.1:$RP" --shots "$WORK/shots" --pages "$WORK/pages" && result admin-browser-test.js passed || result admin-browser-test.js failed
+  node "$HERE/admin-browser-test.js" --relay "http://127.0.0.1:$RP" --home "$WORK/home" --shots "$WORK/shots" --pages "$WORK/pages" && result admin-browser-test.js passed || result admin-browser-test.js failed
 else
   result admin-browser-test.js "skipped (Playwright not found)"
 fi

@@ -4,12 +4,15 @@
    Also: the page at 390, 820 and 1180 px wide without sideways scrolling, every field labelled, no console
    errors (a Content-Security-Policy violation would be one).
 
-   usage: node tests/admin-browser-test.js --relay http://127.0.0.1:P [--shots <folder>] [--pages <folder>] [--password <pw>] */
+   With --home (the extracted upload tests/run.sh serves), also: 10 minutes after the password was typed,
+   Create passcode asks for it again (the sign-in time is moved back in relay.sqlite with php).
+
+   usage: node tests/admin-browser-test.js --relay http://127.0.0.1:P [--home <folder>] [--shots <folder>] [--pages <folder>] [--password <pw>] */
 'use strict';
-const path = require('path'), fs = require('fs');
+const path = require('path'), fs = require('fs'), {execFileSync} = require('child_process');
 const {chromium} = require(path.join(__dirname, '..', '..', '..', 'qa', 'lib.js'));
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 && process.argv[i + 1] ? process.argv[i + 1] : d; };
-const RELAY = arg('--relay', ''), SHOTS = arg('--shots', ''), PAGES = arg('--pages', ''), PW = arg('--password', 'correct horse battery staple');
+const RELAY = arg('--relay', ''), SHOTS = arg('--shots', ''), PAGES = arg('--pages', ''), PW = arg('--password', 'correct horse battery staple'), HOME = arg('--home', '');
 if (!RELAY) { console.error('usage: node admin-browser-test.js --relay http://127.0.0.1:P'); process.exit(2); }
 if (SHOTS) fs.mkdirSync(SHOTS, {recursive: true});
 
@@ -84,6 +87,21 @@ const XSS = '<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>
     ok(red.status === 200 && typeof red.body.token === 'string', 'the code unlocks a tab, called the way the forms call it (same site, no cookies)', red);
     await page.click('#nc-done');
     ok(await page.isHidden('#newcode') && (await page.textContent('#nc-code')) === '', 'Done hides the code');
+    ok(await page.isHidden('#code-pw-row'), 'just signed in, Create passcode does not ask for the password again');
+    if (HOME) {
+      execFileSync('php', ['-r', '$p = new PDO("sqlite:" . $argv[1] . "/nbh-relay/data/relay.sqlite"); $p->exec("UPDATE admin_sessions SET auth_at = " . (time() - 660));', HOME]);
+      await page.fill('#code-label', 'asked again');
+      await page.click('#f-code button[type=submit]');
+      await page.waitForSelector('#code-pw-row:not([hidden])', {timeout: 10000});
+      ok(/Enter the admin password again/.test(await page.textContent('#code-msg')) && await page.evaluate(() => document.activeElement && document.activeElement.id === 'code-pw'),
+        '10 minutes after the password was typed, Create passcode asks for it again, with the focus in its field');
+      await page.fill('#code-pw', PW);
+      await page.click('#f-code button[type=submit]');
+      await page.waitForFunction(() => /^[2-9A-HJ-NP-Z]{3}(-[2-9A-HJ-NP-Z]{3}){3}$/.test(document.getElementById('nc-code').textContent), null, {timeout: 10000});
+      ok(await page.isHidden('#code-pw-row') && (await page.inputValue('#code-pw')) === '', 'with it the passcode is made, and the password field is emptied and put away');
+      if (SHOTS) await page.screenshot({path: path.join(SHOTS, 'admin-asked-again.png'), fullPage: true});
+      await page.click('#nc-done');
+    }
     await page.click('#refresh');
     await page.waitForFunction(() => document.querySelectorAll('#sessions li').length > 0);
     const sess = await page.textContent('#sessions');
@@ -98,8 +116,9 @@ const XSS = '<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>
     await page.waitForSelector('#f-signin', {timeout: 10000});
     ok(true, 'Sign out returns to the sign-in page');
     ok(!(await ctx.cookies()).some(k => k.name === '__Secure-nbh_admin' && k.value), 'and the cookie is gone');
-    // the wrong password and the ended session answered 401 on purpose; the browser notes each such answer
-    const unexpected = errors.filter(e => !/Failed to load resource: the server responded with a status of 401/.test(e));
+    // the wrong password and the ended session answered 401 on purpose, the passcode that needed the password 403;
+    // the browser notes each such answer
+    const unexpected = errors.filter(e => !/Failed to load resource: the server responded with a status of 40[13]/.test(e));
     ok(unexpected.length === 0, 'no other console errors (no Content-Security-Policy violations)', unexpected);
     /* the setup and sign-in pages as relay-test.php saved them (this test's relay is already set up) */
     if (PAGES && fs.existsSync(PAGES)) {
