@@ -4,8 +4,8 @@
    or the workstation's snapshot (positional keys included), leak the session token into either, let typing in the panel
    reach the form's own shortcuts, run past the edge of a 390, 820 or 1180 px screen, or print.
    The checker's own assertions use the small rule set below (injected into the page), so they hold whatever the rules
-   file holds; the rules file itself gets a smoke check. The relay address is injected the same way (the built-in one
-   is empty: "not set up").
+   file holds; the rules file itself gets a smoke check. The relay address is injected the same way (the built-in one,
+   https://newsomebh.com/ai, is another site from the test server: "set up for the forms on newsomebh.com").
    usage: node qa/wording-client-test.js       (a server on :8123 serving the repository, as for every check here)
    env: WS_URL (default http://localhost:8123; the mock answers CORS for that origin), WORDING_SHOTS (screenshots, default
    qa/out/wording-client), MOCK_PORT (default: any free port), AXE_DIR (a node_modules holding axe-core, for the accessibility
@@ -13,7 +13,7 @@
    sections: 0 the block, 1 the buttons, 2 the saved file and the snapshot, 3 Check wording, the keyboard and the Live
    Recorder, 4 Rewrite with Claude, 5 where it cannot work, 6 the three widths, 7 print, 8 accessibility, 9 the one-file
    edition, 10 de-identification and putting names back, 11 Check wording with the rules as built, 12 the button in a
-   two-row field */
+   two-row field, 13 the rewrite service not there yet (not uploaded, not set up, not reachable) */
 const {chromium, fs, path, ROOT, sleep, wire} = require(__dirname + '/lib.js');
 const {spawn, execFileSync} = require('child_process');
 const os = require('os');
@@ -93,7 +93,7 @@ const mock = async (route, body) => (await fetch(RELAY + route, {method: body ? 
 /* the form as served, with the relay address and/or the rule set swapped in; or with the block cut back out */
 function variant(html, opt){
   if (opt.without) return html.replace(/\n<script id="nbh-wording">[\s\S]*?<\/script>\n\n/, '\n');
-  if (opt.relay !== undefined) html = html.replace('window.nbhWordingConfig=\n{"relay":""}', () => 'window.nbhWordingConfig=\n' + J({relay:opt.relay}));
+  if (opt.relay !== undefined) html = html.replace(/window\.nbhWordingConfig=\n\{[^\n]*\}/, () => 'window.nbhWordingConfig=\n' + J({relay:opt.relay}));
   if (opt.rules) html = html.replace(/window\.nbhWordingRules=\n[\s\S]*?\n;\nwindow\.nbhWordingConfig=/, () => 'window.nbhWordingRules=\n' + opt.rules + '\n;\nwindow.nbhWordingConfig=');
   return html;
 }
@@ -176,7 +176,8 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
     await section('1', async () => {
       const ctx = await context(browser, null), page = await openForm(ctx, log);
       const st = await page.evaluate(() => nbhWording.status());
-      ok(st.relay === 'unset' && st.rules > 0 && st.badRules === 0, '1 status: rules compiled, relay not set', st);
+      const builtIn = JSON.parse(config).relay, wantPlan = !builtIn ? 'unset' : new URL(builtIn).hostname.replace(/^www\./, '') === new URL(BASE).hostname.replace(/^www\./, '') ? 'ready' : 'site';
+      ok(st.relay === wantPlan && st.rules > 0 && st.badRules === 0, '1 status: rules compiled, the built-in relay address (' + (builtIn || 'none') + ') reads as "' + wantPlan + '" from ' + BASE, st);
       const rulesInfo = await page.evaluate(() => nbhWording.rules());
       console.log('      rules as built: ' + rulesInfo.count + ' (version ' + rulesInfo.version + ')');
       const smoke = await page.evaluate(() => nbhWording.check('He was very angry and had a tantrum a lot. She said "I am so angry" and upset the cup.'));
@@ -322,7 +323,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
 
     /* ---- 3. Check wording, Apply, Use this text (fixture rules) */
     await section('3', async () => {
-      const lg = [], ctx = await context(browser, {rules:FIXTURE}), page = await openForm(ctx, lg);
+      const lg = [], ctx = await context(browser, {rules:FIXTURE, relay:''}), page = await openForm(ctx, lg);
       await sim(page); await view(page, 'obs');
       const sel = '#obsPages textarea[data-obs="0"][data-row="1"]';
       const TXT = 'Student was very upset and had a tantrum a lot. He said "I am angry" and was mad.';
@@ -850,6 +851,69 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       await shot(page, 'two-row-820x1180.png');
       ok(errorsIn(lg).length === 0, '12 no console errors', errorsIn(lg));
       await ctx.close();
+    });
+
+    /* ---- 13. the rewrite service not there yet: the forms carry its address before the relay is on the website */
+    await section('13', async () => {
+      const lg = [], sel = '#obsPages textarea[data-obs="0"][data-row="1"]';
+      const NET = /Failed to load resource: (the server responded with a status of (404|503)|net::ERR_CONNECTION_REFUSED)/;
+      const bad = from => errorsIn(lg, from).filter(l => !(l.type === 'error' && NET.test(l.text)));
+      const STILL = /Check wording and the iPad’s Writing Tools still work without it\./;
+      const open2 = async (relay) => {
+        const ctx = await context(browser, relay === undefined ? null : {relay}), page = await openForm(ctx, lg);
+        await sim(page); await view(page, 'obs');
+        await clickButtonOf(page, sel); await tab(page, 2);
+        return {ctx, page};
+      };
+      const tryCode = async page => { await page.evaluate(c => { const i = __w.q('#pc'); i.value = c; __w.q('form.pc').requestSubmit(); }, CODE); };
+      /* the built-in address, from this test server (another site): said before anything is tried, and nothing is asked */
+      let from = lg.length, {ctx, page} = await open2();
+      const host = new URL(JSON.parse(config).relay || 'https://x.invalid').hostname;
+      let t = await page.evaluate(() => __w.tab2());
+      ok(t.indexOf('set up for the forms on ' + host) >= 0 && /Writing Tools work without it/.test(t), '13 the built-in address (' + host + ') opened from another site: said so, with what works without it', t.slice(0, 260));
+      ok((await page.evaluate(() => nbhWording.status().reach)) === '', '13 ... and the relay is not asked anything from another site');
+      await ctx.close();
+      /* the relay not uploaded yet: the website answers with its own "not found" page */
+      await mock('/__reset', {codes:[CODE]}); await mock('/__mode', {site:'absent'});
+      from = lg.length; ({ctx, page} = await open2(RELAY));
+      t = await waitTab2(page, /not reachable/);
+      ok(/The rewrite service on localhost is not reachable, or it is not set up yet\./.test(t) && STILL.test(t), '13 not uploaded yet (the website’s 404 page): said plainly as the tab opens, with what still works', t.slice(0, 300));
+      ok(await page.evaluate(() => !!__w.q('#pc')), '13 ... and the passcode box is still there');
+      await page.evaluate(() => { __w.q('#pc').focus(); __w.q('#pc').value = 'ZZZ'; });
+      await tryCode(page);
+      t = await waitTab2(page, /not reachable|not accepted/);
+      ok(/is not reachable, or it is not set up yet\. Your text is still here\./.test(t) && STILL.test(t) && !/not accepted/.test(t), '13 ... a passcode tried then is not called "not accepted": the same plain words', t.slice(0, 300));
+      ok(bad(from).length === 0, '13 ... no console error but the expected 404s', bad(from));
+      await ctx.close();
+      /* the relay uploaded, not set up yet (no API key or admin password in config.php) */
+      await mock('/__reset', {codes:[CODE]}); await mock('/__mode', {site:'setup'});
+      from = lg.length; ({ctx, page} = await open2(RELAY));
+      t = await waitTab2(page, /not set up yet/);
+      ok(/The rewrite service on localhost is not set up yet\./.test(t) && STILL.test(t), '13 uploaded but not set up: said so, with what still works', t.slice(0, 300));
+      await tryCode(page);
+      t = await waitTab2(page, /not set up yet\. Your text/);
+      ok(/is not set up yet\. Your text is still here\./.test(t) && STILL.test(t), '13 ... and a passcode tried then says the same', t.slice(0, 300));
+      ok(bad(from).length === 0, '13 ... no console error but the expected 503s', bad(from));
+      await ctx.close();
+      /* nothing listening at the address */
+      const port = await new Promise(res => { const srv = require('net').createServer(); srv.listen(0, () => { const p = srv.address().port; srv.close(() => res(p)); }); });
+      from = lg.length; ({ctx, page} = await open2('http://localhost:' + port));
+      t = await waitTab2(page, /not reachable/);
+      ok(/is not reachable, or it is not set up yet\./.test(t) && STILL.test(t), '13 nothing at the address: not reachable, with what still works', t.slice(0, 300));
+      ok(bad(from).length === 0, '13 ... no console error but the refused connection', bad(from));
+      await ctx.close();
+      /* the relay there and set up: no word about it, and it is asked once only */
+      await mock('/__reset', {codes:[CODE]});
+      from = lg.length; ({ctx, page} = await open2(RELAY));
+      await sleep(500);
+      t = await page.evaluate(() => __w.tab2());
+      ok(!/not reachable|not set up/.test(t) && /Enter the passcode from your BCBA/.test(t) && (await page.evaluate(() => nbhWording.status().reach)) === 'ok', '13 the relay there: just the passcode box', t.slice(0, 200));
+      await page.evaluate(() => __w.click('#cancel')); await sleep(250);
+      await clickButtonOf(page, sel); await tab(page, 2); await sleep(300);
+      ok((await mock('/__log')).health === 1, '13 ... and it was asked once, not each time the tab opens', (await mock('/__log')).health);
+      ok(bad(from).length === 0, '13 ... no console errors', bad(from));
+      await ctx.close();
+      await mock('/__reset', {codes:[CODE]});
     });
   } catch (e) {
     ok(false, 'the run stopped: ' + (e && e.stack || e));

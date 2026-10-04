@@ -1,7 +1,8 @@
 /* nbh-wording (v21.43): help with the wording of a form's narrative fields.
 
-   An "Improve wording" button sits at the corner of every narrative field (a textarea) while the field has
-   focus or text; from the keyboard, Alt+Enter (Option+Return on a Mac or an iPad) in the field does the same, and
+   An "Improve wording" button sits at the corner of every narrative field (a textarea that is shown, not in the
+   toolbar or a dialog, not marked data-nbh-nowording, not a box the form has turned spelling check off for, and
+   not one of the learner's particulars such as the name or ID) while the field has focus or text; from the keyboard, Alt+Enter (Option+Return on a Mac or an iPad) in the field does the same, and
    Tab goes from field to field as the form has it. It opens a panel holding the field's text (or the part of it
    that was selected) and three ways to improve it:
      1. Check wording: rule based and offline. It flags words that name a feeling, guess at intent or
@@ -16,7 +17,10 @@
         ID (read from the form's fields, or from the workstation's packet) and any names typed into "Also hide"
         are replaced by [Student], [ID], [Name 1] ...; the learner's surname after a title or before "family"
         (a parent) by [Family name]. The text exactly as it will be sent is shown first, with what may still be
-        a name; the placeholders are put back in the answer, each as it was written.
+        a name; the placeholders are put back in the answer, each as it was written. The forms carry the relay's
+        address (tools/blocks/nbh-wording-config.json) before the relay itself may be on the website, so the first
+        time the tab is shown the panel asks the relay whether it is there (nothing is sent); when it is not
+        reachable, or not set up yet, the panel says so plainly, and that Check wording and Writing Tools still work.
      3. iPad Writing Tools: Apple's own, already in every text box on an iPad with Apple Intelligence; the
         panel only explains it.
    "Use this text" writes the panel's text into the field (or over the part that was selected) and fires
@@ -202,9 +206,27 @@ const CATS = [
 function catLabel(c){ for (let i = 0; i < CATS.length; i++) if (CATS[i][0].test(c)) return CATS[i][1]; c = str(c).replace(/[-_]+/g, ' ').trim(); return c ? c.charAt(0).toUpperCase() + c.slice(1) : 'Wording'; }
 
 /* ------------------------------------------------------------------ fields */
+/* Not a narrative, so no button: a field the form has turned spelling check off for (a box to paste a spreadsheet or
+   codes into, a questionnaire's list of items) and the particulars the workstation fills in from its packet (the
+   learner's name, ID, date of birth, grade and school, the case BCBA): there is nothing in a name or a date to word
+   better. The packet's map of those fields is set by a script after this one, so it is read on first use. */
+const PARTICULARS = ['client', 'sid', 'dob', 'grade', 'site', 'bcba', 'first', 'last'];
+let PSEL = null;
+function particularSel(){
+  if (PSEL !== null) return PSEL;
+  const M = window.__nbhPacketMap, out = [];
+  PARTICULARS.forEach(k => (M && Array.isArray(M[k]) ? M[k] : []).concat(SEL[k] || []).forEach(s => {
+    if (typeof s !== 'string' || out.indexOf(s) >= 0) return;
+    try { document.querySelector(s); out.push(s); } catch (e) {}
+  }));
+  const sel = out.join(',');
+  if (M) PSEL = sel;
+  return sel;
+}
+function particular(ta){ const s = particularSel(); if (!s) return false; try { return ta.matches(s); } catch (e) { return false; } }
 function eligible(ta){
-  return !!ta && ta.tagName === 'TEXTAREA' && ta.isConnected && !ta.disabled && !ta.readOnly &&
-    !ta.closest('[data-nbh-nowording],.toolbar,dialog,.nbh-pm');
+  return !!ta && ta.tagName === 'TEXTAREA' && ta.isConnected && !ta.disabled && !ta.readOnly && ta.getAttribute('spellcheck') !== 'false' &&
+    !ta.closest('[data-nbh-nowording],.toolbar,dialog,.nbh-pm') && !particular(ta);
 }
 function shown(ta){
   if (!ta.getClientRects().length) return false;
@@ -611,6 +633,42 @@ async function post(plan, path, body, ms){
     return {ok:false, status:0, aborted: !!(ac && ac.signal.aborted && !timedOut), timeout:timedOut, offline: navigator.onLine === false};
   } finally { clearTimeout(timer); if (RW.ac === ac) RW.ac = null; }
 }
+/* Whether the rewrite service is on the website at all. The forms carry its address from the start, and the relay can
+   be put on the website after them (tools/relay/README.md), so the first time Rewrite with Claude is shown on a tab
+   that is not unlocked, the panel asks once (GET <relay>/api/health; nothing is sent) and says at once when the
+   service is not there, rather than only after a passcode is tried. A failed check is made again a minute later when
+   the tab is shown again; the passcode box works either way. */
+const REACH = {state:'', at:0, text:''};   /* state: '' not asked, 'busy', 'ok', 'down' (text: what to say) */
+async function health(plan){
+  const ac = typeof AbortController === 'function' ? new AbortController() : null;
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; if (ac) ac.abort(); }, 8000);
+  try {
+    const res = await fetch(plan.base + '/api/health', {method:'GET', credentials:'omit', cache:'no-store', redirect:'error', signal: ac ? ac.signal : undefined});
+    let data = null; const txt = await res.text();
+    if (txt && txt.length < 20000) { try { data = JSON.parse(txt); } catch (e) {} }
+    return {ok:res.ok, status:res.status, body:data};
+  } catch (err) {
+    return {ok:false, status:0, timeout:timedOut, offline: navigator.onLine === false};
+  } finally { clearTimeout(timer); }
+}
+async function reach(plan){
+  if (REACH.state === 'busy' || REACH.state === 'ok' || (REACH.state === 'down' && Date.now() - REACH.at < 60000)) return;
+  REACH.state = 'busy';
+  const r = await health(plan);
+  REACH.at = Date.now();
+  if (r.ok && r.body && typeof r.body === 'object' && r.body.ok === true) { REACH.state = 'ok'; REACH.text = ''; }
+  else if (r.offline) { REACH.state = ''; REACH.text = ''; }
+  else { REACH.state = 'down'; REACH.text = errText(r, 'reach', plan.host); }
+  showReach();
+}
+/* the check's answer goes into its own place on the passcode step, so a passcode being typed keeps its focus */
+function showReach(){
+  const box = P && P.tps[1].querySelector('#rch');
+  if (!box) return;
+  box.textContent = '';
+  if (REACH.state === 'down' && REACH.text) box.appendChild(msgBox({kind:'err', text:REACH.text}));
+}
 function errCode(b){
   if (!b || typeof b !== 'object') return '';
   const e = b.error;
@@ -626,16 +684,26 @@ function waitText(r){
   return s < 90 ? ' Wait about a minute, then try again.' : ' Wait about ' + m + ' minutes, then try again.';
 }
 const KEPT = ' Your text is still here.';
-function errText(r, kind){
-  const c = errCode(r.body);
+/* What the person is told when a call to the rewrite service fails; "host" is the site the service lives on. No answer
+   at all, an answer that is not the service's own (the website's "not found" page: the relay is not on the website yet,
+   or not where the forms look for it) and the service saying it is not set up yet are each said plainly, with what
+   works without it: Check wording and the iPad's Writing Tools need no rewrite service.
+   kind: 'redeem' (a passcode), 'rewrite' (a text), 'reach' (the check made as the tab opens; nothing was sent). */
+function errText(r, kind, host){
+  const c = errCode(r.body), svc = 'The rewrite service' + (host ? ' on ' + host : ''), keep = kind === 'reach' ? '' : KEPT;
+  const still = ' Check wording and the iPad’s Writing Tools still work without it.';
+  const json = !!r.body && typeof r.body === 'object' && !Array.isArray(r.body);
   if (r.aborted) return '';
-  if (r.offline) return 'This device is offline, so nothing was sent.' + KEPT + ' Check wording works without a connection.';
-  if (r.timeout) return 'The rewrite service took too long to answer, so the request was stopped.' + KEPT + ' Try again in a minute.';
-  if (!r.status) return 'The rewrite service could not be reached. Check the internet connection and try again.' + KEPT;
+  if (r.offline) return 'This device is offline, so nothing was sent.' + keep + ' Check wording works without a connection.';
+  if (r.timeout && kind !== 'reach') return 'The rewrite service took too long to answer, so the request was stopped.' + KEPT + ' Try again in a minute.';
+  if (!r.status || r.timeout) return svc + ' is not reachable, or it is not set up yet.' + keep + still;
+  if (/setup_?required|not_?set_?up/.test(c)) return svc + ' is not set up yet.' + keep + still;
+  if ((!json && r.status !== 413 && r.status !== 429) || r.status === 404 || r.status === 405 || /not_?found|method_not_allowed/.test(c) || (r.ok && kind === 'reach'))
+    return svc + ' is not reachable, or it is not set up yet.' + keep + still;
   if (/origin|referer|cross/.test(c)) return 'The rewrite service refused this copy of the forms: it answers only the forms on its own site.';
-  if (kind === 'redeem') {
+  if (kind === 'redeem' || kind === 'reach') {
     if (r.status === 429) return 'Too many passcode tries.' + (waitText(r) || ' Wait about 15 minutes, then try again.');
-    if (r.status >= 500) return 'The rewrite service is not working right now. Try again later; Check wording works without it.';
+    if (r.status >= 500 || kind === 'reach') return 'The rewrite service is not working right now. Try again later.' + still;
     return 'That passcode was not accepted. A passcode works once and only for a limited time: check it, or ask your BCBA for a new one.';
   }
   if (r.status === 401 || r.status === 403 || /expired|token|session_?(ended|invalid)|unauthori/.test(c)) return 'This tab\u2019s session has ended. Enter a new passcode from your BCBA to go on.' + KEPT;
@@ -645,7 +713,7 @@ function errText(r, kind){
     return 'Too many rewrites in a short time.' + (waitText(r) || ' Wait a minute, then try again.') + KEPT;
   }
   if (r.status === 422 || /refus/.test(c)) return 'The rewrite service could not rewrite this text. Try another style, or use Check wording.' + KEPT;
-  if (r.status >= 500) return 'The rewrite service is not working right now (it answered with an error). Try again later; Check wording works without it.' + KEPT;
+  if (r.status >= 500) return 'The rewrite service is not working right now (it answered with an error). Try again later.' + KEPT + still;
   return 'The rewrite service could not use this request (error ' + r.status + ').' + KEPT;
 }
 function itemText(x){
@@ -1428,6 +1496,7 @@ function renderRW(){
 function renderLocked(box, plan){
   if (RW.ended) { box.appendChild(msgBox({kind:'err', text:'This tab\u2019s session ended at ' + hm(RW.ended) + '. Enter a new passcode from your BCBA to go on.'})); RW.ended = 0; }
   if (RW.msg) box.appendChild(msgBox(RW.msg));
+  else box.appendChild(h('div', {id:'rch'}));   /* whether the rewrite service is there: see reach() */
   const inp = h('input', {id:'pc', class:'tx code', type:'text', inputmode:'text', autocomplete:'one-time-code', autocapitalize:'characters', autocorrect:'off',
     spellcheck:'false', maxlength:'40', placeholder:'XXX-XXX-XXX-XXX', 'aria-describedby':'pcH'});
   /* what was typed stays through a wrong try, so a one-letter slip is fixed without typing all twelve again */
@@ -1442,6 +1511,7 @@ function renderLocked(box, plan){
   ]);
   f.addEventListener('submit', ev => { ev.preventDefault(); unlock(inp.value); });
   box.appendChild(f);
+  if (!RW.msg) { showReach(); reach(plan); }
 }
 async function unlock(raw){
   const plan = relayPlan(); if (!plan.ok) return;
@@ -1454,7 +1524,7 @@ async function unlock(raw){
   RW.busy = null;
   const tok = r.ok && r.body && typeof r.body.token === 'string' ? r.body.token : '';
   if (tok && tok.length >= 16 && tok.length <= 1024 && setSession(plan, tok, expiryOf(r.body.expires))) {
-    RW.pc = '';
+    RW.pc = ''; REACH.state = 'ok'; REACH.text = '';
     /* a session that ended while a text was waiting to be sent goes back to that text */
     const back = RW.state === 'preview' && RW.style;
     if (!back) RW.state = 'ready';
@@ -1463,7 +1533,7 @@ async function unlock(raw){
     renderRW(); focusIn(back ? 'h4' : '.sty .b');
   } else {
     if (r.status === 429) RW.pc = '';
-    RW.msg = {kind:'err', text: r.ok ? 'The rewrite service sent an answer this panel could not read. Try again; if it keeps happening, tell your BCBA.' : (errText(r, 'redeem') || 'Stopped.')};
+    RW.msg = {kind:'err', text: r.ok && r.body && typeof r.body === 'object' ? 'The rewrite service sent an answer this panel could not read. Try again; if it keeps happening, tell your BCBA.' : (errText(r, 'redeem', plan.host) || 'Stopped.')};
     if (!S) return;
     renderRW(); focusIn('#pc');
     const i = P.tps[1].querySelector('#pc'); if (i && i.value) { try { i.select(); } catch (e) {} }
@@ -1554,11 +1624,11 @@ async function send_(){
       if (P.tps[1].hidden) say('The suggestion is ready under Rewrite with Claude.'); else focusIn('h4');
       return;
     }
-    RW.state = 'preview'; RW.msg = {kind:'err', text:'The rewrite service sent an answer this panel could not read.' + KEPT + ' Try again; if it keeps happening, tell your BCBA.'};
+    RW.state = 'preview'; RW.msg = {kind:'err', text: r.body && typeof r.body === 'object' ? 'The rewrite service sent an answer this panel could not read.' + KEPT + ' Try again; if it keeps happening, tell your BCBA.' : errText(r, 'rewrite', plan.host)};
   } else {
     if (r.status === 401 || (r.status === 403 && !/origin|referer|cross/.test(errCode(r.body)))) clearSession();
     RW.state = 'preview';
-    RW.msg = r.aborted ? {kind:'ok', text:'Stopped. Nothing came back, and your text is unchanged.'} : {kind:'err', text:errText(r, 'rewrite')};
+    RW.msg = r.aborted ? {kind:'ok', text:'Stopped. Nothing came back, and your text is unchanged.'} : {kind:'err', text:errText(r, 'rewrite', plan.host)};
   }
   renderRW(); focusIn(r.aborted ? 'h4' : '.box');
 }
@@ -1595,7 +1665,7 @@ window.nbhWording = Object.freeze({
   open: ta => openPanel(ta),
   close: () => closePanel('cancel'),
   deidentify: (t, extra) => { const r = deidentify(t, Array.isArray(extra) ? extra : []); return {text:r.text, hidden:r.map.filter(m => m.n).map(m => ({placeholder:m.ph, forms:m.forms.slice()}))}; },
-  status: () => { const p = relayPlan(), r = rules(); return {rules:r.rules.length, badRules:r.bad.length, relay: p.ok ? 'ready' : p.why, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; }
+  status: () => { const p = relayPlan(), r = rules(); return {rules:r.rules.length, badRules:r.bad.length, relay: p.ok ? 'ready' : p.why, reach:REACH.state, unlocked: !!(p.ok && getSession(p)), buttons:B.size, open:panelOpen, error:lastErr}; }
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
