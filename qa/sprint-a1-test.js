@@ -19,6 +19,24 @@
       note, the warning about the EXT card, and the button that replaces the step.
    8  Load simulation asks first in TD-1 and SR-1, with the question the other forms ask: Cancel keeps every field;
       Load loads.
+   The review's cases (fix pass):
+   9  the consequence-protocol card follows a change of answer: "yes", Send, then "no"; "no", Send, then "yes"; the
+      escape simulation answered "no" (its card was never sent). Each leaves no escape extinction, and no "not
+      feasible" after "yes", in the card, Copy for the BIP, the staff flowchart or the final plan; in the simulation,
+      the note names every other place that still describes extinction, and once those are put right nothing in the
+      three outputs does. Words edited on the card are kept and named, with a button that sends the protocol again;
+      a card added from the build sheet after "no" does not start with the extinction step.
+   10 a file saved before this change, "no" with the extinction step (and one unanswered with the step filled in):
+      opening it says so; Copy for the BIP, Build staff flowchart and Print final plan only ask first (Go to
+      Responding: nothing leaves the form; the other button goes ahead); no field is changed; a file that follows
+      question 4 is copied without a question.
+   11 after "no", the note names what still describes extinction: the simulations' own steps are the form's words
+      (replaced by the alternative); a step with words added by hand is kept and named, with the button; the Demand
+      fading card's escape-extinction step.
+   12 attention and tangible: question 4 takes the Select sheet's own answer (is extinction feasible?) while it is
+      empty, and the note names a disagreement between the two.
+   13 wording: both extinction cards ("remove them"), a step written for a different function, the automatic
+      recommendation after "no".
    No console or page errors anywhere.
    usage: WS_URL=http://127.0.0.1:8301 node qa/sprint-a1-test.js [edition folder, default NBH-Workstation] */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
@@ -39,7 +57,7 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
   const set=(p,n,v)=>p.evaluate(([n,v])=>{const e=document.querySelector(`[name="${n}"]`);if(!e)return false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));return true;},[n,v]);
   const v=(p,n)=>p.evaluate(n=>{const e=document.querySelector(`[name="${n}"]`);return e?e.value:null;},n);
   const view=async(p,k)=>{await p.evaluate(k=>document.querySelector(`#viewSeg button[data-view="${k}"]`).click(),k);await sleep(250);};
-  const click=async(p,s)=>{await p.evaluate(s=>document.querySelector(s).click(),s);await sleep(300);};
+  const click=async(p,s)=>{const there=await p.evaluate(s=>{const b=document.querySelector(s);if(b)b.click();return !!b;},s);if(!there)check(false,'the button '+s+' is there');await sleep(300);};
   const note=p=>p.evaluate(()=>{const n=document.querySelector('#rbExtNote');return n&&!n.hidden?n.innerText.replace(/\s+/g,' ').trim():'';});
   /* each recommendation: its code, and its name and reasons one per line (run together, "Noncontingent escape" and
      "Extinction not feasible" would read as "escape extinction") */
@@ -209,6 +227,181 @@ let fails=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL ')+msg+
     check(/SIMULATED/.test(await F2.loaded(p)||''),'8 '+F2.id+': the other button loads the simulation',await F2.loaded(p));
     await p.close();
   }
+
+  /* ---------- the review's cases (fix pass) ---------- */
+  const NONE='none (not feasible in this setting)',TGT='On the target behavior: ';
+  const GEN='On the target behavior: deliver the function-matched extinction step (see the respond sheet) with a neutral face and no discussion.';
+  const finalText=async p=>{await view(p,'final');return p.evaluate(()=>document.querySelector('#finalBody').innerText);};
+  const sim=async(p,key)=>{await p.evaluate(k=>{const c=window.confirm;window.confirm=()=>true;document.querySelector('#simScenario').value=k;document.querySelector('#simBtn').click();window.confirm=c;},key);await sleep(1300);};
+  /* the three outputs at once: Copy for the BIP, the staff flowchart, the final plan */
+  const outs=async p=>({bip:await bip(p),flow:await flow(p),fin:await finalText(p)});
+  const cardOk=C=>!!C&&!ESC_EXT.test(C.p0||'')&&!C.steps.some(s=>ESC_EXT.test(s));
+  const cleanOf=(O,re)=>['bip','flow','fin'].filter(k=>re.test(O[k]));
+  const setCard=(p,code,f,v)=>p.evaluate(([code,f,v])=>{const c=document.querySelector(`#compWrap .card[data-code="${code}"]`);const e=c&&document.querySelector(`[name="cp[${c.dataset.i}].${f}"]`);if(!e)return false;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));return true;},[code,f,v]);
+  const toast=p=>p.evaluate(()=>{const h=document.querySelector('#nbhToasts');return h?h.innerText.replace(/\s+/g,' ').trim():'';});
+
+  console.log('\n=== TD-1: the consequence-protocol card follows a change of answer');
+  /* 9a: "yes", Send, then "no" */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'respond');await set(p,'rb.3','yes');await click(p,'#sendRespond');
+  C=await card(p,'R_PB');check(C&&C.p0===EXT.escape&&C.steps.includes(TGT+EXT.escape),'9a "yes" + Send: the card holds escape extinction',C);
+  await view(p,'respond');await set(p,'rb.3','no');await sleep(200);
+  C=await card(p,'R_PB');
+  check(C&&C.p0===NONE&&C.steps.includes(TGT+ALT.escape)&&cardOk(C)&&!C.steps.includes(GEN),'9a then "no": the card says "none" and carries the alternative, without asking for another Send',C);
+  check(await note(p)==='','9a ... and no note (nothing left to put right)',await note(p));
+  let O=await outs(p);
+  check(cleanOf(O,ESC_EXT).length===0&&O.bip.includes(TGT+ALT.escape)&&O.flow.includes(ALT.escape)&&O.fin.includes(ALT.escape),'9a ... Copy for the BIP, the flowchart and the final plan: the alternative, no escape extinction',cleanOf(O,ESC_EXT));
+  await p.close();
+  /* 9b: "no", Send, then "yes" */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'respond');await set(p,'rb.3','no');await click(p,'#sendRespond');
+  await view(p,'respond');await set(p,'rb.3','yes');await sleep(200);
+  C=await card(p,'R_PB');
+  check(C&&C.p0===EXT.escape&&C.steps.includes(TGT+EXT.escape)&&!C.steps.some(s=>s.includes(ALT.escape)),'9b "no" + Send, then "yes": the card holds escape extinction again, no "none" and no alternative',C);
+  O=await outs(p);
+  check(cleanOf(O,/not feasible in this setting|Noncontingent escape \(breaks on the timer\)/).length===0&&O.bip.includes('Extinction form: '+EXT.escape),'9b ... the three outputs no longer say "not feasible" or carry the alternative',cleanOf(O,/not feasible in this setting|Noncontingent escape \(breaks/));
+  await view(p,'respond');check(await note(p)==='','9b ... and no note',await note(p));
+  await p.close();
+  /* 9c: the escape simulation (its card never sent), answered "no" */
+  p=await open(TD1);await sim(p,'escape_fct');
+  C=await card(p,'R_PB');check(C&&C.steps.includes(GEN),'9c the escape simulation: its card holds the generic extinction step',C&&C.steps);
+  await view(p,'respond');await set(p,'rb.3','no');await sleep(200);
+  C=await card(p,'R_PB');
+  check(cardOk(C)&&!C.steps.includes(GEN)&&C.steps.includes(TGT+ALT.escape),'9c then "no": the card\'s generic step becomes the alternative',C&&C.steps);
+  n=await note(p);
+  check(/Extinction \(matched to function\) card/.test(n)&&/What staff do not do/.test(n)&&/the FCT card, Extinction procedure and step 5/.test(n)&&!/consequence-protocol card/.test(n),'9c ... the note names the EXT card, "What staff do not do" and the FCT card\'s Extinction procedure and step 5',n);
+  O=await outs(p);
+  /* the card's own lines in the copy: from its "Component:" line to the next component or section */
+  const RPB=t=>{const i=t.indexOf('Component: Consequence protocol for problem behavior');if(i<0)return '';const r=t.slice(i+10),j=r.search(/\nComponent: |\n\n/);return j<0?r:r.slice(0,j);};
+  check(RPB(O.bip).includes(TGT+ALT.escape)&&!/xtinction|no break|prompt sequence/i.test(RPB(O.bip)),'9c ... the card\'s lines in Copy for the BIP: the alternative, no extinction',RPB(O.bip));
+  /* put right what the note names: the plan then carries extinction nowhere (the SΔ periods of a multiple schedule are not extinction of the behavior) */
+  await view(p,'build');await p.evaluate(()=>{const c=document.querySelector('#compWrap .card[data-code="EXT"]');c.querySelector('[data-rm]').click();});
+  await setCard(p,'FCT','p3','none (not feasible in this setting)');await setCard(p,'FCT','s4','Problem behavior: the break comes on the NCE timer, not after the behavior (typed)');
+  await view(p,'respond');await set(p,'rb.not','No negotiation and no comments about the behavior (typed)');
+  check(await note(p)==='','9c ... once those are edited the note is empty',await note(p));
+  O=await outs(p);
+  const BROAD=/extinction|no break|prompt sequence|guided compliance|not returned/i,SCHED=/extinction (component|period|challenge)|not feasible/i;
+  const left=['bip','flow','fin'].flatMap(k=>O[k].split('\n').filter(l=>BROAD.test(l)&&!SCHED.test(l)).map(l=>k+': '+l.slice(0,120)));
+  check(left.length===0,'9c ... and Copy for the BIP, the flowchart and the final plan describe extinction nowhere',left);
+  await p.close();
+  /* 9d: words edited on the card are kept, named, and Send again puts them right */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'respond');await set(p,'rb.3','yes');await click(p,'#sendRespond');
+  await setCard(p,'R_PB','p0','Escape extinction with hand-over-hand guidance (typed on the card)');
+  await view(p,'respond');await set(p,'rb.3','no');await sleep(200);
+  C=await card(p,'R_PB');n=await note(p);
+  check(C.p0==='Escape extinction with hand-over-hand guidance (typed on the card)'&&C.steps.includes(TGT+ALT.escape),'9d typed on the card, then "no": the typed words are kept, the step the form sent follows',C);
+  check(/consequence-protocol card on the build sheet still holds the extinction step \(Extinction form\): send the consequence protocol again/.test(n)&&/Send the consequence protocol again/.test(n),'9d ... the note names the card, with a button that sends the protocol again',n);
+  await p.evaluate(()=>{if(window.nbhGuard)window.nbhGuard.clean();});
+  await click(p,'#rbSendAgain');
+  C=await card(p,'R_PB');
+  check(C.p0===NONE&&cardOk(C),'9d ... the button sends the protocol again: the card says "none"',C);
+  check(await p.evaluate(()=>!window.nbhGuard||window.nbhGuard.isDirty()),'9d ... and the form counts as changed');
+  await view(p,'respond');check(await note(p)==='','9d ... the note is empty',await note(p));
+  await p.close();
+  /* 9e: a card added from the build sheet after "no" */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'respond');await set(p,'rb.3','no');await view(p,'build');
+  await p.evaluate(()=>{const s=document.querySelector('#addComp');s.value='R_PB';document.querySelector('#addCompBtn').click();});await sleep(200);
+  C=await card(p,'R_PB');
+  check(C&&!C.steps.includes(GEN)&&C.steps.includes(TGT+ALT.escape)&&cardOk(C),'9e a card added from the build sheet after "no" starts with the alternative, not the extinction step',C&&C.steps);
+  await p.close();
+
+  console.log('\n=== TD-1: a file saved before this change, opened and put to use');
+  /* 10: the old fault ("no" with the extinction step) and an unanswered question with the step filled in */
+  const FAULT=variant('no');const FB=JSON.parse(FAULT);
+  p=await open(TD1);await p.evaluate(()=>{window.__prints=0;window.print=()=>{window.__prints++;};});await openFile(p,FAULT);
+  check(/does not follow question 4/.test(await toast(p))&&/still the extinction step/.test(await toast(p)),'10 opening it says the plan does not follow question 4',await toast(p));
+  await same(p,FB.fields,'10 ... and opens with every field as saved');
+  /* Copy for the BIP */
+  await p.evaluate(()=>navigator.clipboard.writeText('(nothing copied)'));
+  await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(300);
+  let D=await dlg(p);
+  check(D&&/does not follow question 4/.test(D.head)&&/still the extinction step/.test(D.body)&&JSON.stringify(D.btns)===JSON.stringify(['Go to Responding','Copy anyway']),'10 Copy for the BIP asks first, naming the step, with Go to Responding and Copy anyway',D);
+  await press(p,'Go to Responding');await sleep(300);
+  check(await p.evaluate(()=>navigator.clipboard.readText())==='(nothing copied)'&&await p.evaluate(()=>document.body.className==='view-respond'),'10 ... Go to Responding: nothing is copied, and the Responding sheet is shown');
+  await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(300);await press(p,'Copy anyway');await sleep(400);
+  t=await p.evaluate(()=>navigator.clipboard.readText());
+  check(t.includes('On the target behavior: '+EXT.escape),'10 ... Copy anyway copies the plan as it stands');
+  /* the staff flowchart */
+  await view(p,'plan');await p.evaluate(()=>{const b=document.querySelector('#flowBlock');b.innerHTML='';b.hidden=true;document.querySelector('#flowBtn').click();});await sleep(300);
+  D=await dlg(p);check(D&&/does not follow question 4/.test(D.head)&&D.btns.includes('Build anyway'),'10 Build staff flowchart asks first',D);
+  await press(p,'Go to Responding');await sleep(300);
+  check(await p.evaluate(()=>document.querySelector('#flowBlock').hidden),'10 ... Go to Responding: no flowchart is built');
+  await view(p,'plan');await p.evaluate(()=>document.querySelector('#flowBtn').click());await sleep(300);await press(p,'Build anyway');await sleep(300);
+  check(await p.evaluate(()=>!document.querySelector('#flowBlock').hidden&&/Staff Procedure Flowchart/.test(document.querySelector('#flowBlock').innerText)),'10 ... Build anyway builds it');
+  /* Print final plan only */
+  await p.evaluate(()=>document.querySelector('#printFinalBtn').click());await sleep(300);
+  D=await dlg(p);check(D&&/does not follow question 4/.test(D.head)&&D.btns.includes('Print anyway'),'10 Print final plan only asks first',D);
+  await press(p,'Go to Responding');await sleep(200);
+  check(await p.evaluate(()=>window.__prints)===0,'10 ... Go to Responding: nothing is printed');
+  await p.evaluate(()=>document.querySelector('#printFinalBtn').click());await sleep(300);await press(p,'Print anyway');await sleep(300);
+  check(await p.evaluate(()=>window.__prints)===1,'10 ... Print anyway prints');
+  await same(p,FB.fields,'10 no field was changed by any of it');
+  /* the note's button puts the step and the card right; the plan then leaves the form without a question */
+  await view(p,'respond');n=await note(p);
+  check(/still the extinction step\. The consequence-protocol card on the build sheet still holds the extinction step \(step 2\); the button puts both right\./.test(n),'10 the note: the step, and the card that holds it too',n);
+  await click(p,'#rbUseStep');C=await card(p,'R_PB');
+  check(await v(p,'rb.target')===ALT.escape&&cardOk(C)&&!C.steps.includes(GEN)&&C.steps.includes(TGT+ALT.escape),'10 ... the button: the step and the card carry the alternative',C&&C.steps);
+  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);
+  check(!(await dlg(p))&&(await p.evaluate(()=>navigator.clipboard.readText())).includes(TGT+ALT.escape),'10 ... and Copy for the BIP then copies without asking');
+  await p.close();
+  /* unanswered with the step filled in */
+  p=await open(TD1);await openFile(p,variant(''));
+  check(/before question 4 was answered/.test(await toast(p)),'10 unanswered with the step filled in: opening it says so',await toast(p));
+  await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(300);D=await dlg(p);
+  check(D&&/before question 4 was answered/.test(D.body),'10 ... and Copy for the BIP asks first',D);
+  if(D)await press(p,'Go to Responding');
+  await p.close();
+  /* a file that follows question 4 */
+  p=await open(TD1);await openFile(p,base);
+  check(await toast(p)==='','10 a file that follows question 4: no notice on opening',await toast(p));
+  await p.evaluate(()=>navigator.clipboard.writeText(''));await p.evaluate(()=>document.querySelector('#bipBtn').click());await sleep(400);
+  check(!(await dlg(p))&&(await p.evaluate(()=>navigator.clipboard.readText())).includes('FORM TD-1'),'10 ... Copy for the BIP copies without asking');
+  await p.close();
+
+  console.log('\n=== TD-1: after "no", what still describes extinction');
+  /* 11: the simulations' own steps */
+  for(const [key,fn] of [['sbt','escape'],['tangible_fct','tangible'],['auto_rrb','automatic']]){
+    p=await open(TD1);await sim(p,key);await view(p,'respond');
+    const before=await v(p,'rb.target');await set(p,'rb.3','no');await sleep(200);
+    const after=await v(p,'rb.target');n=await note(p);
+    check(/\(simulated\)$/.test(before)&&after===ALT[fn],`11 ${key}: the simulation's own step is the form's words, so "no" gives the alternative`,{before,after});
+    if(key==='auto_rrb')check(/the RRB_RB card, Blocking rule and step 2/.test(n),'11 auto_rrb: the note names the blocking card',n);
+    if(key==='sbt'){check(/the SBT_FCR card, step 2/.test(n)&&/the SBT_TR card, step 3/.test(n),'11 sbt: the note names the skill-based treatment steps that withhold the reinforcers',n);
+      await set(p,'rb.3','yes');await sleep(200);check(await v(p,'rb.target')===EXT.escape,'11 sbt: "yes" again gives the escape extinction step');}
+    await p.close();}
+  /* the form's step with words added by hand */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'respond');await set(p,'rb.3','yes');
+  const EXTENDED=EXT.escape+'; guide hand over hand';await set(p,'rb.target',EXTENDED);await set(p,'rb.3','no');await sleep(200);
+  n=await note(p);
+  check(await v(p,'rb.target')===EXTENDED&&/This step still describes extinction/.test(n)&&/Use the alternative/.test(n),'11 the extinction step with words added by hand, then "no": kept, and named with the button',n);
+  await click(p,'#rbUseStep');check(await v(p,'rb.target')===ALT.escape&&await note(p)==='','11 ... the button gives the alternative');
+  await p.close();
+  /* an escape plan sent from the Select sheet: DF, NCE and EXT */
+  p=await open(TD1);await set(p,'m.fn','escape');await view(p,'select');
+  for(const [k,a] of [['q.escape.0','yes'],['q.escape.1','yes'],['q.escape.2','no']])await set(p,k,a);
+  await click(p,'#sendBuild');await view(p,'respond');await set(p,'rb.3','no');await sleep(200);n=await note(p);
+  check(/Extinction \(matched to function\) card/.test(n)&&/the DF card, step 4/.test(n),'11 DF + NCE + EXT from the Select sheet, then "no": the note names the EXT card and the DF card\'s step 4',n);
+  await p.close();
+
+  console.log('\n=== TD-1: the Select sheet\'s own feasibility question (attention, tangible)');
+  for(const fn of ['attention','tangible']){
+    p=await open(TD1);await set(p,'m.fn',fn);await view(p,'select');await set(p,`q.${fn}.0`,'no');await view(p,'respond');
+    check(await v(p,'rb.3')==='no'&&await v(p,'rb.target')===ALT[fn],`12 ${fn}: the Select sheet answered "no", question 4 empty: it takes "no" and the step is the alternative`,[await v(p,'rb.3'),await v(p,'rb.target')]);
+    await set(p,'rb.3','yes');await sleep(200);
+    check(/question 1 on the Select sheet \(is extinction feasible\?\) is answered "no"/.test(await note(p)),`12 ${fn}: question 4 then "yes": the note names the disagreement`,await note(p));
+    await p.close();}
+
+  console.log('\n=== TD-1: wording');
+  p=await open(TD1);await set(p,'m.fn','multiple');await view(p,'build');
+  for(const c of ['EXT','SEXT'])await p.evaluate(c=>{const s=document.querySelector('#addComp');s.value=c;document.querySelector('#addCompBtn').click();},c);
+  await view(p,'respond');await set(p,'rb.3','no');await sleep(200);
+  check(/card and the Sensory extinction \/ protective attenuation card, which question 4 rules out here: remove them on the build sheet/.test(await note(p)),'13 both extinction cards: "remove them"',await note(p));
+  await p.close();
+  p=await open(TD1);{const d=JSON.parse(base);d.fields['rb.0']='attention';d.fields['rb.3']='yes';d.fields['rb.target']=EXT.escape;await openFile(p,JSON.stringify(d));}
+  await view(p,'respond');
+  check(/This step was filled in for a different function from the one question 1 names\./.test(await note(p))&&/Use the extinction step/.test(await note(p)),'13 a step written for a different function: the wording',await note(p));
+  await p.close();
+  p=await open(TD1);await set(p,'m.fn','automatic');await view(p,'respond');await set(p,'rb.3','no');await sleep(200);R=await recs(p);
+  check(R[0]&&R[0].code==='EE'&&/blocking only as the safety plan sets out \(Piazza et al\., 2000; Vollmer, Marcus, & LeBlanc, 1994\)/.test(R[0].text),'13 the automatic recommendation after "no": its wording and its sources',R[0]);
+  await p.close();
 
   const errs=log.filter(l=>l.type!=='warning');
   check(errs.length===0,'no console or page errors',errs.slice(0,4));
