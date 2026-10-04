@@ -1,7 +1,7 @@
 FBA/BIP Workstation - Royal Palm School
 =======================================
 
-This is the Royal Palm School edition. It is the same workstation and the same 42
+This is the Royal Palm School edition. It is the same workstation and the same 44
 forms as the Newsome Behavioral Health edition; only the logo and name differ, and
 it keeps its own autosave, so both can be used in one browser without mixing.
 
@@ -48,6 +48,22 @@ Double-click index.html. Everything runs from this folder.
   - IM-1 records self-injury on a body map: the Self-Injury Trauma Scale
     (Iwata et al., 1990) scored as published, every administration kept,
     the indices graphed over time, the nurse's checks logged beside them.
+  - Writing help: "Improve wording", at the corner of a form's text boxes,
+    checks the wording on this device and suggests observable words (Check
+    wording; nothing is sent). In the forms opened from the website it can
+    also rewrite the text through the practice's relay, once a single-use
+    passcode from the BCBA unlocks the tab (Rewrite with Claude; the
+    student's name and ID are replaced before anything is sent, and the
+    panel shows exactly what will be). On an iPad with Apple Intelligence,
+    Writing Tools work in every box as well. The relay is set up once on the
+    website: see HOSTING.md.
+  - TB-1 has a behavior library: 207 starting definitions for reduction
+    targets in 14 categories, to load into a target card and then edit for
+    the learner.
+  - TK-1 (the Token Board Book) can make the last token look different (a
+    terminal token), plays a narrated Walkthrough of the book in use, and
+    can be linked with TE-1 (the token economy plan) to compare the two and
+    take what you tick.
   - Every procedure a form names can be run on it: the yoked control on EA-1
     replays a master session's deliveries from the runner; the high-p trial
     sheet on TD-1, the selection rounds on DT-1, the computed joint method on
@@ -90,7 +106,9 @@ whether a form's own Print button prints just that form.
 
 The same folder runs from this computer or from a website - there is no
 separate website version. To put it on a website, or update the one that is
-there, see HOSTING.md.
+there, see HOSTING.md. The writing help's Rewrite with Claude works only from
+the website, through its relay (public_html/ai, uploaded once from
+nbh-relay-upload.zip; HOSTING.md says how).
 
 Form IA-1 can take the answers straight from a Google Form: open the responses
 spreadsheet, copy the Form Responses tab, and press Import Google Forms responses
@@ -154,6 +172,7 @@ control chart of its own, on the same days, and they all print together. Its
 Marking setting in the toolbar chooses between the slash / shaded (low / high
 rate) marks and plain shaded-or-blank marks.
 
-Keep nbh-pictos.js in this folder with the forms: it holds the pictures Forms
-SM-1, VS-1 and TK-1 put on sheets and boards. Without it those forms still work,
-with photos and words.
+Keep nbh-pictos.js in this folder with the forms, and upload it with them: it
+holds the pictures Forms SM-1, VS-1 and TK-1 put on sheets and boards, the
+practice's own cards among them (since v21.43). Without it those forms still
+work, with photos and words; an older copy lacks the newer pictures.
