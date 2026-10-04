@@ -10,28 +10,40 @@ Setting it up takes about 20 minutes and is done once. You need:
 
 * your GoDaddy cPanel login for newsomebh.com (the forms are at https://newsomebh.com/workstation-rps/);
 * an Anthropic account with API access and billing set up, at https://console.anthropic.com;
-* the file **nbh-relay-upload.zip**.
+* the file **nbh-relay-upload.zip**, which comes with the release, beside the workstation's own zips (a developer
+  makes it again with `tools/relay/build-zip.sh`).
+
+A computer or an iPad will do: cPanel's File Manager works in Safari. On an iPad there is no right-click, so where
+a step says to choose a file and press a button, tap the file once to select it, then press the button in the row
+of buttons at the top of File Manager.
 
 ---
 
 ## 1. Choose PHP 8.1 or newer
 
-1. Sign in to cPanel. Under **Software**, open **MultiPHP Manager**.
-2. Tick **newsomebh.com**, choose **PHP 8.1** or newer (the newest offered is best, for example 8.3), and press **Apply**.
+1. Sign in to cPanel. On GoDaddy: sign in at godaddy.com, open **My Products**, press **Manage** beside the Web
+   Hosting plan, then **cPanel Admin**. Under **Software**, open **MultiPHP Manager**.
+2. Tick **newsomebh.com**, choose **PHP 8.1** or newer in the **PHP Version** list (the newest offered is best, for
+   example 8.3), and press **Apply**.
 3. If your cPanel also has **Select PHP Version**, open it, go to **Extensions**, and make sure these are ticked:
    **pdo_sqlite**, **curl**, **openssl**, **json**, **mbstring** (they usually are). The relay's setup page
-   (step 3) tells you if one is missing.
+   (step 3) tells you if one is missing, or if the PHP version is still too old; in that case choose 8.1 or
+   newer as the current version in **Select PHP Version** as well.
 
 ## 2. Upload and extract the zip in your home folder
 
 1. In cPanel, under **Files**, open **File Manager**. It opens in your **home folder**: the one whose path is shown
    as `/home/` and your cPanel user name, and that holds `public_html`.
-2. Press **Upload**, choose `nbh-relay-upload.zip`, wait until it says 100%, then go back to File Manager.
-3. In the home folder, right-click `nbh-relay-upload.zip`, choose **Extract**, and extract into the home folder
-   itself (the path it suggests). This makes two things:
+2. Press **Upload**, choose `nbh-relay-upload.zip`, wait until it says 100%, then go back to File Manager. (On an
+   iPad, save the zip to the Files app first, for example to Downloads, then choose it there.)
+3. In the home folder, select `nbh-relay-upload.zip` (on a computer you can also right-click it), press
+   **Extract**, and extract into the home folder itself: leave the path it suggests as it is and press **Extract
+   File(s)**, then close the results window. This makes two things:
    * `public_html/ai/` with `index.php` and `.htaccess`: the web address **https://newsomebh.com/ai/**;
    * `nbh-relay/` next to `public_html` (not inside it): the relay itself, where nothing can be downloaded from
      the web.
+
+   Nothing already in `public_html` is changed: the zip only adds the `ai` folder inside it.
 4. Delete `nbh-relay-upload.zip` from the home folder.
 
 To see `.htaccess` in File Manager, open **Settings** (top right) and tick **Show Hidden Files (dotfiles)**.
@@ -51,9 +63,12 @@ a long random secret already in it) and shows a checklist. Steps marked **!** st
 
 1. In the Anthropic Console, open **API keys**, create a key (name it, for example, "newsomebh relay") and copy it.
    It starts with `sk-ant-` and is shown only once.
-2. In File Manager, open the `nbh-relay` folder, right-click `config.php`, choose **Edit**.
+2. In File Manager, open the `nbh-relay` folder, select `config.php` and press **Edit** (on a computer you can also
+   right-click it and choose **Edit**). If cPanel asks about the character encoding, keep **utf-8** and press
+   **Edit** again; the file opens in an editor in a new tab.
 3. Find the line `'ANTHROPIC_API_KEY' => '',` and paste the key between the two quote marks, so it reads
-   `'ANTHROPIC_API_KEY' => 'sk-ant-...',`. Press **Save Changes**.
+   `'ANTHROPIC_API_KEY' => 'sk-ant-...',` (keep the quote marks and the comma). Press **Save Changes** at the top
+   right.
 
 Keep `config.php` private: do not email it or copy it anywhere public. It cannot be downloaded from the website.
 
@@ -62,8 +77,9 @@ Keep `config.php` private: do not email it or copy it anywhere public. It cannot
 1. Reload https://newsomebh.com/ai/admin. Under **Choose the admin password**, type a password twice (at least 10
    characters; a few words work well) and press **Make the line for config.php**. The password itself is not
    kept anywhere: you will need to remember it.
-2. Press **Copy the line**. In `config.php` (File Manager, **Edit**), replace the whole line that starts with
-   `'ADMIN_PASSWORD_HASH'` with the copied line, and save.
+2. Press **Copy the line**. Open `config.php` again as in step 4, select the whole line that starts with
+   `'ADMIN_PASSWORD_HASH'`, paste the copied line over it, and press **Save Changes**. The new line starts with
+   `'ADMIN_PASSWORD_HASH' =>` and ends with a comma, like the old one.
 3. Reload the page. It now shows **Sign in**, and the password helper switches itself off.
 
 Do steps 3 to 5 in one sitting: until the admin password line is in `config.php`, anyone who finds the page can
@@ -87,23 +103,26 @@ also about $64, before its session ends. The spend limit is what keeps a month s
 ## 7. Make a passcode and try it
 
 1. At https://newsomebh.com/ai/admin, sign in.
-2. Under **New passcode**, optionally type who it is for (only you see this), choose how long it may wait to be
-   used, and press **Create passcode**. Write it down or press **Copy**. It looks like `7KQ-M4P-2XD-V9H` and is
-   shown only once.
+2. Under **New passcode**, optionally type who it is for (only you see this), choose under **Must be used within**
+   how long it may wait to be used, and press **Create passcode** (if your password was last typed more than 10
+   minutes ago, it asks for it again). Write the passcode down or press **Copy**. It looks like `7KQ-M4P-2XD-V9H`
+   and is shown only once.
 3. Give it to the staff member yourself (in person, by phone or by text message), not inside a saved file.
 4. In a form (for example OB-1), they open **Improve wording**, then **Rewrite with Claude**, enter the passcode,
    choose a style, check the text that will be sent, and press **Send**.
 
 ## 8. Switch it on in the forms
 
-The forms already carry the relay's address: `tools/blocks/nbh-wording-config.json` holds
-`{"relay":"https://newsomebh.com/ai"}` (since v21.43), and every one of the 44 forms has the writing help. So once
-steps 1 to 7 are done there is nothing to rebuild: the forms uploaded to `workstation-rps` find the relay. Until the
-relay is uploaded and set up, Rewrite with Claude says that the rewrite service on newsomebh.com is not reachable,
-or not set up yet, as soon as its tab is opened (the panel asks `https://newsomebh.com/ai/api/health`; nothing is
-sent), and that Check wording and the iPad's Writing Tools still work. Rewrite with Claude works in the forms opened
-from newsomebh.com (not in copies opened from a file). If the address ever changes, put the new one in that file,
-then run `python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html` and build the editions again.
+There is nothing to switch on: the forms already know the relay's address, `https://newsomebh.com/ai`, and every
+one of the 44 forms carries the writing help (since v21.43). Once steps 1 to 7 are done, the forms uploaded to
+`workstation-rps` find the relay by themselves. Until the relay is uploaded and set up, Rewrite with Claude says,
+as soon as its tab is opened, that the rewrite service on newsomebh.com is not reachable or not set up yet, and
+that Check wording and the iPad's Writing Tools still work (to find out, the panel asks
+`https://newsomebh.com/ai/api/health`; nothing is sent). Rewrite with Claude works in the forms opened from
+newsomebh.com, not in copies opened from a file.
+
+*For a developer, only if the address ever changes:* put the new one in `tools/blocks/nbh-wording-config.json`, run
+`python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html`, and build the editions again.
 
 ## 9. Keep browsers on https (once the whole site is)
 

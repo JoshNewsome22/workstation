@@ -35,7 +35,9 @@ Paths below are from the repository root. The test server the checks expect:
 - `tools/build-rps.py`, `tools/rps-assets/` — the Royal Palm School edition and its lockup
   and tab icon. `tools/build-single.py` — the one-file editions.
 - `tools/pictos/`, `tools/scene/`, `tools/polish/` — the picture library, the walkthrough
-  scene engine sources and the polish layer sources.
+  scene engine sources and the polish layer sources. `tools/pictos/import-cards.py` brings the
+  practice's own card files (SVG, PNG, WebP or JPEG) into the library; then `build-pictos.py`
+  rebuilds `nbh-pictos.js`, which is copied into `NBH-Workstation/` (SETUP.md, v21.43).
 - `tools/history/` — the one-shot patch scripts that produced earlier versions of
   `index.html` and a few forms (kept as a record; they refuse to run twice).
 - `qa/` — the checks. `lib.js` is the shared Playwright helper; outputs go to `qa/out/`
@@ -92,7 +94,7 @@ What keeps it there:
     python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html
     python3 tools/build-single.py RPS-Workstation deliver/RPS-Workstation.html
 
-`build-rps.py` asserts the number of replacements it makes (43 logos, 158 alt texts, ...)
+`build-rps.py` asserts the number of replacements it makes (45 logos, 163 alt texts, ...)
 and stops if the source changed shape.
 
 ## The checks to run before shipping
