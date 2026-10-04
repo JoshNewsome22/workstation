@@ -160,7 +160,7 @@ function compose(D){
   if(emptySix(S.ch)&&emptySix(S.tg))notes.push('The Choices and Targets are still empty, so the walkthrough shows '+sampleWord+'.');
   else if(emptySix(S.ch))notes.push('The Choices are still empty, so the walkthrough shows '+sampleWord+' for them.');
   else if(emptySix(S.tg))notes.push('The Targets are still empty, so the walkthrough shows '+sampleWord+' for them.');
-  if(!audioLines())notes.push('The recorded narration is not in this copy of the form: the captions are read by the device’s own voice where it has one.');
+  if(!audioLines())notes.push('The recorded narration (nbh-tk1-narration.js) is not beside this form: the captions are read by the device’s own voice where it has one.');
   /* the four pages: the page itself (the canvas), no sheet and no trim marks */
   const PG={};['tk','bd','tg','ch','chb'].forEach(k=>{const el=div('wk-page');el.dataset.pg=k;el.innerHTML=F.pg[k];Lp.appendChild(el);
     const pg=el.querySelector('.pg'),cv=pg.querySelector('.cv');pg.querySelectorAll('.trim').forEach(x=>x.remove());cv.style.left='0';cv.style.top='0';

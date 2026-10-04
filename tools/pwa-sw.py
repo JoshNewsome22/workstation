@@ -74,6 +74,10 @@ def loads(text):
 
 def check_page(name, s):
     low = s.lower()
+    # v21.44 a page of 2 MB or more can reach a browser cut short (Form TK-1 did, on an iPad, from GoDaddy): keep each under
+    # 1.9 MB and put large parts in a file of their own beside the forms, as nbh-pictos.js and nbh-tk1-narration.js are
+    if len(s.encode('utf-8')) >= 1900000:
+        fail('%s is %d bytes: keep every page under 1.9 MB (move a large part into its own file beside the forms)' % (name, len(s.encode('utf-8'))))
     for tag in ('</head>', '</body>', '</html>'):
         if low.count(tag) != 1:
             fail('%s holds %d %s, not one: the host injects its snippet before the first one, which must be the real tag'

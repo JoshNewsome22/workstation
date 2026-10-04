@@ -974,6 +974,12 @@ frames. If the forms are all present and every one still reports *Not answering*
 that is Safari, not the folder: turn on Develop → Developer Settings → Disable
 Local File Restrictions, or open `index.html` in Chrome.
 
+**Form TK-1 on an iPad (v21.44).** In v21.43 Form TK-1 grew to 2.4 MB, nearly half of it the walkthrough's
+recorded narration, and on newsomebh.com an iPad showed the form with none of its scripts running: the view buttons
+stayed on Setup and the workstation said *Not answering*. The file on the website was whole, so what reached the iPad was most likely
+not (cut short on the way). The narration is now its own file beside the forms, `nbh-tk1-narration.js` (loaded by the form, packed into the
+one-file edition, saved in the offline copy), and TK-1 is 1.2 MB. `tools/pwa-sw.py` refuses any page of 1.9 MB or more.
+
 **Not answering, and why (v21.44).** Five seconds after a form is opened without
 answering, the workstation now looks into the form's frame and says which it is:
 another page in the frame, the file missing from the website (404), the form still

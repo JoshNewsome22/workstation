@@ -27,7 +27,9 @@ point a subdomain at it from GoDaddy's DNS.
    The files land directly in `workstation-rps` (`public_html/workstation-rps/index.html`);
    upload the whole folder, `nbh-pictos.js` included (Forms SM-1, VS-1 and TK-1 load their pictures
    from it; since v21.43 it also holds the practice's own cards, so an older copy left on the site
-   leaves those cards without a picture) and `nbh-respond.js` with `respond.html` (the questionnaires
+   leaves those cards without a picture), `nbh-tk1-narration.js` (v21.44: the recorded narration of Form TK-1's
+   walkthrough, kept beside the form so the form stays well under 2 MB; without it the walkthrough reads its captions
+   with the device's own voice) and `nbh-respond.js` with `respond.html` (the questionnaires
    Form IA-1 sends to informants; a link to `respond.html` on the site carries the questionnaire, so
    the page must be served from the same folder); the zip has no folder inside it, so there is nothing
    to move.
