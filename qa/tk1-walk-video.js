@@ -73,7 +73,7 @@ const py=(args,opt)=>execFileSync(PY,[HELPER,...args],Object.assign({stdio:'inhe
   const page=await br.newPage({viewport:{width:W,height:H},deviceScaleFactor:DSF,reducedMotion:'no-preference',colorScheme:'light'});const log=[];wire(page,log);
   await page.goto(URL,{waitUntil:'load'});await sleep(500);
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});
-  await page.waitForFunction(()=>/SIMULATED/.test((S.meta&&S.meta.client)||'')&&S.ch[0].k==='ipad',null,{timeout:10000});await sleep(300);
+  await page.waitForFunction(()=>/SIMULATED/.test((S.meta&&S.meta.client)||'')&&S.ch[0].k==='cardcrayons',null,{timeout:10000});await sleep(300);
   /* the book's options for this run, with the form's own controls */
   const got=await page.evaluate(o=>{const set=(m,v)=>{const el=document.querySelector('select[data-m="'+m+'"]');if(!el)return false;el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));return el.value===v;};
     const ok=[set('term',o.term),set('n',String(o.n))];

@@ -34,9 +34,9 @@ const FB={
   tips:'Three tips. Make the tokens valuable first: give one and trade it for the item right away, again and again, until your learner reaches for the token. Start with a small requirement and few tokens, and raise them slowly; if the behavior falls apart, go back a step. Keep the item available only through the board.',
   outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
-/* the simulator's pictures, shown when a page's six cards are empty */
-const SAMPLE={ch:[['ipad','Tablet'],['puzzle','Puzzle'],['ball','Ball'],['bubbles','Bubbles'],['lego','Building blocks'],['drawing','Drawing']],
-  tg:[['sitting','Sitting'],['raisehand','Raise hand'],['writing','Writing'],['waiting','Waiting'],['alldone','All done'],['reading','Reading']]};
+/* the simulator's pictures (the practice's own cards), shown when a page's six cards are empty */
+const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad','iPad']],
+  tg:[['cardwriting','Writing'],['cardreading','Reading'],['cardalldone','All Done'],['boyraisehand','Raise hand'],['cardmath','Math'],['cardwaiting','Waiting']]};
 /* brief praise that names the behavior: an ongoing behavior named by its -ing word reads as itself (Sitting: "Great sitting!");
    any other target is named after the praise ("Great job: raise hand!"), so the praise always says what was done */
 const NOTGER=/^(bring|sing|ring|string|swing|thing|king|spring|sting|wing|sling|cling|fling|bling|ping)$/;
@@ -117,7 +117,7 @@ function dom(){if(DOM&&DOM.stage&&DOM.stage.isConnected)return DOM;const g=id=>d
 let B=null;
 function emptySix(a){return !a.some(o=>has(o)||String(o.l||'').trim());}
 function firstUsed(a){const i=a.findIndex(o=>has(o)||String(o.l||'').trim());return i<0?0:i;}
-function sampled(k){return SAMPLE[k].map(([key,l])=>P[key]?cello(key,key==='ipad'||key==='waiting'?l:''):cello('',l));}   /* the library's labels, as the simulator has them */
+function sampled(k){return SAMPLE[k].map(([key,l])=>P[key]?cello(key,''):cello('',l));}   /* the library's pictures and labels, as the simulator has them; the words alone when the library is missing */
 /* the pages and cards drawn from a copy of the book's state: First-Then, the 8.82 in page, no presets in First and Then */
 function forced(fn){const saved=S;
   try{S=Object.assign({},saved,{meta:Object.assign({},saved.meta,{layout:'ft',pagesize:'8.82'}),ft:[cello(),cello()],
