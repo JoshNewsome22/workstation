@@ -828,6 +828,13 @@ body.view-obs #obRec{display:block}
   /* no Space hint on Pause and Resume without a keyboard, so the button keeps its width and End and Save stay put */
   #obrStartK{display:none}
 }
+/* v21.44 (A3, fix pass): after End, Save into and Discard come up under the working part, so they are beside Save to the
+   record (an iPad upright, a phone); the Recording Summary follows them, then the interval sample. A short landscape window
+   does the same in its own layout, below. */
+@media not all and (orientation:landscape) and (max-height:860px){
+  body.view-obs #obRec.obr-ended{display:flex;flex-direction:column}
+  .obr.obr-ended .obr-sum,.obr.obr-ended .obr-iv,.obr.obr-ended .obr-keys{order:1}
+}
 /* v21.44 (A3): a short landscape window, wider than tall and at most 860 px tall: an iPad held sideways, on its own or in the
    workstation, but also most laptop windows, and an upright 768 x 1024 iPad inside the workstation, whose form frame is
    768 x 764. The explanations fold away behind How it works, and the title, How it works and the settings share one line
@@ -4682,12 +4689,15 @@ render();
   /* v21.44 (A3, fix pass): the height the form's toolbar covers at the top of the window (now, or once it has stuck there) */
   function barOff(now){ if(!barEl || getComputedStyle(barEl).position !== 'sticky') return 0; return now ? Math.max(0, barEl.getBoundingClientRect().bottom) : barEl.offsetHeight; }
   function inSight(el, top, vh){ if(!el) return false; const r = el.getBoundingClientRect(); return r.height > 0 && r.bottom > top + 1 && r.top < vh - 1; }
-  /* v21.44 (A3, fix pass): bring the recorder back into view. What has to be seen is the working part, and while a sample
-     runs its + and − as well; the panel's title and settings too when all of it fits the window, or else the working part
-     comes to the top under the toolbar. always = false (Start sample) scrolls only when the marks are below the window,
-     and only as far as that needs, never so far that the working part goes under the toolbar. */
+  /* v21.44 (A3, fix pass): bring the recorder back into view. What has to be seen is the working part, and with it, while a
+     sample runs, its + and −, and after End Save into and Discard and the first line of the Recording Summary (where it
+     saves); the panel's title and settings too when all of it fits the window, or else the working part comes to the top
+     under the toolbar. always = false (Start sample) scrolls only when the marks are below the window, and only as far as
+     that needs, never so far that the working part goes under the toolbar. (End does not scroll: Save to the record stays
+     where it was.) */
   function reveal(always){
-    const off = barOff(false), vh = window.innerHeight || document.documentElement.clientHeight, need = (S && marksEl) || work;
+    const off = barOff(false), vh = window.innerHeight || document.documentElement.clientHeight;
+    const need = R.state === 'ended' ? (E.obrSum.querySelector('tr') || work) : (S && marksEl) || work;
     const bt = box.getBoundingClientRect().top, wt = work.getBoundingClientRect().top, nb = need.getBoundingClientRect().bottom;
     let dy;
     if(always) dy = (nb - bt + 16 <= vh - off ? bt : wt) - off - 8;

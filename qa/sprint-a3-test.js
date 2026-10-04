@@ -19,6 +19,12 @@
       with a planned length (whose status line wraps once a pause is counted), at 820x1180, on a phone (390x844, the
       tiles, Start, End, Save and the note box), and with a mouse at 1440x900 (where Pause and Resume carry the Space
       hint) and 1024x700 (where they do not).
+   1d. (fix pass 2) After End, upright as well as in a short landscape window: the page does not scroll and Save to the
+      record stays where it was; Save into and Discard come right under the working part, the Recording Summary after them,
+      starting with where it saves, then the interval sample. In the workstation at 1180x820 and 1024x768 without a sample
+      and at 820x1180 with and without one, Save to the record, Save into and Discard are in view together, and the
+      summary's first line too at 1180x820 and 820x1180 (at 1024x768 it is just below the window, under Save into, which
+      names the same observation); scrolled away, the pill brings all four back. On a phone (390x844) the order holds.
    2. Start, End and Save are one row in the clock's column, under the clock, each at least 44 x 44 px; the note box sits
       under the count tiles.
    3. A short landscape window folds the explanations away behind How it works, which unfolds them; portrait shows them.
@@ -228,6 +234,45 @@ async function sampleCase(br,W,H){
   ok(tag+': Discard there asks first, then discards the recording',disc==='Discard'&&(await fr.evaluate(()=>obRecorder.state()))==='ready',{disc});
   await ctx.close();
 }
+/* (fix pass 2) after End: Save to the record where it was, Save into and Discard under the working part, then the Recording
+   Summary, then the interval sample; at the iPad sizes Save to the record, Save into and Discard in view together, and the
+   summary's first line too where the window has room for it (firstInView) */
+async function endedCase(br,where,W,H,sample,firstInView){
+  const tag=`ended, ${where} ${W}x${H}${sample?', a sample run':''}`;
+  let ctx,fr;
+  if(where==='shell'){({ctx,fr}=await shellOpen(br,W,H,'fold',true,tag));if(!fr){ok(tag+': OB-1 opens in the workstation',false);await ctx.close();return;}}
+  else{ctx=await br.newContext({viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
+    const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));await page.goto(FORM);await sleep(800);fr=page.mainFrame();}
+  await fr.tap('#viewSeg [data-view="obs"]');await sleep(400);
+  await fr.tap('#obrStart');await sleep(400);if(sample){await fr.tap('#obrSample');await sleep(300);}
+  await fr.tap('#obrTapS');await sleep(250);
+  const at=()=>fr.evaluate(()=>{const r=document.getElementById('obrSave').getBoundingClientRect();return [Math.round(scrollY),Math.round(r.left),Math.round(r.top)];});
+  const before=await at();
+  await fr.tap('#obrEnd');await sleep(400);const endOk=await dialogOk(fr,'primary');await sleep(500);
+  const st=await fr.evaluate(()=>obRecorder.state()),after=await at();
+  ok(tag+': End neither scrolls the page nor moves Save to the record',before.join()===after.join(),{before,after});
+  const o=await fr.evaluate(()=>{const g=s=>{const r=document.querySelector(s).getBoundingClientRect();return {t:Math.round(r.top),b:Math.round(r.bottom)};};
+    const tbe=document.querySelector('.toolbar'),top=tbe&&getComputedStyle(tbe).position==='sticky'?tbe.getBoundingClientRect().bottom:0;
+    const tr=document.querySelector('#obrSum tr'),fb=tr?tr.getBoundingClientRect():null;
+    return {note:g('#obrNote'),ctl:g('#obRec .obr-ctl'),sum:g('#obrSum'),iv:g('#obRec .obr-iv'),first:tr?tr.querySelector('th').textContent:null,
+      firstIn:!!fb&&fb.top>=top-0.5&&fb.bottom<=innerHeight+0.5,firstAt:fb?[Math.round(fb.top),Math.round(fb.bottom)]:null,visible:[Math.round(top),innerHeight]};});
+  ok(tag+': Save into and Discard come right under the working part, the Recording Summary after them, then the interval sample',
+    endOk==='End now'&&st==='ended'&&o.note.b<=o.ctl.t&&o.ctl.b<=o.sum.t&&o.sum.b<=o.iv.t,{endOk,st,note:o.note,ctl:o.ctl,sum:o.sum,iv:o.iv});
+  if(where==='shell'){
+    const m=await reach(fr,['obrSave','obrInto','obrDiscard']);
+    ok(tag+': Save to the record, Save into and Discard are in view together',!m.bad.length,{bad:m.bad,save:m.els.obrSave,into:m.els.obrInto,discard:m.els.obrDiscard});}
+  ok(tag+': the Recording Summary starts with where it saves'+(firstInView?', in view':''),o.first==='Saves into'&&(!firstInView||o.firstIn),
+    {first:o.first,firstAt:o.firstAt,visible:o.visible});
+  if(where==='shell'){
+    /* scrolled down to the sheets, the pill ("Recording ended, not saved yet") brings them back, with the summary's first line */
+    await fr.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));await sleep(500);
+    const shown=await fr.isVisible('#obrPill');if(shown)await fr.tap('#obrPill');await sleep(400);
+    const m=await reach(fr,['obrSave','obrInto','obrDiscard']);
+    const first=await fr.evaluate(()=>{const tbe=document.querySelector('.toolbar'),top=getComputedStyle(tbe).position==='sticky'?tbe.getBoundingClientRect().bottom:0,
+      r=document.querySelector('#obrSum tr').getBoundingClientRect();return r.top>=top-0.5&&r.bottom<=innerHeight+0.5;});
+    ok(tag+': scrolled away, the pill brings back Save to the record, Save into, Discard and where it saves',shown&&!m.bad.length&&first,{shown,bad:m.bad,first});}
+  await ctx.close();
+}
 /* (fix pass) scrolled in steps while recording: the pill shows while the tiles and Start, End and Save (and the marks, while
    a sample runs) are all out of sight, hides while the tiles are at least half in sight, and never covers a recorder control */
 async function pillBand(br,W,H,sample){
@@ -416,6 +461,8 @@ async function print(br){
   await aloneCase(br,1180,820);await aloneCase(br,1024,768);
   await pillCase(br,1180,820,'fold',false);await pillCase(br,1024,700,'open',true);
   for(const [W,H] of [[1180,820],[1024,768]]){await sampleCase(br,W,H);await pillBand(br,W,H,false);await pillBand(br,W,H,true);}
+  await endedCase(br,'shell',1180,820,false,true);await endedCase(br,'shell',1024,768,false,false);
+  await endedCase(br,'shell',820,1180,false,true);await endedCase(br,'shell',820,1180,true,true);await endedCase(br,'alone',390,844,true,false);
   await steady(br,1180,820,'shell');await steady(br,1024,768,'shell','10');await steady(br,820,1180,'shell');await steady(br,390,844,'alone');
   await steady(br,1440,900,'desktop');await steady(br,1024,700,'desktop');
   await liveRun(br);
