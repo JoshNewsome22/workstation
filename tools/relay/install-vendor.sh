@@ -19,6 +19,9 @@ MODE="${1:-}"
 
 command -v composer >/dev/null 2>&1 || { echo "install-vendor: composer is not installed (https://getcomposer.org)" >&2; exit 1; }
 export COMPOSER_ALLOW_SUPERUSER=1 COMPOSER_NO_INTERACTION=1
+# The relay's own version, so composer does not read it from this repository's git branch and commit (which
+# would change vendor/composer/installed.php on every install and put the branch name in the upload).
+export COMPOSER_ROOT_VERSION=1.0.0
 
 if [ "$MODE" = "--update" ]; then
   rm -rf "$VENDOR"
@@ -45,7 +48,17 @@ while IFS= read -r -d '' gitdir; do
   trimmed=$((trimmed + 1))
 done < <(find "$VENDOR" -mindepth 3 -maxdepth 3 -type d -name .git -print0)
 
+# standard-webhooks/standard-webhooks (a dependency of the SDK, for webhook signatures) is one repository with
+# its library in ten languages; composer loads only libraries/php/src. Keep that, its licence and composer.json.
+SW="$VENDOR/standard-webhooks/standard-webhooks"
+if [ -d "$SW/libraries/php/src" ]; then
+  find "$SW" -mindepth 1 -maxdepth 1 ! -name composer.json ! -name LICENSE ! -name README.md ! -name libraries -exec rm -rf {} +
+  find "$SW/libraries" -mindepth 1 -maxdepth 1 ! -name php -exec rm -rf {} +
+  find "$SW/libraries/php" -mindepth 1 -maxdepth 1 ! -name src -exec rm -rf {} +
+fi
+
 # Nothing in vendor/ may be a git repository, a test suite or a developer tool.
 if find "$VENDOR" -name .git -print -quit | grep -q .; then echo "install-vendor: a .git folder is still in vendor/" >&2; exit 1; fi
+if find "$VENDOR" -type d \( -name tests -o -name Tests \) -print -quit | grep -q .; then echo "install-vendor: a test folder is still in vendor/" >&2; find "$VENDOR" -type d \( -name tests -o -name Tests \) >&2; exit 1; fi
 touch "$VENDOR/autoload.php"
 echo "install-vendor: installed $(find "$VENDOR" -mindepth 2 -maxdepth 2 -type d | grep -vc '/composer$') packages ($trimmed trimmed from git clones), $(du -sh "$VENDOR" | cut -f1) in vendor/"

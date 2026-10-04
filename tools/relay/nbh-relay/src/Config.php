@@ -21,8 +21,8 @@ final class Config
         'SESSION_HOURS' => 8,
         'CODE_HOURS' => 24,
         'MAX_CODE_HOURS' => 168,
-        'MAX_CHARS' => 4000,
         'MAX_REQUESTS_PER_SESSION' => 300,
+        'MAX_CHARS' => 4000,
         'REWRITES_PER_MINUTE' => 10,
         'REWRITES_PER_DAY' => 1000,
         'ALLOWED_ORIGINS' => ['https://newsomebh.com', 'https://www.newsomebh.com'],
@@ -93,6 +93,11 @@ final class Config
         if (!is_file($file)) {
             return self::broken('nbh-relay/config.php does not exist yet.');
         }
+        // Read the file as it is now: with OPcache on (usual on shared hosting) an edit in File Manager would
+        // otherwise go unseen for a while, or until the server restarts.
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($file, true);
+        }
         try {
             $raw = (static function (string $f) {
                 return require $f;
@@ -162,7 +167,7 @@ final class Config
             $this->problems['EFFORT'] = 'EFFORT must be one of: ' . implode(', ', self::EFFORTS) . '.';
             $this->values['EFFORT'] = self::DEFAULTS['EFFORT'];
         }
-        if (!preg_match('~^https?://[A-Za-z0-9.\-]+(:\d{1,5})?(/[A-Za-z0-9._~\-/]*)?$~', $this->values['API_BASE_URL'])) {
+        if (!preg_match('#^https?://[A-Za-z0-9.\-]+(:\d{1,5})?(/[A-Za-z0-9._~\-/]*)?$#', $this->values['API_BASE_URL'])) {
             $this->problems['API_BASE_URL'] = 'API_BASE_URL must be a web address such as https://api.anthropic.com.';
             $this->values['API_BASE_URL'] = self::DEFAULTS['API_BASE_URL'];
         }
@@ -207,7 +212,7 @@ final class Config
      */
     public static function normalizeOrigin(string $o): ?string
     {
-        if (!preg_match('~^(https?)://([A-Za-z0-9.\-]+|\[[0-9A-Fa-f:.]+\])(?::(\d{1,5}))?$~', trim($o), $m)) {
+        if (!preg_match('~^(https?)://([A-Za-z0-9.\-]+|\[[0-9A-Fa-f:.]+\])(?::(\d{1,5}))?$~i', trim($o), $m)) {
             return null;
         }
         $scheme = strtolower($m[1]);

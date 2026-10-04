@@ -67,15 +67,9 @@ final class Db
      */
     public static function open(string $dir): self
     {
-        if (!is_dir($dir)) {
-            $old = umask(0077);
-            $made = @mkdir($dir, 0700, true);
-            umask($old);
-            if (!$made && !is_dir($dir)) {
-                throw new \RuntimeException('The data folder could not be created. Check that the nbh-relay folder can be written to.');
-            }
+        if (!self::ensureDir($dir)) {
+            throw new \RuntimeException('The data folder could not be created. Check that the nbh-relay folder can be written to.');
         }
-        self::protectFolder($dir);
         $file = $dir . '/' . self::FILE;
         $new = !is_file($file);
         $old = umask(0077);
@@ -100,13 +94,25 @@ final class Db
         return $db;
     }
 
-    /** A deny-all .htaccess in the data folder, in case the folder ever ends up inside public_html. */
-    private static function protectFolder(string $dir): void
+    /**
+     * Makes the data folder (0700) when it is missing, with a deny-all .htaccess in case the folder ever ends
+     * up inside public_html. False when it cannot be made.
+     */
+    public static function ensureDir(string $dir): bool
     {
+        if (!is_dir($dir)) {
+            $old = umask(0077);
+            $made = @mkdir($dir, 0700, true);
+            umask($old);
+            if (!$made && !is_dir($dir)) {
+                return false;
+            }
+        }
         $ht = $dir . '/.htaccess';
         if (!is_file($ht)) {
             @file_put_contents($ht, "Require all denied\n");
         }
+        return true;
     }
 
     public function version(): int
