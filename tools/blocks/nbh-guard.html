@@ -11,7 +11,10 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    its own guard and an autosave), the form now asks before the tab closes or reloads while it holds
    entries changed since the last save. Opening a file counts as saved. Spell-check is turned on
    explicitly for every text field, since the browser default differs by platform, and the compact
-   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */
+   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap.
+   v21.44: the unsaved mark also follows the form's whole state (window.nbhState, the nbh-autosave block), so a tap that
+   changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
+   not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
   var dirty = false;
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
@@ -21,24 +24,27 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
   document.addEventListener('click', function(e){
+    if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
-    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
-    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }
+    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);
   window.addEventListener('beforeunload', function(ev){
     if (window.parent !== window) return;
-    if (!dirty) return;
+    if (!isDirty()) return;
     ev.preventDefault(); ev.returnValue = '';
   });
-  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }
+  function isDirty(){ return dirty || !!(window.nbhState && window.nbhState.unsaved()); }
+  function saved(){ if (window.nbhState) window.nbhState.markSaved(); }
+  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', isDirty()); }
   setInterval(paint, 2000);
-  window.nbhGuard = { isDirty: function(){ return dirty; }, clean: function(){ dirty = false; paint(); } };
+  window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };
 
   /* the quick Save beside More controls */
   function addQuick(){
