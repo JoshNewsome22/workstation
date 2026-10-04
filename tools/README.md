@@ -63,16 +63,22 @@ and stops if the source changed shape.
 
 - `NBH-Workstation/sw.js` — the service worker: keeps the folder's files on the device and checks
   the website for changes (see the comment at its top). Its list of files and its version are written
-  by `tools/pwa-sw.py`: run `python3 tools/pwa-sw.py NBH-Workstation` after adding, renaming or
-  removing a form or a file a page loads, and after any change to `sw.js` itself (`--check` changes
-  nothing and fails when the list is stale; `build-rps.py` runs it on the school edition).
+  by `tools/pwa-sw.py`, which also writes `release.json`, the release list (every file's length and
+  SHA-256; a device takes a file the list moved only when it arrives as listed, so a look during an
+  upload takes nothing). Run `python3 tools/pwa-sw.py NBH-Workstation` after ANY change to a file of
+  the folder (a form, the shell, the picture library), after adding, renaming or removing a form or a
+  file a page loads, and after any change to `sw.js` itself (`--check` changes nothing and fails when
+  `sw.js` or `release.json` is stale; `build-rps.py` refuses to build from a stale practice edition and
+  writes the school edition's own `release.json`). Upload `release.json` with the files.
 - `tools/pwa-assets.py NBH-Workstation` — writes `manifest.json` and the icons (`icon-192.png`,
   `icon-512.png`, `icon-512-maskable.png`, `apple-touch-icon.png`) from the mark in the shell's
   logo; `build-rps.py` writes the school's from its lockup.
 - `tools/blocks/nbh-pwa-save.js` + `tools/blocks/patch-pwa.py` — the block that, in the app
-  installed on an iPad or iPhone, sends saved files to the share sheet. The patcher puts one copy
-  after the `<title>` of the 44 forms and `index.html`, replaces an existing copy, refuses a second,
-  and has `--check`; re-run it after a merge or a rebuilt form.
+  installed on an iPad or iPhone, sends saved files to the share sheet, opens a window the page makes
+  for itself (the master print, a respondent page's preview) inside the app, and says how to print
+  when the print options do not appear. The patcher puts one copy after the `<title>` of the 44 forms
+  and `index.html`, replaces an existing copy, refuses a second, and has `--check`; re-run it (then
+  `pwa-sw.py`) after a merge or a rebuilt form.
 - `build-single.py` leaves the `nbh-pwa-head` block of `index.html` out of the one-file editions.
 - `qa/pwa-test.js` checks it all against an Apache-like server it starts itself.
 
