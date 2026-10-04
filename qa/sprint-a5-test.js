@@ -2,17 +2,23 @@
    1. Current level from DD-1, inside the workstation: DD-1's simulation (plus a target with no baseline days and a rate
       target), then GB-1 fills the matching empty current levels with DD-1's own Results figures for the Baseline
       condition; a different unit, no baseline days and no behavior of that name are left empty and named; a typed
-      value is kept; pressing again keeps what was filled; TD-1's Apply to empty fields still fills what is left empty;
-      Load simulation asks first and Cancel keeps every field.
+      value is kept; pressing again keeps what was filled; the level's source shows in full under the field; TD-1's
+      Apply to empty fields still fills the first objective; Load simulation asks first and Cancel keeps every field.
    2. With DD-1 closed the button offers a file: DD-1's saved file inside the workstation; a case file holding DD-1
       when GB-1 is open on its own; a file from another form is named and changes nothing; another student's DD-1 is
-      asked about; a file chosen here does not mark the form saved.
+      asked about ("Ann" is not "Anna Smith"); a file chosen here does not mark the form saved; the report offers Apply
+      to empty fields only where it would fill (the first objective, left empty, in rate per minute or no measure).
    3. TB-1 simulated, then GB-1 fresh: one acquisition objective per replacement skill, the pairings, and sentences
       that read as English on the cards and in Copy for the BIP; the picker adds no second objective for a skill.
-   4. Typed labels: an action ("Requests a break"), a name ("Break request") and a plain form ("ask for help"); a file
-      saved before this change opens as before; the two copies of the case hooks are the same.
+   4. Typed labels: an action ("Requests a break"), a name ("Break request") and a plain form ("ask for help"), and the
+      labels the review found worded badly (verbs off the list, a subject, an opening phrase, a semicolon); contexts
+      and conditions in lower case except names; a file saved before this change opens as before, and one typed in the
+      old style keeps its fields and reads by the new rules; the two copies of the case hooks are the same.
    5. TB-1's case as it is passed today and as it reads once TB-1 cleans its replacement names (package A4) give the
       same objectives, pairings and sentences, so this package does not depend on A4.
+   6. "see target N" past a TB-1 target card with no name (left out of the case) finds the right target, by order or
+      by the numbers a case gives; a behavior the picker adds to a skill on the form joins its pairing, and a pairing
+      typed by hand is kept and named.
    usage: WS_URL=http://127.0.0.1:8305 WS_ROOT=<worktree> node qa/sprint-a5-test.js [edition folder, NBH-Workstation by default] */
 const {chromium,fs,path,ROOT,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/a5/';fs.mkdirSync(OUT,{recursive:true});
@@ -59,8 +65,8 @@ const ddFigures=(dd,names)=>dd.evaluate(names=>{const out={};
     const c=[...tr.children].map(td=>td.textContent.replace(/\s+/g,' ').trim());const m=/^([\d.,]+)–([\d.,]+)/.exec(c[4]||'');const nb=s=>parseFloat(String(s).replace(/,/g,''));
     out[nm]={cond:c[0],n:+c[1],mean:nb(c[2]),min:m?nb(m[1]):null,max:m?nb(m[2]):null,raw:c.slice(0,5)};});
   return out;},names);
-/* "10 per school day (from DD-1, Baseline: mean of 6 days, range 8–12)" read back as numbers */
-function parseLevel(s){const m=/^([\d.]+)(.*?) \(from DD-1, (.+?): (?:mean of (\d+) days, range ([\d.]+)–([\d.]+)|1 day)\)$/.exec(s||'');
+/* "10 per school day (DD-1 baseline: mean of 6 days, range 8–12)" read back as numbers */
+function parseLevel(s){const m=/^([\d.]+)(.*?) \(DD-1 (.+?): (?:mean of (\d+) days, range ([\d.]+)–([\d.]+)|1 day)\)$/.exec(s||'');
   return m?{mean:+m[1],unit:m[2],cond:m[3],n:m[4]?+m[4]:1,min:m[5]?+m[5]:+m[1],max:m[6]?+m[6]:+m[1]}:null;}
 const same=(a,b)=>a!=null&&b!=null&&Math.abs(a-b)<0.006;
 async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.waitForEvent('filechooser',{timeout:8000}),fr.evaluate(s=>document.querySelector(s).click(),sel)]);await fc.setFiles(file);await sleep(900);}
@@ -96,10 +102,10 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
   let rep=await waitReport(gb);console.log('  report: '+rep.text.slice(0,900));
   let R=await reds(gb);const by=n=>R.find(r=>r.beh===n)||{};
   const pa=by('Physical aggression'),L1=parseLevel(pa.cur),fa=F['Physical aggression']||{};
-  check(L1&&L1.unit===' per school day'&&L1.cond==='Baseline','R1 filled, labelled with DD-1, the condition, the days, the mean and the range: '+pa.cur);
+  check(L1&&L1.unit===' per school day'&&L1.cond==='baseline','R1 filled, labelled with DD-1, the baseline, the days, the mean and the range: '+pa.cur);
   check(L1&&same(L1.mean,fa.mean)&&L1.n===fa.n&&same(L1.min,fa.min)&&same(L1.max,fa.max),'R1 equals DD-1’s own Baseline figures (mean '+fa.mean+', '+fa.n+' days, range '+fa.min+'–'+fa.max+')',{L1,fa});
   check(pa.meas==='frequency per school day','R1 had no response measure and took DD-1’s: '+pa.meas);
-  check(/from [\d.]+ per school day \(from DD-1, Baseline: mean of 6 days, range [\d.]+–[\d.]+\) to no/.test(pa.out),'R1’s sentence carries the level and its source',pa.out.slice(0,200));
+  check(/from [\d.]+ per school day \(DD-1 baseline: mean of 6 days, range [\d.]+–[\d.]+\) to no/.test(pa.out),'R1’s sentence carries the level and its source',pa.out.slice(0,200));
   const os=by('Out of seat'),L7=parseLevel(os.cur),fo=F['Out of seat']||{};
   check(L7&&L7.unit===' per hour'&&same(L7.mean,fo.mean)&&L7.n===fo.n&&same(L7.min,fo.min)&&same(L7.max,fo.max),'Out of seat (rate per hour) equals DD-1’s Baseline figures: '+os.cur,{L7,fo});
   check(!by('Self-injury').cur&&/R2 \(Self-injury\) was left empty: DD-1 records it as a count of occurrences over the entire school day, and this objective is measured in rate per minute/.test(rep.text),'a different unit (rate per minute against DD-1’s count) is left empty, and the reason given');
@@ -108,6 +114,13 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
   check(!by('Elopement').cur&&/Elopement\) was left empty: DD-1 has no days with data for it in its baseline/.test(rep.text)&&F.Elopement&&F.Elopement.n===0,'no baseline days: left empty, and the reason given (DD-1 shows 0 days)');
   check(!by('Running away').cur&&/Running away\) was left empty: DD-1 has no behavior of that name/.test(rep.text)&&/The behaviors on DD-1: Physical aggression; Self-injury/.test(rep.text),'no behavior of that name: left empty, the reason and DD-1’s names given');
   check(/2 of 7 objectives filled/.test(rep.text)&&/from the DD-1 open in this workstation/.test(rep.text),'the report counts what was filled and names the source');
+  check(/What is left empty can be typed\./.test(rep.text)&&!/Apply to empty fields/.test(rep.text),'R1 was filled, so the report does not offer TD-1’s Apply to empty fields (it fills only the first objective)',rep.text.slice(-260));
+  /* the field is narrower than the labelled level: where the level came from shows in full under the field, on screen */
+  await gb.evaluate(()=>{const b=document.querySelector('button[data-view="red"]');if(b)b.click();});await sleep(200);
+  const cap=await gb.evaluate(i=>{const e=document.querySelector('[name="red['+i+'].cur"]'),n=e.closest('.f').querySelector('.gb-cur-src');if(!n)return null;
+    const r=n.getBoundingClientRect(),f=e.getBoundingClientRect();return {text:n.textContent,noprint:n.classList.contains('noprint'),below:r.top>=f.bottom-1&&r.height>0,title:e.title,cut:e.scrollWidth>e.clientWidth};},pa.i);
+  check(cap&&cap.text===(/\((DD-1 [^()]*)\)$/.exec(pa.cur)||[])[1]&&cap.noprint&&cap.below&&cap.title===pa.cur,'the source of the filled level shows in full under the Current level field, on screen only'+(cap&&cap.cut?' (the field cuts the value)':''),cap);
+  check(await gb.evaluate(i=>[...document.querySelectorAll('.gb-cur-src')].length===2&&!document.querySelector('[name="red['+i+'].cur"]').closest('.f').querySelector('.gb-cur-src'),by('Property destruction').i),'no such line under a level that was typed');
   check(await gb.evaluate(()=>window.nbhGuard.isDirty()),'the form is marked unsaved after the fill');
   check(await gb.evaluate(()=>/Check:/.test(document.querySelector('#redWrap').textContent))===false,'no Check line from the labelled level');
   /* the Check line still compares a labelled level with a target in the same unit */
@@ -185,6 +198,26 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
   check(await page.evaluate(()=>document.querySelector('[name="m.client"]').value==='ZQXREAL'),'on its own: Cancel keeps the typed name');
   const e3=errsOf(log);check(e3.length===0,'no console or page errors on the form on its own',e3.slice(0,3));
   await page.close();
+  /* the report offers TD-1's Apply to empty fields only where it would fill: the first objective, left empty, measured
+     in rate per minute or not yet measured */
+  for(const [first,meas,offer] of [['Running away','',true],['Running away','rate per minute',true],['Running away','percentage of intervals',false]]){
+    log=[];page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1000);
+    await typeObjectives(page,[[first,meas,''],['Physical aggression','','']]);
+    await pickFile(page,page.mainFrame(),'#gbDdBtn',OUT+'DD-1.json');rep=await waitReport(page);
+    const said=/R1 can also take the baseline in TD-1’s plan: Apply to empty fields on Setup fills the first reduction objective from it, as a rate per minute\./.test(rep.text);
+    check(said===offer&&/R2 \(Physical aggression\): /.test(rep.text),'R1 left empty'+(meas?', measured in '+meas:'')+': the report '+(offer?'offers':'does not offer')+' Apply to empty fields',rep.text.slice(-300));
+    check(errsOf(log).length===0,'no console or page errors');await page.close();
+  }
+  /* the same student is the same words, not the same first letters */
+  log=[];page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1000);
+  const SAME=await page.evaluate(()=>[['Ann','Anna Smith'],['Jo','Jordan Rivera'],['Max','Maxine Lopez'],['Jordan','Jordan Rivera'],['Jordan Rivera','Rivera, Jordan'],['José Ruiz','Jose Ruiz'],['SIMULATED – Sample Student','SIMULATED - Sample Student'],['','Anyone']].map(([a,b])=>gbSameStudent(a,b)));
+  check(JSON.stringify(SAME)===JSON.stringify([false,false,false,true,true,true,true,true]),'Ann is not Anna Smith, Jo is not Jordan Rivera, Max is not Maxine Lopez; Jordan is Jordan Rivera and Rivera, Jordan',SAME);
+  const anna=JSON.parse(ddText);anna.meta.client='Anna Smith';fs.writeFileSync(OUT+'DD-1-anna.json',JSON.stringify(anna));
+  await typeObjectives(page,[['Physical aggression','','']]);
+  await page.evaluate(()=>{const e=document.querySelector('[name="m.client"]');e.value='Ann';e.dispatchEvent(new Event('input',{bubbles:true}));window.__asked=[];window.confirm=m=>{window.__asked.push(String(m));return false;};});
+  await pickFile(page,page.mainFrame(),'#gbDdBtn',OUT+'DD-1-anna.json');rep=await waitReport(page);
+  check((await page.evaluate(()=>window.__asked)).length===1&&!(await reds(page))[0].cur,'a GB-1 for “Ann” asks before taking the DD-1 of “Anna Smith”');
+  check(errsOf(log).length===0,'no console or page errors');await page.close();
 
   /* ---------- 3. TB-1 simulated: one skill objective per skill, and the sentences ---------- */
   console.log('\n=== 3. TB-1 simulated, then GB-1 fresh');
@@ -224,15 +257,55 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
   console.log('\n=== 4. Typed labels, and a file saved before');
   log=[];page=await ctx.newPage();wire(page,log);
   await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1200);
-  for(const [lab,want] of [['Requests a break','will request a break'],['Break request','will make a break request'],['ask for help','will ask for help'],['Hands a break card and waits (see target 4)','will hand a break card and wait']]){
-    const got=await page.evaluate(l=>{const e=document.querySelector('[name="acq[0].beh"]');e.value=l;e.dispatchEvent(new Event('input',{bubbles:true}));
-      return {out:document.querySelector('[data-out="acq0"]').textContent,field:e.value,bip:window.__bipText()};},lab);
-    check(got.out.includes(' '+want+' [criterion]')&&got.field===lab&&got.bip.includes(' '+want+' [...]'),'typed "'+lab+'": the sentence reads "'+want+'"; the field keeps the words as typed',got.out);
-  }
+  /* the plan's three (an action, a name, a plain form), TB-1's own, and labels the review found worded badly: verbs off
+     the list, a subject, an opening phrase, a semicolon, adverbs, a list of names, a quotation, an abbreviation */
+  const LABELS=[['Requests a break','will request a break'],['Break request','will make a break request'],['ask for help','will ask for help'],
+    ['Hands a break card and waits (see target 4)','will hand a break card and wait'],
+    ['Participates in group activities','will participate in group activities'],['Cooperates with peers','will cooperate with peers'],
+    ['Demonstrates safe body','will demonstrate safe body'],['Utilizes coping strategies','will utilize coping strategies'],
+    ['Seeks attention appropriately','will seek attention appropriately'],['Gains adult attention appropriately','will gain adult attention appropriately'],
+    ['Advocates for a break','will advocate for a break'],['Self-regulates','will self-regulate'],['Self-advocates','will self-advocate'],
+    ['Calms down','will calm down'],['Problem-solves','will problem-solve'],['Apologizes','will apologize'],['Brushes teeth','will brush teeth'],
+    ['Ties shoes','will tie shoes'],['Is on task','will be on task'],['Manages frustration','will manage frustration'],
+    ['Maintains appropriate personal space','will maintain appropriate personal space'],['Displays appropriate behavior','will display appropriate behavior'],
+    ['Exhibits on-task behavior','will exhibit on-task behavior'],['The student requests a break','will request a break'],
+    ['The student hands a break card','will hand a break card'],['Student will request a break using the card','will request a break using the card'],
+    ['When frustrated, requests a break','will request a break when frustrated'],['Given a demand, hands the break card','will hand the break card when given a demand'],
+    ['Requests a break; waits for adult','will request a break and wait for adult'],
+    ['Independently and appropriately requests a break','will independently and appropriately request a break'],
+    ['Makes requests and comments','will make requests and comments'],['"I need a break"','will say "I need a break"'],
+    ['Words to express feelings','will use words to express feelings'],['Safe hands','will keep safe hands'],['Calm body','will keep a calm body'],
+    ['On-task behavior','will demonstrate on-task behavior'],['PECS exchange','will make a PECS exchange'],['FCT response','will make an FCT response'],
+    ['Replacement behavior: requests a break','will request a break']];
+  const typedSkill=(l,who)=>page.evaluate(([l,who])=>{const s=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
+    if(who!=null)s('m.client',who);s('acq[0].beh',l);return {out:document.querySelector('[data-out="acq0"]').textContent,field:document.querySelector('[name="acq[0].beh"]').value,bip:window.__bipText()};},[l,who]);
+  let badWords=[];
+  for(const [lab,want] of LABELS){const got=await typedSkill(lab);
+    if(!(got.out.includes(' '+want+' [criterion]')&&got.field===lab&&got.bip.includes(' '+want+' [...]')))badWords.push([lab,want,got.out.replace(/^.*?will /,'will ').slice(0,90)]);}
+  check(!badWords.length,LABELS.length+' typed skills read correctly after "will" on the card and in Copy for the BIP, and each field keeps the words as typed',badWords);
+  {const got=await typedSkill('Jordan requests a break','Jordan Rivera');
+    check(got.out.includes('Jordan Rivera will request a break [criterion]'),'the student’s own name at the start of a skill is left out: '+got.out.slice(0,140));
+    await typedSkill('','');}
+  /* contexts and conditions: a linking word starts in lower case whatever follows it; a name stays as typed */
+  const CTXS=[['In Room 12',' in Room 12 over '],['During PE',' during PE over '],['Jordan at recess',' in Jordan at recess over '],['Christmas break',' in Christmas break over '],
+    ['Independent academic work in Room 12; occasionally at the bus line',' in independent academic work in Room 12, occasionally at the bus line over '],
+    ['Given a demand',' given a demand over '],['The Smith classroom',' in the Smith classroom over ']];
+  const CONDS=[['A demand presented',', given a demand presented, '],['When Ms. Lee gives a demand',', when Ms. Lee gives a demand, '],['Given a demand',', given a demand, '],
+    ['The break card within reach',', given the break card within reach, '],['Every independent academic demand in Room 12',', given every independent academic demand in Room 12, ']];
+  const badCtx=await page.evaluate(([C,D])=>{const s=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};const bad=[];
+    C.forEach(([v,w])=>{s('red[0].ctx',v);const t=document.querySelector('[data-out="red0"]').textContent;if(!t.includes(w))bad.push([v,t]);});
+    D.forEach(([v,w])=>{s('acq[0].cond',v);const t=document.querySelector('[data-out="acq0"]').textContent;if(!t.includes(w))bad.push([v,t]);});
+    s('red[0].ctx','');s('acq[0].cond','');return bad;},[CTXS,CONDS]);
+  check(!badCtx.length,'contexts and conditions: "in Room 12", "during PE", "in Jordan at recess", "in Christmas break", "when Ms. Lee gives a demand", "given a demand" once',badCtx);
   /* a file saved before this change */
   await page.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'GB-1_old.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},JSON.stringify(OLD_GB1));await sleep(600);
   const old=await page.evaluate(()=>({red:document.querySelector('[data-out="red0"]').textContent,acq:document.querySelector('[data-out="acq0"]').textContent,cur:document.querySelector('[name="red[0].cur"]').value,n:document.querySelectorAll('#redWrap .card').length+document.querySelectorAll('#acqWrap .card').length}));
   check(old.n===2&&old.cur==='1.4 per minute'&&/will decrease their rate per minute of Aggression toward staff \(simulated\) from 1\.4 per minute to no more than 0\.2 per minute/.test(old.red)&&/will hand the break card to an adult \(simulated\) independently in at least 80% of opportunities/.test(old.acq),'a file saved before opens with the same objectives and sentences',old);
+  /* a file saved before, typed in the old style: its fields open as typed, and its sentences follow the new wording */
+  const OLD2=JSON.parse(JSON.stringify(OLD_GB1));Object.assign(OLD2.f,{'acq[0].beh':'Requests a break','red[0].ctx':'Math class; lunch','acq[0].cond':'A demand presented'});
+  await page.evaluate(t=>{const dt=new DataTransfer();dt.items.add(new File([t],'GB-1_old2.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},JSON.stringify(OLD2));await sleep(600);
+  const old2=await page.evaluate(()=>({beh:document.querySelector('[name="acq[0].beh"]').value,ctx:document.querySelector('[name="red[0].ctx"]').value,cond:document.querySelector('[name="acq[0].cond"]').value,red:document.querySelector('[data-out="red0"]').textContent,acq:document.querySelector('[data-out="acq0"]').textContent}));
+  check(old2.beh==='Requests a break'&&old2.ctx==='Math class; lunch'&&old2.cond==='A demand presented'&&/ in math class, lunch over /.test(old2.red)&&/given a demand presented, SIMULATED – Sample Student will request a break independently/.test(old2.acq),'an old-style record: the fields open as typed, and the sentences read "in math class, lunch", "given a demand presented", "will request a break"',old2);
   const e5=errsOf(log);check(e5.length===0,'no console or page errors in part 4',e5.slice(0,3));
   await page.close();
 
@@ -249,6 +322,33 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
     placed.push({red:(await reds(page)).map(r=>r.beh+' | '+r.pair+' | '+r.out),acq:(await acqs(page)).map(a=>a.beh+' | '+a.pair+' | '+a.cond+' | '+a.out),bip:await page.evaluate(()=>window.__bipText())});
     check(errsOf(log).length===0,'no console or page errors placing the '+(behaviors===TODAY?'case as TB-1 passes it today':'cleaned case'));await page.close();}
   check(JSON.stringify(placed[0])===JSON.stringify(placed[1])&&placed[0].acq.length===2,'the same objectives, pairings and sentences from both',{today:placed[0].acq,clean:placed[1].acq});
+
+  /* ---------- 6. "see target N" after a target card with no name; a behavior added later to a skill on the form ---------- */
+  console.log('\n=== 6. Pointers past a blank target, and the picker’s pairing');
+  /* TB-1's cards: 1 Calling out, 2 (no name, left out of the case), 3 Elopement, 4 Raises hand (replacement), 5 Break request (replacement) */
+  const BLANK=[{label:'Calling out',rep:'Raises hand and waits to be called on (see target 4)'},{label:'Elopement',rep:'Hands a break card and waits (see target 5)'},
+    {label:'Raises hand (replacement)',isRep:true,rep:'',ctx:'Group instruction'},{label:'Break request (replacement)',isRep:true,rep:'',ctx:'Independent work'}];
+  const NUMBERED=BLANK.map((b,i)=>Object.assign({n:[1,3,4,5][i]},b));
+  const WANT={red:['Calling out | Raises hand','Elopement | Break request'],acq:['Raises hand | Calling out','Break request | Elopement']};
+  for(const [name,behaviors] of [['in the case’s order',BLANK],['by the numbers the case gives',NUMBERED]]){
+    log=[];page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1000);
+    await page.evaluate(b=>window.nbhCase.apply({behaviors:b,src:{behaviors:'TB-1'}}),behaviors);await sleep(300);
+    const got={red:(await reds(page)).map(r=>r.beh+' | '+r.pair),acq:(await acqs(page)).map(a=>a.beh+' | '+a.pair)};
+    check(JSON.stringify(got)===JSON.stringify(WANT),'a blank target card before them: "see target 4" and "see target 5" find Raises hand and Break request, '+name,got);
+    check(errsOf(log).length===0,'no console or page errors');await page.close();
+  }
+  /* the picker adds Spitting, which shares Break request: A1 now replaces it too; a pairing typed by hand is kept and named */
+  const FOUR=TODAY.slice(0,4),SPIT={label:'Spitting',rep:'Hands a break card and waits'};
+  for(const typed of ['','R1 — aggression']){
+    log=[];page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1000);
+    await page.evaluate(b=>window.nbhCase.apply({behaviors:b,src:{behaviors:'TB-1'}}),FOUR);await sleep(300);
+    if(typed)await page.evaluate(v=>{const e=document.querySelector('[name="acq[0].pair"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));},typed);
+    const res=await page.evaluate(([all,s])=>window.__nbhFactsPick({behaviors:[s],goals:{red:[],acq:[]},menu:[],fn:null,facts:{behaviors:all.concat([s])}}),[FOUR,SPIT]);
+    const A6=await acqs(page),R6=await reds(page);
+    if(!typed)check(A6.length===1&&A6[0].pair==='Aggression; Self-injury – head hitting; Elopement; Spitting'&&R6[3]&&R6[3].beh==='Spitting'&&R6[3].pair==='Break request'&&/Replaces: Aggression; Self-injury – head hitting; Elopement; Spitting/.test(await page.evaluate(()=>window.__bipText())),'the picker adds Spitting to the skill it shares: A1 replaces it too, and R4 is paired with Break request',{res,A6:A6.map(a=>a.pair),R6:R6.map(r=>r.beh+' | '+r.pair)});
+    else check(A6.length===1&&A6[0].pair===typed&&/A1 already says what it replaces \(“R1 — aggression”\), so Spitting was not added to it\./.test(res.note||''),'a pairing typed by hand is kept, and the picker says Spitting was not added to it',{res,pair:A6[0]&&A6[0].pair});
+    check(errsOf(log).length===0,'no console or page errors');await page.close();
+  }
   await br.close();
   console.log('\nFAILURES: '+fails);process.exit(fails?1:0);
 })().catch(e=>{console.error(e);process.exit(2);});
