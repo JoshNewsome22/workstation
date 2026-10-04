@@ -327,6 +327,9 @@ header.top .who b{display:block;font-size:14px;color:var(--navy);white-space:now
 header.top .who b.who-found{font-style:italic}
 header.top #whoTake{white-space:nowrap;flex:0 0 auto}
 header.top #whoTake[hidden]{display:none}
+/* v21.44 (A8): the line under the name stays one line (it gives way at its end), so the heading keeps its height when
+   the two chips sit in it */
+header.top .who #whoSub{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #barToggle{display:none}
 
 /* ---- buttons: one family ---- */
@@ -408,6 +411,37 @@ body.bar-folded #barSum{display:flex}
 .bar button.chip.away::before{background:#b9c8cc}
 @keyframes offPulse{50%{opacity:.3}}
 @media (prefers-reduced-motion:reduce){.bar button.chip.busy::before{animation:none}}
+/* v21.44 (A8): the two chips, Autosave and the offline copy, say how things stand on this device. On a window 1000 px
+   wide or more (an iPad held sideways, a computer) they sit in the heading, beside the student's name, so the case
+   buttons below keep to one row: in the bar, with "Autosaved 12:59 PM" and "Saved for offline use" both showing, the
+   row needed about 1240 px, and on an iPad held sideways (1180 px; 1133 on the mini) Finish PDF and Build master print
+   went to a second row and the form lost 48 px. On a narrower window (held upright, a phone) they stay in the bar,
+   where the case buttons take two rows anyway. placeChips() moves them; the light colours below are the dark bar's,
+   on white. */
+.chips{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 1 auto;min-width:0}   /* in the bar: as two items */
+header.top .chips{flex:0 0 auto;flex-wrap:nowrap}
+.chips [hidden]{display:none!important}
+/* with the chips beside it the heading's title keeps to its one line; the student's name and details give way first */
+@media (min-width:1000px){header.top h1{white-space:nowrap;flex:0 0 auto}}
+/* and the student's details keep to one row while they are open on an iPad 1024 px wide (Done showing) */
+@media (max-width:1100px){.bar .det input{width:128px}}
+header.top button.chip{font-size:11.5px;font-weight:500;padding:4px 11px 4px 9px;min-height:30px;border-radius:999px;
+  background:var(--shade);border-color:var(--rule);color:var(--muted);white-space:nowrap}
+header.top button.chip:hover{background:var(--mist);border-color:var(--rule2)}
+header.top button.chip::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rule2);flex:0 0 auto}
+header.top button.chip.on{color:#2f6b37;border-color:#bcd9c3}
+header.top button.chip.on::before{background:#3f9a5f}
+header.top button.chip.off{color:#8a4b1d;border-color:#e2c7ab}
+header.top button.chip.off::before{background:#d08a4f}
+header.top button.chip.warn{color:#7d5a10;border-color:#e3cf9b}
+header.top button.chip.warn::before{background:#d39a26}
+header.top button.chip.busy{color:#245f7c;border-color:#b6d3e2}
+header.top button.chip.busy::before{background:#4aa3cf;animation:offPulse 1.4s ease-in-out infinite}
+header.top button.chip.upd{color:#245f7c;border-color:#9cc6dd}
+header.top button.chip.upd::before{background:#3d97c9}
+header.top button.chip.away{color:var(--muted);border-color:var(--rule)}
+header.top button.chip.away::before{background:#a9b9bd}
+@media (prefers-reduced-motion:reduce){header.top button.chip.busy::before{animation:none}}
 .pwabar{background:var(--mist);color:var(--ink);border-bottom:1px solid var(--rule);padding:7px 16px;font-size:12.5px;line-height:1.4;
   display:flex;align-items:center;gap:8px 10px;flex:0 0 auto}
 .pwabar[hidden]{display:none}
@@ -451,6 +485,15 @@ main{flex:1;display:flex;min-height:0}
 .alertbar .sp{flex:1}
 .alertbar button{font-size:11.5px;padding:4px 10px;min-height:28px;background:#fff;border-color:#e0c3a4;color:#7a3a10}
 .alertbar button:hover{background:#fff7f0;border-color:#c9955e}
+/* v21.44 (A8): a name, ID or grade corrected on the bar, offered to the open forms that still hold the earlier one */
+.alertbar [hidden]{display:none!important}
+.alertbar button{white-space:nowrap}
+.alertbar button#alertFix{background:#7a3a10;border-color:#7a3a10;color:#fff;font-weight:600}
+.alertbar button#alertFix:hover{background:#9b4e15;border-color:#9b4e15}
+@media (max-width:720px){.alertbar{flex-wrap:wrap;padding:7px 12px;gap:6px 8px}.alertbar #alertText{flex:1 1 100%}.alertbar .sp{display:none}
+  .alertbar button{white-space:normal;text-align:center}}
+/* a finger needs the same 40 px as the bar's own buttons, here and for the chips in the heading */
+@media (pointer:coarse){.alertbar button,header.top .chips button{min-height:40px}}
 
 /* ---- keyboard focus, WCAG 2.1 AA 2.4.7 ---- */
 :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
@@ -752,16 +795,18 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <button id="diag">Diagnostics</button>
     <button id="help">Help</button></span>
     <div class="sp"></div>
-    <button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
-    <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button>
+    <!-- v21.44 (A8): the two chips move into the heading on a window 1000 px wide or more (placeChips) -->
+    <span class="chips" id="wsChips"><button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
+    <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button></span>
     <button class="primary" id="masterPrint">Build master print</button>
     <button id="bookmarkPdf" title="Add a bookmark panel and contents page numbers to a packet you have saved as PDF">Finish PDF</button>
   </div>
 </div>
 
 <div class="alertbar" id="alertbar">
-  <span id="alertText"></span>
+  <span id="alertText" aria-live="polite"></span>
   <div class="sp"></div>
+  <button id="alertFix" hidden>Use the corrected details</button>
   <button id="alertGo">Show me</button>
   <button id="alertHide">Dismiss</button>
 </div>
@@ -1038,8 +1083,18 @@ if(!NARROW.matches)$('#railToggle').setAttribute('aria-expanded',String(!railHid
    The heading, the packet bar and the list go; the form takes the window. Escape
    brings them back, from the form as well as from this page, and so does the button. */
 function fullOn(){return document.body.classList.contains('ws-full');}
-function setFull(on){
-  on=!!on&&!!state.cur;
+/* v21.44 (A8): fullscreen is remembered on this device, the way the hidden form list is (RAILKEY): after a reload, a tab
+   the iPad closed and opened again, or the next visit, the next form to open (Restore included) comes back in
+   fullscreen, until Exit or Escape. Only the person's own choice is kept (auto: a form closed with nothing left to
+   show, or a case opened, leaves the setting as it was). A browser that will not keep the setting (private browsing,
+   website data turned off) simply opens with the bars; nothing else depends on it. */
+const FULLKEY='nbh.ws.full';
+function fullWanted(){try{return localStorage.getItem(FULLKEY)==='on';}catch(e){return false;}}
+function fullKeep(on){try{if(on)localStorage.setItem(FULLKEY,'on');else localStorage.removeItem(FULLKEY);}catch(e){}}
+function setFull(on,auto){
+  const want=!!on;
+  on=want&&!!state.cur;
+  if(!auto&&on===want)fullKeep(on);   /* asked for and done; fullscreen asked for with no form open changes nothing */
   if(on===fullOn()&&!on)return;
   document.body.classList.toggle('ws-full',on);
   const b=$('#fullBtn');
@@ -1065,6 +1120,20 @@ document.addEventListener('fullscreenchange',()=>{
   b.title=on?'Give the browser its bars back':'Use the whole screen: the browser\'s own bars go too';
 });
 try{$('#fsLogo').src=$('#logo').src;}catch(e){}
+/* v21.44 (A8): the Autosave and offline-copy chips in the heading on a window 1000 px wide or more, so the bar's case
+   buttons keep to one row (see the CSS); in the bar, before Build master print, on a narrower one. The chips are moved,
+   not copied, so their ids, their listeners and the code that writes them are untouched. */
+const CHIPTOP=window.matchMedia('(min-width:1000px)');
+function placeChips(){
+  const box=$('#wsChips');if(!box)return;
+  const top=CHIPTOP.matches,host=top?$('header.top'):$('.bar .grp.acts'),before=top?$('header.top .who'):$('#masterPrint');
+  if(!host||!before||(box.parentNode===host&&box.nextElementSibling===before))return;
+  const a=document.activeElement,had=!!a&&box.contains(a);
+  host.insertBefore(box,before);
+  if(had)try{a.focus({preventScroll:true});}catch(e){}
+}
+placeChips();
+if(CHIPTOP.addEventListener)CHIPTOP.addEventListener('change',placeChips);else if(CHIPTOP.addListener)CHIPTOP.addListener(placeChips);
 /* on a phone the packet bar folds behind the Packet button in the heading */
 $('#barToggle').addEventListener('click',()=>{
   const on=!document.body.classList.contains('bar-open');
@@ -1133,6 +1202,7 @@ function openForm(id,keepRail){
   },5000);
   setTimeout(()=>pushPlanTo(id),1800);
   renderRail();
+  if(!fullOn()&&fullWanted())setFull(true,true);   /* v21.44 (A8) fullscreen, as it was left on this device */
 }
 $('#closeForm').addEventListener('click',async()=>{
   if(!state.cur)return;
@@ -1145,7 +1215,10 @@ $('#closeForm').addEventListener('click',async()=>{
   const rest=state.split.filter(x=>x!==state.cur);state.split=[];   /* v21.32 side by side */
   state.cur=null;$('#blank').style.display='';
   document.body.classList.remove('has-form');
-  setFull(false);
+  /* v21.44 (A8): the name the closed form held no longer counts (its warning mark in the list, the strip); with the form
+     list the only place left to go, fullscreen ends, and the setting stays as it was (auto) */
+  delete state.mismatch[closing];if(state.whoIs)delete state.whoIs[closing];if(state.details)delete state.details[closing];
+  setFull(false,true);
   setRail(true);
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';
   $('#crumbFile').textContent='';clearTimeout(state.watch);
@@ -1454,6 +1527,7 @@ async function pushPlanTo(id){
 function pushPacketTo(fr){
   const p=packet();
   if(!Object.values(p).some(v=>String(v).trim()))return;
+  commitBar();   /* v21.44 (A8) what a form has been given is what a later correction on the bar is offered against */
   try{fr.contentWindow.postMessage({nbh:'packet',packet:p},'*');}catch(e){}
 }
 function ask(fr,what,extra){
@@ -1465,7 +1539,11 @@ $('#pushPacket').addEventListener('click',()=>{
   Object.values(state.frames).forEach(pushPacketTo);
   gatherFacts(true);   /* v21.31 the case goes with the details */
   setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),400);
-  alert('Sent to '+n+' open form'+(n===1?'':'s')+'. Fields already holding a different value are left alone.');
+  /* v21.44 (A8) a correction on the bar is not a value to fill: the strip offers it */
+  const k=corrections().fix.length;
+  alert('Sent to '+n+' open form'+(n===1?'':'s')+'. Fields already holding a different value are left alone.'+
+    (k?' The strip above corrects the '+(k===1?'one':k)+' that still hold'+(k===1?'s':'')+' the earlier details.':''));
+  checkIdentity();
 });
 $('#savePacket').addEventListener('click',()=>{
   const p=packet();
@@ -1481,7 +1559,7 @@ $('#packetFile').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result),p=d.packet;if(!p)throw 0;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
-    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
+    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();commitBar();
     Object.values(state.frames).forEach(pushPacketTo);
     if(d.facts)setFacts(d.facts,true);   /* v21.31 the case travels in the packet file */
     barAutoFold();
@@ -1534,9 +1612,11 @@ $('#whoTake').addEventListener('click',()=>{
   [['sid','#pSid'],['grade','#pGrade'],['site','#pSite'],['bcba','#pBcba']].forEach(([k,sel])=>{
     if(det[k]&&!$(sel).value.trim())$(sel).value=det[k];
   });
-  who(); checkIdentity(); barAutoFold();
+  commitBar();who(); checkIdentity(); barAutoFold();
 });
 ['pClient','pSid','pGrade','pSite','pBcba'].forEach(id=>$('#'+id).addEventListener('input',who));
+/* v21.44 (A8) a value left in its box is one the bar has held; the strip looks again at once */
+['pClient','pSid','pGrade'].forEach(id=>$('#'+id).addEventListener('change',()=>{commitBar();checkIdentity();}));
 $('#pClient').addEventListener('change',()=>{if(packet().client.trim()&&!state.barAuto){state.barAuto=true;}});   /* typed by hand: stays open until Done */
 
 /* ================= relay: a form reads another open form (v21.22 relay) =================
@@ -2451,8 +2531,8 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
    fold('Side by side, fullscreen and the screen',
-     '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> brings them back. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
-     '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper.</p>')+
+     '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
+     '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else, and a form holding another student’s name is never changed.</p>')+
    fold('Keyboard',
      '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
    (!EMBED?fold('Offline, installing and updates',
@@ -2927,7 +3007,10 @@ CP.hold(state.auto.tab);   /* while this tab lives, other tabs do not offer its 
 function store(){try{return window.localStorage;}catch(e){return null;}}
 /* v21.44 the switch has a setting of its own: the old one also said 'off' when an earlier version gave up after a full
    store, so a browser that still says so is asked once (autoOffer) instead of staying off for good */
-function autoPref(){const s=store();if(!s)return '';const v=s.getItem(AUTO.pref2);if(v)return v;return s.getItem(AUTO.pref)==='off'?'ask':'';}
+function autoPref(){const s=store();if(!s)return '';
+  /* v21.44 (A8): storage whose every read throws (a browser keeping this site's data from it) reads as no setting, as no
+     storage does, instead of stopping the page's start-up and each autosave with an error */
+  try{const v=s.getItem(AUTO.pref2);if(v)return v;return s.getItem(AUTO.pref)==='off'?'ask':'';}catch(e){return '';}}
 function autoOn(){if(!CP.mode())return false;const v=autoPref();return v!=='off'&&v!=='ask';}
 function autoSet(on){const s=store();try{if(s){s.setItem(AUTO.pref2,on?'on':'off');s.removeItem(AUTO.pref);}}catch(e){}CP.setOff(!on);chip();}
 function chip(){
@@ -3189,12 +3272,15 @@ async function autoOffer(){
 async function loadCase(d,how){
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;
+  state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
   $('#blank').style.display='';document.body.classList.remove('has-form');
+  setFull(false,true);   /* v21.44 (A8) with no form open; the forms reopened below bring it back if it is the setting */
   if(d.packet){
     const p=d.packet;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
     $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
   }
+  commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   barAutoFold();
   const ids=Object.keys(d.forms),notes=[];
@@ -3238,31 +3324,240 @@ function sameName(a,b){
   return sa===sb;
 }
 function noteWho(id,w){
+  /* v21.44 (A8): a reply that carries no name (a snapshot, which Autosave asks for every few seconds) keeps the name the
+     form gave last. It used to count as no name at all, so the warning came and went with the autosaves. */
+  if(w!==undefined){state.whoIs=state.whoIs||{};state.whoIs[id]=w;}
+  const name=w!==undefined?w:(state.whoIs||{})[id];
   const p=packet();
   const was=state.mismatch[id];
-  state.mismatch[id]=!!(w&&p.client&&!sameName(w,p.client));
-  if(w!==undefined)state.whoIs=state.whoIs||{},state.whoIs[id]=w;
+  state.mismatch[id]=!!(name&&p.client&&!sameName(name,p.client));
   /* The strip is otherwise repainted on a timer, so a corrected name left it
      saying "different student" for several seconds after the form agreed. Repaint
      as soon as the answer changes, so the warning goes the moment it is untrue. */
   if(was!==state.mismatch[id])checkIdentity();
   who();   /* a form reporting its name may be the only place one exists yet */
 }
-function checkIdentity(){
-  const odd=Object.keys(state.mismatch).filter(k=>state.mismatch[k]);
-  const bar=$('#alertbar');
-  if(!odd.length||state.alertOff){bar.classList.remove('on');return;}
+
+/* ---- v21.44 (A8): a name, an ID or a grade corrected on the bar ----
+   The packet fills only empty fields, so a name corrected on the bar ("Jordon" to "Jordan") never reached the forms
+   already open: they kept the earlier spelling, and the strip called them a different student. The bar now remembers
+   what it has held (state.barHist: each value it gave to a form, or settled on when a box was left, a packet or case
+   opened, or a name taken from a form; a case opened starts afresh). A form that still holds one of those earlier
+   values is offered the correction, one tap for all of them: "Use Jordan Rivera in these 5 forms".
+   - A correction, not another student: the earlier name and the new one differ by a slip of one or two letters (at
+     most a fifth of the name), capitals, spaces, accents or punctuation, a name still being typed when a form took it,
+     or the same name written out more fully (an initial or a short form completed, a last name added). Anything else
+     is another student, and keeps the warning only, with nothing offered: "Jordan Rivera" and "Maria Lopez", "Student
+     1" and "Student 2", a name the bar never held. An ID or a grade is offered only in a form whose name is this
+     student's (or, in a form that holds no name, when the bar has held no other student).
+   - The tap changes only the student's name (and first and last name where a form keeps them apart), ID and grade,
+     only in the fields the form's packet fills, and only where the field still holds the earlier value; it lists
+     every change. A form is reached the way Autosave reads one (its window, on this page's origin); one the browser
+     keeps apart (a folder opened from a drive) is named, to be corrected by hand. */
+state.barHist={client:[],sid:[],grade:[]};
+function commitBar(fresh){
   const p=packet();
-  $('#alertText').innerHTML='<b>Different student.</b> '+
-    (odd.length===1?'Form '+odd[0]+' holds':odd.length+' forms hold')+
-    ' a name other than <b>'+esc(p.client)+'</b> \u2014 '+
-    odd.map(k=>esc(k)+' \u201c'+esc((state.whoIs||{})[k]||'')+'\u201d').join(', ')+
-    '. Anything printed now would mix two students.';
-  bar.classList.add('on');
-  bar.dataset.first=odd[0];
+  if(fresh||!state.barHist)state.barHist={client:[],sid:[],grade:[]};
+  ['client','sid','grade'].forEach(k=>{
+    const v=String(p[k]||'').trim().replace(/\s+/g,' ');if(!v)return;
+    const h=state.barHist[k],i=h.findIndex(x=>x.toLowerCase()===v.toLowerCase());
+    if(i>=0)h.splice(i,1);
+    h.push(v);if(h.length>12)h.shift();
+  });
 }
-$('#alertGo').addEventListener('click',()=>openForm($('#alertbar').dataset.first));
-$('#alertHide').addEventListener('click',()=>{state.alertOff=true;$('#alertbar').classList.remove('on');});
+function lowTrim(s){return String(s==null?'':s).trim().replace(/\s+/g,' ').toLowerCase();}
+function nameWords(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);}
+/* letters inserted, deleted, changed or swapped (optimal string alignment) */
+function editDist(a,b){
+  if(Math.abs(a.length-b.length)>3)return 9;
+  let p2=null,p1=Array.from({length:b.length+1},(_,j)=>j);
+  for(let i=1;i<=a.length;i++){
+    const c=[i];
+    for(let j=1;j<=b.length;j++){
+      let v=Math.min(p1[j]+1,c[j-1]+1,p1[j-1]+(a[i-1]===b[j-1]?0:1));
+      if(p2&&j>1&&a[i-1]===b[j-2]&&a[i-2]===b[j-1])v=Math.min(v,p2[j-2]+1);
+      c[j]=v;
+    }
+    p2=p1;p1=c;
+  }
+  return p1[b.length];
+}
+/* is now a correction of was (a name the bar held before), rather than another student's name? */
+function nameFixes(was,now){
+  const A=nameWords(was),B=nameWords(now);if(!A.length||!B.length)return false;
+  const a=A.join(''),b=B.join('');
+  if(a===b)return true;                                                 /* capitals, spaces, accents, punctuation */
+  if(a.replace(/\D/g,'')!==b.replace(/\D/g,''))return false;           /* "Student 1" and "Student 2" are two students */
+  const d=editDist(a,b);
+  if(d<=2&&d*5<=Math.max(a.length,b.length))return true;              /* a slip of one or two letters */
+  if(a.length>=2&&b.indexOf(a)===0)return true;                         /* a name still being typed when a form took it */
+  /* written out more fully: every word of the earlier name is a word of the new one or the start of one (an initial,
+     a short form), and one at least is there in full */
+  const used=new Set();let full=false;
+  for(const w of A){
+    let k=B.findIndex((x,i)=>!used.has(i)&&x===w);
+    if(k>=0){if(w.length>1)full=true;}
+    else k=B.findIndex((x,i)=>!used.has(i)&&x.indexOf(w)===0);
+    if(k<0)return false;
+    used.add(k);
+  }
+  return full;
+}
+/* what the open forms hold against the bar: fix, the forms still holding a value the bar has corrected (and which);
+   odd, the forms holding another student's name */
+function corrections(){
+  const p=packet(),now={client:p.client.trim(),sid:p.sid.trim(),grade:p.grade.trim()};
+  const H=state.barHist||{client:[],sid:[],grade:[]},out={fix:[],odd:[]};
+  if(!now.client)return out;
+  const oneStudent=H.client.every(x=>sameName(x,now.client)||nameFixes(x,now.client));
+  for(const id of Object.keys(state.frames)){
+    if(!state.status[id])continue;   /* not answered yet */
+    const w=String((state.whoIs||{})[id]||'').trim(),det=(state.details||{})[id]||{},items=[];
+    if(w&&!sameName(w,now.client)){
+      const was=H.client.find(x=>!sameName(x,now.client)&&sameName(w,x)&&nameFixes(x,now.client));
+      if(!was){out.odd.push(id);continue;}   /* another student: the warning only */
+      items.push({k:'client',from:w,to:now.client,was});
+    }
+    if(w||oneStudent)for(const k of ['sid','grade']){
+      const v=String(det[k]||'').trim();
+      if(!v||!now[k]||lowTrim(v)===lowTrim(now[k]))continue;
+      if(H[k].some(x=>lowTrim(x)===lowTrim(v)))items.push({k,from:v,to:now[k],was:v});
+    }
+    if(items.length)out.fix.push({id,items});
+  }
+  return out;
+}
+function andList(a){return a.length<3?a.join(' and '):a.slice(0,-1).join(', ')+' and '+a[a.length-1];}
+function checkIdentity(){
+  const c=corrections(),bar=$('#alertbar'),p=packet(),W=state.whoIs||{};
+  const sig=JSON.stringify([c.odd.map(k=>k+'='+(W[k]||'')),c.fix.map(f=>f.id+':'+f.items.map(i=>i.k+'='+i.from+'>'+i.to).join(','))]);
+  state.alertSig=sig;
+  if((!c.odd.length&&!c.fix.length)||state.alertOff===sig){bar.classList.remove('on');return;}
+  let html='';
+  if(c.odd.length)html='<b>Different student.</b> '+
+    (c.odd.length===1?'Form '+c.odd[0]+' holds':c.odd.length+' forms hold')+
+    ' a name other than <b>'+esc(p.client)+'</b> \u2014 '+
+    c.odd.map(k=>esc(k)+' \u201c'+esc(W[k]||'')+'\u201d').join(', ')+
+    '. Anything printed now would mix two students.';
+  if(c.fix.length){
+    const ids=c.fix.map(f=>f.id),kinds=new Set(c.fix.flatMap(f=>f.items.map(i=>i.k)));
+    const was=k=>esc([...new Set(c.fix.flatMap(f=>f.items.filter(i=>i.k===k).map(i=>i.was)))].join(' or '));
+    const said=[],what=[];
+    if(kinds.has('client')){said.push('<b>'+was('client')+'</b> is now <b>'+esc(p.client.trim())+'</b>');what.push(p.client.trim());}
+    if(kinds.has('sid')){said.push('ID <b>'+was('sid')+'</b> is now <b>'+esc(p.sid.trim())+'</b>');what.push('ID '+p.sid.trim());}
+    if(kinds.has('grade')){said.push('grade <b>'+was('grade')+'</b> is now <b>'+esc(p.grade.trim())+'</b>');what.push('grade '+p.grade.trim());}
+    html+=(html?' ':'')+'<b>Corrected on the bar:</b> '+said.join(', ')+'. '+
+      (ids.length===1?'Form '+ids[0]+' still holds':andList(ids)+' still hold')+' the earlier '+(kinds.size===1&&kinds.has('client')?'name':'details')+
+      '. (Another student? Close '+(ids.length===1?'it':'them')+' instead.)';
+    $('#alertFix').textContent='Use '+andList(what)+' in '+(ids.length===1?'Form '+ids[0]:'these '+ids.length+' forms');
+  }
+  $('#alertFix').hidden=!c.fix.length;
+  $('#alertGo').hidden=!c.odd.length;
+  if(state.alertHtml!==html){state.alertHtml=html;$('#alertText').innerHTML=html;}
+  bar.dataset.first=c.odd[0]||'';
+  bar.classList.add('on');
+}
+/* the student fields as the forms' own packet finds them (and as their bridge reads the name) */
+const WHO_SELS=['[data-m="client"]','[name="m.client"]','[name="s_name"]','[data-meta="client"]','#m_client','#mClient',
+  '[name="h-client"]','[name="h.client"]','[name="c.client"]','[name="student"]','[name="s.student"]','#h-client','#hClient',
+  '#cClient','#sClient','[name="c.student"]'];
+function splitName(nm){
+  nm=String(nm||'').trim();
+  if(nm.indexOf(',')>-1)return {last:nm.split(',')[0].trim(),first:nm.split(',').slice(1).join(',').trim()};
+  const parts=nm.split(/\s+/),last=parts.length>1?parts.pop():'';
+  return {first:parts.join(' '),last};
+}
+/* the words of from, in s, changed one for one into the words of to (the two names have as many words) */
+function swapWords(s,from,to){
+  const A=String(from).split(/[\s,]+/).filter(Boolean),B=String(to).split(/[\s,]+/).filter(Boolean),m=new Map();
+  if(A.length!==B.length)return null;
+  A.forEach((x,i)=>m.set(x.toLowerCase(),B[i]));
+  return String(s).replace(/[^\s,]+/g,t=>m.has(t.toLowerCase())?m.get(t.toLowerCase()):t);
+}
+/* the corrected name written the way the field has it: the same words in the same order take the bar's spelling;
+   another order ("Rivera, Jordon") has its words changed one for one, or is left for the person */
+function nameLike(v,from,to){
+  if(norm(v)===norm(from))return to;
+  const r=swapWords(v,from,to);
+  return r&&sameName(r,to)?r:'';
+}
+/* one form: the changes made ([{what, from, to}]), or null when this page cannot reach into it */
+function fixIn(id,items){
+  const fr=state.frames[id];let w=null,d=null;
+  try{w=fr.contentWindow;d=w.document;if(!d||!d.body)return null;}catch(e){return null;}
+  const M=w.__nbhPacketMap||{},out=[];
+  const fields=(keys,extra)=>{
+    const sels=new Set(extra||[]);keys.forEach(k=>(M[k]||[]).forEach(s=>sels.add(s)));
+    const els=[];
+    sels.forEach(s=>{let l=[];try{l=d.querySelectorAll(s);}catch(e){}
+      l.forEach(e=>{if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName)&&!/^(file|hidden|checkbox|radio|button|submit|reset|image)$/.test(e.type)&&els.indexOf(e)<0)els.push(e);});});
+    return els;
+  };
+  const fire=e=>['input','change'].forEach(t=>{try{e.dispatchEvent(new w.Event(t,{bubbles:true}));}catch(err){}});
+  const put=(e,v,what)=>{
+    const was=String(e.value||'').trim();
+    if(e.tagName==='SELECT'){
+      const o=Array.prototype.find.call(e.options,o=>lowTrim(o.value)===lowTrim(v)||lowTrim(o.textContent)===lowTrim(v));
+      if(!o)return;
+      e.value=o.value;
+    } else e.value=v;
+    fire(e);out.push({what,from:was,to:String(e.value).trim()});
+  };
+  for(const it of items){
+    if(it.k==='client'){
+      fields(['client'],WHO_SELS).forEach(e=>{
+        const v=String(e.value||'').trim();
+        if(!v||!sameName(v,it.from)||sameName(v,it.to))return;
+        const nv=nameLike(v,it.from,it.to);if(nv)put(e,nv,'name');
+      });
+      /* a form that keeps the first and last name apart (Form DM-1) */
+      const F=fields(['first'],['#sFirst'])[0],L=fields(['last'],['#sLast'])[0];
+      if(F||L){
+        const fv=F?String(F.value||'').trim():'',lv=L?String(L.value||'').trim():'',whole=[fv,lv].filter(Boolean).join(' ');
+        if(whole&&sameName(whole,it.from)&&!sameName(whole,it.to)){
+          let nf=swapWords(fv,it.from,it.to),nl=swapWords(lv,it.from,it.to);
+          if(nf===null){
+            const o=splitName(it.from),n=splitName(it.to);
+            if(lowTrim(o.first)===lowTrim(fv)&&lowTrim(o.last)===lowTrim(lv)){nf=n.first;nl=n.last;}else nf=nl=null;
+          }
+          if(nf!==null&&sameName([nf,nl].filter(Boolean).join(' '),it.to)){
+            if(F&&nf!==fv)put(F,nf,'first name');
+            if(L&&nl!==lv)put(L,nl,'last name');
+          }
+        }
+      }
+    } else {
+      fields([it.k]).forEach(e=>{if(lowTrim(e.value)===lowTrim(it.from))put(e,it.to,it.k==='sid'?'ID':'grade');});
+    }
+  }
+  return out;
+}
+async function applyFixes(){
+  const c=corrections();
+  if(!c.fix.length){checkIdentity();return;}
+  commitBar();
+  const p=packet(),done=[],apart=[],gone=[];
+  for(const f of c.fix){
+    let r=null;try{r=fixIn(f.id,f.items);}catch(e){r=null;}
+    if(r===null)apart.push(f.id);else if(r.length)done.push({id:f.id,list:r});else gone.push(f.id);
+  }
+  /* Autosave keeps the safety copy it has been keeping: the same student, the name corrected */
+  try{const A=state.auto,olds=c.fix.flatMap(f=>f.items.filter(i=>i.k==='client').map(i=>i.was));
+    if(A&&A.student&&olds.some(n=>sameName(A.student,n)||CP.same(A.student,n)))A.student=p.client.trim();}catch(e){}
+  done.forEach(r=>{const fr=state.frames[r.id];if(fr)ask(fr,'status');});
+  setTimeout(checkIdentity,800);
+  const lines=done.map(r=>'Form '+r.id+': '+r.list.map(x=>x.what+' '+(x.from||'(empty)')+' \u2192 '+x.to).join('; '));
+  let msg=done.length?'Corrected in '+done.length+' form'+(done.length===1?'':'s')+'.\n'+lines.join('\n'):'Nothing was changed.';
+  if(apart.length)msg+='\nNot changed: '+apart.map(x=>'Form '+x).join(', ')+'. This browser keeps '+(apart.length===1?'that form':'those forms')+
+    ' apart from the workstation (a folder opened from a drive): correct the details in '+(apart.length===1?'it':'each')+' by hand.';
+  if(gone.length)msg+='\nNot changed: '+gone.map(x=>'Form '+x).join(', ')+', which no longer '+(gone.length===1?'holds':'hold')+' the earlier details.';
+  if(done.length)msg+='\nNothing else was changed: other boxes that mention the student keep what they say. The forms count as changed, so Save case (and Autosave) keep the corrected details.';
+  say(done.length?'Corrected in '+done.length+' form'+(done.length===1?'':'s'):'Nothing was changed');
+  wsUI.alert(msg);
+}
+$('#alertFix').addEventListener('click',applyFixes);
+$('#alertGo').addEventListener('click',()=>{const id=$('#alertbar').dataset.first;if(id)openForm(id);});
+$('#alertHide').addEventListener('click',()=>{state.alertOff=state.alertSig||true;$('#alertbar').classList.remove('on');});
 setInterval(checkIdentity,2500);
 
 /* ================= the case file =================
