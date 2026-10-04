@@ -22,7 +22,10 @@ Paths below are from the repository root. The test server the checks expect:
   `nbh-guard.html` + `patch-guard.py` (unload guard, quick save, spellcheck),
   `nbh-ui.html` + `patch-ui.py` (toasts, notices, questions, progress dots, touch targets,
   the light toolbar inside the workstation), `patch-csv.py` (the `csv?` bridge verb),
-  `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script).
+  `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script),
+  `nbh-copies.js` + `nbh-autosave.js` + `patch-autosave.py` (v21.44 Autosave: the store of safety copies, the
+  whole-state hash and a form's own copy; it also makes small anchored changes in the bridge and the guard, and
+  refreshes the store's copy inside `index.html`; `--check` says whether every file is current).
 - `tools/dedupe-logo.py` — one letterhead image per form (v21.36); idempotent.
 - `tools/build-rps.py`, `tools/rps-assets/` — the Royal Palm School edition and its lockup
   and tab icon. `tools/build-single.py` — the one-file editions.

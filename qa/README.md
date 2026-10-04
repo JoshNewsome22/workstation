@@ -27,6 +27,7 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node shell-check.js after` | Fullscreen on and off (button, Escape, Escape from inside a form, the keyboard shortcut from both), the hidden form list and its memory, the phone packet bar. |
 | `node phoneprint.js PR-1,IN-1,IC-1,CT-1 phone-after` (and `phone-before` against the earlier release's URL) | Prints those forms from a 390px-wide window, from the kept snapshots; `compare-print.py print/phone-before print/phone-after` must find them identical, so the phone text size never reaches paper. |
 | `node determinism.js DD-1 TI-1` | Whether a form's simulation loads the same data twice (DD-1 does not; the print check restores a kept snapshot instead). |
+| `node autosave-test.js [taps,slow,...]` | v21.44 Autosave: taps reach the copy, Save case and a slow form, unanswered offers kept, two students, a photo, a full store, the unsaved mark, Own tab, a form on its own, visibilitychange, the old slot, and (`rt`) a save and reopen round trip for all 44 forms. |
 
 To compare against an earlier release, serve that folder on a second port and pass its URL
 (and `WS_ROOT`) to the `before` runs.
