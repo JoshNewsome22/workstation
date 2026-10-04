@@ -35,7 +35,7 @@ const FB={
   outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
 /* the simulator's pictures (the practice's own cards), shown when a page's six cards are empty */
-const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad','iPad']],
+const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad2','iPad']],
   tg:[['cardwriting','Writing'],['cardreading','Reading'],['cardalldone','All Done'],['boyraisehand','Raise hand'],['cardmath','Math'],['cardwaiting','Waiting']]};
 /* brief praise that names the behavior: an ongoing behavior named by its -ing word reads as itself (Sitting: "Great sitting!");
    any other target is named after the praise ("Great job: raise hand!"), so the praise always says what was done */
