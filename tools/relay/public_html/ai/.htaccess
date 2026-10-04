@@ -24,16 +24,21 @@ DirectoryIndex index.php
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Without mod_rewrite (or if a stray file is ever copied here): refuse every file but index.php.
-<FilesMatch "^(?!index\.php$)">
-    <IfModule mod_authz_core.c>
-        Require all denied
-    </IfModule>
-    <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Deny from all
-    </IfModule>
-</FilesMatch>
+# Without mod_rewrite: refuse every file but index.php (the relay then answers at /ai/index.php/...).
+# Only then: Apache checks this refusal before .htaccess rewriting runs, and it refuses names that do not
+# exist as files too ("admin", "api"), so with mod_rewrite on it would refuse every address of the relay.
+# With mod_rewrite on, the rules above send every name to index.php, so no other file is ever sent anyway.
+<IfModule !mod_rewrite.c>
+    <FilesMatch "^(?!index\.php$)">
+        <IfModule mod_authz_core.c>
+            Require all denied
+        </IfModule>
+        <IfModule !mod_authz_core.c>
+            Order allow,deny
+            Deny from all
+        </IfModule>
+    </FilesMatch>
+</IfModule>
 
 <IfModule mod_headers.c>
     Header always set X-Content-Type-Options "nosniff"

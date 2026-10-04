@@ -112,6 +112,11 @@ HTML;
     <input id="code-label" maxlength="60" autocomplete="off" spellcheck="false">
     <label for="code-hours">Must be used within</label>
     <select id="code-hours"></select>
+    <div id="code-pw-row" hidden>
+      <label for="code-pw">Admin password, again</label>
+      <p class="muted" id="code-pw-note">Asked again when it was last typed more than 10 minutes ago, so that nothing else on this website can make a passcode in your name.</p>
+      <input id="code-pw" type="password" autocomplete="current-password" aria-describedby="code-pw-note">
+    </div>
     <div class="row"><button type="submit">Create passcode</button></div>
     <p class="msg" id="code-msg" role="status" aria-live="polite"></p>
   </form>
@@ -136,7 +141,7 @@ HTML;
 <section class="card" aria-labelledby="h-status">
   <h2 id="h-status">Status</h2>
   <ul id="status"></ul>
-  <div class="row" id="unlock-row" hidden><button type="button" class="quiet" id="unlock">Clear the wrong passcode tries</button></div>
+  <div class="row" id="unlock-row" hidden><button type="button" class="quiet" id="unlock">Clear the wrong tries</button></div>
 </section>
 {$notes}
 <div class="row bar"><button type="button" class="quiet" id="refresh">Refresh</button><button type="button" class="quiet" id="signout">Sign out</button></div>
@@ -358,7 +363,10 @@ CSS;
       ul.appendChild(el('li', {text: 'Rewrites in the last 24 hours: ' + st.rewrites_today + ' (the relay stops at ' + L.rewrites_per_day + ').'}));
       ul.appendChild(el('li', {text: 'Wrong passcode tries in the last ' + L.fail_window_minutes + ' minutes: ' + st.wrong_passcodes + '.'}));
       if (st.passcode_pause > 0) ul.appendChild(el('li', {class: 'warn', text: 'Passcode entry is paused for everyone for about ' + minutes(st.passcode_pause) + ' after too many wrong tries.'}));
-      $('unlock-row').hidden = !(st.wrong_passcodes > 0);
+      ul.appendChild(el('li', {text: 'Wrong admin passwords in the last ' + L.fail_window_minutes + ' minutes: ' + st.wrong_passwords + '.'}));
+      if (st.sign_in_pause > 0) ul.appendChild(el('li', {class: 'warn', text: 'Signing in is paused for about ' + minutes(st.sign_in_pause) + ' after too many wrong passwords, except on devices that have signed in here before.'}));
+      $('unlock-row').hidden = !(st.wrong_passcodes > 0 || st.wrong_passwords > 0);
+      if (st.password_after === 0) $('code-pw-row').hidden = false;
     }
     function revoke(path, id, btn, question) {
       if (!window.confirm(question)) return;
@@ -372,10 +380,21 @@ CSS;
     $('f-code').addEventListener('submit', function (ev) {
       ev.preventDefault();
       var btn = this.querySelector('button[type=submit]');
+      var body = {label: $('code-label').value, hours: parseInt($('code-hours').value, 10)};
+      var pwRow = $('code-pw-row'), pw = $('code-pw');
+      if (!pwRow.hidden) {
+        if (!pw.value) { say('code-msg', 'Enter the admin password again to create a passcode.', 'bad'); pw.focus(); return; }
+        body.password = pw.value;
+      }
       busy(btn, true); say('code-msg', 'Creating…');
-      call('POST', '/api/admin/codes', {label: $('code-label').value, hours: parseInt($('code-hours').value, 10)}).then(function (r) {
+      call('POST', '/api/admin/codes', body).then(function (r) {
         busy(btn, false);
+        if (r.status === 403 && r.data.error === 'password_needed') {
+          pwRow.hidden = false; say('code-msg', 'Enter the admin password again to create a passcode.', 'bad'); pw.focus(); return;
+        }
+        if (r.status === 401 && r.data.error === 'wrong_password') { say('code-msg', problem(r), 'bad'); pw.select(); return; }
         if (!r.ok || typeof r.data.code !== 'string') { say('code-msg', problem(r), 'bad'); return; }
+        pw.value = ''; pwRow.hidden = true;
         say('code-msg', '');
         $('nc-for').textContent = r.data.label ? ' for ' + r.data.label : '';
         $('nc-code').textContent = r.data.code;
@@ -394,7 +413,7 @@ CSS;
     });
     $('unlock').addEventListener('click', function () {
       var btn = this; busy(btn, true);
-      call('POST', '/api/admin/unlock', {}).then(function (r) { busy(btn, false); say('page-msg', r.ok ? 'Cleared.' : problem(r), r.ok ? 'ok' : 'bad'); load(); });
+      call('POST', '/api/admin/unlock', {}).then(function (r) { busy(btn, false); say('page-msg', r.ok ? 'Cleared: passcodes and the admin password can be tried again.' : problem(r), r.ok ? 'ok' : 'bad'); load(); });
     });
     $('refresh').addEventListener('click', function () { say('page-msg', 'Refreshing…'); load(); });
     $('signout').addEventListener('click', function () {

@@ -196,7 +196,11 @@ T::ok(preg_match('/^DirectoryIndex index\.php$/m', $ht) === 1, '.htaccess: index
 T::ok(str_contains($ht, 'RewriteEngine On'), '.htaccess: rewriting on');
 T::ok(preg_match('/RewriteCond %\{HTTPS\} !=on\s+RewriteCond %\{HTTP:X-Forwarded-Proto\} !=https\s+RewriteRule \^ https:\/\/%\{HTTP_HOST\}%\{REQUEST_URI\} \[R=301,L\]/', $ht) === 1, '.htaccess: http is sent to https');
 T::ok(preg_match('/RewriteRule \^index\\\\\.php\$ - \[L\]\s+(#[^\n]*\n\s*)*RewriteRule \^ index\.php \[L\]/', $ht) === 1, '.htaccess: everything else goes to index.php, existing files included');
-T::ok(preg_match('/<FilesMatch "\^\(\?!index\\\\\.php\$\)">.*Require all denied.*<\/FilesMatch>/s', $ht) === 1, '.htaccess: every file but index.php is refused');
+T::ok(preg_match('/<IfModule !mod_rewrite\.c>\s*<FilesMatch "\^\(\?!index\\\\\.php\$\)">.*Require all denied.*<\/FilesMatch>\s*<\/IfModule>/s', $ht) === 1, '.htaccess: without mod_rewrite, every file but index.php is refused');
+// Apache checks Require before .htaccess rewriting, and for an address that is not a file ("admin", "api") it
+// checks the first missing name: a refusal outside the IfModule would refuse every address of the relay
+$outside = preg_replace('/<IfModule !mod_rewrite\.c>.*?<\/FilesMatch>\s*<\/IfModule>/s', '', $ht);
+T::ok(!preg_match('/Require all denied|Deny from all|<Files/i', (string) $outside), '.htaccess: no refusal applies while mod_rewrite routes everything to index.php');
 $pages = (string) file_get_contents($site->relayDir() . '/src/Pages.php');
 T::ok(!preg_match('/innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\(|new Function/', $pages), 'the admin page script never writes HTML from data');
 T::ok(str_contains((string) file_get_contents($site->relayDir() . '/make-admin-hash.php'), "if (PHP_SAPI !== 'cli') {"), 'make-admin-hash.php runs from the command line only');
@@ -480,13 +484,15 @@ T::eq(200, post('/api/redeem', ['code' => $good])['status'], 'and the good code 
 $pdo = $site->db();
 $pdo->beginTransaction();
 $ins = $pdo->prepare("INSERT INTO hits (bucket, at) VALUES ('redeem-fail:all', ?)");
-for ($i = 0; $i < 50; $i++) {
+$allFails = Config::DEFAULTS['REDEEM_FAILS_ALL'];
+T::ok($allFails >= 1000, 'the pause for everyone needs a flood of wrong passcodes (' . $allFails . '), not a few dozen: it cannot be set off cheaply');
+for ($i = 0; $i < $allFails; $i++) {
     $ins->execute([time()]);
 }
 $pdo->commit();
 $good = Admin::code('global pause');
 $r = post('/api/redeem', ['code' => $good]);
-T::eq(429, $r['status'], '50 wrong tries from anywhere pause every address');
+T::eq(429, $r['status'], $allFails . ' wrong tries from anywhere pause every address');
 T::ok((Admin::state()['json']['passcode_pause'] ?? 0) > 0, 'the admin page says passcode entry is paused');
 Admin::call('/api/admin/unlock');
 T::eq(200, post('/api/redeem', ['code' => $good])['status'], 'cleared, the code works');
@@ -694,14 +700,15 @@ T::ok($r['status'] === 429 && ($r['json']['error'] ?? '') === 'rate_limited' && 
 record('rewrite_burst', 'rewrite', $r);
 $site->patchConfig(['REWRITES_PER_MINUTE' => 600]);
 clearHits($site);
+$perDay = Config::DEFAULTS['REWRITES_PER_DAY'];
 $pdo->beginTransaction();
-for ($i = 0; $i < 1000; $i++) {
+for ($i = 0; $i < $perDay; $i++) {
     $ins->execute(['rewrite:all', time()]);
 }
 $pdo->commit();
 $r = rewrite($tok, 'daily', 'concise');
-T::ok($r['status'] === 429 && ($r['json']['error'] ?? '') === 'rate_limited' && (int) hdr($r, 'retry-after') > 80000, 'REWRITES_PER_DAY (1000) for everyone: 429 until the oldest is a day old');
-T::ok(str_contains($site->log(), 'daily_limit_reached limit=1000'), 'the daily limit is logged');
+T::ok($r['status'] === 429 && ($r['json']['error'] ?? '') === 'rate_limited' && (int) hdr($r, 'retry-after') > 80000, "REWRITES_PER_DAY ($perDay) for everyone: 429 until the oldest is a day old");
+T::ok(str_contains($site->log(), 'daily_limit_reached limit=' . $perDay), 'the daily limit is logged');
 clearHits($site);
 $r = rewrite($tok, 'cross-site text OR62', 'concise', ['Origin' => 'https://evil.example']);
 T::ok($r['status'] === 403 && ($r['json']['error'] ?? '') === 'origin' && count($site->mockRequests()) === 0, 'a rewrite from another site: 403, nothing sent');

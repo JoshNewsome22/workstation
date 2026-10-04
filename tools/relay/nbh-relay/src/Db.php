@@ -47,6 +47,10 @@ final class Db
             )',
             'CREATE INDEX hits_bucket_at ON hits (bucket, at)',
         ],
+        // when the admin password was last typed in a sign-in: creating a passcode asks for it again after a while
+        2 => [
+            'ALTER TABLE admin_sessions ADD COLUMN auth_at INTEGER NOT NULL DEFAULT 0',
+        ],
     ];
 
     public const FILE = 'relay.sqlite';

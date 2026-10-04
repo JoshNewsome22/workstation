@@ -85,6 +85,39 @@ final class Setup
         return null;
     }
 
+    /**
+     * config.php (it holds the API key), the data folder and the database are for this account only. One
+     * copied in File Manager, or brought back from a backup, gets the usual 644 that other accounts on a shared
+     * server can read: the relay sets it back to 600 (folders 700) itself wherever it may, which is wherever
+     * PHP runs as the account that owns the files (as usual on cPanel). Returns a note for each one it could
+     * not tighten, for the setup and admin pages.
+     *
+     * @return list<string>
+     */
+    public static function tightenPermissions(string $root, string $dataDir): array
+    {
+        $notes = [];
+        foreach ([[$root . '/config.php', 0600, 'nbh-relay/config.php'], [$dataDir, 0700, 'the data folder'], [$dataDir . '/' . Db::FILE, 0600, 'relay.sqlite']] as [$path, $mode, $name]) {
+            if (!file_exists($path)) {
+                continue;
+            }
+            $perms = @fileperms($path);
+            if ($perms === false || ($perms & 0077) === 0) {
+                continue;
+            }
+            if (@chmod($path, $mode)) {
+                clearstatcache(true, $path);
+                if (((int) @fileperms($path) & 0077) === 0) {
+                    continue;
+                }
+            }
+            if ($perms & 0004) {
+                $notes[] = $name . ' can be read by other accounts on this server, and the relay may not change that here (PHP runs as another user than the file\'s owner). Ask your host whether it can be set to ' . sprintf('%o', $mode) . ' with the website still able to read it.';
+            }
+        }
+        return $notes;
+    }
+
     /** True when the PHP version, the extensions and the vendor folder are all there. */
     public static function platformOk(string $root): bool
     {

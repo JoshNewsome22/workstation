@@ -12,23 +12,35 @@ namespace NBH\Relay;
  * at most 12 hours after signing in. Every call but signing in also needs the X-CSRF-Token header, a token
  * derived from the cookie that only the page itself receives; every POST is also origin-checked (App).
  *
+ * Wrong passwords pause signing in, per internet address and for everyone together. A browser that has
+ * signed in here before carries a second cookie, __Secure-nbh_device (signed with the pepper, 180 days), and
+ * the pause for everyone does not apply to it (its own address and device limits do), so wrong passwords
+ * from elsewhere cannot lock the BCBA out of their own devices.
+ *
+ * Creating a passcode asks for the password again once REAUTH_MINUTES have passed since it was last typed:
+ * a script on another page of the same site could otherwise use a signed-in admin's cookie to make one.
+ *
  *   POST /api/admin/password-hash {password}   only until a working admin password is set: the line for config.php
  *   POST /api/admin/login {password}           -> {ok, csrf} + cookie
  *   POST /api/admin/logout
  *   GET  /api/admin/state                      -> unused codes, active sessions, limits
- *   POST /api/admin/codes {label?, hours?}     -> {code, id, label, created, expires}   (the code is shown once)
+ *   POST /api/admin/codes {label?, hours?, password?}   -> {code, id, label, created, expires}   (the code is shown once)
  *   POST /api/admin/codes/revoke {id}
  *   POST /api/admin/sessions/revoke {id}
  *   POST /api/admin/sessions/revoke-all
- *   POST /api/admin/unlock                     forget the wrong-passcode counts (lifts a pause)
+ *   POST /api/admin/unlock                     forget the wrong-passcode and wrong-password counts (lifts a pause)
  */
 final class Admin
 {
     public const COOKIE = '__Secure-nbh_admin';
+    public const DEVICE_COOKIE = '__Secure-nbh_device';
+    public const DEVICE_DAYS = 180;
     public const MAX_SIGN_IN_HOURS = 12;
+    public const REAUTH_MINUTES = 10;
     public const LABEL_MAX = 60;
     public const MAX_UNUSED_CODES = 500;
     public const HASH_HELPER_PER_WINDOW = 10;
+    public const HASH_HELPER_ALL_PER_WINDOW = 30;
 
     public function __construct(private App $app)
     {
@@ -41,13 +53,13 @@ final class Admin
         $nonce = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
         if (!$this->app->coreReady() || !$this->app->config->hashOk()) {
             $showHelper = $this->app->coreReady() && !$this->app->config->hashOk();
-            return Response::html(200, Pages::setup($this->app->checklist($req), $this->app->config->warnings, $showHelper, $req->base, $nonce), $nonce);
+            return Response::html(200, Pages::setup($this->app->checklist($req), $this->app->config->warnings, $showHelper, $req->linkBase(), $nonce), $nonce);
         }
         $s = $this->session($req);
         if ($s === null) {
-            return Response::html(200, Pages::signIn($req->base, $nonce), $nonce);
+            return Response::html(200, Pages::signIn($req->linkBase(), $nonce), $nonce);
         }
-        $res = Response::html(200, Pages::dashboard($req->base, $this->app->crypto->csrf($s['token']), $this->app->config->warnings, $nonce), $nonce);
+        $res = Response::html(200, Pages::dashboard($req->linkBase(), $this->app->crypto->csrf($s['token']), $this->app->config->warnings, $nonce), $nonce);
         $res->cookies[] = $this->cookie($req, $s['token'], $s['expires_at'] - $this->app->now);
         return $res;
     }
@@ -73,11 +85,13 @@ final class Admin
         $db = $this->app->store();
         $bucket = 'hash-helper:ip:' . $this->app->ipKey($req);
         $window = $this->app->config->int('FAIL_WINDOW_MINUTES') * 60;
+        // each hash is costly (Argon2id), so it is limited per address and for everyone together
         $wait = $db->write(function () use ($db, $bucket, $window): int {
             $rl = new RateLimiter($db, $this->app->now);
-            $wait = $rl->wait($bucket, $window, self::HASH_HELPER_PER_WINDOW);
+            $wait = max($rl->wait($bucket, $window, self::HASH_HELPER_PER_WINDOW), $rl->wait('hash-helper:all', $window, self::HASH_HELPER_ALL_PER_WINDOW));
             if ($wait === 0) {
                 $rl->hit($bucket);
+                $rl->hit('hash-helper:all');
             }
             return $wait;
         });
@@ -101,35 +115,88 @@ final class Admin
         $cfg = $this->app->config;
         $db = $this->app->store();
         $now = $this->app->now;
-        $window = $cfg->int('FAIL_WINDOW_MINUTES') * 60;
-        $ipBucket = 'login-fail:ip:' . $this->app->ipKey($req);
+        $device = $this->device($req);
 
         // one transaction, the password check included, so parallel guesses cannot slip past the limit
-        return $db->write(function () use ($db, $req, $pw, $cfg, $now, $window, $ipBucket): Response {
-            $rl = new RateLimiter($db, $now);
-            $wait = max(
-                $rl->wait($ipBucket, $window, $cfg->int('LOGIN_FAILS_PER_IP')),
-                $rl->wait('login-fail:all', $window, $cfg->int('LOGIN_FAILS_ALL'))
-            );
-            if ($wait > 0) {
-                Log::event('admin_sign_in_paused', ['wait' => $wait]);
-                return Response::error(429, 'rate_limited', 'Too many wrong passwords. Wait, then try again.', ['retry_after' => $wait]);
-            }
-            if (!password_verify($pw, $cfg->str('ADMIN_PASSWORD_HASH'))) {
-                $rl->hit($ipBucket);
-                $rl->hit('login-fail:all');
-                Log::event('admin_sign_in_failed');
-                return Response::error(401, 'wrong_password', 'That is not the admin password.');
+        return $db->write(function () use ($db, $req, $pw, $cfg, $now, $device): Response {
+            $bad = $this->passwordCheck($req, $pw, $device !== null, $device === null ? [] : ['login-fail:dev:' . $device], 'admin_sign_in_failed');
+            if ($bad !== null) {
+                return $bad;
             }
             $token = Crypto::token();
             $expires = min($now + self::MAX_SIGN_IN_HOURS * 3600, $now + $cfg->int('ADMIN_SESSION_MINUTES') * 60);
-            $db->run('INSERT INTO admin_sessions (token_hash, created_at, expires_at) VALUES (?, ?, ?)', [$this->app->crypto->hash('admin', $token), $now, $expires]);
+            $db->run('INSERT INTO admin_sessions (token_hash, created_at, expires_at, auth_at) VALUES (?, ?, ?, ?)', [$this->app->crypto->hash('admin', $token), $now, $expires, $now]);
             $db->run('DELETE FROM admin_sessions WHERE expires_at <= ?', [$now]);
             Log::event('admin_signed_in');
             $res = Response::json(200, ['ok' => true, 'csrf' => $this->app->crypto->csrf($token), 'expires' => App::iso($expires)]);
             $res->cookies[] = $this->cookie($req, $token, $expires - $now);
+            $res->cookies[] = $this->deviceCookie($req);
             return $res;
         });
+    }
+
+    /**
+     * The admin password check with its limits, inside a write transaction: null when $pw is the password,
+     * else the answer to give (429 while paused, 401 when wrong; a wrong one is counted). $trusted (a browser
+     * that has signed in here before, or a signed-in session) skips the pause for everyone, not the others.
+     *
+     * @param list<string> $extra more buckets to count in and to check, with the per-address limit
+     */
+    private function passwordCheck(Request $req, #[\SensitiveParameter] string $pw, bool $trusted, array $extra, string $event): ?Response
+    {
+        $cfg = $this->app->config;
+        $window = $cfg->int('FAIL_WINDOW_MINUTES') * 60;
+        $rl = new RateLimiter($this->app->store(), $this->app->now);
+        $buckets = array_merge(['login-fail:ip:' . $this->app->ipKey($req)], $extra);
+        $wait = 0;
+        foreach ($buckets as $b) {
+            $wait = max($wait, $rl->wait($b, $window, $cfg->int('LOGIN_FAILS_PER_IP')));
+        }
+        if (!$trusted) {
+            $wait = max($wait, $rl->wait('login-fail:all', $window, $cfg->int('LOGIN_FAILS_ALL')));
+        }
+        if ($wait > 0) {
+            Log::event('admin_sign_in_paused', ['wait' => $wait]);
+            return Response::error(429, 'rate_limited', 'Too many wrong passwords. Wait, then try again.', ['retry_after' => $wait]);
+        }
+        if (!password_verify($pw, $cfg->str('ADMIN_PASSWORD_HASH'))) {
+            foreach ($buckets as $b) {
+                $rl->hit($b);
+            }
+            $rl->hit('login-fail:all');
+            Log::event($event);
+            return Response::error(401, 'wrong_password', 'That is not the admin password.');
+        }
+        return null;
+    }
+
+    /**
+     * This browser's id when it has signed in here before (its device cookie is signed with the pepper and
+     * at most DEVICE_DAYS old), else null. The id names its bucket for wrong passwords; it is not kept.
+     */
+    private function device(Request $req): ?string
+    {
+        if (!preg_match('/^(\d{10})\.([A-Za-z0-9_-]{22})\.([0-9a-f]{64})$/', $req->cookie(self::DEVICE_COOKIE), $m)) {
+            return null;
+        }
+        $t = (int) $m[1];
+        $now = $this->app->now;
+        if ($t > $now + 300 || $t < $now - self::DEVICE_DAYS * 86400) {
+            return null;
+        }
+        if (!hash_equals($this->app->crypto->hash('device', $m[1] . '.' . $m[2]), $m[3])) {
+            return null;
+        }
+        return substr($this->app->crypto->hash('device-id', $m[2]), 0, 32);
+    }
+
+    /** A new device cookie, given at every sign-in: "issued.random.signature". */
+    private function deviceCookie(Request $req): string
+    {
+        $t = (string) $this->app->now;
+        $id = rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
+        $value = $t . '.' . $id . '.' . $this->app->crypto->hash('device', $t . '.' . $id);
+        return self::DEVICE_COOKIE . '=' . $value . '; Path=' . self::cookiePath($req) . '; Max-Age=' . (self::DEVICE_DAYS * 86400) . '; Secure; HttpOnly; SameSite=Strict';
     }
 
     /**
@@ -156,7 +223,7 @@ final class Admin
      */
     public function state(Request $req, array $body): Response
     {
-        return $this->guarded($req, function (): Response {
+        return $this->guarded($req, function (array $s): Response {
             $db = $this->app->store();
             $cfg = $this->app->config;
             $now = $this->app->now;
@@ -184,6 +251,9 @@ final class Admin
                 'rewrites_today' => $rl->count('rewrite:all', 86400),
                 'wrong_passcodes' => $rl->count('redeem-fail:all', $window),
                 'passcode_pause' => $rl->wait('redeem-fail:all', $window, $cfg->int('REDEEM_FAILS_ALL')),
+                'wrong_passwords' => $rl->count('login-fail:all', $window),
+                'sign_in_pause' => $rl->wait('login-fail:all', $window, $cfg->int('LOGIN_FAILS_ALL')),
+                'password_after' => max(0, $s['auth_at'] + self::REAUTH_MINUTES * 60 - $now),
                 'limits' => [
                     'session_hours' => $cfg->int('SESSION_HOURS'),
                     'code_hours' => $cfg->int('CODE_HOURS'),
@@ -204,7 +274,7 @@ final class Admin
      */
     public function createCode(Request $req, array $body): Response
     {
-        return $this->guarded($req, function () use ($body): Response {
+        return $this->guarded($req, function (array $s) use ($req, $body): Response {
             $cfg = $this->app->config;
             $label = self::label($body['label'] ?? '');
             if ($label === null) {
@@ -219,6 +289,24 @@ final class Admin
             }
             $db = $this->app->store();
             $now = $this->app->now;
+            if ($now - $s['auth_at'] > self::REAUTH_MINUTES * 60) {
+                $pw = $body['password'] ?? null;
+                if (!is_string($pw) || $pw === '' || strlen($pw) > 1024) {
+                    return Response::error(403, 'password_needed', 'Enter the admin password again to create a passcode.');
+                }
+                $device = $this->device($req);
+                $extra = array_merge(['login-fail:adm:' . $s['id']], $device === null ? [] : ['login-fail:dev:' . $device]);
+                $bad = $db->write(function () use ($db, $req, $pw, $extra, $now, $s): ?Response {
+                    $bad = $this->passwordCheck($req, $pw, true, $extra, 'admin_reauth_failed');
+                    if ($bad === null) {
+                        $db->run('UPDATE admin_sessions SET auth_at = ? WHERE id = ?', [$now, $s['id']]);
+                    }
+                    return $bad;
+                });
+                if ($bad !== null) {
+                    return $bad;
+                }
+            }
             $made = $db->write(function () use ($db, $label, $hours, $now): ?array {
                 $n = (int) ($db->one('SELECT COUNT(*) AS n FROM codes WHERE expires_at > ?', [$now])['n'] ?? 0);
                 if ($n >= self::MAX_UNUSED_CODES) {
@@ -292,7 +380,9 @@ final class Admin
     public function unlock(Request $req, array $body): Response
     {
         return $this->guarded($req, function (): Response {
-            $n = (new RateLimiter($this->app->store(), $this->app->now))->clear('redeem-fail:');
+            $rl = new RateLimiter($this->app->store(), $this->app->now);
+            $n = $rl->clear('redeem-fail:') + $rl->clear('login-fail:');
+            Log::event('wrong_tries_cleared', ['count' => $n]);
             return Response::json(200, ['ok' => true, 'removed' => $n]);
         });
     }
@@ -300,9 +390,9 @@ final class Admin
     // ------------------------------------------------------------------ helpers
 
     /**
-     * Runs $fn for a signed-in admin with the right CSRF token; refreshes the cookie's expiry.
+     * Runs $fn (given the session) for a signed-in admin with the right CSRF token; refreshes the cookie's expiry.
      *
-     * @param callable():Response $fn
+     * @param callable(array{id:int,token:string,expires_at:int,auth_at:int}):Response $fn
      */
     private function guarded(Request $req, callable $fn): Response
     {
@@ -314,7 +404,7 @@ final class Admin
             Log::event('admin_csrf_refused');
             return Response::error(403, 'csrf', 'Reload the admin page and try again.');
         }
-        $res = $fn();
+        $res = $fn($s);
         $res->cookies[] = $this->cookie($req, $s['token'], $s['expires_at'] - $this->app->now);
         return $res;
     }
@@ -322,7 +412,7 @@ final class Admin
     /**
      * The signed-in admin session for this request's cookie, its expiry moved forward; null when there is none.
      *
-     * @return array{id:int,token:string,expires_at:int}|null
+     * @return array{id:int,token:string,expires_at:int,auth_at:int}|null
      */
     private function session(Request $req): ?array
     {
@@ -332,7 +422,7 @@ final class Admin
         }
         $db = $this->app->store();
         $now = $this->app->now;
-        $row = $db->one('SELECT id, created_at, expires_at FROM admin_sessions WHERE token_hash = ?', [$this->app->crypto->hash('admin', $token)]);
+        $row = $db->one('SELECT id, created_at, expires_at, auth_at FROM admin_sessions WHERE token_hash = ?', [$this->app->crypto->hash('admin', $token)]);
         if ($row === null || (int) $row['expires_at'] <= $now) {
             return null;
         }
@@ -341,13 +431,18 @@ final class Admin
             return null;
         }
         $db->run('UPDATE admin_sessions SET expires_at = ? WHERE id = ?', [$expires, $row['id']]);
-        return ['id' => (int) $row['id'], 'token' => $token, 'expires_at' => $expires];
+        return ['id' => (int) $row['id'], 'token' => $token, 'expires_at' => $expires, 'auth_at' => (int) $row['auth_at']];
     }
 
     private function cookie(Request $req, string $value, int $maxAge): string
     {
-        $path = $req->base === '' ? '/' : $req->base . '/';
-        return self::COOKIE . '=' . $value . '; Path=' . $path . '; Max-Age=' . max(0, $maxAge) . '; Secure; HttpOnly; SameSite=Strict';
+        return self::COOKIE . '=' . $value . '; Path=' . self::cookiePath($req) . '; Max-Age=' . max(0, $maxAge) . '; Secure; HttpOnly; SameSite=Strict';
+    }
+
+    /** The relay's folder ("/ai/"): the cookies go to its addresses only, the index.php ones included. */
+    private static function cookiePath(Request $req): string
+    {
+        return $req->base === '' ? '/' : $req->base . '/';
     }
 
     /** A label as given, tidied (no control characters, single spaces); null when it is not text or too long. */
