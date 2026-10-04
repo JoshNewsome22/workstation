@@ -8,13 +8,25 @@
       recording, the pill shown when the recorder is scrolled away brings them all back into view, also at 1024x700 (a
       1024x768 iPad's Safari window) with the bar open, where only the working part fits and the settings line scrolls
       away above.
+   1b. (fix pass) While an interval sample runs, in the workstation at 1180x820 and 1024x768 with the bar folded and wrapped
+      to two rows (the form's frame starts at 260, as it does once the first autosave has widened the chip): after Start
+      sample, and again after the pill, the student's and the peer's + and −, − for both and Undo mark are in view together
+      with everything in 1, and they score where they are. After End, Save to the record, Save into and Discard are in
+      view together, and the Recording Summary starts with where it saves. The pill shows exactly while the tiles and Start,
+      End and Save (and the marks, while a sample runs) are out of sight, and covers no recorder control.
+   1c. (fix pass) Nothing moves while recording: Start, End, Save, the tiles, the Undo buttons, the note box and the marks
+      keep their places (top and left) through Start, Start sample, a count, Pause and Resume, at 1180x820, at 1024x768
+      with a planned length (whose status line wraps once a pause is counted), at 820x1180, on a phone (390x844, the
+      tiles, Start, End, Save and the note box), and with a mouse at 1440x900 (where Pause and Resume carry the Space
+      hint) and 1024x700 (where they do not).
    2. Start, End and Save are one row in the clock's column, under the clock, each at least 44 x 44 px; the note box sits
       under the count tiles.
    3. A short landscape window folds the explanations away behind How it works, which unfolds them; portrait shows them.
    4. The run of ob1-live.js, by touch in the workstation at 1180x820: TB-1 simulated, then OB-1: Start, three student taps,
       one peer tap, a note, End, Save. Every control is tapped where it is, with no scrolling, and the sheet holds what
-      ob1-live.js recorded before this package: count 3, peer 1, minutes 0.1, the date and the start and end times of the
-      run, the note in the narrative, no interval marked.
+      ob1-live.js recorded before this package: count 3, peer 1, the minutes observed (0.1 in ob1-live.js's run, and
+      here whenever the run takes 3 to 9 s), the date and the start and end times of the run, the note in the narrative,
+      no interval marked.
    5. File names: Save data gives OB-1_<Student>_<YYYY-MM-DD>_<HHMM>.json and Export CSV the same name in .csv, from the
       local time of the save, so two saves at different times differ; no student gives OB-1_student_...; the file's
       content is unchanged and opens again; a record in v21.24's shape (below) opens whole and saves again under the new
@@ -51,8 +63,10 @@ function watch(page,where){
   page.on('console',m=>{if(m.type()==='error')errs.push(where+' console: '+m.text().slice(0,240));});
 }
 const CORE=['obrClock','obrStart','obrEnd','obrSave','obrTapS','obrTapP','obrUndoS','obrUndoP','obrNote','obrNoteT','obrNoteNow','obrNoteW','obrNoteAdd'];
+/* while a sample runs: the student's and the peer's + and −, − for both and Undo mark */
+const MARKS=['obrSP','obrSM','obrPP','obrPM','obrBoth','obrUndoM'];
 /* where each control sits, and whether it is fully inside the visible area and not covered */
-async function reach(fr){
+async function reach(fr,list){
   return fr.evaluate(ids=>{
     const tb=document.querySelector('.toolbar'),sticky=!!tb&&getComputedStyle(tb).position==='sticky';
     const top=sticky?tb.getBoundingClientRect().bottom:0,vh=window.innerHeight,vw=document.documentElement.clientWidth;
@@ -67,7 +81,7 @@ async function reach(fr){
       else if(!hit||!(hit===e||e.contains(hit)))out.bad.push(id+' covered by '+(hit?(hit.id||hit.className||hit.tagName):'nothing'));
     }
     const col=document.querySelector('#obRec .obr-clock');out.els.col=col?box(col.getBoundingClientRect()):null;
-    return out;},CORE);
+    return out;},list||CORE);
 }
 /* the recorder scrolled to the top under the toolbar, as the recording pill's "back to the recorder" does */
 const pillScroll=fr=>fr.evaluate(()=>{const box=document.getElementById('obRec'),bar=document.querySelector('.toolbar'),
@@ -163,6 +177,107 @@ async function pillCase(br,W,H,bar,chip){
   await fr.evaluate(()=>{const d=document.querySelector('#nbhUiDlg');if(d&&d.open){const b=d.querySelector('button.primary,button.danger');if(b)b.click();}});await sleep(300);
   await ctx.close();
 }
+/* (fix pass) the workstation with OB-1 open, by touch, the bar folded or open, and the wider Autosaved chip if asked */
+async function shellOpen(br,W,H,bar,chip,tag){
+  const ctx=await br.newContext({viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
+  const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));
+  await page.goto(SHELL);await sleep(900);
+  await page.evaluate(()=>{const e=document.getElementById('pClient');e.value='Jordan Rivera';e.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.evaluate(i=>openForm(i),'OB-1');await page.waitForFunction(i=>!!state.status[i],'OB-1',{timeout:20000}).catch(()=>{});await sleep(1500);
+  const fr=page.frames().find(x=>x.url().includes(OB.file)||x.url().includes(encodeURIComponent(OB.file)));
+  if(bar==='fold'){if(await page.isVisible('#barFold'))await page.tap('#barFold');}else if(await page.isVisible('#barEdit'))await page.tap('#barEdit');
+  if(chip)await page.evaluate(()=>{const c=document.getElementById('autoChip');if(c)c.textContent='Autosaved 12:59 PM';});
+  await sleep(400);
+  const frameTop=await page.evaluate(()=>{const f=[...document.querySelectorAll('iframe')].find(x=>!x.hidden&&x.getBoundingClientRect().height>0);return f?Math.round(f.getBoundingClientRect().top):null;});
+  return {ctx,page,fr,frameTop};
+}
+const dialogOk=(fr,cls)=>fr.evaluate(c=>{const d=document.querySelector('#nbhUiDlg');if(!d||!d.open)return '';const b=d.querySelector('button.'+c);if(!b)return '';const t=b.textContent;b.click();return t;},cls);
+/* (fix pass) while a sample runs, in the workstation with the bar folded and wrapped to two rows, as after the first autosave */
+async function sampleCase(br,W,H){
+  const tag=`sample, shell ${W}x${H} bar fold + Autosaved chip`;
+  const {ctx,fr,frameTop}=await shellOpen(br,W,H,'fold',true,tag);
+  if(!fr){ok(tag+': OB-1 opens in the workstation',false);await ctx.close();return;}
+  ok(tag+': the bar is two rows, as after the first autosave (the form starts at 260)',frameTop>=255,{frameTop});
+  await fr.tap('#viewSeg [data-view="obs"]');await sleep(500);
+  await fr.tap('#obrStart');await sleep(500);
+  const y0=await fr.evaluate(()=>scrollY),m0=await reach(fr,MARKS);
+  await fr.tap('#obrSample');await sleep(500);
+  const y1=await fr.evaluate(()=>scrollY),m1=await reach(fr,CORE.concat(MARKS));
+  ok(tag+': after Start sample, + and − for the student and the peer, − for both and Undo mark are in view with the clock, Start, End, Save, the tiles and the note box',
+    !m1.bad.length,{scrolledBy:y1-y0,outBefore:m0.bad,visible:[m1.top,m1.vh],bad:m1.bad});
+  /* they score where they are, with no scrolling */
+  const here=async id=>{const r=await reach(fr,[id]),y=await fr.evaluate(()=>scrollY);await fr.tap('#'+id);await sleep(250);return !r.bad.length&&y===await fr.evaluate(()=>scrollY);};
+  const a=await here('obrSP'),b=await here('obrPP'),s1=await fr.evaluate(()=>obRecorder.sample());
+  const c=await here('obrUndoM'),s2=await fr.evaluate(()=>obRecorder.sample());
+  ok(tag+': + for the student and for the peer score interval 1 where they are, and Undo mark takes the last mark back',
+    a&&b&&c&&s1.s[0]==='+'&&s1.p[0]==='+'&&s2.s[0]==='+'&&s2.p[0]==='',{inView:[a,b,c],marked:[s1.s[0],s1.p[0]],undone:[s2.s[0],s2.p[0]]});
+  /* scrolled down to the sheets: the pill brings them all back */
+  await fr.evaluate(()=>window.scrollTo(0,document.documentElement.scrollHeight));await sleep(500);
+  const shown=await fr.isVisible('#obrPill');if(shown)await fr.tap('#obrPill');await sleep(400);
+  const m2=await reach(fr,CORE.concat(MARKS));
+  ok(tag+': scrolled away, the pill brings them all back into view',shown&&!m2.bad.length,{shown,visible:[m2.top,m2.vh],bad:m2.bad});
+  /* End: Save to the record, Save into and Discard together, and the summary says first where it saves */
+  await fr.tap('#obrEnd');await sleep(400);const endOk=await dialogOk(fr,'primary');await sleep(500);
+  const m3=await reach(fr,['obrSave','obrInto','obrDiscard']);
+  const sum=await fr.evaluate(()=>{const tr=document.querySelector('#obrSum tr');if(!tr)return null;const r=tr.getBoundingClientRect();
+    return {first:tr.querySelector('th').textContent,what:tr.querySelector('td').textContent,bottom:Math.round(r.bottom),vh:innerHeight};});
+  ok(tag+': after End, Save to the record, Save into and Discard are in view together',endOk==='End now'&&(await fr.evaluate(()=>obRecorder.state()))==='ended'&&!m3.bad.length,
+    {endOk,bad:m3.bad,save:m3.els.obrSave,into:m3.els.obrInto,discard:m3.els.obrDiscard});
+  ok(tag+': the Recording Summary starts with where it saves, in view',!!sum&&sum.first==='Saves into'&&sum.bottom<=sum.vh,sum);
+  await fr.tap('#obrDiscard');await sleep(300);const disc=await dialogOk(fr,'danger');await sleep(300);
+  ok(tag+': Discard there asks first, then discards the recording',disc==='Discard'&&(await fr.evaluate(()=>obRecorder.state()))==='ready',{disc});
+  await ctx.close();
+}
+/* (fix pass) scrolled in steps while recording: the pill shows while the tiles and Start, End and Save (and the marks, while
+   a sample runs) are all out of sight, hides while the tiles are at least half in sight, and never covers a recorder control */
+async function pillBand(br,W,H,sample){
+  const tag=`pill band, shell ${W}x${H}${sample?', a sample running':''}`;
+  const {ctx,fr}=await shellOpen(br,W,H,'fold',true,tag);
+  await fr.tap('#viewSeg [data-view="obs"]');await sleep(400);await fr.tap('#obrStart');await sleep(400);
+  if(sample){await fr.tap('#obrSample');await sleep(400);}
+  const end=await fr.evaluate(()=>Math.round(document.getElementById('obRec').getBoundingClientRect().bottom+scrollY));
+  const bad=[];let n=0,shownAt=null;
+  for(let y=0;y<=end;y+=30){await fr.evaluate(y=>window.scrollTo(0,y),y);await sleep(80);n++;
+    const r=await fr.evaluate(withMarks=>{const tbe=document.querySelector('.toolbar'),tb=getComputedStyle(tbe).position==='sticky'?tbe.getBoundingClientRect().bottom:0,vh=innerHeight;
+      const part=e=>{const r=e.getBoundingClientRect();return r.height?Math.max(0,Math.min(r.bottom,vh)-Math.max(r.top,tb))/r.height:0;};
+      const tiles=part(document.getElementById('obrTapS')),run=part(document.querySelector('#obRec .obr-run')),marks=withMarks?part(document.querySelector('#obRec .obr-mks')):0;
+      const p=document.getElementById('obrPill'),pr=p.getBoundingClientRect(),shown=!p.hidden&&pr.height>0;
+      const covers=shown?[...document.querySelectorAll('#obRec button,#obRec select,#obRec input')].filter(e=>{const r=e.getBoundingClientRect();
+        return r.width>0&&r.height>0&&r.right>pr.left&&r.left<pr.right&&r.bottom>pr.top&&r.top<pr.bottom;}).map(e=>e.id||e.textContent.trim().slice(0,12)):[];
+      return {sy:Math.round(scrollY),tiles,run,marks,shown,covers};},sample);
+    if(r.shown&&shownAt===null)shownAt=r.sy;
+    if(r.tiles===0&&r.run===0&&r.marks===0&&!r.shown)bad.push(r.sy+': all out of sight, no pill');
+    if(r.tiles>=0.5&&r.shown)bad.push(r.sy+': the tiles in sight, and the pill too');
+    if(r.covers.length)bad.push(r.sy+': the pill covers '+r.covers.join('/'));}
+  ok(tag+': the pill shows while the working part is out of sight, hides while the tiles are in sight, covers no control ('+n+' scroll positions, pill from '+shownAt+')',!bad.length&&shownAt!==null,bad);
+  await ctx.close();
+}
+/* (fix pass) nothing moves while recording: top, left, width and height of each control, from Ready through Resume */
+async function steady(br,W,H,where,plan){
+  const tag=`steady, ${where} ${W}x${H}${plan?', planned length '+plan+' min':''}`;
+  let ctx,fr;
+  /* 'desktop': a mouse and no touch, where Pause and Resume show the Space hint */
+  const mouse=where==='desktop',press=sel=>mouse?fr.click(sel):fr.tap(sel);
+  if(where==='shell')({ctx,fr}=await shellOpen(br,W,H,'fold',true,tag));
+  else{ctx=await br.newContext(mouse?{viewport:{width:W,height:H}}:{viewport:{width:W,height:H},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
+    const page=await ctx.newPage();watch(page,tag);page.on('dialog',d=>d.accept().catch(()=>{}));await page.goto(FORM);await sleep(800);fr=page.mainFrame();}
+  await press('#viewSeg [data-view="obs"]');await sleep(400);
+  if(plan)await fr.evaluate(p=>{const e=document.getElementById('obrPlan');e.value=p;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));},plan);
+  await sleep(200);
+  /* on a phone the interval sample's own header changes height when the sample starts (as before this package), so there the
+     marks are left out */
+  const ids=['obrStart','obrEnd','obrSave','obrTapS','obrTapP','obrUndoS','obrUndoP','obrNoteT','obrNoteNow','obrNoteW','obrNoteAdd'].concat(W>760?MARKS:[]);
+  const pos=()=>fr.evaluate(ids=>{const o={};for(const id of ids){const r=document.getElementById(id).getBoundingClientRect();
+      o[id]=[Math.round(r.left),Math.round(r.top+scrollY),Math.round(r.width),Math.round(r.height)];}
+    o.msg=document.getElementById('obrMsg').textContent.trim().slice(0,48);o.sub=document.getElementById('obrSub').textContent;return o;},ids);
+  const base=await pos(),moved=[],seen=[];
+  for(const [name,sel] of [['Start','#obrStart'],['Start sample','#obrSample'],['a count','#obrTapS'],['Pause','#obrStart'],['Resume','#obrStart']]){
+    await press(sel);await sleep(350);const p=await pos();seen.push(name+': "'+p.msg+'" / "'+p.sub+'"');
+    for(const id of ids)if(p[id].join()!==base[id].join())moved.push(name+': '+id+' '+base[id].join(',')+' -> '+p[id].join(','));}
+  ok(tag+': Start, End, Save, the tiles, Undo and the note box'+(W>760?', and the marks,':'')+' keep their places through Start, Start sample, a count, Pause and Resume',
+    !moved.length,moved.length?{moved,seen}:{last:seen[seen.length-1]});
+  await ctx.close();
+}
 async function liveRun(br){
   const tag='live run, shell 1180x820';
   const ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true,isMobile:true});await ctx.addInitScript(()=>{window.print=function(){};});
@@ -198,8 +313,12 @@ async function liveRun(br){
   const exp=await fr.evaluate(([ws,we,el])=>{const p=n=>String(n).padStart(2,'0'),d=new Date(ws),e=new Date(we);
     return {date:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),start:p(d.getHours())+':'+p(d.getMinutes()),end:p(e.getHours())+':'+p(e.getMinutes()),mins:String(Math.round(el/6000)/10)};},[wall.start,wall.end,elapsed]);
   ok(tag+': counts 3 and 1 recorded',counts.s===3&&counts.p===1,counts);
-  ok(tag+': the sheet holds what ob1-live.js recorded: count 3, peer 1, minutes 0.1, no interval marked',
-    got.count==='3'&&got.peerCount==='1'&&got.mins==='0.1'&&got.iv===0&&got.peerIv===0&&got.sheet==='3'&&got.n===1,got);
+  /* the minutes are the time observed, to a tenth: ob1-live.js's run gave 0.1, and so does this one when Start to End takes
+     3 to 9 s (a slow machine can take longer, which is not a fault) */
+  const tenth=Math.round(elapsed/6000)/10;
+  ok(tag+': the sheet holds what ob1-live.js recorded: count 3, peer 1, the minutes observed, no interval marked',
+    got.count==='3'&&got.peerCount==='1'&&got.mins===String(tenth)&&got.iv===0&&got.peerIv===0&&got.sheet==='3'&&got.n===1,
+    Object.assign({},got,{elapsedMs:Math.round(elapsed),asInOb1Live:got.mins==='0.1'}));
   ok(tag+': the date and the start and end times are the run\'s own',got.date===exp.date&&got.start===exp.start&&got.end===exp.end&&got.mins===exp.mins,{got:[got.date,got.start,got.end,got.mins],exp});
   ok(tag+': the note is in the narrative at its time',got.narr.length===1&&got.narr[0][0]===noteT&&got.narr[0][1]==='Math worksheet given; J. pushes paper off desk',{narr:got.narr,noteT});
   ok(tag+': the student came from the bar and the behavior from TB-1; the recorder is ready again',got.client==='Jordan Rivera'&&/\S/.test(got.behavior)&&got.rec==='ready'&&!saveQ,{client:got.client,behavior:got.behavior,rec:got.rec,saveQ});
@@ -262,11 +381,12 @@ async function print(br){
   if(!base){console.log('NOTE the form at '+A3_BASE+' is not in this checkout (set A3_BASE): print comparison skipped');return;}
   const dirs={base:OUT+'print/base/',now:OUT+'print/now/'};Object.values(dirs).forEach(d=>{fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});});
   fs.mkdirSync(OUT+'base/',{recursive:true});fs.writeFileSync(OUT+'base/'+OB.file,base);
-  /* served beside the checkout when the server's root is WS_ROOT; read from the disk otherwise */
+  /* served beside the checkout when the server's root is WS_ROOT; read from the disk otherwise. (fix pass) Asked with a
+     plain request, so a server whose folder is not WS_ROOT answers 404 without a console error in the page. */
   let baseUrl=BASE+'/qa/out/sprint-a3/base/'+encodeURIComponent(OB.file);
   const ctx=await br.newContext({viewport:{width:1280,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
   const page=await ctx.newPage();watch(page,'print');page.on('dialog',d=>d.accept().catch(()=>{}));
-  const r=await page.goto(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+OUT+'base/'+OB.file;
+  const r=await ctx.request.get(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+OUT+'base/'+OB.file;
   await page.goto(FORM);await sleep(700);await page.evaluate(()=>{window.confirm=()=>true;});
   await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(700);
   const data=OUT+'print-data.json';fs.writeFileSync(data,await page.evaluate(()=>JSON.stringify(state,null,1)));
@@ -295,6 +415,9 @@ async function print(br){
     await shellCase(br,W,H,bar,chip);
   await aloneCase(br,1180,820);await aloneCase(br,1024,768);
   await pillCase(br,1180,820,'fold',false);await pillCase(br,1024,700,'open',true);
+  for(const [W,H] of [[1180,820],[1024,768]]){await sampleCase(br,W,H);await pillBand(br,W,H,false);await pillBand(br,W,H,true);}
+  await steady(br,1180,820,'shell');await steady(br,1024,768,'shell','10');await steady(br,820,1180,'shell');await steady(br,390,844,'alone');
+  await steady(br,1440,900,'desktop');await steady(br,1024,700,'desktop');
   await liveRun(br);
   await files(br);
   await print(br);
