@@ -38,6 +38,6 @@ python3 - <<'PY'
 core=open('tools/blocks/nbh-link.js',encoding='utf-8').read()
 doc=open('NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html',encoding='utf-8').read()
 BANNER='/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n'
-assert doc.count(BANNER)==1 and doc.count(BANNER+core)==1 and doc.count('nbh-link (v21.44)')==1, 'the link core is not in the built TK-1 exactly once, byte for byte'
+assert doc.count(BANNER)==1 and doc.count(BANNER+core)==1 and doc.count('nbh-link (v21.43)')==1, 'the link core is not in the built TK-1 exactly once, byte for byte'
 print('the link core (tools/blocks/nbh-link.js) is in the built TK-1 once, byte for byte')
 PY

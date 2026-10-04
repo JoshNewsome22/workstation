@@ -2300,7 +2300,7 @@ var qrcode = function() {
 }));
 
 /* ===== nbh-link (tools/blocks/nbh-link.js) ===== */
-/* nbh-link (v21.44): the optional link between Form TK-1 (the token board book) and Form TE-1 (the token economy
+/* nbh-link (v21.43): the optional link between Form TK-1 (the token board book) and Form TE-1 (the token economy
    plan). One copy of this file is built into both forms (tools/forms/TK-1/build.sh, tools/blocks/patch-link.py),
    so the two cannot drift apart. Each form compares itself with the other when the user clicks (through the
    shell's read-only relay, or a file the other form saved when it is open alone) and takes only the items the
@@ -2309,16 +2309,25 @@ var qrcode = function() {
    Messages (the asker accepts 'answer' and 'opened' only from window.parent, only while it waits for that reply,
    and only for its partner; anything else is ignored and counted):
      form -> shell {nbh:'ask',want}            shell -> form {nbh:'answer',want,ok,title,snap:{total,data,own}}
-     form -> shell {nbh:'open',want,beside}    shell -> form {nbh:'opened',want,ok[,why]}
+     form -> shell {nbh:'open',want,beside}    shell -> form {nbh:'opened',want,ok[,why][,beside]}
+   (beside:false in the 'opened' answer: the partner opened in place of the asker, as on a phone.)
    The form supplies an adapter to mount(): {me,other,meWhat,otherWhat,sibling,host,get(),set(str),view(otherS),
-   rows(view),take(row),snapshot(),restore(json),after()} and, optionally, choose(key,i,view), which returns true when
-   it handled a choice button itself. Each row: {key,what,here,there,same?,owner:'there'|'here'|'',pre:['fill'|
-   'changed'|'any'],can,keep (false: no Keep button),why,warn,info,preview} plus, where needed, block/fill/fillParts
-   (whoRow), mirror (the partner has a matching row), choose {n,value} or {labels,on:[i]} (the choice buttons), seen
-   (menuSeen hashes), took (the words for the took line), rp (pages to reprint), takeLabel. The record's kd and td hold the
-   day a row was kept, or taken in part (a take that left it different). A row with no what is an
-   information line. Apply takes or keeps a row only while its value here is still the one the compare showed, and
-   Undo is offered only while the record is still the one the take left. */
+   rows(view),take(row),snapshot(),restore(json),after()} and, optionally: choose(key,i,view), which returns true when
+   it handled a choice button itself (the row's tick stays) or 'reset' (handled, and the row's tick is let go);
+   record(lk,{taken,kept,step}), called as the record is written after a compare or an Apply, with the rows taken,
+   kept or found in step, so the form can note what they pair (TK-1's paired target card); noView, the message, or a
+   function (partner's S, source) giving it, when view() refuses the partner; rpLine(pages), the words of the reprint
+   line. Each row: {key,what,here,there,same?,owner:'there'|'here'|'',pre:['fill'|'changed'|'any'],can,keep (false: no
+   Keep button),why,warn,info,preview} plus, where needed, block/fill/fillParts (whoRow), mirror (the partner can take
+   this row's value from this form when it compares), choose {n,value} or {labels,on:[i]} (the choice buttons), seen
+   (menuSeen hashes), took (the words for the took line), rp (pages to reprint), takeLabel, keptLabel (the words for a
+   difference kept: "kept different" unless said), nobase (the record's mark for this key is about another item, so the
+   row is compared without it). The record's kd and td hold the day a row was kept, or taken in part (a take that left
+   it different); pb holds the hashes of the case's problem behaviors seen at a compare, so the problem-behavior guard
+   (problem()) still knows them when the form is open on its own. A row with no what is an information line. Apply
+   takes or keeps a row only while its value here is still the one the compare showed, and Undo is offered only while
+   the record is still the one the take left. A compare that finds another student writes no in-step mark; those are
+   written when "These are the same student" is applied. */
 (function(){
 'use strict';
 if(window.NBHLink)return;
@@ -2328,7 +2337,7 @@ const trim=v=>str(v).trim();
 const val=v=>Array.isArray(v)?v.map(str).filter(Boolean).join('; '):str(v);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-const HEX=/^[0-9a-f]{8}$/,RES=/^(step|who|look \d{1,3}|kept \d{1,3})$/,KEYS=['who','card','beh','n','tok','menu','sched'];
+const HEX=/^[0-9a-f]{8}$/,RES=/^(step|who|empty|look \d{1,3}|kept \d{1,3}( part \d{1,3})?|part \d{1,3})$/,KEYS=['who','card','beh','n','tok','menu','sched'];
 const MAX=1800;
 
 /* NFKC does not fold an iPad's smart punctuation, so curly quotes and the dashes are folded to ' and - here */
@@ -2353,6 +2362,7 @@ function tokSame(form,name,stem){const f=norm(form),n=norm(name),st=norm(stem)||
 /* ---- the link record ---- */
 const cut=(v,n)=>typeof v==='string'?v.slice(0,n):'';
 const okCard=v=>Number.isInteger(v)&&v>=0&&v<=5;
+const hexes=(a,n)=>(Array.isArray(a)?a:[]).filter(h=>typeof h==='string'&&HEX.test(h)).slice(0,n);
 function readLk(x){
   if(typeof x!=='string'||!x||x.length>2000)return null;
   let o=null;try{o=JSON.parse(x);}catch(e){return null;}
@@ -2363,12 +2373,16 @@ function readLk(x){
     r.last={when:cut(l.when,40),via:l.via==='shell'?'shell':'file',file:cut(l.file,120),saved:cut(l.saved,40),res:RES.test(l.res||'')?l.res:'',nm:cut(l.nm,160)};}
   if(isObj(o.base))KEYS.forEach(k=>{const b=o.base[k];if(Array.isArray(b)&&b.length===2&&HEX.test(b[0])&&HEX.test(b[1]))r.base[k]=[b[0],b[1]];});
   ['kd','td'].forEach(f=>{if(!isObj(o[f]))return;const d={};KEYS.forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(o[f][k]||''))d[k]=o[f][k];});if(Object.keys(d).length)r[f]=d;});
-  if(Array.isArray(o.menuSeen))r.menuSeen=o.menuSeen.filter(h=>typeof h==='string'&&HEX.test(h)).slice(0,10);
+  if(Array.isArray(o.menuSeen))r.menuSeen=hexes(o.menuSeen,10);
+  {const pb=hexes(o.pb,12);if(pb.length)r.pb=pb;}
   if(typeof o.took==='string'&&o.took)r.took=o.took.slice(0,160);
   if(Array.isArray(o.rp)){const rp=o.rp.filter(p=>typeof p==='string'&&p).map(p=>p.slice(0,30)).slice(0,8);if(rp.length){r.rp=rp;r.rpd=cut(o.rpd,40);}}
   if(isObj(o.board)){const b=o.board,six=a=>{const out=(Array.isArray(a)?a:[]).slice(0,6).map(s=>cut(s,40));while(out.length<6)out.push('');return out;};
     r.board={n:/^([1-9]|10)$/.test(b.n||'')?b.n:'',tok:cut(b.tok,40),term:['ring','pic'].includes(b.term)?b.term:'none',last:cut(b.last,40),
-      card:okCard(b.card)?b.card:0,cardLabel:cut(b.cardLabel,40),ch:six(b.ch),tg:six(b.tg)};}
+      card:okCard(b.card)?b.card:0,cardLabel:cut(b.cardLabel,40),ch:six(b.ch),tg:six(b.tg),paired:b.paired===1?1:0};
+    /* paired: the book's card was paired with the plan's behavior by a Take or a Keep there (or found equal to it);
+       pair: the two hashes of that pairing (the card's label, the behavior), so the plan can tell whether it holds */
+    if(r.board.paired){const p=hexes(b.pair,2);if(p.length===2)r.board.pair=p;}}
   return r;
 }
 const isOn=x=>{const r=readLk(x);return !!r&&r.on===1;};
@@ -2379,17 +2393,17 @@ function pack(obj){const c=JSON.parse(JSON.stringify(isObj(obj)?obj:{}));c.v=1;l
     ['ch','tg'].forEach(k=>{if(Array.isArray(b[k]))b[k]=b[k].map(c24);});s=JSON.stringify(c);if(s.length<=MAX)return s;}
   if(isObj(c.last)){delete c.last.nm;c.last.file=cut(c.last.file,40);}delete c.rp;delete c.rpd;delete c.kd;delete c.td;s=JSON.stringify(c);if(s.length<=MAX)return s;
   delete c.board;delete c.menuSeen;s=JSON.stringify(c);if(s.length<=MAX)return s;
-  return JSON.stringify({v:1,on:c.on===1?1:0,card:okCard(c.card)?c.card:undefined,base:isObj(c.base)?c.base:{}});}
+  return JSON.stringify({v:1,on:c.on===1?1:0,card:okCard(c.card)?c.card:undefined,base:isObj(c.base)?c.base:{},pb:Array.isArray(c.pb)&&c.pb.length?hexes(c.pb,12):undefined});}
 
 /* ---- what each form reads from the other ---- */
-function planOf(teS){const S=isObj(teS)?teS:{},m=isObj(S.meta)?S.meta:{},g=k=>trim(m[k]);
+function planOf(teS){const S=isObj(teS)?teS:{},m=isObj(S.meta)?S.meta:{},g=k=>trim(m[k]),lk=readLk(m.lk);
   const bk=(Array.isArray(S.bk)?S.bk:[]).filter(isObj).map(r=>({n:trim(r.n),conf:trim(r.conf)})).filter(r=>r.n);
   const th=(Array.isArray(S.thin)?S.thin:[]).filter(r=>isObj(r)&&trim(r.ep)),t=th.length?th[th.length-1]:null;
-  const out={bk,thinLast:t?{d:trim(t.d),ep:trim(t.ep)}:null,linkedBack:isOn(m.lk)};
+  const out={bk,thinLast:t?{d:trim(t.d),ep:trim(t.ep)}:null,linkedBack:!!lk&&lk.on===1,pb:lk&&lk.pb?lk.pb.slice():[]};
   ['client','sid','beh','tp','tpN','ep','epN','te','teN','exWhen','exDelay','tokForm','loss','lossRule'].forEach(k=>{out[k]=g(k);});
   return out;}
 function boardOf(tkS){const m=isObj(tkS)&&isObj(tkS.meta)?tkS.meta:null;if(!m)return null;const lk=readLk(m.lk);if(!lk||lk.on!==1||!lk.board)return null;
-  return Object.assign({},lk.board,{ch:lk.board.ch.slice(),tg:lk.board.tg.slice(),client:trim(m.client),sid:trim(m.sid)});}
+  return Object.assign({},lk.board,{ch:lk.board.ch.slice(),tg:lk.board.tg.slice(),client:trim(m.client),sid:trim(m.sid),pb:lk.pb?lk.pb.slice():[]});}
 /* the identity row, the same in both forms: client and sid, each compared only when both are filled */
 function whoRow(here,there,o){o=o||{};here=isObj(here)?here:{};there=isObj(there)?there:{};
   const hc=trim(here.client),hs=trim(here.sid),tc=trim(there.client),ts=trim(there.sid);
@@ -2397,8 +2411,42 @@ function whoRow(here,there,o){o=o||{};here=isObj(here)?here:{};there=isObj(there
   const nid=t=>norm(t).replace(/\.$/,''),block=(!!hc&&!!tc&&nid(hc)!==nid(tc))||(!!hs&&!!ts&&nid(hs)!==nid(ts));
   const fillParts={};if(!hc&&tc)fillParts.client=tc;if(!hs&&ts)fillParts.sid=ts;const fill=!block&&Object.keys(fillParts).length>0;
   return {key:'who',what:'Student',here:show(hc,hs),there:show(tc,ts),same:()=>!block&&!fill&&!!(tc||ts),owner:'',pre:['fill'],can:!block,block,fill,fillParts,
+    /* the partner takes into its own empty client and sid only */
+    mirror:(!tc&&!!hc)||(!ts&&!!hs),
     why:block?'Form '+(o.other||'TE-1')+' names '+show(tc,ts)+'; '+(o.meWhat||'this form')+' names '+dot(show(hc,hs)):'',
     nm:'Form '+(o.other||'TE-1')+' names '+(tc||ts)+'; '+(o.meWhat||'this form')+' names '+dot(hc||hs),took:fill?(fillParts.client&&fillParts.sid?'the student\u2019s name and ID':fillParts.client?'the student\u2019s name':'the student ID'):''};}
+
+/* ---- a behavior to reduce, named where a behavior to increase belongs (the behavior tokens are earned for, a card) ----
+   The case's own list comes first: Form TB-1's problem behaviors (isRep false, or a candidate whose type is not a
+   replacement) and Form FS-1's (it lists problem behaviors only), matched by label; then the problem behaviors seen at
+   an earlier compare (pb: their hashes, kept in a record); then the common words for one, unless a word just before
+   turns it round ("no hitting", "instead of hitting", "appropriate refusal"). The replacement named is the problem
+   behavior's own (Form TB-1's "rep", Form FS-1's alternative, without a "see target 4" cross-reference), else the case's
+   first replacement behavior, so both forms name the same one. */
+const PBW=new RegExp('\\b(aggress(?:ion|ions|ive|ively|ing)|elop(?:e|es|ed|ing|ement|ements)|bolting|(?:runs?|running|ran) away|'+
+  'self[- ]?injur(?:y|ies|ious|ing)|sibs?|self[- ]?harm(?:s|ing)?|head[- ]?bang(?:s|ing)?|hitting|kicking|biting|spitting|scratching|pinching|hair[- ]pulling|'+
+  '(?:hits|kicks|bites|scratches|pinches) (?:others|peers|staff|adults|people|someone|classmates|teachers?|students?|siblings?)|spits (?:at|on)|'+
+  'scream(?:s|ing)|yelling|tantrums?|meltdowns?|property (?:destruction|damage)|destroy(?:s|ing)|destruction|disrupt(?:s|ing|ion|ions|ive)|'+
+  'refusals?|refusing|non-?complian(?:ce|t)|swearing|cursing|profanity|pica|out[- ]of[- ]seat|off[- ]task|throw(?:s|ing) (?:objects|items|materials|things)|without permission)\\b','g');
+const PBNOT=/^(no|not|without|instead|rather|never|avoid|avoids|avoiding|appropriate|appropriately|polite|politely|calm|calmly)$/;
+function pbWord(t){PBW.lastIndex=0;let m;while((m=PBW.exec(t))){const before=t.slice(0,m.index).split(/[^\p{L}\p{N}']+/u).filter(Boolean).slice(-3);
+  if(!before.some(w=>PBNOT.test(w)))return m[1];}return '';}
+const isProb=x=>isObj(x)&&(x.isRep===false||(x.isRep!==true&&(x.src==='FS-1'||(/^TB-1/.test(str(x.src))&&!/replacement|alternative/i.test(str(x.type))))));
+const repClean=s=>trim(s).replace(/\s*\(\s*(?:see|cf\.?)\s[^)]*\)\s*$/i,'').replace(/[\s;,.]*\bsee (?:target|behavior|row) \d+\.?$/i,'').trim();
+function problem(text,o){o=o||{};const t=norm(text);if(!t)return null;const f=Array.isArray(o.facts)?o.facts.filter(isObj):[];
+  const p=f.find(x=>isProb(x)&&norm(x.label)===t);
+  if(p){const r=f.find(x=>x.isRep===true&&trim(x.label));return {src:'case',form:p.src==='FS-1'?'FS-1':'TB-1',rep:repClean(p.rep)||repClean(p.alt)||(r?trim(r.label):'')};}
+  if(hexes(o.seen,99).includes(hash(t)))return {src:'seen',form:'TB-1',rep:''};
+  const w=pbWord(t);return w?{src:'word',word:w}:null;}
+/* the hashes of the case's problem behaviors, for a record's pb */
+function pbOf(facts){const out=[];(Array.isArray(facts)?facts:[]).forEach(x=>{if(isProb(x)&&trim(x.label)){const h=hash(norm(x.label));if(!out.includes(h))out.push(h);}});return out.slice(0,12);}
+/* the warning, worded the same in both forms: o.lead names the item ("Form TE-1's behavior"), o.text is its words, o.fix
+   what to do about it */
+function problemNote(p,o){o=o||{};if(!p)return '';const q='\u201c'+trim(o.text)+'\u201d',lead=o.lead||'The behavior';
+  if(p.src==='word')return lead+', '+q+', names a behavior to reduce (\u201c'+p.word+'\u201d). Tokens are earned for a behavior to increase'+(o.fix?'; '+o.fix:'')+'.';
+  return lead+', '+q+', is a problem behavior on Form '+(p.form||'TB-1')+(p.src==='seen'?' (the case named it at an earlier compare)':'')+'. Tokens are earned for a behavior to increase'+
+    (p.rep?', such as \u201c'+p.rep+'\u201d':'')+(o.fix?'; '+o.fix:'')+'.';}
+
 /* a file the partner saved: its own JSON, a CASE json, or a .case.html. PACKET, this form's own file, other forms'
    files, a case without the partner and unreadable files are refused. */
 function readText(text,fileName,want,me){const t=str(text),O='Form '+want,no=' Nothing was changed.',bad={ok:false,msg:'That file could not be read as a file '+O+' saved.'+no};
@@ -2411,7 +2459,7 @@ function readText(text,fileName,want,me){const t=str(text),O='Form '+want,no=' N
   if(o.form==='CASE'||(!o.form&&isObj(o.forms))){const e=isObj(o.forms)?o.forms[want]:null;
     if(!isObj(e)||!isObj(e.snap))return {ok:false,msg:'That case file holds no '+O+'.'+no};
     let d=null;try{d=JSON.parse(e.snap.own);}catch(x){d=null;}return own(d,fileName,o.saved)||bad;}
-  if(me&&o.form===me)return {ok:false,msg:'That is a file this form saved, not '+O+'\u2019s.'+no};
+  if(me&&o.form===me)return {ok:false,msg:'That file was saved by this form (Form '+me+'), not by '+O+'.'+no};
   const r=own(o,fileName,'');if(r)return r;
   if(typeof o.form==='string'&&o.form!==want&&/^[A-Z]{2,3}-\d$/.test(o.form))return {ok:false,msg:'That file was saved by Form '+o.form+', not by '+O+'.'+no};
   return bad;}
@@ -2421,19 +2469,25 @@ function stateOf(row,base,o){o=o||{};const O='Form '+(o.other||'TE-1');
   const here=val(row.here),there=val(row.there),a=norm(here),b=norm(there),ha=hash(a),hb=hash(b);
   const can=row.can!==false,pre=Array.isArray(row.pre)?row.pre:[],bs=Array.isArray(base)&&base.length===2?base:null;
   const r=(st,label,take,keep,press)=>({st,label,take:!!take&&can,keep:!!keep&&row.keep!==false,pressed:press&&take&&can?'take':'',ha,hb});
+  /* the promise that the partner can take it is made only for a row the partner can take (mirror) */
+  const ct=row.mirror?'; '+O+' can take this when it compares':'';
   if(row.block&&!(bs&&bs[0]===ha&&bs[1]===hb))return {st:0,label:'for another student?',take:false,keep:true,block:true,pressed:'',ha,hb};
+  /* nothing on either side is not "in step": there is nothing to compare */
+  if(!a&&!b&&!row.fill)return r(2,'nothing on either side');
   let same=a===b;if(!same&&typeof row.same==='function'){try{same=!!row.same(here,there);}catch(e){same=false;}}else if(row.same===true)same=true;
   if(same)return r(1,'in step');
-  if(!b)return r(2,'only here'+(row.mirror?'; '+O+' can take this when it compares':''));
+  if(!b)return r(2,'only here'+ct);
   if(!a||row.fill)return r(3,'empty here',1,0,pre.includes('fill')||pre.includes('any'));
-  if(bs&&bs[0]===ha&&bs[1]===hb)return r(4,o.td?'taken in part ('+o.td+')':'kept different'+(o.kd?' ('+o.kd+')':''),1,1,0);
+  if(bs&&bs[0]===ha&&bs[1]===hb)return Object.assign(r(4,o.td?'taken in part ('+o.td+')':(row.keptLabel||'kept different')+(o.kd?' ('+o.kd+')':''),1,1,0),{part:!!o.td});
   if(bs&&bs[0]===ha)return r(5,'changed on '+O,1,1,row.owner==='there'||pre.includes('changed')||pre.includes('any'));
-  if(bs&&bs[1]===hb)return r(6,'changed here; '+O+' can take this when it compares',1,1,0);
+  if(bs&&bs[1]===hb)return r(6,'changed here'+ct,1,1,0);
   return r(7,'different',1,1,pre.includes('any'));}
 
 const fmt=iso=>{const d=new Date(iso);if(!iso||isNaN(d))return '';try{return d.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'});}catch(e){return d.toLocaleString();}};
 const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');const d=m?new Date(+m[1],m[2]-1,+m[3]):new Date(s);if(isNaN(d))return '';try{return d.toLocaleDateString(undefined,{day:'numeric',month:'short'});}catch(e){return d.toDateString();}};
+/* a bare YYYY-MM-DD (kd, td) is a local day; a full timestamp (rpd) is read as the moment it is, so an evening in the
+   Americas is not shown as the next day */
+const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');const d=m?new Date(+m[1],m[2]-1,+m[3]):new Date(s);if(!s||isNaN(d))return '';try{return d.toLocaleDateString(undefined,{day:'numeric',month:'short'});}catch(e){return d.toDateString();}};
 const plural=(n,one,many)=>n+' '+(n===1?one:many);
 const andList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 function confirmBox(t,o){try{if(window.nbhUI&&window.nbhUI.confirm)return Promise.resolve(window.nbhUI.confirm(t,o||{}));}catch(e){}try{return Promise.resolve(!!window.confirm(t));}catch(e){return Promise.resolve(false);}}
@@ -2442,34 +2496,41 @@ const CSS='.nbh-lk [hidden]{display:none!important}'+
  '.nbh-lk .lk-tools .tool,.nbh-lk .lk-tools a,.nbh-lk .lk-tools button.tool+button.tool,.nbh-lk .lk-btns button.tool+button.tool{margin:0}.nbh-lk .lk-tools a{font-family:var(--sans,sans-serif);font-size:13px;align-self:center}'+
  '.nbh-lk .lk-status{font-family:var(--sans,sans-serif);font-size:13px;font-weight:600;margin:6px 0 2px}.nbh-lk p.hint{margin:2px 0}'+
  '.nbh-lk .lk-status,.nbh-lk p.hint,.nbh-lk .lk-msg,.nbh-lk .lk-warn,.nbh-lk .lk-pre{overflow-wrap:anywhere}'+
- '.nbh-lk .grid-wrap{max-width:100%;overflow-x:auto}.nbh-lk table.lk-tbl{table-layout:auto}.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{overflow-wrap:anywhere;word-break:normal}'+
+ /* a word breaks only when it is wider than its whole cell, so a value column is never squeezed to a letter */
+ '.nbh-lk .grid-wrap{max-width:100%;overflow-x:auto}.nbh-lk table.lk-tbl{table-layout:auto}.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{overflow-wrap:break-word;word-break:normal}'+
+ '.nbh-lk .lk-tbl td.lk-v{min-width:7em}.nbh-lk .lk-nw{white-space:nowrap}.nbh-lk .lk-none{color:var(--ink-3,#6b7680)}'+
  '.nbh-lk .lk-tbl tbody th{text-align:left;font-weight:600}.nbh-lk .lk-tbl td.lk-st{min-width:7.5em}'+
  '.nbh-lk .lk-btns{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.nbh-lk .lk-btns button{margin:0;min-width:0}'+
  /* numbered choices (the target card, 1 to 6) sit three to a line, so a narrow column never stacks them one by one */
  '.nbh-lk .lk-btns.lk-num{display:grid;grid-template-columns:repeat(3,max-content)}'+
  '.nbh-lk button[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true],.nbh-lk button.tool[aria-pressed=true]:hover{background:var(--nbh-navy,#182e43);color:#fff;border-color:var(--nbh-navy,#182e43)}'+
- /* a ticked choice shows a tick as well as the dark fill, so it does not read as "press me" */
- '.nbh-lk .lk-tbl button[aria-pressed=true]::before{content:"\\2713\\00a0"}'+
- /* the items picked inside a row (which cards a take adds) are light, so only the row's own Take reads as ticked */
- '.nbh-lk .lk-tbl button.lk-pick[aria-pressed=true],.nbh-lk .lk-tbl button.lk-pick[aria-pressed=true]:hover{background:#E7EDF2;color:var(--ink,#16242e);border-color:var(--nbh-navy,#182e43)}'+
+ /* a ticked Take or Keep shows a tick as well as the dark fill; the tick is decoration, not part of the button's name */
+ '.nbh-lk .lk-tbl button[data-act=take][aria-pressed=true]::before,.nbh-lk .lk-tbl button[data-act=keep][aria-pressed=true]::before{content:"\\2713\\00a0";content:"\\2713\\00a0" / ""}'+
+ /* the choices inside a row (which card is compared, which names a take adds) are light and carry no tick, so only a
+    row's own Take or Keep reads as ticked */
+ '.nbh-lk .lk-tbl button.tool[data-act=choose][aria-pressed=true],.nbh-lk .lk-tbl button.tool[data-act=choose][aria-pressed=true]:hover{background:#E7EDF2;color:var(--ink,#16242e);border-color:var(--nbh-navy,#182e43);font-weight:700}'+
+ '.nbh-lk .lk-tbl button.tool.lk-pick[aria-pressed=false]{border-style:dashed;color:var(--ink-3,#5b6670)}'+
  '.nbh-lk .lk-warn{color:#7a3d0f;background:#FBEEDB;border-left:3px solid #9B4E15;padding:3px 8px;margin:3px 0}'+
  '.nbh-lk .lk-pre{white-space:pre-wrap;font-size:12px;border-left:3px solid var(--rule-2,#ccc);padding:3px 8px;margin:3px 0}'+
  '.nbh-lk .lk-vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}'+
- /* on a phone each row is a card: the item, then this form's value and the partner's, each named, then the state */
- '@media (max-width:600px){.nbh-lk .lk-tbl{font-size:12.5px}.nbh-lk .lk-tbl thead{display:none}'+
+ '.nbh-lk .lk-undo .hint{font-size:12px;flex:1 1 16em}'+
+ /* on a narrow screen (a phone, or a narrow column side by side) each row is a card: the item, then this form's value
+    and the partner's, each named, then the state */
+ '@media (max-width:520px){.nbh-lk .lk-tbl{font-size:12.5px}.nbh-lk .lk-tbl thead{display:none}'+
  '.nbh-lk table.lk-tbl,.nbh-lk .lk-tbl tbody,.nbh-lk .lk-tbl tr,.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{display:block;width:auto!important;min-width:0}'+
  '.nbh-lk .lk-tbl th,.nbh-lk .lk-tbl td{padding:5px 8px;overflow-wrap:break-word}.nbh-lk .lk-tbl tbody td{border-top:0}.nbh-lk .lk-tbl tr[data-key]{margin-top:8px}'+
- '.nbh-lk .lk-tbl td[data-l]::before{content:attr(data-l) ": ";font-weight:600}}@media print{.nbh-lk{display:none!important}}';
+ '.nbh-lk .lk-tbl td.lk-v{min-width:0}.nbh-lk .lk-tbl td[data-l]::before{content:attr(data-l) ": ";font-weight:600}}@media print{.nbh-lk{display:none!important}}';
 
 /* ---- the panel ---- */
 function mount(ad){
   const me=ad.me,other=ad.other,O='Form '+other,meWhat=ad.meWhat||'this form',Me=meWhat.charAt(0).toUpperCase()+meWhat.slice(1);
-  const W={cur:null,undo:null,undoAfter:'',msg:'',msgKind:'',waitA:0,waitO:0,tA:0,tO:0,ignored:0,busy:false,toast:''};
+  const W={cur:null,undo:null,undoAfter:'',undoKeep:null,msg:'',msgKind:'',waitA:0,waitO:0,tA:0,tO:0,ignored:0,busy:false,toast:''};
   const framed=()=>{try{return window.parent!==window;}catch(e){return true;}};
   const getLk=()=>{let s='';try{s=ad.get();}catch(e){s='';}return readLk(s);};
   const setLk=o=>{ad.set(o?pack(o):'');};
   const sigOf=lk=>lk&&lk.on===1&&lk.last?lk.last.when+JSON.stringify(lk.base):'';
   const after=()=>{try{if(ad.after)ad.after();}catch(e){if(window.console)console.error(e);}};
+  const record=(lk,a)=>{try{if(ad.record)ad.record(lk,a);}catch(e){if(window.console)console.error(e);}};
   const toast=(t,kind)=>{W.toast=t;try{if(window.nbhUI&&window.nbhUI.toast){window.nbhUI.toast(t,{kind:kind||'ok'});return;}}catch(e){}};
   const msg=(t,kind)=>{W.msg=t||'';W.msgKind=kind||'';paintMsg();};
   if(!document.getElementById('nbh-link-css')){const st=document.createElement('style');st.id='nbh-link-css';st.textContent=CSS;(document.head||document.documentElement).appendChild(st);}
@@ -2480,41 +2541,53 @@ function mount(ad){
     notOpen:O+' is not open in this workstation. Open it beside '+meWhat+', or open a file it saved.',
     noAnswer:O+' did not answer in time (it may still be loading). Try Compare again.',
     noOpen:'This workstation could not open '+O+' from here. Pick it from the list of forms.',
-    noView:ad.noView||O+'\u2019s link is off, so its file does not name its cards. Turn on Link with Form '+me+' on '+other+'\u2019s Setup page, then compare again.',
+    noView:typeof ad.noView==='string'&&ad.noView?ad.noView:O+'\u2019s link is off, so its file does not name its cards. Turn on Link with Form '+me+' on '+other+'\u2019s Setup page, then compare again.',
     unlink:'Unlink from '+O+'?\nNothing on either form changes; the comparison record is removed.'};
   const Q=s=>host?host.querySelector(s):null;
   if(host){host.classList.add('nbh-lk');host.innerHTML=
     '<div class="lk-off" hidden><p class="hint lk-offtxt">'+esc(T.offText)+'</p><div class="lk-tools"><button type="button" class="tool" data-lk="on">Link with '+esc(O)+'</button></div></div>'+
-    '<div class="lk-on" hidden><p class="lk-status" role="status" aria-live="polite"></p><p class="hint lk-next"></p><p class="hint lk-took" hidden></p><p class="hint lk-rp" hidden></p>'+
+    '<div class="lk-on" hidden><p class="lk-status" role="status" aria-live="polite"></p><p class="hint lk-next"></p><p class="hint lk-took" hidden></p>'+
+    '<div class="lk-rpw" hidden><p class="hint lk-rp" hidden></p><div class="lk-tools"><button type="button" class="tool" data-lk="printed">These pages are reprinted</button></div></div>'+
     '<div class="lk-tools"><button type="button" class="tool" data-lk="compare">Compare with '+esc(O)+'</button><button type="button" class="tool" data-lk="file">Open a file '+esc(O)+' saved</button>'+
     '<button type="button" class="tool" data-lk="beside">Open '+esc(O)+' beside '+esc(meWhat)+'</button><a class="lk-sib" target="_blank" rel="noopener" hidden>Open '+esc(O)+' in a new tab</a>'+
     '<button type="button" class="tool" data-lk="unlink">Unlink</button><input type="file" class="lk-fileIn" accept=".json,.html" hidden></div>'+
     '<div class="verdict v-mid lk-msg" role="alert" hidden></div>'+
-    '<div class="lk-cmp" hidden><p class="hint lk-legend">Dark buttons with a \u2713 are ticked. Tap one to tick or untick it, then press Take the ticked items; nothing changes before that.</p><div class="grid-wrap"><table class="rt lk-tbl"><thead><tr><th scope="col">What</th><th scope="col">'+esc(Me)+'</th><th scope="col">'+esc(O)+'</th><th scope="col"><span class="lk-vh">State and choice</span></th></tr></thead><tbody></tbody></table></div>'+
+    '<div class="lk-cmp" hidden><p class="hint lk-legend">Dark buttons with a \u2713 are ticked. Tap one to tick or untick it, then press Take the ticked items; nothing changes before that. The light buttons beside an item choose which card, or which names, a take uses.</p><div class="grid-wrap"><table class="rt lk-tbl"><thead><tr><th scope="col">What</th><th scope="col">'+esc(Me)+'</th><th scope="col"><span class="lk-nw">'+esc(O)+'</span></th><th scope="col"><span class="lk-vh">State and choice</span></th></tr></thead><tbody></tbody></table></div>'+
     '<div class="lk-tools lk-foot"><button type="button" class="tool" data-lk="apply">Take the ticked items</button><button type="button" class="tool" data-lk="leave">Leave everything as it is</button></div></div>'+
-    '<div class="lk-tools lk-undo" hidden><button type="button" class="tool" data-lk="undo" title="Puts back what '+esc(meWhat)+' held before the take. Offered only until anything else on '+esc(meWhat)+' changes.">Undo what was just taken</button></div></div>';}
-  function paintMsg(){const m=Q('.lk-msg');if(!m)return;m.textContent=W.msg;m.hidden=!W.msg;m.className='verdict '+(W.msgKind==='ok'?'v-ok':'v-mid')+' lk-msg';}
+    '<div class="lk-tools lk-undo" hidden><button type="button" class="tool" data-lk="undo" title="Puts back what '+esc(meWhat)+' held before the take. Offered only until anything else on '+esc(meWhat)+' changes.">Undo what was just taken</button>'+
+    '<span class="hint">Undo puts back what '+esc(meWhat)+' held before the take. It is offered until anything else on '+esc(meWhat)+' changes.</span></div></div>';}
+  /* the alert is written only when its words change, so a screen reader does not announce it again at every repaint */
+  function paintMsg(){const m=Q('.lk-msg');if(!m)return;if(m.textContent!==W.msg)m.textContent=W.msg;if(m.hidden!==!W.msg)m.hidden=!W.msg;
+    const c='verdict '+(W.msgKind==='ok'?'v-ok':'v-mid')+' lk-msg';if(m.className!==c)m.className=c;}
+  function resWords(L){const k=/kept (\d+)/.exec(L.res),p=/part (\d+)/.exec(L.res),out=[];
+    if(k)out.push(plural(+k[1],'difference','differences')+' kept');if(p)out.push(plural(+p[1],'item','items')+' taken in part');return out.join(', ');}
   function statusLines(lk){const L=lk.last,out=[];
     if(!L)out.push('Linked with '+O+' \u00b7 not compared yet.');
-    else{const when=fmt(L.when),sv=fmt(L.saved),src=L.via==='shell'?'with the '+O+' open in this workstation':(L.file?'with the file '+L.file:'with a file '+O+' saved')+(sv?' (saved '+sv+')':'');
+    else{const when=fmt(L.when),sv=fmt(L.saved),src=L.via==='shell'?'with '+O+' (open in this workstation)':(L.file?'with the file '+L.file:'with a file '+O+' saved')+(sv?' (saved '+sv+')':'');
       const n=+(L.res.split(' ')[1]||0),cmp=' \u00b7 compared '+when+' '+src+'.';
-      if(L.res==='who')out.push('Linked with '+O+' \u00b7 for another student? '+(L.nm||''));
+      if(L.res==='who')out.push('Linked with '+O+' \u00b7 for another student? '+(L.nm||'')+cmp);
+      else if(L.res==='empty')out.push('Linked with '+O+' \u00b7 '+O+' holds nothing to compare yet'+cmp);
       else if(/^look/.test(L.res))out.push('Linked with '+O+' \u00b7 '+plural(n,'item','items')+' to look at'+(W.cur?' below.':cmp));
-      else if(/^kept/.test(L.res))out.push('Linked with '+O+' \u00b7 '+plural(n,'difference','differences')+' kept'+cmp);
+      else if(/^(kept|part)/.test(L.res))out.push('Linked with '+O+' \u00b7 '+resWords(L)+cmp);
       else if(L.res==='step')out.push('Linked with '+O+' \u00b7 in step'+cmp);
       else out.push('Linked with '+O+cmp);}
-    out.push(framed()?'Changes made on '+O+' since then show only when you compare again.':
-      'Outside the workstation, '+meWhat+' reads '+O+' from a file: press Save data on '+O+', then Open a file '+O+' saved, here. Changes made there since then show only when you compare again.');return out;}
+    out.push(framed()?(L?'Changes made on '+O+' since then show only when you compare again.':''):
+      'Outside the workstation, '+meWhat+' reads '+O+' from a file: press Save data on '+O+', then Open a file '+O+' saved, here.'+(L?' Changes made there since then show only when you compare again.':''));return out;}
   function evalRows(rows,lk,prev){const st={},pressed={};
-    rows.forEach(r=>{if(!r.what||!r.key)return;const kd=lk.kd&&lk.kd[r.key]?day(lk.kd[r.key]):'',td=lk.td&&lk.td[r.key]?day(lk.td[r.key]):'';
-      const s=stateOf(r,lk.base[r.key],{other,kd,td});st[r.key]=s;
+    rows.forEach(r=>{if(!r.what||!r.key)return;const nb=!!r.nobase,kd=!nb&&lk.kd&&lk.kd[r.key]?day(lk.kd[r.key]):'',td=!nb&&lk.td&&lk.td[r.key]?day(lk.td[r.key]):'';
+      const s=stateOf(r,nb?null:lk.base[r.key],{other,kd,td});st[r.key]=s;
       const p=prev&&prev.st[r.key]&&prev.st[r.key].st===s.st?prev.pressed[r.key]:undefined;
       pressed[r.key]=p!==undefined&&((p==='take'&&s.take)||(p==='keep'&&s.keep)||p==='')?p:s.pressed;});
     return {st,pressed};}
-  function resOf(cur){let look=0,kept=0,who=false;Object.keys(cur.st).forEach(k=>{const s=cur.st[k].st;if(s===0)who=true;else if([3,5,6,7].includes(s))look++;else if(s===4)kept++;});
-    return who?'who':look?'look '+Math.min(look,999):kept?'kept '+Math.min(kept,999):'step';}
+  /* the result of a compare: another student; nothing to compare (every value on the partner's side is empty); items to
+     look at; differences kept and items taken in part; or in step */
+  function resOf(cur,rows){let look=0,kept=0,part=0,who=false;Object.keys(cur.st).forEach(k=>{const s=cur.st[k];if(s.st===0)who=true;else if([3,5,6,7].includes(s.st))look++;else if(s.st===4){if(s.part)part++;else kept++;}});
+    const keyed=(rows||[]).filter(r=>r.what&&r.key);
+    if(who)return 'who';if(keyed.length&&keyed.every(r=>!norm(val(r.there))))return 'empty';
+    return look?'look '+Math.min(look,999):kept||part?(kept?'kept '+Math.min(kept,999):'')+(kept&&part?' ':'')+(part?'part '+Math.min(part,999):''):'step';}
   const blocked=()=>!!W.cur&&Object.keys(W.cur.st).some(k=>W.cur.st[k].st===0&&W.cur.pressed[k]!=='keep');
   const anyPressed=()=>!!W.cur&&Object.keys(W.cur.pressed).some(k=>!!W.cur.pressed[k]);
+  const cell=v=>{const t=val(v);return t?esc(t):'<span class="lk-none" aria-hidden="true">\u2014</span><span class="lk-vh">nothing</span>';};
   function rowHtml(r){
     if(!r.what){const t=val(r.info);return t?'<tr class="lk-info"><td colspan="4" class="hint">'+esc(t)+'</td></tr>':'';}
     const s=W.cur.st[r.key],p=W.cur.pressed[r.key],k=esc(r.key);let b='';
@@ -2522,54 +2595,63 @@ function mount(ad){
     if(s.block)b='<button type="button" class="tool" data-act="keep" data-key="'+k+'" aria-pressed="'+(p==='keep')+'">These are the same student</button>';
     else{if(s.take)b+='<button type="button" class="tool" data-act="take" data-key="'+k+'" aria-pressed="'+(p==='take')+'" aria-label="'+esc(tl+': '+r.what)+'">'+esc(tl)+'</button>';
       if(s.keep)b+='<button type="button" class="tool" data-act="keep" data-key="'+k+'" aria-pressed="'+(p==='keep')+'" aria-label="'+esc(kl+': '+r.what)+'">'+esc(kl)+'</button>';}
-    let ch='';if(isObj(r.choose)){const lb=Array.isArray(r.choose.labels)?r.choose.labels.map(str):null,n=Math.max(1,Math.min(10,lb?lb.length:r.choose.n|0||6)),on=Array.isArray(r.choose.on)?r.choose.on:null;
-      ch='<div class="lk-btns'+(lb?'':' lk-num')+'" role="group" aria-label="'+esc(r.choose.label||'Card')+'">';
-      for(let i=0;i<n;i++)ch+='<button type="button" class="tool'+(on?' lk-pick':'')+'" data-act="choose" data-key="'+k+'" data-i="'+i+'" aria-pressed="'+(on?on.includes(i):r.choose.value===i)+'">'+esc(lb?lb[i]:String(i+1))+'</button>';ch+='</div>';}
+    let ch='';if(isObj(r.choose)){const lb=Array.isArray(r.choose.labels)?r.choose.labels.map(str):null,n=Math.max(1,Math.min(10,lb?lb.length:r.choose.n|0||6)),on=Array.isArray(r.choose.on)?r.choose.on:null,gl=r.choose.label||'Card';
+      ch='<div class="lk-btns'+(lb?'':' lk-num')+'" role="group" aria-label="'+esc(gl)+'">';
+      for(let i=0;i<n;i++)ch+='<button type="button" class="tool'+(on?' lk-pick':'')+'" data-act="choose" data-key="'+k+'" data-i="'+i+'" aria-pressed="'+(on?on.includes(i):r.choose.value===i)+'"'+(lb?'':' aria-label="'+esc(gl+' '+(i+1))+'"')+'>'+esc(lb?lb[i]:String(i+1))+'</button>';ch+='</div>';}
     const notes=[];if(r.why)notes.push('<div class="hint">'+esc(r.why)+'</div>');
     (Array.isArray(r.warn)?r.warn:r.warn?[r.warn]:[]).forEach(w=>notes.push('<div class="lk-warn">'+esc(w)+'</div>'));
     (Array.isArray(r.info)?r.info:r.info?[r.info]:[]).forEach(w=>notes.push('<div class="hint">'+esc(w)+'</div>'));
     if(r.preview)notes.push('<div class="lk-pre">'+esc(r.preview)+'</div>');
-    return '<tr data-key="'+k+'" class="lk-s'+s.st+'"><th scope="row">'+esc(r.what)+ch+'</th><td data-l="'+esc(Me)+'">'+esc(val(r.here))+'</td><td data-l="'+esc(O)+'">'+esc(val(r.there))+'</td><td class="lk-st"><span class="lk-lab">'+esc(s.label)+'</span>'+
+    return '<tr data-key="'+k+'" class="lk-s'+s.st+'"><th scope="row">'+esc(r.what)+ch+'</th><td class="lk-v" data-l="'+esc(Me)+'">'+cell(r.here)+'</td><td class="lk-v" data-l="'+esc(O)+'">'+cell(r.there)+'</td><td class="lk-st"><span class="lk-lab">'+esc(s.label)+'</span>'+
       (b?'<div class="lk-btns">'+b+'</div>':'')+'</td></tr>'+(notes.length?'<tr class="lk-note" data-for="'+k+'"><td colspan="4">'+notes.join('')+'</td></tr>':'');}
   function paintFoot(){const a=Q('[data-lk="apply"]');if(a)a.disabled=blocked()||!anyPressed()||W.busy;}
   /* Undo belongs to the record the take was made on: anything that changes it afterwards (an edit, Open data of
      another file, Clear all, the shell's restore) withdraws it, so it can never put one record over another */
   const snapNow=()=>{try{return str(ad.snapshot());}catch(e){return '';}};
   const undoOk=()=>!!W.undo&&!!W.undoAfter&&snapNow()===W.undoAfter;
+  const dropUndo=()=>{W.undo=null;W.undoAfter='';W.undoKeep=null;};
   function render(){if(!host)return;const lk=getLk(),on=!!lk&&lk.on===1;
-    if(W.cur&&(!on||sigOf(lk)!==W.cur.sig))W.cur=null;if(!on||(W.undo&&!undoOk())){W.undo=null;W.undoAfter='';}
+    if(W.cur&&(!on||sigOf(lk)!==W.cur.sig))W.cur=null;if(!on||(W.undo&&!undoOk()))dropUndo();
     Q('.lk-off').hidden=on;Q('.lk-on').hidden=!on;
-    if(on){const L=statusLines(lk);Q('.lk-status').textContent=L[0];Q('.lk-next').textContent=L[1];
+    if(on){const L=statusLines(lk);Q('.lk-status').textContent=L[0];const nx=Q('.lk-next');nx.textContent=L[1]||'';nx.hidden=!L[1];
       const tk=Q('.lk-took');tk.textContent=lk.took||'';tk.hidden=!lk.took;
-      const rp=Q('.lk-rp'),pages=lk.rp||[];rp.textContent=pages.length?'Reprint: the '+andList(pages)+(pages.length>1?' pages':' page')+(lk.rpd&&day(lk.rpd)?' (changed by the link '+day(lk.rpd)+').':'.'):'';rp.hidden=!pages.length;
+      const rp=Q('.lk-rp'),pages=lk.rp||[];let words='';
+      if(pages.length){try{words=ad.rpLine?str(ad.rpLine(pages.slice())):'';}catch(e){words='';}if(!words)words='the '+andList(pages)+(pages.length>1?' pages':' page');}
+      rp.textContent=pages.length?'Reprint: '+words+(lk.rpd&&day(lk.rpd)?' (changed by the link '+day(lk.rpd)+').':'.'):'';rp.hidden=!pages.length;Q('.lk-rpw').hidden=!pages.length;
       const f=framed();Q('[data-lk="compare"]').hidden=!f;Q('[data-lk="beside"]').hidden=!f;Q('[data-lk="compare"]').disabled=!!W.waitA;Q('[data-lk="beside"]').disabled=!!W.waitO;
       const a=Q('.lk-sib'),blob=location.protocol==='blob:'||location.href==='about:srcdoc'||location.protocol==='about:';
       if(ad.sibling)a.setAttribute('href',ad.sibling);a.hidden=f||blob||!ad.sibling;}
     const cmp=Q('.lk-cmp');cmp.hidden=!(on&&W.cur);
     if(on&&W.cur){Q('.lk-tbl tbody').innerHTML=W.cur.rows.map(rowHtml).join('');}
     Q('.lk-undo').hidden=!(on&&W.undo);paintMsg();paintFoot();}
-  /* compare: reads only. It writes lk.last and the base of the rows found in step. */
+  /* compare: reads only. It writes lk.last and the in-step marks (the base of each row found in step), except when the
+     compare finds another student: then only lk.last, and the marks wait for "These are the same student" */
   function compareWith(obj,src){src=isObj(src)?src:{};let S=obj,saved=trim(src.saved);
     if(isObj(obj)&&isObj(obj.S)&&typeof obj.form==='string'){S=obj.S;saved=saved||trim(obj.saved);}
     const lk=getLk();if(!lk||lk.on!==1)return false;
-    W.undo=null;W.undoAfter='';W.cur=null;let view=null;try{view=ad.view(S);}catch(e){view=null;}
-    if(!view){msg(T.noView);render();return false;}
+    dropUndo();W.cur=null;let view=null;try{view=ad.view(S);}catch(e){view=null;}
+    if(!view){let t=T.noView;try{if(typeof ad.noView==='function')t=str(ad.noView(S,src))||T.noView;}catch(e){t=T.noView;}msg(t);render();return false;}
     const rows=(ad.rows(view)||[]).filter(isObj),ev=evalRows(rows,lk,null);
     const cur={view,rows,st:ev.st,pressed:ev.pressed,src:{via:src.via==='shell'?'shell':'file',file:str(src.file),saved}};
-    rows.forEach(r=>{const s=r.what&&r.key?cur.st[r.key]:null;if(s&&s.st===1)lk.base[r.key]=[s.ha,s.hb];});
-    const who=rows.find(r=>r.key==='who'&&cur.st.who&&cur.st.who.st===0);
-    lk.last={when:new Date().toISOString(),via:cur.src.via,file:cur.src.file,saved,res:resOf(cur),nm:who?str(who.nm||who.why):''};
+    const who=rows.find(r=>r.key==='who'&&cur.st.who&&cur.st.who.st===0);cur.held=!!who;
+    if(!who){const step=[];rows.forEach(r=>{const s=r.what&&r.key?cur.st[r.key]:null;if(s&&s.st===1){lk.base[r.key]=[s.ha,s.hb];step.push(r);}});record(lk,{taken:[],kept:[],step});}
+    lk.last={when:new Date().toISOString(),via:cur.src.via,file:cur.src.file,saved,res:resOf(cur,rows),nm:who?str(who.nm||who.why):''};
     setLk(lk);cur.sig=sigOf(getLk());W.cur=cur;W.msg='';after();render();return true;}
   function press(key,which){if(!W.cur||!W.cur.st[key])return '';const s=W.cur.st[key],p=W.cur.pressed[key];
     if(which!=='take'&&which!=='keep')return p;if(which==='take'&&!s.take)return p;if(which==='keep'&&!s.keep)return p;
     W.cur.pressed[key]=p===which?'':which;
     const tr=Q('tr[data-key="'+key+'"]');if(tr)tr.querySelectorAll('button[data-act="take"],button[data-act="keep"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.act===W.cur.pressed[key])));
     paintFoot();return W.cur.pressed[key];}
-  function choose(key,i){if(!W.cur)return;let done=false;try{done=!!(ad.choose&&ad.choose(key,i,W.cur.view)===true);}catch(e){done=false;}
+  /* a choice button: the adapter handles it (true: the row's tick stays; 'reset': it is let go), or, for an adapter
+     that does not, a card number goes into the record as lk.card. Picking the names a take adds ticks that Take. */
+  function choose(key,i){if(!W.cur)return;let done=false;try{done=ad.choose?ad.choose(key,i,W.cur.view):false;}catch(e){done=false;}
     const prev={st:Object.assign({},W.cur.st),pressed:Object.assign({},W.cur.pressed)};
-    if(!done){const lk=getLk();if(!lk)return;if(key==='card'&&okCard(i))lk.card=i;setLk(lk);delete prev.st[key];}
+    if(done==='reset')delete prev.st[key];
+    else if(done!==true){const lk=getLk();if(!lk)return;if(key==='card'&&okCard(i))lk.card=i;setLk(lk);delete prev.st[key];}
     const rows=(ad.rows(W.cur.view)||[]).filter(isObj);
-    const ev=evalRows(rows,getLk(),prev);W.cur.rows=rows;W.cur.st=ev.st;W.cur.pressed=ev.pressed;render();}
+    const ev=evalRows(rows,getLk(),prev);W.cur.rows=rows;W.cur.st=ev.st;W.cur.pressed=ev.pressed;
+    const r=rows.find(x=>x.key===key);if(done===true&&r&&isObj(r.choose)&&Array.isArray(r.choose.labels)&&ev.st[key]&&ev.st[key].take&&!ev.pressed[key])W.cur.pressed[key]='take';
+    render();}
   /* Apply: the pressed Takes in the order who, card (beh), n, tok, menu, sched; then the bases, the record, the toast */
   /* Apply re-reads this form first: a row whose value here changed after the compare (typed while the table was
      open) is not taken or kept, and is named, so a take never lands on words the compare did not see */
@@ -2578,21 +2660,28 @@ function mount(ad){
     const order=k=>{const i=KEYS.indexOf(k);return i<0?KEYS.length:i;};
     const live={};((ad.rows(cur.view)||[]).filter(isObj)).forEach(r=>{if(r.key)live[r.key]=r;});
     const rows=cur.rows.filter(r=>r.what&&r.key&&cur.pressed[r.key]).sort((a,b)=>order(a.key)-order(b.key));
-    const taken=[],kept=[],stale=[];
+    const taken=[],kept=[],stale=[],undone=[];
     try{for(const r of rows){const p=cur.pressed[r.key];
       if(!live[r.key]||norm(val(live[r.key].here))!==norm(val(r.here))){stale.push(r);continue;}
-      if(p==='take'){let res;try{res=await ad.take(r);}catch(e){res=false;if(window.console)console.error(e);}if(res!==false)taken.push([r,res]);}
+      if(p==='take'){let res;try{res=await ad.take(r);}catch(e){res=false;if(window.console)console.error(e);}if(res!==false)taken.push([r,res]);else undone.push(r);}
       else if(p==='keep')kept.push(r);}}
     finally{W.busy=false;}
     const staleTxt=stale.length?'Not taken, because '+meWhat+' changed after the compare: '+andList(stale.map(r=>r.what))+'. The table now shows '+(stale.length===1?'it':'them')+' as '+(stale.length===1?'it is':'they are')+'.':'';
+    /* a take that wrote nothing (a question cancelled, or nothing left to change) is named, never silent */
+    const undoneTxt=undone.length?'Not taken: '+andList(undone.map(r=>r.what))+' (cancelled, or nothing to change; '+(undone.length===1?'it is as it was':'they are as they were')+').':'';
     const fresh=(ad.rows(cur.view)||[]).filter(isObj),by={};fresh.forEach(r=>{if(r.key)by[r.key]=r;});
     const lk=getLk()||{v:1,on:1,base:{}},now=new Date(),rp=new Set(lk.rp||[]);lk.base=lk.base||{};
     if(!taken.length&&!kept.length){
-      if(stale.length){const ev=evalRows(fresh,lk,null);W.cur={view:cur.view,rows:fresh,st:ev.st,pressed:ev.pressed,src:cur.src,sig:cur.sig};msg(staleTxt,'');}
+      if(stale.length||undone.length){const prev={st:cur.st,pressed:Object.assign({},cur.pressed)};undone.forEach(r=>{prev.pressed[r.key]='';});
+        const ev=evalRows(fresh,lk,prev);W.cur={view:cur.view,rows:fresh,st:ev.st,pressed:ev.pressed,src:cur.src,sig:cur.sig,held:cur.held};msg([staleTxt,undoneTxt].filter(Boolean).join(' '),'');}
       render();return {taken:0,kept:0,stale:stale.length};}
     taken.forEach(([r,res])=>{const nh=typeof res==='string'?res:by[r.key]?val(by[r.key].here):val(r.there);lk.base[r.key]=[hash(norm(nh)),hash(norm(val(r.there)))];
       if(lk.kd)delete lk.kd[r.key];if(Array.isArray(r.seen))lk.menuSeen=r.seen.filter(h=>HEX.test(h)).slice(0,10);(Array.isArray(r.rp)?r.rp:[]).forEach(x=>rp.add(String(x)));});
     kept.forEach(r=>{lk.base[r.key]=[hash(norm(val(r.here))),hash(norm(val(r.there)))];lk.kd=lk.kd||{};lk.kd[r.key]=ymd(now);if(lk.td)delete lk.td[r.key];});
+    /* a compare held for "These are the same student": its in-step marks are written now that it is confirmed */
+    const step=[];if(cur.held&&kept.concat(taken.map(x=>x[0])).some(r=>r.key==='who')){const e=evalRows(fresh,lk,null);
+      fresh.forEach(r=>{const s=r.what&&r.key?e.st[r.key]:null;if(s&&s.st===1&&!taken.some(([t])=>t.key===r.key)&&!kept.some(x=>x.key===r.key)){lk.base[r.key]=[s.ha,s.hb];step.push(r);}});}
+    record(lk,{taken:taken.map(([r])=>r),kept:kept.slice(),step});
     /* a take that leaves its row different (the backups there was room for, the cards picked) reads "taken in part", not "kept" */
     const ev0=evalRows(fresh,lk,null);taken.forEach(([r])=>{const s=ev0.st[r.key];if(s&&s.st===4){lk.td=lk.td||{};lk.td[r.key]=ymd(now);}else if(lk.td)delete lk.td[r.key];});
     if(lk.td&&!Object.keys(lk.td).length)delete lk.td;
@@ -2601,25 +2690,42 @@ function mount(ad){
       while(t.length>160&&words.length>1){words.pop();t=head+words.join('; ')+'; \u2026';}
       if(t.length>160)t=t.slice(0,159)+'\u2026';lk.took=t;}
     if(rp.size&&taken.some(([r])=>Array.isArray(r.rp)&&r.rp.length)){lk.rp=Array.from(rp).slice(0,8);lk.rpd=now.toISOString();}
-    const ev=evalRows(fresh,lk,null);const next={view:cur.view,rows:fresh,st:ev.st,pressed:{},src:cur.src};Object.keys(ev.st).forEach(k=>{next.pressed[k]='';});
-    lk.last={when:now.toISOString(),via:cur.src.via,file:cur.src.file,saved:cur.src.saved,res:resOf(next),nm:''};
-    setLk(lk);next.sig=sigOf(getLk());W.cur=next;W.undo=null;W.undoAfter='';W.msg=staleTxt;
+    const ev=evalRows(fresh,lk,null);
+    lk.last={when:now.toISOString(),via:cur.src.via,file:cur.src.file,saved:cur.src.saved,res:resOf(ev,fresh),nm:''};
+    setLk(lk);
+    /* the table after the take is built again from the record as it now is, so its notes are the new ones; the result
+       is counted on it too, since a pairing the form noted in record() can change which rows use the record's mark */
+    const rows2=(ad.rows(cur.view)||[]).filter(isObj),ev2=evalRows(rows2,getLk()||lk,null),res2=resOf(ev2,rows2);
+    {const l2=getLk();if(l2&&l2.last&&l2.last.res!==res2){l2.last.res=res2;setLk(l2);}}
+    const next={view:cur.view,rows:rows2,st:ev2.st,pressed:{},src:cur.src,held:false};Object.keys(ev2.st).forEach(k=>{next.pressed[k]='';});
+    next.sig=sigOf(getLk());W.cur=next;dropUndo();W.msg=[staleTxt,undoneTxt].filter(Boolean).join(' ');
     after();
-    if(taken.length&&snap){W.undo=snap;W.undoAfter=snapNow();}
+    if(taken.length&&snap){W.undo=snap;W.undoAfter=snapNow();
+      /* the Keeps of the same Apply changed nothing on this form, so an Undo keeps them */
+      const keepRows=kept.concat(step);if(keepRows.length){W.undoKeep={kept:kept.slice(),step:step.slice(),base:{},kd:{}};keepRows.forEach(r=>{W.undoKeep.base[r.key]=lk.base[r.key];if(lk.kd&&lk.kd[r.key])W.undoKeep.kd[r.key]=lk.kd[r.key];});}}
     render();
-    toast((taken.length?(taken.length===1?'1 item':taken.length+' items')+' taken from '+O+'. Nothing else changed.':plural(kept.length,'difference','differences')+' kept. Nothing was changed.')+(staleTxt?' '+staleTxt:''),'ok');
-    /* the Apply button is disabled now; the keyboard goes on to Undo, or to the status line */
-    if(focusIn){const u=Q('[data-lk="undo"]'),st=Q('.lk-status');try{if(u&&!Q('.lk-undo').hidden)u.focus();else if(st){st.tabIndex=-1;st.focus();}}catch(e){}}
+    const said=[];if(taken.length)said.push((taken.length===1?'1 item':taken.length+' items')+' taken from '+O);if(kept.length)said.push(plural(kept.length,'difference','differences')+' kept');
+    toast(said.join(' and ')+'. '+(taken.length?'Nothing else changed.':'Nothing was changed.')+(W.msg?' '+W.msg:''),'ok');
+    /* the Apply button is disabled now; the keyboard goes on to Undo, or to the status line, brought to the middle of
+       the screen so that a sticky toolbar does not cover it */
+    if(focusIn){const u=Q('[data-lk="undo"]'),st=Q('.lk-status');try{const t=u&&!Q('.lk-undo').hidden?u:st;if(t===st)st.tabIndex=-1;t.focus({preventScroll:true});if(t.scrollIntoView)t.scrollIntoView({block:'center'});}catch(e){}}
     return {taken:taken.length,kept:kept.length,stale:stale.length};}
   function undo(){if(!W.undo)return false;
-    if(!undoOk()){W.undo=null;W.undoAfter='';msg('Undo is no longer offered: '+meWhat+' has changed since the take.');render();return false;}
-    const j=W.undo;W.undo=null;W.undoAfter='';W.cur=null;try{ad.restore(j);}catch(e){if(window.console)console.error(e);}render();
-    toast('Undone: '+meWhat+' is as it was before the take.','ok');return true;}
+    if(!undoOk()){dropUndo();msg('Undo is no longer offered: '+meWhat+' has changed since the take.');render();return false;}
+    const j=W.undo,keep=W.undoKeep;dropUndo();W.cur=null;try{ad.restore(j);}catch(e){if(window.console)console.error(e);}
+    if(keep&&Object.keys(keep.base).length){const lk=getLk();if(lk&&lk.on===1){Object.keys(keep.base).forEach(k=>{if(keep.base[k])lk.base[k]=keep.base[k];});
+      if(Object.keys(keep.kd).length)lk.kd=Object.assign(lk.kd||{},keep.kd);record(lk,{taken:[],kept:keep.kept,step:keep.step});setLk(lk);after();}}
+    render();
+    toast('Undone: '+meWhat+' is as it was before the take'+(keep&&keep.kept.length?'; the '+(keep.kept.length===1?'difference':'differences')+' kept then '+(keep.kept.length===1?'is':'are')+' still kept':'')+'.','ok');return true;}
   function leave(){W.cur=null;W.msg='';render();}
-  async function unlink(){if(!(await confirmBox(T.unlink,{ok:'Unlink'})))return false;W.cur=null;W.undo=null;W.msg='';setLk(null);after();render();return true;}
+  /* the reprint line goes only when the user says the pages are printed: a browser reports a cancelled print as a print */
+  function printed(){const lk=getLk();if(!lk||!lk.rp)return false;delete lk.rp;delete lk.rpd;setLk(lk);after();render();toast('The reprint line is cleared.','ok');return true;}
+  async function unlink(){const lk=getLk(),also=[];if(lk&&lk.rp&&lk.rp.length)also.push('the list of pages to reprint');if(lk&&lk.took)also.push('the note of what was last taken');
+    if(!(await confirmBox(T.unlink+(also.length?'\nThat removes '+andList(also)+' too.':''),{ok:'Unlink'})))return false;
+    W.cur=null;dropUndo();W.msg='';setLk(null);after();render();return true;}
   function link(){const lk=getLk()||{v:1,base:{}};lk.on=1;setLk(lk);W.msg='';after();render();if(framed())ask();}
   /* the relay */
-  function ask(){if(!framed()||W.waitA)return;W.cur=null;W.undo=null;W.waitA=Date.now();clearTimeout(W.tA);
+  function ask(){if(!framed()||W.waitA)return;W.cur=null;dropUndo();W.waitA=Date.now();clearTimeout(W.tA);
     W.tA=setTimeout(()=>{if(!W.waitA)return;W.waitA=0;msg(T.noAnswer);render();},12000);
     msg('Asking the workstation for '+O+'\u2026','ok');render();
     try{window.parent.postMessage({nbh:'ask',want:other},'*');}catch(e){W.waitA=0;clearTimeout(W.tA);msg(T.noAnswer);render();}}
@@ -2638,12 +2744,20 @@ function mount(ad){
     if(!parentOk||!W.waitO||d.want!==other){W.ignored++;return;}
     W.waitO=0;clearTimeout(W.tO);
     if(d.ok!==true){msg(T.noOpen);render();return;}
-    msg(O+' is opening beside '+meWhat+'; it is compared in a moment.','ok');render();setTimeout(ask,1500);});
+    /* beside:false: the workstation opened the partner in place of this form (a phone has no room for two) */
+    msg(d.beside===false?O+' opens in place of '+meWhat+', since this screen has no room for both; come back to '+meWhat+' to see the comparison.':
+      O+' is opening beside '+meWhat+'; it is compared in a moment.','ok');render();setTimeout(ask,1500);});
   /* a saved file */
-  /* a file opened while the relay is still asking wins: the late answer is then ignored, as one not waited for */
+  /* a file opened while the relay is still asking wins: the late answer is then ignored, as one not waited for. A file
+     refused leaves the table that was open, and its ticks, as they were. */
   function fromFile(text,name){if(W.waitA){W.waitA=0;clearTimeout(W.tA);}
-    const r=readText(text,name,other,me);if(!r.ok){W.cur=null;msg(r.msg);render();return false;}
+    const r=readText(text,name,other,me);if(!r.ok){msg(r.msg);render();return false;}
     return compareWith(r.S,{via:'file',file:r.file,saved:r.saved});}
+  /* the keyboard stays where it was: after a button rebuilds the table or hides itself, the focus goes back to that
+     button, else to the next one named, else to the status line (or, unlinked, to Link) */
+  function refocus(){const sels=[].slice.call(arguments);
+    for(const s of sels){const el=s?Q(s):null;if(el&&!el.disabled&&el.getClientRects().length){try{el.focus({preventScroll:true});}catch(e){}return;}}
+    const on=!Q('.lk-on').hidden,t=on?Q('.lk-status'):Q('[data-lk="on"]');if(!t)return;if(on)t.tabIndex=-1;try{t.focus({preventScroll:true});}catch(e){}}
   if(host){
     const fi=Q('.lk-fileIn');
     /* The partner's file is not this form's saved state. The forms' unsaved-work guard (nbh-guard) takes the change
@@ -2651,25 +2765,26 @@ function mount(ad){
        window, before it reaches the document, and handled without passing on. */
     window.addEventListener('change',e=>{if(e.target!==fi)return;e.stopPropagation();const f=fi.files&&fi.files[0];if(!f)return;const rd=new FileReader();
       rd.onload=()=>{fromFile(rd.result,f.name);};rd.onerror=()=>{msg('That file could not be read as a file '+O+' saved. Nothing was changed.');};rd.readAsText(f);fi.value='';},true);
-    /* the first edit after a take withdraws Undo (see undoOk) */
+    /* the first edit after a take withdraws Undo (see undoOk), and says so */
     ['input','change'].forEach(t=>document.addEventListener(t,e=>{if(!W.undo||(e.target&&host.contains(e.target)))return;
-      setTimeout(()=>{if(W.undo&&!undoOk()){W.undo=null;W.undoAfter='';render();}},0);}));
+      setTimeout(()=>{if(W.undo&&!undoOk()){dropUndo();msg('Undo is no longer offered: '+meWhat+' has changed since the take.');render();}},0);}));
     host.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!host.contains(b))return;
-      const a=b.dataset.lk,act=b.dataset.act;
-      if(a==='on')link();else if(a==='compare')ask();else if(a==='file'){W.msg='';fi.click();}else if(a==='beside')openBeside();
-      else if(a==='unlink')unlink();else if(a==='apply')apply();else if(a==='leave')leave();else if(a==='undo')undo();
-      else if(act==='take'||act==='keep')press(b.dataset.key,act);else if(act==='choose')choose(b.dataset.key,+b.dataset.i);});}
+      const a=b.dataset.lk,act=b.dataset.act,k=b.dataset.key,i=b.dataset.i;
+      if(a==='on'){link();refocus('[data-lk="compare"]','[data-lk="file"]');}else if(a==='compare')ask();else if(a==='file'){W.msg='';fi.click();}else if(a==='beside')openBeside();
+      else if(a==='unlink')unlink().then(done=>{if(done)refocus('[data-lk="on"]');});else if(a==='apply')apply();else if(a==='leave'){leave();refocus();}else if(a==='undo'){undo();refocus();}
+      else if(a==='printed'){printed();refocus();}
+      else if(act==='take'||act==='keep')press(k,act);else if(act==='choose'){choose(k,+i);refocus('button[data-act="choose"][data-key="'+k+'"][data-i="'+i+'"]');}});}
   const api={compare(){if(framed())ask();else{const fi=Q('.lk-fileIn');if(fi)fi.click();}},compareWith,render,fromFile,
     state(){const lk=getLk();return {on:!!lk&&lk.on===1,lk,res:lk&&lk.last?lk.last.res:'',table:!!W.cur,blocked:blocked(),
       apply:!!W.cur&&!blocked()&&anyPressed()&&!W.busy,undo:!!W.undo,msg:W.msg,toast:W.toast,waiting:!!W.waitA,opening:!!W.waitO,
       status:lk&&lk.on===1?statusLines(lk):[]};},
     rows(){return W.cur?W.cur.rows.filter(r=>r.what&&r.key).map(r=>{const s=W.cur.st[r.key];return {key:r.key,what:r.what,here:val(r.here),there:val(r.there),st:s.st,label:s.label,take:s.take,keep:s.keep,pressed:W.cur.pressed[r.key]||''};}):[];},
-    press,apply,undo,leave,link,unlink,choose,ignored:()=>W.ignored};
+    press,apply,undo,leave,link,unlink,choose,printed,ignored:()=>W.ignored};
   window.nbhLink=api;
   render();
   return api;}
 
-window.NBHLink={norm,hash,near,tokSame,tokKey,TOKWORD,readLk,isOn,pack,planOf,boardOf,whoRow,readText,stateOf,mount,confirm:confirmBox,MAX};
+window.NBHLink={norm,hash,near,tokSame,tokKey,TOKWORD,readLk,isOn,pack,planOf,boardOf,whoRow,problem,pbOf,problemNote,readText,stateOf,mount,confirm:confirmBox,MAX};
 })();
 
 /* ===== Form TK-1 ===== */
@@ -2944,13 +3059,19 @@ function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.ma
   return pages;}
 /* a back whose text does not fit at the floor size continues on a second back page; in a duplex order a blank sheet keeps
    every back on the reverse of its front */
+/* (v21.43) one back fitted to its page: its text shrinks to the floor size, then the credit line gives way; true when
+   it fits on the one page. paginate uses it, and so does the link's schedule row, to say before a take whether the
+   Token Economy back will run on to a second page */
+function fitBack(pg){const body=pg.querySelector('.bbody');if(!body)return true;
+  const cr=pg.querySelector('.credit');const room=()=>{if(cr)body.style.paddingBottom=(cr.offsetHeight+(pg.classList.contains('compact')?14:34)*scl()*96/72)+'px';};room();
+  fitOne(body);if(!tooFull(body))return true;
+  /* the credit line gives way first: one small line at the foot, and the text gets the room back */
+  if(pg.querySelector('.credit')&&!pg.classList.contains('compact')){pg.classList.add('compact');{let f=10.5;const one=13*scl()*96/72*1.4;while(cr.offsetHeight>one&&f>8){f-=.25;cr.style.fontSize=(f*scl())+'pt';}}room();fitOne(body);if(!tooFull(body))return true;}
+  return false;}
 function paginate(root,dup){let guard=0;
   for(let pg=root.querySelector('.pg.back');pg&&guard++<40;pg=pg.nextElementSibling){
     if(!pg.classList.contains('back'))continue;const body=pg.querySelector('.bbody');if(!body)continue;
-    const cr=pg.querySelector('.credit');const room=()=>{if(cr)body.style.paddingBottom=(cr.offsetHeight+(pg.classList.contains('compact')?14:34)*scl()*96/72)+'px';};room();
-    fitOne(body);if(!tooFull(body))continue;
-    /* the credit line gives way first: one small line at the foot, and the text gets the room back */
-    if(pg.querySelector('.credit')&&!pg.classList.contains('compact')){pg.classList.add('compact');{let f=10.5;const one=13*scl()*96/72*1.4;while(cr.offsetHeight>one&&f>8){f-=.25;cr.style.fontSize=(f*scl())+'pt';}}room();fitOne(body);if(!tooFull(body))continue;}
+    if(fitBack(pg))continue;
     body.dataset.fixed=body.style.fontSize||getComputedStyle(body).fontSize;
     const kids=[...body.children].filter(e=>!e.classList.contains('cont'));const moved=[];
     while(tooFull(body)&&kids.length>1){const k=kids.pop();moved.unshift(k);k.remove();}
@@ -3110,16 +3231,20 @@ window.__nbhFactsPick=function(sel){let n=0;const put=(a,w)=>{w=String(w||'').tr
    on Setup (the band under Tokens); an unlinked book saves, prints and counts its fields as before. The shared core
    (tools/blocks/nbh-link.js, put in above by build.sh, byte for byte the copy Form TE-1 carries) owns the panel, the
    relay ask, the file fallback, the row states, Apply, Leave and Undo; this adapter says what is compared and how a take
-   is written. Form TE-1 is the plan of record: its behavior, tokens per exchange, backups and schedule are offered to this
-   book, ticked where they fill an empty place or have changed on the plan; the pictures, the token and the last-token
-   marking are this book's own. Nothing is emptied or deleted (the captions are written again only by a count change,
-   after a question when they were edited); class, cost, preference and the RA-1 answer never come into the book, and a
-   backup whose RA-1 answer is No is never offered. The record is one JSON string in S.meta.lk, carried by #tkState, so
-   the shell's status, snapshots and autosave carry it; while the link is on it also holds a short summary of the board
+   is written. Form TE-1 is the plan of record: its count, backups and schedule are offered to this book, ticked where they
+   fill an empty place or have changed on the plan. Its behavior goes on a target card only when ticked by hand, and is
+   not offered when it names a behavior to reduce (the case's problem behaviors from Form TB-1, those seen at an earlier
+   compare, or the common words for one). The pictures, the token and the last-token marking are this book's own: a take
+   keeps a card's picture. Nothing is emptied or deleted (the captions are written again only by a count change, after a
+   question when they were edited); class, cost, preference and the RA-1 answer never come into the book, and a backup
+   whose RA-1 answer is No is never offered. The record is one JSON string in S.meta.lk, carried by #tkState, so the
+   shell's status, snapshots and autosave carry it; while the link is on it also holds a short summary of the board
    (lk.board: the count, the token, the last-token marking, the paired target card and the card labels), which is what
-   Form TE-1 reads, since it cannot read the picture library. These functions are declarations and var, since renderAll
-   and syncState call some of them before this part of the script has run. */
-var lkApi=null,lkQuiet=false,lkS={n:null,pick:null,sel:null,took:false};
+   Form TE-1 reads, since it cannot read the picture library. The paired card (lk.card) is the one a Take or a Keep of the
+   card row paired with the plan's behavior, or one found equal to it at a compare; it follows its label when the card is
+   moved, and a tap on a card number only chooses the card the table compares. These functions are declarations and var,
+   since renderAll and syncState call some of them before this part of the script has run. */
+var lkApi=null,lkQuiet=false,lkS={n:null,pick:null,sel:null,took:false},lkPicNames=null;
 var LK_SCHED=/^\s*\*\*This book[’']s schedule/;
 function lkT(v){return String(v==null?'':v).trim();}
 function lkQ(w){return '“'+w+'”';}
@@ -3128,103 +3253,166 @@ function lkOrd(n){return n+(n%100>=11&&n%100<=13?'th':['th','st','nd','rd'][n%10
 /* card numbers: "1 to 4", or "2, 4 and 5" */
 function lkNums(a){const s=a.slice().sort((x,y)=>x-y);return s.length>2&&s.every((v,i)=>!i||v===s[i-1]+1)?s[0]+' to '+s[s.length-1]:lkAnd(s.map(String));}
 function lkRec(){return window.NBHLink?NBHLink.readLk(S.meta.lk||''):null;}
-function lkPaint(){if(lkApi)lkApi.render();}
-/* the board summary Form TE-1 reads (lk.board), written only when it has changed, so an unchanged book keeps its record */
+/* the band over the panel says Link until the link is on, then Linked */
+function lkBand(){const h=$('#lkBand');if(!h)return;const r=lkRec(),t=(r&&r.on===1?'Linked':'Link')+' with Form TE-1 (the token economy plan)';if(h.textContent!==t)h.textContent=t;}
+function lkPaint(){if(lkApi){lkApi.render();lkBand();}}
+/* the paired target card: the one a Take or a Keep of the card row paired with the plan's behavior, or one found equal to
+   it at a compare (lk.card). It follows its label (lk.base.card[0] is the label's hash) when the card is moved; when the
+   label itself has changed, the pairing stays on its place, where the row then reads "changed here". -1: none. */
+function lkPaired(lk){if(!lk||!Number.isInteger(lk.card)||!S.tg[lk.card])return -1;const N=NBHLink,b=lk.base&&lk.base.card,h=i=>N.hash(N.norm(lkT(lbl(S.tg[i]))));
+  if(b&&h(lk.card)!==b[0]){const j=S.tg.findIndex((o,i)=>!!lkT(lbl(o))&&h(i)===b[0]);if(j>=0)return j;}
+  return lk.card;}
+/* the board summary Form TE-1 reads (lk.board), written only when it has changed, so an unchanged book keeps its record.
+   card and cardLabel: the paired card (paired 1, with the pairing's two hashes in pair), else the first card with a label */
 function lkBoard(){const N=window.NBHLink;if(!N)return;const r=N.readLk(S.meta.lk||'');if(!r||r.on!==1)return;
   const l=o=>lkT(lbl(o)).slice(0,40),six=a=>{const o=(Array.isArray(a)?a:[]).slice(0,6).map(l);while(o.length<6)o.push('');return o;};
-  const c=Number.isInteger(r.card)?r.card:0,pic=termMode()==='pic'&&Array.isArray(S.tokL)&&has(S.tokL[0]);
-  const b={n:String(nTok()),tok:lkT(tokName()).slice(0,40),term:termMode(),last:pic?l(S.tokL[0]):'',card:c,cardLabel:l((S.tg||[])[c]),ch:six(S.ch),tg:six(S.tg)};
-  if(JSON.stringify(b)===JSON.stringify(r.board))return;r.board=b;S.meta.lk=N.pack(r);}
+  const pc=lkPaired(r),first=(S.tg||[]).findIndex(o=>!!lkT(lbl(o))),c=pc>=0?pc:first>=0?first:0,pic=termMode()==='pic'&&Array.isArray(S.tokL)&&has(S.tokL[0]);
+  const b={n:String(nTok()),tok:lkT(tokName()).slice(0,40),term:termMode(),last:pic?l(S.tokL[0]):'',card:c,cardLabel:l((S.tg||[])[c]),ch:six(S.ch),tg:six(S.tg),paired:pc>=0?1:0};
+  if(pc>=0&&r.base.card)b.pair=r.base.card.slice();
+  const moved=pc>=0&&pc!==r.card;if(moved)r.card=pc;
+  if(!moved&&JSON.stringify(b)===JSON.stringify(r.board))return;r.board=b;S.meta.lk=N.pack(r);}
 /* the last words of the Setup verdict while linked: " Linked with Form TE-1 (compared Oct 3: in step)." */
 function lkPhrase(){const r=lkRec();if(!r||r.on!==1)return '';const L=r.last;if(!L)return ' Linked with Form TE-1 (not compared yet).';
   let d='';try{d=new Date(L.when).toLocaleDateString(undefined,{day:'numeric',month:'short'});}catch(e){d='';}
-  const n=+(String(L.res||'').split(' ')[1]||0),w=L.res==='step'?'in step':/^look/.test(L.res)?n+(n===1?' item':' items')+' to look at':
-    /^kept/.test(L.res)?n+(n===1?' difference':' differences')+' kept':L.res==='who'?'for another student?':'';
+  const res=String(L.res||''),num=re=>{const x=re.exec(res);return x?+x[1]:0;},n=num(/look (\d+)/),k=num(/kept (\d+)/),pt=num(/part (\d+)/);
+  const w=res==='step'?'in step':/^look/.test(res)?n+(n===1?' item':' items')+' to look at':res==='empty'?'Form TE-1 held nothing to compare':
+    /^(kept|part)/.test(res)?[k?k+(k===1?' difference':' differences')+' kept':'',pt?pt+(pt===1?' item':' items')+' taken in part':''].filter(Boolean).join(', '):res==='who'?'for another student?':'';
   return ' Linked with Form TE-1 (compared '+esc(d)+(w?': '+w:'')+').';}
 /* a change to the record is unsaved work: #tkState gets an input event, which the unsaved-work guard counts as an edit
    (this form's own listener lets it pass while lkQuiet is set) */
 function lkDirty(){const t=$('#tkState');if(!t)return;lkQuiet=true;try{t.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}finally{lkQuiet=false;}}
+/* the words of a label, for finding the card a behavior is about: small words left out, endings cut ("raises" and "raise",
+   "blocks" and "block", "sitting" and "sits") */
+var LK_STOP=new Set('a an and or the to of in on at for with from by into onto my his her their your our its is are be it up out then when after before during each every one two all'.split(' '));
+function lkStems(s){const out=[];NBHLink.norm(s).split(/[^\p{L}\p{N}]+/u).forEach(w=>{if(!w||LK_STOP.has(w))return;w=w.replace(/(ingly|edly|ly|ing|ed|es|s|e)$/,'').replace(/([b-df-hj-np-tv-z])\1$/,'$1');if(w.length>=3&&!out.includes(w))out.push(w);});return out;}
+function lkBest(beh,ls){const b=lkStems(beh);let best=-1,sc=0;ls.forEach((l,i)=>{if(!l)return;const s=lkStems(l).filter(w=>b.includes(w)).length;if(s>sc){sc=s;best=i;}});return best;}
 /* the target card compared with the plan's behavior: the one picked with the card buttons in this table, else the card
-   whose label matches the behavior, else the card paired before (lk.card), else the first empty card (where the behavior
-   can go), else card 1. With no behavior on the plan, the first card that has a label, so Form TE-1 can take it. */
+   whose label matches the behavior, else the paired card, else the card whose label shares the most words with it
+   ("Raise my hand" for "Raises hand and waits"), else the first empty card (where the behavior can go), else card 1. With
+   no behavior on the plan: the paired card, else the first card that has a label, so Form TE-1 can take it. */
 function lkCardN(beh,lk){const N=NBHLink;if(lkS.pick!=null)return lkS.pick;const ls=S.tg.map(o=>lkT(lbl(o)));
   if(beh){const i=ls.findIndex(l=>!!l&&(N.norm(l)===N.norm(beh)||N.near(l,beh)));if(i>=0)return i;}
-  if(lk&&Number.isInteger(lk.card))return lk.card;
+  const pc=lkPaired(lk);if(pc>=0)return pc;
+  if(beh){const w=lkBest(beh,ls);if(w>=0)return w;}
   const e=beh?S.tg.findIndex(o=>!has(o)&&!o.l):ls.findIndex(Boolean);return e>=0?e:0;}
-/* the case's behaviors, when the workstation has sent them: a problem behavior (Form TB-1's isRep false; Form FS-1 lists
-   problem behaviors only) named as the behavior the tokens are earned for is flagged and never becomes a card */
-function lkProblem(beh){const C=window.nbhCase,f=C&&C.facts&&Array.isArray(C.facts.behaviors)?C.facts.behaviors:[],N=NBHLink;if(!beh)return null;
-  const p=f.find(x=>x&&(x.isRep===false||(x.isRep===undefined&&x.src==='FS-1'))&&N.norm(x.label)===N.norm(beh));if(!p)return null;
-  const r=f.find(x=>x&&x.isRep===true&&lkT(x.label));return {rep:lkT(p.rep)||lkT(p.alt)||(r?lkT(r.label):'')};}
+/* the case's behaviors, when the workstation has sent them (Form TB-1's targets and candidates, or Form FS-1's) */
+function lkFacts(){const C=window.nbhCase,f=C&&C.facts&&Array.isArray(C.facts.behaviors)?C.facts.behaviors:null;return f&&f.length?f:null;}
+/* a behavior to reduce named as the behavior the tokens are earned for (the core's problem()): the case's problem
+   behaviors, those seen at an earlier compare (this record's pb, and the plan's), or the common words for one */
+function lkProblem(beh,pb){const lk=lkRec()||{};return NBHLink.problem(beh,{facts:lkFacts()||[],seen:[].concat(lk.pb||[],pb||[])});}
+/* the library picture a take puts on a card that has none: only one whose name is the label (or its singular), or starts
+   it as whole words ("Tablet" for "Tablet, video clips"). A name merely inside the label ("Help" in "Raises a hand to ask
+   for help") brings no picture. (The case's own fill, matchPicto, is left as it was.) */
+function lkPicFor(w){const N=NBHLink,t=N.norm(w),s=x=>x.replace(/s$/,'');if(!t)return '';
+  if(!lkPicNames)lkPicNames=KEYS.map(k=>[k,N.norm(P[k].l)]);
+  let e=lkPicNames.find(x=>x[1]===t)||lkPicNames.find(x=>s(x[1])===s(t));if(e)return e[0];
+  e=lkPicNames.find(x=>x[1].length>=4&&N.near(x[1],t));return e?e[0]:'';}
 /* the six choice cards against the plan's backups. A backup is matched by a card when the two are equal, or near (shown
    as ≈): the shared near() ("Tablet" ≈ "Tablet, video clips"), or the card's words (4 characters or more) standing whole
    inside the backup's name ("Magnetic tiles" ≈ "Five minutes with the magnetic tiles"), the rule Form TE-1 uses, so the
    two panels agree. Unmatched backups are offered in the plan's order onto the empty cards (as many as there are empty
-   cards; with fewer cards than backups the names tapped last are the ones taken); one whose RA-1 answer is No, one over
-   40 characters, and all of them when no card is empty, are named instead. seen: the names that are on a card once the
-   take is done, for the notice that one has left the plan's menu. */
+   cards; with fewer cards than backups the names tapped last are the ones taken); one whose RA-1 answer is No and one
+   over 40 characters are named instead, and so are all of them when no card is empty (full). seen: the names that are on a
+   card once the take is done, for the notice that one has left the plan's menu. */
 function lkMenu(p){const N=NBHLink,lk=lkRec()||{},seen=lk.menuSeen||[];
   const eq=(x,y)=>N.norm(x)===N.norm(y),words=x=>' '+N.norm(x).replace(/[^\p{L}\p{N}']+/gu,' ').trim()+' ';
   const inW=(c,n)=>{const a=words(c);return a.trim().length>=4&&!eq(c,n)&&words(n).includes(a);},nr=(c,n)=>N.near(c,n)||inW(c,n);
   const cards=S.ch.map((o,i)=>({i,l:lkT(lbl(o)),empty:!has(o)&&!o.l})),bk=(p.bk||[]).map(b=>({n:lkT(b.n),no:/^no$/i.test(lkT(b.conf))})).filter(b=>b.n);
-  const M={cards,bk,near:[],un:[],offer:[],pick:[],to:[],cap:0,skip:[],noMatch:[],warn:[],seen:[]};
+  const M={cards,bk,near:[],un:[],offer:[],pick:[],to:[],cap:0,skip:[],full:[],noMatch:[],warn:[],seen:[]};
   bk.forEach(b=>{const e=cards.find(c=>c.l&&eq(c.l,b.n)),r=e?null:cards.find(c=>c.l&&nr(c.l,b.n));b.card=e||r||null;
     if(r)M.near.push([r,b]);
     if(b.card&&b.no)M.warn.push('Card '+(b.card.i+1)+', '+b.card.l+', matches a backup Form TE-1 records as not a reinforcer (RA-1).');
     if(!b.card){if(b.no)M.skip.push(lkQ(b.n)+' (not a reinforcer on RA-1)');else if(!M.un.some(x=>eq(x.n,b.n)))M.un.push(b);}});
   const empties=cards.filter(c=>c.empty),fit=[];M.cap=empties.length;
   M.un.forEach(b=>{if(b.n.length>40)M.skip.push(lkQ(b.n)+' (write a short label on Choices)');else fit.push(b.n);});
-  if(!M.cap)fit.forEach(n=>M.skip.push(lkQ(n)+' (no empty card: empty one on Choices first)'));
+  if(!M.cap)M.full=fit.slice();
   else{M.offer=fit;M.pick=(lkS.sel?fit.filter(n=>lkS.sel.includes(N.norm(n))):fit).slice(0,M.cap);M.to=empties.slice(0,M.pick.length).map(c=>c.i);}
   M.noMatch=cards.filter(c=>c.l&&!bk.some(b=>eq(c.l,b.n)||nr(c.l,b.n)));
   cards.forEach(c=>{if(c.l&&seen.includes(N.hash(N.norm(c.l)))&&!bk.some(b=>eq(b.n,c.l)))M.warn.unshift('Card '+(c.i+1)+', '+c.l+', is no longer on Form TE-1’s menu.');});
   M.seen=Array.from(new Set(bk.filter(b=>b.card&&eq(b.card.l,b.n)).map(b=>b.n).concat(M.pick).map(n=>N.hash(N.norm(n))))).slice(0,10);
   return M;}
 /* the plan's schedule as one paragraph of the Token Economy back: "**This book's schedule (Form TE-1):** " + what earns a
-   token + "." + the exchange (when and how long; the delay). The markup characters * _ { } are taken out of the plan's
-   words; {token} is this book's own placeholder and prints the token's name. */
-function lkSchedText(p){const cl=s=>lkT(s).replace(/[*_{}]/g,'').replace(/\s+/g,' ').trim(),stop=s=>s.replace(/[\s.;,:]+$/,'');
-  const tp=cl(p.tp),tpN=lkT(p.tpN),d=/\s[—–-]\s/.exec(tp);let earn=d?tp.slice(d.index+d[0].length).trim():'';
-  if(!earn)earn=/^\d+(\.\d+)?$/.test(tpN)?(+tpN===1?'each response earns one {token}':'every '+tpN+' responses earn one {token}'):tp;
-  earn=stop(earn);const exW=stop(cl(p.exWhen)),exD=stop(cl(p.exDelay));if(!earn&&!exW)return '';
-  return '**This book’s schedule (Form TE-1):** '+(earn?earn+'.':'')+(exW?(earn?' ':'')+'The exchange: '+exW+(exD?'; '+exD:'')+'.':'');}
+   token + "; " + what opens the exchange + "." + the exchange (when and how long; the delay). The markup characters
+   * _ { } are taken out of the plan's words, and a capital that opens one of its parts is made small ("The exchange: end
+   of each block"), unless the word is a name (a day, a month, a title); {token} is this book's own placeholder and prints
+   the token's name. */
+var LK_PROPER=/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December|Mr|Mrs|Ms|Dr)\b/;
+function lkSchedText(p){const cl=s=>lkT(s).replace(/[*_{}]/g,'').replace(/\s+/g,' ').trim(),stop=s=>s.replace(/[\s.;,:]+$/,''),
+    low=s=>/^[A-Z][a-z]/.test(s)&&!LK_PROPER.test(s)?s.charAt(0).toLowerCase()+s.slice(1):s,part=t=>{const d=/\s[—–-]\s/.exec(t);return d?t.slice(d.index+d[0].length).trim():'';};
+  const tp=cl(p.tp),tpN=lkT(p.tpN),epN=lkT(p.epN);
+  let earn=part(tp);if(!earn)earn=/^\d+(\.\d+)?$/.test(tpN)?(+tpN===1?'each response earns one {token}':'every '+tpN+' responses earn one {token}'):tp;
+  let open=part(cl(p.ep));if(!open&&/^[1-9]\d*$/.test(epN))open=+epN===1?'one token opens the exchange':epN+' tokens open the exchange';
+  earn=low(stop(earn));open=low(stop(open));const exW=low(stop(cl(p.exWhen))),exD=low(stop(cl(p.exDelay)));if(!earn&&!open&&!exW)return '';
+  const head=[earn,open].filter(Boolean).join('; ');
+  return '**This book’s schedule (Form TE-1):** '+(head?head+'.':'')+(exW?(head?' ':'')+'The exchange: '+exW+(exD?'; '+exD:'')+'.':'');}
 function lkParas(t){return String(t||'').split(/(\n[ \t]*\n\s*)/);}
 function lkSchedHere(){const ps=lkParas(S.txt.te);for(let i=0;i<ps.length;i+=2)if(LK_SCHED.test(ps[i]))return ps[i].trim();return '';}
+/* the Token Economy back with the paragraph in: it replaces the one there, or goes on as the last paragraph */
+function lkSchedTe(raw){const ps=lkParas(S.txt.te);for(let i=0;i<ps.length;i+=2)if(LK_SCHED.test(ps[i])){ps[i]=raw;return ps.join('');}
+  const t=String(S.txt.te||'').replace(/\s+$/,'');return (t?t+'\n\n':'')+raw;}
 /* the paragraph as it prints, without its bold opening words: what the table shows and compares */
 function lkPlain(t){return fill(t).replace(/^\s*\*\*This book[’']s schedule[^*]*\*\*\s*/,'').replace(/\*\*\*|\*\*|__|\*/g,'').replace(/\s+/g,' ').trim();}
-/* the pages a take of the count or the token changes, named as the reprint line words them ("Reprint: the Board, Tokens
-   and token-card pages"): the Board and the Tokens page (with their backs), the Targets and Choices pages when their backs
-   print the count or the token's name, the sheet of token cards, and the how-to insert when it prints and names them */
-function lkRp(re){const out=['Board','Tokens'];[['tg','Targets'],['ch','Choices']].forEach(([k,nm])=>{if(re.test(S.txt[BACKT[k][0]]||''))out.push(nm);});
+/* whether the Token Economy back holds a text on its one page: that back is laid out off screen at the book's size and
+   fitted as the Preview fits it (fitBack). null when it cannot be measured (the form is not on screen) */
+function lkBackFits(text){const key=BACKT.tk[0],was=S.txt[key],box=document.createElement('div');let r=null;
+  try{S.txt[key]=text;box.className='book';box.style.cssText='position:absolute;left:-30000px;top:0;visibility:hidden';box.innerHTML=pageBack('tk');document.body.appendChild(box);
+    const pg=box.querySelector('.pg'),b=pg&&pg.querySelector('.bbody');if(b&&b.clientHeight)r=fitBack(pg);}
+  catch(e){r=null;}finally{S.txt[key]=was;box.remove();}return r;}
+/* the count named in the plan's own words ("the fifth star"), against the slots this book prints */
+var LK_ORDW=['first','second','third','fourth','fifth','sixth','seventh','eighth','ninth','tenth'];
+function lkOrdIn(t){const tw=lkT(tokName()).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),m=new RegExp('\\b('+LK_ORDW.join('|')+')\\s+((?:'+tw+')s?|tokens?)\\b','i').exec(t);
+  return m?{n:LK_ORDW.indexOf(m[1].toLowerCase())+1,w:m[1].toLowerCase()+' '+m[2].toLowerCase()}:null;}
+/* the pages a take of the count or the token changes, by side: the Board and the Tokens page (both sides when the back
+   prints the count or the token's name, else the front), the backs of Targets and Choices when they print it, the sheet
+   of token cards, and the how-to insert when it prints and names them */
+function lkRp(re){const out=[];[['bd','Board'],['tk','Tokens']].forEach(([k,nm])=>out.push(re.test(S.txt[BACKT[k][0]]||'')?nm:nm+' front'));
+  [['tg','Targets'],['ch','Choices']].forEach(([k,nm])=>{if(re.test(S.txt[BACKT[k][0]]||''))out.push(nm+' back');});
   out.push('token-card');if(S.chk.pg_how&&['h1','h2','h3'].some(k=>re.test(S.txt[k]||'')))out.push('how-to');return out;}
+/* the reprint line's words for those pages ("Reprint: the Board page (both sides), the front of the Tokens page and the
+   sheet of token cards"); it stays until "These pages are reprinted" is pressed, since a browser reports a cancelled print
+   as a print */
+var LK_RP={Board:'the Board page (both sides)','Board front':'the front of the Board page',Tokens:'the Tokens page (both sides)','Tokens front':'the front of the Tokens page',
+  Targets:'the back of the Targets page','Targets back':'the back of the Targets page',Choices:'the back of the Choices page','Choices back':'the back of the Choices page',
+  'Token Economy back':'the Token Economy back','Token Economy back 2':'the Token Economy back with its continued page','token-card':'the sheet of token cards',
+  'target-card':'the sheet of target cards','choice-card':'the sheet of choice cards','how-to':'the how-to insert'};
+function lkRpLine(pages){const has=p=>pages.includes(p),w=[];
+  pages.forEach(p=>{if((p==='Board front'&&has('Board'))||(p==='Tokens front'&&has('Tokens'))||(p==='Token Economy back'&&(has('Tokens')||has('Token Economy back 2'))))return;
+    const t=LK_RP[p]||'the '+p+' page';if(!w.includes(t))w.push(t);});return lkAnd(w);}
 /* the rows of the table, in the order who, card, n, tok, menu, sched, then the information lines (plan 2A) */
-function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||{},out=[],st=(r,k)=>N.stateOf(r,base[k],{other:'TE-1'}).st;
+function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||{},out=[],st=(r,k)=>N.stateOf(r,r.nobase?null:base[k],{other:'TE-1'}).st;
   /* the student: client and sid, each compared only when both are filled; the empty ones here are filled */
-  const who=N.whoRow({client:m.client,sid:m.sid},{client:p.client,sid:p.sid},{other:'TE-1',meWhat:'this book'});who.mirror=true;out.push(who);
-  /* a target card against the behavior the tokens are earned for (40 characters fit on a card) */
-  const beh=lkT(p.beh),n=lkCardN(beh,lk),cur=lkT(lbl(S.tg[n])),prob=lkProblem(beh),long=beh.length>40;lkS.n=n;
-  const card={key:'card',what:'Target card '+(n+1),here:cur,there:beh,same:(x,y)=>N.near(x,y),owner:'there',pre:['fill'],can:!!beh&&!long&&!prob,mirror:true,idx:n,
-    choose:{n:6,value:n,label:'Target card'},took:'target card '+(n+1)+' from the plan’s behavior',rp:['target-card'].concat(m.layout==='rules'?['Board']:[])};
-  if(prob){card.keep=false;card.warn='Form TE-1’s behavior, '+lkQ(beh)+', is a problem behavior on Form TB-1. Tokens are earned for the replacement behavior'+(prob.rep?' (TB-1: '+lkQ(prob.rep)+')':'')+'; correct it on Form TE-1.';}
+  out.push(N.whoRow({client:m.client,sid:m.sid},{client:p.client,sid:p.sid},{other:'TE-1',meWhat:'this book'}));
+  /* a target card against the behavior the tokens are earned for (40 characters fit on a card). Its Take is never ticked
+     for you, and a behavior to reduce is not offered; the record's pairing is used only for the paired card (nobase) */
+  const beh=lkT(p.beh),n=lkCardN(beh,lk),o=S.tg[n],cur=lkT(lbl(o)),pc=lkPaired(lk),prob=lkProblem(beh,p.pb),long=beh.length>40;lkS.n=n;
+  const card={key:'card',what:'Target card '+(n+1),here:cur,there:beh,same:(x,y)=>N.near(x,y),owner:'',pre:[],can:!!beh&&!long&&!prob,
+    mirror:!beh&&!!cur&&!N.problem(cur,{facts:lkFacts()||[]}),idx:n,pb:p.pb,nobase:pc!==n,keptLabel:'paired',choose:{n:6,value:n,label:'Target card'},
+    took:'target card '+(n+1)+' from the plan’s behavior'+(cur?' (was '+lkQ(cur.length>24?cur.slice(0,23)+'…':cur)+')':''),rp:['target-card'].concat(m.layout==='rules'?['Board front']:[])};
+  if(prob){if(prob.src!=='word')card.keep=false;
+    card.warn=N.problemNote(prob,{lead:'Form TE-1’s behavior',text:beh,fix:'correct it on Form TE-1'+(prob.src==='word'?', or, if it is one, write it on Targets card '+(n+1)+' yourself':'')});}
   else{const s=st(card,'card');
     if(long&&s!==1&&s!==4)card.why='Form TE-1’s behavior is '+beh.length+' characters; a card holds 40. '+(cur?'If card '+(n+1)+'’s label stands for it, press Keep to pair them.':'Write a short label on Targets card '+(n+1)+', then compare again and press Keep to pair them.');
-    else if(card.can&&s!==1){const k=matchPicto(beh),o=S.tg[n];card.preview='Writes '+lkQ(beh)+' on target card '+(n+1)+(k&&P[k]?', with the library picture '+lkQ(P[k].l):has(o)?', keeping its picture':', with no picture yet (choose one on Targets)')+'.';}}
+    else if(card.can&&s!==1){const k=has(o)?'':lkPicFor(beh);
+      card.preview='Writes '+lkQ(beh)+' on target card '+(n+1)+(cur?' in place of '+lkQ(cur):'')+(has(o)?', keeping its picture':k?', with the library picture '+lkQ(P[k].l):', with no picture yet (choose one on Targets)')+'.';
+      if(!lkFacts())card.info='This book cannot see Form TB-1’s problem behaviors here (the workstation sends them with the case), so take it only if it is a behavior to increase.';}}
   out.push(card);
   /* the count: 3 to 10 can be taken; 1 or 2 (establishing the token), more than 10 and no number are information */
   const ep=lkT(p.epN),epI=/^[1-9]\d*$/.test(ep)?+ep:0,nn=nTok();
   if(epI>=3&&epI<=10){const def=JSON.stringify(S.caps)===JSON.stringify(defCaps(nn,tokName()));
-    out.push({key:'n',what:'Tokens to earn',here:String(nn),there:ep,same:(x,y)=>x!==''&&y!==''&&+x===+y,owner:'there',pre:[],can:true,mirror:true,v:epI,
-      preview:epI!==nn?'Prints '+epI+' slots on the Board and '+epI+' boxes on the Tokens page; '+(def?'the captions are written for '+epI+'.':'your edited captions are written again for '+epI+' (you are asked first).'):'',
+    out.push({key:'n',what:'Tokens to earn',here:String(nn),there:ep,same:(x,y)=>x!==''&&y!==''&&+x===+y,owner:'there',pre:[],can:true,v:epI,
+      preview:epI!==nn?'Prints '+epI+' slots on the Board and '+epI+' boxes on the Tokens page; '+(def?'the captions are written for '+epI+'.':'your edited captions will be replaced by the standard captions for '+epI+' (you are asked first).'):'',
       took:'tokens to earn '+nn+' → '+epI,rp:lkRp(/\{n\}/)});}
   else out.push({info:!ep?'Form TE-1 has no tokens per exchange yet; it can take this book’s '+nn+' when it compares.':
     epI&&epI<3?'Form TE-1 opens the exchange after '+epI+(epI===1?' token':' tokens')+' (establishing the token); the board prints 3 to 10 slots (now '+nn+').':
     epI>10?'Form TE-1 asks for '+epI+' tokens per exchange; the board holds 10 at most (now '+nn+').':'Form TE-1 has no whole number of tokens per exchange yet.'});
   /* the token: the same when the token form names it (its name, the plural or its stem); a drawn token named there can be taken */
   const tf=lkT(p.tokForm),tn=lkT(tokName()),tk=N.tokKey(tf),drawn=!!tk&&!!TOK[tk],tcan=drawn&&S.tok[0].k!=='tk:'+tk;
-  const tok={key:'tok',what:'Token',here:tn,there:tf,same:(x,y)=>N.tokSame(y,x),owner:'here',pre:[],can:tcan,mirror:true,tk:drawn?tk:'',took:drawn?'the token: '+TOK[tk].l.toLowerCase():'the token',rp:lkRp(/\{(token|tokens|TOKENS)\}/)};
+  const tok={key:'tok',what:'Token',here:tn,there:tf,same:(x,y)=>N.tokSame(y,x),owner:'here',pre:[],can:tcan,mirror:true,tk:drawn?tk:'',
+    took:drawn?'the token: '+TOK[tk].l.toLowerCase()+' (was '+tn.toLowerCase()+')':'the token',rp:lkRp(/\{(token|tokens|TOKENS)\}/)};
   const ts=st(tok,'tok');
   if(ts!==1&&ts!==2&&ts!==4){
-    if(tcan){const rn=lkT(m.tokname)&&!N.tokSame(tf,m.tokname);tok.preview='Uses the '+TOK[tk].l.toLowerCase()+' token'+(rn?' and its name, '+lkQ(TOK[tk].l)+',':'')+' on the Board, the Tokens page and the token cards; the “Your First …!” caption follows it.';}
+    if(tcan){const rn=lkT(m.tokname)&&!N.tokSame(tf,m.tokname),nm=rn||!lkT(m.tokname)?TOK[tk].l:lkT(m.tokname);
+      tok.preview='Uses the '+TOK[tk].l.toLowerCase()+' token'+(rn?' and its name, '+lkQ(TOK[tk].l)+',':'')+' on the Board, the Tokens page and the token cards; the first slot’s caption becomes “Your First '+nm+'!”.';}
     else tok.why=drawn?'Form TE-1’s token form names the '+TOK[tk].l.toLowerCase()+' this book shows, which this book calls '+lkQ(tn)+' (Token name on Setup); press Keep to leave it so, or change the name there.':
       'Form TE-1’s token form names none of the tokens this book draws (star, smiley, thumbs up, check, coin, medal, trophy, heart); if this book’s '+tn.toLowerCase()+' is the token it describes, press Keep.';}
   out.push(tok);
@@ -3232,19 +3420,28 @@ function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||
   const M=lkMenu(p),info=[];
   M.near.forEach(([c,b])=>info.push('Card '+(c.i+1)+' '+lkQ(c.l)+' ≈ backup '+lkQ(b.n)+'.'));
   if(M.skip.length)info.push('Named on Form TE-1 but not offered: '+M.skip.join('; ')+'.');
+  if(M.full.length)info.push('Not offered, since no choice card is empty (empty one on Choices first): '+M.full.map(lkQ).join(', ')+'.');
   if(M.noMatch.length)info.push((M.noMatch.length===1?'Card '+(M.noMatch[0].i+1)+' ('+M.noMatch[0].l+') is':'Cards '+lkNums(M.noMatch.map(c=>c.i+1))+' ('+M.noMatch.map(c=>c.l).join(', ')+') are')+
     ' not on Form TE-1’s menu; Form TE-1 can add '+(M.noMatch.length===1?'it':'them')+' when it compares.');
+  /* the preview names the library pictures the take brings, and the cards that get none */
+  const pics=M.pick.map(nm=>[nm,lkPicFor(nm)]).filter(x=>x[1]),bare=M.pick.length-pics.length;
   out.push({key:'menu',what:'Choices',here:M.cards.filter(c=>c.l).map(c=>c.l),there:M.bk.map(b=>b.n),same:()=>!M.un.length&&M.bk.some(b=>b.card),owner:'there',pre:['any'],can:M.pick.length>0,mirror:true,
     choose:M.offer.length>1?{labels:M.offer,on:M.offer.map((x,i)=>M.pick.includes(x)?i:-1).filter(i=>i>=0),label:'Backups to add'}:null,
-    preview:M.offer.length?(M.pick.length?'Puts '+lkAnd(M.pick)+' on '+(M.to.length===1?'card '+(M.to[0]+1):'cards '+lkNums(M.to.map(i=>i+1)))+'.':'No backup is picked to add.')+
+    preview:M.offer.length?(M.pick.length?'Puts '+lkAnd(M.pick.map(lkQ))+' on '+(M.to.length===1?'card '+(M.to[0]+1):'cards '+lkNums(M.to.map(i=>i+1)))+'.'+
+        (pics.length?' Library picture'+(pics.length===1?': ':'s: ')+lkAnd(pics.map(([nm,k])=>lkQ(P[k].l)+' for '+lkQ(nm)))+(bare?'; the '+(bare===1?'other gets':'others get')+' no picture yet (choose '+(bare===1?'it':'them')+' on Choices).':'.'):
+        ' '+(bare===1?'It gets':'They get')+' no picture yet (choose '+(bare===1?'it':'them')+' on Choices).'):'No backup is picked to add.')+
       (M.offer.length>M.cap?' '+(M.cap===1?'One card is':M.cap+' cards are')+' empty: tap the backups to take, above.':M.offer.length>1?' Tap a backup’s name above to leave it out or put it back.':''):'',
     warn:M.warn,info,seen:M.seen,add:M.pick.slice(),took:'choice '+(M.to.length===1?'card ':'cards ')+lkNums(M.to.map(i=>i+1))+' from the backups',rp:['choice-card']});
-  /* the schedule paragraph of the Token Economy back (a copy into ordinary text, first taken by hand) */
+  /* the schedule paragraph of the Token Economy back (a copy into ordinary text, first taken by hand); the row says before
+     the take whether that back then runs on to a second page */
   const raw=lkSchedText(p),hr=lkSchedHere();
   const sc={key:'sched',what:'Token Economy back',here:hr?lkPlain(hr):'',there:raw?lkPlain(raw):'',owner:'there',pre:[],can:!!raw,raw,took:'the schedule paragraph on the Token Economy back',rp:['Token Economy back']};
   const ss=st(sc,'sched');
-  if(raw&&ss!==1&&ss!==2&&ss!==4)sc.info=hr?'Replaces the paragraph “This book’s schedule (Form TE-1)” on the Token Economy back.':
-    'Adds it as the last paragraph of the Token Economy back, after the bold words “This book’s schedule (Form TE-1):”; it is then ordinary text, edited on Backs like the rest. A back that no longer fits goes on to a second back page (the Preview shows it).';
+  if(raw&&ss!==1&&ss!==2&&ss!==4){const fits=lkBackFits(lkSchedTe(raw)),now=lkBackFits(S.txt.te);if(fits===false)sc.rp=['Token Economy back 2'];
+    sc.info=[(hr?'Replaces the paragraph “This book’s schedule (Form TE-1)” on the Token Economy back.':'Adds it as the last paragraph of the Token Economy back, after the bold words “This book’s schedule (Form TE-1):”; it is then ordinary text, edited on Backs like the rest.')+' '+
+      (fits===true?'It fits on that back.':fits===false&&now!==false?'That back is full, so the paragraph prints on a continued Token Economy back: one more sheet, and two in a duplex print, where a blank sheet keeps the next back on the reverse of its front. To keep the back to one page, shorten its text on Backs.':
+        fits===false?'That back already runs on to a continued page, and the paragraph goes there.':'A back that no longer fits goes on to a second back page (the Preview shows it).')];
+    const om=lkOrdIn(lkPlain(raw));if(om&&om.n!==nn)sc.info.push('The plan’s words name the '+om.w+', but this book prints '+nn+' slots.');}
   out.push(sc);
   /* information: nothing to take */
   if(/^yes/i.test(lkT(p.loss))){const lr=lkT(p.lossRule).replace(/\s+/g,' '),c=lr.length>120?lr.slice(0,119).replace(/\s+\S*$/,'')+'…':lr.replace(/[\s.]+$/,'');
@@ -3254,7 +3451,7 @@ function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||
   if(tpn!=null&&epn!=null){pr.push(r1(tpn*epn)+' responses per exchange');pr.push('unit price '+r1(tpn*epn/(ten||1)));}
   if(pr.length)out.push({info:'Form TE-1: '+pr.join(', ')+'.'});
   const th=p.thinLast,te=th?nb(th.ep):null;
-  if(te!=null&&te!==epn)out.push({info:'Form TE-1’s thinning record has '+lkT(th.ep)+(te===1?' token':' tokens')+' per exchange '+(th.d?'on '+th.d:'at its last step')+'; a new step means a new Board and Tokens page.'});
+  if(te!=null&&te!==epn)out.push({info:'Form TE-1’s thinning record has '+lkT(th.ep)+(te===1?' token':' tokens')+' per exchange '+(th.d?'on '+th.d:'at its last step')+'; when the book moves to that step, change Tokens to earn on Setup and reprint the Board and Tokens pages.'});
   if(termOn()&&epI>=3&&epI<=10&&epI!==nn)out.push({info:'The book marks its '+lkOrd(nn)+' token as the last, but Form TE-1 opens the exchange after '+epI+'.'});
   if(!p.linkedBack)out.push({info:'Form TE-1 is not linked back; turn on Link with Form TK-1 there to see this book from the plan.'});
   return out;}
@@ -3262,46 +3459,45 @@ function lkRows(p){const N=NBHLink,m=S.meta,lk=lkRec()||{base:{}},base=lk.base||
    here changed after the compare); false means nothing was written, and the row keeps its base */
 async function lkTake(r){const m=S.meta,N=NBHLink;
   if(r.key==='who'){let d=0;Object.keys(r.fillParts||{}).forEach(k=>{if(!lkT(m[k])){m[k]=r.fillParts[k];d++;}});if(!d)return false;}
-  else if(r.key==='card'){const i=r.idx,beh=lkT(r.there);if(!Number.isInteger(i)||!S.tg[i]||!beh||beh.length>40||lkProblem(beh))return false;
-    const k=matchPicto(beh),o=S.tg[i];S.tg[i]=k?{k,ph:'',l:beh}:{k:o.k||'',ph:o.ph||'',l:beh};}
+  else if(r.key==='card'){const i=r.idx,beh=lkT(r.there);if(!Number.isInteger(i)||!S.tg[i]||!beh||beh.length>40||lkProblem(beh,r.pb))return false;
+    /* the card keeps its own picture (a photo, or one chosen); a card with none gets a library picture only when its name is the label */
+    const o=S.tg[i];S.tg[i]=has(o)?{k:o.k||'',ph:o.ph||'',l:beh}:{k:lkPicFor(beh),ph:'',l:beh};}
   else if(r.key==='n'){const v=r.v,was=nTok();if(!(v>=3&&v<=10)||v===was)return false;
     /* the captions: written again without a question when they are the defaults for the old count */
     const def=JSON.stringify(S.caps)===JSON.stringify(defCaps(was,tokName()));
-    if(!def&&!(await N.confirm('Change the board to '+v+' tokens?\nYour edited captions are written again for '+v+' slots.',{ok:'Change to '+v})))return false;
+    if(!def&&!(await N.confirm('Change the board to '+v+' tokens?\nYour edited captions will be replaced by the standard captions for '+v+' slots.',{ok:'Change to '+v})))return false;
     m.n=String(v);ensure();recaps(true);}
   else if(r.key==='tok'){const t=r.tk;if(!t||!TOK[t]||S.tok[0].k==='tk:'+t)return false;S.tok[0]=cello('tk:'+t);
     if(lkT(m.tokname)&&!N.tokSame(r.there,m.tokname))m.tokname=TOK[t].l;recaps(false);}
-  else if(r.key==='menu'){let d=0;(r.add||[]).forEach(nm=>{if(S.ch.some(o=>N.norm(lbl(o))===N.norm(nm)))return;const i=S.ch.findIndex(o=>!has(o)&&!o.l);if(i<0)return;S.ch[i]=cellFor(nm);d++;});if(!d)return false;}
-  else if(r.key==='sched'){if(!r.raw)return false;const ps=lkParas(S.txt.te);let at=-1;for(let i=0;i<ps.length;i+=2)if(LK_SCHED.test(ps[i])){at=i;break;}
-    if(at>=0){ps[at]=r.raw;S.txt.te=ps.join('');}else{const t=String(S.txt.te||'').replace(/\s+$/,'');S.txt.te=(t?t+'\n\n':'')+r.raw;}}
+  else if(r.key==='menu'){let d=0;(r.add||[]).forEach(nm=>{if(S.ch.some(o=>N.norm(lbl(o))===N.norm(nm)))return;const i=S.ch.findIndex(o=>!has(o)&&!o.l);if(i<0)return;S.ch[i]={k:lkPicFor(nm),ph:'',l:lkT(nm).slice(0,40)};d++;});if(!d)return false;}
+  else if(r.key==='sched'){if(!r.raw)return false;S.txt.te=lkSchedTe(r.raw);}
   else return false;
   lkS.took=true;}
-/* the buttons inside a row: a target card (1 to 6) for the card row; a backup's name to leave out of the take, or put back */
-function lkChoose(key,i,p){if(key==='card'){if(Number.isInteger(i)&&i>=0&&i<=5){lkS.pick=i;lkS.n=i;}return false;}
+/* the buttons inside a row: a target card (1 to 6) only chooses the card the table compares ('reset': its tick is let go;
+   nothing is written until a Take or a Keep pairs it); a backup's name leaves it out of the take, or puts it back */
+function lkChoose(key,i,p){if(key==='card'){if(Number.isInteger(i)&&i>=0&&i<=5){lkS.pick=i;lkS.n=i;}return 'reset';}
   /* a tap leaves a picked backup out, or picks one; with fewer empty cards than backups, the one picked longest ago gives way */
   if(key==='menu'){const N=NBHLink,M=lkMenu(p),nm=M.offer[i];if(!nm)return true;const k=N.norm(nm);let sel=lkS.sel?lkS.sel.slice():M.pick.map(x=>N.norm(x));
     if(sel.includes(k))sel=sel.filter(x=>x!==k);else{sel.push(k);while(sel.length>M.cap)sel.shift();}lkS.sel=sel;return true;}
   return false;}
-/* once the book has printed, the pages it printed come off the reprint line */
-var LK_PRINTED={Board:/^Board \(/,Tokens:/^Tokens \(/,Targets:/^Targets \(/,Choices:/^Choices \(/,'Token Economy back':/^Tokens \(back/,
-  'token-card':/^Card sheet: the tokens/,'target-card':/^Card sheet: the targets/,'choice-card':/^Card sheet: the choices/,'how-to':/^How to use/};
-window.addEventListener('afterprint',()=>{const N=window.NBHLink,r=lkRec();if(!N||!r||r.on!==1||!r.rp)return;
-  const labs=$$('#book .pg').map(p=>p.dataset.label||''),left=r.rp.filter(x=>!(LK_PRINTED[x]&&labs.some(l=>LK_PRINTED[x].test(l))));
-  if(left.length===r.rp.length)return;if(left.length)r.rp=left;else{delete r.rp;delete r.rpd;}S.meta.lk=N.pack(r);syncState();lkPaint();});
 if(window.NBHLink){
   lkApi=NBHLink.mount({me:'TK-1',other:'TE-1',meWhat:'this book',otherWhat:'the token economy plan',sibling:'TE-1_Token-Economy-Designer_v2026-09.html',host:'#lkPanel',
     get:()=>S.meta.lk||'',
-    /* the target card this table compares goes into the record with it, so Form TE-1 reads the same pairing; the board
-       summary is brought up to date as the record goes into #tkState */
+    /* the record as the core writes it. The case's problem behaviors, when the workstation has sent them, go into it as
+       hashes (pb), so the guard still knows them with this book on its own; the board summary is brought up to date as
+       the record goes into #tkState */
     set:s=>{if(!s){delete S.meta.lk;lkS.n=null;lkS.pick=null;lkS.sel=null;}
-      else{if(lkS.n!=null){const o=NBHLink.readLk(s);if(o&&o.last&&o.card!==lkS.n){o.card=lkS.n;s=NBHLink.pack(o);}}S.meta.lk=s;}
+      else{const f=lkFacts();if(f){const o=NBHLink.readLk(s),pb=NBHLink.pbOf(f);if(o&&JSON.stringify(o.pb||[])!==JSON.stringify(pb)){if(pb.length)o.pb=pb;else delete o.pb;s=NBHLink.pack(o);}}S.meta.lk=s;}
       syncState();lkDirty();},
+    /* the pairing: a target card taken onto, kept, or found equal to the plan's behavior becomes the paired card */
+    record:(lk,a)=>{const c=[].concat(a.taken||[],a.kept||[],a.step||[]).find(r=>r&&r.key==='card');if(c&&Number.isInteger(c.idx))lk.card=c.idx;},
     view:o=>{lkS.pick=null;lkS.sel=null;return NBHLink.planOf(o);},
-    rows:lkRows,take:lkTake,choose:lkChoose,snapshot:()=>JSON.stringify(S),
+    rows:lkRows,take:lkTake,choose:lkChoose,rpLine:lkRpLine,snapshot:()=>JSON.stringify(S),
     /* Undo: the book exactly as it was a moment before the take (the snapshot is this form's own S) */
     restore:j=>{const o=JSON.parse(j);if(!o||typeof o!=='object'||Array.isArray(o)||!o.meta||typeof o.meta!=='object')throw new Error('not a TK-1 record');S=o;renderAll();lkDirty();},
     /* after a take the whole book is drawn again; a compare, a Keep or the link itself changed only the record */
-    after:()=>{if(lkS.took){lkS.took=false;renderAll();}else renderSetup();}});
+    after:()=>{if(lkS.took){lkS.took=false;renderAll();}else{renderSetup();lkBand();}}});
+  lkBand();
 }
 
 /* ===== walk-hands.js ===== */

@@ -1,4 +1,4 @@
-/* v21.44 the TK-1 / TE-1 link, TE-1's side, alone (no shell). The TK-1 files are made by hand from the plan's link
+/* v21.43 the TK-1 / TE-1 link, TE-1's side, alone (no shell). The TK-1 files are made by hand from the plan's link
    record: a TK-1 saved file whose S.meta.lk holds {v:1,on:1,card,base,board:{n,tok,term,last,card,cardLabel,ch,tg}}.
    Checks:
    1  Off by default: no lk in the record, blank or simulated; the bridge total is the committed TE-1's plus one (the
@@ -15,17 +15,18 @@
    CASE json and a .case.html are accepted. Plus a save/open round trip of lk, junk lk read as off, phone width,
    console errors, and screenshots of the panel (off, on, after a compare with differences) at 1280 and 390 px.
    usage: node qa/link-te1-test.js */
-const {chromium,fs,BASE,wire,sleep}=require('/home/user/workstation/qa/lib.js');
+/* the checkout and the server this test runs against (lib.js: WS_ROOT and WS_URL) */
+const {chromium,fs,ROOT,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const {execSync}=require('child_process');
 const FILE='TE-1_Token-Economy-Designer_v2026-09.html',URL1=BASE+'/NBH-Workstation/'+FILE,URL0=BASE+'/NBH-Workstation/__te1_committed.html';
 const SHOTS=process.env.LINK_SHOTS||__dirname+'/out/link-te1';
 /* the baseline is the TE-1 from before the link: the parent of the first commit that holds the link core (HEAD itself
    holds the link now, so comparing with HEAD would compare the file with itself) */
-const G=c=>execSync('git -C /home/user/workstation '+c,{maxBuffer:64<<20}).toString('utf8');
-const FIRST=G("log --format=%H -S 'nbh-link (v21.44)' -- NBH-Workstation/"+FILE).trim().split('\n').filter(Boolean).pop();
+const G=c=>execSync('git -C "'+ROOT+'" '+c,{maxBuffer:64<<20}).toString('utf8');
+const FIRST=G("log --format=%H -S '<script id=\"nbh-link\">' -- NBH-Workstation/"+FILE).trim().split('\n').filter(Boolean).pop();
 const PRE=FIRST?G('rev-parse '+FIRST+'^').trim():'HEAD';
 const HEAD=G('show '+PRE+':NBH-Workstation/'+FILE);
-if(/nbh-link \(v21\.44\)/.test(HEAD))throw new Error('the baseline TE-1 ('+PRE+') already holds the link');
+if(HEAD.includes('<script id="nbh-link">'))throw new Error('the baseline TE-1 ('+PRE+') already holds the link');
 
 /* a TK-1 saved file, by hand. The simulated book: six choices (one left without a label here, so five are named),
    six targets, five stars, the first target card paired */
@@ -121,7 +122,7 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     const S1=JSON.parse(await sOf(p)),s1=await st(p),R1=await rows(p);
     ok('12 apply: client and sid filled',S1.meta.client==='SIMULATED \u2013 Sample Student'&&S1.meta.sid==='SIM-000',S1.meta);
     ok('12 apply: behavior and count taken',S1.meta.beh==='Sitting'&&S1.meta.epN==='5',S1.meta);
-    ok('12 apply: the token form written',S1.meta.tokForm==='Stars on the token board book (Form TK-1), 5 to earn.',S1.meta.tokForm);
+    ok('12 apply: the token form written (the count stays in tokens per exchange, not in the free text)',S1.meta.tokForm==='Stars on the token board book (Form TK-1).',S1.meta.tokForm);
     const note='Choice card in the token board book (Form TK-1)';
     ok('12 apply: five backup rows with the note, the fifth appended, no row deleted',S1.bk.length===5&&S1.bk.map(r=>r.n).join()==='Tablet,Puzzle,Ball,Bubbles,Lego'&&S1.bk.every(r=>r.note===note&&!r.c&&!r.cost&&!r.pref&&!r.conf),S1.bk);
     ok('12 apply: the audit and the thinning record untouched',JSON.stringify(S1.aud)===JSON.stringify(JSON.parse(before).aud)&&JSON.stringify(S1.thin)===JSON.stringify(JSON.parse(before).thin));
@@ -156,7 +157,7 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     await feed(p,TK(BOARD({n:'7'})),'TK-1_SIMULATED_2026-10-03.json');
     const R=await rows(p),s=await st(p);
     ok('12b who in step (both simulations)',R.who.st===1,R.who);
-    ok('12b behavior: both set and different, Keep only',R.beh.st===7&&!R.beh.take&&R.beh.keep,R.beh);
+    ok('12b behavior: no card in the book has it, and the book pairs none: "only here", no promise (66 characters), the 40-character note',R.beh.st===2&&R.beh.label==='only here'&&!R.beh.take&&!R.beh.keep&&R.beh.there===''&&/A card holds 40 characters; write a short label on Form TK-1’s Targets and press Keep there/.test(await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="beh"]').textContent)),R.beh);
     ok('12b count: Keep only, the difference named',R.n.st===7&&!R.n.take&&R.n.keep&&await p.evaluate(()=>/The book prints 7 slots; this plan opens the exchange after 5\. Change the book on Form TK-1 \(Compare there\)\./.test(document.querySelector('#lkPanel tr.lk-note[data-for="n"]').textContent)),R.n);
     ok('12b token form: "Laminated stars" is the same as Star',R.tok.st===1,R.tok);
     const mn=await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="menu"]').textContent);
@@ -174,16 +175,24 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     const S1=JSON.parse(await sOf(p)),B0=JSON.parse(before);
     ok('12b apply: the four existing backups kept as they were, four appended with the note',S1.bk.length===8&&JSON.stringify(S1.bk.slice(0,4))===JSON.stringify(B0.bk.slice(0,4))&&S1.bk.slice(4).every(r=>r.note==='Choice card in the token board book (Form TK-1)'),S1.bk.map(r=>r.n));
     ok('12b apply: the behavior, the count, the token form and the audit unchanged',S1.meta.beh===B0.meta.beh&&S1.meta.epN==='5'&&S1.meta.tokForm===B0.meta.tokForm&&JSON.stringify(S1.aud)===JSON.stringify(B0.aud));
-    ok('12b toast',(await st(p)).toast==='1 item taken from Form TK-1. Nothing else changed.',(await st(p)).toast);
+    ok('12b toast: the take and the Keep both named',(await st(p)).toast==='1 item taken from Form TK-1 and 1 difference kept. Nothing else changed.',(await st(p)).toast);
     await feed(p,TK(BOARD({n:'7'})),'TK-1_SIMULATED_2026-10-03.json');
     const R2=await rows(p),s2=await st(p);
-    ok('12b recompare: the kept rows read "kept different"',R2.beh.st===4&&/^kept different/.test(R2.beh.label)&&R2.n.st===4&&R2.menu.st===1,R2);
-    ok('12b recompare: the status says 2 differences kept',/2 differences kept/.test(s2.status[0]),s2.status);
+    ok('12b recompare: the kept row reads "kept different"',R2.beh.st===2&&R2.n.st===4&&/^kept different/.test(R2.n.label)&&R2.menu.st===1,R2);
+    ok('12b recompare: the status says 1 difference kept',/· 1 difference kept · compared /.test(s2.status[0]),s2.status);
     const pf=await p.evaluate(()=>{const s=JSON.stringify(S);return fromFile(JSON.parse(s)).meta.lk===S.meta.lk;});
     ok('10 Save then Open keeps meta.lk (fromFile)',pf);
-    /* a changed book: the kept behavior on TK-1 changes, so the row reads "changed on Form TK-1" (TE-1 owns it: unticked, Keep only) */
-    await feed(p,TK(BOARD({n:'7',cardLabel:'Puts the block in'})),'TK-1_x.json');
-    const R3=await rows(p);ok('12b a card changed on TK-1: "changed on Form TK-1", nothing pre-ticked',R3.beh.st===5&&R3.beh.pressed==='',R3.beh);
+    /* the book paired its card 1 with this behavior (a Keep there): the pairing reads in step, and says so */
+    const H=t=>p.evaluate(t=>NBHLink.hash(NBHLink.norm(t)),t),bh=await p.evaluate(()=>S.meta.beh);
+    const pair=[await H('Blocks in the bin'),await H(bh)];
+    await feed(p,TK(BOARD({n:'7',cardLabel:'Blocks in the bin',paired:1,pair})),'TK-1_x.json');
+    let R3=await rows(p);
+    ok('18 a pairing made on Form TK-1 reads in step here, and the note says the book pairs it',R3.beh.st===1&&R3.beh.there==='Blocks in the bin'&&/The book pairs its target card 1, “Blocks in the bin”, with this behavior\./.test(await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="beh"]').textContent))&&
+      !/write a short label/.test(await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="beh"]').textContent)),R3.beh);
+    /* a changed book: the paired card's label changes on TK-1, so the row reads "changed on Form TK-1" (TE-1 owns it: unticked, Keep only) */
+    await feed(p,TK(BOARD({n:'7',cardLabel:'Puts the block in',paired:1,pair})),'TK-1_x.json');
+    R3=await rows(p);ok('12b a card changed on TK-1: "changed on Form TK-1", nothing pre-ticked',R3.beh.st===5&&R3.beh.pressed===''&&!R3.beh.take&&R3.beh.keep,R3.beh);
+    ok('18 ... and the note says one of the two changed since the pairing',/was paired with this plan’s behavior, and one of the two has changed since/.test(await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="beh"]').textContent)));
     await p.close();}
 
   /* ---- identity, the last token, link off ---- */
@@ -205,11 +214,11 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     ok('7 identity: once confirmed, the board is kept',await p.evaluate(()=>{const b=NBHLink.readLk(S.meta.lk).board;return !!b&&b.ch[0]==='Tablet'&&!document.querySelector('#lkHintBk').hidden;}));
     await feed(p,TK(BOARD({term:'pic',last:'Gold medal'}),{client:'Sam K.',sid:'1234'}),'TK-1_Sam.json');
     const tt=await p.evaluate(()=>document.querySelector('#lkPanel tr.lk-note[data-for="tok"]').textContent);
-    ok('12 last token pictured: the sentence',tt==='Writes: Stars on the token board book (Form TK-1), 5 to earn; the last one is a gold medal with an orange double border, so the student can see it opens the exchange.',tt);
+    ok('12 last token pictured: the sentence',tt==='Writes: Stars on the token board book (Form TK-1); the last one is a gold medal with an orange double border, so the student can see it opens the exchange.',tt);
     ok('12 last token pictured: the information line',await p.evaluate(()=>[...document.querySelectorAll('#lkPanel tr.lk-info')].some(t=>t.textContent==='The book marks the last token: an orange double border (gold medal).')));
     await feed(p,TK(BOARD({term:'ring',n:'6'}),{client:'Jordan B.',sid:'1234'}),'TK-1_Jordan.json');
     const tr=await p.evaluate(()=>({t:document.querySelector('#lkPanel tr.lk-note[data-for="tok"]').textContent,i:[...document.querySelectorAll('#lkPanel tr.lk-info')].map(t=>t.textContent)}));
-    ok('12 last token ringed: the sentence and lines',tr.t==='Writes: Stars on the token board book (Form TK-1), 6 to earn; the last one has an orange double border, so the student can see it opens the exchange.'&&tr.i.includes('The book marks the last token: an orange double border.'),tr);
+    ok('12 last token ringed: the sentence and lines',tr.t==='Writes: Stars on the token board book (Form TK-1); the last one has an orange double border, so the student can see it opens the exchange.'&&tr.i.includes('The book marks the last token: an orange double border.'),tr);
     await p.evaluate(()=>{S.meta.epN='4';renderAll();});await feed(p,TK(BOARD({term:'ring',n:'6'}),{client:'Jordan B.',sid:'1234'}),'TK-1_Jordan.json');
     ok('12 the count check beside a marked last token',await p.evaluate(()=>[...document.querySelectorAll('#lkPanel tr.lk-info')].some(t=>t.textContent==='The book marks its 6th token as the last, but this plan opens the exchange after 4.')));
     const b2=await sOf(p);
@@ -220,7 +229,7 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
 
     /* ---- files ---- */
     const T=[['packet',JSON.stringify({form:'PACKET',rev:'2026-09',packet:{client:'x'}}),'PACKET_x.json','That file is a student packet, not a file Form TK-1 saved. Nothing was changed.'],
-      ['own file',JSON.stringify({form:'TE-1',rev:'2026-09',saved:'x',S:{meta:{client:'x'}}}),'TE-1_x.json',"That is a file this form saved, not Form TK-1’s. Nothing was changed."],
+      ['own file',JSON.stringify({form:'TE-1',rev:'2026-09',saved:'x',S:{meta:{client:'x'}}}),'TE-1_x.json','That file was saved by this form (Form TE-1), not by Form TK-1. Nothing was changed.'],
       ['SM-1 file',JSON.stringify({form:'SM-1',rev:'2026-09',S:{meta:{}}}),'SM-1_x.json','That file was saved by Form SM-1, not by Form TK-1. Nothing was changed.'],
       ['case with no TK-1',JSON.stringify({form:'CASE',rev:'2026-09',forms:{'TE-1':{snap:{own:'{}'}}}}),'CASE_x.json','That case file holds no Form TK-1. Nothing was changed.'],
       ['junk','not a file at all \u0000','x.json','That file could not be read as a file Form TK-1 saved. Nothing was changed.'],
@@ -329,7 +338,7 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     await p.evaluate(()=>{S.meta.epN='5';S.meta.beh='Elopement';renderAll();window.nbhCase=window.nbhCase||{};window.__case0=window.nbhCase.facts;window.nbhCase.facts={behaviors:[{label:'Elopement',isRep:false},{label:'Asks for a break',isRep:true}]};});
     await feed(p,TK(BOARD({cardLabel:'Ask for break'})),'TK-1_x.json');
     R=await rows(p);const pb=await noteOf(p,'beh');
-    ok('R problem behavior: warned, no Keep, no Take',/This plan’s behavior, “Elopement”, is a problem behavior on Form TB-1\. Tokens are earned for the replacement behavior \(TB-1: “Asks for a break”\); correct it here\./.test(pb)&&!R.beh.keep&&!R.beh.take,{R:R.beh,pb});
+    ok('R problem behavior: warned, no Keep, no Take, no promise that the book can take it',/This plan’s behavior, “Elopement”, is a problem behavior on Form TB-1\. Tokens are earned for a behavior to increase, such as “Asks for a break”; correct it here\./.test(pb)&&!R.beh.keep&&!R.beh.take&&!/can take this/.test(R.beh.label),{R:R.beh,pb});
     await p.evaluate(()=>{window.nbhCase.facts=window.__case0;});
     /* a long behavior: no promise that the book can take it; the pairing line only with a behavior here */
     await p.evaluate(()=>{S.meta.beh='Places one block in the bin from the tray during independent work';renderAll();});
@@ -339,7 +348,7 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     ok('R behavior empty: no pairing line',!/pairs its target card/.test(await noteOf(p,'beh')),await noteOf(p,'beh'));
     /* plurals, articles, a junk result */
     await feed(p,TK(BOARD({tok:'Bus',term:'pic',last:'Unicorn'})),'TK-1_x.json');
-    ok('R wording: "Buses", "a unicorn"',/^Writes: Buses on the token board book \(Form TK-1\), 5 to earn; the last one is a unicorn with/.test(await noteOf(p,'tok')),await noteOf(p,'tok'));
+    ok('R wording: "Buses", "a unicorn"',/^Writes: Buses on the token board book \(Form TK-1\); the last one is a unicorn with/.test(await noteOf(p,'tok')),await noteOf(p,'tok'));
     await p.evaluate(()=>{S.meta.lk=JSON.stringify({v:1,on:1,last:{when:'2026-10-03T12:00:00Z',res:'look 9999'}});renderAll();});
     ok('R junk result: no "in step" claim',await p.evaluate(()=>!/in step/.test(document.querySelector('#lkPanel .lk-status').textContent)&&/^Compared with this plan on /.test(document.querySelector('#lkPrint').textContent)));
     /* the keyboard: after Apply the focus goes to Undo */
@@ -352,8 +361,47 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     ok('R phone: a long file name wraps inside the panel',lw.pw<=lw.pc+1&&lw.doc<=lw.w+1,lw);
     await p.close();}
 
+  /* ---- the second review (part B fixes) ---- */
+  {const p=await open(ctx,URL1,log);await link(p);await sleep(50);
+    /* 14: a book card that names a behavior to reduce is never taken as this plan's behavior: with the case (TB-1), and without (the words) */
+    await p.evaluate(()=>{window.nbhCase=window.nbhCase||{};window.__c1=window.nbhCase.facts;window.nbhCase.facts={behaviors:[{label:'Elopement',isRep:false,rep:'Asks for a break (see target 4)',src:'TB-1'},{label:'Break request (replacement)',isRep:true,src:'TB-1'}]};});
+    await feed(p,TK(BOARD({cardLabel:'Elopement',tg:['Elopement','Raise hand','Writing','Waiting','All done','Reading']})),'TK-1_x.json');
+    let R=await rows(p),nb=await noteOf(p,'beh');
+    ok('14 a problem behavior on the book\'s card: not offered as this plan\'s behavior, warned, the replacement named without its cross-reference',!R.beh.take&&R.beh.st===3&&
+      /The book’s target card 1, “Elopement”, is a problem behavior on Form TB-1\. Tokens are earned for a behavior to increase, such as “Asks for a break”; it is not offered as this plan’s behavior\./.test(nb)&&!/see target/.test(nb),{R:R.beh,nb});
+    ok('14 ... and the record keeps the case\'s problem behaviors (as hashes)',(NBHLink_pb(await p.evaluate(()=>S.meta.lk))).length===1);
+    await p.evaluate(()=>{window.nbhCase.facts=window.__c1;});
+    await feed(p,TK(BOARD({cardLabel:'Hitting peers',tg:['Hitting peers','','','','','']})),'TK-1_x.json');
+    R=await rows(p);nb=await noteOf(p,'beh');
+    ok('14 without the case: a card that names a behavior to reduce ("hitting") is not offered either',!R.beh.take&&/names a behavior to reduce \(“hitting”\)/.test(nb),{R:R.beh,nb});
+    await feed(p,TK(BOARD({cardLabel:'Sit at desk',tg:['Sit at desk','','','','','']})),'TK-1_x.json');
+    R=await rows(p);nb=await noteOf(p,'beh');
+    ok('14 without the case: an ordinary card is offered unticked, with the note that this plan cannot check Form TB-1 here',R.beh.take&&R.beh.pressed===''&&/cannot see Form TB-1’s problem behaviors here/.test(nb)&&/The book’s target card 1 is “Sit at desk” \(not paired with a behavior\)\./.test(nb),{R:R.beh,nb});
+    /* 16: the token form when this plan's count is not the book's: no claim that the last token opens the exchange, not ticked */
+    await p.evaluate(()=>{S.meta.epN='2';renderAll();});
+    await feed(p,TK(BOARD({n:'7',term:'pic',last:'Gold medal'})),'TK-1_x.json');
+    R=await rows(p);const tn=await noteOf(p,'tok');
+    ok('16 counts differ (2 here, 7 in the book): the token form is offered unticked, without "opens the exchange"',R.tok.st===3&&R.tok.take&&R.tok.pressed===''&&tn==='Writes: Stars on the token board book (Form TK-1); the last one is a gold medal with an orange double border.',{R:R.tok,tn});
+    await p.evaluate(()=>{S.meta.epN='7';renderAll();});await feed(p,TK(BOARD({n:'7',term:'pic',last:'Gold medal'})),'TK-1_x.json');
+    R=await rows(p);
+    ok('16 counts agree: ticked, and the last token is said to open the exchange',R.tok.pressed==='take'&&/so the student can see it opens the exchange\.$/.test(await noteOf(p,'tok')),R.tok);
+    /* 31: the print line says when the book's count is not this plan's, and words the last token plainly */
+    await p.evaluate(()=>{S.meta.epN='6';renderAll();});await p.evaluate(()=>nbhLink.leave());
+    await p.emulateMedia({media:'print'});const pr=await printVis(p);await p.emulateMedia({media:'screen'});
+    ok('31 the print line: "7 slots of stars (this plan: 6 per exchange); the last one a gold medal with an orange double border"',/: 7 slots of stars \(this plan: 6 per exchange\); the last one a gold medal with an orange double border; /.test(pr.printText),pr.printText);
+    /* 23: an empty book, and a book whose link is off, in the workstation's words */
+    const empty=JSON.stringify({form:'TK-1',rev:'2026-10',saved:'2026-10-03T13:58:00.000Z',S:{meta:{n:'5'},ch:[{k:'',ph:'',l:''}],tg:[{k:'',ph:'',l:''}],tok:[{k:'tk:star',ph:'',l:''}]}});
+    await feed(p,empty,'TK-1_blank.json');let s0=await st(p);
+    ok('23 an empty book: the message says to open the student\'s saved book there first',/^Form TK-1’s file holds no book yet: open this student’s saved book there \(Open data\), turn on Link with Form TE-1 on its Setup page, then compare again\.$/.test(s0.msg),s0.msg);
+    const shellNo=await p.evaluate(t=>{nbhLink.compareWith(JSON.parse(t),{via:'shell'});return nbhLink.state().msg;},empty);
+    ok('23 ... in the workstation: "open in this workstation"',/^Form TK-1, open in this workstation, holds no book yet/.test(shellNo),shellNo);
+    const shellOff=await p.evaluate(t=>{nbhLink.compareWith(JSON.parse(t),{via:'shell'});return nbhLink.state().msg;},TK(null));
+    ok('23 a book with its link off, in the workstation: "The open Form TK-1 has its link off"',/^The open Form TK-1 has its link off, so it does not name its cards\./.test(shellOff),shellOff);
+    await p.close();}
+
   const errs=log.filter(l=>!/Failed to load resource: the server responded with a status of 404/.test(l.text));
   ok('no console errors',!errs.length,errs);
   await br.close();
   console.log(out.join('\n'));console.log(fails?fails+' FAILED':'ALL OK ('+out.length+' checks)');process.exit(fails?1:0);
 })().catch(e=>{console.error(e);process.exit(2);});
+function NBHLink_pb(s){try{const o=JSON.parse(s);return Array.isArray(o.pb)?o.pb:[];}catch(e){return [];}}
