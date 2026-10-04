@@ -3350,13 +3350,15 @@ const PWA=(()=>{
     const d=e.detail||{};
     if(d.how==='cancelled'&&/^CASE_|\.case\.html$/i.test(d.name||'')){state.lastSig='';state.autoSig=null;try{paintSave();}catch(x){}}
   });
-  /* Save case, installed on an iPad: its click opened the share sheet. True once the sheet kept the file (or it went to
-     the downloads after all), false when it was closed without saving; true at once for an ordinary download. */
-  P.shareKept=async a=>{
+  /* Save case, installed on an iPad: its click opened the share sheet. shareHow: how that ended once it has ('shared',
+     'downloaded' when it went to the downloads after all, 'cancelled' when the sheet was closed without saving), and ''
+     at once for an ordinary download; shareKept: false only for 'cancelled'. */
+  P.shareHow=async a=>{
     const S=window.nbhShareSave,r=S&&S.on?S.last:null;
-    if(!r||r.name!==(a.getAttribute('download')||'')||Date.now()-r.at>3000)return true;
-    return (await r.done)!=='cancelled';
+    if(!r||r.name!==(a.getAttribute('download')||'')||Date.now()-r.at>3000)return '';
+    return await r.done;
   };
+  P.shareKept=async a=>(await P.shareHow(a))!=='cancelled';
   /* Own tab, installed on an iPad or iPhone: the app has no tabs, and what it opens is Safari's, without this copy or the
      work in the form; the form fills the window here instead */
   document.addEventListener('click',e=>{
