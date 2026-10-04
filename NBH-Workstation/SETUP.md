@@ -6998,8 +6998,10 @@ found the faults below. Each is fixed, or the reason it is not is given.
   iPad or on Apple's servers; follow the agency's rules for it, and do not
   use its ChatGPT options for student text.
 - The one-file editions carry the writing help once instead of once per
-  form, so they stay near their old size (the 44 copies would have doubled
-  them to about 13 MB).
+  form: 44 copies would have added about 4 MB to each. They are 10.4 MB now
+  (6.3 MB in v21.42i); the rest of the growth is this release's other parts:
+  the larger picture library, TB-1's library, the narration, Autosave and
+  the offline app.
 
 **The relay**
 
@@ -7063,7 +7065,9 @@ over, so the README inside it is current.
 - `qa/shell-check.js` closes the simulation's notice before it tests Escape
   (while a form's dialog is open, Escape is the dialog's), `qa/pnav-test.js`
   uses the same server as the other checks (`WS_URL`), and `qa/printbase.js`
-  fills the packet's student before Save case.
+  makes its master print in a browser profile of its own (the forms it has
+  just printed keep safety copies, and the workstation's offer to restore
+  them stood in the way) and fills the packet's student before Save case.
 
 ## Autosave that holds up on an iPad (v21.44, draft)
 
