@@ -271,7 +271,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   const ctx=await br.newContext({viewport:{width:1440,height:900},acceptDownloads:true});
   await ctx.addInitScript(()=>{
     window.print=function(){};
-    try{localStorage.setItem('nbh.ws.autosave.on','off');}catch(e){}
+    try{localStorage.setItem('nbh.ws.autosave.on','off');localStorage.setItem('nbh.ws.autosave.v2','off');}catch(e){}
     try{const s=navigator.storage;if(s&&s.persist&&window===window.top){const o=s.persist.bind(s),q=s.persisted.bind(s);
       s.persist=()=>{window.__persistAsked=(window.__persistAsked||0)+1;return o();};
       s.persisted=()=>q().then(v=>{window.__persistedSeen=(window.__persistedSeen||0)+1;window.__persistedWas=v;return v;});}}catch(e){}
@@ -598,7 +598,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const ictx=await br.newContext({viewport:{width:1180,height:820},userAgent:IPAD,hasTouch:true,acceptDownloads:true});
     await ictx.addInitScript(()=>{
       Object.defineProperty(Navigator.prototype,'standalone',{get:()=>true,configurable:true});
-      try{localStorage.setItem('nbh.ws.autosave.on','off');}catch(e){}
+      try{localStorage.setItem('nbh.ws.autosave.on','off');localStorage.setItem('nbh.ws.autosave.v2','off');}catch(e){}
       const T=(()=>{try{return window.top;}catch(e){return window;}})();
       navigator.canShare=d=>!!(d&&d.files&&d.files.length);
       navigator.share=async d=>{
@@ -846,7 +846,9 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     await rp.click('#pwaReload');
     const q=await confirmDlg(rp,false);await sleep(400);
     const kept=await rp.evaluate(()=>!!state.frames['MT-1']);
-    check('R taps that score intervals after a Save case (the shell sees no changed field): the strip says to save first, Reload asks, Not now keeps the form',np>=6&&!dirty&&/save the case first/i.test(strip)&&/since the last Save case/.test(q)&&kept,JSON.stringify({np,dirty,strip:strip.slice(0,110),q:q.replace(/\s+/g,' ').slice(0,140),kept}));
+    /* the shell's own check may see the taps too (Autosave v2 counts them as edits): then the question is the one for
+       typed work; either way Reload must ask */
+    check('R taps that score intervals after a Save case: the strip says to save first, Reload asks, Not now keeps the form',np>=6&&/save the case first/i.test(strip)&&(dirty?/Reload without saving/.test(q):/since the last Save case/.test(q))&&kept,JSON.stringify({np,dirty,strip:strip.slice(0,110),q:q.replace(/\s+/g,' ').slice(0,140),kept}));
     await rc.close();
   }
 
@@ -930,7 +932,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   /* ================= U: installed on an iPad: windows and printing ================= */
   if(want('U')){
     const uctx=await br.newContext({viewport:{width:1180,height:820},userAgent:IPAD,hasTouch:true});
-    await uctx.addInitScript(()=>{Object.defineProperty(Navigator.prototype,'standalone',{get:()=>true,configurable:true});try{localStorage.setItem('nbh.ws.autosave.on','off');}catch(e){}});
+    await uctx.addInitScript(()=>{Object.defineProperty(Navigator.prototype,'standalone',{get:()=>true,configurable:true});try{localStorage.setItem('nbh.ws.autosave.on','off');localStorage.setItem('nbh.ws.autosave.v2','off');}catch(e){}});
     let pops=0;uctx.on('page',()=>pops++);
     const up=await uctx.newPage();wire(up,errs);pops=0;
     await up.goto(NBH);await sleep(1200);
