@@ -36,7 +36,7 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+p.id+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'</button>').join('');
-    if(c!=='_photos')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+'</button>').join('');
+    if(c!=='_photos')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+(P[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
     $('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no pictures are listed. Put it in the same folder as the form, or use a photo.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');};
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
   $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
@@ -72,7 +72,7 @@ function renderLib(){
   $('#photos').innerHTML=S.photos.map(p=>'<div class="ph"><img src="'+p.img+'" alt=""><input data-phl="'+p.id+'" value="'+esc(p.label)+'" aria-label="Photo label"><button type="button" data-phdel="'+p.id+'">Remove</button></div>').join('')||'<p class="hint">No photos yet. Upload a photo and it becomes a picture you can use on any visual.</p>';
   const sel=$('#libCat');if(!sel.options.length)sel.innerHTML='<option value="">All</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('');
   const c=sel.value,q=($('#libQ').value||'').toLowerCase();
-  $('#libGrid').innerHTML=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<div class="it">'+picto(k,'')+esc(P[k].l)+'<div class="k">'+k+'</div></div>').join('');
+  $('#libGrid').innerHTML=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<div class="it">'+picto(k,'')+esc(P[k].l)+'<div class="k">'+k+(P[k].o?' \u00b7 yours':'')+'</div></div>').join('');
 }
 $('#libCat').addEventListener('change',renderLib);$('#libQ').addEventListener('input',renderLib);
 $('#photos').addEventListener('input',e=>{const i=e.target.closest('input[data-phl]');if(i){const p=photo(i.dataset.phl);if(p)p.label=i.value.slice(0,30);}});

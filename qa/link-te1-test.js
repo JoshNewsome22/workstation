@@ -3,7 +3,9 @@
    Checks:
    1  Off by default: no lk in the record, blank or simulated; the bridge total is the committed TE-1's plus one (the
       hidden #teLink) and the filled count is the same; the printed text and the page count are the same as the
-      committed TE-1's; #lkPrint and the link heading do not print; an Unlink leaves no lk behind.
+      committed TE-1's; #lkPrint and the link heading do not print; an Unlink leaves no lk behind. A snapshot of the
+      committed TE-1 without its own file goes back field for field (the bridge's field path), one with its fields
+      one place later is left alone.
    12 Blank TE-1 plus a TK-1 simulation file: who and the token form pre-ticked, the behavior and the count offered
       unticked, 5 cards offered unticked; the compare changes nothing but lk; Apply fills empty fields and adds the
       backup rows with the note, deletes no row and leaves the audit alone; the hints and Undo. A filled TE-1 (the
@@ -42,6 +44,10 @@ async function open(ctx,url,log){const p=await ctx.newPage();wire(p,log);await p
   await p.evaluate(()=>{window.confirm=()=>true;});return p;}
 const status=p=>p.evaluate(()=>new Promise(r=>{const h=e=>{if(e.data&&e.data.nbh==='status'&&e.data.status){removeEventListener('message',h);r(e.data.status);}};addEventListener('message',h);postMessage({nbh:'status'},'*');}));
 const sim=p=>p.evaluate(async()=>{await loadSim();});
+/* the workstation bridge, as the shell asks it: a snapshot (the form's own file in .own) and a restore; the request
+   comes back to this window's own listener too, so only an answer counts */
+const snapOf=p=>p.evaluate(()=>new Promise(r=>{const h=e=>{if(e.data&&e.data.nbh==='snapshot'&&e.data.snap){removeEventListener('message',h);r(e.data.snap);}};addEventListener('message',h);postMessage({nbh:'snapshot'},'*');}));
+const restoreIn=(p,snap)=>p.evaluate(s=>new Promise(r=>{const h=e=>{if(e.data&&e.data.nbh==='restored'){removeEventListener('message',h);r(e.data.report);}};addEventListener('message',h);postMessage({nbh:'restore',snap:s},'*');setTimeout(()=>r('TIMEOUT'),15000);}),snap);
 const sOf=p=>p.evaluate(()=>JSON.stringify(S));
 const noLk=j=>{const o=JSON.parse(j);delete o.meta.lk;return JSON.stringify(o);};
 /* a file into the panel's own file input, as a person picking it would */
@@ -75,6 +81,25 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
     ok('1 simulation: total +1, filled unchanged',b1.total===a1.total+1&&b1.filled===a1.filled,{was:a1,now:b1});
     ok('1 simulation: no lk in the record',await B.evaluate(()=>!('lk' in S.meta)));
     ok('1 simulation: the record is the committed one',(await sOf(A))===(await sOf(B)));
+    /* the bridge's field-by-field restore (a snapshot without the form's own file, or one whose Open fails): a snapshot of
+       the committed TE-1 has no #teLink, so one control fewer. #teLink is the page's last control and the bridge takes
+       the controls without an id or a name for the shape, so every field still goes back where it was. A snapshot whose
+       fields sit one place later (a control put before them) and whose count differs is still left alone */
+    {const sa=await snapOf(A);delete sa.own;const C=await open(ctx,URL1,log);await sim(C);
+      await C.evaluate(()=>{const e=document.querySelector('[data-m="client"]');e.value='';e.dispatchEvent(new Event('input',{bubbles:true}));});
+      const pos=Object.keys(sa.data).filter(k=>k.charAt(0)==='~').length;
+      const rep=await restoreIn(C,sa);await sleep(300);
+      ok('1 field path: a committed TE-1 snapshot without its own file is placed field for field ('+pos+' fields kept by place)',
+        pos>50&&rep&&rep.sameShape===true&&rep.positionalSkipped===0&&rep.placed===sa.total,{rep,total:sa.total,pos});
+      const sc=await snapOf(C);delete sc.own;const dc=Object.assign({},sc.data);delete dc['#teLink'];
+      ok('1 field path: every field holds the snapshot\'s value, the student too',JSON.stringify(dc)===JSON.stringify(sa.data)&&
+        await C.evaluate(()=>document.querySelector('[data-m="client"]').value)==='SIMULATED \u2013 Sample Student',{now:sc.total,was:sa.total});
+      ok('1 field path: the record is the committed one again',(await sOf(A))===(await sOf(C)));
+      const off=JSON.parse(JSON.stringify(sa));off.total+=2;off.data={};
+      Object.keys(sa.data).forEach(k=>{off.data[k.charAt(0)==='~'?'~'+(+k.slice(1)+1):k]=k==='~0'?'(one place off)':sa.data[k];});
+      const before=await sOf(C),rep2=await restoreIn(C,off);await sleep(300);
+      ok('1 field path: a snapshot one place off is not placed',rep2&&rep2.placed===0&&rep2.positionalSkipped>0&&rep2.sameShape===false&&(await sOf(C))===before,rep2);
+      await C.close();}
     for(const [nm,fn] of [['simulation',async()=>{}],['blank',async p=>{await p.evaluate(()=>{S=blank();renderAll();});}]]){
       await fn(A);await fn(B);
       await A.emulateMedia({media:'print'});await B.emulateMedia({media:'print'});

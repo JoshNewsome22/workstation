@@ -70,6 +70,7 @@ for entry in spec['items']:
     key, label, cat, src = entry[:4]
     body = COMP[src[5:]] if src.startswith('COMP:') else from_file(src[5:]) if src.startswith('FILE:') else inner(src)
     items[key] = {'l': label, 'c': cat, 's': body}; order.append(key); total += len(body)
+    if src.startswith('FILE:'): items[key]['o'] = 1   # v21.43: the practice's own picture (a card of its own, a logo, a face): the pickers mark it "yours"
     if len(entry) > 4: items[key].update(entry[4])    # flags, e.g. {"w": 1}: a word card (Form TK-1 prints only its label)
 js = '/* NBH pictogram library: OpenMoji (https://openmoji.org) CC BY-SA 4.0, with composed pictograms. Built by tools/pictos/build-pictos.py. */\n'
 js += 'window.NBH_PICTOS=' + json.dumps(items, ensure_ascii=False, separators=(',', ':')) + ';\n'

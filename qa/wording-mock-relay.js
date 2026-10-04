@@ -1,9 +1,10 @@
-/* A stand-in for the writing-help relay (tools/relay/), for qa/wording-client-test.js. It answers the two calls the
+/* A stand-in for the writing-help relay (tools/relay/), for qa/wording-client-test.js. It answers the calls the
    panel makes, with the shapes the real relay uses:
      POST /api/redeem  {code}               -> 200 {token, expires} | 401 {error:'invalid_code'} | 429 {error:'rate_limited', retry_after}
      POST /api/rewrite {token, text, style} -> 200 {rewrites:[{style,text}], changes:[...], cautions:[...]}
                                               | 401 {error:'session_expired'|'invalid_token'} | 413 {error:'too_long'}
                                               | 429 {error:'rate_limited', retry_after} | 503 {error:'upstream'} | 400 {error:'bad_request'}
+     POST /api/session/end {token}          -> 200 {ended:true}, the session gone whether it was there or not (Lock, v21.43)
      GET  /api/health                       -> 200 {ok:true} | 503 {error:'setup_required'}   (the check the panel makes as its tab opens)
    Codes are single use; five wrong codes in a row are rate limited. CORS is answered for ONE origin (the page under
    test; the real relay is same-origin and sends no CORS headers at all), and only POST with a JSON body is allowed.
@@ -23,7 +24,7 @@ let codes, sessions, fails, mode, site, log;
 function reset(list){
   codes = {}; (list || ['7KQ-M4P-2XD-V9H']).forEach(c => { codes[c] = true; });
   sessions = {}; fails = 0; mode = 'ok'; site = 'ok';
-  log = {redeem:[], rewrite:[], health:0, cookies:[], origins:[], preflights:0};
+  log = {redeem:[], rewrite:[], ended:[], health:0, cookies:[], origins:[], preflights:0};
 }
 reset();
 /* a rewrite that keeps every placeholder where it was, the way the real one is told to */
@@ -68,7 +69,7 @@ const server = http.createServer((req, res) => {
     log.health++;
     return site === 'setup' ? send(res, 503, {error:'setup_required', message:'The rewrite service is not set up yet.'}, cors) : send(res, 200, {ok:true}, cors);
   }
-  if (req.method !== 'POST' || !/^\/api\/(redeem|rewrite)$/.test(url)) return send(res, 404, {error:'not_found'}, cors);
+  if (req.method !== 'POST' || !/^\/api\/(redeem|rewrite|session\/end)$/.test(url)) return send(res, 404, {error:'not_found'}, cors);
   if (site === 'setup') return send(res, 503, {error:'setup_required', message:'The rewrite service is not set up yet.'}, cors);
   log.origins.push(origin); if (req.headers.cookie) log.cookies.push(req.headers.cookie);
   if (!cors['Access-Control-Allow-Origin']) return send(res, 403, {error:'origin'});
@@ -88,6 +89,11 @@ const server = http.createServer((req, res) => {
       }
       fails++;
       return send(res, 401, {error:'invalid_code'}, cors);
+    }
+    if (url === '/api/session/end') {
+      log.ended.push(b);
+      if (typeof b.token === 'string') delete sessions[b.token];
+      return send(res, 200, {ended:true}, cors);
     }
     log.rewrite.push(b);
     const go = () => {

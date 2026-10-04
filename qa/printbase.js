@@ -50,6 +50,8 @@ async function pdf(page,file){
       if(fr){ await L.loadSim(fr); await L.sleep(900); }
     }
     await L.sleep(2000);
+    /* the packet's student, so Save case does not stop at its question "Save the case without a student name?" */
+    await page.evaluate(()=>{for(const [k,v] of [['#pClient','SIMULATED \u2013 Sample Student'],['#pSid','SIM-000']]){const e=$(k);e.value=v;['input','change'].forEach(t=>e.dispatchEvent(new Event(t,{bubbles:true})));}});
     const [dl]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.click('#saveCase')]);
     await dl.saveAs(cf);
     await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);

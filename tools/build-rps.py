@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the Royal Palm School edition of the workstation from the Newsome Behavioral Health one.
 
-Same forms, same code. Changed: the logo (43 places: once per form, once in the index), the tab icon, the organisation name where it
+Same forms, same code. Changed: the logo (45 places: once in each of the 44 forms, once in the index), the tab icon, the organisation name where it
 is printed or shown, and the autosave keys - both editions live on one website, and a browser keeps
 one localStorage per website, so without its own keys each would offer to restore the other's work.
 
@@ -24,9 +24,9 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 EXPECT = [
   (old_logo, new_logo, 45),    # v21.36: once per form (the nbh-logo script) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 163),   # the masthead and print-head images of the 43 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41) + the index + the packet cover
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 163),   # the masthead and print-head images of the 44 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41) + the index + the packet cover
   ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 45),
-  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 46),   # the 43 forms, index.html and respond.html (v21.39)
+  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 46),   # the 44 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),

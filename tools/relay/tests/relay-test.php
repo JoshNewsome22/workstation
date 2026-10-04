@@ -224,11 +224,10 @@ $PEPPER = (string) $made['PEPPER'];
 T::ok($made['ANTHROPIC_API_KEY'] === '' && $made['ADMIN_PASSWORD_HASH'] === '', 'and empty secrets');
 T::ok(($made['TRUST_PROXY_HTTPS'] ?? null) === false, 'and the X-Forwarded-Proto header not trusted (no proxy on a plain host)');
 
-$https = ['X-Forwarded-Proto' => 'https'];
-$r = http('GET', $AI . '/admin', ['headers' => $https]);
-T::eq(403, $r['status'], 'a caller\'s own X-Forwarded-Proto: https over plain http is still refused (TRUST_PROXY_HTTPS false)');
-// the tests' server has no TLS: from here on, X-Forwarded-Proto stands in for https, as a proxy in front would say it
-$site->writeRawConfig(str_replace("'TRUST_PROXY_HTTPS' => false,", "'TRUST_PROXY_HTTPS' => true,", (string) file_get_contents($site->configFile())));
+$r = http('GET', $AI . '/admin', ['headers' => ['X-Forwarded-Proto' => 'https']]);
+T::eq(403, $r['status'], 'a caller\'s own X-Forwarded-Proto: https over plain http is refused (TRUST_PROXY_HTTPS false)');
+// the tests' server has no TLS: tests/tls-shim.php makes a request with this header one that came over https
+$https = ['X-Test-Tls' => '1'];
 $r = http('GET', $AI . '/admin', ['headers' => $https]);
 T::eq(200, $r['status'], 'the setup page (over https)');
 T::ok(str_contains($r['body'], 'Anthropic API key') && str_contains($r['body'], 'Choose the admin password'), 'it asks for the API key and the admin password');

@@ -1,5 +1,5 @@
-const {chromium,fs,wire,sleep,forms}=require(__dirname+'/lib.js');
-const BASE='http://127.0.0.1:8125';
+/* the server: lib.js's BASE (WS_URL, default the :8123 every check here uses) */
+const {chromium,fs,wire,sleep,forms,BASE}=require(__dirname+'/lib.js');
 (async()=>{const br=await chromium.launch();
  for(const f of forms()){const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/'+f.file);await sleep(500);
