@@ -79,6 +79,14 @@ $('#photos').addEventListener('input',e=>{const i=e.target.closest('input[data-p
 $('#photos').addEventListener('click',async e=>{const b=e.target.closest('button[data-phdel]');if(!b)return;if(!(await nbhUI.confirm('Remove this photo?\nAny visual using it loses the picture.',{ok:'Remove',danger:true})))return;const id=b.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['board','cards','rules','ft','sched','choice','tk','fs'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));renderAll();});
 
 /* ---------------- outputs at true size ---------------- */
+/* (v21.44, A7) Safari on the iPad and iPhone ignores a page's request for landscape paper and prints on portrait Letter inside its
+   own margins (about 0.5 in, with the address and date at the foot): a printable area of 7.5 x 10 in. Each visual is drawn on a
+   full Letter sheet with its own half-inch border, so Safari shrank it to fit, a landscape board to 68 % and every other sheet to
+   88 %. On those devices (TK-1's check) the visuals print as the 7.5 x 10 in area inside that border, at full size: the form asks
+   for portrait paper with half-inch margins, Safari's margins take the place of the border, and a landscape board is turned on its
+   side. The Board page's Sheets setting can force either way. A computer prints exactly as before. */
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function turned(){const m=S.meta.sheets;return m==='turn'||(m!=='full'&&IOS);}
 function cellHtml(o,size,opt){ /* size in inches; opt: {label:'below'|'above'|'none', dot:'yes'|'small'|'no', dim, radius, border} */
   opt=opt||{};const lab=opt.label||'below',has=!!(o&&(o.k||o.ph)),text=has?lbl(o):'';
   const fs=Math.max(.11,size/9),labH=lab==='none'||!text?0:fs*1.5,picS=size-labH-.22;
@@ -92,13 +100,15 @@ function renderBoard(){
   const boardW=pw-2*inner,boardH=ph-2*inner;const size=Math.min((boardW-2*pad-gap*(C-1))/C,(boardH-bandH-2*pad-gap*(R-1))/R);
   const band='<div class="band '+(m.b_bandpos||'bottom')+'" style="height:'+bandH+'in;background:'+esc(m.b_color||'#cfe3cf')+'">'+esc(m.b_title||'')+'</div>';
   const cells='<div class="cells" style="grid-template-columns:repeat('+C+','+size.toFixed(2)+'in);gap:'+gap+'in">'+S.board.slice(0,R*C).map(o=>cellHtml(o,size,{label:m.b_label||'below',dot:m.b_dot||'yes',dim:m.b_dim==='dim'})).join('')+'</div>';
-  $('#boardOut').innerHTML='<div class="page" style="width:'+pw+'in;height:'+ph+'in;padding:'+inner+'in"><div class="vb" style="width:'+boardW+'in;height:'+boardH+'in">'+((m.b_bandpos||'bottom')==='top'?band+cells:bandH?cells+band:cells)+'</div></div>';
+  $('#boardOut').innerHTML='<div class="page'+(land?' land':'')+'" style="width:'+pw+'in;height:'+ph+'in;padding:'+inner+'in"><div class="vb" style="width:'+boardW+'in;height:'+boardH+'in">'+((m.b_bandpos||'bottom')==='top'?band+cells:bandH?cells+band:cells)+'</div></div>';
 }
 function renderCards(){
-  const m=S.meta,size=num(m.c_size)||2,gap=m.c_cut==='no'?0:.12,pw=7.5,phh=10;const perRow=Math.floor((pw+gap)/(size+gap)),perCol=Math.floor((phh+gap)/(size+gap)),perPage=perRow*perCol;
+  /* (v21.44, A7) turned (the iPad), the cut lines round the outer cards (0.05 in outside them) would sit in Safari's margin, outside
+     the area it prints: the sheet is set 0.06 in in from the edges of that area, which costs the 1 in cards their ninth row */
+  const m=S.meta,size=num(m.c_size)||2,gap=m.c_cut==='no'?0:.12,ins=gap&&turned()?.06:0,pw=7.5-2*ins,phh=10-2*ins;const perRow=Math.floor((pw+gap)/(size+gap)),perCol=Math.floor((phh+gap)/(size+gap)),perPage=perRow*perCol;
   const list=[];S.cards.forEach(o=>{if(!(o.k||o.ph))return;const q=Math.max(0,Math.min(200,Math.round(num(o.qty)||0)));for(let i=0;i<q;i++)list.push(o);});
   const v=$('#cardsVerdict');v.innerHTML=list.length?'<div class="verdict v-ok">'+list.length+' card'+(list.length===1?'':'s')+' at '+size+' inch: '+perPage+' per page, '+Math.ceil(list.length/perPage)+' page'+(Math.ceil(list.length/perPage)===1?'':'s')+'.</div>':'<div class="verdict v-mid">Add a card with a picture and a count.</div>';
-  let h='';for(let p=0;p<list.length;p+=perPage){h+='<div class="page" style="width:8.5in;height:11in;padding:.5in"><div class="cardsheet" style="grid-template-columns:repeat('+perRow+','+size+'in);gap:'+gap+'in">'+list.slice(p,p+perPage).map(o=>cellHtml(o,size,{label:m.c_label||'above',dot:'no',radius:m.c_round==='no'?'0':undefined}).replace('class="cell2"','class="cell2"'+(gap?' data-cut="1"':''))).join('')+'</div></div>';}
+  let h='';for(let p=0;p<list.length;p+=perPage){h+='<div class="page" style="width:8.5in;height:11in;padding:.5in"><div class="cardsheet" style="grid-template-columns:repeat('+perRow+','+size+'in);gap:'+gap+'in'+(ins?';padding:'+ins+'in':'')+'">'+list.slice(p,p+perPage).map(o=>cellHtml(o,size,{label:m.c_label||'above',dot:'no',radius:m.c_round==='no'?'0':undefined}).replace('class="cell2"','class="cell2"'+(gap?' data-cut="1"':''))).join('')+'</div></div>';}
   $('#cardsOut').innerHTML=h;if(gap)$$('#cardsOut .cell2').forEach(c=>{c.style.outline='1px dashed #999';c.style.outlineOffset='.05in';});
 }
 function renderRules(){
@@ -113,7 +123,9 @@ function renderStrips(){
   const m=S.meta,c=S.chk;let h='';const page=(inner)=>'<div class="page" style="width:8.5in;height:11in;padding:.5in">'+inner+'</div>';
   if(c.s_ft){const w=m.ft_words!=='no';h+=page('<div class="strip" style="width:7.5in;min-height:5.2in"><div class="ttl">First, then</div><div class="rowc"><div class="col"><div class="ttl" style="font-size:.35in">First</div>'+cellHtml(S.ft[0],3,{label:w?'below':'none',dot:'yes'})+'</div><div class="arrow">&#10140;</div><div class="col"><div class="ttl" style="font-size:.35in">Then</div>'+cellHtml(S.ft[1],3,{label:w?'below':'none',dot:'yes'})+'</div></div></div>');}
   if(c.s_sched){const size=num(m.sc_size)||2,items=S.sched.filter(o=>o.k||o.ph);if(m.sc_dir==='h'){h+=page('<div class="strip" style="width:7.5in;min-height:4in"><div class="ttl">'+esc(m.sc_title||'My Schedule')+'</div><div class="rowc" style="justify-content:flex-start">'+items.map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div><div class="rowc" style="justify-content:flex-start"><div class="box" style="width:'+size+'in;height:.6in">Done</div></div></div>');}
-    else{const perPage=Math.floor(9/(size+.2));for(let p=0;p<items.length;p+=perPage){h+=page('<div class="strip" style="width:7.5in;min-height:10in"><div class="ttl">'+esc(m.sc_title||'My Schedule')+'</div><div class="rowc" style="align-items:flex-start;justify-content:center;gap:.6in"><div class="col">'+items.slice(p,p+perPage).map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div><div class="donecol"><div class="ttl" style="font-size:.3in;margin-bottom:0">Done</div>'+items.slice(p,p+perPage).map(()=>'<div class="box" style="width:'+size+'in;height:'+size+'in"><span class="dot" style="position:static;transform:none;display:inline-block;width:.6in;height:.6in;border:2px solid #182e43;border-radius:50%"></span></div>').join('')+'</div></div></div>');}}}
+    /* (v21.44, A7) turned (the iPad), a sheet takes only the steps that fit Safari's 10 in: four 2 in steps with their Done boxes make
+       a strip 10.3 in tall, which a computer prints into the sheet's border; three 2 in steps (or five 1.5 in) fit */
+    else{const perPage=turned()?Math.max(1,Math.floor(8.3/(size+.15))):Math.floor(9/(size+.2));for(let p=0;p<items.length;p+=perPage){h+=page('<div class="strip" style="width:7.5in;min-height:10in"><div class="ttl">'+esc(m.sc_title||'My Schedule')+'</div><div class="rowc" style="align-items:flex-start;justify-content:center;gap:.6in"><div class="col">'+items.slice(p,p+perPage).map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div><div class="donecol"><div class="ttl" style="font-size:.3in;margin-bottom:0">Done</div>'+items.slice(p,p+perPage).map(()=>'<div class="box" style="width:'+size+'in;height:'+size+'in"><span class="dot" style="position:static;transform:none;display:inline-block;width:.6in;height:.6in;border:2px solid #182e43;border-radius:50%"></span></div>').join('')+'</div></div></div>');}}}
   if(c.s_choice){const n=num(m.ch_n)||4,items=S.choice.slice(0,n),size=n>4?2.1:2.6;h+=page('<div class="strip" style="width:7.5in;min-height:6in"><div class="ttl">'+esc(m.ch_title||'I want…')+'</div><div class="rowc">'+items.map(o=>cellHtml(o,size,{label:'below',dot:'yes'})).join('')+'</div></div>');}
   if(c.s_token){const n=Math.max(1,Math.min(10,num(m.tk_n)||5)),ts=n<=5?1.25:n<=8?1.05:.9;h+=page('<div class="strip" style="width:7.5in;min-height:5.5in"><div class="ttl">'+esc(m.tk_title||'I am working for…')+'</div><div class="rowc">'+cellHtml(S.tk[1],2.6,{label:'below',dot:'yes'})+'</div><div class="rowc">'+Array.from({length:n},()=>'<div class="tok" style="width:'+ts+'in;height:'+ts+'in">'+pic(S.tk[0],'')+'</div>').join('')+'</div><div class="ttl" style="font-size:.25in;font-family:var(--sans)">'+n+' tokens, then my reward</div></div>');}
   if(c.s_wait){const n=num(m.w_n)||5,cols=['#5C9E31','#B1CC33','#FCEA2B','#F4AA41','#EA5A47'].slice(5-n);h+=page('<div class="strip" style="width:7.5in;min-height:4.4in"><div class="ttl">Wait</div><div class="rowc">'+cellHtml({k:'waiting'},3,{label:'none',dot:'no'})+'<div style="font:600 .5in var(--sans);max-width:3in;line-height:1.1">'+esc(m.w_words||'Wait. It is coming.')+'</div></div></div><div class="strip" style="width:7.5in;min-height:3.6in;margin-top:.3in"><div class="ttl">Countdown</div><div class="cdown">'+cols.map((col,i)=>'<div class="sq" style="width:1.25in;height:1.25in;background:'+col+'">'+(n-i)+'</div>').join('')+'</div><div class="ttl" style="font-size:.25in;font-family:var(--sans)">Take one away each time; at zero it is your turn.</div></div>');}
@@ -141,7 +153,14 @@ async function rowDel(r,i){const o=S[r]&&S[r][i];if(!o||!['cards','rules','sched
   if((o.k||o.ph||o.l||o.say)&&!(await nbhUI.confirm('Delete this row?\nWhat was entered in it is deleted.',{ok:'Delete',danger:true})))return;S[r].splice(i,1);
   if(!S[r].length)S[r].push(r==='cards'?{k:'',ph:'',l:'',qty:'20'}:r==='rules'?{on:true,k:'',ph:'',l:'',say:''}:cello());
   if(r==='cards')renderCardsTbl();else if(r==='rules')renderRulesTbl();else renderStripTbls();renderOut();}
-function renderOut(){renderBoard();renderCards();renderRules();renderStrips();}
+/* (v21.44, A7) the line above each page's visuals says how they print on this device, and where the Sheets setting is */
+function sheetNotes(){const T=turned(),m=S.meta.sheets,land=(S.meta.b_page||'land')==='land';
+  const name=m==='turn'?'Portrait sheets for Safari':m==='full'?'Full sheets':'Automatic';
+  $$('.vs-sheets').forEach(p=>{const b=p.dataset.v==='board';
+    p.textContent=(T?'Safari on the iPad and iPhone prints portrait only, inside its own margins (a 7.5 by 10 in area). '+(b?(land?'The board prints turned on its side on a portrait sheet, at full size (10 by 7.5 in).':'The board fills that area at full size (7.5 by 10 in).'):'Each sheet is laid out for that area, so the visuals print at full size; one taller than the area is scaled down to fit its sheet.')+' Print at 100%.'
+      :(b?'Prints on Letter '+(land?'landscape':'portrait')+' with no margin, the board '+(land?'10 by 7.5':'7.5 by 10')+' in.':'Each visual prints on its own Letter portrait sheet with no margin, at its true size.')+' Print at 100%, not “fit to page”.'+(IOS?' Safari on this iPad shrinks such a sheet to fit its margins: set Sheets to Automatic for full size.':''))
+      +' Sheets: '+name+(b?'.':' (on the Board page).');});}
+function renderOut(){renderBoard();renderCards();renderRules();renderStrips();sheetNotes();}
 function bindMeta(){$$('[data-m]').forEach(el=>{if(S.meta[el.dataset.m]!==undefined)el.value=S.meta[el.dataset.m];else if(el.tagName==='SELECT')S.meta[el.dataset.m]=el.value;else el.value='';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
 function renderAll(){ensure();bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}
 
@@ -150,9 +169,27 @@ $('#printBtn').addEventListener('click',()=>window.print());
 $('#outPrintBtn').addEventListener('click',()=>{const v=curView();if(!['board','cards','rules','strips'].includes(v)){alert('Open the Board, Card sheets, Rule cards or Strips page, then print its visuals.');return;}
   const sec=$('section.only-'+v);sec.classList.add('vs-show');document.body.classList.add('vs-out-only');
   const orient=v==='board'?((S.meta.b_page||'land')==='land'?'landscape':'portrait'):'portrait';
-  const st=document.createElement('style');st.textContent='@media print{@page{size:letter '+orient+';margin:0}}';document.head.appendChild(st);
-  const off=()=>{document.body.classList.remove('vs-out-only');sec.classList.remove('vs-show');st.remove();window.removeEventListener('afterprint',off);};
+  /* (v21.44, A7) turned (an iPad or iPhone, or Sheets set so): portrait paper with Safari's half-inch margins, each sheet the 7.5 x 10 in
+     area inside them (the stylesheet's vs-turn rules). The form's page header and footer stay off the margins, as they stay off a
+     sheet with no margin */
+  const T=turned();let fit=T?fitSheets(sec):0;if(T)document.body.classList.add('vs-turn');
+  const st=document.createElement('style');st.textContent=T?'@media print{@page{size:letter portrait;margin:.5in;'+['top-left','top-center','top-right','bottom-left','bottom-center','bottom-right'].map(b=>'@'+b+'{content:none}').join('')+'}}':'@media print{@page{size:letter '+orient+';margin:0}}';document.head.appendChild(st);
+  const off=()=>{document.body.classList.remove('vs-out-only','vs-turn');sec.classList.remove('vs-show');st.remove();if(fit){fit=0;renderOut();}window.removeEventListener('afterprint',off);};
   window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);});
+/* (v21.44, A7) a sheet whose visual runs past the 7.5 x 10 in area (a computer prints the overrun into the sheet's border) would go on
+   to a second sheet in Safari: turned, it is scaled down to fit its own sheet instead. Up to 0.02 in over is left to the sheet's edge.
+   The turned board always fits. Measured on the screen, where the screen fit may have zoomed the sheet (Chromium then reports boxes
+   in screen pixels, older WebKit in the sheet's own): every length is taken back to the page's own pixels. Returns how many sheets
+   were scaled; the outputs are drawn afresh after the print. */
+function fitSheets(sec){let n=0;
+  $$('.out .page',sec).forEach(pg=>{if(pg.classList.contains('land'))return;
+    const r=pg.getBoundingClientRect(),z=pg.offsetWidth?r.width/pg.offsetWidth:1,cs=getComputedStyle(pg),x0=r.left+parseFloat(cs.paddingLeft)*z,y0=r.top+parseFloat(cs.paddingTop)*z;let w=0,h=0;
+    (function walk(el){for(const c of el.children){const q=c.getBoundingClientRect();if(q.width&&q.height){w=Math.max(w,(q.right-x0)/z);h=Math.max(h,(q.bottom-y0)/z);}if(getComputedStyle(c).overflow==='visible')walk(c);}})(pg);
+    if(w<=7.52*96&&h<=10.02*96)return;
+    const k=Math.min(7.5*96/w,10*96/h),box=document.createElement('div');box.className='vs-fit';
+    ['display','gridTemplateColumns','gap','alignContent'].forEach(p=>{if(pg.style[p])box.style[p]=pg.style[p];});
+    box.style.setProperty('--k',k.toFixed(4));while(pg.firstChild)box.appendChild(pg.firstChild);pg.appendChild(box);pg.classList.add('vs-fitted');pg.dataset.fit=k.toFixed(4);n++;});
+  return n;}
 /* ---------------- save, load, csv, clear, sim ---------------- */
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'VS-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
