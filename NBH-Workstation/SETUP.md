@@ -6091,16 +6091,21 @@ not cost the work. What changed:
   students keep two copies. Open case and Restore first write the forms
   open now into their copy and then leave it alone; a copy another open tab
   is keeping is not offered as earlier work. No copy is deleted to make
-  room: over five, Autosave asks you to delete the ones you no longer need. The Autosave button
-  lists the copies (student, forms, time) with Restore and Delete for
-  each, Delete all, and the switch. The old single copy is moved over
-  once and removed.
+  room: over five, Autosave asks you to delete the ones you no longer
+  need. The Autosave button lists the copies (student, forms, time) with
+  Restore and Delete for each, Delete all, and the switch. The old single
+  copy is moved over once and removed.
 - **Pictures are kept.** When the browser is short of room the copy is
   kept without pictures, then without the largest forms, with a warning
   on the Autosave button; Autosave stays on. The restore names any form
   whose pictures were not kept.
 - **At once when the tab is hidden.** The copy is written as soon as you
-  switch to another tab or app, not only every so often.
+  switch to another tab or app, not only every so often. A tab being
+  closed or reloaded also leaves its last change in a small slot in this
+  browser at once, and the next opening takes it into the copy.
+- **Autosave stays on.** A full store never switches it off; only you do.
+  A browser where an earlier version switched it off by itself is asked
+  once whether to turn it back on.
 - **Save case waits for every form.** A slow form is asked again with a
   longer wait. A form still missing is named in the notice, and the case
   is then not marked saved and the safety copy is kept. Anything changed
@@ -6109,7 +6114,9 @@ not cost the work. What changed:
   in Files; until you say it is, the dot stays on and the copy is kept.
 - **Own tab takes the work with it**, and a form opened on its own (its
   own tab, a direct link) keeps a safety copy too and offers it back when
-  it opens again, in a box in the corner that blocks nothing.
+  it opens again, in a box in the corner that blocks nothing. Its own Save
+  data ends that copy (on an iPad the copy is kept, marked as saved to a
+  file, because the download cannot be confirmed).
 
 **Where the copies are, and who can see them.** Copies stay in this
 browser on this device and are never sent anywhere. They are protected by
