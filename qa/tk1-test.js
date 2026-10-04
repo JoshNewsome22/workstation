@@ -118,6 +118,12 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
     S.meta.term='none';renderAll();return off&&pic&&ring&&q('.last').length===0;}));
   check('a saved book reopens with its last-token picture and with an SVG photo',await page.evaluate(()=>{const keep=JSON.stringify(S);S.tokL[0]={k:'tk:trophy',ph:'',l:''};S.meta.term='pic';S.photos.push({id:'psvg',label:'drawn',img:'data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10" fill="red"/></svg>')});S.ch[5]={k:'',ph:'psvg',l:''};
     const o=fromFile(JSON.parse(JSON.stringify({form:'TK-1',S})));const ok=o.tokL[0].k==='tk:trophy'&&o.meta.term==='pic'&&o.photos.some(p=>p.id==='psvg')&&o.ch[5].ph==='psvg';S=JSON.parse(keep);renderAll();return ok;}));
+  /* (v21.43) the user's two cards in the picture library: YouTube (the logo) and Waiting (a word card: TK-1 prints its label alone) */
+  check('the library holds the YouTube logo and the Waiting word card; a word card prints its label alone, the table still shows the word',await page.evaluate(()=>{const P=window.NBH_PICTOS||{};if(!P.youtube||!P.waitingword||P.waitingword.w!==1||P.youtube.l!=='YouTube'||P.waitingword.l!=='Waiting')return false;
+    const keep=JSON.stringify(S);S.ch[0]={k:'youtube',ph:'',l:''};S.tg[3]={k:'waitingword',ph:'',l:''};renderAll();
+    const ch=document.querySelectorAll('#book .pg[data-kind="cards-ch"] .card')[0],tg=document.querySelectorAll('#book .pg[data-kind="cards-tg"] .card')[3];
+    const ok=ch.querySelector('.cl').textContent==='YouTube'&&!!ch.querySelector('.cp svg')&&tg.querySelector('.cl').textContent==='Waiting'&&tg.querySelector('.cp').innerHTML===''&&!!document.querySelector('#tgTbl .pick[data-i="3"] .pv svg')&&/Google LLC/.test(window.NBH_PICTO_LICENSE);
+    S=JSON.parse(keep);renderAll();return ok;}));
   check('the six-at-once buttons sit above each table and below it',await page.evaluate(()=>document.querySelectorAll('[data-six="ch"]').length===2&&document.querySelectorAll('[data-six="tg"]').length===2));
   /* the photos face each other: the right one mirrored by default, the left or neither on request; the one photo of the Rules row follows the right */
   await page.click('#viewSeg button[data-view="board"]');await sleep(150);

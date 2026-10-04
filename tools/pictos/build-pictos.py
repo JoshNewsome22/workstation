@@ -49,10 +49,24 @@ COMP = {
   'now': '<circle cx="36" cy="36" r="28" fill="#FCEA2B" stroke="#000" stroke-width="2"/><path d="M36 14 v22 l14 8" ' + LINE + '/>',
   'countdown': ''.join('<rect x="%d" y="22" width="10" height="28" rx="2" fill="%s" stroke="#000" stroke-width="2"/>' % (8 + i * 12, c) for i, c in enumerate(['#5C9E31', '#B1CC33', '#FCEA2B', '#F4AA41', '#EA5A47'])),
 }
+def from_file(rel):
+    """an SVG kept in tools/pictos/ (FILE:custom/name.svg), drawn into the 72 x 72 box through its own view box. Only
+    presentation attributes are allowed: a <style>, a class, an id, a script or a link would leak into the page."""
+    p = os.path.join(os.path.dirname(__file__), rel)
+    t = open(p, encoding='utf-8').read()
+    t = re.sub(r'<\?xml[^>]*\?>', '', t); t = re.sub(r'<!--.*?-->', '', t, flags=re.S)
+    m = re.search(r'<svg[^>]*\sviewBox="([^"]+)"[^>]*>(.*)</svg>', t, re.S)
+    if not m: raise SystemExit(rel + ': no <svg viewBox="...">')
+    vb, body = m.group(1), m.group(2)
+    if re.search(r'<style|\sclass=|\sid=|<script|href=|\son[a-z]+=', body, re.I): raise SystemExit(rel + ': styles, classes, ids, scripts, links or handlers are not allowed')
+    body = re.sub(r'\s+', ' ', body).replace('> <', '><').strip()
+    return '<svg x="0" y="0" width="72" height="72" viewBox="%s">%s</svg>' % (vb, body)
 items = {}; order = []; total = 0
-for key, label, cat, src in spec['items']:
-    body = COMP[src[5:]] if src.startswith('COMP:') else inner(src)
+for entry in spec['items']:
+    key, label, cat, src = entry[:4]
+    body = COMP[src[5:]] if src.startswith('COMP:') else from_file(src[5:]) if src.startswith('FILE:') else inner(src)
     items[key] = {'l': label, 'c': cat, 's': body}; order.append(key); total += len(body)
+    if len(entry) > 4: items[key].update(entry[4])    # flags, e.g. {"w": 1}: a word card (Form TK-1 prints only its label)
 js = '/* NBH pictogram library: OpenMoji (https://openmoji.org) CC BY-SA 4.0, with composed pictograms. Built by tools/pictos/build-pictos.py. */\n'
 js += 'window.NBH_PICTOS=' + json.dumps(items, ensure_ascii=False, separators=(',', ':')) + ';\n'
 js += 'window.NBH_PICTO_CATS=' + json.dumps(spec['cats'], ensure_ascii=False) + ';\nwindow.NBH_PICTO_ORDER=' + json.dumps(order) + ';\n'
