@@ -59,9 +59,27 @@ between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch
 `build-rps.py` asserts the number of replacements it makes (43 logos, 158 alt texts, ...)
 and stops if the source changed shape.
 
+## The installable app and its offline copy (v21.43)
+
+- `NBH-Workstation/sw.js` — the service worker: keeps the folder's files on the device and checks
+  the website for changes (see the comment at its top). Its list of files and its version are written
+  by `tools/pwa-sw.py`: run `python3 tools/pwa-sw.py NBH-Workstation` after adding, renaming or
+  removing a form or a file a page loads, and after any change to `sw.js` itself (`--check` changes
+  nothing and fails when the list is stale; `build-rps.py` runs it on the school edition).
+- `tools/pwa-assets.py NBH-Workstation` — writes `manifest.json` and the icons (`icon-192.png`,
+  `icon-512.png`, `icon-512-maskable.png`, `apple-touch-icon.png`) from the mark in the shell's
+  logo; `build-rps.py` writes the school's from its lockup.
+- `tools/blocks/nbh-pwa-save.js` + `tools/blocks/patch-pwa.py` — the block that, in the app
+  installed on an iPad or iPhone, sends saved files to the share sheet. The patcher puts one copy
+  after the `<title>` of the 44 forms and `index.html`, replaces an existing copy, refuses a second,
+  and has `--check`; re-run it after a merge or a rebuilt form.
+- `build-single.py` leaves the `nbh-pwa-head` block of `index.html` out of the one-file editions.
+- `qa/pwa-test.js` checks it all against an Apache-like server it starts itself.
+
 ## The checks to run before shipping
 
 `all-forms-shell`, `case-test`, `due-test`, `ob1-split-test`, `ob1-ioa-test`, `guard-test`,
 `bip4-test`, `u-test`, `u-check`, `shell-ui-test`, `logo-test`, `xlsx-test`, `single-check`,
 the nine form tests (`sm1-test`, `sa1-test`, `gc1-test`, `si1-test`, `da1-test`, `hd1-test`,
-`cn1-test`, `sr1-test`, `vs1-test`) and `a11y.js` (needs `axe-core` in `qa/node_modules`).
+`cn1-test`, `sr1-test`, `vs1-test`), `pwa-test` (the offline copy and the installed app) and
+`a11y.js` (needs `axe-core` in `qa/node_modules`).
