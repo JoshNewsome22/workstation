@@ -16,6 +16,17 @@
      alone    a form opened on its own keeps a copy and offers it when it opens again; Restore brings it back (10)
      hidden   visibilitychange to hidden writes the copy at once, in the workstation and in a form on its own (10)
      migrate  the old single localStorage slot is read once, kept as a copy, and removed
+   Found by the review of autosave-v2 (scratchpad REVIEW.md), each shown fixed:
+     race     text typed while Save case waits for a slow form is not marked saved, and its copy is kept     (review 1)
+     names    Open case for another student (a similar name, or after an unnamed case) writes the open forms into
+              their copy first and leaves it alone; the file just opened is not copied until it is changed (2, 9)
+     cap      five sessions of a form on its own do not delete an unanswered workstation copy             (3)
+     live     a second tab is not offered the first tab's live copy; once that tab is closed it is, and the restore
+              carries on in a copy of the second tab's own                                                 (4)
+     reload   a reload a second after a change keeps the change (the last word is stashed at once)       (5)
+     savedalone  after Save data in a form on its own, its copy is ended and not offered as unsaved work   (6)
+     offpref  a browser an earlier version switched off is asked once, and stays on when the user says so  (8)
+   (ipad above covers review 7: the dot and the copy stay until the user says the file is in Files.)
      rt       all 44 forms: Save data and Open give the same file back, and so does the safety copy of a form on its
               own after a reload and Restore (RT_FORMS=MT-1,SP-1 limits it to those forms)
    usage: node qa/autosave-test.js            (every scenario; rt takes about ten minutes)
@@ -104,6 +115,19 @@ const TAP = {
   'PA-1': () => { const bs = [...document.querySelectorAll('.pq')]; bs.slice(0, 6).forEach(b => b.click()); return bs.length; },
   'SP-1': () => { const bs = [...document.querySelectorAll('.cell')]; bs.slice(0, 6).forEach(b => b.click()); return bs.length; },
 };
+/* typing into a form's first visible text box */
+async function typeIn(fr, text) {
+  return fr.evaluate(t => { const el = [...document.querySelectorAll('textarea')].find(e => e.offsetParent !== null) || document.querySelector('textarea');
+    el.focus(); el.value = (el.value || '') + t; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
+    el.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true })); return el.id || el.name || el.tagName; }, text);
+}
+async function setClient(page, name) { await page.evaluate(n => { const i = $('#pClient'); i.value = n; i.dispatchEvent(new Event('input', { bubbles: true })); }, name); }
+/* every copy in the store, with which of the marker strings its forms hold */
+const marked = (page, marks) => page.evaluate(async marks => {
+  const rows = await nbhCopies.list(), res = [];
+  for (const r of rows) { const u = await nbhCopies.unpack(r); const txt = Object.values(u.forms).map(f => (f.snap.own || '') + JSON.stringify(f.snap.data || {})).join('');
+    res.push({ key: r.key, kind: r.kind, student: r.student, forms: Object.keys(r.forms), fileAt: r.fileAt || null, has: marks.filter(m => txt.includes(m)) }); }
+  return res; }, marks);
 
 const S = {};
 S.taps = async br => {
@@ -177,19 +201,33 @@ S.slow = async br => {
   SAY(!r.saved, 'the case is not marked saved');
   SAY(r.copies.length >= 1, 'the safety copy is kept', r.copies.map(c => c.key + ' ' + c.forms));
 };
+/* on an iPad the download offers View or Download: Save case asks whether the file is in Files; "Not yet" keeps the dot
+   and the copy (marked as saved to a file), "It is in Files" ends both (review 7) */
 S.ipad = async br => {
-  const ctx = await ctxOf(br, { userAgent: IPAD, viewport: { width: 820, height: 1180 }, hasTouch: true }), log = [], page = await shell(ctx, log);
-  await page.evaluate(() => { $('#pClient').value = 'Ipad Student'; $('#pClient').dispatchEvent(new Event('input', { bubbles: true })); });
-  await open(page, 'DM-1', true);
-  await page.waitForFunction(() => state.auto.at, null, { timeout: 40000 }).catch(() => {});
-  const [dl] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), page.click('#saveCase')]);
-  await sleep(1500);
-  const said = await msgs(page);
-  SAY(/Check that the file is in Files/.test(said), 'iPad: the notice asks to check that the file is in Files', said.slice(-200));
-  const cs = await copies(page);
-  SAY(cs.length === 1 && cs[0].fileAt, 'iPad: the safety copy is kept, marked as saved to a file', cs);
-  SAY(await page.evaluate(() => !caseDirty()), 'iPad: the unsaved dot clears (every form is in the file)');
-  await ctx.close();
+  for (const ans of ['Not yet', 'It is in Files']) {
+    const ctx = await ctxOf(br, { userAgent: IPAD, viewport: { width: 820, height: 1180 }, hasTouch: true }), log = [], page = await shell(ctx, log);
+    await setClient(page, 'Ipad Student');
+    await open(page, 'DM-1', true);
+    await page.waitForFunction(() => state.auto.at, null, { timeout: 40000 }).catch(() => {});
+    await Promise.all([page.waitForEvent('download', { timeout: 60000 }), page.click('#saveCase')]);
+    await page.waitForFunction(() => { const d = document.querySelector('#cfDlg'); return d && d.open; }, null, { timeout: 15000 }).catch(() => {});
+    const q = await page.evaluate(() => { const d = document.querySelector('#cfDlg'); return d && d.open ? d.innerText : ''; });
+    if (ans === 'Not yet') {
+      SAY(/Check that the file is in Files/.test(q) && /Is the file in Files now/.test(q), 'iPad: Save case asks whether the file is in Files', q.slice(-240));
+      SAY(await page.evaluate(() => caseDirty()), 'iPad: until that is answered, the unsaved dot stays on');
+    }
+    await page.evaluate(lbl => { const b = [...document.querySelectorAll('#cfFoot button')].find(x => x.textContent.trim() === lbl); if (b) b.click(); }, ans);
+    await sleep(1500);
+    const cs = await copies(page), dirty = await page.evaluate(() => caseDirty());
+    if (ans === 'Not yet') {
+      SAY(cs.length === 1 && cs[0].fileAt, 'iPad, "Not yet": the safety copy is kept, marked as saved to a file', cs);
+      SAY(dirty, 'iPad, "Not yet": the unsaved dot stays on');
+    } else {
+      SAY(cs.length === 0, 'iPad, "It is in Files": the safety copy is ended', cs);
+      SAY(!dirty, 'iPad, "It is in Files": the unsaved dot clears (every form is in the file)');
+    }
+    await ctx.close();
+  }
 };
 S.offer = async br => {
   const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
@@ -223,9 +261,14 @@ S.two = async br => {
   const cs = await copies(p1);
   const a = cs.find(c => c.student === 'Alice Able'), b = cs.find(c => c.student === 'Ben Best');
   SAY(a && b && a.key !== b.key && a.forms.join() === 'DM-1' && b.forms.join() === 'TB-1', 'two tabs on two students keep two copies', cs.map(c => c.student + ':' + c.forms));
+  /* while both tabs are open their copies are work in progress, not earlier work (review 4); once closed, both are offered */
   const p3 = await shell(ctx, log);
-  const t = await offerText(p3);
-  SAY(t && t.includes('Alice Able') && t.includes('Ben Best'), 'a third tab is offered both', (t || '').slice(0, 220));
+  const t0 = await offerText(p3);
+  SAY(!t0, 'a third tab is not offered the copies two open tabs are keeping', (t0 || '').slice(0, 160));
+  await p3.close(); await p1.close(); await p2.close(); await sleep(1500);
+  const p4 = await shell(ctx, log);
+  const t = await offerText(p4);
+  SAY(t && t.includes('Alice Able') && t.includes('Ben Best'), 'once those tabs are closed, a new tab is offered both', (t || '').slice(0, 220));
   await ctx.close();
 };
 async function photoSession(br, inject) {
@@ -254,19 +297,23 @@ S.photo = async br => {
 };
 S.quota = async br => {
   /* the store refuses any record that holds a picture */
-  const s = await photoSession(br, () => {
+  const NOPICS = () => {
     const put = IDBObjectStore.prototype.put;
     IDBObjectStore.prototype.put = function (v) { if (v && v.forms && Object.values(v.forms).some(f => f.pics && f.pics.length)) throw new DOMException('full', 'QuotaExceededError'); return put.apply(this, arguments); };
-  });
+  };
+  const s = await photoSession(br, NOPICS);
   const cs = await copies(s.page), chip = await s.page.evaluate(() => ({ t: $('#autoChip').textContent, c: $('#autoChip').className, pref: localStorage.getItem(AUTO.pref) }));
   SAY(s.wrote && cs[0] && cs[0].forms.includes('TK-1') && cs[0].lost['TK-1'] >= 1, 'a full store: the copy is kept without the picture', cs[0]);
   SAY(/no pictures/.test(chip.t) && /warn/.test(chip.c) && chip.pref !== 'off', 'Autosave stays on with a warning', chip);
   SAY(!/switched off/.test(await msgs(s.page)), 'nothing says Autosave was switched off');
+  /* the store is still full after the reload (the last word the closing page stashed meets the same full store) */
+  await s.ctx.addInitScript(NOPICS);
   await reload(s.page);
   SAY(await s.page.evaluate(() => $('#autoChip').textContent !== 'Autosave off'), 'next session: Autosave is not off', await s.page.evaluate(() => $('#autoChip').textContent));
-  await clickRow(s.page, 'TK-1', 'r'); await waitFrames(s.page, 1);
+  const offer = await offerText(s.page);
+  const clicked = await clickRow(s.page, 'TK-1', 'r'); await waitFrames(s.page, 1);
   const said = await msgs(s.page);
-  SAY(/Form TK-1: 1 picture could not be kept/.test(said), 'the restore names the form whose picture was not kept', said.slice(-220));
+  SAY(/Form TK-1: 1 picture could not be kept/.test(said), 'the restore names the form whose picture was not kept', { said: said.slice(-220), clicked, offer: (offer || '').slice(0, 300) });
   await s.ctx.close();
   /* a store that refuses anything bigger than a small form: the largest form is left out, the others kept */
   const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
@@ -371,6 +418,158 @@ S.migrate = async br => {
   SAY(await page.evaluate(() => localStorage.getItem(AUTO.key) === null), 'and removed from localStorage');
   await ctx.close();
 };
+/* ---- found by the review of autosave-v2, each shown fixed ---- */
+/* review 1: typing while Save case waits for a slow form */
+S.race = async br => {
+  const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
+  await setClient(page, 'Race Student');
+  const dm = await open(page, 'DM-1'), pa = await open(page, 'PA-1');
+  await page.evaluate(() => openForm('DM-1')); await sleep(500);
+  await typeIn(dm, ' BEFORE-SAVE'); await sleep(1500);
+  await pa.evaluate(ms => { const o = FileReader.prototype.readAsText; FileReader.prototype.readAsText = function (b) { const me = this; setTimeout(() => o.call(me, b), ms); }; }, 7000);
+  const dlP = page.waitForEvent('download', { timeout: 60000 });
+  await page.click('#saveCase'); await sleep(2500);
+  await typeIn(dm, ' TYPED-DURING-SAVE');
+  const dl = await dlP, fp = path.join(OUT, 'race.json'); await dl.saveAs(fp); await sleep(1500);
+  const file = fs.readFileSync(fp, 'utf8');
+  SAY(file.includes('BEFORE-SAVE') && !file.includes('TYPED-DURING-SAVE') && Object.keys(JSON.parse(file).forms).length === 2, 'the file holds the text typed before Save case, not the text typed during it');
+  SAY(await page.evaluate(() => caseDirty()), 'the case stays marked unsaved (the dot)');
+  SAY(/Changed while the file was being written: Form DM-1/.test(await msgs(page)), 'the notice names the form changed during the save', (await msgs(page)).slice(-200));
+  await sleep(12000);
+  const cs = await marked(page, ['TYPED-DURING-SAVE']);
+  SAY(cs.some(c => c.has.length), 'a safety copy holds the text typed during the save, 12 s on', cs);
+  SAY(await dm.evaluate(() => nbhGuard.isDirty()), 'DM-1 keeps its own unsaved mark');
+  SAY(!log.some(l => /pageerror/.test(l)), 'race: no script errors', log.filter(l => /pageerror/.test(l)));
+  await ctx.close();
+};
+/* review 2 and 9: Open case for another student in the same tab */
+S.names = async br => {
+  /* a case file as Save case writes it, for a student whose name is set below */
+  const c0 = await ctxOf(br), p0 = await shell(c0);
+  await setClient(p0, 'File Student'); const f0 = await open(p0, 'DM-1'); await typeIn(f0, ' CASE-FILE-TEXT'); await sleep(1500);
+  const [dl] = await Promise.all([p0.waitForEvent('download', { timeout: 60000 }), p0.click('#saveCase')]);
+  const fp = path.join(OUT, 'names-case.json'); await dl.saveAs(fp); await c0.close();
+  for (const [a, b] of [['Mary Jones', 'Myra Jones'], ['', 'Sample Student']]) {
+    const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
+    await page.evaluate(() => { wsUI.confirm = async () => true; });
+    if (a) await setClient(page, a);
+    const fr = await open(page, 'DM-1'); await typeIn(fr, ' FIRST-STUDENT-WORK'); await sleep(1500);
+    await page.evaluate(() => autoSave(true)); await sleep(2500);
+    await typeIn(fr, ' LATE-EDIT'); await sleep(900);   /* typed after the last copy: Open case must write it first */
+    const d = JSON.parse(fs.readFileSync(fp, 'utf8')); d.packet.client = b;
+    await page.evaluate(t => openCaseText(t, null), JSON.stringify(d)); await sleep(9000);
+    const cs = await marked(page, ['FIRST-STUDENT-WORK', 'LATE-EDIT']);
+    const tag = '[' + (a || 'no name') + ', then Open case ' + b + '] ';
+    SAY(cs.some(c => c.has.length === 2), tag + 'the first student\'s work, with the last edit, is still in a copy', cs);
+    SAY(!cs.some(c => c.student === b), tag + 'the case file just opened is not copied until it is changed', cs.map(c => c.student));
+    SAY(!(await page.evaluate(() => caseDirty())), tag + 'no unsaved dot after Open case');
+    await typeIn(frameOf(page, 'DM-1'), ' AFTER-OPEN'); await sleep(1500); await page.evaluate(() => autoSave(true)); await sleep(2500);
+    const cs2 = await marked(page, ['FIRST-STUDENT-WORK', 'AFTER-OPEN']);
+    SAY(cs2.length === 2 && cs2.some(c => c.has.join() === 'FIRST-STUDENT-WORK') && cs2.some(c => c.has.join() === 'AFTER-OPEN' && c.student === b),
+      tag + 'after an edit: two copies, the first one untouched', cs2.map(c => c.student + ': ' + c.has));
+    SAY(!log.some(l => /pageerror/.test(l)), tag + 'no script errors', log.filter(l => /pageerror/.test(l)));
+    await ctx.close();
+  }
+};
+/* review 3: no copy is deleted to make room */
+S.cap = async br => {
+  const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
+  await setClient(page, 'Student A');
+  const fr = await open(page, 'DM-1'); await typeIn(fr, ' CASE-A-WORK'); await sleep(1500);
+  await page.evaluate(() => autoSave(true)); await sleep(3000);
+  await page.close();
+  for (let i = 0; i < 5; i++) {
+    const p = await ctx.newPage(); wire(p, log); await p.goto(BASE + '/' + ED + '/' + F['MT-1'].file); await sleep(1800);
+    await p.evaluate(() => { const bs = [...document.querySelectorAll('td button')].filter(x => x.textContent.trim() === '+'); bs.slice(0, 2).forEach(x => x.click()); });
+    await sleep(3500); await p.close();
+  }
+  const p = await shell(ctx, log);
+  const cs = await marked(p, ['CASE-A-WORK']);
+  SAY(cs.some(c => c.has.length), 'after five sessions of MT-1 on its own, Student A\'s unanswered copy is still kept', cs.map(c => c.kind + ' ' + c.student + ' ' + c.has));
+  SAY(cs.length === 6, 'no copy was deleted to make room (six kept; the user is asked to delete some)', cs.length);
+  await ctx.close();
+};
+/* review 4: a second tab and the first tab's live copy */
+S.live = async br => {
+  const ctx = await ctxOf(br), log = [], t1 = await shell(ctx, log);
+  await setClient(t1, 'Live Student');
+  const d1 = await open(t1, 'DM-1'); await typeIn(d1, ' TAB1-A'); await sleep(1500); await t1.evaluate(() => autoSave(true)); await sleep(3000);
+  const k1 = await t1.evaluate(() => state.auto.key);
+  const t2 = await shell(ctx, log); await sleep(1500);
+  const offered = await offerText(t2);
+  SAY(!offered, 'tab 2 is not offered tab 1\'s live copy as earlier work', (offered || '').slice(0, 160));
+  await t2.evaluate(() => { wsUI.confirm = async () => true; try { $('#dlg').close(); } catch (e) {} autoDialog(false); }); await sleep(800);
+  const box = await t2.evaluate(() => ({ text: $('#dlgBody').innerText, restore: !!document.querySelector('#dlgBody button[data-as="r"]') }));
+  SAY(box.text.includes('open in another tab now') && !box.restore, 'the Autosave box lists it as open in another tab, with no Restore', box.text.slice(0, 200));
+  await t2.evaluate(() => $('#dlg').close());
+  await t1.close(); await sleep(1500);
+  await t2.evaluate(() => autoDialog(false)); await sleep(800);
+  await t2.evaluate(() => { const b = document.querySelector('#dlgBody button[data-as="r"]'); if (b) b.click(); }); await sleep(9000);
+  const k2 = await t2.evaluate(() => state.auto.key);
+  const cs = await marked(t2, ['TAB1-A']);
+  SAY(k2 && k2 !== k1 && !cs.some(c => c.key === k1) && cs.some(c => c.key === k2 && c.has.includes('TAB1-A')),
+    'once tab 1 is closed, tab 2 restores the copy and carries on in a copy of its own', [k1, k2, cs.map(c => c.key + ' ' + c.has)]);
+  SAY(!log.some(l => /pageerror/.test(l)), 'live: no script errors', log.filter(l => /pageerror/.test(l)));
+  await ctx.close();
+};
+/* review 5: a reload just after a change */
+S.reload = async br => {
+  {
+    const ctx = await ctxOf(br), log = [], page = await shell(ctx, log);
+    await setClient(page, 'Reload Student');
+    const dm = await open(page, 'DM-1'); await typeIn(dm, ' FIRST-EDIT'); await sleep(1500);
+    await page.evaluate(() => autoSave(true)); await sleep(12000);
+    await typeIn(dm, ' RELOAD-1000'); await sleep(1000);
+    await page.reload(); await sleep(2500);
+    const cs = await marked(page, ['RELOAD-1000']);
+    SAY(cs.some(c => c.has.length), 'workstation: an edit 1 s before a reload is in the copy', cs);
+    await ctx.close();
+  }
+  {
+    const ctx = await ctxOf(br), log = [], p = await ctx.newPage(); wire(p, log);
+    await p.goto(BASE + '/' + ED + '/' + F['MT-1'].file); await sleep(1800);
+    await p.evaluate(() => { const bs = [...document.querySelectorAll('td button')].filter(x => x.textContent.trim() === '+'); bs.slice(0, 1).forEach(x => x.click()); });
+    await sleep(4000);
+    await p.evaluate(() => { const bs = [...document.querySelectorAll('td button')].filter(x => x.textContent.trim() === '+'); bs.slice(1, 4).forEach(x => x.click()); });
+    await sleep(300);
+    const want = await ownText(p);
+    await p.reload(); await sleep(2600);
+    const has = await p.evaluate(() => !!document.querySelector('#nbhAsDlg button[data-as="r"]'));
+    if (has) { await p.evaluate(() => document.querySelector('#nbhAsDlg button[data-as="r"]').click()); await sleep(2800); }
+    SAY(has && (await ownText(p)) === want, 'MT-1 on its own: taps 0.3 s before a reload come back with Restore');
+    SAY(!log.some(l => /pageerror/.test(l)), 'reload: no script errors', log.filter(l => /pageerror/.test(l)));
+    await ctx.close();
+  }
+};
+/* review 6: Save data in a form on its own ends its copy */
+S.savedalone = async br => {
+  const ctx = await ctxOf(br), log = [], p = await ctx.newPage(); wire(p, log);
+  await p.goto(BASE + '/' + ED + '/' + F['MT-1'].file); await sleep(1800);
+  await p.evaluate(() => { const bs = [...document.querySelectorAll('td button')].filter(x => x.textContent.trim() === '+'); bs.slice(0, 2).forEach(x => x.click()); });
+  await sleep(3500);
+  SAY((await copies(p)).length === 1, 'MT-1 on its own: the taps are in a copy');
+  const dlP = p.waitForEvent('download', { timeout: 15000 });
+  await p.evaluate(() => (document.querySelector('#saveBtn,#btnSave,#dl-json') || [...document.querySelectorAll('button')].find(b => /^\s*save data\s*$/i.test(b.textContent))).click());
+  await dlP; await sleep(2500);
+  SAY((await copies(p)).length === 0, 'after Save data the copy is ended (the work is in a file)');
+  await p.reload(); await sleep(3000);
+  SAY(!(await p.evaluate(() => document.querySelector('#nbhAsDlg'))), 'the next opening offers nothing');
+  await ctx.close();
+};
+/* review 8: a browser where an earlier version stored 'off' after a full store */
+S.offpref = async br => {
+  const ctx = await ctxOf(br), log = [];
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem('x')) { localStorage.setItem('nbh.ws.autosave.on', 'off'); sessionStorage.setItem('x', '1'); } } catch (e) {} });
+  const page = await ctx.newPage(); wire(page, log);
+  await page.goto(BASE + '/' + ED + '/index.html'); await sleep(1500);
+  const q = await page.evaluate(() => { const d = document.querySelector('#cfDlg'); return d && d.open ? d.innerText : ''; });
+  SAY(/Autosave is off in this browser/.test(q) && /Turn Autosave back on/.test(q), 'the user is asked once whether to turn Autosave back on', q.slice(0, 200));
+  await okStyled(page); await sleep(800);
+  SAY(await page.evaluate(() => /Autosave on|Autosaved/.test($('#autoChip').textContent)), 'answered yes: Autosave is on');
+  await page.reload(); await sleep(2000);
+  SAY(await page.evaluate(() => !(document.querySelector('#cfDlg') || {}).open && /Autosave on|Autosaved/.test($('#autoChip').textContent)), 'and stays on, without asking again');
+  await ctx.close();
+};
 S.rt = async br => {
   const res = {}; let bad = 0;
   const RTF = FORMS.filter(f => !process.env.RT_FORMS || process.env.RT_FORMS.split(',').includes(f.id));   /* RT_FORMS=MT-1,SP-1 for a few */
@@ -398,8 +597,15 @@ S.rt = async br => {
       const B = await ownText(p2);
       r.fileLost = lost(A, B); r.file = !r.fileLost.length || (KNOWN[f.id] && r.fileLost.every(x => KNOWN[f.id][0].test(x)));
       r.dirtyAfterOpen = await p2.evaluate(() => nbhGuard.isDirty());
-      /* 2. the safety copy of the form on its own (page 1 has been working: the copy holds the simulation) */
-      await page.evaluate(() => { const t = document.querySelector('textarea,input[type=text]'); if (t) { t.value += ' '; t.dispatchEvent(new Event('input', { bubbles: true })); } });
+      /* 2. the safety copy of the form on its own. Save data has just ended the copy (the work is in a file), so a
+         change Save data writes is made first: the first text box whose change reaches the file (a trailing space may
+         be trimmed, and some boxes are not saved) */
+      r.changed = await page.evaluate(async () => {
+        const s0 = await nbhState.now(), ev = t => { t.dispatchEvent(new Event('input', { bubbles: true })); t.dispatchEvent(new Event('change', { bubbles: true })); };
+        const els = [...document.querySelectorAll('textarea,input[type=text],input:not([type])')].filter(e => !e.closest('.nbh-as-ui') && !e.readOnly && !e.disabled).slice(0, 30);
+        for (const t of els) { const v = t.value; t.value = v + ' rt'; ev(t); if ((await nbhState.now()) !== s0) return true; t.value = v; ev(t); }
+        return false;
+      });
       await sleep(3200);
       const A2 = await ownText(page);
       await page.close(); await p2.close();
@@ -411,6 +617,7 @@ S.rt = async br => {
       /* the copy brings back everything the form's own Save data and Open would (no less) */
       const fileKinds = new Set(r.fileLost.map(general));
       r.copyLost = lost(A2, C); r.copy = hasDlg && r.copyLost.every(x => fileKinds.has(general(x)));
+      if (!r.changed) { r.copy = !hasDlg; r.copyNote = 'no text box that Save data writes: nothing unsaved, so no copy and no offer'; }
       if (!r.file || !r.copy) {
         const d = (x, y) => { try { const X = JSON.parse(x), Y = JSON.parse(y), out = []; const w = (a, b, p) => { if (out.length > 4) return; if (a && b && typeof a === 'object' && typeof b === 'object') { for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) w(a[k], b[k], p + '.' + k); return; } if (JSON.stringify(a) !== JSON.stringify(b)) out.push(p + ': ' + String(JSON.stringify(a)).slice(0, 60) + ' -> ' + String(JSON.stringify(b)).slice(0, 60)); }; w(X, Y, ''); return out; } catch (e) { return ['unparsed']; } };
         if (!r.file) r.fileDiff = d(A, B);
@@ -429,6 +636,7 @@ S.rt = async br => {
   SAY(Object.values(res).filter(r => r.copy).length === RTF.length, 'all ' + RTF.length + ' forms: the safety copy comes back the same after a reload', failed.filter(([k, r]) => !r.copy).map(([k, r]) => k + ' ' + JSON.stringify(r.copyDiff || r.err)));
   SAY(Object.values(res).every(r => !r.dirtyAfterOpen), 'all forms: a file just opened is not marked unsaved', Object.entries(res).filter(([k, r]) => r.dirtyAfterOpen).map(([k]) => k));
   Object.entries(res).forEach(([k, r]) => { if (r.fileLost && r.fileLost.length && KNOWN[k]) console.log('NOTE ' + k + ': ' + KNOWN[k][1] + ' (' + r.fileLost.length + ' values; the same before v21.44)'); });
+  Object.entries(res).forEach(([k, r]) => { if (r.copyNote) console.log('NOTE ' + k + ': ' + r.copyNote); });
   SAY(Object.values(res).every(r => !(r.errors && r.errors.length)), 'all forms: no script errors', failed.filter(([k, r]) => r.errors && r.errors.length).map(([k, r]) => k + ' ' + r.errors[0]));
 };
 

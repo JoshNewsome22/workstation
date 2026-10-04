@@ -1473,8 +1473,14 @@ renderAll();
         inp.files = dt.files;
         inp.dispatchEvent(new Event('change', { bubbles: true }));
       } catch (e) { quiet(false); return res(false); }
-      /* the form reads the file with a FileReader and redraws; give it that time */
-      setTimeout(function(){ quiet(false); res(true); }, 1200);
+      /* the form reads the file with a FileReader and redraws; give it that time. v21.44: a tap or key of the user's
+         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual */
+      var gest = function(){ quiet(false); };
+      document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);
+      setTimeout(function(){
+        document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);
+        quiet(false); res(true);
+      }, 1200);
     });
   }
   /* a short fingerprint of every value, so an edit that changes no count is

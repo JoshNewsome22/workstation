@@ -2789,7 +2789,7 @@ async function autoDialog(offer){
     if(on)wsUI.toast('Autosave is off. The copies already kept stay until you delete them or they expire.',{ms:8000});});
   const cl=$('#autoClear');if(cl)cl.addEventListener('click',async()=>{
     if(!(await wsUI.confirm('Delete every copy Autosave keeps in this browser ('+rows.length+')?\nThey cannot be brought back.',{ok:'Delete all',danger:true})))return;
-    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();wsUI.toast('Every copy was deleted from this browser. A form still open in another tab keeps copying until that tab is closed.',{ms:9000});chip();});
+    await CP.clear();A.key=null;A.written='';A.forms={};state.autoSig=caseSig();$('#dlg').close();wsUI.toast('Every copy this workstation kept in this browser was deleted. A form still open in another tab keeps copying until that tab is closed.',{ms:9000});chip();});
   $('#dlg').addEventListener('close',function onClose(){$('#dlg').removeEventListener('close',onClose);if(!chose)chip();});
 }
 async function autoRestore(r){
@@ -2824,7 +2824,7 @@ async function autoOffer(){
   await CP.ready();
   if(CP.mode()&&autoPref()==='ask'){
     chip();
-    const y=await wsUI.confirm('Autosave is switched off in this browser.\nAn earlier version switched it off by itself when the storage was full. Turn Autosave back on?',{ok:'Turn Autosave on',cancel:'Keep it off'});
+    const y=await wsUI.confirm('Autosave is off in this browser.\nYou may have turned it off, or an earlier version turned it off by itself when the browser’s storage was full. Turn Autosave back on?',{ok:'Turn Autosave on',cancel:'Keep it off'});
     autoSet(!!y);
   }
   CP.setOff(!autoOn()&&!!CP.mode());   /* forms opened on their own follow the switch */

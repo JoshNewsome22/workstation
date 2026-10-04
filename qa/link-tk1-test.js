@@ -577,12 +577,20 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('19 Open case: both link records come back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE);
     ok('19 Open case: the panels read them',await tk2.evaluate(()=>nbhLink.state().on&&!nbhLink.state().table)&&await te2.evaluate(()=>nbhLink.state().on));
     /* v21.44 the autosave keeps this tab's copy in nbhCopies (IndexedDB); read it back as the case shape it restores from */
+    /* a case file just opened is in a file, so the workstation keeps no copy of it until something is changed: a text box
+       of TE-1's that its Save data writes (outside the link panel) is changed first */
+    const changed=await te2.evaluate(async()=>{const s0=await nbhState.now(),ev=t=>{t.dispatchEvent(new Event('input',{bubbles:true}));t.dispatchEvent(new Event('change',{bubbles:true}));};
+      for(const t of [...document.querySelectorAll('textarea,input[type=text]')].filter(e=>e.offsetParent!==null&&!e.closest('#lkPanel')&&!e.readOnly).slice(0,30)){const v=t.value;t.value=v+' x';ev(t);if((await nbhState.now())!==s0)return true;t.value=v;ev(t);}
+      return false;});
+    await sleep(1200);
+    const lkTE2=await te2.evaluate(()=>S.meta.lk||'');
+    await sh.evaluate(()=>{Object.values(state.frames).forEach(fr=>ask(fr,'status'));});await sleep(600);
     await sh.evaluate(()=>{state.autoSig='';});await sh.evaluate(async()=>{await autoSave(true);});
     const auto=await sh.evaluate(async()=>{const r=(await nbhCopies.list()).find(x=>x.key===state.auto.key);return r?JSON.stringify(await nbhCopies.unpack(r)):null;});
-    ok('19 the autosave holds both records',!!auto&&JSON.parse(JSON.parse(auto).forms['TK-1'].snap.own).S.meta.lk===lkTK&&JSON.parse(JSON.parse(auto).forms['TE-1'].snap.own).S.meta.lk===lkTE);
+    ok('19 the autosave holds both records',changed&&!!auto&&JSON.parse(JSON.parse(auto).forms['TK-1'].snap.own).S.meta.lk===lkTK&&JSON.parse(JSON.parse(auto).forms['TE-1'].snap.own).S.meta.lk===lkTE2,{changed,auto:!!auto,same:lkTE2===lkTE});
     await sh.evaluate(async t=>{state.restoring=true;try{await loadCase(JSON.parse(t),'autosave');}finally{state.restoring=false;}},auto);await sleep(1500);
     tk2=frameOf(TKF);te2=frameOf(TEF);
-    ok('19 an autosave restore brings both back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE);
+    ok('19 an autosave restore brings both back',(await tk2.evaluate(()=>S.meta.lk))===lkTK&&(await te2.evaluate(()=>S.meta.lk))===lkTE2);
     /* a Keep is a change the case notices: TK-1's status signature moves */
     await tk2.evaluate(()=>{window.confirm=()=>true;});
     const sigOf=async()=>{await sh.evaluate(()=>{Object.values(state.frames).forEach(fr=>ask(fr,'status'));});await sleep(500);return sh.evaluate(()=>caseSig());};
