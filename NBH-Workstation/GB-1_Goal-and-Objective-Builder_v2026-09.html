@@ -607,6 +607,18 @@ ol.gs .gs-id{font-family:var(--sans);font-weight:600;margin-right:3px}
 #bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
 #bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
+<style id="gb1-dd-css" data-nbh-screen>
+/* v21.44 (A5) Current level from DD-1: the button's row and the report of what it filled (screen only; noprint) */
+.gb-dd{margin:0 0 12px}
+.gb-dd .gb-dd-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 6px}
+.gb-dd .gb-dd-row .method{flex:1 1 280px;margin:0}
+#gbDdOut{border-left:3px solid var(--rule);background:var(--wash);padding:8px 12px;font-size:12px;line-height:1.5}
+#gbDdOut.bad{border-left-color:#9b4e15;background:#fbf0e6}
+#gbDdOut p{margin:0 0 4px}
+#gbDdOut ul{margin:4px 0;padding-left:18px}
+#gbDdOut li{margin:2px 0}
+#gbDdOut .gb-dd-pick{margin-top:6px}
+</style>
 <main class="sheet">
 <div class="nbh-print-head">
   <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
@@ -656,6 +668,9 @@ fills only the fields you have not written in yourself. The plan states its base
 criterion as rates per minute, so they go only into an objective measured in rate per minute,
 and its number of consecutive sessions comes with its unit, sessions.</p>
 <p class="noprint"><button id="applyPlan" class="tool">Apply to empty fields</button></p>
+<!-- v21.44 (A5): where the measured baseline comes in -->
+<p class="noprint method">The current level can also come from the data: <b>Current level from DD-1</b>, at the top of
+Reduction Objectives, fills each empty one from Form DD-1&rsquo;s baseline, its first condition.</p>
 </section>
 
 <!-- ===================== REDUCTION ===================== -->
@@ -663,6 +678,16 @@ and its number of consecutive sessions comes with its unit, sessions.</p>
 <div class="bar nbh-band">Reduction Objectives</div>
 <p>One row per behavior being reduced. The sentence underneath each row is the
 objective as it will appear on the goal sheet; it rewrites itself as you type.</p>
+
+<!-- v21.44 (A5): Current level from DD-1, the button and what it did (screen only) -->
+<div class="gb-dd noprint">
+<p class="gb-dd-row"><button id="gbDdBtn" class="tool" type="button">Current level from DD-1</button>
+<span class="method">Fills each empty current level from Form DD-1&rsquo;s baseline (its first condition) where the
+objective&rsquo;s response measure is the one DD-1 records. Inside the workstation it reads the DD-1 open there; on its
+own, a DD-1 data file or a case file.</span></p>
+<div id="gbDdOut" role="status" aria-live="polite" hidden></div>
+<input type="file" id="gbDdIn" accept=".json,application/json,.html,text/html" hidden>
+</div>
 
 <div id="redWrap" data-panel="red"></div>
 <p class="noprint"><button id="addRed" class="tool">Add a reduction objective</button></p>
@@ -776,6 +801,17 @@ behavior without committing it to teaching anything. Each reduction objective on
 this form carries a field naming the acquisition objective it is paired with, each
 acquisition objective names the reduction objective it replaces, and the goal sheet
 prints that pairing under each objective, numbered as on the form (R1, A1).</p>
+<!-- v21.44 (A5): screen only, as the other notes on what the form does on screen -->
+<p class="noprint">When several behaviors share one replacement skill, the form writes one acquisition objective
+for it, naming every behavior it replaces. The replacements named on Form TB-1 are read without
+their staff notes (&ldquo;(see target 4)&rdquo;, &ldquo;(replacement)&rdquo;), and a paired
+replacement that points to a replacement target defined on TB-1, or reads exactly as one that does,
+takes that target&rsquo;s name. Wording that only means the same thing is not merged. In the
+sentence the skill follows &ldquo;will&rdquo;: an action named in the third person takes its plain
+form (&ldquo;Hands a break card and waits&rdquo;: will hand a break card and wait), a name is
+introduced by a verb (&ldquo;Break request&rdquo;: will make a break request; &ldquo;On-task
+behavior&rdquo;: will demonstrate on-task behavior), and a staff note is left out. The field keeps
+the words as they were typed.</p>
 
 <h3 class="sub">4. Where the Numbers Should Come From</h3>
 <p>The baseline belongs to the data, not to the goal: take it from the measurement
@@ -787,6 +823,21 @@ there rather than inviting a second, different number.</p>
 criterion than the plan's thinning criterion, for instance &mdash; override it here and
 say so in the note field, so the difference is on the record as a decision rather
 than as a discrepancy.</p>
+<p class="noprint"><b>Current level from DD-1</b>, at the top of Reduction Objectives, takes the baseline from
+Form DD-1, the data the goal will be judged by. For each reduction objective it finds DD-1&rsquo;s
+behavior of the same name and works out its level in DD-1&rsquo;s first condition, the baseline,
+as DD-1&rsquo;s own Results do: the mean of the days with data, their range and their number. It
+writes that level only into an empty Current level, for example &ldquo;10 per school day (from
+DD-1, Baseline: mean of 6 days, range 8&ndash;12)&rdquo;, and only where the objective&rsquo;s response
+measure is the one DD-1 records: rate per hour (DD-1&rsquo;s rate), frequency per school day (a
+count over the entire school day), total duration per session in minutes (a duration recorded per
+session or over a single period) or percentage of intervals. An objective with no response measure
+yet takes DD-1&rsquo;s. A level in another unit is never converted or written: a rate per minute is
+not DD-1&rsquo;s rate per hour, and a latency in seconds is not DD-1&rsquo;s latency in minutes.
+Each objective left empty is named with the reason (a different unit, no days in the baseline, or
+no behavior of that name on DD-1), and TD-1&rsquo;s <b>Apply to empty fields</b> still fills what is
+left empty. Inside the workstation the button reads the DD-1 open there; opened on its own, or with
+DD-1 closed, it reads a file DD-1 saved with Save data, or a case file that holds DD-1.</p>
 <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
 <p class="noprint nbh-wh">The Progress reports box shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
 </section>
@@ -2976,7 +3027,18 @@ document.addEventListener('click', e => {
    is measured (34 CFR 300.320(a)(3)(i)). */
 function gap(s, what) { const t = String(s || '').trim(); return t ? esc(t) : '<span class="gap">[' + what + ']</span>'; }
 const OWNWORD = /^(in|at|on|during|across|throughout|within|while|when|whenever|inside|outside|near|around|for|from|between|among|under|over|after|before)\b/i;
-function ctxPhrase(s) { const t = String(s || '').trim(); return t ? (OWNWORD.test(t) ? '' : 'in ') + esc(t) : 'in/at ' + gap('', 'context'); }
+function ctxPhrase(s) { const t = String(s || '').trim(); return t ? (OWNWORD.test(t) ? '' : 'in ') + esc(gbPhrase(t)) : 'in/at ' + gap('', 'context'); }
+/* v21.44 (A5): a context or a condition inside the sentence. Copied from Form TB-1 they begin as a heading does
+   ("Independent academic work in Room 12; occasionally at the bus line", "Every independent academic demand"), so the
+   first word is lowercased when it is an ordinary word (not a name: not before a number or another capitalized word,
+   not a day, a month, a language or a title, not an abbreviation), and a semicolon inside the sentence becomes a
+   comma. The field keeps the words as typed. */
+const GB_PROPER = /^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December|English|Spanish|French|Haitian|Creole|Portuguese|American|Florida|Mr|Mrs|Ms|Miss|Dr|I)$/;
+function gbPhrase(s) {
+  const t = String(s == null ? '' : s).replace(/\s*;\s*/g, ', ').replace(/\s+/g, ' ').trim(), m = /^([A-Z][a-z]+)(?=$|[\s,])(\s+(\S+))?/.exec(t);
+  if (!m || GB_PROPER.test(m[1]) || (m[3] && /^([0-9]|[A-Z])/.test(m[3]))) return t;
+  return m[1].toLowerCase() + t.slice(m[1].length);
+}
 function redSentence(i) {
   const g = n => val('red[' + i + '].' + n), crit = g('crit');
   return gap(val('m.client'), 'student') + ' will ' + gap(g('dir'), 'direction of change') +
@@ -2999,7 +3061,9 @@ function redChecks(i) {
   if ((down && ml === 'less') || (up && ml === 'more'))
     out.push('a ' + (down ? 'decrease' : 'increase') + ' is written &ldquo;to no ' + (down ? 'more' : 'less') +
       ' than&rdquo;; &ldquo;no ' + ml + ' than&rdquo; makes the target level a ' + (down ? 'floor' : 'ceiling') + '.');
-  const lv = s => { const m = /^\s*(\d+(?:\.\d+)?)\s*(.*?)\s*$/.exec(s); return m ? { n: +m[1], u: m[2].toLowerCase() } : null; };
+  /* v21.44 (A5): a note in brackets after the unit is not part of it: "10 per school day (from DD-1, Baseline: mean of
+     6 days, range 8-12)" is in the unit of "2 per school day" */
+  const lv = s => { const m = /^\s*(\d+(?:\.\d+)?)\s*(.*?)\s*$/.exec(s); return m ? { n: +m[1], u: m[2].replace(/\s*\(.*$/, '').toLowerCase() } : null; };
   const c = lv(g('cur')), t = lv(g('tgt'));
   if (c && t && c.u === t.u && (down ? t.n >= c.n : up && t.n <= c.n))
     out.push('the target level (' + esc(g('tgt')) + ') is not ' + (down ? 'below' : 'above') + ' the current level (' +
@@ -3009,10 +3073,126 @@ function redChecks(i) {
 function checkLines(list) { return list.map(m => '<div class="gb-chk">Check: ' + m + '</div>').join(''); }
 function acqSentence(i) {
   const g = n => val('acq[' + i + '].' + n);
-  return 'By ' + gap(fmtDate(g('date')), 'target date') + ', given ' + gap(g('cond'), 'condition') +
-    ', ' + gap(val('m.client'), 'student') + ' will ' + gap(g('beh'), 'observable behavior') +
+  /* v21.44 (A5): the skill as words that follow "will" (gbWill, below); it went in as named ("will Hands a break card
+     and waits (see target 4)", "will Break request (replacement)") */
+  const beh = g('beh') ? esc(gbWill(g('beh'))) : gap('', 'observable behavior');
+  return 'By ' + gap(fmtDate(g('date')), 'target date') + ', given ' + gap(gbPhrase(g('cond')), 'condition') +
+    ', ' + gap(val('m.client'), 'student') + ' will ' + beh +
     ' ' + gap(g('crit'), 'criterion') + ' across ' + gap(g('n'), 'number') + ' consecutive ' +
     gap(g('unit'), 'unit') + ', as measured by ' + gap(g('meth'), 'measurement method') + '.';
+}
+
+/* ---------- v21.44 (A5) the words of a skill in a sentence ----------
+   A skill is named as it was on Form TB-1 or as typed here: "Hands a break card and waits (see target 4)", "Break
+   request (replacement)", "ask for help". In the objective it follows "will", so the sentence (on screen, on the goal
+   sheet, in Copy for the BIP and in the case) words it by these rules; the field keeps the words as typed.
+   1. Staff notes are left out: a bracket that begins with "see" ("(see target 4)", "(see Forms EA-1 and TD-1)"),
+      wherever it stands; at the end, a bracket naming it a replacement or an alternative ("(replacement)") and a
+      dash followed by "see ...". A leading "will" or "to" and a closing full stop are dropped as well.
+   2. An action named in the third person takes its plain form ("Requests a break": request a break; "Hands a break
+      card and waits": hand a break card and wait), and so does a second verb after "and", "or" or "then" when it is
+      one of the common verbs in GB_VERBS. An "-ing" form of one of them at the start takes the plain form
+      ("Requesting help": request help). An adverb before the verb stays ("Independently requests a break").
+   3. A plain verb phrase stays as it is ("ask for help"; "hand the break card to an adult"). A word not in the list
+      counts as a verb when "a", "the", "his" or another determiner follows it ("Emits a mand": emit a mand).
+   4. A name is introduced by a verb: "make" for a request, a response, a mand, a choice, an exchange and the like
+      ("Break request": make a break request); "use" for a card, a picture, a schedule, a voice or another aid ("Break
+      card": use a break card); "keep" for hands, feet, eyes or a body ("Hands to self": keep hands to self); and
+      "demonstrate" for anything else ("On-task behavior": demonstrate on-task behavior). A name begins with a noun
+      that a listed verb shares when the next word makes it a compound ("Hand raising", "Help request").
+   Its first letter is lowercased unless the first word is an abbreviation ("AAC", "PECS"). */
+const GB_SEE = /\s*\(\s*see\b[^()]*\)/gi;
+const GB_TAIL = /\s*(?:\((?:replacement|alternative)(?:\s+(?:behaviou?r|skill|target|response))?\)|\s[\u2014\u2013-]+\s*see\b.*)\s*$/i;
+function gbClean(s) {
+  const t0 = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  let t = t0.replace(GB_SEE, '').replace(/\s+/g, ' ').trim(), k;
+  do { k = t; t = t.replace(GB_TAIL, '').trim(); } while (t !== k && t);
+  return t || t0;
+}
+/* the same words for comparing two names: case, curly quotes, spaces and a closing stop set aside */
+function gbKey(s) {
+  return gbClean(s).toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201c\u201d]/g, '"').replace(/[.;:,!]+$/, '').replace(/\s+/g, ' ').trim();
+}
+const GB_VERBS = new Set(('accept answer approach ask attend bring call carry check choose clap clean close color come ' +
+  'communicate comment complete comply copy count cross draw eat engage enter exchange express find finish focus fold follow ' +
+  'get give go greet hand hang have help hold identify imitate indicate initiate join keep label leave line listen look ' +
+  'make mand match move name open pass pick place play point practice press put raise reach read recruit refrain ' +
+  'remain remove repeat reply request respond return say select self-monitor share show sign sing sit sort speak stand ' +
+  'start stay stop take talk tap tell throw tolerate touch trade transition try turn use vocalize wait walk wash wear ' +
+  'work write').split(' '));
+const GB_DET = new Set('a an the his her their its my your our this that these those some any each every all one two both it them him'.split(' '));
+const GB_POS = new Set('to in on at down off by under inside together still quiet folded flat crossed apart safe calm and or'.split(' '));
+const GB_CUT = new Set('for with to of in on at from during when while after before across by without within'.split(' '));
+const GB_MAKE = /^(requests?|responses?|mands?|choices?|comments?|greetings?|bids?|initiations?|exchanges?|statements?|questions?|selections?|approach(es)?|repl(y|ies)|answers?|trades?)$/;
+const GB_USE = /^(cards?|pictures?|symbols?|devices?|strateg(y|ies)|schedules?|timers?|tokens?|signals?|signs?|gestures?|phrases?|scripts?|tools?|aids?|charts?|boards?|apps?|voices?)$/;
+/* a verb in the third person, in its plain form; '' when the word is not one of GB_VERBS so written */
+function gbBase(l) {
+  const irr = { has: 'have', does: 'do', goes: 'go' };
+  if (irr[l]) return irr[l];
+  if (!/^[a-z][a-z'-]*[^s]s$/.test(l) || /(us|is)$/.test(l)) return '';
+  const c = [];
+  if (/[^aeiou]ies$/.test(l)) c.push(l.slice(0, -3) + 'y');
+  if (/(sh|ch|x|z|o|ss)es$/.test(l)) c.push(l.slice(0, -2));
+  c.push(l.slice(0, -1));
+  if (/ses$/.test(l)) c.push(l.slice(0, -2));   /* "focuses": focus */
+  for (const x of c) if (GB_VERBS.has(x)) return x;
+  return '';
+}
+/* the plain form of an unlisted verb in the third person ("emits": emit), or '' */
+function gbGuess(l) {
+  if (!/^[a-z][a-z'-]*[^s]s$/.test(l) || /(us|is)$/.test(l)) return '';
+  if (/[^aeiou]ies$/.test(l)) return l.slice(0, -3) + 'y';
+  if (/(sh|ch|x|zz|o|ss)es$/.test(l)) return l.slice(0, -2);
+  return l.slice(0, -1);
+}
+/* an -ing form of one of GB_VERBS, in its plain form ("requesting": request, "tolerating": tolerate, "sitting": sit) */
+function gbIng(l) {
+  if (!/^[a-z][a-z'-]{2,}ing$/.test(l)) return '';
+  const s = l.slice(0, -3), c = [s, s + 'e'];
+  if (/([^aeiou])\1$/.test(s)) c.push(s.slice(0, -1));
+  for (const x of c) if (GB_VERBS.has(x)) return x;
+  return '';
+}
+/* the second word of a name that starts with a word a verb shares: "Hand raising", "Turn taking", "Help request" */
+function gbCompound(l) {
+  return /^[a-z-]{2,}ing$/.test(l) || GB_MAKE.test(l) || /^(contact|behaviou?r|skills?|tolerance|completion|language|time|leader|training)$/.test(l);
+}
+const gbLow = w => /^[A-Z][a-z'\u2019-]*$/.test(w) ? w.charAt(0).toLowerCase() + w.slice(1) : w;
+const gbArt = s => /^(?:[aeio]|u(?!ni|s[aeiou]|r[aeiou]|ti|ke))/i.test(s) ? 'an ' : 'a ';
+function gbAndVerbs(ws) {
+  return ws.map((x, i) => {
+    if (!i || !/^(and|or|then|&)$/i.test(ws[i - 1])) return x;
+    const m = /^([A-Za-z'\u2019-]+)(.*)$/.exec(x); if (!m) return x;
+    const b = gbBase(m[1].toLowerCase());
+    return b ? b + m[2] : x;
+  });
+}
+function gbWill(label) {
+  const t = gbClean(label).replace(/[.;:,!]+$/, '').replace(/^(?:will|to)\s+/i, '').trim();
+  if (!t) return '';
+  const w = t.split(' '), core = x => String(x || '').toLowerCase().replace(/[^a-z'\u2019-]/g, '');
+  let k = 0;
+  while (k < w.length - 1 && /^[a-z]{3,}ly$/i.test(w[k]) && !/^(only|early|daily|family|weekly|monthly|holy|ugly|silly|jelly|belly|bully|rally|tally|lily|reply|apply|supply)$/i.test(w[k])) k++;
+  const lead = w.slice(0, k).map((x, j) => j ? x : gbLow(x)), w0 = w[k], l0 = core(w0), nx = core(w[k + 1]);
+  const verb = base => lead.concat([base], gbAndVerbs(w.slice(k + 1))).join(' ');
+  /* hands, feet, eyes or a body in a place or a state: "Hands to self", "Feet on the floor" */
+  if (!k && /^(hands?|feet|foot|eyes?|body|arms?|legs?)$/.test(l0) && (!nx || GB_POS.has(nx))) return 'keep ' + [gbLow(w0)].concat(w.slice(1)).join(' ');
+  const b3 = gbBase(l0); if (b3) return verb(b3);
+  const g = gbIng(l0); if (g) return verb(g);
+  if (GB_VERBS.has(l0) && !(nx && gbCompound(nx))) return verb(gbLow(w0));
+  if (nx && GB_DET.has(nx)) return verb(gbGuess(l0) || gbLow(w0));
+  /* a name: its head is its last word before a bracket or a linking word ("Break request", "Functional communication
+     response (FCR)": response; "Social interactions with peers": interactions) */
+  const np = [gbLow(w[0])].concat(w.slice(1)).join(' '), cut = [];
+  for (const x of w) { if (/^\(/.test(x) || (cut.length && GB_CUT.has(core(x)))) break; cut.push(core(x)); }
+  const head = cut[cut.length - 1] || '', one = !/[^s]s$/.test(head) || /(us|is)$/.test(head);
+  if (GB_MAKE.test(head)) return 'make ' + (one ? gbArt(np) : '') + np;
+  if (head === 'contact') return 'make ' + np;
+  if (GB_USE.test(head)) return 'use ' + (one ? gbArt(np) : '') + np;
+  if (/^languages?$/.test(head)) return 'use ' + np;
+  if (head === 'body') return 'keep ' + gbArt(np) + np;
+  if (/^(hands|feet|eyes|arms|legs)$/.test(head)) return 'keep ' + np;
+  return 'demonstrate ' + np;
 }
 function fmtDate(d) {
   if (!d) return '';
@@ -3107,6 +3287,7 @@ function resetRecord() {
   $$('[name]').forEach(e => { if (e.type === 'checkbox' || e.type === 'radio') e.checked = false; else e.value = ''; });
   $('#redWrap').innerHTML = ''; $('#acqWrap').innerHTML = ''; $('#sheetOut').innerHTML = '';
   rSeq = 0; aSeq = 0; PLAN = null; sheetOn = false;
+  gbDdClear();   /* v21.44 (A5): the report of Current level from DD-1 was about the record that was there */
 }
 function collect() {
   const o = { form: 'GB-1', rev: '2026-09', saved: new Date().toISOString(), rows: { red: rSeq, acq: aSeq },
@@ -3159,12 +3340,305 @@ $('#printBtn').addEventListener('click', () => { buildSheet(); window.print(); }
 /* F3: the browser's own print carries the goal sheet, as Print does */
 window.addEventListener('beforeprint', () => buildSheet(true));
 
+/* ---------- v21.44 (A5) Current level from DD-1 ----------
+   The button at the top of Reduction Objectives fills each empty Current level from Form DD-1's own data: the level
+   of DD-1's behavior of the same name in DD-1's first condition, the baseline. DD-1's record is read
+   (1) inside the workstation, from the DD-1 open there, through the workstation's relay, as Form PR-1 reads it: this
+       form posts {nbh:'ask', want:'DD-1'} to its parent and takes {nbh:'answer', want:'DD-1', ok, snap | why} only from
+       that parent and only while it waits for one; snap.own is DD-1's own saved file;
+   (2) from a file DD-1 saved with Save data, or a case file holding DD-1 (the workstation's .json, or the one-file
+       edition's .case.html), chosen here when the form is open on its own, or inside the workstation when DD-1 is
+       not open there.
+   The figures are DD-1's own Results for that condition (Within-condition analysis), worked out as DD-1 works them
+   (Form PR-1 carries the same port of its arithmetic): a day's value is the one DD-1 graphs; the conditions start at
+   each full phase change, over the days in date order; the level is the mean of the condition's days with data,
+   with their range and their number. Only an empty Current level is filled, and only where the objective's response
+   measure is the one DD-1 records the behavior in: rate per hour (DD-1's rate), frequency per school day (a count over
+   the entire school day), total duration per session in minutes (a duration recorded per session or over a single
+   period) or percentage of intervals. An objective with no response measure yet takes DD-1's, when it is one of
+   these. A level in another unit is never converted or written. Each objective left empty is named, with the reason:
+   a different unit, no days with data in the baseline, or no behavior of that name on DD-1. TD-1's Apply to empty
+   fields still fills what is left. */
+const GB_DD = { waiting: 0, timer: 0 };
+const GB_DD_UNIT = { 'rate per hour': ' per hour', 'frequency per school day': ' per school day',
+  'total duration per session in minutes': ' minutes per session', 'percentage of intervals': '% of intervals' };
+const GB_DD_OL = { 'entire school day': 'the entire school day', 'morning only': 'the morning only', 'afternoon only': 'the afternoon only',
+  'single period': 'a single period', 'per session': 'each session' };
+const gbNum = v => (v === '' || v === null || v === undefined || !isFinite(Number(v))) ? null : Number(v);
+const gbFix = x => { const r = Math.round(x * 100) / 100; return String(r === 0 ? 0 : r); };
+const gbPlain = s => String(s == null ? '' : s).split('|').map(x => x.trim()).filter(Boolean).join(' \u00b7 ');
+/* ---- DD-1's own arithmetic, as DD-1 does it (its plotValue, buildConditions and analyzeCondition) ---- */
+function gbClock(t) { const p = String(t || '').split(':'); if (p.length < 2) return null; const h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; }
+/* an episode's length in minutes: "7:00", "1:02:30", "90 s", "4 min 30 s", "3.5" (minutes) */
+function gbDur(v) {
+  const s = String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' '); if (!s) return null; let m;
+  if ((m = /^(\d+):(\d{1,2})$/.exec(s))) return +m[2] < 60 ? +m[1] + (+m[2]) / 60 : null;
+  if ((m = /^(\d+):(\d{1,2}):(\d{1,2})$/.exec(s))) return (+m[2] < 60 && +m[3] < 60) ? (+m[1]) * 60 + (+m[2]) + (+m[3]) / 60 : null;
+  if ((m = /^(\d+(?:\.\d+)?) ?s(?:ec(?:ond)?s?)?$/.exec(s))) return (+m[1]) / 60;
+  if ((m = /^(\d+(?:\.\d+)?) ?(?:m|min|mins|minutes?)(?: ?(\d+(?:\.\d+)?) ?s(?:ec(?:ond)?s?)?)?$/.exec(s))) return (+m[1]) + (m[2] ? (+m[2]) / 60 : 0);
+  if (/^\d*\.?\d+$/.test(s)) return +s;
+  return null;
+}
+function gbSec(t) { const p = String(t || '').split(':'); if (p.length < 2) return null; const h = +p[0], m = +p[1], s = p.length > 2 ? +p[2] : 0; return (isNaN(h) || isNaN(m) || isNaN(s)) ? null : h * 3600 + m * 60 + s; }
+function gbEpMin(ep) {
+  ep = ep && typeof ep === 'object' ? ep : {}; const d = gbDur(ep.dur); if (d !== null) return d;
+  const x = gbSec(ep.start), y = gbSec(ep.end); if (x === null || y === null) return null; let k = y - x; if (k < 0) k += 86400; return k / 60;
+}
+function gbObs(R, row) { const o = gbNum(row.obsMin); if (o !== null) return o; return R.st.entryMode === 'interval' ? null : R.win; }
+/* the value DD-1 graphs for a behavior on a day */
+function gbDdDay(R, row, b) {
+  const vals = row.values && typeof row.values === 'object' ? row.values : {};
+  if (R.st.entryMode === 'interval') {
+    const sv = (id, k) => gbNum(((row.intervals || {})[id] || {})[k]);
+    if (b.measure === 'trials') {
+      let c = 0, o = 0, seen = false;
+      R.slots.forEach(k => { const cv = sv(b.id, k), ov = sv(b.id + '::opp', k); if (cv !== null && ov !== null && ov > 0) { c += cv; o += ov; seen = true; } });
+      return seen && o > 0 ? 100 * c / o : null;
+    }
+    const v = R.slots.map(k => sv(b.id, k)).filter(x => x !== null); if (!v.length) return null;
+    const sum = v.reduce((a, x) => a + x, 0);
+    if (b.measure === 'count' || b.measure === 'duration') return sum;
+    if (b.measure === 'rate') return sum / ((v.length * Number(R.st.slotMin)) / 60);
+    return sum / v.length;
+  }
+  if (b.measure === 'duration' || b.measure === 'pdur') {
+    const eps = Array.isArray((row.episodes || {})[b.id]) ? row.episodes[b.id] : [];
+    const mins = eps.map(gbEpMin).filter(x => x !== null);
+    if (mins.length) { const tot = mins.reduce((a, x) => a + x, 0); if (b.measure === 'duration') return tot; const om = gbObs(R, row); return om && om > 0 ? 100 * tot / om : null; }
+  }
+  if (b.measure === 'trials') { const c = gbNum(vals[b.id]), o = gbNum(vals[b.id + '::opp']); return c === null || o === null || o <= 0 ? null : 100 * c / o; }
+  const raw = gbNum(vals[b.id]); if (raw === null) return null;
+  if (b.measure === 'rate') { const om = gbObs(R, row); return om && om > 0 ? raw / (om / 60) : null; }
+  return raw;
+}
+/* DD-1's conditions: a new one at each full phase change, over its days in date order */
+function gbDdConds(R) {
+  const out = []; let cur = { name: gbPlain(R.meta.baseline || 'Baseline') || 'Baseline', idx: [] };
+  R.rows.forEach((row, i) => {
+    if (row.phaseType === 'full' && cur.idx.length) { out.push(cur); cur = { name: gbPlain(row.phaseLabel) || 'Condition ' + (out.length + 1), idx: [] }; }
+    else if (row.phaseType === 'full' && !cur.idx.length && gbPlain(row.phaseLabel)) cur.name = gbPlain(row.phaseLabel);
+    cur.idx.push(i);
+  });
+  if (cur.idx.length) out.push(cur);
+  return out;
+}
+const GB_DD_MEASURES = ['count', 'rate', 'duration', 'pdur', 'interval', 'mts', 'pint', 'wint', 'latency', 'ied', 'opps', 'trials', 'prompt'];
+/* a DD-1 record read in, with DD-1's defaults where its file leaves something out; null when it is not one */
+function gbDdRecord(o) {
+  if (!o || typeof o !== 'object' || Array.isArray(o) || !Array.isArray(o.behaviors) || !Array.isArray(o.rows)) return null;
+  if (o.form !== undefined && o.form !== 'DD-1') return null;
+  const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  const st = Object.assign({ entryMode: 'daily', dayStart: '08:00', dayEnd: '14:00', slotMin: 30 }, obj(o.settings));
+  const seen = {}, beh = [];
+  o.behaviors.forEach(b => {
+    if (!b || typeof b !== 'object' || (typeof b.id !== 'string' && typeof b.id !== 'number')) return;
+    const id = String(b.id); if (!id || seen[id]) return; seen[id] = 1;
+    beh.push({ id, name: String(b.name == null ? '' : b.name).trim(), kind: typeof b.kind === 'string' && b.kind ? b.kind : 'target',
+      measure: GB_DD_MEASURES.indexOf(b.measure) >= 0 ? b.measure : 'count',
+      obsLength: typeof b.obsLength === 'string' && b.obsLength.trim() ? b.obsLength.trim() : 'Entire school day' });
+  });
+  const rows = o.rows.filter(r => r && typeof r === 'object' && !Array.isArray(r)).sort((a, b) => String(a.date || '9999').localeCompare(String(b.date || '9999')));
+  const meta = obj(o.meta), a = gbClock(st.dayStart), e = gbClock(st.dayEnd), step = Number(st.slotMin) || 30, slots = [];
+  if (a !== null && e !== null && e > a) for (let t = a; t + step <= e; t += step) { slots.push(String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0')); if (slots.length >= 64) break; }
+  const R = { meta, st, beh, rows, slots, win: (a === null || e === null || e <= a) ? null : e - a, client: String(meta.client == null ? '' : meta.client).trim() };
+  R.conds = gbDdConds(R);
+  return R;
+}
+/* one behavior over a condition's days, as DD-1's Results count them: every day in it with a value */
+function gbDdStats(R, b, idx) {
+  const y = [];
+  idx.forEach(i => { const v = gbDdDay(R, R.rows[i], b); if (v !== null && isFinite(v)) y.push(v); });
+  if (!y.length) return { n: 0 };
+  return { n: y.length, mean: y.reduce((t, v) => t + v, 0) / y.length, min: Math.min.apply(null, y), max: Math.max.apply(null, y) };
+}
+/* the response measure on this form that DD-1's figures for a behavior are in, or '' when there is none */
+function gbDdMeas(b) {
+  const ol = String(b.obsLength || '').toLowerCase();
+  if (b.measure === 'rate') return 'rate per hour';
+  if (b.measure === 'count') return ol === 'entire school day' ? 'frequency per school day' : '';
+  if (b.measure === 'duration') return ol === 'per session' || ol === 'single period' ? 'total duration per session in minutes' : '';
+  if (/^(interval|mts|pint|wint)$/.test(b.measure)) return 'percentage of intervals';
+  return '';
+}
+/* what DD-1 records, in words, for the reason an objective is left empty */
+function gbDdWhat(b) {
+  const ol = GB_DD_OL[String(b.obsLength || '').toLowerCase()] || '\u201c' + b.obsLength + '\u201d';
+  return ({ count: 'a count of occurrences over ' + ol, rate: 'a rate per hour', duration: 'minutes over ' + ol,
+    pdur: 'a percent of the time observed', interval: 'a percentage of intervals', mts: 'a percentage of intervals (momentary time sampling)',
+    pint: 'a percentage of intervals (partial interval)', wint: 'a percentage of intervals (whole interval)', latency: 'a latency in minutes',
+    ied: 'an interresponse time in minutes', opps: 'a percent correct', trials: 'a percent independent', prompt: 'a mean prompt level' })[b.measure] || 'a count';
+}
+/* a behavior's name for matching: staff notes, case, spaces and punctuation set aside */
+const gbNameKey = s => gbClean(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
+function gbDdFind(R, beh) {
+  const k = gbNameKey(beh); if (!k) return null;
+  const hits = R.beh.filter(b => gbNameKey(b.name) === k);
+  return hits.filter(b => b.kind === 'target')[0] || hits[0] || null;
+}
+const gbLetters = s => String(s || '').toLowerCase().replace(/[^a-z]/g, '');
+function gbSameStudent(a, b) { a = gbLetters(a); b = gbLetters(b); return !a || !b || a === b || a.indexOf(b) === 0 || b.indexOf(a) === 0; }
+/* the level as it is written into Current level: the mean in the measure's unit, then where it came from */
+function gbDdLevel(s, meas, cond) {
+  return gbFix(s.mean) + (GB_DD_UNIT[meas] || '') + ' (from DD-1, ' + cond + ': ' +
+    (s.n === 1 ? '1 day' : 'mean of ' + s.n + ' days, range ' + gbFix(s.min) + '\u2013' + gbFix(s.max)) + ')';
+}
+/* every reduction objective that names a behavior: filled, left empty with the reason, or kept as it was */
+function gbDdFill(R) {
+  const base = R.conds[0], out = [];
+  $$('#redWrap .card').map(c => idxOf(c, 'red')).filter(i => i >= 0).forEach(i => {
+    const g = n => val('red[' + i + '].' + n), beh = g('beh'), id = 'R' + (i + 1);
+    if (!beh) return;
+    if (g('cur')) { out.push({ id, beh, how: 'kept', cur: g('cur') }); return; }
+    const b = gbDdFind(R, beh);
+    if (!b) { out.push({ id, beh, how: 'left', noName: true, why: 'DD-1 has no behavior of that name.' }); return; }
+    const has = gbDdMeas(b), meas = g('meas');
+    if (meas && meas !== has) {
+      out.push({ id, beh, how: 'left', why: 'DD-1 records it as ' + gbDdWhat(b) + ', and this objective is measured in ' + meas + '.' +
+        (has ? ' Choose \u201c' + has + '\u201d as its response measure to use DD-1\u2019s figures.' : '') }); return;
+    }
+    if (!has) { out.push({ id, beh, how: 'left', why: 'DD-1 records it as ' + gbDdWhat(b) + ', which is not one of the response measures on this form.' }); return; }
+    const s = gbDdStats(R, b, base.idx);
+    if (!s.n) { out.push({ id, beh, how: 'left', why: 'DD-1 has no days with data for it in its baseline, \u201c' + base.name + '\u201d.' }); return; }
+    const setMeas = !meas;
+    if (setMeas) setv('red[' + i + '].meas', has);
+    const text = gbDdLevel(s, has, base.name);
+    setv('red[' + i + '].cur', text);
+    out.push({ id, beh, how: 'filled', text, meas: setMeas ? has : '' });
+  });
+  if (out.some(x => x.how === 'filled')) render();
+  return out;
+}
+function gbDdClear() { const o = $('#gbDdOut'); if (o) { o.hidden = true; o.innerHTML = ''; o.className = ''; } }
+/* the report under the button; pick adds a button that chooses a file */
+function gbDdShow(html, bad, pick) {
+  const o = $('#gbDdOut'); if (!o) return;
+  o.className = bad ? 'bad' : '';
+  o.innerHTML = html + (pick ? '<p class="gb-dd-pick"><button type="button" class="tool" id="gbDdPick">Choose a DD-1 file</button></p>' : '');
+  o.hidden = false;
+  const p = $('#gbDdPick'); if (p) p.addEventListener('click', () => $('#gbDdIn').click());
+  /* out of sight: brought to just under the toolbar, which stays on top of the page inside the workstation */
+  try {
+    const r = o.getBoundingClientRect(), tb = $('.toolbar'), top = tb ? Math.max(0, tb.getBoundingClientRect().bottom) : 0;
+    if (r.top < top || r.top > window.innerHeight - 48) window.scrollBy(0, r.top - top - 12);
+  } catch (e) {}
+}
+function gbDdMsg(t, bad, pick) { gbDdShow('<p>' + esc(t) + '</p>', bad, pick); }
+function gbDdReport(rep, src, file, R) {
+  const from = src === 'workstation' ? 'the DD-1 open in this workstation' : (src === 'case' ? 'the case file' : 'the file') + ' \u201c' + file + '\u201d';
+  const nf = rep.filter(x => x.how === 'filled').length;
+  let h = '<p><b>Current level from Form DD-1:</b> ' + (nf ? nf + ' of ' + rep.length + (rep.length === 1 ? ' objective' : ' objectives') + ' filled' : 'nothing filled') +
+    ', from ' + esc(from) + (R.client ? ' (' + esc(R.client) + ')' : '') + '. DD-1\u2019s baseline is its first condition, \u201c' + esc(R.conds[0].name) + '\u201d.</p><ul>';
+  rep.forEach(x => {
+    const who = '<b>' + x.id + '</b> (' + esc(x.beh) + ')';
+    if (x.how === 'filled') h += '<li>' + who + ': ' + esc(x.text) + (x.meas ? '; response measure set to ' + esc(x.meas) + ', as DD-1 records it' : '') + '.</li>';
+    else if (x.how === 'left') h += '<li>' + who + ' was left empty: ' + esc(x.why) + '</li>';
+    else h += '<li>' + who + ' already has a current level, ' + esc(x.cur) + ', which was kept.</li>';
+  });
+  h += '</ul>';
+  if (rep.some(x => x.noName)) h += '<p>The behaviors on DD-1: ' + esc(R.beh.map(b => b.name || '(no name)').join('; ')) + '. An objective is matched by its target behavior\u2019s name.</p>';
+  if (rep.some(x => x.how === 'left')) h += '<p>What is left empty can be typed, or filled from the plan with Apply to empty fields on Setup.</p>';
+  gbDdShow(h, !nf && rep.some(x => x.how === 'left'), false);
+}
+/* a DD-1 record in hand: check the student, fill, report */
+async function gbDdUse(o, src, file) {
+  const R = gbDdRecord(o);
+  if (!R) {
+    gbDdMsg((src === 'workstation' ? 'Form DD-1 in this workstation gave data this form could not read.' : src === 'case' ?
+      'Form DD-1 in that case file has no saved data this form can read.' : 'That file could not be read as Form DD-1\u2019s data.') + ' Nothing was filled.', true, true);
+    return;
+  }
+  if (!R.rows.length || !R.conds.length) { gbDdMsg('Form DD-1 holds no days yet, so it has no baseline to read. Nothing was filled.', true, true); return; }
+  const me = val('m.client');
+  if (me && R.client && !gbSameStudent(me, R.client) &&
+      !(await nbhUI.confirm('Form DD-1 is for \u201c' + R.client + '\u201d, and this form is for \u201c' + me + '\u201d.\nUse its baseline here anyway? Check first that they are the same student.', { ok: 'Use it' }))) {
+    gbDdMsg('Nothing was filled: Form DD-1 is for \u201c' + R.client + '\u201d, and this form is for \u201c' + me + '\u201d.', true, true);
+    return;
+  }
+  gbDdReport(gbDdFill(R), src, file, R);
+}
+/* (1) the workstation: ask the parent, and take the answer from it alone */
+function gbDdAsk() {
+  const btn = $('#gbDdBtn');
+  GB_DD.waiting = Date.now(); clearTimeout(GB_DD.timer); if (btn) btn.disabled = true;
+  gbDdMsg('Asking the workstation for Form DD-1\u2019s data\u2026', false, false);
+  const fail = t => { GB_DD.waiting = 0; clearTimeout(GB_DD.timer); if (btn) btn.disabled = false; gbDdMsg(t, true, true); };
+  GB_DD.timer = setTimeout(() => { if (GB_DD.waiting) fail('The workstation did not answer. Choose DD-1\u2019s saved data file instead.'); }, 15000);
+  try { window.parent.postMessage({ nbh: 'ask', want: 'DD-1' }, '*'); }
+  catch (e) { fail('The workstation could not be asked. Choose DD-1\u2019s saved data file instead.'); }
+}
+window.addEventListener('message', ev => {
+  const d = ev.data; if (!d || typeof d !== 'object' || d.nbh !== 'answer') return;
+  /* only the workstation this form sits in answers, and only while this form waits for DD-1 */
+  if (window.parent === window || ev.source !== window.parent || !GB_DD.waiting || d.want !== 'DD-1') return;
+  GB_DD.waiting = 0; clearTimeout(GB_DD.timer); const btn = $('#gbDdBtn'); if (btn) btn.disabled = false;
+  if (d.ok !== true) {
+    gbDdMsg(d.why === 'not open' ? 'Form DD-1 is not open in this workstation. Open it from the list of forms and press Current level from DD-1 again, or choose DD-1\u2019s saved data file.' :
+      'Form DD-1 is open in this workstation but did not give its data. Wait for it to finish loading and try again, or choose DD-1\u2019s saved data file.', true, true);
+    return;
+  }
+  let o = null; try { o = JSON.parse(d.snap && d.snap.own); } catch (e) { o = null; }
+  gbDdUse(o, 'workstation', '');
+});
+/* (2) a DD-1 data file, or a case file (.json, or the one-file edition's .case.html) */
+function gbDdWho(o) {
+  if (typeof o.form === 'string' && /^[A-Z]{2,6}(-\d+)?$/.test(o.form)) return o.form;
+  const v = typeof o.version === 'string' && /^([A-Z]{2,3}-\d+)\b/.exec(o.version); if (v) return v[1];
+  if (o.format === 'abc-conditional-probability') return 'ABC-1';
+  if (Array.isArray(o.obs) && o.cfg && typeof o.cfg === 'object') return 'OB-1';
+  if (Array.isArray(o.behaviors) && Array.isArray(o.codes)) return 'SP-1';
+  return '';
+}
+function gbDdText(t, name) {
+  let o = null; t = String(t || '');
+  if (/^\s*[{\[]/.test(t)) { try { o = JSON.parse(t); } catch (e) { o = null; } }
+  else {
+    /* the one-file case: its JSON in a block of its own (\x3c is "<", so this script holds no tag of its own) */
+    const m = /\x3cscript type="application\/json" id="nbh-case">([\s\S]*?)\x3c\/script>/.exec(t);
+    if (m) { try { o = JSON.parse(m[1]); } catch (e) { o = null; } }
+    else if (/id="nbh-embed-forms"/.test(t)) { gbDdMsg('That is a workstation file with no case in it yet. Nothing was filled.', true, true); return; }
+  }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) { gbDdMsg('That file could not be read as Form DD-1\u2019s data or a case file. Nothing was filled.', true, true); return; }
+  if (o.form === 'CASE' || (o.forms && typeof o.forms === 'object' && !Array.isArray(o.behaviors))) {
+    const e = o.forms && typeof o.forms === 'object' ? o.forms['DD-1'] : null;
+    if (!e || typeof e !== 'object' || !e.snap) { gbDdMsg('That case file does not hold Form DD-1. Nothing was filled.', true, true); return; }
+    let d = null; try { d = JSON.parse(e.snap.own); } catch (x) { d = null; }
+    gbDdUse(d, 'case', name); return;
+  }
+  if (gbDdRecord(o)) { gbDdUse(o, 'file', name); return; }
+  const who = gbDdWho(o);
+  gbDdMsg(who === 'DD-1' ? 'That file names Form DD-1 but could not be read as its data. Nothing was filled.'
+    : who === 'PACKET' ? 'That is a student packet (Save packet), not Form DD-1\u2019s data. Nothing was filled.'
+    : who ? 'That file was saved by Form ' + who + ', not by Form DD-1. Nothing was filled.'
+    : 'That file could not be read as Form DD-1\u2019s data or a case file. Nothing was filled.', true, true);
+}
+$('#gbDdBtn').addEventListener('click', () => {
+  if (!$$('#redWrap .card').some(c => val('red[' + idxOf(c, 'red') + '].beh'))) {
+    gbDdMsg('No reduction objective names a target behavior yet. Name each one as DD-1 names it, then press Current level from DD-1 again.', true, false);
+    return;
+  }
+  if (window.parent === window) $('#gbDdIn').click(); else gbDdAsk();
+});
+/* The file chosen here is DD-1's or a case file, not this form's own: the leave guard and Autosave take a file chosen
+   on the form for this form's saved file and mark the form saved, though what was just filled in is not in any file.
+   So the choice is taken here, before them, and goes no further. */
+window.addEventListener('change', e => {
+  const t = e.target; if (!t || t.id !== 'gbDdIn') return;
+  e.stopPropagation();
+  const f = t.files && t.files[0]; t.value = ''; if (!f) return;
+  const name = f.name || '', r = new FileReader();
+  r.onload = () => gbDdText(r.result, name);
+  r.onerror = () => gbDdMsg('That file could not be read. Nothing was filled.', true, true);
+  r.readAsText(f);
+}, true);
+
 /* ---------- simulation ---------- */
-$('#simBtn').addEventListener('click', () => {
+$('#simBtn').addEventListener('click', async () => {
   /* v21.16 audit. F2: the simulation starts from an empty record (anything it does not set, the IEP review
      date for one, stayed from before). F14: its dates are local dates; toISOString gave the date in UTC, so
      in the evening in Florida "Date written" was tomorrow's date and disagreed with the goal sheet.
-     F8: it fills the measurement method and the progress-report schedule. */
+     F8: it fills the measurement method and the progress-report schedule.
+     v21.44 (A5): it asks first, as the other forms do; it replaced everything on the form without asking. */
+  if (!(await nbhUI.confirm('Load the simulated goals and objectives?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.', { ok: 'Load' }))) return;
   resetRecord();
   const set = (n, v) => { const e = $('[name="' + n + '"]'); if (e) { e.value = v; } };
   const day = k => { const t = new Date(); t.setDate(t.getDate() + k);
@@ -3218,25 +3692,51 @@ function nbhGbPlace(kind,fill){
   if(i==null){add();cards=$$(wrap+' .card').map(c=>idxOf(c,kind));i=cards[cards.length-1];}
   if(i==null)return false;fill(n=>kind+'['+i+'].'+n);return true;
 }
+/* v21.44 (A5) one skill objective per replacement skill. A paired replacement is named without its staff notes
+   ("(see target 4)", "(see Forms EA-1 and TD-1)": gbClean); one that points to a replacement target defined on TB-1
+   ("see target 4"), or reads exactly as one that does, takes that target's name; a replacement target's name drops
+   "(replacement)". The behaviors whose replacements then read the same (gbKey) share one acquisition objective,
+   which names every behavior it replaces; wording that only means the same thing is not merged. A case in which TB-1
+   already passes the cleaned names gives the same objectives. all: every behavior in the case (a "see target N"
+   counts in it); list: the ones to place (the ticked ones, for the picker). Groups: the paired replacements first, in
+   the order of their behaviors, then the replacement targets that pair with nothing. */
+function nbhGbSkills(all,list){
+  all=all||[];list=list||all;
+  const pointed=rep=>{const m=/\bsee\s+target\s+(\d+)\b/i.exec(String(rep||''));const t=m&&all[+m[1]-1];return t&&t.isRep&&t.label?gbClean(t.label):'';};
+  const alias={},named={};
+  all.forEach(b=>{if(b.isRep&&b.label)named[gbKey(b.label)]=gbClean(b.label);else if(b.rep){const p=pointed(b.rep);if(p)alias[gbKey(b.rep)]=p;}});
+  const skillOf=rep=>pointed(rep)||alias[gbKey(rep)]||named[gbKey(rep)]||gbClean(rep);
+  const groups=[],by={};
+  const group=name=>{const k=gbKey(name);if(!by[k]){by[k]={name,key:k,pairs:[],cond:''};groups.push(by[k]);}return by[k];};
+  list.forEach(b=>{if(!b.isRep&&b.rep){const g=group(skillOf(b.rep));if(b.label&&g.pairs.indexOf(b.label)<0)g.pairs.push(b.label);}});
+  list.forEach(b=>{if(b.isRep&&b.label){const g=group(gbClean(b.label));if(!g.cond&&b.ctx)g.cond=b.ctx;}});
+  return {groups,skillOf};
+}
 window.__nbhFactsIn=function(f){
   let n=0;const behs=f.behaviors||[];
   /* only when no objective names a behavior yet: a half-written sheet is left as it is */
   const anyRed=$$('#redWrap .card').some(c=>val('red['+idxOf(c,'red')+'].beh'));
   if(behs.length&&!anyRed){
-    behs.filter(b=>!b.isRep).forEach(b=>{if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),b.rep);if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
+    const K=nbhGbSkills(behs);
+    behs.filter(b=>!b.isRep).forEach(b=>{if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),K.skillOf(b.rep));if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
     const anyAcq=$$('#acqWrap .card').some(c=>val('acq['+idxOf(c,'acq')+'].beh'));
-    if(!anyAcq){behs.filter(b=>b.rep).forEach(b=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),b.rep);setv(k('pair'),b.label);}))n++;});
-      behs.filter(b=>b.isRep).forEach(b=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),b.label);if(b.ctx)setv(k('cond'),b.ctx);}))n++;});}
+    if(!anyAcq)K.groups.forEach(g=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),g.name);if(g.pairs.length)setv(k('pair'),g.pairs.join('; '));if(g.cond)setv(k('cond'),g.cond);}))n++;});
   }
   if(f.fn&&window.nbhCase){const e=$('[name="m.fn"]');if(e&&window.nbhCase.put(e,e.tagName==='SELECT'?(f.fn.key||f.fn.label):f.fn.label,false))n++;}
   if(n)render();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
-  let n=0;
-  sel.behaviors.forEach(b=>{
-    if(b.isRep){if(nbhGbPlace('acq',k=>{setv(k('beh'),b.label);if(b.ctx)setv(k('cond'),b.ctx);}))n++;return;}
-    if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),b.rep);if(b.ctx)setv(k('ctx'),b.ctx);}))n++;
-    if(b.rep&&nbhGbPlace('acq',k=>{setv(k('beh'),b.rep);setv(k('pair'),b.label);}))n++;});
+  let n=0;const all=(sel.facts&&sel.facts.behaviors)||sel.behaviors,K=nbhGbSkills(all,sel.behaviors);
+  sel.behaviors.forEach(b=>{if(b.isRep)return;
+    if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),K.skillOf(b.rep));if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
+  /* a skill that already has its objective on the form gets no second one; only its empty fields are filled */
+  K.groups.forEach(g=>{
+    const have=$$('#acqWrap .card').map(c=>idxOf(c,'acq')).filter(i=>gbKey(val('acq['+i+'].beh'))===g.key)[0];
+    if(have!=null){const k=x=>'acq['+have+'].'+x;let put=false;
+      if(g.pairs.length&&!val(k('pair'))){setv(k('pair'),g.pairs.join('; '));put=true;}
+      if(g.cond&&!val(k('cond'))){setv(k('cond'),g.cond);put=true;}
+      if(put)n++;return;}
+    if(nbhGbPlace('acq',k=>{setv(k('beh'),g.name);if(g.pairs.length)setv(k('pair'),g.pairs.join('; '));if(g.cond)setv(k('cond'),g.cond);}))n++;});
   if(sel.fn&&window.nbhCase){const e=$('[name="m.fn"]');if(e&&window.nbhCase.put(e,e.tagName==='SELECT'?(sel.fn.key||sel.fn.label):sel.fn.label,true))n++;}
   render();return {filled:n};
 };
