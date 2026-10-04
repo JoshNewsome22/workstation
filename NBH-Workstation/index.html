@@ -4,7 +4,303 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>FBA and BIP Workstation · Newsome Behavioral Health</title>
+<script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
+   Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
+   there, three things a page does are handled here, because they do not behave as they do in Safari:
+   - Saving. A file this page saves (Save data, Save case, Save packet, a CSV, a spreadsheet, a graph as a picture, a
+     finished PDF) goes to the share sheet, where Save to Files keeps it on the device and Mail or AirDrop send it on.
+   - A window the page opens for a page of its own making (the master print, the respondent page's preview, the pop-up
+     test): the app cannot show a second window, so it opens inside the app, over the page, with Print and Close.
+   - Printing. When the print options have not appeared a few seconds after Print, a notice says how to print instead.
+   Everywhere else nothing changes: in a Safari tab, on a computer, installed on a Mac or with Chrome or Edge, this block
+   stops at its first test and touches nothing; on an iPad that cannot share files only the saving part stays off.
+   Every save in the forms and the shell is a link with a download name, clicked from script, so the link's click is
+   the one place to catch: the file is the Blob the link's blob: address was made from (remembered as the address is
+   made) or the data: address itself. The share sheet needs the tap that asked for it. When the file took longer to
+   prepare than the browser allows after a tap (a case gathered from many forms), a small notice asks for one more tap
+   and opens the sheet from that. Closing the sheet without choosing anything says the file was not saved, and the
+   shell hears of it ('nbh-share-save' on window, detail {name, how}; and window.nbhShareSave.last, whose done promise
+   gives how: shared, cancelled or downloaded), so the case is not counted as saved. Nothing is stored or sent anywhere.
+   Written by tools/blocks/patch-pwa.py from tools/blocks/nbh-pwa-save.js; edit that file. */
+(function () {
+  'use strict';
+  if (window.nbhShareSave) return;
+  var W = window;
+  try { if (window.top && window.top.matchMedia) W = window.top; } catch (e) {}
+  function standalone() {
+    try {
+      if (W.navigator.standalone === true) return true;
+      return W.matchMedia('(display-mode: standalone)').matches || W.matchMedia('(display-mode: fullscreen)').matches;
+    } catch (e) { return false; }
+  }
+  /* iPad and iPhone; an iPad asking for desktop sites calls itself a Mac, and its touch points give it away */
+  function appleTouch() {
+    var ua = navigator.userAgent || '';
+    return /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1);
+  }
+  var inApp = standalone() && appleTouch();
+  var on = inApp && typeof navigator.share === 'function' &&
+           typeof navigator.canShare === 'function' && typeof File === 'function' && typeof Blob === 'function';
+  var NS = window.nbhShareSave = { on: on, inApp: inApp, last: null };
+  if (!inApp) return;
+
+  /* ---------------- notices: a form's own (nbhUI), the shell's (wsUI, a name in its script), or a small one here */
+  function toast(msg, kind) {
+    var ui = window.nbhUI || (typeof wsUI !== 'undefined' ? wsUI : null);
+    if (ui && typeof ui.toast === 'function') { try { ui.toast(msg, { kind: kind || 'warn', ms: 12000 }); return; } catch (e) {} }
+    if (!document.body) return;
+    var t = document.createElement('div');
+    t.setAttribute('role', 'status');
+    t.style.cssText = 'position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:2147483100;max-width:min(560px,calc(100% - 32px));' +
+      'background:#7a2e1a;color:#f1f6f5;font:13.5px/1.45 system-ui,sans-serif;padding:10px 16px;border-radius:8px;box-shadow:0 12px 30px -12px rgba(22,36,46,.6)';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 9000);
+  }
+  function button(label, primary) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = label;
+    b.style.cssText = 'font:inherit;font-size:14px;padding:8px 16px;min-height:44px;border:1px solid #c9d4d2;border-radius:4px;background:#fff;color:#16242e;cursor:pointer';
+    if (primary) { b.style.background = '#182e43'; b.style.color = '#fff'; b.style.borderColor = '#182e43'; b.style.fontWeight = '600'; }
+    return b;
+  }
+
+  /* ---------------- printing: the print options should appear within moments of Print */
+  var NOPRINT = 'If no print options appeared, this iPad does not print from the installed app. Save the case (or the ' +
+    'form’s data), open the workstation in Safari, open the file there and print from Safari, or print on a computer.';
+  function watchPrint(win, said) {
+    var fired = false, mark = function () { fired = true; };
+    try { win.addEventListener('beforeprint', mark); } catch (e) {}
+    try { if (W !== win) W.addEventListener('beforeprint', mark); } catch (e) {}
+    setTimeout(function () {
+      try { win.removeEventListener('beforeprint', mark); } catch (e) {}
+      try { if (W !== win) W.removeEventListener('beforeprint', mark); } catch (e) {}
+      if (!fired) (said || toast)(NOPRINT, 'warn');
+    }, 3500);
+  }
+  var wprint = window.print;
+  window.print = function () { watchPrint(window); return wprint.apply(window, arguments); };
+
+  /* ---------------- a window for a page of the page's own making: opened inside the app, over the page */
+  var wopen = window.open, seq = 0;
+  window.open = function (url) {
+    var u = url == null ? '' : String(url);
+    if (u === '' || u === 'about:blank' || /^blob:/i.test(u)) { var w = inside(u); if (w) return w; }
+    return wopen.apply(window, arguments);
+  };
+  function inside(u) {
+    if (!document.body) return null;
+    var before = document.activeElement, id = 'nbhInApp' + (++seq), gone = false;
+    /* a modal dialog where there is one, so that it shows above a notice the page has open (Diagnostics' pop-up test) */
+    var modal = typeof HTMLDialogElement === 'function';
+    var box = document.createElement(modal ? 'dialog' : 'div');
+    box.id = id;
+    if (!modal) { box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); }
+    box.setAttribute('aria-labelledby', id + 'T');
+    box.style.cssText = 'position:fixed;top:0;right:0;bottom:0;left:0;z-index:2147483000;display:flex;flex-direction:column;' +
+      'margin:0;padding:0;border:0;width:100%;height:100%;max-width:none;max-height:none;box-sizing:border-box;' +
+      'background:#fff;color:#16242e;font:14px/1.4 system-ui,-apple-system,sans-serif';
+    var bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:8px 12px;border-bottom:1px solid #c9d4d2;background:#f7f9f8;flex:0 0 auto';
+    var t = document.createElement('b');
+    t.id = id + 'T';
+    t.style.cssText = 'flex:1 1 200px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#182e43;font:600 15px/1.3 Georgia,serif';
+    t.textContent = 'Opening…';
+    var note = document.createElement('span');
+    note.setAttribute('role', 'status');
+    note.style.cssText = 'flex:1 1 100%;order:3;color:#7a2e1a;font-size:12.5px';
+    var pr = button('Print', true), cl = button('Close');
+    var ifr = document.createElement('iframe');
+    ifr.title = 'Page opened inside the app';
+    ifr.style.cssText = 'flex:1 1 auto;width:100%;min-height:0;border:0;background:#fff';
+    if (u) ifr.src = u;
+    var st = document.createElement('style');
+    st.textContent = '@media print{#' + id + '{display:none!important}}';
+    bar.appendChild(t); bar.appendChild(pr); bar.appendChild(cl); bar.appendChild(note);
+    box.appendChild(st); box.appendChild(bar); box.appendChild(ifr);
+    document.body.appendChild(box);
+    if (modal) { try { box.showModal(); } catch (e) { box.setAttribute('open', ''); } }
+    var said = function (msg) { note.textContent = msg; };
+    function close() {
+      if (gone) return; gone = true; clearInterval(tick);
+      try { if (modal && box.open) box.close(); } catch (e) {}
+      if (box.parentNode) box.parentNode.removeChild(box);
+      try { if (before && before.focus) before.focus(); } catch (e) {}
+    }
+    function nprint(w) { return w.__nbhPrint || w.print; }
+    function doPrint() {
+      var w = ifr.contentWindow; if (!w) return;
+      note.textContent = '';
+      watchPrint(w, said);
+      try { w.focus(); nprint(w).call(w); } catch (e) { said(NOPRINT); }
+    }
+    /* the page that opened it may call close() and print() on the window it was given: keep both pointing here */
+    function patch() {
+      var w = ifr.contentWindow;
+      if (!w || w.__nbhInApp === close) return;
+      try { w.__nbhPrint = w.print; w.print = doPrint; w.close = close; w.__nbhInApp = close; } catch (e) {}
+    }
+    var tick = setInterval(function () {
+      patch();
+      try {
+        var d = ifr.contentDocument;
+        if (d && d.title) t.textContent = d.title;
+        else if (d && d.readyState === 'complete' && d.body && d.body.firstChild) t.textContent = 'Opened inside the app';
+      } catch (e) {}
+    }, 300);
+    patch();
+    pr.addEventListener('click', doPrint);
+    cl.addEventListener('click', close);
+    box.addEventListener('cancel', function (e) { e.preventDefault(); close(); });   /* Escape on a modal dialog */
+    box.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    try { cl.focus(); } catch (e) {}
+    return ifr.contentWindow;
+  }
+
+  if (!on) return;
+
+  /* ---------------- saving: the share sheet instead of a download */
+  var blobs = new Map(), mk = URL.createObjectURL, rv = URL.revokeObjectURL, ck = HTMLAnchorElement.prototype.click;
+  URL.createObjectURL = function (o) {
+    var u = mk.apply(URL, arguments);
+    try { if (o instanceof Blob) blobs.set(u, o); } catch (e) {}
+    return u;
+  };
+  URL.revokeObjectURL = function (u) { blobs.delete(u); return rv.apply(URL, arguments); };
+
+  var TYPES = { json: 'application/json', csv: 'text/csv', html: 'text/html', htm: 'text/html', txt: 'text/plain',
+    png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', svg: 'image/svg+xml', pdf: 'application/pdf',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' };
+  function typeFor(name) { var m = /\.([a-z0-9]+)$/i.exec(name || ''); return (m && TYPES[m[1].toLowerCase()]) || 'application/octet-stream'; }
+  function fromData(u) {
+    var i = u.indexOf(','); if (i < 0) return null;
+    var head = u.slice(5, i), body = u.slice(i + 1), b64 = /;base64$/i.test(head);
+    var type = head.replace(/;base64$/i, '').split(';')[0] || 'text/plain';
+    try {
+      if (!b64) return new Blob([decodeURIComponent(body)], { type: type });
+      var bin = atob(body), n = bin.length, a = new Uint8Array(n);
+      for (var k = 0; k < n; k++) a[k] = bin.charCodeAt(k);
+      return new Blob([a], { type: type });
+    } catch (e) { return null; }
+  }
+  /* the file behind a download link, or null when the link is not one this block can hand to the share sheet */
+  function fileOf(a) {
+    var href = a.href || '', name = a.getAttribute('download') || '';
+    var blob = blobs.get(href) || (href.slice(0, 5) === 'data:' ? fromData(href) : null);
+    if (!blob) return null;
+    var file;
+    try { file = new File([blob], name || 'file', { type: blob.type || typeFor(name) }); } catch (e) { return null; }
+    try { if (!navigator.canShare({ files: [file] })) return null; } catch (e) { return null; }
+    return file;
+  }
+  /* each file handed to the share sheet has a record: window.nbhShareSave.last, whose done says how it ended */
+  function track(file) {
+    var r = { name: file.name, at: Date.now(), how: '' };
+    r.done = new Promise(function (res) { r.end = res; });
+    file.__nbhRec = r; NS.last = r;
+    return r;
+  }
+  function tell(file, how) {
+    var r = file.__nbhRec;
+    if (r && !r.how) { r.how = how; r.end(how); }
+    try { window.dispatchEvent(new CustomEvent('nbh-share-save', { detail: { name: file.name, how: how } })); } catch (e) {}
+    if (how === 'cancelled') toast('Not saved: ' + file.name + '. Save again and choose Save to Files to keep it on this device.', 'warn');
+  }
+  /* the download as it was, for the rare failure of the share sheet itself */
+  function download(file) {
+    var u = mk.call(URL, file), a = document.createElement('a');
+    a.href = u; a.download = file.name; a.__nbhPlain = true;
+    (document.body || document.documentElement).appendChild(a);
+    ck.call(a);
+    a.remove();
+    setTimeout(function () { rv.call(URL, u); }, 60000);
+  }
+  function share(file) {
+    var act = navigator.userActivation;
+    if (act && act.isActive === false) { later(file); return; }
+    var p;
+    try { p = navigator.share({ files: [file] }); } catch (e) { later(file); return; }
+    Promise.resolve(p).then(function () { tell(file, 'shared'); }, function (e) {
+      var n = e && e.name;
+      if (n === 'AbortError') tell(file, 'cancelled');
+      else if (n === 'NotAllowedError' || n === 'InvalidStateError') later(file);
+      else { download(file); tell(file, 'downloaded'); }
+    });
+  }
+  /* one more tap: the notice's Save button opens the share sheet from its own click */
+  var dlg = null;
+  function later(file) {
+    if (!document.body) { download(file); tell(file, 'downloaded'); return; }
+    if (dlg) dlg.nbhClose('cancelled');   /* a second file while the first still waits: the first was not saved */
+    var d = document.createElement('dialog'), done = false;
+    d.id = 'nbhShareDlg';
+    d.setAttribute('aria-labelledby', 'nbhShareDlgT');
+    d.style.cssText = 'border:1px solid #c9d4d2;border-radius:8px;padding:0;max-width:440px;width:calc(100% - 32px);color:#16242e;' +
+      'background:#fff;box-shadow:0 30px 70px -24px rgba(24,46,67,.55);font:14px/1.5 system-ui,-apple-system,sans-serif';
+    var h = document.createElement('div');
+    h.id = 'nbhShareDlgT';
+    h.style.cssText = 'padding:14px 18px 6px;font:600 15.5px/1.35 Georgia,serif;color:#182e43;word-break:break-word';
+    h.textContent = 'Save ' + file.name;
+    var b = document.createElement('div');
+    b.style.cssText = 'padding:0 18px 14px;color:#2b3a44';
+    b.textContent = 'The file is ready. Tap Save, then choose Save to Files to keep it on this device, or Mail or AirDrop to send it.';
+    var f = document.createElement('div');
+    f.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;padding:10px 18px;border-top:1px solid #e3eae8;background:#f7f9f8;border-radius:0 0 8px 8px';
+    var no = button('Cancel'), ok = button('Save…', true);
+    var st = document.createElement('style');
+    st.textContent = '#nbhShareDlg::backdrop{background:rgba(22,36,46,.38)}@media print{#nbhShareDlg{display:none!important}}';
+    f.appendChild(no); f.appendChild(ok); d.appendChild(st); d.appendChild(h); d.appendChild(b); d.appendChild(f);
+    var close = function (how) {
+      if (done) return; done = true;
+      try { d.close(); } catch (e) {}
+      if (d.parentNode) d.parentNode.removeChild(d);
+      if (dlg === d) dlg = null;
+      if (how) tell(file, how);
+    };
+    ok.addEventListener('click', function () { close(''); share(file); });
+    no.addEventListener('click', function () { close('cancelled'); });
+    d.addEventListener('cancel', function (e) { e.preventDefault(); close('cancelled'); });
+    d.nbhClose = close;
+    dlg = d;
+    /* shown a moment later, so it sits above any notice the page puts up right after its save */
+    setTimeout(function () {
+      if (done) return;
+      document.body.appendChild(d);
+      try { if (d.showModal) d.showModal(); else d.setAttribute('open', ''); } catch (e) { d.setAttribute('open', ''); }
+      try { ok.focus(); } catch (e) {}
+    }, 40);
+  }
+  function offer(a) {
+    if (!a || a.__nbhPlain || !a.hasAttribute('download')) return false;
+    var file = fileOf(a);
+    if (!file) return false;
+    track(file);
+    share(file);
+    return true;
+  }
+  HTMLAnchorElement.prototype.click = function () {
+    if (offer(this)) return;
+    return ck.apply(this, arguments);
+  };
+  /* a download link a person taps in the page itself */
+  window.addEventListener('click', function (e) {
+    if (e.defaultPrevented) return;
+    var a = e.target && e.target.closest ? e.target.closest('a[download]') : null;
+    if (a && offer(a)) e.preventDefault();
+  }, true);
+})();
+</script>
 <link rel="icon" type="image/png" href="data:image/png;base64,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">
+<!-- nbh-pwa-head (v21.43): the workstation as an app to install, with sw.js, manifest.json and the icons beside this page;
+     build-single.py leaves this block out of the one-file edition -->
+<link rel="manifest" href="manifest.json" crossorigin="use-credentials">
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="NBH Workstation">
+<!-- /nbh-pwa-head -->
 <style>
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
@@ -103,6 +399,25 @@ body.bar-folded #barSum{display:flex}
 .bar button.chip.warn::before{background:#e0a640}
 #dlg .as-list{list-style:none;padding:0;margin:10px 0}#dlg .as-list li{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;border-top:1px solid var(--rule);padding:8px 0}
 #dlg .as-list li>div{flex:1 1 240px}#dlg .as-list small{color:var(--ink-2,#4a5a66)}
+/* ---- the offline copy (v21.43): its chip beside Autosave, the strip that says a new version is ready, the install tip ---- */
+.bar button.chip.busy{color:#d7ecf6;border-color:#4d7f98}
+.bar button.chip.busy::before{background:#8fd0ee;animation:offPulse 1.4s ease-in-out infinite}
+.bar button.chip.upd{color:#d7ecf6;border-color:#4d8fb3}
+.bar button.chip.upd::before{background:#6fb7e0}
+.bar button.chip.away{color:#dfe8ea;border-color:#6a8791}
+.bar button.chip.away::before{background:#b9c8cc}
+@keyframes offPulse{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.bar button.chip.busy::before{animation:none}}
+.pwabar{background:var(--mist);color:var(--ink);border-bottom:1px solid var(--rule);padding:7px 16px;font-size:12.5px;line-height:1.4;
+  display:flex;align-items:center;gap:8px 10px;flex:0 0 auto}
+.pwabar[hidden]{display:none}
+.pwabar b{color:var(--navy)}
+.pwabar .sp{flex:1}
+.pwabar button{font-size:11.5px;padding:4px 10px;min-height:28px}
+.pwabar button[hidden]{display:none}
+.pwabar.tip{background:#fff;box-shadow:inset 3px 0 0 var(--teal)}
+@media (pointer:coarse){.pwabar button{min-height:40px}}
+@media (max-width:720px){.pwabar{padding:7px 12px;flex-wrap:wrap}}
 
 main{flex:1;display:flex;min-height:0}
 
@@ -434,6 +749,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <button id="help">Help</button></span>
     <div class="sp"></div>
     <button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
+    <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button>
     <button class="primary" id="masterPrint">Build master print</button>
     <button id="bookmarkPdf" title="Add a bookmark panel and contents page numbers to a packet you have saved as PDF">Finish PDF</button>
   </div>
@@ -444,6 +760,20 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   <div class="sp"></div>
   <button id="alertGo">Show me</button>
   <button id="alertHide">Dismiss</button>
+</div>
+<!-- v21.43 a new version of the offline copy is ready; the install tip on an iPad or iPhone in Safari -->
+<div class="pwabar" id="pwaBar" hidden>
+  <span id="pwaText"></span>
+  <div class="sp"></div>
+  <button id="pwaSave" class="sm" hidden>Save case</button>
+  <button id="pwaReload" class="sm primary">Reload</button>
+  <button id="pwaSign" class="sm primary" hidden>Sign in</button>
+  <button id="pwaLater" class="sm">Later</button>
+</div>
+<div class="pwabar tip" id="tipBar" hidden>
+  <span><b>Install:</b> Share, then <b>Add to Home Screen</b>. The workstation then opens from its own icon, without the internet as well.</span>
+  <div class="sp"></div>
+  <button id="tipHide" class="sm">Dismiss</button>
 </div>
 
 <main>
@@ -2023,6 +2353,7 @@ $('#diag').addEventListener('click',()=>{
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
    ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1, VS-1 and TK-1 (photos work without it)','diagPic'],
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
+   ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
   ];
   dialog('Diagnostics',
@@ -2035,9 +2366,12 @@ $('#diag').addEventListener('click',()=>{
     '<button id="btnFileCheck">Check all '+ALL.length+' files are here</button>'+
     '<div id="fileOut"></div>');
   $('#btnFileCheck').addEventListener('click',checkFiles);
-  if(!EMBED)fetch('nbh-respond.js',{method:'HEAD'}).then(r=>{const c=$('#diagRsp');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}}).catch(()=>{const c=$('#diagRsp');if(c)c.textContent='could not check';});
+  /* v21.43 offline the website cannot be asked: a file the offline copy holds is there all the same */
+  const diagOff=(id,file,otherwise)=>{const c=$('#'+id);if(!c)return;const say=t=>{const x=$('#'+id);if(x)x.textContent=t;};
+    (typeof PWA!=='undefined'&&PWA.saved?PWA.saved(file):Promise.resolve(false)).then(ok=>say(ok?'saved on this device (the website could not be asked)':otherwise),()=>say(otherwise));};
+  if(!EMBED)fetch('nbh-respond.js',{method:'HEAD'}).then(r=>{const c=$('#diagRsp');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}}).catch(()=>diagOff('diagRsp','nbh-respond.js','could not check'));
   if(!EMBED)fetch('nbh-pictos.js',{method:'HEAD'}).then(r=>{const c=$('#diagPic');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}})
-    .catch(()=>{const c=$('#diagPic');if(c){c.textContent='could not check (open the folder over http, or open Form SM-1 and look for pictures)';}});
+    .catch(()=>diagOff('diagPic','nbh-pictos.js','could not check (open the folder over http, or open Form SM-1 and look for pictures)'));
   pdfTools().then(()=>{const c=$('#diagPdf');if(c)c.textContent='present';})
     .catch(e=>{const c=$('#diagPdf');if(c){c.textContent='missing: '+e.message;c.style.color='#a8321e';}});
 });
@@ -2108,6 +2442,10 @@ $('#help').addEventListener('click',()=>{
      '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper.</p>')+
    fold('Keyboard',
      '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
+   (!EMBED?fold('Offline, installing and updates',
+     '<p>Opened from the website, the workstation saves its own files on the device the first time (the chip beside <b>Autosave</b> counts them), and from then on it opens and works without the internet. It looks for a new version when it starts and every few minutes while it is open; when one is ready, a strip under the bar says so and <b>Reload</b> starts it (in the one workstation window open: the new version is served to every window at once). It never reloads by itself. The chip opens <b>Check for updates</b> and <b>Reset the offline copy</b>.</p>'+
+     '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
+     '<p>Cases are still files: nothing typed into a form goes to the website, and a case moves between devices only when you move its file.</p>'):'')+
    (EMBED?fold('The one-file edition',
      '<p>All 44 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it. Keep that file with the student’s records.</p>'):'')+
    '<div class="note">Each of the 44 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
@@ -3026,6 +3364,8 @@ $('#saveCase').addEventListener('click',async()=>{
     {type:'application/json'}));
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
+  /* v21.43 installed on an iPad the click opened the share sheet: saved (and Autosave's copy ended) only once it kept the file */
+  if(typeof PWA!=='undefined'&&PWA.shareKept&&!(await PWA.shareKept(a)))return;
   const how=late.length?'late':autoFiled(false,fileSig);
   await tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
         'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.');
@@ -3073,6 +3413,7 @@ $('#caseFile').addEventListener('change',e=>{
 
 /* ================= nothing is stored, so do not let it be lost ================= */
 window.addEventListener('beforeunload',ev=>{
+  if(state.pwaReload)return;   /* v21.43 Reload or Reset, pressed after the workstation asked about unsaved work */
   const work=Object.keys(state.status).some(k=>(state.status[k].filled||0)>3||state.status[k].edited);
   if(!work)return;
   if(state.lastSig&&state.lastSig===caseSig())return;   // saved and unchanged since
@@ -3211,6 +3552,383 @@ async function bootEmbedded(){
 renderRail();who();chip();if(EMBED)setTimeout(bootEmbedded,300);else setTimeout(autoOffer,300);
 /* on a narrow window with nothing open yet, start with the list showing */
 if(NARROW.matches&&!state.cur) setRail(true);
+</script>
+<script id="nbh-pwa">
+/* ================= the offline copy and the installed app (v21.43) =================
+   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 44 forms, the
+   picture library, the respondent page, the PDF tools, the manifest and icons), so everything opens without the
+   internet; see the comment at the top of sw.js. This part of the page registers it, on https or on this computer
+   (localhost) only, never from a drive and never in the one-file edition, which needs none. The chip beside Autosave
+   says what the copy is doing (Saving for offline use: n of N, Saved for offline use, Offline now, Checking...,
+   Update ready); pressing it opens a notice with the details, Check for updates and Reset the offline copy. The page
+   asks the worker to look for changes when it starts, when it comes back to the front and every minute (the worker
+   itself keeps to at most every five minutes), and the worker keeps what it finds in a staging copy until every file
+   has been looked at (and, during an upload, until the files the release list names have arrived). Then the strip
+   under the bar says a new version is ready.
+   Nothing reloads by itself: Reload does, after asking while the open forms may hold work not saved to a file (typed
+   entries, and any tap or key inside a form since the last Save case), and only while this is the one workstation
+   window open, since the new version is served to every window at once; the next start takes the new version on its
+   own. Reset deletes this edition's copy, forgets the worker and loads the page from the website again. Only this
+   edition's worker is listened to (both editions can be open on one website). When the website's password stops the
+   worker's own requests, the worker asks this page to fetch its files (the page's requests carry the sign-in). Installed
+   on an iPad or iPhone, Own tab shows the form full-window instead (the app has no tabs), and a Save case that the share
+   sheet did not keep is not counted as saved. On an iPad or iPhone in Safari a tip says how to install the workstation,
+   once. Nothing here reads, keeps or sends a case. */
+const PWA=(()=>{
+  const P={on:false,st:null,inst:null,err:'',reg:null,later:false,reloading:false,base:undefined,ctlAtLoad:false,asked:false,persisted:false,said:'',touched:{}};
+  const sw=('serviceWorker' in navigator)?navigator.serviceWorker:null;
+  const local=/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  P.on=!EMBED&&!!sw&&typeof caches!=='undefined'&&(location.protocol==='https:'||(location.protocol==='http:'&&local));
+  P.scope=new URL('./',location.href).href;
+  const chipEl=$('#offChip'),bar=$('#pwaBar');
+  const standalone=()=>{try{return navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches;}catch(e){return false;}};
+  /* installed on an iPad or iPhone (the save block, nbh-pwa-save, decides it for every page alike) */
+  const inApp=()=>!!(window.nbhShareSave&&window.nbhShareSave.inApp);
+  const mb=n=>(Math.max(0,n||0)/1048576).toFixed(1)+' MB';
+  const when=t=>t?new Date(t).toLocaleString([],{dateStyle:'medium',timeStyle:'short'}):'';
+  P.standalone=standalone;P.inApp=inApp;
+
+  /* a question to a worker (the one serving this page unless another is named), with a reply channel of its own */
+  function worker(){return sw&&(sw.controller||(P.reg&&(P.reg.active||P.reg.installing||P.reg.waiting)))||null;}
+  function ask(cmd,extra,ms,to){
+    return new Promise(res=>{
+      const w=to||worker();if(!w)return res(null);
+      const ch=new MessageChannel(),t=setTimeout(()=>res(null),ms||8000);
+      ch.port1.onmessage=e=>{clearTimeout(t);res(e.data||null);};
+      try{w.postMessage(Object.assign({nbh:'offline',cmd},extra||{}),[ch.port2]);}catch(e){clearTimeout(t);res(null);}
+    });
+  }
+  /* the status, now; no answer means no worker is saving anything just now */
+  function refresh(){return ask('status').then(d=>{if(d)take(d);else if(P.st&&P.st.busy){P.st=Object.assign({},P.st,{busy:null});paint();}});}
+  /* what the workers report: the one serving this page, and a newer one saving a set of its own meanwhile */
+  function take(d){
+    if(!d||d.nbh!=='offline'||!d.status)return;
+    const s=d.status;
+    if(s.scope&&s.scope!==P.scope)return;   /* the other edition's worker, on the same website */
+    if(s.phase==='installing'&&P.reg&&P.reg.active)P.inst=s;
+    else{P.st=s;if(P.base===undefined&&P.ctlAtLoad)P.base=s.set||null;}
+    if(s.live&&!P.asked&&navigator.storage&&navigator.storage.persist){
+      P.asked=true;
+      navigator.storage.persisted().then(p=>p||navigator.storage.persist()).then(p=>{P.persisted=!!p;paint();}).catch(()=>{});
+    }
+    paint();
+  }
+  function ready(){return !!((P.reg&&P.reg.waiting&&P.reg.active)||(P.st&&P.st.staged));}
+  /* which update the strip is about, so Later hides that one and a newer one shows again */
+  function upKey(){return (P.reg&&P.reg.waiting&&P.reg.active?'w':'')+(P.st&&P.st.staged?P.st.staged.at:'')+(elsewhere()?'e'+P.st.set:'');}
+  /* the set serving this page was replaced while it stayed open */
+  function elsewhere(){return !!(P.base&&P.st&&P.st.set&&P.st.set!==P.base);}
+  const WHY={ok:'nothing new',staged:'a new version was found',offline:'this device was offline',network:'the website could not be reached',
+    auth:'the website asked for its password',quota:'this device has no room for it',error:'it stopped with an error',
+    foreign:'the website answered with something that is not the workstation’s file (a holding page, a sign-in page or a redirect), so nothing was taken',
+    mismatch:'the website’s files do not match their list yet (an upload under way?), so nothing was taken; it looks again in a few minutes',
+    stopped:'the browser stopped it before it was done'};
+  function why(r){return !r?'':r.kind==='server'?'the website answered with an error'+(r.status?' ('+r.status+')':''):WHY[r.kind]||'';}
+
+  /* work the case file may not hold: the shell's own check (typed entries since the last Save case), and any press or key
+     inside an open form since then. A tap that scores an interval or a mark changes no field, so the shell's check alone
+     misses it; a press that changed nothing makes the question come up once too often, never once too few. */
+  function hookFrames(){
+    for(const id of Object.keys(state.frames)){
+      let d=null;try{d=state.frames[id].contentDocument;}catch(e){}
+      if(!d||d.__nbhTouch)continue;
+      d.__nbhTouch=true;
+      const mark=e=>{if(e.isTrusted!==false)P.touched[id]=Date.now();};
+      d.addEventListener('pointerdown',mark,true);d.addEventListener('keydown',mark,true);
+    }
+  }
+  function unsaved(){
+    hookFrames();
+    if(caseDirty())return 'typed';
+    const since=state.savedAt?+state.savedAt:0;
+    return Object.keys(state.frames).some(id=>(P.touched[id]||0)>since)?'touched':'';
+  }
+  const ASK={typed:'The open forms hold work that is not in a case file yet. Reloading closes them; Autosave may offer back what it kept. Press Save case first to keep everything.',
+    touched:'Something was entered in the open forms since the last Save case (a tap that scores an interval counts). Reloading closes them; press Save case first to keep it.'};
+  /* the other windows of this edition, by what they show */
+  function othersText(urls){
+    const n=urls.length,names=urls.map(u=>{
+      let f='';try{f=decodeURIComponent(u.slice(P.scope.length).split(/[?#]/)[0]);}catch(e){}
+      if(!f||f==='index.html')return 'the workstation in another tab or window';
+      if(f==='respond.html')return 'a respondent page';
+      const r=ALL.find(x=>x[2]===f);return r?'Form '+r[0]+' on its own':f;});
+    return 'Close the other workstation window first, then press Reload.\nThe new version is served to every window of the workstation at once, so it starts only while this is the one window open. Also open now: '+
+      names.slice(0,4).join('; ')+(n>4?' and '+(n-4)+' more':'')+'. Save the work in '+(n===1?'it':'them')+' before closing '+(n===1?'it':'them')+'. The next start of the workstation, with no window open, uses the new version as well.';
+  }
+
+  function line(){
+    if(P.err)return ['Offline copy unavailable','off'];
+    const s=P.st;
+    if(!s)return ['Offline copy…',''];
+    if(!s.live){
+      if(s.busy)return ['Saving for offline use: '+s.busy.done+' of '+s.busy.total,'busy'];
+      const k=s.result&&s.result.kind;
+      return [k==='quota'?'Not saved for offline use: no room':k==='auth'?'Not saved for offline use: sign in':'Not saved for offline use yet','off'];
+    }
+    if(ready())return ['Update ready','upd'];
+    if(s.busy||(P.inst&&P.inst.busy))return ['Checking…','busy'];
+    if(!navigator.onLine)return ['Offline now','away'];
+    return ['Saved for offline use','on'];
+  }
+  function paint(){
+    if(!P.on)return;
+    const [t,c]=line();
+    chipEl.hidden=false;chipEl.textContent=t;chipEl.className='chip'+(c?' '+c:'');
+    chipEl.title='The workstation’s offline copy on this device: what it is doing, Check for updates, Reset';
+    /* the live region hears the first save, an update and a failure, not every routine check */
+    if(t==='Update ready'&&P.said!==t)say('A new version of the workstation is ready. Reload to start using it.');
+    else if(t==='Saved for offline use'&&/^Saving/.test(P.said))say('The workstation is saved for offline use on this device.');
+    else if(/^Not saved/.test(t)&&!/^Not saved/.test(P.said))say(t);
+    P.said=t;
+    const up=(ready()||elsewhere())&&P.later!==upKey()&&!P.reloading;
+    /* the website's password stopped the last look (or the first copy): say so once a session, with Sign in */
+    const auth=!up&&!P.reloading&&!P.authLater&&navigator.onLine&&!!(P.st&&P.st.result&&P.st.result.kind==='auth');
+    if(up){
+      const u=unsaved();
+      $('#pwaText').innerHTML=elsewhere()&&!ready()
+        ?'<b>The workstation was updated in another window.</b> '+(u==='typed'?'Save the case first, then reload this window too.':'Reload to use the new version here too'+(u?'; save the case first if you entered anything since the last save.':'.'))
+        :'<b>A new version of the workstation is ready.</b> '+(u==='typed'?'Save the case first: the open forms hold work that is not in a file yet. Then reload.':u?'Reload to start using it; save the case first if you entered anything since the last save.':'Reload to start using it.');
+      $('#pwaSave').hidden=!u;
+    }else if(auth){
+      $('#pwaText').innerHTML=P.st.live?'<b>Updates could not be looked for:</b> the website asked for its password. Sign in to look now; the workstation works either way.'
+        :'<b>The offline copy could not be saved:</b> the website asked for its password. Sign in, and the workstation saves its files on this device; it works online either way.';
+      $('#pwaSave').hidden=true;
+    }
+    $('#pwaReload').hidden=!up;$('#pwaSign').hidden=!auth;
+    bar.dataset.mode=up?'update':auth?'auth':'';
+    bar.hidden=!(up||auth);
+    /* the notice, while open: only its first part changes, so a folded section stays as it was and focus stays put */
+    const b=$('#offLive');
+    if(b&&$('#dlg').open){
+      const h=live();
+      if(b.dataset.h!==h){const a=document.activeElement,f=a&&b.contains(a)?a.id:'';b.innerHTML=h;b.dataset.h=h;if(f){const x=document.getElementById(f);if(x)x.focus();}}
+    }
+  }
+  function live(){
+    const s=P.st||{},r=s.result||null,k=r&&r.kind,[t]=line();
+    const lead=P.err?'The offline copy could not start here ('+esc(P.err)+'). The workstation works as before, online.'
+      :!s.live?(s.busy?'The workstation is saving its files on this device, so that it opens without the internet: '+s.busy.done+' of '+s.busy.total+'.'
+        :k==='quota'?'This device does not have room for the offline copy (about 22 MB). Free some space, then press Check for updates. The workstation works as before, online.'
+        :k==='auth'?'The website asked for its password when the workstation began saving its files on this device. Press <b>Sign in to the website</b>: the page loads again, the browser asks for the password, and the saving carries on. The workstation works online meanwhile.'
+        :k==='stopped'?'The browser stopped the saving before it was done (the app went to the background, perhaps). It begins again by itself; Check for updates carries on now.'
+        :k==='foreign'||k==='mismatch'?'The offline copy is not complete yet: '+esc(why(r))+'. It tries again by itself while the device is online; Check for updates tries now.'
+        :'The offline copy is not complete yet. It carries on by itself while the device is online; Check for updates carries on now.')
+      :ready()?'A new version is saved on this device and waiting. Reload starts using it (in the one workstation window open); so does the next start of the workstation.'
+      :(s.busy||(P.inst&&P.inst.busy))?'Asking the website whether anything has changed.'
+      :!navigator.onLine?'This device is offline. The workstation runs from the copy saved here.'
+      :'The workstation’s files are saved on this device, so it opens and works without the internet.';
+    const kept=P.persisted?'until it is reset':(typeof appleMobile==='function'&&appleMobile()&&!standalone())
+      ?'while the device has room; Safari deletes a site’s storage after 7 days without a visit, so install the workstation (Share, Add to Home Screen) to keep it'
+      :'while the device has room (the browser may clear it if storage runs low)';
+    const rows=[
+      ['Saved on this device',s.live?s.files+' files, '+mb(s.bytes)+(s.missing&&s.missing.length?'; the website does not have '+s.missing.map(esc).join(', '):''):s.busy?s.busy.done+' of '+s.busy.total+' files so far':'not yet'],
+      ['Last look for updates',r&&r.at?when(r.at)+(why(r)?': '+esc(why(r)):'')+(r.path&&r.kind!=='ok'&&r.kind!=='staged'?' ('+esc(r.path)+')':''):'not yet'],
+      ['Waiting',s.staged?s.staged.files.length+' changed file'+(s.staged.files.length===1?'':'s')+(s.staged.files.length?': '+s.staged.files.slice(0,4).map(esc).join(', ')+(s.staged.files.length>4?' and '+(s.staged.files.length-4)+' more':''):''):P.reg&&P.reg.waiting?'a new version of the offline copy itself':'nothing'],
+      ['Kept',kept],
+      ['Running',standalone()?'installed, in its own window':'in a browser tab']];
+    return '<p class="hp-lead"><b>'+esc(t)+'.</b> '+lead+'</p>'+
+      '<table>'+rows.map(x=>'<tr><th>'+x[0]+'</th><td>'+x[1]+'</td></tr>').join('')+'</table>'+
+      '<p class="bm-act"><button type="button" class="primary" id="offCheck">Check for updates</button>'+
+      (ready()||elsewhere()?' <button type="button" id="offReload">Reload now</button>':'')+
+      (k==='auth'?' <button type="button" id="offSign">Sign in to the website</button>':'')+
+      ' <button type="button" id="offReset">Reset the offline copy</button></p>';
+  }
+  function body(){
+    return '<div id="offLive">'+live()+'</div>'+
+      '<div class="note">It looks for a new version when it starts and every few minutes while it is open and online, keeps what it finds aside until every file has been looked at (during an upload, until every file of it is up), and never reloads by itself: <b>Reload</b> starts the new version, and so does the next start. Each device, and each browser on it, keeps its own copy. Nothing typed into a form goes to the website: cases are still files that you save and move between devices yourself.</div>'+
+      '<details><summary>Installing it on a device</summary><p>On an iPad or iPhone, in Safari: <b>Share</b>, then <b>Add to Home Screen</b>. On a Mac, in Safari: <b>File</b>, then <b>Add to Dock</b>. In Chrome or Edge: the install icon at the right of the address bar. Installed, it opens from its own icon in a window of its own; the website goes on working in any browser without installing.</p>'+
+      '<p>Installed on an iPad or iPhone, a file you save (Save case, Save data, a spreadsheet) opens the share sheet: choose <b>Save to Files</b> to keep it on the device. The master print and a respondent page’s preview open inside the app, with Print and Close; <b>Own tab</b> shows the form full-window.</p></details>'+
+      '<p class="sb-note">Reset deletes the saved files from this device and loads the workstation from the website again (online). Case files, the packet and Autosave are not touched. If the workstation itself will not open, the same reset is the address <b>'+esc(P.scope)+'?nbh-online=reset</b> typed into Safari, or, installed on an iPad, deleting the icon and adding it again.</p>';
+  }
+  function openDlg(){
+    if(!P.on){alert('The offline copy is not used here: '+P.diag()+'.');return;}
+    dialog('Offline copy','<div id="offBody">'+body()+'</div>');
+    const b=$('#offLive');if(b)b.dataset.h=live();
+    refresh();
+  }
+  async function checkNow(){
+    if(!P.reg){wsUI.toast('The offline copy has not started here.',{kind:'warn'});return;}
+    if(!navigator.onLine){wsUI.toast('This device is offline: the workstation looks for updates when it is back online.');return;}
+    try{P.reg.update().catch(()=>{});}catch(e){}
+    const d=await ask('check',{force:true},180000);
+    take(d);
+    const r=P.st&&P.st.result;
+    if(ready())wsUI.toast('A new version is ready: Reload to start using it.',{kind:'ok'});
+    else if(P.reg&&P.reg.installing)wsUI.toast('A new version of the offline copy is being saved; the strip says when it is ready.');
+    else if(r&&r.kind==='ok'&&P.st.live)wsUI.toast('The workstation is up to date.',{kind:'ok'});
+    else if(r&&r.kind!=='ok'&&r.kind!=='staged')wsUI.toast('Could not look for updates: '+why(r)+'.',{kind:'warn'});
+  }
+  function done(){try{sessionStorage.setItem('nbh.ws.updated','1');}catch(e){}}
+  async function reload(){
+    const u=unsaved();
+    if(u&&!(await wsUI.confirm((u==='typed'?'Reload without saving?\n':'Reload now?\n')+ASK[u],{ok:'Reload anyway',cancel:'Not now',danger:true})))return;
+    const w=P.reg&&P.reg.waiting;
+    P.reloading=true;state.pwaReload=true;paint();
+    const back=()=>{P.reloading=false;state.pwaReload=false;paint();};
+    if(w&&P.reg.active){
+      /* a new sw.js waits: it takes over every window at once, so it is asked to only while this is the one open; it then
+         takes over and the page loads again (controllerchange, or the timer when that event does not come) */
+      const r=await ask('skip-waiting',null,8000,w);
+      if(r&&r.others&&r.others.length){back();wsUI.alert(othersText(r.others));return;}
+      done();setTimeout(()=>location.reload(),6000);return;
+    }
+    if(P.st&&P.st.staged){
+      const r=await ask('apply',null,10000);
+      if(r&&r.others&&r.others.length){back();wsUI.alert(othersText(r.others));return;}
+      if(r&&r.applied)done();
+    }
+    location.reload();
+  }
+  async function reset(){
+    const u=unsaved(),off=!navigator.onLine,o=await ask('others',null,4000),n=o&&o.others?o.others.length:0;
+    if(!(await wsUI.confirm('Reset the offline copy?\nThe workstation’s saved files are deleted from this device and the page loads again from the website.'+
+      (off?' This device is offline now: until it is online again the workstation will not open here.':'')+
+      (u==='typed'?' The open forms hold work that is not in a case file yet; it will be lost.':u?' Anything entered in the open forms since the last Save case will be lost.':'')+
+      (n?' Another workstation window is open; it goes on with what it has until it is reloaded.':'')+
+      ' Case files, the packet and Autosave are not touched.',{ok:'Reset',danger:true})))return;
+    try{
+      for(const r of await sw.getRegistrations())if(r.scope===P.scope)await r.unregister();
+      for(const k of await caches.keys())if(k.indexOf('nbh-offline:'+P.scope+':')===0)await caches.delete(k);
+    }catch(e){}
+    P.reloading=true;state.pwaReload=true;
+    location.replace(P.scope+'?nbh-online=reset');
+  }
+  /* the website's password: a page load past the copy, which the browser answers with its sign-in, then a check */
+  async function signIn(){
+    const u=unsaved();
+    if(u&&!(await wsUI.confirm('Sign in now?\nThe page loads again from the website to ask for the password. '+(u==='typed'?'The open forms hold work that is not in a case file yet; it will be lost.':'Anything entered in the open forms since the last Save case will be lost.'),{ok:'Load the page',danger:true})))return;
+    P.reloading=true;state.pwaReload=true;
+    location.href=P.scope+'?nbh-online=signin';
+  }
+  /* this folder's worker asks for a file past itself: its own requests met the website's password, which this page's
+     requests carry. Only that worker, only a file of this folder, only a GET; the bytes go back to it and nowhere else. */
+  function relay(e){
+    const d=e.data||{};
+    if(d.nbh!=='offline'||d.type!=='fetch')return false;
+    const port=e.ports&&e.ports[0],src=e.source;
+    if(!port||!src||src.scriptURL!==new URL('sw.js',P.scope).href)return true;
+    let u=null;try{u=new URL(d.url);}catch(x){}
+    const name=u?u.href.slice(P.scope.length):'';
+    if(!u||u.origin!==location.origin||u.href.indexOf(P.scope)!==0||u.search||u.hash||!/^[A-Za-z0-9][A-Za-z0-9._-]*\.[A-Za-z0-9]+$/.test(name)){port.postMessage({ok:false});return true;}
+    port.postMessage({ack:true});
+    const h={},q=d.headers||{};
+    if(q['If-None-Match'])h['If-None-Match']=String(q['If-None-Match']);
+    if(q['If-Modified-Since'])h['If-Modified-Since']=String(q['If-Modified-Since']);
+    u.searchParams.set('nbh-online','fetch');
+    fetch(u.href,{credentials:'include',cache:'no-store',redirect:'follow',headers:h}).then(async r=>{
+      const b=r.status===200?await r.arrayBuffer():null,hd={};
+      for(const k of ['ETag','Last-Modified','Content-Type'])if(r.headers.get(k))hd[k]=r.headers.get(k);
+      port.postMessage({ok:true,status:r.status,redirected:r.redirected,headers:hd,body:b},b?[b]:[]);
+    }).catch(()=>{try{port.postMessage({ok:false});}catch(x){}});
+    return true;
+  }
+  $('#dlgBody').addEventListener('click',e=>{
+    const b=e.target.closest('#offCheck,#offReload,#offReset,#offSign');if(!b||!$('#offBody'))return;
+    if(b.id==='offCheck')checkNow();else if(b.id==='offReload')reload();else if(b.id==='offReset')reset();else signIn();
+  });
+  chipEl.addEventListener('click',openDlg);
+  $('#pwaReload').addEventListener('click',reload);
+  $('#pwaLater').addEventListener('click',()=>{
+    if(bar.dataset.mode==='auth'){P.authLater=true;paint();return;}
+    P.later=upKey();paint();say('The new version waits for the next start, or for Reload in the Offline copy notice.');});
+  $('#pwaSign').addEventListener('click',signIn);
+  $('#pwaSave').addEventListener('click',()=>$('#saveCase').click());
+  /* a file the share sheet did not keep (the installed app on an iPad): the case is not saved after all */
+  window.addEventListener('nbh-share-save',e=>{
+    const d=e.detail||{};
+    if(d.how==='cancelled'&&/^CASE_|\.case\.html$/i.test(d.name||'')){state.lastSig='';state.autoSig=null;try{paintSave();}catch(x){}}
+  });
+  /* Save case, installed on an iPad: its click opened the share sheet. shareHow: how that ended once it has ('shared',
+     'downloaded' when it went to the downloads after all, 'cancelled' when the sheet was closed without saving), and ''
+     at once for an ordinary download; shareKept: false only for 'cancelled'. */
+  P.shareHow=async a=>{
+    const S=window.nbhShareSave,r=S&&S.on?S.last:null;
+    if(!r||r.name!==(a.getAttribute('download')||'')||Date.now()-r.at>3000)return '';
+    return await r.done;
+  };
+  P.shareKept=async a=>(await P.shareHow(a))!=='cancelled';
+  /* Own tab, installed on an iPad or iPhone: the app has no tabs, and what it opens is Safari's, without this copy or the
+     work in the form; the form fills the window here instead */
+  document.addEventListener('click',e=>{
+    const b=e.target&&e.target.closest?e.target.closest('#popOut'):null;
+    if(!b||!inApp())return;
+    e.stopPropagation();e.preventDefault();
+    if(!state.cur)return;
+    setFull(true);
+    wsUI.toast('Installed on this iPad, a form cannot open in a tab of its own, so it fills the window here. Exit, above the form, brings the rest back.',{ms:9000});
+  },true);
+  let lastAuto=0,lastUpd=0;
+  function auto(force){
+    if(!P.reg)return;
+    const now=Date.now();
+    if(!force&&(document.hidden||!navigator.onLine||now-lastAuto<55000))return;
+    lastAuto=now;
+    if(force||now-lastUpd>5*60000){lastUpd=now;try{P.reg.update().catch(()=>{});}catch(e){}}
+    ask('check',{force:!!force},180000).then(take);
+  }
+  function watch(reg){
+    const track=w=>{if(w&&!w.nbhTracked){w.nbhTracked=true;w.addEventListener('statechange',()=>{
+      if(w.state==='redundant'||w.state==='activated')P.inst=null;
+      /* the first save was stopped before it was done (the browser stopped the worker, the app went to the background):
+         the browser drops a registration with no working worker, so say so and begin again; the set already saved is kept */
+      if(w.state==='redundant'&&!reg.active&&!reg.waiting&&!reg.installing){
+        P.st=Object.assign({live:false,files:0,bytes:0,total:0,missing:[]},P.st||{},{busy:null,result:{kind:'stopped',at:Date.now()}});
+        paint();setTimeout(again,4000);return;
+      }
+      refresh();paint();});}};
+    track(reg.installing);track(reg.waiting);
+    reg.addEventListener('updatefound',()=>{track(reg.installing);paint();});
+  }
+  function register(){
+    return sw.register('sw.js',{scope:'./',updateViaCache:'none'}).then(reg=>{
+      P.reg=reg;P.err='';watch(reg);
+      return ask('status').then(d=>{take(d);auto(!!P.forceFirst);});
+    }).catch(e=>{P.err=String(e&&e.message||e);paint();});
+  }
+  /* the registration is gone (a first save that was stopped): register again, which carries on with the set begun */
+  function again(){
+    if(!P.on||P.reloading)return;
+    sw.getRegistration('./').then(r=>{if(!r||(!r.active&&!r.installing&&!r.waiting))register();}).catch(()=>{});
+  }
+  /* the one-time install tip: an iPad or iPhone, in Safari, not yet installed */
+  function tip(){
+    const ua=navigator.userAgent||'';
+    if(!P.on||standalone()||!appleMobile()||/CriOS|FxiOS|EdgiOS|OPiOS|GSA\//.test(ua))return;
+    try{if(localStorage.getItem('nbh.ws.installTip'))return;localStorage.setItem('nbh.ws.installTip','shown');}catch(e){return;}
+    $('#tipBar').hidden=false;
+    $('#tipHide').addEventListener('click',()=>{$('#tipBar').hidden=true;try{localStorage.setItem('nbh.ws.installTip','dismissed');}catch(e){}});
+  }
+  P.diag=()=>{
+    if(!P.on)return EMBED?'not used: everything is inside this file':location.protocol==='file:'?'not used: opened from a drive (it needs the website)':'not used: it needs https';
+    const s=P.st||{},[t]=line();
+    return t+(s.live?' — '+s.files+' files, '+mb(s.bytes)+(s.mode==='list'?', checked against the website’s release list':''):'')+(standalone()?'; installed':'');
+  };
+  /* is this file of the folder saved here? (Diagnostics, when the website cannot be asked) */
+  P.saved=f=>P.on?caches.match(P.scope+f).then(r=>!!r,()=>false):Promise.resolve(false);
+  P.open=openDlg;P.check=checkNow;P.paint=paint;P.ask=ask;P.unsaved=unsaved;
+  if(!P.on)return P;
+  if(typeof CMDS!=='undefined')CMDS.push(
+    {k:'offline update updates check new version reload',n:'Check for updates',s:'command',go:checkNow},
+    {k:'offline copy status reset install home screen dock app',n:'Offline copy: status, install, reset',s:'command',go:openDlg});
+  P.ctlAtLoad=!!sw.controller;
+  if(/[?&]nbh-online=/.test(location.search)){P.forceFirst=/signin/.test(location.search);try{history.replaceState(null,'',location.pathname+location.hash);}catch(e){}}
+  try{if(sessionStorage.getItem('nbh.ws.updated')){sessionStorage.removeItem('nbh.ws.updated');setTimeout(()=>wsUI.toast('The new version of the workstation is in use.',{kind:'ok'}),900);}}catch(e){}
+  sw.addEventListener('message',e=>{if(!relay(e))take(e.data);});
+  try{if(sw.startMessages)sw.startMessages();}catch(e){}
+  sw.addEventListener('controllerchange',()=>{if(P.reloading){location.reload();return;}refresh();});
+  /* the forms' documents, as they load, for the presses and keys that count as unsaved work */
+  const fh=$('#frames');
+  if(fh)new MutationObserver(()=>{for(const f of fh.querySelectorAll('iframe'))if(!f.__nbhHook){f.__nbhHook=true;f.addEventListener('load',()=>setTimeout(hookFrames,0));}}).observe(fh,{childList:true,subtree:true});
+  setInterval(hookFrames,1500);
+  paint();
+  register();
+  window.addEventListener('online',()=>{paint();auto();});
+  window.addEventListener('offline',paint);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){again();auto();}});
+  setInterval(()=>{auto();if(P.reg&&(!P.st||P.st.busy||!P.st.live))refresh();else if(!bar.hidden)paint();},60000);
+  tip();
+  return P;
+})();
 </script>
 </body>
 </html>
