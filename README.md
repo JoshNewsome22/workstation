@@ -12,7 +12,7 @@ Two editions of the same workstation, 44 forms each, and the tools that build th
 
 ## Making a release
 
-    python3 tools/apply-polish.py NBH-Workstation                      # after editing tools/polish/*
+    python3 tools/apply-polish.py NBH-Workstation                      # after editing tools/polish/* or the writing help (tools/blocks/nbh-wording*)
     python3 tools/rps-assets.py RPS-Workstation/index.html /tmp/rps    # the school lockup and icon
     python3 tools/build-rps.py NBH-Workstation RPS-Workstation /tmp/rps/rps-lockup.webp /tmp/rps/rps-favicon.png
     python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html
