@@ -33,13 +33,13 @@ const ITEMS=[
 const CONF={read:['Before we start, I want you to know who will hear what you tell me.',
   'I will write down what you say. The adults on your team at school and your parent or guardian may read it. It helps us make school better for you.',
   'This is not about getting you in trouble. I will not share what you say with other students.',
-  'There are a few things I cannot keep private. If you tell me that someone is hurting you, or that you might hurt yourself or someone else, I have to tell the people whose job is to keep you safe, like the school counselor or the principal, and sometimes people outside school whose job is to protect children. The law says I must. If that happens, I will try to tell you first.',
+  'There are a few things I cannot keep private. If you tell me that someone is hurting you, or that you might hurt yourself or someone else, I have to tell people whose job is to keep you safe. That could be the school counselor or the principal, or sometimes people outside school whose job is to protect children. The law and school rules say I must. If that happens, I will try to tell you first.',
   'Do you have any questions about that?'],
  young:['Before we start, here is who hears what you tell me.',
   'I will write down what you say. Your teachers and the grown-ups who take care of you at home may read it. It helps them make school better for you.',
   'This is not to get you in trouble.',
   'If you tell me someone is hurting you, or that you might hurt yourself or someone else, I have to tell a grown-up whose job is to keep kids safe. That is a rule I have to follow.',
-  'Is that OK?']};
+  'Do you want to ask me anything about that?']};
 function renderConf(){const L=CONF[young()?'young':'read'];
   $('#siConfText').innerHTML='<p class="say">'+esc(L[0])+'</p><ul class="say">'+L.slice(1,-1).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul><p class="say">'+esc(L[L.length-1])+'</p>';}
 /* what the student says happens before and after, each tagged with the function it points to */
