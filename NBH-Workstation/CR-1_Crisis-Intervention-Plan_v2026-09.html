@@ -957,6 +957,34 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
 #bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
 #bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
+<style id="cr1-safety-css">
+/* v21.44 (B1, B5): the breathing rule every plan carries, and the report question at every debriefing. Both print
+   with their sheet and are never cut in two on paper. */
+.breath{background:#FDF2F2;border:1px solid #E7C3C3;border-left:4px solid #8E2A2A;padding:10px 14px;margin:10px 0;font-family:var(--sans);font-size:12.5px;line-height:1.5;border-radius:2px}
+.breath .bh{display:block;color:#6F1F1F;font-size:13.5px;margin:2px 0 3px}
+.breath ul{margin:2px 0 8px 18px;padding:0}
+.breath li{margin:1px 0}
+.breath p{margin:4px 0}
+.breath .src{font-size:11px;color:var(--ink-soft);margin-top:6px}
+.rb-note{margin:4px 0 0}
+.rp{border:1px solid var(--rule-2);border-left:3px solid #8E2A2A;background:#FFFCFB;padding:9px 12px;margin:8px 0 12px;font-family:var(--sans);font-size:12.5px;line-height:1.45;border-radius:2px}
+.rp p{margin:3px 0}
+.rp .rp-h{font-weight:600;margin:8px 0 2px}
+.rp label.chk{display:flex;gap:7px;align-items:flex-start;margin:3px 0}
+.rp label.chk input{margin:2px 0 0;flex:none}
+.rp ul{margin:6px 0 6px 18px;padding:0}
+.rp li{margin:2px 0}
+.rp table.rt{margin-top:8px}
+@media screen and (max-width:600px){
+  .rp > table.rt,.rp > table.rt > tbody,.rp > table.rt > tbody > tr,.rp > table.rt > tbody > tr > th,.rp > table.rt > tbody > tr > td{display:block;width:auto!important}
+  .rp > table.rt > tbody > tr > th{border-bottom:0;padding-bottom:2px}
+  .rp > table.rt > tbody > tr > td{border-top:0}
+}
+@media print{
+  .breath,.rp{break-inside:avoid;page-break-inside:avoid}
+  .breath{background:#fff}
+}
+</style>
 </head>
 <body class="view-setup">
 
@@ -1049,25 +1077,50 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     <div class="grid-wrap"><table class="rt" id="pbisTbl"><thead><tr>
       <th style="width:44px">Order</th><th style="width:16%">Stage</th><th style="width:28%">What staff do</th>
       <th style="width:20%">What tells you to move on</th><th>Who</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <p class="hint rb-note">Any step that uses a hold follows the breathing rule under <b>If Restraint Nonetheless Occurs</b>: no hold may restrict breathing.</p>
 
     <h2 class="nbh-band" style="margin-top:16px">2. Health Concerns Limiting the Use of Restraint</h2>
     <div class="statute"><b>&sect; 1003.573(6)(b)2.</b> The plan must include known physical and behavioral health concerns that will limit the use of restraint for this student.</div>
     <table class="rt">
       <tr><th style="width:26%">Physical health concerns</th><td><textarea data-m="hPhys" data-calc="1" rows="3" placeholder="Respiratory, cardiac, orthopedic, seizure, skeletal, medication effects, recent injury or surgery. Source and date of the information."></textarea></td></tr>
       <tr><th>Behavioral health concerns</th><td><textarea data-m="hBeh" data-calc="1" rows="3" placeholder="Trauma history, responses to physical contact, communication limits during escalation. Source and date."></textarea></td></tr>
-      <tr><th>Positions, holds, or contact to avoid entirely</th><td><textarea data-m="hAvoid" data-calc="1" rows="2"></textarea></td></tr>
+      <tr><th>Positions, holds, or contact to avoid entirely</th><td><textarea data-m="hAvoid" data-calc="1" rows="2"></textarea><p class="hint rb-note">Always ruled out, for every student: any hold that restricts breathing (the box under <b>If Restraint Nonetheless Occurs</b>). Write here what is ruled out for this student as well.</p></td></tr>
       <tr><th>Who provided this and when</th><td><input data-m="hSource" placeholder="School nurse, prescriber, parent &mdash; with dates"></td></tr>
       <tr><th>Medical alert to review before any restraint</th><td><input data-m="hAlert" data-calc="1"></td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">If Restraint Nonetheless Occurs</h2>
-    <div class="prohib"><b>Prohibited, and not options on this plan.</b> Seclusion &mdash; the involuntary confinement of a student alone in a room or area they are prevented from leaving &mdash; is prohibited outright for school personnel under &sect; 1003.573(2). Mechanical restraint is prohibited for school personnel under &sect; 1003.573(3)(a). Restraint may not be used for discipline or to correct noncompliance, and techniques may not be used to inflict pain to induce compliance.</div>
+    <div class="prohib"><b>Prohibited, and not options on this plan.</b> Seclusion &mdash; the involuntary confinement of a student alone in a room or area they are prevented from leaving &mdash; is prohibited outright for school personnel under &sect; 1003.573(2). Mechanical restraint is prohibited for school personnel under &sect; 1003.573(3)(a). Restraint may not be used for discipline or to correct noncompliance, and techniques may not be used to inflict pain to induce compliance. Any hold that restricts breathing is never used either: the rule and the danger signs follow.</div>
+    <!-- v21.44 (B1): the breathing rule, the same on every plan. Review this wording. -->
+    <div class="breath" id="crBreath">
+      <b class="bh">No hold may restrict breathing.</b>
+      <p>This applies to every student, every hold and every physical procedure on this plan, and to every adult who helps.</p>
+      <ul>
+        <li>No weight or pressure on the student&rsquo;s chest, back, stomach or neck.</li>
+        <li>No face-down (prone) or face-up (supine) holds.</li>
+        <li>Nothing over the student&rsquo;s mouth or nose. Do not cover the face.</li>
+      </ul>
+      <p>One adult who is not part of the hold watches the student&rsquo;s breathing, face and color the whole time, and tells the others to let go.</p>
+      <b class="bh">Let go at once, and get medical help, if the student:</b>
+      <ul id="crSigns">
+        <li>struggles to breathe, gasps, or breathes very fast;</li>
+        <li>says they cannot breathe (believe them);</li>
+        <li>changes color: pale, gray or blue lips or face;</li>
+        <li>vomits;</li>
+        <li>stops responding, or seems confused or very sleepy;</li>
+        <li>goes limp.</li>
+      </ul>
+      <p>Getting medical help means calling the school nurse at once, and calling 911 if the student is not breathing normally or does not respond. Stay with the student until help takes over.</p>
+      <p class="src">This rule is the form&rsquo;s own. It follows the U.S. Department of Education&rsquo;s <em>Restraint and Seclusion: Resource Document</em> (2012), principle 7: restraint should never be used in a way that restricts a child&rsquo;s breathing or harms the child. Your district&rsquo;s policy may add to it.</p>
+    </div>
     <table class="rt">
-      <tr><th style="width:26%">Trained staff authorized to restrain</th><td><textarea data-m="rStaff" rows="2" placeholder="Names and the date each last completed the district's training. The incident report asks for that date."></textarea></td></tr>
+      <tr><th style="width:26%">Trained staff authorized to restrain</th><td><textarea data-m="rStaff" data-calc="1" rows="2" placeholder="Names and the date each last completed the district's training. The incident report asks for that date."></textarea></td></tr>
+      <tr><th>Adult who watches the breathing (not part of the hold)</th><td><input data-m="rWatch" data-calc="1" placeholder="Name or role, for example the second adult in the room; never one of the adults holding"></td></tr>
       <tr><th>Discontinuation rule</th><td><textarea data-m="rStop" rows="2" placeholder="&sect; 1003.573(3)(b): must be discontinued as soon as the threat posed by the dangerous behavior has dissipated. State how that is judged for this student."></textarea></td></tr>
-      <tr><th>Medical monitoring during and after</th><td><textarea data-m="rMed" rows="2" placeholder="Breathing, color, responsiveness; who checks and when; when the nurse is called"></textarea></td></tr>
+      <tr><th>Medical monitoring during and after</th><td><textarea data-m="rMed" rows="2" placeholder="What the watching adult looks for (any danger sign above ends the hold at once); who checks the student afterwards; when the nurse is called"></textarea></td></tr>
       <tr><th>Who is called, and in what order</th><td><input data-m="rCall"></td></tr>
     </table>
+    <div id="breathVerdict"></div>
 
     <h2 class="nbh-band" style="margin-top:16px">3. Review Timetable</h2>
     <div class="statute"><b>&sect; 1003.573(6)(b)3.</b> The plan must include a timetable for its review and, if necessary, its revision. <b>&sect; 1003.573(7)(b)8.g.</b> requires every incident report to state the date this plan was last reviewed and whether changes were recommended &mdash; so the date below is written into the record each time.</div>
@@ -1111,10 +1164,38 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
         <option>No plan was in place at the time</option></select>
         <textarea data-m="dbFollowedWhy" rows="2" style="margin-top:5px" placeholder="If the plan was not followed, what got in the way — staffing, materials, the plan asking for something that cannot be done in that moment"></textarea></td></tr>
       <tr><th>What happened immediately after the restraint ended</th><td><textarea data-m="dbAfter" rows="2"></textarea></td></tr>
+      <tr><th>Breathing during the hold</th><td><textarea data-m="dbBreath" rows="2" placeholder="Who watched the student's breathing from outside the hold; whether any danger sign was seen, and what was done"></textarea></td></tr>
       <tr><th>Injuries, marks, or medical concerns</th><td><textarea data-m="dbInjury" rows="2" placeholder="For the student and for staff. Documented per district policy."></textarea></td></tr>
       <tr><th>The student&rsquo;s account</th><td><textarea data-m="dbStudent" rows="2" placeholder="Sought in whatever form the student can give it, and recorded in their words. Note if it was not possible and why."></textarea></td></tr>
       <tr><th>Staff experience</th><td><textarea data-m="dbStaff" rows="2" placeholder="Restraint affects the people who carry it out. Record what support was offered."></textarea></td></tr>
     </table>
+    <!-- v21.44 (B5): the report question at every debriefing. Review this wording. -->
+    <h3 style="margin-top:14px">Does This Need a Report?</h3>
+    <div class="rp" id="crRep">
+      <p>This is not the district&rsquo;s incident report. It asks whether anything in this incident gives a reason to suspect abuse or neglect. Answer it at every debriefing.</p>
+      <p class="rp-h">A report is needed if any of these is true:</p>
+      <label class="chk"><input type="checkbox" data-mc="rpR1"> The student has an injury or mark, and no one saw how it happened, or the account of it does not fit.</label>
+      <label class="chk"><input type="checkbox" data-mc="rpR2"> A hold or force that this plan does not allow may have been used (for example, pressure on the chest, back or neck).</label>
+      <label class="chk"><input type="checkbox" data-mc="rpR3"> An injury is in a private area (genitals, buttocks, breasts), or has a pattern (grip, finger, slap or cord marks, or a burn).</label>
+      <label class="chk"><input type="checkbox" data-mc="rpR4"> The student, or anyone else, said that someone hurt the student or is not taking care of them.</label>
+      <label class="chk"><input type="checkbox" data-mc="rpR5"> Anything else gives someone a reason to suspect abuse or neglect.</label>
+      <ul>
+        <li><b>Who reports:</b> the person who suspects it. Telling a supervisor, the nurse or the BCBA does not take the place of your own report. Your agency may ask you to tell them as well.</li>
+        <li><b>When:</b> right away, the same day, as your state&rsquo;s law and your agency&rsquo;s policy require.</li>
+        <li><b>Do not investigate.</b> You do not need proof. Do not press the student for details, do not examine further, and do not contact the person you suspect. Write down what you saw, and what was said in the words used.</li>
+        <li>If abuse or neglect is suspected, your agency&rsquo;s policy says who tells the parent or guardian, and when.</li>
+      </ul>
+      <table class="rt">
+        <tr><th style="width:26%">Does this need a report?</th><td><select data-m="rpNeed" data-calc="1" aria-label="Does this need a report?"><option value=""></option><option value="yes">Yes: a report is needed</option><option value="no">No: no report is needed</option></select></td></tr>
+        <tr><th>If no, why not</th><td><input data-m="rpWhy" data-calc="1" placeholder="A few words"></td></tr>
+        <tr><th>Report made on (date and time)</th><td><input data-m="rpWhen" data-calc="1"></td></tr>
+        <tr><th>To whom</th><td><input data-m="rpTo" data-calc="1" placeholder="The agency or hotline, the person who took the report, any reference number"></td></tr>
+        <tr><th>By whom</th><td><input data-m="rpBy" data-calc="1" placeholder="Name and role of the person who made the report"></td></tr>
+        <tr><th>Others told, as your agency&rsquo;s policy says</th><td><input data-m="rpTold" placeholder="School nurse, administrator; who told the parent or guardian, and when"></td></tr>
+      </table>
+      <div id="rpVerdict"></div>
+      <p class="hint">The report itself is confidential. This sheet records only that it was made, and Copy for the BIP leaves this part out.</p>
+    </div>
     <h3 style="margin-top:14px">What Changes as a Result</h3>
     <p class="hint">A debriefing that changes nothing is a record of an event rather than a reduction activity. At least one line here should be a change to the plan, the environment, or the supports.</p>
     <div class="grid-wrap"><table class="rt" id="actTbl"><thead><tr>
@@ -1188,6 +1269,11 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
       <tr><th>Training</th><td>Annual, for all personnel authorized to use positive behavior interventions and supports. Must cover the use of those interventions, risk assessment to identify when restraint may be used, examples of when the interventions have failed to reduce imminent risk, safe and appropriate techniques including team use, the district&rsquo;s documentation and reporting requirements, identifying and dealing with medical emergencies during restraint, and cardiopulmonary resuscitation.</td></tr>
       <tr><th>Monitoring</th><td>At classroom, building, district, and state level. Documentation goes to the principal, the district ESE director, and the bureau chief of the Bureau of Exceptional Education and Student Services electronically each month school is in session.</td></tr>
     </table>
+    <!-- v21.44 (B1, B5). Review this wording. -->
+    <h2 class="nbh-band" style="margin-top:16px">No Hold May Restrict Breathing</h2>
+    <p>Every plan on this form carries the same rule, whatever the student: no weight or pressure on the chest, back, stomach or neck; no face-down (prone) or face-up (supine) holds; nothing over the mouth or nose; and one adult who is not part of the hold watches the student&rsquo;s breathing, face and color the whole time. The hold ends at once, and medical help is called, at any danger sign: struggling to breathe, saying they cannot breathe, a change of color, vomiting, not responding, or going limp. The rule prints with every plan under <b>If Restraint Nonetheless Occurs</b>, the plan names the adult who watches, the debriefing asks who watched and whether any danger sign was seen, and Copy for the BIP carries the rule. It is this form&rsquo;s rule, following the U.S. Department of Education&rsquo;s <em>Restraint and Seclusion: Resource Document</em> (2012), principle 7: restraint &ldquo;should never be used in a manner that restricts a child&rsquo;s breathing or harms the child.&rdquo; The statute summary above is the law as retrieved; your district&rsquo;s policy may add to the rule.</p>
+    <h2 class="nbh-band" style="margin-top:16px">Does This Need a Report?</h2>
+    <p>The Debriefing sheet asks at every debriefing whether anything in the incident gives a reason to suspect abuse or neglect: an injury or mark that no one saw happen or that the account does not fit, a hold or force the plan does not allow, an injury in a private area or with a pattern, or something the student or anyone else said. This is separate from the district&rsquo;s incident report. The person who suspects abuse or neglect makes the report, right away and the same day, as your state&rsquo;s law and your agency&rsquo;s policy require; telling a supervisor does not take the place of it. No one investigates first: the sheet asks only for what was seen and said. It records when the report was made, to whom and by whom; the report itself stays confidential, and Copy for the BIP leaves this part out.</p>
     <h2 class="nbh-band" style="margin-top:16px">How This Form Sits with the Others</h2>
     <p>The crisis intervention plan is not a behavior intervention plan and does not replace one. The BIP (Form TD-1) addresses the function of the behavior and is what should make restraint unnecessary; this plan governs what happens in the minutes when dangerous behavior is already occurring. A student who needs this form needs the FBA and the BIP reviewed as well &mdash; the statute names updating the functional behavioral analysis and the positive behavior intervention plan among the reduction activities.</p>
     <h2 class="nbh-band" style="margin-top:16px">The Deadline Clock and the Notice Log</h2>
@@ -1205,7 +1291,7 @@ table.rt td.nx,table.rt th.nx{width:30px;text-align:center;padding:0}
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="hint noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, a debriefing, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.</p>
+    <p class="hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated crisis intervention plan loaded: the statutory trigger, the team, the intervention sequence, the health limits, the adult who watches the breathing, a debriefing with its breathing check and its answer to Does This Need a Report?, the restraint log with a reduction goal, and the deadlines and notice log for each restraint.</p>
   </section>
 </main>
 
@@ -3330,6 +3416,8 @@ function renderTrig(){
   teamVerdict();
   /* v21.22: the clock's statuses, the readiness check and the paper copy follow every entry, without redrawing a control */
   crcUpdate();
+  /* v21.44 (B1, B5) */
+  crSafety();
 }
 ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const el=e.target;if(!el.dataset)return;
   /* v21.16 audit (F4-F7): every entry a verdict or a card reads redraws it as it is typed. (F14) No table is redrawn
@@ -3357,7 +3445,30 @@ $('#delLog').addEventListener('click',()=>dropLast(S.log,'restraint',()=>{render
 
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
-    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(el.dataset.calc)renderTrig();});}});}
+    el.addEventListener(ev,()=>{S.meta[k]=el.value;if(el.dataset.calc)renderTrig();});}});
+  /* v21.44 (B5): a tick in Does This Need a Report? is kept in the record as "1"; a file saved before it has none */
+  $$('[data-mc]').forEach(el=>{const k=el.dataset.mc;el.checked=S.meta[k]==='1';
+    if(!el._b){el._b=1;el.addEventListener('change',()=>{S.meta[k]=el.checked?'1':'';crSafety();});}});}
+/* v21.44 (B1, B5): the adult named to watch the breathing, and the answer to Does This Need a Report?. A tick means
+   there is a reason to suspect abuse or neglect, so the answer it leads to is Yes; the sheet asks only for what was
+   seen and said, and for when, to whom and by whom the report was made. */
+const RP_KEYS=['rpR1','rpR2','rpR3','rpR4','rpR5'];
+function crSafety(){
+  const m=S.meta,t=k=>String(m[k]==null?'':m[k]).trim();
+  const bv=document.getElementById('breathVerdict');
+  if(bv)bv.innerHTML=t('rWatch')
+    ?'<div class="verdict v-ok">Named to watch the breathing from outside the hold: '+esc(t('rWatch'))+'.</div>'
+    :'<div class="verdict v-mid"><b>No adult is named to watch the student&rsquo;s breathing.</b> Name one who is not part of the hold: the breathing rule above asks for it.</div>';
+  const rv=document.getElementById('rpVerdict');if(!rv)return;
+  const ticked=RP_KEYS.filter(k=>m[k]==='1').length,need=t('rpNeed');
+  const miss=[['rpWhen','when'],['rpTo','to whom'],['rpBy','by whom']].filter(x=>!t(x[0])).map(x=>x[1]);
+  rv.innerHTML=need==='yes'
+    ?(miss.length?'<div class="verdict v-mid"><b>A report is needed.</b> Still to record: '+miss.join(', ')+'. Make the report today.</div>'
+      :'<div class="verdict v-ok"><b>Report recorded:</b> made '+esc(t('rpWhen'))+' to '+esc(t('rpTo'))+', by '+esc(t('rpBy'))+'.</div>')
+    :ticked?'<div class="verdict v-no"><b>'+(ticked===1?'A box above is ticked':ticked+' boxes above are ticked')+', so a report is needed.</b> '+(need==='no'?'Change the answer to Yes, make':'Answer Yes, make')+' the report today, and record when, to whom and by whom.</div>'
+    :need==='no'?(t('rpWhy')?'<div class="verdict v-ok"><b>No report needed:</b> '+esc(t('rpWhy'))+'</div>':'<div class="verdict v-mid">Write in a few words why no report is needed.</div>')
+    :'<div class="verdict v-mid"><b>Not answered yet.</b> Decide whether anything in this incident needs a report.</div>';
+}
 function renderAll(){ensure();renderTeam();renderPbis();renderAct();renderLog();renderNotify();bindMeta();renderTrig();}
 
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -3431,6 +3542,7 @@ async function loadSim(){
     hSource:'School nurse '+D(20)+'; OT '+D(143)+'; parent '+D(20)+'; prescriber consulted by phone '+D(19),
     hAlert:'Asthma \u2014 inhaler location and breathing check before anything else',
     rStaff:'Aide A (CPI last trained '+D(54)+'), Aide B (CPI last trained '+D(54)+'), classroom teacher (CPI last trained '+D(236)+' \u2014 refresher booked). Each incident report asks for the date each person restraining or assisting was last trained in positive behavior interventions and supports.',
+    rWatch:'The third trained adult in the room, usually the classroom teacher; never Aide A or Aide B while they are holding',
     rStop:'Released as soon as striking toward the head stops for 5 s, regardless of whether they are still shouting. Shouting is not an imminent risk of serious injury.',
     rMed:'Breathing, color, and responsiveness checked continuously by an adult who is not taking part in the hold. If breathing is labored or the inhaler is needed, the hold ends and the nurse is called at once. Full check by the nurse after every incident.',
     rCall:'Second adult first, then the BCBA, then the assistant principal, then the nurse. Parent called before the end of the school day in every case.',
@@ -3448,9 +3560,11 @@ async function loadSim(){
     dbFollowed:'Partly \u2014 explained below',
     dbFollowedWhy:'Two steps could not be run for reasons that were arrangement rather than performance: no second adult, and the visual timer was in another room. The seating meant the aide could not withdraw, which the plan assumes she can.',
     dbAfter:'Released after 22 s, once the fist had dropped and no strike followed for 5 s. Student sat on the floor, accepted water, and returned to the task after 6 min with no further incident.',
+    dbBreath:'Aide B and the teacher held. No third adult was in the room, so no one watched from outside the hold; the teacher watched the student’s face while holding. No danger sign was seen, and the student was talking and breathing normally right after the release. The plan now names the adult who watches.',
     dbInjury:'No injury to the student; no marks. Aide B reported a scratch to the forearm, cleaned and logged. Nurse checked both.',
     dbStudent:'Asked the next morning with the picture choices. The student selected the card for \u201ctoo long\u201d and pointed at the timer, then at the empty shelf where it usually sits.',
     dbStaff:'Aide B described feeling cornered. Offered and took the rest of the period off the floor. The BCBA reviewed the seating with her rather than the hold.',
+    rpNeed:'no',rpWhy:'No injury or mark on the student; the hold was one the plan allows; nothing said suggests abuse or neglect.',
     goal:'No more than one restraint by the end of the semester, and none in the afternoon writing block, reviewed on '+D(-26),
     goalHow:'Second timer kept permanently in the afternoon room. Seating changed so the adult is never between the student and the door. Coverage protected for the afternoon writing block, or the delay shortened to what one adult can hold (already changed on Form CF-1). CPI refresher for the classroom teacher. Data review at each plan review.',
     pattern:'All three restraints this semester occurred in the afternoon writing block with a single adult. None in the morning block, which is the same task with two adults. Form SP-1 shows the same concentration for the target behavior.',
@@ -3472,6 +3586,7 @@ async function loadSim(){
   S.act=[
     {c:'Second visual timer kept permanently in the afternoon room so it is never carried between settings',w:'The environment',who:'Teacher',by:D(11),st:'Done'},
     {c:'Seating changed so the adult is never between the student and the door',w:'This crisis plan',who:'J. Newsome',by:D(11),st:'Done'},
+    {c:'The plan names the adult who watches the breathing from outside any hold',w:'This crisis plan',who:'J. Newsome',by:D(11),st:'Done'},
     {c:'Afternoon delay shortened to 45 s, matching what one adult can hold',w:'The BIP (Form TD-1)',who:'J. Newsome',by:D(12),st:'Done'},
     {c:'CPI refresher for the classroom teacher, whose training date is approaching a year',w:'Staff training (Form ST-1)',who:'Assistant principal',by:D(-7),st:'Open'},
     {c:'Coverage requested for the afternoon writing block',w:'Staffing or schedule',who:'Assistant principal',by:D(10),st:'Not doing'}
@@ -4060,12 +4175,13 @@ function bipText(){
   B.push(['POSITIVE BEHAVIOR INTERVENTIONS AND SUPPORTS',bipLine('Dangerous behavior this plan addresses',m.dbeh),bipLine('What counts as imminent risk of serious injury for this student',m.imminent),bipLine('Earliest reliable precursor',m.precursor)]);
   S.pbis.filter(r=>crcFilled(r)).forEach((r,k)=>{B.push(['STAGE '+(k+1)+(r.s?': '+r.s.toUpperCase():''),bipLine('What staff do',r.do),bipLine('What tells you to move on',r.next),bipLine('Who',r.who)]);});
   B.push(['HEALTH CONCERNS LIMITING THE USE OF RESTRAINT',bipLine('Physical health concerns',m.hPhys),bipLine('Behavioral health concerns',m.hBeh),bipLine('Positions, holds, or contact to avoid entirely',m.hAvoid),bipLine('Who provided this and when',m.hSource),bipLine('Medical alert to review before any restraint',m.hAlert)]);
-  B.push(['IF RESTRAINT NONETHELESS OCCURS',bipLine('Trained staff authorized to restrain',m.rStaff),bipLine('Discontinuation rule',m.rStop),bipLine('Medical monitoring during and after',m.rMed),bipLine('Who is called, and in what order',m.rCall)]);
+  B.push(['IF RESTRAINT NONETHELESS OCCURS',bipLine('Trained staff authorized to restrain',m.rStaff),bipLine('Adult who watches the breathing (not part of the hold)',m.rWatch),bipLine('Discontinuation rule',m.rStop),bipLine('Medical monitoring during and after',m.rMed),bipLine('Who is called, and in what order',m.rCall)]);
+  const iBreath=B.length;
   B.push(['REVIEW TIMETABLE',bipLine('Review schedule',m.revSched),bipLine('Last reviewed',m.revLast),bipLine('Next review due',m.revNext),bipLine('Changes recommended at the last review',m.revChanges),bipLine('Copy provided to the parent or guardian',bipPlain(m.parentCopy)+(bipTxt(m.parentCopyHow)?(m.parentCopy?'. ':'')+bipTxt(m.parentCopyHow):''))]);
   B.push(['POST-INCIDENT DEBRIEFING',bipLine('Incident date and time',m.dbDate),bipLine('Debriefing date',m.dbWhen),bipLine('Facilitated by',m.dbBy),bipLine('District incident report completed',bipPlain(m.dbReport)),bipLine('Restraint on the log',m.dbRow?'Restraint '+m.dbRow:''),
     bipLine('Who took part',m.dbWho),bipLine('What was happening before it started',m.dbContext),bipLine('The behavior leading up to the decision to restrain',m.dbLead),bipLine('Why there was an imminent risk of serious injury',m.dbRisk),
     bipLine('Which interventions from the plan were used, and in what order',m.dbPbis),bipLine('Was the plan followed as written',bipPlain(m.dbFollowed)+(bipTxt(m.dbFollowedWhy)?(m.dbFollowed?'. ':'')+bipTxt(m.dbFollowedWhy):'')),
-    bipLine('What happened immediately after the restraint ended',m.dbAfter),bipLine('Injuries, marks, or medical concerns',m.dbInjury),bipLine('The student’s account',m.dbStudent),bipLine('Staff experience',m.dbStaff)]);
+    bipLine('What happened immediately after the restraint ended',m.dbAfter),bipLine('Breathing during the hold',m.dbBreath),bipLine('Injuries, marks, or medical concerns',m.dbInjury),bipLine('The student’s account',m.dbStudent),bipLine('Staff experience',m.dbStaff)]);
   B.push(['WHAT CHANGES AS A RESULT'].concat(S.act.filter(a=>bipTxt(a.c)).map(a=>'- '+bipTxt(a.c)+(a.w?' — '+a.w:'')+(bipTxt(a.who)?'; '+bipTxt(a.who):'')+(bipTxt(a.by)?', by '+bipTxt(a.by):'')+(a.st?' ('+a.st+')':''))));
   /* the readiness check: an item the debriefed restraint's notice log records is given from it, as on screen; otherwise its tick */
   const states=crcStates(),v=crcTxt(m.dbRow).trim(),nr=/^\d+$/.test(v)?+v:0,st=nr>=1&&nr<=states.length?states[nr-1]:null;
@@ -4073,6 +4189,12 @@ function bipText(){
   B.push(['RESTRAINT LOG AND REDUCTION GOAL'].concat(S.log.filter(crcDated).map((r,k)=>{const s=states[S.log.indexOf(r)];const when=s&&s.began?crcDT(s.began):s&&s.bDay?crcD(s.bDay):bipTxt(r.d);
     return '- Restraint '+(k+1)+(when?', '+when:'')+(bipTxt(r.dur)?', '+bipTxt(r.dur):'')+(bipTxt(r.set)?', '+bipTxt(r.set):'')+(bipTxt(r.staff)?' ('+bipTxt(r.staff)+')':'')+(bipTxt(r.pre)?': '+bipTxt(r.pre).replace(/[.]$/,''):'')+'.'+(r.rep?' Report filed: '+r.rep+'.':'')+(r.deb?' Debriefed: '+r.deb+'.':'');}),
     [bipLine('Reduction goal for this student',m.goal),bipLine('Activities, skills, and resources needed',m.goalHow),bipLine('Is the restraint concentrated in a setting or time',m.pattern),bipLine('Has the FBA or BIP been updated in response',m.fbaUpdate)]));
+  /* v21.44 (B1): the breathing rule goes into every plan that holds anything, after the restraint section. The answer to
+     Does This Need a Report? is left out: the report is confidential and has no place in the BIP. */
+  if(B.slice(1).some(b=>b&&b.slice(1).some(x=>x!=null&&bipTxt(x)!=='')))B.splice(iBreath,0,['BREATHING: NO HOLD MAY RESTRICT IT',
+    '- No weight or pressure on the student’s chest, back, stomach or neck.','- No face-down (prone) or face-up (supine) holds.','- Nothing over the mouth or nose.',
+    '- One adult who is not part of the hold watches the student’s breathing, face and color the whole time.',
+    '- Let go at once and get medical help (the school nurse; 911 if the student is not breathing normally or does not respond) if the student struggles to breathe, says they cannot breathe, changes color, vomits, stops responding, or goes limp.']);
   return bipCompose(B);
 }
 renderAll();
