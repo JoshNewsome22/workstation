@@ -2414,7 +2414,8 @@ const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on',days:14,every:200
         }, function (e) {
           step++;
           if (blobs && e && (e.name === 'DataCloneError' || e.name === 'UnknownError') && step < 3) { blobs = false; blobsOK = false; return attempt(); }
-          if (!quotaErr(e)) return { ok: false, why: 'error', error: String(e && (e.name || e.message) || e) };
+          /* not a full store (the store closed under the page, say): open it afresh next time */
+          if (!quotaErr(e)) { dbP = null; readyP = null; return { ok: false, why: 'error', error: String(e && (e.name || e.message) || e) }; }
           if (keepPics && hasPics) { keepPics = false; return attempt(); }
           keepPics = false;
           var next = bySize.filter(function (id) { return dropped.indexOf(id) < 0; })[0];
@@ -2547,7 +2548,8 @@ function autoHash(forms){
 function autoWarn(r){
   const A=state.auto;let w='',s='';
   const lost=Object.keys((r&&r.picsLost)||{});
-  if(!r||!r.ok){w='Autosave could not keep a copy: this browser’s storage on this device is full. Autosave stays on and tries again; Save case keeps your work in a file.';s='storage full';}
+  if(r&&!r.ok&&r.why==='error'){w='Autosave could not keep a copy just now (this browser said: '+(r.error||'error')+'). Autosave stays on and tries again; Save case keeps your work in a file.';s='not kept';}
+  else if(!r||!r.ok){w='Autosave could not keep a copy: this browser’s storage on this device is full. Autosave stays on and tries again; Save case keeps your work in a file.';s='storage full';}
   else if(r.dropped&&r.dropped.length){w='Autosave is short of room in this browser: the safety copy leaves out Form'+(r.dropped.length>1?'s ':' ')+r.dropped.join(', ')+(lost.length?' and the pictures':'')+'. Save case keeps everything.';s='part only';}
   else if(lost.length){w='Autosave is short of room in this browser: the safety copy of Form'+(lost.length>1?'s ':' ')+lost.join(', ')+' is kept without '+(lost.length>1?'their':'its')+' pictures. Save case keeps everything.';s='no pictures';}
   if(w&&w!==A.warn)wsUI.toast(w,{kind:'warn',ms:12000});
