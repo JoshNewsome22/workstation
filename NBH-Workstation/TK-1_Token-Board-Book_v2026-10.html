@@ -632,7 +632,9 @@ body.view-walk .only-setup,body.view-walk .only-choices,body.view-walk .only-tar
 .wk-item>.wk-ilbl{position:absolute;z-index:3;left:50%;top:100%;margin-top:16px;transform:translateX(-50%);white-space:nowrap;padding:9px 20px;border-radius:999px;background:#1d4a77;color:#fff;font:700 27px/1.1 "Inter","Segoe UI",Arial,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .wk-veil{background:rgba(25,20,10,1);opacity:0}
 /* the hands: each pose is drawn about the point that touches the card */
+.wk-hand{isolation:isolate}
 .wk-pose{position:absolute;left:0;top:0;will-change:transform,opacity;visibility:hidden}
+.wk-pose.wk-out .wh-shadow{display:none}
 .wk-pose svg{display:block;width:100%;height:100%;overflow:visible}
 /* overlays */
 .wk-o{position:absolute;transform-origin:50% 50%;opacity:0;visibility:hidden}
@@ -714,10 +716,10 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 /* touch screens: the shared rule that sets buttons to 40 px must not shrink the player's controls below 44 px */
 @media (pointer:coarse){.wk-player button.wk-b{min-height:48px!important}.wk-player .wk-chaps button{min-height:48px!important}}
 /* narrow screens: the seek bar gets a row of its own; on a phone the player uses the whole width (16 px gutters) */
-@media (max-width:900px){.wk-seek{order:-1;flex-basis:100%;margin:0 4px}}
-@media (max-width:560px){body.view-walk .wk-player{width:calc(100vw - 32px);max-width:none;margin-left:calc(50% - 50vw + 16px);margin-right:0}.wk-small .wk-big{width:56px;height:56px;margin:-28px 0 0 -28px}.wk-small .wk-big svg{width:28px;height:28px}}
+@media (max-width:900px){.wk-seek{order:-2;flex:1 1 calc(100% - 130px);margin:0 4px}.wk-time{order:-1}}
+@media (max-width:560px){body.view-walk .wk-player{width:calc(100vw - 32px);max-width:none;margin-left:calc(50% - 50vw + 16px);margin-right:0}body.view-walk .wk-player.wk-fs{width:auto;margin:0}.wk-small .wk-big{width:56px;height:56px;margin:-28px 0 0 -28px}.wk-small .wk-big svg{width:28px;height:28px}}
 /* a full-screen panel on a short screen (a phone turned sideways): the chapter row gives its height to the picture */
-@media (max-height:500px){.wk-player.wk-fs .wk-chaps,.wk-player:fullscreen .wk-chaps{display:none}.wk-player.wk-fs .wk-seek,.wk-player:fullscreen .wk-seek{order:0;flex-basis:120px}.wk-player.wk-fs .wk-bar{flex-wrap:nowrap}}
+@media (max-height:500px){.wk-player.wk-fs .wk-chaps,.wk-player:fullscreen .wk-chaps{display:none}.wk-player.wk-fs .wk-seek,.wk-player:fullscreen .wk-seek{order:0;flex-basis:120px}.wk-player.wk-fs .wk-time,.wk-player:fullscreen .wk-time{order:0}.wk-player.wk-fs .wk-bar{flex-wrap:nowrap}}
 /* the stage's newer overlays: tab names, the rule's two ways to measure, the pairing demo, the marked name in the praise */
 .wk-tabl{padding:6px 16px 7px;border-radius:999px;background:var(--tc,#fff);border:3px solid #0e2845!important;font:700 28px/1.1 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36;white-space:nowrap;box-shadow:0 3px 10px rgba(60,40,10,.28)}
 .wk-cst{display:grid;align-items:center}
@@ -736,6 +738,28 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .wk-pair .wk-pi span{font:700 15px/1.1 Georgia,serif;color:#1d4a77;text-align:center}
 .wk-msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:31;max-width:92%;padding:8px 16px;border-radius:10px;background:rgba(16,22,28,.9);color:#fff;font:600 15px/1.3 "Inter","Segoe UI",Arial,sans-serif;text-align:center}
 .wk-msg[hidden]{display:none}
+/* the request note beside the Targets page; the steps (tip two) and the locked item (tip three) under the book in the tips */
+.wk-fcr{padding:12px 14px 12px;border-radius:16px;background:#fffbe9;border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.3);font:600 21px/1.25 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36}
+.wk-fq{display:flex;align-items:center;gap:10px}
+.wk-fq svg{flex:none;width:46px;height:38px}
+.wk-fq span{font-style:italic}
+.wk-fa{display:flex;align-items:flex-start;gap:12px;margin-top:10px;padding-top:10px;border-top:2px dashed #c9b98f}
+.wk-fa b{flex:none;width:36px;height:36px;margin:0 5px;border-radius:50%;background:#2f9e44;color:#fff;display:flex;align-items:center;justify-content:center;font:700 21px/1 "Inter",Arial,sans-serif}
+.wk-fa em{display:inline-block;font-style:normal;font-weight:700;padding:0 6px;margin:2px 0 0 -6px;border-radius:7px}
+.wk-stairs{border-radius:16px;background:rgba(255,253,247,.92);border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.25)}
+.wk-stairs svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+.wk-stairs rect{fill:#dfe8f0;stroke:#1d4a77;stroke-width:3}
+.wk-stk{position:absolute;left:34px;top:41px;transform-origin:50% 50%}
+.wk-stk .card{position:relative}
+.wk-sbk{position:absolute;left:26px;top:10px;padding:2px 10px 3px;border-radius:999px;background:#fdecea;border:2px solid #c0392b;color:#a5281b;font:700 17px/1.2 "Inter","Segoe UI",Arial,sans-serif;white-space:nowrap}
+.wk-lock{display:flex;align-items:center;gap:26px;padding:10px 18px;border-radius:16px;background:rgba(255,253,247,.92);border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.25)}
+.wk-lpic{position:relative;flex:none;width:82px;height:82px}
+.wk-lock .wk-pi{width:82px;height:82px;border-radius:14px;background:#fff;box-shadow:0 0 0 4px #acd69a,0 0 0 6px #1d4a77;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;opacity:.55}
+.wk-lock .wk-pi svg,.wk-lock .wk-pi img{width:100%;height:100%;object-fit:contain;display:block}
+.wk-lock .wk-pi span{font:700 15px/1.1 Georgia,serif;color:#1d4a77;text-align:center}
+.wk-lk{position:absolute;right:-16px;bottom:-14px;width:40px;height:46px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.wk-lock p{margin:0;font:600 25px/1.2 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36}
+.wk-lock p b{color:#1d4a77}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
@@ -3481,6 +3505,9 @@ function pic(o,cls,style){if(!o)return '';const ex=style?' style="'+style+'"':''
   if(o.k&&o.k.startsWith('av:')&&AV[o.k.slice(3)])return own(AV[o.k.slice(3)],cls,ex);
   if(o.k&&P[o.k])return picto(o.k,cls||'',ex);return '';}
 const has=o=>!!(o&&(o.k||o.ph));
+/* (v21.43) a word card from the library (flag w, e.g. "Waiting"): the card prints its label alone, as on the user's card sheets,
+   with nothing in the picture area; the picker and the tables still show the drawn word so it can be recognized */
+const isWord=o=>!!(o&&!o.ph&&o.k&&P[o.k]&&P[o.k].w);
 function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);return p?p.label:'';}if(o.k&&o.k.startsWith('tk:')&&TOK[o.k.slice(3)])return TOK[o.k.slice(3)].l;if(o.k&&o.k.startsWith('av:')&&AV[o.k.slice(3)])return AV[o.k.slice(3)].l;return o.k&&P[o.k]?P[o.k].l:'';}
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(has(o)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
@@ -3603,7 +3630,7 @@ function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(30,num(S.meta.wm)||20))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
 function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):size?'width:'+IN(size)+';height:'+IN(size):'';
-  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
+  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':isWord(o)?'':pic(o,''))+'</div></div>';}
 /* (v21.43) the terminal token: the last token can differ from the others (an orange double border, and if chosen its own picture), so the
    learner can see that it fills the board and the exchange comes next; the Board's last slot and the Tokens page's last box carry the same ring */
 function termMode(){const t=S.meta.term;return t==='ring'||t==='pic'?t:'none';}
@@ -3630,7 +3657,7 @@ function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
   if(S.meta.layout==='rules'){const rules=S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
     const k=rules.length,ph=panelH||(612/scl()-d.band-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
-    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
   else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
   return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(S.meta.layout==='rules'?'':qrBox())+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
@@ -3935,14 +3962,15 @@ const f2=v=>(Math.round(v*100)/100).toString();
 function div(cls,html){const d=document.createElement('div');if(cls)d.className=cls;if(html)d.innerHTML=html;return d;}
 function css(el,p,v){const c=el._wk||(el._wk={});if(c[p]!==v){c[p]=v;el.style[p]=v;}}
 function txt(el,v){if(el._wkT!==v){el._wkT=v;el.textContent=v;}}
+function tog(el,c,on){const k='_wkC'+c;if(el[k]!==on){el[k]=on;el.classList.toggle(c,on);}}
 const audioLines=()=>(typeof WALK_AUDIO!=='undefined'&&WALK_AUDIO&&WALK_AUDIO.lines&&typeof WALK_AUDIO.lines==='object')?WALK_AUDIO.lines:null;
 const handArt=()=>(typeof WALK_HANDS!=='undefined'&&WALK_HANDS&&WALK_HANDS.learner&&WALK_HANDS.teacher)?WALK_HANDS:placeholderHands();
 function line(id){const L=audioLines();const l=L&&L[id];const t=String((l&&l.t)||FB[id]||'');const words=t.split(/\s+/).filter(Boolean).length;
   const d=l&&+l.d>0?+l.d:Math.max(1.5,words*.4);return{t,d,a:l&&typeof l.a==='string'?l.a:''};}
-/* where each phrase starts in its recording (seconds from the start of the clip, by the character it starts at), measured from the
-   voice (the start of each caption piece, each clause, and each phrase an action is tied to); a line whose text has changed since
-   it was measured falls back to its share of the characters. Made with the voice by a script outside the repo; keyed by a hash of the text. */
-/* MK:BEGIN */const MK={"intro":{"h":"281d43df","o":[[31,2.28],[56,4.62],[75,5.75],[96,6.74],[105,7.62],[114,8.26],[121,8.68],[125,8.85]]},"ch_show":{"h":"6834c8b5","o":[[30,2.68],[62,5.12],[127,8.72],[164,10.88]]},"ch_pick":{"h":"29e7bff9","o":[[13,0.7],[41,2.4],[64,3.9],[75,4.8],[99,6.22]]},"tg_show":{"h":"b9767bc2","o":[[30,2.5],[62,4.48],[75,5.19],[125,8.82],[164,11.42],[178,11.92],[209,13.56]]},"tg_pick":{"h":"ff41feb0","o":[[7,0.44],[29,2.38],[81,5.48]]},"bd_place":{"h":"10b87ff4","o":[[25,2.02],[55,3.6],[63,4.27],[87,5.86],[122,8.2],[140,9.24]]},"tk_page":{"h":"36a73586","o":[[30,2.62],[53,4.34],[127,8.9],[143,10.03]]},"rule":{"h":"f60a2c85","o":[[18,1.2],[72,4.6],[91,6.4],[101,7.16],[145,10.3]]},"start":{"h":"e3ef0808","o":[[23,1.84],[66,4.4],[84,5.44],[99,6.86],[146,9.8]]},"tok_first":{"h":"c0a19047","o":[[83,5.46],[113,7.36],[152,10.26],[169,11.04]]},"tok_none":{"h":"2e025844","o":[[16,0.83],[68,4.41],[101,6.72],[155,9.9]]},"tok_more":{"h":"bc2e8615","o":[[105,6.88]]},"tok_last_term":{"h":"66774073","o":[[40,3.06],[43,3.52],[117,8.52],[163,10.94]]},"tok_last":{"h":"ccaee597","o":[[72,5.06],[80,5.56]]},"exchange":{"h":"61c3812d","o":[[22,1.4],[47,3.4],[104,7.1],[125,8.39]]},"reset":{"h":"e9ec3a64","o":[[35,2.04],[88,5.78],[106,6.63]]},"tips":{"h":"85d784c5","o":[[28,2.08],[91,6.56],[150,10.58],[265,18.42]]},"outro":{"h":"cbf76364","o":[[24,1.62],[48,3.03],[69,4.57],[79,5.94],[124,8.62],[144,10.14],[163,11.68],[180,12.8]]}};/* MK:END */
+/* where each word starts in its recording (seconds from the start of the clip, by the character it starts at), taken from the
+   voice's own phoneme lengths for that very clip (a mark at every word, at its audible start); a line whose text has changed since
+   falls back to its share of the characters. Made by a script outside the repo; keyed by a hash of the text. */
+/* MK:BEGIN */const MK={"intro":{"h":"281d43df","o":[[5,0.36],[8,0.49],[13,0.69],[19,1.14],[25,1.44],[31,2.31],[36,2.64],[46,3.21],[52,3.79],[56,3.96],[62,4.39],[65,4.49],[69,4.61],[75,5.16],[80,5.29],[82,5.36],[86,5.71],[90,5.86],[96,6.76],[105,7.64],[114,8.31],[121,8.76],[125,8.89]]},"ch_show":{"h":"6834c8b5","o":[[5,0.47],[9,0.97],[12,1.12],[16,1.22],[24,1.72],[30,2.77],[35,3.02],[38,3.14],[45,3.42],[49,3.54],[54,3.97],[62,5.12],[68,5.44],[76,5.89],[83,6.02],[86,6.19],[96,6.62],[101,6.79],[109,7.09],[116,7.69],[122,7.97],[127,8.77],[131,9.04],[141,9.42],[146,9.54],[150,9.69],[154,9.84],[158,10.04],[164,10.92],[167,11.27],[172,11.47],[177,11.72],[181,11.94],[188,12.39]]},"ch_pick":{"h":"29e7bff9","o":[[5,0.36],[13,0.73],[19,0.93],[24,1.11],[28,1.21],[37,1.91],[41,2.03],[47,2.33],[51,2.56],[54,2.68],[59,2.96],[64,3.93],[67,4.11],[75,4.83],[80,5.08],[85,5.21],[89,5.31],[99,6.21],[103,6.36],[107,6.56],[112,6.73],[120,7.11],[125,7.33],[129,7.43]]},"tg_show":{"h":"b9767bc2","o":[[5,0.54],[9,0.97],[12,1.12],[16,1.22],[24,1.69],[30,2.49],[36,2.64],[40,2.79],[47,3.17],[52,3.34],[55,3.47],[62,4.49],[64,4.62],[68,4.87],[75,5.54],[78,5.74],[80,5.82],[92,6.44],[101,7.04],[106,7.19],[110,7.29],[119,7.79],[125,8.84],[128,8.97],[132,9.09],[139,9.49],[142,9.69],[149,10.14],[153,10.29],[164,10.94],[169,11.12],[171,11.19],[178,11.99],[184,12.29],[189,12.49],[194,12.59],[198,12.79],[204,13.12],[209,13.57],[215,13.87]]},"tg_pick":{"h":"ff41feb0","o":[[7,0.49],[11,0.76],[18,1.19],[21,1.21],[23,1.36],[29,2.41],[35,2.79],[40,2.91],[44,3.06],[50,3.34],[57,3.79],[60,3.94],[68,4.56],[73,4.76],[81,5.51],[84,5.74],[93,6.26],[99,6.56],[106,7.14],[110,7.24],[114,7.41],[119,7.71]]},"bd_place":{"h":"10b87ff4","o":[[5,0.52],[11,0.92],[14,1.07],[18,1.17],[25,2.02],[31,2.29],[35,2.39],[42,2.77],[48,3.02],[55,3.62],[59,3.72],[63,3.82],[70,4.34],[75,4.69],[81,4.94],[87,5.89],[92,6.12],[100,6.54],[104,6.72],[108,7.04],[112,7.22],[116,7.32],[122,8.24],[128,8.54],[132,8.64],[140,9.27],[145,9.44],[149,9.59]]},"tk_page":{"h":"36a73586","o":[[5,0.49],[10,0.97],[13,1.12],[17,1.24],[24,1.79],[30,2.59],[36,2.72],[40,2.84],[47,3.42],[53,4.32],[57,4.49],[63,4.89],[69,5.34],[72,5.44],[76,5.54],[82,6.02],[87,6.27],[92,6.44],[100,6.89],[104,7.12],[109,7.37],[113,7.52],[118,7.77],[121,7.89],[127,8.92],[132,9.17],[136,9.39],[143,9.89],[152,10.47],[159,11.24],[163,11.34],[168,11.62],[171,11.69],[175,11.84],[179,12.22],[184,12.47]]},"rule":{"h":"f60a2c85","o":[[7,0.44],[11,0.56],[18,1.19],[25,1.69],[29,1.91],[34,2.14],[37,2.24],[41,2.36],[48,2.76],[57,3.34],[63,3.59],[65,3.69],[72,4.61],[76,4.76],[81,4.99],[88,5.69],[91,5.96],[95,6.19],[101,7.16],[106,7.36],[109,7.54],[116,8.19],[119,8.34],[124,8.51],[132,8.89],[136,9.09],[145,10.34],[150,10.54],[158,11.11],[163,11.51],[167,11.76],[173,12.29],[177,12.49],[183,12.81],[187,12.96]]},"start":{"h":"e3ef0808","o":[[4,0.48],[10,0.71],[14,0.81],[23,1.83],[29,2.13],[32,2.21],[36,2.31],[42,2.68],[46,2.78],[51,3.08],[56,3.38],[66,4.43],[72,4.71],[76,4.81],[84,5.46],[89,5.63],[93,5.78],[99,6.88],[103,7.03],[108,7.41],[115,7.81],[120,8.18],[125,8.53],[136,9.03],[146,9.88],[151,10.16],[154,10.36],[158,10.48],[163,10.68]]},"tok_first":{"h":"c0a19047","o":[[4,0.26],[13,0.78],[16,0.93],[22,1.73],[26,1.86],[31,2.03],[39,2.48],[44,2.73],[47,2.88],[51,2.98],[58,3.43],[67,3.93],[71,4.03],[77,4.33],[83,5.46],[88,5.61],[90,5.71],[96,6.36],[102,6.61],[108,7.36],[113,7.56],[119,7.88],[126,8.36],[131,8.53],[137,8.93],[142,9.11],[147,9.33],[152,10.28],[156,10.46],[161,10.61],[169,11.03],[173,11.26],[176,11.38],[179,11.48],[183,11.58],[188,11.86]]},"tok_none":{"h":"2e025844","o":[[3,0.24],[7,0.34],[16,0.84],[23,1.57],[29,1.74],[32,1.92],[35,2.17],[41,2.62],[45,2.77],[50,2.97],[60,3.89],[64,4.02],[68,4.19],[75,4.57],[82,5.14],[87,5.44],[90,5.54],[94,5.64],[101,6.74],[108,7.24],[115,7.67],[120,7.82],[128,8.27],[133,8.44],[136,8.57],[139,8.82],[145,9.09],[151,9.89],[155,10.04],[161,10.29],[165,10.42],[174,10.87],[179,11.22],[184,11.37],[189,11.49],[195,11.82]]},"tok_more":{"h":"bc2e8615","o":[[5,0.35],[14,0.82],[19,0.94],[23,1.04],[30,1.45],[39,2.12],[45,2.42],[53,2.8],[60,3.72],[66,4.07],[72,4.34],[77,4.77],[82,4.9],[84,5.04],[88,5.27],[94,5.54],[97,5.67],[105,6.87],[109,6.97],[115,7.29],[121,7.62],[125,8.19],[129,8.52],[134,8.92],[137,8.94],[139,9.09]]},"tok_last_term":{"h":"66774073","o":[[4,0.37],[9,0.62],[18,1.22],[24,1.54],[28,1.67],[33,2.04],[40,3.09],[43,3.22],[49,3.47],[60,4.49],[65,4.79],[68,4.94],[72,5.09],[81,5.62],[88,6.44],[95,6.87],[100,7.14],[105,7.29],[109,7.44],[117,8.52],[122,8.72],[132,9.67],[135,9.79],[141,10.09],[146,10.24],[154,10.64],[159,10.79],[163,10.94],[169,11.22],[172,11.42],[181,12.02],[185,12.12],[189,12.27],[194,12.62],[200,12.94]]},"tok_last":{"h":"ccaee597","o":[[4,0.37],[9,0.62],[18,1.12],[23,1.24],[27,1.37],[34,1.77],[44,2.74],[48,2.84],[52,2.97],[57,3.37],[63,3.79],[68,4.12],[72,5.09],[76,5.42],[80,5.52],[86,5.84],[89,6.04],[95,6.67],[99,6.79],[104,6.97],[112,7.39],[116,7.62],[123,7.84],[127,7.97],[132,8.29],[137,8.47]]},"exchange":{"h":"61c3812d","o":[[4,0.24],[10,0.54],[13,0.74],[19,1.44],[22,1.64],[28,1.91],[32,2.04],[39,2.61],[43,2.71],[47,2.84],[52,3.06],[57,3.56],[63,3.84],[69,4.69],[80,5.36],[86,5.54],[90,5.66],[96,5.99],[99,6.14],[104,7.14],[109,7.34],[117,7.74],[122,8.01],[125,8.16],[129,8.26],[133,8.44],[138,8.99],[141,9.16],[148,9.79],[152,10.04],[159,10.29],[163,10.39]]},"reset":{"h":"e9ec3a64","o":[[5,0.21],[9,0.34],[14,0.76],[19,0.89],[23,1.04],[28,1.39],[31,1.51],[35,2.04],[39,2.19],[42,2.29],[48,3.09],[52,3.21],[59,3.64],[63,3.74],[72,4.29],[75,4.36],[81,4.54],[88,5.84],[93,6.06],[98,6.24],[106,6.64],[114,7.06],[120,7.44],[124,7.56],[128,7.66],[133,7.96]]},"tips":{"h":"85d784c5","o":[[6,0.46],[12,1.36],[17,1.59],[21,1.71],[28,2.29],[37,2.86],[44,3.86],[49,4.09],[53,4.36],[57,4.51],[63,4.81],[66,4.94],[70,5.04],[74,5.21],[79,5.64],[85,5.89],[91,6.59],[97,7.04],[101,7.14],[108,7.86],[114,8.19],[119,8.36],[127,8.74],[135,9.19],[139,9.29],[143,9.41],[150,10.64],[156,10.94],[161,11.06],[163,11.21],[169,11.61],[181,12.36],[185,12.51],[189,12.71],[197,13.54],[201,13.69],[207,14.01],[212,14.26],[220,15.24],[223,15.34],[227,15.44],[236,16.01],[242,16.29],[249,16.96],[252,17.16],[257,17.41],[259,17.49],[265,18.41],[270,18.61],[274,18.76],[279,19.11],[289,19.69],[294,20.11],[302,20.31],[306,20.41]]},"outro":{"h":"cbf76364","o":[[7,0.38],[11,0.48],[17,0.76],[24,1.66],[32,2.43],[36,2.61],[40,2.73],[48,3.33],[53,3.53],[57,3.63],[65,4.36],[69,4.48],[79,5.91],[84,6.21],[90,6.78],[94,6.91],[101,7.28],[110,7.81],[117,7.96],[124,8.31],[129,8.56],[136,9.48],[139,9.63],[144,10.16],[151,10.48],[155,10.66],[160,11.18],[163,11.41],[167,11.51],[180,12.78],[184,12.88],[189,13.13],[192,13.21],[197,13.43],[202,13.86],[208,14.18],[212,14.31]]}};/* MK:END */
 const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
 /* the time (s into the clip) the voice reaches character i: the measured marks, joined by straight lines */
 function onsetFn(id,text,d){const m=MK[id];const pts=[[0,.05]];
@@ -4079,8 +4107,8 @@ function compose(D){
   const DEPTH={chb:0,ch:0,tg:1,bd:2,tk:3};
   const BOOK=(k,s,x,y)=>{s=s||sBk;const X=x==null?(SW-pw*s)/2:x,Y=y==null?by:y;return{x:X+DEPTH[k]*2.2*s/sBk,y:Y+DEPTH[k]*2.6*s/sBk,s};};
   /* each person keeps one seat for the whole video: the learner on the left, the teacher on the right; a picked card waits on the
-     table on its own person's side (the chosen item on the left, the target on the right; two places on the right for the reset) */
-  const TL={x:bx/2,y:by+ph*sBk*.5},TR={x:SW-bx/2,y:by+ph*sBk*.5},TRa={x:SW-bx/2,y:by+ph*sBk*.27},TRb={x:SW-bx/2,y:by+ph*sBk*.75};
+     table on its own person's side (the chosen item on the left, the target on the right) */
+  const TL={x:bx/2,y:by+ph*sBk*.5},TR={x:SW-bx/2,y:by+ph*sBk*.5};
   const sBd=Math.min(.8,520/PG.bd.h),sTk=.52;
   const BDS={x:26,y:30,s:sBd},TKS={x:SW-26-pw*sTk,y:Math.min(300,604-PG.tk.h*sTk),s:sTk};
   const RC={x:TKS.x+pw*sTk/2,y:Math.max(150,TKS.y-112)};
@@ -4122,6 +4150,20 @@ function compose(D){
   const PDX=212;
   const pair=mkFx('wk-pair','<div class="wk-pt">'+F.chipTok+'</div><div class="wk-pa">→</div><div class="wk-pi">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div>',{x:64,y:478,w:400,h:104});
   const pTok=sub(pair.el.querySelector('.wk-pt')),pItem=sub(pair.el.querySelector('.wk-pi'),{o:1});
+  /* tip two, in the same place: the requirement as steps; the token climbs one step at a time, wobbles where the behavior falls apart,
+     and goes back a step */
+  const STX=86,STY=16;
+  const stairs=mkFx('wk-stairs','<svg viewBox="0 0 400 122" aria-hidden="true">'+[0,1,2,3].map(i=>'<rect x="'+(24+i*STX)+'" y="'+(92-i*STY)+'" width="78" height="'+(18+i*STY)+'" rx="5"/>').join('')+'</svg>'
+    +'<div class="wk-sbk">&larr; back a step</div><div class="wk-stk">'+F.chipTok+'</div>',{x:64,y:466,w:400,h:122});
+  const stTok=sub(stairs.el.querySelector('.wk-stk'),{o:1,s:.7}),stBack=sub(stairs.el.querySelector('.wk-sbk'),{dy:6});
+  /* tip three, in the same place: the item is locked away except through the board */
+  const lock=mkFx('wk-lock','<div class="wk-lpic"><div class="wk-pi">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div>'
+    +'<svg class="wk-lk" viewBox="0 0 40 46" aria-hidden="true"><path d="M11 20v-7a9 9 0 0 1 18 0v7" fill="none" stroke="#1d2b36" stroke-width="5" stroke-linecap="round"/><rect x="5" y="19" width="30" height="24" rx="5" fill="#ef7d00" stroke="#1d2b36" stroke-width="3"/><circle cx="20" cy="30" r="3.4" fill="#1d2b36"/></svg></div>'
+    +'<p><b>Only</b> through<br>the board</p>',{x:64,y:478,w:400,h:104});
+  /* the Targets page: a target that is a request (asking for a break) still gets what was asked for, every time */
+  const fcr=mkFx('wk-fcr','<div class="wk-fq"><svg viewBox="0 0 48 40" aria-hidden="true"><path d="M7 4h34a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H21l-9 8v-8H7a5 5 0 0 1-5-5V9a5 5 0 0 1 5-5z" fill="#fff" stroke="#1d4a77" stroke-width="3.5" stroke-linejoin="round"/><circle cx="15" cy="16.5" r="2.7" fill="#1d4a77"/><circle cx="24" cy="16.5" r="2.7" fill="#1d4a77"/><circle cx="33" cy="16.5" r="2.7" fill="#1d4a77"/></svg><span>&ldquo;A break, please.&rdquo;</span></div>'
+    +'<div class="wk-fa"><b>✓</b><span>Give the break,<br><em>every time</em></span></div>',{x:1004,y:150,w:264},{s:.85,dy:10});
+  const fqa=sub(fcr.el.querySelector('.wk-fa'),{dy:8}),fqe=sub(fcr.el.querySelector('.wk-fa em'),{o:1,h:0});
   const cyc=mkFx('wk-cyc','',{x:90,y:478,w:1100});
   const cycArr=[];const cycItems=['Choose','Set the target','Earn the tokens','Exchange'].map((w,i)=>{if(i){const a=div('wk-cya','→');cyc.el.appendChild(a);cycArr[i]=sub(a,{dx:-6});}const e=div('wk-cy','<b>'+(i+1)+'</b>'+esc(w));cyc.el.appendChild(e);return sub(e,{s:.85,dy:10});});
 
@@ -4183,9 +4225,10 @@ function compose(D){
     return last+.8-K.t;};
   SC.ch_show=K=>{glowAt(BOOK('ch'),M.tab.ch,5,K.t+.2,1.6);const ids=CH.map((c,i)=>c?i:-1).filter(i=>i>=0);
     ids.forEach((i,j)=>{CH[i].pops.ch=(CH[i].pops.ch||[]).concat(K.t+K.d*(.3+.55*j/Math.max(1,ids.length)));});return K.d;};
-  /* the learner looks over two pictures (half-second moves, short stops), then takes the one they chose, as "picks one" is said */
+  /* the learner looks over two pictures (half-second moves, short stops; the second the one nearer the choice, so the last reach is
+     short), then takes the one they chose, as "picks one" is said */
   SC.ch_pick=K=>{const L=BOOK('ch'),c=cC;const P0=at(L,ctr(M.ch[F.pick.ch]));
-    const scan=[4,2,1,5].filter(i=>CH[i]&&i!==F.pick.ch).slice(0,2);const pts=scan.map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
+    const dist=i=>Math.hypot(M.ch[i].x-M.ch[F.pick.ch].x,M.ch[i].y-M.ch[F.pick.ch].y);const scan=[4,2,1,5].filter(i=>CH[i]&&i!==F.pick.ch).slice(0,2).sort((a,b)=>dist(b)-dist(a));const pts=scan.map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
     const land=Math.max(K.t+.9,K.at('looks over',.1)+.25);let tq=land;
     if(pts.length){enter(HL,K.t,land,pts[0],'point',SHL);for(let j=1;j<pts.length;j++){handTo(HL,tq+.3,tq+.8,pts[j]);tq+=.8;}}
     const gp=grip(c,P0,L.s,'learner'),tp=Math.max(tq+.3+.7,K.at('picks one',.3)+.2);
@@ -4193,14 +4236,24 @@ function compose(D){
     c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HL,tp);c.tr.move(tp,tp+.35,{l:1});
     carryTo(c,HL,tp+.4,tp+1.5,TL,.2);release(c,tp+1.5);c.tr.move(tp+1.5,tp+1.75,{l:0});
     leave(HL,tp+1.85,tp+2.6);return tp+2.7-K.t;};
+  /* the Targets page; as the request is described, a note beside the page: the request, then what is given for it, every time */
   SC.tg_show=K=>{pageTurn('ch',K.t+.15,K.t+1.05);glowAt(BOOK('tg'),M.tab.tg,5,K.t+.9,1.6);
-    const ids=TG.map((c,i)=>c?i:-1).filter(i=>i>=0);ids.forEach((i,j)=>{TG[i].pops.tg=(TG[i].pops.tg||[]).concat(K.t+1.2+(K.d*.6-1.2)*(.3+.55*j/Math.max(1,ids.length)));});return Math.max(K.d,2);};
-  SC.tg_pick=K=>{const L=BOOK('tg'),c=cT;const P0=at(L,ctr(M.tg[F.pick.tg]));
+    const ids=TG.map((c,i)=>c?i:-1).filter(i=>i>=0);ids.forEach((i,j)=>{TG[i].pops.tg=(TG[i].pops.tg||[]).concat(K.t+1.2+(K.d*.6-1.2)*(.3+.55*j/Math.max(1,ids.length)));});
+    const ta=Math.max(K.t+2.5,K.at('asking for something',.66)-.15);fcr.tr.move(ta,ta+.35,{o:1,s:1,dy:0},0,easeOut);
+    const tb=Math.max(ta+1,K.at('still give',.83)-.15);fqa.tr.move(tb,tb+.35,{o:1,dy:0},0,easeOut);
+    const te=Math.max(tb+.6,K.at('every time',.94)-.15);fqe.tr.move(te,te+.3,{h:1});
+    return Math.max(K.d,te+.5-K.t);};
+  /* the teacher picks the target; the target card, waiting beside the book, glows as the line says what counts and the same thing */
+  SC.tg_pick=K=>{const L=BOOK('tg'),c=cT;const P0=at(L,ctr(M.tg[F.pick.tg]));fcr.tr.move(K.t,K.t+.35,{o:0});
     const other=[1,3,5,0].filter(i=>TG[i]&&i!==F.pick.tg)[0];const tp=Math.max(K.t+2.2,K.at('one target',.12)+.9);const gp=grip(c,P0,L.s,'teacher');
     if(other!=null){enter(HT,K.t,K.t+1.0,pointAt(at(L,ctr(M.tg[other])),L.s),'point',SHT);handTo(HT,tp-.75,tp-.05,gp,.12);HT.pose.set(tp-.75,'pinch');}
     else enter(HT,tp-1,tp-.05,gp,'pinch',SHT);
     c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HT,tp);c.tr.move(tp,tp+.35,{l:1});
-    carryTo(c,HT,tp+.4,tp+1.4,TR,.2);release(c,tp+1.4);c.tr.move(tp+1.4,tp+1.65,{l:0});leave(HT,tp+1.75,tp+2.5);return tp+2.6-K.t;};
+    carryTo(c,HT,tp+.4,tp+1.4,TR,.2);release(c,tp+1.4);c.tr.move(tp+1.4,tp+1.65,{l:0});leave(HT,tp+1.75,tp+2.5);
+    const cw=CW*L.s,rT={x:TR.x-cw/2,y:TR.y-cw/2,w:cw,h:cw},O={x:0,y:0,s:1};
+    const g1=Math.max(tp+1.7,K.at('exactly what counts',.5)-.15);glowAt(O,rT,6,g1,1.6);
+    const g2=Math.max(g1+1.9,K.at('the same thing',.9)-.15);glowAt(O,rT,6,g2,1.5);
+    return Math.max(tp+2.6,g2+1.5)-K.t;};
   SC.bd_place=K=>{pageTurn('tg',K.t+.15,K.t+1.05);const L=BOOK('bd');glowAt(L,M.tab.bd,5,K.t+.9,1.4);
     const t1=Math.max(K.t+1.9,K.at('target under first',.2)+.2);
     enter(HT,t1-.9,t1,grip(cT,TR,L.s,'teacher'),'pinch',SHT);take(cT,HT,t1);cT.tr.move(t1,t1+.3,{l:1});
@@ -4212,9 +4265,12 @@ function compose(D){
     return Math.max(t2+2.5,g2+1.5)-K.t;};
   SC.tk_page=K=>{toSession(K.t+.15,1.4);const t1=Math.max(K.t+1.7,K.at('where the tokens wait',.4)-.1);
     TK.forEach((c,i)=>{c.pops.tk=[t1+i*.18];});const t2=Math.max(t1+.4+n*.18,K.at('empty slots',.62)-.15);
-    M.slot.forEach((r,i)=>glowAt(BDS,r,4,t2+i*.2,1.3));
-    const t3=Math.max(t2+n*.2+1,K.at('valuable first',.8)-.15);TK.forEach((c,i)=>{c.pops.tk.push(t3+i*.06);});
-    return Math.max(K.d,t2+n*.2+1.3-K.t);};
+    const sp=Math.min(.2,1.2/n);M.slot.forEach((r,i)=>glowAt(BDS,r,4,t2+i*sp,1.3));
+    /* "how many are left to earn": the whole strip of empty slots at once */
+    const U=M.slot.reduce((u,r)=>({x:Math.min(u.x,r.x),y:Math.min(u.y,r.y),r:Math.max(u.r,r.x+r.w),b:Math.max(u.b,r.y+r.h)}),{x:1e9,y:1e9,r:-1e9,b:-1e9});
+    const tl=Math.max(t2+n*sp+.8,K.at('how many are left',.55)-.15);glowAt(BDS,{x:U.x,y:U.y,w:U.r-U.x,h:U.b-U.y},7,tl,1.7);
+    const t3=Math.max(tl+1.2,K.at('valuable first',.8)-.15);TK.forEach((c,i)=>{c.pops.tk.push(t3+i*.06);});
+    return Math.max(K.d,t3+n*.06+.7-K.t);};
   /* the rule: what earns a token (how many times, or how long), then the example filled in */
   SC.rule=K=>{let t=K.t;if(!session){toSession(t+.1,1.4);t+=1.4;}
     const tc=Math.max(t+.3,K.at('decide how much',.2)-.1);chip.tr.move(tc,tc+.4,{o:1,s:1},0,easeOut);
@@ -4235,7 +4291,7 @@ function compose(D){
     return tr0+1.2-K.t;};
   /* the first token comes as the interval ends (the reach starts just before), not when the line gets to it; the ring keeps its ✓ until
      the token is in its slot; the praise is shown again with the behavior's name marked as the line says so; the slot glows as it is named */
-  SC.tok_first=K=>{const tEnd=K.t+.6,grab=tEnd+.45,atHO=grab+.8,tk=atHO+.9,place=tk+.8;
+  SC.tok_first=K=>{const tEnd=K.t+.6,grab=tEnd+.45,atHO=grab+.8,tk=atHO+.9,place=tk+.95;
     ringInt(ringPending==null?K.t-3:ringPending,tEnd,true,{hold:place+.3});ringPending=null;
     deliver(0,{t0:tEnd-.4,grab,atHO,text:PR.first,bub:atHO,bubDur:2.4,take:tk,place,lin:.9});
     const tb=Math.max(atHO+2.5,K.at('brief praise',.5)-.15);bubble(PR.first,tb,2.8,true);
@@ -4253,10 +4309,10 @@ function compose(D){
   SC.tok_more=K=>{const idx=[];for(let i=1;i<n-1;i++)idx.push(i);if(!idx.length)return K.d;
     const want=(K.d+.4)/idx.length;let T=K.t+.25,end=K.t;
     if(want>=2.4){const cy=Math.min(4,want),ri=cy-1.4;   /* a few tokens: each one in full, the hands come in and go */
-      idx.forEach((i,j)=>{ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.4,grab:D+.5,atHO:D+1.05,text:PR.more[j%PR.more.length],bubDur:1.7,take:D+1.25,place:D+1.85,lin:.9});T+=cy;});}
+      idx.forEach((i,j)=>{ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;end=deliver(i,{t0:D-.4,grab:D+.5,atHO:D+1.1,text:PR.more[j%PR.more.length],bubDur:1.7,take:D+1.3,place:D+2.05,lin:.9});T+=cy;});}
     else{const cy=Math.max(1.75,want),ri=cy-.5;   /* a big board: the intervals follow one another and both hands stay in the frame from token to token */
       idx.forEach((i,j)=>{const last=j===idx.length-1;ringInt(j===0&&ringPending!=null&&ringPending<T?ringPending:T,T+ri,true);const D=T+ri;
-        end=deliver(i,{t0:D-.05,grab:D+.45,atHO:D+.95,text:PR.more[j%PR.more.length],bubDur:Math.min(1.6,cy-.1),take:D+1.2,place:D+1.75,lin:.6,tIn:j>0,lIn:j>0,stay:!last});T+=cy;});}
+        end=deliver(i,{t0:D-.05,grab:D+.45,atHO:D+.95,text:PR.more[j%PR.more.length],bubDur:Math.min(1.6,cy-.1),take:D+1.2,place:D+1.95,lin:.75,tIn:j>0,lIn:j>0,stay:!last});T+=cy;});}
     ringPending=null;
     return end-K.t+.1;};
   /* the last token: given at once; the terminal token goes straight into its slot, and sits there, its round slot glowing, while the line
@@ -4276,11 +4332,11 @@ function compose(D){
     const g0=grip(TK[0],s0p,sBd,'teacher');enter(HT,tg-.9,tg,g0,'pinch',SHT);
     TK.forEach((c,i)=>{const sp=at(BDS,ctr(M.slot[i]));c.tr.set(tg-.3,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(tg-.3,'fly');
       c.tr.move(tg-.2+i*.03,tg+.45+i*.03,{x:s0p.x+i*2.5,y:s0p.y-i*3,l:.4},.05);});
-    const tgT=tg+.5+n*.03;TK.forEach(c=>take(c,HT,tgT));TK.forEach(c=>c.tr.move(tgT,tgT+1,{s:sTk,l:.8}));
-    const tc=at(TKS,{x:pw/2,y:PG.tk.h*.45});carryTo(TK[0],HT,tgT+.05,tgT+1,tc,.16);
-    TK.forEach((c,i)=>{const dp=at(TKS,ctr(M.ybx[i])),tr=tgT+1+i*.04;release(c,tr);c.tr.move(tr,tr+.45,{x:dp.x,y:dp.y,l:0},.1);c.where.set(tr+.47,'tk');});
-    HT.pose.set(tgT+1.05,'point');leave(HT,tgT+1.15,tgT+1.85);
-    const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:292},big=sBd*1.5,tt=Math.max(tgT+1.2,K.at('then item',.4)-.1);
+    const tgT=tg+.5+n*.03;TK.forEach(c=>take(c,HT,tgT));TK.forEach(c=>c.tr.move(tgT,tgT+1.25,{s:sTk,l:.8}));
+    const tc=at(TKS,{x:pw/2,y:PG.tk.h*.45});carryTo(TK[0],HT,tgT+.05,tgT+1.25,tc,.16);
+    TK.forEach((c,i)=>{const dp=at(TKS,ctr(M.ybx[i])),tr=tgT+1.25+i*.04;release(c,tr);c.tr.move(tr,tr+.45,{x:dp.x,y:dp.y,l:0},.1);c.where.set(tr+.47,'tk');});
+    HT.pose.set(tgT+1.3,'point');leave(HT,tgT+1.4,tgT+2.1);
+    const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:292},big=sBd*1.5,tt=Math.max(tgT+1.45,K.at('then item',.4)-.1);
     veil.tr.move(tt-.2,tt+.4,{o:.32});
     c.tr.set(tt,{x:P0.x,y:P0.y,s:sBd,l:0,o:1});c.where.set(tt,'fly');c.tr.move(tt,tt+.35,{l:1});c.tr.move(tt+.35,tt+1.3,{x:CEN.x,y:CEN.y,s:big},.1);
     const is=big*CW/IW;item.tr.set(tt+1.15,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(tt+1.15,'fly');item.tr.move(tt+1.15,tt+1.75,{o:1});c.tr.move(tt+1.15,tt+1.75,{o:0});c.where.set(tt+1.8,'none');
@@ -4289,22 +4345,24 @@ function compose(D){
     const tl=tgv+1.15;enter(HL,tl-.95,tl,grip(item,HOFF,si,'learner',GI_L),'pinch',SHL);release(item,tl);take(item,HL,tl);HT.pose.set(tl+.05,'point');leave(HT,tl+.15,tl+.9);
     const tw=Math.max(tl+1.1,K.at('for the time',.6)+.2);leave(HL,tw,tw+1.1);release(item,tw+1.12);item.where.set(tw+1.12,'none');
     return Math.max(K.d,tw+1.2-K.t);};
-  /* the reset: the item comes back in the teacher's hand and turns back into its card; the hand puts the pictures back, each on its
-     own page (the target first, as its page turns back over the Board, then the chosen item); the learner looks over the choices again */
+  /* the reset: the item comes back in the teacher's hand and, as it is put away, turns back into its card; the same hand picks the
+     target card up off First as well, holds the two over the book while the Targets page turns back, puts the target card on its box,
+     then holds the chosen card while the Choices page turns back and puts it on its box (short, unhurried moves); the learner then
+     looks over the choices again */
   SC.reset=K=>{const r=K.t;veil.tr.move(r+.1,r+.7,{o:0});toBook(r+.1,1.1);
-    const QI={x:820,y:300},si=.75,ti=Math.max(r+1.1,K.at('put it away',.3)-.6),gI=grip(item,QI,si,'teacher',GI_T);
+    const QI={x:820,y:300},si=.75,ti=r+1.25,gI=grip(item,QI,si,'teacher',GI_T);
     const st=enter(HT,ti-1,ti,gI,'pinch',SHT),h0=HT.tr.at(st);item.tr.set(st,{x:h0.x+QI.x-gI.x,y:h0.y+QI.y-gI.y,s:si,l:1,o:1});item.where.set(st,'fly');take(item,HT,st);
-    const ts=ti+.05,sc=sBk*CW/IW;item.tr.move(ts,ts+.5,{s:sc});
+    const ts=Math.max(ti+.35,K.at('put it away',.3)-.2),sc=sBk*CW/IW;item.tr.move(ts,ts+.5,{s:sc});
     const pI={x:QI.x+(gI.x-QI.x)*(1-sc/si),y:QI.y+(gI.y-QI.y)*(1-sc/si)};   /* where the shrinking item's centre ends up (it keeps its point under the fingers) */
     cC.tr.set(ts+.4,{x:pI.x,y:pI.y,s:sBk,l:1,o:0});cC.where.set(ts+.4,'fly');take(cC,HT,ts+.4);cC.tr.move(ts+.4,ts+.6,{o:1});item.tr.move(ts+.4,ts+.6,{o:0});release(item,ts+.62);item.where.set(ts+.62,'none');
-    carryTo(cC,HT,ts+.65,ts+1.25,TRa);release(cC,ts+1.25);cC.tr.move(ts+1.25,ts+1.45,{l:0});
-    const fB=at(BOOK('bd'),ctr(M.first));handTo(HT,ts+1.3,ts+1.8,grip(cT,fB,sBk,'teacher'));
-    cT.tr.set(ts+1.8,{x:fB.x,y:fB.y,s:sBk,l:0,o:1});take(cT,HT,ts+1.8);cT.tr.move(ts+1.8,ts+2,{l:1});carryTo(cT,HT,ts+1.95,ts+2.55,TRb);release(cT,ts+2.55);cT.tr.move(ts+2.55,ts+2.7,{l:0});
-    pageTurn('tg',ts+2.55,ts+3.25,true);
-    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg]));take(cT,HT,ts+3.25);cT.tr.move(ts+3.25,ts+3.4,{l:1});carryTo(cT,HT,ts+3.3,ts+3.9,pT,.15);release(cT,ts+3.9);cT.tr.move(ts+3.9,ts+4.05,{l:0});cT.where.set(ts+4.08,'tg');
-    pageTurn('ch',ts+4,ts+4.7,true);handTo(HT,ts+4,ts+4.55,grip(cC,TRa,sBk,'teacher'));
-    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));take(cC,HT,ts+4.72);cC.tr.move(ts+4.72,ts+4.87,{l:1});carryTo(cC,HT,ts+4.77,ts+5.37,pC,.15);release(cC,ts+5.37);cC.tr.move(ts+5.37,ts+5.52,{l:0});cC.where.set(ts+5.55,'ch');
-    leave(HT,ts+5.5,ts+6.2);let t=ts+5.6;
+    /* the chosen card stays in the hand, a little below the target card the hand picks up next (both held by their right edges) */
+    const fB=at(BOOK('bd'),ctr(M.first)),tA=Math.max(ts+.7,K.at('return the pictures',.38)-.75),tB=tA+.65;handTo(HT,tA,tB,grip(cT,fB,sBk,'teacher'),.1);
+    cT.tr.set(tB,{x:fB.x,y:fB.y,s:sBk,l:0,o:1});take(cT,HT,tB+.05);cT.tr.move(tB+.05,tB+.25,{l:1});
+    const t1=tB+.12;handTo(HT,t1,t1+.6,{x:860,y:300},.08);pageTurn('tg',t1+.05,t1+.75,true);
+    const pT=at(BOOK('tg'),ctr(M.tg[F.pick.tg])),t2=t1+.8;carryTo(cT,HT,t2,t2+.7,pT,.12);release(cT,t2+.7);cT.tr.move(t2+.7,t2+.85,{l:0});cT.where.set(t2+.88,'tg');
+    const t3=t2+.8;handTo(HT,t3,t3+.6,{x:820,y:300},.08);pageTurn('ch',t3+.05,t3+.75,true);
+    const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch])),t4=t3+.8;carryTo(cC,HT,t4,t4+.7,pC,.12);release(cC,t4+.7);cC.tr.move(t4+.7,t4+.85,{l:0});cC.where.set(t4+.88,'ch');
+    leave(HT,t4+.8,t4+1.5);let t=t4+.85;
     /* the learner looks over the choices again, coming in as the teacher's hand is nearly out of the frame (so the arms do not cross) */
     const L=BOOK('ch'),pts=[2,4].filter(i=>CH[i]&&i!==F.pick.ch).concat([F.pick.ch]).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
     if(pts.length){const tl=Math.max(t+1.2,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
@@ -4319,10 +4377,21 @@ function compose(D){
     const sp=Math.max(2.3,Math.min(3,(ts[1]-ts[0]-.8)/2));trade(ts[0]+.6);trade(ts[0]+.6+sp);
     /* once tip one is done, the demo goes (left on the table it would read as nothing traded for the item) */
     const po=Math.max(ts[1]-.1,ts[0]+.6+sp+2.1);pair.tr.move(po,po+.4,{o:0});
+    /* tip two: the token on the first, small step; it climbs a step at a time as the requirement is raised slowly, wobbles as the
+       behavior falls apart, and goes back a step */
+    const s0=po+.3;stairs.tr.move(s0,s0+.4,{o:1});
+    const tsm=Math.max(s0+.5,K.at('small requirement',.55)-.15);stTok.tr.move(tsm,tsm+.25,{s:.84});stTok.tr.move(tsm+.25,tsm+.55,{s:.7});
+    const hop=(i,a)=>{stTok.tr.move(a,a+.24,{dx:STX*(i-.5),dy:-STY*i-14},0,easeOut);stTok.tr.move(a+.24,a+.48,{dx:STX*i,dy:-STY*i},0,easeIn);};
+    const tr=Math.max(tsm+.8,K.at('raise them slowly',.66)-.15);hop(1,tr);hop(2,tr+.75);hop(3,tr+1.5);
+    const tf=Math.max(tr+2.1,K.at('falls apart',.77)-.1);for(let j=0;j<6;j++)stTok.tr.move(tf+j*.1,tf+(j+1)*.1,{dx:STX*3+(j%2?-6:6)});stTok.tr.move(tf+.6,tf+.7,{dx:STX*3});
+    const tb=Math.max(tf+.8,K.at('go back a step',.82)-.15);stTok.tr.move(tb,tb+.5,{dx:STX*2,dy:-STY*2});stBack.tr.move(tb,tb+.35,{o:1,dy:0},0,easeOut);
+    stairs.tr.move(ts[2]+.25,ts[2]+.6,{o:0});
+    /* tip three: the item, locked away except through the board */
+    lock.tr.move(ts[2]+.45,ts[2]+.85,{o:1});
     return Math.max(K.d,2.5);};
   /* the end: the book closes, the cycle is named step by step (each arrow comes with the step after it), and the Choices page turns
      over to show its back as the backs are mentioned */
-  SC.outro=K=>{const t=K.t,sO=Math.min(.7,430/maxH);tipsCard.tr.move(t,t+.5,{o:0,dy:10});pair.tr.move(t,t+.4,{o:0});stackTo(t+.2,t+1.4,k=>BOOK(k,sO,null,24));cyc.tr.move(t+.6,t+.9,{o:1});
+  SC.outro=K=>{const t=K.t,sO=Math.min(.7,430/maxH);tipsCard.tr.move(t,t+.5,{o:0,dy:10});lock.tr.move(t,t+.4,{o:0});stackTo(t+.2,t+1.4,k=>BOOK(k,sO,null,24));cyc.tr.move(t+.6,t+.9,{o:1});
     const after=K.text.toLowerCase().indexOf('cycle');const w=[['choose',.3],['set the target',.42],['earn',.55],['exchange',.68]];let last=t+1;
     cycItems.forEach((fx,i)=>{const tt=Math.max(t+1+i*.35,K.at(w[i][0],w[i][1],after)-.15);fx.tr.move(tt,tt+.4,{o:1,s:1,dy:0},0,easeOut);if(cycArr[i])cycArr[i].tr.move(tt-.05,tt+.3,{o:1,dx:0},0,easeOut);last=tt;});
     /* the steps the next sentence refers to: the target (more often), the item (Choose) and the requirement (Earn the tokens) */
@@ -4373,8 +4442,11 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
     const vis=s.y<SH+420;let ox=0,oy=0;
     if(ps.prev!==ps.v&&ps.since<.3&&h.poses[ps.prev]){const r=ang*Math.PI/180,cs=Math.cos(r),sn=Math.sin(r),W=P=>{const dx=(P.wx-P.ax)*sc,dy=(P.wy-P.ay)*sc;return[dx*cs-dy*sn,dx*sn+dy*cs];};
       const a=W(h.poses[ps.prev]),b=W(h.poses[ps.v]),k=1-ps.since/.3;ox=(a[0]-b[0])*k;oy=(a[1]-b[1])*k;}
-    for(const name in h.poses){const P=h.poses[name];const o=name===ps.v?(ps.prev===name?1:u):name===ps.prev&&ps.prev!==ps.v?1-u:0;const nw=name===ps.v&&ps.prev!==name;
-      css(P.el,'opacity',f2(vis?o:0));css(P.el,'visibility',vis&&o>.001?'visible':'hidden');
+    /* the new drawing is there at once, under the old one, which fades off the top without its shadow: the hand never shows the
+       table through it, only the old fingers melt away */
+    const sw=ps.prev!==ps.v&&ps.since<.14&&!!h.poses[ps.prev];
+    for(const name in h.poses){const P=h.poses[name];const nw=name===ps.v&&ps.prev!==name,old=sw&&name===ps.prev;const o=name===ps.v?1:old?1-u:0;
+      css(P.el,'opacity',f2(vis?o:0));css(P.el,'visibility',vis&&o>.001?'visible':'hidden');css(P.el,'zIndex',old?'2':'1');tog(P.el,'wk-out',old);
       css(P.el,'transform','translate('+f2(s.x-P.ax+(nw?ox:0))+'px,'+f2(s.y-P.ay+(nw?oy:0))+'px) rotate('+f2(ang)+'deg) scale('+sc.toFixed(4)+')');}}
   for(const fx of B.fxs){const s=fx.tr.at(v);css(fx.el,'opacity',f2(s.o));css(fx.el,'visibility',s.o>.001?'visible':'hidden');css(fx.el,'transform',s.dy||s.dx||s.s!==1?'translate('+f2(s.dx||0)+'px,'+f2(s.dy)+'px) scale('+s.s.toFixed(4)+')':'none');
     if(s.h!=null)css(fx.el,'backgroundColor',s.h>.01?'rgba(255,205,90,'+f2(.42*s.h)+')':'transparent');}

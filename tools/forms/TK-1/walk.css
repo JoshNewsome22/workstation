@@ -32,7 +32,9 @@ body.view-walk .only-setup,body.view-walk .only-choices,body.view-walk .only-tar
 .wk-item>.wk-ilbl{position:absolute;z-index:3;left:50%;top:100%;margin-top:16px;transform:translateX(-50%);white-space:nowrap;padding:9px 20px;border-radius:999px;background:#1d4a77;color:#fff;font:700 27px/1.1 "Inter","Segoe UI",Arial,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .wk-veil{background:rgba(25,20,10,1);opacity:0}
 /* the hands: each pose is drawn about the point that touches the card */
+.wk-hand{isolation:isolate}
 .wk-pose{position:absolute;left:0;top:0;will-change:transform,opacity;visibility:hidden}
+.wk-pose.wk-out .wh-shadow{display:none}
 .wk-pose svg{display:block;width:100%;height:100%;overflow:visible}
 /* overlays */
 .wk-o{position:absolute;transform-origin:50% 50%;opacity:0;visibility:hidden}
@@ -114,10 +116,10 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 /* touch screens: the shared rule that sets buttons to 40 px must not shrink the player's controls below 44 px */
 @media (pointer:coarse){.wk-player button.wk-b{min-height:48px!important}.wk-player .wk-chaps button{min-height:48px!important}}
 /* narrow screens: the seek bar gets a row of its own; on a phone the player uses the whole width (16 px gutters) */
-@media (max-width:900px){.wk-seek{order:-1;flex-basis:100%;margin:0 4px}}
-@media (max-width:560px){body.view-walk .wk-player{width:calc(100vw - 32px);max-width:none;margin-left:calc(50% - 50vw + 16px);margin-right:0}.wk-small .wk-big{width:56px;height:56px;margin:-28px 0 0 -28px}.wk-small .wk-big svg{width:28px;height:28px}}
+@media (max-width:900px){.wk-seek{order:-2;flex:1 1 calc(100% - 130px);margin:0 4px}.wk-time{order:-1}}
+@media (max-width:560px){body.view-walk .wk-player{width:calc(100vw - 32px);max-width:none;margin-left:calc(50% - 50vw + 16px);margin-right:0}body.view-walk .wk-player.wk-fs{width:auto;margin:0}.wk-small .wk-big{width:56px;height:56px;margin:-28px 0 0 -28px}.wk-small .wk-big svg{width:28px;height:28px}}
 /* a full-screen panel on a short screen (a phone turned sideways): the chapter row gives its height to the picture */
-@media (max-height:500px){.wk-player.wk-fs .wk-chaps,.wk-player:fullscreen .wk-chaps{display:none}.wk-player.wk-fs .wk-seek,.wk-player:fullscreen .wk-seek{order:0;flex-basis:120px}.wk-player.wk-fs .wk-bar{flex-wrap:nowrap}}
+@media (max-height:500px){.wk-player.wk-fs .wk-chaps,.wk-player:fullscreen .wk-chaps{display:none}.wk-player.wk-fs .wk-seek,.wk-player:fullscreen .wk-seek{order:0;flex-basis:120px}.wk-player.wk-fs .wk-time,.wk-player:fullscreen .wk-time{order:0}.wk-player.wk-fs .wk-bar{flex-wrap:nowrap}}
 /* the stage's newer overlays: tab names, the rule's two ways to measure, the pairing demo, the marked name in the praise */
 .wk-tabl{padding:6px 16px 7px;border-radius:999px;background:var(--tc,#fff);border:3px solid #0e2845!important;font:700 28px/1.1 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36;white-space:nowrap;box-shadow:0 3px 10px rgba(60,40,10,.28)}
 .wk-cst{display:grid;align-items:center}
@@ -136,3 +138,25 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .wk-pair .wk-pi span{font:700 15px/1.1 Georgia,serif;color:#1d4a77;text-align:center}
 .wk-msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:31;max-width:92%;padding:8px 16px;border-radius:10px;background:rgba(16,22,28,.9);color:#fff;font:600 15px/1.3 "Inter","Segoe UI",Arial,sans-serif;text-align:center}
 .wk-msg[hidden]{display:none}
+/* the request note beside the Targets page; the steps (tip two) and the locked item (tip three) under the book in the tips */
+.wk-fcr{padding:12px 14px 12px;border-radius:16px;background:#fffbe9;border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.3);font:600 21px/1.25 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36}
+.wk-fq{display:flex;align-items:center;gap:10px}
+.wk-fq svg{flex:none;width:46px;height:38px}
+.wk-fq span{font-style:italic}
+.wk-fa{display:flex;align-items:flex-start;gap:12px;margin-top:10px;padding-top:10px;border-top:2px dashed #c9b98f}
+.wk-fa b{flex:none;width:36px;height:36px;margin:0 5px;border-radius:50%;background:#2f9e44;color:#fff;display:flex;align-items:center;justify-content:center;font:700 21px/1 "Inter",Arial,sans-serif}
+.wk-fa em{display:inline-block;font-style:normal;font-weight:700;padding:0 6px;margin:2px 0 0 -6px;border-radius:7px}
+.wk-stairs{border-radius:16px;background:rgba(255,253,247,.92);border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.25)}
+.wk-stairs svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+.wk-stairs rect{fill:#dfe8f0;stroke:#1d4a77;stroke-width:3}
+.wk-stk{position:absolute;left:34px;top:41px;transform-origin:50% 50%}
+.wk-stk .card{position:relative}
+.wk-sbk{position:absolute;left:26px;top:10px;padding:2px 10px 3px;border-radius:999px;background:#fdecea;border:2px solid #c0392b;color:#a5281b;font:700 17px/1.2 "Inter","Segoe UI",Arial,sans-serif;white-space:nowrap}
+.wk-lock{display:flex;align-items:center;gap:26px;padding:10px 18px;border-radius:16px;background:rgba(255,253,247,.92);border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.25)}
+.wk-lpic{position:relative;flex:none;width:82px;height:82px}
+.wk-lock .wk-pi{width:82px;height:82px;border-radius:14px;background:#fff;box-shadow:0 0 0 4px #acd69a,0 0 0 6px #1d4a77;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;opacity:.55}
+.wk-lock .wk-pi svg,.wk-lock .wk-pi img{width:100%;height:100%;object-fit:contain;display:block}
+.wk-lock .wk-pi span{font:700 15px/1.1 Georgia,serif;color:#1d4a77;text-align:center}
+.wk-lk{position:absolute;right:-16px;bottom:-14px;width:40px;height:46px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.wk-lock p{margin:0;font:600 25px/1.2 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36}
+.wk-lock p b{color:#1d4a77}
