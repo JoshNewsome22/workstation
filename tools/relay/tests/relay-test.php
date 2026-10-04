@@ -234,7 +234,9 @@ T::ok(trim((string) @file_get_contents($site->relayDir() . '/data/.htaccess')) =
 $r = http('POST', $AI . '/api/redeem', ['json' => ['code' => 'AAA-AAA-AAA-AAA'], 'headers' => $https + ['Origin' => 'https://newsomebh.com']]);
 T::eq(503, $r['status'], 'redeem answers 503 until the API key is set');
 T::eq('setup_required', $r['json']['error'] ?? null, '... with setup_required, and no details');
-T::eq(503, http('GET', $AI . '/api/health', ['headers' => $https])['status'], 'health: 503 until set up');
+$r = http('GET', $AI . '/api/health', ['headers' => $https]);
+T::eq(503, $r['status'], 'health: 503 until set up');
+record('health_setup', 'health', $r);   // what the forms' panel asks as its Rewrite with Claude tab opens
 record('setup_required', 'rewrite', http('POST', $AI . '/api/rewrite', ['json' => ['token' => Crypto::token(), 'text' => 'x', 'style' => 'concise'], 'headers' => $https + ['Origin' => 'https://newsomebh.com']]));
 
 $site->writeConfig(testConfig($PEPPER, ''));
@@ -263,6 +265,7 @@ file_put_contents($PAGES . '/sign-in.html', $r['body']);
 T::eq(404, post('/api/admin/password-hash', ['password' => $PW])['status'], 'the password helper is gone once a password is set');
 $r = http('GET', $AI . '/api/health');
 T::ok($r['status'] === 200 && ($r['json']['ok'] ?? false) === true, 'health: ready');
+record('health_ok', 'health', $r);
 
 // ====================================================================================================
 T::section('A broken config.php: a plain setup message, never its contents');

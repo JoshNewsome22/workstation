@@ -27,6 +27,8 @@ and the server from `WS_URL` (default `http://127.0.0.1:8123`); both are read in
 | `node shell-check.js after` | Fullscreen on and off (button, Escape, Escape from inside a form, the keyboard shortcut from both), the hidden form list and its memory, the phone packet bar. |
 | `node phoneprint.js PR-1,IN-1,IC-1,CT-1 phone-after` (and `phone-before` against the earlier release's URL) | Prints those forms from a 390px-wide window, from the kept snapshots; `compare-print.py print/phone-before print/phone-after` must find them identical, so the phone text size never reaches paper. |
 | `node determinism.js DD-1 TI-1` | Whether a form's simulation loads the same data twice (DD-1 does not; the print check restores a kept snapshot instead). |
+| `node wording-rollout-test.js [FORM-ID ...]` | The writing help in all 44 forms, each against the same form at the commit before the rollout (`WR_COMMIT`, unpacked into `out/wording-rollout/base/`): no console error, a button on every shown narrative field and nowhere else, Save data the same before and after the panel, the workstation's snapshot the same (an old case restored into both copies), the same printed pages, nothing past the edge at 390 px. Results in `out/wording-rollout/results.md`. |
+| `node wording-client-test.js`, `node wording-rules-test.js` | The writing help's panel (in OB-1, against a stand-in relay) and its wording rules. The relay's own tests: `tools/relay/tests/run.sh`. |
 
 To compare against an earlier release, serve that folder on a second port and pass its URL
 (and `WS_ROOT`) to the `before` runs.

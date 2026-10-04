@@ -2,9 +2,11 @@
 # Build Form TK-1 from its parts: the QR library, the shared link core (tools/blocks/nbh-link.js, the link with Form
 # TE-1), script-main.js and the walkthrough files (walk-hands.js, walk-audio.js, walk.js, walk.css, each used when present)
 # go into script.js and the stylesheet, then tools/new-form.py assembles the form on CF-1's shared parts and
-# tools/polish-one.py applies the shared polish layer. The link core goes in byte for byte (Form TE-1 carries the same file
+# tools/polish-one.py applies the shared polish layer and the writing help (tools/blocks/nbh-wording.js, put in by
+# tools/apply-polish.py). The link core goes in byte for byte (Form TE-1 carries the same file
 # through tools/blocks/patch-link.py), so the two forms cannot drift apart; the build stops unless the built form holds it
-# exactly once, unchanged. The parts are copied to a folder of the build's own, so two builds at once cannot mix.
+# exactly once, unchanged, and the writing help once, current. The parts are copied to a folder of the build's own, so two
+# builds at once cannot mix.
 # usage (from the repository root): sh tools/forms/TK-1/build.sh
 set -e
 cd "$(dirname "$0")/../../.."
@@ -40,4 +42,7 @@ doc=open('NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html',encoding='utf-8')
 BANNER='/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n'
 assert doc.count(BANNER)==1 and doc.count(BANNER+core)==1 and doc.count('nbh-link (v21.43)')==1, 'the link core is not in the built TK-1 exactly once, byte for byte'
 print('the link core (tools/blocks/nbh-link.js) is in the built TK-1 once, byte for byte')
+W,R,C=(open('tools/blocks/'+f,encoding='utf-8',newline='').read() for f in ('nbh-wording.js','nbh-wording-rules.json','nbh-wording-config.json'))
+assert doc.count('\n<script id="nbh-wording">')==1 and doc.count(W)==1 and doc.count('window.nbhWordingRules=\n'+R+'\n;\nwindow.nbhWordingConfig=\n'+C+'\n;\n'+W+'</script>')==1, 'the writing help is not in the built TK-1 exactly once, current'
+print('the writing help (tools/blocks/nbh-wording.js, its rules and its config) is in the built TK-1 once, current')
 PY

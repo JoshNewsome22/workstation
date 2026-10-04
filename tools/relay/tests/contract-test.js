@@ -56,7 +56,7 @@ const errors = {
   redeem_used: ['redeem', /That passcode was not accepted\./],
   redeem_origin: ['redeem', /refused this copy of the forms/],
   redeem_paused: ['redeem', /Too many passcode tries\. Wait about 15 minutes/],
-  setup_required: ['rewrite', /not working right now/],
+  setup_required: ['rewrite', /The rewrite service is not set up yet\..*still work without it\./],
   rewrite_refusal: ['rewrite', /could not rewrite this text/],
   rewrite_max_tokens: ['rewrite', /could not rewrite this text/],
   rewrite_bad_json: ['rewrite', /not working right now/],
@@ -81,6 +81,24 @@ for (const [name, [kind, re]] of Object.entries(errors)) {
   const msg = told(e, kind === 'redeem' ? 'redeem' : undefined);
   ok(re.test(msg), name + ' (' + e.status + ' ' + (e.body && e.body.error) + '): "' + msg.slice(0, 90) + '"', msg);
   if (kind === 'rewrite' && !/refused this copy/.test(msg)) ok(/Your text is still here\./.test(msg), name + ': the text is kept', msg);
+}
+
+console.log('\n== the check the panel makes as its Rewrite with Claude tab opens (GET /api/health)');
+const hs = by.health_setup, hk = by.health_ok;
+if (ok(!!hs, 'health_setup: recorded')) {
+  const msg = api.errText(asPanel(hs), 'reach', 'newsomebh.com');
+  ok(/^The rewrite service on newsomebh\.com is not set up yet\. Check wording and the iPad\u2019s Writing Tools still work without it\.$/.test(msg), 'health_setup (' + hs.status + ' ' + (hs.body && hs.body.error) + '): "' + msg + '"', msg);
+}
+if (ok(!!hk, 'health_ok: recorded')) ok(hk.status === 200 && !!hk.body && hk.body.ok === true, 'health_ok: {ok:true}, which the panel takes as the service being there', hk.body);
+/* the relay not on the website at all: what the website itself answers (its own 404 page), or nothing */
+const there = [['a 404 page from the website', {ok:false, status:404, body:null}], ['a 200 page that is not the relay', {ok:true, status:200, body:null}],
+  ['a 405 from the website', {ok:false, status:405, body:null}], ['no answer (not reachable)', {ok:false, status:0, body:null}]];
+for (const [what, r] of there) {
+  for (const kind of ['reach', 'redeem', 'rewrite']) {
+    const msg = api.errText(r, kind, 'newsomebh.com');
+    ok(/^The rewrite service on newsomebh\.com is not reachable, or it is not set up yet\./.test(msg) && /Check wording and the iPad\u2019s Writing Tools still work without it\.$/.test(msg) && (kind === 'reach' || /Your text is still here\./.test(msg)),
+       kind + ', ' + what + ': "' + msg.slice(0, 120) + '"', msg);
+  }
 }
 
 console.log('\n== answers the panel uses');
