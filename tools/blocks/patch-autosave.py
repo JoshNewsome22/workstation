@@ -7,10 +7,14 @@ Into every form named (default: the 44 forms, NBH-Workstation/[A-Z]*.html):
      each byte for byte, before the polish layer at the end of the body (tools/apply-polish.py puts the polish back at the
      end of the body, so a rebuilt form keeps the same order and a rebuild from parts stays byte for byte). An existing
      copy is replaced.
-  2. Four small changes in the workstation bridge: the status a form reports carries the hash of its whole state
+  2. Five small changes in the workstation bridge: the status a form reports carries the hash of its whole state
      (window.nbhState, so taps count), the parts the form's own safety copy needs are named on window.nbhBridge, the
      answer to a snapshot says beside it whether the form has been changed since it was opened and which state the
-     file holds, and a tap or key during a restore ends the quiet that answers the form's own confirms.
+     file holds, and a tap or key during a restore ends the quiet that answers the form's own confirms. And (v21.43)
+     the field-by-field restore (a snapshot without the form's own file, or one whose Open fails) takes the form for
+     the same shape when its controls without an id or a name sit where they sat, not only when the count of all its
+     controls is the same: a control with an id added after those (Form TE-1's hidden #teLink) no longer leaves
+     every positional field of an older snapshot behind. A count that differs for any other reason still does.
   3. Five small changes in the leave guard (nbh-guard): the bridge's silent save (the workstation's Autosave) is not the
      user's Save and clears nothing, and the unsaved mark, the leave warning and the quick Save follow the whole state.
      The same changes are made in tools/blocks/nbh-guard.html, the guard's source, so tools/blocks/patch-guard.py writes
@@ -68,6 +72,20 @@ BRIDGE = [
      "        document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);\n"
      "        quiet(false); res(true);\n"
      "      }, 1200);\n"),
+    ("  function restoreData(snap){\n    var list = ctrls(), keys = keysFor(list);\n"
+     "    var placed = 0, positionalSkipped = 0, unknown = 0, seen = {};\n"
+     "    var sameShape = snap && snap.total === list.length;\n",
+     "  /* v21.43 the shape is the same when the controls without an id or a name sit where they sat: a control with one,\n"
+     "     added after all of those (Form TE-1's hidden link record) or taken away from after them, moves none of them */\n"
+     "  function samePlaces(data, keys){\n"
+     "    var n = 0, i, k;\n"
+     "    for (i = 0; i < keys.length; i++) if (keys[i].charAt(0) === '~') { if (!(keys[i] in data)) return false; n++; }\n"
+     "    for (k in data) if (k.charAt(0) === '~') n--;\n"
+     "    return n === 0;\n"
+     "  }\n"
+     "  function restoreData(snap){\n    var list = ctrls(), keys = keysFor(list);\n"
+     "    var placed = 0, positionalSkipped = 0, unknown = 0, seen = {};\n"
+     "    var sameShape = snap && (snap.total === list.length || samePlaces(snap.data || {}, keys));\n"),
 ]
 GUARD = [
     ("   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */\n",

@@ -113,7 +113,11 @@ function compile(src){
   return out;
 }
 const BLANKRULE = {id:'blank', cat:'blank', why:'A blank is still to be filled in.', suggest:'Replace the words in brackets with what you saw or counted.', replace:null};
-const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2}|(?:email|phone|date|number|address)(?: \d{1,2})?)\]$/i;
+const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2})\]$/i,
+  /* (v21.43) the placeholders the de-identification writes for contact details, dates, addresses and long numbers, as it
+     writes them, with a capital: "[number]" in small letters is a rule's blank to fill in ("[number] times") */
+  PIIOURS = /^\[(?:Email|Phone|Date|Number|Address)(?: \d{1,2})?\]$/;
+const ours = x => OURS.test(x) || PIIOURS.test(x);
 /* a word left out on purpose, as records write it ("[expletive]", "[inaudible]"), is not a blank to fill in */
 const NOTBLANK = /^\[(?:expletives?|expletive deleted|profanity|obscenity|inaudible|unintelligible)\]$/i;
 /* A form can say what in a field is not the writer's own wording: window.nbhWordingKeep(field, text) returns
@@ -187,7 +191,7 @@ function check(text, keep){
     re.lastIndex = 0;
   });
   BLANK.lastIndex = 0; let b;
-  while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
+  while ((b = BLANK.exec(t)) !== null) if (!ours(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
   out.sort((a, c) => a.start - c.start || c.end - a.end);
   const seen = {};
   const list = out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seen[k]) return false; seen[k] = 1; return true; });
@@ -1492,7 +1496,7 @@ function useText(text, btn){
   if (!S) return false;
   btn = btn || 'Use this text';
   /* a blank left to fill in ("[number] times", "[describe what you saw]") is named once before it reaches the record */
-  const blanks = uniqBy(str(text).match(BLANK) || [], x => x).filter(x => !OURS.test(x));
+  const blanks = uniqBy(str(text).match(BLANK) || [], x => x).filter(x => !ours(x));
   if (blanks.length && S.blanks !== text) {
     S.blanks = text;
     say('Still to fill in: ' + blanks.slice(0, 4).join(', ') + (blanks.length > 4 ? ' \u2026' : '') + '. Fill them in, or press ' + btn + ' again to use the text as it is.', true);

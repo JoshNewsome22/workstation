@@ -70,7 +70,11 @@ function makeEngine(raw, opts) {
     rules.push({id, cat: str(r.cat), re, why: str(r.why), suggest: str(r.suggest), replace: typeof r.replace === 'string' ? r.replace : null});
   });
   const BLANKRULE = {id: 'blank', cat: 'blank', why: '', suggest: '', replace: null};
-  const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2}|(?:email|phone|date|number|address)(?: \d{1,2})?)\]$/i;
+  const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2})\]$/i,
+    /* (v21.43) the placeholders the de-identification writes for contact details, dates, addresses and long numbers, as it
+       writes them, with a capital: "[number]" in small letters is a rule's blank to fill in ("[number] times") */
+    PIIOURS = /^\[(?:Email|Phone|Date|Number|Address)(?: \d{1,2})?\]$/;
+  const ours = x => OURS.test(x) || PIIOURS.test(x);
   const NOTBLANK = /^\[(?:expletives?|expletive deleted|profanity|obscenity|inaudible|unintelligible)\]$/i;   /* as the client (v21.43) */
   function quoteSpans(t) {
     const spans = []; let open = -1, kind = '';
@@ -126,7 +130,7 @@ function makeEngine(raw, opts) {
       re.lastIndex = 0;
     });
     BLANK.lastIndex = 0; let b;
-    while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
+    while ((b = BLANK.exec(t)) !== null) if (!ours(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
     out.sort((a, c) => a.start - c.start || c.end - a.end);
     const seenK = {};
     return out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seenK[k]) return false; seenK[k] = 1; return true; });

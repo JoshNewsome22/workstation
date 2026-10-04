@@ -6613,8 +6613,11 @@ which holds the Anthropic API key, so the key is never in the forms.
 - **Unlocking.** A tab is unlocked with a single-use passcode from the BCBA.
   The session lasts until its time is up (8 hours) or the tab is closed,
   whichever comes first. In the workstation, every form in that tab shares
-  it. It is never saved in a form or a file. **Lock** ends it at once; press
-  it when you finish on a shared iPad.
+  it. It is never saved in a form or a file. **Lock** ends it at once, on the
+  relay too, so a tab that carries it (one this tab opened, or one the
+  browser restored) cannot use it either; press it when you finish on a
+  shared iPad. If the relay cannot be reached just then, the panel says that
+  only this tab is locked and until when the session still runs elsewhere.
 - **The privacy step.** Before anything is sent, the panel replaces names
   with placeholders, then shows exactly what will be sent:
   - the learner's name (whole, first, last, and each half of a double
@@ -6622,10 +6625,19 @@ which holds the Anthropic API key, so the key is never in the forms.
     [Student] and [ID];
   - a parent's surname after a title, or before "family", becomes [Family
     name];
-  - names added under **Also hide** become [Name 1], [Name 2] and so on.
+  - names added under **Also hide** become [Name 1], [Name 2] and so on;
+  - email addresses, telephone numbers, full dates (a date of birth among
+    them), street addresses and numbers of six digits or more (a Medicaid or
+    case number) become [Email], [Phone], [Date], [Address] and [Number],
+    numbered ([Date 1], [Date 2]) when a kind comes more than once. Times and
+    counts are left as they are.
 
   It also points out what may still be a name: capitalized words, the
-  learner's initials, and the people the form itself names.
+  learner's initials (J.A.R. as well as JAR), the people the form itself
+  names (its school and BCBA too), and short dates such as "on 10/12". Next
+  to **Send**, *Not hidden yet* lists those still in the text. The note above
+  the preview says what is replaced, that nothing else is, and that
+  de-identified is not anonymous.
 - **The answer.** It appears beside the original, with the names put back on
   the device. Choose **Use this**, **Use and keep editing**, or **Keep
   mine**. If the service is offline, the session has ended, a limit is
@@ -6658,7 +6670,10 @@ program and keeps the settings and the data.
   the admin password on the page and paste the line it makes into
   `config.php`.
 - From then on the page asks for the admin password to sign in, and signs
-  you out after 30 minutes without use.
+  you out after 30 minutes without use. Each browser tab signs in on its own:
+  a second tab, or the page opened again later, asks for the password again.
+  (The page's security token is kept in that tab only, never written into the
+  page, so a script on another page of the website cannot read it.)
 - **New passcode** makes a passcode, such as `7KQ-M4P-2XD-V9H`. It is shown
   once, with an optional label that only the BCBA sees, and it must be used
   within 24 hours unless you choose another time (7 days at most). It asks
@@ -6879,6 +6894,152 @@ and SM-1 load the new pictures, and all 44 forms pass the shell check.
 Every form was printed blank and with its simulation, before and after these
 Guide changes. All of them print the same, except SM-1 and VS-1, whose
 credit sentence changed.
+
+### Changed after the last review
+
+A review of the whole release, on an iPad's sizes as well as a computer's,
+found the faults below. Each is fixed, or the reason it is not is given.
+
+**TK-1**
+
+- The **Walkthrough** fits an iPad held sideways inside the workstation.
+  The picture is scaled to the room left under the form's toolbar and the
+  workstation's own bar, so the picture, the controls and the chapters are
+  on screen together (at 1180 × 820 the whole player now fits in the 608 px
+  the form gets; it was 709 px tall, and only 449 px of the form showed under
+  its toolbar). Held upright, nothing changed.
+- The **View** row keeps its eight buttons on one line; Walkthrough no
+  longer wraps alone onto a second row.
+- **From the case**: the replacement behaviors that come from TB-1 and GB-1
+  arrive as short card labels. Notes in brackets ("(see target 2)",
+  "(replacement)") are dropped, a long text is cut at a word, and texts that
+  name the same replacement behavior become one card. The note says how
+  many were the same.
+- A **word card** (such as the practice's Waiting card) shows its word
+  large, in the middle of the card, instead of a heading over an empty
+  picture area.
+- The **Choices** and **Targets** dots count a card with a picture or a label
+  as filled, out of six, so they no longer flicker between green and amber
+  while nothing changes.
+- The **Preview** line leaves out its text check while the book is not drawn
+  on the screen (an iPad showed "Text check 89.01" there).
+- The instruction **Backs** and the picture-credit box have no Improve
+  wording button: they are boilerplate with {n}, {token} and {last} marks in
+  them, which a rewrite could break. The Guide says so.
+- A saved file, case or safety copy whose photo names are not plain letters,
+  digits, dashes or underscores has those photos left out when it opens,
+  and photo names are escaped in the picker, so a file made elsewhere cannot
+  put markup into the page.
+- The narration is evened out at the -16 LUFS it was meant to have: every
+  clip measures -16.0 to -16.2 LUFS (they were -16.7 to -17.0). The words and
+  the timings are the same.
+
+**TB-1**
+
+- **Fill empty fields only** no longer pours the library's examples,
+  non-examples, borderline rule, exclusions, onset, offset, counting unit and
+  topographies in beside a definition you typed yourself: they are written
+  for the library's definition, not yours. With your own definition on the
+  card, those fields stay empty, and the dialog and the message say which
+  and why. With only a label typed, the rest is filled as before.
+- Loading the **functional version** of an entry now says why its type
+  stays one target (or a cluster): it scores the outcome, whatever form the
+  response takes, rather than a list of movements.
+- **Check wording** leaves the library's own text alone: a sentence still
+  word for word as the library wrote it, and the names the card's target
+  goes by, are not marked (437 marks on library text before, none now). The
+  panel says so. What you change or add is checked as before.
+- **Print.** The example counters print "5 listed" once three or more are
+  listed (they printed "5 of 3"), and empty boxes no longer print with
+  resize grips. These print changes, also part of this release, were
+  checked against v21.42i:
+  - the Guide gains *About the behavior library*;
+  - the References gain eight entries (Ahearn 2007, Borrero & Borrero 2008,
+    Friman 1999, Green & Reid 1996, Iwata, Pace et al. 1990, Mace 1988,
+    Powell 1975), in smaller type;
+  - six one-line entries on the definition cards are now one-row text boxes
+    (the printed text is the same);
+  - the RRB safety-flag checkboxes now print, so a ticked flag shows on
+    paper (the labels printed without their boxes before).
+
+  Blank, TB-1 still prints 18 pages; with the simulation, 19.
+
+**Writing help**
+
+- Boxes that hold someone else's words have no Improve wording button, so
+  their words are never "corrected": IN-1's interview answers, SV-1's open
+  answers, SI-1's answers in the student's words and *What the student said
+  about the plan*, RR-1's quoted present levels, diagnoses, parent
+  information and goals, and CT-1's *What the family said in their own
+  words*. Each Guide says so.
+- More findings can be fixed with one tap: "a lot" becomes "[number] times"
+  to fill in; words that claim a purpose ("deliberately", "on purpose") and
+  dramatic words before a noun ("a blood-curdling scream") can be taken out,
+  and "a" or "an" before the next word is put right. "[expletive]",
+  "[inaudible]" and the like are not taken for blanks to fill in.
+- In a short box that is full, the Improve wording button moves just outside
+  the box's lower edge while you type, instead of fading out under the text.
+- The privacy step hides contact details, dates, addresses and long numbers
+  too, and Lock ends the session on the relay (see above).
+- The Writing Tools tab and the Guides say where Writing Tools' text goes:
+  it is Apple's own, works on the text as written, names included, on the
+  iPad or on Apple's servers; follow the agency's rules for it, and do not
+  use its ChatGPT options for student text.
+- The one-file editions carry the writing help once instead of once per
+  form, so they stay near their old size (the 44 copies would have doubled
+  them to about 13 MB).
+
+**The relay**
+
+- `POST /api/session/end` ends a session (Lock calls it).
+- The admin page's security token is no longer in the page; each tab signs
+  in on its own (see above).
+- "https only" no longer believes a browser's `X-Forwarded-Proto` header.
+  Behind a proxy that sets it (GoDaddy Website Security), set
+  `TRUST_PROXY_HTTPS` to `true` in `config.php`. The README's "too many
+  redirects" entry says how to tell and what else to change.
+- The rewrite instructions name the new placeholders, so the answer keeps
+  them where they were and each is put back.
+
+Rebuild the upload zip (`bash tools/relay/build-zip.sh`) before handing it
+over, so the README inside it is current.
+
+**The workstation and the picture library**
+
+- Each form keeps its place on the page when you switch to another form and
+  back, or change the side-by-side layout.
+- On an iPad held upright (or a phone), opening TK-1 from TE-1, or TE-1 from
+  TK-1, opens it in place of the form, with the message about coming back to
+  compare, instead of two stacked panes with little room.
+- The header's buttons are a little tighter below 1240 px wide, so the time
+  stamp "Autosaved 8:05 AM" no longer pushes *Finish PDF* onto a third row.
+- The 29 pictures stored inside a picture of their own (the practice's
+  cards, the YouTube logo, both Boy avatars) are drawn at full size in the
+  pickers and tables of TK-1, VS-1 and SM-1, centred like the others (they
+  were about half size, top left). The printed cards were already right.
+- The practice's own pictures carry a small *yours* in the pickers and in
+  VS-1's library, so its Ball card and the library's Ball can be told apart.
+- `nbh-pictos.js` is now about 1.72 MB. Upload it with the forms.
+
+**Older snapshots**
+
+- TE-1's hidden link record (#teLink) moved to the end of the page. Placed
+  first, it moved every other field of TE-1 one place on, so a snapshot made
+  before v21.43 could not be put back field by field when its own file
+  part was missing. The workstation's bridge now also takes a form for the
+  same shape when its fields without a name sit where they sat, so a field
+  with a name added after them changes nothing. This is checked in
+  `qa/link-te1-test.js`.
+
+**Housekeeping**
+
+- Two working files committed by mistake (`crops_te1/reshot_d0_now.png` and a
+  Python cache file) are removed, `qa/reshot-te1.js` writes into `qa/out/`,
+  and `qa/print/` and `qa/shots/` are ignored.
+- `qa/shell-check.js` closes the simulation's notice before it tests Escape
+  (while a form's dialog is open, Escape is the dialog's), `qa/pnav-test.js`
+  uses the same server as the other checks (`WS_URL`), and `qa/printbase.js`
+  fills the packet's student before Save case.
 
 ## Autosave that holds up on an iPad (v21.44, draft)
 

@@ -755,13 +755,20 @@ $('#tickUsed').addEventListener('click',()=>{
 $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
 
 /* ---------------- frames ---------------- */
+/* v21.43: a frame put out of sight (display:none) comes back at the top of its page: the browser drops its scroll. It is
+   kept as the frame is hidden and put back as it shows again, so a form asked to open its partner (Form TE-1's link
+   panel), or one gone back to, is where it was */
+function hideFrame(fr){if(!fr||fr.hidden)return;try{const w=fr.contentWindow;if(w)fr.__sy=[w.scrollX||0,w.scrollY||0];}catch(e){}fr.hidden=true;}
+function showFrame(fr){if(!fr||!fr.hidden)return;fr.hidden=false;const s=fr.__sy;if(!s||(!s[0]&&!s[1]))return;
+  const back=()=>{try{const w=fr.contentWindow;if(w&&!fr.hidden&&!w.scrollX&&!w.scrollY)w.scrollTo(s[0],s[1]);}catch(e){}};
+  requestAnimationFrame(()=>requestAnimationFrame(back));}
 function openForm(id,keepRail){
   const rec=ALL.find(f=>f[0]===id); if(!rec)return;
   const prevCur=state.cur;   /* v21.32 side by side */
   state.cur=id;
   if(!keepRail) setRail(false);
   document.body.classList.add('has-form');
-  Object.values(state.frames).forEach(fr=>fr.hidden=true);
+  Object.entries(state.frames).forEach(([k,f])=>{if(k!==id)hideFrame(f);});
   $('#blank').style.display='none';
   let fr=state.frames[id];
   if(!fr){
@@ -772,7 +779,7 @@ function openForm(id,keepRail){
     $('#frames').appendChild(fr);
     state.frames[id]=fr;
   }
-  fr.hidden=false;
+  showFrame(fr);
   $('#crumbTitle').textContent=rec[1];
   $('#crumbId').textContent='Form '+id;
   $('#crumbFile').textContent=rec[2];
@@ -1032,7 +1039,7 @@ function layoutFrames(){
   document.body.classList.toggle('ws-split',on);
   Object.entries(state.frames).forEach(([id,fr])=>{
     const show=on?state.split.includes(id):id===state.cur;
-    fr.hidden=!show;fr.style.order=on?String(state.split.indexOf(id)):'';
+    if(show)showFrame(fr);else hideFrame(fr);fr.style.order=on?String(state.split.indexOf(id)):'';
   });
   $('#paneBar').innerHTML=on?state.split.map(id=>{const rec=ALL.find(f=>f[0]===id);
     return '<div class="pane'+(id===state.cur?' cur':'')+'" data-pane="'+id+'"><b>'+esc(id)+'</b><span class="nm">'+esc(rec?rec[1]:id)+'</span>'+
@@ -1271,8 +1278,9 @@ function openFor(ev,d){
   /* three columns showing: the partner takes the column next to the asker, not the asker's own */
   if(splitOn()&&!state.split.includes(want)&&state.split.length>=3){const k=state.split.indexOf(from);if(k>=0)state.cur=state.split[k<state.split.length-1?k+1:k-1];}
   openForm(want,true);
-  /* side by side only where there is room: on a phone the partner opens in place of the asker */
-  let wide=true;try{wide=window.matchMedia('(min-width:700px)').matches;}catch(e){}
+  /* side by side only where there is room: on a phone the partner opens in place of the asker, and so it does on an
+     upright iPad (v21.43), where side by side stacks the two forms and each shows only a few lines under its toolbar */
+  let wide=true;try{wide=window.matchMedia('(min-width:700px) and (orientation:landscape)').matches;}catch(e){}
   if(d.beside&&!splitOn()&&wide)setSplit([from,want]);
   /* beside: whether the two now show side by side; false tells the asker that its partner took its place (a phone) */
   const both=splitOn()&&state.split.includes(from)&&state.split.includes(want);

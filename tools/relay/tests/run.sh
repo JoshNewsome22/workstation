@@ -60,7 +60,9 @@ unzip -q "$WORK/upload.zip" -d "$WORK/home"
 MP="$(free_port)"; RP="$(free_port)"
 MOCK_DIR="$WORK/mock" PHP_CLI_SERVER_WORKERS=4 php -S "127.0.0.1:$MP" "$HERE/mock-anthropic.php" >"$WORK/mock-server.log" 2>&1 &
 PIDS+=($!)
-(cd "$WORK/home" && PHP_CLI_SERVER_WORKERS=4 exec php -S "127.0.0.1:$RP" -t public_html public_html/ai/index.php) >"$WORK/relay-server.log" 2>&1 &
+# tests/tls-shim.php: a request with X-Test-Tls: 1 counts as https (the built-in server has no TLS; the relay itself
+# trusts X-Forwarded-Proto only with TRUST_PROXY_HTTPS)
+(cd "$WORK/home" && PHP_CLI_SERVER_WORKERS=4 exec php -d auto_prepend_file="$HERE/tls-shim.php" -S "127.0.0.1:$RP" -t public_html public_html/ai/index.php) >"$WORK/relay-server.log" 2>&1 &
 PIDS+=($!)
 wait_port "$MP" && wait_port "$RP" || exit 1
 echo "mock API on 127.0.0.1:$MP, relay on 127.0.0.1:$RP"

@@ -590,8 +590,18 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       t = await waitTab2(page, /Suggested/);
       ok(/Suggested/.test(t), '4 ... and Send works again');
       await page.evaluate(() => __w.click('#tp2 .acts .b', 'Keep mine')); await sleep(200);
+      /* Lock (v21.43): the tab forgets the session and the relay is asked to end it, so a tab that carries the token
+         cannot use it either */
+      const lgBefore = await mock('/__log'), tok = (lgBefore.rewrite[lgBefore.rewrite.length - 1] || {}).token;
+      await page.evaluate(() => __w.click('#tp2 .st .lk', 'Lock'));
+      t = await waitTab2(page, /Locked: the session is ended/);
+      ok(/Locked: the session is ended on the rewrite service, in every tab/.test(t) && await page.evaluate(() => !!__w.q('#pc')), '4 Lock: the session is ended on the relay, said so, with the passcode box', t.slice(0, 220));
+      const lgAfter = await mock('/__log');
+      ok(!!tok && lgAfter.ended.length === lgBefore.ended.length + 1 && lgAfter.ended[lgAfter.ended.length - 1].token === tok, '4 ... the relay was asked to end this tab\'s session', {ended:lgAfter.ended.length});
+      ok(!(await page.evaluate(() => sessionStorage.getItem('nbh.wording.session'))), '4 ... and the tab keeps no session');
+      const reuse = await fetch(RELAY + '/api/rewrite', {method:'POST', headers:{'Content-Type':'application/json', Origin:ORIGIN}, body:J({token:tok, text:'He ran.', style:'grammar'})});
+      ok(reuse.status === 401, '4 ... so the token, from another tab, is refused', reuse.status);
       /* too many wrong passcodes */
-      await page.evaluate(() => __w.click('#tp2 .st .lk', 'Lock')); await sleep(200);
       for (let i = 0; i < 5; i++) { await page.evaluate(() => { const x = __w.q('#pc'); x.value = 'ZZZ-ZZZ-ZZZ-ZZ' + 'Z'; __w.q('form.pc').requestSubmit(); }); await waitTab2(page, /not accepted|Too many/); await sleep(100); }
       await page.evaluate(() => { const x = __w.q('#pc'); x.value = 'YYY-YYY-YYY-YYY'; __w.q('form.pc').requestSubmit(); });
       t = await waitTab2(page, /Too many passcode tries/);
@@ -748,8 +758,13 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const dei = (t, extra) => page.evaluate(([t, e]) => nbhWording.deidentify(t, e || []).text, [t, extra || null]);
       await meta('Mateo Alvarez-Rios', '2026-0417');
       let t = await dei('Mateo’s dad, Mr. Alvarez-Rios, came at 9:30. Mrs. Rios called. The Alvarez family asked for a meeting. Rios cried. Observed on 10/2/2026 (2026-0417).');
-      ok(t === '[Student]’s dad, Mr. [Family name], came at 9:30. Mrs. [Family name] called. The [Family name] family asked for a meeting. [Student] cried. Observed on 10/2/2026 ([ID]).',
-        '10 a parent named by the family name is [Family name], each half of a double surname is hidden, and the year in a date is not taken for the ID', t);
+      ok(t === '[Student]’s dad, Mr. [Family name], came at 9:30. Mrs. [Family name] called. The [Family name] family asked for a meeting. [Student] cried. Observed on [Date] ([ID]).',
+        '10 a parent named by the family name is [Family name], each half of a double surname is hidden, the year in a date is not taken for the ID, and the date is [Date]', t);
+      /* (v21.43) contact details, dates, street addresses and long numbers too, numbered when a kind comes more than once; a
+         short date, a time and a count stay */
+      t = await dei('Mom (555-123-4567, mom@example.com) lives at 12 Oak Street. Medicaid 123456789. Seen March 3, 2026 and 10/14/2026; back on 10/12.');
+      ok(t === 'Mom ([Phone], [Email]) lives at [Address]. Medicaid [Number]. Seen [Date 1] and [Date 2]; back on 10/12.', '10 a phone, an email, an address, a long number and dates are hidden, two dates as [Date 1] and [Date 2]', t);
+      ok((await dei('He ran 3 laps in 25 minutes at 9:30; 2 of 10 trials.')) === 'He ran 3 laps in 25 minutes at 9:30; 2 of 10 trials.', '10 ... a time and the counts are not');
       await meta('Ana Lopez', '');
       t = await dei('Ms. Lopez (mom) arrived. Ana Lopez sat down; Lopez cried.');
       ok(t === 'Ms. [Family name] (mom) arrived. [Student] sat down; [Student] cried.', '10 "Ms. Lopez (mom)" is not the student', t);
@@ -770,6 +785,8 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       await page.evaluate(c => { const i = __w.q('#pc'); i.value = c; __w.q('form.pc').requestSubmit(); }, CODE); await waitTab2(page, /Unlocked/);
       await page.evaluate(() => [...__w.qa('.sty .b')].filter(x => /spelling/.test(x.textContent))[0].click()); await sleep(300);
       ok((await page.evaluate(() => __w.text('pre.sent'))) === '[Student]’s dad, Mr. [Family name], came at 9:30. Liam took his pencil. Teo then ran to the door and Ms. Okafor blocked it. [Student] was very upset; [Student] sat. M.A. left.', '10 the preview', await page.evaluate(() => __w.text('pre.sent')));
+      ok(/email addresses, telephone numbers, dates, street addresses and long numbers are replaced here first/.test(await page.evaluate(() => __w.tab2())) &&
+        /De-identified is not anonymous/.test(await page.evaluate(() => __w.tab2())), '10 the note before Send names what is replaced, and that de-identified is not anonymous');
       const sugg = await page.evaluate(() => __w.qa('.sugg .b').map(b => b.textContent));
       ok(sugg.includes('+ Liam') && sugg.includes('+ Teo'), '10 a name that starts a sentence is offered too (Liam, Teo)', sugg);
       ok(sugg.includes('+ Ms. Okafor') && !sugg.includes('+ Okafor'), '10 the teacher is offered once, as the form names her', sugg);

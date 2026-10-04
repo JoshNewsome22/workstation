@@ -80,8 +80,15 @@ What keeps it there:
       python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
       python3 tools/blocks/patch-wording.py --check NBH-Workstation/[A-Z]*.html    # exit 1 if one is stale
 
-- `build-single.py` stops on a form without exactly one copy and checks that the packed forms unpack
-  to the files; `build-rps.py` copies the forms as they are.
+- `build-single.py` stops on a form without exactly one copy, or with a copy unlike the other forms' (a form
+  not refreshed), and checks that the packed forms unpack to the files; `build-rps.py` copies the forms as
+  they are. The one-file editions keep the writing help ONCE, as they keep the logo: it is cut out of every
+  form (`@@NBH-WORDING@@`) and packed in a block of its own (`nbh-embed-wording`), which `index.html` puts
+  back as it opens a form and copies into a saved case file. 44 copies would add about 4 MB to each
+  edition, because the packer's gzip cannot reach back from one form's copy to the last.
+- A field that holds someone else's words (an interview answer, a quoted record, the student's own
+  answers) or an instruction text with marks in it (TK-1's backs) is marked `data-nbh-nowording` too:
+  rewording it would change what was said or break the marks.
 - A field that is not a narrative gets no button: mark it (or its container) `data-nbh-nowording`.
   Hidden fields, fields in the toolbar or a dialog, fields with spelling check turned off
   (`spellcheck="false"`: paste boxes, item lists) and the learner's particulars the packet fills in

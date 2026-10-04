@@ -9,6 +9,9 @@ const DIR=L.path.join(__dirname,'shots',label); L.fs.mkdirSync(DIR,{recursive:tr
   await page.goto(`${L.BASE}/${EDITION}/index.html`,{waitUntil:'load'}); await L.sleep(600);
   await page.evaluate(()=>openForm('CR-1')); await page.waitForFunction(()=>!!state.status['CR-1'],null,{timeout:20000}).catch(()=>{});
   const fr=page.frames().find(x=>x.url().includes('CR-1_')); if(fr){await L.loadSim(fr);await L.sleep(1200);}
+  /* the simulation's notice (the form's own dialog, v21.34) is closed first: while a dialog is open in the form, Escape
+     is the dialog's, not the workstation's */
+  if(fr) await fr.evaluate(()=>{document.querySelectorAll('dialog[open]').forEach(d=>d.close());});
   await page.screenshot({path:L.path.join(DIR,'shell-CR-1.png')});
   await page.click('#fullBtn'); await L.sleep(500);
   await page.screenshot({path:L.path.join(DIR,'shell-CR-1-full.png')});
