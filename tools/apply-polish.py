@@ -1,18 +1,28 @@
 #!/usr/bin/env python3
-"""Put the shared screen polish into every form of a workstation folder.
+"""Put the shared screen polish, and the writing help, into every form of a workstation folder.
 
 Each form gets, just before </body>, a <style id="nbh-polish-css" data-nbh-screen> block and a
 <script id="nbh-polish"> block from tools/polish/. Run again after editing those files: an existing
-block is replaced, so the result is the same however many times this runs. index.html is not a
-form and is left alone.
+block is replaced, so the result is the same however many times this runs. index.html (the shell)
+and respond.html (the respondent page) are not forms and are left alone.
+
+v21.43: each form also gets the writing help, the <script id="nbh-wording"> block that
+tools/blocks/patch-wording.py makes from tools/blocks/nbh-wording.js, nbh-wording-rules.json and
+nbh-wording-config.json (the Improve wording button and panel), put in or replaced the same way.
+This is the one place a rebuilt form gets it: tools/polish-one.py runs this after every rebuild of a
+form built from parts (tools/new-form.py, TK-1's build.sh), so no rebuild can leave it out.
 
 The bridge inside each form hands every <style> to the master print; the polish is screen-only
 and is kept out of the packet, so the one line that collects styles is taught to skip it.
 
 usage: apply-polish.py <workstation folder>
 """
-import os, re, sys
+import importlib.util, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
+_spec = importlib.util.spec_from_file_location('patch_wording', os.path.join(HERE, 'blocks', 'patch-wording.py'))
+WORDING = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(WORDING)
+NOT_FORMS = ('index.html', 'respond.html')
 CSS = open(os.path.join(HERE, 'polish', 'nbh-polish.css'), encoding='utf-8').read().rstrip('\n')
 JS = open(os.path.join(HERE, 'polish', 'nbh-polish.js'), encoding='utf-8').read().rstrip('\n')
 BLOCK = ('<style id="nbh-polish-css" data-nbh-screen>\n' + CSS + '\n</style>\n'
@@ -29,8 +39,9 @@ REPLY_RE = re.compile(r"( +css: styles\(\), html: [^\n]*who: who\(\) \}\);\n)")
 
 def main(folder):
     done = 0
+    W = WORDING.load()   # the writing help's sources, checked once; stops before anything is written if one is wrong
     for fn in sorted(os.listdir(folder)):
-        if not fn.endswith('.html') or fn == 'index.html':
+        if not fn.endswith('.html') or fn in NOT_FORMS:
             continue
         p = os.path.join(folder, fn)
         s = open(p, encoding='utf-8').read()
@@ -48,9 +59,10 @@ def main(folder):
         s = s.replace(BRANCH, BRANCH + PLAIN_ON)
         s = REPLY_RE.sub(lambda m: m.group(1) + PLAIN_OFF, s)
         s = s.replace('</body>', BLOCK + '</body>', 1)
+        s, _ = WORDING.put(s, fn, W)
         open(p, 'w', encoding='utf-8').write(s)
         done += 1
-    print(f'polished {done} forms in {folder}')
+    print(f'polished {done} forms in {folder}, each with the writing help')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
