@@ -96,10 +96,14 @@ also about $64, before its session ends. The spend limit is what keeps a month s
 
 ## 8. Switch it on in the forms
 
-The relay's address, **https://newsomebh.com/ai**, goes into `tools/blocks/nbh-wording-config.json` as
-`{"relay":"https://newsomebh.com/ai"}`. Whoever builds the forms sets it and rebuilds them; then the rebuilt forms
-are uploaded to `workstation-rps` as usual. Until then the panel says "Not set up for this copy of the forms."
-Rewrite with Claude works in the forms opened from newsomebh.com (not in copies opened from a file).
+The forms already carry the relay's address: `tools/blocks/nbh-wording-config.json` holds
+`{"relay":"https://newsomebh.com/ai"}` (since v21.43), and every one of the 44 forms has the writing help. So once
+steps 1 to 7 are done there is nothing to rebuild: the forms uploaded to `workstation-rps` find the relay. Until the
+relay is uploaded and set up, Rewrite with Claude says that the rewrite service on newsomebh.com is not reachable,
+or not set up yet, as soon as its tab is opened (the panel asks `https://newsomebh.com/ai/api/health`; nothing is
+sent), and that Check wording and the iPad's Writing Tools still work. Rewrite with Claude works in the forms opened
+from newsomebh.com (not in copies opened from a file). If the address ever changes, put the new one in that file,
+then run `python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html` and build the editions again.
 
 ## 9. Keep browsers on https (once the whole site is)
 

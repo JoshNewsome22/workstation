@@ -161,7 +161,9 @@ async function panelRound(target, page, frameEl){
 async function printTo(page, file, focus){
   if (focus) await page.evaluate(() => { const t = __w.firstField(false); if (t) { t.scrollIntoView({block:'center'}); t.focus(); } });
   await sleep(250);
-  await page.emulateMedia({media:'print'});
+  /* the forms size their fields for paper when the print media starts (and the writing help steps aside then too):
+     the PDF is taken once that has settled, as a browser's own print waits for it */
+  await page.emulateMedia({media:'print'}); await sleep(600);
   await page.pdf({path:file, format:'Letter', printBackground:true});
   await page.emulateMedia({media:'screen'});
   await sleep(150);
@@ -263,13 +265,18 @@ async function narrow(browser, f, R){
    the panel has been opened and closed; the new form's own simulation must give the same field count and keys as A. */
 async function openIn(pg, f){
   await pg.evaluate(i => openForm(i), f.id);
-  const ok = await pg.waitForFunction(i => !!state.status[i], f.id, {timeout:25000}).then(() => true).catch(() => false);
-  const fr = pg.frames().find(x => x.url().includes(f.file));
+  const ok = await pg.waitForFunction(i => !!state.status[i] && !!state.frames[i], f.id, {timeout:30000}).then(() => true).catch(() => false);
+  let fr = null;
+  for (let i = 0; i < 20 && !fr; i++) { fr = pg.frames().find(x => x.url().includes(f.file) && !x.isDetached()) || null; if (!fr) await sleep(150); }
   return ok && fr ? fr : null;
 }
-async function closeIn(pg){
-  await pg.evaluate(() => $('#closeForm').click()); await sleep(200);
-  await pg.evaluate(() => { const b = document.querySelector('#cfFoot button.danger'); if (b) b.click(); }); await sleep(300);
+/* closed, and gone: the discard question answered, and the frame removed */
+async function closeIn(pg, f){
+  await pg.evaluate(() => $('#closeForm').click());
+  await pg.waitForFunction(() => !!document.querySelector('#cfFoot button.danger') || !Object.keys(state.frames).length, null, {timeout:3000}).catch(() => {});
+  await pg.evaluate(() => { const b = document.querySelector('#cfFoot button.danger'); if (b) b.click(); });
+  await pg.waitForFunction(i => !state.frames[i], f.id, {timeout:5000}).catch(() => {});
+  await sleep(250);
 }
 const snapOf = (pg, f) => pg.evaluate(async i => { const r = await grab(i, 'snapshot', null, 10000); return r && r.snap; }, f.id);
 const restoreInto = (pg, f, snap) => pg.evaluate(async ([i, s]) => { const r = await grab(i, 'restore', {snap: s}, 15000); return r && r.report; }, [f.id, snap]);
@@ -282,19 +289,21 @@ async function shell(browser, f, R, pages){
   /* before the rollout */
   let fr = await openIn(pages.old, f);
   if (!fr) { R.snap = 'FAIL the pre-rollout form did not open'; return; }
-  await sim(fr); const A = await snapOf(pages.old, f); await closeIn(pages.old);
+  await sim(fr); const A = await snapOf(pages.old, f); await closeIn(pages.old, f);
   fr = await openIn(pages.old, f); await sleep(300);
+  if (!fr) { R.snap = 'FAIL the pre-rollout form did not open again'; return; }
   const repA = await restoreInto(pages.old, f, A); await sleep(800);
-  const A2 = await snapOf(pages.old, f); await closeIn(pages.old);
+  const A2 = await snapOf(pages.old, f); await closeIn(pages.old, f);
   /* after */
   fr = await openIn(pages.new, f);
   if (!fr) { R.snap = 'FAIL the form did not open'; return; }
-  await sim(fr); const B1 = await snapOf(pages.new, f); await closeIn(pages.new);
+  await sim(fr); const B1 = await snapOf(pages.new, f); await closeIn(pages.new, f);
   fr = await openIn(pages.new, f); await sleep(300);
+  if (!fr) { R.snap = 'FAIL the form did not open again'; return; }
   const repB = await restoreInto(pages.new, f, A); await sleep(800);
   const B2 = await snapOf(pages.new, f);
   R.shellPanel = await seekField(fr) ? await panelRound(fr, pages.new, await fr.frameElement()) : 'no field';
-  const B3 = await snapOf(pages.new, f); await closeIn(pages.new);
+  const B3 = await snapOf(pages.new, f); await closeIn(pages.new, f);
   if (!A || !A2 || !B1 || !B2 || !B3) { R.snap = 'FAIL no snapshot ' + J({A: !!A, A2: !!A2, B1: !!B1, B2: !!B2, B3: !!B3}); return; }
   const pos = Object.keys(A.data).filter(k => k[0] === '~').length;
   R.snapInfo = A.total + ' controls, ' + pos + ' keyed by place';

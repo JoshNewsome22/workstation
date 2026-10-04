@@ -934,6 +934,7 @@ const B = new Map();             /* textarea -> its button */
 const counts = new WeakMap();    /* textarea -> {v, n}: the checker's count for the badge */
 const sels = new WeakMap();      /* textarea -> the last selection in it */
 let pinned = null, panelOpen = false, sched = 0, moT = 0, RO = null, treeV = 0, blur = {ta:null, t:0};
+let TALL = false;   /* a field taller than the screen has a button, held on the screen (see place()): it follows the page's scroll */
 function build(){
   if (host) return true;
   if (!document.body) return false;
@@ -1076,13 +1077,19 @@ function overText(b, r, s, endC){
 /* the field's first and last rows of text, in screen pixels: the button sits on one of them, so it covers at most
    the end of one line, and nothing when that row is empty */
 function rows(b, r){
+  /* kept as distances from the field's edges, which scrolling does not change */
   const key = Math.round(r.width) + 'x' + Math.round(r.height) + ':' + treeV;
-  if (b.rk === key) return b.rv;
-  const ta = b.ta, cs = getComputedStyle(ta), z = r.width / (ta.offsetWidth || r.width), px = v => (parseFloat(v) || 0) * z;
-  const lh = px(cs.lineHeight) || px(cs.fontSize) * 1.35;
-  const first = r.top + px(cs.borderTopWidth) + px(cs.paddingTop) + lh / 2, last = r.bottom - px(cs.borderBottomWidth) - px(cs.paddingBottom) - lh / 2;
-  b.rk = key; b.rv = {first, last};
-  return b.rv;
+  if (b.rk !== key) {
+    const ta = b.ta, cs = getComputedStyle(ta), z = r.width / (ta.offsetWidth || r.width), px = v => (parseFloat(v) || 0) * z;
+    const lh = px(cs.lineHeight) || px(cs.fontSize) * 1.35;
+    b.rk = key; b.ro = {top: px(cs.borderTopWidth) + px(cs.paddingTop) + lh / 2, bottom: px(cs.borderBottomWidth) + px(cs.paddingBottom) + lh / 2};
+  }
+  return {first: r.top + b.ro.top, last: r.bottom - b.ro.bottom};
+}
+/* the part of the window that is on the screen (above an iPad's keyboard), in the field's coordinates */
+function screenBand(){
+  const vv = window.visualViewport;
+  return vv && vv.height > 0 ? {top: vv.offsetTop, bottom: vv.offsetTop + vv.height} : {top: 0, bottom: window.innerHeight};
 }
 /* At the field's bottom right corner, on its last row; while the caret is under it, at the top right, on the first
    row; when the caret is under both (a one-line field), out of the way until the caret moves on. With words selected
@@ -1091,8 +1098,15 @@ function rows(b, r){
 function place(b, r, o, vw, typing, fast){
   if (!b.w) { b.w = b.el.offsetWidth; b.h = b.el.offsetHeight; b.pw = b.pl.offsetWidth; b.ph = b.pl.offsetHeight; }
   if (!b.w) return;   /* not drawn (printing): measured as nothing, it would be put in the wrong place */
-  const IN = 5, x = r.right - IN - b.pw, rv = rows(b, r);
-  const yb = Math.max(r.top + 2, Math.min(rv.last - b.ph / 2, r.bottom - 2 - b.ph)), yt = Math.min(Math.max(rv.first - b.ph / 2, r.top + 2), yb);
+  const IN = 5, x = r.right - IN - b.pw, rv = rows(b, r), sb = screenBand();
+  let yb = Math.max(r.top + 2, Math.min(rv.last - b.ph / 2, r.bottom - 2 - b.ph)), yt = Math.min(Math.max(rv.first - b.ph / 2, r.top + 2), yb);
+  /* A field taller than the part of the screen it is on keeps its button on the screen: at the bottom of the part
+     shown (the top corner: at its top), over the field's words, so see-through. */
+  const clampB = yb + b.ph > sb.bottom - 4 && sb.bottom - 4 - b.ph > r.top + 2;
+  if (clampB) yb = sb.bottom - 4 - b.ph;
+  const clampT = yt < sb.top + 4 && sb.top + 4 < r.bottom - 2 - b.ph;
+  if (clampT) yt = Math.min(sb.top + 4, yb);
+  b.tall = r.height + 60 > sb.bottom - sb.top;
   const br = {x, y:yb, w:b.pw, h:b.ph, at:'br'}, tr = {x, y:yt, w:b.pw, h:b.ph, at:'tr'};
   let pick = br, over = !!b.over;
   if (typing) {
@@ -1102,9 +1116,9 @@ function place(b, r, o, vw, typing, fast){
       pick = null; const order = [br, tr];
       for (let i = 0; i < 2; i++) if (!hits(c, order[i])) { pick = order[i]; break; }
       if (!pick && b.ta.selectionStart !== b.ta.selectionEnd) pick = Math.abs((c.top + c.bottom) / 2 - rv.last) <= Math.abs((c.top + c.bottom) / 2 - rv.first) ? tr : br;
-      if (pick && !fast) over = overText(b, r, pick, b.ta.selectionEnd === b.ta.value.length ? c : null);
+      if (pick && !fast) over = (pick === br && clampB) || (pick === tr && clampT) || overText(b, r, pick, b.ta.selectionEnd === b.ta.value.length ? c : null);
     }
-  } else over = overText(b, r, br, null);
+  } else over = clampB || overText(b, r, br, null);
 
   if (over !== !!b.over) { b.over = over; b.el.classList.toggle('over', over); }
   const away = !pick;
@@ -1167,6 +1181,7 @@ function layout(fast){
     place(b, r, o, vw, isAct && document.activeElement === ta);
   }
   B.forEach((b, ta) => { if (!keep.has(ta)) { b.el.remove(); B.delete(ta); if (RO) RO.unobserve(ta); } });
+  TALL = false; B.forEach(b => { if (b.tall) TALL = true; });
 }
 function remember(ta){ if (ta && ta.tagName === 'TEXTAREA' && typeof ta.selectionStart === 'number') sels.set(ta, {s:ta.selectionStart, e:ta.selectionEnd, v:ta.value}); }
 function wire(){
@@ -1174,7 +1189,7 @@ function wire(){
   document.addEventListener('focusout', e => { if (e.target && e.target.tagName === 'TEXTAREA') { remember(e.target); blur = {ta:e.target, t:Date.now()}; schedule(); } }, true);
   document.addEventListener('input', e => { if (e.target && e.target.tagName === 'TEXTAREA') { if (B.has(e.target)) scheduleFast(); else schedule(); } }, true);
   document.addEventListener('selectionchange', () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') { remember(a); if (B.has(a)) scheduleFast(); } });
-  document.addEventListener('scroll', e => { if (e.target !== document) schedule(); }, {capture:true, passive:true});
+  document.addEventListener('scroll', e => { if (e.target !== document || TALL) schedule(); }, {capture:true, passive:true});
   /* Tab and Shift+Tab go from field to field as the form has them (the button is not a stop on the way); from the
      keyboard the panel opens with Alt+Enter (Option+Return on a Mac or an iPad) in the field */
   document.addEventListener('keydown', e => {
@@ -1184,7 +1199,10 @@ function wire(){
     remember(ta); openPanel(ta, 'key');
   }, true);
   window.addEventListener('resize', () => { soon(); fitPanel(); if (panelOpen) fitEd(); });
-  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { schedule(); fitPanel(); });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', () => { schedule(); fitPanel(); });
+    window.visualViewport.addEventListener('scroll', () => { if (TALL) schedule(); });
+  }
   window.addEventListener('load', soon);
   try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(soon); } catch (e) {}
   try {
