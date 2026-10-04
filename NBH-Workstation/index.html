@@ -521,6 +521,8 @@ section.stagew{flex:1;min-width:0;display:flex;flex-direction:column;background:
 /* quiet, but still 4.5:1 against white */
 .crumb #crumbFile{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:#5f727a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 30 auto}
 .crumb #crumbStatus{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 8 auto}
+.crumb #crumbStatus .quietBtn{all:unset;cursor:pointer;color:#a8321e;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.crumb #crumbStatus .quietBtn:focus-visible{outline:2px solid currentColor;outline-offset:2px;border-radius:3px}
 .crumb .acts{display:flex;gap:6px;flex:0 0 auto;margin-left:auto}
 .crumb button{flex:0 0 auto;white-space:nowrap}
 .crumb .fs-logo{display:none;height:22px;width:auto}
@@ -585,6 +587,7 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
   .bar .fld input{flex:1;width:auto;min-width:0}
   .crumb{padding:6px 8px;gap:6px}
   .crumb #crumbStatus,.crumb #crumbId{display:none}
+  .crumb #crumbStatus.quiet{display:inline;flex:0 1 auto}
   .crumb .acts{gap:4px}
 }
 .frames{flex:1;position:relative;min-height:0}
@@ -1128,8 +1131,7 @@ function openForm(id,keepRail){
   $('#crumbStatus').textContent='';
   clearTimeout(state.watch);
   state.watch=setTimeout(()=>{
-    if(state.cur===id&&!state.status[id])
-      $('#crumbStatus').innerHTML='<b style="color:#a8321e">Not answering</b> \u2014 check that <b>'+esc(rec[2])+'</b> is in this folder';
+    if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);   /* v21.44 why, found by looking into the frame */
   },5000);
   setTimeout(()=>pushPlanTo(id),1800);
   renderRail();
@@ -1447,17 +1449,143 @@ async function pushPlanTo(id){
   });
   const fr=state.frames[id];
   if(fr&&Object.keys(fields).length){
-    try{fr.contentWindow.postMessage({nbh:'plan',from:'Form TD-1',fields:fields},'*');}catch(e){}
+    post(fr,{nbh:'plan',from:'Form TD-1',fields:fields});
   }
 }
 
 function pushPacketTo(fr){
   const p=packet();
   if(!Object.values(p).some(v=>String(v).trim()))return;
-  try{fr.contentWindow.postMessage({nbh:'packet',packet:p},'*');}catch(e){}
+  post(fr,{nbh:'packet',packet:p});
 }
 function ask(fr,what,extra){
-  try{fr.contentWindow.postMessage(Object.assign({nbh:what},extra||{}),'*');}catch(e){}
+  post(fr,Object.assign({nbh:what},extra||{}));
+}
+/* v21.44 a message to a form. A form whose frame did not take the browser's message (quietForm found that a message
+   handed to the form directly is answered) gets each one that way: the form is on the same website, so the shell can
+   hand it to the form's own window, and the form answers as usual. */
+function post(fr,msg){
+  const w=fr&&fr.contentWindow; if(!w)return;
+  if(fr.__direct){try{w.dispatchEvent(new w.MessageEvent('message',{data:msg,origin:location.origin,source:window}));return;}catch(e){}}
+  try{w.postMessage(msg,'*');}catch(e){}
+}
+/* ---- a form that does not answer ----
+   Five seconds after a form is opened it has answered the shell, or something is wrong. Before v21.44 the shell could
+   only guess (the file missing from the folder). It now looks into the frame, which it can because the form comes
+   from the same website or folder, and says which of these it is: another page in the frame (the file is missing or
+   misnamed, or the website showed its sign-in or an error); the form still loading; the form loaded but its
+   workstation script never started (the file on the website is not this release's, or the browser refused a script,
+   which is checked here with this browser's own engine); or the form running but the browser's messages between it
+   and the workstation not arriving, in which case the shell talks to it directly from then on and it works. */
+const QUIET={};
+function quietForm(id,fr,rec){
+  const box=$('#crumbStatus');
+  const show=(head,why)=>{
+    if(state.cur!==id||state.status[id])return;
+    box.classList.add('quiet');
+    box.innerHTML='<button type="button" class="quietBtn" title="Why this form is not answering, and what to do"><b>'+esc(head)+'</b>'+
+      (why?' — '+esc(why):'')+' <u>Why?</u></button>';
+    box.querySelector('button').onclick=()=>quietReport(id);
+  };
+  show('Not answering','checking why…');
+  frameCheck(id,fr,rec[2]).then(r=>{
+    QUIET[id]=r;
+    if(r.fixed){box.classList.remove('quiet');return;}
+    show('Not answering',r.short);
+    if(r.retry)setTimeout(()=>{if(state.cur===id&&!state.status[id]&&state.frames[id]===fr)quietForm(id,fr,rec);},8000);
+  }).catch(e=>{QUIET[id]={short:'',lines:['The check itself failed: '+(e&&e.message||e)]};show('Not answering','');});
+}
+function quietReport(id){
+  const r=QUIET[id]||{lines:[]};
+  const rec=ALL.find(x=>x[0]===id)||[id,'',''];
+  dialog('Form '+esc(id)+' is not answering',
+    '<p><b>'+esc(r.short||'The reason was not found.')+'</b></p>'+
+    (r.todo?'<p>'+r.todo+'</p>':'')+
+    '<p style="font-size:13px;color:#555">What the workstation found (a screenshot of this helps whoever looks after the workstation):</p>'+
+    '<pre style="white-space:pre-wrap;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;background:#f4f5f7;padding:10px;border-radius:6px">'+
+    esc(['Form '+id+' · '+rec[2],'Workstation page of '+document.lastModified,
+      'Browser '+navigator.userAgent,'Address '+location.href].concat(r.lines||[]).join('\n'))+'</pre>'+
+    '<p><button type="button" id="quietAgain">Load the form again</button></p>');
+  const b=$('#quietAgain');
+  if(b)b.onclick=()=>{const fr=state.frames[id];$('#dlg').close();if(!fr)return;delete QUIET[id];fr.__direct=false;
+    try{fr.contentWindow.location.reload();}catch(e){loadFrame(fr,rec[2]);}
+    clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
+}
+/* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
+const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
+const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
+  /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
+async function frameCheck(id,fr,file){
+  const lines=[],out=(short,more)=>Object.assign({short,lines},more||{});
+  let w,doc;
+  try{w=fr.contentWindow;doc=w.document;void doc.readyState;}
+  catch(e){lines.push('The frame cannot be looked into: '+(e&&e.message||e));
+    return out('the frame holds a page from another address',{todo:'Open the workstation from the same address every time (with or without www, always https), then open the form again.'});}
+  const href=String(w.location.href||'');
+  lines.push('Frame '+href,'Page "'+(doc.title||'')+'" · '+doc.readyState+' · '+doc.querySelectorAll('script').length+' scripts');
+  if(!EMBED){
+    let here='';try{here=decodeURIComponent(href.split(/[?#]/)[0].split('/').pop()||'');}catch(e){}
+    if(here!==file)return out('the frame shows '+(doc.title?'“'+doc.title+'”':'another page')+', not the form',
+      {todo:'Check that <b>'+esc(file)+'</b> is in the workstation’s folder under exactly that name. If the frame shows the website’s sign-in or an error, sign in or reload the workstation.'});
+  }
+  if(doc.readyState!=='complete')return out('the form is still loading',{retry:true,
+    todo:'A large form on a slow connection takes a while the first time. The workstation looks again in a few seconds.'});
+  const bridge=!!w.nbhBridge,bridged=[].some.call(doc.scripts,s=>/workstation bridge/.test(s.text.slice(0,400)));
+  lines.push('Workstation script '+(bridge?'running':bridged?'in the page but not running':'not in the page')+
+    ' · Autosave '+(w.nbhState?'running':'not running'));
+  if(bridge){
+    /* the form runs: hand it a status question directly; an answer means the browser's messages were what failed */
+    const got=await new Promise(res=>{
+      const h=ev=>{const d=ev.data||{};if((d.nbh==='status'||d.nbh==='pong')&&(d.id===id||ev.source===w)){window.removeEventListener('message',h);res(d);}};
+      window.addEventListener('message',h);setTimeout(()=>{window.removeEventListener('message',h);res(null);},2500);
+      try{w.dispatchEvent(new w.MessageEvent('message',{data:{nbh:'status'},origin:location.origin,source:window}));}catch(e){lines.push('Direct question failed: '+(e&&e.message||e));}
+    });
+    if(got&&got.id!==id){lines.push('The form answered as '+JSON.stringify(got.id)+', not '+JSON.stringify(id)+'.');
+      return out('the form answers under another name ('+got.id+')',{todo:'The file in the folder is another form saved under this form\u2019s name. Upload this release\u2019s zip again.'});}
+    if(got){fr.__direct=true;lines.push('A question handed to the form directly was answered: the shell now talks to this form that way.');
+      return out('fixed',{fixed:true});}
+    let st='';try{st=JSON.stringify(w.nbhBridge.formId())+' / '+(w.document.querySelector('.nbh-formid')||{}).textContent;}catch(e){st='formId failed: '+e.message;}
+    lines.push('Form id '+st,'A question handed to the form directly was not answered either.');
+    return out('the form is running, but its answers do not reach the workstation',{todo:'Load the form again (below). If it stays, open it with Own tab and work there; Save data in the form keeps the work.'});
+  }
+  /* the form loaded without its workstation script: compare the file with this release, and let this browser read each
+     of its scripts, which names a script it refuses */
+  let why='the form opened, but its workstation script did not start',todo='',differs=false;
+  if(!EMBED&&/^https?:/.test(location.protocol)){
+    try{
+      const [fRes,lRes]=await Promise.all([fetch(file+'?nbh-online=check',{cache:'no-store',credentials:'include'}),
+        fetch(RELLIST+'?nbh-online=check',{cache:'no-store',credentials:'include'})]);
+      if(fRes.status!==200){
+        lines.push('File on the website: '+fRes.status+' '+(fRes.statusText||''));
+        return out(fRes.status===404?'the file is not on the website':'the website answered '+fRes.status+' for this form',
+          {todo:fRes.status===404?'Put <b>'+esc(file)+'</b> in the workstation\u2019s folder under exactly that name: upload this release\u2019s zip there again and Extract it.':
+            fRes.status===401||fRes.status===403?'Sign in to the workstation\u2019s folder again (reload the workstation), then open the form.':'Reload the workstation and open the form again.'});
+      }
+      const buf=new Uint8Array(await fRes.arrayBuffer());
+      let txt='';for(let i=0;i<buf.length;i+=0x8000)txt+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));
+      let cut=txt;HOSTMARK.forEach(re=>{cut=cut.replace(re,'');});
+      lines.push('File on the website: '+fRes.status+' · '+buf.length+' bytes'+(cut.length!==txt.length?' ('+cut.length+' without the host’s markup)':'')+
+        ' · '+(fRes.headers.get('Content-Type')||'no type')+(fRes.headers.get('Content-Encoding')?' · '+fRes.headers.get('Content-Encoding'):'')+
+        ' · ends '+(/<\/html>\s*(?:<script\b[^>]*>[\s\S]*?<\/script\s*>\s*)*$/i.test(txt.slice(-8192))?'with the closing html tag':'early'));
+      let want=null;try{want=((await lRes.json()).files||{})[file]||null;}catch(e){}
+      if(want){
+        let same=cut.length===want.len;
+        if(same&&crypto.subtle){const u=new Uint8Array(cut.length);for(let i=0;i<cut.length;i++)u[i]=cut.charCodeAt(i);
+          const d=await crypto.subtle.digest('SHA-256',u);same=Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,'0')).join('')===want.sha;}
+        lines.push('This release’s copy: '+want.len+' bytes · '+(same?'the file on the website is the same':'the file on the website is DIFFERENT'));
+        if(!same){differs=true;why=/<\/html>/i.test(cut.slice(-8192))?'the copy of this form on the website is not this release\u2019s':'the copy of this form on the website is cut short';
+          todo='Upload this release\u2019s zip to the workstation\u2019s folder again and Extract it there (it replaces every file), then reload.';}
+      }
+    }catch(e){lines.push('The file could not be fetched to compare: '+(e&&e.message||e));}
+  }
+  const bad=[];
+  [].forEach.call(doc.scripts,(s,i)=>{
+    if(s.src||(s.type&&!/^(text|application)\/(x-)?(java|ecma)script$/i.test(s.type)))return;
+    try{new Function(s.text);}catch(e){if(e instanceof SyntaxError)bad.push('Script '+(i+1)+' ('+(s.id||s.text.trim().slice(0,40).replace(/\s+/g,' '))+'): '+e.message);}
+  });
+  if(bad.length){if(!differs)why='this browser refused one of the form\u2019s scripts';lines.push.apply(lines,bad.slice(0,6));}
+  else lines.push('Every script of the form reads in this browser.');
+  return out(why,{todo:todo||'Load the form again (below). If it stays, send a screenshot of this box to whoever looks after the workstation.'});
 }
 $('#pushPacket').addEventListener('click',()=>{
   const n=Object.keys(state.frames).length;
