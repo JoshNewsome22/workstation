@@ -6072,6 +6072,814 @@ checks that the square prints at 1 in, on 13 portrait pages.
   and the build label. axe (WCAG 2.1 AA) is clean on every TK-1 view
   and on the open picker.
 
+## TK-1's terminal token and walkthrough, the TK-1/TE-1 link, TB-1's behavior library, writing help, and the practice's own pictures (v21.43)
+
+What this version adds:
+
+- **Form TK-1**: a last token that looks different from the others (the
+  terminal token), and a narrated **Walkthrough** of the book in use, with
+  two MP4 copies to share.
+- **Forms TK-1 and TE-1**: an optional link. Each form compares itself with
+  the other when you ask, and takes only what you tick.
+- **Form TB-1**: a library of 207 starting definitions for reduction targets.
+- **Every form**: writing help for the text boxes. Apple's Writing Tools,
+  an offline wording check, and a rewrite through a relay on newsomebh.com
+  that a passcode from the BCBA unlocks.
+- **The picture library**: 29 of the practice's own cards and pictures.
+
+It also fixes one fault found along the way: a reopened TK-1 book lost its
+last-token picture and its SVG photos.
+
+TK-1 now ends Setup with *This copy of the form: build v21.43*, and the
+Preview line says the same. That is the quickest way to see that the copy on
+the website is the new one.
+
+### The terminal token (TK-1)
+
+The assessor asked for "a separate terminal token that is slightly different
+than the other tokens", so the learner can see which token is the last one
+and that the item comes next. Setup, under Tokens, has **The last token (it
+fills the board; the item comes next)**:
+
+- **The same as the others**: the default. A book saved before v21.43 opens
+  this way and prints as it did.
+- **The same picture, with an orange double border.**
+- **Its own picture, with an orange double border**: a drawn gold medal by
+  default. The trophy, any library picture or a photo can be chosen instead
+  under **The last token's picture**.
+
+When the last token is marked:
+
+- the Board's last slot and the last box on the Tokens page get a matching
+  orange ring, drawn as an outline so it prints without background graphics;
+- the token sheet prints one last token among the others;
+- the Token Board back and Step 3 of the how-to insert add one sentence:
+  "The last star looks different from the others, so your learner can see
+  that it finishes the board and the THEN item comes next." (The book's own
+  token name stands in for star.) The sentence comes from `{last}` in those
+  two texts. With the option off, `{last}` prints
+  nothing. The Backs view now lists `{last}` with the other marks;
+- the Setup verdict says that the last token is marked.
+
+`qa/tk1-test.js` checks the three settings, the rings, the token sheet and
+the sentence.
+
+### A reopened book keeps its last-token picture and SVG photos (TK-1)
+
+Opening a saved book dropped two things: the last token's own picture, and
+any photo uploaded as an SVG. Since v21.42a an uploaded SVG is kept as the
+vector it is, but the check made when a file is opened accepted only PNG,
+JPEG, WebP and GIF. This applied to Open data, case files and the
+workstation's restore. Both now come back. The fault was found while mapping
+the TK-1/TE-1 link. `qa/tk1-test.js` saves and reopens a book that has a
+trophy as its last token and an SVG photo on a card.
+
+### The walkthrough (TK-1)
+
+The assessor asked for "a step by step walkthrough video explaining each step
+and page": a narrator; the learner's hand choosing what to work for; the
+teacher's hand choosing the target; the two cards going into their boxes on
+the Board; the session; a token at each interval; and the item once all the
+tokens are earned. **Walkthrough**, the last button under View, plays this as
+a narrated video. It is drawn live from the book itself: its pictures, photo,
+colours, token picture and count, and the terminal token when it is on.
+
+The pages lie on a table top. The walkthrough runs about three and a half
+minutes (3 min 32 s for the simulated book, or 3 min 37 s with the terminal
+token), in seven chapters:
+
+1. **The book.** Four laminated pages, bound on the left, with a tab for
+   each.
+2. **Choices.** The learner's hand (a child's) looks over the six choice
+   cards and picks one, which lifts off the page. It picks the first card
+   that has a picture.
+3. **Targets.** The teacher's hand (an adult's, with a shirt cuff) picks the
+   target card. It picks the first target that names an ongoing behavior (a
+   word ending in -ing, which suits an interval), or else the first card.
+4. **Board.** The target goes under First and the chosen item under Then.
+   The Tokens page shows where the tokens wait.
+5. **Session.** First the rule: the example is one token for every two
+   minutes. The session starts, and a ring counts down each interval (sped
+   up, and labelled so). At the end of an interval the teacher's hand takes a
+   token from the Tokens page and puts it in the next slot. A speech bubble
+   gives brief praise that names the behavior ("Great writing!"). One
+   interval without the behavior earns no token, and the interval starts
+   again. The last token is the terminal token when the book has one, and the
+   narration says why it looks different; otherwise the narration uses the
+   plain last-token line.
+6. **Exchange.** The board is full, so the Then card goes to the learner at
+   once. Then the tokens return to the Tokens page, the cards return to their
+   pages, and the learner chooses again.
+7. **Tips.** Make the tokens valuable first: give one and trade it for the
+   item at once, again and again. Start with a small requirement and raise it
+   slowly, and go back a step if the behavior falls apart. Keep the item
+   available only through the board.
+
+The narration names no person and gives no number that depends on the book,
+so one recording fits every book. The captions show exactly what is said, and
+*Transcript of the narration* under the player has every line. What it says
+agrees with the book's backs and with the token-economy sources in the Guide:
+
+- the token comes right after the target behavior, or at the end of the
+  interval in which it happened, with brief praise that names it;
+- the exchange is immediate while the board is new;
+- tokens are made valuable first;
+- the requirement starts small and is raised gradually;
+- the item is available only through the board;
+- the learner chooses before the task.
+
+A note under the player says when the walkthrough differs from the book:
+
+- a book that uses the Rules row is shown as First-Then;
+- empty Choices or Targets are shown with the simulated book's cards;
+- a missing picture library or a missing recorded narration is named.
+
+**The controls.** Each control is a large touch target with a name for
+screen readers:
+
+- Play and Pause: the big button on the picture, the button under it, or the
+  Space key;
+- Restart;
+- the seek bar: drag it or tap it; the arrow keys skip five seconds;
+- the time played and the total time;
+- **CC**, the captions, which are on at the start;
+- **Sound**;
+- **Full screen**;
+- the chapter buttons, with the current chapter marked.
+
+The walkthrough pauses when you leave the view, open another form in the
+workstation, or switch tabs. When you come back, it is rebuilt from the book
+as the book is then. With *Reduce Motion* on, each step cuts straight to its
+end instead of moving, and the narration still plays. The walkthrough never
+prints and adds nothing to the saved file. TK-1's printed pages are
+unchanged.
+
+**On the iPad:**
+
+- Safari plays sound only from a tap, so the first tap on Play starts the
+  narration.
+- The page asks Safari to play the narration as media (the audio session
+  setting Safari has had since iPadOS 17). This is meant to keep the silent
+  switch or silent mode from muting it. The volume buttons set the level. If
+  nothing is heard, check the volume, and check that Sound is on under the
+  picture.
+- A call, Siri, an alarm or another app that takes the sound pauses the
+  walkthrough, with "The sound was interrupted. Tap Play to go on."
+- The screen stays on while it plays, where Safari allows it.
+- If the recorded narration cannot play, the device's own voice reads the
+  captions.
+- Full screen fills the iPad's screen. Where a browser has no full screen
+  for a page (an iPhone), the player fills the window instead. Esc, or the
+  button, returns.
+
+This was tested in Chromium. It has not yet been tried on an iPad.
+
+**The MP4 files.** The release folder has two copies of the walkthrough as
+video, for staff and parents who will not open the form:
+
+- `TK-1-Walkthrough.mp4`: the plain last token, 3 min 32 s;
+- `TK-1-Walkthrough_terminal-token.mp4`: the terminal token as its own
+  picture (the gold medal), 3 min 37 s.
+
+Both show the simulated book: Sam, five stars, and the practice's own cards.
+Each is 1920 × 1080 at 30 frames a second, in H.264 with the captions drawn
+in. The narration is AAC sound at -16 LUFS, and the seven chapters are
+chapter marks. Each file is about 23 MB.
+
+To make them again, start the test server (`http-server . -p 8123 -s -c-1`
+from the repository root), then run:
+
+    node qa/tk1-walk-video.js --both --dir <folder>
+
+That writes both videos. To make one: `--term none|ring|pic`, `--n 3` to
+`10` and `--out file.mp4`. `--check` checks a video already made against the
+book's timeline without drawing it again.
+
+The recorder draws every frame with the form's own `TKWALK.renderAt` in
+Chromium and encodes it with ffmpeg, so the video and the form show the same
+frames. It needs:
+
+- a Python with numpy, soundfile and imageio-ffmpeg (`TK1_PY`; by default the
+  narration voice's own venv);
+- for the narration at full bandwidth, the voice folder (`TK1_TTS`). Each
+  line is voiced again, and used only when it is the very same take as the
+  form's clip. With `--no-tts`, the form's own 32 kbit/s clips are used.
+
+The recorder checks the result: length, size, frame rate and frame count,
+colour tags, every line's sound starting at its cue with no shift, loudness,
+the chapters, and that a frame drawn twice comes out the same. It also saves
+frames at five cue midpoints and a contact sheet to look at. Make the videos
+again after any change to the walkthrough, its narration or its hands.
+
+**The narration voice.** The voice is Kokoro-82M with its af_heart voice, at
+speed 0.88. It is licensed Apache-2.0 and is run offline with kokoro-onnx by
+`tools/forms/TK-1/make-narration.py`, from the text in
+`tools/forms/TK-1/walk-script.json`. Nothing is sent anywhere, and no account
+is needed.
+
+Each of the 18 lines is a mono MP3 (24 kHz, 32 kbit/s) inside
+`walk-audio.js`, with its text and its length, so the form plays it with no
+network access. Each line is brought to -16 LUFS, the usual level for speech
+on phones and tablets. This is done with a gain and a limiter at -1.5 dBFS
+whose look-ahead delay is compensated. In this version the narration became
+about 6 dB louder (it was -23 LUFS), and no word moved in time.
+
+To change a line:
+
+1. Edit its text in `walk-script.json`.
+2. Set up the voice once, as the script's header describes: two npm packages
+   for the model and the voices, and a Python venv with kokoro-onnx,
+   imageio-ffmpeg and soundfile.
+3. Run `TK1_TTS=<voice folder> <voice folder>/venv/bin/python tools/forms/TK-1/make-narration.py`.
+   Lines whose text, voice and speed are unchanged keep their audio. To voice
+   only some lines, name their ids.
+4. Rebuild TK-1 with `sh tools/forms/TK-1/build.sh`.
+5. Make the videos again.
+
+The walkthrough takes each line's length from `walk-audio.js`, so a longer
+line lengthens its step. The captions and actions follow each word as it was
+measured in the current recordings. A line whose text has changed falls back
+to an even share of its characters.
+
+**The hands.** The six hand drawings (the learner's and the teacher's:
+pointing, pinching and open) were redrawn to look more lifelike: the back of
+a right hand seen from above, with soft shading. The learner's is a child's
+hand, and the teacher's an adult's with a shirt cuff. The touch points are
+unchanged, so every touch still lands on its card.
+
+**Checked.** `qa/tk1-walk-test.js` (165 checks) covers:
+
+- the timeline, with its cues in order and the terminal or the plain line as
+  the book has it;
+- the cards on their boxes, in First and Then;
+- the tokens in their slots, and the slots empty after the reset;
+- `renderAt`, a pure function of time;
+- each line's action happening while that line plays, with no lines
+  overlapping;
+- the book and its print, unchanged;
+- pausing when you leave the view;
+- reduced motion;
+- named controls;
+- no sideways scrolling on the iPad or on a phone.
+
+The walkthrough was also reviewed for its clinical content, its motion, its
+use on iOS, and accessibility and regressions, and what those reviews found
+was fixed. `qa/tk1-test.js` and `qa/tk1-audit.js` still pass.
+
+### TK-1's sample book shows the practice's own cards
+
+The simulated book now uses the practice's own cards from the library. So do
+the walkthrough's sample pictures, which it shows for a book whose Choices or
+Targets are still empty:
+
+- choices: Color, Ball, Playground, Break, YouTube and iPad (the photo);
+- targets: Writing, Reading, All Done, Raise hand, Math and Waiting.
+
+In the walkthrough the learner picks Color and the teacher Writing ("Great
+writing!"). The narration names no item, so it did not change. The MP4 files
+show the same cards. TK-1's Guide says so under About the Simulator.
+
+### From the case keeps problem behaviors off Targets (TK-1)
+
+**From the case** could put a problem behavior or a reduction goal on the
+Targets page, as if it were something to teach. Now:
+
+- a problem behavior goes on only as its named replacement behavior from
+  TB-1;
+- a reduction goal never goes on;
+- the note says what was left out and why.
+
+The walkthrough's clinical review found this. `qa/tk1-test.js` checks it.
+
+### The TK-1/TE-1 link
+
+TE-1 designs the token economy (the behavior, the schedules, the backups).
+TK-1 prints the book the student holds. Until now the two were filled in
+separately. The link lets each form compare itself with the other and take
+what you choose. Nothing is ever written without a click.
+
+- **Off by default.** An unlinked form saves, prints and counts its fields as
+  before. TE-1 has one hidden field more, which holds the link record; its
+  progress dots are unchanged.
+- **Turning it on.** On TK-1, press **Link with Form TE-1** in the Setup band
+  *Link with Form TE-1 (the token economy plan)*. On TE-1, press **Link with
+  Form TK-1** under *Student materials* on Setup. Linking is per form: it
+  never turns itself on in the other form.
+- **Compare on a click.**
+  - In the workstation, **Compare with Form TE-1** reads the TE-1 open in the
+    same workstation. Nothing is written there.
+  - **Open Form TE-1 beside this book** opens it as a column beside this one
+    (on a phone, in its place) and then compares.
+  - With a form on its own, **Open a file Form TE-1 saved** reads that form's
+    own saved file, a case file (.json) or a `.case.html`. The panel explains
+    how: Save data on the other form, then open the file here.
+  - The forms say "compared", never "synced": a later change on one form
+    shows on the other only at the next compare.
+- **What is compared.**
+  - A target card with the behavior the tokens are earned for.
+  - The token count with tokens per exchange.
+  - The token with the token form.
+  - The Choices with the backup menu.
+  - The Token Economy back's schedule paragraph with TE-1's schedule.
+  - Lines for information only: token loss, the price, the thinning record,
+    and whether the marked last token matches the plan's count.
+- **Take what you tick.**
+  - Each row has **Take** and **Keep**; a pressed button shows a tick.
+  - **Take the ticked items** applies them. **Leave everything as it is**
+    closes the table and writes nothing.
+  - TE-1 is the plan of record. So in TK-1 the plan's count, backups and
+    schedule come ticked where they fill an empty place, or where they have
+    changed on the plan.
+  - The schedule paragraph is unticked the first time, since it changes the
+    printed back; the row says beforehand whether that back then runs on to a
+    second page.
+  - The plan's behavior goes on a target card only when you tick it, and the
+    card keeps its picture.
+  - In TE-1 only the student's name and ID and the token form come ticked,
+    and only where that field is empty. The book's choice cards come in as
+    new backups only when you tick them.
+- **Nothing deleted.** No card, backup row or field is emptied on either
+  side. A change of count rewrites edited captions only after asking. A
+  backup that RA-1 found not to be a reinforcer is never offered. Class,
+  cost and preference stay on TE-1, and TE-1's audit items are never ticked.
+- **Behaviors to reduce.** A behavior to reduce is never offered as the
+  earning behavior, in either form. That means one of TB-1's or FS-1's problem
+  behaviors in the case, one noted at an earlier compare, or a common word
+  for one, such as aggression or elopement, unless it is negated, as in
+  "instead of hitting". With a form on its own and no case, the row says
+  that it cannot check TB-1.
+- **The identity check.** The student's name and ID are compared first. If
+  they differ, the panel asks "for another student?". Nothing can be taken
+  until **These are the same student** is pressed.
+- **Undo.** **Undo what was just taken** puts the form back exactly as it was
+  before. It is withdrawn, and says so, as soon as anything else on the form
+  changes. It is never saved.
+- **Reprinting.** After a take, TK-1's panel names the pages to reprint (for
+  example "the Board page (both sides)") until **These pages are reprinted**
+  is pressed.
+- **The record.** The link is one short text in the form's own saved data
+  (1,800 characters at most). It travels with Save data, case files,
+  snapshots and autosave, and an older build that opens the file keeps it.
+  **Unlink** removes it after asking; nothing else on either form changes.
+  While linked, TE-1 prints one line about the book.
+- **The workstation.** One new message lets TK-1 or TE-1 open the other
+  beside itself. It works only for that pair, and is ignored within a second
+  of the last one or while a case is loading. The case flow is unchanged:
+  From the case still fills TK-1's empty Targets and Choices first. The case
+  map's *What carries forward* box has a line for the pair.
+
+Checked by:
+
+- `qa/link-core-test.js` (95 checks, the shared core in
+  `tools/blocks/nbh-link.js`, which both forms carry byte for byte);
+- `qa/link-te1-test.js` (127);
+- `qa/link-tk1-test.js` (181);
+- `qa/link-shell-test.js` (40).
+
+The checks include: spoofed answers from other frames ignored; files that are
+not the partner's refused, with nothing changed; Undo restoring the form
+exactly; no sideways scrolling at 390 px. An unlinked TK-1 and an unlinked TE-1
+save and print as before. Two reviews made 60 findings in all: 52 were fixed
+in full and 5 in part, and the other 3 were process points or needed no
+change.
+
+`tools/blocks/patch-link.py` puts the core into TE-1, and TK-1's `build.sh`
+puts it into TK-1. Re-run both after any change to `nbh-link.js`.
+
+### TB-1's behavior library
+
+The assessor asked for "a drop down ... with as many reduction target
+behaviors that you can think of and various operational/functional
+definitions that I can either pick or use as a starting point and edit".
+Sheet 4 (Definitions) now has 207 starting definitions in 14 categories:
+
+| Category | Entries |
+|---|---|
+| Aggression toward others | 20 |
+| Verbal aggression and threats | 7 |
+| Self-injurious behavior | 36 |
+| Property destruction | 14 |
+| Elopement and safety | 17 |
+| Tantrums and vocal disruption | 8 |
+| Noncompliance and task avoidance | 12 |
+| Classroom disruption | 11 |
+| Peer and social behavior | 10 |
+| Stereotypy and repetitive behavior | 18 |
+| Feeding and health-related | 18 |
+| Body, privacy and hygiene | 17 |
+| Home and sleep | 6 |
+| Precursors | 13 |
+
+There are 16 clusters, 178 single topographies and 13 precursors. Nineteen
+entries also have a functional (outcome-defined) version, for behaviors
+whose outcome is legitimately the target, such as elopement, property
+destruction and task refusal. Each functional version has its own measure,
+examples and boundaries.
+
+**How to use it:**
+
+- **On a card.** At the top of each target card, under **Start from the
+  behavior library**, search or pick from the category list, then press
+  **Load into this card**.
+  - The search reads names, other names and categories. It also finds the
+    other forms of a word (bite, biting) and words written together or apart
+    (headbanging, head banging).
+  - Where an entry has a functional version, choose Topographical or
+    Functional first.
+- **In the panel.** Open **Behavior library (207 starting definitions)**
+  above the cards. Search, or filter by category, and tap an entry to read it
+  in full. Then press **Load into target n**, or **Add a target card and
+  load**. A card's **Read the full entry** opens the panel at its entry, with
+  **Back to target n**.
+- **On sheet 2.** On Select & prioritize, **Add a candidate from the behavior
+  library** puts a label in the first empty candidate row.
+- **What a load fills.** Only the definition fields: the label, type, style,
+  dimension, counting unit, member topographies, definition, examples,
+  non-examples, onset, offset, borderline cases and exclusions. It never
+  touches the function, urgency, cluster, context, replacement or social
+  validity.
+  - If any of those fields already hold text, it asks first: **Cancel**,
+    **Fill empty fields only**, or **Replace**.
+  - Afterwards the card says "Loaded from the library: ... Edit it to fit
+    this learner", with the entry's clinical note, which shows on screen
+    only. It offers **Undo the load**, until a loaded field is edited, and
+    **Hide this note**.
+
+**The rules every entry follows** are the form's own, from the Guide's
+sections 2 and 3:
+
+- Objective, clear and complete (Hawkins & Dobes, 1977). An observer who has
+  never met the learner could score it.
+- It names the body part, the action, the target, and a threshold where the
+  form alone is ambiguous: audible from 1 m for contact, a mark left, the
+  object displaced, or the 15.24-cm launch distance of Bann and Morris
+  (2026), named in the borderline field where it is used.
+- No function, intent, feeling or diagnosis in a definition.
+- Onset and offset that can be seen, and the episode rule in the counting
+  unit.
+- Examples that include subtle and severe forms, and non-examples that are
+  the near misses an observer would otherwise score.
+- A measure that fits:
+  - a count for brief, discrete acts;
+  - duration or partial-interval recording for long episodes;
+  - latency or percent of opportunities for noncompliance.
+- "The learner", "an adult" and "a peer", so an entry fits school and home.
+- Clusters list their members and carry the clustering rule: the same
+  urgency, function, dimension and consequence, and comparable rates.
+- Notes on safety and on medical or specialist evaluation, and on
+  safeguarding where it applies: self-injury (with Form IM-1), pica,
+  rumination, feeding, fecal smearing, and sexual behavior.
+- Stereotypy is targeted only when it causes harm or interferes with
+  learning, safety or access, never because it looks unusual.
+- One act, two targets: an act two entries describe is scored once, under
+  the entry named. An act that is also a separate safety event (traffic,
+  water, an opened exit) is scored on both.
+
+**Starting points, to edit.** Every entry is a starting point, as the panel
+and the Guide say. Fit it to the learner: the setting, the thresholds and the
+episode rule. Replace its examples and non-examples with the learner's own,
+write the team's decisions into the borderline field, keep one distance
+across a learner's targets, and pilot agreement before baseline.
+
+**Saving and printing.** The library's own controls are drawn outside the
+form's fields, so they are not saved, not counted in the progress dots, and
+never mark work as unsaved. What a load writes is ordinary field text: it
+saves, prints and flows to the case like typed text.
+
+Six one-line fields now grow with their text, so long library text shows and
+prints in full: exclusions, onset, offset, counting unit, replacement and
+social validity. The field names are unchanged, so older files open as
+before.
+
+The References sheet adds the seven works the clinical notes cite. The
+library is about 840 KB of TB-1's file.
+
+**Where it comes from.** The source is
+`tools/blocks/tb1-behavior-library.json`.
+`tools/blocks/patch-tb1-library.py` puts it into TB-1. It refuses a library
+that is malformed, that has a duplicate id or a missing field, or that has a
+value outside the form's own lists. Run it again after editing the JSON.
+
+**Checked.**
+
+- The library was written in batches and merged. A check covers required
+  fields, the fixed vocabularies, at least three examples and three
+  non-examples, definition length, inferential words, units, and citations
+  from an allowed list.
+- An audit read every entry against the spec and the Guide: 46 entries
+  changed and 5 added.
+- `qa/tb1-library-test.js` (136 checks).
+- A review made 25 findings, and 24 were fixed. The file size was left:
+  cutting it would mean removing clinical notes the spec requires.
+- `qa/all-forms-shell.js` and `qa/case-test.js` are unchanged.
+
+### Writing help in every form
+
+The assessor asked for all three ways of improving what staff write, with
+the API key kept on newsomebh.com and the third unlocked for a session by a
+one-time passcode the BCBA makes.
+
+**1. Apple's Writing Tools.** These already work in every text box on an iPad
+with Apple Intelligence: select the text, then Proofread, Rewrite,
+Professional or Concise. The panel and the Guides only explain them.
+
+**2. Check wording.** Each narrative text box (the few left out are listed
+below) shows an **Improve wording** button at its corner while you are in it
+and whenever it holds text. From a keyboard, Alt+Enter in the box opens the
+same panel (Option+Return on a Mac or iPad). The panel shows the box's text,
+or only the part you selected.
+
+Check wording runs on the device and sends nothing. It marks words that:
+
+- name a feeling;
+- guess at intent or function;
+- infer a diagnosis;
+- label the behavior;
+- judge the person;
+- leave a count, a time or an intensity vague.
+
+It says why, and suggests observable wording. There are 98 rules in
+`tools/blocks/nbh-wording-rules.json`. Where a rule has a direct
+replacement, **Apply** changes the panel's text. Repeats are grouped ("Take
+out all 3"). Words in quotation marks are the speaker's own and are left
+alone. **Use this text** writes the panel's text back into the box, as if it
+had been typed. **Cancel** leaves the box as it was.
+
+**3. Rewrite with Claude.** This rewrites the text in one of four styles:
+*Objective and observable*, *Concise*, *Report-ready*, or *Fix spelling and
+grammar only*. It goes through a small relay on the practice's own website,
+which holds the Anthropic API key, so the key is never in the forms.
+
+- **Unlocking.** A tab is unlocked with a single-use passcode from the BCBA.
+  The session lasts until its time is up (8 hours) or the tab is closed,
+  whichever comes first. In the workstation, every form in that tab shares
+  it. It is never saved in a form or a file. **Lock** ends it at once; press
+  it when you finish on a shared iPad.
+- **The privacy step.** Before anything is sent, the panel replaces names
+  with placeholders, then shows exactly what will be sent:
+  - the learner's name (whole, first, last, and each half of a double
+    surname) and ID, from the form or the workstation's packet, become
+    [Student] and [ID];
+  - a parent's surname after a title, or before "family", becomes [Family
+    name];
+  - names added under **Also hide** become [Name 1], [Name 2] and so on.
+
+  It also points out what may still be a name: capitalized words, the
+  learner's initials, and the people the form itself names.
+- **The answer.** It appears beside the original, with the names put back on
+  the device. Choose **Use this**, **Use and keep editing**, or **Keep
+  mine**. If the service is offline, the session has ended, a limit is
+  reached or the relay is down, the panel says so plainly, and nothing typed
+  is lost.
+- **Where it works.** Only in the forms opened from newsomebh.com (or
+  www.newsomebh.com) over https. Both editions use the same relay. In a copy
+  opened from a file (the folder on a computer, or the one-file editions) the
+  panel says so up front, and Check wording and Writing Tools still work.
+
+**The relay on newsomebh.com/ai.** It is PHP for the GoDaddy cPanel hosting
+the forms already use, and it is uploaded once as `nbh-relay-upload.zip`,
+which comes with the release. Extracted in the home folder (the folder that
+holds `public_html`), it makes two folders:
+
+- `public_html/ai/` (`index.php` and `.htaccess`): the address
+  https://newsomebh.com/ai/;
+- `nbh-relay/`, beside `public_html`, not inside it, so nothing in it can be
+  downloaded from the website. It holds the program, the official Anthropic
+  PHP SDK, and its README. The settings file `config.php` and the `data`
+  folder are made on the server.
+
+It needs PHP 8.1 or newer. A newer zip, extracted the same way, replaces the
+program and keeps the settings and the data.
+
+**The admin page** is https://newsomebh.com/ai/admin.
+
+- The first visit makes `config.php`, with a long random secret already in
+  it, and shows a checklist. Paste the API key into `config.php`, then choose
+  the admin password on the page and paste the line it makes into
+  `config.php`.
+- From then on the page asks for the admin password to sign in, and signs
+  you out after 30 minutes without use.
+- **New passcode** makes a passcode, such as `7KQ-M4P-2XD-V9H`. It is shown
+  once, with an optional label that only the BCBA sees, and it must be used
+  within 24 hours unless you choose another time (7 days at most). It asks
+  for the admin password again when that was last typed more than 10 minutes
+  ago.
+- Unused passcodes are listed, and **Revoke** cancels one. Open sessions are
+  listed with their label, their end and the rewrites they used. **End** stops
+  one, and **End all sessions** stops all of them.
+
+**Limits.** Each is a setting in `config.php`:
+
+- a session makes up to 300 rewrites, at most 10 a minute, of up to 4,000
+  characters each;
+- everyone together makes at most 300 rewrites in any 24 hours;
+- after 10 wrong passcodes from one internet address in 15 minutes, that
+  address waits, and after 2,000 from everywhere, everyone waits. **Clear the
+  wrong tries** lifts the pause;
+- after 5 wrong admin passwords from one address, that address waits, and
+  after 20 from everywhere, so does everyone else. Devices that have signed in
+  before are not held up.
+
+**Costs.** The API is paid for by use. At the list price when this was
+written ($4 per million input tokens and $20 per million output tokens), a
+rewrite costs about 1 to 6 US cents: a paragraph near the low end, a full
+4,000-character text near the high end. The most one rewrite can cost is
+about 21 cents, so the worst possible day under the relay's limits is about
+$64. Set a monthly spend limit in the Anthropic Console as well: it is what
+keeps a month safe.
+
+**What is sent and kept.** Only the text in the preview and the chosen style
+are sent, with the relay's fixed instructions. The relay stores and logs no
+text. Its database holds the passcodes and sessions (as hashes), their
+labels and counts, and the counters for the limits. Its log records events
+and error codes, never text, passcodes or keys.
+
+De-identified is not anonymous: an unusual event, a place or a date can still
+point to a child, so leave such details out and read the preview before
+**Send**. Before staff use Rewrite with Claude for real cases, get the
+district's or agency's approval for sending de-identified clinical text to
+an outside AI service, and follow the rules that apply (FERPA or HIPAA
+among them). If those rules call for an agreement with every service that
+handles such text, arrange it with Anthropic first. How Anthropic handles API
+data is set by Anthropic's own terms; the README points to them.
+
+`tools/relay/README.md` has the steps, written for cPanel. It also travels in
+the zip as `nbh-relay/README.md`. It covers:
+
+- setting PHP 8.1;
+- uploading and extracting the zip;
+- the API key;
+- the admin password;
+- the spend limit;
+- making and trying a passcode;
+- keeping browsers on https;
+- backups and updates;
+- what to do when something does not work.
+
+The forms already carry the relay's address, `https://newsomebh.com/ai`, in
+`tools/blocks/nbh-wording-config.json`, so nothing has to be rebuilt once the
+relay is set up. Until then, Rewrite with Claude says that the service is not
+reachable or not set up yet. It finds this out by asking `/ai/api/health`,
+which sends nothing.
+
+**In the forms.** All 44 forms carry the writing help once:
+`<script id="nbh-wording">`, about 240 KB, holding the rules, the address and
+the client, between the form's markup and its own script. It is put in by
+`tools/blocks/patch-wording.py`, and in a rebuilt parts form by
+`tools/apply-polish.py`. See `tools/README.md`.
+
+The button goes only on narrative boxes. These get none:
+
+- hidden boxes;
+- boxes in the toolbar or in a dialog;
+- paste boxes with spelling check turned off;
+- the learner's particulars.
+
+Nothing the button or the panel draws is a form field: it all lives in one
+element at the end of the page. So the saved files, the workstation's
+snapshots, the packet print and the progress dots are exactly what they
+were. Typing in the panel never reaches a form's own shortcuts: OB-1's Live
+Recorder does not count it. Esc closes only the panel.
+
+Every form with a Guide and a multi-line box has a short **Writing help**
+note in its Guide, on screen only. That is 40 forms: not DD-1 and SP-1, which
+have no Guide, and not VS-1 and IM-1, which have no multi-line box. Some
+notes add a line for their form:
+
+- TB-1: in a definition, the behavior's own name belongs there;
+- IN-1, CT-1, SI-1, SV-1 and CF-1: a respondent's own words go in quotation
+  marks, which Check wording leaves alone;
+- PD-1, ST-1 and TI-1: the text is about a staff member, so add their name
+  under Also hide;
+- FS-1 and EB-1: what Report-ready and Concise do for a report and a brief;
+- OB-1: typing in the panel is never counted by the Live Recorder;
+- TK-1: its backs are instructions, so a word Check wording marks there can
+  stay, and a rewrite must keep the book's marks.
+
+**Checked.**
+
+- The relay's suite (`tools/relay/tests/run.sh`, offline, against a local
+  stand-in for the API):
+  - every PHP file linted;
+  - `relay-test.php` (378 checks);
+  - `contract-test.js` (31), which runs the panel's own functions on every
+    recorded answer;
+  - `admin-browser-test.js` (37), the admin page at 390, 820 and 1180 px;
+  - `php81-test.php` (22), under PHP 8.1.
+- A real Apache 2.4.58 with mod_php answered all 12 checks, both with
+  mod_rewrite and without.
+- `qa/wording-rules-test.js`: precision and recall of 100% on 163 samples,
+  and no finding on 78 that must not fire.
+- `qa/wording-client-test.js`: 206 checks, with axe.
+- `qa/wording-rollout-test.js` compares all 44 forms with the copies before
+  the writing help: load, buttons, save, snapshot, print, and 390 px.
+- A review made 30 findings: 24 were dealt with in full, 5 in part, and 1
+  was rejected.
+
+Not yet tried on an iPad, or on the GoDaddy server itself.
+
+### The practice's own cards and pictures in the picture library
+
+The shared picture library (`nbh-pictos.js`, used by SM-1, VS-1 and TK-1)
+grows from 227 to 256 pictures. The 29 new ones are the practice's own cards
+and pictures, taken from its own files. Each sits beside the drawn picture of
+the same name, or the nearest one (Chips beside Crackers, Books beside
+Story), in its category:
+
+- **Activities and rewards:** Bike, Playground, Color (crayons), Ball,
+  Books (two), Puzzle, iPad (the card, and the photo with YouTube on its
+  screen), Bubbles, Cars, Sports, and the YouTube logo.
+- **School:** Math (vector), School Bus, Writing (the card, and two pictures
+  of boys writing at a desk), Reading.
+- **Expectations:** Clean Up, All Done, Raise hand (the boy at his desk,
+  vector), and Waiting twice:
+  - the word card, which TK-1 prints as its label alone, so the word does
+    not print twice;
+  - the Time Timer card.
+- **Needs:** Break.
+- **Food and drink:** Chips, Fruit.
+- **People:** two Boy pictures, a face with curly hair and a boy cropped at
+  the shoulders in a teal shirt.
+
+**In TK-1.** Under **When there is no photo**, TK-1 offers both Boy pictures
+as avatars, **Library: Boy (curly hair)** and **Library: Boy (teal shirt)**.
+Either fills both Board photo circles, mirrored as the facing setting says.
+
+**Credits.** The library's credit line names the practice's own pictures and
+the trademarks: the YouTube logo (Google LLC), iPad (Apple Inc.) and Time
+Timer (Time Timer LLC). The credit lines in TK-1, VS-1 and SM-1, which said
+every picture was OpenMoji, now say the same. In VS-1 and SM-1 the sentence
+prints, so the pages that carry it differ by that sentence; the page counts
+are unchanged. For the same reason `qa/wording-rollout-test.js`, which compares
+each form's print with the copy from before the writing help, now reports
+SM-1 and VS-1 as different: that sentence is the only difference.
+
+**`tools/pictos/import-cards.py`** brings a card file into the library:
+
+    python3 tools/pictos/import-cards.py CARD KEY "LABEL" CATEGORY AFTER_KEY [...]
+
+CARD is an Illustrator card saved as SVG, or a plain picture (.png, .webp,
+.jpg).
+
+- The frame (a card-sized rounded rectangle) and the Georgia label are left
+  out, since TK-1 prints the label above the picture itself.
+- An embedded raster picture is rendered with its transparency, trimmed,
+  scaled to 600 pixels on its long side (about 300 dpi on a 2-inch card
+  picture) and kept as WebP.
+- A vector picture stays vector. Its classes become presentation attributes,
+  and each font list gets a generic fallback.
+- A picture drawn with gradients, clipping paths, masks or patterns is
+  rendered, since those need ids and the library refuses ids.
+- A card saved as one picture, with the frame and label drawn in, is cut out
+  of its frame below the label. Its white surround is made clear softly, so
+  its shadows still fall over a coloured tile. Pale parts that begin with a
+  clear edge (a page, the timer's face) stay as they are.
+
+It writes `tools/pictos/custom/KEY.svg` and the entry in
+`tools/pictos/pictos.json`. Then the library is built again:
+
+    python3 tools/pictos/build-pictos.py <OpenMoji package folder> tools/pictos/nbh-pictos.js
+    cp tools/pictos/nbh-pictos.js NBH-Workstation/nbh-pictos.js
+
+Rendering uses the Playwright Chromium the `qa/` checks use, and WebP comes
+from Pillow. Unchanged pictures import again byte for byte.
+`build-pictos.py` now takes a picture from a file of its own. It refuses
+styles, classes, ids, scripts and links, apart from an embedded PNG, JPEG or
+WebP picture.
+
+**Upload `nbh-pictos.js` with the forms.** It is now about 1.7 MB (it was
+about 650 KB). SM-1, VS-1 and TK-1 load it from beside them. An older copy
+left on the website lacks the new pictures, so cards that use them show and
+print without a picture. The one-file editions carry it inside.
+
+Checked by `qa/tk1-test.js`: the new pictures print under their labels; both
+Boy pictures fill the Board circles; the simulated book's twelve cards. VS-1
+and SM-1 load the new pictures, and all 44 forms pass the shell check.
+
+### The Guides
+
+- TK-1's Guide now covers:
+  - the terminal token, under Making the Book;
+  - the iPad sound, in the Walkthrough paragraph;
+  - the practice's sample cards, under About the Simulator;
+  - writing help;
+  - the corrected picture credit.
+- TK-1's Backs view lists `{last}` and `{n}th` with the other marks.
+- The Guide notes on writing help in CN-1, DA-1, GC-1, HD-1, SA-1, SI-1, SM-1
+  and SR-1 had been put into the built files only. They are now in the parts
+  (`tools/forms/<ID>/body.html`) too, so a rebuild from the parts gives the
+  shipped file again. All eleven parts forms were rebuilt and checked: CN-1,
+  DA-1, GC-1, HD-1, IM-1, SA-1, SI-1 and SR-1 came out byte for byte the same,
+  and SM-1, VS-1 and TK-1 changed only by the text described here.
+- ABC-1's note, beside its narrative box, now also says to press Lock on a
+  shared iPad.
+- TE-1's paragraph on the link now says that the token form also comes ticked
+  when the plan has no count yet, as the form does.
+
+Every form was printed blank and with its simulation, before and after these
+Guide changes. All of them print the same, except SM-1 and VS-1, whose
+credit sentence changed.
+
 ## Autosave that holds up on an iPad (v21.44, draft)
 
 Autosave keeps a safety copy of the work in this browser, on this device,
