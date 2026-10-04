@@ -1078,6 +1078,28 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
 @media (max-width:760px){.obs-top{grid-template-columns:1fr}.obs-big{font-size:36px}.obs-set select{min-width:0;width:100%}.obs-set label{flex:1 1 150px}}
 @media print{.obs-card,.obs-bar,.obs-flash,.sw{display:none!important}}
 </style>
+<style id="abc1-touch-css">
+/* v21.44 (A6): on a touch screen the live record is easier to hit. Screen and a coarse pointer only: paper and the
+   computer layout are unchanged.
+   - The recording rows (Record, Background samples) sit at least 40 px apart, with 6 px between rows; a row's words
+     are tappable over its full height, and the tick box and the dot sit on the first line.
+   - Edit and Delete in the incident list, and Delete in the sample list, are 44 px tall and as wide as their
+     column, one above the other with 8 px between them.
+   - The other buttons used while recording (the observation timer and its bar, the incident stopwatch, the recording
+     format switch, Save incident) are 44 px tall; the switch's two halves stand 4 px apart. */
+@media screen and (pointer:coarse){
+  #panel-record .opt,#panel-background .opt{padding:3px 0;break-inside:avoid}
+  #panel-record .opt label,#panel-background .opt label{padding:9px 0;cursor:pointer;touch-action:manipulation}
+  #panel-record .opt input[type=checkbox],#panel-record .opt input[type=radio],#panel-background .opt input[type=checkbox]{margin:7px 0 0!important}
+  #panel-record .opt .dot,#panel-background .opt .dot{margin-top:15px}
+  #panel-record .opt input[type=text]{align-self:center;min-height:36px}
+  #inc-table button[data-edit],#inc-table button[data-del],#bg-table button[data-delsample]{display:block;width:100%;min-width:44px;min-height:44px!important;padding:8px 10px!important;font-size:13px!important;margin:0!important}
+  #inc-table button[data-del]{margin-top:8px!important}
+  .obs-ctl button,.obs-bar button,.sw button,.segmented button,#panel-record button.btn,#panel-background button.btn,#panel-incidents button.btn{min-height:44px!important}
+  #panel-record .segmented{gap:4px;border:0;border-radius:0;overflow:visible}
+  #panel-record .segmented button,#panel-record .segmented button:last-child{border:1px solid var(--nbh-slate);border-radius:5px}
+}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -4109,12 +4131,37 @@ function exportCSV(){
   });
   download("ABC_incidents_" + stamp() + ".csv", "\uFEFF" + lines.join("\r\n"), "text/csv;charset=utf-8");
 }
+/* v21.44 (A6): a file this form cannot read is named, as the other forms name it. The message went only to the status
+   line on the Data file tab, so from any other tab Open data seemed to do nothing. It now shows where you are, says
+   what the file is when the file tells (another form's saved file, a case file, a student packet), and the record on
+   screen stays as it was. */
+function notAbcFile(d, parsed){
+  let what = "";
+  if(d && typeof d === "object" && !Array.isArray(d)){
+    const f = typeof d.form === "string" ? d.form.trim() : "";
+    const v = typeof d.version === "string" ? ((/^([A-Z]{2}-\d+)\b/.exec(d.version) || [])[1] || "") : "";
+    if(f === "CASE") what = "It is a case file: open it with Open case in the workstation.";
+    else if(f === "PACKET") what = "It is a student packet (the student's details and the case facts): open it with Open packet.";
+    else if(/^[A-Z]{2}-\d+$/.test(f || v)) what = "It is a file saved by Form " + (f || v) + ": open it in that form.";
+    else if(Array.isArray(d.obs) && d.meta && d.cfg) what = "It looks like a file saved by Form OB-1: open it in that form.";
+    else if(Array.isArray(d.rows) && Array.isArray(d.behaviors) && d.schedule) what = "It looks like a file saved by Form DD-1: open it in that form.";
+    else if(Array.isArray(d.behaviors) && d.codes && d.cfg) what = "It looks like a file saved by Form SP-1: open it in that form.";
+  } else if(!parsed) what = "It is not a file saved with Save data.";
+  return "That file could not be read as a saved ABC-1 record.\n" + (what ? what + " " : "") +
+    "Nothing on this form was changed. To open an ABC-1 record, choose the .json file Save data made here.";
+}
 function importJSON(file){
   const fr = new FileReader();
   fr.onload = () => {
+    let d = null, parsed = false;
+    try{ d = JSON.parse(fr.result); parsed = true; }catch(e){}
+    if(!parsed || !d || !Array.isArray(d.entries)){
+      const msg = notAbcFile(d, parsed);
+      $("#data-status").textContent = msg.replace(/\n/g, " ");
+      alert(msg);
+      return;
+    }
     try{
-      const d = JSON.parse(fr.result);
-      if(!d || !Array.isArray(d.entries)) throw new Error("not an ABC data file");
       state.entries = d.entries; state.samples = Array.isArray(d.samples) ? d.samples : [];
       /* v21.21 cross-form (X2): the function comes back with the file (and so through the workstation, which
          restores through Open data). A file saved before it was kept has none and leaves the choice on
@@ -4126,6 +4173,7 @@ function importJSON(file){
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
     }catch(err){
       $("#data-status").textContent = "That file could not be read as an ABC data file. Choose a .json exported from this page.";
+      alert("That file could not be read in full as a saved ABC-1 record.\nCheck the incidents and samples on screen, or open the .json file Save data made here.");
     }
   };
   fr.readAsText(file);
@@ -5356,7 +5404,12 @@ function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
   return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
-function loadDemo(){
+/* v21.44 (A6): the simulation asks first, with the question the other forms ask. It replaced the header, the incident
+   log, the background samples and the function without asking, and left an incident half entered on the Record tab
+   beside the simulated record; after Load that entry is cleared too, so everything already entered is replaced. */
+async function loadDemo(){
+  if(!(await nbhUI.confirm("Load the simulated record?\nEvery tab is filled with a worked example: 46 incidents and 60 background samples, with the analysis set to compare against an escape function. Anything already entered will be replaced.", {ok:"Load"}))) return;
+  clearForm();
   const rnd = mulberry(20260913);
   const pick = arr => arr[Math.floor(rnd()*arr.length)];
   const chance = p => rnd() < p;
