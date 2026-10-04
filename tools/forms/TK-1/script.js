@@ -2875,7 +2875,7 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     const ownList=PICK&&PICK.first==='tok'?[['tk:',TOK],['av:',AV]]:[['av:',AV],['tk:',TOK]];
-    if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+p.id+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'<span class="pd-x" data-phdel="'+p.id+'" title="Remove this photo" role="button" style="display:block;color:#8E2A2A;font-size:10px">remove</span></button>').join('');
+    if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+esc(p.id)+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'<span class="pd-x" data-phdel="'+esc(p.id)+'" title="Remove this photo" role="button" style="display:block;color:#8E2A2A;font-size:10px">remove</span></button>').join('');
     if(!c||c==='_own')ownList.forEach(([pre,set])=>{h+=Object.entries(set).filter(([k,v])=>!q||v.l.toLowerCase().includes(q)).map(([k,v])=>'<button type="button" data-k="'+pre+k+'">'+own(v,'')+esc(v.l)+'</button>').join('');});
     if(c!=='_photos'&&c!=='_own')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+'</button>').join('');
     const out=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no library pictures are listed. Put it in the same folder as the form, or use a photo or one of the pictures drawn here.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');$('#pdGrid').innerHTML=out;marks();};
@@ -2989,7 +2989,7 @@ function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(30,num(S.meta.wm)||20))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
 function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):size?'width:'+IN(size)+';height:'+IN(size):'';
-  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':isWord(o)?'':pic(o,''))+'</div></div>';}
+  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+(isWord(o)&&!other&&!blank?' wd':'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':isWord(o)?'':pic(o,''))+'</div></div>';}
 /* (v21.43) the terminal token: the last token can differ from the others (an orange double border, and if chosen its own picture), so the
    learner can see that it fills the board and the exchange comes next; the Board's last slot and the Tokens page's last box carry the same ring */
 function termMode(){const t=S.meta.term;return t==='ring'||t==='pic'?t:'none';}
@@ -3108,7 +3108,7 @@ function renderOut(){
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
   const tr=$('#termPicRow');if(tr)tr.style.display=termMode()==='pic'?'':'none';const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules';lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
-  setTimeout(()=>{scaleBooks();const pl=$('#prevLine');if(pl&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+textCheck().toFixed(2)+'.';},0);
+  setTimeout(()=>{scaleBooks();const pl=$('#prevLine'),tc=textCheck();if(pl&&tc&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+tc.toFixed(2)+'.';},0);
   syncState();
 }
 /* the fits need the pages laid out: the sections that hold a book are shown off screen while measuring when their view is not the current one */
@@ -3139,7 +3139,10 @@ function scaleBooks(){$$('.out').forEach(out=>{const b=out.querySelector('.book'
   const avail=out.clientWidth-28,w=b.scrollWidth,h=b.offsetHeight;if(!w)return;const k=Math.min(1,avail/w);b.style.transform='scale('+k+')';b.style.marginRight=(-(w*(1-k)))+'px';b.style.marginBottom=(-(h*(1-k)))+'px';
   b.querySelectorAll('.pglabel').forEach(l=>{l.style.fontSize=(12/k).toFixed(1)+'px';});});}
 /* a check that text and boxes scale together: a 72 pt line box inside a page should be as tall as a 1 in box is wide */
-function textCheck(){const pg=$('#book .pg');if(!pg)return 1;const d=document.createElement('div');d.style.cssText='position:absolute;left:0;top:0;width:1in;height:1px;visibility:hidden';const t=document.createElement('span');t.textContent='M';t.style.cssText='position:absolute;left:0;top:0;font:400 72pt/1 Georgia,serif;visibility:hidden';pg.appendChild(d);pg.appendChild(t);const r=t.getBoundingClientRect().height/(d.getBoundingClientRect().width||1);d.remove();t.remove();return r;}
+/* the size text is drawn at on the book's page against its layout (1.00: as set; above it, the browser enlarged the text). Layout sizes,
+   not the box on screen: a page turned on its side for the iPad's print (or scaled to fit) would give a nonsense number. 0 when the
+   page is not laid out (a view that hides it), and then the Preview line says nothing */
+function textCheck(){const pg=$('#book .pg');if(!pg)return 1;const d=document.createElement('div');d.style.cssText='position:absolute;left:0;top:0;width:1in;height:1px;visibility:hidden';const t=document.createElement('span');t.textContent='M';t.style.cssText='position:absolute;left:0;top:0;font:400 72pt/1 Georgia,serif;visibility:hidden';pg.appendChild(d);pg.appendChild(t);const w=d.offsetWidth,r=w?t.offsetHeight/w:0;d.remove();t.remove();return r;}
 let tSc=0;window.addEventListener('resize',()=>{clearTimeout(tSc);tSc=setTimeout(scaleBooks,150);});
 /* after the sheet of one card has printed, the print order goes back to what it was, so the Preview shows the whole book again */
 function restoreOrder(){if(S.meta.order==='spare'&&S.meta.prevOrder){S.meta.order=S.meta.prevOrder;delete S.meta.prevOrder;renderAll();}}
@@ -3190,7 +3193,9 @@ function fromFile(d){
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,2000);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});Object.keys(obj('txt')).forEach(k=>{if(k in TXT0)o.txt[k]=str(s.txt[k]).slice(0,20000);});
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<900000;
-  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)})).filter(p=>p.id&&okImg(p.img)):[];
+  /* a photo's id goes into the picker's markup: only the letters, digits, _ and - this form makes ids of (a file made elsewhere could
+     carry markup in it); a photo with any other id is left out */
+  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
   const ids=new Set(o.photos.map(p=>p.id));const okK=k=>!!(P[k]||(k.startsWith('tk:')&&TOK[k.slice(3)])||(k.startsWith('av:')&&AV[k.slice(3)]));
   const arr=(k,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={k:str(x&&x.k),ph:str(x&&x.ph),l:str(x&&x.l).slice(0,60)};if(!okK(r.k))r.k='';if(!ids.has(r.ph))r.ph='';return r;}):null;
   const ch=arr('ch',6);if(ch)o.ch=ch;const tg=arr('tg',6);if(tg)o.tg=tg;const ft=arr('ft',2);if(ft&&ft.length===2)o.ft=ft;const tok=arr('tok',1);if(tok&&tok.length)o.tok=tok;const tl=arr('tokL',1);if(tl&&tl.length)o.tokL=tl;const ph=arr('photo',1);if(ph&&ph.length)o.photo=ph;const bg=arr('bg',2);if(bg&&bg.length===2)o.bg=bg;const sp=arr('sp',1);if(sp&&sp.length)o.sp=sp;
@@ -3222,15 +3227,43 @@ renderAll();
    a label that names a library picture gets the picture. The picker adds what is ticked to the empty slots. */
 function matchPicto(w){const lw=String(w||'').toLowerCase().trim();if(!lw)return '';let k=KEYS.find(k=>P[k].l.toLowerCase()===lw);if(k)return k;k=KEYS.find(k=>P[k].l.length>3&&lw.includes(P[k].l.toLowerCase()));return k||'';}
 function cellFor(w){w=String(w||'').trim();return{k:matchPicto(w),ph:'',l:w.slice(0,40)};}
+/* (v21.43) the view dots (the shared nbh-ui block): a Choices or Targets card is filled when it has a picture or a label (the label
+   is optional: the picture's own name prints when it is blank), so the dot does not read a picked card as empty */
+window.__nbhViewFill=function(v){if(v!=='choices'&&v!=='targets')return null;const a=v==='choices'?S.ch:S.tg;return {filled:a.filter(o=>has(o)||String(o.l||'').trim()).length,total:a.length};};
+/* (v21.43) what the case gives the Targets page, as labels a learner's card can carry: each replacement behavior once. The
+   forms' own marks come out of the text ("(see target 4)", "(replacement)", "(simulated)", "(see Forms EA-1 and TD-1)"), a
+   long one is cut at a word, under 40 characters, with no "from the" left hanging; a problem behavior's replacement that
+   names another target ("see target 4") is that target's card; and two that share most of their words ("Hands a break card
+   and waits", "hand the break card to an adult") are one card. Labels already on the page count as taken. */
+const TSTOP={a:1,an:1,the:1,to:1,and:1,or:1,of:1,for:1,with:1,from:1,in:1,on:1,at:1,by:1,his:1,her:1,their:1,its:1,is:1,are:1,when:1,then:1};
+function tgtClean(w){w=String(w||'').replace(/\([^()]*\)/g,' ').replace(/\([^()]*$/,' ').replace(/\[[^\[\]]*\]/g,' ').replace(/\s+/g,' ').trim().replace(/[\s.,;:!?\u2013\u2014-]+$/,'');
+  if(w.length>40){w=w.slice(0,41);const sp=w.lastIndexOf(' ');w=(sp>12?w.slice(0,sp):w.slice(0,40)).trim();}
+  let ws=w.split(' ');while(ws.length>1&&TSTOP[ws[ws.length-1].toLowerCase()])ws.pop();w=ws.join(' ').replace(/[\s.,;:!?\u2013\u2014-]+$/,'');
+  return w?w.charAt(0).toUpperCase()+w.slice(1):'';}
+function tgtStems(w){return String(w||'').toLowerCase().split(/[^a-z\u00e0-\u024f]+/).filter(x=>x&&!TSTOP[x]).map(x=>x.length>4?x.replace(/(?:ing|ed|es|s)$/,''):x);}
+function tgtSame(A,B){if(!A.length||!B.length)return false;const a=new Set(A),b=new Set(B);let i=0;a.forEach(x=>{if(b.has(x))i++;});const u=a.size+b.size-i;return i/u>.5||i===a.size||i===b.size;}
+/* behaviors: the case's target behaviors (Form TB-1); acq: the acquisition goals (Form GB-1); taken: labels already on the page */
+function caseTargets(behaviors,acq,taken){const groups=[],out=[];let dup=0,skip=0;
+  const groupOf=st=>groups.find(g=>g.some(x=>tgtSame(x,st)));
+  (taken||[]).forEach(l=>{if(String(l||'').trim())groups.push([tgtStems(l)]);});
+  const add=(raw,alias)=>{const lab=tgtClean(alias||raw);if(!lab)return;const st=tgtStems(lab),st2=alias?tgtStems(tgtClean(raw)):null;
+    const g=groupOf(st)||(st2&&groupOf(st2));if(g){if(st2)g.push(st2);g.push(st);dup++;return;}
+    groups.push(st2?[st,st2]:[st]);out.push(lab);};
+  const B=behaviors||[];
+  B.forEach(b=>{if(b.isRep){add(b.label);return;}const w=String(b.rep||'').trim();if(!w){skip++;return;}
+    const m=/\bsee\s+target\s+(\d+)\b/i.exec(w),T=m?B[+m[1]-1]:null;add(w,T&&T.isRep?T.label:'');});
+  (acq||[]).forEach(g=>{if(String(g&&g.beh||'').trim())add(g.beh);});
+  return {list:out,dup,skip};}
 window.__nbhFactsIn=function(f){let n=0;const empty=a=>a.every(o=>!has(o)&&!o.l);
-  if(empty(S.tg)){const words=[];(f.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(w&&!words.includes(w))words.push(w);});((f.goals&&f.goals.acq)||[]).forEach(g=>{if(g.beh&&!words.includes(g.beh))words.push(g.beh);});words.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
+  if(empty(S.tg)){caseTargets(f.behaviors,f.goals&&f.goals.acq,[]).list.slice(0,6).forEach((w,i)=>{S.tg[i]=cellFor(w);n++;});}
   if(empty(S.ch)&&(f.menu||[]).length){f.menu.slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).slice(0,6).forEach((x,i)=>{S.ch[i]=cellFor(x.name);n++;});}
   if(n)renderAll();return {filled:n,note:n?undefined:'the case holds no replacement behavior, objective or reinforcer menu yet'};};
 /* (v21.43) the Targets page holds skills and replacement behaviors only: a problem behavior goes in as its named replacement
    (or not at all), and a reduction goal never; the note says what was left out and why */
 window.__nbhFactsPick=function(sel){let n=0,skip=0,full=0;const put=(a,w)=>{w=String(w||'').trim();if(!w)return false;const slot=a.find(o=>!has(o)&&!o.l);if(!slot){full++;return false;}Object.assign(slot,cellFor(w));return true;};
-  (sel.behaviors||[]).forEach(b=>{const w=b.isRep?b.label:b.rep;if(!String(w||'').trim()){skip++;return;}if(put(S.tg,w))n++;});((sel.goals&&sel.goals.acq)||[]).forEach(g=>{if(put(S.tg,g.beh))n++;});skip+=((sel.goals&&sel.goals.red)||[]).length;(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
+  const ct=caseTargets(sel.behaviors,sel.goals&&sel.goals.acq,S.tg.filter(o=>has(o)||o.l).map(lbl));skip=ct.skip;ct.list.forEach(w=>{if(put(S.tg,w))n++;});skip+=((sel.goals&&sel.goals.red)||[]).length;(sel.menu||[]).forEach(m=>{if(put(S.ch,m.name))n++;});
   renderAll();const notes=[];if(full)notes.push('the six slots are full; empty one first');if(skip)notes.push((skip===1?'1 item was':skip+' items were')+' left out: a problem behavior or a reduction goal is not a teaching target; its replacement behavior goes on the Targets page');
+  if(ct.dup)notes.push((ct.dup===1?'1 was':ct.dup+' were')+' the same replacement behavior as a card already there');
   return {filled:n,note:notes.join('; ')};};
 
 /* v21.43 the link with Form TE-1 (the token economy plan for the same student). Off until Link with Form TE-1 is pressed

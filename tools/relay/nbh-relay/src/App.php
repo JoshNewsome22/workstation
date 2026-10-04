@@ -21,6 +21,7 @@ final class App
         '/api/health' => ['GET' => ['health', 'none']],
         '/api/redeem' => ['POST' => ['redeem', 'key']],
         '/api/rewrite' => ['POST' => ['rewrite', 'key']],
+        '/api/session/end' => ['POST' => ['endSession', 'core']],
         '/api/admin/password-hash' => ['POST' => ['passwordHash', 'core']],
         '/api/admin/login' => ['POST' => ['login', 'admin']],
         '/api/admin/logout' => ['POST' => ['logout', 'admin']],
@@ -61,7 +62,7 @@ final class App
             Db::ensureDir($app->dataDir);
         }
         Log::init($app->dataDir);
-        $req = Request::fromGlobals($app->config->maxBodyBytes(), $app->config->str('BASE_PATH'));
+        $req = Request::fromGlobals($app->config->maxBodyBytes(), $app->config->str('BASE_PATH'), $app->config->bool('TRUST_PROXY_HTTPS'));
         $app->handle($req)->send($req->method === 'HEAD');
     }
 
@@ -132,6 +133,7 @@ final class App
             'health' => $this->health(),
             'redeem' => (new Api($this))->redeem($req, $body),
             'rewrite' => (new Api($this))->rewrite($req, $body),
+            'endSession' => (new Api($this))->endSession($req, $body),
             default => (new Admin($this))->{$handler}($req, $body),
         };
     }

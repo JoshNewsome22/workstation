@@ -709,6 +709,8 @@ td input,td select{max-width:100%}
 #tgtWrap .card{scroll-margin-top:84px}
 @media (pointer:coarse){html #nbhUiDlg .u-f button{min-height:44px}}
 @media print{.tb1lib-host{display:none!important}}
+/* (v21.43) paper: no resize grip in the corner of a box */
+@media print{textarea{resize:none}}
 </style>
 </head>
 <body class="view-guide">
@@ -838,7 +840,7 @@ td input,td select{max-width:100%}
   <h3 class="sub">About the behavior library</h3>
   <p class="method" style="margin-top:0">Sheet 4 carries a library of <span data-tb1lib="n">207</span> starting definitions for reduction targets in <span data-tb1lib="cats">14</span> categories. Search for a behavior at the top of a target card and load it, or browse the library above the cards; on sheet 2 a library label can be added as a candidate. Loading fills only the definition fields, never the function, urgency, cluster, context, replacement, or social-validity fields, and asks before replacing text already typed. Each entry is a starting point to edit: fit it to the learner (the setting, the thresholds, the episode rule), replace the examples and non-examples with the learner&rsquo;s own, and pilot agreement before baseline (Hawkins &amp; Dobes, 1977). Function is never part of a definition (section 2). An entry with a functional (outcome-defined) version loads it with its own measurement fields. Contact with a person or with the learner&rsquo;s own body is written as audible from 1 m, closer than the 2-m example in section 2 so that quieter contacts also count; keep one distance across a learner&rsquo;s targets. An act that two targets describe is scored once, under the entry named; an act that is also a safety event staff answer differently (traffic, water, an opened exit) is scored on both. An entry&rsquo;s clinical note shows on screen only; the works the notes cite are on the References sheet.</p>
   <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
-  <p class="method noprint nbh-wh" style="margin-top:0">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite. The button and the panel are not saved with the form and never print. In a definition the behavior&rsquo;s own name (a tantrum, aggression) belongs there: Check wording marks such labels wherever they appear, and its reason says when to keep one.</p><!-- /writing help -->
+  <p class="method noprint nbh-wh" style="margin-top:0">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite. The button and the panel are not saved with the form and never print. In a target card, Check wording leaves alone the target&rsquo;s own name (its label, and the behavior library&rsquo;s other names for that entry), which belongs in its definition, and every sentence still as the library wrote it, an approved starting definition; what you write or change yourself is checked.</p><!-- /writing help -->
   <h3 class="sub">About the simulation</h3>
   <p class="method" style="margin-top:0"><b>Load simulation</b> (toolbar) puts simulated entries on every sheet; none of it is a real student record. Simulated target-behavior development loaded on every sheet: seven candidates screened, two cluster tests (one kept, one split), five fully defined targets (one of them arranging and ordering from the sheet-4 RRB template), the quality checklist, and the agreement pilot.</p>
   <div class="cite">Decision rules synthesize Hawkins and Dobes (1977), Kazdin (2011), Johnston and Pennypacker (2009), Derby et al. (1994), Beavers and Iwata (2011), and the precursor and response-class-hierarchy studies listed on the reference sheet. The urgency scale is a practice tool; its tiers are not taken from any single study.</div>
@@ -1284,6 +1286,16 @@ function compile(src){
 }
 const BLANKRULE = {id:'blank', cat:'blank', why:'A blank is still to be filled in.', suggest:'Replace the words in brackets with what you saw or counted.', replace:null};
 const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2})\]$/i;
+/* a word left out on purpose, as records write it ("[expletive]", "[inaudible]"), is not a blank to fill in */
+const NOTBLANK = /^\[(?:expletives?|expletive deleted|profanity|obscenity|inaudible|unintelligible)\]$/i;
+/* A form can say what in a field is not the writer's own wording: window.nbhWordingKeep(field, text) returns
+   {spans:[[start, end], ...], words:[...], note:'...'} for that text. A finding inside a span (Form TB-1: a sentence still
+   word for word as its behavior library wrote it) or that is one of the words (the names the card's target goes by) is
+   not marked; the note says so in the panel. */
+function keepOf(ta, t){
+  const f = window.nbhWordingKeep; if (typeof f !== 'function' || !ta) return null;
+  try { const k = f(ta, str(t)); return k && typeof k === 'object' ? k : null; } catch (e) { return null; }
+}
 /* the learner's own words, in quotation marks, are not the writer's and are not checked */
 function quoteSpans(t){
   const spans = []; let open = -1, kind = '';
@@ -1330,7 +1342,7 @@ function reported(t, s, text){
   /* "said he" before "was angry": the phrase itself has to start with the verb then */
   return !(m[1] && !m[2] && !/^(?:was|were|is|am|are|got|gets|felt|feels|became|becomes|had\s+been|has\s+been)\b/i.test(text));
 }
-function check(text){
+function check(text, keep){
   const t = str(text), q = quoteSpans(t), out = [];
   const quoted = (s, e) => q.some(p => s >= p[0] && e <= p[1]);
   rules().rules.forEach(r => {
@@ -1347,10 +1359,15 @@ function check(text){
     re.lastIndex = 0;
   });
   BLANK.lastIndex = 0; let b;
-  while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
+  while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
   out.sort((a, c) => a.start - c.start || c.end - a.end);
   const seen = {};
-  return out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seen[k]) return false; seen[k] = 1; return true; });
+  const list = out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seen[k]) return false; seen[k] = 1; return true; });
+  if (!keep) return list;
+  const spans = Array.isArray(keep.spans) ? keep.spans.filter(p => Array.isArray(p) && p.length === 2) : [], W = {};
+  (Array.isArray(keep.words) ? keep.words : []).forEach(w => { const k = normKey(w); if (k) W[k] = 1; });
+  const named = f => { const k = normKey(f.text); return !!(W[k] || W[k.replace(/(?:es|s)$/, '')] || W[k + 's']); };
+  return list.filter(f => !spans.some(p => f.start >= p[0] && f.end <= p[1]) && !named(f));
 }
 function applyAt(t, f){
   let a = t.slice(0, f.start), b = t.slice(f.end);
@@ -2140,7 +2157,7 @@ function countFor(ta, now){
   const v = ta.value, c = counts.get(ta);
   if (c && c.v === v) return c.n;
   if (!now) { idleQ.add(ta); if (!idleH) idleH = later(drainCounts); return c ? c.n : 0; }
-  const n = /\S/.test(v) ? check(v).length : 0;
+  const n = /\S/.test(v) ? check(v, keepOf(ta, v)).length : 0;
   counts.set(ta, {v, n});
   return n;
 }
@@ -2610,7 +2627,7 @@ function context(t, f){
   return [(a > 0 ? '\u2026' : '') + t.slice(a, f.start).replace(/\s+/g, ' '), t.slice(f.start, f.end), t.slice(f.end, z).replace(/\s+/g, ' ') + (z < t.length ? '\u2026' : '')];
 }
 function renderCheck(){
-  const t = P.ed.value, all = check(t), list = all.filter(f => !S.ignored[f.id + '|' + f.text.toLowerCase()]);
+  const t = P.ed.value, kp = keepOf(S && S.ta, t), all = check(t, kp), list = all.filter(f => !S.ignored[f.id + '|' + f.text.toLowerCase()]);
   const n = list.length, hidden = all.length - n;
   P.cnt.hidden = !n; P.cnt.textContent = n ? String(n) : '';
   P.tabs[0].setAttribute('aria-label', 'Check wording' + (n ? ', ' + plural(n, 'phrase', 'phrases') + ' to look at' : ''));
@@ -2642,7 +2659,7 @@ function renderCheck(){
       h('div', {class:'ac'}, acts)
     ])));
   });
-  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (rules().version ? ' Rules ' + rules().version + '.' : '');
+  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (kp && kp.note ? ' ' + clean(kp.note, 300) : '') + (rules().version ? ' Rules ' + rules().version + '.' : '');
 }
 function refocus(i){ const b = P.fds.children[Math.min(i, P.fds.children.length - 1)]; const t = b && b.querySelector('button'); try { (t || P.sum).focus({preventScroll:false}); } catch (e) {} }
 /* every place of one rule at once, from the last to the first so that each one's place in the text still holds */
@@ -2857,7 +2874,8 @@ function start(){ if (!build()) return; wire(); schedule(); }
 window.nbhWording = Object.freeze({
   version: VERSION,
   rules: () => { const r = rules(); return {version:r.version, count:r.rules.length, bad:r.bad.slice()}; },
-  check: t => check(t).map(f => ({id:f.id, cat:f.cat, start:f.start, end:f.end, text:f.text, why:f.why, suggest:f.suggest, replacement:f.replacement})),
+  /* with a field as well, what the form marks as not the writer's own (nbhWordingKeep) is left out, as in the panel */
+  check: (t, ta) => check(t, ta && ta.tagName ? keepOf(ta, t) : null).map(f => ({id:f.id, cat:f.cat, start:f.start, end:f.end, text:f.text, why:f.why, suggest:f.suggest, replacement:f.replacement})),
   open: ta => openPanel(ta),
   close: () => closePanel('cancel'),
   deidentify: (t, extra) => { const r = deidentify(t, Array.isArray(extra) ? extra : []); return {text:r.text, hidden:r.map.filter(m => m.n).map(m => ({placeholder:m.ph, forms:m.forms.slice()}))}; },
@@ -2982,7 +3000,9 @@ function tgtCard(t){const d=document.createElement('div');d.className='card';d.d
  return d;}
 function renderTgt(){const n=+$('#nTgt').value,w=$('#tgtWrap');while(w.children.length>n){w.lastChild.remove();delete libRows[w.children.length];}for(let t=w.children.length;t<n;t++)w.appendChild(tgtCard(t));renderSel();libPanelRefresh();}
 function tgtTitle(t){const e=$('#tgtTtl'+t);if(e)e.textContent=val(`tgt[${t}].lab`)||'Untitled';}
-function cnt(t,k){const n=val(`tgt[${t}].${k}`).split('\n').filter(l=>l.trim()).length;const p=$('#'+(k==='ex'?'exN':'nexN')+t);if(!p)return;p.textContent=n+' of 3';p.className='tag '+(n>=3?'ok':n>0?'mid':'na');}
+/* the count of lines against the three the definition needs: "1 of 3" until there are three, then "5 listed" (v21.43:
+   "5 of 3" read like an error, on paper too) */
+function cnt(t,k){const n=val(`tgt[${t}].${k}`).split('\n').filter(l=>l.trim()).length;const p=$('#'+(k==='ex'?'exN':'nexN')+t);if(!p)return;p.textContent=n>=3?n+' listed':n+' of 3';p.className='tag '+(n>=3?'ok':n>0?'mid':'na');}
 
 /* ---------- sheet 4: RRB template (Fergus et al., 2026) and forceful-topography thresholds (Bann & Morris, 2026) ---------- */
 const setv=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
@@ -3233,26 +3253,32 @@ function libChecked(t){const qc=Object.keys(qcState).some(k=>k.indexOf('qc['+t+'
 /* put an entry into card t. A field that holds text the entry would change (or clear: a single topography has no
    member list) is a clash; with any clash the user picks Replace, Fill empty fields only, or Cancel. With "Fill empty
    fields only" a definition already typed is kept, and so are the fields that describe it: the type, the definition
-   style and the dimension are left for the user to set, not taken from the library's definition. */
+   style and the dimension are left for the user to set, not taken from the library's definition. (v21.43) So are the
+   fields the library wrote for its own definition when the one kept is different: its topographies, examples,
+   non-examples, borderline cases, exclusions, onset, offset and counting unit carry its thresholds and its members
+   (15.24 cm, kicking scored with throwing), and beside another definition they would make a card that contradicts
+   itself on paper. They stay empty, and Read the full entry shows them to copy what fits. */
+const LIB_DEP=['tops','ex','nex','border','excl','on','off','unit'];
 async function libLoad(t,e,v){if(!e||!libField(t,'def'))return false;
  const V=libValues(e,v),now=k=>String((libField(t,k)||{}).value||'').trim();
  const clash=LIB_KEYS.filter(k=>libField(t,k)&&now(k)&&now(k)!==String(V[k]).trim());
+ const own=!!now('def')&&now('def')!==String(V.def).trim();
  let mode='replace';
- if(clash.length){const lab=val(`tgt[${t}].lab`),own=clash.indexOf('def')>=0;
+ if(clash.length){const lab=val(`tgt[${t}].lab`);
   mode=await libAsk('Target '+(t+1)+(lab?' ('+lab+')':'')+' already holds text in '+(clash.length===1?'a field':clash.length+' of the fields')+' the library fills.',
    clash.map(k=>LIB_FIELD[k]).join(', ')+'\n\nReplace: put \u201c'+e.lab+'\u201d in '+(clash.length===1?'it':'all of them')+'.\nFill empty fields only: keep what is typed and fill the rest'+
-   (own?'; the type, definition style and dimension are left to you, because they describe the definition':'')+'.');
+   (own?'; the type, definition style and dimension are left to you, because they describe the definition, and so are the topographies, examples, non-examples, borderline cases, exclusions, onset, offset and counting unit, because the library wrote them for its own definition (Read the full entry shows them, to copy what fits)':'')+'.');
   if(!mode)return false;}
- const skip=mode==='empty'&&now('def')?['type','style','dim']:[],skipped=[],before={},after={},changed=[];
+ const skip=mode==='empty'&&now('def')?['type','style','dim'].concat(own?LIB_DEP:[]):[],skipped=[],deps=[],before={},after={},changed=[];
  LIB_KEYS.forEach(k=>{const el=libField(t,k);if(!el)return;before[k]=el.value;
   if(mode==='empty'&&String(el.value).trim())return;
   const x=V[k];if(el.value===x)return;
-  if(skip.indexOf(k)>=0){if(x)skipped.push(LIB_FIELD[k].toLowerCase());return;}
+  if(skip.indexOf(k)>=0){if(x)(LIB_DEP.indexOf(k)>=0?deps:skipped).push(LIB_FIELD[k].toLowerCase());return;}
   if(el.tagName==='SELECT'&&![...el.options].some(o=>o.value===x))return;
   el.value=x;after[k]=el.value;changed.push(el);});
  changed.forEach(libFire);libAfter(t);
  const redef=String(before.def||'').trim()&&changed.some(el=>/\.(def|type)$/.test(el.name));
- if(libRows[t])libRows[t].loaded(e,v,mode,{before,after},changed.length,{skipped,stale:redef?libChecked(t):''});
+ if(libRows[t])libRows[t].loaded(e,v,mode,{before,after},changed.length,{skipped,deps,stale:redef?libChecked(t):''});
  return true;}
 /* undo puts back only what the load wrote and is still there: a field changed since (typed, rewritten, restored, or
    set by the RRB template, which fires no events) is left as it now is, and the row names it */
@@ -3268,6 +3294,30 @@ function libUndo(t,rec){const changed=[],left=[];
  if(m&&LIB_KEYS.indexOf(m[2])>=0&&libRows[+m[1]])libRows[+m[1]].edited(!!ev.isTrusted);},true));
 /* the RRB template (sheet 4) writes without events: it tells the row itself */
 function libForget(t){if(libRows[t])libRows[t].forget();}
+/* (v21.43) the writing help's Check wording (tools/blocks/nbh-wording.js) asks a target card's field what in it is not the
+   writer's own wording: a sentence or line still word for word as the behavior library wrote it (an approved starting
+   definition, not wording to fix; the library's "[expletive]" is not a blank either), and the names the card's target goes
+   by (its label, and the library's other names for that entry), which belong in its own definition. Both are left
+   unmarked; a sentence the user has changed is checked like any other. */
+let libSents=null;
+const libNorm=x=>String(x||'').replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"').replace(/\s+/g,' ').trim().toLowerCase();
+function libSegs(x){const out=[],n=x.length;let i=0;
+ while(i<n){while(i<n&&/\s/.test(x.charAt(i)))i++;if(i>=n)break;let j=i;
+  while(j<n&&x.charAt(j)!=='\n'){if(/[.!?]/.test(x.charAt(j))){let k=j+1;while(k<n&&/[.!?"'\u201d\u2019)\]]/.test(x.charAt(k)))k++;if(k>=n||/\s/.test(x.charAt(k))){j=k;break;}j=k;continue;}j++;}
+  out.push([i,j]);i=j;}
+ return out;}
+function libSentSet(){if(libSents)return libSents;libSents=new Set();if(!LIB_ON)return libSents;
+ LIB.entries.forEach(e=>Object.keys(e).forEach(k=>{if(/^(id|cat|tag|note|aka)$/.test(k)||typeof e[k]!=='string')return;const x=e[k];
+  libSegs(x).forEach(([a,z])=>{const t=libNorm(x.slice(a,z));if(t.length>=12)libSents.add(t);});}));
+ return libSents;}
+window.nbhWordingKeep=function(ta,text){const m=/^tgt\[(\d+)\]\.(\w+)$/.exec((ta&&ta.name)||'');if(!m||!LIB_ON)return null;
+ const t=+m[1],set=libSentSet(),spans=[];
+ libSegs(text).forEach(([a,z])=>{const n=libNorm(text.slice(a,z));if(n.length<12||!set.has(n))return;
+  const p=spans[spans.length-1];if(p&&!/\S/.test(text.slice(p[1],a)))p[1]=z;else spans.push([a,z]);});
+ const lab=val(`tgt[${t}].lab`),words=[];
+ if(lab){words.push(lab);lab.split(/[^A-Za-z\u00c0-\u024f'-]+/).forEach(w=>{if(w.length>=4)words.push(w);});
+  const e=LIB.entries.find(x=>libNorm(x.lab)===libNorm(lab));if(e)(e.aka||[]).forEach(a=>words.push(a));}
+ return {spans,words,note:spans.length?'Sentences still as the behavior library wrote them, and the target\u2019s own name, are left alone.':'The target\u2019s own name is left alone.'};};
 let libRefreshT=null;
 function libPanelRefresh(){if(libPanelApi)libPanelApi.refresh();}
 document.addEventListener('input',ev=>{if(/^tgt\[\d+\]\.lab$/.test((ev.target&&ev.target.name)||'')){clearTimeout(libRefreshT);libRefreshT=setTimeout(libPanelRefresh,250);}});
@@ -3304,12 +3354,13 @@ function libRow(host,t){if(!LIB_ON||!host||host.shadowRoot)return;
   loaded(e,v,mode,rec,n,info){if(n)before=rec;   /* a load that changed nothing keeps the undo of the one before it */
    cur={post:post()};q.value='';libFill(pick,'',e.id);vs.value=(v==='func'&&e.fdef)?'func':'topo';sync();
    const fn=v==='func'&&!!e.fdef,lead=document.createElement('b');msg.textContent='';
-   if(!n&&mode==='empty'){lead.textContent='Nothing was filled from \u201c'+e.lab+'\u201d.';msg.append(lead,' Every field the library fills already holds text; choose Replace to use the library\u2019s text.');}
+   const depNote=info.deps&&info.deps.length?' The '+libAnd(info.deps)+' '+(info.deps.length>1?'were':'was')+' left empty too: the library wrote '+(info.deps.length>1?'them':'it')+' for its own definition, not the one typed here. Read the full entry to copy what fits, or choose Replace to take the library\u2019s definition with '+(info.deps.length>1?'them':'it')+'.':'';
+   if(!n&&mode==='empty'){lead.textContent='Nothing was filled from \u201c'+e.lab+'\u201d.';msg.append(lead,depNote?' The definition typed here was kept'+(info.skipped.length?', so its '+libAnd(info.skipped)+' '+(info.skipped.length>1?'were':'was')+' left for you to set':'')+'.'+depNote:' Every field the library fills already holds text; choose Replace to use the library\u2019s text.');}
    else if(!n){lead.textContent='Nothing changed: the card already holds \u201c'+e.lab+'\u201d.';msg.append(lead);}
    else{lead.textContent='Loaded from the library: '+e.lab+'.';msg.append(lead,' Edit it to fit this learner: the setting, the thresholds and the episode rule.'+
-    (fn?' The functional (outcome-defined) definition was loaded, with its own measurement fields.':'')+
+    (fn?' The functional (outcome-defined) definition was loaded, with its own measurement fields: it scores the outcome, whatever form the response takes, so the type stays '+(e.type==='Cluster (multiple topographies)'?'a cluster':'one target')+', defined by that outcome rather than by a list of movements.':'')+
     (mode==='empty'?' Only the empty fields were filled; the text already typed was kept.':'')+
-    (info.skipped.length?' The definition typed here was kept, so its '+libAnd(info.skipped)+' '+(info.skipped.length>1?'were':'was')+' left for you to set.':'')+
+    (info.skipped.length?' The definition typed here was kept, so its '+libAnd(info.skipped)+' '+(info.skipped.length>1?'were':'was')+' left for you to set.':'')+depNote+
     (info.stale?' The '+info.stale.replace(/^the /,'')+' for target '+(t+1)+' '+(/ and /.test(info.stale)?'were':'was')+' completed for the previous definition: re-check '+(/ and /.test(info.stale)?'them':'it')+' on sheet 5.':''));}
    cn.hidden=!e.note;$r('.ct').textContent=e.note||'';undo.hidden=!before;nou.hidden=true;done.hidden=false;},
   edited(trusted){if(before){before=null;undo.hidden=true;nou.hidden=done.hidden;}

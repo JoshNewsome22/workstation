@@ -113,7 +113,17 @@ function compile(src){
   return out;
 }
 const BLANKRULE = {id:'blank', cat:'blank', why:'A blank is still to be filled in.', suggest:'Replace the words in brackets with what you saw or counted.', replace:null};
-const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2})\]$/i;
+const BLANK = /\[[^\[\]\n]{1,48}\]/g, OURS = /^\[(?:student|id|family name|name \d{1,2}|(?:email|phone|date|number|address)(?: \d{1,2})?)\]$/i;
+/* a word left out on purpose, as records write it ("[expletive]", "[inaudible]"), is not a blank to fill in */
+const NOTBLANK = /^\[(?:expletives?|expletive deleted|profanity|obscenity|inaudible|unintelligible)\]$/i;
+/* A form can say what in a field is not the writer's own wording: window.nbhWordingKeep(field, text) returns
+   {spans:[[start, end], ...], words:[...], note:'...'} for that text. A finding inside a span (Form TB-1: a sentence still
+   word for word as its behavior library wrote it) or that is one of the words (the names the card's target goes by) is
+   not marked; the note says so in the panel. */
+function keepOf(ta, t){
+  const f = window.nbhWordingKeep; if (typeof f !== 'function' || !ta) return null;
+  try { const k = f(ta, str(t)); return k && typeof k === 'object' ? k : null; } catch (e) { return null; }
+}
 /* the learner's own words, in quotation marks, are not the writer's and are not checked */
 function quoteSpans(t){
   const spans = []; let open = -1, kind = '';
@@ -160,7 +170,7 @@ function reported(t, s, text){
   /* "said he" before "was angry": the phrase itself has to start with the verb then */
   return !(m[1] && !m[2] && !/^(?:was|were|is|am|are|got|gets|felt|feels|became|becomes|had\s+been|has\s+been)\b/i.test(text));
 }
-function check(text){
+function check(text, keep){
   const t = str(text), q = quoteSpans(t), out = [];
   const quoted = (s, e) => q.some(p => s >= p[0] && e <= p[1]);
   rules().rules.forEach(r => {
@@ -177,10 +187,26 @@ function check(text){
     re.lastIndex = 0;
   });
   BLANK.lastIndex = 0; let b;
-  while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
+  while ((b = BLANK.exec(t)) !== null) if (!OURS.test(b[0]) && !NOTBLANK.test(b[0])) out.push(finding(BLANKRULE, t, b.index, b.index + b[0].length, [b[0]]));
   out.sort((a, c) => a.start - c.start || c.end - a.end);
   const seen = {};
-  return out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seen[k]) return false; seen[k] = 1; return true; });
+  const list = out.filter(f => { const k = f.start + ':' + f.end + ':' + f.cat; if (seen[k]) return false; seen[k] = 1; return true; });
+  if (!keep) return list;
+  const spans = Array.isArray(keep.spans) ? keep.spans.filter(p => Array.isArray(p) && p.length === 2) : [], W = {};
+  (Array.isArray(keep.words) ? keep.words : []).forEach(w => { const k = normKey(w); if (k) W[k] = 1; });
+  const named = f => { const k = normKey(f.text); return !!(W[k] || W[k.replace(/(?:es|s)$/, '')] || W[k + 's']); };
+  return list.filter(f => !spans.some(p => f.start >= p[0] && f.end <= p[1]) && !named(f));
+}
+/* (v21.43) a word taken out from between "a" or "an" and the next word: the article fits the word now after it ("a huge
+   outburst" without "huge" is "an outburst") */
+function fitArticle(a, b){
+  const m = /(^|[^A-Za-z\u00C0-\u024F'\u2019])(an?|An?|AN?)$/.exec(a);
+  if (!m || !/^[A-Za-z]/.test(b)) return a;
+  const vow = (/^[aeiou]/i.test(b) && !/^(?:uni|use|usu|uti|ure|one|once|eu)/i.test(b)) || /^(?:hour|honest|honou?r|heir)/i.test(b);
+  const was = m[2], want = vow ? 'an' : 'a';
+  if (was.toLowerCase() === want) return a;
+  const art = was === was.toUpperCase() && was.length > 1 ? want.toUpperCase() : was.charAt(0) === 'A' ? 'A' + want.slice(1) : want;
+  return a.slice(0, a.length - was.length) + art;
 }
 function applyAt(t, f){
   let a = t.slice(0, f.start), b = t.slice(f.end);
@@ -189,6 +215,7 @@ function applyAt(t, f){
     a = a.replace(/[ \t]+$/, ''); b = b.replace(/^[ \t]+/, '');
     const c0 = f.text.charAt(0), b0 = b.charAt(0);
     if ((!a || /[.!?]["'\u201D\u2019)]?$/.test(a) || /\n$/.test(a)) && c0 !== c0.toLowerCase() && b0 && b0 !== b0.toUpperCase()) b = b0.toUpperCase() + b.slice(1);
+    a = fitArticle(a, b);
     if (a && b && !/\n$/.test(a) && !/^[\n,.;:!?)\]]/.test(b)) a += ' ';
   }
   return {text: a + rep + b, at: a.length, len: rep.length};
@@ -303,7 +330,7 @@ window.addEventListener('message', ev => {
   if (window.parent === window || ev.source !== window.parent) return;
   const d = ev.data;
   if (d && d.nbh === 'packet' && d.packet && typeof d.packet === 'object') {
-    const p = d.packet; PKT = {client:clean(p.client, 200), sid:clean(p.sid, 80), first:clean(p.first, 100), last:clean(p.last, 100)};
+    const p = d.packet; PKT = {client:clean(p.client, 200), sid:clean(p.sid, 80), first:clean(p.first, 100), last:clean(p.last, 100), site:clean(p.site, 80), bcba:clean(p.bcba, 80)};
   }
 });
 function people(){
@@ -380,13 +407,50 @@ function hideItems(extra){
   if (ff.length) items.push({ph:'[Family name]', kind:'family', forms: ff.map(f => ({f, mode:'auto', src:-1})), canon: ff[ff.length > 1 && /\s/.test(ff[0]) ? 1 : 0]});
   const idf = uniqBy([].concat.apply([], P.ids.map(idForms)), normKey);
   if (idf.length) items.push({ph:'[ID]', kind:'id', forms: idf.map(f => ({f, mode:'auto', src:-1})), canon:P.ids[0]});
-  /* "Ms. Rivera" hides "Rivera" on its own too; "Ana Rivera" hides "Ana" and "Rivera" */
+  /* "Ms. Rivera" hides "Rivera" on its own too; "Ana Rivera" hides "Ana" and "Rivera"; an entry that is a date, a number,
+     a telephone number or an email address ("10/12") gets a placeholder of its kind, [Date] rather than [Name 1] */
   list.forEach((x, j) => {
     if (x.student) return;
-    const c = clean(x.v, 80);
+    const c = clean(x.v, 80), sub = piiKind(c);
+    if (sub) { items.push({ph:null, kind:'pii', sub, entry:j, forms:[{f:c, mode:'ci', src:j}], canon:c}); return; }
     items.push({ph:null, kind:'name', entry:j, forms: uniqBy([c].concat(/\s/.test(c) ? words(c) : []), normKey).map(f => ({f, mode:'auto', src:j})), canon:c});
   });
   return {items, list};
+}
+/* (v21.43) Details that identify a person besides a name, hidden whole before any name inside them is looked for: an
+   email address, a telephone number, a date with its year or its month's name (a date of birth among them), a street
+   address, and a run of six or more digits (a Medicaid or case number). A short numeric date ("10/12") is not one of
+   them (it reads like a score, 3/5), but one after a word that dates it ("set for 10/12") is offered under "Not hidden yet". */
+const MON = '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)';
+const PII = [
+  ['Email', /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g],
+  ['Phone', /(?:\+?1[\s.-]?)?(?:\(\d{3}\)\s?|\b\d{3}[\s.-])\d{3}[\s.-]\d{4}\b/g],
+  ['Phone', /\b\d{3}-\d{4}\b/g],
+  ['Date', /\b(?:19|20)\d\d-\d{1,2}-\d{1,2}\b/g],
+  ['Date', /\b\d{1,2}[\/.-]\d{1,2}[\/.-](?:(?:19|20)\d\d|\d\d)\b/g],
+  ['Date', new RegExp('\\b' + MON + '\\.?\\s+\\d{1,2}(?:st|nd|rd|th)?(?:,?\\s+(?:19|20)\\d\\d)?\\b', 'g')],
+  ['Date', new RegExp('\\b\\d{1,2}(?:st|nd|rd|th)?\\s+(?:of\\s+)?' + MON + '\\.?,?\\s+(?:19|20)\\d\\d\\b', 'g')],
+  ['Date', new RegExp('\\b' + MON + '\\.?\\s+(?:19|20)\\d\\d\\b', 'g')],
+  ['Address', /\b\d{1,6}\s+(?:[A-Z][A-Za-z.'-]*\s+){1,3}(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Court|Ct|Way|Place|Pl|Terrace|Ter|Circle|Cir|Parkway|Pkwy|Highway|Hwy|Trail|Trl)\b(?:\.?,?\s+(?:Apt|Apartment|Unit|Suite|Ste|#)\.?\s*[A-Za-z0-9-]+)?/g],
+  ['Number', /\b\d+(?:-\d+)*\b/g]
+];
+function digits(s){ return str(s).replace(/\D/g, ''); }
+function piiKind(v){
+  const c = clean(v);
+  if (/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(c)) return 'Email';
+  if (/^[\d\s()+.\/-]+$/.test(c) && /\d/.test(c)) {
+    if (/^\d{1,2}[\/.-]\d{1,2}(?:[\/.-]\d{2,4})?$/.test(c)) return 'Date';
+    if (/^(?:\+?1[\s.-]?)?(?:\(\d{3}\)\s?|\d{3}[\s.-])?\d{3}[\s.-]\d{4}$/.test(c)) return 'Phone';
+    return 'Number';
+  }
+  if (new RegExp('^(?:' + MON + '\\.?\\s+\\d{1,2}|\\d{1,2}\\s+' + MON + ')', 'i').test(c)) return 'Date';
+  return '';
+}
+/* a short numeric date after a word that dates it, still in the text: offered for "Also hide" */
+function shortDates(t){
+  const out = [], re = /\b(on|by|for|from|until|till|since|dated?|DOB|born|due|meeting|appointment)\s+(?:the\s+)?(\d{1,2}\/\d{1,2})(?![\/\d])/gi; let m;
+  while ((m = re.exec(str(t))) !== null && out.length < 4) if (out.indexOf(m[2]) < 0) out.push(m[2]);
+  return out;
 }
 function pat(f){
   const one = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')
@@ -417,6 +481,22 @@ function deidentify(text, extra){
   const mark = (idx, f, src) => { occ.push({idx, f, src}); return A + String.fromCharCode(0xE000 + occ.length - 1) + Z; };
   const MK = A + '([\\uE000-\\uF8FF])' + Z, at = ch => ch.charCodeAt(0) - 0xE000;
   let out = str(text);
+  /* contact details, dates and long numbers first, each whole, so a name inside an email address goes with it; the ID the
+     form holds stays the [ID] */
+  const idDigits = {}; items.forEach(it => { if (it.kind === 'id') it.forms.forEach(fo => { const d = digits(fo.f); if (d.length >= 4) idDigits[d] = 1; }); });
+  /* one placeholder for each value (an "Also hide" entry of the same value is that one) */
+  const piiAt = {};
+  items.forEach((it, i) => { if (it.kind === 'pii') piiAt[normKey(it.canon)] = i; });
+  const piiItem = (sub, v) => { const k = normKey(v); if (piiAt[k] == null) { items.push({ph:null, kind:'pii', sub, forms:[{f:v, mode:'cs', src:-1}], canon:v}); piiAt[k] = items.length - 1; } return piiAt[k]; };
+  PII.forEach(([sub, re]) => {
+    re.lastIndex = 0;
+    out = out.replace(re, m => {
+      const d = digits(m);
+      if (sub === 'Number' && (d.length < 6 || idDigits[d])) return m;
+      if (sub !== 'Email' && idDigits[d]) return m;
+      return mark(piiItem(sub, m), m, -1);
+    });
+  });
   /* the family's name first, where a title or "family" says it is not the learner: "Mr. [Family name]" */
   const fi = items.findIndex(it => it.kind === 'family');
   if (fi >= 0) {
@@ -453,6 +533,11 @@ function deidentify(text, extra){
   out.replace(new RegExp(MK, 'g'), (all, ch) => { order.push(at(ch)); return all; });
   let nn = 0;
   order.forEach(k => { const it = items[occ[k].idx]; if (it.kind === 'name' && !it.ph) it.ph = '[Name ' + (++nn) + ']'; });
+  /* [Date] when the text holds one date, [Date 1], [Date 2] ... when it holds more, so each goes back where it was */
+  const seenPii = [], nPii = {};
+  order.forEach(k => { const i = occ[k].idx, it = items[i]; if (it.kind === 'pii' && seenPii.indexOf(i) < 0) { seenPii.push(i); nPii[it.sub] = (nPii[it.sub] || 0) + 1; } });
+  const cPii = {};
+  seenPii.forEach(i => { const it = items[i]; if (!it.ph) it.ph = nPii[it.sub] > 1 ? '[' + it.sub + ' ' + (cPii[it.sub] = (cPii[it.sub] || 0) + 1) + ']' : '[' + it.sub + ']'; });
   const sent = out.replace(new RegExp(MK, 'g'), (all, ch) => items[occ[at(ch)].idx].ph);
   const seq = order.map(k => ({ph: items[occ[k].idx].ph, f: occ[k].f}));
   const map = items.filter(it => it.ph).map(it => {
@@ -464,7 +549,7 @@ function deidentify(text, extra){
   });
   /* each "Also hide" entry: the placeholder it became, and how often the text names it */
   const entries = H.list.map((x, j) => {
-    const it = items.filter(i => i.kind === 'name' && i.entry === j)[0];
+    const it = items.filter(i => (i.kind === 'name' || i.kind === 'pii') && i.entry === j)[0];
     if (it) return {v:x.v, student:false, ph:it.ph, n: seq.filter(y => y.ph && y.ph === it.ph).length};
     const keys = {}; (x.exact ? [clean(x.v, 80)] : [clean(x.v, 80)].concat(words(x.v))).forEach(f => { keys[normKey(f)] = 1; });
     return {v:x.v, student:true, ph:'[Student]', n: seq.filter(y => y.ph === '[Student]' && keys[normKey(y.f)]).length};
@@ -476,10 +561,10 @@ function deidentify(text, extra){
    one way of naming someone is listed in "mixed", for the panel to say so. */
 function restore(text, prep){
   const map = (prep && prep.map) || [], seq = (prep && prep.seq) || [], found = [];
-  const re = /\[\s*(student|id|family\s+name|name\s*(\d{1,2}))\s*\]/gi; let m;
-  const t = str(text);
+  const re = /\[\s*(student|id|family\s+name|name\s*(\d{1,2})|(email|phone|date|number|address)(?:\s*(\d{1,2}))?)\s*\]/gi; let m;
+  const t = str(text), cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
   while ((m = re.exec(t)) !== null) {
-    const ph = m[2] ? '[Name ' + (+m[2]) + ']' : /^id$/i.test(m[1]) ? '[ID]' : /^family/i.test(m[1]) ? '[Family name]' : '[Student]';
+    const ph = m[2] ? '[Name ' + (+m[2]) + ']' : m[3] ? '[' + cap(m[3]) + (m[4] ? ' ' + (+m[4]) : '') + ']' : /^id$/i.test(m[1]) ? '[ID]' : /^family/i.test(m[1]) ? '[Family name]' : '[Student]';
     found.push({at:m.index, len:m[0].length, raw:m[0], ph});
   }
   const inOrder = found.length === seq.length && found.every((x, i) => x.ph === seq[i].ph);
@@ -559,10 +644,14 @@ function studentHints(t){
     w.forEach(x => { const k = normKey(x); if (COMMON[k] && !seen[k] && has(k, 'g')) { seen[k] = 1; out.push({v:k, why:'the student\u2019s name in lower case'}); } });
     if (w.length >= 2) {
       const a = w[0].charAt(0).toUpperCase(), b = w[w.length - 1].charAt(0).toUpperCase();
-      [a + '.' + b + '.', a + '. ' + b + '.', a + b].forEach(f => { if (!seen[f] && has(f, 'g')) { seen[f] = 1; out.push({v:f, exact:true, why:'the student\u2019s initials'}); } });
+      /* and from every part of the name, each half of a double surname too: J.A.R. and JAR for Jordan Alvarez-Rios */
+      const parts = [].concat.apply([], w.map(x => halves(x).length ? halves(x) : [x])).map(x => x.charAt(0).toUpperCase());
+      const forms = [a + '.' + b + '.', a + '. ' + b + '.', a + b];
+      if (parts.length > 2) forms.unshift(parts.join('.') + '.', parts.join('. ') + '.', parts.join(''), parts.join('.'));
+      forms.forEach(f => { if (!seen[f] && has(f, 'g')) { seen[f] = 1; out.push({v:f, exact:true, why:'the student\u2019s initials'}); } });
     }
   });
-  return out.slice(0, 4);
+  return out.slice(0, 5);
 }
 /* other people and places this form names (a teacher, a parent, the observers, the school), offered for "Also hide"
    with one tap */
@@ -576,6 +665,9 @@ function formNames(){
     const v = clean(e.value, 80); if (!v || v.length > 60 || v.split(/\s+/).length > 6 || !/[A-Za-z\u00C0-\u024F]/.test(v)) return;
     out.push({v, why: fieldLabel(e)});
   });
+  /* the workstation's packet: the school and the case BCBA */
+  if (PKT.site) out.push({v:PKT.site, why:'the school, from the workstation'});
+  if (PKT.bcba) out.push({v:PKT.bcba, why:'the BCBA, from the workstation'});
   return uniqBy(out, x => normKey(x.v)).slice(0, 8);
 }
 
@@ -970,7 +1062,7 @@ function countFor(ta, now){
   const v = ta.value, c = counts.get(ta);
   if (c && c.v === v) return c.n;
   if (!now) { idleQ.add(ta); if (!idleH) idleH = later(drainCounts); return c ? c.n : 0; }
-  const n = /\S/.test(v) ? check(v).length : 0;
+  const n = /\S/.test(v) ? check(v, keepOf(ta, v)).length : 0;
   counts.set(ta, {v, n});
   return n;
 }
@@ -1092,7 +1184,7 @@ function screenBand(){
   return vv && vv.height > 0 ? {top: vv.offsetTop, bottom: vv.offsetTop + vv.height} : {top: 0, bottom: window.innerHeight};
 }
 /* At the field's bottom right corner, on its last row; while the caret is under it, at the top right, on the first
-   row; when the caret is under both (a one-line field), out of the way until the caret moves on. With words selected
+   row; when the caret is under both (a one-line field), just outside the field until the caret moves on. With words selected
    (nothing is being typed) it stays, at the corner away from the end of the selection. Over words it is
    see-through. "fast" (while typing): only the caret is measured; the rest waits until typing stops. */
 function place(b, r, o, vw, typing, fast){
@@ -1119,6 +1211,14 @@ function place(b, r, o, vw, typing, fast){
       if (pick && !fast) over = (pick === br && clampB) || (pick === tr && clampT) || overText(b, r, pick, b.ta.selectionEnd === b.ta.value.length ? c : null);
     }
   } else over = clampB || overText(b, r, br, null);
+  /* (v21.43) the caret under both corners (a short box full of text, the caret at its end): rather than vanish until the
+     box is left (an iPad keyboard has no Alt+Enter to fall back on), the button waits just outside the box, under its
+     bottom right corner (over its top one when that is off the screen), see-through */
+  if (typing && !pick) {
+    const below = r.bottom + 2, above = r.top - 2 - b.ph;
+    const y = below + b.ph <= sb.bottom - 4 ? below : above >= sb.top + 4 ? above : null;
+    if (y != null) { pick = {x, y, w:b.pw, h:b.ph, at: y === below ? 'ob' : 'ot'}; over = true; }
+  }
 
   if (over !== !!b.over) { b.over = over; b.el.classList.toggle('over', over); }
   const away = !pick;
@@ -1247,6 +1347,7 @@ const PANEL = `<div class="in">
 <div class="tp wt" role="tabpanel" id="tp3" aria-labelledby="tb3" tabindex="0" hidden>
 <p>On an iPad with Apple Intelligence, select the words in any text box of the forms (or in Your text here), then tap Writing Tools in the menu over the selection, or on the keyboard, and choose Proofread, Rewrite, Professional or Concise.</p>
 <p>It needs nothing set up here and does not appear on iPads without Apple Intelligence. It does not know the rules for observable wording, so check the result with Check wording before you keep it.</p>
+<p>Writing Tools is Apple\u2019s own: it works on the text as written, names included (nothing is hidden first, as Rewrite with Claude does), on the iPad or on Apple\u2019s servers. Follow your agency\u2019s rules for it, and do not use its ChatGPT options for student text.</p>
 </div>
 </section>
 </div></div>
@@ -1440,7 +1541,7 @@ function context(t, f){
   return [(a > 0 ? '\u2026' : '') + t.slice(a, f.start).replace(/\s+/g, ' '), t.slice(f.start, f.end), t.slice(f.end, z).replace(/\s+/g, ' ') + (z < t.length ? '\u2026' : '')];
 }
 function renderCheck(){
-  const t = P.ed.value, all = check(t), list = all.filter(f => !S.ignored[f.id + '|' + f.text.toLowerCase()]);
+  const t = P.ed.value, kp = keepOf(S && S.ta, t), all = check(t, kp), list = all.filter(f => !S.ignored[f.id + '|' + f.text.toLowerCase()]);
   const n = list.length, hidden = all.length - n;
   P.cnt.hidden = !n; P.cnt.textContent = n ? String(n) : '';
   P.tabs[0].setAttribute('aria-label', 'Check wording' + (n ? ', ' + plural(n, 'phrase', 'phrases') + ' to look at' : ''));
@@ -1472,7 +1573,7 @@ function renderCheck(){
       h('div', {class:'ac'}, acts)
     ])));
   });
-  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (rules().version ? ' Rules ' + rules().version + '.' : '');
+  P.note.textContent = 'This check runs on this device and sends nothing. It looks for words that name a feeling, guess at intent or function, label the behavior, or leave a count, a time or an intensity vague; words in quotation marks are the learner\u2019s own and are left alone. Keep a word that is part of the operational definition: press Ignore.' + (kp && kp.note ? ' ' + clean(kp.note, 300) : '') + (rules().version ? ' Rules ' + rules().version + '.' : '');
 }
 function refocus(i){ const b = P.fds.children[Math.min(i, P.fds.children.length - 1)]; const t = b && b.querySelector('button'); try { (t || P.sum).focus({preventScroll:false}); } catch (e) {} }
 /* every place of one rule at once, from the last to the first so that each one's place in the text still holds */
@@ -1505,10 +1606,10 @@ function renderRW(){
   if (!ses) { renderLocked(box, plan); syncUse(); return; }
   box.appendChild(h('p', {class:'st'}, [h('span', {class:'dot', 'aria-hidden':'true'}), h('b', null, 'Unlocked'),
     ' in this tab' + (ses.exp ? ' until ' + hm(ses.exp) : '') + '.',
-    h('button', {type:'button', class:'lk', onclick: () => { clearSession(); RW.state = 'ready'; RW.ans = null; RW.msg = {kind:'ok', text:'Locked. A new passcode is needed to use it again in this tab.'}; renderRW(); }}, 'Lock')]));
+    h('button', {type:'button', class:'lk', onclick: () => lock(plan, ses)}, 'Lock')]));
   /* sessionStorage ends with the tab, but a tab this one opens (a form opened in a new tab) or one the browser
-     restores can carry it: so the time limit is what bounds it, and Lock ends it at once */
-  box.appendChild(h('p', {class:'note'}, 'It ends then, or when this tab is closed, whichever comes first, and is never saved with the form. On a shared iPad, press Lock when you finish.'));
+     restores can carry it: so the time limit is what bounds it, and Lock ends it at once, on the relay too */
+  box.appendChild(h('p', {class:'note'}, 'It ends then, or when this tab is closed, whichever comes first, and is never saved with the form. On a shared iPad, press Lock when you finish: it ends the session on the rewrite service, in every tab.'));
   if (RW.msg) box.appendChild(msgBox(RW.msg));
   if (RW.state === 'preview') renderPreview(box);
   else if (RW.state === 'sending') {
@@ -1518,6 +1619,26 @@ function renderRW(){
   else if (RW.state === 'answer' && RW.ans) renderAnswer(box);
   else renderStyles(box);
   syncUse();
+}
+/* (v21.43) Lock: this tab forgets the token at once, and the relay is asked to end the session, so a tab that carries the
+   token (one this tab opened, or one the browser restored) cannot use it either */
+async function endSession(plan, token){
+  const ac = typeof AbortController === 'function' ? new AbortController() : null, timer = setTimeout(() => { if (ac) ac.abort(); }, 8000);
+  try {
+    const res = await fetch(plan.base + '/api/session/end', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}),
+      credentials:'omit', cache:'no-store', redirect:'error', signal: ac ? ac.signal : undefined});
+    return res.ok;
+  } catch (e) { return false; } finally { clearTimeout(timer); }
+}
+async function lock(plan, ses){
+  clearSession();
+  if (RW.state === 'sending' && RW.ac) RW.ac.abort();
+  RW.state = 'ready'; RW.ans = null; RW.msg = {kind:'ok', text:'Locked. Ending the session on the rewrite service\u2026'}; renderRW();
+  const done = await endSession(plan, ses.token);
+  RW.msg = done ? {kind:'ok', text:'Locked: the session is ended on the rewrite service, in every tab. A new passcode is needed to use it again.'}
+    : {kind:'err', text:'Locked in this tab. The rewrite service could not be reached to end the session, so a tab that holds it (one this tab opened) can still use it until ' + (ses.exp ? hm(ses.exp) : 'its time is up') + '. Press Lock there too, or ask your BCBA to end it on the rewrite service\u2019s page.'};
+  if (!S) return;
+  renderRW();
 }
 function renderLocked(box, plan){
   if (RW.ended) { box.appendChild(msgBox({kind:'err', text:'This tab\u2019s session ended at ' + hm(RW.ended) + '. Enter a new passcode from your BCBA to go on.'})); RW.ended = 0; }
@@ -1575,7 +1696,7 @@ function renderStyles(box){
 }
 function styleOf(id){ return STYLES.filter(s => s.id === id)[0] || STYLES[0]; }
 function marked(text){
-  const out = [], re = /\[(?:Student|ID|Family name|Name \d{1,2})\]/g; let a = 0, m;
+  const out = [], re = /\[(?:Student|ID|Family name|Name \d{1,2}|(?:Email|Phone|Date|Number|Address)(?: \d{1,2})?)\]/g; let a = 0, m;
   while ((m = re.exec(text)) !== null) { if (m.index > a) out.push(text.slice(a, m.index)); out.push(h('span', {class:'phd'}, m[0])); a = m.index + m[0].length; }
   if (a < text.length) out.push(text.slice(a));
   return out;
@@ -1586,7 +1707,7 @@ function renderPreview(box){
   prep.src = P.ed.value;
   const sty = styleOf(RW.style), tooLong = prep.text.length > MAX_SEND, empty = !/\S/.test(prep.text);
   box.appendChild(h('h4', {tabindex:'-1'}, 'Check what will be sent (' + sty.label + ')'));
-  box.appendChild(h('p', {class:'note'}, 'Only this text and the style are sent, to the rewrite service on ' + relayPlan().host + ', which asks Claude (Anthropic\u2019s API) for the rewrite. Names and the ID are replaced here first and put back in the answer.'));
+  box.appendChild(h('p', {class:'note'}, 'Only this text and the style are sent, to the rewrite service on ' + relayPlan().host + ', which asks Claude (Anthropic\u2019s API) for the rewrite. The student\u2019s name and ID, the names under Also hide, and email addresses, telephone numbers, dates, street addresses and long numbers are replaced here first and put back in the answer. Nothing else is: read the text below and hide anything more that could tell someone who this is (a nickname, a short date, a room or a team). De-identified is not anonymous.'));
   box.appendChild(h('pre', {class:'sent', 'aria-label':'The text that will be sent'}, marked(prep.text)));
   const hid = prep.map.filter(m => m.n);
   if (hid.length) box.appendChild(h('p', {class:'hid'}, ['Hidden: '].concat([].concat.apply([], hid.map((m, i) => [i ? '; ' : '', h('b', null, m.ph), ' for ' + m.forms.join(', ')])))));
@@ -1613,9 +1734,14 @@ function renderPreview(box){
   const formWords = {}; fromForm.forEach(x => words(x.v).forEach(w => { formWords[normKey(w)] = 1; }));
   const maybe = likelyNames(prep.text).filter(w => !has(w) && !formWords[normKey(w)]);
   const hints = studentHints(prep.text).filter(x => !has(x.v));
-  if (fromForm.length || maybe.length) {
-    const s = h('div', {class:'sugg'}, [h('span', null, maybe.length ? 'Still in the text and may be names:' : 'Named on this form:')]);
+  const dates = shortDates(prep.text).filter(v => !has(v));
+  /* a name the form or the workstation holds, still written in the text */
+  const inText = v => { try { return new RegExp('(^|' + NONW + ')' + pat(clean(v)) + '(?=' + NONW + '|$)', 'i' + UFLAG).test(prep.text); } catch (e) { return false; } };
+  const formLeft = fromForm.filter(x => inText(x.v)).map(x => x.v);
+  if (fromForm.length || maybe.length || dates.length) {
+    const s = h('div', {class:'sugg'}, [h('span', null, maybe.length || dates.length ? 'Still in the text and may identify someone:' : 'Named on this form:')]);
     maybe.forEach(w => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(w), 'aria-label':'Hide ' + w}, '+ ' + w)));
+    dates.forEach(v => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(v), 'aria-label':'Hide ' + v + ' (a date)'}, '+ ' + v)));
     fromForm.forEach(x => s.appendChild(h('button', {type:'button', class:'b', onclick: () => add(x.v), 'aria-label':'Hide ' + x.v + ' (' + x.why + ')'}, '+ ' + x.v)));
     box.appendChild(s);
   }
@@ -1625,7 +1751,7 @@ function renderPreview(box){
     box.appendChild(s);
   }
   if (tooLong) box.appendChild(msgBox({kind:'err', text:'This is ' + prep.text.length + ' characters; at most ' + MAX_SEND + ' can be sent. Select part of the text in the field, then open Improve wording again.'}));
-  const left = maybe.concat(hints.map(x => x.v));
+  const left = uniqBy(maybe.concat(hints.map(x => x.v), dates, formLeft), normKey);
   if (left.length && !tooLong && !empty) box.appendChild(h('p', {class:'note warnl', style:'margin-top:12px'}, 'Not hidden yet: ' + andList(left.slice(0, 6)) + (left.length > 6 ? ' and others' : '') + '. Hide any that names someone before you send.'));
   const send = h('button', {type:'button', class:'b pri', onclick: send_}, 'Send');
   if (tooLong || empty) send.disabled = true;
@@ -1687,7 +1813,8 @@ function start(){ if (!build()) return; wire(); schedule(); }
 window.nbhWording = Object.freeze({
   version: VERSION,
   rules: () => { const r = rules(); return {version:r.version, count:r.rules.length, bad:r.bad.slice()}; },
-  check: t => check(t).map(f => ({id:f.id, cat:f.cat, start:f.start, end:f.end, text:f.text, why:f.why, suggest:f.suggest, replacement:f.replacement})),
+  /* with a field as well, what the form marks as not the writer's own (nbhWordingKeep) is left out, as in the panel */
+  check: (t, ta) => check(t, ta && ta.tagName ? keepOf(ta, t) : null).map(f => ({id:f.id, cat:f.cat, start:f.start, end:f.end, text:f.text, why:f.why, suggest:f.suggest, replacement:f.replacement})),
   open: ta => openPanel(ta),
   close: () => closePanel('cancel'),
   deidentify: (t, extra) => { const r = deidentify(t, Array.isArray(extra) ? extra : []); return {text:r.text, hidden:r.map.filter(m => m.n).map(m => ({placeholder:m.ph, forms:m.forms.slice()}))}; },

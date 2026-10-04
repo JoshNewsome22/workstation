@@ -52,6 +52,18 @@ const XSS = '<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>
     ok(await page.evaluate(() => !document.cookie.includes('nbh_admin')), 'the page\'s script cannot read it');
     await page.waitForFunction(() => document.getElementById('status').children.length > 0);
     ok(/API key: set\./.test(await page.textContent('#status')), 'Status: the API key is set');
+    /* v21.43: the CSRF token is the signed-in tab's own (sessionStorage), never in the page: another tab, with the same
+       cookie, is asked for the password and shows nothing until then */
+    {
+      const p2 = await ctx.newPage();
+      await p2.goto(RELAY + '/ai/admin');
+      await p2.waitForSelector('#f-again', {timeout: 10000});
+      const t2 = await p2.evaluate(() => ({again: !document.getElementById('again').hidden, dash: document.getElementById('dash').hidden,
+        meta: !!document.querySelector('meta[name="nbh-csrf"]'), focus: document.activeElement && document.activeElement.id, items: document.querySelectorAll('#status li').length}));
+      ok(t2.again && t2.dash && !t2.meta && t2.focus === 'pw-again' && t2.items === 0, 'another tab with the cookie: asked for the password, the page carries no CSRF token and shows no data', t2);
+      await p2.close();
+      ok(await page.evaluate(() => !!sessionStorage.getItem('nbh.relay.csrf') && !document.querySelector('meta[name="nbh-csrf"]')), 'the tab that signed in keeps its token in sessionStorage only');
+    }
 
     ok(await page.getAttribute('#code-label', 'maxlength') === '60', 'the label field takes at most 60 characters (as the relay does)');
     await page.fill('#code-label', XSS.slice(0, 60));

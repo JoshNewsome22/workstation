@@ -166,7 +166,9 @@ async function printPdf(page,file,onlyDefine){
  const ui0=await page.evaluate(()=>({t:document.querySelector('#tgtTtl0').textContent,ex:document.querySelector('#exN0').textContent,exc:document.querySelector('#exN0').className,nex:document.querySelector('#nexN0').textContent,qc:document.querySelector('#qcHead').textContent}));
  const nEx=lines(eSingle.ex),nNex=lines(eSingle.nex);
  check('the card title shows the label',ui0.t===eSingle.lab,ui0.t);
- check('the example counters update ('+ui0.ex+', '+ui0.nex+')',ui0.ex===nEx+' of 3'&&ui0.nex===nNex+' of 3'&&/\bok\b/.test(ui0.exc));
+ /* (v21.43) "n of 3" until three lines, then "n listed" */
+ const cntTxt=n=>n>=3?n+' listed':n+' of 3';
+ check('the example counters update ('+ui0.ex+', '+ui0.nex+')',ui0.ex===cntTxt(nEx)&&ui0.nex===cntTxt(nNex)&&/\bok\b/.test(ui0.exc));
  check('the quality check carries the new label',ui0.qc.includes(eSingle.lab));
  const note0=await page.evaluate(h=>{const R=document.querySelector(h).shadowRoot,d=R.querySelector('.done'),cn=R.querySelector('.cn');return {shown:!d.hidden&&d.getBoundingClientRect().height>0,msg:R.querySelector('.msg').textContent,cn:!cn.hidden&&cn.getBoundingClientRect().height>0,ct:R.querySelector('.ct').textContent};},host(0));
  check('the note under the row says what was loaded',note0.shown&&note0.msg.startsWith('Loaded from the library: '+eSingle.lab+'. Edit it to fit this learner: the setting, the thresholds and the episode rule.'),note0.msg);
@@ -220,15 +222,26 @@ async function printPdf(page,file,onlyDefine){
  check('with Replace, Fill empty fields only and Cancel',!!q1&&JSON.stringify(q1.btn)===JSON.stringify(['Cancel','Fill empty fields only','Replace']),q1&&q1.btn);
  check('naming the fields that hold text',!!q1&&/Label/.test(q1.b)&&/Operational definition/.test(q1.b)&&!/Examples/.test(q1.b),q1&&q1.b);
  check('and saying the type, style and dimension stay with the typed definition',!!q1&&/type, definition style and dimension are left to you/.test(q1.b),q1&&q1.b);
+ check('and that the fields the library wrote for its own definition stay empty beside it',!!q1&&/so are the topographies, examples, non-examples, borderline cases, exclusions, onset, offset and counting unit, because the library wrote them for its own definition/.test(q1.b),q1&&q1.b);
  await page.screenshot({path:OUT+'question.png'});
  await answer(page,'empty');
  let f3=await fields(page,3);const v3=V(eOther);
  check('"Fill empty fields only" keeps the typed text',f3.lab==='Throwing at peers (our wording)'&&f3.def==='Our own definition, typed by the team.');
- check('and fills the empty fields',['unit','ex','nex','on','off','border','excl'].every(k=>f3[k]===v3[k]));
+ /* (v21.43) the library's examples, unit and borderline rules carry its own thresholds: beside a different definition the card would contradict itself */
+ check('and, the typed definition kept, leaves the fields written for the library\'s definition empty',['tops','unit','ex','nex','on','off','border','excl'].every(k=>f3[k]===''),['tops','unit','ex','nex','on','off','border','excl'].filter(k=>f3[k]!==''));
  check('but leaves the type, style and dimension of the typed definition empty',['type','style','dim'].every(k=>f3[k]===''),['type','style','dim'].map(k=>k+'='+f3[k]));
  check('the title keeps the typed label',await page.evaluate(()=>document.querySelector('#tgtTtl3').textContent)==='Throwing at peers (our wording)');
  {const m=await page.evaluate(h=>document.querySelector(h).shadowRoot.querySelector('.msg').textContent,host(3));
-  check('the note says only empty fields were filled, and which were left',/Only the empty fields were filled/.test(m)&&/was kept, so its type, definition style and dimension or sampling method were left for you to set/.test(m),m);}
+  check('the note says nothing was filled, which fields were left and why, and where the library\'s text is',/^Nothing was filled from/.test(m)&&/was kept, so its type, definition style and dimension or sampling method were left for you to set/.test(m)&&/left empty too: the library wrote them for its own definition/.test(m)&&/Read the full entry/.test(m),m);}
+ /* with only a label typed (no definition of the team's own), the empty fields are filled, the definition with its examples */
+ await page.locator('[name="tgt[3].def"]').fill('');
+ await page.locator(host(3)+' button.go').click();await sleep(300);
+ check('a label typed is a clash too: the question opens',await dlgOpen(page));
+ await answer(page,'empty');
+ f3=await fields(page,3);
+ check('with only a label typed, "Fill empty fields only" keeps it and fills every other field, the definition with its own examples',f3.lab==='Throwing at peers (our wording)'&&['def','type','style','dim','unit','ex','nex','on','off','border','excl'].every(k=>f3[k]===v3[k]),['def','type','style','dim','unit','ex','nex','on','off','border','excl'].filter(k=>f3[k]!==v3[k]));
+ {const m=await page.evaluate(h=>document.querySelector(h).shadowRoot.querySelector('.msg').textContent,host(3));
+  check('the note says only the empty fields were filled',/Only the empty fields were filled/.test(m)&&!/left for you to set/.test(m),m);}
  const undo3=(await rowState(page,3)).undo;
  await page.locator(host(3)+' button.go').click();await sleep(300);await answer(page,'empty');
  const nf=await rowState(page,3);
@@ -344,7 +357,7 @@ async function printPdf(page,file,onlyDefine){
  await p2.setInputFiles('#fileIn',file);await sleep(1200);
  const g1=await fields(p2,1),g3=await fields(p2,3),g4=await fields(p2,nT2-1);
  check('opening the file restores the loaded text',JSON.stringify(g1)===JSON.stringify(want1)&&JSON.stringify(g3)===JSON.stringify(want3)&&JSON.stringify(g4)===JSON.stringify(want4));
- check('and the titles and counters',await p2.evaluate(lab=>document.querySelector('#tgtTtl3').textContent===lab&&/ of 3$/.test(document.querySelector('#exN3').textContent)&&document.querySelector('#exN3').className.includes('ok'),eSingle.lab));
+ check('and the titles and counters',await p2.evaluate(lab=>document.querySelector('#tgtTtl3').textContent===lab&&/ (?:of 3|listed)$/.test(document.querySelector('#exN3').textContent)&&document.querySelector('#exN3').className.includes('ok'),eSingle.lab));
  check('the reopened cards have their library rows',await p2.evaluate(n=>document.querySelectorAll('#tgtWrap .card .tb1lib-host').length===n&&[...document.querySelectorAll('#tgtWrap .card .tb1lib-host')].every(h=>h.shadowRoot),nT2));
 
  console.log('9. print');

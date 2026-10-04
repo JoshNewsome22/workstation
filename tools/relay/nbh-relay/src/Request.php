@@ -41,7 +41,7 @@ final class Request
     /**
      * @param int $maxBody the most body bytes read; a longer body is not read and is flagged instead
      */
-    public static function fromGlobals(int $maxBody, string $baseOverride = ''): self
+    public static function fromGlobals(int $maxBody, string $baseOverride = '', bool $trustProxy = false): self
     {
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
         $headers = [];
@@ -81,9 +81,11 @@ final class Request
             }
         }
 
+        // X-Forwarded-Proto is anyone's to send: it counts only when TRUST_PROXY_HTTPS says a proxy in front of the site
+        // (GoDaddy's Website Security, a CDN) sets it, and on a plain shared host nothing does
         $https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower((string) $_SERVER['HTTPS']) !== 'off')
             || strtolower((string) ($_SERVER['REQUEST_SCHEME'] ?? '')) === 'https'
-            || strtolower($headers['x-forwarded-proto'] ?? '') === 'https';
+            || ($trustProxy && strtolower($headers['x-forwarded-proto'] ?? '') === 'https');
 
         return new self(
             method: $method,
