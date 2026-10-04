@@ -3202,7 +3202,7 @@ function compose(D){
     leave(HT,ts+5.5,ts+6.2);let t=ts+5.6;
     /* the learner looks over the choices again, coming in as the teacher's hand is nearly out of the frame (so the arms do not cross) */
     const L=BOOK('ch'),pts=[2,4].filter(i=>CH[i]&&i!==F.pick.ch).concat([F.pick.ch]).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
-    if(pts.length){const tl=Math.max(t+1.4,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
+    if(pts.length){const tl=Math.max(t+1.2,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
     return Math.max(K.d,t-K.t);};
   /* the tips: each tip is lit while it is read; the first is shown under the book, a token given and traded for the item at once, twice */
   SC.tips=K=>{const t=K.t;stackTo(t,t+1,k=>BOOK(k,.52,40,170));tipsCard.tr.move(t+.5,t+1,{o:1,dy:0},0,easeOut);
@@ -3212,6 +3212,8 @@ function compose(D){
     const trade=a=>{pTok.tr.set(a,{o:0,s:.6,dx:0});pTok.tr.move(a,a+.3,{o:1,s:1},0,easeOut);pTok.tr.move(a+.9,a+1.5,{dx:PDX,s:.5},.0);pTok.tr.move(a+1.35,a+1.5,{o:0});
       pItem.tr.move(a+1.45,a+1.7,{s:1.18});pItem.tr.move(a+1.7,a+2,{s:1});};
     const sp=Math.max(2.3,Math.min(3,(ts[1]-ts[0]-.8)/2));trade(ts[0]+.6);trade(ts[0]+.6+sp);
+    /* once tip one is done, the demo goes (left on the table it would read as nothing traded for the item) */
+    const po=Math.max(ts[1]-.1,ts[0]+.6+sp+2.1);pair.tr.move(po,po+.4,{o:0});
     return Math.max(K.d,2.5);};
   /* the end: the book closes, the cycle is named step by step (each arrow comes with the step after it), and the Choices page turns
      over to show its back as the backs are mentioned */
