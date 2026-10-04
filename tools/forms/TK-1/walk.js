@@ -66,7 +66,7 @@ function line(id){const L=audioLines();const l=L&&L[id];const t=String((l&&l.t)|
 /* where each phrase starts in its recording (seconds from the start of the clip, by the character it starts at), measured from the
    voice (the start of each caption piece, each clause, and each phrase an action is tied to); a line whose text has changed since
    it was measured falls back to its share of the characters. Made with the voice by a script outside the repo; keyed by a hash of the text. */
-/* MK:BEGIN */const MK={};/* MK:END */
+/* MK:BEGIN */const MK={"intro":{"h":"281d43df","o":[[31,2.28],[56,4.62],[75,5.75],[96,6.74],[105,7.62],[114,8.26],[121,8.68],[125,8.85]]},"ch_show":{"h":"6834c8b5","o":[[30,2.68],[62,5.12],[127,8.72],[164,10.88]]},"ch_pick":{"h":"29e7bff9","o":[[13,0.7],[41,2.4],[64,3.9],[75,4.8],[99,6.22]]},"tg_show":{"h":"b9767bc2","o":[[30,2.5],[62,4.48],[75,5.19],[125,8.82],[164,11.42],[178,11.92],[209,13.56]]},"tg_pick":{"h":"ff41feb0","o":[[7,0.44],[29,2.38],[81,5.48]]},"bd_place":{"h":"10b87ff4","o":[[25,2.02],[55,3.6],[63,4.27],[87,5.86],[122,8.2],[140,9.24]]},"tk_page":{"h":"36a73586","o":[[30,2.62],[53,4.34],[127,8.9],[143,10.03]]},"rule":{"h":"f60a2c85","o":[[18,1.2],[72,4.6],[91,6.4],[101,7.16],[145,10.3]]},"start":{"h":"e3ef0808","o":[[23,1.84],[66,4.4],[84,5.44],[99,6.86],[146,9.8]]},"tok_first":{"h":"c0a19047","o":[[83,5.46],[113,7.36],[152,10.26],[169,11.04]]},"tok_none":{"h":"2e025844","o":[[16,0.83],[68,4.41],[101,6.72],[155,9.9]]},"tok_more":{"h":"bc2e8615","o":[[105,6.88]]},"tok_last_term":{"h":"66774073","o":[[40,3.06],[43,3.52],[117,8.52],[163,10.94]]},"tok_last":{"h":"ccaee597","o":[[72,5.06],[80,5.56]]},"exchange":{"h":"61c3812d","o":[[22,1.4],[47,3.4],[104,7.1],[125,8.39]]},"reset":{"h":"e9ec3a64","o":[[35,2.04],[88,5.78],[106,6.63]]},"tips":{"h":"85d784c5","o":[[28,2.08],[91,6.56],[150,10.58],[265,18.42]]},"outro":{"h":"cbf76364","o":[[24,1.62],[48,3.03],[69,4.57],[79,5.94],[124,8.62],[144,10.14],[163,11.68],[180,12.8]]}};/* MK:END */
 const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
 /* the time (s into the clip) the voice reaches character i: the measured marks, joined by straight lines */
 function onsetFn(id,text,d){const m=MK[id];const pts=[[0,.05]];
@@ -108,7 +108,8 @@ const ANCH={point:'tip',pinch:'grip',open:'palm'};
 /* ---------------- the DOM of the view ---------------- */
 let DOM=null;
 function dom(){if(DOM&&DOM.stage&&DOM.stage.isConnected)return DOM;const g=id=>document.getElementById(id);const stage=g('wkStage');if(!stage)return null;
-  DOM={sec:stage.closest('section'),player:g('wkPlayer'),frame:g('wkFrame'),stage,big:g('wkBig'),cap2:g('wkCap2'),play:g('wkPlay'),restart:g('wkRestart'),seek:g('wkSeek'),time:g('wkTime'),cc:g('wkCc'),snd:g('wkSnd'),fs:g('wkFs'),chaps:g('wkChaps'),note:g('wkNote'),tx:g('wkTx')};
+  DOM={sec:stage.closest('section'),player:g('wkPlayer'),frame:g('wkFrame'),stage,big:g('wkBig'),cap2:g('wkCap2'),play:g('wkPlay'),restart:g('wkRestart'),seek:g('wkSeek'),time:g('wkTime'),cc:g('wkCc'),snd:g('wkSnd'),fs:g('wkFs'),chaps:g('wkChaps'),note:g('wkNote'),tx:g('wkTx')};const sk=DOM.seek;DOM.sfill=sk&&sk.querySelector('.wk-sfill');DOM.sthumb=sk&&sk.querySelector('.wk-sthumb');
+  let m=DOM.frame.querySelector('.wk-msg');if(!m){m=div('wk-msg');m.setAttribute('role','status');m.hidden=true;DOM.frame.appendChild(m);}DOM.msg=m;
   wire();return DOM;}
 
 /* ---------------- the build ---------------- */
@@ -193,7 +194,7 @@ function compose(D){
   /* the hands */
   const ART=handArt(),hands=[];
   const mkHand=who=>{const root=div('wk-hand wk-'+who);(who==='teacher'?Lht:Lhl).appendChild(root);const h={who,root,poses:{},base:HS[who],tr:new Track({x:640,y:SH+700,s:1,sx:640,sy:SH+800}),pose:new Steps('point'),lifts:[]};
-    ['point','pinch','open'].forEach(p=>{const a=ART[who][p];const an=a[ANCH[p]]||[a.w/2,0];const e=div('wk-pose',a.svg);e.style.width=a.w+'px';e.style.height=a.h+'px';e.style.transformOrigin=f2(an[0])+'px '+f2(an[1])+'px';root.appendChild(e);const wr=a.wrist||[a.w/2,a.h*.24];h.poses[p]={el:e,ax:an[0],ay:an[1],wx:wr[0],wy:wr[1]};});
+    ['point','pinch','open'].forEach(p=>{const a=ART[who][p];const an=a[ANCH[p]]||[a.w/2,0];const e=div('wk-pose',a.svg);e.style.width=a.w+'px';e.style.height=a.h+'px';e.style.transformOrigin=f2(an[0])+'px '+f2(an[1])+'px';root.appendChild(e);const wr=a.wrist||[a.w/2,a.h*.24];h.poses[p]={el:e,ax:an[0],ay:an[1],wx:wr[0],wy:wr[1],w:a.w,h:a.h};});
     hands.push(h);return h;};
   const HL=mkHand('learner'),HT=mkHand('teacher');
   /* layouts: the closed book centred; the session (the Board large on the left, the Tokens page smaller on the right) */
@@ -242,7 +243,7 @@ function compose(D){
     +'<div class="wk-tip" data-i="2"><b>3</b><p><strong>Only through the board.</strong> Keep the Then item put away at other times.</p></div>',{x:520,y:44,w:720},{dy:16});
   const tipRows=[...tipsCard.el.querySelectorAll('.wk-tip')].map(e=>sub(e,{dy:14,h:0}));
   /* tip one, shown under the book: a token given, then traded for the item at once */
-  const PDX=196;
+  const PDX=212;
   const pair=mkFx('wk-pair','<div class="wk-pt">'+F.chipTok+'</div><div class="wk-pa">→</div><div class="wk-pi">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div>',{x:64,y:478,w:400,h:104});
   const pTok=sub(pair.el.querySelector('.wk-pt')),pItem=sub(pair.el.querySelector('.wk-pi'),{o:1});
   const cyc=mkFx('wk-cyc','',{x:90,y:478,w:1100});
@@ -259,11 +260,14 @@ function compose(D){
   const handTo=(h,t0,t1,p,arc)=>{const a=h.tr.at(t0);lift(h,t0,t1,Math.hypot(p.x-a.x,p.y-a.y));h.tr.move(t0,t1,{x:p.x,y:p.y},arc==null?.14:arc);};
   /* in and out of the frame: from just below its bottom edge, along the line from the shoulder; the way in takes longer the
      further it goes (0.8 to 1.3 s) and slows down to land; it starts earlier rather than landing later */
-  const offY=(h,pose)=>SH+34+h.base*h.poses[pose].ay;
+  /* the drawing is turned along the arm, so a corner of it can rise above the touch point: the hand parks low enough that its
+     highest corner, at that angle, is still 34 px below the frame */
+  const offY=(h,pose,p,sx,sy)=>{const P=h.poses[pose],r=Math.atan2(p.x-sx,sy-p.y),sn=Math.sin(r),cs=Math.cos(r);let up=P.ay;
+    for(const x of [-P.ax,P.w-P.ax])for(const y of [-P.ay,P.h-P.ay])up=Math.max(up,-(x*sn+y*cs));return SH+34+h.base*up;};
   const offFrom=(p,sx,sy,y)=>{const dx=sx-p.x,dy=sy-p.y,len=Math.hypot(dx,dy)||1,k=(y-p.y)/Math.max(.2,dy/len);return{x:p.x+dx/len*k,y:p.y+dy/len*k};};
-  const enter=(h,t0,t1,p,pose,sh)=>{const o=offFrom(p,sh[0],sh[1],offY(h,pose));const dur=clamp(Math.hypot(p.x-o.x,p.y-o.y)/700,.8,1.3);
+  const enter=(h,t0,t1,p,pose,sh)=>{const o=offFrom(p,sh[0],sh[1],offY(h,pose,p,sh[0],sh[1]));const dur=clamp(Math.hypot(p.x-o.x,p.y-o.y)/700,.8,1.3);
     const st=Math.min(t1-.35,Math.max(Math.min(t0,t1-dur),h.tr.last().t+.02));h.tr.set(st,{x:o.x,y:o.y,sx:sh[0],sy:sh[1],s:1});h.pose.set(st,pose);h.tr.move(st,t1,{x:p.x,y:p.y},.04,easeOut);return st;};
-  const leave=(h,t0,t1)=>{const s=h.tr.at(t0);const o=offFrom(s,s.sx,s.sy,offY(h,h.pose.at(t0).v));h.tr.move(t0,t1,{x:o.x,y:o.y},0,easeIn);};
+  const leave=(h,t0,t1)=>{const s=h.tr.at(t0);const o=offFrom(s,s.sx,s.sy,offY(h,h.pose.at(t0).v,s,s.sx,s.sy));h.tr.move(t0,t1,{x:o.x,y:o.y},0,easeIn);};
   /* a held card keeps the same point under the fingers: the offset from the hand scales with the card */
   const take=(c,h,t)=>{const cp=cardPos(c,t),hp=h.tr.at(t);c.fol.push({t0:t,t1:1e9,h,dx:cp.x-hp.x,dy:cp.y-hp.y,s0:c.tr.at(t).s||1});c.where.set(t,'fly');};
   const release=(c,t)=>{const f=c.fol[c.fol.length-1];if(!f||f.t1<1e9)return;const p=folPos(c,f,t);f.t1=t;c.tr.set(t,{x:p.x,y:p.y});};
@@ -356,7 +360,7 @@ function compose(D){
   /* the first token comes as the interval ends (the reach starts just before), not when the line gets to it; the ring keeps its ✓ until
      the token is in its slot; the praise is shown again with the behavior's name marked as the line says so; the slot glows as it is named */
   SC.tok_first=K=>{const tEnd=K.t+.6,grab=tEnd+.45,atHO=grab+.8,tk=atHO+.9,place=tk+.8;
-    ringInt(ringPending==null?K.t-3:ringPending,tEnd,true,{hold:place});ringPending=null;
+    ringInt(ringPending==null?K.t-3:ringPending,tEnd,true,{hold:place+.3});ringPending=null;
     deliver(0,{t0:tEnd-.4,grab,atHO,text:PR.first,bub:atHO,bubDur:2.4,take:tk,place,lin:.9});
     const tb=Math.max(atHO+2.5,K.at('brief praise',.5)-.15);bubble(PR.first,tb,2.8,true);
     const ts=Math.max(tb+.5,K.at('put it in the next slot',.85)-.15);glowAt(BDS,M.slot[0],5,ts,1.8);
@@ -382,7 +386,7 @@ function compose(D){
   /* the last token: given at once; the terminal token goes straight into its slot, and sits there, its round slot glowing, while the line
      says why it looks different; the full board glows as it is named */
   SC.tok_last=K=>{const i=n-1,T=K.t+.2,ri=2.2,D=T+ri,tk=F.term?D+2.2:D+1.6,place=tk+.9;
-    ringInt(ringPending!=null&&ringPending<T?ringPending:T,D,true,{hold:place});ringPending=null;
+    ringInt(ringPending!=null&&ringPending<T?ringPending:T,D,true,{hold:place+.3});ringPending=null;
     const end=deliver(i,{t0:D-.4,grab:D+.5,atHO:D+1.2,text:PR.last,bub:D+1.25,bubDur:2.6,take:tk,place,lin:.9});let fin=end;
     if(F.term){TK[i].glowT=[D+.6,place];const ta=Math.max(place,K.at('looks different',.3)-.15);glowAt(BDS,M.slot[i],8,place,Math.max(4.5,ta+3.2-place),true);
       const tf=Math.max(place+4.6,K.at('board is finished',.6)-.15);M.slot.forEach((r,j)=>glowAt(BDS,r,4,tf+j*.08,1.4));fin=Math.max(fin,tf+1.5);}
@@ -425,9 +429,9 @@ function compose(D){
     pageTurn('ch',ts+4,ts+4.7,true);handTo(HT,ts+4,ts+4.55,grip(cC,TRa,sBk,'teacher'));
     const pC=at(BOOK('ch'),ctr(M.ch[F.pick.ch]));take(cC,HT,ts+4.72);cC.tr.move(ts+4.72,ts+4.87,{l:1});carryTo(cC,HT,ts+4.77,ts+5.37,pC,.15);release(cC,ts+5.37);cC.tr.move(ts+5.37,ts+5.52,{l:0});cC.where.set(ts+5.55,'ch');
     leave(HT,ts+5.5,ts+6.2);let t=ts+5.6;
-    /* the learner looks over the choices again */
+    /* the learner looks over the choices again, coming in as the teacher's hand is nearly out of the frame (so the arms do not cross) */
     const L=BOOK('ch'),pts=[2,4].filter(i=>CH[i]&&i!==F.pick.ch).concat([F.pick.ch]).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
-    if(pts.length){const tl=Math.max(t+.4,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
+    if(pts.length){const tl=Math.max(t+1.4,K.at('chooses again',.6)-.2);enter(HL,tl-.9,tl,pts[0],'point',SHL);t=tl;for(let j=1;j<pts.length;j++){handTo(HL,t+.3,t+.8,pts[j]);t+=.8;}t+=.3;leave(HL,t,t+.8);t+=.8;}
     return Math.max(K.d,t-K.t);};
   /* the tips: each tip is lit while it is read; the first is shown under the book, a token given and traded for the item at once, twice */
   SC.tips=K=>{const t=K.t;stackTo(t,t+1,k=>BOOK(k,.52,40,170));tipsCard.tr.move(t+.5,t+1,{o:1,dy:0},0,easeOut);
@@ -443,7 +447,11 @@ function compose(D){
   SC.outro=K=>{const t=K.t,sO=Math.min(.7,430/maxH);tipsCard.tr.move(t,t+.5,{o:0,dy:10});pair.tr.move(t,t+.4,{o:0});stackTo(t+.2,t+1.4,k=>BOOK(k,sO,null,24));cyc.tr.move(t+.6,t+.9,{o:1});
     const after=K.text.toLowerCase().indexOf('cycle');const w=[['choose',.3],['set the target',.42],['earn',.55],['exchange',.68]];let last=t+1;
     cycItems.forEach((fx,i)=>{const tt=Math.max(t+1+i*.35,K.at(w[i][0],w[i][1],after)-.15);fx.tr.move(tt,tt+.4,{o:1,s:1,dy:0},0,easeOut);if(cycArr[i])cycArr[i].tr.move(tt-.05,tt+.3,{o:1,dx:0},0,easeOut);last=tt;});
-    const tb=Math.max(last+1.2,K.at('the back of each page',.86)-.1),B0=BOOK('ch',sO,null,24);
+    /* the steps the next sentence refers to: the target (more often), the item (Choose) and the requirement (Earn the tokens) */
+    const bmp=(fx,ta)=>{fx.tr.move(ta,ta+.25,{s:1.14});fx.tr.move(ta+.25,ta+.6,{s:1});};
+    const tm=Math.max(last+.8,K.at('more often',.45)-.15),ti=Math.max(tm+.7,K.at('change the item',.6)-.1),tq=Math.max(ti+.7,K.at('the requirement',.7)-.1);
+    bmp(cycItems[1],tm);bmp(cycItems[0],ti);bmp(cycItems[2],tq);
+    const tb=Math.max(tq+.8,K.at('the back of each page',.86)-.1),B0=BOOK('ch',sO,null,24);
     PG.chb.tr.set(tb,{x:B0.x,y:B0.y,s:B0.s,ry:0,o:0,fx:0});PG.ch.tr.move(tb,tb+.35,{fx:0},0,easeIn);PG.ch.tr.set(tb+.35,{o:0});PG.chb.tr.set(tb+.35,{o:1});PG.chb.tr.move(tb+.35,tb+.75,{fx:1},0,easeOut);
     return Math.max(K.d,tb+2.4-K.t);};
 
@@ -484,7 +492,7 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
      old one's wrist is (so the forearms coincide and no second arm shows) and slides onto its own touch point over 0.3 s */
   for(const h of B.hands){const s=h.tr.at(v),ps=h.pose.at(v),ang=Math.atan2(s.x-s.sx,s.sy-s.y)*180/Math.PI,u=clamp(ps.since/.14,0,1);
     let lf=0;for(const L of h.lifts)lf=Math.max(lf,bump(v,L[0],L[1]));const sc=h.base*s.s*(1+.05*lf);
-    const vis=s.y<SH+260;let ox=0,oy=0;
+    const vis=s.y<SH+420;let ox=0,oy=0;
     if(ps.prev!==ps.v&&ps.since<.3&&h.poses[ps.prev]){const r=ang*Math.PI/180,cs=Math.cos(r),sn=Math.sin(r),W=P=>{const dx=(P.wx-P.ax)*sc,dy=(P.wy-P.ay)*sc;return[dx*cs-dy*sn,dx*sn+dy*cs];};
       const a=W(h.poses[ps.prev]),b=W(h.poses[ps.v]),k=1-ps.since/.3;ox=(a[0]-b[0])*k;oy=(a[1]-b[1])*k;}
     for(const name in h.poses){const P=h.poses[name];const o=name===ps.v?(ps.prev===name?1:u):name===ps.prev&&ps.prev!==ps.v?1-u:0;const nw=name===ps.v&&ps.prev!==name;
@@ -504,20 +512,28 @@ function folPos(c,f,t){const hp=f.h.tr.at(t),k=(c.tr.at(t).s||1)/(f.s0||1);retur
 function cardPosOf(c,t){for(const f of c.fol)if(t>=f.t0&&t<f.t1)return folPos(c,f,t);return c.tr.at(t);}
 
 /* ---------------- the player: clock, narration, controls ---------------- */
-let pos=0,playing=false,want=false,raf=0,soundOn=true,capsOn=true,busy=false;
-const AU={ctx:null,gain:null,bufs:null,decoding:null,srcs:[],mode:'off',base:0,pos0:0,susp:false,webFail:false,html:{},cur:'',spoken:''};
+let pos=0,playing=false,want=false,raf=0,soundOn=true,capsOn=true,busy=false,drag=false,msg='';
+const AU={ctx:null,gain:null,bufs:{},dec:{},srcs:[],mode:'off',base:0,pos0:0,susp:false,suspPos:0,webFail:false,html:{},cur:'',req:0,spoke:false,wd:null};
 function toAB(uri){const b=atob(uri.slice(uri.indexOf(',')+1));const u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u.buffer;}
-function ctx(){if(AU.ctx)return AU.ctx;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;try{AU.ctx=new C();AU.gain=AU.ctx.createGain();AU.gain.connect(AU.ctx.destination);}catch(e){AU.ctx=null;}return AU.ctx;}
-function decodeAll(){if(AU.decoding)return AU.decoding;const L=audioLines()||{};AU.bufs={};
-  AU.decoding=Promise.all(Object.keys(L).map(id=>new Promise(res=>{const a=L[id]&&L[id].a;if(!a){res();return;}let done=false;const fin=b=>{if(done)return;done=true;if(b)AU.bufs[id]=b;res();};
-    try{const pr=AU.ctx.decodeAudioData(toAB(a),fin,()=>fin(null));if(pr&&pr.then)pr.then(fin,()=>fin(null));}catch(e){fin(null);}}))).then(()=>{if(!Object.keys(AU.bufs).length)AU.webFail=true;});
-  return AU.decoding;}
+function ctx(){if(AU.ctx)return AU.ctx;const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
+  try{AU.ctx=new C();AU.gain=AU.ctx.createGain();AU.gain.connect(AU.ctx.destination);
+    /* the system can take the sound (a call, Siri, an alarm, another app): the clock stops, so the player pauses and says so */
+    AU.ctx.addEventListener('statechange',()=>{if(AU.mode==='web'&&playing&&AU.ctx.state!=='running')interrupted();});}
+  catch(e){AU.ctx=null;}return AU.ctx;}
+/* decode only the lines this build plays (once each); a line a rebuild switches to is decoded then */
+function decodeIds(ids){const L=audioLines()||{};const ps=ids.map(id=>{if(AU.bufs[id]||!L[id]||!L[id].a)return null;if(AU.dec[id])return AU.dec[id];
+    return AU.dec[id]=new Promise(res=>{let done=false;const fin=b=>{if(done)return;done=true;if(b)AU.bufs[id]=b;else AU.dec[id]=null;res();};
+      try{const pr=AU.ctx.decodeAudioData(toAB(L[id].a),fin,()=>fin(null));if(pr&&pr.then)pr.then(fin,()=>fin(null));}catch(e){fin(null);}});}).filter(Boolean);
+  return Promise.all(ps).then(()=>{if(ids.some(id=>L[id]&&L[id].a)&&!ids.some(id=>AU.bufs[id]))AU.webFail=true;});}
+const needIds=()=>B?B.cues.map(c=>c.id).filter(id=>{const L=audioLines();return L&&L[id]&&L[id].a;}):[];
 function mode(){if(!soundOn)return 'off';const L=audioLines();if(L){if(!AU.webFail&&ctx())return 'web';try{if(typeof Audio!=='undefined'&&htmlEl().canPlayType('audio/mpeg'))return 'html';}catch(e){}}
   if(window.speechSynthesis&&window.SpeechSynthesisUtterance)return 'speech';return 'off';}
 function clock(){if(!playing)return pos;return AU.mode==='web'&&AU.ctx?AU.pos0+(AU.ctx.currentTime-AU.base):AU.pos0+(performance.now()/1000-AU.base);}
 function stopAudio(){AU.srcs.forEach(s=>{try{s.stop();}catch(e){}});AU.srcs=[];AU.susp=false;
   if(AU.html.el)try{AU.html.el.pause();}catch(e){}AU.cur='';try{if(window.speechSynthesis&&AU.mode==='speech')speechSynthesis.cancel();}catch(e){}}
-function schedule(from){const c=AU.ctx;B.cues.forEach(q=>{const b=AU.bufs&&AU.bufs[q.id];if(!b||q.start+b.duration<=from)return;const s=c.createBufferSource();s.buffer=b;s.connect(AU.gain);
+/* nothing is sounding: let the audio thread rest (the next Play resumes it inside the tap) */
+function idle(){if(AU.ctx&&AU.ctx.state==='running'&&!AU.srcs.length)try{AU.ctx.suspend();}catch(e){}}
+function schedule(from){const c=AU.ctx;B.cues.forEach(q=>{const b=AU.bufs[q.id];if(!b||q.start+b.duration<=from)return;const s=c.createBufferSource();s.buffer=b;s.connect(AU.gain);
   try{s.start(AU.base+Math.max(0,q.start-from),Math.max(0,from-q.start));}catch(e){return;}AU.srcs.push(s);});}
 /* the fallbacks, driven from the frame loop: one audio element per line, or the device's voice reading the caption */
 function tickAudio(t){const q=cueAt(t);const inLine=q&&t<q.start+q.narr;
@@ -529,26 +545,49 @@ function tickAudio(t){const q=cueAt(t);const inLine=q&&t<q.start+q.narr;
     let k=0;q.chunks.forEach((c,i)=>{if(c.t<=t+.001)k=i;});const say=q.chunks.slice(t-q.start>1?k:0).map(c=>c.text).join(' ');
     try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(say);u.rate=1;u.lang='en-US';speechSynthesis.speak(u);}catch(e){}}}
 function htmlEl(){if(!AU.html.el){AU.html.el=new Audio();AU.html.el.preload='auto';}return AU.html.el;}
-function play(){if(!B)build();if(!B||want)return;want=true;if(pos>=B.D-.05){pos=0;stopAudio();}
+/* iOS lets an audio element, and the device's voice, start later only once they have been started inside a tap: so the Play tap
+   starts both, silently, whichever the narration ends up using */
+let SILENT='';
+function silentWav(){if(SILENT)return SILENT;const n=400,b=new Uint8Array(44+n*2),v=new DataView(b.buffer),w=(o,s)=>{for(let i=0;i<s.length;i++)b[o+i]=s.charCodeAt(i);};
+  w(0,'RIFF');v.setUint32(4,36+n*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,8000,true);v.setUint32(28,16000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,n*2,true);
+  let s='';for(let i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return SILENT='data:audio/wav;base64,'+btoa(s);}
+function prime(){try{if(typeof Audio!=='undefined'){const a=htmlEl();if(!a.src&&!AU.html.primed){AU.html.primed=true;a.src=silentWav();const p=a.play();if(p&&p.then)p.then(()=>{try{a.pause();}catch(e){}},()=>{});}}}catch(e){}
+  try{if(!AU.spoke&&window.speechSynthesis&&window.SpeechSynthesisUtterance&&(!audioLines()||!ctx())){AU.spoke=true;speechSynthesis.speak(new SpeechSynthesisUtterance(''));}}catch(e){}}
+/* the screen stays on while the walkthrough plays (it runs for minutes with no touch) */
+let WL=null;
+function wake(on){try{if(on&&!WL&&navigator.wakeLock&&document.visibilityState==='visible'){navigator.wakeLock.request('screen').then(w=>{if(!want){w.release().catch(()=>{});return;}WL=w;w.addEventListener('release',()=>{if(WL===w)WL=null;});},()=>{});}
+  else if(!on&&WL){const w=WL;WL=null;w.release().catch(()=>{});}}catch(e){}}
+/* inside the workstation, opening another form only hides this form's frame (no visibilitychange): look for that while playing */
+let WT=0,ioHidden=false;
+function frameHidden(){try{const fe=window.frameElement;if(fe&&(fe.hidden||!fe.getClientRects().length))return true;}catch(e){}return ioHidden;}
+function watch(on){clearInterval(WT);WT=0;if(on)WT=setInterval(()=>{if(want&&frameHidden())pause();},500);}
+function setMsg(m){msg=m||'';const D=dom();if(D&&D.msg){txt(D.msg,msg);D.msg.hidden=!msg;}}
+function play(){if(!B||B.dirty)build();if(!B||want)return;want=true;setMsg('');if(pos>=B.D-.05){pos=0;stopAudio();}
   try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+  wake(true);prime();
   if(mode()==='web'){const c=AU.ctx;try{const r=c.resume();if(r&&r.catch)r.catch(()=>{});}catch(e){}
     try{const b=c.createBuffer(1,1,22050),s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start(0);}catch(e){}
-    if(!AU.bufs||!AU.ready){busy=true;ui();decodeAll().then(()=>{AU.ready=true;busy=false;if(want)begin();else ui();});return;}}
+    const ids=needIds();if(ids.some(id=>!AU.bufs[id])&&!AU.webFail){busy=true;ui();const tok=++AU.req;
+      decodeIds(ids).then(()=>{if(tok!==AU.req)return;busy=false;if(want&&!playing)begin();else ui();});return;}}
   begin();}
 function begin(){const m=mode();
-  if(m==='web'&&AU.mode==='web'&&AU.susp&&Math.abs(pos-AU.suspPos)<1e-6){AU.susp=false;try{AU.ctx.resume();}catch(e){}playing=true;loop();ui();return;}
+  if(m==='web'&&AU.mode==='web'&&AU.susp&&Math.abs(pos-AU.suspPos)<1e-6){AU.susp=false;try{AU.ctx.resume();}catch(e){}playing=true;watch(true);loop();ui();return;}
   stopAudio();AU.mode=m;AU.pos0=pos;playing=true;
-  if(m==='web'){try{AU.ctx.resume();}catch(e){}AU.base=AU.ctx.currentTime;schedule(pos);}else AU.base=performance.now()/1000;
+  if(m==='web'){try{AU.ctx.resume();}catch(e){}AU.base=AU.ctx.currentTime;schedule(pos);}else{AU.base=performance.now()/1000;idle();}
   if(m==='html'||m==='speech')tickAudio(pos);   /* the first sound starts inside the Play tap (iOS) */
-  loop();ui();}
-function loop(){cancelAnimationFrame(raf);const f=()=>{if(!playing)return;let t=clock();
-    if(t>=B.D){pos=B.D;renderAt(pos);stop(false);pos=B.D;ui();return;}
+  watch(true);loop();ui();}
+/* the frame loop; with the Web Audio clock it also watches that the clock moves (some systems stop it without telling) */
+function loop(){cancelAnimationFrame(raf);AU.wd=null;const f=()=>{if(!playing)return;let t=clock();
+    if(AU.mode==='web'&&AU.ctx){const now=performance.now(),ct=AU.ctx.currentTime;if(!AU.wd||ct!==AU.wd.ct)AU.wd={ct,at:now};else if(now-AU.wd.at>900){interrupted();return;}}
+    if(t>=B.D){pos=B.D;renderAt(pos);stop(false);stopAudio();idle();pos=B.D;ui();return;}
     if(AU.mode==='html'||AU.mode==='speech')tickAudio(t);renderAt(t);uiTime(t);raf=requestAnimationFrame(f);};raf=requestAnimationFrame(f);}
+function interrupted(){if(!playing)return;pos=clock();playing=false;want=false;busy=false;cancelAnimationFrame(raf);watch(false);wake(false);
+  AU.susp=!!AU.srcs.length;AU.suspPos=pos;renderAt(pos);setMsg('The sound was interrupted. Tap Play to go on.');ui();}
 /* stop(hard): pause; a soft pause of the Web Audio narration suspends the context so Play continues it */
-function stop(hard){want=false;busy=false;if(playing){pos=clock();playing=false;cancelAnimationFrame(raf);}
+function stop(hard){want=false;busy=false;AU.req++;if(playing){pos=clock();playing=false;cancelAnimationFrame(raf);}watch(false);wake(false);
   if(!hard&&AU.mode==='web'&&AU.ctx&&AU.srcs.length){try{AU.ctx.suspend();}catch(e){}AU.susp=true;AU.suspPos=pos;}else stopAudio();}
-function pause(){stop(false);if(B)renderAt(pos);ui();}
-function seek(t){if(!B)build();if(!B)return;const was=want;stop(true);pos=clamp(+t||0,0,B.D);renderAt(pos);uiTime(pos);if(was)play();else ui();}
+function pause(){stop(false);if(!AU.susp)idle();if(B)renderAt(pos);ui();}
+function seek(t){if(!B)build();if(!B)return;const was=want;stop(true);pos=clamp(+t||0,0,B.D);renderAt(pos);uiTime(pos);if(was&&pos<B.D-.05)play();else{idle();ui();}}
 function toggle(){if(want)pause();else play();}
 
 /* ---------------- the controls ---------------- */
@@ -563,57 +602,91 @@ const mmss=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%
 function ui(){const D=dom();if(!D)return;const pl=want;
   D.player.classList.toggle('wk-playing',pl);D.player.classList.toggle('wk-busy',busy);
   if(D.play){D.play.innerHTML=busy?'<span class="wk-spin" aria-hidden="true"></span>':pl?IC.pause:IC.play;D.play.setAttribute('aria-label',busy?'Loading the narration':pl?'Pause':'Play');}
-  if(D.big){D.big.hidden=pl;D.big.setAttribute('aria-label',B&&pos>=B.D-.05?'Play the walkthrough again':pos>0?'Continue the walkthrough':'Play the walkthrough');}
-  if(D.snd){D.snd.innerHTML=(soundOn?IC.snd:IC.mute)+'<span>Sound</span>';D.snd.setAttribute('aria-pressed',String(soundOn));D.snd.setAttribute('aria-label',soundOn?'Sound on':'Sound off');}
+  if(D.big){const hadFocus=document.activeElement===D.big;D.big.hidden=pl;D.big.setAttribute('aria-label',B&&pos>=B.D-.05?'Play the walkthrough again':pos>0?'Continue the walkthrough':'Play the walkthrough');
+    if(pl&&hadFocus&&D.play)try{D.play.focus({preventScroll:true});}catch(e){}}
+  /* toggle buttons keep one name; aria-pressed carries the state */
+  if(D.snd){D.snd.innerHTML=(soundOn?IC.snd:IC.mute)+'<span>Sound</span>';D.snd.setAttribute('aria-pressed',String(soundOn));D.snd.setAttribute('aria-label','Sound');}
   if(D.cc){D.cc.setAttribute('aria-pressed',String(capsOn));D.player.classList.toggle('wk-nocap',!capsOn);}
   if(D.fs){const f=isFs();D.fs.innerHTML=(f?IC.fsx:IC.fs)+'<span>'+(f?'Exit full screen':'Full screen')+'</span>';D.fs.setAttribute('aria-label',f?'Exit full screen':'Full screen');}
-  uiTime(pos);}
-let lastSec=-1,lastCh='';
-function uiTime(t){const D=dom();if(!D||!B)return;if(D.seek&&document.activeElement!==D.seek||D.seek&&!want)D.seek.value=String(Math.round(t*10)/10);
-  const s=Math.floor(t);if(s!==lastSec){lastSec=s;txt(D.time,mmss(t)+' / '+mmss(B.D));if(D.seek)D.seek.setAttribute('aria-valuetext',mmss(t)+' of '+mmss(B.D));}
+  lastAria=-1;uiTime(pos);}
+let lastSec=-1,lastCh='',lastAria=-1;
+/* the seek bar: a slider drawn by the player (not a form field, so watching never counts as an unsaved change in the workstation) */
+function seekDraw(t){const D=dom();if(!D||!B||!D.seek)return;const f=B.D?clamp(t/B.D,0,1):0;
+  if(D.sfill)css(D.sfill,'transform','scaleX('+f.toFixed(4)+')');if(D.sthumb)css(D.sthumb,'left',(f*100).toFixed(2)+'%');
+  /* a screen reader hears the position on a pause or a seek, and at most every ten seconds while it plays */
+  const a=want&&!drag?Math.floor(t/10):Math.floor(t);if(a!==lastAria){lastAria=a;D.seek.setAttribute('aria-valuenow',String(Math.round(t)));D.seek.setAttribute('aria-valuetext',mmss(t)+' of '+mmss(B.D));}}
+function uiTime(t){const D=dom();if(!D||!B)return;seekDraw(t);
+  const s=Math.floor(t);if(s!==lastSec){lastSec=s;txt(D.time,mmss(t)+' / '+mmss(B.D));}
   let ch=B.chapters[0].id;for(const c of B.chapters)if(c.start<=t+.01)ch=c.id;
   if(ch!==lastCh){lastCh=ch;D.chaps.querySelectorAll('button').forEach(b=>{const on=b.dataset.ch===ch;b.setAttribute('aria-current',on?'step':'false');});}}
-function uiBuilt(){const D=dom();if(!D||!B)return;D.seek.max=String(Math.round(B.D*10)/10);lastSec=-1;lastCh='';
+function uiBuilt(){const D=dom();if(!D||!B)return;D.seek.setAttribute('aria-valuemax',String(Math.round(B.D)));lastSec=-1;lastCh='';lastAria=-1;
   D.chaps.innerHTML=B.chapters.map(c=>'<button type="button" data-ch="'+c.id+'" aria-current="false" aria-label="Chapter: '+esc(c.label)+'">'+esc(c.label)+'</button>').join('');
   if(D.note){D.note.textContent=B.notes.join(' ');D.note.hidden=!B.notes.length;}
-  if(D.tx)D.tx.innerHTML=B.chapters.map(ch=>'<h4>'+esc(ch.label)+'</h4>'+B.cues.filter(c=>c.chapter===ch.id).map(c=>'<p>'+esc(c.text)+'</p>').join('')).join('');}
+  if(D.tx)D.tx.innerHTML=B.chapters.map(ch=>'<h3>'+esc(ch.label)+'</h3>'+B.cues.filter(c=>c.chapter===ch.id).map(c=>'<p>'+esc(c.text)+'</p>').join('')).join('');}
 function isFs(){const D=dom();const e=document.fullscreenElement||document.webkitFullscreenElement;return !!(D&&(e===D.player||D.player.classList.contains('wk-fs')));}
+/* the fixed full-screen panel (where element full screen is missing): everything behind it is inert, so Tab stays in the player */
+let INERT=[];
+function setInert(on){INERT.forEach(e=>{e.inert=false;});INERT=[];if(!on)return;const D=dom();
+  for(let n=D.player;n&&n.parentElement&&n!==document.body;n=n.parentElement)for(const sib of n.parentElement.children)if(sib!==n&&!sib.inert&&!/^(SCRIPT|STYLE|LINK)$/.test(sib.tagName)){sib.inert=true;INERT.push(sib);}}
+function panel(on){const D=dom();D.player.classList.toggle('wk-fs',on);document.documentElement.classList.toggle('wk-fs-on',on);setInert(on);}
 function fullscreen(){const D=dom();if(!D)return;const p=D.player;
-  if(isFs()){if(p.classList.contains('wk-fs')){p.classList.remove('wk-fs');document.documentElement.classList.remove('wk-fs-on');}else{(document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);}setTimeout(()=>{fit();ui();},60);return;}
+  if(isFs()){if(p.classList.contains('wk-fs'))panel(false);else{(document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document);}setTimeout(()=>{fit();ui();},60);return;}
   const rq=p.requestFullscreen||p.webkitRequestFullscreen;let ok=false;
-  if(rq){try{const r=rq.call(p);ok=true;if(r&&r.catch)r.catch(()=>{p.classList.add('wk-fs');document.documentElement.classList.add('wk-fs-on');fit();ui();});}catch(e){ok=false;}}
-  if(!ok){p.classList.add('wk-fs');document.documentElement.classList.add('wk-fs-on');}setTimeout(()=>{fit();ui();},60);}
-/* the stage is drawn at 1280 x 720 and scaled to the width of the view (in full screen, to fit the screen) by one transform */
+  if(rq){try{const r=rq.call(p);ok=true;if(r&&r.catch)r.catch(()=>{panel(true);fit();ui();});}catch(e){ok=false;}}
+  if(!ok)panel(true);setTimeout(()=>{fit();ui();},60);}
+/* the stage is drawn at 1280 x 720 and scaled to the width of the view (in full screen, to fit the screen) by one transform; in full
+   screen a small picture moves the captions under it, so the scale is worked out again with the caption band's height */
 function fit(){const D=dom();if(!D)return;const f=isFs();let k;
-  if(f){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||60,chs=D.chaps.offsetHeight||0;k=Math.max(.1,Math.min(window.innerWidth/SW,(window.innerHeight-bar-chs-24)/SH));D.frame.style.width=f2(SW*k)+'px';}
+  if(f){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||60,chs=D.chaps.offsetHeight||0;
+    const kk=cap=>Math.max(.1,Math.min(window.innerWidth/SW,(window.innerHeight-bar-chs-cap-24)/SH));k=kk(0);D.player.classList.toggle('wk-small',k<.5);
+    if(k<.5&&capsOn&&D.cap2)k=kk(D.cap2.offsetHeight||0);D.frame.style.width=f2(SW*k)+'px';}
   else{D.frame.style.width='';k=Math.max(.1,(D.frame.clientWidth||SW)/SW);}
   css(D.stage,'transform','scale('+k.toFixed(5)+')');D.frame.style.height=f2(SH*k)+'px';D.player.classList.toggle('wk-small',k<.5);}
+/* on entering the view: when the player does not fit below the sticky toolbar, scroll it there */
+function reveal(){const D=dom();if(!D||isFs())return;const tb=document.querySelector('.toolbar');let th=0;try{if(tb&&/sticky|fixed/.test(getComputedStyle(tb).position))th=tb.offsetHeight;}catch(e){}
+  const r=D.player.getBoundingClientRect();if(!r.height||(r.top>=th&&r.bottom<=window.innerHeight))return;window.scrollTo({top:Math.max(0,r.top+window.scrollY-th-8)});}
 function wire(){const D=DOM;
   D.play.addEventListener('click',toggle);D.big.addEventListener('click',()=>{play();});
   D.restart.addEventListener('click',()=>{seek(0);if(!want)play();});
-  /* dragging the bar while playing draws the frames and holds the sound; letting go plays on from there */
-  let resume=false;D.seek.addEventListener('input',()=>{if(!B)return;if(want){resume=true;stop(true);}pos=clamp(+D.seek.value,0,B.D);renderAt(pos);uiTime(pos);});
-  D.seek.addEventListener('change',()=>{if(resume){resume=false;play();}else ui();});
-  D.cc.addEventListener('click',()=>{capsOn=!capsOn;ui();});
-  D.snd.addEventListener('click',()=>{soundOn=!soundOn;if(want){const t=clock();seek(t);}else{stopAudio();AU.mode='off';}ui();});
+  /* the seek bar: drag or tap anywhere on it (touch too); while it is held the frames follow and the sound waits; letting go plays on */
+  let resume=false;const posFrom=e=>{const r=D.seek.getBoundingClientRect();return clamp((e.clientX-r.left)/Math.max(1,r.width),0,1)*(B?B.D:0);};
+  D.seek.addEventListener('pointerdown',e=>{if(!B||e.button>0)return;e.preventDefault();drag=true;try{D.seek.setPointerCapture(e.pointerId);}catch(x){}try{D.seek.focus({preventScroll:true});}catch(x){}
+    if(want){resume=true;stop(true);}pos=posFrom(e);renderAt(pos);ui();});
+  D.seek.addEventListener('pointermove',e=>{if(!drag)return;pos=posFrom(e);renderAt(pos);uiTime(pos);});
+  const up=()=>{if(!drag)return;drag=false;if(resume){resume=false;if(pos<B.D-.05)play();else ui();}else ui();};
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>D.seek.addEventListener(ev,up));
+  D.seek.addEventListener('keydown',e=>{if(!B||e.altKey||e.ctrlKey||e.metaKey)return;const st={ArrowLeft:-5,ArrowDown:-5,ArrowRight:5,ArrowUp:5,PageDown:-30,PageUp:30}[e.key];
+    let to=null;if(st!=null)to=clock()+st;else if(e.key==='Home')to=0;else if(e.key==='End')to=B.D;if(to==null)return;e.preventDefault();e.stopPropagation();seek(to);});
+  D.cc.addEventListener('click',()=>{capsOn=!capsOn;ui();if(isFs())fit();});
+  D.snd.addEventListener('click',()=>{soundOn=!soundOn;if(want){const t=clock();seek(t);}else{stopAudio();AU.mode='off';idle();}ui();});
   D.fs.addEventListener('click',fullscreen);
   D.chaps.addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b||!B)return;const c=B.chapters.find(x=>x.id===b.dataset.ch);if(c)seek(c.start);});
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{setTimeout(()=>{fit();ui();},30);}));
   let lastW=-1;const onSize=()=>{const w=D.frame.clientWidth;if(w!==lastW){lastW=w;fit();}};
-  if(window.ResizeObserver){new ResizeObserver(onSize).observe(D.player);}window.addEventListener('resize',()=>{lastW=-1;onSize();});
+  if(window.ResizeObserver){new ResizeObserver(onSize).observe(D.player);}window.addEventListener('resize',()=>{lastW=-1;onSize();if(isFs())fit();});
   window.addEventListener('orientationchange',()=>setTimeout(fit,200));
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&want)pause();});
-  document.addEventListener('keydown',e=>{if(!document.body.classList.contains('view-walk')||e.altKey||e.ctrlKey||e.metaKey)return;const tg=e.target,tn=tg&&tg.tagName;
-    if(tn==='INPUT'&&tg!==D.seek||tn==='TEXTAREA'||tn==='SELECT'||tg&&tg.isContentEditable)return;
-    if(e.key===' '||e.key==='k'||e.key==='K'){if(tn==='BUTTON'&&e.key===' ')return;e.preventDefault();toggle();}
-    else if((e.key==='ArrowLeft'||e.key==='ArrowRight')&&tg!==D.seek){e.preventDefault();seek(clock()+(e.key==='ArrowLeft'?-5:5));}
-    else if(e.key==='Escape'&&D.player.classList.contains('wk-fs')){fullscreen();}});}
+  /* a frame hidden by the workstation reports no intersection and a root of no size (a plain scroll out of view keeps playing) */
+  if(window.IntersectionObserver)try{new IntersectionObserver(es=>{const e=es[es.length-1];ioHidden=!e.isIntersecting&&!!e.rootBounds&&(!e.rootBounds.width||!e.rootBounds.height);if(ioHidden&&want)pause();}).observe(D.player);}catch(e){}
+  /* Escape closes the full-screen panel first, before the workstation sees it (one key, one thing) */
+  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&D.player.classList.contains('wk-fs')){e.preventDefault();e.stopPropagation();fullscreen();}},true);
+  document.addEventListener('keydown',e=>{if(!document.body.classList.contains('view-walk')||e.altKey||e.ctrlKey||e.metaKey||e.defaultPrevented)return;const tg=e.target,tn=tg&&tg.tagName;
+    if(tn==='INPUT'||tn==='TEXTAREA'||tn==='SELECT'||tg&&tg.isContentEditable)return;
+    if(e.key===' '||e.key==='k'||e.key==='K'){if(e.key===' '&&tg&&tg.closest&&tg.closest('button,summary,a[href],[role="button"],[role="checkbox"],dialog'))return;e.preventDefault();if(e.repeat)return;toggle();}
+    else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();seek(clock()+(e.key==='ArrowLeft'?-5:5));}});}
 
 /* ---------------- the view: leaving it pauses, entering it rebuilds from the current book ---------------- */
 const setView0=setView;
-setView=function(v){if(v!=='walk'&&(want||playing))pause();setView0(v);if(v==='walk'){try{build();}catch(e){console.error('Walkthrough: '+(e&&e.message||e));}fit();ui();}};
+setView=function(v){const was=document.body.classList.contains('view-walk');if(v!=='walk'&&(want||playing))pause();
+  if(v==='walk'&&was&&B&&!B.dirty)return;   /* the Walkthrough button again, with the book unchanged: nothing to do */
+  setView0(v);if(v==='walk'){try{build();}catch(e){console.error('Walkthrough: '+(e&&e.message||e));}fit();ui();reveal();}else if(isFs()&&dom()&&dom().player.classList.contains('wk-fs'))panel(false);};
+/* the book can change while the view is open (Open data, a restore, the case): rebuild from it */
+let building=false;
+if(typeof renderAll==='function'){const renderAll0=renderAll;
+  renderAll=function(){const r=renderAll0.apply(this,arguments);if(building)return r;if(B)B.dirty=true;
+    if(document.body.classList.contains('view-walk')){building=true;try{build();fit();ui();}catch(e){console.error('Walkthrough: '+(e&&e.message||e));}finally{building=false;}}return r;};}
 window.TKWALK={build,renderAt,play,pause,seek,toggle,
   get duration(){return B?B.D:0;},get cues(){return cuesOut();},get chapters(){return chapsOut();},
-  get time(){return clock();},get playing(){return playing;},get audioMode(){return AU.mode;},get reduced(){return reduced();},
+  get time(){return clock();},get unmeasured(){const L=audioLines()||{};return Object.keys(L).filter(id=>!MK[id]||MK[id].h!==hash(String(L[id].t||'')));},get playing(){return playing;},get audioMode(){return AU.mode;},get reduced(){return reduced();},
   get stage(){const D=dom();return D&&D.stage;}};
 })();
