@@ -70,8 +70,8 @@ const pdfPages=async p=>{await p.evaluate(()=>setView('preview'));await sleep(15
 const bookText=async p=>{await p.emulateMedia({media:'print'});await p.evaluate(()=>fitAll());const t=await p.evaluate(()=>document.querySelector('#book').innerText);await p.emulateMedia({media:'screen'});return t;};
 /* the panel's picture: from its band heading to its foot; the sticky toolbar is let go so it does not sit over it */
 async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.getElementById('shotCss')){const s=document.createElement('style');s.id='shotCss';s.textContent='.toolbar{position:static!important}';document.head.appendChild(s);}
-    document.querySelectorAll('.nbh-toast').forEach(e=>e.remove());[...document.querySelectorAll('h2.nbh-band')].find(e=>/Linked with Form TE-1/.test(e.textContent)).scrollIntoView();});await sleep(200);
-  const box=await p.evaluate(()=>{const a=[...document.querySelectorAll('h2.nbh-band')].find(e=>/Linked with Form TE-1/.test(e.textContent)).getBoundingClientRect(),b=document.querySelector('#lkPanel').getBoundingClientRect();
+    document.querySelectorAll('.nbh-toast').forEach(e=>e.remove());[...document.querySelectorAll('h2.nbh-band')].find(e=>/Link(ed)? with Form TE-1/.test(e.textContent)).scrollIntoView();});await sleep(200);
+  const box=await p.evaluate(()=>{const a=[...document.querySelectorAll('h2.nbh-band')].find(e=>/Link(ed)? with Form TE-1/.test(e.textContent)).getBoundingClientRect(),b=document.querySelector('#lkPanel').getBoundingClientRect();
     return {x:0,y:Math.max(0,a.top+scrollY-8),width:document.documentElement.clientWidth,height:Math.ceil(b.bottom-a.top+16)};});
   await p.screenshot({path:SHOTS+'/'+name,clip:box,fullPage:true});await p.evaluate(()=>{const e=document.getElementById('shotCss');if(e)e.remove();});}
 const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:document.documentElement.clientWidth,panel:document.querySelector('#lkPanel').scrollWidth,pc:document.querySelector('#lkPanel').clientWidth}));
@@ -91,7 +91,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
   /* ---- 2. one core ---- */
   {const core=fs.readFileSync(path.join(ROOT,'tools/blocks/nbh-link.js'),'utf8');
     const tk=fs.readFileSync(path.join(ROOT,'NBH-Workstation',TKF),'utf8'),te=fs.readFileSync(path.join(ROOT,'NBH-Workstation',TEF),'utf8');
-    ok('2 the core is in the built TK-1 once, byte for byte, under its banner',tk.split(BANNER).length===2&&tk.split(BANNER+core).length===2&&tk.split('nbh-link (v21.44)').length===2);
+    ok('2 the core is in the built TK-1 once, byte for byte, under its banner',tk.split(BANNER).length===2&&tk.split(BANNER+core).length===2&&tk.split('nbh-link (v21.43)').length===2);
     ok('2 the core in TE-1 is the same file, byte for byte',te.split('<script id="nbh-link">'+core+'</script>').length===2);
     const sib=/sibling:'([^']+)'/.exec(tk.slice(tk.indexOf('v21.43 the link with Form TE-1'))),idx=fs.readFileSync(path.join(ROOT,'NBH-Workstation/index.html'),'utf8');
     const all=id=>{const m=new RegExp("\\['"+id+"','[^']*','([^']+)'\\]").exec(idx);return m?m[1]:'';};
@@ -144,7 +144,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
       cn.some(t=>t==='Form TE-1’s behavior is '+beh.length+' characters; a card holds 40. Write a short label on Targets card 1, then compare again and press Keep to pair them.'),{R:R.card,cn});
     ok('3 n and tok in step ("Laminated stars ..." is the Star)',R.n.st===1&&R.tok.st===1,{n:R.n,tok:R.tok});
     ok('3 menu: ticked, the four backups',R.menu.st===3&&R.menu.pressed==='take'&&R.menu.there.split('; ').length===4,R.menu);
-    ok('3 menu: the preview names the four and the cards',(await noteOf(p,'menu')).some(t=>/^Puts Tablet, video clips, Fruit chew, Five minutes with the magnetic tiles and Choose the next work task on cards 1 to 4\./.test(t)));
+    ok('3 menu: the preview names the four, the cards and the library pictures it brings',(await noteOf(p,'menu')).some(t=>/^Puts “Tablet, video clips”, “Fruit chew”, “Five minutes with the magnetic tiles” and “Choose the next work task” on cards 1 to 4\. Library pictures?: .*“Tablet” for “Tablet, video clips”.*no picture yet/.test(t)),await noteOf(p,'menu'));
     ok('3 sched: offered, unticked',R.sched.st===3&&R.sched.take&&R.sched.pressed==='',R.sched);
     const inf=await infos(p);
     ok('3 information: the price line and "not linked back"',inf.includes('Form TE-1: 10 responses per token, 5 tokens per exchange, 50 responses per exchange, unit price 10.')&&
@@ -162,7 +162,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('3 apply: the toast',s1.toast==='2 items taken from Form TE-1. Nothing else changed.',s1.toast);
     ok('3 apply: the took line',/^Taken .+: the student’s name and ID; choice cards 1 to 4 from the backups$/.test(s1.lk.took||''),s1.lk.took);
     const rp=await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent);
-    ok('3 apply: the reprint line names the choice cards',/^Reprint: the choice-card page \(changed by the link .+\)\.$/.test(rp),rp);
+    ok('3 apply: the reprint line names the sheet of choice cards',/^Reprint: the sheet of choice cards \(changed by the link .+\)\.$/.test(rp),rp);
     ok('3 apply: the board summary carries the new cards for Form TE-1',JSON.stringify(s1.lk.board.ch)===JSON.stringify(L.concat(['',''])),s1.lk.board);
     ok('3 apply: the screen shows them',await p.evaluate(()=>[...document.querySelectorAll('#chTbl tbody tr')].slice(0,4).every((tr,i)=>tr.querySelector('input').value===S.ch[i].l)&&document.querySelector('[data-m="client"]').value===S.meta.client));
     ok('3 apply: "From the case" is untouched and the record holds the menu names it saw',s1.lk.menuSeen&&s1.lk.menuSeen.length===4);
@@ -177,6 +177,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await p.evaluate(()=>{const i=document.querySelector('[data-m="first"]');i.value='Ana';i.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(300);
     const u=await p.evaluate(()=>({undo:nbhLink.state().undo,r:nbhLink.undo(),first:S.meta.first}));
     ok('13 an edit after the take withdraws Undo; the edit stays',!u.undo&&u.r===false&&u.first==='Ana',u);
+    ok('13 ... and the panel says so; while it was offered, its condition was said beside it',/^Undo is no longer offered: this book has changed since the take\.$/.test((await st(p)).msg)&&await p.evaluate(()=>/It is offered until anything else on this book changes\./.test(document.querySelector('#lkPanel .lk-undo').textContent)),(await st(p)).msg);
     await p.close();}
 
   /* ---- 4. conflicts ---- */
@@ -188,15 +189,17 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('4 the take preview names the picture it brings',(await noteOf(p,'card')).some(t=>/^Writes “Sits at the desk” on target card 1/.test(t)));
     await press(p,'card','keep');await apply(p);
     await feed(p,plan1,'TE-1_a.json');R=await rows(p);
-    ok('4 Keep, then a recompare: "kept different"',R.card.st===4&&/^kept different/.test(R.card.label)&&R.card.pressed==='',R.card);
+    ok('4 Keep, then a recompare: "paired" (a kept card row is a pairing)',R.card.st===4&&/^paired \(.+\)$/.test(R.card.label)&&R.card.pressed==='',R.card);
     await feed(p,PLAN(S=>{S.meta.beh='Raises a hand to ask for help';}),'TE-1_b.json');R=await rows(p);
-    ok('4 a plan with another behavior: "changed on Form TE-1", ticked',R.card.st===5&&R.card.label==='changed on Form TE-1'&&R.card.pressed==='take',R.card);
-    /* the card buttons choose the card; the choice goes into the record, and the board summary pairs it */
+    ok('4 a plan with another behavior: "changed on Form TE-1", offered but never ticked for you (a behavior goes on a card only by hand)',R.card.st===5&&R.card.label==='changed on Form TE-1'&&R.card.take&&R.card.pressed==='',R.card);
+    /* the card buttons choose the card the table compares; a tap writes nothing: the pairing stays on card 1 until a take or a keep */
     await p.evaluate(()=>document.querySelector('#lkPanel tr[data-key="card"] button[data-act="choose"][data-i="3"]').click());await sleep(150);
-    R=await rows(p);const lk=JSON.parse(await lkOf(p));
-    ok('4 card button 4: the row compares card 4, and the record pairs it',R.card.what==='Target card 4'&&lk.card===3&&lk.board.card===3&&lk.board.cardLabel===R.card.here,{R:R.card,card:lk.card,board:lk.board});
+    R=await rows(p);let lk=JSON.parse(await lkOf(p));
+    ok('4 card button 4: the row compares card 4 (without card 1\'s pairing); the record still pairs card 1',R.card.what==='Target card 4'&&R.card.st===7&&lk.card===0&&lk.board.card===0&&lk.board.paired===1&&lk.board.cardLabel==='Work',{R:R.card,card:lk.card,board:lk.board});
     await press(p,'card','take');await apply(p);
     ok('4 Take: card 4 holds the behavior, the other cards as they were',await p.evaluate(()=>S.tg[3].l==='Raises a hand to ask for help'&&S.tg[0].l==='Work'&&S.tg[1].k==='raisehand'));
+    lk=JSON.parse(await lkOf(p));
+    ok('4 Take: the record now pairs card 4, and the board summary says so',lk.card===3&&lk.board.card===3&&lk.board.paired===1&&lk.board.cardLabel==='Raises a hand to ask for help'&&Array.isArray(lk.board.pair),lk);
     R=await rows(p);ok('4 after the take: in step on card 4',R.card.st===1&&R.card.what==='Target card 4',R.card);
     /* a label that matches the behavior finds its card */
     await p.evaluate(()=>{S.tg[5].l='Sits at the desk';renderAll();});await feed(p,plan1,'TE-1_a.json');R=await rows(p);
@@ -214,14 +217,14 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('5 seven: a row, "different", unticked, with the preview',R.n&&R.n.st===7&&R.n.pressed===''&&R.n.take&&(await noteOf(p,'n')).includes('Prints 7 slots on the Board and 7 boxes on the Tokens page; the captions are written for 7.'),R.n);
     await only(p,[]);await tick(p,'n');await apply(p);
     ok('5 seven taken: n is 7 and the captions are the defaults for 7',await p.evaluate(()=>S.meta.n==='7'&&JSON.stringify(S.caps)===JSON.stringify(defCaps(7,tokName()))&&document.querySelector('[data-m="n"]').value==='7'&&document.querySelectorAll('#book .pg[data-kind="bd"] .slot').length===7));
-    ok('5 seven taken: the reprint line names the Board and the Tokens pages',/^Reprint: the Board, Tokens and token-card pages/.test(await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent)),await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent));
-    /* once printed, the pages printed come off the reprint line */
-    await p.evaluate(()=>{S.meta.order='fronts';renderAll();window.dispatchEvent(new Event('afterprint'));});await sleep(150);
+    ok('5 seven taken: the reprint line names the Board (both sides: its back prints the count), the front of Tokens and the token cards',/^Reprint: the Board page \(both sides\), the front of the Tokens page and the sheet of token cards \(changed by the link .+\)\.$/.test(await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent)),await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent));
+    /* a print, or a cancelled one (the browser reports both the same), leaves the reprint line; "These pages are reprinted" clears it */
+    await p.evaluate(()=>{S.meta.order='all';renderAll();window.dispatchEvent(new Event('beforeprint'));window.dispatchEvent(new Event('afterprint'));});await sleep(450);
     const rp1=JSON.parse(await lkOf(p)).rp;
-    ok('5 afterprint, the fronts printed: the Board and Tokens come off the reprint line, the token cards stay',JSON.stringify(rp1)==='["token-card"]',rp1);
-    await p.evaluate(()=>{S.meta.order='all';renderAll();window.dispatchEvent(new Event('afterprint'));});await sleep(150);
+    ok('5 a print (or a cancelled one) leaves the reprint line as it is',JSON.stringify(rp1)==='["Board","Tokens front","token-card"]'&&await p.evaluate(()=>!document.querySelector('#lkPanel .lk-rp').hidden),rp1);
+    await p.evaluate(()=>{document.querySelector('#lkPanel .lk-rpw [data-lk="printed"]').click();});await sleep(150);
     const lkp=JSON.parse(await lkOf(p));
-    ok('5 afterprint, the whole book printed: the reprint line is gone',!lkp.rp&&!lkp.rpd&&await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').hidden),lkp);
+    ok('5 "These pages are reprinted": the reprint line is gone',!lkp.rp&&!lkp.rpd&&await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').hidden&&document.querySelector('#lkPanel .lk-rpw').hidden),lkp);
     /* edited captions: asked first; Cancel leaves the book exactly as it was */
     await p.evaluate(()=>{S.caps[1].b='Nice!';renderAll();});
     await feed(p,PLAN(S=>{S.meta.epN='4';}),'TE-1_n.json');
@@ -229,15 +232,16 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await p.evaluate(()=>{window.__asked=[];window.confirm=t=>{window.__asked.push(t);return false;};});
     await only(p,[]);await tick(p,'n');const res=await apply(p);
     const asked=await p.evaluate(()=>window.__asked);
-    ok('5 edited captions: the question is asked',asked.length===1&&asked[0]==='Change the board to 4 tokens?\nYour edited captions are written again for 4 slots.',asked);
+    ok('5 edited captions: the question is asked',asked.length===1&&asked[0]==='Change the board to 4 tokens?\nYour edited captions will be replaced by the standard captions for 4 slots.',asked);
     ok('5 Cancel: nothing taken, S exactly as it was',res.taken===0&&(await sOf(p))===b2,res);
     R=await rows(p);ok('5 Cancel: the row keeps its state (not "kept")',R.n.st===5||R.n.st===7,R.n);
+    ok('5 Cancel: said in the panel, and the tick let go',/^Not taken: Tokens to earn \(cancelled, or nothing to change; it is as it was\)\.$/.test((await st(p)).msg)&&R.n.pressed==='',{msg:(await st(p)).msg,R:R.n});
     await p.evaluate(()=>{window.confirm=()=>true;});await tick(p,'n');await apply(p);
     ok('5 OK: 4 slots, the captions written again for 4',await p.evaluate(()=>S.meta.n==='4'&&JSON.stringify(S.caps)===JSON.stringify(defCaps(4,tokName()))));
     ok('5 the last-token line when the book marks it and the count differs',await (async()=>{await p.evaluate(()=>{S.meta.term='ring';renderAll();});await feed(p,PLAN(S=>{S.meta.epN='6';}),'TE-1_n.json');
       return (await infos(p)).includes('The book marks its 4th token as the last, but Form TE-1 opens the exchange after 6.');})());
     ok('5 the thinning line when the plan\'s last step has another count',await (async()=>{await feed(p,PLAN(S=>{S.thin.push({d:'10/14/26',w:'Exchange production',tp:'10',ep:'8',te:'8',crit:''});}),'TE-1_n.json');
-      return (await infos(p)).includes('Form TE-1’s thinning record has 8 tokens per exchange on 10/14/26; a new step means a new Board and Tokens page.');})());
+      return (await infos(p)).includes('Form TE-1’s thinning record has 8 tokens per exchange on 10/14/26; when the book moves to that step, change Tokens to earn on Setup and reprint the Board and Tokens pages.');})());
     ok('5 token loss on the plan: the information line',await (async()=>{await feed(p,PLAN(S=>{S.meta.loss='Yes — described below';S.meta.lossRule='One token comes off for a thrown block, never below zero.';}),'TE-1_n.json');
       return (await infos(p)).includes('Form TE-1 records token loss: One token comes off for a thrown block, never below zero. The book’s backs do not describe it.');})());
     void before;await p.close();}
@@ -272,7 +276,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     /* no empty card: no buttons, the names given with the reason */
     await feed(p,PLAN(S=>{S.bk.push({n:'Bubbles',c:'',cost:'',pref:'',conf:'',note:''},{n:'Swing',c:'',cost:'',pref:'',conf:'',note:''});}),'TE-1_full.json');
     mn=await noteOf(p,'menu');R=await rows(p);
-    ok('6 no empty card: nothing offered, no buttons, the reason named',!R.menu.take&&!(await b())&&mn.some(t=>t.includes('“Swing” (no empty card: empty one on Choices first)')),{R:R.menu,mn});
+    ok('6 no empty card: nothing offered, no buttons, the names given once with the reason',!R.menu.take&&!(await b())&&mn.some(t=>t==='Not offered, since no choice card is empty (empty one on Choices first): “Five minutes with the magnetic tiles”, “Swing”.'),{R:R.menu,mn});
     await p.close();}
 
   /* ---- 7. identity; 8. the problem-behavior guard ---- */
@@ -292,10 +296,12 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await p.evaluate(()=>{window.nbhCase=window.nbhCase||{};window.__f0=window.nbhCase.facts;window.nbhCase.facts={behaviors:[{label:'Elopement',isRep:false,rep:'Asks for a break',src:'TB-1'},{label:'Asks for a break',isRep:true,src:'TB-1'}]};});
     await feed(p,PLAN(S=>{S.meta.client='Sam K.';S.meta.beh='Elopement';}),'TE-1_prob.json');
     R=await rows(p);const w=await p.evaluate(()=>[...document.querySelectorAll('#lkPanel tr.lk-note[data-for="card"] .lk-warn')].map(e=>e.textContent));
-    ok('8 a problem behavior: warned, no Take and no Keep',!R.card.take&&!R.card.keep&&w.includes('Form TE-1’s behavior, “Elopement”, is a problem behavior on Form TB-1. Tokens are earned for the replacement behavior (TB-1: “Asks for a break”); correct it on Form TE-1.'),{R:R.card,w});
+    ok('8 a problem behavior: warned, no Take and no Keep',!R.card.take&&!R.card.keep&&w.includes('Form TE-1’s behavior, “Elopement”, is a problem behavior on Form TB-1. Tokens are earned for a behavior to increase, such as “Asks for a break”; correct it on Form TE-1.'),{R:R.card,w});
+    ok('8 ... and the record keeps the case\'s problem behaviors (as hashes) for later',(JSON.parse(await lkOf(p)).pb||[]).length===1);
     await p.evaluate(()=>{window.nbhCase.facts=window.__f0;});
     await feed(p,PLAN(S=>{S.meta.client='Sam K.';S.meta.beh='Elopement';}),'TE-1_prob.json');R=await rows(p);
-    ok('8 without the case\'s behaviors the same behavior can be taken',R.card.take,R.card);
+    const w8=await p.evaluate(()=>[...document.querySelectorAll('#lkPanel tr.lk-note[data-for="card"] .lk-warn')].map(e=>e.textContent));
+    ok('8 without the case\'s behaviors the guard still holds: the record\'s hashes (no Take, no Keep)',!R.card.take&&!R.card.keep&&w8.some(t=>/is a problem behavior on Form TB-1 \(the case named it at an earlier compare\)/.test(t)),{R:R.card,w8});
     await p.close();}
 
   /* ---- 9. files ---- */
@@ -303,7 +309,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     const b0=await sOf(p);
     const own=JSON.stringify({form:'TK-1',rev:'2026-10',saved:'x',S:JSON.parse(b0)});
     const T=[['packet',JSON.stringify({form:'PACKET',rev:'2026-09',packet:{client:'x'}}),'PACKET_x.json','That file is a student packet, not a file Form TE-1 saved. Nothing was changed.'],
-      ['this form\'s own file',own,'TK-1_x.json','That is a file this form saved, not Form TE-1’s. Nothing was changed.'],
+      ['this form\'s own file',own,'TK-1_x.json','That file was saved by this form (Form TK-1), not by Form TE-1. Nothing was changed.'],
       ['an SM-1 file',JSON.stringify({form:'SM-1',rev:'2026-09',S:{meta:{}}}),'SM-1_x.json','That file was saved by Form SM-1, not by Form TE-1. Nothing was changed.'],
       ['a case without TE-1',JSON.stringify({form:'CASE',rev:'2026-09',forms:{'TK-1':{snap:{own}}}}),'CASE_x.json','That case file holds no Form TE-1. Nothing was changed.'],
       ['junk','not a file at all','x.json','That file could not be read as a file Form TE-1 saved. Nothing was changed.']];
@@ -353,20 +359,20 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     const paras=()=>p.evaluate(()=>String(S.txt.te).split(/\n[ \t]*\n\s*/).filter(x=>/^\*\*This book[’']s schedule/.test(x.trim())));
     await feed(p,SIM,'TE-1_SIMULATED.json');await only(p,[]);await tick(p,'sched');await apply(p);
     let ps=await paras();
-    ok('11 after a take: exactly one schedule paragraph, the last one, with the plan\'s words',ps.length===1&&/\*\*This book’s schedule \(Form TE-1\):\*\* ten blocks placed earn one star\. The exchange: End of each independent work block, 5 min, at the desk; Under 10 s — the fifth star is handed over and the exchange begins immediately\.$/.test(ps[0])&&
+    ok('11 after a take: exactly one schedule paragraph, the last one, with the plan\'s words',ps.length===1&&/\*\*This book’s schedule \(Form TE-1\):\*\* ten blocks placed earn one star; five stars open an exchange\. The exchange: end of each independent work block, 5 min, at the desk; under 10 s — the fifth star is handed over and the exchange begins immediately\.$/.test(ps[0])&&
       (await p.evaluate(()=>/\*\*This book’s schedule[^\n]*$/.test(S.txt.te))),ps);
-    ok('11 the reprint line names the Token Economy back',/^Reprint: the Token Economy back page/.test(await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent)));
-    ok('11 the back prints it, in bold words then the text',await p.evaluate(()=>{const b=[...document.querySelectorAll('#book .pg[data-kind="tk"][data-side="back"]')];return !!b.length&&/This book’s schedule \(Form TE-1\): ten blocks placed earn one star\./.test(b.map(e=>e.textContent).join(' '))&&b.some(x=>[...x.querySelectorAll('b')].some(e=>e.textContent==='This book’s schedule (Form TE-1):'));}));
+    ok('11 the reprint line names the Token Economy back and its continued page (the default back is full)',/^Reprint: the Token Economy back with its continued page \(changed by the link .+\)\.$/.test(await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent)),await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent));
+    ok('11 the back prints it, in bold words then the text',await p.evaluate(()=>{const b=[...document.querySelectorAll('#book .pg[data-kind="tk"][data-side="back"]')];return !!b.length&&/This book’s schedule \(Form TE-1\): ten blocks placed earn one star; five stars open an exchange\./.test(b.map(e=>e.textContent).join(' '))&&b.some(x=>[...x.querySelectorAll('b')].some(e=>e.textContent==='This book’s schedule (Form TE-1):'));}));
     const fit=await p.evaluate(()=>({contd:document.querySelectorAll('#book .pg.contd').length,fs:[...document.querySelectorAll('#book .pg.back .bbody')].map(e=>parseFloat(getComputedStyle(e).fontSize)*72/96)}));
     ok('11 the backs still print at 11 pt or more ('+fit.contd+' continuation page'+(fit.contd===1?'':'s')+')',fit.fs.every(x=>x>=10.99),fit);
     let R=await rows(p);ok('11 in step after the take',R.sched.st===1,R.sched);
     await feed(p,PLAN(S=>{S.meta.tp='FR 8 — eight {blocks} placed *earn* one_star';S.meta.exDelay='';}),'TE-1_tp.json');R=await rows(p);
     ok('11 changed on the plan: "changed on Form TE-1", ticked',R.sched.st===5&&R.sched.pressed==='take',R.sched);
     await apply(p);ps=await paras();
-    ok('11 a second take replaces it: still one paragraph, the new words, no markup from the plan',ps.length===1&&/\*\*This book’s schedule \(Form TE-1\):\*\* eight blocks placed earn onestar\. The exchange: End of each independent work block, 5 min, at the desk\.$/.test(ps[0]),ps);
+    ok('11 a second take replaces it: still one paragraph, the new words, no markup from the plan',ps.length===1&&/\*\*This book’s schedule \(Form TE-1\):\*\* eight blocks placed earn onestar; five stars open an exchange\. The exchange: end of each independent work block, 5 min, at the desk\.$/.test(ps[0]),ps);
     await feed(p,PLAN(S=>{S.meta.tp='FR 3';S.meta.tpN='3';}),'TE-1_tpN.json');await apply(p);ps=await paras();
-    ok('11 a plan with only a number: "every 3 responses earn one {token}", which prints the token\'s name',ps.length===1&&/:\*\* every 3 responses earn one \{token\}\. The exchange:/.test(ps[0])&&
-      await p.evaluate(()=>/every 3 responses earn one star\./.test([...document.querySelectorAll('#book .pg[data-kind="tk"][data-side="back"]')].map(e=>e.textContent).join(' '))),ps);
+    ok('11 a plan with only a number: "every 3 responses earn one {token}", which prints the token\'s name',ps.length===1&&/:\*\* every 3 responses earn one \{token\}; five stars open an exchange\. The exchange:/.test(ps[0])&&
+      await p.evaluate(()=>/every 3 responses earn one star; five stars open an exchange\./.test([...document.querySelectorAll('#book .pg[data-kind="tk"][data-side="back"]')].map(e=>e.textContent).join(' '))),ps);
     await p.evaluate(()=>setView('backs'));await sleep(200);
     ok('11 the Backs view and the book never show "{"',await p.evaluate(()=>!/[{}]/.test(document.querySelector('#bkOut').innerText)&&!/[{}]/.test(document.querySelector('#book').textContent)));
     await p.close();}
@@ -383,6 +389,123 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('tok: no token form on the plan: "only here", Form TE-1 can take it',R.tok.st===2&&/Form TE-1 can take this when it compares/.test(R.tok.label),R.tok);
     await p.close();}
 
+  /* ---- the second review (part B fixes) ---- */
+  {const p=await open(ctx,URL1,log);await sim(p);
+    const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+    await p.evaluate(png=>{setView('setup');S.photos.push({id:'pmine',label:'Sam raising hand',img:png});S.tg[0]={k:'',ph:'pmine',l:'Hand up'};renderAll();},png);await link(p);
+    /* the card's own picture: a take changes its label only */
+    await feed(p,PLAN(S=>{S.meta.beh='Hand up quietly';}),'TE-1_a.json');let R=await rows(p);
+    ok('R1 a near match reads in step, and pairs the card',R.card.what==='Target card 1'&&R.card.st===1&&JSON.parse(await lkOf(p)).card===0,R.card);
+    await feed(p,PLAN(S=>{S.meta.beh='Raises a hand to ask for help';}),'TE-1_b.json');R=await rows(p);const pv=await noteOf(p,'card');
+    ok('R1 the plan\'s behavior changed: offered, never ticked for you; the preview says the card keeps its picture',R.card.st===5&&R.card.take&&R.card.pressed===''&&
+      pv.includes('Writes “Raises a hand to ask for help” on target card 1 in place of “Hand up”, keeping its picture.'),{R:R.card,pv});
+    await only(p,[]);await tick(p,'card');await apply(p);
+    ok('R1 the take keeps the card\'s own photo; only the label changes',await p.evaluate(()=>JSON.stringify(S.tg[0])===JSON.stringify({k:'',ph:'pmine',l:'Raises a hand to ask for help'})),await p.evaluate(()=>S.tg[0]));
+    ok('R1 the took line keeps the label it replaced',/target card 1 from the plan’s behavior \(was “Hand up”\)/.test(JSON.parse(await lkOf(p)).took||''),JSON.parse(await lkOf(p)).took);
+    /* a card with no picture gets a library picture only when its name is the label, or starts it */
+    await p.evaluate(()=>{S.tg[2]=cello();renderAll();});await p.evaluate(()=>document.querySelector('#lkPanel [data-lk="leave"]')&&nbhLink.leave());
+    await feed(p,PLAN(S=>{S.meta.beh='Helps a peer with a task';}),'TE-1_c.json');
+    await p.evaluate(()=>document.querySelector('#lkPanel tr[data-key="card"] button[data-act="choose"][data-i="2"]').click());await sleep(120);
+    ok('R1 an empty card and a behavior that merely holds a picture\'s name ("help"): no picture',(await noteOf(p,'card')).some(t=>t==='Writes “Helps a peer with a task” on target card 3, with no picture yet (choose one on Targets).'),await noteOf(p,'card'));
+    /* the keyboard stays on a card number pressed, and the numbers have names */
+    await p.focus('#lkPanel tr[data-key="card"] button[data-act="choose"][data-i="1"]');await p.keyboard.press('Enter');await sleep(150);
+    ok('R7 a card number pressed from the keyboard keeps the focus, and is named "Target card 2"',await p.evaluate(()=>{const a=document.activeElement;return !!a&&a.dataset.act==='choose'&&a.dataset.i==='1'&&a.getAttribute('aria-label')==='Target card 2'&&a.getAttribute('aria-pressed')==='true';}));
+    ok('R19 a chosen card number is light and carries no tick; a ticked Take keeps its tick out of its name',await p.evaluate(()=>{const b=document.querySelector('#lkPanel tr[data-key="card"] button[data-act="choose"][aria-pressed="true"]');
+      const c=getComputedStyle(b,'::before').content,bg=getComputedStyle(b).backgroundColor;nbhLink.press('card','take');const t=document.querySelector('#lkPanel tr[data-key="card"] button[data-act="take"]'),tc=getComputedStyle(t,'::before').content;nbhLink.press('card','take');
+      return (c==='none'||c==='normal')&&bg!=='rgb(24, 46, 67)'&&/✓/.test(tc)&&/\/\s*""$/.test(tc);}));
+    await p.close();}
+  {const p=await open(ctx,URL1,log);await p.evaluate(()=>{S.meta.client='Sam K.';S.meta.sid='1234';renderAll();});await link(p);
+    /* a compare that finds another student writes nothing but its date */
+    await feed(p,PLAN(S=>{S.meta.client='Jordan B.';S.meta.sid='9999';S.meta.epN='5';}),'TE-1_Jordan.json');
+    const lk1=JSON.parse(await lkOf(p));
+    ok('R2 another student: no in-step mark and no pairing written',lk1.last.res==='who'&&!Object.keys(lk1.base).length&&lk1.card===undefined,lk1);
+    ok('R30 the status names the file and the time for another student too',/for another student\? .+ · compared .+ with the file TE-1_Jordan\.json \(saved .+\)\.$/.test((await st(p)).status[0]),(await st(p)).status[0]);
+    await p.evaluate(()=>nbhLink.leave());
+    await feed(p,PLAN(S=>{S.meta.client='Sam K.';S.meta.sid='1234';S.meta.epN='7';}),'TE-1_Sam.json');let R=await rows(p);
+    ok('R2 ... so Sam\'s own plan then reads "different", nothing ticked',R.n.st===7&&R.n.pressed==='',R.n);
+    /* "These are the same student" applied: that compare's in-step marks are written then */
+    await feed(p,PLAN(S=>{S.meta.client='Jordan B.';S.meta.sid='9999';S.meta.epN='5';}),'TE-1_Jordan.json');
+    await p.evaluate(()=>{nbhLink.rows().forEach(r=>{if(r.pressed)nbhLink.press(r.key,r.pressed);});nbhLink.press('who','keep');});await apply(p);
+    const lk2=JSON.parse(await lkOf(p));
+    ok('R2 after "These are the same student": the in-step marks of that compare are written',!!lk2.base.who&&!!lk2.base.n&&!!lk2.base.tok,lk2.base);
+    await p.close();}
+  {const p=await open(ctx,URL1,log);await sim(p);await p.evaluate(()=>{setView('setup');S.tg[0].l='Hand up';renderAll();});await link(p);
+    /* the pairing follows its card */
+    const plan=PLAN(S=>{S.meta.beh='Puts one hand up and waits quietly until the teacher comes over to help';});
+    await feed(p,plan,'TE-1_a.json');
+    await p.evaluate(()=>document.querySelector('#lkPanel tr[data-key="card"] button[data-act="choose"][data-i="0"]').click());await sleep(100);
+    ok('R3 a tap on a card number writes nothing',JSON.parse(await lkOf(p)).card===undefined);
+    await only(p,[]);await press(p,'card','keep');await apply(p);
+    let lk=JSON.parse(await lkOf(p));
+    ok('R3 Keep pairs card 1 (the record and the board summary)',lk.card===0&&lk.board.paired===1&&lk.board.cardLabel==='Hand up',lk);
+    await p.evaluate(()=>{setView('targets');document.querySelector('#tgTbl button[data-mv="tg:0:1"]').click();});await sleep(300);
+    lk=JSON.parse(await lkOf(p));
+    ok('R3 the paired card moved down: the pairing follows it to card 2',lk.card===1&&lk.board.card===1&&lk.board.cardLabel==='Hand up',{card:lk.card,board:lk.board});
+    await p.evaluate(()=>setView('setup'));await feed(p,plan,'TE-1_a.json');let R=await rows(p);
+    ok('R3 ... and the next compare shows card 2, still paired',R.card.what==='Target card 2'&&R.card.here==='Hand up'&&/^paired \(.+\)$/.test(R.card.label),R.card);
+    /* a Keep and a take in part, counted apart; Undo keeps the Keep */
+    await p.evaluate(()=>{S.ch[4]=cello();renderAll();});await feed(p,SIM,'TE-1_SIMULATED.json');
+    await only(p,['menu']);await tick(p,'sched');await press(p,'card','keep');await apply(p);
+    const s=await st(p);
+    ok('R27 a Keep and a take in part are counted apart in the status',s.lk.last.res==='kept 1 part 1'&&/· 1 difference kept, 1 item taken in part · compared /.test(s.status[0]),{res:s.lk.last.res,st:s.status[0]});
+    ok('R30 the toast names the Keep as well as the takes',s.toast==='2 items taken from Form TE-1 and 1 difference kept. Nothing else changed.',s.toast);
+    await p.evaluate(()=>nbhLink.undo());await sleep(300);lk=JSON.parse(await lkOf(p));
+    ok('R30 Undo puts back the takes and keeps the Keep made in the same Apply',!!lk.base.card&&lk.card===1&&!lk.base.menu&&await p.evaluate(()=>!S.ch[4].l&&!/This book’s schedule/.test(S.txt.te)),lk);
+    /* a refused file leaves the open table and its ticks */
+    await feed(p,SIM,'TE-1_SIMULATED.json');await press(p,'sched','take');await feed(p,'not a file','x.json');const s2=await st(p);
+    ok('R30 a refused file leaves the open table, and its ticks, as they were',s2.table&&/^That file could not be read/.test(s2.msg)&&(await rows(p)).sched.pressed==='take',s2.msg);
+    await p.close();}
+  {const p=await open(ctx,URL1,log);await sim(p);await p.evaluate(()=>{setView('setup');S.tg[5]=cello();renderAll();});await link(p);
+    await feed(p,PLAN(S=>{S.meta.beh='Puts the blocks away';}),'TE-1_a.json');const R=await rows(p);await p.evaluate(()=>nbhLink.leave());
+    const lk=JSON.parse(await lkOf(p));
+    ok('R3 a compare alone pairs nothing (the empty card it offers is a suggestion)',R.card.what==='Target card 6'&&R.card.st===3&&lk.card===undefined&&lk.board.paired===0,{R:R.card,card:lk.card,board:lk.board});
+    /* a behavior that shares words with a card is compared with that card */
+    await feed(p,PLAN(S=>{S.meta.beh='Raises hand and waits';}),'TE-1_b.json');
+    ok('R22 "Raises hand and waits" is compared with card 2, "Raise my hand" (the words they share), not card 1',(await rows(p)).card.what==='Target card 2');
+    await p.close();}
+  {const p=await open(ctx,URL1,log);await link(p);
+    /* alone, with no case: the problem-behavior words still hold, and an ordinary behavior is offered, unticked, with the caution */
+    await feed(p,PLAN(S=>{S.meta.beh='Aggression';}),'TE-1_aggr.json');let R=await rows(p);const w=await p.evaluate(()=>[...document.querySelectorAll('#lkPanel tr.lk-note[data-for="card"] .lk-warn')].map(e=>e.textContent));
+    ok('R12 alone, no case: "Aggression" is not offered as a card, and is warned about',R.card.st===3&&!R.card.take&&R.card.pressed===''&&
+      w.includes('Form TE-1’s behavior, “Aggression”, names a behavior to reduce (“aggression”). Tokens are earned for a behavior to increase; correct it on Form TE-1, or, if it is one, write it on Targets card 1 yourself.'),{R:R.card,w});
+    await apply(p);
+    ok('R12 Take the ticked items leaves the target cards alone',await p.evaluate(()=>S.tg.every(o=>!o.l&&!has(o))));
+    await feed(p,PLAN(S=>{S.meta.beh='Sits at the desk';}),'TE-1_sit.json');R=await rows(p);const n=await noteOf(p,'card');
+    ok('R12 alone, no case: an ordinary behavior is offered for the empty card, not ticked, with the caution that this book cannot check Form TB-1 here',R.card.st===3&&R.card.take&&R.card.pressed===''&&n.some(t=>/^This book cannot see Form TB-1’s problem behaviors here/.test(t)),{R:R.card,n});
+    /* a plan that holds nothing: never "in step" */
+    const blank=JSON.stringify({form:'TE-1',rev:'2026-09',saved:'2026-10-03T13:58:00.000Z',S:{meta:{},bk:[],thin:[],aud:{}}});
+    await p.evaluate(()=>nbhLink.leave());await sim(p);await p.evaluate(()=>setView('setup'));await link(p);
+    await feed(p,blank,'TE-1_blank.json');const s=await st(p);R=await rows(p);
+    ok('R17 a plan that holds nothing: "Form TE-1 holds nothing to compare yet", never "in step"',s.lk.last.res==='empty'&&/· Form TE-1 holds nothing to compare yet · compared /.test(s.status[0])&&!/in step/.test(s.status[0]),s.status);
+    ok('R17 ... the Setup verdict says so, and a row with nothing on either side says that',/Linked with Form TE-1 \(compared [^:]+: Form TE-1 held nothing to compare\)\.$/.test(await p.evaluate(()=>document.querySelector('#setupVerdict').textContent))&&R.sched.label==='nothing on either side',R.sched);
+    /* the Unlink question names what goes with the record */
+    await p.evaluate(()=>{const r=NBHLink.readLk(S.meta.lk);r.rp=['token-card'];r.rpd=new Date().toISOString();r.took='Taken: the token';S.meta.lk=NBHLink.pack(r);renderAll();window.__asked=[];window.confirm=t=>{window.__asked.push(t);return false;};});
+    await p.evaluate(()=>nbhLink.unlink());await sleep(150);
+    ok('R26 the Unlink question names the reprint list and the took line it removes; No keeps the link',(await p.evaluate(()=>window.__asked[0]||'')).endsWith('That removes the list of pages to reprint and the note of what was last taken too.')&&(await st(p)).on,await p.evaluate(()=>window.__asked));
+    await p.evaluate(()=>{window.confirm=()=>true;});await p.close();}
+  {const p=await open(ctx,URL1,log);await sim(p);await p.evaluate(()=>setView('setup'));await link(p);
+    /* the schedule row says beforehand what the paragraph costs, and the reprint line names the pages */
+    await feed(p,SIM,'TE-1_SIMULATED.json');const n=await noteOf(p,'sched');
+    ok('R5 the schedule row says beforehand that the full Token Economy back runs on to a continued page, and what that costs',n.some(t=>/That back is full, so the paragraph prints on a continued Token Economy back: one more sheet, and two in a duplex print/.test(t)),n);
+    const before=await p.evaluate(()=>document.querySelectorAll('#book .pg').length);
+    await only(p,[]);await tick(p,'sched');await apply(p);
+    const after=await p.evaluate(()=>({n:document.querySelectorAll('#book .pg').length,contd:document.querySelectorAll('#book .pg.contd').length}));
+    ok('R5 ... and so it is: a continued back after the take',after.contd===1&&after.n>before,{before,after});
+    /* the plan's own words name a count the book does not print */
+    await feed(p,PLAN(S=>{S.meta.exDelay='Under 10 s — the seventh star is handed over';}),'TE-1_ord.json');
+    ok('R29 the plan\'s words name a count the book does not print: said',(await noteOf(p,'sched')).includes('The plan’s words name the seventh star, but this book prints 5 slots.'),await noteOf(p,'sched'));
+    /* the rows this book changed after a compare: no promise that Form TE-1 can take what it cannot */
+    await p.evaluate(()=>nbhLink.leave());
+    await p.evaluate(()=>{S.txt.te=S.txt.te.replace('ten blocks placed','twelve blocks placed');S.meta.n='6';ensure();recaps(true);renderAll();});
+    await feed(p,SIM,'TE-1_SIMULATED.json');const R=await rows(p);
+    ok('R6 changed here: the schedule and the count make no promise that Form TE-1 can take them',R.sched.st===6&&R.sched.label==='changed here'&&R.n.st===6&&R.n.label==='changed here',{sched:R.sched,n:R.n});
+    await p.close();}
+  {const c=await br.newContext({viewport:{width:1280,height:900},timezoneId:'America/New_York'});const p=await open(c,URL1,log);await link(p);
+    await p.evaluate(()=>{const r=NBHLink.readLk(S.meta.lk);r.rp=['token-card'];r.rpd='2026-10-04T02:04:45.692Z';S.meta.lk=NBHLink.pack(r);renderAll();});
+    const t=await p.evaluate(()=>document.querySelector('#lkPanel .lk-rp').textContent);
+    ok('R25 the reprint day is the local day (10:04 pm in New York is Oct 3, not Oct 4)',/\(changed by the link Oct 3\)\.$/.test(t),t);
+    await c.close();}
+
   /* ---- pictures of the panel, and phone width ---- */
   {const plan=PLAN();
     for(const [w,h] of [[820,1180],[1180,820],[390,844]]){
@@ -393,6 +516,9 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
       await feed(p,plan,'TE-1_SIMULATED_2026-10-03.json');await p.evaluate(()=>nbhLink.press('sched','take'));
       const W=await wide(p);ok('20 '+w+' x '+h+': no sideways page scroll with the table open',W.doc<=W.w+1&&W.panel<=W.pc+1,W);
       await shot(p,'tk1-compare-'+w+'x'+h+'.png');
+      const bw=await p.evaluate(()=>{const out=[];document.querySelectorAll('#lkPanel .lk-tbl tbody td.lk-v').forEach(td=>{const cs=getComputedStyle(td),inner=td.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+        (td.textContent.match(/\S+/g)||[]).forEach(word=>{const sp=document.createElement('span');sp.style.cssText='position:absolute;visibility:hidden;white-space:nowrap;font:'+cs.font;sp.textContent=word;document.body.appendChild(sp);const ww=sp.getBoundingClientRect().width;sp.remove();if(ww>inner+0.5)out.push(word);});});return out;});
+      ok('24 '+w+' x '+h+': no word broken inside a value cell',!bw.length,bw);
       await apply(p);const W2=await wide(p);ok('20 '+w+' x '+h+': none after Apply',W2.doc<=W2.w+1&&W2.panel<=W2.pc+1,W2);
       await shot(p,'tk1-applied-'+w+'x'+h+'.png');
       await c2.close();}}

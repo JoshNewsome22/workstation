@@ -1,4 +1,4 @@
-/* v21.44 the TK-1 / TE-1 link: the shared core (tools/blocks/nbh-link.js) on its own. It is loaded into a blank page
+/* v21.43 the TK-1 / TE-1 link: the shared core (tools/blocks/nbh-link.js) on its own. It is loaded into a blank page
    with a minimal host and a stub adapter (no form, no network), alone and inside a parent that plays the shell's
    relay. Checks: norm, hash, near, tokSame, readLk (junk, long, wrong types read as off), pack (1800 characters at
    most with six 40-character labels), planOf, boardOf, whoRow, readText (own file, CASE json, .case.html; packet,
@@ -6,8 +6,9 @@
    exclusivity, the Apply order, a cancelled take, Keep, Undo, the identity block, the file input, Leave, Unlink,
    the ignored counter for spoofed answers, the open message and its fallback, and the phone width.
    usage: node qa/link-core-test.js */
-const {chromium,fs,wire,sleep}=require('/home/user/workstation/qa/lib.js');
-const CORE=fs.readFileSync('/home/user/workstation/tools/blocks/nbh-link.js','utf8');
+/* the checkout this test runs from (lib.js: WS_ROOT, else the folder above qa/) */
+const {chromium,fs,path,ROOT,wire,sleep}=require(__dirname+'/lib.js');
+const CORE=fs.readFileSync(path.join(ROOT,'tools/blocks/nbh-link.js'),'utf8');
 const HOST='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
   '<style>body{margin:0;padding:16px;font:14px sans-serif;background:#fff}table.rt{border-collapse:collapse;width:100%}table.rt th,table.rt td{border:1px solid #ccc;padding:6px}</style></head>'+
   '<body><main class="sheet"><section><h3>Linked</h3><div id="lkPanel" class="noprint"></div></section></main></body></html>';
@@ -135,7 +136,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
     return r;},TE);
   const NO=' Nothing was changed.';
   ok('readText: the partner\'s own file',RT.own.ok&&RT.own.S.meta.beh==='Sits'&&RT.own.saved===TE.saved&&RT.own.file==='TE-1_Sam_2026-10-03.json',RT.own);
-  ok('readText: this form\'s own file refused',!RT.mine.ok&&RT.mine.msg==="That is a file this form saved, not Form TE-1\u2019s."+NO,RT.mine);
+  ok('readText: this form\'s own file refused',!RT.mine.ok&&RT.mine.msg==="That file was saved by this form (Form TK-1), not by Form TE-1."+NO,RT.mine);
   ok('readText: packet refused',!RT.packet.ok&&RT.packet.msg==='That file is a student packet, not a file Form TE-1 saved.'+NO,RT.packet);
   ok('readText: another form refused',!RT.sm.ok&&RT.sm.msg==='That file was saved by Form SM-1, not by Form TE-1.'+NO,RT.sm);
   ok('readText: unreadable refused',[RT.noS,RT.garbage,RT.empty,RT.caseBad,RT.htmlNo].every(x=>!x.ok&&x.msg==='That file could not be read as a file Form TE-1 saved.'+NO),[RT.noS,RT.garbage,RT.empty,RT.caseBad,RT.htmlNo]);
@@ -153,7 +154,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
     r.s3=s(R('','Sits'));r.s3f=s(R('','Sits',{pre:['fill']}));r.s3no=s(R('','Sits',{pre:['fill'],can:false}));
     r.s4=s(R('Work','Sits'),[h('Work'),h('Sits')]);r.s4d=N.stateOf(R('Work','Sits'),[h('Work'),h('Sits')],{other:'TE-1',kd:'3 Oct'}).label;
     r.s5=s(R('Work','Sits'),[h('Work'),h('Stands')]);r.s5h=s(R('Work','Sits',{owner:'here'}),[h('Work'),h('Stands')]);r.s5c=s(R('Work','Sits',{owner:'here',pre:['changed']}),[h('Work'),h('Stands')]);
-    r.s6=s(R('Work','Sits'),[h('Play'),h('Sits')]);
+    r.s6=s(R('Work','Sits'),[h('Play'),h('Sits')]);r.s6m=s(R('Work','Sits',{mirror:true}),[h('Play'),h('Sits')]);
     r.s7=s(R('Work','Sits'));r.s7b=s(R('Work','Sits'),[h('Play'),h('Stands')]);r.s7no=s(R('Work','Sits',{can:false}));r.s7any=s(R('Work','Sits',{pre:['any']}));
     const wb=N.whoRow({client:'Sam K.',sid:'1'},{client:'Jordan B.',sid:'1'},{other:'TE-1',meWhat:'this book'});
     r.block=s(wb);r.blockWhy=wb.why;r.blockNm=wb.nm;r.blockKept=s(wb,[h(wb.here),h(wb.there)]);
@@ -166,7 +167,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   ok('state 3 empty here: Take offered, pressed only with fill',ST.s3[0]===3&&ST.s3[2]&&!ST.s3[3]&&ST.s3[4]===''&&ST.s3f[4]==='take'&&!ST.s3no[2]&&ST.s3no[4]==='',[ST.s3,ST.s3f,ST.s3no]);
   ok('state 4 kept different: Take and Keep, nothing pressed',ST.s4[0]===4&&ST.s4[1]==='kept different'&&ST.s4[2]&&ST.s4[3]&&ST.s4[4]===''&&ST.s4d==='kept different (3 Oct)',[ST.s4,ST.s4d]);
   ok('state 5 changed on Form TE-1: Take pressed for owner there (or pre changed)',ST.s5[0]===5&&ST.s5[1]==='changed on Form TE-1'&&ST.s5[4]==='take'&&ST.s5h[4]===''&&ST.s5c[4]==='take',[ST.s5,ST.s5h,ST.s5c]);
-  ok('state 6 changed here: offered, not pressed',ST.s6[0]===6&&ST.s6[1]==='changed here; Form TE-1 can take this when it compares'&&ST.s6[2]&&ST.s6[3]&&ST.s6[4]==='',ST.s6);
+  ok('state 6 changed here: offered, not pressed; the partner\'s take promised only for a row it can take (mirror)',ST.s6[0]===6&&ST.s6[1]==='changed here'&&ST.s6m[1]==='changed here; Form TE-1 can take this when it compares'&&ST.s6[2]&&ST.s6[3]&&ST.s6[4]==='',[ST.s6,ST.s6m]);
   ok('state 7 different: Take and Keep, neither pressed',ST.s7[0]===7&&ST.s7[1]==='different'&&ST.s7[2]&&ST.s7[3]&&ST.s7[4]===''&&ST.s7b[0]===7&&!ST.s7no[2]&&ST.s7no[3]&&ST.s7any[4]==='take',[ST.s7,ST.s7b,ST.s7no,ST.s7any]);
   ok('identity: different client or sid blocks',ST.block[0]===0&&!ST.block[2]&&ST.block[3]&&ST.sidBlock[0]===0&&ST.blockWhy==='Form TE-1 names Jordan B. (ID 1); this book names Sam K. (ID 1).'&&ST.blockNm==='Form TE-1 names Jordan B.; this book names Sam K.',[ST.block,ST.blockWhy,ST.blockNm]);
   ok('identity: a confirmed pair reads as kept',ST.blockKept[0]===4,ST.blockKept);
@@ -181,7 +182,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
   await page.click('[data-lk="on"]');
   s=await A(()=>({st:nbhLink.state(),lk:F.S.meta.lk,vis:['compare','file','beside','unlink'].map(k=>!document.querySelector('[data-lk="'+k+'"]').hidden),sib:document.querySelector('.lk-sib').hidden,
     status:document.querySelector('.lk-status').textContent,role:document.querySelector('.lk-status').getAttribute('role'),next:document.querySelector('.lk-next').textContent}));
-  ok('Link: on, not compared yet',s.st.on&&s.lk==='{"v":1,"base":{},"on":1}'&&s.status==='Linked with Form TE-1 · not compared yet.'&&s.role==='status'&&s.next==='Outside the workstation, this book reads Form TE-1 from a file: press Save data on Form TE-1, then Open a file Form TE-1 saved, here. Changes made there since then show only when you compare again.',s);
+  ok('Link: on, not compared yet',s.st.on&&s.lk==='{"v":1,"base":{},"on":1}'&&s.status==='Linked with Form TE-1 · not compared yet.'&&s.role==='status'&&s.next==='Outside the workstation, this book reads Form TE-1 from a file: press Save data on Form TE-1, then Open a file Form TE-1 saved, here.',s);
   ok('alone: Compare and Open beside hidden, file button shown, no sibling link on about:',JSON.stringify(s.vis)==='[false,true,false,true]'&&s.sib===true,s);
 
   /* compare reads only */
@@ -279,7 +280,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
     return {st,dis:document.querySelector('[data-lk="apply"]').disabled,btn:btn.textContent,n:document.querySelectorAll('tr[data-key="who"] button').length,status:document.querySelector('.lk-status').textContent,
       why:document.querySelector('tr.lk-note[data-for="who"]').textContent};},te({client:'Jordan B.',sid:'1234'}));
   ok('identity: Apply disabled, one button, the names',ib.st.blocked&&!ib.st.apply&&ib.dis&&ib.n===1&&ib.btn==='These are the same student'&&ib.why==='Form TE-1 names Jordan B. (ID 1234); this book names Sam K.'&&
-    ib.status==='Linked with Form TE-1 · for another student? Form TE-1 names Jordan B.; this book names Sam K.'&&ib.st.res==='who',ib);
+    /^Linked with Form TE-1 · for another student\? Form TE-1 names Jordan B\.; this book names Sam K\. · compared .+ with a file Form TE-1 saved \(saved .+\)\.$/.test(ib.status)&&ib.st.res==='who',ib);
   const ib2=await A(async()=>{const r0=await nbhLink.apply();const unchanged=JSON.stringify(Object.assign({},F.S,{meta:Object.assign({},F.S.meta,{lk:''})}));
     document.querySelector('tr[data-key="who"] button').click();const st=nbhLink.state();return {r0,unchanged,st,dis:document.querySelector('[data-lk="apply"]').disabled};});
   ok('identity: nothing written before "These are the same student"; then Apply opens',ib2.r0.taken===0&&ib2.unchanged===ib0&&ib2.st.apply&&!ib2.dis,ib2);
@@ -334,7 +335,7 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
     te({beh:'Places_one_block_in_the_bin_from_the_tray_during_independent_work_without_spaces',exWhen:'End of each independent work block, five minutes, at the desk, with the tablet'}));
   const ph=await A(()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,bw:document.body.scrollWidth,wrap:document.querySelector('.lk-cmp .grid-wrap').scrollWidth}));
   ok('phone width 390: no horizontal page overflow',ph.sw<=ph.cw&&ph.bw<=ph.cw,ph);
-  await page.screenshot({path:'/home/user/workstation/qa/out/link-core/phone.png',fullPage:true});
+  await page.screenshot({path:__dirname+'/out/link-core/phone.png',fullPage:true});
 
   /* ---- inside a parent that plays the shell ---- */
   const pg=await ctx.newPage();const log2=[];wire(pg,log2);await pg.setViewportSize({width:1100,height:900});
