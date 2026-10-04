@@ -28,6 +28,20 @@ const ITEMS=[
   {id:'goal',box:'qGoal',read:'What is a goal you have for yourself this year? Say it the way you would say it to a friend.',young:'What do you want to get better at?',hint:'Written in the student&rsquo;s words. Form GB-1 can carry it as the student&rsquo;s goal beside the plan&rsquo;s.',fq:'Do you think you can do it?',fl:'agree'},
   {id:'reward',box:'qReward',read:'What would be worth working for? What would you like to earn, and who would you like to hear it from?',young:'What would you like to earn?',hint:'Things, activities, time with someone, a message home. Form PA-1 tests the list.',fq:'How much do you want it?',fl:'want'}
 ];
+/* v21.44 (B5): who hears what the student says, read aloud before the first question; a reading and a younger
+   version, shown in the version chosen. The first line opens, the last asks, the rest are the points. Review this wording. */
+const CONF={read:['Before we start, I want you to know who will hear what you tell me.',
+  'I will write down what you say. The adults on your team at school and your parent or guardian may read it. It helps us make school better for you.',
+  'This is not about getting you in trouble. I will not share what you say with other students.',
+  'There are a few things I cannot keep private. If you tell me that someone is hurting you, or that you might hurt yourself or someone else, I have to tell the people whose job is to keep you safe, like the school counselor or the principal, and sometimes people outside school whose job is to protect children. The law says I must. If that happens, I will try to tell you first.',
+  'Do you have any questions about that?'],
+ young:['Before we start, here is who hears what you tell me.',
+  'I will write down what you say. Your teachers and the grown-ups who take care of you at home may read it. It helps them make school better for you.',
+  'This is not to get you in trouble.',
+  'If you tell me someone is hurting you, or that you might hurt yourself or someone else, I have to tell a grown-up whose job is to keep kids safe. That is a rule I have to follow.',
+  'Is that OK?']};
+function renderConf(){const L=CONF[young()?'young':'read'];
+  $('#siConfText').innerHTML='<p class="say">'+esc(L[0])+'</p><ul class="say">'+L.slice(1,-1).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul><p class="say">'+esc(L[L.length-1])+'</p>';}
 /* what the student says happens before and after, each tagged with the function it points to */
 const FN={att:'attention',esc:'escape',tan:'tangible',auto:'automatic'};
 const BEF=[
@@ -70,7 +84,7 @@ const prRow=()=>({date:'',a:'',b:'',chose:'',note:''});
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 function setVer(v){S.meta.ver=v==='young'?'young':'read';document.body.classList.toggle('ver-young',S.meta.ver==='young');$$('#verSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ver===S.meta.ver)));$('#verPrint').textContent=S.meta.ver==='young'?'Younger student version (faces)':'Reading version (middle and high school)';}
-$$('#verSeg button').forEach(b=>b.addEventListener('click',()=>{setVer(b.dataset.ver);renderItems();renderHard();renderLists();renderSummary();}));
+$$('#verSeg button').forEach(b=>b.addEventListener('click',()=>{setVer(b.dataset.ver);renderConf();renderItems();renderHard();renderLists();renderSummary();}));
 const young=()=>S.meta.ver==='young';
 const wordFor=o=>young()?o.young:o.read;
 
@@ -190,6 +204,8 @@ function renderSummary(){
   const modes=[['m_verbal','spoke'],['m_point','pointed'],['m_written','wrote'],['m_device','device or typed'],['m_aloud','questions read aloud'],['m_breaks','took a break']].filter(x=>S.chk[x[0]]).map(x=>x[1]).join(', ');
   let s='<div class="s-title">Student Interview, Assent and Treatment Preference: Summary</div><div class="s-grid">'+
     [['Student',m.client],['ID',m.sid],['Grade',m.grade],['Age',m.age],['Interviewed by',(m.asker||'')+(m.role?' ('+m.role+')':'')],['Where',m.where],['Date',m.date],['How the student answered',modes||NONE],['Version',m.ver==='young'?'younger student (faces)':'reading'],['Case BCBA',m.bcba]].map(x=>'<div><b>'+x[0]+':</b> '+esc(x[1]||NONE)+'</div>').join('')+'</div>';
+  /* v21.44 (B5): whether the student heard who reads the answers before the first question */
+  s+='<p><b>Who hears the answers:</b> '+(S.chk.conf_read?'read aloud to the student before the first question ('+(m.ver==='young'?'younger':'reading')+' version).':'<b>not recorded as read aloud</b> before the first question.')+(m.conf_say?' The student said: &ldquo;'+esc(unq(m.conf_say))+'&rdquo;':'')+'</p>';
   s+='<h3>What the student said</h3>';
   s+='<p><b>Likes and does well:</b></p>'+q(v.like.a);
   const hard=S.hard.filter(r=>r.act);
@@ -219,7 +235,7 @@ function renderSummary(){
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();setVer(S.meta.ver);bindMeta();renderItems();renderHard();renderLists();renderHyp();renderAB();renderAL();renderAssent();renderPC();renderPR();renderPref();renderSummary();}
+function renderAll(){ensure();setVer(S.meta.ver);bindMeta();renderConf();renderItems();renderHard();renderLists();renderHyp();renderAB();renderAL();renderAssent();renderPC();renderPR();renderPref();renderSummary();}
 
 /* ---------------- events ---------------- */
 document.addEventListener('input',e=>{const el=e.target;
@@ -310,8 +326,9 @@ async function loadSim(){
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'6',age:'11',beh:'when I walk out',asker:'Joshua Newsome, M.A., BCBA',role:'Case BCBA, with Ms. Ortiz (school counselor) sitting in',where:'Counseling office; the student chose it over the conference room',date:Y(14),mins:'35',lang:'English',paware:'Yes',bcba:'Joshua Newsome, M.A., BCBA',ver:'read',
     a_ask:'At the start of each session: "Do you want to do this with me now, or come back after lunch?" shown on two cards (now / later). During the session: "Keep going, or stop?" at each new task.',a_explain:'"We will practice asking for a break and then do about ten minutes of math. You can stop any time and nothing bad happens. You can earn drawing time."',a_who:'Ms. Ortiz for the first week, then Mr. Patel (math) once the student has met him in the office',a_when:'At the start of every session, and again at each change of task',a_scope:'Assessment and treatment sessions',a_rev:Y(13),
     w_steps:'1. "Okay, we can stop." Stop the task at once. 2. Offer the two cards: a different task, or a break. 3. If neither is taken within a minute, end the session and walk the student back. 4. Write the minute and what was changed. 5. Try again at the next scheduled time, not sooner.',w_change:'Shorter task (5 minutes), a different problem set, or a different adult; after two withdrawals in a row, the BCBA sits in on the next session',a_thr:'25',
-    p_say:'"The break card is fine. I do not want the points thing where everyone can see it."',p_change:'The token board moved from the wall to a folder the student keeps. The first-then schedule stays (the teacher needs it for the class), explained to the student with the reason; the student agreed to try it for two weeks.',p_next:'At the first plan review (PR-1), or sooner if two withdrawals fall in one week'};
-  S.chk={m_verbal:true,m_written:true,m_breaks:true,b_hard:true,b_told:true,b_peer:true,a_out:true,a_sent:true,a_talk:true,w_pause:true,w_choice:true,w_end:true,w_note:true,w_tell:true,w_nolose:true};
+    p_say:'"The break card is fine. I do not want the points thing where everyone can see it."',p_change:'The token board moved from the wall to a folder the student keeps. The first-then schedule stays (the teacher needs it for the class), explained to the student with the reason; the student agreed to try it for two weeks.',p_next:'At the first plan review (PR-1), or sooner if two withdrawals fall in one week',
+    conf_say:'"So my mom will see it? Okay. Ms. Ortiz can stay."'};
+  S.chk={conf_read:true,m_verbal:true,m_written:true,m_breaks:true,b_hard:true,b_told:true,b_peer:true,a_out:true,a_sent:true,a_talk:true,w_pause:true,w_choice:true,w_end:true,w_note:true,w_tell:true,w_nolose:true};
   const iv={like:'Drawing, mostly comics. Basketball at recess. I am good at remembering things people say. Science is okay when we do the experiments.',
     before:'Math, usually. Mr. Patel hands out the worksheet and it is like forty problems. Or Jaden says something about me and I am already mad.',
     after:'I walk out and go to the bathroom or the stairs. Then Ms. Ortiz comes and finds me and we talk. Sometimes I get sent to the office and I do not have to go back to math that day.',
