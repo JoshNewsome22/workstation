@@ -7,6 +7,10 @@ logo cut out, the PDF scripts as JSON, and a copy of index.html itself - which S
 write a case file that is the workstation again with the case inside it. index.html knows to read
 these blocks when they are present and does nothing different when they are not.
 
+v21.43: every form carries the writing help (<script id="nbh-wording">, tools/blocks/patch-wording.py) and keeps
+its one copy here: a form with none or with two stops the build, and the packed forms are unpacked again and
+checked against the files before anything is written.
+
 usage: build-single.py <folder> <out.html>
 """
 import os, re, sys, json, gzip, base64
@@ -17,11 +21,15 @@ m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
 files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
 if len(files) != 44:
     sys.exit(f'expected 44 forms in index.html, found {len(files)}')
+WTAG = '\n<script id="nbh-wording">'
 forms = {}
 for fn in files:
     s = open(os.path.join(SRC, fn), encoding='utf-8').read()
     if logo not in s:
         sys.exit(f'{fn} does not carry the logo index.html carries')
+    if s.count(WTAG) != 1:
+        sys.exit(f'{fn} holds {s.count(WTAG)} copies of the writing help (<script id="nbh-wording">), not one: '
+                 f'run python3 tools/blocks/patch-wording.py on it')
     forms[fn] = s.replace(logo, '@@NBH-LOGO@@')
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
 # v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1 load it by <script src>) travels once, as its own block
@@ -32,9 +40,13 @@ def pack(text):
     return base64.b64encode(gzip.compress(text.encode('utf-8'), compresslevel=9, mtime=0)).decode('ascii')
 def block(bid, text):
     return f'<script type="text/plain" id="{bid}">{text}</script>\n'
-blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', pack(json.dumps(forms, ensure_ascii=False))) +
+packed = pack(json.dumps(forms, ensure_ascii=False))
+back = json.loads(gzip.decompress(base64.b64decode(packed)).decode('utf-8'))
+if back != forms or any(f.count(WTAG) != 1 for f in back.values()):
+    sys.exit('the packed forms do not unpack to the files, each with its one copy of the writing help')
+blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) +
           block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)
-print('wrote', OUT, f'{os.path.getsize(OUT)/1e6:.1f} MB, {len(forms)} forms')
+print('wrote', OUT, f'{os.path.getsize(OUT)/1e6:.1f} MB, {len(forms)} forms, each with the writing help once')

@@ -13,16 +13,24 @@ Paths below are from the repository root. The test server the checks expect:
   `tools/vendor/qrcode-generator/qrcode.js`, licence header kept, followed by `script-main.js`). Never edit the built file of one of these forms; edit the parts and rebuild.
 - `tools/new-form.py` — assembles a form from CF-1 (the template: its head, generic
   stylesheet, brand system, masthead, print head and shared tail blocks) and a parts folder.
-- `tools/polish-one.py` — the post-build polish for one rebuilt form.
-- `tools/apply-polish.py` — the original polish pass over a folder (v21.25); do not run it
-  on the shipped forms again, use `polish-one.py` on a rebuilt form.
+- `tools/polish-one.py` — the post-build polish for one rebuilt form: the polish layer and the
+  writing help (through `apply-polish.py`). It stops with the reason, leaving the form unpolished,
+  when a block's source fails its checks.
+- `tools/apply-polish.py` — the polish pass over a folder (v21.25), which since v21.43 also puts the
+  writing help into every form; it is idempotent (run on the shipped forms it changes nothing) and
+  leaves `index.html` and `respond.html` alone.
 - `tools/blocks/` — the shared blocks every form carries after its own script, and the
   patchers that insert or refresh them (all idempotent; a refresh replaces the existing copy):
   `nbh-case.html` + `patch-case.py` (the case flow: facts, due dates, picker),
   `nbh-guard.html` + `patch-guard.py` (unload guard, quick save, spellcheck),
   `nbh-ui.html` + `patch-ui.py` (toasts, notices, questions, progress dots, touch targets,
   the light toolbar inside the workstation), `patch-csv.py` (the `csv?` bridge verb),
-  `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script).
+  `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script),
+  `nbh-wording.js` + `nbh-wording-rules.json` + `nbh-wording-config.json` + `patch-wording.py`
+  (the writing help: the Improve wording button and panel; see below), `nbh-link.js` +
+  `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`.
+- `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
+  tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
 - `tools/dedupe-logo.py` — one letterhead image per form (v21.36); idempotent.
 - `tools/build-rps.py`, `tools/rps-assets/` — the Royal Palm School edition and its lockup
   and tab icon. `tools/build-single.py` — the one-file editions.
@@ -39,7 +47,7 @@ Paths below are from the repository root. The test server the checks expect:
     python3 tools/polish-one.py NBH-Workstation/DA-1_Demand-Assessment_v2026-10.html
 
 Rebuilding from the committed parts reproduces the shipped file byte for byte (checked at
-v21.36 for all nine). CF-1 is the template, so a change to a shared head or tail block is
+v21.36 for all nine, and at v21.43 for all eleven, the writing help included). CF-1 is the template, so a change to a shared head or tail block is
 made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 
 ## Refresh a shared block in every form
@@ -49,6 +57,34 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 The glob `[A-Z]*.html` is the 44 forms without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
+
+## The writing help in every form
+
+Every form (the 44; not `index.html` or `respond.html`) carries the writing help once, as
+`<script id="nbh-wording">` between the form's markup and its own script, holding
+`tools/blocks/nbh-wording-rules.json`, `nbh-wording-config.json` and `nbh-wording.js` byte for byte.
+What keeps it there:
+
+- `tools/apply-polish.py` puts it in, or replaces it, in every form it polishes, so `polish-one.py`
+  gives every rebuilt parts form its copy (the two steps above, and TK-1's `build.sh`, which also
+  checks the built form holds it once and current). CF-1's own copy sits in the part `new-form.py`
+  does not copy, so a rebuilt form never holds two.
+- After a change to one of the three files (a rule, the relay address), refresh all 44, then build
+  the editions:
+
+      python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
+      python3 tools/blocks/patch-wording.py --check NBH-Workstation/[A-Z]*.html    # exit 1 if one is stale
+
+- `build-single.py` stops on a form without exactly one copy and checks that the packed forms unpack
+  to the files; `build-rps.py` copies the forms as they are.
+- A field that is not a narrative gets no button: mark it (or its container) `data-nbh-nowording`.
+  Hidden fields, fields in the toolbar or a dialog, fields with spelling check turned off
+  (`spellcheck="false"`: paste boxes, item lists) and the learner's particulars the packet fills in
+  (name, ID, date of birth, grade, school, case BCBA) are left out without a mark.
+- The relay address is `https://newsomebh.com/ai` (`nbh-wording-config.json`), the same site as both
+  editions, so the rewrite call is same-origin. Until the relay is uploaded (`tools/relay/README.md`)
+  the panel says the rewrite service is not reachable or not set up yet, and that Check wording and
+  the iPad's Writing Tools still work.
 
 ## Build the editions
 
@@ -65,3 +101,5 @@ and stops if the source changed shape.
 `bip4-test`, `u-test`, `u-check`, `shell-ui-test`, `logo-test`, `xlsx-test`, `single-check`,
 the nine form tests (`sm1-test`, `sa1-test`, `gc1-test`, `si1-test`, `da1-test`, `hd1-test`,
 `cn1-test`, `sr1-test`, `vs1-test`) and `a11y.js` (needs `axe-core` in `qa/node_modules`).
+The writing help: `wording-rollout-test` (all 44 forms against the commit before the rollout),
+`wording-client-test`, `wording-rules-test` and the relay's `tools/relay/tests/run.sh`.

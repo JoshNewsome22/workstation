@@ -1517,8 +1517,14 @@ function eligible(ta){
   return !!ta && ta.tagName === 'TEXTAREA' && ta.isConnected && !ta.disabled && !ta.readOnly && ta.getAttribute('spellcheck') !== 'false' &&
     !ta.closest('[data-nbh-nowording],.toolbar,dialog,.nbh-pm') && !particular(ta);
 }
+/* Drawn on the screen. A field inside a closed <details> (Form SR-1's catalogue entries) keeps a box in Chromium
+   (the content is only skipped), so its button would float over whatever is drawn where the field would be. */
 function shown(ta){
   if (!ta.getClientRects().length) return false;
+  if (typeof ta.checkVisibility === 'function') { try { if (!ta.checkVisibility()) return false; } catch (e) {} }
+  for (let d = ta.closest('details'); d; d = d.parentElement ? d.parentElement.closest('details') : null) {
+    if (!d.open && !ta.closest('summary')) return false;
+  }
   const cs = getComputedStyle(ta);
   return cs.visibility !== 'hidden' && cs.display !== 'none';
 }

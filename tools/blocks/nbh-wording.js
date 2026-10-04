@@ -2,8 +2,9 @@
 
    An "Improve wording" button sits at the corner of every narrative field (a textarea that is shown, not in the
    toolbar or a dialog, not marked data-nbh-nowording, not a box the form has turned spelling check off for, and
-   not one of the learner's particulars such as the name or ID) while the field has focus or text; from the keyboard, Alt+Enter (Option+Return on a Mac or an iPad) in the field does the same, and
-   Tab goes from field to field as the form has it. It opens a panel holding the field's text (or the part of it
+   not one of the learner's particulars such as the name or ID) while the field has focus or text; from the
+   keyboard, Alt+Enter (Option+Return on a Mac or an iPad) in the field does the same, and Tab goes from field to
+   field as the form has it. It opens a panel holding the field's text (or the part of it
    that was selected) and three ways to improve it:
      1. Check wording: rule based and offline. It flags words that name a feeling, guess at intent or
         function, label the behavior or leave a count, a time or an intensity vague, says why, and says what
@@ -228,8 +229,14 @@ function eligible(ta){
   return !!ta && ta.tagName === 'TEXTAREA' && ta.isConnected && !ta.disabled && !ta.readOnly && ta.getAttribute('spellcheck') !== 'false' &&
     !ta.closest('[data-nbh-nowording],.toolbar,dialog,.nbh-pm') && !particular(ta);
 }
+/* Drawn on the screen. A field inside a closed <details> (Form SR-1's catalogue entries) keeps a box in Chromium
+   (the content is only skipped), so its button would float over whatever is drawn where the field would be. */
 function shown(ta){
   if (!ta.getClientRects().length) return false;
+  if (typeof ta.checkVisibility === 'function') { try { if (!ta.checkVisibility()) return false; } catch (e) {} }
+  for (let d = ta.closest('details'); d; d = d.parentElement ? d.parentElement.closest('details') : null) {
+    if (!d.open && !ta.closest('summary')) return false;
+  }
   const cs = getComputedStyle(ta);
   return cs.visibility !== 'hidden' && cs.display !== 'none';
 }
@@ -691,7 +698,7 @@ const KEPT = ' Your text is still here.';
    kind: 'redeem' (a passcode), 'rewrite' (a text), 'reach' (the check made as the tab opens; nothing was sent). */
 function errText(r, kind, host){
   const c = errCode(r.body), svc = 'The rewrite service' + (host ? ' on ' + host : ''), keep = kind === 'reach' ? '' : KEPT;
-  const still = ' Check wording and the iPad’s Writing Tools still work without it.';
+  const still = ' Check wording and the iPad\u2019s Writing Tools still work without it.';
   const json = !!r.body && typeof r.body === 'object' && !Array.isArray(r.body);
   if (r.aborted) return '';
   if (r.offline) return 'This device is offline, so nothing was sent.' + keep + ' Check wording works without a connection.';
@@ -701,9 +708,10 @@ function errText(r, kind, host){
   if ((!json && r.status !== 413 && r.status !== 429) || r.status === 404 || r.status === 405 || /not_?found|method_not_allowed/.test(c) || (r.ok && kind === 'reach'))
     return svc + ' is not reachable, or it is not set up yet.' + keep + still;
   if (/origin|referer|cross/.test(c)) return 'The rewrite service refused this copy of the forms: it answers only the forms on its own site.';
-  if (kind === 'redeem' || kind === 'reach') {
+  if (kind === 'reach') return 'The rewrite service is not working right now. Try again later.' + still;
+  if (kind === 'redeem') {
     if (r.status === 429) return 'Too many passcode tries.' + (waitText(r) || ' Wait about 15 minutes, then try again.');
-    if (r.status >= 500 || kind === 'reach') return 'The rewrite service is not working right now. Try again later.' + still;
+    if (r.status >= 500) return 'The rewrite service is not working right now. Try again later.' + still;
     return 'That passcode was not accepted. A passcode works once and only for a limited time: check it, or ask your BCBA for a new one.';
   }
   if (r.status === 401 || r.status === 403 || /expired|token|session_?(ended|invalid)|unauthori/.test(c)) return 'This tab\u2019s session has ended. Enter a new passcode from your BCBA to go on.' + KEPT;

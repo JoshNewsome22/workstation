@@ -7,7 +7,9 @@ The parts folder holds: meta.json {id, title, sub, file}, own.css, body.html (th
 <main class="sheet">, after the print head), script.js (the form's own script). Everything else -
 the generic stylesheet, the brand system, the masthead and toolbar shell, the packet map, the
 workstation bridge and the shared tail blocks - is copied from the template, with its form id and
-titles replaced. Run tools/apply-polish.py on the folder afterwards.
+titles replaced. Run tools/polish-one.py on the new form afterwards: it adds the polish layer and the
+writing help (the template's own copy of the writing help sits between its markup and its own script,
+a part this does not copy, so the new form gets its one copy from polish-one.py).
 """
 import json, re, sys
 tpl, parts, out = sys.argv[1:4]
