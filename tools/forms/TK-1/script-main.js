@@ -74,6 +74,9 @@ function pic(o,cls,style){if(!o)return '';const ex=style?' style="'+style+'"':''
   if(o.k&&o.k.startsWith('av:')&&AV[o.k.slice(3)])return own(AV[o.k.slice(3)],cls,ex);
   if(o.k&&P[o.k])return picto(o.k,cls||'',ex);return '';}
 const has=o=>!!(o&&(o.k||o.ph));
+/* (v21.43) a word card from the library (flag w, e.g. "Waiting"): the card prints its label alone, as on the user's card sheets,
+   with nothing in the picture area; the picker and the tables still show the drawn word so it can be recognized */
+const isWord=o=>!!(o&&!o.ph&&o.k&&P[o.k]&&P[o.k].w);
 function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);return p?p.label:'';}if(o.k&&o.k.startsWith('tk:')&&TOK[o.k.slice(3)])return TOK[o.k.slice(3)].l;if(o.k&&o.k.startsWith('av:')&&AV[o.k.slice(3)])return AV[o.k.slice(3)].l;return o.k&&P[o.k]?P[o.k].l:'';}
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(has(o)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
@@ -196,7 +199,7 @@ function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];
 const pgClose='</div></div></div>';
 function wmHtml(o){if(!has(o))return '';const op=Math.max(5,Math.min(30,num(S.meta.wm)||20))/100;return '<div class="wm" style="opacity:'+op+'">'+pic(o,'').replace('<svg ','<svg preserveAspectRatio="xMidYMid slice" ')+'</div>';}
 function cardHtml(o,size,opts){opts=opts||{};const other=opts.other,blank=opts.blank;const st=opts.w?'width:'+IN(opts.w)+';height:'+IN(opts.h):size?'width:'+IN(size)+';height:'+IN(size):'';
-  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':pic(o,''))+'</div></div>';}
+  return '<div class="card'+(opts.ul?' ul':'')+(opts.cls?' '+opts.cls:'')+'" style="'+st+'"><div class="cl">'+(blank?'&nbsp;':esc(other?'Other':(lbl(o)||'')))+'</div><div class="cp">'+(other||blank?'<div class="lines"><i></i><i></i><i></i></div>':isWord(o)?'':pic(o,''))+'</div></div>';}
 /* (v21.43) the terminal token: the last token can differ from the others (an orange double border, and if chosen its own picture), so the
    learner can see that it fills the board and the exchange comes next; the Board's last slot and the Tokens page's last box carry the same ring */
 function termMode(){const t=S.meta.term;return t==='ring'||t==='pic'?t:'none';}
@@ -223,7 +226,7 @@ function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
   let inner;
   if(S.meta.layout==='rules'){const rules=S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
     const k=rules.length,ph=panelH||(612/scl()-d.band-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
-    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+pic(o,'')+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
   else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
   return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(S.meta.layout==='rules'?'':qrBox())+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
