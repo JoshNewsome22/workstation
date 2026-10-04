@@ -6,18 +6,28 @@
         B. IA-1 and IN-1 opened first, then FS-1 concludes;
         C. Save case, then Open case (the shell's own buttons; the file is read back), and once more with a hypothesis
            chosen on IN-1, which comes back as chosen;
+        D. a case saved before this change, in which FS-1's function had been written into both fields: opened here,
+           the forms keep what the file holds; cleared, saved and reopened, they stay empty;
       and also: the "From the case" list (the Function item cannot be ticked; a selection holding it places nothing
-      there), the form's own Open packet (the packet's function is left out; Save packet still carries the form's own),
-      and IA-1's own rule (its attention scenario, and the same scores typed in, still fill its own field).
+      there; the footnote and the answer say what is placed and what is not), the form's own Open packet (the packet's
+      function is left out; Save packet still carries the form's own), and IA-1's own rule (its attention scenario, and
+      the same scores typed in, still fill its own field).
    2. Load simulation asks first in IA-1, PA-1, MS-1 and AD-1, with the question the other forms use: Cancel keeps
       every field, Load replaces them, and a stubbed window.confirm still answers it (the older checks rely on that).
-   3. Files saved before the change still open (the audit's saved files: OLDSAVE=<folder> or the default below).
-   No page or console error anywhere. Run: WS_URL=http://127.0.0.1:8302 WS_ROOT=<worktree> node qa/sprint-a2-test.js [edition]
+   3. Files saved before the change still open.
+   The files saved before the change are in qa/data/sprint-a2/ (OLDSAVE=<folder> to use others): <ID>.json, the
+   audit's own saved files for the five forms, and CASE_saved-before-A2.json, a case the workstation saved before this
+   change after FS-1's simulation (Forms FS-1, IA-1 and IN-1, with escape in both hypothesis fields). A missing file
+   is a FAIL. No page or console error anywhere.
+   Run: WS_URL=http://127.0.0.1:8302 WS_ROOT=<worktree> node qa/sprint-a2-test.js [edition]
    (the edition folder: NBH-Workstation, the default, or RPS-Workstation) */
 const {chromium,fs,path,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const ED=process.argv[2]||'NBH-Workstation';
 const OUT=__dirname+'/out/sprint-a2/';
-const OLD=process.env.OLDSAVE||'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/enhance/oldsave';
+const OLD=process.env.OLDSAVE||path.join(__dirname,'data','sprint-a2');
+const CASEFX='CASE_saved-before-A2.json';
+/* the behavior field each assessment names in its "From the case" footnote and answer */
+const FIELD={'IA-1':'Target behavior','IN-1':'Problem behavior'};
 const F={'IA-1':'IA-1_Indirect-Functional-Assessment-Protocol_v2026-09.html','IN-1':'IN-1_Stakeholder-Interview-Record_v2026-09.html',
   'PA-1':'PA-1_Preference-Assessment-Protocol_v2026-09.html','MS-1':'MS-1_Medication-Side-Effect-Monitoring_v2026-09.html',
   'AD-1':'AD-1_Accumulated-vs-Distributed-Reinforcement_v2026-09.html'};
@@ -62,6 +72,27 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   HTMLAnchorElement.prototype.click=function(){if(got)return;return ck.apply(this,arguments);};
   try{[...document.querySelectorAll('button')].find(b=>b.textContent.trim()===t).click();await new Promise(r=>setTimeout(r,400));}finally{URL.createObjectURL=mk;HTMLAnchorElement.prototype.click=ck;}
   return got?await got.text():'';},label);
+/* the shell's Save case (the file it downloads, read back) and Open case (a file chosen as a person would) */
+async function saveCase(page,name){
+  const dl=page.waitForEvent('download',{timeout:30000});
+  await page.evaluate(()=>document.querySelector('#saveCase').click());
+  await page.waitForFunction(()=>document.querySelector('#cfDlg').open,null,{timeout:8000}).catch(()=>{});
+  if(await page.evaluate(()=>document.querySelector('#cfDlg').open&&/without a student name/.test(document.querySelector('#cfTitle').textContent)))
+    await page.evaluate(()=>document.querySelector('#cfFoot .primary').click());
+  const d=await dl;await d.saveAs(OUT+name);await sleep(300);
+  await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d.open)document.querySelector('#cfFoot .primary').click();});
+  return JSON.parse(fs.readFileSync(OUT+name,'utf8'));}
+async function openCase(page,file){
+  /* the shell asks first only when forms are open; an earlier "Case opened" notice is cleared first */
+  const asks=await page.evaluate(()=>{document.querySelectorAll('#wsToasts .ws-toast').forEach(t=>t.remove());return Object.keys(state.frames).length>0;});
+  await page.setInputFiles('#caseFile',file);
+  if(asks){await page.waitForFunction(()=>document.querySelector('#cfDlg').open,null,{timeout:8000});
+    await page.evaluate(()=>document.querySelector('#cfFoot .primary').click());}
+  await page.waitForFunction(()=>[...document.querySelectorAll('#wsToasts .ws-toast, #cfDlg[open]')].some(t=>/Case opened/.test(t.textContent)),null,{timeout:90000});
+  await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d.open)document.querySelector('#cfFoot .primary').click();});
+  const ia2=await frameOf(page,'IA-1'),in2=await frameOf(page,'IN-1');await hasFn(ia2);await hasFn(in2);
+  await sleep(6000);   /* the status poll and the case pushes after the restore */
+  return {ia:await readIA(ia2),in:await readIN(in2),ia2,in2};}
 
 (async()=>{const br=await chromium.launch();
  const behStart=(v,label)=>!!label&&String(v||'').startsWith(label);
@@ -110,17 +141,36 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
     await page.evaluate(id=>openForm(id),id);await sleep(300);
     await fr.evaluate(()=>document.querySelector('#nbhCaseBtn').click());await sleep(300);
     const d=await fr.evaluate(()=>{const cb=document.querySelector('#nbhcBody input[data-kind="fn"]');return {open:document.querySelector('#nbhCaseDlg').open,
-      fn:cb?{checked:cb.checked,disabled:cb.disabled,note:(cb.closest('label').querySelector('.nbhc-own')||{}).textContent||''}:null,nBeh:document.querySelectorAll('#nbhcBody input[data-kind="beh"]').length};});
+      fn:cb?{checked:cb.checked,disabled:cb.disabled,note:(cb.closest('label').querySelector('.nbhc-own')||{}).textContent||''}:null,nBeh:document.querySelectorAll('#nbhcBody input[data-kind="beh"]').length,
+      foot:document.querySelector('#nbhcNote').textContent};});
     ok(id+', From the case: the Function item is shown unticked, cannot be ticked, and says why',d.open&&d.fn&&!d.fn.checked&&d.fn.disabled&&why.test(d.fn.note),d);
+    ok(id+', From the case: the footnote says what this form takes ("'+d.foot+'")',d.foot==='The first ticked behavior goes into this form’s '+FIELD[id]+' field; the function stays off this form.',d.foot);
     const want=await fr.evaluate(()=>{const bs=[...document.querySelectorAll('#nbhcBody input[data-kind="beh"]')];bs.forEach(c=>c.checked=false);const c=bs[bs.length-1];c.checked=true;return nbhCase.facts.behaviors[+c.dataset.i].label;});
     await fr.evaluate(()=>document.querySelector('#nbhcUse').click());await sleep(300);
     const after=id==='IA-1'?await readIA(fr):await readIN(fr),done=await fr.evaluate(()=>document.querySelector('#nbhcDone').textContent);
     ok(id+', From the case: the ticked behavior ('+want+') is placed and the hypothesis is untouched',behStart(after.beh,want)&&after.fn===''&&/^Placed 1 item on this form\.$/.test(done),{after,done});
+    /* two behaviors ticked: the form has one field, so the first of them is placed and the answer says so */
+    const first=await fr.evaluate(()=>{const bs=[...document.querySelectorAll('#nbhcBody input[data-kind="beh"]')];bs.forEach((c,i)=>c.checked=i<2);document.querySelector('#nbhcUse').click();return nbhCase.facts.behaviors[+bs[0].dataset.i].label;});await sleep(300);
+    const two=id==='IA-1'?await readIA(fr):await readIN(fr),done3=await fr.evaluate(()=>document.querySelector('#nbhcDone').textContent);
+    ok(id+', From the case: with two behaviors ticked, the first ('+first+') is placed and the answer says the other was not',behStart(two.beh,first)&&!behStart(two.beh,want)&&two.fn===''&&
+      done3==='Placed 1 item on this form. Only the first ticked behavior was placed, since this form has one '+FIELD[id]+' field.',{two,done3});
     /* the function asked for anyway (the item re-enabled and ticked, as an older picker would send it) */
     await fr.evaluate(()=>{const cb=document.querySelector('#nbhcBody input[data-kind="fn"]');cb.disabled=false;cb.checked=true;document.querySelectorAll('#nbhcBody input[data-kind="beh"]').forEach(c=>c.checked=false);document.querySelector('#nbhcUse').click();});await sleep(300);
     const forced=id==='IA-1'?await readIA(fr):await readIN(fr),done2=await fr.evaluate(()=>document.querySelector('#nbhcDone').textContent);
     ok(id+', From the case: a selection holding the function still leaves the hypothesis alone, and says so',forced.fn===''&&/^Nothing to place: the function stays off this form/.test(done2),{forced,done2});
     await fr.evaluate(()=>document.querySelector('#nbhcClose').click());
+    /* a case that also carries goals (GB-1) and the reinforcer menu (PA-1): this form has no field for either, and the
+       footnote and the answer say so (the case's own facts are put back afterwards) */
+    const gm=await fr.evaluate(async()=>{window.__f0=nbhCase.facts;nbhCase.facts=Object.assign({},nbhCase.facts,{goals:{red:[{beh:'Aggression toward staff',text:'Aggression toward staff will decrease to 0 per day.'}],acq:[]},
+        menu:[{name:'Tablet',type:'Leisure item',rank:1,tier:'HP'},{name:'Bubbles',type:'Leisure item',rank:2,tier:'MP'}]});
+      document.querySelector('#nbhCaseBtn').click();await new Promise(r=>setTimeout(r,300));
+      const foot=document.querySelector('#nbhcNote').textContent,tick=[...document.querySelectorAll('#nbhcBody input:checked')].map(c=>c.dataset.kind+c.dataset.i);
+      document.querySelector('#nbhcBody input[data-kind="red"]').checked=true;document.querySelector('#nbhcUse').click();await new Promise(r=>setTimeout(r,300));
+      const done=document.querySelector('#nbhcDone').textContent;document.querySelector('#nbhcClose').click();nbhCase.facts=window.__f0;nbhCase.paint();return {foot,tick,done};});
+    ok(id+', From the case: with goals and reinforcers in the case, the footnote says they have no field here',
+      gm.foot==='The first ticked behavior goes into this form’s '+FIELD[id]+' field; the function stays off this form. The goals and reinforcers have no field here; copy the text instead.',gm);
+    ok(id+', From the case: a ticked goal and reinforcer are named as not placed ('+gm.tick.join(' ')+' ticked, and the goal)',
+      gm.tick.join()==='beh0,menu0'&&gm.done==='Placed 1 item on this form. The ticked goals and reinforcers have no field on this form.',gm);
   }
   /* IA-1's own rule: the attention scenario, loaded through its question, fills its own field */
   await page.evaluate(()=>openForm('IA-1'));await sleep(300);
@@ -140,24 +190,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
  {const {ctx,page}=await shell(br);
   const facts=await fs1Sim(page);
   const ia=await openIn(page,'IA-1');await hasFn(ia);const inn=await openIn(page,'IN-1');await hasFn(inn);await sleep(600);
-  const save=async name=>{
-    const dl=page.waitForEvent('download',{timeout:30000});
-    await page.evaluate(()=>document.querySelector('#saveCase').click());
-    await page.waitForFunction(()=>document.querySelector('#cfDlg').open,null,{timeout:8000}).catch(()=>{});
-    if(await page.evaluate(()=>document.querySelector('#cfDlg').open&&/without a student name/.test(document.querySelector('#cfTitle').textContent)))
-      await page.evaluate(()=>document.querySelector('#cfFoot .primary').click());
-    const d=await dl;await d.saveAs(OUT+name);await sleep(300);
-    await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d.open)document.querySelector('#cfFoot .primary').click();});
-    return JSON.parse(fs.readFileSync(OUT+name,'utf8'));};
-  const reopen=async name=>{
-    await page.setInputFiles('#caseFile',OUT+name);
-    await page.waitForFunction(()=>document.querySelector('#cfDlg').open,null,{timeout:8000});
-    await page.evaluate(()=>document.querySelector('#cfFoot .primary').click());
-    await page.waitForFunction(()=>[...document.querySelectorAll('#wsToasts .ws-toast, #cfDlg[open]')].some(t=>/Case opened/.test(t.textContent)),null,{timeout:90000});
-    await page.evaluate(()=>{const d=document.querySelector('#cfDlg');if(d.open)document.querySelector('#cfFoot .primary').click();});
-    const ia2=await frameOf(page,'IA-1'),in2=await frameOf(page,'IN-1');await hasFn(ia2);await hasFn(in2);
-    await sleep(6000);   /* the status poll and the case pushes after the restore */
-    return {ia:await readIA(ia2),in:await readIN(in2),ia2,in2};};
+  const save=name=>saveCase(page,name),reopen=name=>openCase(page,OUT+name);
   let cj=await save('case-1.json');
   const own=id=>JSON.parse(cj.forms[id].snap.own);
   ok('C: the case file holds both forms with no hypothesis, and FS-1\'s function in its facts',own('IA-1').fields['m.fn']===''&&!own('IN-1').S.meta.fn&&cj.facts&&cj.facts.fn&&cj.facts.fn.key===facts.fn,
@@ -173,6 +206,32 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   r=await reopen('case-2.json');
   ok('C: after the second Open case, IN-1 keeps attention (not FS-1\'s '+facts.fn+') and IA-1 is still "not yet"',r.in.fn==='attention'&&r.in.meta==='attention'&&r.ia.fn==='',{in:r.in,ia:r.ia});
   await ctx.close();}
+
+ /* ---------- D: a case saved before this change, with FS-1's function written into both forms ---------- */
+ {const fx=path.join(OLD,CASEFX);
+  if(!fs.existsSync(fx))ok('D: the case saved before this change is there ('+fx+'; set OLDSAVE to its folder)',false);
+  else{const {ctx,page}=await shell(br);
+   const saved=JSON.parse(fs.readFileSync(fx,'utf8')),sown=id=>JSON.parse(saved.forms[id].snap.own),beh0=((saved.facts||{}).behaviors||[{}])[0].label;
+   ok('D: the old case file holds escape in both hypothesis fields, as the workstation then wrote it from FS-1',
+     sown('IA-1').fields['m.fn']==='escape'&&sown('IN-1').S.meta.fn==='escape'&&saved.facts.fn.key==='escape'&&!!beh0,{ia:sown('IA-1').fields['m.fn'],in:sown('IN-1').S.meta.fn,fn:saved.facts&&saved.facts.fn&&saved.facts.fn.key});
+   let r=await openCase(page,fx);
+   ok('D: opened here, IA-1 and IN-1 keep the hypothesis the file holds (escape), and their behavior',
+     r.ia.fn==='escape'&&r.in.fn==='escape'&&r.in.meta==='escape'&&behStart(r.ia.beh,beh0)&&behStart(r.in.beh,beh0),{ia:r.ia,in:r.in});
+   /* the assessor clears both; the case still carries FS-1's escape */
+   await page.evaluate(()=>openForm('IA-1'));
+   await r.ia2.evaluate(()=>{const e=document.querySelector('#mFn');e.value='';e.dispatchEvent(new Event('change',{bubbles:true}));});
+   await page.evaluate(()=>openForm('IN-1'));
+   await r.in2.evaluate(()=>{const e=document.querySelector('[data-m="fn"]');e.value='';e.dispatchEvent(new Event('change',{bubbles:true}));});
+   await sleep(300);await page.evaluate(()=>pushFactsToAll());await sleep(1500);
+   const c0={ia:await readIA(r.ia2),in:await readIN(r.in2)};
+   ok('D: cleared, both stay "not yet" through the next case push',c0.ia.fn===''&&c0.in.fn===''&&!c0.in.meta,c0);
+   const cj=await saveCase(page,'case-3.json'),own=id=>JSON.parse(cj.forms[id].snap.own);
+   ok('D: saved again: the file holds no hypothesis on either form, and FS-1\'s escape in its facts',
+     own('IA-1').fields['m.fn']===''&&!own('IN-1').S.meta.fn&&!!(cj.facts&&cj.facts.fn&&cj.facts.fn.key==='escape'),{ia:own('IA-1').fields['m.fn'],in:own('IN-1').S.meta.fn});
+   r=await openCase(page,OUT+'case-3.json');
+   ok('D: reopened, both stay "not yet" and their behavior is back (the workstation used to write escape in again)',
+     r.ia.fn===''&&r.in.fn===''&&!r.in.meta&&behStart(r.ia.beh,beh0)&&behStart(r.in.beh,beh0),{ia:r.ia,in:r.in});
+   await ctx.close();}}
 
  /* ---------- the form's own Open packet, and Save packet ---------- */
  for(const id of ['IA-1','IN-1']){
@@ -223,7 +282,7 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
  const expect={'IA-1':d=>({client:d.fields['m.client'],named:d.fields}),'IN-1':d=>({client:d.S.meta.client}),'PA-1':d=>({client:d.meta.client}),
    'MS-1':d=>({client:d.fields['m.client'],named:d.fields}),'AD-1':d=>({client:d.fields.s_name,named:d.fields})};
  for(const id of Object.keys(F)){
-  const fp=path.join(OLD,id+'.json');if(!fs.existsSync(fp)){console.log('SKIP '+id+': no saved file at '+fp+' (set OLDSAVE)');continue;}
+  const fp=path.join(OLD,id+'.json');if(!fs.existsSync(fp)){ok(id+': the file saved before this change is there ('+fp+'; set OLDSAVE to its folder)',false);continue;}
   const d=JSON.parse(fs.readFileSync(fp,'utf8')),e=expect[id](d);
   const ctx=await br.newContext({viewport:{width:1366,height:1000}});const p=await ctx.newPage();wire(p,log);
   await p.goto(BASE+'/'+ED+'/'+F[id]);await sleep(800);
