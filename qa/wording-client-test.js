@@ -879,9 +879,10 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       t = await waitTab2(page, /not reachable/);
       ok(/The rewrite service on localhost is not reachable, or it is not set up yet\./.test(t) && STILL.test(t), '13 not uploaded yet (the website’s 404 page): said plainly as the tab opens, with what still works', t.slice(0, 300));
       ok(await page.evaluate(() => !!__w.q('#pc')), '13 ... and the passcode box is still there');
+      await shot(page, 'panel-not-there-1180x820.png');
       await page.evaluate(() => { __w.q('#pc').focus(); __w.q('#pc').value = 'ZZZ'; });
       await tryCode(page);
-      t = await waitTab2(page, /not reachable|not accepted/);
+      t = await waitTab2(page, /set up yet\. Your text|not accepted/);
       ok(/is not reachable, or it is not set up yet\. Your text is still here\./.test(t) && STILL.test(t) && !/not accepted/.test(t), '13 ... a passcode tried then is not called "not accepted": the same plain words', t.slice(0, 300));
       ok(bad(from).length === 0, '13 ... no console error but the expected 404s', bad(from));
       await ctx.close();
