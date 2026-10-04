@@ -92,6 +92,21 @@ crosses the network unencrypted.
   upgrading to Deluxe, whose AutoSSL removes the yearly step. Compare GoDaddy's
   prices at the time.
 
+**Compression (v21.43).** Text files shrink by about two thirds when the server
+compresses them, so forms open faster on school Wi-Fi and the installed app's first
+offline copy finishes sooner. It changes nothing in the forms or in what they save.
+
+- cPanel → *Software* → **Optimize Website** → choose **Compress All Content** →
+  **Update Settings**. (On some cPanel versions the choice is *Compress the specified
+  MIME types*; then enter `text/html text/css text/plain application/javascript
+  text/javascript application/json image/svg+xml`.)
+- Check: open a form, then Diagnostics in the shell; or, from a computer, the browser's
+  developer tools → Network → the form's file → *Content-Encoding* shows `gzip` (or `br`).
+- Images, videos and zips are already compressed and are left as they are.
+- To undo it: the same page → **Disabled** → **Update Settings**.
+- The cost is a little extra work for the server on each request, which is negligible
+  at the workstation's traffic. Every current browser on an iPad, Mac or PC handles it.
+
 ## What stays exactly the same
 
 - **Nothing leaves the machine.** Save case downloads a file to the computer in
