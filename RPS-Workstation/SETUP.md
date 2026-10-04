@@ -980,6 +980,23 @@ stayed on Setup and the workstation said *Not answering*. The file on the websit
 not (cut short on the way). The narration is now its own file beside the forms, `nbh-tk1-narration.js` (loaded by the form, packed into the
 one-file edition, saved in the offline copy), and TK-1 is 1.2 MB. `tools/pwa-sw.py` refuses any page of 1.9 MB or more.
 
+**Save as video (v21.44).** Under the walkthrough, **Save as video (MP4)** makes a video file of this book's
+walkthrough on the device itself, to share with the student's team: 1280 x 720, 30 frames a second, the recorded
+narration as its sound, the captions in the picture as the CC button has them, the credit line on every frame. Nothing
+is sent anywhere. A page cannot photograph itself (Safari refuses to read back a picture of HTML), so
+`tools/forms/TK-1/walk-video.js` paints the stage onto a canvas from the page's own layout, piece by piece (boxes, text,
+pictures, the SVG drawings), keeps each moving piece as a picture of its own and paints it again only when something in
+it changes; the browser's own encoders (WebCodecs: H.264 and AAC) make the video and its sound, and mp4-muxer
+(`tools/vendor/mp4-muxer`, MIT) puts them into one MP4. `tools/forms/TK-1/build.sh` writes both into
+`nbh-tk1-video.js` beside the forms (the one-file editions carry it inside). It needs Safari on iPadOS 16.4 or later,
+or Chrome or Edge on a computer; elsewhere the button says so. In WebKit (the engine of Safari) the whole 3½-minute
+walkthrough took about 6½ minutes to make here and came out at about 56 MB; an iPad's own video encoder is usually
+quicker. Keep the page open and the screen on while it works (it asks the screen to stay on). When it is done:
+**Share or save…** opens the iPad's share sheet (Save Video puts it in Photos, Save to Files in Files), and
+**Download** saves it as a file. The video shows the student's book: share it only through the district's drive or
+secure email. `qa/tk1-video-test.js` compares the painted frames with the stage at twelve moments, and frames painted
+in sequence with frames painted fresh.
+
 **TK-1's walkthrough and avatar (v21.44).** A new book starts with the practice's own Boy picture from the
 library (*Library: Boy (teal shirt)*, now first in *When there is no photo*) in the Board's corners and in the
 walkthrough; the drawn avatars are still there to choose, and the drawn boy stands in where the picture library is not

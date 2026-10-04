@@ -38,6 +38,10 @@ python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-0
 python3 tools/polish-one.py NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
 # v21.44 the recorded narration, byte for byte, beside the form (its <script src> is in toolbar.html)
 cp tools/forms/TK-1/walk-audio.js NBH-Workstation/nbh-tk1-narration.js
+# v21.44 Save as video: mp4-muxer (tools/vendor/mp4-muxer, MIT) and walk-video.js, in one file beside the form
+{ printf '/* nbh-tk1-video.js (v21.44): Form TK-1\047s Save as video. Built by tools/forms/TK-1/build.sh from tools/vendor/mp4-muxer/mp4-muxer.js\n'
+  printf '   (mp4-muxer 5.2.2, Copyright (c) 2023 Vanilagy, MIT licence: tools/vendor/mp4-muxer/LICENSE) and tools/forms/TK-1/walk-video.js. */\n'
+  cat tools/vendor/mp4-muxer/mp4-muxer.js; printf ';\n'; cat tools/forms/TK-1/walk-video.js; } > NBH-Workstation/nbh-tk1-video.js
 rm -rf "$D"
 python3 - <<'PY'
 core=open('tools/blocks/nbh-link.js',encoding='utf-8').read()
@@ -45,6 +49,7 @@ doc=open('NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html',encoding='utf-8')
 BANNER='/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n'
 assert doc.count(BANNER)==1 and doc.count(BANNER+core)==1 and doc.count('nbh-link (v21.43)')==1, 'the link core is not in the built TK-1 exactly once, byte for byte'
 print('the link core (tools/blocks/nbh-link.js) is in the built TK-1 once, byte for byte')
+assert doc.count('<script src="nbh-tk1-video.js" defer></script>')==1 and doc.count('id="wkVideo"')==1, 'Save as video is not in the built TK-1'
 assert doc.count('<script src="nbh-tk1-narration.js" defer></script>')==1 and 'const WALK_AUDIO=' not in doc, 'the narration must be beside TK-1, not in it'
 assert open('NBH-Workstation/nbh-tk1-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio.js','rb').read(), 'nbh-tk1-narration.js is not walk-audio.js'
 assert len(doc.encode('utf-8'))<1900000, 'TK-1 is %d bytes: keep it under 1.9 MB (a host may cut a page of 2 MB or more short)' % len(doc.encode('utf-8'))

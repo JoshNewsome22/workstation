@@ -61,6 +61,7 @@ pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
 respond = open(os.path.join(SRC, 'nbh-respond.js'), encoding='utf-8').read()
 # v21.44: Form TK-1's recorded narration (its <script src defer>) travels once too
 narration = open(os.path.join(SRC, 'nbh-tk1-narration.js'), encoding='utf-8').read()
+video = open(os.path.join(SRC, 'nbh-tk1-video.js'), encoding='utf-8').read()
 def pack(text):
     return base64.b64encode(gzip.compress(text.encode('utf-8'), compresslevel=9, mtime=0)).decode('ascii')
 def block(bid, text):
@@ -74,7 +75,7 @@ if back != forms or wback != wording or any('@@NBH-LOGO@@' not in back[fn] or ba
                                              back[fn].replace('@@NBH-LOGO@@', logo).replace(WHOLE, wback) != files_in[fn] for fn in files):
     sys.exit('the packed forms do not unpack to the files, each with its one copy of the writing help')
 blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) + block('nbh-embed-wording', pwording) +
-          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-shell', pack(idx)))
+          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-video', pack(video)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)
