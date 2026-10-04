@@ -110,6 +110,9 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('1 blank: the book prints 11 sheets, as before',pb===11&&pa===pb,{was:pa,now:pb});
     ok('1 blank: the printed text is the one from before',(await bookText(A))===(await bookText(B)));
     await sim(A);await sim(B);await sleep(300);
+    /* the simulator's cards changed after the link (v21.43: the practice's own pictures); the baseline gets the same cards,
+       so this compares the link alone */
+    await A.evaluate(j=>{const o=JSON.parse(j);S.ch=o.ch;S.tg=o.tg;renderAll();},await B.evaluate(()=>JSON.stringify({ch:S.ch,tg:S.tg})));await sleep(200);
     const a1=await totals(A),b1=await totals(B);
     ok('1 simulator: the same totals, no lk, the same record',JSON.stringify(a1)===JSON.stringify(b1)&&(await sOf(A))===(await sOf(B))&&!('lk' in (await B.evaluate(()=>S.meta))),{was:a1,now:b1});
     ok('1 simulator: the same Setup verdict',(await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
@@ -197,7 +200,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     R=await rows(p);let lk=JSON.parse(await lkOf(p));
     ok('4 card button 4: the row compares card 4 (without card 1\'s pairing); the record still pairs card 1',R.card.what==='Target card 4'&&R.card.st===7&&lk.card===0&&lk.board.card===0&&lk.board.paired===1&&lk.board.cardLabel==='Work',{R:R.card,card:lk.card,board:lk.board});
     await press(p,'card','take');await apply(p);
-    ok('4 Take: card 4 holds the behavior, the other cards as they were',await p.evaluate(()=>S.tg[3].l==='Raises a hand to ask for help'&&S.tg[0].l==='Work'&&S.tg[1].k==='raisehand'));
+    ok('4 Take: card 4 holds the behavior, the other cards as they were',await p.evaluate(()=>S.tg[3].l==='Raises a hand to ask for help'&&S.tg[0].l==='Work'&&S.tg[1].k==='cardreading'));
     lk=JSON.parse(await lkOf(p));
     ok('4 Take: the record now pairs card 4, and the board summary says so',lk.card===3&&lk.board.card===3&&lk.board.paired===1&&lk.board.cardLabel==='Raises a hand to ask for help'&&Array.isArray(lk.board.pair),lk);
     R=await rows(p);ok('4 after the take: in step on card 4',R.card.st===1&&R.card.what==='Target card 4',R.card);
@@ -461,7 +464,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('R3 a compare alone pairs nothing (the empty card it offers is a suggestion)',R.card.what==='Target card 6'&&R.card.st===3&&lk.card===undefined&&lk.board.paired===0,{R:R.card,card:lk.card,board:lk.board});
     /* a behavior that shares words with a card is compared with that card */
     await feed(p,PLAN(S=>{S.meta.beh='Raises hand and waits';}),'TE-1_b.json');
-    ok('R22 "Raises hand and waits" is compared with card 2, "Raise my hand" (the words they share), not card 1',(await rows(p)).card.what==='Target card 2');
+    ok('R22 "Raises hand and waits" is compared with card 4, "Raise hand" (the words they share), not card 1',(await rows(p)).card.what==='Target card 4');
     await p.close();}
   {const p=await open(ctx,URL1,log);await link(p);
     /* alone, with no case: the problem-behavior words still hold, and an ordinary behavior is offered, unticked, with the caution */
@@ -564,7 +567,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await te.evaluate(()=>document.querySelector('#lkPanel [data-lk="on"]').click());
     await te.waitForFunction(()=>nbhLink.state().table,null,{timeout:15000}).catch(()=>{});
     const lkTK=await tk.evaluate(()=>S.meta.lk),lkTE=await te.evaluate(()=>S.meta.lk||'');
-    ok('19 both forms hold a link record (TE-1 read TK-1\'s board through the relay)',NBHLink_on(lkTK)&&NBHLink_on(lkTE)&&JSON.parse(lkTE).board&&JSON.parse(lkTE).board.ch[0]==='Tablet',{tk:lkTK.slice(0,80),te:lkTE.slice(0,200)});
+    ok('19 both forms hold a link record (TE-1 read TK-1\'s board through the relay)',NBHLink_on(lkTK)&&NBHLink_on(lkTE)&&JSON.parse(lkTE).board&&JSON.parse(lkTE).board.ch[0]==='Color',{tk:lkTK.slice(0,80),te:lkTE.slice(0,200)});
     await sh.evaluate(()=>{document.querySelector('#pClient').value='SIMULATED – Sample Student';});
     const caseText=await sh.evaluate(()=>new Promise(res=>{const o=URL.createObjectURL;URL.createObjectURL=b=>{URL.createObjectURL=o;b.text().then(res);return o.call(URL,b);};document.querySelector('#saveCase').click();}));
     const kase=JSON.parse(caseText),ownTK=JSON.parse(kase.forms['TK-1'].snap.own),ownTE=JSON.parse(kase.forms['TE-1'].snap.own);

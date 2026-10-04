@@ -420,8 +420,8 @@ $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear
 async function loadSim(){if(!(await nbhUI.confirm('Load a simulated book?\nEvery page is filled with a sample student. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
   Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',site:'Elementary, self-contained classroom',first:'Sam',poss:'s',setting:'',layout:'ft',avatar:'av:boy',n:'5',tokname:'',qr:'https://example.org/token-board/how-to-use',credit:CREDIT0,order:'all',sp_card:'ch:0',sp_size:'large'});
   S.chk.pg_how=true;S.chk.qrframe=true;
-  S.ch=['ipad','puzzle','ball','bubbles','lego','drawing'].map(k=>cello(k));S.tg=['sitting','raisehand','writing','waiting','alldone','reading'].map(k=>cello(k));
-  S.tg[3].l='Waiting';S.ch[0].l='Tablet';
+  /* the practice's own pictures: the choices and the targets its walkthrough video shows */
+  S.ch=['cardcrayons','cardball','cardplayground','cardbreak','youtube','cardipad'].map(k=>cello(k));S.tg=['cardwriting','cardreading','cardalldone','boyraisehand','cardmath','cardwaiting'].map(k=>cello(k));
   renderAll();setView('preview');nbhUI.toast('Simulator loaded: Sam’s book with six choices, six targets, five stars and a sample QR link.',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
