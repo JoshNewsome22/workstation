@@ -7198,10 +7198,21 @@ function fit(){const D=dom();if(!D)return;const f=isFs();let k;
   if(f){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||60,chs=D.chaps.offsetHeight||0;
     const kk=cap=>Math.max(.1,Math.min(window.innerWidth/SW,(window.innerHeight-bar-chs-cap-24)/SH));k=kk(0);D.player.classList.toggle('wk-small',k<.5);
     if(k<.5&&capsOn&&D.cap2)k=kk(D.cap2.offsetHeight||0);D.frame.style.width=f2(SW*k)+'px';}
-  else{D.frame.style.width='';k=Math.max(.1,(D.frame.clientWidth||SW)/SW);}
+  else{const kw=Math.max(.1,(D.player.clientWidth||SW)/SW);k=kw;let small=k<.5;
+    /* a short window (an iPad held sideways, the form inside the workstation): the picture is scaled to the height left below the
+       sticky toolbar once its controls are counted too, so it and its controls show together; it is centred and the controls keep the
+       player's width. Down to .4 the captions stay on the picture; below that they go under it; below .3 the width rules again
+       (the page scrolls, and full screen is the way to see it whole) */
+    const h=roomH(D),kh=h/SH;
+    if(kh<kw){if(kh>=.4){k=kh;small=false;}
+      else{D.player.classList.add('wk-small');const k2=(h-(capsOn&&D.cap2?D.cap2.offsetHeight||0:0))/SH;if(k2>=.3){k=k2;small=true;}}}
+    D.frame.style.width=k<kw-.0005?f2(SW*k)+'px':'';css(D.stage,'transform','scale('+k.toFixed(5)+')');D.frame.style.height=f2(SH*k)+'px';D.player.classList.toggle('wk-small',small);return;}
   css(D.stage,'transform','scale('+k.toFixed(5)+')');D.frame.style.height=f2(SH*k)+'px';D.player.classList.toggle('wk-small',k<.5);}
+/* the height the picture may take outside full screen: the window less the sticky toolbar, the player's controls and its margins */
+function stickyH(){const tb=document.querySelector('.toolbar');let th=0;try{if(tb&&/sticky|fixed/.test(getComputedStyle(tb).position))th=tb.offsetHeight;}catch(e){}return th;}
+function roomH(D){const bar=(D.player.querySelector('.wk-bar')||{}).offsetHeight||0,chs=D.chaps.offsetHeight||0;return (window.innerHeight||0)-stickyH()-bar-chs-30;}
 /* on entering the view: when the player does not fit below the sticky toolbar, scroll it there */
-function reveal(){const D=dom();if(!D||isFs())return;const tb=document.querySelector('.toolbar');let th=0;try{if(tb&&/sticky|fixed/.test(getComputedStyle(tb).position))th=tb.offsetHeight;}catch(e){}
+function reveal(){const D=dom();if(!D||isFs())return;const th=stickyH();
   const r=D.player.getBoundingClientRect();if(!r.height||(r.top>=th&&r.bottom<=window.innerHeight))return;window.scrollTo({top:Math.max(0,r.top+window.scrollY-th-8)});}
 function wire(){const D=DOM;
   D.play.addEventListener('click',toggle);D.big.addEventListener('click',()=>{play();});
@@ -7220,8 +7231,11 @@ function wire(){const D=DOM;
   D.fs.addEventListener('click',fullscreen);
   D.chaps.addEventListener('click',e=>{const b=e.target.closest('button[data-ch]');if(!b||!B)return;const c=B.chapters.find(x=>x.id===b.dataset.ch);if(c)seek(c.start);});
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{setTimeout(()=>{fit();ui();},30);}));
-  let lastW=-1;const onSize=()=>{const w=D.frame.clientWidth;if(w!==lastW){lastW=w;fit();}};
-  if(window.ResizeObserver){new ResizeObserver(onSize).observe(D.player);}window.addEventListener('resize',()=>{lastW=-1;onSize();if(isFs())fit();});
+  let lastW=-1;const onSize=()=>{const w=D.player.clientWidth;if(w!==lastW){lastW=w;fit();}};
+  if(window.ResizeObserver){new ResizeObserver(onSize).observe(D.player);
+    /* the sticky toolbar's height is part of the room the picture fits in (it folds and unfolds, and its rows wrap) */
+    const tb=document.querySelector('.toolbar');let lastT=-1;if(tb)new ResizeObserver(()=>{const h=tb.offsetHeight;if(h!==lastT){lastT=h;if(document.body.classList.contains('view-walk')&&!isFs())fit();}}).observe(tb);}
+  window.addEventListener('resize',()=>{lastW=-1;onSize();if(isFs())fit();});
   window.addEventListener('orientationchange',()=>setTimeout(fit,200));
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&want)pause();});
   /* a frame hidden by the workstation reports no intersection and a root of no size (a plain scroll out of view keeps playing) */

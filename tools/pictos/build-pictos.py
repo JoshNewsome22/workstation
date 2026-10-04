@@ -62,7 +62,9 @@ def from_file(rel):
     chk = re.sub(r'\shref="data:image/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+"', '', body)   # embedded pictures only
     if re.search(r'<style|\sclass=|\sid=|<script|href=|\son[a-z]+=', chk, re.I): raise SystemExit(rel + ': styles, classes, ids, scripts, links or handlers are not allowed')
     body = re.sub(r'\s+', ' ', body).replace('> <', '><').strip()
-    return '<svg x="0" y="0" width="72" height="72" viewBox="%s">%s</svg>' % (vb, body)
+    # v21.43: the size is also set inline, because a form's rule for its thumbnails (".pick .pv svg{width:36px}") matches this
+    # inner <svg> too and would draw the picture at half size in the top left corner of its tile; an inline style outranks it
+    return '<svg x="0" y="0" width="72" height="72" style="width:72px;height:72px" viewBox="%s">%s</svg>' % (vb, body)
 items = {}; order = []; total = 0
 for entry in spec['items']:
     key, label, cat, src = entry[:4]

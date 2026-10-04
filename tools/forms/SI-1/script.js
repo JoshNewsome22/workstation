@@ -80,7 +80,7 @@ function renderItems(){
     const q=(young()?it.young:it.read).replace(/\bit happened\b/,beh==='it'?'it happened':beh+' happened').replace(/\bit happens\b/,beh==='it'?'it happens':beh+' happens');
     $('#'+it.box).innerHTML='<div class="qcard"><p class="q">'+esc(q)+(it.hint?'<small>'+it.hint+'</small>':'')+'</p>'+
       (it.fq?'<div class="faces for-young"><span class="fq">'+esc(it.fq)+'</span>'+facepick(v.s,SCALES[it.fl],'data-iv="'+it.id+'"')+'</div>':'')+
-      '<textarea data-ivt="'+it.id+'" rows="2" placeholder="in the student&rsquo;s words" aria-label="'+esc(q)+'">'+esc(v.a)+'</textarea></div>';});
+      '<textarea data-ivt="'+it.id+'" rows="2" data-nbh-nowording placeholder="in the student&rsquo;s words" aria-label="'+esc(q)+'">'+esc(v.a)+'</textarea></div>';});
 }
 function renderHard(){
   $('#hardTbl tbody').innerHTML=S.hard.map((r,i)=>'<tr><td class="num">'+(i+1)+'</td><td><input data-r="hard" data-i="'+i+'" data-f="act" value="'+esc(r.act)+'" placeholder="Math, after lunch, the bus"></td>'+

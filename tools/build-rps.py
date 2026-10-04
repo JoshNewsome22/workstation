@@ -56,7 +56,7 @@ if left:
 rd = os.path.join(OUT, 'README.txt'); s = open(rd, encoding='utf-8').read()
 s = s.replace('NBH FBA/BIP Workstation\n=======================',
   'FBA/BIP Workstation - Royal Palm School\n=======================================\n\n'
-  'This is the Royal Palm School edition. It is the same workstation and the same 42\n'
+  'This is the Royal Palm School edition. It is the same workstation and the same 44\n'
   'forms as the Newsome Behavioral Health edition; only the logo and name differ, and\n'
   'it keeps its own autosave, so both can be used in one browser without mixing.', 1)
 open(rd, 'w', encoding='utf-8').write(s)

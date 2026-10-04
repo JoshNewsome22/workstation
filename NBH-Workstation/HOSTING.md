@@ -21,10 +21,12 @@ point a subdomain at it from GoDaddy's DNS.
 2. Create a folder, for example `workstation`, and open it.
 3. **Upload** the zip, then select it and choose **Extract**. Delete the zip.
    The files land directly in `workstation` (`public_html/workstation/index.html`);
-   upload the whole folder, `nbh-pictos.js` included (Forms SM-1 and VS-1 load their pictures from it)
-   and `nbh-respond.js` with `respond.html` (the questionnaires Form IA-1 sends to informants; a link to
-   `respond.html` on the site carries the questionnaire, so the page must be served from the same folder);
-   the zip has no folder inside it, so there is nothing to move.
+   upload the whole folder, `nbh-pictos.js` included (Forms SM-1, VS-1 and TK-1 load their pictures
+   from it; since v21.43 it also holds the practice's own cards, so an older copy left on the site
+   leaves those cards without a picture) and `nbh-respond.js` with `respond.html` (the questionnaires
+   Form IA-1 sends to informants; a link to `respond.html` on the site carries the questionnaire, so
+   the page must be served from the same folder); the zip has no folder inside it, so there is nothing
+   to move.
 4. **First time only:** turn on *Settings → Show Hidden Files*, then *+ File*,
    name it `.htaccess`, select it, *Edit*, and paste:
 
@@ -89,9 +91,14 @@ crosses the network unencrypted.
 ## What stays exactly the same
 
 - **Nothing leaves the machine.** Save case downloads a file to the computer in
-  use; Autosave keeps its safety copy in that browser only. There is no account,
-  no upload and no database, and there should not be: the moment a server holds
-  student data you become its custodian, with everything that brings.
+  use; Autosave keeps its safety copy in that browser only. The forms have no
+  account, no upload and no database, and they should not: the moment a server
+  holds student data you become its custodian, with everything that brings.
+  The one exception is **Rewrite with Claude** in the writing help (v21.43),
+  and only once its relay is set up (below) and a passcode unlocks it: it sends
+  the text shown in its preview, with the student's name and ID already
+  replaced, to the relay on this site and from there to Anthropic's API. The
+  relay keeps no text. **Check wording** runs on the device and sends nothing.
 - **Save cases to the district drive**, as before. A case file in a browser's
   Downloads folder on a shared computer is a case file left on a desk.
 - **Chrome or Edge 131 or later, on a computer,** for the master print and
@@ -103,10 +110,15 @@ crosses the network unencrypted.
 
 Upload the new zip into `workstation`, **Extract** it there, and delete the
 zip. The new files replace the old ones of the same name, and that is the
-whole update. The zip holds only the workstation's own files, so it never
-touches `.htaccess` - which is where cPanel keeps the folder's password
-setting. (A zip that carried its own `.htaccess` would replace that file and
-silently switch the password off; that is why this one does not.)
+whole update. (`nbh-pictos.js` is in the zip too; v21.43's copy is larger,
+about 1.7 MB, because it holds the practice's own cards.) The zip holds only
+the workstation's own files, so it never touches `.htaccess` - which is where
+cPanel keeps the folder's password setting. (A zip that carried its own
+`.htaccess` would replace that file and silently switch the password off;
+that is why this one does not.)
+
+The writing-help relay has a zip of its own, which goes in the home folder,
+not here (see the last section); the workstation's zip never touches it.
 
 Because of the cache rule, everyone gets the new version on their next visit.
 If a form still looks old, a hard reload (⌘⇧R, Ctrl⇧R) settles it.
@@ -147,3 +159,40 @@ remembered on the device and saved with the file. Links then open
 without a sign-in; the workstation folder keeps its password. Update
 the two files in the public folder whenever a new edition is
 uploaded. Page files (Save the page as a file) need no hosting.
+
+## The writing-help relay (`public_html/ai`, v21.43)
+
+Every form has an **Improve wording** button on its text boxes. Two of its
+three kinds of help need nothing on the website: **Check wording** runs on
+the device, and Apple's **Writing Tools** are the iPad's own. The third,
+**Rewrite with Claude**, goes through a small PHP program on this same site,
+the relay, which holds the Anthropic API key (so the key is never in the
+forms) and lets in only the browser tabs that a passcode from the BCBA has
+unlocked. Both editions use the one relay, at `https://newsomebh.com/ai`;
+the forms already carry that address.
+
+- **What to upload.** `nbh-relay-upload.zip`, which comes with the release
+  beside the workstation's zip. It goes in the **home folder**, the one that
+  holds `public_html`, not in the workstation's folder. Extracted there, it
+  adds `public_html/ai/` (the web address `https://newsomebh.com/ai/`) and
+  `nbh-relay/` beside `public_html`, where nothing can be downloaded from
+  the web. Nothing else in `public_html` is touched.
+- **The steps.** They are in the zip's `nbh-relay/README.md` (in the workshop,
+  `tools/relay/README.md`): PHP 8.1 or newer for the domain, the API key, the
+  admin password at `https://newsomebh.com/ai/admin`, a monthly spend limit in
+  the Anthropic Console, and a first passcode to try. About 20 minutes, once.
+- **No folder password on `ai`.** Do not put a Directory Privacy password on
+  `public_html/ai`: the forms call it without one, and the passcode does that
+  job. The workstation's own folder keeps its password as before.
+- **https.** Rewrite with Claude works only in the forms opened from
+  newsomebh.com (or www.newsomebh.com) over https, which the Force HTTPS
+  Redirect above already ensures. A copy opened from a file says so in the
+  panel; Check wording still works there.
+- **Before real cases,** get the district's or agency's approval for sending
+  de-identified clinical text to an outside service; the README's Privacy
+  section says what is sent and what is kept (no text).
+- **Updating.** A newer `nbh-relay-upload.zip` is extracted the same way, in
+  the home folder. It replaces the program and never touches the relay's
+  settings (`nbh-relay/config.php`) or its data (`nbh-relay/data/`). The
+  workstation's zip never touches the relay, and the relay's zip never
+  touches the workstation.
