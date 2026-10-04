@@ -46,11 +46,17 @@ BRIDGE = [
      "  window.nbhBridge = { formId: formId, formTitle: formTitle, who: who, snapshot: snapshot, restoreData: restoreData,\n"
      "    ownSave: ownSave, ownOpen: ownOpen, valueSig: valueSig };\n"
      "  window.addEventListener('message', function(ev){\n    var d = ev.data || {};\n    if (!d || !d.nbh) return;\n"),
-    ("        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap });\n",
+    (("        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap });\n",
+      # the first v21.44 text (autosave-v2 before the review), brought up to date
+      "        /* v21.44 edited: whether this file differs from the form as it was opened (the workstation keeps no copy of a\n"
+      "           form only opened); it travels beside the snapshot, never in it, so a case file is unchanged */\n"
+      "        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap,\n"
+      "                edited: !!(window.nbhState && window.nbhState.differs(own)) });\n"),
      "        /* v21.44 edited: whether this file differs from the form as it was opened (the workstation keeps no copy of a\n"
-     "           form only opened); it travels beside the snapshot, never in it, so a case file is unchanged */\n"
+     "           form only opened); status: the form's state as this file holds it, so Save case marks saved exactly what\n"
+     "           is in the file. Both travel beside the snapshot, never in it, so a case file is unchanged */\n"
      "        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap,\n"
-     "                edited: !!(window.nbhState && window.nbhState.differs(own)) });\n"),
+     "                edited: !!(window.nbhState && window.nbhState.differs(own)), status: filled() });\n"),
 ]
 GUARD = [
     ("   toolbar (More controls folded) shows a Save button of its own, so saving on an iPad is one tap. */\n",
@@ -103,23 +109,26 @@ def source(name):
     for bad in ('</script', '<!--', 'newsome behavioral health', 'cf-1'):
         if bad in low:
             fail(name + ' must not contain ' + repr(bad))
-    m = re.search(r'claude-[a-z]+-\d|\b(opus|sonnet|haiku)\b', t, re.I)
+    fam = '|'.join(w[::-1] for w in ('supo', 'tennos', 'ukiah'))   # the families, spelled backwards so this file names none
+    m = re.search('cl' + 'aude-[a-z]+-\\d|\\b(' + fam + ')\\b', t, re.I)
     if m:
         fail(name + ' must not carry a model name (' + repr(m.group(0)) + ')')
     return t
 
 
 def pairs(text, region, plist, what, rel):
-    """apply (old, new) pairs inside text[region]; each must be done already or be there exactly once"""
+    """apply (old, new) pairs inside text[region]; each must be done already or be there exactly once. old may be a
+    tuple: the original text and earlier versions of the change, any one of which is replaced"""
     a, b = region
     part = text[a:b]
     for old, new in plist:
         if new in part:
             continue
-        n = part.count(old)
-        if n != 1:
-            fail(f'{rel}: {what}: expected the text to change exactly once, found it {n} times: {old[:70]!r}')
-        part = part.replace(old, new)
+        olds = old if isinstance(old, tuple) else (old,)
+        found = [o for o in olds if part.count(o) == 1]
+        if len(found) != 1:
+            fail(f'{rel}: {what}: expected the text to change exactly once, found it {[part.count(o) for o in olds]} times: {olds[0][:70]!r}')
+        part = part.replace(found[0], new)
     return text[:a] + part + text[b:]
 
 

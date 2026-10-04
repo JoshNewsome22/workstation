@@ -2,16 +2,20 @@
    on its own: IndexedDB on this site (localStorage only when IndexedDB cannot be opened), in this browser on this device.
    Nothing here makes a network request. A copy is one record: a case (the student) as one tab saw it, with each form's own
    saved file and its pictures kept as Blobs. Records are scoped to the folder the page was opened from, so two editions on
-   one website never offer each other's work. Copies older than 14 days are dropped when the list is read, and at most five
-   are kept. A full store is answered step by step (without pictures, then without the largest forms), never by turning
-   Autosave off; what was left out is written into the record so the restore can say so.
+   one website never offer each other's work. Copies older than 14 days are dropped when the list is read; no other copy is
+   ever deleted without the user (over five, the user is asked to delete some). A full store is answered step by step
+   (without pictures, then without the largest forms), never by turning Autosave off; what was left out is written into
+   the record so the restore can say so. A page being hidden or closed cannot wait for IndexedDB: its last word goes into
+   a small slot in localStorage at once (stash) and is folded into the store when a page of this folder next opens. A tab
+   holds a lock (and a heartbeat) named after it while it lives, so another tab never offers its copy as earlier work.
    The same text is in every form (tools/blocks/patch-autosave.py) and inside the workstation's autosave section. */
 (function () {
   'use strict';
   if (window.nbhCopies) return;
   var DBN = 'nbh-copies', ST = 'copies', DAYS = 14, KEEP = 5, LSP = 'nbh.copies.v2|', OFF = 'nbh.copies.off|';
   var PIC = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+\/=]{2000,}/gi;
-  var mode = null, blobsOK = true, dbP = null;
+  var mode = null, blobsOK = true, dbP = null, gen = 0, asked = false;
+  var PEND = 'nbh.copies.pend|', HB = 'nbh.copies.hb|', held = {};
 
   function scope() {
     try { var m = /^nbh-(?:own|tab)\|([^|]*)\|/.exec(String(window.name || '')); if (m && m[1]) return decodeURIComponent(m[1]); } catch (e) {}
@@ -127,8 +131,10 @@
     catch (e) { return Promise.reject(e); }
   }
   function put(rec) {
+    var g = gen;
     return ready().then(function (m) {
       if (!m) return { ok: false, why: 'none' };
+      if (g !== gen) return { ok: false, why: 'cleared' };   /* started before Delete all: not written */
       var ids = Object.keys(rec.forms || {});
       var hasPics = ids.some(function (id) { var o = rec.forms[id].own; return typeof o === 'string' && (PIC.lastIndex = 0, PIC.test(o)); });
       PIC.lastIndex = 0;
@@ -145,7 +151,9 @@
         var r = {};
         for (var k in rec) if (k !== 'forms') r[k] = rec[k];
         r.v = 2; r.scope = scope(); r.forms = forms; r.dropped = dropped.slice();
+        if (g !== gen) return Promise.resolve({ ok: false, why: 'cleared' });
         return write(r).then(function () {
+          if (!asked) { asked = true; try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {} }
           return { ok: true, full: !dropped.length && !Object.keys(lost).length, picsLost: lost, dropped: dropped.slice(), step: step };
         }, function (e) {
           step++;
@@ -169,14 +177,18 @@
       return [];
     }).catch(function () { return []; });
   }
-  function age(r) { var t = new Date(r && r.saved).getTime(); return isNaN(t) ? Infinity : (Date.now() - t) / 86400000; }
+  /* a time stamp from a clock that was set ahead counts as now, so it neither stays "newest" nor escapes expiry */
+  function ts(r) { var t = new Date(r && r.saved).getTime(); return isNaN(t) ? NaN : Math.min(t, Date.now()); }
+  function age(r) { var t = ts(r); return isNaN(t) ? Infinity : (Date.now() - t) / 86400000; }
   /* this folder's copies, newest first; expired ones are removed on the way */
+  var folded = null;
   function list() {
     var sc = scope();
-    return all().then(function (rows) {
+    folded = folded || fold();
+    return folded.then(all).then(function (rows) {
       var mine = rows.filter(function (r) { return r && r.scope === sc && r.forms; }), keep = [];
       mine.forEach(function (r) { if (age(r) > DAYS) del(r.key); else keep.push(r); });
-      return keep.sort(function (a, b) { return String(b.saved).localeCompare(String(a.saved)); });
+      return keep.sort(function (a, b) { return (ts(b) || 0) - (ts(a) || 0); });
     });
   }
   function del(key) {
@@ -185,16 +197,67 @@
       if (m === 'ls') { var s = ls(); if (s) s.removeItem(LSP + scope() + '|' + key); }
     }).then(function () { return true; }, function () { return false; });
   }
-  function clear() { return list().then(function (rows) { return Promise.all(rows.map(function (r) { return del(r.key); })); }); }
-  /* at most KEEP copies: the oldest go first, those already saved to a file before the others; `except` is never removed */
-  function prune(except) {
-    return list().then(function (rows) {
-      if (rows.length <= KEEP) return 0;
-      var cand = rows.filter(function (r) { return (except || []).indexOf(r.key) < 0; })
-        .sort(function (a, b) { return (a.fileAt ? 0 : 1) - (b.fileAt ? 0 : 1) || String(a.saved).localeCompare(String(b.saved)); });
-      var n = rows.length - KEEP, gone = cand.slice(0, n);
-      return Promise.all(gone.map(function (r) { return del(r.key); })).then(function () { return gone.length; });
-    });
+  /* Delete all: a write already on its way is dropped (gen), and this folder's stashed slots go too */
+  function clear() {
+    gen++;
+    var s = ls(), p = PEND + scope() + '|', ks = [];
+    if (s) { for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); } ks.forEach(function (k) { s.removeItem(k); }); }
+    return list().then(function (rows) { return Promise.all(rows.map(function (r) { return del(r.key); })); });
+  }
+  /* how many copies over KEEP: nothing is deleted to make room (an unanswered copy, or one whose file was never
+     confirmed, may be the only place some work is); the pages ask the user to delete what is no longer needed */
+  function over() { return list().then(function (rows) { return Math.max(0, rows.length - KEEP); }, function () { return 0; }); }
+  /* the last word of a page being hidden or closed: the whole record as text, at once */
+  function stash(rec) {
+    var s = ls(); if (!s || !rec || !rec.key || mode === null) return false;
+    var r = {}; for (var k in rec) r[k] = rec[k];
+    r.v = 2; r.scope = scope(); r.stashed = true;
+    try { s.setItem(PEND + r.scope + '|' + r.key, JSON.stringify(r)); return true; } catch (e) { return false; }
+  }
+  /* stashed slots into the store (once per page, before the first list): a slot newer than the copy replaces it */
+  function fold() {
+    var s = ls(); if (!s) return Promise.resolve(0);
+    var p = PEND + scope() + '|', ks = [];
+    for (var i = 0; i < s.length; i++) { var k = s.key(i); if (k && k.indexOf(p) === 0) ks.push(k); }
+    if (!ks.length) return Promise.resolve(0);
+    return all().then(function (rows) {
+      var have = {}; rows.forEach(function (r) { if (r && r.key) have[r.key] = r; });
+      return ks.reduce(function (pr, k) {
+        return pr.then(function (n) {
+          var d = null; try { d = JSON.parse(s.getItem(k) || 'null'); } catch (e) {}
+          if (!d || !d.key || !d.forms || age(d) > DAYS) { s.removeItem(k); return n; }
+          var h = have[d.key];
+          if (h && !((ts(d) || 0) > (ts(h) || 0))) { s.removeItem(k); return n; }   /* the store already holds this or newer */
+          delete d.stashed;
+          return put(d).then(function (r) { if (r.ok) s.removeItem(k); return n + (r.ok ? 1 : 0); });
+        });
+      }, Promise.resolve(0));
+    }).catch(function () { return 0; });
+  }
+  /* which tabs are open now: each holds a lock named after it for as long as it lives (a tab in the background keeps
+     it, one the browser has thrown away does not), and a heartbeat in localStorage where locks are missing */
+  function hold(tab) {
+    if (!tab || held[tab]) return; held[tab] = 1;
+    try { if (navigator.locks && navigator.locks.request) navigator.locks.request('nbh-tab|' + tab, function () { return new Promise(function () {}); }).catch(function () {}); } catch (e) {}
+    var beat = function () { var s = ls(); try { if (s) s.setItem(HB + tab, String(Date.now())); } catch (e) {} };
+    beat(); setInterval(beat, 5000);
+    window.addEventListener('pagehide', function () { var s = ls(); try { if (s) s.removeItem(HB + tab); } catch (e) {} });
+    window.addEventListener('pageshow', function (e) { if (e.persisted) beat(); });
+  }
+  function live() {
+    var out = {}, s = ls(), now = Date.now(), old = [];
+    if (s) for (var i = 0; i < s.length; i++) {
+      var k = s.key(i); if (!k || k.indexOf(HB) !== 0) continue;
+      var t = +s.getItem(k) || 0;
+      if (now - t < 20000) out[k.slice(HB.length)] = 1; else if (now - t > 86400000) old.push(k);
+    }
+    old.forEach(function (k) { try { s.removeItem(k); } catch (e) {} });
+    var q = null;
+    try { if (navigator.locks && navigator.locks.query) q = navigator.locks.query(); } catch (e) {}
+    return Promise.resolve(q).then(function (r) {
+      ((r && r.held) || []).forEach(function (l) { var n = String(l.name || ''); if (n.indexOf('nbh-tab|') === 0) out[n.slice(8)] = 1; });
+      return out;
+    }, function () { return out; });
   }
   function patch(key, fields) {
     return ready().then(function (m) {
@@ -231,10 +294,9 @@
   function same(a, b) {
     a = String(a || '').toLowerCase().replace(/[^a-z]/g, ''); b = String(b || '').toLowerCase().replace(/[^a-z]/g, '');
     if (!a || !b || a === b) return true;
-    if (a.indexOf(b) === 0 || b.indexOf(a) === 0) return true;   /* a name still being typed */
-    return a.split('').sort().join('') === b.split('').sort().join('');
+    return a.indexOf(b) === 0 || b.indexOf(a) === 0;   /* a name still being typed; "Myra" is not "Mary" */
   }
-  window.nbhCopies = { ready: ready, mode: function () { return mode; }, scope: scope, put: put, list: list, del: del, clear: clear, prune: prune,
+  window.nbhCopies = { ready: ready, mode: function () { return mode; }, scope: scope, put: put, list: list, del: del, clear: clear, over: over,
     patch: patch, unpack: unpack, unpackForm: unpackForm, migrate: migrate, isOff: isOff, setOff: setOff, tabId: tabId, same: same, when: when,
-    DAYS: DAYS, KEEP: KEEP };
+    stash: stash, hold: hold, live: live, DAYS: DAYS, KEEP: KEEP };
 })();

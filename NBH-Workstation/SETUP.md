@@ -6086,9 +6086,12 @@ not cost the work. What changed:
   mark.
 - **One copy for each student in each tab.** Copies are kept in the
   browser's own database (IndexedDB) with each form's file and its
-  pictures, up to five copies, for 14 days. A copy is never written over
-  while its offer has not been answered, so closing the offer box keeps
-  it, and two tabs on two students keep two copies. The Autosave button
+  pictures, for 14 days. A copy is never written over while its offer has
+  not been answered, so closing the offer box keeps it, and two tabs on two
+  students keep two copies. Open case and Restore first write the forms
+  open now into their copy and then leave it alone; a copy another open tab
+  is keeping is not offered as earlier work. No copy is deleted to make
+  room: over five, Autosave asks you to delete the ones you no longer need. The Autosave button
   lists the copies (student, forms, time) with Restore and Delete for
   each, Delete all, and the switch. The old single copy is moved over
   once and removed.
@@ -6100,9 +6103,10 @@ not cost the work. What changed:
   switch to another tab or app, not only every so often.
 - **Save case waits for every form.** A slow form is asked again with a
   longer wait. A form still missing is named in the notice, and the case
-  is then not marked saved and the safety copy is kept. On an iPad the
-  notice asks you to check that the file is in Files; the copy stays
-  until you delete it.
+  is then not marked saved and the safety copy is kept. Anything changed
+  while the file was being written stays marked unsaved. On an iPad,
+  where Safari may only show the file, Save case asks whether the file is
+  in Files; until you say it is, the dot stays on and the copy is kept.
 - **Own tab takes the work with it**, and a form opened on its own (its
   own tab, a direct link) keeps a safety copy too and offers it back when
   it opens again, in a box in the corner that blocks nothing.
@@ -6113,8 +6117,9 @@ the iPad's passcode, not by the workstation: anyone who can unlock the iPad
 and open the workstation can see them. On a shared iPad, delete them
 (Autosave button, Delete all) or turn Autosave off. The installed app and
 Safari keep separate copies. Safari may clear a site's storage after 7 days
-without a visit. A copy is a safety net; the case file is the record, so
-keep saving the case.
+without a visit, and in a private window the copies end when the window
+closes. A copy is a safety net; the case file is the record, so keep saving
+the case.
 
 What could not be checked here: the iPad itself. The checks
 (`qa/autosave-test.js`) run in desktop Chromium with an iPad user agent;
