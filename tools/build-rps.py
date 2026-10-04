@@ -68,7 +68,7 @@ if left:
 # lockup the pages now carry (its mark, left of the words) and from the school edition's index.html (name, colours).
 # sw.js is the same file in both editions (its caches are named after the folder it serves); release.json, the release
 # list, is each edition's own (the school's pages and icons differ), so it is written here, after every page is final.
-_tool('pwa-assets').write(OUT, lockup=LOCKUP)
+_tool('pwa-assets').write(OUT, lockup=LOCKUP, badge=True)   # v21.44 the badge icon (chosen for the school edition)
 if 'Newsome Behavioral Health' in open(os.path.join(OUT, 'manifest.json'), encoding='utf-8').read():
     sys.exit('the school edition\'s manifest.json still names the practice')
 _pwa = _tool('pwa-sw')
