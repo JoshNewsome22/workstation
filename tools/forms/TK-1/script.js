@@ -3211,7 +3211,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load a simulated book?\nEvery
   Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',site:'Elementary, self-contained classroom',first:'Sam',poss:'s',setting:'',layout:'ft',avatar:'av:boy',n:'5',tokname:'',qr:'https://example.org/token-board/how-to-use',credit:CREDIT0,order:'all',sp_card:'ch:0',sp_size:'large'});
   S.chk.pg_how=true;S.chk.qrframe=true;
   /* the practice's own pictures: the choices and the targets its walkthrough video shows */
-  S.ch=['cardcrayons','cardball','cardplayground','cardbreak','youtube','cardipad'].map(k=>cello(k));S.tg=['cardwriting','cardreading','cardalldone','boyraisehand','cardmath','cardwaiting'].map(k=>cello(k));
+  S.ch=['cardcrayons','cardball','cardplayground','cardbreak','youtube','cardipad2'].map(k=>cello(k));S.tg=['cardwriting','cardreading','cardalldone','boyraisehand','cardmath','cardwaiting'].map(k=>cello(k));
   renderAll();setView('preview');nbhUI.toast('Simulator loaded: Sam’s book with six choices, six targets, five stars and a sample QR link.',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
@@ -3581,7 +3581,7 @@ const FB={
   outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
 /* the simulator's pictures (the practice's own cards), shown when a page's six cards are empty */
-const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad','iPad']],
+const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad2','iPad']],
   tg:[['cardwriting','Writing'],['cardreading','Reading'],['cardalldone','All Done'],['boyraisehand','Raise hand'],['cardmath','Math'],['cardwaiting','Waiting']]};
 /* brief praise that names the behavior: an ongoing behavior named by its -ing word reads as itself (Sitting: "Great sitting!");
    any other target is named after the praise ("Great job: raise hand!"), so the praise always says what was done */

@@ -143,15 +143,15 @@ const pages=f=>cp.execSync(`python3 -c "import pymupdf;d=pymupdf.open('${f}');pr
     const ks=['cardpuzzle','cardipad','cardbooks2','cardbubbles','cardcars','cardsports','boyraisehand','faceboy2'],ls=['Puzzle','iPad','Books','Bubbles','Cars','Sports','Raise hand','Boy'];
     if(!ks.every((k,i)=>P[k]&&P[k].l===ls[i]&&!/class=|<style|<script/.test(P[k].s)))return false;
     if(!ks.slice(0,6).every(k=>/data:image\/webp;base64,/.test(P[k].s))||!['boyraisehand','faceboy2'].every(k=>/<path/.test(P[k].s)&&!/<image/.test(P[k].s)))return false;
-    if(!(P.cardwaiting&&P.cardwaiting.l==='Waiting'&&/data:image\/webp;base64,/.test(P.cardwaiting.s)&&!P.cardwaiting.w)||!/Apple Inc\./.test(window.NBH_PICTO_LICENSE)||!/Time Timer LLC/.test(window.NBH_PICTO_LICENSE)||!document.querySelector('[data-m="avatar"] option[value="faceboy2"]'))return false;
+    if(!(P.cardipad2&&P.cardipad2.l==='iPad'&&/data:image\/webp;base64,/.test(P.cardipad2.s))||!(P.cardwaiting&&P.cardwaiting.l==='Waiting'&&/data:image\/webp;base64,/.test(P.cardwaiting.s)&&!P.cardwaiting.w)||!/Apple Inc\./.test(window.NBH_PICTO_LICENSE)||!/Time Timer LLC/.test(window.NBH_PICTO_LICENSE)||!document.querySelector('[data-m="avatar"] option[value="faceboy2"]'))return false;
     const keep=JSON.stringify(S);ks.slice(0,6).forEach((k,i)=>S.ch[i]={k,ph:'',l:''});S.tg[0]={k:'boyraisehand',ph:'',l:''};S.meta.avatar='faceboy2';S.photo[0]={k:'',ph:'',l:''};renderAll();
     const cc=[...document.querySelectorAll('#book .pg[data-kind="cards-ch"] .card')],ct=document.querySelector('#book .pg[data-kind="cards-tg"] .card');
     const av=[...document.querySelectorAll('#book .pg[data-kind="bd"] .bd-photo')].filter(e=>e.querySelector('svg path')).length;
     const ok=ks.slice(0,6).every((k,i)=>cc[i].querySelector('.cl').textContent===ls[i]&&!!cc[i].querySelector('.cp svg image'))&&ct.querySelector('.cl').textContent==='Raise hand'&&!!ct.querySelector('.cp svg path')&&av===2;
     S=JSON.parse(keep);renderAll();return ok;}));
   check('the simulated book (and so the walkthrough video) shows the practice\u2019s own cards: Color, Ball, Playground, Break, YouTube, iPad; Writing, Reading, All Done, Raise hand, Math, Waiting',await page.evaluate(async()=>{const keep=JSON.stringify(S);const c0=nbhUI.confirm;nbhUI.confirm=async()=>true;
-    try{await loadSim();}finally{nbhUI.confirm=c0;}const ch=S.ch.map(o=>lbl(o)).join('|'),tg=S.tg.map(o=>lbl(o)).join('|');S=JSON.parse(keep);renderAll();
-    return ch==='Color|Ball|Playground|Break|YouTube|iPad'&&tg==='Writing|Reading|All Done|Raise hand|Math|Waiting';}));
+    try{await loadSim();}finally{nbhUI.confirm=c0;}const ipadPhoto=S.ch[5].k==='cardipad2';const ch=S.ch.map(o=>lbl(o)).join('|'),tg=S.tg.map(o=>lbl(o)).join('|');S=JSON.parse(keep);renderAll();
+    return ipadPhoto&&ch==='Color|Ball|Playground|Break|YouTube|iPad'&&tg==='Writing|Reading|All Done|Raise hand|Math|Waiting';}));
   check('From the case: a problem behavior goes on Targets only as its replacement, a reduction goal never, and the note says why',await page.evaluate(()=>{const keep=JSON.stringify(S);S.tg=S.tg.map(()=>cello());renderAll();
     const r=window.__nbhFactsPick({behaviors:[{label:'Elopement',isRep:false,rep:'Asks for a break'},{label:'Hitting',isRep:false,rep:''},{label:'Raises hand',isRep:true}],goals:{acq:[{beh:'Writes name'}],red:[{beh:'Aggression'}]},menu:[]});
     const labs=S.tg.map(o=>o.l).filter(Boolean);const ok=r.filled===3&&labs.join('|')==='Asks for a break|Raises hand|Writes name'&&!labs.some(l=>/Elopement|Hitting|Aggression/.test(l))&&/2 items were left out/.test(r.note)&&!/full/.test(r.note);
