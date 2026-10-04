@@ -2,7 +2,7 @@
 body:not(.view-walk) .only-walk{display:none}
 body.view-walk .only-setup,body.view-walk .only-choices,body.view-walk .only-targets,body.view-walk .only-board,body.view-walk .only-backs,body.view-walk .only-preview,body.view-walk .only-guide{display:none}
 @media print{.only-walk{display:none!important}}
-.wk-player{--wk-ink:#f4f7fa;position:relative;margin:10px 0 8px;background:#1d2730;border-radius:12px;padding:0 0 10px;color:var(--wk-ink);font-family:"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;max-width:100%;overflow:hidden;box-sizing:border-box}
+.wk-player{--wk-ink:#f4f7fa;scroll-margin-top:104px;position:relative;margin:10px 0 8px;background:#1d2730;border-radius:12px;padding:0 0 10px;color:var(--wk-ink);font-family:"Inter","Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;max-width:100%;overflow:hidden;box-sizing:border-box}
 .wk-player *{box-sizing:border-box}
 .wk-frame{position:relative;width:100%;overflow:hidden;border-radius:12px 12px 0 0;background:#d8c29d;margin:0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .wk-stage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;overflow:hidden;contain:layout paint;
@@ -77,12 +77,16 @@ body.view-walk .only-setup,body.view-walk .only-choices,body.view-walk .only-tar
 .wk-player button.wk-b{min-width:46px;min-height:46px;border-radius:9px;border:1px solid #4d5d6b;background:#2b3945;color:#fff;font:600 14px/1 "Inter","Segoe UI",Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 13px;cursor:pointer;margin:0}
 .wk-player button.wk-b svg{width:22px;height:22px;flex:none}
 .wk-player button.wk-b:hover{background:#364856}
-.wk-player button.wk-b:focus-visible,.wk-chaps button:focus-visible,#wkSeek:focus-visible{outline:3px solid #f2b84b;outline-offset:2px}
+.wk-player button.wk-b:focus-visible,.wk-chaps button:focus-visible,.wk-seek:focus-visible{outline:3px solid #f2b84b;outline-offset:2px}
 .wk-player button.wk-main{min-width:58px;background:#f2b84b;color:#1d2730;border-color:#f2b84b}
 .wk-player button.wk-main:hover{background:#f5c66a}
 .wk-player button[aria-pressed="false"]{opacity:.62}
 .wk-cc{font-weight:800!important;letter-spacing:.04em}
-#wkSeek{flex:1 1 200px;min-width:120px;height:46px;margin:0;accent-color:#f2b84b;background:transparent;cursor:pointer}
+/* the seek bar: a slider drawn by the player (a track, the part played, a thumb); the whole 46 px height takes a tap or a drag */
+.wk-seek{position:relative;flex:1 1 200px;min-width:120px;height:46px;margin:0 6px;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none;border-radius:9px}
+.wk-strk{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;border-radius:3px;background:#4d5d6b;overflow:hidden}
+.wk-sfill{position:absolute;left:0;top:0;bottom:0;width:100%;background:#f2b84b;transform-origin:0 50%;transform:scaleX(0)}
+.wk-sthumb{position:absolute;top:50%;left:0;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#f2b84b;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45)}
 .wk-time{font:600 15px/1 "Inter","Segoe UI",Arial,sans-serif;font-variant-numeric:tabular-nums;min-width:92px;text-align:center;color:#dfe6ec}
 .wk-chaps{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px 0}
 .wk-player .wk-chaps button{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid #4d5d6b;background:transparent;color:#e7edf2;font:600 14px/1 "Inter","Segoe UI",Arial,sans-serif;cursor:pointer;margin:0}
@@ -93,13 +97,38 @@ body.view-walk .only-setup,body.view-walk .only-choices,body.view-walk .only-tar
 @media (max-width:560px){.wk-player button.wk-b span{display:none}.wk-player button.wk-b{padding:0 10px}.wk-time{min-width:0;font-size:13px}.wk-player .wk-chaps button{padding:0 11px;font-size:13px}}
 .wk-tx{margin:10px 0 0;font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:13px}
 .wk-tx summary{cursor:pointer;font-weight:600;padding:6px 0}
-.wk-tx h4{margin:10px 0 4px;font-size:13px}
+.wk-tx h3{margin:10px 0 4px;font-size:13px}
 .wk-tx p{margin:0 0 6px;line-height:1.45}
 /* full screen: the element itself (Safari on the iPad: webkit), or a fixed panel where element full screen is missing (the iPhone) */
 .wk-player:fullscreen{background:#000;border-radius:0;margin:0;display:flex;flex-direction:column;justify-content:center;padding-bottom:12px}
 .wk-player:-webkit-full-screen{background:#000;border-radius:0;margin:0;display:flex;flex-direction:column;justify-content:center;padding-bottom:12px;width:100%;height:100%}
-.wk-player.wk-fs{position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;background:#000;border-radius:0;margin:0;display:flex;flex-direction:column;justify-content:center;padding:env(safe-area-inset-top) env(safe-area-inset-right) max(12px,env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+.wk-player.wk-fs{position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;background:#000;border-radius:0;margin:0;display:flex;flex-direction:column;justify-content:center;justify-content:safe center;overflow-y:auto;padding:env(safe-area-inset-top) env(safe-area-inset-right) max(12px,env(safe-area-inset-bottom)) env(safe-area-inset-left)}
 .wk-player:fullscreen .wk-frame,.wk-player.wk-fs .wk-frame{border-radius:0;flex:none}
 .wk-player:-webkit-full-screen .wk-frame{border-radius:0;flex:none}
 html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.wk-spin{animation:none}}
+/* touch screens: the shared rule that sets buttons to 40 px must not shrink the player's controls below 44 px */
+@media (pointer:coarse){.wk-player button.wk-b{min-height:48px!important}.wk-player .wk-chaps button{min-height:48px!important}}
+/* narrow screens: the seek bar gets a row of its own; on a phone the player uses the whole width (16 px gutters) */
+@media (max-width:900px){.wk-seek{order:-1;flex-basis:100%;margin:0 4px}}
+@media (max-width:560px){body.view-walk .wk-player{width:calc(100vw - 32px);max-width:none;margin-left:calc(50% - 50vw + 16px);margin-right:0}.wk-small .wk-big{width:56px;height:56px;margin:-28px 0 0 -28px}.wk-small .wk-big svg{width:28px;height:28px}}
+/* a full-screen panel on a short screen (a phone turned sideways): the chapter row gives its height to the picture */
+@media (max-height:500px){.wk-player.wk-fs .wk-chaps,.wk-player:fullscreen .wk-chaps{display:none}.wk-player.wk-fs .wk-seek,.wk-player:fullscreen .wk-seek{order:0;flex-basis:120px}.wk-player.wk-fs .wk-bar{flex-wrap:nowrap}}
+/* the stage's newer overlays: tab names, the rule's two ways to measure, the pairing demo, the marked name in the praise */
+.wk-tabl{padding:6px 16px 7px;border-radius:999px;background:var(--tc,#fff);border:3px solid #0e2845!important;font:700 28px/1.1 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36;white-space:nowrap;box-shadow:0 3px 10px rgba(60,40,10,.28)}
+.wk-cst{display:grid;align-items:center}
+.wk-cst>span{grid-area:1/1}
+.wk-blank{display:inline-block;width:120px;height:4px;margin-left:6px;vertical-align:-2px;background:#1d2b36;border-radius:2px}
+.wk-ric{height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 10px;border-radius:14px;background:#fffbe9;border:3px solid #1d4a77;box-shadow:0 3px 10px rgba(60,40,10,.25);font:600 18px/1.1 "Inter","Segoe UI",Arial,sans-serif;color:#1d2b36;text-align:center}
+.wk-ric svg{height:44px;width:auto;display:block}
+.wk-bub .wk-nm{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:5px;text-decoration-color:#ef7d00}
+.wk-tip{border-radius:12px;padding:6px 8px;margin:0 -8px 10px}
+.wk-pair{display:flex;align-items:center;gap:26px;padding:10px 18px;border-radius:16px;background:rgba(255,253,247,.92);border:3px solid #1d4a77;box-shadow:0 4px 12px rgba(60,40,10,.25)}
+.wk-pair .wk-pt{position:relative;flex:none;transform-origin:50% 50%}
+.wk-pair .wk-pt .card{position:relative}
+.wk-pair .wk-pa{font:700 34px/1 "Inter",Arial,sans-serif;color:#1d4a77;flex:none;width:90px;text-align:center}
+.wk-pair .wk-pi{position:relative;flex:none;width:82px;height:82px;border-radius:14px;background:#fff;box-shadow:0 0 0 4px #acd69a,0 0 0 6px #1d4a77;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;transform-origin:50% 50%}
+.wk-pair .wk-pi svg,.wk-pair .wk-pi img{width:100%;height:100%;object-fit:contain;display:block}
+.wk-pair .wk-pi span{font:700 15px/1.1 Georgia,serif;color:#1d4a77;text-align:center}
+.wk-msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:31;max-width:92%;padding:8px 16px;border-radius:10px;background:rgba(16,22,28,.9);color:#fff;font:600 15px/1.3 "Inter","Segoe UI",Arial,sans-serif;text-align:center}
+.wk-msg[hidden]{display:none}

@@ -62,6 +62,7 @@ async function states(page,label,r){
   check(label+': and the target card in the First box',firstC.length===1&&inside(firstC[0],s.first,2.5));
   const nextMid=r.cues[r.cues.findIndex(c=>c.id==='bd_place')+1];s=await P(nextMid.start+nextMid.dur/2);
   check(label+': the chosen card stays in the Then box in the next cue',s.cards.some(c=>/^ch/.test(c.id)&&inside(c,s.then,2.5)));
+  const nEnd0=id=>cue(id).start+cue(id).narr;
   const inSlots=s2=>s2.cards.filter(c=>/^tok/.test(c.id)&&s2.slots.some(b=>inside(c,b,2.5)));
   s=await P(cue('tk_page')?mid('tk_page'):mid('rule'));check(label+': in the session the Board and the Tokens page are both shown, the tokens on their boxes',s.pages.bd&&s.pages.tk&&s.cards.filter(c=>/^tok/.test(c.id)&&s.ybx.some(b=>inside(c,b,2.5))).length===r.n);
   s=await P(end('tok_first'));check(label+': one token in the first slot after tok_first',inSlots(s).length===1&&inside(inSlots(s)[0],s.slots[0],2.5));
@@ -70,7 +71,10 @@ async function states(page,label,r){
   check(label+': all '+r.n+' tokens in the slots at the end of '+LAST,sl.length===r.n&&s.slots.every(b=>sl.some(c=>inside(c,b,2.5))));
   const lastOne=sl.find(c=>inside(c,s.slots[r.n-1],2.5));
   check(label+': '+(r.term?'the last placed token is the terminal token (class last)':'no token is marked last when the option is off'),r.term?!!lastOne&&lastOne.last&&sl.filter(c=>c.last).length===1:sl.every(c=>!c.last));
-  s=await P(end('exchange'));check(label+': after the exchange the Then box is empty and the item is shown',!s.cards.some(c=>inside(c,s.then,10))&&s.cards.some(c=>c.id==='item'));
+  /* the exchange: the tokens are traded back to the Tokens page, the item is shown and handed over, then the learner keeps it (off the frame) */
+  const ex=cue('exchange');let itemSeen=false;for(let k=1;k<12;k++){const q=await P(ex.start+ex.dur*k/12);if(q.cards.some(c=>c.id==='item'))itemSeen=true;}
+  s=await P(end('exchange'));check(label+': in the exchange the item is shown; after it the Then box is empty and the tokens are back on the Tokens page (the trade)',itemSeen&&!s.cards.some(c=>inside(c,s.then,10))&&inSlots(s).length===0&&s.cards.filter(c=>/^tok/.test(c.id)&&s.ybx.some(b=>inside(c,b,2.5))).length===r.n);
+  s=await P(nEnd0('exchange'));check(label+': sync: the tokens are off the board before exchange’s line ends',inSlots(s).length===0);
   s=await P(end('reset'));check(label+': after the reset the slots are empty and the tokens are back on the Tokens page',inSlots(s).length===0&&s.cards.filter(c=>/^tok/.test(c.id)&&s.ybx.some(b=>inside(c,b,2.5))).length===r.n);
   check(label+': after the reset the book is back on the Choices page with every card on its box',s.pages.ch&&s.cards.filter(c=>/^ch\d$/.test(c.id)).every(c=>inside(c,s.chBx[+c.id.slice(2)])));
   /* sync: what a line says happens while that line plays (checked at the end of its narration), the lines never overlap, the pauses stay short */
@@ -108,7 +112,7 @@ async function states(page,label,r){
     for(const c of r.cues){await page.evaluate(t=>TKWALK.renderAt(t),c.start+c.dur/2);await sleep(40);await (await page.$('#wkFrame')).screenshot({path:SHOTS+'/cue-'+c.id+'.png'});}
     await page.evaluate(()=>{const b=document.getElementById('wkBig');if(b)b.style.visibility='';});
     /* controls */
-    const names=await page.evaluate(()=>[...document.querySelectorAll('#wkPlayer button,#wkPlayer input')].map(e=>[e.id||e.dataset.ch||e.className,(e.getAttribute('aria-label')||e.textContent||'').trim()]));
+    const names=await page.evaluate(()=>[...document.querySelectorAll('#wkPlayer button,#wkPlayer input,#wkPlayer [role="slider"]')].map(e=>[e.id||e.dataset.ch||e.className,(e.getAttribute('aria-label')||e.textContent||'').trim()]));
     check('every control of the player has an accessible name',names.length>=14&&names.every(n=>n[1]),names.filter(n=>!n[1]).map(n=>n[0]).join(',')||names.length+' controls');
     const sizes=await page.evaluate(()=>[...document.querySelectorAll('#wkPlayer .wk-bar button,#wkPlayer .wk-chaps button')].map(e=>{const r=e.getBoundingClientRect();return Math.min(r.width,r.height);}));
     check('the buttons are big touch targets (40 px or more)',sizes.every(v=>v>=40),Math.min(...sizes).toFixed(0)+' px smallest');
@@ -172,6 +176,9 @@ async function states(page,label,r){
     await page.click('#viewSeg button[data-view="walk"]');await sleep(400);
     const lens=await page.evaluate(()=>{const L=WALK_AUDIO.lines;return TKWALK.cues.every(c=>Math.abs(c.narr-L[c.id].d)<1e-9&&c.text===L[c.id].t);});
     check('narration'+(built?'':' (test tones)')+': each cue takes its length and its caption from WALK_AUDIO',lens);
+    if(built){const um=await page.evaluate(()=>TKWALK.unmeasured);check('narration: every recorded line has its measured phrase timings (captions and actions follow the voice; a re-voiced line needs measuring again)',um.length===0,um.join(',')||'all lines');
+      const cf=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='tok_first');TKWALK.renderAt(c.start+5.6);return document.querySelector('#wkStage .wk-cap').textContent;});
+      check('narration: the caption changes with the voice (tok_first, 5.6 s in: "Give a token...")',/^Give a token/.test(cf),cf.slice(0,40));}
     if(built){const real=await page.evaluate(()=>({note:document.getElementById('wkNote').textContent,
         hands:typeof WALK_HANDS==='object'&&['learner','teacher'].every(w=>['point','pinch','open'].every(p=>{const e=document.querySelector('#wkStage .wk-hand.wk-'+w+' .wk-pose:nth-child('+(['point','pinch','open'].indexOf(p)+1)+')');return e&&e.innerHTML.length>1000&&e.innerHTML.replace(/\s/g,'').slice(0,200)===WALK_HANDS[w][p].svg.replace(/\s/g,'').slice(0,200);}))}));
       check('the build’s own files are used: the drawn hands are WALK_HANDS (no placeholders) and no note about missing narration',real.hands&&!/narration is not/.test(real.note),real.note.slice(0,80));}
@@ -184,6 +191,74 @@ async function states(page,label,r){
     await page.evaluate(()=>TKWALK.seek(60));await sleep(500);const p4=await page.evaluate(()=>({t:TKWALK.time,p:TKWALK.playing}));check('narration: a seek while playing goes on playing from there',p4.p&&p4.t>60.2&&p4.t<61.5,p4.t.toFixed(2));
     await page.evaluate(()=>TKWALK.pause());
     check('narration: no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
+  /* ---- the fixes of the review: content, timing and the player's behaviour ---- */
+  {const page=await br.newPage({viewport:{width:1180,height:820}});const log=[];wire(page,log);
+    await page.addInitScript(()=>{window.__ctxs=[];const C=window.AudioContext;if(C){window.AudioContext=function(o){const c=new C(o);window.__ctxs.push(c);return c;};window.AudioContext.prototype=C.prototype;}
+      window.__wl=0;try{if(navigator.wakeLock){const r=navigator.wakeLock.request.bind(navigator.wakeLock);navigator.wakeLock.request=function(t){window.__wl++;return r(t).catch(()=>({release:async()=>{},addEventListener(){}}));};}
+        else Object.defineProperty(navigator,'wakeLock',{value:{request(){window.__wl++;return Promise.resolve({release:async()=>{},addEventListener(){}});}}});}catch(e){}});
+    await page.goto(URL);await sleep(500);await page.evaluate(()=>{window.confirm=()=>true;nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
+    await page.evaluate(()=>document.querySelectorAll('.nbh-toast,[class*="toast"]').forEach(e=>e.remove()));
+    await page.click('#viewSeg button[data-view="walk"]');await sleep(400);await page.addScriptTag({content:PROBE});
+    /* the content */
+    const c1=await page.evaluate(()=>{const ex=TKWALK.cues.find(c=>c.id==='exchange');TKWALK.renderAt(ex.start+ex.dur*.6);
+      return{lbl:(document.querySelector('#wkStage .wk-ilbl')||{}).textContent||'',h3:document.querySelectorAll('#wkTx h3').length,h4:document.querySelectorAll('#wkTx h4').length,
+        snd:document.getElementById('wkSnd').getAttribute('aria-label'),cc:document.getElementById('wkCc').getAttribute('aria-label'),fields:document.querySelectorAll('#wkPlayer input,#wkPlayer select,#wkPlayer textarea').length};});
+    check('the item label names no number of minutes (the time or amount is set before the session)',c1.lbl&&!/\d/.test(c1.lbl),c1.lbl);
+    check('the transcript’s chapter headings are h3 (under the section’s h2)',c1.h3===7&&c1.h4===0);
+    check('toggle buttons keep one name (Sound; CC first in the CC name), aria-pressed carries the state',c1.snd==='Sound'&&/^CC/.test(c1.cc));
+    check('the player has no form fields (the workstation saves form fields: watching must not count as an unsaved change)',c1.fields===0);
+    /* the first token comes as the interval ends; the ring keeps its tick until the token is in its slot */
+    const tf=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='tok_first');const out=[];for(let t=c.start;t<c.start+c.dur;t+=.1){TKWALK.renderAt(t);
+        const sl=[...document.querySelectorAll('#wkStage .wk-page[data-pg="bd"] .wk-in[data-card="tok0"]')].some(e=>e.style.opacity==='1');out.push([t-c.start,(document.querySelector('#wkStage .wk-rt')||{}).textContent,sl]);}return out;});
+    const placed=tf.find(x=>x[2]),tickAt=tf.filter(x=>x[1]==='✓');
+    check('the first token is in its slot within 4 s of the interval’s end',placed&&placed[0]<4.6,placed&&placed[0].toFixed(1)+' s into the line');
+    check('the ring keeps its tick from the interval’s end until the token is placed',tickAt.length&&placed&&tickAt[tickAt.length-1][0]>=placed[0]-.25&&tf.filter(x=>x[0]>.7&&x[0]<placed[0]-.2).every(x=>x[1]==='✓'));
+    const tn=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='tok_none');if(!c)return null;const o=[];for(let t=c.start;t<c.start+4;t+=.1){TKWALK.renderAt(t);o.push((document.querySelector('#wkStage .wk-rt')||{}).textContent+'|'+document.querySelector('#wkStage .wk-ring .fg').style.strokeDashoffset);}return o;});
+    check('no-token interval: the ring stops part way and shows a dash',!tn||tn.some(x=>/^–\|/.test(x)&&parseFloat(x.split('|')[1])>200));
+    /* praise names the behavior, whatever the target's label */
+    const pr=await page.evaluate(()=>{S.tg[0].l='Raise hand';S.tg[0].k='';S.tg[0].ph='';for(let i=1;i<6;i++){S.tg[i].l='';S.tg[i].k='';S.tg[i].ph='';}renderAll();
+      const b=[...document.querySelectorAll('#wkStage .wk-bub')].map(e=>e.textContent);const chip=(document.querySelector('#wkStage .wk-c1')||{}).textContent||'';return{b,chip};});
+    check('praise names a target that is not an -ing word ("Great job: raise hand!"), and rebuilding follows renderAll while the view is open',pr.b.length&&pr.b.every(x=>/raise hand/i.test(x)),pr.b[0]);
+    const pr2=await page.evaluate(()=>{S.tg[2].l='Writing';renderAll();return{b:[...document.querySelectorAll('#wkStage .wk-bub')].map(e=>e.textContent)[0],chip:(document.querySelector('#wkStage .wk-c1')||{}).textContent};});
+    check('the demo target is an ongoing (-ing) behavior when the book has one',/writing/i.test(pr2.b)&&/writing/i.test(pr2.chip),pr2.b);
+    await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);await page.click('#viewSeg button[data-view="setup"]');await page.click('#viewSeg button[data-view="walk"]');await sleep(300);
+    /* the seek bar: keys skip five seconds, End while playing ends (does not start again), it follows playback */
+    const k1=await page.evaluate(async()=>{TKWALK.seek(30);const s=document.getElementById('wkSeek');s.focus();s.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));const a=TKWALK.time;
+      s.dispatchEvent(new KeyboardEvent('keydown',{key:'PageUp',bubbles:true,cancelable:true}));const b=TKWALK.time;return{a,b};});
+    check('seek bar keys: arrow +5 s, Page Up +30 s',Math.abs(k1.a-35)<.01&&Math.abs(k1.b-65)<.01,k1.a+' '+k1.b);
+    await page.click('#wkPlay');await sleep(1200);const wl=await page.evaluate(()=>window.__wl);check('Play asks to keep the screen on (wake lock)',wl>=1,wl+' requests');
+    const f1=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkSeek .wk-sthumb')).left);await sleep(1500);const f2=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkSeek .wk-sthumb')).left);
+    check('the seek bar follows playback while it has focus',f1!==f2,f1+' -> '+f2);
+    /* the Walkthrough button again, with the book unchanged, does not stop playback */
+    await page.click('#viewSeg button[data-view="walk"]');await sleep(200);check('tapping Walkthrough again while playing keeps playing',await page.evaluate(()=>TKWALK.playing));
+    /* the system takes the sound: the player pauses and says so */
+    const it=await page.evaluate(async()=>{const c=window.__ctxs[window.__ctxs.length-1];await c.suspend();await new Promise(r=>setTimeout(r,1500));return{p:TKWALK.playing,lbl:document.getElementById('wkPlay').getAttribute('aria-label'),m:(document.querySelector('#wkFrame .wk-msg')||{}).textContent||''};});
+    check('an interrupted audio context pauses the player and says so',!it.p&&it.lbl==='Play'&&/interrupted/.test(it.m),JSON.stringify(it));
+    const e1=await page.evaluate(async()=>{TKWALK.seek(TKWALK.duration-2);TKWALK.play();await new Promise(r=>setTimeout(r,400));const s=document.getElementById('wkSeek');s.focus();s.dispatchEvent(new KeyboardEvent('keydown',{key:'End',bubbles:true,cancelable:true}));await new Promise(r=>setTimeout(r,300));return{t:TKWALK.time,p:TKWALK.playing,D:TKWALK.duration};});
+    check('End on the seek bar while playing goes to the end (it does not start again)',!e1.p&&e1.t>e1.D-.1,JSON.stringify(e1));
+    /* Space on the transcript opens it; Escape in the full-screen panel is handled once */
+    const sp=await page.evaluate(()=>{TKWALK.seek(10);const sm=document.querySelector('.wk-tx summary');sm.focus();return true;});await page.keyboard.press('Space');await sleep(150);
+    const sp2=await page.evaluate(()=>({open:document.querySelector('.wk-tx').open,p:TKWALK.playing}));check('Space on the transcript opens it and does not play',sp2.open&&!sp2.p);
+    const esc=await page.evaluate(()=>{const p=document.getElementById('wkPlayer');p.requestFullscreen=null;p.webkitRequestFullscreen=null;Element.prototype.requestFullscreen=undefined;document.getElementById('wkFs').click();
+      const on=p.classList.contains('wk-fs'),inert=!!document.querySelector('.toolbar')&&document.querySelector('.toolbar').closest('[inert]')!==null;
+      const dp=!document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));return{on,inert,off:!p.classList.contains('wk-fs'),dp,still:!!document.querySelector('[inert]')};});
+    check('full-screen panel: what is behind it is inert, Escape closes it and is marked handled (the workstation does not also leave full screen)',esc.on&&esc.inert&&esc.off&&esc.dp===true&&!esc.still,JSON.stringify(esc));
+    check('review fixes: no console errors',errorsOf(log).length===0,JSON.stringify(errorsOf(log)).slice(0,300));await page.close();}
+  /* ---- inside a workstation frame: hiding the frame (another form opened) pauses the walkthrough ---- */
+  {const page=await br.newPage({viewport:{width:1180,height:820}});const log=[];wire(page,log);await page.goto(BASE+'/qa/');
+    await page.evaluate(u=>{document.body.innerHTML='<iframe id="f" src="'+u+'" style="width:1100px;height:800px"></iframe>';},URL);await sleep(1500);
+    const fr=page.frames().find(f=>f.url().includes('TK-1'));await fr.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(400);
+    await fr.evaluate(()=>setView('walk'));await sleep(300);await fr.click('#wkPlay');await sleep(1000);const a=await fr.evaluate(()=>TKWALK.playing);
+    await page.evaluate(()=>{document.getElementById('f').hidden=true;});await sleep(1200);const b=await fr.evaluate(()=>({p:TKWALK.playing,t:TKWALK.time}));
+    check('in a frame: hiding the frame pauses the walkthrough',a&&!b.p,JSON.stringify({a,b}));await page.close();}
+  /* ---- touch screens: the controls stay big (the shared 40 px rule for touch does not shrink them) ---- */
+  for(const vp of [{width:820,height:1180},{width:390,height:844}]){const ctx=await br.newContext({viewport:vp,hasTouch:true,isMobile:true});const page=await ctx.newPage();await page.goto(URL);await sleep(500);
+    await page.evaluate(()=>{nbhUI.confirm=async()=>true;document.querySelector('#simBtn').click();});await sleep(300);await page.evaluate(()=>setView('walk'));await sleep(400);
+    const sz=await page.evaluate(()=>[...document.querySelectorAll('#wkPlayer .wk-bar button,#wkPlayer .wk-chaps button,#wkSeek')].map(e=>{const r=e.getBoundingClientRect();return Math.min(r.width,r.height);}));
+    check(vp.width+' touch: every control 44 px or more',sz.every(v=>v>=44),Math.min(...sz).toFixed(0)+' px smallest');
+    if(vp.width<500){const w=await page.evaluate(()=>{const f=document.getElementById('wkFrame').getBoundingClientRect();return{w:f.width,l:f.left,r:f.right,iw:innerWidth,sw:document.documentElement.scrollWidth};});
+      check('phone: the picture uses the width less 16 px gutters, with no sideways scroll',w.w>=w.iw-34&&w.l>=15&&w.r<=w.iw-15&&w.sw<=w.iw,JSON.stringify(w));}
+    await ctx.close();}
   /* ---- no sideways scroll on the iPad (both ways) and a phone ---- */
   for(const vp of [{width:820,height:1180},{width:1180,height:820},{width:390,height:844}]){const {page,log}=await open(br,vp,sim);
     await page.click('#viewSeg button[data-view="walk"]');await sleep(500);
@@ -191,6 +266,8 @@ async function states(page,label,r){
       const kids=[...document.querySelectorAll('#wkPlayer .wk-bar>*,#wkPlayer .wk-chaps>*')].map(e=>e.getBoundingClientRect());
       return{sw:document.documentElement.scrollWidth,iw:innerWidth,pr:p.right,fw:f.width,fh:f.height,kids:kids.every(r=>r.right<=p.right+1&&r.left>=p.left-1)};});
     check(vp.width+' x '+vp.height+': no sideways scroll, the player and its controls inside the page',o.sw<=o.iw&&o.pr<=o.iw&&o.kids,o.sw+' / '+o.iw);
+    if(vp.width===1180){const rv=await page.evaluate(()=>{const tb=document.querySelector('.toolbar').getBoundingClientRect(),f=document.getElementById('wkFrame').getBoundingClientRect();return{tb:tb.bottom,top:f.top,bot:f.bottom,ih:innerHeight};});
+      check('iPad landscape: entering the view brings the whole picture into view below the sticky toolbar',rv.top>=rv.tb-1&&rv.bot<=rv.ih,JSON.stringify(rv));}
     check(vp.width+' x '+vp.height+': the picture is 16:9',Math.abs(o.fw/o.fh-16/9)<.01,o.fw.toFixed(0)+' x '+o.fh.toFixed(0));
     await (await page.$('#wkPlayer')).screenshot({path:SHOTS+'/player-'+vp.width+'.png'});
     check(vp.width+': no console errors',errorsOf(log).length===0);await page.close();}
