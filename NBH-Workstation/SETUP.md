@@ -6748,7 +6748,15 @@ The button goes only on narrative boxes. These get none:
 - hidden boxes;
 - boxes in the toolbar or in a dialog;
 - paste boxes with spelling check turned off;
-- the learner's particulars.
+- the learner's particulars;
+- boxes that keep someone else's words as they were said or written, so
+  that nothing rewords them: IN-1's interview answers, IA-1's FAST open
+  answers, SV-1's open answers, SI-1's answers in the student's words and
+  *What the student said about the plan*, RR-1's quoted present levels,
+  diagnoses, parent information and goals, and CT-1's *What the family said
+  in their own words*;
+- TK-1's backs, how-to steps and credit line: instructions in the
+  assessor's words, with the book's marks in them.
 
 Nothing the button or the panel draws is a form field: it all lives in one
 element at the end of the page. So the saved files, the workstation's
@@ -6762,30 +6770,33 @@ have no Guide, and not VS-1 and IM-1, which have no multi-line box. Some
 notes add a line for their form:
 
 - TB-1: in a definition, the behavior's own name belongs there;
-- IN-1, CT-1, SI-1, SV-1 and CF-1: a respondent's own words go in quotation
-  marks, which Check wording leaves alone;
+- IN-1, IA-1, CT-1, SI-1, SV-1 and RR-1: which of their boxes keep a
+  respondent's, the student's or a record's own words and so have no button;
+  elsewhere (CF-1 too), a respondent's own words go in quotation marks,
+  which Check wording leaves alone;
 - PD-1, ST-1 and TI-1: the text is about a staff member, so add their name
   under Also hide;
 - FS-1 and EB-1: what Report-ready and Concise do for a report and a brief;
 - OB-1: typing in the panel is never counted by the Live Recorder;
-- TK-1: its backs are instructions, so a word Check wording marks there can
-  stay, and a rewrite must keep the book's marks.
+- TK-1: its backs, how-to steps and credit line are instructions with the
+  book's marks in them, so they have no button; Writing Tools can still
+  proofread them, and the note says which marks to check afterwards.
 
 **Checked.**
 
 - The relay's suite (`tools/relay/tests/run.sh`, offline, against a local
   stand-in for the API):
-  - every PHP file linted;
-  - `relay-test.php` (378 checks);
-  - `contract-test.js` (31), which runs the panel's own functions on every
+  - every PHP file linted (24);
+  - `relay-test.php` (394 checks);
+  - `contract-test.js` (95), which runs the panel's own functions on every
     recorded answer;
-  - `admin-browser-test.js` (37), the admin page at 390, 820 and 1180 px;
+  - `admin-browser-test.js` (39), the admin page at 390, 820 and 1180 px;
   - `php81-test.php` (22), under PHP 8.1.
 - A real Apache 2.4.58 with mod_php answered all 12 checks, both with
   mod_rewrite and without.
 - `qa/wording-rules-test.js`: precision and recall of 100% on 163 samples,
   and no finding on 78 that must not fire.
-- `qa/wording-client-test.js`: 206 checks, with axe.
+- `qa/wording-client-test.js`: 227 checks, with axe.
 - `qa/wording-rollout-test.js` compares all 44 forms with the copies before
   the writing help: load, buttons, save, snapshot, print, and 390 px.
 - A review made 30 findings: 24 were dealt with in full, 5 in part, and 1
@@ -6923,9 +6934,10 @@ found the faults below. Each is fixed, or the reason it is not is given.
   while nothing changes.
 - The **Preview** line leaves out its text check while the book is not drawn
   on the screen (an iPad showed "Text check 89.01" there).
-- The instruction **Backs** and the picture-credit box have no Improve
-  wording button: they are boilerplate with {n}, {token} and {last} marks in
-  them, which a rewrite could break. The Guide says so.
+- The instruction **Backs**, the how-to steps and the credit line have no
+  Improve wording button: they are instructions in the assessor's words,
+  with {n}, {token} and {last} marks in them, which a rewrite could break.
+  The Guide says so.
 - A saved file, case or safety copy whose photo names are not plain letters,
   digits, dashes or underscores has those photos left out when it opens,
   and photo names are escaped in the picker, so a file made elsewhere cannot
@@ -6967,11 +6979,11 @@ found the faults below. Each is fixed, or the reason it is not is given.
 **Writing help**
 
 - Boxes that hold someone else's words have no Improve wording button, so
-  their words are never "corrected": IN-1's interview answers, SV-1's open
-  answers, SI-1's answers in the student's words and *What the student said
-  about the plan*, RR-1's quoted present levels, diagnoses, parent
-  information and goals, and CT-1's *What the family said in their own
-  words*. Each Guide says so.
+  their words are never "corrected": IN-1's interview answers, IA-1's FAST
+  open answers, SV-1's open answers, SI-1's answers in the student's words
+  and *What the student said about the plan*, RR-1's quoted present levels,
+  diagnoses, parent information and goals, and CT-1's *What the family said
+  in their own words*. Each Guide says so.
 - More findings can be fixed with one tap: "a lot" becomes "[number] times"
   to fill in; words that claim a purpose ("deliberately", "on purpose") and
   dramatic words before a noun ("a blood-curdling scream") can be taken out,
