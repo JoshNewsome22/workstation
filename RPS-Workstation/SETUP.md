@@ -7045,9 +7045,16 @@ over, so the README inside it is current.
 
 **Housekeeping**
 
-- Two working files committed by mistake (`crops_te1/reshot_d0_now.png` and a
-  Python cache file) are removed, `qa/reshot-te1.js` writes into `qa/out/`,
-  and `qa/print/` and `qa/shots/` are ignored.
+- Two working files committed by mistake are gone from the repository's
+  root and from the parts: `crops_te1/reshot_d0_now.png`, which
+  `qa/autosave-test.js` had taken up as its photo, now lives as
+  `qa/data/autosave-photo.png`, and the Python cache file is removed.
+  `qa/reshot-te1.js` writes into `qa/out/`, and `qa/print/` and `qa/shots/`
+  are ignored.
+- `qa/ob1-split-test.js` tries the side-by-side mode in a browser profile of
+  its own: OB-1, changed on its own just before, keeps a safety copy, and
+  the workstation's offer to restore it stood in the way of the test's
+  clicks.
 - `qa/shell-check.js` closes the simulation's notice before it tests Escape
   (while a form's dialog is open, Escape is the dialog's), `qa/pnav-test.js`
   uses the same server as the other checks (`WS_URL`), and `qa/printbase.js`

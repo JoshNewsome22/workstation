@@ -14,7 +14,8 @@
      print   blank and with the simulation (a field focused, its button on screen), the printed PDF is the
              pre-rollout form's: the same pages, read and rasterised the same (qa/compare-print.py)
      390     at 390 px wide, with a button showing and with the panel open, nothing runs past the screen's edge
-   Random numbers are seeded and the clock is fixed, so both copies take the same simulation.
+   Random numbers are seeded (again as each simulation is loaded) and the clock is fixed, so both copies take the same
+   simulation.
    usage: node qa/wording-rollout-test.js [FORM-ID ...]     (the server on :8123 serving the repository, as for every check)
    env: WR_COMMIT (the commit before the rollout, default e39901f), WR_JOBS (forms at once, default 3),
         WR_OUT (folder for the results, default qa/out/wording-rollout) */
@@ -77,11 +78,13 @@ async function context(browser, vp){
   const ctx = await browser.newContext({viewport: vp || {width:1180, height:820}, acceptDownloads:true});
   await ctx.clock.setFixedTime(FIXED);
   await ctx.addInitScript({content: HELPERS});
-  await ctx.addInitScript(() => { window.print = function(){}; let x = 20261004; Math.random = () => { x = (x * 48271) % 2147483647; return (x - 1) / 2147483646; }; });
+  /* seeded again as the simulation is loaded (sim below): a part that draws a number while the page opens (the Autosave
+     block's tab name, v21.44) would otherwise move every simulated number one on in one copy and not the other */
+  await ctx.addInitScript(() => { window.print = function(){}; let x = 20261004; window.__wrReseed = () => { x = 20261004; }; Math.random = () => { x = (x * 48271) % 2147483647; return (x - 1) / 2147483646; }; });
   return ctx;
 }
 /* the forms ask before loading their simulation over what is there; the answer here is yes */
-const sim = async target => { await target.evaluate(() => { window.confirm = () => true; }); const s = await loadSim(target); await sleep(1400); return s; };
+const sim = async target => { await target.evaluate(() => { window.confirm = () => true; if (window.__wrReseed) window.__wrReseed(); }); const s = await loadSim(target); await sleep(1400); return s; };
 const errs = (log, from) => log.slice(from || 0).filter(l => l.type === 'pageerror' || l.type === 'error').map(l => l.text);
 async function views(target){
   return target.evaluate(() => {
