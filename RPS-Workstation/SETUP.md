@@ -6786,17 +6786,17 @@ notes add a line for their form:
 
 - The relay's suite (`tools/relay/tests/run.sh`, offline, against a local
   stand-in for the API):
-  - every PHP file linted;
-  - `relay-test.php` (378 checks);
-  - `contract-test.js` (31), which runs the panel's own functions on every
+  - every PHP file linted (24);
+  - `relay-test.php` (394 checks);
+  - `contract-test.js` (95), which runs the panel's own functions on every
     recorded answer;
-  - `admin-browser-test.js` (37), the admin page at 390, 820 and 1180 px;
+  - `admin-browser-test.js` (39), the admin page at 390, 820 and 1180 px;
   - `php81-test.php` (22), under PHP 8.1.
 - A real Apache 2.4.58 with mod_php answered all 12 checks, both with
   mod_rewrite and without.
 - `qa/wording-rules-test.js`: precision and recall of 100% on 163 samples,
   and no finding on 78 that must not fire.
-- `qa/wording-client-test.js`: 206 checks, with axe.
+- `qa/wording-client-test.js`: 227 checks, with axe.
 - `qa/wording-rollout-test.js` compares all 44 forms with the copies before
   the writing help: load, buttons, save, snapshot, print, and 390 px.
 - A review made 30 findings: 24 were dealt with in full, 5 in part, and 1
