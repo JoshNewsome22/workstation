@@ -990,7 +990,7 @@ it changes; the browser's own encoders (WebCodecs: H.264 and AAC) make the video
 (`tools/vendor/mp4-muxer`, MIT) puts them into one MP4. `tools/forms/TK-1/build.sh` writes both into
 `nbh-tk1-video.js` beside the forms (the one-file editions carry it inside). It needs Safari on iPadOS 16.4 or later,
 or Chrome or Edge on a computer; elsewhere the button says so. In WebKit (the engine of Safari) the whole 3½-minute
-walkthrough took about 6½ minutes to make here and came out at about 56 MB; an iPad's own video encoder is usually
+walkthrough took about 6½ minutes to make here and came out at about 57 MB (the Smaller size, about 30 MB, is softer while things move); an iPad's own video encoder is usually
 quicker. Keep the page open and the screen on while it works (it asks the screen to stay on). When it is done:
 **Share or save…** opens the iPad's share sheet (Save Video puts it in Photos, Save to Files in Files), and
 **Download** saves it as a file. The video shows the student's book: share it only through the district's drive or
