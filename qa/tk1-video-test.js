@@ -17,8 +17,9 @@ let fails=0;const ok=(name,cond,info)=>{console.log((cond?'PASS ':'FAIL ')+name+
   await page.click('#viewSeg button[data-view="walk"]');await sleep(1500);
   const D=await page.evaluate(()=>TKWALK.duration);
   const ts=[3,22,40,58,62,66,95,120,150,165,190,D-2];
-  for(const t of ts){
-    const png=await page.evaluate(async t=>(await TKVIDEO.frame(t)).toDataURL('image/png'),t);
+  /* the video is 1080p: most moments at 1280 (quicker), three at 1920 x 1080, as the video has them */
+  for(const t of ts){const W=[66,150,190].includes(t)?1920:1280;
+    const png=await page.evaluate(async([t,W])=>(await TKVIDEO.frame(t,W)).toDataURL('image/png'),[t,W]);
     await page.evaluate(t=>TKWALK.renderAt(t),t);await sleep(150);
     /* the stage alone, without the big play button over it */
     await page.evaluate(()=>{const b=document.getElementById('wkBig');if(b)b.style.visibility='hidden';});
@@ -32,7 +33,7 @@ let fails=0;const ok=(name,cond,info)=>{console.log((cond?'PASS ':'FAIL ')+name+
       const p=px(A),q=px(B);let sum=0;const cell=new Array(64).fill(0),cn=new Array(64).fill(0);
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;const dd=(Math.abs(p[i]-q[i])+Math.abs(p[i+1]-q[i+1])+Math.abs(p[i+2]-q[i+2]))/3;sum+=dd;const c=Math.floor(y/(h/8))*8+Math.floor(x/(w/8));cell[c]+=dd;cn[c]++;}
       return{mean:+(sum/(w*h)).toFixed(2),worst:+Math.max(...cell.map((v,i)=>v/cn[i])).toFixed(2)};},[png,'data:image/png;base64,'+shot.toString('base64')]);
-    ok('t='+t.toFixed(1)+' s: the painted frame is the stage as shown',d.mean<3.5&&d.worst<9,d);}
+    ok('t='+t.toFixed(1)+' s, '+W+' wide: the painted frame is the stage as shown',d.mean<3.5&&d.worst<9,d);}
   /* the same moments painted by one scene stepping through the walkthrough (as the video is made: pictures kept between frames
      and painted again only where something changed), against fresh frames: a change the scene misses (a caption's new text,
      the timer's numbers) shows here */
