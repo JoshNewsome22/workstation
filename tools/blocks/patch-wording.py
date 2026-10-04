@@ -7,6 +7,11 @@ time, so run it again whenever one of the three files changes (a new rule, the r
 before the form's first <script> after </main>; a form with no </main> (OB-1 is a run of .sheet pages) takes it before
 its first <script> after <body>, which is the same place: after the markup, before the form's own scripts.
 
+Every form carries it. tools/apply-polish.py puts it in (load() and put() below) with the polish layer, so
+tools/polish-one.py, which runs after every rebuild of a form built from parts (tools/new-form.py, TK-1's build.sh),
+puts it back into a rebuilt form; tools/build-single.py refuses a form that does not hold exactly one copy. To refresh
+all 44 after a change to one of the three files: python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
+
 The sources are checked first and nothing is written if one is wrong: none may contain "</script" or "<!--" (either
 would end or confuse the script element), the practice's name (the school edition build refuses any copy of it) or a
 model ID (only the relay carries one); the rules must have the documented shape, and every rule's pattern must compile
@@ -168,10 +173,13 @@ def insert_at(s, rel):
     return t.start()
 
 
-def main():
-    opt = args(sys.argv[1:])
-    rules = read(opt['rules'], 'the rules file')
-    config = read(opt['config'], 'the config file')
+def load(rules_path=None, config_path=None):
+    """Read and check the three sources once; the block every form gets, with what went into it. Stops (sys.exit)
+    with the reason when a source is wrong, before anything is written. Used by main() and by tools/apply-polish.py."""
+    rules_path = rules_path or os.path.join(BLOCKS, 'nbh-wording-rules.json')
+    config_path = config_path or os.path.join(BLOCKS, 'nbh-wording-config.json')
+    rules = read(rules_path, 'the rules file')
+    config = read(config_path, 'the config file')
     client = read(os.path.join(BLOCKS, 'nbh-wording.js'), 'the client')
     for text, name in ((rules, 'the rules file'), (config, 'the config file'), (client, 'nbh-wording.js'), (HEAD, 'the header')):
         guard(text, name)
@@ -179,29 +187,41 @@ def main():
     check_config(config, 'the config file')
     if 'window.nbhWording' not in client or 'nbhWordingRules' not in client:
         fail('nbh-wording.js does not look like the client')
-    node_check(opt['rules'])
+    node_check(rules_path)
     block = (OPEN + HEAD + 'window.nbhWordingRules=\n' + rules + '\n;\nwindow.nbhWordingConfig=\n' + config + '\n;\n' + client + CLOSE)
+    return {'block': block, 'client': client, 'rules': d, 'relay': json.loads(config)['relay']}
+
+
+def put(s, rel, W):
+    """The text of form "rel" with the current block in it, once: (text, 'inserted' | 'replaced' | 'already current')."""
+    base = os.path.basename(rel)
+    if not base.endswith('.html') or base in ('index.html', 'respond.html'):
+        fail(rel + ': not a form (the shell and the respondent page do not take the panel)')
+    block, client = W['block'], W['client']
+    n = s.count(TAG)
+    if n > 1:
+        fail('%s: %d copies of the block; remove all but one first' % (rel, n))
+    if n:
+        a = s.index(TAG) + 1
+        b = s.index(CLOSE, a) + len(CLOSE)
+        out = s[:a] + block + s[b:]
+        did = 'replaced' if s[a:b] != block else 'already current'
+    else:
+        a = insert_at(s, rel)
+        out = s[:a] + block + '\n\n' + s[a:]
+        did = 'inserted'
+    if not (out.count(TAG) == 1 and out.count(block) == 1 and out.count(client) == 1):
+        fail(rel + ': the result would not hold exactly one copy')
+    return out, did
+
+
+def main():
+    opt = args(sys.argv[1:])
+    W = load(opt['rules'], opt['config'])
     stale = 0
     for rel in opt['forms']:
         path = os.path.abspath(rel)
-        base = os.path.basename(path)
-        if not base.endswith('.html') or base in ('index.html', 'respond.html'):
-            fail(rel + ': not a form (the shell and the respondent page do not take the panel)')
-        s = read(path, 'the form')
-        n = s.count(TAG)
-        if n > 1:
-            fail('%s: %d copies of the block; remove all but one first' % (rel, n))
-        if n:
-            a = s.index(TAG) + 1
-            b = s.index(CLOSE, a) + len(CLOSE)
-            out = s[:a] + block + s[b:]
-            did = 'replaced' if s[a:b] != block else 'already current'
-        else:
-            a = insert_at(s, rel)
-            out = s[:a] + block + '\n\n' + s[a:]
-            did = 'inserted'
-        if not (out.count(TAG) == 1 and out.count(block) == 1 and out.count(client) == 1):
-            fail(rel + ': the result would not hold exactly one copy')
+        out, did = put(read(path, 'the form'), rel, W)
         if opt['check']:
             if did != 'already current':
                 stale += 1
@@ -212,9 +232,10 @@ def main():
                 f.write(out)
         print(did, rel)
     print('%d form%s, %d rules (version %s), relay %s' % (len(opt['forms']), '' if len(opt['forms']) == 1 else 's',
-          len(d['rules']), d['version'], json.loads(config)['relay'] or 'not set'))
+          len(W['rules']['rules']), W['rules']['version'], W['relay'] or 'not set'))
     if stale:
         sys.exit(1)
 
 
-main()
+if __name__ == '__main__':
+    main()
