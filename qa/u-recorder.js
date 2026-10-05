@@ -44,7 +44,9 @@ const click=(p,sel)=>p.evaluate(s=>{const el=document.querySelector(s);if(!el)th
 
  /* ---------- EA-1 session runner ---------- */
  {console.log('\n=== EA-1 runner');const {page,log,native}=await open('EA-1_Experimental-Analysis-Protocol_v2026-09.html');
-  await click(page,'#simBtn');await sleep(600);
+  /* since B2 Load simulation asks first, as OB-1's does */
+  await click(page,'#simBtn');await sleep(100);await press(page,'.primary');await sleep(600);
+  check(/^SIMULATED/.test(await page.evaluate(()=>document.querySelector('[name="m.client"]').value)),'the simulation loaded through its question');
   await page.evaluate(()=>document.querySelector('#viewSeg [data-view="sessions"]').click());await sleep(200);
   await click(page,'#eaStart');await sleep(300);
   const st=await page.evaluate(()=>eaRunner.state());check(st==='run','started: '+st);
