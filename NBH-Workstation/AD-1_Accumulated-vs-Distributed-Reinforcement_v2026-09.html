@@ -3959,7 +3959,9 @@ function loadSim(){
   t.tbMaint=[['2026-10-06','2','Rate; problem behavior','2.3 per min; 0','Board at 15 problems'],['2026-10-20','4','Rate; problem behavior','2.2 per min; 1','Board at 20 problems']];
   restore({version:'AD-1 2026-09',fields:f,tables:t});
 }
-$('#btnSim').addEventListener('click',async ()=>{if(rows('tbSess').length&&!(await nbhUI.confirm('Replace the entries on this form with the simulated case?',{ok:'Replace'})))return;loadSim()});
+/* the enhancement sprint (A2): asks every time, with the question the other forms use (it asked only once session rows
+   existed, so typed details were replaced without a word); Cancel changes nothing */
+$('#btnSim').addEventListener('click',async ()=>{if(!(await nbhUI.confirm('Load the simulated case?\nEvery tab is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;loadSim()});
 refresh();
 })();
 </script>
