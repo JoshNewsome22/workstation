@@ -11,7 +11,8 @@
    3. TB-1 simulated, then GB-1 fresh: one acquisition objective per replacement skill, the pairings, and sentences
       that read as English on the cards and in Copy for the BIP; the picker adds no second objective for a skill.
    4. Typed labels: an action ("Requests a break"), a name ("Break request") and a plain form ("ask for help"), and the
-      labels the review found worded badly (verbs off the list, a subject, an opening phrase, a semicolon); contexts
+      labels the review found worded badly (verbs off the list, a subject, an opening phrase, a semicolon), and more
+      ("Using a quiet voice", "Tasks completed independently", "Glasses on"); contexts
       and conditions in lower case except names; a file saved before this change opens as before, and one typed in the
       old style keeps its fields and reads by the new rules; the two copies of the case hooks are the same.
    5. TB-1's case as it is passed today and as it reads once TB-1 cleans its replacement names (package A4) give the
@@ -19,6 +20,9 @@
    6. "see target N" past a TB-1 target card with no name (left out of the case) finds the right target, by order or
       by the numbers a case gives; a behavior the picker adds to a skill on the form joins its pairing, and a pairing
       typed by hand is kept and named.
+   7. The staff notes Form TB-1 leaves out once it cleans its names (package A4) are read the same way here: a range of
+      targets points to none, a dash with no space before "see target N" and a stop after a note go, so today's case
+      and the cleaned case give the same objectives.
    usage: WS_URL=http://127.0.0.1:8305 WS_ROOT=<worktree> node qa/sprint-a5-test.js [edition folder, NBH-Workstation by default] */
 const {chromium,fs,path,ROOT,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/a5/';fs.mkdirSync(OUT,{recursive:true});
@@ -276,7 +280,16 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
     ['Makes requests and comments','will make requests and comments'],['"I need a break"','will say "I need a break"'],
     ['Words to express feelings','will use words to express feelings'],['Safe hands','will keep safe hands'],['Calm body','will keep a calm body'],
     ['On-task behavior','will demonstrate on-task behavior'],['PECS exchange','will make a PECS exchange'],['FCT response','will make an FCT response'],
-    ['Replacement behavior: requests a break','will request a break']];
+    ['Replacement behavior: requests a break','will request a break'],
+    /* the second fix pass: an -ing word with a short stem, a name followed by what is done with it, a thing kept in place,
+       and labels these rules must leave as they were */
+    ['Using a quiet voice','will use a quiet voice'],['Using coping strategies','will use coping strategies'],
+    ['Going to the calm-down area','will go to the calm-down area'],['Being on task','will be on task'],['Tying shoes','will tie shoes'],
+    ['Tasks completed independently','will complete tasks independently'],['Hands washed','will wash hands'],['Turns taken','will take turns'],
+    ['Points earned','will earn points'],['Assignments turned in','will turn assignments in'],['Feelings identified','will identify feelings'],
+    ['Glasses on','will keep glasses on'],['Intraverbals','will demonstrate intraverbals'],
+    ['Stays seated','will stay seated'],['Completes assigned work','will complete assigned work'],['Hands folded','will keep hands folded'],
+    ['Listening skills','will demonstrate listening skills']];
   const typedSkill=(l,who)=>page.evaluate(([l,who])=>{const s=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));};
     if(who!=null)s('m.client',who);s('acq[0].beh',l);return {out:document.querySelector('[data-out="acq0"]').textContent,field:document.querySelector('[name="acq[0].beh"]').value,bip:window.__bipText()};},[l,who]);
   let badWords=[];
@@ -349,6 +362,32 @@ async function pickFile(page,fr,sel,file){const [fc]=await Promise.all([page.wai
     else check(A6.length===1&&A6[0].pair===typed&&/A1 already says what it replaces \(“R1 — aggression”\), so Spitting was not added to it\./.test(res.note||''),'a pairing typed by hand is kept, and the picker says Spitting was not added to it',{res,pair:A6[0]&&A6[0].pair});
     check(errsOf(log).length===0,'no console or page errors');await page.close();
   }
+
+  /* ---------- 7. notes read as Form TB-1 reads them once it cleans its names (package A4, sprint-a4 at ef7e7eb) ---------- */
+  console.log('\n=== 7. Notes read as TB-1 reads them once it cleans its names');
+  const Rb=(label,rep)=>({label,rep}),Tg=label=>({label,isRep:true,rep:''});
+  /* [what is checked, the case as TB-1 passes it today, the same case as TB-1 passes it once it cleans its names, the skill objectives] */
+  const NOTES=[
+    ['a range of targets ("see targets 3-4", "3 to 4", "3–4") points to none',
+      [Rb('Aggression','Hands a break card (see targets 3-4)'),Rb('Elopement','Hands a break card (see targets 3 to 4)'),Rb('Spitting','Hands a break card (see targets 3–4)'),Tg('Break request'),Tg('Raises hand')],
+      [Rb('Aggression','Hands a break card'),Rb('Elopement','Hands a break card'),Rb('Spitting','Hands a break card'),Tg('Break request'),Tg('Raises hand')],
+      ['Hands a break card <- Aggression; Elopement; Spitting','Break request <- ','Raises hand <- ']],
+    ['a dash with no space before "see target 3" is a note, and target 3 is found',
+      [Rb('Aggression','Hands a break card—see target 3'),Rb('Elopement','Hands a break card'),Tg('Break request')],
+      [Rb('Aggression','Break request'),Rb('Elopement','Break request'),Tg('Break request')],
+      ['Break request <- Aggression; Elopement']],
+    ['a stop after a note goes with it, and so does "(replacement)." at the end',
+      [Rb('Aggression','Engages with a competing item (see Forms EA-1 and TD-1).'),Rb('Elopement','Hands a break card (see target 4).'),Rb('Spitting','Engages with a competing item'),Tg('Break request (replacement).')],
+      [Rb('Aggression','Engages with a competing item'),Rb('Elopement','Break request (replacement).'),Rb('Spitting','Engages with a competing item'),Tg('Break request (replacement).')],
+      ['Engages with a competing item <- Aggression; Spitting','Break request <- Elopement']]];
+  log=[];page=await ctx.newPage();wire(page,log);await page.goto(BASE+'/'+ED+'/'+GB);await sleep(1000);
+  for(const [what,today,clean,want] of NOTES){
+    const got=await page.evaluate(([a,b])=>[a,b].map(f=>nbhGbSkills(f).groups.map(g=>g.name+' <- '+g.pairs.join('; '))),[today,clean]);
+    check(JSON.stringify(got[0])===JSON.stringify(want)&&JSON.stringify(got[1])===JSON.stringify(want),what+': the same objectives from today’s case and the cleaned one',{today:got[0],clean:got[1]});
+  }
+  const said=await page.evaluate(()=>['Break request (replacement).','Hands a break card—see target 3','Hands a break card (see target 4).'].map(s=>gbWill(s)));
+  check(JSON.stringify(said)===JSON.stringify(['make a break request','hand a break card','hand a break card']),'in the sentence: "will make a break request", "will hand a break card" (twice)',said);
+  check(errsOf(log).length===0,'no console or page errors in part 7');await page.close();
   await br.close();
   console.log('\nFAILURES: '+fails);process.exit(fails?1:0);
 })().catch(e=>{console.error(e);process.exit(2);});
