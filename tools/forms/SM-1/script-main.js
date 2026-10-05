@@ -490,7 +490,7 @@ function fromFile(d){
   const fid=arr('fid',['in','note'],FID.length);if(fid&&fid.length===FID.length)o.fid=fid;
   const fade=arr('fade',['on','note'],FADE.length);if(fade&&fade.length===FADE.length)o.fade=fade;
   const bck=arr('bck',['in','note'],BCRULES.length);if(bck&&bck.length===BCRULES.length)o.bck=bck;
-  o.log=arr('log',['date','ph','goal','pts','poss','m','n','met','tgp','note'],400)||[];
+  o.log=arr('log',['date','ph','goal','pts','poss','m','n','met','tgp','note','src'],400)||[];   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
   Object.keys(obj('wk')).forEach(k=>{if(/^d[0-4]_p\d+$/.test(k))o.wk[k]=str(s.wk[k]);});
   o.tg.forEach(t=>{if(!window.NBH_PICTOS||!NBH_PICTOS[t.icon])t.icon='';});o.per.forEach(p=>{if(!window.NBH_PICTOS||!NBH_PICTOS[p.icon])p.icon='';});
   return o;
@@ -557,6 +557,7 @@ async function loadSim(){
     [g3,'1',83,36,17,18],[g3,'1',89,36,17,18]];
   S.log=days.map((d,i)=>{const pts=Math.round(36*d[2]/100);const tp=[Math.min(100,d[2]+8),Math.max(0,d[2]-10),Math.min(100,d[2]+4)];return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',m:d[4]==null?'':String(d[4]),n:d[5]==null?'':String(d[5]),met:d[1]!=='0'&&pts/36*100>=d[0],tgp:tp.join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':''};});
   S.meta.goal='80';
+  if(typeof smRSim==='function')smRSim();   /* v21.46 today's first periods rated on the iPad (sm-rate.js) */
   renderAll();setView('sheet');
   nbhUI.toast('Simulation loaded: '+'a simulated third-grader’s pictorial Self & Match sheet with three targets over six periods.',{kind:'ok'});
 }

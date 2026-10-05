@@ -36,8 +36,14 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined?
     S.d.rate='faces3';S.d.rv='3,1,0';S.sys='smiley';renderAll();r.smiley_rv=possible().poss;S.d.rv='';r.P=P;r.T=T;return r;});
   ok('the points possible follow the rating style (two-level Self & Match keeps the Match Points table; more levels: the top rating and the bonus)',
     pts.auto===pts.P*pts.T*2&&pts.thumbs===pts.auto&&pts.faces3===pts.P*pts.T*3&&pts.stars3===pts.P*pts.T*4&&pts.s15===pts.P*pts.T*6&&pts.cico===pts.P*pts.T*2&&pts.contract15===pts.P*pts.T*5&&pts.smiley_rv===pts.P*pts.T*3,pts);
-  const themes=await page.evaluate(()=>{S.d.look='theme';S.sys='match';S.d.rate='stars3';const r=[];for(const t of Object.keys(SM_THEMES)){S.d.theme=t;renderAll();const o=document.getElementById('sheetOut');r.push(t+':'+(o.querySelector('.v2.theme-'+t)?1:0)+(o.querySelectorAll('.v2-head svg.art').length>=2?1:0)+(o.querySelectorAll('.gstars').length?1:0));}return r;});
+  const themes=await page.evaluate(()=>{S.d.look='theme';S.sys='match';S.d.rate='stars3';const r=[];for(const t of Object.keys(SM_THEMES).filter(k=>!SM_THEMES[k].col)){S.d.theme=t;renderAll();const o=document.getElementById('sheetOut');r.push(t+':'+(o.querySelector('.v2.theme-'+t)?1:0)+(o.querySelectorAll('.v2-head svg.art').length>=2?1:0)+(o.querySelectorAll('.gstars').length?1:0));}return r;});
   ok('the seven themes, each with its pictures and the stars',themes.every(x=>/:111$/.test(x)),themes);
+  /* v21.46 the plain and colour themes: no pictures, the plain words, the colour on the header; Plain is black on white */
+  const cols=await page.evaluate(()=>{S.d.look='theme';S.sys='match';S.d.rate='thumbs';S.d.accent='';const r={};for(const t of Object.keys(SM_THEMES).filter(k=>SM_THEMES[k].col)){S.d.theme=t;renderAll();const o=document.getElementById('sheetOut'),h=o.querySelector('.v2-head');
+      r[t]={col:!!o.querySelector('.v2.theme-col.theme-'+t),art:o.querySelectorAll('svg.art').length,title:o.querySelector('.v2-title').textContent,bg:getComputedStyle(h).backgroundImage.slice(0,40),bgc:getComputedStyle(h).backgroundColor,fg:getComputedStyle(o.querySelector('.v2-title')).color};}
+    const n=Object.keys(r).length;S.d.theme='sports';return {n,r};});
+  ok('thirteen plain and colour themes, no pictures, the sheet type\'s own title',cols.n===13&&Object.values(cols.r).every(x=>x.col&&x.art===0&&x.title==='Sam’s Self & Match Sheet'),cols);
+  ok('Plain is black on white; a colour theme has its colour on the header',cols.r.plain.bgc==='rgb(255, 255, 255)'&&/rgb\(17, 17, 17\)/.test(cols.r.plain.fg)&&/gradient/.test(cols.r.ocean.bg)&&/rgb\(255, 255, 255\)/.test(cols.r.ocean.fg),{plain:cols.r.plain,ocean:cols.r.ocean});
   const classicRate=await page.evaluate(()=>{S.d.look='classic';S.sys='match';S.d.rate='pm';renderAll();const o=document.getElementById('sheetOut');return {pm:o.querySelectorAll('.gt').length,faces:o.querySelectorAll('svg.face').length};});
   ok('a rating style applies to the classic sheet too',classicRate.pm>0,classicRate);
   /* 3. save and open */

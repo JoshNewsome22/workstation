@@ -1,8 +1,8 @@
 #!/bin/sh
 # Build Form SM-1 from its parts (v21.45): the QR library (tools/vendor/qrcode-generator), script-main.js, the interest themes'
 # pictures (sm-themes.js, made by make-themes.py), the target library (sm-library.json), the design and its editors
-# (sm-v2-core.js, sm-v2-ui.js), the walkthrough (walk.js, when present) go into script.js, in that order, and the first render
-# closes it; own.css, sm-v2.css and walk.css make the stylesheet. Then tools/new-form.py assembles the form on CF-1's shared
+# (sm-v2-core.js, sm-v2-ui.js), rating on the iPad (sm-rate.js, v21.46), the walkthrough (walk.js, when present) go into script.js, in that order, and the first render
+# closes it; own.css, sm-v2.css, sm-rate.css and walk.css make the stylesheet. Then tools/new-form.py assembles the form on CF-1's shared
 # parts and tools/polish-one.py applies the polish layer and the writing help. The walkthrough's narration (walk-audio.js)
 # goes beside the form as NBH-Workstation/nbh-sm1-narration.js; Save as video uses TK-1's nbh-tk1-video.js, also beside it.
 # usage (from the repository root): sh tools/forms/SM-1/build.sh
@@ -19,7 +19,7 @@ js=head+lib.rstrip('\n')+'\n\n/* ===== Form SM-1 ===== */\n'+open(R+'script-main
 js=js.rstrip('\n')+'\n\n/* ===== sm-themes.js ===== */\n'+open(R+'sm-themes.js',encoding='utf-8').read()
 L=json.load(open(R+'sm-library.json',encoding='utf-8'))
 js=js.rstrip('\n')+'\n\n/* ===== sm-library.json: the target library (wording written for the practice; editable once placed) ===== */\nconst SM_LIBRARY='+json.dumps(L,ensure_ascii=False,separators=(',',':'))+';\n'
-for f in ('sm-v2-core.js','sm-v2-ui.js'):
+for f in ('sm-v2-core.js','sm-v2-ui.js','sm-rate.js'):
     js=js.rstrip('\n')+'\n\n/* ===== '+f+' ===== */\n'+open(R+f,encoding='utf-8').read()
 if os.path.exists(R+'walk.js'):
     W=json.load(open(R+'walk-script.json',encoding='utf-8'))
@@ -30,6 +30,7 @@ assert '</script' not in js.lower(), 'a part holds </script'
 open(R+'script.js','w',encoding='utf-8').write(js)
 css=open(R+'own.css',encoding='utf-8').read()
 css=css.rstrip('\n')+'\n'+open(R+'sm-v2.css',encoding='utf-8').read()
+css=css.rstrip('\n')+'\n'+open(R+'sm-rate.css',encoding='utf-8').read()
 if os.path.exists(R+'walk.js'):
     # the player's styles: Form TK-1's walk.css, without its view rules (SM-1's are in sm-v2.css), then SM-1's own
     tk=[l for l in open('tools/forms/TK-1/walk.css',encoding='utf-8').read().split('\n') if 'only-' not in l]

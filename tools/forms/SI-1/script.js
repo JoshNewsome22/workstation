@@ -29,7 +29,7 @@ const ITEMS=[
   {id:'reward',box:'qReward',read:'What would be worth working for? What would you like to earn, and who would you like to hear it from?',young:'What would you like to earn?',hint:'Things, activities, time with someone, a message home. Form PA-1 tests the list.',fq:'How much do you want it?',fl:'want'}
 ];
 /* v21.44 (B5): who hears what the student says, read aloud before the first question; a reading and a younger
-   version, shown in the version chosen. The first line opens, the last asks, the rest are the points. Review this wording. */
+   version, shown in the version chosen. The first line opens, the last asks, the rest are the points. Wording approved by the BCBA, October 2026. */
 const CONF={read:['Before we start, I want you to know who will hear what you tell me.',
   'I will write down what you say. The adults on your team at school and your parent or guardian may read it. It helps us make school better for you.',
   'This is not about getting you in trouble. I will not share what you say with other students.',
