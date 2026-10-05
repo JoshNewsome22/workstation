@@ -1015,6 +1015,38 @@ input[data-m],textarea[data-m]{font:inherit}
 }
 @media print{.ti-run,.ti-run-pill,.ti-handoff{display:none!important}}
 </style>
+<style id="ti1-touch-css">
+/* v21.44 (A6): on a touch screen every target on the live sheet is at least 44 px. Screen and a coarse pointer only:
+   paper and the computer layout are unchanged.
+   - The bare tick boxes (Critical on Setup and on the Scoring sheet, IOA collected) each sit in a label, a tappable
+     box at least 44 x 44 px centred in its cell (as wide as the cell inside its padding), so a tap anywhere in it
+     ticks the box; the cells keep their padding between neighbouring targets.
+   - The code lists on the Scoring sheet are 44 px tall.
+   - The runner: its code buttons keep the 64 px they were made at (56 px on a phone, 44 px in the list of every step;
+     the shared touch rule sets every button on the sheet to 40 px, which shrank them); its other buttons are 44 px
+     tall, its step strip 44 x 44 px; a step's line in the list is 44 px tall; the two halves of each Show and
+     type switch stand 4 px apart. */
+@media screen and (pointer:coarse){
+  label.ti-ck{display:flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin:0;padding:0;border-radius:6px;cursor:pointer;touch-action:manipulation}
+  label.ti-ck:active{background:var(--nbh-mist)}
+  label.ti-ck input{margin:0}
+  table.pi td.crit{width:48px}
+  table.pi td.obs select{min-height:44px!important}
+  #tiRun .ti-run-codes button{min-height:64px!important}
+  #tiRun .ti-run-codes.ti-run-sm button{min-height:44px!important}
+  #tiRun .ti-run-ctl button,#tiRun .ti-run-idle button,#tiRun .ti-run-nav button,#tiRun .ti-run-jumps button,#tiRun .ti-run-seg button{min-height:44px!important}
+  #tiRun .ti-run-seg{gap:4px;border:0;border-radius:0;overflow:visible}
+  #tiRun .ti-run-seg button,#tiRun .ti-run-seg button+button{border:1px solid var(--nbh-slate);border-radius:5px}
+  #tiRun .ti-run-strip{gap:6px}
+  #tiRun .ti-run-strip button{width:44px;height:44px;min-height:44px!important}
+  #tiRun .ti-run-rowhd{min-height:44px;align-content:center}
+  #tiRun .ti-run-tick{min-height:44px}
+}
+@media screen and (pointer:coarse) and (max-width:600px){
+  #tiRun .ti-run-codes button{min-height:56px!important}
+  #tiRun .ti-run-codes.ti-run-sm button{min-height:44px!important}
+}
+</style>
 </head>
 <body class="view-setup">
 
@@ -3218,12 +3250,15 @@ function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forE
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------------- setup: step list ---------------- */
+/* v21.44 (A6): each bare tick box (Critical here and on the Scoring sheet, IOA collected) sits in a label.ti-ck, which on a
+   touch screen is a tappable box at least 44 x 44 px centred in its cell, so a tap anywhere in it ticks the box
+   (ti1-touch-css). On paper and with a mouse the label adds nothing. */
 function renderSteps(){
   $('#stepTbl tbody').innerHTML=S.steps.map((st,i)=>
     `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
      <td><textarea data-s="${i}" data-f="d" rows="2" style="width:100%;border:0;background:transparent;font:inherit;resize:vertical" aria-label="Step ${i+1} description">${esc(st.d)}</textarea></td>
      <td style="text-align:center"><select data-s="${i}" data-f="cmp" aria-label="Step ${i+1} component">${CMP.map(([k,l])=>`<option value="${k}"${st.cmp===k?' selected':''}>${l}</option>`).join('')}</select></td>
-     <td style="text-align:center"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
+     <td style="text-align:center"><label class="ti-ck"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></label></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
 }
 /* v21.33 (R): a step can be deleted anywhere in the list. Its codes, both observers' codes and its opportunity
    counts go with it, and those of the steps after it are re-keyed so none moves to another step. */
@@ -3269,7 +3304,7 @@ function renderGrid(){
     <tr class="obshead"><th></th><th style="text-align:right">Context</th><th></th>
         ${S.obs.map((o,j)=>`<th><input data-o="${j}" data-f="ctx" value="${esc(o.ctx)}" placeholder="activity" aria-label="Observation #${j+1} context"></th>`).join('')}<th></th></tr>
     <tr class="obshead"><th></th><th style="text-align:right">IOA collected</th><th></th>
-        ${S.obs.map((o,j)=>`<th><input type="checkbox" data-o="${j}" data-f="ioa"${o.ioa?' checked':''} aria-label="Observation #${j+1}, IOA collected"></th>`).join('')}<th></th></tr>
+        ${S.obs.map((o,j)=>`<th><label class="ti-ck"><input type="checkbox" data-o="${j}" data-f="ioa"${o.ioa?' checked':''} aria-label="Observation #${j+1}, IOA collected"></label></th>`).join('')}<th></th></tr>
   </tbody><tbody>`;
   /* v21.16 audit. F11: the observation details sit in a row group of their own below the header. In the header
      they were repeated at the top of each printed page, where the browser does not draw a field's value, so the
@@ -3280,7 +3315,7 @@ function renderGrid(){
     const c=vals.filter(v=>v==='C').length, sc=vals.filter(scored).length;
     h+=`<tr class="${st.crit?'isCrit':''}"><td class="stepno">${i+1}</td>
         <td class="desc">${cmpBadge(st)}<textarea data-s="${i}" data-f="d" rows="2" aria-label="Step ${i+1} description">${esc(st.d)}</textarea></td>
-        <td class="crit"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></td>
+        <td class="crit"><label class="ti-ck"><input type="checkbox" data-s="${i}" data-f="crit"${st.crit?' checked':''} aria-label="Step ${i+1} critical"></label></td>
         ${vals.map((v,j)=>`<td class="obs"><select class="v-${esc(v||'x')}" data-s="${i}" data-o="${j}" aria-label="Step ${i+1}, observation #${j+1}">${optsFor(v)}</select></td>`).join('')}
         <td class="pct">${fmt(c,sc)}</td></tr>`;
   });

@@ -1,7 +1,6 @@
 /* v21.37: EA-1's yoked control on the runner: a master session keeps its delivery times, a yoked session replays them */
-const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const URL=BASE+'/NBH-Workstation/EA-1_Experimental-Analysis-Protocol_v2026-09.html';
-const PRE=__dirname+'/out/yoke/EA-1_pre.html';
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.stringify(d)));if(!c)fails++;};
 const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g);return m?m.length:0;};
 (async()=>{const log=[];const br=await chromium.launch();const ctx=await br.newContext({viewport:{width:1300,height:1000}});
@@ -59,9 +58,16 @@ const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g
  await page.evaluate(()=>{eaYoke.value='';eaYoke.dispatchEvent(new Event('change'));const s=document.querySelector('#eaCond');s.value='2';s.dispatchEvent(new Event('change'));});await sleep(100);
  const play=await page.evaluate(()=>({yoke:eaYoke.value,ncr:eaNcr.value,cons:eaCons.value}));
  ok('control card: no replay, its own schedule',play.yoke===''&&+play.ncr>0,play);
- /* print: blank unchanged against the pre-edit copy; the hidden record never prints */
- const p2=await ctx.newPage();const count=async url=>{await p2.goto(url);await sleep(500);await p2.emulateMedia({media:'print'});const n=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.emulateMedia({media:'screen'});return n;};
- const blankNow=await count(URL),blankPre=fs.existsSync(PRE)?await count('file://'+PRE):18;
- ok('blank print page count unchanged',blankNow===blankPre,{now:blankNow,pre:blankPre});
+ /* print: the hidden record never prints. (Until B2 this compared the blank print's page count with a copy of the
+    form from before v21.37, or with 18 pages when there was no copy; later versions lengthen the print by design, so
+    the record is now checked directly: hidden on paper, and the same pages with it and without it.) */
+ const printed=async()=>{await page.emulateMedia({media:'print'});await sleep(200);
+   const vis=await page.evaluate(()=>{const e=document.querySelector('[name="s[0].y"]');return {has:!!(e&&e.value),shown:!!e&&getComputedStyle(e).display!=='none'};});
+   const n=pages(await page.pdf({preferCSSPageSize:true,printBackground:true}));await page.emulateMedia({media:'screen'});return {n,vis};};
+ const withRec=await printed();
+ const kept=await page.evaluate(()=>{const e=document.querySelector('[name="s[0].y"]');const v=e.value;e.value='';return v;});
+ const noRec=await printed();
+ await page.evaluate(v=>{document.querySelector('[name="s[0].y"]').value=v;},kept);
+ ok('the kept delivery times never print: hidden on paper, the same page count with and without them',withRec.vis.has&&!withRec.vis.shown&&withRec.n===noRec.n,{withRec,noRec});
  ok('no console or page error',log.length===0,log);
  console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');await br.close();process.exit(fails?1:0);})().catch(e=>{console.error('FAIL',e);process.exit(1);});

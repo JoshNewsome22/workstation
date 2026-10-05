@@ -3545,7 +3545,11 @@ function simShape(key,r,tc){const d=INST[key],yn=d.scale==='yn',nm=it=>`${key}[$
 function simPBQ(mode,c,reliab){const noise=(1-reliab)*2;const hi=5,lo=1.3,mid=3;let m;
  if(mode==='flat')m=mid;else if(mode==='adult_att')m=c===3?hi:c===1?mid:lo;else if(mode==='adult_esc')m=c===2?hi:c===0?mid:lo;else if(mode==='setting')m=c===4?hi:lo;else m=lo;
  const sd=(mode==='flat'||mode==='low'||mode==='setting')&&m!==hi?0.3:0.9+noise;return String(clamp(m+gauss()*sd,0,6));}
-function loadSim(){const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,int:2}});
+async function loadSim(){
+ /* the enhancement sprint (A2): asks first, with the question the other forms use; Cancel changes nothing. The sheets'
+    reset keeps the pasted item wording, the respondent terms and the video link, so the question says so */
+ if(!(await nbhUI.confirm('Load the simulated case?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced; the pasted item wording, the respondent terms and the video link stay.',{ok:'Load'})))return;
+ const sc=SIM[$('#simScenario').value];restore({counts:{inf:3,int:2}});
  const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e){if(e.type==='checkbox')e.checked=!!v;else e.value=v;}};
  const T=sc.target;const label={attention:'adult attention',tangible:'access to preferred items',escape:'escape from academic demands',automatic:'automatic (sensory) reinforcement',physical:'pain attenuation / physical discomfort'}[T]||'undetermined';
  set('m.client','SIMULATED – Sample Student');set('m.sid','SIM-000');set('m.dob','—');set('m.setting','Room 12 (simulated)');set('m.assessor',val('m.assessor')||'Joshua Newsome, M.A., BCBA');set('m.date',new Date().toLocaleDateString());
@@ -3914,6 +3918,58 @@ window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayl
 
 restore({counts:{}});
 })();
+
+/* v21.31 the case: hooks for Form IA-1 (added by the enhancement sprint, package A2). In: the case fills what the
+   general fill placed here before, except the function. The first target behavior goes into the empty "Target behavior"
+   field (its label and definition, as before) when the form opens, when a case is reopened or restored, and whenever the
+   case changes. "Indirect hypothesis carried to the packet" is this assessment's own result and is never filled from the
+   case: the form's own rule fills it, while it is empty, from the category that leads the informants, and the assessor
+   may choose another. Form FS-1's conclusion is drawn partly from this assessment, so writing it back here would show the
+   summary as the indirect result, and the form's own rule would then keep it against its own scores. "From the case"
+   places the first ticked behavior; its Function item is shown unticked and cannot be ticked on this form, and the
+   picker's footnote and its answer say what is placed and what is not (a second behavior, the function, the goals and
+   the reinforcers have no field here). Out: nothing. */
+(function(){
+  var FIELD = 'Target behavior';
+  var WHY = 'Not placed on this form: the indirect hypothesis is this assessment’s own result (the category that leads its informants, or your choice).';
+  var OFF = 'the function stays off this form, since the indirect hypothesis is this assessment’s own result';
+  function cs(){ return window.nbhCase || null; }
+  /* the kinds of item this form has no field for, in words */
+  function others(goals, menu){ return goals && menu ? 'goals and reinforcers' : goals ? 'goals' : menu ? 'reinforcers' : ''; }
+  /* always an object: a falsy answer would let the general fill place the function after all */
+  window.__nbhFactsIn = function(f){
+    var c = cs(); if (!c || !f) return { filled: 0 };
+    return c.generic({ behaviors: f.behaviors || [] }, false);
+  };
+  window.__nbhFactsPick = function(sel){
+    var c = cs(); if (!c || !sel) return { filled: 0 };
+    var bs = sel.behaviors || [], g = sel.goals || {}, rep = c.generic({ behaviors: bs }, true), why = [];
+    if (rep.filled && bs.length > 1) why.push('only the first ticked behavior was placed, since this form has one ' + FIELD + ' field');
+    if (sel.fn) why.push(OFF);
+    var o = others((g.red || []).length + (g.acq || []).length, (sel.menu || []).length);
+    if (o) why.push('the ticked ' + o + ' have no field on this form');
+    /* the shared answer reads "Placed 1 item on this form. <note>" or "Nothing to place: <note>" */
+    if (why.length) { var t = why.join('; ') + '.'; rep.note = rep.filled ? t.charAt(0).toUpperCase() + t.slice(1) : t; }
+    return rep;
+  };
+  /* the picker opens on the button's own click; this runs after it, as the click reaches the document */
+  document.addEventListener('click', function(e){
+    var b = e.target && e.target.closest ? e.target.closest('#nbhCaseBtn') : null; if (!b) return;
+    var body = document.querySelector('#nbhcBody'), note = document.querySelector('#nbhcNote'), cb = body && body.querySelector('input[data-kind="fn"]');
+    /* the footnote says what this form takes (the shared one, written for forms with rows of their own, says every
+       ticked item goes in) */
+    if (body && note) { var o = others(body.querySelector('input[data-kind="red"],input[data-kind="acq"]'), body.querySelector('input[data-kind="menu"]'));
+      var t = body.querySelector('input[data-kind="beh"]') ? 'The first ticked behavior goes into this form’s ' + FIELD + ' field' + (cb ? '; the function stays off this form.' : '.')
+        : cb ? 'The function stays off this form.' : '';
+      note.textContent = t + (o ? (t ? ' ' : '') + 'The ' + o + ' have no field here; copy the text instead.' : ''); }
+    if (!cb || cb.disabled) return;
+    cb.checked = false; cb.disabled = true;
+    /* the reason goes straight under the item's name, above Form FS-1's statements, which can run long */
+    var sp = cb.nextElementSibling, nm = sp && sp.querySelector('b');
+    if (sp) { var s = document.createElement('small'); s.className = 'nbhc-own'; s.style.cssText = 'color:#16242e;font-weight:600'; s.textContent = WHY;
+      sp.insertBefore(s, nm ? nm.nextSibling : sp.firstChild); }
+  });
+})();
 </script>
 
 <script>
@@ -3980,9 +4036,12 @@ restore({counts:{}});
     return p;
   }
   function apply(p, quiet){
-    var filled=[],skipped=[];
+    var filled=[],skipped=[],ownFn=false;
     Object.keys(MAP).forEach(function(k){
       if(!p[k])return;
+      /* the enhancement sprint (A2): the hypothesis on this form is the assessor's own, so a packet's function is never
+         placed here (Save packet still carries this form's own hypothesis to the other forms) */
+      if(k==='fn'){ownFn=true;return;}
       var el=find(k);
       if(!el)return;
       if(el.value&&String(el.value).trim()){
@@ -4021,6 +4080,7 @@ restore({counts:{}});
     if(quiet)return;
     var msg='Packet applied. Filled: '+(filled.length?filled.join(', '):'nothing new');
     if(skipped.length)msg+='.\nLeft alone because this form already had a different value: '+skipped.join(', ');
+    if(ownFn)msg+='.\nThe function in the packet was not placed: the hypothesis on this form is your own';
     alert(msg+'.');
   }
 
