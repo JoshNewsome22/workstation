@@ -170,7 +170,7 @@ function compose(D){
   SC.day=K=>{const v=uni([rowsBox(Math.max(0,body.length-4),body.length),R.today]);camTo(K.t+.1,K.t+1.1,v);if(R.today)glow(R.today,K.t+1,1.4,2);
     let t=Math.max(K.t+1.6,K.at('write the date',.3)-.1);
     const nd=(()=>{const r=S.rows[S.rows.length-1];if(!r||!r.date)return '';const p=r.date.split('-');const d=new Date(+p[0],+p[1]-1,+p[2],12);do{d.setDate(d.getDate()+1);}while(d.getDay()%6===0);return shortDay(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'));})();
-    const m0=write(wrel(cell(today,0)),nd,t,t+.5,'#2b4a9b',12.5);draw(PS,m0,.8);t+=.9;
+    const m0=write(wrel(cell(today,0)),nd,t,t+.5,'#2b4a9b',10.5);draw(PS,m0,.8);t+=.9;
     const tf=Math.max(t,K.at('fill in the row',.55)-.2);t=tf;
     colOf.forEach(c=>{for(let j=0;j<c.n;j++){const src=cell(lastRow,c.i+j),dst=cell(today,c.i+j);if(!dst||!src||src.classList.contains('calc'))continue;const v=(src.querySelector('.ddw-v')||src).textContent.trim();if(!v)continue;
       const mk=write(wrel(dst),v,t,t+.32,'#2b4a9b');draw(PS,mk,.35);t+=.48;}});
