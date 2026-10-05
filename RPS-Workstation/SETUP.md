@@ -7394,3 +7394,17 @@ cue timer, the period chime, the day report, a narrow screen) and in WebKit.
 **The safety wording is approved.** The BCBA approved the wording of the policy and safety packages (B1, B4, B5; the questions in
 *Safety-wording-to-review.md*, kept as they were proposed). The source comments that ended "Review this wording." now end
 "Wording approved by the BCBA, October 2026." Nothing on screen or on paper changed.
+
+**Save as video on the iPad: the sound and the round photo (v21.46).** Two faults in videos made on an iPad (TK-1's and SM-1's
+Save as video share `nbh-tk1-video.js`):
+
+- *No sound.* Safari's audio encoder (WebKit, Safari 26) hands back the AAC track's decoder description as a whole MPEG-4 ES
+  descriptor instead of the bare AudioSpecificConfig the WebCodecs standard specifies (WebKit bug 302253). Written into the file
+  as it came, the track's esds box held a second ES descriptor inside it, and the Photos app played the video silent. The video
+  maker now writes the AudioSpecificConfig itself (AAC-LC, 48 kHz, mono: `11 88`) for every browser. Checked by
+  `qa/tk1-video-test.js` with encoders that behave as Safari's, and by a video made in WebKit whose sound decodes (48 kHz, 4.5 s,
+  the narration's level). Videos made before stay silent: make them again.
+- *A square photo.* The photo in the board's round frame zooms (its own transform), so the video painted it as a picture of its
+  own, and the round frame's cut (`overflow: hidden` with `border-radius: 50%`) was not applied to it. Every picture painted on its
+  own is now cut by the boxes around it that cut it on the page. Checked by `qa/tk1-video-test.js` (a red photo: red in the
+  middle of the frame, not in its corners, as on the screen).
