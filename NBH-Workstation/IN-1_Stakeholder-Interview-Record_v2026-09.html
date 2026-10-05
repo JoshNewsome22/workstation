@@ -1013,7 +1013,7 @@ table.gf-t select{font:inherit;font-size:12px;max-width:100%}
     <div class="gf-f"><label for="rpBehName">Short name of the behavior (the page asks whether the respondent understands its definition)</label><input id="rpBehName" placeholder="e.g., Aggression toward staff"></div>
     <div class="gf-f" id="rpWordRow"><label for="rpWord">Student set only: the student's own word for the behavior (replaces <i>[target behavior]</i> in the questions)</label><input id="rpWord" placeholder="e.g., hit, get mad, run out"></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="gf-p" id="rpNote" style="margin:0"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="gf-p" id="rpNote" style="margin:0"></span></div>
   </div>
 </dialog>
 <dialog id="rcDlg" class="gf" aria-labelledby="rcTitle">
@@ -3475,7 +3475,7 @@ function rpStatus(){const set=$('#rpInst').value,st=$('#rpStatus'),bad=[];
   if(!$('#rpEmail').value.trim())bad.push('Enter your email: the answers are sent to it.');
   if(set==='student'&&!$('#rpWord').value.trim())bad.push('Enter the student’s own word for the behavior: the student set says [target behavior] until you do.');
   st.hidden=!bad.length;st.innerHTML=bad.map(esc).join('<br>');$('#rpWordRow').style.display=set==='student'?'':'none';
-  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
+  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpMail').disabled=$('#rpPreview').disabled=!!bad.length;
   const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this question set':'A link works when the workstation is on a website; opened from a folder, send the file';
   $('#rpNote').textContent=served?'':'Opened from a folder: send the file. The link needs the workstation on a website.';}
 function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='IN-1_'+RP_SETS[p.inst].file+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
@@ -3490,6 +3490,8 @@ $('#rpBehName').addEventListener('input',e=>{e.target.dataset.manual='1';});
 $('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();e.dispatchEvent(new Event('input',{bubbles:true}));}});
 $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{window.open(URL.createObjectURL(new Blob([NBH_RESPOND.pageHTML(rpPayload())],{type:'text/html'})),'_blank');});
+/* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
+$('#rpMail').addEventListener('click',()=>{if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:[{label:'',url:rpLinkUrl()}]});});
 $('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
   try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
 $('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});

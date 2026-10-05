@@ -177,6 +177,45 @@ without a sign-in; the workstation folder keeps its password. Update
 the two files in the public folder whenever a new edition is
 uploaded. Page files (Save the page as a file) need no hosting.
 
+The easier way (v21.44): leave the two files where they are and let
+them through the password. In cPanel's File Manager, turn on
+**Show Hidden Files** (Settings), open the workstation folder's
+`.htaccess` (Directory Privacy wrote it), and add at the end:
+
+```
+# The questionnaire pages informants open: no password (they hold no student data; the questionnaire travels in the link)
+<FilesMatch "^(respond\.html|nbh-respond\.js)$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+    Satisfy Any
+  </IfModule>
+</FilesMatch>
+```
+
+Everything else in the folder keeps its password; the links work as
+the forms make them, and the two files are updated with every upload.
+Leave **Address of respond.html for links** empty. If Directory
+Privacy is turned off and on again, it rewrites `.htaccess`: add the
+lines again.
+
+## Emailing a questionnaire (v21.44)
+
+Forms IA-1, IN-1, SV-1 and CF-1 have **Email it…** beside **Copy
+link** in the Respondent pages dialog. It opens a ready email: the
+informant's address (remembered on the device), a subject naming the
+questionnaire and the student's initials, and a short message with
+the link. **Open in Mail** hands it to the device's own mail app
+(Mail on the iPad, or whichever app is set as the default), where it
+is checked and sent from the user's own account; nothing goes through
+the website. **Share…** (on the iPad) offers Messages and the other
+apps; **Copy the message** puts it on the clipboard for webmail. The
+links need the workstation on its website; opened from a folder, save
+the page as a file and attach it instead.
+
 ## The writing-help relay (`public_html/ai`, v21.43)
 
 Every form has an **Improve wording** button on its text boxes. Two of its
