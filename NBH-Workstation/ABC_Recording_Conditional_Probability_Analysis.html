@@ -1078,6 +1078,37 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
 @media (max-width:760px){.obs-top{grid-template-columns:1fr}.obs-big{font-size:36px}.obs-set select{min-width:0;width:100%}.obs-set label{flex:1 1 150px}}
 @media print{.obs-card,.obs-bar,.obs-flash,.sw{display:none!important}}
 </style>
+<style id="abc1-touch-css">
+/* v21.44 (A6): on a touch screen the live record is easier to hit. Screen and a coarse pointer only: paper and the
+   computer layout are unchanged.
+   - The recording rows (Record, Background samples) sit at least 40 px apart, with 6 px between rows; a row's words
+     are tappable over its full height, and the tick box and the dot sit on the first line.
+   - Edit and Delete in the incident list, and Delete in the sample list, are 44 px tall and as wide as their
+     column, one above the other with 8 px between them. Where the incident list is wider than its box, their column
+     stays in view at the box's right edge.
+   - The other buttons used while recording (the observation timer and its bar, the incident stopwatch, the recording
+     format switch, Save incident) are 44 px tall; the switch's two halves stand 4 px apart. */
+@media screen and (pointer:coarse){
+  #panel-record .opt,#panel-background .opt{padding:3px 0;break-inside:avoid}
+  #panel-record .opt label,#panel-background .opt label{padding:9px 0;cursor:pointer;touch-action:manipulation}
+  #panel-record .opt input[type=checkbox],#panel-record .opt input[type=radio],#panel-background .opt input[type=checkbox]{margin:7px 0 0!important}
+  #panel-record .opt .dot,#panel-background .opt .dot{margin-top:15px}
+  #panel-record .opt input[type=text]{align-self:center;min-height:36px}
+  #inc-table button[data-edit],#inc-table button[data-del],#bg-table button[data-delsample]{display:block;width:100%;min-width:44px;min-height:44px!important;padding:8px 10px!important;font-size:13px!important;margin:0!important}
+  #inc-table button[data-del]{margin-top:8px!important}
+  /* the incident list is wider than its box with the iPad held upright, and in the workstation's frame (the sample
+     list on a phone): the column of Edit and Delete stays at the box's right edge while the rest of the row scrolls
+     under it */
+  #inc-table td:last-child,#inc-table th:last-child,#bg-table td:last-child,#bg-table th:last-child{position:sticky;right:0;box-shadow:inset 1px 0 0 var(--rule)}
+  #inc-table td:last-child,#bg-table td:last-child{z-index:1;background:var(--panel,#fff)}
+  #inc-table tbody tr:hover td:last-child,#bg-table tbody tr:hover td:last-child{background:var(--slate-tint)}
+  #inc-table thead th,#bg-table thead th{z-index:2}
+  #inc-table thead th:last-child,#bg-table thead th:last-child{z-index:3}
+  .obs-ctl button,.obs-bar button,.sw button,.segmented button,#panel-record button.btn,#panel-background button.btn,#panel-incidents button.btn{min-height:44px!important}
+  #panel-record .segmented{gap:4px;border:0;border-radius:0;overflow:visible}
+  #panel-record .segmented button,#panel-record .segmented button:last-child{border:1px solid var(--nbh-slate);border-radius:5px}
+}
+</style>
 </head>
 <body>
 <header class="nbh-mast">
@@ -4109,12 +4140,72 @@ function exportCSV(){
   });
   download("ABC_incidents_" + stamp() + ".csv", "\uFEFF" + lines.join("\r\n"), "text/csv;charset=utf-8");
 }
+/* v21.44 (A6): a file this form cannot read is named, as the other forms name it. The message went only to the status
+   line on the Data file tab, so from any other tab Open data seemed to do nothing. It now shows where you are, says
+   what the file is when the file tells (another form's saved file, a case file, a student packet), and the record on
+   screen stays as it was. */
+function notAbcFile(d, parsed, text){
+  let what = "";
+  if(d && typeof d === "object" && !Array.isArray(d)){
+    const f = typeof d.form === "string" ? d.form.trim() : "";
+    const v = typeof d.version === "string" ? ((/^([A-Z]{2}-\d+)\b/.exec(d.version) || [])[1] || "") : "";
+    if(f === "CASE") what = "It is a case file: open it with Open case in the workstation.";
+    else if(f === "PACKET") what = "It is a student packet (the student's details and the case facts): open it with Open packet.";
+    else if(/^[A-Z]{2}-\d+$/.test(f || v)) what = "It is a file saved by Form " + (f || v) + ": open it in that form.";
+    else if(Array.isArray(d.obs) && d.meta && d.cfg) what = "It looks like a file saved by Form OB-1: open it in that form.";
+    else if(Array.isArray(d.rows) && Array.isArray(d.behaviors) && d.schedule) what = "It looks like a file saved by Form DD-1: open it in that form.";
+    else if(Array.isArray(d.behaviors) && d.codes && d.cfg) what = "It looks like a file saved by Form SP-1: open it in that form.";
+    else if(Array.isArray(d.entries)) what = "It holds a list of entries, but they are not ABC-1 incidents.";
+  } else if(!parsed){
+    /* a file that is not JSON at all: a .csv, a document, or a saved file cut short on the way (a copy that stopped
+       part-way); "not a file saved with Save data" was wrong for the last */
+    what = String(text == null ? "" : text).trim() ? "It is not a complete .json file from Save data (it may be cut short, or be another kind of file)."
+                                                   : "The file is empty.";
+  }
+  return "That file could not be read as a saved ABC-1 record.\n" + (what ? what + " " : "") +
+    "Nothing on this form was changed. To open an ABC-1 record, choose the .json file Save data made here.";
+}
+/* v21.44 (A6, review): what a file holds is checked before anything on screen is replaced. "" when it reads as an
+   ABC-1 record; "wrong" when it is not one; "damaged" when it carries Save data's tag but a part of it cannot be read.
+   Any JSON with a list called "entries" was taken for an incident log and replaced the one on screen (a to-do list
+   loaded as 2 incidents, {"entries":[null]} left the old table on screen over a record of one empty incident, which
+   Save data then wrote). A file saved before the tag was written has none: its incidents must look like incidents
+   (each with a date and a list of behaviors), and a file with no incidents must have a header or a list of samples. */
+function abcFileProblem(d){
+  const rec = x => !!x && typeof x === "object" && !Array.isArray(x);
+  if(!rec(d)) return "wrong";
+  /* another form's file (its tag in "form" or in "version"), a case file or a student packet is never one */
+  if((typeof d.form === "string" && d.form.trim() && d.form.trim() !== "ABC-1") ||
+     (typeof d.version === "string" && /^[A-Z]{2}-\d+\b/.test(d.version) && !/^ABC-1\b/.test(d.version))) return "wrong";
+  if(!Array.isArray(d.entries)) return d.format === "abc-conditional-probability" ? "damaged" : "wrong";
+  const lists = (x, keys) => keys.every(k => x[k] == null || Array.isArray(x[k]));
+  const entry = e => rec(e) && lists(e, ["antecedents","behaviors","precursors","settingEvents","consequences","resolution"]) &&
+    (e.narrative == null || typeof e.narrative === "string");
+  const sample = s => rec(s) && Array.isArray(s.events) && lists(s, ["antecedents","precursors","settingEvents"]);
+  const samples = d.samples == null ? [] : d.samples;
+  const parts = Array.isArray(samples) && samples.every(sample) && (d.header == null || rec(d.header));
+  if(d.format === "abc-conditional-probability") return parts && d.entries.every(entry) ? "" : "damaged";
+  const looks = d.entries.every(e => entry(e) && Array.isArray(e.behaviors) && typeof e.date === "string") &&
+    (d.entries.length > 0 || rec(d.header) || Array.isArray(d.samples));
+  return parts && looks ? "" : "wrong";
+}
 function importJSON(file){
   const fr = new FileReader();
   fr.onload = () => {
+    let d = null, parsed = false;
+    try{ d = JSON.parse(fr.result); parsed = true; }catch(e){}
+    const tell = msg => { $("#data-status").textContent = msg.replace(/\n/g, " "); alert(msg); };
+    const damaged = "That file could not be read in full as a saved ABC-1 record.\nPart of it is damaged or missing, so none of it was opened. " +
+      "Nothing on this form was changed. If you have another copy of the .json file Save data made, open that one.";
+    const problem = parsed ? abcFileProblem(d) : "wrong";
+    if(problem){ tell(problem === "damaged" ? damaged : notAbcFile(d, parsed, fr.result)); return; }
+    /* what is on screen, so that a file that still fails part-way through leaves the record as it was */
+    const HEAD = ["h-client","h-observer","h-location","h-start","h-end","h-target","h-window","h-checks"];
+    const FILTERS = ["f-behavior","a-behavior"], timer = document.getElementById("obsChecks");
+    const kept = { entries: state.entries, samples: state.samples, faFunction: state.faFunction, header: state.header,
+      head: HEAD.map(id => $("#"+id).value), fn: $("#a-function").value, filters: FILTERS.map(id => $("#"+id).value),
+      timer: timer ? timer.value : null };
     try{
-      const d = JSON.parse(fr.result);
-      if(!d || !Array.isArray(d.entries)) throw new Error("not an ABC data file");
       state.entries = d.entries; state.samples = Array.isArray(d.samples) ? d.samples : [];
       /* v21.21 cross-form (X2): the function comes back with the file (and so through the workstation, which
          restores through Open data). A file saved before it was kept has none and leaves the choice on
@@ -4125,7 +4216,21 @@ function importJSON(file){
       writeHeader(d.header); sortEntries(); refreshAll();
       $("#data-status").textContent = "Loaded " + state.entries.length + " incidents and " + state.samples.length + " background samples.";
     }catch(err){
-      $("#data-status").textContent = "That file could not be read as an ABC data file. Choose a .json exported from this page.";
+      state.entries = kept.entries; state.samples = kept.samples; state.faFunction = kept.faFunction;
+      $("#a-function").value = kept.fn;
+      const checksWas = $("#h-checks").value;
+      HEAD.forEach((id, i) => { $("#"+id).value = kept.head[i]; });
+      /* the timer takes the header's check interval while it is ready, as writeHeader tells it; its own setting goes
+         back too (a running observation keeps its schedule, so there it has not moved) */
+      if($("#h-checks").value !== checksWas) $("#h-checks").dispatchEvent(new Event("change", {bubbles:true}));
+      if(timer && timer.value !== kept.timer){ timer.value = kept.timer; timer.dispatchEvent(new Event("change", {bubbles:true})); }
+      state.header = kept.header;
+      try{
+        refreshAll();
+        FILTERS.forEach((id, i) => { const el = $("#"+id); if(Array.from(el.options).some(o => o.value === kept.filters[i])) el.value = kept.filters[i]; });
+        renderIncidents(); if(!$("#panel-analysis").hidden) renderAnalysis();
+      }catch(e){}
+      tell(damaged);
     }
   };
   fr.readAsText(file);
@@ -5356,7 +5461,17 @@ function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 
   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
   return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
-function loadDemo(){
+/* v21.44 (A6): the simulation asks first, with the question the other forms ask. It replaced the header, the incident
+   log, the background samples and the function without asking, and left what was half entered beside the simulated
+   record. After Load that is cleared too: the incident being entered on the Record tab, the sample being entered on
+   Background samples (its ticks, date, time, window and adult within view, as a fresh page has them) and the counts in
+   the IOA calculator on Methods. */
+async function loadDemo(){
+  if(!(await nbhUI.confirm("Load the simulated record?\nEvery tab is filled with a worked example: 46 incidents and 60 background samples, with the analysis set to compare against an escape function. Anything already entered will be replaced.", {ok:"Load"}))) return;
+  clearForm();
+  $$('#bg-a-opts input, #bg-c-opts input, #bg-p-opts input, #bg-se-opts input').forEach(cb => { cb.checked = false; cb.closest(".opt").classList.remove("checked"); });
+  $("#bg-date").value = todayISO(); $("#bg-time").value = nowHM(); $("#bg-window").value = "10"; $("#bg-staffpresent").value = "";
+  ["oa","od","na","nd"].forEach(k => { const el = $("#ioa-"+k); if(el){ el.value = ""; el.dispatchEvent(new Event("input", {bubbles:true})); } });
   const rnd = mulberry(20260913);
   const pick = arr => arr[Math.floor(rnd()*arr.length)];
   const chance = p => rnd() < p;
