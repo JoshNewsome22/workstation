@@ -497,6 +497,50 @@ td input,td select{max-width:100%}
 .sheet thead th.band{padding:5px 8px;font-size:15px}
 .keycell b{color:var(--ink);font-size:11.5px}
 .keycell .krow{margin-bottom:4px}
+/* v21.47 the slim sheet: the student above the table, short headings, the definitions and the key below */
+.sheet-top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:0 0 8px}
+.sheet-top:empty,.sheet-defs:empty{display:none}
+.sheet-top .idwrap{display:flex;gap:10px;align-items:center;text-align:left}
+.sheet-top .idwrap img{width:44px;height:54px;object-fit:cover;border:1px solid var(--rule);border-radius:2px;flex:0 0 auto}
+.sheet-top .nm{font-family:var(--nbh-serif);font-size:17px;font-weight:700;color:var(--ink);line-height:1.2}
+.sheet-top .sub{font-size:11.5px;color:var(--ink-soft);line-height:1.4;margin-top:2px}
+.sheet-top .st-r{font-size:11.5px;color:var(--ink-soft);text-align:right;line-height:1.45}
+.sheet.slim thead th.fixh{vertical-align:bottom;text-align:center;font-size:12px;font-weight:600;white-space:normal;background:#F4F7F8;border:1px solid var(--rule-soft);color:var(--ink);padding:6px 4px}
+.sheet.slim thead th.namecell{vertical-align:middle;line-height:1.25;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+.bnum{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;border-radius:50%;color:#fff;font:700 10.5px/1 var(--nbh-sans);margin-right:5px;vertical-align:1px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.nmsub{display:block;font:400 11px/1.3 var(--nbh-sans);color:var(--ink-soft);margin-top:2px}
+.sd-wrap{margin:12px 0 0;border:1px solid var(--rule);border-radius:3px;padding:10px 12px;background:#FBFCFC}
+.sd-wrap h4{margin:0 0 8px;font-family:var(--nbh-serif);font-size:14px;color:var(--ink)}
+.sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 18px}
+.sd-card{border-left:4px solid var(--c);padding:1px 0 2px 9px;break-inside:avoid;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sd-h{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.sd-h .bnum{margin-right:0}
+.sd-h b{font-size:12.5px;color:var(--ink)}
+.sd-k{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.3px}
+.sd-card p{margin:3px 0 2px;font-size:11.5px;line-height:1.38;color:var(--ink)}
+.sd-m{font-size:11px;color:var(--ink-soft)}
+.sd-key{margin-top:9px;padding-top:7px;border-top:1px solid var(--rule-soft);font-size:11px;color:var(--ink-soft);line-height:1.45}
+.sd-only .sd-key{margin-top:0;padding-top:0;border-top:0}
+.sheet .pdate{display:none}
+@media print{
+  .sheet-top{margin-bottom:5px}.sheet-top .nm{font-size:13px}.sheet-top .sub,.sheet-top .st-r{font-size:8.5px}.sheet-top .idwrap img{width:34px;height:42px}
+  .sheet.slim thead th.fixh{font-size:9px;padding:4px 2px}
+  .sheet.slim thead th.namecell{font-size:10.5px;padding:4px 4px}
+  .nmsub{font-size:8.5px}
+  .bnum{min-width:13px;height:13px;font-size:8.5px;margin-right:3px}
+  .sd-wrap{padding:6px 9px;margin-top:8px;break-inside:avoid;background:#fff}
+  .sd-wrap h4{font-size:10.5px;margin-bottom:5px}
+  .sd-grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:5px 14px}
+  .sd-card{border-left-width:3px;padding-left:7px}
+  .sd-h b{font-size:9.5px}.sd-k{font-size:7.5px}.sd-card p{font-size:8.8px;line-height:1.32}.sd-m{font-size:8px}.sd-key{font-size:8.3px;margin-top:6px;padding-top:5px}
+  .sheet.slim tbody td.col-date > input{display:none}
+  .sheet.slim tbody td.col-date .pdate{display:block;text-align:center;font-size:9.5px;padding:5px 1px;white-space:nowrap}
+  .sheet.slim tbody td > input{padding:5px 2px}
+  /* the actions column is the last of the first heading row here, not of the units row */
+  .sheet.slim thead tr.entry th:last-child{display:table-cell}
+  .sheet.slim thead th.fx-act{display:none}
+  .sheet.slim tbody td.col-phase .po{white-space:normal;line-height:1.2;padding:3px 2px;font-size:8.5px}
+}
 .keycell h5{margin:0 0 5px;font-family:var(--nbh-serif);font-size:13px;color:var(--ink);font-weight:700}
 .cell-flag{background:#FAEDED !important;box-shadow:inset 0 0 0 1px #C98A8A}
 .sheet tbody td > input.is-default{color:#5B6770;font-style:italic}
@@ -1274,6 +1318,12 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
         <button class="btn ghost" id="btnPasteDates" title="Paste a column of dates copied from Google Sheets or Excel">Paste dates</button>
         <button class="btn danger" id="btnClearRows">Clear all rows</button>
         <label style="display:flex;gap:5px;align-items:center;font-size:14px"><input type="checkbox" id="d_defs" checked style="width:auto"> Show definitions</label>
+        <label class="field"><span>Definitions go</span>
+          <select id="d_defpl" title="Below the sheet keeps the columns even and the heading short; in the column headings puts each definition over its column">
+            <option value="below">Below the sheet</option>
+            <option value="head">In the column headings</option>
+          </select>
+        </label>
         <label class="field"><span>Column width</span>
           <select id="d_colw">
             <option value="132">Compact</option>
@@ -1297,6 +1347,7 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
         <span class="hint" style="margin:0;font-size:12px">Observation minutes fill in from this window. Type over a day's value when the student arrived late or left early; clear it to go back to the window.</span>
       </div>
       <div id="pasteNote" class="dd-paste-note no-print" role="status"></div>
+      <div class="sheet-top" id="sheetTop"></div>
       <div class="sheet-wrap" tabindex="0" role="region" aria-label="Daily data sheet">
         <table class="sheet" id="dataTable">
           <colgroup id="dataCols"></colgroup>
@@ -1304,6 +1355,7 @@ dialog.ddl-dlg .dd-actions .btn{min-height:44px}
           <tbody></tbody>
         </table>
       </div>
+      <div class="sheet-defs" id="sheetDefs"></div>
       <p class="hint no-print" style="margin-top:12px">
         <strong>Full phase change</strong> starts a new condition: the graph breaks the data path, draws a solid vertical line, and analyzes the new condition separately.
         <strong>Conditional change</strong> keeps the condition intact and drops a dashed annotated line at that date &mdash; use it for events inside a phase such as a medication adjustment, a staffing change, or an illness.
@@ -4300,6 +4352,21 @@ function syncObsControls(){
   if(S.settings.entryMode==="interval") parts.push(sl.length?`${sl.length} blocks`:"no blocks generated");
   $("#iv_count").textContent=parts.join(" \u00b7 ");
 }
+/* v21.47 the slim sheet: who it is for above the table, the definitions and how to read it below */
+function shortDay(iso){if(!iso)return "";const p=iso.split("-");if(p.length!==3)return iso;const d=new Date(+p[0],+p[1]-1,+p[2],12);
+  return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]+" "+(+p[1])+"/"+(+p[2]);}
+function hm12(t){const m=timeToMin(t);if(m===null)return "";const h=Math.floor(m/60),mm=m%60;return (h%12||12)+":"+String(mm).padStart(2,"0")+(h<12?" am":" pm");}
+function sheetTopHtml(){const wm=windowMinutes(),iv=S.settings.entryMode==="interval";
+  const win=wm!==null?`Observation window ${esc(hm12(S.settings.dayStart))} to ${esc(hm12(S.settings.dayEnd))} (${wm} min a day${iv?`, in ${slotList().length} blocks`:""})`:"";
+  const m=S.meta,det=[m.id?`Student number ${esc(m.id)}`:"",m.age?esc(m.age):"",m.school?esc(m.school):"",m.classroom?esc(m.classroom):"",m.observer?`Data by ${esc(m.observer)}`:"",m.analyst?esc(m.analyst):""].filter(Boolean).join(" \u00b7 ");
+  return `<div class="st-l"><div class="idwrap">${m.photo?`<img src="${esc(m.photo)}" alt="">`:""}<div><div class="nm">${esc(m.client||"Unnamed client")}</div><div class="sub">${det||"Add client details on the first tab"}</div></div></div></div><div class="st-r">${win}${win?"<br>":""}Obs. min: the minutes observed that day (a short day is typed over)</div>`;}
+function sheetDefsHtml(obs,defsOn){
+  const key=`<div class="sd-key"><b>Blank</b> = not measured; <b>0</b> = measured, none occurred (they graph differently). <b>Full phase change</b>: a new condition starts that day (new plan, schedule or setting); the graph breaks and analyzes it separately. <b>Conditional change</b>: an event inside a condition (medication, staffing, illness); a dashed line, the condition is not split.</div>`;
+  if(!defsOn||!obs.length)return `<div class="sd-wrap sd-only">${key}</div>`;
+  return `<div class="sd-wrap"><h4>Definitions and measurement</h4><div class="sd-grid">${obs.map((b,i)=>`<div class="sd-card" style="--c:${esc(b.color)}">
+    <div class="sd-h"><span class="bnum" style="background:${esc(b.color)}">${i+1}</span><b>${esc(b.name||"Untitled")}</b><span class="sd-k">${esc(KINDS[b.kind||"target"]||"")}</span></div>
+    <p>${esc(b.definition||"No definition written yet (Client & behaviors tab).")}</p>
+    <div class="sd-m">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</div></div>`).join("")}</div>${key}</div>`;}
 function renderData(){
   renderSheetId();
   const rows=sortedRows();
@@ -4320,11 +4387,37 @@ function renderData(){
   });
   flushBand();
   const headerRows = S.settings.showDefs ? 4 : 3;
+  /* v21.47 where the definitions go: below the sheet (the default: the heading stays short and the columns even) or, as before,
+     in the column headings */
+  const slim = S.settings.defPlace!=="head", defsOn = S.settings.showDefs!==false;
+  const behHeads = obs.map(b=>{
+      if(!iv && MEASURES[b.measure].two) return `<th class="col-beh"><span class="lg">Occurrences (+)</span><span class="sm">Occ. (+)</span></th><th class="col-beh"><span class="lg">Opportunities</span><span class="sm">Opps</span></th><th class="col-beh">%</th>`;
+      return `<th class="col-beh">${iv?dayHead(b):(MEASURES[b.measure].two?"%":(b.measure==="duration"?"Total minutes (per day)":(b.measure==="pdur"?"% of the day":(ENTRY_HEAD[b.measure]||"(total per day)"))))}</th>`;
+    }).join("");
+  $("#dataTable").classList.toggle("slim",slim);
+  $("#sheetTop").innerHTML = slim ? sheetTopHtml() : "";
+  $("#sheetDefs").innerHTML = slim ? sheetDefsHtml(obs,defsOn) : "";
   $("#dataCols").innerHTML = `<col class="c-date"><col class="c-obs">`+
     obs.map(b=>(!iv&&MEASURES[b.measure].two)?`<col class="c-beh-a"><col class="c-beh-b"><col class="c-beh-c">`:`<col class="c-beh">`).join("")+
     `<col class="c-phase"><col class="c-label"><col class="c-notes"><col class="c-actions">`;
   applyColW(false);
-  head.innerHTML=`
+  if(slim) head.innerHTML=`
+  <tr class="hrow">
+    <th class="col-date fixh" rowspan="3">Date</th>
+    <th class="col-obs fixh" rowspan="3">Obs.<br>min</th>
+    ${bands}
+    <th class="col-phase fixh" rowspan="3">Phase change</th>
+    <th class="col-label fixh" rowspan="3">Condition name or event</th>
+    <th class="col-notes fixh" rowspan="3">Daily notes</th>
+    <th class="fixh fx-act" rowspan="3"></th>
+  </tr>
+  <tr class="hrow">
+    ${obs.map((b,i)=>`<th class="namecell" colspan="${span(b)}" style="border-top:3px solid ${esc(b.color)}">${defsOn?`<span class="bnum" style="background:${esc(b.color)}">${i+1}</span>`:""}${esc(b.name||"Untitled")}${defsOn?"":`<small class="nmsub">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</small>`}</th>`).join("")}
+  </tr>
+  <tr class="entry">
+    ${behHeads}
+  </tr>`;
+  else head.innerHTML=`
   <tr class="hrow">
     <th class="col-date idcell" colspan="2" rowspan="2">${idBlock(true)}</th>
     ${bands}
@@ -4344,10 +4437,7 @@ function renderData(){
   <tr class="entry">
     <th class="col-date">Date</th>
     <th>${iv?"Obs. min":"Obs. min"}</th>
-    ${obs.map(b=>{
-      if(!iv && MEASURES[b.measure].two) return `<th class="col-beh"><span class="lg">Occurrences (+)</span><span class="sm">Occ. (+)</span></th><th class="col-beh"><span class="lg">Opportunities</span><span class="sm">Opps</span></th><th class="col-beh">%</th>`;
-      return `<th class="col-beh">${iv?dayHead(b):(MEASURES[b.measure].two?"%":(b.measure==="duration"?"Total minutes (per day)":(b.measure==="pdur"?"% of the day":(ENTRY_HEAD[b.measure]||"(total per day)"))))}</th>`;
-    }).join("")}
+    ${behHeads}
     <th class="col-phase">Phase change</th>
     <th class="col-label">Condition name or event</th>
     <th class="col-notes">Daily notes</th>
@@ -4361,7 +4451,7 @@ function renderData(){
     let cls = r.phaseType==="full" ? "phase-full" : (r.phaseType==="conditional" ? "phase-cond" : "");
     if(iv && r.id===selectedDay) cls+=" sel-day";
     return `<tr class="${cls}" data-r="${esc(r.id)}">
-      <td class="col-date ${iv?"pick":""}"><input type="date" data-f="date" value="${esc(r.date)}" style="padding-left:2px;padding-right:2px">${iv?`<button class="btn ghost sm" data-act="openDay" style="margin:0 4px 5px;padding:2px 7px">Open</button>`:""}</td>
+      <td class="col-date ${iv?"pick":""}"><input type="date" data-f="date" value="${esc(r.date)}" style="padding-left:2px;padding-right:2px"><span class="pdate">${esc(shortDay(r.date))}</span>${iv?`<button class="btn ghost sm" data-act="openDay" style="margin:0 4px 5px;padding:2px 7px">Open</button>`:""}</td>
       <td class="${iv?"calc":""} ${iv&&!r.obsMin?"none":""}">${iv?esc(r.obsMin||"\u2014"):(()=>{
         const o=num(r.obsMin), wm=windowMinutes();
         return `<input type="number" step="any" min="0" data-f="obsMin" class="${o===null?"is-default":""}" value="${o!==null?esc(r.obsMin):(wm===null?"":wm)}" title="${o===null?"From the standard observation window \u2014 type over it for a short day":"Adjusted for this day \u2014 clear the cell to use the window again"}">`;
@@ -5526,6 +5616,7 @@ function syncResultControls(){
   $("#c_tod").checked=S.settings.showTod; $("#c_heat").checked=S.settings.showHeat;
   $("#d_mode").value=S.settings.entryMode;
   $("#d_defs").checked=S.settings.showDefs!==false;
+  $("#d_defpl").value=S.settings.defPlace==="head"?"head":"below";
   $("#c_key").checked=S.settings.showKey!==false;
   $("#d_colw").value=String(S.settings.colW||172);
   $("#p_orient").value=S.settings.orient||"landscape";
@@ -5689,6 +5780,7 @@ $("#d_mode").addEventListener("change",e=>{
   renderData(); renderIntervalPanel(); renderResults();
 });
 $("#d_defs").addEventListener("change",e=>{S.settings.showDefs=e.target.checked; renderData(); renderIntervalPanel();});
+$("#d_defpl").addEventListener("change",e=>{S.settings.defPlace=e.target.value==="head"?"head":"below"; renderData();});
 $("#c_key").addEventListener("change",e=>{S.settings.showKey=e.target.checked; renderResults();});
 $("#d_colw").addEventListener("change",e=>{S.settings.colW=parseInt(e.target.value,10); applyColW();});
 $("#p_orient").addEventListener("change",e=>{S.settings.orient=e.target.value; applyOrientation();});
@@ -5700,7 +5792,18 @@ function applyColW(printing){
   let behW = S.settings.colW||172;
   const avail = (S.settings.orient==="portrait") ? 700 : 960;
   const TWO = 1.65; // a correct-of-opportunities target occupies this many standard columns
-  if(printing){
+  const slim = S.settings.defPlace!=="head";
+  if(printing && slim){
+    const portrait = S.settings.orient==="portrait";
+    fixed.date=portrait?52:56; fixed.obs=32; fixed.phase=portrait?56:70; fixed.label=portrait?72:96;
+    const nTwo = iv ? 0 : obs.filter(b=>MEASURES[b.measure].two).length;
+    const units = Math.max(1, (obs.length-nTwo) + TWO*nTwo);
+    const minNotes = portrait?80:120;
+    behW = Math.max(52, Math.min(150, Math.floor((avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+minNotes))/units)));
+    const behTotal = obs.reduce((t,b)=>t+((!iv&&MEASURES[b.measure].two)?Math.round(behW*0.6)*2+Math.round(behW*0.45):behW),0);
+    fixed.notes = Math.max(minNotes, avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+behTotal));
+  }
+  else if(printing){
     const nTwo = iv ? 0 : obs.filter(b=>MEASURES[b.measure].two).length;
     const nOne = obs.length - nTwo;
     const units = Math.max(1, nOne + TWO*nTwo);
