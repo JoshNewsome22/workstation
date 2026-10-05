@@ -1,7 +1,7 @@
 /* v21.44 Email it… (nbh-respond.js U.invite): the four forms that build respondent pages open a ready email from the user's own
    mail app. For IA-1 (the FAST, test wording pasted), SV-1, IN-1 and CF-1 with the simulated case: the button is off until the
    page can be built; it opens the dialog with a subject naming the questionnaire and the student's initials only, a message
-   carrying the respondent link (respond.html#p=...), Open in Mail makes a mailto: to the address typed (remembered for next
+   carrying the respondent link (respond.html#z=...), Open in Mail makes a mailto: to the address typed (remembered for next
    time); no name of the simulated student appears in the email.  usage: node qa/invite-test.js   (WS_URL as in qa/lib.js) */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const FORMS=['IA-1_Indirect-Functional-Assessment-Protocol_v2026-09','SV-1_Social-Validity_v2026-09','IN-1_Stakeholder-Interview-Record_v2026-09','CF-1_Contextual-Fit-Assessment_v2026-09'];
@@ -21,11 +21,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined?
     const r=await p.evaluate(()=>{const d=document.querySelector('.nbh-inv');return d?{open:d.open,su:d.querySelector('#nbhInvSu').value,bo:d.querySelector('#nbhInvBo').value}:null;});
     ok(id+': the dialog opens',!!(r&&r.open));if(!r)continue;
     ok(id+': the subject names the questionnaire and initials',/ · [A-Z]\.(?:[A-Z]\.)*$/.test(r.su),r.su);
-    ok(id+': the message carries the respondent link',/https?:\/\/\S+\/respond\.html#p=\S+/.test(r.bo));
-    ok(id+': no student name or ID in the email',/Sample Student/.test(name)&&!/Sample|Student\b|SIM-000/.test(r.su+r.bo.replace(/#p=\S+/,'')),name);
+    ok(id+': the message carries the respondent link',/https?:\/\/\S+\/respond\.html#z=\S+/.test(r.bo));
+    ok(id+': no student name or ID in the email',/Sample Student/.test(name)&&!/Sample|Student\b|SIM-000/.test(r.su+r.bo.replace(/#z=\S+/,'')),name);
     await p.fill('.nbh-inv #nbhInvTo','teacher@example.org');await p.click('.nbh-inv button[data-a=mail]');await sleep(200);
     const h=await p.evaluate(()=>window.__hrefs[0]||'');
-    ok(id+': Open in Mail makes the mailto',h.indexOf('mailto:teacher@example.org?subject=')===0&&decodeURIComponent(h).indexOf('respond.html#p=')>0,h.length);
+    ok(id+': Open in Mail makes the mailto',h.indexOf('mailto:teacher@example.org?subject=')===0&&decodeURIComponent(h).indexOf("respond.html#z=")>0,h.length);
     await p.click('.nbh-inv button[data-a=close]');
     ok(id+': the address is remembered',await p.evaluate(()=>localStorage.getItem('nbh-invite-to')==='teacher@example.org'));}
   ok('no script errors',!errs.length,errs.slice(0,3));

@@ -7180,3 +7180,17 @@ Send) and the due date when there is one, carries the link (or one per target in
 button is off whenever Copy link is. Nothing is sent by the workstation: the email leaves from the user's own account. Checked by
 `qa/invite-test.js`. HOSTING.md has the `.htaccess` lines that let `respond.html` and `nbh-respond.js` through the folder's
 password, so the links work without a public folder.
+
+**Short respondent links (v21.44).** A respondent link is now `respond.html#z=1<form letter><code>` instead of `#p=<the
+questionnaire as base64>`, and is 4 to 20 times shorter (with the simulated case: SV-1 about 260 characters after the address,
+CF-1 about 190, IN-1 about 390, IA-1 with sixteen FAST-length items pasted about 1,100; before, 3,600 to 7,500). The code is
+the questionnaire's JSON packed with deflate (RFC 1951, written into nbh-respond.js so it runs the same in every browser,
+WebKit included, with no library) against a dictionary of the wording the form puts into its links, with a CRC-32 of the
+questionnaire in front. The dictionaries (`tools/respond-dict/v1.json`, one per form, made by `tools/respond-dict/make.js` from
+the forms with the simulated case) are frozen: a link made today opens with exactly these bytes, so a wording change later
+gets a version 2 beside version 1, never an edit of it. IA-1's dictionary has its instructions, scales and open questions
+but not the item wording, which is the user's paste, and not the WEFA's open questions. The form opens each link again before
+handing it out and falls back to the old kind if anything differs; respond.html still opens `#p=` links; a link cut short
+fails its CRC and the page says it does not open (never a wrong questionnaire). A second link opened in the same tab, which
+changes only the part after `#`, now reloads the page so it shows its own questionnaire. Checked by `qa/respond-short-test.js`
+(the frozen dictionaries, links from the four forms, the golden links in `qa/data/respond-golden.json`, old and cut links).

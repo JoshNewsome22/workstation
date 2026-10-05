@@ -25,7 +25,7 @@ let fails=0;const ok=(n,c,x)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.
  await page.evaluate(()=>document.querySelector('#rpPrevClose').click());
  await page.evaluate(()=>{navigator.clipboard.writeText=()=>Promise.reject(new Error('refused'));document.querySelector('#rpLink').click();});await sleep(300);
  const lk=await page.evaluate(()=>({hidden:document.querySelector('#rpLinkBox').hidden,val:document.querySelector('#rpLinkBox').value,note:document.querySelector('#rpNote').textContent}));
- ok('Copy a link with the clipboard refused: the link is in the box with a note to copy it from there',!lk.hidden&&/respond\.html#p=[A-Za-z0-9_-]{40,}/.test(lk.val)&&/select the link in the box/.test(lk.note),lk);
+ ok('Copy a link with the clipboard refused: the link is in the box with a note to copy it from there',!lk.hidden&&/respond\.html#[pz]=[A-Za-z0-9_-]{40,}/.test(lk.val)&&/select the link in the box/.test(lk.note),lk);
  /* the wording, the link and the email are remembered on this device and fill a fresh form */
  await page.evaluate(()=>{document.querySelector('#rpDlg').close();const e=document.querySelector('[name="rp.video"]');e.value='https://youtu.be/x1';e.dispatchEvent(new Event('input',{bubbles:true}));});
  const dev1=await page.evaluate(()=>({note:document.querySelector('#rpDevNote').hidden?'':document.querySelector('#rpDevText').textContent,store:Object.keys(JSON.parse(localStorage.getItem('nbh.ia1.respondent')||'{}'))}));

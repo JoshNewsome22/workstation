@@ -33,7 +33,7 @@ const answer=async(rp,who,pick)=>rp.evaluate(([who,pick])=>{const inp=document.q
  const file=await grab(page,()=>__rp.file());
  ok('page file named and self-contained, no full name',/^CF-1_teacher-r1_respondent_S\.S\._ID_12345_\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/without looking it up/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
  const link=await page.evaluate(()=>__rp.link());
- ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#p=[A-Za-z0-9_-]{100,}$/.test(link),link.slice(0,80));
+ ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the teacher answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(file.text,{waitUntil:'load'});await sleep(300);
  const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,opts:document.querySelectorAll('li.it .opts label').length,inputs:document.querySelectorAll('input[type=text]').length,open:document.querySelectorAll('textarea:not(.code)').length,student:document.querySelector('.def').textContent,key:document.querySelector('.key').textContent}));

@@ -175,7 +175,8 @@ in **Address of respond.html for links**, for example
 remembered on the device and saved with the file. Links then open
 without a sign-in; the workstation folder keeps its password. Update
 the two files in the public folder whenever a new edition is
-uploaded. Page files (Save the page as a file) need no hosting.
+uploaded (v21.44: the short links need the new `nbh-respond.js`; an
+old copy in the public folder says the link does not open). Page files (Save the page as a file) need no hosting.
 
 The easier way (v21.44): leave the two files where they are and let
 them through the password. In cPanel's File Manager, turn on
@@ -215,6 +216,15 @@ the website. **Share…** (on the iPad) offers Messages and the other
 apps; **Copy the message** puts it on the clipboard for webmail. The
 links need the workstation on its website; opened from a folder, save
 the page as a file and attach it instead.
+
+The links are short (v21.44): about 200 to 450 characters for SV-1,
+CF-1 and IN-1, and about 1,000 to 2,000 for IA-1, whose questions are
+the wording pasted on its Setup sheet. `nbh-respond.js` carries the
+forms' own question wording, so a link holds only the questionnaire's
+case details (the behavior, its definition, the initials, the due date,
+the address answers go to) and any wording that was changed, packed
+small. Nothing is stored on the website. Links sent before v21.44 still
+open.
 
 ## The writing-help relay (`public_html/ai`, v21.43)
 

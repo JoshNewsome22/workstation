@@ -27,7 +27,7 @@ const grab=async(page,fn)=>{await page.evaluate(()=>{window.__dl=[];URL.createOb
  /* the public address for links */
  await page.evaluate(()=>{rpBase.value='https://example.org/respond/';rpBase.dispatchEvent(new Event('input'));});
  const link=await page.evaluate(()=>__rp.link());
- ok('with a public address the link points there, respond.html added',/^https:\/\/example\.org\/respond\/respond\.html#p=/.test(link),link.slice(0,70));
+ ok('with a public address the link points there, respond.html added',/^https:\/\/example\.org\/respond\/respond\.html#[pz]=/.test(link),link.slice(0,70));
  const dev=await page.evaluate(()=>JSON.parse(localStorage.getItem('nbh.ia1.respondent')||'{}'));
  ok('the address is remembered on the device; the photo is not',dev['rp.base']==='https://example.org/respond/'&&!dev['rp.photo'],Object.keys(dev));
  /* the photo saves with the file and Clear all removes it */
