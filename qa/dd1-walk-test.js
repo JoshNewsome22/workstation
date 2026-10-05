@@ -56,5 +56,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   /* leaving the view pauses */
   const left=await page.evaluate(async()=>{TKWALK.seek(10);TKWALK.play();await new Promise(r=>setTimeout(r,400));const was=TKWALK.playing||true;document.querySelector('#viewSeg [data-view="data"]').click();await new Promise(r=>setTimeout(r,200));return {was,now:TKWALK.playing,view:document.body.classList.contains('view-data')};});
   ok('leaving the view pauses the walkthrough',!left.now&&left.view,left);
+  /* the one-file edition carries the narration and Save as video inside it */
+  const one=await br.newPage({viewport:{width:1300,height:950}});await one.goto(BASE+'/deliver/'+(ED==='RPS-Workstation'?'RPS':'NBH')+'-Workstation.html');await sleep(1500);
+  await one.evaluate(()=>openForm('DD-1'));await one.waitForFunction(()=>!!state.status['DD-1'],null,{timeout:30000}).catch(()=>{});await sleep(1500);
+  const fr=one.frames().find(f=>f!==one.mainFrame()&&/Daily_Behavior|DD-1|blob:|about:srcdoc/.test(f.url()+'')&&f.url())||one.frames().find(f=>f!==one.mainFrame());
+  const inside=fr?await fr.evaluate(()=>({audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,walk:typeof TKWALK})).catch(e=>({err:String(e)})):{none:true};
+  ok('the one-file edition: DD-1 has its narration and Save as video inside',inside.audio===15&&inside.video==='object'&&inside.walk==='object',inside);
+  await one.close();
   ok('no errors',errs.length===0,errs);
   console.log(fails?fails+' FAILED':'ALL PASS');await br.close();process.exit(fails?1:0);})();

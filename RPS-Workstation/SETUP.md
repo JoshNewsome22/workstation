@@ -7408,3 +7408,34 @@ Save as video share `nbh-tk1-video.js`):
   own, and the round frame's cut (`overflow: hidden` with `border-radius: 50%`) was not applied to it. Every picture painted on its
   own is now cut by the boxes around it that cut it on the page. Checked by `qa/tk1-video-test.js` (a red photo: red in the
   middle of the frame, not in its corners, as on the screen).
+
+## Form DD-1: A Cleaner Data Sheet and a Narrated Walkthrough (v21.47)
+
+**The data sheet, laid out again.** The definitions in the column headings made the heading tall and the columns narrow, and the
+key took four columns of the page. Now, by default:
+
+- The heading is three short rows: the type bands (reduction targets, replacement behaviors, acquisition targets), the names
+  (each with a number in its colour) and the units ("total per day", "Total minutes", "Occ. (+) · Opps · %").
+- **Definitions and measurement** sit below the sheet, one card per behavior under the same number: the definition, its type, the
+  measurement and the observation length. The key (blank and zero, full and conditional changes) is one line under them.
+- The student's name and details are one line above the table, with the observation window on the right.
+- Printed, the Date column reads "Mon 9/7" and is narrow, Obs. min is narrow, the behavior columns share the page evenly (sized to
+  fill it, landscape or portrait) and Daily notes takes what is left; a long name breaks with a hyphen.
+- **Definitions go: In the column headings** (beside Show definitions) keeps the sheet exactly as it was; with Show definitions
+  off, the key stays and each name carries its measurement. The choice is saved with the file; an older file opens with the
+  definitions below. Checked by `qa/dd1-sheet-test.js`.
+
+**Walkthrough (a fourth tab).** A narrated walkthrough of this form's own sheet and graph, for everyone who records, built from
+the form as it is (2 min 51 s with the simulation, five chapters): the column groups, the numbered definitions, the units; a day
+written in by the pencil (today's row, from the last day's numbers); observation minutes (a late arrival typed over); blank and
+zero; a duration behavior's episode log; a skill's correct responses and opportunities and the percent the form works out; a full
+phase change and a conditional change; the first behavior's graph (the camera travels down to it, the days light in turn, the
+phase line); the comparison under it (level, trend, variability, overlap, the summary); four habits for the team. Scenes the data
+cannot show are left out (no episodes, no skill, no change, no days yet). The player, the captions, the chapters, full screen, the
+transcript and **Save as video** are TK-1's and SM-1's; the video carries the student's data, so the page says to share it only
+where the student's records may go, or to make it from the simulation. The narration is `nbh-dd1-narration.js` beside the form
+(Kokoro af_heart, the practice's own voice for TK-1 and SM-1); the one-file editions carry it inside. The walkthrough is written
+into the form by `tools/forms/DD-1/patch-walk.py` from `tools/forms/DD-1/` (walk.js, walk-dd.css, walk-script.json; voice it with
+make-narration.py). Checked by `qa/dd1-walk-test.js` (the tab, every scene for the simulation, the copy of the sheet as text,
+today's row, the camera at the graph and the analysis, scenes left out, five frames painted for the video against the stage,
+pausing on leaving, the one-file edition) and a video made in WebKit.
