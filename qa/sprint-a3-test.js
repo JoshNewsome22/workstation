@@ -203,7 +203,9 @@ async function sampleCase(br,W,H){
   const tag=`sample, shell ${W}x${H} bar fold + Autosaved chip`;
   const {ctx,fr,frameTop}=await shellOpen(br,W,H,'fold',true,tag);
   if(!fr){ok(tag+': OB-1 opens in the workstation',false);await ctx.close();return;}
-  ok(tag+': the bar is two rows, as after the first autosave (the form starts at 260)',frameTop>=255,{frameTop});
+  /* v21.44 merge: since sprint-a8 keeps the chips together the bar stays one row with the Autosaved chip (the form starts
+     at 212, not 260); either way the controls below must be in view */
+  ok(tag+': the bar is folded with the Autosaved chip (the form starts at 212, or 260 where the bar wraps)',frameTop>=205&&frameTop<=270,{frameTop});
   await fr.tap('#viewSeg [data-view="obs"]');await sleep(500);
   await fr.tap('#obrStart');await sleep(500);
   const y0=await fr.evaluate(()=>scrollY),m0=await reach(fr,MARKS);
