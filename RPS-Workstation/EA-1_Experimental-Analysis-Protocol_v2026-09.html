@@ -756,6 +756,57 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 /* never let a fixed-width numeric input overflow a narrow column */
 td input,td select{max-width:100%}
+
+/* ---- the enhancement sprint (B2): the alone or no-interaction condition ---- */
+.warn ul.rules li>b:first-child{display:inline;margin:0;font-size:11.5px}
+.defs .dval.ea-dv{padding:4px 8px}
+.defs .dval.ea-txt,.ea-alone .ea-txt{font-size:12.5px;line-height:1.45;color:var(--ink);padding:5px 8px}
+.ea-alone .ea-dv .ea-txt{padding:4px 0 2px}
+.ea-alone .ea-dv .ea-nsc{padding-top:2px}
+.ea-alone .ea-pm{display:none}
+.ea-alone select.inline{max-width:100%}
+.ea-alone .ea-txt b{font-family:var(--sans);font-size:11.5px}
+.ea-alone label.ea-chk{display:flex;gap:7px;align-items:flex-start;font-size:12.5px;line-height:1.4}
+.defs .dval label.ea-chk input[type=checkbox]{width:16px;height:16px;min-width:16px;padding:0;margin:2px 0 0;flex:0 0 auto}
+/* the fixes (B2): a ticked box prints as "Done." (print strips the look of a box inside .defs); the history line and the
+   copy of it the file keeps; the second line under a step */
+.ea-alone .ea-tick{display:none;font-family:var(--sans);font-weight:700;font-size:11.5px;color:var(--ink);flex:0 0 auto}
+.ea-alone [hidden],.ea-alone input.ea-keep{display:none!important}
+.ea-alone .ea-sub{font-size:11.5px;color:var(--ink-soft);padding:3px 0 0}
+.ea-flag{border-left:4px solid var(--nbh-flag);background:var(--nbh-flag-soft);padding:8px 12px;margin:0 0 8px;font-size:12.5px;line-height:1.5;color:var(--ink)}
+.ea-flag b{color:var(--nbh-flag);font-family:var(--sans);font-size:11.5px}
+.ea-flag button.tool{margin:6px 6px 0 0}
+.ea-true{margin:0 0 10px}
+.ea-ready{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:-4px 0 0}
+.ea-ready.ok{color:var(--ink)}
+.ea-ready b{color:var(--ink)}
+#aloneOpen[hidden]{display:none}
+.ea-cnote{font-family:var(--sans);font-size:12px;line-height:1.45;color:var(--ink-soft);margin:0 0 10px}
+.ea-cnote b{color:var(--ink)}
+.ea-cnote button.tool{margin:0 0 0 6px;padding:2px 9px}
+@media print{
+  .ea-alone select#sAlone{display:none}
+  .ea-alone .ea-pm{display:inline}
+  .ea-alone .ea-txt{font-size:10.5px;line-height:1.36}
+  .defs .dval.ea-txt,.ea-alone .ea-txt{padding:3px 8px}
+  .ea-alone .ea-dv .ea-txt{padding:0}
+  .ea-alone .ea-dv .ea-nsc{padding-top:2px}
+  .ea-alone .defs .dval.ea-dv,.ea-alone .defs .dlab{padding:3px 8px}
+  .ea-alone:not(.is-true) .ea-true{display:none!important}
+  .ea-alone .ea-true[hidden]{display:none!important}
+  .ea-flag{page-break-inside:avoid;break-inside:avoid}
+  /* the fixes (B2): the true alone steps stay together on one page; a ticked box reads "Done." on paper */
+  .ea-alone .ea-true{page-break-inside:avoid;break-inside:avoid}
+  .ea-alone label.ea-chk input[type=checkbox]{display:none}
+  .ea-alone .ea-tick{display:inline}
+  .ea-alone label.ea-chk{font-size:10.5px;line-height:1.36}
+  .ea-alone .ea-sub{font-size:10px;padding-top:2px}
+  /* the RRB arrangement checks: print the box and its tick, which the rule above for .defs inputs takes away */
+  #rrbPanel .defs .dval input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto}
+  /* the Measurement section after the alone box moves to the next page whole, never split across two */
+  #aloneBox~h3.sub{break-after:avoid;page-break-after:avoid}
+  #aloneBox~.ident{break-inside:avoid;page-break-inside:avoid}
+}
 </style>
 <style id="ea-run-css">
 /* ============ EA-1 session runner (v21.15) ============ */
@@ -1194,7 +1245,11 @@ body.view-walk #walk{display:block}
 
   <h3 class="sub">1. The Standard Analysis and What Has Been Learned About It</h3>
   <div class="warn ev"><b>Evidence</b>Iwata, Dorsey, Slifer, Bauman, and Richman (1982/1994) exposed nine participants with developmental disabilities to alone, social-disapproval (attention), academic-demand, and unstructured-play conditions in a multielement design with 15-min sessions (the pilot participant received three of the four conditions) and found self-injury consistently higher in a specific condition for six of the nine. Hanley, Iwata, and McCord (2003) and Beavers, Iwata, and Lerman (2013) reviewed the subsequent literature (435 studies by 2012) and reported differentiated outcomes in the large majority of published analyses. Wallace and Iwata (1999) re-scored 46 analyses at 10 and 5 min: every 10-min data set produced the same interpretation as the 15-min original, and the 5-min sets differed in 3 of 46 cases (93.5% correspondence). Thomason-Sassi, Iwata, and Fritz (2013) found that therapist and setting rarely changed the outcome. Rooker, Iwata, Harper, Fahmie, and Camp (2011) examined how prone the tangible condition is to false-positive outcomes (whether a new response was acquired more readily under tangible reinforcement, and whether behavior known to have no social function emerged under it) and concluded that tangible items should be included with care and selected from items typically found in the individual's environment. Kahng et al. (2015) reviewed the records of 99 people admitted to an inpatient unit for self-injury, found injury rates relatively low both during and outside functional analyses and injuries usually not severe, and concluded that the analysis is relatively safe when appropriate precautions are taken.</div>
-  <div class="warn"><b>Applied guidance</b>The default analysis is the four-condition multielement analysis with 10-min sessions, a play control, and an alone or no-interaction condition (ignore when the target is aggression). Add a tangible condition only when the indirect and descriptive assessments (Forms IA-1, ABC-1) indicate tangible delivery follows the behavior. Continue until the structured criteria on the interpretation sheet are met or until a variant is indicated by the selector sheet. Every analysis carries written session-termination criteria, a protective plan, and medical clearance for behavior that produces injury.</div>
+  <div class="warn"><b>Applied guidance</b>The default analysis is the four-condition multielement analysis with 10-min sessions, a play control, and an alone or no-interaction condition, run supervised (section 1b; ignore when the target is aggression). Add a tangible condition only when the indirect and descriptive assessments (Forms IA-1, ABC-1) indicate tangible delivery follows the behavior. Continue until the structured criteria on the interpretation sheet are met or until a variant is indicated by the selector sheet. Every analysis carries written session-termination criteria, a protective plan, and medical clearance for behavior that produces injury.</div>
+
+  <!-- the enhancement sprint (B2) -->
+  <h3 class="sub" id="guideAlone">1b. The Alone Condition in Schools and Homes</h3>
+  <div class="warn"><b>Applied guidance</b>The alone or no-interaction condition asks whether the behavior keeps happening when nothing social follows it. On this form it is run <b>supervised</b> unless true alone is set on Setup &amp; safety. A no-interaction session with an adult present is an accepted form of this condition: the screen of Querim et al. (2013) used alone or no-interaction sessions.<ul class="rules"><li><b>Supervised, the default.</b> The door stays open, or the student stays in the shared room. An adult watches from a distance, where they can see and hear the student the whole time: across the room, outside the room beside the open doorway (never in it), or through a window. The adult does not interact. If the student has run off before (an elopement history), the adult stays in the room, not interacting, and a second adult waits outside, beside the doorway.</li><li><b>Never kept in.</b> No one locks or blocks the door or stands in the way. If the student walks out, let them go: press End early and write &ldquo;left the room&rdquo; in Notes. The adult named under Staffing follows, close enough to keep the student safe. If the student heads for an exit, a road, water or another danger, that adult steps in at once, as the crisis plan says (Form CR-1). Interpretation counts these sessions on their own line. If leaving is itself the target behavior (elopement), tap it as Target, not as &ldquo;left the room&rdquo;.</li><li><b>No social consequences.</b> No adult reacts to anything the student does. No talk, eye contact, touch, scolding, comfort or items. In a shared room, seat the student where other students are unlikely to react, and write any reaction in Notes. The one exception is safety: when a termination criterion or the stop rule is met, the adult steps in at once.</li><li><b>Stepping in.</b> Stepping in means blocking, moving the danger away, or ending the session. Holding the student is a physical restraint. Use it only as the crisis plan allows (Form CR-1); the crisis plan also says who tells the parent, and how. An injury the student&rsquo;s own behavior does not explain is reported the same day under the safeguarding and mandated-reporting procedure, as Form TB-1 says.</li><li><b>True alone, only after a policy check.</b> The student is alone in the room, watched and heard without a break through a window or on video. Leaving a student alone in a room can count as seclusion or isolation. Florida law bars school staff from using seclusion with students with disabilities (s. 1003.573(2), F.S.; Form CR-1), district policy may apply this to every student, and agencies and states set their own rules. EA-1 lets you choose true alone only after four steps: the policy check, with who confirmed it; the stop-or-step-in rule (when, the longest time alone, and who steps in and how); how the student is watched; and the parent&rsquo;s agreement. All four print with the safety plan. The door is never locked, latched or held shut, and it is closed only if the policy allows it and the student can open it alone.</li><li><b>Ignore.</b> Ignore (for aggression) and the trial-based Ignore segment keep the adult in the room. Ignoring means no interaction; it never means leaving the student alone.</li></ul></div>
 
   <h3 class="sub">2. Variants for Safety, Time, Setting, and Low-Rate Behavior</h3>
   <div class="warn ev"><b>Evidence</b><em>Brief.</em> Northup et al. (1991) completed analyses in a single 90-min outpatient visit using one 5- to 10-min exposure to each condition followed by a contingency reversal; Derby et al. (1992) summarized 79 such cases, and Kahng and Iwata (1999) found that a brief analysis made of the first session of each condition matched the full analysis in 66% of 50 cases. <em>Latency.</em> Thomason-Sassi, Iwata, Neidert, and Roscoe (2011) terminated sessions at the first response and found an inverse relation between rate and latency; latency-based and 10-min analyses corresponded in 9 of 10 paired cases with far fewer occurrences of the behavior. <em>Trial-based.</em> Bloom, Iwata, Fritz, Roscoe, and Carreau (2011) embedded 2-min control and test segments as trials in classroom activities, terminating a segment at the first response; outcomes corresponded with standard analyses in 6 of 10 cases (partially in a 7th), and Bloom, Lambert, Dayton, and Samaha (2013) had teachers run them. <em>Precursor.</em> Smith and Churchill (2002) delivered consequences for precursors instead of the severe behavior and inferred the severe behavior's maintaining variables from the precursor analysis for all 4 participants; Fritz, Iwata, Hammond, and Bloom (2013) found that separate analyses of precursors and of severe behavior corresponded in 7 of 8 cases, and noted that analyzing precursors can reduce the severe behavior observed during assessment. <em>Extended alone.</em> Querim et al. (2013) ran five consecutive 5-min alone or no-interaction sessions as a screen and predicted the automatic-versus-social outcome of the full analysis in 28 of 30 cases. <em>Pairwise.</em> Iwata, Duncan, Zarcone, Lerman, and Shore (1994) alternated one test with its control; Iwata and Dozier (2008) proposed the single-function test when a hypothesis is already strong. <em>Antecedent-only.</em> Carr and Durand (1985) varied task difficulty and attention level without programmed consequences; Anderson and Long (2002) manipulated antecedents while allowing natural consequences (structured descriptive assessment). <em>Synthesized (IISCA).</em> Hanley, Jin, Vanselow, and Hanratty (2014) built one test condition from all interview-reported establishing operations and reinforcers against a matched control; Jessel, Hanley, and Ghaemmaghami (2016) reported differentiation in 30 of 30 replications; Slaton, Hanley, and Raftery (2017) found the IISCA differentiated for all 9 children while the standard analysis was differentiated for 4 (6 when precursors were counted); Fisher, Greer, Romani, Zangrillo, and Owen (2016) found behavior sensitive to isolated contingencies for 4 of 5 participants and none showing the response pattern the synthesis assumes, and Holehan et al. (2020) found that isolated contingencies produced differentiated responding for all 5 participants and little to no difference between treatments informed by isolated and synthesized analyses (Slaton et al., 2017, found IISCA-based treatment effective for all 4 children treated and standard-analysis-based treatment for 2); as Slaton et al. note, the synthesis precludes a precise understanding of the individual contingencies.</div>
@@ -1217,7 +1272,7 @@ body.view-walk #walk{display:block}
   <div class="warn ev"><b>Evidence</b>Baer, Wolf, and Risley (1968) described the reversal and multiple-baseline designs as two designs commonly used to demonstrate reliable control of a behavior change; Sidman (1960) set the steady-state logic: change conditions only after responding is stable. Barlow and Hayes (1979) described the alternating-treatments design; Hartmann and Hall (1976) the changing-criterion design; Horner and Baer (1978) the multiple-probe technique. Thompson and Iwata (2005) reviewed the control conditions used to demonstrate reinforcement effects (extinction, noncontingent reinforcement, DRO, DRA), noting that NCR and DRO controls have often been used because conventional extinction is difficult to implement. Kratochwill et al. (2010, 2013) set the What Works Clearinghouse standards: at least three demonstrations of the effect at three points in time, at least five data points per phase (three with reservations), interobserver agreement on at least 20% of sessions in each condition at 80% or higher, and a visual analysis of level, trend, variability, immediacy, overlap, and consistency; Lane and Gast (2014) give a step-by-step guide to that analysis. Horner et al. (2005) had earlier proposed quality indicators for participants, setting, dependent and independent variables, fidelity, and social validity (Wolf, 1978).</div>
   <div class="warn"><b>Applied guidance</b>The treatment-design sheet builds the phase plan for the chosen design, sets the phase-change rule, counts demonstrations of effect, and computes per-phase level, trend, and percentage of non-overlapping data (Scruggs, Mastropieri, &amp; Casto, 1987) from the logged data. A withdrawal is not used when the behavior is dangerous or the treatment cannot ethically be removed; use a multiple baseline across settings or behaviors, or a DRO or NCR reversal, instead.</div>
   <h3 class="sub">6. Running Sessions at the Table</h3>
-  <div class="warn"><b>Applied guidance</b>The Sessions sheet has a session runner above the log. Pick the condition and the runner reads its card: the session length, the consequence period after each target (for example, the 30-s break in Demand), the attention schedule in the control condition and how long attention is held back after a target, and the prompt-step interval. All of them can be edited before you start. During the session, tap <b>Target</b> for every response (keys: Space or T) and <b>Precursor</b> when a precursor is being analyzed (P). <b>Consequence follows</b> says which response the consequence period follows: the target, the precursor (a precursor analysis), or either (a synthesized analysis whose card says target or precursor). When it follows the precursor, the precursor is the response the log records, and the target count goes in the notes; <b>Undo</b> (Z) removes the last target. The runner times each consequence period and cues its end, cues each noncontingent attention delivery, and can end the session at a termination count. Latency sessions end at the first target and record its latency. Trial-based sessions run the control segment and then the test segment, each ending at the first target, and write the 1 or 0 into the trial-based log. When the session is over, check the summary and press <b>Save to the log</b>. The date, condition, phase, minutes, the value the primary measure needs (count, latency, or percentage of intervals), the terminated box and a short note go into the next empty row, and the log and the graph update. Sound, flash and vibration can each be turned off. The runner is for the data collector; the therapist runs the session.</div>
+  <div class="warn"><b>Applied guidance</b>The Sessions sheet has a session runner above the log. Pick the condition and the runner reads its card: the session length, the consequence period after each target (for example, the 30-s break in Demand), the attention schedule in the control condition and how long attention is held back after a target, and the prompt-step interval. All of them can be edited before you start. During the session, tap <b>Target</b> for every response (keys: Space or T) and <b>Precursor</b> when a precursor is being analyzed (P). <b>Consequence follows</b> says which response the consequence period follows: the target, the precursor (a precursor analysis), or either (a synthesized analysis whose card says target or precursor). When it follows the precursor, the precursor is the response the log records, and the target count goes in the notes; <b>Undo</b> (Z) removes the last target. The runner times each consequence period and cues its end, cues each noncontingent attention delivery, and can end the session at a termination count. Latency sessions end at the first target and record its latency. Trial-based sessions run the control segment and then the test segment, each ending at the first target, and write the 1 or 0 into the trial-based log. When the session is over, check the summary and press <b>Save to the log</b>. The date, condition, phase, minutes, the value the primary measure needs (count, latency, or percentage of intervals), the terminated box and a short note go into the next empty row, and the log and the graph update. Sound, flash and vibration can each be turned off. For the alone or no-interaction condition the runner also shows how it is run, as Setup &amp; safety says: supervised, or true alone with the stop-or-step-in rule, and it flags a card whose wording does not match. A student who walks out ends the session: press End early and write &ldquo;left the room&rdquo; in Notes; Interpretation counts these sessions on their own line. The runner is for the data collector; the therapist runs the session.</div>
   <h3 class="sub">7. Two Analyses Added in 2026: The Component FA and the Higher-Level RRB Analysis</h3>
   <div class="warn ev"><b>Evidence</b><em>Component FA.</em> Bann and Morris (2026) ran a component functional analysis with nine clinic-referred children (4&ndash;13 years, intellectual or developmental disability; eight with autism): four sessions of six trials, each trial one ordering of three establishing operations (attention restricted, tangibles restricted, instructions presented) added one at a time for up to 60 s each after a 60-s play component, with the matching consequences delivered one at a time for up to 20 s each when the behavior occurred and persisted. Evocative-effect probabilities predicted the outcome of an extended multielement analysis with AUC .94&ndash;1.0 and, at the authors&rsquo; optimal cutoffs with four sessions, 100% sensitivity and specificity (evocative) and 87.5% sensitivity with 100% specificity (reinforcement). The component analysis averaged 20 min per session and 76 min in total against 92 min for the multielement analysis, and a single session predicted the multielement outcome for eight of nine children. FCT followed by DRA built on the identified function reduced the behavior by 95% (one child) to 100% (seven children) relative to the multielement test condition. The sample held five isolated tangible functions, one escape, two synthesized, no attention-only and no automatic function; the cutoffs were derived on this sample and have not been applied prospectively, and the format never exposes the child to a low-stimulation, no-consequence context, so it cannot detect automatic reinforcement or idiosyncratic functions. <em>Higher-level RRB.</em> Fergus, Ahearn, Matthews, and Pandola (2026) replicated Rodriguez, Thompson, Schlichenmeyer, and Stocco (2012) with four adolescents and young adults with autism (13&ndash;22 years) at a residential school. A multielement analysis (attention, escape, no-interaction or alone, unstructured play; 5-min sessions) in a room baited before every session with about 20&ndash;30 unaligned, mismatched, disrupted, or incomplete items showed undifferentiated responding including the no-interaction condition for three participants and persistent responding across an extended alone series with low undifferentiated multielement responding for the fourth, read as automatic reinforcement; three further referrals showed escape or attention functions and were excluded. Three effective competing stimuli identified in an augmented competing stimulus assessment (Hagopian et al., 2020; an item associated with at least an 80% reduction in RRB relative to a no-stimulus control) reduced arranging and ordering to zero or near zero for all four, with the support level (none, prompting, or prompting plus blocking) set by the assessment phase in which the stimuli competed; blocking was later withdrawn for both participants who had needed it, and no emotional responses were recorded in any of their treatment sessions.</div>
   <div class="warn"><b>Applied guidance</b>The component FA is offered on the selector sheet for a time-limited case with a social hypothesis. The form prints the trial protocol, logs occurrence and latency per component on the sessions sheet, computes the evocative and reinforcement probabilities, and applies the authors&rsquo; cutoffs (.50 evocative with four, two, or one session and .33 with exactly three; .25 reinforcement) as a working convention that flags a candidate function: a function is reported only after the extended multielement confirmation, which this variant loads as its condition cards, and a no-interaction screen precedes the component FA because the format cannot detect automatic reinforcement. The higher-level RRB variant loads the baited-room analysis; the environmental establishing operation is recorded on the conditions sheet, episodes per minute are measured from 1-s continuous recording, and the interpretation sheet reads the outcome by the narrative rules Fergus et al. used. An automatic result routes to the process-versus-product analysis and the A-CSA, whose rules are printed on the interpretation sheet; a social result leaves the competing-stimulus pathway and goes to the social-function branches of Form TD-1.</div>
@@ -1254,9 +1309,37 @@ body.view-walk #walk{display:block}
     <div class="drow"><div class="dlab">Medical clearance</div><div class="dval"><textarea name="s.med" placeholder="Nurse or physician consulted; date; restrictions" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session termination criteria</div><div class="dval"><textarea name="s.term" placeholder="e.g., any tissue damage; 3 head hits within 10 s; any aggression producing a mark; student requests to stop (Kahng et al., 2015)"></textarea></div></div>
     <div class="drow"><div class="dlab">Protective equipment and blocking</div><div class="dval"><textarea name="s.pe" placeholder="Helmet, arm guards, mats, therapist blocking rules; note that blocking is a consequence" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">Staffing and ratio</div><div class="dval"><textarea name="s.staff" placeholder="Therapist, data collector, second observer; crisis-trained adult present" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Staffing and ratio</div><div class="dval"><textarea name="s.staff" placeholder="Therapist, data collector, second observer; crisis-trained adult present; who follows a student who walks out" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Consent and notification</div><div class="dval"><textarea name="s.consent" placeholder="Parent consent date; administrator notified; district procedure" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Analysis termination criteria</div><div class="dval"><textarea name="s.stop" placeholder="e.g., structured criteria met; 5 series without differentiation; injury; 3 weeks elapsed" class="nbh-line" rows="1"></textarea></div></div>
+  </div>
+  <!-- the enhancement sprint (B2): how the alone or no-interaction condition is run. Supervised is the default; true alone
+       can be chosen only after four steps: the policy check, the stop-or-step-in rule, how the student is watched and the
+       parent's agreement -->
+  <div id="aloneBox" class="ea-alone">
+  <div class="defs">
+    <div class="drow"><div class="dlab">Alone or no-interaction condition</div><div class="dval ea-dv"><select id="sAlone" name="s.alone" data-alone="1" class="inline" aria-label="Alone or no-interaction condition: how it is run" aria-describedby="aloneTxt"><option value="sup">Supervised (the default)</option><option value="true">True alone (only after the four steps below)</option></select><div class="ea-txt" id="aloneTxt"></div>
+      <div class="ea-txt ea-nsc"><b>No social consequences:</b> no adult reacts to anything the student does. No talk, eye contact, touch, scolding, comfort or items. In a shared room, seat the student where other students are unlikely to react, and write any reaction in Notes. The one exception is safety: at a termination criterion or the stop rule, the adult steps in at once.</div>
+      <div class="ea-txt ea-nsc"><b>If the student walks out:</b> no one keeps the student in. Let them go: press End early and write &ldquo;left the room&rdquo; in Notes. The adult named under Staffing follows, close enough to keep the student safe. If the student heads for an exit, a road, water or another danger, that adult steps in at once, as the crisis plan says (Form CR-1).</div>
+      <div class="ea-txt ea-nsc"><b>Stepping in:</b> blocking, moving the danger away, or ending the session. Holding the student is a physical restraint. Use it only as the crisis plan allows (Form CR-1); the crisis plan also says who tells the parent, and how. An injury the student&rsquo;s own behavior does not explain is reported the same day under the safeguarding and mandated-reporting procedure, as Form TB-1 says.</div>
+      <div class="ea-txt ea-nsc" id="aloneHist" hidden></div><input type="text" class="ea-keep" name="s.aloneHist" hidden aria-hidden="true" tabindex="-1" title="how a file saved by an earlier version of EA-1 ran the alone condition"></div></div>
+  </div>
+  <button type="button" class="tool noprint" id="aloneOpen" aria-expanded="false" aria-controls="aloneTrue">Plan a true alone condition (check policy first)</button>
+  <div id="aloneTrue" class="ea-true" hidden>
+    <div class="ea-flag" role="note"><b>Check policy first.</b> Leaving a student alone in a room can count as seclusion or isolation. Florida law bars school staff from using seclusion with students with disabilities: keeping a student alone in a room or area they are prevented from leaving (s. 1003.573(2), F.S.; see Form CR-1). District policy may apply this to every student. Agencies and states set their own rules for homes and clinics. For services funded by Florida&rsquo;s Agency for Persons with Disabilities (APD), for example, Rule 65G-8 counts &ldquo;enforced isolation or confinement of an individual in a room or area&rdquo; as seclusion. Read the rules that apply before you choose true alone. If they do not clearly allow it, keep the condition supervised.</div>
+    <div class="defs">
+      <div class="drow"><div class="dlab">1. Policy check</div><div class="dval ea-dv"><label class="ea-chk"><input type="checkbox" name="s.alonePolicy" data-alone="1"><span class="ea-tick" aria-hidden="true"></span><span>I read the rules on seclusion and isolation that apply here (district, agency, state). They allow true alone for this student in this place.</span></label></div></div>
+      <div class="drow"><div class="dlab">Policies read, and who confirmed them</div><div class="dval"><textarea name="s.alonePolicyNote" data-alone="1" class="nbh-line" rows="1" aria-label="Policies read, and who confirmed them (required for true alone)" placeholder="Required. Name, role, date. e.g., District policy 5.12; confirmed by Ms. Lopez, ESE director, 10/4/2026"></textarea></div></div>
+      <div class="drow"><div class="dlab">2. Stop or step in when</div><div class="dval"><textarea name="s.aloneWhen" data-alone="1" class="nbh-line" rows="1" aria-label="Stop or step in when (required for true alone)" placeholder="Required. e.g., the first head hit against a hard surface, or any hit that leaves a mark"></textarea></div></div>
+      <div class="drow"><div class="dlab">Longest time alone (min)</div><div class="dval"><input name="s.aloneMax" data-alone="1" inputmode="decimal" aria-label="Longest time alone, in minutes (required for true alone)" placeholder="Required. e.g., 5"></div></div>
+      <div class="drow"><div class="dlab">Who steps in, and how</div><div class="dval"><textarea name="s.aloneWho" data-alone="1" class="nbh-line" rows="1" aria-label="Who steps in, and how (required for true alone)" placeholder="Required. e.g., Ms. B, at the window, goes in at once and blocks; the data collector presses End early"></textarea></div></div>
+      <div class="drow"><div class="dlab">3. How the student is watched</div><div class="dval ea-dv"><select name="s.aloneWatch" data-alone="1" class="inline" aria-label="How the student is watched (required for true alone)"><option value=""></option><option value="window">Without a break, through a window or one-way mirror, and able to hear the student</option><option value="video">Without a break, on a live video feed with sound</option></select><div class="ea-sub">If the video records, follow the district&rsquo;s rules and the parent&rsquo;s consent for recording.</div></div></div>
+      <div class="drow"><div class="dlab">4. Parent told and agreed</div><div class="dval ea-dv"><label class="ea-chk"><input type="checkbox" name="s.aloneParent" data-alone="1"><span class="ea-tick" aria-hidden="true"></span><span>The parent was told that the student will be alone in the room, watched without a break as step 3 says, with an adult stepping in by the rule above. The parent agreed.</span></label></div></div>
+      <div class="drow"><div class="dlab">When and how the parent agreed</div><div class="dval"><textarea name="s.aloneParentNote" data-alone="1" class="nbh-line" rows="1" aria-label="When and how the parent agreed (required for true alone)" placeholder="Required. e.g., 10/4/2026, in a meeting; signed and kept with the consent form (Form IC-1)"></textarea></div></div>
+      <div class="drow"><div class="dlab">The door</div><div class="dval ea-txt">Never locked, latched or held shut, and no one stands in the way: the student may leave at any time. Close it only if the policy allows it and the student can open it alone. If they cannot, leave it open.</div></div>
+    </div>
+    <div class="ea-ready noprint" id="aloneReady" aria-live="polite"></div>
+  </div>
   </div>
 
   <h3 class="sub">Measurement and Agreement</h3>
@@ -1308,13 +1391,14 @@ body.view-walk #walk{display:block}
   <div class="bar nbh-band">Conditions: Establishing Operations, Discriminative Stimuli, and Consequences</div>
   <p class="wk-go-line noprint"><a href="#wk-setup" class="wk-go" data-go="setup">See it at the table in the walkthrough <span aria-hidden="true">&rarr;</span></a></p>
   <p class="method" style="margin:0 0 10px">One card per condition. Exactly one condition is marked as the control; the interpretation sheet uses it for the criterion lines. Templates pre-fill the cards for the chosen variant; edit them to the student's history (task type, attention form, preferred items) and record the session signal used to make conditions discriminable.</p>
+  <div id="aloneNote" class="ea-cnote" hidden></div>
   <div id="condWrap"></div>
 <div id="rrbPanel" style="display:none;margin-top:6px">
   <h3 class="sub">Higher-Level RRB Analysis: Baited Room and Setting (Fergus et al., 2026)</h3>
-  <p class="method" style="margin-top:0">The establishing operation is the room itself. Before every session it is baited with about 20&ndash;30 items left unaligned (a crooked cushion or lid), mismatched (a blue cap on a black pen), disrupted (an open drawer or binder), or incomplete (a toy with a part out), chosen from direct observation plus the clinician&rsquo;s report. The same item set is used in every condition and session, moderately preferred leisure items from the preference assessment are present throughout, the therapist never touches a baited item, and moved items are restored before the next session. The no-interaction condition is the default where there is an elopement history or direct supervision is needed; alone is used only with observation through a one-way mirror or door. Attention and escape are run as in the standard template: Fergus et al. did not report their parameters, so the values used here are recorded on the cards above.</p>
+  <p class="method" style="margin-top:0">The establishing operation is the room itself. Before every session it is baited with about 20&ndash;30 items left unaligned (a crooked cushion or lid), mismatched (a blue cap on a black pen), disrupted (an open drawer or binder), or incomplete (a toy with a part out), chosen from direct observation plus the clinician&rsquo;s report. The same item set is used in every condition and session, moderately preferred leisure items from the preference assessment are present throughout, the therapist never touches a baited item, and moved items are restored before the next session. The no-interaction condition, with the therapist in the room, is the default, and the only choice where there is an elopement history or direct supervision is needed. Alone is used only as a true alone condition: it is set on Setup &amp; safety after the four steps there (the policy check, the stop-or-step-in rule, how the student is watched and the parent&rsquo;s agreement), and the student is watched and heard without a break through a one-way mirror, a window or on video. Attention and escape are run as in the standard template: Fergus et al. did not report their parameters, so the values used here are recorded on the cards above.</p>
   <div class="defs">
-    <div class="drow"><div class="dlab">No-interaction or alone</div><div class="dval" style="padding:4px 8px"><select name="rrb.mode" data-rrb="1" class="inline" style="max-width:100%"><option value=""></option><option value="noint">No-interaction: therapist present, oriented away to a laptop or phone</option><option value="alone">Alone: therapist leaves, closes the door, observes through a mirror or window</option></select></div></div>
-    <div class="drow"><div class="dlab">Why that condition</div><div class="dval"><textarea name="rrb.why" data-rrb="1" class="nbh-line" rows="1" placeholder="e.g., elopement history and direct supervision required (no-interaction); or observation through a one-way mirror available (alone)"></textarea></div></div>
+    <div class="drow"><div class="dlab">No-interaction or alone</div><div class="dval" style="padding:4px 8px"><select name="rrb.mode" data-rrb="1" class="inline" style="max-width:100%"><option value=""></option><option value="noint">No-interaction: therapist present, oriented away to a laptop or phone</option><option value="alone">True alone: therapist leaves and watches through a mirror, a window or on video (set on Setup &amp; safety first)</option></select><div class="ea-flag" id="rrbAloneFlag" hidden></div></div></div>
+    <div class="drow"><div class="dlab">Why that condition</div><div class="dval"><textarea name="rrb.why" data-rrb="1" class="nbh-line" rows="1" placeholder="e.g., elopement history and direct supervision required (no-interaction); or true alone set on Setup &amp; safety, watched through a one-way mirror (alone)"></textarea></div></div>
     <div class="drow"><div class="dlab">Number of baited items</div><div class="dval"><input name="rrb.items" data-rrb="1" placeholder="about 20–30, identical across all conditions and sessions"></div></div>
     <div class="drow"><div class="dlab">Baited items and how each is disrupted</div><div class="dval"><textarea name="rrb.types" data-rrb="1" placeholder="One per line: item — unaligned / mismatched / disrupted / incomplete"></textarea></div></div>
     <div class="drow"><div class="dlab">Source of the item list</div><div class="dval"><input name="rrb.source" data-rrb="1" placeholder="Direct observation by the analyst; supervising clinician's report"></div></div>
@@ -1655,14 +1739,14 @@ body.view-walk #walk{display:block}
   <div class="wk-keyrow"><span><i class="k-adult"></i>Therapist</span><span><i class="k-student"></i>Student</span><span><i class="k-obs"></i>Data collector</span><span><i class="k-obs2"></i>Second observer</span><span><i class="k-screen"></i>The session runner’s screen, drawn large</span><span><i class="k-pm"></i>Placemat: the condition’s signal</span></div>
   <div class="script">
     <div><h4>What You Say and Do</h4><ul><li>Agree the roles before the first session: the therapist runs the session; the data collector runs the session runner and taps every target; the second observer records independently and says nothing.</li><li>Set the room for each condition before its session: the placemat, the materials on its card, and nothing else within reach.</li><li>Keep each condition’s signal and materials the same in every session unless the plan changes them.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety, Safety Plan: Medical clearance, Session termination criteria, Protective equipment and blocking, Staffing and ratio, Consent and notification, Analysis termination criteria.</li><li>Measurement and Agreement: Primary measure, Session length (min), Interval size (s), IOA plan (% of sessions), IOA index, Procedural fidelity checks.</li><li>Select variant: the answers and the Variant chosen, then Load condition templates for the chosen variant; the cards on Conditions, edited to the student.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety, Safety Plan: Medical clearance, Session termination criteria, Protective equipment and blocking, Staffing and ratio, Consent and notification, Analysis termination criteria, then Alone or no-interaction condition (Supervised by default).</li><li>Measurement and Agreement: Primary measure, Session length (min), Interval size (s), IOA plan (% of sessions), IOA index, Procedural fidelity checks.</li><li>Select variant: the answers and the Variant chosen, then Load condition templates for the chosen variant; the cards on Conditions, edited to the student.</li></ul></div>
   </div>
   <div class="decide"><b>Decision.</b> Every analysis carries written session-termination criteria, a protective plan, and medical clearance for behavior that produces injury. The analysis termination criteria are written down too: for example, the structured criteria met, or five series without differentiation.</div>
   <h4 class="flowhead">The Standard Template’s Four Cards, Word for Word</h4>
   <div class="card4">
     <div class="pm-red"><b>Attention</b><i>Establishing operation</i>Attention diverted: therapist appears busy (reads or works) with no interaction; leisure items available<i>Therapist</i>Therapist sits nearby, attends to work, no eye contact or talk<i>After a target</i>Brief attention (5–10 s of concern or reprimand, light touch) contingent on each target; then return to work<i>Other behavior</i>No consequence for other behavior</div>
     <div class="pm-blue"><b>Demand</b><i>Establishing operation</i>Academic or self-care tasks presented continuously; three-step prompting (vocal, model, physical)<i>Therapist</i>Prompt sequence every 5–10 s; praise for compliance<i>After a target</i>30-s break: task removed, therapist turns away; then re-present<i>Other behavior</i>No consequence for other behavior; block only per safety plan</div>
-    <div class="pm-none"><b>Alone / No interaction</b><i>Establishing operation</i>No materials, no social interaction (alone) or therapist present but not interacting (ignore, used for aggression)<i>Therapist</i>No interaction throughout<i>After a target</i>None<i>Other behavior</i>None</div>
+    <div class="pm-none"><b>Alone / No interaction</b><i>Establishing operation</i>No materials and no social interaction. Supervised: the door stays open or the student stays in the shared room, and an adult watches from a distance, able to see and hear the student the whole time. The student may leave at any time. For aggression, use ignore: the therapist stays in the room and does not interact.<i>Therapist</i>No interaction throughout: no talk, eye contact, touch or reaction. If the student leaves, no one blocks or brings them back: end the session; the adult named under Staffing follows, close enough to keep the student safe.<i>After a target</i>None<i>Other behavior</i>None</div>
     <div class="pm-green"><b>Play (control)</b><i>Establishing operation</i>Free access to preferred items; attention every 30 s independent of behavior; no demands<i>Therapist</i>Interact, praise, deliver attention on a 30-s schedule; ignore target<i>After a target</i>None (attention withheld for 5 s after a target, then schedule resumes)<i>Other behavior</i>Attention for appropriate play</div>
   </div>
 </section>
@@ -1716,8 +1800,8 @@ body.view-walk #walk{display:block}
 </section>
 
 <section class="proc" id="wk-alone" aria-labelledby="wk-alone-h">
-  <div class="wk-band"><h3 id="wk-alone-h">D. Alone, No Interaction, and Ignore</h3><div class="when">Conditions: the Alone / No interaction card &middot; the extended-alone template</div></div>
-  <p class="wk-lead">Alone tests whether the behavior persists without any social consequence: no materials, no interaction, and no programmed consequence. When the target is aggression the ignore arrangement is used instead, with the therapist present but not interacting.</p>
+  <div class="wk-band"><h3 id="wk-alone-h">D. Alone, No Interaction, and Ignore</h3><div class="when">Setup &amp; safety: Alone or no-interaction condition &middot; Conditions: the Alone / No interaction card &middot; the extended-alone template</div></div>
+  <p class="wk-lead">Alone tests whether the behavior keeps happening when nothing social follows it: no materials, no interaction, and no programmed consequence. On this form it is run supervised unless true alone is set on Setup &amp; safety: the door stays open or the student stays in the shared room, and an adult who can see and hear the student the whole time stays at a distance without interacting. When the target is aggression the ignore arrangement is used instead, with the therapist present but not interacting.</p>
   <div class="story" data-story="alone">
     <div class="stage"><div class="scene"></div></div>
     <div class="wk-ctl"><button type="button" data-act="back">Back</button><button type="button" class="wk-primary" data-act="next">Next step</button><button type="button" data-act="play">Play all</button><span class="wk-at"></span></div>
@@ -1725,13 +1809,13 @@ body.view-walk #walk{display:block}
     <ol class="storysteps"></ol>
   </div>
   <div class="script">
-    <div><h4>What You Say and Do</h4><ul><li>Alone: no materials and no interaction; watch without going in, as the safety plan arranges.</li><li>Ignore, for aggression: the therapist present, facing away, not interacting; blocking only by the plan’s blocking rules.</li><li>Apply the termination criteria exactly as written, in this condition as in every other; End early marks the session terminated.</li></ul></div>
-    <div><h4>What Goes on the Sheet</h4><ul><li>A terminated session: Term. checked and the runner’s note in Notes. Interpretation counts terminated sessions.</li><li>The extended-alone screen: five 5-min sessions, each with the phase label Ext. alone.</li></ul></div>
+    <div><h4>What You Say and Do</h4><ul><li>Supervised: no materials and no interaction. The door stays open, or the student stays in the shared room; sit or stand at a distance where you can see and hear the student, never in the doorway.</li><li>No social consequences: no talk, eye contact, touch, scolding, comfort or items, whatever the student does.</li><li>Never keep the student in. If they walk out, let them go: End early. The adult named under Staffing follows, close enough to keep the student safe.</li><li>Ignore, for aggression: the therapist present, facing away, not interacting; blocking only by the plan&rsquo;s blocking rules.</li><li>True alone, only when it is set on Setup &amp; safety: watch and listen without a break through the window or on video, and step in exactly as the stop rule says.</li><li>Stepping in means blocking, moving the danger away or ending the session. A hold is a physical restraint, used only as the crisis plan allows.</li><li>Apply the termination criteria exactly as written, in this condition as in every other; End early marks the session terminated.</li></ul></div>
+    <div><h4>What Goes on the Sheet</h4><ul><li>Setup &amp; safety: Alone or no-interaction condition, Supervised by default. True alone only after the four steps: the policy check, the stop-or-step-in rule, how the student is watched, and the parent&rsquo;s agreement.</li><li>A terminated session: Term. checked and the runner&rsquo;s note in Notes. A student who walked out: End early, and &ldquo;left the room&rdquo; in Notes. Interpretation counts the two on separate lines.</li><li>The extended-alone screen: five 5-min sessions, each with the phase label Ext. alone.</li></ul></div>
   </div>
-  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate.</div>
-  <h4 class="flowhead">The Screen’s Card, Word for Word</h4>
+  <div class="decide"><b>Decision.</b> Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013). When sessions keep ending on the termination criteria, the Interpretation view notes that latency or precursor measures may be more appropriate. Sessions that ended because the student left the room are counted on their own line: if that keeps happening, run the condition with the adult in the room, or plan an analysis of leaving.</div>
+  <h4 class="flowhead">The Screen&rsquo;s Card, Word for Word</h4>
   <div class="card4">
-    <div class="pm-none"><b>Alone / No interaction (screen)</b><i>Establishing operation</i>No materials and no interaction; five consecutive 5-min sessions<i>Signal</i>Empty room<i>Session duration</i>5 min × 5<i>After a target</i>None<i>Note the template adds to Rationale</i>Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).</div>
+    <div class="pm-none"><b>Alone / No interaction (screen)</b><i>Establishing operation</i>No materials and no interaction; five consecutive 5-min sessions. Supervised: the door stays open or the student stays in the shared room; an adult watches from a distance, able to see and hear the student the whole time; the student may leave at any time.<i>Signal</i>Door open, no materials; adult at a distance, not interacting<i>Session duration</i>5 min × 5<i>After a target</i>None<i>Note the template adds to Rationale</i>Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).</div>
   </div>
 </section>
 
@@ -1861,7 +1945,10 @@ body.view-walk #walk{display:block}
     <div><dt>u, l and n</dt><dd>For one test condition: the points above the upper line, the points below the lower line, and all its points. The rule compares u − l with n / 2.</dd></div>
     <div><dt>Differentiated</dt><dd>u − l is at least n / 2 and the condition’s mean is at least 1.5 times the control mean, the magnitude floor this form applies. For latency the rule is inverted.</dd></div>
     <div><dt>Undifferentiated</dt><dd>No test condition meets the rule. EA-1’s next steps, in order: the extended-alone screen, a pairwise test, establishing operations modified from interview data, then a synthesized analysis.</dd></div>
-    <div><dt>Extended-alone screen</dt><dd>Five consecutive 5-min alone or no-interaction sessions (Querim et al., 2013). Persistence indicates automatic reinforcement; extinction, a social function to test next.</dd></div>
+    <div><dt>Extended-alone screen</dt><dd>Five consecutive 5-min alone or no-interaction sessions (Querim et al., 2013), run supervised by default. Persistence indicates automatic reinforcement; extinction, a social function to test next.</dd></div>
+    <div><dt>Supervised alone</dt><dd>The form&rsquo;s default for the alone or no-interaction condition: the door stays open or the student stays in the shared room, an adult who can see and hear the student the whole time stays at a distance without interacting, and no one keeps the student in.</dd></div>
+    <div><dt>True alone</dt><dd>The student alone in the room, watched and heard without a break through a window or on video. Chosen on Setup &amp; safety only after four steps: the policy check on seclusion and isolation, the stop-or-step-in rule, how the student is watched, and the parent&rsquo;s agreement.</dd></div>
+    <div><dt>No social consequences</dt><dd>No adult reacts to anything the student does: no talk, eye contact, touch, scolding, comfort or items. The one exception is safety, by the termination criteria and the stop rule.</dd></div>
     <div><dt>Pairwise test</dt><dd>One test condition alternated with its own control (Iwata et al., 1994), used for the strongest candidate or when a hypothesis is already strong.</dd></div>
     <div><dt>Latency and ceiling</dt><dd>The seconds from the start of a session to the first target. A session with no response is scored at the ceiling, 10 min (600 s) in the latency template.</dd></div>
     <div><dt>Trial (control segment, test segment)</dt><dd>A trial-based analysis runs a control segment, then a test segment, embedded in the class activity; each ends at the first response and is scored 1 or 0.</dd></div>
@@ -3832,12 +3919,42 @@ const MARK=['circle','square','triangle','diamond','circle','square'];
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='analysis')renderAnalysis();if(v==='sessions'){renderGraph();renderTrials();}if(v==='design')renderTx();window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
+/* ---------- the enhancement sprint (B2): the alone-type cards, worded for each way the condition is run ----------
+   sup: supervised, the default (door open or shared room, an adult who can see and hear the student, the student free
+   to leave); true: true alone, allowed only after the four steps on Setup & safety; old: the templates' wording before
+   this change, kept only to recognise a card loaded then (never written). The templates below hold the supervised
+   wording; Load condition templates puts in the arrangement chosen. A card that holds one of these wordings follows the
+   arrangement back to supervised when true alone goes; a card with wording of its own is never rewritten. */
+const AL={
+ std:{old:{eo:'No materials, no social interaction (alone) or therapist present but not interacting (ignore, used for aggression)',sd:'Empty room or therapist facing away',beh:'No interaction throughout'},
+  sup:{eo:'No materials and no social interaction. Supervised: the door stays open or the student stays in the shared room, and an adult watches from a distance, able to see and hear the student the whole time. The student may leave at any time. For aggression, use ignore: the therapist stays in the room and does not interact.',
+   sd:'Door open, no materials; adult at a distance, not interacting',
+   beh:'No interaction throughout: no talk, eye contact, touch or reaction. If the student leaves, no one blocks or brings them back: end the session; the adult named under Staffing follows, close enough to keep the student safe.'},
+  true:{eo:'No materials and no social interaction. True alone (set on Setup & safety, with its stop rule): the student is alone in the room, and an adult watches and listens without a break through a window or on video. The door is never locked, latched or held shut. For aggression, use ignore instead: the therapist stays in the room and does not interact.',
+   sd:'Empty room; adult outside, watching through a window or on video',
+   beh:'No one in the room and no interaction. The watching adult steps in at once by the stop rule on Setup & safety.'}},
+ scr:{old:{eo:'No materials and no interaction; five consecutive 5-min sessions',sd:'Empty room',beh:'None'},
+  sup:{eo:'No materials and no interaction; five consecutive 5-min sessions. Supervised: the door stays open or the student stays in the shared room; an adult watches from a distance, able to see and hear the student the whole time; the student may leave at any time.',
+   sd:'Door open, no materials; adult at a distance, not interacting',
+   beh:'None: no talk, eye contact, touch or reaction. If the student leaves, end the session; the adult named under Staffing follows, close enough to keep the student safe.'},
+  true:{eo:'No materials and no interaction; five consecutive 5-min sessions. True alone (set on Setup & safety, with its stop rule): the student is alone in the room, watched and heard without a break through a window or on video; the door is never locked, latched or held shut.',
+   sd:'Empty room; adult outside, watching through a window or on video',
+   beh:'No one in the room. The watching adult steps in at once by the stop rule.'}},
+ rrb:{old:{eo:'Room baited as above; therapist says "I need to finish up some work" and orients away toward a laptop or phone for the whole session. Alone alternative (only with observation through a one-way mirror or door): "I am going to finish my work in another room," leave, close the door, observe',sd:'Therapist turned away at the desk (or absent, alone)',beh:'No interaction throughout; no programmed consequence for RRB'},
+  sup:{eo:'Room baited as above; therapist says "I need to finish up some work" and orients away toward a laptop or phone for the whole session, staying in the room, able to see and hear the student',
+   sd:'Therapist turned away at the desk',
+   beh:'No interaction throughout; no programmed consequence for RRB'},
+  true:{eo:'Room baited as above. True alone (set on Setup & safety, with its stop rule): therapist says "I am going to finish my work in another room," leaves, and watches and listens without a break through a one-way mirror, a window or on video; the door is never locked, latched or held shut',
+   sd:'Therapist out of the room, watching through a mirror, window or video',
+   beh:'No interaction throughout; no programmed consequence for RRB; the watching adult steps in by the stop rule'}}
+};
+const AL_KEY={'Alone / No interaction':'std','Alone / No interaction (screen)':'scr','No interaction':'rrb'};
 /* ---------- condition templates ---------- */
 const TPL={
  standard:{design:'Multielement',conds:[
   {name:'Attention',type:'test',eo:'Attention diverted: therapist appears busy (reads or works) with no interaction; leisure items available',sd:'Colored placemat or shirt: e.g., red',mat:'Two or three moderately preferred items',beh:'Therapist sits nearby, attends to work, no eye contact or talk',cons:'Brief attention (5–10 s of concern or reprimand, light touch) contingent on each target; then return to work',other:'No consequence for other behavior',dur:'10 min'},
   {name:'Demand',type:'test',eo:'Academic or self-care tasks presented continuously; three-step prompting (vocal, model, physical)',sd:'Colored placemat: e.g., blue',mat:'Tasks at the student\'s instructional level',beh:'Prompt sequence every 5–10 s; praise for compliance',cons:'30-s break: task removed, therapist turns away; then re-present',other:'No consequence for other behavior; block only per safety plan',dur:'10 min'},
-  {name:'Alone / No interaction',type:'test',eo:'No materials, no social interaction (alone) or therapist present but not interacting (ignore, used for aggression)',sd:'Empty room or therapist facing away',mat:'None',beh:'No interaction throughout',cons:'None',other:'None',dur:'10 min'},
+  {name:'Alone / No interaction',type:'test',eo:AL.std.sup.eo,sd:AL.std.sup.sd,mat:'None',beh:AL.std.sup.beh,cons:'None',other:'None',dur:'10 min'},
   {name:'Play (control)',type:'control',eo:'Free access to preferred items; attention every 30 s independent of behavior; no demands',sd:'Colored placemat: e.g., green',mat:'Highly preferred items from PA-1',beh:'Interact, praise, deliver attention on a 30-s schedule; ignore target',cons:'None (attention withheld for 5 s after a target, then schedule resumes)',other:'Attention for appropriate play',dur:'10 min'}]},
  brief:{design:'Brief multielement + contingency reversal',conds:null,dur:'5 min',note:'Same four conditions as the standard analysis; one exposure to each (5 min here; Northup et al., 1991, ran 5- to 10-min sessions), then replicate the highest condition and run a contingency reversal in which an alternative response (a mand) produces the same consequence (Northup et al., 1991).'},
  pairwise:{design:'Pairwise (test–control alternation)',conds:[
@@ -3848,10 +3965,10 @@ const TPL={
   {name:'Attention',type:'test',eo:'Control segment (2 min): teacher attends continuously. Test segment (2 min): attention diverted',sd:'Embedded in ongoing class activity',mat:'Ongoing activity',beh:'Segment ends at first target; test segment: brief attention contingent on target',cons:'Attention contingent on target (test segment only)',other:'None',dur:'2 + 2 min per trial'},
   {name:'Demand',type:'test',eo:'Control segment: no demands. Test segment: instructional demands with prompting',sd:'Embedded',mat:'Current task',beh:'Segment ends at first target; test segment: brief break contingent on target',cons:'Break from task (test segment only)',other:'None',dur:'2 + 2 min per trial'},
   {name:'Tangible',type:'test',eo:'Control segment: preferred item available. Test segment: item removed',sd:'Embedded',mat:'Preferred item from PA-1',beh:'Segment ends at first target; test segment: item returned contingent on target',cons:'Item returned (test segment only)',other:'None',dur:'2 + 2 min per trial'},
-  {name:'Ignore',type:'test',eo:'Control segment: attention available. Test segment: no interaction, no materials',sd:'Embedded',mat:'None',beh:'No interaction in test segment',cons:'None',other:'None',dur:'2 + 2 min per trial'}]},
+  {name:'Ignore',type:'test',eo:'Control segment: attention available. Test segment: no interaction, no materials; the teacher stays nearby, able to see and hear the student',sd:'Embedded',mat:'None',beh:'No interaction in test segment',cons:'None',other:'None',dur:'2 + 2 min per trial'}]},
  precursor:{design:'Multielement',conds:null,dur:'10 min',note:'Same conditions as the standard analysis, but the programmed consequence is delivered contingent on the precursor (defined on the setup sheet; Smith & Churchill, 2002; Fritz et al., 2013). The severe behavior is recorded and the session ends per the termination criteria if it occurs.'},
  alone:{design:'Extended alone series then multielement',conds:[
-  {name:'Alone / No interaction (screen)',type:'test',eo:'No materials and no interaction; five consecutive 5-min sessions',sd:'Empty room',mat:'None',beh:'None',cons:'None',other:'None',dur:'5 min × 5'},
+  {name:'Alone / No interaction (screen)',type:'test',eo:AL.scr.sup.eo,sd:AL.scr.sup.sd,mat:'None',beh:AL.scr.sup.beh,cons:'None',other:'None',dur:'5 min × 5'},
   {name:'Play (control, if series continues)',type:'control',eo:'Free access to preferred items and attention',sd:'Placemat: green',mat:'Preferred items',beh:'Attention every 30 s',cons:'None',other:'None',dur:'5 min'}],note:'Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).'},
  antecedent:{design:'Multielement',conds:[
   {name:'Demand present',type:'test',eo:'Instructional demands at the usual level and pace',sd:'Placemat: blue',mat:'Current tasks',beh:'Present tasks; respond to target as the natural setting would (recorded), no programmed consequence',cons:'None programmed; natural consequence recorded',other:'None',dur:'10 min'},
@@ -3863,7 +3980,7 @@ const TPL={
  rrb:{design:'Multielement',conds:[
   {name:'Attention',type:'test',eo:'Room baited before the session with the 20–30 disrupted items recorded on this sheet; moderately preferred leisure items present; therapist busy with own work, no interaction',sd:'Therapist seated at the desk with a laptop; colored placemat: red',mat:'Baited items (identical every session); moderately preferred leisure items',beh:'Attends to own work; brief attention contingent on each RRB episode, then returns to work (standard-template values; Fergus et al., 2026, did not report theirs)',cons:'Brief attention (5–10 s of concern or reprimand) contingent on each episode',other:'No consequence for other behavior; never touch a baited item',dur:'5 min'},
   {name:'Escape',type:'test',eo:'Room baited as above; academic or self-care tasks presented continuously with three-step prompting',sd:'Work table and task materials; colored placemat: blue',mat:'Baited items; current tasks',beh:'Prompt sequence every 5–10 s; praise for compliance (standard-template values; Fergus et al., 2026, did not report theirs)',cons:'30-s break: task removed, therapist turns away; then re-present',other:'No consequence for other behavior; never touch a baited item',dur:'5 min'},
-  {name:'No interaction',type:'test',eo:'Room baited as above; therapist says "I need to finish up some work" and orients away toward a laptop or phone for the whole session. Alone alternative (only with observation through a one-way mirror or door): "I am going to finish my work in another room," leave, close the door, observe',sd:'Therapist turned away at the desk (or absent, alone)',mat:'Baited items; moderately preferred leisure items',beh:'No interaction throughout; no programmed consequence for RRB',cons:'None',other:'None; never touch a baited item',dur:'5 min'},
+  {name:'No interaction',type:'test',eo:AL.rrb.sup.eo,sd:AL.rrb.sup.sd,mat:'Baited items; moderately preferred leisure items',beh:AL.rrb.sup.beh,cons:'None',other:'None; never touch a baited item',dur:'5 min'},
   {name:'Unstructured play (control)',type:'control',eo:'Room baited as above; free access to the moderately preferred leisure items; attention every 30 s independent of behavior; no demands',sd:'Therapist seated beside the student; colored placemat: green',mat:'Baited items; moderately preferred leisure items',beh:'Interact, praise, deliver attention on a 30-s schedule; ignore RRB',cons:'None (attention withheld for 5 s after an episode, then the schedule resumes)',other:'Attention for appropriate play; never touch a baited item',dur:'5 min'}],
   note:'Higher-level RRB analysis after Fergus et al. (2026) and Rodriguez et al. (2012): 5-min sessions, each condition at least five times in alternating order, until responding is stable or clearly undifferentiated. The baited room is the establishing operation in every condition; record it on the conditions sheet. Measure RRB episodes per minute from 1-s continuous recording. Where the student is reported to be reactive to observation, run an extended alone or no-interaction series first (Querim et al., 2013), logged as "Ext. alone".'},
  cfa:{design:'Multielement',conds:[
@@ -3935,15 +4052,138 @@ function refreshCondNames(){condNames().forEach(c=>{const t=$('#condTtl'+c.i);if
  $$('select.cond').forEach(sel=>{const cur=sel.value;sel.innerHTML='<option value=""></option>'+condNames().map(c=>`<option value="${c.i}">${esc(c.name)}</option>`).join('');sel.value=cur;});renderTrials(true);}
 document.addEventListener('input',e=>{if(e.target.dataset.cond)refreshCondNames();});
 document.addEventListener('change',e=>{if(e.target.dataset.cond)refreshCondNames();});
-async function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Choose a variant first.');return;}const t=TPL[k];const conds=t.conds||TPL.standard.conds;
+async function loadTpl(quiet){const k=val('v.chosen');if(!k){if(!quiet)alert('Choose a variant first.');return;}const t=TPL[k];const conds=(t.conds||TPL.standard.conds).map(alWord);   /* B2: worded for the arrangement on Setup & safety */
  if(!quiet&&!(await nbhUI.confirm('Replace the condition cards?\nThey are replaced with the '+REC[k].t+' template.',{ok:'Replace',danger:true})))return;
  $('#nCond').value=conds.length;renderConds();
  conds.forEach((c,i)=>{Object.keys(c).forEach(f=>setv(`c[${i}].${f}`,c[f]));if(t.dur&&!t.conds)setv(`c[${i}].dur`,t.dur);if(k==='precursor')setv(`c[${i}].cons`,c.cons.replace('contingent on each target','contingent on each PRECURSOR'));});
  setv('v.design',t.design);if(k==='latency')setv('m.measure','latency');else if(k==='trial')setv('m.measure','trial');else setv('m.measure','rate');
  if(k==='rrb'||k==='cfa'){setv('m.sessmin','5');if(k==='rrb'&&!val('rrb.unit'))setv('rrb.unit','RRB episodes per min from 1-s continuous recording; new episode after a 1-s pause or contact with a new item');}extPanels();
  if(t.note)setv('v.rationale',(val('v.rationale')?val('v.rationale')+' ':'')+t.note);
- refreshCondNames();renderSess();if(!quiet)setView('conditions');}
+ refreshCondNames();renderSess();alRender();if(!quiet)setView('conditions');}
 $('#loadTpl').addEventListener('click',()=>loadTpl(false));
+
+/* ---------- the enhancement sprint (B2): the alone or no-interaction condition ----------
+   s.alone holds how it is run: 'sup' (supervised, the default) or 'true' (true alone). True alone can be chosen only when
+   the four steps are done: 1, the policy check, ticked, with the policies read and who confirmed them; 2, the
+   stop-or-step-in rule: when, the longest time alone, and who steps in and how; 3, how the student is watched; 4, the
+   parent told and agreed, ticked, with when and how. When one of them is taken away it falls back to supervised, and the
+   RRB analysis's alone mode (a true alone too) falls back to no-interaction with it. Whenever the condition becomes
+   supervised, a card that still holds the form's own true alone (or earlier) wording is given the supervised wording, and
+   the message says so; a card with wording of its own is never rewritten, and is flagged on the Conditions sheet and in
+   the session runner. Moving toward true alone stays opt-in: the flag's button puts in the true alone wording. A file
+   saved before EA-1 asked opens supervised for the sessions to come, with a line of history (s.aloneHist) that prints. */
+let alOpen=false,alTimer=0;
+const alMode=()=>{const e=$('[name="s.alone"]');return e&&e.value==='true'?'true':'sup';};
+const alOn=n=>{const e=$('[name="'+n+'"]');return !!(e&&e.checked);};
+const alWords=n=>(val(n).match(/[A-Za-z0-9]+/g)||[]).length;
+/* the longest time alone, in minutes: a number above 0 ("5", "4.5", "5 min"), or null */
+const alMax=()=>{const m=/^\s*(\d+(?:[.,]\d+)?)/.exec(val('s.aloneMax'));const x=m?parseFloat(m[1].replace(',','.')):NaN;return x>0?x:null;};
+function alMissing(){const m=[];
+ if(!alOn('s.alonePolicy'))m.push('tick the policy check');
+ if(alWords('s.alonePolicyNote')<2)m.push('write which policies you read and who confirmed them');
+ if(alWords('s.aloneWhen')<2)m.push('write when to stop or step in');
+ if(alMax()==null)m.push('give the longest time alone, in minutes');
+ if(alWords('s.aloneWho')<2)m.push('write who steps in, and how');
+ if(!val('s.aloneWatch'))m.push('choose how the student is watched');
+ if(!alOn('s.aloneParent'))m.push('tick that the parent was told and agreed');
+ if(alWords('s.aloneParentNote')<2)m.push('write when and how the parent agreed');
+ return m;}
+const alWatch=()=>({window:'through a window or one-way mirror, and can be heard',video:'on a live video feed with sound'})[val('s.aloneWatch')]||'';
+const alEnd=s=>String(s||'').replace(/[\s.;,]+$/,'');
+const alAnd=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+/* the arrangement a card is worded for: the RRB no-interaction card is true alone only when the RRB mode says alone */
+function alEff(k){if(alMode()!=='true')return 'sup';return k==='rrb'?(val('rrb.mode')==='alone'?'true':'sup'):'true';}
+function alWord(c){const k=AL_KEY[c.name];return k?Object.assign({},c,AL[k][alEff(k)]):c;}
+function alHas(k,eo){const t=String(eo||'').trim();if(!t)return '';for(const w of ['sup','true','old'])if(t===AL[k][w].eo)return w;return 'own';}
+const AL_SAYS={sup:'the supervised wording',true:'the true alone wording',old:'the wording of an earlier version of EA-1, which did not say whether the door stays open or an adult stays in the room'};
+function alCards(){return $$('#condWrap .card').map(c=>{const i=+c.dataset.cond,nm=val(`c[${i}].name`),k=AL_KEY[nm];return k?{i,nm,k,has:alHas(k,val(`c[${i}].eo`)),want:alEff(k)}:null;}).filter(Boolean);}
+/* puts one arrangement's wording into card i, only into the fields that are empty or still hold one of the form's own
+   wordings; says whether anything changed */
+function alPut(i,want){const k=AL_KEY[val(`c[${i}].name`)];if(!k)return false;const w=AL[k][want];let ch=false;
+ ['eo','sd','beh'].forEach(f=>{const n=`c[${i}].${f}`,cur=val(n);if(cur!==w[f]&&(!cur||['sup','true','old'].some(x=>AL[k][x][f]===cur))){setv(n,w[f]);ch=true;}});
+ if(ch){const e=$(`[name="c[${i}].eo"]`);if(e)e.dispatchEvent(new Event('change',{bubbles:true}));}
+ return ch;}
+function alFix(i){const k=AL_KEY[val(`c[${i}].name`)];if(!k)return;const want=alEff(k);alPut(i,want);
+ refreshCondNames();alRender();nbhUI.toast('Card '+(i+1)+' now has '+AL_SAYS[want]+'.',{kind:'ok'});}
+/* the condition is supervised: every card that still holds the form's own true alone or earlier wording follows it.
+   Gives the numbers of the cards changed */
+function alRevert(){const n=alCards().filter(c=>c.want==='sup'&&(c.has==='true'||c.has==='old')).filter(c=>alPut(c.i,'sup')).map(c=>c.i+1);if(n.length)refreshCondNames();return n;}
+const alSaid=n=>n.length?' '+(n.length===1?'Card '+n[0]+' now has':'Cards '+alAnd(n)+' now have')+' the supervised wording.':'';
+function alRender(){
+ const box=$('#aloneBox');if(!box)return;const m=alMode(),miss=alMissing(),ready=!miss.length;
+ const sel=$('[name="s.alone"]'),optT=sel&&[...sel.options].find(o=>o.value==='true');if(optT)optT.disabled=!ready&&m!=='true';
+ box.classList.toggle('is-true',m==='true');box.dataset.mode=m;
+ const txt=$('#aloneTxt');
+ const pm='<b class="ea-pm">'+esc(sel&&sel.selectedIndex>=0?sel.options[sel.selectedIndex].text:'Supervised (the default)')+'.</b> ';
+ if(txt)txt.innerHTML=pm+(m==='true'?'The student is alone in the room and is watched without a break '+esc(alWatch())+'. The door is never locked, latched or held shut, and no one stands in the way. The watching adult steps in exactly as the stop-or-step-in rule below says.'
+  :'The door stays open, or the student stays in the shared room. An adult watches from a distance, where they can see and hear the student the whole time: across the room, outside the room beside the open doorway (never in it), or through a window. The adult does not interact. If the student has run off before (an elopement history), the adult stays in the room, not interacting, and a second adult waits outside, beside the doorway.');
+ /* a ticked box reads "Done." on paper, where the look of a box is taken away */
+ $$('#aloneBox label.ea-chk').forEach(l=>{const c=l.querySelector('input'),t=l.querySelector('.ea-tick');if(c&&t)t.textContent=c.checked?'Done.':'Not done.';});
+ /* the line of history a file saved by an earlier version carries */
+ const hs=$('#aloneHist'),hv=val('s.aloneHist');if(hs){hs.hidden=!hv;hs.innerHTML=hv?'<b>Earlier sessions:</b> '+esc(hv):'';}
+ const filled=alOn('s.alonePolicy')||alOn('s.aloneParent')||['s.alonePolicyNote','s.aloneWhen','s.aloneMax','s.aloneWho','s.aloneWatch','s.aloneParentNote'].some(n=>!!val(n));
+ const show=m==='true'||alOpen||filled,pan=$('#aloneTrue'),btn=$('#aloneOpen');
+ if(pan)pan.hidden=!show;if(btn){btn.hidden=show;btn.setAttribute('aria-expanded',String(show));}
+ const rd=$('#aloneReady');if(rd){rd.classList.toggle('ok',ready);
+  rd.innerHTML=m==='true'&&ready?'<b>True alone is set.</b> The four steps print with the safety plan.'
+   :m==='true'?'<b>Finish this, or true alone turns off when you leave the box.</b> Still to do: '+miss.join('; ')+'.'
+   :ready?'<b>All four steps are done.</b> You can now choose True alone under Alone or no-interaction condition.'
+   :'<b>True alone stays locked until all four steps are done.</b> Still to do: '+miss.join('; ')+'.';}
+ /* the RRB analysis: its alone mode is a true alone */
+ const rm=$('[name="rrb.mode"]'),optA=rm&&[...rm.options].find(o=>o.value==='alone');if(optA)optA.disabled=m!=='true'&&rm.value!=='alone';
+ const rf=$('#rrbAloneFlag');if(rf){const bad=!!(rm&&rm.value==='alone'&&m!=='true');rf.hidden=!bad;
+  rf.innerHTML=bad?'<b>Check this.</b> Alone here is a true alone condition. Set true alone on Setup &amp; safety first, or choose No-interaction.':'';}
+ /* the Conditions sheet: the arrangement the alone-type cards are worded for */
+ const note=$('#aloneNote');if(note){const cs=alCards();
+  if(!cs.length){note.hidden=true;note.innerHTML='';}
+  else{const said=m==='true'?'true alone':'supervised';
+   const bad=cs.filter(c=>c.has&&c.has!=='own'&&c.has!==c.want);
+   note.hidden=false;note.classList.toggle('noprint',!bad.length);note.classList.toggle('ea-flag',!!bad.length);
+   note.innerHTML=bad.length?bad.map(c=>'<b>Check card '+(c.i+1)+'.</b> '+esc(c.nm)+' has '+AL_SAYS[c.has]+', but Setup &amp; safety says '+esc(said)+(c.k==='rrb'&&m==='true'&&val('rrb.mode')!=='alone'?' and the RRB analysis uses no-interaction':'')+'. <button type="button" class="tool noprint" data-alfix="'+c.i+'">Use '+AL_SAYS[c.want]+'</button>').join('<br>')
+    :'The alone or no-interaction card follows Setup &amp; safety: <b>'+esc(said)+'</b>.'+(cs.some(c=>c.has==='own')?' A card with wording of its own is left as typed: check that it says how the condition is run.':'')+' <button type="button" class="tool noprint" data-algo="1">Go to Setup &amp; safety</button>';}}
+}
+function alCheck(){
+ const sel=$('[name="s.alone"]'),miss=alMissing(),said=[];let warn=false;
+ if(sel&&sel.value==='true'&&miss.length){sel.value='sup';said.push('True alone is off: '+miss.join('; ')+'. The alone condition is supervised again.');warn=true;}
+ const rm=$('[name="rrb.mode"]');if(rm&&rm.value==='alone'&&alMode()==='sup'){rm.value='noint';said.push('The RRB analysis is back to no-interaction.');warn=true;}
+ const n=alRevert(),t=(said.join(' ')+alSaid(n)).trim();
+ if(t)nbhUI.toast(t,{kind:warn?'warn':'ok'});
+ alRender();}
+const alSoon=()=>{clearTimeout(alTimer);alTimer=setTimeout(alRender,60);};
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.closest&&(t.closest('#aloneBox')||t.closest('#condWrap')||t.name==='rrb.mode'))alSoon();});
+document.addEventListener('change',e=>{const t=e.target;if(!t||!t.closest)return;if(t.closest('#aloneBox')||t.name==='rrb.mode')setTimeout(alCheck,0);else if(t.closest('#condWrap')||t.id==='nCond')alSoon();});
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#aloneOpen,[data-alfix],[data-algo]');if(!b)return;
+ if(b.id==='aloneOpen'){alOpen=true;alRender();const f=$('[name="s.alonePolicy"]');if(f)f.focus();}
+ else if(b.dataset.alfix!=null)alFix(+b.dataset.alfix);
+ else{setView('setup');setTimeout(()=>{const r=$('#aloneBox');if(r)r.scrollIntoView({block:'center'});const s=$('[name="s.alone"]');if(s)s.focus({preventScroll:true});},30);}});
+/* after a file, a simulation or Clear all. A file saved before EA-1 asked how the condition is run opens supervised for
+   the sessions to come: RRB alone becomes no-interaction, a card that still holds the earlier template wording gets the
+   supervised wording, and a line of history says so (it prints, and stays when the file is saved again). A later file
+   that holds true alone without all four steps (or RRB alone without true alone) is put right the same way. */
+function alAfterRestore(d){alOpen=false;const f=d&&d.fields,sel=$('[name="s.alone"]');if(!sel)return;
+ const rm=$('[name="rrb.mode"]');
+ if(f&&typeof f==='object'&&f['s.alone']!=='sup'&&f['s.alone']!=='true'){
+  const rrbAlone=!!(rm&&rm.value==='alone');sel.value='sup';if(rrbAlone)rm.value='noint';
+  const n=alRevert(),had=rrbAlone||condNames().some(c=>/alone|no[\s-]?interaction/i.test(c.name));
+  if(had){if(!val('s.aloneHist'))setv('s.aloneHist','This file was saved by an earlier version of EA-1, which did not record how the alone condition was run. Check your session notes for the sessions already run. From now on the condition is supervised.'+(rrbAlone?' The RRB analysis was set to Alone (the therapist out of the room); it is now No-interaction.':'')+alSaid(n));
+   nbhUI.toast('This file was saved by an earlier version of EA-1. The alone condition is now supervised for the sessions to come.'+alSaid(n),{kind:'warn'});}
+ }else{
+  let fixed=false;if(sel.value==='true'&&alMissing().length){sel.value='sup';fixed=true;}
+  if(rm&&rm.value==='alone'&&alMode()==='sup'){rm.value='noint';fixed=true;}
+  if(fixed){const n=alRevert();nbhUI.toast('This file held true alone without all four steps: the alone condition is supervised.'+alSaid(n),{kind:'warn'});}
+ }
+ alRender();}
+/* what the session runner and the walkthrough's job aids read */
+window.eaAlone={mode:alMode,watch:alWatch,rule:()=>({when:val('s.aloneWhen'),max:alMax(),who:val('s.aloneWho')}),card:k=>AL[k]?AL[k][alEff(k)]:null,words:AL,
+ runLine:name=>{if(!/alone|no[\s-]?interaction/i.test(name||''))return '';const k=AL_KEY[name],t=k?alEff(k)==='true':alMode()==='true';
+  if(!t)return 'Supervised: the door open or the shared room; an adult who can see and hear the student the whole time, not interacting. If the student walks out, press End early and write “left the room” in Notes; the adult named under Staffing follows.';
+  const mx=alMax();return 'True alone: watched without a break '+alWatch()+'. Stop or step in when: '+(alEnd(val('s.aloneWhen'))||'(not written)')+'. '+(mx!=null?'Stop at '+mx+' min at the latest. ':'')+'Who steps in, and how: '+(alEnd(val('s.aloneWho'))||'(not written)')+'.';},
+ /* the runner's flag: a card whose wording does not say how the condition is now run */
+ runFlag:c=>{const nm=(c&&c.name)||'';if(!/alone|no[\s-]?interaction/i.test(nm))return '';const k=AL_KEY[nm];
+  const want=k?alEff(k):alMode(),how=want==='true'?'run as true alone':'supervised',has=k?alHas(k,c.eo):'own';
+  if(has==='own')return 'This card has wording of its own: check that it says the condition is '+how+'.';
+  if(has&&has!==want)return 'It does not say the condition is '+how+': it has '+AL_SAYS[has]+'. Update it on the Conditions sheet.';
+  return '';}};
 
 /* ---------- sessions ---------- */
 function sessRow(i){const tr=document.createElement('tr');tr.innerHTML=`<td class="c">${i+1}</td><td><input class="txt" name="s[${i}].d"></td><td class="c"><select class="cond" name="s[${i}].c" data-sess="1"></select></td><td><input class="txt" name="s[${i}].p" data-sess="1" placeholder="FA"></td><td class="c"><input class="num" name="s[${i}].m" data-sess="1"></td><td class="c"><input class="num" name="s[${i}].v" data-sess="1"></td><td class="c calc" id="sRate${i}"></td><td class="c"><input class="num" name="s[${i}].ioa" data-sess="1"></td><td class="c"><input type="checkbox" name="s[${i}].t" data-sess="1" title="Session terminated per criteria"></td><td><input class="txt" name="s[${i}].n"><input type="text" class="yk" name="s[${i}].y" hidden aria-hidden="true" tabindex="-1" title="delivery times kept for a yoked session"></td>`;return tr;}
@@ -4087,7 +4327,10 @@ function renderAnalysis(){$('#sumClient').textContent=val('m.client');$('#sumBeh
   if(aloneMet&&cs.mean>=0.5*aloneMet.mean)lines.push('The alone or no-interaction condition is among those elevated and the control condition is itself high: responding is elevated across conditions. Check the pattern against the automatic-reinforcement and multiple-control rules of Roane et al. (2013) on visual review, and run the extended alone series (Querim et al., 2013) before concluding multiple social control.');
   else lines.push('Multiple control is possible, but an apparent multiple-control pattern often may be a by-product of aggregated topographies (Beavers & Iwata, 2011) or may reflect an elevated alone condition; check whether the alone or no-interaction condition is also elevated and whether one target was scored.');}
  if(val('d.crit')==='svi')lines.push('Criterion applied: SVI quotient ≥ .50 (points beyond one SD of the control mean ÷ points in the condition), as Bann and Morris (2026) applied it, without the Roane et al. (2013) trend rules and without this form\'s magnitude floor. Trend rules applied on visual review: '+(val('d.trend')||'not stated')+'.');
- if(rows.some(r=>r.term))lines.push(`${rows.filter(r=>r.term).length} session(s) terminated per the safety criteria; latency or precursor measures may be more appropriate.`);
+ /* the enhancement sprint (B2): a session the student ended by walking out ("left the room" in Notes) is counted on its own line, not with the safety stops */
+ const left=rows.filter(r=>/left the room/i.test(val(`s[${r.i}].n`))),stopped=rows.filter(r=>r.term&&!left.includes(r));
+ if(stopped.length)lines.push(`${stopped.length} session(s) terminated per the safety criteria; latency or precursor measures may be more appropriate.`);
+ if(left.length)lines.push(`${left.length} session(s) ended because the student left the room. If this keeps happening, run the condition with the adult in the room, or plan an analysis of leaving.`);
  const exposures=cn.map(c=>rows.filter(r=>r.c===c.i).length).filter(n=>n>0);const exp=exposures.length?Math.min(...exposures):0;if(exp<3)lines.push(`Fewest exposures to any condition: ${exp}. Saini et al. (2018) applied the criteria from three pairs onward; interpret provisionally before that.`);
  v.innerHTML=`<b>Outcome</b><span class="tag ${tag}">${head}</span>${lines.length?`<ul class="rules" style="margin-top:6px">${lines.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}`;
  lineGraph($('#critFig'),null,{title:'Analysis with criterion lines',cap:'Dashed lines: upper and lower criterion lines from the control condition (Hagopian et al., 1997; Roane et al., 2013).',points:rows.map(r=>({x:r.i+1,y:r.y,series:cn.findIndex(c=>c.i===r.c),phase:r.phase})),seriesNames:cn.map(c=>c.name),yLabel:yLabelFor(),hollow:cn.findIndex(c=>c.type==='control'),refs:[{y:UCL,label:'UCL'},{y:LCL,label:'LCL',dash:'2 3'}]});
@@ -4251,7 +4494,9 @@ const CFA_SIM=[['TAE',0,[1,'',''],[18,'',''],[0,'','']],['AET',0,[0,0,1],['','',
  ['AET',0,[0,0,1],['','',19],[0,'','']],['TEA',0,[1,'',''],[25,'',''],[1,0,'']],['EAT',0,[0,0,1],['','',11],[0,'','']],['ATE',0,[1,'',''],[41,'',''],[0,'','']],['ETA',0,[0,1,''],['',27,''],[0,'','']],['TAE',0,[1,'',''],[14,'',''],[0,'','']],
  ['ETA',0,[0,1,''],['',16,''],[0,'','']],['ATE',0,[0,1,''],['',20,''],[0,'','']],['TEA',0,[1,'',''],[11,'',''],[0,'','']],['EAT',0,[0,0,0],['','',''],['','','']],['TAE',0,[1,'',''],[22,'',''],[0,'','']],['AET',0,[0,0,1],['','',33],[0,'','']],
  ['TEA',0,[1,'',''],[7,'',''],[0,'','']],['EAT',0,[0,0,1],['','',24],[0,'','']],['ATE',0,[0,1,''],['',17,''],[0,'','']],['ETA',0,[0,1,''],['',12,''],[0,'','']],['AET',0,[0,0,1],['','',29],[0,'','']],['TAE',0,[1,'',''],[13,'',''],[0,'','']]];
-function loadSim(){const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});
+/* the enhancement sprint (B2): asks first, with the question the other forms use; Cancel changes nothing */
+async function loadSim(){if(!(await nbhUI.confirm('Load the simulated analysis?\nScenario: '+$('#simScenario option:checked').textContent+'. Every sheet is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
+ const key=$('#simScenario').value,sc=SIMS[key];restore({counts:{}});
  setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Assessment room 3 (simulated)');setv('m.assessor',val('m.assessor')||'Joshua Newsome, M.A., BCBA');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.def','Simulated definition; see TB-1 for the real target.');setv('m.prec',sc.variant==='precursor'?'Screaming: vocalization above conversational level lasting ≥ 1 s (simulated)':'');setv('m.hyp','Simulated hypothesis carried in from IA-1: '+(sc.v.hyp==='escape'?'escape from demands':sc.v.hyp==='social'?'attention or tangible':sc.v.hyp==='auto'?'automatic':sc.v.hyp==='idio'?'synthesized escape-to-tangible with attention':'unclear'));setv('m.urg',sc.v.risk==='high'?'4':sc.v.risk==='mod'?'3':'2');
  setv('s.med','Nurse consulted (simulated); no restrictions');setv('s.term','Any tissue damage; 3 head hits within 10 s; student requests to stop (simulated)');setv('s.pe','Arm guards available; therapist blocks per plan (simulated)');setv('s.staff','Therapist, data collector, crisis-trained observer (simulated)');setv('s.consent','Parent consent on file (simulated)');setv('s.stop','Structured criteria met, or 5 series without differentiation (simulated)');
@@ -4292,7 +4537,10 @@ function loadSim(){const key=$('#simScenario').value,sc=SIMS[key];restore({count
  $('#nTx').value=Math.max(8,Math.min(80,tx.length+3));renderTxRows();
  tx.forEach((r,i)=>{setv(`tx[${i}].p`,r.p);setv(`tx[${i}].v`,String(r.v));setv(`tx[${i}].tier`,r.tier);setv(`tx[${i}].d`,new Date(Date.now()+i*864e5).toLocaleDateString());if(i%4===0){setv(`tx[${i}].ioa`,String(86+Math.round(rnd()*13)));setv(`tx[${i}].fid`,String(90+Math.round(rnd()*10)));}});
  refreshCondNames();renderGraph();renderTrialFig();renderAnalysis();if(sc.extra==='undiff'){$('#critPhase').value='Pairwise';renderAnalysis();}if(key==='rrb'||key==='cfa'){$('#critPhase').value=key==='cfa'?'MEFA':'FA';renderAnalysis();}renderTx();extPanels();cfaCompute();rrbRead();
- $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;setView('sessions');}
+ $('#simBanner').hidden=false;$('#simDesc').textContent='Scenario: '+$('#simScenario option:checked').textContent+'. '+sc.desc;
+ /* opened through its button, so the session runner reads the new cards (it also reads them 60 ms after a press of
+    Load simulation, which the question above can outlast) */
+ const vb=$('#viewSeg [data-view="sessions"]');if(vb)vb.click();else setView('sessions');}
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------- toolbar counts ---------- */
@@ -4308,7 +4556,7 @@ function reset(){$('#condWrap').innerHTML='';$('#sessBody').innerHTML='';$('#tri
 function restore(d){reset();const c=d.counts||{};$('#nCond').value=c.cond||4;$('#nSess').value=c.sess||24;$('#nTrial').value=c.trial||10;$('#nTx').value=c.tx||30;
  renderConds();renderSess();for(let i=0;i<(c.phases||0);i++)$('#phaseBody').appendChild(phaseRow(i));renderTxRows();
  const f=d.fields||{};applyFields(f);refreshCondNames();applyFields(f);renderTrials(true);applyFields(f);renderSess();renderVariant();renderTrialFig();renderGraph();renderTx();
- const k=val('t.design');if(DESIGNS[k])$('#dsgnNote').innerHTML='<b>Design requirements</b>'+DESIGNS[k].note;extPanels();cfaCompute();rrbRead();}
+ const k=val('t.design');if(DESIGNS[k])$('#dsgnNote').innerHTML='<b>Design requirements</b>'+DESIGNS[k].note;extPanels();cfaCompute();rrbRead();alAfterRestore(d);}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`EA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='EA-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form EA-1.');}};rd.readAsText(f);e.target.value='';});
@@ -4385,7 +4633,7 @@ cfaInit();restore({counts:{}});
   }
   function script(){const c=R.c;if(!c){byId('eaScript').innerHTML='';return;}
     const row=(k,v)=>v?'<dt>'+k+'</dt><dd>'+v.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</dd>':'';
-    byId('eaScript').innerHTML='<dl>'+row('Condition',c.name+(/control|test/i.test(c.name)?'':(c.type==='control'?' (control)':' (test)')))+row('Before and during',c.eo)+row('Signal',c.sd)+row('Materials',c.mat)
+    byId('eaScript').innerHTML='<dl>'+row('Condition',c.name+(/control|test/i.test(c.name)?'':(c.type==='control'?' (control)':' (test)')))+row('How it is run',window.eaAlone?window.eaAlone.runLine(c.name):'')+row('Check this card',window.eaAlone&&window.eaAlone.runFlag?window.eaAlone.runFlag(c):'')+row('Before and during',c.eo)+row('Signal',c.sd)+row('Materials',c.mat)
       +row('Therapist',c.beh)+row('After a target',c.cons)+row('Other behavior',c.other)+row('Fidelity',c.fid)+'</dl>';}
 
   /* ---- sound, flash, vibration ---- */
@@ -6593,10 +6841,18 @@ function eaBoard(k){
     return g+T(8,98,'Total count','bx-l')+T(200,98,'4 and 4: 100%','bx-v')+T(8,114,'Exact count per interval','bx-l')+T(200,114,'2 of 6 intervals: 33%','bx-v')+
       T(8,130,'Interval-by-interval','bx-l')+T(200,130,'2 of 6 intervals: 33%','bx-v')+T(8,146,'Proportional (smaller / larger)','bx-l')+T(200,146,'0, 0, 1, 1, 0, 0: mean 33%','bx-v');}
   if(k==='conds'){const C=[['#b8433a','Attention','Colored placemat or shirt: e.g., red','Two or three moderately preferred items'],['#2f5fa3','Demand','Colored placemat: e.g., blue','Tasks at the student’s instructional level'],
-      [null,'Alone / No interaction','Empty room or therapist facing away','None'],['#3f8a4f','Play (control)','Colored placemat: e.g., green','Highly preferred items from PA-1']];
+      [null,'Alone / No interaction','Door open; adult at a distance, not interacting','None'],['#3f8a4f','Play (control)','Colored placemat: e.g., green','Highly preferred items from PA-1']];
     let g=T(8,14,'Conditions: each card’s signal and materials','bx-t');
     C.forEach((r,i)=>{const y=42+i*32;g+=r[0]?'<rect x="8" y="'+(y-10)+'" width="14" height="14" rx="2" fill="'+r[0]+'"/>':'<rect x="8.5" y="'+(y-9.5)+'" width="13" height="13" rx="2" fill="#fff" stroke="#54676f" stroke-dasharray="2 2"/>';
       g+=T(30,y,r[1],'bx-v')+T(180,y,r[2],'bx-l')+T(30,y+14,'Materials: '+r[3],'bx-s');});return g;}
+  /* the enhancement sprint (B2): true alone is chosen on Setup & safety only after four steps */
+  if(k==='aloneTrue'){const box=y=>'<rect x="12" y="'+(y-10)+'" width="11" height="11" fill="#fff" stroke="#182e43"/>';
+    return T(8,14,'True alone: only after four steps on Setup & safety','bx-t')+
+    box(36)+T(30,36,'1  Policy check: the rules on seclusion and isolation here allow it,','bx-l')+T(46,49,'and who confirmed them is written down','bx-s')+
+    box(68)+T(30,68,'2  The stop-or-step-in rule: when, the longest time alone, who steps in','bx-l')+
+    box(88)+T(30,88,'3  How the student is watched: without a break, seen and heard','bx-l')+T(46,101,'through a window or on a live video feed with sound','bx-s')+
+    box(120)+T(30,120,'4  The parent told and agreed','bx-l')+
+    T(8,141,'The door is never locked, latched or held shut. Until all four','bx-v')+T(8,155,'are done, the form keeps the condition supervised.','bx-v');}
   if(k==='tang')return T(8,14,'Before a tangible condition goes into the analysis','bx-t')+
     T(8,40,'Add it only when the indirect and descriptive assessments','bx-l')+T(8,55,'indicate that tangible delivery follows the behavior:','bx-l')+
     '<rect x="12" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(30,78,'Form IA-1 (indirect)','bx-l')+'<rect x="182" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(200,78,'Form ABC-1 (descriptive)','bx-l')+
@@ -6661,9 +6917,65 @@ const BOARD=k=>(typeof raBoard==='function'&&raBoard(k))||(typeof eaBoard==='fun
 const LADDER=L=>typeof raLadder==='function'?raLadder(L):'';
 
 /* EA-1: the session room. The placemat, the leisure items, the magazine, the helmet and floor mat,
-   the partition window and the board are in the engine's room; this module names the scene. */
+   the partition window and the board are in the engine's room; this module names the scene and adds
+   the open door of the supervised alone condition (the enhancement sprint, B2): a frame with
+   openDoor:true shows a doorway in the back wall standing open, drawn behind the people and the table.
+   walkOut:true draws the student standing and walking to that door, both feet on the floor; stepIn:true
+   has the therapist get up and stand beside the student, clear of the doorway, with an open hand between
+   the student's hand and head (the pose blockOpen): a block, not a hold. */
 const EXT={
-  alt:'The session room: the therapist, the student and the data collector'
+  alt:'The session room: the therapist, the student and the data collector',
+  /* the hand in the therapist's own space, which stands 26 higher for stepIn: on screen it is at 566, 96,
+     between the student's raised hand and the helmet */
+  poseA:{blockOpen:[206,140,236,122]},
+  svgBack(){return '<g class="ea-door" transform="translate(330 0)" style="display:none">'+
+    '<polygon points="-8,286 72,286 54,256 10,256" fill="#ffffff" opacity=".45"/>'+
+    '<rect x="0" y="62" width="64" height="194" fill="#fbf7ea"/><path d="M0 220 L64 220 L64 256 L0 256 Z" fill="#efe6cf"/>'+
+    '<rect x="-6" y="56" width="76" height="200" fill="none" stroke="#b9c5c1" stroke-width="6"/>'+
+    '<polygon points="0,62 -24,72 -24,266 0,256" fill="#c8b48c"/><polygon points="0,62 -24,72 -24,76 0,66" fill="#b39e75"/>'+
+    '<circle cx="-18" cy="166" r="3" fill="#555"/></g>';},
+  /* the door goes behind the people; each seated figure gets a round knee. A limb's ends are cut in a half circle,
+     so where the thigh meets the shin the room shows through; the table hides that, and the supervised alone frames
+     have no table */
+  refs(el,q){el.eaDoor=q('.ea-door');const back=q('.abcw');if(el.eaDoor&&back)back.parentNode.insertBefore(el.eaDoor,back);
+    [[el.A,9.5],[el.S,7.5]].forEach(([F,r])=>{if(!F||!F.legN)return;const k=F.legN.ownerDocument.createElementNS('http://www.w3.org/2000/svg','circle');
+      k.setAttribute('class','leg near ea-knee');k.setAttribute('r',String(r));F.legN.parentNode.insertBefore(k,F.legN.nextSibling);F.eaKnee=k;});},
+  target(f,t){
+    /* standing, a step from the door: the arms hang nearly straight at the sides */
+    if(f.walkOut){t.sdx=-118;t.sdy=-26;t.sHx=560;t.sHy=240;t.fHx=592;t.fHy=244;t.sGaze=0;t.sTilt=0;}
+    if(f.stepIn)t.adx=330;
+  },
+  discrete(f,el,show){show(el.eaDoor,!!f.openDoor);el.eaWalk=!!f.walkOut;el.eaStand=!!f.stepIn;},
+  /* the stride: the near leg forward toward the door, the far leg behind, the shoes and the shadow on the floor
+     (the figure is lifted 26 to stand, so the floor is at 284 in its own space). The therapist standing (stepIn):
+     lifted 26 the same way, both legs straight down to the floor, the far arm out of sight behind the body. A
+     straight leg is one limb from hip to foot, with no knee; both ends sit inside the body and the shoe, which
+     cover the half circles cut out of a limb's ends */
+  draw(c,el){const S=el.S,A=el.A;if(!S||!S.legN)return;
+    const knee=(F,x,y)=>{if(!F.eaKnee)return;F.eaKnee.style.display=x==null?'none':'';if(x!=null){F.eaKnee.setAttribute('cx',String(x));F.eaKnee.setAttribute('cy',String(y));}};
+    if(el.eaWalk){
+      S.legN.setAttribute('d',limb(566,204,540,282,19,10));
+      S.legF.setAttribute('d',limb(578,206,598,280,17,9));
+      S.shoeN.setAttribute('d','M550 284 q-2 -10 -18 -9 l-4 9 z');S.shoeF.setAttribute('d','M608 282 q-2 -10 -18 -9 l-4 9 z');
+      if(S.shadow){S.shadow.setAttribute('cy','284');S.shadow.setAttribute('cx','572');}
+      knee(S,null);
+    }else{if(S.shadow&&S.shadow.getAttribute('cy')!=='258'){S.shadow.setAttribute('cy','258');S.shadow.setAttribute('cx','538');}
+      /* the engine's own standing legs bend at 234 */
+      const g=FIG.student;if(el.standS)knee(S,g.hip.x-g.face*4,234);else knee(S,g.knee.x,g.knee.y);}
+    if(!A||!A.legN||!el.adultAt)return;
+    const farA=A.upperF&&A.upperF.parentNode;
+    if(el.eaStand){
+      el.adultAt.setAttribute('transform',el.adultAt.getAttribute('transform')+' translate(0 -26)');
+      A.legN.setAttribute('d',limb(124,190,128,282,23,12));
+      A.legF.setAttribute('d',limb(112,192,108,281,21,11));
+      A.shoeN.setAttribute('d','M120 284 q2 -10 18 -9 l4 9 z');A.shoeF.setAttribute('d','M100 282 q2 -10 18 -9 l4 9 z');
+      /* seen side-on, the far arm hangs behind the body */
+      if(farA)farA.style.display='none';
+      if(A.shadow){A.shadow.setAttribute('cy','284');A.shadow.setAttribute('cx','120');}
+      knee(A,null);
+    }else{if(farA&&farA.style.display)farA.style.display='';
+      if(A.shadow&&A.shadow.getAttribute('cy')!=='258'){A.shadow.setAttribute('cy','258');A.shadow.setAttribute('cx','154');}
+      knee(A,FIG.adult.knee.x,FIG.adult.knee.y);}}
 };
 
 const X=(typeof EXT==='object'&&EXT)||{};
@@ -7191,6 +7503,9 @@ const ST={helmet:true,fmat:true};
 const ATT=F(ST,{pm:'red',toys:'some',mag:true,a:'read',look:'down',s:'play'});
 const DEM=F(ST,{pm:'blue',sheet:true,sheetT:'Trace: A B C',ap:'mid',a:'show',s:'rest'});
 const PLY=F(ST,{pm:'green',toys:'lots',ap:'mid',a:'talk',s:'build'});
+/* the alone condition (the enhancement sprint, B2). Supervised, the form's default: the door in the back wall open, no
+   table, the therapist across the room watching without interacting. True alone: the student alone, watched through the window */
+const SUP=F(ST,{openDoor:true,noTable:true,a:'rest',s:'rest'});
 const ALN=F(ST,{noA:true,win:true,s:'rest'});
 const BRD={noS:true,noChairS:true,a:'pointB',noObs:true,who:'On screen'};
 const TWO=F(ST,{noChairA:true,ap:'mid'});
@@ -7207,13 +7522,13 @@ S.setup=[
   cap:'Session termination criteria are written before the first session and apply in every condition: for example, any tissue damage, three head hits within 10 s, or the student asking to stop. In the session runner, End early stops a session at once and marks it terminated; End at this count stops it at a set number of targets.',
   rec:[['Session termination criteria','e.g., any tissue damage; 3 head hits within 10 s; any aggression producing a mark; student requests to stop'],['End early']]}),
  F(TWO,{a:'rest',s:'rest',obs:O('Data collector','Session runner','Target: Space or T','rec'),obs2:O('Second observer','Own record','for agreement','rec'),does:'Seated',
-  cap:'Staffing and ratio. The therapist runs the session. The data collector runs the session runner on Sessions & graph and records every target. A second observer records the same session independently, for agreement. A crisis-trained adult is present.',
-  rec:[['Staffing and ratio','Therapist, data collector, second observer; crisis-trained adult present']]}),
+  cap:'Staffing and ratio. The therapist runs the session. The data collector runs the session runner on Sessions & graph and records every target. A second observer records the same session independently, for agreement. A crisis-trained adult is present, and the plan names who follows a student who walks out.',
+  rec:[['Staffing and ratio','Therapist, data collector, second observer; crisis-trained adult present; who follows a student who walks out']]}),
  F(BRD,{board:'conds',does:'Each card’s signal and materials',
   cap:'The room and materials for each condition come from its card on Conditions, with nothing else within reach. Load the template for the chosen variant, then edit the cards to the student’s history: the task type, the form of attention, the preferred items.',
   rec:[['Load condition templates for the chosen variant'],['Materials','one set per card']]}),
  F(ST,{pm:'blue',sheet:true,sheetT:'Trace: A B C',a:'rest',s:'rest',obs:O('Demand','Ready','10:00 · Start session','rec'),does:'Sits down at the blue placemat',
-  cap:'Each condition keeps its own signal in every session, so the conditions are discriminable: here the blue placemat means Demand, red means Attention and green Play (control). Alone / No interaction is signaled by the empty room, or by the therapist facing away.',
+  cap:'Each condition keeps its own signal in every session, so the conditions are discriminable: here the blue placemat means Demand, red means Attention and green Play (control). Alone / No interaction is signaled by the bare room and the adult at a distance, not interacting, or by the therapist facing away.',
   rec:[['Session signal (SD)','Colored placemat: e.g., blue']]}),
  F(DEM,{obs:O('Demand','Ready','Length 10 min','rec'),does:'Looks at the sheet',
   cap:'Session length: 10 min is the form’s default, after Wallace and Iwata (1999). The session runner reads each card’s Session duration; the data collector checks the timings it shows, then presses Start session.',
@@ -7296,23 +7611,32 @@ S.play=[
 ];
 
 S.alone=[
- F(ALN,{obs:O('Alone / No interaction','Ready','10:00 · Start session','rec'),does:'Sits alone',
-  cap:'No materials and no social interaction: the empty room is the signal. The data collector observes from outside the room, here through a one-way window, and starts the session.',
-  rec:[['Start session']]}),
- F(ALN,{s:'headhit',pb:true,obs:O('Alone / No interaction','Test condition','7:40 left · Target 2','rec'),does:'Hits own head',
-  cap:'The runner has nothing to cue in this condition: no consequence period and no attention schedule. The data collector taps Target for each response.',
+ F(SUP,{obs:O('Alone / No interaction','Ready','10:00 · Supervised','rec'),does:'Sits; the door is open',
+  cap:'Supervised, the form’s default: no materials, no social interaction, and the door open. An adult watches from a distance, able to see and hear the student the whole time: here the therapist sits across the room and watches quietly. The data collector starts the session.',
+  rec:[['Alone or no-interaction condition','Supervised (the default)'],['Start session']]}),
+ F(SUP,{s:'headhit',pb:true,obs:O('Alone / No interaction','Test condition','7:40 left · Target 2','rec'),does:'Hits own head',
+  cap:'No one reacts: no words, no eye contact, no touch. The runner has nothing to cue in this condition, no consequence period and no attention schedule; the data collector taps Target for each response.',
   rec:[['Target']]}),
- F(ALN,{obs:O('Alone / No interaction','Test condition','7:12 left · Target 2','rec'),does:'Sits alone',
-  cap:'No consequence, and no one goes in, unless a termination criterion is met.',
+ F(SUP,{obs:O('Alone / No interaction','Test condition','7:12 left · Target 2','rec'),does:'Sits',
+  cap:'This is what no social consequences means: no adult reacts to anything the student does. The therapist stays in the same place with the same calm face, whatever the student does.',
   rec:[]}),
- F(ALN,{noA:false,ap:'student',a:'reach',obs:O('Terminated','3 hits in 10 s','ended early at 2:48','alert'),does:'Stops',
-  cap:'Three head hits within 10 s meets this student’s termination criterion. End early stops the session at once and marks it terminated, and staff go in as the safety plan says. The runner writes the note for the row.',
+ F(SUP,{sp:'stand',walkOut:true,obs:O('Terminated','Left the room','ended early at 4:12','alert'),does:'Gets up and walks to the open door',
+  cap:'No one keeps the student in. If they walk out, no one blocks the door or brings them back. The data collector presses End early and writes “left the room” in Notes. The adult named under Staffing follows, close enough to keep the student safe. At an exit, a road, water or another danger, that adult steps in at once.',
+  rec:[['End early'],['Notes','left the room']]}),
+ F(SUP,{ap:'student',a:'blockOpen',s:'raised',stepIn:true,obs:O('Terminated','3 hits in 10 s','ended early at 2:48','alert'),does:'Raises a hand toward the helmet',
+  cap:'Three head hits within 10 s meets this student’s termination criterion. End early stops the session at once and marks it terminated. The therapist steps in as the safety plan says: here an open hand between the student’s hand and head, from beside the student. A hold is a physical restraint, used only as the crisis plan allows. The runner writes the note for the row.',
   rec:[['End early'],['Term.','checked'],['Notes','ended early at 2:48']]}),
  {ap:'mid',a:'rest',look:'away',s:'hit',pb:true,obs:O('Alone / No interaction','Test condition','6:20 left · Target 1','rec'),does:'Hits the therapist’s arm',
   cap:'Ignore, when the target is aggression: the therapist stays in the room, faces away, and does not interact. Aggression gets no consequence; the therapist blocks only as the plan’s blocking rules allow.',
   rec:[]},
- F(ALN,{obs:O('Alone (screen)','Session 3 of 5','5:00 · Ext. alone','rec'),does:'Sits alone',
-  cap:'The extended-alone screen: five consecutive 5-min alone or no-interaction sessions (Querim et al., 2013). Each is logged with the phase label Ext. alone, so the graph draws a phase line where the screen starts.',
+ F(BRD,{board:'aloneTrue',does:'Four steps before true alone',
+  cap:'True alone, with the student alone in the room, is a separate choice on Setup & safety. Leaving a student alone in a room can count as seclusion or isolation, so the form allows it only after four steps: the policy check, with who confirmed it; the stop-or-step-in rule; how the student is watched; and the parent’s agreement.',
+  rec:[['1. Policy check','ticked, with who confirmed it'],['2. Stop or step in when','written, with the longest time alone and who steps in'],['3. How the student is watched','chosen'],['4. Parent told and agreed','ticked, with when and how']]}),
+ F(ALN,{obs:O('Alone / No interaction','True alone','stop rule on Setup & safety','rec'),does:'Sits alone',
+  cap:'True alone, when it is set: the student is alone in the room and the observer watches and listens without a break, here through a window. The door is never locked, latched or held shut; at the stop rule, the watching adult steps in.',
+  rec:[['Alone or no-interaction condition','True alone']]}),
+ F(SUP,{obs:O('Alone (screen)','Session 3 of 5','5:00 · Ext. alone','rec'),does:'Sits; the door is open',
+  cap:'The extended-alone screen: five consecutive 5-min alone or no-interaction sessions (Querim et al., 2013), run supervised unless true alone is set. Each is logged with the phase label Ext. alone, so the graph draws a phase line where the screen starts.',
   rec:[['Phase label','Ext. alone'],['Length (min)','5']]}),
  F(BRD,{board:'alone5',does:'Five sessions, all elevated',
   cap:'The five are read together. Persistence across the five alone sessions indicates automatic reinforcement.',
@@ -7516,8 +7840,12 @@ const Q=[
     why:'<b>Other behavior gets no consequence in a test condition.</b> The Attention card: “No consequence for other behavior.” Any attention for calling out would be attention during the establishing operation that did not follow the target.'},
   {w:'D · Alone',f:F(S.alone[1],{obs:O('Alone / No interaction','3 hits in 10 s','7:05 left · Target 5','alert'),does:'Hits own head three times in 10 s'}),
     q:'Alone / No interaction. The student hits their head three times within 10 s, this student’s termination criterion. What do you do?',o:[
-    ['End early: the session stops now and is marked terminated, and staff go in as the safety plan says',1],['Let it run: nothing is delivered in Alone, so nothing can be reinforced',0],['Go in, calm the student, and restart the session clock',0]],
+    ['End early: the session stops now and is marked terminated, and the adult steps in as the safety plan says',1],['Let it run: nothing is delivered in Alone, so nothing can be reinforced',0],['Step in, calm the student, and restart the session clock',0]],
     why:'<b>Termination criteria apply in every condition, as written.</b> They are set on Setup &amp; safety before the first session. EA-1: “Every analysis carries written session-termination criteria, a protective plan, and medical clearance for behavior that produces injury.” End early marks the row terminated, and Interpretation counts terminated sessions.'},
+  {w:'D · Alone, supervised',f:S.alone[3],
+    q:'Supervised alone. The student gets up and walks out through the open door. What do you do?',o:[
+    ['Let them go: End early and write “left the room” in Notes; the adult named under Staffing follows, close enough to keep the student safe',1],['Close the door so the session can finish',0],['Bring the student back and restart the session clock',0]],
+    why:'<b>No one keeps the student in.</b> Closing the door or bringing the student back would keep the student in the room against their wishes, and would be a social consequence too. Setup &amp; safety: “No one keeps the student in. Let them go: press End early and write ‘left the room’ in Notes.” The adult named under Staffing follows and steps in at once if the student heads for an exit, a road, water or another danger. Interpretation counts the session on its own line.'},
   {w:'F · Reading the graph',f:S.graph[3],
     q:'All four Demand points lie above the upper line; the other test conditions stay inside the lines or below them. What does Interpretation report?',o:[
     ['Differentiated: Demand meets the rule, u − l = 4 of n = 4, with a mean far above 1.5 times the control’s',1],['Undifferentiated: one condition is not enough',0],['Multiple control, because Alone has points below the lower line',0]],
@@ -7526,7 +7854,7 @@ const Q=[
     q:'Every condition, Play (control) included, runs near 3 per minute, and nothing meets the rule. What comes next in EA-1?',o:[
     ['The extended alone / no-interaction screen: elevated responding everywhere suggests automatic reinforcement',1],['A synthesized analysis straight away',0],['The same four conditions again until something separates',0]],
     why:'<b>The first step of EA-1’s sequence, and the one this pattern points to.</b> Interpretation: “Responding is elevated and undifferentiated in every condition including alone: consider automatic reinforcement and run the extended alone series.” The Guide’s order after an undifferentiated result: the extended-alone screen, a pairwise test of the strongest candidate, establishing operations modified from interview data, and only then a synthesized analysis.'},
-  {w:'D · Extended alone',f:S.alone[6],
+  {w:'D · Extended alone',f:S.alone[9],
     q:'In the extended-alone screen, responding stays high across all five sessions. What does that indicate?',o:[
     ['Automatic reinforcement',1],['A social function, to be tested next',0],['Nothing yet: five more are needed',0]],
     why:'<b>Persistence without any social consequence.</b> EA-1’s extended-alone template: “Persistence across the five alone sessions indicates automatic reinforcement; extinction across them indicates a social function to be tested next (Querim et al., 2013).”'},
@@ -7596,9 +7924,12 @@ const Q=[
   const C='#b8433a',B='#2f5fa3',G='#3f8a4f';
   const CARDS=[['Attention',C,'Colored placemat or shirt: e.g., red','Attention diverted: therapist appears busy (reads or works) with no interaction; leisure items available','Two or three moderately preferred items','Therapist sits nearby, attends to work, no eye contact or talk','Brief attention (5–10 s of concern or reprimand, light touch) contingent on each target; then return to work','No consequence for other behavior'],
     ['Demand',B,'Colored placemat: e.g., blue','Academic or self-care tasks presented continuously; three-step prompting (vocal, model, physical)','Tasks at the student\'s instructional level','Prompt sequence every 5–10 s; praise for compliance','30-s break: task removed, therapist turns away; then re-present','No consequence for other behavior; block only per safety plan'],
-    ['Alone / No interaction',null,'Empty room or therapist facing away','No materials, no social interaction (alone) or therapist present but not interacting (ignore, used for aggression)','None','No interaction throughout','None','None'],
+    ['Alone / No interaction',null,'Door open, no materials; adult at a distance, not interacting','No materials and no social interaction. Supervised: the door stays open or the student stays in the shared room, and an adult watches from a distance, able to see and hear the student the whole time. The student may leave at any time. For aggression, use ignore: the therapist stays in the room and does not interact.','None','No interaction throughout: no talk, eye contact, touch or reaction. If the student leaves, no one blocks or brings them back: end the session; the adult named under Staffing follows, close enough to keep the student safe.','None','None'],
     ['Play (control)',G,'Colored placemat: e.g., green','Free access to preferred items; attention every 30 s independent of behavior; no demands','Highly preferred items from PA-1','Interact, praise, deliver attention on a 30-s schedule; ignore target','None (attention withheld for 5 s after a target, then schedule resumes)','Attention for appropriate play']];
   const ROWS=['Session signal (SD)','Establishing operation / antecedent','Materials','Therapist behavior','Consequence for target','Consequence for other behavior'];
+  /* the enhancement sprint (B2): the alone condition's fidelity items, supervised (the default) or true alone */
+  const AL_CHK={sup:['No materials; the door open, or the student in the shared room','An adult able to see and hear the student the whole time, not interacting: no talk, eye contact, touch or reaction; never in the doorway','No one kept the student in; a student who walked out: session ended early, “left the room” in Notes, and the named adult followed','Termination criteria applied as written'],
+    true:['True alone set on Setup & safety: the four steps done (the policy check, the stop-or-step-in rule, how the student is watched, the parent’s agreement)','The student watched and heard without a break through the window or on video','The door never locked, latched or held shut; no one in the way','The stop-or-step-in rule followed as written','Termination criteria applied as written']};
   /* the card's own example fidelity items (consequence within 2 s of every target; EO in place at start;
      no attention for other behavior), applied to each card's fields */
   const SHEETS=[
@@ -7607,11 +7938,11 @@ const Q=[
      setup:['The condition’s placemat and the materials on its card; nothing else within reach','The safety plan’s equipment in place (for the example student: helmet and floor mats)','The runner set to the condition, its timings checked against the card','A second observer for agreement sessions'],
      say:['Therapist: exactly what the card says and nothing more, for the target and for other behavior','Data collector: Start session, then Target (Space or T) for every response; End early when a termination criterion is met','When the runner cues the end of a consequence period, return to the condition'],
      sheet:['Save to the log: Date, Condition, Phase, Min, Count; the Rate is computed','Term. and Notes when a session ended early','IOA % for agreement sessions'],
-     frames:[['att',1],['att',3],['att',4],['att',6],['dem',1],['dem',4],['dem',5],['dem',6],['play',1],['play',3],['alone',0],['alone',3]],
+     frames:[['att',1],['att',3],['att',4],['att',6],['dem',1],['dem',4],['dem',5],['dem',6],['play',1],['play',3],['alone',0],['alone',4]],
      decide:'<b>Why.</b> Each test condition arranges one establishing operation and delivers one consequence after the target; Play (control) has none of them. The comparison between them is the analysis, so each is run exactly as its card says.',
      checks:[['Attention',['Red placemat; two or three moderately preferred items (EO in place at start)','Therapist nearby, attending to work: no eye contact or talk','Brief attention, 5–10 s, within 2 s of every target; then back to work','No attention for other behavior']],
        ['Demand',['Blue placemat; tasks at the instructional level, presented continuously (EO in place at start)','Prompt steps every 5–10 s: vocal, model, physical; praise for compliance','30-s break within 2 s of every target: task removed, therapist turned away','Task re-presented when the break ended; no consequence for other behavior; blocking only per the safety plan']],
-       ['Alone / No interaction',['Empty room, no materials (ignore, for aggression: therapist present and facing away)','No interaction throughout; no consequence for the target','Termination criteria applied as written']],
+       ['Alone / No interaction',AL_CHK.sup],
        ['Play (control)',['Green placemat; highly preferred items; no demands at any time','Attention every 30 s, independent of behavior; attention for appropriate play','Target ignored; attention withheld 5 s after a target, then the schedule resumed']],
        ['Every session',['Session length as the card states, or ended per the termination criteria','Every target tapped; the row saved before the next session']]]},
     {key:'graph',title:'Reading the Graph',when:'Sessions & graph · Interpretation',
@@ -7654,6 +7985,11 @@ const Q=[
   const list=a=>'<ul>'+a.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>';
   function build(){
     const host=document.getElementById('wk-aids');host.innerHTML='';const parts=[],draw=[];
+    const EAL=window.eaAlone,alT=!!(EAL&&EAL.mode()==='true'),alC=EAL&&EAL.card('std');
+    /* the arrangement only, never the case's own words (the stop rule): the job aids hold no student information */
+    const alSet=alT?'Alone or no-interaction: true alone, as set on Setup & safety. The student watched and heard without a break, the door never locked, latched or held shut, the stop-or-step-in rule followed exactly'
+      :'Alone or no-interaction: supervised. The door open or the shared room, an adult able to see and hear the student and never in the doorway, no one keeping the student in (true alone only when set on Setup & safety)';
+    const cards=CARDS.map(c=>c[0]==='Alone / No interaction'&&alC?[c[0],c[1],alC.sd,alC.eo,c[4],alC.beh,c[6],c[7]]:c);
     parts.push('<section><div class="jp-band"><div class="jp-when">Form EA-1 · companion</div><h1>Job Aids: Running the Experimental Analysis</h1></div>'+
       '<p class="jp-lead">One sheet per procedure, for the therapist, the data collector and whoever checks fidelity: the steps as they look in the room, the words, what goes on the sheet, the decision each leads to, and a fidelity checklist. The student in the drawings is an example; the condition cards are the rule.</p>'+
       '<h2>Before Any Session</h2>'+list(['The Safety Plan on Setup & safety is complete: medical clearance for behavior that produces injury, session termination criteria, protective equipment and blocking, staffing and ratio, consent and notification.',
@@ -7669,14 +8005,15 @@ const Q=[
       '<div class="jp-cover-scene"></div></section>');
     SHEETS.forEach(sh=>{
       let h='<section><div class="jp-band"><h1>'+esc(sh.title)+'</h1><div class="jp-when">'+esc(sh.when)+'</div></div><p class="jp-lead">'+esc(sh.lead)+'</p>';
-      h+='<div class="jp-cols"><div><h2>Set Up</h2>'+list(sh.setup)+'</div><div><h2>What You Say and Do</h2>'+list(sh.say)+'</div></div>';
-      if(sh.key==='cond')h+='<h2>The Cards, Word for Word</h2><table class="jp-card"><thead><tr><th></th>'+CARDS.map(c=>'<th>'+(c[1]?'<span class="sw" style="background:'+c[1]+'"></span>':'')+esc(c[0])+'</th>').join('')+'</tr></thead><tbody>'+
-        ROWS.map((r,ri)=>'<tr><td>'+esc(r)+'</td>'+CARDS.map(c=>'<td>'+esc(c[ri+2])+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
-      h+='<h2>Step by Step</h2><div class="jp-steps">'+sh.frames.map((fr,n)=>{draw.push(ST[fr[0]][fr[1]]);return stepHTML(ST[fr[0]][fr[1]],n+1);}).join('')+'</div>';
+      h+='<div class="jp-cols"><div><h2>Set Up</h2>'+list(sh.key==='cond'?sh.setup.concat([alSet]):sh.setup)+'</div><div><h2>What You Say and Do</h2>'+list(sh.say)+'</div></div>';
+      if(sh.key==='cond')h+='<h2>The Cards, Word for Word</h2><table class="jp-card"><thead><tr><th></th>'+cards.map(c=>'<th>'+(c[1]?'<span class="sw" style="background:'+c[1]+'"></span>':'')+esc(c[0])+'</th>').join('')+'</tr></thead><tbody>'+
+        ROWS.map((r,ri)=>'<tr><td>'+esc(r)+'</td>'+cards.map(c=>'<td>'+esc(c[ri+2])+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+      const frames=sh.key==='cond'&&alT?sh.frames.map(fr=>fr[0]==='alone'&&fr[1]===0?['alone',7]:fr):sh.frames;
+      h+='<h2>Step by Step</h2><div class="jp-steps">'+frames.map((fr,n)=>{draw.push(ST[fr[0]][fr[1]]);return stepHTML(ST[fr[0]][fr[1]],n+1);}).join('')+'</div>';
       h+='<div class="jp-cols" style="margin-top:8px"><div><h2>What Goes on the Sheet</h2>'+list(sh.sheet)+'</div><div><div class="jp-decide">'+sh.decide+'</div></div></div>';
       h+='<div class="jp-obs"><h2>Observer’s Fidelity Checklist</h2><div class="jp-meta"><span>Date</span><span>Implementer</span><span>Observer</span><span>Session</span></div>';
       h+='<table class="jp-chk"><thead><tr><th>Item</th><th>Yes</th><th>No</th><th>N/A</th></tr></thead><tbody>'+
-        sh.checks.map(g=>'<tr><td colspan="4" class="jp-grp"><b>'+esc(g[0])+'</b></td></tr>'+g[1].map(x=>'<tr><td>'+esc(x)+'</td><td class="b"></td><td class="b"></td><td class="b"></td></tr>').join('')).join('')+
+        sh.checks.map(g=>g[0]==='Alone / No interaction'?[g[0],AL_CHK[alT?'true':'sup']]:g).map(g=>'<tr><td colspan="4" class="jp-grp"><b>'+esc(g[0])+'</b></td></tr>'+g[1].map(x=>'<tr><td>'+esc(x)+'</td><td class="b"></td><td class="b"></td><td class="b"></td></tr>').join('')).join('')+
         '<tr><td style="font-weight:600">Items done as written ÷ applicable items × 100 = fidelity. Retrain any item marked No before the next session.</td><td colspan="3" style="text-align:center">____ / ____ = ____ %</td></tr></tbody></table></div></section>';
       parts.push(h);
     });

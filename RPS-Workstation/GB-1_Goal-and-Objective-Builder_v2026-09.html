@@ -893,6 +893,24 @@ ol.gs .gs-id{font-family:var(--sans);font-weight:600;margin-right:3px}
 #bipDlg textarea{display:block;width:100%;box-sizing:border-box;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;border:1px solid #c9d3d9;border-radius:2px;padding:8px}
 #bipDlg .bip-row{margin-top:10px;text-align:right}
 </style>
+<style id="gb1-dd-css" data-nbh-screen>
+/* v21.44 (A5) Current level from DD-1: the button's row and the report of what it filled (screen only; noprint) */
+.gb-dd{margin:0 0 12px}
+.gb-dd .gb-dd-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 6px}
+.gb-dd .gb-dd-row .method{flex:1 1 280px;margin:0}
+#gbDdOut{border-left:3px solid var(--rule);background:var(--wash);padding:8px 12px;font-size:12px;line-height:1.5}
+#gbDdOut.bad{border-left-color:#9b4e15;background:#fbf0e6}
+#gbDdOut p{margin:0 0 4px}
+#gbDdOut ul{margin:4px 0;padding-left:18px}
+#gbDdOut li{margin:2px 0}
+#gbDdOut .gb-dd-pick{margin-top:6px}
+/* a current level filled from DD-1: where it came from, in full under the field, which is narrower than the level */
+.card.grow .f.gb-has-src{flex-wrap:wrap;row-gap:1px}
+.card.grow .f .gb-cur-src{flex:1 0 100%;box-sizing:border-box;padding-left:calc(40% + 8px);font-family:var(--sans);
+  font-size:10.5px;line-height:1.35;color:var(--ink-soft)}
+.card.grow .f .gb-cur-src .gb-nw{white-space:nowrap}
+@media screen and (max-width:600px){.card.grow .f .gb-cur-src{padding-left:0}}
+</style>
 <main class="sheet">
 <div class="nbh-print-head">
   <img class="nbh-print-logo" data-nbh-logo="1" alt="Royal Palm School">
@@ -942,6 +960,9 @@ fills only the fields you have not written in yourself. The plan states its base
 criterion as rates per minute, so they go only into an objective measured in rate per minute,
 and its number of consecutive sessions comes with its unit, sessions.</p>
 <p class="noprint"><button id="applyPlan" class="tool">Apply to empty fields</button></p>
+<!-- v21.44 (A5): where the measured baseline comes in -->
+<p class="noprint method">The current level can also come from the data: <b>Current level from DD-1</b>, at the top of
+Reduction Objectives, fills each empty one from Form DD-1&rsquo;s baseline, its first condition.</p>
 </section>
 
 <!-- ===================== REDUCTION ===================== -->
@@ -949,6 +970,16 @@ and its number of consecutive sessions comes with its unit, sessions.</p>
 <div class="bar nbh-band">Reduction Objectives</div>
 <p>One row per behavior being reduced. The sentence underneath each row is the
 objective as it will appear on the goal sheet; it rewrites itself as you type.</p>
+
+<!-- v21.44 (A5): Current level from DD-1, the button and what it did (screen only) -->
+<div class="gb-dd noprint">
+<p class="gb-dd-row"><button id="gbDdBtn" class="tool" type="button">Current level from DD-1</button>
+<span class="method">Fills each empty current level from Form DD-1&rsquo;s baseline (its first condition) where the
+objective&rsquo;s response measure is the one DD-1 records. Inside the workstation it reads the DD-1 open there; on its
+own, a DD-1 data file or a case file.</span></p>
+<div id="gbDdOut" role="status" aria-live="polite" hidden></div>
+<input type="file" id="gbDdIn" accept=".json,application/json,.html,text/html" hidden>
+</div>
 
 <div id="redWrap" data-panel="red"></div>
 <p class="noprint"><button id="addRed" class="tool">Add a reduction objective</button></p>
@@ -1062,6 +1093,27 @@ behavior without committing it to teaching anything. Each reduction objective on
 this form carries a field naming the acquisition objective it is paired with, each
 acquisition objective names the reduction objective it replaces, and the goal sheet
 prints that pairing under each objective, numbered as on the form (R1, A1).</p>
+<!-- v21.44 (A5): screen only, as the other notes on what the form does on screen -->
+<p class="noprint">When several behaviors share one replacement skill, the form writes one acquisition objective
+for it, naming every behavior it replaces. The replacements named on Form TB-1 are read without
+their staff notes (&ldquo;(see target 4)&rdquo;, &ldquo;(replacement)&rdquo;), and a paired
+replacement that points to a replacement target defined on TB-1, or reads exactly as one that does,
+takes that target&rsquo;s name. Wording that only means the same thing is not merged. A behavior
+added later from <b>From the case</b> that shares a skill already on the form joins that skill&rsquo;s
+list of the behaviors it replaces, when the list is the form&rsquo;s own. In the sentence the skill
+follows &ldquo;will&rdquo;: an action named in the third person takes its plain form (&ldquo;Hands a
+break card and waits&rdquo;: will hand a break card and wait; &ldquo;Participates in group
+activities&rdquo;: will participate in group activities; &ldquo;Using a quiet voice&rdquo;: will use a
+quiet voice), a name followed by what is done with it starts with that action (&ldquo;Tasks completed
+independently&rdquo;: will complete tasks independently), a subject at the start is left out
+(&ldquo;The student requests a break&rdquo;: will request a break), an opening phrase moves after the
+action (&ldquo;When frustrated, requests a break&rdquo;: will request a break when frustrated), a name
+is introduced by a verb (&ldquo;Break request&rdquo;: will make a break request; &ldquo;On-task
+behavior&rdquo;: will demonstrate on-task behavior), and a staff note is left out. A context or a
+condition starts in lower case when its first word is an ordinary one (&ldquo;In Room 12&rdquo;,
+&ldquo;Independent work&rdquo;); a name stays as typed (&ldquo;Jordan at recess&rdquo;). The fields keep
+the words as they were typed; if a sentence still reads awkwardly, retype the skill in plain form
+(&ldquo;ask for help&rdquo;).</p>
 
 <h3 class="sub">4. Where the Numbers Should Come From</h3>
 <p>The baseline belongs to the data, not to the goal: take it from the measurement
@@ -1073,6 +1125,23 @@ there rather than inviting a second, different number.</p>
 criterion than the plan's thinning criterion, for instance &mdash; override it here and
 say so in the note field, so the difference is on the record as a decision rather
 than as a discrepancy.</p>
+<p class="noprint"><b>Current level from DD-1</b>, at the top of Reduction Objectives, takes the baseline from
+Form DD-1, the data the goal will be judged by. For each reduction objective it finds DD-1&rsquo;s
+behavior of the same name and works out its level in DD-1&rsquo;s first condition, the baseline,
+as DD-1&rsquo;s own Results do: the mean of the days with data, their range and their number. It
+writes that level only into an empty Current level, for example &ldquo;10 per school day (DD-1
+baseline: mean of 6 days, range 8&ndash;12)&rdquo;, with where it came from shown in full under the
+field, and only where the objective&rsquo;s response measure is the one DD-1 records: rate per hour
+(DD-1&rsquo;s rate), frequency per school day (a
+count over the entire school day), total duration per session in minutes (a duration recorded per
+session or over a single period) or percentage of intervals. An objective with no response measure
+yet takes DD-1&rsquo;s. A level in another unit is never converted or written: a rate per minute is
+not DD-1&rsquo;s rate per hour, and a latency in seconds is not DD-1&rsquo;s latency in minutes.
+Each objective left empty is named with the reason (a different unit, no days in the baseline, or
+no behavior of that name on DD-1). TD-1&rsquo;s <b>Apply to empty fields</b> still fills the first
+reduction objective on the form from the plan, its current level as a rate per minute, when that one was left
+empty. Inside the workstation the button reads the DD-1 open there; opened on its own, or with
+DD-1 closed, it reads a file DD-1 saved with Save data, or a case file that holds DD-1.</p>
 <!-- writing help (v21.43) --><h3 class="sub noprint nbh-wh">Writing help</h3>
 <p class="noprint nbh-wh">The Progress reports box shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
 </section>
@@ -3261,8 +3330,44 @@ document.addEventListener('click', e => {
    method, as the acquisition objective does: the IEP must describe how progress toward each annual goal
    is measured (34 CFR 300.320(a)(3)(i)). */
 function gap(s, what) { const t = String(s || '').trim(); return t ? esc(t) : '<span class="gap">[' + what + ']</span>'; }
-const OWNWORD = /^(in|at|on|during|across|throughout|within|while|when|whenever|inside|outside|near|around|for|from|between|among|under|over|after|before)\b/i;
-function ctxPhrase(s) { const t = String(s || '').trim(); return t ? (OWNWORD.test(t) ? '' : 'in ') + esc(t) : 'in/at ' + gap('', 'context'); }
+/* v21.44 (A5): "given", "with", "without", "if", "once", "upon", "until" and "following" are a context's own words too
+   ("in given a demand", "in with peers") */
+const OWNWORD = /^(in|at|on|during|across|throughout|within|while|when|whenever|inside|outside|near|around|for|from|between|among|under|over|after|before|given|with|without|if|once|upon|until|following)\b/i;
+function ctxPhrase(s) { const t = String(s || '').trim(); return t ? (OWNWORD.test(t) ? '' : 'in ') + esc(gbPhrase(t)) : 'in/at ' + gap('', 'context'); }
+/* v21.44 (A5): an acquisition objective's condition follows "given" unless it begins with its own word ("When Ms. Lee
+   gives a demand", "During reading", "With the break card in reach"); one that begins with "given" is not given it
+   twice */
+const CONDWORD = /^(when|whenever|if|once|upon|during|after|before|while|following|throughout|across|within|in|at|on|with|without|from|(?:every|each|any)\s+time)\b/i;
+function condPhrase(s) {
+  const t = gbPhrase(String(s || '').trim()).replace(/^given\s+/i, '');
+  return t ? (CONDWORD.test(t) ? '' : 'given ') + esc(t) : 'given ' + gap('', 'condition');
+}
+/* v21.44 (A5): a context or a condition inside the sentence. Copied from Form TB-1 they begin as a heading does
+   ("Independent academic work in Room 12; occasionally at the bus line", "Every independent academic demand"). The
+   first word is lowercased when it is a small linking word ("In", "During", "A", "The", "Every", "Given"), whatever
+   follows it, or a common word for a setting, an activity or a demand ("Independent", "Math", "Lunch",
+   "Transitions") that a number or a capitalized word does not follow ("Room 12", "Math Lab" stay). Any other first
+   word stays as typed, since it may be a name ("Jordan at recess", "Christmas break", "Lakeside Elementary"). A
+   semicolon inside the sentence becomes a comma. The field keeps the words as typed. */
+const GB_LINK = new Set(('a an the in at on during when whenever while after before every each given for with without ' +
+  'within across throughout from between among under over inside outside near around if once upon until following all ' +
+  'any some both most no to by as into onto through').split(' '));
+const GB_CTXW = new Set(('academic access activities activity adult adults afternoon afternoons arrival art attention ' +
+  'bathroom break breaks bus cafeteria center centers centre centres choice circle class classes classroom community ' +
+  'daily demand demands denied desk direction directions dismissal familiar free group groups gym hallway hallways high ' +
+  'home homework independent individual indoor instruction instructional instructions interaction interactions large ' +
+  'leisure library low lunch math maths meal meals mealtime morning mornings music new non-preferred novel one-to-one ' +
+  'outdoor peer peers period periods play playground preferred presentation presentations reading recess removal request ' +
+  'requests restroom routine routines school science seatwork session sessions small small-group snack social specials ' +
+  'staff structured studies table task tasks teacher teachers therapy time times transition transitions unstructured ' +
+  'verbal whole whole-group work writing written').split(' '));
+function gbPhrase(s) {
+  const t = String(s == null ? '' : s).replace(/\s*;\s*/g, ', ').replace(/\s+/g, ' ').trim(), w = t.split(' '), w0 = w[0] || '';
+  if (!/^[A-Z][a-z'\u2019-]*[,:]?$/.test(w0)) return t;
+  const l0 = w0.toLowerCase().replace(/[,:]$/, ''), nx = w[1] || '';
+  const low = GB_LINK.has(l0) || ((GB_CTXW.has(l0) || GB_CTXW.has(l0.split('-')[0])) && !/^[0-9A-Z]/.test(nx));
+  return low ? w0.charAt(0).toLowerCase() + t.slice(1) : t;
+}
 function redSentence(i) {
   const g = n => val('red[' + i + '].' + n), crit = g('crit');
   return gap(val('m.client'), 'student') + ' will ' + gap(g('dir'), 'direction of change') +
@@ -3285,7 +3390,9 @@ function redChecks(i) {
   if ((down && ml === 'less') || (up && ml === 'more'))
     out.push('a ' + (down ? 'decrease' : 'increase') + ' is written &ldquo;to no ' + (down ? 'more' : 'less') +
       ' than&rdquo;; &ldquo;no ' + ml + ' than&rdquo; makes the target level a ' + (down ? 'floor' : 'ceiling') + '.');
-  const lv = s => { const m = /^\s*(\d+(?:\.\d+)?)\s*(.*?)\s*$/.exec(s); return m ? { n: +m[1], u: m[2].toLowerCase() } : null; };
+  /* v21.44 (A5): a note in brackets after the unit is not part of it: "10 per school day (DD-1 baseline: mean of 6
+     days, range 8-12)" is in the unit of "2 per school day" */
+  const lv = s => { const m = /^\s*(\d+(?:\.\d+)?)\s*(.*?)\s*$/.exec(s); return m ? { n: +m[1], u: m[2].replace(/\s*\(.*$/, '').toLowerCase() } : null; };
   const c = lv(g('cur')), t = lv(g('tgt'));
   if (c && t && c.u === t.u && (down ? t.n >= c.n : up && t.n <= c.n))
     out.push('the target level (' + esc(g('tgt')) + ') is not ' + (down ? 'below' : 'above') + ' the current level (' +
@@ -3295,10 +3402,289 @@ function redChecks(i) {
 function checkLines(list) { return list.map(m => '<div class="gb-chk">Check: ' + m + '</div>').join(''); }
 function acqSentence(i) {
   const g = n => val('acq[' + i + '].' + n);
-  return 'By ' + gap(fmtDate(g('date')), 'target date') + ', given ' + gap(g('cond'), 'condition') +
-    ', ' + gap(val('m.client'), 'student') + ' will ' + gap(g('beh'), 'observable behavior') +
+  /* v21.44 (A5): the skill as words that follow "will" (gbWill, below); it went in as named ("will Hands a break card
+     and waits (see target 4)", "will Break request (replacement)") */
+  const beh = g('beh') ? esc(gbWill(g('beh'), val('m.client'))) : gap('', 'observable behavior');
+  return 'By ' + gap(fmtDate(g('date')), 'target date') + ', ' + condPhrase(g('cond')) +
+    ', ' + gap(val('m.client'), 'student') + ' will ' + beh +
     ' ' + gap(g('crit'), 'criterion') + ' across ' + gap(g('n'), 'number') + ' consecutive ' +
     gap(g('unit'), 'unit') + ', as measured by ' + gap(g('meth'), 'measurement method') + '.';
+}
+
+/* ---------- v21.44 (A5) the words of a skill in a sentence ----------
+   A skill is named as it was on Form TB-1 or as typed here: "Hands a break card and waits (see target 4)", "Break
+   request (replacement)", "ask for help". In the objective it follows "will", so the sentence (on screen, on the goal
+   sheet, in Copy for the BIP and in the case) words it by these rules; the field keeps the words as typed.
+   1. Staff notes are left out (gbClean): a bracket, round or square, that begins with "see", "cf." or "refer to", or
+      that names a form, a target or a sheet ("(see target 4)", "(Forms EA-1 and TD-1)"), wherever it stands; at the
+      end, a bracket naming it a replacement or an alternative ("(replacement)"), a dash followed by "replacement" or
+      "see ...", and a semicolon, a comma or a dash, spaced or not, followed by "see target/form/sheet ..."; a stop
+      after a note at the end goes with it ("(see target 4)."). That covers what Form TB-1 leaves out of the names it
+      passes on once it cleans them (package A4), so a name cleaned there and one cleaned here read the same. A label
+      "Replacement:" in front and a closing full stop go too.
+   2. The sentence names the student, so a subject at the start is left out: "The student", "Student", "He", "She",
+      "They", the student's name as entered on Setup (also "Jordan's"), or any name followed by "will"; then a leading
+      "will" or "to".
+   3. A phrase that opens the label ("When frustrated, requests a break", "Given a demand, hands the break card",
+      "During independent work, raises hand") moves after the action: "request a break when frustrated", "hand the
+      break card when given a demand". Parts joined by semicolons are joined by "and".
+   4. An action named in the third person takes its plain form: "Requests a break": request a break; "Participates in
+      group activities": participate in group activities; "Is on task": be on task. A first word ending in -s counts
+      as such a verb unless it names things (GB_PLN: "Words", "Greetings", "Strategies"), a part of the body or an
+      abbreviation ("PECS"). A second verb after "and", "or" or "then" takes its plain form when it is one of the
+      common verbs in GB_VERBS ("Hands a break card and waits": hand a break card and wait), but a list of names stays
+      ("Makes requests and comments"). An "-ing" form of a listed verb at the start takes the plain form ("Requesting
+      help": request help; "Using a quiet voice": use a quiet voice), and adverbs before the verb stay ("Independently
+      and appropriately requests a break"). A name followed by what is done with it ("Tasks completed independently",
+      "Hands washed", "Turns taken", "Assignments turned in") takes that verb first: complete tasks independently, wash
+      hands, take turns, turn assignments in; but not after a verb that takes a state ("Stays seated", "Is prepared"),
+      nor where the participle comes before a name ("Completes assigned work"). A thing kept in place ("Glasses on",
+      "Phone away") takes "keep".
+   5. A plain verb phrase stays as it is ("ask for help"; "hand the break card to an adult"); so does a word not on the
+      list when "a", "the", "his" or another determiner follows it ("Emit a mand"). A state takes "be" ("On task
+      during independent work", "Engaged in the activity"), and words in quotation marks take "say" ("I need a break").
+   6. A name is introduced by a verb: "make" for a request, a response, a mand, a choice, an exchange and the like
+      ("Break request": make a break request); "use" for a card, a picture, a schedule, words, a voice or another aid
+      ("Break card": use a break card); "take" for a break; "keep" for hands, feet, eyes or a body ("Hands to self":
+      keep hands to self; "Safe body": keep a safe body); and "demonstrate" for anything else ("On-task behavior":
+      demonstrate on-task behavior). A name begins with a noun that a listed verb shares when the next word makes it a
+      compound ("Hand raising", "Help request", "Listening skills"). A label that already reads as a sentence with a
+      verb further in ("Jordan requests a break") gets no verb of its own: a name in front of the verb is left out,
+      and otherwise the words stay as typed.
+   Its first letter is lowercased unless the first word is an abbreviation ("AAC", "PECS") or a name. */
+const GB_SEE = /\s*[(\[]\s*(?:(?:see|cf\.?|refer\s+to)\b[^()\[\]]*|(?:forms?|targets?|sheets?)\s*#?\s*[A-Z]{0,3}-?\d+[^()\[\]]*)[)\]](?:[\s.;,]+$)?/gi;
+const GB_TAIL = /\s*(?:[(\[]\s*(?:the\s+)?(?:replacement|alternative|replaces)\b[^()\[\]]*[)\]]|\s[\u2014\u2013-]+\s*(?:the\s+)?(?:replacement|alternative)(?:\s+(?:behaviou?r|response|skill|target))?|\s[\u2014\u2013-]+\s*see\b.*|\s*[;,.\u2014\u2013]\s*see\s+(?:targets?|forms?|sheets?|pages?|above|below)\b.*)[\s.;,]*$/i;
+function gbClean(s) {
+  const t0 = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+  let t = t0.replace(GB_SEE, '').replace(/\s+/g, ' ').trim(), k;
+  do { k = t; t = t.replace(GB_TAIL, '').trim(); } while (t !== k && t);
+  return t || t0;
+}
+/* the staff notes gbClean leaves out, where a note points to a target ("see target 4") */
+function gbNotes(s) {
+  const t = String(s == null ? '' : s).replace(/\s+/g, ' ').trim(), out = t.match(GB_SEE) || [];
+  let u = t.replace(GB_SEE, '').trim(), m, k = 0;
+  while (k++ < 6 && (m = GB_TAIL.exec(u))) { out.push(m[0]); u = u.slice(0, m.index).trim(); }
+  return out.join(' ');
+}
+/* the one target the notes point to ("see target 4", "target #4"); 0 when they name none or several ("targets 4 and
+   5", "targets 4-5", "targets 4 to 5"), as Form TB-1 reads them once it cleans its names (package A4) */
+function gbPtr(s) {
+  const nums = [];
+  gbNotes(s).replace(/\btargets?\s*#?\s*(\d{1,2})((?:\s*(?:,|and|&|or|to|through|thru|[\u2010-\u2015-])\s*#?\s*\d{1,2})*)/ig, (a, n1, more) => {
+    nums.push(+n1); (more.match(/\d{1,2}/g) || []).forEach(x => nums.push(+x)); return a; });
+  const u = nums.filter((x, i) => nums.indexOf(x) === i);
+  return u.length === 1 ? u[0] : 0;
+}
+/* the same words for comparing two names: case, curly quotes, dashes, spaces and a closing stop set aside */
+function gbKey(s) {
+  return gbClean(s).normalize('NFKC').toLowerCase().replace(/[\u2018\u2019\u02bc]/g, "'").replace(/[\u201c\u201d]/g, '"')
+    .replace(/[\u2010-\u2015]/g, '-').replace(/\s+/g, ' ').replace(/[\s.;:,!]+$/, '').trim();
+}
+const GB_VERBS = new Set(('accept add advocate answer apologise apologize approach ask attend be begin bring brush build button ' +
+  'calculate call carry catch check choose clap clean close collect color colour come communicate comment complete comply concentrate ' +
+  'converse cooperate cope copy count cross cut demonstrate describe display do draw dress drink earn eat employ engage enter ' +
+  'exchange exhibit exit explain express find finish focus fold follow gain get give go greet hand hang have help hold ' +
+  'identify ignore imitate indicate initiate invite join keep label leave line listen look maintain make manage mand match ' +
+  'monitor move name negotiate obtain offer open organise organize pack participate pass persist pick place play point ' +
+  'practice practise prepare press problem-solve pull push put raise reach read receive recognise recognize recruit refrain regulate ' +
+  'relax remain remove repeat reply request resist respond return say seek select self-advocate self-monitor self-regulate ' +
+  'share show sign sing sit smile solve sort speak spell stand start state stay stop submit take talk tap tell thank throw tidy ' +
+  'tie tolerate touch track trade transition try turn untie use utilise utilize verbalise verbalize vocalise vocalize wait ' +
+  'walk wash wave wear work write zip').split(' '));
+/* plural nouns that can begin a name, other words ending in -s that are not verbs, and given names ending in -s */
+const GB_PLN = new Set(('academics activities always afterwards besides boots breaks choices clothes directions echoics emotions ' +
+  'feelings glasses gloves greetings headphones hers instructions intraverbals items its manners materials mathematics means ' +
+  'needs news others ours pants peers perhaps physics questions responses routines rules series shoes skills socks sometimes ' +
+  'species strategies theirs thus tokens towards toys unless visuals was words yes yours ' +
+  'agnes amos andreas carlos charles dolores douglas elias frances james jonas lucas marcos matthias mercedes miles moses ' +
+  'nicholas silas thomas tobias').split(' '));
+const GB_DET = new Set('a an the his her their its my your our this that these those some any each every all one two both it them him himself herself themselves'.split(' '));
+const GB_POS = new Set(('to in on at down off up by under inside together still quiet folded flat crossed apart safe calm and or ' +
+  'listening looking open closed').split(' '));
+const GB_CUT = new Set('for with to of in on at from during when while after before across by without within and or then'.split(' '));
+const GB_LEAD = new Set('always often sometimes usually also then still first'.split(' '));
+const GB_BODY = /^(hands?|feet|foot|eyes?|ears?|body|arms?|legs?|voice|mouth|bottom|head)$/;
+const GB_BODIES = /^(hands|feet|eyes|ears|arms|legs)$/;
+const GB_MAKE = /^(requests?|responses?|mands?|choices?|comments?|greetings?|bids?|initiations?|exchanges?|statements?|questions?|selections?|approach(es)?|repl(y|ies)|answers?|trades?|raises?)$/;
+const GB_USE = /^(cards?|pictures?|symbols?|devices?|strateg(y|ies)|schedules?|timers?|tokens?|signals?|signs?|gestures?|phrases?|scripts?|tools?|aids?|charts?|boards?|apps?|voices?|words|manners)$/;
+/* a verb in the third person, in its plain form; '' when the word is not one of GB_VERBS so written */
+function gbBase(l) {
+  const irr = { is: 'be', are: 'be', has: 'have', does: 'do', goes: 'go' };
+  if (irr[l]) return irr[l];
+  if (!/^[a-z][a-z-]*[^s'\u2019]s$/.test(l) || /(us|is)$/.test(l)) return '';
+  const c = [];
+  if (/[^aeiou]ies$/.test(l)) c.push(l.slice(0, -3) + 'y');
+  if (/(sh|ch|x|z|o|ss)es$/.test(l)) c.push(l.slice(0, -2));
+  c.push(l.slice(0, -1));
+  if (/ses$/.test(l)) c.push(l.slice(0, -2));   /* "focuses": focus */
+  for (const x of c) if (GB_VERBS.has(x)) return x;
+  return '';
+}
+/* the plain form of an unlisted verb in the third person ("participates": participate, "ties": tie), or '' */
+function gbGuess(l) {
+  if (!/^[a-z][a-z-]*[^s'\u2019]s$/.test(l) || /(us|is)$/.test(l)) return '';
+  if (/[^aeiou]ies$/.test(l)) return l.length > 4 ? l.slice(0, -3) + 'y' : l.slice(0, -1);
+  if (/(sh|ch|x|zz|o|ss)es$/.test(l)) return l.slice(0, -2);
+  return l.slice(0, -1);
+}
+/* an -ing form of one of GB_VERBS, in its plain form ("requesting": request, "tolerating": tolerate, "sitting": sit,
+   "using": use, "going": go, "tying": tie) */
+function gbIng(l) {
+  if (!/^[a-z][a-z'-]+ing$/.test(l)) return '';
+  const s = l.slice(0, -3), c = [s, s + 'e'];
+  if (/([^aeiou])\1$/.test(s)) c.push(s.slice(0, -1));
+  if (/y$/.test(s)) c.push(s.slice(0, -1) + 'ie');
+  for (const x of c) if (GB_VERBS.has(x)) return x;
+  return '';
+}
+/* a past participle of a listed verb that names a state ("engaged", "seated", "prepared"), or what was done ("used",
+   "identified") */
+function gbEd(l) {
+  if (!/^[a-z][a-z-]+ed$/.test(l)) return '';
+  const s = l.slice(0, -2), c = [s, s + 'e', l.slice(0, -1)];
+  if (/([^aeiou])\1$/.test(s)) c.push(s.slice(0, -1));
+  if (/ied$/.test(l)) c.push(l.slice(0, -3) + 'y');
+  for (const x of c) if (GB_VERBS.has(x) || x === 'seat') return x;
+  return '';
+}
+/* the plain form of the participle that follows a name ("Tasks completed", "Turns taken"): a listed verb's, or a common
+   irregular one's; none for "seated", which names a state */
+const GB_PP = { made: 'make', taken: 'take', done: 'do', given: 'give', kept: 'keep', put: 'put', held: 'hold', worn: 'wear',
+  brought: 'bring', written: 'write', shown: 'show', said: 'say', told: 'tell', eaten: 'eat', chosen: 'choose', found: 'find',
+  drawn: 'draw', thrown: 'throw', gotten: 'get', begun: 'begin', spoken: 'speak' };
+const gbPart = l => Object.prototype.hasOwnProperty.call(GB_PP, l) ? GB_PP[l] : (l === 'seated' ? '' : gbEd(l));
+/* verbs that take a state after them ("Stays seated", "Is prepared", "Gets dressed"), and the small words that end a
+   phrasal verb ("turned in", "put away") */
+const GB_LINKV = new Set('be have stay remain get become seem appear look feel keep sit stand go come was were been got'.split(' '));
+const GB_PRT = new Set('in up out off down away back over on'.split(' '));
+/* the second word of a name that starts with a word a verb shares: "Hand raising", "Help request", "Listening skills" */
+function gbCompound(l) {
+  return /^[a-z-]{2,}ing$/.test(l) || GB_MAKE.test(l) ||
+    /^(contact|behaviou?rs?|skills?|strateg(y|ies)|tolerance|completion|language|time|leader|training|tasks?|routines?)$/.test(l);
+}
+const gbLow = w => /^[A-Z][a-z'\u2019-]*(?:\/[a-z'\u2019-]+)*[,;:]?$/.test(w) && !/['\u2019]s[,;:]?$/.test(w) ? w.charAt(0).toLowerCase() + w.slice(1) : w;
+/* "a" or "an": by the sound of the first letter of an abbreviation ("an FCR", "a PECS card") */
+const gbArt = s => (/^[A-Z]{2,}/.test(s) ? /^[AEFHILMNORSX]/.test(s) : /^(?:[aeio]|u(?!ni|s[aeiou]|r[aeiou]|ti|ke))/i.test(s)) ? 'an ' : 'a ';
+const gbCore = x => String(x || '').toLowerCase().replace(/[^a-z'\u2019-]/g, '');
+/* a second verb after "and", "or" or "then" takes its plain form; a list of names ("requests and comments") stays */
+function gbAndVerbs(ws) {
+  return ws.map((x, i) => {
+    if (!i || !/^(and|or|then|&)$/i.test(ws[i - 1])) return x;
+    const m = /^([A-Za-z'\u2019-]+)(.*)$/.exec(x); if (!m) return x;
+    const l = m[1].toLowerCase(), b = gbBase(l);
+    if (!b) return x;
+    if (GB_MAKE.test(l) && i >= 2 && GB_MAKE.test(gbCore(ws[i - 2])) && (i === ws.length - 1 || GB_CUT.has(gbCore(ws[i + 1])))) return x;
+    return b + m[2];
+  });
+}
+/* the words of the student's name, set aside where they begin a label */
+function gbWho(who) {
+  return String(who == null ? '' : who).split(/[^\p{L}'\u2019-]+/u).filter(w => w.length > 1 && !/^(simulated|sample|student)$/i.test(w)).map(w => w.toLowerCase());
+}
+const GB_SUBJ = /^(?:(?:the|this|that|each|every)\s+)?(?:student|child|learner|pupil|client|individual|participant)s?\s+(?:will\s+)?(?=\S)/i;
+const GB_PRON = /^(?:he|she|they)\s+(?:will\s+)?(?=\S)/i;
+const GB_INTRO = /^(when|whenever|if|given|after|before|during|while|upon|once|in|at|on|with|without|following|throughout|across|within|from)$/i;
+const GB_ADV_NOT = /^(only|early|daily|family|weekly|monthly|holy|ugly|silly|jelly|belly|bully|rally|tally|lily|reply|apply|supply|fly|ally)$/;
+/* the words of a skill that follow "will"; who: the student's name (Setup), left out where it begins the label */
+function gbWill(label, who) {
+  const t = gbClean(label).replace(/^(?:the\s+)?(?:replacement|alternative)(?:\s+(?:behaviou?r|skill|response))?\s*[:\u2014\u2013]\s*(?=\S)/i, '')
+    .replace(/[.;:,!]+$/, '').trim();
+  if (!t) return '';
+  const parts = t.split(/\s*;\s*/).filter(Boolean).map(p => gbWillPart(p, who)).filter(Boolean);
+  if (parts.length < 2) return parts[0] || '';
+  return parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+}
+function gbWillPart(s, who, deep) {
+  let t = String(s || '').replace(/[.;:,!]+$/, '').trim();
+  /* 2. a subject at the start */
+  const names = gbWho(who);
+  for (let pass = 0; pass < 2; pass++) {
+    t = t.replace(GB_SUBJ, '').replace(GB_PRON, '');
+    if (names.length) {
+      const w = t.split(' '), k = w.findIndex((x, j) => j >= names.length || names.indexOf(x.toLowerCase().replace(/['\u2019]s,?$/, '').replace(/,$/, '')) < 0);
+      if (k > 0 && k < w.length) t = w.slice(k).join(' ');
+    }
+    t = t.replace(/^[A-Z][\p{L}'\u2019-]*\s+will\s+(?=\S)/u, '').replace(/^(?:will|to)\s+(?=\S)/i, '').trim();
+  }
+  if (!t) return '';
+  /* 5. words in quotation marks are said */
+  if (/^["\u201c'\u2018]/.test(t)) return 'say ' + t;
+  const w = t.split(' ');
+  /* 3. an opening phrase moves after the action */
+  if (!deep && w.length > 2 && GB_INTRO.test(gbCore(w[0]))) {
+    const c = /^([^,]{2,80}),\s*(.+)$/.exec(t);
+    let intro = '', rest = '';
+    if (c) { intro = c[1]; rest = c[2]; }
+    else {
+      const j = w.findIndex((x, i) => i > 1 && gbBase(gbCore(x)) && !/^[A-Z]{2,}/.test(x));
+      if (j > 1) { intro = w.slice(0, j).join(' '); rest = w.slice(j).join(' '); }
+    }
+    const r = rest ? gbWillPart(rest, who, true) : '';
+    if (r) return r + ' ' + (/^given\b/i.test(intro) ? 'when ' : '') + gbLow(intro.split(' ')[0]) + intro.slice(intro.split(' ')[0].length);
+  }
+  /* adverbs before the verb: "Independently", "Calmly and quietly", "Always" */
+  const adv = x => (/^[a-z]{3,}ly,?$/i.test(x) && !GB_ADV_NOT.test(gbCore(x))) || GB_LEAD.has(gbCore(x));
+  let k = 0;
+  while (k < w.length - 1) {
+    if (adv(w[k])) { k++; continue; }
+    if (k && /^(and|or)$/i.test(w[k]) && k + 1 < w.length - 1 && adv(w[k + 1])) { k++; continue; }
+    break;
+  }
+  const lead = w.slice(0, k).map((x, j) => j ? x : gbLow(x)), w0 = w[k], l0 = gbCore(w0), nx = gbCore(w[k + 1]);
+  const verb = base => lead.concat([base], gbAndVerbs(w.slice(k + 1))).join(' ');
+  const low = () => [gbLow(w[0])].concat(w.slice(1)).join(' ');
+  /* hands, feet, eyes or a body in a place or a state: "Hands to self", "Feet on the floor", "Voice off" */
+  if (!k && GB_BODY.test(l0) && (!nx || GB_POS.has(nx))) return 'keep ' + low();
+  if (!k && /^(walking feet|listening ears|looking eyes)\b/i.test(t)) return 'use ' + low();
+  /* a name and what is done with it: "Tasks completed independently", "Hands washed", "Assignments turned in":
+     complete tasks independently, wash hands, turn assignments in; not after a verb that takes a state ("Stays
+     seated"), nor where a name follows the participle ("Completes assigned work") */
+  const pp = !k && w.length > 1 && !GB_INTRO.test(l0) && !GB_DET.has(l0) && !GB_CUT.has(l0) && !/^(not|no|never)$/.test(l0) ? gbPart(nx) : '', n2 = gbCore(w[2]);
+  if (pp && !GB_LINKV.has(gbBase(l0) || l0) && (w.length === 2 || adv(w[2]) || GB_CUT.has(n2) || GB_PRT.has(n2)))
+    return [pp, gbLow(w0)].concat(gbAndVerbs(w.slice(2))).join(' ');
+  /* a thing kept in its place: "Glasses on", "Headphones on", "Phone away": keep glasses on */
+  if (!k && w.length === 2 && /^(on|off|away)$/.test(nx) && !gbBase(l0) && !GB_VERBS.has(l0)) return 'keep ' + low();
+  if (!/^[A-Z]{2,}/.test(w0)) {
+    const b3 = gbBase(l0); if (b3) return verb(b3);
+    /* "Requesting help", "Using coping strategies" (an -ing word after it describes what follows); "Listening skills" is a name */
+    const g = gbIng(l0); if (g && !(nx && ((gbCompound(nx) && !/ing$/.test(nx)) || nx === 'of'))) return verb(g);
+    if (GB_VERBS.has(l0) && !(nx && gbCompound(nx))) return verb(gbLow(w0));
+    if (l0 === 'calm' && /^(down|self|himself|herself|themselves|oneself)$/.test(nx)) return verb('calm');
+    /* a state: "On task during independent work", "In seat", "Engaged in the activity", "Seated" */
+    if (!k && /^(on|in|off|at|out)$/.test(l0) && nx) return 'be ' + low();
+    if (!k && gbEd(l0) && (!nx || /^(in|at|on|for|with|during|to|by|within|throughout|until)$/.test(nx) || adv(w[1]))) return 'be ' + low();
+    /* a first word in the third person not on the list ("Participates", "Calms"), unless it names things ("Words") */
+    const g3 = gbGuess(l0);
+    if (g3 && !GB_PLN.has(l0) && !GB_BODIES.test(l0)) return verb(g3);
+    if (nx && GB_DET.has(nx)) return verb(gbLow(w0));
+  }
+  /* 6. a name: its head is its last word before a bracket, a linking word, an adverb or a participle ("Break request",
+     "Functional communication response (FCR)": response; "Break requests using the card": requests) */
+  const n = w.slice(k), cut = [];
+  for (const x of n) {
+    const c = gbCore(x);
+    if (/^\(/.test(x) || (cut.length && (GB_CUT.has(c) || adv(x) || (/^[a-z]{2,}ing$/.test(c) && cut.length > 1)))) break;
+    cut.push(c);
+  }
+  const hi = cut.length - 1, head = cut[hi] || '';
+  /* a label that is a sentence already ("Jordan requests a break") */
+  const vi = cut.findIndex((x, j) => j > 0 && (j < hi || (hi === 1 && !GB_MAKE.test(head) && !GB_USE.test(head))) &&
+    !GB_BODIES.test(x) && (gbBase(x) || x === 'will'));
+  if (vi === 1 && !k && !deep && n.length > 2 && /^[A-Z][\p{L}'\u2019-]*$/u.test(n[0])) return gbWillPart(n.slice(1).join(' '), who, true);
+  if (vi > 0) return w.join(' ');
+  const np = [gbLow(n[0])].concat(gbAndVerbs(n.slice(1))).join(' '), tail = lead.length ? ' ' + lead.join(' ').replace(/,$/, '') : '';
+  const one = (!/[^s]s$/.test(head) || /(us|is)$/.test(head)) && !/['\u2019]s$/.test(n[0]);
+  let out;
+  if (GB_MAKE.test(head)) out = 'make ' + (one ? gbArt(np) : '') + np;
+  else if (head === 'contact') out = 'make ' + np;
+  else if (GB_USE.test(head)) out = 'use ' + (one ? gbArt(np) : '') + np;
+  else if (/^languages?$/.test(head)) out = 'use ' + np;
+  else if (/^breaks?$/.test(head)) out = 'take ' + (one ? gbArt(np) : '') + np;
+  else if (head === 'body') out = 'keep ' + (one ? gbArt(np) : '') + np;
+  else if (GB_BODIES.test(head)) out = 'keep ' + np;
+  else out = 'demonstrate ' + np;
+  return out + tail;
 }
 function fmtDate(d) {
   if (!d) return '';
@@ -3321,10 +3707,22 @@ function idxOf(card, kind) {
    number the form gives it (R1, A1), the one the pairing fields use; the lists numbered 1, 2 ... whatever
    cards had been removed. F8: the sheet gives the progress-report schedule entered on Setup. */
 let sheetOn = false;
+/* v21.44 (A5): a current level filled from DD-1 is longer than its field; where it came from shows in full under the
+   field, on screen (the sentence under the card and the goal sheet carry the whole level) */
+function gbCurNote(c, i) {
+  const e = c.querySelector('[name="red[' + i + '].cur"]'), f = e && e.closest('.f'); if (!f) return;
+  const m = /\(((?:from )?DD-1\b[^()]*)\)\s*$/.exec(e.value || '');
+  let n = f.querySelector('.gb-cur-src');
+  if (m) {
+    if (!n) { n = document.createElement('div'); n.className = 'gb-cur-src noprint'; f.appendChild(n); f.classList.add('gb-has-src'); }
+    n.innerHTML = esc(m[1]).replace(/(\d[\d.]*\u2013\d[\d.]*)/g, '<span class="gb-nw">$1</span>'); e.title = e.value;
+  } else if (n) { n.remove(); f.classList.remove('gb-has-src'); e.removeAttribute('title'); }
+}
 function render() {
   $$('#redWrap .card').forEach(c => {
     const i = idxOf(c, 'red'); if (i < 0) return;
     c.querySelector('[data-out]').innerHTML = '<b>Objective as written:</b> ' + redSentence(i) + checkLines(redChecks(i));
+    gbCurNote(c, i);
   });
   $$('#acqWrap .card').forEach(c => {
     const i = idxOf(c, 'acq'); if (i < 0) return;
@@ -3393,6 +3791,7 @@ function resetRecord() {
   $$('[name]').forEach(e => { if (e.type === 'checkbox' || e.type === 'radio') e.checked = false; else e.value = ''; });
   $('#redWrap').innerHTML = ''; $('#acqWrap').innerHTML = ''; $('#sheetOut').innerHTML = '';
   rSeq = 0; aSeq = 0; PLAN = null; sheetOn = false;
+  gbDdClear();   /* v21.44 (A5): the report of Current level from DD-1 was about the record that was there */
 }
 function collect() {
   const o = { form: 'GB-1', rev: '2026-09', saved: new Date().toISOString(), rows: { red: rSeq, acq: aSeq },
@@ -3445,12 +3844,318 @@ $('#printBtn').addEventListener('click', () => { buildSheet(); window.print(); }
 /* F3: the browser's own print carries the goal sheet, as Print does */
 window.addEventListener('beforeprint', () => buildSheet(true));
 
+/* ---------- v21.44 (A5) Current level from DD-1 ----------
+   The button at the top of Reduction Objectives fills each empty Current level from Form DD-1's own data: the level
+   of DD-1's behavior of the same name in DD-1's first condition, the baseline. DD-1's record is read
+   (1) inside the workstation, from the DD-1 open there, through the workstation's relay, as Form PR-1 reads it: this
+       form posts {nbh:'ask', want:'DD-1'} to its parent and takes {nbh:'answer', want:'DD-1', ok, snap | why} only from
+       that parent and only while it waits for one; snap.own is DD-1's own saved file;
+   (2) from a file DD-1 saved with Save data, or a case file holding DD-1 (the workstation's .json, or the one-file
+       edition's .case.html), chosen here when the form is open on its own, or inside the workstation when DD-1 is
+       not open there.
+   The figures are DD-1's own Results for that condition (Within-condition analysis), worked out as DD-1 works them
+   (Form PR-1 carries the same port of its arithmetic): a day's value is the one DD-1 graphs; the conditions start at
+   each full phase change, over the days in date order; the level is the mean of the condition's days with data,
+   with their range and their number. Only an empty Current level is filled, and only where the objective's response
+   measure is the one DD-1 records the behavior in: rate per hour (DD-1's rate), frequency per school day (a count over
+   the entire school day), total duration per session in minutes (a duration recorded per session or over a single
+   period) or percentage of intervals. An objective with no response measure yet takes DD-1's, when it is one of
+   these. A level in another unit is never converted or written. Each objective left empty is named, with the reason:
+   a different unit, no days with data in the baseline, or no behavior of that name on DD-1. TD-1's Apply to empty
+   fields still fills the first reduction objective on the form, its current level as a rate per minute, and the
+   report offers it only when that objective was left empty and can take it. */
+const GB_DD = { waiting: 0, timer: 0 };
+const GB_DD_UNIT = { 'rate per hour': ' per hour', 'frequency per school day': ' per school day',
+  'total duration per session in minutes': ' minutes per session', 'percentage of intervals': '% of intervals' };
+const GB_DD_OL = { 'entire school day': 'the entire school day', 'morning only': 'the morning only', 'afternoon only': 'the afternoon only',
+  'single period': 'a single period', 'per session': 'each session' };
+const gbNum = v => (v === '' || v === null || v === undefined || !isFinite(Number(v))) ? null : Number(v);
+const gbFix = x => { const r = Math.round(x * 100) / 100; return String(r === 0 ? 0 : r); };
+const gbPlain = s => String(s == null ? '' : s).split('|').map(x => x.trim()).filter(Boolean).join(' \u00b7 ');
+/* ---- DD-1's own arithmetic, as DD-1 does it (its plotValue, buildConditions and analyzeCondition) ---- */
+function gbClock(t) { const p = String(t || '').split(':'); if (p.length < 2) return null; const h = parseInt(p[0], 10), m = parseInt(p[1], 10); return isNaN(h) || isNaN(m) ? null : h * 60 + m; }
+/* an episode's length in minutes: "7:00", "1:02:30", "90 s", "4 min 30 s", "3.5" (minutes) */
+function gbDur(v) {
+  const s = String(v == null ? '' : v).trim().toLowerCase().replace(/\s+/g, ' '); if (!s) return null; let m;
+  if ((m = /^(\d+):(\d{1,2})$/.exec(s))) return +m[2] < 60 ? +m[1] + (+m[2]) / 60 : null;
+  if ((m = /^(\d+):(\d{1,2}):(\d{1,2})$/.exec(s))) return (+m[2] < 60 && +m[3] < 60) ? (+m[1]) * 60 + (+m[2]) + (+m[3]) / 60 : null;
+  if ((m = /^(\d+(?:\.\d+)?) ?s(?:ec(?:ond)?s?)?$/.exec(s))) return (+m[1]) / 60;
+  if ((m = /^(\d+(?:\.\d+)?) ?(?:m|min|mins|minutes?)(?: ?(\d+(?:\.\d+)?) ?s(?:ec(?:ond)?s?)?)?$/.exec(s))) return (+m[1]) + (m[2] ? (+m[2]) / 60 : 0);
+  if (/^\d*\.?\d+$/.test(s)) return +s;
+  return null;
+}
+function gbSec(t) { const p = String(t || '').split(':'); if (p.length < 2) return null; const h = +p[0], m = +p[1], s = p.length > 2 ? +p[2] : 0; return (isNaN(h) || isNaN(m) || isNaN(s)) ? null : h * 3600 + m * 60 + s; }
+function gbEpMin(ep) {
+  ep = ep && typeof ep === 'object' ? ep : {}; const d = gbDur(ep.dur); if (d !== null) return d;
+  const x = gbSec(ep.start), y = gbSec(ep.end); if (x === null || y === null) return null; let k = y - x; if (k < 0) k += 86400; return k / 60;
+}
+function gbObs(R, row) { const o = gbNum(row.obsMin); if (o !== null) return o; return R.st.entryMode === 'interval' ? null : R.win; }
+/* the value DD-1 graphs for a behavior on a day */
+function gbDdDay(R, row, b) {
+  const vals = row.values && typeof row.values === 'object' ? row.values : {};
+  if (R.st.entryMode === 'interval') {
+    const sv = (id, k) => gbNum(((row.intervals || {})[id] || {})[k]);
+    if (b.measure === 'trials') {
+      let c = 0, o = 0, seen = false;
+      R.slots.forEach(k => { const cv = sv(b.id, k), ov = sv(b.id + '::opp', k); if (cv !== null && ov !== null && ov > 0) { c += cv; o += ov; seen = true; } });
+      return seen && o > 0 ? 100 * c / o : null;
+    }
+    const v = R.slots.map(k => sv(b.id, k)).filter(x => x !== null); if (!v.length) return null;
+    const sum = v.reduce((a, x) => a + x, 0);
+    if (b.measure === 'count' || b.measure === 'duration') return sum;
+    if (b.measure === 'rate') return sum / ((v.length * Number(R.st.slotMin)) / 60);
+    return sum / v.length;
+  }
+  if (b.measure === 'duration' || b.measure === 'pdur') {
+    const eps = Array.isArray((row.episodes || {})[b.id]) ? row.episodes[b.id] : [];
+    const mins = eps.map(gbEpMin).filter(x => x !== null);
+    if (mins.length) { const tot = mins.reduce((a, x) => a + x, 0); if (b.measure === 'duration') return tot; const om = gbObs(R, row); return om && om > 0 ? 100 * tot / om : null; }
+  }
+  if (b.measure === 'trials') { const c = gbNum(vals[b.id]), o = gbNum(vals[b.id + '::opp']); return c === null || o === null || o <= 0 ? null : 100 * c / o; }
+  const raw = gbNum(vals[b.id]); if (raw === null) return null;
+  if (b.measure === 'rate') { const om = gbObs(R, row); return om && om > 0 ? raw / (om / 60) : null; }
+  return raw;
+}
+/* DD-1's conditions: a new one at each full phase change, over its days in date order */
+function gbDdConds(R) {
+  const out = []; let cur = { name: gbPlain(R.meta.baseline || 'Baseline') || 'Baseline', idx: [] };
+  R.rows.forEach((row, i) => {
+    if (row.phaseType === 'full' && cur.idx.length) { out.push(cur); cur = { name: gbPlain(row.phaseLabel) || 'Condition ' + (out.length + 1), idx: [] }; }
+    else if (row.phaseType === 'full' && !cur.idx.length && gbPlain(row.phaseLabel)) cur.name = gbPlain(row.phaseLabel);
+    cur.idx.push(i);
+  });
+  if (cur.idx.length) out.push(cur);
+  return out;
+}
+const GB_DD_MEASURES = ['count', 'rate', 'duration', 'pdur', 'interval', 'mts', 'pint', 'wint', 'latency', 'ied', 'opps', 'trials', 'prompt'];
+/* a DD-1 record read in, with DD-1's defaults where its file leaves something out; null when it is not one */
+function gbDdRecord(o) {
+  if (!o || typeof o !== 'object' || Array.isArray(o) || !Array.isArray(o.behaviors) || !Array.isArray(o.rows)) return null;
+  if (o.form !== undefined && o.form !== 'DD-1') return null;
+  const obj = v => v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  const st = Object.assign({ entryMode: 'daily', dayStart: '08:00', dayEnd: '14:00', slotMin: 30 }, obj(o.settings));
+  const seen = {}, beh = [];
+  o.behaviors.forEach(b => {
+    if (!b || typeof b !== 'object' || (typeof b.id !== 'string' && typeof b.id !== 'number')) return;
+    const id = String(b.id); if (!id || seen[id]) return; seen[id] = 1;
+    beh.push({ id, name: String(b.name == null ? '' : b.name).trim(), kind: typeof b.kind === 'string' && b.kind ? b.kind : 'target',
+      measure: GB_DD_MEASURES.indexOf(b.measure) >= 0 ? b.measure : 'count',
+      obsLength: typeof b.obsLength === 'string' && b.obsLength.trim() ? b.obsLength.trim() : 'Entire school day' });
+  });
+  const rows = o.rows.filter(r => r && typeof r === 'object' && !Array.isArray(r)).sort((a, b) => String(a.date || '9999').localeCompare(String(b.date || '9999')));
+  const meta = obj(o.meta), a = gbClock(st.dayStart), e = gbClock(st.dayEnd), step = Number(st.slotMin) || 30, slots = [];
+  if (a !== null && e !== null && e > a) for (let t = a; t + step <= e; t += step) { slots.push(String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0')); if (slots.length >= 64) break; }
+  const R = { meta, st, beh, rows, slots, win: (a === null || e === null || e <= a) ? null : e - a, client: String(meta.client == null ? '' : meta.client).trim() };
+  R.conds = gbDdConds(R);
+  return R;
+}
+/* one behavior over a condition's days, as DD-1's Results count them: every day in it with a value */
+function gbDdStats(R, b, idx) {
+  const y = [];
+  idx.forEach(i => { const v = gbDdDay(R, R.rows[i], b); if (v !== null && isFinite(v)) y.push(v); });
+  if (!y.length) return { n: 0 };
+  return { n: y.length, mean: y.reduce((t, v) => t + v, 0) / y.length, min: Math.min.apply(null, y), max: Math.max.apply(null, y) };
+}
+/* the response measure on this form that DD-1's figures for a behavior are in, or '' when there is none */
+function gbDdMeas(b) {
+  const ol = String(b.obsLength || '').toLowerCase();
+  if (b.measure === 'rate') return 'rate per hour';
+  if (b.measure === 'count') return ol === 'entire school day' ? 'frequency per school day' : '';
+  if (b.measure === 'duration') return ol === 'per session' || ol === 'single period' ? 'total duration per session in minutes' : '';
+  if (/^(interval|mts|pint|wint)$/.test(b.measure)) return 'percentage of intervals';
+  return '';
+}
+/* what DD-1 records, in words, for the reason an objective is left empty */
+function gbDdWhat(b) {
+  const ol = GB_DD_OL[String(b.obsLength || '').toLowerCase()] || '\u201c' + b.obsLength + '\u201d';
+  return ({ count: 'a count of occurrences over ' + ol, rate: 'a rate per hour', duration: 'minutes over ' + ol,
+    pdur: 'a percent of the time observed', interval: 'a percentage of intervals', mts: 'a percentage of intervals (momentary time sampling)',
+    pint: 'a percentage of intervals (partial interval)', wint: 'a percentage of intervals (whole interval)', latency: 'a latency in minutes',
+    ied: 'an interresponse time in minutes', opps: 'a percent correct', trials: 'a percent independent', prompt: 'a mean prompt level' })[b.measure] || 'a count';
+}
+/* a behavior's name for matching: staff notes, case, spaces and punctuation set aside */
+const gbNameKey = s => gbClean(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
+function gbDdFind(R, beh) {
+  const k = gbNameKey(beh); if (!k) return null;
+  const hits = R.beh.filter(b => gbNameKey(b.name) === k);
+  return hits.filter(b => b.kind === 'target')[0] || hits[0] || null;
+}
+/* the same student: every word of one name is a word of the other ("Jordan", "Jordan Rivera", "Rivera, Jordan"), case,
+   accents and punctuation aside; "Ann" is not "Anna Smith". A form with no name either side is not asked about. */
+const gbNameWords = s => String(s || '').normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+function gbSameStudent(a, b) {
+  const A = gbNameWords(a), B = gbNameWords(b);
+  return !A.length || !B.length || A.every(x => B.indexOf(x) >= 0) || B.every(x => A.indexOf(x) >= 0);
+}
+/* the level as it is written into Current level: the mean in the measure's unit, then where it came from, short
+   enough to read in the field ("10 per school day (DD-1 baseline: mean of 6 days, range 8-12)"); a first condition
+   DD-1 names otherwise keeps its name */
+function gbDdLevel(s, meas, cond) {
+  return gbFix(s.mean) + (GB_DD_UNIT[meas] || '') + ' (DD-1 ' + (/^baseline$/i.test(cond) ? 'baseline' : cond) + ': ' +
+    (s.n === 1 ? '1 day' : 'mean of ' + s.n + ' days, range ' + gbFix(s.min) + '\u2013' + gbFix(s.max)) + ')';
+}
+/* every reduction objective that names a behavior: filled, left empty with the reason, or kept as it was */
+function gbDdFill(R) {
+  const base = R.conds[0], out = [];
+  $$('#redWrap .card').map(c => idxOf(c, 'red')).filter(i => i >= 0).forEach(i => {
+    const g = n => val('red[' + i + '].' + n), beh = g('beh'), id = 'R' + (i + 1);
+    if (!beh) return;
+    if (g('cur')) { out.push({ id, beh, how: 'kept', cur: g('cur') }); return; }
+    const b = gbDdFind(R, beh);
+    if (!b) { out.push({ id, beh, how: 'left', noName: true, why: 'DD-1 has no behavior of that name.' }); return; }
+    const has = gbDdMeas(b), meas = g('meas');
+    if (meas && meas !== has) {
+      out.push({ id, beh, how: 'left', why: 'DD-1 records it as ' + gbDdWhat(b) + ', and this objective is measured in ' + meas + '.' +
+        (has ? ' Choose \u201c' + has + '\u201d as its response measure to use DD-1\u2019s figures.' : '') }); return;
+    }
+    if (!has) { out.push({ id, beh, how: 'left', why: 'DD-1 records it as ' + gbDdWhat(b) + ', which is not one of the response measures on this form.' }); return; }
+    const s = gbDdStats(R, b, base.idx);
+    if (!s.n) { out.push({ id, beh, how: 'left', why: 'DD-1 has no days with data for it in its baseline, \u201c' + base.name + '\u201d.' }); return; }
+    const setMeas = !meas;
+    if (setMeas) setv('red[' + i + '].meas', has);
+    const text = gbDdLevel(s, has, base.name);
+    setv('red[' + i + '].cur', text);
+    out.push({ id, beh, how: 'filled', text, meas: setMeas ? has : '' });
+  });
+  if (out.some(x => x.how === 'filled')) render();
+  return out;
+}
+function gbDdClear() { const o = $('#gbDdOut'); if (o) { o.hidden = true; o.innerHTML = ''; o.className = ''; } }
+/* the report under the button; pick adds a button that chooses a file */
+function gbDdShow(html, bad, pick) {
+  const o = $('#gbDdOut'); if (!o) return;
+  o.className = bad ? 'bad' : '';
+  o.innerHTML = html + (pick ? '<p class="gb-dd-pick"><button type="button" class="tool" id="gbDdPick">Choose a DD-1 file</button></p>' : '');
+  o.hidden = false;
+  const p = $('#gbDdPick'); if (p) p.addEventListener('click', () => $('#gbDdIn').click());
+  /* out of sight: brought to just under the toolbar, which stays on top of the page inside the workstation */
+  try {
+    const r = o.getBoundingClientRect(), tb = $('.toolbar'), top = tb ? Math.max(0, tb.getBoundingClientRect().bottom) : 0;
+    if (r.top < top || r.top > window.innerHeight - 48) window.scrollBy(0, r.top - top - 12);
+  } catch (e) {}
+}
+function gbDdMsg(t, bad, pick) { gbDdShow('<p>' + esc(t) + '</p>', bad, pick); }
+function gbDdReport(rep, src, file, R) {
+  const from = src === 'workstation' ? 'the DD-1 open in this workstation' : (src === 'case' ? 'the case file' : 'the file') + ' \u201c' + file + '\u201d';
+  const nf = rep.filter(x => x.how === 'filled').length;
+  let h = '<p><b>Current level from Form DD-1:</b> ' + (nf ? nf + ' of ' + rep.length + (rep.length === 1 ? ' objective' : ' objectives') + ' filled' : 'nothing filled') +
+    ', from ' + esc(from) + (R.client ? ' (' + esc(R.client) + ')' : '') + '. DD-1\u2019s baseline is its first condition, \u201c' + esc(R.conds[0].name) + '\u201d.</p><ul>';
+  rep.forEach(x => {
+    const who = '<b>' + x.id + '</b> (' + esc(x.beh) + ')';
+    if (x.how === 'filled') h += '<li>' + who + ': ' + esc(x.text) + (x.meas ? '; response measure set to ' + esc(x.meas) + ', as DD-1 records it' : '') + '.</li>';
+    else if (x.how === 'left') h += '<li>' + who + ' was left empty: ' + esc(x.why) + '</li>';
+    else h += '<li>' + who + ' already has a current level, ' + esc(x.cur) + ', which was kept.</li>';
+  });
+  h += '</ul>';
+  if (rep.some(x => x.noName)) h += '<p>The behaviors on DD-1: ' + esc(R.beh.map(b => b.name || '(no name)').join('; ')) + '. An objective is matched by its target behavior\u2019s name.</p>';
+  /* TD-1's Apply to empty fields fills the first reduction objective on the form, and its current level only in rate
+     per minute: it is offered only where that objective was left empty and can take it */
+  const c0 = $('#redWrap .card'), i0 = c0 ? idxOf(c0, 'red') : -1, x0 = rep.find(x => x.id === 'R' + (i0 + 1) && x.how === 'left');
+  const m0 = x0 ? val('red[' + i0 + '].meas') : '';
+  if (rep.some(x => x.how === 'left')) h += '<p>What is left empty can be typed.' + (x0 && (!m0 || m0 === 'rate per minute') ?
+    ' ' + x0.id + ' can also take the baseline in TD-1\u2019s plan: Apply to empty fields on Setup fills the first reduction objective from it, as a rate per minute.' : '') + '</p>';
+  gbDdShow(h, !nf && rep.some(x => x.how === 'left'), false);
+}
+/* a DD-1 record in hand: check the student, fill, report */
+async function gbDdUse(o, src, file) {
+  const R = gbDdRecord(o);
+  if (!R) {
+    gbDdMsg((src === 'workstation' ? 'Form DD-1 in this workstation gave data this form could not read.' : src === 'case' ?
+      'Form DD-1 in that case file has no saved data this form can read.' : 'That file could not be read as Form DD-1\u2019s data.') + ' Nothing was filled.', true, true);
+    return;
+  }
+  if (!R.rows.length || !R.conds.length) { gbDdMsg('Form DD-1 holds no days yet, so it has no baseline to read. Nothing was filled.', true, true); return; }
+  const me = val('m.client');
+  if (me && R.client && !gbSameStudent(me, R.client) &&
+      !(await nbhUI.confirm('Form DD-1 is for \u201c' + R.client + '\u201d, and this form is for \u201c' + me + '\u201d.\nUse its baseline here anyway? Check first that they are the same student.', { ok: 'Use it' }))) {
+    gbDdMsg('Nothing was filled: Form DD-1 is for \u201c' + R.client + '\u201d, and this form is for \u201c' + me + '\u201d.', true, true);
+    return;
+  }
+  gbDdReport(gbDdFill(R), src, file, R);
+}
+/* (1) the workstation: ask the parent, and take the answer from it alone */
+function gbDdAsk() {
+  const btn = $('#gbDdBtn');
+  GB_DD.waiting = Date.now(); clearTimeout(GB_DD.timer); if (btn) btn.disabled = true;
+  gbDdMsg('Asking the workstation for Form DD-1\u2019s data\u2026', false, false);
+  const fail = t => { GB_DD.waiting = 0; clearTimeout(GB_DD.timer); if (btn) btn.disabled = false; gbDdMsg(t, true, true); };
+  GB_DD.timer = setTimeout(() => { if (GB_DD.waiting) fail('The workstation did not answer. Choose DD-1\u2019s saved data file instead.'); }, 15000);
+  try { window.parent.postMessage({ nbh: 'ask', want: 'DD-1' }, '*'); }
+  catch (e) { fail('The workstation could not be asked. Choose DD-1\u2019s saved data file instead.'); }
+}
+window.addEventListener('message', ev => {
+  const d = ev.data; if (!d || typeof d !== 'object' || d.nbh !== 'answer') return;
+  /* only the workstation this form sits in answers, and only while this form waits for DD-1 */
+  if (window.parent === window || ev.source !== window.parent || !GB_DD.waiting || d.want !== 'DD-1') return;
+  GB_DD.waiting = 0; clearTimeout(GB_DD.timer); const btn = $('#gbDdBtn'); if (btn) btn.disabled = false;
+  if (d.ok !== true) {
+    gbDdMsg(d.why === 'not open' ? 'Form DD-1 is not open in this workstation. Open it from the list of forms and press Current level from DD-1 again, or choose DD-1\u2019s saved data file.' :
+      'Form DD-1 is open in this workstation but did not give its data. Wait for it to finish loading and try again, or choose DD-1\u2019s saved data file.', true, true);
+    return;
+  }
+  let o = null; try { o = JSON.parse(d.snap && d.snap.own); } catch (e) { o = null; }
+  gbDdUse(o, 'workstation', '');
+});
+/* (2) a DD-1 data file, or a case file (.json, or the one-file edition's .case.html) */
+function gbDdWho(o) {
+  if (typeof o.form === 'string' && /^[A-Z]{2,6}(-\d+)?$/.test(o.form)) return o.form;
+  const v = typeof o.version === 'string' && /^([A-Z]{2,3}-\d+)\b/.exec(o.version); if (v) return v[1];
+  if (o.format === 'abc-conditional-probability') return 'ABC-1';
+  if (Array.isArray(o.obs) && o.cfg && typeof o.cfg === 'object') return 'OB-1';
+  if (Array.isArray(o.behaviors) && Array.isArray(o.codes)) return 'SP-1';
+  return '';
+}
+function gbDdText(t, name) {
+  let o = null; t = String(t || '');
+  if (/^\s*[{\[]/.test(t)) { try { o = JSON.parse(t); } catch (e) { o = null; } }
+  else {
+    /* the one-file case: its JSON in a block of its own (\x3c is "<", so this script holds no tag of its own) */
+    const m = /\x3cscript type="application\/json" id="nbh-case">([\s\S]*?)\x3c\/script>/.exec(t);
+    if (m) { try { o = JSON.parse(m[1]); } catch (e) { o = null; } }
+    else if (/id="nbh-embed-forms"/.test(t)) { gbDdMsg('That is a workstation file with no case in it yet. Nothing was filled.', true, true); return; }
+  }
+  if (!o || typeof o !== 'object' || Array.isArray(o)) { gbDdMsg('That file could not be read as Form DD-1\u2019s data or a case file. Nothing was filled.', true, true); return; }
+  if (o.form === 'CASE' || (o.forms && typeof o.forms === 'object' && !Array.isArray(o.behaviors))) {
+    const e = o.forms && typeof o.forms === 'object' ? o.forms['DD-1'] : null;
+    if (!e || typeof e !== 'object' || !e.snap) { gbDdMsg('That case file does not hold Form DD-1. Nothing was filled.', true, true); return; }
+    let d = null; try { d = JSON.parse(e.snap.own); } catch (x) { d = null; }
+    gbDdUse(d, 'case', name); return;
+  }
+  if (gbDdRecord(o)) { gbDdUse(o, 'file', name); return; }
+  const who = gbDdWho(o);
+  gbDdMsg(who === 'DD-1' ? 'That file names Form DD-1 but could not be read as its data. Nothing was filled.'
+    : who === 'PACKET' ? 'That is a student packet (Save packet), not Form DD-1\u2019s data. Nothing was filled.'
+    : who ? 'That file was saved by Form ' + who + ', not by Form DD-1. Nothing was filled.'
+    : 'That file could not be read as Form DD-1\u2019s data or a case file. Nothing was filled.', true, true);
+}
+$('#gbDdBtn').addEventListener('click', () => {
+  if (!$$('#redWrap .card').some(c => val('red[' + idxOf(c, 'red') + '].beh'))) {
+    gbDdMsg('No reduction objective names a target behavior yet. Name each one as DD-1 names it, then press Current level from DD-1 again.', true, false);
+    return;
+  }
+  if (window.parent === window) $('#gbDdIn').click(); else gbDdAsk();
+});
+/* The file chosen here is DD-1's or a case file, not this form's own: the leave guard and Autosave take a file chosen
+   on the form for this form's saved file and mark the form saved, though what was just filled in is not in any file.
+   So the choice is taken here, before them, and goes no further. */
+window.addEventListener('change', e => {
+  const t = e.target; if (!t || t.id !== 'gbDdIn') return;
+  e.stopPropagation();
+  const f = t.files && t.files[0]; t.value = ''; if (!f) return;
+  const name = f.name || '', r = new FileReader();
+  r.onload = () => gbDdText(r.result, name);
+  r.onerror = () => gbDdMsg('That file could not be read. Nothing was filled.', true, true);
+  r.readAsText(f);
+}, true);
+
 /* ---------- simulation ---------- */
-$('#simBtn').addEventListener('click', () => {
+$('#simBtn').addEventListener('click', async () => {
   /* v21.16 audit. F2: the simulation starts from an empty record (anything it does not set, the IEP review
      date for one, stayed from before). F14: its dates are local dates; toISOString gave the date in UTC, so
      in the evening in Florida "Date written" was tomorrow's date and disagreed with the goal sheet.
-     F8: it fills the measurement method and the progress-report schedule. */
+     F8: it fills the measurement method and the progress-report schedule.
+     v21.44 (A5): it asks first, as the other forms do; it replaced everything on the form without asking. */
+  if (!(await nbhUI.confirm('Load the simulated goals and objectives?\nEvery sheet is filled with a worked example. Anything already entered will be replaced.', { ok: 'Load' }))) return;
   resetRecord();
   const set = (n, v) => { const e = $('[name="' + n + '"]'); if (e) { e.value = v; } };
   const day = k => { const t = new Date(); t.setDate(t.getDate() + k);
@@ -3504,27 +4209,72 @@ function nbhGbPlace(kind,fill){
   if(i==null){add();cards=$$(wrap+' .card').map(c=>idxOf(c,kind));i=cards[cards.length-1];}
   if(i==null)return false;fill(n=>kind+'['+i+'].'+n);return true;
 }
+/* v21.44 (A5) one skill objective per replacement skill. A paired replacement is named without its staff notes
+   ("(see target 4)", "(see Forms EA-1 and TD-1)": gbClean); one that points to a replacement target defined on TB-1
+   ("see target 4": gbPtr), or reads exactly as one that does, takes that target's name; a replacement target's name
+   drops "(replacement)". The behaviors whose replacements then read the same (gbKey) share one acquisition objective,
+   which names every behavior it replaces; wording that only means the same thing is not merged, and words that point
+   to two different targets are left as they are. A case in which TB-1 already passes the cleaned names gives the same
+   objectives. The target a note points to: the behavior with that number (n) when the case numbers them; otherwise
+   the case's own order, in which TB-1 leaves out a target card with no name, so the target named can stand earlier
+   than its number: the nearest replacement target at or before that place whose name shares a word with the
+   replacement's own words is taken, else the one at that place. all: every behavior in the case; list: the ones to
+   place (the ticked ones, for the picker). Groups: the paired replacements first, in the order of their behaviors,
+   then the replacement targets that pair with nothing. */
+const nbhGbStop=new Set('and or the a an to for of in on at with his her their from by when then will be is are it its this that'.split(' '));
+const nbhGbWords=s=>gbKey(s).split(/[^a-z0-9]+/).filter(w=>w.length>2&&!nbhGbStop.has(w)).map(w=>w.replace(/(?:ing|ed|es|s)$/,'').replace(/e$/,''));
+function nbhGbSkills(all,list){
+  all=(all||[]).filter(Boolean);list=(list||all).filter(Boolean);
+  const isT=t=>!!(t&&t.isRep&&t.label),byN=all.some(b=>+b.n>0);
+  const pointed=rep=>{const N=gbPtr(rep);if(!N)return '';
+    if(byN){const t=all.find(b=>+b.n===N);return isT(t)?gbClean(t.label):'';}
+    const own=nbhGbWords(rep);
+    for(let i=Math.min(N,all.length)-1;i>=0;i--)if(isT(all[i])&&nbhGbWords(all[i].label).some(w=>own.indexOf(w)>=0))return gbClean(all[i].label);
+    return isT(all[N-1])?gbClean(all[N-1].label):'';};
+  const alias={},named={};
+  all.forEach(b=>{if(isT(b))named[gbKey(b.label)]=gbClean(b.label);});
+  all.forEach(b=>{if(!b.isRep&&b.rep){const p=pointed(b.rep),k=gbKey(b.rep);if(p)alias[k]=alias[k]===undefined||alias[k]===p?p:null;}});
+  const skillOf=rep=>pointed(rep)||alias[gbKey(rep)]||named[gbKey(rep)]||gbClean(rep);
+  const groups=[],by={};
+  const group=name=>{const k=gbKey(name);if(!by[k]){by[k]={name,key:k,pairs:[],cond:''};groups.push(by[k]);}return by[k];};
+  list.forEach(b=>{if(!b.isRep&&b.rep){const g=group(skillOf(b.rep));if(b.label&&g.pairs.indexOf(b.label)<0)g.pairs.push(b.label);}});
+  list.forEach(b=>{if(b.isRep&&b.label){const g=group(gbClean(b.label));if(!g.cond&&b.ctx)g.cond=b.ctx;}});
+  return {groups,skillOf};
+}
 window.__nbhFactsIn=function(f){
   let n=0;const behs=f.behaviors||[];
   /* only when no objective names a behavior yet: a half-written sheet is left as it is */
   const anyRed=$$('#redWrap .card').some(c=>val('red['+idxOf(c,'red')+'].beh'));
   if(behs.length&&!anyRed){
-    behs.filter(b=>!b.isRep).forEach(b=>{if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),b.rep);if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
+    const K=nbhGbSkills(behs);
+    behs.filter(b=>!b.isRep).forEach(b=>{if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),K.skillOf(b.rep));if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
     const anyAcq=$$('#acqWrap .card').some(c=>val('acq['+idxOf(c,'acq')+'].beh'));
-    if(!anyAcq){behs.filter(b=>b.rep).forEach(b=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),b.rep);setv(k('pair'),b.label);}))n++;});
-      behs.filter(b=>b.isRep).forEach(b=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),b.label);if(b.ctx)setv(k('cond'),b.ctx);}))n++;});}
+    if(!anyAcq)K.groups.forEach(g=>{if(nbhGbPlace('acq',k=>{setv(k('beh'),g.name);if(g.pairs.length)setv(k('pair'),g.pairs.join('; '));if(g.cond)setv(k('cond'),g.cond);}))n++;});
   }
   if(f.fn&&window.nbhCase){const e=$('[name="m.fn"]');if(e&&window.nbhCase.put(e,e.tagName==='SELECT'?(f.fn.key||f.fn.label):f.fn.label,false))n++;}
   if(n)render();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
-  let n=0;
-  sel.behaviors.forEach(b=>{
-    if(b.isRep){if(nbhGbPlace('acq',k=>{setv(k('beh'),b.label);if(b.ctx)setv(k('cond'),b.ctx);}))n++;return;}
-    if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),b.rep);if(b.ctx)setv(k('ctx'),b.ctx);}))n++;
-    if(b.rep&&nbhGbPlace('acq',k=>{setv(k('beh'),b.rep);setv(k('pair'),b.label);}))n++;});
+  let n=0;const notes=[],all=(sel.facts&&sel.facts.behaviors)||sel.behaviors,K=nbhGbSkills(all,sel.behaviors);
+  sel.behaviors.forEach(b=>{if(b.isRep)return;
+    if(nbhGbPlace('red',k=>{setv(k('beh'),b.label);if(b.base||b.rate)setv(k('cur'),b.base||b.rate);if(b.rep)setv(k('pair'),K.skillOf(b.rep));if(b.ctx)setv(k('ctx'),b.ctx);}))n++;});
+  /* a skill that already has its objective on the form gets no second one: its empty fields are filled, and a behavior
+     it now also replaces joins its "Paired reduction objective" when that field lists only the target behaviors of
+     reduction objectives on the form, as the form writes it ("Aggression; Elopement"); words typed there otherwise are
+     kept, and the result says what was not added */
+  const reds=$$('#redWrap .card').map(c=>gbKey(val('red['+idxOf(c,'red')+'].beh'))).filter(Boolean);
+  K.groups.forEach(g=>{
+    const have=$$('#acqWrap .card').map(c=>idxOf(c,'acq')).filter(i=>gbKey(val('acq['+i+'].beh'))===g.key)[0];
+    if(have!=null){const k=x=>'acq['+have+'].'+x,cur=val(k('pair'));let put=false;
+      if(g.pairs.length&&!cur){setv(k('pair'),g.pairs.join('; '));put=true;}
+      else if(g.pairs.length){const was=cur.split(/\s*;\s*/).filter(Boolean),keys=was.map(gbKey),add=g.pairs.filter(p=>keys.indexOf(gbKey(p))<0);
+        if(add.length&&keys.every(x=>reds.indexOf(x)>=0)){const e=$('[name="'+k('pair')+'"]');e.value=was.concat(add).join('; ');e.dispatchEvent(new Event('input',{bubbles:true}));put=true;}
+        else if(add.length)notes.push('A'+(have+1)+' already says what it replaces (\u201c'+cur+'\u201d), so '+add.join(' and ')+' was not added to it.');}
+      if(g.cond&&!val(k('cond'))){setv(k('cond'),g.cond);put=true;}
+      if(put)n++;return;}
+    if(nbhGbPlace('acq',k=>{setv(k('beh'),g.name);if(g.pairs.length)setv(k('pair'),g.pairs.join('; '));if(g.cond)setv(k('cond'),g.cond);}))n++;});
   if(sel.fn&&window.nbhCase){const e=$('[name="m.fn"]');if(e&&window.nbhCase.put(e,e.tagName==='SELECT'?(sel.fn.key||sel.fn.label):sel.fn.label,true))n++;}
-  render();return {filled:n};
+  render();return notes.length?{filled:n,note:notes.join(' ')}:{filled:n};
 };
 
 /* ---------- v21.33 (B) Copy for the BIP ----------

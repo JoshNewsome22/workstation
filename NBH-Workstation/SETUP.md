@@ -7171,3 +7171,79 @@ What could not be checked here: the iPad itself. The checks
 (`qa/autosave-test.js`) run in desktop Chromium with an iPad user agent;
 Safari's handling of a discarded tab, its storage limits and its download
 prompt need a look on the iPad.
+
+## Sprints A1 to A9 and the policy and safety packages (v21.44)
+
+Each package below was finished and reviewed on its own branch and merged
+into v21.44 together (sprint A8, the name corrected on the bar, follows
+later). Each comes with its own check in `qa/`, named after the package; the
+files saved before each change travel with its check in `qa/data/`.
+
+- **TD-1, the response step follows the extinction answer (A1).** "On the
+  target behavior" on the Responding sheet follows question 4 (is the
+  function-matched extinction step feasible here?): yes fills in the
+  extinction step, no fills in the alternative (noncontingent escape or
+  DNRA for escape, NCR or DRA for attention and tangible, matched items and
+  DRA for automatic), unanswered leaves it empty with a note. Typed words
+  are never replaced, and opening a file changes nothing. The consequence
+  protocol card follows the answer the same way. A plan saved before this
+  whose words do not follow question 4 says so, and Copy for the BIP, the
+  staff flowchart and the final plan ask first. TD-1 and SR-1 ask before
+  Load simulation. Check: `qa/sprint-a1-test.js`.
+- **Nothing overwrites what you entered (A2).** FS-1's concluded function no
+  longer fills the hypotheses on IA-1 and IN-1 (not on opening, from the
+  case, from *From the case* or from Open packet); the target behavior
+  still arrives from the case. IA-1, PA-1, MS-1 and AD-1 ask before Load
+  simulation. Check: `qa/sprint-a2-test.js`.
+- **OB-1's Live Recorder on an iPad held sideways (A3).** Start, End and
+  Save sit under the clock, every control at least 44 px on a touch screen,
+  the explanations fold behind *How it works* in a short landscape window,
+  and after End, Save into and Discard come up beside Save. Nothing moves
+  while recording. Save data and Export CSV name the file
+  `OB-1_<Student>_<YYYY-MM-DD>_<HHMM>`. Check: `qa/sprint-a3-test.js`.
+- **Each replacement skill once; DD-1 uses the objective's criterion (A4).**
+  TB-1 passes on clean replacement names (staff notes such as "(see target
+  4)" dropped), DD-1 makes one row per replacement skill and takes the days
+  at criterion and the aim from the GB-1 objective that names the row, with
+  a note at the top when the case changes a row in use. FS-1 does not take
+  a replacement target for a problem behavior. Check: `qa/sprint-a4-test.js`.
+- **GB-1 starts goals from DD-1's baseline (A5).** *Current level from DD-1*
+  fills each empty current level from DD-1's own baseline figures, only
+  where the measure is the one DD-1 records; one acquisition objective per
+  replacement skill; the objective's sentence reads as English ("will hand
+  a break card and wait"). Load simulation asks first. Check:
+  `qa/sprint-a5-test.js`.
+- **Bigger tap targets on the live data sheets (A6).** MT-1's interval
+  marks, TI-1's tick boxes and ABC-1's recording rows are at least 44 x 44
+  px on a touch screen; with a mouse and on paper nothing moves. ABC-1 asks
+  before Load simulation, checks a file before it replaces anything, names
+  a wrong or damaged file and changes nothing. Check: `qa/sprint-a6-test.js`.
+- **VS-1's visuals print at full size from Safari (A7).** On an iPad or
+  iPhone (or with *Sheets* set so) *Print the visuals* draws each sheet for
+  Safari's printable area instead of shrinking it to 68 or 88 %. A computer
+  prints exactly as before. Check: `qa/sprint-a7-test.js`.
+- **TE-1 names the behavior that earns tokens (A9).** TE-1 now has case
+  hooks: the replacement or skill goes into *Behavior the tokens are earned
+  for* (never a problem behavior; one already there is warned of on
+  screen), and PA-1's ranked menu fills the backup reinforcers. Check:
+  `qa/sprint-a9-test.js`.
+- **Escape extinction with physical guidance (B3, TD-1 and DA-1).** While
+  the plan holds escape extinction, the Responding sheet asks whether staff
+  may guide the student's hands, and requires the least help first, the stop
+  rule, what the adult does instead, the student's assent plan, why
+  guidance is needed, and the parent's agreement, with a fixed *Never
+  force* line. Until it is all in place the plan, Copy for the BIP and the
+  staff flowchart say what is missing. DA-1's physical prompt follows the
+  same rule. Check: `qa/policy-td1-test.js`.
+- **Policy and safety (B1, B4, B5: CR-1, IM-1, IC-1, SI-1).** CR-1 states
+  the breathing rule for every hold, lists the danger signs, and asks *Does
+  This Need a Report?* in the debriefing (kept off the printed plan). IM-1
+  names two adults at every check, never examines private areas, and logs
+  what was noticed during required care. IC-1 and SI-1 tell the family and
+  the student the limits of confidentiality. Checks:
+  `qa/policy-safety-test.js`, `qa/im1-test.js`.
+- **EA-1's alone condition is supervised by default (B2).** A true alone
+  condition only after the policy check, a stop-or-step-in rule in three
+  parts, how the student is watched, and the parent told; it falls back to
+  supervised when one goes, and the walkthrough shows the open door. Files
+  saved before open supervised. Check: `qa/policy-ea1-test.js`.
