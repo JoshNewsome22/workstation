@@ -12,9 +12,10 @@
         time, every step listed, ended): every button at least 44 x 44 px and 4 px from the next.
       ABC-1 Record and Background samples: the recording rows at least 40 px apart (centre to centre, as measure.js
         finds them), with at least 4 px between rows, and a tap on a row's words (centre, both ends, top and bottom)
-        ticks it. Incidents: Edit and Delete, and Delete in the sample list, at least 44 x 44 px and 4 px apart. The
-        buttons used while recording (the timer, its bar while observing, the stopwatch, the format switch, Save
-        incident) at least 44 px tall and 4 px apart.
+        ticks it. Incidents: Edit and Delete, and Delete in the sample list, at least 44 x 44 px and 4 px apart; Edit
+        and Delete in view in the list's box and taking a tap wherever the list is scrolled sideways (it is wider than
+        its box at 820 px and in the workstation). The buttons used while recording (the timer, its bar while
+        observing, the stopwatch, the format switch, Save incident) at least 44 px tall and 4 px apart.
       At 820 px no page runs past the right edge. Inside the workstation (each form in its frame) the same sizes hold. On a
       phone (390 px) MT-1's marks stay 44 px and its page never scrolls sideways.
    2. The computer layout does not change: with a mouse at 1180x820, every element of each live view sits where the form
@@ -22,12 +23,17 @@
    3. The same taps score the same marks as before (A6_BASE, by touch at 1180x820): MT-1's sheet and timer, TI-1's tick
       boxes and runner, ABC-1's rows with Save incident and Save sample.
    4. ABC-1's Load simulation asks first, with the shared question (Anything already entered will be replaced, and
-      Cancel): Cancel keeps the typed header, the saved incident and the one being entered; Load replaces them; a
-      test's window.confirm stub is honoured (no question shown).
+      Cancel): Cancel keeps the typed header, the saved incident, the one being entered, the background sample being
+      entered and the IOA calculator's counts; Load replaces them all; a test's window.confirm stub is honoured (no
+      question shown).
    5. ABC-1's Open data: another form's file, an OB-1, DD-1 or SP-1 file (no form tag), a case file, a student packet, a
-      .csv and a JSON array each give a message on the tab in use, saying what the file is where the file tells, and
-      nothing on the form changes; its own file opens; a record in an older shape opens; the files in A6_OLD (ABC-1.json,
-      MT-1.json, TI-1.json from an earlier version) open in their forms; the workstation's restore of the record says
+      .csv, a JSON array, an ABC-1 file cut short, an empty file and JSON from elsewhere with a list called "entries"
+      each give a message on the tab in use, saying what the file is where the file tells, and nothing on the form
+      changes (the record in full, the header, the function, the list on screen); an ABC-1 file with a part that
+      cannot be read is named as damaged and changes nothing; a file that fails part-way through the redraw puts back
+      what was on screen, and Save data then writes the record as it was; its own file opens; a record in an older
+      shape opens; the files in A6_OLD (ABC-1.json, MT-1.json, TI-1.json from an earlier version) open in their forms;
+      the workstation's restore of the record says nothing, and its restore of a damaged one says nothing and changes
       nothing.
    6. Print: the three forms print the same pages as before (A6_BASE), blank and from the simulated record, with a mouse
       and with a touch screen (compare-print.py; page counts without PyMuPDF).
@@ -143,7 +149,9 @@ async function mtTouch(br,W,H){
     ctl:A.report([...document.querySelectorAll('#tmr .tmr-ctl button,#tmr .tmr-ctl select')].filter(e=>A.vis(e)))};});
   ok(tag+': the timer\'s +, - and N/A are at least 44 x 44 px and 4 px apart',t.rec.n===3&&!t.rec.small.length&&t.rec.near>=4,t.rec);
   ok(tag+': the timer\'s other buttons are at least 44 x 44 px and 4 px apart',t.ctl.n>=6&&!t.ctl.small.length&&t.ctl.near>=4,t.ctl);
-  /* a Playwright screenshot ends the touch emulation of the page (the pointer reads fine afterwards), so it comes last */
+  /* a screenshot of one element (Playwright's elementHandle.screenshot) ends the page's touch emulation: the pointer
+     then reads fine and the touch sizes are gone. A screenshot of the page keeps it; the ones here are of the page,
+     and come last anyway */
   ok(tag+': still a coarse pointer when measured',await p.evaluate(()=>matchMedia('(pointer:coarse)').matches));
   await p.screenshot({path:OUT+'mt1-'+W+'x'+H+'.png'});
   await ctx.close();
@@ -228,6 +236,19 @@ async function tiTouch(br,W,H){
   await p.screenshot({path:OUT+'ti1-'+W+'x'+H+'.png'});
   await ctx.close();
 }
+/* ABC-1's incident list is wider than its box with the iPad held upright, and in the workstation's frame: Edit and Delete
+   stay at the box's right edge, in view and taking the tap, as the rows scroll sideways under them (at rest, half way
+   and all the way) */
+const incReach=t=>t.evaluate(async()=>{const box=document.getElementById('inc-table'),out=[];
+  box.scrollIntoView({block:'center'});
+  for(const f of [0,0.5,1]){box.scrollLeft=Math.round((box.scrollWidth-box.clientWidth)*f);box.scrollTop=0;
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    const bb=box.getBoundingClientRect(),th=box.querySelector('thead');const top=Math.max(bb.top,th?th.getBoundingClientRect().bottom:bb.top);
+    const tr=[...box.querySelectorAll('tbody tr')].find(t=>{const r=t.getBoundingClientRect();return r.top>=top&&r.bottom<=Math.min(bb.bottom,innerHeight);});
+    if(!tr){out.push({f,err:'no row in view'});continue;}
+    for(const b of tr.querySelectorAll('[data-edit],[data-del]')){const r=b.getBoundingClientRect(),hit=document.elementFromPoint((r.left+r.right)/2,(r.top+r.bottom)/2);
+      out.push({f,at:Math.round(r.left)+'-'+Math.round(r.right),inBox:r.left>=bb.left-0.5&&r.right<=bb.right+0.5,hit:!!hit&&(hit===b||b.contains(hit))});}}
+  box.scrollLeft=0;return {wider:box.scrollWidth>box.clientWidth+1,box:Math.round(box.getBoundingClientRect().left)+'-'+Math.round(box.getBoundingClientRect().right),res:out};});
 async function abcTouch(br,W,H){
   const tag=`touch ${W}x${H}: ABC-1`;const ctx=await fresh(br,{viewport:{width:W,height:H},hasTouch:true});
   const p=await open(ctx,NOW['ABC-1'],tag);await sim(p);
@@ -261,6 +282,9 @@ async function abcTouch(br,W,H){
   await view(p,'incidents');
   const inc=await p.evaluate(()=>{const A=window.__a6;return A.report([...document.querySelectorAll('#inc-table [data-edit],#inc-table [data-del]')].filter(e=>A.vis(e)));});
   ok(tag+': Incidents: Edit and Delete are at least 44 x 44 px and 4 px apart',inc.n>=40&&!inc.small.length&&inc.near>=4,inc);
+  const reach=await incReach(p);
+  ok(tag+': Incidents: Edit and Delete are in view in their box and take a tap '+(reach.wider?'wherever the list is scrolled sideways (it is wider than its box)':'(the list fits its box)'),
+    reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);
   const incOther=await p.evaluate(()=>{const A=window.__a6;return A.report([...document.querySelectorAll('#panel-incidents button.btn:not([data-edit]):not([data-del])')].filter(e=>A.vis(e)));});
   ok(tag+': Incidents: the other buttons are at least 44 px tall',!incOther.small.length,incOther);
   await view(p,'background');
@@ -300,7 +324,10 @@ async function shellTouch(br,W,H){
       const c=ins.map(i=>{const l=i.labels&&i.labels[0],b=A.box(l||i);return {l:b.l,m:(b.t+b.b)/2};});let min=Infinity;
       for(const a of c)for(const b of c){if(a===b||Math.abs(a.l-b.l)>20)continue;const d=Math.abs(a.m-b.m);if(d>=1&&d<min)min=d;}
       const de=document.documentElement;return {n:ins.length,minPitch:Math.round(min*10)/10,sw:de.scrollWidth,cw:de.clientWidth};});
-    ok(tag+': ABC-1: the recording rows sit at least 40 px apart, and nothing runs past the frame',r.n>=80&&r.minPitch>=40&&r.sw<=r.cw,r);}
+    ok(tag+': ABC-1: the recording rows sit at least 40 px apart, and nothing runs past the frame',r.n>=80&&r.minPitch>=40&&r.sw<=r.cw,r);
+    await fview(fr,'incidents');const reach=await incReach(fr);
+    ok(tag+': ABC-1: Incidents: Edit and Delete are in view in their box and take a tap '+(reach.wider?'wherever the list is scrolled sideways (it is wider than its box)':'(the list fits its box)'),
+      reach.res.length>=6&&reach.res.every(r=>r.inBox&&r.hit),reach);}
   await page.screenshot({path:OUT+'shell-'+W+'x'+H+'.png'});
   await ctx.close();
 }
@@ -375,7 +402,10 @@ async function sameTaps(br){
     for(const which of ['was','now']){const ctx=await fresh(br,{hasTouch:true});const p=await open(ctx,which==='was'?WAS[id]:NOW[id],'taps '+which+' '+id,which==='was');
       if(text)await ownOpen(p,text);res[which]=await fn(p);await ctx.close();}
     ok('touch 1180x820: '+id+': every tap landed on the target meant, before and now',!res.was.miss.length&&!res.now.miss.length,{was:res.was.miss.slice(0,3),now:res.now.miss.slice(0,3)});
-    const a=JSON.stringify(res.was.got),b=JSON.stringify(res.now.got);let at=0;while(at<a.length&&a[at]===b[at])at++;
+    /* the runner writes the time of day it started into the observation's context ("1:08 AM, under 1 min"): the two
+       runs are half a minute apart and can fall either side of a minute, so the clock time is not compared */
+    const clockless=s=>s.replace(/\b\d{1,2}:\d\d\s?[AP]M\b/g,'<time>');
+    const a=clockless(JSON.stringify(res.was.got)),b=clockless(JSON.stringify(res.now.got));let at=0;while(at<a.length&&a[at]===b[at])at++;
     ok('touch 1180x820: '+id+': the same taps score the same marks as before this package',a===b,a===b?{bytes:a.length}:{was:a.slice(Math.max(0,at-80),at+200),now:b.slice(Math.max(0,at-80),at+200)});
     if(id==='MT-1')ok('touch 1180x820: MT-1: the taps scored what they were meant to (timer +, - into intervals 1 and 2; the sheet\'s marks; IOA marks)',
       (()=>{const m=res.now.got.marks,i=res.now.got.ioa;return m[0]==='1'&&m[1]==='0'&&m[4]==='1'&&m[5]==='0'&&m[6]==='x'&&!m[7]&&m[8]==='0'&&m[59]==='1'&&m[30]==='x'&&i[4]==='1'&&i[5]==='1'&&i[6]==='0'&&i[0]==='x';})(),
@@ -398,10 +428,19 @@ async function abcSim(br){
   await p.evaluate(()=>{document.getElementById('a-a_acad').click();document.getElementById('b-b_agg_staff').click();});await set('e-narrative','Typed incident: the worksheet was handed out and the student pushed it away.');
   await p.evaluate(()=>document.getElementById('save-entry').click());await sleep(300);
   await set('e-narrative','An incident still being entered');await p.evaluate(()=>{document.getElementById('b-b_scream').click();});
+  /* a background sample half entered, and counts in the IOA calculator (Methods) */
+  await view(p,'background');
+  await set('bg-date','2026-10-01');await set('bg-time','10:05');await set('bg-window','5');await set('bg-staffpresent','yes');
+  await p.evaluate(()=>{document.getElementById('bga-a_acad').click();document.getElementById('bgc-c_staff_att').click();});
+  await set('ioa-oa','9');await set('ioa-od','1');await view(p,'record');
   const look=()=>p.evaluate(()=>({client:document.getElementById('h-client').value,n:state.entries.length,samples:state.samples.length,narr:document.getElementById('e-narrative').value,
-    scream:document.getElementById('b-b_scream').checked,fn:document.getElementById('a-function').value}));
+    scream:document.getElementById('b-b_scream').checked,fn:document.getElementById('a-function').value,
+    bg:['bga-a_acad','bgc-c_staff_att'].map(id=>document.getElementById(id).checked+'/'+document.querySelector('[data-opt="'+id+'"]').classList.contains('checked')).join(' '),
+    bgFields:['bg-date','bg-time','bg-window','bg-staffpresent'].map(id=>document.getElementById(id).value).join(' '),
+    ioa:['oa','od','na','nd'].map(k=>document.getElementById('ioa-'+k).value).join(' ')+' = '+document.querySelector('#ioa-out .metric .v').textContent}));
   const before=await look();
-  ok(tag+': the real work is in place before the question',before.client==='Real Student A'&&before.n===1&&before.scream,before);
+  ok(tag+': the real work is in place before the question (a typed header, a saved incident, one being entered, a sample being entered, IOA counts)',
+    before.client==='Real Student A'&&before.n===1&&before.scream&&before.bg==='true/true true/true'&&before.bgFields==='2026-10-01 10:05 5 yes'&&before.ioa==='9 1   = 90.0%',before);
   await p.evaluate(()=>document.getElementById('load-demo').click());await sleep(400);
   const q=await uiDlg(p);
   ok(tag+': asks first, with the question the other forms ask (anything already entered will be replaced), and Cancel',
@@ -409,11 +448,13 @@ async function abcSim(br){
   ok(tag+': nothing has changed while the question is open',JSON.stringify(await look())===JSON.stringify(before));
   await uiPress(p,'Cancel');await sleep(300);
   const afterCancel=await look();
-  ok(tag+': Cancel keeps the typed header, the saved incident and the one being entered',JSON.stringify(afterCancel)===JSON.stringify(before)&&!(await uiDlg(p)),afterCancel);
+  ok(tag+': Cancel keeps the typed header, the saved incident, the one being entered, the sample being entered and the IOA counts',JSON.stringify(afterCancel)===JSON.stringify(before)&&!(await uiDlg(p)),afterCancel);
   await p.evaluate(()=>document.getElementById('load-demo').click());await sleep(400);await uiPress(p,'Load');await sleep(900);
-  const loaded=await look();
+  const loaded=await look(),today=await p.evaluate(()=>todayISO()),bgf=loaded.bgFields.split(' ');
   ok(tag+': Load replaces them: 46 incidents, 60 samples, the simulated header, the entry form cleared, the function set to escape',
     loaded.n===46&&loaded.samples===60&&/^SIMULATED/.test(loaded.client)&&loaded.narr===''&&!loaded.scream&&loaded.fn==='escape',loaded);
+  ok(tag+': Load also clears the sample being entered (no ticks; today, now, 10 minutes, adult not recorded, as a fresh page has them) and the IOA counts',
+    loaded.bg==='false/false false/false'&&bgf[0]===today&&/^\d\d:\d\d$/.test(bgf[1])&&bgf[2]==='10'&&bgf[3]===''&&/^\s*= \u2014$/.test(loaded.ioa),{bg:loaded.bg,bgFields:loaded.bgFields,ioa:loaded.ioa,today});
   ok(tag+': no browser dialog',!p.__native.length,p.__native);
   await ctx.close();
   /* a test that stubs window.confirm gets the simulation at once */
@@ -434,17 +475,63 @@ async function abcFiles(br){
   fs.writeFileSync(dir+'ABC_incidents.csv','﻿id,date,time\n1,2026-10-01,09:42\n');files.csv=dir+'ABC_incidents.csv';
   fs.writeFileSync(dir+'list.json','[1,2,3]');files.arr=dir+'list.json';
   fs.writeFileSync(dir+'AD-1_saved.json',JSON.stringify({version:'AD-1 2026-09',fields:{},tables:{}}));files.ad1=dir+'AD-1_saved.json';
+  /* an ABC-1 file cut short part-way, an empty file, and JSON from elsewhere with a list called "entries" */
+  const ownText=fs.readFileSync(files.abc,'utf8');
+  fs.writeFileSync(dir+'ABC-1_cut-short.json',ownText.slice(0,Math.floor(ownText.length/2)));files.cut=dir+'ABC-1_cut-short.json';
+  fs.writeFileSync(dir+'empty.json','');files.empty=dir+'empty.json';
+  const other={todo:{entries:[{title:'Shopping',done:false},{title:'Call home',done:true}]},nums:{entries:[1,2,3]},nulls:{entries:[null],samples:[]},none:{entries:[]},
+    strs:{entries:['a','b']},nodate:{entries:[{behaviors:['b_scream']}]},tagged:{form:'MT-1',entries:[{date:'2026-10-01',behaviors:['b_scream']}],samples:[]}};
+  for(const k of Object.keys(other)){fs.writeFileSync(dir+'entries-'+k+'.json',JSON.stringify(other[k]));files[k]=dir+'entries-'+k+'.json';}
   const cases=[['mt1','an MT-1 file',/Form MT-1/],['ob1','an OB-1 file (no form tag)',/Form OB-1/],['dd1','a DD-1 file (no form tag)',/Form DD-1/],['sp1','an SP-1 file (no form tag)',/Form SP-1/],['cas','a case file',/case file.*Open case/],['pkt','a student packet',/student packet.*Open packet/],
-    ['csv','a .csv',/not a file saved with Save data/],['arr','a JSON list',/./],['ad1','an AD-1 file (its tag in "version")',/Form AD-1/]];
+    ['csv','a .csv',/not a complete \.json file from Save data/],['arr','a JSON list',/./],['ad1','an AD-1 file (its tag in "version")',/Form AD-1/],
+    ['cut','an ABC-1 file cut short part-way',/not a complete \.json file from Save data \(it may be cut short, or be another kind of file\)/],['empty','an empty file',/The file is empty\./],
+    ['todo','another program\'s list of "entries" (a to-do list)',/a list of entries, but they are not ABC-1 incidents/],['nums','{"entries":[1,2,3]}',/not ABC-1 incidents/],
+    ['nulls','{"entries":[null]}',/not ABC-1 incidents/],['none','{"entries":[]} and nothing else',/not ABC-1 incidents/],['strs','{"entries":["a","b"]}',/not ABC-1 incidents/],
+    ['nodate','entries without a date (no tag)',/not ABC-1 incidents/],['tagged','another form\'s tag over entries that look like incidents',/Form MT-1/]];
   const ctx=await fresh(br,{});const p=await open(ctx,NOW['ABC-1'],tag);await sim(p);await view(p,'record');
-  const look=()=>p.evaluate(()=>({n:state.entries.length,s:state.samples.length,client:document.getElementById('h-client').value,fn:state.faFunction,first:state.entries[0]&&state.entries[0].id}));
+  /* the record as the form holds it and shows it: the incidents and samples in full, the header, the function, the
+     incident list on screen and its filter */
+  const look=()=>p.evaluate(()=>{const h=s=>{let x=5381;for(let i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return (x>>>0).toString(36);};
+    return {n:state.entries.length,s:state.samples.length,client:document.getElementById('h-client').value,checks:document.getElementById('h-checks').value,
+      timer:(document.getElementById('obsChecks')||{}).value,fn:state.faFunction,
+      fnShown:document.getElementById('a-function').value,first:state.entries[0]&&state.entries[0].id,record:h(JSON.stringify([state.entries,state.samples])),
+      shown:document.getElementById('inc-count').textContent,rows:document.querySelectorAll('#inc-table tbody tr').length,filter:document.getElementById('f-behavior').value};});
   const before=await look();
   for(const [k,what,re] of cases){if(!files[k]){console.log('NOTE no '+what+' to try');continue;}
     await p.setInputFiles('#file-input',files[k]);await sleep(700);const q=await uiDlg(p),after=await look(),status=await p.evaluate(()=>document.getElementById('data-status').textContent);
     ok(tag+' with '+what+': says so on the tab in use, names what the file is, and changes nothing',
       !!q&&q.head==='That file could not be read as a saved ABC-1 record.'&&re.test(q.body)&&/Nothing on this form was changed/.test(q.body)&&JSON.stringify(after)===JSON.stringify(before)&&/could not be read as a saved ABC-1 record/.test(status),
-      {q,changed:JSON.stringify(after)!==JSON.stringify(before)});
+      {q,changed:JSON.stringify(after)!==JSON.stringify(before)?after:false});
     if(q)await uiPress(p,'OK');await sleep(150);}
+  /* an ABC-1 file (Save data's tag) with a part that cannot be read is named as damaged, and nothing changes */
+  const own0=JSON.parse(ownText);
+  const dmg={entry:Object.assign({},own0,{entries:own0.entries.map((e,i)=>i===5?null:e)}),samples:Object.assign({},own0,{samples:'x'}),
+    list:Object.assign({},own0,{entries:own0.entries.map((e,i)=>i===2?Object.assign({},e,{consequences:'c_dem_rem'}):e)}),noentries:Object.assign({},own0,{entries:undefined})};
+  for(const [k,what] of [['entry','an incident that is empty (null)'],['samples','its samples not a list'],['list','an incident\'s consequences not a list'],['noentries','no list of incidents']]){
+    fs.writeFileSync(dir+'ABC-1_damaged-'+k+'.json',JSON.stringify(dmg[k]));
+    await p.setInputFiles('#file-input',dir+'ABC-1_damaged-'+k+'.json');await sleep(700);const q=await uiDlg(p),after=await look(),status=await p.evaluate(()=>document.getElementById('data-status').textContent);
+    ok(tag+' with an ABC-1 file with '+what+': says it could not be read in full, and changes nothing',
+      !!q&&q.head==='That file could not be read in full as a saved ABC-1 record.'&&/damaged or missing/.test(q.body)&&/Nothing on this form was changed/.test(q.body)&&JSON.stringify(after)===JSON.stringify(before)&&/could not be read in full/.test(status),
+      {q,changed:JSON.stringify(after)!==JSON.stringify(before)?after:false});
+    if(q)await uiPress(p,'OK');await sleep(150);}
+  /* a file that reads but still fails part-way (a part that cannot be drawn, made to fail here on purpose): what was on
+     screen comes back whole, with the filter as it was, and Save data then writes the record as it was */
+  await p.evaluate(()=>{document.querySelector('#viewSeg button[data-view="incidents"]').click();const el=document.getElementById('f-behavior');el.value='b_scream';el.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(300);
+  const before2=await look();
+  fs.writeFileSync(dir+'ABC-1_other.json',JSON.stringify(Object.assign({},own0,{header:Object.assign({},own0.header,{client:'Other Student',checks:'fixed:5'}),faFunction:'attention',
+    entries:own0.entries.filter(e=>!(e.behaviors||[]).includes('b_scream')).slice(0,3),samples:own0.samples.slice(0,2)})));
+  /* the last step of the redraw fails once, after the incidents, the samples and the filter lists are drawn from the file */
+  const patched=await p.evaluate(()=>{if(typeof window.fillBehaviorFilters!=='function')return false;const orig=window.fillBehaviorFilters;let once=true;
+    window.fillBehaviorFilters=function(){const r=orig.apply(this,arguments);if(once){once=false;throw new Error('a part that cannot be drawn (test)');}return r;};return true;});
+  await p.setInputFiles('#file-input',dir+'ABC-1_other.json');await sleep(900);
+  const q2=await uiDlg(p),after2=await look();
+  ok(tag+' with a file that fails part-way: says it could not be read in full, and puts back what was on screen (the record, the header, the function, the list and its filter)',
+    patched&&before2.filter==='b_scream'&&!!q2&&q2.head==='That file could not be read in full as a saved ABC-1 record.'&&JSON.stringify(after2)===JSON.stringify(before2),{patched,q:q2,before:before2,after:after2});
+  if(q2)await uiPress(p,'OK');await sleep(150);
+  const saved=JSON.parse(await ownSave(p));
+  ok(tag+' with a file that fails part-way: Save data then writes the record as it was (46 incidents, 60 samples, the same header and function)',
+    saved.entries.length===46&&saved.samples.length===60&&saved.header.client===before2.client&&saved.header.checks===before2.checks&&saved.faFunction===before2.fn,
+    {n:saved.entries.length,s:saved.samples.length,client:saved.header.client,checks:saved.header.checks,fn:saved.faFunction});
   ok(tag+': no browser dialog',!p.__native.length,p.__native);
   await ctx.close();
   /* its own file, and older ones */
@@ -467,10 +554,17 @@ async function abcFiles(br){
   } else console.log('NOTE A6_OLD not set: files saved by an earlier version not tried');
   /* the workstation's restore of the record (through Open data, quietly) says nothing */
   const c3=await fresh(br,{});const r=await open(c3,NOW['ABC-1'],'restore ABC-1');
-  await r.evaluate(t=>new Promise(res=>{const h=ev=>{if(ev.data&&ev.data.nbh==='restored'){window.removeEventListener('message',h);res(ev.data.report);}};window.addEventListener('message',h);
-    window.postMessage({nbh:'restore',snap:{total:0,data:{},own:t}},'*');setTimeout(()=>res(null),8000);}),fs.readFileSync(files.abc,'utf8'));await sleep(600);
+  const restore=t=>r.evaluate(t=>new Promise(res=>{const h=ev=>{if(ev.data&&ev.data.nbh==='restored'){window.removeEventListener('message',h);res(ev.data.report);}};window.addEventListener('message',h);
+    window.postMessage({nbh:'restore',snap:{total:0,data:{},own:t}},'*');setTimeout(()=>res(null),8000);}),t).then(()=>sleep(600));
+  await restore(fs.readFileSync(files.abc,'utf8'));
   const rs=await r.evaluate(()=>({n:state.entries.length,toasts:[...document.querySelectorAll('#nbhToasts .nbh-toast')].map(t=>t.textContent)}));
   ok(tag+': the workstation\'s restore of the record brings it back and says nothing',rs.n===46&&!(await uiDlg(r))&&!rs.toasts.some(t=>/could not be read/.test(t)),rs);
+  /* a damaged record handed over quietly is not opened, without a word: the record stays as it was */
+  const sig=()=>r.evaluate(()=>JSON.stringify([state.entries,state.samples,document.getElementById('h-client').value]));
+  const s0=await sig();await restore(fs.readFileSync(dir+'ABC-1_damaged-entry.json','utf8'));
+  const rs2=await r.evaluate(()=>({n:state.entries.length,toasts:[...document.querySelectorAll('#nbhToasts .nbh-toast')].map(t=>t.textContent)}));
+  ok(tag+': the workstation\'s quiet restore of a damaged record shows nothing and leaves the record as it was',
+    rs2.n===46&&(await sig())===s0&&!(await uiDlg(r))&&!rs2.toasts.some(t=>/could not be read/.test(t)),rs2);
   await c3.close();
 }
 
