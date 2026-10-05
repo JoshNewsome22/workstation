@@ -4,7 +4,7 @@
 /* ---------------- state: the v2 parts of a saved file ---------------- */
 function smEnsure(){if(!S.d||typeof S.d!=='object'||Array.isArray(S.d))S.d={};if(!Array.isArray(S.store))S.store=[];if(!Array.isArray(S.per2))S.per2=[];
   S.per2.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});}
-const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b'};
+const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b',rshow:'b',rspeak:'b',rchime:'b',rcue:'s',pin:'s'};   /* v21.46 the r… keys and pin: rating on the iPad (sm-rate.js) */
 function smFromFile(s,o){const okImg=v=>typeof v==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<400000?v:'';
   const str=v=>v==null||typeof v==='object'?'':String(v);o.d={};
   const d=s.d&&typeof s.d==='object'&&!Array.isArray(s.d)?s.d:{};
@@ -30,7 +30,8 @@ const SM_LOOK_SW={classic:'linear-gradient(#fff,#fff)',bright:'linear-gradient(1
 function smRenderDesign(){const el=$('#smDesign');if(!el)return;const d=smD(),look=smLook();
   const pk='<input type="radio" name="smLook"';
   let h='<h3>The look</h3><div class="sm2-looks">'+Object.entries(SM_LOOKS).map(([k,l])=>'<label class="'+(k===look?'on':'')+'"><div class="sw" style="background:'+SM_LOOK_SW[k]+';border:1px solid #d5dde3"></div><span>'+pk+' data-d="look" value="'+k+'"'+(k===look?' checked':'')+'> '+esc(l)+'</span></label>').join('')+'</div>';
-  if(look==='theme')h+='<div><b>Theme</b></div><div class="sm2-themes">'+Object.entries(SM_THEMES).map(([k,t])=>'<button type="button" data-smtheme="'+k+'" class="'+(k===smTheme()?'on':'')+'">'+(typeof SM_THEME_ART!=='undefined'&&SM_THEME_ART[k]?'<svg class="art" viewBox="0 0 72 72">'+SM_THEME_ART[k][0]+'</svg>':'')+esc(t.l)+'</button>').join('')+'</div>';
+  if(look==='theme'){const tb=([k,t])=>'<button type="button" data-smtheme="'+k+'" class="'+(k===smTheme()?'on':'')+'">'+(t.col?'<span class="sw2 sw2-'+k+'" style="background:'+t.c+'"></span>':typeof SM_THEME_ART!=='undefined'&&SM_THEME_ART[k]?'<svg class="art" viewBox="0 0 72 72">'+SM_THEME_ART[k][0]+'</svg>':'')+esc(t.l)+'</button>';
+    const E=Object.entries(SM_THEMES);h+='<div><b>Theme with pictures</b></div><div class="sm2-themes">'+E.filter(x=>!x[1].col).map(tb).join('')+'</div><div><b>Plain or one colour</b> <span class="hint">(no pictures; Plain prints well in black and white)</span></div><div class="sm2-themes">'+E.filter(x=>x[1].col).map(tb).join('')+'</div>';}
   if(look!=='classic')h+='<div class="sm2-row"><label>Colour <input type="color" data-d="accent" value="'+esc(/^#[0-9a-f]{6}$/i.test(d.accent||'')?d.accent:smAccent())+'"></label><button type="button" class="tool" id="smAccReset">Back to the look&rsquo;s colour</button>'+
     '<label>Name on the sheet <select data-d="nm"><option value="">'+(['clean','discreet'].includes(look)?'Initials (this look&rsquo;s default)':'First name (this look&rsquo;s default)')+'</option><option value="nick"'+(d.nm==='nick'?' selected':'')+'>First name</option><option value="ini"'+(d.nm==='ini'?' selected':'')+'>Initials only</option><option value="full"'+(d.nm==='full'?' selected':'')+'>Full name</option></select></label>'+
     '<label>The adult who rates is called <input data-d="tw" value="'+esc(d.tw||'')+'" placeholder="Teacher" style="width:120px"></label></div>';

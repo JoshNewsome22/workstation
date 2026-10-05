@@ -77,6 +77,12 @@ const SM_THEMES={
   music:{l:'Music',c:'#1f4e79',a:'#ff7a59',t:'My Day’s Song',tot:'Total beats',store:'Music shop',mid:'Halfway check',goal:'Goal'},
   vehicles:{l:'Vehicles',c:'#b03a2e',a:'#f4d03f',t:'Road Trip',tot:'Miles today',store:'Garage store',mid:'Pit stop',goal:'Goal'}
 };
+/* v21.46 the plain and colour themes: no pictures and the plain words; Plain is black on white, for a black-and-white printer */
+const SM_COL_W={t:'Point Sheet',tot:'Today I earned',store:'My reward store',mid:'Midday check',goal:'My goal',col:1};
+[['plain','Plain','#222222','#222222'],['ocean','Ocean blue','#1f5fa8','#ffd166'],['sky','Sky blue','#2b8ccf','#fff3b0'],['teal','Teal','#11867f','#ffd166'],
+ ['forest','Forest green','#2e7d4f','#f9c74f'],['lime','Lime green','#5b9a1e','#fff3b0'],['sunset','Sunset orange','#d35f1f','#ffe08a'],['gold','Gold','#a87400','#fff3b0'],
+ ['cherry','Cherry red','#b8322c','#ffd166'],['rose','Rose pink','#c2386f','#ffe3a3'],['berry','Berry purple','#6f3a9a','#ffb3d1'],['slate','Slate gray','#4a5866','#ffd166'],
+ ['rainbow','Rainbow','#5b4bc4','#ffd166']].forEach(([k,l,c,a])=>{SM_THEMES[k]=Object.assign({l,c,a},SM_COL_W);});
 function smLook(){const l=smD().look;return SM_LOOKS[l]?l:'classic';}
 function smTheme(){const t=smD().theme;return SM_THEMES[t]?t:'sports';}
 function smAccent(){const d=smD();if(/^#[0-9a-f]{6}$/i.test(d.accent||''))return d.accent;const l=smLook();return l==='theme'?SM_THEMES[smTheme()].c:l==='clean'?'#1d3b5a':l==='discreet'?'#333333':'#1fa3a6';}
@@ -147,7 +153,7 @@ function smLookSheet(m,look){const d=smD(),th=SM_THEMES[smTheme()],acc=smAccent(
   const rr=m.sys==='match'&&/one reminder/.test(S.meta.t_rem||'');   /* a Yes allows one reminder: the adult tallies them under the rating */
   const many=m.tg.length*m.raters.length,lvn=(smLevels()||[0,0]).length,wide=many*Math.max(2,lvn),sz=look==='clean'?(wide>24?16:19):wide>30?17:wide>20?21:wide>12?25:30;
   const title=smTitle(look),dt=S.meta.sh_date?esc(S.meta.sh_date):'________';
-  let h='<div class="v2 look-'+look+(look==='theme'?' theme-'+smTheme():'')+'" style="--acc:'+acc+';--acc2:'+(look==='theme'?th.a:'#f7c948')+'">';
+  let h='<div class="v2 look-'+look+(look==='theme'?' theme-'+smTheme()+(th.col?' theme-col':''):'')+'" style="--acc:'+acc+';--acc2:'+(look==='theme'?th.a:'#f7c948')+'">';
   /* header */
   if(look==='clean')h+='<div class="v2-head"><div><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">'+esc(name)+(S.meta.grade?' · Grade '+esc(S.meta.grade):'')+' · Date '+dt+'</div></div><div class="v2-meta">'+(m.p.need!=null?'Goal <b>'+(m.p.g!=null?pct(m.p.g):'')+'</b> ('+m.p.need+' of '+m.p.poss+')':'')+(d.wf!==false&&d.wf!=='0'?'<br>Working for: <span class="bl" style="min-width:150px">'+esc(S.meta.sh_reward||'')+'</span>':'')+'</div></div><div class="v2-keyline">'+smKeyLine(m)+'</div>';
   else{h+='<div class="v2-head">'+(look==='theme'?smArt(0,58):(smAvatar(70)?'<div class="v2-av">'+smAvatar(64)+'</div>':''))+'<div class="v2-ht"><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">Date '+dt+' &nbsp; '+(m.match?'Me + '+esc(m.tw.toLowerCase())+'. Same answer = points!':m.sys==='cico'?esc(m.tw)+' rates each period.':'I rate each period.')+'</div></div>'+(look==='theme'?smArt(1,50):'')+'<div class="v2-hr">'+smHeadRight(m,look)+'</div></div>';
@@ -175,7 +181,7 @@ function smLookSheet(m,look){const d=smD(),th=SM_THEMES[smTheme()],acc=smAccent(
   h+='<div class="v2-foot">'+esc(d.credit===false?'':'Form SM-1')+'</div></div>';
   return h;}
 function smTitle(look){if(S.meta.sh_title)return S.meta.sh_title;const nm=smName(),poss=nm?nm+'’s':'My';
-  if(look==='theme')return poss+' '+SM_THEMES[smTheme()].t;
+  if(look==='theme'&&!SM_THEMES[smTheme()].col)return poss+' '+SM_THEMES[smTheme()].t;
   if(look==='clean')return {match:'Self-Monitoring Report',cico:'Daily Progress Report',smiley:'Daily Expectations',contract:'Self-Monitoring Contract',interval:'On-Task Check',rubric:'Daily Point Sheet'}[S.sys]||'Daily Report';
   return poss+' '+({match:'Self & Match Sheet',contract:'Check Sheet',smiley:'Super Sheet',cico:'Daily Report',interval:'On-Task Check',rubric:'Point Sheet'}[S.sys]||'Sheet');}
 function smTear(){const full=esc(S.meta.client||'');let t=tearOff();if(full)t=t.replace(full,esc(smName()));return t;}

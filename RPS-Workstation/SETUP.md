@@ -7344,3 +7344,53 @@ The player, the captions, full screen, the transcript and Save as video (1080p, 
 is on every frame. Checked by `qa/sm1-v2-test.js` (the older file, every look and sheet type, the points, the themes, save and
 open, the library, the quick starts, the schedules, the store, the contract, the preview, the extra pages, the walkthrough's lines
 for eight sheets, and five frames painted for the video against the stage), and an MP4 with sound made in WebKit.
+
+## Form SM-1: Plain and Colour Themes, and Rating on the iPad; the Safety Wording Approved (v21.46)
+
+**Plain and colour themes.** The Interest theme now offers, besides the seven picture themes, **Plain** (black on white, no
+pictures, for a black-and-white printer) and twelve one-colour themes with no pictures (ocean blue, sky blue, teal, forest green,
+lime green, sunset orange, gold, cherry red, rose pink, berry purple, slate gray, rainbow). They use the sheet type's own title
+("Sam's Self & Match Sheet") and the plain words ("Today I earned", "My reward store", "Midday check"). The Design page shows the
+two groups: **Theme with pictures** and **Plain or one colour**.
+
+**Rate (iPad), a new view.** The sheet on the iPad. At the end of each period the student taps a rating for each target (big
+buttons in the sheet's own rating style), and the points, the match and the goal follow as they tap:
+
+- **The period card** opens on the period to rate now (the first one already begun that is not rated, from the schedule's times),
+  with arrows and dots to move between periods, the targets' pictures, cues and a read-aloud button (the iPad's own voice).
+- **The adult's part.** Switch between *Sam rates* and *Teacher rates* at the top. Where the system has a match (Self & Match,
+  cued intervals, the rubric with the teacher matching), the adult does not see the student's rating until the adult has rated
+  (Settings can show it); once both have rated, both see "Same answer! +2" or "Different answers". The adult also counts
+  reminders per period (R R) and writes a note for the day. On check-in/check-out the adult rates and the student sees.
+- **Points, as on paper.** A two-level Self & Match style uses the Match Points table (System page); a style with more levels
+  counts the adult's level plus the bonus when they are the same; cued intervals and the matched rubric count the adult's level;
+  the contract, expectations and check-in/check-out count the one rater. A period the adult does not rate counts as the student
+  rated (the matching ladder thins the matching to a sample), and the page says how many are waiting. The day's points possible
+  equal the sheet's.
+- **The goal bar** shows the points, the goal and the price of the reward the student is working for (tap a reward in the store
+  to choose it); reaching the goal shows a short celebration (no movement when the iPad is set to reduce motion). With the bank on,
+  the bank's balance shows.
+- **Student screen** fills the iPad with the student's part only (the rest of the page cannot be reached). Holding the adult's
+  button for a second, and a PIN when one is set in the Settings, opens the adult's part; the PIN keeps the student on their part
+  and is not a lock on the file. In the workstation the Student screen fills the form's frame; opened on its own, it asks Safari
+  for full screen. The iPad stays awake while it is open.
+- **Cue timer** (cued intervals): a soft chime and a flash, or a flash only for a quiet room, every interval (fixed, or variable
+  around the average as the Intervals section sets), opening the next check. **Chime at a period's end** (Settings, period
+  sheets): when a period's time is over the chime sounds and that period opens for rating. Both need the page open.
+- **Finish the day** writes the day to the Record as one row (points, possible, goal, matches, goal met, per-target percents,
+  "Rated on the iPad" and the note); finishing again updates the row; a row typed by hand for the same date is replaced only when
+  you say so. After finishing, the student taps the reward chosen (with the bank on, its price is spent). **Print the day** prints
+  a day report (each period's ratings, the matches, the reminders, the totals, the goal, the reward, the note, signature lines).
+  **Days rated on the iPad** lists the days with Open, Print and Delete.
+- The days are kept in the form's file (`S.days`, by date), so Save data, Open data, the case file and Autosave carry them;
+  a forged file is cleaned on opening. The performance count and the interlocking session stay on paper.
+
+The Guide adds a paragraph and a research row (Wills & Mason, 2014: a self-monitoring app on a tablet with the paper sheet's parts
+raised on-task behavior for two high-school students; the screen changes the recording, not what makes it work). The simulation
+has today's first three periods rated on the iPad. Checked by `qa/sm1-rate-test.js` (every sheet type, the points rules, taps,
+the hidden match, reminders, the celebration, Finish, Delete, save and open, the Student screen with the hold and the PIN, the
+cue timer, the period chime, the day report, a narrow screen) and in WebKit.
+
+**The safety wording is approved.** The BCBA approved the wording of the policy and safety packages (B1, B4, B5; the questions in
+*Safety-wording-to-review.md*, kept as they were proposed). The source comments that ended "Review this wording." now end
+"Wording approved by the BCBA, October 2026." Nothing on screen or on paper changed.

@@ -49,7 +49,7 @@ const PRIV_NAME={genitalia:'Genitalia',rectum:'Rectum',hips:'Buttocks'};
 const CARE_AREAS=[['genitals','Genitals','genitalia'],['buttocks','Buttocks','hips'],['anal','Anal area','rectum'],['breasts','Breasts','chest']];
 const CAREA=Object.fromEntries(CARE_AREAS.map(a=>[a[0],a]));
 const AREA_OF={genitalia:'genitals',hips:'buttocks',rectum:'anal'};
-/* v21.44 (B4): how far each check goes, shown beside the location (the side panel). Review this wording. */
+/* v21.44 (B4): how far each check goes, shown beside the location (the side panel). Wording approved by the BCBA, October 2026. */
 const SLEEVE='Only as far as a rolled sleeve shows.';
 const LOC_NOTE={chest:'The stomach, by lifting the shirt a little, and the chest only at the collar. The breasts are never examined.',
   abdomen:'Above the waistband only. The genitals are never examined.',
@@ -63,7 +63,7 @@ const LOC_NOTE={chest:'The stomach, by lifting the shirt a little, and the chest
    list again, not a reason by itself. */
 const HOW=[['seen','Seen to happen: the student\u2019s self-injury'],['match','Not seen; matches the self-injury seen before'],['nomatch','Not seen; does not match it'],['unknown','Not known'],['other','Another known cause (say in the comment)']];
 const HOWN=Object.fromEntries(HOW);
-/* the things that can be a reason to suspect abuse or neglect. Review this wording. */
+/* the things that can be a reason to suspect abuse or neglect. Wording approved by the BCBA, October 2026. */
 const RP_REASONS=[['r1','No one saw how the injury happened, and it does not match the self-injury staff have seen this student do (its usual places and kinds).'],
   ['r2','It has a pattern: grip, finger, slap or cord marks, or a burn.'],
   ['r3','It is in a private area (genitals, buttocks, breasts).'],
@@ -273,7 +273,7 @@ document.addEventListener('click',e=>{if(!e.target.closest('button[data-sug]'))r
    shows amber and needs a written reason; "Not known" is a prompt to look at the list again, not a reason. The form
    never asks anyone to look into it: only for what was seen and said, and for when, to whom and by whom the report
    was made. The answer and the report stay on the screen: paper and the CSV show only that the question was
-   answered, and when, and Print the report record puts the rest on a sheet of its own. Review this wording. */
+   answered, and when, and Print the report record puts the rest on a sheet of its own. Wording approved by the BCBA, October 2026. */
 const RP_RULES='<ul><li><b>Who reports:</b> the person who suspects it. Telling a supervisor, the nurse or the BCBA does not take the place of your own report. Your agency may ask you to tell them as well.</li>'+
   '<li><b>When:</b> right away, as soon as you suspect it. Do not wait for a meeting or the end of the day. Your state&rsquo;s law and your agency&rsquo;s policy set the exact rule.</li>'+
   '<li><b>Do not investigate.</b> You do not need proof. Do not press the student for details, do not examine further, and do not contact the person you suspect. Write down what you saw, and what was said in the words used.</li>'+
@@ -438,7 +438,7 @@ function renderCareEdit(){const el=$('#imCareEdit');if(!el)return;const d=S.care
   const open=CARE_OPEN||k>=0||draftHas();el.classList.toggle('open',open);
   if(!open){el.innerHTML='<div class="tools" style="margin:4px 0"><button type="button" class="tool" data-carenew="">Record an injury noticed during required care</button></div>';return;}
   const inp=(f,lab,ph,type,dis)=>'<div><label>'+lab+'</label><input data-cd="'+f+'"'+(type?' type="'+type+'"':'')+' value="'+esc(d[f])+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+(dis?' disabled':'')+'></div>';
-  /* Review this wording. */
+  /* Wording approved by the BCBA, October 2026. */
   el.innerHTML='<h3>'+(k>=0?'Correct entry '+(k+1):'Record an injury noticed during required care')+'</h3>'+
     '<div class="fieldgrid">'+inp('date','Date','M/D/YYYY')+inp('time','Time','','time')+
     '<div><label>Area</label><select data-cd="area" aria-label="Area"><option value=""></option>'+CARE_AREAS.map(a=>'<option value="'+a[0]+'"'+(d.area===a[0]?' selected':'')+'>'+a[1]+'</option>').join('')+'</select></div>'+
@@ -491,7 +491,7 @@ document.addEventListener('click',e=>{
    marked confidential: the administrations in the History, the one on the map if it is not filed as it stands, and
    the injuries noticed during care. With none answered it prints the list and the fields blank, for paper. The sheet
    is written only while it prints, so it is never in the form's own print, its saved file or the master print.
-   Review this wording. */
+   Wording approved by the BCBA, October 2026. */
 function repRecItem(title,rep,care,shows){const t=k=>String(rep[k]==null?'':rep[k]).trim(),bx=on=>'<span class="rpBx">'+(on?'X':'')+'</span>';
   return '<div class="rpRecItem"><h3>'+esc(title)+'</h3><table class="rt"><tr><th style="width:30%">Reasons marked</th><td>'+RP_REASONS.map(([k,x])=>'<div class="rpRecR">'+bx(rep[k]===true||(care&&k==='r3'))+' '+esc(x)+'</div>').join('')+(shows&&shows.length?'<div class="rpRecR">'+esc(shows.join(' '))+'</div>':'')+'</td></tr>'+
     '<tr><th>Do you suspect abuse or neglect?</th><td>'+esc(rep.need==='yes'?'Yes: a report is being made':rep.need==='no'?'No':'')+'</td></tr>'+
