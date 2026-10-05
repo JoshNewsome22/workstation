@@ -423,6 +423,10 @@ header.top .chips{flex:0 0 auto;flex-wrap:nowrap}
 .chips [hidden]{display:none!important}
 /* with the chips beside it the heading's title keeps to its one line; the student's name and details give way first */
 @media (min-width:1000px){header.top h1{white-space:nowrap;flex:0 0 auto}}
+/* up to 1100 px the title gives way before the student's name does (the longest chip texts and "Use these details"
+   left a long name 94 px at 1000 px) */
+@media (min-width:1000px) and (max-width:1100px){header.top h1{flex:0 1 auto;overflow:hidden;text-overflow:ellipsis}
+  header.top .who{min-width:170px}}
 /* and the student's details keep to one row while they are open on an iPad 1024 px wide (Done showing) */
 @media (max-width:1100px){.bar .det input{width:128px}}
 header.top button.chip{font-size:11.5px;font-weight:500;padding:4px 11px 4px 9px;min-height:30px;border-radius:999px;
@@ -490,6 +494,9 @@ main{flex:1;display:flex;min-height:0}
 .alertbar button{white-space:nowrap}
 .alertbar button#alertFix{background:#7a3a10;border-color:#7a3a10;color:#fff;font-weight:600}
 .alertbar button#alertFix:hover{background:#9b4e15;border-color:#9b4e15}
+/* beside the different-student warning (letters that differ), the offer is the strip's second action, not its first */
+.alertbar button#alertFix.second{background:#fff;border-color:#e0c3a4;color:#7a3a10;font-weight:600}
+.alertbar button#alertFix.second:hover{background:#fff7f0;border-color:#c9955e}
 @media (max-width:720px){.alertbar{flex-wrap:wrap;padding:7px 12px;gap:6px 8px}.alertbar #alertText{flex:1 1 100%}.alertbar .sp{display:none}
   .alertbar button{white-space:normal;text-align:center}}
 /* a finger needs the same 40 px as the bar's own buttons, here and for the chips in the heading */
@@ -1525,9 +1532,9 @@ async function pushPlanTo(id){
 }
 
 function pushPacketTo(fr){
+  commitBar(false,true);   /* v21.44 (A8) what a form is given is what a later correction on the bar is offered against */
   const p=packet();
   if(!Object.values(p).some(v=>String(v).trim()))return;
-  commitBar();   /* v21.44 (A8) what a form has been given is what a later correction on the bar is offered against */
   try{fr.contentWindow.postMessage({nbh:'packet',packet:p},'*');}catch(e){}
 }
 function ask(fr,what,extra){
@@ -1539,10 +1546,12 @@ $('#pushPacket').addEventListener('click',()=>{
   Object.values(state.frames).forEach(pushPacketTo);
   gatherFacts(true);   /* v21.31 the case goes with the details */
   setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),400);
-  /* v21.44 (A8) a correction on the bar is not a value to fill: the strip offers it */
+  /* v21.44 (A8) a correction on the bar is not a value to fill: the strip offers it, and comes back for it if it was
+     dismissed */
   const k=corrections().fix.length;
+  if(k)state.alertOff=false;
   alert('Sent to '+n+' open form'+(n===1?'':'s')+'. Fields already holding a different value are left alone.'+
-    (k?' The strip above corrects the '+(k===1?'one':k)+' that still hold'+(k===1?'s':'')+' the earlier details.':''));
+    (k?' The strip above offers to correct the '+(k===1?'one':k)+' still holding the earlier details.':''));   /* a toast: 160 characters at most */
   checkIdentity();
 });
 $('#savePacket').addEventListener('click',()=>{
@@ -1617,6 +1626,9 @@ $('#whoTake').addEventListener('click',()=>{
 ['pClient','pSid','pGrade','pSite','pBcba'].forEach(id=>$('#'+id).addEventListener('input',who));
 /* v21.44 (A8) a value left in its box is one the bar has held; the strip looks again at once */
 ['pClient','pSid','pGrade'].forEach(id=>$('#'+id).addEventListener('change',()=>{commitBar();checkIdentity();}));
+/* while the name is being typed, a form that opens takes it as far as it goes ("Jor"): the strip may offer the rest */
+$('#pClient').addEventListener('input',()=>{state.barTyping=true;});
+$('#pClient').addEventListener('blur',()=>{state.barTyping=false;});
 $('#pClient').addEventListener('change',()=>{if(packet().client.trim()&&!state.barAuto){state.barAuto=true;}});   /* typed by hand: stays open until Done */
 
 /* ================= relay: a form reads another open form (v21.22 relay) =================
@@ -2532,7 +2544,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
    fold('Side by side, fullscreen and the screen',
      '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
-     '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else, and a form holding another student’s name is never changed.</p>')+
+     '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else. A name whose letters changed could be another student’s, so the warning stays and you are asked first; a name the bar never held, one that is not a small correction, or one whose ID says another student, is not offered.</p>')+
    fold('Keyboard',
      '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
    (!EMBED?fold('Offline, installing and updates',
@@ -3002,7 +3014,7 @@ const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on',pref2:'nbh.ws.aut
 /* nbh-copies core: end */
 const CP=window.nbhCopies;
 const IOS=/iP(ad|hone|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
-state.auto={tab:CP.tabId(),seq:0,key:null,student:'',at:null,warn:'',warnShort:'',busy:false,again:false,last:0,written:'',forms:{},continued:{},fileAt:null,overTold:false};
+state.auto={tab:CP.tabId(),seq:0,key:null,student:'',at:null,warn:'',warnShort:'',busy:false,again:false,last:0,written:'',forms:{},continued:{},fileAt:null,overTold:false,prev:null};
 CP.hold(state.auto.tab);   /* while this tab lives, other tabs do not offer its copy as earlier work */
 function store(){try{return window.localStorage;}catch(e){return null;}}
 /* v21.44 the switch has a setting of its own: the old one also said 'off' when an earlier version gave up after a full
@@ -3039,7 +3051,8 @@ function autoWho(){
 /* this tab's copy; another student in this tab starts a copy of its own (a name still being typed does not) */
 function autoKey(name){
   const A=state.auto;
-  if(A.key&&name&&A.student&&!CP.same(A.student,name)){A.seq++;A.key=null;A.forms={};A.continued={};A.fileAt=null;A.written='';}
+  /* v21.44 (A8) prev: the copy left behind, so a name corrected on the bar and then in the forms can fold it in (autoFold) */
+  if(A.key&&name&&A.student&&!CP.same(A.student,name)){A.prev={key:A.key,student:A.student};A.seq++;A.key=null;A.forms={};A.continued={};A.fileAt=null;A.written='';}
   if(!A.key)A.key='s-'+A.tab+'-'+A.seq;
   if(name)A.student=name;
   return A.key;
@@ -3117,7 +3130,19 @@ async function autoSeal(){
   const A=state.auto,idle=async()=>{for(let i=0;i<80&&A.busy;i++)await new Promise(r=>setTimeout(r,100));};
   await idle();
   if(Object.keys(state.frames).length&&autoOn()){A.last=0;await autoSave(true);await idle();}
-  A.seq++;A.key=null;A.student='';A.forms={};A.continued={};A.fileAt=null;A.written='';A.at=null;
+  A.seq++;A.key=null;A.student='';A.forms={};A.continued={};A.fileAt=null;A.written='';A.at=null;A.prev=null;
+}
+/* v21.44 (A8): a name corrected on the bar after Autosave had written: its next copy went under the corrected name (as
+   for another student) and the one under the earlier name stayed. Once the person has corrected the forms too (the
+   strip's offer), this tab's copy is written and the earlier one goes, provided every form it holds is in this one. */
+async function autoFold(oldKey){
+  const A=state.auto,idle=async()=>{for(let i=0;i<80&&A.busy;i++)await new Promise(r=>setTimeout(r,100));};
+  try{
+    await idle();A.last=0;await autoSave(true);await idle();
+    const l=await CP.list(),cur=l.find(r=>r.key===A.key),old=l.find(r=>r.key===oldKey);
+    if(!cur||!old||old.tab!==A.tab||cur.tab!==A.tab)return;
+    if(Object.keys(old.forms||{}).every(id=>cur.forms&&cur.forms[id])){await CP.del(oldKey);chip();}
+  }catch(e){}
 }
 /* a case file just opened is in a file: once the forms have settled, and if none has been changed, that is the saved state */
 function autoBaseline(){
@@ -3314,14 +3339,17 @@ function say(msg){const l=$('#live');if(l)l.textContent=msg;}
    already filled, puts two different students in one printed packet. Every
    status ping carries the name that form is holding, so the two can be
    compared continuously rather than discovered on paper. */
-function norm(s){return String(s||'').toLowerCase().replace(/[^a-z]/g,'');}
+/* the words of a name as compared: capitals, accents and punctuation aside ("José O'Brien" is jose, o, brien) */
+function nameWords(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);}
+/* v21.44 (A8): the same student's name: the same letters in the same order, whatever the capitals, spaces, accents or
+   punctuation ("jordan  rivera", "José" and "Jose", "O'Brien" and "OBrien"), or the same words in another order ("Bell,
+   Marcus" and "Marcus Bell"). It used to be any two names made of the same letters, so two letters swapped by a slip
+   ("Jordna Rivera") and another student whose name has the same letters ("Myra Lee" and "Mary Lee") passed without a
+   warning; an accent made two names differ ("José", "Jose") and a number did not ("Student 1", "Student 2"). */
 function sameName(a,b){
-  a=norm(a);b=norm(b);
-  if(!a||!b)return true;
-  if(a===b)return true;
-  /* "Bell, Marcus" and "Marcus Bell" are the same person */
-  const sa=String(a).split('').sort().join(''),sb=String(b).split('').sort().join('');
-  return sa===sb;
+  const A=nameWords(a),B=nameWords(b);
+  if(!A.length||!B.length)return true;
+  return A.join('')===B.join('')||A.slice().sort().join(' ')===B.slice().sort().join(' ');
 }
 function noteWho(id,w){
   /* v21.44 (A8): a reply that carries no name (a snapshot, which Autosave asks for every few seconds) keeps the name the
@@ -3342,31 +3370,49 @@ function noteWho(id,w){
    The packet fills only empty fields, so a name corrected on the bar ("Jordon" to "Jordan") never reached the forms
    already open: they kept the earlier spelling, and the strip called them a different student. The bar now remembers
    what it has held (state.barHist: each value it gave to a form, or settled on when a box was left, a packet or case
-   opened, or a name taken from a form; a case opened starts afresh). A form that still holds one of those earlier
-   values is offered the correction, one tap for all of them: "Use Jordan Rivera in these 5 forms".
-   - A correction, not another student: the earlier name and the new one differ by a slip of one or two letters (at
-     most a fifth of the name), capitals, spaces, accents or punctuation, a name still being typed when a form took it,
-     or the same name written out more fully (an initial or a short form completed, a last name added). Anything else
-     is another student, and keeps the warning only, with nothing offered: "Jordan Rivera" and "Maria Lopez", "Student
-     1" and "Student 2", a name the bar never held. An ID or a grade is offered only in a form whose name is this
-     student's (or, in a form that holds no name, when the bar has held no other student).
+   opened, or a name taken from a form; a case opened starts afresh), and a form that still holds one of those earlier
+   values is offered the bar's: "Use Jordan Rivera in these 5 forms".
+   - The same student's name written another way (capitals, spaces, accents, punctuation, the order of the words) is
+     offered as it is: nothing else could be meant.
+   - A name whose letters differ cannot be told from another student's by its letters: "Jordon" and "Jordan" are one
+     student, "Mark" and "Mary" two. So it keeps the "Different student" warning and Show me, the offer comes second,
+     and the tap asks first, naming both, and changes nothing unless the answer is that they are the same student. It
+     is offered only for a slip (one or two letters, at most a fifth of the name, the words in any order), words added
+     ("Jordan" to "Jordan Rivera"), or a name a form took while it was still being typed on the bar ("Jor"); and never
+     when the ID says it is another student (the form's own ID, or the IDs the bar held with that name, more than one
+     character from the bar's). Anything else is the warning only, with nothing offered: "Jordan Rivera" and "Maria
+     Lopez", "Chris Lee" and "Christina Lee", "Sam" and "Samantha Lee", "Student 1" and "Student 2", a name the bar
+     never held.
+   - An ID or a grade is offered in a form that holds this student's name; an ID more than one character from the
+     earlier one is asked about first. In a form with no name it is offered when the bar has held no other student's
+     name, and asked about first while the bar's other names could be this one corrected (the answer Same student
+     counts from then on: state.barHist's entries keep it as same).
    - The tap changes only the student's name (and first and last name where a form keeps them apart), ID and grade,
      only in the fields the form's packet fills, and only where the field still holds the earlier value; it lists
      every change. A form is reached the way Autosave reads one (its window, on this page's origin); one the browser
      keeps apart (a folder opened from a drive) is named, to be corrected by hand. */
-state.barHist={client:[],sid:[],grade:[]};
-function commitBar(fresh){
+function freshHist(){return {client:[],sid:[],grade:[]};}
+state.barHist=freshHist();
+state.barTyping=false;   /* the name box has been typed in since it was last left */
+function clean(s){return String(s==null?'':s).trim().replace(/\s+/g,' ');}
+function lowTrim(s){return clean(s).toLowerCase();}
+/* the bar's values, as held. given: they are being given to a form (its packet), perhaps while the name is being typed */
+function commitBar(fresh,given){
   const p=packet();
-  if(fresh||!state.barHist)state.barHist={client:[],sid:[],grade:[]};
+  if(fresh||!state.barHist)state.barHist=freshHist();
+  const H=state.barHist,sid=clean(p.sid),typing=!!given&&state.barTyping&&document.activeElement===$('#pClient');
   ['client','sid','grade'].forEach(k=>{
-    const v=String(p[k]||'').trim().replace(/\s+/g,' ');if(!v)return;
-    const h=state.barHist[k],i=h.findIndex(x=>x.toLowerCase()===v.toLowerCase());
-    if(i>=0)h.splice(i,1);
-    h.push(v);if(h.length>12)h.shift();
+    const v=clean(p[k]);if(!v)return;
+    const h=H[k],i=h.findIndex(x=>(k==='client'?x.v:x)===v),old=i>=0?h.splice(i,1)[0]:null;
+    if(k==='client'){
+      const e={v,sids:old?old.sids.slice():[],typing:typing||!!(old&&old.typing),same:old&&old.same||''};
+      if(sid&&!e.sids.some(s=>lowTrim(s)===sid.toLowerCase()))e.sids.push(sid);
+      if(e.sids.length>6)e.sids.shift();
+      h.push(e);
+    } else h.push(v);
+    if(h.length>12)h.shift();
   });
 }
-function lowTrim(s){return String(s==null?'':s).trim().replace(/\s+/g,' ').toLowerCase();}
-function nameWords(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);}
 /* letters inserted, deleted, changed or swapped (optimal string alignment) */
 function editDist(a,b){
   if(Math.abs(a.length-b.length)>3)return 9;
@@ -3382,79 +3428,118 @@ function editDist(a,b){
   }
   return p1[b.length];
 }
-/* is now a correction of was (a name the bar held before), rather than another student's name? */
-function nameFixes(was,now){
+/* was (a name the bar held before) to now: a change that may be a correction, so the strip may offer it, after asking
+   (a slip of one or two letters, words added, a name still being typed); anything else is another student */
+function nameFixes(was,now,typing){
   const A=nameWords(was),B=nameWords(now);if(!A.length||!B.length)return false;
   const a=A.join(''),b=B.join('');
   if(a===b)return true;                                                 /* capitals, spaces, accents, punctuation */
   if(a.replace(/\D/g,'')!==b.replace(/\D/g,''))return false;           /* "Student 1" and "Student 2" are two students */
-  const d=editDist(a,b);
-  if(d<=2&&d*5<=Math.max(a.length,b.length))return true;              /* a slip of one or two letters */
-  if(a.length>=2&&b.indexOf(a)===0)return true;                         /* a name still being typed when a form took it */
-  /* written out more fully: every word of the earlier name is a word of the new one or the start of one (an initial,
-     a short form), and one at least is there in full */
-  const used=new Set();let full=false;
-  for(const w of A){
-    let k=B.findIndex((x,i)=>!used.has(i)&&x===w);
-    if(k>=0){if(w.length>1)full=true;}
-    else k=B.findIndex((x,i)=>!used.has(i)&&x.indexOf(w)===0);
-    if(k<0)return false;
-    used.add(k);
-  }
-  return full;
+  const slip=(x,y)=>{const d=editDist(x,y);return d<=2&&d*5<=Math.max(x.length,y.length);};
+  if(slip(a,b)||slip(A.slice().sort().join(''),B.slice().sort().join('')))return true;   /* one or two letters, any order */
+  let j=0;for(const w of B)if(j<A.length&&w===A[j])j++;
+  if(j===A.length&&A.some(w=>w.length>1))return true;                  /* words added: "Jordan" to "Jordan Rivera" */
+  if(typing&&a.length>=2&&b.indexOf(a)===0)return true;                /* a name a form took while it was being typed */
+  return false;
 }
-/* what the open forms hold against the bar: fix, the forms still holding a value the bar has corrected (and which);
-   odd, the forms holding another student's name */
+/* two IDs at most one slip apart (a character changed, added or left out, or two swapped: "10234" and "10243") */
+function idNear(a,b){const t=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');return editDist(t(a),t(b))<=1;}
+/* the ID says the earlier name was another student's: the form's own ID or, where it holds none, every ID the bar held
+   with that name, is more than one slip from the bar's ID now */
+function idOther(formSid,x,nowSid){
+  if(!nowSid)return false;
+  const ids=formSid?[formSid]:x.sids;
+  return ids.length>0&&ids.every(s=>!idNear(s,nowSid));
+}
+/* what the open forms hold against the bar. fix: the forms still holding values the bar has corrected (items: each
+   change; warn: a name whose letters differ, which keeps the warning; ask: a change the person is asked about first).
+   odd: the forms holding another student's name. */
 function corrections(){
-  const p=packet(),now={client:p.client.trim(),sid:p.sid.trim(),grade:p.grade.trim()};
-  const H=state.barHist||{client:[],sid:[],grade:[]},out={fix:[],odd:[]};
+  const p=packet(),now={client:clean(p.client),sid:clean(p.sid),grade:clean(p.grade)};
+  const H=state.barHist||freshHist(),W=state.whoIs||{},D=state.details||{},out={fix:[],odd:[]};
   if(!now.client)return out;
-  const oneStudent=H.client.every(x=>sameName(x,now.client)||nameFixes(x,now.client));
+  /* the names the bar has held that are not this student's (as written, or as the person has said: x.same); for a
+     form with no name, its ID and grade are offered as they are when there are none, and asked about first when
+     each could be this student's name corrected */
+  const others=H.client.filter(x=>!sameName(x.v,now.client)&&!(x.same&&sameName(x.same,now.client)));
+  const oneStudent=!others.length,maybeOne=others.every(x=>nameFixes(x.v,now.client,x.typing)&&!idOther('',x,now.sid));
   for(const id of Object.keys(state.frames)){
     if(!state.status[id])continue;   /* not answered yet */
-    const w=String((state.whoIs||{})[id]||'').trim(),det=(state.details||{})[id]||{},items=[];
-    if(w&&!sameName(w,now.client)){
-      const was=H.client.find(x=>!sameName(x,now.client)&&sameName(w,x)&&nameFixes(x,now.client));
-      if(!was){out.odd.push(id);continue;}   /* another student: the warning only */
-      items.push({k:'client',from:w,to:now.client,was});
+    const w=clean(W[id]),det=D[id]||{},items=[];let warn=false,ask=false;
+    if(w&&w!==now.client){
+      if(sameName(w,now.client)){
+        /* this student's name written another way: offered where the form has it as the bar had it before, not where
+           it is the form's own way of writing it */
+        const was=H.client.filter(x=>x.v!==now.client&&x.v.toLowerCase()===w.toLowerCase()).pop();
+        if(was)items.push({k:'client',from:w,to:now.client,was:was.v});
+      } else {
+        /* an earlier name of the bar that the form still holds (as written, or its words in another order) */
+        const was=H.client.filter(x=>x.v!==now.client&&sameName(x.v,w)).reverse()
+          .find(x=>nameFixes(x.v,now.client,x.typing)&&!idOther(clean(det.sid),x,now.sid));
+        if(!was){out.odd.push(id);continue;}   /* another student: the warning only */
+        items.push({k:'client',from:w,to:now.client,was:was.v});warn=ask=true;
+      }
     }
-    if(w||oneStudent)for(const k of ['sid','grade']){
-      const v=String(det[k]||'').trim();
-      if(!v||!now[k]||lowTrim(v)===lowTrim(now[k]))continue;
-      if(H[k].some(x=>lowTrim(x)===lowTrim(v)))items.push({k,from:v,to:now[k],was:v});
+    if(w||oneStudent||maybeOne)for(const k of ['sid','grade']){
+      const v=clean(det[k]);
+      if(!v||!now[k]||v.toLowerCase()===now[k].toLowerCase())continue;
+      if(!H[k].some(x=>x.toLowerCase()===v.toLowerCase()))continue;
+      items.push({k,from:v,to:now[k],was:v});
+      if(k==='sid'&&!idNear(v,now.sid))ask=true;   /* another ID altogether: asked first */
     }
-    if(items.length)out.fix.push({id,items});
+    if(!w&&!oneStudent&&items.length)ask=true;
+    if(items.length)out.fix.push({id,name:w,items,warn,ask});
   }
   return out;
 }
 function andList(a){return a.length<3?a.join(' and '):a.slice(0,-1).join(', ')+' and '+a[a.length-1];}
+function orList(a){return a.length<3?a.join(' or '):a.slice(0,-1).join(', ')+' or '+a[a.length-1];}
+function quoted(s){return '\u201c'+esc(s)+'\u201d';}
 function checkIdentity(){
-  const c=corrections(),bar=$('#alertbar'),p=packet(),W=state.whoIs||{};
+  const c=corrections(),bar=$('#alertbar'),p=packet(),W=state.whoIs||{},now=clean(p.client);
+  const slips=c.fix.filter(f=>f.warn),sure=c.fix.filter(f=>!f.warn),order=Object.keys(state.frames);
+  const warn=c.odd.concat(slips.map(f=>f.id)).sort((a,b)=>order.indexOf(a)-order.indexOf(b));   /* in the order they were opened */
   const sig=JSON.stringify([c.odd.map(k=>k+'='+(W[k]||'')),c.fix.map(f=>f.id+':'+f.items.map(i=>i.k+'='+i.from+'>'+i.to).join(','))]);
   state.alertSig=sig;
-  if((!c.odd.length&&!c.fix.length)||state.alertOff===sig){bar.classList.remove('on');return;}
+  if((!warn.length&&!c.fix.length)||state.alertOff===sig){bar.classList.remove('on');return;}
   let html='';
-  if(c.odd.length)html='<b>Different student.</b> '+
-    (c.odd.length===1?'Form '+c.odd[0]+' holds':c.odd.length+' forms hold')+
-    ' a name other than <b>'+esc(p.client)+'</b> \u2014 '+
-    c.odd.map(k=>esc(k)+' \u201c'+esc(W[k]||'')+'\u201d').join(', ')+
-    '. Anything printed now would mix two students.';
-  if(c.fix.length){
-    const ids=c.fix.map(f=>f.id),kinds=new Set(c.fix.flatMap(f=>f.items.map(i=>i.k)));
-    const was=k=>esc([...new Set(c.fix.flatMap(f=>f.items.filter(i=>i.k===k).map(i=>i.was)))].join(' or '));
-    const said=[],what=[];
-    if(kinds.has('client')){said.push('<b>'+was('client')+'</b> is now <b>'+esc(p.client.trim())+'</b>');what.push(p.client.trim());}
-    if(kinds.has('sid')){said.push('ID <b>'+was('sid')+'</b> is now <b>'+esc(p.sid.trim())+'</b>');what.push('ID '+p.sid.trim());}
-    if(kinds.has('grade')){said.push('grade <b>'+was('grade')+'</b> is now <b>'+esc(p.grade.trim())+'</b>');what.push('grade '+p.grade.trim());}
+  if(warn.length){
+    /* the names, each with the forms that hold it */
+    const by=new Map();warn.forEach(id=>{const n=clean(W[id]);if(!by.has(n))by.set(n,[]);by.get(n).push(id);});
+    html='<b>Different student.</b> '+
+      (warn.length===1?'Form '+warn[0]+' holds':warn.length+' forms hold')+
+      ' a name other than <b>'+esc(now)+'</b> \u2014 '+
+      (warn.length===1?quoted(clean(W[warn[0]])):[...by].map(([n,ids])=>quoted(n)+' in '+andList(ids)).join('; '))+
+      '. Anything printed now would mix two students.';
+  }
+  if(slips.length){
+    const ids=slips.map(f=>f.id);
+    html+=' <b>Or the same student, the name corrected on the bar?</b> Then put '+esc(now)+' in '+
+      (c.odd.length?andList(ids):ids.length===1?'it':'them')+'.';
+  }
+  if(sure.length){
+    const ids=sure.map(f=>f.id),kinds=new Set(sure.flatMap(f=>f.items.map(i=>i.k)));
+    const was=k=>esc(orList([...new Set(sure.flatMap(f=>f.items.filter(i=>i.k===k).map(i=>i.was)))]));
+    const said=[];
+    if(kinds.has('client'))said.push('<b>'+was('client')+'</b> is now <b>'+esc(now)+'</b>');
+    if(kinds.has('sid'))said.push('ID <b>'+was('sid')+'</b> is now <b>'+esc(clean(p.sid))+'</b>');
+    if(kinds.has('grade'))said.push('grade <b>'+was('grade')+'</b> is now <b>'+esc(clean(p.grade))+'</b>');
     html+=(html?' ':'')+'<b>Corrected on the bar:</b> '+said.join(', ')+'. '+
-      (ids.length===1?'Form '+ids[0]+' still holds':andList(ids)+' still hold')+' the earlier '+(kinds.size===1&&kinds.has('client')?'name':'details')+
-      '. (Another student? Close '+(ids.length===1?'it':'them')+' instead.)';
+      (ids.length===1?'Form '+ids[0]+' still holds':andList(ids)+' still hold')+' the earlier '+(kinds.size===1&&kinds.has('client')?'name':'details')+'.'+
+      (sure.some(f=>f.ask)?' (Another student? Close '+(ids.length===1?'it':'them')+' instead.)':'');
+  }
+  if(c.fix.length){
+    const kinds=new Set(c.fix.flatMap(f=>f.items.map(i=>i.k))),what=[],ids=c.fix.map(f=>f.id);
+    if(kinds.has('client'))what.push(now);
+    if(kinds.has('sid'))what.push('ID '+clean(p.sid));
+    if(kinds.has('grade'))what.push('grade '+clean(p.grade));
     $('#alertFix').textContent='Use '+andList(what)+' in '+(ids.length===1?'Form '+ids[0]:'these '+ids.length+' forms');
   }
   $('#alertFix').hidden=!c.fix.length;
-  $('#alertGo').hidden=!c.odd.length;
+  $('#alertFix').classList.toggle('second',!!slips.length);   /* beside the warning, the offer is the second action */
+  $('#alertGo').hidden=!warn.length;
   if(state.alertHtml!==html){state.alertHtml=html;$('#alertText').innerHTML=html;}
-  bar.dataset.first=c.odd[0]||'';
+  bar.dataset.first=c.odd[0]||warn[0]||'';   /* Show me: another student's form first */
   bar.classList.add('on');
 }
 /* the student fields as the forms' own packet finds them (and as their bridge reads the name) */
@@ -3477,7 +3562,7 @@ function swapWords(s,from,to){
 /* the corrected name written the way the field has it: the same words in the same order take the bar's spelling;
    another order ("Rivera, Jordon") has its words changed one for one, or is left for the person */
 function nameLike(v,from,to){
-  if(norm(v)===norm(from))return to;
+  if(v.toLowerCase()===String(from).toLowerCase()||nameWords(v).join('')===nameWords(from).join(''))return to;
   const r=swapWords(v,from,to);
   return r&&sameName(r,to)?r:'';
 }
@@ -3505,16 +3590,19 @@ function fixIn(id,items){
   };
   for(const it of items){
     if(it.k==='client'){
+      /* a field still holding the earlier name, as written (capitals and spaces aside) or its words in another order,
+         and not already the bar's */
+      const holds=v=>!!v&&v!==it.to&&(v.toLowerCase()===it.from.toLowerCase()||sameName(v,it.from));
       fields(['client'],WHO_SELS).forEach(e=>{
-        const v=String(e.value||'').trim();
-        if(!v||!sameName(v,it.from)||sameName(v,it.to))return;
-        const nv=nameLike(v,it.from,it.to);if(nv)put(e,nv,'name');
+        const v=clean(e.value);
+        if(!holds(v))return;
+        const nv=nameLike(v,it.from,it.to);if(nv&&nv!==v)put(e,nv,'name');
       });
       /* a form that keeps the first and last name apart (Form DM-1) */
       const F=fields(['first'],['#sFirst'])[0],L=fields(['last'],['#sLast'])[0];
       if(F||L){
-        const fv=F?String(F.value||'').trim():'',lv=L?String(L.value||'').trim():'',whole=[fv,lv].filter(Boolean).join(' ');
-        if(whole&&sameName(whole,it.from)&&!sameName(whole,it.to)){
+        const fv=F?clean(F.value):'',lv=L?clean(L.value):'',whole=[fv,lv].filter(Boolean).join(' ');
+        if(holds(whole)){
           let nf=swapWords(fv,it.from,it.to),nl=swapWords(lv,it.from,it.to);
           if(nf===null){
             const o=splitName(it.from),n=splitName(it.to);
@@ -3532,18 +3620,53 @@ function fixIn(id,items){
   }
   return out;
 }
+/* the question asked before a change only the person can tell is a correction: both students, and the forms */
+function sameQuestion(fs){
+  const p=packet(),now={client:clean(p.client),sid:clean(p.sid),grade:clean(p.grade)},D=state.details||{};
+  const uniq=a=>[...new Set(a.filter(Boolean))];
+  const ident=(n,s,g)=>n+(s.length||g.length?' ('+[s.length?'ID '+orList(s):'',g.length?'grade '+orList(g):''].filter(Boolean).join(', ')+')':'');
+  const named=fs.filter(f=>f.name),bare=fs.filter(f=>!f.name);
+  const names=uniq(named.map(f=>f.name)),other=names.filter(n=>!sameName(n,now.client));
+  const one=fs.length===1,hold=a=>a.length===1?'Form '+a[0].id+' holds ':andList(a.map(f=>f.id))+' hold ';
+  const parts=[];
+  if(named.length)parts.push(hold(named)+ident(orList(names),uniq(named.map(f=>clean((D[f.id]||{}).sid))),uniq(named.map(f=>clean((D[f.id]||{}).grade)))));
+  /* a form with no name holds only the earlier ID or grade */
+  if(bare.length){const was=k=>uniq(bare.flatMap(f=>f.items.filter(i=>i.k===k).map(i=>i.from)));
+    parts.push(hold(bare)+'no name, only '+andList([was('sid').length?'ID '+orList(was('sid')):'',was('grade').length?'grade '+orList(was('grade')):''].filter(Boolean)));}
+  return (other.length?'Is '+orList(other)+' the same student as '+now.client+'?':'Is this the same student?')+'\n'+
+    parts.join('; ')+'; the bar says '+ident(now.client,now.sid?[now.sid]:[],now.grade?[now.grade]:[])+'.\n'+
+    'Put the bar\u2019s details in '+(one?'it':'them')+' only if this is the same student and the earlier details were written wrongly. '+
+    'If it is another student, choose Cancel and close '+(one?'that form':'those forms')+' instead: one packet must not mix two students.';
+}
+function fixSig(c){return JSON.stringify(c.fix.map(f=>[f.id,f.items.map(i=>[i.k,i.from,i.to])]));}
 async function applyFixes(){
-  const c=corrections();
+  let c=corrections();
   if(!c.fix.length){checkIdentity();return;}
+  const asked=c.fix.filter(f=>f.ask);
+  if(asked.length){
+    const plan=fixSig(c);
+    if(!(await wsUI.confirm(sameQuestion(asked),{ok:'Same student: correct '+(c.fix.length===1?'it':'them'),cancel:'Cancel'}))){say('Nothing was changed');return;}
+    c=corrections();
+    if(fixSig(c)!==plan){checkIdentity();wsUI.alert('Nothing was changed: the bar or the forms changed while the question was open.\nThe strip above shows how they stand now.');return;}
+    /* the person has said the earlier names are this student's: an ID or grade left in a form with no name is offered as
+       it is from now on (not asked about again) */
+    const to=clean(packet().client);
+    c.fix.forEach(f=>f.items.forEach(i=>{if(i.k==='client')(state.barHist||freshHist()).client.forEach(x=>{if(x.v===i.was||sameName(x.v,i.from))x.same=to;});}));
+  }
   commitBar();
   const p=packet(),done=[],apart=[],gone=[];
   for(const f of c.fix){
     let r=null;try{r=fixIn(f.id,f.items);}catch(e){r=null;}
     if(r===null)apart.push(f.id);else if(r.length)done.push({id:f.id,list:r});else gone.push(f.id);
   }
-  /* Autosave keeps the safety copy it has been keeping: the same student, the name corrected */
-  try{const A=state.auto,olds=c.fix.flatMap(f=>f.items.filter(i=>i.k==='client').map(i=>i.was));
-    if(A&&A.student&&olds.some(n=>sameName(A.student,n)||CP.same(A.student,n)))A.student=p.client.trim();}catch(e){}
+  /* Autosave: the same student, the name corrected. Its copy takes the corrected name, and a copy it began under the
+     corrected name when the bar changed (before this tap) takes the place of the one under the earlier name */
+  if(done.length)try{
+    const A=state.auto,olds=c.fix.flatMap(f=>f.items.filter(i=>i.k==='client').flatMap(i=>[i.was,i.from]));
+    const old=n=>!!n&&olds.some(o=>sameName(n,o)||CP.same(n,o));
+    if(A&&A.student&&old(A.student))A.student=clean(p.client);
+    if(A&&A.prev&&old(A.prev.student)&&A.prev.key!==A.key){const k=A.prev.key;A.prev=null;autoFold(k);}
+  }catch(e){}
   done.forEach(r=>{const fr=state.frames[r.id];if(fr)ask(fr,'status');});
   setTimeout(checkIdentity,800);
   const lines=done.map(r=>'Form '+r.id+': '+r.list.map(x=>x.what+' '+(x.from||'(empty)')+' \u2192 '+x.to).join('; '));
@@ -4164,7 +4287,7 @@ const PWA=(()=>{
     if(!b||!inApp())return;
     e.stopPropagation();e.preventDefault();
     if(!state.cur)return;
-    setFull(true);
+    setFull(true,true);   /* v21.44 (A8) for this form, not kept as the device's fullscreen setting */
     wsUI.toast('Installed on this iPad, a form cannot open in a tab of its own, so it fills the window here. Exit, above the form, brings the rest back.',{ms:9000});
   },true);
   let lastAuto=0,lastUpd=0;
