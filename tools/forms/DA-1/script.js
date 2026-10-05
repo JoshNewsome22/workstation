@@ -64,7 +64,12 @@ function renderTasks(){
     <td>${sel('tasks',i,'rating',['1','2','3','4','5'],r.rating,'Aversive rating, task '+(i+1))}</td>
     <td><input data-r="tasks" data-i="${i}" data-f="note" value="${esc(r.note)}" placeholder="what the informant said"></td>${delCell('tasks',i,'task')}</tr>`).join('');
 }
-function renderInv(){
+/* v21.44 (B3): the stop rule for the physical step shows while the prompting sequence, or a task's prompting, ends in
+   physical guidance */
+function renderPgRule(){const el=$('#pgRule');if(!el)return;
+  const on=/then physical guidance/i.test(S.meta.prompt||'')||S.tasks.some(t=>/\bphysical\b/i.test(t.prompt||'')&&!/\bno physical\b/i.test(t.prompt||''));
+  if(el.hidden===on)el.hidden=!on;}
+function renderInv(){renderPgRule();
   const el=$('#invVerdict');const T=S.tasks.filter(t=>t.name);
   if(!T.length){el.innerHTML='<div class="verdict v-mid"><b>No tasks yet.</b> List the demands from the schedule; six to eight is a usual set (working convention).</div>';return;}
   const easy=T.filter(t=>num(t.rating)!=null&&num(t.rating)<=2).length,hard=T.filter(t=>num(t.rating)!=null&&num(t.rating)>=4).length;
@@ -216,7 +221,7 @@ document.addEventListener('input',e=>{const el=e.target;
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;if(el.dataset.r==='tasks')renderInv();renderResultsSoon();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='prompt')renderPgRule();}
 });
 $('#addTask').addEventListener('click',()=>{if(S.tasks.length>=12)return;S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderResultsSoon();});
 $('#delTask').addEventListener('click',async ()=>{if(S.tasks.length<=1)return;const i=S.tasks.length-1,used=S.sess.some(s=>String(s.t)===String(i))||S.probes.some(p=>String(p.a)===String(i)||String(p.b)===String(i));
