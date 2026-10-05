@@ -108,6 +108,20 @@ body.view-guide .only-board,body.view-guide .only-cards,body.view-guide .only-ru
   body.vs-out-only .out{margin:0}
 }
 
+/* ---- v21.44 (A7): the sheets for Safari on the iPad and iPhone, which prints portrait Letter inside its own margins (about half an
+   inch, with the address and date at the foot). Turned, Print the visuals draws each page of visuals as the area TK-1 lays its turned
+   sheets out in, 7.4 x 9.45 in (the script's TW and TH), with no border of its own; each is centred at the top of the area Safari
+   prints, which leaves room at the foot and at the sides. A landscape board is turned a quarter (clockwise) inside a fully contained
+   frame, so its unturned width does not make the browser shrink the print (TK-1's frames); a sheet scaled to fit (fitSheets) holds
+   its visual in the same kind of frame. A sheet clips what pokes out of its visual (the poster's last row, a hair below the poster),
+   which would otherwise start a sheet of its own. ---- */
+@media print{
+  body.vs-turn .out .page{margin:0 auto!important;overflow:hidden}
+  body.vs-turn .out .page.land,body.vs-turn .out .page.vs-fitted{height:9.45in!important;contain:strict}
+  body.vs-turn .out .page.land>.vb{position:absolute;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(90deg)}
+  body.vs-turn .out .page.vs-fitted>.vs-fit{position:absolute;left:50%;top:0;width:7.4in;transform-origin:50% 0;transform:translateX(-50%) scale(var(--k,1))}
+}
+
 /* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
 table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
 .rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
