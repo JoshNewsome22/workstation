@@ -100,7 +100,7 @@ const FID=[
 const DAYS=['Monday','Tuesday','Wednesday','Thursday','Friday'];
 
 /* ---------------- state ---------------- */
-function blank(){return{meta:{},chk:{},sys:'',tg:[],per:[],lv:LEVELS.map(l=>({pts:l.pts,desc:l.desc})),lad:LADDER.map(()=>({on:false,note:''})),fade:FADE.map(()=>({on:false,note:''})),fid:FID.map(()=>({in:'',note:''})),bck:BCRULES.map(()=>({in:'',note:''})),log:[],wk:{}};}
+function blank(){return{meta:{},chk:{},sys:'',tg:[],per:[],lv:LEVELS.map(l=>({pts:l.pts,desc:l.desc})),lad:LADDER.map(()=>({on:false,note:''})),fade:FADE.map(()=>({on:false,note:''})),fid:FID.map(()=>({in:'',note:''})),bck:BCRULES.map(()=>({in:'',note:''})),log:[],wk:{},d:{},store:[],per2:[]};}
 let S=blank();
 function ensure(){
   if(!Array.isArray(S.tg))S.tg=[];if(!Array.isArray(S.per))S.per=[];if(!Array.isArray(S.log))S.log=[];
@@ -113,6 +113,7 @@ function ensure(){
   while(S.tg.length<2)S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});
   while(S.per.length<4)S.per.push({t:'',label:'',icon:'',img:''});
   S.per.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});
+  if(typeof smEnsure==='function')smEnsure();   /* v21.45 the design, the store, the second schedule (sm-v2-ui.js) */
 }
 
 /* ---------------- views ---------------- */
@@ -185,11 +186,11 @@ document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderPoints();renderSheet();renderSetup();renderBc();}
   if(el.dataset.wk!==undefined){S.wk[el.dataset.wk]=el.value;renderWk();}
 });
-document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>{if(r==='tg')renderT();else renderP();renderSheet();});});
+document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>{if(r==='tg')renderT();else if(r==='per')renderP();else if(typeof smRepick==='function')smRepick(r);renderSheet();});});
 let wkT=0;function renderWkSoon(){clearTimeout(wkT);wkT=setTimeout(renderWk,250);}
-$('#addT').addEventListener('click',()=>{if(S.tg.length>=5)return;S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});renderT();renderSheet();renderPoints();renderSetup();});
+$('#addT').addEventListener('click',()=>{if(S.tg.length>=6)return;S.tg.push({word:'',def:'',cue:'',ex:'',nex:'',icon:'',img:'',goal:''});renderT();renderSheet();renderPoints();renderSetup();});
 $('#delT').addEventListener('click',async ()=>{if(S.tg.length<=1)return;const r=S.tg[S.tg.length-1];if((r.word||r.def)&&!(await nbhUI.confirm('Remove the last target?\nIts name, definition, cues and examples are deleted.',{ok:'Remove',danger:true})))return;S.tg.pop();renderT();renderSheet();renderPoints();renderSetup();});
-$('#addP').addEventListener('click',()=>{if(S.per.length>=12)return;S.per.push({t:'',label:'',icon:'',img:''});renderP();renderSheet();renderPoints();renderWk();});
+$('#addP').addEventListener('click',()=>{if(S.per.length>=16)return;S.per.push({t:'',label:'',icon:'',img:''});renderP();renderSheet();renderPoints();renderWk();});
 $('#delP').addEventListener('click',async ()=>{if(S.per.length<=1)return;const r=S.per[S.per.length-1];if((r.t||r.label)&&!(await nbhUI.confirm('Remove the last period?\nIts time, label and icon are deleted.',{ok:'Remove',danger:true})))return;S.per.pop();renderP();renderSheet();renderPoints();renderWk();});
 $('#addL').addEventListener('click',()=>{S.log.push({date:'',ph:curPhase(),goal:S.meta.goal||'',pts:'',poss:String(possible().poss||''),m:'',n:'',met:false,tgp:'',note:''});renderL();renderRecord();});
 $('#delL').addEventListener('click',async ()=>{if(!S.log.length)return;const r=S.log[S.log.length-1];if((r.date||r.pts)&&!(await nbhUI.confirm('Remove the last day?\nIts date, points and note are deleted from the Record.',{ok:'Remove',danger:true})))return;S.log.pop();renderL();renderRecord();});
@@ -226,6 +227,7 @@ function possible(){
   else if(sys==='interlock'){poss=1;unit='session';}
   else if(sys==='perf'){poss=num(S.meta.pf_n)||5;unit='sessions';}
   else if(sys==='cico')poss=P*T*2;
+  {const v=typeof smV2Poss==='function'?smV2Poss(sys,P,T):null;if(v!=null)poss=v;}   /* v21.45 a rating style chosen on the Design page */
   const g=num(S.meta.goal);const need=g!=null&&poss?Math.ceil(poss*g/100):null;
   return{poss,need,g,unit};
 }
@@ -265,7 +267,9 @@ function sheetTitle(){if(S.meta.sh_title)return S.meta.sh_title;const n=S.meta.n
   return{match:poss+' Self & Match Sheet',contract:poss+' Self-Monitoring Contract',rubric:poss+' Point Sheet',interval:poss+' On-Task Check',interlock:'Self-Monitoring with an Interlocking Schedule',smiley:poss+' Self-Monitoring',perf:poss+' Work Count',cico:poss+' Daily Progress Report'}[S.sys]||poss+' Sheet';}
 function tgHead(t,i,span){const q=S.tg[i];return '<th class="q" colspan="'+(span||1)+'">'+(S.chk.pict&&!S.chk.pocket?pic(q,'ic'):'')+'<b>'+esc(q.word||('Target '+(i+1)))+'</b>'+(q.cue?'<span class="cue">• '+esc(q.cue)+'</span>':'')+'</th>';}
 function perCell(p,i){return '<td class="per">'+esc(p.t?fmtHM(p.t)+' ':'')+esc(p.label||('Period '+(i+1)))+(S.chk.pict&&!S.chk.pocket?pic(p,'ic'):'')+'</td>';}
-const yn=()=>S.chk.pict&&!S.chk.pocket?face(true)+face(false):'<div class="yn">YES<br>NO</div>';
+const yn=()=>smRateKey()!=='auto'?smRateCell(S.chk.pocket?14:20):S.chk.pict&&!S.chk.pocket?face(true)+face(false):'<div class="yn">YES<br>NO</div>';
+/* v21.45 a rating style chosen on the Design page replaces the sheet type's own marks */
+const smC=def=>smRateKey()!=='auto'?smRateCell(S.chk.pocket?14:20):def;
 const circles=n=>Array.from({length:n},(_,i)=>'<span class="circ">'+(i+1)+'</span>').join('');
 function sheetHead(extra){const m=S.meta,p=possible();
   const goal=m.goal_txt||(p.need!=null?'If I earn '+p.need+' of '+p.poss+' '+p.unit+', I earn my reward.':'');
@@ -309,7 +313,7 @@ function renderSheet(){
         '<tr class="totals"><td>Checks (of '+(P.length*T.length)+')</td>'+DAYS.map(()=>'<td class="w"></td>').join('')+'</tr><tr class="totals"><td>Week total</td><td class="w" colspan="5"></td></tr></tbody></table>'+sheetFoot({unit:'checks'});
     }else{
       h=sheetHead()+'<table class="sm sm-contract"><thead><tr><th style="width:16%">Period</th>'+T.map((t,i)=>tgHead(t,i,1)).join('')+'<th style="width:11%">Teacher initials</th></tr></thead><tbody>'+
-        P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td class="chk">'+(S.chk.pict&&!S.chk.pocket?face(true)+face(false):'<span class="mbox" style="margin:0"></span>')+'</td>').join('')+'<td></td></tr>').join('')+
+        P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td class="chk">'+smC(S.chk.pict&&!S.chk.pocket?face(true)+face(false):'<span class="mbox" style="margin:0"></span>')+'</td>').join('')+'<td></td></tr>').join('')+
         '<tr class="totals"><td>Total checks</td>'+T.map(()=>'<td class="w"></td>').join('')+'<td class="w"></td></tr></tbody></table>'+sheetFoot({unit:'checks'});
     }
   }else if(S.sys==='rubric'){
@@ -343,7 +347,7 @@ function renderSheet(){
     const inrow=S.meta.sm_inrow||'2',earn=(S.meta.sm_earn||'').split('\n').map(x=>x.trim()).filter(Boolean),tiers=(S.meta.sm_tiers||'').split('\n').map(x=>x.trim()).filter(Boolean);
     h='<div class="sm-head"><div><div class="sm-line">Name: <span class="bl">'+esc(S.meta.client||'')+'</span></div><div class="sm-title">'+esc(sheetTitle())+'</div><div class="sm-line">Date: <span class="bl" style="min-width:110px">'+esc(S.meta.sh_date||'')+'</span></div></div></div>'+
       '<div style="display:flex;gap:12px;align-items:flex-start"><table class="sm" style="flex:1"><thead><tr><th style="width:18%">Schedule</th><th colspan="'+T.length+'">I should be…</th><th style="width:9%">'+esc(inrow)+' in a row?</th></tr><tr><th></th>'+T.map((t,i)=>tgHead(t,i,1)).join('')+'<th></th></tr></thead><tbody>'+
-      P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td>'+face(true,'face')+'</td>').join('')+'<td><span class="mbox" style="margin:0"></span></td></tr>').join('')+
+      P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td>'+smC(face(true,'face'))+'</td>').join('')+'<td><span class="mbox" style="margin:0"></span></td></tr>').join('')+
       '<tr class="totals"><td>Day’s total</td>'+T.map(()=>'<td class="w">____ / '+P.length+' = ____%</td>').join('')+'<td class="w"></td></tr>'+
       '<tr class="totals"><td>Goal</td>'+T.map(t=>'<td class="w">'+(t.goal?esc(t.goal)+'%':'______%')+'</td>').join('')+'<td class="w"></td></tr></tbody></table>'+
       '<div style="width:30%;border:1.5px solid #111;padding:8px;font-size:12px"><div style="font-weight:700;text-align:center;border-bottom:1.5px solid #111;padding-bottom:4px;margin-bottom:6px">'+esc(inrow)+' in a row<br>I can earn…</div>'+(earn.length?earn.map(e=>'<div style="padding:2px 0;border-bottom:1px dotted #999">'+esc(e)+'</div>').join(''):'<div style="color:#666">(list the earns on the Reinforcement sheet)</div>')+'<div style="padding:2px 0">Other: ________</div></div></div>'+
@@ -372,7 +376,7 @@ function renderSheet(){
       '<div class="inout"><div><b>Check-in '+esc(S.meta.ci_in?'· '+S.meta.ci_in.split(';')[0]:'')+'</b>Mentor initials: <span class="bl" style="min-width:60px"></span> &nbsp; Card and materials ready: YES / NO<br>My goal today: <span class="bl" style="min-width:60%"></span></div>'+
       '<div><b>Check-out '+esc(S.meta.ci_out?'· '+S.meta.ci_out.split(';')[0]:'')+'</b>Points earned: <span class="bl" style="min-width:50px"></span> of '+poss+' = <span class="bl" style="min-width:50px"></span>% &nbsp; Goal met: YES / NO<br>Mentor initials: <span class="bl" style="min-width:60px"></span> &nbsp; Reward: <span class="bl" style="min-width:140px"></span></div></div>'+
       '<table class="sm cico"><thead><tr><th style="width:18%">Period</th>'+T.map((t,i)=>tgHead(t,i,1)).join('')+'<th style="width:11%">Teacher initials</th></tr></thead><tbody>'+
-      P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td><span class="sc">0 1 2</span></td>').join('')+'<td></td></tr>').join('')+
+      P.map((p,i)=>'<tr>'+perCell(p,i)+T.map(()=>'<td>'+smC('<span class="sc">0 1 2</span>')+'</td>').join('')+'<td></td></tr>').join('')+
       '<tr class="totals"><td>Points</td>'+T.map(()=>'<td class="w">____ of '+(P.length*2)+'</td>').join('')+'<td class="w"></td></tr></tbody></table>'+
       '<div class="sm-line" style="margin-top:6px">Teacher comment (one line, something that went well): <span class="bl" style="min-width:60%"></span></div>'+
       sheetFoot({src:'After the Behavior Education Program card (Crone, Hawken &amp; Horner, 2010)'})+(S.meta.ci_home&&/^Yes/.test(S.meta.ci_home)&&!S.chk.home&&!S.chk.pocket?tearOff():'');
@@ -479,7 +483,7 @@ function fromFile(d){
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
   o.sys=['match','contract','rubric','interval','interlock','smiley','perf','cico'].includes(s.sys)?s.sys:'';
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n||50).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='on'||f==='met'?!!(x&&x[f]):str(x&&x[f]);});return r;}):null;
-  o.tg=arr('tg',['word','def','cue','ex','nex','icon','img','goal'],5)||[];o.per=arr('per',['t','label','icon','img'],12)||[];
+  o.tg=arr('tg',['word','def','cue','ex','nex','icon','img','goal'],6)||[];o.per=arr('per',['t','label','icon','img'],16)||[];
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<400000?v:'';o.tg.forEach(x=>{x.img=okImg(x.img);});o.per.forEach(x=>{x.img=okImg(x.img);});
   const lv=arr('lv',['pts','desc'],5);if(lv&&lv.length===5)o.lv=lv;
   const lad=arr('lad',['on','note'],LADDER.length);if(lad&&lad.length===LADDER.length)o.lad=lad;
@@ -535,6 +539,9 @@ async function loadSim(){
     bc_student:'',bc_teacher:'Ms. R.',bc_parent:'Sam’s father',bc_start:Y(10),bc_review:F(4),bc_voice:'Negotiated line by line',bc_task:'Earn the goal on my point sheet',bc_how:'At least 4 of 5 school days in the week',bc_when:'Every school day, all six periods, Room 12 and specials',bc_record:'Ms. R. initials the task record each day the goal is met',bc_adult:'Ms. R. will rate every period and give the daily reward the same day; Dad will read the home note each night and sign on Friday',bc_rw:'Extra recess with a friend',bc_rwmuch:'10 minutes',bc_rwwhen:'Friday at 2:40',bc_rwwho:'Ms. R.',bc_bonus:'Five days in a row earns lunch with a friend in the classroom',bc_pen:'None: a day the task is not done earns nothing, and nothing is lost',bc_pentext:'',bc_renego:'Either of us may ask for a meeting; the contract is rewritten, never changed by one side',
     sh_date:'',sh_title:'',sh_reward:'',decision:'Week 3: goal raised from 75 to 80 on '+Y(2)+' (met 4 of 5). Matching stays at every period until agreement holds at 90.',sv:'Sam chose the sheet with faces over the one with words and asks for the recess reward most days.'};
   S.chk={pict:true,home:true,weekly:false,big:false,graph:true,eval:true,pocket:false,rubmatch:true};
+  /* v21.45 the design and the reward store */
+  S.d={look:'bright',rate:'thumbs',av:'faceboy2',wf:true,mid:'18 points by lunch = 5 minutes of drawing at the back table',cstrip:false};
+  S.store=[{n:'Line leader',icon:'lineup',img:'',p:'8',tier:'s'},{n:'Drawing time',icon:'drawing',img:'',p:'10',tier:'s'},{n:'Teacher helper',icon:'helper',img:'',p:'12',tier:'m'},{n:'Feed the class fish',icon:'pet',img:'',p:'15',tier:'m'},{n:'Extra recess with a friend',icon:'playground',img:'',p:'20',tier:'b'}];
   S.tg=[{word:'I stayed in my area',def:'Seated or standing within the taped area for the whole period, except with permission or a break card',cue:'Bottom on the chair',ex:'At the desk while the class works; at the carpet during meeting',nex:'Wandering to the window; under the table',icon:'stayarea',img:'',goal:'80'},
     {word:'I followed directions the first time',def:'Starts the task within 10 s of the direction, with at most one reminder',cue:'Start within 10 seconds',ex:'Opens the book when asked',nex:'Says “no” and waits for a third prompt',icon:'follow',img:'',goal:'80'},
     {word:'I used kind words and hands',def:'No hitting, pushing, grabbing or name-calling; asks for help or a break with the card',cue:'Gentle and respectful',ex:'Asks for a turn; uses the break card',nex:'Pushes a chair; calls a peer a name',icon:'safehands',img:'',goal:'90'}];
@@ -556,7 +563,7 @@ async function loadSim(){
 $('#simBtn').addEventListener('click',loadSim);
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
-renderAll();
+/* v21.45 the first render is at the end of the script (build.sh), once the v2 parts (sm-v2-*.js) are defined */
 
 /* v21.31 the case: hooks. The targets a student self-monitors are stated positively, so an empty target
    table takes the acquisition objectives from Form GB-1 and the paired replacements named on Form TB-1,

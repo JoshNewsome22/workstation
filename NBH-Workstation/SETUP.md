@@ -7270,3 +7270,77 @@ files saved before each change travel with its check in `qa/data/`.
   parts, how the student is watched, and the parent told; it falls back to
   supervised when one goes, and the walkthrough shows the open door. Files
   saved before open supervised. Check: `qa/policy-ea1-test.js`.
+
+## Form SM-1, the Self-Monitoring and Point Sheet Creator: Looks, Rating Styles, a Reward Store, and a Walkthrough (v21.45)
+
+SM-1 keeps every sheet type, page and record it had, and gains what Form TK-1 has: a sheet that looks made for the student, and
+a narrated walkthrough of that sheet with **Save as video**. A file saved before v21.45 opens on the **Classic** look with the
+rating "as the sheet type has it", and prints exactly the sheet it printed before (checked for all eight sheet types, weekly and
+pocket sheets, against the v21.44 form).
+
+**Built from parts.** `sh tools/forms/SM-1/build.sh` assembles the form (CF-1's shared parts, then the polish layer) from
+`script-main.js`, the QR library (`tools/vendor/qrcode-generator`), `sm-themes.js` (the themes' pictures, OpenMoji CC BY-SA 4.0,
+made by `make-themes.py`), `sm-library.json` (the target library), `sm-v2-core.js` (the looks, rating styles, store, the model every
+look draws), `sm-v2-ui.js` (the editors), `walk-script.json` and `walk.js` (the walkthrough; its player is a copy of TK-1's), and
+the styles `own.css`, `sm-v2.css`, TK-1's `walk.css` and `walk-sm.css`. The narration (`walk-audio.js`, voiced from
+`walk-script.json` by `make-narration.py`, Kokoro af_heart, as TK-1's) goes beside the form as `nbh-sm1-narration.js` (1.2 MB);
+Save as video is TK-1's `nbh-tk1-video.js`, which now takes its file name and dialog words from the form (`NBH_WALK_INFO`). The
+one-file editions carry the narration once (`nbh-embed-narration-sm1`). Rules written for `#sheetOut` are copied by the build to
+`#smPrevI` (the live preview) and `#wkSheet` (the walkthrough's copy of the sheet).
+
+**Design page (new).** Five looks: Classic, Bright (elementary: the student's avatar or photo, a gradient header, big glyphs),
+Interest theme (sports, space, animals, dinosaurs, art, music, vehicles: the theme's colours, pictures and words, such as "Game
+Plan", "Prize locker", "Halftime check"), Clean (middle and high school: initials, a report layout, a points-to-spend list) and
+Discreet pocket cards (one to six day cards a page, initials only, the week's graph on the sixth). Any look draws Self & Match,
+the contract, expectations and earns, check-in / check-out, cued intervals and the rubric sheet; the performance count, the
+interlocking session and the weekly sheets keep their layout in the look's colour. Also: the colour, the name shown (first name,
+initials or full), the word for the adult who rates, the "I'm working for" box, a midday check, a QR code (the walkthrough video
+saved to the district drive, or any page), and the contract's line on the sheet.
+
+**Rating styles.** One choice for every sheet type: smiles (2 or 3), thumbs, plus / minus, check / x, Yes / No, 0-1-2, 1 to 5,
+stars coloured in (0 to 3), green / yellow / red (lettered, for black-and-white printing), three pictures from the library, or the
+student's own words. Each level's points can be edited. Points possible follow the style: a two-level style on Self & Match keeps
+the Match Points table; a style with more levels counts the adult's rating plus a bonus (default 1) when the student's rating is
+the same (after Rhode, Morgan and Young's matching procedure, 1983); the other sheet types count each cell's points.
+
+**Targets.** **Add from the library** places up to six targets from 26 written for the practice (task engagement, starting and
+finishing work, following directions, schedule changes and transitions, ending a preferred activity, asking for help or a break,
+a calm-down plan, waiting, accepting no and feedback, safe body, staying in the area, kind words, raising a hand, taking turns
+talking, personal space, respectful words to staff; younger and older wording), each with the sheet's words, the adults'
+definition, a cue, an example and a non-example, a picture and a starting goal; a target already on the sheet is not placed twice.
+Six targets are now allowed (five before), sixteen periods (twelve).
+
+**Schedules.** Start from an elementary day, a half day, a middle school day, a high school day or a block schedule, or make rows
+every N minutes; a second schedule (a specials day, early release) prints while its box is ticked (the Record and week grid
+keep the regular day's periods).
+
+**Reward store** (Reinforcement page): rewards with a picture, a price and a tier (small, medium, big), filled from the reward
+menu with pictures guessed from the words; an optional bank. It prints on the sheet (tiles, a list, or a line on the cards) and
+on its own as **My Reward Menu**.
+
+**Quick starts** (Setup page): six common arrangements (young student Self & Match; expectations with a theme; on-task checks;
+middle school check-in / check-out; high school pocket cards; a point sheet with levels). Each sets the sheet type, the look and
+the rating, and fills targets and periods only where they are empty.
+
+**Preview.** **Preview the sheet** (bottom right on the editing pages) shows the sheet as it prints and follows every change.
+
+**Printing.** The Sheet page says whether the sheet fits one page; a sheet that runs over prints shrunk to fit unless **print at
+full size** is ticked. New prints: a week (Monday to Friday, one page each), two half-size copies on a page, My Reward Menu, **How
+to Run This Sheet** (a staff page made from the settings: before the day, at each period, what to say, what never happens, the
+end of the day, the record, the targets' definitions and the goal rule) and a **rating practice page** (the targets' own examples
+and non-examples to rate, with an answer key).
+
+**Contract.** **Fill the empty lines from the sheet** fills the task, how much, when, who records and the reward from the sheet
+(only empty lines); **Pictures on the contract** adds the targets' and the reward's pictures for a younger student.
+
+**Walkthrough** (new view). Built live from the sheet as it prints: the sheet appears, the camera moves to the goals and the day,
+the student's pencil circles the ratings in the first row (as the chosen style is described), the adult's pen rates the same row,
+the matches earn points that are written in, the day is totalled against the goal, the store's rewards light up and the chosen
+one goes into the "working for" box, the contract is signed, and four points for the adults are read. The lines depend on the
+sheet: one per rating style (twelve, plus the rubric, the intervals and the contract's check), the matching lines only for Self &
+Match (two-level or bonus wording), "your teacher rates" for check-in / check-out, and the midday check, the store or the reward
+menu, the bank and the contract only when the sheet has them. With the simulation it runs about 1 min 46 s in seven chapters.
+The player, the captions, full screen, the transcript and Save as video (1080p, with the narration) work as TK-1's; the credit line
+is on every frame. Checked by `qa/sm1-v2-test.js` (the older file, every look and sheet type, the points, the themes, save and
+open, the library, the quick starts, the schedules, the store, the contract, the preview, the extra pages, the walkthrough's lines
+for eight sheets, and five frames painted for the video against the stage), and an MP4 with sound made in WebKit.

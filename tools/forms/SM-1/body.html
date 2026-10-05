@@ -1,5 +1,8 @@
   <!-- ===================== SETUP ===================== -->
   <section class="only-setup">
+    <!-- v21.45 quick starts: one tap sets the system, the design, the targets and the day for a common case -->
+    <h2 class="nbh-band noprint">Quick Start</h2>
+    <div class="noprint" id="smQS"></div>
     <h2 class="nbh-band">Student, Plan, and the Shape of the System</h2>
     <div class="fieldgrid">
       <div><label>Student</label><input data-m="client"></div>
@@ -32,7 +35,7 @@
   <section class="only-targets">
     <h2 class="nbh-band">What the Student Rates</h2>
     <p class="hint">Two to four targets, each stated as something the student does (not stops doing), in the student&rsquo;s own words on the sheet and in observable terms for the adults. Pair each reduction target with the replacement behavior the plan teaches. The cue line prints under the question on the sheet; the examples and non-examples are the teaching set for the discrimination practice.</p>
-    <div class="tools"><button class="tool" id="addT">Add a target</button><button class="tool" id="delT">Remove last</button></div>
+    <div class="tools"><button class="tool" id="addT">Add a target</button><button class="tool" id="delT">Remove last</button><button class="tool" id="smLibBtn">Add from the library</button></div>
     <div class="grid-wrap"><table class="rt wide" id="tTbl"><thead><tr>
       <th style="width:4%">#</th><th style="width:20%">On the sheet (student&rsquo;s words)</th><th style="width:22%">Definition for the adults</th><th style="width:16%">Cue line (short)</th><th style="width:14%">Example</th><th style="width:14%">Non-example</th><th style="width:12%">Picture and goal</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <p class="hint">Pictures come from the shared pictogram library (OpenMoji, CC BY-SA 4.0, and the practice&rsquo;s own cards and pictures) or from a photo you upload; a photo is stored inside the saved file, resized to a thumbnail. A pictorial sheet reads best with four targets or fewer; the form warns above that.</p>
@@ -59,6 +62,7 @@
     <h3>Periods or Activities</h3>
     <p class="hint">The rows of the sheet. Use the student&rsquo;s own day: a time and a label, and a picture for a pictorial sheet. For a weekly contract these are the classes of each day.</p>
     <div class="tools"><button class="tool" id="addP">Add a period</button><button class="tool" id="delP">Remove last</button></div>
+    <div class="noprint" id="smSched"></div>
     <div class="grid-wrap"><table class="rt" id="pTbl"><thead><tr><th style="width:5%">#</th><th style="width:22%">Time</th><th style="width:38%">Label</th><th>Picture</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="ckrow" style="margin-top:8px">
       <label class="ck"><input type="checkbox" data-c="weekly"> Weekly sheet (Monday to Friday on one page) rather than one sheet per day</label>
@@ -147,6 +151,13 @@
   </section>
 
   <!-- ===================== REINFORCEMENT ===================== -->
+  <!-- ===================== DESIGN (v21.45) ===================== -->
+  <section class="only-design noprint">
+    <h2 class="nbh-band">How the Sheet Looks</h2>
+    <p class="hint">The look, the colours and the way the student rates. Every look prints any sheet type (the performance count, the interlocking session and the weekly sheets keep their layout in the look&rsquo;s colours). Classic is the sheet as the form made it before; an older saved file opens on Classic.</p>
+    <div id="smDesign"></div>
+  </section>
+
   <section class="only-reinf">
     <h2 class="nbh-band">Goal, Points, and What They Buy</h2>
     <div class="metrics" id="ptMetrics"></div>
@@ -163,6 +174,9 @@
       <tr><th>Is the reward available anywhere else in the day?</th><td><select data-m="rf_closed" style="width:70%"><option></option><option>No: only through the sheet (closed)</option><option>Sometimes, at set times the student knows</option><option>Yes, freely (open: expect the points to buy less)</option></select></td></tr>
       <tr><th>As the schedule thins</th><td><input data-m="rf_mag" placeholder="what gets bigger or better as matching fades and the goal rises: longer access, a better item, accumulated time at the end of the week"></td></tr>
     </table>
+    <h3>The Reward Store</h3>
+    <p class="hint">What the points buy, with a picture and a price, printed on the sheet (and on its own as <b>My Reward Menu</b> from the Sheet page). Prices are points; put the cheapest first so a first day can buy something. The reward menu above is carried in when the store is empty.</p>
+    <div id="smStore"></div>
     <p class="hint">The order in the first row is the reinforcer-selection flowchart in DeLeon, Bullock and Catania (2013), reproduced in DeLeon et al. (2014): test social consequences first because they fit the classroom best, then nonedible tangibles, then edibles, each assessed inside the token system; if the points do not work, deliver the reinforcer directly after smaller pieces of work. The second row is the open-versus-closed-economy point from the same chapter: a reward the student can also get free is worth less at each step up in the goal. The third row applies their note that magnitude should be adjusted as reinforcement becomes less frequent.</p>
     <h3>Changing the Criterion</h3>
     <p class="hint">Start where the student can succeed, then step the goal up on a rule written in advance. The record applies the rule and says when a step is due.</p>
@@ -246,6 +260,7 @@
     <div class="grid-wrap"><table class="rt" id="bcTbl"><thead><tr><th style="width:5%">#</th><th>Rule</th><th style="width:12%">Met</th><th style="width:30%">Note</th></tr></thead><tbody></tbody></table></div>
     <div id="bcVerdict"></div>
     <h3>The Document</h3>
+    <div class="noprint" id="smBcTools"></div>
     <div id="bcOut"></div>
   </section>
 
@@ -258,7 +273,33 @@
       <tr><th>Title</th><td><input data-m="sh_title" placeholder="filled from the system; e.g., My Morning Check-In"></td></tr>
       <tr><th>Reward chosen today</th><td><input data-m="sh_reward" placeholder="leave blank for a line to write on" style="width:60%"></td></tr>
     </table>
+    <div class="noprint" id="smSheetTools"></div>
     <div id="sheetOut"></div>
+    <div id="smExtraOut"></div>
+  </section>
+
+  <!-- ===================== WALKTHROUGH (v21.45; tools/forms/SM-1/walk.js; the player is Form TK-1's) ===================== -->
+  <section class="only-walk noprint">
+    <h2 class="nbh-band">Walkthrough: How My Sheet Works</h2>
+    <p class="hint">A narrated walkthrough of this student&rsquo;s own sheet, built from it as the Sheet page shows it: the look, the targets and the day, how the student rates and how the adult matches, the points, the goal, the reward store and the contract. Watch it with the student before the first day, and share it with the team. Play starts it with the sound on; the chapters jump to a step, and full screen fills the iPad. Space plays and pauses; the arrow keys skip five seconds.</p>
+    <div class="wk-player" id="wkPlayer">
+      <div class="wk-frame" id="wkFrame"><div class="wk-stage" id="wkStage" aria-hidden="true"></div><button type="button" class="wk-big" id="wkBig" aria-label="Play the walkthrough"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg></button></div>
+      <p class="wk-cap2" id="wkCap2"></p>
+      <div class="wk-bar">
+        <button type="button" class="wk-b wk-main" id="wkPlay" aria-label="Play"></button>
+        <button type="button" class="wk-b" id="wkRestart" aria-label="Restart from the beginning"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M3.6 4.2l1.9 5.9 5.6-2.6z" fill="currentColor"/></svg></button>
+        <div class="wk-seek" id="wkSeek" role="slider" tabindex="0" aria-label="Position in the walkthrough" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00"><div class="wk-strk"><div class="wk-sfill"></div></div><div class="wk-sthumb"></div></div>
+        <span class="wk-time" id="wkTime" aria-hidden="true">0:00 / 0:00</span>
+        <button type="button" class="wk-b wk-cc" id="wkCc" aria-pressed="true" aria-label="CC (captions)">CC</button>
+        <button type="button" class="wk-b" id="wkSnd" aria-pressed="true" aria-label="Sound"></button>
+        <button type="button" class="wk-b" id="wkFs" aria-label="Full screen"></button>
+      </div>
+      <div class="wk-chaps" id="wkChaps" role="group" aria-label="Chapters"></div>
+    </div>
+    <div class="wk-save"><button type="button" id="wkVideo">Save as video (MP4)</button><span class="hint">Makes a video file of this sheet&rsquo;s walkthrough on this device, with the narration and captions, to share with the student&rsquo;s team (save it to the district drive; its link can go in the sheet&rsquo;s QR code on the Design page). It takes a few minutes; nothing is sent anywhere.</span></div>
+    <p class="hint" id="wkVideoNote" hidden></p>
+    <p class="hint" id="wkNote" hidden></p>
+    <details class="wk-tx"><summary>Transcript of the narration</summary><div id="wkTx"></div></details>
   </section>
 
   <!-- ===================== RECORD ===================== -->
@@ -296,6 +337,7 @@
     <p>A self-monitoring system is a self-management package: the student observes and records their own behavior at set moments, an adult checks the record, and the record earns something. Reviews of classroom self-management interventions report consistent gains in on-task and appropriate behavior and reductions in disruption across grade levels and settings (Briesch &amp; Chafouleas, 2009; Bruhn, McDaniel &amp; Kreigh, 2015), and the daily behavior report card, the teacher-rated cousin of these sheets, has a meta-analysis behind it (Vannest, Davis, Davis, Mason &amp; Burke, 2010). The two mechanisms the research keeps finding are the recording itself, which is reactive, and the consequences attached to the record. Both are arranged on this form. DeLeon, Bullock and Catania (2013) add a caution and a reason the arrangement works: human performances under schedules often look different from the laboratory patterns because people describe their own behavior, and in verbally able children &ldquo;it is often easier to shape verbal behavior related to performance than to directly shape the performance itself.&rdquo; A self-monitoring sheet shapes exactly that description, and the match keeps it true.</p>
     <p>The matching procedure comes from Rhode, Morgan and Young (1983): students rated their own behavior on a scale each period, the teacher rated it too, a match earned the points plus a bonus, and the teacher&rsquo;s matching was faded from every period to a random sample to none as agreement held; the gains carried into the regular classroom. Salter and Croce&rsquo;s Self &amp; Match system (2006) is a published form of the same arrangement with Yes/No ratings and the 2-1-0 match points the sheets here reproduce. The cued-interval sheet is self-monitoring of attention (Hallahan, Lloyd &amp; Stoller, 1982), with a tactile prompt where a beep would disturb the class (Amato-Zech, Hoff &amp; Doepke, 2006); Reid, Trout and Schartz (2005) review it alongside self-monitoring of performance for students with ADHD. The interlocking-schedule session sheet is the school&rsquo;s own (Royal Palm School manual, pp. 64&ndash;70): an interlocking schedule, in Ferster and Skinner&rsquo;s (1957) term, makes the response requirement depend on the time elapsed, so the requirement can fall to protect quality or rise to build fluency. Goal stepping follows the changing-criterion logic (Hartmann &amp; Hall, 1976).</p>
     <p>Every point sheet is also a schedule of reinforcement, and the vocabulary for it is Ferster and Skinner&rsquo;s (1957): the rating at the end of each period is an interval arrangement, the points needed for the reward are a ratio, and the end-of-day exchange makes the points conditioned reinforcers in a chain that ends at the back-up. Ferster and Skinner define the interlocking schedule as one in which &ldquo;the organism is reinforced upon completion of a number of responses; but this number changes during the interval which follows the previous reinforcement&rdquo; (Chapter 2); their example is a requirement of 300 that falls in a straight line to 1 over 10 minutes, and the school&rsquo;s sheet, 20 items falling by 2 every 2 minutes, is the same schedule with smaller numbers. Catania&rsquo;s (2007) table of schedule combinations gives the same definition in the company of the other combined schedules. The section &ldquo;What the Schedule Does&rdquo; below says what follows from each for the design.</p>
+    <p><b>How the sheet looks (v21.45).</b> The Design page sets the look (Classic, Bright, an interest theme, Clean, or discreet pocket cards), the colour, the name shown, the word for the adult who rates and how the student rates (smiles, thumbs, plus and minus, check and x, Yes and No, 0-1-2, 1 to 5, stars, colours, chosen pictures or the student&rsquo;s own words), each with its points. The Reinforcement page holds the reward store (a picture, a price and a tier for each reward), printed on the sheet and as My Reward Menu. The Walkthrough page plays a narrated walkthrough of this sheet, made from it, for the student and the team, and saves it as a video. A sheet saved before keeps its Classic look.</p>
     <h2 class="nbh-band" style="margin-top:16px">What the Research Supports</h2>
     <table class="rt">
       <tr><th style="width:28%">Self-monitoring works, and the recording is part of why</th><td>Across the school literature from 1988 to 2008, self-observation and recording of a predefined behavior are the cornerstones of the interventions that worked, with and without reinforcement attached (Briesch &amp; Chafouleas, 2009); the systematic reviews since report the same for students with behavior problems (Bruhn et al., 2015) and for reducing challenging behavior (Smith, Thompson, Maynard &amp; Kim, 2022). Reactivity is real but not reliable on its own, which is why this form attaches consequences from the first day.</td></tr>
