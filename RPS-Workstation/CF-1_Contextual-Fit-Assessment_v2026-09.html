@@ -1044,7 +1044,7 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
       <div class="f"><label for="rpDue">Please send by</label><input id="rpDue" placeholder="m/d/yyyy"></div>
     </div>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="hint" id="rpNote"></span></div>
   </div>
 </dialog>
 <dialog id="rcDlg" class="gf noprint" aria-labelledby="rcTitle">
@@ -3504,7 +3504,7 @@ function rpStatus(){const st=$('#rpStatus'),bad=[];
   if(window.NBH_RESPOND_MISSING)bad.push('The file nbh-respond.js is not beside this form, so no page can be built. Keep the workstation folder together.');
   if(!$('#rpEmail').value.trim())bad.push('Enter your email: the answers are sent to it.');
   st.hidden=!bad.length;st.innerHTML=bad.map(esc).join('<br>');
-  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpPreview').disabled=!!bad.length;
+  $('#rpSave').disabled=$('#rpLink').disabled=$('#rpMail').disabled=$('#rpPreview').disabled=!!bad.length;
   const served=/^https?:$/.test(location.protocol);$('#rpLink').title=served?'Copy a link to respond.html on this website carrying this questionnaire':'A link works when the workstation is on a website; opened from a folder, send the file';
   $('#rpNote').textContent=bad.length?'':ITEMS.length+' items, round '+$('#rpRound').value+'.'+(served?'':' Opened from a folder: send the file; the link needs the workstation on a website.');}
 function rpFile(){const p=rpPayload();const html=NBH_RESPOND.pageHTML(p);const name='CF-1_'+p.inst+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';
@@ -3517,6 +3517,8 @@ $('#rpBtn').addEventListener('click',()=>{if(!$('#rpStudent').value)$('#rpStuden
 $('#rpEmail').addEventListener('change',()=>{const e=$('[data-m="email"]');if(e&&!e.value){e.value=$('#rpEmail').value.trim();S.meta.email=e.value;}});
 $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{const html=NBH_RESPOND.pageHTML(rpPayload());window.open(URL.createObjectURL(new Blob([html],{type:'text/html'})),'_blank');});
+/* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
+$('#rpMail').addEventListener('click',()=>{if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:[{label:'',url:rpLinkUrl()}]});});
 $('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
   try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
 $('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});

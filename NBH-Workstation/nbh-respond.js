@@ -159,6 +159,46 @@
     function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
   }
   U.mount=function(root,payload){NBH_RESPOND_RUNTIME(root,payload);};
+  /* ---- v21.44 Email it: the questionnaire's link in an email of the assessor's own, written for them to check and send ----
+     links: [{label,url}] (one per target behavior where a form makes several); the title, the student's initials, the due
+     date and the assessor are read from the first link's questionnaire. Nothing is sent from here: Open in Mail hands the
+     email to the device's mail app (a mailto link), Share... to the share sheet (Gmail, Outlook, Messages), Copy puts the
+     message on the clipboard. The informant's address is remembered on this device for the next email (never in the file). */
+  U.invite=function(o){o=o||{};var d=document,ls=(o.links||[]).filter(function(l){return l&&l.url;});if(!ls.length)return;
+    var P={};try{var m=/[#&]p=([A-Za-z0-9_-]+)/.exec(ls[0].url);if(m)P=JSON.parse(unb64u(m[1]))||{};}catch(e){P={};}
+    var title=o.title||P.title||P.inst||'questionnaire',who=String(P.student||o.student||'').replace(/\s*\((?:ID|id)[^)]*\)\s*/,'').trim(),bcba=P.bcba||o.bcba||'',due=P.due||'';
+    var defn=!!(P.confirm||P.def);
+    var KEY='nbh-invite-to';var last='';try{last=localStorage.getItem(KEY)||'';}catch(e){}
+    var subj=title+(who?' · '+who:'');
+    var body='Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. Your answers come back to me by email.'+(due?' Please send it by '+due+'.':'')+'\n\n'+
+      (ls.length===1?ls[0].url:ls.map(function(l){return (l.label||'Questionnaire')+':\n'+l.url;}).join('\n\n'))+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
+    var dlg=d.createElement('dialog');dlg.className='nbh-inv';dlg.setAttribute('aria-labelledby','nbhInvT');
+    var css='.nbh-inv{max-width:560px;width:calc(100vw - 32px);max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;border:0;border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#1b2430}'+
+      '.nbh-inv::backdrop{background:rgba(16,22,28,.5)}.nbh-inv h3{margin:0 0 10px;font:600 18px/1.3 Georgia,serif}.nbh-inv label{display:block;font-weight:600;margin:8px 0 3px}'+
+      '.nbh-inv input,.nbh-inv textarea{width:100%;box-sizing:border-box;font-family:inherit;font-size:15px;line-height:1.4;padding:8px 10px;border:1px solid #b8c2cc;border-radius:8px}.nbh-inv textarea{min-height:9em;height:34vh;max-height:46vh;resize:vertical}'+
+      '.nbh-inv .b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.nbh-inv button{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;padding:10px 14px;border-radius:10px;border:1px solid #9aa5b1;background:#fff;color:#1b2430;min-height:44px;cursor:pointer}'+
+      '.nbh-inv button.go{background:#1d4a77;border-color:#1d4a77;color:#fff}.nbh-inv .n{font-size:13px;color:#4a5560;margin:8px 0 0}.nbh-inv .st{min-height:1.3em;font-weight:600;margin:8px 0 0}';
+    dlg.innerHTML='<style>'+css+'</style><h3 id="nbhInvT">Email the questionnaire</h3>'+
+      '<label for="nbhInvTo">To (the informant’s email)</label><input id="nbhInvTo" type="email" autocomplete="email" inputmode="email" spellcheck="false">'+
+      '<label for="nbhInvSu">Subject</label><input id="nbhInvSu">'+
+      '<label for="nbhInvBo">Message</label><textarea id="nbhInvBo" spellcheck="true"></textarea>'+
+      '<p class="n">The email goes from your own email account. The questionnaire shows the student by initials only; check the message before you send it.</p>'+
+      '<div class="b"><button type="button" class="go" data-a="mail">Open in Mail</button>'+(navigator.share?'<button type="button" data-a="share">Share…</button>':'')+'<button type="button" data-a="copy">Copy the message</button><button type="button" data-a="close">Close</button></div><p class="st" role="status" aria-live="polite"></p>';
+    d.body.appendChild(dlg);var $=function(q){return dlg.querySelector(q);};$('#nbhInvTo').value=o.to||last;$('#nbhInvSu').value=subj;$('#nbhInvBo').value=body;
+    var keep=function(){var t=$('#nbhInvTo').value.trim();try{if(t)localStorage.setItem(KEY,t);}catch(e){}return t;};
+    var say=function(t){$('.st').textContent=t;};
+    dlg.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-a]');if(!b)return;var a=b.getAttribute('data-a'),to=keep(),su=$('#nbhInvSu').value,bo=$('#nbhInvBo').value;
+      if(a==='close'){dlg.close();dlg.remove();return;}
+      if(a==='mail'){if(to&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){say('That email address does not look complete.');$('#nbhInvTo').focus();return;}
+        var href='mailto:'+encodeURIComponent(to).replace(/%40/g,'@')+'?subject='+encodeURIComponent(su)+'&body='+encodeURIComponent(bo);
+        var l=d.createElement('a');l.href=href;l.target='_top';l.rel='noopener';d.body.appendChild(l);l.click();l.remove();
+        say('Your mail app should open with the email ready: check it and press Send. If nothing opened, use '+(navigator.share?'Share… or ':'')+'Copy the message.');return;}
+      if(a==='share'){navigator.share({title:su,text:bo}).then(function(){say('Shared.');},function(){});return;}
+      if(a==='copy'){var all=(to?'To: '+to+'\n':'')+'Subject: '+su+'\n\n'+bo;var ok=function(){say('The message is copied: paste it into a new email.');};
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(all).then(ok,function(){$('#nbhInvBo').select();say('Copying was refused: the message is selected, copy it with the keyboard or the menu.');});
+        else{$('#nbhInvBo').select();say('Select the message and copy it.');}}});
+    dlg.addEventListener('cancel',function(){setTimeout(function(){dlg.remove();},0);});
+    dlg.showModal();$(o.to||last?'#nbhInvBo':'#nbhInvTo').focus();};
   /* ---- the generated page: everything inline, nothing to fetch ---- */
   U.pageHTML=function(payload){var json=JSON.stringify(payload).replace(/<\//g,'<\\/');var t=(payload.title||payload.inst||'Questionnaire')+(payload.student?' · '+payload.student:'');
     return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+

@@ -897,7 +897,7 @@ td input,td select{max-width:100%}
     <label class="gf-note" id="rpFxRow"><input type="checkbox" id="rpFx" checked> FAST only: ask the open-ended questions too (most and least likely situations, what happens before and after, current treatments)</label>
     <div class="gf-note"><b>The first items as the page will read them:</b><div id="rpPrev" class="rp-prev"></div></div>
     <div id="rpStatus" class="gf-warn" hidden></div>
-    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpPreview">Preview</button><span class="method" id="rpNote" style="margin:0"></span></div>
+    <div class="gf-row"><button type="button" class="primary" id="rpSave">Save the page as a file</button><button type="button" id="rpLink">Copy a link</button><button type="button" id="rpMail">Email it…</button><button type="button" id="rpPreview">Preview</button><span class="method" id="rpNote" style="margin:0"></span></div>
     <textarea id="rpLinkBox" class="rp-linkbox" rows="3" readonly hidden aria-label="The link to copy"></textarea>
   </div>
 </dialog>
@@ -3825,7 +3825,7 @@ function rpStatus(){const key=$('#rpInst').value,n=rpWording(key).length,ok=rpEx
   if(!ts.length)bad.push('Name a target behavior on the Setup sheet (or open Form TB-1 in the workstation so the case supplies them).');
   if($('#rpConfirm').checked&&ts.some(t=>!t.def))bad.push('The definition question needs a definition: write one in the table above for each target, or untick the question.');
   st.hidden=!bad.length;st.innerHTML=bad.map(gfEsc).join('<br>');$('#rpFxRow').style.display=key==='fast'?'':'none';
-  ['rpSave','rpLink','rpPreview'].forEach(id=>{const b=$('#'+id);b.classList.toggle('off',!!bad.length);b.setAttribute('aria-disabled',bad.length?'true':'false');});
+  ['rpSave','rpLink','rpMail','rpPreview'].forEach(id=>{const b=$('#'+id);b.classList.toggle('off',!!bad.length);b.setAttribute('aria-disabled',bad.length?'true':'false');});
   const served=/^https?:$/.test(location.protocol);$('#rpLink').textContent=ts.length>1?'Copy the links':'Copy a link';$('#rpSave').textContent=ts.length>1?'Save the pages as files':'Save the page as a file';
   $('#rpNote').textContent=served?(/^data:image\//.test(val('rp.photo'))?'The photo is in the page file; a link does not carry it.':''):'Opened from a folder: send the file. The link needs the workstation on a website.';rpPreviewText();}
 function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t=>{st[t.label.toLowerCase()]={sing:t.sing,plur:t.plur,def:t.def};});rpTermsSave(st);
@@ -3861,6 +3861,8 @@ $('#rpPreview').addEventListener('click',()=>{if(rpOff())return;rpRemember();con
 $('#rpPrevClose').addEventListener('click',()=>$('#rpPrevDlg').close());
 $('#rpPrevDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* the link is shown in a box as well as copied: the clipboard is refused on some tablets */
+/* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
+$('#rpMail').addEventListener('click',()=>{if(rpOff())return;rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:rpLinks()});});
 $('#rpLink').addEventListener('click',async()=>{if(rpOff())return;rpRemember();const box=$('#rpLinkBox');if(!/^https?:$/.test(location.protocol)){box.hidden=true;$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
   const ls=rpLinks();const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
   let copied=false;try{await navigator.clipboard.writeText(text);copied=true;}catch(e){copied=false;}

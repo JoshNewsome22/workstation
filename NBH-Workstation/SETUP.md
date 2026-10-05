@@ -7171,3 +7171,12 @@ What could not be checked here: the iPad itself. The checks
 (`qa/autosave-test.js`) run in desktop Chromium with an iPad user agent;
 Safari's handling of a discarded tab, its storage limits and its download
 prompt need a look on the iPad.
+
+**Email it… (v21.44).** The Respondent pages dialog of IA-1, IN-1, SV-1 and CF-1 has **Email it…** beside **Copy link**: a dialog
+(nbh-respond.js `NBH_RESPOND.invite`) with To, Subject and Message filled in, then **Open in Mail** (a `mailto:` link to the
+device's mail app), **Share…** where the browser has a share sheet, and **Copy the message**. The subject is the questionnaire's
+title and the student's initials; the message says what to do (open, read the definition where the page shows one, answer, press
+Send) and the due date when there is one, carries the link (or one per target in IA-1) and is signed with the BCBA's name. The
+button is off whenever Copy link is. Nothing is sent by the workstation: the email leaves from the user's own account. Checked by
+`qa/invite-test.js`. HOSTING.md has the `.htaccess` lines that let `respond.html` and `nbh-respond.js` through the folder's
+password, so the links work without a public folder.
