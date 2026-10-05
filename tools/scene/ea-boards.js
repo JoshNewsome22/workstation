@@ -88,10 +88,18 @@ function eaBoard(k){
     return g+T(8,98,'Total count','bx-l')+T(200,98,'4 and 4: 100%','bx-v')+T(8,114,'Exact count per interval','bx-l')+T(200,114,'2 of 6 intervals: 33%','bx-v')+
       T(8,130,'Interval-by-interval','bx-l')+T(200,130,'2 of 6 intervals: 33%','bx-v')+T(8,146,'Proportional (smaller / larger)','bx-l')+T(200,146,'0, 0, 1, 1, 0, 0: mean 33%','bx-v');}
   if(k==='conds'){const C=[['#b8433a','Attention','Colored placemat or shirt: e.g., red','Two or three moderately preferred items'],['#2f5fa3','Demand','Colored placemat: e.g., blue','Tasks at the student’s instructional level'],
-      [null,'Alone / No interaction','Empty room or therapist facing away','None'],['#3f8a4f','Play (control)','Colored placemat: e.g., green','Highly preferred items from PA-1']];
+      [null,'Alone / No interaction','Door open; adult at a distance, not interacting','None'],['#3f8a4f','Play (control)','Colored placemat: e.g., green','Highly preferred items from PA-1']];
     let g=T(8,14,'Conditions: each card’s signal and materials','bx-t');
     C.forEach((r,i)=>{const y=42+i*32;g+=r[0]?'<rect x="8" y="'+(y-10)+'" width="14" height="14" rx="2" fill="'+r[0]+'"/>':'<rect x="8.5" y="'+(y-9.5)+'" width="13" height="13" rx="2" fill="#fff" stroke="#54676f" stroke-dasharray="2 2"/>';
       g+=T(30,y,r[1],'bx-v')+T(180,y,r[2],'bx-l')+T(30,y+14,'Materials: '+r[3],'bx-s');});return g;}
+  /* the enhancement sprint (B2): true alone is chosen on Setup & safety only after four steps */
+  if(k==='aloneTrue'){const box=y=>'<rect x="12" y="'+(y-10)+'" width="11" height="11" fill="#fff" stroke="#182e43"/>';
+    return T(8,14,'True alone: only after four steps on Setup & safety','bx-t')+
+    box(36)+T(30,36,'1  Policy check: the rules on seclusion and isolation here allow it,','bx-l')+T(46,49,'and who confirmed them is written down','bx-s')+
+    box(68)+T(30,68,'2  The stop-or-step-in rule: when, the longest time alone, who steps in','bx-l')+
+    box(88)+T(30,88,'3  How the student is watched: without a break, seen and heard','bx-l')+T(46,101,'through a window or on a live video feed with sound','bx-s')+
+    box(120)+T(30,120,'4  The parent told and agreed','bx-l')+
+    T(8,141,'The door is never locked, latched or held shut. Until all four','bx-v')+T(8,155,'are done, the form keeps the condition supervised.','bx-v');}
   if(k==='tang')return T(8,14,'Before a tangible condition goes into the analysis','bx-t')+
     T(8,40,'Add it only when the indirect and descriptive assessments','bx-l')+T(8,55,'indicate that tangible delivery follows the behavior:','bx-l')+
     '<rect x="12" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(30,78,'Form IA-1 (indirect)','bx-l')+'<rect x="182" y="68" width="11" height="11" fill="#fff" stroke="#182e43"/>'+T(200,78,'Form ABC-1 (descriptive)','bx-l')+
