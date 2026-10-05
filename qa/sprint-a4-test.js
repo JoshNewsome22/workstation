@@ -22,6 +22,8 @@
    G. A case saved before this change, opened in the workstation: DD-1 takes the objective's 5 days in place of its 3,
       and says so in the lasting note (seen when DD-1 is brought up, not printed, gone when the record is replaced)
       and in a message once the case is open.
+   H. SM-1's own hook: the replacement target's definition, examples and non-examples fill the one row of its skill,
+      and "From the case" does not place that skill a second time.
    No page or console error anywhere.
    Run: WS_URL=http://127.0.0.1:8304 WS_ROOT=<worktree> node qa/sprint-a4-test.js [edition]
    (the edition folder: NBH-Workstation, the default, or RPS-Workstation) */
@@ -362,6 +364,22 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
    await dd.waitForFunction(()=>/SIMULATED/.test(S.meta.client),null,{timeout:10000}).catch(()=>{});
    ok('G: the simulation loaded over the record takes the note away',had&&!(await noteOf(dd))&&await dd.evaluate(()=>/SIMULATED/.test(S.meta.client)));
    await ctx.close();}}
+
+ /* ---------- H: SM-1 (its own hook): the replacement target's definition on the one row of its skill ---------- */
+ {const {ctx,page}=await shell(br);
+  await tb1Sim(page);
+  const sm=await fresh(page,'SM-1');
+  const r=await sm.evaluate(()=>S.tg.filter(t=>t.word).map(t=>({w:t.word,def:t.def,ex:t.ex,nex:t.nex})));
+  const one=r.filter(t=>t.w==='Break request'),b4=await page.evaluate(()=>state.facts.behaviors.find(b=>b.isRep&&b.label==='Break request'));
+  ok('H: SM-1\'s one "Break request" row holds target 4\'s definition, examples and non-examples',one.length===1&&!!b4&&one[0].def===b4.def&&one[0].ex===(b4.ex||'')&&one[0].nex===(b4.nex||'')&&/^Picking up the break card/.test(one[0].def),{r,b4:b4&&{def:b4.def.slice(0,40),ex:!!b4.ex,nex:!!b4.nex}});
+  /* From the case, Aggression ticked: the skill that replaces it is already on the sheet */
+  await page.evaluate(()=>openForm('SM-1'));await sleep(300);
+  await sm.evaluate(()=>document.querySelector('#nbhCaseBtn').click());await sleep(300);
+  const done=await sm.evaluate(()=>{document.querySelectorAll('#nbhcBody input').forEach(c=>c.checked=false);document.querySelector('#nbhcBody input[data-kind="beh"]').checked=true;document.querySelector('#nbhcUse').click();return document.querySelector('#nbhcDone').textContent;});
+  const tg=await sm.evaluate(()=>S.tg.map(t=>t.word).filter(Boolean));
+  ok('H: SM-1\'s "From the case" places a name already on the sheet no second time, and says so',tg.filter(w=>w==='Break request').length===1&&done==='Nothing to place: Break request is already on the sheet.',{done,tg});
+  await sm.evaluate(()=>document.querySelector('#nbhcClose').click());
+  await ctx.close();}
 
  const errs=log.filter(l=>l.type!=='warning');
  ok('no page or console error in any form or the workstation',errs.length===0,errs.slice(0,6));
