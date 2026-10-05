@@ -976,16 +976,18 @@ const EMBED=(()=>{
   }
   /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens;
      v21.43: so is the writing help, which every form carries (build-single.py keeps one copy, not 44) */
-  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
+  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
   const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
   const NARTAG=/<script src="nbh-tk1-narration\.js" defer><\/script>/;   /* v21.44: Form TK-1's recorded narration, the same way */
   const VIDTAG=/<script src="nbh-tk1-video\.js" defer><\/script>/;   /* v21.44: and its Save as video */
   const NARTAG2=/<script src="nbh-sm1-narration\.js" defer><\/script>/;   /* v21.45: Form SM-1's recorded narration */
+  const NARTAG3=/<script src="nbh-dd1-narration\.js" defer><\/script>/;   /* v21.47: Form DD-1's recorded narration */
   E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo).split('@@NBH-WORDING@@').join(E.wording||'');
     if(PICTAG.test(h))h=h.replace(PICTAG,E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
     if(VIDTAG.test(h))h=h.replace(VIDTAG,E.video?'<script>'+E.video.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* Save as video is not inside this file */<\/script>');
     if(NARTAG2.test(h))h=h.replace(NARTAG2,E.narration2?'<script>'+E.narration2.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG3.test(h))h=h.replace(NARTAG3,E.narration3?'<script>'+E.narration3.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(NARTAG.test(h))h=h.replace(NARTAG,E.narration?'<script>'+E.narration.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(RSPTAG.test(h))h=h.replace(RSPTAG,E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
     return h;};
@@ -3855,7 +3857,7 @@ async function caseHtml(p,forms){
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
-  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-shell'].forEach(bid=>{
+  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-narration-dd1','nbh-embed-shell'].forEach(bid=>{
     const el=document.getElementById(bid);if(el)blocks+=block(bid,el.textContent);});
   /* "</" inside the JSON would end the block early; \/ is the same character to JSON */
   blocks+='<script type="application/json" id="nbh-case">'+JSON.stringify(data).replace(/<\//g,'<\\/')+'<\/script>\n';
