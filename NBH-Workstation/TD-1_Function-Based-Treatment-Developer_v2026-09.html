@@ -678,6 +678,10 @@ body{background:var(--nbh-paper);font-family:var(--nbh-sans);color:var(--nbh-ink
 .defs .dval textarea:focus{background:var(--wash);outline:none}
 .defs .dlab .tag{margin-left:4px}
 .defs{margin-bottom:10px}
+/* v21.44 (A1): the note under "On the target behavior" on the Responding sheet (screen only) */
+.rb-note{font-family:var(--sans);font-size:11.5px;line-height:1.45;color:var(--ink-soft);padding:0 8px 7px}
+.rb-note .rb-flag{color:var(--nbh-flag,#9b4e15)}
+.rb-note button.tool{margin:5px 0 0;font-size:11.5px;padding:3px 10px}
 button.tool{font:inherit;font-family:var(--sans);font-size:12px;padding:4px 10px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:2px;cursor:pointer;margin:0 0 12px}
 button.tool:hover{background:var(--wash)}
 .warn.verdict{margin:8px 0 10px}
@@ -1266,7 +1270,7 @@ td input,td select{max-width:100%}
   <div id="rbRec"></div>
   <div class="defs" style="margin-top:8px">
     <div class="drow"><div class="dlab">On the precursor</div><div class="dval"><textarea name="rb.prec" placeholder="e.g., prompt the break card immediately; reinforce the mand; do not remove the task" class="nbh-line" rows="1"></textarea></div></div>
-    <div class="drow"><div class="dlab">On the target behavior</div><div class="dval"><textarea name="rb.target" placeholder="Function-matched extinction step (auto-filled from the selector); block per safety plan; no discussion" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">On the target behavior</div><div class="dval"><textarea name="rb.target" placeholder="Filled in from question 4 above; block per safety plan; no discussion" class="nbh-line" rows="1"></textarea><div id="rbExtNote" class="rb-note noprint" role="status" aria-live="polite" hidden></div></div></div>
     <div class="drow"><div class="dlab">After the episode</div><div class="dval"><textarea name="rb.after" placeholder="e.g., re-present the EO within 5 s; reinforce the next mand; resume the schedule" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">What staff do not do</div><div class="dval"><textarea name="rb.not" placeholder="e.g., no break, no attention statements, no item return, no negotiation" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Crisis procedure (separate from treatment)</div><div class="dval"><textarea name="rb.crisis" placeholder="Trigger; who responds; room clear; physical management per district training; documentation" class="nbh-line" rows="1"></textarea></div></div>
@@ -4071,17 +4075,161 @@ registerQ('rb','rbModel','rbRec','Consequence protocol builder',[
  ['Does the behavior occur in a token economy?','yes','no']],
  a=>{const out=[];const fn=a[0]||val('m.fn');
   const ext={escape:'Escape: continue the instruction through the prompt sequence; do not remove the task or provide a break (Iwata et al., 1990).',attention:'Attention: no comments, eye contact, or reprimands; continue attending to others; deliver attention on the NCR or FCT schedule only (Vollmer et al., 1993).',tangible:'Tangible: the item is not returned contingent on the behavior; wait for the mand or the scheduled delivery.',automatic:'Automatic: block or interrupt neutrally and redirect to the matched item or alternative response (Ahearn et al., 2007).',multiple:'Multiple control: apply the extinction step for each function present (Day et al., 1994).'}[fn];
-  if(ext)out.push(['R_PB',ext]);
+  /* v21.44 (A1): the extinction step is recommended once question 4 says it is feasible, and not before; when it is
+     not feasible the alternative comes first (it was listed after the extinction step, which was still recommended) */
+  if(a[3]==='no'){if(fn==='escape')out.push(['NCE','Extinction not feasible: noncontingent escape or DNRA with parameters favoring the alternative (Vollmer et al., 1999; Lalli et al., 1997, found NCR without extinction effective for tangible-maintained behavior).']);else if(fn==='automatic')out.push(['EE','Extinction not feasible: noncontingent access to the matched items, and DRA for an appropriate response that produces similar stimulation; redirect to a matched item, blocking only as the safety plan sets out (Piazza et al., 2000; Vollmer, Marcus, & LeBlanc, 1994).']);else out.push(['NCR','Extinction not feasible: NCR or DRA with parameters favoring the alternative (Athens & Vollmer, 2010; Lalli et al., 1997).']);}
+  if(ext&&a[3]==='yes')out.push(['R_PB',ext]);
   if(fn==='automatic'&&val('q.automatic.6')==='yes')out.push(['R_PB','Arranging/ordering package (Fergus et al., 2026): at the prompting + blocking level, block or disrupt at onset, restore the item, and redirect to an ECS in hand, with no comments; at the prompting level, a contingent verbal prompt to an ECS; at the ECS-only level, no programmed consequence. Write the stop rule for blocking on the Antecedents sheet planner.']);
   if(a[1]==='yes')out.push(['R_PB','Precursor defined: staff respond to the precursor by prompting and reinforcing the replacement, so the severe form is rarely reached (Smith & Churchill, 2002; Fritz et al., 2013).']);
   if(a[2]==='yes')out.push(['SAFE','Injury risk: a written safety plan with blocking rules and a crisis trigger, documented separately from the consequence protocol (Kahng et al., 2015).']);
-  if(a[3]==='no'){if(fn==='escape')out.push(['NCE','Extinction not feasible: noncontingent escape or DNRA with parameters favoring the alternative (Vollmer et al., 1999; Lalli et al., 1997, found NCR without extinction effective for tangible-maintained behavior).']);else out.push(['NCR','Extinction not feasible: NCR or DRA with parameters favoring the alternative (Athens & Vollmer, 2010; Lalli et al., 1997).']);}
   if(a[4]==='yes')out.push(['R_PB','Token economy: response cost (token loss) is a punishment procedure; consider only after the function-based options, with data and consent (Lerman & Vorndran, 2002).']);
   if(fn==='escape')out.push(['R_PB','Time-out is contraindicated for escape-maintained behavior: it removes the demand and so delivers the reinforcer (a rule of this form; Solnick, Rincover, & Peterson, 1977, found that time-out can reinforce the behavior it follows when time-out is more reinforcing than time-in).']);
   return out;});
-function renderRespond(){if(!val('rb.0')&&val('m.fn'))setv('rb.0',val('m.fn'));renderQ('rb');const fn=val('rb.0')||val('m.fn');const ext={escape:'Escape extinction: continue the prompt sequence; no break',attention:'Attention extinction: no attention, comments, or eye contact',tangible:'Tangible extinction: item not returned',automatic:'Neutral block or interruption; redirect to matched item',multiple:'Function-matched extinction for each function'}[fn];if(ext&&!val('rb.target'))setv('rb.target',ext);}
-$('#sendRespond').addEventListener('click',()=>{if(!$$('#compWrap .card').some(k=>k.dataset.code==='R_PB'))addComp('R_PB');const card=$$('#compWrap .card').find(k=>k.dataset.code==='R_PB');const i=card.dataset.i;setv(`cp[${i}].p0`,val('rb.target'));setv(`cp[${i}].p1`,val('rb.crisis')?'per safety plan':'');setv(`cp[${i}].p2`,val('rb.crisis'));
- const steps=[val('rb.prec')?'On the precursor: '+val('rb.prec'):null,val('rb.target')?'On the target behavior: '+val('rb.target'):null,val('rb.after')?'After the episode: '+val('rb.after'):null,val('rb.not')?'Staff do not: '+val('rb.not'):null].filter(Boolean);steps.forEach((s,k)=>setv(`cp[${i}].s${k}`,s));autosize(card);setView('build');});
+/* v21.44 (A1): "On the target behavior" follows question 4 (is the function-matched extinction step feasible here?).
+   Yes fills in the extinction step for the function, as before; no fills in the alternative (noncontingent
+   reinforcement or differential reinforcement of an alternative), which the selector above now lists first; while
+   question 4 is unanswered the step stays empty and a note points to the question. The form used to fill in the
+   extinction step for every case, before any question was answered and after "not feasible", and the step went on
+   into Copy for the BIP, the staff flowchart, the final plan and EB-1. A change of answer (question 1 or 4) replaces
+   the step only while it still holds words this form filled in: typed or edited text is never replaced, and opening a
+   file changes nothing (a filled-in step that no longer fits the answers is named in the note, with a button to
+   replace it). The consequence-protocol card on the build sheet follows a change of answer too, in the fields that
+   still hold what this sheet sent there; the note names what still describes extinction after "not feasible", and
+   Copy for the BIP, the staff flowchart and Print final plan only ask first while the form's own words do not
+   follow question 4 (files saved before this change). */
+const RB_EXT={escape:'Escape extinction: continue the prompt sequence; no break',attention:'Attention extinction: no attention, comments, or eye contact',tangible:'Tangible extinction: item not returned',automatic:'Neutral block or interruption; redirect to matched item',multiple:'Function-matched extinction for each function'};
+const RB_ALT={escape:'Noncontingent escape (breaks on the timer) or DNRA: the alternative earns a longer, sooner break than the behavior',attention:'NCR (attention on the timer) or DRA: the alternative earns more, sooner attention than the behavior',tangible:'NCR (the item on the timer) or DRA: the alternative earns longer, sooner access than the behavior',automatic:'Matched items available throughout (EE) and DRA; redirect to a matched item; block only per the safety plan',multiple:'For each function: noncontingent reinforcement or DRA, the alternative earning more, sooner, than the behavior'};
+const RB_NONE='none (not feasible in this setting)',RB_TGT='On the target behavior: ';
+const rbFn=()=>val('rb.0')||val('m.fn');
+function rbWant(){const fn=rbFn(),a=val('rb.3');return (a==='yes'?RB_EXT[fn]:a==='no'?RB_ALT[fn]:'')||'';}
+/* the words this form fills in, each with the function and the answer it is written for: the extinction step (yes)
+   and the alternative (no) for each function, and the extinction steps the simulations write (yes) */
+function rbWords(t){t=String(t==null?'':t).trim();if(!t)return null;
+ for(const fn in RB_EXT)if(RB_EXT[fn]===t)return {fn,a:'yes'};
+ for(const fn in RB_ALT)if(RB_ALT[fn]===t)return {fn,a:'no'};
+ for(const k in SIMV)if(SIMV[k].target===t&&SIMS[k])return {fn:SIMS[k].fn,a:'yes'};
+ return null;}
+/* words typed or written on a card that still describe extinction of the behavior, for the note after "not
+   feasible": the word itself or withholding the reinforcer, and the function's own form (escape: no break, the prompt
+   sequence, guided compliance, the task not removed; attention: no attention or comments; tangible: the item not
+   returned; automatic: blocking every response). A step that makes it conditional ("where feasible", "if withholding
+   is not feasible") and the extinction component of a schedule (the SΔ periods of a multiple schedule) are not
+   counted. The cards' own steps are judged by name (RB_XDEF): the ones that prescribe extinction of the behavior */
+const RB_XALL=/extinction|withhold(ing)? (the )?reinforcers?\b/i,
+ RB_XFN={escape:/no break|prompt sequence|guided compliance|is not removed|not remove the (task|demand)/i,attention:/\bno (attention|comments?|reprimands?|eye contact)\b/i,tangible:/not returned|does not produce/i,automatic:/\bblock(ing)?( or (disrupt|interrupt))?( (every|each)\b| at onset)|neutral block or interruption/i},
+ RB_XOK=/not feasible|where feasible|if feasible|if viable|extinction (component|period|challenge|burst)s?\b|resistance to extinction|automatic extinction|extinction or DNRA/i,
+ RB_XDEF={'DF.s3':'','FCT.s4':'','SBT_FCR.s1':'','SBT_TR.s2':'','RRB_RB.s1':'automatic'};
+const rbX=(t,fn)=>!!t&&(RB_XALL.test(t)||(fn==='multiple'?Object.values(RB_XFN):[RB_XFN[fn]]).some(r=>r&&r.test(t)))&&!RB_XOK.test(t);
+const rbXdef=(key,fn)=>key in RB_XDEF&&(!RB_XDEF[key]||RB_XDEF[key]===fn||fn==='multiple');
+const rbSteps=card=>[...card.querySelectorAll('ol.steps textarea')].map(x=>+((/\.s(\d+)$/.exec(x.name)||[])[1])).filter(k=>!isNaN(k));
+const rbAnd=l=>l.length<2?l.join(''):l.slice(0,-1).join(', ')+' and '+l[l.length-1];
+/* the lines Send writes on the consequence-protocol card, in order */
+function rbSendLines(){return [val('rb.prec')?'On the precursor: '+val('rb.prec'):null,val('rb.target')?RB_TGT+val('rb.target'):null,val('rb.after')?'After the episode: '+val('rb.after'):null,val('rb.not')?'Staff do not: '+val('rb.not'):null].filter(Boolean);}
+/* the answer to the Select sheet's own feasibility question (attention and tangible: "is extinction feasible?") */
+function rbSelAnswer(){const fn=rbFn();return (fn==='attention'||fn==='tangible')&&val('m.fn')===fn?val(`q.${fn}.0`):'';}
+/* what the plan holds against question 4. step: the state of "On the target behavior"; card: the consequence-protocol
+   card's fields that do not fit the answer; whole: the extinction cards; other: the other places that still describe
+   extinction after "no"; sel: the Select sheet's answer when it differs. strong: the form's own words that no longer
+   fit the answers (files saved before this change): they are named before the plan is copied or printed, and on
+   opening the file. Nothing here changes a field. */
+function rbCheck(){const fn=rbFn(),a=val('rb.3'),cur=val('rb.target'),w=rbWords(cur),r={fn,a,step:'',card:null,whole:[],other:[],sel:'',strong:[]};
+ if(RB_EXT[fn]){
+  if(!a&&!cur)r.step='ask';
+  else if(w&&!(w.fn===fn&&w.a===a))r.step=!a?'early':w.fn!==fn?'fn':a==='no'?'ext':'alt';
+  else if(!w&&a==='no'&&rbX(cur,fn))r.step='typed';}
+ const GEN=LIB.R_PB.steps[1],lines=rbSendLines(),want=rbWant(),useBtn=!!want&&['ext','alt','fn','typed'].includes(r.step);
+ /* 2: the form's words for the other answer; 1: words typed on the card that describe extinction after "no" */
+ const bad=(t,isP0)=>{if(!t)return 0;const x=t.startsWith(RB_TGT)?rbWords(t.slice(RB_TGT.length)):rbWords(t);
+  if(a==='no'){if(isP0&&t===RB_NONE)return 0;if(t===GEN||(x&&x.a==='yes'))return 2;return rbX(t,fn)?1:0;}
+  if(a==='yes'){if(isP0&&t===RB_NONE)return 2;if(x&&x.a==='no'&&(isP0||t.startsWith(RB_TGT)))return 2;}
+  return 0;};
+ /* each field is judged as it is, as Send would write it now (fix), and as the step's button would leave it (use:
+    the card follows the step, rbCardSync) */
+ const sentW=s=>!!s&&(!!rbWords(s)||s===cur);
+ if(a==='no'||a==='yes')$$('#compWrap .card[data-code="R_PB"]').forEach(card=>{const i=card.dataset.i,f=[],ks=rbSteps(card);let strong=false,fix=false,use=useBtn;
+  const other=ks.some(k=>{const s=val(`cp[${i}].s${k}`);return s!==GEN&&s.startsWith(RB_TGT);});
+  const look=(label,t,next,after,isP0)=>{const b=bad(t,isP0);if(!b)return;f.push(label);if(b===2)strong=true;if(!bad(next,isP0))fix=true;if(bad(after,isP0))use=false;};
+  const p0=val(`cp[${i}].p0`);
+  look('Extinction form',p0,a==='no'?RB_NONE:cur,p0===RB_NONE||sentW(p0)?(a==='no'?RB_NONE:want):p0,true);
+  /* a step that is the very line Send writes from this sheet now is this sheet's own field, named above */
+  ks.forEach(k=>{const s=val(`cp[${i}].s${k}`);if(k<lines.length&&s===lines[k])return;
+   look('step '+(k+1),s,k<lines.length?lines[k]:(a==='no'&&s===GEN?'':s),s.startsWith(RB_TGT)&&s!==GEN&&sentW(s.slice(RB_TGT.length))?RB_TGT+want:s===GEN&&a==='no'?(other?'':RB_TGT+want):s,false);});
+  if(f.length&&!r.card)r.card={fields:f,strong,fix,use:use&&f.length>0};});
+ if(a==='no'){
+  r.whole=$$('#compWrap .card').filter(c=>c.dataset.code==='EXT'||c.dataset.code==='SEXT').map(c=>LIB[c.dataset.code].name);
+  [['rb.prec','On the precursor'],['rb.after','After the episode'],['rb.not','What staff do not do']].forEach(([n,l])=>{if(rbX(val(n),fn))r.other.push(l);});
+  $$('#compWrap .card').forEach(card=>{const code=card.dataset.code;if(code==='EXT'||code==='SEXT'||code==='R_PB')return;const L=LIB[code],i=card.dataset.i,f=[];if(!L)return;
+   L.params.forEach((p,k)=>{const v=val(`cp[${i}].p${k}`);if(v&&((/extinction/i.test(p[0])&&!/^(none|n\/?a)\b|not feasible/i.test(v))||rbX(v,fn)))f.push(p[0]);});
+   rbSteps(card).forEach(k=>{const v=val(`cp[${i}].s${k}`);if(v&&(v===L.steps[k]?rbXdef(code+'.s'+k,fn):rbX(v,fn)))f.push('step '+(k+1));});
+   if(f.length)r.other.push('the '+code+' card, '+rbAnd(f));});}
+ const sq=rbSelAnswer();if(sq&&a&&sq!==a)r.sel='Question 4 says the extinction step is '+(a==='no'?'not ':'')+'feasible here, but question 1 on the Select sheet (is extinction feasible?) is answered "'+sq+'": change one of them so that the plan follows one answer.';
+ if(r.step==='early')r.strong.push('"On the target behavior" was filled in before question 4 was answered');
+ if(r.step==='ext')r.strong.push('"On the target behavior" is still the extinction step, which question 4 says is not feasible here');
+ if(r.step==='alt')r.strong.push('"On the target behavior" is still the alternative, but question 4 says the extinction step is feasible');
+ if(r.step==='fn')r.strong.push('"On the target behavior" was filled in for a different function from the one question 1 names');
+ if(r.card&&r.card.strong)r.strong.push(a==='no'?'the consequence-protocol card still holds the extinction step':'the consequence-protocol card still says the extinction step is not feasible');
+ return r;}
+const rbConflict=()=>rbCheck().strong;
+function rbNote(){const box=$('#rbExtNote');if(!box)return;const r=rbCheck(),parts=[],flag=s=>'<span class="rb-flag">'+s+'</span>',btn=(id,t)=>' <button type="button" class="tool" id="'+id+'">'+t+'</button>',use=btn('rbUseStep',r.a==='no'?'Use the alternative':'Use the extinction step');
+ const holds='The consequence-protocol card on the build sheet still '+(r.a==='no'?'holds the extinction step':'says the extinction step is not feasible'),
+  both=r.card&&r.card.use?' '+holds+' ('+esc(rbAnd(r.card.fields))+'); the button puts both right.':'';
+ if(r.step==='ask')parts.push('Answer question 4 above (is the function-matched extinction step feasible here?) to fill in this step: yes gives the extinction step, no gives the alternative.');
+ else if(r.step==='early')parts.push('This step was filled in before question 4 was answered. Answer question 4 above and the step follows the answer.');
+ else if(r.step==='ext')parts.push(flag('Question 4 says the extinction step is not feasible here, but this step is still the extinction step.'+both)+use);
+ else if(r.step==='alt')parts.push(flag('Question 4 says the extinction step is feasible, but this step is still the alternative.'+both)+use);
+ else if(r.step==='fn')parts.push(flag('This step was filled in for a different function from the one question 1 names.'+both)+use);
+ else if(r.step==='typed')parts.push(flag('This step still describes extinction, which question 4 rules out here.'+both)+use);
+ if(r.card&&!both)parts.push(flag(holds+' ('+esc(rbAnd(r.card.fields))+')'+(r.card.fix?': send the consequence protocol again.':': edit it there, or change the answer.'))+(r.card.fix?btn('rbSendAgain','Send the consequence protocol again'):''));
+ if(r.whole.length)parts.push(flag('The plan still holds '+r.whole.map(n=>'the '+esc(n)+' card').join(' and ')+', which question 4 rules out here: remove '+(r.whole.length>1?'them':'it')+' on the build sheet, or change the answer.'));
+ if(r.other.length)parts.push('Other parts of the plan still describe extinction, which question 4 rules out here: '+esc(r.other.join('; '))+'. Edit or remove them, or change the answer.');
+ if(r.sel)parts.push(flag(esc(r.sel)));
+ const h=parts.join('<br>');if(box.dataset.h!==h){box.dataset.h=h;box.innerHTML=h;box.hidden=!h;}}
+/* changed: the answer to question 1 or 4 has just been changed, so a filled-in step may be replaced; otherwise (a
+   view drawn, a file opened, a print) an empty step is filled in and nothing else changes */
+function rbSync(changed){const el=document.querySelector('[name="rb.target"]');if(!el)return;const cur=el.value.trim(),want=rbWant();
+ if(!cur){if(want)el.value=want;}else if(changed&&rbWords(cur)&&cur!==want){const w=rbWords(cur);if(!(w.fn===rbFn()&&w.a===val('rb.3')))el.value=want;}}
+/* the consequence-protocol cards follow the step: after a change of answer (or "Use the alternative"), each field that
+   still holds what this sheet sent there, or the form's own words, is written as Send would write it now: the
+   "Extinction form", the step "On the target behavior", and, after "no", the card's own step "deliver the
+   function-matched extinction step". Words edited on the card are kept, and the note names them. old: the step
+   before the change. only: one card (a card just added from the build sheet) */
+function rbCardSync(old,only){const a=val('rb.3'),t=val('rb.target'),line=t?RB_TGT+t:'',GEN=LIB.R_PB.steps[1];
+ (only?[only]:$$('#compWrap .card[data-code="R_PB"]')).forEach(card=>{const i=card.dataset.i,F=k=>`cp[${i}].${k}`,ks=rbSteps(card);
+  const sent=s=>!!s&&(!!rbWords(s)||(!!old&&s===old));
+  const p0=val(F('p0'));if(p0&&(p0===RB_NONE||sent(p0))){const np=a==='no'?RB_NONE:t;if(np!==p0)setv(F('p0'),np);}
+  const other=ks.some(k=>{const s=val(F('s'+k));return s!==GEN&&s.startsWith(RB_TGT);});
+  ks.forEach(k=>{const s=val(F('s'+k));
+   if(s.startsWith(RB_TGT)&&s!==GEN&&sent(s.slice(RB_TGT.length))){if(s!==line)setv(F('s'+k),line);}
+   else if(s===GEN&&a==='no')setv(F('s'+k),other?'':line);});
+  autosize(card);});}
+function renderRespond(){if(!val('rb.0')&&val('m.fn'))setv('rb.0',val('m.fn'));renderQ('rb');
+ /* question 4 empty and the Select sheet's own feasibility question answered (attention, tangible): the same answer,
+    which the consequence-protocol card follows as it follows an answer given here */
+ const sq=rbSelAnswer(),old=val('rb.target'),took=!val('rb.3')&&!!sq;if(took){setv('rb.3',sq);renderQ('rb');}
+ rbSync(false);if(took)rbCardSync(old);rbNote();}
+document.addEventListener('change',e=>{const n=e.target&&e.target.name;if(n!=='rb.3'&&n!=='rb.0')return;const old=val('rb.target');rbSync(true);rbCardSync(old);rbNote();});
+document.addEventListener('input',e=>{if(e.target&&/^rb\.(target|prec|after|not)$/.test(e.target.name||''))rbNote();});   /* the cards' fields are read again when the sheet is next shown */
+document.addEventListener('click',e=>{const id=e.target&&e.target.id;
+ if(id==='rbUseStep'){const el=document.querySelector('[name="rb.target"]'),want=rbWant();if(!el||!want)return;const old=el.value.trim();el.value=want;el.dispatchEvent(new Event('input',{bubbles:true}));rbCardSync(old);rbNote();}
+ else if(id==='rbSendAgain'){rbSend();const c=$('#compWrap .card[data-code="R_PB"]'),p=c&&document.querySelector(`[name="cp[${c.dataset.i}].p0"]`);if(p)p.dispatchEvent(new Event('input',{bubbles:true}));}});
+function rbSend(){if(!$$('#compWrap .card').some(k=>k.dataset.code==='R_PB'))addComp('R_PB');const card=$$('#compWrap .card').find(k=>k.dataset.code==='R_PB');const i=card.dataset.i;
+ /* v21.44 (A1): with question 4 answered "not feasible", the card's "Extinction form" says so rather than holding the
+    alternative's words, and the card's generic step "deliver the function-matched extinction step", where it is left
+    below the steps written from this sheet, is cleared */
+ const noExt=val('rb.3')==='no';setv(`cp[${i}].p0`,noExt?RB_NONE:val('rb.target'));setv(`cp[${i}].p1`,val('rb.crisis')?'per safety plan':'');setv(`cp[${i}].p2`,val('rb.crisis'));
+ const steps=rbSendLines();steps.forEach((s,k)=>setv(`cp[${i}].s${k}`,s));
+ if(noExt)rbSteps(card).forEach(k=>{if(k>=steps.length&&val(`cp[${i}].s${k}`)===LIB.R_PB.steps[1])setv(`cp[${i}].s${k}`,'');});
+ autosize(card);rbNote();setView('build');}
+$('#sendRespond').addEventListener('click',rbSend);
+/* before the plan leaves the form (Copy for the BIP, the staff flowchart, Print final plan only): while the form's
+   own words do not follow question 4, the question names them, with the choice to go to the Responding sheet; the
+   fields are not changed. On opening such a file, a notice says so. */
+function rbAsk(what,ok){const c=rbConflict(),s=c.join('; '),q='The plan does not follow question 4 on the Responding sheet.\n'+s.charAt(0).toUpperCase()+s.slice(1)+'. The note under "On the target behavior" offers to put it right. '+what+' anyway?';
+ return (window.nbhUI?nbhUI.confirm(q,{ok,cancel:'Go to Responding'}):Promise.resolve(window.confirm(q))).then(go=>{if(!go){setView('respond');const n=$('#rbExtNote');if(n&&!n.hidden&&n.scrollIntoView)n.scrollIntoView({block:'center'});}return go;});}
+function rbOpened(){const c=rbConflict();if(c.length&&window.nbhUI)nbhUI.toast('This plan does not follow question 4 on the Responding sheet: '+c.join('; ')+'. The note there offers to put it right.',{kind:'warn'});}
+let rbFlowGo=false;
+$('#flowBtn').addEventListener('click',e=>{if(rbFlowGo||!rbConflict().length)return;e.stopImmediatePropagation();
+ rbAsk('Build the flowchart','Build anyway').then(go=>{if(!go)return;rbFlowGo=true;try{$('#flowBtn').click();}finally{rbFlowGo=false;}});},true);
 
 /* ---------- component cards ---------- */
 let compSeq=0;
@@ -4096,7 +4244,10 @@ function addComp(code,at){const L=LIB[code];if(!L)return;const i=(at!=null&&!$('
  $('#compWrap').appendChild(d);autosize(d);}
 function autosize(root){(root||document).querySelectorAll('textarea[data-auto]').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px';});}
 document.addEventListener('input',e=>{if(e.target.dataset.auto){e.target.style.height='auto';e.target.style.height=(e.target.scrollHeight+2)+'px';}});
-$('#addCompBtn').addEventListener('click',()=>{const c=$('#addComp').value;if(c)addComp(c);});
+$('#addCompBtn').addEventListener('click',()=>{const c=$('#addComp').value;if(c)addComp(c);
+ /* v21.44 (A1): a consequence-protocol card added here after question 4 "not feasible" does not start with its
+    generic extinction step */
+ if(c==='R_PB'){const d=$('#compWrap').lastElementChild;if(d&&d.dataset.code==='R_PB')rbCardSync(null,d);}});
 document.addEventListener('click',e=>{if(e.target.dataset.rm){e.target.closest('.card').remove();}});
 function comps(){return $$('#compWrap .card').map(c=>({code:c.dataset.code,i:+c.dataset.i,name:LIB[c.dataset.code].name,steps:LIB[c.dataset.code].steps.map((s,k)=>val(`cp[${c.dataset.i}].s${k}`)).filter(Boolean)}));}
 
@@ -4208,7 +4359,9 @@ function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={esca
  extras.push(['Data, integrity, and decision rules',['Record the target behavior, the replacement response and its independence, and the steps completed on the integrity checklist each observed session.',`Advance one thinning level when the target is at or below ${crit?crit+' per minute':'the criterion set on the monitoring sheet'} and the replacement is at least ${ind||'80'}% independent for ${nn||'3'} consecutive sessions at the current level; step back after two consecutive sessions above criterion at that level.`,`Integrity criterion ${fid||'90'}% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.`,ioa&&'Agreement and fidelity plan: '+ioa].filter(Boolean)]);
  extras.forEach(([title,lines])=>{out+=`<div class="plan-group">${esc(title)}</div><div class="plan-comp">`;lines.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});
  $('#finalBody').innerHTML=out||'<div class="empty">No components yet. Send recommendations from the selection sheets, then return here.</div>';}
-$('#printFinalBtn').addEventListener('click',()=>{renderPlan();renderFinal();document.body.classList.add('print-final');const done=()=>{document.body.classList.remove('print-final');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);window.print();setTimeout(done,3000);});
+function printFinal(){renderPlan();renderFinal();document.body.classList.add('print-final');const done=()=>{document.body.classList.remove('print-final');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);window.print();setTimeout(done,3000);}
+/* v21.44 (A1): a plan whose own words do not follow question 4 asks first (rbAsk) */
+$('#printFinalBtn').addEventListener('click',()=>{if(!rbConflict().length){printFinal();return;}rbAsk('Print the final plan','Print anyway').then(go=>{if(go)printFinal();});});
 
 
 /* ---------- simulator ---------- */
@@ -4238,7 +4391,9 @@ const SIMV={
  auto_rrb:{injure:'no',C_ACSA:['9 items from the PA-1 paired-stimulus assessment (high, moderate, and low preferred)','Phase 2: item placed in hand after 10 s without engagement, "You can play with X like this," 3–5 s of guidance','Phase 3: every attempt blocked at onset; item restored; redirected to the test stimulus'],RRB_ECS:['Rubik\'s Cube (PE + RB), Kindle (PE + RB), tangrams (PE + RB)','ECS + prompts + blocking (A-CSA level: PE + RB)','Within arm\'s reach on the work table, continuous','A-CSA and a secondary preference assessment every 8 weeks'],RRB_PE:['Timed physical prompt (30 s) plus contingent verbal prompt','"You can play with the cube instead of fixing" / "You can play with the Kindle like this"','3–5 s'],RRB_RB:['Block at onset; restore the item; redirect to an ECS','Stop blocking and step back if the student pulls away twice or any aggression occurs; crisis trigger per the Responding sheet','3 consecutive sessions at or below 0.27 per min'],mat:'Rubik\'s Cube, Kindle, tangrams; baited-room list and photo; timer (simulated)',complex:'',reinf:'praise for functional engagement; no programmed consequence for arranging beyond the prompt and block rules (simulated)',prec:'',target:'Block or disrupt at onset; restore the item; redirect to an ECS in hand; no comments (simulated)',after:'Keep the ECS within reach; next timed prompt at 30 s without engagement (simulated)',rbnot:'No reprimands, comments, or attention for arranging; do not let the arrangement be completed (simulated)',crisis:'Trigger: aggression or self-injury during blocking → stop blocking, second adult, district crisis procedure (simulated)'},
  auto_s2:{injure:'yes',EE:['Vibrating pad, compression cap (head-directed; carried into treatment by the augmented CSA)','continuous during seatwork','monthly'],DRAAUTO:['Rest the head on the vibrating pad','Model and gesture prompts, faded','Vibrating pad on the desk'],RIRD:['3 motor demands (hands on table, clap, touch knees)','neutral; no comment','EE + DRA'],mat:'Vibrating pad, compression cap, arm guards, timer (simulated)',complex:'',reinf:'praise for prompted; praise + token for unprompted (simulated)',prec:'',after:'Resume the activity with the vibrating pad within reach; praise its next use (simulated)',rbnot:'No reprimands, comments, or attention for head hitting (simulated)',crisis:'Trigger: injury (redness, swelling, broken skin) or head hitting that continues through blocking for 1 min → second adult, nurse check, district crisis procedure (simulated)'}
 };
-function loadSim(){const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
+/* v21.44 (A1): the simulation asks first, with the question the other forms ask; it replaced every entry without asking */
+async function loadSim(){if(!(await nbhUI.confirm('Load the simulated case?\nEvery sheet is filled with a worked example of the scenario chosen beside the button. Anything already entered will be replaced.',{ok:'Load'})))return;
+ const key=$('#simScenario').value,sc=SIMS[key],X=SIMV[key]||{},pick=(k,d)=>k in X?X[k]:d;restore({counts:{}});const fcr=!!sc.sbt||sc.comps.some(c=>c==='FCT'||c==='DRA');   /* the plan has a functional communication response (v21.16) */
  setv('m.client','SIMULATED – Sample Student');setv('m.sid','SIM-000');setv('m.dob','—');setv('m.setting','Room 12 (simulated)');setv('m.assessor',val('m.assessor')||'Joshua Newsome, M.A., BCBA');setv('m.date',new Date().toLocaleDateString());
  setv('m.beh',sc.beh);setv('m.fn',sc.fn);setv('m.eadesign',sc.sbt?'IISCA: synthesized test vs. control, multielement (simulated)':'Multielement, 4 series (simulated)');setv('m.reinf',sc.reinf);setv('m.rate',String(sc.rate));setv('m.sessmin','10');setv('m.rep',sc.rep);/* v21.21 cross-form (X4b): m.repdesc is the replacement behavior (the plan summary and the flowchart show it as
    that, GB-1 writes it after "will", EB-1 under "What the request looks like"); the simulation filled it with
@@ -4309,7 +4464,7 @@ function cardIdx(c,f){const n=(c.comps||[]).length;if(!n)return null;
  if(Array.isArray(c.idx)&&c.idx.length===n&&c.idx.every(x=>Number.isInteger(+x)&&+x>=0)&&new Set(c.idx.map(Number)).size===n)return c.idx.map(Number);
  const seen=[...new Set(Object.keys(f||{}).map(k=>(/^cp\[(\d+)\]\./.exec(k)||[])[1]).filter(x=>x!=null).map(Number))].sort((a,b)=>a-b);
  return seen.length===n?seen:null;}
-function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);renderPlan();renderMon();renderHp();}
+function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);renderPlan();renderMon();renderHp();rbNote();rbOpened();}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`TD-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='TD-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form TD-1.');}};rd.readAsText(f);e.target.value='';});
@@ -4341,7 +4496,8 @@ function bipCopy(text){const n=text.split('\n').length;
   const fail=()=>{bipShow(text);bipStatus('The clipboard was refused: the text is shown to copy by hand.');};
   try{if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(ok,fail);else fail();}catch(err){fail();}}
 window.__bipText=bipText;
-document.getElementById('bipBtn').addEventListener('click',()=>bipCopy(bipText()));
+document.getElementById('bipBtn').addEventListener('click',()=>{if(!rbConflict().length){bipCopy(bipText());return;}   /* v21.44 (A1): asks first while the plan does not follow question 4 */
+  rbAsk('Copy the text','Copy anyway').then(go=>{if(go)bipCopy(bipText());});});
 
 function bipText(){
   renderPlan();
