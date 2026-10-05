@@ -817,7 +817,9 @@ added later from <b>From the case</b> that shares a skill already on the form jo
 list of the behaviors it replaces, when the list is the form&rsquo;s own. In the sentence the skill
 follows &ldquo;will&rdquo;: an action named in the third person takes its plain form (&ldquo;Hands a
 break card and waits&rdquo;: will hand a break card and wait; &ldquo;Participates in group
-activities&rdquo;: will participate in group activities), a subject at the start is left out
+activities&rdquo;: will participate in group activities; &ldquo;Using a quiet voice&rdquo;: will use a
+quiet voice), a name followed by what is done with it starts with that action (&ldquo;Tasks completed
+independently&rdquo;: will complete tasks independently), a subject at the start is left out
 (&ldquo;The student requests a break&rdquo;: will request a break), an opening phrase moves after the
 action (&ldquo;When frustrated, requests a break&rdquo;: will request a break when frustrated), a name
 is introduced by a verb (&ldquo;Break request&rdquo;: will make a break request; &ldquo;On-task
@@ -3130,9 +3132,10 @@ function acqSentence(i) {
    1. Staff notes are left out (gbClean): a bracket, round or square, that begins with "see", "cf." or "refer to", or
       that names a form, a target or a sheet ("(see target 4)", "(Forms EA-1 and TD-1)"), wherever it stands; at the
       end, a bracket naming it a replacement or an alternative ("(replacement)"), a dash followed by "replacement" or
-      "see ...", and a semicolon or a comma followed by "see target/form/sheet ...". That covers what Form TB-1 leaves
-      out of the names it passes on once it cleans them (package A4), so a name cleaned there and one cleaned here read
-      the same. A label "Replacement:" in front and a closing full stop go too.
+      "see ...", and a semicolon, a comma or a dash, spaced or not, followed by "see target/form/sheet ..."; a stop
+      after a note at the end goes with it ("(see target 4)."). That covers what Form TB-1 leaves out of the names it
+      passes on once it cleans them (package A4), so a name cleaned there and one cleaned here read the same. A label
+      "Replacement:" in front and a closing full stop go too.
    2. The sentence names the student, so a subject at the start is left out: "The student", "Student", "He", "She",
       "They", the student's name as entered on Setup (also "Jordan's"), or any name followed by "will"; then a leading
       "will" or "to".
@@ -3145,7 +3148,12 @@ function acqSentence(i) {
       abbreviation ("PECS"). A second verb after "and", "or" or "then" takes its plain form when it is one of the
       common verbs in GB_VERBS ("Hands a break card and waits": hand a break card and wait), but a list of names stays
       ("Makes requests and comments"). An "-ing" form of a listed verb at the start takes the plain form ("Requesting
-      help": request help), and adverbs before the verb stay ("Independently and appropriately requests a break").
+      help": request help; "Using a quiet voice": use a quiet voice), and adverbs before the verb stay ("Independently
+      and appropriately requests a break"). A name followed by what is done with it ("Tasks completed independently",
+      "Hands washed", "Turns taken", "Assignments turned in") takes that verb first: complete tasks independently, wash
+      hands, take turns, turn assignments in; but not after a verb that takes a state ("Stays seated", "Is prepared"),
+      nor where the participle comes before a name ("Completes assigned work"). A thing kept in place ("Glasses on",
+      "Phone away") takes "keep".
    5. A plain verb phrase stays as it is ("ask for help"; "hand the break card to an adult"); so does a word not on the
       list when "a", "the", "his" or another determiner follows it ("Emit a mand"). A state takes "be" ("On task
       during independent work", "Engaged in the activity"), and words in quotation marks take "say" ("I need a break").
@@ -3158,8 +3166,8 @@ function acqSentence(i) {
       verb further in ("Jordan requests a break") gets no verb of its own: a name in front of the verb is left out,
       and otherwise the words stay as typed.
    Its first letter is lowercased unless the first word is an abbreviation ("AAC", "PECS") or a name. */
-const GB_SEE = /\s*[(\[]\s*(?:(?:see|cf\.?|refer\s+to)\b[^()\[\]]*|(?:forms?|targets?|sheets?)\s*#?\s*[A-Z]{0,3}-?\d+[^()\[\]]*)[)\]]/gi;
-const GB_TAIL = /\s*(?:[(\[]\s*(?:the\s+)?(?:replacement|alternative|replaces)\b[^()\[\]]*[)\]]|\s[\u2014\u2013-]+\s*(?:the\s+)?(?:replacement|alternative)(?:\s+(?:behaviou?r|response|skill|target))?|\s[\u2014\u2013-]+\s*see\b.*|\s*[;,.]\s*see\s+(?:targets?|forms?|sheets?|pages?|above|below)\b.*)\s*$/i;
+const GB_SEE = /\s*[(\[]\s*(?:(?:see|cf\.?|refer\s+to)\b[^()\[\]]*|(?:forms?|targets?|sheets?)\s*#?\s*[A-Z]{0,3}-?\d+[^()\[\]]*)[)\]](?:[\s.;,]+$)?/gi;
+const GB_TAIL = /\s*(?:[(\[]\s*(?:the\s+)?(?:replacement|alternative|replaces)\b[^()\[\]]*[)\]]|\s[\u2014\u2013-]+\s*(?:the\s+)?(?:replacement|alternative)(?:\s+(?:behaviou?r|response|skill|target))?|\s[\u2014\u2013-]+\s*see\b.*|\s*[;,.\u2014\u2013]\s*see\s+(?:targets?|forms?|sheets?|pages?|above|below)\b.*)[\s.;,]*$/i;
 function gbClean(s) {
   const t0 = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
   let t = t0.replace(GB_SEE, '').replace(/\s+/g, ' ').trim(), k;
@@ -3173,10 +3181,11 @@ function gbNotes(s) {
   while (k++ < 6 && (m = GB_TAIL.exec(u))) { out.push(m[0]); u = u.slice(0, m.index).trim(); }
   return out.join(' ');
 }
-/* the one target the notes point to ("see target 4", "target #4"); 0 when they name none or several */
+/* the one target the notes point to ("see target 4", "target #4"); 0 when they name none or several ("targets 4 and
+   5", "targets 4-5", "targets 4 to 5"), as Form TB-1 reads them once it cleans its names (package A4) */
 function gbPtr(s) {
   const nums = [];
-  gbNotes(s).replace(/\btargets?\s*#?\s*(\d{1,2})((?:\s*(?:,|and|&|or)\s*#?\s*\d{1,2})*)/ig, (a, n1, more) => {
+  gbNotes(s).replace(/\btargets?\s*#?\s*(\d{1,2})((?:\s*(?:,|and|&|or|to|through|thru|[\u2010-\u2015-])\s*#?\s*\d{1,2})*)/ig, (a, n1, more) => {
     nums.push(+n1); (more.match(/\d{1,2}/g) || []).forEach(x => nums.push(+x)); return a; });
   const u = nums.filter((x, i) => nums.indexOf(x) === i);
   return u.length === 1 ? u[0] : 0;
@@ -3186,22 +3195,22 @@ function gbKey(s) {
   return gbClean(s).normalize('NFKC').toLowerCase().replace(/[\u2018\u2019\u02bc]/g, "'").replace(/[\u201c\u201d]/g, '"')
     .replace(/[\u2010-\u2015]/g, '-').replace(/\s+/g, ' ').replace(/[\s.;:,!]+$/, '').trim();
 }
-const GB_VERBS = new Set(('accept add advocate answer apologise apologize approach ask attend be begin bring brush build ' +
-  'calculate call carry catch check choose clap clean close color colour come communicate comment complete comply concentrate ' +
-  'converse cooperate cope copy count cross cut demonstrate describe display do draw dress drink eat employ engage enter ' +
+const GB_VERBS = new Set(('accept add advocate answer apologise apologize approach ask attend be begin bring brush build button ' +
+  'calculate call carry catch check choose clap clean close collect color colour come communicate comment complete comply concentrate ' +
+  'converse cooperate cope copy count cross cut demonstrate describe display do draw dress drink earn eat employ engage enter ' +
   'exchange exhibit exit explain express find finish focus fold follow gain get give go greet hand hang have help hold ' +
   'identify ignore imitate indicate initiate invite join keep label leave line listen look maintain make manage mand match ' +
   'monitor move name negotiate obtain offer open organise organize pack participate pass persist pick place play point ' +
-  'practice practise prepare press problem-solve pull push put raise reach read recognise recognize recruit refrain regulate ' +
+  'practice practise prepare press problem-solve pull push put raise reach read receive recognise recognize recruit refrain regulate ' +
   'relax remain remove repeat reply request resist respond return say seek select self-advocate self-monitor self-regulate ' +
-  'share show sign sing sit smile solve sort speak spell stand start state stay stop take talk tap tell thank throw tidy ' +
+  'share show sign sing sit smile solve sort speak spell stand start state stay stop submit take talk tap tell thank throw tidy ' +
   'tie tolerate touch track trade transition try turn untie use utilise utilize verbalise verbalize vocalise vocalize wait ' +
   'walk wash wave wear work write zip').split(' '));
 /* plural nouns that can begin a name, other words ending in -s that are not verbs, and given names ending in -s */
-const GB_PLN = new Set(('academics activities always afterwards besides breaks choices directions emotions feelings ' +
-  'greetings hers instructions items its manners materials mathematics means needs news others ours peers perhaps physics ' +
-  'questions responses routines rules series skills sometimes species strategies theirs thus tokens towards toys unless ' +
-  'visuals was words yes yours ' +
+const GB_PLN = new Set(('academics activities always afterwards besides boots breaks choices clothes directions echoics emotions ' +
+  'feelings glasses gloves greetings headphones hers instructions intraverbals items its manners materials mathematics means ' +
+  'needs news others ours pants peers perhaps physics questions responses routines rules series shoes skills socks sometimes ' +
+  'species strategies theirs thus tokens towards toys unless visuals was words yes yours ' +
   'agnes amos andreas carlos charles dolores douglas elias frances james jonas lucas marcos matthias mercedes miles moses ' +
   'nicholas silas thomas tobias').split(' '));
 const GB_DET = new Set('a an the his her their its my your our this that these those some any each every all one two both it them him himself herself themselves'.split(' '));
@@ -3233,22 +3242,36 @@ function gbGuess(l) {
   if (/(sh|ch|x|zz|o|ss)es$/.test(l)) return l.slice(0, -2);
   return l.slice(0, -1);
 }
-/* an -ing form of one of GB_VERBS, in its plain form ("requesting": request, "tolerating": tolerate, "sitting": sit) */
+/* an -ing form of one of GB_VERBS, in its plain form ("requesting": request, "tolerating": tolerate, "sitting": sit,
+   "using": use, "going": go, "tying": tie) */
 function gbIng(l) {
-  if (!/^[a-z][a-z'-]{2,}ing$/.test(l)) return '';
+  if (!/^[a-z][a-z'-]+ing$/.test(l)) return '';
   const s = l.slice(0, -3), c = [s, s + 'e'];
   if (/([^aeiou])\1$/.test(s)) c.push(s.slice(0, -1));
+  if (/y$/.test(s)) c.push(s.slice(0, -1) + 'ie');
   for (const x of c) if (GB_VERBS.has(x)) return x;
   return '';
 }
-/* a past participle of a listed verb that names a state ("engaged", "seated", "prepared") */
+/* a past participle of a listed verb that names a state ("engaged", "seated", "prepared"), or what was done ("used",
+   "identified") */
 function gbEd(l) {
-  if (!/^[a-z][a-z-]{2,}ed$/.test(l)) return '';
+  if (!/^[a-z][a-z-]+ed$/.test(l)) return '';
   const s = l.slice(0, -2), c = [s, s + 'e', l.slice(0, -1)];
   if (/([^aeiou])\1$/.test(s)) c.push(s.slice(0, -1));
+  if (/ied$/.test(l)) c.push(l.slice(0, -3) + 'y');
   for (const x of c) if (GB_VERBS.has(x) || x === 'seat') return x;
   return '';
 }
+/* the plain form of the participle that follows a name ("Tasks completed", "Turns taken"): a listed verb's, or a common
+   irregular one's; none for "seated", which names a state */
+const GB_PP = { made: 'make', taken: 'take', done: 'do', given: 'give', kept: 'keep', put: 'put', held: 'hold', worn: 'wear',
+  brought: 'bring', written: 'write', shown: 'show', said: 'say', told: 'tell', eaten: 'eat', chosen: 'choose', found: 'find',
+  drawn: 'draw', thrown: 'throw', gotten: 'get', begun: 'begin', spoken: 'speak' };
+const gbPart = l => Object.prototype.hasOwnProperty.call(GB_PP, l) ? GB_PP[l] : (l === 'seated' ? '' : gbEd(l));
+/* verbs that take a state after them ("Stays seated", "Is prepared", "Gets dressed"), and the small words that end a
+   phrasal verb ("turned in", "put away") */
+const GB_LINKV = new Set('be have stay remain get become seem appear look feel keep sit stand go come was were been got'.split(' '));
+const GB_PRT = new Set('in up out off down away back over on'.split(' '));
 /* the second word of a name that starts with a word a verb shares: "Hand raising", "Help request", "Listening skills" */
 function gbCompound(l) {
   return /^[a-z-]{2,}ing$/.test(l) || GB_MAKE.test(l) ||
@@ -3328,9 +3351,18 @@ function gbWillPart(s, who, deep) {
   /* hands, feet, eyes or a body in a place or a state: "Hands to self", "Feet on the floor", "Voice off" */
   if (!k && GB_BODY.test(l0) && (!nx || GB_POS.has(nx))) return 'keep ' + low();
   if (!k && /^(walking feet|listening ears|looking eyes)\b/i.test(t)) return 'use ' + low();
+  /* a name and what is done with it: "Tasks completed independently", "Hands washed", "Assignments turned in":
+     complete tasks independently, wash hands, turn assignments in; not after a verb that takes a state ("Stays
+     seated"), nor where a name follows the participle ("Completes assigned work") */
+  const pp = !k && w.length > 1 && !GB_INTRO.test(l0) && !GB_DET.has(l0) && !GB_CUT.has(l0) && !/^(not|no|never)$/.test(l0) ? gbPart(nx) : '', n2 = gbCore(w[2]);
+  if (pp && !GB_LINKV.has(gbBase(l0) || l0) && (w.length === 2 || adv(w[2]) || GB_CUT.has(n2) || GB_PRT.has(n2)))
+    return [pp, gbLow(w0)].concat(gbAndVerbs(w.slice(2))).join(' ');
+  /* a thing kept in its place: "Glasses on", "Headphones on", "Phone away": keep glasses on */
+  if (!k && w.length === 2 && /^(on|off|away)$/.test(nx) && !gbBase(l0) && !GB_VERBS.has(l0)) return 'keep ' + low();
   if (!/^[A-Z]{2,}/.test(w0)) {
     const b3 = gbBase(l0); if (b3) return verb(b3);
-    const g = gbIng(l0); if (g && !(nx && (gbCompound(nx) || nx === 'of'))) return verb(g);
+    /* "Requesting help", "Using coping strategies" (an -ing word after it describes what follows); "Listening skills" is a name */
+    const g = gbIng(l0); if (g && !(nx && ((gbCompound(nx) && !/ing$/.test(nx)) || nx === 'of'))) return verb(g);
     if (GB_VERBS.has(l0) && !(nx && gbCompound(nx))) return verb(gbLow(w0));
     if (l0 === 'calm' && /^(down|self|himself|herself|themselves|oneself)$/.test(nx)) return verb('calm');
     /* a state: "On task during independent work", "In seat", "Engaged in the activity", "Seated" */
