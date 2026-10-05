@@ -144,12 +144,12 @@ function listOf(root,isRoot,R){const base=root.getBoundingClientRect(),ops=[];
       const bw=[px(cs.borderTopWidth),px(cs.borderRightWidth),px(cs.borderBottomWidth),px(cs.borderLeftWidth)];
       if(bw.some(v=>v>0)){const bc=[cs.borderTopColor,cs.borderRightColor,cs.borderBottomColor,cs.borderLeftColor],bs=[cs.borderTopStyle,cs.borderRightStyle,cs.borderBottomStyle,cs.borderLeftStyle];
         ops.push({k:'border',r,rad,bw,bc,bs});}
-      if(el.tagName==='IMG'&&el.complete&&el.naturalWidth)ops.push({k:'img',el,r:contentBox(r,cs),fit:cs.objectFit,pos:cs.objectPosition,rad});
-      else if(el.tagName==='CANVAS')ops.push({k:'img',el,r:contentBox(r,cs),fit:'fill',pos:'50% 50%',rad});}
+      if(el.tagName==='IMG'&&el.complete&&el.naturalWidth)ops.push({k:'img',el,r:contentBox(r,cs),br:r,fit:cs.objectFit,pos:cs.objectPosition,rad});
+      else if(el.tagName==='CANVAS')ops.push({k:'img',el,r:contentBox(r,cs),br:r,fit:'fill',pos:'50% 50%',rad});}
     for(const ps of ['::before','::after'])pseudoOps(el,ps,r,ops);
     /* an SVG is written out here, in the flat state (shown, as it is when it shows) */
     if(el.namespaceURI===SVGNS){if(vis&&el.tagName.toLowerCase()==='svg'&&r.w>0&&r.h>0)ops.push({k:'svg',text:svgImageText(el,r.w,r.h,R||1),r});if(grp)ops.push({k:'end'});return;}
-    const clip=!first&&cs.overflow!=='visible'&&cs.overflowX!=='visible';if(clip)ops.push({k:'clip',r,rad:radiiOf(cs,r.w,r.h)});
+    const clip=cs.overflow!=='visible'&&cs.overflowX!=='visible';   /* v21.46 a sprite's own root too: the round photo frame (.bd-photo) is one */if(clip)ops.push({k:'clip',r,rad:radiiOf(cs,r.w,r.h)});
     for(const n of el.childNodes){if(n.nodeType===3){if(vis)textOps(n,cs,base,ops);}else if(n.nodeType===1)walk(n,false);}
     if(clip)ops.push({k:'unclip'});if(grp)ops.push({k:'end'});};
   walk(root,true);
@@ -210,7 +210,8 @@ async function paint(L,R){
       if(o.fit==='contain'||o.fit==='scale-down'){const s=Math.min(q.w/nw,q.h/nh);dw=nw*s;dh=nh*s;if(o.fit==='scale-down'&&s>1){dw=nw;dh=nh;}}
       else if(o.fit==='cover'){const s=Math.max(q.w/nw,q.h/nh);dw=nw*s;dh=nh*s;}else if(o.fit==='none'){dw=nw;dh=nh;}
       const pp=String(o.pos||'50% 50%').split(/\s+/),at=(v,free)=>{v=v||'50%';return /%$/.test(v)?free*px(v)/100:px(v);};const dx=q.x+at(pp[0],q.w-dw),dy=q.y+at(pp[1],q.h-dh);
-      ctx.save();boxPath(ctx,q.x,q.y,q.w,q.h,null);ctx.clip();try{ctx.drawImage(el,dx,dy,dw,dh);}catch(e){}ctx.restore();break;}
+      ctx.save();if(o.br&&o.rad&&!noRadii(o.rad)){boxPath(ctx,o.br.x,o.br.y,o.br.w,o.br.h,o.rad);ctx.clip();}   /* v21.46 a picture with rounded corners or a circle keeps them */
+      boxPath(ctx,q.x,q.y,q.w,q.h,null);ctx.clip();try{ctx.drawImage(el,dx,dy,dw,dh);}catch(e){}ctx.restore();break;}
     case 'svg':{if(o.img)try{ctx.drawImage(o.img,o.r.x,o.r.y,o.r.w,o.r.h);}catch(e){}break;}
     case 'clip':{ctx.save();boxPath(ctx,o.r.x,o.r.y,o.r.w,o.r.h,o.rad);ctx.clip();break;}
     case 'unclip':ctx.restore();break;
@@ -270,6 +271,11 @@ function makeScene(stage){
         const sb=stage.getBoundingClientRect();ZF=sb.width/(stage.offsetWidth||SW)||1;
         /* the place of every root inside its parent root, as laid out (no transforms) */
         for(const v of info.values()){const q=v.el.getBoundingClientRect();v.box={x:(q.left-sb.left)/ZF,y:(q.top-sb.top)/ZF,w:q.width/ZF,h:q.height/ZF};}
+        /* v21.46 what cuts a root off: every box between it and its parent root (that one too) whose overflow is not visible, in the
+           parent root's own place; a sprite inside the round photo frame (the photo, which zooms) is cut to the circle as on the page */
+        for(const v of info.values()){v.clips=[];if(!v.parent)continue;const P=info.get(v.parent);for(let e=v.el.parentElement;e;e=e.parentElement){const cs=getComputedStyle(e);
+            if(cs.overflow!=='visible'&&cs.overflowX!=='visible'){const q=e.getBoundingClientRect(),w=q.width/ZF,h=q.height/ZF;v.clips.push({x:(q.left-sb.left)/ZF-P.box.x,y:(q.top-sb.top)/ZF-P.box.y,w,h,rad:radiiOf(cs,w,h)});}
+            if(e===P.el||e===stage)break;}}
         for(const v of dirty)lists.push([v,listOf(v.el,isRoot,R)]);
       }finally{stage.classList.remove('wkv-flat');}
       for(const v of info.values()){const p=v.parent?info.get(v.parent):null;v.L=p?{x:v.box.x-p.box.x,y:v.box.y-p.box.y}:{x:0,y:0};}
@@ -281,9 +287,10 @@ function makeScene(stage){
           m=m.translate(o[0],o[1]).multiply(new DOMMatrix([T.a,T.b,T.c,T.d,T.e,T.f])).translate(-o[0],-o[1]);}}
         /* the stacking order: below the box itself what has a z-index under 0, then the box, then the rest by z-index, in page order */
         const kids=v.kids.slice().sort((a,b)=>(parseInt(a.cs.zIndex)||0)-(parseInt(b.cs.zIndex)||0));
-        for(const k of kids)if((parseInt(k.cs.zIndex)||0)<0)go(k,m,al);
+        const sub=(k,m,al)=>{if(!k.clips||!k.clips.length)return go(k,m,al);ctx.save();ctx.setTransform(m);for(const c of k.clips){boxPath(ctx,c.x,c.y,c.w,c.h,c.rad);ctx.clip();}go(k,m,al);ctx.restore();};
+        for(const k of kids)if((parseInt(k.cs.zIndex)||0)<0)sub(k,m,al);
         const s=v.spr;if(s){ctx.setTransform(m);ctx.globalAlpha=al;ctx.drawImage(s.cv,s.b.x,s.b.y,s.cv.width/s.k,s.cv.height/s.k);}
-        for(const k of kids)if((parseInt(k.cs.zIndex)||0)>=0)go(k,m,al);};
+        for(const k of kids)if((parseInt(k.cs.zIndex)||0)>=0)sub(k,m,al);};
       ctx.save();go(this.root,base,1);ctx.restore();},
     done(){for(const v of info.values())if(v.spr&&v.spr.cv){v.spr.cv.width=0;v.spr.cv.height=0;v.spr=null;}still.remove();flat.remove();stage.classList.remove('wkv-flat');for(const r of roots)r.removeAttribute('data-wkv');}};}
 
@@ -292,6 +299,13 @@ function makeScene(stage){
    move) */
 async function pickVideo(w,h,fps,opt_bitrate){for(const codec of ['avc1.640028','avc1.4D4028','avc1.4D401F','avc1.42E01F']){const cfg={codec,width:w,height:h,bitrate:opt_bitrate||4500000,framerate:fps,avc:{format:"avc"}};
   try{const r=await VideoEncoder.isConfigSupported(cfg);if(r&&r.supported)return cfg;}catch(e){}}return null;}
+/* v21.46 the AAC track's decoder description. Safari's AudioEncoder (WebKit, Safari 26) hands back a whole MPEG-4 ES descriptor
+   where WebCodecs specifies the bare AudioSpecificConfig (WebKit bug 302253); written into the file as it came, the esds box
+   holds an esds inside it, and the Photos app and other players play the video without sound. The encoder is set here to AAC-LC
+   at a known rate and channel count, so the two-byte AudioSpecificConfig is written here and given to the muxer with every
+   chunk that carries a description (the muxer takes the last one given), in every browser: object type 2 (5 bits), the rate's index (4 bits), the channels (4 bits), three zero bits. */
+const AAC_SR=[96000,88200,64000,48000,44100,32000,24000,22050,16000,12000,11025,8000,7350];
+function aacASC(sr,ch){const fi=AAC_SR.indexOf(sr);if(fi<0)throw new Error('AAC cannot carry '+sr+' Hz');return new Uint8Array([(2<<3)|(fi>>1),((fi&1)<<7)|((ch&15)<<3)]);}
 async function pickAudio(){if(typeof AudioEncoder==='undefined')return null;for(const c of [{codec:'mp4a.40.2',mux:'aac'},{codec:'opus',mux:'opus'}]){const cfg={codec:c.codec,sampleRate:48000,numberOfChannels:1,bitrate:96000};
   try{const r=await AudioEncoder.isConfigSupported(cfg);if(r&&r.supported)return Object.assign(cfg,{mux:c.mux});}catch(e){}}return null;}
 function dataToAB(u){const b=atob(u.slice(u.indexOf(',')+1));const a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a.buffer;}
@@ -316,7 +330,8 @@ async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1920,OH
     audio:audio?{codec:acfg.mux,numberOfChannels:1,sampleRate:acfg.sampleRate}:undefined});
   let err=null;const venc=new VideoEncoder({output:(c,m)=>mux.addVideoChunk(c,m),error:e=>{err=e;}});venc.configure(vcfg);
   let aenc=null;
-  if(audio){aenc=new AudioEncoder({output:(c,m)=>mux.addAudioChunk(c,m),error:e=>{err=e;}});const {mux:_m,...ac}=acfg;aenc.configure(ac);
+  if(audio){let first=true;const asc=acfg.mux==='aac'?aacASC(acfg.sampleRate,1):null;
+    aenc=new AudioEncoder({output:(c,m)=>{if(asc&&(first||(m&&m.decoderConfig)))m=Object.assign({},m||{},{decoderConfig:Object.assign({},(m&&m.decoderConfig)||{},{codec:'mp4a.40.2',sampleRate:acfg.sampleRate,numberOfChannels:1,description:asc})});first=false;mux.addAudioChunk(c,m);},error:e=>{err=e;}});const {mux:_m,...ac}=acfg;aenc.configure(ac);
     const ch=audio.getChannelData(0),sr=audio.sampleRate,step=sr/10;
     for(let i=0;i<ch.length;i+=step){const part=ch.subarray(i,Math.min(ch.length,i+step));const ad=new AudioData({format:'f32-planar',sampleRate:sr,numberOfFrames:part.length,numberOfChannels:1,timestamp:Math.round(i/sr*1e6),data:part.slice()});aenc.encode(ad);ad.close();}
     await aenc.flush();}
