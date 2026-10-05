@@ -11,9 +11,11 @@
 <body>
 <div id="nbhr"></div>
 <script>
+/* a second link opened in this tab changes only the part after # (no new page): open its questionnaire */
+window.addEventListener('hashchange',function(){location.reload();});
 (function(){var p=window.NBH_RESPOND&&NBH_RESPOND.payloadFromHash();var root=document.getElementById('nbhr');
  if(p)NBH_RESPOND.mount(root,p);
- else root.innerHTML='<div class="empty"><b>This link carries no questionnaire.</b><p>Ask the person who sent it for the full link (it is long) or for the questionnaire as a file.</p></div>';})();
+ else root.innerHTML=NBH_RESPOND.linkProblem&&NBH_RESPOND.linkProblem()?'<div class="empty"><b>This link does not open.</b><p>Part of it may have been cut off when it was copied, or it was made by a newer edition of the workstation than this page. Ask the person who sent it to send the link again, or the questionnaire as a file.</p></div>':'<div class="empty"><b>This link carries no questionnaire.</b><p>Ask the person who sent it for the full link, or for the questionnaire as a file.</p></div>';})();
 </script>
 </body>
 </html>

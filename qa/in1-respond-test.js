@@ -32,7 +32,7 @@ const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).leng
  const html=await grab(page,()=>__rp.file());
  ok('page file named and self-contained',/^IN-1_Parent_respondent_S\.S\._ID_12345_\.html$/.test(html.name)&&/NBH_RESPOND_RUNTIME/.test(html.text)&&/What are your child/.test(html.text)&&!/Sample Student/.test(html.text),html.name);
  const link=await page.evaluate(()=>__rp.link());
- ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#p=[A-Za-z0-9_-]{100,}$/.test(link),link.slice(0,80));
+ ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the parent answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(html.text,{waitUntil:'load'});await sleep(300);
  const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,prog:!!document.querySelector('.prog'),tas:document.querySelectorAll('textarea:not(.code)').length,maxl:document.querySelector('textarea:not(.code)').getAttribute('maxlength'),

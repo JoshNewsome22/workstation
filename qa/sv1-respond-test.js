@@ -32,7 +32,7 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  const file=await grab(page,()=>__rp.file());
  ok('page file named and self-contained, no full name',/^SV-1_teacher-pre_respondent_S\.S\._ID_12345_\.html$/.test(file.r)&&/NBH_RESPOND_RUNTIME/.test(file.text)&&/Sam will actually need/.test(file.text)&&!/Sample Student/.test(file.text),file.r);
  const link=await page.evaluate(()=>__rp.link());
- ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#p=[A-Za-z0-9_-]{100,}$/.test(link),link.slice(0,80));
+ ok('link points at respond.html with the payload',/\/NBH-Workstation\/respond\.html#z=1[a-z][A-Za-z0-9_-]{60,}$/.test(link),link.slice(0,80));
  /* the teacher answers the file */
  const rp=await ctx.newPage();const rlog=[];wire(rp,rlog);await rp.setContent(file.text,{waitUntil:'load'});await sleep(300);
  const r1=await rp.evaluate(()=>({items:document.querySelectorAll('li.it').length,opts:document.querySelectorAll('li.it .opts label').length,open:document.querySelectorAll('textarea:not(.code)').length,student:document.querySelector('.def').textContent,key:document.querySelector('.key').textContent,first:document.querySelector('li.it .q').textContent,na:document.querySelector('li.it .opts label:last-child input').value,openFirst:!!(document.querySelector('textarea').compareDocumentPosition(document.querySelector('ol.items'))&Node.DOCUMENT_POSITION_FOLLOWING)}));
