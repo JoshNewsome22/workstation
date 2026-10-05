@@ -108,16 +108,18 @@ body.view-guide .only-board,body.view-guide .only-cards,body.view-guide .only-ru
   body.vs-out-only .out{margin:0}
 }
 
-/* ---- v21.44 (A7): the sheets for Safari on the iPad and iPhone, which prints portrait Letter inside its own half-inch margins (a
-   7.5 x 10 in area). Turned, each page of visuals is that area: the page's own border gives way to Safari's margins; a landscape
-   board is turned a quarter (clockwise) inside a fully contained frame, so its unturned width does not make the browser shrink the
-   print (TK-1's frames); a sheet scaled to fit (fitSheets) holds its visual in the same kind of frame. A frame clips what pokes out
-   of its visual (the poster's last row, a hair below the poster), which would otherwise start a sheet of its own. ---- */
+/* ---- v21.44 (A7): the sheets for Safari on the iPad and iPhone, which prints portrait Letter inside its own margins (about half an
+   inch, with the address and date at the foot). Turned, Print the visuals draws each page of visuals as the area TK-1 lays its turned
+   sheets out in, 7.4 x 9.45 in (the script's TW and TH), with no border of its own; each is centred at the top of the area Safari
+   prints, which leaves room at the foot and at the sides. A landscape board is turned a quarter (clockwise) inside a fully contained
+   frame, so its unturned width does not make the browser shrink the print (TK-1's frames); a sheet scaled to fit (fitSheets) holds
+   its visual in the same kind of frame. A sheet clips what pokes out of its visual (the poster's last row, a hair below the poster),
+   which would otherwise start a sheet of its own. ---- */
 @media print{
-  body.vs-turn .out .page{width:7.5in!important;height:auto!important;padding:0!important;margin:0!important;overflow:hidden}
-  body.vs-turn .out .page.land,body.vs-turn .out .page.vs-fitted{height:10in!important;overflow:hidden;contain:strict}
+  body.vs-turn .out .page{margin:0 auto!important;overflow:hidden}
+  body.vs-turn .out .page.land,body.vs-turn .out .page.vs-fitted{height:9.45in!important;contain:strict}
   body.vs-turn .out .page.land>.vb{position:absolute;left:50%;top:50%;margin:0;transform:translate(-50%,-50%) rotate(90deg)}
-  body.vs-turn .out .page.vs-fitted>.vs-fit{position:absolute;left:50%;top:0;width:7.5in;transform-origin:50% 0;transform:translateX(-50%) scale(var(--k,1))}
+  body.vs-turn .out .page.vs-fitted>.vs-fit{position:absolute;left:50%;top:0;width:7.4in;transform-origin:50% 0;transform:translateX(-50%) scale(var(--k,1))}
 }
 
 /* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
