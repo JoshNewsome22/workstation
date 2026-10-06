@@ -1,7 +1,7 @@
 /* The writing help in every form (tools/blocks/patch-wording.py; tools/apply-polish.py puts it into a rebuilt form),
    form by form, against the same form before the rollout: the pre-rollout folder, unpacked from git into
    qa/out/wording-rollout/base/NBH-Workstation (made here when missing, from WR_COMMIT) and served by the same server.
-   For each of the 44 forms in index.html's FORMS:
+   For each of the 45 forms in index.html's FORMS:
      load    the form loads, takes its simulation and goes through its views with no console error, and the writing
              help starts (its rules compile; from this server the built-in relay address is another site, so nothing
              is asked of it)

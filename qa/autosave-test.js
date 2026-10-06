@@ -27,7 +27,7 @@
      savedalone  after Save data in a form on its own, its copy is ended and not offered as unsaved work   (6)
      offpref  a browser an earlier version switched off is asked once, and stays on when the user says so  (8)
    (ipad above covers review 7: the dot and the copy stay until the user says the file is in Files.)
-     rt       all 44 forms: Save data and Open give the same file back, and so does the safety copy of a form on its
+     rt       all 45 forms: Save data and Open give the same file back, and so does the safety copy of a form on its
               own after a reload and Restore (RT_FORMS=MT-1,SP-1 limits it to those forms)
    usage: node qa/autosave-test.js            (every scenario; rt takes about ten minutes)
           node qa/autosave-test.js taps,slow  (those only)

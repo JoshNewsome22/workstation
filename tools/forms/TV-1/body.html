@@ -1,0 +1,94 @@
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">The Student and the Training</h2>
+    <div class="fieldgrid">
+      <div><label>Student</label><input data-m="client" name="m.client"></div>
+      <div><label>Student ID</label><input data-m="sid" name="m.sid"></div>
+      <div><label>Grade</label><input data-m="grade" name="m.grade"></div>
+      <div><label>School or setting</label><input data-m="site" name="m.site"></div>
+      <div><label>Case BCBA</label><input data-m="bcba" name="m.bcba"></div>
+      <div><label>First name, as it is said and shown in the training</label><input data-m="first" name="m.first" placeholder="Sam"></div>
+      <div><label>Who the training is for</label><input data-m="aud" name="m.aud" placeholder="the receiving team"></div>
+      <div><label>Date</label><input type="date" data-m="date" name="m.date"></div>
+    </div>
+    <h2 class="nbh-band" style="margin-top:18px">The Presenter</h2>
+    <div class="fieldgrid">
+      <div><label>Presenter, as on the title card</label><input data-m="pname" name="m.pname" placeholder="Joshua Newsome, BCBA"></div>
+      <div style="grid-column:1/-1"><label>Lines under the name (one a line)</label><textarea data-m="plines" name="m.plines" rows="3" data-nbh-nowording placeholder="Student Advocacy Specialist&#10;Co-author of the FBA and BIP"></textarea></div>
+    </div>
+    <div id="setupVerdict"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Draft the Script from the Case</h2>
+    <p class="hint">The draft takes what the case already holds: the student (the packet), the target behaviors and their definitions (Form TB-1), the function and its hypothesis statements (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1). Each part becomes a segment, with what you will say and the card that shows while you say it. The parts the case cannot know (strengths, the proactive strategies, the response plan, the takeaways) are drafted as prompts in [square brackets] for you to write. Draft from the case adds the segments you tick to the end of the script; nothing already written is changed.</p>
+    <div class="ckrow" id="segPick"></div>
+    <p class="hint" id="caseLine"></p>
+
+    <h2 class="nbh-band" style="margin-top:18px">The Look of the Graphics</h2>
+    <div class="fieldgrid">
+      <div><label>Main colour</label><input type="color" data-m="c1" name="m.c1" value="#1d3b5a"></div>
+      <div><label>Accent colour</label><input type="color" data-m="c2" name="m.c2" value="#e8a33d"></div>
+      <div><label>Card background</label><select data-m="cardbg" name="m.cardbg"><option value="light">White</option><option value="dark">Dark (the main colour)</option></select></div>
+      <div><label>The graphics window's background (what the Yolobox keys out)</label><select data-m="gbg" name="m.gbg"><option value="green">Green (chroma key)</option><option value="blue">Blue (chroma key)</option><option value="black">Black (luma key)</option><option value="none">None: a picture behind (for checking the layout)</option></select></div>
+      <div><label>Where the cards sit (the presenter is on the other side)</label><select data-m="side" name="m.side"><option value="right">Right of the picture</option><option value="left">Left of the picture</option></select></div>
+      <div><label>Type</label><select data-m="font" name="m.font"><option value="sans">Inter / Helvetica (sans serif)</option><option value="serif">Georgia (serif)</option></select></div>
+    </div>
+  </section>
+
+  <!-- ===================== SCRIPT ===================== -->
+  <section class="only-script">
+    <h2 class="nbh-band">The Script</h2>
+    <p class="hint">Each row is one beat of the training: the words you say (the teleprompter shows them) and the card on screen while you say them. Tick <b>Same words as above</b> when the card changes while you are still in the same paragraph: the teleprompter keeps the paragraph and moves to the next card. Words in [square brackets] are still to be written. A card's text is one line a point; a line starting with &bull; or - prints as a bullet.</p>
+    <div id="scriptSum" class="tv-sum"></div>
+    <div class="tools"><button class="tool" id="addSeg" type="button">Add a segment</button><button class="tool" id="addRow" type="button">Add a row at the end</button><button class="tool" id="emptyAll" type="button">Empty the script</button></div>
+    <div id="rows"></div>
+  </section>
+
+  <!-- ===================== TELEPROMPTER ===================== -->
+  <section class="only-prompter">
+    <div class="tp-wrap" id="tpWrap">
+      <div class="tp-bar" id="tpBar">
+        <button type="button" class="tool" id="tpPrev" aria-label="Previous card">&larr; Back</button>
+        <button type="button" class="tool primary" id="tpRun" aria-pressed="false">Scroll</button>
+        <button type="button" class="tool" id="tpNext" aria-label="Next card">Next &rarr;</button>
+        <span class="tp-pos" id="tpPos"></span>
+        <label class="tp-ctl">Size <input type="range" min="28" max="110" step="2" data-m="tpsize" name="m.tpsize" value="58"></label>
+        <label class="tp-ctl">Speed <input type="range" min="80" max="220" step="5" data-m="tpwpm" name="m.tpwpm" value="140"> <span id="tpWpmV"></span></label>
+        <label class="ck tp-ctl"><input type="checkbox" data-c="mirror" name="c.mirror"> Mirror (beam-splitter glass)</label>
+        <button type="button" class="tool" id="tpRec" aria-pressed="false">Start the clock</button>
+        <span class="tp-clock" id="tpClock">0:00</span>
+        <button type="button" class="tool" id="tpGfx">Open the graphics window</button>
+        <button type="button" class="tool" id="tpFs">Full screen</button>
+      </div>
+      <div class="tp-screen" id="tpScreen"><div class="tp-strip" id="tpStrip"></div><div class="tp-line" aria-hidden="true"></div></div>
+      <div class="tp-foot" id="tpFoot"></div>
+    </div>
+    <p class="hint">A Bluetooth page-turner or keyboard works the teleprompter: <b>Page Down</b>, <b>&rarr;</b> or <b>Enter</b> for the next card, <b>Page Up</b> or <b>&larr;</b> for the one before, <b>Space</b> to start or stop scrolling a long paragraph (at the speed set, in words a minute). Each next card also changes the graphics window, when it is open. <b>Start the clock</b> keeps the time each card came up, so they can be put on the video later (Export the card times).</p>
+    <div class="tools"><button class="tool" id="logCsv" type="button">Export the card times (CSV)</button><span class="hint" id="logLine"></span></div>
+  </section>
+
+  <!-- ===================== GRAPHICS ===================== -->
+  <section class="only-graphics">
+    <h2 class="nbh-band">The Graphics</h2>
+    <p class="hint">Every card as it shows on the video, 1920 by 1080. <b>Open the graphics window</b> opens them in a window of their own, full screen on a second display (an iPad with Stage Manager can extend to a display, and a computer can send it out by HDMI), on the background chosen on Setup for the Yolobox to key out; the teleprompter changes it as you go. The layout of a card is chosen on its row in the Script (Automatic picks one from what the card holds).</p>
+    <div class="gx-top"><div class="gx-big" id="gxBig"></div>
+      <div class="gx-side"><div class="tools"><button class="tool" id="gxPrev" type="button">&larr;</button><span id="gxPos"></span><button class="tool" id="gxNext" type="button">&rarr;</button></div>
+        <div class="tools"><button class="tool primary" id="gxWin" type="button">Open the graphics window</button></div>
+        <p class="hint" id="gxInfo"></p></div></div>
+    <div class="gx-grid" id="gxGrid"></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Makes</h2>
+    <p>The training video for a finished FBA and BIP, for a receiving team, new staff or a family: what you will say, and what is on screen while you say it. It replaces the spreadsheet of the script and the cards: the form drafts both from the case, keeps them together, runs the teleprompter, and draws the cards itself. Nothing leaves the device: the script, the cards and the pictures stay in this form's saved file.</p>
+    <table class="rt">
+      <tr><th style="width:24%">1. Draft</th><td>Setup: the student and the presenter. <b>Draft from the case</b> writes a segment for each part of the case the workstation holds (the target behaviors with their definitions, the function and its hypothesis, the goals, the reinforcers), with an opening and the parts to write yourself as prompts in [square brackets]. A sheet made before (the Google Sheet's first tab, downloaded as CSV, or the whole sheet as .xlsx) comes in through <b>Import a sheet</b>.</td></tr>
+      <tr><th>2. Write</th><td>Script: each row is a beat, the words and the card. The total time is worked out at the teleprompter's speed (about 140 words a minute). Words in [brackets] are counted as still to do.</td></tr>
+      <tr><th>3. Check the cards</th><td>Graphics: every card at the size of the video; each row's layout can be changed (a card beside you, a lower third, a full-screen card, a section title, one or two pictures, or no card).</td></tr>
+      <tr><th>4. Record</th><td>Teleprompter on the iPad in front of the camera (mirrored for a beam-splitter glass), a clicker to go to the next card, the graphics window on a second display for the Yolobox. Or keep Flowics for now: <b>Export for Sheets</b> writes the workbook in the layout of the sheet it reads (the first tab every row in nine columns: the segment, the words, the card's title, its text, the two picture captions and the three picture places; then a tab for each segment).</td></tr>
+    </table>
+    <p class="hint" style="margin-top:10px">Privacy: the script names the student and describes the plan. In this form it stays on the device and in the saved file. A sheet exported for Flowics puts it in Google Sheets and Flowics; use the district's account and the services the district allows.</p>
+  </section>
+
+  <!-- the script as it prints (Print the script) -->
+  <section class="only-print" id="printOut"></section>

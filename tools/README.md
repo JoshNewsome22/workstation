@@ -6,8 +6,8 @@ Paths below are from the repository root. The test server the checks expect:
 
 ## Layout
 
-- `tools/forms/<ID>/` — the source parts of the eleven forms built from parts
-  (CN-1, DA-1, GC-1, HD-1, IM-1, SA-1, SI-1, SM-1, SR-1, TK-1, VS-1): `meta.json`, `toolbar.html`,
+- `tools/forms/<ID>/` — the source parts of the twelve forms built from parts
+  (CN-1, DA-1, GC-1, HD-1, IM-1, SA-1, SI-1, SM-1, SR-1, TK-1, TV-1, VS-1): `meta.json`, `toolbar.html`,
   `own.css`, `body.html`, `script.js` (SM-1 and VS-1 keep `script-main.js`, copied to
   `script.js`; TK-1 keeps `script-main.js` and its `script.js` is the vendored QR encoder
   `tools/vendor/qrcode-generator/qrcode.js`, licence header kept, followed by `script-main.js`). Never edit the built file of one of these forms; edit the parts and rebuild.
@@ -59,13 +59,13 @@ made in every form (by its patcher) and reaches the rebuilt forms through CF-1.
 
     python3 tools/blocks/patch-ui.py tools/blocks/nbh-ui.html NBH-Workstation/[A-Z]*.html
 
-The glob `[A-Z]*.html` is the 44 forms without `index.html`. Each patcher prints
+The glob `[A-Z]*.html` is the 45 forms without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
 
 ## The writing help in every form
 
-Every form (the 44; not `index.html` or `respond.html`) carries the writing help once, as
+Every form (the 45; not `index.html` or `respond.html`) carries the writing help once, as
 `<script id="nbh-wording">` between the form's markup and its own script, holding
 `tools/blocks/nbh-wording-rules.json`, `nbh-wording-config.json` and `nbh-wording.js` byte for byte.
 What keeps it there:
@@ -74,7 +74,7 @@ What keeps it there:
   gives every rebuilt parts form its copy (the two steps above, and TK-1's `build.sh`, which also
   checks the built form holds it once and current). CF-1's own copy sits in the part `new-form.py`
   does not copy, so a rebuilt form never holds two.
-- After a change to one of the three files (a rule, the relay address), refresh all 44, then build
+- After a change to one of the three files (a rule, the relay address), refresh all 45, then build
   the editions:
 
       python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
@@ -84,7 +84,7 @@ What keeps it there:
   not refreshed), and checks that the packed forms unpack to the files; `build-rps.py` copies the forms as
   they are. The one-file editions keep the writing help ONCE, as they keep the logo: it is cut out of every
   form (`@@NBH-WORDING@@`) and packed in a block of its own (`nbh-embed-wording`), which `index.html` puts
-  back as it opens a form and copies into a saved case file. 44 copies would add about 4 MB to each
+  back as it opens a form and copies into a saved case file. 45 copies would add about 4 MB to each
   edition, because the packer's gzip cannot reach back from one form's copy to the last.
 - A field that holds someone else's words (an interview answer, a quoted record, the student's own
   answers) or an instruction text with marks in it (TK-1's backs) is marked `data-nbh-nowording` too:
@@ -124,7 +124,7 @@ and stops if the source changed shape.
 - `tools/blocks/nbh-pwa-save.js` + `tools/blocks/patch-pwa.py` — the block that, in the app
   installed on an iPad or iPhone, sends saved files to the share sheet, opens a window the page makes
   for itself (the master print, a respondent page's preview) inside the app, and says how to print
-  when the print options do not appear. The patcher puts one copy after the `<title>` of the 44 forms
+  when the print options do not appear. The patcher puts one copy after the `<title>` of the 45 forms
   and `index.html`, replaces an existing copy, refuses a second, and has `--check`; re-run it (then
   `pwa-sw.py`) after a merge or a rebuilt form.
 - `build-single.py` leaves the `nbh-pwa-head` block of `index.html` out of the one-file editions.
@@ -136,7 +136,7 @@ and stops if the source changed shape.
 `bip4-test`, `u-test`, `u-check`, `shell-ui-test`, `logo-test`, `xlsx-test`, `single-check`,
 the nine form tests (`sm1-test`, `sa1-test`, `gc1-test`, `si1-test`, `da1-test`, `hd1-test`,
 `cn1-test`, `sr1-test`, `vs1-test`) and `a11y.js` (needs `axe-core` in `qa/node_modules`).
-The writing help: `wording-rollout-test` (all 44 forms against the commit before the rollout),
+The writing help: `wording-rollout-test` (all 45 forms against the commit before the rollout),
 `wording-client-test`, `wording-rules-test` and the relay's `tools/relay/tests/run.sh`.
 `cn1-test`, `sr1-test`, `vs1-test`), `pwa-test` (the offline copy and the installed app) and
 `a11y.js` (needs `axe-core` in `qa/node_modules`).
