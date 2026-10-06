@@ -17,6 +17,7 @@ Set up once (only package registries are needed):
     cat shards/kokoro-q8.part0.bin ... part5.bin > model_quantized.onnx
         (sha256 fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478, onnx-community/Kokoro-82M-v1.0-ONNX)
     python3 -m venv venv && venv/bin/pip install kokoro-onnx imageio-ffmpeg soundfile
+(v21.49) The bus ride's lines (ids b_...) are written to walk-audio-bus.js, which adds them to WALK_AUDIO, so neither file reaches 2 MB.
 usage: TK1_TTS=/path/to/tts tts/venv/bin/python tools/forms/TK-1/make-narration.py [only-these-ids ... | --all]
 Lines whose text, voice and speed are unchanged keep their audio from the existing walk-audio.js unless named (--all names
 every line). A line voiced again with unchanged text, voice and speed must come out the same length as before (the
@@ -30,12 +31,21 @@ TTS = os.environ.get('TK1_TTS') or sys.exit('set TK1_TTS to the folder with mode
 spec = json.load(open(os.path.join(HERE, 'walk-script.json'), encoding='utf-8'))
 voice, speed = spec.get('voice', 'af_heart'), float(spec.get('speed', 0.95))
 out_js = os.path.join(HERE, 'walk-audio.js')
+# (v21.49) the bus ride's lines (ids b_...) go in a file of their own, walk-audio-bus.js (beside the form as
+# nbh-tk1-bus-narration.js), so that neither file reaches 2 MB; it adds its lines to WALK_AUDIO when it loads
+out_bus = os.path.join(HERE, 'walk-audio-bus.js')
+BUS = lambda lid: lid.startswith('b_')
 old = {}
 if os.path.exists(out_js):
     m = re.search(r'const WALK_AUDIO=(\{.*\});\s*$', open(out_js, encoding='utf-8').read(), re.S)
     if m:
         try: old = json.loads(m.group(1))
         except Exception: old = {}
+if os.path.exists(out_bus) and old:
+    m = re.search(r'var A=(\{.*?\});if\(', open(out_bus, encoding='utf-8').read(), re.S)
+    if m:
+        try: old.setdefault('lines', {}).update(json.loads(m.group(1)))
+        except Exception: pass
 force = set(a for a in sys.argv[1:] if a != '--all')
 if '--all' in sys.argv[1:]: force = set(ln['id'] for ln in spec['lines'])
 CACHE = os.environ.get('TK1_TTS_CACHE', '')
@@ -95,10 +105,16 @@ for ln in spec['lines']:
         mp3 = open(d + '/a.mp3', 'rb').read()
     lines[lid] = {'t': text, 'd': d_new, 'a': 'data:audio/mpeg;base64,' + base64.b64encode(mp3).decode()}
     print(f'{lid:>14}  {lines[lid]["d"]:6.2f} s  {len(mp3)//1024:4d} KB  {g:+5.1f} dB  {"" if lm is None else "%.1f LUFS" % lm}  {text[:50]}')
-data = {'voice': voice, 'speed': speed, 'lines': lines}
+data = {'voice': voice, 'speed': speed, 'lines': {k: v for k, v in lines.items() if not BUS(k)}}
 open(out_js, 'w', encoding='utf-8').write(
     '/* The walkthrough narration, voiced by tools/forms/TK-1/make-narration.py from walk-script.json with the Kokoro-82M voice\n'
     '   ' + voice + ' (Apache-2.0, run offline). Generated: edit walk-script.json and run the script again. */\n'
     'const WALK_AUDIO=' + json.dumps(data, separators=(',', ':')) + ';\n')
+bus = {k: v for k, v in lines.items() if BUS(k)}
+open(out_bus, 'w', encoding='utf-8').write(
+    '/* The bus ride walkthrough\'s narration (v21.49), voiced by tools/forms/TK-1/make-narration.py from walk-script.json with the\n'
+    '   Kokoro-82M voice ' + voice + ' (Apache-2.0, run offline): its lines are added to WALK_AUDIO (walk-audio.js) when it loads.\n'
+    '   Generated: edit walk-script.json and run the script again. */\n'
+    '(function(){var A=' + json.dumps(bus, separators=(',', ':')) + ';if(typeof WALK_AUDIO===\'undefined\')window.WALK_AUDIO={voice:' + json.dumps(voice) + ',speed:' + json.dumps(speed) + ',lines:A};else Object.assign(WALK_AUDIO.lines,A);})();\n')
 tot = sum(v['d'] for v in lines.values())
-print(f'{len(lines)} lines, {tot:.1f} s of speech, walk-audio.js {os.path.getsize(out_js)//1024} KB')
+print(f'{len(lines)} lines, {tot:.1f} s of speech, walk-audio.js {os.path.getsize(out_js)//1024} KB, walk-audio-bus.js {os.path.getsize(out_bus)//1024} KB')

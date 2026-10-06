@@ -13,6 +13,12 @@ const LIST=['intro','ch_show','ch_pick','tg_show','tg_pick','bd_place','tk_page'
 const OPT={tk_page:1,tok_none:1};
 const CHOF={intro:'book',ch_show:'choices',ch_pick:'choices',tg_show:'targets',tg_pick:'targets',bd_place:'board',tk_page:'board',rule:'session',start:'session',tok_first:'session',tok_none:'session',tok_more:'session',tok_last:'session',tok_last_term:'session',exchange:'exchange',reset:'exchange',tips:'tips',outro:'tips'};
 const CHAPS=[['book','The book'],['choices','Choices'],['targets','Targets'],['board','Board'],['session','Session'],['exchange','Exchange'],['tips','Tips']];
+/* (v21.49) a bus book plays its own walkthrough: the board, the route, the ride, the item, fading the timer, the plan for the staff.
+   Each scene below is in the order played; a book plays one of each pair (b_spread or b_fixed, b_none or b_each, b_last or
+   b_full, b_arrive or b_onbus) as its settings say */
+const LIST_BUS=['b_intro','b_rules','b_item','b_route','b_spread','b_fixed','b_start','b_tok','b_none','b_each','b_more','b_last','b_full','b_arrive','b_onbus','b_land','b_fewer','b_plan','b_outro'];
+const CHAPS_BUS=[['bboard','The board'],['broute','The route'],['bride','The ride'],['bitem','The item'],['bfade','Fading'],['bstaff','For the staff']];
+Object.assign(CHOF,{b_intro:'bboard',b_rules:'bboard',b_item:'bboard',b_route:'broute',b_spread:'broute',b_fixed:'broute',b_start:'bride',b_tok:'bride',b_none:'bride',b_each:'bride',b_more:'bride',b_last:'bride',b_full:'bride',b_arrive:'bitem',b_onbus:'bitem',b_land:'bfade',b_fewer:'bfade',b_plan:'bstaff',b_outro:'bstaff'});
 /* the narration as written in walk-script.json, used only when walk-audio.js is not in the build (its texts always win) */
 const FB={
   intro:'This is your token board book. Four laminated pages are bound on the left, with a tab for each: Choices, Targets, Board, and Tokens.',
@@ -34,8 +40,29 @@ const FB={
   tips:'Three tips. Make the tokens valuable first: give one and trade it for the item right away, again and again, until your learner reaches for the token. Start with a small requirement and few tokens, and raise them slowly; if the behavior falls apart, go back a step. Keep the item available only through the board.',
   outro:'That\'s the whole cycle: choose, set the target, earn the tokens, and exchange. Over time, the target behavior should happen more often; if not, change the item or the requirement. The back of each page tells you more.'
 };
+Object.assign(FB,{
+  b_intro:'This is a token board for the bus ride. It rides along with your learner, and the bus staff use it the same way on every trip.',
+  b_rules:'Across the top are the bus rules your learner is working on, such as staying in the seat, a quiet voice, and hands to self. Choose two to four, each with a picture.',
+  b_item:'Before the ride, your learner picks something to work for, and it goes in the Earn box, so the goal is in sight the whole way.',
+  b_route:'This is the route, drawn simply, from the start of the ride to the stop. The form takes the usual length of the ride, which you can check in Maps.',
+  b_spread:'The form spreads the tokens over the ride. It divides the time by the number of tokens, so the last token comes a minute or two before the stop, just as your learner gets close to the item.',
+  b_fixed:'Here the tokens come at a set interval, such as every few minutes. On a long ride the board can fill more than once, with an exchange each time it is full.',
+  b_start:'To start, the bus staff use a timer set to the checkpoint times on the plan. A vibrating watch is easy to use on a noisy bus. The timer here is sped up for this video.',
+  b_tok:'At each checkpoint, if your learner followed the rules since the last one, give a token right away, with brief praise that names the rule. Let your learner put it on the board.',
+  b_none:'If a rule is not followed, that checkpoint earns no token, but the earned tokens stay. Calmly name the rule once, and the next checkpoint is a fresh chance.',
+  b_each:'With a row for each rule, every rule earns its own token at each checkpoint. A missed rule leaves only its own slot empty, and the other rules still earn.',
+  b_more:'The bus rolls on, and each checkpoint with the rules followed earns another token. The board fills up along the way.',
+  b_last:'The last token comes just before the stop. The board is full, and your learner has earned the item.',
+  b_full:'When the last slot is filled, the board is full, and your learner has earned the item. On a long ride, the board then starts again.',
+  b_arrive:'At the stop, the board goes with your learner to the adult who meets the bus. That adult sees the full board and gives the item right away.',
+  b_onbus:'When the board is full, your learner gets the item right there on the bus, such as a sticker, a song, or a little time with a tablet. Check the district\u2019s rules before using food on the bus.',
+  b_land:'Once the board is working, fade the timer. Use landmarks along the route as the checkpoints instead, such as a store, a park, or a bridge your learner can see from the window.',
+  b_fewer:'Then use fewer checkpoints: every other landmark, and later just the stop. If the rides get harder, go back a step.',
+  b_plan:'The form prints a ride plan for the bus staff, with the route, the checkpoints, what to say, and a log to fill in after each ride.',
+  b_outro:'Same board, same rules, every ride. Over time, the rides should go more smoothly, with fewer tokens needed.'});
 /* the simulator's pictures (the practice's own cards), shown when a page's six cards are empty */
-const SAMPLE={ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad2','iPad']],
+const SAMPLE={btg:[['sitting','Stay in my seat'],['quiet','Quiet voice'],['safehands','Hands to self']],bch:[['sticker',''],['musicfun',''],['ipad',''],['cardbubbles',''],['cardbooks',''],['snackfun','']],
+  blm:[['store','A store',.2],['park','The park',.4],['','A fire station',.58],['libraryplace','The library',.76],['','A bridge',.9]],ch:[['cardcrayons','Color'],['cardball','Ball'],['cardplayground','Playground'],['cardbreak','Break'],['youtube','YouTube'],['cardipad2','iPad']],
   tg:[['cardwriting','Writing'],['cardreading','Reading'],['cardalldone','All Done'],['boyraisehand','Raise hand'],['cardmath','Math'],['cardwaiting','Waiting']]};
 /* brief praise that names the behavior: an ongoing behavior named by its -ing word reads as itself (Sitting: "Great sitting!");
    any other target is named after the praise ("Great job: raise hand!"), so the praise always says what was done */
@@ -67,7 +94,7 @@ function line(id){const L=audioLines();const l=L&&L[id];const t=String((l&&l.t)|
 /* where each word starts in its recording (seconds from the start of the clip, by the character it starts at), taken from the
    voice's own phoneme lengths for that very clip (a mark at every word, at its audible start); a line whose text has changed since
    falls back to its share of the characters. Made by a script outside the repo; keyed by a hash of the text. */
-/* MK:BEGIN */const MK={"intro":{"h":"281d43df","o":[[5,0.36],[8,0.49],[13,0.69],[19,1.14],[25,1.44],[31,2.31],[36,2.64],[46,3.21],[52,3.79],[56,3.96],[62,4.39],[65,4.49],[69,4.61],[75,5.16],[80,5.29],[82,5.36],[86,5.71],[90,5.86],[96,6.76],[105,7.64],[114,8.31],[121,8.76],[125,8.89]]},"ch_show":{"h":"6834c8b5","o":[[5,0.47],[9,0.97],[12,1.12],[16,1.22],[24,1.72],[30,2.77],[35,3.02],[38,3.14],[45,3.42],[49,3.54],[54,3.97],[62,5.12],[68,5.44],[76,5.89],[83,6.02],[86,6.19],[96,6.62],[101,6.79],[109,7.09],[116,7.69],[122,7.97],[127,8.77],[131,9.04],[141,9.42],[146,9.54],[150,9.69],[154,9.84],[158,10.04],[164,10.92],[167,11.27],[172,11.47],[177,11.72],[181,11.94],[188,12.39]]},"ch_pick":{"h":"29e7bff9","o":[[5,0.36],[13,0.73],[19,0.93],[24,1.11],[28,1.21],[37,1.91],[41,2.03],[47,2.33],[51,2.56],[54,2.68],[59,2.96],[64,3.93],[67,4.11],[75,4.83],[80,5.08],[85,5.21],[89,5.31],[99,6.21],[103,6.36],[107,6.56],[112,6.73],[120,7.11],[125,7.33],[129,7.43]]},"tg_show":{"h":"b9767bc2","o":[[5,0.54],[9,0.97],[12,1.12],[16,1.22],[24,1.69],[30,2.49],[36,2.64],[40,2.79],[47,3.17],[52,3.34],[55,3.47],[62,4.49],[64,4.62],[68,4.87],[75,5.54],[78,5.74],[80,5.82],[92,6.44],[101,7.04],[106,7.19],[110,7.29],[119,7.79],[125,8.84],[128,8.97],[132,9.09],[139,9.49],[142,9.69],[149,10.14],[153,10.29],[164,10.94],[169,11.12],[171,11.19],[178,11.99],[184,12.29],[189,12.49],[194,12.59],[198,12.79],[204,13.12],[209,13.57],[215,13.87]]},"tg_pick":{"h":"ff41feb0","o":[[7,0.49],[11,0.76],[18,1.19],[21,1.21],[23,1.36],[29,2.41],[35,2.79],[40,2.91],[44,3.06],[50,3.34],[57,3.79],[60,3.94],[68,4.56],[73,4.76],[81,5.51],[84,5.74],[93,6.26],[99,6.56],[106,7.14],[110,7.24],[114,7.41],[119,7.71]]},"bd_place":{"h":"10b87ff4","o":[[5,0.52],[11,0.92],[14,1.07],[18,1.17],[25,2.02],[31,2.29],[35,2.39],[42,2.77],[48,3.02],[55,3.62],[59,3.72],[63,3.82],[70,4.34],[75,4.69],[81,4.94],[87,5.89],[92,6.12],[100,6.54],[104,6.72],[108,7.04],[112,7.22],[116,7.32],[122,8.24],[128,8.54],[132,8.64],[140,9.27],[145,9.44],[149,9.59]]},"tk_page":{"h":"36a73586","o":[[5,0.49],[10,0.97],[13,1.12],[17,1.24],[24,1.79],[30,2.59],[36,2.72],[40,2.84],[47,3.42],[53,4.32],[57,4.49],[63,4.89],[69,5.34],[72,5.44],[76,5.54],[82,6.02],[87,6.27],[92,6.44],[100,6.89],[104,7.12],[109,7.37],[113,7.52],[118,7.77],[121,7.89],[127,8.92],[132,9.17],[136,9.39],[143,9.89],[152,10.47],[159,11.24],[163,11.34],[168,11.62],[171,11.69],[175,11.84],[179,12.22],[184,12.47]]},"rule":{"h":"f60a2c85","o":[[7,0.44],[11,0.56],[18,1.19],[25,1.69],[29,1.91],[34,2.14],[37,2.24],[41,2.36],[48,2.76],[57,3.34],[63,3.59],[65,3.69],[72,4.61],[76,4.76],[81,4.99],[88,5.69],[91,5.96],[95,6.19],[101,7.16],[106,7.36],[109,7.54],[116,8.19],[119,8.34],[124,8.51],[132,8.89],[136,9.09],[145,10.34],[150,10.54],[158,11.11],[163,11.51],[167,11.76],[173,12.29],[177,12.49],[183,12.81],[187,12.96]]},"start":{"h":"e3ef0808","o":[[4,0.48],[10,0.71],[14,0.81],[23,1.83],[29,2.13],[32,2.21],[36,2.31],[42,2.68],[46,2.78],[51,3.08],[56,3.38],[66,4.43],[72,4.71],[76,4.81],[84,5.46],[89,5.63],[93,5.78],[99,6.88],[103,7.03],[108,7.41],[115,7.81],[120,8.18],[125,8.53],[136,9.03],[146,9.88],[151,10.16],[154,10.36],[158,10.48],[163,10.68]]},"tok_first":{"h":"c0a19047","o":[[4,0.26],[13,0.78],[16,0.93],[22,1.73],[26,1.86],[31,2.03],[39,2.48],[44,2.73],[47,2.88],[51,2.98],[58,3.43],[67,3.93],[71,4.03],[77,4.33],[83,5.46],[88,5.61],[90,5.71],[96,6.36],[102,6.61],[108,7.36],[113,7.56],[119,7.88],[126,8.36],[131,8.53],[137,8.93],[142,9.11],[147,9.33],[152,10.28],[156,10.46],[161,10.61],[169,11.03],[173,11.26],[176,11.38],[179,11.48],[183,11.58],[188,11.86]]},"tok_none":{"h":"2e025844","o":[[3,0.24],[7,0.34],[16,0.84],[23,1.57],[29,1.74],[32,1.92],[35,2.17],[41,2.62],[45,2.77],[50,2.97],[60,3.89],[64,4.02],[68,4.19],[75,4.57],[82,5.14],[87,5.44],[90,5.54],[94,5.64],[101,6.74],[108,7.24],[115,7.67],[120,7.82],[128,8.27],[133,8.44],[136,8.57],[139,8.82],[145,9.09],[151,9.89],[155,10.04],[161,10.29],[165,10.42],[174,10.87],[179,11.22],[184,11.37],[189,11.49],[195,11.82]]},"tok_more":{"h":"bc2e8615","o":[[5,0.35],[14,0.82],[19,0.94],[23,1.04],[30,1.45],[39,2.12],[45,2.42],[53,2.8],[60,3.72],[66,4.07],[72,4.34],[77,4.77],[82,4.9],[84,5.04],[88,5.27],[94,5.54],[97,5.67],[105,6.87],[109,6.97],[115,7.29],[121,7.62],[125,8.19],[129,8.52],[134,8.92],[137,8.94],[139,9.09]]},"tok_last_term":{"h":"66774073","o":[[4,0.37],[9,0.62],[18,1.22],[24,1.54],[28,1.67],[33,2.04],[40,3.09],[43,3.22],[49,3.47],[60,4.49],[65,4.79],[68,4.94],[72,5.09],[81,5.62],[88,6.44],[95,6.87],[100,7.14],[105,7.29],[109,7.44],[117,8.52],[122,8.72],[132,9.67],[135,9.79],[141,10.09],[146,10.24],[154,10.64],[159,10.79],[163,10.94],[169,11.22],[172,11.42],[181,12.02],[185,12.12],[189,12.27],[194,12.62],[200,12.94]]},"tok_last":{"h":"ccaee597","o":[[4,0.37],[9,0.62],[18,1.12],[23,1.24],[27,1.37],[34,1.77],[44,2.74],[48,2.84],[52,2.97],[57,3.37],[63,3.79],[68,4.12],[72,5.09],[76,5.42],[80,5.52],[86,5.84],[89,6.04],[95,6.67],[99,6.79],[104,6.97],[112,7.39],[116,7.62],[123,7.84],[127,7.97],[132,8.29],[137,8.47]]},"exchange":{"h":"61c3812d","o":[[4,0.24],[10,0.54],[13,0.74],[19,1.44],[22,1.64],[28,1.91],[32,2.04],[39,2.61],[43,2.71],[47,2.84],[52,3.06],[57,3.56],[63,3.84],[69,4.69],[80,5.36],[86,5.54],[90,5.66],[96,5.99],[99,6.14],[104,7.14],[109,7.34],[117,7.74],[122,8.01],[125,8.16],[129,8.26],[133,8.44],[138,8.99],[141,9.16],[148,9.79],[152,10.04],[159,10.29],[163,10.39]]},"reset":{"h":"e9ec3a64","o":[[5,0.21],[9,0.34],[14,0.76],[19,0.89],[23,1.04],[28,1.39],[31,1.51],[35,2.04],[39,2.19],[42,2.29],[48,3.09],[52,3.21],[59,3.64],[63,3.74],[72,4.29],[75,4.36],[81,4.54],[88,5.84],[93,6.06],[98,6.24],[106,6.64],[114,7.06],[120,7.44],[124,7.56],[128,7.66],[133,7.96]]},"tips":{"h":"85d784c5","o":[[6,0.46],[12,1.36],[17,1.59],[21,1.71],[28,2.29],[37,2.86],[44,3.86],[49,4.09],[53,4.36],[57,4.51],[63,4.81],[66,4.94],[70,5.04],[74,5.21],[79,5.64],[85,5.89],[91,6.59],[97,7.04],[101,7.14],[108,7.86],[114,8.19],[119,8.36],[127,8.74],[135,9.19],[139,9.29],[143,9.41],[150,10.64],[156,10.94],[161,11.06],[163,11.21],[169,11.61],[181,12.36],[185,12.51],[189,12.71],[197,13.54],[201,13.69],[207,14.01],[212,14.26],[220,15.24],[223,15.34],[227,15.44],[236,16.01],[242,16.29],[249,16.96],[252,17.16],[257,17.41],[259,17.49],[265,18.41],[270,18.61],[274,18.76],[279,19.11],[289,19.69],[294,20.11],[302,20.31],[306,20.41]]},"outro":{"h":"cbf76364","o":[[7,0.38],[11,0.48],[17,0.76],[24,1.66],[32,2.43],[36,2.61],[40,2.73],[48,3.33],[53,3.53],[57,3.63],[65,4.36],[69,4.48],[79,5.91],[84,6.21],[90,6.78],[94,6.91],[101,7.28],[110,7.81],[117,7.96],[124,8.31],[129,8.56],[136,9.48],[139,9.63],[144,10.16],[151,10.48],[155,10.66],[160,11.18],[163,11.41],[167,11.51],[180,12.78],[184,12.88],[189,13.13],[192,13.21],[197,13.43],[202,13.86],[208,14.18],[212,14.31]]}};/* MK:END */
+/* MK:BEGIN */const MK={"intro":{"h":"281d43df","o":[[5,0.36],[8,0.49],[13,0.69],[19,1.14],[25,1.44],[31,2.31],[36,2.64],[46,3.21],[52,3.79],[56,3.96],[62,4.39],[65,4.49],[69,4.61],[75,5.16],[80,5.29],[82,5.36],[86,5.71],[90,5.86],[96,6.76],[105,7.64],[114,8.31],[121,8.76],[125,8.89]]},"ch_show":{"h":"6834c8b5","o":[[5,0.47],[9,0.97],[12,1.12],[16,1.22],[24,1.72],[30,2.77],[35,3.02],[38,3.14],[45,3.42],[49,3.54],[54,3.97],[62,5.12],[68,5.44],[76,5.89],[83,6.02],[86,6.19],[96,6.62],[101,6.79],[109,7.09],[116,7.69],[122,7.97],[127,8.77],[131,9.04],[141,9.42],[146,9.54],[150,9.69],[154,9.84],[158,10.04],[164,10.92],[167,11.27],[172,11.47],[177,11.72],[181,11.94],[188,12.39]]},"ch_pick":{"h":"29e7bff9","o":[[5,0.36],[13,0.73],[19,0.93],[24,1.11],[28,1.21],[37,1.91],[41,2.03],[47,2.33],[51,2.56],[54,2.68],[59,2.96],[64,3.93],[67,4.11],[75,4.83],[80,5.08],[85,5.21],[89,5.31],[99,6.21],[103,6.36],[107,6.56],[112,6.73],[120,7.11],[125,7.33],[129,7.43]]},"tg_show":{"h":"b9767bc2","o":[[5,0.54],[9,0.97],[12,1.12],[16,1.22],[24,1.69],[30,2.49],[36,2.64],[40,2.79],[47,3.17],[52,3.34],[55,3.47],[62,4.49],[64,4.62],[68,4.87],[75,5.54],[78,5.74],[80,5.82],[92,6.44],[101,7.04],[106,7.19],[110,7.29],[119,7.79],[125,8.84],[128,8.97],[132,9.09],[139,9.49],[142,9.69],[149,10.14],[153,10.29],[164,10.94],[169,11.12],[171,11.19],[178,11.99],[184,12.29],[189,12.49],[194,12.59],[198,12.79],[204,13.12],[209,13.57],[215,13.87]]},"tg_pick":{"h":"ff41feb0","o":[[7,0.49],[11,0.76],[18,1.19],[21,1.21],[23,1.36],[29,2.41],[35,2.79],[40,2.91],[44,3.06],[50,3.34],[57,3.79],[60,3.94],[68,4.56],[73,4.76],[81,5.51],[84,5.74],[93,6.26],[99,6.56],[106,7.14],[110,7.24],[114,7.41],[119,7.71]]},"bd_place":{"h":"10b87ff4","o":[[5,0.52],[11,0.92],[14,1.07],[18,1.17],[25,2.02],[31,2.29],[35,2.39],[42,2.77],[48,3.02],[55,3.62],[59,3.72],[63,3.82],[70,4.34],[75,4.69],[81,4.94],[87,5.89],[92,6.12],[100,6.54],[104,6.72],[108,7.04],[112,7.22],[116,7.32],[122,8.24],[128,8.54],[132,8.64],[140,9.27],[145,9.44],[149,9.59]]},"tk_page":{"h":"36a73586","o":[[5,0.49],[10,0.97],[13,1.12],[17,1.24],[24,1.79],[30,2.59],[36,2.72],[40,2.84],[47,3.42],[53,4.32],[57,4.49],[63,4.89],[69,5.34],[72,5.44],[76,5.54],[82,6.02],[87,6.27],[92,6.44],[100,6.89],[104,7.12],[109,7.37],[113,7.52],[118,7.77],[121,7.89],[127,8.92],[132,9.17],[136,9.39],[143,9.89],[152,10.47],[159,11.24],[163,11.34],[168,11.62],[171,11.69],[175,11.84],[179,12.22],[184,12.47]]},"rule":{"h":"f60a2c85","o":[[7,0.44],[11,0.56],[18,1.19],[25,1.69],[29,1.91],[34,2.14],[37,2.24],[41,2.36],[48,2.76],[57,3.34],[63,3.59],[65,3.69],[72,4.61],[76,4.76],[81,4.99],[88,5.69],[91,5.96],[95,6.19],[101,7.16],[106,7.36],[109,7.54],[116,8.19],[119,8.34],[124,8.51],[132,8.89],[136,9.09],[145,10.34],[150,10.54],[158,11.11],[163,11.51],[167,11.76],[173,12.29],[177,12.49],[183,12.81],[187,12.96]]},"start":{"h":"e3ef0808","o":[[4,0.48],[10,0.71],[14,0.81],[23,1.83],[29,2.13],[32,2.21],[36,2.31],[42,2.68],[46,2.78],[51,3.08],[56,3.38],[66,4.43],[72,4.71],[76,4.81],[84,5.46],[89,5.63],[93,5.78],[99,6.88],[103,7.03],[108,7.41],[115,7.81],[120,8.18],[125,8.53],[136,9.03],[146,9.88],[151,10.16],[154,10.36],[158,10.48],[163,10.68]]},"tok_first":{"h":"c0a19047","o":[[4,0.26],[13,0.78],[16,0.93],[22,1.73],[26,1.86],[31,2.03],[39,2.48],[44,2.73],[47,2.88],[51,2.98],[58,3.43],[67,3.93],[71,4.03],[77,4.33],[83,5.46],[88,5.61],[90,5.71],[96,6.36],[102,6.61],[108,7.36],[113,7.56],[119,7.88],[126,8.36],[131,8.53],[137,8.93],[142,9.11],[147,9.33],[152,10.28],[156,10.46],[161,10.61],[169,11.03],[173,11.26],[176,11.38],[179,11.48],[183,11.58],[188,11.86]]},"tok_none":{"h":"2e025844","o":[[3,0.24],[7,0.34],[16,0.84],[23,1.57],[29,1.74],[32,1.92],[35,2.17],[41,2.62],[45,2.77],[50,2.97],[60,3.89],[64,4.02],[68,4.19],[75,4.57],[82,5.14],[87,5.44],[90,5.54],[94,5.64],[101,6.74],[108,7.24],[115,7.67],[120,7.82],[128,8.27],[133,8.44],[136,8.57],[139,8.82],[145,9.09],[151,9.89],[155,10.04],[161,10.29],[165,10.42],[174,10.87],[179,11.22],[184,11.37],[189,11.49],[195,11.82]]},"tok_more":{"h":"bc2e8615","o":[[5,0.35],[14,0.82],[19,0.94],[23,1.04],[30,1.45],[39,2.12],[45,2.42],[53,2.8],[60,3.72],[66,4.07],[72,4.34],[77,4.77],[82,4.9],[84,5.04],[88,5.27],[94,5.54],[97,5.67],[105,6.87],[109,6.97],[115,7.29],[121,7.62],[125,8.19],[129,8.52],[134,8.92],[137,8.94],[139,9.09]]},"tok_last_term":{"h":"66774073","o":[[4,0.37],[9,0.62],[18,1.22],[24,1.54],[28,1.67],[33,2.04],[40,3.09],[43,3.22],[49,3.47],[60,4.49],[65,4.79],[68,4.94],[72,5.09],[81,5.62],[88,6.44],[95,6.87],[100,7.14],[105,7.29],[109,7.44],[117,8.52],[122,8.72],[132,9.67],[135,9.79],[141,10.09],[146,10.24],[154,10.64],[159,10.79],[163,10.94],[169,11.22],[172,11.42],[181,12.02],[185,12.12],[189,12.27],[194,12.62],[200,12.94]]},"tok_last":{"h":"ccaee597","o":[[4,0.37],[9,0.62],[18,1.12],[23,1.24],[27,1.37],[34,1.77],[44,2.74],[48,2.84],[52,2.97],[57,3.37],[63,3.79],[68,4.12],[72,5.09],[76,5.42],[80,5.52],[86,5.84],[89,6.04],[95,6.67],[99,6.79],[104,6.97],[112,7.39],[116,7.62],[123,7.84],[127,7.97],[132,8.29],[137,8.47]]},"exchange":{"h":"61c3812d","o":[[4,0.24],[10,0.54],[13,0.74],[19,1.44],[22,1.64],[28,1.91],[32,2.04],[39,2.61],[43,2.71],[47,2.84],[52,3.06],[57,3.56],[63,3.84],[69,4.69],[80,5.36],[86,5.54],[90,5.66],[96,5.99],[99,6.14],[104,7.14],[109,7.34],[117,7.74],[122,8.01],[125,8.16],[129,8.26],[133,8.44],[138,8.99],[141,9.16],[148,9.79],[152,10.04],[159,10.29],[163,10.39]]},"reset":{"h":"e9ec3a64","o":[[5,0.21],[9,0.34],[14,0.76],[19,0.89],[23,1.04],[28,1.39],[31,1.51],[35,2.04],[39,2.19],[42,2.29],[48,3.09],[52,3.21],[59,3.64],[63,3.74],[72,4.29],[75,4.36],[81,4.54],[88,5.84],[93,6.06],[98,6.24],[106,6.64],[114,7.06],[120,7.44],[124,7.56],[128,7.66],[133,7.96]]},"tips":{"h":"85d784c5","o":[[6,0.46],[12,1.36],[17,1.59],[21,1.71],[28,2.29],[37,2.86],[44,3.86],[49,4.09],[53,4.36],[57,4.51],[63,4.81],[66,4.94],[70,5.04],[74,5.21],[79,5.64],[85,5.89],[91,6.59],[97,7.04],[101,7.14],[108,7.86],[114,8.19],[119,8.36],[127,8.74],[135,9.19],[139,9.29],[143,9.41],[150,10.64],[156,10.94],[161,11.06],[163,11.21],[169,11.61],[181,12.36],[185,12.51],[189,12.71],[197,13.54],[201,13.69],[207,14.01],[212,14.26],[220,15.24],[223,15.34],[227,15.44],[236,16.01],[242,16.29],[249,16.96],[252,17.16],[257,17.41],[259,17.49],[265,18.41],[270,18.61],[274,18.76],[279,19.11],[289,19.69],[294,20.11],[302,20.31],[306,20.41]]},"outro":{"h":"cbf76364","o":[[7,0.38],[11,0.48],[17,0.76],[24,1.66],[32,2.43],[36,2.61],[40,2.73],[48,3.33],[53,3.53],[57,3.63],[65,4.36],[69,4.48],[79,5.91],[84,6.21],[90,6.78],[94,6.91],[101,7.28],[110,7.81],[117,7.96],[124,8.31],[129,8.56],[136,9.48],[139,9.63],[144,10.16],[151,10.48],[155,10.66],[160,11.18],[163,11.41],[167,11.51],[180,12.78],[184,12.88],[189,13.13],[192,13.21],[197,13.43],[202,13.86],[208,14.18],[212,14.31]]},"b_intro":{"h":"64ad00b","o":[[5,0.34],[8,0.44],[10,0.57],[16,1.04],[22,1.52],[26,1.64],[30,1.72],[34,1.99],[40,2.97],[43,3.17],[49,3.57],[55,3.84],[60,3.97],[65,4.09],[74,4.92],[78,5.02],[82,5.12],[86,5.34],[92,5.82],[96,6.04],[99,6.17],[103,6.34],[108,6.69],[112,6.99],[115,7.19],[121,7.49]]},"b_rules":{"h":"e8cee81a","o":[[7,0.58],[11,0.71],[15,1.13],[19,1.23],[23,1.38],[27,1.68],[33,2.06],[38,2.23],[46,2.66],[49,2.81],[57,3.18],[61,3.88],[66,4.08],[69,4.21],[77,4.63],[80,4.73],[84,4.91],[90,5.63],[92,5.76],[98,6.21],[105,6.81],[109,6.93],[115,7.38],[118,7.53],[124,8.63],[131,8.98],[135,9.18],[138,9.33],[144,10.03],[149,10.31],[154,10.43],[156,10.51]]},"b_item":{"h":"f3feaed2","o":[[7,0.36],[11,0.46],[17,1.04],[22,1.21],[30,1.61],[36,1.89],[46,2.19],[49,2.31],[54,2.59],[59,3.29],[63,3.39],[66,3.49],[71,3.89],[74,3.99],[78,4.16],[83,4.41],[88,5.34],[91,5.46],[95,5.56],[100,5.91],[103,6.06],[106,6.26],[112,6.56],[116,6.66],[122,6.96]]},"b_route":{"h":"c6f0bf36","o":[[5,0.41],[8,0.59],[12,0.74],[19,1.41],[25,1.81],[33,2.49],[38,2.64],[42,2.79],[48,3.04],[51,3.11],[55,3.24],[60,3.69],[63,3.76],[67,3.86],[73,5.01],[77,5.16],[82,5.56],[88,5.89],[92,6.06],[98,6.49],[105,6.74],[108,6.84],[112,6.96],[118,7.69],[124,7.89],[128,8.01],[132,8.19],[138,8.46],[141,8.59]]},"b_spread":{"h":"eb4fd866","o":[[4,0.26],[9,0.74],[17,1.14],[21,1.26],[28,1.86],[33,2.04],[37,2.16],[43,3.26],[46,3.39],[54,3.89],[58,4.01],[63,4.51],[66,4.69],[70,4.79],[77,5.04],[80,5.16],[88,6.26],[91,6.41],[95,6.56],[100,7.04],[106,7.51],[112,7.79],[114,7.86],[121,8.09],[124,8.26],[128,8.54],[135,8.81],[139,8.94],[145,9.81],[150,10.11],[153,10.24],[158,10.41],[166,10.81],[171,11.09],[177,11.41],[180,11.49],[184,11.64]]},"b_fixed":{"h":"8e397f41","o":[[5,0.33],[9,0.46],[16,1.03],[21,1.23],[24,1.31],[26,1.43],[30,1.68],[40,2.51],[45,2.68],[48,2.86],[54,3.16],[58,3.33],[67,4.38],[70,4.53],[72,4.66],[77,4.98],[82,5.36],[86,5.46],[92,5.76],[96,5.98],[101,6.26],[106,6.46],[111,6.58],[117,7.31],[122,7.46],[125,7.58],[134,8.38],[139,8.66],[144,9.03],[147,9.13],[150,9.33]]},"b_start":{"h":"dbea4514","o":[[3,0.26],[10,0.86],[14,0.96],[18,1.19],[24,1.66],[28,1.86],[30,1.99],[36,2.59],[40,2.81],[43,2.89],[47,2.99],[58,3.59],[64,4.29],[67,4.39],[71,4.49],[77,5.56],[79,5.69],[89,6.34],[95,6.69],[98,6.91],[103,7.29],[106,7.41],[110,7.79],[113,7.94],[115,8.09],[121,8.56],[126,9.56],[130,9.71],[136,10.14],[141,10.46],[144,10.61],[149,10.89],[152,11.09],[156,11.21],[161,11.41]]},"b_tok":{"h":"99aba9d3","o":[[3,0.36],[8,0.63],[20,1.58],[23,1.71],[28,1.88],[36,2.28],[45,2.68],[49,2.78],[55,3.16],[61,3.38],[65,3.48],[70,3.83],[75,4.43],[80,4.58],[82,4.71],[88,5.28],[94,5.56],[100,6.31],[105,6.53],[111,6.86],[118,7.36],[123,7.53],[129,7.86],[133,7.96],[139,9.03],[143,9.23],[148,9.38],[156,9.78],[160,9.96],[163,10.06],[166,10.16],[170,10.26]]},"b_none":{"h":"72ad28db","o":[[3,0.28],[5,0.41],[10,0.73],[13,0.88],[17,1.16],[27,1.91],[32,2.11],[43,2.71],[49,3.01],[52,3.26],[59,4.13],[63,4.26],[67,4.43],[74,4.76],[81,5.26],[87,6.31],[94,6.73],[99,6.98],[103,7.08],[108,7.36],[114,8.01],[118,8.11],[122,8.21],[127,8.46],[138,9.11],[141,9.21],[143,9.36],[149,9.68]]},"b_each":{"h":"58118845","o":[[5,0.24],[7,0.36],[11,0.69],[15,0.86],[20,1.14],[26,1.84],[32,2.19],[37,2.54],[43,2.79],[47,2.96],[51,3.29],[57,3.76],[60,3.91],[65,4.19],[77,5.49],[79,5.64],[86,5.99],[91,6.36],[98,6.71],[103,7.06],[107,7.24],[111,7.56],[116,7.96],[123,8.84],[127,8.94],[131,9.04],[137,9.29],[143,9.69],[149,9.96]]},"b_more":{"h":"b1c95ec9","o":[[4,0.21],[8,0.54],[14,0.84],[18,1.51],[22,1.71],[27,1.99],[38,2.59],[43,2.71],[47,2.84],[53,3.34],[62,3.81],[68,4.11],[76,4.46],[83,5.59],[87,5.69],[93,6.04],[99,6.31],[102,6.51],[108,6.84],[112,6.94]]},"b_last":{"h":"bdfc0356","o":[[4,0.21],[9,0.59],[15,1.06],[21,1.46],[26,1.76],[33,2.01],[37,2.11],[43,3.09],[47,3.24],[53,3.59],[56,3.79],[62,4.46],[66,4.59],[71,4.76],[79,5.21],[83,5.44],[90,5.64],[94,5.76]]},"b_full":{"h":"4a861d49","o":[[5,0.21],[9,0.31],[14,0.66],[19,1.01],[22,1.21],[30,1.86],[34,2.01],[40,2.31],[43,2.51],[49,3.14],[53,3.26],[58,3.44],[66,3.86],[70,4.06],[77,4.26],[81,4.39],[87,5.46],[90,5.61],[92,5.74],[97,6.06],[103,6.61],[107,6.74],[113,7.06],[118,7.29],[125,7.61]]},"b_arrive":{"h":"b57f4465","o":[[3,0.26],[7,0.38],[13,0.98],[17,1.11],[23,1.41],[28,1.71],[33,1.83],[38,1.98],[46,2.38],[49,2.46],[53,2.61],[59,3.23],[63,3.38],[69,3.68],[73,3.78],[78,4.86],[83,5.06],[89,5.56],[94,5.86],[98,6.01],[103,6.28],[109,7.03],[113,7.18],[119,7.38],[123,7.53],[128,7.96],[134,8.23]]},"b_onbus":{"h":"946b367a","o":[[5,0.21],[9,0.31],[15,0.56],[18,0.76],[24,1.34],[29,1.54],[37,1.89],[42,2.14],[46,2.29],[51,2.66],[57,2.94],[63,3.26],[66,3.36],[70,3.46],[75,4.21],[80,4.41],[83,4.51],[85,4.64],[94,5.46],[96,5.64],[102,6.41],[105,6.59],[107,6.66],[114,6.94],[119,7.39],[124,7.51],[126,7.59],[134,8.86],[140,9.14],[144,9.24],[155,9.69],[161,10.14],[168,10.44],[174,10.84],[179,11.19],[182,11.29],[186,11.39]]},"b_land":{"h":"28d64d44","o":[[5,0.41],[9,0.51],[15,0.76],[18,0.91],[27,1.61],[32,1.86],[36,1.96],[43,3.16],[47,3.41],[57,3.99],[63,4.29],[67,4.39],[73,4.79],[76,4.94],[80,5.04],[92,5.61],[101,6.66],[106,6.86],[109,6.99],[111,7.14],[118,7.91],[120,8.04],[126,8.81],[129,8.99],[131,9.11],[138,9.39],[143,9.51],[151,9.99],[155,10.21],[159,10.44],[164,10.59],[168,10.69]]},"b_fewer":{"h":"1a71d887","o":[[5,0.38],[9,0.63],[15,0.91],[28,1.98],[34,2.26],[40,2.48],[50,3.18],[54,3.31],[60,3.61],[65,3.88],[69,4.01],[75,5.01],[78,5.13],[82,5.26],[88,5.68],[92,5.83],[100,6.38],[103,6.58],[108,6.81],[110,6.88]]},"b_plan":{"h":"9c718c42","o":[[4,0.24],[9,0.61],[16,0.89],[18,1.01],[23,1.39],[28,1.76],[32,1.89],[36,1.96],[40,2.19],[47,3.01],[52,3.14],[56,3.29],[63,3.91],[67,4.01],[80,4.99],[85,5.16],[88,5.31],[93,5.89],[97,5.99],[99,6.11],[103,6.46],[106,6.61],[111,6.84],[114,6.99],[120,7.26],[125,7.51]]},"b_outro":{"h":"f2ceef2d","o":[[5,0.44],[12,0.91],[17,1.19],[24,1.71],[30,2.01],[36,2.96],[41,3.26],[47,3.89],[51,4.04],[57,4.44],[64,4.59],[67,4.79],[72,5.04],[82,5.91],[87,6.14],[93,6.44],[100,6.96]]}};/* MK:END */
 const hash=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return h.toString(16);};
 /* the time (s into the clip) the voice reaches character i: the measured marks, joined by straight lines */
 function onsetFn(id,text,d){const m=MK[id];const pts=[[0,.05]];
@@ -116,12 +143,16 @@ function dom(){if(DOM&&DOM.stage&&DOM.stage.isConnected)return DOM;const g=id=>d
 /* ---------------- the build ---------------- */
 let B=null;
 function emptySix(a){return !a.some(o=>has(o)||String(o.l||'').trim());}
+/* (v21.49) the landmarks the walkthrough shows: the book's own when it has two or more inside the ride, else sample ones */
+function busWalkLm(saved){const R=Math.max(3,Math.min(120,num(saved.meta.bus_min)||25)),own=(saved.lm||[]).filter(o=>String(lbl(o)||'').trim()&&num(o.min)>0&&num(o.min)<=R);
+  return own.length>=2?saved.lm.map(o=>Object.assign({},o)):SAMPLE.blm.map(([k,l,f])=>Object.assign(cello(P[k]?k:'',l),{min:String(Math.round(R*f))}));}
 function firstUsed(a){const i=a.findIndex(o=>has(o)||String(o.l||'').trim());return i<0?0:i;}
 function sampled(k){return SAMPLE[k].map(([key,l])=>P[key]?cello(key,''):cello('',l));}   /* the library's pictures and labels, as the simulator has them; the words alone when the library is missing */
 /* the pages and cards drawn from a copy of the book's state: First-Then, the 8.82 in page, no presets in First and Then */
-function forced(fn){const saved=S;
-  try{S=Object.assign({},saved,{meta:Object.assign({},saved.meta,{layout:'ft',pagesize:'8.82'}),ft:[cello(),cello()],
-      ch:emptySix(saved.ch)?sampled('ch'):saved.ch.map(o=>Object.assign({},o)),tg:emptySix(saved.tg)?sampled('tg'):saved.tg.map(o=>Object.assign({},o))});
+function forced(fn){const saved=S,bus=!!(saved.meta&&saved.meta.kind==='bus');
+  try{S=Object.assign({},saved,{meta:Object.assign({},saved.meta,{layout:'ft',pagesize:'8.82'},bus?{bus_step:'timer'}:{}),ft:[cello(),cello()],
+      ch:emptySix(saved.ch)?sampled(bus?'bch':'ch'):saved.ch.map(o=>Object.assign({},o)),tg:emptySix(saved.tg)?(bus?SAMPLE.btg.map(([k,l])=>cello(P[k]?k:'',l)).concat([cello(),cello(),cello()]):sampled('tg')):saved.tg.map(o=>Object.assign({},o)),
+      lm:bus?busWalkLm(saved):saved.lm});
     return fn();}
   finally{S=saved;}}
 function tempShow(sec){if(!sec||getComputedStyle(sec).display!=='none')return()=>{};const old=sec.style.cssText;
@@ -153,10 +184,12 @@ function compose(D){
     return{pg:{ch:pageGrid('ch'),tg:pageGrid('tg'),bd:pageBoard(),tk:pageTokens(),chb:pageBack('ch')},
       ch:S.ch.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),tg:S.tg.map(o=>has(o)||String(o.l||'').trim()?cardHtml(o,cpt):''),
       tok:Array.from({length:n},(_,i)=>tokCard(tpt,i===n-1)),chipTok:tokCard(.6,false),n,term:termOn(),pick:pk,
-      itemPic:pic(S.ch[pk.ch],''),itemLbl:String(lbl(S.ch[pk.ch])||'').trim(),tgLbl:String(lbl(S.tg[pk.tg])||'').trim()};});
-  const PR=praiseFor(F.tgLbl);
+      itemPic:pic(S.ch[pk.ch],''),itemLbl:String(lbl(S.ch[pk.ch])||'').trim(),tgLbl:String(lbl(S.tg[pk.tg])||'').trim(),
+      bus:isBus()?busWalkF():null};});
+  const BUSM=!!F.bus,PR=praiseFor(F.tgLbl);
   const notes=[];
-  if(S.meta.layout==='rules')notes.push('This book’s Board uses the Rules row (several targets and an Earn box); the walkthrough shows the First-Then Board. Tokens, praise and the exchange work the same way; agree on exactly what earns each token.');
+  if(BUSM)notes.push(...F.bus.notes);
+  else if(S.meta.layout==='rules')notes.push('This book’s Board uses the Rules row (several targets and an Earn box); the walkthrough shows the First-Then Board. Tokens, praise and the exchange work the same way; agree on exactly what earns each token.');
   const libGone=!!window.NBH_PICTOS_MISSING,sampleWord=libGone?'sample words':'sample pictures';
   if(libGone&&[...S.ch,...S.tg,S.tok&&S.tok[0]].some(o=>o&&o.k&&!/^(tk|av):/.test(o.k)))notes.push('The picture library (nbh-pictos.js) is not beside this form, so its pictures are missing here and in the book; put it in the same folder.');
   if(emptySix(S.ch)&&emptySix(S.tg))notes.push('The Choices and Targets are still empty, so the walkthrough shows '+sampleWord+'.');
@@ -172,11 +205,12 @@ function compose(D){
   const rel=(p,el)=>{const r=el.getBoundingClientRect(),c=p.cv.getBoundingClientRect(),k=c.width/(p.cv.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const ctr=r=>({x:r.x+r.w/2,y:r.y+r.h/2});
   const M={ch:[...PG.ch.cv.querySelectorAll('.bx')].map(e=>rel(PG.ch,e)),tg:[...PG.tg.cv.querySelectorAll('.bx')].map(e=>rel(PG.tg,e)),
-    first:rel(PG.bd,PG.bd.cv.querySelector('.bx.ft.grey')),then:rel(PG.bd,PG.bd.cv.querySelector('.bx.ft.green')),
-    slot:[...PG.bd.cv.querySelectorAll('.slot')].map(e=>rel(PG.bd,e)),ybx:[...PG.tk.cv.querySelectorAll('.ybx')].map(e=>rel(PG.tk,e)),
+    first:rel(PG.bd,PG.bd.cv.querySelector(BUSM?'.rule,.grule':'.bx.ft.grey')),then:rel(PG.bd,PG.bd.cv.querySelector(BUSM?'.earn .bx':'.bx.ft.green')),
+    slot:[...PG.bd.cv.querySelectorAll(BUSM?'.slot,.gslot':'.slot')].map(e=>rel(PG.bd,e)),rules:BUSM?[...PG.bd.cv.querySelectorAll('.rule,.grule')].map(e=>rel(PG.bd,e)):[],
+    ttl:rel(PG.bd,PG.bd.cv.querySelector('.ttl')),ybx:[...PG.tk.cv.querySelectorAll('.ybx')].map(e=>rel(PG.tk,e)),
     tab:{},band:rel(PG.ch,PG.ch.cv.querySelector('.band'))};
   M.tabCol={};['ch','tg','bd','tk'].forEach(k=>{const e=PG[k].cv.querySelector('.tab');M.tab[k]=rel(PG[k],e);M.tabCol[k]=getComputedStyle(e).backgroundColor||'#1d4a77';});
-  const n=F.n,CW=CPT*PX,TW=TPT*PX;
+  const n=BUSM?M.slot.length:F.n,CW=CPT*PX,TW=BUSM&&M.slot.length?Math.min(TPT*PX,M.slot[0].w*.92):TPT*PX;
   /* the in-page copies (a card resting on its page moves and turns with it) */
   const inPage=(p,c,html,w)=>{const e=div('wk-in',html);e.style.left=f2(c.x-w/2)+'px';e.style.top=f2(c.y-w/2)+'px';e.style.width=f2(w)+'px';e.style.height=f2(w)+'px';p.lay.appendChild(e);return e;};
   const cards=[];
@@ -186,11 +220,11 @@ function compose(D){
   F.ch.forEach((h,i)=>{if(!h)return;const c=i===F.pick.ch?mkCard('ch'+i,h,CW,CW):{id:'ch'+i,inp:{},pops:{},where:new Steps('ch'),fly:false};c.inp.ch=inPage(PG.ch,ctr(M.ch[i]),h,CW);c.inp.ch.dataset.card='ch'+i;c.where.set(-1e8,'ch');if(!c.el)cards.push(c);CH[i]=c;});
   F.tg.forEach((h,i)=>{if(!h)return;const c=i===F.pick.tg?mkCard('tg'+i,h,CW,CW):{id:'tg'+i,inp:{},pops:{},where:new Steps('tg'),fly:false};c.inp.tg=inPage(PG.tg,ctr(M.tg[i]),h,CW);c.inp.tg.dataset.card='tg'+i;c.where.set(-1e8,'tg');if(!c.el)cards.push(c);TG[i]=c;});
   const cC=CH[F.pick.ch]||mkCard('chx',cardHtml({k:'',ph:'',l:'Item'},CPT/72),CW,CW),cT=TG[F.pick.tg]||mkCard('tgx',cardHtml({k:'',ph:'',l:'Target'},CPT/72),CW,CW);
-  cC.inp.bd=inPage(PG.bd,ctr(M.then),F.ch[F.pick.ch]||cC.el.lastChild.outerHTML,CW);cC.inp.bd.dataset.card=cC.id;
+  const CWE=BUSM?Math.min(CW,M.then.w-10):CW;cC.inp.bd=inPage(PG.bd,ctr(M.then),F.ch[F.pick.ch]||cC.el.lastChild.outerHTML,CWE);cC.inp.bd.dataset.card=cC.id;
   cT.inp.bd=inPage(PG.bd,ctr(M.first),F.tg[F.pick.tg]||cT.el.lastChild.outerHTML,CW);cT.inp.bd.dataset.card=cT.id;
-  for(let i=0;i<n;i++){const c=mkCard('tok'+i,F.tok[i],TW,TW,'wk-tok');c.inp.tk=inPage(PG.tk,ctr(M.ybx[i]),F.tok[i],TW);c.inp.bd=inPage(PG.bd,ctr(M.slot[i]),F.tok[i],TW);
+  for(let i=0;i<n;i++){const th=F.tok[i]||F.tok[F.tok.length-1];const c=mkCard('tok'+i,th,TW,TW,'wk-tok');c.inp.tk=inPage(PG.tk,ctr(M.ybx[i]||M.ybx[M.ybx.length-1]),th,TW);c.inp.bd=inPage(PG.bd,ctr(M.slot[i]),th,TW);
     c.inp.tk.dataset.card=c.inp.bd.dataset.card='tok'+i;c.where.set(-1e8,'tk');TK.push(c);}
-  const lastTok=TK[n-1];if(F.term){lastTok.glow=div('wk-tglow');lastTok.el.insertBefore(lastTok.glow,lastTok.el.children[1]);}
+  const lastTok=TK[n-1];if(F.term&&lastTok&&!(BUSM&&F.bus.each)){lastTok.glow=div('wk-tglow');lastTok.el.insertBefore(lastTok.glow,lastTok.el.children[1]);}
   /* the item (the Then card grown into the thing itself) */
   const itemLabel=F.itemLbl?F.itemLbl+', as agreed':'The item, as agreed';   /* the time or amount is set before the session (no number that echoes the interval) */
   const IW=250;const item=mkCard('item','<div class="wk-ipic">'+(F.itemPic||'<span>'+esc(F.itemLbl||'Item')+'</span>')+'</div><div class="wk-ilbl">'+esc(itemLabel)+'</div>',IW,IW,'wk-item');
@@ -208,10 +242,10 @@ function compose(D){
   /* each person keeps one seat for the whole video: the learner on the left, the teacher on the right; a picked card waits on the
      table on its own person's side (the chosen item on the left, the target on the right) */
   const TL={x:bx/2,y:by+ph*sBk*.5},TR={x:SW-bx/2,y:by+ph*sBk*.5};
-  const sBd=Math.min(.8,520/PG.bd.h),sTk=.52;
-  const BDS={x:26,y:30,s:sBd},TKS={x:SW-26-pw*sTk,y:Math.min(300,604-PG.tk.h*sTk),s:sTk};
-  const RC={x:TKS.x+pw*sTk/2,y:Math.max(150,TKS.y-112)};
-  const HO={x:(BDS.x+pw*sBd+TKS.x)/2,y:Math.max(220,TKS.y-24)};   /* where the teacher holds a token out: in the gap between the Board and the Tokens page */
+  const sBd=BUSM?Math.min(.58,330/PG.bd.h):Math.min(.8,520/PG.bd.h),sTk=BUSM?Math.min(.34,190/PG.tk.h):.52;
+  const BDS=BUSM?{x:20,y:28,s:sBd}:{x:26,y:30,s:sBd},TKS=BUSM?{x:548,y:300,s:sTk}:{x:SW-26-pw*sTk,y:Math.min(300,604-PG.tk.h*sTk),s:sTk};
+  const RC=BUSM?{x:TKS.x+pw*sTk+110,y:TKS.y+88}:{x:TKS.x+pw*sTk/2,y:Math.max(150,TKS.y-112)};
+  const HO=BUSM?{x:BDS.x+pw*sBd/2,y:BDS.y+PG.bd.h*sBd+190}:{x:(BDS.x+pw*sBd+TKS.x)/2,y:Math.max(220,TKS.y-24)};   /* where the teacher holds a token out: in the gap between the Board and the Tokens page */
   const at=(L,c)=>({x:L.x+L.s*c.x,y:L.y+L.s*c.y});
   const s0=sBk*.93;
   Object.keys(PG).forEach(k=>{const b=BOOK(k,s0,(SW-pw*s0)/2,by+ph*(sBk-s0)/2);PG[k].tr=new Track({x:b.x,y:b.y,s:b.s,ry:0,o:k==='chb'?0:1,fx:1});PG[k].el.style.zIndex=String(k==='chb'?11:10-DEPTH[k]);});
@@ -228,7 +262,7 @@ function compose(D){
   const tabLbl={};[['ch','Choices'],['tg','Targets'],['bd','Board'],['tk','Tokens']].forEach(([k,w])=>{const L=BOOK(k),r=M.tab[k];
     const fx=mkFx('wk-tabl',esc(w),{x:L.x+L.s*(r.x+r.w)+14,y:L.y+L.s*(r.y+r.h/2)-24},{s:.8,dx:-10});fx.el.style.borderColor=M.tabCol[k];fx.el.style.setProperty('--tc',M.tabCol[k]);tabLbl[k]=fx;});
   const ringBox={x:RC.x-74,y:RC.y-74,w:148,h:148};
-  const ringEl=mkFx('wk-ring','<svg viewBox="0 0 200 200" aria-hidden="true"><circle class="bg" cx="100" cy="100" r="84"/><circle class="fg" cx="100" cy="100" r="84" transform="rotate(-90 100 100)"/></svg><div class="wk-rt">2:00</div><div class="wk-rl">sped up for this video</div>',ringBox,{s:.7});
+  const ringEl=mkFx('wk-ring','<svg viewBox="0 0 200 200" aria-hidden="true"><circle class="bg" cx="100" cy="100" r="84"/><circle class="fg" cx="100" cy="100" r="84" transform="rotate(-90 100 100)"/></svg><div class="wk-rt">'+(BUSM?busClock(F.bus.gap):'2:00')+'</div><div class="wk-rl">sped up for this video</div>',ringBox,{s:.7});
   const ring={fx:ringEl,fg:ringEl.el.querySelector('.fg'),t:ringEl.el.querySelector('.wk-rt'),ints:[],C:2*Math.PI*84};
   /* the rule: "1 token for ..." first, then the example filled in */
   const chip=mkFx('wk-chip','<span class="wk-ct">'+F.chipTok+'</span><span class="wk-cst"><span class="wk-c0"><b>1 token</b> for <span class="wk-blank"></span></span><span class="wk-c1"><b>1 token</b> for every<br><b>2 minutes</b> of '+(PR.ger?esc(PR.name):'the target')+'</span></span>',{x:RC.x-185,y:12,w:370},{s:.8});
@@ -296,7 +330,7 @@ function compose(D){
   const toSession=(t0,dur)=>{PG.bd.tr.move(t0,t0+dur,BDS);PG.tk.tr.move(t0+.15,t0+dur,TKS,.05);session=true;};
   const toBook=(t0,dur)=>{PG.bd.tr.move(t0,t0+dur,BOOK('bd'));PG.tk.tr.move(t0,t0+dur-.1,BOOK('tk'),.05);session=false;};
   /* an interval of the ring: it runs from t0 to t1 (to the share f of the ring when the behavior stopped), then holds its ✓ or – until hold */
-  const ringInt=(t0,t1,ok,o)=>{o=o||{};ring.ints.push({t0,t1,ok,f:o.f||1,hold:o.hold||t1+.8});};
+  const ringInt=(t0,t1,ok,o)=>{o=o||{};ring.ints.push({t0,t1,ok,f:o.f||1,hold:o.hold||t1+.8,secs:o.secs});};
   /* a token from the Tokens page to the Board: the teacher's hand takes it and holds it out with praise; the learner's hand takes it and puts it in its slot */
   const SHT=[1110,SH+480],SHL=[300,SH+480];
   const deliver=(i,o)=>{const c=TK[i],src=at(TKS,ctr(M.ybx[i])),dst=at(BDS,ctr(M.slot[i])),gp=grip(c,src,sTk,'teacher');
@@ -501,16 +535,158 @@ function compose(D){
     PG.chb.tr.set(tb,{x:B0.x,y:B0.y,s:B0.s,ry:0,o:0,fx:0});PG.ch.tr.move(tb,tb+.35,{fx:0},0,easeIn);PG.ch.tr.set(tb+.35,{o:0});PG.chb.tr.set(tb+.35,{o:1});PG.chb.tr.move(tb+.35,tb+.75,{fx:1},0,easeOut);
     return Math.max(K.d,tb+2.4-K.t);};
 
+  /* ---- (v21.49) the bus ride: the Board on the left, the route top right (a road from the start to the stop, the checkpoints
+     on it where they fall in the ride, the bus moving along it), the Tokens page under it and the timer beside that ---- */
+  if(BUSM){const FB_=F.bus,R=FB_.R,NCP=FB_.each?FB_.n:n,NR=FB_.k,cps=FB_.cps;
+    const sBig=Math.min(.86,560/PG.bd.h,1200/pw),BIG={x:(SW-pw*sBig)/2,y:22,s:sBig},CHS={x:SW-24-pw*.44,y:40,s:.44};
+    Object.keys(PG).forEach(k=>{PG[k].tr=new Track({x:BIG.x,y:BIG.y,s:BIG.s,ry:0,o:k==='bd'?1:0,fx:1});});
+    PG.tk.tr=new Track({x:TKS.x,y:TKS.y,s:TKS.s,ry:0,o:0,fx:1});PG.ch.tr=new Track({x:CHS.x,y:CHS.y,s:CHS.s,ry:0,o:0,fx:1});
+    /* the slot that checkpoint j fills in row r (one row, or a row for each rule) */
+    ring.secs=Math.round(FB_.gap);   /* between checkpoints the ring shows the next one's time */
+    const slotOf=(j,r)=>FB_.each?(r||0)*FB_.n+j:j;
+    const RSTR=s=>esc(s);
+    /* the small route (the ride) and the big one (fading the timer) */
+    const routeCard=(box,title)=>{const k=(box.w-24)/770,svgH=190*k;const fx=mkFx('wk-route','<div class="wk-rh">'+title+'</div><svg viewBox="0 0 770 190" width="'+f2(box.w-24)+'" height="'+f2(svgH)+'" style="position:absolute;left:12px;top:48px" aria-hidden="true">'+busRouteBase()+'</svg>',box,{o:0});
+      const X=vx=>box.x+12+vx*k,Y=vy=>box.y+48+vy*k;return{fx,k,at:f=>{const vx=BUS_X0+(BUS_X1-BUS_X0)*clamp(f,0,1);return{x:X(vx),y:Y(busRoadY(vx))};},end:f=>{const vx=f?BUS_X1+34:BUS_X0-34;return{x:X(vx),y:Y(busRoadY(f?BUS_X1:BUS_X0)-6)};}};};
+    const head='<b>'+RSTR(FB_.from)+'</b> &rarr; <b>'+RSTR(FB_.to)+'</b> &middot; about '+R+' minutes';
+    const RT=routeCard({x:548,y:24,w:712,h:262},head),RB=routeCard({x:150,y:40,w:980,h:330},head);
+    const clockSvg=sz=>'<svg viewBox="-12 -12 24 24" width="'+sz+'" height="'+sz+'" aria-hidden="true">'+busIcon('clock',0,0,1.15)+'</svg>';
+    const pinSvg=sz=>'<svg viewBox="-12 -24 24 26" width="'+sz+'" height="'+f2(sz*26/24)+'" aria-hidden="true">'+busIcon('pin',0,0,1.05)+'</svg>';
+    const mkMark=(RTx,f,html,lab,w)=>{const p=RTx.at(f);return mkFx('wk-cpm',html+(lab?'<span>'+RSTR(lab)+'</span>':''),{x:p.x-(w||70)/2,y:p.y-15,w:w||70},{s:.6});};
+    /* the ride's checkpoints on the small route: the clock, its time, and over it the token it earns (empty, then earned) */
+    const SM=cps.slice(0,16).map((c,i)=>{const f=c.t/R,p=RT.at(f);const mk=mkMark(RT,f,clockSvg(26),busClock(c.t),74);
+      const b0=mkFx('wk-cpb','<b>'+(FB_.fixed&&cps.length>FB_.n?i%FB_.n+1:i+1)+'</b>',{x:p.x-14,y:p.y-56,w:28,h:28},{s:.6}),b1=mkFx('wk-cpb on','<b>&#10003;</b>',{x:p.x-14,y:p.y-56,w:28,h:28},{s:.6});return{f,p,mk,b0,b1};});
+    const p0=RT.at(0);const busFx=mkFx('wk-busi','<svg viewBox="-30 -26 60 30" width="70" height="35" aria-hidden="true">'+busIcon('bus',0,0,1)+'</svg>',{x:p0.x-35,y:p0.y-33,w:70,h:35},{o:0});
+    let busF=0;const driveTo=(t0,t1,f1)=>{const f0=busF,st=Math.max(2,Math.ceil((t1-t0)/.2));
+      for(let j=1;j<=st;j++){const f=f0+(f1-f0)*ease(j/st),p=RT.at(f);busFx.tr.move(t0+(t1-t0)*(j-1)/st,t0+(t1-t0)*j/st,{dx:p.x-p0.x,dy:p.y-p0.y},0,u=>u);}busF=f1;};
+    /* the big route: the timer's checkpoints, then the landmarks (a picture over the pin when the landmark has one) */
+    const BT=cps.slice(0,16).map(c=>mkMark(RB,c.t/R,clockSvg(30),busClock(c.t),80));
+    const BL=FB_.land.map(c=>{const f=c.t/R,p=RB.at(f),pc=c.lm&&has(c.lm)?pic(c.lm,''):'';
+      const e=mkFx('wk-lm',(pc?'<div class="wk-lmp">'+pc+'</div>':'')+pinSvg(30)+'<span>'+RSTR(c.lab)+'</span><i>about '+busClock(c.t)+'</i>',{x:p.x-60,y:p.y-(pc?96:30),w:120},{s:.6,dy:10});
+      return{c,e,keep:FB_.fewer.some(x=>x.t===c.t&&x.lab===c.lab)};});
+    const steps=mkFx('wk-steps','',{x:150,y:390,w:980});
+    const stepEls=['Timer','Landmarks','Fewer landmarks','Just the stop'].map((w,i)=>{if(i){const a=div('wk-cya','&rarr;');steps.el.appendChild(a);}const e=div('wk-cy','<b>'+(i+1)+'</b>'+esc(w));steps.el.appendChild(e);return sub(e,{o:.45,s:.9,h:0});});
+    const backFx=mkFx('wk-note2','&larr; back a step',{x:640,y:470,w:220},{dy:8});
+    const stopGlow=()=>{const e=RB.end(1),k=RB.k;return{x:e.x-34*k,y:e.y-50*k,w:68*k,h:66*k};};
+    /* the "what if" note at a checkpoint (the ride itself goes on with every rule followed) */
+    const ifNote=(x,y,html,w)=>mkFx('wk-if',html,{x:clamp(x-(w||300)/2,10,SW-(w||300)-10),y,w:w||300},{s:.85,dy:8});
+    /* the plan page, shown at 60 % */
+    const PLS=.82,PX0=640-408*PLS,PY0=16,plan=mkFx('wk-planpg',FB_.planHtml,{x:640-408,y:PY0+528*PLS-528,w:816,h:1056},{s:PLS*.92});
+    const planPart=sel=>{const e=plan.el.querySelector(sel),pg=plan.el.querySelector('.pg');if(!e||!pg)return null;const r=e.getBoundingClientRect(),q=pg.getBoundingClientRect(),kk=q.width/816||1;
+      return{x:PX0+(r.left-q.left)/kk*PLS,y:PY0+(r.top-q.top)/kk*PLS,w:r.width/kk*PLS,h:r.height/kk*PLS};};
+    const PP={route:planPart('.bp-route'),when:planPart('.bp-cols'),say:planPart('.bp-ol'),log:planPart('.bp-log')};
+    const O={x:0,y:0,s:1};
+    const rulesAll=M.rules.length?M.rules:[M.first];
+    const praise=j=>FB_.each?praiseFor(FB_.rules[0]||'').first:['Great job on the bus!','Nice riding!','Way to follow the rules!','Super bus rider!','Good job, keep going!','Great riding!'][j%6];
+    const markEarned=(i,t)=>{const m=SM[i];if(!m)return;m.b0.tr.move(t,t+.25,{o:0});m.b1.tr.move(t,t+.3,{o:1,s:1},0,easeOut);m.mk.tr.move(t,t+.2,{s:1.15});m.mk.tr.move(t+.2,t+.45,{s:1});};
+    /* a token straight from the Tokens page into its slot (no hands: the later checkpoints of the ride) */
+    const flyTok=(i,t0,dur)=>{const c=TK[i];if(!c)return t0;const src=at(TKS,ctr(M.ybx[i]||M.ybx[0])),dst=at(BDS,ctr(M.slot[i]));c.tr.set(t0,{x:src.x,y:src.y,s:sTk,l:0,o:1});c.where.set(t0,'fly');
+      c.tr.move(t0,t0+.25,{l:1});c.tr.move(t0+.05,t0+dur,{x:dst.x,y:dst.y,s:sBd},.2);c.tr.move(t0+dur,t0+dur+.2,{l:0});c.where.set(t0+dur+.2,'bd');return t0+dur+.2;};
+    /* checkpoint j: the ring runs out as the bus reaches it, its token badge turns, the tokens of that checkpoint go on the board */
+    const ringTo=(t0,t1,j)=>{ringInt(t0,t1,true,{hold:t1+.9,secs:Math.round(((cps[j]?cps[j].t:R)-(j?cps[j-1].t:0))*60)});driveTo(t0,t1,SM[j]?SM[j].f:busF);};
+    SC.b_intro=K=>{glowAt(BIG,M.ttl,6,Math.max(K.t+.8,K.at('token board',.2)-.15),1.8);const tb=Math.max(K.t+2.4,K.at('bus staff',.7)-.15);glowAt(BIG,{x:M.slot[0].x,y:M.slot[0].y,w:M.slot[M.slot.length-1].x+M.slot[M.slot.length-1].w-M.slot[0].x,h:M.slot[M.slot.length-1].y+M.slot[M.slot.length-1].h-M.slot[0].y},6,tb,1.8);return K.d;};
+    SC.b_rules=K=>{const t0=Math.max(K.t+.3,K.at('bus rules',.15)-.15),ph=['staying in the seat','quiet voice','hands to self'];
+      rulesAll.forEach((r,j)=>{const t=Math.max(t0+.6+j*.9,j<3?K.at(ph[j],.4+.12*j)-.15:t0+.6+j*.9);glowAt(BIG,r,6,t,1.5);});
+      const tp=Math.max(t0+3,K.at('each with a picture',.85)-.15);rulesAll.forEach((r,j)=>glowAt(BIG,r,4,tp+j*.1,1.3));return Math.max(K.d,tp+1.6-K.t);};
+    SC.b_item=K=>{const t=K.t;PG.bd.tr.move(t+.1,t+1.2,BDS);PG.ch.tr.move(t+.5,t+1.1,{o:1});
+      const L=CHS,c=cC,P0=at(L,ctr(M.ch[F.pick.ch]));const others=[4,2,1,5].filter(i=>CH[i]&&i!==F.pick.ch).slice(0,2).map(i=>pointAt(at(L,ctr(M.ch[i])),L.s));
+      const land=Math.max(t+1.6,K.at('picks something',.2)-.2);let tq=land;if(others.length){enter(HL,t+.8,land,others[0],'point',SHL);if(others[1]){handTo(HL,tq+.3,tq+.8,others[1]);tq+=.8;}}
+      const gp=grip(c,P0,L.s,'learner'),tp=Math.max(tq+.9,K.at('to work for',.42)+.1);if(others.length){handTo(HL,tp-.7,tp-.05,gp,.12);HL.pose.set(tp-.7,'pinch');}else enter(HL,tp-1,tp-.05,gp,'pinch',SHL);
+      c.tr.set(tp,{x:P0.x,y:P0.y,s:L.s,l:0,o:1});take(c,HL,tp);c.tr.move(tp,tp+.35,{l:1});
+      const dE=at(BDS,ctr(M.then)),ti=Math.max(tp+.6,K.at('earn box',.55)-.6);c.tr.move(tp+.4,ti+1,{s:BDS.s*CWE/CW});carryTo(c,HL,ti,ti+1,dE,.2);release(c,ti+1);c.tr.move(ti+1,ti+1.25,{l:0});c.where.set(ti+1.25,'bd');leave(HL,ti+1.35,ti+2.1);
+      glowAt(BDS,M.then,6,ti+1.3,1.6);PG.ch.tr.move(ti+1.6,ti+2.2,{o:0});const tg=Math.max(ti+2,K.at('in sight',.85)-.15);glowAt(BDS,M.then,6,tg,1.4);return Math.max(K.d,tg+1.5-K.t);};
+    SC.b_route=K=>{const t=K.t;RT.fx.tr.move(t+.2,t+.8,{o:1});PG.tk.tr.move(t+.4,t+1,{o:1});busFx.tr.move(t+.6,t+1,{o:1});
+      const e0=RT.end(0),e1=RT.end(1),k=RT.k,gb=e=>({x:e.x-34*k,y:e.y-50*k,w:68*k,h:66*k});
+      const ts=Math.max(t+1,K.at('start of the ride',.45)-.15),tt=Math.max(ts+.6,K.at('to the stop',.55)-.15);glowAt(O,gb(e0),6,ts,1.4);glowAt(O,gb(e1),6,tt,1.4);
+      const tl=Math.max(tt+.6,K.at('usual length',.7)-.15);glowAt(O,{x:RT.fx.el.offsetLeft+8,y:RT.fx.el.offsetTop+6,w:RT.fx.el.offsetWidth-16,h:40},4,tl,1.6);return K.d;};
+    const popMarks=(K,t0,t1)=>{SM.forEach((m,i)=>{const t=t0+(t1-t0)*i/Math.max(1,SM.length-1);m.mk.tr.move(t,t+.35,{o:1,s:1},0,easeOut);m.b0.tr.move(t+.1,t+.4,{o:1,s:1},0,easeOut);});};
+    SC.b_spread=K=>{const t0=Math.max(K.t+.6,K.at('divides',.3)-.2),t1=Math.max(t0+1.5,K.at('number of tokens',.5));popMarks(K,t0,t1);
+      const last=SM[SM.length-1];if(last){const tl=Math.max(t1+.6,K.at('last token',.62)-.15);glowAt(O,{x:last.p.x-20,y:last.p.y-62,w:40,h:84},5,tl,1.8);
+        const e1=RT.end(1),tg=Math.max(tl+.8,K.at('before the stop',.75)-.15);glowAt(O,{x:last.p.x-8,y:Math.min(last.p.y,e1.y)-24,w:e1.x-last.p.x+16,h:Math.abs(e1.y-last.p.y)+48},5,tg,1.6);
+        const ti=Math.max(tg+.8,K.at('close to the item',.9)-.15);glowAt(BDS,M.then,6,ti,1.4);return Math.max(K.d,ti+1.5-K.t);}
+      return K.d;};
+    SC.b_fixed=K=>{const t0=Math.max(K.t+.6,K.at('set interval',.2)-.2),t1=Math.max(t0+1.5,K.at('every few minutes',.4));popMarks(K,t0,t1);
+      const tf=Math.max(t1+.6,K.at('more than once',.65)-.15);M.slot.forEach((r,j)=>glowAt(BDS,r,4,tf+j*.05,1.3));return K.d;};
+    let watch=null;
+    SC.b_start=K=>{const t=K.t;ringEl.tr.move(t+.15,t+.6,{o:1,s:1},0,easeOut);
+      watch=mkFx('wk-chip','<svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true"><rect x="13" y="2" width="14" height="9" rx="2" fill="#5d6770"/><rect x="13" y="29" width="14" height="9" rx="2" fill="#5d6770"/><circle cx="20" cy="20" r="12" fill="#fff" stroke="#1d4a77" stroke-width="3"/><path d="M20 13v7l5 3" stroke="#ef7d00" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M4 14q-3 6 0 12M36 14q3 6 0 12" stroke="#1d4a77" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span>Vibrating watch</span>',{x:RC.x+86,y:RC.y-30,w:190},{s:.8});
+      const tw=Math.max(t+1.2,K.at('vibrating watch',.5)-.15);watch.tr.move(tw,tw+.35,{o:1,s:1},0,easeOut);
+      SM.forEach((m,i)=>{const tc=Math.max(t+.6,K.at('checkpoint times',.3)-.15)+i*.08;m.mk.tr.move(tc,tc+.2,{s:1.18});m.mk.tr.move(tc+.2,tc+.45,{s:1});});
+      const tr0=Math.max(t+.8,K.at('sped up',.85)-.3);ringPending=tr0;return Math.max(K.d,tr0+1.2-K.t);};
+    /* the first checkpoint, in full: the aide's hand gives the token with praise, the learner's hand puts it on the board */
+    SC.b_tok=K=>{const tEnd=K.t+.7,grab=tEnd+.45,atHO=grab+.9,tk=atHO+.9,place=tk+1;ringTo(ringPending==null?K.t-2:ringPending,tEnd,0);ringPending=null;markEarned(0,tEnd);
+      if(watch)watch.tr.move(K.t,K.t+.4,{o:0});
+      const tb=Math.max(atHO+.2,K.at('brief praise',.5)-.15);deliver(slotOf(0,0),{t0:tEnd-.4,grab,atHO,text:praise(0),bub:tb,bubDur:2.6,take:Math.max(tk,tb+.5),place:Math.max(place,tb+1.5),lin:.9});
+      let tz=Math.max(place,tb+1.5)+1;if(FB_.each)for(let r=1;r<NR;r++)tz=flyTok(slotOf(0,r),tz-.5+r*.25,.9);
+      const ts=Math.max(tz,K.at('put it on the board',.85)-.15);glowAt(BDS,M.slot[slotOf(0,0)],5,ts,1.6);return Math.max(K.d,ts+1.7-K.t);};
+    /* what happens when a rule is broken: shown as a note at the next checkpoint while the bus rides on (this ride goes on well) */
+    SC.b_none=K=>{const m=SM[1]||SM[0],t=K.t;ringPending=t+.3;driveTo(t+.3,t+K.d,(m.f+busF)/2);
+      const ni=ifNote(1152,300,'<b>If</b> a rule is not followed:<br>no token at this checkpoint.',236),tn=Math.max(t+.6,K.at('no token',.25)-.2);ni.tr.move(tn,tn+.35,{o:1,s:1,dy:0},0,easeOut);
+      const te=Math.max(tn+.8,K.at('earned tokens stay',.45)-.15);glowAt(BDS,M.slot[0],5,te,1.7);
+      const tr=Math.max(te+.8,K.at('name the rule',.65)-.15);glowAt(BDS,rulesAll[0],6,tr,1.5);
+      const tf=Math.max(tr+.8,K.at('fresh chance',.9)-.15);m.mk.tr.move(tf,tf+.2,{s:1.15});m.mk.tr.move(tf+.2,tf+.45,{s:1});ni.tr.move(tf+.6,tf+1,{o:0});return Math.max(K.d,tf+1.1-K.t);};
+    /* a row for each rule: checkpoint two fills a token in every row at once; the note says what a missed rule would leave */
+    SC.b_each=K=>{const t=K.t,j=Math.min(1,NCP-1),tEnd=t+.8;ringTo(ringPending==null?t-2:ringPending,tEnd,j);ringPending=null;markEarned(j,tEnd);
+      let tz=tEnd+.3;for(let r=0;r<NR;r++)tz=Math.max(tz,flyTok(slotOf(j,r),tEnd+.3+r*.35,.9));
+      const tr=Math.max(tz,K.at('own token',.4)-.15);for(let r=0;r<NR;r++)glowAt(BDS,M.slot[slotOf(j,r)],4,tr+r*.15,1.3);
+      const jn=Math.min(j+1,NCP-1),sl=M.slot[slotOf(jn,1)],sp=at(BDS,ctr(sl));const ni=ifNote(sp.x,BDS.y+PG.bd.h*sBd+12,'<b>If</b> one rule is missed:<br>only its own slot stays empty.',320);
+      const tm=Math.max(tr+1,K.at('missed rule',.55)-.15);ni.tr.move(tm,tm+.35,{o:1,s:1,dy:0},0,easeOut);glowAt(BDS,sl,5,tm+.2,1.8);
+      const to=Math.max(tm+1.2,K.at('other rules still earn',.85)-.15);[0,2].filter(r=>r<NR).forEach(r=>glowAt(BDS,M.slot[slotOf(jn,r)],4,to,1.4));ni.tr.move(to+1.2,to+1.6,{o:0});ringPending=to+1.4;return Math.max(K.d,to+1.7-K.t);};
+    SC.b_more=K=>{const j0=FB_.each?2:1,ids=[];for(let j=j0;j<NCP-1;j++)ids.push(j);if(!ids.length)return K.d;
+      const cy=clamp((K.d+.4)/ids.length,1.9,4),ri=cy-1.1;let T=K.t+.2,end=K.t;
+      ids.forEach((j,q)=>{const a=q===0&&ringPending!=null&&ringPending<T?ringPending:T;ringTo(a,T+ri,j);markEarned(j,T+ri);let z=T+ri;
+        for(let r=0;r<NR;r++)z=Math.max(z,flyTok(slotOf(j,r),T+ri+.1+r*.2,.75));if(!FB_.each)bubble(praise(q+1),T+ri+.1,Math.min(1.6,cy-.3));end=z;T+=cy;});
+      ringPending=null;return Math.max(K.d,end-K.t+.1);};
+    /* the last checkpoint: just before the stop (spread) or the last slot (a set interval); the full board glows */
+    const lastCp=K=>{const j=NCP-1,T=K.t+.2,D=T+2;ringTo(ringPending!=null&&ringPending<T?ringPending:T,D,j);ringPending=null;markEarned(j,D);
+      let z=D;for(let r=0;r<NR;r++)z=Math.max(z,flyTok(slotOf(j,r),D+.15+r*.2,.85));if(!FB_.each)bubble(praiseFor('').last,D+.2,2.2);
+      const tf=Math.max(z+.2,K.at('the board is full',.6)-.15);M.slot.forEach((r,q)=>glowAt(BDS,r,4,tf+q*.04,1.4));ringEl.tr.move(tf+.8,tf+1.3,{o:0,s:.9});
+      const ti=Math.max(tf+1,K.at('earned the item',.85)-.15);glowAt(BDS,M.then,6,ti,1.5);return Math.max(K.d,ti+1.6-K.t);};
+    SC.b_last=lastCp;SC.b_full=lastCp;
+    /* the item: at the stop (the bus rolls to it first) or right there on the bus; the Earn card grows into the item, an adult's hand
+       gives it and the learner's hand takes it */
+    const handOver=(K,tt)=>{const c=cC,P0=at(BDS,ctr(M.then)),CEN={x:640,y:300},big=sBd*2.2;veil.tr.move(tt-.2,tt+.4,{o:.32});
+      c.tr.set(tt,{x:P0.x,y:P0.y,s:sBd*CWE/CW,l:0,o:1});c.where.set(tt,'fly');c.tr.move(tt,tt+.35,{l:1});c.tr.move(tt+.35,tt+1.3,{x:CEN.x,y:CEN.y,s:big},.1);
+      const is=big*CW/IW;item.tr.set(tt+1.15,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(tt+1.15,'fly');item.tr.move(tt+1.15,tt+1.75,{o:1});c.tr.move(tt+1.15,tt+1.75,{o:0});c.where.set(tt+1.8,'none');
+      const tg=tt+2,HOFF={x:560,y:330},si=.75;enter(HT,tg-.9,tg,grip(item,CEN,is,'teacher',GI_T),'pinch',SHT);take(item,HT,tg);item.tr.move(tg,tg+1.1,{s:si});carryTo(item,HT,tg+.1,tg+1.1,HOFF,.1);
+      const tl=tg+1.15;enter(HL,tl-.95,tl,grip(item,HOFF,si,'learner',GI_L),'pinch',SHL);release(item,tl);take(item,HL,tl);HT.pose.set(tl+.05,'point');leave(HT,tl+.15,tl+.9);
+      const tw=Math.max(tl+1.4,K.t+K.d-1.2);leave(HL,tw,tw+1.1);release(item,tw+1.12);item.where.set(tw+1.12,'none');veil.tr.move(tw+.6,tw+1.2,{o:0});return tw+1.2;};
+    SC.b_arrive=K=>{const t=K.t;driveTo(t+.1,t+1.6,1);const e1=RT.end(1),k=RT.k;glowAt(O,{x:e1.x-34*k,y:e1.y-50*k,w:68*k,h:66*k},6,t+1.4,1.6);
+      const ts=Math.max(t+2,K.at('sees the full board',.55)-.15);M.slot.forEach((r,q)=>glowAt(BDS,r,4,ts+q*.03,1.3));
+      const end=handOver(K,Math.max(ts+1.2,K.at('gives the item',.8)-1));return Math.max(K.d,end+.2-K.t);};
+    SC.b_onbus=K=>{const t=K.t,tt=Math.max(t+.8,K.at('right there',.25)-.3);const tag=mkFx('wk-chip','<svg viewBox="-30 -26 60 30" width="52" height="26" aria-hidden="true">'+busIcon('bus',0,0,1)+'</svg><span>on the bus</span>',{x:520,y:470,w:240},{s:.8});
+      tag.tr.move(tt+1.4,tt+1.8,{o:1,s:1},0,easeOut);const end=handOver(K,tt);tag.tr.move(end-.6,end-.2,{o:0});return Math.max(K.d,end+.2-K.t);};
+    /* fading the timer: the big route; the clocks give way to the landmarks, then every other landmark, then just the stop */
+    SC.b_land=K=>{const t=K.t;['bd','tk'].forEach(k=>PG[k].tr.move(t+.1,t+.7,{o:0}));[RT.fx,busFx,ringEl].concat(SM.flatMap(m=>[m.mk,m.b0,m.b1])).forEach(fx=>fx.tr.move(t+.1,t+.6,{o:0}));
+      RB.fx.tr.move(t+.5,t+1.1,{o:1});BT.forEach((fx,i)=>fx.tr.move(t+1+i*.06,t+1.3+i*.06,{o:1,s:1}));steps.tr.move(t+.8,t+1.2,{o:1});stepEls[0].tr.move(t+1,t+1.3,{o:1,s:1,h:1});
+      const tf=Math.max(t+2,K.at('fade the timer',.3)-.15);BT.forEach(fx=>fx.tr.move(tf,tf+.5,{o:0,s:.7}));stepEls[0].tr.move(tf,tf+.3,{o:.45,s:.9,h:0});stepEls[1].tr.move(tf,tf+.35,{o:1,s:1,h:1});
+      const t0=Math.max(tf+.5,K.at('landmarks along',.4)-.15),ex=['a store','a park','a bridge'].map((w,i)=>K.at(w,.7+.08*i));
+      BL.forEach((L,i)=>{const tt=Math.max(t0+i*.4,i<3?ex[i]-.15:t0+i*.4);L.e.tr.move(tt,tt+.4,{o:1,s:1,dy:0},0,easeOut);});return Math.max(K.d,t0+BL.length*.4+.6-K.t);};
+    SC.b_fewer=K=>{const t=K.t,tf=Math.max(t+.5,K.at('every other',.3)-.15);BL.forEach(L=>{if(!L.keep)L.e.tr.move(tf,tf+.5,{o:0,s:.8});});stepEls[1].tr.move(tf,tf+.3,{o:.45,s:.9,h:0});stepEls[2].tr.move(tf,tf+.35,{o:1,s:1,h:1});
+      const tj=Math.max(tf+1.2,K.at('just the stop',.55)-.15);BL.forEach(L=>{if(L.keep)L.e.tr.move(tj,tj+.5,{o:0,s:.8});});glowAt(O,stopGlow(),6,tj+.2,1.8);stepEls[2].tr.move(tj,tj+.3,{o:.45,s:.9,h:0});stepEls[3].tr.move(tj,tj+.35,{o:1,s:1,h:1});
+      const tb=Math.max(tj+1.4,K.at('go back a step',.85)-.15);stepEls[3].tr.move(tb,tb+.3,{o:.45,s:.9,h:0});stepEls[2].tr.move(tb,tb+.35,{o:1,s:1,h:1});backFx.tr.move(tb,tb+.35,{o:1,dy:0},0,easeOut);
+      BL.forEach(L=>{if(L.keep)L.e.tr.move(tb+.1,tb+.5,{o:1,s:1});});return Math.max(K.d,tb+1.3-K.t);};
+    /* the plan at a readable size, moved up the frame part by part as the line names them (each glow drawn where its part is then) */
+    SC.b_plan=K=>{const t=K.t;[RB.fx,steps,backFx].concat(BL.map(L=>L.e)).forEach(fx=>fx.tr.move(t+.1,t+.6,{o:0}));plan.tr.move(t+.5,t+1.1,{o:1,s:PLS},0,easeOut);
+      let pan=0,last=t+1.1;const room=560;
+      [['route',PP.route,'the route'],['when',PP.when,'the checkpoints'],['say',PP.say,'what to say'],['log',PP.log,'a log']].forEach(([k,r,w],i)=>{if(!r)return;const tt=Math.max(last+.5,K.at(w,.35+.15*i)-.15);
+        const need=Math.max(0,Math.min(1056*PLS+PY0-room,r.y+r.h-room));if(need>pan+1){plan.tr.move(Math.max(last,tt-.7),tt-.05,{dy:-need});pan=need;}
+        glowAt(O,{x:r.x,y:r.y-pan,w:r.w,h:r.h},5,tt,1.6);last=tt+.4;});return Math.max(K.d,last+1.4-K.t);};
+    SC.b_outro=K=>{const t=K.t;plan.tr.move(t+.1,t+.6,{o:0});PG.bd.tr.set(t+.4,{o:0,x:BIG.x,y:BIG.y,s:BIG.s});PG.bd.tr.move(t+.5,t+1.2,{o:1});
+      const tg=Math.max(t+1.3,K.at('same rules',.3)-.15);rulesAll.forEach((r,j)=>glowAt(BIG,r,5,tg+j*.12,1.4));const ts=Math.max(tg+1,K.at('fewer tokens',.85)-.15);glowAt(BIG,M.ttl,5,ts,1.5);return Math.max(K.d,ts+1.6-K.t);};
+  }
   /* ---- the timeline ---- */
-  const ids=LIST.map(id=>id==='tok_last'&&F.term?'tok_last_term':id).filter(id=>!OPT[id]||present(id));
+  const ids=BUSM?busIds(F.bus):LIST.map(id=>id==='tok_last'&&F.term?'tok_last_term':id).filter(id=>!OPT[id]||present(id));
   let T=0;const cues=[];
   ids.forEach(id=>{const ln=line(id),low=ln.t.toLowerCase(),on=onsetFn(id,ln.t,ln.d),T0=T;
     const K={id,t:T0,d:ln.d,text:ln.t,at:(ph,fr,from)=>{const i=low.indexOf(String(ph).toLowerCase(),from>0?from:0);if(i>=0&&window.__wkMarkLog)window.__wkMarkLog.push([id,i]);return i<0?T0+ln.d*fr:T0+on(i);}};
     const need=(SC[id==='tok_last_term'?'tok_last':id](K))||0;const dur=Math.max(ln.d+PAUSE,need+.1);
     cues.push({id,start:T0,dur,narr:ln.d,text:ln.t,chapter:CHOF[id],chunks:chunks(id,ln.t,T0,on),a:ln.a});T+=dur;});
-  const chapters=CHAPS.map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return{id,label,start:c?c.start:0};});
+  const chapters=(BUSM?CHAPS_BUS:CHAPS).map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return{id,label,start:c?c.start:0};});
   return{D:T,cues,chapters,PG,cards,hands,fxs,ring,cap,notes,item,F};
 }
+/* (v21.49) the lines a bus book plays, in order: one of each pair as its settings say */
+function busIds(b){return ['b_intro','b_rules','b_item','b_route',b.fixed?'b_fixed':'b_spread','b_start','b_tok',b.each?'b_each':'b_none',(b.each?b.n>3:b.n>2)?'b_more':'',b.fixed?'b_full':'b_last',b.reward==='bus'?'b_onbus':'b_arrive','b_land','b_fewer','b_plan','b_outro'].filter(id=>id&&(present(id)||id in FB));}
 /* captions: a line in pieces of up to two caption lines; each piece shows a moment before the voice reaches its first word */
 const CAPLEAD=.12;
 function chunks(id,text,T,on){const parts=(text.match(/[^.!?]+[.!?]+["”]?\s*|[^.!?]+$/g)||[text]).map(s=>s.trim()).filter(Boolean);const out=[];
@@ -550,9 +726,9 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
   for(const fx of B.fxs){const s=fx.tr.at(v);css(fx.el,'opacity',f2(s.o));css(fx.el,'visibility',s.o>.001?'visible':'hidden');css(fx.el,'transform',s.dy||s.dx||s.s!==1?'translate('+f2(s.dx||0)+'px,'+f2(s.dy)+'px) scale('+s.s.toFixed(4)+')':'none');
     if(s.h!=null)css(fx.el,'backgroundColor',s.h>.01?'rgba(255,205,90,'+f2(.42*s.h)+')':'transparent');}
   /* the timer ring */
-  const R=B.ring;let p=0,state='idle';for(const I of R.ints){if(v>=I.t0&&v<I.t1){p=(v-I.t0)/(I.t1-I.t0)*I.f;state='run';break;}if(v>=I.t1&&v<I.hold){p=I.f;state=I.ok?'ok':'no';}}
+  const R=B.ring;let p=0,state='idle',secs=R.secs||120;for(const I of R.ints){if(v>=I.t0&&v<I.t1){p=(v-I.t0)/(I.t1-I.t0)*I.f;state='run';if(I.secs)secs=I.secs;break;}if(v>=I.t1&&v<I.hold){p=I.f;state=I.ok?'ok':'no';}}
   css(R.fg,'strokeDasharray',f2(R.C));css(R.fg,'strokeDashoffset',f2(R.C*(1-p)));css(R.fg,'stroke',state==='ok'?'#2f9e44':state==='no'?'#8c97a1':'#f08c00');
-  const rem=Math.round(120*(1-(state==='idle'?0:p)));txt(R.t,state==='ok'?'✓':state==='no'?'–':Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0'));
+  const rem=Math.round(secs*(1-(state==='idle'?0:p)));txt(R.t,state==='ok'?'✓':state==='no'?'–':Math.floor(rem/60)+':'+String(rem%60).padStart(2,'0'));
   /* captions follow the real time, also with reduced motion */
   let ct='';if(cue){for(const ch of cue.chunks)if(ch.t<=t+.001)ct=ch.text;}
   txt(B.cap,ct);css(B.cap,'visibility',ct?'visible':'hidden');const D=dom();if(D&&D.cap2)txt(D.cap2,ct);
