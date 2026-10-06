@@ -180,7 +180,7 @@ function busSim(){Object.assign(S.meta,{kind:'bus',site:'Elementary, bus route 1
   S.tg=[cello('sitting','Stay in my seat'),cello('quiet','Quiet voice'),cello('safehands','Hands to self'),cello(),cello(),cello()];
   S.lm=[['store','Grocery store','5'],['park','The park','10'],['','Fire station','14'],['libraryplace','Library','18'],['','The bridge','22']].map(([k,l,m])=>Object.assign(cello(k,l),{min:m}));}
 /* the ride plan fits its page: the log gives up rows first (down to three), then the type shrinks a little (to 8.5 pt) */
-function busFitPlan(){$$('.pg[data-kind="busplan"] .bp').forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1;
+function busFitPlan(root){$$('.pg[data-kind="busplan"] .bp',root||document).filter(bp=>root||!bp.closest('#wkStage')).forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1;
   const rows=[...bp.querySelectorAll('table.bp-log tr')].slice(1);let i=rows.length;while(over()&&i>3)rows[--i].remove();
   let fs=10.5,g=0;while(over()&&fs>8.5&&g++<12){fs-=.25;bp.style.fontSize=fs+'pt';}});}
 

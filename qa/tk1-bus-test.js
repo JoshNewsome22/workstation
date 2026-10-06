@@ -134,6 +134,20 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const o=fromFile({form:'TK-1',S:{meta:{first:'Ann',n:'4'},ch:[],tg:[]}});S=o;renderAll();const r={kind:S.meta.kind,rule:S.meta.bus_rule,rw:S.meta.bus_reward,sel:document.querySelector('[data-m="kind"]').value,band:document.getElementById('busBand').hidden,n:nTok()};
     S=JSON.parse(keep);ensure();renderAll();return r;});
   ok('a classroom file opened after a bus book: a classroom book, the bus settings its own defaults',cf.kind===''&&cf.sel===''&&cf.band&&cf.rule==='all'&&cf.rw==='arrive'&&cf.n===4,cf);
+  /* an iPad-sized window: the player is small and its captions go under the picture; the video's frame still has them in it,
+     even when the window is resized while it is painted (the player made small again: how an iPad's video lost them)
+     (the dark caption bar at the foot of the picture), and with CC off it has none */
+  const capAt=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='b_route');return c.start+c.dur*.6;});
+  const capBar=async()=>page.evaluate(async t=>{const pr=TKVIDEO.frame(t,1280);window.dispatchEvent(new Event('resize'));const cv=await pr,g=cv.getContext('2d'),d=g.getImageData(240,600,800,100).data;let n=0;for(let i=0;i<d.length;i+=4)if(d[i]<60&&d[i+1]<60&&d[i+2]<70)n++;return n;},capAt);
+  await page.setViewportSize({width:700,height:900});await sleep(800);
+  const small=await page.evaluate(()=>document.getElementById('wkPlayer').classList.contains('wk-small'));const withCap=await capBar();
+  await page.evaluate(()=>document.getElementById('wkCc').click());await sleep(200);const noCap=await capBar();await page.evaluate(()=>document.getElementById('wkCc').click());
+  const restored=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkStage .wk-cap')).display);
+  ok('a small player (as on an iPad): the video frame has the captions in it; with CC off it has none; the page is as it was',small&&withCap>4000&&noCap<500&&restored==='none',{small,withCap,noCap,restored});
+  await page.setViewportSize({width:1300,height:950});await sleep(800);
+  /* the ride plan in the walkthrough is fitted before its parts are measured: each glow is inside the page */
+  const pl=await page.evaluate(()=>{const pg=document.querySelector('#wkStage .wk-planpg .pg'),bp=pg.querySelector('.bp');return{fits:bp.scrollHeight<=bp.clientHeight+1};});
+  ok('the walkthrough’s ride plan fits its page',pl.fits,pl);
   /* back to a classroom book: the classroom walkthrough */
   const back=await page.evaluate(()=>{S.meta.kind='';ensure();renderAll();TKWALK.build();return{first:TKWALK.cues[0].id,plan:[...document.querySelectorAll('#book .pg')].some(p=>p.dataset.kind==='busplan'),band:document.getElementById('busBand').hidden};});
   ok('a book turned back to the classroom: the classroom walkthrough, no ride plan, no bus band',back.first==='intro'&&!back.plan&&back.band,back);

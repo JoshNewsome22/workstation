@@ -7491,3 +7491,19 @@ arithmetic, the landmark steps, both boards, the ride plan on Letter and on the 
 the CSV and the network, Open in Maps, a saved file and a forged one, the walkthrough's scenes and frames), with
 `qa/tk1-test.js`, `qa/tk1-walk-test.js`, `qa/link-tk1-test.js` (which now leaves the bus fields out of its comparison with the
 TK-1 from before the link) and `qa/tk1-audit.js`. The form's build line reads v21.49.
+
+### v21.49b: captions in a video made on the iPad, and three fixes to the bus walkthrough
+
+A bus-ride video made on an iPad came out with its narration but **no captions**. On an iPad screen (and in the workstation)
+the player is small and shows its captions under the picture rather than on it; Save as video turns that off while it records,
+but a resize during the minutes it takes (the toolbar folding, the screen turning) made the player small again, and the frames
+were painted without the caption. Save as video (`tools/forms/TK-1/walk-video.js`, used by Forms TK-1, SM-1 and DD-1) now keeps
+the caption on the picture for the whole recording, whatever the player's size, and puts the page back afterwards; with CC
+turned off a video still has no captions. Checked in WebKit: a recording with the player small and the window resized
+throughout has the caption bar in every frame. `qa/tk1-bus-test.js` resizes the window while a frame is painted (it failed
+before the change).
+
+In the bus walkthrough: the ride plan is fitted (as the printed page is) before the parts it highlights are measured, so the
+highlight around the ride log is on the log (it was below it on an iPad); "on the bus" no longer covers the item's name; and
+with a set interval the tokens go back to the Tokens page after the exchange and the item card back in the Earn box, as the
+narration says ("the board then starts again"). The form's build line reads v21.49b.

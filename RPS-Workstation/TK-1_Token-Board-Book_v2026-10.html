@@ -6496,7 +6496,7 @@ function busSim(){Object.assign(S.meta,{kind:'bus',site:'Elementary, bus route 1
   S.tg=[cello('sitting','Stay in my seat'),cello('quiet','Quiet voice'),cello('safehands','Hands to self'),cello(),cello(),cello()];
   S.lm=[['store','Grocery store','5'],['park','The park','10'],['','Fire station','14'],['libraryplace','Library','18'],['','The bridge','22']].map(([k,l,m])=>Object.assign(cello(k,l),{min:m}));}
 /* the ride plan fits its page: the log gives up rows first (down to three), then the type shrinks a little (to 8.5 pt) */
-function busFitPlan(){$$('.pg[data-kind="busplan"] .bp').forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1;
+function busFitPlan(root){$$('.pg[data-kind="busplan"] .bp',root||document).filter(bp=>root||!bp.closest('#wkStage')).forEach(bp=>{if(!bp.clientHeight)return;bp.style.fontSize='';const over=()=>bp.scrollHeight>bp.clientHeight+1;
   const rows=[...bp.querySelectorAll('table.bp-log tr')].slice(1);let i=rows.length;while(over()&&i>3)rows[--i].remove();
   let fs=10.5,g=0;while(over()&&fs>8.5&&g++<12){fs-=.25;bp.style.fontSize=fs+'pt';}});}
 
@@ -6675,7 +6675,7 @@ function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLin
    Choices file): slate modules, rounded slate finder rings with a green core, SCAN ME in a clear square in the middle, level H
    so the words cost nothing. The core is a deeper green than the tab (#6aa55a): a pale core is read as white by decoders. */
 /* the build of this copy of the form, shown on Setup and on the Preview so it is easy to check that the uploaded file is the new one */
-const BUILD='v21.49';
+const BUILD='v21.49b';
 const QR_SLATE='#698da9',QR_CORE='#6aa55a';
 function qrSvg(url,frame){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const ec=frame?'H':'M';const q=qrcode(0,ec);q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';
@@ -7909,6 +7909,7 @@ function compose(D){
     const PLS=.82,PX0=640-408*PLS,PY0=16,plan=mkFx('wk-planpg',FB_.planHtml,{x:640-408,y:PY0+528*PLS-528,w:816,h:1056},{s:PLS*.92});
     const planPart=sel=>{const e=plan.el.querySelector(sel),pg=plan.el.querySelector('.pg');if(!e||!pg)return null;const r=e.getBoundingClientRect(),q=pg.getBoundingClientRect(),kk=q.width/816||1;
       return{x:PX0+(r.left-q.left)/kk*PLS,y:PY0+(r.top-q.top)/kk*PLS,w:r.width/kk*PLS,h:r.height/kk*PLS};};
+    busFitPlan(plan.el);   /* fitted as the printed page is (on an iPad its type can need the room), then measured */
     const PP={route:planPart('.bp-route'),when:planPart('.bp-cols'),say:planPart('.bp-ol'),log:planPart('.bp-log')};
     const O={x:0,y:0,s:1};
     const rulesAll=M.rules.length?M.rules:[M.first];
@@ -7985,11 +7986,15 @@ function compose(D){
       const is=big*CW/IW;item.tr.set(tt+1.15,{x:CEN.x,y:CEN.y,s:is,l:1,o:0});item.where.set(tt+1.15,'fly');item.tr.move(tt+1.15,tt+1.75,{o:1});c.tr.move(tt+1.15,tt+1.75,{o:0});c.where.set(tt+1.8,'none');
       const tg=tt+2,HOFF={x:560,y:330},si=.75;enter(HT,tg-.9,tg,grip(item,CEN,is,'teacher',GI_T),'pinch',SHT);take(item,HT,tg);item.tr.move(tg,tg+1.1,{s:si});carryTo(item,HT,tg+.1,tg+1.1,HOFF,.1);
       const tl=tg+1.15;enter(HL,tl-.95,tl,grip(item,HOFF,si,'learner',GI_L),'pinch',SHL);release(item,tl);take(item,HL,tl);HT.pose.set(tl+.05,'point');leave(HT,tl+.15,tl+.9);
-      const tw=Math.max(tl+1.4,K.t+K.d-1.2);leave(HL,tw,tw+1.1);release(item,tw+1.12);item.where.set(tw+1.12,'none');veil.tr.move(tw+.6,tw+1.2,{o:0});return tw+1.2;};
+      const tw=Math.max(tl+1.4,K.t+K.d-1.2);leave(HL,tw,tw+1.1);release(item,tw+1.12);item.where.set(tw+1.12,'none');veil.tr.move(tw+.6,tw+1.2,{o:0});
+      /* a set interval: the tokens come off the board for the next one, and the item card goes back in the Earn box */
+      if(FB_.fixed&&cps.length>NCP){const tb=tw+1.3;TK.forEach((c,i)=>{const sp=at(BDS,ctr(M.slot[i])),dp=at(TKS,ctr(M.ybx[i]||M.ybx[0]));c.tr.set(tb+i*.06,{x:sp.x,y:sp.y,s:sBd,l:0,o:1});c.where.set(tb+i*.06,'fly');c.tr.move(tb+i*.06,tb+.7+i*.06,{x:dp.x,y:dp.y,s:sTk,l:.4},.12);c.tr.move(tb+.7+i*.06,tb+.85+i*.06,{l:0});c.where.set(tb+.86+i*.06,'tk');});
+        cC.where.set(tb+.9+TK.length*.06,'bd');return tb+1.2+TK.length*.06;}
+      return tw+1.2;};
     SC.b_arrive=K=>{const t=K.t;driveTo(t+.1,t+1.6,1);const e1=RT.end(1),k=RT.k;glowAt(O,{x:e1.x-34*k,y:e1.y-50*k,w:68*k,h:66*k},6,t+1.4,1.6);
       const ts=Math.max(t+2,K.at('sees the full board',.55)-.15);M.slot.forEach((r,q)=>glowAt(BDS,r,4,ts+q*.03,1.3));
       const end=handOver(K,Math.max(ts+1.2,K.at('gives the item',.8)-1));return Math.max(K.d,end+.2-K.t);};
-    SC.b_onbus=K=>{const t=K.t,tt=Math.max(t+.8,K.at('right there',.25)-.3);const tag=mkFx('wk-chip','<svg viewBox="-30 -26 60 30" width="52" height="26" aria-hidden="true">'+busIcon('bus',0,0,1)+'</svg><span>on the bus</span>',{x:520,y:470,w:240},{s:.8});
+    SC.b_onbus=K=>{const t=K.t,tt=Math.max(t+.8,K.at('right there',.25)-.3);const tag=mkFx('wk-chip','<svg viewBox="-30 -26 60 30" width="52" height="26" aria-hidden="true">'+busIcon('bus',0,0,1)+'</svg><span>on the bus</span>',{x:880,y:500,w:240},{s:.8});
       tag.tr.move(tt+1.4,tt+1.8,{o:1,s:1},0,easeOut);const end=handOver(K,tt);tag.tr.move(end-.6,end-.2,{o:0});return Math.max(K.d,end+.2-K.t);};
     /* fading the timer: the big route; the clocks give way to the landmarks, then every other landmark, then just the stop */
     SC.b_land=K=>{const t=K.t;['bd','tk'].forEach(k=>PG[k].tr.move(t+.1,t+.7,{o:0}));[RT.fx,busFx,ringEl].concat(SM.flatMap(m=>[m.mk,m.b0,m.b1])).forEach(fx=>fx.tr.move(t+.1,t+.6,{o:0}));
