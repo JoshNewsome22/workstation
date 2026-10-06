@@ -7529,8 +7529,15 @@ BIP are finished, for the receiving team, new staff or a family. It holds what w
 Sheet and Flowics: the words, the card on screen while they are said, the teleprompter and the cards themselves. Five views:
 
 - **Setup**: the student (from the packet), the first name as said in the training, who it is for, the presenter and the lines
-  under the name, and the look of the cards (main and accent colours, a white or dark card, the side the cards sit on, the type,
-  and the background of the graphics window: green or blue for a chroma key, black for a luma key). **Draft from the case**
+  under the name, and the look of the graphics. **Panel** (the default) is the look of the practice's Flowics template, matched
+  to its videos: a navy panel on one half of the picture (the left by default; the presenter on the other half), the segment
+  as its title in capitals with a fine rule under it, the paragraphs, the heading in gold and the list; under the panel the
+  series on a mint band (*Functional Treatments in Applied Behavior Analysis*; blank for none), and the logo beside a dark tag
+  (*FBA & BIP Video Training:* and the student's first name and initial, or a tag typed). The logo is the edition's letterhead
+  logo (the Royal Palm School star in the school edition) or one chosen. The type is Lato Bold and Black, built into the form
+  (`tools/vendor/lato`, SIL Open Font License), so the cards look the same on every device with no network. **Cards** is a white
+  card beside the presenter. The colours (panel, heading, band), the half, and the background of the graphics window (green or
+  blue for a chroma key, black for a luma key) are set here. **Draft from the case**
   writes a segment for each part ticked (Training Overview, Student Profile, Target Behaviors, Function & Data, Goals of
   Intervention, Reinforcement System, Proactive Strategies, Response Plan, Key Takeaways, Terms & Definitions) from what the
   case holds: each target behavior's definition, examples and non-examples (Form TB-1), the function and its hypothesis
@@ -7538,8 +7545,10 @@ Sheet and Flowics: the words, the card on screen while they are said, the telepr
   PA-1). The parts the case cannot know (strengths, communication, the proactive strategies, the response steps, the takeaways,
   the terms) are drafted as prompts in [square brackets]. A draft adds to the end of the script; it changes nothing written. The
   case reaching the form fills nothing until Draft is pressed.
-- **Script**: a row for each beat, in segments: what is said, the card's title and its text (one line a point; a line starting
-  with • or - is a bullet, 1. a numbered step), its layout (Automatic, a card beside the presenter, a lower third, a full-screen
+- **Script**: a row for each card, as a row of the sheet, in segments: the paragraphs (column B: on the panel, and what the
+  teleprompter shows), the teleprompter's own words when more is said than the card shows (kept in the saved file; the sheet has
+  no column for them), the heading (C) and the list (D: one line a point; a line starting with • or - is a bullet, 1. a numbered
+  step), its layout (Automatic, a card beside the presenter, a lower third, a full-screen
   card, a section title, one or two pictures, or no card), two pictures with captions, and a thumbnail of the card. **Same words
   as above** marks a card that changes while the paragraph goes on. Rows move, copy and go; each row, each segment and the whole
   script show their words and their time at the teleprompter's speed; words in brackets count as still to write.
@@ -7549,14 +7558,16 @@ Sheet and Flowics: the words, the card on screen while they are said, the telepr
   keeps the paragraph where it is. **Start the clock** keeps the time each card came up (the last take); **Export the card
   times** writes them as CSV, for putting the cards on the video afterwards.
 - **Graphics**: every card at 1920 by 1080, large and as a grid. **Open the graphics window** opens the cards in a window of their
-  own, on the key background, with a crossfade between cards; the teleprompter (or a tap in the grid) changes it. Double-tap it
+  own, on the key background. As in the template's videos, the panel stays when the next card has the same layout: its words fade
+  out (a quarter second), the panel shows empty for a moment, and the new words fade in; a change of layout crossfades. A list
+  too long for the panel first closes up its spacing, then its words get smaller; the teleprompter (or a tap in the grid) changes it. Double-tap it
   for full screen, on a second display for the Yolobox (by HDMI from a computer, or an iPad's external display). Each text box
   shrinks until its card holds it. The cards are drawn as text and shapes at the size of the display, so a 4K output (3840 by
   2160) draws them at 4K; on a key background a card is opaque and has no shadow, which a key would take part of.
 - **Guide**.
 
 **Import a sheet** reads the first tab of a sheet made before (downloaded from Google Sheets as .xlsx or CSV): A the segment, B
-the words, C the card's title, D its text, E and F the picture captions, G to I the template's picture places (kept as they
+the paragraphs, C the heading, D the list, E and F the picture captions, G to I the template's picture places (kept as they
 came); a row whose words repeat the row above becomes a card on the same paragraph. **Export for Sheets (.xlsx)** writes that
 layout back (the first tab every row, then a tab for each other segment, columns A to D, named 02_Student_Profile and so on),
 so the Flowics template keeps reading it; Export CSV writes the first tab alone. Pictures are not in a sheet: add them on their

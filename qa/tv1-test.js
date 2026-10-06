@@ -61,6 +61,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 Enter forward, the left arrow and Page Up back',t3.i===1,t3);
   await page.keyboard.press(' ');await sleep(700);const run=await page.evaluate(()=>({run:TP.run,b:document.getElementById('tpRun').textContent}));await page.keyboard.press(' ');await sleep(100);
   ok('4 Space starts and stops the scroll',run.run&&run.b==='Stop'&&!(await page.evaluate(()=>TP.run)),run);
+  const tpw=await page.evaluate(()=>{S.rows[0].tp='Words said here, not on the card.';tpRender();const a=document.querySelector('#tpStrip .tp-p .tp-t').textContent;S.rows[0].tp='';tpRender();const b=document.querySelector('#tpStrip .tp-p .tp-t').textContent;return {a,b,say:S.rows[0].say};});
+  ok('4 a row\'s teleprompter words go on the teleprompter in place of its paragraphs; blank, the paragraphs',tpw.a==='Words said here, not on the card.'&&tpw.b===tpw.say.replace(/\n+/g,''),tpw);
   await page.click('#tpRec');await sleep(300);await page.keyboard.press('PageDown');await sleep(400);await page.keyboard.press('PageDown');await sleep(400);await page.click('#tpRec');
   const lg=await page.evaluate(()=>({log:S.log,line:document.getElementById('logLine').textContent,rec:document.getElementById('tpRec').textContent}));
   ok('4 the clock keeps each card\'s time (the card it started on, then each next)',lg.log.length===3&&lg.log.map(l=>l.i).join()==='1,2,3'&&lg.log[2].t>lg.log[1].t&&lg.log[1].t>=lg.log[0].t&&/3 card times/.test(lg.line)&&lg.rec==='Start the clock',lg);
@@ -73,15 +75,18 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.screenshot({path:path.join(OUT,'prompter.png')});
   /* 5 */
   const [pop]=await Promise.all([page.waitForEvent('popup'),page.click('#tpGfx')]);await sleep(700);
-  const g0=await pop.evaluate(()=>({bg:getComputedStyle(document.body).backgroundColor,t:(document.querySelector('#la .gx-title,#lb .gx-title')&&[...document.querySelectorAll('.ly')].find(l=>l.style.opacity==='1'||l.style.opacity==='').querySelector('.gx-title').textContent)}));
+  const g0=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1'||x.style.opacity==='');const h=l&&l.querySelector('.pn-h');return {bg:getComputedStyle(document.body).backgroundColor,t:h?h.textContent:''};});
   const at=await page.evaluate(()=>[S.rows[TP.i].title,S.rows[TP.i+1].title]);
   const ff=await pop.evaluate(()=>getComputedStyle(document.querySelector('.ly .gx')).fontFamily);
-  ok('5 the window draws the cards in the type chosen (sans serif)',/^Inter, "Helvetica Neue"/.test(ff),ff);
-  const flat=await pop.evaluate(()=>{const c=document.querySelector('.ly .gx-card');const st=getComputedStyle(c);return {sh:st.boxShadow,bg:st.backgroundColor};});
-  ok('5 on the key background a card is opaque and has no shadow (nothing for the key to take part of)',flat.sh==='none'&&flat.bg==='rgb(255, 255, 255)',flat);
+  ok('5 the window draws the cards in Lato, built in (no network)',/^"TV Lato"/.test(ff)&&await pop.evaluate(()=>document.fonts.check("900 40px 'TV Lato'")),ff);
+  const flat=await pop.evaluate(()=>{const c=document.querySelector('.ly .pn');const st=getComputedStyle(c);return {sh:st.boxShadow,bg:st.backgroundImage,lc:document.getElementById('lc').textContent.slice(0,60)};});
+  ok('5 the Panel look: the panel is solid (a gradient, no shadow) and the logo comes with it',flat.sh==='none'&&/linear-gradient/.test(flat.bg)&&/pn-logo\{background-image:url\("data:image\//.test(flat.lc),flat);
   ok('5 the graphics window opens on green (the key) with the card shown on the teleprompter',g0.bg==='rgb(0, 177, 64)'&&g0.t===at[0],[g0,at]);
-  await page.bringToFront();await page.keyboard.press('PageDown');await sleep(700);
-  const shown=async()=>pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');const t=l&&l.querySelector('.gx-title');return t?t.textContent:'';});
+  await page.bringToFront();await page.keyboard.press('PageDown');await sleep(150);
+  const mid=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');return {layers:[...document.querySelectorAll('.ly')].map(x=>x.style.opacity),tx:l?[...l.querySelectorAll('.gx-tx')].map(e=>getComputedStyle(e).opacity).map(Number):[],pn:l?getComputedStyle(l.querySelector('.pn')).opacity:''};});
+  ok('5 the next card in the same layout: the panel stays and only its words fade (as the Flowics template)',mid.pn==='1'&&mid.tx.length>0&&mid.tx.every(o=>o<1)&&mid.layers.filter(o=>o==='1').length===1,mid);
+  await sleep(1100);
+  const shown=async()=>pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');const t=l&&l.querySelector('.pn-h');return t?t.textContent:'';});
   ok('5 the next card on the teleprompter changes the window',(await shown())===at[1],[await shown(),at]);
   await page.evaluate(()=>{setView('setup');const s=document.querySelector('[data-m="gbg"]');s.value='black';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(600);
   ok('5 a black background (luma key) reaches the open window',(await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor))==='rgb(0, 0, 0)');
@@ -111,19 +116,30 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const bad={form:'TV-1',rev:'2026-10',S:{meta:{client:'<img src=x onerror=alert(1)>',c1:'red;background:url(x)'},rows:[{seg:'<b>s</b>',say:'hi',title:'<script>alert(1)<\/script>',body:'<img src=x onerror=alert(2)>',lay:'evil',cont:true,pics:[{ph:'zz',cap:'<i>c</i>'}]}],photos:[{id:'zz',img:'javascript:alert(1)'},{id:'<x>',img:'data:image/png;base64,AAAA'}],log:[{i:'x',t:'y'}]}};
   const badP=path.join(OUT,'bad.json');fs.writeFileSync(badP,JSON.stringify(bad));await page.setInputFiles('#fileIn',badP);await sleep(600);
   const b1=await page.evaluate(()=>({n:S.rows.length,cont:S.rows[0].cont,lay:S.rows[0].lay,ph:S.rows[0].pics[0].ph,photos:S.photos.length,imgs:document.querySelectorAll('#rows img,.tv-thumb img').length,scripts:[...document.querySelectorAll('#rows script,.tv-thumb script')].length,
-    title:(document.querySelector('.tv-thumb .gx-title')||{}).textContent,log:S.log,c1:S.meta.c1}));
-  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#1d3b5a',b1);
+    title:(document.querySelector('.tv-thumb .pn-h')||{}).textContent,log:S.log,c1:S.meta.c1}));
+  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#0f1b41',b1);
   const other=path.join(OUT,'other.json');fs.writeFileSync(other,JSON.stringify({form:'TK-1',S:{}}));await page.setInputFiles('#fileIn',other);await sleep(400);
   ok('7 a file saved by another form is refused; nothing changes',(await page.evaluate(()=>S.rows.length))===1);
   /* 8 */
   await page.evaluate(()=>loadSim());await sleep(800);
-  const lays=await page.evaluate(()=>{const out={};['side','lower','full','title','pic1','pic2','none'].forEach(l=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay=l;if(/pic/.test(l)){r.pics=[{ph:'',cap:'One'},{ph:'',cap:'Two'}];}
-    const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0';box.innerHTML=stageHtml(r,960,{presenter:true});document.body.appendChild(box);fitGx(box);const g=box.querySelector('.gx').getBoundingClientRect(),c=box.querySelector('.gx-card,.gx-band');
-    const cr=c?c.getBoundingClientRect():null,inn=box.querySelector('.gx-in');out[l]={inside:!cr||(cr.left>=g.left-1&&cr.right<=g.right+1&&cr.top>=g.top-1&&cr.bottom<=g.bottom+1),over:inn?inn.scrollHeight>inn.clientHeight+2:false,card:!!c};box.remove();});return out;});
-  ok('8 every layout draws inside the stage, its text fitted to its card; no card on "No card"',Object.values(lays).every(x=>x.inside&&!x.over)&&!lays.none.card&&lays.title.card,lays);
-  const long=await page.evaluate(()=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay='side';r.body=Array.from({length:14},(_,i)=>'• A long point number '+i+' that goes on for a while').join('\n');const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);
-    const b=box.querySelector('.gx-body'),inn=box.querySelector('.gx-in');const o={fs:parseFloat(b.style.fontSize),over:inn.scrollHeight>inn.clientHeight+2};box.remove();return o;});
-  ok('8 a long card: the text shrinks until it fits',long.fs<46&&!long.over,long);
+  for(const look of ['panel','cards']){
+  const lays=await page.evaluate(look=>{S.meta.look=look;const out={};['side','lower','full','title','pic1','pic2','none'].forEach(l=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay=l;if(/pic/.test(l)){r.pics=[{ph:'',cap:'One'},{ph:'',cap:'Two'}];}
+    const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0';box.innerHTML=stageHtml(r,960,{presenter:true});document.body.appendChild(box);fitGx(box);const g=box.querySelector('.gx').getBoundingClientRect(),c=box.querySelector('.gx-card,.gx-band,.pn');
+    const cr=c?c.getBoundingClientRect():null,inn=box.querySelector('.gx-in');out[l]={inside:!cr||(cr.left>=g.left-1&&cr.right<=g.right+1&&cr.top>=g.top-1&&cr.bottom<=g.bottom+1),over:inn?inn.scrollHeight>inn.clientHeight+2:false,card:!!c};box.remove();});S.meta.look='panel';return out;},look);
+  ok('8 '+look+' look: every layout draws inside the stage, its text fitted to its card; no card on "No card"',Object.values(lays).every(x=>x.inside&&!x.over)&&!lays.none.card&&lays.title.card,lays);}
+  const long=await page.evaluate(()=>{S.meta.look='cards';const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay='side';r.body=Array.from({length:14},(_,i)=>'• A long point number '+i+' that goes on for a while').join('\n');const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);
+    const b=box.querySelector('.gx-body'),inn=box.querySelector('.gx-in');const o={fs:parseFloat(b.style.fontSize),over:inn.scrollHeight>inn.clientHeight+2};box.remove();S.meta.look='panel';return o;});
+  ok('8 Cards look, a long card: the text shrinks until it fits',long.fs<46&&!long.over,long);
+  /* the Panel look, as the sheet's columns: A the panel's title, B its paragraphs, C the gold heading, D the list; the band, the tag, the logo */
+  const pn=await page.evaluate(()=>{const r=newRow('Training Overview',{say:'The first paragraph.\n\nThe second paragraph.',title:'Covering',body:'• The FBA\n• The BIP\n• Denial vs. delay\n• The first nine weeks\n• One more\n• And another\n• The seventh'});
+    const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);const q=x=>box.querySelector(x),inn=q('.pn-in');
+    const o={t:q('.pn-t').textContent,tt:getComputedStyle(q('.pn-t')).textTransform,p:[...box.querySelectorAll('.pn-in p')].map(e=>e.textContent),h:q('.pn-h').textContent,hc:getComputedStyle(q('.pn-h')).color,b:[...box.querySelectorAll('.pn-l .b')].map(e=>e.textContent),
+      band:q('.pn-band').textContent,tag:q('.pn-tag').textContent,logo:!!q('.pn-logo'),fs:parseFloat(inn.style.fontSize),lg:inn.style.getPropertyValue('--lg'),over:inn.scrollHeight>inn.clientHeight+2,
+      left:Math.round(q('.pn').getBoundingClientRect().left-box.querySelector('.gx').getBoundingClientRect().left),w:Math.round(q('.pn').getBoundingClientRect().width)};box.remove();return o;});
+  ok('8 the Panel look: A the title (in capitals), B two paragraphs, C the heading in gold, D seven bullets; the series band, the tag from the name, the logo',pn.t==='Training Overview'&&pn.tt==='uppercase'&&pn.p.join('|')==='The first paragraph.|The second paragraph.'&&pn.h==='Covering'&&pn.hc==='rgb(203, 185, 138)'&&pn.b.length===7&&/^•/.test(pn.b[0])&&
+    pn.band==='Functional Treatments in Applied Behavior Analysis'&&pn.tag==='FBA & BIP Video Training: Sam S.'&&pn.logo,pn);
+  ok('8 the Panel look: on the left half of the picture (16 to 962 of 1920)',pn.left===8&&pn.w===473,pn);
+  ok('8 the Panel look: a long list closes up its spacing first; the words keep their size',pn.fs===30&&parseFloat(pn.lg)<1.15&&!pn.over,pn);
   await page.evaluate(()=>setView('graphics'));await sleep(500);await page.screenshot({path:path.join(OUT,'graphics.png'),fullPage:true});
   const gx=await page.evaluate(()=>({big:document.querySelectorAll('#gxBig .gx').length,grid:document.querySelectorAll('#gxGrid .gx-t').length,pos:document.getElementById('gxPos').textContent}));
   ok('8 the Graphics view: the card large and all 18 below',gx.big===1&&gx.grid===18&&gx.pos==='Card 1 of 18',gx);
