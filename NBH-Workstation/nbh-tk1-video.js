@@ -2231,6 +2231,7 @@ async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1920,OH
   const stage=TKWALK.stage;if(!stage)throw new Error('Open the Walkthrough first.');
   TKWALK.pause();const was=TKWALK.time;TKWALK.build();
   const player=stage.closest('.wk-player'),small=player&&player.classList.contains('wk-small');if(small)player.classList.remove('wk-small');const Dur=TKWALK.duration;if(!Dur)throw new Error('The walkthrough is empty.');
+  const capOff=capsInPicture(stage,player);   /* v21.49 the captions stay in the picture while it records, even if the window changes */
   const End=Math.min(Dur,opt.until||Dur),N=Math.ceil(End*fps);let audio=null;   /* until: only the first seconds (for the checks) */if(acfg){on({phase:'sound',done:0,total:N});audio=await narration(End,acfg.sampleRate);}
   const target=new MX.ArrayBufferTarget();
   const mux=new MX.Muxer({target,fastStart:'in-memory',firstTimestampBehavior:'offset',video:{codec:'avc',width:OW,height:OH,frameRate:fps},
@@ -2252,13 +2253,19 @@ async function make(opt){opt=opt||{};const fps=opt.fps||30,OW=opt.width||1920,OH
       while(venc.encodeQueueSize>6){await new Promise(r=>setTimeout(r,4));if(err)throw err;}
       if(i%10===0){on({phase:'video',done:i,total:N,ms:performance.now()-t0});await tick();}}
     await venc.flush();if(err)throw err;mux.finalize();
-  }finally{scene.done();if(small)player.classList.add('wk-small');try{venc.close();}catch(e){}try{aenc&&aenc.close();}catch(e){}TKWALK.renderAt(was||0);try{W.dispatchEvent(new Event('resize'));}catch(e){}}
+  }finally{scene.done();capOff();if(small)player.classList.add('wk-small');try{venc.close();}catch(e){}try{aenc&&aenc.close();}catch(e){}TKWALK.renderAt(was||0);try{W.dispatchEvent(new Event('resize'));}catch(e){}}
   on({phase:'done',done:N,total:N,ms:performance.now()-t0});
   return{blob:new Blob([target.buffer],{type:'video/mp4'}),sound:!!audio,seconds:Dur,frames:N};}
 /* one frame, painted as the video would have it (for the checks) */
+/* (v21.49) the caption is part of the picture in a video, whatever size the player is shown at: an iPad shows a small player's
+   captions under the picture, and a resize while the video is made (the toolbar, the screen turning) made the player small again,
+   so the video came out without them. With CC off there are none, as before. Returns the function that puts it back. */
+function capsInPicture(stage,player){const cap=stage&&stage.querySelector('.wk-cap');if(!cap||(player&&player.classList.contains('wk-nocap')))return()=>{};
+  const was=cap.style.getPropertyValue('display'),pr=cap.style.getPropertyPriority('display');cap.style.setProperty('display','block','important');
+  return()=>{if(was)cap.style.setProperty('display',was,pr);else cap.style.removeProperty('display');};}
 async function frame(t,width){const OW=width||1280,OH=Math.round(OW*SH/SW);const player=TKWALK.stage.closest('.wk-player'),small=player&&player.classList.contains('wk-small');if(small)player.classList.remove('wk-small');
-  const scene=makeScene(TKWALK.stage);try{TKWALK.renderAt(t);await scene.update(Math.min(2,Math.max(1,OW/SW)));
-  const cv=D.createElement('canvas');cv.width=OW;cv.height=OH;const ctx=cv.getContext('2d');ctx.fillStyle='#d8c29d';ctx.fillRect(0,0,OW,OH);scene.draw(ctx,OW/SW);return cv;}finally{scene.done();if(small)player.classList.add('wk-small');}}
+  const capOff=capsInPicture(TKWALK.stage,player);const scene=makeScene(TKWALK.stage);try{TKWALK.renderAt(t);await scene.update(Math.min(2,Math.max(1,OW/SW)));
+  const cv=D.createElement('canvas');cv.width=OW;cv.height=OH;const ctx=cv.getContext('2d');ctx.fillStyle='#d8c29d';ctx.fillRect(0,0,OW,OH);scene.draw(ctx,OW/SW);return cv;}finally{scene.done();capOff();if(small)player.classList.add('wk-small');}}
 
 /* the frames at the times `at`, painted by one scene stepping through the walkthrough every `step` seconds, as the video does it
    (its pictures kept and painted again only where something changed): the checks compare them with fresh frames */
