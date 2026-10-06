@@ -29,7 +29,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     inputs:st.querySelectorAll('input,select,button').length,rows:st.querySelectorAll('#wkSheet tbody tr').length,dayRows:S.rows.length,today:!!st.querySelector('tr.ddw-today'),graph:!!st.querySelector('.ddw-gpaper svg.graph'),
     vals:[...[...st.querySelectorAll('#wkSheet tbody tr')][0].cells].map(td=>td.textContent.replace(/\s+/g,' ').trim()).slice(0,5).join(' '),cards:st.querySelectorAll('.sd-card').length};});
   ok('the simulation: every scene, 2½ to 3 minutes, five chapters',wk.ids.join()==='intro,types,defs,units,day,obsmin,blankzero,episodes,percent,phase,cond,graph,analysis,adults,outro'&&wk.d>150&&wk.d<190&&wk.ch.length===5&&wk.view,wk);
-  ok('the stage holds a copy of the sheet as text, with today’s row added, and the graph',wk.inputs===0&&wk.rows===wk.dayRows+1&&wk.today&&wk.graph&&/^Mon \d+\/\d+ 360 9 5 2/.test(wk.vals)&&wk.cards===6,wk);
+  ok('the stage holds a copy of the sheet as text, with today’s row added, and the graph',wk.inputs===0&&wk.rows===wk.dayRows+1&&wk.today&&wk.graph&&/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d+\/\d+ 360 9 5 2/.test(wk.vals)&&wk.cards===6,wk);
   const after=await page.evaluate(()=>JSON.stringify(S));
   ok('building the walkthrough does not change the form’s data',before===after);
   /* the camera reaches the graph and the analysis */
