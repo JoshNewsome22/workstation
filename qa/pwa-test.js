@@ -9,7 +9,7 @@
      B  the first visit registers sw.js, the chip counts the files (n of N) and ends at Saved for offline use, the set
         holds every listed file byte for byte, the shell asked for persistent storage; the list holds every file of the
         folder that a page names (scanned here independently of tools/pwa-sw.py)
-     C  with the network off the shell and every one of the 44 forms open, the picture library loads, a form is filled
+     C  with the network off the shell and every one of the 45 forms open, the picture library loads, a form is filled
         and saved (and the case too), an unsaved page gets the offline page; nothing saved is asked of the network, and
         no request a page makes for a file of the folder goes unanswered; Diagnostics says the libraries are saved
      D  the writing help's relay (/ai, outside the folder: GET and POST), another website, a POST and a HEAD inside the
@@ -296,7 +296,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   check('B every saved copy is the file on the website, byte for byte',!bad.length,bad.join(', '));
   const F=forms('NBH-Workstation');
   const need=['index.html',...F.map(f=>f.file),'nbh-pictos.js','nbh-tk1-narration.js','nbh-tk1-video.js','nbh-sm1-narration.js','nbh-dd1-narration.js','nbh-tk1-bus-narration.js','nbh-respond.js','respond.html','pdf-lib.min.js','nbh-pdf-tools.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png'];
-  check('B the list is the shell, the 44 forms, the picture library, the TK-1 narration, the respondent page and its library, the PDF tools, the manifest and the icons',need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
+  check('B the list is the shell, the 45 forms, the picture library, the TK-1 narration, the respondent page and its library, the PDF tools, the manifest and the icons',need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
   const named=scanLoads(path.join(ROOT,'NBH-Workstation'),['index.html','respond.html',...F.map(f=>f.file)]);
   check('B every file of the folder a page names (scanned here: tags, styles, fetch, loadScript, workers, .src) is in the list',named.length>=6&&named.every(f=>FILES.includes(f)),'named '+named.length+'; not listed: '+named.filter(f=>!FILES.includes(f)).join(', '));
   const pa=await page.evaluate(()=>({asked:window.__persistAsked||0,seen:window.__persistedSeen||0,was:window.__persistedWas}));
@@ -322,7 +322,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const onResp=r=>{const u=r.url();if(u.indexOf(NBH)===0&&r.request().method()!=='HEAD'&&r.status()>=400)unanswered.push(u.slice(NBH.length)+' '+r.status());};
     page.on('requestfailed',onFail);page.on('response',onResp);
     await page.reload();await sleep(900);
-    check('C offline: the shell opens from the copy',await page.evaluate(()=>/Workstation/.test(document.title)&&document.querySelectorAll('#rail .item').length===44));
+    check('C offline: the shell opens from the copy',await page.evaluate(()=>/Workstation/.test(document.title)&&document.querySelectorAll('#rail .item').length===45));
     check('C offline: the chip says Offline now',/^Offline now$/.test(await waitChip(page,/^Offline now$/,10000)),await chip(page));
     const notOpen=[],pic={};
     for(const f of F){
