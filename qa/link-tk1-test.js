@@ -42,11 +42,14 @@ function ok(name,cond,extra){out.push((cond?'ok   ':'FAIL ')+name+(cond||extra==
 
 async function open(ctx,url,log){const p=await ctx.newPage();wire(p,log);await p.goto(url||URL1);await sleep(500);
   await p.evaluate(()=>{window.confirm=()=>true;});return p;}
-const sOf=p=>p.evaluate(()=>JSON.stringify(S));
+/* (v21.49) and its keys in the record (the bus settings, the two print ticks, the landmarks) are left out of the comparison */
+const noBus=o=>{Object.keys(o.meta||{}).forEach(k=>{if(/^bus_/.test(k)||k==='kind')delete o.meta[k];});if(o.chk){delete o.chk.bus_cap;delete o.chk.pg_bus;}delete o.lm;return o;};
+const sOf=p=>p.evaluate(()=>JSON.stringify(S)).then(j=>JSON.stringify(noBus(JSON.parse(j))));
 const noLk=j=>{const o=JSON.parse(j);delete o.meta.lk;return JSON.stringify(o);};
 const lkOf=p=>p.evaluate(()=>S.meta.lk||'');
 /* the bridge's own count (input, select and textarea, less file and hidden ones), computed in the page */
-const totals=p=>p.evaluate(()=>{let n=0,t=0;document.querySelectorAll('input,select,textarea').forEach(e=>{if(e.type==='file'||e.type==='hidden')return;t++;
+/* (v21.49) the Bus ride type came after the link: its fields (the Book type and the bus band) are left out of the count */
+const totals=p=>p.evaluate(()=>{let n=0,t=0;document.querySelectorAll('input,select,textarea').forEach(e=>{if(e.type==='file'||e.type==='hidden'||e.closest('#busBand')||e.dataset.m==='kind')return;t++;
   if(e.type==='checkbox'||e.type==='radio'){if(e.checked)n++;}else if(String(e.value||'').trim())n++;});return {filled:n,total:t};});
 const sim=p=>p.evaluate(async()=>{await loadSim();});
 /* a file into the panel's own file input, as a person picking it would */
@@ -120,7 +123,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     ok('1 simulator: the same totals, no lk, the same record',JSON.stringify(a1)===JSON.stringify(b1)&&(await sOf(A))===(await sOf(B))&&!('lk' in (await B.evaluate(()=>S.meta))),{was:a1,now:b1});
     ok('1 simulator: the same Setup verdict',(await A.evaluate(()=>document.querySelector('#setupVerdict').innerHTML))===(await B.evaluate(()=>document.querySelector('#setupVerdict').innerHTML)));
     const sa=JSON.parse(await saved(A)),sb=JSON.parse(await saved(B));
-    ok('1 simulator: the saved file is the one from before (apart from the time)',JSON.stringify(sa.S)===JSON.stringify(sb.S)&&sa.form===sb.form&&sa.rev===sb.rev);
+    ok('1 simulator: the saved file is the one from before (apart from the time)',JSON.stringify(noBus(sa.S))===JSON.stringify(noBus(sb.S))&&sa.form===sb.form&&sa.rev===sb.rev);
     const qa=await pdfPages(A),qb=await pdfPages(B);
     ok('1 simulator: the same number of printed sheets ('+qb+')',qa===qb,{was:qa,now:qb});
     ok('1 simulator: the printed text is the one from before',(await bookText(A))===(await bookText(B)));

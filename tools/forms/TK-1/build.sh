@@ -1,6 +1,6 @@
 #!/bin/sh
 # Build Form TK-1 from its parts: the QR library, the shared link core (tools/blocks/nbh-link.js, the link with Form
-# TE-1), script-main.js and the walkthrough files (walk-hands.js, walk.js, walk.css, each used when present; walk-audio.js,
+# TE-1), bus.js (the Bus ride type, v21.49), script-main.js and the walkthrough files (walk-hands.js, walk.js, walk.css, each used when present; walk-audio.js,
 # the recorded narration, goes beside the form as NBH-Workstation/nbh-tk1-narration.js, v21.44)
 # go into script.js and the stylesheet, then tools/new-form.py assembles the form on CF-1's shared parts and
 # tools/polish-one.py applies the shared polish layer and the writing help (tools/blocks/nbh-wording.js, put in by
@@ -22,6 +22,7 @@ core=open('tools/blocks/nbh-link.js',encoding='utf-8').read()
 for bad in ('</script','CF-1','Newsome Behavioral Health'):
     assert bad.lower() not in core.lower(), ('nbh-link.js must not contain', bad)
 js=(head+lib.rstrip('\n')+'\n\n/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n'+core+
+    '\n/* ===== Form TK-1: the Bus ride type (bus.js, v21.49; functions only, used by script-main.js) ===== */\n'+open(R+'bus.js',encoding='utf-8').read()+
     '\n/* ===== Form TK-1 ===== */\n'+open(R+'script-main.js',encoding='utf-8').read())
 for f in ('walk-hands.js','walk.js'):   # v21.44 walk-audio.js is not inlined: it goes beside the form as nbh-tk1-narration.js
     if os.path.exists(R+f): js=js.rstrip('\n')+'\n\n/* ===== '+f+' ===== */\n'+open(R+f,encoding='utf-8').read()
@@ -38,6 +39,8 @@ python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-0
 python3 tools/polish-one.py NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
 # v21.44 the recorded narration, byte for byte, beside the form (its <script src> is in toolbar.html)
 cp tools/forms/TK-1/walk-audio.js NBH-Workstation/nbh-tk1-narration.js
+# v21.49 and the bus ride's narration, its own file (each under 1.9 MB; its <script src> is in toolbar.html too)
+cp tools/forms/TK-1/walk-audio-bus.js NBH-Workstation/nbh-tk1-bus-narration.js
 # v21.44 Save as video: mp4-muxer (tools/vendor/mp4-muxer, MIT) and walk-video.js, in one file beside the form
 { printf '/* nbh-tk1-video.js (v21.44): Form TK-1\047s Save as video. Built by tools/forms/TK-1/build.sh from tools/vendor/mp4-muxer/mp4-muxer.js\n'
   printf '   (mp4-muxer 5.2.2, Copyright (c) 2023 Vanilagy, MIT licence: tools/vendor/mp4-muxer/LICENSE) and tools/forms/TK-1/walk-video.js. */\n'
@@ -52,6 +55,10 @@ print('the link core (tools/blocks/nbh-link.js) is in the built TK-1 once, byte 
 assert doc.count('<script src="nbh-tk1-video.js" defer></script>')==1 and doc.count('id="wkVideo"')==1, 'Save as video is not in the built TK-1'
 assert doc.count('<script src="nbh-tk1-narration.js" defer></script>')==1 and 'const WALK_AUDIO=' not in doc, 'the narration must be beside TK-1, not in it'
 assert open('NBH-Workstation/nbh-tk1-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio.js','rb').read(), 'nbh-tk1-narration.js is not walk-audio.js'
+assert doc.count('<script src="nbh-tk1-bus-narration.js" defer></script>')==1 and open('NBH-Workstation/nbh-tk1-bus-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio-bus.js','rb').read(), 'the bus narration is not beside TK-1'
+import os
+for f in ('nbh-tk1-narration.js','nbh-tk1-bus-narration.js'):
+    assert os.path.getsize('NBH-Workstation/'+f)<1900000, f+' is 1.9 MB or more: a file that size can reach an iPad cut short'
 assert len(doc.encode('utf-8'))<1900000, 'TK-1 is %d bytes: keep it under 1.9 MB (a host may cut a page of 2 MB or more short)' % len(doc.encode('utf-8'))
 print('the narration is beside TK-1 (nbh-tk1-narration.js); TK-1 is %d bytes' % len(doc.encode('utf-8')))
 W,R,C=(open('tools/blocks/'+f,encoding='utf-8',newline='').read() for f in ('nbh-wording.js','nbh-wording-rules.json','nbh-wording-config.json'))

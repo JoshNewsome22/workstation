@@ -52,13 +52,16 @@ const CREDIT0='To find more resources and information visit\nwww.Behavior-Charts
    not beside the form) */
 const AV0='faceboy2';
 function avKey(){const k=S.meta.avatar||AV0;return /^av:/.test(k)||P[k]?k:'av:boy';}
-function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:AV0,n:'5',wm:'20',order:'all',sp_card:'ch:0',sp_size:'large',panel:'light',pagesize:'8.82',credit:CREDIT0},DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true,qrframe:true},photos:[],photo:[cello()],tok:[cello('tk:star')],tokL:[cello('tk:medal')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
+/* (v21.49) the bus settings have their own defaults, so a book never takes them (or its Book type) from the one shown before */
+const BUS0={kind:'',bus_rule:'all',bus_time:'spread',bus_lead:'2',bus_every:'5',bus_step:'timer',bus_reward:'arrive'};
+function blank(){return{meta:Object.assign({poss:'s',layout:'ft',avatar:AV0,n:'5',wm:'20',order:'all',sp_card:'ch:0',sp_size:'large',panel:'light',pagesize:'8.82',credit:CREDIT0},BUS0,DEF),chk:{pg_ch:true,pg_tg:true,pg_bd:true,pg_tk:true,pg_how:false,cs_ch:true,cs_tg:true,cs_tk:true,qrframe:true,bus_cap:true,pg_bus:true},photos:[],lm:[],photo:[cello()],tok:[cello('tk:star')],tokL:[cello('tk:medal')],bg:[cello(),cello()],sp:[cello()],ch:Array.from({length:6},()=>cello()),tg:Array.from({length:6},()=>cello()),ft:[cello(),cello()],caps:[],txt:Object.assign({},TXT0)};}
 let S=blank();
-const nTok=()=>Math.max(3,Math.min(10,Math.round(num(S.meta.n)||5)));
+const nTok=()=>busNTok()||Math.max(3,Math.min(10,Math.round(num(S.meta.n)||5)));   /* (v21.49) a bus ride's landmarks can set it (bus.js) */
 function ensure(){
   if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};if(!Array.isArray(S.photos))S.photos=[];
   const six=k=>{if(!Array.isArray(S[k]))S[k]=[];while(S[k].length<6)S[k].push(cello());S[k].length=6;};six('ch');six('tg');
   const fix=(k,n,def)=>{if(!Array.isArray(S[k])||S[k].length!==n)S[k]=def();};fix('ft',2,()=>[cello(),cello()]);fix('tok',1,()=>[cello('tk:star')]);fix('tokL',1,()=>[cello('tk:medal')]);fix('photo',1,()=>[cello()]);fix('bg',2,()=>[cello(),cello()]);fix('sp',1,()=>[cello()]);
+  if(!Array.isArray(S.lm))S.lm=[];S.lm=S.lm.slice(0,10).map(o=>Object.assign(cello(),o&&typeof o==='object'?o:{},{min:String(o&&o.min!=null?o.min:'')}));   /* (v21.49) the bus ride's landmarks */
   if(!S.txt||typeof S.txt!=='object')S.txt={};Object.keys(TXT0).forEach(k=>{if(typeof S.txt[k]!=='string')S.txt[k]=TXT0[k];});
   Object.keys(DEF).forEach(k=>{if(!/^#[0-9a-f]{6}$/i.test(S.meta[k]||''))S.meta[k]=DEF[k];});
   if(!Array.isArray(S.caps))S.caps=[];const n=nTok();if(S.caps.length!==n)S.caps=defCaps(n,tokName());
@@ -108,7 +111,7 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   $('#pdGo',d).addEventListener('click',()=>{if(PICK&&PICK.sel.length)putIn();});
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
   $('#pdGrid',d).addEventListener('click',async e=>{const x=e.target.closest('[data-phdel]');
-    if(x){e.preventDefault();e.stopPropagation();if(!(await nbhUI.confirm('Remove this photo?\nAnything using it loses the picture.',{ok:'Remove',danger:true})))return;const id=x.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['photo','tok','tokL','bg','sp','ch','tg','ft'].forEach(k=>S[k].forEach(o=>{if(o.ph===id)o.ph='';}));grid();renderAll();return;}
+    if(x){e.preventDefault();e.stopPropagation();if(!(await nbhUI.confirm('Remove this photo?\nAnything using it loses the picture.',{ok:'Remove',danger:true})))return;const id=x.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['photo','tok','tokL','bg','sp','ch','tg','ft','lm'].forEach(k=>(S[k]||[]).forEach(o=>{if(o.ph===id)o.ph='';}));grid();renderAll();return;}
     const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;
     if(PICK.multi){const key=keyOf(b),at=PICK.sel.indexOf(key);if(at>=0)PICK.sel.splice(at,1);else if(PICK.sel.length<room())PICK.sel.push(key);marks();return;}
     const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
@@ -143,22 +146,23 @@ function renderTbls(){
   put('#phPick','photo',0);put('#tokPick','tok',0);put('#tokLPick','tokL',0);put('#bgChPick','bg',0);put('#bgTgPick','bg',1);put('#spPick','sp',0);put('#ftFirst','ft',0);put('#ftThen','ft',1);
   const sp=$('#spCard'),v=S.meta.sp_card||'ch:0';sp.innerHTML='<optgroup label="Choices">'+S.ch.map((o,i)=>'<option value="ch:'+i+'">'+(i+1)+'. '+esc(lbl(o)||'(empty)')+'</option>').join('')+'</optgroup><optgroup label="Targets">'+S.tg.map((o,i)=>'<option value="tg:'+i+'">'+(i+1)+'. '+esc(lbl(o)||'(empty)')+'</option>').join('')+'</optgroup><option value="tok">The token ('+esc(tokName())+')</option><option value="own">A card made on the spot (label and picture below)</option>';sp.value=v;if(sp.value!==v)sp.value='ch:0';
   $('#wmPct').textContent=String(Math.max(5,Math.min(25,num(S.meta.wm)||12)));
+  busTables();
   renderSetup();
 }
 function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLine');if(bl)bl.textContent='This copy of the form: build '+BUILD+'.';const nch=S.ch.filter(has).length,ntg=S.tg.filter(has).length;
   if(!m.client&&!m.first&&!nch&&!ntg){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the first name as it prints, the photo, the tokens; then the Choices and Targets pages.'+lkPhrase()+'</div>';return;}
-  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(ntg<6)miss.push((6-ntg)+' of the six targets');
+  const miss=[];if(!m.first)miss.push('the first name (the Board prints a line to write on)');if(!has(S.photo[0]))miss.push('a photo (the '+esc(lbl({k:avKey()})||'avatar').toLowerCase()+' avatar prints instead)');if(nch<6)miss.push((6-nch)+' of the six choices');if(isBus()){if(ntg<2)miss.push('at least two bus rules on the Targets page');}else if(ntg<6)miss.push((6-ntg)+' of the six targets');
   /* (v21.42i) the same picture twice among the six is usually a slip of the finger in the picker */
   const twice=(k,name)=>{const seen={},d=[];S[k].forEach((o,i)=>{const id=o.ph?'ph:'+o.ph:o.k;if(!id)return;if(seen[id]!==undefined)d.push(name+' '+(seen[id]+1)+' and '+(i+1));else seen[id]=i;});return d;};
   const dup=twice('ch','choices').concat(twice('tg','targets'));if(dup.length)miss.push('the same picture on '+dup.join(', ')+' (change one, unless that is meant)');
-  v.innerHTML='<div class="verdict '+(miss.length?'v-mid':'v-ok')+'"><b>'+(miss.length?'Still open:':'Set up.')+'</b> '+(miss.length?miss.join('; ')+'.':'')+' '+nTok()+' '+esc(plural(tokName()).toLowerCase())+' to earn'+(termOn()?' (the last one marked'+(termMode()==='pic'?': '+esc(lbl(S.tokL[0])||'its own picture').toLowerCase():'')+')':'')+'; '+(m.layout==='rules'?'Rules-row':'First-Then')+' board'+(m.qr?'; QR code on every page':'; no QR code')+'.'+lkPhrase()+'</div>';}
+  v.innerHTML='<div class="verdict '+(miss.length?'v-mid':'v-ok')+'"><b>'+(miss.length?'Still open:':'Set up.')+'</b> '+(miss.length?miss.join('; ')+'.':'')+' '+nTok()+' '+esc(plural(tokName()).toLowerCase())+' to earn'+(termOn()?' (the last one marked'+(termMode()==='pic'?': '+esc(lbl(S.tokL[0])||'its own picture').toLowerCase():'')+')':'')+'; '+(isBus()?'Bus-ride board ('+(busEach()?'a row of tokens for each rule':'one token for all the rules')+', '+(busStep()==='timer'?'timer':'landmarks')+')':m.layout==='rules'?'Rules-row':'First-Then')+' board'+(m.qr?'; QR code on every page':'; no QR code')+'.'+lkPhrase()+'</div>';}
 
 /* ---------------- the QR code (qrcode-generator, inlined above; type 0 = automatic, error correction M) ---------------- */
 /* the QR code, made here by qrcode-generator. Plain: black modules, level M. Framed (the default, the assessor's style from the
    Choices file): slate modules, rounded slate finder rings with a green core, SCAN ME in a clear square in the middle, level H
    so the words cost nothing. The core is a deeper green than the tab (#6aa55a): a pale core is read as white by decoders. */
 /* the build of this copy of the form, shown on Setup and on the Preview so it is easy to check that the uploaded file is the new one */
-const BUILD='v21.43';
+const BUILD='v21.49';
 const QR_SLATE='#698da9',QR_CORE='#6aa55a';
 function qrSvg(url,frame){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const ec=frame?'H':'M';const q=qrcode(0,ec);q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';
@@ -194,7 +198,7 @@ function strip(){const n=nTok(),rows=n>5?2:1;if(rows===1)return{n,rows,sz:110.53
   /* on a Letter-high page the two rows must fit under the panel: 87 pt slots */
   return{n,rows,sz:87,pitch:95.5,rowPitch:95.5,band:8.75+87*2+95.5-87+7.35,cap:9.4};}
 /* the canvas: page height in points (the Board grows by a second token row; "fill" is the sheet's 8.5 in) */
-function canvasH(kind){const mode=pageMode();if(mode==='fill')return 612/scl();return kind==='bd'?PH-STRIP+strip().band:PH;}
+function canvasH(kind){const mode=pageMode();if(mode==='fill')return 612/scl();return kind==='bd'&&!busEach()?PH-STRIP+strip().band:PH;}
 function pgOpen(kind,side,cls){const i=TABS.findIndex(t=>t[0]===kind),t=TABS[i];const col=S.meta[t[2]]||DEF[t[2]];const s=scl(),mode=pageMode();
   const ch=canvasH(kind),wIn=PW*s/72,hIn=ch*s/72,cx=(11-wIn)/2,cy=mode==='fill'?0:(8.5-hIn)/2;
   let trim='';if(mode!=='fill'){const x1=cx+wIn,y1=cy+hIn;[[cx-.3,cy],[x1,cy],[cx-.3,y1],[x1,y1]].forEach(([x,y])=>{trim+='<i class="trim h" style="left:'+IN(x)+';top:'+IN(y)+'"></i>';});[[cx,cy-.3],[x1,cy-.3],[cx,y1],[x1,y1]].forEach(([x,y])=>{trim+='<i class="trim v" style="left:'+IN(x)+';top:'+IN(y)+'"></i>';});}
@@ -215,10 +219,11 @@ function pageGrid(kind){const bg=S.bg[kind==='ch'?0:1];const pcls=S.meta.panel==
   return pgOpen(kind,'front')+'<div class="panel '+pcls+'">'+wmHtml(bg)+'<div class="ttl" data-frac=".97">'+title+'</div>'+boxes+'</div>'+pgClose;}
 function stripHtml(){const d=strip();const per=Math.ceil(d.n/d.rows);let h='<div class="strip" style="height:'+pt(d.band)+'">';
   for(let r=0;r<d.rows;r++){const k=Math.min(per,d.n-r*per);const left0=k===5?19.27:(PANW-(k*d.sz+(k-1)*(d.pitch-d.sz)))/2+15.38;
-    h+=S.caps.slice(r*per,r*per+k).map((c,i)=>'<div class="slot'+(d.sz<100?' sm':'')+(termOn()&&r*per+i===d.n-1?' last':'')+'" style="left:'+pt(left0+i*d.pitch)+';top:'+pt(9.44+r*d.rowPitch)+';width:'+pt(d.sz+2)+';height:'+pt(d.sz+2)+'"><span class="ca">'+esc(c.a)+'</span><span class="dot"></span><span class="cb">'+esc(c.b)+'</span></div>').join('');}
+    h+=S.caps.slice(r*per,r*per+k).map((c,i)=>'<div class="slot'+(d.sz<100?' sm':'')+(termOn()&&r*per+i===d.n-1?' last':'')+'" style="left:'+pt(left0+i*d.pitch)+';top:'+pt(9.44+r*d.rowPitch)+';width:'+pt(d.sz+2)+';height:'+pt(d.sz+2)+'"><span class="ca">'+esc(c.a)+'</span><span class="dot"></span><span class="cb">'+esc(busSlotLab(r*per+i)??c.b)+'</span></div>').join('');}
   return h+'</div>';}
 function nameTitle(){const f=String(S.meta.first||'').trim();const ap=S.meta.poss==='bare'&&/s$/i.test(f)?'’':'’s';const st=String(S.meta.setting||'').trim();
-  return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(S.meta.layout==='rules'&&st?esc(st)+' ':'')+'Chart';}
+  const st2=isBus()?st||'Bus':S.meta.layout==='rules'?st:'';   /* (v21.49) a bus book's title: Sam's Bus Chart */
+  return (f?esc(f)+ap:'<span class="blank"></span>’s')+' '+(st2?esc(st2)+' ':'')+'Chart';}
 /* the student's photo is cropped to the circle at the position and size set on Setup (a portrait's face sits above its middle, so it starts at 35 % down) */
 function photoFit(){const x=Math.max(0,Math.min(100,num(S.meta.ph_x)??50)),y=Math.max(0,Math.min(100,num(S.meta.ph_y)??35)),z=Math.max(100,Math.min(300,num(S.meta.ph_z)??100))/100;return 'object-position:'+x+'% '+y+'%;transform-origin:'+x+'% '+y+'%;transform:scale('+z+')';}
 /* (v21.42i) the two photos face each other: one of them prints mirrored (the samples mirror the right one) */
@@ -226,15 +231,15 @@ function flipSide(){const f=S.meta.ph_flip||'r';return f==='l'||f==='none'?f:'r'
 function photoInner(){const o=S.photo[0];return has(o)?(o.ph?pic(o,'',photoFit()):pic(o,'')):pic({k:avKey()},'');}
 function photoHtml(side){return '<div class="bd-photo '+side+(flipSide()===side?' flip':'')+'">'+photoInner()+'</div>';}
 function presetBox(o,cls,ul,cx){return '<div class="bx ft '+cls+'"'+(cx!=null?' style="left:'+pt(cx-74.94)+'"':'')+'>'+(has(o)?cardHtml(o,0,{ul}):'<span class="dot"></span>')+'</div>';}
-function pageBoard(){const d=strip();const panelH=pageMode()==='fill'?null:BDH;
+function pageBoard(){if(busEach())return busGridBoard();const d=strip();const panelH=pageMode()==='fill'?null:BDH;const rl=S.meta.layout==='rules'||isBus();   /* (v21.49) a bus book: the rules row, or a row for each rule */
   let inner;
-  if(S.meta.layout==='rules'){const rules=S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
+  if(rl){const rules=isBus()?busRules():S.tg.filter(has).slice(0,5);while(rules.length<2)rules.push(S.tg[rules.length]||cello());
     const k=rules.length,ph=panelH||(612/scl()-d.band-6.8),avail=ph-100-10,earn=Math.min(146.88,avail-48),rp=Math.min(173,avail-50),cw=(PANW-14-8-(earn+2)-20-(k-1)*10)/k;
-    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div></div></div>';}
+    inner=photoHtml('r')+'<div class="ttl rules" data-frac="1"><span class="ul">'+nameTitle()+'</span></div><div class="rulesrow"><div class="rr">'+rules.map(o=>'<div class="rule" style="width:'+pt(cw)+'"><div class="rl"><span>'+esc(lbl(o))+'</span></div><div class="rp" style="height:'+pt(rp)+'">'+(isWord(o)?'':pic(o,''))+'</div></div>').join('')+'</div><div class="earn"><div class="lab">Earn</div><div class="bx ft green" style="width:'+pt(earn+3)+';height:'+pt(earn+3)+'"><span class="dot"></span>'+qrBox().replace('class="qr"','class="qr" style="width:'+pt(Math.min(51.7,(earn+3)/2-21))+';height:'+pt(Math.min(51.7,(earn+3)/2-21))+'"')+'</div>'+busGoalHtml()+'</div></div>';}
   else inner=photoHtml('l')+photoHtml('r')+'<div class="ttl bd" data-frac=".72"><span class="ul">'+nameTitle()+'</span></div><div class="ftlab" style="left:'+pt(163.62)+'">First</div><div class="ftlab" style="left:'+pt(432.04)+'">Then</div>'+presetBox(S.ft[0],'grey',false,163.62)+presetBox(S.ft[1],'green',true,432.04);
-  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(S.meta.layout==='rules'?'':qrBox())+'</div>'+stripHtml()+pgClose;}
+  return pgOpen('bd','front')+'<div class="panel" style="bottom:'+pt(d.band)+'">'+inner+(rl?'':qrBox())+'</div>'+stripHtml()+pgClose;}
 function parkRows(n){const per=n<=3?n:n<=4?2:n<=6?3:n<=8?4:5;const rows=Math.ceil(n/per);const out=[];let left=n;for(let r=0;r<rows;r++){const k=Math.min(per,Math.ceil(left/(rows-r)));out.push(k);left-=k;}return out;}
-function pageTokens(){const n=nTok(),rows=parkRows(n);const sz=112.53;
+function pageTokens(){if(busEach())return busGridTokens();const n=nTok(),rows=parkRows(n);const sz=112.53;
   const xs=k=>{if(k===1)return[(PANW-sz)/2];const pitch=k<=3?226.1:(PANW-16-sz)/(k-1);const w=(k-1)*pitch+sz;return Array.from({length:k},(_,i)=>(PANW-w)/2+i*pitch);};
   let boxes='',j=0;rows.forEach((k,r)=>{const anchor=rows.length===1?'top:'+pt(147.5):r===0?'top:'+pt(107.22):'bottom:'+pt(38.12);xs(k).forEach(x=>{j++;boxes+='<div class="ybx'+(termOn()&&j===n?' last':'')+'" style="left:'+pt(x)+';'+anchor+'"><span class="dot"></span></div>';});});
   const corner=S.tok[0].k==='tk:star'||has(S.tok[0])?tokCard(55*scl()/72):'';
@@ -258,7 +263,7 @@ function sheetCards(kind){const list=S[kind].filter(o=>has(o)||o.l);const ul=kin
   /* (v21.42i) the cards keep the size of the boxes, so the larger pages' cards can need a second portrait sheet on the iPad */
   const per=cols*Math.max(1,Math.floor((ph-.5+.12)/(sz+.12))),out=[];for(let i=0;i<cards.length;i+=per){const c=cards.slice(i,i+per);out.push(sheetOpen('cards-'+kind)+sheetGrid(cols,Math.ceil(c.length/cols),sz,sz,.12,pw,ph,c.join(''),'top')+'</div>');}
   return out;}
-function sheetTokens(){const d=strip(),sz=tokIn(),[pw,ph,aw]=sheetDims(),cols=Math.min(5,Math.max(1,Math.floor((aw+.15)/(sz+.15))));return sheetOpen('cards-tk')+sheetGrid(cols,Math.ceil(d.n/cols),sz,sz,.15,pw,ph,Array.from({length:d.n},(_,i)=>tokCard(sz,i===d.n-1)).join(''),'top')+'</div>';}
+function sheetTokens(){const N=tokTotal(),g=busEach(),sz=g?busTokIn():tokIn(),[pw,ph,aw]=sheetDims(),cols=Math.min(g?8:5,Math.max(1,Math.floor((aw+.15)/(sz+.15))));return sheetOpen('cards-tk')+sheetGrid(cols,Math.ceil(N/cols),sz,sz,.15,pw,ph,Array.from({length:N},(_,i)=>tokCard(sz,!g&&i===N-1)).join(''),'top')+'</div>';}
 function spareCard(){const v=S.meta.sp_card||'ch:0';if(v==='tok')return{tok:true};if(v==='own')return{o:{k:S.sp[0].k,ph:S.sp[0].ph,l:S.meta.sp_label||''}};const m=/^(ch|tg):(\d)$/.exec(v);return{o:m?S[m[1]][+m[2]]:S.ch[0]};}
 function sheetSpare(){const big=S.meta.sp_size!=='small',T=turned(),sz=big?1.5:1.25,gap=.06,cols=T?Math.floor((TW-.2+gap)/(sz+gap)):big?5:6,rows=Math.floor(((T?TH-.2:10.4)+gap)/(sz+gap)),c=spareCard();
   /* an empty card (an empty slot, or a card made on the spot with no label and no picture) prints write-in lines, not a blank box */
@@ -270,9 +275,10 @@ const PGNAME={ch:'Choices',tg:'Targets',bd:'Board',tk:'Tokens'};
 function bookPages(){const c=S.chk,order=S.meta.order||'all';const kinds=TABS.map(t=>t[0]).filter(k=>c['pg_'+k]);const pages=[];
   const fronts=()=>kinds.forEach(k=>pages.push({label:PGNAME[k]+' (front)',html:pageFront(k)}));
   const duplex=()=>kinds.forEach(k=>{pages.push({label:PGNAME[k]+' (front)',html:pageFront(k)});pages.push({label:PGNAME[k]+' (back: '+BACKT[k][1]+')',html:pageBack(k)});});
+  const plan=()=>{if(isBus()&&c.pg_bus!==false)pages.push({label:'Bus ride plan, for the bus staff (portrait)',html:busPlanPage()});};   /* (v21.49) */
   const howto=()=>{if(c.pg_how){const h=pagesHowto().split('</div></div></div>');pages.push({label:'How to use, Steps 1 and 2',html:h[0]+'</div></div></div>'});pages.push({label:'How to use, Step 3',html:h[1]+'</div></div></div>'});}};
   const cards=()=>{const add=(k,name)=>{const h=sheetCards(k);h.forEach((x,i)=>pages.push({label:'Card sheet: '+name+(h.length>1?' ('+(i+1)+' of '+h.length+')':''),html:x}));};if(c.cs_ch)add('ch','the choices');if(c.cs_tg)add('tg','the targets');if(c.cs_tk)pages.push({label:'Card sheet: the tokens',html:sheetTokens()});};
-  if(order==='fronts')fronts();else if(order==='duplex'){duplex();howto();}else if(order==='cards')cards();else if(order==='spare')pages.push({label:'A sheet of one card (portrait)',html:sheetSpare()});else{duplex();howto();cards();}
+  if(order==='fronts'){fronts();plan();}else if(order==='duplex'){duplex();plan();howto();}else if(order==='cards')cards();else if(order==='spare')pages.push({label:'A sheet of one card (portrait)',html:sheetSpare()});else{duplex();plan();howto();cards();}
   return pages;}
 /* a back whose text does not fit at the floor size continues on a second back page; in a duplex order a blank sheet keeps
    every back on the reverse of its front */
@@ -312,6 +318,7 @@ function turnPages(){pageRule();const b=$('#book');if(!b)return;b.classList.togg
 function relabel(root){root.querySelectorAll('.pglabel').forEach(e=>e.remove());const pgs=[...root.querySelectorAll('.pg')];
   pgs.forEach((p,i)=>{const l=document.createElement('p');l.className='pglabel';l.textContent='Sheet '+(i+1)+' of '+pgs.length+': '+(p.dataset.label||'');p.insertAdjacentElement('beforebegin',l);});return pgs.length;}
 function renderOut(){
+  busCalc();
   const pages=bookPages(),order=S.meta.order||'all',mode=pageMode();
   $('#book').innerHTML=pages.map(p=>p.html.replace(/^<div class="pg /,'<div data-label="'+esc(p.label)+'" class="pg ')).join('');
   $('#chOut').innerHTML='<div class="book">'+pageGrid('ch')+'</div>';$('#tgOut').innerHTML='<div class="book">'+pageGrid('tg')+'</div>';$('#bdOut').innerHTML='<div class="book">'+pageBoard()+'</div>';
@@ -321,7 +328,7 @@ function renderOut(){
   $('#prevLine').textContent=n+' sheet'+(n===1?'':'s')+', '+(order==='fronts'?'the fronts only':order==='duplex'?'fronts and backs interleaved for a duplex printer (long-edge flip)':order==='cards'?'the card sheets only':order==='spare'?'one portrait sheet of a single card':'fronts and backs interleaved, then '+(S.chk.pg_how?'the how-to insert, then ':'')+'the card sheets')+'. Letter'+(order==='spare'?' portrait':turned()?' portrait, each book page turned on its side at full size ('+size.replace(/ centred with trim marks$/,'')+', with trim marks), for Safari on the iPad and iPhone, which prints portrait only':' landscape, '+size)+'; print at 100%. (Form build '+BUILD+'.)';
   const wr=$('#wholeRow');if(wr)wr.style.display=order==='all'?'none':'';
   const pv=(id,v)=>{const e=$(id);if(e)e.textContent=v;};pv('#phXv',(num(S.meta.ph_x)??50)+'%');pv('#phYv',(num(S.meta.ph_y)??35)+'%');pv('#phZv',(num(S.meta.ph_z)??100)+'%');
-  const tr=$('#termPicRow');if(tr)tr.style.display=termMode()==='pic'?'':'none';const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules';lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
+  const tr=$('#termPicRow');if(tr)tr.style.display=termMode()==='pic'?'':'none';const lk=$('#phLook');if(lk){const one=S.meta.layout==='rules'||isBus();lk.innerHTML=one?photoHtml('r'):photoHtml('l')+photoHtml('r');}
   setTimeout(()=>{scaleBooks();const pl=$('#prevLine'),tc=textCheck();if(pl&&tc&&!/Text check/.test(pl.textContent))pl.textContent+=' Text check '+tc.toFixed(2)+'.';},0);
   syncState();
 }
@@ -337,6 +344,7 @@ function fitOne(el){if(!el.clientHeight)return;if(el.dataset.fixed){el.style.fon
 function fitAll(){const tb=$('#book'),tu=tb&&tb.classList.contains('turned');const rot=tu?[...tb.querySelectorAll('.pgw>.pg')].map(p=>[p,p.style.transform]):[];
   if(tu){tb.classList.remove('turned');rot.forEach(([p])=>p.style.transform='');}try{fitAll0();}finally{if(tu){tb.classList.add('turned');rot.forEach(([p,t])=>p.style.transform=t);}}}
 function fitAll0(){
+  busFitPlan();   /* (v21.49) the bus ride plan */
   $$('.fit').forEach(fitOne);
   $$('.ttl[data-frac]').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';const cs=getComputedStyle(el);const room=(el.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))*(num(el.dataset.frac)||.8);let fs=parseFloat(cs.fontSize),g=0;/* the text's width in the title's own layout units: the range is measured on screen, so divide out any zoom in effect (the book's preview zoom, the polish layer's fit-to-window) */const w=()=>{const r=document.createRange();r.selectNodeContents(el);const k=el.getBoundingClientRect().width/(el.offsetWidth||1)||1;return r.getBoundingClientRect().width/k;};while(w()>room&&fs>16&&g++<80){fs-=1;el.style.fontSize=fs+'px';}});
   $$('.card .cl').forEach(el=>{if(!el.clientWidth)return;el.style.fontSize='';let fs=parseFloat(getComputedStyle(el).fontSize),g=0;while(el.scrollWidth>el.clientWidth+1&&fs>8&&g++<40){fs-=1;el.style.fontSize=fs+'px';}});
@@ -387,7 +395,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button[data-mv]'
 $('#chSpare').addEventListener('click',()=>spare('ch',$('#chSpareSel')));$('#tgSpare').addEventListener('click',()=>spare('tg',$('#tgSpareSel')));
 
 /* ---------------- meta + render ---------------- */
-function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!==undefined&&(S.meta[k]!==''||k==='credit'))el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range'){S.meta[k]=el.value;}else el.value='';});
+function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!==undefined&&(S.meta[k]!==''||k==='credit'||k==='kind'))el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range'){S.meta[k]=el.value;}else el.value='';});
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});$$('[data-b]').forEach(el=>{el.value=S.txt[el.dataset.b]||'';});$$('input[data-r="ft"]').forEach(el=>{el.value=S.ft[+el.dataset.i].l||'';});}
 /* (v21.43) while the link with Form TE-1 is on, the record's board summary is brought up to date first (lkBoard, in the
    link block), so the shell's status, snapshots and autosave carry it */
@@ -413,6 +421,7 @@ function fromFile(d){
   const ids=new Set(o.photos.map(p=>p.id));const okK=k=>!!(P[k]||(k.startsWith('tk:')&&TOK[k.slice(3)])||(k.startsWith('av:')&&AV[k.slice(3)]));
   const arr=(k,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={k:str(x&&x.k),ph:str(x&&x.ph),l:str(x&&x.l).slice(0,60)};if(!okK(r.k))r.k='';if(!ids.has(r.ph))r.ph='';return r;}):null;
   const ch=arr('ch',6);if(ch)o.ch=ch;const tg=arr('tg',6);if(tg)o.tg=tg;const ft=arr('ft',2);if(ft&&ft.length===2)o.ft=ft;const tok=arr('tok',1);if(tok&&tok.length)o.tok=tok;const tl=arr('tokL',1);if(tl&&tl.length)o.tokL=tl;const ph=arr('photo',1);if(ph&&ph.length)o.photo=ph;const bg=arr('bg',2);if(bg&&bg.length===2)o.bg=bg;const sp=arr('sp',1);if(sp&&sp.length)o.sp=sp;
+  const lm=arr('lm',10);if(lm)o.lm=lm.map((r,i)=>Object.assign(r,{min:str(s.lm[i]&&s.lm[i].min).replace(/[^0-9.]/g,'').slice(0,6)}));   /* (v21.49) the bus ride's landmarks */
   o.caps=Array.isArray(s.caps)?s.caps.slice(0,10).map(c=>({a:str(c&&c.a).slice(0,40),b:str(c&&c.b).slice(0,40)})):[];
   return o;
 }
@@ -423,17 +432,20 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const prev=S;S=next;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved TK-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Page','Position','Picture','Label']];S.ch.forEach((o,i)=>out.push(['Choices',i+1,o.ph?'photo':o.k,lbl(o)]));S.tg.forEach((o,i)=>out.push(['Targets',i+1,o.ph?'photo':o.k,lbl(o)]));S.ft.forEach((o,i)=>out.push(['Board',i?'Then':'First',o.ph?'photo':o.k,lbl(o)]));S.caps.forEach((c,i)=>out.push(['Token slot',i+1,c.a,c.b]));
+  const out=[['Page','Position','Picture','Label']];S.ch.forEach((o,i)=>out.push(['Choices',i+1,o.ph?'photo':o.k,lbl(o)]));S.tg.forEach((o,i)=>out.push(['Targets',i+1,o.ph?'photo':o.k,lbl(o)]));S.ft.forEach((o,i)=>out.push(['Board',i?'Then':'First',o.ph?'photo':o.k,lbl(o)]));S.caps.forEach((c,i)=>out.push(['Token slot',i+1,c.a,c.b]));if(isBus())S.lm.forEach((o,i)=>out.push(['Bus landmark',i+1,(o.ph?'photo':o.k)+(o.min?' (at '+o.min+' min)':''),lbl(o)]));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='TK-1_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
-async function loadSim(){if(!(await nbhUI.confirm('Load a simulated book?\nEvery page is filled with a sample student. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
+async function loadSim(){const bus=isBus();   /* (v21.49) a bus book loads the sample bus ride */
+  if(!(await nbhUI.confirm(bus?'Load a simulated bus ride?\nEvery page is filled with a sample student and a sample route. Anything already entered will be replaced.':'Load a simulated book?\nEvery page is filled with a sample student. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
   Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',site:'Elementary, self-contained classroom',first:'Sam',poss:'s',setting:'',layout:'ft',avatar:AV0,n:'5',tokname:'',qr:'https://example.org/token-board/how-to-use',credit:CREDIT0,order:'all',sp_card:'ch:0',sp_size:'large'});
   S.chk.pg_how=true;S.chk.qrframe=true;
   /* the practice's own pictures: the choices and the targets its walkthrough video shows */
   S.ch=['cardcrayons','cardball','cardplayground','cardbreak','youtube','cardipad2'].map(k=>cello(k));S.tg=['cardwriting','cardreading','cardalldone','boyraisehand','cardmath','cardwaiting'].map(k=>cello(k));
-  renderAll();setView('preview');nbhUI.toast('Simulator loaded: Sam’s book with six choices, six targets, five stars and a sample QR link.',{kind:'ok'});}
+  if(bus)busSim();
+  renderAll();setView('preview');nbhUI.toast(bus?'Simulator loaded: Sam’s bus ride, 25 minutes from school to home, with three bus rules, five landmarks and five stars.':'Simulator loaded: Sam’s book with six choices, six targets, five stars and a sample QR link.',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
+busWire();
 renderAll();
 
 /* v21.42 the case: hooks. The Targets take the case's replacement behaviors (Form TB-1) and acquisition

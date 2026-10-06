@@ -7450,3 +7450,44 @@ card's too). Bright shows a chosen picture by itself, as before; the other looks
 prints as it did. The photo (made small, about 256 pixels, when it is added) stays inside the form's saved file and on the device;
 it also shows on the Rate page and in the walkthrough. Checked by `qa/sm1-v2-test.js` (every look with each choice, Open data
 keeping the choice and dropping a forged one).
+
+## Form TK-1: The Bus Ride Type (v21.49)
+
+Setup › **Book type** › *Bus ride* makes a token board book for the ride on the school bus (tools/forms/TK-1/bus.js). The bus
+rules are the Targets page's cards (two to five), the item is a Choices card in the Earn box, the Board is titled "Sam's Bus
+Chart", and the tokens come at **checkpoints** along the route:
+
+- **The ride**: its usual length in minutes, typed. *The length from Maps* takes the start and stop addresses (optional) and
+  **Open in Maps** opens Apple Maps' driving directions between them, on that tap only. The addresses are kept only in the
+  form's saved file (and its autosave on the device): never printed, never in the CSV, never sent by the form.
+- **How a token is earned**, per student: one token at a checkpoint when every rule was followed, or a row of tokens for each
+  rule (up to four rules and six checkpoints; the Tokens page and the token sheet then hold a token for every slot).
+- **When**: spread over the ride (the ride less the minutes kept before the stop, 1 to 5, divided by the tokens, so the last
+  token comes just before the stop; times to the quarter minute), or at a set interval (2 to 15 minutes; Setup says how often
+  the board fills, what is left over before the stop, and which intervals come out even).
+- **The goal**: tokens needed for the item (blank: every token). With fixed checkpoints a miss cannot be made up, so Setup
+  suggests most of the tokens while the board is new; a goal below the full board prints under the Earn box.
+- **Fading the timer**: Step 1 a timer at the checkpoint times; Step 2 landmarks on the route (up to ten, with a picture each,
+  in route order with the minute each is passed; they set the token count); Step 3 every other landmark, the last kept. Setup
+  warns of a landmark outside the ride, uneven gaps and a last landmark far from the stop.
+- **The item**, per student: given at the stop by the adult who meets the bus, or on the bus when the board fills (with the
+  note to check the district's rules and the student's health plan before food on the bus).
+- **The ride plan** for the bus staff, a portrait page after the book's pages (Setup can leave it out): the route drawn plainly
+  (no map, no street), the rules, the times or landmarks, what to do at each checkpoint, that the aide runs the board and never
+  the driver while driving, the item, the fading steps with the current one marked, a note, and a ride log. It shrinks to fit
+  (the log gives up rows first) and is scaled into the iPad's portrait sheet.
+
+The **Walkthrough** of a bus book is the bus ride (about 2½ minutes, six chapters): the board and its rules, the item put in the
+Earn box, the route and its checkpoints, the ride (the bus rolls along the route as the timer runs; each checkpoint earns its
+token), what a missed rule means (or, with a row for each rule, a missed rule's own slot), the item at the stop or on the bus,
+the landmarks and the fewer landmarks, and the ride plan. Its 19 lines are recorded with the same voice (walk-script.json →
+make-narration.py) and their word timings measured by the new **tools/forms/TK-1/make-marks.py** (the voice's own phoneme
+lengths; it reproduces the earlier lines' timings exactly), so `nbh-tk1-narration.js` is now about 2.1 MB. Save as video makes
+the bus ride's MP4 the same way. Load simulator on a bus book loads a sample ride (25 minutes, three rules, five landmarks).
+
+A classroom book is unchanged: its count, pages, walkthrough and saved file are as before (the bus settings have their own
+defaults, so a book never takes them from the one shown before). Checked by the new `qa/tk1-bus-test.js` (the schedule
+arithmetic, the landmark steps, both boards, the ride plan on Letter and on the iPad's sheet, the addresses kept off the pages,
+the CSV and the network, Open in Maps, a saved file and a forged one, the walkthrough's scenes and frames), with
+`qa/tk1-test.js`, `qa/tk1-walk-test.js`, `qa/link-tk1-test.js` (which now leaves the bus fields out of its comparison with the
+TK-1 from before the link) and `qa/tk1-audit.js`. The form's build line reads v21.49.
