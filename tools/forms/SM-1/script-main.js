@@ -275,7 +275,7 @@ function sheetHead(extra){const m=S.meta,p=possible();
   const goal=m.goal_txt||(p.need!=null?'If I earn '+p.need+' of '+p.poss+' '+p.unit+', I earn my reward.':'');
   return '<div class="sm-head"><div><div class="sm-line">Name: <span class="bl">'+esc(m.client||'')+'</span> &nbsp; Date: <span class="bl" style="min-width:110px">'+esc(m.sh_date||'')+'</span></div>'+
     '<div class="sm-title">'+esc(sheetTitle())+'</div>'+(goal?'<div class="sm-line">'+esc(goal)+'</div>':'')+
-    '<div class="sm-line">Reward I’m working for: <span class="bl">'+esc(m.sh_reward||'')+'</span></div></div>'+(extra||'')+'</div>';}
+    '<div class="sm-line">Reward I’m working for: <span class="bl">'+esc(m.sh_reward||'')+'</span></div></div>'+(extra||'')+(typeof smPhoto==='function'?smPhoto(S.chk.pocket?44:68,'classic'):'')+'</div>';}   /* v21.48 the photo, when the Design page shows it */
 function matchKey(){const k=mp();const f=(y)=>S.chk.pict&&!S.chk.pocket?face(y,'face'):(y?'Yes':'No');
   if(S.chk.pocket)return '<div class="sm-line" style="font-size:10px">Points: both Yes '+k.yy+' · both No '+k.nn+' · mismatch '+k.yn+(k.ny!==k.yn?' / '+k.ny:'')+'</div>';
   return '<table class="key"><tr><th>If student says</th><th>If teacher says</th><th>Points</th></tr><tr><td>'+f(true)+'</td><td>'+f(true)+'</td><td>'+k.yy+'</td></tr><tr><td>'+f(false)+'</td><td>'+f(false)+'</td><td>'+k.nn+'</td></tr><tr><td>'+f(true)+'</td><td>'+f(false)+'</td><td>'+k.yn+'</td></tr>'+(k.ny!==k.yn?'<tr><td>'+f(false)+'</td><td>'+f(true)+'</td><td>'+k.ny+'</td></tr>':'')+'</table>';}

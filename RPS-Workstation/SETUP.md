@@ -7439,3 +7439,14 @@ into the form by `tools/forms/DD-1/patch-walk.py` from `tools/forms/DD-1/` (walk
 make-narration.py). Checked by `qa/dd1-walk-test.js` (the tab, every scene for the simulation, the copy of the sheet as text,
 today's row, the camera at the graph and the analysis, scenes left out, five frames painted for the video against the stage,
 pausing on leaving, the one-file edition) and a video made in WebKit.
+
+## Form SM-1: The Student's Photo on Every Look (v21.48)
+
+Design › **Student's photo** (it was on the Bright look only): **Add a photo or picture** opens the picture chooser (take a
+photo with the iPad's camera, upload one, or use a library headshot); **On the sheet** chooses *Shown*, *A blank circle to glue a
+printed photo onto*, or *Not shown*. Where it goes: the header circle on Bright, in place of the theme's first picture on an
+interest theme, beside the title on Clean, on each discreet pocket card, at the right of the Classic sheet's heading (the pocket
+card's too). Bright shows a chosen picture by itself, as before; the other looks show it only when asked, so a sheet made before
+prints as it did. The photo (made small, about 256 pixels, when it is added) stays inside the form's saved file and on the device;
+it also shows on the Rate page and in the walkthrough. Checked by `qa/sm1-v2-test.js` (every look with each choice, Open data
+keeping the choice and dropping a forged one).
