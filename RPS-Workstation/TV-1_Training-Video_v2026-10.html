@@ -955,9 +955,10 @@ td input,td select{max-width:100%}
       <div><label>Panel or main colour</label><input type="color" data-m="c1" name="m.c1" value="#222f5a"></div>
       <div><label>Heading colour (the accent)</label><input type="color" data-m="c2" name="m.c2" value="#eed9ad"></div>
       <div><label>Band colour</label><input type="color" data-m="c3" name="m.c3" value="#c1d8d3"></div>
+      <div class="v2-only"><label>Ticker speed <span id="tkV"></span></label><input type="range" min="0" max="200" step="5" data-m="tkspd" name="m.tkspd" value="90" aria-label="Ticker speed, in pixels a second (0 holds it still)"></div>
       <div class="v2-only"><label>Chapter bar colour</label><input type="color" data-m="c4" name="m.c4" value="#8b91bb"></div>
       <div><label>Card background (the Cards look)</label><select data-m="cardbg" name="m.cardbg"><option value="light">White</option><option value="dark">Dark (the main colour)</option></select></div>
-      <div><label>The graphics window's background (what the Yolobox keys out)</label><select data-m="gbg" name="m.gbg"><option value="green">Green (chroma key)</option><option value="blue">Blue (chroma key)</option><option value="black">Black (luma key)</option><option value="none">None: a picture behind (for checking the layout)</option></select></div>
+      <div><label>The graphics window's background (what the Yolobox keys out)</label><select data-m="gbg" name="m.gbg"><option value="green">Green (chroma key)</option><option value="blue">Blue (chroma key)</option><option value="black">Black (luma key)</option><option value="white">White (no key: the cards on plain white)</option><option value="none">None: a picture behind (for checking the layout)</option></select></div>
       <div><label>Where the cards sit (the presenter is on the other side)</label><select data-m="side" name="m.side"><option value="left">Left half of the picture</option><option value="right">Right half of the picture</option></select></div>
       <div><label>Type</label><select data-m="font" name="m.font"><option value="lato">Lato (as the Flowics template; built in)</option><option value="sans">Inter / Helvetica</option><option value="serif">Georgia (serif)</option></select></div>
     </div>
@@ -2983,7 +2984,7 @@ const nw=n=>WORDS[n]||String(n);
 const LOOKC={chapters:{c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb'},panel:{c1:'#0f1b41',c2:'#cbb98a',c3:'#a9cdc7',c4:'#8b91bb'},cards:{c1:'#1d3b5a',c2:'#e8a33d',c3:'#a9cdc7',c4:'#8b91bb'}};
 const LAYS=[['auto','Automatic'],['side','A card beside the presenter'],['lower','Lower third'],['full','Full-screen card'],['title','Section title'],['pic1','One picture'],['pic2','Two pictures'],['split','Text beside a picture'],['none','No card (the presenter alone)']];
 function newRow(seg,o){return Object.assign({seg:seg||'',say:'',tp:'',cont:false,title:'',body:'',lay:'auto',ch:'',pics:[{ph:'',cap:''},{ph:'',cap:''}],x:Array(20).fill('')},o||{});}
-function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140'},chk:{mirror:false},rows:[],photos:[],log:[],segs:{}};}
+function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',tkspd:'90',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140'},chk:{mirror:false},rows:[],photos:[],log:[],segs:{}};}
 let S=blank();
 function ensure(){if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
   if(!Array.isArray(S.rows))S.rows=[];if(!Array.isArray(S.photos))S.photos=[];if(!Array.isArray(S.log))S.log=[];if(!S.segs||typeof S.segs!=='object')S.segs={};
@@ -3214,7 +3215,7 @@ function panelHtml(r,opt){const v2=S.meta.look==='chapters',side=S.meta.side==='
   /* the Chapters look: the chapter bar along the panel's foot, the chapter of this card lit */
   if(v2){const C=chList(),cur=chOf(r);if(C.list.length>1)inner+='<div class="pn-bar">'+C.list.map((c,j)=>'<div class="gx-fitw'+(j===cur?' on':'')+'" data-fs="22" data-min="10">'+esc(c)+'</div>').join('')+'</div>';}
   const ser=String(S.meta.series||'').trim(),tg=v2?String(S.meta.tag||'').trim():tagText();let band='';
-  if(ser&&v2){const d=Math.max(20,Math.round(ser.length*.62));band='<div class="pn-tick"><div class="tk-in" data-dur="'+d+'" style="animation-duration:'+d+'s">'+Array(6).fill('<span>'+esc(ser)+'</span>').join('')+'</div></div>';}
+  if(ser&&v2){band='<div class="pn-tick"><div class="tk-in" data-spd="'+tkSpd()+'">'+Array(6).fill('<span>'+esc(ser)+'</span>').join('')+'</div></div>';}
   else if(ser)band='<div class="pn-band gx-fitw" data-fs="30" data-min="14"><span>'+esc(ser)+'</span></div>';
   return '<div class="'+cls+'" data-k="'+k+'" style="'+vars()+'">'+ph+'<div class="pn">'+inner+'</div>'+band+
     (logoSrc()?'<div class="pn-logo"></div>':'')+(tg?'<div class="pn-tag gx-fitw" data-fs="27" data-min="14"><span>'+esc(tg)+'</span></div>':'')+'</div>';}
@@ -3242,14 +3243,16 @@ function stageHtml(r,w,opt){const k=w/1920;return '<div class="gx-box" style="wi
 
 /* ---------------- the graphics window: the cards on their own, for a second display and the Yolobox ---------------- */
 let GW=null,gwAt=-1;
-const GBG={green:'#00b140',blue:'#0047bb',black:'#000000',none:'#3d4a55'};
+const GBG={green:'#00b140',blue:'#0047bb',black:'#000000',white:'#ffffff',none:'#3d4a55'};
+/* the ticker's speed, in pixels a second of the 1920 stage (0: still) */
+const tkSpd=()=>{const n=num(S.meta.tkspd);return n==null?90:Math.max(0,Math.min(200,n));};
 function gwOpen(){if(GW&&!GW.closed){try{GW.focus();}catch(e){}gwShow(curRow());return;}
   GW=window.open('','tv1-graphics','popup,width=960,height=540');if(!GW){nbhUI.toast('The browser did not open the window: allow pop-ups for this site, then try again.',{kind:'warn'});return;}
   const fit=fitGx.toString();
   GW.document.open();GW.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TV-1 graphics</title><style>html,body{margin:0;height:100%;overflow:hidden;background:'+(GBG[S.meta.gbg]||'#00b140')+';cursor:none}'+
     '#st{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}.ly{position:absolute;inset:0;transition:opacity .35s ease}'+GFX_ALL+'<\/style><style id="lc"><\/style><\/head><body><div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><script>'+fit+
     ';var A=document.getElementById("la"),B=document.getElementById("lb");function size(){var w=innerWidth,h=innerHeight,k=Math.min(w/1920,h/1080),st=document.getElementById("st");st.style.transform="translate("+((w-1920*k)/2)+"px,"+((h-1080*k)/2)+"px) scale("+k+")";}'+
-    'addEventListener("resize",size);size();var T=0,LC=document.getElementById("lc");function tick(L){var t=L.querySelectorAll(".tk-in");for(var i=0;i<t.length;i++){var d=+t[i].getAttribute("data-dur")||30;t[i].style.animationDelay=(-((performance.now()/1000)%d))+"s";}}'+
+    'addEventListener("resize",size);size();var T=0,LC=document.getElementById("lc");function tick(L){var t=L.querySelectorAll(".tk-in");for(var i=0;i<t.length;i++){var sp=+t[i].getAttribute("data-spd");if(!sp){t[i].style.animationName="none";continue;}var d=Math.max(1,t[i].scrollWidth/2/sp);t[i].style.animationDuration=d+"s";t[i].style.animationDelay=(-((performance.now()/1000)%d))+"s";}}'+
     /* the same layout as the card shown: its words fade out (a quarter second), the panel stays, the new words fade in; another layout crossfades */
     'window.show=function(h,bg,lc){document.body.style.background=bg;if(lc!=null&&LC.textContent!==lc)LC.textContent=lc;clearTimeout(T);var m=/data-k="([^"]+)"/.exec(h),c=A.firstChild&&A.firstChild.getAttribute?A.firstChild.getAttribute("data-k"):null;'+
     'if(m&&c&&m[1]===c&&A.style.opacity!=="0"){var o=A.querySelectorAll(".gx-tx");for(var i=0;i<o.length;i++){o[i].style.transition="opacity .25s ease";o[i].style.opacity="0";}'+
@@ -3259,7 +3262,7 @@ function gwOpen(){if(GW&&!GW.closed){try{GW.focus();}catch(e){}gwShow(curRow());
     'try{if(!document.fonts.check("900 40px \'TV Lato\'"))document.fonts.load("900 40px \'TV Lato\'").then(function(){fitGx(A);});}catch(e){}};'+
     'document.addEventListener("dblclick",function(){var e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);});<\/script><\/body><\/html>');GW.document.close();
   gwAt=-1;setTimeout(()=>gwShow(curRow()),80);}
-function gwShow(i){if(!GW||GW.closed||!GW.show)return;const r=S.rows[i];gwAt=i;try{GW.show(cardHtml(r,{presenter:S.meta.gbg==='none',flat:S.meta.gbg!=='none',live:true}),GBG[S.meta.gbg]||'#00b140',logoCss());}catch(e){}}
+function gwShow(i){if(!GW||GW.closed||!GW.show)return;const r=S.rows[i];gwAt=i;try{GW.show(cardHtml(r,{presenter:S.meta.gbg==='none',flat:/^(green|blue|black)$/.test(S.meta.gbg),live:true}),GBG[S.meta.gbg]||'#00b140',logoCss());}catch(e){}}
 
 /* ---------------- views ---------------- */
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});
@@ -3351,7 +3354,7 @@ $('#logCsv').addEventListener('click',()=>{if(!S.log.length){nbhUI.toast('No car
 /* ---------------- editing ---------------- */
 let tSoon=0;function soon(){clearTimeout(tSoon);tSoon=setTimeout(()=>{renderSums();syncState();},250);}
 document.addEventListener('input',e=>{const el=e.target;if(el.id==='tvState'){restoreState(el.value);return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chapters'){chLine();renderRows();}if(/^(c1|c2|c3|c4|cardbg|side|font|look|series|tag|first|client|chapters)$/.test(el.dataset.m)){clearTimeout(window.__tvLk);window.__tvLk=setTimeout(()=>{renderThumbs();gwShow(gwAt<0?curRow():gwAt);},250);}if(/^tp/.test(el.dataset.m))tpStyle();if(el.dataset.m==='tpwpm')renderSums();soon();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chapters'){chLine();renderRows();}if(el.dataset.m==='tkspd')tkLine();if(/^(c1|c2|c3|c4|cardbg|side|font|look|series|tag|first|client|chapters|tkspd)$/.test(el.dataset.m)){clearTimeout(window.__tvLk);window.__tvLk=setTimeout(()=>{renderThumbs();gwShow(gwAt<0?curRow():gwAt);},250);}if(/^tp/.test(el.dataset.m))tpStyle();if(el.dataset.m==='tpwpm')renderSums();soon();return;}
   if(el.dataset.segname!==undefined){const i0=+el.dataset.segname,old=S.rows[i0].seg;for(let i=i0;i<S.rows.length&&S.rows[i].seg===old;i++)S.rows[i].seg=el.value;clearTimeout(window.__tvSg);window.__tvSg=setTimeout(()=>renderThumbs(),300);soon();return;}
   if(el.dataset.i!==undefined&&el.dataset.f){const i=+el.dataset.i,f=el.dataset.f,r=S.rows[i];if(!r)return;
     if(f==='cont'){r.cont=el.checked;if(r.cont)r.say='';renderRows();syncState();return;}
@@ -3371,7 +3374,8 @@ $('#addSeg').addEventListener('click',()=>{S.rows.push(newRow('New segment',{tit
 $('#addRow').addEventListener('click',()=>{const L=S.rows[S.rows.length-1];S.rows.push(newRow(L?L.seg:'Training Overview'));renderRows();syncState();});
 $('#emptyAll').addEventListener('click',async()=>{if(!S.rows.length)return;if(await nbhUI.confirm('Empty the script?\nEvery row, card and picture is removed.',{ok:'Empty',danger:true})){S.rows=[];S.photos=[];renderAll();}});
 function setLook(v){const o=LOOKC[S.meta.look]||{},n=LOOKC[v]||{};['c1','c2','c3','c4'].forEach(k=>{if(!S.meta[k]||String(S.meta[k]).toLowerCase()===o[k])S.meta[k]=n[k];});S.meta.look=v;bindMeta();chLine();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();}
-function chLine(){document.body.classList.toggle('tv-v2',S.meta.look==='chapters');const C=chList(),l=$('#chLine');if(l)l.textContent=S.meta.look!=='chapters'?'':C.own?C.list.length+' chapters on the bar; each card is in the chapter set on its row or on the nearest row above.':'No chapters typed: the segments are the chapters ('+C.list.length+').';}
+function tkLine(){const v=$('#tkV');if(v)v.textContent=tkSpd()?'('+tkSpd()+' px a second)':'(still)';}
+function chLine(){tkLine();document.body.classList.toggle('tv-v2',S.meta.look==='chapters');const C=chList(),l=$('#chLine');if(l)l.textContent=S.meta.look!=='chapters'?'':C.own?C.list.length+' chapters on the bar; each card is in the chapter set on its row or on the nearest row above.':'No chapters typed: the segments are the chapters ('+C.list.length+').';}
 /* the logo beside the tag: the form's letterhead logo, or one chosen here (kept with the pictures, as 'logo') */
 $('#logoBtn').addEventListener('click',()=>{PICK={logo:true};$('#photoIn').click();});
 $('#logoReset').addEventListener('click',()=>{S.photos=S.photos.filter(p=>p.id!=='logo');paintLogo();logoLine();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();});

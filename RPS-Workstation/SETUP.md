@@ -7592,3 +7592,11 @@ Checked by the new `qa/tv1-test.js` (the draft from a case, the simulator, the t
 window and its background, the workbook out and back in, a CSV in the sheet's layout, Save and Open, a forged file, every
 layout inside the stage, print, no request off the folder) and in WebKit; the counts of 45 forms in `tools/build-single.py`,
 `tools/pwa-sw.py` (61 files offline), `tools/build-rps.py` and the tests.
+
+### v21.50b: the ticker's speed, and a plain white background
+
+Setup › **Ticker speed** (the Chapters look) sets how fast the series runs along the band under the panel, from 0 (held
+still) to 200 pixels a second of the 1920-wide picture; 90 is the default. It changes the open graphics window at once, and
+the time a pass takes is measured from the text itself, so a longer series runs at the same speed as a short one. Setup ›
+**The graphics window's background** gains **White**: the cards on plain white, with no key (the shadows stay, as nothing is
+keyed out), for recording the window itself or matching a white background. Checked by `qa/tv1-test.js`.

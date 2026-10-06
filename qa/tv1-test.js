@@ -90,6 +90,14 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('5 the next card on the teleprompter changes the window',(await shown())===at[1],[await shown(),at]);
   await page.evaluate(()=>{setView('setup');const s=document.querySelector('[data-m="gbg"]');s.value='black';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(600);
   ok('5 a black background (luma key) reaches the open window',(await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor))==='rgb(0, 0, 0)');
+  /* v21.50b plain white (no key), and the ticker's speed */
+  const setM=async(k,v,ev)=>{await page.evaluate(([k,v,ev])=>{const s=document.querySelector('[data-m="'+k+'"]');s.value=v;s.dispatchEvent(new Event(ev,{bubbles:true}));},[k,v,ev]);await sleep(700);};
+  await setM('gbg','white','change');
+  ok('5 White: the window is plain white, and the panel keeps no key-safe flattening it does not need',await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(255, 255, 255)'&&!document.querySelector('.ly[style*="opacity: 1"] .gx.flat')));
+  const tk=()=>pop.evaluate(()=>{const t=[...document.querySelectorAll('.ly')].find(l=>l.style.opacity==='1').querySelector('.tk-in');const st=getComputedStyle(t);return {d:parseFloat(st.animationDuration),n:st.animationName,w:t.scrollWidth};});
+  await setM('tkspd','90','input');const k90=await tk();await setM('tkspd','45','input');const k45=await tk();await setM('tkspd','0','input');const k0=await tk();
+  const tl=await page.evaluate(()=>document.getElementById('tkV').textContent);await setM('tkspd','90','input');
+  ok('5 the ticker speed: half the speed takes twice as long; 0 holds it still; Setup says the speed',Math.abs(k45.d/k90.d-2)<0.05&&Math.abs(k90.d-k90.w/2/90)<0.5&&k0.n==='none'&&tl==='(still)',{k90,k45,k0,tl});
   await pop.setViewportSize({width:1280,height:720});await sleep(300);await pop.screenshot({path:path.join(OUT,'window.png')});await pop.close();
   /* 6 */
   await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'].concat(Array(17).fill(''));syncState();});
