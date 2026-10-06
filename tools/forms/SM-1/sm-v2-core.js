@@ -93,6 +93,13 @@ function smName(){const m=S.meta,d=smD();const full=String(m.client||'').trim(),
   const ini=s=>String(s||'').replace(/\(.*?\)/g,'').split(/[\s–-]+/).filter(w=>/^[A-Za-z]/.test(w)).map(w=>w[0].toUpperCase()+'.').join('');
   const mode=d.nm||(['clean','discreet'].includes(smLook())?'ini':'nick');
   if(mode==='full')return full;if(mode==='ini')return ini(full)||ini(nick);return nick||full;}
+/* v21.48 the student's photo on the sheet (Design: Student's photo). phs: '' the look's own way (Bright shows the picture chosen,
+   the other looks none), 'show', 'blank' (an empty circle to glue a printed photo onto) or 'off' */
+function smPhotoMode(look){const v=smD().phs;look=look||smLook();if(v==='off')return '';if(v==='blank')return 'blank';
+  if(v==='show'||(!v&&look==='bright'))return smAvatar(10)?'show':'';return '';}
+function smPhoto(sz,look){const m=smPhotoMode(look);if(!m)return '';
+  if(m==='blank')return '<div class="v2-ph v2-ph-blank" style="width:'+sz+'px;height:'+sz+'px"><span>photo</span></div>';
+  return '<div class="v2-ph" style="width:'+sz+'px;height:'+sz+'px">'+smAvatar(sz-6)+'</div>';}
 function smPoss(n){return n===1?'':'s';}
 function smAvatar(sz){const d=smD();if(d.avimg)return '<img class="av-img" src="'+d.avimg+'" alt="" style="width:'+sz+'px;height:'+sz+'px">';
   if(d.av&&window.NBH_PICTOS&&NBH_PICTOS[d.av])return '<span class="av-pic" style="width:'+sz+'px;height:'+sz+'px">'+picto(d.av,'')+'</span>';return '';}
@@ -155,8 +162,8 @@ function smLookSheet(m,look){const d=smD(),th=SM_THEMES[smTheme()],acc=smAccent(
   const title=smTitle(look),dt=S.meta.sh_date?esc(S.meta.sh_date):'________';
   let h='<div class="v2 look-'+look+(look==='theme'?' theme-'+smTheme()+(th.col?' theme-col':''):'')+'" style="--acc:'+acc+';--acc2:'+(look==='theme'?th.a:'#f7c948')+'">';
   /* header */
-  if(look==='clean')h+='<div class="v2-head"><div><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">'+esc(name)+(S.meta.grade?' · Grade '+esc(S.meta.grade):'')+' · Date '+dt+'</div></div><div class="v2-meta">'+(m.p.need!=null?'Goal <b>'+(m.p.g!=null?pct(m.p.g):'')+'</b> ('+m.p.need+' of '+m.p.poss+')':'')+(d.wf!==false&&d.wf!=='0'?'<br>Working for: <span class="bl" style="min-width:150px">'+esc(S.meta.sh_reward||'')+'</span>':'')+'</div></div><div class="v2-keyline">'+smKeyLine(m)+'</div>';
-  else{h+='<div class="v2-head">'+(look==='theme'?smArt(0,58):(smAvatar(70)?'<div class="v2-av">'+smAvatar(64)+'</div>':''))+'<div class="v2-ht"><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">Date '+dt+' &nbsp; '+(m.match?'Me + '+esc(m.tw.toLowerCase())+'. Same answer = points!':m.sys==='cico'?esc(m.tw)+' rates each period.':'I rate each period.')+'</div></div>'+(look==='theme'?smArt(1,50):'')+'<div class="v2-hr">'+smHeadRight(m,look)+'</div></div>';
+  if(look==='clean')h+='<div class="v2-head">'+(smPhoto(56,'clean')?'<div class="v2-hl">'+smPhoto(56,'clean'):'')+'<div><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">'+esc(name)+(S.meta.grade?' · Grade '+esc(S.meta.grade):'')+' · Date '+dt+'</div></div>'+(smPhoto(56,'clean')?'</div>':'')+'<div class="v2-meta">'+(m.p.need!=null?'Goal <b>'+(m.p.g!=null?pct(m.p.g):'')+'</b> ('+m.p.need+' of '+m.p.poss+')':'')+(d.wf!==false&&d.wf!=='0'?'<br>Working for: <span class="bl" style="min-width:150px">'+esc(S.meta.sh_reward||'')+'</span>':'')+'</div></div><div class="v2-keyline">'+smKeyLine(m)+'</div>';
+  else{const pm=smPhotoMode(look);h+='<div class="v2-head">'+(look==='theme'?(smPhoto(64,'theme')||smArt(0,58)):(pm==='show'?'<div class="v2-av">'+smAvatar(64)+'</div>':pm==='blank'?'<div class="v2-av v2-ph-blank"><span>photo</span></div>':''))+'<div class="v2-ht"><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">Date '+dt+' &nbsp; '+(m.match?'Me + '+esc(m.tw.toLowerCase())+'. Same answer = points!':m.sys==='cico'?esc(m.tw)+' rates each period.':'I rate each period.')+'</div></div>'+(look==='theme'?smArt(1,50):'')+'<div class="v2-hr">'+smHeadRight(m,look)+'</div></div>';
     const kl=smKeyLine(m);if(kl)h+='<div class="v2-keyline">'+kl+'</div>';}
   /* the table */
   const who=r=>r==='me'?'Me':esc(m.tw);
@@ -190,7 +197,7 @@ function smContractStrip(){const m=S.meta;return '<div class="v2-box v2-contract
 function smDiscreet(m){const d=smD(),n=[1,2,4,6].includes(+d.cards)?+d.cards:(S.chk.weekly?6:2);const name=smName();
   const days=S.chk.weekly||n>1?['Monday','Tuesday','Wednesday','Thursday','Friday']:['Today'];
   const short=t=>{const w=String(t.word||'').replace(/^I\s+/i,'');return w.charAt(0).toUpperCase()+w.slice(1);};
-  const card=day=>'<div class="dc"><div class="dch"><b>'+esc(day)+'</b><span>'+esc(name)+(m.p.need!=null?' · goal '+m.p.need+'/'+m.p.poss:'')+'</span></div><table><tr><th></th>'+m.rows.map((r,i)=>{const w=r.label.split(/[\s,/]+/)[0];return '<th title="'+esc(r.label)+'">'+(m.rows.length>8?i+1:esc(w.length>9?w.slice(0,8)+'.':w))+'</th>';}).join('')+'</tr>'+
+  const ph=smPhoto(30,'discreet');const card=day=>'<div class="dc"><div class="dch">'+(ph?'<span class="dch-l">'+ph+'<b>'+esc(day)+'</b></span>':'<b>'+esc(day)+'</b>')+'<span>'+esc(name)+(m.p.need!=null?' · goal '+m.p.need+'/'+m.p.poss:'')+'</span></div><table><tr><th></th>'+m.rows.map((r,i)=>{const w=r.label.split(/[\s,/]+/)[0];return '<th title="'+esc(r.label)+'">'+(m.rows.length>8?i+1:esc(w.length>9?w.slice(0,8)+'.':w))+'</th>';}).join('')+'</tr>'+
     m.tg.map(t=>m.raters.map(x=>'<tr><td class="gl">'+esc(short(t))+(m.raters.length>1?' <i>('+(x==='me'?'me':esc(m.tw.toLowerCase()))+')</i>':'')+'</td>'+m.rows.map(()=>'<td>'+smCell(m.sys,13)+'</td>').join('')+'</tr>').join('')).join('')+
     '<tr><td class="gl">'+esc(m.tw)+' initials</td>'+m.rows.map(()=>'<td class="in"></td>').join('')+'</tr></table><div class="dcf"><span>Total ____ / '+(m.p.poss||'')+'</span>'+(smStore().length?'<span>Spend ____</span>':'')+'<span>'+smKeyLine(m,true).replace(/<(?!svg|\/svg|path|circle|text|\/text|span|\/span)[^>]+>/g,'')+'</span></div></div>';
   const cards=[];for(let i=0;i<n;i++){if(i===5&&n===6){cards.push('<div class="dc wk"><div class="dch"><b>My week</b><span>'+esc(name)+'</span></div><div class="bars">'+['M','T','W','Th','F'].map(x=>'<div><i></i><span>'+x+'</span></div>').join('')+'</div><div class="dcf"><span>Days at goal ____ / 5</span>'+(S.meta.bc_rw?'<span>'+esc(S.meta.bc_rw)+'</span>':'')+'</div></div>');break;}cards.push(card(days[i%days.length]));}

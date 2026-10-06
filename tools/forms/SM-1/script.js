@@ -2577,7 +2577,7 @@ function sheetHead(extra){const m=S.meta,p=possible();
   const goal=m.goal_txt||(p.need!=null?'If I earn '+p.need+' of '+p.poss+' '+p.unit+', I earn my reward.':'');
   return '<div class="sm-head"><div><div class="sm-line">Name: <span class="bl">'+esc(m.client||'')+'</span> &nbsp; Date: <span class="bl" style="min-width:110px">'+esc(m.sh_date||'')+'</span></div>'+
     '<div class="sm-title">'+esc(sheetTitle())+'</div>'+(goal?'<div class="sm-line">'+esc(goal)+'</div>':'')+
-    '<div class="sm-line">Reward I’m working for: <span class="bl">'+esc(m.sh_reward||'')+'</span></div></div>'+(extra||'')+'</div>';}
+    '<div class="sm-line">Reward I’m working for: <span class="bl">'+esc(m.sh_reward||'')+'</span></div></div>'+(extra||'')+(typeof smPhoto==='function'?smPhoto(S.chk.pocket?44:68,'classic'):'')+'</div>';}   /* v21.48 the photo, when the Design page shows it */
 function matchKey(){const k=mp();const f=(y)=>S.chk.pict&&!S.chk.pocket?face(y,'face'):(y?'Yes':'No');
   if(S.chk.pocket)return '<div class="sm-line" style="font-size:10px">Points: both Yes '+k.yy+' · both No '+k.nn+' · mismatch '+k.yn+(k.ny!==k.yn?' / '+k.ny:'')+'</div>';
   return '<table class="key"><tr><th>If student says</th><th>If teacher says</th><th>Points</th></tr><tr><td>'+f(true)+'</td><td>'+f(true)+'</td><td>'+k.yy+'</td></tr><tr><td>'+f(false)+'</td><td>'+f(false)+'</td><td>'+k.nn+'</td></tr><tr><td>'+f(true)+'</td><td>'+f(false)+'</td><td>'+k.yn+'</td></tr>'+(k.ny!==k.yn?'<tr><td>'+f(false)+'</td><td>'+f(true)+'</td><td>'+k.ny+'</td></tr>':'')+'</table>';}
@@ -3015,6 +3015,13 @@ function smName(){const m=S.meta,d=smD();const full=String(m.client||'').trim(),
   const ini=s=>String(s||'').replace(/\(.*?\)/g,'').split(/[\s–-]+/).filter(w=>/^[A-Za-z]/.test(w)).map(w=>w[0].toUpperCase()+'.').join('');
   const mode=d.nm||(['clean','discreet'].includes(smLook())?'ini':'nick');
   if(mode==='full')return full;if(mode==='ini')return ini(full)||ini(nick);return nick||full;}
+/* v21.48 the student's photo on the sheet (Design: Student's photo). phs: '' the look's own way (Bright shows the picture chosen,
+   the other looks none), 'show', 'blank' (an empty circle to glue a printed photo onto) or 'off' */
+function smPhotoMode(look){const v=smD().phs;look=look||smLook();if(v==='off')return '';if(v==='blank')return 'blank';
+  if(v==='show'||(!v&&look==='bright'))return smAvatar(10)?'show':'';return '';}
+function smPhoto(sz,look){const m=smPhotoMode(look);if(!m)return '';
+  if(m==='blank')return '<div class="v2-ph v2-ph-blank" style="width:'+sz+'px;height:'+sz+'px"><span>photo</span></div>';
+  return '<div class="v2-ph" style="width:'+sz+'px;height:'+sz+'px">'+smAvatar(sz-6)+'</div>';}
 function smPoss(n){return n===1?'':'s';}
 function smAvatar(sz){const d=smD();if(d.avimg)return '<img class="av-img" src="'+d.avimg+'" alt="" style="width:'+sz+'px;height:'+sz+'px">';
   if(d.av&&window.NBH_PICTOS&&NBH_PICTOS[d.av])return '<span class="av-pic" style="width:'+sz+'px;height:'+sz+'px">'+picto(d.av,'')+'</span>';return '';}
@@ -3077,8 +3084,8 @@ function smLookSheet(m,look){const d=smD(),th=SM_THEMES[smTheme()],acc=smAccent(
   const title=smTitle(look),dt=S.meta.sh_date?esc(S.meta.sh_date):'________';
   let h='<div class="v2 look-'+look+(look==='theme'?' theme-'+smTheme()+(th.col?' theme-col':''):'')+'" style="--acc:'+acc+';--acc2:'+(look==='theme'?th.a:'#f7c948')+'">';
   /* header */
-  if(look==='clean')h+='<div class="v2-head"><div><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">'+esc(name)+(S.meta.grade?' · Grade '+esc(S.meta.grade):'')+' · Date '+dt+'</div></div><div class="v2-meta">'+(m.p.need!=null?'Goal <b>'+(m.p.g!=null?pct(m.p.g):'')+'</b> ('+m.p.need+' of '+m.p.poss+')':'')+(d.wf!==false&&d.wf!=='0'?'<br>Working for: <span class="bl" style="min-width:150px">'+esc(S.meta.sh_reward||'')+'</span>':'')+'</div></div><div class="v2-keyline">'+smKeyLine(m)+'</div>';
-  else{h+='<div class="v2-head">'+(look==='theme'?smArt(0,58):(smAvatar(70)?'<div class="v2-av">'+smAvatar(64)+'</div>':''))+'<div class="v2-ht"><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">Date '+dt+' &nbsp; '+(m.match?'Me + '+esc(m.tw.toLowerCase())+'. Same answer = points!':m.sys==='cico'?esc(m.tw)+' rates each period.':'I rate each period.')+'</div></div>'+(look==='theme'?smArt(1,50):'')+'<div class="v2-hr">'+smHeadRight(m,look)+'</div></div>';
+  if(look==='clean')h+='<div class="v2-head">'+(smPhoto(56,'clean')?'<div class="v2-hl">'+smPhoto(56,'clean'):'')+'<div><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">'+esc(name)+(S.meta.grade?' · Grade '+esc(S.meta.grade):'')+' · Date '+dt+'</div></div>'+(smPhoto(56,'clean')?'</div>':'')+'<div class="v2-meta">'+(m.p.need!=null?'Goal <b>'+(m.p.g!=null?pct(m.p.g):'')+'</b> ('+m.p.need+' of '+m.p.poss+')':'')+(d.wf!==false&&d.wf!=='0'?'<br>Working for: <span class="bl" style="min-width:150px">'+esc(S.meta.sh_reward||'')+'</span>':'')+'</div></div><div class="v2-keyline">'+smKeyLine(m)+'</div>';
+  else{const pm=smPhotoMode(look);h+='<div class="v2-head">'+(look==='theme'?(smPhoto(64,'theme')||smArt(0,58)):(pm==='show'?'<div class="v2-av">'+smAvatar(64)+'</div>':pm==='blank'?'<div class="v2-av v2-ph-blank"><span>photo</span></div>':''))+'<div class="v2-ht"><div class="v2-title">'+esc(title)+'</div><div class="v2-sub">Date '+dt+' &nbsp; '+(m.match?'Me + '+esc(m.tw.toLowerCase())+'. Same answer = points!':m.sys==='cico'?esc(m.tw)+' rates each period.':'I rate each period.')+'</div></div>'+(look==='theme'?smArt(1,50):'')+'<div class="v2-hr">'+smHeadRight(m,look)+'</div></div>';
     const kl=smKeyLine(m);if(kl)h+='<div class="v2-keyline">'+kl+'</div>';}
   /* the table */
   const who=r=>r==='me'?'Me':esc(m.tw);
@@ -3112,7 +3119,7 @@ function smContractStrip(){const m=S.meta;return '<div class="v2-box v2-contract
 function smDiscreet(m){const d=smD(),n=[1,2,4,6].includes(+d.cards)?+d.cards:(S.chk.weekly?6:2);const name=smName();
   const days=S.chk.weekly||n>1?['Monday','Tuesday','Wednesday','Thursday','Friday']:['Today'];
   const short=t=>{const w=String(t.word||'').replace(/^I\s+/i,'');return w.charAt(0).toUpperCase()+w.slice(1);};
-  const card=day=>'<div class="dc"><div class="dch"><b>'+esc(day)+'</b><span>'+esc(name)+(m.p.need!=null?' · goal '+m.p.need+'/'+m.p.poss:'')+'</span></div><table><tr><th></th>'+m.rows.map((r,i)=>{const w=r.label.split(/[\s,/]+/)[0];return '<th title="'+esc(r.label)+'">'+(m.rows.length>8?i+1:esc(w.length>9?w.slice(0,8)+'.':w))+'</th>';}).join('')+'</tr>'+
+  const ph=smPhoto(30,'discreet');const card=day=>'<div class="dc"><div class="dch">'+(ph?'<span class="dch-l">'+ph+'<b>'+esc(day)+'</b></span>':'<b>'+esc(day)+'</b>')+'<span>'+esc(name)+(m.p.need!=null?' · goal '+m.p.need+'/'+m.p.poss:'')+'</span></div><table><tr><th></th>'+m.rows.map((r,i)=>{const w=r.label.split(/[\s,/]+/)[0];return '<th title="'+esc(r.label)+'">'+(m.rows.length>8?i+1:esc(w.length>9?w.slice(0,8)+'.':w))+'</th>';}).join('')+'</tr>'+
     m.tg.map(t=>m.raters.map(x=>'<tr><td class="gl">'+esc(short(t))+(m.raters.length>1?' <i>('+(x==='me'?'me':esc(m.tw.toLowerCase()))+')</i>':'')+'</td>'+m.rows.map(()=>'<td>'+smCell(m.sys,13)+'</td>').join('')+'</tr>').join('')).join('')+
     '<tr><td class="gl">'+esc(m.tw)+' initials</td>'+m.rows.map(()=>'<td class="in"></td>').join('')+'</tr></table><div class="dcf"><span>Total ____ / '+(m.p.poss||'')+'</span>'+(smStore().length?'<span>Spend ____</span>':'')+'<span>'+smKeyLine(m,true).replace(/<(?!svg|\/svg|path|circle|text|\/text|span|\/span)[^>]+>/g,'')+'</span></div></div>';
   const cards=[];for(let i=0;i<n;i++){if(i===5&&n===6){cards.push('<div class="dc wk"><div class="dch"><b>My week</b><span>'+esc(name)+'</span></div><div class="bars">'+['M','T','W','Th','F'].map(x=>'<div><i></i><span>'+x+'</span></div>').join('')+'</div><div class="dcf"><span>Days at goal ____ / 5</span>'+(S.meta.bc_rw?'<span>'+esc(S.meta.bc_rw)+'</span>':'')+'</div></div>');break;}cards.push(card(days[i%days.length]));}
@@ -3125,13 +3132,14 @@ function smDiscreet(m){const d=smD(),n=[1,2,4,6].includes(+d.cards)?+d.cards:(S.
 /* ---------------- state: the v2 parts of a saved file ---------------- */
 function smEnsure(){if(!S.d||typeof S.d!=='object'||Array.isArray(S.d))S.d={};if(!Array.isArray(S.store))S.store=[];if(!Array.isArray(S.per2))S.per2=[];
   S.per2.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});}
-const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b',rshow:'b',rspeak:'b',rchime:'b',rcue:'s',pin:'s'};   /* v21.46 the r… keys and pin: rating on the iPad (sm-rate.js) */
+const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b',phs:'s',rshow:'b',rspeak:'b',rchime:'b',rcue:'s',pin:'s'};   /* v21.46 the r… keys and pin: rating on the iPad (sm-rate.js) */
 function smFromFile(s,o){const okImg=v=>typeof v==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<400000?v:'';
   const str=v=>v==null||typeof v==='object'?'':String(v);o.d={};
   const d=s.d&&typeof s.d==='object'&&!Array.isArray(s.d)?s.d:{};
   Object.keys(SM_D_KEYS).forEach(k=>{if(!(k in d))return;const t=SM_D_KEYS[k];o.d[k]=t==='b'?!!d[k]:t==='img'?okImg(d[k]):str(d[k]);});
   if(o.d.look&&!SM_LOOKS[o.d.look])delete o.d.look;if(o.d.theme&&!SM_THEMES[o.d.theme])delete o.d.theme;if(o.d.rate&&!SM_RATES[o.d.rate])delete o.d.rate;
   if(o.d.av&&!(window.NBH_PICTOS&&NBH_PICTOS[o.d.av]))o.d.av='';
+  if(o.d.phs&&!['show','blank','off'].includes(o.d.phs))delete o.d.phs;
   o.store=Array.isArray(s.store)?s.store.slice(0,16).map(x=>({n:str(x&&x.n),icon:window.NBH_PICTOS&&NBH_PICTOS[str(x&&x.icon)]?str(x.icon):'',img:okImg(x&&x.img),p:str(x&&x.p),tier:['s','m','b'].includes(x&&x.tier)?x.tier:''})):[];
   o.per2=Array.isArray(s.per2)?s.per2.slice(0,16).map(x=>({t:str(x&&x.t),label:str(x&&x.label),icon:window.NBH_PICTOS&&NBH_PICTOS[str(x&&x.icon)]?str(x.icon):'',img:okImg(x&&x.img)})):[];
   return o;}
@@ -3156,7 +3164,10 @@ function smRenderDesign(){const el=$('#smDesign');if(!el)return;const d=smD(),lo
   if(look!=='classic')h+='<div class="sm2-row"><label>Colour <input type="color" data-d="accent" value="'+esc(/^#[0-9a-f]{6}$/i.test(d.accent||'')?d.accent:smAccent())+'"></label><button type="button" class="tool" id="smAccReset">Back to the look&rsquo;s colour</button>'+
     '<label>Name on the sheet <select data-d="nm"><option value="">'+(['clean','discreet'].includes(look)?'Initials (this look&rsquo;s default)':'First name (this look&rsquo;s default)')+'</option><option value="nick"'+(d.nm==='nick'?' selected':'')+'>First name</option><option value="ini"'+(d.nm==='ini'?' selected':'')+'>Initials only</option><option value="full"'+(d.nm==='full'?' selected':'')+'>Full name</option></select></label>'+
     '<label>The adult who rates is called <input data-d="tw" value="'+esc(d.tw||'')+'" placeholder="Teacher" style="width:120px"></label></div>';
-  if(look==='bright')h+='<div class="sm2-row sm2-av"><span class="avp" id="smAvP">'+(smAvatar(52)||'<span class="hint">none</span>')+'</span><button type="button" class="tool" id="smAvBtn">Choose the student&rsquo;s picture</button>'+(d.av||d.avimg?'<button type="button" class="tool" id="smAvNone">No picture</button>':'')+'<span class="hint">a library picture (the boy or girl headshot) or a photo; a photo stays inside the saved file</span></div>';
+  /* v21.48 the student's photo, on every look */
+  h+='<div class="sm2-row sm2-av"><b>Student&rsquo;s photo</b><span class="avp" id="smAvP">'+(smAvatar(52)||'<span class="hint">none chosen</span>')+'</span><button type="button" class="tool" id="smAvBtn">'+(d.av||d.avimg?'Change the photo':'Add a photo or picture')+'</button>'+(d.av||d.avimg?'<button type="button" class="tool" id="smAvNone">Remove it</button>':'')+
+    '<label>On the sheet <select data-d="phs"><option value="">'+(look==='bright'?'Shown (this look&rsquo;s way)':'Not shown (this look&rsquo;s way)')+'</option><option value="show"'+(d.phs==='show'?' selected':'')+'>Shown</option><option value="blank"'+(d.phs==='blank'?' selected':'')+'>A blank circle to glue a printed photo onto</option><option value="off"'+(d.phs==='off'?' selected':'')+'>Not shown</option></select></label>'+
+    '<span class="hint">Take one with the iPad&rsquo;s camera, upload one, or use a library picture (the boy or girl headshot). The photo stays inside this form&rsquo;s saved file and on this device; it is shown on the Rate page too.</span></div>';
   if(look==='discreet')h+='<div class="sm2-row"><label>Cards on a page <select data-d="cards">'+[['','2 (or 6 for a weekly sheet)'],['1','1'],['2','2'],['4','4'],['6','6: Monday to Friday and the week’s graph']].map(([v,l])=>'<option value="'+v+'"'+(String(d.cards||'')===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label></div>';
   if(look!=='classic')h+='<div class="sm2-row"><label class="ck"><input type="checkbox" data-d="wf"'+(d.wf===false?'':' checked')+'> &ldquo;I&rsquo;m working for&rdquo; box (the reward chosen before the day starts)</label>'+
     '<label class="ck"><input type="checkbox" data-d="cstrip"'+(d.cstrip?' checked':'')+'> The contract&rsquo;s line on the sheet (from the Contract page)</label></div>'+

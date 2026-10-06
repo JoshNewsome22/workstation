@@ -4,13 +4,14 @@
 /* ---------------- state: the v2 parts of a saved file ---------------- */
 function smEnsure(){if(!S.d||typeof S.d!=='object'||Array.isArray(S.d))S.d={};if(!Array.isArray(S.store))S.store=[];if(!Array.isArray(S.per2))S.per2=[];
   S.per2.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});}
-const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b',rshow:'b',rspeak:'b',rchime:'b',rcue:'s',pin:'s'};   /* v21.46 the r… keys and pin: rating on the iPad (sm-rate.js) */
+const SM_D_KEYS={look:'s',theme:'s',accent:'s',rate:'s',rv:'s',rpics:'s',rwords:'s',mbonus:'s',tw:'s',nm:'s',av:'s',avimg:'img',wf:'b',mid:'s',qr:'s',qrlab:'s',cstrip:'b',cards:'s',bank:'b',tiers:'b',alt:'b',nofit:'b',bcpic:'b',phs:'s',rshow:'b',rspeak:'b',rchime:'b',rcue:'s',pin:'s'};   /* v21.46 the r… keys and pin: rating on the iPad (sm-rate.js) */
 function smFromFile(s,o){const okImg=v=>typeof v==='string'&&/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<400000?v:'';
   const str=v=>v==null||typeof v==='object'?'':String(v);o.d={};
   const d=s.d&&typeof s.d==='object'&&!Array.isArray(s.d)?s.d:{};
   Object.keys(SM_D_KEYS).forEach(k=>{if(!(k in d))return;const t=SM_D_KEYS[k];o.d[k]=t==='b'?!!d[k]:t==='img'?okImg(d[k]):str(d[k]);});
   if(o.d.look&&!SM_LOOKS[o.d.look])delete o.d.look;if(o.d.theme&&!SM_THEMES[o.d.theme])delete o.d.theme;if(o.d.rate&&!SM_RATES[o.d.rate])delete o.d.rate;
   if(o.d.av&&!(window.NBH_PICTOS&&NBH_PICTOS[o.d.av]))o.d.av='';
+  if(o.d.phs&&!['show','blank','off'].includes(o.d.phs))delete o.d.phs;
   o.store=Array.isArray(s.store)?s.store.slice(0,16).map(x=>({n:str(x&&x.n),icon:window.NBH_PICTOS&&NBH_PICTOS[str(x&&x.icon)]?str(x.icon):'',img:okImg(x&&x.img),p:str(x&&x.p),tier:['s','m','b'].includes(x&&x.tier)?x.tier:''})):[];
   o.per2=Array.isArray(s.per2)?s.per2.slice(0,16).map(x=>({t:str(x&&x.t),label:str(x&&x.label),icon:window.NBH_PICTOS&&NBH_PICTOS[str(x&&x.icon)]?str(x.icon):'',img:okImg(x&&x.img)})):[];
   return o;}
@@ -35,7 +36,10 @@ function smRenderDesign(){const el=$('#smDesign');if(!el)return;const d=smD(),lo
   if(look!=='classic')h+='<div class="sm2-row"><label>Colour <input type="color" data-d="accent" value="'+esc(/^#[0-9a-f]{6}$/i.test(d.accent||'')?d.accent:smAccent())+'"></label><button type="button" class="tool" id="smAccReset">Back to the look&rsquo;s colour</button>'+
     '<label>Name on the sheet <select data-d="nm"><option value="">'+(['clean','discreet'].includes(look)?'Initials (this look&rsquo;s default)':'First name (this look&rsquo;s default)')+'</option><option value="nick"'+(d.nm==='nick'?' selected':'')+'>First name</option><option value="ini"'+(d.nm==='ini'?' selected':'')+'>Initials only</option><option value="full"'+(d.nm==='full'?' selected':'')+'>Full name</option></select></label>'+
     '<label>The adult who rates is called <input data-d="tw" value="'+esc(d.tw||'')+'" placeholder="Teacher" style="width:120px"></label></div>';
-  if(look==='bright')h+='<div class="sm2-row sm2-av"><span class="avp" id="smAvP">'+(smAvatar(52)||'<span class="hint">none</span>')+'</span><button type="button" class="tool" id="smAvBtn">Choose the student&rsquo;s picture</button>'+(d.av||d.avimg?'<button type="button" class="tool" id="smAvNone">No picture</button>':'')+'<span class="hint">a library picture (the boy or girl headshot) or a photo; a photo stays inside the saved file</span></div>';
+  /* v21.48 the student's photo, on every look */
+  h+='<div class="sm2-row sm2-av"><b>Student&rsquo;s photo</b><span class="avp" id="smAvP">'+(smAvatar(52)||'<span class="hint">none chosen</span>')+'</span><button type="button" class="tool" id="smAvBtn">'+(d.av||d.avimg?'Change the photo':'Add a photo or picture')+'</button>'+(d.av||d.avimg?'<button type="button" class="tool" id="smAvNone">Remove it</button>':'')+
+    '<label>On the sheet <select data-d="phs"><option value="">'+(look==='bright'?'Shown (this look&rsquo;s way)':'Not shown (this look&rsquo;s way)')+'</option><option value="show"'+(d.phs==='show'?' selected':'')+'>Shown</option><option value="blank"'+(d.phs==='blank'?' selected':'')+'>A blank circle to glue a printed photo onto</option><option value="off"'+(d.phs==='off'?' selected':'')+'>Not shown</option></select></label>'+
+    '<span class="hint">Take one with the iPad&rsquo;s camera, upload one, or use a library picture (the boy or girl headshot). The photo stays inside this form&rsquo;s saved file and on this device; it is shown on the Rate page too.</span></div>';
   if(look==='discreet')h+='<div class="sm2-row"><label>Cards on a page <select data-d="cards">'+[['','2 (or 6 for a weekly sheet)'],['1','1'],['2','2'],['4','4'],['6','6: Monday to Friday and the week’s graph']].map(([v,l])=>'<option value="'+v+'"'+(String(d.cards||'')===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label></div>';
   if(look!=='classic')h+='<div class="sm2-row"><label class="ck"><input type="checkbox" data-d="wf"'+(d.wf===false?'':' checked')+'> &ldquo;I&rsquo;m working for&rdquo; box (the reward chosen before the day starts)</label>'+
     '<label class="ck"><input type="checkbox" data-d="cstrip"'+(d.cstrip?' checked':'')+'> The contract&rsquo;s line on the sheet (from the Contract page)</label></div>'+
