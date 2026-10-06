@@ -173,16 +173,24 @@ const GFX_CSS=`.gx{position:absolute;left:0;top:0;width:1920px;height:1080px;ove
 .gx.pnl .pn-tag{position:absolute;left:380px;width:588px;top:994px;height:72px;box-sizing:border-box;padding:0 22px;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--tg0),var(--tg1));font-weight:900;font-size:27px;text-transform:uppercase;white-space:nowrap;overflow:hidden;letter-spacing:.01em}
 .gx.pnl.right .pn-tag{left:952px}
 .gx.pnl .gx-todo{background:rgba(203,185,138,.35)}
+/* the Chapters look's own proportions (the newer template): the panel 1131 wide and nearly the full height, larger type */
+.gx.pnl.v2 .pn{top:12px;width:1131px;height:895px}
+.gx.pnl.v2.full .pn{width:1888px}
+.gx.pnl.v2 .pn-t{left:62px;top:34px;height:136px;line-height:136px}
+.gx.pnl.v2 .pn-in{left:46px;right:44px;top:200px}
 .gx.pnl.v2 .pn-t,.gx.pnl.v2 .pn-h{color:var(--c2)}
 .gx.pnl.v2 .pn-h{text-shadow:0 3px 4px rgba(0,0,0,.6)}
-.gx.pnl.v2 .pn-rule{left:40px;width:780px;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.6) 55%,rgba(255,255,255,0))}
-.gx.pnl.v2 .pn-in{bottom:66px}
-.gx.pnl.v2 .pn-bar{position:absolute;left:8px;right:8px;bottom:8px;height:42px;display:flex;gap:7px}
+.gx.pnl.v2 .pn-l{font-size:1em;margin-left:.55em}
+.gx.pnl.v2 .pn-l .b{padding-left:.75em;text-indent:-.75em}
+.gx.pnl.v2 .pn-rule{top:176px;left:30px;width:900px;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.6) 55%,rgba(255,255,255,0))}
+.gx.pnl.v2 .pn-in{bottom:56px}
+.gx.pnl.v2 .pn-bar{position:absolute;left:4px;right:4px;bottom:4px;height:38px;display:flex;gap:9px}
 .gx.pnl.v2 .pn-bar>div{flex:1 1 0;min-width:0;background:var(--c4);color:#fff;font-family:'TV Merri',Georgia,serif;font-weight:900;font-size:22px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.35);opacity:.82}
 .gx.pnl.v2 .pn-bar>div.on{background:var(--c2);color:var(--c1);opacity:1;text-shadow:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
-.gx.pnl .pn-tick{position:absolute;left:20px;width:948px;top:925px;height:58px;background:var(--c3);overflow:hidden;display:flex;align-items:center}
-.gx.pnl.right .pn-tick{left:auto;right:20px}
-.gx.pnl .pn-tick .tk-in{display:flex;flex:none;white-space:nowrap;font-family:'TV Merri',Georgia,serif;font-weight:900;font-size:37px;color:#111;text-shadow:0 3px 3px rgba(0,0,0,.32)}
+.gx.pnl .pn-tick{position:absolute;left:16px;width:1131px;top:911px;height:63px;background:var(--c3);overflow:hidden;display:flex;align-items:center}
+.gx.pnl.right .pn-tick{left:auto;right:16px}
+.gx.pnl.v2 .pn-logo{top:984px;height:76px}
+.gx.pnl .pn-tick .tk-in{display:flex;flex:none;white-space:nowrap;font-family:'TV Merri',Georgia,serif;font-weight:900;font-size:43px;color:#111;text-shadow:0 3px 3px rgba(0,0,0,.32)}
 .gx.pnl .pn-tick .tk-in span{padding:0 .3em 0 .45em}.gx.pnl .pn-tick .tk-in span:after{content:"\\2022";padding-left:.75em;color:var(--c1)}
 @keyframes tvtick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .gx.live .pn-tick .tk-in{animation-name:tvtick;animation-timing-function:linear;animation-iteration-count:infinite}`;
@@ -235,7 +243,7 @@ function panelHtml(r,opt){const v2=S.meta.look==='chapters',side=S.meta.side==='
   else if(lay==='title')inner='<div class="pn-t gx-tx gx-fitw" data-fs="112" data-min="44">'+mark(r.seg||r.title||'')+'</div><div class="pn-rule"></div>'+(r.title&&r.title!==r.seg?'<div class="pn-h gx-tx gx-fitw" data-fs="50" data-min="24">'+mark(r.title)+'</div>':'');
   else{const tx='<div class="pn-tx">'+paraHtml(say)+(r.title?'<div class="pn-h">'+mark(r.title)+'</div>':'')+(String(r.body||'').trim()?'<div class="pn-l">'+listHtml(r.body)+'</div>':'')+'</div>';
     const pp=hp?'<div class="pn-pics">'+pics.slice(0,hp).map(p=>'<div class="pn-pic"><div class="im"><img src="'+photo(p.ph).img+'" alt=""></div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>').join('')+'</div>':'';
-    inner='<div class="pn-t gx-tx gx-fitw" data-fs="92" data-min="40">'+mark(r.seg||'')+'</div><div class="pn-rule"></div><div class="gx-in pn-in gx-tx gx-fit" data-fs="30" data-min="13" data-gap="'+(v2?'.8':'1.15')+'">'+tx+pp+'</div>';}
+    inner='<div class="pn-t gx-tx gx-fitw" data-fs="'+(v2?102:92)+'" data-min="40">'+mark(r.seg||'')+'</div><div class="pn-rule"></div><div class="gx-in pn-in gx-tx gx-fit" data-fs="'+(v2?33:30)+'" data-min="13" data-gap="'+(v2?'1':'1.15')+'">'+tx+pp+'</div>';}
   /* the Chapters look: the chapter bar along the panel's foot, the chapter of this card lit */
   if(v2){const C=chList(),cur=chOf(r);if(C.list.length>1)inner+='<div class="pn-bar">'+C.list.map((c,j)=>'<div class="gx-fitw'+(j===cur?' on':'')+'" data-fs="22" data-min="10">'+esc(c)+'</div>').join('')+'</div>';}
   const ser=String(S.meta.series||'').trim(),tg=v2?String(S.meta.tag||'').trim():tagText();let band='';
