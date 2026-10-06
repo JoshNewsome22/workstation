@@ -162,7 +162,7 @@ function renderSetup(){const m=S.meta,v=$('#setupVerdict');const bl=$('#buildLin
    Choices file): slate modules, rounded slate finder rings with a green core, SCAN ME in a clear square in the middle, level H
    so the words cost nothing. The core is a deeper green than the tab (#6aa55a): a pale core is read as white by decoders. */
 /* the build of this copy of the form, shown on Setup and on the Preview so it is easy to check that the uploaded file is the new one */
-const BUILD='v21.49b';
+const BUILD='v21.49c';
 const QR_SLATE='#698da9',QR_CORE='#6aa55a';
 function qrSvg(url,frame){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const ec=frame?'H':'M';const q=qrcode(0,ec);q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';

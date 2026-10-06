@@ -7507,3 +7507,17 @@ In the bus walkthrough: the ride plan is fitted (as the printed page is) before 
 highlight around the ride log is on the log (it was below it on an iPad); "on the bus" no longer covers the item's name; and
 with a set interval the tokens go back to the Tokens page after the exchange and the item card back in the Earn box, as the
 narration says ("the board then starts again"). The form's build line reads v21.49b.
+
+### v21.49c: the bus narration fits every book
+
+The narration is recorded once for every book, so a line cannot say a book's own rules. Three bus lines named examples
+("such as staying in the seat, a quiet voice, and hands to self"; "a store, a park, or a bridge"; "a sticker, a song, or a
+little time with a tablet") while the picture showed the book's own rules, landmarks and item, which did not match. They are
+recorded again without examples: "Across the top are your learner's own bus rules, each with a picture, so everyone can see
+what earns a token. Two to four rules work best."; the landmarks are "places your learner can see from the window, in the order
+the bus passes them"; and on the bus "something small and quick works best". As the rules line is said, the book's own rules
+light one by one, and the landmarks appear one by one along the route. The praise bubbles, which the narration says "name the
+rule", now name the book's own rules, a different one at each checkpoint ("Great working!", "Great job: accepting change!").
+A label in title case reads as ordinary words in the praise ("Daily Living": "Great job: daily living!"), in the classroom
+walkthrough too. `qa/tk1-bus-test.js` checks that the bus narration names no example rule, landmark or item, and that the praise
+names the book's rules. The form's build line reads v21.49c.
