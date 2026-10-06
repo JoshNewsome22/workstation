@@ -107,6 +107,13 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('the bus walkthrough: its scenes in order (spread, a missed rule, the item at the stop)',w0.ids==='b_intro,b_rules,b_item,b_route,b_spread,b_start,b_tok,b_none,b_more,b_last,b_arrive,b_land,b_fewer,b_plan,b_outro',w0);
   ok('about two and a half minutes, six chapters, the two routes drawn, no address on it',w0.d>130&&w0.d<190&&w0.ch==='The board|The route|The ride|The item|Fading|For the staff'&&w0.routes===2&&!w0.addr,w0);
   ok('every recorded line has its measured word timings',w0.um.length===0,w0.um);
+  /* (v21.49c) the narration is recorded, so it names no rule, landmark or item of its own: what is said fits any book; the praise
+     bubbles name this book's own rules (here rules like a classroom's, as a book can have) */
+  const nm=await page.evaluate(()=>{const keep=JSON.stringify(S);S.tg[0]=cello('','Working');S.tg[1]=cello('','Accepting change');S.tg[2]=cello('','Waiting');renderAll();TKWALK.build();
+    const said=TKWALK.cues.map(c=>c.text).join(' ').toLowerCase(),bub=[...document.querySelectorAll('#wkStage .wk-bub')].map(e=>e.textContent.toLowerCase());
+    S=JSON.parse(keep);ensure();renderAll();TKWALK.build();return{said,bub};});
+  ok('the bus narration names no example rule, landmark or item',!/staying in the seat|quiet voice|hands to self|a store|a park|a bridge|a sticker|a song|a tablet/.test(nm.said),nm.said.slice(0,200));
+  ok('the praise names the book’s own rules (working, accepting change, waiting)',nm.bub.some(b=>/working/.test(b))&&nm.bub.some(b=>/accepting change/.test(b))&&nm.bub.some(b=>/waiting/.test(b)),nm.bub);
   /* the bus rolls to each checkpoint as its token is earned */
   const w1=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='b_last');TKWALK.renderAt(c.start+c.dur-.3);const bd=[...document.querySelectorAll('#wkStage .wk-page[data-pg="bd"] .wk-in')].filter(e=>e.dataset.card&&/^tok/.test(e.dataset.card)&&getComputedStyle(e).opacity==='1').length;
     const on=[...document.querySelectorAll('#wkStage .wk-cpb.on')].filter(e=>+getComputedStyle(e).opacity>.9).length;return{bd,on};});
