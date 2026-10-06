@@ -7521,3 +7521,51 @@ rule", now name the book's own rules, a different one at each checkpoint ("Great
 A label in title case reads as ordinary words in the praise ("Daily Living": "Great job: daily living!"), in the classroom
 walkthrough too. `qa/tk1-bus-test.js` checks that the bus narration names no example rule, landmark or item, and that the praise
 names the book's rules. The form's build line reads v21.49c.
+
+## Form TV-1, the Training Video (v21.50)
+
+A new form, the 45th, under Implementation (the case map lists it in *Train and run it*): the training video made once an FBA and
+BIP are finished, for the receiving team, new staff or a family. It holds what was spread over a teleprompter script, a Google
+Sheet and Flowics: the words, the card on screen while they are said, the teleprompter and the cards themselves. Five views:
+
+- **Setup**: the student (from the packet), the first name as said in the training, who it is for, the presenter and the lines
+  under the name, and the look of the cards (main and accent colours, a white or dark card, the side the cards sit on, the type,
+  and the background of the graphics window: green or blue for a chroma key, black for a luma key). **Draft from the case**
+  writes a segment for each part ticked (Training Overview, Student Profile, Target Behaviors, Function & Data, Goals of
+  Intervention, Reinforcement System, Proactive Strategies, Response Plan, Key Takeaways, Terms & Definitions) from what the
+  case holds: each target behavior's definition, examples and non-examples (Form TB-1), the function and its hypothesis
+  statements (Form FS-1), the reduction and teaching goals (Form GB-1), the reinforcer menu, the most preferred first (Form
+  PA-1). The parts the case cannot know (strengths, communication, the proactive strategies, the response steps, the takeaways,
+  the terms) are drafted as prompts in [square brackets]. A draft adds to the end of the script; it changes nothing written. The
+  case reaching the form fills nothing until Draft is pressed.
+- **Script**: a row for each beat, in segments: what is said, the card's title and its text (one line a point; a line starting
+  with • or - is a bullet, 1. a numbered step), its layout (Automatic, a card beside the presenter, a lower third, a full-screen
+  card, a section title, one or two pictures, or no card), two pictures with captions, and a thumbnail of the card. **Same words
+  as above** marks a card that changes while the paragraph goes on. Rows move, copy and go; each row, each segment and the whole
+  script show their words and their time at the teleprompter's speed; words in brackets count as still to write.
+- **Teleprompter**: white on black with a reading line, the size and the speed (80 to 220 words a minute) set on its bar, mirror
+  for a beam-splitter glass, full screen, the screen kept awake. A Bluetooth page-turner or keyboard drives it: Page Down, → or
+  Enter the next card, Page Up or ← the one before, Space scrolls a long paragraph at the speed set. A paragraph's second card
+  keeps the paragraph where it is. **Start the clock** keeps the time each card came up (the last take); **Export the card
+  times** writes them as CSV, for putting the cards on the video afterwards.
+- **Graphics**: every card at 1920 by 1080, large and as a grid. **Open the graphics window** opens the cards in a window of their
+  own, on the key background, with a crossfade between cards; the teleprompter (or a tap in the grid) changes it. Double-tap it
+  for full screen, on a second display for the Yolobox (by HDMI from a computer, or an iPad's external display). Each text box
+  shrinks until its card holds it. The cards are drawn as text and shapes at the size of the display, so a 4K output (3840 by
+  2160) draws them at 4K; on a key background a card is opaque and has no shadow, which a key would take part of.
+- **Guide**.
+
+**Import a sheet** reads the first tab of a sheet made before (downloaded from Google Sheets as .xlsx or CSV): A the segment, B
+the words, C the card's title, D its text, E and F the picture captions, G to I the template's picture places (kept as they
+came); a row whose words repeat the row above becomes a card on the same paragraph. **Export for Sheets (.xlsx)** writes that
+layout back (the first tab every row, then a tab for each other segment, columns A to D, named 02_Student_Profile and so on),
+so the Flowics template keeps reading it; Export CSV writes the first tab alone. Pictures are not in a sheet: add them on their
+rows. **Print the script** prints the words beside the cards, by segment.
+
+Everything stays in the form and its saved file (the pictures too, at up to 3840 pixels on the long side, sharp on a 4K video); the form sends nothing. A sheet
+exported for Flowics puts the script in Google Sheets and Flowics: use the district's account and the services the district
+allows. A saved file from elsewhere is checked as it opens (text is text, a picture must be an image, a colour must be a colour).
+Checked by the new `qa/tv1-test.js` (the draft from a case, the simulator, the teleprompter's keys, clock and CSV, the graphics
+window and its background, the workbook out and back in, a CSV in the sheet's layout, Save and Open, a forged file, every
+layout inside the stage, print, no request off the folder) and in WebKit; the counts of 45 forms in `tools/build-single.py`,
+`tools/pwa-sw.py` (61 files offline), `tools/build-rps.py` and the tests.

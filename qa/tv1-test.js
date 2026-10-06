@@ -77,6 +77,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const at=await page.evaluate(()=>[S.rows[TP.i].title,S.rows[TP.i+1].title]);
   const ff=await pop.evaluate(()=>getComputedStyle(document.querySelector('.ly .gx')).fontFamily);
   ok('5 the window draws the cards in the type chosen (sans serif)',/^Inter, "Helvetica Neue"/.test(ff),ff);
+  const flat=await pop.evaluate(()=>{const c=document.querySelector('.ly .gx-card');const st=getComputedStyle(c);return {sh:st.boxShadow,bg:st.backgroundColor};});
+  ok('5 on the key background a card is opaque and has no shadow (nothing for the key to take part of)',flat.sh==='none'&&flat.bg==='rgb(255, 255, 255)',flat);
   ok('5 the graphics window opens on green (the key) with the card shown on the teleprompter',g0.bg==='rgb(0, 177, 64)'&&g0.t===at[0],[g0,at]);
   await page.bringToFront();await page.keyboard.press('PageDown');await sleep(700);
   const shown=async()=>pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');const t=l&&l.querySelector('.gx-title');return t?t.textContent:'';});

@@ -7551,7 +7551,8 @@ Sheet and Flowics: the words, the card on screen while they are said, the telepr
 - **Graphics**: every card at 1920 by 1080, large and as a grid. **Open the graphics window** opens the cards in a window of their
   own, on the key background, with a crossfade between cards; the teleprompter (or a tap in the grid) changes it. Double-tap it
   for full screen, on a second display for the Yolobox (by HDMI from a computer, or an iPad's external display). Each text box
-  shrinks until its card holds it.
+  shrinks until its card holds it. The cards are drawn as text and shapes at the size of the display, so a 4K output (3840 by
+  2160) draws them at 4K; on a key background a card is opaque and has no shadow, which a key would take part of.
 - **Guide**.
 
 **Import a sheet** reads the first tab of a sheet made before (downloaded from Google Sheets as .xlsx or CSV): A the segment, B
@@ -7561,7 +7562,7 @@ layout back (the first tab every row, then a tab for each other segment, columns
 so the Flowics template keeps reading it; Export CSV writes the first tab alone. Pictures are not in a sheet: add them on their
 rows. **Print the script** prints the words beside the cards, by segment.
 
-Everything stays in the form and its saved file (the pictures too, at up to 1600 pixels); the form sends nothing. A sheet
+Everything stays in the form and its saved file (the pictures too, at up to 3840 pixels on the long side, sharp on a 4K video); the form sends nothing. A sheet
 exported for Flowics puts the script in Google Sheets and Flowics: use the district's account and the services the district
 allows. A saved file from elsewhere is checked as it opens (text is text, a picture must be an image, a colour must be a colour).
 Checked by the new `qa/tv1-test.js` (the draft from a case, the simulator, the teleprompter's keys, clock and CSV, the graphics

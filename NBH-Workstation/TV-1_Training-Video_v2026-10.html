@@ -3075,11 +3075,13 @@ const GFX_CSS=`.gx{position:absolute;left:0;top:0;width:1920px;height:1080px;ove
 .gx.pic2 .gx-card{left:110px;right:110px;top:470px;bottom:60px}
 .gx.pic2 .gx-in{padding-top:22px}
 .gx.pic2 .gx-title{font-size:48px!important;margin-bottom:14px}.gx.pic2 .gx-title:after{display:none}
+.gx.flat .gx-card,.gx.flat .gx-band{box-shadow:none}
 .gx .gx-todo{background:rgba(232,163,61,.28);border-radius:6px;padding:0 .15em}
 .gx-ph{position:absolute;inset:0;background:linear-gradient(135deg,#5a6b78,#2c3a45)}
 .gx-ph:after{content:"";position:absolute;width:420px;height:560px;bottom:0;border-radius:210px 210px 0 0;background:rgba(255,255,255,.16)}
 .gx-ph.l:after{left:330px}.gx-ph.r:after{right:330px}`;
-/* the cards' own rules, in this page too (the graphics window writes them into its own) */
+/* the cards' own rules (a card is opaque, and on a key background it has no shadow: a see-through card or a shadow on the
+   green or black is keyed out in part, a tinted, muddy edge), in this page too (the graphics window writes them into its own) */
 (()=>{const st=document.createElement('style');st.id='tv-gfx';st.textContent=GFX_CSS;document.head.appendChild(st);})();
 /* a card's text: one line a point; "• " or "- " a bullet, "1. " a numbered step; words in [brackets] marked as still to write */
 function mark(s){return esc(s).replace(/\[([^\]]+)\]/g,'<span class="gx-todo">[$1]</span>');}
@@ -3092,9 +3094,9 @@ function layOf(r){if(r.lay!=='auto')return r.lay;const np=r.pics.filter(p=>p.ph)
   const L=String(r.body||'').split('\n').filter(s=>s.trim()).length;if(!r.title&&!L)return 'none';return L>7||String(r.body||'').length>420?'full':'side';}
 /* a colour is a #hex or the default: a value from a file goes into a style attribute */
 const hex=(v,d)=>/^#[0-9a-f]{3,8}$/i.test(String(v||''))?String(v):d;
-function vars(){const m=S.meta,dark=m.cardbg==='dark',c1=hex(m.c1,'#1d3b5a'),c2=hex(m.c2,'#e8a33d');return '--c1:'+c1+';--c2:'+c2+';--cb:'+(dark?c1:'rgba(255,255,255,.97)')+';--ct:'+(dark?'#fff':'#1d2730')+';--tc:'+(dark?'#fff':c1)+';--gf:'+(m.font==='serif'?"Georgia,'Times New Roman',serif":"Inter,'Helvetica Neue',Helvetica,Arial,sans-serif");}
+function vars(){const m=S.meta,dark=m.cardbg==='dark',c1=hex(m.c1,'#1d3b5a'),c2=hex(m.c2,'#e8a33d');return '--c1:'+c1+';--c2:'+c2+';--cb:'+(dark?c1:'#ffffff')+';--ct:'+(dark?'#fff':'#1d2730')+';--tc:'+(dark?'#fff':c1)+';--gf:'+(m.font==='serif'?"Georgia,'Times New Roman',serif":"Inter,'Helvetica Neue',Helvetica,Arial,sans-serif");}
 function cardHtml(r,opt){opt=opt||{};if(!r)return '<div class="gx" style="'+vars()+'"></div>';const lay=layOf(r),side=S.meta.side==='left'?'left':'right',dark=S.meta.cardbg==='dark';
-  const ph=opt.presenter?'<div class="gx-ph '+(side==='right'?'l':'r')+'"></div>':'';const seg=esc(r.seg||'');const cls='gx '+lay+' '+side+(dark?' dark':'');
+  const ph=opt.presenter?'<div class="gx-ph '+(side==='right'?'l':'r')+'"></div>':'';const seg=esc(r.seg||'');const cls='gx '+lay+' '+side+(dark?' dark':'')+(opt.flat?' flat':'');
   if(lay==='none')return '<div class="'+cls+'" style="'+vars()+'">'+ph+'</div>';
   if(lay==='title')return '<div class="'+cls+'" style="'+vars()+'">'+ph+'<div class="gx-band"><div class="gx-k">'+seg+'</div><div class="gx-title gx-fit" data-fs="96" data-min="44">'+mark(r.title||r.seg||'')+'</div></div></div>';
   const pics=r.pics.filter(p=>p.ph&&photo(p.ph));
@@ -3124,7 +3126,7 @@ function gwOpen(){if(GW&&!GW.closed){try{GW.focus();}catch(e){}gwShow(curRow());
     'addEventListener("resize",size);size();window.show=function(h,bg){document.body.style.background=bg;B.innerHTML=h;fitGx(B);B.style.opacity="1";A.style.opacity="0";var t=A;A=B;B=t;};'+
     'document.addEventListener("dblclick",function(){var e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);});<\/script><\/body><\/html>');GW.document.close();
   gwAt=-1;setTimeout(()=>gwShow(curRow()),80);}
-function gwShow(i){if(!GW||GW.closed||!GW.show)return;const r=S.rows[i];gwAt=i;try{GW.show(cardHtml(r,{presenter:S.meta.gbg==='none'}),GBG[S.meta.gbg]||'#00b140');}catch(e){}}
+function gwShow(i){if(!GW||GW.closed||!GW.show)return;const r=S.rows[i];gwAt=i;try{GW.show(cardHtml(r,{presenter:S.meta.gbg==='none',flat:S.meta.gbg!=='none'}),GBG[S.meta.gbg]||'#00b140');}catch(e){}}
 
 /* ---------------- views ---------------- */
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});
@@ -3234,11 +3236,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 $('#addSeg').addEventListener('click',()=>{S.rows.push(newRow('New segment',{title:'',say:''}));renderRows();syncState();const ins=$$('.tv-segname');if(ins.length){ins[ins.length-1].focus();ins[ins.length-1].select();}});
 $('#addRow').addEventListener('click',()=>{const L=S.rows[S.rows.length-1];S.rows.push(newRow(L?L.seg:'Training Overview'));renderRows();syncState();});
 $('#emptyAll').addEventListener('click',async()=>{if(!S.rows.length)return;if(await nbhUI.confirm('Empty the script?\nEvery row, card and picture is removed.',{ok:'Empty',danger:true})){S.rows=[];S.photos=[];renderAll();}});
-/* pictures: kept at up to 1600 px (the cards are 1080 high), as JPEG (PNG when they have transparency) */
+/* pictures: kept at up to 3840 px on the long side (sharp on a 4K video, 3840 x 2160), as JPEG (PNG when they have transparency) */
 let PICK=null;
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const at=PICK;PICK=null;const r=new FileReader();
-  r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,1600/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
-    const png=/png|gif|webp/i.test(f.type);const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push({id,label:String(f.name||'picture').replace(/\.[^.]+$/,'').slice(0,40),img:png?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.86)});
+  r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,3840/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
+    const png=/png|gif|webp/i.test(f.type);const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push({id,label:String(f.name||'picture').replace(/\.[^.]+$/,'').slice(0,40),img:png?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.9)});
     S.rows[at.i].pics[at.j].ph=id;if(!S.rows[at.i].pics[at.j].cap)S.rows[at.i].pics[at.j].cap='';renderRows();syncState();};im.src=r.result;};r.readAsDataURL(f);});
 function prune(){const used=new Set();S.rows.forEach(r=>r.pics.forEach(p=>{if(p.ph)used.add(p.ph);}));S.photos=S.photos.filter(p=>used.has(p.id));}
 
@@ -3324,7 +3326,7 @@ $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window
 function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);}
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});['c1','c2'].forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<3000000;
+  const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
   o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
   const ids=new Set(o.photos.map(p=>p.id));
   o.rows=Array.isArray(s.rows)?s.rows.slice(0,600).map(r=>{r=r&&typeof r==='object'?r:{};const pics=Array.isArray(r.pics)?r.pics:[];
