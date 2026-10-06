@@ -2,7 +2,7 @@
 """v21.43 Write into sw.js the list of files the offline copy saves and the copy's VERSION, and write release.json, the
 release list: every one of those files with its length and SHA-256.
 
-The list is every file the workstation loads from its own folder, in this order: index.html; the 44 forms its FORMS
+The list is every file the workstation loads from its own folder, in this order: index.html; the 45 forms its FORMS
 list names; every file of the folder a page loads (respond.html and the 45 pages are scanned for src= and href= on
 script, link, img, iframe, source, video, audio, embed and object tags, url(...) in styles, and fetch('...') and
 loadScript('...') in scripts: the picture library nbh-pictos.js, the respondent pages' nbh-respond.js, the PDF tools
@@ -98,8 +98,8 @@ def files_of(folder):
     if not m:
         fail('index.html has no FORMS list')
     forms = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
-    if len(forms) != 44:
-        fail('expected 44 forms in index.html, found %d' % len(forms))
+    if len(forms) != 45:
+        fail('expected 45 forms in index.html, found %d' % len(forms))
     if MANIFEST_LINK not in idx:
         fail('index.html does not link manifest.json as ' + MANIFEST_LINK)
     if '<script id="nbh-pwa">' not in idx:

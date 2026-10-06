@@ -308,7 +308,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   const hp=await page.evaluate(()=>document.querySelector('#dlgBody').textContent);
   await page.evaluate(()=>$('#dlg').close());
   const pal=await page.evaluate(()=>CMDS.map(c=>c.n).filter(n=>/update|Offline copy/i.test(n)));
-  check('B Diagnostics names the offline copy, Help explains it, the command box can check for updates',/Saved for offline use \u2014 60 files/.test(dg)&&/Offline, installing and updates/.test(hp)&&/Add to Home Screen/.test(hp)&&pal.length===2,dg.slice(0,120)+' | '+pal.join(', '));
+  check('B Diagnostics names the offline copy, Help explains it, the command box can check for updates',/Saved for offline use \u2014 61 files/.test(dg)&&/Offline, installing and updates/.test(hp)&&/Add to Home Screen/.test(hp)&&pal.length===2,dg.slice(0,120)+' | '+pal.join(', '));
   check('B in a browser tab nothing is wrapped for saving (createObjectURL and the link click are the browser’s own)',await page.evaluate(()=>window.nbhShareSave&&window.nbhShareSave.on===false&&/\[native code\]/.test(URL.createObjectURL.toString())&&/\[native code\]/.test(HTMLAnchorElement.prototype.click.toString())));
 
   /* ================= C: offline ================= */
@@ -330,10 +330,10 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
       if(['SM-1','VS-1','TK-1'].includes(f.id)){const fr=frameOf(page,f.file);pic[f.id]=fr?await fr.evaluate(()=>window.NBH_PICTOS?Object.keys(window.NBH_PICTOS).length:0).catch(()=>0):0;}
       await closeCur(page);
     }
-    check('C offline: every one of the 44 forms opens in the shell and answers',!notOpen.length,notOpen.join(', '));
+    check('C offline: every one of the 45 forms opens in the shell and answers',!notOpen.length,notOpen.join(', '));
     check('C offline: the picture library loads in SM-1, VS-1 and TK-1',Object.values(pic).length===3&&Object.values(pic).every(n=>n>100),JSON.stringify(pic));
     page.off('requestfailed',onFail);page.off('response',onResp);
-    check('C offline: no request the shell and the 44 forms made for a file of the folder went unanswered',!unanswered.length,unanswered.slice(0,6).join(', '));
+    check('C offline: no request the shell and the 45 forms made for a file of the folder went unanswered',!unanswered.length,unanswered.slice(0,6).join(', '));
     await page.evaluate(()=>$('#diag').click());
     await page.waitForFunction(()=>{const r=Array.from(document.querySelectorAll('#dlgBody tr')).map(t=>t.textContent).join('|');return /Picture library.*(saved on this device|could not check)/.test(r)&&/Respondent pages.*(saved on this device|could not check)/.test(r);},null,{timeout:8000}).catch(()=>{});
     const dgo=await page.evaluate(()=>Array.from(document.querySelectorAll('#dlgBody tr')).map(t=>t.textContent).filter(t=>/^(Picture library|Respondent pages)/.test(t)));
