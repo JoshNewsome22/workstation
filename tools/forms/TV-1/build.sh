@@ -12,9 +12,9 @@ python3 - "$R" <<'PY'
 import base64, json, sys
 R = sys.argv[1]
 src = open(R + '/script-main.js', encoding='utf-8').read()
-css = ''.join("@font-face{font-family:'TV Lato';font-style:normal;font-weight:%d;font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}" % (w, base64.b64encode(open('tools/vendor/lato/lato-latin-%d-normal.woff2' % w, 'rb').read()).decode()) for w in (700, 900))
+css = ''.join("@font-face{font-family:'TV Lato';font-style:normal;font-weight:%d;font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}" % (w, base64.b64encode(open('tools/vendor/lato/lato-latin-%d-normal.woff2' % w, 'rb').read()).decode()) for w in (700, 900)) + "@font-face{font-family:'TV Merri';font-style:normal;font-weight:900;font-display:block;src:url(data:font/woff2;base64,%s) format('woff2')}" % base64.b64encode(open('tools/vendor/merriweather/merriweather-latin-900-normal.woff2', 'rb').read()).decode()
 assert src.count("const LATO_CSS='/*@@LATO@@*/';") == 1, 'the Lato placeholder is not in script-main.js once'
-src = src.replace("const LATO_CSS='/*@@LATO@@*/';", 'const LATO_CSS=' + json.dumps('/* Lato (c) Lukasz Dziedzic, SIL Open Font License 1.1: tools/vendor/lato/LICENSE */' + css) + ';')
+src = src.replace("const LATO_CSS='/*@@LATO@@*/';", 'const LATO_CSS=' + json.dumps('/* Lato (c) Lukasz Dziedzic and Merriweather (c) The Merriweather Project Authors, SIL Open Font License 1.1: tools/vendor/lato/LICENSE, tools/vendor/merriweather/LICENSE */' + css) + ';')
 open(R + '/script.js', 'w', encoding='utf-8').write('/* ===== Form TV-1 ===== */\n' + src)
 PY
 for f in meta.json body.html toolbar.html script.js own.css; do cp $R/$f "$D/$f"; done

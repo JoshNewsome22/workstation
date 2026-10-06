@@ -92,15 +92,15 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('5 a black background (luma key) reaches the open window',(await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor))==='rgb(0, 0, 0)');
   await pop.setViewportSize({width:1280,height:720});await sleep(300);await pop.screenshot({path:path.join(OUT,'window.png')});await pop.close();
   /* 6 */
-  await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'];syncState();});
+  await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'].concat(Array(17).fill(''));syncState();});
   const xP=await dl(()=>document.getElementById('xlsxBtn').click());
   const wb=await page.evaluate(async b=>{const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0));const sh=await readXlsx(u);return sh.map(s=>({name:s.name,n:s.rows.length,w:Math.max(...s.rows.map(r=>r.length)),r:s.rows}));},fs.readFileSync(xP).toString('base64'));
-  ok('6 the workbook: the first tab every row (nine columns), then a tab for each other segment',wb.length===10&&wb[0].name==='01_Training_Overview'&&wb[0].n===18&&wb[0].w===9&&wb[1].name==='02_Student_Profile'&&wb[3].name==='04_Function_And_Data'&&wb[9].name==='10_Terms_And_Definitions',wb.map(s=>[s.name,s.n,s.w]));
-  ok('6 a continued row repeats its paragraph\'s words in column B; captions in E, F; the template\'s columns G to I kept',wb[0].r[1][1]===wb[0].r[0][1]&&wb[0].r[1][2]==='Training Overview'&&wb[0].r[3][4]==='Sam at the art table'&&wb[0].r[3].slice(6).join()==='G,H,I',wb[0].r.slice(0,4));
-  const before=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x])));
+  ok('6 the workbook: the first tab every row (A to Z in the Chapters look), then a tab for each other segment',wb.length===10&&wb[0].name==='01_Training_Overview'&&wb[0].n===18&&wb[0].w>=22&&wb[1].name==='02_Student_Profile'&&wb[3].name==='04_Function_And_Data'&&wb[9].name==='10_Terms_And_Definitions',wb.map(s=>[s.name,s.n,s.w]));
+  ok('6 a continued row repeats its paragraph\'s words in column B; captions in E, F; the template\'s columns G to I kept',wb[0].r[1][1]===wb[0].r[0][1]&&wb[0].r[1][2]==='Training Overview'&&wb[0].r[3][4]==='Sam at the art table'&&wb[0].r[3].slice(6,9).join()==='G,H,I',wb[0].r.slice(0,4));
+  const before=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
   await page.setInputFiles('#impIn',xP);await sleep(900);
-  const after=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x])));
-  ok('6 the workbook comes back in as it went out (the continued rows found again)',after===before,[before.slice(0,300),after.slice(0,300)]);
+  const after=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
+  ok('6 the workbook comes back in as it went out (the continued rows found again, each card in its chapter)',after===before,[before.slice(0,300),after.slice(0,300)]);
   const csvIn=path.join(OUT,'sheet.csv');fs.writeFileSync(csvIn,'﻿"Opening","Hello team.\nThis is the plan.","Welcome","• One\n• Two","","","","",""\r\n"Opening","Hello team.\nThis is the plan.","Agenda","Profile","","","","",""\r\n,,,,,,,,\r\n"Behaviors","Elopement means leaving.","Elopement","Leaving the area","Door","Hallway","x","y","z"\r\n');
   await page.setInputFiles('#impIn',csvIn);await sleep(700);
   const ci=await page.evaluate(()=>({rows:S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics[0].cap,r.pics[1].cap,r.x.join('')]),view:document.body.className}));
@@ -117,25 +117,25 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const badP=path.join(OUT,'bad.json');fs.writeFileSync(badP,JSON.stringify(bad));await page.setInputFiles('#fileIn',badP);await sleep(600);
   const b1=await page.evaluate(()=>({n:S.rows.length,cont:S.rows[0].cont,lay:S.rows[0].lay,ph:S.rows[0].pics[0].ph,photos:S.photos.length,imgs:document.querySelectorAll('#rows img,.tv-thumb img').length,scripts:[...document.querySelectorAll('#rows script,.tv-thumb script')].length,
     title:(document.querySelector('.tv-thumb .pn-h')||{}).textContent,log:S.log,c1:S.meta.c1}));
-  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#0f1b41',b1);
+  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#222f5a',b1);
   const other=path.join(OUT,'other.json');fs.writeFileSync(other,JSON.stringify({form:'TK-1',S:{}}));await page.setInputFiles('#fileIn',other);await sleep(400);
   ok('7 a file saved by another form is refused; nothing changes',(await page.evaluate(()=>S.rows.length))===1);
   /* 8 */
   await page.evaluate(()=>loadSim());await sleep(800);
-  for(const look of ['panel','cards']){
-  const lays=await page.evaluate(look=>{S.meta.look=look;const out={};['side','lower','full','title','pic1','pic2','none'].forEach(l=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay=l;if(/pic/.test(l)){r.pics=[{ph:'',cap:'One'},{ph:'',cap:'Two'}];}
+  for(const look of ['chapters','panel','cards']){
+  const lays=await page.evaluate(look=>{S.meta.look=look;const out={};['side','lower','full','title','pic1','pic2','split','none'].forEach(l=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay=l;if(/pic/.test(l)){r.pics=[{ph:'',cap:'One'},{ph:'',cap:'Two'}];}
     const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0';box.innerHTML=stageHtml(r,960,{presenter:true});document.body.appendChild(box);fitGx(box);const g=box.querySelector('.gx').getBoundingClientRect(),c=box.querySelector('.gx-card,.gx-band,.pn');
-    const cr=c?c.getBoundingClientRect():null,inn=box.querySelector('.gx-in');out[l]={inside:!cr||(cr.left>=g.left-1&&cr.right<=g.right+1&&cr.top>=g.top-1&&cr.bottom<=g.bottom+1),over:inn?inn.scrollHeight>inn.clientHeight+2:false,card:!!c};box.remove();});S.meta.look='panel';return out;},look);
+    const cr=c?c.getBoundingClientRect():null,inn=box.querySelector('.gx-in');out[l]={inside:!cr||(cr.left>=g.left-1&&cr.right<=g.right+1&&cr.top>=g.top-1&&cr.bottom<=g.bottom+1),over:inn?inn.scrollHeight>inn.clientHeight+2:false,card:!!c};box.remove();});S.meta.look='chapters';return out;},look);
   ok('8 '+look+' look: every layout draws inside the stage, its text fitted to its card; no card on "No card"',Object.values(lays).every(x=>x.inside&&!x.over)&&!lays.none.card&&lays.title.card,lays);}
   const long=await page.evaluate(()=>{S.meta.look='cards';const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay='side';r.body=Array.from({length:14},(_,i)=>'• A long point number '+i+' that goes on for a while').join('\n');const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);
-    const b=box.querySelector('.gx-body'),inn=box.querySelector('.gx-in');const o={fs:parseFloat(b.style.fontSize),over:inn.scrollHeight>inn.clientHeight+2};box.remove();S.meta.look='panel';return o;});
+    const b=box.querySelector('.gx-body'),inn=box.querySelector('.gx-in');const o={fs:parseFloat(b.style.fontSize),over:inn.scrollHeight>inn.clientHeight+2};box.remove();S.meta.look='chapters';return o;});
   ok('8 Cards look, a long card: the text shrinks until it fits',long.fs<46&&!long.over,long);
   /* the Panel look, as the sheet's columns: A the panel's title, B its paragraphs, C the gold heading, D the list; the band, the tag, the logo */
-  const pn=await page.evaluate(()=>{const r=newRow('Training Overview',{say:'The first paragraph.\n\nThe second paragraph.',title:'Covering',body:'• The FBA\n• The BIP\n• Denial vs. delay\n• The first nine weeks\n• One more\n• And another\n• The seventh'});
+  const pn=await page.evaluate(()=>{setLook('panel');const r=newRow('Training Overview',{say:'The first paragraph.\n\nThe second paragraph.',title:'Covering',body:'• The FBA\n• The BIP\n• Denial vs. delay\n• The first nine weeks\n• One more\n• And another\n• The seventh'});
     const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);const q=x=>box.querySelector(x),inn=q('.pn-in');
     const o={t:q('.pn-t').textContent,tt:getComputedStyle(q('.pn-t')).textTransform,p:[...box.querySelectorAll('.pn-in p')].map(e=>e.textContent),h:q('.pn-h').textContent,hc:getComputedStyle(q('.pn-h')).color,b:[...box.querySelectorAll('.pn-l .b')].map(e=>e.textContent),
       band:q('.pn-band').textContent,tag:q('.pn-tag').textContent,logo:!!q('.pn-logo'),fs:parseFloat(inn.style.fontSize),lg:inn.style.getPropertyValue('--lg'),over:inn.scrollHeight>inn.clientHeight+2,
-      left:Math.round(q('.pn').getBoundingClientRect().left-box.querySelector('.gx').getBoundingClientRect().left),w:Math.round(q('.pn').getBoundingClientRect().width)};box.remove();return o;});
+      left:Math.round(q('.pn').getBoundingClientRect().left-box.querySelector('.gx').getBoundingClientRect().left),w:Math.round(q('.pn').getBoundingClientRect().width)};box.remove();setLook('chapters');return o;});
   ok('8 the Panel look: A the title (in capitals), B two paragraphs, C the heading in gold, D seven bullets; the series band, the tag from the name, the logo',pn.t==='Training Overview'&&pn.tt==='uppercase'&&pn.p.join('|')==='The first paragraph.|The second paragraph.'&&pn.h==='Covering'&&pn.hc==='rgb(203, 185, 138)'&&pn.b.length===7&&/^•/.test(pn.b[0])&&
     pn.band==='Functional Treatments in Applied Behavior Analysis'&&pn.tag==='FBA & BIP Video Training: Sam S.'&&pn.logo,pn);
   ok('8 the Panel look: on the left half of the picture (16 to 962 of 1920)',pn.left===8&&pn.w===473,pn);
@@ -147,6 +147,28 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('8 print: the script by segment, every row',/Sam’s Training Video/.test(pr.h)&&pr.g===10&&pr.r===18,pr);
   await page.emulateMedia({media:'print'});const vis=await page.evaluate(()=>({p:getComputedStyle(document.getElementById('printOut')).display,s:getComputedStyle(document.querySelector('.only-graphics')).display}));await page.emulateMedia({media:'screen'});
   ok('8 only the script prints',vis.p==='block'&&vis.s==='none',vis);
+  /* 9 the Chapters look (the newer template): the chapter bar with the card's own chapter lit, the ticker, the A-Z sheet */
+  await page.evaluate(()=>loadSim());await sleep(800);
+  const c9=await page.evaluate(()=>{const r=S.rows.find(x=>x.title==='Physical aggression');const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);
+    const o={look:S.meta.look,chs:S.meta.chapters.split('\n'),tabs:[...box.querySelectorAll('.pn-bar>div')].map(e=>e.textContent),on:[...box.querySelectorAll('.pn-bar>div.on')].map(e=>e.textContent),
+      tick:[...box.querySelectorAll('.pn-tick .tk-in span')].length,tt:(box.querySelector('.pn-tick span')||{}).textContent,tag:!!box.querySelector('.pn-tag'),t:getComputedStyle(box.querySelector('.pn-t')).color,ff:getComputedStyle(box.querySelector('.pn-bar>div')).fontFamily};box.remove();return o;});
+  ok('9 the draft sets six chapters for the bar; the card on a target behavior lights Behavior; the ticker runs the series; no tag; the title in the light gold; the bar in Merriweather',
+    c9.look==='chapters'&&c9.chs.join('|')==='Intro|Behavior|Goals|The Plan|Response|Close'&&c9.tabs.join('|')===c9.chs.join('|')&&c9.on.join()==='Behavior'&&c9.tick===6&&c9.tt==='Functional Treatments in Applied Behavior Analysis'&&!c9.tag&&c9.t==='rgb(238, 217, 173)'&&/^"TV Merri"/.test(c9.ff),c9);
+  await page.evaluate(()=>{const r=S.rows.find(x=>x.title==='Hypothesis');r.lay='split';r.title='Results';r.body='The words beside the picture.';});
+  const xP2=await dl(()=>document.getElementById('xlsxBtn').click());
+  const wb2=await page.evaluate(async b=>{const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0));const sh=await readXlsx(u);return sh[0].rows;},fs.readFileSync(xP2).toString('base64'));
+  const iB=await page.evaluate(()=>S.rows.findIndex(x=>x.title==='Physical aggression')),iS=await page.evaluate(()=>S.rows.findIndex(x=>x.title==='Results'));
+  ok('9 the sheet: P the chapters from the first row, Q to V the tabs (1 for the card\'s own chapter, 0.35 the others), a picture card\'s words in M and N',
+    wb2.slice(0,6).map(r=>r[15]).join('|')==='Intro|Behavior|Goals|The Plan|Response|Close'&&wb2[iB].slice(16,22).join()==='0.35,1,0.35,0.35,0.35,0.35'&&wb2[iS][12]==='Results'&&wb2[iS][13]==='The words beside the picture.'&&!wb2[iS][2]&&!wb2[iS][3],[wb2[iB].slice(15,22),wb2[iS].slice(0,4),wb2[iS].slice(12,15)]);
+  /* a sheet in the newer template's layout (as Scatter_Plot_Graphics): its chapters, a card beside a picture, the picture's file named */
+  const Z=(o)=>{const r=Array(26).fill('');Object.entries(o).forEach(([k,v])=>{r[k.charCodeAt(0)-65]=v;});return r;};
+  const q=x=>'"'+String(x).replace(/"/g,'""')+'"';
+  const sc=[Z({A:'Welcome',B:'South Florida\n\nThe Average Problem',D:'•  Average is 73 degrees.\n\n•  July: hot.',P:'Intro'}),Z({A:'Welcome',B:'The problem with line graphs.',P:'Instrument'}),Z({A:'The Instrument',B:'Time of day runs down the side.',C:'Definition',D:'•  Open cell',P:'Close',Q:'0.35',R:'1',S:'0.35'}),
+    Z({A:'Case 1: Joan',M:'Results',N:'Following the intervention you see an immediate drop.',O:'IMG_0004.jpeg'})];
+  const scP=path.join(OUT,'scatter.csv');fs.writeFileSync(scP,sc.map(r=>r.map(q).join(',')).join('\n'));await page.setInputFiles('#impIn',scP);await sleep(800);
+  const c10=await page.evaluate(()=>({look:S.meta.look,chs:S.meta.chapters.split('\n'),n:S.rows.length,ch:S.rows.map(r=>chList().list[chOf(r)]),sp:[S.rows[3].lay,S.rows[3].title,S.rows[3].body],o:document.body.innerText.includes('The sheet names a picture: IMG_0004.jpeg'),say0:S.rows[0].say}));
+  ok('9 a sheet in the newer layout: its chapters (P), the card beside a picture (M, N), the chapter lit by its tabs (Q to Z), the picture it names',
+    c10.look==='chapters'&&c10.chs.join('|')==='Intro|Instrument|Close'&&c10.n===4&&c10.ch.join('|')==='Intro|Intro|Instrument|Instrument'&&c10.sp.join('|')==='split|Results|Following the intervention you see an immediate drop.'&&c10.o&&c10.say0==='South Florida\n\nThe Average Problem',c10);
   const off=reqs.filter(u=>!u.startsWith(BASE+'/')&&!u.startsWith('data:')&&!u.startsWith('blob:')&&u!=='about:blank');
   ok('8 no request off the workstation\'s own folder',!off.length,off.slice(0,5));
   ok('8 no errors',!errs.length,errs.concat(miss));

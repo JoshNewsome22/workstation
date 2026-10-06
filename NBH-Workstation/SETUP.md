@@ -7529,13 +7529,19 @@ BIP are finished, for the receiving team, new staff or a family. It holds what w
 Sheet and Flowics: the words, the card on screen while they are said, the teleprompter and the cards themselves. Five views:
 
 - **Setup**: the student (from the packet), the first name as said in the training, who it is for, the presenter and the lines
-  under the name, and the look of the graphics. **Panel** (the default) is the look of the practice's Flowics template, matched
-  to its videos: a navy panel on one half of the picture (the left by default; the presenter on the other half), the segment
+  under the name, and the look of the graphics. **Chapters** (the default) is the practice's newer Flowics template, matched
+  to its screens: the panel in a lighter navy with the title and the headings in a light gold, a white rule, a **chapter bar**
+  along the panel's foot (the chapters typed on Setup, one a line, up to ten; with none typed, the segments; each card is in the
+  chapter set on its row or on the nearest row above, and its own chapter's tab is lit, which the template's sheet could not
+  do: its tab values were all 0.35), a **ticker** under the panel (the series, in Merriweather Black, running continuously in
+  the graphics window; it does not jump when the card changes), and the logo under it. **Panel** is the FBA and BIP template,
+  matched to its videos: a navy panel on one half of the picture (the left by default; the presenter on the other half), the segment
   as its title in capitals with a fine rule under it, the paragraphs, the heading in gold and the list; under the panel the
   series on a mint band (*Functional Treatments in Applied Behavior Analysis*; blank for none), and the logo beside a dark tag
   (*FBA & BIP Video Training:* and the student's first name and initial, or a tag typed). The logo is the edition's letterhead
   logo (the Royal Palm School star in the school edition) or one chosen. The type is Lato Bold and Black, built into the form
-  (`tools/vendor/lato`, SIL Open Font License), so the cards look the same on every device with no network. **Cards** is a white
+  (`tools/vendor/lato`, SIL Open Font License), with Merriweather Black for the Chapters look's bar and ticker
+  (`tools/vendor/merriweather`, the same licence), so the cards look the same on every device with no network. **Cards** is a white
   card beside the presenter. The colours (panel, heading, band), the half, and the background of the graphics window (green or
   blue for a chroma key, black for a luma key) are set here. **Draft from the case**
   writes a segment for each part ticked (Training Overview, Student Profile, Target Behaviors, Function & Data, Goals of
@@ -7567,10 +7573,15 @@ Sheet and Flowics: the words, the card on screen while they are said, the telepr
 - **Guide**.
 
 **Import a sheet** reads the first tab of a sheet made before (downloaded from Google Sheets as .xlsx or CSV): A the segment, B
-the paragraphs, C the heading, D the list, E and F the picture captions, G to I the template's picture places (kept as they
-came); a row whose words repeat the row above becomes a card on the same paragraph. **Export for Sheets (.xlsx)** writes that
-layout back (the first tab every row, then a tab for each other segment, columns A to D, named 02_Student_Profile and so on),
-so the Flowics template keeps reading it; Export CSV writes the first tab alone. Pictures are not in a sheet: add them on their
+the paragraphs, C the heading, D the list, E and F the picture captions, and G to Z as they came. In the newer template's sheet
+M and N are the heading and the words of a card beside a picture (they become the layout *Text beside a picture*), O names the
+picture's file (the row says so, for the picture to be added), P lists the chapters (one a row, from the first row; the look
+becomes Chapters), and Q to Z hold the tabs' values (a card whose value stands above the others is put in that chapter). A
+row whose words repeat the row above becomes a card on the same paragraph. **Export for Sheets (.xlsx)** writes that layout
+back (the first tab every row, A to Z, or A to I when nothing past I is used; then a tab for each other segment, columns A to
+D, named 02_Student_Profile and so on), so the Flowics template keeps reading it. In the Chapters look P is written with the
+chapters and Q to Z with 1 for each card's own chapter and 0.35 for the others: a template whose tabs read those values lights
+the chapter as the cards go. Export CSV writes the first tab alone. Pictures are not in a sheet: add them on their
 rows. **Print the script** prints the words beside the cards, by segment.
 
 Everything stays in the form and its saved file (the pictures too, at up to 3840 pixels on the long side, sharp on a 4K video); the form sends nothing. A sheet
