@@ -7530,7 +7530,8 @@ Sheet and Flowics: the words, the card on screen while they are said, the telepr
 
 - **Setup**: the student (from the packet), the first name as said in the training, who it is for, the presenter and the lines
   under the name, and the look of the graphics. **Chapters** (the default) is the practice's newer Flowics template, matched
-  to its screens: the panel in a lighter navy with the title and the headings in a light gold, a white rule, a **chapter bar**
+  to its screens: the panel wider (about three fifths of the picture, nearly its full height) in a lighter navy, with the
+  title and the headings in a light gold and the list the size of the paragraphs, a white rule, a **chapter bar**
   along the panel's foot (the chapters typed on Setup, one a line, up to ten; with none typed, the segments; each card is in the
   chapter set on its row or on the nearest row above, and its own chapter's tab is lit, which the template's sheet could not
   do: its tab values were all 0.35), a **ticker** under the panel (the series, in Merriweather Black, running continuously in
