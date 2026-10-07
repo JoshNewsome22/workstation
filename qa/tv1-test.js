@@ -69,7 +69,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 Space again while it counts calls the countdown off',await page.evaluate(()=>!TP.run&&document.getElementById('tpCd').hidden));
   await page.evaluate(()=>document.querySelector('[data-c="nocd"]').click());
   const tpw=await page.evaluate(()=>{S.rows[0].tp='Words said here, not on the card.';tpRender();const a=document.querySelector('#tpStrip .tp-p .tp-t').textContent;S.rows[0].tp='';tpRender();const b=document.querySelector('#tpStrip .tp-p .tp-t').textContent;return {a,b,say:S.rows[0].say};});
-  ok('4 a row\'s teleprompter words go on the teleprompter in place of its paragraphs; blank, the paragraphs',tpw.a==='Words said here, not on the card.'&&tpw.b===tpw.say.replace(/\n+/g,''),tpw);
+  ok('4 a row\'s teleprompter words go on the teleprompter in place of its paragraphs; blank, the paragraphs',tpw.a==='Words said here, not on the card.'&&tpw.b.replace(/[\s▶]/g,'')===tpw.say.replace(/>>|\s/g,''),tpw);
   await page.click('#tpRec');await sleep(300);await page.keyboard.press('PageDown');await sleep(400);await page.keyboard.press('PageDown');await sleep(400);await page.click('#tpRec');
   const lg=await page.evaluate(()=>({log:S.log,line:document.getElementById('logLine').textContent,rec:document.getElementById('tpRec').textContent}));
   ok('4 the clock keeps each card\'s time (the card it started on, then each next)',lg.log.length===3&&lg.log.map(l=>l.i).join()==='1,2,3'&&lg.log[2].t>lg.log[1].t&&lg.log[1].t>=lg.log[0].t&&/3 card times/.test(lg.line)&&lg.rec==='Start the clock',lg);
@@ -82,7 +82,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   /* v21.51 the marks, the reading line, the scroll across paragraphs with the cards following it, the voice without a microphone */
   const mk=await page.evaluate(()=>{const r=S.rows[0],o=r.tp;r.tp='Hello // there *Sam* {smile} 15 again';tpRender();const t=document.querySelector('#tpStrip .tp-p .tp-t');
     const res={pause:!!t.querySelector('.tp-pause'),em:(t.querySelector('.tp-em')||{}).textContent,note:(t.querySelector('.tp-note')||{}).textContent,tw:[...t.querySelectorAll('.tw')].map(e=>e.textContent).join(' '),sw:SW.filter(x=>x.k===0).map(x=>x.w).join(' '),n:words(r.tp)};
-    r.tp=o;const s0=r.say;r.say='Welcome // to the *plan*. {breathe}';const b=document.createElement('div');b.innerHTML=cardHtml(r,{});res.card=b.querySelector('.pn-in').textContent;res.B=sheetRows()[0][1];r.say=s0;tpRender();return res;});
+    r.tp=o;const s0=r.say;r.say='Welcome // to the *plan*. >> {breathe}';const b=document.createElement('div');b.innerHTML=cardHtml(r,{});res.card=b.querySelector('.pn-in').textContent;res.B=sheetRows()[0][1];r.say=s0;tpRender();return res;});
   ok('4 the marks: a pause, a word stressed and a note show on the teleprompter; the words are matched without them (15 as fifteen)',mk.pause&&mk.em==='Sam'&&mk.note==='smile'&&mk.tw==='Hello there Sam 15 again'&&mk.sw==='hello there sam fifteen again'&&mk.n===5,mk);
   ok('4 the marks never reach a card or the sheet',!/\/\/|\*|\{|breathe/.test(mk.card)&&/^Welcome to the plan\./.test(mk.card)&&mk.B==='Welcome to the plan.',mk);
   await page.evaluate(()=>{const r=document.querySelector('[data-m="tpline"]');r.value='50';r.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(100);
@@ -96,6 +96,21 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     return {y0,y1,i1,i2,i3,run:TP.run,want:[paras()[1].start,paras()[2].start],rd:document.querySelectorAll('#tpStrip .tw.rd').length};});
   ok('4 the scroll goes on from paragraph to paragraph, and the cards change as each reaches the reading line',scr.y1>scr.y0&&scr.i1===scr.want[0]&&scr.i2===scr.want[1]&&!scr.run,scr);
   ok('4 Only the clicker changes the cards: the scroll leaves the card',scr.i3===scr.i2,scr);
+  /* v21.52 the next-card marks: placed by the simulator (as by the draft), one for each step after a paragraph's first; the
+     word before a mark said, or its line at the reading line, brings the next card or the next point */
+  const cu=await page.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));const P=paras(),need=P.reduce((a,p)=>a+paraSteps(p),0),have=CQ.length,el=CQE.length;
+    const k=P.findIndex(p=>p.rows.length>1),p=P[k],cq=CQ.map((c,j)=>Object.assign({j},c)).filter(c=>c.k===k);tpGo(p.start,true);TP.man=0;
+    const at0=TP.i;TP.y=CQE[cq[0].j].offsetTop-30;tpAutoCard();const before=TP.i;TP.y=CQE[cq[0].j].offsetTop+2;tpAutoCard();const after=TP.i,done=CQE[cq[0].j].classList.contains('done');
+    const real=tpMd;window.tpMd=()=>'follow';tpGo(p.start,true);TP.man=0;TP.pos=cq[0].at-1;tpAutoCard();const f0=TP.i;TP.pos=cq[0].at;tpAutoCard();const f1=TP.i;window.tpMd=real;
+    const pb=P.findIndex(q=>q.rows.some(i=>S.rows[i].build));
+    return {need,have,el,k,rows:p.rows,at0,before,after,done,f0,f1,pb};});
+  ok('4 >> marks: the simulator has one for each step after a paragraph\'s first (every paragraph with more than one card)',cu.need>0&&cu.have===cu.need&&cu.el===cu.have,cu);
+  ok('4 >> scrolling: the next card comes up as the mark reaches the reading line, not before; the mark is dimmed once passed',cu.at0===cu.rows[0]&&cu.before===cu.rows[0]&&cu.after===cu.rows[1]&&cu.done,cu);
+  ok('4 >> following the words: the next card as the word before the mark is said',cu.f0===cu.rows[0]&&cu.f1===cu.rows[1],cu);
+  const cb=await page.evaluate(()=>{const r=S.rows.find(x=>String(x.body).split('\n').filter(Boolean).length>=3&&!x.cont);const i=S.rows.indexOf(r);const o=[r.say,r.build,r.tp];r.build=true;r.tp='';r.say='First this. Then the second point. Then the third one. And the fourth here. Done now.';
+    const n=placeCues([i]),say=r.say;tpRender();const k=paras().findIndex(p=>p.start===i),cq=CQ.map((c,j)=>Object.assign({j},c)).filter(c=>c.k===k);tpGo(i,true);TP.man=0;const st=[TP.b];
+    cq.forEach(c=>{TP.y=CQE[c.j].offsetTop+2;tpAutoCard();st.push(TP.i===i?TP.b:'next');});const pts=buildN(r),steps=paraSteps(paras()[k]);r.say=o[0];r.build=o[1];r.tp=o[2];tpRender();tpGo(0,true);return {n,say,st,pts,steps,again:placeCues([i])};});
+  ok('4 >> in a list that builds: one mark a point, each mark the next point (the button places them; a paragraph that has marks keeps them)',cb.n===cb.steps&&cb.steps>=cb.pts&&cb.st.join()===Array.from({length:cb.pts+1},(_,j)=>j).concat(Array(cb.steps-cb.pts).fill('next')).join()&&cb.again===0,cb);
   await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=()=>Promise.reject(new DOMException('denied','NotAllowedError'));const m=document.querySelector('[data-m="tpmode"]');m.value='speak';m.dispatchEvent(new Event('change',{bubbles:true}));tpGo(0,true);tpToggle();});await sleep(900);
   const sp=await page.evaluate(()=>{const v=document.getElementById('tpVoice');const o={msg:v.hidden?'':v.textContent,md:tpMd(),y:TP.y,vo:document.body.classList.contains('tp-voice'),sens:getComputedStyle(document.querySelector('[data-m="tpsens"]').closest('label')).display};tpToggle();
     const m=document.querySelector('[data-m="tpmode"]');m.value='fixed';m.dispatchEvent(new Event('change',{bubbles:true}));o.after=document.body.classList.contains('tp-voice');return o;});
@@ -151,10 +166,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const wb=await page.evaluate(async b=>{const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0));const sh=await readXlsx(u);return sh.map(s=>({name:s.name,n:s.rows.length,w:Math.max(...s.rows.map(r=>r.length)),r:s.rows}));},fs.readFileSync(xP).toString('base64'));
   ok('6 the workbook: the first tab every row (A to Z in the Chapters look), then a tab for each other segment',wb.length===10&&wb[0].name==='01_Training_Overview'&&wb[0].n===18&&wb[0].w>=22&&wb[1].name==='02_Student_Profile'&&wb[3].name==='04_Function_And_Data'&&wb[9].name==='10_Terms_And_Definitions',wb.map(s=>[s.name,s.n,s.w]));
   ok('6 a continued row repeats its paragraph\'s words in column B; captions in E, F; the template\'s columns G to I kept',wb[0].r[1][1]===wb[0].r[0][1]&&wb[0].r[1][2]==='Training Overview'&&wb[0].r[3][4]==='Sam at the art table'&&wb[0].r[3].slice(6,9).join()==='G,H,I',wb[0].r.slice(0,4));
-  const before=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
+  const before=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,unmark(r.say),r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
   await page.setInputFiles('#impIn',xP);await sleep(900);
-  const after=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
-  ok('6 the workbook comes back in as it went out (the continued rows found again, each card in its chapter)',after===before,[before.slice(0,300),after.slice(0,300)]);
+  const after=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,unmark(r.say),r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
+  ok('6 the workbook comes back in as it went out (the continued rows found again, each card in its chapter; the teleprompter\'s marks are not in a sheet)',after===before,[before.slice(0,300),after.slice(0,300)]);
   const csvIn=path.join(OUT,'sheet.csv');fs.writeFileSync(csvIn,'﻿"Opening","Hello team.\nThis is the plan.","Welcome","• One\n• Two","","","","",""\r\n"Opening","Hello team.\nThis is the plan.","Agenda","Profile","","","","",""\r\n,,,,,,,,\r\n"Behaviors","Elopement means leaving.","Elopement","Leaving the area","Door","Hallway","x","y","z"\r\n');
   await page.setInputFiles('#impIn',csvIn);await sleep(700);
   const ci=await page.evaluate(()=>({rows:S.rows.map(r=>[r.seg,r.say,r.cont,r.title,r.body,r.pics[0].cap,r.pics[1].cap,r.x.join('')]),view:document.body.className}));

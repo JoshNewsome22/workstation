@@ -7664,3 +7664,34 @@ recorded voice reading the simulator's first six paragraphs is the microphone of
 word for word to the end of the sixth (downloaded and checked the first time, from the device the next, the word times
 timing the captions, no request off the site). In WebKit the recogniser starts in under 2 seconds and decodes 30 seconds of
 speech in about 3, landing on the word being said.
+
+### v21.52: the whole script drafted from the case, and the cards changed by the words
+
+**Draft from the case** (TV-1 Setup) now writes the whole script, so what is left is to read it through and put it in your own
+words. The shell reads three more forms for the case (as it reads TB-1, FS-1, GB-1 and PA-1), and the case bar names them:
+
+- **Form DM-1** (the person-centred profile): the strengths and interests (Student Profile › Strengths), how the student
+  communicates (expressive, receptive), the yes / no / stop / pain signals, what helps, what to avoid and the assistive
+  technology (Student Profile › Communication);
+- **Form TD-1** (the plan developed): the antecedent arrangements and the cards before sessions (Proactive Strategies), the
+  replacement behavior, how it is taught and the reinforcement schedule (Reinforcement System), the response to the precursor
+  and to the behavior, afterwards, and what staff do not do (Response Plan › Steps), and the takeaways (Key Takeaways);
+- **Form CR-1** (the crisis plan): its stages, said in order and numbered on a full-screen card (Response Plan › Safety).
+
+Only what no form holds is left in [square brackets] (the presenter, typed on Setup, and the terms). Each form's own words are
+used as they were written (the paragraphs are said aloud, so read them through); a card takes the first clause of each, without
+the asides in brackets. Open those forms in the workstation (or the case file that holds them) before drafting.
+
+**The next-card mark, `>>`.** Put `>>` in the words said where the next card should come up: as the word before it is said
+(Scroll › following my words), or as it reaches the reading line (the other two ways), the graphics window changes to the next
+card, or to the next point of a list that builds, with no click. A paragraph comes up on its first card; each mark passed is one
+step more. Once the script has marks, only the marks (and each new paragraph) change the cards; the clicker still works at any
+time. The draft puts the marks in for you (one for each card after a paragraph's first, and one for each point of a list that
+builds, at the end of the sentence nearest an even share of the words), and **Place the next-card marks** (Script) does the same
+for any paragraph that has none, after you have written or changed it. Move a mark by moving its `>>`. On the teleprompter a mark
+shows as a small orange ▶, grey once passed. Like the other marks, `>>` is never on a card, in the sheet or in the captions.
+
+Checked by `qa/tv1-test.js` (70 checks: the marks placed, one for each step; a card as the mark reaches the reading line and
+as the word before it is said; a list that builds one point a mark), the new `qa/tv1-case-test.js` (the seven forms'
+simulators through the shell, then the draft: every segment written from them, only the presenter and the terms left, the
+marks in), and `qa/tv1-voice-test.js` with a recorded voice: the card came up 0.01 s after the word before its mark was said.

@@ -776,6 +776,9 @@ body.tp-voice .tp-p.on .tw.rd{color:#8a949c}
 .tp-mic.on i{background:#4cd07d}
 .tp-vmsg{flex:none;padding:6px 12px;background:#3a2a10;color:#ffd99a;font-size:13px;border-bottom:1px solid #2b3238}
 .tv-build{margin-top:2px}
+/* v21.52 the next-card mark: a small arrow on the teleprompter, dimmed once passed */
+.tp-cue{display:inline-block;font-size:.42em;color:#111;background:#e8a33d;border-radius:3px;padding:.05em .3em;margin:0 .25em;vertical-align:.35em;font-weight:700;line-height:1.2}
+.tp-cue.done{background:#4a535b;color:#9aa4ad}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
@@ -960,7 +963,7 @@ td input,td select{max-width:100%}
     <div id="setupVerdict"></div>
 
     <h2 class="nbh-band" style="margin-top:18px">Draft the Script from the Case</h2>
-    <p class="hint">The draft takes what the case already holds: the student (the packet), the target behaviors and their definitions (Form TB-1), the function and its hypothesis statements (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1). Each part becomes a segment, with what you will say and the card that shows while you say it. The parts the case cannot know (strengths, the proactive strategies, the response plan, the takeaways) are drafted as prompts in [square brackets] for you to write. Draft from the case adds the segments you tick to the end of the script; nothing already written is changed.</p>
+    <p class="hint">The draft takes what the case already holds: the student (the packet), the target behaviors and their definitions (Form TB-1), the function and its hypothesis statements (Form FS-1), the goals (Form GB-1), the reinforcer menu (Form PA-1), the strengths, interests and communication (the profile, Form DM-1), the antecedent strategies, the teaching, the reinforcement and the response plan (Form TD-1) and the crisis plan's stages (Form CR-1). Each part becomes a segment, with what you will say and the card that shows while you say it, and the &gt;&gt; marks that bring each next card up as you speak. What none of those forms holds yet is drafted as a prompt in [square brackets] for you to write; read the draft through, and put it in your own words. Draft from the case adds the segments you tick to the end of the script; nothing already written is changed.</p>
     <div class="ckrow" id="segPick"></div>
     <p class="hint" id="caseLine"></p>
 
@@ -991,7 +994,7 @@ td input,td select{max-width:100%}
     <h2 class="nbh-band">The Script</h2>
     <p class="hint">Each row is one card, as a row of the Google Sheet: the segment (column A, the panel's title), the paragraphs (B), the heading (C, in gold) and the list (D), with two pictures and their captions (E, F). The teleprompter shows the paragraphs, or the row's own teleprompter words when you say more than the card. Tick <b>Same words as above</b> when the card changes while you are still in the same paragraph: the teleprompter keeps the paragraph and moves to the next card. Words in [square brackets] are still to be written. A card's text is one line a point; a line starting with &bull; or - prints as a bullet.</p>
     <div id="scriptSum" class="tv-sum"></div>
-    <div class="tools"><button class="tool" id="addSeg" type="button">Add a segment</button><button class="tool" id="addRow" type="button">Add a row at the end</button><button class="tool" id="emptyAll" type="button">Empty the script</button></div>
+    <div class="tools"><button class="tool" id="addSeg" type="button">Add a segment</button><button class="tool" id="addRow" type="button">Add a row at the end</button><button class="tool" id="emptyAll" type="button">Empty the script</button><button class="tool" id="cueBtn" type="button">Place the next-card marks (&gt;&gt;)</button></div>
     <div id="rows"></div>
   </section>
 
@@ -1024,7 +1027,7 @@ td input,td select{max-width:100%}
       <div class="tp-foot" id="tpFoot"></div>
     </div>
     <p class="hint">A Bluetooth page-turner or keyboard works the teleprompter: <b>Page Down</b>, <b>&rarr;</b> or <b>Enter</b> for the next card (or the next point of a list that builds), <b>Page Up</b> or <b>&larr;</b> for the one before, <b>Space</b> to start or stop the scroll. Each card also changes the graphics window, when it is open. <b>Scroll</b> moves the script <b>at the speed set</b> (words a minute), <b>while I speak</b> (it moves only while the microphone hears you, and waits when you pause), or <b>following my words</b> (speech recognition on this device places each word you say in the script; skip a sentence or go back and it finds you). As the script scrolls the cards change with it, unless only the clicker changes them. <b>Start the clock</b> keeps the time each card came up (and, following your words, each word) for the chapters and the captions below.</p>
-    <p class="hint">In the words said: <b>//</b> marks a pause (&#8214;), <b>*a word*</b> one to stress, and <b>{a note}</b> a note to yourself. They show on the teleprompter only: never on a card, in the sheet or in the captions. The microphone is used only while the script scrolls with your voice; nothing it hears is recorded or sent. Following your words needs the speech recogniser, about 57 MB, downloaded from this workstation's website the first time and kept on the device (not in the one-file edition).</p>
+    <p class="hint">In the words said: <b>//</b> marks a pause (&#8214;), <b>*a word*</b> one to stress, <b>{a note}</b> a note to yourself, and <b>&gt;&gt;</b> the next card: as the word before it is said (following your words), or as it reaches the reading line, the next card comes up (or the next point of a list that builds) with no click. Once the script has &gt;&gt; marks, only they (and each new paragraph) change the cards; the draft and <b>Place the next-card marks</b> on Script put them in for you. They show on the teleprompter only: never on a card, in the sheet or in the captions. The microphone is used only while the script scrolls with your voice; nothing it hears is recorded or sent. Following your words needs the speech recogniser, about 57 MB, downloaded from this workstation's website the first time and kept on the device (not in the one-file edition).</p>
     <div class="tools"><button class="tool" id="logCsv" type="button">Export the card times (CSV)</button><button class="tool" id="chapBtn" type="button">YouTube chapters</button><button class="tool" id="srtBtn" type="button">Captions (SRT)</button><button class="tool" id="vttBtn" type="button">Captions (WebVTT)</button><button class="tool" id="asrDrop" type="button">Remove the speech recogniser</button><span class="hint" id="logLine"></span></div>
   </section>
 
@@ -3031,10 +3034,11 @@ const possess=n=>/s$/i.test(n)?n+'’':n+'’s';
 const photo=id=>S.photos.find(p=>p.id===id);
 
 /* ---------------- the words: what a paragraph says, how long it takes ---------------- */
-/* the teleprompter's own marks in the words said (v21.51): "//" a pause, *a word* to stress, {a note to yourself}; taken out
+/* the teleprompter's own marks in the words said (v21.51): "//" a pause, *a word* to stress, {a note to yourself}, and (v21.52)
+   ">>" the next card (or the next point of a list that builds) as the word before it is said; taken out
    of what is counted, of the cards, of the sheet and of the captions */
-const MK=/\{[^}]*\}|(^|\s)\/\/(?=\s|$)|\*[^*\n]+\*/;
-const unmark=t=>{t=String(t||'');return MK.test(t)?t.replace(/\{[^}]*\}/g,' ').replace(/(^|\s)\/\/(?=\s|$)/g,'$1').replace(/\*([^*\n]+)\*/g,'$1').replace(/[ \t]{2,}/g,' ').replace(/ *\n */g,'\n').trim():t;};
+const MK=/\{[^}]*\}|(^|\s)(\/\/|>>|»)(?=\s|$)|\*[^*\n]+\*/;
+const unmark=t=>{t=String(t||'');return MK.test(t)?t.replace(/\{[^}]*\}/g,' ').replace(/(^|\s)(\/\/|>>|»)(?=\s|$)/g,'$1').replace(/\*([^*\n]+)\*/g,'$1').replace(/[ \t]{2,}/g,' ').replace(/ *\n */g,'\n').trim():t;};
 const words=t=>(unmark(t).replace(/\[[^\]]*\]/g,' x ').match(/[A-Za-z0-9’'-]+/g)||[]).length;
 const todo=t=>/\[[^\]]+\]/.test(String(t||''));
 /* what is said: the row's teleprompter words when it has them, else its paragraphs (column B, on the card in the Panel look) */
@@ -3044,6 +3048,19 @@ function paraOf(i){let k=i;while(k>0&&S.rows[k].cont)k--;return k;}
 function paras(){const P=[];S.rows.forEach((r,i)=>{if(i===0||!r.cont)P.push({start:i,rows:[i]});else P[P.length-1].rows.push(i);});return P;}
 const wpm=()=>Math.max(80,Math.min(220,num(S.meta.tpwpm)||140));
 const mmss=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+
+/* ---------------- the next-card marks (v21.52) ---------------- */
+/* a paragraph with more than one step (more than one card, or a list that builds) gets a ">>" for each step after the first,
+   at the end of the sentence nearest an even share of its words (or, with no sentence end near, after the word itself); a
+   paragraph that has marks already is left as it is */
+const CUE_RE=/(^|\s)(>>|»)(?=\s|$)/;
+function paraSteps(p){return p.rows.length-1+p.rows.reduce((a,i)=>a+buildN(S.rows[i]),0);}
+function placeCues(only){let n=0;paras().forEach((p,k)=>{if(only&&!only.includes(p.start))return;const r=S.rows[p.start],f=String(r.tp||'').trim()?'tp':'say',t=String(r[f]||''),need=paraSteps(p);
+    if(need<1||CUE_RE.test(t))return;const W=[];const re=/\S+/g;let m;while((m=re.exec(t))){if(/^(\/\/|\{.*\}|\[.*\])$/.test(m[0]))continue;W.push({end:m.index+m[0].length,se:/[.!?:;]["”’)\]]*$/.test(m[0])||/^\s*\n/.test(t.slice(m.index+m[0].length))});}
+    if(W.length<2)return;const at=[];for(let j=1;j<=need;j++){const want=Math.round(j*W.length/(need+1))-1,win=Math.max(2,Math.round(W.length/(need+1)/2));let best=-1;
+      for(let d=0;d<=win;d++){for(const q of [want+d,want-d])if(q>=0&&q<W.length-1&&W[q].se&&!at.includes(q)&&(!at.length||q>at[at.length-1])){best=q;break;}if(best>=0)break;}
+      if(best<0)best=Math.max(at.length?at[at.length-1]+1:0,Math.min(W.length-2,want));if(best>=W.length-1||at.includes(best))continue;at.push(best);}
+    let o=t;at.slice().sort((a,b)=>b-a).forEach(q=>{o=o.slice(0,W[q].end)+' >>'+o.slice(W[q].end);});r[f]=o;n+=at.length;});return n;}
 
 /* ---------------- drafting from the case ---------------- */
 /* the case (the facts the workstation shell hands this form) is kept as it last came, so a draft can be made later too */
@@ -3056,9 +3073,23 @@ const bullets=a=>a.filter(Boolean).map(x=>'• '+String(x).trim()).join('\n');
 /* column B as the sheet writes it: the opening sentence a paragraph, the rest the next */
 const lead=t=>String(t||'').replace(/^([^.!?\[\n]{12,}?[.!?])\s+(?=[A-Z\[])/,'$1\n\n');
 const GROUP={overview:'Intro',profile:'Intro',behaviors:'Behavior',function:'Behavior',goals:'Goals',reinforce:'The Plan',proactive:'The Plan',response:'Response',takeaways:'Close',terms:'Close'};
+/* (v21.52) the case's own words, from the profile (DM-1), the plan (TD-1) and the crisis plan (CR-1): a field's items (split at
+   ";", new lines and commas), a list said aloud, a short line for a card */
+const str=v=>String(v==null?'':v).trim();
+const items=t=>str(t).split(/\s*(?:[;\n•]|,\s+)\s*/).map(x=>x.replace(/^[-–*]\s*/,'').replace(/[.]+$/,'').trim()).filter(Boolean);
+const andList=a=>a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const cap1=x=>{x=str(x);return x?x[0].toUpperCase()+x.slice(1):x;};
+/* a card's line: without the asides in brackets, the first clause (or as many of its parts as fit), cut at a word only when
+   nothing shorter is whole */
+const short=(x,n)=>{x=str(x).replace(/\s*\([^)]*\)/g,'').replace(/\s+/g,' ').trim();n=n||64;if(x.length<=n)return x;
+  const c0=x.split(/\s*[;:]\s+|\.\s+/)[0];if(c0.length<=n&&c0.length>=8)return c0;let o='';for(const q of c0.split(/,\s+/)){if((o?o+', '+q:q).length>n)break;o=o?o+', '+q:q;}
+  return o.length>=8?o:x.slice(0,n).replace(/\s+\S*$/,'')+'…';};
+const first=x=>str(x).split(/(?<=[.;])\s+/)[0].replace(/[.;]$/,'');
 function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];const add=(seg,o)=>{if(o&&o.say)o.say=lead(o.say);out.push(newRow(seg,o));};
   const behs=(f.behaviors||[]).filter(b=>b&&(b.label||b.def)),red=behs.filter(b=>!b.isRep&&!/replacement|alternative/i.test(b.type||'')),rep=behs.filter(b=>b.isRep||/replacement|alternative/i.test(b.type||''));
   const fn=f.fn||null,g=f.goals||{},gr=(g.red||[]).filter(x=>x&&(x.text||x.beh)),ga=(g.acq||[]).filter(x=>x&&(x.text||x.beh));
+  const pf=f.profile&&typeof f.profile==='object'?f.profile:null,pl=f.plan&&typeof f.plan==='object'?f.plan:null,cr=f.crisis&&typeof f.crisis==='object'?f.crisis:null;
+  const rsp=pl&&pl.respond&&typeof pl.respond==='object'?pl.respond:{},arr=v=>Array.isArray(v)?v.map(str).filter(Boolean):[];
   const menu=(f.menu||[]).slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).filter(m=>m&&m.name);
   const who=String(S.meta.pname||'').trim()||'[your name and role]',aud=String(S.meta.aud||'').trim()||'a receiving team';
   const segName=k=>(SEGS.find(s=>s[0]===k)||[k,k])[1],on=k=>keys.includes(k);
@@ -3066,9 +3097,12 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
     add(segName('overview'),{say:'This training walks '+aud+' through '+Np+' Functional Behavior Assessment and Behavior Intervention Plan. It is presented by '+who+'.',title:'Presenter',body:[String(S.meta.pname||'').trim()||'[your name]'].concat(String(S.meta.plines||'').split('\n').map(s=>s.trim()).filter(Boolean)).join('\n'),lay:'side'});
     add(segName('overview'),{say:'Everything that follows is meant for someone meeting '+N+' for the first time. It moves from the assessment, to the plan, to what you will do each day.',title:'Covering',
       body:bullets(keys.filter(k=>k!=='overview').map(segName))});}
-  if(on('profile')){
-    add(segName('profile'),{say:'A behavior plan only makes sense in the context of the whole learner, including what '+N+' does well and enjoys. [What '+N+' does well, and what '+N+' enjoys.]',title:'Strengths',body:'• [a strength]\n• [a strength]\n• [an interest]'});
-    add(segName('profile'),{say:'[How '+N+' communicates, and what every adult should do to support it.]',title:'Communication',body:'[what every adult does]'});}
+  if(on('profile')){const st=pf?items(pf.strengths).slice(0,6):[],it=pf?items(pf.interests).slice(0,5):[];
+    add(segName('profile'),{say:'A behavior plan only makes sense in the context of the whole learner, including what '+N+' does well and enjoys. '+(st.length?sent('The team names these strengths: '+andList(st.map(lc1))):'[What '+N+' does well.]')+' '+(it.length?cap1(sent(N+' enjoys '+andList(it.map(lc1)))):'[What '+N+' enjoys.]'),
+      title:'Strengths',body:st.length||it.length?bullets(st.slice(0,4).map(x=>short(cap1(x),40)).concat(it.length?['Enjoys '+short(andList(it.slice(0,3).map(lc1)),40)]:[])):'• [a strength]\n• [a strength]\n• [an interest]'});
+    const cm=pf?[[pf.expr,'Expressive communication: ','Says: '],[pf.recep,'Receptive communication: ','Understands: '],[pf.signals,'Know '+Np+' signals. ','Signals: '],[pf.helps,'What helps: ','Helps: '],[pf.avoid,'What to avoid: ','Avoid: '],[pf.at,'Assistive technology: ','Uses: ']].filter(x=>str(x[0])):[];
+    add(segName('profile'),{say:cm.length?'How '+N+' communicates, and what every adult does to support it. '+cm.map(x=>sent(x[1]+str(x[0]))).join(' '):'[How '+N+' communicates, and what every adult should do to support it.]',
+      title:'Communication',body:cm.length?cm.slice(0,5).map(x=>x[2]+lc1(short(x[0],40))).join('\n'):'[what every adult does]'});}
   if(on('behaviors')){
     if(red.length){
       add(segName('behaviors'),{say:'A target behavior definition must be observable and measurable, so that any two staff members counting the same event arrive at the same number. '+(red.length===1?'One behavior is':nw(red.length)[0].toUpperCase()+nw(red.length).slice(1)+' behaviors are')+' tracked on this plan.',title:'Tracked',body:bullets(red.map(b=>b.label))});
@@ -3087,11 +3121,21 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
     if(teach.length)add(segName('goals'),{say:'A replacement behavior produces the same outcome as the problem behavior through an appropriate response. '+(teach.length===1?'One is':nw(teach.length)[0].toUpperCase()+nw(teach.length).slice(1)+' are')+' being taught.',title:'Teach',body:teach.join('\n')});
     if(!gr.length&&!teach.length)add(segName('goals'),{say:'[The goals of the plan: what will be reduced, and what will be taught.]',title:'Goals',body:'[goal]'});}
   if(on('reinforce')){
-    add(segName('reinforce'),{say:(menu.length?'These are the items and activities '+N+' works for, from the preference assessment, the most preferred first. ':'')+'[How reinforcement is delivered: what earns it, how often, and for how long.]',
+    add(segName('reinforce'),{say:(menu.length?'These are the items and activities '+N+' works for, from the preference assessment, the most preferred first. ':'')+(pl&&(str(pl.rep)||arr(pl.teach).length||arr(pl.sched).length||str(pl.prompted))?[str(pl.rep)?sent('The replacement behavior is: '+str(pl.rep))+' Honor it every time.':'',arr(pl.teach).length?sent('It is taught with '+andList(arr(pl.teach).map(lc1))):'',arr(pl.sched).length?sent('The reinforcement schedule: '+andList(arr(pl.sched).map(lc1))):'',str(pl.prompted)?sent('Prompted and unprompted responses: '+str(pl.prompted)):''].filter(Boolean).join(' '):'[How reinforcement is delivered: what earns it, how often, and for how long.]'),
       title:menu.length?'Works For':'Reinforcement',body:menu.length?bullets(menu.slice(0,6).map(m=>m.name)):'• [what earns it]\n• [how often]'});}
-  if(on('proactive'))add(segName('proactive'),{say:'Proactive strategies prevent the behavior, or make it less likely, by changing what happens before it. [The strategies every adult uses with '+N+'.]',title:'Proactive',body:'• [a strategy]\n• [a strategy]'});
-  if(on('response'))add(segName('response'),{say:'A response plan says what staff do after the behavior begins. It is a safety and de-escalation sequence, followed in order. [The steps.]',title:'Steps',body:'1. [first step]\n2. [next step]\n3. [next step]',lay:'full'});
-  if(on('takeaways'))add(segName('takeaways'),{say:'[The two or three things every adult should remember about '+N+'.]',title:'Remember',body:'• [the first thing]\n• [the second thing]',lay:'full'});
+  if(on('proactive')){const an=pl?arr(pl.ant):[],ac=pl?arr(pl.antCards):[];
+    add(segName('proactive'),{say:'Proactive strategies prevent the behavior, or make it less likely, by changing what happens before it. '+(an.length||ac.length?(an.length?'Every adult working with '+N+' does these things. '+an.map(sent).join(' '):'')+(ac.length?' '+sent('The plan also uses '+andList(ac.map(lc1))):''):'[The strategies every adult uses with '+N+'.]'),
+      title:'Proactive',body:an.length||ac.length?bullets(an.map(x=>cap1(short(x,50))).concat(ac.map(x=>short(x,50))).slice(0,6)):'• [a strategy]\n• [a strategy]'});}
+  if(on('response')){const sp=[[rsp.prec,'At the first sign'+(pl&&str(pl.prec)?' ('+lc1(str(pl.prec).replace(/[.]+$/,''))+')':'')+': ','First sign: '],[rsp.target,'If the behavior occurs: ','If it occurs: '],[rsp.after,'Afterwards: ','After: '],[rsp.not,'What staff do not do: ','Do not: ']].filter(x=>str(x[0]));
+    add(segName('response'),{say:'A response plan says what staff do after the behavior begins. It is a safety and de-escalation sequence, followed in order. '+(sp.length?sp.map(x=>sent(x[1]+str(x[0]))).join(' '):'[The steps.]'),
+      title:'Steps',body:sp.length?sp.map((x,j)=>(j+1)+'. '+x[2]+lc1(short(x[0],46))).join('\n'):'1. [first step]\n2. [next step]\n3. [next step]',lay:'full'});
+    const stg=cr&&Array.isArray(cr.stages)?cr.stages.filter(x=>x&&str(x.s)&&str(x.do)).slice(0,6):[];
+    if(stg.length)add(segName('response'),{say:'When the behavior becomes dangerous, the crisis plan takes over, one stage at a time. '+stg.map((x,j)=>'Stage '+nw(j+1)+', '+lc1(str(x.s).replace(/[.:]+$/,''))+'. '+cap1(sent(str(x.do)))).join(' '),
+      title:'Safety',body:stg.map((x,j)=>(j+1)+'. '+short(str(x.s),26)+': '+lc1(short(x.do,40))).join('\n'),lay:'full'});
+    else if(str(rsp.crisis))add(segName('response'),{say:sent('In a crisis: '+str(rsp.crisis)),title:'Safety',body:short(str(rsp.crisis),120),lay:'full'});}
+  if(on('takeaways')){const an=pl?arr(pl.ant):[],tk=[pl&&str(pl.rep)?['First, the replacement behavior: '+str(pl.rep)+'. Honor it every time.','Honor the replacement: '+lc1(short(str(pl.rep),34))]:null,str(rsp.not)?['Second, what never to do: '+lc1(str(rsp.not)),'Never: '+lc1(short(rsp.not,44))]:null,an.length?['And every day, before anything happens: '+lc1(an[0]),cap1(short(an[0],50))]:null].filter(Boolean);
+    add(segName('takeaways'),{say:tk.length?(tk.length>1?nw(tk.length)[0].toUpperCase()+nw(tk.length).slice(1)+' things matter most. ':'One thing matters most. ')+tk.map(x=>sent(x[0])).join(' '):'[The two or three things every adult should remember about '+N+'.]',
+      title:'Remember',body:tk.length?bullets(tk.map(x=>x[1])):'• [the first thing]\n• [the second thing]',lay:'full'});}
   if(on('terms'))add(segName('terms'),{say:'[Terms specific to '+Np+' plan and to this building, so new staff do not have to guess what they mean.]',title:'Terms',body:'• [term]: [what it means]'});
   /* the chapters of the bar: typed on Setup, or (none yet) one for each part drafted, set on its first row */
   if(!String(S.meta.chapters||'').trim()){const g=[];keys.forEach(k=>{if(!g.includes(GROUP[k]))g.push(GROUP[k]);});S.meta.chapters=g.join('\n');}
@@ -3323,8 +3367,8 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 /* ---------------- Setup ---------------- */
 function renderSetup(){const pk=$('#segPick');if(pk&&!pk.children.length)pk.innerHTML=SEGS.map(([k,l])=>'<label class="ck"><input type="checkbox" data-seg="'+k+'" checked> '+esc(l)+'</label>').join('');
   const f=CASE||{},bits=[];if((f.behaviors||[]).length)bits.push((f.behaviors.length===1?'one target behavior':nw(f.behaviors.length)+' target behaviors')+' (Form '+((f.src&&f.src.behaviors)||'TB-1')+')');
-  if(f.fn&&(f.fn.label||f.fn.key))bits.push('the function (Form FS-1)');if(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))bits.push('the goals (Form GB-1)');if((f.menu||[]).length)bits.push('the reinforcer menu (Form PA-1)');
-  const cl=$('#caseLine');if(cl)cl.textContent=bits.length?'The case holds '+bits.join(', ')+'.':'No case yet: open the case in the workstation (Forms TB-1, FS-1, GB-1, PA-1) and the draft fills from it; without it, the draft is the outline with prompts to write.';
+  if(f.fn&&(f.fn.label||f.fn.key))bits.push('the function (Form FS-1)');if(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))bits.push('the goals (Form GB-1)');if((f.menu||[]).length)bits.push('the reinforcer menu (Form PA-1)');if(f.profile)bits.push('the profile (Form DM-1)');if(f.plan)bits.push('the plan (Form TD-1)');if(f.crisis)bits.push('the crisis plan (Form CR-1)');
+  const cl=$('#caseLine');if(cl)cl.textContent=bits.length?'The case holds '+bits.join(', ')+'.':'No case yet: open the case in the workstation (Forms TB-1, FS-1, GB-1, PA-1, and DM-1, TD-1, CR-1) and the draft fills from it; without it, the draft is the outline with prompts to write.';
   const v=$('#setupVerdict'),n=S.rows.length,P=paras(),w=S.rows.reduce((a,r,i)=>a+(r.cont?0:words(spoken(r))),0),td=S.rows.filter(r=>todo(r.say)||todo(r.title)||todo(r.body)).length;
   if(v)v.innerHTML=n?'<div class="verdict '+(td?'v-mid':'v-ok')+'"><b>'+(td?'Still to write:':'Ready.')+'</b> '+(td?td+' row'+(td===1?'':'s')+' with words in [brackets]. ':'')+n+' card'+(n===1?'':'s')+' in '+P.length+' paragraph'+(P.length===1?'':'s')+', about '+mmss(w/wpm()*60)+' at '+wpm()+' words a minute.</div>':
     '<div class="verdict v-mid"><b>No script yet.</b> Draft from the case (below), import a sheet made before, or Load simulator to see a sample.</div>';}
@@ -3373,14 +3417,14 @@ const ONES=['zero','one','two','three','four','five','six','seven','eight','nine
 function n2w(n){if(n<20)return [ONES[n]];if(n<100)return [TENS[Math.floor(n/10)]].concat(n%10?[ONES[n%10]]:[]);if(n<1000)return [ONES[Math.floor(n/100)],'hundred'].concat(n%100?n2w(n%100):[]);
   if((n>=1100&&n<2000)||(n>=2010&&n<2100))return n2w(Math.floor(n/100)).concat(n%100===0?['hundred']:n%100<10?['oh'].concat(n2w(n%100)):n2w(n%100));return n2w(Math.floor(n/1000)).concat(['thousand'],n%1000?n2w(n%1000):[]);}
 function normTok(w){const out=[];String(w).toLowerCase().replace(/[’']/g,'').replace(/%/g,' percent ').replace(/&/g,' and ').split(/[^a-z0-9]+/).forEach(p=>{if(!p)return;if(/^\d+$/.test(p)&&p.length<=4)n2w(+p).forEach(x=>out.push(x));else if(/^\d+$/.test(p))p.split('').forEach(d=>out.push(ONES[+d]));else out.push(p);});return out;}
-let SW=[],SP=[],SPn=0,SPK=[],PK=[],PW=[];
+let SW=[],SP=[],SPn=0,SPK=[],PK=[],PW=[],CQ=[],CQE=[];
 function tpWordsHtml(text,k){let h='';const re=/(\{[^}]*\})|(\[[^\]]*\])|(\*[^*\n]+\*)|(\n+)|([ \t]+)|([^\s{}\[\]*]+|[{}\[\]*])/g;let m;
   while((m=re.exec(text))){if(m[1])h+='<span class="tp-note">'+esc(m[1].slice(1,-1))+'</span>';else if(m[2])h+=mark(m[2]);else if(m[3])h+='<em class="tp-em">'+tpWordsHtml(m[3].slice(1,-1),k)+'</em>';
-    else if(m[4])h+='<br>';else if(m[5])h+=m[5];else{const w=m[6];if(w==='//'){h+='<span class="tp-pause" title="Pause">‖</span>';continue;}const toks=normTok(w),s=SPn++;SPK[s]=k;toks.forEach(t=>SW.push({w:t,s,k}));h+='<span class="tw" data-s="'+s+'">'+esc(w)+'</span>';}}
+    else if(m[4])h+='<br>';else if(m[5])h+=m[5];else{const w=m[6];if(w==='//'){h+='<span class="tp-pause" title="Pause">‖</span>';continue;}if(w==='>>'||w==='»'){h+='<span class="tp-cue" title="The next card here">▶</span>';CQ.push({k,at:SW.length});continue;}const toks=normTok(w),s=SPn++;SPK[s]=k;toks.forEach(t=>SW.push({w:t,s,k}));h+='<span class="tw" data-s="'+s+'">'+esc(w)+'</span>';}}
   return h;}
-function tpRender(){const st=$('#tpStrip');if(!st)return;const P=paras();SW=[];SPn=0;SPK=[];
+function tpRender(){const st=$('#tpStrip');if(!st)return;const P=paras();SW=[];SPn=0;SPK=[];CQ=[];
   st.innerHTML=P.length?P.map((p,k)=>{const r0=S.rows[p.start];return '<div class="tp-p" data-p="'+k+'">'+'<div class="tp-cards">'+p.rows.map(i=>'<span class="tp-c" data-ci="'+i+'">'+(i+1)+(S.rows[i].title?' · '+esc(S.rows[i].title):'')+'</span>').join('')+'</div><div class="tp-t">'+tpWordsHtml(spoken(r0)||'',k)+'</div></div>';}).join('')+'<div class="tp-end">End of the script</div>':'<div class="tp-p"><div class="tp-t">No script yet.</div></div>';
-  SP=[...st.querySelectorAll('.tw')];PK=[];PW=[];SW.forEach((t,j)=>{if(PK[t.k]==null)PK[t.k]=j;PW[t.k]=(PW[t.k]||0)+1;});TP.pos=Math.min(TP.pos||0,SW.length);
+  SP=[...st.querySelectorAll('.tw')];CQE=[...st.querySelectorAll('.tp-cue')];PK=[];PW=[];SW.forEach((t,j)=>{if(PK[t.k]==null)PK[t.k]=j;PW[t.k]=(PW[t.k]||0)+1;});TP.pos=Math.min(TP.pos||0,SW.length);
   tpStyle();tpGo(TP.i,true);}
 function tpStyle(){const sc=$('#tpScreen');if(!sc)return;sc.style.setProperty('--tps',(num(S.meta.tpsize)||58)+'px');sc.style.setProperty('--tl',Math.max(15,Math.min(60,num(S.meta.tpline)||30))+'%');sc.classList.toggle('mirror',!!S.chk.mirror);
   const v=$('#tpWpmV');if(v)v.textContent=wpm()+' wpm';const md=S.meta.tpmode||'fixed';document.body.classList.toggle('tp-voice',md!=='fixed');const w=$('#tpWpmL');if(w)w.hidden=md==='follow';}
@@ -3419,10 +3463,18 @@ function tpFrame(now){if(!TP.run)return;const dt=Math.min(.1,(now-TP.last)/1000)
   else if(md==='fixed'||(md==='speak'&&VO.speaking)){const k=tpParaAt(TP.y),pe=P[k];if(pe){const n=Math.max(1,PW[k]||words(spoken(S.rows[paras()[k].start]))),secs=n/wpm()*60,end=P[P.length-1].offsetTop+P[P.length-1].offsetHeight;TP.y=Math.min(end,TP.y+pe.offsetHeight/secs*dt);tpApply(false);
     if(PK[k]!=null){const f=Math.max(0,Math.min(1,(TP.y-pe.offsetTop)/Math.max(1,pe.offsetHeight))),p=PK[k]+Math.floor(f*(PW[k]||0));if(p>TP.pos){TP.pos=p;tpReadTo(p);}}}}
   tpAutoCard();TP.raf=requestAnimationFrame(tpFrame);}
-function tpAutoCard(){if(S.chk.tpmanual||performance.now()-TP.man<4000)return;const P=paras();let k,f;
-  if(tpMd()==='follow'&&SW.length){const t=SW[Math.max(0,Math.min(SW.length-1,TP.pos-1))];k=t.k;f=PW[k]?(TP.pos-1-PK[k])/PW[k]:0;}
+/* (v21.52) with next-card marks in the script, the marks change the cards: a paragraph comes up on its first card, and each
+   mark passed (the word before it said, or, scrolling without the words, its line at the reading line) is one more step (the
+   next point of a list that builds, else the next card). With no marks, each paragraph's cards share its words. */
+function stepOf(k,n){const p=paras()[k];let i=p.rows[0],b=0;for(let j=0;j<n;j++){if(b<buildN(S.rows[i])){b++;continue;}if(i+1>=S.rows.length)break;i++;b=0;}return {i,b};}
+function cuePassed(c,j,fol){return fol?TP.pos>=c.at:!!CQE[j]&&CQE[j].offsetTop<=TP.y;}
+function tpAutoCard(){const fol=tpMd()==='follow'&&SW.length;if(CQ.length)CQ.forEach((c,j)=>{const e=CQE[j];if(e)e.classList.toggle('done',cuePassed(c,j,fol));});
+  if(S.chk.tpmanual||performance.now()-TP.man<4000)return;const P=paras();let k,f;
+  if(fol){const t=SW[Math.max(0,Math.min(SW.length-1,TP.pos-1))];k=t.k;f=PW[k]?(TP.pos-1-PK[k])/PW[k]:0;}
   else{k=tpParaAt(TP.y);const pe=pEls()[k];f=pe?(TP.y-pe.offsetTop)/Math.max(1,pe.offsetHeight):0;}
-  const p=P[k];if(!p)return;const idx=p.rows[Math.max(0,Math.min(p.rows.length-1,Math.floor(f*p.rows.length)))];if(idx>TP.i||(k!==TP.lastP&&idx!==TP.i&&P.findIndex(q=>q.rows.includes(TP.i))<k))tpSetCard(idx,buildN(S.rows[idx]));}
+  const p=P[k];if(!p)return;
+  if(CQ.length){let n=0;CQ.forEach((c,j)=>{if(c.k===k&&cuePassed(c,j,fol))n++;});const st=stepOf(k,n);
+    if(st.i>TP.i)tpSetCard(st.i,st.b);else if(st.i===TP.i&&st.b>TP.b){TP.b=st.b;tpInfo();gwReveal();}return;}const idx=p.rows[Math.max(0,Math.min(p.rows.length-1,Math.floor(f*p.rows.length)))];if(idx>TP.i||(k!==TP.lastP&&idx!==TP.i&&P.findIndex(q=>q.rows.includes(TP.i))<k))tpSetCard(idx,buildN(S.rows[idx]));}
 /* the words read so far, dimmed (the voice modes) */
 let RD=0;function tpReadTo(pos){if(!SP.length)return;const s=pos>0&&SW[pos-1]?SW[pos-1].s+1:0;if(s===RD)return;const a=Math.min(s,RD),b=Math.max(s,RD);for(let j=a;j<b&&j<SP.length;j++)SP[j].classList.toggle('rd',j<s);RD=s;}
 function tpStop(){if(TP.run)tpHalt();cdStop();wake(false);}
@@ -3563,6 +3615,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   if(d.addhere!==undefined){const i0=+d.addhere,seg=S.rows[i0].seg;let k=i0;while(k+1<S.rows.length&&S.rows[k+1].seg===seg)k++;S.rows.splice(k+1,0,newRow(seg));renderRows();syncState();const t=$('textarea[data-i="'+(k+1)+'"][data-f="say"]');if(t)t.focus();return;}
   if(d.pic){const [i,j]=d.pic.split(':').map(Number);PICK={i,j};$('#photoIn').click();return;}
   if(d.picx){const [i,j]=d.picx.split(':').map(Number);S.rows[i].pics[j].ph='';prune();renderRows();syncState();return;}});
+$('#cueBtn').addEventListener('click',()=>{const n=placeCues();renderRows();syncState();nbhUI.toast(n?n+' next-card mark'+(n===1?'':'s')+' (>>) placed, each where a card changes or a point comes up: move one by moving its >> in the words.':'No paragraph needs one: every paragraph with more than one card or point has its marks already.',{kind:'ok'});});
 $('#addSeg').addEventListener('click',()=>{S.rows.push(newRow('New segment',{title:'',say:''}));renderRows();syncState();const ins=$$('.tv-segname');if(ins.length){ins[ins.length-1].focus();ins[ins.length-1].select();}});
 $('#addRow').addEventListener('click',()=>{const L=S.rows[S.rows.length-1];S.rows.push(newRow(L?L.seg:'Training Overview'));renderRows();syncState();});
 $('#emptyAll').addEventListener('click',async()=>{if(!S.rows.length)return;if(await nbhUI.confirm('Empty the script?\nEvery row, card and picture is removed.',{ok:'Empty',danger:true})){S.rows=[];S.photos=[];renderAll();}});
@@ -3693,7 +3746,7 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.va
   if(!n){nbhUI.toast(other?'That file was saved by Form '+other+', not by Form TV-1. Nothing was changed.':'That file could not be read as a saved TV-1 form. Nothing was changed.',{kind:'warn'});return;}S=n;renderAll();};r.readAsText(f);});
 $('#clearBtn').addEventListener('click',async()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
 $('#draftBtn').addEventListener('click',async()=>{const keys=$$('#segPick input[data-seg]').filter(c=>c.checked).map(c=>c.dataset.seg);if(!keys.length){nbhUI.toast('Tick the segments to draft (Setup).',{kind:'warn'});setView('setup');return;}
-  const rows=draft(keys);S.rows=S.rows.concat(rows);renderAll();setView('script');
+  const rows=draft(keys);S.rows=S.rows.concat(rows);placeCues(rows.map(r=>S.rows.indexOf(r)));renderAll();setView('script');
   nbhUI.toast(rows.length+' rows drafted'+(CASE?' from the case':' (no case open: the outline, with prompts to write)')+'. Words in [brackets] are still to write.',{kind:'ok'});});
 /* the simulator: a sample student; nothing in it is real */
 const SIMCASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by more than three feet without permission',ex:'walking out of the classroom door; running to the playground',nex:'going to the bathroom with a pass',dim:'frequency'},
@@ -3717,7 +3770,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load a simulated training scr
   const ri=S.rows.findIndex(r=>r.seg==='Proactive Strategies');S.rows.splice(ri,0,newRow('Reinforcement System',{ch:'The Plan',say:'These are the items and activities Sam works for, from the preference assessment, the most preferred first.\n\nSam earns a token for each finished step; five tokens earn five minutes of the chosen item.',title:'Works For',body:'• Tablet time\n• Drawing\n• Playground\n• Music'}),
     newRow('Reinforcement System',{cont:true,title:'Earning',body:'• A token for each finished step\n• Five tokens: five minutes',lay:'lower'}));
   S.rows.splice(1,0,newRow('Training Overview',{cont:true,title:'Training Overview',lay:'title'}));
-  CASE=SIMCASE;renderAll();setView('script');nbhUI.toast('Simulator loaded: a sample training script for Sam ('+S.rows.length+' cards).',{kind:'ok'});}
+  placeCues();CASE=SIMCASE;renderAll();setView('script');nbhUI.toast('Simulator loaded: a sample training script for Sam ('+S.rows.length+' cards).',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
 
 /* ---------------- the case (the workstation shell's facts): kept for drafting; nothing is filled until you draft ---------------- */
