@@ -25,7 +25,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const dl=async fn=>{const [d]=await Promise.all([page.waitForEvent('download'),page.evaluate(fn)]);const p=path.join(OUT,d.suggestedFilename());await d.saveAs(p);return p;};
   /* 1 */
   const v0=await page.evaluate(()=>({v:document.getElementById('setupVerdict').textContent,n:S.rows.length,segs:document.querySelectorAll('#segPick input').length,caseLine:document.getElementById('caseLine').textContent}));
-  ok('1 no script yet: Setup says so, ten segments to tick, no case',v0.n===0&&/No script yet/.test(v0.v)&&v0.segs===10&&/No case yet/.test(v0.caseLine),v0);
+  ok('1 no script yet: Setup says so, eleven segments to tick, no case',v0.n===0&&/No script yet/.test(v0.v)&&v0.segs===11&&/No case yet/.test(v0.caseLine),v0);
   const CASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by more than three feet without permission',ex:'walking out of the classroom door',nex:'going to the bathroom with a pass',dim:'frequency'},{label:'Asking for a break',isRep:true,type:'replacement'}],
     fn:{label:'Escape from demands',statements:['When Jo is given a long task, Jo leaves the area, and the task is taken away.']},goals:{red:[{beh:'Elopement',text:'Elopement will decrease to zero a day for 15 days'}],acq:[{beh:'Asking for a break',text:'Jo will ask for a break in 8 of 10 opportunities'}]},
     menu:[{name:'Music',rank:2},{name:'Tablet time',rank:1}],src:{behaviors:'TB-1'}};
@@ -50,18 +50,18 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.evaluate(()=>loadSim());await sleep(900);
   const s1=await page.evaluate(()=>({n:S.rows.length,p:paras().length,segs:new Set(S.rows.map(r=>r.seg)).size,cont:S.rows.filter(r=>r.cont).map(r=>r.title),client:S.meta.client,td:S.rows.filter(r=>todo(r.say)||todo(r.title)||todo(r.body)).map(r=>r.title),
     thumbs:document.querySelectorAll('.tv-thumb .gx').length,dis:[...document.querySelectorAll('textarea[data-f="say"]')].filter(t=>t.disabled).length}));
-  ok('3 the simulator: 18 cards in 15 paragraphs over ten segments, three cards on a paragraph above, nothing left to write',s1.n===18&&s1.p===15&&s1.segs===10&&s1.cont.join('|')==='Training Overview|Function|Earning'&&!s1.td.length&&/^SIMULATED/.test(s1.client),s1);
-  ok('3 each row shows its card; a continued row\'s words are the paragraph above (its box is off)',s1.thumbs===18&&s1.dis===3,s1);
+  ok('3 the simulator: 20 cards in 17 paragraphs over eleven segments (a title card first, a closing card last), three cards on a paragraph above, nothing left to write',s1.n===20&&s1.p===17&&s1.segs===11&&s1.cont.join('|')==='Training Overview|Function|Earning'&&!s1.td.length&&/^SIMULATED/.test(s1.client),s1);
+  ok('3 each row shows its card; a continued row\'s words are the paragraph above (its box is off)',s1.thumbs===20&&s1.dis===3,s1);
   /* 4 */
-  await page.evaluate(()=>setView('prompter'));await sleep(500);
+  await page.evaluate(()=>{setView('prompter');tpGo(1,true);});await sleep(500);
   const tp=async()=>page.evaluate(()=>({i:TP.i,on:[...document.querySelectorAll('#tpStrip .tp-p')].findIndex(e=>e.classList.contains('on')),chip:(document.querySelector('#tpStrip .tp-c.on')||{}).textContent,pos:document.getElementById('tpPos').textContent,foot:document.getElementById('tpFoot').textContent,y:TP.y}));
-  const t0=await tp();ok('4 the teleprompter opens on card 1, paragraph 1; the next is the same paragraph',t0.i===0&&t0.on===0&&/^Card 1 of 18/.test(t0.pos)&&/Next: \(same paragraph\) Training Overview/.test(t0.foot),t0);
+  const t0=await tp();ok('4 the teleprompter on card 2 (the presenter), paragraph 2; the next is the same paragraph',t0.i===1&&t0.on===1&&/^Card 2 of 20/.test(t0.pos)&&/Next: \(same paragraph\) Training Overview/.test(t0.foot),t0);
   await page.keyboard.press('PageDown');await sleep(500);const t1=await tp();
-  ok('4 Page Down: card 2, the same paragraph (the strip does not move), its chip lit',t1.i===1&&t1.on===0&&t1.y===t0.y&&/^2 · Training Overview/.test(t1.chip),t1);
+  ok('4 Page Down: card 3, the same paragraph (the strip does not move), its chip lit',t1.i===2&&t1.on===1&&t1.y===t0.y&&/^3 · Training Overview/.test(t1.chip),t1);
   await page.keyboard.press('ArrowRight');await sleep(500);const t2=await tp();
-  ok('4 the arrow: card 3, the next paragraph, the strip moves up to it',t2.i===2&&t2.on===1&&t2.y>t1.y,t2);
+  ok('4 the arrow: card 4, the next paragraph, the strip moves up to it',t2.i===3&&t2.on===2&&t2.y>t1.y,t2);
   await page.keyboard.press('Enter');await page.keyboard.press('ArrowLeft');await page.keyboard.press('PageUp');await sleep(500);const t3=await tp();
-  ok('4 Enter forward, the left arrow and Page Up back',t3.i===1,t3);
+  ok('4 Enter forward, the left arrow and Page Up back',t3.i===2,t3);
   await page.keyboard.press(' ');await sleep(400);const cd=await page.evaluate(()=>{const o=document.getElementById('tpCd');return {cd:o&&!o.hidden?o.textContent:'',run:TP.run};});
   ok('4 Space: 3, 2, 1 first (v21.51), then the scroll',cd.cd==='3'&&!cd.run,cd);
   await sleep(3000);const run=await page.evaluate(()=>({run:TP.run,b:document.getElementById('tpRun').textContent,cd:document.getElementById('tpCd').hidden}));await page.keyboard.press(' ');await sleep(100);
@@ -73,17 +73,17 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 a row\'s teleprompter words go on the teleprompter in place of its paragraphs; blank, the paragraphs',tpw.a==='Words said here, not on the card.'&&tpw.b.replace(/[\s▶]/g,'')===tpw.say.replace(/>>|\s/g,''),tpw);
   await page.click('#tpRec');await sleep(300);await page.keyboard.press('PageDown');await sleep(400);await page.keyboard.press('PageDown');await sleep(400);await page.click('#tpRec');
   const lg=await page.evaluate(()=>({log:S.log,line:document.getElementById('logLine').textContent,rec:document.getElementById('tpRec').textContent}));
-  ok('4 the clock keeps each card\'s time (the card it started on, then each next)',lg.log.length===3&&lg.log.map(l=>l.i).join()==='1,2,3'&&lg.log[2].t>lg.log[1].t&&lg.log[1].t>=lg.log[0].t&&/3 card times/.test(lg.line)&&lg.rec==='Start the clock',lg);
+  ok('4 the clock keeps each card\'s time (the card it started on, then each next)',lg.log.length===3&&lg.log.map(l=>l.i).join()==='2,3,4'&&lg.log[2].t>lg.log[1].t&&lg.log[1].t>=lg.log[0].t&&/3 card times/.test(lg.line)&&lg.rec==='Start the clock',lg);
   const csvP=await dl(()=>document.getElementById('logCsv').click());const csv=fs.readFileSync(csvP,'utf8');
-  ok('4 the card times export as CSV',/^"Card","Seconds","Time","Segment","Title"\n"2",/.test(csv)&&csv.split('\n').length===4&&/"Covering"/.test(csv),csv);
+  ok('4 the card times export as CSV',/^"Card","Seconds","Time","Segment","Title"\n"3",/.test(csv)&&csv.split('\n').length===4&&/"Covering"/.test(csv),csv);
   await page.evaluate(()=>document.querySelector('[data-c="mirror"]').click());await page.evaluate(()=>{const r=document.querySelector('[data-m="tpsize"]');r.value='80';r.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(200);
   const mi=await page.evaluate(()=>{const sc=document.getElementById('tpScreen');return {m:sc.classList.contains('mirror'),tf:getComputedStyle(sc).transform,fs:getComputedStyle(document.querySelector('.tp-p')).fontSize};});
   ok('4 mirror flips the screen; the size sets the words',mi.m&&/^matrix\(-1/.test(mi.tf)&&mi.fs==='80px',mi);
   await page.evaluate(()=>document.querySelector('[data-c="mirror"]').click());
   /* v21.51 the marks, the reading line, the scroll across paragraphs with the cards following it, the voice without a microphone */
-  const mk=await page.evaluate(()=>{const r=S.rows[0],o=r.tp;r.tp='Hello // there *Sam* {smile} 15 again';tpRender();const t=document.querySelector('#tpStrip .tp-p .tp-t');
-    const res={pause:!!t.querySelector('.tp-pause'),em:(t.querySelector('.tp-em')||{}).textContent,note:(t.querySelector('.tp-note')||{}).textContent,tw:[...t.querySelectorAll('.tw')].map(e=>e.textContent).join(' '),sw:SW.filter(x=>x.k===0).map(x=>x.w).join(' '),n:words(r.tp)};
-    r.tp=o;const s0=r.say;r.say='Welcome // to the *plan*. >> {breathe}';const b=document.createElement('div');b.innerHTML=cardHtml(r,{});res.card=b.querySelector('.pn-in').textContent;res.B=sheetRows()[0][1];r.say=s0;tpRender();return res;});
+  const mk=await page.evaluate(()=>{const r=S.rows[1],o=r.tp;r.tp='Hello // there *Sam* {smile} 15 again';tpRender();const t=document.querySelectorAll('#tpStrip .tp-p .tp-t')[1];
+    const res={pause:!!t.querySelector('.tp-pause'),em:(t.querySelector('.tp-em')||{}).textContent,note:(t.querySelector('.tp-note')||{}).textContent,tw:[...t.querySelectorAll('.tw')].map(e=>e.textContent).join(' '),sw:SW.filter(x=>x.k===1).map(x=>x.w).join(' '),n:words(r.tp)};
+    r.tp=o;const s0=r.say;r.say='Welcome // to the *plan*. >> {breathe}';const b=document.createElement('div');b.innerHTML=cardHtml(r,{});res.card=b.querySelector('.pn-in').textContent;res.B=sheetRows()[1][1];r.say=s0;tpRender();return res;});
   ok('4 the marks: a pause, a word stressed and a note show on the teleprompter; the words are matched without them (15 as fifteen)',mk.pause&&mk.em==='Sam'&&mk.note==='smile'&&mk.tw==='Hello there Sam 15 again'&&mk.sw==='hello there sam fifteen again'&&mk.n===5,mk);
   ok('4 the marks never reach a card or the sheet',!/\/\/|\*|\{|breathe/.test(mk.card)&&/^Welcome to the plan\./.test(mk.card)&&mk.B==='Welcome to the plan.',mk);
   await page.evaluate(()=>{const r=document.querySelector('[data-m="tpline"]');r.value='50';r.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(100);
@@ -185,8 +185,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'].concat(Array(17).fill(''));syncState();});
   const xP=await dl(()=>document.getElementById('xlsxBtn').click());
   const wb=await page.evaluate(async b=>{const u=Uint8Array.from(atob(b),c=>c.charCodeAt(0));const sh=await readXlsx(u);return sh.map(s=>({name:s.name,n:s.rows.length,w:Math.max(...s.rows.map(r=>r.length)),r:s.rows}));},fs.readFileSync(xP).toString('base64'));
-  ok('6 the workbook: the first tab every row (A to Z in the Chapters look), then a tab for each other segment',wb.length===10&&wb[0].name==='01_Training_Overview'&&wb[0].n===18&&wb[0].w>=22&&wb[1].name==='02_Student_Profile'&&wb[3].name==='04_Function_And_Data'&&wb[9].name==='10_Terms_And_Definitions',wb.map(s=>[s.name,s.n,s.w]));
-  ok('6 a continued row repeats its paragraph\'s words in column B; captions in E, F; the template\'s columns G to I kept',wb[0].r[1][1]===wb[0].r[0][1]&&wb[0].r[1][2]==='Training Overview'&&wb[0].r[3][4]==='Sam at the art table'&&wb[0].r[3].slice(6,9).join()==='G,H,I',wb[0].r.slice(0,4));
+  ok('6 the workbook: the first tab every row (A to Z in the Chapters look), then a tab for each other segment',wb.length===11&&wb[0].name==='01_Training_Overview'&&wb[0].n===20&&wb[10].name==='11_Closing'&&wb[0].w>=22&&wb[1].name==='02_Student_Profile'&&wb[3].name==='04_Function_And_Data'&&wb[9].name==='10_Terms_And_Definitions',wb.map(s=>[s.name,s.n,s.w]));
+  ok('6 a continued row repeats its paragraph\'s words in column B; captions in E, F; the template\'s columns G to I kept',wb[0].r[2][1]===wb[0].r[1][1]&&wb[0].r[2][2]==='Training Overview'&&wb[0].r[3][4]==='Sam at the art table'&&wb[0].r[3].slice(6,9).join()==='G,H,I',wb[0].r.slice(0,4));
   const before=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,unmark(r.say),r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
   await page.setInputFiles('#impIn',xP);await sleep(900);
   const after=await page.evaluate(()=>JSON.stringify(S.rows.map(r=>[r.seg,unmark(r.say),r.cont,r.title,r.body,r.pics.map(p=>p.cap),r.x.slice(0,3),chOf(r)])));
@@ -214,7 +214,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.evaluate(()=>loadSim());await sleep(800);
   const cc=await page.evaluate(()=>{S.meta.look='chapters';const P=paras();S.log=P.map((p,k)=>({i:p.start,t:k?k*15+3:0,seg:S.rows[p.start].seg,title:S.rows[p.start].title}));S.wt=[];
     S.rows[0].say='Welcome // to *Sam’s* training, {smile} everyone. '+S.rows[0].say;const c=chaptersOf(),q=cuesOf();
-    const k0=SW.filter(x=>x.k===0),s0=[...new Set(k0.map(x=>x.s))];S.wt=s0.map((s,j)=>[s,j*0.5]);const q2=cuesOf();const first2=q2.length>1?q2[1]:null;const idx2=first2?s0.findIndex(s=>first2.text.split(/\s/)[0]===SP[s].textContent.replace(/[,.]$/,'')):-1;
+    const k0=SW.filter(x=>x.k===0),s0=[...new Set(k0.map(x=>x.s))];S.wt=s0.map((s,j)=>[s,j*0.5]);const q2=cuesOf();const first2=q2.length>1?q2[1]:null;const idx2=first2?q2[0].text.split(/\s+/).length:-1;
     return {c:c.list.map(x=>hms(x.t)+' '+x.l),note:c.note,chs:chList().list,q0:q.slice(0,3),n:q.length,maxLine:Math.max(...q.map(x=>Math.max(...x.text.split('\n').map(l=>l.length)))),lines:Math.max(...q.map(x=>x.text.split('\n').length)),
       mono:q.every((x,j)=>x.b>x.a&&(!q[j+1]||x.b<=q[j+1].a+1e-9)),marks:q.some(x=>/\/\/|\*|\{|smile/.test(x.text)),w2:first2&&first2.a,want2:idx2*0.5,idx2,q2a:q2[0]};});
   ok('9 YouTube chapters: the first at 0:00, one for each chapter of the bar (each 10 seconds or more)',cc.c.length===cc.chs.length&&cc.c[0]==='0:00 '+cc.chs[0]&&cc.c.every((x,j)=>x.endsWith(' '+cc.chs[j]))&&!cc.note,cc);
@@ -256,9 +256,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('8 the Panel look: a long list closes up its spacing first; the words keep their size',pn.fs===30&&parseFloat(pn.lg)<1.15&&!pn.over,pn);
   await page.evaluate(()=>setView('graphics'));await sleep(500);await page.screenshot({path:path.join(OUT,'graphics.png'),fullPage:true});
   const gx=await page.evaluate(()=>({big:document.querySelectorAll('#gxBig .gx').length,grid:document.querySelectorAll('#gxGrid .gx-t').length,pos:document.getElementById('gxPos').textContent}));
-  ok('8 the Graphics view: the card large and all 18 below',gx.big===1&&gx.grid===18&&gx.pos==='Card 1 of 18',gx);
+  ok('8 the Graphics view: the card large and all 20 below',gx.big===1&&gx.grid===20&&gx.pos==='Card 1 of 20',gx);
   await page.evaluate(()=>{renderPrint();});const pr=await page.evaluate(()=>({h:document.querySelector('#printOut .pr-h').textContent,g:document.querySelectorAll('#printOut .pr-g').length,r:document.querySelectorAll('#printOut .pr-r').length}));
-  ok('8 print: the script by segment, every row',/Sam’s Training Video/.test(pr.h)&&pr.g===10&&pr.r===18,pr);
+  ok('8 print: the script by segment, every row',/Sam’s Training Video/.test(pr.h)&&pr.g===11&&pr.r===20,pr);
   await page.emulateMedia({media:'print'});const vis=await page.evaluate(()=>({p:getComputedStyle(document.getElementById('printOut')).display,s:getComputedStyle(document.querySelector('.only-graphics')).display}));await page.emulateMedia({media:'screen'});
   ok('8 only the script prints',vis.p==='block'&&vis.s==='none',vis);
   /* 9 the Chapters look (the newer template): the chapter bar with the card's own chapter lit, the ticker, the A-Z sheet */
