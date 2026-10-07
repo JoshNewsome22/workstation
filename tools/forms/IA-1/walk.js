@@ -14,10 +14,20 @@
 (function(){
 'use strict';
 /* Save as video (nbh-tk1-video.js) names the file and the dialog's words for this form */
-window.NBH_WALK_INFO={file:'FAST walkthrough',from:'from this form: the FAST worksheet, its totals, agreement and figures, and the research behind them',what:'form'};
+/* (v21.57) three walkthroughs share the engine: the FAST for the assessor, the FAST for informants (two minutes), the Convergence sheet */
+let MODE='fast';
+const INFO={fast:{file:'FAST walkthrough',from:'from this form: the FAST worksheet, its totals, agreement and figures, and the research behind them'},
+  inf:{file:'FAST for informants',from:'from this form: the target behavior, the FAST worksheet and Section 1, for the people who answer it'},
+  conv:{file:'Convergence walkthrough',from:'from this form: the Convergence sheet, its verdict and figure, the hypothesis, the decision and the verification record'}};
+window.NBH_WALK_INFO=Object.assign({what:'form'},INFO.fast);
 const SW=1280,SH=720,PAUSE=.4;
-const CHOF={intro:'fast',cats:'fast',define:'before',informants:'before',items:'fill',na:'fill',totals:'scoring',verdict:'scoring',agree:'agreement',pubitems:'agreement',outagree:'agreement',validity:'research',concur:'research',meaning:'meaning',section1:'meaning',next:'meaning',outro:'meaning'};
-const CHAPS=[['fast','The FAST'],['before','Before you start'],['fill','Filling it in'],['scoring','Scoring'],['agreement','Agreement'],['research','The research'],['meaning','What it means']];
+const CHOF={intro:'fast',cats:'fast',define:'before',informants:'before',items:'fill',na:'fill',totals:'scoring',verdict:'scoring',practice:'scoring',practice_answer:'scoring',agree:'agreement',pubitems:'agreement',outagree:'agreement',validity:'research',concur:'research',meaning:'meaning',section1:'meaning',next:'meaning',outro:'meaning',
+  i_intro:'inf',i_one:'inf',i_items:'inf',i_na:'inf',i_own:'inf',i_outro:'inf',
+  c_intro:'conv_sheet',c_rows:'conv_sheet',c_vote:'conv_rules',c_verdict:'conv_rules',c_phys:'conv_rules',c_fig:'conv_rules',c_hyp:'conv_next',c_decide:'conv_next',c_fa:'conv_fa',c_outro:'conv_fa'};
+const CHAPS_BY={fast:[['fast','The FAST'],['before','Before you start'],['fill','Filling it in'],['scoring','Scoring'],['agreement','Agreement'],['research','The research'],['meaning','What it means']],
+  inf:[['inf','The FAST, for informants']],
+  conv:[['conv_sheet','The sheet'],['conv_rules','Consensus'],['conv_next','Hypothesis and decision'],['conv_fa','After the analysis']]};
+const IDS_BY={fast:null,inf:['i_intro','i_one','i_items','i_na','i_own','i_outro'],conv:['c_intro','c_rows','c_vote','c_verdict','c_phys','c_fig','c_hyp','c_decide','c_fa','c_outro']};
 /* the narration as written in walk-script.json, used only when walk-audio.js is not beside the form (its texts always win) */
 const FB={};(window.IA_WALK_SCRIPT||[]).forEach(l=>{FB[l.id]=l.text;});
 
@@ -71,24 +81,48 @@ const EX={
     'fast.ml_t':'mid-morning academics','fast.ml_s':'independent worksheets','fast.ml_p':'classroom teacher present','fast.ll_t':'arrival; preferred activity block','fast.ll_s':'one-to-one preferred activity','fast.ll_p':'one-to-one staff',
     'fast.before':'A worksheet is handed out, or a direction is repeated.','fast.after':'The task is removed; the student is sent to the calm corner.','fast.tx':'None listed (example)',
     'fast.incons':'B answered No to item 6 but wrote that the behavior starts when worksheets are handed out: ask B about item 6, and observe the start of independent work.'}};
-const hasFast=()=>document.querySelector('select[name^="fast["]')&&[...document.querySelectorAll('select[name^="fast["]')].some(s=>s.value!=='');
+const hasFast=()=>[...document.querySelectorAll('select[name^="fast["]')].some(s=>s.value!=='');
+const hasAny=()=>[...document.querySelectorAll('select[data-inst]')].some(s=>s.value!=='')||[...document.querySelectorAll('select[name^="int["][name$=".fn"]')].some(s=>s.value!=='');
+/* the Convergence example: a third informant (the parent) whose FAST, QABF and MAS point to attention while the teacher's and the
+   paraprofessional's point to escape: escape leads, two of three informants (a majority without agreement); the interview by the
+   teacher says escape; the functional analysis, entered afterwards, found escape */
+const EXC={
+  C:{1:'Y',2:'Y',3:'Y',4:'N',5:'N',6:'N',7:'Y',8:'N',9:'N',10:'N',11:'N',12:'N',13:'N',14:'N',15:'N',16:'N'},
+  fields:{'inf[2].name':'Parent (example)','inf[2].role':'parent','inf[2].mo':'all','inf[2].daily':'No','inf[2].hrs':'2','inf[2].set':'home; school events','inf[2].train':'None',
+    'plan.fast.u':'Yes','plan.fast.who':'A, B, C','plan.qabf.u':'Yes','plan.qabf.who':'A, B, C','plan.mas.u':'Yes','plan.mas.who':'A, B, C','plan.int.u':'Yes','plan.int.who':'A',
+    'int[0].inst':'FACTS','int[0].who':'A','int[0].routine':'independent math work 10:15 to 10:45','int[0].routineLow':'preferred activity with one-to-one staff','int[0].a':'an independent worksheet is presented','int[0].c':'the task is removed; sent to the calm corner',
+    'int[0].idio':'multi-step math worksheets','int[0].summary':'During independent work, when a worksheet is presented, the student hits staff, and as a result the task is removed. (Example.)','int[0].fn':'escape','int[0].conf':'4','int[0].by':'Assessor (example)',
+    'hyp.se':'short sleep (parent report); days with a substitute','hyp.a':'When an independent, multi-step math worksheet is presented','hyp.b':'the student hits staff (Aggression toward staff, example)','hyp.c':'and as a result the task is removed: escape from demands (2 of 3 informants; the interview agrees)',
+    'hyp.alt':'Attention (the parent\'s FAST, QABF and MAS; the teacher\'s attention the behavior draws)','hyp.idio':'multi-step math worksheets; the first minute of independent work; a substitute teacher',
+    'fa.out':'escape','fa.date':'10/21/2026','fa.design':'Multielement (Iwata et al., 1982/1994)','dec.fa':true,'dec.interview':true,
+    'dec.note':'Two of three informants point to escape and the interview agrees, but the parent sees attention: a full multielement analysis with both conditions, after a follow-up interview on FAST items 1 to 4. (Example.)'}};
+/* the QABF (0 to 3, five items a subscale) and the MAS (0 to 6, four items a subscale) for an informant whose target is one common category */
+function exInst(key,r,target){const d=INST[key],hi=key==='qabf'?[3,2,3,2,3]:[5,6,5,6],lo=key==='qabf'?[0,1,0,0,1]:[1,0,1,0];
+  const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e)e.value=String(v);};
+  d.cats.forEach((c,ci)=>{const on=c[2].includes(target);c[1].forEach((it,k)=>set(key+'['+r+']['+it+']',(on?hi:lo)[(k+r)%(on?hi:lo).length]));});}
 /* runs fn with the example in the form's fields, then puts every field back as it was (all of it in one turn: nothing else runs between) */
 function withExample(fn){
-  if(hasFast()||typeof snapshot!=='function'||typeof applyFields!=='function'||typeof renderInst!=='function')return fn(false);
-  const snap=snapshot(),nEl=document.getElementById('nInf'),n0=nEl?nEl.value:'';
-  try{if(nEl)nEl.value='2';renderInst('fast');
-    const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v;};
+  const need=MODE==='conv'?!hasAny():!hasFast();
+  if(!need||typeof snapshot!=='function'||typeof applyFields!=='function'||typeof renderInst!=='function')return fn(false);
+  const snap=snapshot(),nEl=document.getElementById('nInf'),n0=nEl?nEl.value:'',iEl=document.getElementById('nInt'),i0=iEl?iEl.value:'';
+  const keys=MODE==='conv'?['fast','qabf','mas']:['fast'];
+  const set=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v;};
+  try{if(nEl)nEl.value=MODE==='conv'?'3':'2';keys.forEach(k=>renderInst(k));
     Object.keys(EX.fields).forEach(k=>set(k,EX.fields[k]));
     for(let it=1;it<=16;it++){set('fast[0]['+it+']',EX.A[it]);set('fast[1]['+it+']',EX.B[it]);}
-    if(typeof renderTot==='function')renderTot('fast');
+    if(MODE==='conv'){Object.keys(EXC.fields).forEach(k=>set(k,EXC.fields[k]));for(let it=1;it<=16;it++)set('fast[2]['+it+']',EXC.C[it]);
+      [0,1,2].forEach(r=>{exInst('qabf',r,r===2?'attention':'escape');exInst('mas',r,r===2?'attention':'escape');});}
+    if(typeof renderTot==='function')keys.forEach(k=>renderTot(k));
+    if(MODE==='conv'&&typeof renderSummary==='function')renderSummary();
     return fn(true);}
-  finally{if(nEl)nEl.value=n0;renderInst('fast');applyFields(snap);if(typeof renderTot==='function')renderTot('fast');}}
+  finally{if(nEl)nEl.value=n0;if(iEl)iEl.value=i0;keys.forEach(k=>renderInst(k));applyFields(snap);if(typeof renderTot==='function')keys.forEach(k=>renderTot(k));if(MODE==='conv'&&typeof renderSummary==='function')renderSummary();}}
 
 /* ---------------- the build ---------------- */
 let B=null;
 function tempShow(sec){if(!sec||getComputedStyle(sec).display!=='none')return()=>{};const old=sec.style.cssText;
   sec.style.cssText='display:block!important;position:absolute;left:-30000px;top:0;width:12in;visibility:hidden';return()=>{sec.style.cssText=old;};}
-function build(){const D=dom();if(!D)return null;stop(true);
+function build(){const D=dom();if(!D)return null;stop(true);quizHide();
+  window.NBH_WALK_INFO=Object.assign({what:'form'},INFO[MODE]||INFO.fast);
   const restore=tempShow(D.sec);
   try{fit();withExample(ex=>{B=compose(D,ex);});}
   finally{restore();}
@@ -107,7 +141,7 @@ function copyOf(orig){if(!orig)return null;const c=orig.cloneNode(true);
   const ov=[...orig.querySelectorAll('input,select,textarea')],cv=[...c.querySelectorAll('input,select,textarea')];
   cv.forEach((e,i)=>{const o=ov[i]||e;const s=document.createElement('span');s.className='iaw-v';
     if(o.type==='checkbox'||o.type==='radio'){s.textContent=o.checked?'☑':'☐';s.classList.add('iaw-chk');}
-    else{const v=String(o.value==null?'':o.value);s.textContent=v;if(e.tagName==='TEXTAREA')s.classList.add('iaw-ta');if(!v)s.classList.add('iaw-empty');}
+    else{let v=String(o.value==null?'':o.value);if(o.tagName==='SELECT'&&o.selectedOptions&&o.selectedOptions[0])v=o.selectedOptions[0].textContent.trim();s.textContent=v;if(e.tagName==='TEXTAREA')s.classList.add('iaw-ta');if(!v)s.classList.add('iaw-empty');}
     e.replaceWith(s);});
   c.querySelectorAll('button,[hidden],.noprint,.nbh-print-head,.no-print').forEach(x=>x.remove());
   c.querySelectorAll('[id]').forEach(e=>{if(e.tagName.toLowerCase()!=='pattern')e.removeAttribute('id');});
@@ -121,44 +155,49 @@ function compose(D,ex){
   const cred=div('wk-credit');cred.textContent=CREDIT_WALK;st.appendChild(cred);
   const notes=[];
   if(!audioLines())notes.push('The recorded narration (nbh-ia1-narration.js) is not beside this form: the captions are read by the device’s own voice where it has one.');
-  if(ex)notes.push('The FAST sheet has no answers yet, so the walkthrough shows a worked example of two informants. Enter a case (or load the simulation) and it is built from that instead.');
+  if(ex)notes.push(MODE==='conv'?'No instrument has answers yet, so the walkthrough shows a worked example of three informants and three instruments. Enter a case (or load the simulation) and it is built from that instead.':'The FAST sheet has no answers yet, so the walkthrough shows a worked example of two informants. Enter a case (or load the simulation) and it is built from that instead.');
   const n=typeof nInf==='function'?nInf():2;
   /* the world the camera moves over: the Setup sheet's definition and informants, the FAST worksheet, its figures, Section 1 */
   const world=div('iaw-world');Lcam.appendChild(world);
   const PW=816;
   const paper=(cls)=>{const p=div('smw-paper iaw-paper '+(cls||''));p.style.width=PW+'px';world.appendChild(p);return p;};
   const q1=(s,root)=>(root||document).querySelector(s);
+  let setupP=null,fastP=null,figP=null,s1P=null,sumP=null,defsC=null,infC=null,chk=null,barC=null,methC=null,twoC=null,grid=null,tot=null,verd=null,figsC=null,fig3C=null,s1C=null,sum=null;
+  if(MODE==='conv'){/* the Convergence sheet, whole (its print head, references and signatures left out) */
+    sumP=paper('iaw-sum');sum=copyOf(q1('#summary'));if(sum){sum.classList.remove('sheet');sum.querySelectorAll('.cite,.sig').forEach(x=>x.remove());const mf=sum.querySelector('.ident');if(mf)mf.remove();sumP.appendChild(sum);}}
+  else{
   /* 1. setup: the definition rows and the informants */
-  const setupP=paper('iaw-setup');
+  setupP=paper('iaw-setup');
   setupP.appendChild(div('bar','Setup: Target Behavior and Informants'));
-  const defs0=q1('#setup .defs');const defsC=copyOf(defs0);if(defsC){[...defsC.querySelectorAll('.drow')].forEach((r,i)=>{if(i>1)r.remove();});setupP.appendChild(defsC);}
+  const defs0=q1('#setup .defs');defsC=copyOf(defs0);if(defsC){[...defsC.querySelectorAll('.drow')].forEach((r,i)=>{if(i>1)r.remove();});setupP.appendChild(defsC);}
   const h3=div('sub','Informants');h3.className='sub iaw-h3';setupP.appendChild(h3);
-  const infC=copyOf(q1('#infTbl'));if(infC){const wrap=div('iaw-tblwrap');wrap.appendChild(infC);setupP.appendChild(wrap);
+  infC=copyOf(q1('#infTbl'));if(infC){const wrap=div('iaw-tblwrap');wrap.appendChild(infC);setupP.appendChild(wrap);
     [...infC.tBodies[0]?infC.tBodies[0].rows:[]].forEach((r,i)=>{if(i>=n)r.remove();});}
-  const chk=copyOf(q1('#setup .chkrow'));if(chk)setupP.appendChild(chk);
+  chk=copyOf(q1('#setup .chkrow'));if(chk)setupP.appendChild(chk);
   /* 2. the FAST worksheet: the grid, the totals, the verdict */
-  const fastP=paper('iaw-fast');
-  const barC=copyOf(q1('#fast .bar'));if(barC)fastP.appendChild(barC);
-  const methC=copyOf(q1('#fast p.method'));if(methC)fastP.appendChild(methC);
-  const two0=[...document.querySelectorAll('#fast .twoup')].find(e=>!e.classList.contains('figs'));const twoC=copyOf(two0);if(twoC)fastP.appendChild(twoC);
-  const grid=twoC&&twoC.querySelector('table.grid.item'),tot=twoC&&twoC.querySelectorAll('table.grid')[1],verd=twoC&&twoC.querySelector('.verdict');
+  fastP=paper('iaw-fast');
+  barC=copyOf(q1('#fast .bar'));if(barC)fastP.appendChild(barC);
+  methC=copyOf(q1('#fast p.method'));if(methC)fastP.appendChild(methC);
+  const two0=[...document.querySelectorAll('#fast .twoup')].find(e=>!e.classList.contains('figs'));twoC=copyOf(two0);if(twoC)fastP.appendChild(twoC);
+  grid=twoC&&twoC.querySelector('table.grid.item');tot=twoC&&twoC.querySelectorAll('table.grid')[1];verd=twoC&&twoC.querySelector('.verdict');
+  if(MODE!=='inf'){
   /* 3. the figures */
-  const figP=paper('iaw-figs');
-  const figsC=copyOf(q1('#fast .twoup.figs')),fig3C=copyOf(q1('#fastFig3'));if(figsC)figP.appendChild(figsC);if(fig3C)figP.appendChild(fig3C);
+  figP=paper('iaw-figs');
+  figsC=copyOf(q1('#fast .twoup.figs'));fig3C=copyOf(q1('#fastFig3'));if(figsC)figP.appendChild(figsC);if(fig3C)figP.appendChild(fig3C);}
   /* 4. Section 1 */
-  const s1P=paper('iaw-s1');
+  s1P=paper('iaw-s1');
   const s1h=[...document.querySelectorAll('#fast h3.sub')].find(h=>/Section 1/.test(h.textContent));
   if(s1h){s1P.appendChild(copyOf(s1h));const pm=s1h.nextElementSibling;if(pm&&pm.matches('p.method'))s1P.appendChild(copyOf(pm));}
-  const s1C=copyOf(q1('#fast .defs'));if(s1C)s1P.appendChild(s1C);
+  s1C=copyOf(q1('#fast .defs'));if(s1C)s1P.appendChild(s1C);}
   /* the papers one under the other */
-  let y=0;[setupP,fastP,figP,s1P].forEach(p=>{p.style.top=y+'px';y+=p.offsetHeight+70;});
+  let y=0;[setupP,fastP,figP,s1P,sumP].filter(Boolean).forEach(p=>{p.style.top=y+'px';y+=p.offsetHeight+70;});
   world.style.width=PW+'px';world.style.height=y+'px';
   /* positions in the world (the camera's coordinates) */
   const wrel=el=>{if(!el)return null;const r=el.getBoundingClientRect(),c=world.getBoundingClientRect();const k=c.width/(world.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y=Math.min(...rs.map(r=>r.y));return{x,y,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y};};
   const pad=(r,p)=>r?{x:r.x-p,y:r.y-p,w:r.w+2*p,h:r.h+2*p}:null;
   /* the camera */
-  const fastR=wrel(fastP);
+  const fastR=MODE==='conv'&&sum?uni([wrel(sum.querySelector('.bar')),wrel(sum.querySelector('table.grid'))])||wrel(sumP):wrel(fastP);
   const view=r=>{if(!r)return{x:0,y:0,s:1};const s=clamp(Math.min(1180/r.w,560/r.h),.3,1.9);return{x:SW/2-(r.x+r.w/2)*s,y:316-(r.y+r.h/2)*s,s};};
   const HOME=(()=>{const v=view(fastR);v.s=Math.min(v.s,1.2);v.x=SW/2-(fastR.x+fastR.w/2)*v.s;v.y=316-(fastR.y+fastR.h/2)*v.s;return v;})();
   const cam=new Track(HOME);
@@ -188,9 +227,9 @@ function compose(D,ex){
   const catRows=k=>uni(rows.slice(k*4,k*4+4).map(wrel));
   const ansCells=[];for(let r=0;r<n;r++)for(let i=0;i<16;i++){const td=cell(i,2+r);if(td)ansCells.push({r,i,td,sp:td.querySelector('.iaw-v')});}
   const agrCells=n>1?rows.map(tr=>tr.cells[2+n]).filter(Boolean):[];
-  const R={bar:wrel(barC),setupBar:wrel(setupP.querySelector('.bar')),grid:wrel(grid),head:grid?wrel(grid.tHead):null,tot:wrel(tot),verd:wrel(verd),
+  const R={bar:wrel(barC),setupBar:wrel(setupP&&setupP.querySelector('.bar')),grid:wrel(grid),head:grid?wrel(grid.tHead):null,tot:wrel(tot),verd:wrel(verd),
     defRows:defsC?[...defsC.querySelectorAll('.drow')].map(wrel):[],infT:wrel(infC),infRows:infC&&infC.tBodies[0]?[...infC.tBodies[0].rows].map(wrel):[],
-    infCols:infC?[...infC.tHead.rows[0].cells].map(wrel):[],chk:chk?[...chk.querySelectorAll('label')].map(wrel):[],
+    infCols:infC&&infC.tHead?[...infC.tHead.rows[0].cells].map(wrel):[],chk:chk?[...chk.querySelectorAll('label')].map(wrel):[],
     agrHead:grid&&n>1?wrel(grid.tHead.rows[0].cells[2+n]):null,agr:agrCells.map(wrel),
     figs:figsC?[...figsC.querySelectorAll('.figure')].map(wrel):[],fig3:wrel(fig3C),s1Rows:s1C?[...s1C.querySelectorAll('.drow')].map(wrel):[]};
   /* the answers, the agreement, the totals and the verdict are hidden until the pencil has entered them */
@@ -293,19 +332,92 @@ function compose(D,ex){
     const at=[['screen',.05],['ask',.4],['then test',.7]].map((a,i)=>Math.max(K.t+.4+i*.45,K.at(a[0],a[1])-.15));ws.forEach((fx,i)=>fx.tr.move(at[i],at[i]+.4,{o:1,s:1,dy:0},0,easeOut));
     veil(K.t+.2,null,.55);return K.d+.6;};
 
-  /* ---- the timeline ---- */
-  const ids=['intro'];
-  if(grid){ids.push('cats');if(defsC||infC)ids.push('define','informants');ids.push('items','na','totals','verdict');if(n>1)ids.push('agree');if(fig3C)ids.push('pubitems');ids.push('outagree','validity','concur','meaning');if(s1C)ids.push('section1');ids.push('next');}
-  ids.push('outro');
+  /* ---- the practice check: the last informant's totals; the viewer decides, then the answer ---- */
+  const CATL=['Social positive','Social negative','Automatic: sensory','Automatic: pain'];
+  const quiz=(()=>{if(!tot||!tot.tBodies[0])return null;const trs=[...tot.tBodies[0].rows];const ncol=trs[0]?trs[0].cells.length-1:0;if(ncol<1)return null;
+    let col=ncol;for(;col>=1;col--){if(trs.some(tr=>/\d/.test((tr.cells[col]||{}).textContent||'')))break;}if(col<1)return null;
+    const tots=trs.map(tr=>{const m=/(\d+)\s*\/\s*(\d+)/.exec(tr.cells[col].textContent||'');return m?[+m[1],+m[2]]:[0,0];});
+    const vals=tots.map(x=>x[0]);const mx=Math.max(...vals);const tops=vals.map((v,i)=>v===mx?i:-1).filter(i=>i>=0);const rest=vals.filter((v,i)=>!tops.includes(i));const second=rest.length?Math.max(...rest):0;
+    return {who:(typeof CODES!=='undefined'?CODES[col-1]:String(col)),col,labels:CATL,tots,ans:mx===0?-1:tops.length>1?-1:tops[0],tie:mx>0&&tops.length>1,margin:mx-second,mx,second};})();
+  let practiceCard=null;
+  SC.practice=K=>{if(!quiz)return K.d;camTo(K.t+.1,K.t+1,pad(R.tot,10));veil(K.t+.6,null,.45);
+    const html='<h3>Your turn: informant '+esc(quiz.who)+'</h3><div class="st" data-i="0"><span>Social positive (items 1 to 4)</span><b>'+quiz.tots[0][0]+' of '+quiz.tots[0][1]+'</b></div><div class="st" data-i="1"><span>Social negative (5 to 8)</span><b>'+quiz.tots[1][0]+' of '+quiz.tots[1][1]+'</b></div><div class="st" data-i="2"><span>Automatic: sensory (9 to 12)</span><b>'+quiz.tots[2][0]+' of '+quiz.tots[2][1]+'</b></div><div class="st" data-i="3"><span>Automatic: pain (13 to 16)</span><b>'+quiz.tots[3][0]+' of '+quiz.tots[3][1]+'</b></div><p class="lt iaw-ask">Which group is the outcome? By how much?</p><p class="iaw-ans">'+(quiz.ans<0?(quiz.tie?'A tie: no outcome':'Nothing endorsed: no outcome'):'Outcome: '+esc(CATL[quiz.ans])+' ('+quiz.mx+' of '+quiz.tots[quiz.ans][1]+'), margin '+quiz.margin+(quiz.margin===1?': kept, with a caution':''))+'</p>';
+    practiceCard=card('iaw-card iaw-stats iaw-quiz',html,{x:230,y:60,w:820},K.t+.6,null);const ans=practiceCard.el.querySelector('.iaw-ans');practiceCard.ans=sub(ans,{o:0,dy:6});
+    const ask=practiceCard.el.querySelector('.iaw-ask');const fa=sub(ask,{o:0});fa.tr.move(Math.max(K.t+1.5,K.at('decide',.45)-.2),Math.max(K.t+1.8,K.at('decide',.45)+.1),{o:1});return K.d+.2;};
+  SC.practice_answer=K=>{if(!quiz||!practiceCard)return K.d;const ta=Math.max(K.t+.3,K.at('The outcome is',.02));practiceCard.ans.tr.move(ta,ta+.4,{o:1,dy:0},0,easeOut);
+    practiceCard.tr.move(K.t+K.d,K.t+K.d+.4,{o:0});const vl=fxs.find(f=>f.el.classList.contains('smw-veil')&&f.tr.k.some(k=>k.st.o>0));if(vl)vl.tr.move(K.t+K.d,K.t+K.d+.4,{o:0});
+    if(quiz.ans>=0&&tot){const td=tot.tBodies[0].rows[quiz.ans].cells[quiz.col];glow(wrel(td),ta+.3,K.t+K.d-ta,3);}return K.d+.4;};
+  /* ---- for informants: the same sheets, their own words ---- */
+  SC.i_intro=K=>{cam.move(K.t,K.t+.1,HOME);glow(R.bar,Math.max(K.t+.4,K.at('the FAST',.1)-.1),2.4,6);glow(pad(R.grid,0),Math.max(K.t+2.4,K.at('sixteen',.4)-.1),2.4,4);
+    note(R.bar,'16 questions · about 15 to 20 minutes',Math.max(K.t+5,K.at('fifteen',.75)-.3),K.t+K.d+.2,'below');return K.d;};
+  SC.i_one=K=>{camTo(K.t+.1,K.t+1.3,pad(uni([R.setupBar].concat(R.defRows)),8));glow(R.defRows[0],Math.max(K.t+1.3,K.at('one behavior',.1)-.1),3,3);
+    const td=Math.max(K.t+3,K.at('as it was defined',.3)-.1);glow(R.defRows[1],td,3,3);note(R.defRows[1],'This behavior, as defined: nothing else',Math.max(td+.5,K.at('nothing else',.45)-.1),K.t+K.d-.2,'below');return K.d;};
+  SC.i_items=K=>{camTo(K.t+.1,K.t+1,R.grid);let t=Math.max(K.t+1.2,K.at('choose yes',.15)-.3);
+    ansCells.filter(a=>a.r===0).forEach(a=>{const v=(a.sp&&a.sp.textContent||'').trim();const box=wrel(a.td);if(!v||!box){t+=.05;return;}const mk=write(box,v,t,t+.26,'#2b4a9b',Math.min(16,box.h*.74));draw(PS,mk,.3);t+=.42;});
+    penAway(PS,t+.1);note(R.grid?{x:R.grid.x-74,y:R.grid.y+70,w:0,h:0}:null,'Your answers',Math.max(K.t+1.2,K.at('choose yes',.15)-.2),K.t+K.d+.2);
+    const ts=Math.max(t+.2,K.at('actually seen',.75)-.2);note(R.grid?{x:R.grid.x+R.grid.w/2,y:R.grid.y+R.grid.h/2+26,w:0,h:0}:null,'What you have seen, not a guess',ts,K.t+K.d+.2);return Math.max(K.d,t+.6-K.t);};
+  SC.i_na=K=>{const r=naCell&&naCell.r===0?wrel(naCell.td):null;const v=r?uni([r,wrel(rows[Math.max(0,naCell.i-3)]),wrel(rows[Math.min(15,naCell.i+3)])]):R.grid;camTo(K.t+.1,K.t+1,v);
+    if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: never in that situation',Math.max(K.t+1.3,K.at('N A',.3)-.3),K.t+K.d-.2);}
+    else{veil(K.t+.5,K.t+K.d,.4);card('iaw-card','<h3>NA: not applicable</h3><p>You have never been in that situation with the student. It is a better answer than a guess, and it is left out of the scoring.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}return K.d;};
+  SC.i_own=K=>{const v=uni([R.infT].concat(R.chk));camTo(K.t+.1,K.t+1.2,v||R.setupBar);if(R.chk[0])glow(R.chk[0],Math.max(K.t+1.2,K.at('on your own',.05)-.1),4,4);
+    const ts=Math.max(K.t+7,K.at('open-ended section',.5)-.4);if(R.s1Rows.length){camTo(ts,ts+1.2,pad(uni(R.s1Rows),10));[0,1,2].forEach(i=>glow(R.s1Rows[i],Math.max(ts+1.2,K.at('when and where',.65)-.2),2.4,2));[6,7].forEach(i=>glow(R.s1Rows[i],Math.max(ts+3,K.at('before and after',.9)-.3),K.t+K.d-ts-3,2));}
+    return K.d;};
+  SC.i_outro=K=>{cam.move(K.t,K.t+1.2,HOME);const words=['One behavior','Your own answers','Yes · No · NA'];
+    const box=mkFx('smw-words iaw-words3',words.map(w=>'<span>'+esc(w)+'</span>').join(''),{x:60,y:250,w:1160},{o:1});const ws=[...box.el.querySelectorAll('span')].map(e=>sub(e,{s:.6,dy:12}));
+    const at=[['one behavior',.05],['your own',.35],['yes',.65]].map((a,i)=>Math.max(K.t+.4+i*.5,K.at(a[0],a[1])-.15));ws.forEach((fx,i)=>fx.tr.move(at[i],at[i]+.4,{o:1,s:1,dy:0},0,easeOut));veil(K.t+.2,null,.55);return K.d+.6;};
+  /* ---- the Convergence sheet ---- */
+  const S2=sum?{bar:wrel(sum.querySelector('.bar')),head:wrel(sum.querySelector('.sumhead')),tbl:sum.querySelector('table.grid'),verd:sum.querySelectorAll('.verdict')[0]||null,faVerd:sum.querySelectorAll('.verdict')[1]||null,
+    fig:sum.querySelector('.figure'),idents:[...sum.querySelectorAll('.ident')],defs:[...sum.querySelectorAll('.defs')],chk:sum.querySelector('.chkrow'),h3:[...sum.querySelectorAll('h3')]}:null;
+  const S2R=S2?{tbl:wrel(S2.tbl),rows:S2.tbl&&S2.tbl.tBodies[0]?[...S2.tbl.tBodies[0].rows].map(wrel):[],heads:S2.tbl&&S2.tbl.tHead?[...S2.tbl.tHead.rows[0].cells].map(wrel):[],verd:wrel(S2.verd),faVerd:wrel(S2.faVerd),fig:wrel(S2.fig),
+    fa:wrel(S2.idents[0]),hyp:wrel(S2.defs[0]),hypRows:S2.defs[0]?[...S2.defs[0].querySelectorAll('.drow')].map(wrel):[],chk:wrel(S2.chk),chkRows:S2.chk?[...S2.chk.querySelectorAll('label')].map(wrel):[],note:wrel(S2.defs[1])}:null;
+  if(S2){/* the hypothesis and the analysis record appear when the narration reaches them */
+    if(S2.defs[0])S2.defs[0].querySelectorAll('.iaw-v').forEach(e=>hide(e));if(S2.idents[0])S2.idents[0].querySelectorAll('.iaw-v').forEach(e=>hide(e));if(S2.faVerd)hide(S2.faVerd);}
+  const trsOf=()=>S2&&S2.tbl&&S2.tbl.tBodies[0]?[...S2.tbl.tBodies[0].rows]:[];
+  SC.c_intro=K=>{cam.move(K.t,K.t+.1,HOME);glow(S2.bar,Math.max(K.t+.4,K.at('Convergence sheet',.05)-.1),2.6,6);const trs=trsOf();const tr0=Math.max(K.t+3,K.at('Each row',.3)-.2);
+    camTo(tr0-.2,tr0+.8,pad(uni([S2R.tbl].concat(S2R.heads)),10));trs.forEach((tr,i)=>glow(wrel(tr),tr0+.6+i*.25,1.6,2));
+    const hc=S2R.heads[S2R.heads.length-1];note(hc,'The common set: attention, tangible, escape, automatic, physical',Math.max(tr0+2,K.at('common set',.62)-.2),K.t+K.d+.2);return K.d;};
+  SC.c_rows=K=>{camTo(K.t+.1,K.t+1,pad(S2R.tbl,10));const trs=trsOf();const sp=trs.filter(tr=>/ or /.test(tr.cells[6]&&tr.cells[6].textContent||''));const ts=Math.max(K.t+1,K.at('social-positive',.05)-.2);
+    sp.forEach((tr,i)=>glow(wrel(tr.cells[6]),ts+i*.2,3,2));if(sp.length)note(wrel(sp[0].cells[6]),'Attention or tangible: either',ts+.3,ts+3.2);
+    const wk=trs.filter(tr=>/weak/.test(tr.cells[5]&&tr.cells[5].textContent||''));const tw=Math.max(ts+3.5,K.at('flagged weak',.5)-.2);
+    if(wk.length){wk.forEach((tr,i)=>glow(wrel(tr.cells[5]),tw+i*.2,K.t+K.d-tw,2));note(wrel(wk[0].cells[5]),'Shown, not counted',tw+.3,K.t+K.d+.2,'below');}
+    else{const hd=S2R.heads[5];glow(hd,tw,K.t+K.d-tw,3);note(hd,'A weak row would be shown here, not counted',tw+.3,K.t+K.d+.2);}return K.d;};
+  SC.c_vote=K=>{camTo(K.t+.1,K.t+1,pad(uni([S2R.tbl,S2R.verd]),10));const trs=trsOf();const tv=Math.max(K.t+1,K.at('by informant',.1)-.2);glow(uni([S2R.heads[1]].concat(trs.map(tr=>wrel(tr.cells[1])))),tv,4,3);
+    note(S2R.tbl?{x:S2R.tbl.x-74,y:S2R.tbl.y+90,w:0,h:0}:null,'One vote per informant',tv+.3,K.t+K.d+.2);const tm=Math.max(tv+4.5,K.at('most frequent',.7)-.3);trs.forEach((tr,i)=>glow(wrel(tr.cells[6]),tm+i*.15,K.t+K.d-tm,2));return K.d;};
+  SC.c_verdict=K=>{camTo(K.t+.1,K.t+1,pad(S2R.verd,10));const tag=S2.verd.querySelector('.tag');const tl=Math.max(K.t+1,K.at('leading category',.08)-.2);if(tag)glow(wrel(tag),tl,K.t+K.d-tl,4);
+    const t3=Math.max(tl+2.5,K.at('three informants',.35)-.2);note(S2R.verd,'At least 3 informants with an outcome',t3,t3+4);const t8=Math.max(t3+3,K.at('eighty percent',.55)-.2);note(S2R.verd,'80% or more = agreement',t8,t8+4,'below');
+    const li=S2.verd.querySelector('li');const tr=Math.max(t8+3,K.at('A majority',.75)-.2);if(li)glow(wrel(li),tr,K.t+K.d-tr,3);return K.d;};
+  SC.c_phys=K=>{veil(K.t,K.t+K.d,.5);card('iaw-card','<h3>Physical or pain leads</h3><p>Wherever a physical or pain profile leads on any instrument, the sheet says so first: a medical or nursing referral comes before any behavioral conclusion.</p>',{x:250,y:120,w:780},K.t+.3,K.t+K.d);
+    const li=[...S2.verd.querySelectorAll('li')].find(l=>/Physical \/ pain leads/.test(l.textContent));if(li)glow(wrel(li),K.t+.5,K.t+K.d-K.t-.5,3);return K.d+.3;};
+  SC.c_fig=K=>{if(!S2R.fig)return K.d;camTo(K.t+.1,K.t+1.3,pad(S2R.fig,10));glow(S2R.fig,Math.max(K.t+1.3,K.at('two ways',.15)-.2),3,4);
+    const tc=Math.max(K.t+5,K.at('counted, not averaged',.55)-.3);note({x:S2R.fig.x+S2R.fig.w/2,y:S2R.fig.y+S2R.fig.h*.55+26,w:0,h:0},'Counted, not averaged',tc,K.t+K.d+.2);return K.d;};
+  SC.c_hyp=K=>{camTo(K.t+.1,K.t+1.2,pad(uni([S2R.hyp]),10));const td=Math.max(K.t+1.2,K.at('drafted from the sheet',.12)-.2);if(S2.defs[0])S2.defs[0].querySelectorAll('.iaw-v').forEach((e,i)=>{const f=hid.find(h=>h.el===e);if(f)f.tr.move(td+i*.25,td+i*.25+.4,{o:1});});
+    [['setting events',.3,0],['the antecedent',.4,1],['the behavior',.48,2],['the consequence',.55,3],['competing hypothesis',.65,4],['idiosyncratic',.78,5]].forEach(([ph,fr,i])=>{if(S2R.hypRows[i])glow(S2R.hypRows[i],Math.max(td+1+i*.3,K.at(ph,fr)-.15),1.8,2);});
+    note(S2R.hyp,'A draft: edit it',Math.max(td+5,K.at('It is a draft',.9)-.2),K.t+K.d+.3,'below');return K.d;};
+  SC.c_decide=K=>{camTo(K.t+.1,K.t+1.2,pad(uni([S2R.chk,S2R.note]),10));[['descriptive assessment',.1,0],['medical referral',.3,1],['full analysis',.45,2],['single-function',.55,3],['follow-up interview',.78,4]].forEach(([ph,fr,i],k)=>{if(S2R.chkRows[i])glow(S2R.chkRows[i],Math.max(K.t+1.2+k*.5,K.at(ph,fr)-.15),2.4,3);});return K.d;};
+  SC.c_fa=K=>{camTo(K.t+.1,K.t+1.2,pad(uni([S2R.fa,S2R.faVerd]),10));let t=Math.max(K.t+1.4,K.at('enter its outcome',.12)-.2);
+    const sps=S2.idents[0]?[...S2.idents[0].querySelectorAll('.iaw-v')]:[];sps.forEach(sp=>{const v=(sp.textContent||'').trim();const box=wrel(sp);if(!v||!box)return;const short=v.replace(/\s*\(.*$/,'');const mk=write(box,short.length>26?short.slice(0,24)+'…':short,t,t+.5,'#2b4a9b',Math.min(15,box.h*.7));draw(PS,mk,.5);t+=.8;});if(sps.length)penAway(PS,t+.1);
+    const tv=Math.max(t+.3,K.at('scores each',.4)-.2);const f=hid.find(h=>h.el===S2.faVerd);if(f)f.tr.move(tv,tv+.4,{o:1});if(S2.faVerd)[...S2.faVerd.querySelectorAll('li')].forEach((li,i)=>glow(wrel(li),tv+.5+i*.3,2,2));
+    note(S2R.faVerd,'The practice’s own validity record',Math.max(tv+2.5,K.at('validity record',.9)-.3),K.t+K.d+.3,'below');return Math.max(K.d,t+1-K.t);};
+  SC.c_outro=K=>{cam.move(K.t,K.t+1.2,HOME);const words=['Converge','Decide','Verify'];
+    const box=mkFx('smw-words',words.map(w=>'<span>'+esc(w)+'</span>').join(''),{x:90,y:250,w:1100},{o:1});const ws=[...box.el.querySelectorAll('span')].map(e=>sub(e,{s:.6,dy:12}));
+    const at=[['converge',.05],['decide',.4],['verify',.7]].map((a,i)=>Math.max(K.t+.4+i*.45,K.at(a[0],a[1])-.15));ws.forEach((fx,i)=>fx.tr.move(at[i],at[i]+.4,{o:1,s:1,dy:0},0,easeOut));veil(K.t+.2,null,.55);return K.d+.6;};
+
+  /* ---- the timeline: the lines of this mode the form can show ---- */
+  let ids;
+  if(MODE==='conv'){ids=sum?IDS_BY.conv.filter(id=>id!=='c_fig'||(S2.fig&&S2.fig.querySelector('svg'))):['c_outro'];}
+  else if(MODE==='inf'){ids=grid?IDS_BY.inf.slice():['i_intro','i_outro'];}
+  else{ids=['intro'];
+    if(grid){ids.push('cats');if(defsC||infC)ids.push('define','informants');ids.push('items','na','totals','verdict');if(quiz)ids.push('practice','practice_answer');if(n>1)ids.push('agree');if(fig3C)ids.push('pubitems');ids.push('outagree','validity','concur','meaning');if(s1C)ids.push('section1');ids.push('next');}
+    ids.push('outro');}
   let T=0;const cues=[];
   ids.filter(id=>present(id)).forEach(id=>{const ln=line(id),low=ln.t.toLowerCase(),on=onsetFn(id,ln.t,ln.d),T0=T;
     const K={id,t:T0,d:ln.d,text:ln.t,at:(ph,fr,from)=>{const i=low.indexOf(String(ph).toLowerCase(),from>0?from:0);return i<0?T0+ln.d*fr:T0+on(i);}};
     const need=(SC[id]?SC[id](K):ln.d)||0;const dur=Math.max(ln.d+PAUSE,need+.1);
-    cues.push({id,start:T0,dur,narr:ln.d,text:ln.t,chapter:CHOF[id]||'fast',chunks:chunks(id,ln.t,T0,on),a:ln.a});T+=dur;});
-  if(!ids.includes('items'))shown(0);
+    cues.push({id,start:T0,dur,narr:ln.d,text:ln.t,chapter:CHOF[id]||(CHAPS_BY[MODE]||CHAPS_BY.fast)[0][0],chunks:chunks(id,ln.t,T0,on),a:ln.a});T+=dur;});
+  if(!ids.includes('items')&&MODE==='fast')shown(0);
   cam.move(T-1.2,T-.2,HOME);
-  const chapters=CHAPS.map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return c?{id,label,start:c.start}:null;}).filter(Boolean);
-  return{D:T,cues,chapters,cam,paper:world,fxs,marks,pens,cap,notes};
+  const chapters=(CHAPS_BY[MODE]||CHAPS_BY.fast).map(([id,label])=>{const c=cues.find(q=>q.chapter===id);return c?{id,label,start:c.start}:null;}).filter(Boolean);
+  return{D:T,cues,chapters,cam,paper:world,fxs,marks,pens,cap,notes,quiz:ids.includes('practice_answer')?quiz:null,mode:MODE};
 }
 /* captions: a line in pieces of up to two caption lines; each piece shows a moment before the voice reaches its first word */
 const CAPLEAD=.12;
@@ -328,10 +440,41 @@ function renderAt(t){if(!B)build();if(!B)return;t=clamp(+t||0,0,B.D);const cue=c
   for(const p of B.pens){let s=p.tr.at(v),x=s.x,y=s.y;
     for(const d of p.draws)if(v>=d.t0&&v<=d.t1){const P=d.pt(d,(v-d.t0)/Math.max(.01,d.t1-d.t0),v);x=P.x;y=P.y;break;}
     css(p.el,'opacity',f2(s.o));css(p.el,'visibility',s.o>.001?'visible':'hidden');css(p.el,'transform','translate('+f2(x)+'px,'+f2(y-13)+'px) rotate('+f2(s.a)+'deg)');}
+  if(B.quiz&&cue&&cue.id==='practice_answer'&&playing&&t<cue.start+.25&&!QUIZ.done&&!QUIZ.open){pause();quizShow();}
   let ct='';if(cue){for(const ch of cue.chunks)if(ch.t<=t+.001)ct=ch.text;}
   txt(B.cap,ct);css(B.cap,'visibility',ct?'visible':'hidden');const D=dom();if(D&&D.cap2)txt(D.cap2,ct);
   B.t=t;}
 /*@@PLAYER@@*/
+/* ---------------- the three walkthroughs: the buttons over the player ---------------- */
+function setMode(m){if(!INFO[m]||m===MODE)return;MODE=m;document.querySelectorAll('#walk .wk-modes button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m?'true':'false'));
+  const intro=document.getElementById('wkIntro');if(intro){const t={fast:intro.dataset.fast,inf:intro.dataset.inf,conv:intro.dataset.conv}[m];if(t)intro.textContent=t;}
+  pos=0;try{build();}catch(e){console.error('Walkthrough: '+(e&&e.message||e));}fit();ui();}
+document.querySelectorAll('#walk .wk-modes button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+/* ---------------- the practice check: the player stops at the answer; the viewer decides; Play on ---------------- */
+const QUIZ={open:false,done:false,a:null,m:null};
+const qel=id=>document.getElementById(id);
+function quizHide(){QUIZ.open=false;QUIZ.done=false;QUIZ.a=null;QUIZ.m=null;const q=qel('wkQuiz');if(q)q.hidden=true;}
+function quizShow(){const q=qel('wkQuiz'),z=B&&B.quiz;if(!q||!z)return;QUIZ.open=true;QUIZ.a=null;QUIZ.m=null;
+  qel('wkQuizQ').textContent='Informant '+z.who+': '+z.labels.map((l,i)=>l+' '+z.tots[i][0]+' of '+z.tots[i][1]).join(' · ')+'. Which group is the outcome, and by how much?';
+  const mk=(host,opts,key)=>{host.innerHTML='';opts.forEach(([v,l])=>{const b=document.createElement('button');b.type='button';b.className='wk-qb';b.textContent=l;b.dataset.v=String(v);b.addEventListener('click',()=>{QUIZ[key]=v;[...host.children].forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));quizCheck();});host.appendChild(b);});};
+  mk(qel('wkQuizA'),z.labels.map((l,i)=>[i,l]).concat([[-1,'No outcome (a tie)']]),'a');mk(qel('wkQuizM'),[[0,'0'],[1,'1'],[2,'2'],[3,'3 or more']],'m');
+  qel('wkQuizR').textContent='';qel('wkQuizR').className='wk-qres';q.hidden=false;try{q.scrollIntoView({block:'nearest'});}catch(e){}}
+function quizCheck(){const z=B&&B.quiz,r=qel('wkQuizR');if(!z||QUIZ.a===null)return;if(QUIZ.a!==-1&&QUIZ.m===null)return;
+  const okA=QUIZ.a===z.ans,okM=z.ans<0?QUIZ.a===-1:(z.margin>=3?QUIZ.m===3:QUIZ.m===z.margin);QUIZ.done=true;
+  const right=z.ans<0?(z.tie?'A tie: no outcome.':'Nothing endorsed: no outcome.'):'The outcome is '+z.labels[z.ans]+' ('+z.mx+' of '+z.tots[z.ans][1]+'), margin '+z.margin+(z.margin===1?': kept, with a caution.':'.');
+  r.textContent=(okA&&okM?'Right. ':okA?'The group is right; the margin is the gap to the next group. ':'Not quite. ')+right;r.className='wk-qres '+(okA&&okM?'ok':'no');}
+(function(){const go=qel('wkQuizGo');if(go)go.addEventListener('click',()=>{const q=qel('wkQuiz');if(q)q.hidden=true;QUIZ.open=false;QUIZ.done=true;play();});})();
+/* ---------------- captions (SRT) and chapters for YouTube, from this walkthrough's own timeline ---------------- */
+function stamp(t,sep){t=Math.max(0,t);const h=Math.floor(t/3600),m=Math.floor(t/60)%60,s=Math.floor(t%60),ms=Math.round((t-Math.floor(t))*1000);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+sep+String(ms).padStart(3,'0');}
+function captionsOf(){if(!B)build();if(!B)return [];const out=[];B.cues.forEach((c,i)=>{const end=Math.min(c.start+c.dur,(B.cues[i+1]||{start:B.D}).start);
+  c.chunks.forEach((ch,k)=>{const a=ch.t,b=k+1<c.chunks.length?c.chunks[k+1].t:Math.min(end,c.start+c.narr+.35);if(b>a+.2)out.push({a,b,text:ch.text});});});return out;}
+function chaptersText(){if(!B)build();if(!B)return '';const mm=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0');};return B.chapters.map((c,i)=>mm(i?c.start:0)+' '+c.label).join('\n');}
+function dlText(text,type,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);}
+function exportCaps(){const caps=captionsOf();if(!caps.length)return;const base=(INFO[MODE]||INFO.fast).file.replace(/\s+/g,'-');
+  const srt=caps.map((x,j)=>(j+1)+'\n'+stamp(x.a,',')+' --> '+stamp(x.b,',')+'\n'+x.text).join('\n\n')+'\n';dlText(srt,'application/x-subrip','IA-1_'+base+'_captions.srt');
+  const ch=chaptersText()+'\n';setTimeout(()=>dlText(ch,'text/plain','IA-1_'+base+'_YouTube-chapters.txt'),400);try{if(navigator.clipboard)navigator.clipboard.writeText(ch).catch(()=>{});}catch(e){}
+  if(window.nbhUI&&nbhUI.toast)nbhUI.toast(caps.length+' captions (SRT) and '+(B.chapters.length)+' chapters for the video\'s description; the chapters are on the clipboard too.',{kind:'ok'});}
+(function(){const b=document.getElementById('wkCaps');if(b)b.addEventListener('click',exportCaps);})();
 /* ---------------- the view: IA-1's views; leaving the Walkthrough pauses it, entering it builds it from the form as it is ---------------- */
 const setView0=setView;
 setView=function(v){if(v!=='walk'&&(want||playing))pause();
@@ -346,5 +489,6 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
   get duration(){return B?B.D:0;},get cues(){return cuesOut();},get chapters(){return chapsOut();},
   get time(){return clock();},get unmeasured(){return [];},get playing(){return playing;},get audioMode(){return AU.mode;},get reduced(){return reduced();},
   get example(){return B?B.notes.some(x=>/worked example/.test(x)):false;},
+  get mode(){return MODE;},set mode(m){setMode(m);},get quiz(){return B?B.quiz:null;},captions:captionsOf,chapterList:chaptersText,exportCaptions:exportCaps,quizState:QUIZ,quizCheck,quizShow,
   get stage(){const D=dom();return D&&D.stage;}};
 })();
