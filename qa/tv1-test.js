@@ -293,6 +293,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const c10=await page.evaluate(()=>({look:S.meta.look,chs:S.meta.chapters.split('\n'),n:S.rows.length,ch:S.rows.map(r=>chList().list[chOf(r)]),sp:[S.rows[3].lay,S.rows[3].title,S.rows[3].body],o:document.body.innerText.includes('The sheet names a picture: IMG_0004.jpeg'),say0:S.rows[0].say}));
   ok('9 a sheet in the newer layout: its chapters (P), the card beside a picture (M, N), the chapter lit by its tabs (Q to Z), the picture it names',
     c10.look==='chapters'&&c10.chs.join('|')==='Intro|Instrument|Close'&&c10.n===4&&c10.ch.join('|')==='Intro|Intro|Instrument|Instrument'&&c10.sp.join('|')==='split|Results|Following the intervention you see an immediate drop.'&&c10.o&&c10.say0==='South Florida\n\nThe Average Problem',c10);
+  /* (v21.56) Script: the FAST, the walkthrough's seventeen lines as rows with cards, in seven chapters */
+  const c11=await page.evaluate(async()=>{S=blank();renderAll();nbhUI.confirm=async()=>true;document.getElementById('fastBtn').click();await new Promise(r=>setTimeout(r,300));
+    return {n:S.rows.length,chs:S.meta.chapters.split('\n'),segs:[...new Set(S.rows.map(r=>r.seg))],titles:S.rows.filter(r=>r.title).length,builds:S.rows.filter(r=>r.build).length,lay:[S.rows[0].lay,S.rows[S.rows.length-1].lay],ch:S.rows.filter(r=>r.ch).length,
+      say:S.rows[0].say.slice(0,40),num:S.rows.some(r=>/71\.5%/.test(r.body)),view:document.body.className,cards:document.querySelectorAll('#rows .row, .tv-row, [data-row]').length};});
+  ok('10 Script: the FAST: 17 rows in seven chapters, a card on each (a title card first and last, six that build), the walkthrough\'s words and the article\'s numbers',
+    c11.n===17&&c11.chs.join('|')==='The FAST|Before you start|Filling it in|Scoring|Agreement|The research|What it means'&&c11.segs.length===7&&c11.titles===17&&c11.builds===6&&c11.lay.join()==='title,title'&&c11.ch===7&&/^This is the Functional Analysis Screenin/.test(c11.say)&&c11.num&&/view-script/.test(c11.view),c11);
   const off=reqs.filter(u=>!u.startsWith(BASE+'/')&&!u.startsWith('data:')&&!u.startsWith('blob:')&&u!=='about:blank');
   ok('8 no request off the workstation\'s own folder',!off.length,off.slice(0,5));
   ok('8 no errors',!errs.length,errs.concat(miss));
