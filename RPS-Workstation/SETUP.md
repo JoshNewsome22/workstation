@@ -7821,3 +7821,37 @@ script writes the view inside the form's own script (a closure), between its mar
 it wrote. The one-file editions carry the narration once (`nbh-embed-narration-ia1`). Checked by `qa/ia1-walk-test.js`
 (17 checks: the view, the example and its scores, the fields unchanged, the pencil, the camera's stops, the captions'
 decimals, the simulation, five frames of Save as video against the stage, pausing on leaving, the link, the one-file edition).
+
+**A presenter version on camera (Form TV-1).** TV-1's toolbar has **Script: the FAST**: the same seventeen lines as rows in
+seven chapters (The FAST, Before you start, Filling it in, Scoring, Agreement, The research, What it means), each with its
+card (a title card, bullet cards that build, the article's numbers), added after any rows already there and placed with
+cue marks, for the teleprompter and the graphics page on the Yolobox. The words are the walkthrough's, to edit to your own
+voice; the numbers are the article's. The recording, once on YouTube, goes into IA-1's link field under its player.
+
+### v21.57: three walkthroughs on IA-1, a practice check, captions for YouTube
+
+**Three walkthroughs share the player** (buttons over it): **The FAST (for the assessor, 6 min)** as in v21.56; **The FAST for
+informants (1 min)**: six lines for the people who answer it (one behavior as defined, yes if usually true, no if not, NA when
+they have never been in that situation, on their own, then the open-ended section), the pencil writing one informant's answers;
+**Convergence (2½ min)**: ten lines in four chapters on the Convergence sheet (each informant's outcome on each instrument
+mapped to the common set; a FAST social-positive outcome as attention or tangible; weak rows shown but not counted; consensus
+counted by informant, at least three, 80% or more; the physical-profile rule; the figure, counted not averaged; the drafted
+hypothesis; the decision; the verification record after the analysis, the pencil entering the outcome, the date and the
+design, the correspondence appearing). A form with no answers shows a worked example of three informants on the FAST, QABF
+and MAS and one interview (escape for the teacher and the paraprofessional, attention for the parent: escape 2 of 3, a
+majority without agreement; the analysis found escape, mean correspondence 0.75), put in for the build only and taken out
+again. Each has its own Save as video name and its own captions.
+
+**A practice check** in the assessor's walkthrough, after the verdict: a card shows the last informant's four totals and asks
+for the outcome and the margin; in the player the narration's "pause here" is kept for you (the player stops at the answer
+with the question under it: the group, the margin, Play on), and the answer is told right or not; in the saved video the
+card and the answer play through.
+
+**Captions and chapters (for YouTube)** under the player: an SRT captions file timed from the walkthrough's own caption
+pieces, and a chapter list (0:00 first, also copied) to paste into the video's description, for whichever walkthrough is
+shown. **Script: the FAST** on TV-1 is unchanged.
+
+Parts as before (`tools/forms/IA-1/`; walk-script.json now 35 lines, the narration 3 MB beside the form). On the stage a
+paragraph's measure is pinned, because the polish layer widens long paragraphs after the build (the glows had drifted on the
+Convergence copy). Checked by `qa/ia1-walk-test.js` (22 checks: the three modes, the practice check through the player,
+the captions and chapters, the fields unchanged after all three builds).
