@@ -2,7 +2,8 @@
 /* Form TV-1 · Training Video (v21.50): the script of a training video for a finished FBA and BIP, drafted from the case, the
    cards shown beside each paragraph, a teleprompter, the graphics drawn here (and in a window of their own for the Yolobox),
    and an export in the layout of the Google Sheet that drives Flowics. Everything stays in this form's state (S) and its saved
-   file: nothing is sent anywhere. */
+   file: nothing is sent anywhere. (v21.51) The teleprompter can scroll with the voice (its level, or its words recognised on the
+   device), a list can build one point a click, and a take gives the video's chapters and captions. */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=v=>{const n=parseFloat(String(v==null?'':v));return isFinite(n)?n:null;};
@@ -450,7 +451,7 @@ function voAudio(x){let e=0;for(let j=0;j<x.length;j++)e+=x[j]*x[j];const rms=Ma
   VO.lv=rms;voMeter();
   if(VO.mode==='follow'&&VO.ready){const sr=VO.ctx.sampleRate,f=sr/16000,n=Math.floor(x.length/f),y=new Float32Array(n);for(let j=0;j<n;j++){const a=Math.floor(j*f),b=Math.min(x.length,Math.floor((j+1)*f));let s=0;for(let q=a;q<b;q++)s+=x[q];y[j]=s/Math.max(1,b-a);}
     VO.acc.push(y);VO.accN+=n;if(VO.accN>=1600&&VO.inflight<4){const all=new Float32Array(VO.accN);let o=0;VO.acc.forEach(a=>{all.set(a,o);o+=a.length;});VO.acc=[];VO.accN=0;VO.inflight++;VO.w.postMessage({t:'audio',s:all,n:++VO.n},[all.buffer]);}}}
-let voMt=0;function voMeter(){const m=$('#tpMic');if(!m)return;const now=performance.now();if(now-voMt<100&&VO.on)return;voMt=now;
+let voMt=0;function voMeter(now0){const m=$('#tpMic');if(!m)return;const now=performance.now();if(!now0&&now-voMt<100&&VO.on)return;voMt=now;
   m.hidden=!VO.on&&!VO.loading;m.classList.toggle('on',VO.speaking);const d=m.querySelector('i');if(d)d.style.transform='scale('+(1+Math.min(1.5,VO.lv*40)).toFixed(2)+')';
   const t=m.querySelector('span');if(t&&!VO.loading)t.textContent=VO.mode==='follow'?(VO.ready?'Following your words':'Starting the recogniser…'):VO.speaking?'Speaking':'Listening';}
 function voSay(t){const l=$('#tpVoice');if(l){l.textContent=t;l.hidden=!t;}}
@@ -471,7 +472,7 @@ async function asrEnsure(){if(VO.ready||VO.loading){if(VO.ready)VO.mode='follow'
   if(!(await asrHave())&&!(await nbhUI.confirm('Follow my words: download the speech recogniser?\nIt is about 57 MB, from this workstation’s website, once; it stays on this device afterwards. It runs on the device: what the microphone hears is not recorded and never leaves it.',{ok:'Download'}))){voSay('Not downloaded: your voice paces the script instead.');VO.mode='speak';return;}
   VO.loading=true;voMeter();const m=$('#tpMic span');
   try{const f=await asrFiles(p=>{if(m)m.textContent='Getting the recogniser: '+Math.round(p*100)+'%';});if(m)m.textContent='Starting the recogniser…';
-    VO.w=new Worker('nbh-asr/asr-worker.js');VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter();}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
+    VO.w=new Worker('nbh-asr/asr-worker.js');VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter(true);}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
     VO.w.postMessage({t:'init',wasm:f.wasm,data:f.data},[f.wasm,f.data]);}
   catch(err){VO.loading=false;voSay('The recogniser could not be fetched ('+String(err.message||err)+'): your voice paces the script instead.');VO.mode='speak';voMeter();}}
 $('#asrDrop').addEventListener('click',async()=>{if(!window.caches){nbhUI.toast('No speech recogniser is kept here.',{kind:'ok'});return;}const had=await asrHave();
@@ -492,7 +493,8 @@ function voHeard(text,end){if(!TP.run)return;const toks=normTok(text);VO.cur=tok
   look(p-6,p+30,.4);if(!best||best.sc<1.4)look(0,SW.length,1.2);if(!best)return;
   const to=best.e+1,back=to<p-1,far=Math.abs(to-p)>30;if(best.sc<(back||far?2.6:1.4))return;if(to===p)return;
   TP.pos=to;tpReadTo(to);const sp=SP[SW[to-1].s];if(sp){TP.ty=Math.max(0,sp.offsetTop-sp.offsetHeight*.2);}
-  if(TP.rec){S.wt.push([SW[to-1].s,+((performance.now()-TP.t0)/1000).toFixed(2)]);if(S.wt.length>20000)S.wt.splice(0,S.wt.length-20000);}}
+  /* the clock running: the time of each word come to (the few passed since the last words heard, at this time too) */
+  if(TP.rec){const t=+((performance.now()-TP.t0)/1000).toFixed(2);let last=-1;for(let j=to>p&&to-p<=12?p:to-1;j<to;j++){const s=SW[j].s;if(s!==last){S.wt.push([s,t]);last=s;}}if(S.wt.length>20000)S.wt.splice(0,S.wt.length-20000);}}
 
 $('#tpNext').addEventListener('click',tpNext);$('#tpPrev').addEventListener('click',tpPrev);$('#tpRun').addEventListener('click',tpToggle);
 $('#tpRec').addEventListener('click',()=>{const b=$('#tpRec');if(!TP.rec){if(cdStop())return;countdown(()=>{TP.rec=true;TP.t0=performance.now();S.log=[];S.wt=[];b.textContent='Stop the clock';b.setAttribute('aria-pressed','true');TP.tick=setInterval(tpClock,250);wake(true);tpSetCard(TP.i,TP.b);});}

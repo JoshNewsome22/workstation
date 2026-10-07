@@ -10,6 +10,8 @@
       tab for each segment; the workbook and a CSV in the sheet's layout come back in, the continued rows found again;
    7. Save data and Open give the same script back; a file from elsewhere cannot put markup or a stray picture in;
    8. the card layouts each draw inside the stage; print; no errors and no request off the page's own folder.
+   v21.51: the countdown, the marks, the reading line, the scroll across paragraphs and the cards following it, the clicker
+   alone, the voice without a microphone, a list that builds, 9. the chapters and the captions (the voice itself: tv1-voice-test.js).
    usage: node qa/tv1-test.js   (WS_URL as in qa/lib.js) */
 const {chromium,fs,path,BASE,sleep}=require(__dirname+'/lib.js');
 const URL=BASE+'/NBH-Workstation/TV-1_Training-Video_v2026-10.html';
