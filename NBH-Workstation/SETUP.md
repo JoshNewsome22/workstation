@@ -7600,3 +7600,11 @@ still) to 200 pixels a second of the 1920-wide picture; 90 is the default. It ch
 the time a pass takes is measured from the text itself, so a longer series runs at the same speed as a short one. Setup ›
 **The graphics window's background** gains **White**: the cards on plain white, with no key (the shadows stay, as nothing is
 keyed out), for recording the window itself or matching a white background. Checked by `qa/tv1-test.js`.
+
+### v21.50c: the ticker's text size, type and colour
+
+Setup (the Chapters look) gains three settings beside Ticker speed: **Ticker text size** (24 to 48 pixels of the 1920-wide
+picture; 43 is the template's, and 48 is the largest that keeps the descenders inside the band), **Ticker type** (Merriweather
+Black as the template, Lato Black as the panel, both built in, or the device's Georgia) and **Ticker text colour**. Each
+reaches the open graphics window at once; the speed set holds whatever the size or type, as it is measured against the text.
+The words themselves are the Series on Setup. Checked by `qa/tv1-test.js`.
