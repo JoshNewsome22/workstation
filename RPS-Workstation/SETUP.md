@@ -7727,3 +7727,46 @@ last words recognised while the words are followed, so a word misheard can be se
 Checked by `qa/tv1-test.js` (77: the graphics page opened by hand follows the card and a list that builds, the tabs' colours
 reach the window, the Chapters look's lower third and title and the ticker's width, the voice's thresholds) and in WebKit
 (the graphics page in a second window follows over the channel), and the voice and case suites again.
+
+### v21.54: the rehearsal, the microphone check, a title and a closing card, pictures from the token board, music, Close case
+
+**On the teleprompter.** **Rehearse** runs the script from the top at the speed set, the cards changing as they will (the
+graphics page too), and ends with the pacing: the whole, each segment's time and cards, and any card that stays on screen
+more than 45 seconds with no change (add a card, a point that builds or a `>>` mark, or shorten the words); **Pacing** gives
+the same without the run. **Test the microphone** (the voice modes) listens for ten seconds without scrolling and says what it
+heard (the words, in *following my words*; how much of the time was speech, in *while I speak*) and how loud. **Width** on
+the second row narrows the words to 40 to 100 percent of the screen, so the eyes move less across the glass. **Card** (or
+the G key) shows the card the teleprompter is on over the script, its points as revealed, in full screen too; press again for
+the script. **Music off** fades the music out now.
+
+**The draft** opens with a title card (the student's FBA and BIP, with the series when one is set) and ends with a closing
+card (*Thank you*: the presenter and **Contact for questions**, new on Setup; the segment *Closing*, in the *Close* chapter);
+the simulator has both. (Those made the sample script 20 cards in 17 paragraphs over 11 segments; the tests say so.)
+
+**Pictures from the other forms.** A row's **Add** picture now asks: from this device, from the token board (Form TK-1) or
+from the visual supports (Form VS-1). The other two ask the workstation for that form's own saved data (the relay of v21.22:
+the form must be open in the workstation, beside this one or not) and offer its photos and the pictograms its cards use,
+drawn from the shared library beside the forms (`nbh-pictos.js`, fetched when first needed; not in a file opened on its
+own). Tap one and it is copied into this form (a pictogram gives the caption its name), so nothing is uploaded twice. The
+token board itself cannot be taken as one picture (Form TK-1 draws it as a page, not an image).
+
+**Music.** Setup › **Music**: up to four tracks (MP3, M4A or WAV, 12 MB each, kept in the form and its saved file), and for
+each segment a setting: keep playing, silence (a fade out), or a track at a level with a fade in and a fade out. The change
+comes as the segment's first card comes up, from the teleprompter or the clicker, and the end of the script fades the music
+out. The graphics page plays it, through the HDMI lead into the Yolobox, so the camera's microphone never hears it and the
+Yolobox mixes it; a browser that waits for a tap before sound plays shows *Tap to allow the music to play* on the page (the
+double-tap for full screen counts). **Play it on this device too** (a checkbox) plays it here as well, for a rehearsal. A
+saved file keeps the tracks and settings (checked as they open: sound data only, four at most, the levels and fades in range).
+
+**Close case** (the shell's bar, after Open case): saves the case the same way Save case does, then closes every form and
+clears the student's details, the case facts and what is due, so the next student's case starts without leaving the
+workstation; with nothing to save it just clears. If the save does not happen (the picker dismissed, a form not answering)
+nothing is closed. Help and the command palette know it. Checked by the new `qa/close-case-test.js` (26 checks: the file
+written with both forms, every form gone, the details and facts cleared, the dot off, the guard quiet, a form reopened empty,
+nothing closed when the save is refused).
+
+Checked by `qa/tv1-test.js` (the counts, the title and closing cards, the marks on the presenter card), the voice suite with a
+new recording of the first six paragraphs (the title card's words first), and `qa/tv1-case-test.js`; the picture chooser
+through the shell (12 pictograms from Form TK-1's sample board, one placed on a card with its name as the caption) and the
+music (a track and two segments' settings, the command reaching the graphics page as the segment's card comes up, a bad
+saved file cleaned) by hand in Chromium.

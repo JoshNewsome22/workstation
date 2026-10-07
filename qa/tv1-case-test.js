@@ -28,7 +28,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('Safety: the crisis plan\'s five stages, said in order and numbered on the card',/crisis plan takes over/.test(row('Safety').say)&&row('Safety').body.split('\n').length===5&&/^1\. Prevention/.test(row('Safety').body)&&row('Safety').lay==='full',row('Safety'));
   ok('Remember: the takeaways from the plan',!row('Remember').todo&&/things matter most/.test(row('Remember').say),row('Remember'));
   const left=d.rows.filter(r=>r.todo).map(r=>r.title);
-  ok('only what no form holds is left to write (the presenter, typed on Setup, and the terms)',left.join()==='Presenter,Terms',left);
+  ok('only what no form holds is left to write (the presenter, typed on Setup, on the presenter and closing cards, and the terms)',left.join()==='Presenter,Terms,Thank you',left);
   ok('the draft puts in the next-card marks: one for each step after a paragraph\'s first',d.cues>0&&d.cues===d.steps,{cues:d.cues,steps:d.steps});
   const bad=log.filter(l=>l.type==='pageerror'||(l.type==='error'&&!/favicon|ERR_FILE/.test(l.text)));
   ok('no errors',!bad.length,bad);

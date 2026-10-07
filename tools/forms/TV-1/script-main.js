@@ -19,14 +19,14 @@ const LOOKC={chapters:{c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#
 const CKEYS=['c1','c2','c3','c4','c5','c6','c7'];
 const LAYS=[['auto','Automatic'],['side','A card beside the presenter'],['lower','Lower third'],['full','Full-screen card'],['title','Section title'],['pic1','One picture'],['pic2','Two pictures'],['split','Text beside a picture'],['none','No card (the presenter alone)']];
 function newRow(seg,o){return Object.assign({seg:seg||'',say:'',tp:'',cont:false,title:'',body:'',build:false,lay:'auto',ch:'',pics:[{ph:'',cap:''},{ph:'',cap:''}],x:Array(20).fill('')},o||{});}
-function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a',tkspd:'90',tksize:'43',tkfont:'merri',tkcol:'#111111',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140',tpmode:'fixed',tpsens:'50',tpline:'30'},chk:{mirror:false,nocd:false,tpmanual:false},rows:[],photos:[],log:[],wt:[],segs:{}};}
+function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a',tkspd:'90',tksize:'43',tkfont:'merri',tkcol:'#111111',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140',tpmode:'fixed',tpsens:'50',tpline:'30',tpwide:'100',contact:''},chk:{mirror:false,nocd:false,tpmanual:false},rows:[],photos:[],log:[],wt:[],segs:{},mus:{tracks:[],by:{}}};}
 let S=blank();
 function ensure(){if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
-  if(!Array.isArray(S.rows))S.rows=[];if(!Array.isArray(S.photos))S.photos=[];if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.wt))S.wt=[];if(!S.segs||typeof S.segs!=='object')S.segs={};
+  if(!Array.isArray(S.rows))S.rows=[];if(!Array.isArray(S.photos))S.photos=[];if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.wt))S.wt=[];if(!S.mus||typeof S.mus!=='object')S.mus={tracks:[],by:{}};if(!Array.isArray(S.mus.tracks))S.mus.tracks=[];if(!S.mus.by||typeof S.mus.by!=='object')S.mus.by={};if(!S.segs||typeof S.segs!=='object')S.segs={};
   S.rows=S.rows.map(r=>{const o=newRow('',r&&typeof r==='object'?r:{});if(!Array.isArray(o.pics))o.pics=[];while(o.pics.length<2)o.pics.push({ph:'',cap:''});o.pics.length=2;
     if(!Array.isArray(o.x))o.x=[];o.x=o.x.map(v=>String(v==null?'':v));while(o.x.length<20)o.x.push('');o.x.length=20;o.ch=String(o.ch||'');if(!LAYS.some(l=>l[0]===o.lay))o.lay='auto';o.cont=!!o.cont;o.build=!!o.build;return o;});
   /* a setting left empty on purpose stays empty (no series band, the tag made from the name) */
-  const d=blank().meta,keep=['series','tag','chapters'];Object.keys(d).forEach(k=>{if(S.meta[k]==null||(S.meta[k]===''&&!keep.includes(k)))S.meta[k]=d[k];});
+  const d=blank().meta,keep=['series','tag','chapters','contact'];Object.keys(d).forEach(k=>{if(S.meta[k]==null||(S.meta[k]===''&&!keep.includes(k)))S.meta[k]=d[k];});
   S.rows.forEach(r=>{r.tp=String(r.tp==null?'':r.tp);});if(!/^(fixed|speak|follow)$/.test(S.meta.tpmode))S.meta.tpmode='fixed';}
 const firstName=()=>{const f=String(S.meta.first||'').trim();if(f)return f;const c=String(S.meta.client||'').trim().replace(/^SIMULATED\s*[–-]\s*/,'');return c?c.split(/\s+/)[0]:'the student';};
 const possess=n=>/s$/i.test(n)?n+'’':n+'’s';
@@ -65,13 +65,13 @@ function placeCues(only){let n=0;paras().forEach((p,k)=>{if(only&&!only.includes
 /* the case (the facts the workstation shell hands this form) is kept as it last came, so a draft can be made later too */
 let CASE=null;
 const SEGS=[['overview','Training Overview'],['profile','Student Profile'],['behaviors','Target Behaviors'],['function','Function & Data'],['goals','Goals of Intervention'],
-  ['reinforce','Reinforcement System'],['proactive','Proactive Strategies'],['response','Response Plan'],['takeaways','Key Takeaways'],['terms','Terms & Definitions']];
+  ['reinforce','Reinforcement System'],['proactive','Proactive Strategies'],['response','Response Plan'],['takeaways','Key Takeaways'],['terms','Terms & Definitions'],['close','Closing']];
 const lc1=s=>{s=String(s||'').trim();return /^[A-Z][a-z]/.test(s)?s[0].toLowerCase()+s.slice(1):s;};
 const sent=s=>{s=String(s||'').trim().replace(/\s+/g,' ');if(!s)return '';return /[.!?]$/.test(s)?s:s+'.';};
 const bullets=a=>a.filter(Boolean).map(x=>'• '+String(x).trim()).join('\n');
 /* column B as the sheet writes it: the opening sentence a paragraph, the rest the next */
 const lead=t=>String(t||'').replace(/^([^.!?\[\n]{12,}?[.!?])\s+(?=[A-Z\[])/,'$1\n\n');
-const GROUP={overview:'Intro',profile:'Intro',behaviors:'Behavior',function:'Behavior',goals:'Goals',reinforce:'The Plan',proactive:'The Plan',response:'Response',takeaways:'Close',terms:'Close'};
+const GROUP={overview:'Intro',profile:'Intro',behaviors:'Behavior',function:'Behavior',goals:'Goals',reinforce:'The Plan',proactive:'The Plan',response:'Response',takeaways:'Close',terms:'Close',close:'Close'};
 /* (v21.52) the case's own words, from the profile (DM-1), the plan (TD-1) and the crisis plan (CR-1): a field's items (split at
    ";", new lines and commas), a list said aloud, a short line for a card */
 const str=v=>String(v==null?'':v).trim();
@@ -92,7 +92,9 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
   const menu=(f.menu||[]).slice().sort((a,b)=>(a.rank==null?99:a.rank)-(b.rank==null?99:b.rank)).filter(m=>m&&m.name);
   const who=String(S.meta.pname||'').trim()||'[your name and role]',aud=String(S.meta.aud||'').trim()||'a receiving team';
   const segName=k=>(SEGS.find(s=>s[0]===k)||[k,k])[1],on=k=>keys.includes(k);
-  if(on('overview')){
+  /* (v21.54) a title card opens the video, and a closing card (the contact for questions, Setup) ends it */
+  if(on('overview')){const ser=String(S.meta.series||'').trim();
+    add(segName('overview'),{say:'Welcome. This is the training video for '+Np+' Functional Behavior Assessment and Behavior Intervention Plan'+(ser?', in the series '+ser:'')+'.',title:Np+' FBA and BIP',lay:'title'});
     add(segName('overview'),{say:'This training walks '+aud+' through '+Np+' Functional Behavior Assessment and Behavior Intervention Plan. It is presented by '+who+'.',title:'Presenter',body:[String(S.meta.pname||'').trim()||'[your name]'].concat(String(S.meta.plines||'').split('\n').map(s=>s.trim()).filter(Boolean)).join('\n'),lay:'side'});
     add(segName('overview'),{say:'Everything that follows is meant for someone meeting '+N+' for the first time. It moves from the assessment, to the plan, to what you will do each day.',title:'Covering',
       body:bullets(keys.filter(k=>k!=='overview').map(segName))});}
@@ -136,6 +138,7 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
     add(segName('takeaways'),{say:tk.length?(tk.length>1?nw(tk.length)[0].toUpperCase()+nw(tk.length).slice(1)+' things matter most. ':'One thing matters most. ')+tk.map(x=>sent(x[0])).join(' '):'[The two or three things every adult should remember about '+N+'.]',
       title:'Remember',body:tk.length?bullets(tk.map(x=>x[1])):'• [the first thing]\n• [the second thing]',lay:'full'});}
   if(on('terms'))add(segName('terms'),{say:'[Terms specific to '+Np+' plan and to this building, so new staff do not have to guess what they mean.]',title:'Terms',body:'• [term]: [what it means]'});
+  if(on('close')){const ct=String(S.meta.contact||'').trim();add(segName('close'),{say:'Thank you for watching. Questions about '+Np+' plan go to '+who+(ct?', '+ct:'')+'. Thank you for the care you give '+N+' every day.',title:'Thank you',body:[String(S.meta.pname||'').trim(),ct].filter(Boolean).join('\n'),lay:'title'});}
   /* the chapters of the bar: typed on Setup, or (none yet) one for each part drafted, set on its first row */
   if(!String(S.meta.chapters||'').trim()){const g=[];keys.forEach(k=>{if(!g.includes(GROUP[k]))g.push(GROUP[k]);});S.meta.chapters=g.join('\n');}
   const have=String(S.meta.chapters).split('\n').map(x=>x.trim());let lastG='';out.forEach(r=>{const k=(SEGS.find(x=>x[1]===r.seg)||[''])[0],gname=GROUP[k];if(gname&&gname!==lastG&&have.includes(gname)){r.ch=gname;lastG=gname;}});
@@ -372,8 +375,9 @@ function gwBoot(){var root=document.getElementById('gwRoot')||document.body,A=do
         requestAnimationFrame(function(){requestAnimationFrame(function(){for(var j=0;j<n.length;j++){n[j].style.transition='opacity .45s ease';n[j].style.opacity='1';}});});},400);}
     else{A.style.transition='opacity .35s ease';B.style.transition='opacity .35s ease';B.innerHTML=h;fitGx(B);tick(B);B.style.opacity='1';A.style.opacity='0';var t=A;A=B;B=t;}
     try{if(!document.fonts.check("900 40px 'TV Lato'"))document.fonts.load("900 40px 'TV Lato'").then(function(){fitGx(A);});}catch(e){}};
+  var MP=musPlayer(root);window.music=function(c){MP.music(c);};
   root.addEventListener('dblclick',function(){var e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);});
-  try{var ch=new BroadcastChannel('tv1-graphics');ch.onmessage=function(e){var d=e.data||{};if(d.t==='show')window.show(d.h,d.bg,d.lc);else if(d.t==='reveal')window.reveal(d.n);else if(d.t==='here')ch.postMessage({t:'hello'});};ch.postMessage({t:'hello'});}catch(e){}}
+  try{var ch=new BroadcastChannel('tv1-graphics');ch.onmessage=function(e){var d=e.data||{};if(d.t==='show')window.show(d.h,d.bg,d.lc);else if(d.t==='reveal')window.reveal(d.n);else if(d.t==='music')window.music(d);else if(d.t==='here')ch.postMessage({t:'hello'});};ch.postMessage({t:'hello'});}catch(e){}}
 if(GFX_ONLY){document.documentElement.classList.add('tv-gfx-page');document.title='TV-1 graphics';
   const st=document.createElement('style');st.textContent='html.tv-gfx-page,html.tv-gfx-page body{margin:0;height:100%;overflow:hidden}html.tv-gfx-page body>*:not(#gwRoot){display:none!important}#gwRoot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#00b140;cursor:none}'+GW_CSS();document.head.appendChild(st);
   const lc=document.createElement('style');lc.id='lc';document.head.appendChild(lc);
@@ -385,13 +389,13 @@ function gwOpen(){if(GW&&!GW.closed){try{GW.focus();}catch(e){}gwShow(curRow());
   if(!inApp&&location.protocol!=='file:'&&GC){GW=window.open(location.href.split('#')[0]+'#graphics','tv1-graphics','popup,width=960,height=540');if(!GW){nbhUI.toast('The browser did not open the window: allow pop-ups for this site, then try again.',{kind:'warn'});return;}gwAt=-1;return;}
   GW=window.open('','tv1-graphics','popup,width=960,height=540');if(!GW){nbhUI.toast('The browser did not open the window: allow pop-ups for this site, then try again.',{kind:'warn'});return;}
   GW.document.open();GW.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TV-1 graphics</title><style>html,body{margin:0;height:100%;overflow:hidden;background:'+(GBG[S.meta.gbg]||'#00b140')+';cursor:none}'+
-    GW_CSS()+GFX_ALL+'<\/style><style id="lc"><\/style><\/head><body><div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><script>'+fitGx.toString()+';('+gwBoot.toString()+')();<\/script><\/body><\/html>');GW.document.close();
+    GW_CSS()+GFX_ALL+'<\/style><style id="lc"><\/style><\/head><body><div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><script>'+fitGx.toString()+';'+musPlayer.toString()+';('+gwBoot.toString()+')();<\/script><\/body><\/html>');GW.document.close();
   gwAt=-1;setTimeout(()=>gwShow(curRow()),80);}
 /* rv: the points shown of a list that builds (the teleprompter's card); left out, the teleprompter's own when it is this card */
 const gwHandle=()=>{try{return !!(GW&&!GW.closed&&GW.show);}catch(e){return false;}};
 function gwShow(i,rv){if(GFX_ONLY||(!gwHandle()&&!GCon))return;const r=S.rows[i];gwAt=i;if(rv===undefined)rv=r&&r.build&&i===TP.i&&document.body.classList.contains('view-prompter')?TP.b:null;
   const h=cardHtml(r,{presenter:S.meta.gbg==='none',flat:/^(green|blue|black)$/.test(S.meta.gbg),live:true,rv}),bg=GBG[S.meta.gbg]||'#00b140',lc=logoCss();
-  if(gwHandle())try{GW.show(h,bg,lc);}catch(e){}if(GCon&&GC)try{GC.postMessage({t:'show',h,bg,lc});}catch(e){}}
+  if(gwHandle())try{GW.show(h,bg,lc);}catch(e){}if(GCon&&GC)try{GC.postMessage({t:'show',h,bg,lc});}catch(e){}musOnShow(i);}
 function gwReveal(){if(gwAt!==TP.i)return;if(gwHandle())try{GW.reveal(TP.b);}catch(e){}if(GCon&&GC)try{GC.postMessage({t:'reveal',n:TP.b});}catch(e){}}
 
 /* ---------------- views ---------------- */
@@ -445,7 +449,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-gx]');if(b
 let TP={i:0,run:false,y:0,ty:null,raf:0,last:0,t0:0,rec:false,tick:0,b:0,lastP:-1,pos:0,man:0};
 /* the way the script scrolls now: the one chosen, or while the microphone is asked for nothing, without it the speed set, and
    until the recogniser is ready (or when it cannot be had) the voice's level */
-function tpMd(){let m=S.meta.tpmode||'fixed';if(m==='fixed')return m;if(!VO.on)return VO.asking?'hold':'fixed';if(m==='follow'&&(!VO.ready||VO.mode!=='follow'))m='speak';return m;}
+function tpMd(){let m=S.meta.tpmode||'fixed';if(m==='fixed'||TP.reh)return 'fixed';if(!VO.on)return VO.asking?'hold':'fixed';if(m==='follow'&&(!VO.ready||VO.mode!=='follow'))m='speak';return m;}
 const curRow=()=>Math.max(0,Math.min(S.rows.length-1,TP.i));
 const ONES=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'],TENS=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
 /* a number as it is said (a year as a year), for matching what is heard */
@@ -461,7 +465,7 @@ function tpRender(){const st=$('#tpStrip');if(!st)return;const P=paras();SW=[];S
   st.innerHTML=P.length?P.map((p,k)=>{const r0=S.rows[p.start];return '<div class="tp-p" data-p="'+k+'">'+'<div class="tp-cards">'+p.rows.map(i=>'<span class="tp-c" data-ci="'+i+'">'+(i+1)+(S.rows[i].title?' · '+esc(S.rows[i].title):'')+'</span>').join('')+'</div><div class="tp-t">'+tpWordsHtml(spoken(r0)||'',k)+'</div></div>';}).join('')+'<div class="tp-end">End of the script</div>':'<div class="tp-p"><div class="tp-t">No script yet.</div></div>';
   SP=[...st.querySelectorAll('.tw')];CQE=[...st.querySelectorAll('.tp-cue')];PK=[];PW=[];SW.forEach((t,j)=>{if(PK[t.k]==null)PK[t.k]=j;PW[t.k]=(PW[t.k]||0)+1;});TP.pos=Math.min(TP.pos||0,SW.length);
   tpStyle();tpGo(TP.i,true);}
-function tpStyle(){const sc=$('#tpScreen');if(!sc)return;sc.style.setProperty('--tps',(num(S.meta.tpsize)||58)+'px');sc.style.setProperty('--tl',Math.max(15,Math.min(60,num(S.meta.tpline)||30))+'%');sc.classList.toggle('mirror',!!S.chk.mirror);
+function tpStyle(){const sc=$('#tpScreen');if(!sc)return;sc.style.setProperty('--tps',(num(S.meta.tpsize)||58)+'px');sc.style.setProperty('--tl',Math.max(15,Math.min(60,num(S.meta.tpline)||30))+'%');sc.style.setProperty('--tpw',Math.max(40,Math.min(100,num(S.meta.tpwide)||100))+'%');sc.classList.toggle('mirror',!!S.chk.mirror);
   const v=$('#tpWpmV');if(v)v.textContent=wpm()+' wpm';const md=S.meta.tpmode||'fixed';document.body.classList.toggle('tp-voice',md!=='fixed');const w=$('#tpWpmL');if(w)w.hidden=md==='follow';}
 const pEls=()=>$$('#tpStrip .tp-p');
 function tpParaAt(y){const P=pEls();let k=0;for(let j=0;j<P.length;j++){if(P[j].offsetTop<=y+2)k=j;else break;}return k;}
@@ -471,7 +475,7 @@ const buildN=r=>r&&r.build?String(r.body||'').split('\n').filter(x=>x.trim()).le
 function tpSetCard(i,bv){const n=S.rows.length;if(!n)return;TP.i=Math.max(0,Math.min(n-1,i));TP.b=bv==null?0:Math.max(0,Math.min(buildN(S.rows[TP.i]),bv));const k=paras().findIndex(p=>p.rows.includes(TP.i));TP.lastP=k;
   pEls().forEach((e,j)=>e.classList.toggle('on',j===k));$$('#tpStrip .tp-c').forEach(e=>e.classList.toggle('on',+e.dataset.ci===TP.i));tpInfo();
   if(TP.rec){const r=S.rows[TP.i];S.log.push({i:TP.i,t:+((performance.now()-TP.t0)/1000).toFixed(2),seg:r.seg,title:r.title});syncState();logLine();}
-  gwShow(TP.i,buildN(S.rows[TP.i])?TP.b:null);}
+  gwShow(TP.i,buildN(S.rows[TP.i])?TP.b:null);tpCardBox();}
 function tpInfo(){const n=S.rows.length,r=S.rows[TP.i],bn=buildN(r);$('#tpPos').textContent='Card '+(TP.i+1)+' of '+n+(r&&r.title?': '+r.title:'')+(bn?' · point '+TP.b+' of '+bn:'');
   const nx=S.rows[TP.i+1];$('#tpFoot').textContent=bn&&TP.b<bn?'Next: point '+(TP.b+1)+' of '+bn:nx?'Next: '+(nx.cont?'(same paragraph) ':'')+(nx.title||nx.seg||''):'The last card';}
 /* a card chosen (the clicker, the arrows): the script goes to its paragraph */
@@ -480,8 +484,8 @@ function tpGo(i,instant,bv){const n=S.rows.length;if(!n)return;const was=TP.i,k0
   if(!instant&&i!==was)TP.man=performance.now();}
 function tpApply(smooth){const st=$('#tpStrip');if(!st)return;st.style.transition=smooth?'transform .45s ease':'none';st.style.transform='translateY('+(-TP.y)+'px)';}
 /* the clicker: the next point of a card that builds, else the next card (the one before shows its whole list) */
-function tpNext(){const r=S.rows[TP.i],bn=buildN(r);if(bn&&TP.b<bn){TP.b++;tpInfo();gwReveal();return;}if(S.rows.length&&TP.i<S.rows.length-1)tpGo(TP.i+1);}
-function tpPrev(){if(buildN(S.rows[TP.i])&&TP.b>0){TP.b--;tpInfo();gwReveal();return;}if(TP.i>0)tpGo(TP.i-1,false,buildN(S.rows[TP.i-1]));}
+function tpNext(){const r=S.rows[TP.i],bn=buildN(r);if(bn&&TP.b<bn){TP.b++;tpInfo();gwReveal();tpCardBox();return;}if(S.rows.length&&TP.i<S.rows.length-1)tpGo(TP.i+1);}
+function tpPrev(){if(buildN(S.rows[TP.i])&&TP.b>0){TP.b--;tpInfo();gwReveal();tpCardBox();return;}if(TP.i>0)tpGo(TP.i-1,false,buildN(S.rows[TP.i-1]));}
 /* 3, 2, 1 before the clock or the scroll starts (Setup: the countdown) */
 function countdown(go){if(S.chk.nocd){go();return;}const sc=$('#tpScreen');let o=$('#tpCd');if(!o){o=document.createElement('div');o.id='tpCd';o.className='tp-cd';sc.appendChild(o);}
   cdStop();let n=3;o.hidden=false;o.textContent=n;countdown.on=true;countdown.t=setInterval(()=>{n--;if(n>0){o.textContent=n;return;}cdStop();go();},1000);}
@@ -489,13 +493,38 @@ function countdown(go){if(S.chk.nocd){go();return;}const sc=$('#tpScreen');let o
 function cdStop(){clearInterval(countdown.t);const was=!!countdown.on;countdown.on=false;const o=$('#tpCd');if(o)o.hidden=true;return was;}
 function tpToggle(){if(TP.run){tpHalt();return;}if(cdStop())return;countdown(()=>{TP.run=true;const b=$('#tpRun');if(b){b.setAttribute('aria-pressed','true');b.textContent='Stop';}TP.last=performance.now();cancelAnimationFrame(TP.raf);TP.raf=requestAnimationFrame(tpFrame);wake(true);
   const md=S.meta.tpmode||'fixed';if(md!=='fixed')voStart(md);voSay('');});}
-function tpHalt(){TP.run=false;const b=$('#tpRun');if(b){b.setAttribute('aria-pressed','false');b.textContent='Scroll';}cancelAnimationFrame(TP.raf);voStop();}
+function tpHalt(){TP.run=false;const b=$('#tpRun');if(b){b.setAttribute('aria-pressed','false');b.textContent='Scroll';}cancelAnimationFrame(TP.raf);voStop();if(TP.reh){TP.reh=false;paceShow(true);}}
+/* (v21.54) the card shown over the script (full screen too): the card the teleprompter is on, its points as revealed */
+function tpCardBox(){const w=$('#tpWrap'),bx=$('#tpCardBox');if(!w||!bx||!w.classList.contains('tp-card'))return;const r=S.rows[TP.i];if(!r){bx.innerHTML='';return;}
+  const W=bx.clientWidth||800,H=bx.clientHeight||450,wd=Math.min(W,H*1920/1080);bx.innerHTML=stageHtml(r,Math.max(200,wd),{presenter:S.meta.gbg==='none',flat:/^(green|blue|black)$/.test(S.meta.gbg),rv:buildN(r)?TP.b:null});fitGx(bx);}
+function tpCardToggle(){const w=$('#tpWrap');w.classList.toggle('tp-card');const b=$('#tpCard');if(b)b.setAttribute('aria-pressed',String(w.classList.contains('tp-card')));tpCardBox();}
+/* the rehearsal: from the top, at the speed set, the cards changing as they will; at the end, the pacing */
+function rehearse(){if(TP.run)tpHalt();if(!S.rows.length){nbhUI.toast('No script yet.',{kind:'warn'});return;}tpGo(0,true);TP.pos=0;tpReadTo(0);TP.man=0;TP.reh=true;TP.rehT=performance.now();const nocd=S.chk.nocd;S.chk.nocd=true;tpToggle();S.chk.nocd=nocd;}
+/* the pacing: each segment's time at the speed set, the whole, and the paragraphs that run long with no card change */
+function pacing(){const W=wpm(),P=paras(),segs=[];let total=0;const long=[];
+  P.forEach((p,k)=>{const r=S.rows[p.start],n=words(spoken(r)),secs=n/W*60;total+=secs;let sg=segs.find(x=>x.seg===r.seg);if(!sg){sg={seg:r.seg,secs:0,cards:0};segs.push(sg);}sg.secs+=secs;sg.cards+=p.rows.length;
+    if(secs>45&&paraSteps(p)<1)long.push({k,start:p.start,secs,title:r.title||r.seg});});
+  const todo=S.rows.filter(r=>todo_(r)).length;return {total,segs,long,todo,W};}
+const todo_=r=>todo(r.say)||todo(r.title)||todo(r.body);
+function paceShow(after){const o=$('#paceOut');if(!o)return;const pc=pacing();if(!S.rows.length){o.hidden=false;o.innerHTML='<p class="hint">No script yet.</p>';return;}
+  const took=after&&TP.rehT?(performance.now()-TP.rehT)/1000:null;
+  o.hidden=false;o.innerHTML='<b>'+(after?'Rehearsed: ':'Pacing: ')+mmss(took!=null?took:pc.total)+'</b>'+(took!=null&&Math.abs(took-pc.total)>5?' (the script reads as '+mmss(pc.total)+' at '+pc.W+' words a minute)':' at '+pc.W+' words a minute')+(pc.todo?' &middot; <span class="tv-tdn">'+pc.todo+' card'+(pc.todo===1?'':'s')+' still to write</span>':'')+
+    '<table class="rt pace"><tr><th>Segment</th><th>Cards</th><th>Time</th></tr>'+pc.segs.map(x=>'<tr><td>'+esc(x.seg)+'</td><td>'+x.cards+'</td><td>'+mmss(x.secs)+'</td></tr>').join('')+'</table>'+
+    (pc.long.length?'<p class="hint"><b>On screen too long with no change:</b> '+pc.long.map(x=>'card '+(x.start+1)+' ('+esc(x.title)+', '+mmss(x.secs)+')').join(', ')+'. Add a card, a point that builds, or a &gt;&gt; mark, or shorten the words.</p>':'<p class="hint">No paragraph stays on one card longer than 45 seconds.</p>');}
+/* the microphone check: ten seconds of listening, no scrolling; what was heard, and how loud */
+async function micTest(){if(VO.test)return;const md=S.meta.tpmode||'fixed';if(md==='fixed'){nbhUI.toast('Choose "while I speak" or "following my words" first (Scroll).',{kind:'warn'});return;}
+  VO.test=true;VO.peak=0;VO.spkMs=0;VO.lastT=0;const b=$('#micTest');if(b){b.disabled=true;b.textContent='Listening (10 s)…';}voSay('Microphone check: read the first lines of the script aloud for ten seconds.');
+  await voStart(md);if(!VO.on){VO.test=false;if(b){b.disabled=false;b.textContent='Test the microphone';}return;}
+  const t0=performance.now();await new Promise(r=>setTimeout(r,10000));const heard=VO.done.concat(VO.cur),n=heard.length,pk=VO.peak,spk=VO.spkMs/Math.max(1,performance.now()-t0);voStop();VO.test=false;if(b){b.disabled=false;b.textContent='Test the microphone';}
+  const loud=pk<.01?'very quiet: move the microphone closer or raise the sensitivity':pk<.04?'on the quiet side':'a good level';
+  if(md==='follow'&&VO.ready)voSay(n?'Microphone check: heard '+n+' words ('+heard.slice(-8).join(' ')+'), the level '+loud+'. Following your words will work.':'Microphone check: the recogniser heard no words; the level was '+loud+'.');
+  else voSay('Microphone check: speaking was detected '+Math.round(spk*100)+'% of the time, the level '+loud+'.'+(md==='follow'&&!VO.ready?' The recogniser is not ready yet.':''));}
 /* the scroll: at the speed set (each paragraph its height over its reading time), while you speak, or to the word heard;
    the cards change as the reading line passes into the next paragraph (or the next part of one), unless only the clicker
    changes them (Setup) */
 function tpFrame(now){if(!TP.run)return;const dt=Math.min(.1,(now-TP.last)/1000);TP.last=now;const md=tpMd(),P=pEls();
   if(md==='follow'){if(TP.ty!=null&&Math.abs(TP.ty-TP.y)>.5){TP.y+=(TP.ty-TP.y)*Math.min(1,dt*5);tpApply(false);}}
-  else if(md==='fixed'||(md==='speak'&&VO.speaking)){const k=tpParaAt(TP.y),pe=P[k];if(pe){const n=Math.max(1,PW[k]||words(spoken(S.rows[paras()[k].start]))),secs=n/wpm()*60,end=P[P.length-1].offsetTop+P[P.length-1].offsetHeight;TP.y=Math.min(end,TP.y+pe.offsetHeight/secs*dt);tpApply(false);
+  else if(md==='fixed'||(md==='speak'&&VO.speaking)){const k=tpParaAt(TP.y),pe=P[k];if(pe){const n=Math.max(1,PW[k]||words(spoken(S.rows[paras()[k].start]))),secs=n/wpm()*60,end=P[P.length-1].offsetTop+P[P.length-1].offsetHeight;TP.y=Math.min(end,TP.y+pe.offsetHeight/secs*dt);tpApply(false);if(TP.y>=end-.5){if(MUSEG!==null){MUSEG=null;musCmd('',true);}if(TP.reh){tpAutoCard();tpHalt();return;}}
     if(PK[k]!=null){const f=Math.max(0,Math.min(1,(TP.y-pe.offsetTop)/Math.max(1,pe.offsetHeight))),p=PK[k]+Math.floor(f*(PW[k]||0));if(p>TP.pos){TP.pos=p;if(md==='fixed')tpReadTo(p);}}}}
   tpAutoCard();TP.raf=requestAnimationFrame(tpFrame);}
 /* (v21.52) with next-card marks in the script, the marks change the cards: a paragraph comes up on its first card, and each
@@ -512,7 +541,7 @@ function tpAutoCard(){const fol=tpMd()==='follow'&&SW.length;if(CQ.length)CQ.for
     if(st.i>TP.i)tpSetCard(st.i,st.b);else if(st.i===TP.i&&st.b>TP.b){TP.b=st.b;tpInfo();gwReveal();}return;}const idx=p.rows[Math.max(0,Math.min(p.rows.length-1,Math.floor(f*p.rows.length)))];if(idx>TP.i||(k!==TP.lastP&&idx!==TP.i&&P.findIndex(q=>q.rows.includes(TP.i))<k))tpSetCard(idx,buildN(S.rows[idx]));}
 /* the words read so far, dimmed (the voice modes) */
 let RD=0;function tpReadTo(pos){if(!SP.length)return;const s=pos>0&&SW[pos-1]?SW[pos-1].s+1:0;if(s===RD)return;const a=Math.min(s,RD),b=Math.max(s,RD);for(let j=a;j<b&&j<SP.length;j++)SP[j].classList.toggle('rd',j<s);RD=s;}
-function tpStop(){if(TP.run)tpHalt();cdStop();wake(false);}
+function tpStop(){if(TP.run)tpHalt();cdStop();wake(false);if(VO.test){VO.test=false;voStop();}}
 let WL=null;function wake(on){try{if(on&&!WL&&navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>{WL=w;},()=>{});else if(!on&&WL){WL.release().catch(()=>{});WL=null;}}catch(e){}}
 function tpClock(){if(!TP.rec)return;$('#tpClock').textContent=mmss((performance.now()-TP.t0)/1000);}
 function logLine(){const l=$('#logLine');if(l)l.textContent=S.log.length?S.log.length+' card times kept (the last take)'+(S.wt.length?', and '+S.wt.length+' word times':'')+'.':'';}
@@ -525,7 +554,7 @@ async function voStart(md){VO.mode=md;if(VO.on){if(md==='follow')asrEnsure();ret
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){voSay('This browser gives the page no microphone: the script scrolls at the speed set.');return;}
   VO.asking=true;try{VO.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});VO.asking=false;}
   catch(e){VO.asking=false;voSay('The microphone was not allowed: the script scrolls at the speed set. (Allow it for this site to scroll with your voice.)');return;}
-  if(!TP.run){VO.stream.getTracks().forEach(t=>t.stop());return;}
+  if(!TP.run&&!VO.test){VO.stream.getTracks().forEach(t=>t.stop());return;}
   const AC=window.AudioContext||window.webkitAudioContext;VO.ctx=new AC();VO.src=VO.ctx.createMediaStreamSource(VO.stream);VO.proc=VO.ctx.createScriptProcessor(2048,1,1);
   const mute=VO.ctx.createGain();mute.gain.value=0;VO.src.connect(VO.proc);VO.proc.connect(mute);mute.connect(VO.ctx.destination);VO.proc.onaudioprocess=e=>voAudio(e.inputBuffer.getChannelData(0));
   try{await VO.ctx.resume();}catch(e){}VO.on=true;VO.floor=.004;VO.done=[];VO.cur=[];VO.inflight=0;if(VO.w&&VO.ready)VO.w.postMessage({t:'reset'});voMeter();if(md==='follow')asrEnsure();}
@@ -534,7 +563,7 @@ function voStop(){if(VO.proc)VO.proc.onaudioprocess=null;try{VO.src&&VO.src.disc
 const voSens=()=>{const s=num(S.meta.tpsens);return s==null?50:Math.max(0,Math.min(100,s));};
 function voAudio(x){let e=0;for(let j=0;j<x.length;j++)e+=x[j]*x[j];const rms=Math.sqrt(e/x.length),now=performance.now(),k=1.6+(100-voSens())/100*3.2;
   if(rms>Math.max(.002,VO.floor*k)){VO.speaking=true;VO.hang=now+450;}else{if(now>VO.hang)VO.speaking=false;VO.floor=Math.max(.0008,VO.floor*.97+rms*.03);}
-  VO.lv=rms;voMeter();
+  VO.lv=rms;if(rms>(VO.peak||0))VO.peak=rms;if(VO.test){const t=performance.now();if(VO.speaking&&VO.lastT)VO.spkMs+=t-VO.lastT;VO.lastT=t;}voMeter();
   if(VO.mode==='follow'&&VO.ready){const sr=VO.ctx.sampleRate,f=sr/16000,n=Math.floor(x.length/f),y=new Float32Array(n);for(let j=0;j<n;j++){const a=Math.floor(j*f),b=Math.min(x.length,Math.floor((j+1)*f));let s=0;for(let q=a;q<b;q++)s+=x[q];y[j]=s/Math.max(1,b-a);}
     VO.acc.push(y);VO.accN+=n;if(VO.accN>=1600&&VO.inflight<4){const all=new Float32Array(VO.accN);let o=0;VO.acc.forEach(a=>{all.set(a,o);o+=a.length;});VO.acc=[];VO.accN=0;VO.inflight++;VO.w.postMessage({t:'audio',s:all,n:++VO.n},[all.buffer]);}}}
 let voMt=0;function voMeter(now0){const m=$('#tpMic');if(!m)return;const now=performance.now();if(!now0&&now-voMt<100&&VO.on)return;voMt=now;
@@ -542,7 +571,7 @@ let voMt=0;function voMeter(now0){const m=$('#tpMic');if(!m)return;const now=per
   const t=m.querySelector('span');if(t&&!VO.loading)t.textContent=VO.mode==='follow'?(VO.ready?'Following your words':'Starting the recogniser…'):VO.speaking?'Speaking':'Listening';}
 function voSay(t){const l=$('#tpVoice');if(l){l.textContent=t;l.hidden=!t;}}
 /* the last words heard, under the screen while the words are followed (so a word misheard can be seen) */
-function voHeardLine(){const l=$('#tpHeard');if(!l)return;const on=TP.run&&VO.on&&VO.mode==='follow'&&VO.ready;l.hidden=!on;if(on)l.textContent='Heard: '+VO.done.concat(VO.cur).slice(-12).join(' ');}
+function voHeardLine(){const l=$('#tpHeard');if(!l)return;const on=(TP.run||VO.test)&&VO.on&&VO.mode==='follow'&&VO.ready;l.hidden=!on;if(on)l.textContent='Heard: '+VO.done.concat(VO.cur).slice(-12).join(' ');}
 
 /* ---------------- the recogniser, on the device (Follow my words) ---------------- */
 /* sherpa-onnx (Apache License 2.0) with a small English model, in nbh-asr/ beside the forms: 57 MB, downloaded once when
@@ -578,8 +607,8 @@ const wtW=w=>STOP.has(w)?.3:w.length<=3?.6:1;
 function voScore(R,e,part){let i=R.length-1,j=e,sc=0,miss=0;if((part?simL:simW)(R[i],SW[j].w)<.72)return 0;
   while(i>=0&&j>=0&&miss<4){const s=(part&&i===R.length-1?simL:simW)(R[i],SW[j].w);if(s>=.72){sc+=wtW(SW[j].w)*s;i--;j--;continue;}if(j>0&&simW(R[i],SW[j-1].w)>=.72){j--;miss++;continue;}if(i>0&&simW(R[i-1],SW[j].w)>=.72){i--;miss++;continue;}i--;j--;miss++;}
   return sc;}
-function voHeard(text,end){if(!TP.run)return;const toks=normTok(text);VO.cur=toks;if(end&&toks.length){VO.done=VO.done.concat(toks).slice(-24);VO.cur=[];}
-  voHeardLine();const R=VO.done.concat(VO.cur).slice(-8);if(R.length<2||!SW.length)return;const p=TP.pos;let best=null;
+function voHeard(text,end){if(!TP.run&&!VO.test)return;const toks=normTok(text);VO.cur=toks;if(end&&toks.length){VO.done=VO.done.concat(toks).slice(-24);VO.cur=[];}
+  voHeardLine();if(VO.test)return;const R=VO.done.concat(VO.cur).slice(-8);if(R.length<2||!SW.length)return;const p=TP.pos;let best=null;
   const look=(a,b,pen)=>{for(let e=Math.max(0,a);e<Math.min(SW.length,b);e++){const sc=voScore(R,e,!end);if(sc<=0)continue;const v=sc-pen*Math.abs(e+1-p)/40;if(!best||v>best.v)best={e,sc,v};}};
   look(p-6,p+30,.4);if(!best||best.sc<1.4)look(0,SW.length,1.2);if(!best)return;
   /* the next word or two needs little; a jump of more needs more of the words heard to agree, the further the more (a weak
@@ -592,6 +621,8 @@ function voHeard(text,end){if(!TP.run)return;const toks=normTok(text);VO.cur=tok
 $('#tpNext').addEventListener('click',tpNext);$('#tpPrev').addEventListener('click',tpPrev);$('#tpRun').addEventListener('click',tpToggle);
 $('#tpRec').addEventListener('click',()=>{const b=$('#tpRec');if(!TP.rec){if(cdStop())return;countdown(()=>{TP.rec=true;TP.t0=performance.now();S.log=[];S.wt=[];b.textContent='Stop the clock';b.setAttribute('aria-pressed','true');TP.tick=setInterval(tpClock,250);wake(true);tpSetCard(TP.i,TP.b);});}
   else{TP.rec=false;clearInterval(TP.tick);b.textContent='Start the clock';b.setAttribute('aria-pressed','false');syncState();logLine();}});
+$('#tpCard').addEventListener('click',tpCardToggle);$('#rehearseBtn').addEventListener('click',rehearse);$('#paceBtn').addEventListener('click',()=>paceShow(false));$('#micTest').addEventListener('click',micTest);
+window.addEventListener('resize',()=>tpCardBox());
 $('#tpGfx').addEventListener('click',gwOpen);$('#gxWin').addEventListener('click',gwOpen);
 $('#gxPrev').addEventListener('click',()=>{gxAt--;gxRender();gwShow(gxAt);});$('#gxNext').addEventListener('click',()=>{gxAt++;gxRender();gwShow(gxAt);});
 $('#tpFs').addEventListener('click',()=>{const w=$('#tpWrap');const fe=document.fullscreenElement||document.webkitFullscreenElement;
@@ -601,6 +632,7 @@ document.addEventListener('keydown',e=>{if(!document.body.classList.contains('vi
   if(['PageDown','ArrowRight','ArrowDown','Enter'].includes(e.key)){e.preventDefault();tpNext();}
   else if(['PageUp','ArrowLeft','ArrowUp'].includes(e.key)){e.preventDefault();tpPrev();}
   else if(e.key===' '){e.preventDefault();if(!e.repeat)tpToggle();}
+  else if(e.key==='g'||e.key==='G'){e.preventDefault();tpCardToggle();}
   else if(e.key==='Escape'){$('#tpWrap').classList.remove('tp-fs');}});
 $('#logCsv').addEventListener('click',()=>{if(!S.log.length){nbhUI.toast('No card times yet: Start the clock on the teleprompter as you record.',{kind:'warn'});return;}
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';const rows=[['Card','Seconds','Time','Segment','Title']].concat(S.log.map(l=>[l.i+1,l.t,mmss(l.t),l.seg,l.title]));
@@ -655,7 +687,8 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   if(d.dup!==undefined){const i=+d.dup,c=JSON.parse(JSON.stringify(S.rows[i]));S.rows.splice(i+1,0,newRow('',c));renderRows();syncState();return;}
   if(d.del!==undefined){const i=+d.del;S.rows.splice(i,1);if(S.rows[i]&&i===0)S.rows[0].cont=false;if(S.rows[i]&&S.rows[i].cont&&(i===0))S.rows[i].cont=false;renderRows();syncState();return;}
   if(d.addhere!==undefined){const i0=+d.addhere,seg=S.rows[i0].seg;let k=i0;while(k+1<S.rows.length&&S.rows[k+1].seg===seg)k++;S.rows.splice(k+1,0,newRow(seg));renderRows();syncState();const t=$('textarea[data-i="'+(k+1)+'"][data-f="say"]');if(t)t.focus();return;}
-  if(d.pic){const [i,j]=d.pic.split(':').map(Number);PICK={i,j};$('#photoIn').click();return;}
+  if(d.pic){const [i,j]=d.pic.split(':').map(Number);picChoose(i,j);return;}
+  if(d.picsrc){picFrom(d.picsrc);return;}if(d.picuse!==undefined){picUse(+d.picuse);return;}
   if(d.picx){const [i,j]=d.picx.split(':').map(Number);S.rows[i].pics[j].ph='';prune();renderRows();syncState();return;}});
 $('#cueBtn').addEventListener('click',()=>{const n=placeCues();renderRows();syncState();nbhUI.toast(n?n+' next-card mark'+(n===1?'':'s')+' (>>) placed, each where a card changes or a point comes up: move one by moving its >> in the words.':'No paragraph needs one: every paragraph with more than one card or point has its marks already.',{kind:'ok'});});
 $('#addSeg').addEventListener('click',()=>{S.rows.push(newRow('New segment',{title:'',say:''}));renderRows();syncState();const ins=$$('.tv-segname');if(ins.length){ins[ins.length-1].focus();ins[ins.length-1].select();}});
@@ -670,11 +703,80 @@ $('#logoReset').addEventListener('click',()=>{S.photos=S.photos.filter(p=>p.id!=
 function logoLine(){const l=$('#logoLine');if(l)l.textContent=photo('logo')?'A logo of your own.':'The letterhead logo.';}
 /* pictures: kept at up to 3840 px on the long side (sharp on a 4K video, 3840 x 2160), as JPEG (PNG when they have transparency) */
 let PICK=null;
+/* (v21.54) a row's picture: from this device, or from the pictures another open form holds (Form TK-1, the token board, and
+   Form VS-1, the visual supports): the workstation hands over that form's own saved data (its photos, and the pictograms its
+   cards use, drawn from the shared library), so nothing is uploaded twice. Only inside the workstation, with that form open. */
+let PICL=[];
+const framed=()=>{try{return window.parent&&window.parent!==window;}catch(e){return false;}};
+function picChoose(i,j){PICK={i,j};const d=$('#picDlg');if(!d||typeof d.showModal!=='function'){$('#photoIn').click();return;}
+  PICL=[];$('#picGrid').innerHTML='';$('#picNote').textContent=framed()?'':'Open this form in the workstation, with Form TK-1 or VS-1 open too, to take their pictures.';
+  $$('[data-picsrc]',d).forEach(b=>{b.disabled=!framed();});d.showModal();}
+$('#picDlg').addEventListener('click',e=>{if(e.target.dataset.picclose!==undefined||e.target===e.currentTarget){e.currentTarget.close();}});
+$('#picFile').addEventListener('click',()=>{$('#picDlg').close();$('#photoIn').click();});
+/* the pictogram library beside the forms, fetched when first needed (not in a file opened on its own) */
+function pictosLoad(){if(window.NBH_PICTOS)return Promise.resolve(true);if(location.protocol==='file:')return Promise.resolve(false);
+  return new Promise(res=>{const sc=document.createElement('script');sc.src='nbh-pictos.js';sc.onload=()=>res(!!window.NBH_PICTOS);sc.onerror=()=>res(false);document.head.appendChild(sc);});}
+const svgUrl=inner=>'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72" width="720" height="720">'+inner+'</svg>')));
+let ASKW=null;
+function askForm(id){return new Promise(res=>{if(!framed()){res({ok:false,why:'not framed'});return;}if(ASKW){res({ok:false,why:'busy'});return;}
+  const done=m=>{if(!ASKW)return;ASKW=null;window.removeEventListener('message',on);clearTimeout(tm);res(m);};
+  const on=ev=>{const d=ev.data;if(!d||d.nbh!=='answer'||d.want!==id||ev.source!==window.parent)return;done(d);};ASKW=id;window.addEventListener('message',on);
+  const tm=setTimeout(()=>done({ok:false,why:'no answer'}),12000);try{window.parent.postMessage({nbh:'ask',want:id},'*');}catch(e){done({ok:false,why:'no answer'});}});}
+async function picFrom(id){const n=$('#picNote');n.textContent='Asking the workstation for Form '+id+'…';const a=await askForm(id);
+  if(!a.ok){n.textContent=a.why==='not open'?'Form '+id+' is not open: open it in the workstation (it can sit beside this one), then try again.':a.why==='not framed'?'Open this form in the workstation, with Form '+id+' open too.':'Form '+id+' did not answer. Try again.';return;}
+  let F=null;try{F=JSON.parse(String(a.snap&&a.snap.own||''));}catch(e){}const T=F&&F.S&&typeof F.S==='object'?F.S:null;if(!T){n.textContent='Form '+id+' has nothing saved yet.';return;}
+  const list=[],seen=new Set();const ph=Array.isArray(T.photos)?T.photos:[];ph.forEach(p=>{if(p&&/^data:image\//.test(String(p.img||''))&&!seen.has('p'+p.id)){seen.add('p'+p.id);list.push({label:String(p.label||'picture').slice(0,40),img:String(p.img),kind:'photo'});}});
+  const keys=[];(function walk(o,dep){if(!o||dep>5)return;if(Array.isArray(o)){o.forEach(x=>walk(x,dep+1));return;}if(typeof o!=='object')return;if(typeof o.k==='string'&&o.k&&!/^(tk|av):/.test(o.k)&&!keys.includes(o.k))keys.push(o.k);Object.keys(o).forEach(k=>{if(k!=='photos')walk(o[k],dep+1);});})(T,0);
+  if(keys.length&&await pictosLoad()){keys.forEach(k=>{const P=window.NBH_PICTOS[k];if(P&&P.s)list.push({label:String(P.l||k).slice(0,40),img:svgUrl(P.s),kind:'pictogram'});});}
+  PICL=list.slice(0,80);n.textContent=PICL.length?PICL.length+' picture'+(PICL.length===1?'':'s')+' in Form '+id+(keys.length&&!window.NBH_PICTOS?' (its pictograms need the library beside the forms)':'')+'. Tap one.':'Form '+id+' holds no pictures yet'+(keys.length?' (its pictograms need the library beside the forms, nbh-pictos.js)':'')+'.';
+  $('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+x.img+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
+function picUse(k){const x=PICL[k];if(!x||!PICK||PICK.logo)return;const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push({id,label:x.label,img:x.img});
+  S.rows[PICK.i].pics[PICK.j].ph=id;if(!S.rows[PICK.i].pics[PICK.j].cap&&x.kind==='pictogram')S.rows[PICK.i].pics[PICK.j].cap=x.label;PICK=null;$('#picDlg').close();renderRows();syncState();}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const at=PICK;PICK=null;const r=new FileReader();
   r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,3840/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
     const png=/png|gif|webp/i.test(f.type);const id=at.logo?'logo':'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);if(at.logo)S.photos=S.photos.filter(p=>p.id!=='logo');S.photos.push({id,label:String(f.name||'picture').replace(/\.[^.]+$/,'').slice(0,40),img:png?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.9)});
     if(at.logo){paintLogo();logoLine();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();return;}S.rows[at.i].pics[at.j].ph=id;if(!S.rows[at.i].pics[at.j].cap)S.rows[at.i].pics[at.j].cap='';renderRows();syncState();};im.src=r.result;};r.readAsDataURL(f);});
 function prune(){const used=new Set();S.rows.forEach(r=>r.pics.forEach(p=>{if(p.ph)used.add(p.ph);}));S.photos=S.photos.filter(p=>used.has(p.id)||p.id==='logo');}
+
+/* ---------------- the music (v21.54) ---------------- */
+/* background music the graphics page plays (over the HDMI lead, into the Yolobox, so the camera's microphone never hears it;
+   on this device too, for a rehearsal, when ticked): up to four tracks kept in the form, and for each segment a setting:
+   keep playing, go silent, or a track at a level, with a fade in and a fade out; the change comes as the first card of the
+   segment comes up, and the last card's end fades the music out. */
+const MUS_MAX=12000000;
+function musSegs(){const u=[];S.rows.forEach(r=>{if(r.seg&&!u.includes(r.seg))u.push(r.seg);});return u;}
+function renderMusic(){const el=$('#musTracks'),tb=$('#musBy');if(!el||!tb)return;const T=S.mus.tracks;
+  el.innerHTML=T.length?T.map(t=>'<div class="tv-trk"><b>'+esc(t.label)+'</b> <span class="hint">'+Math.round(t.src.length*0.75/1e6*10)/10+' MB</span> <button type="button" class="tool" data-trkx="'+esc(t.id)+'">Remove</button></div>').join(''):'<p class="hint">No tracks yet. Add an MP3, M4A or WAV (up to 12 MB each, four tracks).</p>';
+  const segs=musSegs();tb.innerHTML=segs.length?'<table class="rt"><tr><th>Segment</th><th>Music</th><th>Level</th><th>Fade in (s)</th><th>Fade out (s)</th></tr>'+segs.map(sg=>{const b=S.mus.by[sg]||{t:'keep',v:60,fi:2,fo:3};
+    return '<tr><td>'+esc(sg)+'</td><td><select data-ms="'+esc(sg)+'" data-mf="t"><option value="keep"'+(b.t==='keep'?' selected':'')+'>Keep playing</option><option value="none"'+(b.t==='none'?' selected':'')+'>Silence (fade out)</option>'+T.map(t=>'<option value="'+esc(t.id)+'"'+(b.t===t.id?' selected':'')+'>'+esc(t.label)+'</option>').join('')+'</select></td>'+
+      '<td><input type="range" min="0" max="100" step="5" value="'+b.v+'" data-ms="'+esc(sg)+'" data-mf="v" aria-label="Level"></td><td><input type="number" min="0" max="10" step="0.5" value="'+b.fi+'" data-ms="'+esc(sg)+'" data-mf="fi" style="width:60px"></td><td><input type="number" min="0" max="10" step="0.5" value="'+b.fo+'" data-ms="'+esc(sg)+'" data-mf="fo" style="width:60px"></td></tr>';}).join('')+'</table>':'<p class="hint">The segments appear here once the script has rows.</p>';}
+$('#musIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(S.mus.tracks.length>=4){nbhUI.toast('Four tracks at most: remove one first.',{kind:'warn'});return;}
+  if(f.size>MUS_MAX){nbhUI.toast('That file is '+Math.round(f.size/1e6)+' MB; a track can be up to 12 MB. Export it at a lower bit rate, or trim it.',{kind:'warn'});return;}
+  if(!/^audio\//.test(f.type)){nbhUI.toast('Choose a sound file (MP3, M4A, WAV).',{kind:'warn'});return;}
+  const r=new FileReader();r.onload=()=>{const src=String(r.result||'');if(!/^data:audio\//.test(src)){nbhUI.toast('That file could not be read as sound.',{kind:'warn'});return;}
+    S.mus.tracks.push({id:'m'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:String(f.name||'track').replace(/\.[^.]+$/,'').slice(0,40),src});renderMusic();syncState();};r.readAsDataURL(f);});
+$('#musBtn').addEventListener('click',()=>$('#musIn').click());
+document.addEventListener('click',e=>{const b=e.target.closest('[data-trkx]');if(!b)return;const id=b.dataset.trkx;S.mus.tracks=S.mus.tracks.filter(t=>t.id!==id);Object.keys(S.mus.by).forEach(k=>{if(S.mus.by[k].t===id)delete S.mus.by[k];});renderMusic();syncState();});
+document.addEventListener('input',e=>{const el=e.target;if(el.dataset.ms===undefined)return;const sg=el.dataset.ms,b=S.mus.by[sg]||(S.mus.by[sg]={t:'keep',v:60,fi:2,fo:3});
+  if(el.dataset.mf==='t')b.t=el.value;else b[el.dataset.mf]=Math.max(0,Math.min(el.dataset.mf==='v'?100:10,num(el.value)||0));if(b.t==='keep'&&b.v===60&&b.fi===2&&b.fo===3)delete S.mus.by[sg];syncState();});
+/* the command for a segment as its first card comes up (and the fade-out at the end of the script) */
+let MUSEG=null;
+function musCmd(seg,last){const b=S.mus.by[seg];let c=null;if(last)c={t:'music',stop:true,fo:3};else if(!b||b.t==='keep')c=null;else if(b.t==='none')c={t:'music',stop:true,fo:b.fo};else{const t=S.mus.tracks.find(x=>x.id===b.t);if(t)c={t:'music',id:t.id,src:t.src,vol:b.v/100,fi:b.fi,fo:b.fo};}
+  if(!c)return;if(gwHandle())try{GW.music(c);}catch(e){}if(GCon&&GC)try{GC.postMessage(c);}catch(e){}if(S.chk.mushere&&window.__musHere)window.__musHere.music(c);}
+function musOnShow(i){const r=S.rows[i];if(!r)return;const seg=r.seg||'';if(seg!==MUSEG){MUSEG=seg;musCmd(seg,false);}}
+$('#musOff').addEventListener('click',()=>{MUSEG=null;musCmd('',true);});
+/* the player, in the graphics page and here: one <audio> a track, looping; a fade is the volume ramped; a browser that waits
+   for a tap before sound plays gets a notice to tap (the graphics page's own) */
+function musPlayer(root){var AU={},cur=null,ramps={};function ramp(a,to,secs,done){clearInterval(ramps[a.src]);var from=a.volume,t0=Date.now(),ms=Math.max(50,secs*1000);if(secs<=0){a.volume=to;if(done)done();return;}
+    ramps[a.src]=setInterval(function(){var k=Math.min(1,(Date.now()-t0)/ms);a.volume=from+(to-from)*k;if(k>=1){clearInterval(ramps[a.src]);if(done)done();}},50);}
+  function need(){var n=root.querySelector('#musTap');if(n)return;n=document.createElement('div');n.id='musTap';n.textContent='Tap to allow the music to play';n.style.cssText='position:absolute;left:50%;top:8%;transform:translateX(-50%);z-index:9;background:rgba(0,0,0,.75);color:#fff;font:600 22px/1.3 system-ui,sans-serif;padding:12px 22px;border-radius:10px;cursor:pointer';root.appendChild(n);
+    n.addEventListener('click',function(){n.remove();if(cur)cur.play().catch(function(){});});}
+  return {music:function(c){if(c.stop){if(cur){var a=cur;cur=null;ramp(a,0,c.fo||0,function(){a.pause();});}return;}
+      if(cur&&cur.dataset.id===c.id){ramp(cur,c.vol,1);return;}
+      if(cur){var o=cur;ramp(o,0,c.fo||0,function(){o.pause();});}var a2=AU[c.id];if(!a2){a2=new Audio(c.src);a2.loop=true;a2.dataset.id=c.id;AU[c.id]=a2;}
+      a2.volume=0;cur=a2;var p=a2.play();if(p&&p.catch)p.catch(function(){need();});ramp(a2,c.vol,c.fi||0);},
+    stopAll:function(){Object.keys(AU).forEach(function(k){try{AU[k].pause();}catch(e){}});cur=null;}};}
+window.__musHere=musPlayer(document.body);
 
 /* ---------------- the sheet: import and export in the layout Flowics reads ---------------- */
 /* the first tab: every row, A the segment, B the paragraphs, C the heading, D the list, E and F the two picture captions, G to Z
@@ -769,13 +871,17 @@ $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window
 function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);}
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
+  const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
   o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
   const ids=new Set(o.photos.map(p=>p.id));
   o.rows=Array.isArray(s.rows)?s.rows.slice(0,600).map(r=>{r=r&&typeof r==='object'?r:{};const pics=Array.isArray(r.pics)?r.pics:[];
     return newRow(str(r.seg).slice(0,80),{say:str(r.say).slice(0,8000),tp:str(r.tp).slice(0,8000),cont:!!r.cont,title:str(r.title).slice(0,200),body:str(r.body).slice(0,4000),lay:LAYS.some(l=>l[0]===r.lay)?r.lay:'auto',ch:str(r.ch).slice(0,60),
       build:!!r.build,pics:[0,1].map(j=>{const p=pics[j]||{};return {ph:ids.has(str(p.ph))?str(p.ph):'',cap:str(p.cap).slice(0,120)};}),x:Array.from({length:20},(_,j)=>str(Array.isArray(r.x)?r.x[j]:'').slice(0,2000))});}):[];
   if(o.rows[0])o.rows[0].cont=false;
+  /* (v21.54) the music: up to four tracks as audio data, and each segment's setting */
+  const okAud=v=>/^data:audio\/(mpeg|mp4|x-m4a|m4a|aac|wav|x-wav|ogg|webm|flac);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<MUS_MAX*1.4;
+  const m=s.mus&&typeof s.mus==='object'?s.mus:{};o.mus.tracks=Array.isArray(m.tracks)?m.tracks.slice(0,4).map(t=>({id:str(t&&t.id).slice(0,20),label:str(t&&t.label).slice(0,40),src:str(t&&t.src)})).filter(t=>/^[A-Za-z0-9_-]{1,20}$/.test(t.id)&&okAud(t.src)):[];
+  const tid=new Set(o.mus.tracks.map(t=>t.id));if(m.by&&typeof m.by==='object')Object.keys(m.by).slice(0,80).forEach(k=>{const b=m.by[k]||{},t=str(b.t);if(!(t==='none'||t==='keep'||tid.has(t)))return;o.mus.by[str(k).slice(0,80)]={t,v:Math.max(0,Math.min(100,num(b.v)==null?60:num(b.v))),fi:Math.max(0,Math.min(10,num(b.fi)==null?2:num(b.fi))),fo:Math.max(0,Math.min(10,num(b.fo)==null?3:num(b.fo)))};});
   o.log=Array.isArray(s.log)?s.log.slice(0,2000).map(l=>({i:Math.max(0,parseInt(l&&l.i)||0),t:num(l&&l.t)||0,seg:str(l&&l.seg).slice(0,80),title:str(l&&l.title).slice(0,200)})):[];
   o.wt=Array.isArray(s.wt)?s.wt.slice(-20000).filter(a=>Array.isArray(a)&&a.length===2).map(a=>[Math.max(0,parseInt(a[0])||0),Math.max(0,num(a[1])||0)]):[];
   return o;}
@@ -798,7 +904,7 @@ const SIMCASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by m
   goals:{red:[{beh:'Elopement',text:'Elopement will decrease to zero instances a day for 15 consecutive school days'}],acq:[{beh:'Asking for a break',text:'Sam will ask for a break with the break card in 8 of 10 opportunities over 3 weeks'}]},
   menu:[{name:'Tablet time',rank:1},{name:'Drawing',rank:2},{name:'Playground',rank:3},{name:'Music',rank:4}]};
 async function loadSim(){if(!(await nbhUI.confirm('Load a simulated training script?\nThe form is filled with a sample student. Anything already entered will be replaced.',{ok:'Load'})))return;S=blank();
-  Object.assign(S.meta,{client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',site:'Elementary, self-contained classroom',bcba:'Sample BCBA',first:'Sam',aud:'the receiving team at the new school',pname:'Sample Presenter, BCBA',plines:'Behavior Analyst\nCo-author of the FBA and BIP'});
+  Object.assign(S.meta,{contact:'sample@school.example, ext. 1234',client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'3',site:'Elementary, self-contained classroom',bcba:'Sample BCBA',first:'Sam',aud:'the receiving team at the new school',pname:'Sample Presenter, BCBA',plines:'Behavior Analyst\nCo-author of the FBA and BIP'});
   S.rows=draft(SEGS.map(s=>s[0]),SIMCASE);
   const fill=(seg,title,say,body)=>{const r=S.rows.find(x=>x.seg===seg&&x.title===title);if(r){if(say!=null)r.say=lead(say);if(body!=null)r.body=body;}};
   fill('Student Profile','Strengths','A behavior plan only makes sense in the context of the whole learner, including what Sam does well and enjoys. Sam reads above grade level, loves drawing, and is kind to younger students.','• Reads above grade level\n• Drawing and art\n• Kind to younger students');
@@ -811,7 +917,7 @@ async function loadSim(){if(!(await nbhUI.confirm('Load a simulated training scr
   S.rows=S.rows.filter(r=>!(r.seg==='Reinforcement System')).concat([]);
   const ri=S.rows.findIndex(r=>r.seg==='Proactive Strategies');S.rows.splice(ri,0,newRow('Reinforcement System',{ch:'The Plan',say:'These are the items and activities Sam works for, from the preference assessment, the most preferred first.\n\nSam earns a token for each finished step; five tokens earn five minutes of the chosen item.',title:'Works For',body:'• Tablet time\n• Drawing\n• Playground\n• Music'}),
     newRow('Reinforcement System',{cont:true,title:'Earning',body:'• A token for each finished step\n• Five tokens: five minutes',lay:'lower'}));
-  S.rows.splice(1,0,newRow('Training Overview',{cont:true,title:'Training Overview',lay:'title'}));
+  S.rows.splice(2,0,newRow('Training Overview',{cont:true,title:'Training Overview',lay:'title'}));
   placeCues();CASE=SIMCASE;renderAll();setView('script');nbhUI.toast('Simulator loaded: a sample training script for Sam ('+S.rows.length+' cards).',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
 
@@ -824,7 +930,7 @@ window.__nbhViewFill=function(v){if(v!=='script')return null;return {filled:S.ro
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!=null&&S.meta[k]!=='')el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range')S.meta[k]=el.value;else el.value='';});
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();paintLogo();logoLine();chLine();renderRows();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
+function renderAll(){ensure();bindMeta();paintLogo();logoLine();chLine();renderRows();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 window.addEventListener('beforeprint',renderPrint);
 window.addEventListener('resize',()=>{clearTimeout(window.__tvRs);window.__tvRs=setTimeout(()=>{if(document.body.classList.contains('view-graphics'))gxRender();},200);});

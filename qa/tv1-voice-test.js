@@ -39,8 +39,8 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     out.push({k:c.k,word:SP[s].textContent,row:st.i,said:tw,card:lg&&lg.t});});return out;});
   ok('1 the >> marks: each card came up as the word before its mark was said (within 1.5 s), with no click',mk.length>=1&&mk.every(m=>m.said!=null&&m.card!=null&&Math.abs(m.card-m.said)<1.5),mk);
   await page.evaluate(()=>{tpToggle();document.getElementById('tpRec').click();});
-  const cap=await page.evaluate(()=>{const q=cuesOf();return {n:q.length,first:q.slice(0,3),p2:q.find(x=>/^A behavior plan/.test(x.text))};});
-  ok('2 the captions are timed by the words heard (the third paragraph\'s caption when it was said)',cap.n>10&&cap.p2&&cap.p2.a>ph[2][0]-1.5&&cap.p2.a<ph[2][0]+1.5,{cap,ph2:ph[2]});
+  const cap=await page.evaluate(()=>{const q=cuesOf();const k=paras().findIndex(p=>/^A behavior plan/.test(spoken(S.rows[p.start])));return {n:q.length,first:q.slice(0,3),k,p2:q.find(x=>/^A behavior plan/.test(x.text))};});
+  ok('2 the captions are timed by the words heard (the "A behavior plan" paragraph\'s caption when it was said)',cap.n>10&&cap.p2&&ph[cap.k]&&cap.p2.a>ph[cap.k][0]-1.5&&cap.p2.a<ph[cap.k][0]+1.5,{cap,phk:ph[cap.k]});
   /* 3 */
   const before=reqs.length;await open();const t2=Date.now();await page.evaluate(()=>tpToggle());
   while(Date.now()-t2<60000&&!(await page.evaluate(()=>VO.ready)))await sleep(300);

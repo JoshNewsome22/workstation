@@ -14,6 +14,7 @@
     <h2 class="nbh-band" style="margin-top:18px">The Presenter</h2>
     <div class="fieldgrid">
       <div><label>Presenter, as on the title card</label><input data-m="pname" name="m.pname" placeholder="Joshua Newsome, BCBA"></div>
+      <div><label>Contact for questions (on the closing card)</label><input data-m="contact" name="m.contact" placeholder="name@school.org, ext. 1234"></div>
       <div style="grid-column:1/-1"><label>Lines under the name (one a line)</label><textarea data-m="plines" name="m.plines" rows="3" data-nbh-nowording placeholder="Student Advocacy Specialist&#10;Co-author of the FBA and BIP"></textarea></div>
     </div>
     <div id="setupVerdict"></div>
@@ -46,6 +47,11 @@
       <div><label>Where the cards sit (the presenter is on the other side)</label><select data-m="side" name="m.side"><option value="left">Left half of the picture</option><option value="right">Right half of the picture</option></select></div>
       <div><label>Type</label><select data-m="font" name="m.font"><option value="lato">Lato (as the Flowics template; built in)</option><option value="sans">Inter / Helvetica</option><option value="serif">Georgia (serif)</option></select></div>
     </div>
+    <h2 class="nbh-band" style="margin-top:18px">Music</h2>
+    <p class="hint">Background music the graphics page plays, over the HDMI lead into the Yolobox, so the camera's microphone never hears it (tick the box below to hear it on this device too, for a rehearsal). Each segment can keep the music playing, go silent, or start a track at a level, with a fade in and a fade out; the change comes as the segment's first card comes up, and the end of the script fades the music out. Use music you have the right to use in a video.</p>
+    <div class="tools"><button type="button" class="tool" id="musBtn">Add a track</button><input type="file" id="musIn" accept="audio/*" hidden><label class="ck"><input type="checkbox" data-c="mushere" name="c.mushere"> Play it on this device too (rehearsal)</label></div>
+    <div id="musTracks"></div>
+    <div id="musBy"></div>
   </section>
 
   <!-- ===================== SCRIPT ===================== -->
@@ -70,24 +76,31 @@
         <span class="tp-mic" id="tpMic" hidden aria-live="polite"><i></i><span></span></span>
         <button type="button" class="tool" id="tpRec" aria-pressed="false">Start the clock</button>
         <span class="tp-clock" id="tpClock">0:00</span>
+        <button type="button" class="tool" id="musOff" title="Fade the music out now">Music off</button>
+        <button type="button" class="tool" id="tpCard" aria-pressed="false" title="Show the card the teleprompter is on, over the script (G)">Card</button>
         <button type="button" class="tool" id="tpGfx">Open the graphics window</button>
         <button type="button" class="tool" id="tpFs">Full screen</button>
       </div>
       <div class="tp-bar tp-bar2">
         <label class="tp-ctl">Size <input type="range" min="28" max="110" step="2" data-m="tpsize" name="m.tpsize" value="58"></label>
+        <label class="tp-ctl">Width <input type="range" min="40" max="100" step="2" data-m="tpwide" name="m.tpwide" value="100" aria-label="How wide the words run across the screen"></label>
         <label class="tp-ctl">Reading line <input type="range" min="15" max="60" step="1" data-m="tpline" name="m.tpline" value="30" aria-label="Where the reading line is, from the top of the screen"></label>
         <label class="tp-ctl tp-vo">Microphone <input type="range" min="0" max="100" step="5" data-m="tpsens" name="m.tpsens" value="50" aria-label="How quiet a voice still counts as speaking (higher: quieter)"></label>
         <label class="ck tp-ctl"><input type="checkbox" data-c="mirror" name="c.mirror"> Mirror (beam-splitter glass)</label>
         <label class="ck tp-ctl"><input type="checkbox" data-c="nocd" name="c.nocd"> No 3-2-1</label>
         <label class="ck tp-ctl"><input type="checkbox" data-c="tpmanual" name="c.tpmanual"> Only the clicker changes the cards</label>
+        <button type="button" class="tool tp-vo" id="micTest">Test the microphone</button>
+        <button type="button" class="tool" id="rehearseBtn" title="From the top at the speed set, the cards changing as they will; the pacing at the end">Rehearse</button>
+        <button type="button" class="tool" id="paceBtn">Pacing</button>
       </div>
       <div class="tp-vmsg" id="tpVoice" hidden role="status"></div>
       <div class="tp-heard" id="tpHeard" hidden aria-live="off"></div>
-      <div class="tp-screen" id="tpScreen"><div class="tp-strip" id="tpStrip"></div><div class="tp-line" aria-hidden="true"></div></div>
+      <div class="tp-screen" id="tpScreen"><div class="tp-strip" id="tpStrip"></div><div class="tp-line" aria-hidden="true"></div><div class="tp-cardbox" id="tpCardBox" aria-label="The card the teleprompter is on"></div></div>
       <div class="tp-foot" id="tpFoot"></div>
     </div>
-    <p class="hint">A Bluetooth page-turner or keyboard works the teleprompter: <b>Page Down</b>, <b>&rarr;</b> or <b>Enter</b> for the next card (or the next point of a list that builds), <b>Page Up</b> or <b>&larr;</b> for the one before, <b>Space</b> to start or stop the scroll. Each card also changes the graphics window, when it is open. <b>Scroll</b> moves the script <b>at the speed set</b> (words a minute), <b>while I speak</b> (it moves only while the microphone hears you, and waits when you pause), or <b>following my words</b> (speech recognition on this device places each word you say in the script; skip a sentence or go back and it finds you). As the script scrolls the cards change with it, unless only the clicker changes them. <b>Start the clock</b> keeps the time each card came up (and, following your words, each word) for the chapters and the captions below.</p>
+    <p class="hint">A Bluetooth page-turner or keyboard works the teleprompter: <b>Page Down</b>, <b>&rarr;</b> or <b>Enter</b> for the next card (or the next point of a list that builds), <b>Page Up</b> or <b>&larr;</b> for the one before, <b>Space</b> to start or stop the scroll, <b>G</b> to show the card the teleprompter is on over the script (and back; in full screen too). <b>Width</b> narrows the words so the eyes move less; <b>Rehearse</b> runs the script from the top at the speed set with the cards changing as they will, and <b>Pacing</b> gives each segment's time and any card that stays on screen too long. Each card also changes the graphics window, when it is open. <b>Scroll</b> moves the script <b>at the speed set</b> (words a minute), <b>while I speak</b> (it moves only while the microphone hears you, and waits when you pause), or <b>following my words</b> (speech recognition on this device places each word you say in the script; skip a sentence or go back and it finds you). As the script scrolls the cards change with it, unless only the clicker changes them. <b>Start the clock</b> keeps the time each card came up (and, following your words, each word) for the chapters and the captions below.</p>
     <p class="hint">In the words said: <b>//</b> marks a pause (&#8214;), <b>*a word*</b> one to stress, <b>{a note}</b> a note to yourself, and <b>&gt;&gt;</b> the next card: as the word before it is said (following your words), or as it reaches the reading line, the next card comes up (or the next point of a list that builds) with no click. Once the script has &gt;&gt; marks, only they (and each new paragraph) change the cards; the draft and <b>Place the next-card marks</b> on Script put them in for you. They show on the teleprompter only: never on a card, in the sheet or in the captions. The microphone is used only while the script scrolls with your voice; nothing it hears is recorded or sent. Following your words needs the speech recogniser, about 57 MB, downloaded from this workstation's website the first time and kept on the device (not in the one-file edition).</p>
+    <div id="paceOut" class="tv-pace" hidden></div>
     <div class="tools"><button class="tool" id="logCsv" type="button">Export the card times (CSV)</button><button class="tool" id="chapBtn" type="button">YouTube chapters</button><button class="tool" id="srtBtn" type="button">Captions (SRT)</button><button class="tool" id="vttBtn" type="button">Captions (WebVTT)</button><button class="tool" id="asrDrop" type="button">Remove the speech recogniser</button><span class="hint" id="logLine"></span></div>
   </section>
 
@@ -100,6 +113,12 @@
         <div class="tools"><button class="tool primary" id="gxWin" type="button">Open the graphics window</button></div>
         <p class="hint">Or open the graphics page yourself, in any tab or window of this browser: <a id="gfxLink" href="#graphics" target="_blank" rel="opener">the graphics page</a>. It shows this form's cards and follows the teleprompter. On an iPad with Stage Manager, put that window on the external display (the Yolobox) and double-tap it for full screen.</p>
         <p class="hint" id="gxInfo"></p></div></div>
+    <dialog id="picDlg" class="tv-dlg" aria-labelledby="picDlgT">
+      <h3 id="picDlgT">A picture for the card</h3>
+      <div class="tools"><button type="button" class="tool primary" id="picFile">From this device</button><button type="button" class="tool" data-picsrc="TK-1">From the token board (Form TK-1)</button><button type="button" class="tool" data-picsrc="VS-1">From the visual supports (Form VS-1)</button><button type="button" class="tool" data-picclose>Cancel</button></div>
+      <p class="hint" id="picNote"></p>
+      <div class="tv-pkgrid" id="picGrid"></div>
+    </dialog>
     <div class="gx-grid" id="gxGrid"></div>
   </section>
 

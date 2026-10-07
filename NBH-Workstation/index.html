@@ -799,6 +799,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <input type="file" id="packetFile" accept="application/json" hidden>
     <span class="pair"><button id="saveCase">Save case</button>
     <button id="openCase">Open case</button>
+    <button id="closeCase" title="Save this case, then clear every form and the student&rsquo;s details for the next case">Close case</button>
     <button id="caseXlsx" title="Every open form into one spreadsheet: a sheet per form, from its own CSV export where it has one, else every field by name">Case as spreadsheet</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
     <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
@@ -2679,7 +2680,7 @@ $('#help').addEventListener('click',()=>{
      '<p>The target behaviors (Form TB-1), the function (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1) are read from those forms while they are open and go into every other open form, into empty fields and empty behavior tables only; the line under the bar shows what has been read, and <b>Send to open forms</b> sends it again. They are saved in the packet and case files.</p>'+
      '<p><b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case. The bar also shows what is due: review dates and next steps the open forms hold, within two weeks or past.</p>')+
    fold('Saving, autosave and closing the tab',
-     '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> loads it back. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
+     '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> loads it back. <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the iPad\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
@@ -3880,11 +3881,15 @@ async function writeCase(handle,text,name){
   a.href=URL.createObjectURL(new Blob([text],{type:'text/html'}));a.download=name;
   document.body.appendChild(a);a.click();a.remove();return null;
 }
-$('#saveCase').addEventListener('click',async()=>{
+/* v21.45 Save case as a function: the click below and Close case both use it. It resolves true once the case is in a
+   file with every open form in it and marked saved (on an iPad, once the person has said the file is in Files), and
+   false when nothing was written, the person backed out, a form was left out, or an edit came while the file was
+   being written. What it says and writes is the same as before. */
+async function saveCase(){
   const open=Object.keys(state.frames);
-  if(!open.length){alert('No form is open yet. A case file holds the forms you have open.');return;}
+  if(!open.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
   const p=packet();
-  if(!p.client){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return;}
+  if(!p.client){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return false;}
   /* the one-file edition asks where to write before anything else: a browser
      shows the picker only while the click is still fresh. Once a file has been
      chosen, every later save in this session goes back into it without asking. */
@@ -3892,7 +3897,7 @@ $('#saveCase').addEventListener('click',async()=>{
   if(EMBED&&!handle&&window.showSaveFilePicker){
     try{handle=await showSaveFilePicker({suggestedName:caseName(p)+'.case.html',
       types:[{description:'Workstation case (one file)',accept:{'text/html':['.html']}}]});}
-    catch(e){if(e&&e.name==='AbortError')return;handle=null;}
+    catch(e){if(e&&e.name==='AbortError')return false;handle=null;}
   }
   const btn=$('#saveCase'); btn.textContent='Saving\u2026'; btn.disabled=true;
   /* v21.44: every open form, a slow one asked once more with a longer wait; a form still missing is named, and the
@@ -3907,7 +3912,7 @@ $('#saveCase').addEventListener('click',async()=>{
   }
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
-  if(!n){alert('Nothing could be read from the open forms.');return;}
+  if(!n){alert('Nothing could be read from the open forms.');return false;}
   const nm=caseName(p);
   const fileSig=Object.keys(state.status).sort().map(k=>{const t=stat[k]||state.status[k]||{};return k+':'+t.filled+':'+(t.sig||'');}).join('|');
   const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
@@ -3919,20 +3924,19 @@ $('#saveCase').addEventListener('click',async()=>{
   /* on an iPad the download offers View or Download, so the case is marked saved only when the user says it is in Files:
      the notice is then a question, and "Not yet" keeps the dot and the copy */
   const tell=async(how,text)=>{
-    if(how!=='check')return wsUI.alert(text);
+    if(how!=='check'){await wsUI.alert(text);return how==='done';}
     const y=await wsUI.confirm(text+'\n\nIs the file in Files now? On an iPad the download can be only viewed, not kept. Until you say it is there, Save case keeps its dot and the safety copy stays.',{ok:'It is in Files',cancel:'Not yet'});
-    if(y){autoFiled(true,fileSig);paintSave();}};
+    if(y){autoFiled(true,fileSig);paintSave();}return !!y;};
   if(EMBED){
     let where=null;
     try{
       const text=await caseHtml(p,forms);
       where=await writeCase(handle,text,nm+'.case.html');
-    }catch(e){alert('The case could not be written: '+(e&&e.message||e));return;}
+    }catch(e){alert('The case could not be written: '+(e&&e.message||e));return false;}
     const how=late.length?'late':autoFiled(!!where,fileSig);
-    await tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+nm+'.case.html.')+
+    return tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+nm+'.case.html.')+
       '\n\nDouble-click that file to open the workstation with this case in it \u2014 '+n+' form'+(n===1?'':'s')+', nothing else needed.'+
       (where?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(how==='moved'?after():'')+(where?'':check));
-    return;
   }
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(
@@ -3942,10 +3946,53 @@ $('#saveCase').addEventListener('click',async()=>{
   document.body.appendChild(a);a.click();a.remove();
   /* v21.43 installed on an iPad the click opened the share sheet: saved (and Autosave's copy ended) only once it kept the file */
   const shared=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';
-  if(shared==='cancelled')return;
+  if(shared==='cancelled')return false;
   const how=late.length?'late':autoFiled(shared==='shared',fileSig);   /* kept by the share sheet: no "Is the file in Files?" */
-  await tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
+  return tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
         'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.');
+}
+$('#saveCase').addEventListener('click',()=>{saveCase();});
+/* ================= Close case (v21.45) =================
+   One student's case is finished and the next begins without leaving the workstation: the case is saved first (the
+   same Save case), then every form is closed and the bar is cleared, the way Open case clears the screen before it
+   loads a file. Nothing is closed unless the file is written with every form in it. */
+async function clearCase(){
+  await autoSeal();   /* the copy of what was open is written and left alone; the next case gets a copy of its own */
+  Object.values(state.frames).forEach(fr=>fr.remove());
+  state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;
+  state.whoIs={};state.details={};state.split=[];
+  $('#blank').style.display='';document.body.classList.remove('has-form');
+  setFull(false,true);
+  layoutFrames();   /* side by side ends with the forms */
+  ['#pClient','#pSid','#pGrade','#pSite','#pBcba'].forEach(sel=>{const e=$(sel);if(e)e.value='';});
+  who();
+  commitBar(true);   /* the earlier student's values on the bar are not corrections of the next one's */
+  setFacts(null,false);
+  state.due=[];state.dueSig={};clearTimeout(dueTimer);paintDue();
+  state.caseId=null;state.caseHandle=null;state.lastSig='';state.savedAt=null;state.autoSig=caseSig();
+  state.dirtySince=null;state.nudged=false;state.barAuto=false;
+  clearTimeout(state.watch);
+  $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
+  setRail(true);renderRail();foldBar(false);paintSave();chip();
+}
+$('#closeCase').addEventListener('click',async()=>{
+  const open=Object.keys(state.frames);
+  /* work: the same measure as the Save case dot and the unload guard (a blank form reports a few default values) */
+  const work=caseDirty()||open.some(id=>{const t=state.status[id];return !!t&&((t.filled||0)>3||t.edited);});
+  const typed=Object.values(packet()).some(v=>String(v||'').trim());
+  if(work){
+    if(!(await wsUI.confirm('Close this case? It is saved first, then every form and the student\u2019s details are cleared, ready for the next case.',{ok:'Save and close'})))return;
+    let saved=false;
+    try{saved=await saveCase();}catch(e){saved=false;}
+    if(!saved){wsUI.toast('The case was not saved, so nothing was closed. Everything is as it was.',{kind:'warn',ms:9000});return;}
+    await clearCase();
+    wsUI.toast('The case is closed and saved. Start the next one: enter the student, then open forms.',{kind:'ok',ms:9000});
+    say('Case closed and saved');return;
+  }
+  const had=open.length||typed;
+  await clearCase();
+  wsUI.toast(had?'The case is closed; there was nothing to save. Start the next one: enter the student, then open forms.':'Nothing was open. Start a case: enter the student, then open forms.',{ms:8000});
+  say('Case closed');
 });
 async function openCaseText(text,handle){
     let d; try{d=parseCase(text);}catch(err){alert(err&&err.message||'That file could not be read.');return;}
@@ -4011,6 +4058,7 @@ const CMDS=[
   {k:'finish pdf bookmark outline sidebar page numbers contents',n:'Finish a packet PDF',s:'command',go:()=>$('#bookmarkPdf').click()},
   {k:'save case',n:'Save case',s:'command',go:()=>$('#saveCase').click()},
   {k:'open case',n:'Open case',s:'command',go:()=>$('#openCase').click()},
+  {k:'close case next student finish',n:'Close case: save it, then clear for the next student',s:'command',go:()=>$('#closeCase').click()},
   {k:'spreadsheet excel numbers xlsx csv export the case as data workbook',n:'Case as spreadsheet (.xlsx)',s:'command',go:()=>$('#caseXlsx').click()},
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
   {k:'open packet',n:'Open packet',s:'command',go:()=>$('#openPacket').click()},
