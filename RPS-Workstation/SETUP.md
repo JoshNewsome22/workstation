@@ -7779,3 +7779,45 @@ kept; changes within a second of each other (typing, a colour picker dragged) ar
 picture. The clock's card and word times are not steps. Setup also has **The look's own colours**, which puts every colour
 back to the look's (Chapters: #222f5a panel, #eed9ad heading, #c1d8d3 band, #8b91bb tabs, white tab text, #eed9ad lit tab,
 #222f5a its text), for a colour changed by mistake with no way back. Checked by `qa/tv1-test.js` (two checks).
+
+## Form IA-1: The FAST Walkthrough (v21.56)
+
+**A narrated walkthrough of the FAST** (View ▸ Walkthrough on Form IA-1), built as Form DD-1's and TK-1's are: a player over
+this form's own sheets, with the recorded narration (Kokoro, beside the form as `nbh-ia1-narration.js`, 1.8 MB, inside the
+one-file editions), captions, chapters, full screen and **Save as video (MP4)**. Seventeen lines in seven chapters, about six
+minutes:
+
+- **The FAST**: the sixteen yes/no items on the worksheet, the four groups of four lit in turn (social positive, social
+  negative, automatic sensory, automatic pain).
+- **Before you start**: the Setup sheet's target behavior and operational definition (one behavior per administration, the same
+  definition read to every informant), the informants table (role, months known, hours in the target routines), independent
+  completion within a few days, fifteen to twenty minutes.
+- **Filling it in**: the pencil writes each informant's answers down the grid; NA (not seen) and its exclusion from the pair's
+  agreement.
+- **Scoring**: the totals table (yes answers per group, the highest shaded as the outcome, no margin rule on the published FAST),
+  the verdict (a one-item margin kept with a caution; a tie is no outcome).
+- **Agreement**: the Agree column and the pair's item agreement; Study 1's 196 pairs (mean 71.5%, range 28.6 to 100%, most
+  between 61 and 80%, "moderate at best" against the 80% criterion); the per-item figure against Table 3 (53.3% on item 12 to
+  84.5% on item 4; antecedent items 78.9% against consequent 67.7%); outcome agreement 64.8%.
+- **The research**: Study 2's 69 functional analyses (63.8% matched; 77.8% social positive, 56% social negative, 61.5%
+  automatic) and the 24 with both informants agreeing (70.8%; 7 of 7 for social positive).
+- **What it means**: a screening tool that structures the interview and helps design the analysis, not a replacement and not
+  enough alone for treatment; Section 1's open-ended answers compared with the items for inconsistencies and clarifying
+  questions; the next step (strong concurrence can justify a single-function test; disagreement calls for interview,
+  observation and a full analysis; pain items endorsed go to a medical screen first; the FA's outcome recorded on Convergence).
+
+It is built from the form as it is: the definition, the informants, every informant's answers, the totals, the verdict, the
+figures and Section 1 are copies of the form's own, turned into text. **A form with no FAST answers yet shows a worked example**
+of two informants (a teacher and a paraprofessional; escape with a margin of two and of one, one item not seen, 11 of 15 items
+agreed, the outcome agreed), put into the form's fields for the build only and taken out again in the same turn, so nothing
+is changed and nothing is autosaved: Save as video from an empty form is the version to share. With the simulation, or a
+case, the same scenes show that data (three informants on the simulation).
+
+**Your recorded version**: a field under the player for a YouTube link (a presenter version recorded on the Yolobox, or the
+MP4 uploaded), saved with the form; Open follows it. The same link can be the instructions link on the respondent pages.
+
+Parts: `tools/forms/IA-1/{walk-script.json, walk.js, walk-ia.css, make-narration.py, walk-audio.js, patch-walk.py}`; the
+script writes the view inside the form's own script (a closure), between its markers, and running it again replaces what
+it wrote. The one-file editions carry the narration once (`nbh-embed-narration-ia1`). Checked by `qa/ia1-walk-test.js`
+(17 checks: the view, the example and its scores, the fields unchanged, the pencil, the camera's stops, the captions'
+decimals, the simulation, five frames of Save as video against the stage, pausing on leaving, the link, the one-file edition).
