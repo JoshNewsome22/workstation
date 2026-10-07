@@ -799,6 +799,8 @@ body.tp-voice .tp-p.on .tw.rd{color:#8a949c}
 .tv-pk img{width:100%;height:84px;object-fit:contain;display:block;margin-bottom:4px}
 .tv-pk:hover{border-color:#1d3b5a}
 .tv-trk{display:flex;gap:10px;align-items:center;padding:4px 0;font-family:var(--sans);font-size:13px}
+/* v21.55 Undo and Redo stay on the toolbar (not folded under More) and take only their own width */
+html .toolbar > .tgroup.tg-keep.tv-undo:not(.tg-ctl),html.nbh-compact .toolbar > .tgroup.tg-keep.tv-undo:not(.tg-ctl){flex:0 0 auto;min-width:0}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
@@ -940,6 +942,10 @@ td input,td select{max-width:100%}
       <button data-view="graphics" aria-pressed="false">Graphics</button>
       <button data-view="guide" aria-pressed="false">Guide</button>
     </div></div></div>
+  <div class="tgroup tg-keep tv-undo"><span>Edit</span><div class="row">
+    <button id="undoBtn" disabled title="Undo the last change (Ctrl/Cmd+Z)">Undo</button>
+    <button id="redoBtn" disabled title="Redo (Ctrl/Cmd+Shift+Z)">Redo</button>
+  </div></div>
   <div class="tgroup"><span>Sheet actions</span><div class="row">
     <button id="simBtn">Load simulator</button>
     <button class="primary" id="draftBtn">Draft from the case</button>
@@ -995,6 +1001,7 @@ td input,td select{max-width:100%}
       <div><label>Series, on the band under the panel (the ticker in the Chapters look; blank: no band)</label><input data-m="series" name="m.series" placeholder="Functional Treatments in Applied Behavior Analysis"></div>
       <div><label>Tag, beside the logo (blank: FBA &amp; BIP Video Training and the student's first name and initial)</label><input data-m="tag" name="m.tag" placeholder="FBA &amp; BIP Video Training: Sam S."></div>
       <div><label>Logo, beside the tag</label><div class="tools" style="margin:2px 0"><button type="button" class="tool" id="logoBtn">Choose a logo</button><button type="button" class="tool" id="logoReset">Use the letterhead logo</button><input type="file" id="logoIn" accept="image/*" hidden></div><span class="hint" id="logoLine"></span></div>
+      <div style="grid-column:1/-1"><div class="tools" style="margin:0"><button type="button" class="tool" id="colReset" title="Every colour below back to the look's own (Chapters: #222f5a, #eed9ad, #c1d8d3, #8b91bb, #ffffff, #eed9ad, #222f5a)">The look’s own colours</button><span class="hint">A colour changed by mistake: Undo on the toolbar (Ctrl/Cmd+Z), or this button for all of them.</span></div></div>
       <div><label>Panel or main colour</label><input type="color" data-m="c1" name="m.c1" value="#222f5a"></div>
       <div><label>Heading colour (the accent)</label><input type="color" data-m="c2" name="m.c2" value="#eed9ad"></div>
       <div><label>Band colour</label><input type="color" data-m="c3" name="m.c3" value="#c1d8d3"></div>
@@ -3915,7 +3922,23 @@ function renderPrint(){const o=$('#printOut');if(!o)return;let seg=null,h='<h1 c
 $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window.print(),60);});
 
 /* ---------------- save, open, clear, the simulator ---------------- */
-function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);}
+function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);histMark();}
+/* ---------------- undo and redo (v21.55) ---------------- */
+/* every change (a colour, a row, a picture, a setting) is a step, up to 80 kept; changes within a second of each other (typing,
+   a colour picker dragged) are one step. The clock's card and word times are not steps. Pictures and tracks are kept once,
+   by id, so the steps stay small. Undo and Redo on the toolbar, or Ctrl/Cmd+Z and Shift+Z outside a text box. */
+const HIST={a:[],i:-1,t:0,big:{},lock:false};
+function histSnap(){const o=Object.assign({},S,{log:undefined,wt:undefined,photos:S.photos.map(p=>{HIST.big['p:'+p.id]=p;return p.id;}),mus:Object.assign({},S.mus,{tracks:S.mus.tracks.map(t=>{HIST.big['t:'+t.id]=t;return t.id;})})});return JSON.stringify(o);}
+function histUn(str){const o=JSON.parse(str);o.photos=(o.photos||[]).map(id=>HIST.big['p:'+id]).filter(Boolean);o.mus=o.mus&&typeof o.mus==='object'?o.mus:{tracks:[],by:{}};o.mus.tracks=(o.mus.tracks||[]).map(id=>HIST.big['t:'+id]).filter(Boolean);o.log=S.log;o.wt=S.wt;return o;}
+function histMark(){if(HIST.lock)return;const snap=histSnap();if(snap===HIST.a[HIST.i])return;const now=performance.now();
+  if(HIST.i>=1&&now-HIST.t<1000)HIST.a[HIST.i]=snap;else{HIST.a.length=HIST.i+1;HIST.a.push(snap);if(HIST.a.length>80)HIST.a.shift();HIST.i=HIST.a.length-1;}HIST.t=now;histBtns();}
+function histBtns(){const u=$('#undoBtn'),r=$('#redoBtn');if(u)u.disabled=HIST.i<=0;if(r)r.disabled=HIST.i>=HIST.a.length-1;}
+function histGo(d){const j=HIST.i+d;if(j<0||j>=HIST.a.length)return;HIST.i=j;HIST.lock=true;try{S=histUn(HIST.a[j]);renderAll();}finally{HIST.lock=false;}HIST.t=0;histBtns();nbhUI.toast(d<0?'Undone.':'Redone.',{kind:'ok',ms:1200});}
+$('#undoBtn').addEventListener('click',()=>histGo(-1));$('#redoBtn').addEventListener('click',()=>histGo(1));
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)return;const t=e.target,typing=t&&(/^(TEXTAREA)$/.test(t.tagName)||(t.tagName==='INPUT'&&!/^(range|checkbox|color|file)$/.test(t.type)));if(typing)return;
+  if(e.key==='z'||e.key==='Z'){e.preventDefault();histGo(e.shiftKey?1:-1);}else if(e.key==='y'||e.key==='Y'){e.preventDefault();histGo(1);}});
+/* the look's own colours back (Setup) */
+$('#colReset').addEventListener('click',()=>{const n=LOOKC[S.meta.look]||LOOKC.chapters;CKEYS.forEach(k=>{S.meta[k]=n[k];});S.meta.tkcol='#111111';bindMeta();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();nbhUI.toast('The look’s own colours are back: '+CKEYS.map(k=>n[k]).join(', ')+'.',{kind:'ok'});});
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;

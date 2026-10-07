@@ -869,7 +869,23 @@ function renderPrint(){const o=$('#printOut');if(!o)return;let seg=null,h='<h1 c
 $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window.print(),60);});
 
 /* ---------------- save, open, clear, the simulator ---------------- */
-function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);}
+function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);histMark();}
+/* ---------------- undo and redo (v21.55) ---------------- */
+/* every change (a colour, a row, a picture, a setting) is a step, up to 80 kept; changes within a second of each other (typing,
+   a colour picker dragged) are one step. The clock's card and word times are not steps. Pictures and tracks are kept once,
+   by id, so the steps stay small. Undo and Redo on the toolbar, or Ctrl/Cmd+Z and Shift+Z outside a text box. */
+const HIST={a:[],i:-1,t:0,big:{},lock:false};
+function histSnap(){const o=Object.assign({},S,{log:undefined,wt:undefined,photos:S.photos.map(p=>{HIST.big['p:'+p.id]=p;return p.id;}),mus:Object.assign({},S.mus,{tracks:S.mus.tracks.map(t=>{HIST.big['t:'+t.id]=t;return t.id;})})});return JSON.stringify(o);}
+function histUn(str){const o=JSON.parse(str);o.photos=(o.photos||[]).map(id=>HIST.big['p:'+id]).filter(Boolean);o.mus=o.mus&&typeof o.mus==='object'?o.mus:{tracks:[],by:{}};o.mus.tracks=(o.mus.tracks||[]).map(id=>HIST.big['t:'+id]).filter(Boolean);o.log=S.log;o.wt=S.wt;return o;}
+function histMark(){if(HIST.lock)return;const snap=histSnap();if(snap===HIST.a[HIST.i])return;const now=performance.now();
+  if(HIST.i>=1&&now-HIST.t<1000)HIST.a[HIST.i]=snap;else{HIST.a.length=HIST.i+1;HIST.a.push(snap);if(HIST.a.length>80)HIST.a.shift();HIST.i=HIST.a.length-1;}HIST.t=now;histBtns();}
+function histBtns(){const u=$('#undoBtn'),r=$('#redoBtn');if(u)u.disabled=HIST.i<=0;if(r)r.disabled=HIST.i>=HIST.a.length-1;}
+function histGo(d){const j=HIST.i+d;if(j<0||j>=HIST.a.length)return;HIST.i=j;HIST.lock=true;try{S=histUn(HIST.a[j]);renderAll();}finally{HIST.lock=false;}HIST.t=0;histBtns();nbhUI.toast(d<0?'Undone.':'Redone.',{kind:'ok',ms:1200});}
+$('#undoBtn').addEventListener('click',()=>histGo(-1));$('#redoBtn').addEventListener('click',()=>histGo(1));
+document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)return;const t=e.target,typing=t&&(/^(TEXTAREA)$/.test(t.tagName)||(t.tagName==='INPUT'&&!/^(range|checkbox|color|file)$/.test(t.type)));if(typing)return;
+  if(e.key==='z'||e.key==='Z'){e.preventDefault();histGo(e.shiftKey?1:-1);}else if(e.key==='y'||e.key==='Y'){e.preventDefault();histGo(1);}});
+/* the look's own colours back (Setup) */
+$('#colReset').addEventListener('click',()=>{const n=LOOKC[S.meta.look]||LOOKC.chapters;CKEYS.forEach(k=>{S.meta[k]=n[k];});S.meta.tkcol='#111111';bindMeta();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();nbhUI.toast('The look’s own colours are back: '+CKEYS.map(k=>n[k]).join(', ')+'.',{kind:'ok'});});
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;

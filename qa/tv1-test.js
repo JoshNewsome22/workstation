@@ -123,6 +123,16 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 following the words: the next words move the reading; two words heard from further on do not; six do; a word half said counts',vh.start===3&&vh.two===3&&vh.six===16&&(vh.nxLen<7||vh.partial===17),vh);
   await page.evaluate(i=>tpGo(i,true),tpAt);
   await page.screenshot({path:path.join(OUT,'prompter.png')});
+  /* v21.55 undo and redo: a colour changed on Setup comes back, a row removed comes back with its picture, the look's own colours */
+  const un=await page.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));const set=(k,v)=>{const s=document.querySelector('[data-m="'+k+'"]');s.value=v;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));};
+    await w(1100);const c40=S.meta.c4;set('c4','#102030');await w(1100);set('c2','#aa0000');await w(200);const o={c40,i:HIST.i,u:document.getElementById('undoBtn').disabled};
+    histGo(-1);o.a=[S.meta.c4,S.meta.c2,document.querySelector('[data-m="c2"]').value];histGo(-1);o.b=[S.meta.c4,document.querySelector('[data-m="c4"]').value];histGo(1);o.c=S.meta.c4;histGo(1);o.d=S.meta.c2;
+    await w(1100);const n=S.rows.length;S.photos.push({id:'pz',label:'z',img:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='});S.rows[4].pics[0].ph='pz';renderRows();syncState();await w(1100);
+    document.querySelector('[data-del="4"]').click();await w(200);o.del=[S.rows.length,S.photos.some(p=>p.id==='pz')];histGo(-1);o.back=[S.rows.length,S.rows[4].pics[0].ph,!!(photo('pz')||{}).img];
+    histGo(-1);histGo(-1);histGo(-1);set('c4','#000000');await w(200);document.getElementById('colReset').click();o.reset=[S.meta.c4,S.meta.c2,S.meta.c6,document.querySelector('[data-m="c4"]').value];return o;});
+  ok('undo and redo: the colours come back one step at a time, and forward again; the toolbar buttons follow',un.i>=2&&!un.u&&un.a[0]==='#102030'&&un.a[1]!=='#aa0000'&&un.a[2]===un.a[1]&&un.b[0]===un.c40&&un.b[1]===un.c40&&un.c==='#102030'&&un.d==='#aa0000',un);
+  ok('undo brings a removed row back with its picture; the look\'s own colours button restores every colour',un.del[0]===19&&un.back[0]===20&&un.back[1]==='pz'&&un.back[2]&&un.reset[0]==='#8b91bb'&&un.reset[1]==='#eed9ad'&&un.reset[2]==='#eed9ad'&&un.reset[3]==='#8b91bb',un);
+  await page.evaluate(()=>{S.meta.c4='#8b91bb';S.meta.c2='#eed9ad';bindMeta();});
   /* 5 */
   const [pop]=await Promise.all([page.waitForEvent('popup'),page.click('#tpGfx')]);await sleep(700);
   const g0=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1'||x.style.opacity==='');const h=l&&l.querySelector('.pn-h');return {bg:getComputedStyle(document.getElementById('gwRoot')||document.body).backgroundColor,t:h?h.textContent:''};});
