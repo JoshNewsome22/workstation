@@ -59,8 +59,13 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('4 the arrow: card 3, the next paragraph, the strip moves up to it',t2.i===2&&t2.on===1&&t2.y>t1.y,t2);
   await page.keyboard.press('Enter');await page.keyboard.press('ArrowLeft');await page.keyboard.press('PageUp');await sleep(500);const t3=await tp();
   ok('4 Enter forward, the left arrow and Page Up back',t3.i===1,t3);
-  await page.keyboard.press(' ');await sleep(700);const run=await page.evaluate(()=>({run:TP.run,b:document.getElementById('tpRun').textContent}));await page.keyboard.press(' ');await sleep(100);
-  ok('4 Space starts and stops the scroll',run.run&&run.b==='Stop'&&!(await page.evaluate(()=>TP.run)),run);
+  await page.keyboard.press(' ');await sleep(400);const cd=await page.evaluate(()=>{const o=document.getElementById('tpCd');return {cd:o&&!o.hidden?o.textContent:'',run:TP.run};});
+  ok('4 Space: 3, 2, 1 first (v21.51), then the scroll',cd.cd==='3'&&!cd.run,cd);
+  await sleep(3000);const run=await page.evaluate(()=>({run:TP.run,b:document.getElementById('tpRun').textContent,cd:document.getElementById('tpCd').hidden}));await page.keyboard.press(' ');await sleep(100);
+  ok('4 Space starts and stops the scroll',run.run&&run.b==='Stop'&&run.cd&&!(await page.evaluate(()=>TP.run)),run);
+  await page.keyboard.press(' ');await sleep(300);await page.keyboard.press(' ');await sleep(3200);
+  ok('4 Space again while it counts calls the countdown off',await page.evaluate(()=>!TP.run&&document.getElementById('tpCd').hidden));
+  await page.evaluate(()=>document.querySelector('[data-c="nocd"]').click());
   const tpw=await page.evaluate(()=>{S.rows[0].tp='Words said here, not on the card.';tpRender();const a=document.querySelector('#tpStrip .tp-p .tp-t').textContent;S.rows[0].tp='';tpRender();const b=document.querySelector('#tpStrip .tp-p .tp-t').textContent;return {a,b,say:S.rows[0].say};});
   ok('4 a row\'s teleprompter words go on the teleprompter in place of its paragraphs; blank, the paragraphs',tpw.a==='Words said here, not on the card.'&&tpw.b===tpw.say.replace(/\n+/g,''),tpw);
   await page.click('#tpRec');await sleep(300);await page.keyboard.press('PageDown');await sleep(400);await page.keyboard.press('PageDown');await sleep(400);await page.click('#tpRec');
@@ -72,6 +77,28 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const mi=await page.evaluate(()=>{const sc=document.getElementById('tpScreen');return {m:sc.classList.contains('mirror'),tf:getComputedStyle(sc).transform,fs:getComputedStyle(document.querySelector('.tp-p')).fontSize};});
   ok('4 mirror flips the screen; the size sets the words',mi.m&&/^matrix\(-1/.test(mi.tf)&&mi.fs==='80px',mi);
   await page.evaluate(()=>document.querySelector('[data-c="mirror"]').click());
+  /* v21.51 the marks, the reading line, the scroll across paragraphs with the cards following it, the voice without a microphone */
+  const mk=await page.evaluate(()=>{const r=S.rows[0],o=r.tp;r.tp='Hello // there *Sam* {smile} 15 again';tpRender();const t=document.querySelector('#tpStrip .tp-p .tp-t');
+    const res={pause:!!t.querySelector('.tp-pause'),em:(t.querySelector('.tp-em')||{}).textContent,note:(t.querySelector('.tp-note')||{}).textContent,tw:[...t.querySelectorAll('.tw')].map(e=>e.textContent).join(' '),sw:SW.filter(x=>x.k===0).map(x=>x.w).join(' '),n:words(r.tp)};
+    r.tp=o;const s0=r.say;r.say='Welcome // to the *plan*. {breathe}';const b=document.createElement('div');b.innerHTML=cardHtml(r,{});res.card=b.querySelector('.pn-in').textContent;res.B=sheetRows()[0][1];r.say=s0;tpRender();return res;});
+  ok('4 the marks: a pause, a word stressed and a note show on the teleprompter; the words are matched without them (15 as fifteen)',mk.pause&&mk.em==='Sam'&&mk.note==='smile'&&mk.tw==='Hello there Sam 15 again'&&mk.sw==='hello there sam fifteen again'&&mk.n===5,mk);
+  ok('4 the marks never reach a card or the sheet',!/\/\/|\*|\{|breathe/.test(mk.card)&&/^Welcome to the plan\./.test(mk.card)&&mk.B==='Welcome to the plan.',mk);
+  await page.evaluate(()=>{const r=document.querySelector('[data-m="tpline"]');r.value='50';r.dispatchEvent(new Event('input',{bubbles:true}));});await sleep(100);
+  const rl=await page.evaluate(()=>{const sc=document.getElementById('tpScreen');return {s:parseFloat(getComputedStyle(document.getElementById('tpStrip')).top),l:parseFloat(getComputedStyle(document.querySelector('.tp-line')).top),h:sc.clientHeight};});
+  ok('4 the reading line where it is set (the script starts on it)',Math.abs(rl.s-rl.h*.5)<2&&Math.abs(rl.l-rl.h*.5)<2,rl);
+  await page.evaluate(()=>{const r=document.querySelector('[data-m="tpline"]');r.value='30';r.dispatchEvent(new Event('input',{bubbles:true}));});
+  const W=ms=>new Promise(r=>setTimeout(r,ms));
+  const tpAt=await page.evaluate(()=>TP.i);
+  const scr=await page.evaluate(async()=>{const w=ms=>new Promise(r=>setTimeout(r,ms));tpGo(0,true);TP.man=0;const P=[...document.querySelectorAll('#tpStrip .tp-p')],y0=TP.y;tpToggle();await w(700);const y1=TP.y;
+    TP.y=P[1].offsetTop+4;await w(250);const i1=TP.i;TP.y=P[2].offsetTop+4;await w(250);const i2=TP.i;S.chk.tpmanual=true;TP.y=P[4].offsetTop+4;await w(250);const i3=TP.i;S.chk.tpmanual=false;tpToggle();
+    return {y0,y1,i1,i2,i3,run:TP.run,want:[paras()[1].start,paras()[2].start],rd:document.querySelectorAll('#tpStrip .tw.rd').length};});
+  ok('4 the scroll goes on from paragraph to paragraph, and the cards change as each reaches the reading line',scr.y1>scr.y0&&scr.i1===scr.want[0]&&scr.i2===scr.want[1]&&!scr.run,scr);
+  ok('4 Only the clicker changes the cards: the scroll leaves the card',scr.i3===scr.i2,scr);
+  await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=()=>Promise.reject(new DOMException('denied','NotAllowedError'));const m=document.querySelector('[data-m="tpmode"]');m.value='speak';m.dispatchEvent(new Event('change',{bubbles:true}));tpGo(0,true);tpToggle();});await sleep(900);
+  const sp=await page.evaluate(()=>{const v=document.getElementById('tpVoice');const o={msg:v.hidden?'':v.textContent,md:tpMd(),y:TP.y,vo:document.body.classList.contains('tp-voice'),sens:getComputedStyle(document.querySelector('[data-m="tpsens"]').closest('label')).display};tpToggle();
+    const m=document.querySelector('[data-m="tpmode"]');m.value='fixed';m.dispatchEvent(new Event('change',{bubbles:true}));o.after=document.body.classList.contains('tp-voice');return o;});
+  ok('4 While I speak, with no microphone to be had: it says so and scrolls at the speed set; the microphone setting shows only in the voice modes',/microphone/.test(sp.msg)&&sp.md==='fixed'&&sp.y>0&&sp.vo&&sp.sens!=='none'&&!sp.after,sp);
+  await page.evaluate(i=>tpGo(i,true),tpAt);
   await page.screenshot({path:path.join(OUT,'prompter.png')});
   /* 5 */
   const [pop]=await Promise.all([page.waitForEvent('popup'),page.click('#tpGfx')]);await sleep(700);
@@ -103,6 +130,18 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('5 the ticker text: its size, its type and its colour reach the open window, and the speed holds for the new width',tf.fs==='30px'&&/^"TV Lato"/.test(tf.ff)&&tf.c==='rgb(122, 16, 32)'&&Math.abs(tf.sp-tf.w/2/90)<0.5&&tz==='(30 px)',tf);
   await setM('tksize','43','input');await setM('tkfont','merri','change');await setM('tkcol','#111111','input');
   ok('5 the ticker speed: half the speed takes twice as long; 0 holds it still; Setup says the speed',Math.abs(k45.d/k90.d-2)<0.05&&Math.abs(k90.d-k90.w/2/90)<0.5&&k0.n==='none'&&tl==='(still)',{k90,k45,k0,tl});
+  /* v21.51 a list that builds: the points come one a click; the card before shows its whole list */
+  const b_bi=await page.evaluate(()=>S.rows.findIndex(r=>String(r.body).split('\n').filter(x=>x.trim()).length>=3));
+  await page.evaluate(i=>{setView('script');const c=document.querySelector('[data-i="'+i+'"][data-f="build"]');c.click();setView('prompter');tpGo(i,true);},b_bi);await sleep(1000);
+  const rvs=()=>pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');return [...l.querySelectorAll('[data-rv]')].map(e=>e.classList.contains('rv-hid')?0:1).join('');});
+  const b_nb=await page.evaluate(i=>({b:S.rows[i].build,n:buildN(S.rows[i])}),b_bi);
+  const b_r0=await rvs();await page.keyboard.press('PageDown');await sleep(450);const b_r1=await rvs();const b_p1=await page.evaluate(()=>[TP.i,TP.b,document.getElementById('tpPos').textContent]);
+  await page.keyboard.press('PageDown');await sleep(450);const b_r2=await rvs();await page.keyboard.press('PageUp');await sleep(450);const b_r3=await rvs();
+  ok('5 a list that builds (ticked on its row): hidden on its card, one point more a click, one less with Page Up',b_nb.b&&b_r0==='0'.repeat(b_nb.n)&&b_r1==='1'+'0'.repeat(b_nb.n-1)&&b_r2==='11'+'0'.repeat(b_nb.n-2)&&b_r3===b_r1&&b_p1[0]===b_bi&&new RegExp('point 1 of '+b_nb.n).test(b_p1[2]),{b_nb,b_r0,b_r1,b_r2,b_r3,b_p1});
+  for(let k=0;k<b_nb.n;k++){await page.keyboard.press('PageDown');await sleep(120);}
+  const b_nx=await page.evaluate(()=>TP.i);await sleep(600);await page.keyboard.press('PageUp');await sleep(1000);const b_r4=await rvs();
+  ok('5 after the last point the next card; back from it, the whole list',b_nx===b_bi+1&&b_r4==='1'.repeat(b_nb.n)&&(await page.evaluate(()=>TP.i))===b_bi,{b_nx,b_r4});
+  await page.evaluate(i=>{S.rows[i].build=false;},b_bi);
   await pop.setViewportSize({width:1280,height:720});await sleep(300);await pop.screenshot({path:path.join(OUT,'window.png')});await pop.close();
   /* 6 */
   await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'].concat(Array(17).fill(''));syncState();});
@@ -120,19 +159,35 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('6 a CSV in the sheet\'s layout: three rows (the empty one skipped), the second continues the first, captions and the last columns kept',ci.rows.length===3&&ci.rows[1][2]===true&&ci.rows[1][1]===''&&ci.rows[0][1]==='Hello team.\nThis is the plan.'&&ci.rows[2][5]==='Door'&&ci.rows[2][6]==='Hallway'&&ci.rows[2][7]==='xyz'&&/view-script/.test(ci.view),ci.rows);
   /* 7 */
   await page.evaluate(()=>loadSim());await sleep(800);
-  await page.evaluate(()=>{S.photos.push({id:'pa',label:'a',img:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='});S.rows[5].pics[0]={ph:'pa',cap:'Cap'};S.rows[5].lay='pic1';renderAll();});
+  await page.evaluate(()=>{S.rows[2].build=true;S.wt=[[1,2.5],[3,4]];S.photos.push({id:'pa',label:'a',img:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='});S.rows[5].pics[0]={ph:'pa',cap:'Cap'};S.rows[5].lay='pic1';renderAll();});
   const sv=await dl(()=>document.getElementById('saveBtn').click());const saved=JSON.parse(fs.readFileSync(sv,'utf8'));
-  const ref=await page.evaluate(()=>JSON.stringify({rows:S.rows,photos:S.photos,meta:S.meta}));
+  const ref=await page.evaluate(()=>JSON.stringify({rows:S.rows,photos:S.photos,meta:S.meta,wt:S.wt}));
   await page.evaluate(()=>{S=blank();renderAll();});await page.setInputFiles('#fileIn',sv);await sleep(700);
-  const back=await page.evaluate(()=>JSON.stringify({rows:S.rows,photos:S.photos,meta:S.meta}));
+  const back=await page.evaluate(()=>JSON.stringify({rows:S.rows,photos:S.photos,meta:S.meta,wt:S.wt}));
   ok('7 Save data and Open: the same script, pictures and settings back',saved.form==='TV-1'&&back===ref,[ref.length,back.length]);
-  const bad={form:'TV-1',rev:'2026-10',S:{meta:{client:'<img src=x onerror=alert(1)>',c1:'red;background:url(x)'},rows:[{seg:'<b>s</b>',say:'hi',title:'<script>alert(1)<\/script>',body:'<img src=x onerror=alert(2)>',lay:'evil',cont:true,pics:[{ph:'zz',cap:'<i>c</i>'}]}],photos:[{id:'zz',img:'javascript:alert(1)'},{id:'<x>',img:'data:image/png;base64,AAAA'}],log:[{i:'x',t:'y'}]}};
+  const bad={form:'TV-1',rev:'2026-10',S:{meta:{client:'<img src=x onerror=alert(1)>',c1:'red;background:url(x)'},rows:[{seg:'<b>s</b>',say:'hi',title:'<script>alert(1)<\/script>',body:'<img src=x onerror=alert(2)>',lay:'evil',cont:true,pics:[{ph:'zz',cap:'<i>c</i>'}]}],photos:[{id:'zz',img:'javascript:alert(1)'},{id:'<x>',img:'data:image/png;base64,AAAA'}],log:[{i:'x',t:'y'}],wt:[['x','y'],'zz',[1,2,3],[2,'<b>']]}};
   const badP=path.join(OUT,'bad.json');fs.writeFileSync(badP,JSON.stringify(bad));await page.setInputFiles('#fileIn',badP);await sleep(600);
   const b1=await page.evaluate(()=>({n:S.rows.length,cont:S.rows[0].cont,lay:S.rows[0].lay,ph:S.rows[0].pics[0].ph,photos:S.photos.length,imgs:document.querySelectorAll('#rows img,.tv-thumb img').length,scripts:[...document.querySelectorAll('#rows script,.tv-thumb script')].length,
-    title:(document.querySelector('.tv-thumb .pn-h')||{}).textContent,log:S.log,c1:S.meta.c1}));
-  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#222f5a',b1);
+    title:(document.querySelector('.tv-thumb .pn-h')||{}).textContent,log:S.log,c1:S.meta.c1,wt:JSON.stringify(S.wt)}));
+  ok('7 a file from elsewhere: markup is text, a bad picture is dropped, a first row cannot continue, a bad layout is Automatic, a colour that is not a colour the default',b1.n===1&&!b1.cont&&b1.lay==='auto'&&b1.ph===''&&b1.photos===0&&b1.imgs===0&&b1.scripts===0&&b1.title==='<script>alert(1)</script>'&&b1.log[0].i===0&&b1.c1==='#222f5a'&&b1.wt==='[[0,0],[2,0]]',b1);
   const other=path.join(OUT,'other.json');fs.writeFileSync(other,JSON.stringify({form:'TK-1',S:{}}));await page.setInputFiles('#fileIn',other);await sleep(400);
   ok('7 a file saved by another form is refused; nothing changes',(await page.evaluate(()=>S.rows.length))===1);
+  /* v21.51 the chapters and the captions of a take, from the card times (and the words heard) */
+  await page.evaluate(()=>loadSim());await sleep(800);
+  const cc=await page.evaluate(()=>{S.meta.look='chapters';const P=paras();S.log=P.map((p,k)=>({i:p.start,t:k?k*15+3:0,seg:S.rows[p.start].seg,title:S.rows[p.start].title}));S.wt=[];
+    S.rows[0].say='Welcome // to *Sam’s* training, {smile} everyone. '+S.rows[0].say;const c=chaptersOf(),q=cuesOf();
+    const k0=SW.filter(x=>x.k===0),s0=[...new Set(k0.map(x=>x.s))];S.wt=s0.map((s,j)=>[s,j*0.5]);const q2=cuesOf();const first2=q2.length>1?q2[1]:null;const idx2=first2?s0.findIndex(s=>first2.text.split(/\s/)[0]===SP[s].textContent.replace(/[,.]$/,'')):-1;
+    return {c:c.list.map(x=>hms(x.t)+' '+x.l),note:c.note,chs:chList().list,q0:q.slice(0,3),n:q.length,maxLine:Math.max(...q.map(x=>Math.max(...x.text.split('\n').map(l=>l.length)))),lines:Math.max(...q.map(x=>x.text.split('\n').length)),
+      mono:q.every((x,j)=>x.b>x.a&&(!q[j+1]||x.b<=q[j+1].a+1e-9)),marks:q.some(x=>/\/\/|\*|\{|smile/.test(x.text)),w2:first2&&first2.a,want2:idx2*0.5,idx2,q2a:q2[0]};});
+  ok('9 YouTube chapters: the first at 0:00, one for each chapter of the bar (each 10 seconds or more)',cc.c.length===cc.chs.length&&cc.c[0]==='0:00 '+cc.chs[0]&&cc.c.every((x,j)=>x.endsWith(' '+cc.chs[j]))&&!cc.note,cc);
+  ok('9 the captions: the script\'s words without the marks, two lines of at most 42 characters, in order, none overlapping',cc.n>15&&cc.maxLine<=42&&cc.lines<=2&&cc.mono&&!cc.marks&&cc.q0[0].a===0&&/^Welcome to Sam’s training, everyone\./.test(cc.q0[0].text.replace(/\n/g,' ')),cc);
+  ok('9 with the words heard, a caption starts when its first word was said',cc.idx2>0&&Math.abs(cc.w2-cc.want2)<0.01,cc);
+  const chP=await dl(()=>document.getElementById('chapBtn').click());const chT=fs.readFileSync(chP,'utf8');
+  const srtP=await dl(()=>document.getElementById('srtBtn').click());const srt=fs.readFileSync(srtP,'utf8');
+  const vttP=await dl(()=>document.getElementById('vttBtn').click());const vtt=fs.readFileSync(vttP,'utf8');
+  ok('9 the files: the chapters as text for the description, SRT and WebVTT',/^0:00 Intro\n\d+:\d\d \S/.test(chT)&&/_YouTube-chapters\.txt$/.test(chP)&&/^1\n00:00:00,000 --> 00:00:\d\d,\d{3}\nWelcome to Sam’s/.test(srt)&&/\n\n2\n00:00:\d\d,\d{3} --> /.test(srt)&&/^WEBVTT\n\n00:00:00\.000 --> 00:00:\d\d\.\d{3}\n/.test(vtt)&&/_captions\.vtt$/.test(vttP),[chT.slice(0,80),srt.slice(0,120),vtt.slice(0,80)]);
+  const short=await page.evaluate(()=>{const f=c=>S.rows.findIndex(r=>chOf(r)===c);S.log=[{i:f(0),t:0},{i:f(1),t:4},{i:f(2),t:30}].map(l=>Object.assign(l,{seg:S.rows[l.i].seg,title:S.rows[l.i].title}));const c=chaptersOf();return {n:c.list.length,note:c.note};});
+  ok('9 a chapter under 10 seconds is left out, and fewer than three is said',short.n===2&&/at least three/.test(short.note)&&/1 shorter than 10 seconds/.test(short.note),short);
   /* 8 */
   await page.evaluate(()=>loadSim());await sleep(800);
   for(const look of ['chapters','panel','cards']){
