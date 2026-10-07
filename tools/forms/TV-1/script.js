@@ -15,10 +15,12 @@ const nw=n=>WORDS[n]||String(n);
    title, body: the card; lay: its layout; pics: two pictures with captions; x: the sheet's own last three columns, kept as
    they came (the places of the pictures in the Flowics template) */
 /* each look's own colours: the panel, the title and heading, the band, the chapter bar */
-const LOOKC={chapters:{c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb'},panel:{c1:'#0f1b41',c2:'#cbb98a',c3:'#a9cdc7',c4:'#8b91bb'},cards:{c1:'#1d3b5a',c2:'#e8a33d',c3:'#a9cdc7',c4:'#8b91bb'}};
+/* (v21.53) c5: the chapter tabs' text, c6 and c7: the lit tab and its text */
+const LOOKC={chapters:{c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a'},panel:{c1:'#0f1b41',c2:'#cbb98a',c3:'#a9cdc7',c4:'#8b91bb',c5:'#ffffff',c6:'#cbb98a',c7:'#0f1b41'},cards:{c1:'#1d3b5a',c2:'#e8a33d',c3:'#a9cdc7',c4:'#8b91bb',c5:'#ffffff',c6:'#e8a33d',c7:'#1d3b5a'}};
+const CKEYS=['c1','c2','c3','c4','c5','c6','c7'];
 const LAYS=[['auto','Automatic'],['side','A card beside the presenter'],['lower','Lower third'],['full','Full-screen card'],['title','Section title'],['pic1','One picture'],['pic2','Two pictures'],['split','Text beside a picture'],['none','No card (the presenter alone)']];
 function newRow(seg,o){return Object.assign({seg:seg||'',say:'',tp:'',cont:false,title:'',body:'',build:false,lay:'auto',ch:'',pics:[{ph:'',cap:''},{ph:'',cap:''}],x:Array(20).fill('')},o||{});}
-function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',tkspd:'90',tksize:'43',tkfont:'merri',tkcol:'#111111',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140',tpmode:'fixed',tpsens:'50',tpline:'30'},chk:{mirror:false,nocd:false,tpmanual:false},rows:[],photos:[],log:[],wt:[],segs:{}};}
+function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a',tkspd:'90',tksize:'43',tkfont:'merri',tkcol:'#111111',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140',tpmode:'fixed',tpsens:'50',tpline:'30'},chk:{mirror:false,nocd:false,tpmanual:false},rows:[],photos:[],log:[],wt:[],segs:{}};}
 let S=blank();
 function ensure(){if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
   if(!Array.isArray(S.rows))S.rows=[];if(!Array.isArray(S.photos))S.photos=[];if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.wt))S.wt=[];if(!S.segs||typeof S.segs!=='object')S.segs={};
@@ -232,8 +234,8 @@ const GFX_CSS=`.gx{position:absolute;left:0;top:0;width:1920px;height:1080px;ove
 .gx.pnl.v2 .pn-rule{top:176px;left:30px;width:900px;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.6) 55%,rgba(255,255,255,0))}
 .gx.pnl.v2 .pn-in{bottom:56px}
 .gx.pnl.v2 .pn-bar{position:absolute;left:4px;right:4px;bottom:4px;height:38px;display:flex;gap:9px}
-.gx.pnl.v2 .pn-bar>div{flex:1 1 0;min-width:0;background:var(--c4);color:#fff;font-family:'TV Merri',Georgia,serif;font-weight:900;font-size:22px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.35);opacity:.82}
-.gx.pnl.v2 .pn-bar>div.on{background:var(--c2);color:var(--c1);opacity:1;text-shadow:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+.gx.pnl.v2 .pn-bar>div{flex:1 1 0;min-width:0;background:var(--c4);color:var(--c5);font-family:'TV Merri',Georgia,serif;font-weight:900;font-size:22px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.35);opacity:.82}
+.gx.pnl.v2 .pn-bar>div.on{background:var(--c6);color:var(--c7);opacity:1;text-shadow:none;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
 .gx.pnl .pn-tick{position:absolute;left:16px;width:1131px;top:911px;height:63px;background:var(--c3);overflow:hidden;display:flex;align-items:center}
 .gx.pnl.right .pn-tick{left:auto;right:16px}
 .gx.pnl.v2 .pn-logo{top:984px;height:76px}
@@ -241,6 +243,15 @@ const GFX_CSS=`.gx{position:absolute;left:0;top:0;width:1920px;height:1080px;ove
 .gx.pnl .pn-tick .tk-in span{padding:0 .3em 0 .45em}.gx.pnl .pn-tick .tk-in span:after{content:"\\2022";padding-left:.75em;color:var(--c1)}
 @keyframes tvtick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .gx.live .pn-tick .tk-in{animation-name:tvtick;animation-timing-function:linear;animation-iteration-count:infinite}
+/* (v21.53) the Chapters look's lower third and section title (its own rules above would override theirs), and its ticker as
+   wide as a full-width panel */
+.gx.pnl.v2.lower .pn{top:700px;height:201px;width:1131px}
+.gx.pnl.v2.lower .pn-t{top:14px;height:80px;line-height:80px}
+.gx.pnl.v2.lower .pn-h{top:96px}
+.gx.pnl.v2.title .pn-t{top:300px;height:150px;line-height:150px}
+.gx.pnl.v2.title .pn-rule{top:468px;left:62px;width:520px;height:4px;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.6) 55%,rgba(255,255,255,0))}
+.gx.pnl.v2.title .pn-h{top:498px;font-size:50px}
+.gx.pnl.v2.full .pn-tick{width:1888px}
 /* a list shown one point at a time (v21.51): the points still to come keep their place, unseen */
 .gx [data-rv]{transition:opacity .4s ease,transform .4s ease}
 .gx .rv-hid{opacity:0;transform:translateY(12px)}`;
@@ -266,7 +277,7 @@ function layOf(r){if(r.lay!=='auto')return r.lay;const np=r.pics.filter(p=>p.ph)
 /* a colour is a #hex or the default: a value from a file goes into a style attribute */
 const hex=(v,d)=>/^#[0-9a-f]{3,8}$/i.test(String(v||''))?String(v):d;
 const mixc=(a,b,t)=>{const p=h=>{h=String(h).replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return [0,2,4].map(i=>parseInt(h.substr(i,2),16)||0);};const A=p(a),B=p(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');};
-function vars(){const m=S.meta,dark=m.cardbg==='dark',c1=hex(m.c1,'#0f1b41'),c2=hex(m.c2,'#cbb98a'),c3=hex(m.c3,'#a9cdc7'),c4=hex(m.c4,'#8b91bb');return '--c1:'+c1+';--c2:'+c2+';--cb:'+(dark?c1:'#ffffff')+';--ct:'+(dark?'#fff':'#1d2730')+';--tc:'+(dark?'#fff':c1)+';--c3:'+c3+';--c4:'+c4+';--c3a:'+mixc(c3,'#ffffff',.12)+';--p0:'+mixc(c1,'#05060d',.62)+';--tg0:'+mixc(c1,'#000000',.82)+';--tg1:'+mixc(c1,'#16404f',.72)+';--gf:'+(m.font==='serif'?"Georgia,'Times New Roman',serif":m.font==='sans'?"Inter,'Helvetica Neue',Helvetica,Arial,sans-serif":"'TV Lato',Lato,'Avenir Next','Helvetica Neue',Arial,sans-serif");}
+function vars(){const m=S.meta,dark=m.cardbg==='dark',c1=hex(m.c1,'#0f1b41'),c2=hex(m.c2,'#cbb98a'),c3=hex(m.c3,'#a9cdc7'),c4=hex(m.c4,'#8b91bb'),c5=hex(m.c5,'#ffffff'),c6=hex(m.c6,c2),c7=hex(m.c7,c1);return '--c1:'+c1+';--c2:'+c2+';--c5:'+c5+';--c6:'+c6+';--c7:'+c7+';--cb:'+(dark?c1:'#ffffff')+';--ct:'+(dark?'#fff':'#1d2730')+';--tc:'+(dark?'#fff':c1)+';--c3:'+c3+';--c4:'+c4+';--c3a:'+mixc(c3,'#ffffff',.12)+';--p0:'+mixc(c1,'#05060d',.62)+';--tg0:'+mixc(c1,'#000000',.82)+';--tg1:'+mixc(c1,'#16404f',.72)+';--gf:'+(m.font==='serif'?"Georgia,'Times New Roman',serif":m.font==='sans'?"Inter,'Helvetica Neue',Helvetica,Arial,sans-serif":"'TV Lato',Lato,'Avenir Next','Helvetica Neue',Arial,sans-serif");}
 /* chapters (the Chapters look's bar): the list typed on Setup, a row in the chapter set on it or on the nearest row above; with
    no list typed, the segments are the chapters */
 function chList(){const L=String(S.meta.chapters||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,10);if(L.length)return {list:L,own:true};
@@ -335,27 +346,54 @@ const TKF={merri:"'TV Merri',Georgia,serif",lato:"'TV Lato',Lato,'Avenir Next',A
 const tkSize=()=>{const n=num(S.meta.tksize);return n==null?43:Math.max(24,Math.min(48,n));};
 function tkStyle(){return 'font-size:'+tkSize()+'px;font-family:'+(TKF[S.meta.tkfont]||TKF.merri)+';color:'+hex(S.meta.tkcol,'#111111');}
 const tkSpd=()=>{const n=num(S.meta.tkspd);return n==null?90:Math.max(0,Math.min(200,n));};
+/* the graphics page (v21.53): the window this form opens, or this form's own file opened with #graphics at the end of its
+   address, in any tab or window of the same browser (on an iPad, one moved to the external display). It shows the card the
+   teleprompter is on and follows it: by the handle the opener keeps, and over a channel between the pages of this site
+   (BroadcastChannel), so a page opened by hand, or moved to another window, follows too. */
+const GFX_ONLY=/^#graphics/.test(location.hash);
+let GC=null,GCon=false;try{if(!GFX_ONLY&&window.BroadcastChannel)GC=new BroadcastChannel('tv1-graphics');}catch(e){GC=null;}
+/* either page may open first: a graphics page says hello as it opens, and answers this form's "here" with one */
+if(GC){GC.onmessage=e=>{const d=e.data||{};if(d.t==='hello'){GCon=true;gwShow(gwAt<0?curRow():gwAt);}};try{GC.postMessage({t:'here'});}catch(e){}}
+const GW_CSS=bg=>'#st{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}.ly{position:absolute;inset:0;transition:opacity .35s ease}'+
+  '#gwWait{position:absolute;left:0;right:0;top:46%;text-align:center;font:500 22px/1.4 system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 8%}';
+/* the page's own script: the stage scaled to the window, each card shown (the words fade when the layout stays), the points
+   of a list revealed, the ticker run; a double-tap for full screen. Written into the window as text, so it must stand alone. */
+function gwBoot(){var root=document.getElementById('gwRoot')||document.body,A=document.getElementById('la'),B=document.getElementById('lb'),LC=document.getElementById('lc'),WT=document.getElementById('gwWait');
+  function size(){var w=innerWidth,h=innerHeight,k=Math.min(w/1920,h/1080),st=document.getElementById('st');st.style.transform='translate('+((w-1920*k)/2)+'px,'+((h-1080*k)/2)+'px) scale('+k+')';}
+  addEventListener('resize',size);size();var T=0,LH=null,LB=null,LL=null;
+  function tick(L){var t=L.querySelectorAll('.tk-in');for(var i=0;i<t.length;i++){var sp=+t[i].getAttribute('data-spd');if(!sp){t[i].style.animationName='none';continue;}var d=Math.max(1,t[i].scrollWidth/2/sp);t[i].style.animationDuration=d+'s';t[i].style.animationDelay=(-((performance.now()/1000)%d))+'s';}}
+  var RVN=null;function rv(L){if(RVN==null)return;var e=L.querySelectorAll('[data-rv]');for(var i=0;i<e.length;i++)e[i].classList.toggle('rv-hid',+e[i].getAttribute('data-rv')>=RVN);}
+  window.reveal=function(n){RVN=n;rv(A);};
+  /* the same card again (the handle and the channel both bring it) changes nothing; the same layout as the card shown: its
+     words fade out (a quarter second), the panel stays, the new words fade in; another layout crossfades */
+  window.show=function(h,bg,lc){if(h===LH&&bg===LB&&lc===LL)return;LH=h;LB=bg;LL=lc;RVN=null;root.style.background=bg;if(WT)WT.hidden=true;if(lc!=null&&LC.textContent!==lc)LC.textContent=lc;clearTimeout(T);
+    var m=/data-k="([^"]+)"/.exec(h),c=A.firstChild&&A.firstChild.getAttribute?A.firstChild.getAttribute('data-k'):null;
+    if(m&&c&&m[1]===c&&A.style.opacity!=='0'){var o=A.querySelectorAll('.gx-tx');for(var i=0;i<o.length;i++){o[i].style.transition='opacity .25s ease';o[i].style.opacity='0';}
+      T=setTimeout(function(){A.style.transition='none';B.style.transition='none';B.innerHTML=h;fitGx(B);tick(B);var n=B.querySelectorAll('.gx-tx');for(var j=0;j<n.length;j++)n[j].style.opacity='0';B.style.opacity='1';A.style.opacity='0';var t=A;A=B;B=t;rv(A);
+        requestAnimationFrame(function(){requestAnimationFrame(function(){for(var j=0;j<n.length;j++){n[j].style.transition='opacity .45s ease';n[j].style.opacity='1';}});});},400);}
+    else{A.style.transition='opacity .35s ease';B.style.transition='opacity .35s ease';B.innerHTML=h;fitGx(B);tick(B);B.style.opacity='1';A.style.opacity='0';var t=A;A=B;B=t;}
+    try{if(!document.fonts.check("900 40px 'TV Lato'"))document.fonts.load("900 40px 'TV Lato'").then(function(){fitGx(A);});}catch(e){}};
+  root.addEventListener('dblclick',function(){var e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);});
+  try{var ch=new BroadcastChannel('tv1-graphics');ch.onmessage=function(e){var d=e.data||{};if(d.t==='show')window.show(d.h,d.bg,d.lc);else if(d.t==='reveal')window.reveal(d.n);else if(d.t==='here')ch.postMessage({t:'hello'});};ch.postMessage({t:'hello'});}catch(e){}}
+if(GFX_ONLY){document.documentElement.classList.add('tv-gfx-page');document.title='TV-1 graphics';
+  const st=document.createElement('style');st.textContent='html.tv-gfx-page,html.tv-gfx-page body{margin:0;height:100%;overflow:hidden}html.tv-gfx-page body>*:not(#gwRoot){display:none!important}#gwRoot{position:fixed;inset:0;z-index:2147483000;overflow:hidden;background:#00b140;cursor:none}'+GW_CSS();document.head.appendChild(st);
+  const lc=document.createElement('style');lc.id='lc';document.head.appendChild(lc);
+  const root=document.createElement('div');root.id='gwRoot';root.innerHTML='<div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><div id="gwWait">Waiting for the teleprompter. Open Form TV-1 in another tab or window of this browser, and this page shows its cards. Double-tap for full screen.</div>';
+  document.body.appendChild(root);gwBoot();}
 function gwOpen(){if(GW&&!GW.closed){try{GW.focus();}catch(e){}gwShow(curRow());return;}
+  /* a page of its own (the form's file with #graphics), unless this is the installed app on an iPad (where a page it opens shows inside it) or a file opened on its own (no channel between files) */
+  const inApp=!!(window.nbhShareSave&&window.nbhShareSave.inApp);
+  if(!inApp&&location.protocol!=='file:'&&GC){GW=window.open(location.href.split('#')[0]+'#graphics','tv1-graphics','popup,width=960,height=540');if(!GW){nbhUI.toast('The browser did not open the window: allow pop-ups for this site, then try again.',{kind:'warn'});return;}gwAt=-1;return;}
   GW=window.open('','tv1-graphics','popup,width=960,height=540');if(!GW){nbhUI.toast('The browser did not open the window: allow pop-ups for this site, then try again.',{kind:'warn'});return;}
-  const fit=fitGx.toString();
   GW.document.open();GW.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TV-1 graphics</title><style>html,body{margin:0;height:100%;overflow:hidden;background:'+(GBG[S.meta.gbg]||'#00b140')+';cursor:none}'+
-    '#st{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}.ly{position:absolute;inset:0;transition:opacity .35s ease}'+GFX_ALL+'<\/style><style id="lc"><\/style><\/head><body><div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><script>'+fit+
-    ';var A=document.getElementById("la"),B=document.getElementById("lb");function size(){var w=innerWidth,h=innerHeight,k=Math.min(w/1920,h/1080),st=document.getElementById("st");st.style.transform="translate("+((w-1920*k)/2)+"px,"+((h-1080*k)/2)+"px) scale("+k+")";}'+
-    'addEventListener("resize",size);size();var T=0,LC=document.getElementById("lc");function tick(L){var t=L.querySelectorAll(".tk-in");for(var i=0;i<t.length;i++){var sp=+t[i].getAttribute("data-spd");if(!sp){t[i].style.animationName="none";continue;}var d=Math.max(1,t[i].scrollWidth/2/sp);t[i].style.animationDuration=d+"s";t[i].style.animationDelay=(-((performance.now()/1000)%d))+"s";}}'+
-    /* the same layout as the card shown: its words fade out (a quarter second), the panel stays, the new words fade in; another layout crossfades */
-    'var RVN=null;function rv(L){if(RVN==null)return;var e=L.querySelectorAll("[data-rv]");for(var i=0;i<e.length;i++)e[i].classList.toggle("rv-hid",+e[i].getAttribute("data-rv")>=RVN);}window.reveal=function(n){RVN=n;rv(A);};'+
-    'window.show=function(h,bg,lc){RVN=null;document.body.style.background=bg;if(lc!=null&&LC.textContent!==lc)LC.textContent=lc;clearTimeout(T);var m=/data-k="([^"]+)"/.exec(h),c=A.firstChild&&A.firstChild.getAttribute?A.firstChild.getAttribute("data-k"):null;'+
-    'if(m&&c&&m[1]===c&&A.style.opacity!=="0"){var o=A.querySelectorAll(".gx-tx");for(var i=0;i<o.length;i++){o[i].style.transition="opacity .25s ease";o[i].style.opacity="0";}'+
-    'T=setTimeout(function(){A.style.transition="none";B.style.transition="none";B.innerHTML=h;fitGx(B);tick(B);var n=B.querySelectorAll(".gx-tx");for(var j=0;j<n.length;j++)n[j].style.opacity="0";B.style.opacity="1";A.style.opacity="0";var t=A;A=B;B=t;rv(A);'+
-    'requestAnimationFrame(function(){requestAnimationFrame(function(){for(var j=0;j<n.length;j++){n[j].style.transition="opacity .45s ease";n[j].style.opacity="1";}});});},400);}'+
-    'else{A.style.transition="opacity .35s ease";B.style.transition="opacity .35s ease";B.innerHTML=h;fitGx(B);tick(B);B.style.opacity="1";A.style.opacity="0";var t=A;A=B;B=t;}'+
-    'try{if(!document.fonts.check("900 40px \'TV Lato\'"))document.fonts.load("900 40px \'TV Lato\'").then(function(){fitGx(A);});}catch(e){}};'+
-    'document.addEventListener("dblclick",function(){var e=document.documentElement;(e.requestFullscreen||e.webkitRequestFullscreen||function(){}).call(e);});<\/script><\/body><\/html>');GW.document.close();
+    GW_CSS()+GFX_ALL+'<\/style><style id="lc"><\/style><\/head><body><div id="st"><div class="ly" id="la"></div><div class="ly" id="lb" style="opacity:0"></div></div><script>'+fitGx.toString()+';('+gwBoot.toString()+')();<\/script><\/body><\/html>');GW.document.close();
   gwAt=-1;setTimeout(()=>gwShow(curRow()),80);}
 /* rv: the points shown of a list that builds (the teleprompter's card); left out, the teleprompter's own when it is this card */
-function gwShow(i,rv){if(!GW||GW.closed||!GW.show)return;const r=S.rows[i];gwAt=i;if(rv===undefined)rv=r&&r.build&&i===TP.i&&document.body.classList.contains('view-prompter')?TP.b:null;
-  try{GW.show(cardHtml(r,{presenter:S.meta.gbg==='none',flat:/^(green|blue|black)$/.test(S.meta.gbg),live:true,rv}),GBG[S.meta.gbg]||'#00b140',logoCss());}catch(e){}}
-function gwReveal(){if(!GW||GW.closed||!GW.reveal||gwAt!==TP.i)return;try{GW.reveal(TP.b);}catch(e){}}
+const gwHandle=()=>{try{return !!(GW&&!GW.closed&&GW.show);}catch(e){return false;}};
+function gwShow(i,rv){if(GFX_ONLY||(!gwHandle()&&!GCon))return;const r=S.rows[i];gwAt=i;if(rv===undefined)rv=r&&r.build&&i===TP.i&&document.body.classList.contains('view-prompter')?TP.b:null;
+  const h=cardHtml(r,{presenter:S.meta.gbg==='none',flat:/^(green|blue|black)$/.test(S.meta.gbg),live:true,rv}),bg=GBG[S.meta.gbg]||'#00b140',lc=logoCss();
+  if(gwHandle())try{GW.show(h,bg,lc);}catch(e){}if(GCon&&GC)try{GC.postMessage({t:'show',h,bg,lc});}catch(e){}}
+function gwReveal(){if(gwAt!==TP.i)return;if(gwHandle())try{GW.reveal(TP.b);}catch(e){}if(GCon&&GC)try{GC.postMessage({t:'reveal',n:TP.b});}catch(e){}}
 
 /* ---------------- views ---------------- */
 function setView(v){document.body.className=document.body.className.replace(/\bview-\S+/,'')+' view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});
@@ -459,7 +497,7 @@ function tpHalt(){TP.run=false;const b=$('#tpRun');if(b){b.setAttribute('aria-pr
 function tpFrame(now){if(!TP.run)return;const dt=Math.min(.1,(now-TP.last)/1000);TP.last=now;const md=tpMd(),P=pEls();
   if(md==='follow'){if(TP.ty!=null&&Math.abs(TP.ty-TP.y)>.5){TP.y+=(TP.ty-TP.y)*Math.min(1,dt*5);tpApply(false);}}
   else if(md==='fixed'||(md==='speak'&&VO.speaking)){const k=tpParaAt(TP.y),pe=P[k];if(pe){const n=Math.max(1,PW[k]||words(spoken(S.rows[paras()[k].start]))),secs=n/wpm()*60,end=P[P.length-1].offsetTop+P[P.length-1].offsetHeight;TP.y=Math.min(end,TP.y+pe.offsetHeight/secs*dt);tpApply(false);
-    if(PK[k]!=null){const f=Math.max(0,Math.min(1,(TP.y-pe.offsetTop)/Math.max(1,pe.offsetHeight))),p=PK[k]+Math.floor(f*(PW[k]||0));if(p>TP.pos){TP.pos=p;tpReadTo(p);}}}}
+    if(PK[k]!=null){const f=Math.max(0,Math.min(1,(TP.y-pe.offsetTop)/Math.max(1,pe.offsetHeight))),p=PK[k]+Math.floor(f*(PW[k]||0));if(p>TP.pos){TP.pos=p;if(md==='fixed')tpReadTo(p);}}}}
   tpAutoCard();TP.raf=requestAnimationFrame(tpFrame);}
 /* (v21.52) with next-card marks in the script, the marks change the cards: a paragraph comes up on its first card, and each
    mark passed (the word before it said, or, scrolling without the words, its line at the reading line) is one more step (the
@@ -493,7 +531,7 @@ async function voStart(md){VO.mode=md;if(VO.on){if(md==='follow')asrEnsure();ret
   const mute=VO.ctx.createGain();mute.gain.value=0;VO.src.connect(VO.proc);VO.proc.connect(mute);mute.connect(VO.ctx.destination);VO.proc.onaudioprocess=e=>voAudio(e.inputBuffer.getChannelData(0));
   try{await VO.ctx.resume();}catch(e){}VO.on=true;VO.floor=.004;VO.done=[];VO.cur=[];VO.inflight=0;if(VO.w&&VO.ready)VO.w.postMessage({t:'reset'});voMeter();if(md==='follow')asrEnsure();}
 function voStop(){if(VO.proc)VO.proc.onaudioprocess=null;try{VO.src&&VO.src.disconnect();VO.proc&&VO.proc.disconnect();}catch(e){}if(VO.stream)VO.stream.getTracks().forEach(t=>t.stop());if(VO.ctx)VO.ctx.close().catch(()=>{});
-  VO.on=false;VO.stream=VO.ctx=VO.src=VO.proc=null;VO.speaking=false;VO.acc=[];VO.accN=0;voMeter();}
+  VO.on=false;VO.stream=VO.ctx=VO.src=VO.proc=null;VO.speaking=false;VO.acc=[];VO.accN=0;voMeter();voHeardLine();}
 const voSens=()=>{const s=num(S.meta.tpsens);return s==null?50:Math.max(0,Math.min(100,s));};
 function voAudio(x){let e=0;for(let j=0;j<x.length;j++)e+=x[j]*x[j];const rms=Math.sqrt(e/x.length),now=performance.now(),k=1.6+(100-voSens())/100*3.2;
   if(rms>Math.max(.002,VO.floor*k)){VO.speaking=true;VO.hang=now+450;}else{if(now>VO.hang)VO.speaking=false;VO.floor=Math.max(.0008,VO.floor*.97+rms*.03);}
@@ -504,6 +542,8 @@ let voMt=0;function voMeter(now0){const m=$('#tpMic');if(!m)return;const now=per
   m.hidden=!VO.on&&!VO.loading;m.classList.toggle('on',VO.speaking);const d=m.querySelector('i');if(d)d.style.transform='scale('+(1+Math.min(1.5,VO.lv*40)).toFixed(2)+')';
   const t=m.querySelector('span');if(t&&!VO.loading)t.textContent=VO.mode==='follow'?(VO.ready?'Following your words':'Starting the recogniser…'):VO.speaking?'Speaking':'Listening';}
 function voSay(t){const l=$('#tpVoice');if(l){l.textContent=t;l.hidden=!t;}}
+/* the last words heard, under the screen while the words are followed (so a word misheard can be seen) */
+function voHeardLine(){const l=$('#tpHeard');if(!l)return;const on=TP.run&&VO.on&&VO.mode==='follow'&&VO.ready;l.hidden=!on;if(on)l.textContent='Heard: '+VO.done.concat(VO.cur).slice(-12).join(' ');}
 
 /* ---------------- the recogniser, on the device (Follow my words) ---------------- */
 /* sherpa-onnx (Apache License 2.0) with a small English model, in nbh-asr/ beside the forms: 57 MB, downloaded once when
@@ -520,8 +560,9 @@ async function asrEnsure(){if(VO.ready||VO.loading){if(VO.ready)VO.mode='follow'
   if(location.protocol==='file:'||!window.caches||!window.crypto||!crypto.subtle){voSay('Follow my words needs the workstation from its website (the recogniser is a download beside the forms): your voice paces the script instead.');VO.mode='speak';return;}
   if(!(await asrHave())&&!(await nbhUI.confirm('Follow my words: download the speech recogniser?\nIt is about 57 MB, from this workstation’s website, once; it stays on this device afterwards. It runs on the device: what the microphone hears is not recorded and never leaves it.',{ok:'Download'}))){voSay('Not downloaded: your voice paces the script instead.');VO.mode='speak';return;}
   VO.loading=true;voMeter();const m=$('#tpMic span');
-  try{const f=await asrFiles(p=>{if(m)m.textContent='Getting the recogniser: '+Math.round(p*100)+'%';});if(m)m.textContent='Starting the recogniser…';
-    VO.w=new Worker('nbh-asr/asr-worker.js');VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter(true);}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
+  voSay('Getting the speech recogniser: until it is ready, the script scrolls at the speed set while you speak.');
+  try{const f=await asrFiles(p=>{if(m)m.textContent='Getting the recogniser: '+Math.round(p*100)+'%';voSay('Getting the speech recogniser ('+Math.round(p*100)+'%): until it is ready, the script scrolls at the speed set while you speak.');});if(m)m.textContent='Starting the recogniser…';voSay('Starting the speech recogniser: a few seconds more.');
+    VO.w=new Worker('nbh-asr/asr-worker.js');VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter(true);voSay('');voHeardLine();}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
     VO.w.postMessage({t:'init',wasm:f.wasm,data:f.data},[f.wasm,f.data]);}
   catch(err){VO.loading=false;voSay('The recogniser could not be fetched ('+String(err.message||err)+'): your voice paces the script instead.');VO.mode='speak';voMeter();}}
 $('#asrDrop').addEventListener('click',async()=>{if(!window.caches){nbhUI.toast('No speech recogniser is kept here.',{kind:'ok'});return;}const had=await asrHave();
@@ -532,15 +573,19 @@ $('#asrDrop').addEventListener('click',async()=>{if(!window.caches){nbhUI.toast(
 const STOP=new Set(['the','a','an','and','of','to','in','is','it','that','on','for','as','at','be','or','by','with','this','are','was','he','she','his','her','they','we','you','i']);
 function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c;}return p[n];}
 const simW=(a,b)=>a===b?1:(a.length<4||b.length<4)?0:1-lev(a,b)/Math.max(a.length,b.length);
+/* the last word of a result still being said: the start of a longer word in the script counts ("asse" for "assessment") */
+const simL=(a,b)=>{const s=simW(a,b);return s>=.72?s:a.length>=4&&b.length>a.length&&b.length<=a.length+7&&b.startsWith(a)?.75:s;};
 const wtW=w=>STOP.has(w)?.3:w.length<=3?.6:1;
-function voScore(R,e){let i=R.length-1,j=e,sc=0,miss=0;if(simW(R[i],SW[j].w)<.72)return 0;
-  while(i>=0&&j>=0&&miss<4){const s=simW(R[i],SW[j].w);if(s>=.72){sc+=wtW(SW[j].w)*s;i--;j--;continue;}if(j>0&&simW(R[i],SW[j-1].w)>=.72){j--;miss++;continue;}if(i>0&&simW(R[i-1],SW[j].w)>=.72){i--;miss++;continue;}i--;j--;miss++;}
+function voScore(R,e,part){let i=R.length-1,j=e,sc=0,miss=0;if((part?simL:simW)(R[i],SW[j].w)<.72)return 0;
+  while(i>=0&&j>=0&&miss<4){const s=(part&&i===R.length-1?simL:simW)(R[i],SW[j].w);if(s>=.72){sc+=wtW(SW[j].w)*s;i--;j--;continue;}if(j>0&&simW(R[i],SW[j-1].w)>=.72){j--;miss++;continue;}if(i>0&&simW(R[i-1],SW[j].w)>=.72){i--;miss++;continue;}i--;j--;miss++;}
   return sc;}
 function voHeard(text,end){if(!TP.run)return;const toks=normTok(text);VO.cur=toks;if(end&&toks.length){VO.done=VO.done.concat(toks).slice(-24);VO.cur=[];}
-  const R=VO.done.concat(VO.cur).slice(-8);if(R.length<2||!SW.length)return;const p=TP.pos;let best=null;
-  const look=(a,b,pen)=>{for(let e=Math.max(0,a);e<Math.min(SW.length,b);e++){const sc=voScore(R,e);if(sc<=0)continue;const v=sc-pen*Math.abs(e+1-p)/40;if(!best||v>best.v)best={e,sc,v};}};
+  voHeardLine();const R=VO.done.concat(VO.cur).slice(-8);if(R.length<2||!SW.length)return;const p=TP.pos;let best=null;
+  const look=(a,b,pen)=>{for(let e=Math.max(0,a);e<Math.min(SW.length,b);e++){const sc=voScore(R,e,!end);if(sc<=0)continue;const v=sc-pen*Math.abs(e+1-p)/40;if(!best||v>best.v)best={e,sc,v};}};
   look(p-6,p+30,.4);if(!best||best.sc<1.4)look(0,SW.length,1.2);if(!best)return;
-  const to=best.e+1,back=to<p-1,far=Math.abs(to-p)>30;if(best.sc<(back||far?2.6:1.4))return;if(to===p)return;
+  /* the next word or two needs little; a jump of more needs more of the words heard to agree, the further the more (a weak
+     match ahead would put the reading ahead of the voice, and a jump back needs the same) */
+  const to=best.e+1,d=to-p,need=d>=-2&&d<=3?1.4:d>-8&&d<=12?2.2:2.6;if(best.sc<need)return;if(to===p)return;
   TP.pos=to;tpReadTo(to);const sp=SP[SW[to-1].s];if(sp){TP.ty=Math.max(0,sp.offsetTop-sp.offsetHeight*.2);}
   /* the clock running: the time of each word come to (the few passed since the last words heard, at this time too) */
   if(TP.rec){const t=+((performance.now()-TP.t0)/1000).toFixed(2);let last=-1;for(let j=to>p&&to-p<=12?p:to-1;j<to;j++){const s=SW[j].s;if(s!==last){S.wt.push([s,t]);last=s;}}if(S.wt.length>20000)S.wt.splice(0,S.wt.length-20000);}}
@@ -595,7 +640,7 @@ $('#srtBtn').addEventListener('click',()=>capDl('srt'));$('#vttBtn').addEventLis
 /* ---------------- editing ---------------- */
 let tSoon=0;function soon(){clearTimeout(tSoon);tSoon=setTimeout(()=>{renderSums();syncState();},250);}
 document.addEventListener('input',e=>{const el=e.target;if(el.id==='tvState'){restoreState(el.value);return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chapters'){chLine();renderRows();}if(/^tk/.test(el.dataset.m))tkLine();if(/^(c1|c2|c3|c4|cardbg|side|font|look|series|tag|first|client|chapters|tkspd|tksize|tkfont|tkcol)$/.test(el.dataset.m)){clearTimeout(window.__tvLk);window.__tvLk=setTimeout(()=>{renderThumbs();gwShow(gwAt<0?curRow():gwAt);},250);}if(/^tp/.test(el.dataset.m))tpStyle();if(el.dataset.m==='tpwpm')renderSums();soon();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chapters'){chLine();renderRows();}if(/^tk/.test(el.dataset.m))tkLine();if(/^(c[1-7]|cardbg|side|font|look|series|tag|first|client|chapters|tkspd|tksize|tkfont|tkcol)$/.test(el.dataset.m)){clearTimeout(window.__tvLk);window.__tvLk=setTimeout(()=>{renderThumbs();gwShow(gwAt<0?curRow():gwAt);},250);}if(/^tp/.test(el.dataset.m))tpStyle();if(el.dataset.m==='tpwpm')renderSums();soon();return;}
   if(el.dataset.segname!==undefined){const i0=+el.dataset.segname,old=S.rows[i0].seg;for(let i=i0;i<S.rows.length&&S.rows[i].seg===old;i++)S.rows[i].seg=el.value;clearTimeout(window.__tvSg);window.__tvSg=setTimeout(()=>renderThumbs(),300);soon();return;}
   if(el.dataset.i!==undefined&&el.dataset.f){const i=+el.dataset.i,f=el.dataset.f,r=S.rows[i];if(!r)return;
     if(f==='cont'){r.cont=el.checked;if(r.cont)r.say='';renderRows();syncState();return;}
@@ -617,7 +662,7 @@ $('#cueBtn').addEventListener('click',()=>{const n=placeCues();renderRows();sync
 $('#addSeg').addEventListener('click',()=>{S.rows.push(newRow('New segment',{title:'',say:''}));renderRows();syncState();const ins=$$('.tv-segname');if(ins.length){ins[ins.length-1].focus();ins[ins.length-1].select();}});
 $('#addRow').addEventListener('click',()=>{const L=S.rows[S.rows.length-1];S.rows.push(newRow(L?L.seg:'Training Overview'));renderRows();syncState();});
 $('#emptyAll').addEventListener('click',async()=>{if(!S.rows.length)return;if(await nbhUI.confirm('Empty the script?\nEvery row, card and picture is removed.',{ok:'Empty',danger:true})){S.rows=[];S.photos=[];renderAll();}});
-function setLook(v){const o=LOOKC[S.meta.look]||{},n=LOOKC[v]||{};['c1','c2','c3','c4'].forEach(k=>{if(!S.meta[k]||String(S.meta[k]).toLowerCase()===o[k])S.meta[k]=n[k];});S.meta.look=v;bindMeta();chLine();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();}
+function setLook(v){const o=LOOKC[S.meta.look]||{},n=LOOKC[v]||{};CKEYS.forEach(k=>{if(!S.meta[k]||String(S.meta[k]).toLowerCase()===o[k])S.meta[k]=n[k];});S.meta.look=v;bindMeta();chLine();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();}
 function tkLine(){const v=$('#tkV');if(v)v.textContent=tkSpd()?'('+tkSpd()+' px a second)':'(still)';const z=$('#tkZ');if(z)z.textContent='('+tkSize()+' px)';}
 function chLine(){tkLine();document.body.classList.toggle('tv-v2',S.meta.look==='chapters');const C=chList(),l=$('#chLine');if(l)l.textContent=S.meta.look!=='chapters'?'':C.own?C.list.length+' chapters on the bar; each card is in the chapter set on its row or on the nearest row above.':'No chapters typed: the segments are the chapters ('+C.list.length+').';}
 /* the logo beside the tag: the form's letterhead logo, or one chosen here (kept with the pictures, as 'logo') */
@@ -724,7 +769,7 @@ $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window
 /* ---------------- save, open, clear, the simulator ---------------- */
 function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);}
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
-  if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});['c1','c2','c3','c4','tkcol'].forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
+  if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
   o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
   const ids=new Set(o.photos.map(p=>p.id));

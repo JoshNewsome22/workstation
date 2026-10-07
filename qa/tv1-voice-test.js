@@ -23,7 +23,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const st=await page.evaluate(async()=>({ready:VO.ready,parts:(await (await caches.open('tv1-voice-model')).keys()).length,mic:document.getElementById('tpMic').textContent}));
   ok('1 the recogniser downloaded, each part checked and kept on the device, and started',st.ready&&st.parts===32&&/Following your words/.test(st.mic),Object.assign(st,{secs:(Date.now()-t0)/1000}));
   /* from the top, the clock running: the speech starts again with the new capture */
-  await page.evaluate(()=>{tpToggle();tpGo(0,true);});await sleep(500);
+  await page.evaluate(()=>{tpToggle();tpGo(0,true);TP.pos=0;tpReadTo(0);});await sleep(500);
   await page.evaluate(()=>{document.getElementById('tpRec').click();tpToggle();});
   const trace=[];const t1=Date.now();
   while(Date.now()-t1<75500){await sleep(2000);trace.push(await page.evaluate(()=>({t:+((performance.now()-TP.t0)/1000).toFixed(1),pos:TP.pos,i:TP.i,heard:VO.done.concat(VO.cur).slice(-6).join(' ')})));}

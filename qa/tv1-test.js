@@ -10,6 +10,7 @@
       tab for each segment; the workbook and a CSV in the sheet's layout come back in, the continued rows found again;
    7. Save data and Open give the same script back; a file from elsewhere cannot put markup or a stray picture in;
    8. the card layouts each draw inside the stage; print; no errors and no request off the page's own folder.
+   v21.53: the graphics page in another tab, the chapter tabs' colours, the Chapters look's lower third and title, the voice's thresholds.
    v21.51: the countdown, the marks, the reading line, the scroll across paragraphs and the cards following it, the clicker
    alone, the voice without a microphone, a list that builds, 9. the chapters and the captions (the voice itself: tv1-voice-test.js).
    usage: node qa/tv1-test.js   (WS_URL as in qa/lib.js) */
@@ -115,11 +116,16 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const sp=await page.evaluate(()=>{const v=document.getElementById('tpVoice');const o={msg:v.hidden?'':v.textContent,md:tpMd(),y:TP.y,vo:document.body.classList.contains('tp-voice'),sens:getComputedStyle(document.querySelector('[data-m="tpsens"]').closest('label')).display};tpToggle();
     const m=document.querySelector('[data-m="tpmode"]');m.value='fixed';m.dispatchEvent(new Event('change',{bubbles:true}));o.after=document.body.classList.contains('tp-voice');return o;});
   ok('4 While I speak, with no microphone to be had: it says so and scrolls at the speed set; the microphone setting shows only in the voice modes',/microphone/.test(sp.msg)&&sp.md==='fixed'&&sp.y>0&&sp.vo&&sp.sens!=='none'&&!sp.after,sp);
+  /* v21.53 the words heard, placed: the next words need little; a jump ahead on two words heard is not taken, on six it is; a word still being said matches the start of a longer one */
+  const vh=await page.evaluate(()=>{tpRender();tpGo(0,true);TP.run=true;VO.done=[];VO.cur=[];const w=SW.map(x=>x.w),say=(t,e)=>{voHeard(t,!!e);return TP.pos;};const r={};
+    r.start=say(w.slice(0,3).join(' '));r.two=say(w.slice(0,3).concat(w.slice(14,16)).join(' '));r.six=say(w.slice(10,16).join(' '),true);
+    const nx=w[16];r.partial=say(w.slice(12,16).join(' ')+' '+nx.slice(0,Math.max(4,nx.length-3)));r.nxLen=nx.length;r.w=w.slice(0,18);TP.run=false;VO.done=[];VO.cur=[];tpGo(0,true);return r;});
+  ok('4 following the words: the next words move the reading; two words heard from further on do not; six do; a word half said counts',vh.start===3&&vh.two===3&&vh.six===16&&(vh.nxLen<7||vh.partial===17),vh);
   await page.evaluate(i=>tpGo(i,true),tpAt);
   await page.screenshot({path:path.join(OUT,'prompter.png')});
   /* 5 */
   const [pop]=await Promise.all([page.waitForEvent('popup'),page.click('#tpGfx')]);await sleep(700);
-  const g0=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1'||x.style.opacity==='');const h=l&&l.querySelector('.pn-h');return {bg:getComputedStyle(document.body).backgroundColor,t:h?h.textContent:''};});
+  const g0=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1'||x.style.opacity==='');const h=l&&l.querySelector('.pn-h');return {bg:getComputedStyle(document.getElementById('gwRoot')||document.body).backgroundColor,t:h?h.textContent:''};});
   const at=await page.evaluate(()=>[S.rows[TP.i].title,S.rows[TP.i+1].title]);
   const ff=await pop.evaluate(()=>getComputedStyle(document.querySelector('.ly .gx')).fontFamily);
   ok('5 the window draws the cards in Lato, built in (no network)',/^"TV Lato"/.test(ff)&&await pop.evaluate(()=>document.fonts.check("900 40px 'TV Lato'")),ff);
@@ -133,11 +139,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const shown=async()=>pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');const t=l&&l.querySelector('.pn-h');return t?t.textContent:'';});
   ok('5 the next card on the teleprompter changes the window',(await shown())===at[1],[await shown(),at]);
   await page.evaluate(()=>{setView('setup');const s=document.querySelector('[data-m="gbg"]');s.value='black';s.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(600);
-  ok('5 a black background (luma key) reaches the open window',(await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor))==='rgb(0, 0, 0)');
+  ok('5 a black background (luma key) reaches the open window',(await pop.evaluate(()=>getComputedStyle(document.getElementById('gwRoot')||document.body).backgroundColor))==='rgb(0, 0, 0)');
   /* v21.50b plain white (no key), and the ticker's speed */
   const setM=async(k,v,ev)=>{await page.evaluate(([k,v,ev])=>{const s=document.querySelector('[data-m="'+k+'"]');s.value=v;s.dispatchEvent(new Event(ev,{bubbles:true}));},[k,v,ev]);await sleep(700);};
   await setM('gbg','white','change');
-  ok('5 White: the window is plain white, and the panel keeps no key-safe flattening it does not need',await pop.evaluate(()=>getComputedStyle(document.body).backgroundColor==='rgb(255, 255, 255)'&&!document.querySelector('.ly[style*="opacity: 1"] .gx.flat')));
+  ok('5 White: the window is plain white, and the panel keeps no key-safe flattening it does not need',await pop.evaluate(()=>getComputedStyle(document.getElementById('gwRoot')||document.body).backgroundColor==='rgb(255, 255, 255)'&&!document.querySelector('.ly[style*="opacity: 1"] .gx.flat')));
   const tk=()=>pop.evaluate(()=>{const t=[...document.querySelectorAll('.ly')].find(l=>l.style.opacity==='1').querySelector('.tk-in');const st=getComputedStyle(t);return {d:parseFloat(st.animationDuration),n:st.animationName,w:t.scrollWidth};});
   await setM('tkspd','90','input');const k90=await tk();await setM('tkspd','45','input');const k45=await tk();await setM('tkspd','0','input');const k0=await tk();
   const tl=await page.evaluate(()=>document.getElementById('tkV').textContent);await setM('tkspd','90','input');
@@ -146,6 +152,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const tz=await page.evaluate(()=>document.getElementById('tkZ').textContent);
   ok('5 the ticker text: its size, its type and its colour reach the open window, and the speed holds for the new width',tf.fs==='30px'&&/^"TV Lato"/.test(tf.ff)&&tf.c==='rgb(122, 16, 32)'&&Math.abs(tf.sp-tf.w/2/90)<0.5&&tz==='(30 px)',tf);
   await setM('tksize','43','input');await setM('tkfont','merri','change');await setM('tkcol','#111111','input');
+  /* v21.53 the chapter tabs' colours */
+  await setM('c4','#102030','input');await setM('c5','#fff0e0','input');await setM('c6','#d02020','input');await setM('c7','#f0f0f0','input');
+  const tabs=await pop.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1'),d=[...l.querySelectorAll('.pn-bar>div')],on=d.find(x=>x.classList.contains('on')),off=d.find(x=>!x.classList.contains('on'));const c=e=>{const st=getComputedStyle(e);return st.backgroundColor+' '+st.color;};return {on:c(on),off:c(off)};});
+  ok('5 the chapter tabs: their colour and text, and the lit tab\'s colour and text, from Setup, reach the window',tabs.off==='rgb(16, 32, 48) rgb(255, 240, 224)'&&tabs.on==='rgb(208, 32, 32) rgb(240, 240, 240)',tabs);
+  await setM('c4','#8b91bb','input');await setM('c5','#ffffff','input');await setM('c6','#eed9ad','input');await setM('c7','#222f5a','input');
   ok('5 the ticker speed: half the speed takes twice as long; 0 holds it still; Setup says the speed',Math.abs(k45.d/k90.d-2)<0.05&&Math.abs(k90.d-k90.w/2/90)<0.5&&k0.n==='none'&&tl==='(still)',{k90,k45,k0,tl});
   /* v21.51 a list that builds: the points come one a click; the card before shows its whole list */
   const b_bi=await page.evaluate(()=>S.rows.findIndex(r=>String(r.body).split('\n').filter(x=>x.trim()).length>=3));
@@ -160,6 +171,16 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('5 after the last point the next card; back from it, the whole list',b_nx===b_bi+1&&b_r4==='1'.repeat(b_nb.n)&&(await page.evaluate(()=>TP.i))===b_bi,{b_nx,b_r4});
   await page.evaluate(i=>{S.rows[i].build=false;},b_bi);
   await pop.setViewportSize({width:1280,height:720});await sleep(300);await pop.screenshot({path:path.join(OUT,'window.png')});await pop.close();
+  /* v21.53 the graphics page opened by hand (the form's file with #graphics), in another tab: it shows the card the teleprompter is on and follows it */
+  const gp=await ctx.newPage();await gp.goto(URL+'#graphics');await sleep(1500);
+  const gpOn=()=>gp.evaluate(()=>{const l=[...document.querySelectorAll('.ly')].find(x=>x.style.opacity==='1');return {wait:document.getElementById('gwWait').hidden,h:l&&l.querySelector('.pn-h')?l.querySelector('.pn-h').textContent:'',form:[...document.body.children].filter(e=>e.id!=='gwRoot'&&getComputedStyle(e).display!=='none').length,bg:getComputedStyle(document.getElementById('gwRoot')).backgroundColor};});
+  await page.evaluate(()=>{setView('prompter');tpGo(S.rows.findIndex(r=>r.title==='Strengths'),true);});await sleep(900);
+  const gp0=await gpOn(),gpAt=await page.evaluate(()=>[S.rows[TP.i].title,S.rows[TP.i+1].title]);
+  await page.bringToFront();await page.keyboard.press('PageDown');await sleep(1200);const gp1=await gpOn();
+  ok('5 the graphics page opened by hand shows the teleprompter\'s card (the form itself hidden) and follows the next card',gp0.wait&&gp0.h===gpAt[0]&&gp0.form===0&&gp1.h===gpAt[1],{gp0,gp1,gpAt});
+  const gp2=await (async()=>{await page.evaluate(()=>{S.rows[TP.i].build=true;tpGo(TP.i,true);});await sleep(900);const a=await gp.evaluate(()=>[...document.querySelectorAll('.ly[style*="opacity: 1"] [data-rv]')].map(e=>e.classList.contains('rv-hid')?0:1).join(''));await page.keyboard.press('PageDown');await sleep(600);const b=await gp.evaluate(()=>[...document.querySelectorAll('.ly[style*="opacity: 1"] [data-rv]')].map(e=>e.classList.contains('rv-hid')?0:1).join(''));await page.evaluate(()=>{S.rows[TP.i].build=false;});return {a,b};})();
+  ok('5 a list that builds reveals on the graphics page too',gp2.a.length>1&&/^0+$/.test(gp2.a)&&/^10+$/.test(gp2.b),gp2);
+  await gp.close();
   /* 6 */
   await page.evaluate(()=>{S.rows[3].pics[0].cap='Sam at the art table';S.rows[3].x=['G','H','I'].concat(Array(17).fill(''));syncState();});
   const xP=await dl(()=>document.getElementById('xlsxBtn').click());
@@ -212,6 +233,14 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0';box.innerHTML=stageHtml(r,960,{presenter:true});document.body.appendChild(box);fitGx(box);const g=box.querySelector('.gx').getBoundingClientRect(),c=box.querySelector('.gx-card,.gx-band,.pn');
     const cr=c?c.getBoundingClientRect():null,inn=box.querySelector('.gx-in');out[l]={inside:!cr||(cr.left>=g.left-1&&cr.right<=g.right+1&&cr.top>=g.top-1&&cr.bottom<=g.bottom+1),over:inn?inn.scrollHeight>inn.clientHeight+2:false,card:!!c};box.remove();});S.meta.look='chapters';return out;},look);
   ok('8 '+look+' look: every layout draws inside the stage, its text fitted to its card; no card on "No card"',Object.values(lays).every(x=>x.inside&&!x.over)&&!lays.none.card&&lays.title.card,lays);}
+  /* v21.53 the Chapters look's lower third (a short panel at the foot, the title above the heading), its section title (the title mid-panel) and its ticker under a full-width panel */
+  const v2=await page.evaluate(()=>{S.meta.look='chapters';const out={};const draw=l=>{const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay=l;const box=document.createElement('div');box.style.cssText='position:absolute;left:0;top:0';box.innerHTML=stageHtml(r,960,{presenter:true,live:true});document.body.appendChild(box);fitGx(box);return box;};
+    let b=draw('lower');let pn=b.querySelector('.pn').getBoundingClientRect(),t=b.querySelector('.pn-t').getBoundingClientRect(),h=b.querySelector('.pn-h').getBoundingClientRect(),bar=b.querySelector('.pn-bar');out.lower={ph:pn.height/0.5,ptop:pn.top/0.5,tBottom:t.bottom,hTop:h.top,bar:!!bar&&bar.getBoundingClientRect().top>=h.bottom-1};b.remove();
+    b=draw('title');pn=b.querySelector('.pn').getBoundingClientRect();t=b.querySelector('.pn-t').getBoundingClientRect();out.title={tTop:(t.top-pn.top)/pn.height,hTop:((b.querySelector('.pn-h')||t).getBoundingClientRect().top-pn.top)/pn.height};b.remove();
+    b=draw('full');out.full={tick:b.querySelector('.pn-tick').getBoundingClientRect().width/0.5,pn:b.querySelector('.pn').getBoundingClientRect().width/0.5};b.remove();b=draw('side');out.side={tick:b.querySelector('.pn-tick').getBoundingClientRect().width/0.5};b.remove();return out;});
+  ok('8 Chapters look, lower third: a short panel at the foot, the title above the heading, the bar under both',v2.lower.ph<210&&v2.lower.ptop>690&&v2.lower.tBottom<=v2.lower.hTop+1&&v2.lower.bar,v2.lower);
+  ok('8 Chapters look, section title: the title mid-panel, the heading under it',v2.title.tTop>.3&&v2.title.hTop>v2.title.tTop+.1,v2.title);
+  ok('8 Chapters look: the ticker as wide as the panel (1888 under a full-width one, 1131 beside the presenter)',Math.abs(v2.full.tick-1888)<2&&Math.abs(v2.full.pn-1888)<2&&Math.abs(v2.side.tick-1131)<2,v2);
   const long=await page.evaluate(()=>{S.meta.look='cards';const r=JSON.parse(JSON.stringify(S.rows[6]));r.lay='side';r.body=Array.from({length:14},(_,i)=>'• A long point number '+i+' that goes on for a while').join('\n');const box=document.createElement('div');box.innerHTML=stageHtml(r,960,{});document.body.appendChild(box);fitGx(box);
     const b=box.querySelector('.gx-body'),inn=box.querySelector('.gx-in');const o={fs:parseFloat(b.style.fontSize),over:inn.scrollHeight>inn.clientHeight+2};box.remove();S.meta.look='chapters';return o;});
   ok('8 Cards look, a long card: the text shrinks until it fits',long.fs<46&&!long.over,long);
