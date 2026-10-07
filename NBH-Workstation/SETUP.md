@@ -7695,3 +7695,35 @@ Checked by `qa/tv1-test.js` (70 checks: the marks placed, one for each step; a c
 as the word before it is said; a list that builds one point a mark), the new `qa/tv1-case-test.js` (the seven forms'
 simulators through the shell, then the draft: every segment written from them, only the presenter and the terms left, the
 marks in), and `qa/tv1-voice-test.js` with a recorded voice: the card came up 0.01 s after the word before its mark was said.
+
+### v21.53: the graphics page in any window (one iPad for both), the chapter tabs' colours, three fixes
+
+**The graphics page.** The cards no longer need the window this form opens: the form's own file opened with `#graphics` at
+the end of its address (the link under the Graphics view, or **Open the graphics window**, which opens that page) shows the
+card the teleprompter is on and follows it, in any tab or window of the same browser. The two pages find each other over a
+channel between the pages of the site (BroadcastChannel), whichever opens first, as well as by the handle the opener keeps;
+the same card arriving both ways changes nothing. So on an iPad that extends to an external display (Stage Manager), one
+iPad does both: the workstation in Safari (not the installed app: a page the installed app opens shows inside it, and a page
+it sends to Safari cannot reach it), the graphics page in its own window moved to the display connected to the Yolobox and
+double-tapped for full screen, the teleprompter on the iPad. Until a teleprompter is found the page says so. The form's own
+sheet is hidden under the page (the file is the form, loaded once more, from the cache). A file opened on its own (file:) has
+no channel and keeps the window it writes.
+
+**The chapter tabs' colours** (Setup, the Chapters look): **Chapter tabs**, **Chapter tabs' text**, **The lit chapter tab** and
+**The lit chapter tab's text** (before, the tabs took the heading and panel colours and white). They reach the open page at
+once, and a saved file keeps them (checked as colours).
+
+**Fixes.** In the Chapters look the lower third and the section title drew as the full panel (the look's own rules overrode the
+layouts': the title over the heading, the panel the full height); the lower third is now a short panel at the foot with the
+chapter bar under its heading, and the section title sits mid-panel as in the Panel look. The ticker under a full-width panel
+stopped at half its width; it runs the panel's width. Following the words: a weak match a few words ahead could move the
+reading ahead of the voice and stay there (a jump back needed a stronger match than the jump forward had); now the next word
+or two needs little, and a jump of more, forward or back, needs more of the words heard to agree, the further the more. A word
+still being said (the recogniser gives its first letters) counts as the start of the script's longer word. While the
+recogniser is still being fetched or started the voice message says so (the script scrolls at the speed set while you speak
+until then), and in that fallback the words are no longer dimmed as if read (a guess). **Heard:** under the screen shows the
+last words recognised while the words are followed, so a word misheard can be seen for what it is.
+
+Checked by `qa/tv1-test.js` (77: the graphics page opened by hand follows the card and a list that builds, the tabs' colours
+reach the window, the Chapters look's lower third and title and the ticker's width, the voice's thresholds) and in WebKit
+(the graphics page in a second window follows over the channel), and the voice and case suites again.
