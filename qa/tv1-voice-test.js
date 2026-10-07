@@ -6,6 +6,7 @@
    2. with the clock running, the time each word was heard is kept, and the captions are timed by it;
    3. opened again, the recogniser comes from the device: no part is downloaded again;
    4. no errors, and nothing sent anywhere but the page's own folder.
+   (v21.52) the next-card marks: each card comes up as the word before its >> is said.
    usage: TV1_WAV=/path/speech.wav node qa/tv1-voice-test.js   (WS_URL as in qa/lib.js; the WAV 16-bit PCM, any rate) */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const URL=BASE+'/NBH-Workstation/TV-1_Training-Video_v2026-10.html';
@@ -33,6 +34,10 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('1 it moves forward with the speech (no jump back)',back===0,trace.map(x=>x.pos));
   const ph=await page.evaluate(()=>{const P=paras();return [0,1,2,3,4].map(k=>{const s=[...new Set(SW.filter(x=>x.k===k).map(x=>x.s))],t=S.wt.filter(w=>s.includes(w[0])).map(w=>w[1]);return t.length?[Math.min(...t),Math.max(...t)]:null;});});
   ok('2 each word\'s time is kept while the clock runs, paragraph after paragraph',fin.wt>150&&ph.every(Boolean)&&ph.every((p,j)=>!j||p[0]>=ph[j-1][0]),{wt:fin.wt,ph});
+  /* v21.52 the next-card marks (the simulator has them): each card came up as the word before its mark was said */
+  const mk=await page.evaluate(()=>{const out=[];const ord={};CQ.forEach(c=>{if(c.k>5)return;ord[c.k]=(ord[c.k]||0)+1;const st=stepOf(c.k,ord[c.k]);const s=SW[c.at-1].s,tw=(S.wt.find(w=>w[0]===s)||[])[1],lg=S.log.find(l=>l.i===st.i);
+    out.push({k:c.k,word:SP[s].textContent,row:st.i,said:tw,card:lg&&lg.t});});return out;});
+  ok('1 the >> marks: each card came up as the word before its mark was said (within 1.5 s), with no click',mk.length>=1&&mk.every(m=>m.said!=null&&m.card!=null&&Math.abs(m.card-m.said)<1.5),mk);
   await page.evaluate(()=>{tpToggle();document.getElementById('tpRec').click();});
   const cap=await page.evaluate(()=>{const q=cuesOf();return {n:q.length,first:q.slice(0,3),p2:q.find(x=>/^A behavior plan/.test(x.text))};});
   ok('2 the captions are timed by the words heard (the third paragraph\'s caption when it was said)',cap.n>10&&cap.p2&&cap.p2.a>ph[2][0]-1.5&&cap.p2.a<ph[2][0]+1.5,{cap,ph2:ph[2]});

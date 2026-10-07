@@ -1859,7 +1859,8 @@ function openFor(ev,d){
    target renamed on TB-1 reaches the other forms within a few seconds. The facts travel in the
    packet and case files, so they survive the session; a source form that is not open keeps its
    last reading. */
-const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu'};
+/* (v21.52) and for Form TV-1's draft: the profile (DM-1), the plan developed (TD-1) and the crisis plan's stages (CR-1) */
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis'};
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -1868,9 +1869,9 @@ function noteFactSource(id,st){
   state.factSrcSig[id]=sig;
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
-function hasFacts(f){return !!(f&&((f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
+function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu]):'';}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -1888,6 +1889,7 @@ async function gatherFacts(push){
       }
       if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
       if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
+      if(id==='DM-1'||id==='TD-1'||id==='CR-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
     }
     const sig=factsSig(f);
     if(sig!==state.factsSig){
@@ -1910,6 +1912,9 @@ function paintFacts(){
   if(f.fn&&(f.fn.label||f.fn.key))bits.push('<b>Function:</b> '+esc(f.fn.label||f.fn.key)+' <i>('+esc(s.fn||'')+')</i>');
   const g=f.goals||{},nr=(g.red||[]).length,na=(g.acq||[]).length;
   if(nr||na)bits.push('<b>Goals:</b> '+[nr?nr+' reduction':'',na?na+' acquisition':''].filter(Boolean).join(', ')+' <i>('+esc(s.goals||'')+')</i>');
+  if(f.profile)bits.push('<b>Profile</b> <i>('+esc(s.profile||'')+')</i>');
+  if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
+  if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }
