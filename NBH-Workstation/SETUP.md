@@ -7608,3 +7608,59 @@ picture; 43 is the template's, and 48 is the largest that keeps the descenders i
 Black as the template, Lato Black as the panel, both built in, or the device's Georgia) and **Ticker text colour**. Each
 reaches the open graphics window at once; the speed set holds whatever the size or type, as it is measured against the text.
 The words themselves are the Series on Setup. Checked by `qa/tv1-test.js`.
+
+### v21.51: the teleprompter follows your voice; lists that build; chapters and captions
+
+**Scroll** on the teleprompter's bar now has three ways:
+
+- **at the speed set** (words a minute, as before), now going on from paragraph to paragraph instead of stopping at each;
+- **while I speak**: the microphone's level only. The script moves at the speed set while it hears you and waits when you
+  pause; the room's own noise is measured as you go, and **Microphone** on the second row sets how quiet a voice still counts
+  (higher: quieter). No words are recognised in this mode;
+- **following my words**: speech recognition on the device places each word you say in the script and keeps it on the
+  reading line, at your own pace. A word missed or misheard is allowed for; skip a sentence or go back and it finds you (a
+  jump needs a strong match, about three seconds of the new place). The words read are dimmed.
+
+As the script scrolls, the card changes when the reading line passes into the next paragraph (or the next part of one), and the
+graphics window with it; the clicker still changes it at any time, and the scroll leaves the cards alone for four seconds after
+a click. **Only the clicker changes the cards** turns that off. The second row also holds the size, **Reading line** (where the
+line is, 15 to 60% down the screen), Mirror and **No 3-2-1**: Scroll and Start the clock count 3, 2, 1 first (pressed again,
+the count is called off).
+
+**The recogniser.** sherpa-onnx (k2-fsa, Apache License 2.0) with a small streaming English model (the 20M zipformer, int8),
+in `nbh-asr/` beside the forms: 57 MB in 32 parts of 1.8 MB. It is downloaded from the workstation's own website the first time
+*following my words* is chosen (after a confirm), each part checked against its SHA-256, and kept on the device (Cache Storage,
+`tv1-voice-model`; **Remove the speech recogniser** deletes it). It runs in a worker on the device: what the microphone hears
+is not recorded, kept or sent anywhere, in either voice mode. The offline copy (`sw.js`) does not list `nbh-asr/`, so nobody
+downloads it who does not use it. The one-file edition cannot have it (a page opened from a file cannot fetch it): there,
+following my words says so and the voice paces the script instead. The same happens if the microphone is not allowed (the
+speed set) or the download is declined. Safari asks for the microphone the first time; allow it for the site.
+`tools/forms/TV-1/build-asr.py` builds the folder from the two archives named in `tools/vendor/sherpa-onnx/README.md`.
+
+**Marks in the words said** (the paragraphs, or the row's teleprompter words): `//` a pause (shown as ‖), `*a word*` to stress
+(underlined), `{a note}` to yourself (small, in a box). They show on the teleprompter only: never on a card, in column B of the
+sheet, in the word counts or in the captions.
+
+**A list that builds.** Tick **The list one point at a time** on a row: the card comes up with its list hidden (each point keeps
+its place) and each click of the clicker shows the next point, fading in, on the graphics window; Page Up takes one back; after
+the last point the next click is the next card. Coming back to the card from the next one shows the whole list, and so does a
+card the scroll or the voice moved to. The bar says *point 2 of 4*.
+
+**Chapters and captions** (below the teleprompter), from the last take with the clock running:
+
+- **YouTube chapters**: a text file (and the clipboard) of the times each chapter began, for the video's description: the first
+  at 0:00, a chapter the bar's (the Chapters look) or the segment; one shorter than 10 seconds is folded into the next, and the
+  form says when there are fewer than three (YouTube shows none then).
+- **Captions (SRT)** and **Captions (WebVTT)**: the script's own words, two lines of at most 42 characters a caption, timed by
+  the cards' times (each paragraph from its first card to the next paragraph's) or, when the take followed your words, by the
+  time each word was heard. Upload either with the video (YouTube Studio › Subtitles), and check them against the take: words
+  said off the script are not in them.
+
+Saved files keep each row's build and the word times of the last take (checked as they open). Checked by `qa/tv1-test.js` (66
+checks: the countdown and calling it off, the marks on the teleprompter and never on a card or the sheet, the reading line, the
+scroll across paragraphs and the cards following it, the clicker alone, the voice without a microphone, a list that builds in
+the graphics window, the chapters, the captions and their files, a file's word times) and the new `qa/tv1-voice-test.js`: a
+recorded voice reading the simulator's first six paragraphs is the microphone of a Chromium, and the teleprompter follows it
+word for word to the end of the sixth (downloaded and checked the first time, from the device the next, the word times
+timing the captions, no request off the site). In WebKit the recogniser starts in under 2 seconds and decodes 30 seconds of
+speech in about 3, landing on the word being said.
