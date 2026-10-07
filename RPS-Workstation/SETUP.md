@@ -7770,3 +7770,12 @@ new recording of the first six paragraphs (the title card's words first), and `q
 through the shell (12 pictograms from Form TK-1's sample board, one placed on a card with its name as the caption) and the
 music (a track and two segments' settings, the command reaching the graphics page as the segment's card comes up, a bad
 saved file cleaned) by hand in Chromium.
+
+### v21.55: Undo and Redo on TV-1, and the look's own colours back
+
+**Undo** and **Redo** on TV-1's toolbar (Ctrl/Cmd+Z and Shift+Z outside a text box): every change is a step (a colour, a
+setting, a row moved, copied or removed, a picture added or removed, a track, a draft, the simulator, an import), up to 80
+kept; changes within a second of each other (typing, a colour picker dragged) are one step. A row removed comes back with its
+picture. The clock's card and word times are not steps. Setup also has **The look's own colours**, which puts every colour
+back to the look's (Chapters: #222f5a panel, #eed9ad heading, #c1d8d3 band, #8b91bb tabs, white tab text, #eed9ad lit tab,
+#222f5a its text), for a colour changed by mistake with no way back. Checked by `qa/tv1-test.js` (two checks).
