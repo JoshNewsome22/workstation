@@ -97,6 +97,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const tk=()=>pop.evaluate(()=>{const t=[...document.querySelectorAll('.ly')].find(l=>l.style.opacity==='1').querySelector('.tk-in');const st=getComputedStyle(t);return {d:parseFloat(st.animationDuration),n:st.animationName,w:t.scrollWidth};});
   await setM('tkspd','90','input');const k90=await tk();await setM('tkspd','45','input');const k45=await tk();await setM('tkspd','0','input');const k0=await tk();
   const tl=await page.evaluate(()=>document.getElementById('tkV').textContent);await setM('tkspd','90','input');
+  await setM('tksize','30','input');await setM('tkfont','lato','change');await setM('tkcol','#7a1020','input');
+  const tf=await pop.evaluate(()=>{const t=[...document.querySelectorAll('.ly')].find(l=>l.style.opacity==='1').querySelector('.tk-in');const st=getComputedStyle(t);return {fs:st.fontSize,ff:st.fontFamily,c:st.color,sp:parseFloat(st.animationDuration),w:t.scrollWidth};});
+  const tz=await page.evaluate(()=>document.getElementById('tkZ').textContent);
+  ok('5 the ticker text: its size, its type and its colour reach the open window, and the speed holds for the new width',tf.fs==='30px'&&/^"TV Lato"/.test(tf.ff)&&tf.c==='rgb(122, 16, 32)'&&Math.abs(tf.sp-tf.w/2/90)<0.5&&tz==='(30 px)',tf);
+  await setM('tksize','43','input');await setM('tkfont','merri','change');await setM('tkcol','#111111','input');
   ok('5 the ticker speed: half the speed takes twice as long; 0 holds it still; Setup says the speed',Math.abs(k45.d/k90.d-2)<0.05&&Math.abs(k90.d-k90.w/2/90)<0.5&&k0.n==='none'&&tl==='(still)',{k90,k45,k0,tl});
   await pop.setViewportSize({width:1280,height:720});await sleep(300);await pop.screenshot({path:path.join(OUT,'window.png')});await pop.close();
   /* 6 */
