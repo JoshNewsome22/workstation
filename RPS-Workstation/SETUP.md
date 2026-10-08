@@ -8035,3 +8035,56 @@ first in another card's picker, found by its other name in the candidate picker,
 reload, offered to a card named as it, loaded, saved to a file, removed, opened from the file, a wrong file refused; the
 saved file's shape; the Send row hidden on the form alone and, in the workstation, sending to another open form), and by
 `qa/tb1-library-test.js` (140) as before.
+
+### v21.64: Form IA-1 holds every target, and a send-out board
+
+**Several target behaviors in one file.** IA-1 was one target behavior per file. Now a file holds a record per target: its
+worksheets (FAST, QABF, MAS, PBQ, WEFA), interviews, convergence, instrument plan and its own lines on Setup (label, definition,
+frequency, severity, hypothesized function); the student, the informants, the pasted item wording and the walkthrough are
+shared. The toolbar's **Target behavior (this file)** list switches the sheets between targets, **+ Target** adds one and
+**Remove** takes one out (asking when it holds anything). Switching puts the current target's fields into its record and the
+other's onto the sheets through the one-target load the form always had (`restore1`), so every worksheet, total, figure and
+verdict is the target's own. The saved file carries every record (`targets`, `cur`) and the current target's fields as before,
+so an older edition still opens it as a one-target file, and a file saved before this opens as one target. Inside the
+workstation the case adds a record per target Form TB-1 holds, with the definition, and fills an empty current target first
+(`__nbhFactsIn`, From the case: each ticked behavior becomes a target); a target removed by hand is not added back until
+**Take the targets from the case** on Setup is pressed. The Respondent pages dialog lists this file's targets first, then the
+case's not yet in it.
+
+**The informants, shared, with an email.** One informant table serves every target (the Setup text says so), with a new Email
+column for the respondent pages' emails. The Send-outs sheet can leave an informant out for a given target.
+
+**The Send-outs sheet.** A board of target × instrument × informant rows. The plan panel ticks the targets (each with its
+informants, untick one to leave it out for that target), the instruments (one with no wording pasted yet is marked) and the
+dates for the rows planned next (Send on, Please send by); **Plan the send-outs** makes the missing rows. Each row shows its
+status, Planned, Page made, Sent, Not back yet (sent and past its date), Received, Placed, with "send today" and "past its send
+date" marks, and its own buttons: **Page** (that target and instrument's respondent page as a file, which marks every row of the
+pair made), **Link** (copied, and in the box), **Email** (the invitation, nbh-respond.js, to that informant's email with the
+row's link; the row is marked sent today by email), **Sent ✓** and **Not sent**, **Remind** (the invitation again, the date
+noted), **Received ✓** and **Not received**, **Open the worksheet** (switches to the target and the instrument), and × (off the
+board). **Make every page not made yet** saves one page per target and instrument; **Add the dates to a calendar** saves an
+.ics file with an all-day event per send-on date not yet sent and per please-send-by date of a row sent and not back, the
+student by initials, for the iPad's calendar. The Respondent pages dialog's Save, Copy a link and Email it mark the rows of
+their targets and instrument "page made". A row's dates can be typed on the board. The board travels in the file (`outs`,
+`drop`) and in the case.
+
+**Collect responses, by target and by informant.** A code is placed on the target it names, when this file holds it, in the
+column of the informant whose name it carries (else the next free column, and the count of informants follows), each target's
+own worksheet and Section 1 taking its answers; a code naming no target goes to the current target; a file with no target named
+yet takes the first one named; a code about a target the file does not hold is held, with **Add it as a target here** and Copy
+those codes. Every code placed marks its row on the board Received and Placed (from whom, the code's date; a row never marked
+sent counts as sent that day). The workstation's case bar lists what is due from the board (`window.__nbhDue`): the send-on
+dates not yet sent and the please-send-by dates not yet back, within two weeks or past, like the other forms' dates.
+
+What it cannot do: send the emails by itself on the dates. The pages go from the assessor's own mail app, one tap from the
+board; the workstation keeps the student's details off servers by design. Parts: IA-1's main script (`T`, `tgtStore`,
+`tgtLoad`, `tgtSwitch`, `tgtFromFacts`, `withTarget`; `OUTS`, `DROP`, `outsPlan`, `outsRender`, `outsAct`, `outsMade`,
+`outsReceived`, `rpPayloadQuiet`, `outsIcs`, `__nbhDue`; `rcRead` and `rcSlotFor`; `importResponses` taking a column per
+response), the Send-outs sheet (`#outs`), the toolbar's target group, the Setup note and button, the informant table's Email
+column. Checked by `qa/ia1-outs-test.js` (29 checks: the list, + Target, switching with the worksheets apart and the
+informants shared, the file with both targets and reopened, an older file, the case adding records, a removed one kept out
+until asked; the plan panel and the rows, nothing doubled, Page, Link, Email, Remind, Sent and Not sent, the due list, the
+calendar file, a typed date, a row taken off; two codes placed on their targets and informants with the board marked, a held
+code added as a target, the board saved and reopened; in the workstation TB-1's targets becoming records and the board's dates
+on the case bar), and by the respondent, WEFA, audit, iPad, photo and short-link suites as before (the respondent suite now
+expects a second respondent in the next free column, A kept).
