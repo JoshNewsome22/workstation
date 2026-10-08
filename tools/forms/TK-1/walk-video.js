@@ -377,7 +377,7 @@ function ui(){const btn=D.getElementById('wkVideo');if(!btn)return;const note=D.
   btn.addEventListener('click',async()=>{
     const dlg=D.createElement('dialog');dlg.className='wkv-dlg';dlg.setAttribute('aria-labelledby','wkvT');
     dlg.innerHTML='<h3 id="wkvT">Save the walkthrough as a video</h3><p class="wkv-msg">The video is made here, on this device, '+INFO.from+'. Nothing is sent anywhere. It takes a few minutes; keep this page open and the screen on until it is done.</p>'+
-      '<p class="wkv-msg wkv-priv">The video shows this student’s '+INFO.what+'. Share it only through the district’s drive or secure email, as any record about the student.</p>'+
+      '<p class="wkv-msg wkv-priv">'+(INFO.priv||('The video shows this student’s '+INFO.what+'. Share it only through the district’s drive or secure email, as any record about the student.'))+'</p>'+   /* v21.60 a form whose video holds no record (RA-1) says so (NBH_WALK_INFO.priv) */
       '<fieldset class="wkv-size"><legend>Size</legend><label><input type="radio" name="wkvSize" value="sharp" checked> 1080p, sharpest (about 100 MB, for the district drive)</label><label><input type="radio" name="wkvSize" value="small"> 1080p, smaller (about 50 MB; softer while things move)</label></fieldset>'+
       '<div class="wkv-bar" hidden><div class="wkv-fill"></div></div><p class="wkv-st" role="status" aria-live="polite"></p>'+
       '<div class="wkv-btns"><button type="button" class="wkv-go">Make the video</button><button type="button" class="wkv-x">Cancel</button></div>';
