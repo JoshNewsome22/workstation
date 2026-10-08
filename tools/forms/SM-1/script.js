@@ -2331,22 +2331,32 @@ function svgToPng(svg,fname){if(!svg)return;const vb=(svg.getAttribute('viewBox'
 
 /* ---- the pictures a sheet can carry: the shared pictogram library (window.NBH_PICTOS) or an uploaded photo ---- */
 const ICON_KEYS=window.NBH_PICTO_ORDER||[];
+/* (v21.62) My pictures: the practice's own pictures, taken with the camera (nbh-pictures.js beside the forms; without it the
+   picker has no My pictures). A chosen one goes into the cell as a photo does, at 256 px. */
+const MINE=!!window.NBHPIC;
+if(MINE)NBHPIC.on(()=>{const d=$('#pickDlg');if(d&&d.open)d.grid();});
 const icon=(k,cls)=>window.NBH_PICTOS&&window.NBH_PICTOS[k]?picto(k,cls||'ic'):'';
 const pic=(o,cls)=>o&&o.img?'<img class="'+(cls||'ic')+'" src="'+o.img+'" alt="">':icon(o&&o.icon,cls);
 const face=(happy,cls)=>'<svg class="'+(cls||'face')+'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="'+(happy?'#c9e6c6':'#f0cfcf')+'" stroke="#333" stroke-width="1.4"/><circle cx="8.5" cy="10" r="1.4" fill="#333"/><circle cx="15.5" cy="10" r="1.4" fill="#333"/><path d="'+(happy?'M7.5 14.5 q4.5 4.5 9 0':'M7.5 16.5 q4.5 -4.5 9 0')+'" fill="none" stroke="#333" stroke-width="1.6" stroke-linecap="round"/></svg>';
 /* the picker dialog: one for the whole form */
 let PICK=null;
 function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('dialog');d.id='pickDlg';
-  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option>'+Object.entries(window.NBH_PICTO_CATS||{}).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' A photo is resized to a thumbnail and saved inside the form\'s file.</div>';
+  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option>'+(MINE?'<option value="_mine">My pictures</option>':'')+Object.entries(window.NBH_PICTO_CATS||{}).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button>'+(MINE?'<button type="button" id="pdCam">Take a photo</button><button type="button" id="pdLib">My pictures\u2026</button>':'')+'<button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' A photo is resized to a thumbnail and saved inside the form\'s file.</div>';
   document.body.appendChild(d);
-  const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();$('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no pictures are listed. Put it in the same folder as the form, or use a photo.</p>':'')+ICON_KEYS.filter(k=>{const p=NBH_PICTOS[k];return (!c||p.c===c)&&(!q||p.l.toLowerCase().includes(q)||k.includes(q));}).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(NBH_PICTOS[k].l)+(NBH_PICTOS[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('')||'<p class="hint">Nothing matches.</p>';};
+  const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
+    if(MINE&&(!c||c==='_mine'))h+=NBHPIC.buttons(NBHPIC.list().filter(p=>!q||(p.label||'').toLowerCase().includes(q)));
+    if(c!=='_mine')h+=ICON_KEYS.filter(k=>{const p=NBH_PICTOS[k];return (!c||p.c===c)&&(!q||p.l.toLowerCase().includes(q)||k.includes(q));}).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(NBH_PICTOS[k].l)+(NBH_PICTOS[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
+    $('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no pictures are listed. Put it in the same folder as the form, or use a photo.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');};
+  const useLib=pic=>{NBHPIC.toPhoto(pic,256,380000).then(p=>{if(!PICK)return;PICK.arr[PICK.i].img=p.img;PICK.arr[PICK.i].icon='';d.close();PICK.done();});};
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
-  $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k]');if(!b||!PICK)return;PICK.arr[PICK.i].icon=b.dataset.k;PICK.arr[PICK.i].img='';d.close();PICK.done();});
+  $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k],button[data-lib]');if(!b||!PICK)return;if(b.dataset.lib){const pic=NBHPIC.get(b.dataset.lib);if(pic)useLib(pic);return;}PICK.arr[PICK.i].icon=b.dataset.k;PICK.arr[PICK.i].img='';d.close();PICK.done();});
   $('#pdNone',d).addEventListener('click',()=>{if(PICK){PICK.arr[PICK.i].icon='';PICK.arr[PICK.i].img='';d.close();PICK.done();}});
   $('#pdClose',d).addEventListener('click',()=>d.close());
   $('#pdPhoto',d).addEventListener('click',()=>$('#photoIn').click());
+  if(MINE){$('#pdCam',d).addEventListener('click',()=>{NBHPIC.open({use:!!PICK}).then(pic=>{if(!pic)return;if(PICK)useLib(pic);else grid();});});
+    $('#pdLib',d).addEventListener('click',()=>{NBHPIC.manage().then(grid);});}
   d.grid=grid;return d;}
-function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const r=new FileReader();
   r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,256/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
       PICK.arr[PICK.i].img=c.toDataURL('image/jpeg',0.82);PICK.arr[PICK.i].icon='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();};im.src=r.result;};r.readAsDataURL(f);});

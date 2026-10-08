@@ -53,6 +53,8 @@ PY
 python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-09.html "$D" NBH-Workstation/SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html
 python3 tools/polish-one.py NBH-Workstation/SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html
 if [ -f tools/forms/SM-1/walk-audio.js ]; then cp tools/forms/SM-1/walk-audio.js NBH-Workstation/nbh-sm1-narration.js; fi
+# v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
+cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
 rm -rf "$D"
 python3 - <<'PY'
 import os

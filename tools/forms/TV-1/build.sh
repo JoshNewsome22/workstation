@@ -20,6 +20,8 @@ PY
 for f in meta.json body.html toolbar.html script.js own.css; do cp $R/$f "$D/$f"; done
 python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-09.html "$D" NBH-Workstation/TV-1_Training-Video_v2026-10.html
 python3 tools/polish-one.py NBH-Workstation/TV-1_Training-Video_v2026-10.html
+# v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
+cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
 rm -rf "$D"
 python3 - <<'PY'
 doc=open('NBH-Workstation/TV-1_Training-Video_v2026-10.html',encoding='utf-8').read()

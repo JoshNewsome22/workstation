@@ -57,6 +57,8 @@ for fn in files:
 pdf = {fn: open(os.path.join(SRC, fn), encoding='utf-8').read() for fn in ('pdf-lib.min.js', 'nbh-pdf-tools.js')}
 # v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1 load it by <script src>) travels once, as its own block
 pictos = open(os.path.join(SRC, 'nbh-pictos.js'), encoding='utf-8').read()
+# v21.62: My pictures (Forms VS-1, SM-1, TK-1 and TV-1 load nbh-pictures.js by <script src>) travels once too
+pictures = open(os.path.join(SRC, 'nbh-pictures.js'), encoding='utf-8').read()
 # v21.39: the respondent-page library (Form IA-1 loads it by <script src>) travels once too
 respond = open(os.path.join(SRC, 'nbh-respond.js'), encoding='utf-8').read()
 # v21.44: Form TK-1's recorded narration (its <script src defer>) travels once too
@@ -85,7 +87,7 @@ if back != forms or wback != wording or any('@@NBH-LOGO@@' not in back[fn] or ba
                                              back[fn].replace('@@NBH-LOGO@@', logo).replace(WHOLE, wback) != files_in[fn] for fn in files):
     sys.exit('the packed forms do not unpack to the files, each with its one copy of the writing help')
 blocks = (block('nbh-embed-logo', logo) + block('nbh-embed-forms', packed) + block('nbh-embed-wording', pwording) +
-          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-video', pack(video)) + block('nbh-embed-narration-sm1', pack(narration_sm1)) + block('nbh-embed-narration-dd1', pack(narration_dd1)) + block('nbh-embed-narration-tk1bus', pack(narration_tk1bus)) + block('nbh-embed-narration-ia1', pack(narration_ia1)) + block('nbh-embed-narration-ra1', pack(narration_ra1)) + block('nbh-embed-shell', pack(idx)))
+          block('nbh-embed-pdf', pack(json.dumps(pdf, ensure_ascii=False))) + block('nbh-embed-pictos', pack(pictos)) + block('nbh-embed-pictures', pack(pictures)) + block('nbh-embed-respond', pack(respond)) + block('nbh-embed-narration', pack(narration)) + block('nbh-embed-video', pack(video)) + block('nbh-embed-narration-sm1', pack(narration_sm1)) + block('nbh-embed-narration-dd1', pack(narration_dd1)) + block('nbh-embed-narration-tk1bus', pack(narration_tk1bus)) + block('nbh-embed-narration-ia1', pack(narration_ia1)) + block('nbh-embed-narration-ra1', pack(narration_ra1)) + block('nbh-embed-shell', pack(idx)))
 at = idx.index('<body>\n')
 out = idx[:at + 7] + blocks + idx[at + 7:]
 open(OUT, 'w', encoding='utf-8').write(out)

@@ -3062,6 +3062,13 @@ function recaps(all){const n=nTok(),d=defCaps(n,tokName());if(all||S.caps.length
 
 /* ---------------- pictures ---------------- */
 function photo(id){return S.photos.find(p=>p.id===id);}
+/* (v21.62) My pictures: the practice's own pictures, taken with the camera (nbh-pictures.js beside the forms; without it the
+   picker has no My pictures). A chosen one is copied into this book's photos at its full 600 px (it prints on the cards), with
+   its library id (lib), so the saved file carries it and a device opening the file adds it to its own My pictures (absorb). */
+const MINE=!!window.NBHPIC;
+function libPhoto(pic,cb){const have=S.photos.find(p=>p.lib===pic.id);if(have){cb(have);return;}NBHPIC.toPhoto(pic,600,880000).then(p=>{S.photos.push(p);cb(p);});}
+const libPhotoP=id=>new Promise(res=>{const pic=NBHPIC.get(id);if(!pic)res(null);else libPhoto(pic,res);});
+if(MINE)NBHPIC.on(()=>{const d=$('#pickDlg');if(d&&d.open)d.grid();});
 function pic(o,cls,style){if(!o)return '';const ex=style?' style="'+style+'"':'';
   if(o.ph){const p=photo(o.ph);return p?'<img class="'+(cls||'')+'" src="'+p.img+'" alt=""'+ex+'>':'';}
   if(o.k&&o.k.startsWith('tk:')&&TOK[o.k.slice(3)])return own(TOK[o.k.slice(3)],cls,ex);
@@ -3075,22 +3082,25 @@ function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);r
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(has(o)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
 function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('dialog');d.id='pickDlg';
-  d.innerHTML='<div class="pd-head"><div class="pd-top"><b id="pdTitle">Choose a picture</b><div class="pd-seg" id="pdMultiLab" role="group" aria-label="How many pictures"><button type="button" id="pdOne" aria-pressed="true">One picture</button><button type="button" id="pdMulti" aria-pressed="false">Several at once</button></div></div><select id="pdCat" aria-label="Picture category"><option value="">All</option><option value="_photos">My photos</option><option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button><div class="pd-bar" id="pdBar"><span id="pdCount"></span><button type="button" id="pdUndo">Clear the picks</button><button type="button" class="pd-go" id="pdGo">Put them on the cards</button></div></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
+  d.innerHTML='<div class="pd-head"><div class="pd-top"><b id="pdTitle">Choose a picture</b><div class="pd-seg" id="pdMultiLab" role="group" aria-label="How many pictures"><button type="button" id="pdOne" aria-pressed="true">One picture</button><button type="button" id="pdMulti" aria-pressed="false">Several at once</button></div></div><select id="pdCat" aria-label="Picture category"><option value="">All</option><option value="_photos">My photos</option>'+(MINE?'<option value="_mine">My pictures</option>':'')+'<option value="_own">Tokens and avatars drawn here</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button>'+(MINE?'<button type="button" id="pdCam">Take a photo</button><button type="button" id="pdLib">My pictures\u2026</button>':'')+'<button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button><div class="pd-bar" id="pdBar"><span id="pdCount"></span><button type="button" id="pdUndo">Clear the picks</button><button type="button" class="pd-go" id="pdGo">Put them on the cards</button></div></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form’s file. The tokens and avatars are drawn in this form.</div>';
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     const ownList=PICK&&PICK.first==='tok'?[['tk:',TOK],['av:',AV]]:[['av:',AV],['tk:',TOK]];
     if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+esc(p.id)+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'<span class="pd-x" data-phdel="'+esc(p.id)+'" title="Remove this photo" role="button" style="display:block;color:#8E2A2A;font-size:10px">remove</span></button>').join('');
+    if(MINE&&(!c||c==='_mine'))h+=NBHPIC.buttons(NBHPIC.list().filter(p=>!q||(p.label||'').toLowerCase().includes(q)));
     if(!c||c==='_own')ownList.forEach(([pre,set])=>{h+=Object.entries(set).filter(([k,v])=>!q||v.l.toLowerCase().includes(q)).map(([k,v])=>'<button type="button" data-k="'+pre+k+'">'+own(v,'')+esc(v.l)+'</button>').join('');});
-    if(c!=='_photos'&&c!=='_own')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+(P[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
+    if(c!=='_photos'&&c!=='_own'&&c!=='_mine')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+(P[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
     const out=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no library pictures are listed. Put it in the same folder as the form, or use a photo or one of the pictures drawn here.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');$('#pdGrid').innerHTML=out;marks();};
   /* several at once: each tap adds the picture to the picks (a second tap takes it out); the picks go on the cards in the order tapped */
-  const keyOf=b=>b.dataset.k?'k:'+b.dataset.k:'ph:'+b.dataset.ph;
+  const keyOf=b=>b.dataset.k?'k:'+b.dataset.k:b.dataset.ph?'ph:'+b.dataset.ph:'lib:'+b.dataset.lib;
   const room=()=>PICK?PICK.arr.length-PICK.i:0;
   const marks=()=>{const m=!!(PICK&&PICK.multi);d.classList.toggle('multi',m);$('#pdMulti',d).setAttribute('aria-pressed',String(m));$('#pdOne',d).setAttribute('aria-pressed',String(!m));$('#pdMultiLab',d).style.display=PICK&&PICK.canMulti?'':'none';$('#pdTitle',d).textContent=PICK&&PICK.canMulti?(m?'Choose pictures for cards '+(PICK.i+1)+' to '+PICK.arr.length:'Choose a picture for card '+(PICK.i+1)):'Choose a picture';$('#photoIn').multiple=m;
-    $$('#pdGrid button[data-k],#pdGrid button[data-ph]').forEach(b=>{const n=m?PICK.sel.indexOf(keyOf(b)):-1;b.classList.toggle('on',n>=0);if(n>=0)b.dataset.n=n+1;else delete b.dataset.n;});
+    $$('#pdGrid button[data-k],#pdGrid button[data-ph],#pdGrid button[data-lib]').forEach(b=>{const n=m?PICK.sel.indexOf(keyOf(b)):-1;b.classList.toggle('on',n>=0);if(n>=0)b.dataset.n=n+1;else delete b.dataset.n;});
     if(m){const n=PICK.sel.length,r=room();$('#pdCount',d).textContent=n?n+' of '+r+' picked: they go on '+(n===1?'card '+(PICK.i+1):'cards '+(PICK.i+1)+' to '+(PICK.i+n))+', in the order tapped':'Tap up to '+r+' pictures, in the order you want them on cards '+(PICK.i+1)+' to '+PICK.arr.length+'.';$('#pdGo',d).disabled=!n;}};
   d.marks=marks;
-  const putIn=()=>{PICK.sel.forEach((key,j)=>{const o=PICK.arr[PICK.i+j];if(!o)return;const [t,v]=[key.slice(0,key.indexOf(':')),key.slice(key.indexOf(':')+1)];if(t==='k'){o.k=v;o.ph='';}else{o.ph=v;o.k='';}o.l='';});d.close();const dn=PICK.done;PICK=null;dn();};
+  const putIn=async()=>{const sel=PICK.sel.slice(),P0=PICK;for(let j=0;j<sel.length;j++){const key=sel[j],o=P0.arr[P0.i+j];if(!o)continue;const [t,v]=[key.slice(0,key.indexOf(':')),key.slice(key.indexOf(':')+1)];
+      if(t==='k'){o.k=v;o.ph='';}else if(t==='ph'){o.ph=v;o.k='';}else{const p=await libPhotoP(v);if(!p)continue;o.ph=p.id;o.k='';}o.l='';}   /* lib: a My pictures copy (v21.62) */
+    if(PICK!==P0)return;d.close();const dn=PICK.done;PICK=null;dn();};
   /* the choice of one or several is remembered for the rest of the session */
   const setMulti=m=>{if(!PICK||PICK.multi===m)return;PICK.multi=m;PICK_MULTI=m;PICK.sel=[];marks();};
   $('#pdMulti',d).addEventListener('click',()=>setMulti(true));$('#pdOne',d).addEventListener('click',()=>setMulti(false));
@@ -3099,15 +3109,19 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
   $('#pdGrid',d).addEventListener('click',async e=>{const x=e.target.closest('[data-phdel]');
     if(x){e.preventDefault();e.stopPropagation();if(!(await nbhUI.confirm('Remove this photo?\nAnything using it loses the picture.',{ok:'Remove',danger:true})))return;const id=x.dataset.phdel;S.photos=S.photos.filter(p=>p.id!==id);['photo','tok','tokL','bg','sp','ch','tg','ft','lm'].forEach(k=>(S[k]||[]).forEach(o=>{if(o.ph===id)o.ph='';}));grid();renderAll();return;}
-    const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;
+    const b=e.target.closest('button[data-k],button[data-ph],button[data-lib]');if(!b||!PICK)return;
     if(PICK.multi){const key=keyOf(b),at=PICK.sel.indexOf(key);if(at>=0)PICK.sel.splice(at,1);else if(PICK.sel.length<room())PICK.sel.push(key);marks();return;}
-    const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
+    const o=PICK.arr[PICK.i];
+    if(b.dataset.lib){const pic=NBHPIC.get(b.dataset.lib);if(!pic)return;libPhoto(pic,p=>{o.ph=p.id;o.k='';d.close();PICK.done();});return;}
+    if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
   $('#pdNone',d).addEventListener('click',()=>{if(PICK){PICK.arr[PICK.i].k='';PICK.arr[PICK.i].ph='';d.close();PICK.done();}});
   $('#pdClose',d).addEventListener('click',()=>d.close());
   $('#pdPhoto',d).addEventListener('click',()=>$('#photoIn').click());
+  if(MINE){$('#pdCam',d).addEventListener('click',()=>{NBHPIC.open({use:!!PICK}).then(pic=>{if(!pic||!PICK)return;if(PICK.multi){if(PICK.sel.length<room())PICK.sel.push('lib:'+pic.id);grid();return;}const o=PICK.arr[PICK.i];libPhoto(pic,p=>{o.ph=p.id;o.k='';d.close();const dn=PICK.done;PICK=null;dn();});});});
+    $('#pdLib',d).addEventListener('click',()=>{NBHPIC.manage().then(grid);});}
   d.grid=grid;return d;}
 let PICK_MULTI=false;
-function openPick(arr,i,done,first,multi){const can=arr===S.ch||arr===S.tg;PICK={arr,i,done,first,canMulti:can,multi:can&&(multi===undefined?PICK_MULTI&&i<arr.length-1:!!multi),sel:[]};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done,first,multi){const can=arr===S.ch||arr===S.tg;PICK={arr,i,done,first,canMulti:can,multi:can&&(multi===undefined?PICK_MULTI&&i<arr.length-1:!!multi),sel:[]};const d=pickDlg();$('#pdQ',d).value='';$('#pdCat',d).value=first==='tok'||first==='av'?'_own':'';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 /* v21.42a: pictures keep print quality. An SVG is kept as the vector it is (it prints sharp at any size); a photo or PNG is kept at up to
    1200 px on its long side, which is 300 dpi on a 4 in card and about 420 dpi on the 2.85 in boxes, as a JPEG at 0.86 (PNG when it has transparency). */
 function addPhoto(file,cb){const mk=(img,label)=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:(label||'photo').replace(/\.[^.]+$/,'').slice(0,30),img});
@@ -3388,7 +3402,7 @@ function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k
    link block), so the shell's status, snapshots and autosave carry it */
 function syncState(){if(S.meta&&S.meta.lk)lkBoard();const t=$('#tkState');if(t)t.value=JSON.stringify(S);}
 function restoreState(v){let d=null;try{d=JSON.parse(v);}catch(e){d=null;}const next=d&&fromFile({form:'TK-1',S:d});if(next){S=next;renderAll();}}
-function renderAll(){ensure();bindMeta();renderTbls();renderOut();lkPaint();}
+function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();renderTbls();renderOut();lkPaint();}
 
 /* ---------------- printing ---------------- */
 $('#printBtn').addEventListener('click',()=>{setView('preview');setTimeout(()=>{fitAll();window.print();},80);});
@@ -3404,7 +3418,7 @@ function fromFile(d){
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<900000;
   /* a photo's id goes into the picker's markup: only the letters, digits, _ and - this form makes ids of (a file made elsewhere could
      carry markup in it); a photo with any other id is left out */
-  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
+  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>Object.assign({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)},/^m[a-z0-9]{1,24}$/.test(str(p&&p.lib))?{lib:str(p.lib)}:{})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];   /* lib (v21.62): the My pictures id a copy came from */
   const ids=new Set(o.photos.map(p=>p.id));const okK=k=>!!(P[k]||(k.startsWith('tk:')&&TOK[k.slice(3)])||(k.startsWith('av:')&&AV[k.slice(3)]));
   const arr=(k,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={k:str(x&&x.k),ph:str(x&&x.ph),l:str(x&&x.l).slice(0,60)};if(!okK(r.k))r.k='';if(!ids.has(r.ph))r.ph='';return r;}):null;
   const ch=arr('ch',6);if(ch)o.ch=ch;const tg=arr('tg',6);if(tg)o.tg=tg;const ft=arr('ft',2);if(ft&&ft.length===2)o.ft=ft;const tok=arr('tok',1);if(tok&&tok.length)o.tok=tok;const tl=arr('tokL',1);if(tl&&tl.length)o.tokL=tl;const ph=arr('photo',1);if(ph&&ph.length)o.photo=ph;const bg=arr('bg',2);if(bg&&bg.length===2)o.bg=bg;const sp=arr('sp',1);if(sp&&sp.length)o.sp=sp;

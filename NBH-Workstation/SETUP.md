@@ -65,6 +65,9 @@ already been solved:
 that work silently. The browser now stops and asks — unless the case has been
 saved and nothing has changed since, in which case it closes without fuss.
 
+**My pictures.** A photo of a real item, taken with the camera on a plain sheet of paper, has its background cut away on the
+device and becomes a square picture every visual can use, kept in the browser for every form and every student (v21.62).
+
 **One case file.** `Save case` writes every open form plus the student details
 into a single file; `Open case` lists its forms at once and fills each from the file as it is opened (v21.61).
 One file to keep or hand over instead of a folder of twenty-seven. Each form's own
@@ -7933,3 +7936,50 @@ spreadsheet, master print and relay paths named above. Checked by `qa/case-open-
 few seconds with one form loaded, the rail, a tap, typing holding the quiet loading, the rest loading one by one and put
 away, Save case right after Open case with five forms still waiting, Close case, a file without `cur`, an edit and a save
 followed by quiet loads), and by the case, Close case, autosave, sprint-a2 and sprint-a4 suites as before.
+
+### v21.62: My pictures, from the camera
+
+A picture of the real thing is the most concrete picture a visual can carry, and until now it meant a photo uploaded whole,
+background and all. Now Forms VS-1, SM-1, TK-1 and TV-1 share **My pictures**: the practice's own picture library, made with
+the camera. In any of their pickers, **Take a photo** opens the iPad's camera (a computer offers a file instead); the photo's
+plain background is cut away on the device, the item is trimmed and set in a square the way the library's pictograms sit in
+theirs, kept at 600 x 600 px with a see-through ground (or a white one, a switch), named, and saved to My pictures, and with
+**Save and use it here** it goes straight onto the cell or card that was being filled. **My pictures…** opens the library:
+every picture with its name (editable), Remove, the three ways in (the camera, a picture file, a picture pasted from the
+clipboard, such as a subject copied out of Photos, which already has a clear background and is kept as it is), **Save the
+pictures to a file** and **Open a pictures file**, for carrying the whole library to another device or keeping it safe.
+VS-1's Pictures page has the same two buttons, and TV-1's picture dialog has **Take a photo** and **From My pictures**.
+
+The library is kept in the browser itself (IndexedDB, on the site's origin, so every form and every student share it; the
+one-file edition's forms share the file's own store), never on a server. A picture put on a visual is copied into that form's
+own saved data, as an uploaded photo is (VS-1 at 400 px, SM-1 at 256 px, TK-1 and TV-1 at the full 600 px, each within the
+form's limit for a photo), with the library picture's id, so a case file carries the pictures its forms use, and a form opened
+from such a file on another device adds them to My pictures there. Pictures already placed keep their copies when a library
+picture is removed or renamed.
+
+The cut needs a plain background: the note in the dialog says to put the item on a plain sheet of paper or a plain table,
+fill the frame with it, and keep one's own shadow off it. The colour of the photo's border is taken as the background (the
+median of a band along the four edges; a border whose colour varies, or whose edges differ, as a table's edge does, is not
+plain, and the photo is kept whole, with a note); from the edges in, every pixel near that colour and close in colour to the
+neighbour it is reached from joins the background, so the shading and the soft shadows on the sheet go and the item's edge,
+where the colour changes sharply, stops the flood; a closed-in patch of the paper's own colour no larger than a quarter of
+the item's box is background too (the paper seen through a cup's handle); the edge is feathered over two pixels, and the
+paper's share is taken out of the edge pixels' colour, so there is no pale fringe. An item the colour of the sheet is the one
+case it cannot do (the note says to use a sheet of another colour, or to keep the photo whole: the cut is a tick that can be
+turned off). A dark sheet works as a white one does. A photo is worked on at up to 1400 px on its long side; the cut takes
+about a quarter of a second on a computer, a second or so on an iPad.
+
+Parts: `tools/blocks/nbh-pictures.js` (the source; its copy `NBH-Workstation/nbh-pictures.js` sits beside the forms, loaded by
+`<script src="nbh-pictures.js">` from the four forms' `toolbar.html`; the SM-1, TK-1 and TV-1 build scripts copy it, and the
+one-file edition carries it once, as the `nbh-embed-pictures` block, put into a form as it opens, like the pictogram library).
+It exposes `window.NBHPIC` (`process`, `cutout`, `square`, `open`, `manage`, `list`/`all`/`get`/`put`/`rename`/`remove`,
+`toPhoto`, `absorb`, `download`/`importFile`, `buttons`). Without the file beside a form, the picker is as before. The forms'
+parts: VS-1 (`libPhoto`, the picker's `_mine` category, `#pdCam`, `#pdLib`, the Pictures page's `#phCam` and `#phMine`,
+`absorb` in `renderAll`, `lib` kept by `fromFile`), SM-1 (`useLib`), TK-1 (`libPhoto`, `lib:` keys in the several-at-once
+picks, `putIn` now waits for the copies), TV-1 (`picShow`, `#picCam`, `#picMine`). The shell's Diagnostics has a My pictures
+row; the offline copy counts 64 files. Checked by `qa/pictures-test.js` (the cut on synthetic photos: a shaded, grainy
+sheet with a soft shadow, a soft-edged item, a ring, a dark sheet, a busy background kept whole, a picture with its own
+clear background, the white ground, the cut unticked, a small item drawn up; the flow in VS-1 through the camera input; the
+library shared with SM-1 and TK-1, one picture and several at once, one copy per picture; rename, save to a file, remove and
+open the file; a pasted picture; a file opened on a fresh browser adding its pictures; the forms without the file; the shell
+and the one-file build), and by the VS-1, SM-1, TK-1, TV-1 and PWA suites as before.

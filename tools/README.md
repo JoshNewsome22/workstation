@@ -11,6 +11,10 @@ Paths below are from the repository root. The test server the checks expect:
   `own.css`, `body.html`, `script.js` (SM-1 and VS-1 keep `script-main.js`, copied to
   `script.js`; TK-1 keeps `script-main.js` and its `script.js` is the vendored QR encoder
   `tools/vendor/qrcode-generator/qrcode.js`, licence header kept, followed by `script-main.js`). Never edit the built file of one of these forms; edit the parts and rebuild.
+- `tools/blocks/nbh-pictures.js` — My pictures (v21.62): the camera library Forms VS-1, SM-1, TK-1 and TV-1 load by
+  `<script src="nbh-pictures.js">`; its copy must sit beside the forms as `NBH-Workstation/nbh-pictures.js` (the SM-1, TK-1
+  and TV-1 build scripts copy it; after a change, or after rebuilding VS-1 alone, copy it by hand:
+  `cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js`; `qa/pictures-test.js` checks the two are the same).
 - `tools/new-form.py` — assembles a form from CF-1 (the template: its head, generic
   stylesheet, brand system, masthead, print head and shared tail blocks) and a parts folder.
 - `tools/polish-one.py` — the post-build polish for one rebuilt form: the polish layer and the
