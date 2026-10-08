@@ -7875,3 +7875,33 @@ Figure 1 of: Iwata, B. A., DeLeon, I. G., & Roscoe, E. M. (2013). Reliability an
 Screening Tool. *Journal of Applied Behavior Analysis, 46*(1), 271–284. https://doi.org/10.1002/jaba.31" (the affiliations
 as printed in the article). The respondent page for the FAST carries the same credit under its footnote (`nbh-respond.js`
 shows a questionnaire's `credit` when the form sends one; the link grows by its length).
+
+### v21.60: RA-1's walkthrough video, drawn with hands
+
+Form RA-1's Walkthrough view now opens with a narrated walkthrough of the reinforcer assessment at the table (about five
+minutes, sixteen lines in six chapters: Why test, Single operant, Concurrent operants, Progressive ratio, At the table, The
+result), drawn with Form TK-1's hands on a top-down table: the student's hand takes a block from the tray and places it in the
+bin (the response), the assessor's hand reaches in from across the table and delivers the tablet within two seconds, the
+student's hand rests on it for the access, and the tablet goes away. Beside the table a session panel counts what the sheet
+will take: the condition and its placemat colour, the clock (paused during an access), the responses, the rate per minute, the
+access ring, and a cumulative record; a fast-forward badge runs the rest of each five-minute session. The control session ends
+at 12 responses (2.4 a minute, "the rate to beat"), the tablet session at 58 (11.6), praise with a high five at 13 (2.6, its
+rate with control: preferred is not reinforcing), then the sheet's own figure and the Clear verdict; three bins with the
+positions rotating and the allocation (34, 9, 1: Preferred, Lower, Not chosen); the progressive ratio with the ladder, the
+reinforcers, the stop interval and the break point (FR 15, High); the rules for every design; the runner part way through a
+session; and the summary's verdicts (Confirmed, Confirmed, Not supported) with the plan ratio. The sheets on the stage are
+copies of the form's own sheets rendered from the worked example (the simulated student, with fixed numbers), their fields
+turned into text; the example is put into the form for the build only and taken out again in the same turn, so nothing on
+your sheets is shown or changed, and the video can be shared with the staff who run the sessions. The narration names the
+tablet, the fruit chew and praise, so the walkthrough is always the worked example. The drawn stories and the printable job
+aids follow it on the same view, as before.
+
+The player, captions, chapters, full screen, **Save as video** and **Captions and chapters (for YouTube)** are the same as
+IA-1's; the Save as video dialog says the video holds only the worked example (`NBH_WALK_INFO.priv`, a line the shared
+`nbh-tk1-video.js` now takes from a form). A link to your recorded version is a field saved with the form. Parts:
+`tools/forms/RA-1/` (walk.js, walk-ra.css, walk-script.json, make-narration.py; walk-audio.js, the recorded narration, 1.5 MB,
+beside the form as `nbh-ra1-narration.js`, inside the one-file editions and the offline copy), put in by `patch-walk.py`,
+which inlines TK-1's `walk-hands.js` and SM-1's copy of TK-1's player between its own markers in the form. Checked by
+`qa/ra1-walk-test.js` (the build, the example's verdicts on the copies, the form unchanged, the panel's numbers through the
+sessions, the hands in and out of the frame, the camera on each paper, captions and chapters, five painted frames, leaving the
+view) and by `qa/ra1-regress.js` as before; the offline copy counts 63 files.
