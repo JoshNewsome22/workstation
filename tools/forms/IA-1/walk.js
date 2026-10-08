@@ -177,7 +177,8 @@ function compose(D,ex){
   /* 2. the FAST worksheet: the grid, the totals, the verdict */
   fastP=paper('iaw-fast');
   barC=copyOf(q1('#fast .bar'));if(barC)fastP.appendChild(barC);
-  methC=copyOf(q1('#fast p.method'));if(methC)fastP.appendChild(methC);
+  const credC=copyOf(q1('#fast .fast-credit'));if(credC)fastP.appendChild(credC);
+  methC=copyOf(q1('#fast p.method:not(.fast-credit)'));if(methC)fastP.appendChild(methC);
   const two0=[...document.querySelectorAll('#fast .twoup')].find(e=>!e.classList.contains('figs'));twoC=copyOf(two0);if(twoC)fastP.appendChild(twoC);
   grid=twoC&&twoC.querySelector('table.grid.item');tot=twoC&&twoC.querySelectorAll('table.grid')[1];verd=twoC&&twoC.querySelector('.verdict');
   if(MODE!=='inf'){

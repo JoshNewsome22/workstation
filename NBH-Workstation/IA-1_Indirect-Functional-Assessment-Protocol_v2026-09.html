@@ -1102,6 +1102,9 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
 #fast .twoup.fast-wide,.iaw-paper .twoup.fast-wide{grid-template-columns:1fr;gap:14px}
 #fast .twoup.fast-wide table.grid.item td.catcell{width:auto}
 @media print{#fast .twoup.fast-wide{grid-template-columns:1fr}}
+/* v21.59: the FAST's credit line under the worksheet's heading */
+#fast .fast-credit,.iaw-paper .fast-credit{font-size:11px;line-height:1.45;color:var(--ink-soft,#4b5a66);margin:-4px 0 10px}
+#fast .fast-credit a{color:inherit}
 @media print{#walk{display:none!important}}
 </style>
 </head>
@@ -1347,7 +1350,8 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">FAST Scoring Worksheet</div>
-  <p class="method" style="margin:0 0 10px">The sixteen questions are printed beside their numbers (Iwata, DeLeon &amp; Roscoe, 2013, Figure 1), so the worksheet reads as the interview or is filled from a paper FAST. Enter each informant's answer by item number: Y, N, or NA. Items 1 to 4 score social-positive reinforcement (attention or preferred items), 5 to 8 social-negative reinforcement (escape), 9 to 12 automatic reinforcement (sensory stimulation), and 13 to 16 automatic reinforcement (pain attenuation). The category total is the count of yes answers; the outcome is the highest total (Iwata et al., 2013). Items answered NA by either informant are excluded from that pair's agreement, as in the original reliability analysis.</p>
+  <!-- ia1-credit --><p class="method fast-credit">The Functional Analysis Screening Tool (FAST) was developed by Brian A. Iwata (University of Florida), Iser G. DeLeon (Kennedy Krieger Institute and Johns Hopkins University School of Medicine), and Eileen M. Roscoe (New England Center for Children). Its items are reproduced from Figure 1 of: Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. <em>Journal of Applied Behavior Analysis, 46</em>(1), 271&ndash;284. <a href="https://doi.org/10.1002/jaba.31" target="_blank" rel="noopener">https://doi.org/10.1002/jaba.31</a></p><!-- /ia1-credit -->
+    <p class="method" style="margin:0 0 10px">The sixteen questions are printed beside their numbers (Iwata, DeLeon &amp; Roscoe, 2013, Figure 1), so the worksheet reads as the interview or is filled from a paper FAST. Enter each informant's answer by item number: Y, N, or NA. Items 1 to 4 score social-positive reinforcement (attention or preferred items), 5 to 8 social-negative reinforcement (escape), 9 to 12 automatic reinforcement (sensory stimulation), and 13 to 16 automatic reinforcement (pain attenuation). The category total is the count of yes answers; the outcome is the highest total (Iwata et al., 2013). Items answered NA by either informant are excluded from that pair's agreement, as in the original reliability analysis.</p>
   <div class="twoup fast-wide">
     <div class="nbh-scrollx"><table class="grid item" id="fastGrid"></table></div>
     <div>
@@ -4101,7 +4105,7 @@ $('#gfDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.current
    those codes (pasted emails or saved files) and places them through the same step the Google Forms import
    uses. The published instruments' wording is pasted once on the Setup sheet, from the assessor's own copy. */
 const RP_INFO={
-  fast:{heading:'Functional Analysis Screening Tool (FAST)',scale:{kind:'yn'},open:[['ml','In what situations or activities is the behavior most likely to occur?'],['ll','In what situations or activities is it least likely to occur?'],['before','What usually happens right before the behavior?'],['after','What usually happens right after the behavior?'],['tx','Current treatments or medications, if any']]},
+  fast:{heading:'Functional Analysis Screening Tool (FAST)',credit:'The Functional Analysis Screening Tool (FAST) was developed by Brian A. Iwata, Iser G. DeLeon, and Eileen M. Roscoe. Items reproduced from Figure 1 of Iwata, B. A., DeLeon, I. G., & Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. Journal of Applied Behavior Analysis, 46(1), 271–284. https://doi.org/10.1002/jaba.31',scale:{kind:'yn'},open:[['ml','In what situations or activities is the behavior most likely to occur?'],['ll','In what situations or activities is it least likely to occur?'],['before','What usually happens right before the behavior?'],['after','What usually happens right after the behavior?'],['tx','Current treatments or medications, if any']]},
   qabf:{heading:'Questions About Behavioral Function (QABF)',scale:{kind:'num',min:0,max:3,anchors:['0 never','1 rarely','2 some','3 often'],na:true,naLabel:'X: does not apply'}},   /* v21.40 (12): the collector maps NA to blank through gfValue */
   mas:{heading:'Motivation Assessment Scale (MAS)',scale:{kind:'num',min:0,max:6,anchors:['0 never','1 almost never','2 seldom','3 half the time','4 usually','5 almost always','6 always']}},
   pbq:{heading:'Problem Behavior Questionnaire (PBQ)',scale:{kind:'num',min:0,max:6,anchors:['0 never','1 about 10% of the time','2 about 25%','3 about 50%','4 about 75%','5 about 90%','6 always']}},
@@ -4160,6 +4164,7 @@ function rpPayloadFor(t,opt){const key=$('#rpInst').value,items=rpWording(key),i
     subject:INST[key].title+' answers for Form IA-1 · '+t.label};
   const vid=$('#rpVideo').value.trim();if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:'Watch the instructions'}];
   if(!(opt&&opt.link)){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}   /* v21.41b: the photo travels in the page file, never in a link */
+  if(key==='fast'&&info.credit)p.credit=info.credit;   /* v21.59 the authors' credit on the page */
   if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));
   if(key==='wefa'){p.open=info.open.map(o=>Object.assign({},o,{label:P(o.label)}));p.openFirst=true;p.openHeading=info.openHeading;}   /* v21.41 */
   if(key==='pbq')p.pbqVer=String(items.length);
@@ -4447,7 +4452,8 @@ function compose(D,ex){
   /* 2. the FAST worksheet: the grid, the totals, the verdict */
   fastP=paper('iaw-fast');
   barC=copyOf(q1('#fast .bar'));if(barC)fastP.appendChild(barC);
-  methC=copyOf(q1('#fast p.method'));if(methC)fastP.appendChild(methC);
+  const credC=copyOf(q1('#fast .fast-credit'));if(credC)fastP.appendChild(credC);
+  methC=copyOf(q1('#fast p.method:not(.fast-credit)'));if(methC)fastP.appendChild(methC);
   const two0=[...document.querySelectorAll('#fast .twoup')].find(e=>!e.classList.contains('figs'));twoC=copyOf(two0);if(twoC)fastP.appendChild(twoC);
   grid=twoC&&twoC.querySelector('table.grid.item');tot=twoC&&twoC.querySelectorAll('table.grid')[1];verd=twoC&&twoC.querySelector('.verdict');
   if(MODE!=='inf'){

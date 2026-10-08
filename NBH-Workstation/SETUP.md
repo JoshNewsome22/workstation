@@ -7865,3 +7865,13 @@ none are pasted on Setup (the wording box says "built in"; paste there only to c
 Iwata, DeLeon and Roscoe (2013), reproduced in the article; the FAST sheet's note says so. The QABF, MAS, PBQ and WEFA are
 unchanged: their wording is still pasted once from your own copy. Parts: the questions sit in `tools/forms/IA-1/patch-walk.py`
 (FAST_ITEMS, between its own markers in the form's script).
+
+### v21.59: the FAST's authors credited
+
+Under the FAST worksheet's heading (and so on the walkthroughs' copy of the sheet): "The Functional Analysis Screening Tool
+(FAST) was developed by Brian A. Iwata (University of Florida), Iser G. DeLeon (Kennedy Krieger Institute and Johns Hopkins
+University School of Medicine), and Eileen M. Roscoe (New England Center for Children). Its items are reproduced from
+Figure 1 of: Iwata, B. A., DeLeon, I. G., & Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis
+Screening Tool. *Journal of Applied Behavior Analysis, 46*(1), 271–284. https://doi.org/10.1002/jaba.31" (the affiliations
+as printed in the article). The respondent page for the FAST carries the same credit under its footnote (`nbh-respond.js`
+shows a questionnaire's `credit` when the form sends one; the link grows by its length).
