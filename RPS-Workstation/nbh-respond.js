@@ -32,11 +32,32 @@
           if(/ies$/.test(w))w=w.replace(/ies$/,'y');else if(/(ch|sh|x|z|o|ss)es$/.test(w))w=w.replace(/es$/,'');else w=w.replace(/s$/,'');return a+' '+w;});}}
     if(o.behs){t=t.replace(/\b(the|this|that|these|those)\s+(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
       .replace(/\b(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);})
-      .replace(/\b(the|these|those)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);});}
+      .replace(/\b(the|these|those)\s+behaviou?rs\b/gi,function(m){return cap(m,o.behs);});
+      /* v21.66 a behavior with no plural (hitting, elopement, aggression: the phrase is the term itself, or does not end in s) takes
+         a singular sentence: "How severe are the problem behaviors when they occur?" -> "How severe is hitting when it occurs?" */
+      if(massNoun(o.behs,o.beh))t=agreeSingular(t,o.behs);}
     if(o.beh){t=t.replace(/\b(the|this|that)\s+(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);})
       .replace(/\b(problem|target|challenging|inappropriate|interfering|disruptive)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);})
       .replace(/\b(the|this)\s+behaviou?r\b/gi,function(m){return cap(m,o.beh);});}
+    if(o.pron==='they'){var Q={does:'do',is:'are',has:'have',was:'were',"doesn't":"don't","doesn’t":"don’t","isn't":"aren't","isn’t":"aren’t","wasn't":"weren't","wasn’t":"weren’t","hasn't":"haven't","hasn’t":"haven’t"};
+      t=t.replace(/\b(does|is|has|was|doesn't|doesn’t|isn't|isn’t|wasn't|wasn’t|hasn't|hasn’t)(\s+they)\b/gi,function(m,v,th){return cap(v,Q[v.toLowerCase()]||v)+th;});}   /* v21.66 "Does they" -> "Do they" */
     return t;};
+  /* v21.66 agreement for a behavior phrase that is singular in form */
+  function massNoun(behs,beh){var p=String(behs||'').trim().toLowerCase(),s=String(beh||'').trim().toLowerCase();return !p||p===s||!/s$/.test(p);}
+  var SG_VERB=/^(occur|happen|seem|tend|appear|stop|continue|become|get|look|last|increase|decrease|escalate|start|begin|end|follow|result|involve|serve|persist|come|take|make|cause|lead|require|vary|improve|worsen|need|help|bother|hurt|interfere|disrupt|leave|keep|remain|recur|resolve|respond|change|decline|intensify|subside|spread|fade|return|repeat|cluster|build|peak|differ|go)$/;
+  var SG_MAP={are:'is',were:'was',have:'has',do:'does',"don't":"doesn't","don’t":"doesn’t","aren't":"isn't","aren’t":"isn’t","weren't":"wasn't","weren’t":"wasn’t","haven't":"hasn't","haven’t":"hasn’t",go:'goes'};
+  function sgVerb(v){var k=v.toLowerCase();if(SG_MAP[k])return cap(v,SG_MAP[k]);if(!SG_VERB.test(k))return v;var w=k;if(/[^aeiou]y$/.test(w))w=w.slice(0,-1)+'ies';else if(/(s|sh|ch|x|z|o)$/.test(w))w+='es';else w+='s';return cap(v,w);}
+  var ADV='(?:usually|often|always|never|sometimes|typically|generally|still|also|mostly|rarely|first|then|only|just|frequently|normally)';
+  function agreeSingular(t,phrase){var re=new RegExp('(\\b(?:are|were|do|have)\\s+)?('+phrase.replace(/[.*+?^${}()|[\]\\]/g,function(c){return '\\'+c;})+')(?![A-Za-z])','gi'),out='',last=0,m;
+    while((m=re.exec(t))){out+=t.slice(last,m.index);var pre=m[1]||'';if(pre){var w=pre.trim();out+=cap(w,SG_MAP[w.toLowerCase()]||w)+pre.slice(w.length);}out+=m[2];last=m.index+m[0].length;
+      var rest=t.slice(last),end=rest.search(/[.?!](\s|$)/),orig=end<0?rest:rest.slice(0,end);
+      /* the verb after the phrase takes -s ("hitting occurs"), unless a question verb came before it ("Does hitting stop"); "do they last" -> "does it last" */
+      var seg=(pre?orig:orig.replace(new RegExp('^(\\s+(?:'+ADV+'\\s+)?)([A-Za-z\'’]+)'),function(mm,sp,v){return sp+sgVerb(v);}))
+        .replace(/\b(do|are|were|have|don't|don’t|aren't|aren’t|weren't|weren’t|haven't|haven’t)(\s+they)\b/gi,function(mm,aux){return cap(aux,SG_MAP[aux.toLowerCase()]||aux)+' it';})
+        .replace(new RegExp('\\b(they)(\\s+'+ADV+')?\\s+([A-Za-z\'’]+)','g'),function(mm,th,adv,v){return cap(th,'it')+(adv||'')+' '+sgVerb(v);})
+        .replace(/\bthey\b/g,function(mm){return cap(mm,'it');}).replace(/\bthem\b/g,function(mm){return cap(mm,'it');}).replace(/\btheir\b/g,function(mm){return cap(mm,'its');}).replace(/\bthemselves\b/g,function(mm){return cap(mm,'itself');});
+      out+=seg;last+=orig.length;re.lastIndex=last;}
+    return out+t.slice(last);}
   /* ---- v21.44 short links: the questionnaire packed with deflate (RFC 1951) against a dictionary of the forms' own wording ----
      A link is respond.html#z=<version><form letter><base64url of: CRC-32 of the questionnaire (4 bytes), then the deflated
      JSON>. The dictionary (DICTS below, made once by tools/respond-dict/make.js and never changed) holds the wording the form
@@ -134,7 +155,7 @@
       '.nr .opts label:focus-within{outline:3px solid #2f7fa8;outline-offset:2px}.nr .key{font-size:13px;color:var(--muted);margin:0 0 6px}.nr .key span{display:inline-block;margin-right:10px}'+
       '.nr .prog{position:sticky;top:0;background:#f1f4f3;padding:8px 0;font-size:13.5px;color:var(--muted);z-index:2}.nr .prog b{color:var(--navy)}'+
       '.nr button{font:inherit;font-size:16px;padding:12px 18px;border-radius:8px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;min-height:48px}.nr button.ghost{background:#fff;color:var(--navy)}'+
-      '.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
+      '.nr [hidden]{display:none!important}.nr .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}.nr .warn{background:#fdf3ec;border-left:4px solid #b9672d;padding:8px 12px;font-size:14px;margin:10px 0}'+
       '.nr .done{background:#e8f3ec;border-left:4px solid #2f6b37;padding:10px 12px;margin:10px 0}.nr .code{width:100%;font:12.5px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;min-height:90px}'+
       '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
       '.nr .links{margin:10px 0 0;font-size:15px}.nr .links a{color:var(--navy);font-weight:600;text-decoration:underline}'+
@@ -164,7 +185,7 @@
       P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:'Photo of the student'}):null,
       h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
       P.confirm?confBlock():null,
-      h('p',{'class':'sub',text:P.instructions||'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send: your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'}),
+      h('p',{'class':'sub',text:P.instructions||('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send'+(P.box&&P.box.u?': your answers go straight to '+(P.bcba||'the BCBA')+'.':': your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'))}),
       P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null,
       linksBlock()]);
     root.appendChild(card);

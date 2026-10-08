@@ -45,7 +45,7 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
     if(MINE&&(!c||c==='_mine'))h+=NBHPIC.buttons(NBHPIC.list().filter(p=>!q||(p.label||'').toLowerCase().includes(q)));
     if(c!=='_mine')h+=ICON_KEYS.filter(k=>{const p=NBH_PICTOS[k];return (!c||p.c===c)&&(!q||p.l.toLowerCase().includes(q)||k.includes(q));}).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(NBH_PICTOS[k].l)+(NBH_PICTOS[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
     $('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no pictures are listed. Put it in the same folder as the form, or use a photo.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');};
-  const useLib=pic=>{NBHPIC.toPhoto(pic,256,380000).then(p=>{if(!PICK)return;PICK.arr[PICK.i].img=p.img;PICK.arr[PICK.i].icon='';d.close();PICK.done();});};
+  const useLib=pic=>{NBHPIC.toPhoto(pic,PICK.size||256,380000).then(p=>{if(!PICK)return;PICK.arr[PICK.i].img=p.img;PICK.arr[PICK.i].icon='';d.close();PICK.done();});};
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
   $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k],button[data-lib]');if(!b||!PICK)return;if(b.dataset.lib){const pic=NBHPIC.get(b.dataset.lib);if(pic)useLib(pic);return;}PICK.arr[PICK.i].icon=b.dataset.k;PICK.arr[PICK.i].img='';d.close();PICK.done();});
   $('#pdNone',d).addEventListener('click',()=>{if(PICK){PICK.arr[PICK.i].icon='';PICK.arr[PICK.i].img='';d.close();PICK.done();}});
@@ -54,9 +54,9 @@ function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('d
   if(MINE){$('#pdCam',d).addEventListener('click',()=>{NBHPIC.open({use:!!PICK}).then(pic=>{if(!pic)return;if(PICK)useLib(pic);else grid();});});
     $('#pdLib',d).addEventListener('click',()=>{NBHPIC.manage().then(grid);});}
   d.grid=grid;return d;}
-function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done,size){PICK={arr,i,done,size:size||256};   /* size (v21.66): the model pictures ask for 480 px */const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const r=new FileReader();
-  r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,256/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,(PICK.size||256)/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
       PICK.arr[PICK.i].img=c.toDataURL('image/jpeg',0.82);PICK.arr[PICK.i].icon='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();};im.src=r.result;};r.readAsDataURL(f);});
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+(pic(o,'')||'')+'</span><button type="button" data-pick="1">'+(o.img||o.icon?'Change':'Choose')+'</button></div>';}
 
@@ -124,6 +124,7 @@ function ensure(){
   while(S.per.length<4)S.per.push({t:'',label:'',icon:'',img:''});
   S.per.forEach(p=>{const h=toHM24(p.t);if(h)p.t=h;});
   if(typeof smEnsure==='function')smEnsure();   /* v21.45 the design, the store, the second schedule (sm-v2-ui.js) */
+  if(typeof mmEnsure==='function')mmEnsure();   /* v21.66 Match the model (sm-mm.js) */
 }
 
 /* ---------------- views ---------------- */
@@ -470,7 +471,7 @@ function drawLog(R){
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();setSys(S.sys);renderT();renderP();renderRub();renderLad();renderFade();renderFid();renderBck();renderL();renderWk();renderPoints();renderSetup();renderSheet();renderBc();renderRecord();}
+function renderAll(){ensure();bindMeta();setSys(S.sys);renderT();renderP();renderRub();renderLad();renderFade();renderFid();renderBck();renderL();renderWk();renderPoints();renderSetup();renderSheet();renderBc();renderRecord();if(typeof mmRender==='function')mmRender();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -503,6 +504,7 @@ function fromFile(d){
   o.log=arr('log',['date','ph','goal','pts','poss','m','n','met','tgp','note','src'],400)||[];   /* src (v21.46): 'ipad:yyyy-mm-dd' for a row a day rated on the iPad wrote */
   Object.keys(obj('wk')).forEach(k=>{if(/^d[0-4]_p\d+$/.test(k))o.wk[k]=str(s.wk[k]);});
   o.tg.forEach(t=>{if(!window.NBH_PICTOS||!NBH_PICTOS[t.icon])t.icon='';});o.per.forEach(p=>{if(!window.NBH_PICTOS||!NBH_PICTOS[p.icon])p.icon='';});
+  if(typeof mmFromFile==='function'){const mm=mmFromFile(s.mm);if(mm)o.mm=mm;}   /* v21.66 Match the model; mmEnsure cleans it */
   return o;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -568,6 +570,7 @@ async function loadSim(){
   S.log=days.map((d,i)=>{const pts=Math.round(36*d[2]/100);const tp=[Math.min(100,d[2]+8),Math.max(0,d[2]-10),Math.min(100,d[2]+4)];return{date:D(days.length-1-i),ph:d[1],goal:String(d[0]),pts:String(pts),poss:'36',m:d[4]==null?'':String(d[4]),n:d[5]==null?'':String(d[5]),met:d[1]!=='0'&&pts/36*100>=d[0],tgp:tp.join(','),note:i===4?'first day rating':i===14?'goal raised to 75':i===19?'goal raised to 80':''};});
   S.meta.goal='80';
   if(typeof smRSim==='function')smRSim();   /* v21.46 today's first periods rated on the iPad (sm-rate.js) */
+  if(typeof mmSim==='function')mmSim(D);   /* v21.66 */
   renderAll();setView('sheet');
   nbhUI.toast('Simulation loaded: '+'a simulated third-grader’s pictorial Self & Match sheet with three targets over six periods.',{kind:'ok'});
 }

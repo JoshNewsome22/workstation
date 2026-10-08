@@ -19,7 +19,7 @@ js=head+lib.rstrip('\n')+'\n\n/* ===== Form SM-1 ===== */\n'+open(R+'script-main
 js=js.rstrip('\n')+'\n\n/* ===== sm-themes.js ===== */\n'+open(R+'sm-themes.js',encoding='utf-8').read()
 L=json.load(open(R+'sm-library.json',encoding='utf-8'))
 js=js.rstrip('\n')+'\n\n/* ===== sm-library.json: the target library (wording written for the practice; editable once placed) ===== */\nconst SM_LIBRARY='+json.dumps(L,ensure_ascii=False,separators=(',',':'))+';\n'
-for f in ('sm-v2-core.js','sm-v2-ui.js','sm-rate.js'):
+for f in ('sm-v2-core.js','sm-v2-ui.js','sm-rate.js','sm-mm.js'):
     js=js.rstrip('\n')+'\n\n/* ===== '+f+' ===== */\n'+open(R+f,encoding='utf-8').read()
 if os.path.exists(R+'walk.js'):
     W=json.load(open(R+'walk-script.json',encoding='utf-8'))
@@ -31,6 +31,7 @@ open(R+'script.js','w',encoding='utf-8').write(js)
 css=open(R+'own.css',encoding='utf-8').read()
 css=css.rstrip('\n')+'\n'+open(R+'sm-v2.css',encoding='utf-8').read()
 css=css.rstrip('\n')+'\n'+open(R+'sm-rate.css',encoding='utf-8').read()
+css=css.rstrip('\n')+'\n'+open(R+'sm-mm.css',encoding='utf-8').read()
 if os.path.exists(R+'walk.js'):
     # the player's styles: Form TK-1's walk.css, without its view rules (SM-1's are in sm-v2.css), then SM-1's own
     tk=[l for l in open('tools/forms/TK-1/walk.css',encoding='utf-8').read().split('\n') if 'only-' not in l]
