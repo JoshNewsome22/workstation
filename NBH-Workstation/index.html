@@ -985,6 +985,7 @@ const EMBED=(()=>{
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
   const PICTAG2=/<script src="nbh-pictures\.js"><\/script>/;   /* v21.62: My pictures (the camera library, Forms VS-1, SM-1, TK-1 and TV-1), the same way */
   const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
+  /* v21.66: each library goes in through a function, so a $& or $1 inside it is not read as a replacement pattern */
   const NARTAG=/<script src="nbh-tk1-narration\.js" defer><\/script>/;   /* v21.44: Form TK-1's recorded narration, the same way */
   const VIDTAG=/<script src="nbh-tk1-video\.js" defer><\/script>/;   /* v21.44: and its Save as video */
   const NARTAG2=/<script src="nbh-sm1-narration\.js" defer><\/script>/;   /* v21.45: Form SM-1's recorded narration */
@@ -993,16 +994,16 @@ const EMBED=(()=>{
   const NARTAG5=/<script src="nbh-ia1-narration\.js" defer><\/script>/;   /* v21.56: Form IA-1's FAST walkthrough narration */
   const NARTAG6=/<script src="nbh-ra1-narration\.js" defer><\/script>/;   /* v21.60: Form RA-1's reinforcer assessment walkthrough narration */
   E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo).split('@@NBH-WORDING@@').join(E.wording||'');
-    if(PICTAG.test(h))h=h.replace(PICTAG,E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
-    if(PICTAG2.test(h))h=h.replace(PICTAG2,E.pictures?'<script>'+E.pictures.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* My pictures is not inside this file */<\/script>');
-    if(VIDTAG.test(h))h=h.replace(VIDTAG,E.video?'<script>'+E.video.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* Save as video is not inside this file */<\/script>');
-    if(NARTAG2.test(h))h=h.replace(NARTAG2,E.narration2?'<script>'+E.narration2.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(NARTAG3.test(h))h=h.replace(NARTAG3,E.narration3?'<script>'+E.narration3.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(NARTAG4.test(h))h=h.replace(NARTAG4,E.narration4?'<script>'+E.narration4.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(NARTAG5.test(h))h=h.replace(NARTAG5,E.narration5?'<script>'+E.narration5.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(NARTAG6.test(h))h=h.replace(NARTAG6,E.narration6?'<script>'+E.narration6.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(NARTAG.test(h))h=h.replace(NARTAG,E.narration?'<script>'+E.narration.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
-    if(RSPTAG.test(h))h=h.replace(RSPTAG,E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
+    if(PICTAG.test(h))h=h.replace(PICTAG,()=>E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
+    if(PICTAG2.test(h))h=h.replace(PICTAG2,()=>E.pictures?'<script>'+E.pictures.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* My pictures is not inside this file */<\/script>');
+    if(VIDTAG.test(h))h=h.replace(VIDTAG,()=>E.video?'<script>'+E.video.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* Save as video is not inside this file */<\/script>');
+    if(NARTAG2.test(h))h=h.replace(NARTAG2,()=>E.narration2?'<script>'+E.narration2.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG3.test(h))h=h.replace(NARTAG3,()=>E.narration3?'<script>'+E.narration3.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG4.test(h))h=h.replace(NARTAG4,()=>E.narration4?'<script>'+E.narration4.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG5.test(h))h=h.replace(NARTAG5,()=>E.narration5?'<script>'+E.narration5.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG6.test(h))h=h.replace(NARTAG6,()=>E.narration6?'<script>'+E.narration6.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(NARTAG.test(h))h=h.replace(NARTAG,()=>E.narration?'<script>'+E.narration.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
+    if(RSPTAG.test(h))h=h.replace(RSPTAG,()=>E.respond?'<script>'+E.respond.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the respondent-page library is not inside this file */<\/script>');
     return h;};
   E.pdf=async()=>{if(!E._pdf)E._pdf=JSON.parse(await inflate('nbh-embed-pdf')||'{}');return E._pdf;};
   E.shell=()=>inflate('nbh-embed-shell');

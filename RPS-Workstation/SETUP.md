@@ -8142,3 +8142,42 @@ Collect placing two in their columns and holding the third, nothing twice, the S
 target and placed; the invitation's wording, QR on a row and in the dialog; the file with the box, reopened, nothing twice,
 the box's own site when no address is known; Remove from the site, an unreadable reply counted; an address out of reach and
 the page's email fallback; no errors) and by the respondent, IA-1 send-outs, WEFA, audit and short-link suites as before.
+
+### v21.66: Form SM-1 matches the model, and the respondent pages read right
+
+**Match the model (Form SM-1, a new page).** A quality standard the student can see. The sheet holds a task ("Clean the lunch
+table") and two to four pictures of the finished work at each level (the clean table, the half-clean table, the table not
+done), each with a name, points, what makes it that level and a checklist printed under the picture. The pictures come from
+the camera (My pictures), a photo or the library, at 480 px. The student does the task, looks at the work and at the pictures
+and picks the one the work looks like (a self-evaluation of a permanent product); the teacher picks without seeing the
+student's choice; when the two match, the student earns the level's points plus the bonus and the best reward; one level
+apart, the student's points stand without the bonus (or the teacher's, or none, as set); two or more apart, no points (or the
+teacher's) and the two look at the pictures together. An honest "Not yet" that matches still earns the bonus: accuracy is
+paid as well as quality, which is the matching contingency of Rhode, Morgan and Young (1983) applied to the quality of a
+product. The teacher's checks are thinned as the matches hold (every time, every other time, one in three unannounced,
+surprise checks); on an unchecked trial the student's rating counts. **Rate now (iPad):** the first rater picks a picture
+and locks it in (hidden), the second picks, the result shows both pictures, the points and the reward, a photo of the work
+can be taken and kept beside the trial, and Save this trial writes the record; the order can be reversed (the teacher first,
+hidden) for early teaching, and Not checking this time thins the checks. **The record:** a row per trial (date, the two
+picks, the result, the points, the reward, a note, the photo), editable, with the metrics (trials, checked, matches, the last
+five, points, at the best level), a suggestion that moves the checks on at 4 of the last 5 matches and back after two
+far-apart checks, a chart of both raters' levels with the matches marked, Add a row by hand for the paper sheet, and a CSV.
+**The printed sheet** (Print the model sheet, alone, landscape for four pictures): the pictures with their names, points and
+checklists, the rule in the student's words, and a row per trial with a circle per picture for the student and the teacher,
+Match? and the points. **Ideas for teaching it** sit under the sheet: teach the rating on other people's work first, rate the
+work not the person, the student commits first, pay for accuracy, fix before rating, thin the checks on a criterion, vary the
+models, generalize to the next setting, fade the pictures last (Rhode et al., 1983; Smith et al., 1988; Cooper, Heron and
+Heward, 2020; McClannahan and Krantz, 1999). The simulation brings a drawn lunch table at three levels and ten trials; the
+file carries the page (`S.mm`) and a forged file is cleaned. Parts: `tools/forms/SM-1/sm-mm.js` and `sm-mm.css` (built in by
+`build.sh`), the section in `body.html`, the toolbar's view and Print the model sheet, `script-main.js` hooks (`ensure`,
+`renderAll`, `fromFile`, the picker's size, the simulation). Checked by `qa/sm1-model-test.js` (20 checks).
+
+**The respondent pages read right (nbh-respond.js).** A behavior with no plural (hitting, elopement, aggression: the plural
+phrase left as the term, or not ending in s) now makes the sentence singular: "How severe are the problem behaviors when they
+occur?" becomes "How severe is hitting when it occurs?", "Do the problem behaviors stop when…" becomes "Does hitting stop
+when…", "Are these behaviors more likely…, and do they last long?" becomes "Is elopement more likely…, and does it last
+long?"; a real plural (tantrums) keeps its plural sentence. With the pronouns set to they, "Does they seem" is now "Do they
+seem". The Respondent pages dialog says so under the plural column. On the page itself, the code row (Copy the code, Save as
+a file, Open the email) stayed visible before Send on every page since v21.39, because the row's own display rule beat the
+hidden attribute: fixed; and the intro sentence says "your answers go straight to J. Newsome" when the page carries a reply
+box. Checked by two new checks in `qa/respond-test.js`.
