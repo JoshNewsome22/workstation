@@ -34,7 +34,7 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 EXPECT = [
   (old_logo, new_logo, 46),    # v21.36: once per form (the nbh-logo script) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 165),   # the masthead and print-head images of the 45 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41) + the index + the packet cover
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 166),   # the masthead and print-head images of the 45 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64) + the index + the packet cover
   ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 46),
   (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 47),   # the 45 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),

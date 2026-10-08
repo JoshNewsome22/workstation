@@ -67,8 +67,8 @@ const grab=async(page,fn)=>page.evaluate(async f=>{let got=null;const mk=URL.cre
  await page.evaluate(c=>{rcText.value=c;__rp.read([c]);},code3);await sleep(100);
  ok('a form with no target named takes the response\'s target',/takes Self-injury from the responses/.test(await page.evaluate(()=>document.querySelector('#rcOut').textContent)));
  await page.evaluate(()=>document.querySelector('#rcGo').click());await sleep(300);
- const pbq=await page.evaluate(()=>{const v=n=>document.querySelector('[name="'+n+'"]').value;return {ver:document.querySelector('#pbqVer').value,a:[1,2,8,15].map(i=>v('pbq[0]['+i+']')),name:v('inf[0].name'),beh:v('m.beh')};});
- ok('PBQ answers placed with the 15-item version; the target named from the response',pbq.ver==='15'&&pbq.a.join()==='0,1,0,0'&&pbq.name==='Mr. Okafor'&&pbq.beh==='Self-injury',pbq);
+ const pbq=await page.evaluate(()=>{const v=n=>document.querySelector('[name="'+n+'"]').value;return {ver:document.querySelector('#pbqVer').value,a:[1,2,8,15].map(i=>v('pbq[1]['+i+']')),name:v('inf[1].name'),a0:v('inf[0].name'),beh:v('m.beh')};});
+ ok('PBQ answers placed with the 15-item version in the next free column (v21.64: A stays Ms. Rivera, Mr. Okafor becomes B); the target named from the response',pbq.ver==='15'&&pbq.a.join()==='0,1,0,0'&&pbq.name==='Mr. Okafor'&&pbq.a0==='Ms. Rivera'&&pbq.beh==='Self-injury',pbq);
  /* the wording, the name, the pronouns, the terms and the email save with the file */
  const data=(await grab(page,()=>document.querySelector('#saveBtn').click())).text;
  ok('wording, pronouns, terms and email in the saved file',/rp\.w\.fast/.test(data)&&/"rp\.pron": ?"he"/.test(data)&&/self-injurious behaviors/.test(data)&&/bcba@example\.org/.test(data)&&/youtu\.be\/abc123/.test(data));

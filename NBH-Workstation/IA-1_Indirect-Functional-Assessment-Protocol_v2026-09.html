@@ -544,7 +544,7 @@ table.grid.inner td{height:24px}
 
 /* ---- Form RA-1 additions ---- */
 body[class^="view-"] .sheet{display:none}
-body.view-walk #walk,body.view-guide #guide,body.view-setup #setup,body.view-fast #fast,body.view-qabf #qabf,body.view-mas #mas,body.view-pbq #pbq,body.view-wefa #wefa,body.view-interview #interview,body.view-summary #summary{display:block}
+body.view-walk #walk,body.view-guide #guide,body.view-setup #setup,body.view-fast #fast,body.view-qabf #qabf,body.view-mas #mas,body.view-pbq #pbq,body.view-wefa #wefa,body.view-interview #interview,body.view-summary #summary,body.view-outs #outs{display:block}
 .chkrow{display:flex;gap:22px;flex-wrap:wrap;font-size:13px;margin:4px 0}
 .chkrow label{display:flex;gap:6px;align-items:center}
 table.grid td.c input.dt{width:74px;text-align:center;border:0;background:transparent;font:inherit;font-size:11px;padding:2px 0}
@@ -732,6 +732,22 @@ table.gf-t th{background:var(--wash);font-size:11px;color:var(--ink-soft)}
 #rpDlg button.off{opacity:.45;cursor:not-allowed}
 @keyframes rpflash{0%{outline:3px solid #b9672d}100%{outline:3px solid transparent}}.rp-flash{animation:rpflash 1s ease-out}
 .rp-photo-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}#rpPhotoThumb{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1.5px solid var(--teal)}
+/* (v21.64) the send-out board */
+.out-plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px 16px;font-family:var(--sans);font-size:12.5px;margin:0 0 6px}
+.out-plan>div>b{display:block;margin:0 0 4px;font-size:12px;color:var(--nbh-navy,#182e43)}
+.out-plan label{display:block;margin:2px 0;cursor:pointer}
+.out-plan input[type=date]{font:inherit;border:1px solid var(--rule-2);border-radius:3px;padding:3px 6px;margin-left:4px}
+.out-chips{display:flex;flex-wrap:wrap;gap:4px 10px;margin:0 0 6px 18px}
+.out-chips label{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-soft);margin:0}
+#outTbl td input[type=date]{width:100%;border:0;background:transparent;font:inherit;font-size:12px;padding:2px 3px;color:var(--ink)}
+#outTbl td input[type=date]:focus{background:var(--wash);outline:none}
+#outTbl td .acts{display:flex;flex-wrap:wrap;gap:4px}
+#outTbl td .acts button{font:inherit;font-family:var(--sans);font-size:11px;padding:2px 7px;border:1px solid var(--rule);background:#fff;color:var(--ink);border-radius:3px;cursor:pointer;margin:0}
+#outTbl td .acts button:hover{background:var(--wash)}
+#outTbl td .acts button.x{color:#8E2A2A}
+#outTbl tr.out-late td{background:#fff5f2}
+#outTbl tr.out-today td{background:#fffbe6}
+@media print{#outTbl td .acts,#outPlan,#outNote{display:none!important}}
 .rp-linkbox{width:100%;box-sizing:border-box;margin:8px 0 0;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
 dialog.rp-prevdlg{width:min(980px,96vw);max-height:none;height:92vh;padding:0;overflow:hidden}
 dialog.rp-prevdlg iframe{display:block;width:100%;height:calc(92vh - 44px);border:0;background:#f1f4f3}.rp-hint{font-weight:400;color:var(--ink-soft);font-size:11px}.rp-prev{font-size:12.5px;margin:4px 0 0}.rp-prev div{margin:2px 0}.rp-other button{margin-left:8px}#rpDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:700px){#rpDlg .grid2{grid-template-columns:1fr}}@media(max-width:700px){.rp-grid{grid-template-columns:1fr}}
@@ -1141,8 +1157,13 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
         <button data-view="wefa" aria-pressed="false">WEFA</button>
         <button data-view="interview" aria-pressed="false">Interviews</button>
         <button data-view="summary" aria-pressed="false">Convergence</button>
+        <button data-view="outs" aria-pressed="false">Send-outs</button>
       </div>
     </div>
+  </div>
+  <div class="tgroup tg-keep" id="tgtGroup">
+    <span>Target behavior (this file)</span>
+    <div class="row"><select id="tgtSel" aria-label="Target behavior: which of this file's targets the sheets show"></select><button type="button" id="tgtAdd" title="Add another target behavior to this file, with worksheets of its own">+ Target</button><button type="button" id="tgtDel" title="Remove this target behavior and its worksheets from this file">Remove</button></div>
   </div>
   <div class="tgroup">
     <span>Informants per instrument</span>
@@ -1294,8 +1315,9 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <div class="f"><label for="mEmail">Assessor email (respondent pages reply here)</label><input id="mEmail" name="m.email" type="email" autocomplete="off"></div>
     <div class="f"><label for="mDate">Start date</label><input id="mDate" name="m.date"></div>
   </div>
+  <div class="noprint" id="tgtBar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px"><span id="tgtNote" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span><button type="button" class="tool" id="tgtFromCase" style="margin:0">Take the targets from the case</button></div>
   <div class="defs">
-    <div class="drow"><div class="dlab">Target behavior (label)</div><div class="dval"><textarea name="m.beh" placeholder="One target from Form TB-1; one administration per target" class="nbh-line" rows="1"></textarea></div></div>
+    <div class="drow"><div class="dlab">Target behavior (label)</div><div class="dval"><textarea name="m.beh" placeholder="This target's label, from Form TB-1 (+ Target in the toolbar adds another to this file)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Operational definition read to every informant</div><div class="dval"><textarea name="m.def" placeholder="Paste the TB-1 definition. All informants score the same definition; confirm agreement on the definition before scoring."></textarea></div></div>
     <div class="drow"><div class="dlab">Reported frequency and severity</div><div class="dval flexrow" style="display:flex;gap:10px;align-items:center;padding:3px 8px;font-size:12.5px"><label>Frequency <select name="m.freqcat" class="inline"><option value=""></option><option>Hourly</option><option>Daily</option><option>Weekly</option><option>Less often</option></select></label><label>Severity <select name="m.sev" class="inline"><option value=""></option><option>Mild: disruptive, little risk</option><option>Moderate: property damage or minor injury</option><option>Severe: significant threat to health or safety</option></select></label><label>TB-1 urgency <input name="m.freq" class="inline" style="width:60px" placeholder="1–4"></label></div></div>
     <div class="drow"><div class="dlab">Current treatments and medications noted</div><div class="dval"><textarea name="m.tx" class="nbh-line" rows="1"></textarea></div></div>
@@ -1303,10 +1325,10 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
   </div>
 
   <h3 class="sub">Informants</h3>
-  <p class="method" style="margin-top:0">Set the number of informants in the toolbar (1 to 5). The same informant codes are used on every worksheet. If informants answered on a Google Form, <b>Import Google Forms responses</b> in the toolbar fills the worksheet and this table from the responses spreadsheet. <b>Respondent pages</b> makes a one-page questionnaire per instrument (a file to attach, or a link when the workstation is on a website) that an informant answers on any phone or computer; Send opens an email to you with the answers as a code, and <b>Collect responses</b> reads the codes back onto the worksheet and into this table. The pages carry the instrument's wording pasted once on the Setup sheet, show the student as initials and ID, and send nothing anywhere but the email the informant chooses to send. Record contact so that disagreements can be weighed against exposure (McIntosh et al., 2008) and training so that expert and caregiver reports can be compared (Dracobly et al., 2018). Administer to all informants within 2 to 3 days of one another, as in Iwata et al. (2013), and record each informant's date in the table. One IA-1 file per target behavior: the respondent pages and Collect responses sort responses by target.</p>
+  <p class="method" style="margin-top:0">Set the number of informants in the toolbar (1 to 5). The same informant codes are used on every worksheet. If informants answered on a Google Form, <b>Import Google Forms responses</b> in the toolbar fills the worksheet and this table from the responses spreadsheet. <b>Respondent pages</b> makes a one-page questionnaire per instrument (a file to attach, or a link when the workstation is on a website) that an informant answers on any phone or computer; Send opens an email to you with the answers as a code, and <b>Collect responses</b> reads the codes back onto the worksheet and into this table. The pages carry the instrument's wording pasted once on the Setup sheet, show the student as initials and ID, and send nothing anywhere but the email the informant chooses to send. Record contact so that disagreements can be weighed against exposure (McIntosh et al., 2008) and training so that expert and caregiver reports can be compared (Dracobly et al., 2018). Administer to all informants within 2 to 3 days of one another, as in Iwata et al. (2013), and record each informant's date in the table. One file for every target behavior of the student (v21.64): each target has its own worksheets, switched with the toolbar's Target behavior list; the informants are shared (the Send-outs sheet can leave one out for a target), and the respondent pages and Collect responses sort responses by target.</p>
   <p class="method" id="infDateNote" hidden style="margin:0 0 6px;color:var(--nbh-flag)"></p>
   <div class="nbh-scrollx"><table class="rank cmp" id="infTbl">
-    <thead><tr><th class="n" style="width:6%">Code</th><th style="width:18%">Informant</th><th style="width:14%">Role</th><th style="width:10%">Date given</th><th style="width:12%">Months known</th><th style="width:10%">Daily contact?</th><th style="width:10%">Hours / week in target routines</th><th style="width:14%">Behavior-analytic training</th><th>Settings observed in</th></tr></thead>
+    <thead><tr><th class="n" style="width:6%">Code</th><th style="width:18%">Informant</th><th style="width:14%">Role</th><th style="width:14%">Email (for the respondent pages)</th><th style="width:10%">Date given</th><th style="width:12%">Months known</th><th style="width:10%">Daily contact?</th><th style="width:10%">Hours / week in target routines</th><th style="width:14%">Behavior-analytic training</th><th>Settings observed in</th></tr></thead>
     <tbody id="infBody"></tbody>
   </table></div>
 
@@ -1341,6 +1363,22 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     </div>
   </div>
   <div class="cite">Administration to several informants who interact with the student frequently follows the FAST instructions, and independent completion follows the method of Iwata et al. (2013); agreement on the definition before scoring follows the QABF administration guidance (Matson &amp; Vollmer, 1995). Recording informant contact follows McIntosh et al. (2008).</div>
+</div>
+
+<!-- ================================================================ SEND-OUTS (v21.64) -->
+<div class="sheet" id="outs">
+  <div class="nbh-print-head">
+    <img class="nbh-print-logo" data-nbh-logo="1" alt="Newsome Behavioral Health">
+    <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
+  </div>
+  <div class="bar nbh-band">Send-outs: Which Questionnaire Went to Whom, and What Came Back</div>
+  <p class="method" style="margin:0 0 10px">Plan the respondent pages for the targets in this file, the instruments and the informants (the informants are shared by every target; untick one to leave it out for a target), then make the pages or links, email them, and watch what comes back. <b>Collect responses</b> marks a row Received and Placed when it reads that informant&rsquo;s code; a row&rsquo;s own buttons mark Sent and Received by hand. The dates feed the workstation&rsquo;s case bar (what is due) and the calendar file.</p>
+  <div class="noprint" id="outPlan"></div>
+  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><button type="button" class="tool" id="outPlanBtn" style="margin:0">Plan the send-outs</button><button type="button" class="tool" id="outPagesBtn" style="margin:0">Make every page not made yet</button><button type="button" class="tool" id="outIcsBtn" style="margin:0">Add the dates to a calendar (.ics)</button><span id="outNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
+  <p class="method" id="outSum" style="margin:0 0 8px"></p>
+  <div class="nbh-scrollx"><table class="rank cmp" id="outTbl"><thead><tr><th style="width:15%">Target</th><th style="width:8%">Instrument</th><th style="width:15%">Informant</th><th style="width:10%">Send on</th><th style="width:10%">Please send by</th><th style="width:10%">Status</th><th style="width:9%">Sent</th><th style="width:9%">Received</th><th class="noprint">Actions</th></tr></thead><tbody id="outBody"></tbody></table></div>
+  <textarea id="outLinkBox" class="rp-linkbox noprint" rows="2" readonly hidden aria-label="The link to copy"></textarea>
+  <div class="cite">Administration to several informants who see the student often follows the FAST instructions (Iwata et al., 2013); independent completion within a few days across informants, and the definition agreed before scoring (Matson &amp; Vollmer, 1995), are what the dates and the definition question on the pages are for. The board records who was asked, when, and what came back, the administration record the Instrument Plan asks for.</div>
 </div>
 
 <!-- ================================================================ FAST -->
@@ -3596,12 +3634,12 @@ const COMMON=['attention','tangible','escape','automatic','physical'];
 const COMMON_LABEL={attention:'Attention',tangible:'Tangible',escape:'Escape',automatic:'Automatic',physical:'Physical / pain'};
 
 /* ---------- views ---------- */
-function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='summary')renderSummary();window.scrollTo({top:0});}
+function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===v?'true':'false'));if(v==='summary')renderSummary();if(v==='outs'&&typeof outsRender==='function')outsRender();window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
 
 /* ---------- setup ---------- */
 function renderInf(){const n=nInf(),body=$('#infBody');while(body.children.length>n)body.lastChild.remove();
- for(let i=body.children.length;i<n;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="n"><b>${CODES[i]}</b></td><td><input name="inf[${i}].name" aria-label="Informant ${CODES[i]}: name"></td><td><input name="inf[${i}].role" aria-label="Informant ${CODES[i]}: role" placeholder="teacher, para, parent"></td><td><input name="inf[${i}].date" aria-label="Informant ${CODES[i]}: date the instruments were given (m/d/yyyy)" placeholder="m/d/yyyy"></td><td><input name="inf[${i}].mo" aria-label="Informant ${CODES[i]}: months known"></td><td><select name="inf[${i}].daily" aria-label="Informant ${CODES[i]}: daily contact"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="inf[${i}].hrs" aria-label="Informant ${CODES[i]}: hours per week in target routines"></td><td><select name="inf[${i}].train" aria-label="Informant ${CODES[i]}: behavior-analytic training"><option value=""></option><option>None</option><option>In-service only</option><option>RBT</option><option>BCaBA / BCBA</option></select></td><td><input name="inf[${i}].set" aria-label="Informant ${CODES[i]}: settings observed in"></td>`;body.appendChild(tr);}}
+ for(let i=body.children.length;i<n;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="n"><b>${CODES[i]}</b></td><td><input name="inf[${i}].name" aria-label="Informant ${CODES[i]}: name"></td><td><input name="inf[${i}].role" aria-label="Informant ${CODES[i]}: role" placeholder="teacher, para, parent"></td><td><input name="inf[${i}].email" type="email" aria-label="Informant ${CODES[i]}: email, for the respondent pages" autocomplete="off" spellcheck="false"></td><td><input name="inf[${i}].date" aria-label="Informant ${CODES[i]}: date the instruments were given (m/d/yyyy)" placeholder="m/d/yyyy"></td><td><input name="inf[${i}].mo" aria-label="Informant ${CODES[i]}: months known"></td><td><select name="inf[${i}].daily" aria-label="Informant ${CODES[i]}: daily contact"><option value=""></option><option>Yes</option><option>No</option></select></td><td><input name="inf[${i}].hrs" aria-label="Informant ${CODES[i]}: hours per week in target routines"></td><td><select name="inf[${i}].train" aria-label="Informant ${CODES[i]}: behavior-analytic training"><option value=""></option><option>None</option><option>In-service only</option><option>RBT</option><option>BCaBA / BCBA</option></select></td><td><input name="inf[${i}].set" aria-label="Informant ${CODES[i]}: settings observed in"></td>`;body.appendChild(tr);}}
 
 /* ---------- item grids ---------- */
 function ynOpts(noNA){return '<option value=""></option><option>Y</option><option>N</option>'+(noNA?'':'<option>NA</option>');}
@@ -3966,9 +4004,19 @@ function renderAllTot(){Object.keys(INST).forEach(renderTot);}
 /* ---------- save / open / clear ---------- */
 function snapshot(){const f={};$$('[name]').forEach(el=>{f[el.name]=el.type==='checkbox'?el.checked:el.value;});return f;}
 function applyFields(f){Object.keys(f).forEach(k=>{const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});}
-function collect(){return {form:'IA-1',rev:'2026-09',saved:new Date().toISOString(),counts:{inf:nInf(),int:+$('#nInt').value},fields:snapshot()};}
+function collect(){tgtStore();return {form:'IA-1',rev:'2026-09',saved:new Date().toISOString(),counts:{inf:nInf(),int:+$('#nInt').value},fields:snapshot(),
+  targets:T.list.map(r=>({id:r.id,label:r.label,def:r.def,int:r.int,fields:r.fields})),cur:T.cur,ign:T.ign.slice(),outs:OUTS.map(o=>Object.assign({},o)),drop:DROP};}   /* v21.64 every target, the board */
 function reset(){$('#infBody').innerHTML='';$('#intWrap').innerHTML='';$$('[name^="m."],[name^="plan."],[name^="hyp."],[name^="dec."],[name^="fast."],[name^="setup."],[name^="fa."],[name="rp.name"],[name="rp.pron"],[name="rp.photo"],[name^="walk."]').forEach(el=>{if(el.type==='checkbox')el.checked=false;else el.value='';});}   /* v21.40 (9): rp.w.*, rp.terms and rp.video stay across Clear all */
-function restore(d){reset();$('#gfBanner').hidden=true;setTimeout(()=>{if(typeof rpCounts==='function')rpCounts();},0);const c=d.counts||{};$('#nInf').value=c.inf||3;nInfPrev=nInf();$('#nInt').value=(c.int==null?2:c.int);const pv=String((d.fields||{})['pbq.ver']||'15');$('#pbqVer').value=pv;setPbqVer(pv);renderInf();renderAllInst();renderInt();applyFields(d.fields||{});renderAllTot();renderSummary();setTimeout(()=>{if(typeof rpDevFill==='function')rpDevFill();},0);}
+function restore1(d){reset();$('#gfBanner').hidden=true;setTimeout(()=>{if(typeof rpCounts==='function')rpCounts();},0);const c=d.counts||{};$('#nInf').value=c.inf||3;nInfPrev=nInf();$('#nInt').value=(c.int==null?2:c.int);const pv=String((d.fields||{})['pbq.ver']||'15');$('#pbqVer').value=pv;setPbqVer(pv);renderInf();renderAllInst();renderInt();applyFields(d.fields||{});renderAllTot();renderSummary();setTimeout(()=>{if(typeof rpDevFill==='function')rpDevFill();},0);}
+/* (v21.64) a file holds every target of the student: the current target's fields are put on the sheets by restore1 (the one-target load the
+   form always had) with the shared fields; a file saved before this holds one target */
+function restore(d){const c=d.counts||{},f=d.fields||{};
+  if(Array.isArray(d.targets)&&d.targets.length){T.list=d.targets.filter(r=>r&&typeof r==='object').map(r=>({id:String(r.id||'')||tgtId(),label:String(r.label||''),def:String(r.def||''),int:r.int==null?(c.int==null?2:+c.int):+r.int,fields:(r.fields&&typeof r.fields==='object')?r.fields:{}}));
+    if(!T.list.length)T.list=[tgtBlank()];T.cur=T.list.some(r=>r.id===d.cur)?d.cur:T.list[0].id;const rec=tgtRec(T.cur);
+    restore1({counts:{inf:c.inf,int:rec.int},fields:Object.assign({},tgtShared(f),rec.fields,{'m.beh':rec.label,'m.def':rec.def})});}
+  else{restore1(d);const lab=String(f['m.beh']||'').trim();T.list=[{id:tgtId(),label:lab,def:String(f['m.def']||'').trim(),int:c.int==null?2:+c.int,fields:tgtOwn(f)}];T.cur=T.list[0].id;}
+  T.ign=Array.isArray(d.ign)?d.ign.map(x=>String(x).toLowerCase()):[];OUTS=Array.isArray(d.outs)?d.outs.filter(o=>o&&typeof o==='object').map(outNorm):[];DROP=(d.drop&&typeof d.drop==='object'&&!Array.isArray(d.drop))?d.drop:{};
+  tgtPaint();if(document.body.classList.contains('view-outs'))outsRender();}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`IA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='IA-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form IA-1.');}};rd.readAsText(f);e.target.value='';});
@@ -4067,20 +4115,21 @@ function importResponses(key,n,picked,opt){
   if(key==='pbq'){$('#pbqVer').value=String(n);setPbqVer(String(n));}
   /* the informant count follows the responses unless later columns already hold something */
   const used=from=>{for(let r=from;r<5;r++)if($$('[name^="inf['+r+'].'+'"]'+Object.keys(INST).map(k=>',[name^="'+k+'['+r+']"]').join('')).some(e=>String(e.value).trim()!==''))return true;return false;};
-  if(picked.length>nInf()||(picked.length<nInf()&&!used(picked.length)))$('#nInf').value=picked.length;nInfPrev=nInf();
+  const need=Math.max(...picked.map((r,k)=>(r.slot!=null?+r.slot:k)+1));   /* v21.64 a response may name its column (the informant it matches) */
+  if(need>nInf()||(need<nInf()&&!used(need)))$('#nInf').value=Math.min(5,need);nInfPrev=nInf();
   renderInf();renderAllInst();applyFields(saved);
   const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e)e.value=v;};
   const putIf=(n,v)=>{if(v!=='')put(n,v);};
   let cells=0,unread=0;
-  picked.forEach((r,idx)=>{
+  picked.forEach((r,k)=>{const idx=(r.slot!=null)?+r.slot:k;
     for(let it=1;it<=n;it++){const x=r.raw[it-1];const v=gfValue(key,x);if(v===null&&x.trim()!=='')unread++;const vv=v===null?'':v;put(key+'['+idx+']['+it+']',vv);if(vv)cells++;}
     if(opt.inf){putIf('inf['+idx+'].name',r.name);putIf('inf['+idx+'].role',r.role);putIf('inf['+idx+'].mo',r.mo);
       putIf('inf['+idx+'].daily',/^y/i.test(r.daily)?'Yes':/^n/i.test(r.daily)?'No':'');putIf('inf['+idx+'].set',r.set);}
     if(r.ts&&!val('inf['+idx+'].date'))put('inf['+idx+'].date',toMDY(r.ts));   /* v21.40 (10): the response date, into an empty slot */});
   if(key==='fast'&&opt.fx){
-    const join=k=>picked.map((r,idx)=>r.fx&&r.fx[k]?CODES[idx]+': '+r.fx[k]:'').filter(Boolean).join('\n');
+    const join=k=>picked.map((r,k2)=>{const idx=(r.slot!=null)?+r.slot:k2;return r.fx&&r.fx[k]?CODES[idx]+': '+r.fx[k]:'';}).filter(Boolean).join('\n');
     [['ml','fast.ml_s'],['ll','fast.ll_s'],['before','fast.before'],['after','fast.after'],['tx','fast.tx']].forEach(([k,n])=>{if(!val(n)&&join(k))put(n,join(k));});}
-  if(key==='wefa')picked.forEach((r,idx)=>{if(!r.det)return;WEFA_DET.forEach(([id])=>{if(r.det[id])put('wefa['+idx+'].'+id,String(r.det[id]));});});   /* v21.41: the header details */
+  if(key==='wefa')picked.forEach((r,k2)=>{const idx=(r.slot!=null)?+r.slot:k2;if(!r.det)return;WEFA_DET.forEach(([id])=>{if(r.det[id])put('wefa['+idx+'].'+id,String(r.det[id]));});});   /* v21.41: the header details */
   renderAllTot();renderSummary();
   return {cells,unread};}
 function gfImport(){const a=gfData;if(!a)return;
@@ -4138,11 +4187,9 @@ $('#rpDevForget').addEventListener('click',()=>{try{localStorage.removeItem(RP_D
 function rpInitials(){const nm=val('m.client').trim();const ini=nm?nm.split(/\s+/).map(w=>w[0]).join('').toUpperCase().replace(/[^A-Z]/g,'').split('').join('.'):'';const id=val('m.sid');return (ini?ini+'.':'')+(id?(ini?' ':'')+'(ID '+id+')':'')||'the student';}
 function rpFirstName(){const nm=val('m.client').trim();if(!nm)return '';const parts=nm.split(/\s*,\s*/);return (parts.length>1?parts[1]:parts[0]).split(/\s+/)[0];}
 /* the targets a page can be about: this form's own, then the case's (Form TB-1), replacements left out */
-function rpTargets(){const out=[];let own=val('m.beh').trim(),ownDef=val('m.def').trim();
+function rpTargets(){const out=[];tgtStore();   /* v21.64 this file's targets first, then the case's not yet in it */
   const cs=(window.nbhCase&&nbhCase.behaviors&&nbhCase.behaviors())||[];
-  if(own){const m=!ownDef&&own.match(/^([^:]{2,70}):\s*(.+)$/s);if(m){own=m[1].trim();ownDef=m[2].trim();}   /* the case bridge writes "Label: definition" into one field */
-    if(!ownDef){const c=cs.find(b=>b&&b.label&&b.label.trim().toLowerCase()===own.toLowerCase());if(c&&c.def)ownDef=String(c.def).trim();}
-    out.push({label:own,def:ownDef,src:'this form'});}
+  T.list.forEach(r=>{if(!r.label)return;let def=r.def;if(!def){const c=cs.find(b=>b&&b.label&&b.label.trim().toLowerCase()===r.label.toLowerCase());if(c&&c.def)def=String(c.def).trim();}out.push({label:r.label,def,src:'this form',id:r.id});});
   cs.forEach(b=>{if(!b||!b.label||b.isRep||/replacement|alternative/i.test(b.type||''))return;if(out.some(o=>o.label.trim().toLowerCase()===b.label.trim().toLowerCase()))return;out.push({label:b.label.trim(),def:(b.def||'').trim(),src:b.src||'the case'});});
   return out;}
 function rpTermsStore(){try{return JSON.parse(val('rp.terms')||'{}')||{};}catch(e){return {};}}
@@ -4190,7 +4237,7 @@ function rpRemember(){const ts=rpTermsFromTable(),st=rpTermsStore();ts.forEach(t
   const put=(n,v)=>{const e=document.querySelector('[name="'+n+'"]');if(e&&e.value!==v){e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));}};put('rp.name',$('#rpName').value.trim());put('rp.pron',$('#rpPron').value);put('rp.video',$('#rpVideo').value.trim());put('rp.base',$('#rpBase').value.trim());
   const em=document.querySelector('[name="m.email"]');if(em&&!em.value){em.value=$('#rpEmail').value.trim();em.dispatchEvent(new Event('input',{bubbles:true}));}}
 function rpFileName(p){return 'IA-1_'+INST[p.inst].title+'_'+(p.behLabel||'behavior').replace(/[^\w.-]+/g,'_').slice(0,40)+'_respondent_'+(p.student||'student').replace(/[^\w.-]+/g,'_')+'.html';}
-function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];
+function rpFile(){rpRemember();const ts=rpTermsFromTable();const names=[];outsMade($('#rpInst').value,ts.map(t=>t.label));
   ts.forEach((t,i)=>{setTimeout(()=>{const p=rpPayloadFor(t);const html=NBH_RESPOND.pageHTML(p);const name=rpFileName(p);names.push(name);
     const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
     if(i===ts.length-1&&window.nbhUI)nbhUI.toast(ts.length===1?'Respondent page saved: '+name+'. Attach it to an email to each informant.':ts.length+' respondent pages saved, one per target behavior. Attach them to the emails.',{kind:'ok'});},i*500);});
@@ -4220,9 +4267,9 @@ $('#rpPrevClose').addEventListener('click',()=>$('#rpPrevDlg').close());
 $('#rpPrevDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* the link is shown in a box as well as copied: the clipboard is refused on some tablets */
 /* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
-$('#rpMail').addEventListener('click',()=>{if(rpOff())return;rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:rpLinks()});});
+$('#rpMail').addEventListener('click',()=>{if(rpOff())return;rpRemember();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}const ls=rpLinks();outsMade($('#rpInst').value,ls.map(l=>l.label));NBH_RESPOND.invite({links:ls});});
 $('#rpLink').addEventListener('click',async()=>{if(rpOff())return;rpRemember();const box=$('#rpLinkBox');if(!/^https?:$/.test(location.protocol)){box.hidden=true;$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
-  const ls=rpLinks();const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
+  const ls=rpLinks();outsMade($('#rpInst').value,ls.map(l=>l.label));const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
   let copied=false;try{await navigator.clipboard.writeText(text);copied=true;}catch(e){copied=false;}
   $('#rpNote').textContent=copied?(ls.length===1?'Link copied ('+text.length+' characters; paste it into the email as a link, not typed out). It is also in the box below.':ls.length+' links copied, one line per target behavior; they are also in the box below.'):'The clipboard was refused: select the link in the box below and copy it.';
   try{box.focus();box.setSelectionRange(0,box.value.length);}catch(e){}});
@@ -4232,43 +4279,202 @@ let rcData=null;
 function rcRead(texts){const found=[];texts.forEach(t=>NBH_RESPOND.find(t).forEach(o=>found.push(o)));
   const mine=found.filter(o=>o.form==='IA-1'&&INST[o.inst]);const out=$('#rcOut');rcData=null;
   if(!mine.length){out.innerHTML='<div class="gf-warn">'+(found.length?'The codes found belong to another form ('+gfEsc([...new Set(found.map(o=>o.form))].join(', '))+'), not IA-1.':'No answer code (NBH1....) was found in what was pasted or chosen.')+'</div>';return;}
-  /* this form is about one target behavior: responses about another are held, not placed */
-  const own=val('m.beh').trim().toLowerCase();const behOf=o=>String(o.beh||'').trim();
+  /* (v21.64) a response is placed on the target it names, when this file holds it, in the column of the informant whose name it carries (else a
+     free column); one naming no target goes to the current target; a file with no target named yet takes the first one named; a response about
+     a target this file does not hold is held, with Add it as a target here and Copy those codes */
+  tgtStore();const behOf=o=>String(o.beh||'').trim();const recOf=k=>T.list.find(r=>r.label.trim().toLowerCase()===k)||null;const cur=tgtCur();
   const groups={};mine.forEach(o=>{const k=behOf(o).toLowerCase();(groups[k]=groups[k]||[]).push(o);});const gk=Object.keys(groups);
-  let useKey=own&&groups[own]?own:(!own&&gk.length===1?gk[0]:(groups['']?'':null));
-  if(useKey===null&&gk.length===1&&!own)useKey=gk[0];
-  const list0=useKey===null?[]:groups[useKey];const others=gk.filter(k=>k!==useKey);
-  let h='';
-  if(!list0.length){h+='<div class="gf-warn">These responses are about '+gfEsc(gk.map(k=>behOf(groups[k][0])||'(no behavior named)').join(', '))+'; this form is about '+(own?'<b>'+gfEsc(val('m.beh'))+'</b>':'no target yet')+'. Open the IA-1 file for that behavior and paste them there'+(own?'':', or name this form’s target on Setup')+'.</div>';}
-  const keys=[...new Set(list0.map(o=>o.inst))];const key=keys[0];const list=list0.filter(o=>o.inst===key);
-  if(list.length){const n=list[0].n||list[0].ans.length;
-    if(!own&&useKey)h+='<p class="method" style="margin:6px 0">This form has no target named yet: it takes <b>'+gfEsc(behOf(list[0]))+'</b> from the responses.</p>';
-    h+='<p class="method" style="margin:6px 0"><b>'+gfEsc(INST[key].title)+'</b> about <b>'+gfEsc(behOf(list[0])||val('m.beh'))+'</b>: '+list.length+' response'+(list.length===1?'':'s')+' found'+(keys.length>1?' (also '+keys.slice(1).map(k=>INST[k].title).join(', ')+': import the '+INST[key].title+' first, then paste again for the others)':'')+'.</p>';
-    h+='<table class="gf-t"><thead><tr><th></th><th>Informant</th><th>Relationship</th><th>Sent</th><th>Answers</th><th>Read the definition</th><th>Goes to</th></tr></thead><tbody>';
-    list.forEach((o,i)=>{const k=(o.ans||[]).filter(x=>x!=='').length;const mine=rpSig(o.inst);const diff=!!(o.sig&&mine&&o.sig!==mine);   /* v21.40 (21): unticked when the wording differs */
-      h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(i<5&&!diff?' checked':'')+' aria-label="Import this response"></td><td>'+(gfEsc(o.name)||'<i>no name</i>')+(diff?' <span class="tag na">wording differs from this form\'s: check the item order</span>':'')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td>'+(o.confirmed==='yes'||o.confirmed===true?'understood':o.confirmed==='no'||o.confirmed===false?'<span class="tag na">did not understand</span>':o.confirmed==='unsure'?'<span class="tag na">unsure</span>':'—')+'</td><td class="gf-slot"></td></tr>';});
+  let took='';if(cur&&!cur.label&&!T.list.some(r=>r.label)){const first=gk.find(k=>k);if(first){cur.label=behOf(groups[first][0]);took=cur.label;const be=document.querySelector('[name="m.beh"]');if(be)be.value=cur.label;tgtPaint();}}
+  const place=[],others=[];gk.forEach(k=>{if(k===''||recOf(k))place.push(k);else others.push(k);});
+  let h=took?'<p class="method" style="margin:6px 0">This form has no target named yet: it takes <b>'+gfEsc(took)+'</b> from the responses.</p>':'';const list=[],taken={};
+  place.forEach(k=>{const rec=k?recOf(k):cur;const g=groups[k];[...new Set(g.map(o=>o.inst))].forEach(key=>{const gl=g.filter(o=>o.inst===key);
+    h+='<p class="method" style="margin:6px 0"><b>'+gfEsc(INST[key].title)+'</b> about <b>'+gfEsc(rec.label||behOf(gl[0])||'the current target')+'</b>: '+gl.length+' response'+(gl.length===1?'':'s')+' found.</p>';
+    gl.forEach(o=>{const tk=taken[rec.id+'|'+key]=taken[rec.id+'|'+key]||[];const slot=rcSlotFor(o.name,tk);if(slot>=0)tk.push(slot);list.push({o,rec,key,slot});});});});
+  if(!list.length)h+='<div class="gf-warn">These responses are about '+gfEsc(others.map(k=>behOf(groups[k][0])||'(no behavior named)').join(', '))+'; this file holds '+(T.list.some(r=>r.label)?'<b>'+gfEsc(T.list.map(r=>r.label).filter(Boolean).join(', '))+'</b>':'no target yet')+'. Add the target below, or name it on Setup, then paste again.</div>';
+  if(list.length){h+='<table class="gf-t"><thead><tr><th></th><th>Target</th><th>Instrument</th><th>Informant</th><th>Relationship</th><th>Sent</th><th>Answers</th><th>Read the definition</th><th>Goes to</th></tr></thead><tbody>';
+    list.forEach((x,i)=>{const o=x.o,k=(o.ans||[]).filter(v=>v!=='').length,n=o.n||o.ans.length,sig=rpSig(o.inst),diff=!!(o.sig&&sig&&o.sig!==sig);   /* v21.40 (21): unticked when the wording differs */
+      h+='<tr><td><input type="checkbox" data-rc="'+i+'"'+(x.slot>=0&&!diff?' checked':'')+' aria-label="Import this response"></td><td>'+gfEsc(x.rec.label||'the current target')+'</td><td>'+gfEsc(INST[x.key].title)+'</td><td>'+(gfEsc(o.name)||'<i>no name</i>')+(diff?' <span class="tag na">wording differs from this form\'s: check the item order</span>':'')+'</td><td>'+gfEsc(o.role||'')+'</td><td>'+gfEsc(o.date||'')+'</td><td>'+k+' of '+n+'</td><td>'+(o.confirmed==='yes'||o.confirmed===true?'understood':o.confirmed==='no'||o.confirmed===false?'<span class="tag na">did not understand</span>':o.confirmed==='unsure'?'<span class="tag na">unsure</span>':'\u2014')+'</td><td class="gf-slot">'+(x.slot>=0?'Informant '+CODES[x.slot]:'\u2014 (limit is five)')+'</td></tr>';});
     h+='</tbody></table><label class="gf-note"><input type="checkbox" id="rcInf" checked> Fill the informant table (name, relationship, months known, daily contact, setting) from the responses</label>';
-    if(key==='fast')h+='<label class="gf-note"><input type="checkbox" id="rcFx" checked> Copy the open-ended answers into FAST Section 1 where it is empty</label>';
-    h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the worksheet</button><span class="method" style="margin:0">Ticked responses become informants A to E in order, up to five. Answers already on the worksheet for those columns are replaced.</span></div>';}
-  others.forEach(k=>{const g=groups[k];h+='<div class="gf-note rp-other"><b>'+g.length+' response'+(g.length===1?'':'s')+' about '+gfEsc(behOf(g[0])||'(no behavior named)')+'</b> ('+[...new Set(g.map(o=>INST[o.inst].title))].join(', ')+'): held for that behavior’s IA-1. <button type="button" data-copy="'+gfEsc(k)+'">Copy those codes</button></div>';});
-  out.innerHTML=h;rcData=list.length?{key,n:list[0].n||list[0].ans.length,list,beh:behOf(list[0])}:null;
+    if(list.some(x=>x.key==='fast'))h+='<label class="gf-note"><input type="checkbox" id="rcFx" checked> Copy the open-ended answers into FAST Section 1 where it is empty</label>';
+    h+='<div class="gf-row"><button type="button" class="primary" id="rcGo">Import into the worksheets</button><span class="method" style="margin:0">Each ticked response goes to the informant column named (the informant of that name, else a free column) on that target\u2019s worksheet; answers already there are replaced.</span></div>';}
+  others.forEach(k=>{const g=groups[k];h+='<div class="gf-note rp-other"><b>'+g.length+' response'+(g.length===1?'':'s')+' about '+gfEsc(behOf(g[0])||'(no behavior named)')+'</b> ('+[...new Set(g.map(o=>INST[o.inst].title))].join(', ')+'): this file does not hold that target. <button type="button" data-addt="'+gfEsc(k)+'">Add it as a target here</button> <button type="button" data-copy="'+gfEsc(k)+'">Copy those codes</button></div>';});
+  out.innerHTML=h;rcData=list.length?{list}:null;
   $$('#rcOut [data-copy]').forEach(b=>b.addEventListener('click',async()=>{const txt=groups[b.dataset.copy].map(o=>NBH_RESPOND.encode(o)).join('\n');try{await navigator.clipboard.writeText(txt);b.textContent='Copied';}catch(e){b.textContent='Could not copy';}}));
+  $$('#rcOut [data-addt]').forEach(b=>b.addEventListener('click',()=>{const g=groups[b.dataset.addt];tgtAdd(behOf(g[0]),'');tgtPaint();rcRead(texts);}));
   if(!list.length)return;
-  const slots=()=>{let k=0;$$('#rcOut tbody tr').forEach(tr=>{const cb=tr.querySelector('[data-rc]'),td=tr.querySelector('.gf-slot');if(cb.checked){td.textContent=k<5?'Informant '+CODES[k]:'— (limit is five)';k++;}else td.textContent='';});};
-  slots();$$('#rcOut [data-rc]').forEach(cb=>cb.addEventListener('change',slots));
-  $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>a.list[+cb.dataset.rc]).slice(0,5);if(!picked.length){alert('Tick at least one response.');return;}
-    const rows=picked.map(o=>({raw:(o.ans||[]).map(x=>x==null?'':String(x)),name:o.name||'',role:o.role||'',mo:gfMonths(o.mo||''),daily:o.daily||'',set:o.set||'',ts:o.date||'',fx:o.open?{ml:o.open.ml||'',ll:o.open.ll||'',before:o.open.before||'',after:o.open.after||'',tx:o.open.tx||''}:null,det:o.open||null}));
-    const {cells,unread}=importResponses(a.key,a.n,rows,{inf:$('#rcInf')&&$('#rcInf').checked,fx:$('#rcFx')&&$('#rcFx').checked});
-    if(!val('m.beh')&&a.beh){const e=document.querySelector('[name="m.beh"]');e.value=a.beh;e.dispatchEvent(new Event('input',{bubbles:true}));}
-    const b=$('#gfBanner');b.textContent='Collected '+picked.length+' '+INST[a.key].title+' response'+(picked.length===1?'':'s')+(a.beh?' about '+a.beh:'')+' from respondent pages into informant'+(picked.length===1?' A':'s A to '+CODES[picked.length-1])+': '+cells+' answers'+(unread?'; '+unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet.';b.hidden=false;
-    $('#rcDlg').close();setView(a.key);});}
+  $('#rcGo').addEventListener('click',()=>{const a=rcData;if(!a)return;const picked=$$('#rcOut [data-rc]:checked').map(cb=>a.list[+cb.dataset.rc]).filter(x=>x.slot>=0);if(!picked.length){alert('Tick at least one response.');return;}
+    const inf=$('#rcInf')&&$('#rcInf').checked,fx=$('#rcFx')&&$('#rcFx').checked;const byT={};picked.forEach(x=>{const key=x.rec.id+'|'+x.key;(byT[key]=byT[key]||{rec:x.rec,key:x.key,rows:[]}).rows.push(x);});
+    let cells=0,unread=0;const done=[];
+    Object.values(byT).forEach(g=>{const rows=g.rows.map(x=>{const o=x.o;return {slot:x.slot,raw:(o.ans||[]).map(v=>v==null?'':String(v)),name:o.name||'',role:o.role||'',mo:gfMonths(o.mo||''),daily:o.daily||'',set:o.set||'',ts:o.date||'',fx:o.open?{ml:o.open.ml||'',ll:o.open.ll||'',before:o.open.before||'',after:o.open.after||'',tx:o.open.tx||''}:null,det:o.open||null};});
+      const n=g.rows[0].o.n||g.rows[0].o.ans.length;const r=withTarget(g.rec.id,()=>importResponses(g.key,n,rows,{inf,fx}));cells+=r.cells;unread+=r.unread;
+      g.rows.forEach(x=>outsReceived(g.rec.id,g.key,x.slot,x.o.name||'',isoOf(x.o.date||'')));done.push(g.rows.length+' '+INST[g.key].title+' response'+(g.rows.length===1?'':'s')+' about '+(g.rec.label||'the current target'));});
+    const b=$('#gfBanner');b.textContent='Collected '+done.join('; ')+' from respondent pages: '+cells+' answers'+(unread?'; '+unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet'+(done.length>1?'s':'')+'; the Send-outs sheet shows what is back.';b.hidden=false;
+    $('#rcDlg').close();const first=picked[0];if(first.rec.id!==T.cur)tgtSwitch(first.rec.id);setView(first.key);});}
+function rcSlotFor(name,taken){const n=nInf(),low=String(name||'').trim().toLowerCase();
+  if(low)for(let i=0;i<n;i++){const nm=val('inf['+i+'].name').trim().toLowerCase();if(nm&&(nm===low||nm.indexOf(low)>=0||low.indexOf(nm)>=0)&&taken.indexOf(i)<0)return i;}
+  for(let i=0;i<5;i++){if(taken.indexOf(i)>=0)continue;if(!(i<n&&val('inf['+i+'].name').trim()))return i;}
+  for(let i=0;i<5;i++)if(taken.indexOf(i)<0)return i;return -1;}
 $('#rcBtn').addEventListener('click',()=>{$('#rcText').value='';$('#rcOut').innerHTML='';$('#rcStatus').textContent='';rcData=null;$('#rcDlg').showModal();$('#rcText').focus();});
 $('#rcRead').addEventListener('click',()=>rcRead([$('#rcText').value]));
 $('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
 $('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
 $('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 rpCounts();
-window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable};   /* for the checks */
+window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable,targets:()=>T,outs:()=>OUTS,drop:()=>DROP,quiet:rpPayloadQuiet,ics:outsIcs,act:outsAct,plan:outsPlan,render:outsRender,due:()=>window.__nbhDue()};   /* for the checks */
+
+
+/* ---------- (v21.64) several target behaviors in one file ----------
+   A record per target: its worksheets, interviews, convergence, instrument plan and its own lines on Setup (TGT_RE); the student,
+   the informants, the pasted wording and the walkthrough are shared. The sheets show one target at a time, switched with the
+   toolbar's list (tgtSwitch: the current target's fields go into its record, the other's come out through restore1). The saved
+   file carries every record (collect: targets, cur) and the current target's fields as before, so an older edition still opens it
+   as a one-target file. The case (Form TB-1 through the workstation) adds a record per target it holds (tgtFromFacts); a target
+   removed by hand is not added back by the case until Take the targets from the case is pressed (T.ign). */
+const T={list:[],cur:'',ign:[]};
+const tgtId=()=>'t'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
+const tgtBlank=()=>({id:tgtId(),label:'',def:'',int:2,fields:{}});
+const TGT_RE=/^(?:fast|qabf|mas|pbq|wefa|int)\[|^(?:fast|hyp|dec|fa|plan|setup)\.|^pbq\.ver$|^m\.(?:beh|def|freqcat|freq|sev|fn)$/;
+const tgtOwnKey=k=>TGT_RE.test(k);
+const tgtOwn=f=>{const o={};Object.keys(f).forEach(k=>{if(tgtOwnKey(k))o[k]=f[k];});return o;};
+const tgtShared=f=>{const o={};Object.keys(f).forEach(k=>{if(!tgtOwnKey(k))o[k]=f[k];});return o;};
+const tgtRec=id=>T.list.find(r=>r.id===id)||null;
+const tgtCur=()=>tgtRec(T.cur)||T.list[0]||null;
+/* "Label: definition" in the label box (the case bridge wrote it so before this) is split */
+function tgtSplit(){const be=document.querySelector('[name="m.beh"]'),de=document.querySelector('[name="m.def"]');if(!be||!de)return;const b=String(be.value||'').trim();
+  if(b&&!String(de.value||'').trim()){const m=b.match(/^([^:]{2,70}):\s*(.+)$/s);if(m){be.value=m[1].trim();de.value=m[2].trim();}}}
+function tgtStore(){const r=tgtCur();if(!r)return;tgtSplit();const f=snapshot();r.fields=tgtOwn(f);r.label=String(f['m.beh']||'').trim();r.def=String(f['m.def']||'').trim();r.int=+$('#nInt').value||0;}
+function tgtLoad(id){const r=tgtRec(id);if(!r)return;T.cur=id;const shared=tgtShared(snapshot());
+  restore1({counts:{inf:nInf(),int:r.int},fields:Object.assign({},shared,r.fields,{'m.beh':r.label,'m.def':r.def})});tgtPaint();}
+function tgtSwitch(id){if(!tgtRec(id)||id===T.cur)return;tgtStore();tgtLoad(id);}
+function tgtAdd(label,def){tgtStore();const r=tgtBlank();r.label=String(label||'').trim();r.def=String(def||'').trim();T.list.push(r);return r;}
+async function tgtRemove(id){const r=tgtRec(id);if(!r||T.list.length<2)return false;tgtStore();
+  const has=Object.keys(r.fields).some(k=>r.fields[k]!==''&&r.fields[k]!==false);
+  if((has||r.label)&&!(await nbhUI.confirm('Remove the target \u201c'+(r.label||'untitled')+'\u201d and its worksheets from this file?\nIts send-outs go too.',{ok:'Remove',danger:true})))return false;
+  const at=T.list.indexOf(r);T.list.splice(at,1);if(r.label&&T.ign.indexOf(r.label.toLowerCase())<0)T.ign.push(r.label.toLowerCase());OUTS=OUTS.filter(o=>o.tgt!==id);delete DROP[id];
+  if(T.cur===id)tgtLoad(T.list[Math.max(0,at-1)].id);else tgtPaint();return true;}
+function tgtPaint(){const sel=$('#tgtSel');if(!sel)return;const cur=tgtCur();if(cur&&cur.id===T.cur){const be=document.querySelector('[name="m.beh"]');if(be)cur.label=String(be.value||'').trim();}
+  sel.innerHTML=T.list.map((r,i)=>'<option value="'+esc(r.id)+'">'+(i+1)+'. '+esc(r.label||'(untitled target)')+'</option>').join('');sel.value=T.cur;
+  const del=$('#tgtDel');if(del)del.disabled=T.list.length<2;
+  const n=$('#tgtNote');if(n)n.textContent=T.list.length===1?'This file holds one target behavior. + Target in the toolbar adds another, with worksheets of its own; the informants are shared.':'This file holds '+T.list.length+' target behaviors, each with worksheets of its own: switch with the toolbar\u2019s Target behavior list. The informants are shared.';}
+function tgtFromFacts(bs,force){tgtStore();let n=0;const names=[];
+  (bs||[]).forEach(b=>{if(!b||!b.label||b.isRep||/replacement|alternative/i.test(b.type||''))return;const lab=String(b.label).trim(),low=lab.toLowerCase();
+    if(!force&&T.ign.indexOf(low)>=0)return;if(force)T.ign=T.ign.filter(x=>x!==low);
+    const have=T.list.find(r=>r.label.trim().toLowerCase()===low);
+    if(have){if(!have.def&&b.def){have.def=String(b.def).trim();if(have.id===T.cur){const de=document.querySelector('[name="m.def"]');if(de&&!de.value.trim())de.value=have.def;}}return;}
+    const cur=tgtCur();if(cur&&!cur.label){cur.label=lab;cur.def=String(b.def||'').trim();if(cur.id===T.cur){const be=document.querySelector('[name="m.beh"]'),de=document.querySelector('[name="m.def"]');if(be)be.value=lab;if(de&&!de.value.trim())de.value=cur.def;}}
+    else tgtAdd(lab,b.def||'');n++;names.push(lab);});
+  tgtPaint();if(n)renderSummary();
+  return {filled:n,note:n?'Target'+(n===1?'':'s')+' added to this file: '+names.join(', ')+(n>1?' (each with worksheets of its own; switch with the toolbar\u2019s Target behavior list)':'')+'.':'Every target the case holds is in this file already.'};}
+function withTarget(id,fn){if(!tgtRec(id)||id===T.cur)return fn();const back=T.cur;tgtSwitch(id);try{return fn();}finally{tgtStore();tgtLoad(back);}}
+$('#tgtSel').addEventListener('change',()=>tgtSwitch($('#tgtSel').value));
+$('#tgtAdd').addEventListener('click',()=>{const r=tgtAdd('','');tgtLoad(r.id);setView('setup');try{document.querySelector('[name="m.beh"]').focus();}catch(e){}});
+$('#tgtDel').addEventListener('click',()=>{tgtRemove(T.cur);});
+$('#tgtFromCase').addEventListener('click',()=>{const cs=(window.nbhCase&&nbhCase.behaviors&&nbhCase.behaviors())||[];const r=tgtFromFacts(cs,true);$('#tgtNote').textContent=cs.length?r.note:'The case holds no target behavior yet: open Form TB-1 in the workstation, or type the target here.';});
+document.addEventListener('input',e=>{if(e.target&&e.target.name==='m.beh')tgtPaint();});
+window.__ia1Targets={fromFacts:tgtFromFacts,list:()=>T.list,cur:()=>T.cur,store:tgtStore,switchTo:tgtSwitch,add:tgtAdd};
+
+/* ---------- (v21.64) the send-out board ----------
+   OUTS: a row per target x instrument x informant: planned (plan: send on; due: please send by), page made, sent (how), received (from,
+   the code's date), placed; DROP[target]: the informants left out for that target. The respondent dialog's Save, Copy a link and Email it
+   mark the rows of their targets and instrument "page made"; a row's Email and Remind open the invitation (nbh-respond.js) to the
+   informant's email and mark it sent; Collect responses marks received and placed; the dates go to the workstation's case bar
+   (window.__nbhDue) and to a calendar file (outsIcs). */
+let OUTS=[],DROP={};
+const OUT_INSTS=['fast','qabf','mas','pbq','wefa'];
+const pad2=n=>String(n).padStart(2,'0');
+const isoToday=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
+function isoOf(x){const t=String(x||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;const d=parseDate(t);return d?d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()):'';}
+const mdy=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(iso||'');};
+const outId=()=>'o'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
+function outNorm(o){const s=k=>String(o[k]==null?'':o[k]);return {id:s('id')||outId(),tgt:s('tgt'),inst:OUT_INSTS.indexOf(s('inst'))>=0?s('inst'):'fast',inf:/^[A-E]$/.test(s('inf'))?s('inf'):'',plan:isoOf(s('plan')),due:isoOf(s('due')),made:isoOf(s('made')),sent:isoOf(s('sent')),how:s('how'),recv:isoOf(s('recv')),from:s('from'),placed:!!o.placed,rem:isoOf(s('rem')),note:s('note')};}
+const infIdx=code=>CODES.indexOf(code);
+const infLabel=code=>{const i=infIdx(code);return i<0?'any informant':infName(i);};
+const infEmail=code=>{const i=infIdx(code);return i<0?'':val('inf['+i+'].email');};
+const outStatus=o=>o.placed?'placed':o.recv?'received':o.sent?(o.due&&o.due<isoToday()?'late':'sent'):o.made?'ready':'planned';
+const OUT_WORD={planned:'Planned',ready:'Page made',sent:'Sent',late:'Not back yet',received:'Received',placed:'Placed'},OUT_TAG={planned:'na',ready:'mid',sent:'mid',late:'no',received:'ok',placed:'ok'};
+const outsFind=(tgt,inst,inf)=>OUTS.find(o=>o.tgt===tgt&&o.inst===inst&&o.inf===inf)||null;
+let PLANUI=null;   /* the plan panel's ticks, kept across redraws */
+function outsPlanRead(){const p=$('#outPlan');if(!p)return;PLANUI={t:$$('#outPlan [data-ot]:checked').map(c=>c.dataset.ot),i:$$('#outPlan [data-oi]:checked').map(c=>c.dataset.oi),on:($('#outPlanOn')||{}).value||'',by:($('#outDueBy')||{}).value||''};}
+function outsPlan(){tgtStore();outsPlanRead();const tg=PLANUI.t,ins=PLANUI.i,plan=isoOf(PLANUI.on),due=isoOf(PLANUI.by),n=nInf();let made=0;
+  tg.forEach(t=>{if(!tgtRec(t))return;const dropped=DROP[t]||[];for(let i=0;i<n;i++){const code=CODES[i];if(dropped.indexOf(code)>=0)continue;ins.forEach(k=>{if(outsFind(t,k,code))return;OUTS.push(outNorm({tgt:t,inst:k,inf:code,plan,due}));made++;});}});
+  outsRender();$('#outNote').textContent=made?made+' send-out'+(made===1?'':'s')+' planned.':(tg.length&&ins.length?'Every one of those is on the board already.':'Tick at least one target and one instrument.');}
+function outsRender(){const p=$('#outPlan');if(!p)return;tgtStore();const n=nInf(),ui=PLANUI||{t:T.list.map(r=>r.id),i:['fast','qabf','mas'],on:'',by:''};
+  const chips=t=>CODES.slice(0,n).map((c,i)=>'<label><input type="checkbox" data-od="'+esc(t.id)+'" data-code="'+c+'"'+((DROP[t.id]||[]).indexOf(c)>=0?'':' checked')+'> '+esc(infName(i))+'</label>').join('');
+  p.innerHTML='<div class="out-plan"><div><b>Targets (untick an informant to leave it out for that target)</b>'+T.list.map(t=>'<label><input type="checkbox" data-ot="'+esc(t.id)+'"'+(ui.t.indexOf(t.id)>=0?' checked':'')+'> '+esc(t.label||'(untitled target)')+'</label><div class="out-chips">'+chips(t)+'</div>').join('')+'</div>'+
+    '<div><b>Instruments</b>'+OUT_INSTS.map(k=>'<label><input type="checkbox" data-oi="'+k+'"'+(ui.i.indexOf(k)>=0?' checked':'')+'> '+INST[k].title+(rpWording(k).length?'':' <span class="tag na">no wording on Setup yet</span>')+'</label>').join('')+'</div>'+
+    '<div><b>Dates for the rows planned next</b><label>Send on <input type="date" id="outPlanOn" value="'+esc(ui.on)+'"></label><label>Please send by <input type="date" id="outDueBy" value="'+esc(ui.by)+'"></label></div></div>';
+  const order=o=>[T.list.findIndex(r=>r.id===o.tgt),OUT_INSTS.indexOf(o.inst),CODES.indexOf(o.inf)];
+  const rows=OUTS.slice().sort((a,b)=>{const x=order(a),y=order(b);return x[0]-y[0]||x[1]-y[1]||x[2]-y[2];});
+  const td=isoToday();
+  $('#outBody').innerHTML=rows.map(o=>{const r=tgtRec(o.tgt),st=outStatus(o),late=st==='late'||(!o.sent&&o.plan&&o.plan<td),tdy=!o.sent&&o.plan===td;
+    const acts=st==='planned'||st==='ready'?['page','link','email','sent','del']:st==='sent'||st==='late'?['remind','recv','unsent','del']:['go','unrecv','del'];
+    const B={page:'Page',link:'Link',email:'Email',sent:'Sent \u2713',remind:'Remind',recv:'Received \u2713',unsent:'Not sent',unrecv:'Not received',go:'Open the worksheet',del:'\u00d7'};
+    return '<tr data-id="'+esc(o.id)+'" class="'+(late?'out-late':tdy?'out-today':'')+'"><td>'+esc(r?r.label||'(untitled target)':'(target removed)')+'</td><td>'+INST[o.inst].title+'</td><td>'+esc(infLabel(o.inf))+'</td>'+
+      '<td><input type="date" data-od="plan" value="'+esc(o.plan)+'" aria-label="Send on"></td><td><input type="date" data-od="due" value="'+esc(o.due)+'" aria-label="Please send by"></td>'+
+      '<td><span class="tag '+OUT_TAG[st]+'">'+OUT_WORD[st]+'</span>'+(tdy?' <span class="tag mid">send today</span>':!o.sent&&late?' <span class="tag no">past its send date</span>':'')+(o.rem?'<br><span class="tag na">reminded '+esc(mdy(o.rem))+'</span>':'')+'</td>'+
+      '<td>'+esc(o.sent?mdy(o.sent)+(o.how?' ('+o.how+')':''):o.made?'page made '+mdy(o.made):'')+'</td><td>'+esc(o.recv?mdy(o.recv)+(o.from?' from '+o.from:''):'')+'</td>'+
+      '<td class="noprint"><div class="acts">'+acts.map(a=>'<button type="button" data-act="'+a+'"'+(a==='del'?' class="x" title="Take this row off the board"':'')+'>'+B[a]+'</button>').join('')+'</div></td></tr>';}).join('')||'<tr><td colspan="9" class="empty2">Nothing planned yet. Tick the targets, the instruments and the informants above, set the dates, and press Plan the send-outs.</td></tr>';
+  const c={};rows.forEach(o=>{const st=outStatus(o);c[st]=(c[st]||0)+1;});const over=rows.filter(o=>!o.sent&&o.plan&&o.plan<td).length,tdn=rows.filter(o=>!o.sent&&o.plan===td).length;
+  $('#outSum').textContent=rows.length?rows.length+' send-out'+(rows.length===1?'':'s')+': '+Object.keys(OUT_WORD).filter(k=>c[k]).map(k=>c[k]+' '+OUT_WORD[k].toLowerCase()).join(', ')+(tdn?'; '+tdn+' to send today':'')+(over?'; '+over+' past the send date':'')+'.':'';}
+function outsMade(key,labels){const low=(labels||[]).map(l=>String(l||'').trim().toLowerCase());const ids=T.list.filter(r=>low.indexOf(r.label.trim().toLowerCase())>=0).map(r=>r.id);let n=0;
+  OUTS.forEach(o=>{if(o.inst===key&&ids.indexOf(o.tgt)>=0&&!o.made){o.made=isoToday();n++;}});if(n&&document.body.classList.contains('view-outs'))outsRender();return n;}
+function outsReceived(tgt,key,slot,from,date){const code=CODES[slot]||'';let o=outsFind(tgt,key,code)||OUTS.find(x=>x.tgt===tgt&&x.inst===key&&!x.inf&&!x.recv);
+  if(!o){o=outNorm({tgt,inst:key,inf:code});OUTS.push(o);}o.inf=o.inf||code;o.recv=date||isoToday();o.from=from||o.from;o.placed=true;if(!o.sent){o.sent=o.recv;o.how=o.how||'collected';}if(document.body.classList.contains('view-outs'))outsRender();}
+/* a page or a link for a row, from the stored settings (the dialog's values, remembered with the file) */
+function rpPayloadQuiet(key,rec,opt){opt=opt||{};const items=rpWording(key),info=RP_INFO[key];if(!items.length||!info||!rec)return null;
+  const t=Object.assign({label:rec.label,def:rec.def},rpTermsOf({label:rec.label,def:rec.def}));const name=val('rp.name')||rpFirstName();const per={name,pron:val('rp.pron'),beh:t.sing,behs:t.plur};const P=x=>NBH_RESPOND.personalize(x,per);
+  const p={v:1,form:'IA-1',inst:key,title:INST[key].title,heading:info.heading,student:rpInitials(),beh:rec.label,behLabel:rec.label,def:t.def,confirm:!!t.def,bcba:val('m.assessor')||'the BCBA',email:val('m.email'),due:opt.due?mdy(opt.due):'',
+    sub:'Indirect functional assessment: '+INST[key].title+' answered by someone who sees '+(name||'the student')+' and '+t.sing,items:items.map((x,i)=>({n:i+1,text:P(x)})),scale:info.scale,extras:RP_EXTRAS,subject:INST[key].title+' answers for Form IA-1 \u00b7 '+rec.label};
+  const vid=val('rp.video');if(/^https?:\/\//i.test(vid))p.links=[{url:vid,label:'Watch the instructions'}];
+  if(!opt.link){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}
+  if(key==='fast'&&info.credit)p.credit=info.credit;if(key==='fast')p.open=info.open.map(([id,label])=>({id,label:P(label)}));
+  if(key==='wefa'){p.open=info.open.map(x=>Object.assign({},x,{label:P(x.label)}));p.openFirst=true;p.openHeading=info.openHeading;}
+  if(key==='pbq')p.pbqVer=String(items.length);p.sig=rpSig(key);return p;}
+function outsWhy(key,rec){if(window.NBH_RESPOND_MISSING)return 'The file nbh-respond.js is not beside this form, so no page can be built.';if(!rec||!rec.label)return 'The target has no label yet: name it on Setup.';
+  const n=rpWording(key).length;if(!n)return 'No wording for the '+INST[key].title+' is on the Setup sheet yet: paste its items there (Item Wording for Respondent Pages).';if(rpExpected(key).indexOf(n)<0)return n+' lines of wording for the '+INST[key].title+' where '+rpExpected(key).join(' or ')+' items are expected: check the Setup sheet.';
+  if(!val('m.email'))return 'Enter the assessor email on Setup: the answers are sent to it.';return '';}
+function outsPage(o,quiet){const r=tgtRec(o.tgt),why=outsWhy(o.inst,r);if(why){$('#outNote').textContent=why;return false;}const p=rpPayloadQuiet(o.inst,r,{due:o.due});if(!p)return false;
+  const html=NBH_RESPOND.pageHTML(p),name=rpFileName(p),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  OUTS.forEach(x=>{if(x.tgt===o.tgt&&x.inst===o.inst&&!x.made)x.made=isoToday();});if(!quiet){$('#outNote').textContent='Page saved: '+name+'. Attach it to an email to '+infLabel(o.inf)+'.';}return name;}
+function outsLinkUrl(o){const r=tgtRec(o.tgt),why=outsWhy(o.inst,r);if(why)return {why};if(!/^https?:$/.test(location.protocol))return {why:'Opened from a folder: links need the workstation on its website. Make the page and attach it to an email instead.'};
+  const p=rpPayloadQuiet(o.inst,r,{due:o.due,link:true});return {url:rpBaseUrl()+NBH_RESPOND.payloadToHash(p),label:r.label};}
+async function outsLink(o){const l=outsLinkUrl(o);if(l.why){$('#outNote').textContent=l.why;return;}const box=$('#outLinkBox');box.hidden=false;box.value=l.url;let ok=false;try{await navigator.clipboard.writeText(l.url);ok=true;}catch(e){}
+  OUTS.forEach(x=>{if(x.tgt===o.tgt&&x.inst===o.inst&&!x.made)x.made=isoToday();});$('#outNote').textContent=(ok?'Link copied for '+infLabel(o.inf)+' (paste it into the email as a link). ':'The clipboard was refused: ')+'It is in the box below.';outsRender();try{box.focus();box.setSelectionRange(0,box.value.length);}catch(e){}}
+function outsEmail(o,remind){const l=outsLinkUrl(o);if(l.why){$('#outNote').textContent=l.why;return;}
+  NBH_RESPOND.invite({links:[{label:l.label,url:l.url}],to:infEmail(o.inf)||undefined,title:remind?'Reminder: '+INST[o.inst].title:undefined});
+  if(remind)o.rem=isoToday();else{o.sent=isoToday();o.how='email';if(!o.made)o.made=o.sent;}outsRender();$('#outNote').textContent=(remind?'Reminder opened for ':'Email opened for ')+infLabel(o.inf)+'; the row is marked '+(remind?'reminded':'sent')+'. Undo with Not sent if the email was not sent.';}
+function outsAct(act,id){const o=OUTS.find(x=>x.id===id);if(!o)return;
+  if(act==='del'){OUTS=OUTS.filter(x=>x.id!==id);outsRender();return;}
+  if(act==='sent'){o.sent=isoToday();o.how=o.how||'by hand';outsRender();return;}
+  if(act==='unsent'){o.sent='';o.how='';o.rem='';outsRender();return;}
+  if(act==='recv'){o.recv=isoToday();outsRender();return;}
+  if(act==='unrecv'){o.recv='';o.from='';o.placed=false;outsRender();return;}
+  if(act==='page'){outsPage(o,false);outsRender();return;}
+  if(act==='link'){outsLink(o);return;}
+  if(act==='email'||act==='remind'){outsEmail(o,act==='remind');return;}
+  if(act==='go'){tgtSwitch(o.tgt);setView(o.inst);return;}}
+function outsIcs(){const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z'),stu=rpInitials()||'the student';
+  const e1=x=>String(x).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/[,;]/g,m=>'\\'+m);
+  const next=d=>{const t=new Date(+d.slice(0,4),+d.slice(5,7)-1,+d.slice(8,10)+1);return t.getFullYear()+pad2(t.getMonth()+1)+pad2(t.getDate());};
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//NBH Workstation//Form IA-1//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];let n=0;
+  const ev=(uid,date,summ,desc)=>{L.push('BEGIN:VEVENT','UID:'+uid+'@nbh-ia1','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+date.replace(/-/g,''),'DTEND;VALUE=DATE:'+next(date),'SUMMARY:'+e1(summ),'DESCRIPTION:'+e1(desc),'END:VEVENT');n++;};
+  OUTS.forEach(o=>{const r=tgtRec(o.tgt),lab=r?r.label:'',who=infLabel(o.inf),t=INST[o.inst].title;
+    if(o.plan&&!o.sent)ev(o.id+'-s',o.plan,'Send '+t+' to '+who+' ('+lab+')','Form IA-1, '+stu+': send the '+t+' respondent page about '+lab+' to '+who+'.');
+    if(o.due&&o.sent&&!o.recv)ev(o.id+'-d',o.due,t+' back from '+who+' ('+lab+')','Form IA-1, '+stu+': the '+t+' about '+lab+' is due back from '+who+'.');});
+  L.push('END:VCALENDAR');return {text:L.join('\r\n')+'\r\n',n};}
+$('#outPlanBtn').addEventListener('click',outsPlan);
+$('#outPagesBtn').addEventListener('click',()=>{tgtStore();const seen={},names=[];let why='';OUTS.forEach(o=>{if(o.made||o.sent)return;const k=o.tgt+'|'+o.inst;if(seen[k])return;seen[k]=1;const r=outsPage(o,true);if(r)names.push(r);else why=why||$('#outNote').textContent;});
+  outsRender();$('#outNote').textContent=names.length?names.length+' page'+(names.length===1?'':'s')+' saved (one per target and instrument; the same page serves every informant). Attach each to its emails.':(why||'Every planned page is made already.');});
+$('#outIcsBtn').addEventListener('click',()=>{const c=outsIcs();if(!c.n){$('#outNote').textContent='No dates to add: set Send on or Please send by on the rows first.';return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c.text],{type:'text/calendar'}));a.download='IA-1_send-outs_'+(rpInitials()||'student').replace(/[^\w.-]+/g,'_')+'.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  $('#outNote').textContent=c.n+' calendar event'+(c.n===1?'':'s')+' saved as a file: open it on the iPad and add them to the calendar.';});
+$('#outPlan').addEventListener('change',e=>{const c=e.target.closest('[data-od][data-code]');if(c){const t=c.dataset.od,code=c.dataset.code;DROP[t]=(DROP[t]||[]).filter(x=>x!==code);if(!c.checked){DROP[t].push(code);OUTS=OUTS.filter(o=>!(o.tgt===t&&o.inf===code&&!o.sent));}outsPlanRead();outsRender();return;}outsPlanRead();});
+$('#outBody').addEventListener('click',e=>{const b=e.target.closest('button[data-act]');if(!b)return;const tr=b.closest('tr');outsAct(b.dataset.act,tr.dataset.id);});
+$('#outBody').addEventListener('change',e=>{const i=e.target.closest('input[data-od]');if(!i)return;const tr=i.closest('tr'),o=OUTS.find(x=>x.id===tr.dataset.id);if(o){o[i.dataset.od]=isoOf(i.value);outsRender();}});
+/* what is due, for the workstation's case bar: the send-on dates not yet sent, and the please-send-by dates not yet back */
+window.__nbhDue=function(){const out=[];OUTS.forEach(o=>{const r=tgtRec(o.tgt),lab=r?r.label:'',t=INST[o.inst].title,who=infLabel(o.inf);
+  if(o.plan&&!o.sent)out.push({what:'Send the '+t+' to '+who+(lab?' ('+lab+')':''),date:o.plan});
+  if(o.due&&o.sent&&!o.recv)out.push({what:t+' back from '+who+(lab?' ('+lab+')':''),date:o.due});});return out;};
 
 /* ia1-walk:begin */
 /* ===== walk-script.json: the narration's words (read when nbh-ia1-narration.js is not beside the form) ===== */
@@ -4987,12 +5193,13 @@ restore({counts:{}});
   /* always an object: a falsy answer would let the general fill place the function after all */
   window.__nbhFactsIn = function(f){
     var c = cs(); if (!c || !f) return { filled: 0 };
+    if (window.__ia1Targets) { var r = window.__ia1Targets.fromFacts(f.behaviors || [], false); return { filled: r.filled, note: r.filled ? r.note : undefined }; }   /* v21.64 a record per target */
     return c.generic({ behaviors: f.behaviors || [] }, false);
   };
   window.__nbhFactsPick = function(sel){
     var c = cs(); if (!c || !sel) return { filled: 0 };
-    var bs = sel.behaviors || [], g = sel.goals || {}, rep = c.generic({ behaviors: bs }, true), why = [];
-    if (rep.filled && bs.length > 1) why.push('only the first ticked behavior was placed, since this form has one ' + FIELD + ' field');
+    var bs = sel.behaviors || [], g = sel.goals || {}, why = [];
+    var rep = window.__ia1Targets ? (function(){ var r = window.__ia1Targets.fromFacts(bs, true); return { filled: r.filled, note: r.filled ? r.note : undefined }; })() : c.generic({ behaviors: bs }, true);   /* v21.64 */
     if (sel.fn) why.push(OFF);
     var o = others((g.red || []).length + (g.acq || []).length, (sel.menu || []).length);
     if (o) why.push('the ticked ' + o + ' have no field on this form');
@@ -5007,7 +5214,7 @@ restore({counts:{}});
     /* the footnote says what this form takes (the shared one, written for forms with rows of their own, says every
        ticked item goes in) */
     if (body && note) { var o = others(body.querySelector('input[data-kind="red"],input[data-kind="acq"]'), body.querySelector('input[data-kind="menu"]'));
-      var t = body.querySelector('input[data-kind="beh"]') ? 'The first ticked behavior goes into this form’s ' + FIELD + ' field' + (cb ? '; the function stays off this form.' : '.')
+      var t = body.querySelector('input[data-kind="beh"]') ? 'Each ticked behavior becomes a target of this file, with worksheets of its own' + (cb ? '; the function stays off this form.' : '.')
         : cb ? 'The function stays off this form.' : '';
       note.textContent = t + (o ? (t ? ' ' : '') + 'The ' + o + ' have no field here; copy the text instead.' : ''); }
     if (!cb || cb.disabled) return;
