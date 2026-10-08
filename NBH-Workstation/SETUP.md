@@ -8188,3 +8188,6 @@ with a string replacement, in which a `$&` or `$1` inside the library is read as
 carried a `$&`, which cut the respondent library short inside the one-file edition and left Form IA-1 there without it. The
 library no longer carries the sequence, and the shell now replaces through a function, so any library may. Checked by the
 one-file checks run before the release.
+
+**IA-1's toolbar on the iPad.** With six targets from Form TB-1 the target list grew past its group, and + Target and Remove
+landed under the case chip beside it. The list is now capped in width and the buttons wrap under it.

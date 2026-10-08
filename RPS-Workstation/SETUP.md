@@ -8181,3 +8181,13 @@ seem". The Respondent pages dialog says so under the plural column. On the page 
 a file, Open the email) stayed visible before Send on every page since v21.39, because the row's own display rule beat the
 hidden attribute: fixed; and the intro sentence says "your answers go straight to J. Newsome" when the page carries a reply
 box. Checked by two new checks in `qa/respond-test.js`.
+
+**The one-file edition's shell, hardened.** The shell puts each embedded library (the respondent pages, My pictures, the
+pictograms, the narrations, Save as video) into a form by replacing its `<script src>` tag with the library's text. It did so
+with a string replacement, in which a `$&` or `$1` inside the library is read as a replacement pattern; the new wording code
+carried a `$&`, which cut the respondent library short inside the one-file edition and left Form IA-1 there without it. The
+library no longer carries the sequence, and the shell now replaces through a function, so any library may. Checked by the
+one-file checks run before the release.
+
+**IA-1's toolbar on the iPad.** With six targets from Form TB-1 the target list grew past its group, and + Target and Remove
+landed under the case chip beside it. The list is now capped in width and the buttons wrap under it.
