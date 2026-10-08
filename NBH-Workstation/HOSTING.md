@@ -263,3 +263,61 @@ the forms already carry that address.
   settings (`nbh-relay/config.php`) or its data (`nbh-relay/data/`). The
   workstation's zip never touches the relay, and the relay's zip never
   touches the workstation.
+
+## The reply box (`public_html/reply`, v21.65)
+
+Form IA-1's respondent pages (the FAST, QABF, MAS, PBQ and WEFA an
+informant answers on a phone) used to send their answers back in an
+email, as a code pasted into **Collect responses**. With the reply box
+the page locks the answers on the informant's device so that only the
+form's own file can open them, and sends them to a small PHP program on
+this site; Form IA-1 collects them itself (the Send-outs sheet does it
+while it is open, **Collect from the reply box now** at once) and places
+them on the worksheets. The informant presses Send and is done. The site
+keeps only what it cannot read.
+
+- **What to upload.** `nbh-reply-box-upload.zip`, which comes with the
+  release beside the workstation's zip. It goes in the **home folder**, the
+  one that holds `public_html`. Extracted there, it adds
+  `public_html/reply/` (the web address `https://newsomebh.com/reply/`)
+  with `box.php` and `.htaccess`. Nothing else in `public_html` is touched.
+- **The steps.** They are in the zip's `README.md` (in the workshop,
+  `tools/reply-box/README.md`): PHP 8.1 or newer for the domain (already
+  the case if the writing-help relay is set up), upload, extract, and open
+  `https://newsomebh.com/reply/box.php?a=ping` once to see
+  `{"ok":true,...}`. About ten minutes, once. No key, no password, no
+  database.
+- **The forms find it by themselves.** A workstation opened from
+  newsomebh.com (either edition) uses `https://newsomebh.com/reply/box.php`
+  unless the **Reply box** field in IA-1's Respondent pages dialog names
+  another address (remembered on the device, like the wording). Each IA-1
+  file makes its own keys and registers its own box the first time a page
+  or link is made; the file carries the keys, so a copy opened from a
+  folder still collects. A form opened from a folder with no address known
+  makes pages that send email, as before.
+- **No folder password on `reply`.** Do not put a Directory Privacy
+  password on `public_html/reply`: the respondent pages post to it from any
+  device and any origin (CORS `*`; a page opened from an email attachment
+  has no origin of its own). The workstation's own folder keeps its
+  password as before.
+- **What the site keeps.** A box id and a hash of the form's read token
+  (both random, made by the form), each reply's ciphertext with the
+  informant's one-time public key and the time, and a count of replies per
+  address for an hour (a hash of the address) against abuse. No name, no
+  score, no student, no email. A reply stays until the form removes it
+  (**Remove the collected replies from the site**) or 60 days pass; a box
+  nothing has reached for 60 days is removed. Limits: 64 KB per reply, 300
+  replies per box, 120 replies an hour from one address. Keys: ECDH P-256
+  and HKDF-SHA-256 for the shared secret, AES-GCM-256 for the answers,
+  all done by the browsers (WebCrypto); the private key lives only in the
+  IA-1 file.
+- **If the box cannot be reached** (no internet, the program not uploaded,
+  the address wrong), the respondent page says so and offers **Open the
+  email** with the code, the way it always worked; the form's line under
+  the address says what went wrong.
+- **Updating.** A newer `nbh-reply-box-upload.zip` is extracted the same
+  way; it replaces `box.php` and leaves the data folder (`reply/data/`,
+  closed to the web by its own `.htaccess`) as it is. The workstation's
+  zip never touches the box, and the box's zip never touches the
+  workstation. To keep the data outside `public_html`, the README shows
+  the one line (`SetEnv NBH_REPLY_DATA ...`).

@@ -200,19 +200,33 @@
     /* send */
     var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:'Send your answers'}));
     var warn=h('div',{'class':'warn'});warn.hidden=true;sc.appendChild(warn);
-    var row=h('div',{'class':'row'});var send=h('button',{type:'button',text:'Send to '+(P.bcba||'the BCBA')});row.appendChild(send);sc.appendChild(row);
-    var done=h('div',{'class':'done'});done.hidden=true;sc.appendChild(done);
+    var BOX=(P.box&&P.box.u&&P.box.b&&P.box.k&&P.box.k.x&&P.box.k.y&&/^https?:\/\//i.test(P.box.u)&&window.crypto&&crypto.subtle&&window.fetch&&window.TextEncoder)?P.box:null;   /* v21.65 the reply box */
+    var row=h('div',{'class':'row'});var send=h('button',{type:'button',text:'Send my answers to '+(P.bcba||'the BCBA')});row.appendChild(send);sc.appendChild(row);
+    var done=h('div',{'class':'done',id:'nbhr-done'});done.hidden=true;sc.appendChild(done);
     var codeBox=h('textarea',{'class':'code',readonly:'readonly','aria-label':'Your answer code'});codeBox.hidden=true;sc.appendChild(codeBox);
     var row2=h('div',{'class':'row'});row2.hidden=true;var cp=h('button',{type:'button','class':'ghost',text:'Copy the code'}),sv=h('button',{type:'button','class':'ghost',text:'Save as a file'}),ml=h('a',{href:'#',id:'nbhr-mail'});ml.appendChild(h('button',{type:'button',text:'Open the email again'}));
     row2.appendChild(cp);row2.appendChild(sv);row2.appendChild(ml);sc.appendChild(row2);
-    sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
+    sc.appendChild(h('p',{'class':'foot',text:BOX?'Your answers are locked on this device so that only '+(P.bcba||'the BCBA')+'\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.':'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
     if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
       if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-    var lastCode='',warnedMiss='';
+    var lastCode='',warnedMiss='',sending=false,sent=false;
+    /* (v21.65) the reply box: a key of this page's own for the one reply, the shared secret with the form's public key (ECDH P-256),
+       HKDF, AES-GCM; the ciphertext goes to the box as text (no preflight), and the box answers ok */
+    function sendBox(obj,cb){try{var S=crypto.subtle,enc=function(x){return new TextEncoder().encode(x);},b64=function(u){var s='';for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+      var pub={kty:'EC',crv:'P-256',x:BOX.k.x,y:BOX.k.y,ext:true},kp,iv=crypto.getRandomValues(new Uint8Array(12));
+      S.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']).then(function(k){kp=k;return S.importKey('jwk',pub,{name:'ECDH',namedCurve:'P-256'},false,[]);})
+       .then(function(pk){return S.deriveBits({name:'ECDH',public:pk},kp.privateKey,256);})
+       .then(function(bits){return S.importKey('raw',bits,'HKDF',false,['deriveKey']);})
+       .then(function(hk){return S.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc(BOX.b),info:enc('nbh-reply-v1')},hk,{name:'AES-GCM',length:256},false,['encrypt']);})
+       .then(function(aes){return S.encrypt({name:'AES-GCM',iv:iv},aes,enc(JSON.stringify(obj)));})
+       .then(function(ct){return S.exportKey('jwk',kp.publicKey).then(function(j){return {v:1,k:{x:j.x,y:j.y},iv:b64(iv),ct:b64(new Uint8Array(ct))};});})
+       .then(function(body){return fetch(BOX.u+(BOX.u.indexOf('?')>=0?'&':'?')+'a=put&b='+encodeURIComponent(BOX.b),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});})
+       .then(function(r){return r.json().then(function(j){cb(r.ok&&j&&j.ok?null:((j&&j.error)||('the box answered '+r.status)));},function(){cb('the box answered '+r.status);});})
+       .catch(function(e){cb(String((e&&e.message)||e||'no connection'));});}catch(e){cb(String((e&&e.message)||e));}}
     function mailto(code){var subj=(P.subject||((P.title||P.inst)+' answers'))+(P.student?' · '+P.student:'');
       var body='Answers from the respondent page, for Form '+(P.form||'')+'. Paste this whole message into "Collect responses" on the form.\n\n'+code+'\n\n'+(ex.name&&ex.name.value?'From: '+ex.name.value+'\n':'')+'Sent '+new Date().toLocaleDateString();
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
@@ -225,7 +239,14 @@
         warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+((scale.kind==='yn'&&!(scale.labels&&(scale.labels[2]===null||scale.labels[2]==='')))||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
         warnedMiss=need.length?'':miss.join(',');if(!again)return;}
       else{warn.hidden=true;warnedMiss='';}
-      lastCode=encode(response());codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
+      var resp=response();
+      if(BOX&&!sending){sending=true;send.disabled=true;send.textContent='Sending\u2026';done.hidden=false;done.className='done';done.innerHTML='Sending your answers\u2026';
+        sendBox(resp,function(err){sending=false;send.disabled=false;send.textContent='Send my answers to '+(P.bcba||'the BCBA');
+          if(!err){sent=true;done.className='done';done.innerHTML='<b>Sent.</b> Your answers went to '+esc(P.bcba||'the BCBA')+'. Thank you; you can close this page.';codeBox.hidden=true;row2.hidden=true;send.hidden=true;return;}
+          lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;ml.href=mailto(lastCode);ml.hidden=false;
+          done.className='warn';done.innerHTML='<b>The reply box could not be reached</b> ('+esc(err)+'). Press <b>Open the email</b> below to send your answers by email to '+esc(P.email||'the BCBA')+' instead, or try Send again in a moment.';
+          ml.firstChild.textContent='Open the email';});return;}
+      lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
       done.innerHTML='<b>Your email program should open now</b> with the message to '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+'. Press Send there. If nothing opened, copy the code below and paste it into an email to '+esc(P.email||'the BCBA')+', or save it as a file and attach it.';
       ml.href=mailto(lastCode);
       if(ml.href.length>(P.mailMax||1800)){done.className='warn';done.innerHTML='<b>Your answers are longer than an email link can carry</b> ('+ml.href.length.toLocaleString()+' characters, where about '+(P.mailMax||1800).toLocaleString()+' fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to '+esc(P.email||'the BCBA')+', or <b>Copy the code</b> and paste it into the message.';
@@ -246,10 +267,10 @@
   U.invite=function(o){o=o||{};var d=document,ls=(o.links||[]).filter(function(l){return l&&l.url;});if(!ls.length)return;
     var P=U.payloadFromHash(ls[0].url)||{};
     var title=o.title||P.title||P.inst||'questionnaire',who=String(P.student||o.student||'').replace(/\s*\((?:ID|id)[^)]*\)\s*/,'').trim(),bcba=P.bcba||o.bcba||'',due=P.due||'';
-    var defn=!!(P.confirm||P.def);
+    var defn=!!(P.confirm||P.def),boxed=!!(P.box&&P.box.u);   /* v21.65 the answers come back through the reply box */
     var KEY='nbh-invite-to';var last='';try{last=localStorage.getItem(KEY)||'';}catch(e){}
     var subj=title+(who?' · '+who:'');
-    var body='Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. Your answers come back to me by email.'+(due?' Please send it by '+due+'.':'')+'\n\n'+
+    var body='Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.')+(due?' Please send it by '+due+'.':'')+'\n\n'+
       (ls.length===1?ls[0].url:ls.map(function(l){return (l.label||'Questionnaire')+':\n'+l.url;}).join('\n\n'))+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
     var dlg=d.createElement('dialog');dlg.className='nbh-inv';dlg.setAttribute('aria-labelledby','nbhInvT');
     var css='.nbh-inv{max-width:560px;width:calc(100vw - 32px);max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;border:0;border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#1b2430}'+
