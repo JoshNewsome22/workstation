@@ -554,6 +554,7 @@ nav.rail{width:var(--rail);flex:0 0 var(--rail);background:#fff;border-right:1px
 .dot{width:8px;height:8px;border-radius:50%;background:var(--rule2);flex:0 0 auto}
 .dot.open{background:var(--flag)}
 .dot.done{background:var(--ok)}
+.dot.saved{background:transparent;box-shadow:inset 0 0 0 2px var(--ok)}   /* v21.61 in the case, not loaded yet */
 .item.cur .dot{box-shadow:0 0 0 2px rgba(255,255,255,.35)}
 
 /* ---- the stage: the bar over the form, and the form ---- */
@@ -655,6 +656,8 @@ body.ws-split #paneBar{display:flex;align-items:stretch;background:var(--shade);
 body.ws-split .frames{display:flex;align-items:stretch}
 body.ws-split .frames iframe{position:static;flex:1 1 0;min-width:0;height:auto;border-left:1px solid var(--rule)}
 body.ws-split .frames iframe[hidden]{display:none}
+/* v21.61 a form of the case loading quietly: laid out at the stage's size, off screen, until it is opened or put away */
+body.ws-split .frames iframe.warm,.frames iframe.warm{position:absolute;left:-30000px;top:0;width:100%;height:100%;visibility:hidden;flex:none;min-height:0}
 @media (max-width:900px){
   body.ws-split .frames{flex-direction:column}
   body.ws-split .frames iframe{border-left:0;border-top:1px solid var(--rule);min-height:0}
@@ -955,7 +958,7 @@ const FORMS=[
   ['IM-1','Self-Injury Trauma Scale and Injury Monitoring','IM-1_Self-Injury-Trauma-and-Injury-Monitoring_v2026-10.html']]]
 ];
 const ALL=FORMS.flatMap(g=>g[1]);
-const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:''};
+const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:'',pending:{},caseOrder:[],lastInput:0,warm:null};   /* v21.61 pending: the case's forms not loaded yet, as the file holds them */
 
 /* ================= the one-file edition =================
    build-single.py packs the 45 forms, the PDF tools and a copy of this page
@@ -1036,20 +1039,20 @@ function parseCase(text){
    a control, and the list had no key that opened anything. */
 function railHTML(){
   return FORMS.map(([stage,items],gi)=>{
-    const open=items.filter(([id])=>state.status[id]).length;
+    const open=items.filter(([id])=>state.status[id]||state.pending[id]).length;   /* v21.61 listed from a case file too */
     return `<div class="stage" id="stage${gi}">${stage}<span class="cnt">${open} of ${items.length} open</span></div>`+
     `<ul class="stagelist" aria-labelledby="stage${gi}">`+
     items.map(([id,name,file])=>{
-      const st=state.status[id];
-      const cls=st? (st.filled>4?'done':'open') : '';
-      const lab=st? `${st.filled}` : '';
+      const st=state.status[id],pd=!st&&state.pending[id];   /* v21.61 pd: in the case, not loaded yet */
+      const cls=st? (st.filled>4?'done':'open') : pd?'saved':'';
+      const lab=st? `${st.filled}` : pd?`${pd.status.filled}`:'';
       const odd=state.mismatch[id]?'<span class="dirty" role="img" aria-label="holds a different student name" title="This form holds a different student name">&#9888;</span>':'';
       const cur=state.cur===id, stop=cur||(!state.cur&&id===ALL[0][0]);
       return `<li class="item${cur?' cur':''}" data-id="${id}">
         <input type="checkbox" data-tick="${id}" ${state.ticked[id]?'checked':''} aria-label="Include Form ${id} in the master print">
         <button type="button" class="open" data-open="${id}" tabindex="${stop?0:-1}"${cur?' aria-current="true"':''}>
         <span class="dot ${cls}" aria-hidden="true"></span>${odd}
-        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st${st?' has':''}">${lab}${st?'<span class="sr"> fields filled</span>':'<span class="sr">not opened</span>'}</span></button></li>`;
+        <span class="fid">${id}</span><span class="nm">${name}</span><span class="st${(st||pd)?' has':''}">${lab}${st?'<span class="sr"> fields filled</span>':pd?'<span class="sr"> fields filled in the case file; loads when opened</span>':'<span class="sr">not opened</span>'}</span></button></li>`;
     }).join('')+'</ul>';
   }).join('');
 }
@@ -1174,7 +1177,7 @@ const onNarrow=()=>{
 };
 if(NARROW.addEventListener) NARROW.addEventListener('change',onNarrow); else if(NARROW.addListener) NARROW.addListener(onNarrow);
 $('#tickUsed').addEventListener('click',()=>{
-  ALL.forEach(([id])=>{const st=state.status[id];state.ticked[id]=!!(st&&st.filled>4);});
+  ALL.forEach(([id])=>{const st=state.status[id]||(state.pending[id]||{}).status;state.ticked[id]=!!(st&&st.filled>4);});   /* v21.61 the case's forms not loaded yet count */
   renderRail();
 });
 $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
@@ -1183,10 +1186,82 @@ $('#tickNone').addEventListener('click',()=>{state.ticked={};renderRail();});
 /* v21.43: a frame put out of sight (display:none) comes back at the top of its page: the browser drops its scroll. It is
    kept as the frame is hidden and put back as it shows again, so a form asked to open its partner (Form TE-1's link
    panel), or one gone back to, is where it was */
-function hideFrame(fr){if(!fr||fr.hidden)return;try{const w=fr.contentWindow;if(w)fr.__sy=[w.scrollX||0,w.scrollY||0];}catch(e){}fr.hidden=true;}
-function showFrame(fr){if(!fr||!fr.hidden)return;fr.hidden=false;const s=fr.__sy;if(!s||(!s[0]&&!s[1]))return;
+function hideFrame(fr){if(!fr||fr.hidden||fr.classList.contains('warm'))return;   /* v21.61 a form loading quietly stays laid out off screen */try{const w=fr.contentWindow;if(w)fr.__sy=[w.scrollX||0,w.scrollY||0];}catch(e){}fr.hidden=true;}
+function showFrame(fr){if(!fr)return;if(fr.classList.contains('warm')){fr.classList.remove('warm');fr.hidden=false;return;}if(!fr.hidden)return;fr.hidden=false;const s=fr.__sy;if(!s||(!s[0]&&!s[1]))return;
   const back=()=>{try{const w=fr.contentWindow;if(w&&!fr.hidden&&!w.scrollX&&!w.scrollY)w.scrollTo(s[0],s[1]);}catch(e){}};
   requestAnimationFrame(()=>requestAnimationFrame(back));}
+/* ================= v21.61 a case opens at once =================
+   A case used to open one form after another: each form's page loaded, waited, was filled from the file and asked to confirm
+   before the next began, some twenty seconds for ten forms on a computer and twice that on an iPad. Now Open case lists the
+   case's forms in the rail at once (a hollow green dot, with the count of fields the file holds), keeps what the file holds for
+   each one (state.pending), and loads one form: the one that was open when the case was saved, or the first in the file. Every
+   other form is loaded and filled the first time it is opened, or quietly in the background meanwhile, one at a time, laid out
+   off screen, and only while nothing has been typed or tapped for a moment (warmTick). Save case, Autosave, Close case, the
+   spreadsheet, the master print and the relay between forms take the forms still waiting from what the file holds, so nothing
+   is lost by not opening them; a form opened later is filled before the student's details and the case are pushed into it. */
+const inCase=id=>!!(state.frames[id]||state.pending[id]);
+function filledOf(snap){const d=(snap&&snap.data)||{};let n=0;for(const k in d){const v=d[k];if(v===true||(typeof v==='string'&&v.trim()))n++;}return n;}
+function snapSig(snap){let h=5381;const s=JSON.stringify((snap&&snap.data)||{});for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return 'f'+(h>>>0).toString(36)+'.'+s.length;}
+function setPending(id,title,snap,copy){state.pending[id]={title:title||'',snap:snap||{total:0,data:{}},copy:!!copy,status:{filled:filledOf(snap),sig:snapSig(snap)}};}
+const caseClean=()=>!!(state.lastSig&&state.lastSig===caseSig());
+/* the case's forms in the order of the file, then any opened since */
+function orderCase(f){const o={};state.caseOrder.concat(Object.keys(f)).forEach(id=>{if(f[id]&&!o[id])o[id]=f[id];});return o;}
+function makeFrame(id,rec){
+  const fr=document.createElement('iframe');
+  fr.title=rec[1]+' (Form '+id+')';
+  fr.__settle=new Promise(res=>{fr.__settleRes=res;});
+  loadFrame(fr,rec[2]);
+  fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; afterLoad(id,fr); setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); setTimeout(()=>pushFactsTo(fr),1100); });
+  $('#frames').appendChild(fr);
+  state.frames[id]=fr;
+  return fr;
+}
+/* the form has loaded: filled from the case file when it is one of the case's forms still waiting; then the frame has settled */
+async function afterLoad(id,fr){
+  touchHook(fr);
+  let rep=null;
+  const P=state.pending[id];
+  if(P&&state.frames[id]===fr){
+    const clean=caseClean();
+    await new Promise(r=>setTimeout(r,150));
+    const r=await grab(id,'restore',{snap:P.snap,copy:P.copy},20000,fr);
+    if(state.pending[id]===P)delete state.pending[id];
+    rep={notes:[]};
+    if(!r)rep.notes.push(id+': did not answer');
+    else{const R=r.report||{};
+      if(R.positionalSkipped)rep.notes.push(id+': '+R.positionalSkipped+' field'+(R.positionalSkipped===1?'':'s')+' could not be placed because the form has changed shape');
+      if(R.unknown)rep.notes.push(id+': '+R.unknown+' saved field'+(R.unknown===1?'':'s')+' no longer exist on this form');}
+    /* the case was as its file when this form arrived: it still is (the form's own state now stands for what the file held) */
+    if(clean){state.lastSig=caseSig();state.autoSig=caseSig();}
+    if(id==='TD-1')['GB-1','EB-1'].forEach(k=>{if(state.frames[k])pushPlanTo(k);});
+    renderRail();if(typeof paintSave==='function')paintSave();
+    if(rep.notes.length&&!state.restoring)wsUI.toast('Form '+id+', filled from the case: '+rep.notes.join('; '),{kind:'warn',ms:9000});
+  }
+  if(fr.__settleRes)fr.__settleRes(rep);
+}
+function settled(id,ms){const fr=state.frames[id];if(!fr)return Promise.resolve(null);return Promise.race([fr.__settle||Promise.resolve(null),new Promise(r=>setTimeout(()=>r(null),ms||25000))]);}
+/* typing or tapping, in the workstation or inside a form, holds the quiet loading back for a moment */
+function touchHook(fr){try{const d=fr.contentDocument;if(!d||d.__nbhWarmHook)return;d.__nbhWarmHook=true;const m=()=>{state.lastInput=Date.now();};d.addEventListener('pointerdown',m,true);d.addEventListener('keydown',m,true);}catch(e){}}
+['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{state.lastInput=Date.now();},true));
+/* the quiet loading of the case's other forms: one at a time, off screen, while nothing is being typed */
+function warmStart(){if(state.warm)return;state.warm={timer:setInterval(warmTick,500),busy:false};}
+function warmStop(){if(state.warm){clearInterval(state.warm.timer);state.warm=null;}}
+function warmTick(){
+  const W=state.warm;if(!W||W.busy)return;
+  const next=state.caseOrder.find(id=>state.pending[id]&&!state.frames[id]);
+  if(!next){warmStop();return;}
+  if(document.hidden||Date.now()-state.lastInput<1500)return;
+  W.busy=true;warmForm(next).catch(()=>{}).then(()=>{W.busy=false;});
+}
+async function warmForm(id){
+  const rec=ALL.find(f=>f[0]===id);if(!rec)return null;
+  let fr=state.frames[id];
+  if(!fr){fr=makeFrame(id,rec);fr.classList.add('warm');}
+  await settled(id);
+  /* settled and still not opened: put away as any other form not on screen */
+  if(state.frames[id]===fr&&fr.classList.contains('warm')){fr.classList.remove('warm');fr.hidden=true;}
+  return state.frames[id]===fr?fr:null;
+}
 function openForm(id,keepRail){
   const rec=ALL.find(f=>f[0]===id); if(!rec)return;
   const prevCur=state.cur;   /* v21.32 side by side */
@@ -1196,14 +1271,7 @@ function openForm(id,keepRail){
   Object.entries(state.frames).forEach(([k,f])=>{if(k!==id)hideFrame(f);});
   $('#blank').style.display='none';
   let fr=state.frames[id];
-  if(!fr){
-    fr=document.createElement('iframe');
-    fr.title=rec[1]+' (Form '+id+')';
-    loadFrame(fr,rec[2]);
-    fr.addEventListener('load',()=>{ fr.dataset.loaded='1'; setTimeout(()=>{ pushPacketTo(fr); ask(fr,'status'); },500); setTimeout(()=>pushFactsTo(fr),1100); });
-    $('#frames').appendChild(fr);
-    state.frames[id]=fr;
-  }
+  if(!fr)fr=makeFrame(id,rec);   /* v21.61 (a form of the case not loaded yet is filled from the file as it loads: afterLoad) */
   showFrame(fr);
   $('#crumbTitle').textContent=rec[1];
   $('#crumbId').textContent='Form '+id;
@@ -1362,18 +1430,20 @@ function flattenSnap(snap){
 }
 async function exportCaseXlsx(opt){
   opt=opt||{};
-  const order=FORMS.flatMap(([st,items])=>items.map(([id])=>id)).filter(id=>state.frames[id]);
+  const order=FORMS.flatMap(([st,items])=>items.map(([id])=>id)).filter(id=>inCase(id));   /* v21.61 the case's forms not loaded yet too */
   if(!order.length){wsUI.alert('Open the forms you want in the spreadsheet first.\nEach open form becomes a sheet of the workbook.');return null;}
   const p=packet(),used=new Set(),sheets=[],index=[['Form','Title','Sheet','Taken from','Fields filled']];
   const sheetName=(id,suffix)=>{let n=(id+(suffix?' '+suffix:'')).replace(/[\[\]:*?\/\\]/g,'-').slice(0,31);let k=2;while(used.has(n)){n=n.slice(0,28)+' '+(k++);}used.add(n);return n;};
   const titleOf=id=>{for(const [st,items] of FORMS)for(const [i,name] of items)if(i===id)return name;return id;};
   for(const id of order){
-    const r=await grab(id,'csv?',null,4000);let rows=null,src='';
+    let rows=null,src='';
+    if(state.pending[id]){rows=flattenSnap(state.pending[id].snap);src='every field by name, as the case file holds it';}   /* v21.61 not loaded yet */
+    else{const r=await grab(id,'csv?',null,4000);
     if(r&&r.csv){rows=parseCsv(r.csv);src="the form's CSV export";}
-    if(!rows||rows.length<2){const sn=await grab(id,'snapshot',null,8000);if(sn&&sn.snap){rows=flattenSnap(sn.snap);src='every field by name';}}
+    if(!rows||rows.length<2){const sn=await grab(id,'snapshot',null,8000);if(sn&&sn.snap){rows=flattenSnap(sn.snap);src='every field by name';}}}
     if(!rows||rows.length<2)continue;
     const nm=sheetName(id,src==='every field by name'?'fields':'');sheets.push({name:nm,rows});
-    index.push([id,titleOf(id),nm,src,String((state.status[id]||{}).filled||'')]);
+    index.push([id,titleOf(id),nm,src,String(((state.status[id]||(state.pending[id]||{}).status)||{}).filled||'')]);
   }
   if(!sheets.length){wsUI.alert('None of the open forms holds anything to write yet.');return null;}
   const stamp=new Date();
@@ -1823,6 +1893,7 @@ async function relay(ev,d){
   if(!from){relayNote('',want,'ignored: not a form frame');return;}
   if(!ALL.some(f=>f[0]===want)){relayNote(from,want,'ignored: not a form of this workstation');return;}
   const answer=m=>{try{src.postMessage(Object.assign({nbh:'answer',want},m),'*');}catch(e){}};
+  if(state.pending[want]){const P=state.pending[want];relayNote(from,want,'answered from the case file');answer({ok:true,title:String(P.title||''),snap:P.snap});return;}   /* v21.61 not loaded yet */
   if(!state.frames[want]){relayNote(from,want,'not open');answer({ok:false,why:'not open'});return;}
   const busy=state.relayBusy||(state.relayBusy={}),key=from+'>'+want;
   if(!busy[key]){relayNote(from,want,'reading');busy[key]=grab(want,'snapshot',null,8000).then(r=>{delete busy[key];return r;});}
@@ -2208,7 +2279,7 @@ function staticize(html){
 $('#masterPrint').addEventListener('click',async()=>{
   const chosen=ALL.filter(([id])=>state.ticked[id]);
   if(!chosen.length){alert('Tick at least one form in the list first.');return;}
-  const notOpen=chosen.filter(([id])=>!state.frames[id]);
+  const notOpen=chosen.filter(([id])=>!inCase(id));   /* v21.61 a form of the case not loaded yet is loaded below, filled from the file */
   const names=notOpen.map(f=>f[0]).join(', ');
   if(notOpen.length&&state.blankOk!==names){
     if(!(await wsUI.confirm(notOpen.length+' ticked form'+(notOpen.length===1?' is':'s are')+' not open yet: print '+(notOpen.length===1?'it':'them')+' blank?\n'+
@@ -2231,6 +2302,7 @@ $('#masterPrint').addEventListener('click',async()=>{
   const parts=[];
   for(const [id,name] of chosen){
     let fr=state.frames[id];
+    if(state.pending[id]){fr=await warmForm(id);}   /* v21.61 one of the case's forms: loaded and filled now, and kept */
     if(!fr){                                     // load it just long enough to collect
       const rec=ALL.find(f=>f[0]===id);
       fr=document.createElement('iframe');fr.hidden=true;loadFrame(fr,rec[2]);
@@ -2601,7 +2673,7 @@ $('#diag').addEventListener('click',()=>{
    ['Page origin',String(window.origin),'"null" is normal when opened from a drive'],
    ['Secure context',String(window.isSecureContext),''],
    ['Folder access API',('showDirectoryPicker' in window)?'present':'absent','Not used yet; would allow reading a student folder'],
-   ['Forms open',String(Object.keys(state.frames).length),''],
+   ['Forms open',String(Object.keys(state.frames).length)+(Object.keys(state.pending).length?' ('+Object.keys(state.pending).length+' more in the case, not loaded yet)':''),''],
    ['Forms responding',String(Object.keys(state.status).length),'Each open form answers a status ping every few seconds'],
    ['Packet page headers',heads,'The practice, the student and "Page N of M" on every sheet of the master print need Chrome or Edge 131 or later. Anything else prints the pages without them.'],
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
@@ -2654,7 +2726,7 @@ const CASE_MAP=[
   [['PR-1','periodic review: continue, change, fade, exit'],['RM-1','relapse mitigation and inoculation before fading'],['SV-1','social validity after'],['DD-1','the graph decides']]]
 ];
 function caseMapHtml(){
-  const f=(id,why)=>`<button type="button" class="${state.frames[id]?'on':''}" data-open="${id}" title="Open Form ${id}"><b>${id}</b><span>${esc((ALL.find(x=>x[0]===id)||[,id])[1])}</span><i>&middot; ${esc(why)}</i></button>`;
+  const f=(id,why)=>`<button type="button" class="${inCase(id)?'on':''}" data-open="${id}" title="Open Form ${id}"><b>${id}</b><span>${esc((ALL.find(x=>x[0]===id)||[,id])[1])}</span><i>&middot; ${esc(why)}</i></button>`;
   return '<p class="cm-lead">Which form when, from referral to exit. Any form can be skipped when the case does not need it; a button opens the form. The ones already open are marked.</p>'+
     CASE_MAP.map((s,i)=>`<div class="cm-stage"><div class="cm-n">${i+1}</div><h3>${esc(s[0])}</h3><p class="cm-when">${esc(s[1])}</p><div class="cm-forms">${s[2].map(x=>f(x[0],x[1])).join('')}</div></div>`).join('')+
     '<div class="cm-box"><h3>What carries forward on its own</h3><ul>'+
@@ -2684,7 +2756,7 @@ $('#help').addEventListener('click',()=>{
      '<p>The target behaviors (Form TB-1), the function (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1) are read from those forms while they are open and go into every other open form, into empty fields and empty behavior tables only; the line under the bar shows what has been read, and <b>Send to open forms</b> sends it again. They are saved in the packet and case files.</p>'+
      '<p><b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case. The bar also shows what is due: review dates and next steps the open forms hold, within two weeks or past.</p>')+
    fold('Saving, autosave and closing the tab',
-     '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> loads it back. <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
+     '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> lists its forms at once and fills each from the file as you open it (the form you were on opens first; the rest load quietly behind it). <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the iPad\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
@@ -3226,8 +3298,8 @@ async function autoSave(force){
   const A=state.auto;
   if(!autoOn()||state.restoring)return;
   if(A.busy){A.again=A.again==='force'||force?'force':'soft';return;}
-  const ids=Object.keys(state.frames);
-  if(!ids.length)return;
+  const kept=Object.keys(state.pending),ids=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: the case's forms not filled from the file yet, as it holds them */
+  if(!ids.length&&!kept.length)return;
   const sig=caseSig();
   if(!force&&(sig===state.autoSig||Date.now()-A.last<AUTO.every/2))return;   // nothing new, or written in the last ten seconds
   A.busy=true;A.last=Date.now();
@@ -3238,8 +3310,9 @@ async function autoSave(force){
       if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||''};
       if((r&&r.edited)||(state.status[id]||{}).edited)work=true;
     }
+    kept.forEach(id=>{const P=state.pending[id],sn=P.snap||{};A.forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||''};});
     if(!work){state.autoSig=sig;return;}   // forms only opened, nothing done in them yet: no copy
-    Object.keys(A.forms).forEach(id=>{if(!state.frames[id])delete A.forms[id];});   // a form closed since is not in the copy
+    Object.keys(A.forms).forEach(id=>{if(!inCase(id))delete A.forms[id];});   // a form closed since is not in the copy
     const forms={};
     Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
     if(!Object.keys(forms).length)return;
@@ -3278,7 +3351,7 @@ function autoFiled(verified,sig){
 async function autoSeal(){
   const A=state.auto,idle=async()=>{for(let i=0;i<80&&A.busy;i++)await new Promise(r=>setTimeout(r,100));};
   await idle();
-  if(Object.keys(state.frames).length&&autoOn()){A.last=0;await autoSave(true);await idle();}
+  if((Object.keys(state.frames).length||Object.keys(state.pending).length)&&autoOn()){A.last=0;await autoSave(true);await idle();}
   A.seq++;A.key=null;A.student='';A.forms={};A.continued={};A.fileAt=null;A.written='';A.at=null;A.prev=null;
 }
 /* v21.44 (A8): a name corrected on the bar after Autosave had written: its next copy went under the corrected name (as
@@ -3311,6 +3384,7 @@ function autoLast(){
       else if(A.forms[id])forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});
       if((state.status[id]||{}).edited)work=true;
     }
+    Object.keys(state.pending).forEach(id=>{const P=state.pending[id],sn=P.snap||{};forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||'',continued:A.continued[id]||null};});   /* v21.61 */
     if(!work||!Object.keys(forms).length)return;
     const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'');
     if(h===A.written)return;
@@ -3444,8 +3518,9 @@ async function autoOffer(){
 
 /* shared by Open case and the autosave offer, so both behave identically */
 async function loadCase(d,how){
+  warmStop();
   Object.values(state.frames).forEach(fr=>fr.remove());
-  state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;
+  state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.pending={};state.caseOrder=[];
   state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
   $('#blank').style.display='';document.body.classList.remove('has-form');
   setFull(false,true);   /* v21.44 (A8) with no form open; the forms reopened below bring it back if it is the setting */
@@ -3458,25 +3533,17 @@ async function loadCase(d,how){
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
   barAutoFold();
   const ids=Object.keys(d.forms),notes=[];
+  /* v21.61 the case's forms are listed at once, each kept as the file holds it; one is loaded now (the form that was open
+     when the case was saved, else the first in the file), the others as they are opened, and quietly meanwhile */
   for(const id of ids){
     if(!ALL.find(x=>x[0]===id)){notes.push(id+': not in this workstation');continue;}
-    openForm(id);
-    const fr=state.frames[id];
-    await new Promise(res=>{
-      if(fr.dataset.loaded)return res();
-      fr.addEventListener('load',()=>setTimeout(res,600),{once:true});
-      setTimeout(res,6000);
-    });
-    const rep=await grab(id,'restore',{snap:d.forms[id].snap,copy:how==='autosave'});
-    if(!rep)notes.push(id+': did not answer');
-    else{
-      const R=rep.report||{};
-      if(R.positionalSkipped)notes.push(id+': '+R.positionalSkipped+' field'+
-        (R.positionalSkipped===1?'':'s')+' could not be placed because the form has changed shape');
-      if(R.unknown)notes.push(id+': '+R.unknown+' saved field'+(R.unknown===1?'':'s')+' no longer exist on this form');
-    }
+    setPending(id,d.forms[id].title,d.forms[id].snap,how==='autosave');state.caseOrder.push(id);
   }
-  renderRail(); say(ids.length+' forms restored');
+  renderRail();
+  const first=(d.cur&&state.pending[d.cur])?d.cur:state.caseOrder[0];
+  if(first){openForm(first);const rep=await settled(first,12000);if(rep&&rep.notes)notes.push(...rep.notes);}
+  renderRail(); say(state.caseOrder.length+' form'+(state.caseOrder.length===1?'':'s')+' in the case'+(first?'; Form '+first+' open, the others as you open them':''));
+  warmStart();
   return notes;
 }
 function say(msg){const l=$('#live');if(l)l.textContent=msg;}
@@ -3835,10 +3902,14 @@ setInterval(checkIdentity,2500);
 /* ================= the case file =================
    Each form still writes its own file. This writes one file for the whole case,
    so a packet in progress is a single thing to keep, reopen and hand over. */
-function caseSig(){
+function caseSig(over){
   /* the count of filled fields alone missed an edit that changed a value
-     without emptying or filling a field; the forms now report a fingerprint */
-  return Object.keys(state.status).sort().map(k=>k+':'+state.status[k].filled+':'+(state.status[k].sig||'')).join('|');
+     without emptying or filling a field; the forms now report a fingerprint.
+     v21.61 over: a form's state as it was read for a file; the case's forms not loaded yet count as the file holds them */
+  const S=Object.assign({},state.status,over||{});
+  const a=Object.keys(S).sort().map(k=>k+':'+S[k].filled+':'+(S[k].sig||''));
+  const b=Object.keys(state.pending||{}).filter(k=>!S[k]).sort().map(k=>k+':'+state.pending[k].status.filled+':'+state.pending[k].status.sig+':file');
+  return a.concat(b).join('|');
 }
 /* Ask one form for something and wait for its answer. Requests used to be
    filed under the form's name alone, so an autosave asking a form for a
@@ -3866,7 +3937,7 @@ async function caseHtml(p,forms){
   const shell=await EMBED.shell();
   if(!shell)throw new Error('This file does not carry a copy of the workstation page, so it cannot write a case file.');
   const id=state.caseId||(state.caseId=caseUid());
-  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined};
+  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined,cur:state.cur||undefined};   /* v21.61 cur: the form to open first */
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
@@ -3890,8 +3961,8 @@ async function writeCase(handle,text,name){
    false when nothing was written, the person backed out, a form was left out, or an edit came while the file was
    being written. What it says and writes is the same as before. */
 async function saveCase(){
-  const open=Object.keys(state.frames);
-  if(!open.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
+  const kept=Object.keys(state.pending),open=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: written as the file holds them */
+  if(!open.length&&!kept.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
   const p=packet();
   if(!p.client){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return false;}
   /* the one-file edition asks where to write before anything else: a browser
@@ -3908,17 +3979,19 @@ async function saveCase(){
      case is marked saved (and this tab's safety copy ended) only when every form is in the file */
   /* each answer carries the form's state as it was read (status), so the saved mark is the file's, not the moment the
      last form answered: an edit made while a slow form is waited for stays unsaved */
-  const forms={},late=[],stat={};
+  let forms={};const late=[],stat={};
   for(const id of open){
     let r=await grab(id,'snapshot');
     if(!(r&&r.snap)){btn.textContent='Waiting for '+id+'\u2026';r=await grab(id,'snapshot',null,20000);}
     if(r&&r.snap){forms[id]={title:r.title,snap:r.snap};stat[id]=r.status||state.status[id];}else late.push(id);
   }
+  kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});   /* v21.61 as the file holds them */
+  forms=orderCase(forms);
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
   const nm=caseName(p);
-  const fileSig=Object.keys(state.status).sort().map(k=>{const t=stat[k]||state.status[k]||{};return k+':'+t.filled+':'+(t.sig||'');}).join('|');
+  const fileSig=caseSig(stat);
   const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
   const left=late.length?'\n\nNOT IN THIS FILE: Form'+(late.length>1?'s ':' ')+late.join(', ')+' did not answer in time'+late.map(inCopy).join('')+'. The case is not marked saved; press Save case again in a moment.':'';
   const after=()=>{
@@ -3944,7 +4017,7 @@ async function saveCase(){
   }
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(
-    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined},null,1)],
+    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined,cur:state.cur||undefined},null,1)],
     {type:'application/json'}));
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
@@ -3965,6 +4038,7 @@ async function clearCase(){
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;
   state.whoIs={};state.details={};state.split=[];
+  warmStop();state.pending={};state.caseOrder=[];   /* v21.61 */
   $('#blank').style.display='';document.body.classList.remove('has-form');
   setFull(false,true);
   layoutFrames();   /* side by side ends with the forms */
@@ -3993,7 +4067,7 @@ $('#closeCase').addEventListener('click',async()=>{
     wsUI.toast('The case is closed and saved. Start the next one: enter the student, then open forms.',{kind:'ok',ms:9000});
     say('Case closed and saved');return;
   }
-  const had=open.length||typed;
+  const had=open.length||Object.keys(state.pending).length||typed;
   await clearCase();
   wsUI.toast(had?'The case is closed; there was nothing to save. Start the next one: enter the student, then open forms.':'Nothing was open. Start a case: enter the student, then open forms.',{ms:8000});
   say('Case closed');
@@ -4005,8 +4079,8 @@ async function openCaseText(text,handle){
       alert('That file is not a case file.');return;
     }
     const ids=Object.keys(d.forms);
-    if(Object.keys(state.frames).length&&
-       !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be loaded and filled.\n'+
+    if((Object.keys(state.frames).length||Object.keys(state.pending).length)&&
+       !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be listed and filled from the file as you open them.\n'+
                 'What is open now is replaced.',{ok:'Open case'})))return;
     const btn=$('#openCase');btn.textContent='Opening\u2026';btn.disabled=true;
     await autoSeal();   /* v21.44 the copy of what is open now is written and left alone; this case gets a copy of its own */
@@ -4018,7 +4092,8 @@ async function openCaseText(text,handle){
     /* a one-file case opened here is the file later saves go back into */
     state.caseHandle=handle||null;
     state.caseId=d.id||null;
-    alert('Case opened: '+ids.length+' form'+(ids.length===1?'':'s')+'.'+
+    const shown=state.cur&&ids.includes(state.cur)?state.cur:'';
+    alert('Case opened: '+ids.length+' form'+(ids.length===1?'':'s')+'.'+(shown&&ids.length>1?' Form '+shown+' is open; the others are filled from the file as you open them, and load quietly meanwhile.':'')+
       (notes.length?'\n\nWorth knowing:\n\u2022 '+notes.join('\n\u2022 '):''));
 }
 $('#openCase').addEventListener('click',async()=>{

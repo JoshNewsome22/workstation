@@ -66,7 +66,7 @@ that work silently. The browser now stops and asks — unless the case has been
 saved and nothing has changed since, in which case it closes without fuss.
 
 **One case file.** `Save case` writes every open form plus the student details
-into a single file; `Open case` loads it back, opening each form and filling it.
+into a single file; `Open case` lists its forms at once and fills each from the file as it is opened (v21.61).
 One file to keep or hand over instead of a folder of twenty-seven. Each form's own
 `Save data` button is untouched. Since the third pass (below) the case file carries
 each form's own saved data, so rows, steps, sessions and incidents added while
@@ -7905,3 +7905,31 @@ which inlines TK-1's `walk-hands.js` and SM-1's copy of TK-1's player between it
 `qa/ra1-walk-test.js` (the build, the example's verdicts on the copies, the form unchanged, the panel's numbers through the
 sessions, the hands in and out of the frame, the camera on each paper, captions and chapters, five painted frames, leaving the
 view) and by `qa/ra1-regress.js` as before; the offline copy counts 63 files.
+
+### v21.61: a case opens at once
+
+Open case used to rebuild the workstation one form at a time: each form's page loaded, the shell waited, filled it from the
+file through the form's own Open data path and waited again for it to confirm, then began the next. Measured with ten filled
+forms on a computer that was twenty seconds, of which the forms' own loading was one to five; an iPad took two or three times
+as long. Now Open case (and Restore from Autosave, and a one-file case opened by double-click) lists the case's forms in the
+rail at once and loads one: the form that was open when the case was saved (the file now carries `cur`), else the first in
+the file. The others show with a hollow green dot and the count of fields the file holds for them; each is loaded and filled
+the first time it is opened (about a second and a half on a computer, a few on an iPad), and meanwhile they load quietly in
+the background, one at a time, laid out off screen, only while nothing has been typed or tapped for a moment, so typing in
+the open form is never held up. A form opened later is filled from the file before the student's details and the case are
+pushed into it, as before.
+
+Nothing waits on a form being loaded: Save case writes the forms not loaded yet exactly as the file held them (and no
+longer waits on them), Autosave's copy and the last-moment stash carry them, Close case clears them, the case as a
+spreadsheet takes their fields from the file, the master print loads and fills a ticked one before collecting it, and a form
+asking the relay for a partner not loaded yet is answered from the file. The Save case dot and the unload guard count a
+waiting form as the file holds it, so a case just opened is not "unsaved", and a form that loads quietly later does not make
+it so; an edit in any open form does, as before. The Diagnostics row "Forms open" says how many are still waiting.
+
+Shell parts (`NBH-Workstation/index.html`): `state.pending` (what the file holds for each waiting form, with its field count
+and a fingerprint), `loadCase`, `makeFrame` and `afterLoad` (the restore on load), `warmStart`/`warmTick`/`warmForm` (the
+quiet loading; `.warm` frames sit off screen), `settled`, `caseSig(over)`, and the Save case, Autosave, Close case,
+spreadsheet, master print and relay paths named above. Checked by `qa/case-open-test.js` (a six-form case: the open within a
+few seconds with one form loaded, the rail, a tap, typing holding the quiet loading, the rest loading one by one and put
+away, Save case right after Open case with five forms still waiting, Close case, a file without `cur`, an edit and a save
+followed by quiet loads), and by the case, Close case, autosave, sprint-a2 and sprint-a4 suites as before.
