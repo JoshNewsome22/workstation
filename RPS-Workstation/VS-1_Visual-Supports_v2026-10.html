@@ -898,6 +898,8 @@ td input,td select{max-width:100%}
 
 <!-- the shared pictogram library, one file beside the forms (see tools/pictos); the one-file edition inlines it -->
 <script src="nbh-pictos.js"></script>
+<!-- v21.62 My pictures: the practice's own pictures, taken with the camera (tools/blocks/nbh-pictures.js, one copy beside the forms; the one-file edition inlines it); without it the picker has no My pictures -->
+<script src="nbh-pictures.js"></script>
 <div class="toolbar noprint">
   <div class="tgroup"><span>View</span><div class="row">
     <div class="seg" id="viewSeg">
@@ -1039,9 +1041,9 @@ td input,td select{max-width:100%}
   <!-- ===================== LIBRARY ===================== -->
   <section class="only-library">
     <h2 class="nbh-band">Pictures</h2>
-    <p class="hint">The shared pictogram library (OpenMoji, CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts, and the practice&rsquo;s own cards and pictures), and this student&rsquo;s own photos. A photo is resized to a thumbnail and stored inside the saved file, so a real toilet, the student&rsquo;s own water bottle or the actual bus can stand in for the drawing wherever a picture is used. Real photos are the most concrete picture type and the first step of the picture hierarchy; line drawings are more abstract.</p>
+    <p class="hint">The shared pictogram library (OpenMoji, CC BY-SA 4.0, with a few pictograms composed from OpenMoji parts, and the practice&rsquo;s own cards and pictures), and this student&rsquo;s own photos. A photo is resized to a thumbnail and stored inside the saved file, so a real toilet, the student&rsquo;s own water bottle or the actual bus can stand in for the drawing wherever a picture is used. Real photos are the most concrete picture type and the first step of the picture hierarchy; line drawings are more abstract. <b>My pictures</b> (v21.62) are the practice&rsquo;s own: a photo of a real item, taken with the camera on a plain sheet of paper, has its background cut away here on this device and is kept in this browser for every form and every student; <b>Take a photo</b> adds one and uses it here, <b>My pictures</b> names, removes, saves and opens them.</p>
     <h3>My photos</h3>
-    <div class="tools"><button class="tool" id="phAdd">Upload a photo</button></div>
+    <div class="tools"><button class="tool" id="phAdd">Upload a photo</button><button class="tool" id="phCam">Take a photo</button><button class="tool" id="phMine">My pictures&hellip;</button></div>
     <div class="photos" id="photos"></div>
     <h3>The library</h3>
     <div class="tools"><select id="libCat" aria-label="Category"></select><input id="libQ" placeholder="search" aria-label="Search the library" style="font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px"></div>
@@ -3042,6 +3044,12 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.quer
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=v=>{const n=parseFloat(String(v==null?'':v));return isFinite(n)?n:null;};
 const KEYS=window.NBH_PICTO_ORDER||[],P=window.NBH_PICTOS||{},CATS=window.NBH_PICTO_CATS||{};
+/* (v21.62) My pictures: the practice's own pictures, taken with the camera (nbh-pictures.js beside the forms; without it the
+   picker has no My pictures). A chosen one is copied into this form's photos at 400 px, with its library id (lib), so the saved
+   file carries it and a device opening the file adds it to its own My pictures (absorb, in renderAll). */
+const MINE=!!window.NBHPIC;
+function libPhoto(pic,cb){const have=S.photos.find(p=>p.lib===pic.id);if(have){cb(have);return;}NBHPIC.toPhoto(pic,400,580000).then(p=>{S.photos.push(p);cb(p);});}
+if(MINE)NBHPIC.on(()=>{const d=$('#pickDlg');if(d&&d.open)d.grid();});
 
 /* ---- v21.33: a row can be deleted anywhere. delCell() renders the x at the end of a row; rowDel() removes
    the row and re-keys whatever else refers to it by index, after a confirm when the row holds an entry. ---- */
@@ -3068,23 +3076,30 @@ function lbl(o){if(!o)return '';if(o.l)return o.l;if(o.ph){const p=photo(o.ph);r
 function pickCell(r,i,o){return '<div class="pick" data-r="'+r+'" data-i="'+i+'"><span class="pv">'+pic(o,'')+'</span><button type="button" data-pick="1">'+(o&&(o.k||o.ph)?'Change':'Choose')+'</button></div>';}
 let PICK=null;
 function pickDlg(){let d=$('#pickDlg');if(d)return d;d=document.createElement('dialog');d.id='pickDlg';
-  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option><option value="_photos">My photos</option>'+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button><button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form\'s file.</div>';
+  d.innerHTML='<div class="pd-head"><b>Choose a picture</b><select id="pdCat"><option value="">All</option><option value="_photos">My photos</option>'+(MINE?'<option value="_mine">My pictures</option>':'')+Object.entries(CATS).map(([k,v])=>'<option value="'+k+'">'+esc(v)+'</option>').join('')+'</select><input id="pdQ" placeholder="search" aria-label="Search pictures"><button type="button" id="pdPhoto">Upload a photo</button>'+(MINE?'<button type="button" id="pdCam">Take a photo</button><button type="button" id="pdLib">My pictures\u2026</button>':'')+'<button type="button" id="pdNone">No picture</button><button type="button" id="pdClose">Close</button></div><div class="pd-grid" id="pdGrid"></div><div class="pd-foot">'+esc(window.NBH_PICTO_LICENSE||'')+' Photos are resized to thumbnails and saved inside the form\'s file.</div>';
   document.body.appendChild(d);
   const grid=()=>{const c=$('#pdCat').value,q=($('#pdQ').value||'').toLowerCase();let h='';
     if(!c||c==='_photos')h+=S.photos.filter(p=>!q||p.label.toLowerCase().includes(q)).map(p=>'<button type="button" data-ph="'+p.id+'"><img src="'+p.img+'" alt="">'+esc(p.label||'photo')+'</button>').join('');
-    if(c!=='_photos')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+(P[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
+    if(MINE&&(!c||c==='_mine'))h+=NBHPIC.buttons(NBHPIC.list().filter(p=>!q||(p.label||'').toLowerCase().includes(q)));
+    if(c!=='_photos'&&c!=='_mine')h+=KEYS.filter(k=>(!c||P[k].c===c)&&(!q||P[k].l.toLowerCase().includes(q)||k.includes(q))).map(k=>'<button type="button" data-k="'+k+'">'+picto(k,'')+esc(P[k].l)+(P[k].o?'<span class="pd-yours">yours</span>':'')+'</button>').join('');
     $('#pdGrid').innerHTML=(window.NBH_PICTOS_MISSING?'<p class="hint">The picture library file <b>nbh-pictos.js</b> is not beside this form, so no pictures are listed. Put it in the same folder as the form, or use a photo.</p>':'')+(h||'<p class="hint">Nothing matches.</p>');};
   $('#pdCat',d).addEventListener('change',grid);$('#pdQ',d).addEventListener('input',grid);
-  $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k],button[data-ph]');if(!b||!PICK)return;const o=PICK.arr[PICK.i];if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
+  $('#pdGrid',d).addEventListener('click',e=>{const b=e.target.closest('button[data-k],button[data-ph],button[data-lib]');if(!b||!PICK)return;const o=PICK.arr[PICK.i];
+    if(b.dataset.lib){const pic=NBHPIC.get(b.dataset.lib);if(!pic)return;libPhoto(pic,p=>{o.ph=p.id;o.k='';d.close();PICK.done();});return;}
+    if(b.dataset.k){o.k=b.dataset.k;o.ph='';}else{o.ph=b.dataset.ph;o.k='';}d.close();PICK.done();});
   $('#pdNone',d).addEventListener('click',()=>{if(PICK){PICK.arr[PICK.i].k='';PICK.arr[PICK.i].ph='';d.close();PICK.done();}});
   $('#pdClose',d).addEventListener('click',()=>d.close());
   $('#pdPhoto',d).addEventListener('click',()=>$('#photoIn').click());
+  if(MINE){$('#pdCam',d).addEventListener('click',()=>{NBHPIC.open({use:!!PICK}).then(pic=>{if(!pic)return;if(PICK){const o=PICK.arr[PICK.i];libPhoto(pic,p=>{o.ph=p.id;o.k='';d.close();PICK.done();});}else{grid();renderLib();}});});
+    $('#pdLib',d).addEventListener('click',()=>{NBHPIC.manage().then(grid);});}
   d.grid=grid;return d;}
-function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(d.showModal)d.showModal();else d.setAttribute('open','');}
+function openPick(arr,i,done){PICK={arr,i,done};const d=pickDlg();$('#pdQ',d).value='';d.grid();if(MINE)NBHPIC.all();if(d.showModal)d.showModal();else d.setAttribute('open','');}
 function addPhoto(file,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,320/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);
   const p={id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:(file.name||'photo').replace(/\.[^.]+$/,'').slice(0,30),img:c.toDataURL('image/jpeg',0.82)};S.photos.push(p);cb(p);};im.src=r.result;};r.readAsDataURL(file);}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;addPhoto(f,p=>{if(PICK){PICK.arr[PICK.i].ph=p.id;PICK.arr[PICK.i].k='';const d=$('#pickDlg');if(d&&d.open)d.close();PICK.done();PICK=null;}renderLib();});});
 $('#phAdd').addEventListener('click',()=>{PICK=null;$('#photoIn').click();});
+if(MINE){$('#phCam').addEventListener('click',()=>{NBHPIC.open({}).then(pic=>{if(pic)libPhoto(pic,()=>renderLib());});});$('#phMine').addEventListener('click',()=>{NBHPIC.manage();});}
+else ['#phCam','#phMine'].forEach(k=>{const b=$(k);if(b)b.hidden=true;});
 document.addEventListener('click',e=>{const b=e.target.closest('.pick button[data-pick]');if(!b)return;const g=b.parentNode,r=g.dataset.r,i=+g.dataset.i;openPick(S[r],i,()=>renderAll());});
 
 /* ---------------- views ---------------- */
@@ -3245,7 +3260,7 @@ function probeFits(v){const out=$('#'+v+'Out');if(!out||!out.offsetWidth)return 
   return r;}
 function renderOut(){renderBoard();renderCards();renderRules();renderStrips();if(!LAY)sheetNotes(true);}
 function bindMeta(){$$('[data-m]').forEach(el=>{if(S.meta[el.dataset.m]!==undefined)el.value=S.meta[el.dataset.m];else if(el.tagName==='SELECT')S.meta[el.dataset.m]=el.value;else el.value='';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}
+function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();renderBoardTbl();renderCardsTbl();renderRulesTbl();renderStripTbls();renderLib();renderOut();}
 
 /* ---------------- printing ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -3287,7 +3302,7 @@ function fromFile(d){
   /* (A7) a file saved before the Sheets setting (or holding a value it does not know) opens as Automatic, whatever Sheets shows now */
   if(!/^(auto|full|turn)$/.test(o.meta.sheets))o.meta.sheets='auto';
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<600000;
-  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)})).filter(p=>p.id&&okImg(p.img)):[];
+  o.photos=Array.isArray(s.photos)?s.photos.slice(0,60).map(p=>Object.assign({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,30),img:str(p&&p.img)},/^m[a-z0-9]{1,24}$/.test(str(p&&p.lib))?{lib:str(p.lib)}:{})).filter(p=>p.id&&okImg(p.img)):[];   /* lib (v21.62): the My pictures id a copy came from */
   const ids=new Set(o.photos.map(p=>p.id));
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='on'?!!(x&&x[f]):str(x&&x[f]);});if(!P[r.k])r.k='';if(!ids.has(r.ph))r.ph='';return r;}):null;
   const b=arr('board',['k','ph','l'],30);if(b)o.board=b;const c=arr('cards',['k','ph','l','qty'],30);if(c&&c.length)o.cards=c;

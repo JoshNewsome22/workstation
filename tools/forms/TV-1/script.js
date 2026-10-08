@@ -708,6 +708,14 @@ let PICK=null;
    Form VS-1, the visual supports): the workstation hands over that form's own saved data (its photos, and the pictograms its
    cards use, drawn from the shared library), so nothing is uploaded twice. Only inside the workstation, with that form open. */
 let PICL=[];
+/* (v21.62) My pictures: the practice's own pictures, taken with the camera (nbh-pictures.js beside the forms; without it the
+   two buttons are hidden). A chosen one is kept with the pictures at its 600 px, with its library id (lib), so a device opening
+   the file adds it to its own My pictures (absorb, in renderAll). */
+const MINE=!!window.NBHPIC;
+function picShow(list,note){PICL=list.slice(0,120);$('#picNote').textContent=note;$('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+x.img+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
+if(MINE){$('#picMine').addEventListener('click',()=>{$('#picNote').textContent='Looking in My pictures\u2026';NBHPIC.all().then(a=>{const L=a.map(p=>({label:String(p.label||'picture').slice(0,40),img:p.img,kind:'mine',lib:p.id}));picShow(L,L.length?L.length+' in My pictures. Tap one.':'No pictures in My pictures yet: press Take a photo, and a photo of a real item on a plain sheet of paper becomes one.');});});
+  $('#picCam').addEventListener('click',()=>{NBHPIC.open({use:true}).then(pic=>{if(!pic||!PICK||PICK.logo)return;PICL=[{label:String(pic.label||'picture').slice(0,40),img:pic.img,kind:'mine',lib:pic.id}];picUse(0);});});}
+else ['#picCam','#picMine'].forEach(k=>{const b=$(k);if(b)b.hidden=true;});
 const framed=()=>{try{return window.parent&&window.parent!==window;}catch(e){return false;}};
 function picChoose(i,j){PICK={i,j};const d=$('#picDlg');if(!d||typeof d.showModal!=='function'){$('#photoIn').click();return;}
   PICL=[];$('#picGrid').innerHTML='';$('#picNote').textContent=framed()?'':'Open this form in the workstation, with Form TK-1 or VS-1 open too, to take their pictures.';
@@ -731,7 +739,7 @@ async function picFrom(id){const n=$('#picNote');n.textContent='Asking the works
   if(keys.length&&await pictosLoad()){keys.forEach(k=>{const P=window.NBH_PICTOS[k];if(P&&P.s)list.push({label:String(P.l||k).slice(0,40),img:svgUrl(P.s),kind:'pictogram'});});}
   PICL=list.slice(0,80);n.textContent=PICL.length?PICL.length+' picture'+(PICL.length===1?'':'s')+' in Form '+id+(keys.length&&!window.NBH_PICTOS?' (its pictograms need the library beside the forms)':'')+'. Tap one.':'Form '+id+' holds no pictures yet'+(keys.length?' (its pictograms need the library beside the forms, nbh-pictos.js)':'')+'.';
   $('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+x.img+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
-function picUse(k){const x=PICL[k];if(!x||!PICK||PICK.logo)return;const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push({id,label:x.label,img:x.img});
+function picUse(k){const x=PICL[k];if(!x||!PICK||PICK.logo)return;const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push(Object.assign({id,label:x.label,img:x.img},x.lib?{lib:x.lib}:{}));
   S.rows[PICK.i].pics[PICK.j].ph=id;if(!S.rows[PICK.i].pics[PICK.j].cap&&x.kind==='pictogram')S.rows[PICK.i].pics[PICK.j].cap=x.label;PICK=null;$('#picDlg').close();renderRows();syncState();}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const at=PICK;PICK=null;const r=new FileReader();
   r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,3840/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext('2d');g.drawImage(im,0,0,c.width,c.height);
@@ -889,7 +897,7 @@ $('#colReset').addEventListener('click',()=>{const n=LOOKC[S.meta.look]||LOOKC.c
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
-  o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];
+  o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>Object.assign({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)},/^m[a-z0-9]{1,24}$/.test(str(p&&p.lib))?{lib:str(p.lib)}:{})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];   /* lib (v21.62): the My pictures id a copy came from */
   const ids=new Set(o.photos.map(p=>p.id));
   o.rows=Array.isArray(s.rows)?s.rows.slice(0,600).map(r=>{r=r&&typeof r==='object'?r:{};const pics=Array.isArray(r.pics)?r.pics:[];
     return newRow(str(r.seg).slice(0,80),{say:str(r.say).slice(0,8000),tp:str(r.tp).slice(0,8000),cont:!!r.cont,title:str(r.title).slice(0,200),body:str(r.body).slice(0,4000),lay:LAYS.some(l=>l[0]===r.lay)?r.lay:'auto',ch:str(r.ch).slice(0,60),
@@ -975,7 +983,7 @@ window.__nbhViewFill=function(v){if(v!=='script')return null;return {filled:S.ro
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!=null&&S.meta[k]!=='')el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range')S.meta[k]=el.value;else el.value='';});
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();paintLogo();logoLine();chLine();renderRows();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
+function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();paintLogo();logoLine();chLine();renderRows();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 window.addEventListener('beforeprint',renderPrint);
 window.addEventListener('resize',()=>{clearTimeout(window.__tvRs);window.__tvRs=setTimeout(()=>{if(document.body.classList.contains('view-graphics'))gxRender();},200);});

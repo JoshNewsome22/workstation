@@ -37,6 +37,8 @@ PY
 )
 python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-09.html "$D" NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
 python3 tools/polish-one.py NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
+# v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
+cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
 # v21.44 the recorded narration, byte for byte, beside the form (its <script src> is in toolbar.html)
 cp tools/forms/TK-1/walk-audio.js NBH-Workstation/nbh-tk1-narration.js
 # v21.49 and the bus ride's narration, its own file (each under 1.9 MB; its <script src> is in toolbar.html too)
