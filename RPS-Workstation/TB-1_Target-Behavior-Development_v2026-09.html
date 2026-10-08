@@ -709,6 +709,12 @@ td input,td select{max-width:100%}
 #tgtWrap .card{scroll-margin-top:84px}
 @media (pointer:coarse){html #nbhUiDlg .u-f button{min-height:44px}}
 @media print{.tb1lib-host{display:none!important}}
+/* (v21.63) a candidate row's delete button; the bank dialog lives in a shadow root (#tb1BankHost), so its boxes are not the form's */
+.tb1-del{font:inherit;font-size:15px;line-height:1;padding:2px 7px;border:1px solid var(--rule-2);border-radius:3px;background:#fff;color:#8E2A2A;cursor:pointer;margin:0}
+.tb1-del:hover{background:var(--wash)}
+th.tb1-xh{width:34px}
+#tb1BankHost{display:block}
+@media print{#tb1BankHost,#sendRow,#selFromCand,#selNote{display:none!important}}
 /* (v21.43) paper: no resize grip in the corner of a box */
 @media print{textarea{resize:none}}
 </style>
@@ -880,6 +886,7 @@ td input,td select{max-width:100%}
       <th style="width:9%">Contacts natural reinforcement?</th>
       <th style="width:8%">Cusp?</th>
       <th>Decision</th>
+      <th class="noprint tb1-xh" aria-label="Delete"></th>
     </tr></thead>
     <tbody id="candBody"></tbody>
   </table></div>
@@ -887,11 +894,12 @@ td input,td select{max-width:100%}
   <div class="tb1lib-host noprint" id="tb1LibCand"></div>
 
   <h3 class="sub">Selected Targets for This Plan</h3>
-  <p class="method" style="margin-top:0">Carry each selected candidate to sheet 3 (if it is a set of forms) or directly to sheet 4 (if it is a single topography, a precursor, or a replacement behavior). Confirm every reduction target has a paired replacement. Set the number of targets in the toolbar.</p>
+  <p class="method" style="margin-top:0">Take the candidates marked Target below, or type each target. The Goes-to-sheet column follows the Type: a cluster (a set of forms) goes to sheet 3 first, anything else straight to sheet 4. Each row starts a card on the Definitions sheet with its label, type, urgency and paired replacement (a card edited there keeps its own words), and where the behavior library holds a starting definition for it, the card offers it. Confirm every reduction target has a paired replacement. The number of targets is set in the toolbar and grows to fit.</p>
   <div class="tb1-scroll" tabindex="0" role="region" aria-label="Selected targets, scrolls sideways"><table class="rank cmp" id="selTbl">
     <thead><tr><th class="n" style="width:5%">#</th><th>Target label</th><th style="width:20%">Type</th><th class="n" style="width:9%">Urgency</th><th style="width:24%">Paired replacement target</th><th style="width:12%">Goes to sheet</th></tr></thead>
     <tbody id="selBody"></tbody>
   </table></div>
+  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 0"><button class="tool" id="selFromCand" type="button" style="margin:0">Take the candidates marked Target</button><span id="selNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
   <div class="defs" style="margin-top:12px">
     <div class="drow"><div class="dlab">Selection rationale</div><div class="dval"><textarea name="m.rationale" placeholder="Why these targets and not the others; social validity input from teacher, family, and student"></textarea></div></div>
   </div>
@@ -918,6 +926,7 @@ td input,td select{max-width:100%}
   </div>
   <div class="bar nbh-band">Operational Definitions</div>
   <p class="method" style="margin:0 0 12px">One card per target: cluster, single topography, precursor, or replacement. Write examples and non-examples one per line; the counter reaches criterion at three or more. Function is recorded in its own field and never written into the definition.</p>
+  <div class="noprint" id="sendRow" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 12px"><button class="tool" id="sendTgt" type="button" style="margin:0">Send the targets to the other forms</button><span id="sendNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
   <div class="tb1lib-host noprint" id="tb1LibPanel"></div>
   <div id="tgtWrap"></div>
 <div id="rrbTpl" style="margin-top:14px">
@@ -3043,11 +3052,46 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 /* ---------- sheet 2 ---------- */
 let candN=0;
 function addCand(){const i=candN++;const tr=document.createElement('tr');
- tr.innerHTML=`<td class="n">${i+1}</td><td><textarea name="cand[${i}].beh"></textarea></td><td><input name="cand[${i}].by"></td><td><input name="cand[${i}].rate" placeholder="/day"></td><td class="n"><select name="cand[${i}].urg">${URG}</select></td><td><select name="cand[${i}].sig">${YN}</select></td><td><select name="cand[${i}].rel">${YN}</select></td><td><select name="cand[${i}].cusp">${YN}</select></td><td><select name="cand[${i}].dec"><option value=""></option><option>Target – cluster</option><option>Target – single topography</option><option>Target – precursor</option><option>Target – replacement</option><option>Monitor only</option><option>Not targeted</option></select></td>`;
+ tr.innerHTML=`<td class="n">${i+1}</td><td><textarea name="cand[${i}].beh"></textarea></td><td><input name="cand[${i}].by"></td><td><input name="cand[${i}].rate" placeholder="/day"></td><td class="n"><select name="cand[${i}].urg">${URG}</select></td><td><select name="cand[${i}].sig">${YN}</select></td><td><select name="cand[${i}].rel">${YN}</select></td><td><select name="cand[${i}].cusp">${YN}</select></td><td><select name="cand[${i}].dec"><option value=""></option><option>Target – cluster</option><option>Target – single topography</option><option>Target – precursor</option><option>Target – replacement</option><option>Monitor only</option><option>Not targeted</option></select></td><td class="n noprint"><button type="button" class="tb1-del" title="Delete this candidate" aria-label="Delete candidate ${i+1}">&times;</button></td>`;
  $('#candBody').appendChild(tr);}
 $('#addCand').addEventListener('click',addCand);
+/* (v21.63) a candidate row can be deleted: the rows below move up and are renumbered, so the fields stay cand[0] to cand[n-1]
+   and a saved file reopens with the rows that are left */
+function candRenum(){const rows=$$('#candBody tr');rows.forEach((tr,k)=>{tr.querySelector('td.n').textContent=k+1;tr.querySelectorAll('[name^="cand["]').forEach(el=>{el.name=el.name.replace(/^cand\[\d+\]/,'cand['+k+']');});const b=tr.querySelector('.tb1-del');if(b)b.setAttribute('aria-label','Delete candidate '+(k+1));});candN=rows.length;}
+$('#candBody').addEventListener('click',async e=>{const b=e.target.closest('.tb1-del');if(!b)return;const tr=b.closest('tr'),k=$$('#candBody tr').indexOf(tr);
+ if(Array.from(tr.querySelectorAll('[name]')).some(el=>String(el.value).trim())&&!(await nbhUI.confirm('Delete candidate '+(k+1)+'?\nIts row goes; the rows below move up.',{ok:'Delete',danger:true})))return;
+ tr.remove();candRenum();$('#candTbl').dispatchEvent(new Event('change',{bubbles:true}));});
 function renderSel(){const n=+$('#nTgt').value,body=$('#selBody');while(body.children.length>n)body.lastChild.remove();
- for(let i=body.children.length;i<n;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="n">${i+1}</td><td><input name="sel[${i}].lab" data-sel="${i}"></td><td><select name="sel[${i}].type">${TYPE}</select></td><td class="n"><select name="sel[${i}].urg">${URG}</select></td><td><input name="sel[${i}].rep"></td><td><select name="sel[${i}].to"><option value=""></option><option>3 then 4</option><option>4</option></select></td>`;body.appendChild(tr);}}
+ for(let i=body.children.length;i<n;i++){const tr=document.createElement('tr');tr.innerHTML=`<td class="n">${i+1}</td><td><input name="sel[${i}].lab" data-sel="${i}"></td><td><select name="sel[${i}].type">${TYPE}</select></td><td class="n"><select name="sel[${i}].urg">${URG}</select></td><td><input name="sel[${i}].rep"></td><td><select name="sel[${i}].to"><option value=""></option><option>3 then 4</option><option>4</option></select></td>`;body.appendChild(tr);SELV[i]={lab:'',type:'',urg:'',rep:''};}}
+/* (v21.63) the Goes-to-sheet column follows the Type (a cluster goes to sheet 3 first, anything else straight to sheet 4; set by
+   hand, it stays until the type changes), and each selected target starts its card on sheet 4: the label, type, urgency and paired
+   replacement go to the card while the card's own field is empty or still holds what this table last gave it, so a card edited on
+   sheet 4 keeps its own words. A card whose label the library knows is offered the library's starting definition (libSuggest). */
+const SEL_KEYS={lab:'lab',type:'type',urg:'urg',rep:'rep'};let SELV={};
+const selTo=type=>!type?'':/^Cluster/.test(type)?'3 then 4':'4';
+const selField=(i,k)=>document.querySelector(`[name="sel[${i}].${k}"]`);
+const plainFire=el=>['input','change'].forEach(tp=>{try{el.dispatchEvent(new Event(tp,{bubbles:true}));}catch(x){}});
+function selInit(){SELV={};$$('#selBody tr').forEach((tr,i)=>{SELV[i]={};Object.keys(SEL_KEYS).forEach(k=>{const el=selField(i,k);SELV[i][k]=el?el.value:'';});});}
+function selFollow(i){const t=selField(i,'type'),to=selField(i,'to');if(t&&to&&!to.value&&t.value)to.value=selTo(t.value);}
+function selSync(i,k){const src=selField(i,k),dst=libField(i,SEL_KEYS[k]);if(!src)return;const cur=src.value,prev=(SELV[i]||{})[k]||'';SELV[i]=SELV[i]||{};SELV[i][k]=cur;
+ if(!dst||(dst.value&&dst.value!==prev)||dst.value===cur)return;if(dst.tagName==='SELECT'&&cur&&![...dst.options].some(o=>o.value===cur))return;
+ dst.value=cur;plainFire(dst);if(k==='lab')libSuggest(i);}
+$('#selBody').addEventListener('input',e=>{const m=/^sel\[(\d+)\]\.(lab|rep)$/.exec(e.target.name||'');if(m)selSync(+m[1],m[2]);});
+$('#selBody').addEventListener('change',e=>{const m=/^sel\[(\d+)\]\.(type|urg)$/.exec(e.target.name||'');if(!m)return;const i=+m[1];
+ if(m[2]==='type'){const to=selField(i,'to');if(to&&to.value!==selTo(e.target.value)){to.value=selTo(e.target.value);to.dispatchEvent(new Event('change',{bubbles:true}));}}selSync(i,m[2]);});
+/* the candidates decided Target become the selected targets, in order, in the empty rows; the count of targets grows to fit (up to the form's ten) */
+const DEC_TYPE={'cluster':'Cluster (multiple topographies)','single topography':'Single topography','precursor':'Precursor','replacement':'Replacement / alternative behavior'};
+$('#selFromCand').addEventListener('click',()=>{
+ const have=new Set($$('#selBody tr').map((tr,i)=>libFold(val(`sel[${i}].lab`))).filter(Boolean)),list=[];
+ for(let i=0;i<candN;i++){const beh=val(`cand[${i}].beh`),dec=val(`cand[${i}].dec`);if(!beh||!/^Target/.test(dec)||have.has(libFold(beh)))continue;
+  list.push({beh,type:DEC_TYPE[dec.replace(/^Target\s*[\u2013-]\s*/,'').toLowerCase()]||'',urg:val(`cand[${i}].urg`)});have.add(libFold(beh));}
+ const note=$('#selNote');if(!list.length){note.textContent=candN?'Every candidate marked Target is in the targets already. Set a candidate\u2019s Decision to one of the Target choices first.':'List the candidates first, and set the Decision of each to one of the Target choices.';return;}
+ const inp=$('#nTgt'),mx=+inp.max||10;let empty=$$('#selBody tr').map((tr,i)=>i).filter(i=>!val(`sel[${i}].lab`));
+ const need=list.length-empty.length;if(need>0){const n=Math.min(mx,+inp.value+need);if(n!==+inp.value){inp.value=n;inp.dispatchEvent(new Event('change',{bubbles:true}));empty=$$('#selBody tr').map((tr,i)=>i).filter(i=>!val(`sel[${i}].lab`));}}
+ const put=[],left=[];list.forEach(x=>{const i=empty.shift();if(i===undefined){left.push(x.beh);return;}
+  const set=(k,v)=>{const el=selField(i,k);if(!el)return;if(el.tagName==='SELECT'&&v&&![...el.options].some(o=>o.value===v))return;el.value=v;el.dispatchEvent(new Event(el.tagName==='SELECT'?'change':'input',{bubbles:true}));};
+  set('lab',x.beh);set('type',x.type);set('urg',x.urg);put.push(i+1);});
+ note.textContent=(put.length?put.length+(put.length===1?' candidate':' candidates')+' added to the targets (row'+(put.length===1?' ':'s ')+put.join(', ')+'): the card'+(put.length===1?'':'s')+' on the Definitions sheet took the label'+(put.length===1?'':'s')+'.':'')+(left.length?' Left out, beyond the form\u2019s '+mx+' targets: '+left.join(', ')+'.':'');});
 
 /* ---------- sheet 3 ---------- */
 function clusCard(c){const d=document.createElement('div');d.className='card';d.dataset.clus=c;
@@ -3089,7 +3133,8 @@ function checkClus(c){const rows=$$('#clusBody'+c+' tr');const ms=[];
 document.addEventListener('click',e=>{const b=e.target.closest('[data-addtop]');if(b){addTop(+b.dataset.addtop);}});
 document.addEventListener('input',e=>{const card=e.target.closest('#clusWrap .card');if(card)checkClus(+card.dataset.clus);
  const t=e.target.closest('#tgtWrap .card');if(t){const i=+t.dataset.tgt;if(e.target.name===`tgt[${i}].lab`){tgtTitle(i);buildQC();}if(e.target.name===`tgt[${i}].ex`)cnt(i,'ex');if(e.target.name===`tgt[${i}].nex`)cnt(i,'nex');}});
-document.addEventListener('change',e=>{const card=e.target.closest('#clusWrap .card');if(card)checkClus(+card.dataset.clus);});
+document.addEventListener('change',e=>{const card=e.target.closest('#clusWrap .card');if(card)checkClus(+card.dataset.clus);
+ const t=e.target.closest('#tgtWrap .card');if(t&&/\.(lab|def)$/.test(e.target.name||''))libSuggest(+t.dataset.tgt);});   /* v21.63 */
 
 /* ---------- sheet 4 ---------- */
 function tgtCard(t){const d=document.createElement('div');d.className='card';d.dataset.tgt=t;
@@ -3228,7 +3273,22 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
 .v li{margin:2px 0}
 .fxn{margin:5px 0 0;font-size:12px;color:var(--nbh-muted,#54676f)}
 @media (pointer:coarse){input[type=search],select,button{min-height:44px}button.lnk{min-height:44px;display:inline-flex;align-items:center}.acts button{min-height:44px}.meta{margin-top:2px}}
-@media (max-width:600px){input[type=search],select{font-size:16px}.row>*,.load>*{flex:1 1 100%}.var{flex-wrap:wrap}.var select{flex:1 1 auto}.btns button{flex:1 1 100%}.btns .sub{max-width:none}.r{flex-direction:column}.k{flex:none;border-right:0;border-bottom:1px solid var(--nbh-rule,#cfdad8)}}`;
+@media (max-width:600px){input[type=search],select{font-size:16px}.row>*,.load>*{flex:1 1 100%}.var{flex-wrap:wrap}.var select{flex:1 1 auto}.btns button{flex:1 1 100%}.btns .sub{max-width:none}.r{flex-direction:column}.k{flex:none;border-right:0;border-bottom:1px solid var(--nbh-rule,#cfdad8)}}
+.offer{margin:8px 0 0;padding:7px 10px;border-left:3px solid var(--nbh-teal,#76a2a3);background:#fff;font-size:12.5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.offer .ot{flex:1 1 220px}
+.mine{margin:7px 0 0;font-size:12px}
+.bankrow{margin:0 0 8px;font-size:12.5px;line-height:1.5}.bankrow .bn{color:var(--nbh-muted,#54676f)}
+.minep{font-size:12px;color:var(--nbh-muted,#54676f);margin:4px 0 8px}
+dialog.bkd{border:1px solid var(--nbh-rule,#cfdad8);border-radius:8px;padding:0;width:min(560px,96vw);max-width:96vw;background:#fff;color:var(--nbh-ink,#1a2933)}
+dialog.bkd::backdrop{background:rgba(20,40,50,.45)}
+.bk{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.bk h3{margin:0;font-size:16px;font-weight:600;color:var(--nbh-navy,#182e43)}
+.bk label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--nbh-muted,#54676f)}
+.bk input[type=text],.bk textarea{font:inherit;font-size:13px;color:var(--nbh-ink,#1a2933);border:1px solid var(--nbh-field,#b7c8c5);border-radius:var(--nbh-radius,6px);padding:6px 10px;min-height:36px;background:#fff}
+.bk textarea{resize:vertical;min-height:52px}
+.bk input[type=text]:focus,.bk textarea:focus{outline:none;border-color:var(--nbh-focus,#2f7fa8);box-shadow:0 0 0 3px var(--nbh-focus-soft,rgba(47,127,168,.26))}
+.bk .bkp{font-size:12px;color:var(--nbh-muted,#54676f);line-height:1.5}.bk .bkp:empty{display:none}
+.bk .bkb{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}`;
 /* ---------- sheet 4: the behavior library (v21.43) ----------
    TB1_LIB (the script element "tb1-lib" above, written by tools/blocks/patch-tb1-library.py from
    tools/blocks/tb1-behavior-library.json) holds starting definitions for reduction targets. Each target card gets a
@@ -3242,6 +3302,7 @@ details.about>p{margin:6px 0 0;padding:8px 12px;border-left:3px solid var(--nbh-
    dots, the unsaved-work guard and the shell's change fingerprint all read every input, select and textarea in the
    document, so a search box there would be saved, counted and taken for an edit. Inside a shadow root it is not. */
 const LIB=(typeof TB1_LIB!=='undefined'&&TB1_LIB&&Array.isArray(TB1_LIB.entries)&&TB1_LIB.entries.length)?TB1_LIB:null;
+const LIB_BUILTIN=LIB?LIB.entries.slice():[],LIB_PICKS=[],bank={list:[]};   /* v21.63 the built-in entries; the pickers to refill when the bank changes; my bank's entries */
 const LIB_ON=!!(LIB&&document.head&&document.head.attachShadow);
 const LIB_KEYS=['lab','type','style','dim','def','tops','ex','nex','border','excl','on','off','unit'];   /* the card's own order */
 const LIB_FIELD={lab:'Label',type:'Type',style:'Definition style',dim:'Dimension or sampling method',unit:'Counting unit / episode rule',
@@ -3445,6 +3506,8 @@ function libRow(host,t){if(!LIB_ON||!host||host.shadowRoot)return;
 <select class="pick" aria-label="Starting definitions for target ${t+1}"></select>
 <label class="var" hidden><span>Definition</span><select class="vs"><option value="topo">Topographical</option><option value="func">${LIB_FUNC}</option></select></label>
 <button type="button" class="go primary" disabled>Load into this card</button></div>
+<div class="offer" hidden><span class="ot"></span><button type="button" class="ostart primary">Start from it</button><button type="button" class="lnk oread">Read it</button></div>
+<div class="mine"><button type="button" class="lnk bank">Save this definition to my bank</button></div>
 <div class="meta" hidden><span class="mt"></span> <button type="button" class="lnk read">Read the full entry</button></div>
 <div class="done" hidden aria-live="polite"><p class="msg"></p><div class="cn" hidden><div class="cnh">Clinical note <span>shown here only: not loaded into the card, not printed</span></div><div class="ct"></div></div>
 <div class="acts"><button type="button" class="undo">Undo the load</button><span class="nou" hidden>Undo is off once the card is edited.</span><button type="button" class="hide">Hide this note</button></div></div>`;
@@ -3455,7 +3518,7 @@ function libRow(host,t){if(!LIB_ON||!host||host.shadowRoot)return;
  const sync=()=>{const e=libById[pick.value];go.disabled=!e;vw.hidden=!(e&&e.fdef);if(!(e&&e.fdef))vs.value='topo';meta.hidden=!e;
   if(e){vs.options[0].textContent=e.style;const f=vs.value==='func'&&!!e.fdef;
    $r('.mt').textContent=[e.cat,e.type,f&&e.fdim?e.fdim:e.dim].join(' \u00b7 ')+(e.fdef?(f?' \u00b7 the functional (outcome-defined) version':' \u00b7 also offers a functional (outcome-defined) version'):'')+'.';}};
- q.addEventListener('input',()=>{libFill(pick,q.value,pick.value);sync();});
+ q.addEventListener('input',()=>{libFill(pick,q.value,pick.value);sync();});LIB_PICKS.push(()=>{libFill(pick,q.value,pick.value);sync();});
  q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();(pick.value?go:pick).focus();}});
  pick.addEventListener('change',sync);vs.addEventListener('change',sync);
  go.addEventListener('click',async()=>{const e=libById[pick.value];if(busy||!e)return;busy=true;try{await libLoad(t,e,vs.value);}finally{busy=false;}});
@@ -3465,7 +3528,14 @@ function libRow(host,t){if(!LIB_ON||!host||host.shadowRoot)return;
   msg.textContent=left.length?'The load was undone, except '+libAnd(left)+', which changed after the load and '+(left.length>1?'are':'is')+' left as it is now.':'The load was undone: the fields are as they were before it.';
   cn.hidden=true;undo.hidden=true;nou.hidden=true;try{q.focus();}catch(x){}});
  $r('.hide').addEventListener('click',()=>{done.hidden=true;try{(go.disabled?pick:go).focus();}catch(x){}});
- libRows[t]={
+ /* (v21.63) the label names a behavior the library (or the bank) knows, and the definition is still empty: offer it */
+ const offer=$r('.offer'),ot=$r('.ot');
+ const suggest=()=>{const lab=val(`tgt[${t}].lab`);const e=lab&&!val(`tgt[${t}].def`)?libBest(lab):null;if(!e){offer.hidden=true;return;}
+  if(pick.value!==e.id){q.value='';libFill(pick,'',e.id);sync();}ot.textContent=(e.mine?'Your bank has':'The library has')+' a starting definition for \u201c'+lab+'\u201d: '+libPick(e)+'.';offer.hidden=false;};
+ $r('.ostart').addEventListener('click',async()=>{const e=libById[pick.value]||libBest(val(`tgt[${t}].lab`));if(!e||busy)return;busy=true;try{await libLoad(t,e,'topo');}finally{busy=false;}suggest();});
+ $r('.oread').addEventListener('click',()=>{const e=libById[pick.value];if(e&&libPanelApi)libPanelApi.open(e.id,t,'topo');});
+ $r('.bank').addEventListener('click',()=>bankSave(t));
+ libRows[t]={suggest,
   loaded(e,v,mode,rec,n,info){if(n)before=rec;   /* a load that changed nothing keeps the undo of the one before it */
    cur={post:post()};q.value='';libFill(pick,'',e.id);vs.value=(v==='func'&&e.fdef)?'func':'topo';sync();
    const fn=v==='func'&&!!e.fdef,lead=document.createElement('b');msg.textContent='';
@@ -3488,6 +3558,7 @@ function libPanel(host){if(!LIB_ON||!host||host.shadowRoot)return;
  const R=libShadow(host),N=LIB.entries.length,G=libGroups(LIB.entries),d=document.createElement('details');d.className='pan';
  d.innerHTML=`<summary><span class="t">Behavior library</span> <span class="n">(${N} starting definitions)</span></summary>
 <div class="body"><p class="intro">Tap an entry to read it, then load it into a target card: only the definition fields are filled, and text already typed is replaced only if you say so.</p>
+<p class="bankrow"><b>My bank:</b> <span class="bn"></span> <button type="button" class="lnk bsave">Save the bank to a file</button> <button type="button" class="lnk bopen">Open a bank file</button><input type="file" class="bin" accept="application/json,.json" hidden></p>
 <details class="about"><summary>How the entries are written</summary><p></p></details>
 <div class="row"><input type="search" class="q" placeholder="Search: hitting, head banging, pica, bolting\u2026" aria-label="Search the behavior library" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
 <select class="cat" aria-label="Category"><option value="">All categories (${N})</option>${G.map(g=>`<option value="${esc(g.cat)}">${esc(g.cat)} (${g.list.length})</option>`).join('')}</select></div>
@@ -3496,10 +3567,14 @@ function libPanel(host){if(!LIB_ON||!host||host.shadowRoot)return;
  const $p=s=>d.querySelector(s),q=$p('.q'),cat=$p('.cat'),cntEl=$p('.cnt'),listEl=$p('.list'),det=$p('.detail');
  const about=$p('details.about');if(LIB.note)about.querySelector('p').textContent=LIB.note;else about.hidden=true;
  let cur='',back=null,lastQ=null,lastC=null;
+ /* (v21.63) the categories and the bank's line, redrawn when the bank changes */
+ const catFill=()=>{const v=cat.value,n=LIB.entries.length,g=libGroups(LIB.entries);cat.innerHTML=`<option value="">All categories (${n})</option>`+g.map(x=>`<option value="${esc(x.cat)}">${esc(x.cat)} (${x.list.length})</option>`).join('');cat.value=g.some(x=>x.cat===v)?v:'';
+  const bn=$p('.bn');if(bn)bn.textContent=bank.list.length?bank.list.length+' definition'+(bank.list.length===1?'':'s')+' of your own, kept in this browser for every student and offered first in every search here.':'none yet. On any target card, \u201cSave this definition to my bank\u201d keeps it here for every student, and a search finds it first.';};
+ LIB_PICKS.push(()=>{catFill();draw();if(cur&&!libById[cur])show('');});
  /* each category's header and its entries share one box, so a header scrolls away with its group instead of
     stacking under the next one; a new search or category starts the list at its top */
  function draw(){const r=libSearch(q.value,cat.value),list=r.list;
-  cntEl.textContent=(list.length===N?N+' entries':list.length+' of '+N+' entries')+(!list.length?'':r.tier===2?', found in the definitions':r.tier===3?': no entry has every word, so the closest are listed':'');
+  const NN=LIB.entries.length;cntEl.textContent=(list.length===NN?NN+' entries':list.length+' of '+NN+' entries')+(!list.length?'':r.tier===2?', found in the definitions':r.tier===3?': no entry has every word, so the closest are listed':'');
   let h='';libGroups(list).forEach(g=>{h+=`<div class="grp" role="group" aria-label="${esc(g.cat)}"><div class="gh" aria-hidden="true">${esc(g.cat)}</div>`+g.list.map(e=>`<button type="button" class="it" data-id="${esc(e.id)}" aria-pressed="${e.id===cur?'true':'false'}"><span class="l">${esc(e.lab)}</span><span class="m">${esc(e.type)} \u00b7 ${esc(e.dim)}${e.fdef?' \u00b7 two definitions':''}</span></button>`).join('')+'</div>';});
   listEl.innerHTML=h||'<div class="none">Nothing matches. Try another word, or All categories.</div>';
   if(q.value!==lastQ||cat.value!==lastC){listEl.scrollTop=0;lastQ=q.value;lastC=cat.value;}}
@@ -3513,6 +3588,7 @@ function libPanel(host){if(!LIB_ON||!host||host.shadowRoot)return;
   det.hidden=!e;if(!e){det.innerHTML='';return;}
   const fx=!e.fdef?'':`<div class="vh">${LIB_FUNC} version</div><div class="rows">${row('Operational definition',e.fdef)}${row('Dimension or sampling method',e.fdim)}${row('Examples',e.fex,true)}${row('Non-examples',e.fnex,true)}${row('Counting unit / episode rule',e.funit)}${row('Onset criterion',e.fon)}${row('Offset criterion',e.foff)}${row('Borderline cases and decisions',e.fborder)}${row('Exclusions',e.fexcl)}</div><p class="fxn">Loaded together; every other field is the same as in the ${esc(e.style.toLowerCase())} version.</p>`;
   det.innerHTML=`${back!=null&&libField(back,'def')?`<button type="button" class="lnk back">Back to target ${back+1}</button>`:''}<h4>${esc(e.lab)}</h4><div class="dm">${[e.cat,e.type,e.style,e.dim].map(esc).join(' \u00b7 ')}</div>
+${e.mine?`<p class="minep">In my bank, saved ${esc(String(e.saved||'').slice(0,10))}. <button type="button" class="lnk bdel">Remove from my bank</button></p>`:''}
 <div class="load">${e.fdef?`<label class="var"><span>Definition to load</span><select class="vs"><option value="topo">${esc(e.style)}</option><option value="func">${LIB_FUNC}</option></select></label>`:''}<div class="btns"></div><div class="st" hidden aria-live="polite"></div></div>
 ${e.fdef?`<div class="vh">${esc(e.style)} version</div>`:''}<div class="rows">${row('Operational definition',e.def)}${row('Included topographies',e.tops,true)}${row('Examples',e.ex,true)}${row('Non-examples',e.nex,true)}${row('Counting unit / episode rule',e.unit)}${row('Onset criterion',e.on)}${row('Offset criterion',e.off)}${row('Borderline cases and decisions',e.border)}${row('Exclusions',e.excl)}${(e.aka||[]).length?row('Other names searched',e.aka.join(', ')):''}</div>
 ${fx}${e.note?`<div class="cn"><div class="cnh">Clinical note <span>shown on screen only: not loaded into the card, not printed</span></div><div class="ct">${esc(e.note)}</div></div>`:''}`;
@@ -3533,8 +3609,12 @@ ${fx}${e.note?`<div class="cn"><div class="cnh">Clinical note <span>shown on scr
  listEl.addEventListener('click',ev=>{const b=ev.target.closest('.it');if(!b)return;show(b.dataset.id);libGoTo($p('.load')||det,'nearest');});
  det.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
   if(b.classList.contains('ld'))load(+b.dataset.t,false);else if(b.classList.contains('add'))load(0,true);
+  else if(b.classList.contains('bdel')){const e=libById[cur];if(e&&e.mine)nbhUI.confirm('Remove \u201c'+e.lab+'\u201d from my bank?\nA card that loaded it keeps its text.',{ok:'Remove',danger:true}).then(ok=>{if(ok)bankRemove(e.id).then(()=>{show('');draw();});});}
   else if(b.classList.contains('back')){const t=back;libGoTo(document.querySelector(`#tgtWrap .card[data-tgt="${t}"]`));if(libRows[t])libRows[t].focus();}});
- draw();
+ draw();catFill();
+ $p('.bsave').addEventListener('click',()=>{const n=bankExport();$p('.bn').textContent=n?'Saved: a file with '+n+' definition'+(n===1?'':'s')+'. Open it on another device with Open a bank file.':'Nothing to save yet.';});
+ $p('.bopen').addEventListener('click',()=>$p('.bin').click());
+ $p('.bin').addEventListener('change',ev=>{const f=ev.target.files&&ev.target.files[0];ev.target.value='';if(!f)return;bankImport(f).then(r=>{$p('.bn').textContent=r.added+' definition'+(r.added===1?'':'s')+' added'+(r.kept?', '+r.kept+' already here':'')+'.';},e=>{$p('.bn').textContent=(e&&e.message)||'The file could not be opened.';});});
  libPanelApi={refresh:btns,
   open(id,from,v){if(!libById[id])return;d.open=true;back=(from==null||!isFinite(from))?null:+from;
    if(!libSearch(q.value,cat.value).list.some(x=>x.id===id)){q.value='';cat.value='';}draw();show(id);
@@ -3552,7 +3632,7 @@ function libCand(host){if(!LIB_ON||!host||host.shadowRoot)return;
  const $c=s=>w.querySelector(s),q=$c('.q'),pick=$c('.pick'),go=$c('.go');
  libFill(pick,'','');
  const sync=()=>{go.disabled=!libById[pick.value];};
- q.addEventListener('input',()=>{libFill(pick,q.value,pick.value);sync();});
+ q.addEventListener('input',()=>{libFill(pick,q.value,pick.value);sync();});LIB_PICKS.push(()=>{libFill(pick,q.value,pick.value);sync();});
  q.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();(pick.value?go:pick).focus();}});
  pick.addEventListener('change',sync);
  go.addEventListener('click',()=>{const e=libById[pick.value];if(!e)return;let i=-1;
@@ -3588,7 +3668,8 @@ function reset(){$('#candBody').innerHTML='';candN=0;$('#clusWrap').innerHTML=''
 function restore(d){reset();const c=d.counts||{};for(let i=0;i<(c.cand||6);i++)addCand();$('#nTgt').value=c.tgt||4;$('#nClus').value=c.clus?c.clus.length:2;renderTgt();renderClus();
  (c.clus||[]).forEach((n,ci)=>{const body=$('#clusBody'+ci);while(body&&body.children.length<n)addTop(ci);});
  const f=d.fields||{};Object.keys(f).forEach(k=>{if(k.startsWith('qc[')){qcState[k]=f[k];return}if(k.startsWith('ioa[')){ioaState[k]=f[k];return}const el=document.querySelector('[name="'+k+'"]');if(!el)return;if(el.type==='checkbox')el.checked=!!f[k];else el.value=f[k];});
- $$('#clusWrap .card').forEach(card=>checkClus(+card.dataset.clus));$$('#tgtWrap .card').forEach(card=>{const t=+card.dataset.tgt;tgtTitle(t);cnt(t,'ex');cnt(t,'nex');});buildQC();rrbSel();libPanelRefresh();}
+ $$('#clusWrap .card').forEach(card=>checkClus(+card.dataset.clus));$$('#tgtWrap .card').forEach(card=>{const t=+card.dataset.tgt;tgtTitle(t);cnt(t,'ex');cnt(t,'nex');});buildQC();rrbSel();libPanelRefresh();
+ selInit();$$('#selBody tr').forEach((tr,i)=>selFollow(i));$$('#tgtWrap .card').forEach(c=>libSuggest(+c.dataset.tgt));}   /* v21.63 */
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`TB-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='TB-1')throw 0;restore(d);}catch(err){alert('That file is not a saved copy of Form TB-1.');}};rd.readAsText(f);e.target.value='';});
@@ -3879,6 +3960,87 @@ window.__nbhFactsOut=function(){
     out.push({label:isRep?nbhTbName(beh):beh,def:'',rate:g('rate'),type,isRep,urg:g('urg'),src:'TB-1 (candidate)'});}}
   return out.length?{behaviors:out}:null;
 };
+
+/* ---------- (v21.63) the best library entry for a card's label: its exact name or other name, else the one entry every word of the
+   label is in; the bank's entries come first in LIB.entries, so one of your own with the same name wins ---------- */
+function libBest(lab){if(!LIB)return null;const f=libFold(lab);if(!f)return null;
+ const ex=LIB.entries.find(e=>libFold(e.lab)===f)||LIB.entries.find(e=>(e.aka||[]).some(a=>libFold(a)===f));if(ex)return ex;
+ const r=libSearch(lab,'');return r.list.length&&r.tier===1&&r.lab.has(r.list[0].id)?r.list[0]:null;}
+function libSuggest(t){if(libRows[t])libRows[t].suggest();}
+
+/* ---------- (v21.63) my bank: definitions of one's own, kept in this browser (IndexedDB; localStorage where there is none) for every
+   student, offered first on every target card's library row, in the panel and in the candidate picker. An entry holds what a
+   library entry holds (the definition fields of the card it was saved from, a name, other names a search finds, a note shown on
+   screen only), under the category "My definitions". The bank can be saved to a file and opened on another device. ---------- */
+const BANK_CAT='My definitions',BANK_DB='nbh-tb1-bank',BANK_ST='defs',BANK_LS='nbh.tb1.bank.v1';
+let bankDbP=null,bankMode=null,bankMem=[],bankChan=null;
+function bankOpen(){if(bankDbP)return bankDbP;bankDbP=new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};
+ try{if(!window.indexedDB)return fin(null);r=indexedDB.open(BANK_DB,1);}catch(e){return fin(null);}setTimeout(()=>fin(null),5000);
+ r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains(BANK_ST))db.createObjectStore(BANK_ST,{keyPath:'id'});}catch(e){}};
+ r.onsuccess=()=>{const db=r.result;try{db.onversionchange=()=>{db.close();bankDbP=null;};}catch(e){}fin(db);};r.onerror=()=>fin(null);r.onblocked=()=>fin(null);});return bankDbP;}
+function bankTx(kind,fn){return bankOpen().then(db=>{if(!db)throw new Error('no store');return new Promise((res,rej)=>{let t,out;try{t=db.transaction(BANK_ST,kind);out=fn(t.objectStore(BANK_ST));}catch(e){return rej(e);}
+ t.oncomplete=()=>res(out&&'result' in out?out.result:out);t.onerror=()=>rej(t.error||new Error('store error'));t.onabort=()=>rej(t.error||new Error('store aborted'));});});}
+const bankLs=()=>{try{const x=window.localStorage;x.setItem('nbh.tb1.t','1');x.removeItem('nbh.tb1.t');return x;}catch(e){return null;}};
+function bankReady(){if(bankMode)return Promise.resolve(bankMode);return bankOpen().then(db=>bankMode=db?'idb':(bankLs()?'ls':'mem'),()=>bankMode=bankLs()?'ls':'mem');}
+const bankLsRead=()=>{try{const a=JSON.parse(bankLs().getItem(BANK_LS)||'[]');return Array.isArray(a)?a:[];}catch(e){return [];}};
+function bankReadAll(){return bankReady().then(m=>m==='idb'?bankTx('readonly',x=>x.getAll()).then(r=>Array.isArray(r)?r:[],()=>[]):m==='ls'?bankLsRead():bankMem.slice());}
+function bankWrite(e){return bankReady().then(m=>{if(m==='idb')return bankTx('readwrite',x=>x.put(e));if(m==='ls'){bankLs().setItem(BANK_LS,JSON.stringify(bankLsRead().filter(x=>x.id!==e.id).concat([e])));return;}bankMem=bankMem.filter(x=>x.id!==e.id).concat([e]);});}
+function bankDelete(id){return bankReady().then(m=>{if(m==='idb')return bankTx('readwrite',x=>x.delete(id));if(m==='ls'){bankLs().setItem(BANK_LS,JSON.stringify(bankLsRead().filter(x=>x.id!==id)));return;}bankMem=bankMem.filter(x=>x.id!==id);});}
+const bankOk=e=>!!(e&&typeof e==='object'&&typeof e.id==='string'&&/^my-[a-z0-9]+$/.test(e.id)&&String(e.lab||'').trim()&&String(e.def||'').trim());
+function bankApply(list){if(!LIB)return;bank.list=list.filter(bankOk).map(e=>Object.assign({},e,{cat:BANK_CAT,mine:true,aka:Array.isArray(e.aka)?e.aka.map(x=>String(x)).filter(Boolean):[]}));
+ bank.list.sort((a,b)=>String(b.saved||'').localeCompare(String(a.saved||'')));LIB.entries=bank.list.concat(LIB_BUILTIN);
+ Object.keys(libById).forEach(k=>{if(libById[k].mine)delete libById[k];});bank.list.forEach(e=>{libById[e.id]=e;});libIdx=null;libSents=null;
+ LIB_PICKS.forEach(f=>{try{f();}catch(e){}});$$('#tgtWrap .card').forEach(c=>libSuggest(+c.dataset.tgt));}
+function bankLoad(){return bankReadAll().then(bankApply).catch(()=>{});}
+const bankTell=()=>{try{if(bankChan)bankChan.postMessage({t:'change'});}catch(e){}};
+async function bankPut(e){await bankWrite(e);await bankLoad();bankTell();}
+async function bankRemove(id){await bankDelete(id);await bankLoad();bankTell();}
+function bankExport(){const o={nbh:'tb1-bank',v:1,saved:new Date().toISOString(),count:bank.list.length,entries:bank.list.map(e=>Object.assign({},e))};
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o)],{type:'application/json'}));a.download='TB-1_my-bank_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{try{URL.revokeObjectURL(a.href);}catch(e){}a.remove();},3000);return o.count;}
+function bankImport(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{let o=null;try{o=JSON.parse(String(r.result||''));}catch(e){}if(!o||o.nbh!=='tb1-bank'||!Array.isArray(o.entries))return rej(new Error('That is not a bank file of Form TB-1.'));res(o);};r.onerror=()=>rej(new Error('The file could not be read.'));r.readAsText(file);})
+ .then(async o=>{const have=new Set(bank.list.map(e=>e.id));let added=0,kept=0;for(const e of o.entries){if(!bankOk(e))continue;if(have.has(e.id)){kept++;continue;}await bankWrite(Object.assign({},e,{cat:BANK_CAT,mine:true}));added++;}await bankLoad();bankTell();return {added,kept};});}
+/* the Save dialog, in a shadow root of its own (its boxes are not the form's: not saved, not counted, not an edit) */
+let bankDlg=null;
+function bankDialog(){if(bankDlg)return bankDlg;const host=document.createElement('div');host.id='tb1BankHost';host.className='noprint';document.body.appendChild(host);
+ const R=libShadow(host),d=document.createElement('dialog');d.className='bkd';d.setAttribute('aria-labelledby','bkT');
+ d.innerHTML=`<div class="bk"><h3 id="bkT">Save this definition to my bank</h3><p class="bkp bkwhat"></p>
+<label>Name in the bank<input type="text" class="bklab" maxlength="80" autocomplete="off"></label><p class="bkp bkdup"></p>
+<label>Other names it goes by (a search finds these; separate them with commas)<input type="text" class="bkaka" maxlength="200" autocomplete="off" placeholder="e.g., hits, punching"></label>
+<label>Note to myself (shown on screen only, never loaded into a card)<textarea class="bknote" rows="2" maxlength="600"></textarea></label>
+<div class="bkb"><button type="button" class="bkcancel">Cancel</button><button type="button" class="primary bksave">Save to my bank</button></div></div>`;
+ R.appendChild(d);bankDlg=d;d.$=s=>d.querySelector(s);
+ d.$('.bkcancel').addEventListener('click',()=>d.close());d.addEventListener('cancel',e=>{e.preventDefault();d.close();});
+ d.$('.bklab').addEventListener('input',()=>{const dup=bankFind(d.$('.bklab').value);d.$('.bkdup').textContent=dup?'Replaces \u201c'+dup.lab+'\u201d, already in the bank.':'';});
+ return d;}
+const bankFind=lab=>{const f=libFold(lab);return f?bank.list.find(e=>libFold(e.lab)===f)||null:null;};
+function bankSave(t){const g=k=>val(`tgt[${t}].${k}`);
+ if(!g('def')){nbhUI.toast('Write the operational definition of target '+(t+1)+' first: the bank keeps the definition with its type, style, dimension, examples, non-examples, borderline cases, exclusions, onset, offset and counting unit.',{kind:'warn',ms:7000});return;}
+ const d=bankDialog(),lab=g('lab')||'';d.$('.bklab').value=lab;d.$('.bkaka').value='';d.$('.bknote').value='';
+ const held=['def','ex','nex','border','excl','on','off','unit','tops'].filter(k=>g(k)).length;
+ d.$('.bkwhat').textContent='Target '+(t+1)+(lab?' (\u201c'+lab+'\u201d)':'')+': its '+(held===1?'definition':'definition and '+(held-1)+' more of its fields')+', with the type, definition style and dimension, saved as they are now. The bank lives in this browser, for every student; a card that loads an entry gets a copy, and the entry stays as saved.';
+ d.$('.bkdup').textContent=bankFind(lab)?'Replaces \u201c'+bankFind(lab).lab+'\u201d, already in the bank.':'';
+ const save=d.$('.bksave');save.disabled=false;
+ save.onclick=async()=>{const name=String(d.$('.bklab').value||'').trim().slice(0,80);if(!name){d.$('.bklab').focus();return;}save.disabled=true;
+  const dup=bankFind(name),e={id:(dup&&dup.id)||('my-'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36)),cat:BANK_CAT,lab:name,
+   aka:String(d.$('.bkaka').value||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,12),type:g('type'),style:g('style'),dim:g('dim'),unit:g('unit'),def:g('def'),tops:g('tops'),ex:g('ex'),nex:g('nex'),on:g('on'),off:g('off'),border:g('border'),excl:g('excl'),note:String(d.$('.bknote').value||'').trim(),mine:true,saved:new Date().toISOString()};
+  try{await bankPut(e);d.close();nbhUI.toast((dup?'Replaced in my bank: ':'Saved to my bank: ')+'\u201c'+name+'\u201d. It is offered first in every library search on this form, on every target card and in the candidate picker, for every student. The library panel on this sheet can save the bank to a file.',{ms:9000});}
+  catch(x){save.disabled=false;nbhUI.toast('The bank could not keep it: '+((x&&x.message)||x),{kind:'warn'});}};
+ if(d.showModal)d.showModal();else d.setAttribute('open','');try{d.$('.bklab').focus();}catch(x){}}
+try{if(window.BroadcastChannel){bankChan=new BroadcastChannel('nbh-tb1-bank');bankChan.onmessage=()=>bankLoad();}}catch(e){bankChan=null;}
+if(LIB_ON)bankLoad();
+
+/* ---------- (v21.63) the targets to the other forms ----------
+   Inside the workstation the targets defined here reach every other open form on their own within a few seconds, and a form opened
+   later takes them as it opens (the case, index.html, v21.31): empty fields and empty behavior tables take them, anything typed is
+   left alone, and "From the case" on each form's toolbar picks more. The button on the Definitions sheet sends them now and says
+   what happened. On a form opened on its own it stays hidden: there is nothing to send to. */
+const FRAMED=(()=>{try{return !!(window.parent&&window.parent!==window);}catch(e){return false;}})();
+if(FRAMED){const row=$('#sendRow');if(row)row.style.display='flex';
+ $('#sendTgt').addEventListener('click',()=>{const note=$('#sendNote'),n=tgtLabels().filter(x=>val(`tgt[${x.t}].lab`)).length;
+  if(!n&&!$$('#candBody tr').some((tr,i)=>/^Target/.test(val(`cand[${i}].dec`))&&val(`cand[${i}].beh`))){note.textContent='Nothing to send yet: label a target on this sheet, or mark a candidate Target on the Select sheet.';return;}
+  note.textContent='Sending\u2026';try{window.parent.postMessage({nbh:'send-facts',id:'TB-1'},'*');}catch(e){note.textContent='The workstation did not answer.';}});
+ window.addEventListener('message',ev=>{const d=ev.data||{};if(d.nbh!=='facts-sent'||ev.source!==window.parent)return;const note=$('#sendNote');if(!note)return;
+  note.textContent=d.ok?'Sent to '+d.n+' other open form'+(d.n===1?'':'s')+(d.pending?' ('+d.pending+' more of the case take them as they open)':'')+'. Empty fields and empty behavior tables take the targets; anything already typed is left alone. The From the case button on each form\u2019s toolbar lets you pick more.':'Nothing was sent: the workstation read no target here yet. Label a target and try again.';});}
 })();
 </script>
 

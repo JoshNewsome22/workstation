@@ -65,6 +65,9 @@ already been solved:
 that work silently. The browser now stops and asks — unless the case has been
 saved and nothing has changed since, in which case it closes without fuss.
 
+**My pictures.** A photo of a real item, taken with the camera on a plain sheet of paper, has its background cut away on the
+device and becomes a square picture every visual can use, kept in the browser for every form and every student (v21.62).
+
 **One case file.** `Save case` writes every open form plus the student details
 into a single file; `Open case` lists its forms at once and fills each from the file as it is opened (v21.61).
 One file to keep or hand over instead of a folder of twenty-seven. Each form's own
@@ -7933,3 +7936,102 @@ spreadsheet, master print and relay paths named above. Checked by `qa/case-open-
 few seconds with one form loaded, the rail, a tap, typing holding the quiet loading, the rest loading one by one and put
 away, Save case right after Open case with five forms still waiting, Close case, a file without `cur`, an edit and a save
 followed by quiet loads), and by the case, Close case, autosave, sprint-a2 and sprint-a4 suites as before.
+
+### v21.62: My pictures, from the camera
+
+A picture of the real thing is the most concrete picture a visual can carry, and until now it meant a photo uploaded whole,
+background and all. Now Forms VS-1, SM-1, TK-1 and TV-1 share **My pictures**: the practice's own picture library, made with
+the camera. In any of their pickers, **Take a photo** opens the iPad's camera (a computer offers a file instead); the photo's
+plain background is cut away on the device, the item is trimmed and set in a square the way the library's pictograms sit in
+theirs, kept at 600 x 600 px with a see-through ground (or a white one, a switch), named, and saved to My pictures, and with
+**Save and use it here** it goes straight onto the cell or card that was being filled. **My pictures…** opens the library:
+every picture with its name (editable), Remove, the three ways in (the camera, a picture file, a picture pasted from the
+clipboard, such as a subject copied out of Photos, which already has a clear background and is kept as it is), **Save the
+pictures to a file** and **Open a pictures file**, for carrying the whole library to another device or keeping it safe.
+VS-1's Pictures page has the same two buttons, and TV-1's picture dialog has **Take a photo** and **From My pictures**.
+
+The library is kept in the browser itself (IndexedDB, on the site's origin, so every form and every student share it; the
+one-file edition's forms share the file's own store), never on a server. A picture put on a visual is copied into that form's
+own saved data, as an uploaded photo is (VS-1 at 400 px, SM-1 at 256 px, TK-1 and TV-1 at the full 600 px, each within the
+form's limit for a photo), with the library picture's id, so a case file carries the pictures its forms use, and a form opened
+from such a file on another device adds them to My pictures there. Pictures already placed keep their copies when a library
+picture is removed or renamed.
+
+The cut needs a plain background: the note in the dialog says to put the item on a plain sheet of paper or a plain table,
+fill the frame with it, and keep one's own shadow off it. The colour of the photo's border is taken as the background (the
+median of a band along the four edges; a border whose colour varies, or whose edges differ, as a table's edge does, is not
+plain, and the photo is kept whole, with a note); from the edges in, every pixel near that colour and close in colour to the
+neighbour it is reached from joins the background, so the shading and the soft shadows on the sheet go and the item's edge,
+where the colour changes sharply, stops the flood; a closed-in patch of the paper's own colour no larger than a quarter of
+the item's box is background too (the paper seen through a cup's handle); the edge is feathered over two pixels, and the
+paper's share is taken out of the edge pixels' colour, so there is no pale fringe. An item the colour of the sheet is the one
+case it cannot do (the note says to use a sheet of another colour, or to keep the photo whole: the cut is a tick that can be
+turned off). A dark sheet works as a white one does. A photo is worked on at up to 1400 px on its long side; the cut takes
+about a quarter of a second on a computer, a second or so on an iPad.
+
+Parts: `tools/blocks/nbh-pictures.js` (the source; its copy `NBH-Workstation/nbh-pictures.js` sits beside the forms, loaded by
+`<script src="nbh-pictures.js">` from the four forms' `toolbar.html`; the SM-1, TK-1 and TV-1 build scripts copy it, and the
+one-file edition carries it once, as the `nbh-embed-pictures` block, put into a form as it opens, like the pictogram library).
+It exposes `window.NBHPIC` (`process`, `cutout`, `square`, `open`, `manage`, `list`/`all`/`get`/`put`/`rename`/`remove`,
+`toPhoto`, `absorb`, `download`/`importFile`, `buttons`). Without the file beside a form, the picker is as before. The forms'
+parts: VS-1 (`libPhoto`, the picker's `_mine` category, `#pdCam`, `#pdLib`, the Pictures page's `#phCam` and `#phMine`,
+`absorb` in `renderAll`, `lib` kept by `fromFile`), SM-1 (`useLib`), TK-1 (`libPhoto`, `lib:` keys in the several-at-once
+picks, `putIn` now waits for the copies), TV-1 (`picShow`, `#picCam`, `#picMine`). The shell's Diagnostics has a My pictures
+row; the offline copy counts 64 files. Checked by `qa/pictures-test.js` (the cut on synthetic photos: a shaded, grainy
+sheet with a soft shadow, a soft-edged item, a ring, a dark sheet, a busy background kept whole, a picture with its own
+clear background, the white ground, the cut unticked, a small item drawn up; the flow in VS-1 through the camera input; the
+library shared with SM-1 and TK-1, one picture and several at once, one copy per picture; rename, save to a file, remove and
+open the file; a pasted picture; a file opened on a fresh browser adding its pictures; the forms without the file; the shell
+and the one-file build), and by the VS-1, SM-1, TK-1, TV-1 and PWA suites as before.
+
+### v21.63: Form TB-1, from the candidates to the definitions, and the targets sent on
+
+Four asks on Form TB-1 (Target Behavior Development), and one answer.
+
+**A candidate row can be deleted.** Each row of Candidate Behaviors (sheet 2) ends in a small × (not printed). Deleting a row
+that holds anything asks first; the rows below move up and are renumbered, the fields stay `cand[0]` to `cand[n-1]`, and a
+saved file reopens with the rows that are left (`candRenum`).
+
+**Goes to sheet follows the Type.** On Selected Targets for This Plan, choosing the Type sets the Goes-to-sheet column: a
+cluster (a set of forms) goes to 3 then 4, anything else straight to 4. Set by hand, the column stays until the Type changes
+(`selTo`, `selFollow`); a file saved before this fills the empty column from the Type as it opens.
+
+**A selected target starts its card on the Definitions sheet.** The label, Type, urgency and paired replacement typed on a
+Selected Targets row go to the card of the same number on sheet 4 while the card's own field is empty or still holds what the
+table last gave it, so a card edited on sheet 4 keeps its own words (`selSync`, with the table's last values in `SELV`).
+**Take the candidates marked Target** (a button under the table) puts every candidate decided "Target – …" that is not yet
+among the targets into the empty rows, in order, with the Type from the decision, the urgency and the sheet; the number of
+targets grows to fit, up to the form's ten, and the note under the button says what was added and what did not fit.
+
+**The library's starting definition is offered.** When a card's label names a behavior the library knows (its name, one of
+its other names, or the one entry every word of the label is in: `libBest`) and the card's definition is still empty, the
+card's library row says so ("The library has a starting definition for “Screaming”: Screaming.") with **Start from it** and
+**Read it**; the row's picker is set to the entry, so Load into this card does the same. The offer goes once a definition is
+written or loaded. It is made when the table hands a label over, when a label is typed on the card, and when a file opens.
+
+**My bank: definitions of one's own.** Each card's library row has **Save this definition to my bank**: a small dialog takes a
+name (the card's label), other names a search should find, and a note shown on screen only, and saves the card's definition
+fields (type, definition style, dimension, definition, topographies, examples, non-examples, borderline cases, exclusions,
+onset, offset, counting unit) as a library entry of one's own, under the category **My definitions**, kept in the browser
+(IndexedDB; localStorage where there is none) for every student. Bank entries come first in every search, in every card's
+picker, in the candidate picker and in the panel; a card named as one is offered it ("Your bank has a starting definition for
+…"); the panel shows a bank entry as "In my bank, saved <date>" with **Remove from my bank**, and its My bank line has **Save
+the bank to a file** and **Open a bank file** (a file of another kind is refused). Saving under a name already in the bank
+replaces that entry; a card that loaded an entry keeps its text whatever happens to the bank. The dialog lives in a shadow
+root (`#tb1BankHost`), like the library's own controls, so its boxes are not the form's: not saved, not counted, not an edit.
+The form's saved file is unchanged in shape and never carries the bank.
+
+**Sending the targets to the other forms.** Inside the workstation this already happened on its own (v21.31): the shell reads
+the targets from TB-1 while it is open, hands them to every open form within a few seconds (empty fields and empty behavior
+tables take them; anything typed is left alone), gives them to a form of the case as it opens, and each form's toolbar has
+From the case to pick more. Now the Definitions sheet also has **Send the targets to the other forms**, shown only inside the
+workstation: it asks the shell to read the case and send it at once (`send-facts` → `sendFactsFor` → `facts-sent`), and the
+note beside it says how many other open forms took the targets and how many forms of the case will take them as they open.
+
+Checked by `qa/tb1-flow-test.js` (28 checks: the delete and the renumbering through a save and reopen; Goes to sheet; the
+table starting the cards and a card edited keeping its words; the offer, Start from it, a label known by another name and one
+not known; Take the candidates marked Target, nothing twice, the count growing; the bank dialog in its shadow root, the entry
+first in another card's picker, found by its other name in the candidate picker, the panel's category and line, kept across a
+reload, offered to a card named as it, loaded, saved to a file, removed, opened from the file, a wrong file refused; the
+saved file's shape; the Send row hidden on the form alone and, in the workstation, sending to another open form), and by
+`qa/tb1-library-test.js` (140) as before.

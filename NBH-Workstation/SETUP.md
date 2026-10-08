@@ -7983,3 +7983,55 @@ clear background, the white ground, the cut unticked, a small item drawn up; the
 library shared with SM-1 and TK-1, one picture and several at once, one copy per picture; rename, save to a file, remove and
 open the file; a pasted picture; a file opened on a fresh browser adding its pictures; the forms without the file; the shell
 and the one-file build), and by the VS-1, SM-1, TK-1, TV-1 and PWA suites as before.
+
+### v21.63: Form TB-1, from the candidates to the definitions, and the targets sent on
+
+Four asks on Form TB-1 (Target Behavior Development), and one answer.
+
+**A candidate row can be deleted.** Each row of Candidate Behaviors (sheet 2) ends in a small × (not printed). Deleting a row
+that holds anything asks first; the rows below move up and are renumbered, the fields stay `cand[0]` to `cand[n-1]`, and a
+saved file reopens with the rows that are left (`candRenum`).
+
+**Goes to sheet follows the Type.** On Selected Targets for This Plan, choosing the Type sets the Goes-to-sheet column: a
+cluster (a set of forms) goes to 3 then 4, anything else straight to 4. Set by hand, the column stays until the Type changes
+(`selTo`, `selFollow`); a file saved before this fills the empty column from the Type as it opens.
+
+**A selected target starts its card on the Definitions sheet.** The label, Type, urgency and paired replacement typed on a
+Selected Targets row go to the card of the same number on sheet 4 while the card's own field is empty or still holds what the
+table last gave it, so a card edited on sheet 4 keeps its own words (`selSync`, with the table's last values in `SELV`).
+**Take the candidates marked Target** (a button under the table) puts every candidate decided "Target – …" that is not yet
+among the targets into the empty rows, in order, with the Type from the decision, the urgency and the sheet; the number of
+targets grows to fit, up to the form's ten, and the note under the button says what was added and what did not fit.
+
+**The library's starting definition is offered.** When a card's label names a behavior the library knows (its name, one of
+its other names, or the one entry every word of the label is in: `libBest`) and the card's definition is still empty, the
+card's library row says so ("The library has a starting definition for “Screaming”: Screaming.") with **Start from it** and
+**Read it**; the row's picker is set to the entry, so Load into this card does the same. The offer goes once a definition is
+written or loaded. It is made when the table hands a label over, when a label is typed on the card, and when a file opens.
+
+**My bank: definitions of one's own.** Each card's library row has **Save this definition to my bank**: a small dialog takes a
+name (the card's label), other names a search should find, and a note shown on screen only, and saves the card's definition
+fields (type, definition style, dimension, definition, topographies, examples, non-examples, borderline cases, exclusions,
+onset, offset, counting unit) as a library entry of one's own, under the category **My definitions**, kept in the browser
+(IndexedDB; localStorage where there is none) for every student. Bank entries come first in every search, in every card's
+picker, in the candidate picker and in the panel; a card named as one is offered it ("Your bank has a starting definition for
+…"); the panel shows a bank entry as "In my bank, saved <date>" with **Remove from my bank**, and its My bank line has **Save
+the bank to a file** and **Open a bank file** (a file of another kind is refused). Saving under a name already in the bank
+replaces that entry; a card that loaded an entry keeps its text whatever happens to the bank. The dialog lives in a shadow
+root (`#tb1BankHost`), like the library's own controls, so its boxes are not the form's: not saved, not counted, not an edit.
+The form's saved file is unchanged in shape and never carries the bank.
+
+**Sending the targets to the other forms.** Inside the workstation this already happened on its own (v21.31): the shell reads
+the targets from TB-1 while it is open, hands them to every open form within a few seconds (empty fields and empty behavior
+tables take them; anything typed is left alone), gives them to a form of the case as it opens, and each form's toolbar has
+From the case to pick more. Now the Definitions sheet also has **Send the targets to the other forms**, shown only inside the
+workstation: it asks the shell to read the case and send it at once (`send-facts` → `sendFactsFor` → `facts-sent`), and the
+note beside it says how many other open forms took the targets and how many forms of the case will take them as they open.
+
+Checked by `qa/tb1-flow-test.js` (28 checks: the delete and the renumbering through a save and reopen; Goes to sheet; the
+table starting the cards and a card edited keeping its words; the offer, Start from it, a label known by another name and one
+not known; Take the candidates marked Target, nothing twice, the count growing; the bank dialog in its shadow root, the entry
+first in another card's picker, found by its other name in the candidate picker, the panel's category and line, kept across a
+reload, offered to a card named as it, loaded, saved to a file, removed, opened from the file, a wrong file refused; the
+saved file's shape; the Send row hidden on the form alone and, in the workstation, sending to another open form), and by
+`qa/tb1-library-test.js` (140) as before.

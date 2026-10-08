@@ -1980,6 +1980,10 @@ async function gatherFacts(push){
 function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig(state.facts);paintFacts();if(push)pushFactsToAll();}
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
 function pushFactsToAll(){Object.values(state.frames).forEach(pushFactsTo);}
+/* v21.63 a form (TB-1) asks for the case to be read and sent now; it hears back how many other open forms took it */
+async function sendFactsFor(ev){const src=ev.source;if(!relayFrom(src))return;await gatherFacts(false);const ok=!!state.facts;if(ok)pushFactsToAll();
+  const n=Object.values(state.frames).filter(fr=>{try{return fr.contentWindow!==src;}catch(e){return true;}}).length,p=Object.keys(state.pending).length;
+  try{src.postMessage({nbh:'facts-sent',ok,n,pending:p},'*');}catch(e){}}
 function paintFacts(){
   if(typeof paintSum==='function')paintSum();
   const row=$('#factsRow'),t=$('#factsTxt');if(!row)return;
@@ -2017,6 +2021,7 @@ window.addEventListener('message',ev=>{
      first because an ask carries no form id, and the file check's filter below would drop it. */
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
+  if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
     if(!relayFrom(ev.source))return;
