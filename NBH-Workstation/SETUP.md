@@ -7855,3 +7855,13 @@ Parts as before (`tools/forms/IA-1/`; walk-script.json now 35 lines, the narrati
 paragraph's measure is pinned, because the polish layer widens long paragraphs after the build (the glows had drifted on the
 Convergence copy). Checked by `qa/ia1-walk-test.js` (22 checks: the three modes, the practice check through the player,
 the captions and chapters, the fields unchanged after all three builds).
+
+### v21.58: the FAST's sixteen questions, built in
+
+The FAST worksheet now prints each question beside its item number, with the category as a small tag, so the worksheet reads
+as the interview or is filled from a paper FAST, and the walkthroughs (which copy the sheet) show the questions as the pencil
+answers them, the camera following four rows at a time. The respondent page for the FAST carries the same questions when
+none are pasted on Setup (the wording box says "built in"; paste there only to change them). The wording is Figure 1 of
+Iwata, DeLeon and Roscoe (2013), reproduced in the article; the FAST sheet's note says so. The QABF, MAS, PBQ and WEFA are
+unchanged: their wording is still pasted once from your own copy. Parts: the questions sit in `tools/forms/IA-1/patch-walk.py`
+(FAST_ITEMS, between its own markers in the form's script).
