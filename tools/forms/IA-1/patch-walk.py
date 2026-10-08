@@ -8,6 +8,8 @@ running it again replaces what it wrote:
   - the Walkthrough button in the toolbar's View segment (after FAST) and its section, <!-- ia1-walk:section --> ... <!-- /ia1-walk:section -->,
     after the FAST sheet (shown by body.view-walk, as the sheets are);
   - the form's reset clears the view's own field (walk.video, the link to the recorded version);
+  - (v21.58) the FAST's sixteen questions (FAST_ITEMS, between /* ia1-items:begin */ and /* ia1-items:end */): on the worksheet beside
+    their numbers, on the respondent page when none are pasted, and so in the walkthroughs; the words around them;
   - inside the form's own script (a closure: its setView, snapshot, renderTot are private), between /* ia1-walk:begin */ and
     /* ia1-walk:end */ before its last line: walk-script.json's words (IA_WALK_SCRIPT, read only without the narration file),
     then tools/forms/IA-1/walk.js with SM-1's copy of TK-1's player put in at /*@@PLAYER@@*/;
@@ -101,6 +103,77 @@ s = re.sub(r'<!-- ia1-walk:guide -->.*?<!-- /ia1-walk:guide -->\n', '', s, flags
 a3 = '  <h3 class="sub">1. Reliability: Do Two Informants Give the Same Answers?</h3>'
 assert s.count(a3) == 1, 'the Guide\'s first heading'
 s = s.replace(a3, GN + a3)
+
+# 3c. (v21.58) the FAST's sixteen questions, built in: on the worksheet beside their numbers, on the respondent page when none
+# are pasted, and so on the walkthroughs' copies of the sheet. The wording is Figure 1 of Iwata, DeLeon & Roscoe (2013).
+ITEMS = ["Does the problem behavior occur when the person is not receiving attention or when caregivers are paying attention to someone else?",
+    "Does the problem behavior occur when the person's requests for preferred items or activities are denied or when these are taken away?",
+    "When the problem behavior occurs, do caregivers usually try to calm the person down or involve the person in preferred activities?",
+    "Is the person usually well behaved when (s)he is getting lots of attention or when preferred activities are freely available?",
+    "Does the person usually fuss or resist when (s)he is asked to perform a task or to participate in activities?",
+    "Does the problem behavior occur when the person is asked to perform a task or to participate in activities?",
+    "If the problem behavior occurs while tasks are being presented, is the person usually given a \"break\" from tasks?",
+    "Is the person usually well behaved when (s)he is not required to do anything?",
+    "Does the problem behavior occur even when no one is nearby or watching?",
+    "Does the person engage in the problem behavior even when leisure activities are available?",
+    "Does the problem behavior appear to be a form of \"self-stimulation?\"",
+    "Is the problem behavior less likely to occur when sensory stimulating activities are presented?",
+    "Is the problem behavior cyclical, occurring for several days and then stopping?",
+    "Does the person have recurring painful conditions such as ear infections or allergies? If so, list:",
+    "Is the problem behavior more likely to occur when the person is ill?",
+    "If the person is experiencing physical problems, and these are treated, does the problem behavior usually go away?"]
+assert len(ITEMS) == 16
+IT = "/* the FAST's sixteen questions (Iwata, DeLeon & Roscoe, 2013, Figure 1): on the worksheet, on the respondent page when none are pasted, in the walkthroughs */\nconst FAST_ITEMS=" + json.dumps({str(i + 1): t for i, t in enumerate(ITEMS)}, ensure_ascii=False, separators=(',', ':')) + ";"
+A3, Z3 = '/* ia1-items:begin */\n', '\n/* ia1-items:end */\n'
+r = between(s, A3, Z3, IT)
+if r is None:
+    anchor = 'const FAST_PUB={1:70.8,'
+    assert s.count(anchor) == 1, 'FAST_PUB'
+    s = s.replace(anchor, A3 + IT + Z3 + anchor)
+else: s = r
+# the worksheet: the question beside its number, the category as a small tag
+a = "h+=`<tr><td class=\"lab c\">${it}</td><td class=\"catcell\">${d.cue?d.cue[it]:d.cats[c][0]}</td>`;"
+b = "h+=`<tr><td class=\"lab c\">${it}</td><td class=\"catcell\">${key==='fast'&&typeof FAST_ITEMS!=='undefined'&&FAST_ITEMS[it]?'<div class=\"qtext\">'+esc(FAST_ITEMS[it])+'</div><span class=\"qcat\">'+d.cats[c][0]+'</span>':(d.cue?d.cue[it]:d.cats[c][0])}</td>`;   /* v21.58 the FAST's questions */"
+if b not in s:
+    assert s.count(a) == 1, 'renderGrid'
+    s = s.replace(a, b)
+# the respondent page: the built-in wording when none is pasted
+a = "function rpWording(key){const t=val('rp.w.'+key);if(!t)return [];"
+b = "function rpWording(key){const t=val('rp.w.'+key);if(!t)return key==='fast'&&typeof FAST_ITEMS!=='undefined'?Object.keys(FAST_ITEMS).map(k=>FAST_ITEMS[k]):[];   /* v21.58 the FAST's own questions */"
+if b not in s:
+    assert s.count(a) == 1, 'rpWording'
+    s = s.replace(a, b)
+a = "function rpCounts(){$$('.rp-count').forEach(el=>{const k=el.dataset.rpw,n=rpWording(k).length,ok=rpExpected(k).indexOf(n)>=0;el.textContent=n?'('+n+' pasted'+(ok?'':', expected '+rpExpected(k).join(' or '))+')':'';el.style.color=n&&!ok?'#a8321e':'';});}"
+b = "function rpCounts(){$$('.rp-count').forEach(el=>{const k=el.dataset.rpw,pasted=!!val('rp.w.'+k),n=rpWording(k).length,ok=rpExpected(k).indexOf(n)>=0;el.textContent=!pasted&&n?'(built in)':n?'('+n+' pasted'+(ok?'':', expected '+rpExpected(k).join(' or '))+')':'';el.style.color=pasted&&n&&!ok?'#a8321e':'';});}"
+if b not in s:
+    assert s.count(a) == 1, 'rpCounts'
+    s = s.replace(a, b)
+# the worksheet's grid takes the sheet's width with the questions on it; the totals and the verdict go under it
+a = '<div class="twoup">\n    <div class="nbh-scrollx"><table class="grid item" id="fastGrid"></table></div>'
+b = '<div class="twoup fast-wide">\n    <div class="nbh-scrollx"><table class="grid item" id="fastGrid"></table></div>'
+if b not in s:
+    assert s.count(a) == 1, 'the FAST twoup'
+    s = s.replace(a, b)
+# the words around it
+a = "The instruments are published forms, so the wording is not built into the workstation: paste each instrument's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go."
+b = "The FAST's sixteen questions are built in (Iwata, DeLeon &amp; Roscoe, 2013, Figure 1): they show on its worksheet and its respondent page, so paste here only to change them. The QABF, MAS, PBQ and WEFA are published forms whose wording is not built into the workstation: paste each one's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go."
+if b not in s:
+    assert s.count(a) == 1, 'the wording paragraph'
+    s = s.replace(a, b)
+b = '<label for="rpwFast">FAST, 16 items (paste only to change the built-in wording) <span class="rp-count" data-rpw="fast"></span></label>'
+if b not in s:
+    s, k = re.subn(r'<label for="rpwFast">FAST, 16 items[^<]*<span class="rp-count" data-rpw="fast"></span></label>', b, s)
+    assert k == 1, 'the FAST label'
+a = "<p class=\"method\" style=\"margin:0 0 10px\">Enter each informant's answer by item number: Y, N, or NA. Items 1 to 4"
+b = "<p class=\"method\" style=\"margin:0 0 10px\">The sixteen questions are printed beside their numbers (Iwata, DeLeon &amp; Roscoe, 2013, Figure 1), so the worksheet reads as the interview or is filled from a paper FAST. Enter each informant's answer by item number: Y, N, or NA. Items 1 to 4"
+if b not in s:
+    assert s.count(a) == 1, 'the FAST method'
+    s = s.replace(a, b)
+a = "This form counts a one-item margin and notes it as a caution, because a one-item margin was typical of the FAST outcomes that matched the functional analysis in Study 2.</div>"
+b = "This form counts a one-item margin and notes it as a caution, because a one-item margin was typical of the FAST outcomes that matched the functional analysis in Study 2. The item wording is reproduced from Figure 1 of the article.</div>"
+if b not in s:
+    assert s.count(a) == 1, 'the FAST cite'
+    s = s.replace(a, b)
 
 # 4. the script: the words, the walkthrough, the player
 W = json.load(open(R + 'walk-script.json', encoding='utf-8'))

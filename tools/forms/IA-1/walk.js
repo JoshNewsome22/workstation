@@ -243,10 +243,10 @@ function compose(D,ex){
   SC.intro=K=>{cam.move(K.t,K.t+.1,HOME);glow(R.bar,Math.max(K.t+.4,K.at('the FAST',.08)-.1),2.2,6);
     glow(pad(R.grid,0),Math.max(K.t+2.2,K.at('sixteen-item',.25)-.1),2.4,4);
     const tp=Math.max(K.t+5,K.at('published',.62)-.2);note(R.bar,'Iwata, DeLeon & Roscoe (2013), JABA 46, 271–284',tp,K.t+K.d+.2,'below');return K.d;};
-  SC.cats=K=>{camTo(K.t+.1,K.t+1,R.grid);
+  SC.cats=K=>{camTo(K.t+.1,K.t+1,uni([R.head,catRows(0)]));
     const at=[['items one to four',.15],['five to eight',.42],['nine to twelve',.62],['thirteen to sixteen',.82]].map((a,i)=>Math.max(K.t+1+i*1.2,K.at(a[0],a[1])-.15));
     const lab=['Social positive','Social negative','Automatic: sensory','Automatic: pain'];
-    at.forEach((t,k)=>{const r=catRows(k);const end=(at[k+1]||K.t+K.d)+.2;glow(r,t,end-t,3);note({x:r.x-74,y:r.y+r.h/2+26,w:0,h:0},lab[k],t+.2,end-.3);});return K.d;};
+    at.forEach((t,k)=>{const r=catRows(k);const end=(at[k+1]||K.t+K.d)+.2;if(k)camTo(t-.5,t+.3,pad(r,30));glow(r,t,end-t,3);note({x:r.x+r.w*.78,y:r.y+r.h/2+26,w:0,h:0},lab[k],t+.2,end-.3);});return K.d;};
   /* before you start */
   SC.define=K=>{camTo(K.t+.1,K.t+1.3,pad(uni([R.setupBar].concat(R.defRows)),8));
     glow(R.defRows[0],Math.max(K.t+1.3,K.at('one behavior',.3)-.1),2.4,3);
@@ -257,12 +257,14 @@ function compose(D,ex){
     const ti=Math.max(K.t+8,K.at('without conferring',.72)-.2);if(R.chk[0])glow(R.chk[0],ti,K.t+K.d-ti,4);
     const tm=Math.max(ti+1.5,K.at('fifteen',.9)-.2);note(R.chk[0]||R.infT,'15 to 20 minutes, on their own',tm,K.t+K.d+.2,'below');return K.d;};
   /* filling it in */
-  SC.items=K=>{camTo(K.t+.1,K.t+1,R.grid);
+  /* the camera follows the pencil down the column, four rows at a time */
+  const follow=(r,i,t)=>{if(i%4===0)camTo(t-.45,t+.15,pad(uni([catRows(i/4),wrel(cell(i,2+r))]),26));};
+  SC.items=K=>{camTo(K.t+.1,K.t+1,uni([R.head,catRows(0)]));
     let t=Math.max(K.t+1.4,K.at('Y for yes',.25)-.2);const tB=K.at('informant B',.62);
     for(let r=0;r<n;r++){if(r===1)t=Math.max(t+.2,tB-.3);
-      ansCells.filter(a=>a.r===r).forEach(a=>{const v=(a.sp&&a.sp.textContent||'').trim();const box=wrel(a.td);if(!v||!box){t+=.04;return;}
+      ansCells.filter(a=>a.r===r).forEach(a=>{const v=(a.sp&&a.sp.textContent||'').trim();const box=wrel(a.td);if(!v||!box){t+=.04;return;}follow(r,a.i,t);
         const mk=write(box,v,t,t+.22,'#2b4a9b',Math.min(16,box.h*.74));draw(PS,mk,.3);t+=.3;});}
-    penAway(PS,t+.1);const ts=Math.max(t+.3,K.at('counts as you type',.85)-.1);shown(ts);
+    penAway(PS,t+.1);const ts=Math.max(t+.3,K.at('counts as you type',.85)-.1);shown(ts);camTo(ts-.3,ts+.6,uni([R.head,catRows(0),catRows(1)]));
     agrCells.forEach((td,i)=>glow(wrel(td),ts+.3+i*.03,1.6,1));return Math.max(K.d,ts+2.2-K.t);};
   const naCell=ansCells.find(a=>(a.sp&&a.sp.textContent||'').trim()==='NA');
   SC.na=K=>{const r=naCell?wrel(naCell.td):null;const v=r?uni([r,wrel(rows[Math.max(0,naCell.i-3)]),wrel(rows[Math.min(15,naCell.i+3)])]):R.grid;camTo(K.t+.1,K.t+1,v);
@@ -281,7 +283,7 @@ function compose(D,ex){
     const tm=Math.max(tr+2,K.at('single item',.3)-.2);if(mg){const r=wrel(mg);glow(r,tm,K.t+K.d-tm,3);note(r,'A one-item margin: kept, with a caution',Math.max(tm+.6,K.at('caution',.45)-.1),K.t+K.d-.2,'below');}
     const tt=Math.max(tm+3,K.at('two groups tie',.9)-.2);note(R.verd,'A tie: no outcome',tt,K.t+K.d+.3);return K.d;};
   /* agreement */
-  SC.agree=K=>{const ag=uni([R.agrHead].concat(R.agr));if(ag){camTo(K.t+.1,K.t+1.1,pad(uni([ag,wrel(grid.tHead)]),20));glow(ag,Math.max(K.t+1.2,K.at('Agree column',.1)-.1),2.6,3);}
+  SC.agree=K=>{const ag=uni([R.agrHead].concat(R.agr));if(ag){const top=uni([R.agrHead].concat(R.agr.slice(0,8))),bot=uni(R.agr.slice(8));camTo(K.t+.1,K.t+1.1,pad(uni([top,wrel(grid.tHead)]),20));glow(ag,Math.max(K.t+1.2,K.at('Agree column',.1)-.1),3.2,3);if(bot)camTo(K.t+2.2,K.t+3.2,pad(bot,20));}
     const pairLi=verd?[...verd.querySelectorAll('li')].find(li=>/vs .*item agreement/i.test(li.textContent)):null;
     const tp=Math.max(K.t+3.6,K.at('each pair',.28)-.3);if(pairLi){camTo(tp,tp+1,pad(R.verd,8));glow(wrel(pairLi),tp+1,2.4,3);}
     const ts=Math.max(tp+3,K.at('In the study',.42)-.3);veil(ts,K.t+K.d,.45);
@@ -352,10 +354,10 @@ function compose(D,ex){
     note(R.bar,'16 questions · about 15 to 20 minutes',Math.max(K.t+5,K.at('fifteen',.75)-.3),K.t+K.d+.2,'below');return K.d;};
   SC.i_one=K=>{camTo(K.t+.1,K.t+1.3,pad(uni([R.setupBar].concat(R.defRows)),8));glow(R.defRows[0],Math.max(K.t+1.3,K.at('one behavior',.1)-.1),3,3);
     const td=Math.max(K.t+3,K.at('as it was defined',.3)-.1);glow(R.defRows[1],td,3,3);note(R.defRows[1],'This behavior, as defined: nothing else',Math.max(td+.5,K.at('nothing else',.45)-.1),K.t+K.d-.2,'below');return K.d;};
-  SC.i_items=K=>{camTo(K.t+.1,K.t+1,R.grid);let t=Math.max(K.t+1.2,K.at('choose yes',.15)-.3);
-    ansCells.filter(a=>a.r===0).forEach(a=>{const v=(a.sp&&a.sp.textContent||'').trim();const box=wrel(a.td);if(!v||!box){t+=.05;return;}const mk=write(box,v,t,t+.26,'#2b4a9b',Math.min(16,box.h*.74));draw(PS,mk,.3);t+=.42;});
-    penAway(PS,t+.1);note(R.grid?{x:R.grid.x-74,y:R.grid.y+70,w:0,h:0}:null,'Your answers',Math.max(K.t+1.2,K.at('choose yes',.15)-.2),K.t+K.d+.2);
-    const ts=Math.max(t+.2,K.at('actually seen',.75)-.2);note(R.grid?{x:R.grid.x+R.grid.w/2,y:R.grid.y+R.grid.h/2+26,w:0,h:0}:null,'What you have seen, not a guess',ts,K.t+K.d+.2);return Math.max(K.d,t+.6-K.t);};
+  SC.i_items=K=>{camTo(K.t+.1,K.t+1,uni([R.head,catRows(0)]));let t=Math.max(K.t+1.2,K.at('choose yes',.15)-.3);
+    ansCells.filter(a=>a.r===0).forEach(a=>{const v=(a.sp&&a.sp.textContent||'').trim();const box=wrel(a.td);if(!v||!box){t+=.05;return;}follow(0,a.i,t);const mk=write(box,v,t,t+.26,'#2b4a9b',Math.min(16,box.h*.74));draw(PS,mk,.3);t+=.42;});
+    penAway(PS,t+.1);note(R.grid?{x:R.grid.x-74,y:R.grid.y+70,w:0,h:0}:null,'Your answers',Math.max(K.t+1.2,K.at('choose yes',.15)-.2),K.t+3.5);
+    const ts=Math.max(t+.2,K.at('actually seen',.75)-.2);camTo(ts-.4,ts+.5,uni([R.head,catRows(0),catRows(1)]));note(R.grid?{x:R.grid.x+R.grid.w/2,y:R.grid.y+40,w:0,h:0}:null,'What you have seen, not a guess',ts,K.t+K.d+.2);return Math.max(K.d,t+.6-K.t);};
   SC.i_na=K=>{const r=naCell&&naCell.r===0?wrel(naCell.td):null;const v=r?uni([r,wrel(rows[Math.max(0,naCell.i-3)]),wrel(rows[Math.min(15,naCell.i+3)])]):R.grid;camTo(K.t+.1,K.t+1,v);
     if(r){glow(r,K.t+1,K.t+K.d-K.t-1,3);note(r,'NA: never in that situation',Math.max(K.t+1.3,K.at('N A',.3)-.3),K.t+K.d-.2);}
     else{veil(K.t+.5,K.t+K.d,.4);card('iaw-card','<h3>NA: not applicable</h3><p>You have never been in that situation with the student. It is a better answer than a guess, and it is left out of the scoring.</p>',{x:300,y:150,w:680},K.t+.6,K.t+K.d);}return K.d;};

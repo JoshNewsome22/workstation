@@ -9,9 +9,10 @@ let fails=0;const ok=(n,c,x)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.
  await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
  const t1=await page.evaluate(()=>({opt:rpTarget.options[0].textContent,def:document.querySelector('#rpTargets [data-rt="def"]').value,label:document.querySelector('#rpTargets td b').textContent}));
  ok('"Label: definition" in the behavior field becomes a label and a definition',t1.label==='Aggression'&&/^Forceful contact/.test(t1.def)&&/^Aggression \(this form\)/.test(t1.opt),t1);
- /* no wording pasted: the buttons are off but tappable, and a tap flashes the reason */
- const off=await page.evaluate(()=>{const b=document.querySelector('#rpPreview');const was=b.classList.contains('off')&&!b.disabled;b.click();return {was,flash:document.querySelector('#rpStatus').classList.contains('rp-flash'),prev:document.querySelector('#rpPrevDlg').open,text:document.querySelector('#rpStatus').textContent};});
- ok('without wording the buttons are off yet tappable; a tap flashes the status instead of doing nothing',off.was&&off.flash&&!off.prev&&/No wording for the FAST/.test(off.text),off);
+ /* no wording pasted: the buttons are off but tappable, and a tap flashes the reason (the QABF: the FAST's questions are built in since v21.58) */
+ const off=await page.evaluate(()=>{const si=document.querySelector('#rpInst');si.value='qabf';si.dispatchEvent(new Event('change',{bubbles:true}));const b=document.querySelector('#rpPreview');const was=b.classList.contains('off')&&!b.disabled;b.click();return {was,flash:document.querySelector('#rpStatus').classList.contains('rp-flash'),prev:document.querySelector('#rpPrevDlg').open,text:document.querySelector('#rpStatus').textContent};});
+ ok('without wording the buttons are off yet tappable; a tap flashes the status instead of doing nothing',off.was&&off.flash&&!off.prev&&/No wording for the QABF/.test(off.text),off);
+ await page.evaluate(()=>{const si=document.querySelector('#rpInst');si.value='fast';si.dispatchEvent(new Event('change',{bubbles:true}));});
  /* the layout: the definition column is not squeezed */
  const w=await page.evaluate(()=>{const td=[...document.querySelectorAll('#rpTargets tbody tr:first-child td')].map(e=>e.getBoundingClientRect().width);return td;});
  ok('targets table: the definition column is at least a quarter of the table',w.length===4&&w[3]>=0.25*(w[0]+w[1]+w[2]+w[3]),w);
