@@ -154,6 +154,26 @@ b = '<div class="twoup fast-wide">\n    <div class="nbh-scrollx"><table class="g
 if b not in s:
     assert s.count(a) == 1, 'the FAST twoup'
     s = s.replace(a, b)
+# (v21.59) the credit: the FAST's authors, with the article in APA form, under the worksheet's heading (and so on the stage)
+CREDIT = ('<!-- ia1-credit --><p class="method fast-credit">The Functional Analysis Screening Tool (FAST) was developed by Brian A. Iwata (University of Florida), '
+          'Iser G. DeLeon (Kennedy Krieger Institute and Johns Hopkins University School of Medicine), and Eileen M. Roscoe (New England Center for Children). '
+          'Its items are reproduced from Figure 1 of: Iwata, B. A., DeLeon, I. G., &amp; Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. '
+          '<em>Journal of Applied Behavior Analysis, 46</em>(1), 271&ndash;284. <a href="https://doi.org/10.1002/jaba.31" target="_blank" rel="noopener">https://doi.org/10.1002/jaba.31</a></p><!-- /ia1-credit -->\n')
+s = re.sub(r'<!-- ia1-credit -->.*?<!-- /ia1-credit -->\n', '', s, flags=re.S)
+a = '  <div class="bar nbh-band">FAST Scoring Worksheet</div>\n'
+assert s.count(a) == 1, 'the FAST bar'
+s = s.replace(a, a + '  ' + CREDIT)
+# the respondent page for the FAST names its authors (plain text, under the page's own footnote)
+RPC = "credit:'The Functional Analysis Screening Tool (FAST) was developed by Brian A. Iwata, Iser G. DeLeon, and Eileen M. Roscoe. Items reproduced from Figure 1 of Iwata, B. A., DeLeon, I. G., & Roscoe, E. M. (2013). Reliability and validity of the Functional Analysis Screening Tool. Journal of Applied Behavior Analysis, 46(1), 271\u2013284. https://doi.org/10.1002/jaba.31',"
+a = "fast:{heading:'Functional Analysis Screening Tool (FAST)',scale:{kind:'yn'},"
+if RPC not in s:
+    assert s.count(a) == 1, 'RP_INFO.fast'
+    s = s.replace(a, "fast:{heading:'Functional Analysis Screening Tool (FAST)'," + RPC + "scale:{kind:'yn'},")
+a = "  if(key==='fast'&&$('#rpFx').checked)p.open=info.open.map(([id,label])=>({id,label:P(label)}));"
+b = "  if(key==='fast'&&info.credit)p.credit=info.credit;   /* v21.59 the authors' credit on the page */\n" + a
+if "p.credit=info.credit" not in s:
+    assert s.count(a) == 1, 'rpPayloadFor open'
+    s = s.replace(a, b)
 # the words around it
 a = "The instruments are published forms, so the wording is not built into the workstation: paste each instrument's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go."
 b = "The FAST's sixteen questions are built in (Iwata, DeLeon &amp; Roscoe, 2013, Figure 1): they show on its worksheet and its respondent page, so paste here only to change them. The QABF, MAS, PBQ and WEFA are published forms whose wording is not built into the workstation: paste each one's items here once, one item per line, from your own copy (or from the Google Form you already use); the numbering may stay or go."

@@ -206,6 +206,7 @@
     var row2=h('div',{'class':'row'});row2.hidden=true;var cp=h('button',{type:'button','class':'ghost',text:'Copy the code'}),sv=h('button',{type:'button','class':'ghost',text:'Save as a file'}),ml=h('a',{href:'#',id:'nbhr-mail'});ml.appendChild(h('button',{type:'button',text:'Open the email again'}));
     row2.appendChild(cp);row2.appendChild(sv);row2.appendChild(ml);sc.appendChild(row2);
     sc.appendChild(h('p',{'class':'foot',text:'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
+    if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
       if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);
