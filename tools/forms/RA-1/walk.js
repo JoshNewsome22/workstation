@@ -305,6 +305,7 @@ function compose(D){
   if(run){/* the runner as it looks part way through a tablet session */
     const set=(sel,v)=>{const e=run.querySelector(sel);if(e)e.textContent=v;};
     const sels=[...run.querySelectorAll('.ra-run-set .raw-v')];if(sels[0])sels[0].textContent=EXN[0];if(sels[1])sels[1].textContent='1';if(sels[2])sels[2].textContent='20';if(sels[3])sels[3].textContent='Minutes run less access time';
+    const srcs=[...run.querySelectorAll('.ra-run-src')];if(srcs[0])srcs[0].textContent='Every response: FR 1';if(srcs[1])srcs[1].textContent='20 s access, as on Setup';
     set('.ra-run-big','3:48');set('.ra-run-sub b','Running');set('.ra-run-sub span','1:12 elapsed');set('.ra-run-cue b','Deliver '+EXN[0]);set('.ra-run-cue span','20 s of access, then the clock runs again');
     const ns=run.querySelectorAll('.ra-run-n');if(ns[0])ns[0].textContent='17';if(ns[1])ns[1].textContent='0';const bar=run.querySelector('.ra-run-bar span');if(bar)bar.style.width='24%';
     set('.ra-run-info','Every response produces '+EXN[0]+' for 20 s; the sheet takes minutes run less access time.');const scr=run.querySelector('.ra-run-script');if(scr)scr.remove();const sm=run.querySelector('.ra-run-sum');if(sm)sm.remove();const msg=run.querySelector('.ra-run-msg');if(msg)msg.remove();}
