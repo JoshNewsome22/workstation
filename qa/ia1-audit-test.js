@@ -125,7 +125,7 @@ const QABF=Array.from({length:25},(_,i)=>(i+1)+'. Simulated QABF item '+(i+1)+' 
  let txt='';await page.evaluate(()=>{window.confirm=m=>{window.__q=String(m);return true;};});await clearAll();txt=await page.evaluate(()=>window.__q||'');await stub();
  const kept=await page.evaluate(()=>['rp.w.qabf','rp.terms','rp.video','rp.name','rp.pron','m.fn','inf[0].date','m.beh'].map(n=>document.querySelector('[name="'+n+'"]').value));
  ok('9: Clear all keeps rp.w.*, rp.terms and rp.video and clears rp.name, rp.pron, m.fn, the date and the target',kept[0].length>100&&/self-injury/.test(kept[1])&&kept[2]==='https://youtu.be/abc'&&kept[3]===''&&kept[4]===''&&kept[5]===''&&kept[6]===''&&kept[7]==='',kept.map(k=>k.slice(0,30)));
- ok('9: the confirm text says what stays',/pasted item wording, the respondent terms and the video link stay/.test(txt),txt);
+ ok('9: the confirm text says what stays',/pasted item wording, the respondent terms, the video link and the reply box address stay/.test(txt),txt);
 
  /* save, reload, open: the new fields travel */
  await sim('attention');await set('inf[0].date','9/2/2026');await set('inf[2].date','9/9/2026');await set('m.fn','tangible');await sleep(250);

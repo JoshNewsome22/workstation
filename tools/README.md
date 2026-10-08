@@ -35,6 +35,10 @@ Paths below are from the repository root. The test server the checks expect:
   `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`.
 - `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
   tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
+- `tools/reply-box/` — the reply box for IA-1's respondent pages (v21.65): `public_html/reply/box.php`
+  (PHP 8.1+, no database; boxes, encrypted replies, a read token, CORS for any page), its README with the
+  upload steps and `build-zip.sh` → `dist/nbh-reply-box-upload.zip`. Checked end to end by
+  `qa/reply-box-test.js`, which runs it with `php -S`.
   `nbh-copies.js` + `nbh-autosave.js` + `patch-autosave.py` (v21.44 Autosave: the store of safety copies, the
   whole-state hash and a form's own copy; it also makes small anchored changes in the bridge and the guard, and
   refreshes the store's copy inside `index.html`; `--check` says whether every file is current).

@@ -8088,3 +8088,57 @@ calendar file, a typed date, a row taken off; two codes placed on their targets 
 code added as a target, the board saved and reopened; in the workstation TB-1's targets becoming records and the board's dates
 on the case bar), and by the respondent, WEFA, audit, iPad, photo and short-link suites as before (the respondent suite now
 expects a second respondent in the next free column, A kept).
+
+### v21.65: the reply box, answers straight back to Form IA-1
+
+**For the informant.** A respondent page (the FAST, QABF, MAS, PBQ or WEFA opened from a link or an attached file) used to
+end with an email: Send opened the informant's mail app with the answers as a code, which the BCBA pasted into Collect
+responses. Now, when the page carries a reply box, Send locks the answers on the informant's device and sends them to the box;
+the page says **Sent.** and is done. No email, no code, nothing to copy. The page's foot says so ("Your answers are locked on
+this device so that only J. Newsome's own form can open them"). If the box cannot be reached (no internet, the program not
+set up), the page says so and offers **Open the email** with the code, the way it always worked.
+
+**For the assessor.** Form IA-1 collects the replies itself: the Send-outs sheet collects while it is open (once on opening,
+then every minute) and **Collect from the reply box now** does it at once; the Collect responses dialog has **Collect from the
+reply box** too. A reply is placed the way a pasted code is (the target it names, the column of the informant whose name it
+carries, else a free one; the informant table filled; the board's row marked Received and Placed from whom). A reply about a
+target the file does not hold, or whose wording differs from this form's, is held on the Send-outs sheet with **Add it as a
+target and place it** (or Place it anyway, Discard). Every reply taken is remembered, so nothing is placed twice; **Remove the
+collected replies from the site** deletes them there (they stay in the file). The invitation email says "Your answers come
+straight back to me when you press Send" when the link carries a box. A row's new **QR** button (and **QR code** in the
+Respondent pages dialog) shows the link as a code the informant scans with a phone, with Share the link… (the iPad's share
+sheet: Messages, Gmail, AirDrop) and Copy the link; the Email and Share buttons keep working as before.
+
+**Where the box lives.** A small PHP program, `public_html/reply/box.php` on the practice's site (`tools/reply-box`, with a
+README and `nbh-reply-box-upload.zip` beside the release; HOSTING.md has the steps: upload, extract, open `?a=ping` once).
+A workstation opened from newsomebh.com uses `/reply/box.php` on that site by itself; the Respondent pages dialog's new
+**Reply box** field names another address (completed to `box.php`, remembered on the device like the wording and in the file
+as `rp.box`); a form opened from a folder with no address known makes email pages as before, and a file that already holds a
+box keeps using the site it was registered at. Each IA-1 file makes its own key pair and read token and registers its own box
+(a random id) the first time a page or link is made; the file carries them (`box`: id, token, both keys, the site, the replies
+taken, the held replies), so a copy opened elsewhere still collects. Clear all drops the file's box (the address stays); a
+new file gets its own.
+
+**What is where.** The link and the page carry the box's address, id and public key (never the private key). The page makes a
+one-time key of its own for the reply, derives a shared secret with the form's public key (ECDH P-256, HKDF-SHA-256 with the
+box id as salt), encrypts the answers (AES-GCM-256) and posts the ciphertext as text (no preflight). The site keeps the box
+id, a SHA-256 of the read token, the ciphertexts with the one-time public keys and times, and an hourly count per address
+(hashed); it never sees a name, a score or the student. The form lists its box with the token, decrypts with its private key,
+places, and keeps the ids taken. Replies are swept after 60 days, a box nothing has reached for 60 days too; 64 KB per reply,
+300 replies per box, 120 an hour from one address; a reply that does not decrypt (not for this file) is counted once and never
+tried again. Requests are allowed from any page (CORS `*`): a page opened from an email attachment has no origin.
+
+Parts: `tools/reply-box/public_html/reply/box.php` (+ `.htaccess`, README, `build-zip.sh`); `nbh-respond.js` (the runtime's
+`sendBox`, the Sent and fallback lines, the invitation's wording; the done line is `#nbhr-done`); IA-1's main script (`BOX`,
+`boxUrl`/`boxSite`/`boxReady`/`boxLink`, `boxKeys`, `boxEnsure`, `boxDecrypt`, `boxCollect`, `rcPlaceAuto` and `rcRowOf`,
+`boxNote`, `boxPaint`, `boxHeldPaint`, `boxPurge`, `window.__ia1BoxOuts`, `qrSvg`/`qrShow`; `rp.box` in the device memory and
+`rpRemember`; the box in `rpPayloadFor` and `rpPayloadQuiet`; `collect`/`restore` with `box`; `outsAct` async with `qr`), the
+dialogs' new field, buttons and lines, the Send-outs sheet's second row of buttons and the held list, the QR dialog, the QR
+library (qrcode-generator, MIT) inlined as `<script id="ia1-qr">`. Checked by `qa/reply-box-test.js` (44 checks: the API's
+ping, new, had, 409, 400, put, not a reply, 404, 413, 403, list with CORS, preflight, del, drop, the data folder; the form with
+no box, the address completed, registration with the keys in the form and the hash on the site, the link and the page carrying
+the box without the private key; three informants sending from the page, Sent with no mailto, ciphertexts only on the site;
+Collect placing two in their columns and holding the third, nothing twice, the Send-outs lines, the held reply added as a
+target and placed; the invitation's wording, QR on a row and in the dialog; the file with the box, reopened, nothing twice,
+the box's own site when no address is known; Remove from the site, an unreadable reply counted; an address out of reach and
+the page's email fallback; no errors) and by the respondent, IA-1 send-outs, WEFA, audit and short-link suites as before.
