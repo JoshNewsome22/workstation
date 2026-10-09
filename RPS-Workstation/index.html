@@ -1989,6 +1989,8 @@ async function gatherFacts(push){
       if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
       if(id==='DM-1'||id==='TD-1'||id==='CR-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
     }
+    /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
+    const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
     const sig=factsSig(f);
     if(sig!==state.factsSig){
       state.factsSig=sig;f.when=new Date().toISOString();
@@ -4318,10 +4320,10 @@ const nbhDocRead=(()=>{
     {k:'enroll',label:'Enrolled',al:'enrollment date|date (?:of )?enroll(?:ed|ment)|date enrolled|entry date|date of entry|enrolled (?:on|since)|enrolled',kind:'date',to:['DM-1:s.enroll']},
     {k:'prior',label:'Previous school',al:'previous school|prior school|last school|former school|transferred from',kind:'text',to:['DM-1:s.prior']},
     {k:'trans',label:'Transportation',al:'transportation|bus (?:number|no\\.?|#|route)|bus',kind:'text',to:['DM-1:s.trans']},
-    {k:'lang',label:'Home language',al:'home language|primary language|native language|first language|language spoken at home|language at home|language',kind:'text',to:['DM-1:s.lang']},
+    {k:'lang',label:'Home language',al:'home language|primary language|native language|first language|language spoken at home|language at home|parent language|student language|preferred oral language|preferred written language|language',kind:'text',to:['DM-1:s.lang']},
     {k:'interp',label:'Interpreter',al:'interpreter (?:needed|required)|interpreter',kind:'interp',to:['DM-1:s.interp']},
     {k:'ell',label:'ELL',al:'ell status|ell code|english language learner|esol(?: status)?|lep status|ell|lep',kind:'ell',to:['DM-1:s.ell']},
-    {k:'eth',label:'Race / ethnicity',al:'race/ethnicity|race / ethnicity|race and ethnicity|ethnicity|race',kind:'text',to:['DM-1:s.eth']},
+    {k:'eth',label:'Race / ethnicity',al:'single ethnicity|race/ethnicity|race / ethnicity|race and ethnicity|ethnicity|race',kind:'eth',to:['DM-1:s.eth']},
     {k:'medicaid',label:'Medicaid',al:'medicaid (?:id|number|no\\.?|#)|medicaid',kind:'text',to:['DM-1:s.medicaid']},
     {k:'elig',label:'Primary exceptionality',al:'primary (?:exceptionality|disability|eligibility|ese program)|exceptionality|eligibility category|disability category|primary ese|eligibility|disability',kind:'elig',to:['DM-1:p.elig']},
     {k:'elig2',label:'Secondary exceptionality',al:'secondary (?:exceptionality|disability|eligibility)|other exceptionalit(?:y|ies)|related services?',kind:'text',to:['DM-1:p.elig2']},
@@ -4345,7 +4347,7 @@ const nbhDocRead=(()=>{
     {k:'bcba',label:'BCBA',al:'case bcba|bcba name|behavior analyst|bcba',kind:'text',to:['bar:bcba']},
     {k:'holder',label:'Rights held by',al:'educational rights(?: held by| holder)?|rights (?:held by|holder)|parental rights',kind:'holder',to:['DM-1:r.holder']},
     /* labels read so that their values are not taken for another field's; nothing is placed from them */
-    {k:'skip',label:'',al:'parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship',kind:'skip',to:[]}
+    {k:'skip',label:'',al:'parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship|former or maiden name|maiden name|former name|suffix|original enter grade|enter grade|entry grade|military family student|grandmother|grandfather|aunt|uncle|sibling|brother|sister|stepmother|stepfather|custody contact|custody alert|resident status|residence county|location of birth|country of birth|security pin|student pin|marital status|survey date',kind:'skip',to:[]}
   ];
   const BY={};F.forEach(f=>{BY[f.k]=f;});
   /* every alias, longest first, so that "student id number" wins over "student id" and "student"; a space is any run of
@@ -4353,7 +4355,7 @@ const nbhDocRead=(()=>{
   const topSplit=al=>{const out=[];let d=0,cur='';for(const c of al){if(c==='(')d++;else if(c===')')d--;if(c==='|'&&!d){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;};
   const alts=[];F.forEach(f=>topSplit(f.al).forEach(a=>alts.push({a,k:f.k,re:new RegExp('^(?:'+a.replace(/ /g,'[ \\t]+')+')$','i')})));
   alts.sort((x,y)=>y.a.length-x.a.length);
-  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;\\u2013\\u2014-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
+  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;?\\u2013\\u2014-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
   const keyOf=s=>{const t=s.replace(/\s+/g,' ');for(const x of alts){if(x.re.test(t))return x.k;}return 'skip';};
   const STRICT={date:/^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}|\d{4}-\d{2}-\d{2}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/,grade:/^(\d{1,2}(?:st|nd|rd|th)?|k|kg|pk|pre-?k|kindergarten)(?![a-z0-9])/i,
     id:/^[A-Z]?\d[\dA-Z\-]{3,}$/i,sex:/^(m|f|male|female|boy|girl)$/i,yesno:/^(y|yes|n|no|x)$/i,matrix:/^25[1-5]$/,
@@ -4394,8 +4396,10 @@ const nbhDocRead=(()=>{
     let s=cap(String(v||'').replace(/\s+/g,' ').trim()),firstN='',lastN='';
     if(s.indexOf(',')>=0){const p=s.split(',');lastN=p[0].trim();firstN=p.slice(1).join(',').trim();}
     else{const w=s.split(' ').filter(x=>!SUFFIX.test(x));if(w.length>=2){lastN=w[w.length-1];firstN=w.slice(0,-1).join(' ');}else firstN=s;}
-    firstN=firstN.split(' ').filter((x,i)=>i===0||!/^[A-Z]\.?$/.test(x)).join(' ');   /* the middle initial stays off the first name */
-    return {first:firstN,last:lastN,full:(firstN+' '+lastN).trim()};
+    firstN=firstN.split(' ').filter(x=>!SUFFIX.test(x)).filter((x,i)=>i===0||!/^[A-Z]\.?$/.test(x)).join(' ');   /* the middle initial stays off the first name */
+    /* a legal name lists every given name ("Rivera, Mateo Josue"): the first goes to the bar, all of them to Form DM-1 */
+    const given=firstN.split(' ')[0]||'';
+    return {first:firstN,last:lastN,given,full:(given+' '+lastN).trim()};
   }
   /* a text value ends at a gap or at an unknown label ("Phone:") */
   const cutText=v=>String(v||'').split(/[ \t]{2,}/)[0].replace(/\s+[A-Z][A-Za-z\/ ]{0,24}:\s.*$/,'').replace(/[\s,;:\-\u2013]+$/,'').trim();
@@ -4414,7 +4418,10 @@ const nbhDocRead=(()=>{
       case 'holder':{const s=first(v,HOLDER);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
       case 'matrix':{const m=v.match(/\b(25[1-5])\b/);return m?{value:m[1],ok:true}:{value:v,ok:false,note:'not 251 to 255'};}
       case 'id':{const s=cutText(v).replace(/^[#:\s]+/,'').split(/\s+/)[0]||'';return s?{value:s,ok:/\d/.test(s)}:{value:'',ok:false};}
-      case 'name':{const s=cutText(v);const n=splitName(s);return n.last?{value:n.full,ok:true,first:n.first,last:n.last}:{value:s,ok:!!s,note:'one name only',first:n.first,last:''};}
+      case 'eth':{const q=v.match(/^(hispanic or latino|white|black or african american|asian|american indian or alaska native|native hawaiian or other pacific islander)\s+(yes|no)(?![a-z])/i);
+        if(q)return q[2].toLowerCase()==='yes'?{value:q[1],ok:true}:{value:'',ok:false};   /* "Race: White  No" is a question answered No: nothing to place */
+        const s=cutText(v).slice(0,120);return {value:s,ok:!!s};}
+      case 'name':{const s=cutText(v);const n=splitName(s);return n.last?{value:n.full,ok:true,first:n.first,last:n.last,given:n.given}:{value:s,ok:!!s,note:'one name only',first:n.first,last:'',given:n.given};}
       default:{const s=cutText(v).slice(0,300);return {value:s,ok:!!s};}
     }
   }
@@ -4435,14 +4442,14 @@ const nbhDocRead=(()=>{
     /* a label with a colon counts anywhere; one followed by a gap or ending the line only where it stands on its own
        (the line's start, after a gap, after a bullet or a bracket), so "Royal Palm School  Student Information" has no
        label in it; one followed by a single space only with a value of its shape */
-    const alone=h.start===0||/[ \t]{2,}$/.test(before)||/[(\[\u2022\u00b7*|,;]\s*$/.test(before)||/^[ \t]*[\u2022\u00b7*\-\u2013]\s*$/.test(before);
+    const alone=h.start===0||/[ \t]{2,}$/.test(before)||/[(\[\u2022\u00b7*|,;?]\s*$/.test(before)||/^[ \t]*[\u2022\u00b7*?\-\u2013]\s*$/.test(before);
     if(h.type==='colon')return true;
     if(h.type==='gap'||h.type==='eol')return alone;
     const re=STRICT[f&&f.kind];if(!re)return false;
     return re.test(next);
   }
   function lines(text){
-    return String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').split('\n').map(l=>l.replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*]\s*/,''));
+    return String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').split('\n').map(l=>l.replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
   }
   function parse(text){
     const L=lines(text),found={},order=[],used=new Set();
@@ -4452,20 +4459,24 @@ const nbhDocRead=(()=>{
       for(let j=0;j<hs.length;j++){
         const h=hs[j],nextStart=j+1<hs.length?hs[j+1].start:line.length;
         let raw=line.slice(h.end,nextStart).trim(),seen=line.trim(),from=i;
-        if(!raw&&(h.type==='colon'||h.type==='eol')&&i+1<L.length){
-          const n=L[i+1].trim();
-          if(n&&!hits(L[i+1]).some(x=>x.start===0&&valid(x,L[i+1],L[i+1].slice(x.end).trim()))){raw=n;seen=line.trim()+' / '+n;from=i+1;used.add(i+1);}
+        const f=BY[h.k];
+        if(!raw&&f&&f.kind!=='skip'&&(h.type==='colon'||h.type==='eol')&&i+1<L.length){
+          /* the value on the next line (a table's label above its value): a short line with no label and no colon of its own (an
+             empty field followed by the next field is not a value), of the field's shape where it has one */
+          const n=L[i+1].trim(),re=STRICT[f.kind];
+          if(n&&n.length<=80&&!/[:\uff1a=]/.test(n)&&!hits(L[i+1]).some(x=>valid(x,L[i+1],L[i+1].slice(x.end).trim()))&&(!re||re.test(n))){raw=n;seen=line.trim()+' / '+n;from=i+1;used.add(i+1);}
         }
         if(h.k==='skip'||!raw)continue;
-        if(found[h.k]&&found[h.k].str>=h.str)continue;   /* the first reading stands, unless a later one has a surer label (a colon) */
-        const f=BY[h.k],sh=shape(f,raw);if(!sh.value)continue;
-        if(!found[h.k])order.push(h.k);
+        const sh=shape(f,raw);if(!sh.value)continue;
+        const cur=found[h.k];
+        if(cur&&(cur.ok||!sh.ok)&&cur.str>=h.str)continue;   /* the first reading stands, unless a later one has a surer label (a colon), or the first was not of the field's shape and this one is */
+        if(!cur)order.push(h.k);
         found[h.k]=Object.assign({k:f.k,label:f.label,to:f.to.slice(),raw,seen:seen.slice(0,160),line:from,str:h.str},sh);
       }
     }
     /* a first or last name read on its own wins over the split of the whole name */
     if(found.name){if(found.first){found.name.first=found.first.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.first');}if(found.last){found.name.last=found.last.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.last');}
-      found.name.value=((found.name.first||'')+' '+(found.name.last||'')).trim();}
+      found.name.value=(((found.first?found.first.value:(found.name.given||found.name.first))||'')+' '+(found.name.last||'')).trim();}
     else if(found.first||found.last){const full=((found.first||{}).value||'')+' '+((found.last||{}).value||'');found.name={k:'name',label:'Student',to:['bar:client'],value:full.trim(),raw:full.trim(),seen:((found.first||found.last).seen),ok:true,first:(found.first||{}).value||'',last:(found.last||{}).value||''};order.unshift('name');}
     const fields=order.map(k=>found[k]);
     return {fields,behaviors:behaviors(L),lines:L.length};
@@ -4580,9 +4591,19 @@ async function drOcr(canvas,what){
       logger:m=>{if(m&&m.status==='recognizing text'&&DR.what)drProg('Reading '+DR.what+'\u2026 '+Math.round((m.progress||0)*100)+'%');}});
   }
   DR.what=what;drProg('Reading '+what+'\u2026');
-  const r=await DR.worker.recognize(canvas);
+  const r=await DR.worker.recognize(canvas,{},{text:true,blocks:true});
   DR.what='';
-  return (r&&r.data&&r.data.text)||'';
+  return drLinesOfOcr(r&&r.data)||(r&&r.data&&r.data.text)||'';
+}
+/* the recognizer's words with their places: a gap wider than two letters between two words on a line is a column break
+   (a label's cell and its value's, a value and the next label), kept as a double space for the matcher, as a PDF's is */
+function drLinesOfOcr(data){
+  const blocks=data&&data.blocks;if(!Array.isArray(blocks)||!blocks.length)return '';
+  const out=[];
+  blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>{const ws=(l.words||[]).filter(w=>w&&w.text&&w.bbox).sort((a,b)=>a.bbox.x0-b.bbox.x0);if(!ws.length)return;
+    let s='',prev=null;ws.forEach(w=>{if(prev){const cw=Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2);s+=w.bbox.x0-prev.bbox.x1>2.2*cw?'  ':' ';}s+=w.text;prev=w;});
+    out.push(s);})));
+  return out.join('\n');
 }
 function drShow(text,from){
   DR.text=text;const res=DR.res=nbhDocRead.parse(text);
@@ -4633,6 +4654,7 @@ async function drPlace(){
   }
   /* the case: target behaviors from a plan, when the forms hold none */
   if(behs.length){
+    const t1=Date.now();while(factsBusy&&Date.now()-t1<6000)await new Promise(r=>setTimeout(r,100));   /* a gather under way would write over them */
     const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
     f.behaviors=behs.map(b=>({label:b.label,def:b.def||'',ex:'',nex:'',type:b.isRep?'replacement':'',isRep:!!b.isRep,fn:'',fnKey:'',dim:'',unit:'',rep:'',ctx:'',src:'document'}));
     f.src.behaviors='document';f.when=new Date().toISOString();
