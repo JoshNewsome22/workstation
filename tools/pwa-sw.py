@@ -55,6 +55,11 @@ def local(ref):
     return bool(re.match(r'^[A-Za-z0-9][A-Za-z0-9._-]*\.[A-Za-z0-9]+$', ref or ''))
 
 
+def local_path(ref):
+    """v21.67 a file in a folder of this folder (nbh-doc/pdf.min.mjs), as the nbh-offline meta names the readers"""
+    return bool(re.match(r'^[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9][A-Za-z0-9._-]*)+\.[A-Za-z0-9]+$', ref or ''))
+
+
 def loads(text):
     """the same-folder files a page loads, in the order they appear"""
     out = []
@@ -123,6 +128,10 @@ def files_of(folder):
         fail('manifest.json: ' + str(e))
     if 'manifest.json' not in out:
         out.append('manifest.json')
+    # v21.67 files a page loads only when asked for (the document reader's PDF.js, the OCR engine): named in index.html as
+    # <meta name="nbh-offline" content="path path ...">, so they are saved for offline use with the rest
+    for m in re.finditer(r'<meta name="nbh-offline" content="([^"]*)"', idx):
+        out += [x for x in m.group(1).split() if (local(x) or local_path(x)) and x not in out]
     out += [i['src'] for i in man.get('icons', []) if local(i.get('src', '')) and i['src'] not in out]
     out += [x for x in re.findall(r'<link rel="apple-touch-icon" href="([^"]+)"', idx) if local(x) and x not in out]
     missing = [f for f in out if not os.path.isfile(os.path.join(folder, f))]

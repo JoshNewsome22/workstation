@@ -296,7 +296,9 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   check('B every saved copy is the file on the website, byte for byte',!bad.length,bad.join(', '));
   const F=forms('NBH-Workstation');
   const need=['index.html',...F.map(f=>f.file),'nbh-pictos.js','nbh-tk1-narration.js','nbh-tk1-video.js','nbh-sm1-narration.js','nbh-dd1-narration.js','nbh-tk1-bus-narration.js','nbh-ia1-narration.js','nbh-ra1-narration.js','nbh-pictures.js','nbh-respond.js','respond.html','pdf-lib.min.js','nbh-pdf-tools.js','manifest.json','icon-192.png','icon-512.png','icon-512-maskable.png','apple-touch-icon.png'];
-  check('B the list is the shell, the 45 forms, the picture library, the TK-1 narration, the respondent page and its library, the PDF tools, the manifest and the icons',need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
+  /* v21.67 the document readers (PDF.js, Tesseract) in their folders, named by index.html's nbh-offline meta */
+  const offline=(/<meta name="nbh-offline" content="([^"]*)"/.exec(fs.readFileSync(path.join(ROOT,'NBH-Workstation','index.html'),'utf8'))||[0,''])[1].split(/\s+/).filter(Boolean);need.push(...offline);
+  check('B the list is the shell, the 45 forms, the picture library, the TK-1 narration, the respondent page and its library, the PDF tools, the document readers (nbh-offline), the manifest and the icons',offline.length===6&&need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
   const named=scanLoads(path.join(ROOT,'NBH-Workstation'),['index.html','respond.html',...F.map(f=>f.file)]);
   check('B every file of the folder a page names (scanned here: tags, styles, fetch, loadScript, workers, .src) is in the list',named.length>=6&&named.every(f=>FILES.includes(f)),'named '+named.length+'; not listed: '+named.filter(f=>!FILES.includes(f)).join(', '));
   const pa=await page.evaluate(()=>({asked:window.__persistAsked||0,seen:window.__persistedSeen||0,was:window.__persistedWas}));
@@ -308,7 +310,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   const hp=await page.evaluate(()=>document.querySelector('#dlgBody').textContent);
   await page.evaluate(()=>$('#dlg').close());
   const pal=await page.evaluate(()=>CMDS.map(c=>c.n).filter(n=>/update|Offline copy/i.test(n)));
-  check('B Diagnostics names the offline copy, Help explains it, the command box can check for updates',/Saved for offline use \u2014 64 files/.test(dg)&&/Offline, installing and updates/.test(hp)&&/Add to Home Screen/.test(hp)&&pal.length===2,dg.slice(0,120)+' | '+pal.join(', '));
+  check('B Diagnostics names the offline copy, Help explains it, the command box can check for updates',new RegExp('Saved for offline use \\u2014 '+FILES.length+' files').test(dg)&&/Offline, installing and updates/.test(hp)&&/Add to Home Screen/.test(hp)&&pal.length===2,dg.slice(0,120)+' | '+pal.join(', '));
   check('B in a browser tab nothing is wrapped for saving (createObjectURL and the link click are the browser’s own)',await page.evaluate(()=>window.nbhShareSave&&window.nbhShareSave.on===false&&/\[native code\]/.test(URL.createObjectURL.toString())&&/\[native code\]/.test(HTMLAnchorElement.prototype.click.toString())));
 
   /* ================= C: offline ================= */

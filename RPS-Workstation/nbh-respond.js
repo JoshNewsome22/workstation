@@ -19,6 +19,10 @@
   var PRON={he:{s:'he',o:'him',p:'his',r:'himself'},she:{s:'she',o:'her',p:'her',r:'herself'},they:{s:'they',o:'them',p:'their',r:'themselves'}};
   function cap(src,rep){return /^[A-Z]/.test(src)?rep.charAt(0).toUpperCase()+rep.slice(1):rep;}
   U.personalize=function(text,o){o=o||{};var t=String(text==null?'':text);var pr=PRON[o.pron]||null;
+    /* v21.67 a Spanish page: "el estudiante" takes the name, "la conducta problem\u00e1tica" the behavior's term (as written on the targets table) */
+    if(o.lang==='es'){if(o.name)t=t.replace(/\b(el|la|el\/la)\s+(estudiante|alumno\/a|alumno|alumna|ni\u00f1o\/a|ni\u00f1o|ni\u00f1a|cliente)\b/gi,function(m){return cap(m,o.name);});
+      if(o.behs)t=t.replace(/\b(las|estas|esas)\s+conductas\s+(problem\u00e1ticas|problematicas|problema|objetivo|desafiantes|inapropiadas)\b|\b(los|estos|esos)\s+comportamientos\s+(problem\u00e1ticos|problematicos|problema|objetivo|desafiantes|inapropiados)\b/gi,function(m){return cap(m,o.behs);});
+      if(o.beh)t=t.replace(/\b(la|esta|esa)\s+conducta\s+(problem\u00e1tica|problematica|problema|objetivo|desafiante|inapropiada)\b|\b(el|este|ese)\s+comportamiento\s+(problem\u00e1tico|problematico|problema|objetivo|desafiante|inapropiado)\b/gi,function(m){return cap(m,o.beh);});}
     if(o.name){t=t.replace(/\b(the|your|this|that|my)\s+(student|client|individual|person|child|pupil|learner|consumer)(['’]s)?\b/gi,function(m,a,b,pos){return cap(m,o.name+(pos?'’s':''));});}
     if(pr){t=t.replace(/\b(himself\s+or\s+herself|herself\s+or\s+himself|himself\s*\/\s*herself|herself\s*\/\s*himself|him\s*\/\s*herself|her\s*\/\s*himself|\(s\)he\s*self|them\s*\/\s*self)\b/gi,function(m){return cap(m,pr.r);})
       .replace(/\b(his\s+or\s+her|her\s+or\s+his|his\s*\/\s*hers?|her\s*\/\s*his|hers?\s*\/\s*his)\b/gi,function(m){return cap(m,pr.p);})
@@ -162,72 +166,99 @@
       '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:15px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
       '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
+    /* v21.67 the page in Spanish (P.lang 'es'): every word of the page's own, the items as the assessor pasted them */
+    var ES=P.lang==='es';
+    var TXT={'the BCBA':'el BCBA','Photo of the student':'Foto del estudiante','Student:':'Estudiante:','Behavior this questionnaire is about:':'Conducta sobre la que trata este cuestionario:',
+      'What counts as {b}:':'Qu\u00e9 cuenta como {b}:','the behavior':'la conducta','Do you understand this definition of {b}?':'\u00bfEntiende esta definici\u00f3n de {b}?','Do you understand the definition':'\u00bfEntiende la definici\u00f3n?',
+      'Yes':'S\u00ed','No':'No','Unsure':'No estoy seguro/a','Sometimes':'A veces',
+      'Please ask {who} to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.':'Por favor pida a {who} que le explique la definici\u00f3n antes de responder: la p\u00e1gina no enviar\u00e1 respuestas sobre una definici\u00f3n que no entiende. Cuando est\u00e9 clara, cambie su respuesta a S\u00ed.',
+      'Please ask {who} about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.':'Si puede, pregunte a {who} sobre la definici\u00f3n antes de responder. Si contin\u00faa, responda solo sobre lo que ha visto que coincide con la definici\u00f3n de arriba; su respuesta aqu\u00ed viaja con sus respuestas.',
+      'Instructions':'Instrucciones','Form ':'Formulario ','Questionnaire':'Cuestionario',
+      'Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send':'Responda cada pregunta sobre el estudiante y la conducta indicados arriba, seg\u00fan lo que usted ha visto. Cuando termine, pulse Enviar',
+      ': your answers go straight to {who}.':': sus respuestas van directamente a {who}.',': your email program opens with a message to {who} ready to go.':': se abre su programa de correo con un mensaje para {who} listo para enviar.',
+      'Please send it by {d}.':'Por favor env\u00edelo antes del {d}.','About you':'Sobre usted','The items':'Las preguntas','<b>{n} of {m}</b> answered':'<b>{n} de {m}</b> respondidas','Can\u2019t judge':'No puedo juzgar','Item {n}':'Pregunta {n}',
+      'In your own words':'En sus propias palabras','Add a note if you wish':'A\u00f1ada una nota si lo desea','Note for {l}':'Nota para {l}','Send your answers':'Enviar sus respuestas','Send my answers to {who}':'Enviar mis respuestas a {who}',
+      'Your answer code':'Su c\u00f3digo de respuestas','Copy the code':'Copiar el c\u00f3digo','Copied':'Copiado','Save as a file':'Guardar como archivo','Open the email again':'Abrir el correo de nuevo','Open the email':'Abrir el correo',
+      'Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.':'Sus respuestas se cifran en este dispositivo para que solo el formulario de {who} pueda abrirlas, y van al buz\u00f3n de respuestas de la pr\u00e1ctica cuando pulsa Enviar. Esta p\u00e1gina no guarda nada. No escriba el nombre completo del estudiante en esta p\u00e1gina.',
+      'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.':'Sus respuestas viajan solo en el correo que usted env\u00eda; esta p\u00e1gina no guarda nada ni env\u00eda nada por s\u00ed sola. No incluya el nombre completo del estudiante en el mensaje.',
+      '{t} answers':'{t}: respuestas','Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.':'Respuestas de la p\u00e1gina del cuestionario, para el formulario {f}. Pegue este mensaje completo en \u00abCollect responses\u00bb del formulario.','From: ':'De: ','Sent ':'Enviado el ',
+      'whether you understand the definition':'si entiende la definici\u00f3n',
+      'You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.':'Respondi\u00f3 <b>No</b> a la pregunta sobre la definici\u00f3n, as\u00ed que la p\u00e1gina a\u00fan no puede enviar sus respuestas. Por favor pida a {who} que le explique la definici\u00f3n; cuando est\u00e9 clara, cambie su respuesta a S\u00ed y pulse Enviar de nuevo.',
+      'Please fill in: ':'Por favor complete: ','Unanswered item':'Pregunta sin responder','Unanswered items':'Preguntas sin responder','Sending with {n} left blank, as you chose.':'Se enviar\u00e1 con {n} sin responder, como usted eligi\u00f3.','Answer each one':'Responda cada una',' (N/A counts)':' (N/A cuenta)',
+      ' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.':' y pulse Enviar de nuevo. Para enviar dej\u00e1ndolas en blanco a prop\u00f3sito, pulse Enviar una vez m\u00e1s sin cambiar nada.',
+      'Sending\u2026':'Enviando\u2026','Sending your answers\u2026':'Enviando sus respuestas\u2026','<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.':'<b>Enviado.</b> Sus respuestas llegaron a {who}. Gracias; puede cerrar esta p\u00e1gina.',
+      '<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.':'<b>No se pudo conectar con el buz\u00f3n de respuestas</b> ({e}). Pulse <b>Abrir el correo</b> abajo para enviar sus respuestas por correo electr\u00f3nico a {who}, o intente Enviar de nuevo en un momento.',
+      '<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.':'<b>Su programa de correo deber\u00eda abrirse ahora</b> con el mensaje para {who}. Pulse Enviar all\u00ed. Si no se abri\u00f3 nada, copie el c\u00f3digo de abajo y p\u00e9guelo en un correo para {to}, o gu\u00e1rdelo como archivo y adj\u00fantelo.',
+      '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Sus respuestas son m\u00e1s largas de lo que un enlace de correo puede llevar</b> ({n} caracteres, donde caben unos {m}), as\u00ed que no se abri\u00f3 ning\u00fan correo. Pulse <b>Guardar como archivo</b> y adjunte el archivo a un correo para {to}, o <b>Copiar el c\u00f3digo</b> y p\u00e9guelo en el mensaje.'};
+    function _(s,v){var t=ES&&TXT[s]!==undefined?TXT[s]:s;if(v)for(var k in v)t=t.split('{'+k+'}').join(v[k]);return t;}
+    var WHO=P.bcba||_('the BCBA');
+    if(ES)try{d.documentElement.lang='es';}catch(e){}
     root.innerHTML='';root.className='nr';
     var items=P.items||[],scale=P.scale||{kind:'yn'},extras=P.extras||[],opens=P.open||[];
     var ans=new Array(items.length).fill(''),prog;
     function answered(){var k=0;ans.forEach(function(a){if(a!=='')k++;});return k;}
-    function paint(){prog.innerHTML='<b>'+answered()+' of '+items.length+'</b> answered';}
+    function paint(){prog.innerHTML=_('<b>{n} of {m}</b> answered',{n:answered(),m:items.length});}
     /* the definition question: Yes / No / Unsure, required when the payload asks for it */
     var conf='';
-    function confBlock(){var w=h('div',{'class':'conf',id:'nbhr-conf'});w.appendChild(h('p',{'class':'q',html:'<b>Do you understand this definition of '+esc(P.beh||'the behavior')+'?</b> <span class="req">*</span>'}));
-      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Do you understand the definition'}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
-      [['yes','Yes'],['no','No'],['unsure','Unsure']].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
+    function confBlock(){var w=h('div',{'class':'conf',id:'nbhr-conf'});w.appendChild(h('p',{'class':'q',html:'<b>'+_('Do you understand this definition of {b}?',{b:esc(P.beh||_('the behavior'))})+'</b> <span class="req">*</span>'}));
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Do you understand the definition')}),note=h('p',{'class':'sub',id:'nbhr-conf-note'});note.hidden=true;
+      [['yes',_('Yes')],['no',_('No')],['unsure',_('Unsure')]].forEach(function(c){var lab=h('label'),r=h('input',{type:'radio',name:'nbhr-confirm',value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){conf=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');w.classList.remove('missing');
-          note.hidden=conf==='yes';note.textContent=conf==='yes'?'':conf==='no'?'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.':'Please ask '+(P.bcba||'the BCBA')+(P.email?' ('+P.email+')':'')+' about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.';});
+          var who=WHO+(P.email?' ('+P.email+')':'');note.hidden=conf==='yes';note.textContent=conf==='yes'?'':conf==='no'?_('Please ask {who} to explain the definition before you answer: the page will not send answers about a definition you do not understand. When it is clear, change your answer to Yes.',{who:who}):_('Please ask {who} about the definition before you answer, if you can. If you go on, answer only about what you have seen that matches the definition above; your answer here travels with your responses.',{who:who});});
         opts.appendChild(lab);});
       w.appendChild(opts);w.appendChild(note);return w;}
     /* links the assessor adds: an instructions video or page (http and https only) */
     function linksBlock(){var ls=(P.links||[]).filter(function(l){return l&&/^https?:\/\//i.test(l.url||'');});if(!ls.length)return null;
-      var w=h('p',{'class':'links'});ls.forEach(function(l,i){if(i)w.appendChild(d.createTextNode(' \u00b7 '));var a=h('a',{href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.label||'Instructions'});w.appendChild(a);});return w;}
+      var w=h('p',{'class':'links'});ls.forEach(function(l,i){if(i)w.appendChild(d.createTextNode(' \u00b7 '));var a=h('a',{href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.label||_('Instructions')});w.appendChild(a);});return w;}
     /* head */
-    var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?'Form '+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||'Questionnaire')}),
+    var card=h('div',{'class':'nr-card'},[h('div',{'class':'band',text:(P.form?_('Form ')+P.form+' · ':'')+(P.title||P.inst)}),h('h1',{text:P.heading||(P.title||_('Questionnaire'))}),
       h('p',{'class':'sub',text:(P.sub||'')}),
-      P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:'Photo of the student'}):null,
-      h('div',{'class':'def',html:'<b>Student:</b> '+esc(P.student||'')+(P.beh?'<br><b>Behavior this questionnaire is about:</b> '+esc(P.beh):'')+(P.def?'<br><b>What counts as '+esc(P.beh||'the behavior')+':</b> '+esc(P.def):'')}),
+      P.photo&&/^data:image\//.test(P.photo)?h('img',{'class':'photo',src:P.photo,alt:_('Photo of the student')}):null,
+      h('div',{'class':'def',html:'<b>'+_('Student:')+'</b> '+esc(P.student||'')+(P.beh?'<br><b>'+_('Behavior this questionnaire is about:')+'</b> '+esc(P.beh):'')+(P.def?'<br><b>'+_('What counts as {b}:',{b:esc(P.beh||_('the behavior'))})+'</b> '+esc(P.def):'')}),
       P.confirm?confBlock():null,
-      h('p',{'class':'sub',text:P.instructions||('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send'+(P.box&&P.box.u?': your answers go straight to '+(P.bcba||'the BCBA')+'.':': your email program opens with a message to '+(P.bcba||'the BCBA')+' ready to go.'))}),
-      P.due?h('p',{'class':'sub',text:'Please send it by '+P.due+'.'}):null,
+      h('p',{'class':'sub',text:P.instructions||(_('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send')+(P.box&&P.box.u?_(': your answers go straight to {who}.',{who:WHO}):_(': your email program opens with a message to {who} ready to go.',{who:WHO})))}),
+      P.due?h('p',{'class':'sub',text:_('Please send it by {d}.',{d:P.due})}):null,
       linksBlock()]);
     root.appendChild(card);
     /* respondent */
-    var who=h('div',{'class':'nr-card'});who.appendChild(h('div',{'class':'band',text:'About you'}));var g=h('div',{'class':'grid2'});
+    var who=h('div',{'class':'nr-card'});who.appendChild(h('div',{'class':'band',text:_('About you')}));var g=h('div',{'class':'grid2'});
     var ex={};extras.forEach(function(x){var lab=h('label',{'class':'f',text:x.label+(x.req?' *':'')});var inp;
-      if(x.type==='yn'){inp=h('select');['','Yes','No'].forEach(function(v){inp.appendChild(h('option',{value:v,text:v||'—'}));});}
+      if(x.type==='yn'){inp=h('select');[['',''],['Yes',_('Yes')],['No',_('No')]].forEach(function(v){inp.appendChild(h('option',{value:v[0],text:v[1]||'—'}));});}
       else{inp=h('input',{type:'text',autocomplete:x.id==='name'?'name':'off'});}
       ex[x.id]=inp;lab.appendChild(inp);g.appendChild(lab);});
     who.appendChild(g);root.appendChild(who);
     /* items */
-    var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||'The items'}));
+    var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||_('The items')}));
     prog=h('div',{'class':'prog'});ic.appendChild(prog);
     if(scale.kind==='num'&&scale.anchors&&scale.anchors.length){var key=h('div',{'class':'key'});scale.anchors.forEach(function(a){key.appendChild(h('span',{text:a}));});ic.appendChild(key);}
     var ol=h('ol',{'class':'items'});
     items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+(it.n||i+1)+'.</b> '+esc(it.text||'')}));
-      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':'Item '+(it.n||i+1)});var choices;
-      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||'Can\u2019t judge','']);}
-      else{var L=scale.labels||['Yes','No','N/A'];choices=[['Y',L[0]||'Yes',''],['N',L[1]||'No','']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Item {n}',{n:it.n||i+1})});var choices;
+      if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||_('Can\u2019t judge'),'']);}
+      else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
         r.addEventListener('change',function(){ans[i]=c[0];Array.prototype.forEach.call(opts.querySelectorAll('label'),function(l){l.classList.remove('on');});lab.classList.add('on');li.classList.remove('missing');paint();});
         opts.appendChild(lab);});
       li.appendChild(opts);ol.appendChild(li);});
     ic.appendChild(ol);
     /* open-ended, after the items unless the payload asks for them first */
-    var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||'In your own words'}));
+    var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||_('In your own words')}));
       opens.forEach(function(o){var lab=h('label',{'class':'f',text:o.label});oc.appendChild(lab);
-        if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||'Add a note if you wish','aria-label':'Note for '+o.label});
-          (o.choices||['Yes','No','Sometimes']).forEach(function(c){var l=h('label',{text:c});l.addEventListener('click',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
+        if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||_('Add a note if you wish'),'aria-label':_('Note for {l}',{l:o.label})});
+          (o.choices||[_('Yes'),_('No'),_('Sometimes')]).forEach(function(c){var l=h('label',{text:c});l.addEventListener('click',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
           wrap.appendChild(opts);wrap.appendChild(note);oc.appendChild(wrap);op[o.id]={get value(){return pick?pick+(note.value.trim()?'; '+note.value.trim():''):note.value.trim();}};}
         else{var ta=h('textarea',{maxlength:String(o.max||600)});op[o.id]=ta;oc.appendChild(ta);}});}
     if(oc&&P.openFirst)root.appendChild(oc);if(items.length)root.appendChild(ic);if(oc&&!P.openFirst)root.appendChild(oc);
     /* send */
-    var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:'Send your answers'}));
+    var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:_('Send your answers')}));
     var warn=h('div',{'class':'warn'});warn.hidden=true;sc.appendChild(warn);
     var BOX=(P.box&&P.box.u&&P.box.b&&P.box.k&&P.box.k.x&&P.box.k.y&&/^https?:\/\//i.test(P.box.u)&&window.crypto&&crypto.subtle&&window.fetch&&window.TextEncoder)?P.box:null;   /* v21.65 the reply box */
-    var row=h('div',{'class':'row'});var send=h('button',{type:'button',text:'Send my answers to '+(P.bcba||'the BCBA')});row.appendChild(send);sc.appendChild(row);
+    var row=h('div',{'class':'row'});var send=h('button',{type:'button',text:_('Send my answers to {who}',{who:WHO})});row.appendChild(send);sc.appendChild(row);
     var done=h('div',{'class':'done',id:'nbhr-done'});done.hidden=true;sc.appendChild(done);
-    var codeBox=h('textarea',{'class':'code',readonly:'readonly','aria-label':'Your answer code'});codeBox.hidden=true;sc.appendChild(codeBox);
-    var row2=h('div',{'class':'row'});row2.hidden=true;var cp=h('button',{type:'button','class':'ghost',text:'Copy the code'}),sv=h('button',{type:'button','class':'ghost',text:'Save as a file'}),ml=h('a',{href:'#',id:'nbhr-mail'});ml.appendChild(h('button',{type:'button',text:'Open the email again'}));
+    var codeBox=h('textarea',{'class':'code',readonly:'readonly','aria-label':_('Your answer code')});codeBox.hidden=true;sc.appendChild(codeBox);
+    var row2=h('div',{'class':'row'});row2.hidden=true;var cp=h('button',{type:'button','class':'ghost',text:_('Copy the code')}),sv=h('button',{type:'button','class':'ghost',text:_('Save as a file')}),ml=h('a',{href:'#',id:'nbhr-mail'});ml.appendChild(h('button',{type:'button',text:_('Open the email again')}));
     row2.appendChild(cp);row2.appendChild(sv);row2.appendChild(ml);sc.appendChild(row2);
-    sc.appendChild(h('p',{'class':'foot',text:BOX?'Your answers are locked on this device so that only '+(P.bcba||'the BCBA')+'\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.':'Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.'}));
+    sc.appendChild(h('p',{'class':'foot',text:BOX?_('Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.',{who:WHO}):_('Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.')}));
     if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
@@ -248,32 +279,32 @@
        .then(function(body){return fetch(BOX.u+(BOX.u.indexOf('?')>=0?'&':'?')+'a=put&b='+encodeURIComponent(BOX.b),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body)});})
        .then(function(r){return r.json().then(function(j){cb(r.ok&&j&&j.ok?null:((j&&j.error)||('the box answered '+r.status)));},function(){cb('the box answered '+r.status);});})
        .catch(function(e){cb(String((e&&e.message)||e||'no connection'));});}catch(e){cb(String((e&&e.message)||e));}}
-    function mailto(code){var subj=(P.subject||((P.title||P.inst)+' answers'))+(P.student?' · '+P.student:'');
-      var body='Answers from the respondent page, for Form '+(P.form||'')+'. Paste this whole message into "Collect responses" on the form.\n\n'+code+'\n\n'+(ex.name&&ex.name.value?'From: '+ex.name.value+'\n':'')+'Sent '+new Date().toLocaleDateString();
+    function mailto(code){var subj=(P.subject||_('{t} answers',{t:P.title||P.inst}))+(P.student?' · '+P.student:'');
+      var body=_('Answers from the respondent page, for Form {f}. Paste this whole message into "Collect responses" on the form.',{f:P.form||''})+'\n\n'+code+'\n\n'+(ex.name&&ex.name.value?_('From: ')+ex.name.value+'\n':'')+_('Sent ')+new Date().toLocaleDateString(ES?'es':undefined);
       return 'mailto:'+encodeURIComponent(P.email||'')+'?subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);}
     send.addEventListener('click',function(){var miss=[];items.forEach(function(it,i){if(ans[i]==='')miss.push(it.n||i+1);});
       var need=extras.filter(function(x){return x.req&&!(ex[x.id].value||'').trim();}).map(function(x){return x.label;});
-      if(P.confirm&&!conf){need.push('whether you understand the definition');var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
-      if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML='You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+' to explain the definition; when it is clear, change your answer to Yes and press Send again.';var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
+      if(P.confirm&&!conf){need.push(_('whether you understand the definition'));var cw=d.getElementById('nbhr-conf');if(cw)cw.classList.add('missing');}
+      if(P.confirm&&conf==='no'){warn.hidden=false;warn.innerHTML=_('You answered <b>No</b> to the question about the definition, so the page cannot send your answers yet. Please ask {who} to explain the definition; when it is clear, change your answer to Yes and press Send again.',{who:esc(WHO)+(P.email?' ('+esc(P.email)+')':'')});var cw2=d.getElementById('nbhr-conf');if(cw2)cw2.scrollIntoView({behavior:'smooth',block:'center'});return;}
       Array.prototype.forEach.call(ol.children,function(li,i){li.classList.toggle('missing',ans[i]==='');});
       if(need.length||miss.length){var again=!need.length&&miss.length<items.length&&warnedMiss===miss.join(',');
-        warn.hidden=false;warn.innerHTML=(need.length?'Please fill in: <span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?'Unanswered item'+(miss.length===1?'':'s')+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?'Sending with '+miss.length+' left blank, as you chose.':'Answer each one'+((scale.kind==='yn'&&!(scale.labels&&(scale.labels[2]===null||scale.labels[2]==='')))||scale.na?' (N/A counts)':'')+' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.'):'');
+        warn.hidden=false;warn.innerHTML=(need.length?_('Please fill in: ')+'<span class="miss">'+esc(need.join(', '))+'</span>. ':'')+(miss.length?(miss.length===1?_('Unanswered item'):_('Unanswered items'))+': <span class="miss">'+miss.join(', ')+'</span>. '+(again?_('Sending with {n} left blank, as you chose.',{n:miss.length}):_('Answer each one')+((scale.kind==='yn'&&!(scale.labels&&(scale.labels[2]===null||scale.labels[2]==='')))||scale.na?_(' (N/A counts)'):'')+_(' and press Send again. To send with these left blank on purpose, press Send once more without changing anything.')):'');
         warnedMiss=need.length?'':miss.join(',');if(!again)return;}
       else{warn.hidden=true;warnedMiss='';}
       var resp=response();
-      if(BOX&&!sending){sending=true;send.disabled=true;send.textContent='Sending\u2026';done.hidden=false;done.className='done';done.innerHTML='Sending your answers\u2026';
-        sendBox(resp,function(err){sending=false;send.disabled=false;send.textContent='Send my answers to '+(P.bcba||'the BCBA');
-          if(!err){sent=true;done.className='done';done.innerHTML='<b>Sent.</b> Your answers went to '+esc(P.bcba||'the BCBA')+'. Thank you; you can close this page.';codeBox.hidden=true;row2.hidden=true;send.hidden=true;return;}
+      if(BOX&&!sending){sending=true;send.disabled=true;send.textContent=_('Sending\u2026');done.hidden=false;done.className='done';done.innerHTML=_('Sending your answers\u2026');
+        sendBox(resp,function(err){sending=false;send.disabled=false;send.textContent=_('Send my answers to {who}',{who:WHO});
+          if(!err){sent=true;done.className='done';done.innerHTML=_('<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.',{who:esc(WHO)});codeBox.hidden=true;row2.hidden=true;send.hidden=true;return;}
           lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;ml.href=mailto(lastCode);ml.hidden=false;
-          done.className='warn';done.innerHTML='<b>The reply box could not be reached</b> ('+esc(err)+'). Press <b>Open the email</b> below to send your answers by email to '+esc(P.email||'the BCBA')+' instead, or try Send again in a moment.';
-          ml.firstChild.textContent='Open the email';});return;}
+          done.className='warn';done.innerHTML=_('<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.',{e:esc(err),who:esc(P.email||WHO)});
+          ml.firstChild.textContent=_('Open the email');});return;}
       lastCode=encode(resp);codeBox.value=lastCode;codeBox.hidden=false;row2.hidden=false;done.hidden=false;
-      done.innerHTML='<b>Your email program should open now</b> with the message to '+esc(P.bcba||'the BCBA')+(P.email?' ('+esc(P.email)+')':'')+'. Press Send there. If nothing opened, copy the code below and paste it into an email to '+esc(P.email||'the BCBA')+', or save it as a file and attach it.';
+      done.innerHTML=_('<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.',{who:esc(WHO)+(P.email?' ('+esc(P.email)+')':''),to:esc(P.email||WHO)});
       ml.href=mailto(lastCode);
-      if(ml.href.length>(P.mailMax||1800)){done.className='warn';done.innerHTML='<b>Your answers are longer than an email link can carry</b> ('+ml.href.length.toLocaleString()+' characters, where about '+(P.mailMax||1800).toLocaleString()+' fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to '+esc(P.email||'the BCBA')+', or <b>Copy the code</b> and paste it into the message.';
+      if(ml.href.length>(P.mailMax||1800)){done.className='warn';done.innerHTML=_('<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.',{n:ml.href.length.toLocaleString(),m:(P.mailMax||1800).toLocaleString(),to:esc(P.email||WHO)});
         row2.insertBefore(sv,cp);ml.hidden=true;sv.className='';cp.className='ghost';return;}
       done.className='done';ml.hidden=false;window.location.href=ml.href;});
-    cp.addEventListener('click',function(){codeBox.select();try{navigator.clipboard.writeText(lastCode);}catch(e){d.execCommand('copy');}cp.textContent='Copied';setTimeout(function(){cp.textContent='Copy the code';},1500);});
+    cp.addEventListener('click',function(){codeBox.select();try{navigator.clipboard.writeText(lastCode);}catch(e){d.execCommand('copy');}cp.textContent=_('Copied');setTimeout(function(){cp.textContent=_('Copy the code');},1500);});
     sv.addEventListener('click',function(){var blob=new Blob([lastCode+'\n'],{type:'text/plain'}),a=h('a',{href:URL.createObjectURL(blob),download:(P.form||'form')+'_'+(P.inst||'answers')+'_'+((ex.name&&ex.name.value)||'respondent').replace(/[^\w.-]+/g,'_')+'.nbhr.txt'});d.body.appendChild(a);a.click();a.remove();});
     ml.addEventListener('click',function(e){if(!lastCode){e.preventDefault();}});
     paint();
@@ -289,10 +320,14 @@
     var P=U.payloadFromHash(ls[0].url)||{};
     var title=o.title||P.title||P.inst||'questionnaire',who=String(P.student||o.student||'').replace(/\s*\((?:ID|id)[^)]*\)\s*/,'').trim(),bcba=P.bcba||o.bcba||'',due=P.due||'';
     var defn=!!(P.confirm||P.def),boxed=!!(P.box&&P.box.u);   /* v21.65 the answers come back through the reply box */
+    var es=P.lang==='es';   /* v21.67 a Spanish page gets its email in Spanish */
     var KEY='nbh-invite-to';var last='';try{last=localStorage.getItem(KEY)||'';}catch(e){}
     var subj=title+(who?' · '+who:'');
-    var body='Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.')+(due?' Please send it by '+due+'.':'')+'\n\n'+
-      (ls.length===1?ls[0].url:ls.map(function(l){return (l.label||'Questionnaire')+':\n'+l.url;}).join('\n\n'))+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
+    var urls=(ls.length===1?ls[0].url:ls.map(function(l){return (l.label||(es?'Cuestionario':'Questionnaire'))+':\n'+l.url;}).join('\n\n'));
+    var body=es?'Hola:\n\nGracias por ayudar con este cuestionario'+(who?' sobre '+who:'')+': '+title+'. Toma unos minutos en un tel\u00e9fono, una tableta o una computadora. Abra el enlace'+(ls.length>1?' de cada conducta':'')+(defn?', lea la definici\u00f3n de la conducta,':',')+' responda las preguntas y pulse Enviar al final. '+(boxed?'Sus respuestas me llegan directamente cuando pulsa Enviar.':'Sus respuestas me llegan por correo electr\u00f3nico.')+(due?' Por favor env\u00edelo antes del '+due+'.':'')+'\n\n'+
+      urls+'\n\nSi el enlace no se abre, responda a este correo y le enviar\u00e9 el cuestionario como archivo.\n\nGracias,\n'+(bcba||'')
+     :'Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.')+(due?' Please send it by '+due+'.':'')+'\n\n'+
+      urls+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
     var dlg=d.createElement('dialog');dlg.className='nbh-inv';dlg.setAttribute('aria-labelledby','nbhInvT');
     var css='.nbh-inv{max-width:560px;width:calc(100vw - 32px);max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;border:0;border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#1b2430}'+
       '.nbh-inv::backdrop{background:rgba(16,22,28,.5)}.nbh-inv h3{margin:0 0 10px;font:600 18px/1.3 Georgia,serif}.nbh-inv label{display:block;font-weight:600;margin:8px 0 3px}'+
@@ -322,7 +357,7 @@
     dlg.showModal();$(o.to||last?'#nbhInvBo':'#nbhInvTo').focus();};
   /* ---- the generated page: everything inline, nothing to fetch ---- */
   U.pageHTML=function(payload){var json=JSON.stringify(payload).replace(/<\//g,'<\\/');var t=(payload.title||payload.inst||'Questionnaire')+(payload.student?' · '+payload.student:'');
-    return '<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+
+    return '<!DOCTYPE html>\n<html lang="'+(payload&&payload.lang==='es'?'es':'en')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+
       '<script type="application/json" id="nbhr-payload">'+json+'<\/script>\n<script>\n'+NBH_RESPOND_RUNTIME.toString()+'\nNBH_RESPOND_RUNTIME(document.getElementById("nbhr"),JSON.parse(document.getElementById("nbhr-payload").textContent));\n<\/script></body></html>\n';};
   /* ---- the short links' dictionaries: tools/respond-dict/v1.json, made by tools/respond-dict/make.js from the forms' own
      wording (IA-1's pasted item wording is not in it). FROZEN: a link made with version 1 opens with exactly these bytes, so

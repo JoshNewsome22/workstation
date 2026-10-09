@@ -301,6 +301,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="NBH Workstation">
 <!-- /nbh-pwa-head -->
+<!-- v21.67 Read a document: the readers it loads only when asked for, saved for offline use with the rest (tools/pwa-sw.py reads this) -->
+<meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz">
 <style>
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
@@ -684,6 +686,22 @@ body.ws-split .frames iframe.warm,.frames iframe.warm{position:absolute;left:-30
 }
 
 dialog{border:1px solid var(--rule2);border-radius:10px;padding:0;max-width:760px;width:92%;box-shadow:0 30px 70px -24px rgba(24,46,67,.55)}
+/* v21.67 Read a document (the dialog's table) */
+.dr-intro{margin:0 0 10px;line-height:1.45}.dr-src{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:8px}.dr-file,.dr-paste{flex:1 1 260px;min-width:0}
+.dr-pick{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;font-weight:600}.dr-pick input{font:inherit;font-size:12.5px;max-width:100%}
+.dr-hint{display:block;font-size:12px;color:#5b6770;margin-top:6px;line-height:1.4}
+.dr-paste textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13px;padding:6px 8px;border:1px solid #c9d4d2;border-radius:4px;min-height:96px;resize:vertical}
+.dr-prog{font-size:12.5px;color:#1d4a77;margin:6px 0}.dr-err,.dr-none{color:#8a2b2b;line-height:1.45}
+.dr-found{margin:8px 0 4px}
+.dr-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}.dr-tbl th,.dr-tbl td{border-top:1px solid #e3eae8;padding:4px 6px;text-align:left;vertical-align:top}
+.dr-tbl th{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#5b6770;border-top:0}
+.dr-tbl input[type=text]{width:100%;min-width:120px;box-sizing:border-box;font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid #c9d4d2;border-radius:3px}
+.dr-tbl input[type=checkbox]{width:18px;height:18px}
+.dr-seen{color:#5b6770;font-size:11.5px;max-width:240px;overflow-wrap:anywhere}.dr-note{display:block;color:#8a5a1a;font-size:11px;margin-top:2px}
+.dr-tbl tr.off td{opacity:.6}
+.dr-beh{margin:10px 0}.dr-bl{display:block;padding:4px 0;border-top:1px solid #e3eae8;line-height:1.4}.dr-bl small{display:block;color:#5b6770;font-size:11.5px;margin-left:24px}.dr-bl small.dr-def{margin-left:24px}
+.dr-acts{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-top:10px}.dr-over{font-size:12.5px}
+@media (max-width:640px){.dr-tbl thead{display:none}.dr-tbl tr{display:grid;grid-template-columns:26px 1fr;gap:2px 6px;padding:6px 0;border-top:1px solid #e3eae8}.dr-tbl td{border:0;padding:1px 0}.dr-tbl td:first-child{grid-row:1/span 4}.dr-seen{max-width:none}}
 dialog::backdrop{background:rgba(24,46,67,.45)}
 dialog .dh{background:var(--navy);color:#fff;padding:12px 18px;font-family:var(--serif);font-size:17px;border-radius:9px 9px 0 0}
 dialog .db{padding:16px 18px;max-height:62vh;overflow:auto;font-size:13px;line-height:1.55}
@@ -789,6 +807,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="fld"><label for="pSite">School</label><input id="pSite"></span>
     <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
+    <button id="readDoc" title="Read the student’s details from a PDF, a picture or pasted text and place them in the bar and Form DM-1">Read a document</button>
     <button id="barFold" class="sm" hidden title="Fold the details to one line">Done</button>
   </div>
   <!-- v21.31 the case: what the shell has read from Forms TB-1, FS-1, GB-1 and PA-1, carried to every open form -->
@@ -2040,7 +2059,7 @@ window.addEventListener('message',ev=>{
     noteWho(d.id,d.who);
     renderRail();
     if(state.cur===d.id)$('#crumbStatus').textContent=d.status.filled+' fields filled';
-  } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'||d.nbh==='csv-out'){
+  } else if(d.nbh==='payload'||d.nbh==='snapshot'||d.nbh==='restored'||d.nbh==='facts-out'||d.nbh==='facts-applied'||d.nbh==='csv-out'||d.nbh==='fill-applied'){
     if(d.nbh!=='payload'&&d.status){state.status[d.id]=d.status;noteWho(d.id,d.who);renderRail();}
     /* answered in the order asked, per form and per kind of answer. v21.43: only by the frame that was asked, so
        one form cannot answer for another (the relay hands a snapshot on to the asking form as the partner's) */
@@ -3927,7 +3946,7 @@ function caseSig(over){
    waiting request with the other: the packet then waited for an answer that
    had already gone elsewhere, and sat at "Collecting..." for good. Each kind
    of answer now has its own queue, and every request its own time limit. */
-const REPLY={snapshot:'snapshot',restore:'restored',collect:'payload','facts?':'facts-out',facts:'facts-applied','csv?':'csv-out'};
+const REPLY={snapshot:'snapshot',restore:'restored',collect:'payload','facts?':'facts-out',facts:'facts-applied','csv?':'csv-out',fill:'fill-applied'};   /* v21.67 fill: Read a document into Form DM-1 */
 async function grab(id,verb,extra,ms,frame){
   const fr=frame||state.frames[id]; if(!fr)return null;
   const key=id+'|'+(REPLY[verb]||verb);
@@ -4152,6 +4171,7 @@ const CMDS=[
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
   {k:'open packet',n:'Open packet',s:'command',go:()=>$('#openPacket').click()},
   {k:'fill open forms',n:'Fill open forms with the packet',s:'command',go:()=>$('#pushPacket').click()},
+  {k:'read a document',n:'Read a document: the student\u2019s details from a PDF, a picture or pasted text',s:'command',go:()=>$('#readDoc').click()},
   {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
@@ -4266,6 +4286,377 @@ async function bootEmbedded(){
 renderRail();who();chip();if(EMBED)setTimeout(bootEmbedded,300);else setTimeout(autoOffer,300);
 /* on a narrow window with nothing open yet, start with the list showing */
 if(NARROW.matches&&!state.cur) setRail(true);
+</script>
+<script id="nbh-docread">
+/* ===================== Read a document (v21.67) =====================
+   A student's details come on paper: the school's information printout, the IEP's cover page, a plan. Rather than type
+   them again, the bar's Read a document takes a PDF, a picture (a photo, a screenshot) or pasted text, finds the details
+   in it and offers each one, with the line it was read from, for the bar and Form DM-1 (and target behaviors found in a
+   plan for the case). Everything happens on this device: a PDF with its own text is read by PDF.js (nbh-doc/), a scanned
+   page or a picture by Tesseract (nbh-ocr/), both kept with the workstation and saved for offline use; nothing is sent
+   anywhere, and the text is kept only while the dialog is open. The one-file edition, and a folder opened from a drive,
+   take pasted text (the iPad's Live Text copies it from any photo or PDF); the readers need the website or the app.
+   The matcher: nbhDocRead.parse(text) -> {fields:[{k,label,value,raw,seen,to,ok,note}], behaviors:[{label,def,isRep}]}.
+   A label is known by its aliases (longest first); what follows it on the line, up to the next label, is its value, or
+   the next line when the label stands alone; a label followed by one space counts only when the value has the field's
+   shape (a date, a grade, an ID, a name). Values are shaped for the form: dates to YYYY-MM-DD, grades to the list,
+   sex, ELL, interpreter, eligibility, placement, diploma, yes/no to Form DM-1's choices. */
+const nbhDocRead=(()=>{
+  const F=[
+    {k:'name',label:'Student',al:'student name|name of (?:the )?student|student(?:\'s|\u2019s)? (?:legal |full )?name|child(?:\'s|\u2019s)? name|legal name|full name|learner|pupil|student|name',kind:'name',to:['bar:client','DM-1:s.first','DM-1:s.last']},
+    {k:'last',label:'Last name',al:'last name|surname|family name',kind:'text',to:['DM-1:s.last']},
+    {k:'first',label:'First name',al:'first name|given name',kind:'text',to:['DM-1:s.first']},
+    {k:'pref',label:'Preferred name',al:'preferred name|nickname|goes by|known as|preferred',kind:'text',to:['DM-1:s.pref']},
+    {k:'dob',label:'Date of birth',al:'date of birth|birth date|birthdate|birthday|d\\.?o\\.?b\\.?|born',kind:'date',to:['DM-1:s.dob']},
+    {k:'sex',label:'Sex',al:'sex|gender',kind:'sex',to:['DM-1:s.sex']},
+    {k:'pron',label:'Pronouns',al:'pronouns?',kind:'text',to:['DM-1:s.pron']},
+    {k:'sid',label:'Student ID',al:'student (?:id|identification) (?:number|no\\.?|#)|student (?:id|number|no\\.?|#)|local (?:id|student id)|district (?:id|student id)|id (?:number|no\\.?|#)|student id|id',kind:'id',to:['bar:sid','DM-1:s.sid']},
+    {k:'fleid',label:'FLEID',al:'fleid|florida education identifier|state (?:student )?id(?: number)?|state identifier',kind:'id',to:['DM-1:s.fleid']},
+    {k:'school',label:'School',al:'school name|name of school|school of (?:enrollment|attendance)|enrolled school|current school|attending school|zoned school|campus|school',kind:'school',to:['bar:site','DM-1:s.school']},
+    {k:'grade',label:'Grade',al:'grade level|current grade|grade|gr\\.',kind:'grade',to:['bar:grade','DM-1:s.grade']},
+    {k:'room',label:'Classroom / teacher',al:'teacher name|homeroom teacher|classroom teacher|teacher|homeroom|classroom|room',kind:'text',to:['DM-1:s.room']},
+    {k:'enroll',label:'Enrolled',al:'enrollment date|date (?:of )?enroll(?:ed|ment)|date enrolled|entry date|date of entry|enrolled (?:on|since)|enrolled',kind:'date',to:['DM-1:s.enroll']},
+    {k:'prior',label:'Previous school',al:'previous school|prior school|last school|former school|transferred from',kind:'text',to:['DM-1:s.prior']},
+    {k:'trans',label:'Transportation',al:'transportation|bus (?:number|no\\.?|#|route)|bus',kind:'text',to:['DM-1:s.trans']},
+    {k:'lang',label:'Home language',al:'home language|primary language|native language|first language|language spoken at home|language at home|language',kind:'text',to:['DM-1:s.lang']},
+    {k:'interp',label:'Interpreter',al:'interpreter (?:needed|required)|interpreter',kind:'interp',to:['DM-1:s.interp']},
+    {k:'ell',label:'ELL',al:'ell status|ell code|english language learner|esol(?: status)?|lep status|ell|lep',kind:'ell',to:['DM-1:s.ell']},
+    {k:'eth',label:'Race / ethnicity',al:'race/ethnicity|race / ethnicity|race and ethnicity|ethnicity|race',kind:'text',to:['DM-1:s.eth']},
+    {k:'medicaid',label:'Medicaid',al:'medicaid (?:id|number|no\\.?|#)|medicaid',kind:'text',to:['DM-1:s.medicaid']},
+    {k:'elig',label:'Primary exceptionality',al:'primary (?:exceptionality|disability|eligibility|ese program)|exceptionality|eligibility category|disability category|primary ese|eligibility|disability',kind:'elig',to:['DM-1:p.elig']},
+    {k:'elig2',label:'Secondary exceptionality',al:'secondary (?:exceptionality|disability|eligibility)|other exceptionalit(?:y|ies)|related services?',kind:'text',to:['DM-1:p.elig2']},
+    {k:'eligdate',label:'Initial eligibility date',al:'initial eligibility(?: date)?|eligibility date|date of (?:initial )?eligibility|initial placement date',kind:'date',to:['DM-1:p.eligdate']},
+    {k:'iepdate',label:'Current IEP date',al:'iep (?:meeting )?date|current iep(?: date)?|date of (?:the )?iep|iep (?:dated|developed|written)|iep start(?: date)?|plan date|meeting date',kind:'date',to:['DM-1:p.iepdate']},
+    {k:'annual',label:'Annual review due',al:'annual review(?: due| date)?|iep (?:annual )?review(?: due| date)?|iep due(?: date)?|next (?:iep|annual review)(?: date)?|iep end(?: date)?|review date|iep expires?',kind:'date',to:['DM-1:p.annual']},
+    {k:'reeval',label:'Reevaluation due',al:'re-?evaluation(?: due| date)?|next re-?eval(?:uation)?(?: date)?|re-?eval due|reevaluation|re-?eval',kind:'date',to:['DM-1:p.reeval']},
+    {k:'place',label:'Placement',al:'placement|educational setting|service delivery(?: model)?|lre|setting',kind:'place',to:['DM-1:p.place']},
+    {k:'matrix',label:'Matrix',al:'matrix of services(?: level| score)?|matrix(?: level| score)?|cost factor',kind:'matrix',to:['DM-1:p.matrix']},
+    {k:'diploma',label:'Diploma option',al:'diploma (?:option|track|type)|diploma',kind:'diploma',to:['DM-1:p.diploma']},
+    {k:'p504',label:'504 plan',al:'section 504(?: plan)?|504 plan|504',kind:'yesno',to:['DM-1:p.p504']},
+    {k:'esy',label:'ESY',al:'extended school year|esy',kind:'yesno',to:['DM-1:p.esy']},
+    {k:'allergy',label:'Allergies',al:'allerg(?:y|ies)',kind:'text',to:['DM-1:h.allergy']},
+    {k:'diet',label:'Diet',al:'diet(?:ary)? (?:restrictions?|needs?)|diet',kind:'text',to:['DM-1:h.diet']},
+    {k:'pcp',label:'Physician',al:'primary care (?:physician|provider|doctor)|physician|pediatrician|doctor|pcp',kind:'text',to:['DM-1:h.pcp']},
+    {k:'psy',label:'Psychiatrist / therapist',al:'psychiatrist|psychologist|therapist|counselor',kind:'text',to:['DM-1:h.psy']},
+    {k:'cond',label:'Medical conditions',al:'medical (?:conditions?|history|diagnos[ei]s|concerns)|health (?:conditions?|concerns)|diagnos[ei]s|conditions?',kind:'text',to:['DM-1:h.cond']},
+    {k:'vh',label:'Vision / hearing',al:'vision/hearing|vision / hearing|vision and hearing|vision(?: screening)?|hearing(?: screening)?',kind:'text',to:['DM-1:h.vh']},
+    {k:'strengths',label:'Strengths',al:'strengths?',kind:'text',to:['DM-1:pf.strengths']},
+    {k:'interests',label:'Interests',al:'interests?|preferred activities|likes',kind:'text',to:['DM-1:pf.interests']},
+    {k:'bcba',label:'BCBA',al:'case bcba|bcba name|behavior analyst|bcba',kind:'text',to:['bar:bcba']},
+    {k:'holder',label:'Rights held by',al:'educational rights(?: held by| holder)?|rights (?:held by|holder)|parental rights',kind:'holder',to:['DM-1:r.holder']},
+    /* labels read so that their values are not taken for another field's; nothing is placed from them */
+    {k:'skip',label:'',al:'parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship',kind:'skip',to:[]}
+  ];
+  const BY={};F.forEach(f=>{BY[f.k]=f;});
+  /* every alias, longest first, so that "student id number" wins over "student id" and "student"; a space is any run of
+     spaces; the match ends at a word's end */
+  const topSplit=al=>{const out=[];let d=0,cur='';for(const c of al){if(c==='(')d++;else if(c===')')d--;if(c==='|'&&!d){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;};
+  const alts=[];F.forEach(f=>topSplit(f.al).forEach(a=>alts.push({a,k:f.k,re:new RegExp('^(?:'+a.replace(/ /g,'[ \\t]+')+')$','i')})));
+  alts.sort((x,y)=>y.a.length-x.a.length);
+  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;\\u2013\\u2014-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
+  const keyOf=s=>{const t=s.replace(/\s+/g,' ');for(const x of alts){if(x.re.test(t))return x.k;}return 'skip';};
+  const STRICT={date:/^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}|\d{4}-\d{2}-\d{2}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/,grade:/^(\d{1,2}(?:st|nd|rd|th)?|k|kg|pk|pre-?k|kindergarten)(?![a-z0-9])/i,
+    id:/^[A-Z]?\d[\dA-Z\-]{3,}$/i,sex:/^(m|f|male|female|boy|girl)$/i,yesno:/^(y|yes|n|no|x)$/i,matrix:/^25[1-5]$/,
+    name:/^(?!.*\b(?:Information|Record|Report|Profile|Data|Form|Summary|Plan|Services|Details|Demographics|Sheet|Name|Number|ID|Date|School|Grade|Services|Support|Team|Meeting|Review)\b)([A-Z][A-Za-z'\u2019\-]+,\s*[A-Z][A-Za-z'\u2019\-]+|[A-Z][a-z'\u2019\-]+(?:\s+[A-Z]\.?)?\s+[A-Z][A-Za-z'\u2019\-]+)$/,
+    school:/^[A-Z][\w.&'\u2019 \-]{2,60}\b(School|Academy|Center|Centre|Elementary|Middle|High|Campus|Prep|Institute)\b/,ell:/^(ly|lf|lz|zz|ln|lp)$/i};
+  const MON={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  const pad=n=>String(n).padStart(2,'0');
+  const iso=(y,m,d)=>{y=+y;m=+m;d=+d;if(!(m>=1&&m<=12&&d>=1&&d<=31&&y>=1900&&y<=2100))return '';return y+'-'+pad(m)+'-'+pad(d);};
+  const year2=y=>{if(String(y).length===4)return +y;const yy=+y,now=new Date().getFullYear()%100;return (yy<=now?2000:1900)+yy;};
+  function toISO(s){
+    s=String(s||'');let m;
+    if((m=s.match(/(\d{4})[\/.\-](\d{1,2})[\/.\-](\d{1,2})/)))return iso(m[1],m[2],m[3]);
+    if((m=s.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/)))return iso(year2(m[3]),m[1],m[2]);
+    if((m=s.match(/([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})/))&&MON[m[1].slice(0,3).toLowerCase()])return iso(m[3],MON[m[1].slice(0,3).toLowerCase()],m[2]);
+    if((m=s.match(/(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})/))&&MON[m[2].slice(0,3).toLowerCase()])return iso(m[3],MON[m[2].slice(0,3).toLowerCase()],m[1]);
+    return '';
+  }
+  function grade(v){const s=String(v||'').trim().toLowerCase();let m;
+    if(/^(pre-?k|pk|vpk|prek|pre-?kindergarten)/.test(s))return 'PK';
+    if(/^(k|kg|kindergarten|kinder)(?![a-z])/.test(s))return 'K';
+    if(/transition|18\s*[-\u2013]\s*22|post-?secondary|adult/.test(s))return 'Transition (18\u201322)';
+    if(/ungraded|un-graded/.test(s))return 'Ungraded';
+    if((m=s.match(/(\d{1,2})(?:st|nd|rd|th)?(?![\d\/.\-])/))){const n=+m[1];if(n>=1&&n<=12)return String(n);if(n===0)return 'K';}
+    return '';}
+  const first=(s,pairs,dflt)=>{const t=String(s||'').toLowerCase();for(const p of pairs){if(p[0].test(t))return p[1];}return dflt===undefined?'':dflt;};
+  const SEX=[[/^\s*(m|male|boy)(?![a-z])/,'Male'],[/^\s*(f|female|girl)(?![a-z])/,'Female']];
+  const YN=[[/^\s*(y|yes|x|\u2713|\u2714|true|eligible|receives?)(?![a-z])/,'Yes'],[/^\s*(n|no|none|false|not|n\/a)(?![a-z])/,'No']];
+  const ELL=[[/\b(ly|active|current)\b|^\s*(y|yes)(?![a-z])/,'ELL: active'],[/\b(lf|monitor(?:ed|ing)?|former|exited)\b/,'ELL: monitored'],[/\b(lz|zz|ln|lp|no|not|none|n\/a)\b/,'Not ELL']];
+  const INTERP=[[/sign|asl/,'Yes: sign'],[/written|translat/,'Yes: written translation'],[/^\s*(n|no|none|not)(?![a-z])/,'No'],[/^\s*(y|yes|needed|required|spoken)(?![a-z])|[a-z]{3,}/,'Yes: spoken']];
+  const ELIG=[[/autis|\basd\b/,'Autism Spectrum Disorder'],[/intellectual|\bind\b|\bid\b|\bimh?\b/,'Intellectual Disability'],[/emotional|behaviou?ral disab|\bebd\b|\be\/?bd\b|\bed\b/,'Emotional/Behavioral Disability'],[/other health|\bohi\b/,'Other Health Impairment'],[/specific learning|learning disab|\bsld\b/,'Specific Learning Disability'],[/language impair|\bli\b/,'Language Impairment'],[/speech|\bsi\b/,'Speech Impairment'],[/developmental(?:ly)? delay|\bdd\b/,'Developmental Delay'],[/deaf|hard of hearing|hearing impair|\bdhh\b|\bhi\b/,'Deaf or Hard of Hearing'],[/dual sensory|deaf-?blind/,'Dual Sensory Impairment'],[/visual|\bvi\b|blind/,'Visual Impairment'],[/orthopedic|\boi\b/,'Orthopedic Impairment'],[/traumatic brain|\btbi\b/,'Traumatic Brain Injury']];
+  const PLACE=[[/center school|ese center|special day school|separate school/,'ESE center school'],[/self-?contained|separate class|special class/,'Separate class (self-contained)'],[/resource/,'Resource'],[/general ed|gen\.? ed|regular (?:class|ed)|inclusion|mainstream|with supports?|consult/,'General education with supports'],[/hospital|homebound|home instruction/,'Hospital / homebound']];
+  const DIPLOMA=[[/access|\bfaa\b|alternate|modified/,'Access Points (FAA)'],[/standard|regular|general/,'Standard diploma'],[/not yet|tbd|undetermined|to be determined/,'Not yet determined']];
+  const HOLDER=[[/both parents|parents\b|shared/,'Both parents (shared)'],[/surrogate/,'Surrogate parent'],[/guardian advocate/,'Guardian advocate (F.S. 393.12)'],[/legal guardian|guardian/,'Legal guardian'],[/supported decision/,'Adult student with supported decision-making'],[/adult student|self|student/,'Adult student (18+)'],[/parent|mother|father/,'Parent (one)']];
+  const SUFFIX=/^(jr|sr|ii|iii|iv|v)\.?$/i;
+  const cap=s=>s===s.toUpperCase()&&/[A-Z]/.test(s)?s.toLowerCase().replace(/(^|[\s\-'\u2019])([a-z])/g,(m,a,b)=>a+b.toUpperCase()):s;
+  /* "Doe, John A" or "John A. Doe" or "DOE JOHN" -> {first, last} */
+  function splitName(v){
+    let s=cap(String(v||'').replace(/\s+/g,' ').trim()),firstN='',lastN='';
+    if(s.indexOf(',')>=0){const p=s.split(',');lastN=p[0].trim();firstN=p.slice(1).join(',').trim();}
+    else{const w=s.split(' ').filter(x=>!SUFFIX.test(x));if(w.length>=2){lastN=w[w.length-1];firstN=w.slice(0,-1).join(' ');}else firstN=s;}
+    firstN=firstN.split(' ').filter((x,i)=>i===0||!/^[A-Z]\.?$/.test(x)).join(' ');   /* the middle initial stays off the first name */
+    return {first:firstN,last:lastN,full:(firstN+' '+lastN).trim()};
+  }
+  /* a text value ends at a gap or at an unknown label ("Phone:") */
+  const cutText=v=>String(v||'').split(/[ \t]{2,}/)[0].replace(/\s+[A-Z][A-Za-z\/ ]{0,24}:\s.*$/,'').replace(/[\s,;:\-\u2013]+$/,'').trim();
+  function shape(f,raw){
+    const v=String(raw||'').trim();
+    switch(f.kind){
+      case 'date':{const d=toISO(v);return d?{value:d,ok:true}:{value:v,ok:false,note:'not read as a date'};}
+      case 'grade':{const g=grade(v);return g?{value:g,ok:true}:{value:v,ok:false,note:'not one of the grades'};}
+      case 'sex':{const s=first(v,SEX);return s?{value:s,ok:true}:{value:v,ok:false,note:'not Male or Female'};}
+      case 'yesno':{const s=first(v,YN);return s?{value:s,ok:true}:{value:v,ok:false,note:'not Yes or No'};}
+      case 'ell':{const s=first(v,ELL);return s?{value:s,ok:true}:{value:v,ok:false,note:'not an ELL status'};}
+      case 'interp':{const s=first(v,INTERP);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
+      case 'elig':{const s=first(v,ELIG);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the eligibilities'};}
+      case 'place':{const s=first(v,PLACE);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the placements'};}
+      case 'diploma':{const s=first(v,DIPLOMA);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the diploma options'};}
+      case 'holder':{const s=first(v,HOLDER);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
+      case 'matrix':{const m=v.match(/\b(25[1-5])\b/);return m?{value:m[1],ok:true}:{value:v,ok:false,note:'not 251 to 255'};}
+      case 'id':{const s=cutText(v).replace(/^[#:\s]+/,'').split(/\s+/)[0]||'';return s?{value:s,ok:/\d/.test(s)}:{value:'',ok:false};}
+      case 'name':{const s=cutText(v);const n=splitName(s);return n.last?{value:n.full,ok:true,first:n.first,last:n.last}:{value:s,ok:!!s,note:'one name only',first:n.first,last:''};}
+      default:{const s=cutText(v).slice(0,300);return {value:s,ok:!!s};}
+    }
+  }
+  /* the labels on a line, each with what follows it; a label with no separator counts only with a value of its shape,
+     and a label standing at the end of a line only at the line's start or after a gap */
+  function hits(line){
+    const out=[];LBL.lastIndex=0;let m;
+    while((m=LBL.exec(line))){
+      const k=keyOf(m[2]),sep=m[3]||'',start=m.index+m[1].length,end=m.index+m[0].length;
+      const type=/[:\uff1a=;\-\u2013\u2014]/.test(sep)?'colon':sep.length>=2?'gap':sep.length===1?'one':'eol';
+      out.push({k,start,end,type,text:m[2],str:type==='colon'?3:type==='one'?1:2});
+      LBL.lastIndex=start+m[2].length;   /* the search goes on from the label's end: its separator may be the next label's boundary */
+    }
+    return out;
+  }
+  function valid(h,line,next){
+    const f=BY[h.k],before=line.slice(0,h.start);
+    /* a label with a colon counts anywhere; one followed by a gap or ending the line only where it stands on its own
+       (the line's start, after a gap, after a bullet or a bracket), so "Royal Palm School  Student Information" has no
+       label in it; one followed by a single space only with a value of its shape */
+    const alone=h.start===0||/[ \t]{2,}$/.test(before)||/[(\[\u2022\u00b7*|,;]\s*$/.test(before)||/^[ \t]*[\u2022\u00b7*\-\u2013]\s*$/.test(before);
+    if(h.type==='colon')return true;
+    if(h.type==='gap'||h.type==='eol')return alone;
+    const re=STRICT[f&&f.kind];if(!re)return false;
+    return re.test(next);
+  }
+  function lines(text){
+    return String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').split('\n').map(l=>l.replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*]\s*/,''));
+  }
+  function parse(text){
+    const L=lines(text),found={},order=[],used=new Set();
+    for(let i=0;i<L.length;i++){
+      const line=L[i];if(!line.trim())continue;
+      const hs=hits(line).filter(h=>{const rest=line.slice(h.end,(hits(line).find(x=>x.start>h.end)||{start:line.length}).start).trim();return valid(h,line,rest);});
+      for(let j=0;j<hs.length;j++){
+        const h=hs[j],nextStart=j+1<hs.length?hs[j+1].start:line.length;
+        let raw=line.slice(h.end,nextStart).trim(),seen=line.trim(),from=i;
+        if(!raw&&(h.type==='colon'||h.type==='eol')&&i+1<L.length){
+          const n=L[i+1].trim();
+          if(n&&!hits(L[i+1]).some(x=>x.start===0&&valid(x,L[i+1],L[i+1].slice(x.end).trim()))){raw=n;seen=line.trim()+' / '+n;from=i+1;used.add(i+1);}
+        }
+        if(h.k==='skip'||!raw)continue;
+        if(found[h.k]&&found[h.k].str>=h.str)continue;   /* the first reading stands, unless a later one has a surer label (a colon) */
+        const f=BY[h.k],sh=shape(f,raw);if(!sh.value)continue;
+        if(!found[h.k])order.push(h.k);
+        found[h.k]=Object.assign({k:f.k,label:f.label,to:f.to.slice(),raw,seen:seen.slice(0,160),line:from,str:h.str},sh);
+      }
+    }
+    /* a first or last name read on its own wins over the split of the whole name */
+    if(found.name){if(found.first){found.name.first=found.first.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.first');}if(found.last){found.name.last=found.last.value;found.name.to=found.name.to.filter(t=>t!=='DM-1:s.last');}
+      found.name.value=((found.name.first||'')+' '+(found.name.last||'')).trim();}
+    else if(found.first||found.last){const full=((found.first||{}).value||'')+' '+((found.last||{}).value||'');found.name={k:'name',label:'Student',to:['bar:client'],value:full.trim(),raw:full.trim(),seen:((found.first||found.last).seen),ok:true,first:(found.first||{}).value||'',last:(found.last||{}).value||''};order.unshift('name');}
+    const fields=order.map(k=>found[k]);
+    return {fields,behaviors:behaviors(L),lines:L.length};
+  }
+  /* target behaviors in a plan: "Target behavior 1: Aggression", "Behavior: Hitting – any instance of ...", a
+     Definition line after; a replacement behavior keeps its kind */
+  function behaviors(L){
+    const out=[],seen=new Set();
+    for(let i=0;i<L.length;i++){
+      const line=L[i].trim();
+      const m=line.match(/^(?:(target|problem|challenging|interfering|replacement|alternative|desired)\s+)?behaviou?rs?\s*(?:#\s*)?(?:\d{1,2})?\s*[:\uff1a\-\u2013\u2014]\s*(.+)$/i);
+      if(!m)continue;
+      const isRep=/replacement|alternative|desired/i.test(m[1]||'');
+      let label=m[2].trim(),def='';
+      const dm=label.match(/^(.{2,60}?)\s*(?:[:\uff1a]|\s[\-\u2013\u2014]\s|\(|\bis defined as\b|\bdefined as\b|\bmeans\b|\bis any\b)\s*(.{10,})$/i);
+      if(dm){label=dm[1].trim();def=dm[2].replace(/^(?:as|that)\s+/i,'').replace(/\)$/,'').trim();}
+      for(let j=i+1;j<L.length&&j<=i+3;j++){
+        const n=L[j].trim();if(!n)continue;
+        const d2=n.match(/^(?:operational\s+)?definition\s*[:\uff1a\-\u2013\u2014]\s*(.+)$/i);
+        if(d2){def=def||d2[1].trim();break;}
+        if(/^(?:(?:target|problem|replacement|alternative|desired)\s+)?behaviou?r/i.test(n)||hits(L[j]).some(h=>h.start===0&&h.type==='colon'))break;
+        if(!def&&n.length>=30&&(new RegExp('^'+label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(n)||/^(any|defined|occurs|includes|instances?|each)/i.test(n))){def=n;break;}
+      }
+      label=label.replace(/[\s.;:,\-\u2013]+$/,'');
+      if(label.length<2||label.length>80||!/[a-z]/i.test(label)||/^(yes|no|none|n\/?a|current|active|see|n|y)$/i.test(label))continue;
+      const key=label.toLowerCase();if(seen.has(key))continue;seen.add(key);
+      out.push({label,def:def.slice(0,600),isRep,src:'document'});
+    }
+    return out;
+  }
+  return {parse,toISO,grade,splitName,fields:F};
+})();
+
+/* ---- the dialog ---- */
+const DR={text:'',res:null,worker:null,pdf:null};
+const drCan=()=>!EMBED&&/^https?:$/.test(location.protocol);   /* the readers: the website or the app, not the one-file edition or a drive */
+function drProg(t){const p=$('#drProg');if(!p)return;p.hidden=!t;p.textContent=t||'';}
+function drOpen(){
+  DR.text='';DR.res=null;
+  dialog('Read a document',
+    '<p class="dr-intro">The document is read here, on this device; nothing leaves it. The student\u2019s details it finds are listed for you to check, each with the line it was read from. <b>Place</b> puts the ticked ones into the bar and Form DM-1, into empty fields unless you say otherwise, and target behaviors found in a plan into the case.</p>'+
+    '<div class="dr-src">'+
+    (drCan()?'<div class="dr-file"><label class="dr-pick"><input type="file" id="drFile" accept="application/pdf,image/*"> <span>Choose a PDF or a picture</span></label>'+
+      '<span class="dr-hint">A PDF with its own text is read at once. A scanned page, a photo or a screenshot is read by the text recognizer kept with the workstation: a few seconds a page, and the first picture loads it (about 7 MB, then kept offline).</span></div>'
+      :'<div class="dr-file"><span class="dr-hint">'+(EMBED?'This one-file edition reads pasted text.':'Opened from a drive, the workstation reads pasted text.')+' To read a PDF or a picture itself, open the workstation from its website or the installed app.</span></div>')+
+    '<div class="dr-paste"><textarea id="drText" rows="5" placeholder="Or paste the text here. On the iPad: open the picture or PDF, press and hold on its text, Select All, Copy."></textarea>'+
+    '<div class="dr-acts"><button type="button" id="drRead" class="primary">Read the text</button></div></div></div>'+
+    '<div id="drProg" class="dr-prog" hidden></div><div id="drOut"></div>');
+  $('#drRead').addEventListener('click',()=>{const t=$('#drText').value;if(!t.trim()){alert('Paste the document\u2019s text first.');return;}drShow(t,'the pasted text');});
+  const fi=$('#drFile');if(fi)fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(f)drFile(f);});
+}
+async function drFile(file){
+  $('#drOut').innerHTML='';
+  try{
+    let text='';
+    if(/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name))text=await drPdf(file);
+    else if(/^image\//.test(file.type)||/\.(png|jpe?g|gif|webp|bmp|heic|tiff?)$/i.test(file.name))text=await drImage(file);
+    else{alert('Choose a PDF or a picture (PNG, JPEG, HEIC).');return;}
+    drProg('');
+    drShow(text,file.name);
+  }catch(e){drProg('');$('#drOut').innerHTML='<p class="dr-err">The file could not be read: '+esc(e&&e.message||e)+'. Paste its text instead.</p>';}
+}
+async function drPdfLib(){
+  if(!DR.pdf){const lib=await import(new URL('nbh-doc/pdf.min.js',location.href).href);lib.GlobalWorkerOptions.workerSrc=new URL('nbh-doc/pdf.worker.min.js',location.href).href;DR.pdf=lib;}
+  return DR.pdf;
+}
+/* the text of a page, line by line: items on one height make a line, a wide gap between two a column break */
+function drLinesOf(items){
+  const rows=[];
+  items.forEach(it=>{if(!it.str||!it.transform)return;const y=it.transform[5],x=it.transform[4];let r=rows.find(r=>Math.abs(r.y-y)<=3);if(!r){r={y,items:[]};rows.push(r);}r.items.push({x,w:it.width||0,s:it.str});});
+  rows.sort((a,b)=>b.y-a.y);
+  return rows.map(r=>{r.items.sort((a,b)=>a.x-b.x);let s='',end=null;r.items.forEach(it=>{if(end!==null){const gap=it.x-end;s+=gap>12?'  ':(gap>1.5&&!/\s$/.test(s)&&!/^\s/.test(it.s)?' ':'');}s+=it.s;end=it.x+it.w;});return s;}).join('\n');
+}
+async function drPdf(file){
+  drProg('Opening the PDF\u2026');
+  const lib=await drPdfLib();
+  const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,disableAutoFetch:true}).promise;
+  const N=Math.min(doc.numPages,8);let text='';
+  for(let p=1;p<=N;p++){
+    drProg('Reading page '+p+' of '+N+'\u2026');
+    const page=await doc.getPage(p);let t='';
+    try{t=drLinesOf((await page.getTextContent()).items);}catch(e){t='';}
+    if(t.replace(/[^A-Za-z]/g,'').length<40){   /* a scanned page: drawn and read as a picture */
+      const vp=page.getViewport({scale:2}),c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      t=await drOcr(c,'page '+p+' of '+N);
+    }
+    text+=t+'\n';
+  }
+  if(doc.numPages>N)text+='\n';
+  try{await doc.destroy();}catch(e){}
+  return text;
+}
+async function drImage(file){
+  drProg('Opening the picture\u2026');
+  const url=URL.createObjectURL(file);
+  try{
+    const img=new Image();img.src=url;await img.decode();
+    /* small text reads better larger; a camera's picture is brought down to a size the recognizer handles */
+    const w=img.naturalWidth,h=img.naturalHeight;let sc=1;if(w<1400)sc=Math.min(2.5,1400/w);if(w*sc>2600)sc=2600/w;
+    const c=document.createElement('canvas');c.width=Math.round(w*sc);c.height=Math.round(h*sc);
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
+    return await drOcr(c,'the picture');
+  }finally{URL.revokeObjectURL(url);}
+}
+function drScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('the text recognizer did not load ('+src+')'));document.head.appendChild(s);});}
+async function drOcr(canvas,what){
+  if(!window.Tesseract){drProg('Loading the text recognizer\u2026');await drScript('nbh-ocr/tesseract.min.js');}
+  if(!DR.worker){
+    drProg('Starting the text recognizer\u2026');
+    DR.worker=await Tesseract.createWorker('eng',1,{workerPath:'nbh-ocr/worker.min.js',corePath:'nbh-ocr/tesseract-core-simd-lstm.wasm.js',langPath:'nbh-ocr',gzip:true,workerBlobURL:false,
+      logger:m=>{if(m&&m.status==='recognizing text'&&DR.what)drProg('Reading '+DR.what+'\u2026 '+Math.round((m.progress||0)*100)+'%');}});
+  }
+  DR.what=what;drProg('Reading '+what+'\u2026');
+  const r=await DR.worker.recognize(canvas);
+  DR.what='';
+  return (r&&r.data&&r.data.text)||'';
+}
+function drShow(text,from){
+  DR.text=text;const res=DR.res=nbhDocRead.parse(text);
+  const out=$('#drOut');if(!out)return;
+  const haveBeh=!!(state.facts&&(state.facts.behaviors||[]).length&&(state.facts.src||{}).behaviors!=='document');
+  if(!res.fields.length&&!res.behaviors.length){out.innerHTML='<p class="dr-none">Nothing recognisable in '+esc(from)+' ('+res.lines+' lines read). The details are read from their labels: Student name, Date of birth, Student ID, Grade, School, Teacher, and the IEP\u2019s. '+(text.trim()?'':'The text was empty: a picture of a page needs the text recognizer, which needs the website or the app.')+'</p>';return;}
+  let h='<p class="dr-found"><b>'+res.fields.length+(res.fields.length===1?' detail':' details')+'</b> read from '+esc(from)+(res.behaviors.length?', and '+res.behaviors.length+(res.behaviors.length===1?' target behavior':' target behaviors'):'')+'. Untick what is wrong, or correct it.</p>';
+  h+='<table class="dr-tbl"><thead><tr><th></th><th>Detail</th><th>Value</th><th>Goes to</th><th>Read from</th></tr></thead><tbody>';
+  res.fields.forEach((f,i)=>{
+    const to=f.to.map(t=>t.split(':')[0]).filter((x,k,a)=>a.indexOf(x)===k).map(x=>x==='bar'?'the bar':'Form '+x).join(', ')||'\u2014';
+    h+='<tr'+(f.ok?'':' class="off"')+'><td><input type="checkbox" data-dr="'+i+'"'+(f.ok?' checked':'')+' aria-label="Place '+esc(f.label)+'"></td><td>'+esc(f.label)+'</td><td><input type="text" data-drv="'+i+'" value="'+esc(f.value)+'">'+(f.note?'<small class="dr-note">'+esc(f.note)+'</small>':'')+'</td><td>'+esc(to)+'</td><td class="dr-seen">'+esc(f.seen)+'</td></tr>';
+  });
+  h+='</tbody></table>';
+  if(res.behaviors.length){
+    h+='<div class="dr-beh"><b>Target behaviors</b>'+(haveBeh?' <small class="dr-note">(the case already holds the targets from Form TB-1; these are left out unless ticked)</small>':'')+'<div>';
+    res.behaviors.forEach((b,i)=>{h+='<label class="dr-bl"><input type="checkbox" data-drb="'+i+'"'+(haveBeh?'':' checked')+'> <b>'+esc(b.label)+'</b>'+(b.isRep?' <small>(replacement)</small>':'')+(b.def?'<small class="dr-def">'+esc(b.def)+'</small>':'')+'</label>';});
+    h+='</div></div>';
+  }
+  h+='<div class="dr-acts"><label class="dr-over"><input type="checkbox" id="drOver"> Replace what the bar and the form already hold</label><button type="button" id="drPlace" class="primary">Place in the bar and Form DM-1</button></div>';
+  out.innerHTML=h;
+  $('#drPlace').addEventListener('click',drPlace);
+}
+async function drPlace(){
+  const res=DR.res;if(!res)return;
+  const over=!!$('#drOver').checked,bar={},dm={},tick=[];
+  res.fields.forEach((f,i)=>{
+    const c=$('#drOut [data-dr="'+i+'"]');if(!c||!c.checked)return;
+    const v=String(($('#drOut [data-drv="'+i+'"]')||{}).value||'').trim();if(!v)return;
+    tick.push(f);
+    f.to.forEach(t=>{const [where,key]=t.split(':');
+      if(where==='bar'){bar[key]=v;}
+      else if(f.k==='name'){const n=f.value===v?f:nbhDocRead.splitName(v);if(key==='s.first'&&n.first)dm[key]=n.first;if(key==='s.last'&&n.last)dm[key]=n.last;}
+      else dm[key]=v;});
+  });
+  const behs=res.behaviors.filter((b,i)=>{const c=$('#drOut [data-drb="'+i+'"]');return c&&c.checked;});
+  if(!tick.length&&!behs.length){alert('Tick at least one detail to place.');return;}
+  const rep={bar:[],kept:[],dm:null,beh:0};
+  /* the bar */
+  const BAR={client:'#pClient',sid:'#pSid',grade:'#pGrade',site:'#pSite',bcba:'#pBcba'};
+  Object.keys(bar).forEach(k=>{const el=$(BAR[k]);if(!el)return;if(el.value.trim()===bar[k])return;if(el.value.trim()&&!over){rep.kept.push(k);return;}
+    el.value=bar[k];el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));rep.bar.push(k);});
+  if(typeof paintSum==='function')paintSum();
+  /* Form DM-1, opened if it is not */
+  if(Object.keys(dm).length){
+    if(!state.frames['DM-1'])openForm('DM-1',true);
+    const t0=Date.now();while(!state.status['DM-1']&&Date.now()-t0<15000)await new Promise(r=>setTimeout(r,120));
+    rep.dm=await grab('DM-1','fill',{fields:dm,over},8000);
+  }
+  /* the case: target behaviors from a plan, when the forms hold none */
+  if(behs.length){
+    const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
+    f.behaviors=behs.map(b=>({label:b.label,def:b.def||'',ex:'',nex:'',type:b.isRep?'replacement':'',isRep:!!b.isRep,fn:'',fnKey:'',dim:'',unit:'',rep:'',ctx:'',src:'document'}));
+    f.src.behaviors='document';f.when=new Date().toISOString();
+    setFacts(f,true);rep.beh=behs.length;
+  }
+  /* the details reach the other open forms as the packet does */
+  Object.values(state.frames).forEach(fr=>{if(fr!==state.frames['DM-1'])pushPacketTo(fr);});
+  setTimeout(()=>Object.values(state.frames).forEach(fr=>ask(fr,'status')),400);
+  try{$('#dlg').close();}catch(e){}
+  const bits=[],kept=[];
+  if(rep.bar.length)bits.push(rep.bar.length+' in the bar');
+  if(rep.dm&&(rep.dm.put||[]).length)bits.push(rep.dm.put.length+' in Form DM-1');
+  if(rep.beh)bits.push(rep.beh+(rep.beh===1?' target behavior':' target behaviors')+' to the case');
+  if(rep.kept.length)kept.push(rep.kept.length+' in the bar');
+  if(rep.dm&&(rep.dm.kept||[]).length)kept.push(rep.dm.kept.length+' in Form DM-1');
+  let msg=bits.length?'Placed: '+bits.join('; ')+'.':'Nothing new to place.';
+  if(kept.length)msg+=' Left as they were: '+kept.join(', ')+' (tick Replace to change them).';
+  if(!rep.dm&&Object.keys(dm).length)msg+=' Form DM-1 did not answer: open it and try again.';
+  if(rep.dm&&(rep.dm.none||[]).length)msg+=' Not taken by the form: '+rep.dm.none.length+'.';
+  if(rep.dm&&(rep.dm.put||[]).length)msg+=' Check Form DM-1.';
+  wsUI.toast(msg,{ms:9000});
+  if(state.frames['DM-1']&&state.cur!=='DM-1')openForm('DM-1',true);
+}
+$('#readDoc').addEventListener('click',drOpen);
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
@@ -4523,7 +4914,7 @@ const PWA=(()=>{
     if(!port||!src||src.scriptURL!==new URL('sw.js',P.scope).href)return true;
     let u=null;try{u=new URL(d.url);}catch(x){}
     const name=u?u.href.slice(P.scope.length):'';
-    if(!u||u.origin!==location.origin||u.href.indexOf(P.scope)!==0||u.search||u.hash||!/^[A-Za-z0-9][A-Za-z0-9._-]*\.[A-Za-z0-9]+$/.test(name)){port.postMessage({ok:false});return true;}
+    if(!u||u.origin!==location.origin||u.href.indexOf(P.scope)!==0||u.search||u.hash||!/^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)?\.[A-Za-z0-9]+$/.test(name)){port.postMessage({ok:false});return true;}   /* v21.67 a file in a folder of the folder (nbh-doc/, nbh-ocr/) too */
     port.postMessage({ack:true});
     const h={},q=d.headers||{};
     if(q['If-None-Match'])h['If-None-Match']=String(q['If-None-Match']);

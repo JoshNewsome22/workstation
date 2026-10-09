@@ -142,6 +142,16 @@ that is why this one does not.)
 The writing-help relay has a zip of its own, which goes in the home folder,
 not here (see the last section); the workstation's zip never touches it.
 
+From v21.67 the zip also holds two folders, `nbh-doc/` (PDF.js, about 1.8 MB) and
+`nbh-ocr/` (the Tesseract text recognizer and its English model, about 7 MB), for
+the bar's **Read a document**: a PDF or a picture of a student's information page is
+read on the device itself, and nothing is sent anywhere. Extract the zip as before;
+the folders land beside the forms. They are on the offline list too, so the first
+visit after the update saves about 9 MB more on the device. The one-file edition
+has neither and takes pasted text instead. (PDF.js's module files are named `.js` so that every host
+serves them as JavaScript; the recognizer's model is a `.gz` file it unpacks itself, and a host that
+unpacks `.gz` files on the way out does no harm.)
+
 Because of the cache rule, everyone gets the new version on their next visit.
 If a form still looks old, a hard reload (⌘⇧R, Ctrl⇧R) settles it.
 

@@ -8197,3 +8197,66 @@ unchanged. A fourth picture is "Not started" at 1 and the model at 4.
 
 **IA-1's toolbar on the iPad.** With six targets from Form TB-1 the target list grew past its group, and + Target and Remove
 landed under the case chip beside it. The list is now capped in width and the buttons wrap under it.
+
+### v21.67: Read a document, several model tasks and rating practice, Spanish respondent pages, the model walkthrough
+
+**Read a document (the bar).** A student's details come on paper: the school's information printout, the IEP's cover page,
+a plan. The bar's **Read a document** takes a PDF, a picture (a photo of the page, a screenshot) or pasted text, finds the
+details in it and lists each one with the line it was read from: the name (split into first and last, "RIVERA, MATEO J"
+read as Mateo Rivera), the date of birth and every other date (written as the form needs them), sex, the student ID and
+FLEID, the school, grade, teacher, enrolment and previous school, transportation, home language, ELL status, interpreter,
+race/ethnicity, Medicaid, the primary and secondary exceptionality, the eligibility, IEP, annual-review and reevaluation
+dates, placement, matrix, diploma option, ESY, 504, allergies, diet, physician, psychiatrist, conditions, vision/hearing,
+strengths, interests, the BCBA and who holds the rights: 41 details in all, each read by its label (and the label's other
+names: DOB, Birthdate, Student No., Homeroom, Primary language, ESOL…). The choices are put in Form DM-1's own words
+(Male, ELL: active, Autism Spectrum Disorder, Separate class (self-contained), Standard diploma, Yes/No). Target behaviors
+in a plan ("Target behavior 1: Aggression – any instance of…", a Definition line, a replacement behavior) are read too.
+Untick what is wrong or correct it in the table, then **Place**: the bar's five fields, Form DM-1 (opened if it is not, the
+fields filled by name, a choice only when it is one of the form's), the other open forms as the packet does, and the
+behaviors to the case (when Form TB-1 holds none), where Form TB-1 takes them as candidate rows ("the document" as who
+reported, the replacement said so, the decision left open) and Form GB-1 starts objectives from them. What the bar and the
+form already hold is kept unless Replace is ticked; a value already there is passed over quietly. Everything happens on the
+device: a PDF with its own text is read by PDF.js (`nbh-doc/`), a scanned page or a picture by Tesseract (`nbh-ocr/`, the
+English model; a few seconds a page, about 7 MB loaded the first time and then kept offline with the rest: `index.html`
+names both in `<meta name="nbh-offline">`, which `tools/pwa-sw.py` reads; the worker's release list and the page's
+relay for a password-protected folder now accept a file in a folder of the folder, which neither did before); nothing is
+sent anywhere and the text is kept only while the dialog is open. The one-file edition, and a folder opened from a drive, read pasted text (the iPad's Live
+Text copies it out of any photo or PDF) and say so. The matcher is `nbhDocRead` in `index.html`: a label is known by its
+aliases, longest first; what follows it on the line, up to the next label, is its value, or the next line when the label
+stands alone; a label followed by one space counts only with a value of the field's shape (a date, a grade, an ID, a
+name); a label with a colon beats one without, so a heading such as "Student Information Record" never becomes the name;
+parent, phone, address and letterhead lines are read so that their values go to nothing. Form DM-1 answers `{nbh:'fill'}`
+(`fill-applied` in the shell's reply map); Form TB-1 defines `__nbhFactsIn` for document behaviors. The vendored readers
+and their licences are listed in `tools/README.md`; the zip grows by about 9 MB (HOSTING.md, Updating). Checked by
+`qa/doc-read-test.js` (22 checks: the matcher on a printout and a plan, the table, Place into the bar, DM-1, TB-1 and
+GB-1, kept and replaced values, a text PDF, a picture read by the recognizer, a scanned PDF, a folder from a drive).
+
+**Form SM-1, Match the model: several tasks and rating practice.** A file now holds several tasks (the lunch table, the
+backpack, handwriting), each with its own pictures, rule, record and sheet: the Task list on the page, + Task, Remove this
+task (asked first when it holds pictures or trials), Print every task (one sheet per task) beside Print the model sheet,
+and a Task column in the CSV. A v21.66 file with one task opens as before. **Rating practice**, the teaching idea at the
+top of the list made real: pictures of other work (taken with the camera or chosen) tagged with the model each is like,
+plus the trial photos already rated, make a practice set; Start asks ten in turn with the model tiles, judges each answer
+on the spot and keeps the score (9 of 10: ready to rate my own) in a practice log per task. `S.mm` is now
+`{tasks:[…],at}`; a forged file is cleaned task by task. The Setup page's quick starts no longer overflow a phone screen
+(two columns under 640 px). `qa/sm1-model-test.js` grows to 26 checks.
+
+**The walkthrough's Match the model chapter (Form SM-1).** When the file holds a model task with a name or a picture, the
+walkthrough plays six more lines before the adults' part, in a chapter of their own, with the model sheet drawn as a second
+page the camera goes to: the job and the pictures with their numbers; the student circles the picture the work is most
+like (the pencil), the teacher circles too (the pen); a match writes the points and the bonus in; the rating-practice card
+(the models, nine of ten); the checks thinning (every time → every other → one in three → a surprise). The six lines are
+voiced with the same voice as the rest (`tools/forms/SM-1/walk-script.json`, `make-narration.py`; 38 lines, 4.9 minutes of
+speech in `nbh-sm1-narration.js`). The simulation's sheet now has eight chapters. Checked in `qa/sm1-model-test.js` (8b, 8c)
+and `qa/sm1-v2-test.js`.
+
+**Spanish respondent pages (Form IA-1, nbh-respond.js).** The Respondent pages dialog has a language choice (English,
+Español), kept in the file (`rp.lang`). A Spanish page says everything of its own in Spanish: the headings, the definition
+question (Sí / No / No estoy seguro/a) and its notes, the instructions, About you and its fields, the items' choices (Sí /
+No / N/A; the QABF's, MAS's and PBQ's anchors; the WEFA's Verdadero / Falso), In your own words with the FAST's and the
+WEFA's open questions, the Send button, the warnings, the Sent and email messages, the foot, the email's text, and the
+invitation email the assessor sends; the page's `lang` is es. The items themselves appear as pasted on the Setup sheet, so
+the instrument's Spanish wording is pasted there (the dialog says so), and the behavior's name, plural phrase and
+definition come from the targets table as written. Personalization in Spanish: "el estudiante" takes the name, "la conducta
+problemática" the behavior's term. The library translates with a table inside its runtime (`TXT`), so a page file carries
+its own words. IN-1's, SV-1's and CF-1's pages stay English for now. Checked by four new checks in `qa/respond-test.js`.

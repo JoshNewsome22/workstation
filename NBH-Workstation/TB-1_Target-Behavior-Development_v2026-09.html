@@ -3960,6 +3960,22 @@ window.__nbhFactsOut=function(){
     out.push({label:isRep?nbhTbName(beh):beh,def:'',rate:g('rate'),type,isRep,urg:g('urg'),src:'TB-1 (candidate)'});}}
   return out.length?{behaviors:out}:null;
 };
+/* (v21.67) target behaviors the shell read from a document (Read a document on the bar; the case carries them with src
+   "document") become candidate rows here, each once, with the definition read beside the name and "the document" as who
+   reported it (a replacement says so). The form's own targets travel with src TB-1 and never come back this way. */
+window.__nbhFactsIn=function(f){
+  const behs=(f&&f.behaviors)||[];if(!behs.length||!(f.src&&f.src.behaviors==='document'))return {filled:0};
+  const have=[];for(let i=0;i<candN;i++){const b=libFold(val(`cand[${i}].beh`));if(b)have.push(b);}
+  const has=lab=>{const fl=libFold(lab);return !!fl&&have.some(h=>h===fl||h.startsWith(fl+' '));};
+  let n=0;
+  behs.forEach(b=>{const lab=String(b.label||'').trim();if(!lab||has(lab))return;
+    let i=-1;for(let k=0;k<candN;k++){if($$(`[name^="cand[${k}]."]`).every(el=>!String(el.value).trim())){i=k;break;}}
+    if(i<0){addCand();i=candN-1;}
+    const set=(k,v)=>{const el=document.querySelector(`[name="cand[${i}].${k}"]`);if(!el||!v)return;el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));};
+    set('beh',b.def?lab+' \u2014 '+b.def:lab);set('by',b.isRep?'the document (a replacement behavior)':'the document');   /* the decision is left to the person: a candidate decided here would at once become the form's own target */
+    have.push(libFold(lab));n++;});
+  return {filled:n};
+};
 
 /* ---------- (v21.63) the best library entry for a card's label: its exact name or other name, else the one entry every word of the
    label is in; the bank's entries come first in LIB.entries, so one of your own with the same name wins ---------- */

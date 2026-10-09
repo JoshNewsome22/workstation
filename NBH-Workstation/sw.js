@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = '403111e386c3';
+const VERSION = 'e291898fd1c5';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -133,6 +133,12 @@ const FILES = [
   'nbh-tk1-narration.js',
   'nbh-tk1-bus-narration.js',
   'respond.html',
+  'nbh-doc/pdf.min.js',
+  'nbh-doc/pdf.worker.min.js',
+  'nbh-ocr/tesseract.min.js',
+  'nbh-ocr/worker.min.js',
+  'nbh-ocr/tesseract-core-simd-lstm.wasm.js',
+  'nbh-ocr/eng.traineddata.gz',
   'icon-192.png',
   'icon-512.png',
   'icon-512-maskable.png',
@@ -172,7 +178,7 @@ const TYPES = {html: 'text/html; charset=utf-8', js: 'text/javascript; charset=u
   webp: 'image/webp', svg: 'image/svg+xml', css: 'text/css; charset=utf-8', txt: 'text/plain; charset=utf-8'};
 const extOf = path => ((/\.([a-z0-9]+)$/i.exec(path) || [])[1] || '').toLowerCase();
 const typeOf = path => TYPES[extOf(path)] || 'application/octet-stream';
-const local = name => /^[A-Za-z0-9][A-Za-z0-9._-]*\.[A-Za-z0-9]+$/.test(name || '');
+const local = name => /^[A-Za-z0-9][A-Za-z0-9._-]*(?:\/[A-Za-z0-9][A-Za-z0-9._-]*)?\.[A-Za-z0-9]+$/.test(name || '');   // v21.67 a file in a folder of the folder too (nbh-doc/, nbh-ocr/)
 async function sha(buf) {
   const d = await crypto.subtle.digest('SHA-256', buf);
   return Array.from(new Uint8Array(d), b => b.toString(16).padStart(2, '0')).join('');

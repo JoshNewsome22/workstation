@@ -45,6 +45,14 @@ Paths below are from the repository root. The test server the checks expect:
 - `tools/dedupe-logo.py` — one letterhead image per form (v21.36); idempotent.
 - `tools/build-rps.py`, `tools/rps-assets/` — the Royal Palm School edition and its lockup
   and tab icon. `tools/build-single.py` — the one-file editions.
+- `NBH-Workstation/nbh-doc/` and `NBH-Workstation/nbh-ocr/` — the readers behind the bar's Read a document
+  (v21.67), vendored from the npm registry and never edited: `nbh-doc/` is PDF.js 6.4.299 (legacy build,
+  `pdf.min.js` and `pdf.worker.min.js`, upstream's `.mjs` files renamed so that every host serves them as JavaScript, Apache-2.0; `LICENSE-pdf.js.txt`), `nbh-ocr/` is Tesseract.js 7.0.0
+  (`tesseract.min.js`, `worker.min.js`), tesseract.js-core 6.1.2 (`tesseract-core-simd-lstm.wasm.js`, the
+  SIMD single-file build) and the `eng.traineddata.gz` model (tessdata 4.0.0, best int), all Apache-2.0
+  (`LICENSE-tesseract.js.txt`, `LICENSE-tesseract-core.txt`). To update, `npm pack pdfjs-dist@<v>`,
+  `npm pack tesseract.js@<v> tesseract.js-core@<v>` and copy the same files; `index.html` names them in
+  `<meta name="nbh-offline">` so `pwa-sw.py` puts them on the offline list. Checked by `qa/doc-read-test.js`.
 - `tools/pictos/`, `tools/scene/`, `tools/polish/` — the picture library, the walkthrough
   scene engine sources and the polish layer sources. `tools/pictos/import-cards.py` brings the
   practice's own card files (SVG, PNG, WebP or JPEG) into the library; then `build-pictos.py`
