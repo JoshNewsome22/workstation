@@ -356,6 +356,15 @@ button.icon{padding:5px 8px;min-width:32px}
 .bar .sum b{color:#fff;font-size:14px;font-family:var(--serif);font-weight:600}
 .bar .sum span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .bar .sum #sumCase{color:#9fb6bd;flex:1 1 200px}
+/* v21.68 the student's photo: a round picture on the bar, the folded line and the crumb; the flags on the case line */
+.bar .pphoto{width:40px;height:40px;min-height:0;padding:0;border-radius:50%;overflow:hidden;border:1px solid #476c7e;background:#1d3a48;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;cursor:pointer;color:#cfe0dd}
+.bar .pphoto:hover{background:#2b5265;border-color:#6a92a4}
+.bar .pphoto img{width:100%;height:100%;object-fit:cover;display:block}.bar .pphoto img[hidden]{display:none}
+.bar .pphoto span{font-size:12.5px;font-weight:600;letter-spacing:.02em;line-height:1}.bar .pphoto span.cam svg{display:block}.bar .pphoto span[hidden]{display:none}
+.bar .sum #sumPhoto{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:0 0 auto;border:1px solid #476c7e}.bar .sum #sumPhoto[hidden]{display:none}
+.crumb #crumbPhoto{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:0 0 auto;border:1px solid #c9d4d2}.crumb #crumbPhoto[hidden]{display:none}
+.bar .facts .flag,.bar .facts .flag b{color:#f3d9a6}
+.ph-dlg .ph-big{width:160px;height:160px;border-radius:50%;object-fit:cover;display:block;margin:0 0 10px;border:1px solid #c9d4d2}
 body.bar-folded .bar .det,body.bar-folded .bar .facts{display:none}
 .bar [hidden]{display:none!important}   /* the bar's flex rules outranked the hidden attribute */
 body.bar-folded #barSum{display:flex}
@@ -794,13 +803,14 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
 <div class="bar" id="bar">
   <!-- v21.34: once the student is loaded the details fold to this one line; Edit opens them again -->
   <div class="grp sum" id="barSum" hidden>
-    <b id="sumName"></b><span id="sumDet"></span><span id="sumCase"></span><span id="sumDue" class="due"></span>
+    <img id="sumPhoto" alt="" hidden><b id="sumName"></b><span id="sumDet"></span><span id="sumCase"></span><span id="sumDue" class="due"></span>
     <div class="sp"></div>
     <button id="barEdit" class="sm" title="Show the packet details and the case line">Edit details</button>
   </div>
   <!-- The student's details on one row, each label kept with its own box when
        the window is narrow; what you do with the packet and the case below. -->
   <div class="grp det" role="group" aria-label="Packet details">
+    <button type="button" id="pPhotoBtn" class="pphoto" aria-label="The student’s photo" title="The student’s photo: take one or choose one; it is kept in the case file and shown while you work"><img id="pPhotoImg" alt="" hidden><span id="pPhotoIni" class="cam" aria-hidden="true"></span></button><input type="file" id="pPhotoFile" accept="image/*" hidden>
     <span class="fld"><label for="pClient">Student</label><input id="pClient" placeholder="Name"></span>
     <span class="fld"><label for="pSid">ID</label><input id="pSid" style="width:96px" placeholder="Student no."></span>
     <span class="fld"><label for="pGrade">Grade</label><input id="pGrade" style="width:70px"></span>
@@ -877,6 +887,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <div class="crumb">
       <button id="railToggle" class="sm" aria-controls="railNav" aria-expanded="false" aria-label="Show the list of forms" title="Show the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11"/></svg><span class="lbl">Forms</span></button>
       <img class="fs-logo" id="fsLogo" alt="" aria-hidden="true">
+      <img id="crumbPhoto" alt="" hidden>
       <b id="crumbTitle">Nothing open</b>
       <span id="crumbId"></span>
       <span id="crumbFile"></span>
@@ -1383,12 +1394,48 @@ function paintSum(){
   $('#sumDet').textContent=[p.sid,p.grade?'Grade '+p.grade:'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
   const f=state.facts,bits=[];
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
-    const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');}
+    const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
+    const fl=f.profile&&f.profile.flags;if(fl){if((fl.safety||[]).length)bits.push('safety: '+fl.safety.join(', ').toLowerCase());if(fl.photo==='No')bits.push('no photo permission');if(/outdated/i.test(fl.crisis||''))bits.push('crisis plan outdated');else if(fl.crisis==='No')bits.push('no crisis plan');}}
   $('#sumCase').textContent=bits.length?'The case: '+bits.join(', '):'';
   row.hidden=!document.body.classList.contains('bar-folded');
+  if(typeof paintPhoto==='function')paintPhoto();
 }
 function foldBar(on){document.body.classList.toggle('bar-folded',!!on&&!!packet().client.trim());paintSum();if(!on){const e=$('#pClient');if(e)try{e.focus({preventScroll:true});}catch(err){}}}
 $('#barEdit').addEventListener('click',()=>foldBar(false));
+/* ---------------- v21.68 the student's photo ----------------
+   Taken with the camera or chosen from the library, brought to 240 px square (about 15 KB), kept in the packet and so in the
+   case file, the packet file and Autosave's copy, and nowhere else (not the offline copy, not a link); shown on the bar, the
+   folded line and the crumb, so the case you are in stays in sight; offered to Form IA-1's respondent pages while they hold no
+   photo of their own. With no photo the circle shows the student's initials, or a camera. */
+state.photo='';
+const PHOTO_RE=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+function photoOk(v){return typeof v==='string'&&v.length<600000&&PHOTO_RE.test(v);}
+function setPhoto(v,quiet){state.photo=photoOk(v)?v:'';paintPhoto();
+  if(!quiet&&state.photo){const fl=state.facts&&state.facts.profile&&state.facts.profile.flags;if(fl&&fl.photo==='No')wsUI.toast('Form DM-1 says the photo/media permission on file is No. The photo stays in this case file and goes nowhere else.',{ms:9000});}}
+function initials(){const n=packet().client.replace(/\(.*?\)/g,'').trim();if(!n)return '';const w=n.split(/[\s,]+/).filter(Boolean);if(!w.length)return '';
+  const f=x=>((x||'')[0]||'').toUpperCase();if(n.indexOf(',')>0&&w.length>1)return f(w[1])+f(w[0]);return f(w[0])+(w.length>1?f(w[w.length-1]):'');}
+const CAM='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v10H4z"/><circle cx="12" cy="13" r="3.2"/></svg>';
+function paintPhoto(){const v=state.photo,b=$('#pPhotoBtn');if(!b)return;const img=$('#pPhotoImg'),ini=$('#pPhotoIni');
+  img.hidden=!v;if(v){if(img.getAttribute('src')!==v)img.src=v;}else img.removeAttribute('src');
+  const t=v?'':initials();ini.hidden=!!v;ini.className=t?'':'cam';ini.innerHTML=t?esc(t):CAM;
+  b.title=v?'The student’s photo: change it or take it off':'The student’s photo: take one or choose one; it is kept in the case file and shown while you work';
+  const sm=$('#sumPhoto');sm.hidden=!v;if(v){if(sm.getAttribute('src')!==v)sm.src=v;}else sm.removeAttribute('src');
+  const c=$('#crumbPhoto'),on=!!v&&document.body.classList.contains('has-form');c.hidden=!on;if(v){if(c.getAttribute('src')!==v)c.src=v;}else c.removeAttribute('src');}
+function photoFromFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{try{const S=240,w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,k=Math.min(w,h),sx=(w-k)/2,sy=(h-k)/2;const c=document.createElement('canvas');c.width=S;c.height=S;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,S,S);g.drawImage(img,sx,sy,k,k,0,0,S,S);URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.8));}catch(e){URL.revokeObjectURL(url);rej(e);}};
+  img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('not an image'));};img.src=url;});}
+$('#pPhotoBtn').addEventListener('click',()=>{
+  if(!state.photo){$('#pPhotoFile').click();return;}
+  dialog('The student’s photo','<div class="ph-dlg"><img src="'+state.photo+'" alt="The student" class="ph-big"><p>Kept in the case file and shown on the bar and the crumb while you work; offered to Form IA-1’s respondent pages. It is not in the offline copy or in any link.</p><p><button type="button" class="primary" id="phChange">Change the photo</button> <button type="button" id="phDrop">Take it off</button></p></div>');
+  $('#phChange').addEventListener('click',()=>{$('#dlg').close();$('#pPhotoFile').click();});
+  $('#phDrop').addEventListener('click',()=>{$('#dlg').close();setPhoto('',true);wsUI.toast('The photo is off the case.');});
+});
+$('#pPhotoFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  try{setPhoto(await photoFromFile(f));const ia=state.frames['IA-1'];if(ia)pushPacketTo(ia);}   /* the respondent pages take it at once */
+  catch(err){alert('That file is not a picture the browser can read.');}});
+$('#pClient').addEventListener('input',()=>paintPhoto());
+new MutationObserver(()=>paintPhoto()).observe(document.body,{attributes:true,attributeFilter:['class']});   /* the crumb's photo follows has-form */
+paintPhoto();
 $('#barFold').addEventListener('click',()=>foldBar(true));
 /* folded on its own the first time a name arrives from a packet, a case or the forms; typing keeps it open */
 state.barAuto=false;
@@ -1606,8 +1653,10 @@ window.addEventListener('blur',()=>{setTimeout(()=>{
 
 /* ---------------- packet ---------------- */
 function packet(){
-  return {client:$('#pClient').value,sid:$('#pSid').value,grade:$('#pGrade').value,
+  const p={client:$('#pClient').value,sid:$('#pSid').value,grade:$('#pGrade').value,
           site:$('#pSite').value,bcba:$('#pBcba').value};
+  if(state.photo)p.photo=state.photo;   /* v21.68 the student's photo travels with the packet (the case file, the packet file, Autosave's copy) */
+  return p;
 }
 /* GB-1 writes the goals and TD-1 holds the baseline and the criteria. Rather than
    have the same numbers typed twice and drift apart, the workstation carries them
@@ -1804,7 +1853,7 @@ $('#packetFile').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result),p=d.packet;if(!p)throw 0;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
-    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();commitBar();
+    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);who();commitBar();
     Object.values(state.frames).forEach(pushPacketTo);
     if(d.facts)setFacts(d.facts,true);   /* v21.31 the case travels in the packet file */
     barAutoFold();
@@ -2017,6 +2066,11 @@ function paintFacts(){
   const g=f.goals||{},nr=(g.red||[]).length,na=(g.acq||[]).length;
   if(nr||na)bits.push('<b>Goals:</b> '+[nr?nr+' reduction':'',na?na+' acquisition':''].filter(Boolean).join(', ')+' <i>('+esc(s.goals||'')+')</i>');
   if(f.profile)bits.push('<b>Profile</b> <i>('+esc(s.profile||'')+')</i>');
+  /* v21.68 Form DM-1's flags: the safety precautions ticked, no photo/media permission, a crisis plan outdated or missing */
+  const fl=f.profile&&f.profile.flags;
+  if(fl){const parts=[];if((fl.safety||[]).length)parts.push('<b>Safety:</b> '+esc(fl.safety.join(', ')));if(fl.photo==='No')parts.push('<b>No photo/media permission</b>');
+    if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>');else if(fl.crisis==='No')parts.push('<b>No crisis plan</b>');
+    if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
@@ -3347,7 +3401,7 @@ async function autoSave(force){
     const forms={};
     Object.keys(A.forms).forEach(id=>{forms[id]=Object.assign({},A.forms[id],{continued:A.continued[id]||null});});
     if(!Object.keys(forms).length)return;
-    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'');
+    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
     if(h===A.written){state.autoSig=sig;return;}
     const rec={key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
       packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms};
@@ -3417,7 +3471,7 @@ function autoLast(){
     }
     Object.keys(state.pending).forEach(id=>{const P=state.pending[id],sn=P.snap||{};forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||'',continued:A.continued[id]||null};});   /* v21.61 */
     if(!work||!Object.keys(forms).length)return;
-    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'');
+    const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
     if(h===A.written)return;
     CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
       packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
@@ -3558,7 +3612,7 @@ async function loadCase(d,how){
   if(d.packet){
     const p=d.packet;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
-    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';who();
+    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);who();
   }
   commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
@@ -4074,6 +4128,7 @@ async function clearCase(){
   setFull(false,true);
   layoutFrames();   /* side by side ends with the forms */
   ['#pClient','#pSid','#pGrade','#pSite','#pBcba'].forEach(sel=>{const e=$(sel);if(e)e.value='';});
+  setPhoto('',true);
   who();
   commitBar(true);   /* the earlier student's values on the bar are not corrections of the next one's */
   setFacts(null,false);

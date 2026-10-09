@@ -8269,3 +8269,23 @@ the instrument's Spanish wording is pasted there (the dialog says so), and the b
 definition come from the targets table as written. Personalization in Spanish: "el estudiante" takes the name, "la conducta
 problemática" the behavior's term. The library translates with a table inside its runtime (`TXT`), so a page file carries
 its own words. IN-1's, SV-1's and CF-1's pages stay English for now. Checked by four new checks in `qa/respond-test.js`.
+
+### v21.68: the student's photo on the bar, and Form DM-1's flags on the case line
+
+**The student's photo.** The circle at the left of the bar holds the student's photo: tap it to take one with the
+camera or choose one from the library (on the iPad the picker offers both). The picture is brought to 240 px square
+(about 15 KB) and kept in the packet, so it travels in the case file, the packet file and Autosave's copy, and nowhere
+else: not in the offline copy, not in a link. It shows on the bar, on the folded summary line and on the crumb while a
+form is open, so the case you are in stays in sight; with no photo the circle shows the student's initials, or a camera
+before a name is typed. Tapping a photo opens its dialog: Change the photo, Take it off. Form IA-1 takes the case's
+photo for its respondent pages while it holds no photo of its own (the dialog's Remove the photo still works). A case
+file with a forged photo (not a JPEG, PNG or WebP data URL, or over 600 KB) opens without one. Close case takes it off
+with the details. In the shell: `state.photo`, `setPhoto`, `paintPhoto`, `photoFromFile`, `packet().photo`; in IA-1
+the packet listener; the Autosave's change hash counts the photo.
+
+**Form DM-1's flags on the case line.** DM-1's facts (`__nbhFactsOut`) now carry `profile.flags`: the safety precautions
+ticked (Elopement, Self-injury, Aggression, Pica, Water, Traffic, Choking, Climbing / falls, Goes with strangers, Medical
+emergency, Physical management restrictions, Other precaution), the photo/media permission when it is No, and a crisis
+plan that is outdated or missing. The case line shows them in amber ("Safety: Elopement, Water · No photo/media
+permission · Crisis plan outdated (DM-1)"), the folded line in short, and setting a photo while the permission is No
+says so once. Checked by `qa/photo-flags-test.js` (16 checks).

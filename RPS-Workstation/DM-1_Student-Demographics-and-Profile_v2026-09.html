@@ -3426,7 +3426,14 @@ window.__nbhFactsOut=function(){
   try{
     const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
     const p={strengths:g('pf.strengths'),interests:g('pf.interests'),expr:g('pf.expr'),recep:g('pf.recep'),lit:g('pf.lit'),signals:g('pf.signals'),helps:g('pf.helps'),avoid:g('pf.avoid'),at:g('p.at'),src:'DM-1'};
-    return Object.keys(p).some(k=>k!=='src'&&p[k])?{profile:p}:null;
+    /* v21.68 the flags the workstation shows on its case line: the safety precautions ticked here, the photo/media permission
+       when it is No, a crisis plan that is outdated or missing */
+    const SF={elope:'Elopement',sib:'Self-injury',agg:'Aggression',pica:'Pica',water:'Water',traffic:'Traffic',choke:'Choking',climb:'Climbing / falls',strangers:'Goes with strangers',medical:'Medical emergency',restr:'Physical management restrictions',other:'Other precaution'};
+    const safety=Object.keys(SF).filter(k=>{const e=document.querySelector('[name="sf.'+k+'"]');return e&&e.checked;}).map(k=>SF[k]);
+    const flags={safety,photo:g('s.photo'),crisis:g('p.crisis')};
+    const any=Object.keys(p).some(k=>k!=='src'&&p[k])||safety.length||flags.photo==='No'||/outdated/i.test(flags.crisis)||flags.crisis==='No';
+    if(any)p.flags=flags;
+    return any?{profile:p}:null;
   }catch(e){return null;}
 };
 </script>
