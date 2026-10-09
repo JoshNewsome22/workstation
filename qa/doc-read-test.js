@@ -78,12 +78,25 @@ const CARD=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:
 <tr><td class="l">Teacher:</td><td>Ms. Alvarez</td><td class="l">Home Language:</td><td>Spanish</td></tr>
 <tr><td class="l">Primary Exceptionality:</td><td>Autism Spectrum Disorder</td><td class="l">IEP Date:</td><td>01/22/2026</td></tr>
 <tr><td class="l">Allergies:</td><td>peanuts</td><td class="l">ESY:</td><td>Yes</td></tr></table></div></body></html>`;
+/* the same page in the look of a student information system: a label cell in grey, the value beside it, no colons, a "?" mark */
+const SISCARD=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff;font:17px/1.5 "DejaVu Sans",Arial,sans-serif;color:#222}
+.p{padding:28px 30px}h2{font-size:21px;margin:0 0 12px}table{border-collapse:collapse;width:100%}td{padding:7px 12px;border:1px solid #d8d8d8;vertical-align:middle}td.l{background:#eeeeee;text-align:right;width:230px;color:#333}td.q{width:22px;background:#eeeeee;border-right:0;font-weight:700}td.l.n{border-left:0}</style></head><body><div class="p">
+<h2>Demographics</h2><table>
+<tr><td class="q">?</td><td class="l n">Local Student ID</td><td>4471823</td><td class="q"></td><td class="l n">Legal Name</td><td>Rivera , Mateo Josue</td></tr>
+<tr><td class="q">?</td><td class="l n">Suffix</td><td></td><td class="q">?</td><td class="l n">Nickname</td><td>Teo</td></tr>
+<tr><td class="q">?</td><td class="l n">Former or Maiden Name</td><td></td><td class="q">?</td><td class="l n">* Birthdate</td><td>03/14/2016</td></tr>
+<tr><td class="q">?</td><td class="l n">* Location of Birth</td><td>JUPITER,FL</td><td class="q">?</td><td class="l n">* Gender</td><td>Male</td></tr>
+<tr><td class="q">?</td><td class="l n">Single Ethnicity</td><td>W - White</td><td class="q">?</td><td class="l n">* Ethnicity: Hispanic or Latino</td><td>No</td></tr>
+<tr><td class="q">?</td><td class="l n">Parent Language</td><td>English</td><td class="q">?</td><td class="l n">Student Language</td><td>English</td></tr>
+<tr><td class="q">?</td><td class="l n">Original Enter Date</td><td>09/15/2021</td><td class="q">?</td><td class="l n">Original Enter Grade</td><td>PK</td></tr>
+</table></div></body></html>`;
 (async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1300,height:900}});const log=[];wire(page,log);
   /* the fixtures */
   fs.writeFileSync(OUT+'printout.pdf',textPdf(TEXT.split('\n')));
   const card=await br.newPage({viewport:{width:1000,height:560},deviceScaleFactor:2});await card.setContent(CARD);await sleep(300);
   await card.screenshot({path:OUT+'card.png',type:'png'});const jpg=await card.screenshot({type:'jpeg',quality:92});await card.close();
   fs.writeFileSync(OUT+'scan.pdf',jpegPdf(jpg,2000,1120));
+  const sis=await br.newPage({viewport:{width:1100,height:520},deviceScaleFactor:2});await sis.setContent(SISCARD);await sleep(300);await sis.screenshot({path:OUT+'sis.png',type:'png'});await sis.close();
   await page.goto(BASE+'/NBH-Workstation/index.html',{waitUntil:'load'});await sleep(800);
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m);};try{wsUI.confirm=async()=>true;}catch(e){}});
   /* 1. the dialog */
@@ -108,6 +121,14 @@ const CARD=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:
   const G={};r2.fields.forEach(f=>{G[f.k]=f;});
   ok('2g a label on its own takes the next line; a label with one space takes a value of its shape (a date, a grade, an ID); a first and last name read on their own win; prose with "grade 4" and "School District" gives nothing wrong',
     G.name&&G.name.value==='Ann Smith'&&G.name.first==='Ann'&&G.name.last==='Smith'&&G.dob.value==='2015-01-02'&&G.grade.value==='5'&&G.sid.value==='9988776'&&!G.school&&G.iepdate.value==='2026-01-05'&&G.name.to.join()==='bar:client',{keys:Object.keys(G).join(),name:G.name,school:G.school,grade:G.grade});
+  const SIS=['? Local Student ID  4471823      Legal Name  Rivera , Mateo Josue','? Suffix                          ? Nickname  Teo','? Former or Maiden Name           * Birthdate  03/14/2016    10 years 6 months',
+    '* Location of Birth  JUPITER,FL   * Country of Birth  United States','* Birth Date Verification  Certified Copy of Birth Certificate   * Gender  Male','? Date Entered United States School  08/22/2021','Alerts','Has Custody Alert  x    Custody Alert',
+    'Address Information','Resident Status  PK12 - In-County Resident    Residence County  50 - Palm Beach','Second Custody Contact  Luis Rivera','Race','Single Ethnicity  W - White     Ethnicity: Hispanic or Latino  No','Race: White  Yes    Race: Black or African American  No',
+    'Race: Asian  No    Race: American Indian or Alaska Native  No','Language Information','Home Language Survey Date  09/13/2021      Is a language other than English used in the home?  Yes','Parent Language  Spanish      Student Language  Spanish','Miscellaneous',
+    'Student Email Address  S4471823@stu.example.org     Security Pin  22TbZVQx','Original Enter Date  08/22/2021     Original Enter Grade  PK','Military Family Student  No'].join('\n');
+  const r3=await page.evaluate(t=>nbhDocRead.parse(t),SIS);const H={};r3.fields.forEach(f=>{H[f.k]=f;});
+  ok('2h a student information system\u2019s page (labels in cells, no colons, help marks, an empty field before the next): the legal name (first given name to the bar, all to the form), nickname, birth date, sex, ID, ethnicity from the Yes line, language; nothing from Original Enter Grade, the custody contact, the email, the pin or the military question',
+    Object.keys(H).sort().join()==='dob,eth,lang,name,pref,sex,sid'&&H.name.value==='Mateo Rivera'&&H.name.first==='Mateo Josue'&&H.name.last==='Rivera'&&H.pref.value==='Teo'&&H.dob.value==='2016-03-14'&&H.sex.value==='Male'&&H.sid.value==='4471823'&&H.eth.value==='White'&&H.lang.value==='Spanish',Object.fromEntries(Object.keys(H).map(k=>[k,H[k].value])));
   /* 3. the table and Place: TB-1 and GB-1 open first, with nothing in them */
   await page.evaluate(()=>{document.querySelector('#dlg').close();});
   for(const id of ['TB-1','GB-1']){await page.evaluate(id=>openForm(id,true),id);const t=Date.now();while(Date.now()-t<15000&&!(await page.evaluate(id=>!!state.status[id],id)))await sleep(150);}
@@ -160,6 +181,12 @@ const CARD=`<!doctype html><html><head><meta charset="utf-8"><style>body{margin:
   const f2=await page.evaluate(()=>({rows:[...document.querySelectorAll('#drOut .dr-tbl tbody tr')].map(tr=>tr.children[1].textContent+'='+tr.children[2].querySelector('input').value),err:(document.querySelector('#drOut .dr-err,#drOut .dr-none')||{}).textContent||'',text:DR.text}));
   fs.writeFileSync(OUT+'ocr-card.txt',f2.text||'');
   ok('5b a picture is read by the text recognizer on the device, with its progress shown: the name, the ID, the birth date, the grade, the school and the eligibility read',has(f2.rows,'Student=Mateo Rivera')&&has(f2.rows,'Student ID=4471823')&&has(f2.rows,'Date of birth=2016-03-14')&&has(f2.rows,'Grade=3')&&has(f2.rows,'School=Royal Palm School')&&has(f2.rows,'Primary exceptionality=Autism Spectrum Disorder')&&progs.some(p=>/Reading the picture/.test(p))&&!f2.err,{rows:f2.rows,err:f2.err,progs,ms:Date.now()-t});
+  await page.evaluate(()=>{document.querySelector('#dlg').close();});await page.click('#readDoc');await sleep(200);
+  await page.setInputFiles('#drFile',OUT+'sis.png');
+  t=Date.now();while(Date.now()-t<150000&&!(await page.evaluate(()=>!!document.querySelector('#drOut .dr-tbl, #drOut .dr-err, #drOut .dr-none'))))await sleep(400);
+  const f4=await page.evaluate(()=>({rows:[...document.querySelectorAll('#drOut .dr-tbl tbody tr')].map(tr=>tr.children[1].textContent+'='+tr.children[2].querySelector('input').value),err:(document.querySelector('#drOut .dr-err,#drOut .dr-none')||{}).textContent||'',text:DR.text}));
+  fs.writeFileSync(OUT+'ocr-sis.txt',f4.text||'');
+  ok('5b2 a screenshot in a student information system\u2019s look (label cells, no colons): the recognizer\u2019s word gaps keep label and value apart, so the name, ID, birth date, sex, nickname, ethnicity and language are read, and Original Enter Grade is not a grade',has(f4.rows,'Student=Mateo Rivera')&&has(f4.rows,'Student ID=4471823')&&has(f4.rows,'Date of birth=2016-03-14')&&has(f4.rows,'Sex=Male')&&has(f4.rows,'Preferred name=Teo')&&has(f4.rows,'Race / ethnicity=W - White')&&has(f4.rows,'Home language=English')&&!f4.rows.some(r=>/^Grade=/.test(r))&&/\n/.test(f4.text)&&!f4.err,{rows:f4.rows,err:f4.err,text:f4.text.slice(0,400)});
   await page.evaluate(()=>{document.querySelector('#dlg').close();});await page.click('#readDoc');await sleep(200);
   progs.length=0;await page.setInputFiles('#drFile',OUT+'scan.pdf');
   t=Date.now();while(Date.now()-t<150000&&!(await page.evaluate(()=>!!document.querySelector('#drOut .dr-tbl, #drOut .dr-err, #drOut .dr-none'))))await sleep(400);

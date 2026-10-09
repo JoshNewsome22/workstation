@@ -8228,8 +8228,17 @@ name); a label with a colon beats one without, so a heading such as "Student Inf
 parent, phone, address and letterhead lines are read so that their values go to nothing. Form DM-1 answers `{nbh:'fill'}`
 (`fill-applied` in the shell's reply map); Form TB-1 defines `__nbhFactsIn` for document behaviors. The vendored readers
 and their licences are listed in `tools/README.md`; the zip grows by about 9 MB (HOSTING.md, Updating). Checked by
-`qa/doc-read-test.js` (22 checks: the matcher on a printout and a plan, the table, Place into the bar, DM-1, TB-1 and
+`qa/doc-read-test.js` (24 checks: the matcher on a printout and a plan, the table, Place into the bar, DM-1, TB-1 and
 GB-1, kept and replaced values, a text PDF, a picture read by the recognizer, a scanned PDF, a folder from a drive).
+**On a student information system's pages** (Focus, as the district's screenshots look): the labels sit in cells with
+no colon, a "?" help mark or a "*" before them, and the page has traps: an empty field followed by the next one (the
+value on the next line is taken only when that line has no label and no colon of its own and has the field's shape),
+"Original Enter Grade" (not the grade), "Military Family Student: No" (not the name; a reading that is not of the
+field's shape gives way to a later one that is), "Race: White  Yes / No" and "Ethnicity: Hispanic or Latino  No"
+(questions: Yes places the race, No places nothing), "Parent Language" (the home language), "Legal Name: Rivera , Mateo
+Josue" (the first given name goes to the bar, all of them to Form DM-1's first name). The recognizer's words come with
+their places, so a gap wider than two letters between two words is kept as a column break (label | value | label),
+which the matcher reads as a gap; `drLinesOfOcr`. Checked by 2h (the text) and 5b2 (the same page as a picture).
 
 **Form SM-1, Match the model: several tasks and rating practice.** A file now holds several tasks (the lunch table, the
 backpack, handwriting), each with its own pictures, rule, record and sheet: the Task list on the page, + Task, Remove this
