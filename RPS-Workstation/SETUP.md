@@ -8189,5 +8189,11 @@ carried a `$&`, which cut the respondent library short inside the one-file editi
 library no longer carries the sequence, and the shell now replaces through a function, so any library may. Checked by the
 one-file checks run before the release.
 
+**The pictures run 1, 2, 3 from the lowest to the model.** The sheet first put the model at 1 with 3 points, so the number
+a student circled ran against the points. The pictures now run from the lowest (1) to the model (the last), and a picture's
+number is its points by default: the same order and numbers on the printed sheet, its circles, the iPad tiles (each with its
+number), the level cards and the record's lists. The model keeps the first place in the data (`lv[0]`), so saved files are
+unchanged. A fourth picture is "Not started" at 1 and the model at 4.
+
 **IA-1's toolbar on the iPad.** With six targets from Form TB-1 the target list grew past its group, and + Target and Remove
 landed under the case chip beside it. The list is now capped in width and the buttons wrap under it.
