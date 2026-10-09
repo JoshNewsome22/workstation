@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'e291898fd1c5';
+const VERSION = '0b97ea3ae22a';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -112,6 +112,7 @@ const FILES = [
   'TV-1_Training-Video_v2026-10.html',
   'HD-1_Home-Data-Sheets_v2026-10.html',
   'EB-1_Essentials-Brief-Limited-Contact-Staff_v2026-09.html',
+  'QS-1_Staff-Quick-Start_v2026-10.html',
   'Delay-Tolerance-Protocol-Toolkit.html',
   'AD-1_Accumulated-vs-Distributed-Reinforcement_v2026-09.html',
   'TE-1_Token-Economy-Designer_v2026-09.html',
