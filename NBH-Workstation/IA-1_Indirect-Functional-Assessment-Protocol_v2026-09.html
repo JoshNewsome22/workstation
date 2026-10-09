@@ -6592,6 +6592,9 @@ $('#rpLang').addEventListener('change',()=>{rpRemember();rpLangNote();rpStatus()
 $('#rpInst').addEventListener('change',rpStatus);$('#rpVideo').addEventListener('input',rpStatus);$('#rpBase').addEventListener('input',()=>{rpRemember();rpStatus();});$('#rpBox').addEventListener('input',()=>{rpRemember();boxPaint();});$('#rpBox').addEventListener('change',()=>{boxEnsure();});
 function rpPhotoShow(){const ph=val('rp.photo'),ok=/^data:image\//.test(ph);$('#rpPhotoThumb').hidden=!ok;$('#rpPhotoDrop').hidden=!ok;if(ok)$('#rpPhotoThumb').src=ph;}
 function rpPhotoSet(v){const e=document.querySelector('[name="rp.photo"]');e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));rpPhotoShow();rpStatus();}
+/* v21.68 the case's photo of the student (the workstation's bar) goes on the respondent pages while this form holds none of its own */
+window.addEventListener('message',ev=>{if(window.parent===window||ev.source!==window.parent)return;const d=ev.data,p=d&&d.nbh==='packet'&&d.packet;if(!p||typeof p.photo!=='string')return;
+  if(!/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(p.photo)||p.photo.length>=600000)return;try{if(!val('rp.photo').trim())rpPhotoSet(p.photo);}catch(x){}});
 $('#rpPhoto').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const img=new Image();const url=URL.createObjectURL(f);
   img.onload=()=>{const M=224,k=Math.min(1,M/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*k)),hh=Math.max(1,Math.round(img.height*k));const c=document.createElement('canvas');c.width=w;c.height=hh;c.getContext('2d').drawImage(img,0,0,w,hh);
     URL.revokeObjectURL(url);rpPhotoSet(c.toDataURL('image/jpeg',0.72));e.target.value='';};img.onerror=()=>{URL.revokeObjectURL(url);$('#rpNote').textContent='That file is not an image the browser can read.';};img.src=url;});
