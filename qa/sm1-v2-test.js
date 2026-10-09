@@ -96,7 +96,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined?
   await page.evaluate(()=>{document.getElementById('simBtn').click();});await sleep(1000);
   await page.evaluate(()=>{document.querySelector('#viewSeg [data-view="walk"]').click();});await sleep(800);
   const wk=await page.evaluate(()=>{TKWALK.build();return {d:TKWALK.duration,ch:TKWALK.chapters.map(c=>c.id),audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,info:window.NBH_WALK_INFO&&NBH_WALK_INFO.what};});
-  ok('the simulated sheet: about 1½ to 2 minutes, seven chapters, its narration, Save as video',wk.d>80&&wk.d<160&&wk.ch.length===7&&wk.audio>=30&&wk.video==='object'&&wk.info==='sheet',wk);
+  ok('the simulated sheet: about 1½ to 3 minutes, eight chapters (v21.67: Match the model, from the simulation\'s tasks), its narration, Save as video',wk.d>80&&wk.d<240&&wk.ch.length===8&&wk.audio>=30&&wk.video==='object'&&wk.info==='sheet',wk);
   /* the frames Save as video paints are the stage as the page shows it (the simulation's notice gone first: it sits over the page) */
   await page.evaluate(()=>[...document.body.querySelectorAll('*')].forEach(e=>{if(!e.closest('#wkPlayer')&&getComputedStyle(e).position==='fixed')e.style.display='none';}));
   for(const t of [5,26,45,70,95]){const png=await page.evaluate(async t=>(await TKVIDEO.frame(t,1280)).toDataURL('image/png'),t);

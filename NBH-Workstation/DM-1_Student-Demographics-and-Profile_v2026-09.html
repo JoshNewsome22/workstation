@@ -4034,6 +4034,26 @@ window.__nbhFactsOut=function(){
       /* reuse the packet applier already in this form */
       if (window.__nbhApplyPacket) { window.__nbhApplyPacket(d.packet, true); }
       reply({ nbh:'packet-applied', id: formId() });
+    } else if (d.nbh === 'fill' && d.fields && typeof d.fields === 'object') {
+      /* v21.67 Read a document: the shell hands fields by name ({'s.first':'Ada', 's.dob':'2015-01-02', ...}) read from a
+         PDF, a picture or pasted text and checked by the person; each goes into its field when that is empty (over: into
+         every one); a choice must be one of the select's; the form hears the change as if typed */
+      var put = [], kept = [], none = [];
+      Object.keys(d.fields).forEach(function(k){
+        var v = d.fields[k]; if (v == null || !String(v).trim() || !/^[a-z]+\.[a-z0-9]+$/.test(k)) return;
+        var el = document.querySelector('[name="' + k + '"]'); if (!el || el.tagName === 'BUTTON') { none.push(k); return; }
+        var cur = String(el.value || '').trim(), want = String(v).trim();
+        if (cur === want) return;   /* already there (the packet put it there): neither placed nor kept */
+        if (cur && !d.over) { kept.push(k); return; }
+        if (el.tagName === 'SELECT') {
+          var hit = Array.prototype.filter.call(el.options, function(o){ return o.value === want || o.textContent.trim() === want; })[0];
+          if (!hit) { none.push(k); return; }
+          el.value = hit.value || hit.textContent;
+        } else el.value = String(v).slice(0, 2000);
+        ['input','change'].forEach(function(t){ try { el.dispatchEvent(new Event(t, {bubbles:true})); } catch(e){} });
+        put.push(k);
+      });
+      reply({ nbh:'fill-applied', id: formId(), put: put, kept: kept, none: none, status: filled() });
     } else if (d.nbh === 'collect') {
       if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(true);   /* nbh-polish */
       reply({ nbh:'payload', id: formId(), title: formTitle(),

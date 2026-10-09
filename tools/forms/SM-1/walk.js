@@ -13,8 +13,11 @@
 window.NBH_WALK_INFO={file:'Self-monitoring sheet walkthrough',from:'from this sheet: its targets, pictures, names and rewards',what:'sheet'};
 const SW=1280,SH=720,PAUSE=.4;
 const CHOF={intro:'sheet',targets:'sheet',rows:'sheet',rows_iv:'sheet',honest:'rate',match_teacher:'match',match_points:'match',match_bonus:'match',teacher_rates:'match',
-  count:'points',goal:'points',midday:'points',store:'rewards',reward_plain:'rewards',bank:'rewards',contract:'contract',adults:'adults',outro:'adults'};
-const CHAPS=[['sheet','Your sheet'],['rate','Rating'],['match','Matching'],['points','Points'],['rewards','Rewards'],['contract','Contract'],['adults','For the adults']];
+  count:'points',goal:'points',midday:'points',store:'rewards',reward_plain:'rewards',bank:'rewards',contract:'contract',
+  mm_intro:'model',mm_rate:'model',mm_teacher:'model',mm_match:'model',mm_practice:'model',mm_checks:'model',adults:'adults',outro:'adults'};
+const CHAPS=[['sheet','Your sheet'],['rate','Rating'],['match','Matching'],['points','Points'],['rewards','Rewards'],['contract','Contract'],['model','Match the model'],['adults','For the adults']];
+/* v21.67 the Match the model chapter plays when the file holds a task with a name or a picture (tools/forms/SM-1/sm-mm.js) */
+const MM_IDS=['mm_intro','mm_rate','mm_teacher','mm_match','mm_practice','mm_checks'];
 /* the narration as written in walk-script.json, used only when walk-audio.js is not beside the form (its texts always win) */
 const FB=(function(){const o={};(window.SM_WALK_SCRIPT||[]).forEach(l=>{o[l.id]=l.text;});return o;})();
 /* ---------------- small helpers ---------------- */
@@ -105,7 +108,11 @@ function compose(D){
   const paper=div('smw-paper');const inner=div(so.className,so.innerHTML);inner.id='wkSheet';paper.appendChild(inner);Lpaper.appendChild(paper);
   inner.querySelectorAll('button,.extras,.tear,.sm2-fit').forEach(e=>e.remove());
   if(!S.sys)inner.innerHTML='<p style="font:600 28px var(--bk);padding:60px">Choose a sheet type on the System page, and the student’s sheet appears here.</p>';
-  const PW=1000;inner.style.width=PW+'px';const PH=Math.max(200,inner.offsetHeight);
+  const PW=1000;inner.style.width=PW+'px';
+  /* v21.67 the Match the model sheet, a second page to the right of the first (the camera goes to it in its chapter) */
+  const MMT=(typeof mmT==='function'&&S.mm&&S.mm.tasks&&S.mm.tasks.length)?mmT():null,mmOn=!!(MMT&&(MMT.task||MMT.lv.some(l=>l.img||l.icon)));
+  let mmEl=null;if(mmOn){inner.style.position='relative';mmEl=div('smw-mm',mmSheetHtml(MMT));mmEl.style.cssText='position:absolute;left:1090px;top:0;width:1000px';inner.appendChild(mmEl);paper.style.overflow='visible';}
+  const PH=Math.max(200,inner.offsetHeight);
   const prel=el=>{if(!el)return null;const r=el.getBoundingClientRect(),c=inner.getBoundingClientRect();const k=c.width/(inner.offsetWidth||1)||1;return{x:(r.left-c.left)/k,y:(r.top-c.top)/k,w:r.width/k,h:r.height/k};};
   const q=s=>inner.querySelector(s),qa=s=>[...inner.querySelectorAll(s)];
   const uni=rs=>{rs=rs.filter(Boolean);if(!rs.length)return null;const x=Math.min(...rs.map(r=>r.x)),y=Math.min(...rs.map(r=>r.y));return{x,y,w:Math.max(...rs.map(r=>r.x+r.w))-x,h:Math.max(...rs.map(r=>r.y+r.h))-y};};
@@ -221,6 +228,31 @@ function compose(D){
     card.tr.move(K.t+.3,K.t+.9,{o:1,dy:0},0,easeOut);const rows=[...card.el.querySelectorAll('.tp')].map(e=>sub(e,{o:.35,h:0}));
     const at=[['rate on your own',.12],['praise',.45],['never take',.68],['give the reward',.86]].map((a,i)=>Math.max(K.t+1+i*.5,K.at(a[0],a[1])-.2));
     rows.forEach((fx,i)=>{fx.tr.move(at[i],at[i]+.35,{o:1,h:1});fx.tr.move((at[i+1]||K.t+K.d)-.05,(at[i+1]||K.t+K.d)+.3,{h:0});});card.tr.move(K.t+K.d,K.t+K.d+.4,{o:0});return K.d+.4;};
+  /* v21.67 Match the model: the job and the pictures; the student circles the picture the work is most like, the teacher too; a
+     match earns the picture's points and the bonus; the practice; the checks thinning */
+  const MR=mmOn?{sheet:prel(mmEl.querySelector('.mm-sheet')),task:prel(mmEl.querySelector('.mm-task')),models:[...mmEl.querySelectorAll('.mm-model')],rule:prel(mmEl.querySelector('.mm-rule')),
+    row0:mmEl.querySelector('table.mm-grid tbody tr'),foot:prel(mmEl.querySelector('.mm-sfoot')),grid:prel(mmEl.querySelector('table.mm-grid'))}:null;
+  const mmCells=()=>MR&&MR.row0?[...MR.row0.querySelectorAll('td')]:[];
+  SC.mm_intro=K=>{camTo(K.t+.1,K.t+1.2,MR.sheet);glow(MR.task,Math.max(K.t+1.4,K.at('the job',.2)-.1),2,6);let t=Math.max(K.t+3.2,K.at('not yet',.45)-.2);
+    MR.models.forEach((el,i)=>glow(prel(el),t+i*.9,1.6,4));const tn=Math.max(t+MR.models.length*.9,K.at('number',.8)-.2);MR.models.forEach((el,i)=>glow(prel(el.querySelector('.mm-mnum')),tn+i*.3,1.4,4));
+    return Math.max(K.d,tn+MR.models.length*.3+1.4-K.t);};
+  SC.mm_rate=K=>{const tds=mmCells();camTo(K.t+.1,K.t+1,uni([prel(MR.models[0]),prel(MR.row0)]));const tc=Math.max(K.t+1.2,K.at('look at the pictures',.3)-.2);MR.models.forEach((el,i)=>glow(prel(el),tc+i*.5,1.2,4));
+    const circ=tds[1]?[...tds[1].querySelectorAll('.mm-circ')]:[];const best=circ[circ.length-1];const tr=Math.max(tc+MR.models.length*.5+.3,K.at('circle',.7)-.3);
+    if(best){const mk=ring(prel(best),tr,tr+.6,'#2b4a9b');draw(PS,mk,.8);penAway(PS,tr+.9);}return Math.max(K.d,tr+1.6-K.t);};
+  SC.mm_teacher=K=>{const tds=mmCells();const circ=tds[2]?[...tds[2].querySelectorAll('.mm-circ')]:[];const best=circ[circ.length-1];const tr=Math.max(K.t+1.2,K.at('circles',.6)-.3);
+    if(best){const mk=ring(prel(best),tr,tr+.6,'#b8322a');draw(PT,mk,.8);penAway(PT,tr+.9);}return Math.max(K.d,tr+1.6-K.t);};
+  SC.mm_match=K=>{const tds=mmCells();const t0=Math.max(K.t+.8,K.at('match',.2)-.1);if(tds[1]&&tds[2])glow(uni([prel(tds[1]),prel(tds[2])]),t0,1.8,4);
+    const tw=Math.max(t0+1.6,K.at('points',.4)-.2);const top=MMT.lv[0]||{pts:3};
+    if(tds[3]){const m1=write(prel(tds[3]),'✓ yes',tw,tw+.4,'#2b7a3b',13);draw(PT,m1,.6);}if(tds[4]){const m2=write(prel(tds[4]),String((+top.pts||0)+(+MMT.bonus||0)),tw+.7,tw+1.1,'#2b4a9b',18);draw(PS,m2,.6);}
+    const th=Math.max(tw+1.4,K.at('honest',.7)-.2);glow(MR.rule,th,2.4,6);penAway(PS,tw+1.6);penAway(PT,tw+1.2);return Math.max(K.d,th+2.4-K.t);};
+  SC.mm_practice=K=>{cam.move(K.t,K.t+.8,HOME);const card=mkFx('smw-card smw-prac','<h3>Rating practice</h3><div class="pr">'+MR.models.map(el=>'<div class="pm">'+((el.querySelector('.mm-mpic')||{}).innerHTML||'')+'<b>'+esc(((el.querySelector('.mm-mnum')||{}).textContent||'').trim())+'</b></div>').join('')+'</div><p class="sc"><b>9</b> of 10 right → ready to rate my own</p>',{x:290,y:50,w:700},{dy:16});
+    card.tr.move(K.t+.4,K.t+1,{o:1,dy:0},0,easeOut);const pms=[...card.el.querySelectorAll('.pm')].map(e=>sub(e,{o:.5,h:0}));const t1=Math.max(K.t+2,K.at('pick the model',.45)-.2);
+    pms.forEach((fx,i)=>{fx.tr.move(t1+i*.5,t1+i*.5+.3,{o:1,h:1});fx.tr.move(t1+i*.5+.9,t1+i*.5+1.2,{h:0});});
+    const sc=sub(card.el.querySelector('.sc'),{o:0});const t2=Math.max(t1+pms.length*.5+.5,K.at('nine',.75)-.2);sc.tr.move(t2,t2+.4,{o:1});card.tr.move(K.t+K.d+.1,K.t+K.d+.5,{o:0});return K.d+.5;};
+  SC.mm_checks=K=>{camTo(K.t,K.t+.8,uni([MR.grid,MR.foot]));glow(MR.foot,K.t+.9,2.2,6);
+    const card=mkFx('smw-card smw-checks','<h3>The teacher’s checks</h3><div class="st">'+['Every time','Every other time','One in three','A surprise'].map(x=>'<span>'+x+'</span>').join('<i>→</i>')+'</div>',{x:290,y:430,w:700},{dy:16});
+    card.tr.move(K.t+1,K.t+1.6,{o:1,dy:0},0,easeOut);const sp=[...card.el.querySelectorAll('.st span')].map(e=>sub(e,{o:.45,h:0}));const t1=Math.max(K.t+2.2,K.at('less often',.5)-.6);
+    sp.forEach((fx,i)=>{fx.tr.move(t1+i*.55,t1+i*.55+.3,{o:1,h:1});fx.tr.move(t1+i*.55+.8,t1+i*.55+1.1,{h:0});});card.tr.move(K.t+K.d+.1,K.t+K.d+.5,{o:0});return K.d+.5;};
   SC.outro=K=>{cam.move(K.t,K.t+1,HOME);const words=['Notice','Rate','Be honest','Count'];
     const box=mkFx('smw-words',words.map(w=>'<span>'+esc(w)+'</span>').join(''),{x:140,y:250,w:1000},{o:1});const ws=[...box.el.querySelectorAll('span')].map(e=>sub(e,{s:.6,dy:12}));
     const at=[['notice',.05],['rate',.15],['honest',.28],['count',.42]].map((a,i)=>Math.max(K.t+.5+i*.45,K.at(a[0],a[1])-.15));ws.forEach((fx,i)=>fx.tr.move(at[i],at[i]+.4,{o:1,s:1,dy:0},0,easeOut));
@@ -232,7 +264,8 @@ function compose(D){
     if(hasMatch&&S.sys==='match'){ids.push('match_teacher');ids.push(bin?'match_points':'match_bonus');}else if(hasMatch)ids.push('match_teacher');else if(teacherOnly)ids.push('teacher_rates');
     ids.push('count');if(m.p&&m.p.need!=null)ids.push('goal');if(smD().mid&&R.mid)ids.push('midday');
     if(smStore().length&&R.store)ids.push('store');else ids.push('reward_plain');if(smD().bank&&smStore().length)ids.push('bank');
-    if(S.meta.bc_task||S.meta.bc_rw)ids.push('contract');ids.push('adults');}
+    if(S.meta.bc_task||S.meta.bc_rw)ids.push('contract');if(mmOn)ids.push(...MM_IDS);ids.push('adults');}
+  else if(mmOn)ids.push(...MM_IDS);
   ids.push('outro');
   let T=0;const cues=[];
   ids.filter(id=>present(id)).forEach(id=>{const ln=line(id),low=ln.t.toLowerCase(),on=onsetFn(id,ln.t,ln.d),T0=T;
