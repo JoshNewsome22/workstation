@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack a workstation folder into one file: index.html with the 45 forms, the two PDF-tool
+"""Pack a workstation folder into one file: index.html with the 46 forms, the two PDF-tool
 scripts and the pictogram library inside it, gzip-compressed and base64-encoded in text blocks at the top of the body.
 
 The shared logo is kept once (every form carries it several times), the forms as JSON with the
@@ -9,7 +9,7 @@ these blocks when they are present and does nothing different when they are not.
 
 v21.43: every form carries the writing help (<script id="nbh-wording">, tools/blocks/patch-wording.py), the same
 240 KB in each. The packer's gzip cannot share it between forms (deflate looks back 32 KB, the copies are 300 KB and
-more apart), so 45 copies would cost about 4 MB here: like the logo, it is cut out of every form (@@NBH-WORDING@@)
+more apart), so 46 copies would cost about 4 MB here: like the logo, it is cut out of every form (@@NBH-WORDING@@)
 and kept once, in a block of its own, which index.html puts back as it opens a form. A form with none or with two
 copies, or with a copy unlike the others' (a form not re-patched), stops the build, and the packed forms are
 unpacked again, the writing help and the logo put back, and checked against the files before anything is written.
@@ -31,8 +31,8 @@ if re.search(r'<link rel="(manifest|apple-touch-icon)"', idx):
 logo = re.search(r'<img id="logo" alt="[^"]*" src="(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)"', idx).group(1)
 m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
 files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
-if len(files) != 45:
-    sys.exit(f'expected 45 forms in index.html, found {len(files)}')
+if len(files) != 46:
+    sys.exit(f'expected 46 forms in index.html, found {len(files)}')
 WTAG = '\n<script id="nbh-wording">'
 WHOLE = '@@NBH-WORDING@@'
 forms, files_in, wording = {}, {}, None

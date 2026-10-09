@@ -978,7 +978,8 @@ const FORMS=[
   ['CT-1','Caregiver Training','CT-1_Caregiver-Training_v2026-09.html'],
   ['TV-1','Training Video','TV-1_Training-Video_v2026-10.html'],
   ['HD-1','Home Data Sheets','HD-1_Home-Data-Sheets_v2026-10.html'],
-  ['EB-1','Essentials Brief for Limited-Contact Staff','EB-1_Essentials-Brief-Limited-Contact-Staff_v2026-09.html']]],
+  ['EB-1','Essentials Brief for Limited-Contact Staff','EB-1_Essentials-Brief-Limited-Contact-Staff_v2026-09.html'],
+  ['QS-1','Staff Quick Start','QS-1_Staff-Quick-Start_v2026-10.html']]],
  ['Specialist protocols',[
   ['DT-1','Delay Tolerance and Discounting','Delay-Tolerance-Protocol-Toolkit.html'],
   ['AD-1','Accumulated vs. Distributed Reinforcement','AD-1_Accumulated-vs-Distributed-Reinforcement_v2026-09.html'],
@@ -991,7 +992,7 @@ const ALL=FORMS.flatMap(g=>g[1]);
 const state={cur:null,ticked:{},status:{},frames:{},mismatch:{},savedAt:null,lastSig:'',pending:{},caseOrder:[],lastInput:0,warm:null};   /* v21.61 pending: the case's forms not loaded yet, as the file holds them */
 
 /* ================= the one-file edition =================
-   build-single.py packs the 45 forms, the PDF tools and a copy of this page
+   build-single.py packs the 46 forms, the PDF tools and a copy of this page
    into this one file, gzip-compressed and base64-encoded in text blocks at
    the end of the body. When those blocks are present the forms are opened
    from them, and a case is kept as one HTML file: this page, the same blocks,
@@ -2806,7 +2807,7 @@ const CASE_MAP=[
  ['Plan','Function first, then goals, then the components the case needs; contextual fit before anyone is trained.',
   [['TD-1','function-based treatment: antecedent, teaching, consequence, crisis'],['GB-1','goals and objectives: they carry forward'],['CF-1','contextual fit with the people who will run it'],['SV-1','social validity before (and again after)'],['SA-1','skill-acquisition data for the replacement skill'],['SM-1','self-monitoring, point systems, behavioral contract'],['SR-1','the schedule of reinforcement, designed and thinned'],['TE-1','token economy'],['GC-1','class-wide and group contingencies'],['VS-1','visual supports and communication boards'],['TK-1','the token board book: choices, targets, board and tokens, printed, laminated and bound'],['CR-1','crisis plan and debriefing, when the behavior is dangerous'],['DT-1','delay tolerance'],['AD-1','accumulated or distributed reinforcement'],['BC-1','behavioral contrast across settings'],['MS-1','medication side effects, when medication changes']]],
  ['Train and run it','Before the start date, then every week.',
-  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged']]],
+  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['QS-1','the staff quick start: four pages and a flow sheet for the adults running the plan'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged']]],
  ['Review and exit','At each review date, and whenever the graph says so.',
   [['PR-1','periodic review: continue, change, fade, exit'],['RM-1','relapse mitigation and inoculation before fading'],['SV-1','social validity after'],['DD-1','the graph decides']]]
 ];
@@ -2818,7 +2819,7 @@ function caseMapHtml(){
     '<li><b>The student’s details</b> on the packet bar go into every form as it opens, into empty fields only.</li>'+
     '<li><b>The target behaviors</b> defined on TB-1 go to every form that holds a behavior: the tables on DD-1, HD-1, FS-1, GB-1 and SM-1, and the behavior line on OB-1, ABC-1, MT-1, SA-1, SR-1, DA-1, CN-1, TD-1, TI-1 and the rest. Rename one on TB-1 and the others follow.</li>'+
     '<li><b>The function</b> concluded on FS-1 goes to every function field; <b>the goals</b> written on GB-1 to SA-1, SM-1, CN-1 and the aims on DD-1; <b>the reinforcer menu</b> ranked on PA-1 to SM-1, SA-1 and SR-1.</li>'+
-    '<li><b>The plan</b> on TD-1 (baseline, criteria, replacement) goes to GB-1 and EB-1; PR-1 reads the graph on DD-1 and ST-1 reads the integrity scores on TI-1 when they are open.</li>'+
+    '<li><b>The plan</b> on TD-1 (baseline, criteria, replacement) goes to GB-1, EB-1 and QS-1 (which also takes the profile, the function, the crisis stages, the goals and the menu); PR-1 reads the graph on DD-1 and ST-1 reads the integrity scores on TI-1 when they are open.</li>'+
     '<li>Everything above fills empty fields and empty tables only. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. The case travels in the packet and case files.</li>'+
     '<li><b>TE-1 and TK-1</b>, when linked: each compares with the other on a click and takes what you tick.</li></ul></div>'+
     '<div class="cm-box"><h3>The shortest defensible path</h3><p class="cm-path"><b>DM-1</b> → <b>IC-1</b> → <b>TB-1</b> → <b>IA-1</b> + <b>OB-1</b> or <b>ABC-1</b> (and <b>DD-1</b> baseline) → <b>FS-1</b> → <b>TD-1</b> → <b>GB-1</b> → <b>CF-1</b> → <b>ST-1</b> → <b>DD-1</b> + <b>TI-1</b> → <b>PR-1</b>. '+
@@ -2858,8 +2859,8 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
      '<p>Cases are still files: nothing typed into a form goes to the website, and a case moves between devices only when you move its file.</p>'):'')+
    (EMBED?fold('The one-file edition',
-     '<p>All 45 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it. Keep that file with the student’s records.</p>'):'')+
-   '<div class="note">Each of the 45 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
+     '<p>All 46 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it. Keep that file with the student’s records.</p>'):'')+
+   '<div class="note">Each of the 46 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
 });
 
 /* ================= bookmarking a saved packet =================
@@ -4737,7 +4738,7 @@ $('#readDoc').addEventListener('click',drOpen);
 </script>
 <script id="nbh-pwa">
 /* ================= the offline copy and the installed app (v21.43) =================
-   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 45 forms, the
+   sw.js, beside this page, keeps a copy of the workstation's own files on this device (the shell, the 46 forms, the
    picture library, the respondent page, the PDF tools, the manifest and icons), so everything opens without the
    internet; see the comment at the top of sw.js. This part of the page registers it, on https or on this computer
    (localhost) only, never from a drive and never in the one-file edition, which needs none. The chip beside Autosave

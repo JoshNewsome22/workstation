@@ -8289,3 +8289,36 @@ emergency, Physical management restrictions, Other precaution), the photo/media 
 plan that is outdated or missing. The case line shows them in amber ("Safety: Elopement, Water · No photo/media
 permission · Crisis plan outdated (DM-1)"), the folded line in short, and setting a photo while the permission is No
 says so once. Checked by `qa/photo-flags-test.js` (16 checks).
+
+### v21.69: Form QS-1, the Staff Quick Start
+
+The forty-sixth form, built from parts (`tools/forms/QS-1`). Four letter pages for the adults who run the plan
+every day, and a fifth, the flow sheet, when it is on: page one, who the student is, where things stand (tiles
+with a number each), the three to five things that matter most, why the behavior happens in three boxes, and
+health and safety; page two, a day with the student card by card, one routine spelled out, how to talk (chips
+and a say-this-not-that table), the skills already there, and "something new?"; page three, reading the moment,
+tier by tier what you see, do and say, a line every adult must know, and the consequence box when the team has
+one; page four, the do-and-don't non-negotiables, what is recorded every school day and how, the first weeks
+advancing on the data, who to call, and "one voice". Headings follow the pronouns and the name the staff use.
+
+Inside the workstation, or from a case file, the case fills the empty fields: DM-1's profile and precautions
+(the who box, the health line, a day card, a don't), TB-1's targets (the record table, the skills, the "may"
+box), FS-1's function (the "which gets" box), TD-1's plan (the five things, the day cards, the earliest sign and
+the response rows, a do and a don't), CR-1's stages (the tiers), GB-1's current levels and criteria (the tiles,
+the "next" lines of the first weeks, a skill), PA-1's menu (a who line), and the case BCBA as a call card. Every
+placed line is marked "from the plan, rewrite" until its words change; the Setup view counts what is still
+marked, lists the technical wording left on the pages (EB-1's list), and says when a page runs over by about how
+many lines. From the case on the toolbar picks items into fields already in use. The form never translates the
+plan into plain language: that is the BCBA's judgement, and the mark is the reminder.
+
+The flow sheet is drawn from the pages, never kept by hand: "what do you see?" at the top, then three branches
+(working or just flickering, with the routines and the earliest sign; the request, honored; the behavior tier by
+tier, ending in the call and the crisis plan, Form CR-1), and the recovery row under all three. Where it and the
+plan differ, the plan governs, and the page says so with the date it was drawn.
+
+Registered in the index (Implementation, after EB-1, and on the case map), in the builders (46 forms; the RPS
+build's counts), the gate's wording and the README. Checked by `qa/qs1-test.js` (15 checks: the simulation builds
+five pages that each fit one letter page by the form's own measure and print as five PDF pages; the jargon list;
+the flow sheet off; Save data and Open data with the marks; inside the shell the case fills the fields, each
+marked, a rewrite takes the mark off, the packet bar's student reaches Setup, no page errors). Not yet taken from
+the case: the day-by-day counts on DD-1 (the tiles come from GB-1's current levels until DD-1 exposes its record).
