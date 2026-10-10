@@ -570,6 +570,8 @@ body.dd-week-on #tab-data > :not(#ddWeekWrap){display:none!important}
 .dd-week .wk-next{width:100%;font-family:inherit;font-size:14px;box-sizing:border-box}
 .dd-week .wk-next-p{display:none}
 @media print{
+  .dd-pack-blank{break-before:page;page-break-before:always}
+  .dd-pack .wk-next-p{display:block}
   #ddInc:not(.print-on){display:none!important}
   #ddInc{break-inside:auto;margin-top:8px;padding-top:6px}
   #ddInc .inc-hd .hint{display:none}
@@ -7950,6 +7952,75 @@ function ddAfterData(){ddBlankBar();ddIncRender();if(ddWeek)ddWeekRender();}
 /* a record replaced (a file opened, the simulation loaded) leaves the blank sheet and the summary */
 {const drop=nbhDdDrop;nbhDdDrop=function(){ddBlank=null;ddWeekOff();return drop.apply(this,arguments);};}
 ddClean();ddAfterData();
+</script>
+<script>
+/* ===================================================================================================
+   v21.75 more of the record for the case: each behavior's baseline and current condition, whether the aim has
+   held for the days the criterion asks, the conditions, the incidents and the latest week's summary; and Form TI-1's
+   observations marked on the graphs and named in the week summary.
+   =================================================================================================== */
+"use strict";
+const ddStrip=h=>String(h==null?"":h).replace(/<[^>]*>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&[lr]squo;/g,"’").replace(/\s+/g," ").trim();
+const dd2=v=>v==null?null:Math.round(v*100)/100;
+function ddCondStats(b,rows){const v=rows.map(r=>plotValue(r,b)).filter(x=>x!==null);if(!v.length)return null;const t=v.reduce((a,c)=>a+c,0);return {days:v.length,mean:dd2(t/v.length),total:dd2(t)};}
+function ddAimNow(b,rows){const aim=num(b.aim);if(aim===null)return null;const need=critNeed(b);let run=0;
+  rows.forEach(r=>{const v=plotValue(r,b);if(v===null)return;const ok=b.direction==="decrease"?v<=aim:v>=aim;run=ok?run+1:0;});
+  return {aim,need,run,met:run>=need};}
+{const out0=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out0();}catch(e){o=null;}
+  try{const all=sortedRows(),conds=buildConditions(),inc=(S.incidents||[]);
+    if(!o&&!inc.length)return o;
+    if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};
+    const d=o.data,rowsOf=c=>c.rowIdx.map(i=>all[i]).filter(r=>r&&r.date);
+    d.conds=conds.map(c=>{const r=rowsOf(c);return {name:c.name,from:r.length?r[0].date:"",to:r.length?r[r.length-1].date:"",days:r.filter(x=>S.behaviors.some(b=>plotValue(x,b)!==null)).length};});
+    const first=conds[0]?rowsOf(conds[0]):[],last=conds.length?rowsOf(conds[conds.length-1]):[];
+    const byName={};orderedBehaviors().forEach(b=>{byName[b.name||""]=b;});
+    d.behaviors.forEach(x=>{const b=byName[x.name];if(!b)return;
+      x.base=conds.length>1?ddCondStats(b,first):null;x.baseName=conds.length>1?conds[0].name:"";
+      x.cur=ddCondStats(b,last);x.curName=conds.length?conds[conds.length-1].name:"";
+      const a=ddAimNow(b,last);x.aim=a?a.aim:null;x.need=a?a.need:null;x.run=a?a.run:null;x.aimMet=!!(a&&a.met);});
+    d.incidentList=ddIncSorted().slice(-200).map(i=>({date:i.date,time:i.time,beh:ddIncName(i),tier:i.tier,before:i.before,what:i.what,words:i.words,did:i.did,ended:i.ended,parent:i.parent,parentWhen:i.parentWhen,bcba:i.bcba,by:i.by}));
+    d.incidents=inc.length;
+    /* the latest week with data, as the week summary gives it */
+    const mon=ddWeekDefault(),sun=ddAddDays(mon,6),pm=ddAddDays(mon,-7),ps=ddAddDays(mon,-1);
+    const wk=all.filter(r=>r.date>=mon&&r.date<=sun),lw=all.filter(r=>r.date>=pm&&r.date<=ps);
+    d.week={mon,days:wk.filter(r=>S.behaviors.some(b=>plotValue(r,b)!==null)).length,
+      rows:orderedBehaviors().map(b=>{const c=ddStat(b,wk),a=ddStat(b,lw),ch=ddChange(b,a,c);return {name:b.name||"",kind:b.kind||"target",now:ddStrip(ddStatTxt(b,c)),last:ddStrip(ddStatTxt(b,a)),change:ch.t,good:ch.k};}),
+      incidents:inc.filter(i=>i.date>=mon&&i.date<=sun).length,phases:wk.filter(r=>r.phaseType&&r.phaseType!=="none").map(r=>({date:r.date,type:r.phaseType,label:plainLabel(r.phaseLabel||"")})),
+      notes:wk.filter(r=>ddT(r.notes)).map(r=>({date:r.date,text:ddT(r.notes)})),decided:(S.weekly||{})[mon]||""};
+    return o;}catch(e){return o;}};}
+
+/* ---- Form TI-1's observations on the graph: a teal tick at the day of each one, with its integrity ---- */
+function ddTiObs(){const f=ddCaseFacts&&ddCaseFacts.integrity;return f&&Array.isArray(f.obs)?f.obs.filter(x=>x&&ddIsoOk(x.date)&&typeof x.pct==="number"):[];}
+function ddTiMarks(F,rows){const L=ddTiObs();if(!L.length)return "";const ds=rows.map(r=>r.date||"");let out="";const y=F.top;
+  L.forEach(o=>{let i=ds.indexOf(o.date);if(i<0){i=ds.findIndex(d=>d&&d>o.date);if(i<0)return;i=Math.max(0,i-0.5);}if(i>F.xEnd)return;
+    const x=F.X(i).toFixed(1),lab="TI "+Math.round(o.pct)+"%";
+    out+=`<g class="dd-ti"><line x1="${x}" y1="${y}" x2="${x}" y2="${y+9}" stroke="#0E5C63" stroke-width="2"/><rect x="${(+x-19).toFixed(1)}" y="${y+10}" width="38" height="12" rx="2" fill="#fff" fill-opacity=".85"/><text x="${x}" y="${y+19.5}" font-size="9.5" font-weight="600" fill="#0E5C63" text-anchor="middle">${esc(lab)}<\/text><title>Form TI-1: ${esc(Math.round(o.pct)+"% integrity on "+shortDay(o.date)+(o.type?" ("+o.type.toLowerCase()+")":""))}<\/title><\/g>`;});
+  return out;}
+{const fr0=ddFrame;ddFrame=function(rows){const F=fr0.apply(this,arguments);try{F.condLines+=ddTiMarks(F,rows);}catch(e){}return F;};}
+/* the week summary names the observations of the week */
+{const wr0=ddWeekRender;ddWeekRender=function(){wr0.apply(this,arguments);try{if(!ddWeek)return;const sun=ddAddDays(ddWeek,6),L=ddTiObs().filter(o=>o.date>=ddWeek&&o.date<=sun);
+  const h=[...document.querySelectorAll("#ddWeekWrap h4")].find(x=>/^Point sheet/.test(x.textContent));if(!h)return;
+  const box=document.createElement("div");box.className="wk-ti";box.innerHTML=`<h4>Treatment integrity (Form TI-1)</h4>`+(L.length?`<p>${L.map(o=>`<b>${esc(Math.round(o.pct))}%</b> on ${esc(shortDay(o.date))}${o.type?` (${esc(o.type.toLowerCase())})`:""}`).join(" · ")}</p>`:`<p class="hint">${ddTiObs().length?"No TI-1 observation this week.":"No TI-1 observations in the case. Open Form TI-1 in the workstation to bring them in."}</p>`);
+  h.parentNode.insertBefore(box,h);}catch(e){}};}
+/* a new reading of the case redraws the graphs (the ticks follow TI-1) */
+{const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const was=JSON.stringify(ddTiObs());const r=fi0.apply(this,arguments);try{if(JSON.stringify(ddTiObs())!==was&&typeof renderResults==="function")renderResults();}catch(e){}return r;};}
+</script>
+<script id="dd-weekpack">
+/* v21.75 the end of the week, for the workstation's packet: asked for its week ({nbh:'collect', week:true}), the form gives
+   the week summary of the latest week with data and, on a page of its own, next week's blank sheet, instead of the tabs
+   it prints otherwise. What is on the screen is put back as it was. This listener runs before the bridge's own. */
+"use strict";
+let ddPackWeek=false;
+window.addEventListener("message",e=>{const d=e.data;if(d&&typeof d==="object"&&d.nbh==="collect"&&d.week===true){ddPackWeek=true;setTimeout(()=>{ddPackWeek=false;},0);}});
+function ddWeekPack(){const keepWeek=ddWeek,keepBlank=ddBlank,head=document.querySelector(".nbh-print-head");
+  ddWeekOn(ddWeekDefault());const w=document.getElementById("ddWeekWrap").cloneNode(true);w.removeAttribute("hidden");w.removeAttribute("id");
+  w.querySelectorAll(".wk-bar,.wk-next").forEach(x=>x.remove());ddWeekOff();
+  ddBlankOn(ddWeekOfDefault(),5);const panel=document.getElementById("sheetTop").closest(".panel");const b=panel.cloneNode(true);
+  b.querySelectorAll("h2,p.hint,.inline-controls,#ivSettings,#pasteNote,#ddBlankNote,#ddInc,.noprint,.no-print").forEach(x=>x.remove());
+  ddBlank=keepBlank;if(keepWeek)ddWeekOn(keepWeek);else renderData();
+  const box=document.createElement("div");box.className="dd-pack";box.appendChild(w);const pg=document.createElement("div");pg.className="dd-pack-blank";pg.appendChild(b);box.appendChild(pg);
+  return [head,box];}
+{const pn0=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(ddPackWeek){try{return ddWeekPack();}catch(e){}}return pn0?pn0():[];};}
 </script>
 
 <script>

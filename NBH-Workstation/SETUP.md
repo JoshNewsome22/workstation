@@ -8414,3 +8414,40 @@ daily and interval sheets now sits where the table puts it; the screen keeps the
   (Mac), the page count, the student's name, the photo, saving a PDF on the iPad.
 
 Checked by `qa/v2174-test.js` (27 checks).
+
+### v21.75: the record used further, the week in one print, Today and the hand-over check
+
+- **Form PR-1 from the case.** Inside the workstation, with Form DD-1 or Form TI-1 in the case, a bar above the review
+  runs PR-1's own imports in one tap (*Fill question 1 from TI-1*, *Fill question 2 from DD-1*); each still asks before
+  it changes an entry already made. A new box, *Also in the review period*, is written from the case over DD-1's
+  current condition: the incidents logged (by tier, and how many home was told about), the behaviors at their aim for
+  the days the criterion asks, Form SM-1's point sheet and Form TI-1's observations. It follows the case until it is
+  rewritten.
+- **DD-1's incidents on the scatterplot and on ABC-1.** *Place DD-1's incidents* on the scatterplot marks each
+  incident of the behavior on the sheet in its interval and on its day (one mark more; in count mode one more on the
+  count), once. *Add DD-1's incidents* on ABC-1 adds each as a narrative-only incident (the behavior under Other; the
+  before, what happened, the words, what adults did and how it ended in the narrative), once. As before, narrative-only
+  incidents are kept and listed but not counted in the conditional probabilities until they are coded with Edit.
+- **Form CN-1 starts from the week summary.** A note being written (undated, or dated in the week or after) takes,
+  into its empty fields, the data reviewed (DD-1's week and the latest TI-1), the first reduction target's level
+  against its aim, what the week looked like against the last (each behavior, the incidents, the phase changes, what
+  the team decided) and the latest integrity observation. *Start from the week summary* does it for any note.
+- **Form TI-1 on DD-1's graphs.** TI-1 now shares each scored observation's date, type and integrity. Form DD-1 ticks
+  them along the top of its graphs ("TI 86%"), names the week's in the week summary, and the line under the bar says
+  "Integrity: 4 observations".
+- **Form FS-1 quotes DD-1's baseline.** A target's *level during the assessment*, when empty, is the mean of DD-1's
+  first condition for the behavior of that name ("10 a day (mean of 6 school days of baseline, 9/14 to 9/21; Form
+  DD-1)"). A level typed is kept.
+- **Today.** *Today* on the bar lists what needs you in the case: what is due, incidents home has not been told about,
+  no data on DD-1 for three school days, a behavior at its aim (time to raise the criterion), no TI-1 check for two
+  weeks or the last one under the criterion; each with the form to open.
+- **The end of the week in one print.** From Today, or *End of the week* in the command box: one print of DD-1's week
+  summary for the latest week with data, next week's blank sheet on a page of its own, and Form SM-1's sheets, under
+  their own cover. The forms are put back as they were.
+- **The hand-over check.** From Today, or *Hand-over check* in the command box: what a case handed on should hold and
+  does not (no consent date on Form IC-1, no target behaviors or one without a definition, no goals, a plan with no
+  crisis plan or one DM-1 records as outdated, the photo kept without photo permission, incidents home has not been
+  told about). *Close case* lists the same before it saves and closes (*Save and close anyway*). Form IC-1 now shares its
+  consent and signature dates for it.
+
+Checked by `qa/v2175-test.js` (19 checks).

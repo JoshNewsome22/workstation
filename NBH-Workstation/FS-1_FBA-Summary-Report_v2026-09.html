@@ -3588,6 +3588,24 @@ document.addEventListener('click',function(e){
       sp.insertBefore(s,nm?nm.nextSibling:sp.firstChild);}});
 });
 
+/* v21.75 the level during the assessment, from Form DD-1: a target with that field empty takes the mean of the days in
+   DD-1's first condition (its baseline; the whole record when it has one condition) for the behavior of the same name.
+   A level typed here is kept; one written from DD-1 before follows DD-1 (S.baseFrom keeps what was written). */
+const nbhFsK=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+const nbhFsMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
+function nbhFsBase(f){const d=f&&f.data;if(!d)return 0;let n=0;if(!S.baseFrom||typeof S.baseFrom!=='object')S.baseFrom={};
+  const c0=(d.conds||[])[0],whole=(d.conds||[]).length<2;
+  S.beh.forEach((b,i)=>{if(!b.lab)return;const x=(d.behaviors||[]).find(y=>nbhFsK(y.name)===nbhFsK(b.lab));if(!x)return;
+    const st=whole?(x.days?{days:x.days,mean:x.mean}:null):x.base;if(!st||!st.days)return;
+    const pc=x.two||/%/.test(x.unit||''),lvl=(Math.round(st.mean*100)/100)+(pc?'%':x.measure==='count'?' a day':' '+(x.unit||''));
+    const span=whole?nbhFsMd(d.from)+' to '+nbhFsMd(d.to):(c0&&c0.from?nbhFsMd(c0.from)+' to '+nbhFsMd(c0.to):'');
+    const v=lvl+' (mean of '+st.days+' school day'+(st.days===1?'':'s')+' of '+(whole?'data':(x.baseName||'baseline').toLowerCase())+(span?', '+span:'')+'; Form DD-1)';
+    const k=nbhFsK(b.lab),cur=String(b.base||'').trim();
+    if(cur&&cur!==S.baseFrom[k])return;if(cur===v)return;b.base=v;S.baseFrom[k]=v;n++;});
+  return n;}
+{const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=fi0.apply(this,arguments)||{filled:0};const k=nbhFsBase(f);
+  if(k){renderAll();return {filled:(r.filled||0)+k,note:[r.note,'the levels during the assessment from Form DD-1'].filter(Boolean).join('; ')};}return r;};}
+
 /* ---------- v21.33 (B) Copy for the BIP ----------
    The plan's text, composed from the record in the shape the district's BIP document takes (uppercase
    section headings, "Label: value" lines, "- item" lists, a blank line between sections, empty fields left
