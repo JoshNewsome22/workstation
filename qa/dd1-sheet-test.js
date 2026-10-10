@@ -53,6 +53,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const r={photo:!!img&&getComputedStyle(img).display!=='none'&&Math.round(img.getBoundingClientRect().width),below:!!d&&d.getBoundingClientRect().top>=t.getBoundingClientRect().bottom,cards:document.querySelectorAll('#sheetDefs .sd-card').length,inHead:t.querySelectorAll('.defncell').length};
     S.meta.photo=was;renderData();applyColW(true);return r;});
   ok('printed: the student\u2019s photo stays on the student line and the definitions print below the sheet',kp.photo===50&&kp.below&&kp.cards===6&&kp.inHead===0,kp);
+  /* v21.73 on paper nothing in the sheet is sticky: Safari printed the sticky units row and Date column where a scrolled screen had them */
+  const st=await page.evaluate(()=>{const t=document.getElementById('dataTable');const c=[t.tHead.rows[2].cells[0],t.tHead.rows[0].cells[0],t.tBodies[0].rows[0].cells[0]];return c.map(x=>getComputedStyle(x).position);});
+  ok('printed: the units row and the Date column are not sticky on paper',st.every(v=>v==='static'),st);
   const por=await page.evaluate(()=>{S.settings.orient='portrait';applyColW(true);const t=document.getElementById('dataTable');const w=parseInt(t.style.width,10);S.settings.orient='landscape';applyColW(true);return {w,tr:t.style.transform};});
   ok('printed in portrait: the table fits the page',por.w<=700||!!por.tr,por);
   await page.emulateMedia({media:'screen'});

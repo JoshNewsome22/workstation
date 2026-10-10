@@ -8365,3 +8365,11 @@ name and details on the left, **Data 10/13 – 10/23** and the observation windo
 title are left off when the Daily data tab prints (the Graphs tab keeps its print head), the "Add client details" hint
 stays on screen, and "Obs. min: the minutes observed that day" moves into the key under the sheet. A landscape page
 with eight behaviors holds 20 rows instead of 17. Checked by `qa/dd1-sheet-test.js` (one new check).
+
+### v21.73: Form DD-1's units row stays in the heading on paper
+
+On screen the units row ("(total per day)") and the Date column stay in view as the sheet scrolls (they are
+`position: sticky`). Safari on the iPad printed them where the screen had them stuck, so a sheet printed from a
+scrolled page had its units row inside the first day's row and its Date heading moved. On paper every cell of the
+daily and interval sheets now sits where the table puts it; the screen keeps them in view. Checked by
+`qa/dd1-sheet-test.js` (one new check).
