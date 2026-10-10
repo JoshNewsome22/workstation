@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""v21.43 Put the installed-app save (tools/blocks/nbh-pwa-save.js) into the 44 forms and the shell, as ONE
+"""v21.43 Put the installed-app save (tools/blocks/nbh-pwa-save.js) into the forms and the shell, as ONE
 <script id="nbh-pwa-save"> on the line after each page's <title>, the script's text copied byte for byte. Like
 patch-wording.py it REPLACES an existing copy every time, so run it again whenever nbh-pwa-save.js changes, or on a tree
 whose forms were rebuilt or merged; it refuses a page that already holds more than one copy, and never adds a second.
 Every page is worked out before any is written, so a refusal leaves the folder as it was.
 
-The pages are index.html and the 44 forms its FORMS list names (respond.html, the informants' page, is left alone).
+The pages are index.html and the forms its FORMS list names (respond.html, the informants' page, is left alone).
 Nothing else in a page changes. The block is a script in the head that wraps nothing and stops at its first test unless
 the page runs as the workstation installed on an iPad or iPhone (see the comment at its top), so a page in a browser tab,
 on paper or inside the one-file edition behaves exactly as before.
@@ -48,8 +48,10 @@ def pages(folder):
     if not m:
         fail('index.html has no FORMS list')
     files = re.findall(r"\['[A-Z]+-1','[^']*','([^']+\.html)'\]", m.group(1))
-    if len(files) != 44:
-        fail('expected 44 forms in index.html, found %d' % len(files))
+    # v21.78 as many forms as the FORMS list names (it was a fixed 44; there are 46 now)
+    n = len(re.findall(r"\['[A-Z0-9]+-\d+',", m.group(1)))
+    if not files or len(files) != n:
+        fail('expected %d forms in index.html, found %d' % (n, len(files)))
     missing = [f for f in files if not os.path.isfile(os.path.join(folder, f))]
     if missing:
         fail('forms named in index.html but not in the folder: ' + ', '.join(missing))

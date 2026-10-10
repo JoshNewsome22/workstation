@@ -586,7 +586,13 @@ function voHeardLine(){const l=$('#tpHeard');if(!l)return;const on=(TP.run||VO.t
    first chosen, each part checked against its SHA-256, kept on the device (Cache Storage), and run in a worker */
 const ASR_CACHE='tv1-voice-model';
 async function sha(b){const h=await crypto.subtle.digest('SHA-256',b);return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function asrFiles(prog){const base='nbh-asr/',man=await (await fetch(base+'manifest.json',{cache:'no-cache'})).json(),cache=await caches.open(ASR_CACHE),all=new Uint8Array(man.size);let o=0;
+/* (v21.78) offline too: the manifest and the three scripts are kept in the same cache as the parts, taken from the website
+   when it answers and from the cache when it does not; the worker runs from them (blob URLs), so nothing is fetched offline */
+async function asrKept(cache,name,type){const base='nbh-asr/';let t=null;try{const r=await fetch(base+name,{cache:'no-cache'});if(r.ok){t=await r.text();try{await cache.put(base+name,new Response(t,{headers:{'Content-Type':type}}));}catch(e){}}}catch(e){t=null;}
+  if(t==null){const r=await cache.match(base+name);if(r)t=await r.text();}if(t==null)throw new Error(name+' is not on this device yet (go online once)');return t;}
+async function asrLibs(){const cache=await caches.open(ASR_CACHE),js='text/javascript',url=t=>URL.createObjectURL(new Blob([t],{type:js}));
+  const [w,a,b]=await Promise.all(['asr-worker.js','sherpa-onnx-asr.js','sherpa-onnx-wasm-main-asr.js'].map(n=>asrKept(cache,n,js)));return {worker:url(w),libs:[url(a),url(b)]};}
+async function asrFiles(prog){const base='nbh-asr/',cache=await caches.open(ASR_CACHE),man=JSON.parse(await asrKept(cache,'manifest.json','application/json')),all=new Uint8Array(man.size);let o=0;
   for(const p of man.parts){let b=null;try{const r=await cache.match(base+p.name);if(r){b=await r.arrayBuffer();if(b.byteLength!==p.size||await sha(b)!==p.sha256)b=null;}}catch(e){b=null;}
     if(!b){const res=await fetch(base+p.name,{cache:'no-store'});if(!res.ok)throw new Error('part '+p.name+': '+res.status);b=await res.arrayBuffer();if(b.byteLength!==p.size||await sha(b)!==p.sha256)throw new Error('part '+p.name+' did not arrive whole');try{await cache.put(base+p.name,new Response(b.slice(0)));}catch(e){}}
     all.set(new Uint8Array(b),o);o+=b.byteLength;prog(o/man.size);}
@@ -598,8 +604,8 @@ async function asrEnsure(){if(VO.ready||VO.loading){if(VO.ready)VO.mode='follow'
   VO.loading=true;voMeter();const m=$('#tpMic span');
   voSay('Getting the speech recogniser: until it is ready, the script scrolls at the speed set while you speak.');
   try{const f=await asrFiles(p=>{if(m)m.textContent='Getting the recogniser: '+Math.round(p*100)+'%';voSay('Getting the speech recogniser ('+Math.round(p*100)+'%): until it is ready, the script scrolls at the speed set while you speak.');});if(m)m.textContent='Starting the recogniser…';voSay('Starting the speech recogniser: a few seconds more.');
-    VO.w=new Worker('nbh-asr/asr-worker.js');VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter(true);voSay('');voHeardLine();}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
-    VO.w.postMessage({t:'init',wasm:f.wasm,data:f.data},[f.wasm,f.data]);}
+    const L=await asrLibs();VO.w=new Worker(L.worker);VO.w.onmessage=e=>{const d=e.data||{};if(d.t==='ready'){VO.ready=true;VO.loading=false;voMeter(true);voSay('');voHeardLine();}else if(d.t==='res'){VO.inflight=Math.max(0,VO.inflight-1);voHeard(d.text,d.end);}else if(d.t==='error'){VO.loading=false;voSay('The recogniser did not start ('+d.m+'): your voice paces the script instead.');VO.mode='speak';voMeter();}};
+    VO.w.postMessage({t:'init',wasm:f.wasm,data:f.data,libs:L.libs},[f.wasm,f.data]);}
   catch(err){VO.loading=false;voSay('The recogniser could not be fetched ('+String(err.message||err)+'): your voice paces the script instead.');VO.mode='speak';voMeter();}}
 $('#asrDrop').addEventListener('click',async()=>{if(!window.caches){nbhUI.toast('No speech recogniser is kept here.',{kind:'ok'});return;}const had=await asrHave();
   if(had&&!(await nbhUI.confirm('Remove the speech recogniser from this device?\nFollow my words downloads it again (about 57 MB) when next chosen.',{ok:'Remove',danger:true})))return;

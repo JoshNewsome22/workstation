@@ -1,4 +1,5 @@
-/* master print of all 33 forms from a fresh case file built from every simulation */
+/* master print of every form (33 when it was written; all that index.html names now) from a fresh case file built from every
+   simulation. v21.78: the student is named first (Save case asks about a case with no student name), simulated */
 const L=require(__dirname+'/lib.js');
 const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
 (async()=>{
@@ -15,6 +16,7 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   }
   await L.sleep(2000);
   const cf=L.path.join(DIR,'case.json');
+  await page.fill('#pClient','SIMULATED – Sample Student');await page.dispatchEvent('#pClient','input');
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.click('#saveCase')]); await dl.saveAs(cf);
   await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   await page.setInputFiles('#caseFile',cf);
