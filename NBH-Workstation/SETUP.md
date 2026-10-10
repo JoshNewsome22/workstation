@@ -8341,3 +8341,18 @@ the case: the day-by-day counts on DD-1 (the tiles come from GB-1's current leve
 - **Weekdays only** (beside Add days, on by default, saved with the file): Add days adds school days, skipping Saturday and
   Sunday, so ten days from a Tuesday run to the second Monday.
 - Checked by `qa/dd1-sheet-test.js` (one new check: the percentages, Behaviors only, the weekday, the weekend skipped).
+
+### v21.71: placing the student's photo, and the photo on Form DD-1's sheet
+
+- **Place the photo.** A picture chosen for the bar now opens *Place the photo*: it fills a square under a circle; drag it
+  (or use the arrow keys) to move it, and the Size slider makes it up to four times bigger. *Use this photo* keeps what is
+  in the square (240 px, as before); *Cancel* keeps the photo there was. A tall picture starts a little below its top,
+  where a face usually is, instead of at its middle, which is what cut heads off before.
+- **Adjust position** (in the photo dialog, beside Change the photo) opens the picture again. For the rest of the session
+  it is the whole picture as chosen (kept in memory only, at most 1000 px); after the case is reopened it is the kept
+  240 px square, which can still be moved and enlarged. A photo placed before v21.71 is best chosen again.
+- **Form DD-1's sheet.** DD-1 holding no photo of its own takes the case's photo, shows it round beside the student's
+  name above the data sheet (56 px on screen, 50 px printed), follows a new one and drops it when the case's is taken
+  off. A photo chosen on DD-1's Client & behaviors tab stays DD-1's own. Every open form now hears of a new photo at
+  once (it was Form IA-1 only).
+- Checked by `qa/photo-crop-test.js` (8 checks) and `qa/photo-flags-test.js` (updated for the placing step).

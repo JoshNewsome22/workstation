@@ -26,7 +26,7 @@ const OUT=__dirname+'/out/photo-flags/';fs.mkdirSync(OUT,{recursive:true});
   ok('1 with no photo the circle shows a camera, then the student’s initials once a name is typed (Last, First and First Last alike)',c0.cam&&c0.img&&c0.photo===''&&c1==='MR'&&c2==='MR',{c0,c1,c2});
   /* 2. a picture: a 900 x 600 drawing, brought to 240 square */
   const png=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=900;c.height=600;const g=c.getContext('2d');g.fillStyle='#3a7bd5';g.fillRect(0,0,900,600);g.fillStyle='#f6c343';g.beginPath();g.arc(450,300,200,0,Math.PI*2);g.fill();return c.toDataURL('image/png');});
-  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(600);
+  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(600);await page.waitForSelector('#phUse',{timeout:5000});await page.evaluate(()=>document.querySelector('#phUse').click());await sleep(400);
   const p1=await page.evaluate(async()=>{const v=state.photo;const im=new Image();im.src=v;await im.decode();return {kind:v.slice(0,23),len:v.length,w:im.naturalWidth,h:im.naturalHeight,shown:!document.querySelector('#pPhotoImg').hidden&&document.querySelector('#pPhotoImg').src===v,ini:document.querySelector('#pPhotoIni').hidden,inPacket:packet().photo===v};});
   ok('2a the picture is brought to 240 px square JPEG, about 15 KB, shown on the bar in place of the initials, and is in the packet',p1.kind==='data:image/jpeg;base64,'&&p1.len<80000&&p1.w===240&&p1.h===240&&p1.shown&&p1.ini&&p1.inPacket,p1);
   await page.evaluate(()=>foldBar(true));await sleep(200);
@@ -59,7 +59,7 @@ const OUT=__dirname+'/out/photo-flags/';fs.mkdirSync(OUT,{recursive:true});
   ok('3d Close case takes the photo off with the details',p7.photo===''&&p7.client===''&&p7.img,p7);
   /* 4. Form IA-1's respondent pages, and the dialog */
   await page.fill('#pClient','Mateo Rivera');await page.evaluate(()=>document.querySelector('#pClient').dispatchEvent(new Event('input',{bubbles:true})));
-  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(600);
+  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(600);await page.waitForSelector('#phUse',{timeout:5000});await page.evaluate(()=>document.querySelector('#phUse').click());await sleep(400);
   await page.evaluate(()=>openForm('IA-1',true));await settle('IA-1');await sleep(1500);
   const ia=await page.evaluate(()=>{const w=state.frames['IA-1'].contentWindow;const v=w.document.querySelector('[name="rp.photo"]').value;return {same:v===state.photo,len:v.length};});
   ok('4a Form IA-1 takes the photo for its respondent pages while it holds none of its own',ia.same&&ia.len>1000,ia);
@@ -84,7 +84,7 @@ const OUT=__dirname+'/out/photo-flags/';fs.mkdirSync(OUT,{recursive:true});
   await page.evaluate(()=>foldBar(true));await sleep(200);
   const f2=await page.evaluate(()=>document.querySelector('#sumCase').textContent);await page.evaluate(()=>foldBar(false));
   ok('5b the folded line says so too',/safety: elopement, pica, water/.test(f2)&&/no photo permission/.test(f2)&&/crisis plan outdated/.test(f2),f2);
-  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(700);
+  await page.setInputFiles('#pPhotoFile',{name:'student.png',mimeType:'image/png',buffer:Buffer.from(png.split(',')[1],'base64')});await sleep(700);await page.waitForSelector('#phUse',{timeout:5000});await page.evaluate(()=>document.querySelector('#phUse').click());await sleep(400);
   const f3=await page.evaluate(()=>({photo:!!state.photo,toast:([...document.querySelectorAll('#wsToasts .ws-toast')].pop()||{}).textContent||''}));
   ok('5c setting a photo while Form DM-1 says the permission is No says so, and keeps the photo',f3.photo&&/photo\/media permission on file is No/.test(f3.toast),f3);
   await page.evaluate(()=>{const w=state.frames['DM-1'].contentWindow,d=w.document;['sf.elope','sf.water','sf.pica'].forEach(n=>{const e=d.querySelector('[name="'+n+'"]');e.checked=false;e.dispatchEvent(new Event('change',{bubbles:true}));});const e=d.querySelector('[name="s.photo"]');e.value='Yes';e.dispatchEvent(new Event('change',{bubbles:true}));const c=d.querySelector('[name="p.crisis"]');c.value='Yes, current';c.dispatchEvent(new Event('change',{bubbles:true}));});
