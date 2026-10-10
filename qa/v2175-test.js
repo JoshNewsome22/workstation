@@ -98,6 +98,39 @@ const FACTS={data:{from:'2026-09-14',to:'2026-10-09',days:20,src:'DD-1',
     ab.n1===ab.n0+2&&ab.n2===ab.n1&&ab.mode==='open'&&ab.beh==='Physical aggression'&&/^Before: Math worksheet handed out\. What happened: Hit the aide on the arm\. Said: “I am not doing this”/.test(ab.narr),ab);
   await page.close();
 
+  /* ---------- 7. the audit of the older forms ---------- */
+  const TB={behaviors:[{label:'Physical aggression',def:'Hitting or kicking staff',ex:'Kicks an aide',nex:'High five',dim:'Frequency'},{label:'Elopement',def:'Leaving the area',ex:'',nex:''},{label:'Asks for a break',def:'Card exchange',isRep:true}],
+    menu:[{name:'Tablet time',type:'Activity',rank:1},{name:'Pretzels',type:'Edible',rank:2}]};
+  page=await br.newPage({viewport:{width:1024,height:1366}});wire(page,log);
+  await page.goto(W+'Scatterplot_Pattern_Analysis.html',{waitUntil:'load'});await sleep(900);await page.evaluate(stub);
+  const sp2=await page.evaluate(f=>{const r0=window.__nbhFactsIn(f);const r={rep:r0&&r0.filled,n:state.behaviors.length,m:state.behaviors.map(b=>[b.meta.behavior,b.meta.definition,b.meta.example||'',b.meta.nonexample||'']),cap:(document.querySelector('#grid caption.sp-pcap')||{}).textContent||''};return r;},TB);
+  ok('7a the scatterplot makes a sheet for each target behavior with its definition, example and non-example, and each grid names the student, behavior and days on paper',
+    sp2.n===2&&sp2.m[0][0]==='Physical aggression'&&sp2.m[0][1]==='Hitting or kicking staff'&&sp2.m[0][2]==='Kicks an aide'&&sp2.m[0][3]==='High five'&&sp2.m[1][0]==='Elopement'&&/Physical aggression/.test(sp2.cap),sp2);
+  await page.close();
+  page=await br.newPage({viewport:{width:1024,height:1366}});wire(page,log);
+  await page.goto(W+'ABC_Recording_Conditional_Probability_Analysis.html',{waitUntil:'load'});await sleep(900);await page.evaluate(stub);await loadSim(page);await sleep(1500);
+  const ab2=await page.evaluate(()=>{const b=[...document.querySelectorAll('#viewSeg button,[data-tab]')].find(x=>/analy/i.test(x.textContent||''));if(b)b.click();
+    const rows=[...document.querySelectorAll('table')].filter(t=>/Antecedent condition/.test(t.textContent)).flatMap(t=>[...t.querySelectorAll('tbody tr')]).map(r=>r.lastElementChild.textContent.trim());
+    return {rows,q:qDir(-0.76),q2:qDir(0.8)};});
+  ok('7b ABC-1: an antecedent row resting on an empty cell says "thin", and a negative association says "(less likely)"',ab2.rows.some(x=>/thin/.test(x))&&ab2.rows.some(x=>/less likely/.test(x))&&/less likely/.test(ab2.q)&&ab2.q2==='',ab2);
+  await page.close();
+  page=await br.newPage({viewport:{width:1024,height:1366}});wire(page,log);
+  await page.goto(W+'Reinforcer_Assessment_Protocol.html',{waitUntil:'load'});await sleep(900);await page.evaluate(stub);
+  const ra=await page.evaluate(f=>{const r0=window.__nbhFactsIn(f);return {rep:r0&&r0.filled,stim:[...document.querySelectorAll('#stimTbl tbody tr')].map(t=>[t.querySelector('[data-f=name]').value,t.querySelector('[data-f=type]').value,t.querySelector('[data-f=pa]').value]).filter(x=>x[0]),pb:document.getElementById('mPBdef').value,ta:document.getElementById('mPBdef').tagName};},TB);
+  await loadSim(page);await sleep(1200);
+  await page.evaluate(()=>document.querySelector('#viewSeg [data-view="pr"]').click());await sleep(600);
+  const raw=await page.evaluate(()=>({sw:document.documentElement.scrollWidth,iw:innerWidth,hdr:[...document.querySelectorAll('th')].map(t=>t.textContent).filter(t=>/^% /.test(t))}));
+  ok('7c RA-1 takes the stimuli from Form PA-1 (rank and type) and the problem behavior from Form TB-1',ra.stim.length===2&&ra.stim[0][0]==='Tablet time'&&ra.stim[0][1]==='Activity'&&ra.stim[0][2]==='1'&&ra.stim[1][1]==='Edible'&&ra.pb==='Physical aggression: Hitting or kicking staff'&&ra.ta==='TEXTAREA',ra);
+  ok('7d RA-1’s progressive ratio view no longer scrolls the page sideways, and the concurrent-operants headings are whole',raw.sw<=raw.iw+1&&raw.hdr.every(t=>!/\(vi$/.test(t)),raw);
+  await page.close();
+  page=await br.newPage({viewport:{width:1024,height:1366}});wire(page,log);
+  await page.goto(W+'Variable_Isolation_Protocol.html',{waitUntil:'load'});await sleep(900);await page.evaluate(stub);
+  const vi=await page.evaluate(f=>{window.__nbhFactsIn(f);return {m:document.querySelector('[name="s_measure"]').value,d:document.querySelector('[name="s_def"]').value};},TB);
+  ok('7e VI-1 takes the measurement as well as the definition from the case',vi.m==='Frequency / rate'&&/Hitting or kicking staff/.test(vi.d),vi);
+  const vp=await page.evaluate(async()=>{const r=await fetch('index.html');const t=await r.text();return /maximum-scale=1/.test(t)&&/maximum-scale=1/.test(document.querySelector('meta[name=viewport]').content);});
+  ok('7f the workstation and the forms keep iPad Safari from zooming into a field on tap (maximum-scale=1; pinch zoom still works)',vp);
+  await page.close();
+
   /* ---------- 6. the workstation ---------- */
   page=await br.newPage({viewport:{width:1300,height:900}});wire(page,log);
   await page.goto(W+'index.html',{waitUntil:'load'});await sleep(800);

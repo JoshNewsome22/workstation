@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form ABC-1 · ABC Recording &amp; Conditional Probability Analysis · Newsome Behavioral Health</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -1108,6 +1108,10 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   #panel-record .segmented{gap:4px;border:0;border-radius:0;overflow:visible}
   #panel-record .segmented button,#panel-record .segmented button:last-child{border:1px solid var(--nbh-slate);border-radius:5px}
 }
+
+/* v21.75 (audit) on a touch screen the pickers are a finger high */
+@media (pointer:coarse){#h-checks,#e-intensity,#a-function,label.field select{min-height:44px}}
+.qdir{font-weight:500;font-size:.92em}
 </style>
 </head>
 <body>
@@ -4288,6 +4292,8 @@ function twoByTwo(a,b,c,d){
            minCell:Math.min(a,b,c,d), sparse:(Math.min(a,b,c,d) === 0 || a+b < 5 || c+d < 5) };
 }
 
+/* v21.75 (audit) a negative Q is as strong, the other way: the condition goes with fewer incidents, so the word says so */
+function qDir(q){return q!=null&&q<=-0.20?' <span class="qdir">(less likely)</span>':'';}
 function qStrength(q){
   if(q == null) return {word:"\u2014", color:"var(--ink-faint)"};
   const m = Math.abs(q);
@@ -4931,7 +4937,7 @@ function renderAnalysis(){
             <td class="num">${num(t.phi,2)}</td>
             <td class="num">${num(t.chi,1)}</td>
             <td class="num">${t.p==null?"\u2014":(t.p<0.001?"&lt;.001":t.p.toFixed(3))}</td>
-            <td style="color:${st.color};font-weight:600">${st.word}${t.sparse?' <span class="withheld">thin</span>':""}</td>
+            <td style="color:${st.color};font-weight:600">${st.word}${qDir(t.q)}${t.sparse?' <span class="withheld">thin</span>':""}</td>
           </tr>`;}).join("")}</tbody></table></div>`,
       caveat(`<b>Cells.</b> a = incidents followed by the consequence, b = incidents not followed by it, c = no-behavior windows containing it, d = no-behavior windows without it. <b>Two cautions.</b> First, the rows and columns come from different units of observation &mdash; behavior-anchored events and time-sampled windows &mdash; so these values estimate contingency rather than measure it exactly; event-based and interval-based methods do not always agree (Lloyd, Yoder, Tapp, &amp; Staubitz, 2016). Second, &chi;&sup2; here is a rough flag on a small hand-collected sample, not a hypothesis test you should report as one; any cell under about 5 makes it unstable.`));
   } else {
@@ -4984,7 +4990,7 @@ function renderAnalysis(){
           <td class="num">${Math.round((r.pBaseCondition||0)*M)}/${M} &nbsp;${pct(r.pBaseCondition,0)}</td>
           <td class="num">${r.stats.or==null?"\u2014":(r.stats.or===Infinity?"\u221e":num(r.stats.or,2))}</td>
           <td class="num" style="font-weight:700">${num(r.stats.q,2)}</td>
-          <td style="color:${st.color};font-weight:600">${st.word}</td></tr>`; }).join("")}</tbody></table></div>`,
+          <td style="color:${st.color};font-weight:600">${st.word}${qDir(r.stats.q)}${r.stats.sparse?' <span class="withheld">thin</span>':""}</td></tr>`; }).join("")}</tbody></table></div>`,
       caveat(`<b>Antecedents are not the safer bet.</b> It is tempting to trust this section more than the consequence sections, on the reasoning that antecedents are scheduled by the timetable rather than delivered in reaction to the behavior and so should be less contaminated. Camp, Iwata, Hammond, and Bloom (2009) tested that directly across seven participants and found antecedent events were no better than consequent events at identifying function: two of seven matched the functional analysis on antecedents, three of seven on consequences. Read this section alongside the consequence sections, not instead of them. One further wrinkle from the same paper: a <i>low</i> base rate of demands can itself be a finding, because adults issue fewer instructions to students who have a history of problem behavior (Carr, Taylor, &amp; Robinson, 1991), so a demand condition that barely appears may mean the room is avoiding demands rather than that demands are irrelevant.`) +
       caveat(`<b>Why an odds ratio here and not a risk ratio.</b> This table compares two different sampling frames &mdash; every incident on one side, every sampled window on the other &mdash; so a raw risk ratio would move up or down purely with how many background samples you happened to take. The odds ratio and Yule's Q are unaffected by that ratio, which is why they are the two columns reported. Both say the condition and the behavior travel together; neither says the condition evoked it. Antecedent conditions co-vary heavily in classrooms &mdash; demands, transitions, and low attention arrive together &mdash; so treat high-ranking conditions as candidates for a structured antecedent manipulation, not as established evocative stimuli.`));
   }

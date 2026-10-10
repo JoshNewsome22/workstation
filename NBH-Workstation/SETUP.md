@@ -8450,4 +8450,21 @@ Checked by `qa/v2174-test.js` (27 checks).
   told about). *Close case* lists the same before it saves and closes (*Save and close anyway*). Form IC-1 now shares its
   consent and signature dates for it.
 
-Checked by `qa/v2175-test.js` (19 checks).
+- **The audit of four older forms** (the scatterplot, ABC-1, the reinforcer assessment and variable isolation): no
+  script errors, no wrong figures and no print cut off were found; what was fixed:
+  - *Every form and the workstation*: iPad Safari no longer zooms into a field when it is tapped (the page's viewport
+    is `maximum-scale=1`; pinch zoom still works on the iPad). The fields were smaller than the 16 px Safari asks for.
+  - *Scatterplot*: a sheet for each target behavior from the case, each with its definition, example and
+    non-example (when no sheet holds a mark yet); on paper each grid names the student, the behavior and the days,
+    since the grid often starts a page of its own; the legend stays with the grid; a sheet wider than the window fades
+    at its right edge to show there is more.
+  - *ABC-1*: an antecedent resting on an empty cell is marked *thin*, as the consequence table already was; a negative
+    association reads *strong (less likely)* instead of looking like a positive one; the pickers are a finger high.
+  - *Reinforcer assessment*: the progressive-ratio table scrolls inside its box instead of the whole page, and a view
+    chosen re-fits the page; the stimuli under test come from Form PA-1's menu (rank and type) and the problem
+    behavior from Form TB-1; the problem behavior, the agreement and the problem behavior summary are full-width
+    boxes that wrap and stay whole on paper; the concurrent-operants headings are no longer cut at ten letters.
+  - *Variable isolation*: each rating is a finger-sized target; the measurement comes from the case with the
+    definition.
+
+Checked by `qa/v2175-test.js` (25 checks).
