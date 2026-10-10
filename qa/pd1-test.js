@@ -2,6 +2,8 @@ const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/pd1/shots';
 fs.mkdirSync(OUT,{recursive:true});
 const URL=BASE+'/NBH-Workstation/PD-1_Performance-Diagnostic-Checklist_v2026-09.html';
+/* v21.78 what this test only logged now decides its exit: a round trip that differs, or errors in the LOG, fail it */
+{const lg=console.log,bad=[];console.log=(...a)=>{const s=a.map(x=>typeof x==='string'?x:JSON.stringify(x)).join(' ');if(/round trip identical: false/.test(s)||/LOG:\s*\[\s*["{]/.test(s))bad.push(s.slice(0,240));lg(...a);};process.on('beforeExit',()=>{if(process.exitCode)return;if(bad.length){lg('FAIL '+bad.length+' check(s): '+bad.join(' | '));process.exitCode=1;}else lg('RESULT: all passed');});}
 (async()=>{
   const br=await chromium.launch();const log=[];
   const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);

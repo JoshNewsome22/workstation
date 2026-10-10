@@ -2,6 +2,8 @@ const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const OUT=__dirname+'/out/vs1/shots';fs.mkdirSync(OUT,{recursive:true});
 const URL=BASE+'/NBH-Workstation/VS-1_Visual-Supports_v2026-10.html';const cp=require('child_process');
 const pages=f=>cp.execSync(`python3 -c "import pymupdf;print(pymupdf.open('${f}').page_count)"`).toString().trim();
+/* v21.78 what this test only logged now decides its exit: a round trip that differs, or errors in the LOG, fail it */
+{const lg=console.log,bad=[];console.log=(...a)=>{const s=a.map(x=>typeof x==='string'?x:JSON.stringify(x)).join(' ');if(/round trip identical: false/.test(s)||/LOG:\s*\[\s*["{]/.test(s))bad.push(s.slice(0,240));lg(...a);};process.on('beforeExit',()=>{if(process.exitCode)return;if(bad.length){lg('FAIL '+bad.length+' check(s): '+bad.join(' | '));process.exitCode=1;}else lg('RESULT: all passed');});}
 (async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
   await page.goto(URL);await sleep(500);const views=['board','cards','rules','strips','library','guide'];
   for(const v of views){await page.click(`#viewSeg button[data-view="${v}"]`);await sleep(150);await page.screenshot({path:`${OUT}/blank-${v}.png`,fullPage:true});}
