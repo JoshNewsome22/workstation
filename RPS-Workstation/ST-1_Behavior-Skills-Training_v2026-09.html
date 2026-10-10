@@ -3676,6 +3676,19 @@ $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 </script>
+<script id="st1-tv1">
+/* v21.77 Form TV-1's rehearsal steps: the training video's strategies, do list, response steps and tiers come in with the
+   case and fill the step list while it is empty (no step written, no round coded), with their component and the critical
+   marks; a list already started is left as it is. The rest of the case goes where it went before. */
+window.__nbhFactsIn=function(f){const t=f&&f.training,st=t&&Array.isArray(t.steps)?t.steps.filter(x=>x&&String(x.d||'').trim()):[];let n=0,note='';
+  if(st.length){const empty=S.steps.every(x=>!String(x.d||'').trim())&&!Object.keys(S.cells||{}).length;
+    if(empty){S.steps=st.slice(0,40).map(x=>({d:String(x.d).trim().slice(0,600),crit:!!x.crit,cmp:x.cmp==='con'||x.cmp==='ant'?x.cmp:''}));renderAll();n=S.steps.length;
+      const ta=document.querySelector('#stepTbl textarea');if(ta)ta.dispatchEvent(new Event('input',{bubbles:true}));
+      try{nbhUI.toast(n+' step'+(n>1?'s':'')+' from Form TV-1, the training video: check them against the plan before the rehearsal.',{kind:'ok'});}catch(e){}}
+    else note='the step list has steps already: Form TV-1’s steps were not placed';}
+  let g=null;try{g=window.nbhCase&&typeof window.nbhCase.generic==='function'?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
+  return {filled:n+((g&&g.filled)|0),note:note||(g&&g.note)||''};};
+</script>
 
 <script id="rr-run">
 /* ===================== v21.24: the rehearsal runner (one script on Forms ST-1 and CT-1) =====================
