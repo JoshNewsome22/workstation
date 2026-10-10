@@ -4218,6 +4218,9 @@ async function saveCase(){
   }
   kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});   /* v21.61 as the file holds them */
   forms=orderCase(forms);
+  /* v21.80 the case facts the file carries are read from the forms as they are now, not as at the last read: a case opened
+     again then has the facts its forms give, and the forms that load quietly are not sent changed facts that fill them anew */
+  try{await gatherFacts(false);}catch(e){}
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
