@@ -8260,6 +8260,191 @@ dialog.gs-dlg{width:min(640px,calc(100vw - 24px))}dialog.gs-dlg .field{display:b
 .gs-prev{font-size:13.5px}.gs-prev ul{margin:4px 0 6px 18px;padding:0}.gs-prev li{margin:2px 0}
 @media print{#dataTable input.gs-cell{box-shadow:none}}
 </style>
+<script id="dd-v2178">
+/* ===================================================================================================
+   v21.78 (1) a physical intervention on each incident (none, a physical escort, a restraint, a seclusion), kept with the
+   incident's own id and given to the case, so Form CR-1 can start the Florida notice clock for a restraint or a seclusion;
+   (2) a short note for home from the week's summary, in plain words; (3) the home days Form HD-1 holds, brought in on
+   request as a home series of their own: drawn on the graphs as open diamonds, never added to the school days or analyzed.
+   =================================================================================================== */
+"use strict";
+const DD_HOLDS={"":"None",escort:"Physical escort",restraint:"Restraint",seclusion:"Seclusion"};
+const ddHoldOk=v=>Object.prototype.hasOwnProperty.call(DD_HOLDS,v)?v:"";
+const ddHoldBig=v=>v==="restraint"||v==="seclusion";
+const DD_CR1_NOTE="Form CR-1 starts the Florida notice clock for this (24-hour report, parent the same day, written report within 3 school days): open Form CR-1 in the workstation.";
+/* a file or a restore: every incident keeps (or gets) its id, and its hold as one of the four */
+{const cl0=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],H={};
+  L.forEach(x=>{if(!x||typeof x!=="object")return;if(typeof x.id!=="string"||!x.id)x.id=uid("i");H[x.id.slice(0,40)]=ddHoldOk(x.hold);});
+  const r=cl0.apply(this,arguments);(S.incidents||[]).forEach(i=>{i.hold=H[i.id]||"";});
+  S.home=ddHomeState();return r;};}
+
+/* ---- (1) the incident dialog: the physical intervention, after the tier ---- */
+{const dl0=ddIncDlg;ddIncDlg=function(){const d=dl0.apply(this,arguments);if(!d.querySelector("#incHold")){const g=d.querySelector(".inc-g");
+  const box=document.createElement("div");box.className="inc-hold";
+  box.innerHTML=`<label class="field"><span>Physical intervention</span><select id="incHold">${Object.keys(DD_HOLDS).map(k=>`<option value="${k}">${DD_HOLDS[k]}</option>`).join("")}</select></label><p class="hint" id="incHoldHint"></p>`;
+  g.parentNode.insertBefore(box,g.nextSibling);
+  const s=box.querySelector("#incHold"),hint=()=>{box.querySelector("#incHoldHint").textContent=ddHoldBig(s.value)?"A restraint or a seclusion: Form CR-1 starts the notice clock once this is saved.":"";};
+  s.addEventListener("change",hint);box._hint=hint;}return d;};}
+{const op0=ddIncOpen;ddIncOpen=function(id){const r=op0.apply(this,arguments);const d=document.getElementById("dlgInc"),i=id?(S.incidents||[]).find(x=>x.id===id):null;
+  const s=d&&d.querySelector("#incHold");if(s){s.value=i?ddHoldOk(i.hold):"";const b=d.querySelector(".inc-hold");if(b&&b._hint)b._hint();}return r;};}
+let ddHoldNotice=null;   /* the incident whose restraint or seclusion was just saved, until the notice is dismissed */
+{const sv0=ddIncSave;ddIncSave=function(){const d=document.getElementById("dlgInc"),s=d&&d.querySelector("#incHold"),hold=s?ddHoldOk(s.value):"";
+  const ed=ddIncEditing,n0=(S.incidents||[]).length;const r=sv0.apply(this,arguments);if(d&&d.open)return r;   /* not saved (no date): the dialog stays open */
+  const i=ed?(S.incidents||[]).find(x=>x.id===ed):((S.incidents||[]).length>n0?S.incidents[S.incidents.length-1]:null);
+  if(!i)return r;const was=i.hold||"";i.hold=hold;
+  if(ddHoldBig(hold)){ddHoldNotice={id:i.id,hold};try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(DD_HOLDS[hold]+" logged. "+DD_CR1_NOTE,{kind:"warn",ms:12000});}catch(e){}}
+  else if(ddHoldNotice&&ddHoldNotice.id===i.id)ddHoldNotice=null;
+  if(was!==hold)ddEdited();ddIncRender();if(ddWeek)ddWeekRender();return r;};}
+/* the hold on the list, the week summary and paper: first in the follow-up column */
+{const rh0=ddIncRowHtml;ddIncRowHtml=function(i,act){const h=rh0.apply(this,arguments),v=ddHoldOk(i&&i.hold);if(!v)return h;
+  return h.replace('<td class="f">',`<td class="f"><b class="inc-hold-t${ddHoldBig(v)?" big":""}">${esc(DD_HOLDS[v])}</b><br>`);};}
+{const ir0=ddIncRender;ddIncRender=function(){const r=ir0.apply(this,arguments);const el=document.getElementById("ddInc");if(!el)return r;
+  const L=S.incidents||[],n=L.filter(i=>ddHoldBig(i.hold)).length;
+  if(n){const hd=el.querySelector(".inc-hd .hint");if(hd)hd.insertAdjacentHTML("beforeend",` <b class="inc-hold-t big">${n} with a restraint or seclusion.</b>`);}
+  const i=ddHoldNotice&&L.find(x=>x.id===ddHoldNotice.id&&ddHoldBig(x.hold));if(!i){ddHoldNotice=null;return r;}
+  const box=document.createElement("div");box.className="inc-cr1 noprint no-print";box.id="ddHoldNote";box.setAttribute("role","alert");
+  box.innerHTML=`<span><b>${esc(DD_HOLDS[i.hold])} on ${esc(i.date?shortDay(i.date):"the incident")}${i.time?" at "+esc(hm12(i.time)):""}.</b> ${esc(DD_CR1_NOTE)}</span><button type="button" class="btn ghost sm" id="ddHoldOk">OK</button>`;
+  el.insertBefore(box,el.firstChild);return r;};}
+document.addEventListener("click",e=>{if(e.target&&e.target.closest&&e.target.closest("#ddHoldOk")){ddHoldNotice=null;ddIncRender();}});
+/* the case: each incident's id and hold; the home days brought in */
+{const out0=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out0();}catch(e){o=null;}
+  try{const H=ddHomeRows();if(!o&&H.length)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};if(!o||!o.data)return o;const d=o.data;
+    if(Array.isArray(d.incidentList)){const L=ddIncSorted().slice(-200);d.incidentList.forEach((x,k)=>{const i=L[k];if(!i)return;x.id=i.id;x.hold=ddHoldOk(i.hold);});}
+    if(H.length)d.home=H.map(x=>Object.assign({},x));return o;}catch(e){return o;}};}
+
+/* ---- (2) the week's note for home: one good thing, where each behavior stands in plain words, what comes next ---- */
+const DD_PLAIN=[[/\bmands?\b/gi,"asking"],[/\bmanding\b/gi,"asking"],[/\btacts?\b/gi,"naming"],[/\belopement\b/gi,"leaving the area"],[/\bnon-?compliance\b/gi,"not following directions"],
+  [/\bSIB\b/g,"hurting self"],[/\bself-injurious behaviou?r\b/gi,"hurting self"],[/\bFCR\b|\bFCT\b/g,"asking for help"],[/\bon-task\b/gi,"working"],[/\boff-task\b/gi,"not working"]];
+function ddPlainName(b){let s=String((b&&b.name)||"").replace(/\s*\([^)]*\)/g,"").trim()||"this behavior";DD_PLAIN.forEach(([re,w])=>{s=s.replace(re,w);});return s;}
+const ddLow=s=>s.length>1&&s.slice(0,2)!==s.slice(0,2).toUpperCase()?s.charAt(0).toLowerCase()+s.slice(1):s;
+const ddN=v=>{const x=Math.round(v*10)/10;return Number.isInteger(x)?String(x):x.toFixed(1);};
+const ddAnd=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+function ddAmount(b,s){const m=b.measure,v=s.mean,one=Math.abs(v-1)<1e-9;
+  if(m==="count")return `about ${ddN(v)} time${one?"":"s"} a day`;
+  if(m==="rate")return `about ${ddN(v)} time${one?"":"s"} an hour`;
+  if(m==="duration")return `about ${ddN(v)} minute${one?"":"s"} a day`;
+  if(m==="latency")return `about ${ddN(v)} minute${one?"":"s"} before getting started`;
+  if(m==="ied")return `about ${ddN(v)} minute${one?"":"s"} apart`;
+  if(m==="opps")return `${Math.round(v)}% correct`;
+  if(m==="trials")return `${Math.round(v)}% of the time without help`;
+  if(m==="prompt")return `about ${ddN(v)} on our scale of how much help was needed`;
+  return `during about ${Math.round(v)}% of the time we watched`;}
+function ddHomeNoteText(mon){const nm=ddFirst(),sun=ddAddDays(mon,6),pm=ddAddDays(mon,-7),ps=ddAddDays(mon,-1),rows=sortedRows();
+  const wk=rows.filter(r=>r.date>=mon&&r.date<=sun),lw=rows.filter(r=>r.date>=pm&&r.date<=ps),days=wk.filter(r=>S.behaviors.some(b=>plotValue(r,b)!==null)).length;
+  const B=orderedBehaviors().map(b=>{const c=ddStat(b,wk),a=ddStat(b,lw),ch=ddChange(b,a,c),dec=(b.direction||((b.kind||"target")==="target"?"decrease":"increase"))==="decrease";
+    const zero=wk.filter(r=>plotValue(r,b)===0).length;return {b,c,a,ch,dec,zero,name:ddPlainName(b)};});
+  const L=["Hello,",""];
+  L.push(`Here is a short note about ${nm}’s week at school (${ddLongDay(mon)} to ${ddLongDay(ddAddDays(mon,4))}).`);L.push("");
+  let good=B.find(x=>x.c&&x.a&&x.ch.k==="good"&&!x.dec);
+  let g=good?`${nm} did more ${ddLow(good.name)} this week than last week.`:"";
+  if(!g){good=B.find(x=>x.c&&x.a&&x.ch.k==="good");if(good)g=`${nm} had less ${ddLow(good.name)} this week than last week.`;}
+  if(!g){good=B.find(x=>!x.dec&&x.c);if(good)g=`${nm} practiced ${ddLow(good.name)} on ${good.c.n} day${good.c.n===1?"":"s"} this week.`;}
+  if(!g){good=B.find(x=>x.dec&&x.zero>0);if(good)g=`${nm} had ${good.zero} day${good.zero===1?"":"s"} this week with no ${ddLow(good.name)}.`;}
+  if(!g)g=days?`${nm} was with us for ${days} day${days===1?"":"s"} this week, and we enjoyed the time together.`:`We enjoyed having ${nm} in class this week.`;
+  L.push("Something good first: "+g);L.push("");
+  const how=B.map(x=>{if(!x.c)return `- ${x.name}: we did not write this down this week.`;let t=`- ${x.name}: ${ddAmount(x.b,x.c)} this week`;
+    if(!x.a)t+=".";else if(x.ch.t==="no change"||!x.ch.k)t+=", about the same as last week.";
+    else if(x.ch.k==="good")t+=x.dec?", less than last week, which is good to see.":", more than last week, which is great.";
+    else t+=x.dec?", more than last week; we are keeping a close eye on it.":", a little less than last week; we will keep practicing.";return t;});
+  if(how.length){L.push("How things are going:");how.forEach(t=>L.push(t));L.push("");}
+  const reps=B.filter(x=>!x.dec).map(x=>ddLow(x.name)),worse=B.filter(x=>x.dec&&x.c&&x.a&&x.ch.k==="bad").map(x=>ddLow(x.name));
+  L.push("What we are working on next: "+(reps.length?`at school we will keep practicing ${ddAnd(reps)} with ${nm}.`:`at school we will keep following ${nm}’s plan and cheer on every good moment.`)
+    +(worse.length?` We will look closely at ${ddAnd(worse)} and let you know if anything in the plan changes.`:""));
+  const inc=ddIncSorted().filter(i=>i.date>=mon&&i.date<=sun).length;
+  if(inc){L.push("");L.push(`We wrote ${inc} incident note${inc===1?"":"s"} this week. Please ask us if you would like to talk about ${inc===1?"it":"them"}.`);}
+  L.push("");L.push("Thank you for all you do at home. Please reach out with any questions.");
+  const sig=[S.meta.observer,S.meta.school].map(ddT).filter(Boolean).join(", ");if(sig){L.push("");L.push(sig);}
+  return L.join("\n");}
+function ddHnDlg(){let d=document.getElementById("dlgHomeNote");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog dd-hn-dlg";d.id="dlgHomeNote";d.setAttribute("aria-labelledby","hnT");
+  d.innerHTML=`<h2 id="hnT">Note for home (this week)</h2><p class="hint" id="hnSub"></p>
+    <textarea id="hnTx" rows="16" style="font-family:inherit;font-size:15px;width:100%;box-sizing:border-box"></textarea>
+    <div class="dd-actions"><button type="button" class="btn ghost" id="hnRedo">Write it again</button><button type="button" class="btn ghost" id="hnClose">Close</button><button type="button" class="btn ghost" id="hnPrint">Print</button><button type="button" class="btn" id="hnCopy">Copy</button></div>`;
+  document.body.appendChild(d);d.querySelector("#hnClose").addEventListener("click",()=>d.close());
+  d.querySelector("#hnRedo").addEventListener("click",()=>{d.querySelector("#hnTx").value=ddHomeNoteText(d.dataset.mon);});
+  d.querySelector("#hnCopy").addEventListener("click",async()=>{const t=d.querySelector("#hnTx");try{await navigator.clipboard.writeText(t.value);toast("Copied. Paste it into the message home.");}
+    catch(e){t.focus();t.select();try{document.execCommand("copy");toast("Copied.");}catch(e2){toast("Select the note and copy it.");}}});
+  d.querySelector("#hnPrint").addEventListener("click",()=>{const t=d.querySelector("#hnTx").value;let p=document.getElementById("ddHnPrint");
+    if(!p){p=document.createElement("div");p.id="ddHnPrint";const m=document.querySelector("main")||document.body;m.appendChild(p);}
+    p.innerHTML=t.split(/\n{2,}/).map(x=>`<p>${esc(x).replace(/\n/g,"<br>")}</p>`).join("");d.close();document.body.classList.add("dd-hn-on");
+    const off=()=>{document.body.classList.remove("dd-hn-on");window.removeEventListener("afterprint",off);document.removeEventListener("pointerdown",off,true);};
+    window.addEventListener("afterprint",off);setTimeout(()=>document.addEventListener("pointerdown",off,true),400);printTab("Note for home");});
+  return d;}
+function ddHomeNote(mon){mon=mon||ddWeek||ddWeekDefault();const d=ddHnDlg();d.dataset.mon=mon;
+  d.querySelector("#hnSub").textContent=`Written from the week of ${shortDay(mon)}: the sheet and a count of the incidents. Read it over and change what you like; nothing is sent from here.`;
+  d.querySelector("#hnTx").value=ddHomeNoteText(mon);try{d.showModal();}catch(e){d.setAttribute("open","");}}
+{const ws=document.getElementById("btnWeekSum");if(ws&&!document.getElementById("btnHomeNote")){const b=document.createElement("button");b.className="btn ghost";b.id="btnHomeNote";b.type="button";
+  b.title="A short, plain-words note for the family from this week's summary, to read over, print or copy";b.textContent="Note for home (this week)";ws.parentNode.insertBefore(b,ws.nextSibling);}}
+{const wr1=ddWeekRender;ddWeekRender=function(){const r=wr1.apply(this,arguments);try{const c=document.getElementById("ddWeekClose");if(c&&!document.getElementById("ddWeekHome"))
+  c.insertAdjacentHTML("beforebegin",`<button type="button" class="btn ghost" id="ddWeekHome">Note for home (this week)</button>`);}catch(e){}return r;};}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;if(t.closest("#btnHomeNote")){ddHomeNote(ddWeekDefault());return;}if(t.closest("#ddWeekHome")){ddHomeNote(ddWeek);return;}});
+
+/* ---- (3) the home days from Form HD-1: S.home = {rows:[{date, beh, value, unit, measure}], at, src:'HD-1'} ---- */
+function ddHomeState(){const h=S.home&&typeof S.home==="object"&&!Array.isArray(S.home)?S.home:null;if(!h)return null;
+  const rows=(Array.isArray(h.rows)?h.rows:[]).filter(x=>x&&ddIsoOk(x.date)&&typeof x.beh==="string"&&x.beh.trim()&&typeof x.value==="number"&&isFinite(x.value)).slice(0,3000)
+    .map(x=>{const o={date:x.date,beh:x.beh.slice(0,200),value:x.value,unit:typeof x.unit==="string"?x.unit.slice(0,40):""};if(typeof x.measure==="string")o.measure=x.measure.slice(0,10);if(typeof x.of==="number")o.of=x.of;return o;});
+  return rows.length?{rows,at:typeof h.at==="string"?h.at.slice(0,40):"",src:"HD-1"}:null;}
+const ddHomeRows=()=>S.home&&Array.isArray(S.home.rows)?S.home.rows:[];
+const ddHomeKey=x=>x.date+"|"+nbhDdK(x.beh);
+function ddHomeIn(){const f=ddCaseFacts&&ddCaseFacts.home;const L=f&&Array.isArray(f.data)?f.data:[];
+  return L.filter(x=>x&&ddIsoOk(x.date)&&typeof x.beh==="string"&&x.beh.trim()&&typeof x.value==="number"&&isFinite(x.value));}
+/* what HD-1 holds that the record does not have yet (a day not brought in, or a value the family's sheet changed) */
+function ddHomePending(){const have={};ddHomeRows().forEach(x=>{have[ddHomeKey(x)]=x.value;});return ddHomeIn().filter(x=>have[ddHomeKey(x)]!==x.value);}
+let ddHomeLater="";   /* Not now: the offer stays away until HD-1 holds something else */
+function ddHomeBar(){const P=ddHomePending(),sig=JSON.stringify(P.map(ddHomeKey));let el=document.getElementById("ddHomeBar");
+  if(!P.length||ddHomeLater===sig){if(el)el.remove();return;}
+  if(!el){const at=document.getElementById("tab-setup");if(!at)return;el=document.createElement("div");el.id="ddHomeBar";el.className="dd-home-bar noprint no-print";el.setAttribute("role","status");at.parentNode.insertBefore(el,at);}
+  const days=[...new Set(P.map(x=>x.date))].sort(),behs=[...new Set(P.map(x=>x.beh))];
+  el.innerHTML=`<span><b>Form HD-1 has ${days.length} home day${days.length===1?"":"s"}</b> (${esc(shortDay(days[0]))}${days.length>1?" to "+esc(shortDay(days[days.length-1])):""}; ${esc(ddAnd(behs))}). Brought in, they are kept as a home series of their own and drawn on the graphs as open diamonds; the school days and their analysis do not change.</span>
+    <button type="button" class="btn" id="ddHomeIn">Bring in ${days.length} home day${days.length===1?"":"s"} from Form HD-1</button><button type="button" class="btn ghost sm" id="ddHomeLater">Not now</button>`;
+  el.dataset.sig=sig;}
+function ddHomeImport(){const P=ddHomePending();if(!P.length){ddHomeBar();return 0;}const rows=ddHomeRows().slice(),at={};rows.forEach((x,k)=>{at[ddHomeKey(x)]=k;});
+  P.forEach(x=>{const o={date:x.date,beh:x.beh.trim().slice(0,200),value:x.value,unit:typeof x.unit==="string"?x.unit:""};if(typeof x.measure==="string")o.measure=x.measure;if(typeof x.of==="number")o.of=x.of;
+    const k=ddHomeKey(o);if(at[k]!==undefined)rows[at[k]]=o;else{at[k]=rows.length;rows.push(o);}});
+  rows.sort((a,b)=>(a.date+a.beh).localeCompare(b.date+b.beh));S.home={rows,at:new Date().toISOString(),src:"HD-1"};
+  const n=new Set(P.map(x=>x.date)).size;ddEdited();ddHomeBar();if(typeof renderResults==="function")renderResults();
+  toast(`${n} home day${n===1?"":"s"} brought in from Form HD-1. They show on the graphs as open diamonds, apart from the school days.`);return n;}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;if(t.closest("#ddHomeIn")){ddHomeImport();return;}
+  if(t.closest("#ddHomeLater")){const el=document.getElementById("ddHomeBar");ddHomeLater=el?el.dataset.sig||"":"";ddHomeBar();}});
+/* the home rows a behavior's graph can draw: the same behavior, in a measure the school graph shares */
+function ddHomeBeh(x){const k=nbhDdK(x.beh),kb=k.replace(/\s*\(.*$/,"");return S.behaviors.find(b=>nbhDdK(b.name)===k)||S.behaviors.find(b=>{const n=nbhDdK(b.name).replace(/\s*\(.*$/,"");return n&&n===kb;})||null;}
+const ddHomeFits=(b,x)=>(b.measure==="count"&&x.unit==="times")||(b.measure==="duration"&&x.unit==="minutes");
+const ddDayNo=iso=>{const p=iso.split("-");return Date.UTC(+p[0],+p[1]-1,+p[2])/864e5;};
+{const bc0=buildChart;buildChart=function(beh,rows){const svg=bc0.apply(this,arguments);try{
+  const H=ddHomeRows().filter(x=>ddHomeBeh(x)===beh);if(!svg||!H.length)return svg;
+  const fit=H.filter(x=>ddHomeFits(beh,x)),other=H.filter(x=>!ddHomeFits(beh,x));
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg),vb=/viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(svg);if(!m||!vb)return svg;
+  const l=+m[1],t=+m[2],iw=+m[3],ih=+m[4],top=ddDrawn.top,xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),Y=v=>t+ih-(Math.min(v,top)/top)*ih;
+  const ds=rows.map(r=>r.date||"");let drawn=0,out=0,g="";
+  fit.forEach(x=>{let i=ds.indexOf(x.date);
+    if(i<0){let p=-1,q=-1;ds.forEach((d,k)=>{if(d&&d<x.date)p=k;if(d&&d>x.date&&q<0)q=k;});if(p<0||q<0){out++;return;}i=p+(ddDayNo(x.date)-ddDayNo(ds[p]))/(ddDayNo(ds[q])-ddDayNo(ds[p]))*(q-p);}
+    if(i>xEnd+1e-9){out++;return;}const cx=X(i),cy=Y(x.value);drawn++;
+    g+=`<path class="dd-home" d="M${cx.toFixed(1)} ${(cy-5.5).toFixed(1)}L${(cx+5.5).toFixed(1)} ${cy.toFixed(1)}L${cx.toFixed(1)} ${(cy+5.5).toFixed(1)}L${(cx-5.5).toFixed(1)} ${cy.toFixed(1)}Z" fill="#fff" stroke="#6B3FA0" stroke-width="1.8"><title>Home (Form HD-1), ${esc(shortDay(x.date))}: ${esc(r1(x.value))} ${esc(x.unit)}${x.value>top?" (above the axis; drawn on its top edge)":""}<\/title><\/path>`;});
+  ddDrawn.home={drawn,out,other:other.length,otherUnit:[...new Set(other.map(x=>x.unit).filter(Boolean))].join(", "),n:H.length};
+  if(drawn)g+=`<text x="${(+vb[1]-26).toFixed(1)}" y="${(+vb[2]-8).toFixed(1)}" font-size="11" fill="#6B3FA0" text-anchor="end">◇ Home (Form HD-1), not in the analysis<\/text>`;
+  if(!g)return svg;const k=svg.lastIndexOf("</svg>");return svg.slice(0,k)+`<g class="dd-home-s">${g}</g>`+svg.slice(k);}catch(e){return svg;}};}
+{const le0=ddLegendExtra;ddLegendExtra=function(d){const h=le0.apply(this,arguments);return h+(d&&d.home&&d.home.drawn?`<span><svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true" style="vertical-align:-2px;margin-right:4px"><path d="M6.5 1L12 6.5L6.5 12L1 6.5Z" fill="#fff" stroke="#6B3FA0" stroke-width="1.6"/></svg>Home days (Form HD-1)<\/span>`:"");};}
+{const cl1=ddClipHtml;ddClipHtml=function(d){const h=cl1.apply(this,arguments),x=d&&d.home;if(!x)return h;
+  const bits=[];if(x.drawn)bits.push(`${x.drawn} home day${x.drawn===1?" is":"s are"} drawn as open diamonds`);if(x.out)bits.push(`${x.out} fall${x.out===1?"s":""} outside the school days on the graph`);
+  if(x.other)bits.push(`${x.other} ${x.other===1?"was":"were"} kept at home in another measure (${esc(x.otherUnit||"not given")}) and ${x.other===1?"is":"are"} not drawn`);
+  return h+`<p class="hint dd-home-h">From Form HD-1: ${bits.join("; ")}. The home days are a series of their own, not counted with the school days or in the analysis below.<\/p>`;};}
+/* every reading of the case: the offer, when HD-1 holds home days the record does not */
+{const fi1=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=fi1?fi1.apply(this,arguments):{filled:0};try{ddHomeBar();}catch(e){}return r;};}
+{const af0=ddAfterData;ddAfterData=function(){const r=af0.apply(this,arguments);try{ddHomeBar();}catch(e){}return r;};}
+{const ra1=renderAll;renderAll=function(){S.home=ddHomeState();return ra1.apply(this,arguments);};}
+S.home=ddHomeState();(S.incidents||[]).forEach(i=>{i.hold=ddHoldOk(i.hold);});ddIncRender();
+</script>
+<style id="dd-v2178-css">
+.inc-hold{display:grid;grid-template-columns:minmax(200px,320px) 1fr;gap:4px 12px;align-items:end}.inc-hold .hint{margin:0 0 8px;color:#8e2a2a;font-weight:600}
+.inc-hold-t{font-weight:700}.inc-hold-t.big{color:#8e2a2a}
+.inc-cr1{display:flex;gap:12px;align-items:flex-start;margin:0 0 10px;padding:9px 12px;border:1px solid #e0b4b4;border-left:4px solid #8e2a2a;border-radius:4px;background:#fbf1f1;color:#16242e;font-size:13.5px;line-height:1.45}
+.inc-cr1 span{flex:1}
+.dd-home-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 12px;padding:9px 12px;border:1px solid #d3c6e4;border-left:4px solid #6B3FA0;border-radius:4px;background:#f6f2fb;color:#16242e;font-size:13.5px;line-height:1.45}
+.dd-home-bar>span{flex:1 1 320px}
+dialog.dd-hn-dlg{width:min(680px,calc(100vw - 24px))}
+#ddHnPrint{display:none}
+@media print{body.dd-hn-on main>:not(.nbh-print-head):not(#printHead):not(#ddHnPrint){display:none!important}body.dd-hn-on #ddHnPrint{display:block!important;font-size:13pt;line-height:1.5;max-width:6.5in}body.dd-hn-on #ddHnPrint p{margin:0 0 .8em}}
+@media (max-width:560px){.inc-hold{grid-template-columns:1fr}}
+</style>
 
 <script>
 /* ===================== NBH student packet =====================
