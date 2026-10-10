@@ -530,6 +530,10 @@ td input,td select{max-width:100%}
      again, are left off and the rows get the room */
   body:has(#tab-data:not(.hidden) #sheetTop:not(:empty)) #printHead{display:none!important}
   #tab-data .dd-datah{display:none!important}
+  /* v21.73 on screen the units row and the Date column stay in view while the sheet scrolls (position:sticky). Safari
+     printed them where the screen had them stuck, so printed from a scrolled page the "(total per day)" row landed in the
+     first day's row and the Date heading moved off its cell. On paper every cell of the sheets sits where the table puts it. */
+  .sheet th,.sheet td,.igrid th,.igrid td{position:static!important;top:auto!important;left:auto!important}
   #tab-data > .panel{padding-top:0!important;margin-top:0!important;border:0!important;box-shadow:none!important}
   .sheet-top .st-r b{color:var(--ink);font-weight:600}
   .sheet-top{margin-bottom:5px}.sheet-top .nm{font-size:13px}.sheet-top .sub,.sheet-top .st-r{font-size:8.5px}.sheet-top .idwrap img{width:50px;height:50px}
