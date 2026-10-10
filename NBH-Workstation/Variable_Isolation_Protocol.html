@@ -6345,5 +6345,31 @@ window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.
     const o=want&&[...el.options].find(x=>x.textContent.indexOf(want)===0);if(o){el.value=o.value||o.textContent;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;}}
   return n?{filled:((g&&g.filled)||0)+n,note:(g&&g.note)||''}:g;};
 </script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the variable-isolation result as evidence for Forms FS-1 and EA-1: the hypothesis statement
+   (h_statement), its function from the words after "maintained by", the assessment dates, and the strength from the causal
+   confidence band (high Strong, moderate Moderate, low Weak). */
+OUT(function(){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const st=v('h_statement');if(!st)return null;
+  const mb=/maintained by\s+(.*?)(?:\s*\(|[.;]|$)/i.exec(st),fnw=mb?T(mb[1]):'';
+  const band=T((document.getElementById('hillBand')||{}).textContent),b=/high/i.test(band)?'Strong':/moderate/i.test(band)?'Moderate':/low/i.test(band)?'Weak':'';
+  const key=K(fnw||st);
+  return EV(Object.assign({form:'VI-1',method:'Variable isolation from the descriptive record (non-experimental)'},SPAN([v('s_start'),v('s_end')]),{n:null,fn:fnw?fnw.charAt(0).toUpperCase()+fnw.slice(1):'',fnKey:key,
+    strength:key&&key!=='unclear'?b:'',by:v('s_bcba'),statement:st}));});
+})();
+</script>
 </body>
 </html>

@@ -6401,5 +6401,32 @@ a{text-underline-offset:2px}
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the interviews' result as evidence for Forms FS-1 and EA-1. The function is "Interview
+   hypothesis carried to the packet" (its words from "Hypothesized function from the interviews alone" when it is not chosen),
+   the statement is that hypothesis, the count is the respondents interviewed, the dates are their interview dates.
+   Strength: Weak, since informant report alone is tier 4 (the form says so). */
+OUT(function(){const m=S.meta||{},hyp=T(m.hyp),resp=(S.resp||[]).filter(r=>r&&T(r.n));if(!hyp&&!m.fn)return null;
+  const sel=document.querySelector('[data-m="fn"]'),o=sel&&m.fn?[...sel.options].find(x=>x.value===m.fn):null;
+  const key=m.fn?({attention:'attention',tangible:'tangible',escape:'escape',automatic:'automatic',multiple:'multiple',undetermined:'unclear'}[m.fn]||''):K(hyp);
+  const fn=o?T(o.textContent):'';
+  return EV(Object.assign({form:'IN-1',method:'Stakeholder interviews (indirect)'},SPAN(resp.map(r=>r.d)),{n:resp.length||null,fn:fn||(key?key:''),fnKey:key,
+    strength:key&&key!=='unclear'?'Weak':'',by:T(m.bcba),statement:hyp||('Interview hypothesis carried to the packet: '+fn+'.')}));});
+})();
+</script>
 </body>
 </html>

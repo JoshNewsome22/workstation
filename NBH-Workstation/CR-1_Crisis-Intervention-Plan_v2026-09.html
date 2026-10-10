@@ -4332,7 +4332,7 @@ window.__nbhFactsOut=function(){
 <script>
 /* v21.78 the case, in: the crisis plan fills only what is still empty: the dangerous behavior (TB-1's targets at urgency
    level 4, or 3 when none is at 4), the earliest precursor (TD-1), the stages from the plan's responses when no stage is
-   written (TD-1: before, at the precursor, at the behavior, the crisis step, after), the related plans in force (TD-1,
+   written (TD-1: before, at the precursor, at the behavior, the crisis step unless it only points to this form, after), the related plans in force (TD-1,
    FS-1, IC-1's consent, the IEP date), and the health concerns (DM-1's health record, signals and what to avoid).
    A restraint or a seclusion on Form DD-1's incident record (its hold) goes on the restraint log once, keyed by the
    incident's id (kept in the record's meta.ddInc, so a row deleted by hand is not brought back), and its s. 1003.573
@@ -4353,7 +4353,7 @@ window.__nbhFactsOut=function(){
     /* the stages, only when none is written */
     if(plan&&!S.pbis.some(p=>T(p.s)||T(p.do))){
       const ant=(plan.antCards||[]).length?plan.antCards.join('; '):(plan.ant||[]).map(T).filter(Boolean).join('; ');
-      const rows=[[STAGES[1],ant],[STAGES[2],r.prec],[STAGES[3],r.target],[STAGES[4],r.crisis],[STAGES[5],r.after]].filter(x=>T(x[1]));
+      const rows=[[STAGES[1],ant],[STAGES[2],r.prec],[STAGES[3],r.target],[STAGES[4],T(r.crisis).length<80&&/CR-1|crisis (intervention )?plan/i.test(r.crisis)?'':r.crisis],[STAGES[5],r.after]].filter(x=>T(x[1]));
       rows.forEach((x,i)=>{while(S.pbis.length<=i)S.pbis.push({s:'',do:'',next:'',who:''});S.pbis[i].s=x[0];S.pbis[i].do=T(x[1]);});
       if(rows.length){n+=rows.length;placed.push(rows.length+' stage'+(rows.length===1?'':'s')+' from the plan (TD-1)');}}
     /* the related plans in force */

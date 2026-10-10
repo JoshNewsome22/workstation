@@ -9010,5 +9010,69 @@ a{text-underline-offset:2px}
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the functional analysis outcome as evidence for Form FS-1: "Function(s) identified" when it is
+   written, else the interpretation sheet's outcome (the condition or conditions that meet the criterion, by their names:
+   demand or escape, attention, tangible, alone or no interaction for automatic), the variant and design used, the session
+   dates and count (the sessions logged with a condition and a value). Strength: one condition meeting the rule without flags Strong; with flags, or several, Moderate;
+   undifferentiated names no function. */
+OUT(function(){const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
+  const txt=n=>{const e=document.querySelector('[name="'+n+'"]');return e&&e.tagName==='SELECT'&&e.selectedIndex>0?T(e.options[e.selectedIndex].textContent):'';};
+  const rows=[...document.querySelectorAll('#sessBody tr')].map((tr,i)=>i).filter(i=>val('s['+i+'].c')!==''&&val('s['+i+'].v')!=='');const func=val('d.func');if(!rows.length&&!func)return null;
+  const vd=document.getElementById('critVerdict'),tag=vd&&vd.querySelector('.tag'),head=T(tag?tag.textContent:'');
+  const word=s=>/alone|ignore|no interaction/i.test(s)?'Automatic':/demand|escape|task/i.test(s)?'Escape':/attention/i.test(s)?'Attention':/tangible|item/i.test(s)?'Tangible':/synth|iisca/i.test(s)?'Synthesized contingencies (multiple)':T(s);
+  let met=[],strength='',m;
+  if((m=/^Differentiated: (.+?) meets the rule/.exec(head))){met=[m[1]];strength=/Review flags/.test(vd.textContent)?'Moderate':'Strong';}
+  else if((m=/^Multiple conditions meet the rule: (.+?)\.?$/.exec(head.split('.')[0]+'.'))){met=m[1].split(/,\s*/);strength='Moderate';}
+  const found=met.map(word),undiff=/^Undifferentiated/.test(head);
+  const fn=func||(found.length?found.join(' and '):undiff?'Undifferentiated':'');
+  const key=K(func)||(found.length>1?'multiple':K(found[0]||''))||(undiff?'unclear':'');
+  if(func&&!strength)strength=document.querySelector('[name="d.fn"]:checked')?'Strong':'Moderate';
+  if(!key||key==='unclear')strength='';
+  const variant=txt('v.chosen'),design=val('v.design');
+  const sd=rows.map(i=>val('s['+i+'].d')).filter(Boolean);
+  return EV(Object.assign({form:'EA-1',method:'Functional analysis'+(variant||design?' ('+[variant,design].filter(Boolean).join(', ')+')':''),design:design||variant},
+    SPAN(sd.length?sd:[val('m.date')]),{n:rows.length||null,fn,fnKey:key,strength,by:val('m.assessor'),
+    statement:(func?'Function(s) identified: '+func+'. ':'')+(head?head+(/[.]$/.test(head)?'':'.'):'')}));});
+
+/* v21.78 the FBA chain, in: what the analysis is built on, when the field is empty (never over what is typed): "Hypothesis
+   carried in" and "Prior hypothesis (IA-1 / ABC-1)" from the evidence of Forms IA-1, IN-1, ABC-1 and OB-1 (a line per form
+   naming its function; the prior hypothesis is a consensus only when every function named agrees and one source is Moderate
+   or Strong, unclear or conflicting when they differ), "Consent and notification" from Form IC-1, "Medical clearance" from
+   the medications on Form DM-1 (names and doses), the definition, the TB-1 urgency level and the precursor (Form TD-1, else
+   Form CR-1). The shared fill (the target behavior) runs first, as before. */
+window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;if(!f)return g;let n=0;const got=[];
+  const put=(name,v,what)=>{const el=document.querySelector('[name="'+name+'"]');v=T(v);if(!el||!v||T(el.value))return;
+    if(el.tagName==='SELECT'){if(![...el.options].some(o=>o.value===v))return;}el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;if(what)got.push(what);};
+  const E=f.evidence||{},src=['IA-1','IN-1','ABC-1','OB-1'].map(id=>E[id]&&Object.assign({id},E[id])).filter(e=>e&&T(e.fn));
+  if(src.length){put('m.hyp',src.map(e=>e.id+': '+T(e.fn)+(e.strength?' ('+e.strength.toLowerCase()+')':'')).join('; '),'the hypothesis carried in');
+    const keys=[...new Set(src.map(e=>e.fnKey||K(e.fn)).filter(Boolean))],firm=src.some(e=>/Strong|Moderate/.test(e.strength||''));
+    const one=keys.length===1?{attention:'social',tangible:'social',escape:'escape',automatic:'auto'}[keys[0]]:'';
+    put('v.hyp',one&&firm?one:(keys.length>1||(keys.length===1&&!one))?'none':'','the prior hypothesis');}
+  const c=f.consent;if(c&&T(c.date)){const d=MDY(ISO(c.date))||T(c.date),p=T(c.parent)&&T(c.parent)!==T(c.date)?MDY(ISO(c.parent))||T(c.parent):'';
+    put('s.consent','Parent consent obtained '+d+(p?' (parent signed '+p+')':'')+' (Form IC-1)','consent');}
+  const h=f.profile&&f.profile.health,meds=h&&Array.isArray(h.meds)?h.meds.filter(m=>m&&T(m.name)):[];
+  if(meds.length)put('s.med','Current medications (Form DM-1): '+meds.map(m=>T(m.name)+(T(m.dose)?' '+T(m.dose):'')).join('; ')+'.','medications');
+  const b=(f.behaviors||[]).find(x=>x&&!(x.isRep||/replacement|alternative/i.test(x.type||'')));
+  if(b){put('m.def',b.def,'the definition');if(b.urg!=null)put('m.urg',String(b.urg),'the urgency level');}
+  put('m.prec',(f.plan&&T(f.plan.prec))||(f.crisis&&T(f.crisis.precursor)),'the precursor');
+  if(n)try{if(typeof refresh==='function')refresh();}catch(e){}
+  const gf=(g&&g.filled)||0;return gf||n?{filled:gf+n,note:got.length?'from the case: '+got.join(', '):((g&&g.note)||'')}:g;};
+})();
+</script>
 </body>
 </html>

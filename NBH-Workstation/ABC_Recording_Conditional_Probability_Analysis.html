@@ -9807,5 +9807,41 @@ function abcBtn(){let el=document.getElementById('abcIncBtn');const L=abcIncs();
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){abcCase=f||null;abcBtn();return was?was.apply(this,arguments):null;};}
 abcBtn();
 </script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the conditional-probability conclusion as evidence for Forms FS-1 and EA-1, by the Analysis
+   tab's own ranking ("Reading the record as a whole"): the consequence class taken forward as the first hypothesis to test,
+   over the coded incidents in the analysis filter. With no social consequence ranked and nothing socially mediated after
+   at least half of the incidents, the automatic hypothesis is named (consistent with, not established). Strength: from
+   Yule's Q against the background samples once 10 or more are on file (strong, moderate, otherwise Weak); Weak without them,
+   since a frequent consequence is not shown to be contingent. */
+OUT(function(){const A=analysisSet(),N=A.coded.length,M=A.samples.length;if(!N)return null;
+  const k=classStats(A.coded,A.samples);
+  const ranked=k.filter(r=>r.cls!=='none'&&r.n>0).sort((a,b)=>(M&&a.stats&&b.stats)?((b.stats.q??-2)-(a.stats.q??-2)):(b.pGiven-a.pGiven));
+  const top=ranked[0],none=k.find(r=>r.cls==='none'),P=x=>Math.round((x||0)*100)+'%';
+  let fn='',key='',st='',strength='Weak';
+  if(top){fn=top.label;key=top.cls;const q=top.stats&&top.stats.q;
+    st=top.label+' followed '+P(top.pGiven)+' of incidents ('+top.n+' of '+N+')'+(q!=null?'; Yule’s Q against the no-behavior base rate of '+P(top.pBase)+' is '+q.toFixed(2)+' ('+qStrength(q).word+')':'')+'. The record supports taking '+top.label.toLowerCase()+' forward as the first hypothesis to test.';
+    if(M>=10&&q!=null){const w=qStrength(q).word;strength=w==='strong'?'Strong':w==='moderate'?'Moderate':'Weak';}}
+  else if(none&&none.pGiven>=0.5){fn='Automatic (nothing socially mediated delivered)';key='automatic';st='Nothing socially mediated was recorded after '+P(none.pGiven)+' of incidents ('+none.n+' of '+N+'): consistent with automatic maintenance, which this record cannot establish.';}
+  else st='No consequence class followed the behavior often enough to rank.';
+  const h=state.header||{};
+  return EV(Object.assign({form:'ABC-1',method:M?'ABC recording with conditional probabilities against '+M+' background samples (descriptive)':'ABC recording with conditional probabilities (descriptive)'},
+    SPAN(A.coded.map(e=>e.date)),{n:N,fn,fnKey:K(key)||key,strength:fn?strength:'',by:T(h.observer),statement:st}));});
+})();
+</script>
 </body>
 </html>

@@ -292,3 +292,19 @@ async function loadSim(){if(!(await nbhUI.confirm('Load a simulated set of visua
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+
+/* v21.78 the case: in. The reinforcer menu from Form PA-1 (the high and middle preference items, in its order) names
+   the choice board's choices, the first-then board's "Then" and the token board's reward, only where that label is
+   still empty (the "Then" card's own word counts as empty) and no photo is on the card. The pictures are left as they
+   are, so the note asks the person to check that each picture matches its new name. Nothing typed is replaced. */
+(function(){const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
+  if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  const menu=(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP').map(m=>String(m.name).trim()),L=s=>String(s||'').trim().toLowerCase();
+  if(menu.length){ensure();const chn=num(S.meta.ch_n)||4,ch=S.choice.slice(0,chn),used=new Set(ch.map(o=>L(o.l)).filter(Boolean));
+    const free=menu.filter(x=>!used.has(L(x)));ch.forEach(o=>{if(!o.ph&&!L(o.l)&&free.length){o.l=free.shift();k++;}});
+    const t=S.ft[1];if(t&&!t.ph&&(!L(t.l)||L(t.l)==='then')){t.l=menu[0];k++;}
+    const w=S.tk[1];if(w&&!w.ph&&!L(w.l)){w.l=menu[0];k++;}}
+  if(k){try{renderAll();}catch(e){}const el=document.querySelector('[data-r="choice"][data-f="l"]')||document.querySelector('[data-m]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}
+  return {filled:n+k,note:k?'reinforcer names from Form PA-1 went on as labels; check that each picture matches':((r&&r.note)||'')};};
+})();

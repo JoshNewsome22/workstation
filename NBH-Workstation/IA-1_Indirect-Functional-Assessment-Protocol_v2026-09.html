@@ -10488,5 +10488,40 @@ a{text-underline-offset:2px}
 </script>
 <script src="nbh-ia1-narration.js" defer></script>
 <script src="nbh-tk1-video.js" defer></script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: this assessment's result as evidence for Forms FS-1 and EA-1 (they retyped it before). The
+   function is "Indirect hypothesis carried to the packet" (m.fn), the method names the instruments that have an outcome on
+   the convergence table, the count is the informants with a counted outcome, and the statement quotes the consensus line.
+   Strength: Moderate when at least 3 informants agree at 80% or more on the category carried, otherwise Weak (an indirect
+   assessment never demonstrates control). The function itself is still never filled from the case. */
+OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
+  const rows=[...document.querySelectorAll('#convTbl tbody tr')].filter(r=>r.cells.length>=6);if(!v&&!rows.length)return null;
+  const inst=[...new Set(rows.map(r=>T(r.cells[0].textContent)).filter(Boolean))].map(x=>/open-ended/i.test(x)?'open-ended interview':x);
+  const inf=new Set(rows.filter(r=>/counted/.test(r.cells[5].textContent)).map(r=>T(r.cells[1].textContent)));
+  const tag=document.querySelector('#convVerdict .tag'),L=tag?[...tag.childNodes].filter(n=>n.nodeType===3).map(n=>T(n.textContent)).filter(Boolean):[];
+  const cons=L[0]&&/informant/.test(L[0])?L[0]:'',m=/(\d+) of (\d+) informants \((\d+)%\)/.exec(cons),cat=K(cons.split(/[:(]/)[0]);
+  const key={attention:'attention',tangible:'tangible',escape:'escape',automatic:'automatic',multiple:'multiple',undetermined:'unclear'}[v]||'';
+  const fn=v&&sel.selectedIndex>=0?T(sel.options[sel.selectedIndex].textContent):'';
+  const strength=!v||key==='unclear'?'':(key&&m&&+m[1]>=3&&+m[3]>=80&&cat===key)?'Moderate':'Weak';
+  const val=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};
+  const list=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+  return EV(Object.assign({form:'IA-1',method:(inst.length?list(inst):'Rating scales and interviews')+' (indirect)'},SPAN([val('m.date')]),{n:inf.size||null,fn,fnKey:key,strength,by:val('m.assessor'),
+    statement:'Indirect hypothesis carried to the packet: '+(fn||'not yet chosen')+'.'+(cons?' Informant consensus: '+cons+(L[1]?'; '+L[1]:'')+'.':'')}));});
+})();
+</script>
 </body>
 </html>

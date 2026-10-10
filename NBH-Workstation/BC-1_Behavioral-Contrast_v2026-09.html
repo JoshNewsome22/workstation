@@ -3197,6 +3197,30 @@ renderAll();
 </script>
 
 <script>
+/* v21.78 the case: in. The form kept the shared fill (the target behavior), and two fields come from the case when
+   they are empty: the measure, from the dimension and counting unit Form TB-1 gives the behavior named here (else the
+   first target behavior), and "Integrity in the changed component", from Form TI-1. Nothing typed is replaced. */
+(function(){
+const tiLine=t=>{if(!t||typeof t!=='object')return '';const o=(t.obs||[]).filter(x=>x&&isFinite(parseFloat(x.pct)));
+  const ov=isFinite(parseFloat(t.overall))?+t.overall:(o.length?o.reduce((a,x)=>a+ +x.pct,0)/o.length:null);if(ov==null)return '';
+  const last=o.map(x=>String(x.date||'')).filter(Boolean).sort().pop();
+  return 'Treatment integrity '+(Math.round(ov*10)/10)+'%'+(o.length?' over '+o.length+' TI-1 observation'+(o.length===1?'':'s'):' (Form TI-1)')+(last?' (latest '+last+')':'');};
+const pickB=(bs,cur)=>{bs=(bs||[]).filter(b=>b&&String(b.label||'').trim());const c=String(cur||'').trim().toLowerCase(),L=b=>String(b.label).trim().toLowerCase();
+  return (c&&bs.find(b=>c===L(b)||c.indexOf(L(b))===0))||bs.find(b=>!b.isRep)||bs[0]||null;};
+const put=(key,v)=>{const el=document.querySelector('[data-m="'+key+'"]');if(!el||!v||String(el.value||'').trim()||String(S.meta[key]||'').trim())return 0;
+  el.value=v;S.meta[key]=v;el.dispatchEvent(new Event('input',{bubbles:true}));return 1;};
+const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};const got=[];
+  if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  const b=pickB(f.behaviors,S.meta.beh),ms=b?[String(b.dim||'').trim(),String(b.unit||'').trim()].filter(Boolean).join(' — '):'';
+  if(put('measure',ms)){k++;got.push('the measure from Form TB-1');}
+  if(put('r_int',tiLine(f.integrity))){k++;got.push('integrity from Form TI-1');}
+  if(k)try{renderAll();}catch(e){}
+  return {filled:n+k,note:got.join('; ')||((r&&r.note)||'')};};
+})();
+</script>
+
+<script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
    identifiers get retyped into every one. This adds a small shared file that
