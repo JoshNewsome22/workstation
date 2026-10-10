@@ -95,7 +95,7 @@ function renderTr(){
     <div class="metric"><b>Teaching mean</b><div class="val">${T.length?pct(T.reduce((a,x)=>a+x.pi,0)/T.length):'—'}</div><div class="sub">${T.length} teaching session${T.length===1?'':'s'}</div></div>
     <div class="metric"><b>First trial independent</b><div class="val">${f5.length?fi+' of '+f5.length:'—'}</div><div class="sub">last ${f5.length||5} sessions with a first trial scored</div></div>`;
 }
-$('#addS').addEventListener('click',()=>{if(S.sess.length>=60)return;const prev=S.sess[S.sess.length-1];S.sess.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',tr:[],note:''});renderTr();renderGraph();});
+$('#addS').addEventListener('click',()=>{if(S.sess.length>=60)return;const prev=S.sess[S.sess.length-1];S.sess.push({date:'',ph:prev?prev.ph:'B',inst:prev?prev.inst:'',tr:[],dl:'',note:''});renderTr();renderGraph();});
 $('#delS').addEventListener('click',async ()=>{if(!S.sess.length)return;const s=S.sess[S.sess.length-1];if((s.date||s.tr.some(x=>x))&&!(await nbhUI.confirm('Remove the last session?\nIts date and scores are deleted.',{ok:'Remove',danger:true})))return;S.sess.pop();renderTr();renderGraph();});
 
 /* ---------------- task analysis ---------------- */
@@ -311,7 +311,7 @@ function fromFile(d){
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
   const strs=(a,n)=>Array.isArray(a)?a.slice(0,n).map(str):[];
   o.codes=Array.isArray(s.codes)?s.codes.slice(0,10).map(x=>({c:str(x&&x.c),label:str(x&&x.label),kind:['ind','pr','err'].includes(x&&x.kind)?x.kind:'pr'})):[];
-  o.sess=Array.isArray(s.sess)?s.sess.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),tr:strs(x&&x.tr,50),note:str(x&&x.note)})):[];
+  o.sess=Array.isArray(s.sess)?s.sess.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),tr:strs(x&&x.tr,50),...(x&&x.dl!=null?{dl:str(x.dl)}:{}),note:str(x&&x.note)})):[];   /* v21.78: the Delay row (v21.37) is kept, as a string */
   o.steps=Array.isArray(s.steps)?s.steps.slice(0,30).map(x=>({text:str(x&&x.text)})):[];
   o.tas=Array.isArray(s.tas)?s.tas.slice(0,60).map(x=>({date:str(x&&x.date),ph:['B','T','M'].includes(x&&x.ph)?x.ph:'',inst:str(x&&x.inst),lv:strs(x&&x.lv,30),note:str(x&&x.note)})):[];
   o.probes=Array.isArray(s.probes)?s.probes.slice(0,60).map(x=>({date:str(x&&x.date),type:str(x&&x.type),dim:str(x&&x.dim),desc:str(x&&x.desc),n:str(x&&x.n),k:str(x&&x.k),note:str(x&&x.note)})):[];
@@ -396,4 +396,22 @@ window.__nbhFactsPick=function(sel){
   else if(b){m.skill=b.rep||b.label;if(b.def&&!b.rep)m.def=b.def;n++;}
   if(sel.menu.length){m.reinforcer=sel.menu.map(x=>x.name).join('; ')+' (ranked on Form PA-1)';n++;}
   renderAll();return {filled:n};
+};
+
+/* v21.78 the case: out. The program this form holds, for the other forms (GB-1's progress report reads it):
+   name, target skill, the mastery criterion in words, the current level (% independent in the latest scored
+   session of the graphed grid), the last date (ISO), mastered (the graph's mastery rule) and the phase. */
+function isoOf(t){t=String(t||'').trim();let m=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=t.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/);if(!m)return '';const now=new Date();let y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):now.getFullYear();
+  if(!m[3]&&new Date(y,+m[1]-1,+m[2])>new Date(now.getFullYear(),now.getMonth(),now.getDate()+7))y--;   /* a month/day without a year is the latest such date not in the future */
+  return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}
+window.__nbhFactsOut=function(){
+  const M=S.meta||{},R=series(),m=mc(),scored=R.filter(r=>r.pi!=null);if(!(M.program||M.skill||scored.length))return null;
+  const T=scored.filter(r=>r.ph==='T'),win=T.slice(-m.n),insts=new Set(win.map(r=>r.inst).filter(Boolean)),ta=srcIsTA();
+  const mastered=win.length>=m.n&&win.every(r=>r.pi>=m.pct)&&insts.size>=m.inst&&(!S.chk.mc_first||ta||win.every(r=>r.firstInd));
+  const lastS=scored[scored.length-1],dated=R.filter(r=>isoOf(r.date)),lastD=dated.length?isoOf(dated[dated.length-1].date):'';
+  const p={name:String(M.program||M.skill||'').trim(),target:String(M.skill||'').trim(),criterion:m.pct+'% independent across '+m.n+' consecutive teaching sessions'+(m.inst>1?' with '+m.inst+' instructors':''),
+    current:lastS?Math.round(lastS.pi):null,unit:ta?'% of steps independent':'% of trials independent',mastered:!!mastered,phase:lastS?(PHNAME[lastS.ph]||''):''};
+  if(lastD)p.last=lastD;if(M.goal)p.goal=String(M.goal);
+  return {skills:{programs:[p]}};
 };

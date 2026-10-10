@@ -697,3 +697,27 @@ window.__nbhFactsIn=function(f){const m=S.meta;let n=0;const b=f.behaviors||[];
   if(sib){if(!m.beh){m.beh=sib.label;n++;}if(!m.behdef&&sib.def){m.behdef=sib.def;n++;}}
   if(n)renderAll();return {filled:n,note:sib?undefined:'the case holds no target behavior yet'};};
 window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {filled:0};S.meta.beh=b.label;if(b.def)S.meta.behdef=b.def;renderAll();return {filled:1};};
+
+/* v21.78 the case: out. The injuries this form records, for the workstation's Today and Safety lists: the latest date an
+   injury was recorded (an administration that found an injured site, an injury report among the events, or an injury
+   noticed during required care), how many such records fall in the last 30 days, the latest administration's indices,
+   and what is still open with its date: a check due or overdue on the schedule, a report question not answered or a
+   report not yet recorded, and an injury noticed during care not yet passed to the nurse or, where no report is being
+   made, the parent or guardian. Dates are ISO. */
+window.__nbhFactsOut=function(){
+  const iso=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'',tx=v=>String(v==null?'':v).trim();
+  const H=histSorted(),inj=[];H.forEach(h=>{const d=pDate(h.date);if(d&&score(h.rows).n)inj.push(d);});
+  S.events.forEach(e=>{const d=pDate(e.date);if(d&&e.kind==='Injury report')inj.push(d);});S.care.forEach(c=>{const d=pDate(c.date);if(d)inj.push(d);});
+  if(!H.length&&!S.events.length&&!S.care.length&&!S.meta.intake)return null;
+  const now=new Date();now.setHours(12,0,0,0);const from=addDays(now,-30),last=inj.length?new Date(Math.max(...inj)):null;
+  const o={count30:inj.filter(d=>d>=from&&d<=addDays(now,1)).length,open:[]};if(last)o.last=iso(last);
+  const lh=H.filter(h=>pDate(h.date)).slice(-1)[0];if(lh){const sc=score(lh.rows);o.latest={date:iso(pDate(lh.date)),sites:sc.n,ni:sc.ni,si:sc.si,risk:sc.risk||''};}
+  schedule().items.filter(x=>!x.done).forEach(x=>o.open.push({what:x.what+(x.over?' (overdue)':''),due:iso(x.date),done:false}));
+  const repOpen=(rep,what,d)=>{if(!rep)return;if(!rep.need)o.open.push({what:'Answer the report question (abuse or neglect) for '+what,due:iso(d),done:false});
+    else if(rep.need==='yes'&&!['when','to','by'].every(k=>tx(rep[k])))o.open.push({what:'Record the report made for '+what+' (when, to whom, by whom)',due:iso(d),done:false});};
+  H.forEach(h=>{const d=pDate(h.date);if(d)repOpen(h.rep,'the SIT Scale of '+MDY(d),d);});
+  S.care.forEach(c=>{const d=pDate(c.date);if(!d)return;const w='the injury noticed during care on '+MDY(d);repOpen(c.rep,w,d);
+    if(!tx(c.nurse))o.open.push({what:'Pass '+w+' to the school nurse',due:iso(d),done:false});
+    if(!tx(c.parent)&&c.rep&&c.rep.need!=='yes')o.open.push({what:'Tell the parent or guardian about '+w,due:iso(d),done:false});});
+  return {injury:o};
+};

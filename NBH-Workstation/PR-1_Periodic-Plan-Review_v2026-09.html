@@ -4037,6 +4037,33 @@ function prAlso(){const f=prCase;if(!f)return 0;const v=prAlsoText(f);if(!v)retu
 window.__nbhFactsIn=function(f){prCase=f||null;prCaseBar();const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;const k=prAlso();
   return k?{filled:((g&&g.filled)||0)+k,note:'the review period from the case'}:g;};
 prCaseBar();
+/* v21.78 the case: out. The review this form records, for the workstation's Today list and the other forms: the
+   review date and the next one (ISO), the decision recorded (continue, modify, reassess, fade or exit) with its words,
+   this form's fixed decision rules (a 25% reduction from baseline is counted as progress; 60% begins fading; 10% above
+   returns to assessment; integrity 90%), and, after an exit, the monitoring: the schedule, the next check from it and
+   the threshold that brings the plan back. PR-1 sets no minimum days in a period, so minDays is the workstation's 10. */
+const prIso=t=>{t=prT(t);let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/.exec(t)||/^(\d{1,2})\/(\d{1,2})()$/.exec(t);if(!m)return '';const y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):new Date().getFullYear();
+  return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
+const PR_DEC={'Continue unchanged':'continue','Continue and address implementation':'continue','Modify the plan':'modify','Return to assessment':'reassess','Begin fading':'fade','Exit the plan':'exit'};
+const PR_NUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twice:2,once:1};
+function prNextCheck(iso,every){if(!iso||!every)return '';const t=every.toLowerCase(),d=new Date(iso+'T12:00:00');if(isNaN(d))return '';
+  const n=w=>w==null?1:(/^\d+$/.test(w)?+w:(PR_NUM[w]||1));let m;
+  if((m=/every\s+(\d+|[a-z]+)?\s*days?\b/.exec(t)))d.setDate(d.getDate()+n(m[1]));else if(/\bdaily\b|every day/.test(t))d.setDate(d.getDate()+1);
+  else if((m=/every\s+(\d+|[a-z]+)\s+weeks?\b/.exec(t)))d.setDate(d.getDate()+7*n(m[1]));else if(/\bweekly\b|every week|once a week/.test(t))d.setDate(d.getDate()+7);
+  else if(/biweekly|fortnight|every other week/.test(t))d.setDate(d.getDate()+14);
+  else if((m=/every\s+(\d+|[a-z]+)\s+months?\b/.exec(t)))d.setMonth(d.getMonth()+n(m[1]));else if(/quarterly/.test(t))d.setMonth(d.getMonth()+3);
+  else if(/monthly|every month|once a month/.test(t))d.setMonth(d.getMonth()+1);else return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=was?was.apply(this,arguments):null;const o=r&&typeof r==='object'?r:{};
+  const m=(typeof S!=='undefined'&&S&&S.meta)||{},dec=prT(m.dec),date=prIso(m.date),next=prIso(m.next),every=prT(m.post),back=prT(m.back);
+  if(!date&&!next&&!dec&&!every&&!back)return r||null;
+  const rv={decision:PR_DEC[dec]||'',decisionText:dec,rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  if(date)rv.date=date;if(next)rv.next=next;if(prT(m.decWhat))rv.changes=prT(m.decWhat);if(prT(m.decWhy))rv.why=prT(m.decWhy);if(prT(m.earlier))rv.earlier=prT(m.earlier);
+  if(rv.decision==='exit'||every||back){const tn=/(\d+(?:\.\d+)?)/.exec(back),tw=/\b(one|two|three|four|five|six|seven|eight|nine|ten|once|twice)\b/i.exec(back);
+    const x={every,threshold:back,thresholdN:tn?+tn[1]:tw?PR_NUM[tw[1].toLowerCase()]:null};
+    if(rv.decision==='exit'&&date){x.date=date;const nc=prNextCheck(date,every);if(nc)x.next=nc;}rv.exit=x;}
+  o.review=rv;return o;};}
 </script>
 
 <script>

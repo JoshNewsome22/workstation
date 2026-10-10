@@ -50,8 +50,8 @@ const views=['setup','trials','steps','graph','probes','guide'];
   await page.evaluate(()=>{S=blank();renderAll();});
   console.log('cleared: sess',await page.evaluate(()=>S.sess.length),'client',await page.evaluate(()=>S.meta.client||'(none)'));
   await page.evaluate(async t=>{const dt=new DataTransfer();dt.items.add(new File([t],'x.json',{type:'application/json'}));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));},saved);await sleep(300);
-  const after=await page.evaluate(()=>JSON.stringify(S));console.log('round trip identical:',before===after,'bytes',saved.length,'form',JSON.parse(saved).form,JSON.parse(saved).rev);
-  if(before!==after){const a=JSON.parse(before),b=JSON.parse(after);for(const k of Object.keys(a))if(JSON.stringify(a[k])!==JSON.stringify(b[k]))console.log('  differs:',k,JSON.stringify(a[k]).slice(0,160),'|',JSON.stringify(b[k]).slice(0,160));}
+  const after=await page.evaluate(()=>JSON.stringify(S));console.log('round trip identical:',before===after,'delay row kept:',JSON.parse(after).sess.map(s=>s.dl).join(','),'bytes',saved.length,'form',JSON.parse(saved).form,JSON.parse(saved).rev);
+  if(before!==after){process.exitCode=1;console.log('FAIL round trip is not identical');const a=JSON.parse(before),b=JSON.parse(after);for(const k of Object.keys(a))if(JSON.stringify(a[k])!==JSON.stringify(b[k]))console.log('  differs:',k,JSON.stringify(a[k]).slice(0,160),'|',JSON.stringify(b[k]).slice(0,160));}
   await page.evaluate(async()=>{const dt=new DataTransfer();dt.items.add(new File(['{"form":"SM-1","S":{}}'],'x.json'));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(200);
   console.log('still loaded after wrong file:',await page.evaluate(()=>S.sess.length),await page.evaluate(()=>S.meta.client));
   await page.evaluate(async()=>{const dt=new DataTransfer();dt.items.add(new File(['not json'],'x.json'));const i=document.querySelector('#fileIn');i.files=dt.files;i.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(200);
@@ -71,5 +71,8 @@ const views=['setup','trials','steps','graph','probes','guide'];
   for(const v of views){await page.click(`#viewSeg button[data-view="${v}"]`).catch(()=>{});await sleep(200);const sw=await page.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth]);if(sw[0]!==sw[1])console.log('PHONE OVERFLOW',v,sw.join('/'));}
   await page.click('#viewSeg button[data-view="trials"]');await sleep(200);await page.screenshot({path:`${OUT}/phone-trials.png`,fullPage:true});
   console.log('phone checked. LOG:',JSON.stringify(log));
+  /* v21.78: a page error fails the run too */
+  if(log.some(l=>l.type==='pageerror')){process.exitCode=1;console.log('FAIL page errors logged');}
+  console.log(process.exitCode?'RESULT: failed':'RESULT: all passed');
   await br.close();
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

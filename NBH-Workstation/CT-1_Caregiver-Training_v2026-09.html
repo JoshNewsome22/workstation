@@ -3534,6 +3534,22 @@ async function loadSim(){
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+/* v21.78 the case: In. The consent date from Form IC-1; the protocol steps of Form TV-1 (each step and whether it is
+   critical) when this form's step list is still empty and uncoded; the reinforcer menu of Form PA-1 offered as the
+   reinforcers at home, marked to be checked with the family. Each only where the field is empty; then the shared fill
+   (target behavior and function), which this form relied on before. */
+window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
+  const dm=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'').trim();};
+  const meta=(k,v)=>{v=String(v==null?'':v).trim();if(!v||String(S.meta[k]==null?'':S.meta[k]).trim())return;const el=$('[data-m="'+k+'"]');if(el&&String(el.value||'').trim())return;S.meta[k]=v;last=el||last;n++;};
+  const c=f.consent||{},cd=c.date||c.parent;if(cd)meta('consent',dm(cd)+' (Form IC-1'+(c.parent&&c.parent!==cd?'; parent signed '+dm(c.parent):'')+')');
+  const menu=(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP').slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
+  if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
+  const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
+  let steps=false;
+  if(T.length&&S.steps.every(x=>!String(x.d||'').trim())&&!Object.keys(S.cells||{}).some(k=>S.cells[k])){S.steps=T.map(x=>({d:String(x.d).trim(),crit:!!x.crit}));n+=T.length;steps=true;}
+  if(n){renderAll();const el=last||$('#stepTbl [data-s="0"]')||$('[data-m]');try{if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
+  return {filled:n+(g&&g.filled||0),note:steps?'Protocol steps from Form TV-1':''};};
 </script>
 
 <script id="rr-run">

@@ -6454,6 +6454,15 @@ a{text-underline-offset:2px}
 /* v21.75 out: the date consent was obtained and the date of the parent's signature, for the workstation's hand-over check */
 window.__nbhFactsOut=function(){try{const v=id=>{const e=document.getElementById(id);return e?String(e.value||'').trim():'';};const c=v('cDate'),p=v('sParDate');
   return c||p?{consent:{date:c,parent:p,src:'IC-1'}}:null;}catch(e){return null;}};
+/* v21.78 in: the behaviors of concern from Form TB-1 (each label with its definition, one to a line) when the field is
+   empty; then the shared fill this form relied on before. Wrapped, so a hook set earlier keeps working. */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let n=0;try{const el=document.querySelector('[name="c.behav"]'),B=(f&&Array.isArray(f.behaviors)?f.behaviors:[]).filter(b=>b&&String(b.label||'').trim());
+    if(el&&B.length&&!String(el.value||'').trim()){const def=el.tagName==='TEXTAREA';
+      el.value=B.map(b=>{const l=String(b.label).trim(),d=String(b.def||'').trim();return def&&d?l+': '+d:l;}).join(def?'\n':'; ');n++;
+      ['input','change'].forEach(t=>{try{el.dispatchEvent(new Event(t,{bubbles:true}));}catch(e){}});}}catch(e){}
+  let g=null;if(!was){try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}}
+  return {filled:n+(r&&r.filled||0)+(g&&g.filled||0),note:n?'Behaviors of concern from Form TB-1':(r&&r.note)||''};};})();
 </script>
 </body>
 </html>
