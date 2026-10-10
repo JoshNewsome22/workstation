@@ -392,7 +392,9 @@ body.bar-folded #barSum{display:flex}
   .bar button,.crumb button,#paneBar .pane button{min-height:40px}
   .crumb .acts button{min-width:40px}
   .rail .item{min-height:46px}
-  .rail .item input[type=checkbox]{width:22px;height:22px}
+  .rail .item input[type=checkbox]{width:26px;height:26px}
+  /* v21.78 the iPad audit: the list's small buttons at 40 px too, and the space around a tick box is its target (the script) */
+  .railhead button.sm{min-height:40px;padding:8px 12px}
   #cfDlg .df button,#dlg .df button{min-height:44px}
 }
 .bar .facts{font-size:12px;color:#cfe0dd;line-height:1.4}.bar .facts .lbl{font-weight:600;color:#fff;letter-spacing:.02em}.bar .facts b{color:#fff;font-weight:600}.bar .facts i{font-style:normal;color:#9fb6bd}
@@ -1153,6 +1155,8 @@ $('#rail').addEventListener('click',e=>{
   const tick=e.target.closest('[data-tick]');
   if(tick){state.ticked[tick.dataset.tick]=tick.checked;renderRail();e.stopPropagation();return;}
   const it=e.target.closest('.item'); if(!it)return;
+  /* v21.78 a tap in the space around a form's tick box (left of its name) ticks it, rather than opening the form */
+  if(e.target===it){const cb=it.querySelector('[data-tick]'),b=it.querySelector('button.open');if(cb&&b&&e.clientX<b.getBoundingClientRect().left){cb.click();return;}}
   openForm(it.dataset.id);
 });
 /* the form list as a drawer on a narrow window (see the CSS for why) */

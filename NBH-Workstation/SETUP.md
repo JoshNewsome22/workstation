@@ -8556,3 +8556,69 @@ Checked by `qa/v2176-test.js` (16 checks, with Google's sign-in and the Sheets A
 
 Checked by `qa/v2177-test.js` (31 checks; the simulated student Mateo Rivera); `qa/tv1-test.js` counts fourteen
 segments now.
+
+### v21.78: the case carried further, Today and the hand-over, the iPad
+
+**The case carries more, so less is typed twice.** Every fill takes only empty fields; nothing you typed is replaced.
+- *The FBA chain.* IA-1, IN-1, OB-1, ABC-1, SP-1, VI-1 and EA-1 each give their result to the case (the method, the
+  dates, the function, the strength, the form's own statement). Form FS-1 takes a row of its evidence table for each
+  (never twice), its consent date from IC-1 and the statements into empty hypothesis rows; Form EA-1 takes the
+  hypothesis carried in, the consent, the medications, the definition, the urgency and the precursor.
+- *The plan and safety.* Form TD-1 takes the replacement behavior, the precursor, the preferred items, the reinforcer and
+  EO, the safety level, the baseline and EA-1's function and design. Form CR-1 takes the dangerous behavior, the
+  precursor, the stages (from the plan, when none is written), the related plans and the student's health and signals.
+  Form EB-1 takes the plan's lines (see, ask, after, respond, never, the early signs, what helps, when and whom to call).
+- *Smaller fills.* DM-1 now shares the student's health (medications, prescriber, allergies, conditions) and the IEP and
+  reevaluation dates; RR-1, MS-1, CR-1 and EA-1 take them. IC-1's consent date goes to FS-1, EA-1, RR-1 and CT-1. TI-1's
+  integrity goes to CF-1, BC-1 and PD-1. PA-1's menu goes to AD-1, DT-1 and VS-1 (labels only; check the pictures). The
+  definitions go to MT-1, GC-1, BC-1 and IC-1; DT-1's "what the student does instead of waiting" takes the target
+  behaviors. TV-1's rehearsal steps go to CT-1 as well as ST-1.
+- *New in the case:* PR-1's review (its decision, its rules, the exit monitoring), RR-1's records (removal days this
+  year, the manifestation determination, the IEP and reevaluation dates), HD-1's home sheets (sent, due back, came back)
+  and their counts, IM-1's injuries and open follow-ups, SA-1's skill programs, and CR-1's restraint and seclusion
+  notice deadlines. The case line names each.
+
+**Restraint and seclusion (Florida s. 1003.573).** Form DD-1's incident log has *Physical intervention*: none, physical
+escort, restraint or seclusion. A restraint or seclusion saved there tells you that Form CR-1 starts the notice clock;
+CR-1 takes the incident into its log (once) and its deadlines (the 24-hour report, the parent the same day, the written
+report within 3 school days, the crisis plan at the second restraint in a semester) reach Today and the hand-over check.
+With no release time entered, the 24-hour report is counted from when the restraint began (never later than the law).
+
+**Today** now also lists: the restraint and seclusion notices due or overdue (first); IM-1's open injury follow-ups;
+*Decision*: a behavior judged after ten school days in its phase that has not moved by PR-1's progress threshold (20%
+from the level before the plan by default), with integrity at its criterion: review the plan; with integrity under it:
+retrain first; with no TI-1 check: check the plan is run before changing it. *Timeline*: the FBA due 60 days from consent
+until FS-1 holds a function (Rule 6A-6.0331); the plan review (PR-1's next date, or six weeks after the last review or
+the start of the plan); the check after exit; the annual IEP review (30 days ahead) and the reevaluation (45 days); eight
+or more removal days this year (at ten, a manifestation determination and a review of the plan, 34 CFR 300.530) and a
+review after a manifestation determination. *Home*: home sheets not back by their date.
+
+**The hand-over check** adds the restraint notices not done, an overdue plan review and the home sheets not back, and
+offers **Transition summary: print it**: one page for the next BCBA (history, targets with definitions, the function and
+its evidence, the plan, where things stand, what worked and what did not yet, the open deadlines, the contacts).
+
+**More in the forms.** Form GB-1's **Progress report** (IDEA 34 CFR 300.320(a)(3)): for a period (the last nine weeks by
+default), each goal's current level from the case's data or skill programs against its criterion, a progress code
+picked from the data (changeable), a sentence for the family, Print and Copy. Form DD-1's **Note for home (this week)**:
+one good thing first, each behavior in plain words, what is next, the number of incidents only; editable, Print, Copy.
+Form HD-1's sheets carry *Sent home*, *Due back* and *Came back*; DD-1 offers to bring the home counts in as a home
+series (open purple diamonds where the measure matches, never mixed into the school counts or the analysis).
+
+**Fixes.** Form SA-1 kept losing the *Delay (s) or level* row when a saved file was opened: it is kept now. Form TV-1's
+*Follow my words* starts with no connection once the recogniser has been downloaded (the manifest and its three scripts
+are kept on the device with the model).
+
+**The iPad.** The packet bar keeps one row at 1180, 1133 and 1024 px (the details shrink to the row, *Read a document* is
+its icon), so the form starts where it did. The form list's *Packet* row and its Hide button stay pinned at the top as the
+list scrolls; with the list put away a tab on the left edge brings it back (a tap, or a swipe right on it), and a swipe
+left on the list puts it away. Tap targets: a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, narrow
+grid buttons 34 px wide; a tap anywhere in a table cell that holds one checkbox or radio ticks it (in the forms), and a
+tap beside a form's tick box in the list ticks it. Screen only: printing is unchanged.
+
+**Housekeeping.** The build checks (tools/blocks/patch-pwa.py, patch-autosave.py) count the forms from index.html
+instead of a fixed 44. Tests that only printed their round trips now fail when one differs (sa1, si1, da1, sr1, vs1,
+gc1, hd1, im1, pd1); tk1, master33, sprint-a2 (IA-1 since v21.64) and v2134-verify (DD-1's Walkthrough) are current.
+
+Checked by `qa/v2178-a-test.js`, `-b`, `-c1`, `-c2`, `-d1`, `-d2` (the forms), `qa/v2178-shell-test.js` (Today, the hand-over,
+the summary), `qa/v2178-flow-test.js` (OB-1 and EA-1 into FS-1 through the workstation), `qa/v2178-rail-test.js`,
+`qa/v2178-touch-test.js` and `qa/v2178-asr-test.js`; `qa/sprint-a8-test.js` (the bars) passes again.

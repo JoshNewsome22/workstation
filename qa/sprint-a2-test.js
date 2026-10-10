@@ -35,7 +35,10 @@ const SIMBTN={'IA-1':'#simBtn','PA-1':'#simBtn','MS-1':'#simBtn','AD-1':'#btnSim
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c||d===undefined?'':' '+JSON.stringify(d).slice(0,700)));if(!c)fails++;};
 const log=[];
 /* the two hypothesis fields and the behavior fields */
-const readIA=fr=>fr.evaluate(()=>({fn:document.querySelector('#mFn').value,beh:document.querySelector('[name="m.beh"]').value,last:window.nbhCase&&nbhCase.last}));
+const readIA=fr=>fr.evaluate(()=>({fn:document.querySelector('#mFn').value,beh:document.querySelector('[name="m.beh"]').value,last:window.nbhCase&&nbhCase.last,tg:window.__rp&&__rp.targets?__rp.targets().list.map(r=>r.label):[]}));
+/* v21.78 since v21.64 IA-1 keeps several targets: each behavior from the case becomes a target of its own (its own worksheets), not one field */
+const FOOT={'IN-1':'The first ticked behavior goes into this form’s Problem behavior field; the function stays off this form.','IA-1':'Each ticked behavior becomes a target of this file, with worksheets of its own; the function stays off this form.'};
+const hasTg=(r,l)=>(r.tg||[]).some(x=>{const a=String(x||'').toLowerCase(),b=String(l||'').toLowerCase();return !!a&&!!b&&(a.startsWith(b)||b.startsWith(a));});
 const readIN=fr=>fr.evaluate(()=>({fn:document.querySelector('[data-m="fn"]').value,meta:typeof S!=='undefined'&&S.meta?(S.meta.fn||''):null,beh:document.querySelector('[data-m="beh"]').value,last:window.nbhCase&&nbhCase.last}));
 const hasFn=fr=>fr.waitForFunction(()=>!!(window.nbhCase&&nbhCase.facts&&nbhCase.facts.fn&&nbhCase.facts.fn.key),null,{timeout:30000});
 
@@ -104,7 +107,7 @@ async function openCase(page,file){
   const ia=await openIn(page,'IA-1');await hasFn(ia);await sleep(500);
   const a=await readIA(ia);
   ok('A: IA-1 opened after FS-1 concluded: its indirect hypothesis stays "not yet"',a.fn==='',a);
-  ok('A: IA-1 still takes the target behavior from the case',behStart(a.beh,facts.beh[0])&&a.last&&a.last.filled===1,a);
+  ok('A: IA-1 still takes the target behavior from the case (each behavior a target of its own, v21.64)',behStart(a.beh,facts.beh[0])&&a.last&&a.last.filled>=1&&hasTg(a,facts.beh[0]),a);
   const inn=await openIn(page,'IN-1');await hasFn(inn);await sleep(500);
   const b=await readIN(inn);
   ok('A: IN-1 opened after FS-1 concluded: its interview hypothesis stays "not yet"',b.fn===''&&!b.meta,b);
@@ -144,15 +147,15 @@ async function openCase(page,file){
       fn:cb?{checked:cb.checked,disabled:cb.disabled,note:(cb.closest('label').querySelector('.nbhc-own')||{}).textContent||''}:null,nBeh:document.querySelectorAll('#nbhcBody input[data-kind="beh"]').length,
       foot:document.querySelector('#nbhcNote').textContent};});
     ok(id+', From the case: the Function item is shown unticked, cannot be ticked, and says why',d.open&&d.fn&&!d.fn.checked&&d.fn.disabled&&why.test(d.fn.note),d);
-    ok(id+', From the case: the footnote says what this form takes ("'+d.foot+'")',d.foot==='The first ticked behavior goes into this form’s '+FIELD[id]+' field; the function stays off this form.',d.foot);
+    ok(id+', From the case: the footnote says what this form takes ("'+d.foot+'")',d.foot===FOOT[id],d.foot);
     const want=await fr.evaluate(()=>{const bs=[...document.querySelectorAll('#nbhcBody input[data-kind="beh"]')];bs.forEach(c=>c.checked=false);const c=bs[bs.length-1];c.checked=true;return nbhCase.facts.behaviors[+c.dataset.i].label;});
     await fr.evaluate(()=>document.querySelector('#nbhcUse').click());await sleep(300);
     const after=id==='IA-1'?await readIA(fr):await readIN(fr),done=await fr.evaluate(()=>document.querySelector('#nbhcDone').textContent);
-    ok(id+', From the case: the ticked behavior ('+want+') is placed and the hypothesis is untouched',behStart(after.beh,want)&&after.fn===''&&/^Placed 1 item on this form\.$/.test(done),{after,done});
+    ok(id+', From the case: the ticked behavior ('+want+') is placed and the hypothesis is untouched',id==='IA-1'?hasTg(after,want)&&after.fn===''&&/^(Placed \d+ items? on this form|Nothing to place)/.test(done):behStart(after.beh,want)&&after.fn===''&&/^Placed 1 item on this form\.$/.test(done),{after,done});
     /* two behaviors ticked: the form has one field, so the first of them is placed and the answer says so */
     const first=await fr.evaluate(()=>{const bs=[...document.querySelectorAll('#nbhcBody input[data-kind="beh"]')];bs.forEach((c,i)=>c.checked=i<2);document.querySelector('#nbhcUse').click();return nbhCase.facts.behaviors[+bs[0].dataset.i].label;});await sleep(300);
     const two=id==='IA-1'?await readIA(fr):await readIN(fr),done3=await fr.evaluate(()=>document.querySelector('#nbhcDone').textContent);
-    ok(id+', From the case: with two behaviors ticked, the first ('+first+') is placed and the answer says the other was not',behStart(two.beh,first)&&!behStart(two.beh,want)&&two.fn===''&&
+    ok(id+', From the case: with two behaviors ticked, '+(id==='IA-1'?'both are targets of this file':'the first ('+first+') is placed and the answer says the other was not'),id==='IA-1'?hasTg(two,first)&&hasTg(two,want)&&two.fn==='':behStart(two.beh,first)&&!behStart(two.beh,want)&&two.fn===''&&
       done3==='Placed 1 item on this form. Only the first ticked behavior was placed, since this form has one '+FIELD[id]+' field.',{two,done3});
     /* the function asked for anyway (the item re-enabled and ticked, as an older picker would send it) */
     await fr.evaluate(()=>{const cb=document.querySelector('#nbhcBody input[data-kind="fn"]');cb.disabled=false;cb.checked=true;document.querySelectorAll('#nbhcBody input[data-kind="beh"]').forEach(c=>c.checked=false);document.querySelector('#nbhcUse').click();});await sleep(300);
@@ -168,9 +171,9 @@ async function openCase(page,file){
       document.querySelector('#nbhcBody input[data-kind="red"]').checked=true;document.querySelector('#nbhcUse').click();await new Promise(r=>setTimeout(r,300));
       const done=document.querySelector('#nbhcDone').textContent;document.querySelector('#nbhcClose').click();nbhCase.facts=window.__f0;nbhCase.paint();return {foot,tick,done};});
     ok(id+', From the case: with goals and reinforcers in the case, the footnote says they have no field here',
-      gm.foot==='The first ticked behavior goes into this form’s '+FIELD[id]+' field; the function stays off this form. The goals and reinforcers have no field here; copy the text instead.',gm);
+      gm.foot===FOOT[id]+' The goals and reinforcers have no field here; copy the text instead.',gm);
     ok(id+', From the case: a ticked goal and reinforcer are named as not placed ('+gm.tick.join(' ')+' ticked, and the goal)',
-      gm.tick.join()==='beh0,menu0'&&gm.done==='Placed 1 item on this form. The ticked goals and reinforcers have no field on this form.',gm);
+      gm.tick.join()==='beh0,menu0'&&(gm.done==='Placed 1 item on this form. The ticked goals and reinforcers have no field on this form.'||(id==='IA-1'&&gm.done==='Nothing to place: the ticked goals and reinforcers have no field on this form.')),gm);
   }
   /* IA-1's own rule: the attention scenario, loaded through its question, fills its own field */
   await page.evaluate(()=>openForm('IA-1'));await sleep(300);
@@ -244,7 +247,7 @@ async function openCase(page,file){
     packet:{client:'Packet Student',sid:'P-0001',beh:'Hitting peers: open-hand contact with a peer',fn:'escape'}}))});
   await sleep(700);
   const r=await p.evaluate(s=>({fn:document.querySelector(s.fn).value,beh:document.querySelector(s.beh).value,client:(()=>{for(const q of window.__nbhPacketMap.client){const e=document.querySelector(q);if(e)return e.value;}})(),al:window.__al.join(' | ')}),sel);
-  ok(id+': Open packet fills the student and the behavior',r.client==='Packet Student'&&r.beh==='Hitting peers: open-hand contact with a peer',r);
+  ok(id+': Open packet fills the student and the behavior',r.client==='Packet Student'&&(r.beh==='Hitting peers: open-hand contact with a peer'||(id==='IA-1'&&r.beh==='Hitting peers')),r);   /* IA-1 (v21.64): the target's name; its definition is kept with it */
   ok(id+': Open packet leaves the hypothesis alone and says so',r.fn===''&&/The function in the packet was not placed: the hypothesis on this form is your own\.$/.test(r.al),r);
   await p.evaluate(s=>{const e=document.querySelector(s);e.value='tangible';e.dispatchEvent(new Event('change',{bubbles:true}));},sel.fn);await sleep(200);
   const pk=JSON.parse((await caught(p,'Save packet'))||'{}');

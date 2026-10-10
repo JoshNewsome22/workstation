@@ -24,7 +24,8 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:240000}); await L.sleep(4000);
   const restored=await page.evaluate(()=>Object.keys(state.frames).length);
   await page.evaluate(()=>{ALL.forEach(([id])=>state.ticked[id]=true);renderRail();});
-  const [popup]=await Promise.all([page.waitForEvent('popup'),page.click('#masterPrint')]);
+  await page.evaluate(()=>{wsUI.confirm=async()=>true;});   /* v21.78 the shell's questions (forms not loaded yet: include them) answered yes */
+  const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.click('#masterPrint')]);
   await popup.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await popup.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000}); await L.sleep(1500);
   const secs=await popup.evaluate(()=>Array.from(document.querySelectorAll('.mp-sec')).length);
