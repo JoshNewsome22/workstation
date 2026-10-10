@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>FBA and BIP Workstation · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -737,6 +737,7 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 #saveQuick.nudge{border-color:#c9742a;box-shadow:0 0 0 0 rgba(201,116,42,.6);animation:saveNudge 1.6s ease-out 3}
 @keyframes saveNudge{0%{box-shadow:0 0 0 0 rgba(201,116,42,.6)}100%{box-shadow:0 0 0 10px rgba(201,116,42,0)}}
 /* help (v21.35): short first, the rest folded */
+.td-list{list-style:none;margin:6px 0 12px;padding:0}.td-list li{padding:7px 0;border-top:1px solid var(--rule,#dfe6e4);line-height:1.45}.td-list li:first-child{border-top:0}.td-list .td-k{display:inline-block;min-width:68px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted,#54676f);font-weight:600}.td-list button{margin-left:6px}.td-more button{margin:4px 6px 4px 0}
 .pc-list{margin:6px 0 10px 20px;padding:0}.pc-list li{margin:0 0 7px;line-height:1.4}.pc-list label{display:block;cursor:pointer}.pc-list input{margin-right:4px;transform:scale(1.2)}.pc-list span{display:block;color:var(--muted,#54676f);font-size:13px;margin-left:24px}.pc-open button{margin:2px 4px 2px 0}.pc-done{color:#2F6B37}
 #dlg .hp-lead{font-size:14px;color:var(--ink);margin:0 0 10px}
 #dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
@@ -905,6 +906,8 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
       <div class="sp"></div>
       <span id="crumbStatus"></span>
       <div class="acts">
+        <!-- v21.75 Today: what needs you in this case (an icon here, so the row of case buttons stays one row on an iPad) -->
+        <button id="todayBtn" class="sm" aria-label="Today: what needs you in this case" title="Today: what is due, incidents home has not heard about, the integrity check, aims met; the end of the week; the hand-over check"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 10l1.6 1.5L10.5 8.5"/></svg></button>
         <button id="saveQuick" class="sm" aria-label="Save case" title="Save the case to a file"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/></svg><span class="lbl">Save case</span><span class="dot" aria-hidden="true"></span></button>
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
         <button id="popOut" class="sm" aria-label="Open in its own tab" title="Open in its own tab"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M6 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10"/></svg><span class="lbl">Own tab</span></button>
@@ -2056,8 +2059,9 @@ function openFor(ev,d){
    packet and case files, so they survive the session; a source form that is not open keeps its
    last reading. */
 /* (v21.52) and for Form TV-1's draft: the profile (DM-1), the plan developed (TD-1) and the crisis plan's stages (CR-1) */
-/* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1) */
-const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick'};
+/* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1); v21.75 the
+   treatment integrity observations (TI-1) */
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent'};
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2067,8 +2071,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2086,7 +2090,7 @@ async function gatherFacts(push){
       }
       if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
       if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
-      if(id==='DM-1'||id==='TD-1'||id==='CR-1'||id==='DD-1'||id==='SM-1'||id==='QS-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
+      if(id==='DM-1'||id==='TD-1'||id==='CR-1'||id==='DD-1'||id==='SM-1'||id==='QS-1'||id==='TI-1'||id==='IC-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
     const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
@@ -2126,6 +2130,7 @@ function paintFacts(){
   if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
   if(f.points)bits.push('<b>Point sheet:</b> '+((f.points.days||[]).length)+' days <i>('+esc(s.points||'')+')</i>');
   if(f.quick)bits.push('<b>Quick start</b> <i>('+esc(s.quick||'')+')</i>');
+  if(f.integrity)bits.push('<b>Integrity:</b> '+(f.integrity.obs||[]).length+' observations <i>('+esc(s.integrity||'')+')</i>');
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }
@@ -2412,8 +2417,9 @@ function staticize(html){
   return root.innerHTML;
 }
 
-$('#masterPrint').addEventListener('click',async()=>{
-  const chosen=ALL.filter(([id])=>state.ticked[id]);
+/* v21.75 the packet is built by masterRun: Build master print gives it the ticked forms; the end of the week gives it Form
+   DD-1 (asked for its week: the summary and next week's blank sheet) and Form SM-1, under its own title */
+async function masterRun(chosen,opt){opt=opt||{};
   if(!chosen.length){alert('Tick at least one form in the list first.');return;}
   const notOpen=chosen.filter(([id])=>!inCase(id));   /* v21.61 a form of the case not loaded yet is loaded below, filled from the file */
   const names=notOpen.map(f=>f[0]).join(', ');
@@ -2446,7 +2452,7 @@ $('#masterPrint').addEventListener('click',async()=>{
       await new Promise(r=>fr.addEventListener('load',()=>setTimeout(r,700),{once:true}));
       pushPacketTo(fr);await new Promise(r=>setTimeout(r,250));
     }
-    const payload=await grab(id,'collect',undefined,4000,fr);
+    const payload=await grab(id,'collect',(opt.extra||{})[id],4000,fr);
     if(payload)parts.push(payload);
   }
   $('#masterPrint').textContent='Build master print';
@@ -2456,7 +2462,7 @@ $('#masterPrint').addEventListener('click',async()=>{
   const stamp=new Date();
   const head=`<div class="mp-cover">
     <div class="mp-brand"><img src="${$('#logo').src}" alt="Royal Palm School"></div>
-    <h1>Functional Behavior Assessment and Behavior Intervention Plan</h1>
+    <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
     <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
     <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
@@ -2715,7 +2721,8 @@ $('#masterPrint').addEventListener('click',async()=>{
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
   w.document.open();w.document.write(doc);w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},900);
-});
+}
+$('#masterPrint').addEventListener('click',()=>masterRun(ALL.filter(([id])=>state.ticked[id])));
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* a value going inside a CSS content:"..." string, where a stray quote or
    backslash would end the declaration and silently drop the running header */
@@ -2922,6 +2929,8 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count.</p>'+
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
+   fold('The team\u2019s Google Sheet (Form DD-1)',
+     '<p>Form DD-1 reads the team\u2019s daily Google Sheet (the Behavior-Charts template) and keeps the record current: on its <b>Daily data</b> tab, <b>Link a Google Sheet</b>, the sheet\u2019s link, sign in to Google (read-only), tick the data tabs, <b>Link and read</b>. The sheet wins for the days it holds; <b>Use the sheet\u2019s data</b> off puts the record back as it was without it. It reads again when the form opens and every five minutes while it is open; the numbers go from Google to this device and nowhere else. Setting up the Google sign-in key once, and what to ask the district\u2019s IT if Google blocks it: SETUP.md, v21.76.</p>')+
    fold('Side by side, fullscreen and the screen',
      '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
      '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else. A name whose letters changed could be another student’s, so the warning stays and you are asked first; a name the bar never held, one that is not a small correction, or one whose ID says another student, is not offered.</p>')+
@@ -4213,13 +4222,61 @@ async function clearCase(){
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
   setRail(true);renderRail();foldBar(false);paintSave();chip();
 }
+/* ================= v21.75 Today, the end of the week, the hand-over check =================
+   Read from the case as the open forms give it (state.facts) and from what is due (state.due). Nothing here is kept. */
+const tdMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
+function tdDays(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));if(!m)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((t-new Date(+m[1],+m[2]-1,+m[3]))/864e5);}
+function tdSchoolDays(iso){const n=tdDays(iso);if(n===null||n<=0)return 0;let k=0;const t=new Date();t.setHours(12,0,0,0);for(let i=0;i<n;i++){const wd=t.getDay();if(wd&&wd!==6)k++;t.setDate(t.getDate()-1);}return k;}
+function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
+  (state.due||[]).forEach(x=>L.push({k:'Due',t:'<b>'+esc(x.id)+'</b> '+esc(x.what)+' '+dueText(x.d),open:x.id}));
+  if(d){const inc=(d.incidentList||[]).filter(i=>i.parent!=='yes'&&(tdDays(i.date)||0)<=30);
+    if(inc.length)L.push({k:'Home',t:inc.length+' incident'+(inc.length===1?'':'s')+' home has not been told about: '+inc.slice(-3).map(i=>esc(tdMd(i.date)+' '+(i.beh||'')+(i.time?' '+i.time:''))).join('; ')+(inc.length>3?' and '+(inc.length-3)+' more':''),open:'DD-1'});
+    if(d.to&&tdSchoolDays(d.to)>=3)L.push({k:'Data',t:'No data on Form DD-1 since '+esc(tdMd(d.to))+' ('+tdSchoolDays(d.to)+' school days)',open:'DD-1'});
+    (d.behaviors||[]).filter(b=>b.aimMet).forEach(b=>L.push({k:'Aim',t:esc(b.name)+' has been at its aim '+b.run+' days in a row ('+b.need+' asked): raise the criterion or plan the next step',open:'GB-1'}));}
+  if(ti&&(ti.obs||[]).length){const o=ti.obs[ti.obs.length-1],n=tdDays(o.date);
+    if(n!==null&&n>14)L.push({k:'Integrity',t:'No integrity check on Form TI-1 for '+n+' days (the last, '+esc(tdMd(o.date))+', '+o.pct+'%)',open:'TI-1'});
+    if(o.pct<(ti.criterion||90))L.push({k:'Integrity',t:'The last integrity check was '+o.pct+'%, under the '+(ti.criterion||90)+'% criterion: retrain the steps missed before reading the data',open:'TI-1'});}
+  else if(d&&d.days)L.push({k:'Integrity',t:'No integrity check on Form TI-1 in the case yet',open:'TI-1'});
+  return L;}
+async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch(e){}
+  const L=todayItems(),p=packet(),f=state.facts;
+  dialog('Today',
+    '<p class="hp-lead">'+esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))+(p.client?' · '+esc(p.client):'')+'</p>'+
+    (L.length?'<ul class="td-list">'+L.map(x=>'<li><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
+      :'<p>'+(f?'Nothing needs you today in this case.':'Nothing to go on yet: open the case’s forms (Form DD-1, TI-1, GB-1 and the rest) and this list fills from them.')+'</p>')+
+    '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdHand">Hand-over check</button></p>'+
+    '<p class="hint">The end of the week prints, in one go, Form DD-1’s week summary, next week’s blank sheet and Form SM-1’s point sheets.</p>');}
+async function endOfWeek(){if(!inCase('DD-1')){alert('Open Form DD-1 for this student first: the end of the week starts from its record.');return;}
+  const chosen=['DD-1','SM-1'].filter(inCase).map(id=>ALL.find(x=>x[0]===id)).filter(Boolean);
+  await masterRun(chosen,{title:'The Week: the Summary, Next Week’s Sheet and the Point Sheets',extra:{'DD-1':{week:true}}});}
+function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L=[];
+  if(!(f.consent&&(f.consent.date||f.consent.parent)))L.push({t:'No consent on file: Form IC-1 holds no date of consent and no parent’s signature date'+(inCase('IC-1')?'':' (IC-1 is not in this case)'),open:'IC-1'});
+  const tg=(f.behaviors||[]).filter(b=>!b.isRep&&!/replacement|alternative/i.test(b.type||''));
+  if(!tg.length)L.push({t:'No target behaviors defined (Form TB-1)',open:'TB-1'});
+  const und=tg.filter(b=>!String(b.def||'').trim());if(und.length)L.push({t:und.length+' target behavior'+(und.length===1?'':'s')+' without a definition: '+esc(und.map(b=>b.label).join(', ')),open:'TB-1'});
+  if(!(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length)))L.push({t:'No goals written (Form GB-1)',open:'GB-1'});
+  if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
+  if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated'),open:'CR-1'});
+  if(state.photo&&fl&&fl.photo==='No')L.push({t:'The student’s photo is on the case, but Form DM-1 records no photo or media permission: take it off before the case is handed on (the photo button on the bar)',open:''});
+  if(f.data&&(f.data.incidentList||[]).some(i=>i.parent!=='yes'))L.push({t:'Incidents home has not been told about (Form DD-1’s incident log)',open:'DD-1'});
+  return L;}
+async function handoverOpen(){await gatherFacts(false);const L=handoverItems();
+  dialog('Hand-over check',
+    '<p class="hp-lead">What a case handed to another BCBA, a school or a review should hold. Read from the forms open in this case.</p>'+
+    (L.length?'<ul class="td-list">'+L.map(x=>'<li><span class="td-k">Missing</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
+      :'<p class="pc-done"><b>Nothing missing</b> that the check looks for: consent, defined targets, goals, the crisis plan, the photo permission, home told about incidents.</p>'));}
+$('#todayBtn').addEventListener('click',()=>todayOpen());
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
   const open=Object.keys(state.frames);
   /* work: the same measure as the Save case dot and the unload guard (a blank form reports a few default values) */
   const work=caseDirty()||open.some(id=>{const t=state.status[id];return !!t&&((t.filled||0)>3||t.edited);});
   const typed=Object.values(packet()).some(v=>String(v||'').trim());
   if(work){
-    if(!(await wsUI.confirm('Close this case? It is saved first, then every form and the student\u2019s details are cleared, ready for the next case.',{ok:'Save and close'})))return;
+    await gatherFacts(false);const miss=state.facts?handoverItems():[];   /* v21.75 the hand-over check, before it goes */
+    const strip=h=>String(h).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+    if(!(await wsUI.confirm('Close this case? It is saved first, then every form and the student\u2019s details are cleared, ready for the next case.'+
+      (miss.length?'\n\nBefore it is handed on, the case is missing:\n'+miss.slice(0,6).map(x=>'\u2022 '+strip(x.t)).join('\n')+(miss.length>6?'\n\u2022 and '+(miss.length-6)+' more (Hand-over check)':''):''),{ok:miss.length?'Save and close anyway':'Save and close'})))return;
     let saved=false;
     try{saved=await saveCase();}catch(e){saved=false;}
     if(!saved){wsUI.toast('The case was not saved, so nothing was closed. Everything is as it was.',{kind:'warn',ms:9000});return;}
@@ -4306,6 +4363,9 @@ const CMDS=[
   {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
+  {k:'today what needs me due incidents aim integrity',n:'Today: what needs me in this case',s:'command',go:()=>todayOpen()},
+  {k:'end of week friday packet week summary blank sheet point sheets print',n:'End of the week: the summary, next week\u2019s sheet and the point sheets in one print',s:'command',go:()=>endOfWeek()},
+  {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
   {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
   {k:'side by side two three forms split columns at once',n:'Side by side: two or three forms at once',s:'view',go:()=>$('#splitBtn').click()},

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form TI-1 · Treatment Integrity Observation · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -3706,6 +3706,13 @@ window.__nbhFactsIn=function(f){tiQuick=(f&&f.quick)||null;tiQuickBtn();
   const k=tiQuickAdd();renderAll();
   return {filled:((g&&g.filled)||0)+k,note:'the steps are the non-negotiables on Form QS-1'};};
 tiQuickBtn();
+/* v21.75 out: each scored observation's date, type and integrity (correct steps over scored steps), the critical-step
+   figure and the overall one, for Form DD-1's graphs and week summary, Form PR-1 and the workstation's Today list */
+window.__nbhFactsOut=function(){try{const M=metrics(),iso=v=>{v=String(v||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);if(m)return v;
+    m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(v);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+  const obs=M.used.map(x=>{const o=S.obs[x.j]||{};return {date:iso(o.date),type:String(o.type||''),pct:Math.round(1000*x.c/x.s)/10,n:x.s};}).filter(o=>o.date);
+  if(!obs.length)return null;
+  return {integrity:{obs,overall:M.global.n?Math.round(1000*M.global.c/M.global.n)/10:null,crit:M.critM.n?Math.round(1000*M.critM.c/M.critM.n)/10:null,criterion:+S.crit||90,src:'TI-1'}};}catch(e){return null;}};
 </script>
 
 <script id="ti1-run">

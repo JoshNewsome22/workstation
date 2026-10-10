@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form SP-1 · Scatter Plot: Pattern Analysis · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -7936,5 +7936,73 @@ a{text-underline-offset:2px}
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
+<script id="sp-incidents">
+/* v21.75 the incidents logged on Form DD-1 onto this sheet: "Place DD-1's incidents" marks each incident of the behavior
+   shown in the interval and on the day it happened (a dated day on this sheet, within its hours): in tap mode one mark more
+   (a blank interval becomes low rate, a low one high), in count mode one more on the count. An incident is placed once
+   (the sheet remembers which, with its data); one outside the sheet's dates or hours is counted and left. */
+"use strict";
+let spCase=null;
+const spK=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+const spMin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(String(t||''));return m?(+m[1])*60+(+m[2]):null;};
+function spIncs(){const d=spCase&&spCase.data;return d&&Array.isArray(d.incidentList)?d.incidentList.filter(i=>i&&i.date&&spMin(i.time)!==null):[];}
+function spMine(){commitBeh();const b=state.behaviors[state.cur]||{meta:{}},nm=spK(b.meta.behavior||state.meta.behavior);
+  const L=spIncs();return {b,nm,mine:nm?L.filter(i=>{const k=spK(i.beh);return k&&(k===nm||k.indexOf(nm)>=0||nm.indexOf(k)>=0);}):[]};}
+function spPlace(){const {b,mine,nm}=spMine();if(!nm)return {why:'name'};if(!mine.length)return {why:'none'};
+  const placed=new Set(String(b.meta.incPlaced||'').split('|').filter(Boolean)),dates={};
+  for(let i=0;i<state.cfg.days;i++){const d=state.meta['date'+i];if(d&&dates[d]===undefined)dates[d]=i;}
+  if(!Object.keys(dates).length)return {why:'dates'};
+  const nR=rowLabels().length;let n=0,off=0,dup=0;
+  mine.forEach(x=>{const k=x.date+' '+x.time+' '+spK(x.beh);if(placed.has(k)){dup++;return;}
+    const c=dates[x.date],r=Math.floor((spMin(x.time)-state.cfg.startMin)/state.cfg.interval);
+    if(c===undefined||r<0||r>=nR){off++;return;}
+    const cell=cellOf(r,c);if(state.cfg.mode==='count')cell.n=(cell.n===null||cell.n===''||isNaN(cell.n)?0:Number(cell.n))+1;else cell.s=Math.min(2,(cell.s||0)+1);
+    placed.add(k);n++;});
+  b.meta.incPlaced=[...placed].join('|');commitBeh();render();return {n,off,dup,total:mine.length};}
+function spBtn(){let el=document.getElementById('spIncBtn');const L=spIncs();
+  if(!el){const at=document.getElementById('clearBtn');if(!at)return;el=document.createElement('button');el.className=at.className;el.id='spIncBtn';el.type='button';
+    el.textContent='Place DD-1’s incidents';at.parentNode.insertBefore(el,at);
+    el.addEventListener('click',()=>{const r=spPlace();
+      const msg=r.why==='name'?'Name the behavior on this sheet first; incidents are placed by the behavior they were logged under.':r.why==='none'?'Form DD-1 has no incident logged under this behavior.':
+        r.why==='dates'?'Give the sheet its dates first (the date under each day); incidents are placed on the day they happened.':
+        (r.n?r.n+' incident'+(r.n===1?'':'s')+' placed':'No new incident placed')+(r.dup?'; '+r.dup+' placed before':'')+(r.off?'; '+r.off+' outside this sheet’s days or hours':'')+'.';
+      nbhUI.toast(msg,r.n?{kind:'ok'}:undefined);});}
+  el.style.display=L.length?'':'none';el.title=L.length?L.length+' incident'+(L.length===1?'':'s')+' logged on Form DD-1':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){spCase=f||null;spBtn();return was?was.apply(this,arguments):null;};}
+spBtn();
+</script>
+<script id="sp-v2175">
+/* v21.75 (audit) the case: a sheet per target behavior, with its definition, example and non-example, when no sheet
+   holds a mark yet; with marks on the sheets, only the empty definition fields of the sheet that names a behavior.
+   On paper each grid carries a line naming the student, the behavior and the days, since the grid often starts a page;
+   the legend stays with the grid above it. On screen a sheet wider than the window shows a fade at its right edge. */
+"use strict";
+const spIsRep=b=>!!(b.isRep||/replacement|alternative/i.test(b.type||''));
+const spMarked=b=>Object.values((b&&b.cells)||{}).some(c=>c&&((c.s|0)>0||(c.n!==null&&c.n!==''&&+c.n>0)||c.code));
+function spFromCase(f){const behs=((f&&f.behaviors)||[]).filter(b=>b&&b.label&&!spIsRep(b));if(!behs.length)return 0;
+  commitBeh();let n=0;const T=v=>String(v||'').trim();
+  const put=(m,b)=>{[['behavior',b.label],['definition',b.def],['example',b.ex],['nonexample',b.nex]].forEach(([k,v])=>{if(T(v)&&!T(m[k])){m[k]=T(v);n++;}});};
+  if(!state.behaviors.some(spMarked)&&state.behaviors.length===1&&(!T(state.behaviors[0].meta.behavior)||spK(state.behaviors[0].meta.behavior)===spK(behs[0].label))){
+    const first=state.behaviors[0];state.behaviors=behs.slice(0,6).map((b,i)=>{const o=i?{meta:{},cells:{}}:first;put(o.meta,b);return o;});}
+  else state.behaviors.forEach(o=>{const b=behs.find(x=>spK(x.label)===spK(o.meta.behavior));if(b)put(o.meta,b);});
+  if(!n)return 0;
+  const c=state.behaviors[Math.min(state.cur,state.behaviors.length-1)];state.cur=state.behaviors.indexOf(c);BKEYS.forEach(k=>{state.meta[k]=c.meta[k]||'';});state.cells=c.cells;
+  renderMeta();renderBehBar();render();return n;}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;const n=spFromCase(f);
+  if(n)return {filled:n,note:state.behaviors.length>1?'a sheet for each target behavior':''};
+  return r||(window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null);};}
+{const gh0=gridHTML;gridHTML=function(c0,c1){return "<caption class='sp-pcap'>"+esc(state.meta.client||"Student not named")+" · "+esc(state.meta.behavior||"Target behavior not named")+" · "+esc(dayRangeLabel(c0,c1))+"</caption>"+gh0(c0,c1);};}
+function spFade(){document.querySelectorAll('.gridwrap').forEach(w=>{w.classList.toggle('sp-more',w.scrollWidth>w.clientWidth+2&&w.scrollLeft+w.clientWidth<w.scrollWidth-2);});}
+document.addEventListener('scroll',e=>{if(e.target&&e.target.classList&&e.target.classList.contains('gridwrap'))spFade();},true);
+window.addEventListener('resize',spFade);
+{const r0=render;render=function(){const r=r0.apply(this,arguments);try{spFade();}catch(e){}return r;};}
+spFade();
+</script>
+<style id="sp-v2175-css">
+caption.sp-pcap{display:none}
+.gridwrap.sp-more{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 36px),rgba(0,0,0,.25));mask-image:linear-gradient(to right,#000 calc(100% - 36px),rgba(0,0,0,.25))}
+@media print{caption.sp-pcap{display:table-caption;caption-side:top;text-align:left;font-family:var(--sans,Arial,sans-serif);font-size:9pt;font-weight:600;color:#182e43;padding:0 0 4px}
+  .legend{break-before:avoid;page-break-before:avoid}.gridwrap.sp-more{-webkit-mask-image:none;mask-image:none}}
+</style>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form PR-1 · Periodic Plan Review and Exit Criteria · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -864,6 +864,9 @@ table.pr-fid td.n{text-align:center;font-variant-numeric:tabular-nums;white-spac
 .pr-fid-mid{color:#8A4412;font-weight:600}
 .pr-fid-ok{color:#2F6B37}
 .pr-tibar{margin:8px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pr-casebar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:#eef6f5;border:1px solid #b9d6d3;border-radius:3px;padding:8px 12px;margin:0 0 12px;font-size:13.5px}
+.pr-casebar[hidden]{display:none}.pr-casebar .hint{margin:0}
+textarea.pr-also{width:100%;min-height:72px}
 .pr-tibar .hint{margin:0}
 .pr-dlg fieldset{border:1px solid var(--nbh-rule);border-radius:3px;margin:10px 0;padding:6px 12px 10px;min-width:0}
 .pr-dlg legend{font-family:var(--nbh-serif);font-weight:600;font-size:15px;color:var(--nbh-navy);padding:0 4px}
@@ -1013,6 +1016,10 @@ table.pr-ddprev{min-width:600px}
     <p class="hint">Each period&rsquo;s behavior figures next to the fidelity it was delivered with. A period below 80% integrity, or with reinforcers delivered after the target behavior on more than 10% of consequence-step opportunities, is read as a test of the implementation, not of the plan; a fall of 15 points or more from the period before is marked for the sequence note above. The cut-offs are this form&rsquo;s conventions.</p>
     <div class="pr-fidwrap" tabindex="0" role="region" aria-label="Fidelity beside outcome"><table class="rt pr-grid pr-fid" id="fidTbl"></table></div>
     <div class="pr-ddpanel" id="ddPanel"></div>
+    <!-- v21.75 what else the case says about the period: the incidents, the point sheet, integrity, the aims met -->
+    <h3 style="margin-top:12px">Also in the Review Period</h3>
+    <p class="hint">Written from the case when it is empty: the incidents logged on Form DD-1, Form SM-1&rsquo;s point sheet, Form TI-1&rsquo;s observations and the behaviors at their aim, over Form DD-1&rsquo;s current condition. It follows the case until it is changed here.</p>
+    <textarea data-m="alsoCase" rows="4" class="pr-line pr-also" aria-label="Also in the review period"></textarea>
 
     <h2 class="nbh-band" style="margin-top:16px">3. Is the Replacement Established?</h2>
     <table class="rt">
@@ -3988,6 +3995,48 @@ const tiBaseRender=renderAll;renderAll=function(){tiBaseRender();renderTiRec();}
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+</script>
+
+<script id="pr1-case">
+/* v21.75 the review from the case. Inside the workstation, with Form DD-1 or Form TI-1 in the case, a bar above the form
+   runs this form's own imports from them in one tap (each asks before it changes an entry already made, as it always has).
+   "Also in the review period" is written from the case while it is empty or still holds what was written before: the
+   incidents, the point sheet, the integrity observations and the behaviors at their aim, over DD-1's current condition. */
+"use strict";
+let prCase=null;
+const prT=v=>String(v==null?'':v).trim();
+const prMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
+const prR=x=>x==null?'':String(Math.round(x*10)/10);
+function prAlsoText(f){const d=f.data||null,pts=f.points||null,ti=f.integrity||null;if(!d&&!pts&&!ti)return '';
+  const conds=(d&&d.conds)||[],cur=conds.length?conds[conds.length-1]:null,from=cur&&cur.from?cur.from:(d&&d.from)||'',to=(d&&d.to)||'';
+  const inP=x=>x&&(!from||x>=from)&&(!to||x<=to);const L=[];
+  if(from)L.push((cur&&conds.length>1?'Since '+prMd(from)+' ('+cur.name+', ':'From '+prMd(from)+' to '+prMd(to)+' (')+((cur&&cur.days)||(d&&d.days)||0)+' school days with data):');
+  if(d){const inc=(d.incidentList||[]).filter(i=>inP(i.date));
+    if(inc.length){const t={};inc.forEach(i=>{const k=i.tier||'no tier';t[k]=(t[k]||0)+1;});const told=inc.filter(i=>i.parent==='yes').length;
+      L.push('Incidents logged on Form DD-1: '+inc.length+' ('+Object.keys(t).map(k=>k+': '+t[k]).join(', ')+'); home told after '+told+' of '+inc.length+'.');}
+    else L.push('Incidents logged on Form DD-1: none.');
+    const met=(d.behaviors||[]).filter(b=>b.aimMet),aims=(d.behaviors||[]).filter(b=>b.aim!=null);
+    if(aims.length)L.push('At the aim for the days the criterion asks: '+(met.length?met.map(b=>b.name+' ('+b.run+' days in a row, '+b.need+' asked)').join('; '):'none yet')+'.');}
+  if(pts){const P=(pts.days||[]).filter(x=>inP(x.date));
+    if(P.length){const m=P.reduce((a,c)=>a+c.pct,0)/P.length;L.push('Point sheet (Form SM-1): '+prR(m)+'% of the points on average across '+P.length+' day'+(P.length===1?'':'s')+'; the goal met on '+P.filter(x=>x.met).length+'.');}}
+  if(ti){const O=(ti.obs||[]).filter(o=>inP(o.date));
+    if(O.length)L.push('Treatment integrity (Form TI-1): '+O.map(o=>prR(o.pct)+'% on '+prMd(o.date)+(o.type?' ('+o.type.toLowerCase()+')':'')).join(', ')+'.');}
+  return L.join('\n');}
+function prCaseBar(){let b=document.getElementById('prCaseBar');const f=prCase||{},d=f.data,t=f.integrity,framed=window.parent!==window;
+  if(!b){const at=document.querySelector('.nbh-band');if(!at)return;b=document.createElement('div');b.id='prCaseBar';b.className='pr-casebar noprint';b.setAttribute('role','status');at.parentNode.insertBefore(b,at);}
+  if(!framed||(!d&&!t)){b.hidden=true;return;}
+  b.hidden=false;
+  b.innerHTML='<b>From the case:</b> <span>'+[d?'Form DD-1’s record ('+d.days+' school days'+((d.conds||[]).length>1?', '+d.conds.length+' conditions':'')+')':'',t?'Form TI-1’s '+t.obs.length+' observation'+(t.obs.length===1?'':'s'):''].filter(Boolean).join(' and ')+'.</span> '+
+    (t?'<button type="button" class="tool" id="prFillTi">Fill question 1 from TI-1</button>':'')+(d?'<button type="button" class="tool" id="prFillDd">Fill question 2 from DD-1</button>':'')+
+    '<span class="hint">Each asks before it changes an entry already made.</span>';}
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('#prFillTi')){if(typeof tiAsk==='function')tiAsk();return;}
+  if(t.closest('#prFillDd')){if(typeof ddOpen==='function'){ddOpen();if(typeof ddAsk==='function')ddAsk();}return;}});
+function prAlso(){const f=prCase;if(!f)return 0;const v=prAlsoText(f);if(!v)return 0;const cur=prT(S.meta.alsoCase),was=prT(S.meta.alsoCaseWas);
+  if(cur&&cur!==was)return 0;if(cur===v)return 0;S.meta.alsoCase=v;S.meta.alsoCaseWas=v;const el=document.querySelector('[data-m="alsoCase"]');if(el)el.value=v;return 1;}
+window.__nbhFactsIn=function(f){prCase=f||null;prCaseBar();const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;const k=prAlso();
+  return k?{filled:((g&&g.filled)||0)+k,note:'the review period from the case'}:g;};
+prCaseBar();
 </script>
 
 <script>
