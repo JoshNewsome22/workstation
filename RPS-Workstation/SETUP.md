@@ -8644,3 +8644,53 @@ decisions, timelines, what is due, home), each with Open, which opens that stude
 
 Checked by `qa/v2179-test.js` (two simulated students kept, listed, initials only, opened from the list, removed, and
 nothing kept when it is turned off); `qa/sprint-a8-test.js` (the bars keep one row with the new button).
+
+### v21.80: the morning refresh, the caseload backup, assent, settings and probes
+
+**Read every linked sheet** (Caseload). Each student kept on this iPad whose Form DD-1 is linked to a Google Sheet, with
+*Use the sheet's data* ticked, has their sheet read in one go: the workstation loads that student's DD-1 out of sight,
+puts their saved record back in it and DD-1 reads the sheet exactly as it does when open (the sheet wins for its days,
+the marks stay). Their copy on this iPad then holds the new days and Caseload shows what needs you from them.
+
+- *The sign-in.* The first read asks for Google's sign-in (the tap opens Google's window); it is kept in this tab only,
+  as in DD-1, and never written into a file. The sign-in key is the one given once in DD-1 (Setup: the Google Sheets link).
+  Reading works in the website edition, where Google's sign-in is allowed; the one-file edition says so.
+- *The student on screen.* Their open Form DD-1 reads its own sheet; the next Save case keeps it.
+- *What comes back.* Caseload says which sheets were read (with the days and the last date) and which were not, and why
+  (signed out, the sheet for another student, Use the sheet off).
+
+**Back up the caseload** writes one file, `CASELOAD_<date>.json`, holding every student kept on this iPad (each as their
+case file). **Restore a backup** puts one back after asking: students not here are added, and for a student on both,
+the newer copy wins. No case file is touched. A week after the last backup (or with none yet), Today shows a *Backup*
+item with a Back up button. Keep the backup with the case files (Files, the school drive): it holds every student's case.
+
+**Form DD-1, per day** (the *Assent · day* column of the daily data): an **Assent** mark (Agreed, Refused, Withdrew), and
+in the day's details the **Setting** (Classroom, Specials, Lunch, Recess, Bus, Home, or any typed), **Collected by**, and a
+**Probe** mark (Generalization, Maintenance). They are labels only: the counts, the means and the analysis do not change.
+They are kept in the data file and the CSV (four columns at the end when any day has one); the printed sheet has a narrow
+Assent column when any day is marked; Graphs & analysis has a **By setting** table (each behavior's mean per setting, with
+the days) and a G or M over each probe day. A labelled day keeps its labels through each Google Sheet read. Old files
+open unchanged.
+
+**Form PA-1**: *Next reassessment due*, a date beside the reassessment schedule, typed or set from the schedule (weekly,
+every N weeks, monthly, quarterly, each grading period, and so on) counted from the latest dated session the form holds.
+With no date typed, the date worked out from the schedule is the one the case uses.
+
+**Form PR-1** reads DD-1's assent marks (refused and withdrew over the last days marked, with a caution at three or more
+of the last ten) under *Also in the review period*, and on *Fading & exit* the maintenance probes since the exit and
+whether one is due.
+
+**Today** (and so Caseload) adds: the preference reassessment due within a week or overdue (Form PA-1); **Assent** when
+the student refused or withdrew assent on three or more of the last ten days marked (ranked after Decision); after an exit
+(Form PR-1), a Decision item when the days since the exit average above the level set for going back to the plan (the
+target named in that level, or the first reduction target); and a maintenance probe on DD-1 counts as the check after
+exit, so that reminder goes.
+
+*Fixed:* Save case now reads the case facts from the forms before writing the file, so a case opened again does not
+send changed facts to the forms loading quietly (which could fill a form anew and mark the case unsaved).
+
+Checked by `qa/v2180-test.js` (the refresh with Google simulated: signed in, signed out, the student on screen; the hidden
+form leaves nothing behind; the backup, the restore and the reminder; the new Today items; PA-1's date reaching the case),
+`qa/v2180-e-test.js` (DD-1: the refresh hook, the marks through the table and the details, Save data and open, the CSV,
+the facts, By setting, probes, the print column, phone and iPad widths), `qa/v2180-f-test.js` (PA-1's date and the
+schedule, PR-1's assent and probes), and `qa/case-open-test.js`.

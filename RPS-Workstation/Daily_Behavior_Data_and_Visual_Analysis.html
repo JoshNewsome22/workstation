@@ -8446,6 +8446,200 @@ dialog.dd-hn-dlg{width:min(680px,calc(100vw - 24px))}
 @media (max-width:560px){.inc-hold{grid-template-columns:1fr}}
 </style>
 
+<script id="dd-v2180">
+/* ===================================================================================================
+   v21.80 (1) the workstation's caseload can ask the form to read the linked Google Sheet again (window.__nbhGsRefresh),
+   with the sign-in already held in this tab and never a Google window of its own; (2) each day can carry the student's
+   assent (agreed, refused, withdrew), (3) where the data was taken (the setting) and who took it, and (4) whether it was a
+   generalization or a maintenance probe. These are labels on the day: they never change the day's numbers or any of the
+   analysis. The graphs mark the probe days; a "By setting" table gives each behavior's mean in each setting.
+   =================================================================================================== */
+"use strict";
+const DD_ASSENT={"":"—",agreed:"Agreed",refused:"Refused",withdrew:"Withdrew"};
+const DD_PROBE={"":"None",gen:"Generalization",maint:"Maintenance"};
+const DD_SET_SUGG=["Classroom","Specials","Lunch","Recess","Bus","Home"];
+const DD_DAYW=206;
+const ddAsOk=v=>typeof v==="string"&&v&&Object.prototype.hasOwnProperty.call(DD_ASSENT,v)?v:"";
+const ddPrOk=v=>typeof v==="string"&&v&&Object.prototype.hasOwnProperty.call(DD_PROBE,v)?v:"";
+const ddTagStr=v=>typeof v==="string"?v.replace(/\s+/g," ").trim().slice(0,60):"";
+const ddTagged=r=>!!r&&!!(ddAsOk(r.assent)||ddPrOk(r.probe)||ddTagStr(r.setting)||ddTagStr(r.by));
+const ddTagAny=()=>(S.rows||[]).some(ddTagged);
+const ddAsAny=()=>(S.rows||[]).some(r=>r&&ddAsOk(r.assent));
+const ddAsWord=v=>ddAsOk(v)?DD_ASSENT[v]:"";
+/* a field set to nothing is taken off the day, so a record without these labels stays as it was */
+function ddTagSet(r,k,v){if(!r)return;v=k==="assent"?ddAsOk(v):k==="probe"?ddPrOk(v):ddTagStr(v);if(v)r[k]=v;else delete r[k];}
+/* a file or a restore: the labels a day has are kept in shape; a day without them is not given any */
+function ddTagClean(){(Array.isArray(S.rows)?S.rows:[]).forEach(r=>{if(!r||typeof r!=="object")return;
+  ["assent","probe","setting","by"].forEach(k=>{if(k in r)ddTagSet(r,k,r[k]);});});}
+{const cl2=ddClean;ddClean=function(){const r=cl2.apply(this,arguments);try{ddTagClean();}catch(e){}return r;};}
+
+/* ---- (1) the caseload's refresh: read the linked sheet now, the way "Read now" does, if the sign-in still holds ---- */
+window.__nbhGsInfo=function(){const g=S.gs,linked=!!(g&&g.id);return {linked,on:linked&&g.on!==false,title:linked?String(g.title||""):"",id:linked?String(g.id):""};};
+window.__nbhGsRefresh=async function(){const out={linked:false,on:false,signin:false,ok:false,days:0,to:"",err:""};
+  const lastTo=()=>{const r=sortedRows().filter(x=>x.date&&S.behaviors.some(b=>plotValue(x,b)!==null));return r.length?r[r.length-1].date:"";};
+  const sheetDays=()=>{const g=S.gs;return g&&g.cache?new Set([].concat(...(g.cache.groups||[]).map(x=>Object.keys(x.days||{})))).size:0;};
+  try{const g=S.gs;if(!g||!g.id){out.to=lastTo();return out;}
+    out.linked=true;out.on=g.on!==false;
+    if(!out.on){out.to=lastTo();out.err="The sheet is set aside on this record (Use the sheet’s data is off).";return out;}
+    gsTokLoad();
+    if(!gsSigned()){out.signin=true;gsErr="signin";try{gsBar();}catch(e){}out.to=lastTo();return out;}
+    for(let k=0;gsBusy&&k<100;k++)await new Promise(r=>setTimeout(r,200));   /* a reading already under way finishes first */
+    const ok=await gsRead({quiet:true});out.ok=!!ok;
+    if(!ok){if(gsErr==="signin")out.signin=true;
+      else if(/^name:/.test(gsErr))out.err=`The sheet is for ${gsErr.slice(5)}; the record is for ${S.meta.client||"another student"}. Nothing was taken.`;
+      else out.err=gsErr||"The sheet could not be read.";}
+    else out.days=sheetDays();
+    out.to=lastTo();}
+  catch(e){out.ok=false;out.err=(e&&e.message)||String(e);}
+  return out;};
+/* the sheet's days keep their labels: a day the sheet made is taken out and made again at every reading, so a day with a
+   label stays (its numbers go as before) and is the sheet's day again when the sheet next fills it */
+let ddKeptMade=[];
+{const u1=gsUndo;gsUndo=function(){const g=S.gs,made=new Set((g&&g.madeRows)||[]),keep=(S.rows||[]).filter(r=>made.has(r.id)&&ddTagged(r));
+  const r=u1.apply(this,arguments);keep.forEach(k=>{if(S.rows.indexOf(k)<0)S.rows.push(k);});ddKeptMade=keep.map(k=>k.id);return r;};}
+{const a1=gsApply;gsApply=function(){ddKeptMade=[];const r=a1.apply(this,arguments);try{const g=S.gs;if(g&&ddKeptMade.length){const A=Object.keys(g.applied||{});
+  ddKeptMade.forEach(id=>{if(A.some(k=>k.indexOf(id+"|")===0)&&(g.madeRows||[]).indexOf(id)<0)(g.madeRows=g.madeRows||[]).push(id);});}}catch(e){}ddKeptMade=[];return r;};}
+
+/* ---- (2-4) the day's labels on the sheet: the assent in the row, the setting, who and the probe a tap away ---- */
+function ddTagBtnTxt(r){const s=ddTagStr(r.setting),p=ddPrOk(r.probe),b=ddTagStr(r.by);
+  return s||b||p?`${esc(s||b||"Day")}${p?` <b class="dd-pr-k ${p}">${p==="gen"?"G":"M"}</b>`:""}`:"+ Setting, by";}
+function ddDayCell(r){const a=ddAsOk(r.assent),dis=ddBlank?` disabled tabindex="-1"`:"",day=r.date?shortDay(r.date):"this day";
+  const tip=[ddTagStr(r.setting)?"Setting: "+ddTagStr(r.setting):"",ddTagStr(r.by)?"By: "+ddTagStr(r.by):"",ddPrOk(r.probe)?DD_PROBE[r.probe]+" probe":""].filter(Boolean).join(" · ")||"Add the setting, who took the data, and a probe";
+  return `<td class="col-day"><div class="dd-day-w"><select data-f="assent" class="dd-as${a?" on-"+a:""}" aria-label="Assent on ${esc(day)}" title="The student's assent that day"${dis}>${Object.keys(DD_ASSENT).map(k=>`<option value="${k}"${k===a?" selected":""}>${DD_ASSENT[k]}</option>`).join("")}</select>`+
+    `<button type="button" class="dd-tagbtn no-print noprint" data-daytags="${esc(r.id)}" title="${esc(tip)}" aria-label="Day details for ${esc(day)}: ${esc(tip)}"${dis}>${ddTagBtnTxt(r)}</button></div><span class="po">${esc(ddAsWord(a))}</span></td>`;}
+let ddColP=false;
+/* the day's column sits between the condition and the notes (the sheet's code gives its widths by place: the notes' width
+   lands on it, the actions' on the notes; each is put back where it belongs) */
+function ddDayColW(printing,fix){const dc=$("#dataCols"),t=$("#dataTable");if(!dc||!t)return;const cols=[...dc.children],k=cols.findIndex(c=>c.classList.contains("c-day"));if(k<0)return;
+  const nt=dc.querySelector("col.c-notes"),ac=dc.querySelector("col.c-actions");if(fix&&nt)nt.style.width=cols[k].style.width;
+  cols[k].style.width=(printing?(ddAsAny()?44:0):DD_DAYW)+"px";if(ac)ac.style.width=(printing?0:92)+"px";
+  const total=cols.reduce((s,c)=>s+(parseInt(c.style.width,10)||0),0);t.style.width=total+"px";
+  const avail=S.settings.orient==="portrait"?700:960,q=(printing&&total>avail)?avail/total:0;t.style.transform=q?`scale(${q.toFixed(3)})`:"";}
+{const ac1=applyColW;applyColW=function(printing){ddColP=!!printing;const r=ac1.apply(this,arguments);try{ddDayColW(!!printing,true);}catch(e){}return r;};}
+/* paper: the assent is a narrow column only when a day has one; it takes its room from the notes */
+{const ps1=ddPaperScheme;ddPaperScheme=function(){const P=ps1.apply(this,arguments);try{if(!document.querySelector("#dataCols col.c-day"))return P;
+  const port=S.settings.orient==="portrait",w=ddAsAny()?(port?30:38):0,n=P.cols.length;P.cols.splice(n-2,0,w);
+  if(w&&!P.off){const i=n-1,cut=Math.min(w,Math.max(0,P.cols[i]-(port?64:96)));P.cols[i]-=cut;P.fixed.notes=P.cols[i];}}catch(e){}return P;};}
+function ddDayCol(){const t=$("#dataTable");if(!t)return;const dc=$("#dataCols");
+  let made=false;if(dc&&!dc.querySelector("col.c-day")){const a=dc.querySelector("col.c-notes"),c=document.createElement("col");c.className="c-day";if(a){dc.insertBefore(c,a);made=true;}}
+  const head=t.tHead;if(head&&!head.querySelector("th.col-day")){const slim=t.classList.contains("slim"),lab=`Assent<span class="noprint no-print"> · day</span>`;
+    if(slim){const fx=head.querySelector("th.col-notes");if(fx)fx.insertAdjacentHTML("beforebegin",`<th class="col-day fixh" rowspan="3">${lab}</th>`);}
+    else{const kc=head.querySelector("th.keycell");if(kc)kc.colSpan=(+kc.colSpan||4)+1;const er=head.querySelector("tr.entry"),nh=er&&er.querySelector("th.col-notes");if(nh)nh.insertAdjacentHTML("beforebegin",`<th class="col-day">${lab}</th>`);}}
+  const body=t.tBodies[0];if(body)[...body.rows].forEach(tr=>{if(!tr.dataset.r){const td=tr.cells.length===1?tr.cells[0]:null;if(td&&td.colSpan>1&&!td.dataset.dd80){td.colSpan+=1;td.dataset.dd80="1";}return;}
+    if(tr.querySelector("td.col-day"))return;const rows=ddBlank||S.rows,r=rows.find(x=>x.id===tr.dataset.r);if(!r)return;const nc=tr.querySelector("td.col-notes");if(nc)nc.insertAdjacentHTML("beforebegin",ddDayCell(r));});
+  t.classList.toggle("dd-as-on",ddAsAny());if(made)applyColW(ddColP);else ddDayColW(ddColP,false);}
+{const rd2=renderData;renderData=function(){const r=rd2.apply(this,arguments);try{ddDayCol();}catch(e){}return r;};}
+/* the assent picked in the row: the sheet's own input handler has written it; the day keeps it in shape and paper follows */
+document.addEventListener("input",e=>{const s=e.target;if(!s||!s.matches||!s.matches("#dataTable select.dd-as"))return;const tr=s.closest("tr"),r=tr&&S.rows.find(x=>x.id===tr.dataset.r);if(!r)return;
+  ddTagSet(r,"assent",s.value);const a=ddAsOk(r.assent);s.className="dd-as"+(a?" on-"+a:"");const po=tr.querySelector("td.col-day .po");if(po)po.textContent=ddAsWord(a);
+  const t=$("#dataTable");if(t)t.classList.toggle("dd-as-on",ddAsAny());});
+/* the day's details: setting and who (each with the values already used), assent and probe; day before and next day */
+let ddTagRow=null;
+function ddTagLists(){const cnt=k=>{const m=new Map();(S.rows||[]).forEach(r=>{const v=ddTagStr(r[k]);if(v){const key=v.toLowerCase();const o=m.get(key)||{v,n:0};o.n++;m.set(key,o);}});return [...m.values()].sort((a,b)=>b.n-a.n||a.v.localeCompare(b.v)).map(o=>o.v);};
+  const set=cnt("setting");DD_SET_SUGG.forEach(s=>{if(!set.some(x=>x.toLowerCase()===s.toLowerCase()))set.push(s);});
+  const by=cnt("by");if(ddTagStr(S.meta.observer)&&!by.some(x=>x.toLowerCase()===ddTagStr(S.meta.observer).toLowerCase()))by.push(ddTagStr(S.meta.observer));
+  [["ddSetList",set],["ddByList",by]].forEach(([id,L])=>{let d=document.getElementById(id);if(!d){d=document.createElement("datalist");d.id=id;document.body.appendChild(d);}d.innerHTML=L.map(v=>`<option value="${esc(v)}"></option>`).join("");});
+  return {set,by};}
+function ddTagDlg(){let d=document.getElementById("dlgDayTags");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog dd-tag-dlg";d.id="dlgDayTags";d.setAttribute("aria-labelledby","dtT");
+  d.innerHTML=`<h2 id="dtT">Day details</h2><p class="hint" id="dtSub"></p>
+  <div class="dt-g"><label class="field"><span>Setting</span><input id="dtSet" list="ddSetList" autocomplete="off" placeholder="e.g. Classroom"></label>
+  <label class="field"><span>Collected by</span><input id="dtBy" list="ddByList" autocomplete="off" placeholder="who took the data"></label>
+  <label class="field"><span>Assent</span><select id="dtAs">${Object.keys(DD_ASSENT).map(k=>`<option value="${k}">${k?DD_ASSENT[k]:"Not marked"}</option>`).join("")}</select></label>
+  <label class="field"><span>Probe</span><select id="dtPr">${Object.keys(DD_PROBE).map(k=>`<option value="${k}">${k?DD_PROBE[k]+" probe":"Not a probe"}</option>`).join("")}</select></label></div>
+  <p class="hint">Labels on the day only: the day’s numbers and the analysis do not change. A probe day is marked on the graphs (G or M).</p>
+  <div class="dd-actions"><button type="button" class="btn ghost" id="dtPrev">‹ Day before</button><button type="button" class="btn ghost" id="dtNext">Next day ›</button><span style="flex:1"></span><button type="button" class="btn" id="dtDone">Done</button></div>`;
+  document.body.appendChild(d);
+  const F={dtSet:"setting",dtBy:"by",dtAs:"assent",dtPr:"probe"};
+  Object.keys(F).forEach(id=>d.querySelector("#"+id).addEventListener("input",e=>{if(!ddTagRow)return;ddTagSet(ddTagRow,F[id],e.target.value);}));
+  d.querySelector("#dtDone").addEventListener("click",()=>d.close());
+  d.querySelector("#dtPrev").addEventListener("click",()=>ddTagStep(-1));d.querySelector("#dtNext").addEventListener("click",()=>ddTagStep(1));
+  d.addEventListener("close",()=>{ddTagRow=null;renderData();renderResults();});return d;}
+function ddTagFill(){const d=ddTagDlg(),r=ddTagRow;if(!r)return;const R=sortedRows(),i=R.indexOf(r);
+  d.querySelector("#dtT").textContent="Day details: "+(r.date?ddLongDay(r.date):"a day without a date");
+  d.querySelector("#dtSub").textContent=`Setting and who took the data, the student’s assent, a probe. ${R.length>1?`Day ${i+1} of ${R.length} on the sheet.`:""}`;
+  d.querySelector("#dtSet").value=ddTagStr(r.setting);d.querySelector("#dtBy").value=ddTagStr(r.by);d.querySelector("#dtAs").value=ddAsOk(r.assent);d.querySelector("#dtPr").value=ddPrOk(r.probe);
+  d.querySelector("#dtPrev").disabled=i<=0;d.querySelector("#dtNext").disabled=i<0||i>=R.length-1;}
+function ddTagStep(k){const R=sortedRows(),i=R.indexOf(ddTagRow),n=R[i+k];if(!n)return;ddTagRow=n;ddTagFill();}
+function ddTagOpen(id){const r=(S.rows||[]).find(x=>x.id===id);if(!r)return;ddTagLists();const d=ddTagDlg();ddTagRow=r;ddTagFill();try{d.showModal();}catch(e){d.setAttribute("open","");}}
+document.addEventListener("click",e=>{const b=e.target&&e.target.closest&&e.target.closest("[data-daytags]");if(b&&!ddBlank){ddTagOpen(b.dataset.daytags);}});
+
+/* ---- the probe days on each graph: a small G or M at the top of the day's column ---- */
+{const bc2=buildChart;buildChart=function(beh,rows){const svg=bc2.apply(this,arguments);try{if(!svg)return svg;
+  const P=[];rows.forEach((r,i)=>{const k=ddPrOk(r.probe);if(k)P.push({i,k,r});});if(!P.length)return svg;
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return svg;
+  const l=+m[1],t=+m[2],iw=+m[3],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),n={gen:0,maint:0};let g="";
+  P.forEach(p=>{if(p.i>xEnd+1e-9)return;const cx=X(p.i);n[p.k]++;
+    g+=`<g class="dd-probe" data-probe="${p.k}"><rect x="${(cx-7).toFixed(1)}" y="${(t+2).toFixed(1)}" width="14" height="14" rx="3" fill="${p.k==="gen"?"#0E5C63":"#7A5B0B"}"/><text x="${cx.toFixed(1)}" y="${(t+12.6).toFixed(1)}" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">${p.k==="gen"?"G":"M"}<\/text><title>${DD_PROBE[p.k]} probe, ${esc(shortDay(p.r.date))}${ddTagStr(p.r.setting)?" ("+esc(ddTagStr(p.r.setting))+")":""}<\/title><\/g>`;});
+  if(!g)return svg;ddDrawn.probe=n;const k=svg.lastIndexOf("</svg>");return svg.slice(0,k)+`<g class="dd-probes">${g}</g>`+svg.slice(k);}catch(e){return svg;}};}
+{const le1=ddLegendExtra;ddLegendExtra=function(d){const h=le1.apply(this,arguments),p=d&&d.probe;if(!p)return h;
+  return h+(p.gen?`<span><b class="dd-pr-k gen">G<\/b> Generalization probe<\/span>`:"")+(p.maint?`<span><b class="dd-pr-k maint">M<\/b> Maintenance probe<\/span>`:"");};}
+
+/* ---- By setting: each behavior's mean in each setting, with the days behind it (the analysis above is not changed) ---- */
+function ddBySetting(behs){const G=new Map();
+  sortedRows().filter(r=>r.date&&ddTagStr(r.setting)).forEach(r=>{const s=ddTagStr(r.setting),key=s.toLowerCase();if(!G.has(key))G.set(key,{setting:s,rows:[]});G.get(key).rows.push(r);});
+  return [...G.values()].map(x=>{const days=x.rows.filter(r=>S.behaviors.some(b=>plotValue(r,b)!==null)).length;
+    return {setting:x.setting,days,behaviors:behs.map(b=>{const v=x.rows.map(r=>plotValue(r,b)).filter(v=>v!==null);return {name:b.name||"",mean:v.length?Math.round(v.reduce((a,c)=>a+c,0)/v.length*100)/100:null,days:v.length};})};})
+    .filter(x=>x.days>0).sort((a,b)=>b.days-a.days||a.setting.localeCompare(b.setting));}
+function ddBySetRender(){const out=$("#resultsOut"),src=document.getElementById("ddSources");if(!out||!src)return;const old=document.getElementById("ddBySet");if(old)old.remove();
+  const sel=$("#r_behavior").value,behs=sel==="all"?orderedBehaviors():S.behaviors.filter(b=>b.id===sel),T=ddBySetting(behs);if(!T.length||!behs.length)return;
+  const all=sortedRows().filter(r=>r.date&&S.behaviors.some(b=>plotValue(r,b)!==null)),none=all.filter(r=>!ddTagStr(r.setting)).length;
+  const pc=b=>MEASURES[b.measure].two||DD_PCT.indexOf(b.measure)>-1;
+  const html=`<div class="panel dd-byset" id="ddBySet"><div class="sec-title"><h3>By setting<\/h3><span>each behavior’s mean on the days tagged with each setting; labels only, not part of the analysis above<\/span><\/div>
+    <div class="dd-byset-w"><table class="dd-byset-t"><thead><tr><th>Setting<\/th><th>Days<\/th>${behs.map(b=>`<th><span class="swatch" style="background:${esc(b.color)}"><\/span>${esc(b.name||"Untitled")}<br><small>${esc(MEASURES[b.measure].unit)}<\/small><\/th>`).join("")}<\/tr><\/thead>
+    <tbody>${T.map(x=>`<tr data-setting="${esc(x.setting)}"><th scope="row">${esc(x.setting)}<\/th><td>${x.days}<\/td>${x.behaviors.map((v,i)=>`<td data-mean="${v.mean===null?"":v.mean}">${v.mean===null?"—":esc(r1(v.mean))+(pc(behs[i])?"%":"")}${v.days?` <small>(${v.days} day${v.days===1?"":"s"})<\/small>`:""}<\/td>`).join("")}<\/tr>`).join("")}<\/tbody><\/table><\/div>
+    ${none?`<p class="hint">${none} day${none===1?"":"s"} with data ${none===1?"has":"have"} no setting (Data tab: the day’s details).<\/p>`:""}<\/div>`;
+  src.insertAdjacentHTML("beforebegin",html);}
+{const rr1=renderResults;renderResults=function(){const r=rr1.apply(this,arguments);try{ddBySetRender();}catch(e){}return r;};}
+
+/* ---- the CSV: four columns at the end (assent, setting, collected by, probe) when any day has one ---- */
+function ddCsvRecs(t){const R=[];let cur="",q=false;for(let i=0;i<t.length;i++){const c=t[i];if(c==='"'){q=!q;cur+=c;}else if(c==="\n"&&!q){R.push(cur);cur="";}else cur+=c;}R.push(cur);return R;}
+function ddCsvTags(text){const R=ddCsvRecs(text),q=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`,rows=sortedRows(),per=S.settings.entryMode==="interval"?slotList().length+1:1;
+  const tag=r=>[ddAsWord(r.assent),ddTagStr(r.setting),ddTagStr(r.by),ddPrOk(r.probe)?DD_PROBE[r.probe]:""];
+  R[0]+=","+["Assent","Setting","Collected by","Probe"].map(q).join(",");
+  for(let k=1;k<R.length;k++){const j=k-1,r=rows[Math.floor(j/per)];R[k]+=","+((j%per)===per-1&&r?tag(r):["","","",""]).map(q).join(",");}
+  return R.join("\n");}
+{const dl1=download;download=function(name,content,type){try{if(/csv/i.test(type||"")&&/^behavior_data/.test(String(name))&&ddTagAny())content=ddCsvTags(String(content));}catch(e){}return dl1.call(this,name,content,type);};}
+
+/* ---- the case: assent, settings, probes, and each of the last 30 days' values ---- */
+{const out2=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out2();}catch(e){o=null;}
+  try{const B=orderedBehaviors(),dated=sortedRows().filter(r=>r.date),has=r=>B.some(b=>plotValue(r,b)!==null);
+    if(!o&&!dated.some(ddTagged))return o;if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};if(!o.data)return o;const d=o.data;
+    const vd=dated.filter(has).slice(-30);
+    if(vd.length)d.byDay=vd.map(r=>{const vals={};B.forEach(b=>{const v=plotValue(r,b);vals[b.name||""]=v===null?null:Math.round(v*100)/100;});return {date:r.date,vals};});
+    const marked=dated.filter(r=>ddAsOk(r.assent));
+    if(marked.length){const c=(L,k)=>L.filter(r=>r.assent===k).length,l10=dated.filter(r=>has(r)||ddTagged(r)).slice(-10).filter(r=>ddAsOk(r.assent));
+      d.assent={days:marked.length,refused:c(marked,"refused"),withdrew:c(marked,"withdrew"),last10:{days:l10.length,refused:c(l10,"refused"),withdrew:c(l10,"withdrew")},
+        list:marked.slice(-20).map(r=>({date:r.date,mark:r.assent}))};}
+    const bs=ddBySetting(B);if(bs.length)d.bySetting=bs;
+    const pr=dated.filter(r=>ddPrOk(r.probe));if(pr.length)d.probes=pr.slice(-30).map(r=>({date:r.date,kind:r.probe,setting:ddTagStr(r.setting)}));
+    return o;}catch(e){return o;}};}
+ddTagClean();try{ddDayCol();}catch(e){}
+</script>
+<style id="dd-v2180-css">
+.sheet col.c-day{width:206px}
+#dataTable td.col-day .dd-day-w{display:flex;gap:4px;align-items:center;padding:2px 3px}
+#dataTable select.dd-as{font-size:16px;width:96px;min-height:36px;padding:2px 4px;flex:0 0 auto}
+#dataTable select.dd-as.on-agreed{background:#eaf5ee;border-color:#9cc9ad}
+#dataTable select.dd-as.on-refused,#dataTable select.dd-as.on-withdrew{background:#fbf1f1;border-color:#d9a5a5;color:#7c2222}
+.dd-tagbtn{flex:1 1 auto;min-width:0;min-height:36px;font-size:13px;line-height:1.2;padding:2px 6px;border:1px solid var(--rule);border-radius:3px;background:#f5f8f9;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;cursor:pointer}
+.dd-tagbtn:disabled{opacity:.5}
+.dd-pr-k{display:inline-block;min-width:15px;height:15px;line-height:15px;border-radius:3px;text-align:center;color:#fff;font-size:10.5px;font-weight:700;background:#0E5C63;vertical-align:1px;margin-right:3px}
+.dd-pr-k.maint{background:#7A5B0B}
+dialog.dd-tag-dlg{width:min(560px,calc(100vw - 24px))}
+.dd-tag-dlg .dt-g{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:8px 0}
+.dd-tag-dlg .field{display:block}.dd-tag-dlg .field input,.dd-tag-dlg .field select{width:100%;box-sizing:border-box;font-size:16px;min-height:40px}
+.dd-tag-dlg .dd-actions{flex-wrap:wrap}
+.dd-byset-w{overflow-x:auto;max-width:100%}
+.dd-byset-t{border-collapse:collapse;font-size:13.5px;min-width:0}
+.dd-byset-t th,.dd-byset-t td{border-bottom:1px solid var(--rule-soft,#dce3e7);padding:6px 10px;text-align:left;vertical-align:top}
+.dd-byset-t thead th{position:static;font-size:12.5px}.dd-byset-t td small,.dd-byset-t th small{color:var(--ink-soft);font-weight:400}
+.dd-byset{break-inside:avoid}
+@media (max-width:560px){.dd-tag-dlg .dt-g{grid-template-columns:1fr}}
+@media print{#dataTable .dd-day-w{display:none!important}#dataTable:not(.dd-as-on) .col-day{display:none!important}
+  #dataTable td.col-day .po{display:block;text-align:center;font-size:8.5px;padding:3px 1px;white-space:normal;line-height:1.15}
+  #dataTable th.col-day{font-size:8.5px;padding:4px 1px}.dd-byset-w{overflow:visible}}
+</style>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
