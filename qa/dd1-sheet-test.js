@@ -41,6 +41,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   ok('printed: the widths hold as percentages whatever width the page has, Behaviors only leaves phase, condition and notes off, the weekday sits above the date, Add days skips the weekend',
     v70.fixed&&v70.sum===100&&Math.abs(v70.w1-v70.wrap)<=2&&v70.hid&&v70.beh>101&&v70.dw==='Mon '&&v70.days.join()==='2026-10-16,2026-10-19,2026-10-20',v70);
   ok('printed: the date reads "Mon 9/7" and the % heading shows',/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2}\/\d{1,2}$/.test(pr.pdate)&&pr.pdShown==='block'&&pr.inputHidden==='none'&&pr.pct!=='none'&&pr.pctT==='%',pr);
+  /* v21.72 on paper the student line is the only heading: no print head, no "Daily data" title; the days covered on its right */
+  const v72=await page.evaluate(()=>{const h=document.getElementById('printHead');h.innerHTML='<div class="l">X \u2014 Daily data sheet</div>';
+    const r={ph:getComputedStyle(h).display,h2:getComputedStyle(document.querySelector('#tab-data .dd-datah')).display,span:(document.querySelector('#sheetTop .st-r b')||{}).textContent||'',
+      note:getComputedStyle(document.querySelector('#sheetDefs .dd-onpaper')).display};h.innerHTML='';return r;});
+  ok('printed: the student line is the only heading above the sheet (no print head, no "Daily data" title), with the days it covers; the Obs. min note is in the key',
+    v72.ph==='none'&&v72.h2==='none'&&/^Data \d{1,2}\/\d{1,2} \u2013 \d{1,2}\/\d{1,2}$/.test(v72.span)&&v72.note==='inline',v72);
   const por=await page.evaluate(()=>{S.settings.orient='portrait';applyColW(true);const t=document.getElementById('dataTable');const w=parseInt(t.style.width,10);S.settings.orient='landscape';applyColW(true);return {w,tr:t.style.transform};});
   ok('printed in portrait: the table fits the page',por.w<=700||!!por.tr,por);
   await page.emulateMedia({media:'screen'});
