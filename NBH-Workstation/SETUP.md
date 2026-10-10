@@ -8322,3 +8322,22 @@ five pages that each fit one letter page by the form's own measure and print as 
 the flow sheet off; Save data and Open data with the marks; inside the shell the case fills the fields, each
 marked, a rewrite takes the mark off, the packet bar's student reaches Setup, no page errors). Not yet taken from
 the case: the day-by-day counts on DD-1 (the tiles come from GB-1's current levels until DD-1 exposes its record).
+
+### v21.70: Form DD-1's printed sheet, eight behaviors to a landscape page
+
+- **The widths travel with the print.** The printed widths were set by the form when it heard the browser start to print.
+  Safari on the iPad, printing from inside the workstation, did not always tell it, so the sheet printed at its screen
+  widths (172 px a behavior) and the right-hand columns ran off the page. The widths are now also a print style, in
+  percentages of the page, rewritten whenever the sheet changes (`ddPaperScheme`, `ddPrintStyle`); any print of the
+  sheet uses them: the form on its own, Print this form, the master print.
+- **Narrower Date and Obs. min.** The weekday prints small above the date ("TUE" over "10/13"), so Date needs 36 px of a
+  960 px landscape page (was 56); Obs. min 26 (was 32). Phase change 54, Condition 76, Daily notes at least 96. With
+  eight count behaviors in landscape each gets about 84 px; in portrait about 60, with the names set a size smaller.
+- **On paper: Behaviors only** (Data tab, beside Column width) leaves Phase change, Condition name and Daily notes off the
+  printed sheet, giving the behaviors the room: eight count behaviors get about 110 px each in landscape. The choice is
+  saved with the file; the screen keeps every column.
+- **Names wrap at word breaks** and after a slash ("Public Urinating/ Defecating"), never inside a word; with seven or more
+  columns they print a size smaller.
+- **Weekdays only** (beside Add days, on by default, saved with the file): Add days adds school days, skipping Saturday and
+  Sunday, so ten days from a Tuesday run to the second Monday.
+- Checked by `qa/dd1-sheet-test.js` (one new check: the percentages, Behaviors only, the weekday, the weekend skipped).

@@ -534,7 +534,16 @@ td input,td select{max-width:100%}
   .sd-card{border-left-width:3px;padding-left:7px}
   .sd-h b{font-size:9.5px}.sd-k{font-size:7.5px}.sd-card p{font-size:8.8px;line-height:1.32}.sd-m{font-size:8px}.sd-key{font-size:8.3px;margin-top:6px;padding-top:5px}
   .sheet.slim tbody td.col-date > input{display:none}
-  .sheet.slim tbody td.col-date .pdate{display:block;text-align:center;font-size:9.5px;padding:5px 1px;white-space:nowrap}
+  .sheet.slim tbody td.col-date .pdate{display:block;text-align:center;font-size:9px;line-height:1.1;padding:3px 0;white-space:nowrap}
+  /* v21.70 the weekday sits small above the date, so the Date column needs only the width of "10/13" */
+  .sheet.slim tbody td.col-date .pdate .dw{display:block;font-size:7px;letter-spacing:.3px;text-transform:uppercase;color:#5b6770}
+  .sheet.slim thead th.col-obs{font-size:8px;padding:4px 1px}
+  .sheet.slim tbody td.col-obs > input{font-size:8.5px;padding:5px 0;text-align:center}
+  .sheet.slim thead th.namecell{overflow-wrap:normal;word-break:normal}
+  .sheet.slim.many thead th.namecell{font-size:9.5px;padding:4px 3px}
+  .sheet.slim.many thead tr.entry th{font-size:8px;padding:4px 1px}
+  .sheet.slim.narrow thead th.namecell{font-size:8.5px;padding:4px 2px;overflow-wrap:break-word}
+  .sheet.slim.narrow thead tr.entry th{font-size:7.5px}
   .sheet.slim tbody td > input{padding:5px 2px}
   /* the actions column is the last of the first heading row here, not of the units row */
   .sheet.slim thead tr.entry th:last-child{display:table-cell}
@@ -1551,6 +1560,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
         </label>
         <label class="field"><span>Start date</span><input type="date" id="d_start"></label>
         <label class="field"><span>Days to add</span><input type="number" id="d_count" value="5" min="1" max="120"></label>
+        <label style="display:flex;gap:5px;align-items:center;font-size:14px" title="Add days skips Saturdays and Sundays"><input type="checkbox" id="d_wkd" checked style="width:auto"> Weekdays only</label>
         <button class="btn" id="btnAddDays">Add days</button>
         <button class="btn ghost" id="btnAddOne">Add one row</button>
         <button class="btn ghost" id="btnPasteDates" title="Paste a column of dates copied from Google Sheets or Excel">Paste dates</button>
@@ -1560,6 +1570,12 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
           <select id="d_defpl" title="Below the sheet keeps the columns even and the heading short; in the column headings puts each definition over its column">
             <option value="below">Below the sheet</option>
             <option value="head">In the column headings</option>
+          </select>
+        </label>
+        <label class="field" title="Phase change, Condition name and Daily notes take a third of a printed page; leave them off to give the behaviors the room (8 or more fit comfortably on a landscape page)"><span>On paper</span>
+          <select id="d_paper">
+            <option value="all">Phase, condition and notes columns</option>
+            <option value="off">Behaviors only</option>
           </select>
         </label>
         <label class="field"><span>Column width</span>
@@ -4618,6 +4634,8 @@ function syncObsControls(){
   $("#iv_count").textContent=parts.join(" \u00b7 ");
 }
 /* v21.47 the slim sheet: who it is for above the table, the definitions and how to read it below */
+/* v21.70 the printed date: "TUE" small above "10/13" (the text still reads "Tue 10/13") */
+function pdateHtml(iso){const t=shortDay(iso),i=t.indexOf(" ");return i<0?esc(t):`<span class="dw">${esc(t.slice(0,i+1))}</span>${esc(t.slice(i+1))}`;}
 function shortDay(iso){if(!iso)return "";const p=iso.split("-");if(p.length!==3)return iso;const d=new Date(+p[0],+p[1]-1,+p[2],12);
   return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]+" "+(+p[1])+"/"+(+p[2]);}
 function hm12(t){const m=timeToMin(t);if(m===null)return "";const h=Math.floor(m/60),mm=m%60;return (h%12||12)+":"+String(mm).padStart(2,"0")+(h<12?" am":" pm");}
@@ -4677,7 +4695,7 @@ function renderData(){
     <th class="fixh fx-act" rowspan="3"></th>
   </tr>
   <tr class="hrow">
-    ${obs.map((b,i)=>`<th class="namecell" colspan="${span(b)}" style="border-top:3px solid ${esc(b.color)}">${defsOn?`<span class="bnum" style="background:${esc(b.color)}">${i+1}</span>`:""}${esc(b.name||"Untitled")}${defsOn?"":`<small class="nmsub">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</small>`}</th>`).join("")}
+    ${obs.map((b,i)=>`<th class="namecell" colspan="${span(b)}" style="border-top:3px solid ${esc(b.color)}">${defsOn?`<span class="bnum" style="background:${esc(b.color)}">${i+1}</span>`:""}${esc(b.name||"Untitled").replace(/\//g,"/<wbr>")}${defsOn?"":`<small class="nmsub">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</small>`}</th>`).join("")}
   </tr>
   <tr class="entry">
     ${behHeads}
@@ -4716,7 +4734,7 @@ function renderData(){
     let cls = r.phaseType==="full" ? "phase-full" : (r.phaseType==="conditional" ? "phase-cond" : "");
     if(iv && r.id===selectedDay) cls+=" sel-day";
     return `<tr class="${cls}" data-r="${esc(r.id)}">
-      <td class="col-date ${iv?"pick":""}"><input type="date" data-f="date" value="${esc(r.date)}" style="padding-left:2px;padding-right:2px"><span class="pdate">${esc(shortDay(r.date))}</span>${iv?`<button class="btn ghost sm" data-act="openDay" style="margin:0 4px 5px;padding:2px 7px">Open</button>`:""}</td>
+      <td class="col-date ${iv?"pick":""}"><input type="date" data-f="date" value="${esc(r.date)}" style="padding-left:2px;padding-right:2px"><span class="pdate">${pdateHtml(r.date)}</span>${iv?`<button class="btn ghost sm" data-act="openDay" style="margin:0 4px 5px;padding:2px 7px">Open</button>`:""}</td>
       <td class="${iv?"calc":""} ${iv&&!r.obsMin?"none":""}">${iv?esc(r.obsMin||"\u2014"):(()=>{
         const o=num(r.obsMin), wm=windowMinutes();
         return `<input type="number" step="any" min="0" data-f="obsMin" class="${o===null?"is-default":""}" value="${o!==null?esc(r.obsMin):(wm===null?"":wm)}" title="${o===null?"From the standard observation window \u2014 type over it for a short day":"Adjusted for this day \u2014 clear the cell to use the window again"}">`;
@@ -5089,8 +5107,12 @@ function addDays(){
   const count=Math.max(1,Math.min(120,parseInt($("#d_count").value,10)||1));
   if(!start){ toast("Pick a start date first."); return; }
   const d=new Date(start+"T12:00:00");
-  for(let i=0;i<count;i++){
+  /* v21.70 Weekdays only (the default): the days added are school days, Saturday and Sunday skipped */
+  const wk=S.settings.weekdays!==false;
+  for(let i=0,n=0;n<count&&i<400;i++){
     const dd=new Date(d.getTime()+i*86400000);
+    if(wk&&(dd.getDay()===0||dd.getDay()===6)) continue;
+    n++;
     const iso=localISO(dd);   /* v21.21 cross-form (X1): local date, not UTC */
     if(!S.rows.some(r=>r.date===iso)) S.rows.push(newRow(iso));
   }
@@ -5884,6 +5906,8 @@ function syncResultControls(){
   $("#d_defpl").value=S.settings.defPlace==="head"?"head":"below";
   $("#c_key").checked=S.settings.showKey!==false;
   $("#d_colw").value=String(S.settings.colW||172);
+  $("#d_paper").value=S.settings.paperCols==="off"?"off":"all";
+  $("#d_wkd").checked=S.settings.weekdays!==false;
   $("#p_orient").value=S.settings.orient||"landscape";
   applyColW(); applyOrientation();
 }
@@ -6048,7 +6072,39 @@ $("#d_defs").addEventListener("change",e=>{S.settings.showDefs=e.target.checked;
 $("#d_defpl").addEventListener("change",e=>{S.settings.defPlace=e.target.value==="head"?"head":"below"; renderData();});
 $("#c_key").addEventListener("change",e=>{S.settings.showKey=e.target.checked; renderResults();});
 $("#d_colw").addEventListener("change",e=>{S.settings.colW=parseInt(e.target.value,10); applyColW();});
-$("#p_orient").addEventListener("change",e=>{S.settings.orient=e.target.value; applyOrientation();});
+$("#d_paper").addEventListener("change",e=>{S.settings.paperCols=e.target.value==="off"?"off":"all"; applyColW();});
+$("#d_wkd").addEventListener("change",e=>{S.settings.weekdays=e.target.checked;});
+$("#p_orient").addEventListener("change",e=>{S.settings.orient=e.target.value; applyOrientation(); applyColW();});
+/* v21.70 the printed sheet's widths (definitions below the sheet): Date fits "10/13" with the weekday above it, Obs. min
+   fits "360", the behaviors share the page evenly, and the phase, condition and notes columns take what is left, or are
+   left off the paper (Data tab, "On paper"). Px at the page's width (960 landscape, 700 portrait), then written as
+   percentages in a print style (ddPrintStyle), so the sheet fits whatever width the browser prints at: Safari on the iPad,
+   the workstation's Print this form and the master print included, whether or not the browser announces that it prints. */
+function ddPaperScheme(){
+  const obs=orderedBehaviors(), iv=S.settings.entryMode==="interval", portrait=S.settings.orient==="portrait";
+  const avail=portrait?700:960, off=S.settings.paperCols==="off";
+  const fixed={date:36,obs:26,phase:off?0:(portrait?44:54),label:off?0:(portrait?56:76),notes:0};
+  const nTwo=iv?0:obs.filter(b=>MEASURES[b.measure].two).length;
+  const units=Math.max(1,(obs.length-nTwo)+1.65*nTwo);
+  const minNotes=off?0:(portrait?64:96);
+  const behW=Math.max(44,Math.min(off?170:150,Math.floor((avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+minNotes))/units)));
+  const behTotal=obs.reduce((t,b)=>t+((!iv&&MEASURES[b.measure].two)?Math.round(behW*0.6)*2+Math.round(behW*0.45):behW),0);
+  fixed.notes=off?0:Math.max(minNotes,avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+behTotal));
+  const cols=[fixed.date,fixed.obs];
+  obs.forEach(b=>{if(!iv&&MEASURES[b.measure].two){const a=Math.round(behW*0.6),c=Math.round(behW*0.45);cols.push(a,a,c);}else cols.push(behW);});
+  cols.push(fixed.phase,fixed.label,fixed.notes,0);
+  return {fixed,behW,cols,off,many:units>6,narrow:behW<80};
+}
+function ddPrintStyle(){
+  let st=document.getElementById("ddPrintCols");
+  if(!st){st=document.createElement("style");st.id="ddPrintCols";document.head.appendChild(st);}
+  const t=$("#dataTable"),P0=ddPaperScheme();if(t){t.classList.toggle("many",P0.many);t.classList.toggle("narrow",P0.narrow);}
+  if(S.settings.defPlace==="head"){st.textContent="";return;}
+  const P=ddPaperScheme(),sum=P.cols.reduce((a,b)=>a+b,0)||1;
+  const w=P.cols.map((v,i)=>`#dataCols col:nth-child(${i+1}){width:${(v*100/sum).toFixed(3)}%!important}`).join("");
+  st.textContent=`@media print{#dataTable.slim{table-layout:fixed!important;width:100%!important;transform:none!important}${w}`+
+    (P.off?`#dataTable.slim .col-phase,#dataTable.slim .col-label,#dataTable.slim .col-notes{display:none!important}`:"")+`}`;
+}
 function applyColW(printing){
   const obs=orderedBehaviors(), iv=S.settings.entryMode==="interval";
   const fixed = printing
@@ -6059,14 +6115,7 @@ function applyColW(printing){
   const TWO = 1.65; // a correct-of-opportunities target occupies this many standard columns
   const slim = S.settings.defPlace!=="head";
   if(printing && slim){
-    const portrait = S.settings.orient==="portrait";
-    fixed.date=portrait?52:56; fixed.obs=32; fixed.phase=portrait?56:70; fixed.label=portrait?72:96;
-    const nTwo = iv ? 0 : obs.filter(b=>MEASURES[b.measure].two).length;
-    const units = Math.max(1, (obs.length-nTwo) + TWO*nTwo);
-    const minNotes = portrait?80:120;
-    behW = Math.max(52, Math.min(150, Math.floor((avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+minNotes))/units)));
-    const behTotal = obs.reduce((t,b)=>t+((!iv&&MEASURES[b.measure].two)?Math.round(behW*0.6)*2+Math.round(behW*0.45):behW),0);
-    fixed.notes = Math.max(minNotes, avail-(fixed.date+fixed.obs+fixed.phase+fixed.label+behTotal));
+    const P=ddPaperScheme();Object.assign(fixed,P.fixed);behW=P.behW;
   }
   else if(printing){
     const nTwo = iv ? 0 : obs.filter(b=>MEASURES[b.measure].two).length;
@@ -6097,6 +6146,7 @@ function applyColW(printing){
       t.style.transformOrigin = "top left";
     }
   }
+  ddPrintStyle();
   const ic=$("#ivCols");
   if(ic){
     const ivBehW = printing ? Math.max(52,Math.min(behW,Math.floor(((S.settings.orient==="portrait"?690:930)-(fixed.time+fixed.act))/Math.max(1,obs.length)))) : behW;
