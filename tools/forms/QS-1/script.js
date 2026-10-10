@@ -327,7 +327,7 @@ window.__nbhFactsPick=function(sel){ensure();PASS=new Set();let n=0;const notes=
 
 /* v21.74 out: the non-negotiables (for Form TI-1's checklist) and the tiers (for Form DD-1's incident log) */
 window.__nbhFactsOut=function(){try{ensure();const rules=filled('rules').map(r=>({do:T(r.do),dont:T(r.dont)}));
-  const tiers=filled('tiers').map(r=>({name:T(r.name),see:T(r.see),do:T(r.do)}));
+  const tiers=filled('tiers').map(r=>({name:T(r.name),see:T(r.see),do:T(r.do),say:T(r.say)}));   /* v21.77 the words to say too (Form TV-1's tiers) */
   return rules.length||tiers.length?{quick:{rules,tiers,src:'QS-1'}}:null;}catch(e){return null;}};
 
 /* ---------------- simulation ---------------- */

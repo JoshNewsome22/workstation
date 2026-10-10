@@ -25,7 +25,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const dl=async fn=>{const [d]=await Promise.all([page.waitForEvent('download'),page.evaluate(fn)]);const p=path.join(OUT,d.suggestedFilename());await d.saveAs(p);return p;};
   /* 1 */
   const v0=await page.evaluate(()=>({v:document.getElementById('setupVerdict').textContent,n:S.rows.length,segs:document.querySelectorAll('#segPick input').length,caseLine:document.getElementById('caseLine').textContent}));
-  ok('1 no script yet: Setup says so, eleven segments to tick, no case',v0.n===0&&/No script yet/.test(v0.v)&&v0.segs===11&&/No case yet/.test(v0.caseLine),v0);
+  ok('1 no script yet: Setup says so, fourteen segments to tick (v21.77: where things stand, every day, step by step), no case',v0.n===0&&/No script yet/.test(v0.v)&&v0.segs===14&&/No case yet/.test(v0.caseLine),v0);
   const CASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by more than three feet without permission',ex:'walking out of the classroom door',nex:'going to the bathroom with a pass',dim:'frequency'},{label:'Asking for a break',isRep:true,type:'replacement'}],
     fn:{label:'Escape from demands',statements:['When Jo is given a long task, Jo leaves the area, and the task is taken away.']},goals:{red:[{beh:'Elopement',text:'Elopement will decrease to zero a day for 15 days'}],acq:[{beh:'Asking for a break',text:'Jo will ask for a break in 8 of 10 opportunities'}]},
     menu:[{name:'Music',rank:2},{name:'Tablet time',rank:1}],src:{behaviors:'TB-1'}};

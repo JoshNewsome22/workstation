@@ -8512,3 +8512,47 @@ measurement and observation length above them) now fills Form DD-1 and keeps it 
    OAuth App Name Or Client ID*, paste the Client ID, and set it to *Trusted* (or *Limited* to Google Sheets).
 
 Checked by `qa/v2176-test.js` (16 checks, with Google's sign-in and the Sheets API simulated).
+
+### v21.77: Form TV-1, the training video, further
+
+- **Where things stand.** A new segment (after *Function & Data*) takes Form DD-1's record: each behavior's level before
+  the plan and now (the first condition and the latest), and whether a goal has held for the days the plan asks. The
+  card shows a chart drawn here (a panel a behavior, up to four, each on its own scale, the goal dashed) as its picture,
+  so it is in every look, in the graphics window and in the saved file; the list gives the numbers; the teleprompter
+  says them. With one condition only, the bar is *Lately*.
+- **Every day, and step by step (Form QS-1).** *Every Day* (after the proactive strategies) is the quick start's
+  non-negotiables as a card of two columns, *Do* with a tick and *Don't* with a cross (the layout *Do and don't, in two
+  columns*, in both looks); five to a card. *Step by Step* (after the response plan) is a card naming the tiers, then a
+  card a tier that builds a point a click: *See*, *Do*, *Say* (QS-1 now hands on the words to say). The long words of
+  these cards go in the teleprompter's own field, so the panel keeps to the card.
+- **Drafted for staff or a family.** *Drafted for* on Setup: Automatic (a family when *Who the training is for* names a
+  family, a parent, a caregiver or home), Staff, or A family. A family's draft opens each part in plain words, and
+  leaves out the crisis plan's stages, the crisis line and the crisis tiers (the first signs, the behavior and the
+  recovery stay).
+- **Plain-language check.** On the Script, the plan's technical terms found in what is said and on the cards
+  (reinforcement, antecedent, replacement behavior, extinction, baseline, FCT and some fifty more), each with plain
+  words, the cards it is on, *Replace* (in every card; Undo brings it back) and *Keep* (off the list on purpose).
+- **Before you record (Setup).** The audience; the photos on the cards against Form DM-1's photo or media permission
+  (red when DM-1 records No and a card shows a photo, amber when nothing is recorded; the chart and pictograms are not
+  photos); the name; the technical words; the length against the target. **Initials only** puts the student's
+  initials (M. R.) in place of the name in the script, on the tag and in every later draft.
+- **Target length.** *Target length, in minutes* on Setup: the summary says on target, over or under (within 10% or 30
+  seconds is on target); each segment shows its share of the time, and the longest segment and the longest card are
+  marked.
+- **Check quiz.** *Make the check quiz* (on the Script, under the rows) writes five to eight questions from the case
+  (the definitions, the function, the replacement, the first sign, what never to do, the do and don't list, a tier,
+  the data) and the script's takeaways, each with its answer among the choices. *Print the quiz* prints it with boxes
+  and the answer key on a page of its own; *For Google Forms (CSV)* and *Copy the rows for a sheet* give a row a
+  question (question, type, four options, the correct answer, points), for a Google Forms quiz add-on or to type in.
+- **The rehearsal steps (Form ST-1).** The script's proactive strategies, reinforcement, do list, response steps and
+  tiers become the rehearsal steps (the response steps and the tiers critical; antecedent or consequence as on TI-1).
+  They go out with the case: Form ST-1 takes them for its step list when that list is empty (no step written, no round
+  coded), and leaves a list already started as it is. *Print the rehearsal checklist* prints them with boxes for
+  modeled, rehearsed, correct and feedback.
+- **Retakes.** On the teleprompter, **R**, the *Retake* button, or the clicker's Next held down marks the segment on
+  screen to record again (the held clicker goes back to the card it was pressed on). With the clock running, each mark
+  keeps its time and when its segment began; *The retakes (CSV)* lists them for the edit. The marks are kept in the
+  saved file; starting the clock again begins a new list.
+
+Checked by `qa/v2177-test.js` (31 checks; the simulated student Mateo Rivera); `qa/tv1-test.js` counts fourteen
+segments now.
