@@ -47,6 +47,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
       note:getComputedStyle(document.querySelector('#sheetDefs .dd-onpaper')).display};h.innerHTML='';return r;});
   ok('printed: the student line is the only heading above the sheet (no print head, no "Daily data" title), with the days it covers; the Obs. min note is in the key',
     v72.ph==='none'&&v72.h2==='none'&&/^Data \d{1,2}\/\d{1,2} \u2013 \d{1,2}\/\d{1,2}$/.test(v72.span)&&v72.note==='inline',v72);
+  /* v21.72 kept on paper: the student's photo on the student line, and the definitions below the sheet */
+  const kp=await page.evaluate(()=>{const was=S.meta.photo;S.meta.photo='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';renderData();
+    const img=document.querySelector('#sheetTop .idwrap img'),t=document.getElementById('dataTable'),d=document.querySelector('#sheetDefs .sd-wrap');
+    const r={photo:!!img&&getComputedStyle(img).display!=='none'&&Math.round(img.getBoundingClientRect().width),below:!!d&&d.getBoundingClientRect().top>=t.getBoundingClientRect().bottom,cards:document.querySelectorAll('#sheetDefs .sd-card').length,inHead:t.querySelectorAll('.defncell').length};
+    S.meta.photo=was;renderData();applyColW(true);return r;});
+  ok('printed: the student\u2019s photo stays on the student line and the definitions print below the sheet',kp.photo===50&&kp.below&&kp.cards===6&&kp.inHead===0,kp);
   const por=await page.evaluate(()=>{S.settings.orient='portrait';applyColW(true);const t=document.getElementById('dataTable');const w=parseInt(t.style.width,10);S.settings.orient='landscape';applyColW(true);return {w,tr:t.style.transform};});
   ok('printed in portrait: the table fits the page',por.w<=700||!!por.tr,por);
   await page.emulateMedia({media:'screen'});
