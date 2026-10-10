@@ -654,6 +654,10 @@ body.view-out .pane[data-pane="out"],body.view-guide .pane[data-pane="guide"]{di
 .qsf textarea{min-height:36px;resize:vertical;line-height:1.4}
 .qsf .qs-fw{display:flex;flex-direction:column;gap:3px;min-width:0}
 .qs-pull{font-family:var(--sans);font-size:10px;color:#8a5a20;background:#fbf0e6;border:1px solid #e0c3a4;border-radius:2px;padding:1px 6px;display:inline-block;align-self:flex-start}
+.qs-chg{display:block;font-family:var(--sans);font-size:11.5px;line-height:1.4;color:#5a3d10;background:#fff7e0;border:1px solid #e3c77a;border-radius:3px;padding:5px 8px;margin-top:3px}
+.qs-chg b{color:#7a4a00}
+.qs-chg .tool{margin:3px 4px 0 0;font-size:11px}
+@media print{.qs-chg{display:none!important}}
 .qs-rows{width:100%;border-collapse:collapse;margin:4px 0 6px;font-family:var(--sans);font-size:12.5px}
 .qs-rows th{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:3px 6px;border-bottom:1px solid var(--rule-2);font-weight:600}
 .qs-rows td{padding:3px 4px;vertical-align:top;border-bottom:1px solid #eef2f1}
@@ -2989,13 +2993,14 @@ const MAXR={stats:4,five:7,day:9,talk:10,skills:4,read:2,tiers:7,rules:12,rec:14
 const row=k=>{const o={};ROW[k].forEach(f=>{o[f]='';});return o;};
 function blank(){const S={meta:{client:'',sid:'',grade:'',school:'',bcba:'',program:'',first:'',pron:'he',start:'',plan:'',issued:''},
   who:'',goal:'',statnote:'',when:'',may:'',gets:'',health:'',title2:'',spotHead:'',spotText:'',chips:'',newline:'',title3:'',readnote:'',mustknow:'',
-  consLead:'',consRules:'',consSay:'',title4:'',recnote:'',onevoice:'',flowOn:'yes',flowCalm:'',flowCall:'',pulled:{}};
+  consLead:'',consRules:'',consSay:'',title4:'',recnote:'',onevoice:'',flowOn:'yes',flowCalm:'',flowCall:'',pulled:{},changed:{}};
   Object.keys(ROW).forEach(k=>{S[k]=[];for(let i=0;i<START[k];i++)S[k].push(row(k));});return S;}
 let S=blank();
 function ensure(){const b=blank();if(!S||typeof S!=='object')S=b;if(!S.meta||typeof S.meta!=='object')S.meta={};
   Object.keys(b.meta).forEach(k=>{if(typeof S.meta[k]!=='string')S.meta[k]=b.meta[k];});if(!/^(he|she|they)$/.test(S.meta.pron))S.meta.pron='he';
-  Object.keys(b).forEach(k=>{if(k==='meta'||k==='pulled'||ROW[k])return;if(typeof S[k]!=='string')S[k]=b[k];});
+  Object.keys(b).forEach(k=>{if(k==='meta'||k==='pulled'||k==='changed'||ROW[k])return;if(typeof S[k]!=='string')S[k]=b[k];});
   if(!S.pulled||typeof S.pulled!=='object')S.pulled={};
+  if(!S.changed||typeof S.changed!=='object'||Array.isArray(S.changed))S.changed={};
   Object.keys(ROW).forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];S[k]=S[k].slice(0,MAXR[k]).map(r=>{const o=row(k);if(r&&typeof r==='object')ROW[k].forEach(f=>{o[f]=str(r[f]);});return o;});
     while(S[k].length<Math.min(START[k],MAXR[k]))S[k].push(row(k));});
   if(S.flowOn!=='no')S.flowOn='yes';}
@@ -3019,7 +3024,10 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 
 /* ---------------- the editor ---------------- */
 /* a field: label, the control bound to a path, and the mark when the case placed its words */
-function mark(p){const v=T(getP(p)),w=T(S.pulled[p]);return v&&w&&v===w?'<span class="qs-pull" data-mark="'+esc(p)+'">from the plan &mdash; rewrite</span>':'<span data-mark="'+esc(p)+'"></span>';}
+/* v21.74 a line rewritten here while the plan has since changed carries the plan's new words, to take or to keep mine */
+function chgMark(p){const nv=T(S.changed[p]);if(!nv)return '';return '<span class="qs-chg" data-chg="'+esc(p)+'"><b>The plan has changed here.</b> It now says: &ldquo;'+esc(nv)+'&rdquo; <button type="button" class="tool" data-usenew="'+esc(p)+'">Use the plan&rsquo;s words</button> <button type="button" class="tool" data-keepmine="'+esc(p)+'">Keep mine</button></span>';}
+function mark(p){return mark0(p)+chgMark(p);}
+function mark0(p){const v=T(getP(p)),w=T(S.pulled[p]);return v&&w&&v===w?'<span class="qs-pull" data-mark="'+esc(p)+'">from the plan &mdash; rewrite</span>':'<span data-mark="'+esc(p)+'"></span>';}
 function fld(label,p,opt){opt=opt||{};const v=getP(p),id='f_'+p.replace(/\W+/g,'_');
   let c;if(opt.select)c='<select id="'+id+'" data-k="'+p+'"'+(opt.m?' data-m="'+opt.m+'"':'')+'>'+opt.select.map(o=>'<option value="'+esc(o[0])+'"'+(o[0]===v?' selected':'')+'>'+esc(o[1])+'</option>').join('')+'</select>';
   else if(opt.ta)c='<textarea id="'+id+'" data-k="'+p+'" rows="'+(opt.rows||2)+'"'+(opt.ph?' placeholder="'+esc(opt.ph)+'"':'')+'>'+esc(v)+'</textarea>';
@@ -3091,7 +3099,12 @@ document.addEventListener('change',e=>{const el=e.target;if(!el.dataset||el.data
 document.addEventListener('click',async e=>{const a=e.target.closest('button[data-add]');if(a){const k=a.dataset.add;if(S[k].length<MAXR[k])S[k].push(row(k));renderEditor();buildSoon(0);return;}
   const d=e.target.closest('button.rowDel[data-del]');if(!d)return;e.preventDefault();const k=d.dataset.del,i=+d.dataset.i,r=S[k][i];if(!r)return;
   if(ROW[k].some(f=>T(r[f]))&&!(await nbhUI.confirm('Delete this row?\nWhat it holds is deleted.',{ok:'Delete',danger:true})))return;
-  S[k].splice(i,1);Object.keys(S.pulled).forEach(p=>{if(p.indexOf(k+'.')===0)delete S.pulled[p];});renderEditor();buildSoon(0);});
+  S[k].splice(i,1);Object.keys(S.pulled).forEach(p=>{if(p.indexOf(k+'.')===0)delete S.pulled[p];});Object.keys(S.changed).forEach(p=>{if(p.indexOf(k+'.')===0)delete S.changed[p];});renderEditor();buildSoon(0);});
+document.addEventListener('click',e=>{const u=e.target.closest('button[data-usenew]'),k=e.target.closest('button[data-keepmine]');if(!u&&!k)return;
+  const p=(u||k).dataset[u?'usenew':'keepmine'],nv=T(S.changed[p]);if(!nv)return;
+  if(u)setP(p,nv);
+  S.pulled[p]=nv;   /* kept or used: the plan's new words are known, so they do not ask again */
+  delete S.changed[p];renderEditor();buildSoon(0);});
 
 /* ---------------- the handout ---------------- */
 const nl=s=>esc(s).replace(/\n/g,'<br>');
@@ -3185,6 +3198,8 @@ function pageHeights(html){let m=$('#qsMeasure');if(!m){m=document.createElement
 function reviewHTML(html){const pulled=Object.keys(pulledNow()).length,jar=jargonHits(),hs=pageHeights(html);
   let h='<b>What is left to do</b>';
   h+=pulled?'<div class="bad">'+pulled+' field'+(pulled===1?' still holds':'s still hold')+' the plan&rsquo;s words unchanged (marked on the pages).</div>':'<div class="ok">Nothing placed from the plan is left unrewritten.</div>';
+  const ch=Object.keys(S.changed).filter(p=>T(S.changed[p])).length;
+  if(ch)h+='<div class="bad">'+ch+' line'+(ch===1?'':'s')+' you rewrote '+(ch===1?'is':'are')+' under a part of the plan that has changed since: take the plan&rsquo;s new words or keep yours (marked on the pages).</div>';
   h+=jar.length?'<div class="bad">Technical wording still on the pages: '+jar.map(w=>'<span class="j">'+esc(w)+'</span>').join('')+'</div>':'<div class="ok">No technical wording found.</div>';
   if(hs){const over=hs.map((hh,i)=>({i:i+1,px:hh-(PAGE_H-(i===0?HEAD_H:0))})).filter(o=>o.px>1);
     h+=over.length?'<div class="bad">'+over.map(o=>'Page '+o.i+' runs over by about '+Math.ceil(o.px/14)+' line'+(Math.ceil(o.px/14)===1?'':'s')).join('; ')+'. Cut lines rather than shrinking the type.</div>':'<div class="ok">Every page fits on one letter page.</div>';}
@@ -3206,6 +3221,7 @@ function fromFile(d){if(!d||typeof d!=='object'||d.form!=='QS-1'||!d.S||typeof d
   const s=d.S,o=blank();if(s.meta&&typeof s.meta==='object'&&!Array.isArray(s.meta))Object.keys(o.meta).forEach(k=>{o.meta[k]=str(s.meta[k])||o.meta[k];});
   Object.keys(o).forEach(k=>{if(k==='meta'||k==='pulled')return;if(ROW[k])o[k]=Array.isArray(s[k])?s[k].slice(0,MAXR[k]):o[k];else if(typeof s[k]==='string')o[k]=s[k];});
   o.pulled={};if(s.pulled&&typeof s.pulled==='object'&&!Array.isArray(s.pulled))Object.keys(s.pulled).forEach(p=>{if(typeof s.pulled[p]==='string'&&/^[\w.]+$/.test(p))o.pulled[p]=s.pulled[p];});
+  o.changed={};if(s.changed&&typeof s.changed==='object'&&!Array.isArray(s.changed))Object.keys(s.changed).forEach(p=>{if(typeof s.changed[p]==='string'&&/^[\w.]+$/.test(p))o.changed[p]=s.changed[p];});
   return o;}
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
@@ -3223,25 +3239,48 @@ function caseState(f){CASE=f;const box=$('#caseState');if(!box)return;
   if(f.fn&&(f.fn.label||f.fn.key))bits.push('the function (Form '+(s.fn||'FS-1')+')');if(f.plan)bits.push('the plan (Form '+(s.plan||'TD-1')+')');if(f.crisis)bits.push('the crisis stages (Form '+(s.crisis||'CR-1')+')');
   const g=f.goals||{};if((g.red||[]).length||(g.acq||[]).length)bits.push('the goals (Form '+(s.goals||'GB-1')+')');if((f.menu||[]).length)bits.push('the reinforcer menu (Form '+(s.menu||'PA-1')+')');
   box.className='note';box.innerHTML='<b>From the case:</b> '+(bits.length?bits.join(', '):'nothing this form uses')+'. Placed into empty fields only, each marked until rewritten. <b>From the case</b> on the toolbar picks items into fields already in use.';}
-function place(p,v){v=T(v);if(!v||T(getP(p)))return false;setP(p,v);S.pulled[p]=v;return true;}
+/* v21.74 what the case places. An empty field takes the plan's words. A field still holding the words placed before follows
+   the plan when it changes (it was never rewritten). A field rewritten here keeps its words; when the plan's words for it change
+   it is marked (S.changed) with the new words, to use or to keep. A field takes one value in a pass (the first source wins). */
+let PASS=new Set();
+function place(p,v){v=T(v);if(!v||PASS.has(p))return false;PASS.add(p);
+  const cur=T(getP(p)),was=T(S.pulled[p]);
+  if(!cur){setP(p,v);S.pulled[p]=v;delete S.changed[p];return true;}
+  if(was&&cur===was){if(v===was)return false;setP(p,v);S.pulled[p]=v;delete S.changed[p];return true;}
+  if(was&&v!==was){if(T(S.changed[p])!==v)S.changed[p]=v;return false;}
+  return false;}
+/* a list line (a day card) placed once: the same words already on a card, or placed there before, are not placed again */
+function placeRow(k,f,v){v=T(v);if(!v)return false;
+  for(let i=0;i<S[k].length;i++){if(T(S[k][i][f])===v||T(S.pulled[k+'.'+i+'.'+f])===v){PASS.add(k+'.'+i+'.'+f);return false;}}
+  const i=blankRow(k);return i>=0&&place(k+'.'+i+'.'+f,v);}
+const md=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3]):String(iso||'');};
+const nfmt=x=>x==null?'':String(Math.round(x*10)/10);
 function blankRow(k){let i=S[k].findIndex(r=>!ROW[k].some(f=>T(r[f])));if(i<0){if(S[k].length>=MAXR[k])return -1;S[k].push(row(k));i=S[k].length-1;}return i;}
 function howOf(b){const d=str(b.dim).toLowerCase(),u=T(b.unit);if(/freq|count|rate/.test(d))return 'Count'+(u?' per '+u:'');if(/dur/.test(d))return 'Minutes, start to stop';if(/laten/.test(d))return 'Seconds from the direction';if(/percent|%|trial|opportun/.test(d))return 'Tally times / chances';return T(b.dim);}
 const uniq=a=>a.filter((x,i)=>x&&a.indexOf(x)===i);
-window.__nbhFactsIn=function(f){ensure();const p=P();let n=0;
+window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   const pf=f.profile||null,behs=f.behaviors||[],fn=f.fn||null,plan=f.plan||null,cr=f.crisis||null,goals={red:(f.goals&&f.goals.red)||[],acq:(f.goals&&f.goals.acq)||[]},menu=f.menu||[];
   const isRep=b=>!!(b.isRep||/replacement|alternative/i.test(b.type||''));const prob=behs.filter(b=>!isRep(b)),reps=behs.filter(isRep);
-  if(!T(S.who)){const L=[];if(pf){if(pf.strengths)L.push('Strengths: '+pf.strengths);if(pf.interests)L.push('Likes: '+pf.interests);if(pf.expr||pf.recep)L.push('Communicates: '+[pf.expr,pf.recep].filter(Boolean).join('; '));if(pf.signals)L.push('Shows yes, no and stop: '+pf.signals);if(pf.at)L.push('Uses: '+pf.at);}
+  if(!T(S.who)||T(S.who)===T(S.pulled.who)){const L=[];if(pf){if(pf.strengths)L.push('Strengths: '+pf.strengths);if(pf.interests)L.push('Likes: '+pf.interests);if(pf.expr||pf.recep)L.push('Communicates: '+[pf.expr,pf.recep].filter(Boolean).join('; '));if(pf.signals)L.push('Shows yes, no and stop: '+pf.signals);if(pf.at)L.push('Uses: '+pf.at);}
     if(menu.length&&window.nbhCase)L.push('Works for: '+nbhCase.menuLine(menu,5));if(L.length&&place('who',L.join('\n')))n++;}
   if(pf&&pf.flags&&(pf.flags.safety||[]).length&&place('health','Precautions on file: '+pf.flags.safety.join(', ')+'.'))n++;
-  const cur=goals.red.filter(g=>T(g.cur));cur.slice(0,MAXR.stats).forEach((g,i)=>{while(S.stats.length<=i)S.stats.push(row('stats'));if(place('stats.'+i+'.n',g.cur))n++;if(place('stats.'+i+'.label',g.beh+' now'))n++;});
-  if(cur.length&&place('statnote','The levels written on the goals (Form GB-1); the record on Form DD-1 is the source.'))n++;
+  /* v21.74 where things stand: the record on Form DD-1 (the last recorded school days), else the levels on the goals (GB-1) */
+  const dd=f.data&&(f.data.behaviors||[]).filter(b=>b.days>0);
+  if(dd&&dd.length){const tiles=dd.filter(b=>b.kind==='target').slice(0,3).concat(dd.filter(b=>b.kind!=='target').slice(0,1)).slice(0,MAXR.stats);
+    tiles.forEach((b,i)=>{while(S.stats.length<=i)S.stats.push(row('stats'));
+      const pc=b.two||/%/.test(b.unit||''),v=nfmt(b.mean)+(pc?'%':'');
+      const l=String(b.name||'').toLowerCase()+(b.measure==='count'?', a day':pc?', on average':' ('+(b.unit||'')+'), on average');
+      if(place('stats.'+i+'.n',v))n++;if(place('stats.'+i+'.label',l))n++;});
+    if(place('statnote','Across the last '+f.data.days+' recorded school day'+(f.data.days===1?'':'s')+' ('+md(f.data.from)+' to '+md(f.data.to)+'), from the record on Form DD-1.'))n++;}
+  else{const cur=goals.red.filter(g=>T(g.cur));cur.slice(0,MAXR.stats).forEach((g,i)=>{while(S.stats.length<=i)S.stats.push(row('stats'));if(place('stats.'+i+'.n',g.cur))n++;if(place('stats.'+i+'.label',g.beh+' now'))n++;});
+  if(cur.length&&place('statnote','The levels written on the goals (Form GB-1); the record on Form DD-1 is the source.'))n++;}
   if(plan){const r=plan.respond||{};const seeds=[(plan.antCards||[]).length?'Before it starts: '+plan.antCards.join(', '):'',plan.reinf||plan.pref?'What '+p.sub+' works for: '+(plan.reinf||plan.pref):'',plan.rep?'The request to honor: '+plan.rep:'',r.target?'If the behavior happens: '+r.target:'',r.after?'After it is over: '+r.after:''].filter(Boolean);
     seeds.forEach((s,i)=>{if(S.five[i]&&!T(S.five[i].head)&&place('five.'+i+'.text',s))n++;});}
   const antL=uniq(behs.map(b=>T(b.ant)));if(antL.length&&place('when',antL.join('\n')))n++;
   if(prob.length&&place('may',prob.map(b=>b.label).join('; ')))n++;
   if(fn&&(fn.label||fn.key)&&place('gets',fn.label||fn.key))n++;
-  if(plan&&(plan.ant||[]).length)plan.ant.slice(0,6).forEach(a=>{const i=blankRow('day');if(i>=0&&place('day.'+i+'.text',a))n++;});
-  if(pf&&pf.helps){const i=blankRow('day');if(i>=0&&place('day.'+i+'.text','What helps: '+pf.helps))n++;}
+  if(plan&&(plan.ant||[]).length)plan.ant.slice(0,6).forEach(a=>{if(placeRow('day','text',a))n++;});
+  if(pf&&pf.helps&&placeRow('day','text','What helps: '+pf.helps))n++;
   if(pf&&pf.avoid&&place('rules.0.dont',pf.avoid))n++;
   const sk=[];reps.forEach(b=>sk.push({name:b.label,text:b.def}));prob.forEach(b=>{if(b.rep&&!sk.some(s=>s.name===b.rep))sk.push({name:b.rep,text:''});});
   goals.acq.forEach(g=>{const s=sk.find(x=>x.name===g.beh);if(s){if(!s.text)s.text=g.text;}else sk.push({name:g.beh,text:g.text});});
@@ -3255,7 +3294,7 @@ window.__nbhFactsIn=function(f){ensure();const p=P();let n=0;
   goals.red.slice(0,MAXR.phases).forEach((g,i)=>{if(S.phases[i]&&T(g.crit)&&place('phases.'+i+'.next',g.crit))n++;});
   if(T(S.meta.bcba)&&!S.calls.some(c=>T(c.name)===T(S.meta.bcba))){const i=blankRow('calls');if(i>=0){place('calls.'+i+'.role','Case BCBA');place('calls.'+i+'.name',S.meta.bcba);if(place('calls.'+i+'.when','after any serious incident, and for questions'))n++;}}
   caseState(f);renderEditor();buildSoon(0);return {filled:n};};
-window.__nbhFactsPick=function(sel){ensure();let n=0;const notes=[];
+window.__nbhFactsPick=function(sel){ensure();PASS=new Set();let n=0;const notes=[];
   const isRep=b=>!!(b.isRep||/replacement|alternative/i.test(b.type||''));
   (sel.behaviors||[]).forEach(b=>{if(isRep(b)){if(S.skills.some(s=>T(s.name).toLowerCase()===T(b.label).toLowerCase())){notes.push(b.label+' is already a skill');return;}const i=blankRow('skills');if(i<0){notes.push('the skills are full');return;}place('skills.'+i+'.name',b.label);place('skills.'+i+'.text',b.def);n++;}
     else{if(S.rec.some(r=>T(r.measure).toLowerCase()===T(b.label).toLowerCase())){notes.push(b.label+' is already recorded');return;}const i=blankRow('rec');if(i<0){notes.push('the record table is full');return;}place('rec.'+i+'.measure',b.label);place('rec.'+i+'.counts',b.def);place('rec.'+i+'.how',howOf(b));n++;}});
@@ -3264,6 +3303,11 @@ window.__nbhFactsPick=function(sel){ensure();let n=0;const notes=[];
   if(sel.fn&&(sel.fn.label||sel.fn.key)&&place('gets',sel.fn.label||sel.fn.key))n++;
   if((sel.menu||[]).length){const line='Works for: '+sel.menu.map(m=>m.name).join(', ');if(T(S.who).indexOf(line)<0){S.who=[T(S.who),line].filter(Boolean).join('\n');S.pulled.who=S.who;n++;}}
   renderEditor();buildSoon(0);return {filled:n,note:notes.join('; ')};};
+
+/* v21.74 out: the non-negotiables (for Form TI-1's checklist) and the tiers (for Form DD-1's incident log) */
+window.__nbhFactsOut=function(){try{ensure();const rules=filled('rules').map(r=>({do:T(r.do),dont:T(r.dont)}));
+  const tiers=filled('tiers').map(r=>({name:T(r.name),see:T(r.see),do:T(r.do)}));
+  return rules.length||tiers.length?{quick:{rules,tiers,src:'QS-1'}}:null;}catch(e){return null;}};
 
 /* ---------------- simulation ---------------- */
 async function loadSim(){
@@ -3333,7 +3377,7 @@ async function loadSim(){
     {head:'4 · Expand',when:'week 4 on',text:'One new setting or adult at a time, previewed and run through “Try it for two minutes.”',next:'each addition holds two weeks without a tier 3'}];
   S.calls=[{role:'Classroom teacher',name:'',when:'Daily lead for the plan'},{role:'Paraeducator (Mr. Ortiz)',name:'',when:'Tier 2 and 3, the data, the checks'},{role:'Administrator',name:'',when:'Tier 3, parent contact'},{role:'Parent',name:'Ms. Alvarez (simulated)',when:'Daily home note; the same day after a tier 3, with the recovery'},{role:'Case BCBA',name:'Joshua Newsome, M.A., BCBA',when:'After any tier 3, and for questions'}];
   S.onevoice='During an escalation one adult speaks; the others move the class on and stay quiet. A handover is said out loud: “Mr. Ortiz has it now.”';
-  S.flowOn='yes';S.pulled={};
+  S.flowOn='yes';S.pulled={};S.changed={};
   renderEditor();build();setView('out');
   nbhUI.toast('Simulation loaded: a worked quick start for a simulated student, four pages and the flow sheet.',{kind:'ok'});
 }

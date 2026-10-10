@@ -737,6 +737,7 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 #saveQuick.nudge{border-color:#c9742a;box-shadow:0 0 0 0 rgba(201,116,42,.6);animation:saveNudge 1.6s ease-out 3}
 @keyframes saveNudge{0%{box-shadow:0 0 0 0 rgba(201,116,42,.6)}100%{box-shadow:0 0 0 10px rgba(201,116,42,0)}}
 /* help (v21.35): short first, the rest folded */
+.pc-list{margin:6px 0 10px 20px;padding:0}.pc-list li{margin:0 0 7px;line-height:1.4}.pc-list label{display:block;cursor:pointer}.pc-list input{margin-right:4px;transform:scale(1.2)}.pc-list span{display:block;color:var(--muted,#54676f);font-size:13px;margin-left:24px}.pc-open button{margin:2px 4px 2px 0}.pc-done{color:#2F6B37}
 #dlg .hp-lead{font-size:14px;color:var(--ink);margin:0 0 10px}
 #dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
 #dlg details{border:1px solid var(--rule);border-radius:6px;padding:6px 12px;margin:6px 0;background:#fff}
@@ -1421,6 +1422,8 @@ $('#barEdit').addEventListener('click',()=>foldBar(false));
 state.photo='';
 const PHOTO_RE=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
 function photoOk(v){return typeof v==='string'&&v.length<600000&&PHOTO_RE.test(v);}
+/* v21.74 the whole picture behind the photo, as a case file keeps it (state.photoSrc); only with a photo */
+function photoSrcIn(v){state.photoSrc=state.photo&&typeof v==='string'&&v.length<1500000&&PHOTO_RE.test(v)?v:'';}
 function setPhoto(v,quiet){state.photo=photoOk(v)?v:'';if(quiet)state.photoSrc='';paintPhoto();
   if(!quiet&&state.photo){const fl=state.facts&&state.facts.profile&&state.facts.profile.flags;if(fl&&fl.photo==='No')wsUI.toast('Form DM-1 says the photo/media permission on file is No. The photo stays in this case file and goes nowhere else.',{ms:9000});}}
 function initials(){const n=packet().client.replace(/\(.*?\)/g,'').trim();if(!n)return '';const w=n.split(/[\s,]+/).filter(Boolean);if(!w.length)return '';
@@ -1438,13 +1441,14 @@ function photoFromFile(file){return new Promise((res,rej)=>{const url=URL.create
 /* v21.71 the photo is placed by hand before it is kept: the picture fills a 260 px square under a circle; drag (or the
    arrow keys) moves it, the slider makes it up to four times bigger, and Use this photo keeps the square as 240 px. A tall
    picture starts a little below its top, where a face usually is, instead of at its middle. The picture chosen is kept
-   for this session (state.photoSrc, at most 1000 px) so Adjust position can move it again with the whole picture to
-   work with; it is not saved: after the case is reopened, Adjust works on the kept 240 px square. */
+   (state.photoSrc, at most 800 px) so Adjust position can move it again with the whole picture to work with. v21.74 it is
+   kept in the case file too (beside the packet, never in it, so no form is sent it), so Adjust works on the whole picture
+   after the case is reopened as well. */
 function cropPhoto(src){return new Promise(res=>{const img=new Image();
   img.onerror=()=>res(undefined);
   img.onload=()=>{
     const W=img.naturalWidth||img.width,H=img.naturalHeight||img.height,V=260,base=V/Math.min(W,H);let z=1,x=(V-W*base)/2,y=H>W?-(H*base-V)*0.12:(V-H*base)/2;
-    let srcData='';try{const k=Math.min(1,1000/Math.max(W,H)),c=document.createElement('canvas');c.width=Math.round(W*k);c.height=Math.round(H*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);srcData=c.toDataURL('image/jpeg',0.85);}catch(e){}
+    let srcData='';try{const k=Math.min(1,800/Math.max(W,H)),c=document.createElement('canvas');c.width=Math.round(W*k);c.height=Math.round(H*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);srcData=c.toDataURL('image/jpeg',0.82);}catch(e){}
     dialog('Place the photo','<div class="ph-crop"><div class="ph-view" id="phView" tabindex="0" aria-label="The photo: drag it, or use the arrow keys, to move it"><img id="phImg" alt="" draggable="false"><div class="ph-ring"></div></div>'+
       '<div class="ph-side"><p>Drag the picture to move it; the slider makes it bigger. What is inside the circle is what the bar, the crumb and the forms show.</p>'+
       '<label class="ph-zoom">Size <input type="range" id="phZoom" min="1" max="4" step="0.01" value="1"></label>'+
@@ -1890,7 +1894,7 @@ $('#savePacket').addEventListener('click',()=>{
   const nm=(p.client||'student').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'PACKET',rev:'2026-09',
-    saved:new Date().toISOString(),packet:p,facts:state.facts||undefined},null,1)],{type:'application/json'}));
+    saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,facts:state.facts||undefined},null,1)],{type:'application/json'}));
   a.download='PACKET_'+nm+'.json';document.body.appendChild(a);a.click();a.remove();
 });
 $('#openPacket').addEventListener('click',()=>$('#packetFile').click());
@@ -1898,7 +1902,7 @@ $('#packetFile').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{try{const d=JSON.parse(r.result),p=d.packet;if(!p)throw 0;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
-    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);who();commitBar();
+    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);photoSrcIn(d.photoSrc);who();commitBar();
     Object.values(state.frames).forEach(pushPacketTo);
     if(d.facts)setFacts(d.facts,true);   /* v21.31 the case travels in the packet file */
     barAutoFold();
@@ -2052,7 +2056,8 @@ function openFor(ev,d){
    packet and case files, so they survive the session; a source form that is not open keeps its
    last reading. */
 /* (v21.52) and for Form TV-1's draft: the profile (DM-1), the plan developed (TD-1) and the crisis plan's stages (CR-1) */
-const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis'};
+/* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1) */
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick'};
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2062,8 +2067,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2081,7 +2086,7 @@ async function gatherFacts(push){
       }
       if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
       if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
-      if(id==='DM-1'||id==='TD-1'||id==='CR-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
+      if(id==='DM-1'||id==='TD-1'||id==='CR-1'||id==='DD-1'||id==='SM-1'||id==='QS-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
     const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
@@ -2118,6 +2123,9 @@ function paintFacts(){
     if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
+  if(f.data)bits.push('<b>Data:</b> '+(f.data.days|0)+' school day'+((f.data.days|0)===1?'':'s')+' <i>('+esc(s.data||'')+')</i>');
+  if(f.points)bits.push('<b>Point sheet:</b> '+((f.points.days||[]).length)+' days <i>('+esc(s.points||'')+')</i>');
+  if(f.quick)bits.push('<b>Quick start</b> <i>('+esc(s.quick||'')+')</i>');
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }
@@ -2872,6 +2880,26 @@ function caseMapHtml(){
 $('#caseMap').addEventListener('click',()=>dialog('The case, start to finish',caseMapHtml()));
 $('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('button[data-open]');if(!b)return;$('#dlg').close();openForm(b.dataset.open);});
 
+/* v21.74 the print check: what to look at in Safari's print window before a page goes to paper (each line ticks off;
+   nothing is kept). It is reached from Help (Printing and the PDF) and from the command box. */
+function printCheck(){
+  const L=[
+    ['Scroll the form to the top first.','Safari can print a heading that stays in view while the page scrolls where the screen had it; from the top it prints where it belongs.'],
+    ['Paper: US Letter.','In the print window, <b>Options</b> (iPad) or the paper menu (Mac). A4 cuts the bottom rows off a data sheet.'],
+    ['Orientation: the one the form asks for.','Form DD-1’s data sheet and Form SM-1’s wide sheets are landscape; the forms set it, and Safari usually follows. If the preview shows the sheet small or cut on the right, turn the page in Options.'],
+    ['Backgrounds on (Mac: Print backgrounds).','The colour bands, the shaded rows and the tier colours print only with it. On the iPad they print as they are.'],
+    ['Headers and footers off (Mac).','Safari’s own page title, address and date would print over the form’s letterhead and page numbers.'],
+    ['The page count looks right.','Swipe through the preview: the student’s name and the letterhead on page one, no last page left blank, no row cut across two pages. Form DD-1’s blank week is one page for five days.'],
+    ['The name is the student’s.','An amber strip above the form means one form holds another name. Put it right before printing.'],
+    ['The photo may print.','Form DD-1 and the respondent pages carry the photo; with <b>No photo/media permission</b> on the case line, take it off first (the photo button on the bar).'],
+    ['A PDF, not paper?','In the print window on the iPad: pinch the preview open, then <b>Share</b> and <b>Save to Files</b>. For the master print, <b>Finish PDF</b> then adds the bookmarks and page numbers.']];
+  dialog('Print check',
+    '<p class="hp-lead">Before a page goes to the printer from Safari. Tick each as you look; nothing is kept.</p>'+
+    '<ol class="pc-list">'+L.map((x,i)=>'<li><label><input type="checkbox" id="pc'+i+'"> <b>'+x[0]+'</b> <span>'+x[1]+'</span></label></li>').join('')+'</ol>'+
+    '<p class="pc-open">Open: <button type="button" data-open="DD-1">DD-1 data sheet</button> <button type="button" data-open="QS-1">QS-1 quick start</button> <button type="button" data-open="SM-1">SM-1 point sheet</button></p>'+
+    '<p class="pc-done" id="pcDone" hidden><b>All checked.</b> Print from the form’s own Print button, or ⌘P.</p>');
+  const box=$('#dlgBody');box.addEventListener('change',()=>{const all=[...box.querySelectorAll('.pc-list input')];const d=$('#pcDone');if(d)d.hidden=!all.every(c=>c.checked);});}
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#hpPrintCheck')){e.preventDefault();printCheck();}});
 $('#help').addEventListener('click',()=>{
   const fold=(t,h)=>'<details><summary>'+t+'</summary>'+h+'</details>';
   dialog('How this works',
@@ -2891,6 +2919,7 @@ $('#help').addEventListener('click',()=>{
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
+     '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count.</p>'+
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
    fold('Side by side, fullscreen and the screen',
@@ -3449,7 +3478,7 @@ async function autoSave(force){
     const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
     if(h===A.written){state.autoSig=sig;return;}
     const rec={key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
-      packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms};
+      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms};
     const r=await CP.put(rec);
     if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
@@ -3519,7 +3548,7 @@ function autoLast(){
     const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
     if(h===A.written)return;
     CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
-      packet:packet(),facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
+      packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
   }catch(e){}
 }
 setInterval(()=>{if(caseSig()!==state.autoSig)autoSave(false);},5000);
@@ -3657,7 +3686,7 @@ async function loadCase(d,how){
   if(d.packet){
     const p=d.packet;
     $('#pClient').value=p.client||'';$('#pSid').value=p.sid||'';$('#pGrade').value=p.grade||'';
-    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);who();
+    $('#pSite').value=p.site||'';$('#pBcba').value=p.bcba||'';setPhoto(p.photo||'',true);photoSrcIn(d.photoSrc);who();
   }
   commitBar(true);   /* v21.44 (A8) another case: the earlier values on the bar are not corrections of this one */
   if(d.facts)setFacts(d.facts,false); else setFacts(null,false);   /* v21.31 the case */
@@ -4067,7 +4096,7 @@ async function caseHtml(p,forms){
   const shell=await EMBED.shell();
   if(!shell)throw new Error('This file does not carry a copy of the workstation page, so it cannot write a case file.');
   const id=state.caseId||(state.caseId=caseUid());
-  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined,cur:state.cur||undefined};   /* v21.61 cur: the form to open first */
+  const data={form:'CASE',rev:'2026-09',id,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined};   /* v21.61 cur: the form to open first */
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
@@ -4147,7 +4176,7 @@ async function saveCase(){
   }
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([JSON.stringify(
-    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms,facts:state.facts||undefined,cur:state.cur||undefined},null,1)],
+    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined},null,1)],
     {type:'application/json'}));
   a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
   document.body.appendChild(a);a.click();a.remove();
@@ -4277,6 +4306,7 @@ const CMDS=[
   {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
+  {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
   {k:'side by side two three forms split columns at once',n:'Side by side: two or three forms at once',s:'view',go:()=>$('#splitBtn').click()},
   {k:'hide show form list sidebar',n:'Show or hide the form list',s:'view',go:()=>{if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);else setRailHidden(!railHidden(),true);}},
