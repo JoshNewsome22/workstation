@@ -8373,3 +8373,44 @@ On screen the units row ("(total per day)") and the Date column stay in view as 
 scrolled page had its units row inside the first day's row and its Date heading moved. On paper every cell of the
 daily and interval sheets now sits where the table puts it; the screen keeps them in view. Checked by
 `qa/dd1-sheet-test.js` (one new check).
+
+### v21.74: the record goes further, a blank week, incidents, a week summary, steps from the quick start, a print check
+
+- **Form DD-1 shares its record with the case.** While it is open, the last 20 school days with data (each behavior's
+  days, mean, total and zero days) go to the case beside the target behaviors and the goals, and the line under the bar
+  says "Data: 20 school days". Form QS-1's "Where he is now" tiles come from it (the mean a day, the percent for a
+  skill), and fall back to the levels on Form GB-1's goals when Form DD-1 is not open. Form SM-1 shares its Record the
+  same way (each day's share of the points and whether the goal was met), and Form QS-1 shares its non-negotiables and
+  its tiers.
+- **A blank week to print (Form DD-1).** *Blank week to print*, beside *Print this sheet*, shows five empty, dated
+  school days (Monday to Friday of next week; any week and 5 to 20 days can be picked) in place of the record. Nothing
+  in it can be typed into and the record is not changed; *Back to the data* returns to it.
+- **A slimmer letterhead on the data sheet.** On paper the letterhead of the data sheet is one line (a smaller logo, the
+  title beside the form line) and each row a quarter inch, still room to write a number. A landscape page of blank days
+  holds 24 rows instead of 21.
+- **The whole photo is kept in the case file.** The picture behind the student's photo (at most 800 px) is saved beside
+  the packet in the case file, the packet file and the safety copies, never sent to a form, so *Adjust position* works
+  on the whole picture after a case is reopened too.
+- **Form QS-1 follows the plan.** A field still holding the plan's words (marked "from the plan, rewrite") now changes
+  when the plan changes. A field rewritten here keeps its words; when the plan's words for it change, an amber note
+  under it gives them, with *Use the plan's words* and *Keep mine*. The note does not print.
+- **The week summary (Form DD-1).** *Week summary* shows one page for the team meeting: each behavior this week against
+  last week (the total and the mean a day for a count, the mean for the rest), the change marked green or red by the
+  behavior's direction, the aim, Form SM-1's point sheet for the week when it is in the case, the incidents, the phase
+  changes and the daily notes, and a box for what the team decided, kept with the data file by week. *Print it* prints
+  only the summary.
+- **Form TI-1 takes the quick start's non-negotiables.** An empty step list takes Form QS-1's non-negotiables as its
+  steps, each do beside the don't it replaces ("Say yes to the break card at once (not: make him wait)"). *Add the Quick
+  Start's non-negotiables* adds the ones not yet on a list in use.
+- **The incident log (Form DD-1).** Under the sheet, *Log an incident* keeps the date and time, the behavior and the
+  tier (Form QS-1's tiers when it is in the case, else Form CR-1's stages, else Tier 1 to 3 and the crisis plan), what
+  came before, what happened and the exact words said, what the adults did, how it ended, whether home and the BCBA
+  were told, and who recorded it. For a behavior counted by frequency it adds one to that day's count (adding the day
+  when it is not on the sheet); an edit or a delete takes the one off again. *Note for home* writes a short note in
+  plain words from it (the exact words and the tier left off) to read over and copy; nothing is sent. The log travels
+  in the data file and prints with the sheet only when *Print the incidents with the sheet* is ticked.
+- **A print check for Safari.** Help (Printing and the PDF) and the command box (*Print check*) open a list to tick
+  through in Safari's print window: scroll to the top, US Letter, the orientation, backgrounds, headers and footers off
+  (Mac), the page count, the student's name, the photo, saving a PDF on the iPad.
+
+Checked by `qa/v2174-test.js` (27 checks).

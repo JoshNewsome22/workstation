@@ -3683,6 +3683,31 @@ $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(und
 renderAll();
 </script>
 
+<script id="ti1-quick">
+/* v21.74 the steps from Form QS-1: the quick start's non-negotiables (each do beside the don't it replaces) are the
+   things every adult is checked on, so an empty step list takes them as its steps, and "Add the Quick Start's
+   non-negotiables" adds any not yet on the list. The rest of the case goes where it did before (the generic fill). */
+"use strict";
+let tiQuick=null;
+function tiQuickSteps(){return ((tiQuick&&tiQuick.rules)||[]).map(r=>{const d=String(r.do||'').trim(),n=String(r.dont||'').trim();
+  return d?d+(n?' (not: '+n.charAt(0).toLowerCase()+n.slice(1)+')':''):(n?'Avoids: '+n:'');}).filter(Boolean);}
+const tiK=s=>String(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+function tiQuickAdd(){const L=tiQuickSteps(),have=new Set(S.steps.map(st=>tiK(st.d)));let n=0;
+  L.forEach(d=>{if(have.has(tiK(d)))return;let i=S.steps.findIndex(st=>!String(st.d||'').trim());if(i<0){addBlankStep();i=S.steps.length-1;}S.steps[i].d=d;have.add(tiK(d));n++;});
+  return n;}
+function tiQuickBtn(){let b=document.getElementById('addQuick');const n=tiQuickSteps().length;
+  if(!b){const at=document.getElementById('delStep');if(!at)return;b=document.createElement('button');b.className='tool';b.id='addQuick';b.type='button';
+    b.textContent='Add the Quick Start\u2019s non-negotiables';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const k=tiQuickAdd();renderAll();nbhUI.toast(k?k+' step'+(k===1?'':'s')+' from Form QS-1 added.':'Every non-negotiable on Form QS-1 is already a step.',k?{kind:'ok'}:undefined);});}
+  b.style.display=n?'':'none';b.title=n?n+' non-negotiable'+(n===1?'':'s')+' on Form QS-1':'';}
+window.__nbhFactsIn=function(f){tiQuick=(f&&f.quick)||null;tiQuickBtn();
+  const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;
+  if(!tiQuickSteps().length||S.steps.some(st=>String(st.d||'').trim()))return g;
+  const k=tiQuickAdd();renderAll();
+  return {filled:((g&&g.filled)||0)+k,note:'the steps are the non-negotiables on Form QS-1'};};
+tiQuickBtn();
+</script>
+
 <script id="ti1-run">
 /* ===================== v21.22: the live observation runner and the retraining list for ST-1 =====================
    The runner codes one observation at the table and keeps its codes to itself until the observer ends the

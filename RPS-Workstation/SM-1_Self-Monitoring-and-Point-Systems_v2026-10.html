@@ -7222,6 +7222,16 @@ window.__nbhFactsIn=function(f){
   if(!S.meta.menu&&(f.menu||[]).length){S.meta.menu=nbhCase.menuLine(f.menu,5);n++;}
   if(n)renderAll();return {filled:n};
 };
+/* v21.74 out: the Record's days (the share of the points earned, the goal, whether it was met), for Form DD-1's week summary.
+   A date without a year ("10/13", as the Record writes it) is this year's, or last year's when that is more than two months ahead. */
+const nbhSmIso=s=>{s=String(s||'').trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2}|\d{4}))?$/.exec(s);if(!m||+m[1]<1||+m[1]>12||+m[2]<1||+m[2]>31)return '';
+  const now=new Date();let y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):now.getFullYear();
+  if(!m[3]&&new Date(y,+m[1]-1,+m[2])-now>61*864e5)y--;
+  return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
+window.__nbhFactsOut=function(){try{const days=(S.log||[]).map(r=>{const d=nbhSmIso(r.date),p=num(r.pts),q=num(r.poss);
+    return d&&p!=null&&q?{date:d,pct:Math.round(p/q*1000)/10,goal:num(r.goal),met:!!r.met}:null;}).filter(Boolean).slice(-60);
+  return days.length?{points:{days,src:'SM-1'}}:null;}catch(e){return null;}};
 window.__nbhFactsPick=function(sel){
   let n=0;const dup=[];
   const add=o=>{const had=nbhSmK(o.word)?S.tg.find(t=>nbhSmK(t.word)===nbhSmK(o.word)):null;

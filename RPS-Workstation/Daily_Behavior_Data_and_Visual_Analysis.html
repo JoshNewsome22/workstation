@@ -522,6 +522,73 @@ td input,td select{max-width:100%}
 .sd-key{margin-top:9px;padding-top:7px;border-top:1px solid var(--rule-soft);font-size:11px;color:var(--ink-soft);line-height:1.45}
 .sd-only .sd-key{margin-top:0;padding-top:0;border-top:0}
 .sheet .pdate{display:none}
+/* v21.74 the blank week, the incident log and the week summary */
+.dd-blank-note{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;background:#fff7e0;border:1px solid #e3c77a;border-radius:3px;padding:8px 12px;margin:0 0 10px;font-size:13.5px;color:#4a3608}
+.dd-blank-note>span{flex:1 1 260px;align-self:center}
+.dd-blank-note .field{margin:0}
+body.dd-blank-on #dataTable tbody .actions button{visibility:hidden}
+body.dd-blank-on #dataTable tbody input,body.dd-blank-on #dataTable tbody select{background:#fff;color:var(--ink)}
+body.dd-blank-on #ddInc{display:none!important}
+.dd-inc{margin-top:16px;border-top:1px solid var(--rule-soft);padding-top:10px}
+.dd-inc .inc-hd{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.dd-inc h3{margin:0;font-size:16px}
+.dd-inc .inc-hd .hint{margin:0;font-size:12.5px}
+.dd-inc .inc-tools{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:13px}
+.dd-inc .inc-tools label{display:flex;gap:5px;align-items:center}
+.dd-inc .inc-tools input{width:auto}
+.inc-wrap{overflow-x:auto;margin-top:8px}
+.inc-tab{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.35}
+.inc-tab th{text-align:left;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:4px 6px;font-weight:600}
+.inc-tab td{border-bottom:1px solid var(--rule-soft);padding:5px 6px;vertical-align:top}
+.inc-tab td.w{white-space:nowrap;font-weight:600}
+.inc-tab td.w span,.inc-tab td .tier{font-weight:400;color:var(--ink-soft);font-size:11.5px}
+.inc-tab .words{font-style:italic;margin-top:2px}
+.inc-tab td.f{font-size:11.5px;color:var(--ink-soft)}
+.inc-tab td.a{white-space:nowrap}
+dialog.dd-inc-dlg{width:min(680px,calc(100vw - 24px))}
+dialog.dd-inc-dlg textarea{min-height:44px;font-family:inherit;font-size:14px}
+dialog.dd-inc-dlg .inc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:4px 10px}
+dialog.dd-inc-dlg .field{margin:0 0 6px}
+dialog.dd-inc-dlg label.chk{display:flex;gap:7px;align-items:center;font-size:14px;margin:4px 0}
+dialog.dd-inc-dlg label.chk input{width:auto}
+#ddWeekWrap[hidden]{display:none!important}
+body.dd-week-on #tab-data > :not(#ddWeekWrap){display:none!important}
+.dd-week .wk-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;margin-bottom:12px}
+.dd-week .wk-bar .field{margin:0}.dd-week .wk-bar .hint{flex:1 1 260px;margin:0;align-self:center}
+.dd-week .wk-head{display:flex;gap:12px;align-items:center;border-bottom:2px solid var(--nbh-navy,#182e43);padding-bottom:6px;margin-bottom:6px}
+.dd-week .wk-head img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.dd-week .wk-head .nm{font-size:17px;font-weight:600}.dd-week .wk-head .sub{font-size:12px;color:var(--ink-soft)}
+.dd-week .wk-r{margin-left:auto;text-align:right;font-size:12.5px}
+.dd-week h4{font-size:13.5px;margin:12px 0 4px;color:var(--nbh-navy,#182e43)}
+.dd-week p{margin:2px 0;font-size:13px}.dd-week p.days{font-size:12px;color:var(--ink-soft)}
+.dd-week ul{margin:2px 0 0 18px;padding:0;font-size:13px}
+.wk-tab{width:100%;border-collapse:collapse;font-size:13px}
+.wk-tab th{text-align:left;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:4px 6px}
+.wk-tab td{border-bottom:1px solid var(--rule-soft);padding:5px 6px;vertical-align:top}
+.wk-tab td span{font-size:11.5px;color:var(--ink-soft)}
+.wk-tab td.good{color:#2F6B37;font-weight:600}.wk-tab td.bad{color:#8e2a2a;font-weight:600}
+.dd-week .wk-next{width:100%;font-family:inherit;font-size:14px;box-sizing:border-box}
+.dd-week .wk-next-p{display:none}
+@media print{
+  #ddInc:not(.print-on){display:none!important}
+  #ddInc{break-inside:auto;margin-top:8px;padding-top:6px}
+  #ddInc .inc-hd .hint{display:none}
+  .inc-tab{font-size:8.5pt}.inc-tab th{font-size:7pt;padding:2px 4px}.inc-tab td{padding:3px 4px}
+  .inc-tab tr{break-inside:avoid}
+  .dd-week{padding:0!important;border:0!important;box-shadow:none!important}
+  .dd-week .wk-next{display:none!important}
+  .dd-week .wk-next-p{display:block;min-height:.9in;border:1px solid #c9d3d6;border-radius:2px;padding:6px 8px;font-size:10pt}
+  .wk-tab{font-size:9.5pt}.dd-week p,.dd-week ul{font-size:9.5pt}.dd-week h4{font-size:10.5pt;margin:8px 0 3px;break-after:avoid}
+  /* v21.74 (3) on the data sheet (and the week summary) the letterhead is one slim line: the logo smaller, the title and
+     the form line side by side, less room under it; the rows get the room */
+  body:has(#tab-data:not(.hidden) #sheetTop:not(:empty)) .nbh-print-head{align-items:center;padding:0 0 3px;margin:0 0 5px;border-bottom-width:1.5px}
+  body:has(#tab-data:not(.hidden) #sheetTop:not(:empty)) .nbh-print-logo{height:0.3in}
+  body:has(#tab-data:not(.hidden) #sheetTop:not(:empty)) .nbh-print-meta{display:flex;gap:10px;align-items:baseline;font-size:7.5pt;line-height:1.2}
+  body:has(#tab-data:not(.hidden) #sheetTop:not(:empty)) .nbh-print-title{font-size:11pt;margin:0}
+  /* and each row a quarter inch: still room to write a number in */
+  #dataTable.sheet.slim tbody td > input,#dataTable.sheet.slim tbody td .ep-wrap > input{padding-top:3.5px;padding-bottom:3.5px}
+  #dataTable.sheet.slim tbody td.col-date .pdate{padding:1.5px 0}
+}
 .dd-onpaper{display:none}
 @media print{.dd-onpaper{display:inline}}
 @media print{
@@ -1499,6 +1566,8 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 
   <!-- ============ DATA ============ -->
   <section id="tab-data" class="hidden" data-panel="data">
+    <!-- v21.74 the week summary: one page for the team, shown in place of the sheet while it is open -->
+    <div class="panel dd-week" id="ddWeekWrap" hidden></div>
     <!-- Live recording at the table: a session timer and one control per behavior. It writes the day's row only when
          Save to the sheet is pressed. None of its controls has a name, so none is a record field, and none of it prints. -->
     <section class="ddl noprint no-print" id="ddLive" data-s="ready" aria-labelledby="ddlTitle">
@@ -1598,7 +1667,9 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
             <option value="220">Wide</option>
           </select>
         </label>
-        <button class="btn" id="btnPrintData" style="margin-left:auto">Print this sheet</button>
+        <button class="btn ghost" id="btnBlankWeek" style="margin-left:auto" title="A sheet of empty, dated school days to print for the week ahead; the record is not changed">Blank week to print</button>
+        <button class="btn ghost" id="btnWeekSum" title="One page for the team: this week against last week, the point sheet, incidents, phase changes and notes">Week summary</button>
+        <button class="btn" id="btnPrintData">Print this sheet</button>
       </div>
       <div class="inline-controls" id="ivSettings" style="background:#F4F7F8;border:1px solid var(--rule-soft);border-radius:3px;padding:10px 12px">
         <label class="field"><span>Observation window start</span><input type="time" id="iv_start" step="900"></label>
@@ -1614,6 +1685,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
         <span class="hint" style="margin:0;font-size:12px">Observation minutes fill in from this window. Type over a day's value when the student arrived late or left early; clear it to go back to the window.</span>
       </div>
       <div id="pasteNote" class="dd-paste-note no-print" role="status"></div>
+      <div class="dd-blank-note noprint no-print" id="ddBlankNote" hidden></div>
       <div class="sheet-top" id="sheetTop"></div>
       <div class="sheet-wrap" tabindex="0" role="region" aria-label="Daily data sheet">
         <table class="sheet" id="dataTable">
@@ -1623,6 +1695,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
         </table>
       </div>
       <div class="sheet-defs" id="sheetDefs"></div>
+      <div class="dd-inc" id="ddInc"></div>
       <p class="hint no-print" style="margin-top:12px">
         <strong>Full phase change</strong> starts a new condition: the graph breaks the data path, draws a solid vertical line, and analyzes the new condition separately.
         <strong>Conditional change</strong> keeps the condition intact and drops a dashed annotated line at that date &mdash; use it for events inside a phase such as a medication adjustment, a staffing change, or an illness.
@@ -3783,6 +3856,8 @@ function blankState(){
     ],
     rows:[],
     schedule:{},
+    /* v21.74 the incident log and the week summary's notes (by the Monday of the week) */
+    incidents:[], weekly:{},
     settings:{trend:"ols",level:"mean",env:"25full",crit:80,imm:3,showEnv:true,showLevel:true,showTrend:true,showCond:true,showLabels:false,
       entryMode:"daily",dayStart:"08:00",dayEnd:"14:00",slotMin:30,showTod:true,showHeat:true,showDefs:true,
       showKey:true,colW:172,orient:"landscape",
@@ -3793,6 +3868,8 @@ function blankState(){
   };
 }
 let S = blankState();
+/* v21.74 a blank sheet for the week: the dated rows shown in place of the record while it is on (none of it is saved) */
+let ddBlank = null;
 let selectedDay = null;   // row id currently open in the interval grid
 
 /* ---------------------------------------------------------------
@@ -4657,7 +4734,7 @@ function sheetTopHtml(){const wm=windowMinutes(),iv=S.settings.entryMode==="inte
   const m=S.meta,det=[m.id?`Student number ${esc(m.id)}`:"",m.age?esc(m.age):"",m.school?esc(m.school):"",m.classroom?esc(m.classroom):"",m.observer?`Data by ${esc(m.observer)}`:"",m.analyst?esc(m.analyst):""].filter(Boolean).join(" \u00b7 ");
   return `<div class="st-l"><div class="idwrap">${m.photo?`<img src="${esc(m.photo)}" alt="">`:""}<div><div class="nm">${esc(m.client||"Unnamed client")}</div><div class="sub">${det||`<span class="noprint no-print">Add client details on the first tab</span>`}</div></div></div></div><div class="st-r">${ddSpan()?`<b>Data ${ddSpan()}</b><br>`:""}${win}<span class="noprint no-print">${win?"<br>":""}Obs. min: the minutes observed that day (a short day is typed over)</span></div>`;}
 /* v21.72 the days the sheet covers, for the student line on paper (the print head it replaces gave them) */
-function ddSpan(){const r=sortedRows().filter(x=>x.date);return r.length?`${esc(shortDay(r[0].date).replace(/^\S+ /,""))} \u2013 ${esc(shortDay(r[r.length-1].date).replace(/^\S+ /,""))}`:"";}
+function ddSpan(){const r=(ddBlank||sortedRows()).filter(x=>x.date);return r.length?`${esc(shortDay(r[0].date).replace(/^\S+ /,""))} \u2013 ${esc(shortDay(r[r.length-1].date).replace(/^\S+ /,""))}`:"";}
 function sheetDefsHtml(obs,defsOn){
   const key=`<div class="sd-key"><span class="dd-onpaper"><b>Obs. min</b> = the minutes observed that day (a short day is typed over). </span><b>Blank</b> = not measured; <b>0</b> = measured, none occurred (they graph differently). <b>Full phase change</b>: a new condition starts that day (new plan, schedule or setting); the graph breaks and analyzes it separately. <b>Conditional change</b>: an event inside a condition (medication, staffing, illness); a dashed line, the condition is not split.</div>`;
   if(!defsOn||!obs.length)return `<div class="sd-wrap sd-only">${key}</div>`;
@@ -4667,9 +4744,8 @@ function sheetDefsHtml(obs,defsOn){
     <div class="sd-m">${esc(MEASURES[b.measure].label)}${b.obsLength?` \u00b7 ${esc(b.obsLength)}`:""}</div></div>`).join("")}</div>${key}</div>`;}
 function renderData(){
   renderSheetId();
-  const rows=sortedRows();
-  S.rows=rows;
-  rows.forEach(r=>S.behaviors.forEach(b=>syncEpisodeValue(r,b)));
+  const rows=ddBlank||sortedRows();
+  if(!ddBlank){ S.rows=rows; rows.forEach(r=>S.behaviors.forEach(b=>syncEpisodeValue(r,b))); }
   const head=$("#dataTable > thead"), body=$("#dataTable > tbody");
   const iv = S.settings.entryMode==="interval";
   const obs=orderedBehaviors();
@@ -4778,6 +4854,8 @@ function renderData(){
       <td class="actions"><button class="btn danger sm" data-act="delRow">Delete</button></td>
     </tr>`;
   }).join("");
+  /* v21.74 the blank sheet is for paper: nothing in it can be typed into */
+  if(ddBlank) body.querySelectorAll("input,select,button").forEach(el=>{ if(el.tagName==="INPUT") el.readOnly=true; else el.disabled=true; el.tabIndex=-1; });
 }
 
 /* a duration cell: the day's total, and a button into the episode log. With
@@ -7646,6 +7724,232 @@ window.__nbhFactsPick=function(sel){
   (sel.goals.acq||[]).forEach(g=>goal(g,false));
   if(n)nbhDdAfter();return {filled:n,note:notes.join('; ')};
 };
+</script>
+<script>
+/* ===================================================================================================
+   v21.74 the record beyond the sheet: the days it holds go to the case (Form QS-1's tiles, the team's week), a blank week
+   prints for paper, an incident log tied to the plan's tiers adds to the day's count, and a one-page week summary.
+   =================================================================================================== */
+"use strict";
+let ddCaseFacts=null;   /* the case as last read (Form QS-1's tiers, Form SM-1's point sheet); never saved */
+const ddT=v=>String(v==null?"":v).trim();
+function ddFirst(){const c=ddT(S.meta.client).replace(/^SIMULATED\s*[\u2013-]\s*/i,"");if(!c)return "the student";const m=/^([^,]+),\s*(.+)$/.exec(c);return ((m?m[2]:c).split(/\s+/)[0])||"the student";}
+function ddAddDays(iso,n){const p=iso.split("-");const d=new Date(+p[0],+p[1]-1,+p[2],12);d.setDate(d.getDate()+n);return localISO(d);}
+function ddMonday(iso){const p=iso.split("-");const d=new Date(+p[0],+p[1]-1,+p[2],12);const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);return localISO(d);}
+function ddLongDay(iso){const p=String(iso||"").split("-");if(p.length!==3)return ddT(iso);const d=new Date(+p[0],+p[1]-1,+p[2],12);
+  return isNaN(d)?ddT(iso):d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});}
+const ddIsoOk=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||""));
+const ddTimeOk=v=>/^\d{2}:\d{2}$/.test(String(v||""));
+
+/* ---- what a file or a restore brings: the incidents and the week notes, in the shape this form writes ---- */
+function ddClean(){
+  const L=Array.isArray(S.incidents)?S.incidents:[];const F=["date","time","beh","behName","tier","before","what","words","did","ended","parent","parentWhen","by"];
+  S.incidents=L.filter(x=>x&&typeof x==="object").slice(0,1000).map(x=>{const o={id:typeof x.id==="string"&&x.id?x.id.slice(0,40):uid("i")};
+    F.forEach(f=>{o[f]=typeof x[f]==="string"?x[f].slice(0,2000):"";});if(!ddIsoOk(o.date))o.date="";if(!ddTimeOk(o.time))o.time="";
+    o.bcba=x.bcba===true;o.counted=x.counted===true;return o;});
+  const W=S.weekly&&typeof S.weekly==="object"&&!Array.isArray(S.weekly)?S.weekly:{};S.weekly={};
+  Object.keys(W).slice(0,200).forEach(k=>{if(ddIsoOk(k)&&typeof W[k]==="string")S.weekly[k]=W[k].slice(0,4000);});
+  S.settings.incPrint=S.settings.incPrint===true;
+}
+
+/* ---- (1) the record for the case: the last 20 school days with data, each behavior's days, total, mean, zero days ---- */
+window.__nbhFactsOut=function(){try{
+  const rows=sortedRows().filter(r=>r.date&&S.behaviors.some(b=>plotValue(r,b)!==null)).slice(-20);
+  if(!rows.length)return null;
+  const behaviors=orderedBehaviors().map(b=>{const v=rows.map(r=>plotValue(r,b)).filter(x=>x!==null),t=v.reduce((a,c)=>a+c,0);
+    return {name:b.name||"",kind:b.kind||"target",measure:b.measure,unit:MEASURES[b.measure].unit,two:!!MEASURES[b.measure].two,direction:b.direction||"",
+      days:v.length,total:v.length?Math.round(t*100)/100:null,mean:v.length?Math.round(t/v.length*100)/100:null,zero:v.filter(x=>x===0).length,last:v.length?v[v.length-1]:null};});
+  const from=rows[0].date,to=rows[rows.length-1].date;
+  return {data:{from,to,days:rows.length,behaviors,incidents:(S.incidents||[]).filter(i=>i.date>=from&&i.date<=to).length,src:"DD-1"}};
+}catch(e){return null;}};
+/* the case as read is kept for the tiers and the point sheet; what the form did with it before is unchanged */
+if(typeof window.__nbhFactsIn==="function"){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ddCaseFacts=f||null;const r=was.apply(this,arguments);try{ddAfterData();}catch(e){}return r;};}
+
+/* ---- (2) a blank sheet for the week: dated school days, nothing in them, for paper ---- */
+function ddWeekOfDefault(){const d=new Date();d.setHours(12,0,0,0);while(d.getDay()!==1)d.setDate(d.getDate()+1);return localISO(d);}
+function ddBlankRows(start,n){const out=[];let d=start,k=0;while(out.length<n&&k<60){const p=d.split("-"),wd=new Date(+p[0],+p[1]-1,+p[2],12).getDay();
+  if(wd!==0&&wd!==6){const r=newRow(d);r.id="blank-"+out.length;out.push(r);}d=ddAddDays(d,1);k++;}return out;}
+function ddBlankOn(start,n){ddWeekOff(true);ddBlank=ddBlankRows(start||ddWeekOfDefault(),n||5);ddBlank.start=start||ddWeekOfDefault();ddBlank.n=n||5;renderData();}
+function ddBlankOff(){if(!ddBlank)return;ddBlank=null;renderData();}
+function ddBlankBar(){const el=document.getElementById("ddBlankNote");if(!el)return;document.body.classList.toggle("dd-blank-on",!!ddBlank);
+  if(!ddBlank){el.hidden=true;el.innerHTML="";return;}
+  el.hidden=false;
+  if(!el.querySelector("#ddBlankStart"))el.innerHTML=`<b>Blank sheet to print.</b> <span>Empty, dated school days; the record is not changed and nothing typed here is kept.</span>
+    <label class="field"><span>Week of</span><input type="date" id="ddBlankStart"></label>
+    <label class="field"><span>School days</span><select id="ddBlankN"><option value="5">5 (one week)</option><option value="10">10 (two weeks)</option><option value="15">15</option><option value="20">20</option></select></label>
+    <button type="button" class="btn" id="ddBlankPrint">Print it</button><button type="button" class="btn ghost" id="ddBlankBack">Back to the data</button>`;
+  el.querySelector("#ddBlankStart").value=ddBlank.start;el.querySelector("#ddBlankN").value=String(ddBlank.n);}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest("#btnBlankWeek")){ddBlankOn(ddWeekOfDefault(),5);const s=document.getElementById("ddBlankNote");if(s&&s.scrollIntoView)s.scrollIntoView({block:"nearest"});return;}
+  if(t.closest("#ddBlankBack")){ddBlankOff();return;}
+  if(t.closest("#ddBlankPrint")){printTab("Blank data sheet");return;}});
+document.addEventListener("change",e=>{const t=e.target;if(!t||!ddBlank)return;
+  if(t.id==="ddBlankStart"&&ddIsoOk(t.value))ddBlankOn(t.value,ddBlank.n);
+  if(t.id==="ddBlankN")ddBlankOn(ddBlank.start,+t.value||5);});
+
+/* ---- (9) the incident log: each one dated and timed, before / what happened and the words / what adults did / how it
+   ended; a count behavior can take it as one more that day; a note for home is written from it ---- */
+function ddTiers(){const f=ddCaseFacts||{},q=f.quick&&Array.isArray(f.quick.tiers)?f.quick.tiers.map(t=>ddT(t.name)).filter(Boolean):[];
+  if(q.length)return {list:q,src:"Form QS-1"};
+  const c=f.crisis&&Array.isArray(f.crisis.stages)?f.crisis.stages.map(s=>ddT(s.s)).filter(Boolean):[];
+  if(c.length)return {list:c,src:"Form CR-1"};
+  return {list:["Early signs","Tier 1","Tier 2","Tier 3","Crisis plan (Form CR-1)"],src:""};}
+const ddCountable=b=>!!b&&b.measure==="count"&&S.settings.entryMode!=="interval";
+function ddIncBeh(i){return S.behaviors.find(b=>b.id===i.beh)||null;}
+function ddIncName(i){const b=ddIncBeh(i);return b?(b.name||"Untitled"):(i.behName||"");}
+/* one more (or one fewer) on the day's count; a day not on the sheet is added */
+function ddIncCount(i,sign){const b=ddIncBeh(i);if(!ddCountable(b)||!i.date)return false;let r=S.rows.find(x=>x.date===i.date);
+  if(!r){if(sign<0)return false;r=newRow(i.date);S.rows.push(r);}
+  const v=num(r.values[b.id]);if(sign<0&&v===null)return false;r.values[b.id]=String(Math.max(0,(v||0)+sign));return true;}
+function ddIncSorted(){return (S.incidents||[]).slice().sort((a,b)=>((a.date||"9999")+(a.time||"")).localeCompare((b.date||"9999")+(b.time||"")));}
+function ddIncRowHtml(i,act){const t=i.time?hm12(i.time):"";
+  return `<tr data-inc="${esc(i.id)}"><td class="w">${esc(i.date?shortDay(i.date):"no date")}${t?`<br><span>${esc(t)}</span>`:""}</td><td>${esc(ddIncName(i))}${i.tier?`<br><span class="tier">${esc(i.tier)}</span>`:""}</td>
+    <td>${esc(i.before)}</td><td>${esc(i.what)}${i.words?`<div class="words">&ldquo;${esc(i.words)}&rdquo;</div>`:""}</td><td>${esc(i.did)}</td><td>${esc(i.ended)}</td>
+    <td class="f">${i.parent==="yes"?`Home told${i.parentWhen?` (${esc(i.parentWhen)})`:""}`:"Home not yet told"}${i.bcba?"<br>BCBA told":""}${i.counted?"<br>On the day&rsquo;s count":""}${i.by?`<br>By ${esc(i.by)}`:""}</td>
+    ${act?`<td class="a noprint no-print"><button type="button" class="btn ghost sm" data-inc-edit="${esc(i.id)}">Edit</button> <button type="button" class="btn ghost sm" data-inc-note="${esc(i.id)}">Note for home</button> <button type="button" class="btn danger sm" data-inc-del="${esc(i.id)}">Delete</button></td>`:""}</tr>`;}
+function ddIncHead(act){return `<thead><tr><th>When</th><th>Behavior and tier</th><th>Before it (A)</th><th>What happened (B) and the words said</th><th>What adults did (C)</th><th>How it ended</th><th>Follow-up</th>${act?`<th class="noprint no-print"></th>`:""}</tr></thead>`;}
+function ddIncRender(){const el=document.getElementById("ddInc");if(!el)return;const L=ddIncSorted(),T=ddTiers();
+  el.classList.toggle("print-on",S.settings.incPrint===true&&L.length>0);
+  el.innerHTML=`<div class="inc-hd"><h3>Incident log</h3><span class="hint">${L.length?`${L.length} incident${L.length===1?"":"s"}`:"None logged"}. ${T.src?`Tiers from ${esc(T.src)}.`:"Tiers: the plan&rsquo;s levels, once Form QS-1 or CR-1 is in the case."}</span>
+    <span class="inc-tools noprint no-print"><label><input type="checkbox" id="ddIncPrint"${S.settings.incPrint?" checked":""}> Print the incidents with the sheet</label><button type="button" class="btn" id="ddIncAdd">Log an incident</button></span></div>
+    ${L.length?`<div class="inc-wrap"><table class="inc-tab">${ddIncHead(true)}<tbody>${L.map(i=>ddIncRowHtml(i,true)).join("")}</tbody></table></div>`:`<p class="hint noprint no-print">An incident logged here keeps the time, what came before, what happened and the exact words, and what the adults did. For a behavior counted by frequency it can add one to that day&rsquo;s count, and a note for home is written from it.</p>`}`;}
+function ddIncDlg(){let d=document.getElementById("dlgInc");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog dd-inc-dlg";d.id="dlgInc";d.setAttribute("aria-labelledby","incTitle");
+  d.innerHTML=`<h2 id="incTitle">Log an incident</h2>
+  <div class="inc-g"><label class="field"><span>Date</span><input type="date" id="incDate"></label><label class="field"><span>Time</span><input type="time" id="incTime"></label>
+  <label class="field"><span>Behavior</span><select id="incBeh"></select></label><label class="field"><span>Tier</span><select id="incTier"></select></label></div>
+  <label class="field"><span>Before it (A): the activity, the request, what changed</span><textarea id="incBefore" rows="2"></textarea></label>
+  <label class="field"><span>What happened (B), as it would look on video</span><textarea id="incWhat" rows="2"></textarea></label>
+  <label class="field"><span>The exact words said, if any</span><input id="incWords"></label>
+  <label class="field"><span>What adults did (C), in order</span><textarea id="incDid" rows="2"></textarea></label>
+  <label class="field"><span>How it ended</span><input id="incEnded" placeholder="e.g. back at his desk by 10:32; worked through to lunch"></label>
+  <div class="inc-g"><label class="field"><span>Home told</span><select id="incParent"><option value="no">Not yet</option><option value="yes">Yes</option></select></label>
+  <label class="field"><span>How and when</span><input id="incParentWhen" placeholder="e.g. phone call 3:15"></label><label class="field"><span>Recorded by</span><input id="incBy"></label></div>
+  <label class="chk"><input type="checkbox" id="incBcba"> The BCBA has been told</label>
+  <label class="chk" id="incCountL"><input type="checkbox" id="incCount" checked> <span id="incCountT">Add one to the day&rsquo;s count</span></label>
+  <div class="dd-actions"><button type="button" class="btn ghost" id="incCancel">Cancel</button><button type="button" class="btn" id="incSave">Save</button></div>`;
+  document.body.appendChild(d);
+  d.querySelector("#incCancel").addEventListener("click",()=>d.close());
+  d.querySelector("#incBeh").addEventListener("change",ddIncCountUi);d.querySelector("#incDate").addEventListener("change",ddIncCountUi);
+  d.querySelector("#incSave").addEventListener("click",ddIncSave);return d;}
+let ddIncEditing=null;
+function ddIncCountUi(){const d=document.getElementById("dlgInc"),b=S.behaviors.find(x=>x.id===d.querySelector("#incBeh").value),ok=ddCountable(b),c=d.querySelector("#incCount");
+  c.disabled=!ok;if(!ok)c.checked=false;
+  d.querySelector("#incCountT").textContent=ok?`Add one to ${d.querySelector("#incDate").value?shortDay(d.querySelector("#incDate").value):"the day"}’s count of ${b.name||"this behavior"}`:
+    (b?`${b.name||"This behavior"} is not counted by frequency${S.settings.entryMode==="interval"?" (the sheet is in intervals)":""}; enter the day’s value on the sheet`:"Pick a behavior counted by frequency to add it to the day’s count");}
+function ddIncOpen(id){const d=ddIncDlg(),i=id?(S.incidents||[]).find(x=>x.id===id):null,T=ddTiers();ddIncEditing=i?i.id:null;
+  const now=new Date();d.querySelector("#incTitle").textContent=i?"Edit the incident":"Log an incident";
+  const behs=orderedBehaviors();d.querySelector("#incBeh").innerHTML=behs.map(b=>`<option value="${esc(b.id)}">${esc(b.name||"Untitled")}</option>`).join("")+`<option value="">Another behavior (not on the sheet)</option>`;
+  const tl=T.list.slice();if(i&&i.tier&&tl.indexOf(i.tier)<0)tl.push(i.tier);
+  d.querySelector("#incTier").innerHTML=`<option value="">—</option>`+tl.map(t=>`<option>${esc(t)}</option>`).join("");
+  const v=(k,x)=>{d.querySelector(k).value=x;};
+  v("#incDate",i?i.date:localISO(now));v("#incTime",i?i.time:String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0"));
+  v("#incBeh",i?(ddIncBeh(i)?i.beh:""):(behs.find(b=>(b.kind||"target")==="target")||behs[0]||{id:""}).id);v("#incTier",i?i.tier:"");
+  ["Before","What","Words","Did","Ended","ParentWhen","By"].forEach(k=>v("#inc"+k,i?i[k.charAt(0).toLowerCase()+k.slice(1)]:(k==="By"?(S.meta.observer||""):"")));
+  v("#incParent",i&&i.parent==="yes"?"yes":"no");d.querySelector("#incBcba").checked=!!(i&&i.bcba);
+  ddIncCountUi();const c=d.querySelector("#incCount");if(!c.disabled)c.checked=i?i.counted:true;
+  try{d.showModal();}catch(e){d.setAttribute("open","");}}
+function ddIncSave(){const d=document.getElementById("dlgInc"),g=k=>d.querySelector(k).value;
+  const o={date:ddIsoOk(g("#incDate"))?g("#incDate"):"",time:ddTimeOk(g("#incTime"))?g("#incTime"):"",beh:g("#incBeh"),tier:g("#incTier"),before:g("#incBefore").trim(),what:g("#incWhat").trim(),
+    words:g("#incWords").trim(),did:g("#incDid").trim(),ended:g("#incEnded").trim(),parent:g("#incParent")==="yes"?"yes":"no",parentWhen:g("#incParentWhen").trim(),by:g("#incBy").trim(),bcba:d.querySelector("#incBcba").checked};
+  const b=S.behaviors.find(x=>x.id===o.beh);o.behName=b?(b.name||""):"";
+  if(!o.date){toast("Give the incident its date.");return;}
+  if(!S.incidents)S.incidents=[];
+  let i=ddIncEditing?(S.incidents.find(x=>x.id===ddIncEditing)):null;
+  if(i&&i.counted)ddIncCount(i,-1);
+  if(!i){i={id:uid("i")};S.incidents.push(i);}
+  Object.assign(i,o);i.counted=d.querySelector("#incCount").checked&&!d.querySelector("#incCount").disabled?ddIncCount(i,1):false;
+  d.close();ddEdited();renderData();renderIntervalPanel();renderResults();
+  toast(i.counted?`Incident saved; ${shortDay(i.date)} now counts ${(S.rows.find(r=>r.date===i.date)||{values:{}}).values[i.beh]} for ${o.behName||"it"}.`:"Incident saved.");}
+async function ddIncDel(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;
+  const ok=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm("Delete this incident?\n"+(i.counted?"The one it added to the day’s count is taken off again.":"What it holds is deleted."),{ok:"Delete",danger:true}):confirm("Delete this incident?");
+  if(!ok)return;if(i.counted)ddIncCount(i,-1);S.incidents=S.incidents.filter(x=>x.id!==id);ddEdited();renderData();renderIntervalPanel();renderResults();}
+/* the note for home: plain words, from what was logged; the adult reads it over and changes what they like before it goes */
+function ddIncNoteText(i){const nm=ddFirst(),L=[];
+  L.push("Hello,");L.push("");
+  L.push(`This is a short note about ${nm}’s day on ${ddLongDay(i.date)}.`);
+  const what=i.what||(ddIncName(i)?`${ddIncName(i).toLowerCase()}`:"a hard moment");
+  L.push(`What happened${i.time?` (around ${hm12(i.time)})`:""}: ${what.replace(/\.?\s*$/,".")}`);
+  if(i.before)L.push(`What was going on just before: ${i.before.replace(/\.?\s*$/,".")}`);
+  if(i.did)L.push(`What the adults did: ${i.did.replace(/\.?\s*$/,".")}`);
+  if(i.ended)L.push(`How it ended: ${i.ended.replace(/\.?\s*$/,".")}`);
+  L.push("");L.push(`${nm}’s plan stays the same, and we will keep you posted on how the rest of the week goes. Please reach out with any questions.`);
+  L.push("");L.push([i.by||S.meta.observer||"",S.meta.school||""].filter(Boolean).join(", "));
+  return L.join("\n").replace(/\n+$/,"");}
+function ddIncNote(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;let d=document.getElementById("dlgIncNote");
+  if(!d){d=document.createElement("dialog");d.className="dd-dialog";d.id="dlgIncNote";d.setAttribute("aria-labelledby","incNoteT");
+    d.innerHTML=`<h2 id="incNoteT">Note for home</h2><p class="hint">Written from the incident. Read it over and change what you like; nothing is sent from here. The exact words and the tier stay off the note.</p>
+    <textarea id="incNoteTx" rows="12" style="font-family:inherit;font-size:14px"></textarea>
+    <div class="dd-actions"><button type="button" class="btn ghost" id="incNoteClose">Close</button><button type="button" class="btn" id="incNoteCopy">Copy</button></div>`;
+    document.body.appendChild(d);d.querySelector("#incNoteClose").addEventListener("click",()=>d.close());
+    d.querySelector("#incNoteCopy").addEventListener("click",async()=>{const t=d.querySelector("#incNoteTx");try{await navigator.clipboard.writeText(t.value);toast("Copied. Paste it into the message home.");}
+      catch(e){t.focus();t.select();try{document.execCommand("copy");toast("Copied.");}catch(e2){toast("Select the note and copy it.");}}});}
+  d.querySelector("#incNoteTx").value=ddIncNoteText(i);try{d.showModal();}catch(e){d.setAttribute("open","");}}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;let b;
+  if(t.closest("#ddIncAdd")){ddIncOpen(null);return;}
+  if((b=t.closest("[data-inc-edit]"))){ddIncOpen(b.dataset.incEdit);return;}
+  if((b=t.closest("[data-inc-note]"))){ddIncNote(b.dataset.incNote);return;}
+  if((b=t.closest("[data-inc-del]"))){ddIncDel(b.dataset.incDel);return;}});
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="ddIncPrint"){S.settings.incPrint=e.target.checked;ddEdited();ddIncRender();}});
+/* the form's own change signal (autosave and the workstation's unsaved mark listen for input on the page) */
+function ddEdited(){try{document.dispatchEvent(new Event("input",{bubbles:true}));}catch(e){}}
+
+/* ---- (7) the week summary: one page for the team ---- */
+let ddWeek=null;   /* the Monday shown, while the summary is open */
+function ddWeekOff(quiet){if(!ddWeek)return;ddWeek=null;document.body.classList.remove("dd-week-on");const w=document.getElementById("ddWeekWrap");if(w){w.hidden=true;w.innerHTML="";}}
+function ddWeekDefault(){const r=sortedRows().filter(x=>x.date&&S.behaviors.some(b=>plotValue(x,b)!==null));return ddMonday(r.length?r[r.length-1].date:localISO(new Date()));}
+function ddStat(b,rows){const v=rows.map(r=>plotValue(r,b)).filter(x=>x!==null);if(!v.length)return null;const t=v.reduce((a,c)=>a+c,0);return {n:v.length,total:t,mean:t/v.length,max:Math.max(...v)};}
+function ddStatTxt(b,s){if(!s)return "—";const pc=MEASURES[b.measure].two||/%/.test(MEASURES[b.measure].unit);
+  if(b.measure==="count")return `${r1(s.total)} <span>(${r1(s.mean)} a day)</span>`;
+  if(b.measure==="duration")return `${r1(s.total)} min <span>(${r1(s.mean)} a day)</span>`;
+  return pc?`${r1(s.mean)}%`:`${r1(s.mean)} <span>${esc(MEASURES[b.measure].unit)}</span>`;}
+function ddChange(b,a,c){if(!a||!c)return {t:"—",k:""};const d=c.mean-a.mean,up=(b.direction||(b.kind==="target"?"decrease":"increase"))!=="decrease";
+  if(Math.abs(d)<1e-9)return {t:"no change",k:""};const good=up?d>0:d<0;
+  const t=a.mean>0?`${d<0?"down":"up"} ${Math.round(Math.abs(d)/a.mean*100)}%`:`up from 0`;return {t,k:good?"good":"bad"};}
+function ddPointsFor(mon){const P=ddCaseFacts&&ddCaseFacts.points&&Array.isArray(ddCaseFacts.points.days)?ddCaseFacts.points.days:null;if(!P)return null;
+  const end=ddAddDays(mon,6),w=P.filter(x=>x&&x.date>=mon&&x.date<=end&&typeof x.pct==="number");return {days:w,any:P.length};}
+function ddWeekRender(){const w=document.getElementById("ddWeekWrap");if(!w||!ddWeek)return;const mon=ddWeek,sun=ddAddDays(mon,6),pm=ddAddDays(mon,-7),ps=ddAddDays(mon,-1);
+  const rows=sortedRows(),wk=rows.filter(r=>r.date>=mon&&r.date<=sun),lw=rows.filter(r=>r.date>=pm&&r.date<=ps);
+  const behs=orderedBehaviors();const m=S.meta;
+  const tbl=behs.map(b=>{const c=ddStat(b,wk),a=ddStat(b,lw),ch=ddChange(b,a,c);
+    return `<tr><td><b style="border-left:4px solid ${esc(b.color)};padding-left:6px">${esc(b.name||"Untitled")}</b><br><span>${esc(KINDS[b.kind||"target"]||"")} · ${esc(MEASURES[b.measure].label)}</span></td>
+      <td>${ddStatTxt(b,c)}${c?`<br><span>${c.n} day${c.n===1?"":"s"}</span>`:""}</td><td>${ddStatTxt(b,a)}</td><td class="${ch.k}">${esc(ch.t)}</td><td>${b.aim!==""&&b.aim!=null?esc(b.aim):"—"}</td></tr>`;}).join("");
+  const pts=ddPointsFor(mon);let ptsH;
+  if(pts&&pts.days.length){const mean=pts.days.reduce((a,c)=>a+c.pct,0)/pts.days.length,met=pts.days.filter(x=>x.met).length;
+    ptsH=`<p><b>${r1(mean)}%</b> of the points on average across ${pts.days.length} day${pts.days.length===1?"":"s"}; the goal was met on ${met} of them. <span class="hint">(Form SM-1)</span></p>
+      <p class="days">${pts.days.map(x=>`${esc(shortDay(x.date))}: ${r1(x.pct)}%${x.met?" ✓":""}`).join(" · ")}</p>`;}
+  else ptsH=`<p class="hint">${pts?"No point sheet days recorded on Form SM-1 this week.":"No point sheet in the case. Open Form SM-1 in the workstation to bring its Record in."}</p>`;
+  const inc=ddIncSorted().filter(i=>i.date>=mon&&i.date<=sun);
+  const ph=wk.filter(r=>r.phaseType&&r.phaseType!=="none");const notes=wk.filter(r=>ddT(r.notes));
+  w.innerHTML=`<div class="wk-bar noprint no-print"><label class="field"><span>Week of</span><input type="date" id="ddWeekOf" value="${esc(mon)}"></label>
+      <button type="button" class="btn" id="ddWeekPrint">Print it</button><button type="button" class="btn ghost" id="ddWeekClose">Back to the data</button>
+      <span class="hint">One page for the team meeting. It reads the sheet, the incident log and Form SM-1&rsquo;s point sheet; nothing on it changes them.</span></div>
+    <div class="wk-head">${m.photo?`<img src="${esc(m.photo)}" alt="">`:""}<div><div class="nm">${esc(m.client||"Unnamed client")}</div><div class="sub">${[m.id?`Student number ${esc(m.id)}`:"",esc(m.school||""),esc(m.classroom||"")].filter(Boolean).join(" · ")}</div></div>
+      <div class="wk-r"><b>Week summary</b><br>${esc(shortDay(mon).replace(/^\S+ /,""))} – ${esc(shortDay(ddAddDays(mon,4)).replace(/^\S+ /,""))} · ${wk.length} day${wk.length===1?"":"s"} recorded</div></div>
+    <h4>The behaviors: this week against last week</h4>
+    <table class="wk-tab"><thead><tr><th>Behavior</th><th>This week</th><th>Last week</th><th>Change</th><th>Aim</th></tr></thead><tbody>${tbl||`<tr><td colspan="5">No behaviors on the sheet.</td></tr>`}</tbody></table>
+    <h4>Point sheet</h4>${ptsH}
+    <h4>Incidents (${inc.length})</h4>${inc.length?`<table class="inc-tab wk-inc">${ddIncHead(false)}<tbody>${inc.map(i=>ddIncRowHtml(i,false)).join("")}</tbody></table>`:`<p class="hint">None logged this week.</p>`}
+    ${ph.length?`<h4>Phase and condition changes</h4><ul>${ph.map(r=>`<li><b>${esc(shortDay(r.date))}</b>: ${r.phaseType==="full"?"full phase change":"conditional change"}${r.phaseLabel?` — ${esc(plainLabel(r.phaseLabel))}`:""}</li>`).join("")}</ul>`:""}
+    ${notes.length?`<h4>Daily notes</h4><ul>${notes.map(r=>`<li><b>${esc(shortDay(r.date))}</b>: ${esc(r.notes)}</li>`).join("")}</ul>`:""}
+    <h4>For the team: what we decided</h4>
+    <textarea id="ddWeekNext" class="wk-next" rows="4" placeholder="one line each: what changes next week, who does it, by when">${esc((S.weekly||{})[mon]||"")}</textarea>
+    <div class="wk-next-p">${esc((S.weekly||{})[mon]||"").replace(/\n/g,"<br>")||"&nbsp;"}</div>`;}
+function ddWeekOn(mon){if(ddBlank){ddBlank=null;renderData();}ddWeek=mon||ddWeekDefault();document.body.classList.add("dd-week-on");const w=document.getElementById("ddWeekWrap");if(w)w.hidden=false;ddWeekRender();window.scrollTo({top:0});}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest("#btnWeekSum")){ddWeekOn();return;}
+  if(t.closest("#ddWeekClose")){ddWeekOff();return;}
+  if(t.closest("#ddWeekPrint")){printTab("Week summary");return;}});
+document.addEventListener("change",e=>{if(e.target&&e.target.id==="ddWeekOf"&&ddIsoOk(e.target.value))ddWeekOn(ddMonday(e.target.value));});
+document.addEventListener("input",e=>{if(e.target&&e.target.id==="ddWeekNext"&&ddWeek){if(!S.weekly)S.weekly={};const v=e.target.value;if(v.trim())S.weekly[ddWeek]=v;else delete S.weekly[ddWeek];
+  const p=document.querySelector("#ddWeekWrap .wk-next-p");if(p)p.innerHTML=esc(v).replace(/\n/g,"<br>")||"&nbsp;";}});
+
+/* ---- after every render of the sheet: the blank-sheet bar, the incident log ---- */
+function ddAfterData(){ddBlankBar();ddIncRender();if(ddWeek)ddWeekRender();}
+{const rd=renderData;renderData=function(){const r=rd.apply(this,arguments);try{ddAfterData();}catch(e){}return r;};}
+{const ra=renderAll;renderAll=function(){ddClean();return ra.apply(this,arguments);};}
+/* a record replaced (a file opened, the simulation loaded) leaves the blank sheet and the summary */
+{const drop=nbhDdDrop;nbhDdDrop=function(){ddBlank=null;ddWeekOff();return drop.apply(this,arguments);};}
+ddClean();ddAfterData();
 </script>
 
 <script>
