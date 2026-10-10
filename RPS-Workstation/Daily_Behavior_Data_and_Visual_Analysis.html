@@ -501,7 +501,7 @@ td input,td select{max-width:100%}
 .sheet-top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:0 0 8px}
 .sheet-top:empty,.sheet-defs:empty{display:none}
 .sheet-top .idwrap{display:flex;gap:10px;align-items:center;text-align:left}
-.sheet-top .idwrap img{width:44px;height:54px;object-fit:cover;border:1px solid var(--rule);border-radius:2px;flex:0 0 auto}
+.sheet-top .idwrap img{width:56px;height:56px;object-fit:cover;object-position:50% 25%;border:1px solid var(--rule);border-radius:50%;flex:0 0 auto;-webkit-print-color-adjust:exact;print-color-adjust:exact}   /* v21.71 round, like the bar */
 .sheet-top .nm{font-family:var(--nbh-serif);font-size:17px;font-weight:700;color:var(--ink);line-height:1.2}
 .sheet-top .sub{font-size:11.5px;color:var(--ink-soft);line-height:1.4;margin-top:2px}
 .sheet-top .st-r{font-size:11.5px;color:var(--ink-soft);text-align:right;line-height:1.45}
@@ -523,7 +523,7 @@ td input,td select{max-width:100%}
 .sd-only .sd-key{margin-top:0;padding-top:0;border-top:0}
 .sheet .pdate{display:none}
 @media print{
-  .sheet-top{margin-bottom:5px}.sheet-top .nm{font-size:13px}.sheet-top .sub,.sheet-top .st-r{font-size:8.5px}.sheet-top .idwrap img{width:34px;height:42px}
+  .sheet-top{margin-bottom:5px}.sheet-top .nm{font-size:13px}.sheet-top .sub,.sheet-top .st-r{font-size:8.5px}.sheet-top .idwrap img{width:50px;height:50px}
   .sheet.slim thead th.fixh{font-size:9px;padding:4px 2px}
   .sheet.slim thead th.namecell{font-size:10.5px;padding:4px 4px}
   .nmsub{font-size:8.5px}
@@ -6000,9 +6000,16 @@ $("#behTable").addEventListener("click",async e=>{
 });
 
 // images
-function setPhoto(file){ readImage(file,d=>{S.meta.photo=d; renderMeta(); renderData(); renderIntervalPanel(); renderResults(); toast("Photo added.");}); }
+/* v21.71 the case's photo of the student (the workstation's bar) goes on the sheet while this form holds none of its own,
+   and follows the bar while it is the one taken from there (S.meta.photoCase); a photo chosen here is this form's own */
+window.addEventListener('message',ev=>{if(window.parent===window||ev.source!==window.parent)return;const d=ev.data;if(!d||d.nbh!=='packet'||!d.packet||typeof d.packet!=='object')return;
+  const v=typeof d.packet.photo==='string'&&/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(d.packet.photo)&&d.packet.photo.length<600000?d.packet.photo:'';
+  if(S.meta.photo&&!S.meta.photoCase)return;
+  if(v===(S.meta.photo||''))return;
+  S.meta.photo=v;S.meta.photoCase=!!v;renderMeta();renderData();renderIntervalPanel();renderResults();});
+function setPhoto(file){ readImage(file,d=>{S.meta.photo=d; S.meta.photoCase=false; renderMeta(); renderData(); renderIntervalPanel(); renderResults(); toast("Photo added.");}); }
 $("#filePhoto").addEventListener("change",e=>{ if(e.target.files[0]) setPhoto(e.target.files[0]); e.target.value=""; });
-$("#btnPhotoClear").addEventListener("click",()=>{S.meta.photo=""; renderMeta(); renderData(); renderIntervalPanel(); renderResults();});
+$("#btnPhotoClear").addEventListener("click",()=>{S.meta.photo="";S.meta.photoCase=false; renderMeta(); renderData(); renderIntervalPanel(); renderResults();});
 ["dragenter","dragover"].forEach(t=>$("#photoSlot").addEventListener(t,e=>{e.preventDefault(); $("#photoSlot").classList.add("drag");}));
 ["dragleave","drop"].forEach(t=>$("#photoSlot").addEventListener(t,e=>{e.preventDefault(); $("#photoSlot").classList.remove("drag");}));
 $("#photoSlot").addEventListener("drop",e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f&&/^image\//.test(f.type)) setPhoto(f); });

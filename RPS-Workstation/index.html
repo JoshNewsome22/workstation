@@ -364,6 +364,16 @@ button.icon{padding:5px 8px;min-width:32px}
 .bar .sum #sumPhoto{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:0 0 auto;border:1px solid #476c7e}.bar .sum #sumPhoto[hidden]{display:none}
 .crumb #crumbPhoto{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:0 0 auto;border:1px solid #c9d4d2}.crumb #crumbPhoto[hidden]{display:none}
 .bar .facts .flag,.bar .facts .flag b{color:#f3d9a6}
+/* v21.71 placing the photo: drag to move it, the slider to make it bigger; what is inside the circle is kept */
+.ph-crop{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.ph-view{position:relative;width:260px;height:260px;overflow:hidden;background:#e9eef0;border-radius:6px;touch-action:none;cursor:grab;flex:0 0 auto;outline-offset:3px}
+.ph-view:active{cursor:grabbing}
+.ph-view img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;pointer-events:none}
+.ph-ring{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 999px rgba(22,36,46,.5);border:2px solid #fff;pointer-events:none}
+.ph-side{flex:1 1 200px;min-width:0}
+.ph-side p{margin:0 0 12px;line-height:1.45}
+.ph-zoom{display:flex;gap:10px;align-items:center;margin:0 0 14px;font-weight:600}
+.ph-zoom input{flex:1;min-width:0}
 .ph-dlg .ph-big{width:160px;height:160px;border-radius:50%;object-fit:cover;display:block;margin:0 0 10px;border:1px solid #c9d4d2}
 body.bar-folded .bar .det,body.bar-folded .bar .facts{display:none}
 .bar [hidden]{display:none!important}   /* the bar's flex rules outranked the hidden attribute */
@@ -1411,7 +1421,7 @@ $('#barEdit').addEventListener('click',()=>foldBar(false));
 state.photo='';
 const PHOTO_RE=/^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
 function photoOk(v){return typeof v==='string'&&v.length<600000&&PHOTO_RE.test(v);}
-function setPhoto(v,quiet){state.photo=photoOk(v)?v:'';paintPhoto();
+function setPhoto(v,quiet){state.photo=photoOk(v)?v:'';if(quiet)state.photoSrc='';paintPhoto();
   if(!quiet&&state.photo){const fl=state.facts&&state.facts.profile&&state.facts.profile.flags;if(fl&&fl.photo==='No')wsUI.toast('Form DM-1 says the photo/media permission on file is No. The photo stays in this case file and goes nowhere else.',{ms:9000});}}
 function initials(){const n=packet().client.replace(/\(.*?\)/g,'').trim();if(!n)return '';const w=n.split(/[\s,]+/).filter(Boolean);if(!w.length)return '';
   const f=x=>((x||'')[0]||'').toUpperCase();if(n.indexOf(',')>0&&w.length>1)return f(w[1])+f(w[0]);return f(w[0])+(w.length>1?f(w[w.length-1]):'');}
@@ -1425,15 +1435,49 @@ function paintPhoto(){const v=state.photo,b=$('#pPhotoBtn');if(!b)return;const i
 function photoFromFile(file){return new Promise((res,rej)=>{const url=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{try{const S=240,w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,k=Math.min(w,h),sx=(w-k)/2,sy=(h-k)/2;const c=document.createElement('canvas');c.width=S;c.height=S;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,S,S);g.drawImage(img,sx,sy,k,k,0,0,S,S);URL.revokeObjectURL(url);res(c.toDataURL('image/jpeg',0.8));}catch(e){URL.revokeObjectURL(url);rej(e);}};
   img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('not an image'));};img.src=url;});}
+/* v21.71 the photo is placed by hand before it is kept: the picture fills a 260 px square under a circle; drag (or the
+   arrow keys) moves it, the slider makes it up to four times bigger, and Use this photo keeps the square as 240 px. A tall
+   picture starts a little below its top, where a face usually is, instead of at its middle. The picture chosen is kept
+   for this session (state.photoSrc, at most 1000 px) so Adjust position can move it again with the whole picture to
+   work with; it is not saved: after the case is reopened, Adjust works on the kept 240 px square. */
+function cropPhoto(src){return new Promise(res=>{const img=new Image();
+  img.onerror=()=>res(undefined);
+  img.onload=()=>{
+    const W=img.naturalWidth||img.width,H=img.naturalHeight||img.height,V=260,base=V/Math.min(W,H);let z=1,x=(V-W*base)/2,y=H>W?-(H*base-V)*0.12:(V-H*base)/2;
+    let srcData='';try{const k=Math.min(1,1000/Math.max(W,H)),c=document.createElement('canvas');c.width=Math.round(W*k);c.height=Math.round(H*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);srcData=c.toDataURL('image/jpeg',0.85);}catch(e){}
+    dialog('Place the photo','<div class="ph-crop"><div class="ph-view" id="phView" tabindex="0" aria-label="The photo: drag it, or use the arrow keys, to move it"><img id="phImg" alt="" draggable="false"><div class="ph-ring"></div></div>'+
+      '<div class="ph-side"><p>Drag the picture to move it; the slider makes it bigger. What is inside the circle is what the bar, the crumb and the forms show.</p>'+
+      '<label class="ph-zoom">Size <input type="range" id="phZoom" min="1" max="4" step="0.01" value="1"></label>'+
+      '<p><button type="button" class="primary" id="phUse">Use this photo</button> <button type="button" id="phCancel">Cancel</button></p></div></div>');
+    const im=$('#phImg'),view=$('#phView');im.src=src;
+    const paint=()=>{const s=base*z,iw=W*s,ih=H*s;x=Math.min(0,Math.max(V-iw,x));y=Math.min(0,Math.max(V-ih,y));im.style.width=iw+'px';im.style.height=ih+'px';im.style.transform='translate('+x+'px,'+y+'px)';};
+    paint();
+    let drag=null;
+    view.addEventListener('pointerdown',e=>{drag={px:e.clientX,py:e.clientY,x,y};try{view.setPointerCapture(e.pointerId);}catch(err){}e.preventDefault();});
+    view.addEventListener('pointermove',e=>{if(!drag)return;x=drag.x+e.clientX-drag.px;y=drag.y+e.clientY-drag.py;paint();});
+    const end=()=>{drag=null;};view.addEventListener('pointerup',end);view.addEventListener('pointercancel',end);
+    view.addEventListener('keydown',e=>{const d=e.shiftKey?20:5,m={ArrowLeft:[-d,0],ArrowRight:[d,0],ArrowUp:[0,-d],ArrowDown:[0,d]}[e.key];if(m){x+=m[0];y+=m[1];paint();e.preventDefault();}});
+    $('#phZoom').addEventListener('input',e=>{const nz=+e.target.value,c=V/2,r=nz/z;x=c-(c-x)*r;y=c-(c-y)*r;z=nz;paint();});
+    let done=false;const fin=v=>{if(done)return;done=true;res(v);};
+    $('#phUse').addEventListener('click',()=>{const S=240,s=base*z,c=document.createElement('canvas');c.width=S;c.height=S;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,S,S);
+      g.drawImage(img,-x/s,-y/s,V/s,V/s,0,0,S,S);fin({v:c.toDataURL('image/jpeg',0.8),src:srcData});$('#dlg').close();});
+    $('#phCancel').addEventListener('click',()=>{fin(null);$('#dlg').close();});
+    $('#dlg').addEventListener('close',()=>fin(null),{once:true});
+  };
+  img.src=src;});}
+/* every open form hears of the photo at once (Form IA-1's respondent pages, Form DD-1's sheet) */
+function pushPhoto(){Object.values(state.frames).forEach(fr=>{try{pushPacketTo(fr);}catch(e){}});}
+async function placePhoto(src,keep){const r=await cropPhoto(src);if(r===undefined){alert('That file is not a picture the browser can read.');return;}if(!r)return;
+  setPhoto(r.v);state.photoSrc=photoOk(state.photo)?(r.src||keep||''):'';pushPhoto();}
 $('#pPhotoBtn').addEventListener('click',()=>{
   if(!state.photo){$('#pPhotoFile').click();return;}
-  dialog('The student’s photo','<div class="ph-dlg"><img src="'+state.photo+'" alt="The student" class="ph-big"><p>Kept in the case file and shown on the bar and the crumb while you work; offered to Form IA-1’s respondent pages. It is not in the offline copy or in any link.</p><p><button type="button" class="primary" id="phChange">Change the photo</button> <button type="button" id="phDrop">Take it off</button></p></div>');
+  dialog('The student’s photo','<div class="ph-dlg"><img src="'+state.photo+'" alt="The student" class="ph-big"><p>Kept in the case file and shown on the bar and the crumb while you work; offered to Form IA-1’s respondent pages. It is not in the offline copy or in any link.</p><p><button type="button" class="primary" id="phChange">Change the photo</button> <button type="button" id="phAdjust">Adjust position</button> <button type="button" id="phDrop">Take it off</button></p></div>');
+  $('#phAdjust').addEventListener('click',()=>{const src=state.photoSrc||state.photo;$('#dlg').close();setTimeout(()=>placePhoto(src,state.photoSrc),0);});
   $('#phChange').addEventListener('click',()=>{$('#dlg').close();$('#pPhotoFile').click();});
-  $('#phDrop').addEventListener('click',()=>{$('#dlg').close();setPhoto('',true);wsUI.toast('The photo is off the case.');});
+  $('#phDrop').addEventListener('click',()=>{$('#dlg').close();setPhoto('',true);state.photoSrc='';pushPhoto();wsUI.toast('The photo is off the case.');});
 });
 $('#pPhotoFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
-  try{setPhoto(await photoFromFile(f));const ia=state.frames['IA-1'];if(ia)pushPacketTo(ia);}   /* the respondent pages take it at once */
-  catch(err){alert('That file is not a picture the browser can read.');}});
+  const url=URL.createObjectURL(f);try{await placePhoto(url);}finally{URL.revokeObjectURL(url);}});
 $('#pClient').addEventListener('input',()=>paintPhoto());
 new MutationObserver(()=>paintPhoto()).observe(document.body,{attributes:true,attributeFilter:['class']});   /* the crumb's photo follows has-form */
 paintPhoto();
