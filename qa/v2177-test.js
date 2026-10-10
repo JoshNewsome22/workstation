@@ -124,6 +124,6 @@ const CASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by more
   ok('2 Form QS-1 hands on each tier\'s words to say',qs&&typeof qs.say==='string'&&qs.say.length>3,qs);await qp.close();
   /* 10 the shell */
   const sh=fs.readFileSync(path.join(__dirname,'..','NBH-Workstation','index.html'),'utf8');
-  ok('10 the shell reads Form TV-1\'s facts (training) and shows the rehearsal steps on the case line',/'TV-1':'training'/.test(sh)&&/f\.training\)\);\}/.test(sh)&&/Rehearsal steps:/.test(sh),'');
+  ok('10 the shell reads Form TV-1\'s facts (training) and shows the rehearsal steps on the case line',/'TV-1':'training'/.test(sh)&&/\|\|f\.training\b/.test(sh)&&/Rehearsal steps:/.test(sh),'');
   ok('no errors',!errs.length,errs);
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});
