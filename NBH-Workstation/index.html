@@ -4470,7 +4470,7 @@ CL_ORDER.splice(CL_ORDER.indexOf('Decision')+1,0,'Assent');
 const clBkAt=()=>{try{return localStorage.getItem(CL_BK)||'';}catch(e){return '';}};
 const clBkDue=()=>{const t=clBkAt();return !t||(Date.now()-Date.parse(t))>7*864e5;};
 function clLinkOf(r){try{const d=parseCase(r.text),fm=d&&d.forms&&d.forms['DD-1'];if(!fm||!fm.snap||!fm.snap.own)return null;
-  const o=JSON.parse(fm.snap.own),g=o&&o.S&&o.S.gs;return g&&g.id?{d,fm,gs:g}:null;}catch(e){return null;}}
+  const o=JSON.parse(fm.snap.own),g=o&&(o.S||o).gs;return g&&g.id?{d,fm,gs:g}:null;}catch(e){return null;}}
 const clTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.tok')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
 const clGid=()=>{try{return localStorage.getItem('nbh.google.client')||'';}catch(e){return '';}};
 let clGsi=null;
