@@ -40,8 +40,8 @@ const stub=()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m
   await page.emulateMedia({media:'screen'});
   ok('1c on paper the letterhead is one slim line (logo 0.3 in, title 11 pt beside the form line) and a row a quarter inch; the blank-sheet bar does not print',
     pr.logo<=30&&pr.title==='14.6667px'&&pr.meta==='flex'&&pr.row<=24.5&&pr.bar==='none'&&pr.inc==='none',pr);
-  const back=await page.evaluate(()=>{document.getElementById('ddBlankBack').click();return {rows:document.querySelectorAll('#dataTable tbody tr').length,bar:document.getElementById('ddBlankNote').hidden};});
-  ok('1d Back to the data shows the record again',back.rows===20&&back.bar,back);
+  const back=await page.evaluate(()=>{document.getElementById('ddBlankBack').click();const n=document.getElementById('ddBlankNote');return {rows:document.querySelectorAll('#dataTable tbody tr').length,bar:n.hidden&&getComputedStyle(n).display==='none'};});
+  ok('1d Back to the data shows the record again, and the blank-sheet bar is gone from the screen',back.rows===20&&back.bar,back);
   const inc=await page.evaluate(async()=>{const b=orderedBehaviors()[0],d=S.rows[S.rows.length-1].date,was=num(S.rows.find(x=>x.date===d).values[b.id]);
     document.getElementById('ddIncAdd').click();const g=document.getElementById('dlgInc'),set=(k,v)=>{const e=g.querySelector(k);e.value=v;e.dispatchEvent(new Event('change',{bubbles:true}));};
     const tiers=[...g.querySelectorAll('#incTier option')].map(o=>o.textContent);
