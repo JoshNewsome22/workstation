@@ -1020,6 +1020,8 @@ table.pr-ddprev{min-width:600px}
     <h3 style="margin-top:12px">Also in the Review Period</h3>
     <p class="hint">Written from the case when it is empty: the incidents logged on Form DD-1, Form SM-1&rsquo;s point sheet, Form TI-1&rsquo;s observations and the behaviors at their aim, over Form DD-1&rsquo;s current condition. It follows the case until it is changed here.</p>
     <textarea data-m="alsoCase" rows="4" class="pr-line pr-also" aria-label="Also in the review period"></textarea>
+    <!-- v21.80 the student's assent marked on Form DD-1, beside the data it was collected under -->
+    <div id="prAssent" class="pr-assent" hidden></div>
 
     <h2 class="nbh-band" style="margin-top:16px">3. Is the Replacement Established?</h2>
     <table class="rt">
@@ -1095,6 +1097,8 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Monitoring after exit</th><td><textarea data-m="post" placeholder="e.g., rate checked monthly for one term, then at the annual review" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>What brings the plan back</th><td><textarea data-m="back" rows="2" placeholder="Stated as a threshold, so re-entry does not require a crisis first"></textarea></td></tr>
     </table>
+    <!-- v21.80 the maintenance probes Form DD-1 holds since the exit, and whether one is due -->
+    <div id="prProbes" class="pr-probes" hidden></div>
     <h3 style="margin-top:14px">Exit Readiness</h3>
     <div id="exitWrap"></div>
     <div id="exitVerdict"></div>
@@ -4064,6 +4068,44 @@ function prNextCheck(iso,every){if(!iso||!every)return '';const t=every.toLowerC
     const x={every,threshold:back,thresholdN:tn?+tn[1]:tw?PR_NUM[tw[1].toLowerCase()]:null};
     if(rv.decision==='exit'&&date){x.date=date;const nc=prNextCheck(date,every);if(nc)x.next=nc;}rv.exit=x;}
   o.review=rv;return o;};}
+
+/* v21.80 the case: in, two more parts of Form DD-1. assent {days, refused, withdrew, last10:{days, refused, withdrew},
+   list:[{date, mark}]}: a line under "Also in the review period" (and in its text when that is written from the case),
+   with a caution when the student refused or withdrew on 3 or more of the last 10 days marked. probes [{date, kind:
+   'gen'|'maint', setting}]: on the Fading and exit sheet, the maintenance probes since the exit recorded here and
+   whether one is due by the monitoring schedule. PR-1 has no field of its own for either, so nothing typed changes. */
+let prCase80=null;
+const prToday=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+const prEsc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function prAssentPart(a){if(!a||typeof a!=='object')return null;const l=a.last10&&typeof a.last10==='object'?a.last10:a;const k=Math.max(0,+l.days||0);if(!k)return null;
+  const r=Math.max(0,+l.refused||0),w=Math.max(0,+l.withdrew||0);
+  return {k,r,w,caution:r+w>=3,line:'Assent (Form DD-1): refused on '+r+' and withdrew on '+w+' of the last '+k+' day'+(k===1?'':'s')+' marked.'};}
+{const was=prAlsoText;prAlsoText=function(f){const t=was.apply(this,arguments);const a=f&&f.data?prAssentPart(f.data.assent):null;return a?(t?t+'\n':'')+a.line:t;};}
+function prAssentRender(){const el=document.getElementById('prAssent');if(!el)return;const d=prCase80&&prCase80.data,a=d?prAssentPart(d.assent):null;
+  if(!a){el.hidden=true;el.innerHTML='';return;}
+  const all=d.assent,inAlso=prT(S.meta.alsoCase).indexOf(a.line)>=0,L=(Array.isArray(all.list)?all.list:[]).filter(x=>x&&x.date&&x.mark&&!/^(?:yes|assent(?:ed)?|gave|given|\+)$/i.test(prT(x.mark))).slice(-10);
+  el.hidden=false;
+  el.innerHTML='<p class="hint'+(inAlso?' noprint':'')+'" style="margin:8px 0 4px"><b>'+prEsc(a.line)+'</b>'+(all.days&&all.last10?' Across all '+(+all.days)+' days marked: refused '+(+all.refused||0)+', withdrew '+(+all.withdrew||0)+'.':'')+
+    (L.length?' <span>'+L.map(x=>prEsc(prT(x.mark).toLowerCase())+' '+prEsc(prMd(prIso(x.date)||x.date))).join(', ')+'.</span>':'')+'</p>'+
+    (a.caution?'<div class="verdict v-mid"><b>Assent withdrawn or refused on '+(a.r+a.w)+' of the last '+a.k+' days marked.</b> Weigh this beside the data before judging the plan: ask what the student is avoiding (the demand, the procedure, the person, the setting) and whether the reinforcers still compete, and talk it through with the student and the team before continuing unchanged.</div>':'');}
+function prProbesRender(){const el=document.getElementById('prProbes');if(!el)return;const f=prCase80||{},m=S.meta||{};
+  const P=(Array.isArray(f.probes)?f.probes:[]).map(p=>p&&typeof p==='object'?Object.assign({},p,{iso:prIso(p.date)}):null).filter(p=>p&&p.iso).sort((a,b)=>a.iso<b.iso?-1:a.iso>b.iso?1:0);
+  const own=prT(m.dec),exitD=own?(PR_DEC[own]==='exit'?prIso(m.date):''):((f.review&&f.review.exit&&f.review.exit.date)||'');
+  if(!Array.isArray(f.probes)){el.hidden=true;el.innerHTML='';return;}
+  const one=p=>prEsc(prMd(p.iso))+(prT(p.setting)?' ('+prEsc(prT(p.setting))+')':'');let h='<h3 style="margin-top:14px">Maintenance Probes (Form DD-1)</h3>';
+  if(exitD){const M=P.filter(p=>p.kind==='maint'&&p.iso>=exitD),G=P.filter(p=>p.kind==='gen'&&p.iso>=exitD);
+    h+='<p class="hint" style="margin:4px 0">Since the exit on '+prEsc(prMd(exitD))+': '+(M.length?M.length+' maintenance probe'+(M.length===1?'':'s')+', '+M.map(one).join('; '):'no maintenance probe yet')+'.'+(G.length?' Generalization probes: '+G.map(one).join('; ')+'.':'')+'</p>';
+    const base=M.length?M[M.length-1].iso:exitD,every=prT(m.post),nx=prNextCheck(base,every),today=prToday();
+    h+=nx?(nx<=today?'<div class="verdict v-mid"><b>A maintenance probe is due</b> (due '+prEsc(prMd(nx))+' by the monitoring schedule, counted from '+(M.length?'the last probe':'the exit')+').</div>':'<p class="hint" style="margin:4px 0">Next maintenance probe due '+prEsc(prMd(nx))+' by the monitoring schedule.</p>')
+      :'<p class="hint" style="margin:4px 0">Write the monitoring after exit with a period (e.g., monthly) to see when the next probe is due.</p>';}
+  else{const M=P.filter(p=>p.kind==='maint'),G=P.filter(p=>p.kind==='gen');
+    h+='<p class="hint" style="margin:4px 0">No exit recorded on this review. Probes on Form DD-1: '+(P.length?M.length+' maintenance, '+G.length+' generalization; the latest '+one(P[P.length-1])+'.':'none.')+'</p>';}
+  el.hidden=false;el.innerHTML=h;}
+function prCase80Render(){try{prAssentRender();prProbesRender();}catch(e){}}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){prCase80=f||null;const r=was?was.apply(this,arguments):null;prCase80Render();return r;};}
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);prCase80Render();return r;};}
+document.addEventListener('input',e=>{if(prCase80&&e.target&&e.target.dataset&&/^(?:dec|date|post|alsoCase)$/.test(e.target.dataset.m||''))prCase80Render();});
+document.addEventListener('change',e=>{if(prCase80&&e.target&&e.target.dataset&&/^(?:dec|date|post)$/.test(e.target.dataset.m||''))prCase80Render();});
 </script>
 
 <script>
