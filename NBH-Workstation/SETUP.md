@@ -8468,3 +8468,47 @@ Checked by `qa/v2174-test.js` (27 checks).
     definition.
 
 Checked by `qa/v2175-test.js` (25 checks).
+
+### v21.76: Form DD-1 reads the team's Google Sheet
+
+The team's daily sheet (the Behavior-Charts template: one row per school day; a *(Total Per Day)* column for each
+count target; *Occurrences(+)*, *Opportunities* and *%* for each target scored out of opportunities; the definitions,
+measurement and observation length above them) now fills Form DD-1 and keeps it current, so nothing is copied by hand.
+
+- **How it reads.** On the *Daily data* tab, *Link a Google Sheet* asks for the sheet's link, signs in to Google as you
+  (read-only: `spreadsheets.readonly`), lists the sheet's tabs that have target columns (the "Reduction and
+  Acquisition TBx" tabs; the ABC and scatterplot tabs are left alone; hidden tabs too) with the targets and days found,
+  and *Link and read* takes them. Any number of targets is read (1 to 8 or more, a tab or several). The numbers go
+  from Google straight to the iPad; no other website, newsomebh.com included, sees them. The sign-in lasts an hour
+  (Google's rule) and is never saved in a file; after it, *Sign in to Google* on the bar reads again in one tap.
+- **The sheet wins.** Each reading writes the sheet's days into the record: a day the record already has takes the
+  sheet's numbers; a day it does not have is added. A target the record does not have becomes a row of its own, with
+  its kind (from the band above it: Reduction, Acquisition, Replacement), measurement and definition; a record not used
+  yet (no days, only the three example rows) takes the sheet's targets in their place. Cells the sheet wrote carry a
+  green underline. It reads again when the form opens and every five minutes while it is on screen.
+- **Set it aside.** *Use the sheet's data* off puts the record back as it was without the sheet: what was typed for
+  the sheet's days comes back and the days only the sheet had are taken out (the target rows stay, with their aims and
+  criteria). On again brings the sheet back. *Change* links another sheet or other tabs; *Unlink* takes the sheet out.
+- **Checks.** A sheet whose student (cell A1) shares no name with the record's student is not read until you say it is
+  the same student. A target the sheet scores one way and the record another, with the record's own numbers in it, is
+  left as the record has it and named on the bar. A record kept in intervals is not filled from daily totals.
+- **Where it works.** The workstation opened from its website (or installed from it). The one-file edition opened from
+  Files cannot sign in to Google.
+
+**Setting it up (once).** Google needs a sign-in key (an OAuth client ID) for the workstation's website:
+
+1. Go to console.cloud.google.com and sign in (with the district account if it may create projects; otherwise with a
+   personal Google account). Create a project, for example "NBH Workstation".
+2. *APIs & Services › Library*: find **Google Sheets API** and press *Enable*.
+3. *Google Auth Platform* (formerly *OAuth consent screen*): give the app a name and a support email. Audience:
+   *Internal* if the project belongs to the district's Google organization; otherwise *External*, and add your district
+   address under *Test users*. Under *Data access* add the scope `.../auth/spreadsheets.readonly`.
+4. *Clients › Create client › Web application*. Under *Authorized JavaScript origins* add `https://newsomebh.com`. Create,
+   and copy the **Client ID** (it ends in `.apps.googleusercontent.com`; it is not a secret).
+5. In Form DD-1: *Link a Google Sheet*, paste the Client ID (asked once on each device), paste the student's sheet link,
+   *Sign in and find the tabs*. Google may say it has not verified the app: it is your own; continue.
+6. If Google answers "Access blocked" or that your administrator has not approved the app, the district's IT can allow
+   it: *Admin console › Security › Access and data control › API controls › Manage third-party app access › Add app ›
+   OAuth App Name Or Client ID*, paste the Client ID, and set it to *Trusted* (or *Limited* to Google Sheets).
+
+Checked by `qa/v2176-test.js` (16 checks, with Google's sign-in and the Sheets API simulated).
