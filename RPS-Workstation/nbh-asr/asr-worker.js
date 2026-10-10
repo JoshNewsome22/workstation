@@ -16,7 +16,8 @@ self.onmessage = function (e) {
         catch (err) { self.postMessage({t: 'error', m: String(err && err.message || err)}); }
       }
     };
-    try { importScripts('sherpa-onnx-asr.js', 'sherpa-onnx-wasm-main-asr.js'); }
+    /* v21.78 the page hands the two scripts as blob URLs it keeps on the device (offline); else from beside this file */
+    try { if (d.libs && d.libs.length === 2) importScripts(d.libs[0], d.libs[1]); else importScripts('sherpa-onnx-asr.js', 'sherpa-onnx-wasm-main-asr.js'); }
     catch (err) { self.postMessage({t: 'error', m: String(err && err.message || err)}); }
   } else if (d.t === 'audio' && st) {
     st.acceptWaveform(16000, d.s);

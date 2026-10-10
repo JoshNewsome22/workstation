@@ -3425,6 +3425,28 @@ $('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clea
 window.addEventListener('beforeprint',()=>{renderGrid();renderVitals();renderEpsVerdict();renderReport();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 restore({counts:{}});
+/* v21.78 the case: In. The medications Form DM-1 lists go into the empty medication cards (matched to the library by
+   generic or brand name, else entered as Other with the name as prescribed; a card is added up to the form's 6), the
+   prescriber, the health conditions and allergies as the medical history, and the first target behavior of Form TB-1
+   as the BIP target tracked alongside, each only where the field is empty; then the shared fill. */
+const msTok=s=>String(s||'').toLowerCase().split(/[^a-z]+/).filter(w=>w.length>2&&!/^(er|xr|cr|sr|la|xl|otc|and|enter|manually|other)$/.test(w));
+const msLib=name=>{const t=msTok(name)[0];if(!t)return -1;return MEDS.findIndex((x,k)=>k<MEDS.length-1&&(msTok(x.n).includes(t)||msTok(x.b).includes(t)));};
+window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
+ const put=(k,v)=>{const e=document.querySelector('[name="'+k+'"]');v=String(v==null?'':v).trim();if(!e||!v||String(e.value||'').trim())return false;e.value=v;last=e;n++;return true;};
+ const H=(f.profile&&f.profile.health)||{};
+ put('m.doc',H.prescriber);
+ const al=String(H.allergies||'').trim();put('m.hx',[String(H.conditions||'').trim(),al?'Allergies: '+al:''].filter(Boolean).join('; '));
+ const b=(f.behaviors||[]).find(x=>x&&x.label);if(b)put('m.bip',b.label);
+ const have=medList().map(m=>m.name.toLowerCase()),haveT=new Set(medList().map(m=>msTok(m.name)[0]).filter(Boolean)),medsIn=[];
+ (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim())return;const t=msTok(m.name)[0];if(have.includes(String(m.name).trim().toLowerCase())||(t&&haveT.has(t)))return;medsIn.push(m);if(t)haveT.add(t);});
+ const emptyCard=i=>['lib','name','dose','start','change'].every(k=>!val(`md[${i}].${k}`));
+ medsIn.forEach(m=>{let i=$$('#medWrap .card').map(c=>+c.dataset.med).find(emptyCard);
+  if(i==null){const e=$('#nMed');if(+e.value>=+e.max)return;e.value=+e.value+1;renderMeds();i=+e.value-1;}
+  const k=msLib(m.name);setv(`md[${i}].lib`,String(k>=0?k:MEDS.length-1));if(k<0)setv(`md[${i}].name`,String(m.name).trim());renderMedInfo(i);
+  setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;});
+ if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+ let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
+ return {filled:n+(g&&g.filled||0),note:n?'Medications, prescriber and history from Form DM-1':''};};
 })();
 </script>
 
@@ -4423,6 +4445,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -4576,6 +4608,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

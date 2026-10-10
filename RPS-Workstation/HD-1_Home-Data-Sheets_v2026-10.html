@@ -975,6 +975,7 @@ td input,td select{max-width:100%}
       <div><label>Sheets that came back</label><div class="ckrow"><label class="ck"><input type="checkbox" data-w="r_tally"> Tally</label><label class="ck"><input type="checkbox" data-w="r_check"> Checklist</label><label class="ck"><input type="checkbox" data-w="r_abc"> ABC notes</label><label class="ck"><input type="checkbox" data-w="r_sleep"> Sleep log</label></div></div>
       <div><label>ABC notes returned (count)</label><input data-w="n_abc" placeholder="0"></div>
       <div><label>Nights logged on the sleep sheet</label><input data-w="n_sleep" placeholder="0"></div>
+      <!-- v21.78 the week's dates, for the case (Form PR-1, the team) --><div class="hd-dates" style="grid-column:1/-1"><label>This week&rsquo;s sheets: the dates</label><div class="ckrow"><label class="ck">Sent home <input type="date" data-w="sent" aria-label="Date the sheets were sent home"></label><label class="ck">Due back <input type="date" data-w="due" aria-label="Date the sheets are due back"></label><label class="ck">Came back <input type="date" data-w="back" aria-label="Date the sheets came back"></label></div></div>
       <div style="grid-column:1/-1"><label>Note on the sheets returned (completeness, who filled them, anything the family said)</label><input data-w="note"></div>
     </div>
     <div class="grid-wrap"><table class="rt wide" id="entTbl"></table></div>
@@ -3016,7 +3017,7 @@ const ABC_C=['Got what they wanted','Got out of the task','Got attention or talk
 /* ---------------- state ---------------- */
 function blank(){return{meta:{},chk:{tally:true,check:true,abc:false,sleep:false},bh:[],rt:[],sk:[],wk:[],ag:[]};}
 let S=blank(),curWk=0;
-const newWeek=()=>({start:'',r_tally:false,r_check:false,r_abc:false,r_sleep:false,n_abc:'',n_sleep:'',note:'',cells:{}});
+const newWeek=()=>({start:'',sent:'',due:'',back:'',r_tally:false,r_check:false,r_abc:false,r_sleep:false,n_abc:'',n_sleep:'',note:'',cells:{}});
 function ensure(){
   ['bh','rt','sk','wk','ag'].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[];});
   if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||typeof S.chk!=='object')S.chk={};
@@ -3285,7 +3286,7 @@ function fromFile(d){
   o.bh=arr('bh',['name','ex','nex','ms','todo'],6);o.bh.forEach(b=>{if(!MEAS[b.ms])b.ms='tally';});
   o.rt=arr('rt',['label','time','on','note'],10);o.sk=arr('sk',['label','who','rt'],12);o.sk.forEach(k=>{if(k.who!=='Child')k.who='Adult';});
   o.ag=arr('ag',['date','rt','bh','staff','home','note'],200);
-  o.wk=Array.isArray(s.wk)?s.wk.slice(0,26).map(x=>{const w=newWeek();if(!x||typeof x!=='object')return w;['start','n_abc','n_sleep','note'].forEach(f=>{w[f]=str(x[f]);});['r_tally','r_check','r_abc','r_sleep'].forEach(f=>{w[f]=!!x[f];});
+  o.wk=Array.isArray(s.wk)?s.wk.slice(0,26).map(x=>{const w=newWeek();if(!x||typeof x!=='object')return w;['start','n_abc','n_sleep','note'].forEach(f=>{w[f]=str(x[f]);});['sent','due','back'].forEach(f=>{const v=str(x[f]);w[f]=/^\d{4}-\d{2}-\d{2}$/.test(v)?v:'';});['r_tally','r_check','r_abc','r_sleep'].forEach(f=>{w[f]=!!x[f];});
     if(x.cells&&typeof x.cells==='object'&&!Array.isArray(x.cells))Object.keys(x.cells).forEach(k=>{if(/^b\d+_r\d+_d[0-6]$/.test(k))w.cells[k]=str(x.cells[k]);});return w;}):[];
   return o;
 }
@@ -3326,7 +3327,7 @@ async function loadSim(){
   S.sk=[{label:'Show the picture schedule before the routine starts',who:'Adult',rt:''},{label:'Let Sam choose which part to do first',who:'Adult',rt:'2'},{label:'Set the timer: 10 minutes of work, then a 3-minute break',who:'Adult',rt:'2'},{label:'Ask for a break with the card or the words “break please”',who:'Child',rt:''},{label:'Praise within a minute of starting a step',who:'Adult',rt:''},{label:'Same order every night: bath, pajamas, two books, lights out',who:'Adult',rt:'3'}];
   const hit=[[2,3,4,2,3,1,2],[1,2,2,1,2,1,0],[0,1,1,0,1,0,0]],tan=[[15,25,30,10,20,5,12],[8,12,10,6,9,0,4],[0,6,4,0,3,0,0]],bed=[[2,3,2,1,2,3,2],[2,2,1,1,2,2,1],[1,2,1,0,1,2,1]];
   const split=(n,parts)=>{const o=parts.map(()=>0);let k=0;for(let i=0;i<n;i++){o[parts[k%parts.length]]++;k++;}return o;};
-  S.wk=[0,1,2].map(wi=>{const w=newWeek();w.start=Y(mon(3-wi));w.r_tally=true;w.r_check=wi<2;w.r_abc=wi===0;w.r_sleep=true;w.n_abc=wi===0?'4':'';w.n_sleep=String([7,6,7][wi]);
+  S.wk=[0,1,2].map(wi=>{const w=newWeek();w.start=Y(mon(3-wi));w.sent=nbhHdIso(off(mon(3-wi),-3));w.due=nbhHdIso(off(mon(3-wi),4));w.back=nbhHdIso(off(mon(3-wi),wi===1?7:4));w.r_tally=true;w.r_check=wi<2;w.r_abc=wi===0;w.r_sleep=true;w.n_abc=wi===0?'4':'';w.n_sleep=String([7,6,7][wi]);
     w.note=['Full week; ABC notes for the four worst moments, all at homework or bedtime','Checklist back with Thursday blank (late pickup); Sunday outing not marked','Checklist not sent (dropped by agreement); tally and sleep log full'][wi];
     for(let di=0;di<7;di++){const skipOut=(di===1||di===3||di===4);const parts=skipOut?[2,3,0]:[2,3,4,0];const h=split(hit[wi][di],parts);
       [0,1,2,3,4].forEach(ri=>{if(ri===4&&skipOut)return;if(ri===1&&wi===1&&di===3)return;w.cells[cellKey(0,ri,di)]=String(h[ri]||0);
@@ -3355,6 +3356,29 @@ window.__nbhFactsPick=function(sel){
   sel.goals.acq.forEach(g=>{if(S.bh.some(x=>x.name===g.beh))return;S.bh.push({name:g.beh,ex:g.cond?'given '+g.cond:'',nex:'',ms:'yn',todo:''});n++;});
   if(n)renderAll();return {filled:n};
 };
+
+/* v21.78 the home data for the case (Form DD-1 brings the days in as a home series; the review reads the dates): each
+   sheet sent, with the week's Sent home / Due back / Came back dates, and every day total the family wrote, dated from
+   the week's Monday. Nothing typed in: null. */
+const nbhHdIso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function nbhHdMon(t){t=String(t||'').trim();let d=null,m;
+  if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(t)))d=new Date(+m[1],+m[2]-1,+m[3],12);
+  else if((m=/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2}|\d{4}))?$/.exec(t))){const y=m[3]?(m[3].length===2?2000+(+m[3]):+m[3]):new Date().getFullYear();d=new Date(y,+m[1]-1,+m[2],12);}
+  if(!d||isNaN(d)||d.getMonth()!==((m&&m[1].length===4)?+m[2]-1:+m[1]-1))return null;d.setDate(d.getDate()-((d.getDay()+6)%7));return d;}
+const NBH_HD_UNIT={tally:'times',dur:'minutes',rate:'rating 0 to 3',yn:'routines with a yes'};
+window.__nbhFactsOut=function(){try{ensure();
+  const names={tally:'Tally sheet',check:'Routine checklist',abc:'ABC notes',sleep:'Sleep log'},asked=['tally','check','abc','sleep'].filter(k=>S.chk[k]);
+  const sheets=[],data=[],D=dayIdx();
+  S.wk.forEach((w,wi)=>{const mon=nbhHdMon(w.start),iso=mon?nbhHdIso(mon):'',used=iso||w.sent||w.due||w.back||Object.keys(w.cells).some(k=>String(w.cells[k]).trim()!=='');if(!used)return;
+    const anyBack=['r_tally','r_check','r_abc','r_sleep'].some(k=>w[k]);
+    asked.forEach(k=>{const o={name:names[k]+(w.start?' · week of '+w.start:' · week '+(wi+1)),kind:k};if(iso)o.week=iso;if(w.sent)o.sent=w.sent;if(w.due)o.due=w.due;
+      const came=!!w['r_'+k]||(!anyBack&&!!w.back);if(came&&w.back)o.back=w.back;o.returned=came;sheets.push(o);});
+    if(!mon)return;
+    S.bh.forEach((b,bi)=>{if(!b.name)return;D.forEach(di=>{const t=dayTotal(w,bi,di);if(t.v==null)return;const d=new Date(mon);d.setDate(d.getDate()+di);
+      const r={date:nbhHdIso(d),beh:b.name,value:Math.round(t.v*100)/100,unit:NBH_HD_UNIT[b.ms]||'',measure:b.ms};if(b.ms==='yn')r.of=t.n;data.push(r);});});});
+  if(!sheets.length&&!data.length){if(!S.bh.some(b=>b.name)||!asked.length)return null;asked.forEach(k=>sheets.push({name:names[k],kind:k}));}
+  return {home:{sheets,data,src:'HD-1'}};
+}catch(e){return null;}};
 </script>
 
 <script>
@@ -4352,6 +4376,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -4505,6 +4539,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

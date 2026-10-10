@@ -3902,6 +3902,36 @@ $('#clearBtn').addEventListener('click',async()=>{if(!(await nbhUI.confirm('Clea
 window.addEventListener('beforeprint',()=>{$$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));$$('input[type=date]').forEach(e=>e.classList.toggle('rr-nodate',!e.value));refresh();$$('textarea').forEach(t=>{t.style.height='auto';t.style.height=(t.scrollHeight+4)+'px';});});
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 restore({counts:{}});
+/* v21.78 the case: hooks. In: the consent date from Form IC-1 and the health record from Form DM-1 (the medications into the
+   empty rows of the medications table, the health conditions and allergies, the prescriber, the IEP and reevaluation dates),
+   each only where this form's field is empty; the target behavior and function by the shared fill. Out: the records part,
+   from the removal-day ledger (this school year's counted removal days, its rows, whether 10 days are reached), the
+   manifestation determination date, the IEP and reevaluation dates and the consent date this form records. */
+const rrISO=v=>{v=String(v||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(v);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v);return m?m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
+ const put=(k,v)=>{const e=document.querySelector('[name="'+k+'"]');v=String(v==null?'':v).trim();if(!e||!v||String(e.value||'').trim())return;if(e.type==='date'){v=rrISO(v);if(!v)return;}e.value=v;last=e;n++;};
+ const c=f.consent||{};put('h.consent',c.date||c.parent);
+ const P=f.profile||{},H=P.health||{},D=P.dates||{};
+ const al=String(H.allergies||'').trim(),cond=[String(H.conditions||'').trim(),al?'Allergies: '+al:''].filter(Boolean).join('; ');put('m.cond',cond);
+ if(H.prescriber)put('s.outside','Prescriber (psychiatry / neurology): '+H.prescriber);
+ const have=new Set($$('[name$="].n"]').filter(e=>/^md\[/.test(e.name)).map(e=>String(e.value||'').trim().toLowerCase()).filter(Boolean));
+ (Array.isArray(H.meds)?H.meds:[]).filter(m=>m&&m.name&&!have.has(String(m.name).trim().toLowerCase())).forEach(m=>{
+  for(let i=0;i<4;i++){const ne=document.querySelector('[name="md['+i+'].n"]');if(!ne||String(ne.value||'').trim())continue;
+   if(['dose','start','chg','fx'].some(k=>{const e=document.querySelector('[name="md['+i+'].'+k+'"]');return e&&String(e.value||'').trim();}))continue;
+   put('md['+i+'].n',m.name);put('md['+i+'].dose',[m.dose,m.times].filter(Boolean).join(' / '));have.add(String(m.name).trim().toLowerCase());break;}});
+ put('i.iepdate',D.iepHeld);put('i.annual',D.iep);put('i.reeval',D.reeval);
+ if(last){refresh();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+ let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
+ return {filled:n+(g&&g.filled||0),note:n?'Consent and health record from the case':''};};
+window.__nbhFactsOut=function(){try{const C=lgCompute(),E=1e-9,cy=lgSY(ymd(new Date()));
+ const o=C.years.find(y=>y.y===cy),rows=C.rows.filter(x=>x.by[cy]>E||x.sy===cy);
+ const list=rows.map(x=>{const it={date:x.r.s,days:Math.round((x.by[cy]!=null?x.by[cy]:x.days)*100)/100,kind:lgLab(LG_TYPES,x.r.t)||''};if(x.r.e&&x.r.e!==x.r.s)it.to=x.r.e;it.counted=LG_CNT[x.r.c]||'';return it;});
+ const days=o?Math.round(o.counted*100)/100:0,R={};
+ if(list.length)R.removals={days,list,at10:days>=10-E,year:lgSYL(cy)};
+ const yz=Object.keys(LG.yr).sort().reverse(),Z=LG.yr[cy]&&LG.yr[cy].md?LG.yr[cy]:(yz.map(y=>LG.yr[y]).find(z=>z&&z.md)||null);
+ if(Z&&Z.md){R.mdr=Z.md;if(Z.mv)R.mdrResult=Z.mv==='yes'?'manifestation':'not a manifestation';}
+ const iep=val('i.annual')||val('i.iepdate');if(iep)R.iep=iep;if(val('i.reeval'))R.reeval=val('i.reeval');if(val('h.consent'))R.consent=val('h.consent');
+ return Object.keys(R).length?{records:R}:null;}catch(e){return null;}};
 })();
 </script>
 
@@ -4900,6 +4930,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5053,6 +5093,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

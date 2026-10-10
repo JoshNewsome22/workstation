@@ -3534,6 +3534,22 @@ async function loadSim(){
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+/* v21.78 the case: In. The consent date from Form IC-1; the protocol steps of Form TV-1 (each step and whether it is
+   critical) when this form's step list is still empty and uncoded; the reinforcer menu of Form PA-1 offered as the
+   reinforcers at home, marked to be checked with the family. Each only where the field is empty; then the shared fill
+   (target behavior and function), which this form relied on before. */
+window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
+  const dm=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'').trim();};
+  const meta=(k,v)=>{v=String(v==null?'':v).trim();if(!v||String(S.meta[k]==null?'':S.meta[k]).trim())return;const el=$('[data-m="'+k+'"]');if(el&&String(el.value||'').trim())return;S.meta[k]=v;last=el||last;n++;};
+  const c=f.consent||{},cd=c.date||c.parent;if(cd)meta('consent',dm(cd)+' (Form IC-1'+(c.parent&&c.parent!==cd?'; parent signed '+dm(c.parent):'')+')');
+  const menu=(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP').slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
+  if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
+  const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
+  let steps=false;
+  if(T.length&&S.steps.every(x=>!String(x.d||'').trim())&&!Object.keys(S.cells||{}).some(k=>S.cells[k])){S.steps=T.map(x=>({d:String(x.d).trim(),crit:!!x.crit}));n+=T.length;steps=true;}
+  if(n){renderAll();const el=last||$('#stepTbl [data-s="0"]')||$('[data-m]');try{if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
+  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
+  return {filled:n+(g&&g.filled||0),note:steps?'Protocol steps from Form TV-1':''};};
 </script>
 
 <script id="rr-run">
@@ -5019,6 +5035,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5172,6 +5198,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>
