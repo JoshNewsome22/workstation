@@ -535,7 +535,21 @@ main{flex:1;display:flex;min-height:0}
 /* ---- the list of forms ---- */
 nav.rail{width:var(--rail);flex:0 0 var(--rail);background:#fff;border-right:1px solid var(--rule);
   overflow-y:auto;display:flex;flex-direction:column}
-.railhead{padding:10px 10px 10px 14px;border-bottom:1px solid var(--rule);background:#fff;font-size:12px;color:var(--muted);line-height:1.45}
+/* v21.78 the Packet row pinned at the top of the scrolling list, the section headings under it */
+.rh-top{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:8px;padding:8px 8px 6px 14px;background:#fff;flex:none}
+.rh-top b{color:var(--navy);font-family:var(--serif);font-size:16px;font-weight:600}.rh-top .sp{flex:1}
+.rh-top #railHide{min-height:36px;min-width:40px;padding:4px 8px;color:var(--muted);border-color:transparent;background:none}
+.rh-top #railHide:hover{background:var(--mist);color:var(--navy);border-color:var(--rule2)}
+nav.rail .stage{top:50px}
+main{position:relative}
+.rail-edge{display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:30;width:22px;height:72px;padding:0;align-items:center;justify-content:center;
+  background:#fff;color:var(--navy);border:1px solid var(--rule2);border-left:0;border-radius:0 10px 10px 0;box-shadow:0 2px 10px rgba(24,46,67,.18);cursor:pointer}
+.rail-edge:hover{background:var(--mist)}
+@media (min-width:1180.02px){body.rail-hidden .rail-edge{display:flex}}
+@media (max-width:1180px){body:not(.rail-open) .rail-edge{display:flex}}
+body.ws-full .rail-edge{display:none!important}
+@media print{.rail-edge{display:none!important}}
+.railhead{padding:2px 10px 10px 14px;border-bottom:1px solid var(--rule);background:#fff;font-size:12px;color:var(--muted);line-height:1.45}
 .railhead .rh-row{display:flex;align-items:center;gap:8px;margin-bottom:2px}
 .railhead .rh-row b{color:var(--navy);font-family:var(--serif);font-size:16px;font-weight:600}
 .railhead .rh-row .sp{flex:1}
@@ -894,9 +908,10 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
 
 <main>
   <nav class="rail" id="railNav" aria-label="Forms in this packet">
+    <!-- v21.78 the Packet row and its Hide button stay pinned at the top of the list as it scrolls -->
+    <div class="rh-row rh-top"><b>Packet</b><span class="sp"></span>
+        <button id="railHide" class="sm icon" title="Hide the list of forms (or swipe the list to the left)" aria-label="Hide the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11M11.5 6.5 10 8l1.5 1.5"/></svg></button></div>
     <div class="railhead">
-      <div class="rh-row"><b>Packet</b><span class="sp"></span>
-        <button id="railHide" class="sm icon" title="Hide the list of forms" aria-label="Hide the list of forms"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M6 2.5v11M11.5 6.5 10 8l1.5 1.5"/></svg></button></div>
       <button id="railFind" class="find" title="Find a form or run a command (Ctrl K)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg><span>Find a form or command&hellip;</span><kbd>&#8984;K</kbd></button>
       Tick a form to include it in the master print. <span id="tickCount">0 of 45 ticked</span>.
       <div class="rh-tools">
@@ -944,6 +959,8 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     </div>
   </section>
   <div class="rail-scrim" id="railScrim" hidden></div>
+  <!-- v21.78 with the list put away: a tab on the left edge brings it back (a tap, or a swipe to the right) -->
+  <button type="button" id="railEdge" class="rail-edge" aria-label="Show the list of forms" title="Show the list of forms (or swipe right)"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
 </main>
 
 <div class="pal-back" id="palBack"></div>
@@ -1164,6 +1181,16 @@ $('#railToggle').addEventListener('click',()=>{
 });
 $('#railHide').addEventListener('click',()=>{ if(NARROW.matches)setRail(false,true); else setRailHidden(true,true); });
 $('#railFind').addEventListener('click',()=>palOpen());
+/* v21.78 the list by touch: a swipe to the left on it puts it away; the tab on the left edge (a tap, or a swipe to the right
+   on it) brings it back */
+function railShowNow(){if(NARROW.matches)setRail(true,false);else setRailHidden(false,false);}
+function railSwipe(el,dir,fn){let x0=null,y0=0,t0=0;
+  el.addEventListener('touchstart',e=>{const t=e.touches[0];if(!t||e.touches.length>1){x0=null;return;}x0=t.clientX;y0=t.clientY;t0=Date.now();},{passive:true});
+  el.addEventListener('touchend',e=>{if(x0===null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;
+    if(Math.abs(dx)>=60&&Math.abs(dx)>Math.abs(dy)*1.5&&Date.now()-t0<800&&Math.sign(dx)===dir)fn();},{passive:true});}
+railSwipe($('#railNav'),-1,()=>{if(NARROW.matches)setRail(false,false);else setRailHidden(true,false);});
+railSwipe($('#railEdge'),1,railShowNow);
+$('#railEdge').addEventListener('click',railShowNow);
 $('#railShow').addEventListener('click',()=>{ if(NARROW.matches)setRail(true,true); else setRailHidden(false,true); });
 if(railHidden())document.body.classList.add('rail-hidden');
 if(!NARROW.matches)$('#railToggle').setAttribute('aria-expanded',String(!railHidden()));
