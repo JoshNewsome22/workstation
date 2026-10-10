@@ -3603,6 +3603,19 @@ $('#simBtn').addEventListener('click',loadSim);
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+
+/* v21.78 the case: in. The form kept the shared fill, and "How a disruption or an on-task check is defined" takes the
+   definitions of the target behaviors Form TB-1 defines (each as its name and definition) when it is empty. Nothing
+   typed is replaced. */
+(function(){const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
+  if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  const v=(f.behaviors||[]).filter(b=>b&&!b.isRep&&String(b.label||'').trim()&&String(b.def||'').trim()).slice(0,4).map(b=>String(b.label).trim()+': '+String(b.def).trim().replace(/[.;\s]+$/,'')).join('; ');
+  const el=document.querySelector('[data-m="b_def"]');
+  if(el&&v&&!String(el.value||'').trim()&&!String(S.meta.b_def||'').trim()){el.value=v;S.meta.b_def=v;el.dispatchEvent(new Event('input',{bubbles:true}));k++;}
+  if(k)try{renderAll();}catch(e){}
+  return {filled:n+k,note:k?'the definitions from Form TB-1':((r&&r.note)||'')};};
+})();
 </script>
 
 <script>

@@ -3621,6 +3621,23 @@ renderAll();
 </script>
 
 <script>
+/* v21.78 the case: in. The form kept the shared fill (the target behavior), and the operational definition comes from
+   Form TB-1 when it is empty: the definition of the behavior named here, else of the first target behavior. Nothing
+   typed is replaced. */
+(function(){
+const pickB=(bs,cur)=>{bs=(bs||[]).filter(b=>b&&String(b.label||'').trim());const c=String(cur||'').trim().toLowerCase(),L=b=>String(b.label).trim().toLowerCase();
+  return (c&&bs.find(b=>c===L(b)||c.indexOf(L(b))===0))||bs.find(b=>!b.isRep)||bs[0]||null;};
+const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
+  if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  const b=pickB(f.behaviors,S.meta.beh),v=b?String(b.def||'').trim():'',el=document.querySelector('[data-m="def"]');
+  if(el&&v&&!String(el.value||'').trim()&&!String(S.meta.def||'').trim()){el.value=v;S.meta.def=v;el.dispatchEvent(new Event('input',{bubbles:true}));k++;}
+  if(k)try{renderAll();}catch(e){}
+  return {filled:n+k,note:k?'the definition from Form TB-1':((r&&r.note)||'')};};
+})();
+</script>
+
+<script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
    identifiers get retyped into every one. This adds a small shared file that

@@ -3045,6 +3045,8 @@ function newBeh(){return{lab:'',def:'',dim:'',base:'',fn:'',sub:'',lod:'',se:'',
   desired:'',desCons:'',alt:'',altCons:'',rationale:'',notes:''};}
 const tierOf=m=>{const r=METHODS.find(x=>x[0]===m);return r?r[2]:0;};
 const formOf=m=>{const r=METHODS.find(x=>x[0]===m);return r?r[1]:'';};
+/* v21.78 a row's form: the form written on it (a row placed from the case names its own, e.g. IN-1 or OB-1, which share a method with IA-1 and ABC-1), else its method's */
+const rowForm=r=>String(r&&r.form||'').trim()||formOf(r&&r.method);
 
 function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -3053,7 +3055,7 @@ $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.datase
 function renderSrc(){
   const opt=(arr,v)=>arr.map(o=>{const t=Array.isArray(o)?o[0]:o;return `<option${t===v?' selected':''}>${t}</option>`;}).join('');
   $('#srcTbl tbody').innerHTML=S.src.map((r,i)=>`<tr>
-    <td style="text-align:center;font-family:var(--sans);font-size:11.5px">${esc(formOf(r.method))||'&mdash;'}</td>
+    <td style="text-align:center;font-family:var(--sans);font-size:11.5px">${esc(rowForm(r))||'&mdash;'}</td>
     <td><select data-i="${i}" data-f="method">${opt(METHODS,r.method)}</select></td>
     <td><input data-i="${i}" data-f="dates"value="${esc(r.dates)}"></td>
     <td><input data-i="${i}" data-f="who" value="${esc(r.who)}"></td>
@@ -3100,7 +3102,7 @@ $('#hypTbl').addEventListener('click',async e=>{const b=e.target.closest('button
      function that no source supports is never the one reported. */
 const UNK=FN[5],SUP=['Strong','Moderate','Weak'],SETS=['Strong','Moderate'];
 const rankFn=(a,b)=>((a.tier||9)-(b.tier||9))||(b.strong-a.strong)||(b.n-a.n);
-const formsOf=a=>esc([...new Set(a.map(r=>formOf(r.method)||'?'))].join(', '));
+const formsOf=a=>esc([...new Set(a.map(r=>rowForm(r)||'?'))].join(', '));
 function convergence(){
   const rec=S.src.filter(r=>r.method);
   const fa=rec.filter(r=>tierOf(r.method)>0&&r.fn&&(r.fn===UNK||r.str));
@@ -3110,7 +3112,7 @@ function convergence(){
     const set=sup.filter(r=>SETS.includes(r.str)).map(r=>tierOf(r.method));
     return {fn:f,n:sup.length,strong:sup.filter(r=>r.str==='Strong').length,
       tier:set.length?Math.min(...set):null,weak:sup.length?Math.min(...sup.map(r=>tierOf(r.method))):null,
-      con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,srcs:sup.map(r=>formOf(r.method)||'?')};
+      con:used.filter(r=>r.fn===f&&r.str==='Contradicts').length,srcs:sup.map(r=>rowForm(r)||'?')};
   }).filter(r=>r.n||r.con).sort(rankFn);
   return {rec,fa,used,rows,noFn:fa.filter(r=>r.fn===UNK),notFn:rec.filter(r=>!tierOf(r.method))};
 }
@@ -3319,7 +3321,7 @@ function renderReport(){
   if(m.referral)h+=`<h3>Referral question</h3><p>${esc(m.referral)}</p>`;
   h+=`<h3>Methods</h3>`;
   const used=S.src.filter(r=>r.method);
-  h+= used.length?`<p>${used.map(r=>esc(r.method)+(formOf(r.method)?' (Form '+formOf(r.method)+')':'')+(r.dates?', '+esc(r.dates):'')).join('; ')}.</p>`
+  h+= used.length?`<p>${used.map(r=>esc(r.method)+(rowForm(r)?' (Form '+esc(rowForm(r))+')':'')+(r.dates?', '+esc(r.dates):'')).join('; ')}.</p>`
     :'<p class="hint">No assessment methods recorded.</p>';
   if(m.settings)h+=`<p>Data were collected across ${nod(m.settings)}.</p>`;
   if(m.notassessed)h+=`<p>The following were not sampled and the conclusions do not extend to them: ${nod(m.notassessed)}.</p>`;
@@ -3657,7 +3659,7 @@ function bipText(){
       E.second?E.second.fn+' is supported by '+E.second.n+' source'+(E.second.n===1?'':'s')+', '+(E.second.n>E.top.n?'more than':'as many as')+' this function'+(reduced?', and the level has been reduced for that reason':'')+'.':'');}
   else if(E.nRec)L.push('No function is supported by a source that assessed function, so no level of evidence can be derived.');
   B.push(L);
-  B.push(['SOURCES OF EVIDENCE'].concat(S.src.filter(r=>r.method).map(r=>'- '+r.method+(formOf(r.method)?' (Form '+formOf(r.method)+')':'')+(bipTxt(r.dates)?', '+bipTxt(r.dates):'')+(bipTxt(r.who)?', '+bipTxt(r.who):'')+
+  B.push(['SOURCES OF EVIDENCE'].concat(S.src.filter(r=>r.method).map(r=>'- '+r.method+(rowForm(r)?' (Form '+rowForm(r)+')':'')+(bipTxt(r.dates)?', '+bipTxt(r.dates):'')+(bipTxt(r.who)?', '+bipTxt(r.who):'')+
     (bipTxt(r.contrib)?': '+bipTxt(r.contrib):'')+(r.fn?' Function supported: '+r.fn+(r.str?' ('+r.str.toLowerCase()+')':'')+'.':''))));
   B.push(['HYPOTHESES CONSIDERED'].concat(S.hyp.filter(x=>bipTxt(x.h)).map(x=>'- '+bipTxt(x.h)+': '+(x.out||'outcome not recorded')+'.'+(bipTxt(x.how)?' Tested: '+bipTxt(x.how):'')+(bipTxt(x.what)?' Result: '+bipTxt(x.what):''))));
   B.push(['RECOMMENDATION'].concat(S.beh.filter(b=>bipTxt(b.alt)).map((b,i)=>'- '+(bipTxt(b.lab)||'Target '+(i+1))+'. Alternative behavior to teach: '+plain(b.alt)+'. Consequence it should produce: '+plain(b.altCons||b.cons||'the same consequence as the problem behavior')+'. Antecedent to address: '+(b.ant?plain(b.ant):'[antecedent]')+'.'),
@@ -6468,6 +6470,45 @@ a{text-underline-offset:2px}
   window.addEventListener('load', function () { pagenav(); pnUpdate(); });
   window.nbhPolish = { run: run, plain: plain };
 })();
+</script>
+<script id="v2178-ev">
+"use strict";
+/* v21.78 the FBA chain, in: each assessment's result reaches the evidence table, where it was retyped by hand. A row per
+   form of f.evidence (IA-1, IN-1, OB-1, SP-1, ABC-1, VI-1, EA-1), into an empty row (a new one when none is left), never for
+   a form already listed (a row whose form is that form, or whose text names it); the method is the table's own method for
+   that form, the function and strength the table's own choices for the form's result. "Consent obtained (Form IC-1)" from
+   Form IC-1 when empty. The statements of IA-1, OB-1 and EA-1 are offered into empty rows of "Hypotheses Tested and Set
+   Aside" (the outcome is left to you). Nothing typed is changed. A short message says what was placed. */
+const fsEvOrder=['IA-1','IN-1','OB-1','SP-1','ABC-1','VI-1','EA-1'];
+const fsEvUnit={'IA-1':'informants','IN-1':'interviews','OB-1':'observations','SP-1':'days','ABC-1':'incidents','VI-1':'occurrences','EA-1':'sessions'};
+function fsEvMethod(id,e){const m=String(e.method||'');
+  if(id==='EA-1')return /trial|iisca|synthes/i.test(m)?METHODS[2][0]:/component/i.test(m)?METHODS[3][0]:METHODS[1][0];
+  if(id==='ABC-1')return /conditional|background/i.test(m)?METHODS[4][0]:METHODS[6][0];
+  return ({'VI-1':METHODS[5][0],'SP-1':METHODS[7][0],'OB-1':METHODS[6][0],'IA-1':METHODS[11][0],'IN-1':METHODS[11][0]})[id]||'';}
+function fsEvFn(e){const k=e.fnKey||'';return ({attention:FN[1],tangible:FN[2],escape:FN[3],automatic:FN[4],unclear:FN[5]})[k]||'';}
+const fsEvT=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const fsEvNames=(r,id)=>new RegExp('(^|[^A-Za-z0-9-])'+id.replace('-','\\-')+'(?![0-9])').test([r.contrib,r.who,r.dates,r.h,r.how,r.what].map(fsEvT).join(' '));
+function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
+  const ids=fsEvOrder.concat(Object.keys(E).filter(k=>fsEvOrder.indexOf(k)<0));
+  ids.forEach(id=>{const e=E[id];if(!e||typeof e!=='object')return;
+    if(S.src.some(r=>fsEvT(r.form)===id||(!fsEvT(r.form)&&formOf(r.method)===id)||fsEvNames(r,id)))return;
+    const method=fsEvMethod(id,e);if(!method)return;
+    const contrib=[fsEvT(e.method)+(e.n!=null&&e.n!==''?' ('+e.n+' '+(fsEvUnit[id]||'')+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
+    const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e),str:STR.indexOf(e.strength)>0?e.strength:''};
+    const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push(id);n++;});
+  ['IA-1','OB-1','EA-1'].forEach(id=>{const e=E[id];if(!e||!fsEvT(e.statement))return;if(S.hyp.some(r=>fsEvNames(r,id)))return;
+    const slot=S.hyp.find(r=>!rowHas(r));if(!slot)return;
+    Object.assign(slot,{h:(fsEvT(e.fn)||'What the record suggests')+' (Form '+id+')',how:fsEvT(e.method)+(e.dates?', '+fsEvT(e.dates):''),out:'',what:fsEvT(e.statement)});hyp.push(id);n++;});
+  let consent=false;const c=f&&f.consent;
+  if(c&&fsEvT(c.date)&&!fsEvT(S.meta.consent)){const md=x=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(fsEvT(x));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:fsEvT(x);};
+    const p=fsEvT(c.parent)&&fsEvT(c.parent)!==fsEvT(c.date)?md(c.parent):'';S.meta.consent=md(c.date)+(p?'; parent signed '+p:'')+' (Form IC-1)';consent=true;n++;}
+  if(!n)return {n:0};
+  renderAll();const el=document.querySelector('[data-m="consent"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));
+  const bits=[];if(put.length)bits.push(put.join(', ')+' on the evidence table');if(hyp.length)bits.push((hyp.length===1?'a hypothesis':hyp.length+' hypotheses')+' offered ('+hyp.join(', ')+')');if(consent)bits.push('the consent date');
+  const note=bits.join('; ');try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+note+'.',{kind:'ok'});}catch(e){}
+  return {n,note};}
+{const fi1=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=(fi1?fi1.apply(this,arguments):null)||{filled:0};const k=fsEvidence(f);
+  return k.n?{filled:(r.filled||0)+k.n,note:[r.note,k.note].filter(Boolean).join('; ')}:r;};}
 </script>
 </body>
 </html>

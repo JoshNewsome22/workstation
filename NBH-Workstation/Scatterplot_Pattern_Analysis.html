@@ -8004,5 +8004,30 @@ caption.sp-pcap{display:none}
 @media print{caption.sp-pcap{display:table-caption;caption-side:top;text-align:left;font-family:var(--sans,Arial,sans-serif);font-size:9pt;font-weight:600;color:#182e43;padding:0 0 4px}
   .legend{break-before:avoid;page-break-before:avoid}.gridwrap.sp-more{-webkit-mask-image:none;mask-image:none}}
 </style>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the scatter plot's pattern as evidence for Forms FS-1 and EA-1: the Pattern Summary's first
+   line (intervals marked, heaviest intervals and days) for the behavior on screen, over the sheet's dated days. A scatter
+   plot shows when the behavior occurs, not why, so it names no function and no strength. */
+OUT(function(){let d=null;try{if(typeof commitBeh==='function')commitBeh();d=summaryData();}catch(e){d=null;}if(!d||!d.marked)return null;
+  let p=document.querySelector('#sumBody p.cap');if(!p){try{renderSummary();}catch(e){}p=document.querySelector('#sumBody p.cap');}const m=state.meta||{};
+  const dates=Object.keys(m).filter(k=>/^date\d+$/.test(k)&&+k.slice(4)<(d.nC||99)).map(k=>m[k]);
+  return EV(Object.assign({form:'SP-1',method:'Scatter plot of when the behavior occurs (descriptive)'},SPAN(dates),{n:d.nC||null,fn:'',fnKey:'',strength:'',by:T(m.observer),
+    statement:(T(m.behavior)?T(m.behavior)+': ':'')+T(p?p.textContent:'')+' A scatter plot shows when the behavior occurs, not why.'}));});
+})();
+</script>
 </body>
 </html>
