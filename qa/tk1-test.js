@@ -230,7 +230,7 @@ print(round((max(xs)-min(xs)+1)/72,2))"`).toString().trim();
   /* the shell over the form: open, status, simulation, facts, snapshot and restore carry the pictures */
   const log2=[];const ctx=await br.newContext({viewport:{width:1440,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});const sh=await ctx.newPage();wire(sh,log2);
   await sh.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
-  check('the index lists TK-1 and counts 45 forms',await sh.evaluate(()=>FORMS.flatMap(g=>g[1]).some(f=>f[0]==='TK-1')&&FORMS.flatMap(g=>g[1]).length===45&&/0 of 45 ticked/.test(document.body.innerText)));
+  check('the index lists TK-1 and counts every form it names (v21.78: no fixed number)',await sh.evaluate(()=>{const n=FORMS.flatMap(g=>g[1]).length;return FORMS.flatMap(g=>g[1]).some(f=>f[0]==='TK-1')&&n>=46&&new RegExp('0 of '+n+' ticked').test(document.body.innerText);}));
   await sh.evaluate(()=>openForm('TK-1'));const ok=await sh.waitForFunction(()=>!!state.status['TK-1'],null,{timeout:20000}).then(()=>true).catch(()=>false);
   check('TK-1 opens in the shell and answers status',ok);
   const fr=sh.frames().find(f=>f.url().includes('TK-1_'));await fr.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});await fr.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);

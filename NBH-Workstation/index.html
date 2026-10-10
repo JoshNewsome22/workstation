@@ -638,6 +638,18 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
    chip's time ("Autosaved 10:26 AM" is wider than "Autosave on") cannot push Finish PDF onto a row of its own in the
    middle of work, moving the form down */
 @media (max-width:1240px){.bar .grp.acts button:not(.chip){padding-left:9px;padding-right:9px}}
+/* v21.78 an iPad (1180, 1133 and 1024 px): the student's details share the row (the boxes shrink to it, the narrowest
+   still a name's width), Read a document is its icon, and at 1100 px the case buttons give up a little more padding, so
+   neither row wraps and the form starts where it did */
+.rd-ico{display:none;vertical-align:-3px}
+@media (max-width:1240px){
+  .bar .det .fld{flex:1 1 auto;min-width:0}
+  .bar .det .fld input{flex:1 1 60px;width:60px!important;min-width:52px}
+  .bar .det .fld input#pClient{min-width:110px;flex-grow:2}
+  .bar .det .fld input#pGrade{flex:0 1 46px;min-width:40px}
+  #readDoc .lbl{display:none}#readDoc .rd-ico{display:inline-block}#readDoc{padding-left:9px;padding-right:9px}
+}
+@media (max-width:1100px){.bar .grp.acts button:not(.chip){padding-left:6px;padding-right:6px}.bar .pair{margin-right:2px}}
 @media (max-width:1000px){
   .crumb .acts button .lbl,#railToggle .lbl{display:none}
   .crumb .acts button,#railToggle{padding:5px 8px;min-width:32px}
@@ -829,7 +841,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="fld"><label for="pSite">School</label><input id="pSite"></span>
     <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
-    <button id="readDoc" title="Read the student’s details from a PDF, a picture or pasted text and place them in the bar and Form DM-1">Read a document</button>
+    <button id="readDoc" aria-label="Read a document" title="Read the student’s details from a PDF, a picture or pasted text and place them in the bar and Form DM-1"><svg class="rd-ico" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="lbl">Read a document</span></button>
     <button id="barFold" class="sm" hidden title="Fold the details to one line">Done</button>
   </div>
   <!-- v21.31 the case: what the shell has read from Forms TB-1, FS-1, GB-1 and PA-1, carried to every open form -->
@@ -2061,7 +2073,9 @@ function openFor(ev,d){
 /* (v21.52) and for Form TV-1's draft: the profile (DM-1), the plan developed (TD-1) and the crisis plan's stages (CR-1) */
 /* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1); v21.75 the
    treatment integrity observations (TI-1) */
-const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training'};
+const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
+  /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2071,8 +2085,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||(f.evidence&&Object.keys(f.evidence).length)));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2090,7 +2104,9 @@ async function gatherFacts(push){
       }
       if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
       if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
-      if(id==='DM-1'||id==='TD-1'||id==='CR-1'||id==='DD-1'||id==='SM-1'||id==='QS-1'||id==='TI-1'||id==='IC-1'||id==='TV-1'){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
+      if(FACT_GEN.includes(id)){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
+      /* v21.78 the assessments' results, one entry a form */
+      if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
     const now=state.facts;if(now&&(now.src||{}).behaviors==='document'&&(now.behaviors||[]).length&&!(f.behaviors&&f.src.behaviors&&f.src.behaviors!=='document')){f.behaviors=now.behaviors;f.src.behaviors='document';}
@@ -2131,6 +2147,12 @@ function paintFacts(){
   if(f.points)bits.push('<b>Point sheet:</b> '+((f.points.days||[]).length)+' days <i>('+esc(s.points||'')+')</i>');
   if(f.quick)bits.push('<b>Quick start</b> <i>('+esc(s.quick||'')+')</i>');
   if(f.integrity)bits.push('<b>Integrity:</b> '+(f.integrity.obs||[]).length+' observations <i>('+esc(s.integrity||'')+')</i>');
+  if(f.evidence)bits.push('<b>Assessment results:</b> '+Object.keys(f.evidence).length+' <i>('+esc(s.evidence||'')+')</i>');   /* v21.78 */
+  if(f.review)bits.push('<b>Plan review</b>'+(f.review.decision?': '+esc(f.review.decision):'')+' <i>('+esc(s.review||'')+')</i>');
+  if(f.records)bits.push('<b>Records</b> <i>('+esc(s.records||'')+')</i>');
+  if(f.home)bits.push('<b>Home sheets:</b> '+((f.home.sheets||[]).length)+' <i>('+esc(s.home||'')+')</i>');
+  if(f.injury)bits.push('<b>Injuries</b> <i>('+esc(s.injury||'')+')</i>');
+  if(f.skills)bits.push('<b>Skill programs:</b> '+((f.skills.programs||[]).length)+' <i>('+esc(s.skills||'')+')</i>');
   if(f.training)bits.push('<b>Rehearsal steps:</b> '+(f.training.steps||[]).length+' <i>('+esc(s.training||'')+')</i>');   /* v21.77 Form TV-1, for Form ST-1 */
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
@@ -4266,6 +4288,78 @@ async function handoverOpen(){await gatherFacts(false);const L=handoverItems();
     '<p class="hp-lead">What a case handed to another BCBA, a school or a review should hold. Read from the forms open in this case.</p>'+
     (L.length?'<ul class="td-list">'+L.map(x=>'<li><span class="td-k">Missing</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
       :'<p class="pc-done"><b>Nothing missing</b> that the check looks for: consent, defined targets, goals, the crisis plan, the photo permission, home told about incidents.</p>'));}
+/* ================= v21.78 Today and the hand-over check read further: the restraint notices (Form CR-1), injuries (IM-1),
+   the plan review's decision rules against the data (PR-1, DD-1, TI-1), the timelines (consent, the plan's review, the IEP,
+   the reevaluation, removals: IC-1, PR-1, DM-1, RR-1), home sheets due back (HD-1); and a transition summary for the next BCBA. */
+const tdISO=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const tdAdd=(iso,n)=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||''));if(!m)return '';const d=new Date(+m[1],+m[2]-1,+m[3],12);d.setDate(d.getDate()+n);return tdISO(d);};
+const tdLeft=iso=>{const n=tdDays(String(iso||'').slice(0,10));return n===null?null:-n;};   /* days until (negative: past) */
+const tdWhen=iso=>{const n=tdLeft(iso);if(n===null)return '';return n<0?(-n)+' day'+(n===-1?'':'s')+' overdue':n===0?'today':'in '+n+' day'+(n===1?'':'s');};
+const tdT=v=>String(v==null?'':v).trim();
+/* the plan review's rules (PR-1's own, or these defaults): judge a phase after ten school days; a change of 20% or more from
+   the level before the plan counts as progress */
+function tdRules(f){const r=f.review&&f.review.rules||{};return {minDays:+r.minDays>0?+r.minDays:10,improvePct:+r.improvePct>0?+r.improvePct:20};}
+function tdDecision(f){const d=f.data,L=[];if(!d||!Array.isArray(d.behaviors))return L;const R=tdRules(f),ti=f.integrity,obs=ti&&(ti.obs||[]).length?ti.obs[ti.obs.length-1]:null,crit=ti&&ti.criterion||90;
+  d.behaviors.forEach(b=>{if(!b.base||!b.cur||b.base.mean==null||b.cur.mean==null||!(b.cur.days>=R.minDays))return;const up=/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase';
+    const bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):(up?(cm>0?100:0):(cm>0?-100:0));if(chg>=R.improvePct)return;
+    const how=chg<=-R.improvePct?(up?'lower':'higher')+' than before the plan ('+Math.round(Math.abs(chg))+'%)':'about where it was before the plan ('+(chg>=0?'+':'')+Math.round(chg)+'%)';
+    const lead=esc(b.name)+': '+b.cur.days+' days into '+esc(b.curName||'the plan')+', '+how+'; Form PR-1 counts '+R.improvePct+'% as progress';
+    if(!obs)L.push({k:'Decision',t:lead+'. Check that the plan is being run (Form TI-1) before changing it',open:'TI-1'});
+    else if(obs.pct<crit)L.push({k:'Decision',t:lead+', but the last integrity check was '+obs.pct+'%: retrain first, then judge the plan',open:'TI-1'});
+    else L.push({k:'Decision',t:lead+', with integrity at '+obs.pct+'%: review the plan (modify it, or go back to the assessment)',open:'PR-1'});});
+  return L;}
+function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{};
+  /* the FBA: 60 calendar days from consent (the Florida evaluation timeline, Rule 6A-6.0331) until the function is written (Form FS-1) */
+  const cons=f.consent&&(f.consent.date||f.consent.parent);if(cons&&!(f.fn&&(f.fn.key||f.fn.label))){const due=tdAdd(cons,60),n=tdLeft(due);if(n!==null&&n<=15)push('Timeline','The FBA is due '+esc(tdMd(due))+', 60 days from consent on '+esc(tdMd(cons))+' ('+tdWhen(due)+'): Form FS-1 has no function yet','FS-1');}
+  /* the plan's review: PR-1's next date, or six weeks after the last review or the start of the plan */
+  if(rv.next){const n=tdLeft(rv.next);if(n!==null&&n<=7)push('Timeline','The plan review (Form PR-1) is due '+esc(tdMd(rv.next))+' ('+tdWhen(rv.next)+')','PR-1');}
+  else if(f.plan&&f.data&&Array.isArray(f.data.conds)&&f.data.conds.length>1){const c=f.data.conds[f.data.conds.length-1],from=rv.date&&rv.date>c.from?rv.date:c.from,due=tdAdd(from,42),n=tdLeft(due);
+    if(n!==null&&n<=7)push('Timeline','No plan review since '+esc(tdMd(from))+(rv.date?'':' (the start of '+esc(c.name||'the plan')+')')+': review it every six weeks (Form PR-1), due '+esc(tdMd(due))+' ('+tdWhen(due)+')','PR-1');}
+  if(rv.exit&&rv.exit.next){const n=tdLeft(rv.exit.next);if(n!==null&&n<=7)push('Timeline','The check after exit is due '+esc(tdMd(rv.exit.next))+' ('+tdWhen(rv.exit.next)+')'+(rv.exit.threshold?': back to the plan if '+esc(rv.exit.threshold):''),'PR-1');}
+  const iep=rc.iep||dt.iep,re=rc.reeval||dt.reeval;
+  if(iep){const n=tdLeft(iep);if(n!==null&&n<=30&&n>=-30)push('Timeline','The annual IEP review is '+esc(tdMd(iep))+' ('+tdWhen(iep)+'): bring the progress report (Form GB-1) and the plan review','GB-1');}
+  if(re){const n=tdLeft(re);if(n!==null&&n<=45&&n>=-30)push('Timeline','The reevaluation is due '+esc(tdMd(re))+' ('+tdWhen(re)+')','RR-1');}
+  /* removals: at ten school days a change of placement asks for a manifestation determination and a review of the plan (34 CFR 300.530) */
+  const rm=rc.removals;if(rm&&+rm.days>=8)push('Timeline',(rm.at10||+rm.days>=10?'<b>'+rm.days+' days of removal this year</b>: a manifestation determination and a review of the plan are required (34 CFR 300.530)':rm.days+' days of removal this year: at ten, a manifestation determination and a review of the plan are required'),'RR-1');
+  if(rc.mdr){const n=tdDays(rc.mdr);if(n!==null&&n>=0&&n<=30&&!(rv.date&&rv.date>=rc.mdr))push('Timeline','After the manifestation determination on '+esc(tdMd(rc.mdr))+', review the plan (Form PR-1)','PR-1');}
+  return L;}
+function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{};
+  (cr.deadlines||[]).filter(x=>x&&!x.done&&x.due).forEach(x=>{const n=tdLeft(x.due);if(n!==null&&n<=3)L.push({k:n<0?'Overdue':'Safety',t:(n<0?'<b>':'')+esc(x.what)+(n<0?'</b>':'')+' for the '+(x.event?esc(tdMd(x.event))+' ':'')+'restraint or seclusion: due '+esc(tdMd(String(x.due).slice(0,10)))+(String(x.due).length>10?' '+esc(String(x.due).slice(11,16)):'')+' ('+tdWhen(x.due)+')',open:'CR-1'});});
+  if(cr.restraints&&+cr.restraints.semester>=2)L.push({k:'Safety',t:cr.restraints.semester+' restraints this semester: the crisis plan is reviewed after the second (s. 1003.573, F.S.)',open:'CR-1'});
+  (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>L.push({k:'Injury',t:esc(x.what)+(x.due?' (due '+esc(tdMd(x.due))+', '+tdWhen(x.due)+')':''),open:'IM-1'}));
+  if(+inj.count30>=3)L.push({k:'Injury',t:inj.count30+' injuries in the last 30 days (Form IM-1): look at the trend with the team and the nurse',open:'IM-1'});
+  return L;}
+function tdHome(f){const h=f.home;if(!h||!Array.isArray(h.sheets))return [];const late=h.sheets.filter(s=>s&&s.due&&!s.back&&(tdLeft(s.due)||0)<0);
+  return late.length?[{k:'Home',t:late.length+' home sheet'+(late.length===1?'':'s')+' not back: '+late.slice(0,3).map(s=>esc((s.name||'sheet')+', due '+tdMd(s.due))).join('; '),open:'HD-1'}]:[];}
+{const ti0=todayItems;todayItems=function(){const f=state.facts||{};let L=[];try{L=tdSafety(f).concat(ti0.apply(this,arguments),tdDecision(f),tdTimelines(f),tdHome(f));}catch(e){L=ti0.apply(this,arguments);}return L;};}
+{const hi0=handoverItems;handoverItems=function(){const f=state.facts||{},L=hi0.apply(this,arguments);try{
+  (f.crisis&&f.crisis.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>L.push({t:'A restraint or seclusion notice not done: '+esc(x.what)+(x.event?' ('+esc(tdMd(x.event))+')':''),open:'CR-1'}));
+  if(f.review&&f.review.next&&(tdLeft(f.review.next)||0)<0)L.push({t:'The plan review was due '+esc(tdMd(f.review.next))+' (Form PR-1)',open:'PR-1'});
+  tdHome(f).forEach(x=>L.push({t:x.t,open:'HD-1'}));}catch(e){}return L;};}
+/* the transition summary: what the next BCBA needs on one page, from the case as the open forms give it */
+function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},rs=pl.respond||{},A=v=>Array.isArray(v)?v.filter(x=>tdT(x)):[];
+  const sec=(h,b)=>b?'<h2>'+h+'</h2>'+b:'',li=a=>a.length?'<ul>'+a.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'';
+  const tg=(f.behaviors||[]).filter(b=>b&&b.label);
+  const ev=f.evidence?Object.keys(f.evidence).map(k=>{const e=f.evidence[k]||{};return '<b>'+esc(k)+'</b> '+esc(e.method||'')+(e.dates?', '+esc(e.dates):'')+(e.fn?': '+esc(e.fn):'')+(e.strength?' ('+esc(e.strength)+')':'');}):[];
+  const lvl=(d.behaviors||[]).map(b=>{const u=b.unit||'';const bv=b.base&&b.base.mean!=null?b.base.mean:null,cv=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean;return '<b>'+esc(b.name)+'</b>: '+(bv!=null?esc(bv+' '+u)+' before the plan ('+esc(b.baseName||'baseline')+'), ':'')+(cv!=null?esc(cv+' '+u)+' now ('+esc(b.curName||'latest')+')':'no data')+(b.aim!=null?'; aim '+esc(b.aim):'')+(b.aimMet?', <b>met</b>':'');});
+  const R=tdRules(f),worked=[],not=[];(d.behaviors||[]).forEach(b=>{if(!b.base||!b.cur||b.base.mean==null||b.cur.mean==null)return;const up=/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase',bm=+b.base.mean,cm=+b.cur.mean,chg=bm?((up?cm-bm:bm-cm)/bm*100):0;(chg>=R.improvePct?worked:not).push(esc(b.name)+' ('+(chg>=0?'+':'')+Math.round(chg)+'% under '+esc(b.curName||'the plan')+')');});
+  const ti=f.integrity,open=[].concat(tdSafety(f),tdTimelines(f),tdHome(f)).map(x=>x.t);
+  const due=(state.due||[]).map(x=>esc(x.id)+' '+esc(x.what)+' '+dueText(x.d));
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Transition summary'+(p.client?': '+esc(p.client):'')+'</title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555;margin:0 0 8pt}ul{margin:0;padding-left:16pt}li{margin:0 0 3pt}@media print{body{margin:0}}</style></head><body>'+
+    '<h1>Transition Summary</h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'</p>'+
+    sec('History',li([f.consent&&f.consent.date?'Consent for the FBA and BIP: '+esc(f.consent.date)+' (Form IC-1)':'',f.fn&&(f.fn.label||f.fn.key)?'FBA function: '+esc(f.fn.label||f.fn.key)+' (Form FS-1)':'',f.review&&f.review.date?'Last plan review: '+esc(f.review.date)+(f.review.decisionText||f.review.decision?', '+esc(f.review.decisionText||f.review.decision):'')+' (Form PR-1)':''].filter(Boolean)))+
+    sec('Target behaviors',li(tg.map(b=>'<b>'+esc(b.label)+'</b>'+(b.isRep||/replacement/i.test(b.type||'')?' (replacement)':'')+(b.def?': '+esc(b.def):''))))+
+    sec('Function and the evidence',(f.fn&&(f.fn.statements||[]).length?'<p>'+f.fn.statements.map(esc).join(' ')+'</p>':'')+li(ev))+
+    sec('The plan',li([pl.rep?'Replacement: '+esc(pl.rep):'',A(pl.ant).length?'Before it happens: '+esc(A(pl.ant).join('; ')):'',rs.prec?'At the first sign: '+esc(rs.prec):'',rs.target?'If it happens: '+esc(rs.target):'',rs.after?'Afterwards: '+esc(rs.after):'',rs.not?'Never: '+esc(rs.not):'',f.crisis&&(f.crisis.stages||[]).length?'Crisis plan: '+f.crisis.stages.length+' stages (Form CR-1)':''].filter(Boolean)))+
+    sec('Where things stand',li(lvl)+(ti&&(ti.obs||[]).length?'<p>Treatment integrity: '+esc(ti.obs[ti.obs.length-1].pct)+'% on '+esc(ti.obs[ti.obs.length-1].date)+' ('+ti.obs.length+' observations, criterion '+esc(ti.criterion||90)+'%).</p>':''))+
+    sec('What worked, and what did not yet',li(worked.map(x=>'Progress: '+x).concat(not.map(x=>'Not yet: '+x))))+
+    sec('Open deadlines and what is due',li(open.concat(due)))+
+    sec('Contacts',li([p.bcba?'Case BCBA: '+esc(p.bcba):'',p.site?'School: '+esc(p.site):''].filter(Boolean)))+
+    '<p class="s" style="margin-top:14pt">Written from the forms open in this case. Read it against the forms before it goes on.</p></body></html>';}
+function tdSummaryOpen(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then press Transition summary again.');return;}
+  try{w.document.open();w.document.write(tdSummaryHTML());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
+{const ho0=handoverOpen;handoverOpen=async function(){await ho0.apply(this,arguments);const b=$('#dlgBody');if(b&&!b.querySelector('#tdSum'))b.insertAdjacentHTML('beforeend','<p class="td-more"><button type="button" class="primary" id="tdSum">Transition summary: print it</button></p><p class="hint">One page for the next BCBA: the history, the targets, the function and its evidence, the plan, where things stand, what worked, the open deadlines and the contacts.</p>');};}
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdSum'))tdSummaryOpen();});
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{

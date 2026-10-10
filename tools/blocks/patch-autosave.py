@@ -207,8 +207,12 @@ def main(argv):
     block = OPEN + '\n' + HEAD + core.rstrip('\n') + '\n' + part.rstrip('\n') + '\n' + CLOSE
     if not files:
         files = sorted(glob.glob(os.path.join(ROOT, 'NBH-Workstation', '[A-Z]*.html')))
-        if len(files) != 44:
-            fail(f'expected the 44 forms in NBH-Workstation, found {len(files)}')
+        # v21.78 as many as index.html's FORMS list names (it was a fixed 44)
+        idx = read(os.path.join(ROOT, 'NBH-Workstation', 'index.html'))
+        mm = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
+        n = len(re.findall(r"\['[A-Z0-9]+-\d+',", mm.group(1))) if mm else -1
+        if len(files) != n:
+            fail(f'expected the {n} forms in NBH-Workstation, found {len(files)}')
     stale = []; done = 0
     for f in files:
         path = os.path.abspath(f); rel = os.path.relpath(path, ROOT)
