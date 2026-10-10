@@ -8096,19 +8096,19 @@ const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='
 const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
 /* v21.78 the FBA chain, out: the observations as evidence for Forms FS-1 and EA-1. The statement is "Statement for the FBA
-   Summary (Form FS-1)" (the summary box's words while it is empty), the dates and count are the observations'. The function is
+   Summary (Form FS-1)" (the summary box's words while it is empty), the dates and count are the observations' (those with anything entered). The function is
    read by the summary's own rules: demands withdrawn after the behavior in at least 60% of the observations in which it
    occurred (and at least two) is an escape hypothesis; access to an item, activity or attention by the same rule is named in
    words without a key, since the form does not tell attention from items; both together are multiple. Strength: Moderate
    when the rule holds over 3 or more observations with the behavior, otherwise Weak; none without a function. */
-OUT(function(){const obs=state.obs||[];const carry=T(state.meta&&state.meta.carry);if(!obs.length&&!carry)return null;
+OUT(function(){const obs=(state.obs||[]).filter(o=>o&&(T(o.date)||T(o.count)||T(o.mins)||T(o.start)||T(o.activity)));const carry=T(state.meta&&state.meta.carry);if(!obs.length&&!carry)return null;
   let d=null;try{d=summary();}catch(e){d=null;}const w=d&&d.withAny?d.withAny.length:0,c=(d&&d.cons)||{};
   const rule=x=>w&&(c[x]||0)>=Math.max(2,w*0.6),esc=rule('escape'),acc=rule('access');
   const fn=esc&&acc?'Escape from demands and access to items, activities or attention':esc?'Escape from demands (a hypothesis to test)':acc?'Access to an item, activity or attention (a hypothesis to test)':'';
   const key=esc&&acc?'multiple':esc?'escape':'';
   const box=document.getElementById('sumBox');
   return EV(Object.assign({form:'OB-1',method:'Direct observation (descriptive)'},SPAN(obs.map(o=>o.date)),{n:obs.length||null,fn,fnKey:key,
-    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||T(box?box.textContent:'')}));});
+    strength:fn?(w>=3?'Moderate':'Weak'):'',by:T(state.meta&&state.meta.observer),statement:carry||(box?[...box.querySelectorAll('li')].map(x=>T(x.textContent)).join(' ')||T(box.textContent).replace(/^What the observations show\s*/,''):'')}));});
 })();
 </script>
 </body>
