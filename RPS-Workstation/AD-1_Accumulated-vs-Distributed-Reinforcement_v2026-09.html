@@ -3963,6 +3963,32 @@ function loadSim(){
    existed, so typed details were replaced without a word); Cancel changes nothing */
 $('#btnSim').addEventListener('click',async ()=>{if(!(await nbhUI.confirm('Load the simulated case?\nEvery tab is filled with a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;loadSim()});
 refresh();
+/* v21.78 the case: in. The form kept the shared fill (the problem behavior and function fields), and the reinforcer
+   menu from Form PA-1 goes on two tables, each item once, filling empty rows before adding any: "A. Preference
+   Assessment Results" (every ranked item: item, class, and the format, selection % and date when the case carries
+   them) and the Reinforcer Inventory (the high and middle preference items: item and class). Nothing typed is replaced;
+   how each is consumed, its removal and its use are for the person to record. */
+const nbhClass=t=>/edible|food|snack|drink/i.test(t||'')?'Edible':/leisure|activity|toy|game|sensory/i.test(t||'')?'Activity':/break|escape/i.test(t||'')?'Break':'';
+const nbhPick=(sel,v)=>{if(!sel||!v)return '';v=String(v).trim().toLowerCase();const o=Array.from(sel.options).find(o=>{const t=o.value.toLowerCase();return t&&(t===v||t.indexOf(v)===0||v.indexOf(t)===0);});return o?o.value:'';};
+const nbhPct=m=>{const v=[m.pct,m.selPct,m.selection,m.percent].find(x=>x!=null&&x!==''&&isFinite(parseFloat(x)));return v==null?'':String(parseFloat(v));};
+/* a reinforcer goes on a row once: it fills an empty row first, else a new one; a row already naming it is left alone */
+function nbhPlace(id,items,vf){const L=s=>String(s||'').trim().toLowerCase(),blankRow=tr=>Array.from(tr.querySelectorAll('input,select')).every(x=>!String(x.value||'').trim());
+  const have=new Set(rows(id).map(tr=>L((tr.querySelector('input[type="text"],input:not([type]),select')||{}).value)).filter(Boolean)),free=rows(id).filter(blankRow);let k=0,first=null;
+  items.forEach(m=>{const nm=String(m.name||'').trim();if(!nm||have.has(L(nm)))return;const tr=free.shift()||addRow(id),fs=tr.querySelectorAll('input,select');
+    vf(m).forEach((v,i)=>{const e=fs[i];if(!e||v==null||v==='')return;v=String(v);
+      if(e.tagName==='SELECT'){const o=nbhPick(e,v);if(o)e.value=o;}else if(e.type==='number'){if(isFinite(parseFloat(v)))e.value=String(parseFloat(v));}
+      else if(e.type==='date'){if(/^\d{4}-\d{2}-\d{2}$/.test(v))e.value=v;}else e.value=v;});
+    have.add(L(nm));k++;first=first||fs[0];});
+  if(first)first.dispatchEvent(new Event('input',{bubbles:true}));return k;}
+(function(){const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
+  if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
+  const menu=(f.menu||[]).filter(m=>m&&String(m.name||'').trim());
+  if(menu.length){k+=nbhPlace('tbPref',menu.slice(0,10),m=>[m.name,nbhClass(m.type||m.cls||m['class']),m.format||m.method||'',nbhPct(m),m.date||'']);
+    k+=nbhPlace('tbRf',menu.filter(m=>m.tier!=='LP').slice(0,6),m=>[m.name,nbhClass(m.type||m.cls||m['class'])]);}
+  if(k)try{refresh();}catch(e){}
+  return {filled:n+k,note:k?'reinforcers from Form PA-1':((r&&r.note)||'')};};
+})();
 })();
 </script>
 <script>
@@ -4965,6 +4991,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5118,6 +5154,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

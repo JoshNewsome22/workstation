@@ -3928,6 +3928,30 @@ window.__nbhFactsIn=function(f){const m=S.meta;let n=0;const b=f.behaviors||[];
   if(sib){if(!m.beh){m.beh=sib.label;n++;}if(!m.behdef&&sib.def){m.behdef=sib.def;n++;}}
   if(n)renderAll();return {filled:n,note:sib?undefined:'the case holds no target behavior yet'};};
 window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {filled:0};S.meta.beh=b.label;if(b.def)S.meta.behdef=b.def;renderAll();return {filled:1};};
+
+/* v21.78 the case: out. The injuries this form records, for the workstation's Today and Safety lists: the latest date an
+   injury was recorded (an administration that found an injured site, an injury report among the events, or an injury
+   noticed during required care), how many such records fall in the last 30 days, the latest administration's indices,
+   and what is still open with its date: a check due or overdue on the schedule, a report question not answered or a
+   report not yet recorded, and an injury noticed during care not yet passed to the nurse or, where no report is being
+   made, the parent or guardian. Dates are ISO. */
+window.__nbhFactsOut=function(){
+  const iso=d=>d?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'',tx=v=>String(v==null?'':v).trim();
+  const H=histSorted(),inj=[];H.forEach(h=>{const d=pDate(h.date);if(d&&score(h.rows).n)inj.push(d);});
+  S.events.forEach(e=>{const d=pDate(e.date);if(d&&e.kind==='Injury report')inj.push(d);});S.care.forEach(c=>{const d=pDate(c.date);if(d)inj.push(d);});
+  if(!H.length&&!S.events.length&&!S.care.length&&!S.meta.intake)return null;
+  const now=new Date();now.setHours(12,0,0,0);const from=addDays(now,-30),last=inj.length?new Date(Math.max(...inj)):null;
+  const o={count30:inj.filter(d=>d>=from&&d<=addDays(now,1)).length,open:[]};if(last)o.last=iso(last);
+  const lh=H.filter(h=>pDate(h.date)).slice(-1)[0];if(lh){const sc=score(lh.rows);o.latest={date:iso(pDate(lh.date)),sites:sc.n,ni:sc.ni,si:sc.si,risk:sc.risk||''};}
+  schedule().items.filter(x=>!x.done).forEach(x=>o.open.push({what:x.what+(x.over?' (overdue)':''),due:iso(x.date),done:false}));
+  const repOpen=(rep,what,d)=>{if(!rep)return;if(!rep.need)o.open.push({what:'Answer the report question (abuse or neglect) for '+what,due:iso(d),done:false});
+    else if(rep.need==='yes'&&!['when','to','by'].every(k=>tx(rep[k])))o.open.push({what:'Record the report made for '+what+' (when, to whom, by whom)',due:iso(d),done:false});};
+  H.forEach(h=>{const d=pDate(h.date);if(d)repOpen(h.rep,'the SIT Scale of '+MDY(d),d);});
+  S.care.forEach(c=>{const d=pDate(c.date);if(!d)return;const w='the injury noticed during care on '+MDY(d);repOpen(c.rep,w,d);
+    if(!tx(c.nurse))o.open.push({what:'Pass '+w+' to the school nurse',due:iso(d),done:false});
+    if(!tx(c.parent)&&c.rep&&c.rep.need!=='yes')o.open.push({what:'Tell the parent or guardian about '+w,due:iso(d),done:false});});
+  return {injury:o};
+};
 </script>
 
 <script>
@@ -4925,6 +4949,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5078,6 +5112,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

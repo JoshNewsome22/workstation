@@ -3585,6 +3585,39 @@ start(); showPlan(); review(); buildQuiet();
 
 </script>
 <script>
+/* v21.78 the case, in: what "Bring the plan text in" places from a plan file, placed from the case's plan (Form TD-1)
+   into the fields still empty: the behavior (What You Will See), the replacement (How the Student Asks), after it is
+   over, the response (If the Behavior Happens) and Staff do not (Never Do This), each marked "from the plan" until it is
+   rewritten; also the earliest sign (the plan's precursor, else the crisis plan's), What Helps Before It Starts (the
+   plan's antecedent arrangements, when no line is written), and Calling for Help (the crisis plan's peak stage, CR-1). */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),one=v=>T(v).replace(/\s*[\r\n]+\s*/g,' ');
+  window.__nbhFactsIn=function(f){
+    f=f||{};const plan=f.plan||null,cr=f.crisis||null,r=(plan&&plan.respond)||{},placed=[];let n=0;
+    const put=(k,v,lab,mark)=>{if(val(k)||!T(v))return;setv(k,T(v));if(mark)PULLED[k]=val(k);n++;placed.push(lab);};
+    /* lines: only when the block has no line written; empty rows are used first, then rows are added */
+    const putLines=(kind,list,lab,mark)=>{list=list.map(one).filter(Boolean);if(!list.length||lines(kind).length)return;
+      list.forEach(t=>{let e=$$('#'+kind+'Wrap [name]').find(x=>!T(x.value));if(!e){add(kind);e=$$('#'+kind+'Wrap [name]').find(x=>!T(x.value));}
+        if(!e)return;e.value=t;try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}});
+      if(mark)PULLED[kind]=list[0];n+=list.length;placed.push(lab);};
+    if(plan){
+      put('e.see',plan.beh,'what you will see',1);put('e.ask',plan.rep,'how the student asks',1);put('e.after',r.after,'after it is over',1);
+      putLines('resp',[r.target],'if the behavior happens',1);putLines('never',[r.not],'never do this',1);
+      putLines('prev',(plan.ant||[]).slice(0,5),'what helps before it starts');}
+    put('e.early',(plan&&plan.prec)||(cr&&cr.precursor),'the earliest sign');
+    /* calling for help: the crisis plan's peak stage, else its escalation stage */
+    const st=((cr&&cr.stages)||[]).filter(s=>s&&T(s.s)),pk=st.find(s=>/peak|imminent/i.test(s.s))||st.find(s=>/escalat/i.test(s.s));
+    if(pk){const beh=T((cr&&(cr.dbeh||cr.beh))||'').split(/[:\n]/)[0];
+      put('e.callwhen',(beh?beh+', or ':'')+'anyone is at risk of being hurt (the crisis plan’s “'+T(pk.s)+'” stage)','when to call');
+      put('e.callwho',T(pk.who)||T((st.find(s=>T(s.who))||{}).who),'who to call');}
+    const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):{filled:0};n+=g.filled||0;
+    if(n)changed();
+    if(placed.length&&window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+placed.join(', ')+'. Rewrite the plan’s words for this setting.',{kind:'ok'});
+    return {filled:n,note:placed.length?'placed '+placed.join(', '):''};
+  };
+})();
+</script>
+<script>
 
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
@@ -4582,6 +4615,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -4735,6 +4778,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

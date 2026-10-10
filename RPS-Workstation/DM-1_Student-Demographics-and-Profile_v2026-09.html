@@ -3436,6 +3436,19 @@ window.__nbhFactsOut=function(){
     return any?{profile:p}:null;
   }catch(e){return null;}
 };
+/* v21.78 the profile also carries the health record (the medications table, prescriber, allergies, the health conditions that
+   can act on behavior) for Forms RR-1 and MS-1, and the annual IEP and reevaluation dates for the workstation's due list.
+   Wrapped, so the profile above is unchanged; only parts with an entry are sent. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+ try{const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
+  const meds=[];for(let i=0;i<50;i++){if(!document.querySelector('[name="m['+i+'].name"]'))break;const name=g('m['+i+'].name');if(!name)continue;
+   const m={name,dose:g('m['+i+'].dose'),times:[g('m['+i+'].freq'),g('m['+i+'].time')].filter(Boolean).join(', '),reason:g('m['+i+'].purpose')};const rx=g('m['+i+'].rx');if(rx)m.rx=rx;meds.push(m);}
+  const h={};if(meds.length)h.meds=meds;if(g('h.psy'))h.prescriber=g('h.psy');if(g('h.allergy'))h.allergies=g('h.allergy');if(g('h.cond'))h.conditions=g('h.cond');
+  if(!h.prescriber){const rx=meds.map(m=>m.rx).find(Boolean);if(rx)h.prescriber=rx;}
+  const d={};const iep=g('p.annual')||g('p.iepdate');if(iep)d.iep=iep;if(g('p.iepdate'))d.iepHeld=g('p.iepdate');if(g('p.reeval'))d.reeval=g('p.reeval');
+  if(Object.keys(h).length||d.iep||d.reeval){o=o||{};o.profile=o.profile||{src:'DM-1'};if(Object.keys(h).length)o.profile.health=h;if(d.iep||d.reeval)o.profile.dates=d;}
+ }catch(e){}
+ return o;};})();
 </script>
 
 <script>
@@ -4453,6 +4466,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -4606,6 +4629,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>

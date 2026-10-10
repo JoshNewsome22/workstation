@@ -4329,6 +4329,103 @@ window.__nbhFactsOut=function(){
   }catch(e){return null;}
 };
 </script>
+<script>
+/* v21.78 the case, in: the crisis plan fills only what is still empty: the dangerous behavior (TB-1's targets at urgency
+   level 4, or 3 when none is at 4), the earliest precursor (TD-1), the stages from the plan's responses when no stage is
+   written (TD-1: before, at the precursor, at the behavior, the crisis step unless it only points to this form, after), the related plans in force (TD-1,
+   FS-1, IC-1's consent, the IEP date), and the health concerns (DM-1's health record, signals and what to avoid).
+   A restraint or a seclusion on Form DD-1's incident record (its hold) goes on the restraint log once, keyed by the
+   incident's id (kept in the record's meta.ddInc, so a row deleted by hand is not brought back), and its s. 1003.573
+   clock starts from the date and time the incident gives. A notice names what was placed. */
+(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const isRep=b=>!!(b&&(b.isRep||/replacement|alternative/i.test(b.type||'')));
+  const mdy=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(iso));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+  const md=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(T(iso));return m?(+m[2])+'/'+(+m[3]):T(iso);};
+  window.__nbhFactsIn=function(f){
+    f=f||{};ensure();const m=S.meta,placed=[],notes=[];let n=0;
+    const put=(k,v,lab)=>{if(T(m[k])||!T(v))return;m[k]=T(v);n++;placed.push(lab);};
+    const plan=f.plan||null,pf=f.profile||null,r=(plan&&plan.respond)||{};
+    const prob=(f.behaviors||[]).filter(b=>b&&T(b.label)&&!isRep(b));
+    let hi=prob.filter(b=>+b.urg>=4);if(!hi.length)hi=prob.filter(b=>+b.urg===3);
+    put('dbeh',hi.map(b=>T(b.label)+(T(b.def)?': '+T(b.def):'')).join('\n'),'the dangerous behavior (TB-1)');
+    put('precursor',plan&&plan.prec,'the precursor (TD-1)');
+    /* the stages, only when none is written */
+    if(plan&&!S.pbis.some(p=>T(p.s)||T(p.do))){
+      const ant=(plan.antCards||[]).length?plan.antCards.join('; '):(plan.ant||[]).map(T).filter(Boolean).join('; ');
+      const rows=[[STAGES[1],ant],[STAGES[2],r.prec],[STAGES[3],r.target],[STAGES[4],T(r.crisis).length<80&&/CR-1|crisis (intervention )?plan/i.test(r.crisis)?'':r.crisis],[STAGES[5],r.after]].filter(x=>T(x[1]));
+      rows.forEach((x,i)=>{while(S.pbis.length<=i)S.pbis.push({s:'',do:'',next:'',who:''});S.pbis[i].s=x[0];S.pbis[i].do=T(x[1]);});
+      if(rows.length){n+=rows.length;placed.push(rows.length+' stage'+(rows.length===1?'':'s')+' from the plan (TD-1)');}}
+    /* the related plans in force */
+    const rel=[],iep=T((f.records&&f.records.iep)||(pf&&pf.dates&&pf.dates.iep));
+    if(plan)rel.push('BIP (Form TD-1)'+(T(plan.beh)?' for '+T(plan.beh).split(/[:\n]/)[0]:''));
+    if(f.fn||(f.behaviorsFS||[]).length)rel.push('FBA summary (Form FS-1)'+(f.fn&&T(f.fn.label)?', function: '+T(f.fn.label):''));
+    if(f.consent&&T(f.consent.date))rel.push('consent signed '+T(f.consent.date)+' (Form IC-1)');
+    if(iep)rel.push('IEP '+iep);
+    put('related',rel.join('; '),'the related plans');
+    /* the health concerns (DM-1) */
+    const h=(pf&&pf.health)||{},meds=(h.meds||[]).filter(x=>x&&T(x.name));
+    const phys=[T(h.conditions)?'Health conditions: '+T(h.conditions):'',T(h.allergies)?'Allergies: '+T(h.allergies):'',
+      meds.length?'Medications: '+meds.map(x=>T(x.name)+(T(x.dose)?' '+T(x.dose):'')+(T(x.times)?' ('+T(x.times)+')':'')+(T(x.reason)?', for '+T(x.reason):'')).join('; '):''].filter(Boolean);
+    const hp=!T(m.hPhys)&&phys.length;
+    put('hPhys',phys.join('. ')+(phys.length?'. From the student profile (Form DM-1).':''),'the physical health concerns (DM-1)');
+    if(hp)put('hSource','Student profile, Form DM-1'+(T(h.prescriber)?'; prescriber: '+T(h.prescriber):''),'the source');
+    put('hBeh',pf&&T(pf.signals)?'How the student shows yes, no and stop: '+T(pf.signals)+' (Form DM-1).':'','the behavioral health concerns (DM-1)');
+    put('hAvoid',pf&&T(pf.avoid)?'From the student profile (Form DM-1): '+T(pf.avoid):'','what to avoid (DM-1)');
+    /* the incidents with a restraint or a seclusion (DD-1): each once, by its id */
+    const seen=T(m.ddInc)?T(m.ddInc).split(','):[],added=[];
+    ((f.data&&f.data.incidentList)||[]).forEach(i=>{
+      if(!i||!/^(restraint|seclusion)$/.test(i.hold||'')||!T(i.id)||seen.includes(T(i.id)))return;
+      const day=crcYMD(i.date);if(!day)return;const iso=crcDateStr(day),tm=crcHM(i.time)?T(i.time).slice(0,5):'';
+      seen.push(T(i.id));
+      /* a restraint already on the log on that date and time (typed by hand) is the same one */
+      if(S.log.some(x=>(T(x.rd)===iso||crcMDY(x.d)===iso)&&(!tm||!T(x.rt)||T(x.rt)===tm)))return;
+      let x=S.log.find(y=>!crcFilled(Object.assign({},y,{att:(y.att||[]).filter(crcFilled)})));
+      if(!x){x=crcRow({d:'',dur:'',set:'',staff:'',rep:'',deb:'',pre:''});S.log.push(x);}
+      x.d=mdy(iso);x.rd=iso;x.rt=tm;
+      x.pre=(i.hold==='seclusion'?'Seclusion (prohibited by s. 1003.573): ':'')+(T(i.beh)||'Incident')+(T(i.what)?': '+T(i.what).replace(/[.]$/,''):'')+
+        (T(i.before)?'. Before it: '+T(i.before).replace(/[.]$/,''):'')+'. From the incident record (Form DD-1).';
+      added.push((i.hold==='seclusion'?'a seclusion':'a restraint')+' on '+md(iso));});
+    if(seen.join(',')!==T(m.ddInc))m.ddInc=seen.join(',');
+    if(added.length){n+=added.length;notes.push('Form DD-1 recorded '+added.join(' and ')+': '+(added.length===1?'it is':'they are')+' on the restraint log, and the deadlines of s. 1003.573 are running. Enter the release time for the 24-hour report.');}
+    const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):{filled:0};n+=g.filled||0;
+    if(n){renderAll();const e=document.querySelector('[data-m="dbeh"]');if(e)try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}}
+    const say=[placed.length?'From the case: '+placed.join(', ')+'.':''].concat(notes).filter(Boolean).join(' ');
+    if(say&&window.nbhUI&&nbhUI.toast)nbhUI.toast(say,{kind:added.length?'warn':'ok',ms:added.length?15000:undefined});
+    return {filled:n,note:say};
+  };
+  /* v21.78 Out, extended: the notice deadlines of each restraint in the last 60 days, from the form's own clock (the
+     incident report within 24 hours of the release, the written notice to the parent the same school day, the report by
+     mail within 3 school days, and the crisis intervention plan upon the second restraint in the semester), the count
+     this semester, the dangerous behavior and the precursor. A 24-hour report whose release time is not entered is
+     counted from when the restraint began, which is never later than the statute's. */
+  const was=window.__nbhFactsOut;
+  window.__nbhFactsOut=function(){
+    let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+    try{
+      const now=new Date(),today=crcDay(now),st=crcStates(now),cal=crcCal(),iso=d=>d?crcDateStr(d):'',isoT=d=>d?crcDateStr(d)+'T'+crcTimeStr(d):'';
+      const ev=st.filter(s=>s.dated).map(s=>Object.assign(s,{day:s.bDay||crcYMD(crcMDY(s.ld))}));
+      const deadlines=[];
+      ev.forEach(s=>{const d=s.day;if(!d||crcCmp(d,crcAdd(today,-60))<0)return;const e=iso(d),on=' (restraint on '+md(e)+')';
+        const rp=s.rep,repDue=rp.mode==='24h'&&rp.dueAt?isoT(rp.dueAt):rp.mode==='closure'&&rp.ro?iso(rp.ro):s.began?isoT(new Date(s.began.getTime()+864e5)):iso(crcAdd(d,1));
+        deadlines.push({what:'Incident report within 24 hours of the release'+on,due:repDue,done:!!s.pDay||/^(Yes|Late)$/.test(s.g('rep')),event:e});
+        deadlines.push({what:'Written notice to the parent before the end of the school day'+on,due:e,done:!!s.wDay,event:e});
+        const m3=s.ml&&s.ml.m3?s.ml.m3:cal.add(d,3);
+        deadlines.push({what:'Incident report to the parent by mail within 3 school days'+on,due:iso(m3),done:!!s.mdDay,event:e});});
+      const sec=ev[1];
+      if(sec&&sec.day){const e=iso(sec.day),m=S.meta||{};
+        deadlines.push({what:'Crisis intervention plan upon the second restraint this semester',due:e,done:!!(T(m.date)&&(T(m.dbeh)||(S.pbis||[]).some(p=>T(p.do)))),event:e});}
+      const nr=parseInt(T((S.meta||{}).nRest),10),cnt=Math.max(ev.length,isNaN(nr)?0:nr),last=ev.map(s=>s.day).filter(Boolean).sort((a,b)=>crcCmp(a,b)).pop();
+      const m=S.meta||{},any=deadlines.length||cnt||T(m.dbeh)||T(m.precursor);
+      if(!any)return o;
+      o=o||{};const c=o.crisis=o.crisis||{beh:T(m.dbeh),precursor:T(m.precursor),stages:[],src:'CR-1'};
+      c.dbeh=T(m.dbeh);c.precursor=T(m.precursor);if(deadlines.length)c.deadlines=deadlines;
+      if(cnt)c.restraints={semester:cnt,last:iso(last)};
+      return o;
+    }catch(e){return o;}
+  };
+})();
+</script>
 
 <script>
 /* ===================== NBH student packet =====================
@@ -5319,6 +5416,16 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   .nbh-pagenav button{min-height:44px!important}
   #nbhCaseDlg .nbhc-s label{padding:9px 0!important}
 }
+/* v21.78 the iPad audit (32 px a target): a checkbox or radio is 24 px, a checkbox label's tap area 36 px high, the narrow
+   grid buttons 34 px wide, the walkthrough's links taller; a table cell with one checkbox or radio is its target (the script
+   below). Screen only: what prints on an iPad stays as it was. */
+@media screen and (pointer:coarse){
+  input[type="checkbox"],input[type="radio"]{width:24px!important;height:24px!important;min-width:24px!important}
+  label.ck,label.chk,label.ind,.ckrow label{padding-top:7px!important;padding-bottom:7px!important}
+  button.pq,button.cell,button.tb1-del,button.tool,.toolbar button{min-width:34px!important}
+  a.wk-go{display:inline-block;padding:9px 0!important}
+  td.nbh-celltap{cursor:pointer}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5472,6 +5579,13 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
   }
   try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
   window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>
