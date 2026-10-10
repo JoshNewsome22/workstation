@@ -24,7 +24,22 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     return {w:parseInt(t.style.width,10),tr:t.style.transform,date:cs[0],obs:cs[1],one,notes:cs[cs.length-2],pct:getComputedStyle(last).display,pctT:last.textContent.trim(),
       pdate:(t.querySelector('tbody td.col-date .pdate')||{}).textContent,pdShown:getComputedStyle(t.querySelector('tbody td.col-date .pdate')).display,inputHidden:getComputedStyle(t.querySelector('tbody td.col-date input')).display};});
   ok('printed: the table fills the page width without shrinking',pr.w===960&&!pr.tr,pr);
-  ok('printed: Date and Obs. min are narrow, the behaviors even, Notes takes the rest',pr.date<=56&&pr.obs<=34&&pr.one.every(v=>v===pr.one[0])&&pr.one[0]>=70&&pr.notes>=120,pr);
+  ok('printed: Date and Obs. min are narrow, the behaviors even, Notes takes the rest',pr.date<=40&&pr.obs<=28&&pr.one.every(v=>v===pr.one[0])&&pr.one[0]>=70&&pr.notes>=96,pr);
+  /* v21.70 the widths are also a print style in percentages, so a print the form never hears of (Safari on the iPad printing
+     the workstation, the master print) lays the sheet out the same; eight behaviors fit; Behaviors only on paper; weekdays only */
+  const v70=await page.evaluate(()=>{const st=(document.getElementById('ddPrintCols')||{}).textContent||'';const t=document.getElementById('dataTable');
+    t.style.width='2400px';const w1=Math.round(t.getBoundingClientRect().width),wrap=Math.round(t.parentElement.getBoundingClientRect().width);
+    const sum=[...st.matchAll(/nth-child\(\d+\)\{width:([\d.]+)%/g)].reduce((a,m)=>a+parseFloat(m[1]),0);
+    const sel=document.getElementById('d_paper');sel.value='off';sel.dispatchEvent(new Event('change',{bubbles:true}));
+    const hid=[...t.tBodies[0].rows[0].cells].filter(c=>/col-(phase|label|notes)/.test(c.className)).every(c=>getComputedStyle(c).display==='none');
+    const beh=Math.round(t.tBodies[0].rows[0].querySelector('td.col-beh').getBoundingClientRect().width);
+    sel.value='all';sel.dispatchEvent(new Event('change',{bubbles:true}));applyColW(true);
+    const pd=t.querySelector('tbody td.col-date .pdate .dw');
+    const keep=S.rows.slice();S.rows=[];document.getElementById('d_start').value='2026-10-16';document.getElementById('d_count').value='3';document.getElementById('btnAddDays').click();
+    const days=S.rows.map(r=>r.date);S.rows=keep;renderData();
+    return {fixed:/table-layout:fixed/.test(st),sum:Math.round(sum),w1,wrap,hid,beh,dw:pd?pd.textContent:'',days};});
+  ok('printed: the widths hold as percentages whatever width the page has, Behaviors only leaves phase, condition and notes off, the weekday sits above the date, Add days skips the weekend',
+    v70.fixed&&v70.sum===100&&Math.abs(v70.w1-v70.wrap)<=2&&v70.hid&&v70.beh>101&&v70.dw==='Mon '&&v70.days.join()==='2026-10-16,2026-10-19,2026-10-20',v70);
   ok('printed: the date reads "Mon 9/7" and the % heading shows',/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2}\/\d{1,2}$/.test(pr.pdate)&&pr.pdShown==='block'&&pr.inputHidden==='none'&&pr.pct!=='none'&&pr.pctT==='%',pr);
   const por=await page.evaluate(()=>{S.settings.orient='portrait';applyColW(true);const t=document.getElementById('dataTable');const w=parseInt(t.style.width,10);S.settings.orient='landscape';applyColW(true);return {w,tr:t.style.transform};});
   ok('printed in portrait: the table fits the page',por.w<=700||!!por.tr,por);
