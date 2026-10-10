@@ -8356,3 +8356,12 @@ the case: the day-by-day counts on DD-1 (the tiles come from GB-1's current leve
   off. A photo chosen on DD-1's Client & behaviors tab stays DD-1's own. Every open form now hears of a new photo at
   once (it was Form IA-1 only).
 - Checked by `qa/photo-crop-test.js` (8 checks) and `qa/photo-flags-test.js` (updated for the placing step).
+
+### v21.72: Form DD-1's printed sheet starts under the letterhead
+
+The top of the printed data sheet said who and what three times: the print head ("Chris — Daily data sheet", with its
+rules), the "Daily data" title, and the student line. On paper the student line is now the only heading: the photo, the
+name and details on the left, **Data 10/13 – 10/23** and the observation window on the right. The print head and the
+title are left off when the Daily data tab prints (the Graphs tab keeps its print head), the "Add client details" hint
+stays on screen, and "Obs. min: the minutes observed that day" moves into the key under the sheet. A landscape page
+with eight behaviors holds 20 rows instead of 17. Checked by `qa/dd1-sheet-test.js` (one new check).
