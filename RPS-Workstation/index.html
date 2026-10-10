@@ -658,6 +658,9 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
    still a name's width), Read a document is its icon, and at 1100 px the case buttons give up a little more padding, so
    neither row wraps and the form starts where it did */
 .rd-ico{display:none;vertical-align:-3px}
+/* v21.79 the caseload */
+.cl-h{font:600 14px var(--sans);margin:14px 0 6px;color:var(--navy)}.cl-opt{font-size:12.5px;margin-right:14px;display:inline-flex;align-items:center;gap:6px}
+.cl-wrap{overflow-x:auto}.cl-tbl{width:100%;border-collapse:collapse;font-size:13px}.cl-tbl th,.cl-tbl td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}.cl-tbl th{font-size:11.5px;color:var(--muted);font-weight:600}.cl-act{white-space:nowrap}
 @media (max-width:1240px){
   .bar .det .fld{flex:1 1 auto;min-width:0}
   .bar .det .fld input{flex:1 1 60px;width:60px!important;min-width:52px}
@@ -936,6 +939,8 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
       <span id="crumbStatus"></span>
       <div class="acts">
         <!-- v21.75 Today: what needs you in this case (an icon here, so the row of case buttons stays one row on an iPad) -->
+        <!-- v21.79 Caseload: every student kept on this device -->
+        <button id="caseloadBtn" class="sm" aria-label="Caseload: every student on this iPad" title="Caseload: every student kept on this iPad, the most urgent first, and what needs you across them"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13.5c.4-2.4 2.1-3.8 4.2-3.8s3.8 1.4 4.2 3.8"/><circle cx="11.4" cy="6.2" r="1.8"/><path d="M11 9.8c1.7.1 2.9 1.3 3.2 3.2"/></svg></button>
         <button id="todayBtn" class="sm" aria-label="Today: what needs you in this case" title="Today: what is due, incidents home has not heard about, the integrity check, aims met; the end of the week; the hand-over check"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 10l1.6 1.5L10.5 8.5"/></svg></button>
         <button id="saveQuick" class="sm" aria-label="Save case" title="Save the case to a file"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/></svg><span class="lbl">Save case</span><span class="dot" aria-hidden="true"></span></button>
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
@@ -4212,6 +4217,7 @@ async function saveCase(){
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
+  try{caseloadKeep(p,forms);}catch(e){}   /* v21.79 the caseload's copy on this device */
   const nm=caseName(p);
   const fileSig=caseSig(stat);
   const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
@@ -4298,7 +4304,7 @@ async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch
     '<p class="hp-lead">'+esc(new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}))+(p.client?' · '+esc(p.client):'')+'</p>'+
     (L.length?'<ul class="td-list">'+L.map(x=>'<li><span class="td-k">'+x.k+'</span> <span>'+x.t+'</span>'+(x.open?' <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'</button>':'')+'</li>').join('')+'</ul>'
       :'<p>'+(f?'Nothing needs you today in this case.':'Nothing to go on yet: open the case’s forms (Form DD-1, TI-1, GB-1 and the rest) and this list fills from them.')+'</p>')+
-    '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdHand">Hand-over check</button></p>'+
+    '<p class="td-more"><button type="button" class="primary" id="tdWeek">End of the week: print the packet</button> <button type="button" id="tdHand">Hand-over check</button> <button type="button" id="tdCaseload">Caseload</button></p>'+
     '<p class="hint">The end of the week prints, in one go, Form DD-1’s week summary, next week’s blank sheet and Form SM-1’s point sheets.</p>');}
 async function endOfWeek(){if(!inCase('DD-1')){alert('Open Form DD-1 for this student first: the end of the week starts from its record.');return;}
   const chosen=['DD-1','SM-1'].filter(inCase).map(id=>ALL.find(x=>x[0]===id)).filter(Boolean);
@@ -4391,6 +4397,62 @@ function tdSummaryOpen(){const w=window.open('','_blank');if(!w){alert('The brow
   try{w.document.open();w.document.write(tdSummaryHTML());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
 {const ho0=handoverOpen;handoverOpen=async function(){await ho0.apply(this,arguments);const b=$('#dlgBody');if(b&&!b.querySelector('#tdSum'))b.insertAdjacentHTML('beforeend','<p class="td-more"><button type="button" class="primary" id="tdSum">Transition summary: print it</button></p><p class="hint">One page for the next BCBA: the history, the targets, the function and its evidence, the plan, where things stand, what worked, the open deadlines and the contacts.</p>');};}
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdSum'))tdSummaryOpen();});
+/* ================= v21.79 the caseload: every student on this iPad at a glance =================
+   Each Save case (and Close case, which saves first) keeps a copy of that case here, in this browser on this device (a
+   store of its own, nothing sent anywhere), with a summary of the case as it was saved: what Today says, the last day of
+   data. Caseload lists the students, the most urgent first, and what needs you across all of them, and opens a student's
+   case from its copy. The case files you save remain the record; this is a convenience copy. */
+const CL={db:null};
+const clScope=()=>{const h=String(location.href).split('#')[0].split('?')[0];return h.slice(0,h.lastIndexOf('/')+1);};
+const clOff=()=>{try{return localStorage.getItem('nbh.caseload.off')==='1';}catch(e){return false;}};
+const clIni=()=>{try{return localStorage.getItem('nbh.caseload.ini')==='1';}catch(e){return false;}};
+function clOpenDb(){if(CL.db)return CL.db;CL.db=new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  try{if(!window.indexedDB)return fin(null);r=indexedDB.open('nbh-caseload',1);}catch(e){return fin(null);}
+  setTimeout(()=>fin(null),5000);r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains('cases'))db.createObjectStore('cases',{keyPath:'key'});}catch(e){}};
+  r.onsuccess=()=>fin(r.result);r.onerror=()=>fin(null);});return CL.db;}
+async function clTx(mode,fn){const db=await clOpenDb();if(!db)throw new Error('no storage in this browser');
+  return new Promise((res,rej)=>{let out;try{const t=db.transaction('cases',mode);out=fn(t.objectStore('cases'));t.oncomplete=()=>res(out&&'result' in out?out.result:out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);}catch(e){rej(e);}});}
+const clKey=p=>{const n=String(p.client||'').trim().toLowerCase().replace(/\s+/g,' '),s=String(p.sid||'').trim();return n||s?clScope()+'|'+s+'|'+n:'';};
+const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}const f=state.facts||{};
+  return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
+async function caseloadKeep(p,forms){if(clOff())return;const key=clKey(p);if(!key)return;
+  try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
+  const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});
+  const rec={key,scope:clScope(),client:String(p.client||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
+  try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
+async function clList(){try{const all=await clTx('readonly',st=>st.getAll());return (all||[]).filter(r=>r&&r.scope===clScope());}catch(e){return null;}}
+const CL_ORDER=['Overdue','Safety','Injury','Decision','Timeline','Due','Home','Data','Integrity','Aim'];
+const clRank=k=>{const i=CL_ORDER.indexOf(k);return i<0?CL_ORDER.length:i;};
+const clName=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim();if(!clIni())return w||'(no name)';const p=w.split(/\s+/).filter(Boolean);return p.length?p.map(x=>x[0].toUpperCase()+'.').join(' '):'(no name)';};
+const clUrgency=r=>((r.sum&&r.sum.items)||[]).reduce((a,x)=>Math.min(a,clRank(x.k)),99);
+const clAgo=iso=>{const n=tdDays(String(iso||'').slice(0,10));return n===null?'':n<=0?'today':n===1?'yesterday':n+' days ago';};
+async function caseloadOpen(){const L=await clList();
+  if(L===null){dialog('Caseload','<p>This browser keeps no caseload here: its storage is not available (a private window, or storage turned off).</p>');return;}
+  /* the case on screen: its summary as it is now (its copy stays its last save) */
+  const ck=clKey(packet()),me=ck&&L.find(r=>r.key===ck);if(me){me.sum=clSummary();try{await clTx('readwrite',st=>st.put(me));}catch(e){}}
+  L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
+  const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(x=>all.push(Object.assign({who:clName(r),key:r.key},x))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
+  dialog('Caseload',
+    '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+' on this iPad, each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you save are still the record.</p>'+
+    '<p class="td-more"><label class="cl-opt"><input type="checkbox" id="clIni"'+(clIni()?' checked':'')+'> Initials only</label> <label class="cl-opt"><input type="checkbox" id="clOff"'+(clOff()?' checked':'')+'> Do not keep cases on this device</label></p>'+
+    (L.length?'<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
+        :'<p>Nothing needs you in the students kept here, as at their last save.</p>')+
+      '<h3 class="cl-h">Students</h3><div class="cl-wrap"><table class="cl-tbl"><tr><th>Student</th><th>School</th><th>Saved</th><th>Last data</th><th>Needs you</th><th></th></tr>'+L.map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];
+        return '<tr data-clrow="'+esc(r.key)+'"><td><b>'+esc(clName(r))+'</b>'+(r.sid&&!clIni()?'<br><span class="hint">'+esc(r.sid)+'</span>':'')+'</td><td>'+esc(r.site||'')+'</td><td>'+esc(clAgo(r.saved))+'</td><td>'+(r.sum&&r.sum.lastData?esc(tdMd(r.sum.lastData)+' ('+clAgo(r.sum.lastData)+')'):'none')+'</td><td>'+(it.length?it.length+(top?' <span class="td-k">'+esc(top.k)+'</span>':''):'nothing')+'</td><td class="cl-act"><button type="button" class="primary" data-clopen="'+esc(r.key)+'">Open</button> <button type="button" data-cldel="'+esc(r.key)+'">Remove</button></td></tr>';}).join('')+'</table></div>'
+     :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
+    '<p class="hint">Safari can clear a website’s storage after some weeks without a visit; installed on the Home Screen, the workstation keeps it. Remove takes a student off this list on this iPad only; their case files are not touched.</p>');}
+async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key===key);if(!r){alert('That student is no longer kept here.');return;}
+  try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null);if(form&&inCase(form))try{openForm(form);}catch(e){}}
+$('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data-clopen]'),d=e.target.closest('[data-cldel]');
+  if(e.target.closest('#tdCaseload')){caseloadOpen();return;}
+  if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
+  if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
+    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this iPad?\nTheir case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;
+    try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}caseloadOpen();}});
+$('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
+  if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
+$('#caseloadBtn').addEventListener('click',()=>caseloadOpen());
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
@@ -4490,6 +4552,7 @@ const CMDS=[
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
   {k:'today what needs me due incidents aim integrity',n:'Today: what needs me in this case',s:'command',go:()=>todayOpen()},
+  {k:'caseload students all cases dashboard overdue across',n:'Caseload: every student on this iPad',s:'command',go:()=>caseloadOpen()},
   {k:'end of week friday packet week summary blank sheet point sheets print',n:'End of the week: the summary, next week\u2019s sheet and the point sheets in one print',s:'command',go:()=>endOfWeek()},
   {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
   {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
