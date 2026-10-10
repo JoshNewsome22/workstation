@@ -8622,3 +8622,25 @@ gc1, hd1, im1, pd1); tk1, master33, sprint-a2 (IA-1 since v21.64) and v2134-veri
 Checked by `qa/v2178-a-test.js`, `-b`, `-c1`, `-c2`, `-d1`, `-d2` (the forms), `qa/v2178-shell-test.js` (Today, the hand-over,
 the summary), `qa/v2178-flow-test.js` (OB-1 and EA-1 into FS-1 through the workstation), `qa/v2178-rail-test.js`,
 `qa/v2178-touch-test.js` and `qa/v2178-asr-test.js`; `qa/sprint-a8-test.js` (the bars) passes again.
+
+### v21.79: the caseload
+
+**Caseload** (the people button beside Today in the bar over the form, in Today, and in Find a form or command) lists
+every student kept on this iPad, the most urgent first: the student (and number), the school, when the case was last
+saved, the last day of data, and how many things need you, with the most pressing kind. Above the list, **what needs you
+across the caseload**: each student's Today items in one list (the restraint and seclusion notices first, then injuries,
+decisions, timelines, what is due, home), each with Open, which opens that student's case and the form the item names.
+
+- *How a student gets here.* Each Save case (and Close case, which saves first) keeps a copy of that student's case, the
+  same as the case file, with a summary read from it then (what Today says, the last day of data). A student is known by
+  their name and student number; saving again replaces their copy. *Open* opens the case from its copy, as Open case
+  does from a file (what is open is replaced, after the question), and the case is as it was saved.
+- *Privacy.* The copies are kept in this browser on this device only (a store of its own); nothing is sent anywhere.
+  *Initials only* shows initials and hides the student numbers on the screen. *Do not keep cases on this device* stops
+  new copies (the ones kept stay until removed). *Remove* takes a student off this device's list; their case files are
+  not touched. The case files you save remain the record.
+- *Keeping it.* Safari can clear a website's storage after some weeks without a visit; the workstation installed on the
+  Home Screen keeps it. The case on screen has its summary brought up to date when Caseload opens.
+
+Checked by `qa/v2179-test.js` (two simulated students kept, listed, initials only, opened from the list, removed, and
+nothing kept when it is turned off); `qa/sprint-a8-test.js` (the bars keep one row with the new button).
