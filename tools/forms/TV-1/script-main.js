@@ -17,7 +17,7 @@ const nw=n=>WORDS[n]||String(n);
 /* (v21.53) c5: the chapter tabs' text, c6 and c7: the lit tab and its text */
 const LOOKC={chapters:{c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a'},panel:{c1:'#0f1b41',c2:'#cbb98a',c3:'#a9cdc7',c4:'#8b91bb',c5:'#ffffff',c6:'#cbb98a',c7:'#0f1b41'},cards:{c1:'#1d3b5a',c2:'#e8a33d',c3:'#a9cdc7',c4:'#8b91bb',c5:'#ffffff',c6:'#e8a33d',c7:'#1d3b5a'}};
 const CKEYS=['c1','c2','c3','c4','c5','c6','c7'];
-const LAYS=[['auto','Automatic'],['side','A card beside the presenter'],['lower','Lower third'],['full','Full-screen card'],['title','Section title'],['pic1','One picture'],['pic2','Two pictures'],['split','Text beside a picture'],['none','No card (the presenter alone)']];
+const LAYS=[['auto','Automatic'],['side','A card beside the presenter'],['lower','Lower third'],['full','Full-screen card'],['title','Section title'],['pic1','One picture'],['pic2','Two pictures'],['split','Text beside a picture'],['dodont','Do and don’t, in two columns'],['none','No card (the presenter alone)']];
 function newRow(seg,o){return Object.assign({seg:seg||'',say:'',tp:'',cont:false,title:'',body:'',build:false,lay:'auto',ch:'',pics:[{ph:'',cap:''},{ph:'',cap:''}],x:Array(20).fill('')},o||{});}
 function blank(){return{meta:{aud:'',pname:'',plines:'',look:'chapters',chapters:'',c1:'#222f5a',c2:'#eed9ad',c3:'#c1d8d3',c4:'#8b91bb',c5:'#ffffff',c6:'#eed9ad',c7:'#222f5a',tkspd:'90',tksize:'43',tkfont:'merri',tkcol:'#111111',series:'Functional Treatments in Applied Behavior Analysis',tag:'',cardbg:'light',gbg:'green',side:'left',font:'lato',tpsize:'58',tpwpm:'140',tpmode:'fixed',tpsens:'50',tpline:'30',tpwide:'100',contact:''},chk:{mirror:false,nocd:false,tpmanual:false},rows:[],photos:[],log:[],wt:[],segs:{},mus:{tracks:[],by:{}}};}
 let S=blank();
@@ -28,7 +28,7 @@ function ensure(){if(!S.meta||typeof S.meta!=='object')S.meta={};if(!S.chk||type
   /* a setting left empty on purpose stays empty (no series band, the tag made from the name) */
   const d=blank().meta,keep=['series','tag','chapters','contact'];Object.keys(d).forEach(k=>{if(S.meta[k]==null||(S.meta[k]===''&&!keep.includes(k)))S.meta[k]=d[k];});
   S.rows.forEach(r=>{r.tp=String(r.tp==null?'':r.tp);});if(!/^(fixed|speak|follow)$/.test(S.meta.tpmode))S.meta.tpmode='fixed';}
-const firstName=()=>{const f=String(S.meta.first||'').trim();if(f)return f;const c=String(S.meta.client||'').trim().replace(/^SIMULATED\s*[–-]\s*/,'');return c?c.split(/\s+/)[0]:'the student';};
+const firstName=()=>{if(S.chk&&S.chk.initials){const i=tvInitials();if(i)return i;}const f=String(S.meta.first||'').trim();if(f)return f;const c=String(S.meta.client||'').trim().replace(/^SIMULATED\s*[–-]\s*/,'');return c?c.split(/\s+/)[0]:'the student';};
 const possess=n=>/s$/i.test(n)?n+'’':n+'’s';
 const photo=id=>S.photos.find(p=>p.id===id);
 
@@ -64,14 +64,14 @@ function placeCues(only){let n=0;paras().forEach((p,k)=>{if(only&&!only.includes
 /* ---------------- drafting from the case ---------------- */
 /* the case (the facts the workstation shell hands this form) is kept as it last came, so a draft can be made later too */
 let CASE=null;
-const SEGS=[['overview','Training Overview'],['profile','Student Profile'],['behaviors','Target Behaviors'],['function','Function & Data'],['goals','Goals of Intervention'],
-  ['reinforce','Reinforcement System'],['proactive','Proactive Strategies'],['response','Response Plan'],['takeaways','Key Takeaways'],['terms','Terms & Definitions'],['close','Closing']];
+const SEGS=[['overview','Training Overview'],['profile','Student Profile'],['behaviors','Target Behaviors'],['function','Function & Data'],['data','Where Things Stand'],['goals','Goals of Intervention'],
+  ['reinforce','Reinforcement System'],['proactive','Proactive Strategies'],['everyday','Every Day'],['response','Response Plan'],['tiers','Step by Step'],['takeaways','Key Takeaways'],['terms','Terms & Definitions'],['close','Closing']];
 const lc1=s=>{s=String(s||'').trim();return /^[A-Z][a-z]/.test(s)?s[0].toLowerCase()+s.slice(1):s;};
 const sent=s=>{s=String(s||'').trim().replace(/\s+/g,' ');if(!s)return '';return /[.!?]$/.test(s)?s:s+'.';};
 const bullets=a=>a.filter(Boolean).map(x=>'• '+String(x).trim()).join('\n');
 /* column B as the sheet writes it: the opening sentence a paragraph, the rest the next */
 const lead=t=>String(t||'').replace(/^([^.!?\[\n]{12,}?[.!?])\s+(?=[A-Z\[])/,'$1\n\n');
-const GROUP={overview:'Intro',profile:'Intro',behaviors:'Behavior',function:'Behavior',goals:'Goals',reinforce:'The Plan',proactive:'The Plan',response:'Response',takeaways:'Close',terms:'Close',close:'Close'};
+const GROUP={overview:'Intro',profile:'Intro',behaviors:'Behavior',function:'Behavior',data:'Behavior',goals:'Goals',reinforce:'The Plan',proactive:'The Plan',everyday:'The Plan',response:'Response',tiers:'Response',takeaways:'Close',terms:'Close',close:'Close'};
 /* (v21.52) the case's own words, from the profile (DM-1), the plan (TD-1) and the crisis plan (CR-1): a field's items (split at
    ";", new lines and commas), a list said aloud, a short line for a card */
 const str=v=>String(v==null?'':v).trim();
@@ -84,7 +84,7 @@ const short=(x,n)=>{x=str(x).replace(/\s*\([^)]*\)/g,'').replace(/\s+/g,' ').tri
   const c0=x.split(/\s*[;:]\s+|\.\s+/)[0];if(c0.length<=n&&c0.length>=8)return c0;let o='';for(const q of c0.split(/,\s+/)){if((o?o+', '+q:q).length>n)break;o=o?o+', '+q:q;}
   return o.length>=8?o:x.slice(0,n).replace(/\s+\S*$/,'')+'…';};
 const first=x=>str(x).split(/(?<=[.;])\s+/)[0].replace(/[.;]$/,'');
-function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];const add=(seg,o)=>{if(o&&o.say)o.say=lead(o.say);out.push(newRow(seg,o));};
+function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[],fam=tvFam();const add=(seg,o)=>{if(o&&o.say)o.say=lead(o.say);out.push(newRow(seg,o));};
   const behs=(f.behaviors||[]).filter(b=>b&&(b.label||b.def)),red=behs.filter(b=>!b.isRep&&!/replacement|alternative/i.test(b.type||'')),rep=behs.filter(b=>b.isRep||/replacement|alternative/i.test(b.type||''));
   const fn=f.fn||null,g=f.goals||{},gr=(g.red||[]).filter(x=>x&&(x.text||x.beh)),ga=(g.acq||[]).filter(x=>x&&(x.text||x.beh));
   const pf=f.profile&&typeof f.profile==='object'?f.profile:null,pl=f.plan&&typeof f.plan==='object'?f.plan:null,cr=f.crisis&&typeof f.crisis==='object'?f.crisis:null;
@@ -95,8 +95,8 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
   /* (v21.54) a title card opens the video, and a closing card (the contact for questions, Setup) ends it */
   if(on('overview')){const ser=String(S.meta.series||'').trim();
     add(segName('overview'),{say:'Welcome. This is the training video for '+Np+' Functional Behavior Assessment and Behavior Intervention Plan'+(ser?', in the series '+ser:'')+'.',title:Np+' FBA and BIP',lay:'title'});
-    add(segName('overview'),{say:'This training walks '+aud+' through '+Np+' Functional Behavior Assessment and Behavior Intervention Plan. It is presented by '+who+'.',title:'Presenter',body:[String(S.meta.pname||'').trim()||'[your name]'].concat(String(S.meta.plines||'').split('\n').map(s=>s.trim()).filter(Boolean)).join('\n'),lay:'side'});
-    add(segName('overview'),{say:'Everything that follows is meant for someone meeting '+N+' for the first time. It moves from the assessment, to the plan, to what you will do each day.',title:'Covering',
+    add(segName('overview'),{say:(fam?'This video is for '+aud+'. It shares '+Np+' plan at school: what the team has learned, and what helps. It is presented by '+who+'.':'This training walks '+aud+' through '+Np+' Functional Behavior Assessment and Behavior Intervention Plan. It is presented by '+who+'.'),title:'Presenter',body:[String(S.meta.pname||'').trim()||'[your name]'].concat(String(S.meta.plines||'').split('\n').map(s=>s.trim()).filter(Boolean)).join('\n'),lay:'side'});
+    add(segName('overview'),{say:fam?'It moves from what the team has learned about '+N+', to the plan, to what helps at school and at home.':'Everything that follows is meant for someone meeting '+N+' for the first time. It moves from the assessment, to the plan, to what you will do each day.',title:'Covering',
       body:bullets(keys.filter(k=>k!=='overview').map(segName))});}
   if(on('profile')){const st=pf?items(pf.strengths).slice(0,6):[],it=pf?items(pf.interests).slice(0,5):[];
     add(segName('profile'),{say:'A behavior plan only makes sense in the context of the whole learner, including what '+N+' does well and enjoys. '+(st.length?sent('The team names these strengths: '+andList(st.map(lc1))):'[What '+N+' does well.]')+' '+(it.length?cap1(sent(N+' enjoys '+andList(it.map(lc1)))):'[What '+N+' enjoys.]'),
@@ -106,34 +106,37 @@ function draft(keys,f){f=f||CASE||{};const N=firstName(),Np=possess(N),out=[];co
       title:'Communication',body:cm.length?cm.slice(0,5).map(x=>x[2]+lc1(short(x[0],40))).join('\n'):'[what every adult does]'});}
   if(on('behaviors')){
     if(red.length){
-      add(segName('behaviors'),{say:'A target behavior definition must be observable and measurable, so that any two staff members counting the same event arrive at the same number. '+(red.length===1?'One behavior is':nw(red.length)[0].toUpperCase()+nw(red.length).slice(1)+' behaviors are')+' tracked on this plan.',title:'Tracked',body:bullets(red.map(b=>b.label))});
+      add(segName('behaviors'),{say:(fam?'The school team counts a few behaviors, each one described so that everyone means the same thing. ':'A target behavior definition must be observable and measurable, so that any two staff members counting the same event arrive at the same number. ')+(red.length===1?'One behavior is':nw(red.length)[0].toUpperCase()+nw(red.length).slice(1)+' behaviors are')+' tracked on this plan.',title:'Tracked',body:bullets(red.map(b=>b.label))});
       red.forEach(b=>{const d=String(b.def||'').trim(),ex=String(b.ex||'').trim(),nex=String(b.nex||'').trim(),dim=String(b.dim||'').trim();
         add(segName('behaviors'),{say:(d?sent(b.label+' is defined as '+lc1(d).replace(/[.]+$/,'')):'['+b.label+': its definition.]')+(dim?' It is measured by '+lc1(dim).replace(/[.]+$/,'')+'.':'')+(ex?' For example: '+sent(lc1(ex)):'')+(nex?' It does not include '+sent(lc1(nex)):''),
           title:b.label,body:[d,ex?'Examples: '+ex:'',nex?'Not: '+nex:''].filter(Boolean).join('\n')});});}
     else add(segName('behaviors'),{say:'A target behavior definition must be observable and measurable. [The behaviors tracked, each with its definition.]',title:'Tracked',body:'• [a behavior]'});}
   if(on('function')){
     const st=(fn&&fn.statements||[]).filter(Boolean);
-    add(segName('function'),{say:'A hypothesis statement links the conditions under which behavior occurs to the consequence that maintains it.'+(st.length?' '+st.map(sent).join(' '):' [The hypothesis statement.]'),
+    add(segName('function'),{say:(fam?'This is the team’s best understanding of why the behavior happens.':'A hypothesis statement links the conditions under which behavior occurs to the consequence that maintains it.')+(st.length?' '+st.map(sent).join(' '):' [The hypothesis statement.]'),
       title:'Hypothesis',body:st.length?st.join('\n'):'[when …, '+N+' will …, in order to …]'});
     if(fn&&(fn.label||fn.key))add(segName('function'),{say:'',cont:true,title:'Function',body:String(fn.label||fn.key)});}
+  if(on('data'))tvDraftData(f,add,segName('data'),fam);
   if(on('goals')){
-    if(gr.length)add(segName('goals'),{say:'Reduction goals specify the criterion at which a target behavior is considered resolved for planning purposes. '+(gr.length===1?'One reduction goal is':nw(gr.length)[0].toUpperCase()+nw(gr.length).slice(1)+' reduction goals are')+' on this plan.',title:'Reduce',body:gr.map(x=>sent(x.text||x.beh)).join('\n')});
+    if(gr.length)add(segName('goals'),{say:(fam?'These are the goals for what the team wants to see less of. ':'Reduction goals specify the criterion at which a target behavior is considered resolved for planning purposes. ')+(gr.length===1?'One reduction goal is':nw(gr.length)[0].toUpperCase()+nw(gr.length).slice(1)+' reduction goals are')+' on this plan.',title:'Reduce',body:gr.map(x=>sent(x.text||x.beh)).join('\n')});
     const teach=ga.length?ga.map(x=>sent(x.text||x.beh)):rep.map(b=>sent(b.label));
-    if(teach.length)add(segName('goals'),{say:'A replacement behavior produces the same outcome as the problem behavior through an appropriate response. '+(teach.length===1?'One is':nw(teach.length)[0].toUpperCase()+nw(teach.length).slice(1)+' are')+' being taught.',title:'Teach',body:teach.join('\n')});
+    if(teach.length)add(segName('goals'),{say:(fam?'And this is what '+N+' is learning to do instead, to get the same thing in a better way. ':'A replacement behavior produces the same outcome as the problem behavior through an appropriate response. ')+(teach.length===1?'One is':nw(teach.length)[0].toUpperCase()+nw(teach.length).slice(1)+' are')+' being taught.',title:'Teach',body:teach.join('\n')});
     if(!gr.length&&!teach.length)add(segName('goals'),{say:'[The goals of the plan: what will be reduced, and what will be taught.]',title:'Goals',body:'[goal]'});}
   if(on('reinforce')){
     add(segName('reinforce'),{say:(menu.length?'These are the items and activities '+N+' works for, from the preference assessment, the most preferred first. ':'')+(pl&&(str(pl.rep)||arr(pl.teach).length||arr(pl.sched).length||str(pl.prompted))?[str(pl.rep)?sent('The replacement behavior is: '+str(pl.rep))+' Honor it every time.':'',arr(pl.teach).length?sent('It is taught with '+andList(arr(pl.teach).map(lc1))):'',arr(pl.sched).length?sent('The reinforcement schedule: '+andList(arr(pl.sched).map(lc1))):'',str(pl.prompted)?sent('Prompted and unprompted responses: '+str(pl.prompted)):''].filter(Boolean).join(' '):'[How reinforcement is delivered: what earns it, how often, and for how long.]'),
       title:menu.length?'Works For':'Reinforcement',body:menu.length?bullets(menu.slice(0,6).map(m=>m.name)):'• [what earns it]\n• [how often]'});}
   if(on('proactive')){const an=pl?arr(pl.ant):[],ac=pl?arr(pl.antCards):[];
-    add(segName('proactive'),{say:'Proactive strategies prevent the behavior, or make it less likely, by changing what happens before it. '+(an.length||ac.length?(an.length?'Every adult working with '+N+' does these things. '+an.map(sent).join(' '):'')+(ac.length?' '+sent('The plan also uses '+andList(ac.map(lc1))):''):'[The strategies every adult uses with '+N+'.]'),
+    add(segName('proactive'),{say:(fam?'Most of the plan happens before anything goes wrong: small changes that make the behavior less likely. ':'Proactive strategies prevent the behavior, or make it less likely, by changing what happens before it. ')+(an.length||ac.length?(an.length?'Every adult working with '+N+' does these things. '+an.map(sent).join(' '):'')+(ac.length?' '+sent('The plan also uses '+andList(ac.map(lc1))):''):'[The strategies every adult uses with '+N+'.]'),
       title:'Proactive',body:an.length||ac.length?bullets(an.map(x=>cap1(short(x,50))).concat(ac.map(x=>short(x,50))).slice(0,6)):'• [a strategy]\n• [a strategy]'});}
+  if(on('everyday'))tvDraftEveryday(f,add,segName('everyday'),fam);
   if(on('response')){const sp=[[rsp.prec,'At the first sign'+(pl&&str(pl.prec)?' ('+lc1(str(pl.prec).replace(/[.]+$/,''))+')':'')+': ','First sign: '],[rsp.target,'If the behavior occurs: ','If it occurs: '],[rsp.after,'Afterwards: ','After: '],[rsp.not,'What staff do not do: ','Do not: ']].filter(x=>str(x[0]));
-    add(segName('response'),{say:'A response plan says what staff do after the behavior begins. It is a safety and de-escalation sequence, followed in order. '+(sp.length?sp.map(x=>sent(x[1]+str(x[0]))).join(' '):'[The steps.]'),
+    add(segName('response'),{say:(fam?'If the behavior does happen, this is what school staff do, step by step. ':'A response plan says what staff do after the behavior begins. It is a safety and de-escalation sequence, followed in order. ')+(sp.length?sp.map(x=>sent(x[1]+str(x[0]))).join(' '):'[The steps.]'),
       title:'Steps',body:sp.length?sp.map((x,j)=>(j+1)+'. '+x[2]+lc1(short(x[0],46))).join('\n'):'1. [first step]\n2. [next step]\n3. [next step]',lay:'full'});
-    const stg=cr&&Array.isArray(cr.stages)?cr.stages.filter(x=>x&&str(x.s)&&str(x.do)).slice(0,6):[];
+    const stg=!fam&&cr&&Array.isArray(cr.stages)?cr.stages.filter(x=>x&&str(x.s)&&str(x.do)).slice(0,6):[];
     if(stg.length)add(segName('response'),{say:'When the behavior becomes dangerous, the crisis plan takes over, one stage at a time. '+stg.map((x,j)=>'Stage '+nw(j+1)+', '+lc1(str(x.s).replace(/[.:]+$/,''))+'. '+cap1(sent(str(x.do)))).join(' '),
       title:'Safety',body:stg.map((x,j)=>(j+1)+'. '+short(str(x.s),26)+': '+lc1(short(x.do,40))).join('\n'),lay:'full'});
-    else if(str(rsp.crisis))add(segName('response'),{say:sent('In a crisis: '+str(rsp.crisis)),title:'Safety',body:short(str(rsp.crisis),120),lay:'full'});}
+    else if(!fam&&str(rsp.crisis))add(segName('response'),{say:sent('In a crisis: '+str(rsp.crisis)),title:'Safety',body:short(str(rsp.crisis),120),lay:'full'});}
+  if(on('tiers'))tvDraftTiers(f,add,segName('tiers'),fam);
   if(on('takeaways')){const an=pl?arr(pl.ant):[],tk=[pl&&str(pl.rep)?['First, the replacement behavior: '+str(pl.rep)+'. Honor it every time.','Honor the replacement: '+lc1(short(str(pl.rep),34))]:null,str(rsp.not)?['Second, what never to do: '+lc1(str(rsp.not)),'Never: '+lc1(short(rsp.not,44))]:null,an.length?['And every day, before anything happens: '+lc1(an[0]),cap1(short(an[0],50))]:null].filter(Boolean);
     add(segName('takeaways'),{say:tk.length?(tk.length>1?nw(tk.length)[0].toUpperCase()+nw(tk.length).slice(1)+' things matter most. ':'One thing matters most. ')+tk.map(x=>sent(x[0])).join(' '):'[The two or three things every adult should remember about '+N+'.]',
       title:'Remember',body:tk.length?bullets(tk.map(x=>x[1])):'• [the first thing]\n• [the second thing]',lay:'full'});}
@@ -256,7 +259,12 @@ const GFX_CSS=`.gx{position:absolute;left:0;top:0;width:1920px;height:1080px;ove
 .gx.pnl.v2.full .pn-tick{width:1888px}
 /* a list shown one point at a time (v21.51): the points still to come keep their place, unseen */
 .gx [data-rv]{transition:opacity .4s ease,transform .4s ease}
-.gx .rv-hid{opacity:0;transform:translateY(12px)}`;
+.gx .rv-hid{opacity:0;transform:translateY(12px)}
+.gx .dd2{display:grid;grid-template-columns:1fr 1fr;gap:0 1.1em}.gx .dd2-h{font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin:0 0 .4em;padding-bottom:.18em;border-bottom:4px solid currentColor}
+.gx .dd2-i{position:relative;padding-left:1.15em;margin:0 0 .42em;line-height:1.2}.gx .dd2-i:before{position:absolute;left:0;font-weight:900}.gx .dd2-do .dd2-i:before{content:"\\2713"}.gx .dd2-no .dd2-i:before{content:"\\2715"}
+.gx .dd2-do .dd2-h,.gx .dd2-do .dd2-i:before{color:#23794a}.gx .dd2-no .dd2-h,.gx .dd2-no .dd2-i:before{color:#b3261e}
+.gx.pnl .dd2-do .dd2-h,.gx.pnl .dd2-do .dd2-i:before,.gx.dark .dd2-do .dd2-h,.gx.dark .dd2-do .dd2-i:before{color:#86d9a3}.gx.pnl .dd2-no .dd2-h,.gx.pnl .dd2-no .dd2-i:before,.gx.dark .dd2-no .dd2-h,.gx.dark .dd2-no .dd2-i:before{color:#ff9b8e}
+.gx.pic1 .gx-card{top:120px;width:800px;height:840px}.gx.pic1.right .gx-card{left:1040px}.gx.pic1.left .gx-card{left:80px}.gx.pic1 .gx-pic .im{flex-basis:0}.gx .gx-pic .im img[src^="data:image/svg+xml"]{object-fit:contain;background:#fff}`;
 /* Lato Bold and Black (tools/vendor/lato, SIL Open Font License), put in by build.sh as @font-face rules with data URLs */
 const LATO_CSS='/*@@LATO@@*/';
 const GFX_ALL=LATO_CSS+'\n'+GFX_CSS;
@@ -293,21 +301,21 @@ function chOf(r){const C=chList();if(!C.list.length)return -1;if(!C.own)return C
 function logoSrc(){const L=photo('logo');if(L)return L.img;const im=document.querySelector('img[data-nbh-logo]');return im&&/^data:image\//.test(im.src)?im.src:'';}
 function logoCss(){const u=logoSrc();return u?'.gx.pnl .pn-logo{background-image:url("'+u+'")}':'';}
 function paintLogo(){const st=$('#tv-logo');if(st){const c=logoCss();if(st.textContent!==c)st.textContent=c;}}
-function tagText(){const t=String(S.meta.tag||'').trim();if(t)return t;const c=String(S.meta.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);
+function tagText(){const t=String(S.meta.tag||'').trim();if(t)return t;if(S.chk&&S.chk.initials&&tvInitials())return 'FBA & BIP Video Training: '+tvInitials();const c=String(S.meta.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);
   const f=String(S.meta.first||'').trim()||c[0]||'',l=c.length>1?c[c.length-1][0].toUpperCase()+'.':'';return 'FBA & BIP Video Training'+(f?': '+f+(l?' '+l:''):'');}
 function paraHtml(t){return unmark(t).split('\n').map(x=>x.trim()).filter(Boolean).map(x=>'<p>'+mark(x)+'</p>').join('');}
 function listHtml(t,rv){const cl=(j,c)=>rv==null?(c?' class="'+c+'"':''):' data-rv="'+j+'" class="'+(c?c+' ':'')+(j>=rv?'rv-hid':'')+'"';
   return String(t||'').split('\n').map(x=>x.trim()).filter(Boolean).map((x,j)=>/^[•\-*–]\s*/.test(x)?'<div'+cl(j,'b')+'>•&nbsp;'+mark(x.replace(/^[•\-*–]\s*/,''))+'</div>':/^\d+[.)]\s+/.test(x)?'<div'+cl(j,'b')+'>'+mark(x)+'</div>':'<div'+cl(j,'')+'>'+mark(x)+'</div>').join('');}
 function panelHtml(r,opt){const v2=S.meta.look==='chapters',side=S.meta.side==='right'?'right':'left',pics=r.pics.filter(p=>p.ph&&photo(p.ph)),np=pics.length;
   const l0=r.lay!=='auto'?r.lay:np>=2?'pic2':np===1?'pic1':(!r.seg&&!r.title&&!String(r.say||'').trim()&&!String(r.body||'').trim()?'none':'side');
-  let lay=/^(pic1|pic2|side)$/.test(l0)?'side':l0;const hp=(lay==='side'||lay==='split')&&np?(l0==='pic1'||lay==='split'?1:Math.min(2,np)):0;
+  let lay=/^(pic1|pic2|side|dodont)$/.test(l0)?'side':l0;const hp=(lay==='side'||lay==='split')&&np?(l0==='pic1'||lay==='split'?1:Math.min(2,np)):0;
   const ph=opt.presenter?'<div class="gx-ph '+(side==='right'?'l':'r')+'"></div>':'',k=(v2?'v2-':'')+lay+'-'+side+'-'+hp;
   const cls='gx pnl '+lay+' '+side+(v2?' v2':'')+(hp?' hp':'')+(opt.flat?' flat':'')+(opt.live?' live':'');
   if(lay==='none')return '<div class="'+cls+'" data-k="'+k+'" style="'+vars()+'">'+ph+'</div>';
   const at=S.rows.indexOf(r),say=r.cont&&at>0?S.rows[paraOf(at)].say:r.say,first=String(r.body||'').split('\n').map(x=>x.trim().replace(/^[•\-*–]\s*/,'')).filter(Boolean)[0]||'';let inner;
   if(lay==='lower')inner='<div class="pn-t gx-tx gx-fitw" data-fs="58" data-min="28">'+mark(r.title||r.seg||'')+'</div>'+(first?'<div class="pn-h gx-tx gx-fitw" data-fs="34" data-min="18">'+mark(first)+'</div>':'');
   else if(lay==='title')inner='<div class="pn-t gx-tx gx-fitw" data-fs="112" data-min="44">'+mark(r.seg||r.title||'')+'</div><div class="pn-rule"></div>'+(r.title&&r.title!==r.seg?'<div class="pn-h gx-tx gx-fitw" data-fs="50" data-min="24">'+mark(r.title)+'</div>':'');
-  else{const tx='<div class="pn-tx">'+paraHtml(say)+(r.title?'<div class="pn-h">'+mark(r.title)+'</div>':'')+(String(r.body||'').trim()?'<div class="pn-l">'+listHtml(r.body,r.build?opt.rv:null)+'</div>':'')+'</div>';
+  else{const tx='<div class="pn-tx">'+paraHtml(say)+(r.title?'<div class="pn-h">'+mark(r.title)+'</div>':'')+(String(r.body||'').trim()?'<div class="pn-l">'+(l0==='dodont'?ddHtml(r.body):listHtml(r.body,r.build?opt.rv:null))+'</div>':'')+'</div>';
     const pp=hp?'<div class="pn-pics">'+pics.slice(0,hp).map(p=>'<div class="pn-pic"><div class="im"><img src="'+photo(p.ph).img+'" alt=""></div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>').join('')+'</div>':'';
     inner='<div class="pn-t gx-tx gx-fitw" data-fs="'+(v2?102:92)+'" data-min="40">'+mark(r.seg||'')+'</div><div class="pn-rule"></div><div class="gx-in pn-in gx-tx gx-fit" data-fs="'+(v2?33:30)+'" data-min="13" data-gap="'+(v2?'1':'1.15')+'">'+tx+pp+'</div>';}
   /* the Chapters look: the chapter bar along the panel's foot, the chapter of this card lit */
@@ -317,7 +325,7 @@ function panelHtml(r,opt){const v2=S.meta.look==='chapters',side=S.meta.side==='
   else if(ser)band='<div class="pn-band gx-fitw" data-fs="30" data-min="14"><span>'+esc(ser)+'</span></div>';
   return '<div class="'+cls+'" data-k="'+k+'" style="'+vars()+'">'+ph+'<div class="pn">'+inner+'</div>'+band+
     (logoSrc()?'<div class="pn-logo"></div>':'')+(tg?'<div class="pn-tag gx-fitw" data-fs="27" data-min="14"><span>'+esc(tg)+'</span></div>':'')+'</div>';}
-function cardHtml(r,opt){opt=opt||{};if(!r)return '<div class="gx" style="'+vars()+'"></div>';if(S.meta.look!=='cards')return panelHtml(r,opt);const lay=layOf(r),side=S.meta.side==='left'?'left':'right',dark=S.meta.cardbg==='dark';
+function cardHtml(r,opt){opt=opt||{};if(!r)return '<div class="gx" style="'+vars()+'"></div>';if(S.meta.look!=='cards')return panelHtml(r,opt);const lay0=layOf(r),lay=lay0==='dodont'?'full':lay0,side=S.meta.side==='left'?'left':'right',dark=S.meta.cardbg==='dark';
   const ph=opt.presenter?'<div class="gx-ph '+(side==='right'?'l':'r')+'"></div>':'';const seg=esc(r.seg||'');const cls='gx '+lay+' '+side+(dark?' dark':'')+(opt.flat?' flat':'');
   if(lay==='none')return '<div class="'+cls+'" style="'+vars()+'">'+ph+'</div>';
   if(lay==='title')return '<div class="'+cls+'" style="'+vars()+'">'+ph+'<div class="gx-band"><div class="gx-k">'+seg+'</div><div class="gx-title gx-fit" data-fs="96" data-min="44">'+mark(r.title||r.seg||'')+'</div></div></div>';
@@ -326,7 +334,7 @@ function cardHtml(r,opt){opt=opt||{};if(!r)return '<div class="gx" style="'+vars
   if(lay==='pic1'||lay==='pic2'){const use=lay==='pic1'?pics.slice(0,1):pics.slice(0,2);
     inner+='<div class="gx-pics">'+(use.length?use:[{ph:'',cap:''}]).map(p=>{const P=photo(p.ph);return '<div class="gx-pic"><div class="im">'+(P?'<img src="'+P.img+'" alt="">':'')+'</div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>';}).join('')+'</div>';
     if(lay==='pic1'&&String(r.body||'').trim())inner+='<div class="gx-body gx-fit" data-fs="30" data-min="20" style="flex:0 0 auto;margin-top:14px">'+bodyHtml(r.body,r.build?opt.rv:null)+'</div>';}
-  else{const L=String(r.body||'').split('\n').filter(s=>s.trim()).length;inner+='<div class="gx-body gx-fit'+(lay==='full'&&L>6?' cols':'')+'" data-fs="'+(lay==='lower'?38:lay==='full'?46:46)+'" data-min="20">'+bodyHtml(lay==='lower'?String(r.body||'').split('\n').filter(s=>s.trim()).slice(0,2).join('\n'):r.body,r.build?opt.rv:null)+'</div>';}
+  else{const L=String(r.body||'').split('\n').filter(s=>s.trim()).length;inner+='<div class="gx-body gx-fit'+(lay==='full'&&L>6?' cols':'')+'" data-fs="'+(lay==='lower'?38:lay==='full'?46:46)+'" data-min="20">'+(lay0==='dodont'?ddHtml(r.body):bodyHtml(lay==='lower'?String(r.body||'').split('\n').filter(s=>s.trim()).slice(0,2).join('\n'):r.body,r.build?opt.rv:null))+'</div>';}
   return '<div class="'+cls+'" style="'+vars()+'">'+ph+'<div class="gx-card"><div class="gx-seg">'+seg+'</div><div class="gx-in">'+inner+'</div></div></div>';}
 /* each text box shrinks until its card holds it (from its data-fs to its data-min, in px of the 1920 stage) */
 function fitGx(root){(root||document).querySelectorAll('.gx').forEach(g=>{
@@ -972,6 +980,252 @@ async function loadSim(){if(!(await nbhUI.confirm('Load a simulated training scr
   S.rows.splice(2,0,newRow('Training Overview',{cont:true,title:'Training Overview',lay:'title'}));
   placeCues();CASE=SIMCASE;renderAll();setView('script');nbhUI.toast('Simulator loaded: a sample training script for Sam ('+S.rows.length+' cards).',{kind:'ok'});}
 $('#simBtn').addEventListener('click',loadSim);
+
+/* ===================================================================================================
+   v21.77 the training video, further: where things stand (Form DD-1's data, drawn as a chart for the card), the quick
+   start's do and don't and its tiers (Form QS-1), a draft for staff or for a family, a plain-language check, the photo and
+   name check with an initials-only switch, a target length with each segment's share, a check quiz (to print, or for
+   Google Forms), the rehearsal steps handed to Form ST-1, and retakes marked as you record (R, or the clicker held).
+   =================================================================================================== */
+/* ---- the audience: staff, or a family; Automatic reads "Who the training is for" ---- */
+const FAM_RE=/\b(famil|parent|caregiver|guardian|mom|dad|mother|father|grandparent|grandmother|grandfather|foster|home)/i;
+function tvFam(){const k=String(S.meta.audk||'');if(k==='family')return true;if(k==='staff')return false;return FAM_RE.test(String(S.meta.aud||''));}
+/* ---- the student's name, and the initials the cards show instead when Initials only is on ---- */
+function tvNames(){const c=String(S.meta.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim(),p=c.split(/\s+/).filter(Boolean),f=String(S.meta.first||'').trim()||p[0]||'';
+  return {full:p.length>1?c:'',first:f,last:p.length>1?p[p.length-1]:''};}
+function tvInitials(){const n=tvNames();if(!n.first)return '';return n.first[0].toUpperCase()+'.'+(n.last?' '+n.last[0].toUpperCase()+'.':'');}
+const tvReq=x=>String(x).replace(/[-\/\\^$*+?.()|[\]{}]/g,'\\$&');
+function tvNameRe(g){const n=tvNames(),L=[n.full,n.first].filter(x=>x&&x.length>1);return L.length?new RegExp('(^|[^A-Za-z])('+L.map(tvReq).join('|')+')(?![A-Za-z])',g?'g':''):null;}
+function tvNameHits(){const re=tvNameRe(false);if(!re)return [];const hits=[];
+  S.rows.forEach((r,i)=>{if([r.say,r.tp,r.title,r.body,r.seg,r.pics[0].cap,r.pics[1].cap].some(t=>re.test(String(t||''))))hits.push(i);});
+  if(re.test(String(S.meta.tag||''))||re.test(String(S.meta.chapters||'')))hits.push(-1);return hits;}
+function tvUseInitials(){const ini=tvInitials(),re=tvNameRe(true);if(!ini||!re)return 0;let c=0;const fix=t=>String(t||'').replace(re,(m,p1)=>{c++;return p1+ini;});
+  S.rows.forEach(r=>{['say','tp','title','body','seg'].forEach(k=>{r[k]=fix(r[k]);});r.pics.forEach(p=>{p.cap=fix(p.cap);});});S.meta.tag=fix(S.meta.tag);S.meta.chapters=fix(S.meta.chapters);return c;}
+
+/* ---- Form DD-1's data: each behavior's level before the plan and now, said, listed and drawn ---- */
+const fmtN=v=>{if(v==null||!isFinite(v))return '';return Math.abs(v)>=10?String(Math.round(v)):String(Math.round(v*10)/10);};
+function tvUnit(b){const u=String(b&&b.unit||'').toLowerCase(),pct=/%/.test(u)||!!(b&&b.two);
+  if(pct){const of=/time/.test(u)?' of the time':/interval/.test(u)?' of intervals':'';return {pct:true,say:' percent'+of,sh:'%',ax:'percent'+of};}
+  if(/hour/.test(u))return {say:' times an hour',sh:' an hour',ax:'times an hour'};
+  if(/minute/.test(u))return b.measure==='latency'?{say:' minutes before starting',sh:' min',ax:'minutes before starting'}:{say:' minutes a day',sh:' min a day',ax:'minutes a day'};
+  return {say:' times a day',sh:' a day',ax:'times a day'};}
+function tvDataList(f){const d=f&&f.data;if(!d||!Array.isArray(d.behaviors))return [];
+  return d.behaviors.filter(b=>b&&b.name).map(b=>{const cv=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean,bv=b.base&&b.base.mean!=null?b.base.mean:null;
+    return {name:String(b.name),kind:b.kind||'target',bv:typeof bv==='number'?bv:null,cv:typeof cv==='number'?cv:null,aim:typeof b.aim==='number'?b.aim:null,met:!!b.aimMet,u:tvUnit(b)};}).filter(x=>x.cv!=null).slice(0,4);}
+const tvDay=iso=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(iso||''));return m?new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString('en-US',{month:'long',day:'numeric'}):'';};
+/* the chart: a panel a behavior (up to four), the bar before the plan and the bar now, on its own scale, the goal dashed;
+   kept as the picture 'tvchart', so it shows in every look, in the graphics window and in the saved file */
+function tvChart(L){const W=1200,H=720,n=L.length,cols=n===1?1:2,rws=Math.ceil(n/cols),pw=W/cols,ph=H/rws,c1=hex(S.meta.c1,'#222f5a'),gold=mixc(hex(S.meta.c2,'#eed9ad'),'#000000',.45),sm=n>2;
+  const nice=m=>{if(!(m>0))return 1;const p=Math.pow(10,Math.floor(Math.log10(m)));for(const k of [1,1.5,2,2.5,3,4,5,6,8,10])if(k*p>=m-1e-9)return k*p;return 10*p;};
+  let g='<rect width="'+W+'" height="'+H+'" rx="24" fill="#ffffff"/>';
+  L.forEach((x,k)=>{const x0=(k%cols)*pw,y0=Math.floor(k/cols)*ph,top=y0+(sm?122:152),bot=y0+ph-(sm?52:76),lf=x0+56,rt=x0+pw-40,
+      mx=x.u.pct?100:nice(Math.max(x.bv||0,x.cv||0,x.aim||0)*1.12),Y=v=>bot-(Math.max(0,Math.min(mx,v))/mx)*(bot-top);
+    g+='<text x="'+(x0+pw/2)+'" y="'+(y0+(sm?44:58))+'" text-anchor="middle" font-size="'+(sm?30:40)+'" font-weight="900" fill="'+c1+'">'+esc(short(x.name,sm?26:34))+'</text>';
+    g+='<text x="'+(x0+pw/2)+'" y="'+(y0+(sm?76:96))+'" text-anchor="middle" font-size="'+(sm?20:25)+'" fill="#5b6670">'+esc(x.u.ax)+'</text>';
+    g+='<line x1="'+lf+'" y1="'+bot+'" x2="'+rt+'" y2="'+bot+'" stroke="#9aa5b1" stroke-width="3"/>';
+    const bars=x.bv!=null?[[x.bv,'Before the plan','#a3adb8'],[x.cv,'Now',c1]]:[[x.cv,'Lately',c1]],bw=Math.min(170,(rt-lf)*(bars.length>1?.3:.38));
+    bars.forEach((b,j)=>{const cx=lf+(rt-lf)*(bars.length>1?(j?.7:.3):.5),y=Y(b[0]);
+      g+='<rect x="'+(cx-bw/2).toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(2,bot-y).toFixed(1)+'" rx="8" fill="'+b[2]+'"/>';
+      g+='<text x="'+cx.toFixed(1)+'" y="'+(y-12).toFixed(1)+'" text-anchor="middle" font-size="'+(sm?30:40)+'" font-weight="900" fill="#1d2730">'+esc(fmtN(b[0])+(x.u.pct?'%':''))+'</text>';
+      g+='<text x="'+cx.toFixed(1)+'" y="'+(bot+(sm?30:40))+'" text-anchor="middle" font-size="'+(sm?20:26)+'" font-weight="700" fill="#3c4650">'+esc(b[1])+'</text>';});
+    if(x.aim!=null&&x.aim<=mx){const y=Y(x.aim);g+='<line x1="'+lf+'" y1="'+y.toFixed(1)+'" x2="'+rt+'" y2="'+y.toFixed(1)+'" stroke="'+gold+'" stroke-width="4" stroke-dasharray="14 10"/><text x="'+(rt-4)+'" y="'+(y-8).toFixed(1)+'" text-anchor="end" font-size="'+(sm?18:22)+'" font-weight="700" fill="'+gold+'">Goal '+esc(fmtN(x.aim)+(x.u.pct?'%':''))+'</text>';}});
+  const img='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" font-family="Lato,\'Helvetica Neue\',Helvetica,Arial,sans-serif">'+g+'</svg>')));
+  S.photos=S.photos.filter(p=>p.id!=='tvchart');S.photos.push({id:'tvchart',label:'Before and now (Form DD-1)',img});return 'tvchart';}
+function tvDraftData(f,add,seg,fam){const L=tvDataList(f);if(!L.length)return;const d=f.data||{},two=L.some(x=>x.bv!=null),ph=tvChart(L);
+  const said=L.map(x=>{const nm=cap1(lc1(x.name));return x.bv!=null?nm+': about '+fmtN(x.bv)+x.u.say+' before the plan, and about '+fmtN(x.cv)+x.u.say+' now.':nm+': about '+fmtN(x.cv)+x.u.say+' lately.';}).join(' ');
+  const met=L.filter(x=>x.met).map(x=>lc1(x.name));
+  const open=fam?'Here is how things are going, from the numbers the school team keeps every day.':'Here is where things stand, from the daily data'+(d.from&&d.to?', '+tvDay(d.from)+' to '+tvDay(d.to):'')+'.';
+  /* the card's paragraph is the opening (the chart says the rest); the teleprompter has every number, said */
+  add(seg,{say:open,tp:open+' '+said+(met.length?' '+sent(cap1(andList(met))+(met.length===1?' has':' have')+' met '+(met.length===1?'its':'their')+' goal for as many days in a row as the plan asks'):''),
+    title:two?'Before and Now':'Lately',body:L.map(x=>short(x.name,28)+': '+(x.bv!=null?fmtN(x.bv)+' → ':'')+fmtN(x.cv)+x.u.sh).join('\n'),lay:'pic1',pics:[{ph,cap:'From the daily data (Form DD-1)'},{ph:'',cap:''}]});}
+
+/* ---- Form QS-1: the non-negotiables as a card of do and don't, and the tiers, one a card, a point a click ---- */
+const tvDont=x=>cap1(str(x).replace(/^(don[’']?t|do not|never)\s+/i,''));
+function tvDraftEveryday(f,add,seg,fam){const q=f&&f.quick,R=q&&Array.isArray(q.rules)?q.rules.filter(r=>r&&(str(r.do)||str(r.dont))):[];if(!R.length)return;const N=firstName();
+  for(let k=0;k<R.length;k+=5){const part=R.slice(k,k+5),first=!k;
+    const open=fam?'A few things matter every day, at school and at home.':'These are the non-negotiables: what every adult does, and never does, with '+N+', every day.',all=part.map(r=>[str(r.do)?sent(cap1(str(r.do))):'',str(r.dont)?sent('Don’t '+lc1(tvDont(r.dont))):''].filter(Boolean).join(' ')).join(' ');
+    /* the card shows the two columns; the teleprompter says each line */
+    add(seg,{say:first?open:'',tp:first?open+' '+all:'',cont:!first,
+      title:'Do and Don’t',body:part.map(r=>[str(r.do)?'Do: '+short(cap1(r.do),54):'',str(r.dont)?'Don’t: '+short(tvDont(r.dont),54):''].filter(Boolean).join('\n')).join('\n'),lay:'dodont'});}}
+function tvDraftTiers(f,add,seg,fam){const q=f&&f.quick;let T=q&&Array.isArray(q.tiers)?q.tiers.filter(t=>t&&(str(t.see)||str(t.do))):[];if(!T.length)return;
+  /* a family: the first signs and the behavior, and the recovery; not the crisis detail */
+  if(fam)T=T.filter((t,j)=>(j<2||/recover|after|calm|return/i.test(str(t.name)))&&!/crisis|danger|unsafe|emergenc|restrain|hold|911/i.test(str(t.name)+' '+str(t.do)));if(!T.length)return;
+  add(seg,{say:fam?'At school, staff respond the same way each time, by what they see. ':'The plan in tiers: for each one, what you see, what you do, and what you say. Every adult responds the same way.',title:'What You See, What You Do',body:bullets(T.map(t=>short(str(t.name)||'Tier',40))),build:true});
+  T.forEach((t,j)=>{const nm=str(t.name)||('Tier '+j),see=str(t.see),dd=str(t.do),sy=str(t.say);
+    const nm1=sent(cap1(nm.replace(/^\d+\s*[·.:–-]\s*/,'')));
+    add(seg,{say:nm1,tp:nm1+(see?' '+sent('What you see: '+lc1(see)):'')+(dd?' '+sent('What you do: '+lc1(dd)):'')+(sy?' What you say: '+sy:''),
+      title:nm,body:[see?'See: '+short(see,60):'',dd?'Do: '+short(dd,70):'',sy?'Say: '+short(sy,60):''].filter(Boolean).join('\n'),build:true});});}
+/* the two columns of a do and don't card: "Do:" lines on the left, "Don't:" lines on the right */
+function ddHtml(t){const D=[],X=[];String(t||'').split('\n').map(s=>s.trim().replace(/^[•\-*–]\s*/,'')).filter(Boolean).forEach(s=>{const m=/^(don[’']?t|do not|never)\s*:\s*/i.exec(s);if(m)X.push(s.slice(m[0].length));else D.push(s.replace(/^do\s*:\s*/i,''));});
+  const col=(c,h,L)=>'<div class="dd2-c '+c+'"><div class="dd2-h">'+h+'</div>'+L.map(x=>'<div class="dd2-i">'+mark(x)+'</div>').join('')+'</div>';
+  return '<div class="dd2">'+col('dd2-do','Do',D)+col('dd2-no','Don’t',X)+'</div>';}
+
+/* ---- the plain-language check: the plan's terms, each with plain words, Replace and Keep ---- */
+const PLAIN=[['differential reinforcement','rewarding the better choice'],['functional communication training','teaching a better way to ask'],['noncontingent reinforcement','attention or breaks on a schedule'],
+  ['schedule of reinforcement','how often rewards come'],['reinforcement schedule','how often rewards come'],['token economy','token system'],['response cost','losing points or tokens'],
+  ['treatment integrity','following the plan as written'],['treatment fidelity','following the plan as written'],['hypothesis statement','best explanation of why'],['hypothesis','best explanation'],
+  ['replacement behaviors','skills taught instead'],['replacement behavior','skill taught instead'],['target behaviors','behaviors the team counts'],['target behavior','behavior the team counts'],
+  ['observable and measurable','something you can see and count'],['motivating operation','what makes something more wanted'],['establishing operation','what makes something more wanted'],
+  ['de-escalation','calming down'],['antecedent strategies','things done ahead of time'],['antecedents','what happens before'],['antecedent','what happens before'],
+  ['consequences','what happens after'],['consequence','what happens after'],['reinforcers','rewards'],['reinforcer','reward'],['reinforcement','rewards and praise'],['reinforced','rewarded'],['reinforce','reward'],
+  ['extinction','no longer getting what the behavior used to get'],['precursors','early warning signs'],['precursor','early warning sign'],['topography','what it looks like'],['baseline','before the plan started'],
+  ['criterion','goal'],['contingency','if-then rule'],['contingent','only after'],['generalization','using the skill everywhere'],['maintained by','kept going by'],['escape-maintained','done to get out of things'],
+  ['mand','request'],['FCT','teaching a better way to ask'],['NCR','attention or breaks on a schedule'],['DRA','rewarding the better choice'],['DRO','rewarding time without the behavior'],
+  ['latency','time before starting'],['prompt fading','giving less help over time'],['acquisition','learning'],['proactive strategies','things done ahead of time'],['operational definition','clear description']];
+const tvAcr=w=>/^[A-Z]{2,}$/.test(w);
+function tvPlainRe(){if(tvPlainRe.r)return tvPlainRe.r;const L=PLAIN.slice().sort((a,b)=>b[0].length-a[0].length);
+  return tvPlainRe.r={ci:new RegExp('(^|[^A-Za-z])('+L.filter(x=>!tvAcr(x[0])).map(x=>tvReq(x[0])).join('|')+')(?![A-Za-z])','gi'),cs:new RegExp('(^|[^A-Za-z])('+L.filter(x=>tvAcr(x[0])).map(x=>tvReq(x[0])).join('|')+')(?![A-Za-z])','g')};}
+const tvPlainOf=t=>{const x=PLAIN.find(p=>tvAcr(p[0])?p[0]===t:p[0]===String(t).toLowerCase());return x?x[1]:'';};
+const tvKey=w=>tvAcr(w)?w:w.toLowerCase();
+const tvKeep=()=>String(S.meta.plainKeep||'').split('|').filter(Boolean);
+function tvPlainHits(){const R=tvPlainRe(),keep=tvKeep(),by={};
+  S.rows.forEach((r,i)=>{['say','tp','title','body'].forEach(k=>{const t=String(r[k]||'');[R.ci,R.cs].forEach(re=>{re.lastIndex=0;let m;while((m=re.exec(t))){const key=tvKey(m[2]);if(keep.includes(key))continue;
+    const o=by[key]||(by[key]={t:key,n:0,rows:[]});o.n++;if(!o.rows.includes(i))o.rows.push(i);}});});});
+  return Object.values(by).sort((a,b)=>b.n-a.n||a.t.localeCompare(b.t));}
+function tvPlainReplace(term){const R=tvPlainRe(),pl=tvPlainOf(term);if(!pl)return 0;let n=0;
+  const fix=t=>{t=String(t||'');[R.ci,R.cs].forEach(re=>{re.lastIndex=0;t=t.replace(re,(m,p1,w,off,all)=>{if(tvKey(w)!==term)return m;n++;const at=off+p1.length,start=/(^|[.!?:]\s+|\n\s*)$/.test(all.slice(0,at));
+    return p1+(start||(!tvAcr(w)&&/^[A-Z]/.test(w))?cap1(pl):pl);});});return t;};
+  S.rows.forEach(r=>{['say','tp','title','body'].forEach(k=>{r[k]=fix(r[k]);});});return n;}
+function tvPlainRender(){const el=$('#plainOut');if(!el||el.hidden)return;const H=tvPlainHits(),fam=tvFam(),K=tvKeep();
+  el.innerHTML=(H.length?'<p class="hint">'+(fam?'Drafted for a family: each of these is worth plain words.':'Drafted for staff: a term every adult here is trained in can stay (Keep takes it off the list).')+' Replace puts the plain words in what is said and on the cards; Undo (Ctrl/Cmd+Z) brings the term back.</p>'+
+    '<table class="rt tv-plain"><tr><th style="width:26%">Term</th><th>Plain words</th><th style="width:20%">Where</th><th style="width:196px"></th></tr>'+H.map(x=>'<tr><td><b>'+esc(x.t)+'</b> ('+x.n+')</td><td>'+esc(tvPlainOf(x.t))+'</td><td>card'+(x.rows.length>1?'s ':' ')+x.rows.slice(0,8).map(i=>i+1).join(', ')+(x.rows.length>8?'…':'')+'</td><td><button type="button" class="tool" data-plainrep="'+esc(x.t)+'">Replace</button> <button type="button" class="tool" data-plainkeep="'+esc(x.t)+'">Keep</button></td></tr>').join('')+'</table>':
+    '<div class="verdict v-ok"><b>Plain words.</b> None of the plan’s technical terms on the list is in the script'+(K.length?' (kept on purpose: '+esc(K.join(', '))+')':'')+'.</div>')+(K.length?'<div class="tools"><button type="button" class="tool" id="plainUnkeep">Check the kept terms again</button></div>':'');}
+function tvPlainShow(on){const el=$('#plainOut'),b=$('#plainBtn');if(!el)return;el.hidden=on===undefined?!el.hidden:!on;if(b)b.setAttribute('aria-pressed',String(!el.hidden));tvPlainRender();}
+
+/* ---- the checks before recording, on Setup: the audience, the photos and the permission, the name, the words, the length ---- */
+function tvPhotoCheck(){const fl=CASE&&CASE.profile&&CASE.profile.flags,perm=fl&&fl.photo?String(fl.photo):'',cards=[];
+  S.rows.forEach((r,i)=>{if(r.pics.some(p=>{const P=p.ph&&photo(p.ph);return P&&P.id!=='tvchart'&&!/^data:image\/svg/.test(P.img);}))cards.push(i);});return {perm,cards};}
+function tvSegTimes(){const W=wpm(),m=[];S.rows.forEach((r,i)=>{const L=m.length&&m[m.length-1].seg===r.seg&&i>0&&S.rows[i-1].seg===r.seg?m[m.length-1]:null,w=r.cont?0:words(spoken(r));if(L)L.w+=w;else m.push({seg:r.seg,i,w});});
+  const tot=m.reduce((a,x)=>a+x.w,0);m.forEach(x=>{x.s=x.w/W*60;x.share=tot?x.w/tot:0;});return {m,tot,s:tot/W*60};}
+const tvOnTarget=(s,tg)=>Math.abs(s-tg*60)<=Math.max(30,tg*6);
+function tvChecks(){const el=$('#tvChecks');if(!el)return;const out=[],fam=tvFam(),cs=n=>n>1?'s ':' ',sh=n=>n>1?'':'s';
+  out.push(['v-ok','<b>Drafted for '+(fam?'a family':'staff')+'.</b> '+(S.meta.audk?'As chosen above.':'Automatic, from “Who the training is for”'+(fam?', which names a family':'')+'.')+(fam?' The draft uses plain words, and leaves out the crisis plan’s stages.':'')]);
+  const pc=tvPhotoCheck();if(pc.cards.length){const w=pc.cards.map(i=>i+1).join(', '),n=pc.cards.length;
+    if(/^no$/i.test(pc.perm))out.push(['v-no','<b>Photos, and no permission.</b> Form DM-1 records no photo or media permission, and card'+cs(n)+w+' show'+sh(n)+' a photo. Take out any that shows '+esc(firstName())+' or another student before recording.']);
+    else if(!/^yes$/i.test(pc.perm))out.push(['v-mid','<b>Photos: check the permission.</b> Card'+cs(n)+w+' show'+sh(n)+' a photo, and '+(CASE&&CASE.profile?'Form DM-1 does not record the photo or media permission':'no profile (Form DM-1) has said whether there is photo or media permission')+'.']);
+    else out.push(['v-ok','<b>Photos:</b> Form DM-1 records photo or media permission ('+n+' card'+(n>1?'s':'')+' with a photo).']);}
+  if(S.chk.initials){const nh=tvNameHits(),nc=nh.filter(i=>i>=0).length;out.push(nh.length?['v-mid','<b>The name still shows.</b> Initials only is on, and the name is still in '+(nc?nc+' card'+(nc>1?'s':''):'')+(nc&&nh.includes(-1)?' and ':'')+(nh.includes(-1)?'the tag or the chapters':'')+'. <button type="button" class="tool" id="tvIniGo">Use the initials everywhere</button>']:['v-ok','<b>Initials only:</b> '+esc(tvInitials()||'(no name yet)')+' on the cards, the tag and in the words drafted.']);}
+  const pl=tvPlainHits();if(pl.length)out.push([fam?'v-mid':'v-ok','<b>'+pl.length+' technical term'+(pl.length>1?'s':'')+'</b> ('+esc(pl.slice(0,5).map(x=>x.t).join(', '))+(pl.length>5?'…':'')+'). '+(fam?'For a family, each is worth plain words.':'Staff may know them; a family would not.')+' <button type="button" class="tool" id="tvPlainGo">Plain-language check</button>']);
+  const tg=num(S.meta.target);if(tg>0&&S.rows.length){const T=tvSegTimes(),d=T.s-tg*60,ok=tvOnTarget(T.s,tg);let big=null;T.m.forEach(x=>{if(!big||x.w>big.w)big=x;});
+    out.push([ok?'v-ok':'v-mid','<b>Length:</b> about '+mmss(T.s)+' against '+mmss(tg*60)+(ok?', on target.':d>0?': '+mmss(d)+' over.':': '+mmss(-d)+' under.')+(big&&T.m.length>1?' The longest segment is '+esc(big.seg||'(no name)')+', about '+mmss(big.s)+' ('+Math.round(big.share*100)+'%).':'')]);}
+  el.innerHTML=out.map(o=>'<div class="verdict '+o[0]+'">'+o[1]+'</div>').join('');}
+function tvCaseLine(){const f=CASE||{},x=[];if(tvDataList(f).length)x.push('the daily data (Form DD-1)');if(f.quick&&((f.quick.rules||[]).length||(f.quick.tiers||[]).length))x.push('the quick start’s do and don’t and its tiers (Form QS-1)');
+  const cl=$('#caseLine');if(!cl||!x.length)return;const t=cl.textContent;cl.textContent=/^No case yet/.test(t)?'The case holds '+x.join(', ')+'.':t.replace(/\.$/,', '+x.join(', ')+'.');}
+{const su0=renderSetup;renderSetup=function(){su0.apply(this,arguments);try{tvCaseLine();tvChecks();}catch(e){}};}
+/* each segment's share of the time, the longest segment and the longest card marked, and the target on the summary */
+function tvSums(){const T=tvSegTimes(),tg=num(S.meta.target);let big=null;T.m.forEach(x=>{if(!big||x.w>big.w)big=x;});
+  $$('[data-segsum]').forEach(e=>{const x=T.m.find(y=>y.i===+e.dataset.segsum),on=!!x&&T.m.length>1&&x===big;if(x&&T.tot)e.textContent+=' · '+Math.round(x.share*100)+'%'+(on?', the longest':'');e.classList.toggle('tv-longseg',on);});
+  let li=-1,lw=0;S.rows.forEach((r,i)=>{if(r.cont)return;const w=words(spoken(r));if(w>lw){lw=w;li=i;}});
+  $$('[data-w]').forEach(e=>{const on=+e.dataset.w===li&&S.rows.length>2;e.classList.toggle('tv-longcard',on);if(on&&e.textContent)e.textContent+=' · the longest card';});
+  const sm=$('#scriptSum');if(sm&&S.rows.length&&tg>0){const d=T.s-tg*60,ok=tvOnTarget(T.s,tg);sm.insertAdjacentHTML('beforeend',' &middot; <span class="'+(ok?'tv-tgok':'tv-tgover')+'">target '+mmss(tg*60)+': '+(ok?'on target':d>0?mmss(d)+' over':mmss(-d)+' under')+'</span>');}
+  tvPlainRender();}
+{const rs0=renderSums;renderSums=function(){rs0.apply(this,arguments);try{tvSums();}catch(e){}};}
+
+/* ---- the rehearsal steps: the strategies, the do list, the response steps and the tiers, for Form ST-1 and to print ---- */
+const TV_STEP_SEGS=['proactive','reinforce','everyday','response','tiers'];
+const tvSegKey=r=>{const s=SEGS.find(x=>x[1]===r.seg);return s?s[0]:'';};
+function tvSteps(){const out=[],seen=new Set();
+  S.rows.forEach(r=>{const k=tvSegKey(r);if(!TV_STEP_SEGS.includes(k)||r.lay==='title'||/^works for$/i.test(str(r.title)))return;if(k==='tiers'&&!/^(see|do|say)\s*:/im.test(r.body||''))return;
+    String(r.body||'').split('\n').forEach(l=>{let d=l.trim().replace(/^[•\-*–]\s*/,'').replace(/^\d+[.)]\s+/,'').trim();if(!d||todo(d)||/^(don[’']?t|do not|never)\s*:/i.test(d)||/^see\s*:/i.test(d))return;
+      d=d.replace(/^do\s*:\s*/i,'').replace(/^say\s*:\s*/i,'Says: ');if(k==='tiers'&&str(r.title))d+=' ('+str(r.title)+')';
+      const key=d.toLowerCase();if(seen.has(key))return;seen.add(key);out.push({d:cap1(d),crit:k==='response'||k==='tiers',cmp:k==='proactive'||k==='everyday'?'ant':'con',seg:r.seg});});});
+  return out.slice(0,30);}
+window.__nbhFactsOut=function(){try{const st=tvSteps();return st.length?{training:{steps:st.map(s=>({d:s.d,crit:s.crit,cmp:s.cmp,seg:s.seg})),title:possess(firstName())+' training video',src:'TV-1'}}:null;}catch(e){return null;}};
+function tvStepsRender(){const el=$('#stepsOut');if(!el)return;const st=tvSteps();
+  el.innerHTML=st.length?'<p class="hint">'+st.length+' step'+(st.length>1?'s':'')+' from the script: the strategies, the do list, the response steps and the tiers. In the workstation, Form ST-1 takes them for its step list when that list is empty (the response steps and the tiers marked critical).</p><ol class="tv-steps">'+st.map(s=>'<li>'+esc(s.d)+(s.crit?' <b class="tv-crit">critical</b>':'')+' <span class="hint">('+(s.cmp==='ant'?'antecedent':'consequence')+')</span></li>').join('')+'</ol>':
+    '<div class="verdict v-mid"><b>No steps yet.</b> The steps come from the cards of the proactive strategies, the reinforcement, the do and don’t, the response plan and the tiers.</div>';}
+function tvStepsPrint(){const st=tvSteps(),box='<td class="pq-box"></td>';
+  return '<h1 class="pr-h">'+esc(possess(firstName()))+' Plan: the Rehearsal Checklist</h1><p class="pr-s">'+esc([S.meta.client,S.meta.site,S.meta.pname].filter(Boolean).join(' · '))+'</p>'+
+    '<p class="pr-s">Trainee: ________________________ &nbsp; Date: ____________ &nbsp; Trainer: ________________________</p>'+
+    '<table class="pq-tbl"><tr><th style="width:22pt">#</th><th>Step</th><th style="width:44pt">Modeled</th><th style="width:48pt">Rehearsed</th><th style="width:48pt">Correct</th><th style="width:50pt">Feedback</th></tr>'+st.map((s,j)=>'<tr><td>'+(j+1)+'</td><td>'+esc(s.d)+(s.crit?' <b>(critical)</b>':'')+'</td>'+box+box+box+box+'</tr>').join('')+'</table>'+
+    '<p class="pr-s" style="margin-top:10pt">Behavior skills training: instruct, model, rehearse, give feedback, until each step is correct. Record the rounds on Form ST-1.</p>';}
+
+/* ---- the check quiz: five to eight questions from the case and the script, an answer each, to print or for Google Forms ---- */
+function tvHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+const tvMix=(a,seed)=>a.map(x=>({x,k:tvHash(seed+'|'+x)})).sort((p,q)=>p.k-q.k).map(o=>o.x);
+function tvQuiz(){const f=CASE||{},N=firstName(),Q=[],pl=f.plan&&typeof f.plan==='object'?f.plan:{},rsp=pl.respond&&typeof pl.respond==='object'?pl.respond:{},q=f.quick||{},arr=v=>Array.isArray(v)?v.map(str).filter(Boolean):[];
+  const mc=(text,ans,wrong,pr)=>{ans=str(ans);const w=[...new Set(wrong.map(str).filter(x=>x&&x.toLowerCase()!==ans.toLowerCase()))].slice(0,3);if(!ans||w.length<2)return;Q.push({q:text,type:'mc',a:ans,ch:tvMix([ans].concat(w),text),pr:pr||1});};
+  const tf=(text,yes)=>{Q.push({q:'True or false: '+text,type:'tf',a:yes?'True':'False',ch:['True','False']});};
+  const behs=(f.behaviors||[]).filter(b=>b&&b.label&&b.def),red=behs.filter(b=>!b.isRep&&!/replacement|alternative/i.test(b.type||''));
+  red.slice(0,2).forEach((b,j)=>{const o=behs.filter(x=>x!==b).map(x=>short(x.def,90));if(b.nex)o.push(cap1(short(b.nex,90)));if(o.length>=2)mc('Which of these is '+lc1(b.label)+', as the plan defines it?',short(b.def,90),o,j?3:1);else if(b.nex)tf(sent(cap1(lc1(b.nex))+' counts as '+lc1(b.label)),false);});
+  const FN=[['attention','To get attention from an adult or a classmate'],['escape','To get out of a task or a demand'],['tangible','To get an item or an activity'],['automatic','Because of how it feels (sensory)']];
+  if(f.fn&&(f.fn.label||f.fn.key)){const t=str(f.fn.label+' '+(f.fn.key||'')).toLowerCase(),hit=FN.find(x=>t.includes(x[0])||(x[0]==='escape'&&/avoid|demand|task/.test(t))||(x[0]==='tangible'&&/item|activit|access/.test(t))||(x[0]==='automatic'&&/sensory|automatic/.test(t)));
+    if(hit)mc('Why does the team think the behavior happens?',hit[1],FN.filter(x=>x!==hit).map(x=>x[1]));}
+  const rep=str(pl.rep)||str((behs.find(b=>b.isRep||/replacement/i.test(b.type||''))||(f.behaviors||[]).find(b=>b&&(b.isRep||/replacement/i.test(b.type||'')))||{}).label);
+  if(rep)mc('When '+N+' uses the replacement behavior ('+lc1(short(rep,60))+'), what do you do?','Honor it right away, every time',['Ask '+N+' to wait until the work is done','Ignore it, so it is not used too often','Give a warning first']);
+  if(str(rsp.prec))mc('At the first sign'+(str(pl.prec)?' ('+lc1(short(pl.prec,60))+')':'')+', what do you do first?',short(rsp.prec,90),[rsp.target,rsp.after].map(x=>short(x,90)).filter(Boolean).concat(['Wait to see if it passes on its own','Send '+N+' to the office']));
+  const ant=arr(pl.ant);if(str(rsp.not)&&ant.length>=2)mc('Which of these should staff not do?',short(rsp.not,90),ant.map(x=>short(x,90)));
+  const R=(q.rules||[]).filter(r=>r&&str(r.do)&&str(r.dont));
+  if(R.length>=3){mc('Which of these is on the do list?',short(R[0].do,90),R.slice(1).map(r=>tvDont(short(r.dont,90))));mc('Which of these is on the don’t list?',tvDont(short(R[1].dont,90)),R.filter((r,j)=>j!==1).map(r=>short(r.do,90)),2);}
+  const T=(q.tiers||[]).filter(t=>t&&str(t.see)&&str(t.do));if(T.length>=3)mc('When you see this: “'+short(T[0].see,80)+'”, what do you do?',short(T[0].do,90),T.slice(1).map(x=>short(x.do,90)));
+  tvDataList(f).filter(x=>x.bv!=null).slice(0,1).forEach(x=>{const a=x.cv<x.bv*0.9?'It has gone down':x.cv>x.bv*1.1?'It has gone up':'It has stayed about the same';Q.push({q:'Since the plan started, what has happened to '+lc1(x.name)+'?',type:'mc',a,ch:['It has gone down','It has stayed about the same','It has gone up']});});
+  /* a short case: the takeaways and the strategies of the script, each true */
+  if(Q.length<5)S.rows.filter(r=>/^(takeaways|proactive|everyday)$/.test(tvSegKey(r))).forEach(r=>String(r.body||'').split('\n').map(l=>l.trim().replace(/^[•\-*–]\s*/,'').replace(/^\d+[.)]\s+/,'').replace(/^do\s*:\s*/i,'')).filter(l=>l&&!todo(l)&&!/^(don[’']?t|do not|never)\s*:/i.test(l)).forEach(l=>{if(Q.length<5)tf(sent(cap1(l)),true);}));
+  /* more than eight: the second definition goes first, then the don't list; the rest keep their order */
+  const keep=Q.map((x,j)=>({x,j})).sort((a,b)=>(a.x.pr||1)-(b.x.pr||1)||a.j-b.j).slice(0,8).sort((a,b)=>a.j-b.j).map(o=>o.x);
+  return keep;}
+let QUIZ=[];
+function tvQuizRender(){QUIZ=tvQuiz();const el=$('#quizOut');if(!el)return;
+  el.innerHTML=QUIZ.length?'<ol class="tv-quiz">'+QUIZ.map(x=>'<li><b>'+esc(x.q)+'</b><ul>'+x.ch.map((c,j)=>'<li'+(c===x.a?' class="ok"':'')+'>'+'ABCD'[j]+'. '+esc(c)+(c===x.a?' <span aria-label="the answer">✓</span>':'')+'</li>').join('')+'</ul></li>').join('')+'</ol>'+
+    '<p class="hint">'+QUIZ.length+' question'+(QUIZ.length>1?'s':'')+', from the case and the script'+(QUIZ.length<5?': with more of the case open (Forms TB-1, FS-1, TD-1, QS-1, DD-1), there are more':'')+'. The answer is ticked; the printed quiz has the key on a page of its own.</p>':
+    '<div class="verdict v-mid"><b>No questions yet.</b> The quiz comes from the case (the target behaviors, the function, the plan, the quick start and the data) and the script’s takeaways. Open the case in the workstation, or draft the script first.</div>';}
+function tvQuizPrint(){const L=QUIZ.length?QUIZ:tvQuiz(),A='ABCD';
+  return '<h1 class="pr-h">'+esc(possess(firstName()))+' Training: Check Quiz</h1><p class="pr-s">Name: ________________________ &nbsp; Role: ________________ &nbsp; Date: ____________</p>'+
+    '<ol class="pq">'+L.map(x=>'<li><b>'+esc(x.q)+'</b>'+x.ch.map((c,j)=>'<div class="pq-c">&#9744; '+A[j]+'. '+esc(c)+'</div>').join('')+'</li>').join('')+'</ol>'+
+    '<div class="pq-key"><h2 class="pr-g">Answer key</h2><ol>'+L.map(x=>'<li>'+A[x.ch.indexOf(x.a)]+'. '+esc(x.a)+'</li>').join('')+'</ol></div>';}
+const tvQuizRows=()=>[['Question','Question type','Option 1','Option 2','Option 3','Option 4','Correct answer','Points']].concat((QUIZ.length?QUIZ:tvQuiz()).map(x=>[x.q,'Multiple choice',x.ch[0]||'',x.ch[1]||'',x.ch[2]||'',x.ch[3]||'',x.a,1]));
+let TVPRINT=null;
+{const rp0=renderPrint;renderPrint=function(){const o=$('#printOut');if(TVPRINT==='quiz'&&o){o.innerHTML=tvQuizPrint();return;}if(TVPRINT==='steps'&&o){o.innerHTML=tvStepsPrint();return;}return rp0.apply(this,arguments);};}
+function tvPrintAs(k){TVPRINT=k;renderPrint();const done=()=>{window.removeEventListener('afterprint',done);TVPRINT=null;renderPrint();};window.addEventListener('afterprint',done);setTimeout(()=>window.print(),60);}
+
+/* ---- retakes: R on the teleprompter, or the clicker's Next held, marks the segment on screen to record again ---- */
+let TK_HOLD=null,TAKE_T0=null;
+function tvSegFrom(seg,t){let from=null,prev=null;S.log.slice().sort((a,b)=>a.t-b.t).forEach(l=>{if(l.t>t+0.01)return;const s=(S.rows[l.i]||{}).seg;if(s===seg&&prev!==seg)from=l.t;prev=s;});return from;}
+function tvRetake(held){if(!S.rows.length)return;if(!Array.isArray(S.takes))S.takes=[];const i=curRow(),r=S.rows[i]||{};let t=null,from=null;
+  if(TP.rec){if(TAKE_T0!==TP.t0){TAKE_T0=TP.t0;S.takes=S.takes.filter(x=>x.t==null);}t=+((performance.now()-TP.t0)/1000).toFixed(2);from=tvSegFrom(r.seg,t);}
+  S.takes.push({i,t,seg:r.seg||'',title:r.title||'',from});syncState();logLine();
+  nbhUI.toast('Retake marked'+(held?' (the clicker held)':'')+': '+(r.seg||'card '+(i+1))+(t!=null?', at '+mmss(t)+(from!=null?'; the segment began at '+mmss(from):''):', with no time (Start the clock to keep the times)')+'.',{kind:'ok'});}
+const TV_NEXT=['PageDown','ArrowRight','ArrowDown','Enter'];
+window.addEventListener('keydown',e=>{if(!document.body.classList.contains('view-prompter')||e.altKey||e.ctrlKey||e.metaKey)return;const t=e.target;if(t&&/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)&&t.type!=='range'&&t.type!=='checkbox')return;
+  if(e.key==='r'||e.key==='R'){e.preventDefault();if(!e.repeat)tvRetake(false);return;}
+  if(!TV_NEXT.includes(e.key))return;
+  if(!e.repeat){TK_HOLD={i:TP.i,b:TP.b,done:false};return;}
+  /* the key held: back to the card it was pressed on (its first press moved on), and that segment marked */
+  e.preventDefault();e.stopImmediatePropagation();
+  if(TK_HOLD&&!TK_HOLD.done){TK_HOLD.done=true;if(TP.i!==TK_HOLD.i||TP.b!==TK_HOLD.b){if(TP.i===TK_HOLD.i){TP.b=TK_HOLD.b;tpInfo();gwReveal();tpCardBox();}else tpGo(TK_HOLD.i,false,TK_HOLD.b);}tvRetake(true);}},true);
+window.addEventListener('keyup',e=>{if(TV_NEXT.includes(e.key))TK_HOLD=null;},true);
+{const ll0=logLine;logLine=function(){ll0.apply(this,arguments);const l=$('#logLine'),n=(S.takes||[]).length;if(l&&n)l.textContent=(l.textContent?l.textContent.replace(/\.$/,'')+'; ':'')+n+' retake'+(n>1?'s':'')+' marked.';};}
+/* the state keeps the retakes; a file from elsewhere is read field by field */
+{const b0=blank;blank=function(){const o=b0.apply(this,arguments);o.takes=[];return o;};}
+{const en0=ensure;ensure=function(){en0.apply(this,arguments);if(!Array.isArray(S.takes))S.takes=[];};}
+{const ff0=fromFile;fromFile=function(d){const o=ff0.apply(this,arguments);if(o){const T=d&&d.S&&Array.isArray(d.S.takes)?d.S.takes:[];
+  o.takes=T.slice(0,500).filter(x=>x&&typeof x==='object').map(x=>({i:Math.max(0,parseInt(x.i)||0),t:num(x.t),seg:String(x.seg==null?'':x.seg).slice(0,80),title:String(x.title==null?'':x.title).slice(0,200),from:num(x.from)}));}return o;};}
+
+/* ---- the buttons and switches ---- */
+$('#plainBtn').addEventListener('click',()=>tvPlainShow());
+$('#tpRetake').addEventListener('click',()=>tvRetake(false));
+$('#takeCsv').addEventListener('click',()=>{const T=S.takes||[];if(!T.length){nbhUI.toast('No retakes marked: press R on the teleprompter, or hold the clicker’s Next, on a segment to record again.',{kind:'warn'});return;}
+  const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';const rows=[['Retake','Time','Seconds','Segment began','Card','Segment','Title']].concat(T.map((x,j)=>[j+1,x.t!=null?mmss(x.t):'',x.t!=null?x.t:'',x.from!=null?mmss(x.from):'',x.i+1,x.seg,x.title]));
+  download(rows.map(r=>r.map(q).join(',')).join('\n'),'text/csv','TV-1_'+fileName()+'_retakes.csv');});
+$('#quizBtn').addEventListener('click',tvQuizRender);
+$('#quizPrint').addEventListener('click',()=>{if(!QUIZ.length)tvQuizRender();if(!QUIZ.length){nbhUI.toast('No questions yet: open the case, or draft the script first.',{kind:'warn'});return;}tvPrintAs('quiz');});
+$('#quizCsv').addEventListener('click',()=>{if(!QUIZ.length)tvQuizRender();if(!QUIZ.length){nbhUI.toast('No questions yet: open the case, or draft the script first.',{kind:'warn'});return;}
+  const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';download(tvQuizRows().map(r=>r.map(q).join(',')).join('\n'),'text/csv','TV-1_'+fileName()+'_quiz.csv');});
+$('#quizTsv').addEventListener('click',async()=>{if(!QUIZ.length)tvQuizRender();if(!QUIZ.length){nbhUI.toast('No questions yet: open the case, or draft the script first.',{kind:'warn'});return;}
+  const txt=tvQuizRows().map(r=>r.map(x=>String(x).replace(/[\t\n]+/g,' ')).join('\t')).join('\n');
+  try{await navigator.clipboard.writeText(txt);nbhUI.toast('Copied: paste into the first cell of a Google Sheet, a row a question.',{kind:'ok'});}catch(e){download(txt,'text/tab-separated-values','TV-1_'+fileName()+'_quiz.tsv');}});
+$('#stepsBtn').addEventListener('click',tvStepsRender);
+$('#stepsPrint').addEventListener('click',()=>{if(!tvSteps().length){nbhUI.toast('No steps yet: draft the strategies, the response plan or the tiers first.',{kind:'warn'});return;}tvPrintAs('steps');});
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.id==='tvIniGo'){const n=tvUseInitials();renderAll();nbhUI.toast(n?n+' place'+(n>1?'s':'')+' now show'+(n>1?'':'s')+' the initials. Undo (Ctrl/Cmd+Z) brings the name back.':'The name is not in the script.',{kind:'ok'});return;}
+  if(b.id==='tvPlainGo'){setView('script');tvPlainShow(true);const el=$('#plainOut');if(el)el.scrollIntoView({block:'start'});return;}
+  if(b.id==='plainUnkeep'){S.meta.plainKeep='';syncState();tvPlainRender();renderSetup();return;}
+  if(b.dataset.plainrep){const n=tvPlainReplace(b.dataset.plainrep);renderRows();syncState();nbhUI.toast(n+' place'+(n===1?'':'s')+': “'+b.dataset.plainrep+'” is now “'+tvPlainOf(b.dataset.plainrep)+'”. Read the sentence again; Undo brings it back.',{kind:'ok'});return;}
+  if(b.dataset.plainkeep){const K=tvKeep();if(!K.includes(b.dataset.plainkeep))K.push(b.dataset.plainkeep);S.meta.plainKeep=K.join('|');syncState();tvPlainRender();renderSetup();return;}});
+document.addEventListener('change',e=>{const el=e.target;
+  if(el.dataset.c==='initials'){if(el.checked){const n=tvUseInitials();renderAll();nbhUI.toast('Initials only: '+(tvInitials()||'(no name yet)')+(n?'; '+n+' place'+(n>1?'s':'')+' in the script changed (Undo brings the name back)':'')+'.',{kind:'ok'});}
+    else{renderAll();nbhUI.toast('The name again in the next draft and on the tag. What the script says now stays as it is.',{kind:'ok'});}return;}
+  if(el.dataset.m==='audk'||el.dataset.m==='aud'||el.dataset.m==='target'){renderSums();}});
 
 /* ---------------- the case (the workstation shell's facts): kept for drafting; nothing is filled until you draft ---------------- */
 window.__nbhFactsIn=function(f){CASE=f||null;renderSetup();return {filled:0,note:'the case is kept for drafting: press Draft from the case'};};
