@@ -661,6 +661,7 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
 /* v21.79 the caseload */
 .cl-h{font:600 14px var(--sans);margin:14px 0 6px;color:var(--navy)}.cl-opt{font-size:12.5px;margin-right:14px;display:inline-flex;align-items:center;gap:6px}
 .cl-wrap{overflow-x:auto}.cl-tbl{width:100%;border-collapse:collapse;font-size:13px}.cl-tbl th,.cl-tbl td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}.cl-tbl th{font-size:11.5px;color:var(--muted);font-weight:600}.cl-act{white-space:nowrap}
+.cl-tools{margin:4px 0 8px}.cl-note{background:var(--soft,#eef4f7);border-left:3px solid var(--accent,#254657);padding:8px 10px;border-radius:6px;font-size:13.5px;margin:6px 0}
 @media (max-width:1240px){
   .bar .det .fld{flex:1 1 auto;min-width:0}
   .bar .det .fld input{flex:1 1 60px;width:60px!important;min-width:52px}
@@ -2121,8 +2122,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||(f.evidence&&Object.keys(f.evidence).length)));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||(f.evidence&&Object.keys(f.evidence).length)));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2139,7 +2140,8 @@ async function gatherFacts(push){
         else if(f.src.behaviors==='FS-1'&&!(out&&out.behaviorsFS))drop('behaviors');
       }
       if(id==='GB-1'){if(out&&out.goals){f.goals=out.goals;f.src.goals='GB-1';}else if(f.src.goals)drop('goals');}
-      if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');}
+      if(id==='PA-1'){if(out&&out.menu){f.menu=out.menu;f.src.menu='PA-1';}else if(f.src.menu)drop('menu');
+        if(out&&out.prefs){f.prefs=out.prefs;f.src.prefs='PA-1';}else if(f.src.prefs)drop('prefs');}   /* v21.80 the reassessment date */
       if(FACT_GEN.includes(id)){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
       /* v21.78 the assessments' results, one entry a form */
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
@@ -2210,6 +2212,8 @@ $('#factsSend').addEventListener('click',async()=>{
 const pending={};
 window.addEventListener('message',ev=>{
   const d=ev.data||{}; if(!d.nbh)return;
+  /* v21.80 the caseload's Form DD-1 out of sight (Read every linked sheet): its answers go only to what asked for them */
+  if(window.__clRfWin&&ev.source===window.__clRfWin){if(d.id){const q=pending[d.id+'|'+d.nbh];if(q&&q.length){const i=q.findIndex(f=>f.src===ev.source);if(i>=0)q[i](d);}}return;}
   /* v21.22 relay: a form asking for another open form's data; the protocol is at relay() above. It comes
      first because an ask carries no form id, and the file check's filter below would drop it. */
   if(d.nbh==='ask'){relay(ev,d);return;}
@@ -4214,6 +4218,9 @@ async function saveCase(){
   }
   kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});   /* v21.61 as the file holds them */
   forms=orderCase(forms);
+  /* v21.80 the case facts the file carries are read from the forms as they are now, not as at the last read: a case opened
+     again then has the facts its forms give, and the forms that load quietly are not sent changed facts that fill them anew */
+  try{await gatherFacts(false);}catch(e){}
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
@@ -4453,6 +4460,146 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
 $('#caseloadBtn').addEventListener('click',()=>caseloadOpen());
+/* ================= v21.80 the caseload: the morning refresh from Google Sheets, a backup, and what the new facts ask for =================
+   Read every linked sheet: for each student kept here whose Form DD-1 is linked to a Google Sheet (Use the sheet ticked),
+   that student's DD-1 is loaded out of sight, its saved record put back in it, and DD-1 reads its sheet the way it does
+   when open (the sheet wins, the marks stay); the student's copy here then holds the new days, and Caseload shows what
+   needs you from them. The sign-in is Google's own window, opened by the tap, kept in this tab only (as DD-1 keeps it).
+   Back up the caseload writes every student kept here into one file; Restore puts a backup back, the newer copy of each
+   student winning. Nothing goes anywhere but Google (the sheets already linked) and the file you keep. */
+const CLX={busy:false,note:'',linked:0};
+const CL_BK='nbh.caseload.backup';
+CL_ORDER.splice(CL_ORDER.indexOf('Decision')+1,0,'Assent');
+const clBkAt=()=>{try{return localStorage.getItem(CL_BK)||'';}catch(e){return '';}};
+const clBkDue=()=>{const t=clBkAt();return !t||(Date.now()-Date.parse(t))>7*864e5;};
+function clLinkOf(r){try{const d=parseCase(r.text),fm=d&&d.forms&&d.forms['DD-1'];if(!fm||!fm.snap||!fm.snap.own)return null;
+  const o=JSON.parse(fm.snap.own),g=o&&(o.S||o).gs;return g&&g.id?{d,fm,gs:g}:null;}catch(e){return null;}}
+const clTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.tok')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
+const clGid=()=>{try{return localStorage.getItem('nbh.google.client')||'';}catch(e){return '';}};
+let clGsi=null;
+function clGsiLoad(){if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();if(clGsi)return clGsi;
+  clGsi=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>res();
+    s.onerror=()=>{clGsi=null;rej(new Error('Google’s sign-in could not be loaded. Check the internet connection.'));};document.head.appendChild(s);});return clGsi;}
+/* the sign-in opens Google's window, so it is called in the tap itself, before anything is awaited */
+function clSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('nokey'));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
+  try{google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/spreadsheets.readonly',
+      callback:r=>{if(r&&r.access_token){try{sessionStorage.setItem('nbh.google.tok',JSON.stringify({tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000}));}catch(e){}res();}
+        else rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:''});}
+  catch(e){rej(e);}});}
+/* Form DD-1 out of sight; its messages answer only what asked them (the message handler checks window.__clRfWin) */
+function clFrame(){const rec=ALL.find(x=>x[0]==='DD-1');return new Promise(res=>{let host=document.getElementById('clHost');
+  if(!host){host=document.createElement('div');host.id='clHost';host.setAttribute('aria-hidden','true');host.style.cssText='position:fixed;left:-10000px;top:0;width:1000px;height:700px;visibility:hidden';document.body.appendChild(host);}
+  const fr=document.createElement('iframe');fr.title='Caseload: Form DD-1 reading its sheet';fr.tabIndex=-1;let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  fr.addEventListener('load',()=>setTimeout(()=>fin(fr),500),{once:true});setTimeout(()=>fin(null),25000);
+  host.appendChild(fr);window.__clRfWin=fr.contentWindow;loadFrame(fr,rec[2]);});}
+function clResum(r,facts){const sf=state.facts,sd=state.due;let items=[];
+  try{state.facts=facts||null;state.due=[];items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}finally{state.facts=sf;state.due=sd;}
+  const kept=((r.sum&&r.sum.items)||[]).filter(x=>x.k==='Due');   /* what was due as the forms gave it at the save */
+  return {items:kept.concat(items),lastData:facts&&facts.data&&facts.data.to||'',forms:r.sum&&r.sum.forms||0};}
+async function clRefreshOne(r,L){let fr=null;
+  try{fr=await clFrame();if(!fr)return {err:'Form DD-1 did not load'};
+    const rs=await grab('DD-1','restore',{snap:L.fm.snap,copy:false},20000,fr);if(!rs)return {err:'Form DD-1 did not take the saved record'};
+    const w=fr.contentWindow;if(!w||typeof w.__nbhGsRefresh!=='function')return {err:'this copy of Form DD-1 cannot read its sheet on its own'};
+    const g=await Promise.race([Promise.resolve().then(()=>w.__nbhGsRefresh()),new Promise(z=>setTimeout(()=>z({err:'Google did not answer in time'}),45000))])||{};
+    if(!g.ok)return g;
+    const sn=await grab('DD-1','snapshot',null,10000,fr);if(!(sn&&sn.snap))return {err:'Form DD-1 did not give the record back'};
+    const fo=await grab('DD-1','facts?',null,5000,fr),data=fo&&fo.facts&&fo.facts.data;
+    const d=L.d;d.forms['DD-1']=Object.assign({},d.forms['DD-1'],{snap:sn.snap});
+    if(data){d.facts=Object.assign({},d.facts||{});d.facts.src=Object.assign({},d.facts.src||{});d.facts.data=data;d.facts.src.data='DD-1';}
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();
+    await clTx('readwrite',st=>st.put(r));
+    return Object.assign({},g,{snap:sn.snap});}
+  catch(e){return {err:String(e&&e.message||e)};}
+  finally{window.__clRfWin=null;if(fr)fr.remove();}}
+const clProg=t=>{const el=document.getElementById('clProg');if(el){el.hidden=false;el.textContent=t;}};
+async function clRefreshAll(){if(CLX.busy)return;CLX.busy=true;
+  try{const all=await clList()||[],todo=all.map(r=>({r,l:clLinkOf(r)})).filter(x=>x.l&&x.l.gs.on!==false);
+    if(!todo.length){CLX.note='No student kept here has a Google Sheet linked in Form DD-1 with Use the sheet ticked.';return;}
+    const me=clKey(packet()),out=[];let k=0,need=false;
+    for(const x of todo){k++;clProg('Reading '+k+' of '+todo.length+': '+clName(x.r)+'…');
+      /* the student on screen: their open Form DD-1 reads its own sheet, and the next Save case keeps it */
+      if(x.r.key===me&&state.frames['DD-1']){let g={};try{const w=state.frames['DD-1'].contentWindow;g=w&&typeof w.__nbhGsRefresh==='function'?await w.__nbhGsRefresh():{err:'this copy of Form DD-1 cannot read its sheet on its own'};}catch(e){g={err:String(e&&e.message||e)};}
+        if(g&&g.ok){try{await gatherFacts(true);x.r.sum=clSummary();x.r.read=new Date().toISOString();await clTx('readwrite',st=>st.put(x.r));}catch(e){}}
+        out.push({x,g:g||{}});if(g&&g.signin)need=true;continue;}
+      const g=await clRefreshOne(x.r,x.l);out.push({x,g});
+      if(g.ok&&x.r.key===me&&state.pending['DD-1']){const P=state.pending['DD-1'];setPending('DD-1',P.title,g.snap,P.copy);renderRail();if(typeof paintSave==='function')paintSave();}
+      if(g.signin){need=true;break;}}
+    const ok=out.filter(o=>o.g.ok),bad=out.filter(o=>!o.g.ok&&!o.g.signin);
+    CLX.note=(need?'Google asked for the sign-in again partway: press Read every linked sheet once more. ':'')+
+      (ok.length?'Read '+ok.length+' sheet'+(ok.length===1?'':'s')+': '+ok.map(o=>clName(o.x.r)+' ('+(o.g.days||0)+' day'+(o.g.days===1?'':'s')+(o.g.to?', to '+tdMd(o.g.to):'')+')').join('; ')+'. ':'')+
+      (bad.length?'Not read: '+bad.map(o=>clName(o.x.r)+' ('+(o.g.err||(o.g.linked===false?'no sheet linked':o.g.on===false?'Use the sheet is off':'not read'))+')').join('; ')+'.':'');
+    try{localStorage.setItem('nbh.caseload.read',new Date().toISOString());}catch(e){}}
+  finally{CLX.busy=false;}
+  caseloadOpen();}
+/* the backup: every student kept here in one file */
+async function clBackup(){const L=await clList();if(!L||!L.length){alert('No student is kept here yet, so there is nothing to back up.');return;}
+  const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'),nm='CASELOAD_'+ds+'.json';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'CASELOAD',rev:'2026-10',saved:t.toISOString(),cases:L})],{type:'application/json'}));
+  a.download=nm;document.body.appendChild(a);a.click();a.remove();
+  const how=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';
+  if(how==='cancelled')return;
+  try{localStorage.setItem(CL_BK,t.toISOString());}catch(e){}
+  wsUI.toast(L.length+' student'+(L.length===1?'':'s')+' backed up as '+nm+'. Keep it with the case files (Files, the school drive): it holds every student’s case.',{kind:'ok',ms:9000});
+  if($('#dlg').open&&$('#dlgBody').querySelector('#clBk'))caseloadOpen();}
+async function clRestoreText(text){let d=null;try{d=JSON.parse(text);}catch(e){}
+  if(!d||d.form!=='CASELOAD'||!Array.isArray(d.cases)){alert(d&&d.form==='CASE'?'That is one student’s case file. Use Open case for it; its next Save case keeps it on the caseload.':'That file is not a caseload backup.');return;}
+  const have=await clList();if(have===null){alert('This browser keeps no caseload here: its storage is not available (a private window, or storage turned off).');return;}
+  const by={};have.forEach(r=>{by[r.key]=r;});const put=[];let add=0,upd=0,same=0;
+  d.cases.forEach(c=>{if(!c||typeof c.text!=='string'||!(c.client||c.sid))return;const key=clKey(c);if(!key)return;
+    const rec=Object.assign({},c,{key,scope:clScope()}),h=by[key];
+    if(!h){add++;put.push(rec);}else if(String(c.saved||'')>String(h.saved||'')){upd++;put.push(rec);}else same++;});
+  if(!put.length){alert('Every student in that backup is here already, as new or newer. Nothing was changed.');return;}
+  if(!(await wsUI.confirm('Restore the caseload backup'+(d.saved?' of '+new Date(d.saved).toLocaleDateString():'')+'?\n'+
+      (add?add+' student'+(add===1?'':'s')+' added. ':'')+(upd?upd+' replaced by the newer copy in the backup. ':'')+(same?same+' left as they are here (as new or newer here).':'')+
+      '\nNo case file is touched.',{ok:'Restore'})))return;
+  try{await clTx('readwrite',st=>{put.forEach(x=>st.put(x));});}catch(e){alert('The backup could not be put back: '+(e&&e.message||e));return;}
+  wsUI.toast('Caseload restored: '+(add+upd)+' student'+(add+upd===1?'':'s')+' from the backup.',{kind:'ok',ms:8000});caseloadOpen();}
+{const fi=document.createElement('input');fi.type='file';fi.id='clFile';fi.accept='.json,application/json';fi.hidden=true;document.body.appendChild(fi);
+  fi.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;e.target.value='';const r=new FileReader();r.onload=()=>clRestoreText(r.result);r.readAsText(f);});}
+/* the caseload dialog gains the sheets, the backup and the restore */
+{const co0=caseloadOpen;caseloadOpen=async function(){await co0.apply(this,arguments);const b=$('#dlgBody');if(!b||b.querySelector('#clTools'))return;
+  const L=await clList()||[];CLX.linked=L.filter(r=>{const l=clLinkOf(r);return l&&l.gs.on!==false;}).length;
+  if(CLX.linked&&!EMBED&&clGid())clGsiLoad().catch(()=>{});   /* ready before the tap, so the tap can open Google's window */
+  const rd=(()=>{try{return localStorage.getItem('nbh.caseload.read')||'';}catch(e){return '';}})(),bk=clBkAt();
+  const lead=b.querySelector('.td-more');
+  const html='<div id="clTools" class="cl-tools"><p class="td-more">'+
+    '<button type="button" class="primary" id="clRead"'+(CLX.linked?'':' disabled')+'>Read every linked sheet'+(CLX.linked?' ('+CLX.linked+')':'')+'<\/button> '+
+    '<button type="button" id="clBk"'+(L.length?'':' disabled')+'>Back up the caseload<\/button> <button type="button" id="clRs">Restore a backup<\/button><\/p>'+
+    '<p class="hint" id="clProg"'+(CLX.busy?'':' hidden')+'><\/p>'+
+    (CLX.note?'<p class="cl-note" role="status">'+esc(CLX.note)+'<\/p>':'')+
+    '<p class="hint">'+(CLX.linked?CLX.linked+' student'+(CLX.linked===1?' has':'s have')+' a Google Sheet linked in Form DD-1'+(rd?'; last read '+esc(clAgo(rd))+' on this iPad':'')+'. '+(EMBED?'Reading the sheets works in the website edition, where Google’s sign-in is allowed. ':clTok()?'Signed in to Google in this tab. ':'The first read asks for the Google sign-in, kept in this tab only. '):'Link a student’s Google Sheet in their Form DD-1, then Save case, and the sheets are read here in one go. ')+
+    (L.length?(bk?'Last backup '+esc(clAgo(bk))+'.':'<b>No backup yet.<\/b>')+' The backup is one file holding every student kept here: keep it with the case files.':'')+'<\/p><\/div>';
+  if(lead)lead.insertAdjacentHTML('afterend',html);else b.insertAdjacentHTML('afterbegin',html);CLX.note='';};}
+$('#dlgBody').addEventListener('click',e=>{
+  if(e.target.closest('#clRead')){
+    if(EMBED){wsUI.alert('Reading the sheets works in the website edition (the workstation opened from its web address), where Google’s sign-in is allowed.');return;}
+    if(!clTok()){if(!clGid()){wsUI.alert('The Google sign-in key is not set on this iPad yet. Open a student’s Form DD-1, Google Sheet, and give the key there once (Setup: the Google Sheets link).');return;}
+      clSignIn().then(()=>clRefreshAll()).catch(err=>{CLX.note=err.message==='nokey'?'The Google sign-in key is not set on this iPad.':err.message;caseloadOpen();});return;}
+    clRefreshAll();return;}
+  if(e.target.closest('#clBk')||e.target.closest('#tdBk')){clBackup();return;}
+  if(e.target.closest('#clRs')){$('#clFile').click();return;}});
+/* Today: the reminder to back up the caseload, a week after the last backup */
+{const to0=todayOpen;todayOpen=async function(){await to0.apply(this,arguments);try{if(!clBkDue())return;const L=await clList();if(!L||!L.length)return;const b=$('#dlgBody');if(!b||b.querySelector('#tdBk'))return;
+  const bk=clBkAt(),li='<li><span class="td-k">Backup<\/span> <span>'+(bk?'The caseload was last backed up '+esc(clAgo(bk)):'The caseload has never been backed up')+': '+L.length+' student'+(L.length===1?'':'s')+' kept on this iPad only<\/span> <button type="button" id="tdBk">Back up<\/button><\/li>';
+  const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('beforeend',li);else{const p=b.querySelector('.hp-lead');(p||b).insertAdjacentHTML(p?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}catch(e){}};}
+/* Today's new items: PA-1's reassessment date, assent from DD-1, the level set for going back to the plan after exit
+   (PR-1, against DD-1's days since the exit); a maintenance probe on DD-1 counts as the check after exit */
+function tdV2180(f){const L=[],d=f.data||{},rv=f.review||{},ex=rv.exit||{},pr=f.prefs;
+  if(pr&&pr.reassess){const n=tdLeft(pr.reassess);if(n!==null&&n<=7)L.push({k:n<0?'Overdue':'Timeline',t:'The preference reassessment (Form PA-1) is due '+esc(tdMd(pr.reassess))+' ('+tdWhen(pr.reassess)+')'+(pr.schedule?': '+esc(pr.schedule):'')+'. What a student wants changes; the menu goes stale',open:'PA-1'});}
+  const a=d.assent&&d.assent.last10;if(a&&(+a.refused||0)+(+a.withdrew||0)>=3)L.push({k:'Assent',t:'Of the last '+(+a.days||0)+' days marked on Form DD-1, the student refused on '+(+a.refused||0)+' and withdrew assent on '+(+a.withdrew||0)+': look at what the plan asks and what it offers (the reinforcers on Form PA-1, the review on Form PR-1) before going on',open:'PR-1'});
+  if(ex.date&&ex.thresholdN!=null&&ex.thresholdN!==''&&isFinite(ex.thresholdN)&&Array.isArray(d.byDay)){const T=+ex.thresholdN,after=d.byDay.filter(x=>x&&x.date>ex.date);
+    const red=(d.behaviors||[]).filter(b=>!(/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase'));
+    const named=red.filter(b=>b.name&&String(ex.threshold||'').toLowerCase().includes(String(b.name).toLowerCase()));
+    (named.length?named:red.slice(0,1)).forEach(b=>{const v=after.map(x=>x.vals&&x.vals[b.name]).filter(x=>x!=null&&x!==''&&isFinite(x)).map(Number);if(v.length<3)return;
+      const m=Math.round(v.reduce((s,x)=>s+x,0)/v.length*100)/100;
+      if(m>T)L.push({k:'Decision',t:esc(b.name)+' has averaged '+m+(b.unit?' '+esc(b.unit):'')+' over '+v.length+' days since the exit on '+esc(tdMd(ex.date))+', above '+T+', the level set for going back to the plan'+(ex.threshold?' ('+esc(ex.threshold)+')':'')+': put the plan back in place and review it (Form PR-1)',open:'PR-1'});});}
+  return L;}
+{const ti1=todayItems;todayItems=function(){const f=state.facts||{};let L=ti1.apply(this,arguments);try{
+  const ex=f.review&&f.review.exit,pb=f.data&&Array.isArray(f.data.probes)?f.data.probes:[];
+  if(ex&&ex.next){const from=tdAdd(ex.next,-7);if(pb.some(x=>x&&x.kind==='maint'&&x.date>=from))L=L.filter(x=>!(x.open==='PR-1'&&/^The check after exit/.test(x.t)));}
+  L=L.concat(tdV2180(f));}catch(e){}return L;};}
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{

@@ -1928,6 +1928,8 @@ body.view-walk #walk{display:block}
     <div class="f"><label for="mPB">Problem behavior across methods (summary)</label><input id="mPB" data-meta="pbsum"></div>
     <div class="f"><label for="mRA">Reinforcer assessment planned (design, stimuli, response)</label><input id="mRA" data-meta="ra" placeholder="e.g., concurrent-operants: top 2 vs control; progressive-ratio for top 3"></div>
     <div class="f"><label for="mReassess">Reassessment schedule</label><select id="mReassess" data-meta="reassess"><option></option><option>Brief MSWO daily before sessions (edibles)</option><option>Brief MSWO weekly</option><option>Full assessment monthly</option><option>Full assessment each grading period</option><option>When treatment data flatten or plan changes</option></select></div>
+    <!-- v21.80 the schedule above is words, so it never came due: the date the next reassessment is due, typed or worked out from the schedule -->
+    <div class="f"><label for="mReassessDue">Next reassessment due</label><span class="pa-due" style="display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center"><input id="mReassessDue" type="date" data-meta="reassessDue" style="max-width:11em;min-width:0"> <button type="button" class="tool noprint" id="mReassessSet" title="Work out the date from the schedule and the latest dated assessment session">Set from the schedule</button></span><span class="pa-dueh noprint" id="mReassessHint" role="status" aria-live="polite" style="font-size:11.5px;color:var(--ink-soft)"></span></div>
   </div>
   <div class="defs" style="margin-top:8px">
     <div class="drow"><div class="dlab">Stimuli recommended for the plan (with access rules)</div><div class="dval"><textarea data-meta="recs" class="nbh-line" rows="1"></textarea></div></div>
@@ -4772,6 +4774,47 @@ window.__nbhFactsOut=function(){
     return menu.length?{menu}:null;
   }catch(e){return null;}
 };
+/* v21.80 the next reassessment. The schedule is words ("Brief MSWO weekly"), so it never came due anywhere: a date
+   beside it, typed, or worked out from the schedule (daily 1 day, weekly 7, every N weeks, every other week 14,
+   monthly, quarterly 3 months, each grading period about 9 weeks, each semester about 18) counted from the latest
+   dated assessment session on the form (the sheets' dates, the brief-MSWO log and the in-context observations).
+   The case gets prefs:{reassess, last, schedule} beside the menu; with the date empty, reassess is the worked-out one. */
+const paIso=s=>{const d=csaDate(s);return d&&!isNaN(d)?d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'):'';};
+const paMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+function paLast(){const L=['date','ssDate','psDate','msDate','foDate','ecoDate','csaDate','csaRetestDate','pictDate'].map(k=>paIso(S.meta[k]));
+  (S.stab||[]).forEach(r=>{if(r&&r.date&&(r.r1!==''||r.r2!==''||r.r3!==''))L.push(paIso(r.date));});
+  ((S.eco&&S.eco.obs)||[]).forEach(o=>{if(o&&o.date&&(o.item!==''||String(o.other||'').trim()))L.push(paIso(o.date));});
+  return L.filter(Boolean).sort().pop()||'';}
+const PA_NUM={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twelve:12};
+function paStep(t){t=String(t||'').toLowerCase();if(!t)return null;let m;const n=w=>/^\d+$/.test(w)?+w:(PA_NUM[w]||0);
+  if((m=/every\s+(\d+|[a-z]+)\s+days?\b/.exec(t))&&n(m[1]))return {d:n(m[1])};
+  if(/\bdaily\b|every day|each day|before (?:each|every) session/.test(t))return {d:1};
+  if((m=/every\s+(\d+|[a-z]+)\s+weeks?\b/.exec(t))&&n(m[1]))return {d:7*n(m[1])};
+  if(/bi-?weekly|fortnight|every other week/.test(t))return {d:14};
+  if(/\bweekly\b|every week|each week|once a week/.test(t))return {d:7};
+  if(/grading period|marking period|report card|nine weeks|9 weeks|quarter grading/.test(t))return {d:63};
+  if((m=/every\s+(\d+|[a-z]+)\s+months?\b/.exec(t))&&n(m[1]))return {m:n(m[1])};
+  if(/quarter/.test(t))return {m:3};
+  if(/\bmonthly\b|every month|each month|once a month/.test(t))return {m:1};
+  if(/semester/.test(t))return {d:126};
+  if(/annual|yearly|every year|each year/.test(t))return {m:12};
+  return null;}
+function paDue(){const st=paStep(S.meta.reassess),last=paLast();if(!st||!last)return '';const d=new Date(last+'T12:00:00');
+  if(st.d)d.setDate(d.getDate()+st.d);else d.setMonth(d.getMonth()+st.m);return paIso(d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate());}
+function paToday(){const t=new Date();return paIso(t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate());}
+function paHint(){const h=$('#mReassessHint'),b=$('#mReassessSet');if(!h||!b)return;const typed=paIso(S.meta.reassessDue),due=paDue(),last=paLast(),sch=String(S.meta.reassess||'').trim();
+  b.disabled=!due;
+  if(typed){const days=Math.round((new Date(typed+'T12:00:00')-new Date(paToday()+'T12:00:00'))/864e5);
+    h.textContent=days<0?'Overdue by '+(-days)+' day'+(days===-1?'':'s')+'.':days===0?'Due today.':'Due in '+days+' day'+(days===1?'':'s')+'.';return;}
+  if(due){h.textContent='From the schedule: '+paMd(due)+', counted from the session on '+paMd(last)+'.';return;}
+  h.textContent=!sch?'Choose a schedule, or type the date.':!paStep(sch)?'This schedule names no period; type the date.':'Date an assessment session to work it out, or type the date.';}
+$('#mReassessSet').addEventListener('click',()=>{const due=paDue(),el=$('#mReassessDue');if(!due||!el)return;el.value=due;el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));paHint();});
+document.addEventListener('input',()=>paHint());document.addEventListener('change',()=>paHint());
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);paHint();return r;};}
+paHint();
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=was?was.apply(this,arguments):null;
+  try{const sch=String(S.meta.reassess||'').trim(),typed=paIso(S.meta.reassessDue),due=typed||paDue(),last=paLast();if(!sch&&!due&&!last)return r;
+    const o=r&&typeof r==='object'?r:{};const p={};if(due){p.reassess=due;p.reassessFrom=typed?'typed':'schedule';}if(last)p.last=last;if(sch)p.schedule=sch;o.prefs=p;return o;}catch(e){return r;}};}
 })();
 </script>
 <script id="pa-run">
