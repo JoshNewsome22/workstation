@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form DD-1 · Daily Target Behavior Data Sheet &amp; Visual Analysis · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -525,6 +525,7 @@ td input,td select{max-width:100%}
 /* v21.74 the blank week, the incident log and the week summary */
 .dd-blank-note{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end;background:#fff7e0;border:1px solid #e3c77a;border-radius:3px;padding:8px 12px;margin:0 0 10px;font-size:13.5px;color:#4a3608}
 .dd-blank-note>span{flex:1 1 260px;align-self:center}
+.dd-blank-note[hidden]{display:none!important}
 .dd-blank-note .field{margin:0}
 body.dd-blank-on #dataTable tbody .actions button{visibility:hidden}
 body.dd-blank-on #dataTable tbody input,body.dd-blank-on #dataTable tbody select{background:#fff;color:var(--ink)}
@@ -570,6 +571,8 @@ body.dd-week-on #tab-data > :not(#ddWeekWrap){display:none!important}
 .dd-week .wk-next{width:100%;font-family:inherit;font-size:14px;box-sizing:border-box}
 .dd-week .wk-next-p{display:none}
 @media print{
+  .dd-pack-blank{break-before:page;page-break-before:always}
+  .dd-pack .wk-next-p{display:block}
   #ddInc:not(.print-on){display:none!important}
   #ddInc{break-inside:auto;margin-top:8px;padding-top:6px}
   #ddInc .inc-hd .hint{display:none}
@@ -7951,6 +7954,312 @@ function ddAfterData(){ddBlankBar();ddIncRender();if(ddWeek)ddWeekRender();}
 {const drop=nbhDdDrop;nbhDdDrop=function(){ddBlank=null;ddWeekOff();return drop.apply(this,arguments);};}
 ddClean();ddAfterData();
 </script>
+<script>
+/* ===================================================================================================
+   v21.75 more of the record for the case: each behavior's baseline and current condition, whether the aim has
+   held for the days the criterion asks, the conditions, the incidents and the latest week's summary; and Form TI-1's
+   observations marked on the graphs and named in the week summary.
+   =================================================================================================== */
+"use strict";
+const ddStrip=h=>String(h==null?"":h).replace(/<[^>]*>/g,"").replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&[lr]squo;/g,"’").replace(/\s+/g," ").trim();
+const dd2=v=>v==null?null:Math.round(v*100)/100;
+function ddCondStats(b,rows){const v=rows.map(r=>plotValue(r,b)).filter(x=>x!==null);if(!v.length)return null;const t=v.reduce((a,c)=>a+c,0);return {days:v.length,mean:dd2(t/v.length),total:dd2(t)};}
+function ddAimNow(b,rows){const aim=num(b.aim);if(aim===null)return null;const need=critNeed(b);let run=0;
+  rows.forEach(r=>{const v=plotValue(r,b);if(v===null)return;const ok=b.direction==="decrease"?v<=aim:v>=aim;run=ok?run+1:0;});
+  return {aim,need,run,met:run>=need};}
+{const out0=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out0();}catch(e){o=null;}
+  try{const all=sortedRows(),conds=buildConditions(),inc=(S.incidents||[]);
+    if(!o&&!inc.length)return o;
+    if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};
+    const d=o.data,rowsOf=c=>c.rowIdx.map(i=>all[i]).filter(r=>r&&r.date);
+    d.conds=conds.map(c=>{const r=rowsOf(c);return {name:c.name,from:r.length?r[0].date:"",to:r.length?r[r.length-1].date:"",days:r.filter(x=>S.behaviors.some(b=>plotValue(x,b)!==null)).length};});
+    const first=conds[0]?rowsOf(conds[0]):[],last=conds.length?rowsOf(conds[conds.length-1]):[];
+    const byName={};orderedBehaviors().forEach(b=>{byName[b.name||""]=b;});
+    d.behaviors.forEach(x=>{const b=byName[x.name];if(!b)return;
+      x.base=conds.length>1?ddCondStats(b,first):null;x.baseName=conds.length>1?conds[0].name:"";
+      x.cur=ddCondStats(b,last);x.curName=conds.length?conds[conds.length-1].name:"";
+      const a=ddAimNow(b,last);x.aim=a?a.aim:null;x.need=a?a.need:null;x.run=a?a.run:null;x.aimMet=!!(a&&a.met);});
+    d.incidentList=ddIncSorted().slice(-200).map(i=>({date:i.date,time:i.time,beh:ddIncName(i),tier:i.tier,before:i.before,what:i.what,words:i.words,did:i.did,ended:i.ended,parent:i.parent,parentWhen:i.parentWhen,bcba:i.bcba,by:i.by}));
+    d.incidents=inc.length;
+    /* the latest week with data, as the week summary gives it */
+    const mon=ddWeekDefault(),sun=ddAddDays(mon,6),pm=ddAddDays(mon,-7),ps=ddAddDays(mon,-1);
+    const wk=all.filter(r=>r.date>=mon&&r.date<=sun),lw=all.filter(r=>r.date>=pm&&r.date<=ps);
+    d.week={mon,days:wk.filter(r=>S.behaviors.some(b=>plotValue(r,b)!==null)).length,
+      rows:orderedBehaviors().map(b=>{const c=ddStat(b,wk),a=ddStat(b,lw),ch=ddChange(b,a,c);return {name:b.name||"",kind:b.kind||"target",now:ddStrip(ddStatTxt(b,c)),last:ddStrip(ddStatTxt(b,a)),change:ch.t,good:ch.k};}),
+      incidents:inc.filter(i=>i.date>=mon&&i.date<=sun).length,phases:wk.filter(r=>r.phaseType&&r.phaseType!=="none").map(r=>({date:r.date,type:r.phaseType,label:plainLabel(r.phaseLabel||"")})),
+      notes:wk.filter(r=>ddT(r.notes)).map(r=>({date:r.date,text:ddT(r.notes)})),decided:(S.weekly||{})[mon]||""};
+    return o;}catch(e){return o;}};}
+
+/* ---- Form TI-1's observations on the graph: a teal tick at the day of each one, with its integrity ---- */
+function ddTiObs(){const f=ddCaseFacts&&ddCaseFacts.integrity;return f&&Array.isArray(f.obs)?f.obs.filter(x=>x&&ddIsoOk(x.date)&&typeof x.pct==="number"):[];}
+function ddTiMarks(F,rows){const L=ddTiObs();if(!L.length)return "";const ds=rows.map(r=>r.date||"");let out="";const y=F.top;
+  L.forEach(o=>{let i=ds.indexOf(o.date);if(i<0){i=ds.findIndex(d=>d&&d>o.date);if(i<0)return;i=Math.max(0,i-0.5);}if(i>F.xEnd)return;
+    const x=F.X(i).toFixed(1),lab="TI "+Math.round(o.pct)+"%";
+    out+=`<g class="dd-ti"><line x1="${x}" y1="${y}" x2="${x}" y2="${y+9}" stroke="#0E5C63" stroke-width="2"/><rect x="${(+x-19).toFixed(1)}" y="${y+10}" width="38" height="12" rx="2" fill="#fff" fill-opacity=".85"/><text x="${x}" y="${y+19.5}" font-size="9.5" font-weight="600" fill="#0E5C63" text-anchor="middle">${esc(lab)}<\/text><title>Form TI-1: ${esc(Math.round(o.pct)+"% integrity on "+shortDay(o.date)+(o.type?" ("+o.type.toLowerCase()+")":""))}<\/title><\/g>`;});
+  return out;}
+{const fr0=ddFrame;ddFrame=function(rows){const F=fr0.apply(this,arguments);try{F.condLines+=ddTiMarks(F,rows);}catch(e){}return F;};}
+/* the week summary names the observations of the week */
+{const wr0=ddWeekRender;ddWeekRender=function(){wr0.apply(this,arguments);try{if(!ddWeek)return;const sun=ddAddDays(ddWeek,6),L=ddTiObs().filter(o=>o.date>=ddWeek&&o.date<=sun);
+  const h=[...document.querySelectorAll("#ddWeekWrap h4")].find(x=>/^Point sheet/.test(x.textContent));if(!h)return;
+  const box=document.createElement("div");box.className="wk-ti";box.innerHTML=`<h4>Treatment integrity (Form TI-1)</h4>`+(L.length?`<p>${L.map(o=>`<b>${esc(Math.round(o.pct))}%</b> on ${esc(shortDay(o.date))}${o.type?` (${esc(o.type.toLowerCase())})`:""}`).join(" · ")}</p>`:`<p class="hint">${ddTiObs().length?"No TI-1 observation this week.":"No TI-1 observations in the case. Open Form TI-1 in the workstation to bring them in."}</p>`);
+  h.parentNode.insertBefore(box,h);}catch(e){}};}
+/* a new reading of the case redraws the graphs (the ticks follow TI-1) */
+{const fi0=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const was=JSON.stringify(ddTiObs());const r=fi0.apply(this,arguments);try{if(JSON.stringify(ddTiObs())!==was&&typeof renderResults==="function")renderResults();}catch(e){}return r;};}
+</script>
+<script id="dd-weekpack">
+/* v21.75 the end of the week, for the workstation's packet: asked for its week ({nbh:'collect', week:true}), the form gives
+   the week summary of the latest week with data and, on a page of its own, next week's blank sheet, instead of the tabs
+   it prints otherwise. What is on the screen is put back as it was. This listener runs before the bridge's own. */
+"use strict";
+let ddPackWeek=false;
+window.addEventListener("message",e=>{const d=e.data;if(d&&typeof d==="object"&&d.nbh==="collect"&&d.week===true){ddPackWeek=true;setTimeout(()=>{ddPackWeek=false;},0);}});
+function ddWeekPack(){const keepWeek=ddWeek,keepBlank=ddBlank,head=document.querySelector(".nbh-print-head");
+  ddWeekOn(ddWeekDefault());const w=document.getElementById("ddWeekWrap").cloneNode(true);w.removeAttribute("hidden");w.removeAttribute("id");
+  w.querySelectorAll(".wk-bar,.wk-next").forEach(x=>x.remove());ddWeekOff();
+  ddBlankOn(ddWeekOfDefault(),5);const panel=document.getElementById("sheetTop").closest(".panel");const b=panel.cloneNode(true);
+  b.querySelectorAll("h2,p.hint,.inline-controls,#ivSettings,#pasteNote,#ddBlankNote,#ddInc,.noprint,.no-print").forEach(x=>x.remove());
+  ddBlank=keepBlank;if(keepWeek)ddWeekOn(keepWeek);else renderData();
+  const box=document.createElement("div");box.className="dd-pack";box.appendChild(w);const pg=document.createElement("div");pg.className="dd-pack-blank";pg.appendChild(b);box.appendChild(pg);
+  return [head,box];}
+{const pn0=window.nbhPrintNodes;window.nbhPrintNodes=function(){if(ddPackWeek){try{return ddWeekPack();}catch(e){}}return pn0?pn0():[];};}
+</script>
+<script id="dd-gsheets">
+/* ===================================================================================================
+   v21.76 the team's Google Sheet as the record's source. The sheet the team fills every day (one row per school day; a
+   "(Total Per Day)" column for each count target, "Occurrences(+) / Opportunities / %" for each target scored out of
+   opportunities; the definitions, measurement and observation length above) is read straight from Google into this
+   record, on this device: the form signs in to Google as the user, read-only, and the numbers go from Google to the
+   iPad and nowhere else. The sheet wins: on each reading its days replace what the record holds for those days; what was
+   in the record before is kept aside, so "Use the sheet's data" off puts the record back as it was without the sheet.
+   It reads again when the form opens and every five minutes while it is on screen, as long as the sign-in holds (an
+   hour, Google's rule; then one tap signs in again).
+   =================================================================================================== */
+"use strict";
+const GS_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
+const GS_EVERY=5*60*1000;
+let gsTok=null,gsExp=0,gsBusy=false,gsErr="",gsLib=null,gsDlgState=null;
+const gsK=s=>String(s==null?"":s).trim().replace(/\s+/g," ").toLowerCase();
+function gsClientId(){try{return localStorage.getItem("nbh.google.client")||"";}catch(e){return "";}}
+function gsSetClientId(v){try{if(v)localStorage.setItem("nbh.google.client",v);else localStorage.removeItem("nbh.google.client");}catch(e){}}
+function gsTokLoad(){try{const t=JSON.parse(sessionStorage.getItem("nbh.google.tok")||"null");if(t&&t.exp>Date.now()+60000){gsTok=t.tok;gsExp=t.exp;}}catch(e){}}
+function gsTokSave(){try{sessionStorage.setItem("nbh.google.tok",JSON.stringify({tok:gsTok,exp:gsExp}));}catch(e){}}
+const gsSigned=()=>!!gsTok&&gsExp>Date.now()+30000;
+function gsLoadLib(){if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();if(gsLib)return gsLib;
+  gsLib=new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;s.onload=()=>res();
+    s.onerror=()=>{gsLib=null;rej(new Error("Google’s sign-in could not be loaded. Check the internet connection."));};document.head.appendChild(s);});return gsLib;}
+/* the sign-in opens Google's window, so it runs in the tap itself (the library is loaded before the button is offered) */
+function gsSignIn(){return new Promise((res,rej)=>{const id=gsClientId();if(!id){rej(new Error("nokey"));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error("Google’s sign-in is still loading. Try again in a moment."));return;}
+  try{const c=google.accounts.oauth2.initTokenClient({client_id:id,scope:GS_SCOPE,
+      callback:r=>{if(r&&r.access_token){gsTok=r.access_token;gsExp=Date.now()+(+r.expires_in||3600)*1000;gsTokSave();res();}else rej(new Error(r&&r.error_description||r&&r.error||"The sign-in was not completed."));},
+      error_callback:e=>rej(new Error(e&&e.type==="popup_closed"?"The Google window was closed before the sign-in finished.":e&&e.type==="popup_failed_to_open"?"The Google window could not open. Allow pop-ups for this site and try again.":"The sign-in did not finish."))});
+    c.requestAccessToken({prompt:""});}catch(e){rej(e);}});}
+function gsIdOf(v){v=String(v||"").trim();const m=/\/spreadsheets\/d\/([A-Za-z0-9_-]{20,})/.exec(v);return m?m[1]:(/^[A-Za-z0-9_-]{30,}$/.test(v)?v:"");}
+async function gsGet(path){const r=await fetch("https://sheets.googleapis.com/v4/spreadsheets/"+path,{headers:{Authorization:"Bearer "+gsTok}});
+  if(r.status===401){gsTok=null;gsExp=0;try{sessionStorage.removeItem("nbh.google.tok");}catch(e){}throw new Error("signin");}
+  if(r.status===403)throw new Error("Google refused (403): this account cannot open the sheet, or the district has not allowed the workstation to read Google Sheets. See Setup: the Google Sheets link.");
+  if(r.status===404)throw new Error("Google could not find that sheet (404). Check the link, and that this account can open it.");
+  if(!r.ok)throw new Error("Google Sheets answered "+r.status+".");return r.json();}
+const gsMetaOf=id=>gsGet(encodeURIComponent(id)+"?fields=properties.title,sheets.properties(title,hidden)");
+function gsRange(t){return "'"+String(t).replace(/'/g,"''")+"'!A1:BZ800";}
+const gsValuesOf=(id,tabs)=>gsGet(encodeURIComponent(id)+"/values:batchGet?"+tabs.map(t=>"ranges="+encodeURIComponent(gsRange(t))).join("&")+"&valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS");
+
+/* ---- reading one tab of the template: the "Date" row is the heading row; each "(Total Per Day)" is a count target, each
+   "Occurrences(+)" followed by "Opportunities" (and "%") a target scored out of opportunities; above them, in each
+   target's first column, "<name> Definition", the definition, the name, the examples; "Measurement" and "Observ.
+   Length" in column A; the band ("Reduction Targets", "Acquisition Targets", "Replacement ...") over the columns says
+   the kind. Below, one row per day with its date in column A. ---- */
+function gsDate(s){s=String(s||"").trim();let m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?2000+(+m[3]):+m[3];if(+m[1]<1||+m[1]>12||+m[2]<1||+m[2]>31)return "";return y+"-"+String(m[1]).padStart(2,"0")+"-"+String(m[2]).padStart(2,"0");}
+  m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);return m?m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0"):"";}
+const gsNum=v=>{const t=String(v==null?"":v).replace(/[,%\s]/g,"");if(t===""||t==="-")return null;const n=Number(t);return isFinite(n)?n:null;};
+function gsParse(rows,tab){if(!Array.isArray(rows))return null;
+  const cell=(r,c)=>String(((rows[r]||[])[c])==null?"":(rows[r]||[])[c]).trim();
+  const H=rows.findIndex(r=>/^date$/i.test(String((r||[])[0]||"").trim()));if(H<0)return null;
+  const rowA=re=>{for(let r=0;r<H;r++)if(re.test(cell(r,0)))return r;return -1;};
+  const mR=rowA(/^measurement/i),oR=rowA(/^observ/i),hdr=rows[H]||[],groups=[];
+  for(let c=1;c<hdr.length;c++){const h=String(hdr[c]||"").trim();
+    if(/total per day|^\(?total\b/i.test(h))groups.push({c,two:false});
+    else if(/occurrences/i.test(h)&&/opportunit/i.test(String(hdr[c+1]||""))){groups.push({c,two:true});c+=/%/.test(String(hdr[c+2]||""))?2:1;}}
+  const kindOf=c=>{for(let r=0;r<H;r++)for(let k=c;k>=1;k--){const t=cell(r,k);if(!t)continue;
+      if(/reduction|decrease|problem/i.test(t))return "target";if(/replacement|alternative/i.test(t))return "replacement";if(/acquisition|skill|increase/i.test(t))return "acquisition";break;}
+    return "";};
+  const end=mR>0?mR:H;
+  const out=groups.map(g=>{const c=g.c;let L=-1;for(let r=0;r<end;r++){if(/definition\s*$/i.test(cell(r,c))&&!/^write the definition/i.test(cell(r,c))){L=r;break;}}
+    let name=L>=0?cell(L,c).replace(/\s*definition\s*$/i,"").trim():"",nameRow=-1,def="";
+    if(L>=0){for(let r=L+1;r<end;r++)if(name&&gsK(cell(r,c))===gsK(name)){nameRow=r;break;}
+      const stop=nameRow>0?nameRow:Math.min(end,L+3);const D=[];for(let r=L+1;r<stop;r++){const t=cell(r,c);if(t&&!/^write the definition/i.test(t))D.push(t);}def=D.join(" ");}
+    if(!name)name=cell(H+1,c)||("Target in column "+String.fromCharCode(65+Math.min(25,c)));
+    const ex=[];if(nameRow>0)for(let r=nameRow+1;r<end;r++){const t=cell(r,c);if(/^(non[- ]?example|example)[^:]*:\s*\S/i.test(t))ex.push(t);}
+    const meas=mR>=0?cell(mR,c):"",obs=oR>=0?cell(oR,c):"";
+    const measure=g.two?"trials":/duration|minute/i.test(meas)?"duration":/rate|per hour/i.test(meas)?"rate":"count";
+    const days={};for(let r=H+1;r<rows.length;r++){const iso=gsDate(cell(r,0));if(!iso)continue;
+      if(g.two){const a=gsNum(cell(r,c)),b=gsNum(cell(r,c+1));if(a===null&&b===null)continue;days[iso]={v:a,o:b};}
+      else{const v=gsNum(cell(r,c));if(v===null)continue;days[iso]={v};}}
+    return {tab:String(tab||""),col:c,name,kind:kindOf(c)||(g.two?"acquisition":"target"),measure,two:g.two,def,ex:ex.join(" "),meas,obs,days};});
+  return {tab:String(tab||""),student:{name:cell(0,0),id:cell(1,0)},groups:out};}
+
+/* ---- the record's state for the link (saved with the data file, never the sign-in) ---- */
+function gsState(){const g=S.gs&&typeof S.gs==="object"&&!Array.isArray(S.gs)?S.gs:null;if(!g)return null;
+  const str=v=>typeof v==="string"?v.slice(0,400):"";
+  const o={id:gsIdOf(g.id)?String(g.id):"",url:str(g.url),title:str(g.title),tabs:Array.isArray(g.tabs)?g.tabs.filter(t=>typeof t==="string").slice(0,20):[],
+    on:g.on!==false,read:str(g.read),nameOk:str(g.nameOk),applied:{},madeRows:[],madeBeh:[],cache:null};
+  if(g.applied&&typeof g.applied==="object")Object.keys(g.applied).slice(0,20000).forEach(k=>{if(/^[^|]{1,60}\|[^|]{1,80}$/.test(k)){const v=g.applied[k];o.applied[k]=v==null?"":String(v).slice(0,40);}});
+  ["madeRows","madeBeh"].forEach(k=>{if(Array.isArray(g[k]))o[k]=g[k].filter(x=>typeof x==="string").slice(0,5000);});
+  if(g.cache&&Array.isArray(g.cache.groups))o.cache={student:{name:str((g.cache.student||{}).name),id:str((g.cache.student||{}).id)},groups:g.cache.groups.slice(0,40).filter(x=>x&&typeof x==="object").map(x=>{
+    const d={};if(x.days&&typeof x.days==="object")Object.keys(x.days).slice(0,3000).forEach(k=>{if(/^\d{4}-\d{2}-\d{2}$/.test(k)&&x.days[k]&&typeof x.days[k]==="object"){const v=x.days[k];d[k]={v:typeof v.v==="number"?v.v:null};if(x.two)d[k].o=typeof v.o==="number"?v.o:null;}});
+    return {tab:str(x.tab),col:+x.col||0,name:str(x.name),kind:["target","replacement","acquisition"].indexOf(x.kind)>=0?x.kind:"target",measure:Object.prototype.hasOwnProperty.call(MEASURES,x.measure)?x.measure:"count",two:!!x.two,def:str(x.def),ex:str(x.ex),meas:str(x.meas),obs:str(x.obs),days:d};})};
+  return o;}
+/* undo: what the record held before the sheet goes back and the days only the sheet had go. The rows of the behaviors the
+   sheet named stay (with their aims and criteria), and go only when the sheet is unlinked (drop) with nothing left in them. */
+function gsUndo(drop){const g=S.gs;if(!g)return;const A=g.applied||{};
+  Object.keys(A).forEach(k=>{const i=k.indexOf("|"),rid=k.slice(0,i),key=k.slice(i+1),r=S.rows.find(x=>x.id===rid);if(r)r.values[key]=A[k];});
+  const made=new Set(g.madeRows||[]),blank=v=>String(v==null?"":v).trim()==="";
+  S.rows=S.rows.filter(r=>!made.has(r.id)||Object.values(r.values||{}).some(v=>!blank(v))||!blank(r.notes)||!blank(r.phaseLabel)||(r.phaseType&&r.phaseType!=="none"));
+  if(drop){(g.madeBeh||[]).forEach(id=>{if(!S.rows.some(r=>!blank(r.values[id])||!blank(r.values[OPP(id)])))S.behaviors=S.behaviors.filter(b=>b.id!==id);});g.madeBeh=[];}
+  g.applied={};g.madeRows=[];}
+function gsBehFor(x,made,warn){let b=S.behaviors.find(y=>gsK(y.name)===gsK(x.name));
+  const own=b&&S.rows.some(r=>String(r.values[b.id]==null?"":r.values[b.id]).trim()!==""&&!(S.gs.applied||{})[r.id+"|"+b.id]);
+  if(b&&!!MEASURES[b.measure].two!==!!x.two){if(own){warn.push(x.name+": the sheet scores it "+(x.two?"out of opportunities":"as a count")+", the record "+(x.two?"as a count":"out of opportunities")+"; left as the record has it");return null;}b.measure=x.measure;}
+  if(!b){b={id:uid("b"),kind:x.kind,name:x.name,definition:x.def+(x.ex?" "+x.ex:""),obsLength:x.obs||"Entire school day",measure:x.measure,direction:x.kind==="target"?"decrease":"increase",aim:"",critDays:3,pairWith:"",color:PALETTE[S.behaviors.length%PALETTE.length]};
+    S.behaviors.push(b);S.rows.forEach(r=>{r.values[b.id]="";r.values[OPP(b.id)]="";r.intervals=r.intervals||{};r.intervals[b.id]={};r.intervals[OPP(b.id)]={};});made.push(b.id);}
+  else{if(!String(b.definition||"").trim()&&x.def)b.definition=x.def+(x.ex?" "+x.ex:"");if(x.obs&&!b.obsLength)b.obsLength=x.obs;}
+  return b;}
+function gsApply(){const g=S.gs;if(!g||!g.cache)return {n:0,days:0,warn:[]};gsUndo();
+  if(!g.on)return {n:0,days:0,warn:[]};
+  if(S.settings.entryMode==="interval")return {n:0,days:0,warn:["the record is kept in intervals; the sheet’s daily totals go into a record kept one total per day"]};
+  const warn=[],madeB=[],madeR=[],A={};let n=0;const dates=new Set();
+  (g.cache.groups||[]).forEach(x=>{const b=gsBehFor(x,madeB,warn);if(!b)return;
+    Object.keys(x.days).forEach(iso=>{const d=x.days[iso];let r=S.rows.find(y=>y.date===iso);
+      if(!r){r=newRow(iso);S.behaviors.forEach(bb=>{if(!(bb.id in r.values)){r.values[bb.id]="";r.values[OPP(bb.id)]="";}});S.rows.push(r);madeR.push(r.id);}
+      const put=(key,v)=>{if(v===null||v===undefined)return;const k=r.id+"|"+key;if(!(k in A))A[k]=r.values[key]==null?"":String(r.values[key]);r.values[key]=String(v);n++;};
+      put(b.id,d.v);if(x.two)put(OPP(b.id),d.o);dates.add(iso);});});
+  g.applied=A;g.madeRows=madeR;g.madeBeh=(g.madeBeh||[]).concat(madeB.filter(id=>(g.madeBeh||[]).indexOf(id)<0));return {n,days:dates.size,warn};}
+/* the student on the sheet and on the record: two names with no word in common ask first */
+function gsSameStudent(sheetName){const a=gsK(sheetName).replace(/^simulated\s*[–-]\s*/,""),b=gsK(S.meta.client).replace(/^simulated\s*[–-]\s*/,"");if(!a||!b)return true;
+  const w=x=>x.split(/[\s,]+/).filter(t=>t.length>1);const A=w(a),B=w(b);return A.some(t=>B.indexOf(t)>=0);}
+
+/* ---- reading ---- */
+async function gsRead(opt){opt=opt||{};const g=S.gs;if(!g||!g.id||gsBusy)return false;if(!g.on&&!opt.force)return false;
+  if(!gsSigned()){gsErr="signin";gsBar();return false;}
+  gsBusy=true;gsErr="";gsBar();
+  try{const vr=await gsValuesOf(g.id,g.tabs.length?g.tabs:[]);const groups=[];let student=null;
+    (vr.valueRanges||[]).forEach((v,i)=>{const p=gsParse(v.values||[],g.tabs[i]);if(!p)return;if(!student||!student.name)student=p.student;p.groups.forEach(x=>groups.push(x));});
+    if(!groups.length)throw new Error("No target columns were found on the tabs linked (a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns).");
+    if(student&&student.name&&!gsSameStudent(student.name)&&g.nameOk!==student.name){
+      gsErr="name:"+student.name;gsBusy=false;gsBar();return false;}
+    g.cache={student:student||{name:"",id:""},groups};g.read=new Date().toISOString();
+    const r=gsApply();renderAll();gsEdited();
+    if(!opt.quiet)toast(r.n?"From Google Sheets: "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+"."+(r.warn.length?" "+r.warn.join("; ")+".":""):(r.warn.length?r.warn.join("; "):"The sheet holds no numbers yet."));
+    g.warn=r.warn;return true;}
+  catch(e){gsErr=e&&e.message==="signin"?"signin":(e&&e.message)||String(e);return false;}
+  finally{gsBusy=false;gsBar();}}
+function gsEdited(){try{document.dispatchEvent(new Event("input",{bubbles:true}));}catch(e){}}
+function gsWhen(iso){if(!iso)return "";const d=new Date(iso);if(isNaN(d))return "";const t=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  return d.toDateString()===new Date().toDateString()?t:d.toLocaleDateString(undefined,{month:"numeric",day:"numeric"})+" "+t;}
+
+/* ---- the bar above the sheet ---- */
+function gsBar(){let el=document.getElementById("gsBar");if(!el){const h=document.querySelector("#tab-data .dd-datah");if(!h)return;el=document.createElement("div");el.id="gsBar";el.className="gs-bar noprint no-print";el.setAttribute("role","status");h.parentNode.insertBefore(el,h.nextSibling);}
+  const g=S.gs;
+  if(!g||!g.id){el.className="gs-bar gs-off noprint no-print";el.innerHTML=`<span><b>Google Sheets.</b> The team’s sheet can fill this record and keep it current.</span> <button type="button" class="btn ghost sm" id="gsLink">Link a Google Sheet</button>`;return;}
+  const n=g.cache?(g.cache.groups||[]).length:0,days=g.cache?new Set([].concat(...(g.cache.groups||[]).map(x=>Object.keys(x.days)))).size:0;
+  let st="";
+  if(gsBusy)st="Reading the sheet…";
+  else if(gsErr==="signin")st=`Signed out of Google: the record shows the sheet as last read${g.read?" ("+esc(gsWhen(g.read))+")":""}. <button type="button" class="btn sm" id="gsSign">Sign in to Google</button>`;
+  else if(/^name:/.test(gsErr))st=`<b class="gs-bad">This sheet is for ${esc(gsErr.slice(5))}; the record is for ${esc(S.meta.client||"another student")}.</b> Nothing was taken. <button type="button" class="btn sm" id="gsNameOk">It is the same student: read it</button>`;
+  else if(gsErr)st=`<span class="gs-bad">${esc(gsErr)}</span>`;
+  else st=g.on?`Read ${esc(gsWhen(g.read))||"not yet"}${n?` · ${n} target${n===1?"":"s"}, ${days} day${days===1?"":"s"}`:""}${(g.warn||[]).length?` · <span class="gs-bad">${esc(g.warn.join("; "))}</span>`:""}. Reads again every five minutes while this is open.`:`Not in use: the record shows only what was typed here.`;
+  el.className="gs-bar noprint no-print"+(g.on?"":" gs-paused");
+  el.innerHTML=`<span class="gs-t"><b>Google Sheets:</b> ${esc(g.title||"the linked sheet")}${g.tabs.length?` <span class="gs-tabs">(${esc(g.tabs.join(", "))})</span>`:""}</span><span class="gs-st">${st}</span>
+    <span class="gs-tools"><label class="gs-use"><input type="checkbox" id="gsUse"${g.on?" checked":""}> Use the sheet’s data</label>
+    <button type="button" class="btn ghost sm" id="gsNow"${gsBusy||!g.on?" disabled":""}>Read now</button><button type="button" class="btn ghost sm" id="gsLink">Change</button></span>`;}
+/* the cells the sheet wrote carry a mark, and say so */
+function gsMarks(){const g=S.gs;if(!g||!g.on)return;Object.keys(g.applied||{}).forEach(k=>{const i=k.indexOf("|"),rid=k.slice(0,i),key=k.slice(i+1);
+  const inp=document.querySelector(`#dataTable tr[data-r="${CSS.escape(rid)}"] input[data-v="${CSS.escape(key)}"]`);if(inp){inp.classList.add("gs-cell");inp.title="From Google Sheets; the sheet wins at the next reading. Change it there.";}});}
+
+/* ---- the dialog: the sign-in key (once per device), the sheet's link, its tabs, a look before linking ---- */
+function gsDlg(){let d=document.getElementById("dlgGs");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog gs-dlg";d.id="dlgGs";d.setAttribute("aria-labelledby","gsT");
+  d.innerHTML=`<h2 id="gsT">Link a Google Sheet</h2>
+  <p class="hint">The sheet is read from Google straight into this record, on this device, read-only; nothing goes to any other website. The sheet wins for the days it holds; what was typed here for those days is kept aside and comes back when <b>Use the sheet’s data</b> is off.</p>
+  <div id="gsKeyRow"><label class="field"><span>Google sign-in key (OAuth client ID, set up once for this device; Setup: the Google Sheets link)</span><input id="gsKey" placeholder="1234567890-abc.apps.googleusercontent.com" autocomplete="off" spellcheck="false"></label></div>
+  <label class="field"><span>The student’s sheet (its link from the address bar, or Share › Copy link)</span><input id="gsUrl" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off" spellcheck="false"></label>
+  <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="gsFind">Sign in and find the tabs</button><span class="hint" id="gsMsg" role="status" style="margin:0 0 0 8px"></span></div>
+  <div id="gsTabs"></div><div id="gsPrev"></div>
+  <div class="dd-actions"><button type="button" class="btn danger ghost" id="gsUnlink" hidden>Unlink</button><span style="flex:1"></span><button type="button" class="btn ghost" id="gsCancel">Cancel</button><button type="button" class="btn" id="gsGo" disabled>Link and read</button></div>`;
+  document.body.appendChild(d);d.querySelector("#gsCancel").addEventListener("click",()=>d.close());return d;}
+function gsMsg(t,bad){const m=document.getElementById("gsMsg");if(m){m.textContent=t||"";m.classList.toggle("gs-bad",!!bad);}}
+function gsOpen(){const d=gsDlg(),g=S.gs;gsDlgState=null;
+  d.querySelector("#gsKey").value=gsClientId();d.querySelector("#gsKeyRow").hidden=!!gsClientId()&&!!(g&&g.id);
+  d.querySelector("#gsUrl").value=g&&g.url?g.url:"";d.querySelector("#gsTabs").innerHTML="";d.querySelector("#gsPrev").innerHTML="";d.querySelector("#gsGo").disabled=true;
+  d.querySelector("#gsUnlink").hidden=!(g&&g.id);gsMsg(location.protocol==="file:"?"The one-file copy opened from Files cannot sign in to Google; open the workstation from its website.":"");
+  gsLoadLib().catch(e=>gsMsg(e.message,true));try{d.showModal();}catch(e){d.setAttribute("open","");}}
+async function gsFind(){const d=gsDlg(),key=d.querySelector("#gsKey").value.trim(),url=d.querySelector("#gsUrl").value.trim(),id=gsIdOf(url);
+  if(key&&key!==gsClientId())gsSetClientId(key);
+  if(!gsClientId()){d.querySelector("#gsKeyRow").hidden=false;gsMsg("Give the Google sign-in key first (Setup: the Google Sheets link).",true);return;}
+  if(!id){gsMsg("That is not a Google Sheets link.",true);return;}
+  try{if(!gsSigned()){gsMsg("Signing in to Google…");await gsSignIn();}
+    gsMsg("Reading the sheet’s tabs…");const meta=await gsMetaOf(id),tabs=(meta.sheets||[]).map(s=>s.properties||{}).filter(p=>!p.hidden).map(p=>p.title);
+    const vr=await gsValuesOf(id,tabs),P=[];(vr.valueRanges||[]).forEach((v,i)=>{const p=gsParse(v.values||[],tabs[i]);if(p&&p.groups.length)P.push(p);});
+    gsDlgState={id,url,title:(meta.properties||{}).title||"",tabs,parsed:P};
+    const was=S.gs&&S.gs.id===id?S.gs.tabs:null;
+    d.querySelector("#gsTabs").innerHTML=P.length?`<fieldset class="gs-tabset"><legend>Tabs with target columns</legend>${P.map((p,i)=>`<label><input type="checkbox" data-gstab="${i}"${(was?was.indexOf(p.tab)>=0:/reduction|acquisition|replacement|tbx|target/i.test(p.tab))?" checked":""}> <b>${esc(p.tab)}</b> <span class="hint">${p.groups.map(x=>esc(x.name)).join(", ")}</span></label>`).join("")}</fieldset>`:
+      `<p class="gs-bad">No tab of this sheet has a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns.</p>`;
+    gsMsg((meta.properties||{}).title?"“"+meta.properties.title+"”: "+tabs.length+" tab"+(tabs.length===1?"":"s")+".":"");gsPreview();}
+  catch(e){gsMsg(e&&e.message==="signin"?"Google asked to sign in again. Press the button once more.":e&&e.message==="nokey"?"Give the Google sign-in key first.":(e&&e.message)||String(e),true);}}
+function gsChosen(){const d=gsDlg(),st=gsDlgState;if(!st)return [];return [...d.querySelectorAll("[data-gstab]:checked")].map(c=>st.parsed[+c.dataset.gstab]).filter(Boolean);}
+function gsPreview(){const d=gsDlg(),C=gsChosen(),box=d.querySelector("#gsPrev");if(!gsDlgState){box.innerHTML="";return;}
+  if(!C.length){box.innerHTML="";d.querySelector("#gsGo").disabled=true;return;}
+  const G=[].concat(...C.map(p=>p.groups)),all=[].concat(...G.map(x=>Object.keys(x.days))).sort(),st=C[0].student||{};
+  const same=gsSameStudent(st.name);
+  box.innerHTML=`<div class="gs-prev"><p><b>${G.length} target${G.length===1?"":"s"}</b>, ${new Set(all).size} school day${new Set(all).size===1?"":"s"}${all.length?` (${esc(shortDay(all[0]))} to ${esc(shortDay(all[all.length-1]))})`:""}:</p>
+    <ul>${G.map(x=>{const b=S.behaviors.find(y=>gsK(y.name)===gsK(x.name));return `<li><b>${esc(x.name)}</b> · ${esc(KINDS[x.kind]||"")} · ${x.two?"occurrences of opportunities (%)":esc(MEASURES[x.measure].label)} · ${Object.keys(x.days).length} days · ${b?"goes into the record’s row of that name":"<i>a new row in the record</i>"}</li>`;}).join("")}</ul>
+    ${st.name&&!same?`<p class="gs-bad"><b>The sheet is for ${esc(st.name)}; this record is for ${esc(S.meta.client)}.</b> <label><input type="checkbox" id="gsSameOk"> It is the same student</label></p>`:""}</div>`;
+  const ok=()=>{d.querySelector("#gsGo").disabled=!(same||(d.querySelector("#gsSameOk")||{}).checked);};ok();const cb=d.querySelector("#gsSameOk");if(cb)cb.addEventListener("change",ok);}
+async function gsLinkGo(){const d=gsDlg(),st=gsDlgState,C=gsChosen();if(!st||!C.length)return;
+  if(S.gs&&S.gs.id&&S.gs.id!==st.id)gsUndo(true);
+  /* a record not yet used (no days, only the three example rows with nothing written) takes the sheet's targets in their place */
+  const EX=['physical aggression','self-injury','property destruction'];
+  if(!S.rows.length&&S.behaviors.every(b=>!String(b.definition||'').trim()&&!String(b.aim||'').trim()&&EX.indexOf(gsK(b.name))>=0))S.behaviors=[];
+  const groups=[].concat(...C.map(p=>p.groups)),stu=C[0].student||{name:"",id:""};
+  S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name)?"":stu.name,cache:{student:stu,groups}});
+  if(!S.meta.id&&stu.id&&gsSameStudent(stu.name))S.meta.id=stu.id;
+  const r=gsApply();gsErr="";d.close();renderAll();gsEdited();
+  toast("Linked. "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+" from the sheet."+(r.warn.length?" "+r.warn.join("; ")+".":""));}
+async function gsUnlinkGo(){if(!S.gs)return;const ok=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm("Unlink the Google Sheet?\nThe days and numbers the sheet wrote are taken out of this record and what was typed here comes back. The sheet itself is not changed.",{ok:"Unlink",danger:true}):confirm("Unlink the Google Sheet?");
+  if(!ok)return;gsUndo(true);S.gs=null;gsErr="";gsDlg().close();renderAll();gsEdited();toast("The sheet is unlinked; the record holds only what was typed here.");}
+document.addEventListener("click",async e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest("#gsLink")){gsOpen();return;}
+  if(t.closest("#gsFind")){gsFind();return;}
+  if(t.closest("#gsGo")){gsLinkGo();return;}
+  if(t.closest("#gsUnlink")){gsUnlinkGo();return;}
+  if(t.closest("#gsNow")){gsRead({});return;}
+  if(t.closest("#gsNameOk")){if(S.gs&&/^name:/.test(gsErr)){S.gs.nameOk=gsErr.slice(5);gsErr="";gsRead({});}return;}
+  if(t.closest("#gsSign")){try{await gsLoadLib();}catch(err){gsErr=err.message;gsBar();return;}
+    gsSignIn().then(()=>{gsErr="";gsRead({});}).catch(err=>{gsErr=err.message==="nokey"?"The Google sign-in key is not set on this device: Change, then give it.":err.message;gsBar();});return;}});
+document.addEventListener("change",e=>{const t=e.target;if(!t)return;
+  if(t.matches&&t.matches("[data-gstab]")){gsPreview();return;}
+  if(t.id==="gsUse"&&S.gs){S.gs.on=t.checked;if(S.gs.on){gsApply();renderAll();gsEdited();gsRead({quiet:true});}else{gsUndo();renderAll();gsEdited();toast("The sheet’s data is set aside: the record shows only what was typed here. Tick it again to bring the sheet back.");}}});
+/* the bar and the marks after each render; the link's state read in the shape this form writes when a record comes in */
+{const rd=renderData;renderData=function(){const r=rd.apply(this,arguments);try{gsBar();gsMarks();}catch(e){}return r;};}
+{const ra=renderAll;renderAll=function(){S.gs=gsState();return ra.apply(this,arguments);};}
+/* reading again: when the form opens (a sign-in still good in this tab), every five minutes while it is on screen, and on coming back to it */
+gsTokLoad();S.gs=gsState();gsBar();
+setTimeout(()=>{if(S.gs&&S.gs.on&&gsSigned())gsRead({quiet:true});},2500);
+setInterval(()=>{if(document.visibilityState==="visible"&&S.gs&&S.gs.on&&gsSigned())gsRead({quiet:true});},GS_EVERY);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&S.gs&&S.gs.on&&gsSigned()&&(!S.gs.read||Date.now()-new Date(S.gs.read)>GS_EVERY))gsRead({quiet:true});});
+</script>
+<style id="dd-gsheets-css">
+.gs-bar{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:#eef6f2;border:1px solid #b9d8c6;border-radius:3px;padding:8px 12px;margin:0 0 12px;font-size:13.5px}
+.gs-bar.gs-off{background:#f4f7f8;border-color:var(--rule-soft)}.gs-bar.gs-paused{background:#fbf6e9;border-color:#e3d29a}
+.gs-bar .gs-st{flex:1 1 280px}.gs-bar .gs-tabs{color:var(--ink-soft);font-size:12.5px}.gs-bar .gs-tools{display:flex;gap:8px;align-items:center;margin-left:auto}
+.gs-bar .gs-use{display:flex;gap:5px;align-items:center;font-size:13px}.gs-bar .gs-use input{width:auto}
+.gs-bad{color:#8e2a2a}
+#dataTable input.gs-cell{box-shadow:inset 0 -2px 0 #4a9a6e}
+dialog.gs-dlg{width:min(640px,calc(100vw - 24px))}dialog.gs-dlg .field{display:block}dialog.gs-dlg .field input{width:100%;box-sizing:border-box;font-size:16px}dialog.gs-dlg textarea{min-height:0}
+.gs-tabset{border:1px solid var(--rule-soft);border-radius:3px;padding:6px 10px;margin:8px 0}.gs-tabset label{display:block;padding:4px 0;font-size:14px}.gs-tabset input{width:auto;margin-right:5px}
+.gs-prev{font-size:13.5px}.gs-prev ul{margin:4px 0 6px 18px;padding:0}.gs-prev li{margin:2px 0}
+@media print{#dataTable input.gs-cell{box-shadow:none}}
+</style>
 
 <script>
 /* ===================== NBH student packet =====================

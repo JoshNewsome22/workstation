@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form RA-1 · Reinforcer Assessment Protocol · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -1689,7 +1689,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   </div>
   <div class="ident" style="margin-top:8px">
     <div class="f"><label for="mCap">Session cap for PR (min)</label><input id="mCap" data-meta="prcap" placeholder="e.g., 20"></div>
-    <div class="f"><label for="mPBdef">Problem behavior to record</label><input id="mPBdef" data-meta="pbdef"></div>
+    <div class="f ra-full" style="grid-column:1/-1"><label for="mPBdef">Problem behavior to record</label><textarea id="mPBdef" data-meta="pbdef" class="nbh-line" rows="1"></textarea></div>
     <div class="f"><label for="mStopRule">Stop rule for problem behavior</label><input id="mStopRule" data-meta="stoprule" placeholder="e.g., end session at first aggression"></div>
   </div>
   <div class="cite">Response selection follows the arbitrary-response approach of Roscoe et al. (1999) and the task responses used by Roane et al. (2001) and DeLeon et al. (2009). Whichever is chosen, the same response, materials, and session length are used in every condition so that only the consequence differs.</div>
@@ -2014,9 +2014,10 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="drow"><div class="dlab">Conditions not tested (delay, task type, setting, staff)</div><div class="dval"><textarea data-meta="untested" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Re-test trigger</div><div class="dval"><textarea data-meta="retest" placeholder="e.g., when response rate falls below 60% of the assessment level for 3 days; each new schedule step" class="nbh-line" rows="1"></textarea></div></div>
   </div>
-  <div class="ident" style="grid-template-columns:repeat(2,1fr);margin-top:10px">
-    <div class="f"><label for="mIoa">Interobserver agreement (design, sessions, %)</label><input id="mIoa" data-meta="ioa"></div>
-    <div class="f"><label for="mPBsum">Problem behavior across sessions (summary)</label><input id="mPBsum" data-meta="pbsum"></div>
+  <!-- v21.75 (audit) one per line, and able to wrap: two half-width boxes printed as inch-wide columns and split across pages -->
+  <div class="ident ra-wide" style="grid-template-columns:1fr;margin-top:10px">
+    <div class="f"><label for="mIoa">Interobserver agreement (design, sessions, %)</label><textarea id="mIoa" data-meta="ioa" class="nbh-line" rows="1"></textarea></div>
+    <div class="f"><label for="mPBsum">Problem behavior across sessions (summary)</label><textarea id="mPBsum" data-meta="pbsum" class="nbh-line" rows="1"></textarea></div>
   </div>
   <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div><div>Parent or guardian informed / date</div></div>
 
@@ -4273,7 +4274,7 @@ function coOptList(){const m=S.meta.coOpts||'2';const n=S.n;const st=i=>({key:St
   return [st(0),st(1)];}
 function renderCO(){
   const opts=coOptList();
-  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label).slice(0,10)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
+  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
   S.co.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="pos"><option value=""></option><option${s.pos==='L'?' selected':''}>L</option><option${s.pos==='M'?' selected':''}>M</option><option${s.pos==='R'?' selected':''}>R</option></select></td>${opts.map((o,j)=>`<td class="c"><input type="number" min="0" data-k="${k}" data-j="${j}" data-f="r" value="${esc(s.r[j])}"></td>`).join('')}<td class="c calc" id="coT${k}"></td>${opts.map((o,j)=>`<td class="c calc" id="coP${k}_${j}"></td>`).join('')}<td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
   $('#coTbl').innerHTML=h+'</tbody>';computeCO();
 }
@@ -5640,6 +5641,19 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
 
 /* ra1-walk:end */
 renderAll();
+/* v21.75 (audit) the case into the stimuli and the problem behavior (see the ra-v2175 block below) */
+const raT=v=>String(v||'').trim();
+function raType(t){t=raT(t).toLowerCase();if(!t)return '';if(/edible|food|snack|drink/.test(t))return 'Edible';if(/social|attention|praise/.test(t))return 'Social / attention';
+  if(/token/.test(t))return 'Token';if(/escape|break/.test(t))return 'Escape / break';if(/activity|game|computer|tablet|video/.test(t))return 'Activity';if(/leisure|toy|tangible|item/.test(t))return 'Leisure item';return '';}
+window.__nbhFactsIn=function(f){let n=0;
+  const menu=((f&&f.menu)||[]).slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99));
+  menu.forEach(m=>{if(!raT(m.name)||S.stim.some(x=>raT(x.name).toLowerCase()===raT(m.name).toLowerCase()))return;const i=S.stim.findIndex(x=>!raT(x.name));if(i<0)return;
+    S.stim[i].name=raT(m.name);if(!raT(S.stim[i].pa)&&m.rank)S.stim[i].pa=String(m.rank);if(!raT(S.stim[i].type)){const t=raType(m.type);if(t)S.stim[i].type=t;}n++;});
+  const b=((f&&f.behaviors)||[]).find(x=>!(x.isRep||/replacement|alternative/i.test(x.type||''))&&raT(x.def||x.label));
+  if(b&&!raT(S.meta.pbdef)){S.meta.pbdef=raT(b.label)+(raT(b.def)?': '+raT(b.def):'');n++;}
+  if(n){renderAll();}
+  const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;
+  return n?{filled:n+((g&&g.filled)||0),note:'the stimuli from Form PA-1 and the problem behavior from Form TB-1'}:g;};
 })();
 </script>
 <script id="ra-run">
@@ -10151,5 +10165,18 @@ a{text-underline-offset:2px}
 </script>
 <script src="nbh-ra1-narration.js" defer></script>
 <script src="nbh-tk1-video.js" defer></script>
+<style id="ra-v2175-css">
+/* v21.75 (audit) a wide table scrolls inside its box, not the page; long entries stay whole on paper */
+@media screen{.gridwrap{overflow-x:auto;max-width:100%}}
+@media print{.ra-wide .f,.ra-full{break-inside:avoid;page-break-inside:avoid}}
+@media (pointer:coarse){#prTbl input[type=checkbox]{width:28px;height:28px}}
+</style>
+<script id="ra-v2175">
+/* v21.75 (audit) the case: the stimuli under test from Form PA-1's reinforcer menu (into empty rows, in rank order, the
+   rank in the PA-1 column and the type when it is one of this form's), the problem behavior to record from the first
+   target behavior's definition (Form TB-1), when those are empty. A view chosen re-fits the page to it. */
+"use strict";
+document.addEventListener('click',e=>{if(e.target&&e.target.closest&&e.target.closest('#viewSeg button'))setTimeout(()=>window.dispatchEvent(new Event('resize')),40);});
+</script>
 </body>
 </html>

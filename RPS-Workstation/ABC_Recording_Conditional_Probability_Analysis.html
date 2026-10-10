@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Form ABC-1 · ABC Recording &amp; Conditional Probability Analysis · Royal Palm School</title>
 <script id="nbh-pwa-save">/* nbh-pwa-save (v21.43): the workstation installed on an iPad or iPhone: saving a file, a window it opens, printing.
    Opened from the Home Screen, the workstation runs in a window of its own, without Safari around it. There, and only
@@ -1108,6 +1108,10 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
   #panel-record .segmented{gap:4px;border:0;border-radius:0;overflow:visible}
   #panel-record .segmented button,#panel-record .segmented button:last-child{border:1px solid var(--nbh-slate);border-radius:5px}
 }
+
+/* v21.75 (audit) on a touch screen the pickers are a finger high */
+@media screen and (pointer:coarse){#h-checks,#e-intensity,#a-function,label.field select{min-height:44px}}
+.qdir{font-weight:500;font-size:.92em}
 </style>
 </head>
 <body>
@@ -4288,6 +4292,8 @@ function twoByTwo(a,b,c,d){
            minCell:Math.min(a,b,c,d), sparse:(Math.min(a,b,c,d) === 0 || a+b < 5 || c+d < 5) };
 }
 
+/* v21.75 (audit) a negative Q is as strong, the other way: the condition goes with fewer incidents, so the word says so */
+function qDir(q){return q!=null&&q<=-0.20?' <span class="qdir">(less likely)</span>':'';}
 function qStrength(q){
   if(q == null) return {word:"\u2014", color:"var(--ink-faint)"};
   const m = Math.abs(q);
@@ -4931,7 +4937,7 @@ function renderAnalysis(){
             <td class="num">${num(t.phi,2)}</td>
             <td class="num">${num(t.chi,1)}</td>
             <td class="num">${t.p==null?"\u2014":(t.p<0.001?"&lt;.001":t.p.toFixed(3))}</td>
-            <td style="color:${st.color};font-weight:600">${st.word}${t.sparse?' <span class="withheld">thin</span>':""}</td>
+            <td style="color:${st.color};font-weight:600">${st.word}${qDir(t.q)}${t.sparse?' <span class="withheld">thin</span>':""}</td>
           </tr>`;}).join("")}</tbody></table></div>`,
       caveat(`<b>Cells.</b> a = incidents followed by the consequence, b = incidents not followed by it, c = no-behavior windows containing it, d = no-behavior windows without it. <b>Two cautions.</b> First, the rows and columns come from different units of observation &mdash; behavior-anchored events and time-sampled windows &mdash; so these values estimate contingency rather than measure it exactly; event-based and interval-based methods do not always agree (Lloyd, Yoder, Tapp, &amp; Staubitz, 2016). Second, &chi;&sup2; here is a rough flag on a small hand-collected sample, not a hypothesis test you should report as one; any cell under about 5 makes it unstable.`));
   } else {
@@ -4984,7 +4990,7 @@ function renderAnalysis(){
           <td class="num">${Math.round((r.pBaseCondition||0)*M)}/${M} &nbsp;${pct(r.pBaseCondition,0)}</td>
           <td class="num">${r.stats.or==null?"\u2014":(r.stats.or===Infinity?"\u221e":num(r.stats.or,2))}</td>
           <td class="num" style="font-weight:700">${num(r.stats.q,2)}</td>
-          <td style="color:${st.color};font-weight:600">${st.word}</td></tr>`; }).join("")}</tbody></table></div>`,
+          <td style="color:${st.color};font-weight:600">${st.word}${qDir(r.stats.q)}${r.stats.sparse?' <span class="withheld">thin</span>':""}</td></tr>`; }).join("")}</tbody></table></div>`,
       caveat(`<b>Antecedents are not the safer bet.</b> It is tempting to trust this section more than the consequence sections, on the reasoning that antecedents are scheduled by the timetable rather than delivered in reaction to the behavior and so should be less contaminated. Camp, Iwata, Hammond, and Bloom (2009) tested that directly across seven participants and found antecedent events were no better than consequent events at identifying function: two of seven matched the functional analysis on antecedents, three of seven on consequences. Read this section alongside the consequence sections, not instead of them. One further wrinkle from the same paper: a <i>low</i> base rate of demands can itself be a finding, because adults issue fewer instructions to students who have a history of problem behavior (Carr, Taylor, &amp; Robinson, 1991), so a demand condition that barely appears may mean the room is avoiding demands rather than that demands are irrelevant.`) +
       caveat(`<b>Why an odds ratio here and not a risk ratio.</b> This table compares two different sampling frames &mdash; every incident on one side, every sampled window on the other &mdash; so a raw risk ratio would move up or down purely with how many background samples you happened to take. The odds ratio and Yule's Q are unaffected by that ratio, which is why they are the two columns reported. Both say the condition and the behavior travel together; neither says the condition evoked it. Antecedent conditions co-vary heavily in classrooms &mdash; demands, transitions, and low attention arrive together &mdash; so treat high-ranking conditions as candidates for a structured antecedent manipulation, not as established evocative stimuli.`));
   }
@@ -9775,6 +9781,31 @@ a{text-underline-offset:2px}
   window.addEventListener('load', function () { pagenav(); pnUpdate(); });
   window.nbhPolish = { run: run, plain: plain };
 })();
+</script>
+<script id="abc-incidents">
+/* v21.75 the incidents logged on Form DD-1 as narrative-only incidents here: "Add DD-1's incidents" adds each one not yet
+   on file, with its date and time, the behavior under Other, and its before, what happened, the words, what the adults
+   did and how it ended as the narrative. Narrative-only incidents are listed and kept but, as before, are not part of
+   the conditional probabilities, which read coded incidents only; code one with Edit to bring it in. */
+"use strict";
+let abcCase=null;
+const ABC_MARK='(from Form DD-1’s incident log)';
+function abcIncs(){const d=abcCase&&abcCase.data;return d&&Array.isArray(d.incidentList)?d.incidentList.filter(i=>i&&/^\d{4}-\d{2}-\d{2}$/.test(i.date||'')):[];}
+function abcNarr(i){return [i.before?'Before: '+i.before:'',i.what?'What happened: '+i.what:'',i.words?'Said: “'+i.words+'”':'',i.did?'What adults did: '+i.did:'',i.ended?'How it ended: '+i.ended:'',i.tier?'Tier: '+i.tier:'',ABC_MARK].filter(Boolean).join('. ').replace(/\.\./g,'.');}
+function abcAdd(){const L=abcIncs();let n=0,dup=0;
+  L.forEach(i=>{const t=/^\d{2}:\d{2}$/.test(i.time||'')?i.time:'';
+    if(state.entries.some(e=>e.date===i.date&&(e.time||'')===t&&String(e.narrative||'').indexOf(ABC_MARK)>=0&&(e.behaviorOther||{}).b_other===i.beh)){dup++;return;}
+    state.entries.push({id:uid(),mode:'open',date:i.date,time:t,duration:null,activity:'',staff:i.by||'',staffPresent:'',intensity:null,
+      antecedents:[],antecedentOther:{},behaviors:['b_other'],behaviorOther:{b_other:i.beh||'Incident'},precursors:[],precursorOther:{},
+      settingEvents:[],settingEventOther:{},consequences:[],consequenceOther:{},immediate:'',resolution:[],resolutionOther:{},narrative:abcNarr(i)});n++;});
+  if(n){sortEntries();refreshAll();}return {n,dup};}
+function abcBtn(){let el=document.getElementById('abcIncBtn');const L=abcIncs();
+  if(!el){const at=document.getElementById('save-status');if(!at)return;el=document.createElement('button');el.type='button';el.id='abcIncBtn';el.className='btn ghost';
+    el.textContent='Add DD-1’s incidents';el.style.marginLeft='8px';at.parentNode.insertBefore(el,at);
+    el.addEventListener('click',()=>{const r=abcAdd();nbhUI.toast(r.n?r.n+' incident'+(r.n===1?'':'s')+' from Form DD-1 added as narrative only'+(r.dup?'; '+r.dup+' already on file':'')+'. Code one with Edit to bring it into the analysis.':'Every incident on Form DD-1 is already on file.',r.n?{kind:'ok'}:undefined);});}
+  el.style.display=L.length?'':'none';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){abcCase=f||null;abcBtn();return was?was.apply(this,arguments):null;};}
+abcBtn();
 </script>
 </body>
 </html>

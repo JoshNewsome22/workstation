@@ -8414,3 +8414,101 @@ daily and interval sheets now sits where the table puts it; the screen keeps the
   (Mac), the page count, the student's name, the photo, saving a PDF on the iPad.
 
 Checked by `qa/v2174-test.js` (27 checks).
+
+### v21.75: the record used further, the week in one print, Today and the hand-over check
+
+- **Form PR-1 from the case.** Inside the workstation, with Form DD-1 or Form TI-1 in the case, a bar above the review
+  runs PR-1's own imports in one tap (*Fill question 1 from TI-1*, *Fill question 2 from DD-1*); each still asks before
+  it changes an entry already made. A new box, *Also in the review period*, is written from the case over DD-1's
+  current condition: the incidents logged (by tier, and how many home was told about), the behaviors at their aim for
+  the days the criterion asks, Form SM-1's point sheet and Form TI-1's observations. It follows the case until it is
+  rewritten.
+- **DD-1's incidents on the scatterplot and on ABC-1.** *Place DD-1's incidents* on the scatterplot marks each
+  incident of the behavior on the sheet in its interval and on its day (one mark more; in count mode one more on the
+  count), once. *Add DD-1's incidents* on ABC-1 adds each as a narrative-only incident (the behavior under Other; the
+  before, what happened, the words, what adults did and how it ended in the narrative), once. As before, narrative-only
+  incidents are kept and listed but not counted in the conditional probabilities until they are coded with Edit.
+- **Form CN-1 starts from the week summary.** A note being written (undated, or dated in the week or after) takes,
+  into its empty fields, the data reviewed (DD-1's week and the latest TI-1), the first reduction target's level
+  against its aim, what the week looked like against the last (each behavior, the incidents, the phase changes, what
+  the team decided) and the latest integrity observation. *Start from the week summary* does it for any note.
+- **Form TI-1 on DD-1's graphs.** TI-1 now shares each scored observation's date, type and integrity. Form DD-1 ticks
+  them along the top of its graphs ("TI 86%"), names the week's in the week summary, and the line under the bar says
+  "Integrity: 4 observations".
+- **Form FS-1 quotes DD-1's baseline.** A target's *level during the assessment*, when empty, is the mean of DD-1's
+  first condition for the behavior of that name ("10 a day (mean of 6 school days of baseline, 9/14 to 9/21; Form
+  DD-1)"). A level typed is kept.
+- **Today.** *Today* on the bar lists what needs you in the case: what is due, incidents home has not been told about,
+  no data on DD-1 for three school days, a behavior at its aim (time to raise the criterion), no TI-1 check for two
+  weeks or the last one under the criterion; each with the form to open.
+- **The end of the week in one print.** From Today, or *End of the week* in the command box: one print of DD-1's week
+  summary for the latest week with data, next week's blank sheet on a page of its own, and Form SM-1's sheets, under
+  their own cover. The forms are put back as they were.
+- **The hand-over check.** From Today, or *Hand-over check* in the command box: what a case handed on should hold and
+  does not (no consent date on Form IC-1, no target behaviors or one without a definition, no goals, a plan with no
+  crisis plan or one DM-1 records as outdated, the photo kept without photo permission, incidents home has not been
+  told about). *Close case* lists the same before it saves and closes (*Save and close anyway*). Form IC-1 now shares its
+  consent and signature dates for it.
+
+- **The audit of four older forms** (the scatterplot, ABC-1, the reinforcer assessment and variable isolation): no
+  script errors, no wrong figures and no print cut off were found; what was fixed:
+  - *Every form and the workstation*: iPad Safari no longer zooms into a field when it is tapped (the page's viewport
+    is `maximum-scale=1`; pinch zoom still works on the iPad). The fields were smaller than the 16 px Safari asks for.
+  - *Scatterplot*: a sheet for each target behavior from the case, each with its definition, example and
+    non-example (when no sheet holds a mark yet); on paper each grid names the student, the behavior and the days,
+    since the grid often starts a page of its own; the legend stays with the grid; a sheet wider than the window fades
+    at its right edge to show there is more.
+  - *ABC-1*: an antecedent resting on an empty cell is marked *thin*, as the consequence table already was; a negative
+    association reads *strong (less likely)* instead of looking like a positive one; the pickers are a finger high.
+  - *Reinforcer assessment*: the progressive-ratio table scrolls inside its box instead of the whole page, and a view
+    chosen re-fits the page; the stimuli under test come from Form PA-1's menu (rank and type) and the problem
+    behavior from Form TB-1; the problem behavior, the agreement and the problem behavior summary are full-width
+    boxes that wrap and stay whole on paper; the concurrent-operants headings are no longer cut at ten letters.
+  - *Variable isolation*: each rating is a finger-sized target; the measurement comes from the case with the
+    definition.
+
+Checked by `qa/v2175-test.js` (25 checks).
+
+### v21.76: Form DD-1 reads the team's Google Sheet
+
+The team's daily sheet (the Behavior-Charts template: one row per school day; a *(Total Per Day)* column for each
+count target; *Occurrences(+)*, *Opportunities* and *%* for each target scored out of opportunities; the definitions,
+measurement and observation length above them) now fills Form DD-1 and keeps it current, so nothing is copied by hand.
+
+- **How it reads.** On the *Daily data* tab, *Link a Google Sheet* asks for the sheet's link, signs in to Google as you
+  (read-only: `spreadsheets.readonly`), lists the sheet's tabs that have target columns (the "Reduction and
+  Acquisition TBx" tabs; the ABC and scatterplot tabs are left alone; hidden tabs too) with the targets and days found,
+  and *Link and read* takes them. Any number of targets is read (1 to 8 or more, a tab or several). The numbers go
+  from Google straight to the iPad; no other website, newsomebh.com included, sees them. The sign-in lasts an hour
+  (Google's rule) and is never saved in a file; after it, *Sign in to Google* on the bar reads again in one tap.
+- **The sheet wins.** Each reading writes the sheet's days into the record: a day the record already has takes the
+  sheet's numbers; a day it does not have is added. A target the record does not have becomes a row of its own, with
+  its kind (from the band above it: Reduction, Acquisition, Replacement), measurement and definition; a record not used
+  yet (no days, only the three example rows) takes the sheet's targets in their place. Cells the sheet wrote carry a
+  green underline. It reads again when the form opens and every five minutes while it is on screen.
+- **Set it aside.** *Use the sheet's data* off puts the record back as it was without the sheet: what was typed for
+  the sheet's days comes back and the days only the sheet had are taken out (the target rows stay, with their aims and
+  criteria). On again brings the sheet back. *Change* links another sheet or other tabs; *Unlink* takes the sheet out.
+- **Checks.** A sheet whose student (cell A1) shares no name with the record's student is not read until you say it is
+  the same student. A target the sheet scores one way and the record another, with the record's own numbers in it, is
+  left as the record has it and named on the bar. A record kept in intervals is not filled from daily totals.
+- **Where it works.** The workstation opened from its website (or installed from it). The one-file edition opened from
+  Files cannot sign in to Google.
+
+**Setting it up (once).** Google needs a sign-in key (an OAuth client ID) for the workstation's website:
+
+1. Go to console.cloud.google.com and sign in (with the district account if it may create projects; otherwise with a
+   personal Google account). Create a project, for example "NBH Workstation".
+2. *APIs & Services › Library*: find **Google Sheets API** and press *Enable*.
+3. *Google Auth Platform* (formerly *OAuth consent screen*): give the app a name and a support email. Audience:
+   *Internal* if the project belongs to the district's Google organization; otherwise *External*, and add your district
+   address under *Test users*. Under *Data access* add the scope `.../auth/spreadsheets.readonly`.
+4. *Clients › Create client › Web application*. Under *Authorized JavaScript origins* add `https://newsomebh.com`. Create,
+   and copy the **Client ID** (it ends in `.apps.googleusercontent.com`; it is not a secret).
+5. In Form DD-1: *Link a Google Sheet*, paste the Client ID (asked once on each device), paste the student's sheet link,
+   *Sign in and find the tabs*. Google may say it has not verified the app: it is your own; continue.
+6. If Google answers "Access blocked" or that your administrator has not approved the app, the district's IT can allow
+   it: *Admin console › Security › Access and data control › API controls › Manage third-party app access › Add app ›
+   OAuth App Name Or Client ID*, paste the Client ID, and set it to *Trusted* (or *Limited* to Google Sheets).
+
+Checked by `qa/v2176-test.js` (16 checks, with Google's sign-in and the Sheets API simulated).
