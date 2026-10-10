@@ -244,11 +244,42 @@ function nbhCnGoalLine(behs,red){
   if(!b&&!r)return '';
   return (b?b.label:r.beh)+(r&&r.tgt?'; goal: no '+(r.ml||'more')+' than '+r.tgt+(r.crit?' over '+r.crit+' consecutive measurements':'')+' (Form GB-1)':'');
 }
+/* v21.75 the note starts from Form DD-1's week summary: the data reviewed, the first reduction target against its aim, what
+   the week looked like against the last (each behavior, the incidents, the phase changes, what the team decided) and the
+   latest Form TI-1 observation, into the empty fields of the note open; "Start from the week summary" does it again. */
+let nbhCnCase=null;
+const nbhCnMd=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1].slice(2):String(iso||'');};
+function nbhCnWeek(f){const d=f&&f.data,w=d&&d.week,ti=f&&f.integrity,out={};if(!w&&!ti)return out;
+  if(w){const fri=(()=>{const p=w.mon.split('-');const x=new Date(+p[0],+p[1]-1,+p[2]+4,12);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');})();
+    out.data_forms='Daily Behavior Data (Form DD-1), week of '+nbhCnMd(w.mon)+' to '+nbhCnMd(fri)+(ti&&ti.obs.length?'; TI-1 of '+nbhCnMd(ti.obs[ti.obs.length-1].date):'');
+    const L=['The week of '+nbhCnMd(w.mon)+' ('+w.days+' day'+(w.days===1?'':'s')+' recorded), against the week before:'];
+    w.rows.forEach(r=>{if(r.now==='\u2014'&&r.last==='\u2014')return;L.push('- '+r.name+': '+r.now+(r.last&&r.last!=='\u2014'?', the week before '+r.last:'')+(r.change&&r.change!=='\u2014'?' ('+r.change+')':'')+'.');});
+    L.push('Incidents logged: '+(w.incidents||'none')+'.');
+    (w.phases||[]).forEach(p=>L.push('Phase change '+nbhCnMd(p.date)+': '+(p.type==='full'?'full phase change':'conditional change')+(p.label?', '+p.label:'')+'.'));
+    if(w.decided)L.push('The team decided: '+w.decided.replace(/\n+/g,'; ')+'.');
+    out.observed=L.join('\n');
+    const t=(d.behaviors||[]).find(b=>b.kind==='target'&&b.aim!=null&&b.cur);
+    if(t){out.data_rate=String(t.cur.mean);out.data_goal=String(t.aim);out.data_unit=t.measure==='count'?'a day ('+t.name.toLowerCase()+', '+t.curName+')':(t.unit||'');out.data_dir=t.direction==='increase'?'up':'';}}
+  if(ti&&ti.obs.length){const o=ti.obs[ti.obs.length-1];out.integ=String(o.pct);out.integ_date=nbhCnMd(o.date);out.integ_note='Form TI-1, '+(o.type?o.type.toLowerCase()+' ':'')+'observation; '+ti.obs.length+' in the record, '+ti.overall+'% overall.';}
+  return out;}
+function nbhCnPlace(force){const n=note(),v=nbhCnWeek(nbhCnCase);let k=0;
+  /* on its own the case fills only a note being written now: undated, or dated in or after the week it summarises */
+  const w=nbhCnCase&&nbhCnCase.data&&nbhCnCase.data.week;if(!force&&w&&n.date){const d=parseDate(n.date),p=w.mon.split('-');if(!d||d<new Date(+p[0],+p[1]-1,+p[2]))return 0;}
+  Object.keys(v).forEach(f=>{if(!v[f])return;if(!force&&String(n[f]||'').trim())return;if(force&&String(n[f]||'').trim()&&f!=='observed'&&f!=='data_forms')return;
+    if(force&&f==='observed'&&String(n[f]||'').trim()&&n[f].indexOf(v[f])<0){n[f]=v[f]+'\n'+n[f];k++;return;}if(n[f]!==v[f]){n[f]=v[f];k++;}});
+  return k;}
+function nbhCnBtn(){let b=document.getElementById('cnWeek');const has=!!(nbhCnCase&&((nbhCnCase.data&&nbhCnCase.data.week)||nbhCnCase.integrity));
+  if(!b){const at=document.getElementById('dupNote');if(!at)return;b=document.createElement('button');b.className='tool';b.id='cnWeek';b.type='button';b.textContent='Start from the week summary';
+    b.title='Fills the data reviewed, what was seen and the integrity from Form DD-1\u2019s week summary and Form TI-1; the observation goes above what is written there';at.parentNode.insertBefore(b,at.nextSibling);
+    b.addEventListener('click',()=>{const k=nbhCnPlace(true);renderNote();nbhUI.toast(k?'The week summary is in this note.':'This note already holds the week summary.',k?{kind:'ok'}:undefined);});}
+  b.style.display=has?'':'none';}
 window.__nbhFactsIn=function(f){
-  const m=S.meta;let n=0;
+  const m=S.meta;let n=0;nbhCnCase=f||null;nbhCnBtn();
   if(!m.goal){const t=nbhCnGoalLine(f.behaviors||[],(f.goals&&f.goals.red)||[]);if(t){m.goal=t;n++;}}
+  n+=nbhCnPlace(false);
   if(n)renderAll();return {filled:n};
 };
+nbhCnBtn();
 window.__nbhFactsPick=function(sel){
   const m=S.meta;let n=0;const t=nbhCnGoalLine(sel.behaviors,sel.goals.red);if(t){m.goal=t;n++;}
   if(n)renderAll();return {filled:n};

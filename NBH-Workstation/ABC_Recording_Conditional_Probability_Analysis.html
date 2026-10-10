@@ -9776,5 +9776,30 @@ a{text-underline-offset:2px}
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
+<script id="abc-incidents">
+/* v21.75 the incidents logged on Form DD-1 as narrative-only incidents here: "Add DD-1's incidents" adds each one not yet
+   on file, with its date and time, the behavior under Other, and its before, what happened, the words, what the adults
+   did and how it ended as the narrative. Narrative-only incidents are listed and kept but, as before, are not part of
+   the conditional probabilities, which read coded incidents only; code one with Edit to bring it in. */
+"use strict";
+let abcCase=null;
+const ABC_MARK='(from Form DD-1’s incident log)';
+function abcIncs(){const d=abcCase&&abcCase.data;return d&&Array.isArray(d.incidentList)?d.incidentList.filter(i=>i&&/^\d{4}-\d{2}-\d{2}$/.test(i.date||'')):[];}
+function abcNarr(i){return [i.before?'Before: '+i.before:'',i.what?'What happened: '+i.what:'',i.words?'Said: “'+i.words+'”':'',i.did?'What adults did: '+i.did:'',i.ended?'How it ended: '+i.ended:'',i.tier?'Tier: '+i.tier:'',ABC_MARK].filter(Boolean).join('. ').replace(/\.\./g,'.');}
+function abcAdd(){const L=abcIncs();let n=0,dup=0;
+  L.forEach(i=>{const t=/^\d{2}:\d{2}$/.test(i.time||'')?i.time:'';
+    if(state.entries.some(e=>e.date===i.date&&(e.time||'')===t&&String(e.narrative||'').indexOf(ABC_MARK)>=0&&(e.behaviorOther||{}).b_other===i.beh)){dup++;return;}
+    state.entries.push({id:uid(),mode:'open',date:i.date,time:t,duration:null,activity:'',staff:i.by||'',staffPresent:'',intensity:null,
+      antecedents:[],antecedentOther:{},behaviors:['b_other'],behaviorOther:{b_other:i.beh||'Incident'},precursors:[],precursorOther:{},
+      settingEvents:[],settingEventOther:{},consequences:[],consequenceOther:{},immediate:'',resolution:[],resolutionOther:{},narrative:abcNarr(i)});n++;});
+  if(n){sortEntries();refreshAll();}return {n,dup};}
+function abcBtn(){let el=document.getElementById('abcIncBtn');const L=abcIncs();
+  if(!el){const at=document.getElementById('save-status');if(!at)return;el=document.createElement('button');el.type='button';el.id='abcIncBtn';el.className='btn ghost';
+    el.textContent='Add DD-1’s incidents';el.style.marginLeft='8px';at.parentNode.insertBefore(el,at);
+    el.addEventListener('click',()=>{const r=abcAdd();nbhUI.toast(r.n?r.n+' incident'+(r.n===1?'':'s')+' from Form DD-1 added as narrative only'+(r.dup?'; '+r.dup+' already on file':'')+'. Code one with Edit to bring it into the analysis.':'Every incident on Form DD-1 is already on file.',r.n?{kind:'ok'}:undefined);});}
+  el.style.display=L.length?'':'none';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){abcCase=f||null;abcBtn();return was?was.apply(this,arguments):null;};}
+abcBtn();
+</script>
 </body>
 </html>

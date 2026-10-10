@@ -7936,5 +7936,40 @@ a{text-underline-offset:2px}
   window.nbhPolish = { run: run, plain: plain };
 })();
 </script>
+<script id="sp-incidents">
+/* v21.75 the incidents logged on Form DD-1 onto this sheet: "Place DD-1's incidents" marks each incident of the behavior
+   shown in the interval and on the day it happened (a dated day on this sheet, within its hours): in tap mode one mark more
+   (a blank interval becomes low rate, a low one high), in count mode one more on the count. An incident is placed once
+   (the sheet remembers which, with its data); one outside the sheet's dates or hours is counted and left. */
+"use strict";
+let spCase=null;
+const spK=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+const spMin=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(String(t||''));return m?(+m[1])*60+(+m[2]):null;};
+function spIncs(){const d=spCase&&spCase.data;return d&&Array.isArray(d.incidentList)?d.incidentList.filter(i=>i&&i.date&&spMin(i.time)!==null):[];}
+function spMine(){commitBeh();const b=state.behaviors[state.cur]||{meta:{}},nm=spK(b.meta.behavior||state.meta.behavior);
+  const L=spIncs();return {b,nm,mine:nm?L.filter(i=>{const k=spK(i.beh);return k&&(k===nm||k.indexOf(nm)>=0||nm.indexOf(k)>=0);}):[]};}
+function spPlace(){const {b,mine,nm}=spMine();if(!nm)return {why:'name'};if(!mine.length)return {why:'none'};
+  const placed=new Set(String(b.meta.incPlaced||'').split('|').filter(Boolean)),dates={};
+  for(let i=0;i<state.cfg.days;i++){const d=state.meta['date'+i];if(d&&dates[d]===undefined)dates[d]=i;}
+  if(!Object.keys(dates).length)return {why:'dates'};
+  const nR=rowLabels().length;let n=0,off=0,dup=0;
+  mine.forEach(x=>{const k=x.date+' '+x.time+' '+spK(x.beh);if(placed.has(k)){dup++;return;}
+    const c=dates[x.date],r=Math.floor((spMin(x.time)-state.cfg.startMin)/state.cfg.interval);
+    if(c===undefined||r<0||r>=nR){off++;return;}
+    const cell=cellOf(r,c);if(state.cfg.mode==='count')cell.n=(cell.n===null||cell.n===''||isNaN(cell.n)?0:Number(cell.n))+1;else cell.s=Math.min(2,(cell.s||0)+1);
+    placed.add(k);n++;});
+  b.meta.incPlaced=[...placed].join('|');commitBeh();render();return {n,off,dup,total:mine.length};}
+function spBtn(){let el=document.getElementById('spIncBtn');const L=spIncs();
+  if(!el){const at=document.getElementById('clearBtn');if(!at)return;el=document.createElement('button');el.className=at.className;el.id='spIncBtn';el.type='button';
+    el.textContent='Place DD-1’s incidents';at.parentNode.insertBefore(el,at);
+    el.addEventListener('click',()=>{const r=spPlace();
+      const msg=r.why==='name'?'Name the behavior on this sheet first; incidents are placed by the behavior they were logged under.':r.why==='none'?'Form DD-1 has no incident logged under this behavior.':
+        r.why==='dates'?'Give the sheet its dates first (the date under each day); incidents are placed on the day they happened.':
+        (r.n?r.n+' incident'+(r.n===1?'':'s')+' placed':'No new incident placed')+(r.dup?'; '+r.dup+' placed before':'')+(r.off?'; '+r.off+' outside this sheet’s days or hours':'')+'.';
+      nbhUI.toast(msg,r.n?{kind:'ok'}:undefined);});}
+  el.style.display=L.length?'':'none';el.title=L.length?L.length+' incident'+(L.length===1?'':'s')+' logged on Form DD-1':'';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){spCase=f||null;spBtn();return was?was.apply(this,arguments):null;};}
+spBtn();
+</script>
 </body>
 </html>
