@@ -5,7 +5,7 @@ const FORMS=[
  {id:'abc1',file:'ABC_Recording_Conditional_Probability_Analysis.html',keys:['record','incidents','background','analysis','methods','data','walk'],panel:k=>'#panel-'+k,
   ids:['load-demo','printBtn','dl-json','up-json','file-input','dl-csv','dl-matrix','clear-all'],sim:'#load-demo',
   rowTab:'incidents',rowSel:'#inc-table [data-del]',count:'state.entries.length',clear:'#clear-all',cleared:'state.entries.length+state.samples.length'},
- {id:'dd1',file:'Daily_Behavior_Data_and_Visual_Analysis.html',keys:['setup','data','results'],panel:k=>'#tab-'+k,
+ {id:'dd1',file:'Daily_Behavior_Data_and_Visual_Analysis.html',keys:['setup','data','results','walk'],panel:k=>'#tab-'+k,   /* v21.78 the Walkthrough view (v21.47) counted */
   ids:['btnLoadExample','btnPrintTop','btnSave','btnLoad','fileImport','btnCsv','btnClearAll'],sim:'#btnLoadExample',
   rowTab:'setup',rowSel:'#behTable [data-act="delBeh"]',count:'S.behaviors.length',clear:'#btnClearAll',cleared:'S.rows.length',reloads:true},
  {id:'vi1',file:'Variable_Isolation_Protocol.html',keys:['p0','p1','p2','p3','p4','p5','p6','p7','p8'],panel:k=>'#'+k,
