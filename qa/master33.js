@@ -25,7 +25,7 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   const restored=await page.evaluate(()=>Object.keys(state.frames).length+Object.keys(state.pending).length);
   await page.evaluate(()=>{ALL.forEach(([id])=>state.ticked[id]=true);renderRail();});
   await page.evaluate(()=>{wsUI.confirm=async()=>true;});   /* v21.78 the shell's questions (forms not loaded yet: include them) answered yes */
-  const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.click('#masterPrint')]);
+  const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
   await popup.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await popup.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000}); await L.sleep(1500);
   const secs=await popup.evaluate(()=>Array.from(document.querySelectorAll('.mp-sec')).length);

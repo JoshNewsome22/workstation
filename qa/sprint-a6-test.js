@@ -48,6 +48,10 @@ const {execFileSync}=require('child_process');
 const ED=process.argv[2]||'NBH-Workstation';
 const OUT=__dirname+'/out/sprint-a6/';
 const A6_BASE=process.env.A6_BASE||'655e3ee';
+/* v21.86 the layout check (part 2) compares with the forms of the last delivered release, not with the forms before this
+   package: later releases changed the layout on purpose (ABC-1's analysis table), so the old comparison only drifted */
+const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'6fd4505';
+const WASL={};
 const COMPARE=ED==='NBH-Workstation'||!!process.env.A6_BASE;
 const A6_OLD=process.env.A6_OLD||'';
 const ONLY=process.env.A6_ONLY?process.env.A6_ONLY.split(','):null;
@@ -343,13 +347,13 @@ async function record(br,id,o){/* the simulated record, saved by the form before
 async function computerLayout(br){
   for(const id of ['MT-1','TI-1','ABC-1']){
     const text=await record(br,id);const sig={};
-    for(const which of ['was','now']){const ctx=await fresh(br,{});const p=await open(ctx,which==='was'?WAS[id]:NOW[id],'mouse '+which+' '+id,which==='was');
+    for(const which of ['was','now']){const ctx=await fresh(br,{});const p=await open(ctx,which==='was'?(WASL[id]||WAS[id]):NOW[id],'mouse '+which+' '+id,which==='was');
       await ownOpen(p,text);sig[which]={};
       for(const v of LAYOUT_VIEWS[id]){await view(p,v);await p.evaluate(()=>window.scrollTo(0,0));await sleep(150);sig[which][v]=await layoutOf(p);}
       await ctx.close();}
     for(const v of LAYOUT_VIEWS[id]){const a=sig.was[v],b=sig.now[v],diff=[];
       for(let i=0;i<Math.max(a.length,b.length)&&diff.length<4;i++)if(a[i]!==b[i])diff.push({was:a[i],now:b[i]});
-      ok('mouse 1180x820: '+id+' '+v+': every element sits where it did before this package ('+a.length+' elements)',!diff.length&&a.length===b.length,diff);}
+      ok('mouse 1180x820: '+id+' '+v+': every element sits where it did '+(WASL[id]?'in the release at '+A6_LAYOUT_BASE:'before this package')+' ('+a.length+' elements)',!diff.length&&a.length===b.length,diff);}
   }
 }
 
@@ -605,6 +609,9 @@ async function printSame(br){
     if(base){const c=await br.newContext();const q=await c.newPage();const r=await q.goto(WAS['MT-1']).catch(()=>null);await c.close();
       if(!r||!r.ok())for(const id of ['MT-1','TI-1','ABC-1'])WAS[id]='file://'+OUT+'base/'+FILE[id];}}
   if(!base){for(const k of Object.keys(WAS))delete WAS[k];console.log('NOTE the forms at '+A6_BASE+' are not available for '+ED+': the comparisons with the forms before this package (2, 3, 6) are skipped');}
+  if(base){const d=OUT+'base-layout-'+A6_LAYOUT_BASE+'/';if(!fs.existsSync(d+ED+'/'+FILE['ABC-1'])){fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});
+      try{execFileSync('sh',['-c','git -C "$0" archive "$1" "$2" | tar -x -C "$3"',ROOT,A6_LAYOUT_BASE,ED,d]);}catch(e){}}
+    for(const id of ['MT-1','TI-1','ABC-1'])if(fs.existsSync(d+ED+'/'+FILE[id]))WASL[id]=BASE+'/qa/out/sprint-a6/base-layout-'+A6_LAYOUT_BASE+'/'+ED+'/'+encodeURI(FILE[id]);}
   const on=k=>!ONLY||ONLY.includes(k);
   if(on('touch')){for(const [W,H] of [[1180,820],[820,1180]]){await mtTouch(br,W,H);await tiTouch(br,W,H);await abcTouch(br,W,H);await shellTouch(br,W,H);}await mtPhone(br);}
   if(base&&on('layout'))await computerLayout(br);

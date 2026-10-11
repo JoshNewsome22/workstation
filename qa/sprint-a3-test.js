@@ -249,6 +249,9 @@ async function endedCase(br,where,W,H,sample,firstInView){
   await fr.tap('#obrStart');await sleep(400);if(sample){await fr.tap('#obrSample');await sleep(300);}
   await fr.tap('#obrTapS');await sleep(250);
   const at=()=>fr.evaluate(()=>{const r=document.getElementById('obrSave').getBoundingClientRect();return [Math.round(scrollY),Math.round(r.left),Math.round(r.top)];});
+  /* v21.86 on a phone the folding toolbar (v21.83) can leave End above the window after a tile is tapped; bring it into
+     view and let the toolbar settle first, so the check is about End itself (the tap would scroll it into view anyway) */
+  await fr.evaluate(()=>{const e=document.getElementById('obrEnd'),r=e.getBoundingClientRect();if(r.top<120||r.bottom>innerHeight)e.scrollIntoView({block:'center'});});await sleep(700);
   const before=await at();
   await fr.tap('#obrEnd');await sleep(400);const endOk=await dialogOk(fr,'primary');await sleep(500);
   const st=await fr.evaluate(()=>obRecorder.state()),after=await at();
