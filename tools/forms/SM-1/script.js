@@ -2752,7 +2752,9 @@ function renderRecord(){
   drawLog(R);
 }
 function drawLog(R){
-  const W=900,H=320,L=56,Rg=20,T=18,B=48,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
+  /* full check: the legend under the chart was one centred line of about 1100 units in a 900-unit chart, cut at both
+     ends; it is two lines now, with the plot 14 units shorter to make room (B 48 -> 62; the chart's size is unchanged) */
+  const W=900,H=320,L=56,Rg=20,T=18,B=62,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   [0,25,50,75,100].forEach(p=>{s+='<line x1="'+L+'" y1="'+Y(p)+'" x2="'+(W-Rg)+'" y2="'+Y(p)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(Y(p)+4)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+p+'%</text>';});
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
@@ -2767,7 +2769,8 @@ function drawLog(R){
   R.forEach((r,i)=>{if(r.pc==null)return;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r.pc).toFixed(1)+'" r="4.5" fill="'+(r.ph==='0'?'#fff':r.met?'#2F6B37':'#2f5568')+'" stroke="#2f5568" stroke-width="1.5"/>';
     if(r.ag!=null)s+='<rect x="'+(X(i)-3).toFixed(1)+'" y="'+(Y(r.ag)-3).toFixed(1)+'" width="6" height="6" fill="#76a2a3"/>';
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(String(r.date||i+1).slice(0,6))+'</text>';});
-  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-6)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase) · goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)</text>';
+  [['Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase)',H-22],['goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)',H-7]].forEach(([t,y])=>{
+    s+='<text x="'+((L+W-Rg)/2)+'" y="'+y+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+t+'</text>';});
   $('#logPlot').innerHTML=s;
 }
 
@@ -3792,8 +3795,13 @@ function mmRenderLog(){const m=mmT(),tb=$('#mmLog'),met=$('#mmMetrics'),sg=$('#m
       '<td>'+(r.img?'<img class="mm-thumb" src="'+r.img+'" alt="The work">':'')+'</td><td class="nx noprint"><button type="button" class="x" data-mmdel="'+i+'" title="Remove this trial">×</button></td></tr>').join(''):'<tr><td colspan="10" class="empty2">No trials yet. Rate on the iPad above, or add a row by hand from the paper sheet.</td></tr>')+'</tbody>';
   if(met)met.innerHTML=[['Trials',L.length],['Checked by the teacher',ch.length],['Matches',ch.length?mt+' of '+ch.length+' ('+Math.round(100*mt/ch.length)+'%)':'—'],['Last five checked',ch.length?ch.slice(-5).filter(r=>r.s===r.t).length+' of '+Math.min(5,ch.length)+' matched':'—'],['Points earned',pts],['At the best level (teacher)',ch.length?ch.filter(r=>r.t===0).length+' of '+ch.length:'—']].map(x=>'<div class="metric"><div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>').join('');
   if(sg)sg.innerHTML=L.length?'<p class="hint mm-sug"><b>Checks:</b> '+esc(mmSuggest())+'</p>':'';mmPlot();}
+/* full check: the level names sit left of the plot, right-aligned at x0-8; with x0 fixed at 70 a longer name ("Like the
+   model") ran past the chart's left edge and was cut ("ke the model"). x0 now comes from the longest name (its width
+   estimated generously for the 11-unit text), never less than 70. */
+const mmTW=t=>[...String(t)].reduce((a,c)=>a+(/[mwMW]/.test(c)?.86:/[A-Z]/.test(c)?.72:/[\s.,:;'’()\/-]/.test(c)?.32:.58),0)*11;
 function mmPlot(){const svg=$('#mmPlot');if(!svg)return;const m=mmT(),L=m.log,n=m.n;if(!L.length){svg.innerHTML='';return;}
-  const W=900,H=260,x0=70,x1=880,y0=28,y1=214,xs=i=>L.length===1?(x0+x1)/2:x0+i*(x1-x0)/(L.length-1),ys=l=>y0+l*(y1-y0)/(n-1);let h='';
+  const x0=Math.min(320,Math.max(70,Math.ceil(14+Math.max(0,...m.lv.slice(0,n).map((l,i)=>mmTW(l.name||('Level '+(i+1))))))));
+  const W=900,H=260,x1=880,y0=28,y1=214,xs=i=>L.length===1?(x0+x1)/2:x0+i*(x1-x0)/(L.length-1),ys=l=>y0+l*(y1-y0)/(n-1);let h='';
   for(let l=0;l<n;l++)h+='<line x1="'+x0+'" y1="'+ys(l)+'" x2="'+x1+'" y2="'+ys(l)+'" stroke="#dde3e6"/><text x="'+(x0-8)+'" y="'+(ys(l)+4)+'" text-anchor="end" font-size="11" fill="#4a5560">'+esc(m.lv[l].name||('Level '+(l+1)))+'</text>';
   const tp=L.map((r,i)=>r.t>=0?xs(i)+','+ys(r.t):null).filter(Boolean);if(tp.length>1)h+='<polyline points="'+tp.join(' ')+'" fill="none" stroke="#1d4a77" stroke-width="2"/>';
   L.forEach((r,i)=>{const x=xs(i);if(r.t>=0)h+='<circle cx="'+x+'" cy="'+ys(r.t)+'" r="6" fill="#1d4a77"/>';if(r.s>=0)h+='<rect x="'+(x-6)+'" y="'+(ys(r.s)-6)+'" width="12" height="12" fill="none" stroke="#b9672d" stroke-width="2"/>';

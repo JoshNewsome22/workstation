@@ -118,8 +118,13 @@ function mmRenderLog(){const m=mmT(),tb=$('#mmLog'),met=$('#mmMetrics'),sg=$('#m
       '<td>'+(r.img?'<img class="mm-thumb" src="'+r.img+'" alt="The work">':'')+'</td><td class="nx noprint"><button type="button" class="x" data-mmdel="'+i+'" title="Remove this trial">×</button></td></tr>').join(''):'<tr><td colspan="10" class="empty2">No trials yet. Rate on the iPad above, or add a row by hand from the paper sheet.</td></tr>')+'</tbody>';
   if(met)met.innerHTML=[['Trials',L.length],['Checked by the teacher',ch.length],['Matches',ch.length?mt+' of '+ch.length+' ('+Math.round(100*mt/ch.length)+'%)':'—'],['Last five checked',ch.length?ch.slice(-5).filter(r=>r.s===r.t).length+' of '+Math.min(5,ch.length)+' matched':'—'],['Points earned',pts],['At the best level (teacher)',ch.length?ch.filter(r=>r.t===0).length+' of '+ch.length:'—']].map(x=>'<div class="metric"><div class="k">'+x[0]+'</div><div class="v">'+x[1]+'</div></div>').join('');
   if(sg)sg.innerHTML=L.length?'<p class="hint mm-sug"><b>Checks:</b> '+esc(mmSuggest())+'</p>':'';mmPlot();}
+/* full check: the level names sit left of the plot, right-aligned at x0-8; with x0 fixed at 70 a longer name ("Like the
+   model") ran past the chart's left edge and was cut ("ke the model"). x0 now comes from the longest name (its width
+   estimated generously for the 11-unit text), never less than 70. */
+const mmTW=t=>[...String(t)].reduce((a,c)=>a+(/[mwMW]/.test(c)?.86:/[A-Z]/.test(c)?.72:/[\s.,:;'’()\/-]/.test(c)?.32:.58),0)*11;
 function mmPlot(){const svg=$('#mmPlot');if(!svg)return;const m=mmT(),L=m.log,n=m.n;if(!L.length){svg.innerHTML='';return;}
-  const W=900,H=260,x0=70,x1=880,y0=28,y1=214,xs=i=>L.length===1?(x0+x1)/2:x0+i*(x1-x0)/(L.length-1),ys=l=>y0+l*(y1-y0)/(n-1);let h='';
+  const x0=Math.min(320,Math.max(70,Math.ceil(14+Math.max(0,...m.lv.slice(0,n).map((l,i)=>mmTW(l.name||('Level '+(i+1))))))));
+  const W=900,H=260,x1=880,y0=28,y1=214,xs=i=>L.length===1?(x0+x1)/2:x0+i*(x1-x0)/(L.length-1),ys=l=>y0+l*(y1-y0)/(n-1);let h='';
   for(let l=0;l<n;l++)h+='<line x1="'+x0+'" y1="'+ys(l)+'" x2="'+x1+'" y2="'+ys(l)+'" stroke="#dde3e6"/><text x="'+(x0-8)+'" y="'+(ys(l)+4)+'" text-anchor="end" font-size="11" fill="#4a5560">'+esc(m.lv[l].name||('Level '+(l+1)))+'</text>';
   const tp=L.map((r,i)=>r.t>=0?xs(i)+','+ys(r.t):null).filter(Boolean);if(tp.length>1)h+='<polyline points="'+tp.join(' ')+'" fill="none" stroke="#1d4a77" stroke-width="2"/>';
   L.forEach((r,i)=>{const x=xs(i);if(r.t>=0)h+='<circle cx="'+x+'" cy="'+ys(r.t)+'" r="6" fill="#1d4a77"/>';if(r.s>=0)h+='<rect x="'+(x-6)+'" y="'+(ys(r.s)-6)+'" width="12" height="12" fill="none" stroke="#b9672d" stroke-width="2"/>';

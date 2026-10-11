@@ -450,7 +450,9 @@ function renderRecord(){
   drawLog(R);
 }
 function drawLog(R){
-  const W=900,H=320,L=56,Rg=20,T=18,B=48,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
+  /* full check: the legend under the chart was one centred line of about 1100 units in a 900-unit chart, cut at both
+     ends; it is two lines now, with the plot 14 units shorter to make room (B 48 -> 62; the chart's size is unchanged) */
+  const W=900,H=320,L=56,Rg=20,T=18,B=62,n=Math.max(R.length,10);const X=i=>L+(i+0.5)*(W-L-Rg)/n,Y=v=>T+(H-T-B)*(1-v/100);
   let s='<rect x="0" y="0" width="'+W+'" height="'+H+'" fill="#fff"/>';
   [0,25,50,75,100].forEach(p=>{s+='<line x1="'+L+'" y1="'+Y(p)+'" x2="'+(W-Rg)+'" y2="'+Y(p)+'" stroke="#e3e8ea"/><text x="'+(L-6)+'" y="'+(Y(p)+4)+'" font-size="11" text-anchor="end" fill="#5B6B6B" font-family="system-ui,sans-serif">'+p+'%</text>';});
   s+='<line x1="'+L+'" y1="'+Y(0)+'" x2="'+(W-Rg)+'" y2="'+Y(0)+'" stroke="#182e43"/><line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+Y(0)+'" stroke="#182e43"/>';
@@ -465,7 +467,8 @@ function drawLog(R){
   R.forEach((r,i)=>{if(r.pc==null)return;s+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(r.pc).toFixed(1)+'" r="4.5" fill="'+(r.ph==='0'?'#fff':r.met?'#2F6B37':'#2f5568')+'" stroke="#2f5568" stroke-width="1.5"/>';
     if(r.ag!=null)s+='<rect x="'+(X(i)-3).toFixed(1)+'" y="'+(Y(r.ag)-3).toFixed(1)+'" width="6" height="6" fill="#76a2a3"/>';
     s+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(0)+14)+'" font-size="10" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+esc(String(r.date||i+1).slice(0,6))+'</text>';});
-  s+='<text x="'+((L+W-Rg)/2)+'" y="'+(H-6)+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase) · goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)</text>';
+  [['Percent of points (line; filled green when the goal was met; hollow in the teacher-only phase)',H-22],['goal (brown) · agreement (small squares) · per-target percents (thin dashed lines)',H-7]].forEach(([t,y])=>{
+    s+='<text x="'+((L+W-Rg)/2)+'" y="'+y+'" font-size="11" text-anchor="middle" fill="#5B6B6B" font-family="system-ui,sans-serif">'+t+'</text>';});
   $('#logPlot').innerHTML=s;
 }
 
