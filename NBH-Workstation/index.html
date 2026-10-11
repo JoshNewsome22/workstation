@@ -1354,7 +1354,7 @@ function warmStart(){if(state.warm)return;state.warm={timer:setInterval(warmTick
 function warmStop(){if(state.warm){clearInterval(state.warm.timer);state.warm=null;}}
 function warmTick(){
   const W=state.warm;if(!W||W.busy)return;
-  const next=state.caseOrder.find(id=>state.pending[id]&&!state.frames[id]);
+  const next=state.caseOrder.find(id=>state.pending[id]&&!state.pending[id].away&&!state.frames[id]);   /* v21.81 away: put away by Close or to save memory, loaded when opened */
   if(!next){warmStop();return;}
   if(Object.keys(state.frames).length>=FRAME_CAP){warmStop();return;}   /* v21.81 the rest load when opened */
   if(document.hidden||Date.now()-state.lastInput<1500)return;
@@ -1438,7 +1438,7 @@ async function unloadForm(id,force){const fr=state.frames[id];if(!fr||state.pend
   try{await gatherFacts(false);}catch(e){}
   const r=await grab(id,'snapshot',null,8000);if(!(r&&r.snap)||state.frames[id]!==fr)return false;
   const rec=ALL.find(f=>f[0]===id),clean=caseClean();
-  setPending(id,r.title||(rec&&rec[1])||id,r.snap,false);
+  setPending(id,r.title||(rec&&rec[1])||id,r.snap,false);state.pending[id].away=true;
   fr.remove();delete state.frames[id];delete state.status[id];
   if(!state.caseOrder.includes(id))state.caseOrder.push(id);
   if(clean){state.lastSig=caseSig();state.autoSig=caseSig();}
