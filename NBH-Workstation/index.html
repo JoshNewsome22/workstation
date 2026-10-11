@@ -2182,7 +2182,7 @@ function noteFactSource(id,st){
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||(f.evidence&&Object.keys(f.evidence).length)));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff]):'';}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2203,6 +2203,7 @@ async function gatherFacts(push){
         if(out&&out.prefs){f.prefs=out.prefs;f.src.prefs='PA-1';}else if(f.src.prefs)drop('prefs');}   /* v21.80 the reassessment date */
       if(FACT_GEN.includes(id)){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
       /* v21.78 the assessments' results, one entry a form */
+      if(out&&out.replies&&typeof out.replies==='object'){f.replies=Object.assign({},f.replies||{},out.replies);f.src.replies='forms';}   /* v21.86 what came back, per form */
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
@@ -2278,6 +2279,7 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
+  if(d.nbh==='mail'){mailFor(ev,d);return;}   /* v21.86 a form's invitations, sent from the school Google account */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
     if(!relayFrom(ev.source))return;
@@ -4960,6 +4962,123 @@ setTimeout(()=>{CMDS.push({k:'iep meeting packet present levels plaafp goals cop
   {k:'calendar ics deadlines caseload reviews iep reevaluation',n:'Caseload deadlines to the Calendar (.ics)',s:'command',go:()=>clCalendar()},
   {k:'restraint seclusion report district caseload notices',n:'Restraint and seclusion report (the caseload)',s:'command',go:()=>clRestraintOpen()},
   {k:'remove delete all student data privacy ipad',n:'Remove all student data from this iPad',s:'command',go:()=>clRemoveAll()});},0);   /* the commands list is made further down the page */
+/* ================= v21.86 email from the BCBA's school Google account, and the replies brought in for the whole caseload =================
+   A form (IA-1, IN-1, SV-1, CF-1) asks the workstation to send its invitations: one email per person, from the account the
+   BCBA signs in with (Google's own window, opened by the tap on Sign in and send), through Gmail. The emails go from that
+   account like any it sends; nothing passes through any other server. When the workstation cannot (no Google key on this
+   iPad, the one-file edition, Gmail not on the account), the form falls back to the iPad's Mail app, one person at a time. */
+const GM={busy:false};
+const GM_SCOPE='https://www.googleapis.com/auth/gmail.send email';
+const gmTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.mail')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
+function gmSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('nokey'));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
+  try{google.accounts.oauth2.initTokenClient({client_id:id,scope:GM_SCOPE,
+      callback:r=>{if(r&&r.access_token){const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.mail',JSON.stringify(t));}catch(e){}res(t);}
+        else rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:''});}
+  catch(e){rej(e);}});}
+async function gmWho(tok){try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}});if(r.ok){const j=await r.json();return j.email||'';}}catch(e){}return '';}
+const gmB64=s=>{const u=new TextEncoder().encode(s);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);};
+const gmUrl=s=>gmB64(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const gmHead=s=>/^[\x20-\x7e]*$/.test(s)?s:'=?UTF-8?B?'+gmB64(s)+'?=';
+function gmRaw(m,from){const name=String(m.name||'').replace(/["\r\n]/g,'').slice(0,80),to=String(m.to||'').trim();
+  const body=gmB64(String(m.text||'')).replace(/.{1,76}/g,'$&\r\n');
+  return gmUrl([(from?'From: '+from:''),'To: '+(name?'"'+gmHead(name)+'" ':'')+'<'+to+'>','Subject: '+gmHead(String(m.subject||'').replace(/[\r\n]+/g,' ').slice(0,200)),'MIME-Version: 1.0','Content-Type: text/plain; charset="UTF-8"','Content-Transfer-Encoding: base64','',body].filter((x,i)=>i||x).join('\r\n'));}
+async function gmSend(tok,m,from){const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({raw:gmRaw(m,from)})});
+  if(r.ok)return {ok:true};let j=null;try{j=await r.json();}catch(e){}const msg=j&&j.error&&(j.error.message||j.error.status)||('Gmail answered '+r.status);
+  if(r.status===401){try{sessionStorage.removeItem('nbh.google.mail');}catch(e){}return {ok:false,signin:true,err:'Google asked for the sign-in again'};}
+  if(/mail service not enabled|not.*enabled for this account|failedPrecondition/i.test(msg))return {ok:false,service:true,err:'Gmail is not turned on for this account'};
+  if(r.status===403)return {ok:false,service:true,err:/insufficient|scope|permission/i.test(msg)?'this account has not allowed the workstation to send mail (the district may need to allow it)':msg};
+  return {ok:false,err:msg};}
+const gmOk=e=>/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(e||'').trim());
+/* the request from a form: shown, confirmed in a tap that also signs in, sent one by one, answered */
+async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};
+  if(!from){return;}
+  const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
+  if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
+  if(EMBED){answer({unavailable:true,why:'The one-file edition cannot sign in to Google; use the website edition to send from your school account.'});return;}
+  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this iPad (Form DD-1, Google Sheet, gives it once).'});return;}
+  if(GM.busy){answer({unavailable:true,why:'Another set of emails is being sent; try again in a moment.'});return;}
+  clGsiLoad().catch(()=>{});
+  const go=await new Promise(res=>{const dlg=$('#cfDlg');$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';
+    $('#cfBody').textContent='From Form '+from+', one email to each person, each with their own link:\n'+L.slice(0,8).map(m=>'• '+(m.name?m.name+' ':'')+'<'+m.to+'>').join('\n')+(L.length>8?'\n• and '+(L.length-8)+' more':'')+'\n\nThey go from the Google account you sign in with, like any email you send from it.';
+    $('#cfBody').style.display='';const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{dlg.close();}catch(e){}res(v);};
+    const c=document.createElement('button');c.type='button';c.textContent='Not now';c.onclick=()=>done(null);
+    const mailApp=document.createElement('button');mailApp.type='button';mailApp.textContent='Use the Mail app instead';mailApp.onclick=()=>done('app');
+    const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=gmTok()?'Send':'Sign in and send';
+    /* the sign-in opens Google's window, so it is started in this tap, before anything is awaited */
+    ok.onclick=()=>{if(gmTok()){done(gmTok());return;}gmSignIn().then(t=>done(t)).catch(e=>done({err:e&&e.message==='nokey'?'The Google sign-in key is not set on this iPad.':(e&&e.message||String(e))}));};
+    f.appendChild(c);f.appendChild(mailApp);f.appendChild(ok);dlg.oncancel=e=>{e.preventDefault();done(null);};dlg.showModal();ok.focus();});
+  if(!go){answer({unavailable:true,why:'Not sent from your school account.',declined:true});return;}
+  if(go==='app'){answer({unavailable:true,why:'The Mail app, one person at a time.'});return;}
+  if(go.err){answer({unavailable:true,why:go.err});wsUI.toast(go.err,{kind:'warn',ms:9000});return;}
+  GM.busy=true;const results=[];let who='';
+  try{who=await gmWho(go.tok);
+    for(let i=0;i<L.length;i++){const m=L[i];let r={ok:false,err:'not sent'};try{r=await gmSend(go.tok,m,who);}catch(e){r={ok:false,err:String(e&&e.message||e)};}
+      if(i===0&&!r.ok&&r.service){answer({unavailable:true,why:'Gmail could not send from this account: '+r.err+'.'});wsUI.toast('Gmail could not send from this account ('+r.err+'). The Mail app is used instead.',{kind:'warn',ms:12000});return;}
+      results.push({to:m.to,ok:!!r.ok,err:r.ok?'':r.err});if(r.signin)break;}
+    answer({from:who||'your Google account',results});
+    const n=results.filter(x=>x.ok).length,bad=results.filter(x=>!x.ok);
+    wsUI.toast(n+' email'+(n===1?'':'s')+' sent from '+(who||'your Google account')+(bad.length?'; '+bad.length+' not sent ('+bad[0].err+')':'')+'.',{kind:bad.length?'warn':'ok',ms:9000});}
+  finally{GM.busy=false;}}
+/* the replies, for every student kept here: each form with a reply box is loaded out of sight with the student's saved work,
+   collects what came back (its own Collect, no dialog), and the student's copy here takes the result */
+const CL_REPLY_FORMS=[['IA-1','__nbhBoxCollect'],['IN-1','__nbhBoxCollect'],['SV-1','__nbhBoxCollect'],['CF-1','__nbhBoxCollect'],['DD-1','__nbhStaffCollect']];
+function clBoxForms(r){let d=null;try{d=parseCase(r.text);}catch(e){}if(!d||!d.forms)return [];
+  return CL_REPLY_FORMS.filter(([id])=>{const fm=d.forms[id],own=fm&&fm.snap&&String(fm.snap.own||'');return own&&/"box"\s*:\s*\{/.test(own)&&/"token"/.test(own);}).map(x=>x.concat([d]));}
+function clFrameFor(id){const rec=ALL.find(x=>x[0]===id);return new Promise(res=>{let host=document.getElementById('clHost');
+  if(!host){host=document.createElement('div');host.id='clHost';host.setAttribute('aria-hidden','true');host.style.cssText='position:fixed;left:-10000px;top:0;width:1000px;height:700px;visibility:hidden';document.body.appendChild(host);}
+  const fr=document.createElement('iframe');fr.title='Caseload: Form '+id+' collecting replies';fr.tabIndex=-1;let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  fr.addEventListener('load',()=>setTimeout(()=>fin(fr),500),{once:true});setTimeout(()=>fin(null),25000);host.appendChild(fr);window.__clRfWin=fr.contentWindow;loadFrame(fr,rec[2]);});}
+function clMergeOut(d,id,out){if(!out)return;d.facts=Object.assign({src:{}},d.facts||{});d.facts.src=Object.assign({},d.facts.src||{});const k=FACT_SRC[id];
+  if(k==='evidence'){if(out.evidence){d.facts.evidence=Object.assign({},d.facts.evidence||{});d.facts.evidence[id]=out.evidence;}}
+  else if(k&&out[k]){d.facts[k]=out[k];d.facts.src[k]=id;}
+  if(out.replies)d.facts.replies=Object.assign({},d.facts.replies||{},out.replies);}
+async function clReplyOne(r,id,fn,d){const me=clKey(packet());
+  /* the student on screen: their open form collects itself, and the next Save case keeps it */
+  if(r.key===me&&(state.frames[id]||state.pending[id])){const fr=state.frames[id];if(!fr)return {err:'their Form '+id+' is not open; open it and it collects by itself'};
+    try{const w=fr.contentWindow;const g=w&&typeof w[fn]==='function'?await w[fn]():{err:'this copy of Form '+id+' cannot collect on its own'};if(g&&g.ok)try{await gatherFacts(true);}catch(e){}return g||{};}catch(e){return {err:String(e&&e.message||e)};}}
+  let fr=null;
+  try{fr=await clFrameFor(id);if(!fr)return {err:'Form '+id+' did not load'};
+    const rs=await grab(id,'restore',{snap:d.forms[id].snap,copy:false},20000,fr);if(!rs)return {err:'Form '+id+' did not take the saved work'};
+    const w=fr.contentWindow;if(!w||typeof w[fn]!=='function')return {err:'this copy of Form '+id+' cannot collect on its own'};
+    const g=await Promise.race([Promise.resolve().then(()=>w[fn]()),new Promise(z=>setTimeout(()=>z({err:'the reply box did not answer in time'}),45000))])||{};
+    if(!g.ok||!(+g.placed||+g.held))return g;
+    const sn=await grab(id,'snapshot',null,10000,fr);if(!(sn&&sn.snap))return {err:'Form '+id+' did not give its work back'};
+    const fo=await grab(id,'facts?',null,5000,fr);
+    const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {err:'their case was saved again meanwhile; collect once more'};
+    d.forms[id]=Object.assign({},d.forms[id],{snap:sn.snap});clMergeOut(d,id,fo&&fo.facts);
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();await clTx('readwrite',st=>st.put(r));return g;}
+  catch(e){return {err:String(e&&e.message||e)};}
+  finally{window.__clRfWin=null;if(fr)fr.remove();}}
+async function clRepliesAll(quiet){const L=await clList()||[],todo=[];L.forEach(r=>clBoxForms(r).forEach(([id,fn,d])=>todo.push({r,id,fn,d})));
+  if(!todo.length){if(!quiet)CLX.note='No student kept here has a form waiting for replies (questionnaires sent with the reply box, or staff phone links).';return {n:0};}
+  const out=[];let k=0;for(const x of todo){k++;clProg('Collecting replies '+k+' of '+todo.length+': '+clName(x.r)+', Form '+x.id+'…');
+    /* each form of a student reads the latest copy (an earlier form may have just written it) */
+    const fresh=(await clList()||[]).find(y=>y.key===x.r.key)||x.r;let d=x.d;try{d=parseCase(fresh.text);}catch(e){}
+    const g=await clReplyOne(fresh,x.id,x.fn,d);out.push({x,g});}
+  const got=out.filter(o=>o.g&&o.g.ok&&(+o.g.placed||+o.g.held)),bad=out.filter(o=>!(o.g&&o.g.ok));
+  const placed=got.reduce((a,o)=>a+(+o.g.placed||0),0),held=got.reduce((a,o)=>a+(+o.g.held||0),0);
+  CLX.note=(CLX.note?CLX.note+' ':'')+(placed||held?'Replies: '+placed+' placed'+(held?', '+held+' held to check':'')+' — '+got.map(o=>clName(o.x.r)+' (Form '+o.x.id+': '+(+o.g.placed||0)+(+o.g.held?', '+o.g.held+' held':'')+')').join('; ')+'. ':'No new replies. ')+
+    (bad.length?'Not collected: '+bad.map(o=>clName(o.x.r)+' (Form '+o.x.id+': '+(o.g&&o.g.err||'no answer')+')').join('; ')+'.':'');
+  try{localStorage.setItem('nbh.caseload.replies',new Date().toISOString());}catch(e){}
+  return {n:todo.length,placed,held};}
+/* the morning refresh brings the replies in too, and Caseload has its own button for them */
+{const ra6=clRefreshAll;clRefreshAll=async function(){await ra6.apply(this,arguments);if(CLX.busy)return;CLX.busy=true;try{await clRepliesAll(true);}finally{CLX.busy=false;}caseloadOpen();};}
+async function clRepliesNow(){if(CLX.busy)return;CLX.busy=true;CLX.note='';try{await clRepliesAll(false);}finally{CLX.busy=false;}caseloadOpen();}
+{const co6=caseloadOpen;caseloadOpen=async function(){await co6.apply(this,arguments);const b=$('#dlgBody'),t=b&&b.querySelector('#clTools');if(!t||b.querySelector('#clReplies'))return;
+  const L=await clList()||[],n=L.filter(r=>clBoxForms(r).length).length,last=(()=>{try{return localStorage.getItem('nbh.caseload.replies')||'';}catch(e){return '';}})();
+  const p=t.querySelector('.td-more');if(p)p.insertAdjacentHTML('beforeend',' <button type="button" id="clReplies"'+(n?'':' disabled')+'>Collect replies'+(n?' ('+n+')':'')+'<\/button>');
+  const h=t.querySelector('.hint');if(h&&n)h.insertAdjacentHTML('beforeend',' '+n+' student'+(n===1?' has':'s have')+' questionnaires or staff phone links waiting for replies'+(last?'; last collected '+esc(clAgo(last)):'')+'; Read every linked sheet collects them too.');};}
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#clReplies'))clRepliesNow();});
+/* Today: what came back and what is still out */
+function tdReplies(f){const L=[],R=f.replies||{};Object.keys(R).forEach(id=>{const x=R[id]||{};
+  if(+x.held)L.push({k:'Replies',t:x.held+' repl'+(+x.held===1?'y':'ies')+' held on Form '+esc(id)+': it did not match a target or the wording; check and place it',open:id});
+  if(+x.waiting)L.push({k:'Replies',t:x.waiting+' sent on Form '+esc(id)+' and not back by their date: remind them (Remind all not back)',open:id});});
+  const st=f.data&&f.data.staff;if(st&&st.last&&tdSchoolDays(st.last)>=3&&(st.links||[]).length)L.push({k:'Data',t:'No staff phone entries since '+esc(tdMd(st.last))+' on Form DD-1 ('+tdSchoolDays(st.last)+' school days)',open:'DD-1'});
+  return L;}
+{const ti6=todayItems;todayItems=function(){const f=state.facts||{};let L=ti6.apply(this,arguments);try{L=L.concat(tdReplies(f));}catch(e){}return L;};}
+CL_ORDER.splice(CL_ORDER.indexOf('Data'),0,'Replies');
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
