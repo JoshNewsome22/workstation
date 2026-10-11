@@ -2,7 +2,7 @@
    php -S, as qa/reply-box-test.js does); the case is kept on this iPad and closed; a phone sends the day's counts; the
    workstation's Collect replies (Caseload, and the morning refresh) opens that student's DD-1 unseen, places the entry, and
    writes the case back to the caseload with its facts: the count on its day, data.staff, nothing twice on a second run,
-   no dialog. Simulated student only (Mateo Rivera, ID 4471823, Royal Palm School). Needs php on the PATH.
+   no dialog; and by itself, two hours after the last collection. Simulated student only (Mateo Rivera, ID 4471823, Royal Palm School). Needs php on the PATH.
    usage: WS_URL=http://127.0.0.1:8155 node qa/v2186-collect-test.js */
 const {chromium,fs,path,ROOT,BASE,sleep}=require(__dirname+'/lib.js');
 const {spawn}=require('child_process');
@@ -54,12 +54,22 @@ const IPHONE='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit
   const again=await page.evaluate(async()=>{const r=await clRepliesAll(true);return {r,note:CLX.note,asked:window.__asked};});
   const after2=await page.evaluate(async([el,today])=>{const r=(await clList()||[]).find(x=>/Mateo Rivera/.test(x.client||''));const own=JSON.parse(parseCase(r.text).forms['DD-1'].snap.own);const row=(own.rows||[]).find(x=>x.date===today);return row&&row.values&&row.values[el];},[T.el,T.today]);
   ok('7 a second run: nothing new, nothing placed twice, no question asked',again.r.placed===0&&/No new replies/.test(again.note)&&String(after2)==='2'&&again.asked===0,{again,after2});
+  /* by itself: the phone sends one more; the workstation collects when two hours have passed since the last time, quietly */
+  await pg.reload({waitUntil:'load'});await sleep(500);await pg.tap(`section.t[data-t="${T.el}"] [data-a="inc"]`);await sleep(60);await pg.tap('#sdSend');await sleep(1500);
+  const au=await page.evaluate(async()=>{window.__toasts=[];const t0=wsUI.toast;wsUI.toast=(m,o)=>{window.__toasts.push(String(m));};
+    localStorage.setItem('nbh.caseload.replies',new Date().toISOString());const soon=await clRepliesAuto(false);
+    localStorage.setItem('nbh.caseload.replies',new Date(Date.now()-3*3600e3).toISOString());const late=await clRepliesAuto(false);
+    wsUI.toast=t0;return {soon,late,toasts:window.__toasts,asked:window.__asked};});
+  const after3=await page.evaluate(async([el,today])=>{const r=(await clList()||[]).find(x=>/Mateo Rivera/.test(x.client||''));const own=JSON.parse(parseCase(r.text).forms['DD-1'].snap.own);const row=(own.rows||[]).find(x=>x.date===today);return row&&row.values&&row.values[el];},[T.el,T.today]);
+  ok('7b by itself: not within two hours of the last collection; after that, the new entry is placed (2 + 1) with a notice naming the student, no question asked',au.soon===null&&au.late&&au.late.placed===1&&String(after3)==='3'&&au.toasts.length===1&&/Replies came in: 1 placed.*Mateo Rivera/.test(au.toasts[0])&&au.asked===0,{au,after3});
+  const sched=await page.evaluate(()=>/setTimeout\(\(\)=>clRepliesAuto\(false\),20000\)/.test(document.documentElement.innerHTML)||[...document.scripts].some(s=>/clRepliesAuto\(false\),20000/.test(s.textContent)));
+  ok('7c it is set to run soon after the workstation opens, every so often while open, and when back online',sched);
   /* reopening the case: the form shows what came in */
   const shown=await page.evaluate(async el=>{const r=(await clList()||[]).find(x=>/Mateo Rivera/.test(x.client||''));await openCaseText(r.text,null,{asked:true,quiet:true});return true;},T.el);
   await page.evaluate(()=>openForm('DD-1'));await page.waitForFunction(()=>!!state.status['DD-1'],null,{timeout:30000});await sleep(1500);
   const fr2=page.frames().find(f=>/Daily_Behavior_Data/.test(f.url()));
   const v2=await fr2.evaluate(([el,today])=>{const row=S.rows.find(x=>x.date===today);return row&&row.values[el];},[T.el,T.today]);
-  ok('8 opened from the caseload, Form DD-1 shows the two elopements on today’s row',shown&&String(v2)==='2',v2);
+  ok('8 opened from the caseload, Form DD-1 shows the three elopements on today’s row',shown&&String(v2)==='3',v2);
   ok('no page errors',!errs.length,errs.slice(0,5));
   }finally{await br.close();php.kill();}
   console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

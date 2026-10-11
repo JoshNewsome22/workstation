@@ -5098,6 +5098,19 @@ function tdService(f){const sv=f&&f.service,ip=sv&&sv.iep;if(!ip||ip.done==null|
   return [{k:'Service',t:'IEP service minutes behind: '+esc(ip.line||(ip.done+' of '+ip.minutes+' minutes'))+' on Form CN-1 (about '+want+' by now)',open:'CN-1'}];}
 {const ti5s=todayItems;todayItems=function(){const f=state.facts||{};let L=ti5s.apply(this,arguments);try{L=L.concat(tdService(f));}catch(e){}return L;};}
 CL_ORDER.splice(CL_ORDER.indexOf('Home')+1,0,'Service');
+/* ======== v21.86 replies come in by themselves: soon after the workstation opens, again every two hours while it is open
+   and when the iPad is back online, for every student kept here with a form waiting (online, the website edition) ======== */
+const CL_AUTO_MS=2*3600e3;
+async function clRepliesAuto(force){if(EMBED||CLX.busy||clOff()||navigator.onLine===false)return null;
+  let last=0;try{last=Date.parse(localStorage.getItem('nbh.caseload.replies')||'')||0;}catch(e){}
+  if(!force&&Date.now()-last<CL_AUTO_MS)return null;
+  const L=await clList()||[];if(!L.some(r=>clBoxForms(r).length))return null;
+  CLX.busy=true;let r=null;try{r=await clRepliesAll(true);}catch(e){r=null;}finally{CLX.busy=false;}
+  if(r&&(r.placed||r.held)){try{wsUI.toast(CLX.note.replace(/^Replies: /,'Replies came in: ').trim()+' Caseload has them; open the student to see them in the form.',{ms:12000});}catch(e){}
+    try{paintBlank();}catch(e){}try{paintBadge();}catch(e){}}
+  return r;}
+setTimeout(()=>clRepliesAuto(false),20000);setInterval(()=>clRepliesAuto(false),15*60e3);
+window.addEventListener('online',()=>setTimeout(()=>clRepliesAuto(false),5000));
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
