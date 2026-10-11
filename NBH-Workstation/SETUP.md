@@ -8694,3 +8694,43 @@ form leaves nothing behind; the backup, the restore and the reminder; the new To
 `qa/v2180-e-test.js` (DD-1: the refresh hook, the marks through the table and the details, Save data and open, the CSV,
 the facts, By setting, probes, the print column, phone and iPad widths), `qa/v2180-f-test.js` (PA-1's date and the
 schedule, PR-1's assent and probes), and `qa/case-open-test.js`.
+
+### v21.81: fixes that keep work safe, and a lighter load on the iPad
+
+From a review of the workstation in four parts (the day on the iPad, data safety, the clinical packet, the iPad's
+performance). This release fixes what could lose or mix up work, and the iPad's memory; the clinical gaps follow in v21.82.
+
+**Work kept safe**
+- *A form that does not take its saved work.* When a case's form is filled from the file and does not answer (it is
+  asked twice, 20 seconds each), the case keeps that form's work as the file holds it, Save case writes that copy (not the
+  empty form), and the case is not marked saved over it. A note says to close the form and open it again.
+- *Caseload's Open.* For the student already on screen, their case stays as it is and the form asked for opens. For another
+  student, with work on screen not saved to a file: *Save first*, *Switch anyway* (the work stays in this iPad's safety
+  copy, where Open case offers it) or *Cancel*. *Open TI-1* (or any form) now opens that form, in the case or not.
+- *Close on the crumb.* A form holding work asks *Close* (its work stays in the case: Save case writes it, and it is filled
+  again when opened) or *Remove from the case*. A blank form just closes. After closing, the form viewed before it is shown.
+- *The caseload copy.* A form that did not answer Save case keeps its last copy on the caseload.
+- *No false "Unsaved work found".* A case saved and unchanged writes no safety copy when the iPad leaves the page.
+- *Read every linked sheet,* for the student on screen, reads the Form DD-1 of the case that is open, never the iPad's
+  older copy; and a Save case of a student made while their sheet is read wins over the read.
+- *Form DD-1 and Google Sheets.* A sheet is taken only for the same student: when both carry a student ID the IDs decide;
+  otherwise the first and last name must both match (Rivera, Mateo is the same; Lucas Rivera is not). *It is the same
+  student* answers for that exact sheet student only. The unattended read (Caseload) never takes a mismatch. An incident
+  counted on a day the sheet writes is added on top of the sheet's number after every read, and taken off cleanly.
+
+**The iPad's memory**
+- At most eight forms stay loaded. Past that, the form viewed longest ago (never the one on screen or side by side) is put
+  away: its work read and kept in the case as a form not loaded yet, and filled again when opened (no data is dropped;
+  Save case writes it). Opening a case loads its forms quietly only up to eight; the others load when opened.
+- Build master print no longer leaves a hidden copy of each form it loaded; Diagnostics' file check loads four forms at a
+  time instead of all 46 at once.
+
+**On screen and on paper**
+- Forms open on their working tab (Setup, Student, Consent...), with the Guide last (DM-1, EA-1, IA-1, IC-1, MS-1, PA-1,
+  RR-1, RA-1, TB-1, TD-1, VI-1; the Guide after the Walkthrough in TK-1, AD-1, DT-1; ABC-1's Methods & references last).
+- TD-1's Print / Save as PDF leaves out the Guide and the References unless *Include the guide and references* is ticked
+  (kept with the form's data); the master print does the same.
+- On the iPad in portrait: text in the forms and the workstation no smaller than 13 px, and buttons 44 pt tall.
+
+Checked by `qa/v2181-test.js` (each shell fix, the memory limit, master print, the file check), `qa/v2181-g-test.js`
+(DD-1's student check and the counted incidents), `qa/v2181-h-test.js` (tab order, TD-1's print with and without the tick).
