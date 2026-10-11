@@ -482,6 +482,18 @@ select.codesel:focus-visible{outline:2px solid #1D6FA5;outline-offset:0}
 /* the number keeps clear of the code tag in its corner */
 td.mark input.count{padding-right:0}
 html.sp-codes td.mark input.count{padding-right:22px}
+/* full check: on a touch screen the code tag in a cell's corner was 20 px wide (27 in landscape) beside the cell's count or
+   mark, so a finger meant for the one hit the other. On a touch screen, with codes on, a cell is two targets one above
+   the other, each the cell's full width and 44 px tall: the count (or the mark) and, under it, the code. A mouse and
+   paper keep the tag in the corner. */
+@media screen and (pointer:coarse){
+  html.sp-codes table.scatter td.mark{vertical-align:top}
+  html.sp-codes table.scatter td.mark input.count{padding-right:0;height:44px;min-height:44px!important}
+  html.sp-codes table.scatter td.mark button.cell{height:44px;min-height:44px!important}
+  html.sp-codes table.scatter td.mark select.codesel{position:relative;right:auto;top:auto;z-index:1;display:block;
+    width:100%;min-width:44px;height:44px;min-height:44px!important;padding:0 12px 0 0;font-size:13px;
+    border-radius:0;border-top:1px solid var(--rule-2);background-position:right 5px center;background-size:8px 5px}
+}
 
 td.tot,th.tot{
   width:52px;font-size:10.5px;text-align:center;
