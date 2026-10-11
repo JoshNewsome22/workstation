@@ -15,7 +15,7 @@ const check=(name,ok,note)=>{console.log((ok?'PASS':'FAIL')+' '+name+(ok||note==
     const toast=wsUI.toast;wsUI.toast=(t,o)=>{__told.push(String(t));return toast(t,o);};});
   const open=async id=>{await page.evaluate(id=>openForm(id),id);
     const fr=await page.waitForSelector(`iframe[title*="Form ${id})"]`,{timeout:8000});await sleep(1200);return (await fr.contentFrame());};
-  const sim=async id=>{const f=await open(id);await f.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();});await sleep(900);return f;};
+  const sim=async id=>{const f=await open(id);await f.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{nbhUI.confirm=async()=>true;}catch(e){}document.querySelector('#simBtn').click();});await sleep(900);return f;};
   const filledOf=async f=>f.evaluate(()=>Array.from(document.querySelectorAll('input,textarea,select')).filter(e=>{
     if(e.type==='checkbox'||e.type==='radio')return e.checked;if(e.type==='hidden'||e.type==='button'||e.type==='submit')return false;return String(e.value||'').trim()!=='';}).length);
   const btn=await page.$('#closeCase');
@@ -37,7 +37,7 @@ const check=(name,ok,note)=>{console.log((ok?'PASS':'FAIL')+' '+name+(ok||note==
   const dlP=page.waitForEvent('download',{timeout:30000}).catch(()=>null);
   await page.evaluate(()=>$('#closeCase').click());
   const dl=await dlP;
-  check('a: Close case asks first, with "Save and close"',await page.evaluate(()=>__asked.some(a=>/^Close this case\?/.test(a.t)&&a.ok==='Save and close')),await page.evaluate(()=>JSON.stringify(__asked)));
+  check('a: Close case asks first, with "Save and close"',await page.evaluate(()=>__asked.some(a=>/^Close this case\?/.test(a.t)&&/^Save and close( anyway)?$/.test(a.ok))),await page.evaluate(()=>JSON.stringify(__asked)));
   let body='';if(dl){const p=await dl.path().catch(()=>null);if(p)body=fs.readFileSync(p,'utf8');}
   let kase=null;try{kase=JSON.parse(body);}catch(e){}
   check('a: the case file is downloaded (CASE_*.json) with both forms and the student in it',!!dl&&/^CASE_Close_Test_Student_\d{4}-\d{2}-\d{2}\.json$/.test(dl.suggestedFilename())&&!!kase&&kase.form==='CASE'&&!!kase.forms['TB-1']&&!!kase.forms['TK-1']&&kase.packet.client==='Close Test Student',dl&&dl.suggestedFilename());
@@ -72,7 +72,7 @@ const check=(name,ok,note)=>{console.log((ok?'PASS':'FAIL')+' '+name+(ok||note==
   check('b: the reopened TB-1 reports the fresh signature',b2.tb&&b2.tb.sig===fresh.tb.sig&&b2.tb.sig!==before.tbSig&&!b2.tb.edited,JSON.stringify(b2.tb));
   /* TK-1 counts as work on its own (58 default values), so take it out; a fresh TB-1 (3 defaults) is no work */
   await page.evaluate(()=>{openForm('TK-1',true);});await sleep(300);
-  await page.evaluate(()=>{wsUI.confirm=async(t,o)=>{__asked.push({t:String(t),ok:o&&o.ok});return true;};});
+  await page.evaluate(()=>{wsUI.confirm=async(t,o)=>{__asked.push({t:String(t),ok:o&&o.ok});return true;};wsUI.choose=async t=>/^Close Form/.test(t)?'remove':'';});   /* v21.81 the form's Close asks Close / Remove from the case */
   await page.evaluate(()=>$('#closeForm').click());await sleep(800);
   check('b: TK-1 closed by the form\'s own Close, TB-1 stays',await page.evaluate(()=>Object.keys(state.frames).join()==='TB-1'));
   /* an untouched form open and no name: Close case clears without asking and without a file */

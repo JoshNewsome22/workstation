@@ -10,7 +10,7 @@ const FORMS=[
   {id:'DA-1',file:'DA-1_Demand-Assessment_v2026-10.html',arr:'sess',len:'S.sess.length'},
   {id:'HD-1',file:'HD-1_Home-Data-Sheets_v2026-10.html',arr:'ag',len:'S.ag.length'},
   {id:'CN-1',file:'CN-1_Consultation-Notes_v2026-10.html',arr:'nx',len:'S.notes[cur].next.length',pre:'cur=S.notes.map(n=>n.next.length).indexOf(Math.max(...S.notes.map(n=>n.next.length)));S.notes[cur].next.push({what:"Added by the check so the table has a middle row",who:"BCBA",when:"",done:false});renderNote();'},
-  {id:'SR-1',file:'SR-1_Schedules-of-Reinforcement_v2026-10.html',arr:null,len:'0',noAsk:true},
+  {id:'SR-1',file:'SR-1_Schedules-of-Reinforcement_v2026-10.html',arr:null,len:'0'},   /* asks like the others since v21.35 */
   {id:'VS-1',file:'VS-1_Visual-Supports_v2026-10.html',arr:'cards',len:'S.cards.length'},
 ];
 const only=process.argv[2];

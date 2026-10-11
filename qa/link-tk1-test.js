@@ -591,6 +591,7 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
     await sleep(1200);
     const lkTE2=await te2.evaluate(()=>S.meta.lk||'');
     await sh.evaluate(()=>{Object.values(state.frames).forEach(fr=>ask(fr,'status'));});await sleep(600);
+    await sh.waitForFunction(()=>caseDirty(),null,{timeout:15000}).catch(()=>{});   /* the change is read by the status poll (every 4 s), then it counts */
     await sh.evaluate(()=>{state.autoSig='';});await sh.evaluate(async()=>{await autoSave(true);});
     const auto=await sh.evaluate(async()=>{const r=(await nbhCopies.list()).find(x=>x.key===state.auto.key);return r?JSON.stringify(await nbhCopies.unpack(r)):null;});
     ok('19 the autosave holds both records',changed&&!!auto&&JSON.parse(JSON.parse(auto).forms['TK-1'].snap.own).S.meta.lk===lkTK&&JSON.parse(JSON.parse(auto).forms['TE-1'].snap.own).S.meta.lk===lkTE2,{changed,auto:!!auto,same:lkTE2===lkTE});
@@ -614,5 +615,5 @@ const wide=p=>p.evaluate(()=>({doc:document.documentElement.scrollWidth,w:docume
   ok('no console errors',!errs.length,errs);
   await br.close();
   console.log(out.join('\n'));console.log(fails?fails+' FAILED':'ALL OK ('+out.length+' checks)');process.exit(fails?1:0);
-})().catch(e=>{console.error(e);process.exit(2);});
+})().catch(e=>{console.log(out.join("\n"));console.error(e);process.exit(2);});   /* what was checked before the stop is shown too */
 function NBHLink_on(s){try{const o=JSON.parse(s);return !!o&&o.v===1&&o.on===1;}catch(e){return false;}}

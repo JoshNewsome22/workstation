@@ -4,14 +4,14 @@ const L=require(__dirname+'/lib.js');
 const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
 (async()=>{
   const browser=await L.chromium.launch(); const ctx=await browser.newContext({viewport:{width:1280,height:900}});
-  await ctx.addInitScript(()=>{window.print=function(){};});
+  await ctx.addInitScript(()=>{window.print=function(){};try{localStorage.setItem('nbh.frames.cap','60');}catch(e){}});   /* v21.81 the workstation keeps 8 forms loaded; this check wants every one at once */
   const log=[]; const page=await ctx.newPage(); L.wire(page,log);
   const idx=`${L.BASE}/NBH-Workstation/index.html`; await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   for(const f of L.forms()){
     await page.evaluate(id=>openForm(id),f.id);
     await page.waitForFunction(id=>!!state.status[id],f.id,{timeout:20000}).catch(()=>{});
     const fr=page.frames().find(x=>x.url().endsWith('/'+f.file));
-    if(fr){ await fr.evaluate(()=>{const b=document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b)b.click();}); await L.sleep(900); }
+    if(fr){ await fr.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}const b=document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b)b.click();}); await L.sleep(900); }   /* v21.34 most forms ask with their own dialog */
     process.stderr.write(f.id+' ');
   }
   await L.sleep(2000);
@@ -20,9 +20,9 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.click('#saveCase')]); await dl.saveAs(cf);
   await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   await page.setInputFiles('#caseFile',cf);
-  await page.waitForFunction(n=>Object.keys(state.frames).length>=n,L.forms().length,{timeout:240000});
+  await page.waitForFunction(n=>Object.keys(state.frames).length+Object.keys(state.pending).length>=n,L.forms().length,{timeout:240000});   /* v21.61 a form not loaded yet is listed (pending) */
   await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:240000}); await L.sleep(4000);
-  const restored=await page.evaluate(()=>Object.keys(state.frames).length);
+  const restored=await page.evaluate(()=>Object.keys(state.frames).length+Object.keys(state.pending).length);
   await page.evaluate(()=>{ALL.forEach(([id])=>state.ticked[id]=true);renderRail();});
   await page.evaluate(()=>{wsUI.confirm=async()=>true;});   /* v21.78 the shell's questions (forms not loaded yet: include them) answered yes */
   const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.click('#masterPrint')]);
@@ -34,4 +34,7 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   const buf=await popup.pdf({preferCSSPageSize:true,printBackground:true}); L.fs.writeFileSync(L.path.join(DIR,'master.pdf'),buf);
   console.log(JSON.stringify({restored,sections:secs,pagenavInMaster:bars,fitted:await popup.evaluate(()=>window.__nbhFitted),bytes:buf.length,log:log.slice(0,5)}));
   await browser.close();
+  /* v21.86 the checks: every form back from the case file, a section for each in the master print, no page error */
+  const n=L.forms().length,bad=[];if(restored!==n)bad.push('restored '+restored+' of '+n);if(secs!==n)bad.push('sections '+secs+' of '+n);if(log.length)bad.push('errors '+JSON.stringify(log.slice(0,3)));
+  console.log(bad.length?'FAIL '+bad.join('; '):'PASS every form restored and printed ('+n+' sections, '+buf.length+' bytes)');process.exit(bad.length?1:0);
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

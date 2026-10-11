@@ -119,7 +119,7 @@ const host=t=>`#tgtWrap .card[data-tgt="${t}"] .tb1lib-host`;
   const open=async id=>{await sh.evaluate(id=>openForm(id),id);const fr=await sh.waitForSelector(`iframe[title*="Form ${id})"]`,{timeout:8000});await sleep(1200);return (await fr.contentFrame());};
   const hd=await open('HD-1');const tb=await open('TB-1');
   const row=await tb.evaluate(()=>getComputedStyle(document.querySelector('#sendRow')).display);
-  await tb.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};document.querySelector('#simBtn').click();});await sleep(600);
+  await tb.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{nbhUI.confirm=async()=>true;}catch(e){}document.querySelector('#simBtn').click();});await sleep(800);   /* the sample asks with the form's own dialog (v21.34) */
   await tb.evaluate(()=>{document.querySelector('#viewSeg button[data-view="define"]').click();document.querySelector('#sendTgt').click();});await sleep(2500);
   const sent=await tb.evaluate(()=>document.querySelector('#sendNote').textContent);
   const got=await hd.evaluate(()=>S.bh.map(b=>b.name).filter(Boolean));
