@@ -15,7 +15,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
 const OUT=__dirname+'/out/photo-flags/';fs.mkdirSync(OUT,{recursive:true});
 (async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1300,height:900}});const log=[];wire(page,log);
   await page.goto(BASE+'/NBH-Workstation/index.html',{waitUntil:'load'});await sleep(800);
-  await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m);};try{wsUI.confirm=async()=>true;}catch(e){}});
+  await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m);};try{wsUI.confirm=async()=>true;wsUI.choose=async(t,opts)=>/^Close Form/.test(t)?'keep':(opts&&opts[0]&&opts[0].v)||'';}catch(e){}});   /* v21.81 Close asks Close / Remove from the case */
   const settle=async id=>{const t=Date.now();while(Date.now()-t<15000&&!(await page.evaluate(id=>!!state.status[id],id)))await sleep(150);};
   /* 1. the circle */
   const c0=await page.evaluate(()=>({cam:!!document.querySelector('#pPhotoIni svg'),img:document.querySelector('#pPhotoImg').hidden,photo:state.photo}));
