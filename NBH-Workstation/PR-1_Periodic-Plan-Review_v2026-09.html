@@ -2378,6 +2378,13 @@ function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.beh
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
   try{k=pr83Fill(f||{});if(k){pr83Render();const el=document.querySelector('#pr83Tbl [data-f]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){k=0;}
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the results by target from Forms TD-1 and DD-1'].filter(Boolean).join('; ')};};}
+/* v21.87 the exit criteria from the goals (Form GB-1): an empty Behavior criterion takes the reduction goals and an empty Replacement
+   criterion the acquisition goals, as GB-1 writes them (until now the goals reached the review only as DD-1's aims) */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const g=(f&&f.goals)||{},T=x=>String(x==null?'':x).trim(),put=(m,list)=>{const e=document.querySelector('[data-m="'+m+'"]'),t=(list||[]).map(x=>T(x&&x.text)).filter(Boolean).join('\n');
+      if(!e||!t||T(e.value))return;e.value=t;e.dispatchEvent(new Event('input',{bubbles:true}));k++;};
+    put('xBeh',g.red);put('xRep',g.acq);}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the exit criteria from the goals (Form GB-1)'].filter(Boolean).join('; ')};};}
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   const A=pr83Tg().filter(x=>prT(x.name));if(!A.length)return r;const o=r&&typeof r==='object'?r:{};
   const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
