@@ -62,7 +62,7 @@ let DAYS=[['8/10/2026',[6,[2,3]]],['8/11/2026',[5,[2,2]]],['8/12/2026',[1,[1,1]]
   /* 3. signed out: the tap opens Google's sign-in, then the sheets are read */
   DAYS.push(['8/14/2026',[0,[3,3]]]);
   await page.evaluate(()=>{try{sessionStorage.removeItem('nbh.google.tok');}catch(e){}caseloadOpen();});await sleep(800);
-  const hint=await page.evaluate(()=>document.querySelector('#clTools .hint:last-child').textContent);
+  const hint=await page.evaluate(()=>[...document.querySelectorAll('#clTools .hint')].map(h=>h.textContent).join(' '));   /* v21.85 Caseload has rows after the hint */
   await page.evaluate(()=>document.getElementById('clRead').click());
   await page.waitForFunction(()=>!CLX.busy&&document.querySelector('#dlgBody .cl-note'),null,{timeout:90000}).catch(()=>{});
   const r2=await page.evaluate(async()=>{const r=(await clList()).find(x=>x.client==='Mateo Rivera'),o=JSON.parse(JSON.parse(r.text).forms['DD-1'].snap.own);return {rows:(o.S||o).rows.map(x=>x.date),ask:window.__gsAsk,tok:!!sessionStorage.getItem('nbh.google.tok')};});
@@ -79,6 +79,7 @@ let DAYS=[['8/10/2026',[6,[2,3]]],['8/11/2026',[5,[2,2]]],['8/12/2026',[1,[1,1]]
   const r4=await page.evaluate(async()=>{const r=(await clList()).find(x=>x.client==='Mateo Rivera');return {last:r.sum.lastData,frames:Object.keys(state.frames),note:(document.querySelector('#dlgBody .cl-note')||{}).textContent||''};});
   ok('4a the student on screen: the open Form DD-1 takes the new day itself, and Caseload says when the data runs to',live.includes('2026-08-17')&&r4.last==='2026-08-17'&&/Read 1 sheet/.test(r4.note),{live,r4});
   /* 5. the backup and the restore */
+  await page.evaluate(()=>{wsUI.prompt=async()=>'';});   /* v21.85 the backup offers a passphrase: left empty, the plain file */
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:20000}),page.evaluate(()=>document.getElementById('clBk').click())]);
   const bp=await dl.path(),bj=JSON.parse(fs.readFileSync(bp,'utf8'));await sleep(500);
   ok('5a Back up the caseload: one file, CASELOAD, both students with their cases',bj.form==='CASELOAD'&&bj.cases.length===2&&bj.cases.every(c=>typeof c.text==='string'&&JSON.parse(c.text).form==='CASE')&&/^CASELOAD_\d{4}-\d\d-\d\d\.json$/.test(dl.suggestedFilename()),{form:bj.form,n:bj.cases&&bj.cases.length,name:dl.suggestedFilename()});

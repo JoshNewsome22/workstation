@@ -5065,7 +5065,11 @@ async function clRepliesAll(quiet){const L=await clList()||[],todo=[];L.forEach(
   try{localStorage.setItem('nbh.caseload.replies',new Date().toISOString());}catch(e){}
   return {n:todo.length,placed,held};}
 /* the morning refresh brings the replies in too, and Caseload has its own button for them */
-{const ra6=clRefreshAll;clRefreshAll=async function(){await ra6.apply(this,arguments);if(CLX.busy)return;CLX.busy=true;try{await clRepliesAll(true);}finally{CLX.busy=false;}caseloadOpen();};}
+{const ra6=clRefreshAll;clRefreshAll=async function(){if(CLX.busy)return;
+  /* the sheet read's own closing redraw is held back (it would show and clear its note before the replies are in); Caseload opens once with both */
+  const co=caseloadOpen;let held=false;caseloadOpen=function(){if(!held&&!CLX.busy){held=true;return Promise.resolve();}return co.apply(this,arguments);};
+  try{await ra6.apply(this,arguments);}finally{caseloadOpen=co;}
+  if(!CLX.busy){CLX.busy=true;try{await clRepliesAll(true);}catch(e){}finally{CLX.busy=false;}}caseloadOpen();};}
 async function clRepliesNow(){if(CLX.busy)return;CLX.busy=true;CLX.note='';try{await clRepliesAll(false);}finally{CLX.busy=false;}caseloadOpen();}
 {const co6=caseloadOpen;caseloadOpen=async function(){await co6.apply(this,arguments);const b=$('#dlgBody'),t=b&&b.querySelector('#clTools');if(!t||b.querySelector('#clReplies'))return;
   const L=await clList()||[],n=L.filter(r=>clBoxForms(r).length).length,last=(()=>{try{return localStorage.getItem('nbh.caseload.replies')||'';}catch(e){return '';}})();
