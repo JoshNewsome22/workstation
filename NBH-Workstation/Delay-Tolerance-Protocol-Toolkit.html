@@ -4421,5 +4421,12 @@ a{text-underline-offset:2px}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
+<script id="dt1-due">
+/* v21.87 what is due on this form, for the workstation's Today and the bar: each maintenance probe with a Due date and no Done
+   date. Until now the shared scan read every date of the probe table as due, the Done dates too, named by the table's header */
+window.__nbhDue=function(){var out=[];document.querySelectorAll('#tbMaint tr').forEach(function(tr){var c=tr.querySelectorAll('input');if(c.length<3)return;
+  var iv=String(c[0].value||'').trim(),due=String(c[1].value||'').trim(),done=String(c[2].value||'').trim();
+  if(due&&!done)out.push({what:'Maintenance probe'+(iv?' ('+iv+')':''),date:due});});return out;};
+</script>
 </body>
 </html>

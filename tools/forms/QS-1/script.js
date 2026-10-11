@@ -310,7 +310,9 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
     cr.stages.slice(0,MAXR.tiers-1).forEach((s,i)=>{const k=i+1;while(S.tiers.length<=k&&S.tiers.length<MAXR.tiers)S.tiers.push(row('tiers'));if(!S.tiers[k])return;if(place('tiers.'+k+'.name',s.s))n++;if(place('tiers.'+k+'.do',s.do+(s.who?' ('+s.who+')':'')))n++;});}
   if(plan){const r=plan.respond||{};if(plan.prec&&place('tiers.0.see',plan.prec))n++;if(r.prec&&place('tiers.0.do',r.prec))n++;if(plan.beh&&place('tiers.1.see',plan.beh))n++;if(r.target&&place('tiers.1.do',r.target))n++;
     const last=S.tiers.length-1;if(r.crisis&&last>=3&&place('tiers.'+(last-1)+'.do',r.crisis))n++;if(r.after){if(place('tiers.'+last+'.name','Recovery'))n++;if(place('tiers.'+last+'.do',r.after))n++;}
-    if(r.not&&place('rules.'+(T(S.rules[0].dont)?Math.max(0,blankRow('rules')):0)+'.dont',r.not))n++;if(r.target&&place('rules.0.do',r.target))n++;}
+    /* v21.87 the plan's Never once: it went into a new Don't row each time the case arrived (until the list was full) once
+       DM-1's What to avoid held rule 1 */
+    if(r.not&&!S.rules.some((x,i)=>T(x.dont)===T(r.not)||T(S.pulled['rules.'+i+'.dont'])===T(r.not))){if(!T(S.rules[0].dont)?place('rules.0.dont',r.not):placeRow('rules','dont',r.not))n++;}if(r.target&&place('rules.0.do',r.target))n++;}
   prob.concat(reps).forEach(b=>{if(S.rec.some(r=>T(r.measure).toLowerCase()===T(b.label).toLowerCase()))return;const i=blankRow('rec');if(i<0)return;if(place('rec.'+i+'.measure',b.label))n++;if(place('rec.'+i+'.counts',b.def))n++;if(place('rec.'+i+'.how',isRep(b)?'Tally times / chances':howOf(b)))n++;});
   goals.red.slice(0,MAXR.phases).forEach((g,i)=>{if(S.phases[i]&&T(g.crit)&&place('phases.'+i+'.next',g.crit))n++;});
   if(T(S.meta.bcba)&&!S.calls.some(c=>T(c.name)===T(S.meta.bcba))){const i=blankRow('calls');if(i>=0){place('calls.'+i+'.role','Case BCBA');place('calls.'+i+'.name',S.meta.bcba);if(place('calls.'+i+'.when','after any serious incident, and for questions'))n++;}}

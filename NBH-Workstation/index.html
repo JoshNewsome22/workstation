@@ -1706,14 +1706,16 @@ function dueText(d){
   return n<0?md+' <span class="late">('+(-n)+(n===-1?' day':' days')+' overdue)</span>':n===0?md+' (today)':md+' (in '+n+(n===1?' day':' days')+')';
 }
 async function gatherDue(){
-  const out=[];
+  const out=[],seen=new Set();
   for(const id of Object.keys(state.frames)){
-    const r=await grab(id,'facts?',null,3000),due=r&&r.facts&&r.facts.due;
+    const r=await grab(id,'facts?',null,3000),due=r&&r.facts&&r.facts.due;if(r)seen.add(id);
     if(!Array.isArray(due))continue;
     due.forEach(x=>{const d=parseDue(x.date);if(!d)return;const n=Math.round((d-new Date().setHours(0,0,0,0))/86400000);if(n>DUE_DAYS)return;out.push({id,what:String(x.what||'').slice(0,60),d,n});});
   }
-  (state.due||[]).forEach(x=>{if(state.pending[x.id]&&!state.frames[x.id])out.push(x);});   /* v21.81 a form put away keeps what it said was due */
-  out.sort((a,b)=>a.d-b.d);state.due=out;paintDue();
+  (state.due||[]).forEach(x=>{if(state.pending[x.id]&&!state.frames[x.id]&&!seen.has(x.id))out.push(x);});   /* v21.81 a form put away keeps what it said was due */
+  /* v21.87 once each: a form put away while this read ran was counted twice */
+  const once=new Set(),uniq=out.filter(x=>{const k=x.id+'|'+x.what+'|'+(+x.d);if(once.has(k))return false;once.add(k);return true;});
+  uniq.sort((a,b)=>a.d-b.d);state.due=uniq;paintDue();
 }
 function paintDue(){
   const list=state.due.slice(0,4);
@@ -2174,7 +2176,7 @@ const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-
   /* v21.85 the service log */ 'CN-1':'service'};
 const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
-let factsTimer=null,factsBusy=false,factsAgain=false;
+let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
   const sig=(st&&st.sig)||'';
   if(state.factSrcSig[id]===sig)return;
@@ -2185,14 +2187,16 @@ function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||(f.evidence&&Object.keys(f.evidence).length)));}
 function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service]):'';}
 async function gatherFacts(push){
-  if(factsBusy){factsAgain=true;return;}
+  if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
   try{
     const f=Object.assign({},state.facts||{});f.src=Object.assign({},f.src||{});
     const drop=k=>{delete f[k];delete f.src[k];};
     for(const id of Object.keys(FACT_SRC)){
-      if(!state.frames[id])continue;
-      const r=await grab(id,'facts?',null,4000),out=(r&&r.facts)||null;
+      /* v21.87 a form still being filled from the file (pending), or one that does not answer, keeps what the case last had from
+         it: until now its part was dropped, so a Save case at that moment wrote the file without it */
+      if(!state.frames[id]||state.pending[id])continue;
+      const r=await grab(id,'facts?',null,4000);if(!r)continue;const out=r.facts||null;
       if(id==='TB-1'){if(out&&out.behaviors){f.behaviors=out.behaviors;f.src.behaviors='TB-1';}else if(f.src.behaviors==='TB-1')drop('behaviors');}
       if(id==='FS-1'){
         if(out&&out.fn){f.fn=out.fn;f.src.fn='FS-1';}else if(f.src.fn==='FS-1')drop('fn');
@@ -2213,9 +2217,10 @@ async function gatherFacts(push){
     if(sig!==state.factsSig){
       state.factsSig=sig;f.when=new Date().toISOString();
       state.facts=hasFacts(f)?f:null;paintFacts();
-      if(push)pushFactsToAll();
+      if(push){factsOwed=false;pushFactsToAll();}else factsOwed=true;
     }
-  }finally{factsBusy=false;if(factsAgain){factsAgain=false;setTimeout(()=>gatherFacts(push),300);}}
+    else if(push&&factsOwed){factsOwed=false;pushFactsToAll();}   /* v21.87 a read that did not send saw the change first: the forms are told now */
+  }finally{factsBusy=false;if(factsAgain){const p=factsAgainPush;factsAgain=false;factsAgainPush=false;setTimeout(()=>gatherFacts(p),300);}}
 }
 function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig(state.facts);paintFacts();if(push)pushFactsToAll();}
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
