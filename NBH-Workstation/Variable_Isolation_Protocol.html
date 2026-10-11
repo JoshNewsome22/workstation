@@ -518,8 +518,10 @@ td input,td select{max-width:100%}
 .tblwrap{max-width:100%}
 /* v21.37: the matched non-occurrence ledger prints once a pair is coded; on screen it is always there */
 @media print{.nl-part.nl-empty{display:none!important}}
+/* full check: on every screen (an iPad in portrait too, where the occurrence ledger is wider than the sheet) a table
+   scrolls inside its own box; on paper it is as before (overflow:visible below) */
+@media screen{.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}}
 @media screen and (max-width:760px){
-  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .tblwrap > table{min-width:560px}
   .tblwrap.wide > table{min-width:780px}
 }

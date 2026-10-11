@@ -797,6 +797,16 @@ td input,td select{max-width:100%}
   .panel table caption,.panel label.f{break-after:avoid;page-break-after:avoid}
   input[type=date].nbh-date-empty::-webkit-datetime-edit,input[type=date][value=""]::-webkit-datetime-edit{visibility:hidden}
 }
+/* full check: on paper a table's figures sat in 14 px fields with the screen's 8 px side padding, which left "16.7" short
+   of room in Progress Monitoring's % SC column, so it printed as "16.1", "0.25" in PB / min as "0.2", and "83.3" in the
+   generalization probes as "83." (a field's text is clipped at its box). On paper a table's fields are 12 px with a
+   narrower padding, each figure has room for five characters ("100.0", "12.25") and the progress table's phase for its
+   usual names ("TR training", "Delay fading"); every table still fits the width of the page. */
+@media print{
+  .panel td input:not([type=checkbox]):not([type=radio]),.panel td select{font-size:12px;padding-left:3px;padding-right:3px}
+  .panel td input[type=number]{min-width:calc(5ch + 8px)}
+  #tbProg td:nth-child(3) input{min-width:7.5em}
+}
 </style>
 </head>
 <body>

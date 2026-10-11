@@ -58,6 +58,12 @@ const ONLY=process.env.A6_ONLY?process.env.A6_ONLY.split(','):null;
 const F=forms(ED),FILE={};
 for(const id of ['MT-1','TI-1','ABC-1','OB-1','DD-1','SP-1'])FILE[id]=(F.find(f=>f.id===id)||{}).file;
 if(!FILE['MT-1']||!FILE['TI-1']||!FILE['ABC-1']){console.error('FAIL MT-1, TI-1 and ABC-1 are not all in '+ED);process.exit(1);}
+/* the full check (v21.86) changed a form's print on purpose after this package: on paper MT-1's session log gives each short
+   field room for its text (it printed "Whole interval" as "Whole interva"). The print check (part 6) gives the form before
+   this package the same rule, read from the form as it is now, so it still shows that nothing else on paper changed. */
+const LATER_PRINT={};
+{const src=fs.readFileSync(path.join(ROOT,ED,FILE['MT-1']),'utf8'),m=/\/\* full check: on paper the long notes of the session log[\s\S]*?\*\/\s*(@media print\{[\s\S]*?\n\})/.exec(src);
+ if(m)LATER_PRINT['MT-1']=m[1];else console.log('NOTE MT-1 has no full-check print rule for its session log: its print is compared as it stands');}
 const NOW={},WAS={};for(const id of Object.keys(FILE))if(FILE[id])NOW[id]=BASE+'/'+ED+'/'+encodeURI(FILE[id]);
 let fails=0,passes=0;
 const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+name+(detail!==undefined?' '+JSON.stringify(detail).slice(0,cond?300:2000):''));if(cond)passes++;else fails++;};
@@ -584,6 +590,7 @@ async function printSame(br){
         /* one clock for both, or a time field filled in as the page opens (ABC-1's start time) differs by a minute */
         const ctx=await fresh(br,Object.assign({viewport:{width:1280,height:900}},o));await ctx.clock.setFixedTime(new Date(2026,9,5,9,0,0)).catch(()=>{});
         const p=await open(ctx,which==='was'?WAS[id]:NOW[id],'print '+label+' '+which+' '+id,which==='was');
+        if(which==='was'&&LATER_PRINT[id])await p.addStyleTag({content:LATER_PRINT[id]});
         if(name==='simulated')await ownOpen(p,text);
         await p.emulateMedia({media:'print'});await p.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));await sleep(400);
         const buf=await p.pdf({path:dirs[which]+id+'-'+name+'.pdf',preferCSSPageSize:true,printBackground:true});counts[label+' '+which+' '+id+' '+name]=pages(buf);
