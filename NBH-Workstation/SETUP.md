@@ -8935,3 +8935,71 @@ library's block as well, so the forms that use your pictures (VS-1, SM-1, TK-1, 
 
 Checked by `qa/v2185-test.js` (the shell), `qa/v2185-svc-test.js` (the service minutes in the shell), `qa/v2185-r-test.js`
 (CN-1, DM-1 and TD-1) and `qa/v2185-p-test.js` (the phone page and DD-1, with the reply box running).
+
+### v21.86: questionnaires sent from your school email, and the answers straight back
+
+**Sending from your school Google account.** When a form sends its questionnaires (Forms IA-1, IN-1, SV-1 and CF-1), the
+workstation shows who gets an email and offers *Sign in and send* (or *Send*, once signed in on this tab), *Use the Mail app
+instead* and *Not now*. *Sign in and send* opens Google's sign-in in that tap, then sends one email per person from your
+school account through Gmail, each with that person's own link; the form marks each one sent, or names the address Gmail
+refused. The emails are in your Gmail *Sent* folder like any other. The workstation keeps the sign-in for this tab only
+(it is forgotten when the tab closes, and by *Remove all student data from this iPad*).
+
+It falls back to the iPad's Mail app, one email at a time as before, when: the form is opened on its own or in the one-file
+edition; no Google sign-in key is set on this iPad; Gmail is not turned on for the account, or the district has not
+allowed the workstation to send mail; or you chose *Use the Mail app instead*. *Not now* sends nothing.
+
+**Setting it up (once)**, in the same Google Cloud project as Form DD-1's sheet link (*v21.76*, *Setting it up*):
+
+1. *APIs & Services › Library*: find **Gmail API** and press *Enable*.
+2. *Google Auth Platform › Data access*: *Add or remove scopes*, add `.../auth/gmail.send` (send email on your behalf; it
+   cannot read your mail) and `.../auth/userinfo.email` (your address, to say which account it sends from), and save. If the audience is *External*, your district address must be under *Test users*.
+3. The Client ID is the one already pasted in Form DD-1 (the workstation uses the same key; on an iPad without one, paste
+   it in Form DD-1's *Link a Google Sheet* first).
+4. If Google says "Access blocked" or that your administrator has not approved the app, the district's IT can allow it as
+   for the sheet link (*Admin console › Security › Access and data control › API controls › Manage third-party app
+   access*), set to *Trusted*, or *Limited* to Gmail and Google Sheets.
+
+If your school account is not a Google account, nothing changes: the workstation says Gmail could not send, and the Mail
+app is used.
+
+**In the forms.**
+
+- **Form IA-1**, on the send-out board: *Send all due now* (every row not sent whose send-on date has come, or that has
+  none), *Send these* (plans the rows the panel has ticked, then sends them) and *Remind all not back* (the rows sent and
+  past their please-send-by date). The rows are grouped by person: **one email each**, "Hello Ms. Lopez,", each
+  questionnaire with that person's own link, the please-send-by date, "Your answers come straight back to me when you
+  press Send", signed by you. A row is marked Sent (by email, today) only when Gmail sent that person's email; anyone with
+  no email address, or a questionnaire with no wording on Setup yet, is listed plainly. The buttons on each row are as
+  before. IA-1 now collects as soon as it opens (whatever sheet is showing), then every minute and when you come back to
+  the tab.
+- **Forms IN-1, SV-1 and CF-1** have their own reply box (one per file, kept in the file) and a list of people in
+  *Respondent pages*, with *Email everyone not sent yet* and *Remind everyone not back*, through the same email. A reply
+  is placed as their *Collect* places a code; one that does not fit is held, with *Place it anyway* or *Discard*; nothing
+  is placed twice; *Remove the collected replies from the site* empties the box. The email code is still there when the
+  box cannot be reached. A reply box address typed in IA-1 on this iPad is used by these forms too.
+- **The page people open from their email**: their name and role are filled and locked ("Answering as Ms. Lopez
+  (Teacher). Not you? change"), with what the form knows (months known, daily contact, settings); the student is shown as
+  first name and last initial; it ends at **Sent.**, with no code to copy and no email to send.
+- **With the Mail app** (no Google, or *Use the Mail app instead*): one email per person, opened one at a time ("Email 1
+  of 3: Ms. Lopez", *Next person (2 of 3)*); a person's rows are marked when their email is opened.
+
+**The answers straight back, for every student.** Each answer still goes, sealed on the person's phone or computer, to the
+reply box (`box.php`, *v21.65*); what is new is who collects it:
+
+- The open form collects by itself, as before.
+- **By itself**, for **every student kept on this iPad**, the case on screen or not: soon after the workstation opens,
+  every two hours while it is open, and when the iPad is back online (the website edition, with a signal; *Collect
+  replies* in Caseload and *Read every linked sheet* do it at once). Each student's form opens unseen, takes what came
+  back and places it exactly as its own Collect does (questionnaire answers into the instrument, staff phone entries into
+  Form DD-1's days), and the caseload's copy of the case is updated. Nothing is asked; what cannot be placed for certain
+  is held for you. A notice says what came in and for whom.
+- Today and the start screen name the replies held to check, and the questionnaires sent and not back by their date.
+- The caseload's copy is the one updated: when the case is next opened from the caseload, the forms have the answers;
+  *Save case* then puts them in the case file.
+
+Checked by `qa/v2186-test.js` (sending from the account, with Google's sign-in and Gmail simulated),
+`qa/v2186-collect-test.js` (a staff phone entry collected into a closed case, end to end with the reply box),
+`qa/v2186-q-test.js` (IA-1, IN-1, SV-1 and CF-1: grouping, the pages, collecting, the Mail app flow, Not now) and
+`qa/v2186-ia1-shell-test.js` (the whole path in the workstation: IA-1 sends through Gmail, the informant answers from the
+email's link, the workstation collects by itself into the closed case).
