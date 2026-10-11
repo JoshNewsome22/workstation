@@ -8777,3 +8777,27 @@ FBA report and the BIP left out.
 Checked by `qa/v2182-test.js` (the shell: the new facts, Today, the hand-over check, Ready to start, the summary),
 `qa/v2182-i-test.js` (TD-1), `qa/v2182-j-test.js` (PR-1, SV-1, CF-1), `qa/v2182-k-test.js` (FS-1, SI-1, DM-1, IN-1) and
 `qa/v2182-l-test.js` (ST-1, GB-1, HD-1, CT-1, DD-1).
+
+### v21.83: room for the form on the iPad, and a plan for every target
+
+- **The form's toolbar folds.** On a touch screen (or a window 1194 px wide or less), scrolling down a form folds its
+  pinned toolbar to a 44 px strip: the view buttons on one line (the open view kept in sight) and *Tools*, which unfolds it.
+  Scrolling up, reaching the top or tapping the strip brings it back; typing in a field folds it while the keyboard is up.
+  The content sits 120–180 px higher in IA-1, TD-1 and EA-1 (with the keyboard up in landscape, TD-1 shows about 164 px of
+  the form instead of 45). Nothing moves as it folds; never in print, never on a desktop with a mouse.
+- **The workstation's bar.** On a screen 1194 px wide or less, Save packet, Open packet, Case as spreadsheet, Diagnostics and
+  Finish PDF go into *More* (each runs the bar's own button); wider, they stay on the bar. The student's details fold to one
+  line when the first form opens, unless they are still being typed.
+- **Targets in this plan (Form TD-1).** Every reduction target of the case (TB-1's, and FS-1's where TB-1 lacks one), each
+  with its function (FS-1's for that target, else the plan's) and which parts of the plan address it: before it happens,
+  teaching the replacement, responding (a tick or a short note). Filled from the case while empty, editable, saved and
+  printed. A target nothing addresses is marked *Not addressed by the plan yet*, and one whose function differs from the
+  plan's *Function differs from the plan's*; the copy for the BIP and the final plan list every target with its
+  definition and function. Ready to start names a target the plan does not address yet.
+- **Results by target (Form PR-1).** A row per target: the baseline and current means, the school days in the phase, the
+  change, the decision rule (met, not met, too few days) and a decision for that target (fade, continue, modify,
+  reassess, suggested from the change and integrity); the overall decision stays. Closing a review keeps a line per target
+  in the log.
+
+Checked by `qa/v2183-test.js` (the bar and More), `qa/v2183-m-test.js` (TD-1 and PR-1) and `qa/v2183-n-test.js` (the fold in
+ten forms at both iPad widths, print unchanged).

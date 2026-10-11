@@ -6,7 +6,7 @@
 # tools/polish-one.py applies the shared polish layer and the writing help (tools/blocks/nbh-wording.js, put in by
 # tools/apply-polish.py). The link core goes in byte for byte (Form TE-1 carries the same file
 # through tools/blocks/patch-link.py), so the two forms cannot drift apart; the build stops unless the built form holds it
-# exactly once, unchanged, and the writing help once, current. The parts are copied to a folder of the build's own, so two
+# exactly once, unchanged, and the loader of the writing help once (v21.84: nbh-wording.js beside the forms, current). The parts are copied to a folder of the build's own, so two
 # builds at once cannot mix.
 # usage (from the repository root): sh tools/forms/TK-1/build.sh
 set -e
@@ -64,6 +64,8 @@ for f in ('nbh-tk1-narration.js','nbh-tk1-bus-narration.js'):
 assert len(doc.encode('utf-8'))<1900000, 'TK-1 is %d bytes: keep it under 1.9 MB (a host may cut a page of 2 MB or more short)' % len(doc.encode('utf-8'))
 print('the narration is beside TK-1 (nbh-tk1-narration.js); TK-1 is %d bytes' % len(doc.encode('utf-8')))
 W,R,C=(open('tools/blocks/'+f,encoding='utf-8',newline='').read() for f in ('nbh-wording.js','nbh-wording-rules.json','nbh-wording-config.json'))
-assert doc.count('\n<script id="nbh-wording">')==1 and doc.count(W)==1 and doc.count('window.nbhWordingRules=\n'+R+'\n;\nwindow.nbhWordingConfig=\n'+C+'\n;\n'+W+'</script>')==1, 'the writing help is not in the built TK-1 exactly once, current'
-print('the writing help (tools/blocks/nbh-wording.js, its rules and its config) is in the built TK-1 once, current')
+# v21.84 the form carries the loader; the writing help itself is NBH-Workstation/nbh-wording.js, written by polish-one.py
+WF=open('NBH-Workstation/nbh-wording.js',encoding='utf-8',newline='').read()
+assert doc.count('\n<script id="nbh-wording"')==1 and doc.count('\n<script id="nbh-wording" src="nbh-wording.js"></script>')==1 and W not in doc and WF.endswith('window.nbhWordingRules=\n'+R+'\n;\nwindow.nbhWordingConfig=\n'+C+'\n;\n'+W), 'the built TK-1 does not load the writing help once, or nbh-wording.js is not current'
+print('the built TK-1 loads the writing help once; nbh-wording.js (tools/blocks/nbh-wording.js, its rules and its config) is current')
 PY

@@ -5,7 +5,8 @@ release list: every one of those files with its length and SHA-256.
 The list is every file the workstation loads from its own folder, in this order: index.html; the 46 forms its FORMS
 list names; every file of the folder a page loads (respond.html and the 46 pages are scanned for src= and href= on
 script, link, img, iframe, source, video, audio, embed and object tags, url(...) in styles, and fetch('...') and
-loadScript('...') in scripts: the picture library nbh-pictos.js, the respondent pages' nbh-respond.js, the PDF tools
+loadScript('...') in scripts: the writing help nbh-wording.js and the letterhead nbh-logo.js (v21.84, every form loads
+each), the picture library nbh-pictos.js, the respondent pages' nbh-respond.js, the PDF tools
 pdf-lib.min.js and nbh-pdf-tools.js); respond.html; manifest.json, the icons it names and the apple-touch-icon index.html
 names. A link a person follows (<a href>) is not a file a page loads. Every one must be in the folder.
 
@@ -97,6 +98,19 @@ def check_page(name, s):
              % (name, s.count(SAVE_TAG), SAVE_TAG))
 
 
+# v21.84 the scripts every form loads from ONE file beside it (tools/blocks/patch-wording.py, tools/dedupe-logo.py) rather
+# than carrying a copy of its own: a form must hold the loader once and no inline copy, so that no release brings the 46
+# copies back (11.6 MB and 2.5 MB of the folder, re-downloaded by every device whenever one of them changed)
+SHARED = (('nbh-wording', 'nbh-wording.js', 'tools/blocks/patch-wording.py'), ('nbh-logo', 'nbh-logo.js', 'tools/dedupe-logo.py'))
+
+
+def check_form(name, s):
+    for sid, sfile, tool in SHARED:
+        tag = '<script id="%s" src="%s"></script>' % (sid, sfile)
+        if s.count(tag) != 1 or s.count('<script id="%s"' % sid) != 1:
+            fail('%s does not load %s once by %s (or still holds an inline copy): run python3 %s on it' % (name, sfile, tag, tool))
+
+
 def files_of(folder):
     idx = read(os.path.join(folder, 'index.html'))
     m = re.search(r'const FORMS=(\[[\s\S]*?\n\]);', idx)
@@ -114,6 +128,8 @@ def files_of(folder):
     for p in pages:
         s = read(os.path.join(folder, p))
         check_page(p, s)
+        if p in forms:
+            check_form(p, s)
         for x in loads(s):
             if x.endswith('.html') or x in out:
                 continue

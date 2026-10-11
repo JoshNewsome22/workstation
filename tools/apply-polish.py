@@ -11,6 +11,8 @@ tools/blocks/patch-wording.py makes from tools/blocks/nbh-wording.js, nbh-wordin
 nbh-wording-config.json (the Improve wording button and panel), put in or replaced the same way.
 This is the one place a rebuilt form gets it: tools/polish-one.py runs this after every rebuild of a
 form built from parts (tools/new-form.py, TK-1's build.sh), so no rebuild can leave it out.
+v21.84: what a form gets is the loader, <script id="nbh-wording" src="nbh-wording.js"></script>, and the
+writing help itself is written once, as nbh-wording.js in the folder (an inline copy is replaced by the loader).
 
 The bridge inside each form hands every <style> to the master print; the polish is screen-only
 and is kept out of the packet, so the one line that collects styles is taught to skip it.
@@ -62,7 +64,8 @@ def main(folder):
         s, _ = WORDING.put(s, fn, W)
         open(p, 'w', encoding='utf-8').write(s)
         done += 1
-    print(f'polished {done} forms in {folder}, each with the writing help')
+    WORDING.write_shared(folder, W)   # v21.84 the one copy the loaders load
+    print(f'polished {done} forms in {folder}, each with the writing help (its loader; {WORDING.FILE} beside them)')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

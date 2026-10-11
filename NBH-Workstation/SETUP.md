@@ -4703,6 +4703,9 @@ from 1,054 KB to 620 KB, and the 42 forms with the index from 20.6 MB
 to 14.6 MB. The one-file editions stay at 5.6 MB: their packing already
 compressed the repeated image to nothing, so the saving is in the
 folder editions and in what the browser parses per form.
+(v21.84: the script is one file beside the forms, `nbh-logo.js`, loaded by
+`<script id="nbh-logo" src="nbh-logo.js"></script>` in the same place in each
+form's head; see *v21.84: one copy of the shared scripts* below.)
 `tools/build-rps.py` now expects the logo in 43 places (once per form,
 once in the index). `$S/logo/dedupe.py` did it and is idempotent;
 `new-form.py` copies the script from the template's head, so a rebuilt
@@ -6787,6 +6790,9 @@ which sends nothing.
 the client, between the form's markup and its own script. It is put in by
 `tools/blocks/patch-wording.py`, and in a rebuilt parts form by
 `tools/apply-polish.py`. See `tools/README.md`.
+(v21.84: the 240 KB are one file beside the forms, `nbh-wording.js`, and each
+form carries only `<script id="nbh-wording" src="nbh-wording.js"></script>` in
+that place; see *v21.84: one copy of the shared scripts* below.)
 
 The button goes only on narrative boxes. These get none:
 
