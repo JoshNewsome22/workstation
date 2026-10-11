@@ -22,6 +22,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     }else ok(w+'x'+h+' wider: the buttons stay on the bar, no More',vis.save&&vis.xlsx&&vis.diag&&vis.pdf&&!vis.more,vis);
     /* the bar folds when the first form opens */
     await page.fill('#pClient','Mateo Rivera');await page.dispatchEvent('#pClient','input');await sleep(300);
+    /* still typing (the name field in focus): no fold */
+    await page.focus('#pClient');await page.evaluate(()=>openForm('TB-1'));await sleep(800);
+    const typing=await page.evaluate(()=>document.body.classList.contains('bar-folded'));
+    ok(w+'x'+h+' while the name is being typed, opening a form does not fold the details',!typing);
+    await page.evaluate(()=>{document.activeElement.blur();state.barTyped=0;state.barAuto=false;});
     const before=await page.evaluate(()=>document.body.classList.contains('bar-folded'));
     await page.evaluate(()=>openForm('IC-1'));await sleep(1500);
     const after=await page.evaluate(()=>document.body.classList.contains('bar-folded'));

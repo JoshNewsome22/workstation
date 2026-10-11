@@ -4726,7 +4726,10 @@ $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))ready
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!M.hidden){shut();$('#moreBtn').focus();}});
   window.addEventListener('resize',shut);}
 /* v21.83 the student's details fold to one line when the first form opens (they stay a tap away: Edit) */
-{const of0=openForm;openForm=function(){const r=of0.apply(this,arguments);try{if(!state.barAuto&&packet().client.trim())barAutoFold();}catch(e){}return r;};}
+/* not while the details are being typed: no field of theirs in focus, and nothing typed there for four seconds */
+document.addEventListener('input',e=>{if(e.target&&e.target.closest&&e.target.closest('.grp.det'))state.barTyped=Date.now();},true);
+{const of0=openForm;openForm=function(){const r=of0.apply(this,arguments);try{const a=document.activeElement;
+  if(!state.barAuto&&packet().client.trim()&&!(a&&a.closest&&a.closest('.grp.det'))&&Date.now()-(state.barTyped||0)>4000)barAutoFold();}catch(e){}return r;};}
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
