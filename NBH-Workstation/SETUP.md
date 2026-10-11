@@ -8847,3 +8847,6 @@ Checked by `qa/v2184-o-test.js` (the files, the loaders, the lists, the editions
 website and from a file, with no page error, the writing help started and finding wording, its button over a field and the
 letterhead filled; forms in the workstation, in their own tab, in both one-file editions and in the school edition), with
 `qa/pwa-test.js`, `qa/autosave-test.js`, `qa/wording-client-test.js` and `qa/wording-rollout-test.js`.
+
+*Also fixed in v21.84:* a one-file case file (written by Save case in the one-file edition) now carries the picture
+library's block as well, so the forms that use your pictures (VS-1, SM-1, TK-1, TV-1) have them when the case is opened.
