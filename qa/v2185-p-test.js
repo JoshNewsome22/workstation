@@ -122,9 +122,13 @@ const errsOf=log=>log.filter(x=>(x.type==='pageerror'||x.type==='error')&&!/ERR_
     c1.t&&c1.t.pa==='3'&&c1.t.el==='2'&&c1.t.rq.join()==='5,6'&&c1.t.ot==='50'&&c1.t.basis&&c1.t.basis.n===4&&c1.t.basis.s===2&&c1.t.ep.length===1&&/^From Ms\. A, Room 12’s phone\|true\|true\|0:0[12]$/.test(c1.t.ep[0])&&+c1.t.tn>0&&c1.cell==='3',c1);
   ok('18 who sent it is under Collected by (both), the assent and the setting where the day had none, the note after the day’s notes',c1.t&&c1.t.by==='Ms. A, Room 12; Mr. B, Para'&&c1.t.as==='agreed'&&c1.t.set==='Classroom'&&/Ms\. A, Room 12: Calm after the break \(simulated\)/.test(c1.t.notes),c1.t);
   ok('19 the entry sent later goes on its own day (yesterday): its count, a measured 0 for the targets watched with nothing tapped, by and assent',c1.y&&c1.y.pa==='4'&&c1.y.el==='0'&&c1.y.tn==='0'&&!c1.y.rq&&!c1.y.ot&&c1.y.by==='Ms. A, Room 12'&&c1.y.as==='agreed'&&c1.rows===2,c1.y);
-  ok('20 the links list the last entry and the number taken; the panel says what came',c1.links.length===2&&c1.links[0].split(c1.sd).length===3&&/2$/.test(c1.links[0].replace(/QR.*$/,''))&&/Collected from staff phones/.test(c1.line)&&c1.seen===3&&c1.got===3&&c1.held===0,{links:c1.links,line:c1.line,seen:c1.seen});
+  /* the phone sends again what it was sending when the page was reopened (it cannot know the first send arrived): the box can
+     then hold one copy more than there are entries; DD-1 takes the copy as the same entry (its id), so nothing is placed twice
+     (17, 19) and only the messages fetched (got) count it */
+  const X=c1.got-c1.seen;
+  ok('20 the links list the last entry and the number taken; the panel says what came',c1.links.length===2&&c1.links[0].split(c1.sd).length===3&&/2$/.test(c1.links[0].replace(/QR.*$/,''))&&/Collected from staff phones/.test(c1.line)&&c1.seen===3&&X>=0&&X<=1&&c1.held===0,{links:c1.links,line:c1.line,seen:c1.seen,got:c1.got});
   const c2=await dd.evaluate(async b=>{const before=JSON.stringify(S.rows);const r=await __ddStaff.collect(false);return {r,same:JSON.stringify(S.rows)===before,line:document.getElementById('stLine').textContent};},B);
-  ok('21 collecting again places nothing twice',c2.r&&c2.r.placed===0&&c2.r.fresh===0&&c2.r.all===3&&c2.same&&/Nothing new/.test(c2.line),c2);
+  ok('21 collecting again places nothing twice',c2.r&&c2.r.placed===0&&c2.r.fresh===0&&c2.r.all===3+X&&c2.same&&/Nothing new/.test(c2.line),c2);
   const f1=await dd.evaluate(()=>{const o=window.__nbhFactsOut();return o&&o.data&&o.data.staff;});
   ok('22 the facts carry data.staff: the links (code, who, made, last), the entries taken, the last day',f1&&f1.links.length===2&&f1.links[0].who==='Ms. A, Room 12'&&f1.links[0].made===T.today&&f1.links[0].last===T.today&&/^[A-Z0-9]{8}$/.test(f1.links[0].code)&&f1.entries===3&&f1.last===T.today&&f1.links[1].last===T.today,f1);
 
@@ -153,7 +157,7 @@ const errsOf=log=>log.filter(x=>(x.type==='pageerror'||x.type==='error')&&!/ERR_
 
   /* ================= Save data, a fresh form, Open ================= */
   const own=await dd.evaluate(()=>window.nbhBridge.ownSave());const F=JSON.parse(own);
-  ok('26 Save data carries the box (id, token, both keys, the site), the links, the entries taken and the record of them',F.staff&&F.staff.box.id===m1.box.id&&F.staff.box.token===m1.box.token&&F.staff.box.priv.d===m1.box.priv.d&&F.staff.box.site===BOXURL&&F.staff.links.length===2&&F.staff.links[1].off===true&&F.staff.seen.length===5&&F.staff.got.length===5&&F.staff.log.length===5,F.staff&&{links:F.staff.links,seen:F.staff.seen.length});
+  ok('26 Save data carries the box (id, token, both keys, the site), the links, the entries taken and the record of them',F.staff&&F.staff.box.id===m1.box.id&&F.staff.box.token===m1.box.token&&F.staff.box.priv.d===m1.box.priv.d&&F.staff.box.site===BOXURL&&F.staff.links.length===2&&F.staff.links[1].off===true&&F.staff.seen.length===5&&F.staff.got.length===5+X&&F.staff.log.length===5,F.staff&&{links:F.staff.links,seen:F.staff.seen.length});
   await dd.goto(W,{waitUntil:'load'});await sleep(1000);await dd.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}document.querySelectorAll('section[data-panel]').forEach(s=>s.classList.toggle('hidden',s.dataset.panel!=='data'));});
   const fresh=await dd.evaluate(()=>({staff:S.staff===undefined,links:document.querySelectorAll('#stLinks tbody tr').length}));
   await dd.evaluate(t=>window.nbhBridge.ownOpen(t),own);await sleep(2600);
@@ -170,7 +174,7 @@ const errsOf=log=>log.filter(x=>(x.type==='pageerror'||x.type==='error')&&!/ERR_
   await dd.evaluate(()=>document.getElementById('stPurge').click());await sleep(900);
   const pr=await dd.evaluate(b=>({line:document.getElementById('stLine').textContent,el:S.rows.find(x=>x.date===localISO(new Date())).values[b['Elopement']],dis:document.getElementById('stPurge').disabled}),B);
   const left=fs.readdirSync(data+'/'+m1.box.id).filter(f=>/^r-/.test(f));
-  ok('29 Remove the collected entries from the site: the site holds none, the record keeps them',left.length===0&&/6 entries removed from the site; they stay in this file/.test(pr.line)&&pr.el==='5'&&pr.dis,{left,pr});
+  ok('29 Remove the collected entries from the site: the site holds none, the record keeps them',left.length===0&&new RegExp((6+X)+' entries removed from the site; they stay in this file').test(pr.line)&&pr.el==='5'&&pr.dis,{left,pr});
   /* the hook on a form with no links, and with the box out of reach */
   const bl=await br.newPage();const blog=[];wire(bl,blog);await bl.goto(W,{waitUntil:'load'});await sleep(800);
   const h0=await bl.evaluate(()=>window.__nbhStaffCollect());
