@@ -9043,7 +9043,7 @@ data*. A photo, a picture or another form's file read in no longer clears the un
 - The master print: a form's page a few lines taller than the packet's page (the packet's margins are larger, for the
   running head and foot) is scaled to fit it instead of running onto a sheet of its own (Form OB-1's observation sheets,
   Form DM-1, Form TB-1); a form's empty page (a view with nothing to print, such as Form OB-1's observation log) is left
-  off the paper, where it gave a blank sheet. The packet's cover note lists what was scaled.
+  off the paper, where it gave a blank sheet.
 
 **The checks.** `qa/sweep-test.js` (the sweep; runnable in parts with ONLY, PART, STEPS and JOBS),
 `qa/student-journey-test.js` (the simulated student, about eight minutes) and `qa/guard-open-test.js` (the leave warning
