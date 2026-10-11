@@ -593,7 +593,13 @@ S.rt = async br => {
       r.dirtyAfterSave = await page.evaluate(() => nbhGuard.isDirty());
       const p2 = await ctx.newPage(); wire(p2, log);
       await p2.goto(BASE + '/' + ED + '/' + f.file); await sleep(1200);
-      await (await p2.$('#fileIn,#fileImport,#file-input')).setInputFiles(fp); await sleep(2500);
+      /* v21.87 opened as a person opens it: Open data, then the file picker (the guard counts a file as opened only after
+         Open data; a photo or another form's file chosen is a change) */
+      { const chP = p2.waitForEvent('filechooser', { timeout: 10000 }).catch(() => null);
+        const has = await p2.evaluate(() => { const b = document.querySelector('#loadBtn,#btnLoad,#up-json') || [...document.querySelectorAll('button')].find(x => /^\s*open data\s*$/i.test(x.textContent)); if (!b) return false; b.click(); return true; });
+        let ch = null; if (has) { for (let i = 0; i < 10 && !ch; i++) { await p2.evaluate(() => { const b = [...document.querySelectorAll('dialog[open] button')].find(b => /ok|open|load|yes|replace|continue/i.test(b.textContent)); if (b) b.click(); }).catch(() => {}); ch = await Promise.race([chP, sleep(300).then(() => null)]); } if (!ch) ch = await chP; }
+        if (ch) await ch.setFiles(fp); else await (await p2.$('#fileIn,#fileImport,#file-input')).setInputFiles(fp);
+        await sleep(2500); }
       await p2.evaluate(() => { const b = [...document.querySelectorAll('dialog[open] button')].find(b => /ok|open|load|yes|replace|continue/i.test(b.textContent)); if (b) b.click(); }).catch(() => {});
       await sleep(800);
       const B = await ownText(p2);
