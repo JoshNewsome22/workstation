@@ -1,32 +1,43 @@
 #!/usr/bin/env python3
-"""v21.43 Put the writing help into the forms named on the command line, as ONE <script id="nbh-wording"> that holds,
-each copied byte for byte: the checker's rules (tools/blocks/nbh-wording-rules.json), the relay's address
-(tools/blocks/nbh-wording-config.json) and the client (tools/blocks/nbh-wording.js: the Improve wording button and
-panel, the offline checker and the Rewrite with Claude client). Like patch-link.py it REPLACES an existing copy every
-time, so run it again whenever one of the three files changes (a new rule, the relay going live). A new copy goes
-before the form's first <script> after </main>; a form with no </main> (OB-1 is a run of .sheet pages) takes it before
-its first <script> after <body>, which is the same place: after the markup, before the form's own scripts.
+"""v21.43 Put the writing help into the forms named on the command line. It holds, each copied byte for byte: the checker's
+rules (tools/blocks/nbh-wording-rules.json), the relay's address (tools/blocks/nbh-wording-config.json) and the client
+(tools/blocks/nbh-wording.js: the Improve wording button and panel, the offline checker and the Rewrite with Claude client).
 
-Every form carries it. tools/apply-polish.py puts it in (load() and put() below) with the polish layer, so
-tools/polish-one.py, which runs after every rebuild of a form built from parts (tools/new-form.py, TK-1's build.sh),
-puts it back into a rebuilt form; tools/build-single.py refuses a form that does not hold exactly one copy. To refresh
-all 44 after a change to one of the three files: python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
+v21.84: the writing help is ONE file beside the forms, nbh-wording.js (in the folder of each form named), and each form
+carries only its loader, <script id="nbh-wording" src="nbh-wording.js"></script>: a classic script, synchronous, in the
+place the inline copy held, so it runs at the same moment as before. (46 inline copies were 11.6 MB of the folder, and a
+change to one rule rewrote every form.) The one-file edition puts it back inline in every form (tools/build-single.py),
+so a form there is what it was. An inline copy left in a form (an older release) is replaced by the loader.
+
+Like patch-link.py it REPLACES an existing copy every time, so run it again whenever one of the three files changes (a
+new rule, the relay going live): it rewrites nbh-wording.js, and a form only when its loader is missing or old. A new
+loader goes before the form's first <script> after </main>; a form with no </main> (OB-1 is a run of .sheet pages)
+takes it before its first <script> after <body>, which is the same place: after the markup, before the form's own scripts.
+
+Every form carries it. tools/apply-polish.py puts it in (load(), put() and write_shared() below) with the polish layer,
+so tools/polish-one.py, which runs after every rebuild of a form built from parts (tools/new-form.py, TK-1's build.sh),
+puts the loader back into a rebuilt form; tools/build-single.py refuses a form that does not hold exactly one loader,
+and tools/pwa-sw.py a form with an inline copy. To refresh all 46 after a change to one of the three files:
+python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
 
 The sources are checked first and nothing is written if one is wrong: none may contain "</script" or "<!--" (either
-would end or confuse the script element), the practice's name (the school edition build refuses any copy of it) or a
-model ID (only the relay carries one); the rules must have the documented shape, and every rule's pattern must compile
-in JavaScript and run quickly on long text (checked with node when it is installed); the relay address must be empty or
-an https URL. Files are read and written without newline translation, so the copy is byte for byte on any system.
+would end or confuse the script element when the one-file edition puts it back inline), the practice's name (the school
+edition build refuses any copy of it) or a model ID (only the relay carries one); the rules must have the documented
+shape, and every rule's pattern must compile in JavaScript and run quickly on long text (checked with node when it is
+installed); the relay address must be empty or an https URL. Files are read and written without newline translation, so
+the copy is byte for byte on any system.
 
 usage: python3 tools/blocks/patch-wording.py [--check] [--rules FILE] [--config FILE] FORM.html [FORM.html ...]
-  --check   change nothing; exit 1 unless every form named already carries the current copy
+  --check   change nothing; exit 1 unless every form named already carries the loader and nbh-wording.js is current
   --rules / --config   read another rules or config file (a test fixture) instead of the ones in tools/blocks/"""
 import json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 BLOCKS = os.path.join(ROOT, 'tools', 'blocks')
 OPEN, CLOSE = '<script id="nbh-wording">', '</script>'
-TAG = '\n' + OPEN          # the element itself starts a line; the words in a comment do not count
+FILE = 'nbh-wording.js'    # v21.84 the one copy, beside the forms
+LOADER = '<script id="nbh-wording" src="' + FILE + '"></script>'
+TAG = '\n<script id="nbh-wording"'   # the element (an inline copy or the loader) starts a line; words in a comment do not count
 HEAD = ('/* nbh-wording (v21.43): the writing help for the narrative fields, its wording rules and the relay address.\n'
         '   Written by tools/blocks/patch-wording.py from tools/blocks/nbh-wording-rules.json, nbh-wording-config.json and\n'
         '   nbh-wording.js, each copied byte for byte; change those files and run it again rather than editing this copy. */\n')
@@ -188,12 +199,16 @@ def load(rules_path=None, config_path=None):
     if 'window.nbhWording' not in client or 'nbhWordingRules' not in client:
         fail('nbh-wording.js does not look like the client')
     node_check(rules_path)
-    block = (OPEN + HEAD + 'window.nbhWordingRules=\n' + rules + '\n;\nwindow.nbhWordingConfig=\n' + config + '\n;\n' + client + CLOSE)
-    return {'block': block, 'client': client, 'rules': d, 'relay': json.loads(config)['relay']}
+    body = HEAD + 'window.nbhWordingRules=\n' + rules + '\n;\nwindow.nbhWordingConfig=\n' + config + '\n;\n' + client
+    # v21.84 body: the text of nbh-wording.js; block: what a form carries (the loader); inline: the block as it was
+    # inside each form before, which the one-file edition puts back (tools/build-single.py)
+    return {'block': LOADER, 'body': body, 'inline': OPEN + body + CLOSE, 'client': client, 'rules': d,
+            'relay': json.loads(config)['relay']}
 
 
 def put(s, rel, W):
-    """The text of form "rel" with the current block in it, once: (text, 'inserted' | 'replaced' | 'already current')."""
+    """The text of form "rel" with the loader in it, once: (text, 'inserted' | 'replaced' | 'already current').
+    v21.84 an inline copy (an older release) or another loader is replaced by the loader."""
     base = os.path.basename(rel)
     if not base.endswith('.html') or base in ('index.html', 'respond.html'):
         fail(rel + ': not a form (the shell and the respondent page do not take the panel)')
@@ -210,17 +225,36 @@ def put(s, rel, W):
         a = insert_at(s, rel)
         out = s[:a] + block + '\n\n' + s[a:]
         did = 'inserted'
-    if not (out.count(TAG) == 1 and out.count(block) == 1 and out.count(client) == 1):
-        fail(rel + ': the result would not hold exactly one copy')
+    if not (out.count(TAG) == 1 and out.count(block) == 1 and client not in out and 'window.nbhWordingRules=' not in out):
+        fail(rel + ': the result would not hold exactly one loader and no inline copy')
     return out, did
+
+
+def write_shared(folder, W, check=False):
+    """v21.84 nbh-wording.js in folder: 'written' | 'already current' (with check, 'STALE' instead of writing)."""
+    path = os.path.join(folder, FILE)
+    old = None
+    if os.path.isfile(path):
+        with open(path, encoding='utf-8', newline='') as f:
+            old = f.read()
+    if old == W['body']:
+        return 'already current'
+    if check:
+        return 'STALE'
+    with open(path, 'w', encoding='utf-8', newline='') as f:
+        f.write(W['body'])
+    return 'written'
 
 
 def main():
     opt = args(sys.argv[1:])
     W = load(opt['rules'], opt['config'])
     stale = 0
+    folders = []
     for rel in opt['forms']:
         path = os.path.abspath(rel)
+        if os.path.dirname(path) not in folders:
+            folders.append(os.path.dirname(path))
         out, did = put(read(path, 'the form'), rel, W)
         if opt['check']:
             if did != 'already current':
@@ -231,8 +265,13 @@ def main():
             with open(path, 'w', encoding='utf-8', newline='') as f:
                 f.write(out)
         print(did, rel)
-    print('%d form%s, %d rules (version %s), relay %s' % (len(opt['forms']), '' if len(opt['forms']) == 1 else 's',
-          len(W['rules']['rules']), W['rules']['version'], W['relay'] or 'not set'))
+    for d in folders:   # v21.84 the one copy, beside the forms
+        did = write_shared(d, W, opt['check'])
+        if did == 'STALE':
+            stale += 1
+        print(did, os.path.relpath(os.path.join(d, FILE)))
+    print('%d form%s, %d rules (version %s), relay %s; %s %d KB' % (len(opt['forms']), '' if len(opt['forms']) == 1 else 's',
+          len(W['rules']['rules']), W['rules']['version'], W['relay'] or 'not set', FILE, len(W['body'].encode('utf-8')) // 1024))
     if stale:
         sys.exit(1)
 

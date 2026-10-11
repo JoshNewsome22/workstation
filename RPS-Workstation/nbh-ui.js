@@ -1,0 +1,291 @@
+
+/* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
+   Until now every notice was the browser's alert() and every question its confirm(): unstyled, "this site
+   says", and on an iPad a stop to the whole screen. This block gives each form:
+     nbhUI.toast(text, {kind:'ok'|'warn'|'', ms})   a short message at the foot of the window
+     nbhUI.alert(text)                              a toast for a short message, a styled notice for a long one
+     nbhUI.confirm(text, {ok, cancel, danger})      a styled question; resolves true or false
+   window.alert is routed through nbhUI.alert, so existing calls change on their own. window.confirm stays
+   the browser's, because a synchronous answer cannot be styled; the forms' own code calls
+   nbhUI.confirm instead (await it). A test that replaces window.confirm with its own function is
+   honoured: nbhUI.confirm then returns that function's answer at once, so checks that auto-accept keep
+   working. The block also marks each view button with a dot (empty, partly filled, filled) from the
+   fields that view shows, and grows the small controls on a touch screen (the CSS above). */
+(function(){
+  var U = {}, nativeConfirm = window.confirm, nativeAlert = window.alert;
+  function q(s){ return document.querySelector(s); }
+  function host(){ var h = q('#nbhToasts'); if (!h) { h = document.createElement('div'); h.id = 'nbhToasts'; h.setAttribute('role', 'status'); h.setAttribute('aria-live', 'polite'); document.body.appendChild(h); } return h; }
+  U.toast = function(text, opt){
+    if (window.__nbhSilent) return null;   /* v21.36: the shell reads a CSV without the form's messages */
+    opt = opt || {}; var h = host(), t = document.createElement('div');
+    t.className = 'nbh-toast' + (opt.kind ? ' ' + opt.kind : '');
+    var s = document.createElement('span'); s.textContent = String(text); t.appendChild(s);
+    var x = document.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Dismiss'); x.innerHTML = '&times;'; t.appendChild(x);
+    var gone = function(){ if (t.parentNode) t.parentNode.removeChild(t); };
+    x.addEventListener('click', gone);
+    h.appendChild(t);
+    while (h.children.length > 3) h.removeChild(h.firstChild);
+    setTimeout(gone, opt.ms || Math.min(12000, 3500 + String(text).length * 35));
+    return t;
+  };
+  function dlg(){
+    var d = q('#nbhUiDlg');
+    if (d) return d;
+    d = document.createElement('dialog'); d.id = 'nbhUiDlg'; d.className = 'noprint'; d.setAttribute('aria-labelledby', 'nbhUiH'); d.setAttribute('aria-describedby', 'nbhUiB');
+    d.innerHTML = '<div class="u-h" id="nbhUiH"></div><div class="u-b" id="nbhUiB"></div><div class="u-f" id="nbhUiF"></div>';
+    document.body.appendChild(d);
+    return d;
+  }
+  function split(text){
+    var s = String(text == null ? '' : text).trim(), i = s.indexOf('\n');
+    var first = i >= 0 ? s.slice(0, i).trim() : s, rest = i >= 0 ? s.slice(i + 1).trim() : '';
+    if (first.length > 120 && i < 0) { var j = first.indexOf('. '); if (j > 20 && j < 110) { rest = first.slice(j + 2); first = first.slice(0, j + 1); } }
+    return { head: first, body: rest };
+  }
+  function ask(text, opt, question){
+    opt = opt || {};
+    return new Promise(function(res){
+      var d = dlg(), p = split(text);
+      q('#nbhUiH').textContent = p.head; q('#nbhUiB').textContent = p.body; q('#nbhUiB').style.display = p.body ? '' : 'none';
+      var f = q('#nbhUiF'); f.innerHTML = '';
+      var done = function(v){ try { d.close(); } catch (e) {} res(v); };
+      if (question) { var c = document.createElement('button'); c.type = 'button'; c.textContent = opt.cancel || 'Cancel'; c.addEventListener('click', function(){ done(false); }); f.appendChild(c); }
+      var ok = document.createElement('button'); ok.type = 'button'; ok.className = opt.danger ? 'danger' : 'primary'; ok.textContent = opt.ok || (question ? 'OK' : 'OK');
+      ok.addEventListener('click', function(){ done(true); }); f.appendChild(ok);
+      d.oncancel = function(ev){ ev.preventDefault(); done(false); };
+      if (d.showModal) d.showModal(); else d.setAttribute('open', '');
+      ok.focus();
+    });
+  }
+  U.alert = function(text){
+    if (window.__nbhSilent) return Promise.resolve();
+    var s = String(text == null ? '' : text);
+    if (s.length <= 160 && s.indexOf('\n') < 0) { U.toast(s); return Promise.resolve(); }
+    return ask(s, { ok: 'OK' }, false);
+  };
+  U.confirm = function(text, opt){
+    if (window.confirm !== nativeConfirm) { var v; try { v = !!window.confirm(String(text)); } catch (e) { v = false; } return Promise.resolve(v); }
+    return ask(text, opt || {}, true);
+  };
+  U.native = { alert: nativeAlert, confirm: nativeConfirm };
+  window.alert = function(m){ U.alert(m); };
+
+  /* ---- view progress ---- */
+  var MAP = null, timer = null;
+  function fields(root){
+    var out = [], list = root.querySelectorAll('input,select,textarea');
+    for (var i = 0; i < list.length; i++) { var e = list[i]; if (e.type === 'file' || e.type === 'hidden' || e.type === 'button' || e.type === 'submit' || e.closest('.toolbar,#nbhCaseDlg,#nbhUiDlg,.nbh-pagenav,.obr')) continue; out.push(e); }
+    return out;
+  }
+  function vis(e){ return !!(e.offsetParent || (e.getClientRects && e.getClientRects().length)); }
+  function buildMap(){
+    var btns = Array.prototype.slice.call(document.querySelectorAll('#viewSeg button[data-view]'));
+    if (!btns.length) return null;
+    var m = {}, keys = btns.map(function(b){ return b.dataset.view; });
+    var direct = keys.every(function(k){ return document.querySelector('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]'); });
+    if (direct) {
+      keys.forEach(function(k){ var out = []; document.querySelectorAll('section.only-' + k + ',#panel-' + k + ',[data-panel="' + k + '"]').forEach(function(s){ out = out.concat(fields(s)); }); m[k] = out; });
+      return m;
+    }
+    /* measure: each view's class on the body, in turn, and the fields it shows; fields shown by every view are shared and left out */
+    var body = document.body, was = body.className, seen = {};
+    keys.forEach(function(k){
+      var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + k); body.className = cls.join(' ');
+      var out = fields(document).filter(vis);
+      out.forEach(function(e){ seen[e.__nbhId || (e.__nbhId = Math.random().toString(36).slice(2))] = (seen[e.__nbhId] || 0) + 1; });
+      m[k] = out;
+    });
+    body.className = was;
+    keys.forEach(function(k){ m[k] = m[k].filter(function(e){ return seen[e.__nbhId] < keys.length; }); });
+    return m;
+  }
+  function filled(e){ return (e.type === 'checkbox' || e.type === 'radio') ? e.checked : !!String(e.value || '').trim(); }
+  U.progress = function(){
+    /* (v21.43) a form that draws its rows again (the same number of fields, so the count below does not change) leaves
+       the old ones out of the page: the map is made again, or the dots would count only what was not redrawn */
+    if (MAP && Object.keys(MAP).some(function(k){ return MAP[k].some(function(e){ return !e.isConnected; }); })) MAP = null;
+    if (!MAP) MAP = buildMap();
+    if (!MAP) return null;
+    var out = {}, own = typeof window.__nbhViewFill === 'function' ? window.__nbhViewFill : null;
+    Object.keys(MAP).forEach(function(k){
+      var list = MAP[k].filter(function(e){ return e.isConnected; }), n = 0;
+      list.forEach(function(e){ if (filled(e)) n++; });
+      /* a form can count a view itself (Form TK-1: a card with a picture is filled; its label is optional) */
+      var o = null; if (own) { try { o = own(k); } catch (e) { o = null; } }
+      if (o && typeof o.total === 'number' && typeof o.filled === 'number') { n = o.filled; list = { length: o.total }; }
+      out[k] = { filled: n, total: list.length };
+      var b = document.querySelector('#viewSeg button[data-view="' + k + '"]');
+      if (b) {
+        var st = !list.length ? 'none' : n === 0 ? 'empty' : n >= Math.max(1, Math.round(list.length * 0.8)) ? 'done' : 'part';
+        if (b.dataset.nbhFill !== st) b.dataset.nbhFill = st;
+        var tip = list.length ? n + ' of ' + list.length + ' fields filled' : '';
+        if (b.title !== tip) b.title = tip;
+      }
+    });
+    return out;
+  };
+  U.remap = function(){ MAP = null; U.progress(); };
+  function soon(ms){ clearTimeout(timer); timer = setTimeout(function(){ try { U.progress(); } catch (e) {} }, ms || 400); }
+  document.addEventListener('input', function(){ soon(500); }, true);
+  document.addEventListener('change', function(){ soon(300); }, true);
+  var remapTimer = null, lastCount = -1;
+  function maybeRemap(){
+    clearTimeout(remapTimer);
+    remapTimer = setTimeout(function(){ var n = document.querySelectorAll('input,select,textarea').length; if (n !== lastCount) { lastCount = n; MAP = null; } try { U.progress(); } catch (e) {} }, 900);
+  }
+  try { new MutationObserver(maybeRemap).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  window.addEventListener('load', function(){ setTimeout(function(){ try { lastCount = document.querySelectorAll('input,select,textarea').length; U.progress(); } catch (e) {} }, 400); });
+  /* v21.78 on a touch screen a table cell holding one checkbox or radio (and nothing else to press) is its target: a tap
+     anywhere in the cell ticks it, as if the box were the size of the cell */
+  try { if (window.matchMedia && matchMedia('(pointer:coarse)').matches) document.addEventListener('click', function(e){
+    var t = e.target; if (!t || !t.closest || t.closest('input,label,button,select,textarea,a,summary')) return;
+    var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
+    if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
+  }, false); } catch (e) {}
+  /* v21.81 iPad in portrait: mark the elements whose own words the form sets under 12 px (not drawings, not fields, not a
+     size a script set on the element, not the walkthrough's drawn stage) so the screen-only rule above shows them at
+     13 px. A marked parent can bring an em-sized child up, so it looks again (three rounds at most); rows the form draws
+     later are looked at when added. All the sizes are read before any mark is written, to keep it quick. A data
+     attribute, so a form setting className keeps the mark. */
+  try { if (window.matchMedia) (function(){
+    var mq = matchMedia('screen and (max-width:834px)'), HTML = 'http://www.w3.org/1999/xhtml', SKIP = /^(SCRIPT|STYLE|INPUT|SELECT|TEXTAREA|OPTION|TEMPLATE|NOSCRIPT)$/, STAGE = '#wkStage,.wk-stage', pend = [], timer = 0;
+    function words(e){ for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true; return false; }
+    function scan(roots){
+      if (!mq.matches) return;
+      for (var round = 0; round < 3; round++) {
+        var pick = [];
+        roots.forEach(function(r){
+          if (!r || r.nodeType !== 1 || !r.isConnected) return;
+          var list = [r].concat(Array.prototype.slice.call(r.getElementsByTagName('*')));
+          for (var i = 0; i < list.length; i++) { var e = list[i];
+            if (e.namespaceURI !== HTML || SKIP.test(e.tagName) || e.hasAttribute('data-nbh-fs') || (e.style && e.style.fontSize) || !words(e)) continue;
+            var fs = parseFloat(getComputedStyle(e).fontSize); if (fs > 0 && fs < 11.95 && !e.closest(STAGE)) pick.push(e); }
+        });
+        if (!pick.length) break;
+        pick.forEach(function(e){ e.setAttribute('data-nbh-fs', ''); });
+      }
+    }
+    function all(){ if (document.body) scan([document.body]); }
+    function later(){ timer = 0; var r = pend; pend = []; try { var set = new Set(r); scan(r.filter(function(n){ for (var p = n.parentNode; p; p = p.parentNode) if (set.has(p)) return false; return true; })); } catch (e) {} }
+    try { new MutationObserver(function(recs){
+      if (!mq.matches) return;
+      recs.forEach(function(m){ for (var i = 0; i < m.addedNodes.length; i++) if (m.addedNodes[i].nodeType === 1) pend.push(m.addedNodes[i]); });
+      if (pend.length && !timer) timer = setTimeout(later, 500);
+    }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+    if (mq.addEventListener) mq.addEventListener('change', all); else if (mq.addListener) mq.addListener(all);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', all); else all();
+    window.addEventListener('load', function(){ setTimeout(all, 300); });
+  })(); } catch (e) {}
+  /* v21.83 the pinned toolbar folds on an iPad. On a touch screen, or in a window 1194 px wide or less, a swipe down the form
+     (more than 40 px) folds the toolbar to its view buttons on one line plus a "Tools" button (the CSS above, html.nbh-fold);
+     a swipe up, the top of the form, a tap on the strip or on Tools unfold it. A tap in a text field, text area or list on a
+     touch screen folds it while the keyboard is up, and leaving the field unfolds it. Only a person's own swipe, wheel or
+     key scroll folds it, and only a tap focuses into the fold (a script's scroll or focus does not), so nothing a script
+     clicks in the toolbar is ever hidden from it. The height the bar gives up is added below it, so the page does not
+     move; a fold waits until the form is far enough down for that space to be out of sight (a field tapped near the top
+     folds the bar once the page has come up under it, as the keyboard opens or the user scrolls). Another pinned bar
+     sitting under the toolbar (MT-1's timer) moves up with it. Printing unfolds it; the fold rules are screen only. On a
+     desktop with a mouse in a window wider than 1194 px (the workstation's window, whatever the form's frame) it never folds. */
+  try { if (window.matchMedia) (function(){
+    var R = document.documentElement, mq = matchMedia('(pointer:coarse), (max-width:1194px)'), touch = matchMedia('(pointer:coarse)');
+    var FIELD = 'textarea,select,input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset]):not([type=range]):not([type=color]):not([type=file]):not([type=hidden]):not([type=image]),[contenteditable=""],[contenteditable="true"]';
+    var tb = null, seg = null, btn = null, st = 0, T = 0, D = 0, S = 0, need = 0, lastY = 0, acc = 0, gest = 0, tapT = 0, pend = 0, raf = 0, ut = 0, W = window.innerWidth, moved = [];
+    /* the window's width, not the form's frame: a form in the workstation on a wide desktop sits in a narrower frame */
+    function wide(){ var w = window.innerWidth; try { if (window.top !== window) w = Math.max(w, window.top.innerWidth || 0); } catch (e) { w = Math.max(w, window.outerWidth || 0); } return w; }
+    function on(){ return !window.__nbhNoFold && (touch.matches || (mq.matches && wide() <= 1194)); }
+    function field(e){ return !!(e && e.nodeType === 1 && e.matches && e.matches(FIELD) && !e.closest('.toolbar') && !e.disabled && !e.readOnly); }
+    function find(){
+      if (tb && tb.isConnected && seg && seg.isConnected && btn && btn.isConnected) return tb;
+      tb = null; seg = document.getElementById('viewSeg') || document.querySelector('.toolbar [role="tablist"],.nbh-toolbar [role="tablist"]');
+      var t = seg && seg.closest('.toolbar'); if (!t) return null;
+      btn = document.getElementById('nbhFoldBtn');
+      if (!btn) {
+        btn = document.createElement('button'); btn.type = 'button'; btn.id = 'nbhFoldBtn'; btn.className = 'noprint'; btn.textContent = 'Tools';
+        btn.title = 'Show the whole toolbar'; btn.setAttribute('aria-expanded', 'true');
+        btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(true); });
+        t.addEventListener('click', function(ev){ if (st && !ev.target.closest('button,a,input,select,textarea,label,[role="tab"]')) open(true); });
+      }
+      if (btn.parentNode !== t) t.appendChild(btn);
+      return tb = t;
+    }
+    function mark(){ seg.classList.add('nbh-fseg'); for (var e = seg.parentElement; e && e !== tb; e = e.parentElement) e.classList.add('nbh-fk'); }
+    function nextIn(t){ for (var e = t.nextElementSibling; e; e = e.nextElementSibling) { var c = getComputedStyle(e); if (c.display !== 'none' && (c.position === 'static' || c.position === 'relative')) return e; } return null; }
+    function under(t, full){
+      /* other pinned bars whose top is the toolbar's full height */
+      var out = [], all = document.body.getElementsByTagName('*');
+      for (var i = 0; i < all.length; i++) { var e = all[i]; if (e === t || t.contains(e)) continue; var c = getComputedStyle(e);
+        if (c.position === 'sticky' && Math.abs(parseFloat(c.top) - full) <= 2) out.push(e); }
+      return out;
+    }
+    function fold(why){
+      var t = find(); if (!t || st || !on()) return false;
+      var cs = getComputedStyle(t), pos = cs.position; if (pos !== 'sticky' && pos !== 'fixed') return false;
+      var y = window.scrollY || 0, full = t.offsetHeight, mb0 = parseFloat(cs.marginBottom) || 0;
+      S = parseFloat(cs.top) || 0;
+      if (pos === 'sticky') { var sp = t.style.position; t.style.position = 'relative'; T = t.getBoundingClientRect().top + y; t.style.position = sp; }
+      /* a page too short to scroll the bar's spare height out of sight: a field tapped there folds the bar at once and the
+         page comes up to the strip (more of the form above the keyboard); elsewhere a fold waits until it is out of sight */
+      var my = Math.max(0, (document.scrollingElement || R).scrollHeight - window.innerHeight), shortP = why === 'focus' && pos === 'sticky' && need && my + S < T + need;
+      if (pos === 'sticky' && need && y + S < T + need && !shortP) { if (why === 'focus') pend = 1; return false; }
+      var nx = pos === 'sticky' ? nextIn(t) : null, n0 = nx ? nx.getBoundingClientRect().top + y : 0, bars = pos === 'sticky' ? under(t, full) : [];
+      mark(); R.classList.add('nbh-fold');
+      var h = t.offsetHeight; D = full - h; need = D;
+      shortP = why === 'focus' && pos === 'sticky' && my + S < T + D;
+      if (D < 8 || (pos === 'sticky' && y + S < T + D && !shortP)) { R.classList.remove('nbh-fold'); if (why === 'focus' && D >= 8) pend = 1; return false; }
+      if (pos === 'sticky') {
+        /* the space given up stays below the bar (out of sight above the screen), so the page under the finger stays put;
+           measured on the page, not the screen (Safari does not hold the scroll still when the page above it changes),
+           and corrected for a margin the next block shared with the bar */
+        var keep = shortP ? Math.max(0, Math.min(D, y + S - T)) : D, want = n0 - (D - keep), g = mb0 + keep;
+        R.style.setProperty('--nbh-fold-gap', g + 'px');
+        for (var i = 0; nx && i < 2; i++) { var d = nx.getBoundingClientRect().top + (window.scrollY || 0) - want; if (Math.abs(d) < 0.5) break; g = Math.max(0, g - d); R.style.setProperty('--nbh-fold-gap', g + 'px'); }
+      }
+      moved = bars.map(function(e){ var w = e.style.getPropertyValue('top'), p = e.style.getPropertyPriority('top'); e.style.setProperty('top', (S + h) + 'px', 'important'); return [e, w, p]; });
+      R.style.setProperty('--nbh-fold-d', D + 'px');
+      st = why === 'focus' ? 2 : 1; acc = 0; pend = 0; btn.setAttribute('aria-expanded', 'false');
+      /* the view that is open stays in sight on the strip */
+      var a = seg.querySelector('[aria-pressed="true"],[aria-selected="true"],.active,.on');
+      if (a && seg.scrollWidth > seg.clientWidth) seg.scrollLeft = Math.max(0, a.offsetLeft - seg.offsetLeft - (seg.clientWidth - a.offsetWidth) / 2);
+      return true;
+    }
+    function open(manual){
+      if (!st) return; st = 0; acc = 0;
+      R.classList.remove('nbh-fold'); R.style.removeProperty('--nbh-fold-gap');
+      moved.forEach(function(m){ if (m[1]) m[0].style.setProperty('top', m[1], m[2]); else m[0].style.removeProperty('top'); }); moved = [];
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      if (tb && tb.isConnected) { R.classList.remove('nbh-unfolding'); void tb.offsetWidth; R.classList.add('nbh-unfolding'); clearTimeout(ut); ut = setTimeout(function(){ R.classList.remove('nbh-unfolding'); }, 260); }
+      if (manual && tb) { var f = tb.querySelector('button:not(#nbhFoldBtn):not([disabled])'); if (manual === true && btn === document.activeElement && f) try { f.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    function tick(){
+      raf = 0; var y = window.scrollY || 0, dy = y - lastY; lastY = y;
+      if (!on()) { if (st) open(); return; }
+      if (st === 2) return;
+      if (pend) { if (field(document.activeElement) && touch.matches) { if (y + S >= T + need) fold('focus'); } else pend = 0; return; }
+      if (st === 1) {
+        if (y + S < T + D + 1) { open(); return; }
+        acc = dy < 0 ? Math.min(acc, 0) + dy : 0;
+        if (acc < -30) open();
+        return;
+      }
+      acc = dy > 0 ? Math.max(acc, 0) + dy : 0;
+      if (acc > 40 && Date.now() - gest < 1500) fold('scroll');
+    }
+    window.addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+    var now = function(){ gest = Date.now(); };
+    document.addEventListener('touchstart', function(){ tapT = gest = Date.now(); }, { passive: true, capture: true });
+    document.addEventListener('touchmove', now, { passive: true, capture: true });
+    document.addEventListener('wheel', now, { passive: true, capture: true });
+    document.addEventListener('keydown', function(e){ if (/^(PageDown|PageUp|ArrowDown|ArrowUp|End|Home| )$/.test(e.key) && !field(e.target)) now(); }, { passive: true, capture: true });
+    document.addEventListener('focusin', function(e){
+      if (!touch.matches || !on() || !field(e.target) || Date.now() - tapT > 1200) return;
+      if (st === 1) st = 2; else if (!st) fold('focus');
+    }, true);
+    document.addEventListener('focusout', function(){ setTimeout(function(){ if (!field(document.activeElement)) { pend = 0; if (st === 2) open(); } }, 80); }, true);
+    window.addEventListener('resize', function(){ if (window.innerWidth !== W) { W = window.innerWidth; need = 0; open(); } }, { passive: true });
+    window.addEventListener('beforeprint', function(){ open(); });
+    var ch = function(){ need = 0; if (!on()) open(); };
+    if (mq.addEventListener) mq.addEventListener('change', ch); else if (mq.addListener) mq.addListener(ch);
+    U.fold = function(on){ return on === false ? (open(), false) : on === true ? fold('focus') : st; };
+  })(); } catch (e) {}
+  window.nbhUI = U;
+})();

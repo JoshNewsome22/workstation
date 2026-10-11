@@ -26,6 +26,15 @@ fs.mkdirSync(SHOTS, {recursive:true});
 const FILE = 'OB-1_Direct-Observation-Record_v2026-09.html';
 const FORM_PATH = path.join(ROOT, 'NBH-Workstation', FILE);
 const FORM_URL = BASE + '/NBH-Workstation/' + FILE;
+/* v21.84 the writing help is one file beside the forms, which OB-1 loads by <script id="nbh-wording" src="nbh-wording.js"> */
+const WFILE = 'nbh-wording.js', WPATH = path.join(ROOT, 'NBH-Workstation', WFILE);
+/* a copy of the folder in a temporary one, every file linked but OB-1 and nbh-wording.js as given */
+function folderCopy(dir, files){
+  for (const f of fs.readdirSync(path.join(ROOT, 'NBH-Workstation'))) {
+    const from = path.join(ROOT, 'NBH-Workstation', f);
+    if (files[f] !== undefined) fs.writeFileSync(path.join(dir, f), files[f]); else fs.symlinkSync(from, path.join(dir, f));
+  }
+}
 const CODE = '7KQ-M4P-2XD-V9H';
 const FIXTURE = JSON.stringify({version:'qa-fixture', rules:[
   {id:'emo-angry', cat:'internal', re:'(?:was |got |became )?(?:angry|mad)', flags:'i', why:'Anger is a feeling the observer infers.', suggest:'Describe what was seen and heard.'},
@@ -90,9 +99,10 @@ async function startMock(){
 }
 const mock = async (route, body) => (await fetch(RELAY + route, {method: body ? 'POST' : 'GET', headers:{'Content-Type':'application/json'}, body: body ? J(body) : undefined})).json();
 
-/* the form as served, with the relay address and/or the rule set swapped in; or with the block cut back out */
+/* the form as served with the block (v21.84: its loader) cut back out; or the writing help (v21.84: nbh-wording.js)
+   with the relay address and/or the rule set swapped in */
 function variant(html, opt){
-  if (opt.without) return html.replace(/\n<script id="nbh-wording">[\s\S]*?<\/script>\n\n/, '\n');
+  if (opt.without) return html.replace(/\n<script id="nbh-wording"[^>]*>[\s\S]*?<\/script>\n\n/, '\n');
   if (opt.relay !== undefined) html = html.replace(/window\.nbhWordingConfig=\n\{[^\n]*\}/, () => 'window.nbhWordingConfig=\n' + J({relay:opt.relay}));
   if (opt.rules) html = html.replace(/window\.nbhWordingRules=\n[\s\S]*?\n;\nwindow\.nbhWordingConfig=/, () => 'window.nbhWordingRules=\n' + opt.rules + '\n;\nwindow.nbhWordingConfig=');
   return html;
@@ -151,21 +161,21 @@ async function shot(page, name){ await page.screenshot({path: path.join(SHOTS, n
 async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() - t0 < (ms || 8000)) { const t = await page.evaluate(() => __w.tab2()); if (re.test(t)) return t; await sleep(100); } return page.evaluate(() => __w.tab2()); }
 
 (async () => {
-  const html = fs.readFileSync(FORM_PATH, 'utf8');
+  const html = fs.readFileSync(FORM_PATH, 'utf8'), wfile = fs.readFileSync(WPATH, 'utf8');
   const client = fs.readFileSync(path.join(ROOT, 'tools/blocks/nbh-wording.js'), 'utf8');
   const config = fs.readFileSync(path.join(ROOT, 'tools/blocks/nbh-wording-config.json'), 'utf8');
   const rulesPath = path.join(ROOT, 'tools/blocks/nbh-wording-rules.json');
   const rules = fs.existsSync(rulesPath) ? fs.readFileSync(rulesPath, 'utf8') : null;
 
   /* ---- 0. the block in the form */
-  const nBlocks = (html.match(/\n<script id="nbh-wording">/g) || []).length;
-  ok(nBlocks === 1, '0 OB-1 holds exactly one <script id="nbh-wording">', nBlocks);
-  const block = (html.match(/<script id="nbh-wording">([\s\S]*?)<\/script>/) || [])[1] || '';
-  ok(block.includes(client) && html.split(client).length === 2, '0 the client in OB-1 is nbh-wording.js byte for byte, once');
-  ok(block.includes('window.nbhWordingConfig=\n' + config + '\n;'), '0 the config in OB-1 is nbh-wording-config.json byte for byte');
-  if (rules) ok(block.includes('window.nbhWordingRules=\n' + rules + '\n;'), '0 the rules in OB-1 are nbh-wording-rules.json byte for byte');
+  const nBlocks = (html.match(/\n<script id="nbh-wording"/g) || []).length;
+  ok(nBlocks === 1 && html.split('\n<script id="nbh-wording" src="nbh-wording.js"></script>\n').length === 2, '0 OB-1 holds exactly one <script id="nbh-wording">, the loader of nbh-wording.js (v21.84)', nBlocks);
+  const block = wfile;
+  ok(block.includes(client) && block.split(client).length === 2 && !html.includes(client), '0 the client in NBH-Workstation/nbh-wording.js is tools/blocks/nbh-wording.js byte for byte, once; none in OB-1');
+  ok(block.includes('window.nbhWordingConfig=\n' + config + '\n;'), '0 the config in nbh-wording.js is nbh-wording-config.json byte for byte');
+  if (rules) ok(block.includes('window.nbhWordingRules=\n' + rules + '\n;'), '0 the rules in nbh-wording.js are nbh-wording-rules.json byte for byte');
   else console.log('note  the rules file is not there yet: OB-1 was built with a fixture');
-  ok(html.indexOf('<script id="nbh-wording">') < html.indexOf('<script>\n"use strict";'), '0 the block sits before the form\'s own script');
+  ok(html.indexOf('<script id="nbh-wording"') < html.indexOf('<script>\n"use strict";'), '0 the block sits before the form\'s own script');
   ok(!/claude-[a-z]+-\d/i.test(client + config + (rules || '')), '0 no model ID in the client, the config or the rules');
 
   const child = await startMock();
@@ -619,8 +629,8 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const t = await page.evaluate(() => __w.tab2());
       ok(/set up for the forms on localhost\. This copy opens from 127\.0\.0\.1/.test(t), '5 a copy on another site is told so before anything is tried', t.slice(0, 200));
       await ctx.close();
-      const tmp = path.join(os.tmpdir(), 'wording-file-' + process.pid + '.html');
-      fs.writeFileSync(tmp, variant(fs.readFileSync(FORM_PATH, 'utf8'), {relay:'https://newsomebh.com/ai'}));
+      const tdir = fs.mkdtempSync(path.join(os.tmpdir(), 'wording-file-')), tmp = path.join(tdir, FILE);
+      folderCopy(tdir, {[WFILE]: variant(fs.readFileSync(WPATH, 'utf8'), {relay:'https://newsomebh.com/ai'})});
       const c2 = await context(browser, null), p2 = await c2.newPage(); wire(p2, lg);
       await p2.goto('file://' + tmp); await sleep(700); await p2.evaluate(() => { window.confirm = () => true; });
       await sim(p2); await view(p2, 'obs');
@@ -628,7 +638,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const t2 = await p2.evaluate(() => __w.tab2());
       ok(/opened from a file on this device/.test(t2) && /newsomebh\.com/.test(t2), '5 a copy opened from a file (the one-file edition on a disk) is told so', t2.slice(0, 200));
       ok(errorsIn(lg).length === 0, '5 no console errors', errorsIn(lg));
-      await c2.close(); fs.unlinkSync(tmp);
+      await c2.close(); fs.rmSync(tdir, {recursive:true, force:true});
     });
 
     /* ---- 6. no running past the edge, at the three widths; the screenshots */
@@ -724,11 +734,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
     await section('9', async () => {
       const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'wording-one-'));
       const src = path.join(tmp, 'src'); fs.mkdirSync(src);
-      for (const f of fs.readdirSync(path.join(ROOT, 'NBH-Workstation'))) {
-        const from = path.join(ROOT, 'NBH-Workstation', f);
-        if (f === FILE) fs.writeFileSync(path.join(src, f), variant(fs.readFileSync(from, 'utf8'), {relay:'https://newsomebh.com/ai'}));
-        else fs.symlinkSync(from, path.join(src, f));
-      }
+      folderCopy(src, {[WFILE]: variant(fs.readFileSync(WPATH, 'utf8'), {relay:'https://newsomebh.com/ai'})});
       execFileSync('python3', [path.join(ROOT, 'tools', 'build-single.py'), src, path.join(tmp, 'one.html')], {stdio:'ignore'});
       const lg = [], ctx = await context(browser, null), page = await ctx.newPage(); wire(page, lg);
       await page.goto('file://' + path.join(tmp, 'one.html')); await page.waitForFunction(() => typeof openForm === 'function', null, {timeout:30000}); await sleep(600);

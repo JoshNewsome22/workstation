@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the Royal Palm School edition of the workstation from the Newsome Behavioral Health one.
 
-Same forms, same code. Changed: the logo (47 places: once in each of the 46 forms, once in the index), the tab icon, the organisation name where it
+Same forms, same code. Changed: the logo (2 places since v21.84: nbh-logo.js, which every form loads, and the index), the tab icon, the organisation name where it
 is printed or shown, and the autosave keys - both editions live on one website, and a browser keeps
 one localStorage per website, so without its own keys each would offer to restore the other's work. Since v21.43 also the
 installed app's Home Screen name, manifest.json and icons (from the lockup) and its release list (release.json, the
@@ -32,7 +32,7 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 
 # (old, new, how many times it must be replaced across all files)
 EXPECT = [
-  (old_logo, new_logo, 47),    # v21.36: once per form (the nbh-logo script) and once in index.html
+  (old_logo, new_logo, 2),     # v21.84: once in nbh-logo.js (every form loads it; until v21.83 a copy in each of the 46 forms) and once in index.html
   (old_fav, new_fav, 1),
   ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 168),   # the masthead and print-head images of the 46 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64) + the index + the packet cover
   ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 47),
@@ -44,8 +44,15 @@ EXPECT = [
   ('<meta name="apple-mobile-web-app-title" content="NBH Workstation">', '<meta name="apple-mobile-web-app-title" content="RPS Workstation">', 1),
 ]
 done = [0] * len(EXPECT)
+# v21.84 the scripts every form loads from one file beside it (the letterhead, the writing help, ...) are part of the pages
+_sj = importlib.util.spec_from_file_location('shared_js', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blocks', 'shared_js.py'))
+_SJ = importlib.util.module_from_spec(_sj); _sj.loader.exec_module(_SJ)
+SHARED_JS = _SJ.FILES   # tools/blocks/shared_js.py
+for f in SHARED_JS:
+    if not os.path.isfile(os.path.join(OUT, f)):
+        sys.exit(f'{f} is not in {SRC}: every form loads it')
 for fn in sorted(os.listdir(OUT)):
-    if not fn.endswith('.html'): continue
+    if not (fn.endswith('.html') or fn in SHARED_JS): continue
     p = os.path.join(OUT, fn); s = open(p, encoding='utf-8').read()
     for i, (a, b, _) in enumerate(EXPECT):
         n = s.count(a); done[i] += n; s = s.replace(a, b)
@@ -58,7 +65,7 @@ if bad:
 # anything still naming the practice in a way a user sees
 left = []
 for fn in sorted(os.listdir(OUT)):
-    if fn.endswith('.html'):
+    if fn.endswith('.html') or fn in SHARED_JS:
         for m in re.finditer(r'.{0,40}Newsome Behavioral Health.{0,40}', open(os.path.join(OUT, fn), encoding='utf-8').read()):
             if 'shared form system' not in m.group(0): left.append((fn, m.group(0)))
 if left:

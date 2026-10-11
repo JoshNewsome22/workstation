@@ -33,6 +33,8 @@ Paths below are from the repository root. The test server the checks expect:
   `nbh-wording.js` + `nbh-wording-rules.json` + `nbh-wording-config.json` + `patch-wording.py`
   (the writing help: the Improve wording button and panel; see below), `nbh-link.js` +
   `patch-link.py` (the TK-1/TE-1 link), `tb1-behavior-library.json` + `patch-tb1-library.py`.
+  v21.84: `shared_js.py` (the list of the scripts every form loads from one file beside it, used by the patchers and
+  the builds) and `patch-shared.py` (moves inline copies out of forms; see *The shared scripts* below).
 - `tools/relay/` — the rewrite service for the writing help: PHP for newsomebh.com, with its
   tests, its upload zip (`build-zip.sh`) and a README with the upload steps.
 - `tools/reply-box/` — the reply box for IA-1's respondent pages (v21.65): `public_html/reply/box.php`
@@ -79,29 +81,63 @@ The glob `[A-Z]*.html` is the 46 forms without `index.html`. Each patcher prints
 `patched` or `already` per form. The case block's refresh is a replacement of the text
 between `<style id="nbh-case-css">` and `<style id="nbh-guard-css">` (see `patch-case.py`).
 
+## The shared scripts: one file beside the forms (v21.84)
+
+Until v21.83 every form carried the same script blocks byte for byte: 21.5 of the 34.8 MB of forms were those
+copies (the writing help alone 11.6 MB), and a change to one rewrote all 46 forms, so every iPad downloaded the whole
+set again. Each of these is now ONE file beside the forms, and a form carries only its loader, a classic synchronous
+`<script id="..." src="..."></script>` in the place the inline block held (so the order the form's scripts run in is
+unchanged):
+
+| file | block | written by |
+| --- | --- | --- |
+| `nbh-logo.js` | the letterhead (`window.NBH_LOGO`), in the head | `tools/dedupe-logo.py` |
+| `nbh-wording.js` | the writing help | `tools/blocks/patch-wording.py` (and `apply-polish.py`) |
+| `nbh-case-flow.js` | the case flow | `tools/blocks/patch-case.py` |
+| `nbh-ui.js` | toasts, questions, progress | `tools/blocks/patch-ui.py` |
+| `nbh-field-care.js` | field care | edit the file itself; `tools/blocks/patch-shared.py` moves an inline copy out |
+| `nbh-autosave.js` | autosave | `tools/blocks/patch-autosave.py` |
+| `nbh-polish.js` | the polish script | `tools/apply-polish.py` (and `polish-one.py`) |
+
+The list is `tools/blocks/shared_js.py`, which the tools share. Each tool still builds the block as before, then leaves
+the loader in the form and writes the block's text to the file, byte for byte. CF-1 carries the loaders, so
+`new-form.py` gives a rebuilt form the loaders. Not moved: the styles (the master print collects a form's `<style>`s),
+`nbh-pwa-save` (the offline worker checks every page carries it), `nbh-guard` (`patch-autosave.py` edits it inside each
+form) and the blocks that differ between forms.
+
+- `pwa-sw.py` lists the files for the offline copy (it lists what pages load) and **refuses a form that holds an
+  inline copy again** or lacks a loader: run `python3 tools/blocks/patch-shared.py NBH-Workstation/[A-Z]*.html`
+  (it moves every inline copy out; `--check` changes nothing).
+- `build-rps.py` copies the files and swaps the logo in `nbh-logo.js` (2 places now: it and `index.html`).
+- `build-single.py` puts each loader back as the inline block, the file's text byte for byte, before it packs the
+  forms: inside the one-file edition a form opens from srcdoc (or a blob, in its own tab), where a relative `src`
+  loads nothing. Its output, and so the case files written from it, are what they were before v21.84.
+- After changing any of these files, run `pwa-sw.py` and build the editions as usual. A change to one of them is now
+  one small file per release, not 46 forms.
+
 ## The writing help in every form
 
-Every form (the 46; not `index.html` or `respond.html`) carries the writing help once, as
-`<script id="nbh-wording">` between the form's markup and its own script, holding
-`tools/blocks/nbh-wording-rules.json`, `nbh-wording-config.json` and `nbh-wording.js` byte for byte.
+Every form (the 46; not `index.html` or `respond.html`) loads the writing help once, by
+`<script id="nbh-wording" src="nbh-wording.js"></script>` between the form's markup and its own script;
+`NBH-Workstation/nbh-wording.js` holds `tools/blocks/nbh-wording-rules.json`, `nbh-wording-config.json` and
+`nbh-wording.js` byte for byte (v21.84; before, each form held its own copy, `<script id="nbh-wording">`).
 What keeps it there:
 
-- `tools/apply-polish.py` puts it in, or replaces it, in every form it polishes, so `polish-one.py`
-  gives every rebuilt parts form its copy (the two steps above, and TK-1's `build.sh`, which also
-  checks the built form holds it once and current). CF-1's own copy sits in the part `new-form.py`
-  does not copy, so a rebuilt form never holds two.
-- After a change to one of the three files (a rule, the relay address), refresh all 45, then build
-  the editions:
+- `tools/apply-polish.py` puts the loader in, or replaces an inline copy with it, in every form it polishes, and
+  writes `nbh-wording.js` beside them, so `polish-one.py` gives every rebuilt parts form its loader and the current
+  file (the two steps above, and TK-1's and TV-1's `build.sh`, which also check the built form loads it once and the
+  file is current). CF-1's own loader sits in the part `new-form.py` does not copy, so a rebuilt form never holds two.
+- After a change to one of the three files (a rule, the relay address), refresh (it rewrites `nbh-wording.js`; the
+  forms change only if a loader is missing), then build the editions:
 
       python3 tools/blocks/patch-wording.py NBH-Workstation/[A-Z]*.html
       python3 tools/blocks/patch-wording.py --check NBH-Workstation/[A-Z]*.html    # exit 1 if one is stale
 
-- `build-single.py` stops on a form without exactly one copy, or with a copy unlike the other forms' (a form
-  not refreshed), and checks that the packed forms unpack to the files; `build-rps.py` copies the forms as
-  they are. The one-file editions keep the writing help ONCE, as they keep the logo: it is cut out of every
-  form (`@@NBH-WORDING@@`) and packed in a block of its own (`nbh-embed-wording`), which `index.html` puts
-  back as it opens a form and copies into a saved case file. 46 copies would add about 4 MB to each
-  edition, because the packer's gzip cannot reach back from one form's copy to the last.
+- `build-single.py` stops on a form without exactly one loader, puts the file back inline in every form (see
+  above), and checks that the packed forms unpack to those; `build-rps.py` copies the file. The one-file editions
+  keep the writing help ONCE, as they keep the logo: it is cut out of every form (`@@NBH-WORDING@@`) and packed in a
+  block of its own (`nbh-embed-wording`), which `index.html` puts back as it opens a form and copies into a saved
+  case file.
 - A field that holds someone else's words (an interview answer, a quoted record, the student's own
   answers) or an instruction text with marks in it (TK-1's backs) is marked `data-nbh-nowording` too:
   rewording it would change what was said or break the marks.

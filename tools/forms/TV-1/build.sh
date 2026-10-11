@@ -26,7 +26,9 @@ rm -rf "$D"
 python3 - <<'PY'
 doc=open('NBH-Workstation/TV-1_Training-Video_v2026-10.html',encoding='utf-8').read()
 W,R,C=(open('tools/blocks/'+f,encoding='utf-8',newline='').read() for f in ('nbh-wording.js','nbh-wording-rules.json','nbh-wording-config.json'))
-assert doc.count('\n<script id="nbh-wording">')==1 and doc.count(W)==1 and doc.count('window.nbhWordingRules=\n'+R+'\n;\nwindow.nbhWordingConfig=\n'+C+'\n;\n'+W+'</script>')==1, 'the writing help is not in the built TV-1 exactly once, current'
+# v21.84 the form carries the loader; the writing help itself is NBH-Workstation/nbh-wording.js, written by polish-one.py
+WF=open('NBH-Workstation/nbh-wording.js',encoding='utf-8',newline='').read()
+assert doc.count('\n<script id="nbh-wording"')==1 and doc.count('\n<script id="nbh-wording" src="nbh-wording.js"></script>')==1 and W not in doc and WF.endswith('window.nbhWordingRules=\n'+R+'\n;\nwindow.nbhWordingConfig=\n'+C+'\n;\n'+W), 'the built TV-1 does not load the writing help once, or nbh-wording.js is not current'
 assert len(doc.encode('utf-8'))<1900000, 'TV-1 is %d bytes: keep it under 1.9 MB' % len(doc.encode('utf-8'))
-print('TV-1 is %d bytes; the writing help is in it once, current' % len(doc.encode('utf-8')))
+print('TV-1 is %d bytes; it loads the writing help once (nbh-wording.js, current)' % len(doc.encode('utf-8')))
 PY

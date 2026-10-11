@@ -10,6 +10,9 @@ workstation bridge and the shared tail blocks - is copied from the template, wit
 titles replaced. Run tools/polish-one.py on the new form afterwards: it adds the polish layer and the
 writing help (the template's own copy of the writing help sits between its markup and its own script,
 a part this does not copy, so the new form gets its one copy from polish-one.py).
+v21.84: the shared scripts (tools/blocks/shared_js.py) are loaders in CF-1, <script id="..." src="..."></script>,
+so the new form gets the loaders from the head and the tail copied here, and polish-one.py gives it the writing
+help's and the polish script's loaders; the scripts themselves are the files beside the forms.
 """
 import json, re, sys
 tpl, parts, out = sys.argv[1:4]
