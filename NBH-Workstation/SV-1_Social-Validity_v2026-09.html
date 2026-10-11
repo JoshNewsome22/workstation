@@ -1033,7 +1033,7 @@ td input,td select{max-width:100%}
     <h3 style="margin-top:14px">Checks Before Reporting</h3>
     <div id="flagList"></div>
     <h3 style="margin-top:14px">What Goes to FS-1 and PR-1</h3>
-    <p class="hint">Copy these into FS-1 (Evidence: a source with method &ldquo;Social validity &mdash; goals (Wolf, 1978)&rdquo;, tier none, and a short paragraph in the Report) and into PR-1 section 4 (the row &ldquo;Social validity (SV-1, this period)&rdquo;). Neither entry carries a function, a strength, or a tier, and neither counts toward convergence.</p>
+    <p class="hint">Copy the first of these into FS-1 (Evidence: a source with method &ldquo;Social validity &mdash; goals (Wolf, 1978)&rdquo;, tier none, and a short paragraph in the Report). In the workstation, PR-1 section 4&rsquo;s row &ldquo;Social validity (SV-1, this period)&rdquo; fills automatically from this form while it is empty; with this form opened on its own, copy the PR-1 line below into that row. Neither entry carries a function, a strength, or a tier, and neither counts toward convergence.</p>
     <div class="feed" id="feedFs"></div>
     <div class="feed" id="feedPr"></div>
     <table class="rt" style="margin-top:12px">
@@ -3561,6 +3561,31 @@ window.__rp={file:rpFile,link:rpLinkUrl,read:rcRead,payload:rpPayload};   /* for
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+</script>
+
+<script id="sv-v2182">
+/* v21.82 the case: out (new key 'sv'). The rounds of this record for Form PR-1 and the workstation: each round's mean over
+   every scored rating in it (Goals, Procedures and, post only, Effects; E5 reversed, N/A left out), how many respondents
+   rated in it and its latest date (the respondents' pre or post dates, as ISO); the scale; the items rated at the low end
+   (at or below the threshold in the toolbar by at least one respondent, in the latest round of each section, as on the
+   Summary sheet); the working cut a post mean is read against (4.5) and the verdict label. Null while nothing is rated. */
+(function(){
+const iso=t=>{t=String(t==null?'':t).trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/.exec(t);if(!m)return '';return (m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
+const r2=x=>Math.round(x*100)/100;
+function round(rd){let s=0,n=0;const who=new Set();
+  Object.keys(SECS).forEach(sec=>{if(SECS[sec].rounds.indexOf(rd)<0)return;SECITEMS(sec).forEach(x=>S.resp.forEach((r,i)=>{if(!applies(x,r.role))return;const v=scored(rd,x.id,i);if(v!=null){s+=v;n++;who.add(i);}}));});
+  if(!n)return null;const ds=[...who].map(i=>iso(S.resp[i]&&S.resp[i][rd])).filter(Boolean).sort();
+  const o={mean:r2(s/n),n:who.size,ratings:n};const d=ds.pop()||(rd==='post'?iso(S.meta.date):'');if(d)o.date=d;return o;}
+const was=window.__nbhFactsOut;
+window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{ensure();const pre=round('pre'),post=round('post');if(!pre&&!post)return r;
+    const flagged=[];Object.keys(SECS).forEach(sec=>{const rd=sec==='E'?'post':latest(sec);SECITEMS(sec).forEach(x=>{
+      if(S.resp.some((p,i)=>{const v=scored(rd,x.id,i);return v!=null&&v<=S.thr&&applies(x,p.role);})){const t=wording(x,x.who==='student'?'Student':'');flagged.push(x.rev?t.replace(/\.$/,'')+' (reverse-scored: rated high)':t);}});});
+    const sv={scale:'1-6',flagged,form:'SV-1',cut:4.5,thr:S.thr};if(pre)sv.pre=pre;if(post)sv.post=post;
+    try{const V=verdict();if(V&&V.label)sv.label=V.label;}catch(e){}
+    const o=r&&typeof r==='object'?r:{};o.sv=sv;return o;}catch(e){return r;}};
+})();
 </script>
 
 <script>
