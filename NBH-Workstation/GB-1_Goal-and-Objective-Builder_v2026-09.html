@@ -4481,6 +4481,131 @@ document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
   if(t.closest('#viewSeg button[data-view="prog"]'))gbProgRender();});
 gbProgRender();
 </script>
+<script id="gb1-v2182">
+/* v21.82 (1) generalization and maintenance objectives. An acquisition objective can be of three types: Acquisition (as
+   before), Generalization (the skill at its criterion in at least N settings or with N people beyond where it was
+   taught, measured on Form DD-1's generalization probes and the setting it records each day) and Maintenance (the skill
+   still at its criterion on maintenance probes N weeks or more after mastery). Two buttons add one from the first
+   acquisition objective (its skill, condition, criterion and date). The sentence, the goal sheet, Copy for the BIP and
+   the case carry the type. In the progress report such an objective is read from DD-1's probes (f.data.probes, with each
+   probe day's value from f.data.byDay): Generalization, the settings at the criterion on their latest probe against the
+   number asked, else DD-1's means by setting (f.data.bySetting) when no probe is marked; Maintenance, the probes at the
+   criterion and how long after mastery. (2) the family's home language (f.profile.language from Form DM-1, or the plan's
+   considerations from Form TD-1): when an interpreter is asked for or the language is not English, the progress report
+   shows a flag on screen to have it translated or explained before it goes home; it never prints and nothing is
+   translated here. */
+const GB_KIND={gen:'Generalization objective',maint:'Maintenance objective'};
+const GB_ACROSS=['settings','people','settings and people'];
+function gbKindOf(i){const v=val('acq['+i+'].kind');return v==='gen'||v==='maint'?v:'';}
+function gbKindFields(c){if(!c)return;const i=idxOf(c,'acq');if(i<0||c.querySelector('[name="acq['+i+'].kind"]'))return;const p=c.querySelector('.param');if(!p)return;
+  const id='f_acq_'+i+'__kind';
+  p.insertAdjacentHTML('afterbegin','<div class="f gb-k-sel"><label for="'+id+'">Objective type</label><select id="'+id+'" name="acq['+i+'].kind"><option value="">Acquisition (teach the skill)</option><option value="gen">Generalization (across settings or people)</option><option value="maint">Maintenance (after mastery)</option></select></div>');
+  p.insertAdjacentHTML('beforeend','<div class="gb-k-gen">'+field('Across how many','acq['+i+'].gN',{ph:'e.g. 3'})+field('Settings or people','acq['+i+'].gAcross',{options:GB_ACROSS})+
+    field('Which ones (beyond where it was taught)','acq['+i+'].gList',{ph:'e.g. art, music and the cafeteria'})+'</div><div class="gb-k-maint">'+
+    field('Weeks after mastery','acq['+i+'].mWeeks',{ph:'e.g. 4'})+field('Mastered on','acq['+i+'].mDate',{date:true})+'</div>');
+  const u=c.querySelector('[name="acq['+i+'].unit"]');if(u&&u.closest('.f'))u.closest('.f').classList.add('gb-k-unit');}
+function gbKindSync(){$$('#acqWrap .card').forEach(c=>{gbKindFields(c);const k=gbKindOf(idxOf(c,'acq'));if(k)c.dataset.kind=k;else delete c.dataset.kind;
+  const t=c.querySelector('.chdt');if(t)t.textContent=k?GB_KIND[k]:'Acquisition objective';});}
+/* every card made has the type and its fields, whatever made it (the button, Open data, the case, the simulation) */
+{const add0=addAcq;addAcq=function(){const r=add0.apply(this,arguments);try{gbKindSync();}catch(e){}return r;};
+  const b=$('#addAcq');if(b){b.removeEventListener('click',add0);b.addEventListener('click',()=>{addAcq();render();});}}
+{const r0=render;render=function(){try{gbKindSync();}catch(e){}return r0.apply(this,arguments);};}
+document.addEventListener('change',e=>{const t=e.target;if(t&&t.name&&/^acq\[\d+\]\.kind$/.test(t.name)){gbKindSync();render();}});
+/* the sentence: Acquisition as before; the other two in the same frame */
+{const s0=acqSentence;acqSentence=function(i){const k=gbKindOf(i);if(!k)return s0.apply(this,arguments);const g=n=>val('acq['+i+'].'+n);
+  const beh=g('beh')?esc(gbWill(g('beh'),val('m.client'))):gap('','observable behavior'),list=g('gList')?' ('+esc(gbPhrase(g('gList')))+')':'';
+  const head='By '+gap(fmtDate(g('date')),'target date')+', '+(g('cond')?condPhrase(g('cond'))+', ':'')+gap(val('m.client'),'student');
+  const tail=', as measured by '+gap(g('meth'),'measurement method')+'.';
+  if(k==='gen'){const a=g('gAcross')||'settings',N=gap(g('gN'),'number');
+    const where=a==='people'?'with at least '+N+' people'+list+' beyond the adult who taught it':a==='settings and people'?'across at least '+N+' settings or people'+list+' beyond those where it was taught':'in at least '+N+' settings'+list+' beyond the one where it was taught';
+    return head+' will '+beh+' '+gap(g('crit'),'criterion')+' '+where+', across '+gap(g('n'),'number')+' consecutive generalization probes'+tail;}
+  return head+' will continue to '+beh+' '+gap(g('crit'),'criterion')+' on maintenance probes taken '+gap(g('mWeeks'),'number')+' or more weeks after mastery'+
+    (g('mDate')?' (mastered '+esc(fmtDate(g('mDate')))+')':'')+', across '+gap(g('n'),'number')+' consecutive probes'+tail;};}
+/* the two templates: a new objective from the first acquisition objective that names a skill */
+function gbCaseSettings(){const d=gbCase&&gbCase.data,L=d&&Array.isArray(d.bySetting)?d.bySetting.filter(s=>s&&s.setting):[];return L.slice(1).map(s=>String(s.setting));}
+function gbAddKind(k){const base=$$('#acqWrap .card').map(c=>idxOf(c,'acq')).find(i=>i>=0&&!gbKindOf(i)&&val('acq['+i+'].beh'));
+  addAcq();const cs=$$('#acqWrap .card'),c=cs[cs.length-1],i=idxOf(c,'acq'),A=n=>'acq['+i+'].'+n,B=n=>base==null?'':val('acq['+base+'].'+n);
+  setv(A('kind'),k);['beh','cond','crit','date'].forEach(n=>setv(A(n),B(n)));setv(A('n'),'2');
+  if(k==='gen'){setv(A('gN'),'3');setv(A('gAcross'),'settings');const L=gbCaseSettings();if(L.length)setv(A('gList'),L.join(', '));
+    setv(A('meth'),'generalization probes marked on Form DD-1, with the setting recorded each day');}
+  else{setv(A('mWeeks'),'4');setv(A('meth'),'maintenance probes marked on Form DD-1');}
+  if(base!=null)setv(A('note'),(k==='gen'?'Generalization':'Maintenance')+' of A'+(base+1)+'.');
+  gbKindSync();render();try{c.scrollIntoView({block:'nearest'});}catch(e){}return i;}
+{const b=$('#addAcq');if(b&&!$('#addGen')){b.insertAdjacentHTML('afterend',' <button type="button" id="addGen" class="tool">Add a generalization objective</button> <button type="button" id="addMaint" class="tool">Add a maintenance objective</button>');
+  $('#addGen').addEventListener('click',()=>gbAddKind('gen'));$('#addMaint').addEventListener('click',()=>gbAddKind('maint'));}}
+/* the case: each such objective says its type */
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){const o=was?was.apply(this,arguments):null;
+  try{if(o&&o.goals&&Array.isArray(o.goals.acq))o.goals.acq.forEach(a=>{const k=gbKindOf(a.i);if(!k)return;const g=n=>val('acq['+a.i+'].'+n);
+    a.kind=k==='gen'?'generalization':'maintenance';if(k==='gen'){a.across=g('gAcross')||'settings';a.acrossN=g('gN');a.acrossList=g('gList');}else{a.weeks=g('mWeeks');a.mastered=g('mDate');}});}catch(e){}return o;};}
+/* the progress report: read from DD-1's probes and settings */
+function gbGM(R,i,k){const g=n=>val('acq['+i+'].'+n),f=gbCase||{},d=f.data||null,P=gbpPeriod(),time=gbpTimeShare(R.date,P);
+  const N=Math.max(1,Math.round(gbpN(g('gN'))||1)),need=Math.max(1,Math.round(gbpN(g('n'))||2)),tgt=gbpN(g('crit')),a=g('gAcross')||'settings';
+  R.gk=k;R.target=k==='gen'?g('crit')+(a==='people'?' with ':' in ')+N+' '+(a==='settings and people'?'settings or people':a)+(g('gList')?' ('+g('gList')+')':''):g('crit')+' on maintenance probes '+(g('mWeeks')||'[N]')+' or more weeks after mastery';
+  if(!d){R.why='No data in the case: open this form in the workstation with Form DD-1, or choose the code.';return R;}
+  const names=[...new Set([].concat((d.behaviors||[]).map(b=>b&&b.name),(d.byDay||[]).flatMap(x=>Object.keys((x&&x.vals)||{})),(d.bySetting||[]).flatMap(s=>((s&&s.behaviors)||[]).map(b=>b&&b.name))).filter(Boolean))];
+  const nm=(gbpBest(names.map(n=>({name:n})),R.beh,x=>[x.name])||{}).name;
+  if(!nm){R.code=GBP_CODES[4];R.why='DD-1 records no behavior by this name, so no probe has been taken on it.';return R;}
+  const b=(d.behaviors||[]).find(x=>x&&x.name===nm)||{},dec=b.direction==='decrease',pct=/%|percent/i.test(b.unit||'')||(!b.unit&&/%/.test(g('crit')));
+  const fv=v=>gbpR(v)+(pct?'%':''),meets=v=>v!=null&&tgt!=null&&(dec?v<=tgt:v>=tgt);
+  const byDate={};(d.byDay||[]).forEach(x=>{if(x&&x.date&&x.vals&&x.vals[nm]!=null)byDate[x.date]=+x.vals[nm];});
+  const sc=(d.probes||[]).filter(p=>p&&p.kind===k&&p.date>=P.from&&p.date<=P.to&&byDate[p.date]!=null).sort((x,y)=>x.date.localeCompare(y.date)).map(p=>({date:p.date,setting:String(p.setting||'').trim(),v:byDate[p.date]}));
+  let run=0;for(let j=sc.length-1;j>=0&&meets(sc[j].v);j--)run++;
+  const left=time!=null?'; '+Math.round(time*100)+'% of the time to the target date has gone.':'.';
+  R.src='Form DD-1, '+nm+(k==='gen'?' (generalization probes)':' (maintenance probes)');R.fig={u:pct?'% of the time':gbpUnit(b.unit),pct};
+  if(k==='gen'){
+    if(sc.length){const M={};sc.forEach(p=>{const s=p.setting||'no setting recorded';M[s.toLowerCase()]={name:s,v:p.v,date:p.date};});
+      const L=Object.values(M),met=L.filter(x=>meets(x.v)&&x.name!=='no setting recorded');
+      Object.assign(R.fig,{gen:true,probes:true,k:met.length,N,met:met.map(x=>x.name),list:L,from:sc[0].date,to:sc[sc.length-1].date});
+      R.level=sc.length+' generalization probe'+(sc.length===1?'':'s')+' ('+gbpMd(R.fig.from)+(sc.length>1?' to '+gbpMd(R.fig.to):'')+'), latest in each setting: '+L.map(x=>x.name+' '+fv(x.v)).join(', ');
+      if(tgt==null){R.why='The objective states no number in its criterion to compare the probes with: choose the code.';return R;}
+      R.code=GBP_CODES[met.length>=N?(run>=need?0:1):gbpByShare(met.length/N,time)];
+      R.why='At the criterion in '+met.length+' of the '+N+' '+(a==='people'?'people':'settings')+' asked, on the latest probe in each'+(met.length>=N?'; '+run+' consecutive probe'+(run===1?'':'s')+' at the criterion ('+need+' asked)':'')+left;return R;}
+    const bs=(d.bySetting||[]).map(s=>{const x=((s&&s.behaviors)||[]).find(y=>y&&y.name===nm);return x&&x.mean!=null&&x.days?{name:String(s.setting),v:+x.mean,days:x.days}:null;}).filter(Boolean);
+    if(bs.length>1){const beyond=bs.slice(1),met=beyond.filter(x=>meets(x.v));R.src='Form DD-1, '+nm+' (means by setting; no probe marked)';
+      Object.assign(R.fig,{gen:true,probes:false,k:met.length,N,met:met.map(x=>x.name),list:bs,from:d.from,to:d.to});
+      R.level='No generalization probe in this period. DD-1’s means by setting: '+bs.map(x=>x.name+' '+fv(x.v)+' ('+x.days+' day'+(x.days===1?'':'s')+')').join(', ');
+      if(tgt==null){R.why='The objective states no number in its criterion to compare with: choose the code.';return R;}
+      R.code=GBP_CODES[met.length>=N?1:gbpByShare(met.length/N,time)];
+      R.why='At the criterion on average in '+met.length+' of the '+N+' settings asked beyond '+bs[0].name+' (the setting with the most days); mark generalization probes on DD-1 to show it held'+left;return R;}
+    R.code=GBP_CODES[4];R.why='DD-1 has no generalization probe marked in this period'+(bs.length?', and data in one setting only':'')+'.';return R;}
+  const md=gbpDate(g('mDate')),W=gbpN(g('mWeeks')),wk=s=>md?Math.max(0,Math.floor((gbpDate(s)-md)/(7*864e5))):null;
+  if(!sc.length){R.code=GBP_CODES[4];R.why='DD-1 has no maintenance probe marked in this period.';return R;}
+  const last=sc[sc.length-1],lw=wk(last.date),k2=sc.filter(p=>meets(p.v)).length;
+  Object.assign(R.fig,{maint:true,k:k2,m:sc.length,weeks:lw,from:sc[0].date,to:last.date});
+  R.level=sc.length+' maintenance probe'+(sc.length===1?'':'s')+': '+sc.map(p=>gbpMd(p.date)+' '+fv(p.v)).join(', ')+(lw!=null?' (the latest '+lw+' week'+(lw===1?'':'s')+' after mastery)':'');
+  if(tgt==null){R.why='The objective states no number in its criterion to compare the probes with: choose the code.';return R;}
+  const late=W==null||lw==null||lw>=W;
+  R.code=GBP_CODES[run>=need&&late?0:run>=1?1:k2?2:3];
+  R.why=k2+' of '+sc.length+' probe'+(sc.length===1?'':'s')+' at the criterion; '+run+' consecutive at the end ('+need+' asked)'+(W!=null?(lw!=null?'; the latest '+lw+' week'+(lw===1?'':'s')+' after mastery ('+W+' asked)':'; enter the mastery date to count the weeks'):'')+'.';return R;}
+{const g0=gbpGoal;gbpGoal=function(kind,i){const R=g0.apply(this,arguments),k=kind==='acq'?gbKindOf(i):'';if(!k)return R;
+  Object.assign(R,{src:'',level:'',code:'',why:'',fig:null});return gbGM(R,i,k);};}
+{const s0=gbpSay;gbpSay=function(R,code){if(!R||!R.gk)return s0.apply(this,arguments);
+  const w=gbpWho(),W=gbpCap(w),by=R.date?fmtDate(R.date):'the end of the IEP year',x=R.fig,s=(gbWill(R.beh,val('m.client'))||'use this skill').replace(/\s*\([^)]*\)/g,'');
+  const end={[GBP_CODES[0]]:w+' has met this goal',[GBP_CODES[1]]:w+' is on track to meet this goal by '+by,[GBP_CODES[2]]:w+' is making progress but may not meet this goal by '+by+' at this pace, so the team is looking at what to adjust',
+    [GBP_CODES[3]]:'there has been little or no change so far, so the team is changing how this goal is taught',[GBP_CODES[4]]:'work on this goal has not started yet'}[code]||'';
+  const fin=end?'; '+end+'.':'.',lv=v=>'about '+gbpR(v)+(x&&x.pct?'% of the time':x?x.u:'');
+  if(R.gk==='gen'){const ppl=(val('acq['+R.i+'].gAcross')||'settings')==='people',unit=ppl?'adults':'places';
+    if(!x||!x.gen)return W+' is learning to '+s+' in more '+unit+' than where it was taught'+fin;
+    if(x.probes)return W+' was able to '+s+' in '+x.k+' of the '+x.N+' '+unit+' this goal asks for'+(x.met.length?' ('+x.met.join(', ')+')':'')+' when we checked between '+gbpMd(x.from)+' and '+gbpMd(x.to)+fin;
+    return W+' is learning to '+s+' in more '+unit+'. Where we take data: '+x.list.map(l=>l.name+', '+lv(l.v)).join('; ')+fin;}
+  if(!x||!x.maint)return W+' learned to '+s+', and we are checking that it lasts'+fin;
+  return W+' learned to '+s+'; when we checked again between '+gbpMd(x.from)+' and '+gbpMd(x.to)+', '+w+' was at the goal level '+x.k+' of '+x.m+' time'+(x.m===1?'':'s')+(x.weeks!=null?' (the latest '+x.weeks+' week'+(x.weeks===1?'':'s')+' after learning it)':'')+fin;};}
+/* (2) the home language flag on the progress report: on screen only */
+function gbLang(){const f=gbCase||{},L=(f.profile&&f.profile.language)||{},C=(f.plan&&f.plan.considerations)||{};
+  const home=String(L.home||C.language||'').trim(),intp=L.interpreter===true||(L.interpreter===undefined&&C.interpreter===true);
+  if(!intp&&(!home||/^\s*english(\s+only)?\s*\.?\s*$/i.test(home)))return null;return {home,intp};}
+const gbLangText=x=>'Home language: '+(x.home||'not recorded (an interpreter is asked for)')+'. Have this translated or explained by an interpreter (the district’s interpreter service) before it goes home.';
+{const p0=gbProgRender;gbProgRender=function(){const r=p0.apply(this,arguments);try{const h=$('#progOut .gp-head'),x=gbLang();
+  if(h&&x&&!h.querySelector('.nbh-lang-flag'))h.insertAdjacentHTML('beforeend','<div class="nbh-lang-flag noprint" role="note"><b>Before this goes home.</b> '+esc(gbLangText(x))+'</div>');}catch(e){}return r;};}
+gbKindSync();render();
+</script>
+<style id="gb1-v2182-css">
+.card .gb-k-gen,.card .gb-k-maint{display:none}
+.card[data-kind="gen"] .gb-k-gen,.card[data-kind="maint"] .gb-k-maint{display:contents}
+.card[data-kind="gen"] .gb-k-unit,.card[data-kind="maint"] .gb-k-unit{display:none}
+.nbh-lang-flag{margin:8px 0;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45;font-family:var(--sans,inherit)}
+@media print{.nbh-lang-flag{display:none!important}}
+</style>
 <script>
 
 /* ===================== NBH student packet =====================
