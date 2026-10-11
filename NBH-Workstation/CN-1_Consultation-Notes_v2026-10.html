@@ -1329,7 +1329,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='CN-1'?d.form:'';
     const next=other?null:fromFile(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved CN-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form CN-1. Nothing was changed.':'That file could not be read as a saved CN-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;cur=0;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
+    /* v21.87 a file opens on its last note (the newest; new notes are added at the end), not the first */
+    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';

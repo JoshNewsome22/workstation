@@ -98,7 +98,9 @@ GUARD = [
      "   changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is\n"
      "   not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */\n"),
     ("    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; paint(); }, 900); return; }",
-     "    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }"),
+     "    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }"),   # v21.87 Open data only (patch-guard-open.py)
+    ("  var dirty = false;\n  function isField(t)",
+     "  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */\n  function isField(t)"),
     ("  document.addEventListener('click', function(e){\n    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
      "    if (b.id === 'nbhSaveQuick') return;\n"
      "    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\\s*save data\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }\n"
@@ -107,6 +109,7 @@ GUARD = [
      "    if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */\n"
      "    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
      "    if (b.id === 'nbhSaveQuick') return;\n"
+     "    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\\s*open data\\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;\n"
      "    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\\s*save data\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }\n"
      "    else if (b.id === 'clearBtn' || /^\\s*clear all\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }\n"),
     ("    if (window.parent !== window) return;\n    if (!dirty) return;\n",

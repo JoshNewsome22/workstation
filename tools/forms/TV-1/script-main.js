@@ -732,7 +732,10 @@ else ['#picCam','#picMine'].forEach(k=>{const b=$(k);if(b)b.hidden=true;});
 const framed=()=>{try{return window.parent&&window.parent!==window;}catch(e){return false;}};
 function picChoose(i,j){PICK={i,j};const d=$('#picDlg');if(!d||typeof d.showModal!=='function'){$('#photoIn').click();return;}
   PICL=[];$('#picGrid').innerHTML='';$('#picNote').textContent=framed()?'':'Open this form in the workstation, with Form TK-1 or VS-1 open too, to take their pictures.';
-  $$('[data-picsrc]',d).forEach(b=>{b.disabled=!framed();});d.showModal();}
+  $$('[data-picsrc]',d).forEach(b=>{b.disabled=!framed();});
+  /* v21.87 the dialog sits in the Graphics section, hidden on the Script view: shown from there it was open, modal and 0 x 0,
+     so nothing on the page could be tapped; it opens from the page itself, whatever view is showing */
+  if(d.parentElement!==document.body)document.body.appendChild(d);d.showModal();}
 $('#picDlg').addEventListener('click',e=>{if(e.target.dataset.picclose!==undefined||e.target===e.currentTarget){e.currentTarget.close();}});
 $('#picFile').addEventListener('click',()=>{$('#picDlg').close();$('#photoIn').click();});
 /* the pictogram library beside the forms, fetched when first needed (not in a file opened on its own) */
