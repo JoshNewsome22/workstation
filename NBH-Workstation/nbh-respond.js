@@ -182,7 +182,8 @@
       '.nr .yns .opts{margin:0 0 6px}.nr .yns input{margin:0 0 4px}'+
       '.nr .links{margin:10px 0 0;font-size:15px}.nr .links a{color:var(--navy);font-weight:600;text-decoration:underline}'+
       '.nr .conf{background:#fff;border:1.5px solid var(--teal);border-radius:8px;padding:10px 12px;margin:8px 0}.nr .conf.missing{border-color:var(--red)}.nr .conf .q{margin:0 0 8px;font-size:15px}.nr .conf .req{color:var(--red)}.nr .conf .sub{margin:8px 0 0;color:var(--ink)}'+
-      '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}';
+      '.nr .foot{font-size:12.5px;color:var(--muted);margin:14px 0 0}.nr .miss{color:var(--red);font-weight:600}@media print{.nr .prog,.nr .row,.nr button{display:none}}'+
+      '.nr .me{background:var(--mist);border-radius:6px;padding:8px 12px;margin:6px 0 4px;font-size:15px}.nr .me a{color:var(--navy);font-weight:600;margin-left:6px;text-decoration:underline}.nr input[readonly]{background:#f4f7f6}';
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     /* v21.67 the page in Spanish (P.lang 'es'): every word of the page's own, the items as the assessor pasted them */
     var ES=P.lang==='es';
@@ -207,7 +208,8 @@
       'Sending\u2026':'Enviando\u2026','Sending your answers\u2026':'Enviando sus respuestas\u2026','<b>Sent.</b> Your answers went to {who}. Thank you; you can close this page.':'<b>Enviado.</b> Sus respuestas llegaron a {who}. Gracias; puede cerrar esta p\u00e1gina.',
       '<b>The reply box could not be reached</b> ({e}). Press <b>Open the email</b> below to send your answers by email to {who} instead, or try Send again in a moment.':'<b>No se pudo conectar con el buz\u00f3n de respuestas</b> ({e}). Pulse <b>Abrir el correo</b> abajo para enviar sus respuestas por correo electr\u00f3nico a {who}, o intente Enviar de nuevo en un momento.',
       '<b>Your email program should open now</b> with the message to {who}. Press Send there. If nothing opened, copy the code below and paste it into an email to {to}, or save it as a file and attach it.':'<b>Su programa de correo deber\u00eda abrirse ahora</b> con el mensaje para {who}. Pulse Enviar all\u00ed. Si no se abri\u00f3 nada, copie el c\u00f3digo de abajo y p\u00e9guelo en un correo para {to}, o gu\u00e1rdelo como archivo y adj\u00fantelo.',
-      '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Sus respuestas son m\u00e1s largas de lo que un enlace de correo puede llevar</b> ({n} caracteres, donde caben unos {m}), as\u00ed que no se abri\u00f3 ning\u00fan correo. Pulse <b>Guardar como archivo</b> y adjunte el archivo a un correo para {to}, o <b>Copiar el c\u00f3digo</b> y p\u00e9guelo en el mensaje.'};
+      '<b>Your answers are longer than an email link can carry</b> ({n} characters, where about {m} fit), so no email was opened. Press <b>Save as a file</b> and attach the file to an email to {to}, or <b>Copy the code</b> and paste it into the message.':'<b>Sus respuestas son m\u00e1s largas de lo que un enlace de correo puede llevar</b> ({n} caracteres, donde caben unos {m}), as\u00ed que no se abri\u00f3 ning\u00fan correo. Pulse <b>Guardar como archivo</b> y adjunte el archivo a un correo para {to}, o <b>Copiar el c\u00f3digo</b> y p\u00e9guelo en el mensaje.',
+      'Answering as <b>{n}</b>.':'Responde como <b>{n}</b>.','Not you? change':'\u00bfNo es usted? Cambiar'};
     function _(s,v){var t=ES&&TXT[s]!==undefined?TXT[s]:s;if(v)for(var k in v)t=t.split('{'+k+'}').join(v[k]);return t;}
     var WHO=P.bcba||_('the BCBA');
     if(ES)try{d.documentElement.lang='es';}catch(e){}
@@ -244,6 +246,19 @@
       if(x.type==='yn'){inp=h('select');[['',''],['Yes',_('Yes')],['No',_('No')]].forEach(function(v){inp.appendChild(h('option',{value:v[0],text:v[1]||'—'}));});}
       else{inp=h('input',{type:'text',autocomplete:x.id==='name'?'name':'off'});}
       ex[x.id]=inp;lab.appendChild(inp);g.appendChild(lab);});
+    /* v21.86 a personal link (P.who: the person it was sent to): their name and role filled in and locked, anything else the form
+       knows about them (P.who.fill, by question id) filled, with "Not you? change", which empties these for whoever is answering
+       instead (the reply then names that person, not the one it was sent to, and carries no send id) */
+    var me=P.who&&typeof P.who==='object'&&String(P.who.name||'').trim()?P.who:null,meRole=ex.role||ex.rel||null;
+    if(me){var meLine=h('p',{'class':'me',id:'nbhr-me'});
+      if(ex.name){ex.name.value=String(me.name).trim();ex.name.readOnly=true;}
+      if(meRole&&String(me.role||'').trim()){meRole.value=String(me.role).trim();meRole.readOnly=true;}
+      var meFill=[];if(me.fill&&typeof me.fill==='object')Object.keys(me.fill).forEach(function(k){var x=ex[k],v=String(me.fill[k]==null?'':me.fill[k]).trim();if(!x||!v||x===ex.name||x===meRole)return;   /* what the form already knows about the person, filled (they can change it) */
+        if(x.tagName==='SELECT'){for(var i=0;i<x.options.length;i++)if(x.options[i].value===v){x.value=v;meFill.push(x);break;}}else{x.value=v;meFill.push(x);}});
+      meLine.innerHTML=_('Answering as <b>{n}</b>.',{n:esc(String(me.name).trim())+(String(me.role||'').trim()?' ('+esc(String(me.role).trim())+')':'')});
+      var notMe=h('a',{href:'#',id:'nbhr-notme',text:_('Not you? change')});
+      notMe.addEventListener('click',function(e){e.preventDefault();me=null;[ex.name,meRole].concat(meFill).forEach(function(x){if(x){x.readOnly=false;x.value='';}});meLine.hidden=true;if(ex.name)ex.name.focus();});
+      meLine.appendChild(d.createTextNode(' '));meLine.appendChild(notMe);who.appendChild(meLine);}
     who.appendChild(g);root.appendChild(who);
     /* items */
     var ic=h('div',{'class':'nr-card'});ic.appendChild(h('div',{'class':'band',text:P.itemsHeading||_('The items')}));
@@ -280,7 +295,7 @@
     if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
     root.appendChild(sc);
     function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
-      if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);
+      if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);if(me&&me.sid)r.sid=String(me.sid).slice(0,40);   /* v21.86 the send it answers */
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
     var lastCode='',warnedMiss='',sending=false,sent=false;
@@ -373,6 +388,316 @@
         else{$('#nbhInvBo').select();say('Select the message and copy it.');}}});
     dlg.addEventListener('cancel',function(){setTimeout(function(){dlg.remove();},0);});
     dlg.showModal();$(o.to||last?'#nbhInvBo':'#nbhInvTo').focus();};
+  /* ---- v21.86 one email per person, from the BCBA's school account ----
+     A form asks the workstation (its parent window) to send: {nbh:'mail', id:<form>, req, messages:[{to,name,subject,text}]} (one
+     message per person, at most 60). The workstation confirms with the user, signs in with Google and sends through Gmail, and
+     answers {nbh:'mail-result', req, from, results:[{to,ok,err}]}, or {nbh:'mail-result', req, unavailable:true, why} when it
+     cannot (with declined:true when the user said Not now). A form opened on its own has no parent: unavailable at once.
+     mailFlow shows it happening: who was sent and who was not and why; where the workstation cannot send (and the user did not
+     decline), the iPad's Mail app one person at a time ("Next person (2 of 5)"). onSent(k, how) for each person sent: how is
+     'email' (from the account) or 'mail' (opened in the Mail app). Nothing here stores anything. */
+  var EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  U.mailAsk=function(form,messages,opt){opt=opt||{};return new Promise(function(res){
+    var par=null;try{if(window.parent&&window.parent!==window)par=window.parent;}catch(e){par=null;}
+    if(!par){res({unavailable:true,why:'the form is open on its own, not inside the workstation'});return;}
+    var req='mail-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),over=false,t=0;
+    function end(r){if(over)return;over=true;clearTimeout(t);window.removeEventListener('message',on);res(r);}
+    function on(ev){var x=ev.data;if(!x||typeof x!=='object'||x.nbh!=='mail-result'||x.req!==req)return;if(ev.source&&ev.source!==par)return;
+      if(x.unavailable)end({unavailable:true,declined:!!x.declined,why:String(x.why||'the workstation cannot send email here')});
+      else end({from:String(x.from||''),results:Array.isArray(x.results)?x.results:[]});}
+    window.addEventListener('message',on);
+    t=setTimeout(function(){end({unavailable:true,why:'the workstation did not answer',timeout:true});},opt.wait||300000);
+    if(opt.cancel)opt.cancel(function(){end({unavailable:true,why:'you chose the Mail app',cancelled:true});});
+    try{par.postMessage({nbh:'mail',id:String(form||''),req:req,messages:(messages||[]).slice(0,60).map(function(m){return {to:String(m.to||''),name:String(m.name||''),subject:String(m.subject||''),text:String(m.text||'')};})},'*');}
+    catch(e){end({unavailable:true,why:'the workstation could not be asked'});}});};
+  /* the Mail app with one message (a mailto link); a check can replace this */
+  U.openMail=function(href){var l=document.createElement('a');l.href=href;l.target='_top';l.rel='noopener';document.body.appendChild(l);l.click();l.remove();};
+  U.mailtoOf=function(m){return 'mailto:'+encodeURIComponent(m.to||'').replace(/%40/g,'@')+'?subject='+encodeURIComponent(m.subject||'')+'&body='+encodeURIComponent(m.text||'');};
+  /* the student by first name and last initial ("Mateo Rivera" or "Rivera, Mateo" -> "Mateo R.") */
+  U.shortName=function(full){var t=String(full||'').replace(/\s+/g,' ').trim();if(!t)return '';var first='',last='';
+    if(t.indexOf(',')>=0){var p=t.split(',');last=p[0].trim();first=String(p[1]||'').trim().split(' ')[0]||'';if(!first){first=last;last='';}}
+    else{var w=t.split(' ');first=w[0];if(w.length>2&&/^(jr|sr|ii|iii|iv)\.?$/i.test(w[w.length-1]))w.pop();last=w.length>1?w[w.length-1]:'';}
+    last=last.replace(/[^A-Za-zÀ-ɏ]/g,'');return first+(last?' '+last.charAt(0).toUpperCase()+'.':'');};
+  /* one person's email: a plain greeting, each questionnaire with its own link, the please-send-by date, and how the answers come back.
+     o: {to, name, items:[{title, label, url, due, boxed}], student, bcba, remind, lang} -> {to, name, subject, text} */
+  U.personMail=function(o){o=o||{};var es=o.lang==='es',items=(o.items||[]).filter(function(x){return x&&x.url;}),n=items.length,stu=String(o.student||'').trim();
+    var dot=stu&&/[.!?]$/.test(stu)?'':'.',boxed=items.some(function(x){return !!x.boxed;}),dues=items.map(function(x){return String(x.due||'').trim();}),one=dues.every(function(x){return x===dues[0];}),due=one?dues[0]:'';
+    var subj=(o.remind?(es?'Recordatorio: ':'Reminder: '):'')+(n===1?(items[0].title||(es?'Cuestionario':'Questionnaire')):(es?n+' cuestionarios':n+' questionnaires'))+(stu?(es?' sobre ':' about ')+stu:'');
+    var L=[(es?'Hola':'Hello')+(o.name?' '+o.name:'')+',',''];
+    if(es)L.push((o.remind?'Un recordatorio: todavía no he recibido sus respuestas. ':'')+'Gracias por ayudar con '+(n===1?'este cuestionario':'estos '+n+' cuestionarios')+(stu?' sobre '+stu+dot:'.')+' '+(n===1?'Toma':'Cada uno toma')+' unos minutos en un teléfono, una tableta o una computadora: abra '+(n===1?'el enlace':'cada enlace')+', responda las preguntas y pulse Enviar al final. '+(boxed?'Sus respuestas me llegan directamente cuando pulsa Enviar.':'Sus respuestas me llegan por correo electrónico.'));
+    else L.push((o.remind?'A reminder: I have not received your answers yet. ':'')+'Thank you for helping with '+(n===1?'this questionnaire':'these '+n+' questionnaires')+(stu?' about '+stu+dot:'.')+' '+(n===1?'It takes':'Each takes')+' a few minutes on a phone, tablet or computer: open '+(n===1?'the link':'each link')+', answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.'));
+    L.push('');
+    items.forEach(function(x,i){L.push((n>1?(i+1)+'. ':'')+(x.label||x.title||(es?'Cuestionario':'Questionnaire'))+(!one&&x.due?(es?' (por favor antes del '+x.due+')':' (please send it by '+x.due+')'):'')+':');L.push(x.url);L.push('');});
+    if(due){L.push(es?'Por favor envíe'+(n===1?'lo':'los')+' antes del '+due+'.':'Please send '+(n===1?'it':'them')+' by '+due+'.');L.push('');}
+    L.push(es?'Si un enlace no se abre, responda a este correo y le enviaré el cuestionario como archivo.':'If a link does not open, reply to this email and I will send the questionnaire as a file.');L.push('');
+    L.push(es?'Gracias,':'Thank you,');if(o.bcba)L.push(String(o.bcba));
+    return {to:String(o.to||'').trim(),name:String(o.name||'').trim(),subject:subj,text:L.join('\n')};};
+  U.mailFlow=function(o){o=o||{};var d=document,msgs=(o.messages||[]).slice(0,60),N=msgs.length,onSent=o.onSent||function(){},up=o.onUpdate||function(){};
+    var out={via:'',from:'',sent:[],failed:[],skipped:[],why:'',declined:false,done:false};
+    var name=function(k){var m=msgs[k]||{};return m.name||m.to||('person '+(k+1));};
+    var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    return new Promise(function(resolve){
+      if(!N){out.why='nothing to send';out.done=true;resolve(out);return;}
+      var dlg=d.createElement('dialog');dlg.className='nbh-mail';dlg.setAttribute('aria-labelledby','nbhMailT');
+      var css='.nbh-mail{max-width:600px;width:calc(100vw - 32px);max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;border:0;border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#1b2430}'+
+        '.nbh-mail::backdrop{background:rgba(16,22,28,.5)}.nbh-mail h3{margin:0 0 10px;font:600 18px/1.3 Georgia,serif}.nbh-mail label{display:block;font-weight:600;margin:8px 0 3px}.nbh-mail ul{margin:6px 0;padding-left:20px}.nbh-mail li{margin:3px 0}'+
+        '.nbh-mail input,.nbh-mail textarea{width:100%;box-sizing:border-box;font-family:inherit;font-size:15px;line-height:1.4;padding:8px 10px;border:1px solid #b8c2cc;border-radius:8px}.nbh-mail textarea{min-height:8em;height:30vh;max-height:42vh;resize:vertical}'+
+        '.nbh-mail .b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.nbh-mail button{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;padding:10px 14px;border-radius:10px;border:1px solid #9aa5b1;background:#fff;color:#1b2430;min-height:44px;cursor:pointer}'+
+        '.nbh-mail button.go{background:#1d4a77;border-color:#1d4a77;color:#fff}.nbh-mail .n{font-size:13px;color:#4a5560;margin:8px 0 0}.nbh-mail .st{min-height:1.3em;font-weight:600;margin:8px 0 0}.nbh-mail .bad{color:#8e2a2a}.nbh-mail .okk{color:#2f6b37}';
+      dlg.innerHTML='<style>'+css+'</style><h3 id="nbhMailT"></h3><div class="nbh-mail-body"></div><div class="b"></div><p class="st" role="status" aria-live="polite"></p>';
+      d.body.appendChild(dlg);
+      var T=dlg.querySelector('h3'),Bd=dlg.querySelector('.nbh-mail-body'),Bt=dlg.querySelector('.b'),St=dlg.querySelector('.st'),closed=false,cancel=null;
+      function finish(){if(closed)return;closed=true;out.done=true;try{dlg.close();}catch(e){}dlg.remove();up(out);resolve(out);}
+      function btn(label,cls,fn,da){var b=d.createElement('button');b.type='button';b.textContent=label;if(cls)b.className=cls;if(da)b.setAttribute('data-mf',da);b.addEventListener('click',fn);Bt.appendChild(b);return b;}
+      dlg.addEventListener('cancel',function(e){e.preventDefault();finish();});
+      /* the workstation is asked */
+      T.textContent=(o.remind?'Reminders':'Emails')+' to '+N+' '+(N===1?'person':'people');
+      Bd.innerHTML='<p>Sending '+N+' email'+(N===1?'':'s')+' from your school account, one to each person: '+esc(msgs.map(function(m,k){return name(k);}).join(', '))+'. The workstation asks you to confirm first.</p>';
+      btn('Use the Mail app instead','',function(){if(cancel)cancel();},'mailapp');
+      St.textContent='Waiting for the workstation…';
+      try{dlg.showModal();}catch(e){}
+      U.mailAsk(o.form,msgs,{cancel:function(f){cancel=f;},wait:o.wait}).then(function(r){
+        if(r.unavailable){out.why=r.why||'';
+          if(r.declined){out.via='none';out.declined=true;up(out);if(!closed){T.textContent='Not sent';Bd.innerHTML='<p>Nothing was sent.</p>';Bt.innerHTML='';St.textContent='';btn('Close','go',finish,'close');}return;}
+          out.via='mail';up(out);if(!closed)flow(msgs.map(function(m,k){return k;}),r.why);else resolve(out);return;}
+        out.via='workstation';out.from=r.from||'';var res=r.results||[];
+        msgs.forEach(function(m,k){var to=String(m.to||'').toLowerCase(),x=null;
+          if(res[k]&&String(res[k].to||'').toLowerCase()===to)x=res[k];else for(var i=0;i<res.length;i++)if(res[i]&&String(res[i].to||'').toLowerCase()===to){x=res[i];break;}
+          if(x&&x.ok){out.sent.push(k);try{onSent(k,'email');}catch(e){}}else out.failed.push({k:k,err:x?String(x.err||'not sent'):'the workstation did not report it'});});
+        up(out);if(!closed)results();});
+      function results(){T.textContent=out.failed.length?(out.sent.length?'Sent '+out.sent.length+' of '+N:'Not sent'):'Sent';
+        Bd.innerHTML=(out.sent.length?'<p class="okk"><b>Sent'+(out.from?' from '+esc(out.from):'')+':</b></p><ul>'+out.sent.map(function(k){return '<li>'+esc(name(k))+' ('+esc(msgs[k].to)+')</li>';}).join('')+'</ul>':'')+
+          (out.failed.length?'<p class="bad"><b>Not sent:</b></p><ul>'+out.failed.map(function(f){return '<li>'+esc(name(f.k))+' ('+esc(msgs[f.k].to)+'): '+esc(f.err)+'</li>';}).join('')+'</ul>':'');
+        Bt.innerHTML='';St.textContent='';
+        if(out.failed.length)btn('Open '+(out.failed.length===1?'that one':'those '+out.failed.length)+' in the Mail app','',function(){flow(out.failed.map(function(f){return f.k;}),'');},'retry');
+        btn('Close','go',finish,'close');}
+      /* the Mail app, one person at a time */
+      function flow(ks,why){var j=0;out.via=out.via==='workstation'?'workstation':'mail';
+        function show(){if(j>=ks.length){var op=ks.filter(function(k){return out.sent.indexOf(k)>=0;});T.textContent='Done';
+            Bd.innerHTML='<p>'+op.length+' of '+ks.length+' email'+(ks.length===1?'':'s')+' opened in the Mail app'+(op.length?': '+esc(op.map(name).join(', ')):'')+'.</p>'+(op.length<ks.length?'<p class="bad">Not opened: '+esc(ks.filter(function(k){return op.indexOf(k)<0;}).map(name).join(', '))+'.</p>':'');
+            Bt.innerHTML='';St.textContent='';btn('Close','go',finish,'close');up(out);return;}
+          var k=ks[j],m=msgs[k];T.textContent='Email '+(j+1)+' of '+ks.length+': '+name(k);
+          Bd.innerHTML=(j===0&&why?'<p class="n">The workstation cannot send from here ('+esc(why)+'), so your Mail app opens for one person at a time: press Send there, then come back for the next person.</p>':'')+
+            '<label for="nbhMailTo">To</label><input id="nbhMailTo" type="email" spellcheck="false"><label for="nbhMailSu">Subject</label><input id="nbhMailSu"><label for="nbhMailBo">Message</label><textarea id="nbhMailBo" spellcheck="true"></textarea>';
+          Bd.querySelector('#nbhMailTo').value=m.to||'';Bd.querySelector('#nbhMailSu').value=m.subject||'';Bd.querySelector('#nbhMailBo').value=m.text||'';
+          Bt.innerHTML='';St.textContent='';var cur=function(){return {to:Bd.querySelector('#nbhMailTo').value.trim(),subject:Bd.querySelector('#nbhMailSu').value,text:Bd.querySelector('#nbhMailBo').value};};
+          var nx;btn('Open in Mail','go',function(){var c=cur();if(c.to&&!EMAIL_RE.test(c.to)){St.textContent='That email address does not look complete.';return;}
+            U.openMail(U.mailtoOf(c));if(out.sent.indexOf(k)<0){out.sent.push(k);out.failed=out.failed.filter(function(f){return f.k!==k;});try{onSent(k,'mail');}catch(e){}up(out);}
+            St.textContent='Your Mail app should open with the email to '+name(k)+': press Send there, then come back here.';this.className='';if(nx)nx.className='go';},'open');
+          if(navigator.share)btn('Share…','',function(){var c=cur();navigator.share({title:c.subject,text:c.text}).then(function(){St.textContent='Shared.';},function(){});},'share');
+          btn('Copy the message','',function(){var c=cur(),all=(c.to?'To: '+c.to+'\n':'')+'Subject: '+c.subject+'\n\n'+c.text;
+            if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(all).then(function(){St.textContent='The message is copied: paste it into a new email.';},function(){St.textContent='Copying was refused: select the message and copy it.';});},'copy');
+          nx=btn(j+1<ks.length?'Next person ('+(j+2)+' of '+ks.length+')':'Finish','',function(){if(out.sent.indexOf(k)<0&&out.skipped.indexOf(k)<0)out.skipped.push(k);j++;show();},'next');
+          btn('Close','',finish,'close');}
+        show();}
+    });};
+  /* ---- v21.86 the reply box, a form's side (v21.65 began it in Form IA-1, which keeps its own copy) ----
+     A box per file: a random id, a read token and an ECDH P-256 key pair, the private key kept only in the form's file; registered
+     at the site (tools/reply-box box.php) the first time a page or link is made. The pages carry the address, the id and the public
+     key; the form lists its box with the token, unlocks each reply (ECDH, HKDF-SHA-256 with the box id as salt, AES-GCM-256) and
+     remembers the ids taken, so nothing is placed twice. o: {get() -> the stored box or null, set(box), addr() -> the address typed
+     or remembered, paint()}. */
+  U.boxAddr=function(v){v=String(v||'').trim();
+    if(/^https?:\/\//i.test(v))return /\.php$/i.test(v)?v:v.replace(/\/+$/,'')+(/\/reply$/i.test(v.replace(/\/+$/,''))?'':'/reply')+'/box.php';
+    if(/^https?:$/.test(location.protocol)&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname))return location.origin+'/reply/box.php';return '';};
+  U.boxNorm=function(b){if(!b||typeof b!=='object')return null;var hx=function(v){return /^[a-f0-9]{32}$/.test(String(v||''))?String(v):'';},j=function(v){return /^[A-Za-z0-9_-]{40,50}$/.test(String(v||''))?String(v):'';};
+    var id=hx(b.id),token=hx(b.token),pub=b.pub||{},priv=b.priv||{};if(!id||!token||!j(pub.x)||!j(pub.y)||!j(priv.d)||!j(priv.x)||!j(priv.y))return null;
+    return {id:id,token:token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\//i.test(String(b.site||''))?String(b.site):'',got:(Array.isArray(b.got)?b.got:[]).map(String).slice(-2000),
+      held:(Array.isArray(b.held)?b.held:[]).filter(function(x){return x&&typeof x==='object';}).slice(-300),made:String(b.made||'')};};
+  U.boxClient=function(o){var C={last:''},busy=null,coll=null,S=window.crypto&&crypto.subtle;
+    var hex=function(u){var s='';for(var i=0;i<u.length;i++)s+=(u[i]<16?'0':'')+u[i].toString(16);return s;};
+    var te=function(t){return new TextEncoder().encode(t);},host=function(u){var m=/^https?:\/\/([^\/]+)/i.exec(u||'');return m?m[1]:'';};
+    var msg=function(e){return String((e&&e.message)||e||'no connection');};
+    function B(){return o.get();}
+    function fetchJ(url,opt){return fetch(url,opt).then(function(r){return r.json().then(function(j){return {r:r,j:j};},function(){return {r:r,j:null};});},function(){throw new Error('no connection to '+host(url));})
+      .then(function(x){if(!x.j||typeof x.j!=='object')throw new Error(host(url)+' answered '+x.r.status+(x.r.status===404?' (box.php is not there)':''));if(!x.j.ok)throw new Error(x.j.error||(host(url)+' answered '+x.r.status));return x.j;});}
+    function post(url,b){return fetchJ(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});}
+    function sha(t){return S.digest('SHA-256',te(t)).then(function(h){return hex(new Uint8Array(h));});}
+    function keys(){var kp;return S.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']).then(function(k){kp=k;return Promise.all([S.exportKey('jwk',kp.publicKey),S.exportKey('jwk',kp.privateKey)]);})
+      .then(function(a){var t=new Date();return {id:hex(crypto.getRandomValues(new Uint8Array(16))),token:hex(crypto.getRandomValues(new Uint8Array(16))),pub:{x:a[0].x,y:a[0].y},priv:{d:a[1].d,x:a[1].x,y:a[1].y},site:'',got:[],held:[],made:t.toISOString().slice(0,10)};});}
+    function dec(b,r){var priv,pub;return S.importKey('jwk',{kty:'EC',crv:'P-256',d:b.priv.d,x:b.priv.x,y:b.priv.y,ext:true},{name:'ECDH',namedCurve:'P-256'},false,['deriveBits'])
+      .then(function(k){priv=k;return S.importKey('jwk',{kty:'EC',crv:'P-256',x:r.k.x,y:r.k.y,ext:true},{name:'ECDH',namedCurve:'P-256'},false,[]);})
+      .then(function(k){pub=k;return S.deriveBits({name:'ECDH',public:pub},priv,256);}).then(function(bits){return S.importKey('raw',bits,'HKDF',false,['deriveKey']);})
+      .then(function(hk){return S.deriveKey({name:'HKDF',hash:'SHA-256',salt:te(b.id),info:te('nbh-reply-v1')},hk,{name:'AES-GCM',length:256},false,['decrypt']);})
+      .then(function(aes){return S.decrypt({name:'AES-GCM',iv:unbytes64(r.iv)},aes,unbytes64(r.ct));}).then(function(pt){return JSON.parse(new TextDecoder().decode(pt));});}
+    function paint(){if(o.paint)try{o.paint();}catch(e){}}
+    C.can=function(){return !!(window.crypto&&crypto.subtle&&window.fetch&&window.TextEncoder);};
+    C.url=function(){return U.boxAddr(o.addr?o.addr():'');};
+    C.site=function(){var b=B();return C.url()||(b&&b.site)||'';};
+    C.ready=function(){var b=B();return !!(b&&b.site&&b.site===C.site());};
+    C.link=function(){var b=B();return C.ready()?{u:b.site,b:b.id,k:{x:b.pub.x,y:b.pub.y}}:null;};
+    C.host=host;
+    /* registers the box (once; again at another site); true when the pages and links can carry it */
+    C.ensure=function(){var u=C.site();if(!u||!C.can())return Promise.resolve(false);if(C.ready())return Promise.resolve(true);if(busy)return busy;
+      busy=(B()?Promise.resolve(B()):keys().then(function(b){o.set(b);return b;})).then(function(b){return sha(b.token).then(function(h){return post(u+'?a=new',{b:b.id,t:h});}).then(function(){b.site=u;o.set(b);C.last='';return true;});})
+        .catch(function(e){C.last=msg(e);return false;}).then(function(v){busy=null;paint();return v;});return busy;};
+    /* the replies not yet taken, unlocked: {objs, unread, fresh, all}; null when the box cannot be reached. noEnsure: the box's own
+       site only, nothing registered (the workstation's quiet collect) */
+    C.fetch=function(opt){opt=opt||{};if(coll)return coll;
+      coll=(opt.noEnsure?Promise.resolve(!!(B()&&B().site&&C.can())):C.ensure()).then(function(ok){if(!ok)return null;var b=B();
+        return fetchJ(b.site+'?a=list&b='+encodeURIComponent(b.id)+'&t='+encodeURIComponent(b.token)).then(function(j){var all=j.replies||[],objs=[],unread=0;
+          var fresh=all.filter(function(r){return r&&r.id&&r.k&&r.iv&&r.ct&&b.got.indexOf(r.id)<0;});
+          return fresh.reduce(function(p,r){return p.then(function(){return dec(b,r).then(function(x){if(x&&typeof x==='object'){x.at=String(r.at||'');objs.push(x);}else unread++;},function(){unread++;}).then(function(){b.got.push(r.id);});});},Promise.resolve())
+            .then(function(){if(b.got.length>2000)b.got=b.got.slice(-2000);o.set(b);C.last='';return {objs:objs,unread:unread,fresh:fresh.length,all:all.length};});});})
+        .catch(function(e){C.last=msg(e);return null;}).then(function(v){coll=null;paint();return v;});return coll;};
+    /* the replies taken are removed from the site (they stay in the file) */
+    C.purge=function(){var b=B();if(!b||!b.got.length||!C.ready())return Promise.resolve(null);
+      return post(b.site+'?a=del&b='+encodeURIComponent(b.id),{t:b.token,ids:b.got.slice(-300)}).then(function(j){C.last='';paint();return j;},function(e){C.last=msg(e);paint();return null;});};
+    C.line=function(){var u=C.site(),b=B(),t;
+      if(!C.can())t='This browser cannot lock answers (no WebCrypto): the pages send email.';
+      else if(!u)t='No reply box: the answers come by email. Put the workstation on its website, or enter the box address.';
+      else if(C.ready())t='Reply box ready at '+host(u)+': '+b.got.length+' repl'+(b.got.length===1?'y':'ies')+' collected'+(b.held.length?', '+b.held.length+' held':'')+'.';
+      else t='Reply box at '+host(u)+': registered when the first page or link is made.';
+      if(C.last)t+=' '+C.last.charAt(0).toUpperCase()+C.last.slice(1).replace(/\.?$/,'.');return t;};
+    return C;};
+  /* ---- v21.86 the reply box and one-email-per-person for Forms IN-1, SV-1 and CF-1 (Form IA-1 has its send-out board) ----
+     The form's record keeps rb: {box (U.boxNorm), sends:[{id, name, role, email, pg (page type), round, sent, how, due, rem, back,
+     from}], placed (replies placed in all), last (the date of the last), addr (the box address)}. The Respondent pages dialog gains
+     a list of the people to send to (one email each, a link of their own: their name and role filled on the page, the student by
+     first name and last initial), Email everyone not sent yet, Remind everyone not back, and the box's address; Collect responses
+     gains Collect from the reply box, the replies held (they did not fit), and Remove the collected replies from the site. The form
+     collects quietly when it opens with a box, and every minute while it is open; window.__nbhBoxCollect does it for the
+     workstation with no dialog. cfg: {form, rec() -> the record, payload(pg, round) -> the form's page for that type and round,
+     inst(pg, round), pages() -> [[key, label]], pageOf(role) -> key, round() -> the dialog's round ('' when none), people() ->
+     [{name, role}] on the sheet, place(objs) -> {placed:[o], held:[{o, why}], done:['...'], cells}, force(o) -> the same for one
+     held reply placed anyway (or null), changed() (re-render; autosave notices), short() -> the student's short name, bcba(),
+     why() -> a reason pages cannot be made now, or '', fill(send) -> what the form already knows about that person, by the page's
+     question ids (optional; filled on the page, not locked)}. */
+  U.rbNorm=function(x){x=x&&typeof x==='object'?x:{};var s=function(v){return v==null||typeof v==='object'?'':String(v);},iso=function(v){v=s(v);return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:'';};
+    return {box:U.boxNorm(x.box),sends:(Array.isArray(x.sends)?x.sends:[]).filter(function(o){return o&&typeof o==='object';}).slice(-300).map(function(o){
+        return {id:s(o.id).slice(0,40)||('s'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36)),name:s(o.name),role:s(o.role),email:s(o.email).trim(),pg:s(o.pg),round:s(o.round),sent:iso(o.sent),how:s(o.how),due:s(o.due),rem:iso(o.rem),back:iso(o.back),from:s(o.from)};}),
+      placed:Math.max(0,parseInt(x.placed,10)||0),last:iso(x.last),addr:/^https?:\/\//i.test(s(x.addr))?s(x.addr):''};};
+  U.replyKit=function(cfg){var d=document,K={};
+    var $=function(q,r){return (r||d).querySelector(q);};
+    var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+    var pad=function(n){return (n<10?'0':'')+n;},today=function(){var t=new Date();return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());};
+    var mdy=function(i){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(i||'');};
+    var iso=function(t){t=String(t||'').trim();var m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+pad(+m[2])+'-'+pad(+m[3]);m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(t);return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+pad(+m[1])+'-'+pad(+m[2]):'';};
+    var newId=function(){return 's'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36);};
+    var DEV='nbh.reply.box';
+    function rb(){var s=cfg.rec();if(!s)return U.rbNorm(null);if(!s.rb||!s.rb.__k){s.rb=U.rbNorm(s.rb);try{Object.defineProperty(s.rb,'__k',{value:1,enumerable:false});}catch(e){}}return s.rb;}
+    function devAddr(){try{var a=localStorage.getItem(DEV)||'';if(a)return a;var o=JSON.parse(localStorage.getItem('nbh.ia1.respondent')||'{}');return String(o['rp.box']||'');}catch(e){return '';}}
+    function addr(){var e=$('#rbBox');return ((e&&e.value)||rb().addr||devAddr()||'').trim();}
+    var C=U.boxClient({get:function(){return rb().box;},set:function(b){rb().box=b;},addr:addr,paint:function(){paintBox();}});K.client=C;
+    function ping(){try{var n=$('#rbNote');if(n)n.dispatchEvent(new Event('change',{bubbles:true}));}catch(e){}}
+    function changed(){try{cfg.changed();}catch(e){}ping();}
+    function toast(t,kind){try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,kind?{kind:kind}:{});}catch(e){}}
+    /* ---- the dialog's parts ---- */
+    function inject(){var dl=$(cfg.dlg||'#rpDlg'),body=dl&&$('.gf-body',dl);if(!body||$('#rbSend'))return;
+      if(!$('#nbh-rb-css')){var st=d.createElement('style');st.id='nbh-rb-css';st.textContent='.nbh-rb{border-top:1px solid #cfdad8;margin:12px 0 0;padding:10px 0 0}.nbh-rb-h{font-weight:700;margin:0 0 4px}.nbh-rb-t input,.nbh-rb-t select{width:100%;box-sizing:border-box;font:inherit;font-size:13px;padding:4px 6px;border:1px solid #b7c8c5;border-radius:3px;background:#fff}.nbh-rb-t td{vertical-align:top}.nbh-rb-t button{min-width:32px}.nbh-rb .f{display:block}.nbh-rb .f label{display:block;margin:8px 0 3px}.nbh-rb .f input{display:block;width:100%;box-sizing:border-box}.nbh-rb-scroll{overflow-x:auto;max-width:100%}@media print{.nbh-rb{display:none!important}}';d.head.appendChild(st);}
+      var w=d.createElement('div');w.id='rbSend';w.className='nbh-rb noprint';
+      w.innerHTML='<div class="nbh-rb-h">Send it to each person, one email each</div>'+
+        '<p class="hint">Each person gets a link of their own: the page opens with their name and role filled in and shows the student by first name and last initial. With the reply box their answers come straight back into this form when they press Send; without it, the email with the answer code comes to you as before.</p>'+
+        '<div class="nbh-rb-scroll"><table class="gf-t nbh-rb-t"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Page</th><th>Status</th><th></th></tr></thead><tbody id="rbRows"></tbody></table></div>'+
+        '<div class="gf-row"><button type="button" id="rbFromSheet">Add the people on the sheet</button><button type="button" id="rbAdd">+ Person</button></div>'+
+        '<div class="gf-row"><button type="button" class="primary" id="rbSendAll">Email everyone not sent yet</button><button type="button" id="rbRemind">Remind everyone not back</button></div>'+
+        '<p class="hint" id="rbNote" aria-live="polite"></p>'+
+        '<div class="f"><label for="rbBox">Reply box on your website (the answers come straight back to this form; leave blank for the site this workstation is on)</label><input id="rbBox" type="url" placeholder="https://newsomebh.com/reply/box.php"></div>'+
+        '<p class="hint" id="rbBoxLine" aria-live="polite"></p>';
+      body.appendChild(w);
+      var rc=$(cfg.rc||'#rcDlg'),rcb=rc&&$('.gf-body',rc);
+      if(rcb){var x=d.createElement('div');x.className='nbh-rb noprint';x.id='rbRc';
+        x.innerHTML='<div class="gf-row"><button type="button" class="primary" id="rbCollect">Collect from the reply box</button><button type="button" id="rbPurge">Remove the collected replies from the site</button></div><p class="hint" id="rbCollectLine" aria-live="polite"></p><div id="rbHeld"></div>';
+        var first=rcb.firstElementChild;rcb.insertBefore(x,first?first.nextSibling:null);}
+      $('#rbRows').addEventListener('input',edit);$('#rbRows').addEventListener('change',edit);
+      $('#rbRows').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-x]');if(!b)return;var tr=b.closest('tr'),r=rb();r.sends=r.sends.filter(function(s){return s.id!==tr.getAttribute('data-id');});paintRows();changed();});
+      $('#rbAdd').addEventListener('click',function(){rb().sends.push({id:newId(),name:'',role:'',email:'',pg:(cfg.pages()[0]||[''])[0],round:round(),sent:'',how:'',due:'',rem:'',back:'',from:''});paintRows();var ins=d.querySelectorAll('#rbRows input[data-f="name"]');if(ins.length)ins[ins.length-1].focus();});
+      $('#rbFromSheet').addEventListener('click',function(){var n=fromSheet();$('#rbNote').textContent=n?n+' added from the sheet. Add their emails, then press Email everyone not sent yet.':'Everyone named on the sheet is on the list already.';});
+      $('#rbSendAll').addEventListener('click',function(){K.send(false);});$('#rbRemind').addEventListener('click',function(){K.send(true);});
+      $('#rbBox').addEventListener('input',function(){paintBox();});
+      $('#rbBox').addEventListener('change',function(){var v=$('#rbBox').value.trim();rb().addr=/^https?:\/\//i.test(v)?v:'';try{if(/^https?:\/\//i.test(v))localStorage.setItem(DEV,v);}catch(e){}changed();C.ensure().then(function(){paintBox();});});
+      $('#rbCollect').addEventListener('click',function(){K.collect(false);});
+      $('#rbPurge').addEventListener('click',function(){var b=rb().box;if(!b||!b.got.length)return;
+        var go=function(){C.purge().then(function(j){var t=j?j.deleted+' repl'+(j.deleted===1?'y':'ies')+' removed from the site.':'';paintBox();if(t){$('#rbCollectLine').textContent=t;toast(t,'ok');}});};
+        if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove the '+b.got.length+' collected repl'+(b.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'}).then(function(y){if(y)go();});else go();});
+      $('#rbHeld').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-hadd],button[data-hdrop]');var bx=rb().box;if(!b||!bx)return;var i=+(b.getAttribute('data-hadd')!=null?b.getAttribute('data-hadd'):b.getAttribute('data-hdrop')),o=bx.held[i];if(!o)return;bx.held.splice(i,1);
+        if(b.getAttribute('data-hdrop')==null&&cfg.force){var p=Object.assign({},o);delete p.why;var r=cfg.force(p);if(r)after(r,false);}
+        paintHeld();paintBox();changed();});
+      /* the dialog opens: the box is registered (when a site is known) so the links carry it; the list is drawn while it is open */
+      dl.addEventListener('close',function(){var tb=$('#rbRows');if(tb)tb.innerHTML='';});
+      var rpb=$('#rpBtn');if(rpb)rpb.addEventListener('click',function(){setTimeout(function(){var e=$('#rbBox');if(e&&!e.value)e.value=rb().addr||devAddr()||'';paintRows();paintBox();if(C.site())C.ensure();},0);});
+      ['#rpRound','#rpRole','#rpInst'].forEach(function(q){var e=$(q);if(e)e.addEventListener('change',function(){if(dl.open)paintRows();});});
+      var em=$('#rpEmail');if(em)em.addEventListener('input',paintBtns);
+      var rcbtn=$('#rcBtn');if(rcbtn)rcbtn.addEventListener('click',function(){setTimeout(function(){paintBox();paintHeld();},0);});
+      /* a code pasted into Collect responses marks its person back as well */
+      rc&&rc.addEventListener('click',function(e){if(!(e.target&&e.target.id==='rcGo'))return;var a=null;try{a=typeof rcData!=='undefined'?rcData:null;}catch(err){a=null;}if(!a)return;
+        var picked=Array.prototype.slice.call(d.querySelectorAll('#rcOut [data-rc]:checked')).map(function(cb){var i=+cb.getAttribute('data-rc');return a.list?a.list[i]:a.rows&&a.rows[i]?a.rows[i].o:null;}).filter(Boolean);
+        setTimeout(function(){var n=0;picked.forEach(function(o){if(markBack(o))n++;});var r=rb();r.placed+=picked.length;if(picked.length)r.last=today();changed();},0);},true);}
+    function round(){return cfg.round?String(cfg.round()||''):'';}
+    function rows(){var rd=round();return rb().sends.filter(function(s){return s.round===rd;});}
+    function status(s){return s.back?'Back '+mdy(s.back)+(s.from&&s.from.toLowerCase()!==s.name.toLowerCase()?' from '+s.from:''):s.sent?'Sent '+mdy(s.sent)+(s.how==='mail'?' (Mail app)':'')+(s.rem?'; reminded '+mdy(s.rem):''):'Not sent yet';}
+    function paintRows(){var tb=$('#rbRows'),dl=$(cfg.dlg||'#rpDlg');if(!tb)return;if(dl&&!dl.open){tb.innerHTML='';return;}var list=rows(),pg=cfg.pages();
+      tb.innerHTML=list.map(function(s){var id=esc(s.id);return '<tr data-id="'+id+'"><td><input id="rb-n-'+id+'" data-f="name" value="'+esc(s.name)+'" aria-label="Name"></td><td><input id="rb-r-'+id+'" data-f="role" value="'+esc(s.role)+'" aria-label="Role"></td><td><input id="rb-e-'+id+'" data-f="email" type="email" spellcheck="false" value="'+esc(s.email)+'" aria-label="Email"></td>'+
+        '<td><select id="rb-p-'+id+'" data-f="pg" aria-label="Page">'+pg.map(function(p){return '<option value="'+esc(p[0])+'"'+(p[0]===s.pg?' selected':'')+'>'+esc(p[1])+'</option>';}).join('')+'</select></td><td class="rb-st">'+esc(status(s))+'</td><td><button type="button" data-x="1" title="Take this person off the list" aria-label="Take this person off the list">×</button></td></tr>';}).join('')||
+        '<tr><td colspan="6" class="hint">No one on the list'+(round()&&cfg.roundName?' for '+esc(cfg.roundName(round())):'')+' yet: press Add the people on the sheet, or + Person.</td></tr>';
+      paintBtns();}
+    function paintBtns(){var list=rows(),ns=list.filter(function(s){return !s.sent;}).length,nb=list.filter(function(s){return s.sent&&!s.back;}).length,why=cfg.why?cfg.why():'';
+      var a=$('#rbSendAll'),b=$('#rbRemind');if(!a)return;a.textContent='Email everyone not sent yet'+(ns?' ('+ns+')':'');b.textContent='Remind everyone not back'+(nb?' ('+nb+')':'');a.disabled=!ns||!!why;b.disabled=!nb||!!why;}
+    function edit(e){var el=e.target.closest&&e.target.closest('[data-f]');if(!el)return;var tr=el.closest('tr'),s=rb().sends.find(function(x){return x.id===tr.getAttribute('data-id');});if(!s)return;
+      var f=el.getAttribute('data-f'),v=f==='email'?el.value.trim():el.value;s[f]=v;
+      if(f==='role'&&e.type==='change'&&!s.sent){var g=cfg.pageOf(s.role);if(g){s.pg=g;var sel=tr.querySelector('[data-f="pg"]');if(sel)sel.value=g;}}
+      if(f==='name'&&e.type==='change'&&!s.email){var o=rb().sends.find(function(x){return x!==s&&x.email&&x.name.trim().toLowerCase()===s.name.trim().toLowerCase();});if(o){s.email=o.email;var ie=tr.querySelector('[data-f="email"]');if(ie)ie.value=o.email;}}
+      if(e.type==='change')changed();paintBtns();}
+    /* the respondents on the sheet with a name, not yet on the list for this round; an email they had before comes along */
+    function fromSheet(){var rd=round(),r=rb(),n=0;(cfg.people()||[]).forEach(function(p){var nm=String(p.name||'').trim();if(!nm)return;var low=nm.toLowerCase();
+        if(r.sends.some(function(s){return s.round===rd&&s.name.trim().toLowerCase()===low;}))return;var old=r.sends.find(function(s){return s.email&&s.name.trim().toLowerCase()===low;});
+        r.sends.push({id:newId(),name:nm,role:String(p.role||'').trim(),email:old?old.email:'',pg:p.pg||cfg.pageOf(p.role)||(cfg.pages()[0]||[''])[0],round:rd,sent:'',how:'',due:'',rem:'',back:'',from:''});n++;});
+      if(n){paintRows();changed();}return n;}
+    /* ---- the pages ---- */
+    K.withBox=function(p){var l=C.link();if(!p||!l)return p;p.box=l;var who=p.bcba||'the BCBA';
+      if(p.instructions)p.instructions=String(p.instructions).replace(/When you have finished, press Send:[\s\S]*$/,'When you have finished, press Send: your answers go straight to '+who+'.');return p;};
+    K.base=function(){return location.href.replace(/[#?].*$/,'').replace(/[^\/]*$/,'')+'respond.html';};
+    K.personPayload=function(s){var p=cfg.payload(s.pg,s.round);if(!p)return null;p=K.withBox(p);p.who={name:s.name.trim(),role:s.role.trim(),sid:s.id};var fl=cfg.fill?cfg.fill(s):null;if(fl&&Object.keys(fl).length)p.who.fill=fl;var sh=cfg.short&&cfg.short();if(sh)p.student=sh;
+      var due=($('#rpDue')&&$('#rpDue').value.trim())||s.due;if(due)p.due=due;return p;};
+    K.personLink=function(s){var p=K.personPayload(s);return p?K.base()+U.payloadToHash(p):'';};
+    /* Email everyone not sent yet / Remind everyone not back: one email each, through the workstation or the Mail app */
+    K.send=function(remind){var note=$('#rbNote'),say=function(t){if(note)note.textContent=t;};var why=cfg.why?cfg.why():'';if(why){say(why);return Promise.resolve(null);}
+      if(!/^https?:$/.test(location.protocol)){say('Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.');return Promise.resolve(null);}
+      var list=rows().filter(function(s){return remind?s.sent&&!s.back:!s.sent;}),skip=[];
+      var go=list.filter(function(s){if(!s.name.trim()){skip.push('a person with no name');return false;}if(!EMAIL_RE.test(s.email)){skip.push(s.name.trim()+' (no email)');return false;}return true;});
+      if(!go.length){say(skip.length?'Nothing sent: '+skip.join(', ')+'.':remind?'No one to remind: everyone sent is back.':'Everyone on the list has been sent the page.');return Promise.resolve(null);}
+      return (C.site()?C.ensure():Promise.resolve(false)).then(function(){
+        var due=($('#rpDue')&&$('#rpDue').value.trim())||'';go.forEach(function(s){if(due&&!remind)s.due=due;});
+        var msgs=go.map(function(s){var p=K.personPayload(s);return U.personMail({to:s.email,name:s.name.trim(),items:[{title:p.title||'Questionnaire',label:p.title||'Questionnaire',url:K.base()+U.payloadToHash(p),due:p.due||'',boxed:!!p.box}],student:p.student,bcba:cfg.bcba?cfg.bcba():p.bcba,remind:remind});});
+        var mark=function(k,how){var s=go[k];if(!s)return;if(remind)s.rem=today();else{s.sent=today();s.how=how==='mail'?'mail':'email';}paintRows();changed();};
+        var sum=function(out){var t=out.declined?'Not sent.':out.via==='workstation'?'Sent '+out.sent.length+' of '+go.length+' email'+(go.length===1?'':'s')+(out.from?' from '+out.from:'')+(out.sent.length?' ('+out.sent.map(function(k){return go[k].name.trim();}).join(', ')+')':'')+'.'+(out.failed.length?' Not sent: '+out.failed.map(function(f){return go[f.k].name.trim()+' ('+go[f.k].email+'): '+f.err;}).join('; ')+'.':'')
+            :out.via==='mail'?out.sent.length+' of '+go.length+' opened in the Mail app'+(out.sent.length?' ('+out.sent.map(function(k){return go[k].name.trim();}).join(', ')+')':'')+'; the workstation could not send ('+out.why+').':'';
+          if(skip.length&&t)t+=' Left out: '+skip.join(', ')+'.';if(t)say(t);};
+        return U.mailFlow({form:cfg.form,messages:msgs,remind:remind,onSent:mark,onUpdate:sum});});};
+    /* ---- collecting ---- */
+    function markBack(o){var r=rb(),nm=String(o.name||'').trim().toLowerCase(),s=null;if(o.sid)s=r.sends.find(function(x){return x.id===o.sid;})||null;
+      if(!s&&nm)s=r.sends.find(function(x){return !x.back&&x.name.trim().toLowerCase()===nm&&cfg.inst(x.pg,x.round)===o.inst;})||null;
+      if(!s)return false;s.back=iso(o.date)||today();s.from=String(o.name||'').trim();if(!s.sent){s.sent=s.back;s.how=s.how||'collected';}return true;}
+    function after(res,quiet){var r=rb(),n=(res.placed||[]).length;(res.placed||[]).forEach(markBack);r.placed+=n;if(n)r.last=today();
+      if(n){changed();var t='Collected '+(res.done||[]).join('; ')+' from the reply box'+(res.cells!=null?': '+res.cells+' answers':'')+'.';var ln=$('#rbCollectLine');if(ln)ln.textContent=t;toast(t,'ok');}
+      paintHeld();paintBox();paintRows();return n;}
+    var inflight=null;
+    K.collect=function(quiet,opt){if(inflight)return inflight;
+      inflight=C.fetch(opt).then(function(f){if(!f){paintBox();return null;}var bx=rb().box,mine=f.objs.filter(function(o){return o.form===cfg.form;}),res={placed:[],held:[],done:[],cells:0};
+          if(mine.length){try{res=cfg.place(mine)||res;}catch(e){res={placed:[],held:mine.map(function(o){return {o:o,why:'error'};}),done:[]};}}
+          (res.held||[]).forEach(function(h){bx.held.push(Object.assign({},h.o,{why:h.why||'fit'}));});
+          var n=after(res,quiet),out={ok:true,placed:n,held:(res.held||[]).length,unread:f.unread+(f.objs.length-mine.length),fresh:f.fresh,all:f.all};
+          if(!n){var t=out.held?out.held+' repl'+(out.held===1?'y is':'ies are')+' held below (they do not fit this form).':out.unread?out.unread+' repl'+(out.unread===1?'y':'ies')+' could not be read (not for this file).':f.all?'Nothing new: every reply in the box is placed already.':'Nothing in the box yet.';
+            if(out.held||out.unread)changed();var ln=$('#rbCollectLine');if(ln&&!quiet)ln.textContent=t;if(!quiet)toast(t,out.held||out.unread?'err':'');}
+          return out;})
+        .then(function(v){inflight=null;return v;},function(e){inflight=null;C.last=String((e&&e.message)||e);paintBox();return null;});return inflight;};
+    function paintBox(){var t=C.line();['#rbBoxLine','#rbCollectLine'].forEach(function(q){var e=$(q);if(e&&(q==='#rbBoxLine'||!e.textContent||/^(Reply box|No reply box|This browser)/.test(e.textContent)))e.textContent=t;});var pb=$('#rbPurge'),bx=rb().box;if(pb)pb.disabled=!(bx&&bx.got.length);}
+    function paintHeld(){var h=$('#rbHeld');if(!h)return;var held=(rb().box&&rb().box.held)||[];
+      h.innerHTML=held.map(function(o,i){return '<div class="gf-warn rb-held"><b>Reply'+(o.name?' from '+esc(o.name):'')+(o.inst?' ('+esc(o.inst)+')':'')+'</b>: '+(o.why==='fit'?'it does not fit this form (its items or questions differ from this form’s).':o.why==='error'?'it could not be placed.':esc(o.why))+' '+
+        (cfg.force?'<button type="button" data-hadd="'+i+'">Place it anyway</button> ':'')+'<button type="button" data-hdrop="'+i+'">Discard</button></div>';}).join('');}
+    /* ---- the workstation's side ---- */
+    K.out=function(){var r=rb();if(!r.box&&!r.sends.length&&!r.placed)return null;var o={placed:r.placed,waiting:r.sends.filter(function(s){return s.sent&&!s.back;}).length,held:r.box?r.box.held.length:0};if(r.last)o.last=r.last;return o;};
+    window.__nbhBoxCollect=function(){var b=rb().box;if(!b||!b.site||!C.can())return Promise.resolve({ok:true,placed:0,held:0,err:''});
+      return K.collect(true,{noEnsure:true}).then(function(x){return x?{ok:true,placed:x.placed,held:x.held,err:''}:{ok:false,placed:0,held:0,err:C.last||'the reply box could not be reached'};},function(e){return {ok:false,placed:0,held:0,err:String((e&&e.message)||e)};});};
+    var was=window.__nbhFactsOut;window.__nbhFactsOut=function(){var r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}var x=null;try{x=K.out();}catch(e){x=null;}if(!x)return r;
+      var o=r&&typeof r==='object'?r:{},rep={};rep[cfg.form]=x;o.replies=Object.assign({},o.replies||{},rep);return o;};
+    /* opened with a box (a file, the workstation's copy): one quiet collect; then every minute while the form is in view */
+    var timer=0;K.opened=function(){var b=rb().box;if(!b||!b.site||!C.can())return;K.collect(true);
+      if(!timer)timer=setInterval(function(){var bx=rb().box;if(!d.hidden&&bx&&bx.site&&C.ready())K.collect(true);},60000);};
+    var fi=$('#fileIn');if(fi)fi.addEventListener('change',function(){setTimeout(K.opened,1200);});
+    d.addEventListener('visibilitychange',function(){if(!d.hidden){var bx=rb().box;if(bx&&bx.site&&C.ready())K.collect(true);}});
+    K.rb=rb;K.paint=function(){paintRows();paintBox();paintHeld();};K.markBack=markBack;
+    inject();setTimeout(K.opened,1500);return K;};
   /* ---- the generated page: everything inline, nothing to fetch ---- */
   U.pageHTML=function(payload){var json=JSON.stringify(payload).replace(/<\//g,'<\\/');var t=(payload.title||payload.inst||'Questionnaire')+(payload.student?' · '+payload.student:'');
     return '<!DOCTYPE html>\n<html lang="'+(payload&&payload.lang==='es'?'es':'en')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>'+t.replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];})+'</title></head>\n<body><div id="nbhr"></div>\n'+
