@@ -1021,6 +1021,36 @@ td input,td select{max-width:100%}
     <div class="drow"><div class="dlab">Setting constraints</div><div class="dval"><textarea name="m.constraints" placeholder="Staff ratio; who can implement; whether breaks away from the group are feasible; tolerance for any problem behavior; whether the reinforcer can be withheld; classroom disruption limits"></textarea></div></div>
     <div class="drow"><div class="dlab">Severity and safety</div><div class="dval"><textarea name="m.safety" placeholder="TB-1 urgency level; injury history; size and physical management; medical clearance" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <!-- v21.83 (M): every reduction target in the case, each with its function and the parts of this plan that address it
+       (td-v2183). Filled from the case while empty; editable; saved in tg.rows; printed here and on the final plan. -->
+  <div id="td83Block">
+    <style>
+    /* v21.83 (M) */
+    #td83Block .td83-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0}
+    #td83Tbl{min-width:640px}
+    #td83Tbl td{vertical-align:top}
+    #td83Tbl td input[type=text],#td83Tbl td textarea,#td83Tbl td select{font:inherit;font-size:12px;width:100%;box-sizing:border-box;min-height:34px}
+    #td83Tbl td textarea{min-height:34px}
+    #td83Tbl .td83-part label{display:flex;align-items:center;gap:6px;min-height:34px;font-size:11.5px}
+    #td83Tbl .td83-part input[type=checkbox]{width:20px;height:20px;margin:0}
+    #td83Tbl .td83-st{font-size:11.5px;line-height:1.4}
+    #td83Tbl .td83-st .td83-flag{display:block;color:var(--ink);font-weight:700}
+    #td83Tbl .td83-st .td83-ok{display:block;color:var(--ink-soft)}
+    #td83Block .td83-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin:2px 0 6px}
+    #td83Block .td83-bar{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+    #td83Final .td83-p{margin:0 0 6px;padding:0 8px;font-size:12.5px;line-height:1.5}
+    #td83Final .td83-p .td83-flag{font-weight:600}
+    @media print{#td83Tbl{min-width:0}#td83Tbl td input,#td83Tbl td textarea,#td83Tbl td select{border:0;background:transparent}#td83Tbl td input[type=text]:placeholder-shown{display:none}#td83Block .td83-wrap{overflow:visible}}
+    </style>
+    <h3 class="sub">Targets in This Plan</h3>
+    <p class="td83-hint">Every reduction target in the case (Forms TB-1 and FS-1), with its function and the parts of this plan that address it: tick a part, or write a short note. A target whose function differs from the plan&rsquo;s main function needs strategies of its own.</p>
+    <div id="td83Sum" class="warn" role="status" aria-live="polite" hidden></div>
+    <div class="td83-wrap" tabindex="0" role="region" aria-label="Targets in this plan">
+    <table class="rank cmp" id="td83Tbl"><thead><tr><th style="width:22%">Target and definition</th><th style="width:14%">Function</th><th style="width:15%">Antecedent strategies</th><th style="width:15%">Replacement and teaching</th><th style="width:15%">Consequence and responding</th><th>Status</th><th class="noprint" style="width:7%"></th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="td83-bar noprint"><button type="button" class="tool" id="td83Add">Add a target</button><button type="button" class="tool" id="td83Tick">Tick what the plan already covers</button></div>
+    <textarea name="tg.rows" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
+  </div>
   <h3 class="sub">Assessment Add-Ons: A-CSA, Process-versus-Product, and Component FA (EA-1 variants)</h3>
   <p class="method" style="margin-top:0">Fill only the rows that apply. The augmented competing-stimulus assessment (A-CSA) and the process-versus-product analysis come from the EA-1 arranging/ordering variant (Fergus et al., 2026; Hagopian et al., 2020); the component-FA rows come from the EA-1 sequential-EO / sequential-consequence variant (Bann &amp; Morris, 2026). The treatment level of the competing-stimulus package on the Antecedents sheet is read from the A-CSA phase entered here.</p>
   <div class="defs">
@@ -1422,6 +1452,7 @@ td input,td select{max-width:100%}
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div id="finalHead"></div>
+  <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <div id="finalBody"></div>
   <!-- v21.82 (I): what a BIP also has to say: why the plan is least restrictive, who collects which data, social validity,
        the review date and the exit criteria, the student and family considerations, and the team meeting that adopted
@@ -5167,6 +5198,124 @@ window.__nbhFactsOut=function(){
   window.addEventListener('beforeprint',()=>{renderRevs();render();});
   window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect'){renderRevs();render();}});
   const go=()=>{renderRevs();render();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
+})();
+</script>
+<script id="td-v2183">
+/* v21.83 (M) every target in the plan. The plan hub had one target behavior and one function, while Forms TB-1 and FS-1
+   can carry several reduction targets with different functions. "Targets in this plan" (Setup sheet) lists each target
+   from the case (TB-1's problem behaviors, then any FS-1 target TB-1 lacks): its definition, its function (FS-1's for that
+   target, else TB-1's, else blank = the plan's main function) and the parts of this plan that address it (antecedent
+   strategies, replacement and teaching, consequence and responding), each a tick or a short note. Filled from the case
+   while the table is empty (later fills only complete a row's empty definition or function); a target sharing the plan's
+   function gets the parts the plan already has ticked. Flags: a target with no part ticked or noted ("Not addressed by the
+   plan yet") and a target whose function differs from the plan's main function (needs its own strategies). Kept as one
+   hidden named field (tg.rows) so Save data, Open data and the safety copy carry it; printed on the Setup sheet and the
+   final plan; Copy for the BIP lists every target with its definition and function. Facts out: plan.targets
+   [{label, def, fn, fnDiffers, ant:bool|text, teach, respond, covered}], and plan.beh = the first target when empty. */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),low=v=>T(v).toLowerCase().replace(/\s+/g,' ');
+  const q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]'),g=n=>T((fld(n)||{}).value);
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const poke=e=>{try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}};
+  const FN=[['escape','Escape / avoidance'],['attention','Attention'],['tangible','Tangible / activity'],['automatic','Automatic'],['multiple','Multiple control']];
+  const fnLab=k=>(FN.find(x=>x[0]===k)||[0,''])[1];
+  const FNW=[['escape',/escape|avoid/i],['attention',/attention/i],['tangible',/tangible|activity|item/i],['automatic',/automatic|nonsocial|sensory/i],['multiple',/multiple|more than one|synthesi/i]];
+  const fnKey=s=>{const k=low(s);if(!k||/unknown|unclear|undetermined/.test(k))return '';if(FN.some(x=>x[0]===k))return k;const h=FNW.find(w=>w[1].test(k));return h?h[0]:'';};
+  const PARTS=[['ant','antecedent strategies'],['teach','replacement and teaching'],['respond','consequence and responding']];
+  const isRep=b=>!!(b&&(b.isRep||/replacement|alternative/i.test(b.type||'')));
+  /* ---- the rows, kept in tg.rows ---- */
+  let self=false;
+  const clean=r=>{const o={label:T(r.label),def:T(r.def),fn:fnKey(r.fn)};PARTS.forEach(([k])=>{o[k]=!!r[k];o[k+'N']=T(r[k+'N']);});return o;};
+  const rows=()=>{try{const a=JSON.parse(g('tg.rows')||'[]');return Array.isArray(a)?a.filter(x=>x&&typeof x==='object').map(clean):[];}catch(e){return [];}};
+  const putRows=a=>{const e=fld('tg.rows');if(!e)return;e.value=a.length?JSON.stringify(a.map(clean)):'';self=true;poke(e);self=false;};
+  const planFn=()=>g('m.fn');
+  const effFn=r=>r.fn||planFn();
+  const differs=r=>{const p=planFn();return !!(r.fn&&p&&p!=='multiple'&&r.fn!==p);};
+  const covered=r=>PARTS.some(([k])=>r[k]||r[k+'N']);
+  /* what the plan already has: antecedent cards or arrangements, teaching cards or a replacement, the responding steps */
+  function planHas(){let p=null;try{const o=window.__td83BaseOut?window.__td83BaseOut():null;p=o&&o.plan;}catch(e){p=null;}p=p||{};const rs=p.respond||{};
+    return {ant:!!((p.ant||[]).length||(p.antCards||[]).length),teach:!!((p.teach||[]).length||T(p.rep)),respond:!!(T(rs.prec)||T(rs.target)||T(rs.after))};}
+  function tickFromPlan(a){const H=planHas(),pf=planFn();let n=0;if(!pf)return 0;
+    a.forEach(r=>{if(effFn(r)!==pf)return;PARTS.forEach(([k])=>{if(H[k]&&!r[k]){r[k]=true;n++;}});});return n;}
+  /* ---- the table ---- */
+  function partCell(r,k,lab,i){return `<td class="td83-part"><label><input type="checkbox" data-f="${k}" id="td83${k}${i}"${r[k]?' checked':''} aria-label="Target ${i+1}: ${lab}"> Addressed</label>`+
+    `<input type="text" data-f="${k}N" value="${esc(r[k+'N'])}" placeholder="note" aria-label="Target ${i+1}: ${lab}, note"></td>`;}
+  function statusHtml(r){const L=[];if(!covered(r))L.push('<span class="td83-flag">Not addressed by the plan yet</span>');
+    if(differs(r))L.push('<span class="td83-flag">Function differs from the plan&rsquo;s ('+esc(fnLab(planFn()).toLowerCase())+'): needs its own strategies</span>');
+    if(!L.length)L.push('<span class="td83-ok">Addressed by: '+PARTS.filter(([k])=>r[k]||r[k+'N']).map(x=>x[1]).join(', ')+'</span>');return L.join('');}
+  function renderTable(){const tb=q('#td83Tbl tbody');if(!tb)return;const A=rows(),pf=planFn();
+    tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td><input type="text" data-f="label" value="${esc(r.label)}" placeholder="target behavior" aria-label="Target ${i+1}"><textarea data-f="def" rows="2" placeholder="definition" aria-label="Target ${i+1}: definition">${esc(r.def)}</textarea></td>`+
+      `<td><select data-f="fn" class="inline" aria-label="Target ${i+1}: function"><option value="">${pf?'The plan&rsquo;s ('+esc(fnLab(pf))+')':'The plan&rsquo;s function'}</option>${FN.map(x=>`<option value="${x[0]}"${r.fn===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></td>`+
+      PARTS.map(([k,lab])=>partCell(r,k,lab,i)).join('')+`<td class="td83-st">${statusHtml(r)}</td><td class="noprint"><button type="button" class="tool td83-x" data-k="${i}" aria-label="Remove target ${i+1}">Remove</button></td></tr>`).join('')
+      :'<tr class="td83-none"><td colspan="7" class="td83-hint">No target listed yet: they are filled from the case (Forms TB-1 and FS-1), or use Add a target.</td></tr>';
+    renderSum(A);}
+  function renderStatus(){const A=rows();document.querySelectorAll('#td83Tbl tbody tr[data-k]').forEach(tr=>{const r=A[+tr.dataset.k],c=tr.querySelector('.td83-st');if(r&&c)c.innerHTML=statusHtml(r);});renderSum(A);}
+  function renderSum(A){const box=q('#td83Sum');if(!box)return;const un=A.filter(r=>T(r.label)&&!covered(r)),df=A.filter(r=>T(r.label)&&differs(r));
+    box.hidden=!(un.length||df.length);
+    box.innerHTML=box.hidden?'':'<b>Targets to plan for</b>'+[un.length?'Not addressed by the plan yet: '+un.map(r=>esc(r.label)).join(', ')+'.':'',
+      df.length?'A function other than the plan&rsquo;s ('+esc(fnLab(planFn()).toLowerCase())+'): '+df.map(r=>esc(r.label)+' ('+esc(fnLab(r.fn).toLowerCase())+')').join(', ')+'; each needs strategies matched to its own function.':''].filter(Boolean).join(' ');}
+  function readTable(){return [...document.querySelectorAll('#td83Tbl tbody tr[data-k]')].map(tr=>{const o={};tr.querySelectorAll('[data-f]').forEach(e=>{o[e.dataset.f]=e.type==='checkbox'?e.checked:e.value;});return clean(o);});}
+  /* ---- the lines (the final plan and Copy for the BIP) ---- */
+  function lines(){return rows().filter(r=>T(r.label)).map((r,i)=>{const f=effFn(r),parts=PARTS.filter(([k])=>r[k]||r[k+'N']).map(([k,lab])=>lab+(r[k+'N']?' ('+r[k+'N']+')':''));
+    return {r,text:(i+1)+'. '+r.label+(r.def?': '+r.def.replace(/[.\s]+$/,'')+'.':'.')+' Function: '+(f?fnLab(f).toLowerCase():'not recorded')+(r.fn?'':f?' (the plan\'s)':'')+
+      (differs(r)?', not the plan\'s main function ('+fnLab(planFn()).toLowerCase()+'): it needs strategies of its own.':'.')+
+      (parts.length?' Addressed by: '+parts.join('; ')+'.':' Not addressed by the plan yet.'),flag:!parts.length||differs(r)};});}
+  function renderFinal(){const box=q('#td83Final');if(!box)return;const L=lines();
+    box.innerHTML=L.length?'<div class="plan-group">Targets in this plan</div>'+L.map(x=>'<p class="td83-p">'+(x.flag?'<span class="td83-flag">':'')+esc(x.text)+(x.flag?'</span>':'')+'</p>').join(''):'';}
+  function renderAll(){renderTable();renderFinal();}
+  /* Copy for the BIP: wraps v21.82's hook (bipText calls it); the single target line gives way to the list */
+  const was82=window.__td82Bip;
+  window.__td82Bip=function(B,o){try{const L=lines();if(L.length){const k=B.findIndex(b=>b&&b[0]==='TARGET BEHAVIOR AND FUNCTION');
+      if(k>=0){const b=B[k].filter((x,j)=>!(j>0&&/^Target behavior: /.test(String(x||''))));b.splice(1,0,'Targets in this plan:',...L.map(x=>x.text));B[k]=b;}
+      else B.splice(1,0,['TARGETS IN THIS PLAN'].concat(L.map(x=>x.text)));}}catch(e){}
+    return was82?was82.apply(this,arguments):undefined;};
+  /* Open data (restore calls v21.82's sync) */
+  const wasSync=window.__td82Sync;
+  window.__td82Sync=function(){const r=wasSync?wasSync.apply(this,arguments):undefined;try{renderAll();}catch(e){}return r;};
+  /* ---- facts in: the targets from the case, only while the table is empty; afterwards a row's empty definition or function ---- */
+  function caseTargets(f){const tb=(f.behaviors||[]).filter(b=>b&&T(b.label)&&!isRep(b)),fs=(f.behaviorsFS||[]).filter(b=>b&&T(b.label)&&!isRep(b));
+    const per=(f.fn&&Array.isArray(f.fn.perBehavior)?f.fn.perBehavior:[]).filter(b=>b&&T(b.label));
+    const byL=(a,l)=>a.find(b=>low(b.label)===low(l));
+    const out=[];const add=(b)=>{if(out.some(x=>low(x.label)===low(b.label)))return;const s=byL(fs,b.label)||{},p=byL(per,b.label)||{};
+      out.push(clean({label:T(b.label),def:T(b.def)||T(s.def),fn:fnKey(s.fnKey)||fnKey(s.fn)||fnKey(p.fnKey)||fnKey(p.fn)||fnKey(b.fnKey)||fnKey(b.fn)}));};
+    tb.forEach(add);fs.forEach(add);return out;}
+  const wasIn=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){f=f||{};let r=null,cap='';const U=window.nbhUI,ot=U&&U.toast;
+    if(ot)U.toast=function(m){if(/^From the case: /.test(String(m))){cap=String(m).replace(/^From the case: /,'').replace(/\.$/,'');return;}return ot.apply(this,arguments);};
+    try{r=wasIn?wasIn.apply(this,arguments):null;}catch(e){r={filled:0,note:''};}finally{if(ot)U.toast=ot;}
+    r=r&&typeof r==='object'?r:{filled:0,note:''};let n=0,lab='';
+    try{const C=caseTargets(f),A=rows();
+      if(C.length&&!A.some(x=>T(x.label))){tickFromPlan(C);putRows(C);n=C.length;lab=C.length===1?'the target in this plan':'the '+C.length+' targets in this plan';}
+      else if(C.length){let k=0;A.forEach(x=>{const c=C.find(y=>low(y.label)===low(x.label));if(!c)return;if(!x.def&&c.def){x.def=c.def;k++;}if(!x.fn&&c.fn){x.fn=c.fn;k++;}});
+        if(k){putRows(A);n=k;lab='the targets\' definitions and functions';}}
+      renderAll();
+    }catch(e){}
+    const all=[cap,lab].filter(Boolean);
+    if(all.length&&ot)ot.call(U,'From the case: '+all.join(', ')+'.',{kind:'ok'});
+    return {filled:(r.filled||0)+n,note:[T(r.note),lab?'placed '+lab:''].filter(Boolean).join('; ')};};
+  /* ---- facts out ---- */
+  const wasOut=window.__nbhFactsOut;window.__td83BaseOut=wasOut;
+  window.__nbhFactsOut=function(){let r=null;try{r=wasOut?wasOut.apply(this,arguments):null;}catch(e){r=null;}
+    try{const A=rows().filter(x=>T(x.label));if(A.length){r=r||{};r.plan=r.plan||{src:'TD-1'};
+      r.plan.targets=A.map(x=>{const o={label:x.label};if(x.def)o.def=x.def;o.fn=effFn(x);o.fnDiffers=differs(x);PARTS.forEach(([k])=>{o[k]=x[k+'N']||x[k];});o.covered=covered(x);return o;});
+      if(!T(r.plan.beh))r.plan.beh=A[0].label;}}catch(e){}
+    return r;};
+  /* ---- wiring ---- */
+  document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+    if(t.closest('#td83Add')){const A=rows();A.push(clean({label:A.length?'':g('m.beh')}));putRows(A);renderAll();const tr=q('#td83Tbl tbody tr[data-k="'+(A.length-1)+'"] [data-f="label"]');if(tr)tr.focus();return;}
+    if(t.closest('#td83Tick')){const A=rows(),n=tickFromPlan(A);if(n)putRows(A);renderAll();
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast(n?'Ticked '+n+' plan '+(n===1?'part':'parts')+' for the targets that share the plan\'s function.':(planFn()?'Nothing to tick: the plan has no further part for the targets that share its function.':'Choose the plan\'s function first.'),{kind:n?'ok':'info'});return;}
+    const x=t.closest('.td83-x');if(x){const k=+x.dataset.k,go=()=>{const A=rows();A.splice(k,1);putRows(A);renderAll();};
+      if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove target '+(k+1)+' from this plan\'s list?',{ok:'Remove',danger:true}).then(y=>{if(y)go();});else go();return;}
+    const v=t.closest('#viewSeg button[data-view]');if(v&&(v.dataset.view==='final'||v.dataset.view==='setup'))setTimeout(renderAll,0);});
+  const onEdit=e=>{const t=e.target;if(!t)return;
+    if(t.closest&&t.closest('#td83Tbl tbody')&&t.dataset&&t.dataset.f){putRows(readTable());renderStatus();renderFinal();return;}
+    if(t.name==='tg.rows'){if(!self)renderAll();return;}
+    if(t.name==='m.fn')renderAll();};
+  document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
+  window.addEventListener('beforeprint',renderAll);
+  window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect')renderAll();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAll);else renderAll();
 })();
 </script>
 

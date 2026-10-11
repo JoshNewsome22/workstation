@@ -4232,6 +4232,120 @@ function prExit82Render(){let el=document.getElementById('prExit82');const v=doc
   rv.log=L;rv.exitReady=prExitReady();o.review=rv;return o;};}
 renderAll();
 </script>
+<style id="pr1-v2183-css">
+/* v21.83 (M) results by target */
+#pr83Sec{margin-top:12px}
+#pr83Tbl{min-width:760px}
+#pr83Tbl td{vertical-align:top}
+#pr83Tbl td input,#pr83Tbl td select{min-height:30px}
+#pr83Tbl .pr83-chg{white-space:nowrap;font-variant-numeric:tabular-nums}
+#pr83Tbl .pr83-rule{font-size:11.5px;line-height:1.4}
+#pr83Tbl .pr83-sug{display:block;font-size:11px;color:var(--ink-soft,#555);margin-top:2px}
+#pr83Tbl .pr83-unit{display:block;font-size:11px;color:var(--ink-soft,#555)}
+#pr83Sec .pr83-bar{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+@media print{#pr83Tbl{min-width:0}#pr83Tbl .pr83-sug{display:none}}
+</style>
+<script id="pr1-v2183">
+/* v21.83 (M) results by target. PR-1 judged one target behavior and one replacement, while the plan (Form TD-1) can hold
+   several reduction targets. "Results by target" (question 2) has a row per target: its baseline mean, its current mean
+   and the school days in the current phase (from Form DD-1, matched by name), the change from baseline, whether this
+   form's decision rule is met (a reduction of review.rules.improvePct, 25%, after at least minDays, 10, school days in the
+   phase), and a decision for that target (continue, modify, reassess, fade), suggested from the same cut-offs as the
+   overall suggestion (60% or more: fade; 25% or more: continue; less than a 10% rise: modify; a 10% rise or more:
+   reassess; too few days, or integrity below the criterion: continue). The overall decision in section 4 stays as it is.
+   The rows are named from TD-1's plan.targets, else TB-1's problem behaviors, else DD-1's target behaviors; the case fills
+   only empty cells (the rows only while the table holds none). Kept in S.tg (saved, opened, the safety copy), printed with
+   question 2. Closing a review adds a short per-target line to the log entry (targets) and clears this period's figures
+   and decisions, keeping the targets and their baselines. Out: review.targets [{name, unit, base, cur, days, chg, met,
+   decision}]. */
+const PR83_F=['name','unit','dir','base','cur','days','decision','note'];
+const PR83_DEC=[['continue','Continue'],['modify','Modify'],['reassess','Reassess'],['fade','Fade']];
+const pr83R=()=>({improvePct:25,minDays:10,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90});
+const pr83Row=o=>{const r={};PR83_F.forEach(k=>{const v=o&&o[k];r[k]=v==null||typeof v==='object'?'':String(v);});return r;};
+const pr83Low=v=>prT(v).toLowerCase().replace(/\s+/g,' ');
+function pr83Tg(){if(!Array.isArray(S.tg))S.tg=[];return S.tg;}
+/* the reading of one row: the change, the rule, the suggested decision */
+function pr83Read(r){const R=pr83R(),b=prN(r.base),c=prN(r.cur),d=prN(r.days),up=r.dir==='increase';
+  const o={b,c,d,chg:null,met:false,state:'',rule:'',sug:''};
+  if(b==null||c==null){o.state='not judged';o.rule='Not judged: '+(b==null&&c==null?'no baseline or current mean':b==null?'no baseline mean':'no current mean')+'.';return o;}
+  if(!(b>0)){o.state='not judged';o.rule='Not judged: the baseline is 0, so no change is computed.';return o;}
+  o.chg=(c-b)/b*100;const good=up?o.chg:-o.chg,txt=relTxt(o.chg)+' baseline';
+  if(d!=null&&d<R.minDays){o.state='too few days';o.rule='Too few days ('+d+' of '+R.minDays+'): '+txt+', not judged yet.';o.sug='continue';return o;}
+  o.met=good>=R.improvePct;o.state=o.met?'met':'not met';
+  o.rule=(o.met?'Met: ':'Not met: ')+txt+(d!=null?' over '+d+' school day'+(d===1?'':'s'):'')+(o.met?'':', short of the '+R.improvePct+'% '+(up?'increase':'reduction'))+'.';
+  const ip=prN(S.meta.intPct);
+  if(ip!=null&&ip<R.integrity)o.sug='continue';
+  else o.sug=good>=R.fadePct?'fade':o.met?'continue':-good<R.reassessPct?'modify':'reassess';
+  return o;}
+function pr83SugTxt(r,o){if(!o.sug)return '';const ip=prN(S.meta.intPct),R=pr83R();
+  return 'Suggested: '+o.sug+(o.state==='too few days'?' (too few days to judge)':ip!=null&&ip<R.integrity?' (integrity below '+R.integrity+'%: address implementation first)':'')+'.';}
+function pr83Sec(){let s=document.getElementById('pr83Sec');if(s)return s;const at=document.getElementById('dataMetrics');if(!at)return null;
+  s=document.createElement('div');s.id='pr83Sec';const R=pr83R();
+  s.innerHTML='<h3>Results by Target</h3><p class="hint">One row per reduction target in the plan (Form TD-1&rsquo;s targets, else Form TB-1&rsquo;s), with the baseline and current means from Form DD-1 matched by name. The rule: a '+R.improvePct+'% reduction from baseline after at least '+R.minDays+' school days in the current phase. Each target gets its own decision; the overall decision stays in section 4. Filled from the case into empty cells only.</p>'+
+    '<div class="grid-wrap" tabindex="0" role="region" aria-label="Results by target"><table class="rt pr-grid" id="pr83Tbl"><thead><tr><th style="width:18%">Target</th><th style="width:9%">Baseline mean</th><th style="width:9%">Current mean</th><th style="width:8%">Days in phase</th><th style="width:8%">Change</th><th style="width:20%">Rule ('+R.improvePct+'%, '+R.minDays+' days)</th><th style="width:12%">Decision</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>'+
+    '<div class="pr83-bar noprint"><button type="button" class="tool" id="pr83Add">Add target</button></div>';
+  at.parentNode.insertBefore(s,at.nextSibling);return s;}
+function pr83Cells(tr,r){const o=pr83Read(r);const c=tr.querySelector('.pr83-chg'),u=tr.querySelector('.pr83-rule'),g=tr.querySelector('.pr83-sug');
+  if(c)c.textContent=o.chg==null?'—':pctTxt(o.chg);if(u)u.textContent=o.rule;if(g)g.textContent=r.decision&&r.decision===o.sug?'':pr83SugTxt(r,o);}
+function pr83Render(){const s=pr83Sec();if(!s)return;const tb=s.querySelector('tbody'),A=pr83Tg();
+  const inp=(i,k,lab,num)=>`<input${num?' type="number" step="any"':''} data-k="${i}" data-f="${k}" value="${prEsc(A[i][k])}" aria-label="Target ${i+1}: ${lab}">`;
+  tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td>${inp(i,'name','name')}${r.unit?'<span class="pr83-unit">'+prEsc(r.unit)+(r.dir==='increase'?', to increase':'')+'</span>':''}</td><td>${inp(i,'base','baseline mean',1)}</td><td>${inp(i,'cur','current mean',1)}</td><td>${inp(i,'days','school days in the current phase',1)}</td>`+
+    `<td class="n pr83-chg"></td><td class="pr83-rule"></td><td><select data-k="${i}" data-f="decision" aria-label="Target ${i+1}: decision"><option value=""></option>${PR83_DEC.map(x=>`<option value="${x[0]}"${r.decision===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select><span class="pr83-sug noprint"></span></td>`+
+    `<td><textarea data-k="${i}" data-f="note" rows="1" class="pr-line" aria-label="Target ${i+1}: note">${prEsc(r.note)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint pr83-x" data-k="${i}" aria-label="Remove target ${i+1}">&times;</button></td></tr>`).join('')
+    :'<tr class="pr83-none"><td colspan="9" class="hint">No target listed yet. Inside the workstation the targets are filled from the case (Forms TD-1, TB-1 and DD-1); or use Add target.</td></tr>';
+  tb.querySelectorAll('tr[data-k]').forEach(tr=>pr83Cells(tr,A[+tr.dataset.k]));}
+/* the per-target line for the log */
+function pr83Line(){return pr83Tg().filter(r=>prT(r.name)).map(r=>{const o=pr83Read(r);
+  return prT(r.name)+' '+(o.chg==null?'change not computed':pctTxt(o.chg))+' ('+o.state+')'+(r.decision?', '+r.decision:'');}).join('; ');}
+/* ---- the case ---- */
+function pr83Names(f){const pt=f.plan&&Array.isArray(f.plan.targets)?f.plan.targets.map(t=>t&&prT(t.label)).filter(Boolean):[];if(pt.length)return pt;
+  const tb=(Array.isArray(f.behaviors)?f.behaviors:[]).filter(b=>b&&prT(b.label)&&!(b.isRep||/replacement|alternative/i.test(b.type||''))).map(b=>prT(b.label));if(tb.length)return tb;
+  return [];}
+function pr83Match(D,name){const n=pr83Low(name);if(!n)return null;return D.find(b=>pr83Low(b.name)===n)||D.find(b=>{const m=pr83Low(b.name);return m&&(m.indexOf(n)>=0||n.indexOf(m)>=0);})||null;}
+function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.behaviors:[]).filter(b=>b&&prT(b.name));
+  let A=pr83Tg(),k=0;
+  if(!A.some(r=>prT(r.name))){const N=pr83Names(f);
+    D.filter(b=>(b.kind||'target')==='target'&&!N.some(n=>pr83Match([b],n))).forEach(b=>N.push(prT(b.name)));
+    if(!N.length)return 0;A=S.tg=N.map(n=>pr83Row({name:n}));k+=N.length;}
+  A.forEach(r=>{const b=pr83Match(D,r.name);if(!b)return;const put=(key,v)=>{if(v==null||v===''||prT(r[key]))return;r[key]=String(v);k++;};
+    put('unit',b.unit);if(!r.dir&&b.direction)r.dir=String(b.direction);
+    put('base',b.base&&prN(b.base.mean)!=null?b.base.mean:null);
+    put('cur',b.cur&&prN(b.cur.mean)!=null?b.cur.mean:(b.base?null:b.mean));
+    put('days',b.cur&&prN(b.cur.days)!=null?b.cur.days:(b.base?null:b.days));});
+  A.forEach(r=>{if(r.decision)return;const o=pr83Read(r);if(o.sug&&prN(r.cur)!=null){r.decision=o.sug;k++;}});
+  return k;}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{k=pr83Fill(f||{});if(k){pr83Render();const el=document.querySelector('#pr83Tbl [data-f]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){k=0;}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the results by target from Forms TD-1 and DD-1'].filter(Boolean).join('; ')};};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  const A=pr83Tg().filter(x=>prT(x.name));if(!A.length)return r;const o=r&&typeof r==='object'?r:{};
+  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  rv.targets=A.map(x=>{const q=pr83Read(x),t={name:prT(x.name)};if(x.unit)t.unit=x.unit;t.base=q.b;t.cur=q.c;if(q.d!=null)t.days=q.d;
+    t.chg=q.chg==null?null:Math.round(q.chg*10)/10;t.met=q.met;t.decision=x.decision||'';if(prT(x.note))t.note=prT(x.note);return t;});
+  o.review=rv;return o;};}
+/* ---- the record: saved, opened, rendered; the log line when a review closes ---- */
+{const ff=fromFile;fromFile=function(d){const s=ff.apply(this,arguments);const x=d&&typeof d.S==='object'&&d.S?d.S:{};
+  if(!Array.isArray(s.log))s.log=[];/* the keys in the order a record built on the form has them */
+  if(Array.isArray(x.tg))s.tg=x.tg.filter(y=>y&&typeof y==='object'&&!Array.isArray(y)).map(pr83Row);return s;};}
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);try{pr83Render();}catch(e){}return r;};}
+PR_LOGF.push('targets');
+{const le=prLogEntry;prLogEntry=function(){const e=le.apply(this,arguments);const t=pr83Line();if(t)e.targets=t;return e;};}
+{const lr=prLogRender;prLogRender=function(){const r=lr.apply(this,arguments);try{const L=Array.isArray(S.log)?S.log.slice().reverse():[];
+  document.querySelectorAll('#prLogTbl tbody tr').forEach((tr,i)=>{const e=L[i],c=tr.children[2];if(e&&e.targets&&c&&!c.querySelector('.pr83-log'))c.insertAdjacentHTML('beforeend',(c.textContent?'<br>':'')+'<small class="pr83-log">By target: '+prEsc(e.targets)+'</small>');});}catch(e){}return r;};}
+{const pc=prCloseReview;prCloseReview=async function(){const ok=await pc.apply(this,arguments);
+  if(ok){pr83Tg().forEach(r=>{r.cur='';r.days='';r.decision='';r.note='';});pr83Render();}return ok;};}
+/* typing in the table changes the record; the readings follow each keystroke (the rows are rebuilt only on add or remove) */
+const pr83Edit=e=>{const t=e.target;if(!t||!t.closest||!t.closest('#pr83Tbl tbody')||!t.dataset||!t.dataset.f)return;const A=pr83Tg(),r=A[+t.dataset.k];if(!r)return;
+  r[t.dataset.f]=t.value;const tr=t.closest('tr');if(tr)pr83Cells(tr,r);};
+document.addEventListener('input',pr83Edit);document.addEventListener('change',pr83Edit);
+document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.m==='intPct')document.querySelectorAll('#pr83Tbl tbody tr[data-k]').forEach(tr=>pr83Cells(tr,pr83Tg()[+tr.dataset.k]));});
+document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest('#pr83Add')){pr83Tg().push(pr83Row({}));pr83Render();const el=document.querySelector('#pr83Tbl tbody tr:last-child [data-f="name"]');if(el){el.focus();el.dispatchEvent(new Event('input',{bubbles:true}));}return;}
+  const x=t.closest('.pr83-x');if(x){const k=+x.dataset.k,A=pr83Tg(),r=A[k];if(!r)return;
+    const go=()=>{A.splice(k,1);pr83Render();const el=document.querySelector('[data-m="date"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));};
+    if(PR83_F.some(f=>prT(r[f]))&&window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove target '+(k+1)+(prT(r.name)?' ('+prT(r.name)+')':'')+' from the results?',{ok:'Remove',danger:true}).then(y=>{if(y)go();});else go();}});
+pr83Render();
+</script>
 
 <script>
 /* ===================== NBH student packet =====================
