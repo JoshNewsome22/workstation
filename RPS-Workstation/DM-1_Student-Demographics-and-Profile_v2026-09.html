@@ -3449,6 +3449,17 @@ window.__nbhFactsOut=function(){
   if(Object.keys(h).length||d.iep||d.reeval){o=o||{};o.profile=o.profile||{src:'DM-1'};if(Object.keys(h).length)o.profile.health=h;if(d.iep||d.reeval)o.profile.dates=d;}
  }catch(e){}
  return o;};})();
+/* v21.82 the profile also carries the home language (with whether the family needs an interpreter, and the kind and the ELL
+   status as notes) and the cultural, religious or dietary considerations, for Forms FS-1 and TD-1. Wrapped; only parts with an
+   entry are sent, and interpreter is true or false only when the field is answered. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+ try{const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
+  const home=g('s.lang'),interp=g('s.interp'),ell=g('s.ell'),culture=g('pf.culture'),L={};
+  if(home)L.home=home;if(interp)L.interpreter=/^Yes/.test(interp);
+  const notes=[/^Yes:/.test(interp)?'Interpreter: '+interp.replace(/^Yes:\s*/,''):'',ell].filter(Boolean).join('; ');if(notes&&(home||interp))L.notes=notes;
+  if(Object.keys(L).length||culture){o=o||{};o.profile=o.profile||{src:'DM-1'};if(Object.keys(L).length)o.profile.language=L;if(culture)o.profile.culture=culture;}
+ }catch(e){}
+ return o;};})();
 </script>
 
 <script>

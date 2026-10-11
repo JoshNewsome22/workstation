@@ -8695,6 +8695,51 @@ function ddGsIncOn(){let n=0;const g=S.gs;if(!g||g.on===false||!g.applied)return
 {const rh1=ddIncRowHtml;ddIncRowHtml=function(i){let h=rh1.apply(this,arguments);try{if(i&&i.counted&&i.gsc){const b=ddIncBeh(i),r=S.rows.find(x=>x.date===i.date);
   h=h.replace("On the day&rsquo;s count",b&&ddGsOwns(r,b.id)?"On the day&rsquo;s count, on top of the sheet&rsquo;s number":"On the sheet&rsquo;s day count while the sheet is in use");}}catch(e){}return h;};}
 </script>
+<script id="dd-v2182">
+/* ===================================================================================================
+   v21.82 (1) the family's home language (f.profile.language {home, interpreter} from Form DM-1, else Form TD-1's plan
+   considerations): when an interpreter is asked for or the language is not English, the note for home shows a flag on
+   screen, to have it translated or explained by an interpreter before it goes home. The flag is never part of the note's
+   text, its copy or its print, and nothing is translated here. (2) each phase line on the graphs carries the decision of
+   the Form PR-1 review that started it: a closed review in f.review.log dated within 3 school days of the first day of a
+   condition labels that condition's line ("Modified 10/14 (PR-1)"), on screen and on paper. Labels only: the analysis
+   does not change.
+   =================================================================================================== */
+"use strict";
+const DD_PR1_DEC={continue:"Continued",modify:"Modified",reassess:"Reassessed",fade:"Faded",exit:"Exit"};
+function ddLangInfo(){const f=ddCaseFacts||{},L=(f.profile&&f.profile.language)||{},C=(f.plan&&f.plan.considerations)||{};
+  const home=String(L.home||C.language||"").trim(),intp=L.interpreter===true||(L.interpreter===undefined&&C.interpreter===true);
+  if(!intp&&(!home||/^\s*english(\s+only)?\s*\.?\s*$/i.test(home)))return null;return {home,intp};}
+function ddHnLang(){const d=document.getElementById("dlgHomeNote");if(!d)return;let el=d.querySelector("#hnLang");const x=ddLangInfo();
+  if(!x){if(el)el.remove();return;}
+  if(!el){const s=d.querySelector("#hnSub");if(!s)return;el=document.createElement("div");el.id="hnLang";el.className="nbh-lang-flag noprint no-print";el.setAttribute("role","note");s.parentNode.insertBefore(el,s.nextSibling);}
+  el.innerHTML=`<b>Before this goes home.</b> Home language: ${esc(x.home||"not recorded (an interpreter is asked for)")}. Have this translated or explained by an interpreter (the district’s interpreter service) before it goes home.`;}
+{const hn0=ddHomeNote;ddHomeNote=function(){const r=hn0.apply(this,arguments);try{ddHnLang();}catch(e){}return r;};}
+/* the PR-1 review whose date is nearest the first day of a condition, within 3 school days (Monday to Friday) */
+function ddSchoolGap(a,b){let x=ddDayNo(a),y=ddDayNo(b);if(x>y)[x,y]=[y,x];let n=0;for(let d=x+1;d<=y&&n<=10;d++){const w=new Date(d*864e5).getUTCDay();if(w!==0&&w!==6)n++;}return n;}
+function ddPr1Log(){const r=ddCaseFacts&&ddCaseFacts.review,L=r&&Array.isArray(r.log)?r.log:[];return L.filter(e=>e&&ddIsoOk(e.date));}
+function ddPr1For(date){if(!ddIsoOk(date))return null;let best=null,bg=99;ddPr1Log().forEach(e=>{const g=ddSchoolGap(date,e.date);if(g<=3&&g<bg){bg=g;best=e;}});return best;}
+function ddPr1Text(e){const k=String(e.decision||"").toLowerCase(),p=e.date.split("-");return (DD_PR1_DEC[k]||(k?k.charAt(0).toUpperCase()+k.slice(1):"Reviewed"))+" "+(+p[1])+"/"+(+p[2])+" (PR-1)";}
+function ddPr1Svg(svg,rows,conds){if(!svg||!Array.isArray(conds)||conds.length<2||!ddPr1Log().length)return {svg,n:0};
+  const m=/data-plot="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg);if(!m)return {svg,n:0};
+  const l=+m[1],t=+m[2],iw=+m[3],xEnd=ddPlotEnd(rows),X=i=>l+(xEnd<=0?iw/2:i*iw/xEnd),sans=ddSans();let g="",n=0;
+  conds.forEach((c,ci)=>{const i=c&&Array.isArray(c.rowIdx)?c.rowIdx[0]:null;if(!ci||i==null||i>xEnd)return;const r=rows[i]||{},e=ddPr1For(r.date);if(!e)return;
+    const x=(X(i-1)+X(i))/2,txt=ddPr1Text(e),w=ddTextW(txt,10.5,700,sans),right=x+5+w<=l+iw-2;n++;
+    g+=`<text class="dd-pr1" data-date="${esc(e.date)}" x="${(right?x+5:x-5).toFixed(1)}" y="${(t+30).toFixed(1)}" font-size="10.5" font-weight="700" fill="#254657" text-anchor="${right?"start":"end"}" stroke="#fff" stroke-width="3" stroke-linejoin="round" paint-order="stroke">${esc(txt)}<title>Form PR-1 review on ${esc(shortDay(e.date))}: ${esc(e.decisionText||e.decision||"")}<\/title><\/text>`;});
+  if(!g)return {svg,n:0};const k=svg.lastIndexOf("</svg>");return {svg:svg.slice(0,k)+`<g class="dd-pr1s">${g}</g>`+svg.slice(k),n};}
+{const bc3=buildChart;buildChart=function(beh,rows,conds){const svg=bc3.apply(this,arguments);try{const o=ddPr1Svg(svg,rows,conds);if(o.n)ddDrawn.pr1=o.n;return o.svg;}catch(e){return svg;}};}
+{const pc1=pairChart;pairChart=function(a1,b1,a2,b2,rows,conds){const svg=pc1.apply(this,arguments);try{const o=ddPr1Svg(svg,rows,conds);if(o.n&&ddPairDrawn)ddPairDrawn.pr1=o.n;return o.svg;}catch(e){return svg;}};}
+{const le2=ddLegendExtra;ddLegendExtra=function(d){const h=le2.apply(this,arguments);return h+(d&&d.pr1?`<span><b class="dd-pr1-k">PR-1<\/b> the review that started the phase<\/span>`:"");};}
+/* every reading of the case: the graphs again when the reviews changed; the flag on an open note for home */
+let ddPr1Sig="[]";
+{const fi2=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=fi2?fi2.apply(this,arguments):{filled:0};
+  try{const sig=JSON.stringify(ddPr1Log().map(e=>[e.date,e.decision]));if(sig!==ddPr1Sig){ddPr1Sig=sig;if(typeof renderResults==="function")renderResults();}ddHnLang();}catch(e){}return r;};}
+/* the block's few rules, from here (this version adds this one block to the form and nothing else) */
+if(!document.getElementById("dd-v2182-css")){const st=document.createElement("style");st.id="dd-v2182-css";
+  st.textContent=".nbh-lang-flag{margin:8px 0;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}"+
+    ".dd-pr1-k{display:inline-block;padding:0 4px;border:1px solid #254657;border-radius:3px;color:#254657;font-size:10.5px;font-weight:700;margin-right:3px}"+
+    "@media print{.nbh-lang-flag{display:none!important}}";document.head.appendChild(st);}
+</script>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

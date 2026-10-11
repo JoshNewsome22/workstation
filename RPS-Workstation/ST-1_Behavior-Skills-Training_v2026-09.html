@@ -3689,6 +3689,26 @@ window.__nbhFactsIn=function(f){const t=f&&f.training,st=t&&Array.isArray(t.step
   let g=null;try{g=window.nbhCase&&typeof window.nbhCase.generic==='function'?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
   return {filled:n+((g&&g.filled)|0),note:note||(g&&g.note)||''};};
 </script>
+<script id="st1-v2182">
+/* v21.82 the case: Out, new key 'staff' = {people:[{name, role, criterion, met, date}], all}. The trainee on this record,
+   with the criterion it is judged on and whether it is met: met when the decision on the Competency page reads Competent
+   (the rehearsal criterion held, the critical and consequence steps correct, an in-situ probe at or above the criterion)
+   or the sign-off records "Competent — may run the plan without the trainer present". The date is the in-situ probe's
+   when it reads as a date, else the last decision round's. all: every person listed has met it (the shell's "Ready to
+   start" check reads it). No trainee named: nothing is sent. */
+{const was=window.__nbhFactsOut;
+  const iso=t=>{t=String(t==null?'':t).trim();let m=/(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+    m=/\b(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(t);if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');}return '';};
+  window.__nbhStaffFacts=function(){const m=S.meta||{},name=String(m.trainee||'').trim();if(!name)return null;
+    let M=null;try{M=metrics();}catch(e){M=null;}
+    const v=document.querySelector('#verdictBox .verdict'),met=!!(v&&v.classList.contains('v-ok'))||m.outcome===OUT_NEW;
+    const rounds=M&&M.win&&M.win.length?M.win.map(x=>(S.rounds[x.j]||{}).date).filter(Boolean):[];
+    const p={name,role:String(m.pos||'').trim(),criterion:S.crit+'% across '+S.critN+' consecutive round'+(S.critN===1?'':'s')+', then an in-situ probe at '+S.crit+'% or above',met};
+    if(met){const d=iso(m.situ_date)||iso(rounds[rounds.length-1]);if(d)p.date=d;}
+    return {people:[p],all:met};};
+  window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+    let s=null;try{s=window.__nbhStaffFacts();}catch(e){s=null;}if(!s)return o;o=o||{};o.staff=s;return o;};}
+</script>
 
 <script id="rr-run">
 /* ===================== v21.24: the rehearsal runner (one script on Forms ST-1 and CT-1) =====================

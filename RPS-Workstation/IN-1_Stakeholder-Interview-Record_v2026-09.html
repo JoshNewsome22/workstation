@@ -6493,5 +6493,26 @@ OUT(function(){const m=S.meta||{},hyp=T(m.hyp),resp=(S.resp||[]).filter(r=>r&&T(
     strength:key&&key!=='unclear'?'Weak':'',by:T(m.bcba),statement:hyp||('Interview hypothesis carried to the packet: '+fn+'.')}));});
 })();
 </script>
+<script id="v2182-parent">
+(function(){"use strict";
+/* v21.82 the family's voice, out: when the record holds a parent or guardian interview, the evidence also carries
+   parent:{concerns, goals} for Form FS-1's background. Concerns are the parent's answers on how often the behavior happens at
+   home and how hard it is (questions 3 and 19 of the parent set); goals the answer on short- and long-term goals (question 14).
+   With more than one parent interviewed, each answer is headed by who gave it. When the interviews have no hypothesis yet, the
+   evidence is sent with its function, strength and statement empty, so the family's part still reaches the case. Wrapped. */
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const qi=re=>Q_PARENT.findIndex(q=>re.test(q.k||'')||re.test(q.q||''));
+function parentPart(){const resp=(S.resp||[]).map((r,i)=>({r,i})).filter(x=>x.r&&x.r.role==='Parent or guardian');if(!resp.length)return null;
+  const iRate=qi(/^rate$/),iInt=qi(/^intens$/),iGoal=qi(/goals for your child/i),a=(i,j)=>j<0?'':T((S.ans||{})[i+'_'+j]);
+  const who=x=>T(x.r.rel)||T(x.r.n)||'Parent',many=resp.filter(x=>[iRate,iInt,iGoal].some(j=>a(x.i,j))).length>1;
+  const join=f=>resp.map(x=>{const t=f(x);return t?(many?who(x)+': ':'')+t:'';}).filter(Boolean).join(' ');
+  const concerns=join(x=>[a(x.i,iRate),a(x.i,iInt)].filter(Boolean).join(' ')),goals=join(x=>a(x.i,iGoal));
+  if(!concerns&&!goals)return null;const p={};if(concerns)p.concerns=concerns;if(goals)p.goals=goals;return p;}
+const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let p=null;try{p=parentPart();}catch(e){p=null;}if(!p)return r;
+  const ev=Object.assign({},(r&&r.evidence)||{form:'IN-1',method:'Stakeholder interviews (indirect)',fn:'',fnKey:'',strength:'',statement:'',dates:'',n:null},{parent:p});
+  return Object.assign({},r||{},{evidence:ev});};
+})();
+</script>
 </body>
 </html>
