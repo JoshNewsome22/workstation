@@ -8655,6 +8655,46 @@ dialog.dd-tag-dlg{width:min(560px,calc(100vw - 24px))}
   #dataTable td.col-day .po{display:block;text-align:center;font-size:8.5px;padding:3px 1px;white-space:normal;line-height:1.15}
   #dataTable th.col-day{font-size:8.5px;padding:4px 1px}.dd-byset-w{overflow:visible}}
 </style>
+<script id="dd-v2181">
+/* ===================================================================================================
+   v21.81 an incident counted into a day's count where the Google Sheet writes that day's number. The sheet's number is
+   put back at every reading, so the incident's one is kept apart from it and added on top after each reading: the day
+   shows the sheet's number plus the incidents counted on it. An incident counted on a day the sheet writes rides on the
+   sheet's number (incident.gsc) and is never written into what the record held before the sheet; taking it off (deleted,
+   or no longer counted) takes one off the day only while the sheet shows it. One counted before the sheet came (or while
+   it was set aside) is in the record's own number too, and comes off both. With the sheet set aside the day shows the
+   record's own number again; unlinked, the incidents that rode on the sheet are no longer on a day's count (an edit counts
+   one on the record again). (The student check for the sheet, v21.81, is in the Google Sheets block itself.)
+   =================================================================================================== */
+"use strict";
+let ddGsDropped=0;
+/* the sheet writes this day's number for this behavior now (in use, and in what it applied at its last reading) */
+function ddGsOwns(r,bid){const g=S.gs;return !!(r&&bid&&g&&g.on!==false&&g.applied&&Object.prototype.hasOwnProperty.call(g.applied,r.id+"|"+bid));}
+{const ic1=ddIncCount;ddIncCount=function(i,sign){const b=i&&ddIncBeh(i);if(!i||!ddCountable(b)||!i.date)return ic1.apply(this,arguments);
+  const r=S.rows.find(x=>x.date===i.date),own=ddGsOwns(r,b.id),k=r?r.id+"|"+b.id:"";
+  if(sign>0){if(!own){delete i.gsc;return ic1.apply(this,arguments);}const v=num(r.values[b.id]);r.values[b.id]=String((v||0)+1);i.gsc=true;return true;}
+  if(i.gsc){delete i.gsc;if(own){const v=num(r.values[b.id]);if(v!==null)r.values[b.id]=String(Math.max(0,v-1));}return true;}
+  if(own){const A=S.gs.applied,a=num(A[k]);if(a!==null)A[k]=String(Math.max(0,a-1));const v=num(r.values[b.id]);if(v!==null)r.values[b.id]=String(Math.max(0,v-1));return true;}
+  return ic1.apply(this,arguments);};}
+/* after every reading: each counted incident goes on top of the sheet's number for its day */
+function ddGsIncOn(){let n=0;const g=S.gs;if(!g||g.on===false||!g.applied)return n;
+  (S.incidents||[]).forEach(i=>{if(!i||!i.counted||!i.date)return;const b=ddIncBeh(i);if(!ddCountable(b))return;const r=S.rows.find(x=>x.date===i.date);
+    if(!ddGsOwns(r,b.id))return;const v=num(r.values[b.id]);r.values[b.id]=String((v||0)+1);n++;});return n;}
+{const a2=gsApply;gsApply=function(){const r=a2.apply(this,arguments);try{ddGsIncOn();}catch(e){}return r;};}
+/* unlinked (or another sheet linked in its place): the ones that rode on the sheet's number are no longer counted */
+{const u2=gsUndo;gsUndo=function(drop){const r=u2.apply(this,arguments);if(drop)(S.incidents||[]).forEach(i=>{if(i&&i.gsc){delete i.gsc;if(i.counted){i.counted=false;ddGsDropped++;}}});return r;};}
+{const ul1=gsUnlinkGo;gsUnlinkGo=async function(){ddGsDropped=0;const r=await ul1.apply(this,arguments);
+  if(ddGsDropped&&!S.gs){try{ddIncRender();}catch(e){}toast(`The sheet is unlinked; the record holds only what was typed here. ${ddGsDropped} incident${ddGsDropped===1?" was":"s were"} counted on the sheet’s days and ${ddGsDropped===1?"is":"are"} no longer on a day’s count (Edit, then Add one, counts it on the record).`);}
+  ddGsDropped=0;return r;};}
+/* a file or a restore keeps the mark */
+{const cl3=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],G={};L.forEach(x=>{if(x&&typeof x==="object"&&typeof x.id==="string"&&x.gsc===true)G[x.id.slice(0,40)]=1;});
+  const r=cl3.apply(this,arguments);(S.incidents||[]).forEach(i=>{if(G[i.id]&&i.counted)i.gsc=true;else delete i.gsc;});return r;};}
+/* the incident dialog and the log say where the one goes */
+{const cu1=ddIncCountUi;ddIncCountUi=function(){const r=cu1.apply(this,arguments);try{const d=document.getElementById("dlgInc"),b=S.behaviors.find(x=>x.id===d.querySelector("#incBeh").value),
+  row=S.rows.find(x=>x.date===d.querySelector("#incDate").value);if(ddCountable(b)&&ddGsOwns(row,b.id))d.querySelector("#incCountT").textContent+=" (on top of the Google Sheet’s number for that day, kept at each reading)";}catch(e){}return r;};}
+{const rh1=ddIncRowHtml;ddIncRowHtml=function(i){let h=rh1.apply(this,arguments);try{if(i&&i.counted&&i.gsc){const b=ddIncBeh(i),r=S.rows.find(x=>x.date===i.date);
+  h=h.replace("On the day&rsquo;s count",b&&ddGsOwns(r,b.id)?"On the day&rsquo;s count, on top of the sheet&rsquo;s number":"On the sheet&rsquo;s day count while the sheet is in use");}}catch(e){}return h;};}
+</script>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
