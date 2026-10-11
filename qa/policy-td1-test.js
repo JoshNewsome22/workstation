@@ -440,6 +440,9 @@ let fails=0,oks=0;const check=(c,msg,extra)=>{console.log((c?'  ok   ':'  FAIL '
   check(await p.evaluate(()=>/Breaux, C\. A\., &amp; Smith, K\. \(2023\)/.test(document.querySelector('#refs').innerHTML)),'16 the references list Breaux and Smith (2023)');
   await addCard(p,'EXT');await view(p,'respond');await set(p,'ee.pg','yes');await sleep(150);
   await p.emulateMedia({media:'print'});await p.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));await sleep(300);
+  /* v21.81 the Guide prints only with "Include the guide and references" ticked (by Print / Save as PDF) */
+  check(await p.evaluate(()=>{const e=document.querySelector('#eeGuide');return !!e&&e.getClientRects().length===0;}),'16 print: the Guide box is left out while "Include the guide and references" is off');
+  await p.evaluate(()=>{const c=document.getElementById('printGuide');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(150);
   const pr=await p.evaluate(()=>{const vis=s=>{const e=document.querySelector(s);return !!e&&e.getClientRects().length>0;};
     return {block:vis('#eeBlock'),stop:vis('#eeBlock .ee-yes'),least:vis('#eeLeast'),never:vis('#eeNever'),box:vis('#compWrap .card[data-code="EXT"] .ee-card'),btn:vis('#compWrap .card[data-code="EXT"] .ee-card button'),guide:vis('#eeGuide'),offer:vis('#eeOffer'),hint:vis('#eeBlock [data-ee-def]')};});
   check(pr.block&&pr.stop&&pr.least&&pr.never&&pr.box&&!pr.btn&&pr.guide&&!pr.offer&&!pr.hint,'16 print: the block, the stop rule, the least help, never force, the EXT box (no button) and the Guide box print; the offer and the hints do not',pr);

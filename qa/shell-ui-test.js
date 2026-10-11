@@ -9,7 +9,7 @@ const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
  await page.click('#closeForm');await sleep(300);
  console.log('close dialog',await page.evaluate(()=>({open:$('#cfDlg').open,title:$('#cfTitle').textContent,btns:[...document.querySelectorAll('#cfFoot button')].map(b=>b.textContent)})));
  await page.evaluate(()=>document.querySelector('#cfFoot button').click());await sleep(200);console.log('after cancel cur',await page.evaluate(()=>state.cur));
- await page.click('#closeForm');await sleep(200);await page.evaluate(()=>document.querySelector('#cfFoot button.danger').click());await sleep(300);console.log('after close cur',await page.evaluate(()=>state.cur));
+ await page.click('#closeForm');await sleep(200);await page.evaluate(()=>document.querySelector('#cfFoot button:last-child').click()/* v21.81 a blank form closes with a plain Close */);await sleep(300);console.log('after close cur',await page.evaluate(()=>state.cur));
  /* the bar fold */
  console.log('fold before',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sum:$('#barSum').hidden})));
  await page.evaluate(()=>{$('#pClient').value='Sample Student';$('#pSid').value='123';$('#pGrade').value='7';$('#pSite').value='Royal Palm School';who();barAutoFold();});await sleep(200);
