@@ -4794,7 +4794,7 @@ async function clRemoveAll(){const L=await clList()||[];
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this iPad. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}
-  try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');}catch(e){}
+  try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
   wsUI.toast('Every student’s data is removed from this iPad. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
 /* the last safety copy before the page closed could not be kept (storage full): said when the workstation next opens */

@@ -8850,3 +8850,88 @@ letterhead filled; forms in the workstation, in their own tab, in both one-file 
 
 *Also fixed in v21.84:* a one-file case file (written by Save case in the one-file edition) now carries the picture
 library's block as well, so the forms that use your pictures (VS-1, SM-1, TK-1, TV-1) have them when the case is opened.
+
+### v21.85: privacy, the start screen, switching students, the service log, signatures and staff phones
+
+**Privacy on this iPad**
+
+- **The caseload backup can be locked.** *Back up the caseload* offers a passphrase. With one, the file
+  (`CASELOAD_<date>_locked.json`) is encrypted (PBKDF2-SHA-256, 250,000 rounds, to AES-GCM-256) and *Restore* asks for the
+  passphrase. Without the passphrase the file cannot be read, by anyone: keep it somewhere safe. Without one, the backup
+  is the plain file as before.
+- **Forget a student not saved for 4, 8 or 12 weeks** (Caseload, *never* by default). A student kept on this iPad but not
+  yet in a file, and the student on screen, are never forgotten.
+- **Remove all student data from this iPad** (Caseload, asks first, and again when a student was never saved to a file):
+  the caseload, every Autosave safety copy, this tab's Google sign-ins (DD-1's and the email's) and the caseload's
+  remembered times. The case files you saved are not touched.
+- **Autosave never fails silently.** When the iPad refuses to keep an Autosave (storage full, a private window), the save
+  line says *not kept*; when a safety copy could not be kept, the workstation says so the next time it opens.
+- **Safari's seven days.** Safari can clear what a website keeps after seven days without a visit; installed on the Home
+  Screen, the workstation keeps it. Caseload now says so plainly. Keep each case in its file (Save case) whatever the iPad
+  keeps, and back up the caseload now and then.
+
+**The start screen and switching students**
+
+- Before a case is open, the start screen lists what needs you across the caseload and a button per student; *New
+  student*, *Read a document*, *Open case* and *Caseload* are there too.
+- **Today's count**: the Today button carries the number of items for the student on screen (red for overdue or safety).
+- **Find** also finds the students in the caseload.
+- **Switching to another student** with work not saved to a file asks: *Keep it on this iPad and switch* (the caseload
+  holds the case; Caseload lists it with *Save the file* until it is saved), *Save the file first*, *Switch anyway*, or
+  Cancel.
+- **Side by side** ticks the form on screen and the one viewed before it.
+
+**What the caseload gives**
+
+- *Deadlines to the Calendar (.ics)*: every student's deadlines as one calendar file, with initials only.
+- *Restraint and seclusion report*: every restraint and seclusion across the caseload (Form DD-1's incidents and Form
+  CR-1's notices, each student as at the last save), with the notices done and overdue, on screen and as a spreadsheet
+  (CSV).
+- *What changed* (Today): what the case on screen changed since its last save.
+- *IEP meeting packet* (Today): present levels of behavior from the daily data, the goals, the plan, the behavior services,
+  progress, safety and the next review, each part with Copy for the district's IEP system; *Print the packet*, or print it
+  with the graph, the goals and the plan (Forms DD-1, GB-1 and TD-1).
+
+**The service log (Form CN-1) and the IEP's minutes (Form DM-1)**
+
+- Each consultation note now has its service minutes, kind (direct, consultation, observation, training, meeting, other),
+  with whom and one line. Left empty, each takes the note's own value, shown in grey: the minutes from the start and end
+  times, the kind from the note's type, with whom from the roles under *Present*, the line from the purpose.
+- The *Service log* page: this week (Monday to Sunday) and this month by kind, and against the IEP's minutes ("90 of 120
+  minutes this month"). An IEP kind of consultation counts every kind but direct; direct counts direct only; both counts
+  all. A grading period counts between the days typed on the page.
+- *Print the service log* prints the period chosen alone: student, ID, date of birth, Medicaid ID if typed, each date with
+  start, end, minutes and service, the provider's name and credential, the attestation and the signature line. The CSV
+  holds the same rows.
+- Form DM-1 has a row *Behavior service minutes on the IEP* (minutes, per week, month or grading period, kind, a note);
+  empty, it is read from the BCBA line of the related services table ("2x/wk, 30 min" is 60 a week). Form CN-1 takes it
+  through the case into its empty fields.
+- The workstation reads the log: Today says *IEP service minutes behind* when, past half the week or month, fewer than
+  three quarters of the minutes due by now are logged; the IEP packet states the minutes.
+
+**The adoption meeting signed (Form TD-1)**
+
+- *List the team present* makes a row per person from the Team present box: name, role, how (signed on the iPad, in
+  person, by phone, declined) and the date. Each signs with a finger, a stylus or the mouse; the parent signs the plan.
+- The signatures are kept in TD-1's own file as small pictures and print on the final plan; only the names, roles and dates
+  go to the case (`plan.adoption.signatures`). Copy for the BIP lists who signed.
+
+**Staff record behavior data on their phones (Form DD-1)**
+
+- *Staff phones* (the end of Daily data) makes a link per person, as a QR code to scan, a link to copy or share, with Stop
+  and Resume. The phone page (`staff-data.html`) has a card per target: a count with +1 and −1, a duration with Start and
+  Stop, intervals or opportunities with + and −, assent, the setting, a note. Every tap is kept on the phone; *Send today's
+  data* sends the day, encrypted on the phone to the reply box (the same box as the questionnaires, `box.php`). With no
+  signal it waits on the phone and goes when the page is opened again.
+- The link carries the box, the student's initials, the staff label and the targets, never a name. The site holds only
+  sealed entries it cannot read.
+- Form DD-1 collects on opening and every five minutes (and Collect now): counts add to the day, episodes go into the
+  episode log, + and − make the day's percent; each entry is placed once. A day the team's Google Sheet writes is held,
+  not added on top (the sheet counts the same behavior), with a note to add it on the sheet; other entries it cannot place
+  for certain are held for *Place it*.
+- **Upload `staff-data.html`** with the forms. When the workstation folder has a password, let the page through it as
+  `respond.html` is (HOSTING.md, *Respondent links when `/workstation/` has a password*), or put it in the public folder
+  and give its address under *Reply box and page addresses* in the Staff phones panel.
+
+Checked by `qa/v2185-test.js` (the shell), `qa/v2185-svc-test.js` (the service minutes in the shell), `qa/v2185-r-test.js`
+(CN-1, DM-1 and TD-1) and `qa/v2185-p-test.js` (the phone page and DD-1, with the reply box running).
