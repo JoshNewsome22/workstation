@@ -9003,3 +9003,48 @@ Checked by `qa/v2186-test.js` (sending from the account, with Google's sign-in a
 `qa/v2186-q-test.js` (IA-1, IN-1, SV-1 and CF-1: grouping, the pages, collecting, the Mail app flow, Not now) and
 `qa/v2186-ia1-shell-test.js` (the whole path in the workstation: IA-1 sends through Gmail, the informant answers from the
 email's link, the workstation collects by itself into the closed case).
+
+### v21.87: the full check
+
+Every form and the workstation were checked end to end: every test run and brought up to date, a robot sweep of all 46
+forms on an iPad-sized touch screen (every view, every button, Save data and Open data, print; in the workstation, Save
+case and Open case; the one-file edition), and one simulated student (Mateo Rivera) taken through the whole workstation
+from intake to the IEP meeting. What it found is fixed here.
+
+**The case.**
+
+- A change read from one form while another was being read is now still sent to the other open forms, and a change read
+  without sending is sent at the next send (a restraint entered on Form DD-1 now always reaches Form CR-1).
+- A form still being filled from the file, or one that does not answer, keeps its part of the case: *Save case* no longer
+  drops it.
+- Today and the start screen list only real deadlines: dates of things done (started, completed, updated, last reviewed)
+  and whole table headers are left out, each item is listed once, and Form DT-1 lists its maintenance probes due.
+- Form QS-1 takes the plan's Never rule once. Form PR-1 takes Form GB-1's goals as written when its Behavior criterion or
+  Replacement criterion is empty.
+
+**Not losing work.** The leave warning in every form counts a file as just opened (so nothing unsaved) only after *Open
+data*. A photo, a picture or another form's file read in no longer clears the unsaved mark of work typed before it.
+
+**On the iPad.**
+
+- The Autosave offer leaves room under the page, so the end of every view (and *Next*) scrolls clear of it.
+- Form TV-1's picture dialog opens on the page itself (it could open unseen in the hidden Graphics section, so nothing
+  could be tapped), and its move buttons are a finger's size.
+- Form CN-1 opens a file on its newest note.
+- Larger touch targets, each at least 44 px: Form OB-1's interval strip (ten intervals to a line, the whole strip in view),
+  Form SP-1's cells with codes on (the count or mark, and the code under it, as two targets), Form RR-1's ledger buttons.
+- Wide tables scroll inside their own box instead of pushing the page sideways: Form VI-1's data tables, Form AD-1's
+  session log.
+
+**On paper.**
+
+- Cut-off figures fixed: Form DA-1's dates, Form DT-1's figures in every table, Form MT-1's session log ("Whole
+  interval"), Form PA-1's bar labels after a full bar, Form SM-1's chart labels and legend.
+- The master print: a form's page a few lines taller than the packet's page (the packet's margins are larger, for the
+  running head and foot) is scaled to fit it instead of running onto a sheet of its own (Form OB-1's observation sheets,
+  Form DM-1, Form TB-1); a form's empty page (a view with nothing to print, such as Form OB-1's observation log) is left
+  off the paper, where it gave a blank sheet. The packet's cover note lists what was scaled.
+
+**The checks.** `qa/sweep-test.js` (the sweep; runnable in parts with ONLY, PART, STEPS and JOBS),
+`qa/student-journey-test.js` (the simulated student, about eight minutes) and `qa/guard-open-test.js` (the leave warning
+and Open data) are new, and every test now runs in the release run.

@@ -2664,6 +2664,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-sec:first-of-type{page-break-before:auto;break-before:auto}
     /* a form built as a run of pages keeps those page breaks inside the packet */
     .mp-sec .nbh-page+.nbh-page{page-break-before:always;break-before:page}
+    @media print{.mp-sec [data-mp-empty]{display:none!important}}
     /* The packet decides pagination, through the section break above and the one
        between pages. A form that also breaks before its own sheet fires on top of
        that and leaves an empty sheet of paper between two forms. */
@@ -2841,6 +2842,28 @@ async function masterRun(chosen,opt){opt=opt||{};
            ' scaled to fit, the smallest to ' + Math.round(least * 100) + '%');
        }
      });
+     /* v21.87 a sheet a form starts on a page of its own and fills for its own margins (Form OB-1's observation sheets, at 0.45in)
+        ran a few lines past the packet's taller page (0.62in, for the running head and foot) onto a page of its own: such a
+        sheet, up to a sixteenth taller than the packet's page, is scaled to fit it */
+     var PAGEH = (11 - 0.62 * 2) * 96, tall = {};
+     document.querySelectorAll('.mp-sec').forEach(function(sec){
+       var list = sec.getElementsByTagName('*');
+       for (var i = 0; i < list.length; i++) {
+         var el = list[i]; if (el.ownerSVGElement) continue;
+         var cs = getComputedStyle(el); if (cs.breakBefore !== 'page' && cs.pageBreakBefore !== 'always') continue;
+         var h = el.getBoundingClientRect().height;
+         if (h < 2) {   /* an empty page of a form (a view with nothing to print, Form OB-1's observation log) gave a blank sheet, and, kept on paper as an empty box at the foot of a full page, pushed the next page on by one: it is left off the paper */
+           var shows = false, inner = el.getElementsByTagName('*');
+           for (var j = 0; j < inner.length && !shows; j++) { var q = inner[j].getBoundingClientRect(); shows = q.width > 0 && q.height > 0; }
+           if (!shows) el.setAttribute('data-mp-empty', '');
+           continue;
+         }
+         if (h <= PAGEH - 2 || h > PAGEH * 1.0625) continue;
+         var cur = parseFloat(el.style.zoom) || 1; el.style.zoom = (cur * (PAGEH - 6) / h).toFixed(3); el.setAttribute('data-mp-fit', '');
+         var t = sec.getAttribute('data-title') || 'a form'; tall[t] = (tall[t] || 0) + 1;
+       }
+     });
+     Object.keys(tall).forEach(function(t){ scaled.push(t + ': ' + tall[t] + ' page' + (tall[t] === 1 ? '' : 's') + ' scaled to the packet’s page'); });
      rules.forEach(function(r, i){ if (texts[i] !== undefined) try { r.media.mediaText = texts[i]; } catch (e) {} });
      if (scaled.length && window.console) console.log('NBH packet: fitted ' + scaled.join('; '));
      window.__nbhFitted = scaled;
