@@ -1501,6 +1501,43 @@ td input,td select{max-width:100%}
     <div class="noprint" style="margin:6px 0 10px"><button type="button" class="tool" id="td82Rev">Record a revision</button></div>
     <textarea name="ad.versions" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
   </div>
+  <!-- v21.85 (R): the adoption meeting's sign-in (each person present: name, role, how they signed, the date and an on-screen
+       signature) and the parent's signature on the plan. The signature images stay in this form's saved file (td-v2185). -->
+  <div id="td85Block">
+    <style>
+    /* v21.85 (R) */
+    #td85Block .td85-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;margin:6px 0 8px}
+    #td85Block .td85-card{border:1px solid var(--rule-2);background:#fff;padding:8px 10px 8px;break-inside:avoid;page-break-inside:avoid}
+    #td85Block .td85-card.td85-par{max-width:680px}
+    #td85Block .td85-f{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px}
+    #td85Block .td85-f label{display:block;font-family:var(--sans);font-size:10.5px;color:var(--ink-soft);letter-spacing:.02em}
+    #td85Block .td85-f input,#td85Block .td85-f select{display:block;width:100%;box-sizing:border-box;font:inherit;font-size:12.5px;min-height:38px;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;background:#fff}
+    #td85Block canvas.td85-pad{display:block;width:100%;height:auto;aspect-ratio:4/1;border:1px solid var(--rule-2);border-bottom:1.5px solid var(--ink);background:var(--wash);margin:8px 0 4px;touch-action:none;cursor:crosshair}
+    #td85Block img.td85-img{display:block;width:100%;height:auto;aspect-ratio:4/1;object-fit:contain;border:1px solid var(--rule-2);border-bottom:1.5px solid var(--ink);background:#fff;margin:8px 0 4px}
+    #td85Block .td85-line{min-height:48px;border-bottom:1.5px solid var(--ink);margin:8px 0 4px;font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);display:flex;align-items:flex-end;padding:0 2px 3px}
+    #td85Block .td85-note{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);margin:8px 0 4px;padding:8px;border:1px dashed var(--rule-2)}
+    #td85Block .td85-t{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    #td85Block .td85-t .tool{margin:0}
+    #td85Block .td85-hint{font-family:var(--sans);font-size:11px;color:var(--ink-soft)}
+    #td85Block .td85-say{font-size:12px;line-height:1.45;margin:2px 0 6px}
+    #td85Block .td85-bar{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 6px}
+    #td85Block .td85-bar .tool{margin:0}
+    #td85Block .td85-empty{font-family:var(--sans);font-size:12px;color:var(--ink-soft);font-style:italic;padding:2px 8px 6px}
+    #final .sig div.td85-has{border-top:0;padding-top:0}
+    #final .sig div.td85-has img{display:block;width:100%;height:46px;object-fit:contain;object-position:left bottom;border-bottom:1px solid var(--ink);margin-bottom:4px}
+    @media (max-width:640px){#td85Block .td85-list{grid-template-columns:1fr}#td85Block .td85-f{grid-template-columns:1fr}}
+    @media print{#td85Block .td85-list{grid-template-columns:1fr 1fr}#td85Block .td85-f input,#td85Block .td85-f select{border:0;min-height:0;padding:0;background:transparent}#td85Block canvas.td85-pad,#td85Block .td85-empty{display:none!important}#td85Block .td85-line.td85-pr{display:flex!important}#td85Block .td85-card{border-color:#999}#td85Block input[type=date].td85-nd,#td85Block input[type=date].td85-nd::-webkit-datetime-edit{color:transparent!important}}
+    #td85Block .td85-line.td85-pr{display:none}
+    </style>
+    <div class="plan-group">Sign-in at the adoption meeting</div>
+    <p class="method noprint" style="margin:0 0 6px">Each person present: the name and role, how they signed (on this iPad, in person on the printed plan, by phone, or declined) and the date. Sign in the box with a finger, a stylus or the mouse. The signatures stay in this form&rsquo;s saved file and print with the plan; only the names, roles, dates and how go to the case.</p>
+    <div class="td85-bar noprint"><button type="button" class="tool" id="td85Add">Add a person</button><button type="button" class="tool" id="td85Team">List the team present</button></div>
+    <div class="td85-list" id="td85List"></div>
+    <div class="plan-group">The parent&rsquo;s signature on the plan</div>
+    <div id="td85Parent"></div>
+    <textarea name="ad.sigs" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
+    <textarea name="ad.psig" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
+  </div>
   <div class="sigcite">
   <div class="sig"><div>BCBA signature / date</div><div>Implementer trained / date</div><div>Parent or guardian / date</div></div>
   <div class="cite">Procedures on this sheet were selected on the assessment and design sheets of Form TD-1 from the sources named under each component; the full reference list is on the References sheet. Nothing on this sheet is implemented until the implementer has been trained to the integrity criterion and the safety plan is in place.</div>
@@ -3373,6 +3410,140 @@ window.__nbhFactsOut=function(){
     if(t.closest&&t.closest('#td83Tbl tbody')&&t.dataset&&t.dataset.f){putRows(readTable());renderStatus();renderFinal();return;}
     if(t.name==='tg.rows'){if(!self)renderAll();return;}
     if(t.name==='m.fn')renderAll();};
+  document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
+  window.addEventListener('beforeprint',renderAll);
+  window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect')renderAll();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAll);else renderAll();
+})();
+</script>
+<script id="td-v2185">
+/* v21.85 (R) the adoption meeting signed. Under v21.82's "Adopted by the team", a sign-in for each person present (name,
+   role, how they signed: on this iPad, in person on the printed plan, by phone, or declined; the date) with an on-screen
+   signature for each, and the parent's signature on the plan (name, relationship, how, date, signature). The pads are
+   IC-1's (pointer events, so a finger, a stylus and the mouse all draw), drawn at twice the size and kept as a 600 by 150
+   PNG; a drawn signature dates itself today and marks itself "signed on the iPad" when those are empty. The rows and the
+   images are kept in two hidden named fields (ad.sigs, ad.psig), so Save data, Open data and the safety copy carry them;
+   an image from a file is kept only when it is a PNG or JPEG data address. The sign-in and the parent's signature print on
+   the final plan; the parent or guardian line at its foot says how the parent signed. "List the team present" makes rows
+   from the Team present box. Copy for the BIP lists who signed and how. Facts out: plan.adoption.signatures
+   [{name, role, signed, how}] (the parent's signature on the plan carries parent:true); no image leaves the form. */
+(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]'),g=n=>T((fld(n)||{}).value);
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const iso=v=>{v=T(v);if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v);return m?m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+  const nice=d=>{const i=iso(d);if(!i)return T(d);const p=i.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});};
+  const today=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+  const poke=e=>{try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}};
+  const HOW=[['signed on the iPad','Signed on the iPad'],['in person','In person, on paper'],['by phone','By phone'],['declined','Declined']];
+  const howOK=h=>HOW.some(x=>x[0]===h);
+  const REL=['Parent','Legal guardian','Foster parent','Surrogate parent','Person acting as parent','Adult student (18+)','Guardian advocate','Other'];
+  const ROLES=['Parent or guardian','LEA representative','ESE teacher','General education teacher','BCBA','School psychologist','Administrator','Paraprofessional','Student','Speech-language pathologist','Counselor','Other'];
+  const ROLEONLY=/^(the\s+)?(parents?|mother|father|guardian|student|lea representative|ese teacher|general education teacher|gen(eral)? ed(ucation)? teacher|teacher|classroom teacher|bcba|behavior analyst|school psychologist|psychologist|administrator|principal|assistant principal|ap|paraprofessional|para|paraeducator|counselor|case manager|speech-language pathologist|slp|occupational therapist|ot|nurse|social worker|interpreter)$/i;
+  const W=600,H=150,K=2;   /* the image kept; the pad draws at K times its size */
+  const sigOK=v=>typeof v==='string'&&v.length<400000&&/^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(v);
+  const clean=r=>{r=r&&typeof r==='object'?r:{};const o={name:T(r.name).slice(0,120),role:T(r.role).slice(0,80),how:howOK(T(r.how))?T(r.how):'',signed:iso(r.signed)};if(sigOK(r.img))o.img=r.img;return o;};
+  const cleanP=r=>{r=r&&typeof r==='object'?r:{};const o=clean(r);delete o.role;o.rel=T(r.rel).slice(0,60);return o;};
+  /* ---- the rows and the parent's signature, kept in ad.sigs and ad.psig ---- */
+  let self=false;
+  const rows=()=>{try{const a=JSON.parse(g('ad.sigs')||'[]');return Array.isArray(a)?a.slice(0,30).filter(x=>x&&typeof x==='object').map(clean):[];}catch(e){return [];}};
+  const par=()=>{try{return cleanP(JSON.parse(g('ad.psig')||'{}'));}catch(e){return cleanP({});}};
+  const put=(n,v)=>{const e=fld(n);if(!e||e.value===v)return;e.value=v;self=true;poke(e);self=false;};
+  const putRows=a=>put('ad.sigs',a.length?JSON.stringify(a.map(clean)):'');
+  const putPar=p=>{const o=cleanP(p);put('ad.psig',(o.name||o.rel||o.how||o.signed||o.img)?JSON.stringify(o):'');};
+  /* ---- the cards ---- */
+  function area(r,k,lab){
+    if(r.img)return {html:`<img class="td85-img" src="${esc(r.img)}" alt="Signature of ${esc(lab)}">`,tools:`<button type="button" class="tool td85-clr" data-k="${k}">Clear the signature</button>`};
+    if(r.how==='in person')return {html:'<div class="td85-line">Signs here on the printed plan</div>',tools:''};
+    if(r.how==='by phone')return {html:'<div class="td85-note">Took part by phone; no signature.</div>',tools:''};
+    if(r.how==='declined')return {html:'<div class="td85-note">Declined to sign.</div>',tools:''};
+    return {html:`<canvas class="td85-pad" data-k="${k}" width="${W*K}" height="${H*K}" aria-label="Signature box for ${esc(lab)}"></canvas><div class="td85-line td85-pr">Signature</div>`,tools:`<span class="td85-hint">Sign in the box</span><button type="button" class="tool td85-clr" data-k="${k}">Clear</button>`};}
+  const howSel=(id,v)=>`<select id="${id}" data-f="how"><option value=""></option>${HOW.map(h=>`<option value="${h[0]}"${v===h[0]?' selected':''}>${h[1]}</option>`).join('')}</select>`;
+  function card(r,k){const lab=r.name||('person '+(k+1)),a=area(r,k,lab);
+    return `<div class="td85-card" data-k="${k}"><div class="td85-f">`+
+      `<div><label for="td85n${k}">Name</label><input id="td85n${k}" data-f="name" value="${esc(r.name)}" autocomplete="off"></div>`+
+      `<div><label for="td85r${k}">Role</label><input id="td85r${k}" data-f="role" value="${esc(r.role)}" list="td85Roles" autocomplete="off"></div>`+
+      `<div><label for="td85h${k}">How</label>${howSel('td85h'+k,r.how)}</div>`+
+      `<div><label for="td85d${k}">Date</label><input type="date" id="td85d${k}" data-f="signed" value="${esc(r.signed)}"></div></div>`+
+      a.html+`<div class="td85-t noprint">${a.tools}<button type="button" class="tool td85-x" data-k="${k}" style="margin-left:auto" aria-label="Remove ${esc(lab)} from the sign-in">Remove</button></div></div>`;}
+  function parCard(p){const a=area(p,'p','the parent or guardian');
+    return `<div class="td85-card td85-par" data-k="p"><p class="td85-say">The parent or guardian signs the behavior intervention plan as reviewed with the team on the meeting date above.</p><div class="td85-f">`+
+      `<div><label for="td85pn">Parent or guardian</label><input id="td85pn" data-f="name" value="${esc(p.name)}" autocomplete="off"></div>`+
+      `<div><label for="td85pr">Relationship</label><select id="td85pr" data-f="rel"><option value=""></option>${REL.map(x=>`<option${p.rel===x?' selected':''}>${esc(x)}</option>`).join('')}${p.rel&&!REL.includes(p.rel)?`<option selected>${esc(p.rel)}</option>`:''}</select></div>`+
+      `<div><label for="td85ph">How</label>${howSel('td85ph',p.how)}</div>`+
+      `<div><label for="td85pd">Date</label><input type="date" id="td85pd" data-f="signed" value="${esc(p.signed)}"></div></div>`+
+      a.html+(a.tools?`<div class="td85-t noprint">${a.tools}</div>`:'')+`</div>`;}
+  /* the parent or guardian line at the foot of the final plan says how the parent signed */
+  function renderFoot(){const d=q('#final .sigcite .sig > div:nth-child(3)');if(!d)return;if(d.dataset.td85==null)d.dataset.td85=d.textContent;const base=d.dataset.td85,p=par(),h=p.how||(p.img?'signed on the iPad':'');
+    const who=[p.name,p.signed?nice(p.signed):''].filter(Boolean).join(', ');
+    d.textContent=base+(p.img?': signed on the iPad above':h==='by phone'?': took part by phone, no signature':h==='declined'?': declined to sign':'')+((p.img||h==='by phone'||h==='declined')&&who?' ('+who+')':'');}
+  function renderAll(){const box=q('#td85List');if(!box)return;const A=rows();
+    if(!q('#td85Roles')){const dl=document.createElement('datalist');dl.id='td85Roles';dl.innerHTML=ROLES.map(r=>`<option value="${esc(r)}"></option>`).join('');q('#td85Block').appendChild(dl);}
+    box.innerHTML=A.length?A.map(card).join(''):'<div class="td85-empty">No one has signed in yet: Add a person, or List the team present from the Team present box above.</div>';
+    const pb=q('#td85Parent');if(pb)pb.innerHTML=parCard(par());
+    wirePads();renderFoot();noDates();}
+  /* an empty date prints blank, not as its mm/dd/yyyy pattern */
+  function noDates(){document.querySelectorAll('#td85Block input[type=date]').forEach(e=>e.classList.toggle('td85-nd',!e.value));}
+  /* ---- the pads (IC-1's approach) ---- */
+  function exportPad(cv){const o=document.createElement('canvas');o.width=W;o.height=H;const c=o.getContext('2d');if(!c)return '';c.drawImage(cv,0,0,W,H);return o.toDataURL('image/png');}
+  function saved(cv){const k=cv.dataset.k,img=exportPad(cv);if(!sigOK(img))return;const c=cv.closest('.td85-card');
+    const fill=r=>{r.img=img;if(!r.how)r.how='signed on the iPad';if(!r.signed)r.signed=today();if(c){const h=c.querySelector('[data-f="how"]'),d=c.querySelector('[data-f="signed"]');if(h&&!h.value)h.value=r.how;if(d&&!d.value){d.value=r.signed;d.classList.remove('td85-nd');}}};
+    if(k==='p'){const p=par();fill(p);putPar(p);}else{const A=rows(),r=A[+k];if(!r)return;fill(r);putRows(A);}
+    renderFoot();}
+  function wirePads(){document.querySelectorAll('#td85Block canvas.td85-pad').forEach(cv=>{if(cv.dataset.on)return;cv.dataset.on='1';const ctx=cv.getContext&&cv.getContext('2d');if(!ctx)return;
+    ctx.lineWidth=2.2*K;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#1a2933';let drawing=false,moved=false,last=null;
+    const pos=e=>{const b=cv.getBoundingClientRect();return {x:(e.clientX-b.left)*cv.width/b.width,y:(e.clientY-b.top)*cv.height/b.height};};
+    cv.addEventListener('pointerdown',e=>{drawing=true;moved=false;last=pos(e);try{cv.setPointerCapture(e.pointerId);}catch(x){}e.preventDefault();});
+    cv.addEventListener('pointermove',e=>{if(!drawing)return;const p=pos(e);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p;moved=true;e.preventDefault();});
+    const end=()=>{if(!drawing)return;drawing=false;if(moved)saved(cv);};
+    ['pointerup','pointercancel','pointerleave'].forEach(t=>cv.addEventListener(t,end));});}
+  /* ---- the team present, as rows ---- */
+  function teamPeople(){const t=g('ad.team');if(!t)return [];let P=t.split(/\n|;/).map(T).filter(Boolean);if(P.length===1)P=P[0].split(/,(?![^()]*\))/).map(T).filter(Boolean);
+    return P.slice(0,24).map(s=>{s=s.replace(/^(and|&)\s+/i,'').replace(/[.]+$/,'');let m=/^(.*?)\s*\(([^)]*)\)$/.exec(s);if(m&&T(m[1]))return {name:T(m[1]),role:T(m[2])};
+      m=/^([^:]{2,40}):\s*(.+)$/.exec(s);if(m)return {name:T(m[2]),role:T(m[1])};m=/^(.+?)\s+[–—-]\s+(.+)$/.exec(s);if(m)return {name:T(m[1]),role:T(m[2])};
+      return ROLEONLY.test(s)?{name:'',role:s}:{name:s,role:''};}).filter(p=>p.name||p.role);}
+  /* ---- Copy for the BIP: who signed and how, in the adoption block ---- */
+  const howText=x=>{const h=x.how||(x.img?'signed on the iPad':'');return (h==='signed on the iPad'?(x.img?'signed on the iPad':'to sign on the iPad'):h==='in person'?'signs in person on the printed plan':h==='by phone'?'took part by phone, no signature':h==='declined'?'declined to sign':'not signed yet')+(x.signed?', '+nice(x.signed):'');};
+  function sigLines(){const L=[],A=rows().filter(x=>x.name||x.role),p=par();
+    if(A.length){L.push('Signed in at the meeting:');A.forEach(x=>L.push('- '+[x.name,x.role].filter(Boolean).join(', ')+': '+howText(x)));}
+    if(p.name||p.how||p.img)L.push('The parent\'s signature on the plan: '+([p.name,p.rel].filter(Boolean).join(', ')||'parent or guardian')+', '+howText(p));
+    return L;}
+  const wasBip=window.__td82Bip;
+  window.__td82Bip=function(B){const res=wasBip?wasBip.apply(this,arguments):undefined;
+    try{const L=sigLines();if(L.length){const k=B.findIndex(b=>b&&b[0]==='ADOPTION AND REVISIONS');if(k>=0)B[k]=B[k].concat(L);else B.push(['ADOPTION AND REVISIONS'].concat(L));}}catch(e){}
+    return res;};
+  /* Open data (restore calls v21.82's sync) */
+  const wasSync=window.__td82Sync;
+  window.__td82Sync=function(){const r=wasSync?wasSync.apply(this,arguments):undefined;try{renderAll();}catch(e){}return r;};
+  /* ---- facts out: names, roles, dates and how; never an image ---- */
+  const wasOut=window.__nbhFactsOut;
+  window.__nbhFactsOut=function(){let r=null;try{r=wasOut?wasOut.apply(this,arguments):null;}catch(e){r=null;}
+    try{const L=[],one=(x,role,extra)=>{const o={name:x.name};if(role)o.role=role;if(x.signed)o.signed=x.signed;const h=x.how||(x.img?'signed on the iPad':'');if(h)o.how=h;return Object.assign(o,extra||{});};
+      rows().forEach(x=>{if(x.name||x.role||x.img)L.push(one(x,x.role));});
+      const p=par();if(p.name||p.how||p.img)L.push(one(p,p.rel||'Parent or guardian',{parent:true}));
+      if(L.length){r=r||{};r.plan=r.plan||{src:'TD-1'};r.plan.adoption=r.plan.adoption||{};r.plan.adoption.signatures=L;}}catch(e){}
+    return r;};
+  /* ---- wiring ---- */
+  const ask=(m,o)=>window.nbhUI&&nbhUI.confirm?nbhUI.confirm(m,o):Promise.resolve(true);
+  document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+    if(t.closest('#td85Add')){const A=rows();if(A.length>=30)return;A.push(clean({}));putRows(A);renderAll();const n=q('#td85n'+(A.length-1));if(n)n.focus();return;}
+    if(t.closest('#td85Team')){const P=teamPeople(),A=rows(),low=s=>T(s).toLowerCase();let n=0;
+      P.forEach(p=>{if(A.length>=30||A.some(x=>(p.name&&low(x.name)===low(p.name))||(!p.name&&!x.name&&low(x.role)===low(p.role))))return;A.push(clean(p));n++;});
+      if(n){putRows(A);renderAll();}
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast(n?'Listed '+n+(n===1?' person':' people')+' from the Team present box; each signs or is marked.':g('ad.team')?'Everyone in the Team present box is already listed.':'Type the team present above first (names and roles).',{kind:n?'ok':'info'});return;}
+    const c=t.closest('.td85-clr');if(c){const k=c.dataset.k;if(k==='p'){const p=par();delete p.img;putPar(p);}else{const A=rows();if(A[+k]){delete A[+k].img;putRows(A);}}renderAll();return;}
+    const x=t.closest('.td85-x');if(x){const k=+x.dataset.k,A=rows(),r=A[k];if(!r)return;const go=()=>{const B=rows();B.splice(k,1);putRows(B);renderAll();};
+      if(r.name||r.img)ask('Remove '+(r.name||'this person')+' from the sign-in?'+(r.img?'\nThe signature drawn here is deleted with the row.':''),{ok:'Remove',danger:true}).then(y=>{if(y)go();});else go();return;}
+    const v=t.closest('#viewSeg button[data-view]');if(v&&v.dataset.view==='final')setTimeout(renderAll,0);});
+  const onEdit=e=>{const t=e.target;if(!t)return;
+    if(t.name==='ad.sigs'||t.name==='ad.psig'){if(!self)renderAll();return;}
+    if(!(t.closest&&t.closest('#td85Block')&&t.dataset&&t.dataset.f))return;
+    const c=t.closest('.td85-card'),k=c&&c.dataset.k,f=t.dataset.f;if(k==null)return;
+    if(f==='how'&&e.type!=='change')return;
+    const get=()=>{if(k==='p')return par();return rows()[+k]||null;},set=r=>{if(k==='p')putPar(r);else{const A=rows();if(!A[+k])return;A[+k]=r;putRows(A);}};
+    const r=get();if(!r)return;
+    if(f==='how'&&r.img&&t.value!=='signed on the iPad'){ask('Change how this person signed?\nThe signature drawn on the iPad is deleted.',{ok:'Change',danger:true}).then(y=>{const s=get();if(!s)return;if(y){delete s.img;s.how=t.value;}set(s);renderAll();});return;}
+    r[f]=t.value;set(r);if(f==='how')renderAll();else{renderFoot();noDates();}};
   document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
   window.addEventListener('beforeprint',renderAll);
   window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect')renderAll();});

@@ -5,6 +5,7 @@
     <div class="fieldgrid">
       <div><label>Student</label><input data-m="client"></div>
       <div><label>Student ID</label><input data-m="sid"></div>
+      <div><label>Date of birth</label><input data-m="dob" placeholder="m/d/yyyy"></div>
       <div><label>Grade</label><input data-m="grade"></div>
       <div><label>School and district</label><input data-m="school"></div>
       <div><label>Case BCBA (name and credentials)</label><input data-m="bcba"></div>
@@ -25,6 +26,15 @@
       <div style="grid-column:1/-1"><label>Who was present (name and role)</label><input data-n="present" placeholder="e.g., Ms. R. (teacher), J. Ortiz (paraeducator), the student; parent by phone"></div>
       <div><label>Plan in force at this visit</label><input data-n="plan" placeholder="filled from the case when the note is created"></div>
       <div><label>Purpose of the contact</label><input data-n="purpose" placeholder="e.g., scheduled monthly observation and data review"></div>
+    </div>
+    <!-- v21.85 (R): the note's entry on the service log; an empty field takes the value shown in grey (from the times, the type, who was present, the purpose) -->
+    <h3>For the Service Log</h3>
+    <p class="hint">The minutes, the kind of service and with whom go on the Service log page and its printed log; left empty, each takes the value shown in grey.</p>
+    <div class="fieldgrid svcgrid">
+      <div><label for="svcMin">Service minutes</label><input id="svcMin" data-n="svc_min" inputmode="numeric"></div>
+      <div><label for="svcKind">Kind of service</label><select id="svcKind" data-n="svc_kind"><option value="">(from the type)</option><option value="direct">Direct service</option><option value="consult">Consultation</option><option value="observation">Observation</option><option value="training">Training</option><option value="meeting">Meeting</option><option value="other">Other</option></select></div>
+      <div><label for="svcWith">With whom</label><input id="svcWith" data-n="svc_with" list="svcWithList"><datalist id="svcWithList"><option value="teacher"></option><option value="paraprofessional"></option><option value="parent"></option><option value="team"></option><option value="student"></option><option value="teacher and paraprofessional"></option><option value="administrator"></option><option value="related-service provider"></option></datalist></div>
+      <div style="grid-column:1/-1"><label for="svcNote">One line for the log</label><input id="svcNote" data-n="svc_note" maxlength="160"></div>
     </div>
 
     <h3>What Was Observed and Reviewed</h3>
@@ -87,6 +97,27 @@
     <div class="grid-wrap"><table class="rt" id="openTbl"><thead><tr><th style="width:9%">From note</th><th>What</th><th style="width:20%">Who</th><th style="width:12%">By when</th><th style="width:10%">Status</th></tr></thead><tbody></tbody></table></div>
   </section>
 
+  <!-- ===================== SERVICE LOG (v21.85, R) ===================== -->
+  <section class="only-svc">
+    <h2 class="nbh-band noprint">Service Log</h2>
+    <p class="hint noprint">Every dated note is an entry: its date, minutes, kind of service, with whom, and one line. The totals for this week (Monday to Sunday) and this month are counted by kind and against the service minutes on the student&rsquo;s IEP, which come from Form DM-1 through the case or can be typed here. <b>Print the service log</b> prints the chosen period alone as a service log page with the provider&rsquo;s signature line; <b>Service log CSV</b> exports it.</p>
+    <div class="fieldgrid noprint">
+      <div><label for="iepMin">IEP behavior service minutes</label><input id="iepMin" data-m="iep_min" inputmode="numeric" placeholder="e.g., 120"></div>
+      <div><label for="iepPer">Per</label><select id="iepPer" data-m="iep_per"><option value=""></option><option value="week">week</option><option value="month">month</option><option value="grading period">grading period</option></select></div>
+      <div><label for="iepKind">Kind on the IEP</label><select id="iepKind" data-m="iep_kind"><option value=""></option><option value="consult">Consultation (indirect)</option><option value="direct">Direct</option><option value="both">Direct and consultation</option></select></div>
+      <div class="svc-gp"><label for="gpFrom">Grading period starts</label><input id="gpFrom" type="date" data-m="gp_from"></div>
+      <div class="svc-gp"><label for="gpTo">Grading period ends</label><input id="gpTo" type="date" data-m="gp_to"></div>
+      <div><label for="iepNote">IEP service note</label><input id="iepNote" data-m="iep_note" placeholder="e.g., behavior consultation to the classroom team, in the classroom"></div>
+      <div><label for="svcMedicaid">Medicaid ID (only when the service is billed)</label><input id="svcMedicaid" data-m="medicaid"></div>
+    </div>
+    <div class="metrics noprint" id="svcMetrics"></div>
+    <h3 class="noprint" style="margin-top:12px">This Week and This Month by Kind</h3>
+    <div class="grid-wrap noprint"><table class="rt" id="svcTot"></table></div>
+    <div class="tools noprint" style="margin-top:14px"><label class="hint" for="svcPeriod">Period</label><select id="svcPeriod" aria-label="Period of the service log"></select><button class="tool" id="svcPrint" type="button">Print the service log</button><button class="tool" id="svcCsv" type="button">Service log CSV</button><span class="hint" id="svcCount"></span></div>
+    <p class="hint noprint">Click an entry to open its note. The page below is what prints.</p>
+    <div id="svcOut"></div>
+  </section>
+
   <!-- ===================== GUIDE ===================== -->
   <section class="only-guide">
     <h2 class="nbh-band">What This Form Keeps</h2>
@@ -110,6 +141,8 @@
       <tr><th>Integrity</th><td>The TI-1 score as a percent: 90% and above is treated as acceptable, 80% to 89% as needing a retraining step, below 80% as a plan that is not being run (working conventions, the same as Form TI-1 uses).</td></tr>
       <tr><th>Hours by month</th><td>Each note&rsquo;s duration, in hours to two decimals, summed by the month of its date and by its type. Notes without a readable date are listed under &ldquo;undated&rdquo;.</td></tr>
       <tr><th>Open next steps</th><td>Steps not ticked done, from every note; a step is overdue when its date is before today.</td></tr>
+      <tr><th>Service log entries (v21.85)</th><td>Each dated note is one entry. Its minutes are the service minutes typed on the note, else the duration from the start and end times; its kind is the one chosen, else the type&rsquo;s (an observation is observation, a consultation or a call is consultation, a training is training, a direct session is direct service, a parent or IEP meeting is a meeting, a record review is other), else the category with the most minutes; with whom is the one typed, else the roles named in brackets under who was present (a parent meeting is with the parent, an IEP meeting with the team, a direct session with the student); the one line is the one typed, else the purpose. A note without a date, or without minutes or times, is not an entry.</td></tr>
+      <tr><th>This week, this month, the IEP</th><td>The week runs Monday to Sunday and the month is the calendar month, both the ones containing today. Against the IEP&rsquo;s minutes (Form DM-1, per week, month or grading period, between the dates typed for the grading period), the minutes counted are those of the kind the IEP names: direct service for direct, every other kind (consultation, observation, training, meetings, other) for consultation, and all of them for both. &ldquo;120 of 120 minutes this month&rdquo; is the minutes counted against the minutes owed.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">What Makes a Note Hold Up</h2>
@@ -119,12 +152,13 @@
       <tr><th>Changes name their authority</th><td>A plan change inside the adjustments the plan already allows is the BCBA&rsquo;s call; one outside them is the team&rsquo;s (Form PR-1) or needs consent (Form IC-1). The note says which, every time.</td></tr>
       <tr><th>Every recommendation has a next step</th><td>A recommendation that nobody owns by a date is recorded as &ldquo;recommended only; awaiting the team&rdquo; and reappears on the open-steps table until it is either adopted or dropped.</td></tr>
       <tr><th>The note cites its data</th><td>Which forms, which dates. The note does not repeat the graph; it says where the graph is.</td></tr>
+      <tr><th>The service log stands on the notes</th><td>The printed service log is a summary of the notes, not a substitute for them: each line points to a dated, signed note that says what the service consisted of. Where the district bills school-based Medicaid, it sets which fields its log needs (commonly the student and Medicaid ID, the date, the start and end times or the minutes, the service, the provider&rsquo;s name and credential, and a signature); check the printed page against the district&rsquo;s own requirements before using it as the billing record.</td></tr>
       <tr><th>Nothing about third parties that is not needed</th><td>Other students are not named; a peer is &ldquo;a peer&rdquo;. Staff are named with their role because the plan assigns them steps.</td></tr>
     </table>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated case is six notes over five weeks (two observations with TI-1 scores, a phone call, a parent meeting, an IEP meeting and a consultation), with next steps, time by category and the hours log.</p>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. The simulated case is six notes over five weeks (two observations with TI-1 scores, a phone call, a parent meeting, an IEP meeting and a consultation), with next steps, time by category and the hours log; the service log counts them against an IEP of 120 minutes a month of consultation.</p>
     <p class="hint" id="cnRefs" style="margin-top:10px"><b>Reference list.</b>
     Behavior Analyst Certification Board. (2020). <em>Ethics code for behavior analysts</em>. Author. &bull;
     Bergan, J. R., &amp; Kratochwill, T. R. (1990). <em>Behavioral consultation and therapy</em>. Plenum. &bull;

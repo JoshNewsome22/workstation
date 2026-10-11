@@ -16,7 +16,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button.rowDel[da
 
 const TYPES=['Observation','Consultation','Training','Direct session','Parent meeting','IEP or team meeting','Phone or video call','Record review'];
 const TCAT=[['t_obs','Observation'],['t_cons','Consultation'],['t_train','Training'],['t_direct','Direct service'],['t_meet','Meeting'],['t_doc','Documentation'],['t_travel','Travel']];
-const NFIELDS=['date','start','end','type','setting','present','plan','purpose','data_forms','data_rate','data_goal','data_unit','data_dir','observed','integ','integ_date','integ_note','problems','recs','changes','authority','training','materials','t_obs','t_cons','t_train','t_direct','t_meet','t_doc','t_travel','sig','sig_date','written'];
+const NFIELDS=['date','start','end','type','setting','present','plan','purpose','data_forms','data_rate','data_goal','data_unit','data_dir','observed','integ','integ_date','integ_note','problems','recs','changes','authority','training','materials','t_obs','t_cons','t_train','t_direct','t_meet','t_doc','t_travel','sig','sig_date','written','svc_min','svc_kind','svc_with','svc_note'];
 
 /* ---------------- state ---------------- */
 function blank(){return{meta:{},notes:[]};}
@@ -58,6 +58,7 @@ function renderComputed(){
   if(n.changes&&!/^\s*(none|no change)/i.test(n.changes)&&(!n.authority||/^No change/.test(n.authority)))out.push('A change to the plan is recorded without its authority.');
   if(n.recs&&!n.next.some(s=>s.what))out.push('Recommendations were given but no next step has an owner and a date.');
   if(!n.sig)out.push('The note is not signed.');
+  renderSvcHints();
   $('#noteVerdict').innerHTML=out.length?'<div class="verdict v-mid">'+out.map(x=>'<div>'+esc(x)+'</div>').join('')+'</div>':(n.date?'<div class="verdict v-ok"><b>Complete.</b> Dated, timed, typed, attended, signed; changes carry their authority and recommendations their next step.</div>':'');
   renderNoteOut();
 }
@@ -66,7 +67,7 @@ function renderNoteOut(){
   const P=(label,v,pre)=>'<h4>'+label+'</h4>'+(v&&String(v).trim()?'<p>'+esc(v)+'</p>':'<p class="cn-empty">none recorded</p>');
   const nx=n.next.filter(s=>s.what);
   $('#noteOut').innerHTML='<div class="cn-title">Consultation and Session Note'+(n.type?': '+esc(n.type):'')+'</div>'+
-    '<div class="cn-head"><div><b>Student</b>'+esc(m.client||'')+(m.sid?' ('+esc(m.sid)+')':'')+'</div><div><b>Date</b>'+esc(n.date||'')+'</div><div><b>Time</b>'+esc(fmtHM(n.start||''))+(n.end?' to '+esc(fmtHM(n.end)):'')+(d!=null?' ('+fmtDur(d)+')':'')+'</div><div><b>Setting</b>'+esc(n.setting||'')+'</div><div><b>School</b>'+esc(m.school||'')+'</div><div><b>BCBA</b>'+esc(m.bcba||'')+'</div><div style="grid-column:1/-1"><b>Present</b>'+esc(n.present||'')+'</div><div style="grid-column:1/-1"><b>Plan in force</b>'+esc(n.plan||m.plan||'')+(n.purpose?' &nbsp; <b>Purpose</b>'+esc(n.purpose):'')+'</div></div>'+
+    '<div class="cn-head"><div><b>Student</b>'+esc(m.client||'')+(m.sid?' ('+esc(m.sid)+')':'')+'</div><div><b>Date</b>'+esc(n.date||'')+'</div><div><b>Time</b>'+esc(fmtHM(n.start||''))+(n.end?' to '+esc(fmtHM(n.end)):'')+(d!=null?' ('+fmtDur(d)+')':'')+'</div><div><b>Setting</b>'+esc(n.setting||'')+'</div><div><b>School</b>'+esc(m.school||'')+'</div><div><b>BCBA</b>'+esc(m.bcba||'')+'</div><div style="grid-column:1/-1"><b>Present</b>'+esc(n.present||'')+'</div>'+svcHead(n)+'<div style="grid-column:1/-1"><b>Plan in force</b>'+esc(n.plan||m.plan||'')+(n.purpose?' &nbsp; <b>Purpose</b>'+esc(n.purpose):'')+'</div></div>'+
     '<h4>Data reviewed</h4><p>'+(n.data_forms?esc(n.data_forms):'<span class="cn-empty">none recorded</span>')+(rc?'<br>Rate '+rc.r+' against goal '+rc.g+(n.data_unit?' '+esc(n.data_unit):'')+': '+(rc.met?'meets the goal':rc.close?'close to the goal':'not at the goal')+(rc.up?' (higher is better).':' (lower is better).'):'')+'</p>'+
     P('What was seen',n.observed)+
     '<h4>Integrity observed (Form TI-1)</h4><p>'+(ic?pct(ic.v)+(n.integ_date?' on '+esc(n.integ_date):'')+(n.integ_note?'; '+esc(n.integ_note):''):'<span class="cn-empty">no integrity observation at this contact</span>')+'</p>'+
@@ -115,25 +116,105 @@ function renderLog(){
   $('#openTbl tbody').innerHTML=ops.map(o=>'<tr class="open" data-open="'+o.i+'" tabindex="0" role="button" aria-label="Open note '+(o.i+1)+'"><td>'+esc(o.n.date||('note '+(o.i+1)))+'</td><td>'+esc(o.s.what)+'</td><td>'+esc(o.s.who)+'</td><td>'+esc(o.s.when)+'</td><td class="num">'+(o.st==='overdue'?'<b style="color:#8E2A2A">overdue</b>':'open')+'</td></tr>').join('')||'<tr><td colspan="5" class="hint">No open steps.</td></tr>';
 }
 
+/* ---------------- v21.85 (R) the service log ----------------
+   Each dated note is a service entry: its minutes (typed, else the duration from the times), its kind (typed, else the
+   type's, else the category with the most minutes), with whom (typed, else the roles in brackets under who was present)
+   and one line (typed, else the purpose). The Service log page totals this week (Monday to Sunday) and this month by
+   kind and against the IEP's service minutes (Form DM-1's profile.services through the case, or typed here), prints a
+   chosen period alone as a service log page with the provider's signature line, and exports it as CSV. Facts out:
+   service {log, week, month, iep}. */
+const KINDS=[['direct','Direct service'],['consult','Consultation'],['observation','Observation'],['training','Training'],['meeting','Meeting'],['other','Other']];
+const kindLab=k=>(KINDS.find(x=>x[0]===k)||[0,''])[1];
+const KIND_OF={'Observation':'observation','Consultation':'consult','Training':'training','Direct session':'direct','Parent meeting':'meeting','IEP or team meeting':'meeting','Phone or video call':'consult','Record review':'other'};
+const CAT_KIND={t_obs:'observation',t_cons:'consult',t_train:'training',t_direct:'direct',t_meet:'meeting'};
+const IEPK={consult:'consultation',direct:'direct',both:'direct and consultation'};
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const fromIso=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||'').trim());return m?new Date(+m[1],+m[2]-1,+m[3]):null;};
+const mdy=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();
+const countWhat=k=>k==='consult'?'every kind but direct service':k==='direct'?'direct service':'every kind';
+function svcAuto(n){const d=duration(n);let kind=KIND_OF[n.type]||'';
+  if(!kind){let best=0;Object.keys(CAT_KIND).forEach(k=>{const v=num(n[k]);if(v!=null&&v>best){best=v;kind=CAT_KIND[k];}});}
+  let w=n.type==='Parent meeting'?'parent':n.type==='IEP or team meeting'?'team':n.type==='Direct session'?'student':'';
+  if(!w){const R=[],p=String(n.present||'');p.replace(/\(([^)]+)\)/g,(m,x)=>{const r=x.split(/[,;]/)[0].trim().toLowerCase();if(r&&!R.includes(r))R.push(r);return m;});
+    if(/\bthe student\b/i.test(p)&&!R.includes('student'))R.push('student');if(!R.length&&/\b(parent|mother|father|guardian)\b/i.test(p))R.push('parent');w=R.slice(0,4).join(', ');}
+  const line=String(n.purpose||'').trim()||String(n.observed||'').split('\n')[0].trim();
+  return {min:d,kind:kind||'other',with:w,note:line.slice(0,160)};}
+function svcOf(n,i){const a=svcAuto(n),d=parseDate(n.date),m=num(n.svc_min);
+  return {i,n,d,iso:d?isoOf(d):'',min:m!=null&&m>=0?Math.round(m):a.min,kind:KINDS.some(k=>k[0]===n.svc_kind)?n.svc_kind:a.kind,with:String(n.svc_with||'').trim()||a.with,note:(String(n.svc_note||'').trim()||a.note).slice(0,160)};}
+function svcEntries(){return S.notes.map(svcOf).filter(e=>e.d&&e.min!=null&&e.min>0).sort((a,b)=>a.d-b.d||a.i-b.i);}
+function weekOf(t){const d=new Date(t.getFullYear(),t.getMonth(),t.getDate());d.setDate(d.getDate()-(d.getDay()+6)%7);const e=new Date(d);e.setDate(e.getDate()+6);return {from:d,to:e};}
+function monthOf(t){return {from:new Date(t.getFullYear(),t.getMonth(),1),to:new Date(t.getFullYear(),t.getMonth()+1,0)};}
+function svcTot(E,r){const o={total:0,direct:0,consult:0,by:{},n:0};KINDS.forEach(k=>{o.by[k[0]]=0;});
+  E.forEach(e=>{if(r&&!(e.d>=r.from&&e.d<=r.to))return;o.by[e.kind]+=e.min;o.total+=e.min;o.n++;if(e.kind==='direct')o.direct+=e.min;else o.consult+=e.min;});return o;}
+const counted=(t,k)=>k==='direct'?t.direct:k==='consult'?t.consult:t.total;
+/* the IEP's minutes against the period they are owed in (this week, this month, or the grading period typed) */
+function iepInfo(E,now){const m=S.meta,min=num(m.iep_min);if(min==null||min<=0)return null;const per=['week','month','grading period'].includes(m.iep_per)?m.iep_per:'month',kind=IEPK[m.iep_kind]?m.iep_kind:'';
+  let r=null,lab='this month';if(per==='week'){r=weekOf(now);lab='this week';}else if(per==='grading period'){const a=fromIso(m.gp_from),b=fromIso(m.gp_to);if(a&&b&&b>=a)r={from:a,to:b};lab='this grading period';}else r=monthOf(now);
+  if(!r)return {min,per,kind,done:null,lab,line:'',need:'Enter the grading period’s first and last days to count the minutes against the IEP.'};
+  const done=counted(svcTot(E,r),kind);return {min,per,kind,done,lab,r,line:done+' of '+min+' minutes '+lab};}
+/* the periods the page can show: this month (always), this week, each month with an entry, the grading period, all */
+let svcPer='';
+function svcPeriods(E,now){const cm=monthKey(mdy(now)),wk=weekOf(now),P=[['m:'+cm,monthLabel(cm)+' (this month)'],['w','This week ('+mdy(wk.from)+' to '+mdy(wk.to)+')']];
+  [...new Set(E.map(e=>monthKey(mdy(e.d))))].sort().reverse().forEach(k=>{if(k!==cm)P.push(['m:'+k,monthLabel(k)]);});
+  const a=fromIso(S.meta.gp_from),b=fromIso(S.meta.gp_to);if(a&&b&&b>=a)P.push(['gp','Grading period ('+mdy(a)+' to '+mdy(b)+')']);P.push(['all','Every entry']);return P;}
+function svcRange(key,now){if(key==='w'){const w=weekOf(now);return {from:w.from,to:w.to,kind:'week',lab:'the week of '+mdy(w.from)};}
+  if(key==='gp'){const a=fromIso(S.meta.gp_from),b=fromIso(S.meta.gp_to);return a&&b?{from:a,to:b,kind:'grading period',lab:'the grading period '+mdy(a)+' to '+mdy(b)}:null;}
+  if(key==='all')return null;const k=String(key||'').slice(2),y=+k.slice(0,4),mo=+k.slice(5,7);if(!y||!mo)return null;return {from:new Date(y,mo-1,1),to:new Date(y,mo,0),kind:'month',lab:monthLabel(k)};}
+function renderSvcHints(){const n=note(),a=svcAuto(n),set=(id,v)=>{const e=document.getElementById(id);if(e)e.placeholder=v;};
+  set('svcMin',a.min!=null?a.min+' (from the times)':'from the start and end times');
+  const o=document.querySelector('#svcKind option[value=""]');if(o)o.textContent=kindLab(a.kind)+(!KIND_OF[n.type]&&catSum(n)!=null?' (from the time by category)':' (from the type)');
+  set('svcWith',a.with||'e.g., teacher, parent, team');set('svcNote',a.note?a.note.slice(0,100):'one line: what the service was');}
+function svcHead(n){const e=svcOf(n,cur);return e.min!=null?'<div style="grid-column:1/-1"><b>Service</b>'+e.min+' min, '+esc(kindLab(e.kind).toLowerCase())+(e.with?', with '+esc(e.with):'')+'</div>':'';}
+function svcProvider(){return S.meta.bcba||((S.notes.find(n=>n.sig)||{}).sig)||'';}
+function svcRows(){const now=new Date(),E=svcEntries(),r=svcRange(svcPer,now);return {now,E,r,R:E.filter(e=>!r||(e.d>=r.from&&e.d<=r.to))};}
+function renderSvc(){const box=$('#svcOut');if(!box)return;const m=S.meta,now=new Date(),E=svcEntries(),w=weekOf(now),tw=svcTot(E,w),tm=svcTot(E,monthOf(now)),ta=svcTot(E,null),ip=iepInfo(E,now);
+  $$('.svc-gp').forEach(x=>{x.hidden=m.iep_per!=='grading period';});
+  const dated=S.notes.filter(n=>parseDate(n.date)).length,nomin=dated-E.length;
+  $('#svcMetrics').innerHTML=`<div class="metric"><b>This week</b><div class="val">${tw.total} min</div><div class="sub">${mdy(w.from)} to ${mdy(w.to)} · direct ${tw.direct} · consultation and other ${tw.consult}</div></div>
+    <div class="metric"><b>${monthLabel(monthKey(mdy(now)))}</b><div class="val">${tm.total} min</div><div class="sub">${tm.n} entr${tm.n===1?'y':'ies'} · direct ${tm.direct} · consultation and other ${tm.consult}</div></div>
+    <div class="metric ${ip&&ip.done!=null?(ip.done>=ip.min?'m-ok':'m-mid'):''}" id="svcIep"><b>Against the IEP</b><div class="val">${ip?(ip.done!=null?ip.done+' of '+ip.min:'—'):'—'}</div><div class="sub">${ip?(ip.done!=null?esc('minutes '+ip.lab+(ip.kind?' ('+IEPK[ip.kind]+')':'')+(ip.done<ip.min?'; '+(ip.min-ip.done)+' to go':ip.done>ip.min?'; '+(ip.done-ip.min)+' over':'')):esc(ip.need)):'no IEP service minutes yet: Form DM-1 through the case, or type them above'}</div></div>
+    <div class="metric"><b>Entries</b><div class="val">${E.length}</div><div class="sub">${nomin>0?nomin+' dated note'+(nomin===1?' has':'s have')+' no minutes or times':'every dated note has its minutes'}</div></div>`;
+  $('#svcTot').innerHTML='<thead><tr><th>Kind</th><th>This week (min)</th><th>This month (min)</th><th>Every entry (min)</th></tr></thead><tbody>'+KINDS.map(([k,l])=>'<tr><td class="lk">'+l+'</td><td class="num">'+(tw.by[k]||'—')+'</td><td class="num">'+(tm.by[k]||'—')+'</td><td class="num">'+(ta.by[k]||'—')+'</td></tr>').join('')+
+    '<tr class="tot"><td>Total</td><td class="num">'+tw.total+'</td><td class="num">'+tm.total+'</td><td class="num">'+ta.total+'</td></tr>'+(ip&&ip.done!=null?'<tr><td class="lk">Against the IEP</td><td colspan="3">'+esc(ip.line)+(ip.kind?' (counting '+countWhat(ip.kind)+')':'')+'</td></tr>':'')+'</tbody>';
+  /* the period and the page */
+  const P=svcPeriods(E,now);if(!P.some(p=>p[0]===svcPer))svcPer=P[0][0];const sel=$('#svcPeriod');if(sel)sel.innerHTML=P.map(p=>'<option value="'+p[0]+'"'+(p[0]===svcPer?' selected':'')+'>'+esc(p[1])+'</option>').join('');
+  const r=svcRange(svcPer,now),R=E.filter(e=>!r||(e.d>=r.from&&e.d<=r.to)),tp=svcTot(R,null),provider=svcProvider();
+  $('#svcCount').textContent=R.length+' entr'+(R.length===1?'y':'ies')+', '+tp.total+' minutes';
+  let iepLine='';const im=num(m.iep_min);if(im!=null&&im>0)iepLine=im+' minutes per '+(m.iep_per||'month')+(IEPK[m.iep_kind]?', '+IEPK[m.iep_kind]:'')+(m.iep_note?'; '+m.iep_note:'');
+  const against=ip&&r&&r.kind===ip.per?'Against the IEP: '+counted(tp,ip.kind)+' of '+ip.min+' minutes in '+r.lab+(ip.kind?' (counting '+countWhat(ip.kind)+')':'')+'.':'';
+  box.innerHTML='<div class="sl-title">Service Log: Behavior Analysis Services</div>'+
+    '<div class="sl-head"><div><b>Student</b>'+esc(m.client||'')+'</div><div><b>Student ID</b>'+esc(m.sid||'')+'</div><div><b>Date of birth</b>'+esc(m.dob||'')+'</div>'+(m.medicaid?'<div><b>Medicaid ID</b>'+esc(m.medicaid)+'</div>':'')+
+    '<div><b>School</b>'+esc(m.school||'')+'</div><div><b>Provider</b>'+esc(provider)+'</div><div><b>Period</b>'+esc(r?r.lab+(r.kind==='month'?' ('+mdy(r.from)+' to '+mdy(r.to)+')':''):'every entry')+'</div>'+
+    '<div style="grid-column:1/-1"><b>IEP service</b>'+(iepLine?esc(iepLine):'<span class="cn-empty">not recorded</span>')+'</div></div>'+
+    (R.length?'<table class="sl-t"><thead><tr><th style="width:11%">Date</th><th style="width:9%">Start</th><th style="width:9%">End</th><th style="width:8%">Minutes</th><th style="width:17%">Service</th><th style="width:16%">With</th><th>Note</th></tr></thead><tbody>'+
+      R.map(e=>'<tr class="open" data-open="'+e.i+'" tabindex="0" role="button" aria-label="Open the note of '+esc(mdy(e.d))+'"><td>'+mdy(e.d)+'</td><td>'+esc(e.n.start?fmtHM(e.n.start):'')+'</td><td>'+esc(e.n.end?fmtHM(e.n.end):'')+'</td><td class="num">'+e.min+'</td><td>'+esc(kindLab(e.kind))+(e.n.type&&e.n.type!==kindLab(e.kind)?' ('+esc(e.n.type)+')':'')+'</td><td>'+esc(e.with)+'</td><td>'+esc(e.note)+'</td></tr>').join('')+
+      '<tr class="tot"><td colspan="3">Total, '+R.length+' entr'+(R.length===1?'y':'ies')+'</td><td class="num">'+tp.total+'</td><td colspan="3">'+(tp.total>=60?fmtDur(tp.total):'')+'</td></tr></tbody></table>'+
+      '<p class="sl-sum">'+KINDS.filter(([k])=>tp.by[k]).map(([k,l])=>l+' '+tp.by[k]+' min').join(' · ')+'.'+(against?' '+esc(against):'')+'</p>'
+      :'<p class="cn-empty">No service entries in this period. An entry is a note with a date and its minutes (or start and end times).</p>')+
+    '<p class="sl-att">I certify that the services listed were provided as recorded, on the dates and for the times shown, and that each is documented in a dated and signed note on Form CN-1.</p>'+
+    '<div class="sl-sig"><span>Provider signature: <span class="bl"></span></span><span>Date: <span class="bl" style="min-width:120px"></span></span><span>Name and credential: <b>'+esc(provider)+'</b></span></div>'+
+    '<div class="sl-foot"><span>Confidential student record; retain with the behavior file.</span><span>Form CN-1 · Service log · printed '+mdy(now)+'</span></div>';}
+
 /* ---------------- events ---------------- */
 document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.n!==undefined){note()[el.dataset.n]=el.value;renderComputed();if(el.dataset.n==='date'||el.dataset.n==='type'||el.dataset.n==='setting')renderNoteSelSoon();return;}
   if(el.dataset.x!==undefined&&el.type!=='checkbox'){note().next[+el.dataset.i][el.dataset.x]=el.value;renderNoteOutSoon();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderNoteOutSoon();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderNoteOutSoon();renderSvcSoon();}
   if(el.id==='logSearch')renderLog();
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.n!==undefined){note()[el.dataset.n]=el.value;renderComputed();renderNoteSel();return;}
   if(el.dataset.x!==undefined){note().next[+el.dataset.i][el.dataset.x]=el.type==='checkbox'?el.checked:el.value;renderComputed();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderNoteOut();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;renderNoteOut();renderSvc();}
   if(el.id==='logType'||el.id==='logMonth')renderLog();
+  if(el.id==='svcPeriod'){svcPer=el.value;renderSvc();}
 });
 document.addEventListener('click',e=>{const tr=e.target.closest('tr[data-open]');if(!tr)return;cur=+tr.dataset.open;renderNote();setView('note');});
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-open]');if(!tr||e.target.tagName==='INPUT')return;cur=+tr.dataset.open;renderNote();setView('note');});
-let selT=0,outT=0;function renderNoteSelSoon(){clearTimeout(selT);selT=setTimeout(renderNoteSel,400);}function renderNoteOutSoon(){clearTimeout(outT);outT=setTimeout(renderComputed,300);}
+let selT=0,outT=0,svcT=0;function renderNoteSelSoon(){clearTimeout(selT);selT=setTimeout(renderNoteSel,400);}function renderNoteOutSoon(){clearTimeout(outT);outT=setTimeout(renderComputed,300);}function renderSvcSoon(){clearTimeout(svcT);svcT=setTimeout(renderSvc,300);}
 $('#noteSel').addEventListener('change',e=>{cur=+e.target.value;renderNote();});
 $('#newNote').addEventListener('click',()=>{if(S.notes.length>=400)return;S.notes.push(newNote());cur=S.notes.length-1;renderNote();$('[data-n="date"]').focus();});
-$('#dupNote').addEventListener('click',()=>{if(S.notes.length>=400)return;const o=note(),n=newNote();['type','setting','present','plan','purpose','sig'].forEach(f=>{n[f]=o[f];});S.notes.push(n);cur=S.notes.length-1;renderNote();$('[data-n="date"]').focus();});
+$('#dupNote').addEventListener('click',()=>{if(S.notes.length>=400)return;const o=note(),n=newNote();['type','setting','present','plan','purpose','sig','svc_kind','svc_with'].forEach(f=>{n[f]=o[f];});S.notes.push(n);cur=S.notes.length-1;renderNote();$('[data-n="date"]').focus();});
 $('#delNote').addEventListener('click',async ()=>{const n=note(),k=cur;if((n.date||n.observed||n.problems)&&!(await nbhUI.confirm('Delete note '+(k+1)+' ('+(n.date||'no date')+')?\nThe note and its next steps are deleted; this cannot be undone.',{ok:'Delete',danger:true})))return;S.notes.splice(k,1);cur=Math.max(0,k-1);renderNote();});
 $('#addNx').addEventListener('click',()=>{if(note().next.length>=12)return;note().next.push({what:'',who:'',when:'',done:false});renderNx();});
 $('#delNx').addEventListener('click',async ()=>{const nx=note().next;if(nx.length<=1)return;if(nx[nx.length-1].what&&!(await nbhUI.confirm('Remove the last step?\nThe next step, its owner and its date are deleted.',{ok:'Remove',danger:true})))return;nx.pop();renderNx();renderComputed();});
@@ -143,8 +224,8 @@ async function rowDel(r,i){
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});}
-function renderAll(){ensure();bindMeta();renderNote();renderLog();}
-$$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.view==='log')renderLog();}));
+function renderAll(){ensure();bindMeta();renderNote();renderLog();renderSvc();}
+$$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.view==='log')renderLog();if(b.dataset.view==='svc')renderSvc();}));
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -163,7 +244,7 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='CN-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object'&&!Array.isArray(s.meta))Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]);});
-  o.notes=Array.isArray(s.notes)?s.notes.slice(0,400).map(x=>{const n={};NFIELDS.forEach(f=>{n[f]=str(x&&x[f]);});if(!TYPES.includes(n.type))n.type='';
+  o.notes=Array.isArray(s.notes)?s.notes.slice(0,400).map(x=>{const n={};NFIELDS.forEach(f=>{n[f]=str(x&&x[f]);});if(!TYPES.includes(n.type))n.type='';if(!KINDS.some(k=>k[0]===n.svc_kind))n.svc_kind='';
     n.next=Array.isArray(x&&x.next)?x.next.slice(0,12).map(y=>({what:str(y&&y.what),who:str(y&&y.who),when:str(y&&y.when),done:!!(y&&y.done)})):[];return n;}):[];
   return o;
 }
@@ -176,8 +257,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const head=['#','Date','Start','End','Minutes','Type','Setting','Present','Plan in force','Purpose','Data reviewed','Rate','Goal','Unit','Direction','Observed','Integrity %','Integrity date','Integrity note','Problems','Recommendations','Changes','Authority','Training','Materials','Next steps','Observation min','Consultation min','Training min','Direct min','Meeting min','Documentation min','Travel min','Signed','Date signed','Written on'];
-  const out=[head];noteRows().reverse().forEach(r=>{const n=r.n;out.push([r.i+1,n.date,n.start,n.end,r.dur==null?'':r.dur,n.type,n.setting,n.present,n.plan,n.purpose,n.data_forms,n.data_rate,n.data_goal,n.data_unit,n.data_dir==='up'?'higher is better':'lower is better',n.observed,n.integ,n.integ_date,n.integ_note,n.problems,n.recs,n.changes,n.authority,n.training,n.materials,n.next.filter(s=>s.what).map(s=>s.what+' ('+s.who+(s.when?', by '+s.when:'')+(s.done?', done':'')+')').join('; '),n.t_obs,n.t_cons,n.t_train,n.t_direct,n.t_meet,n.t_doc,n.t_travel,n.sig,n.sig_date,n.written]);});
+  const head=['#','Date','Start','End','Minutes','Type','Setting','Present','Plan in force','Purpose','Data reviewed','Rate','Goal','Unit','Direction','Observed','Integrity %','Integrity date','Integrity note','Problems','Recommendations','Changes','Authority','Training','Materials','Next steps','Observation min','Consultation min','Training min','Direct min','Meeting min','Documentation min','Travel min','Signed','Date signed','Written on','Service minutes','Service kind','With whom','Service note'];
+  const out=[head];noteRows().reverse().forEach(r=>{const n=r.n;out.push([r.i+1,n.date,n.start,n.end,r.dur==null?'':r.dur,n.type,n.setting,n.present,n.plan,n.purpose,n.data_forms,n.data_rate,n.data_goal,n.data_unit,n.data_dir==='up'?'higher is better':'lower is better',n.observed,n.integ,n.integ_date,n.integ_note,n.problems,n.recs,n.changes,n.authority,n.training,n.materials,n.next.filter(s=>s.what).map(s=>s.what+' ('+s.who+(s.when?', by '+s.when:'')+(s.done?', done':'')+')').join('; '),n.t_obs,n.t_cons,n.t_train,n.t_direct,n.t_meet,n.t_doc,n.t_travel,n.sig,n.sig_date,n.written].concat((e=>[e.min==null?'':e.min,kindLab(e.kind),e.with,e.note])(svcOf(n,r.i))));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='CN-1_log.csv';document.body.appendChild(a);a.click();a.remove();});
 $('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();cur=0;renderAll();setView('note');}});
 
@@ -187,7 +268,7 @@ async function loadSim(){
   const day=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-n);while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()-1);return d;};
   const Y=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);const fwd=(d,k)=>{const x=new Date(d);x.setDate(x.getDate()+k);return x;};
   S=blank();cur=0;
-  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'4',school:'Lincoln Elementary, Riverside USD',bcba:'Joshua Newsome, M.A., BCBA',plan:'BIP v2, dated '+Y(day(45))+' (Form TD-1)',service:'4 hours a month of consultation under the district contract; parent consent on IC-1 dated '+Y(day(60)),goal:'Elopement from the classroom (TB-1); goal under 1 per day for 4 school weeks (GB-1)'};
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'4',school:'Lincoln Elementary, Riverside USD',bcba:'Joshua Newsome, M.A., BCBA',plan:'BIP v2, dated '+Y(day(45))+' (Form TD-1)',service:'4 hours a month of consultation under the district contract; parent consent on IC-1 dated '+Y(day(60)),goal:'Elopement from the classroom (TB-1); goal under 1 per day for 4 school weeks (GB-1)',dob:'3/14/2016',iep_min:'120',iep_per:'month',iep_kind:'consult',iep_note:'Behavior consultation to the classroom team (IEP services page, Form DM-1)'};
   const sig='Joshua Newsome, M.A., BCBA';
   const mk=(o)=>{const n=newNote();Object.assign(n,o);n.sig=sig;n.sig_date=n.sig_date||n.date;n.plan=n.plan||S.meta.plan;return n;};
   const d1=day(33),d2=day(26),d3=day(19),d4=day(14),d5=day(7),d6=day(2);
@@ -287,3 +368,29 @@ window.__nbhFactsPick=function(sel){
 
 /* v21.35 what is due: the open next steps of every note, by their dates, for the workstation's due line */
 window.__nbhDue=function(){const out=[];(S.notes||[]).forEach(n=>(n.next||[]).forEach(x=>{if(x.done||!x.when||!x.what)return;out.push({what:(x.what+(x.who?' ('+x.who+')':'')).slice(0,60).trim(),date:x.when});}));return out;};
+
+/* v21.85 (R) the service log, toolbar and case. Print the service log prints the chosen period alone (portrait letter);
+   the CSV holds the same rows. In: the IEP's service minutes (Form DM-1's profile.services: minutes, per, kind, note)
+   into the empty fields of the Service log page. Out: service {log:[{date, min, kind, with, note}] oldest first, the last
+   200; week and month {from, to, direct, consult (every kind but direct), total, byKind}; iep {minutes, per, kind, done,
+   line} when the IEP's minutes are known}. */
+$('#svcPrint').addEventListener('click',()=>{renderSvc();const {R}=svcRows();if(!R.length&&!String(S.meta.client||'').trim()){nbhUI.toast('There is no service entry to print yet.');return;}
+  document.body.classList.add('cn-svc-only');
+  const st=document.createElement('style');st.id='cnSvcPage';st.textContent='@media print{@page{size:letter portrait;margin:0.6in}}';document.head.appendChild(st);
+  const off=()=>{document.body.classList.remove('cn-svc-only');st.remove();window.removeEventListener('afterprint',off);};
+  window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);});
+$('#svcCsv').addEventListener('click',()=>{renderSvc();const {R,r}=svcRows(),m=S.meta,q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"',pv=svcProvider();
+  const out=[['Student','Student ID','Date','Start','End','Minutes','Kind','Type of contact','With whom','Note','Provider']].concat(R.map(e=>[m.client,m.sid,e.iso,e.n.start,e.n.end,e.min,kindLab(e.kind),e.n.type,e.with,e.note,pv]));
+  const nm=String(m.client||'student').replace(/[^\w-]+/g,'_'),per=r?isoOf(r.from)+'_to_'+isoOf(r.to):'all';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(x=>x.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='CN-1_service-log_'+nm+'_'+per+'.csv';document.body.appendChild(a);a.click();a.remove();});
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}r=r&&typeof r==='object'?r:{filled:0};let n=0;
+  try{const sv=f&&f.profile&&f.profile.services;if(sv&&typeof sv==='object'){const m=S.meta,put=(k,v)=>{v=v==null?'':String(v).trim();if(!v||String(m[k]||'').trim())return;m[k]=v;n++;};
+    const mn=num(sv.minutes);if(mn!=null&&mn>0)put('iep_min',String(mn));if(['week','month','grading period'].includes(sv.per))put('iep_per',sv.per);if(IEPK[sv.kind])put('iep_kind',sv.kind);put('iep_note',sv.note);
+    if(n){bindMeta();renderSvc();const e=document.getElementById('iepMin');if(e)e.dispatchEvent(new Event('input',{bubbles:true}));}}}catch(e){}
+  return {filled:(r.filled||0)+n,note:[r.note||'',n?'placed the IEP service minutes (DM-1)':''].filter(Boolean).join('; ')};};})();
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+  try{const E=svcEntries();if(E.length){const now=new Date(),sum=r=>{const t=svcTot(E,r),by={};KINDS.forEach(([k])=>{if(t.by[k])by[k]=t.by[k];});return {from:isoOf(r.from),to:isoOf(r.to),direct:t.direct,consult:t.consult,total:t.total,byKind:by};};
+    const svc={log:E.slice(-200).map(e=>{const x={date:e.iso,min:e.min,kind:e.kind};if(e.with)x.with=e.with;if(e.note)x.note=e.note;return x;}),week:sum(weekOf(now)),month:sum(monthOf(now))};
+    const ip=iepInfo(E,now);if(ip&&ip.done!=null)svc.iep={minutes:ip.min,per:ip.per,kind:ip.kind,done:ip.done,line:ip.line};else if(ip)svc.iep={minutes:ip.min,per:ip.per,kind:ip.kind};
+    o=o||{};o.service=svc;}}catch(e){}
+  return o;};})();
