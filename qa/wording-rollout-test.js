@@ -1,6 +1,7 @@
 /* The writing help in every form (tools/blocks/patch-wording.py; tools/apply-polish.py puts it into a rebuilt form),
-   form by form, against the same form before the rollout: the pre-rollout folder, unpacked from git into
-   qa/out/wording-rollout/base/NBH-Workstation (made here when missing, from WR_COMMIT) and served by the same server.
+   form by form, against the same form without the writing help: today's folder with each page's loader of nbh-wording.js
+   taken out, made fresh in qa/out/wording-rollout/base/NBH-Workstation each run and served by the same server (WR_COMMIT:
+   instead the forms at that commit, unpacked from git, as before v21.86).
    For each of the 45 forms in index.html's FORMS:
      load    the form loads, takes its simulation and goes through its views with no console error, and the writing
              help starts (its rules compile; from this server the built-in relay address is another site, so nothing
@@ -17,12 +18,12 @@
    Random numbers are seeded (again as each simulation is loaded) and the clock is fixed, so both copies take the same
    simulation.
    usage: node qa/wording-rollout-test.js [FORM-ID ...]     (the server on :8123 serving the repository, as for every check)
-   env: WR_COMMIT (the commit before the rollout, default e39901f), WR_JOBS (forms at once, default 3),
+   env: WR_COMMIT (compare with the forms at that commit instead, e.g. e39901f, the one before the rollout), WR_JOBS (forms at once, default 3),
         WR_OUT (folder for the results, default qa/out/wording-rollout) */
 const {chromium, fs, path, ROOT, BASE, forms, loadSim, wire, sleep} = require(__dirname + '/lib.js');
 const {execFileSync} = require('child_process');
 const OUT = process.env.WR_OUT || path.join(__dirname, 'out', 'wording-rollout');
-const COMMIT = process.env.WR_COMMIT || 'e39901f';
+const COMMIT = process.env.WR_COMMIT || '';
 const JOBS = +(process.env.WR_JOBS || 3);
 const BASEDIR = path.join(__dirname, 'out', 'wording-rollout', 'base');
 const NEWURL = BASE + '/NBH-Workstation/', OLDURL = BASE + '/qa/out/wording-rollout/base/NBH-Workstation/';
@@ -30,10 +31,28 @@ const PDF = {old: path.join(OUT, 'pdf-before'), new: path.join(OUT, 'pdf-after')
 const J = JSON.stringify;
 const FIXED = new Date('2026-10-05T10:00:00');
 
-if (!fs.existsSync(path.join(BASEDIR, 'NBH-Workstation', 'index.html'))) {
-  fs.mkdirSync(BASEDIR, {recursive:true});
-  execFileSync('sh', ['-c', 'git -C "$0" archive "$1" NBH-Workstation | tar -x -C "$2"', ROOT, COMMIT, BASEDIR]);
-  console.log('unpacked NBH-Workstation at ' + COMMIT + ' into ' + BASEDIR);
+/* the same forms without the writing help, made fresh each run (v21.86; until then the copy was the forms before the rollout,
+   unpacked from git, which drifted further from today's forms with every release): each page's loader of nbh-wording.js is
+   taken out, every other file is the folder's own (linked, not copied) */
+if (process.env.WR_COMMIT) {
+  if (!fs.existsSync(path.join(BASEDIR, 'NBH-Workstation', 'index.html'))) {
+    fs.mkdirSync(BASEDIR, {recursive:true});
+    execFileSync('sh', ['-c', 'git -C "$0" archive "$1" NBH-Workstation | tar -x -C "$2"', ROOT, COMMIT, BASEDIR]);
+    console.log('unpacked NBH-Workstation at ' + COMMIT + ' into ' + BASEDIR);
+  }
+} else {
+  const src = path.join(ROOT, 'NBH-Workstation'), dst = path.join(BASEDIR, 'NBH-Workstation');
+  fs.rmSync(BASEDIR, {recursive:true, force:true}); fs.mkdirSync(dst, {recursive:true});
+  let n = 0;
+  for (const name of fs.readdirSync(src)) {
+    const from = path.join(src, name), to = path.join(dst, name);
+    if (/\.html$/.test(name)) {
+      const t = fs.readFileSync(from, 'utf8'), u = t.replace(/<script id="nbh-wording" src="nbh-wording\.js"><\/script>/g, '');
+      if (u !== t) n++;
+      fs.writeFileSync(to, u);
+    } else fs.symlinkSync(from, to);
+  }
+  console.log('the forms without the writing help: ' + n + ' pages in ' + dst);
 }
 for (const d of Object.values(PDF)) { fs.rmSync(d, {recursive:true, force:true}); fs.mkdirSync(d, {recursive:true}); }
 
