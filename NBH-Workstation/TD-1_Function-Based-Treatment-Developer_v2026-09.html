@@ -6642,6 +6642,25 @@ html.nbh-framed .toolbar :focus-visible{outline:2px solid var(--nbh-focus,#2f7fa
 html.nbh-framed #viewSeg button[data-nbh-fill]::after{border-color:rgba(24,46,67,.4)}
 html.nbh-framed #viewSeg button[aria-pressed=true][data-nbh-fill]::after{border-color:rgba(255,255,255,.6)}
 html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);color:var(--nbh-navy,#182e43)}
+/* v21.83 on an iPad (or any window 1194 px wide or less) the form's pinned toolbar folds to its view buttons on one line, a
+   44 px strip with a "Tools" button, while the user reads down the form or types in a field (the script below sets
+   html.nbh-fold); it unfolds on scrolling up, at the top, on a tap on the strip or on Tools. The space the bar gave up is
+   kept below it (--nbh-fold-gap), so nothing on the page moves. Screen only: paper never sees any of it. */
+#nbhFoldBtn{display:none}
+@media screen{
+  html.nbh-fold .toolbar{flex-wrap:nowrap!important;align-items:center!important;padding-top:3px!important;padding-bottom:3px!important;row-gap:0!important;margin-bottom:var(--nbh-fold-gap,0px)!important;animation:nbhFoldIn .18s ease-out}
+  html.nbh-fold .toolbar > :not(.nbh-fk):not(.nbh-fseg):not(#nbhFoldBtn),html.nbh-fold .toolbar .nbh-fk > :not(.nbh-fk):not(.nbh-fseg){display:none!important}
+  html.nbh-fold .toolbar .nbh-fk{display:flex!important;flex:1 1 auto!important;min-width:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;flex-wrap:nowrap!important}
+  html.nbh-fold .toolbar .nbh-fseg{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:100%!important;min-width:0!important;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  html.nbh-fold .toolbar .nbh-fseg::-webkit-scrollbar{display:none}
+  html.nbh-fold .toolbar .nbh-fseg > *,html.nbh-fold .toolbar #viewSeg.nbh-fseg > *{flex:0 0 auto!important;white-space:nowrap!important;height:36px!important;min-height:36px!important;padding-top:0!important;padding-bottom:0!important}
+  html.nbh-fold .toolbar #nbhFoldBtn{display:inline-flex!important;align-items:center;flex:0 0 auto;margin:0 0 0 8px;height:38px!important;min-height:38px!important;padding:0 14px!important;font-weight:600;white-space:nowrap}
+  html.nbh-unfolding .toolbar{animation:nbhUnfold .2s ease-out}
+}
+@keyframes nbhFoldIn{from{opacity:.55;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes nbhUnfold{from{-webkit-clip-path:inset(0 0 var(--nbh-fold-d,0px) 0);clip-path:inset(0 0 var(--nbh-fold-d,0px) 0)}to{-webkit-clip-path:inset(0);clip-path:inset(0)}}
+@media (prefers-reduced-motion:reduce){html.nbh-fold .toolbar,html.nbh-unfolding .toolbar{animation:none!important}}
+@media print{#nbhFoldBtn{display:none!important}}
 </style>
 <script id="nbh-ui">
 /* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
@@ -6820,6 +6839,117 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
     if (mq.addEventListener) mq.addEventListener('change', all); else if (mq.addListener) mq.addListener(all);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', all); else all();
     window.addEventListener('load', function(){ setTimeout(all, 300); });
+  })(); } catch (e) {}
+  /* v21.83 the pinned toolbar folds on an iPad. On a touch screen, or in a window 1194 px wide or less, a swipe down the form
+     (more than 40 px) folds the toolbar to its view buttons on one line plus a "Tools" button (the CSS above, html.nbh-fold);
+     a swipe up, the top of the form, a tap on the strip or on Tools unfold it. A tap in a text field, text area or list on a
+     touch screen folds it while the keyboard is up, and leaving the field unfolds it. Only a person's own swipe, wheel or
+     key scroll folds it, and only a tap focuses into the fold (a script's scroll or focus does not), so nothing a script
+     clicks in the toolbar is ever hidden from it. The height the bar gives up is added below it, so the page does not
+     move; a fold waits until the form is far enough down for that space to be out of sight (a field tapped near the top
+     folds the bar once the page has come up under it, as the keyboard opens or the user scrolls). Another pinned bar
+     sitting under the toolbar (MT-1's timer) moves up with it. Printing unfolds it; the fold rules are screen only. On a
+     desktop with a mouse in a window wider than 1194 px (the workstation's window, whatever the form's frame) it never folds. */
+  try { if (window.matchMedia) (function(){
+    var R = document.documentElement, mq = matchMedia('(pointer:coarse), (max-width:1194px)'), touch = matchMedia('(pointer:coarse)');
+    var FIELD = 'textarea,select,input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset]):not([type=range]):not([type=color]):not([type=file]):not([type=hidden]):not([type=image]),[contenteditable=""],[contenteditable="true"]';
+    var tb = null, seg = null, btn = null, st = 0, T = 0, D = 0, S = 0, need = 0, lastY = 0, acc = 0, gest = 0, tapT = 0, pend = 0, raf = 0, ut = 0, W = window.innerWidth, moved = [];
+    /* the window's width, not the form's frame: a form in the workstation on a wide desktop sits in a narrower frame */
+    function wide(){ var w = window.innerWidth; try { if (window.top !== window) w = Math.max(w, window.top.innerWidth || 0); } catch (e) { w = Math.max(w, window.outerWidth || 0); } return w; }
+    function on(){ return !window.__nbhNoFold && (touch.matches || (mq.matches && wide() <= 1194)); }
+    function field(e){ return !!(e && e.nodeType === 1 && e.matches && e.matches(FIELD) && !e.closest('.toolbar') && !e.disabled && !e.readOnly); }
+    function find(){
+      if (tb && tb.isConnected && seg && seg.isConnected && btn && btn.isConnected) return tb;
+      tb = null; seg = document.getElementById('viewSeg') || document.querySelector('.toolbar [role="tablist"],.nbh-toolbar [role="tablist"]');
+      var t = seg && seg.closest('.toolbar'); if (!t) return null;
+      btn = document.getElementById('nbhFoldBtn');
+      if (!btn) {
+        btn = document.createElement('button'); btn.type = 'button'; btn.id = 'nbhFoldBtn'; btn.className = 'noprint'; btn.textContent = 'Tools';
+        btn.title = 'Show the whole toolbar'; btn.setAttribute('aria-expanded', 'true');
+        btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(true); });
+        t.addEventListener('click', function(ev){ if (st && !ev.target.closest('button,a,input,select,textarea,label,[role="tab"]')) open(true); });
+      }
+      if (btn.parentNode !== t) t.appendChild(btn);
+      return tb = t;
+    }
+    function mark(){ seg.classList.add('nbh-fseg'); for (var e = seg.parentElement; e && e !== tb; e = e.parentElement) e.classList.add('nbh-fk'); }
+    function nextIn(t){ for (var e = t.nextElementSibling; e; e = e.nextElementSibling) { var c = getComputedStyle(e); if (c.display !== 'none' && (c.position === 'static' || c.position === 'relative')) return e; } return null; }
+    function under(t, full){
+      /* other pinned bars whose top is the toolbar's full height */
+      var out = [], all = document.body.getElementsByTagName('*');
+      for (var i = 0; i < all.length; i++) { var e = all[i]; if (e === t || t.contains(e)) continue; var c = getComputedStyle(e);
+        if (c.position === 'sticky' && Math.abs(parseFloat(c.top) - full) <= 2) out.push(e); }
+      return out;
+    }
+    function fold(why){
+      var t = find(); if (!t || st || !on()) return false;
+      var cs = getComputedStyle(t), pos = cs.position; if (pos !== 'sticky' && pos !== 'fixed') return false;
+      var y = window.scrollY || 0, full = t.offsetHeight, mb0 = parseFloat(cs.marginBottom) || 0;
+      S = parseFloat(cs.top) || 0;
+      if (pos === 'sticky') { var sp = t.style.position; t.style.position = 'relative'; T = t.getBoundingClientRect().top + y; t.style.position = sp; }
+      /* a page too short to scroll the bar's spare height out of sight: a field tapped there folds the bar at once and the
+         page comes up to the strip (more of the form above the keyboard); elsewhere a fold waits until it is out of sight */
+      var my = Math.max(0, (document.scrollingElement || R).scrollHeight - window.innerHeight), shortP = why === 'focus' && pos === 'sticky' && need && my + S < T + need;
+      if (pos === 'sticky' && need && y + S < T + need && !shortP) { if (why === 'focus') pend = 1; return false; }
+      var nx = pos === 'sticky' ? nextIn(t) : null, n0 = nx ? nx.getBoundingClientRect().top + y : 0, bars = pos === 'sticky' ? under(t, full) : [];
+      mark(); R.classList.add('nbh-fold');
+      var h = t.offsetHeight; D = full - h; need = D;
+      shortP = why === 'focus' && pos === 'sticky' && my + S < T + D;
+      if (D < 8 || (pos === 'sticky' && y + S < T + D && !shortP)) { R.classList.remove('nbh-fold'); if (why === 'focus' && D >= 8) pend = 1; return false; }
+      if (pos === 'sticky') {
+        /* the space given up stays below the bar (out of sight above the screen), so the page under the finger stays put;
+           measured on the page, not the screen (Safari does not hold the scroll still when the page above it changes),
+           and corrected for a margin the next block shared with the bar */
+        var keep = shortP ? Math.max(0, Math.min(D, y + S - T)) : D, want = n0 - (D - keep), g = mb0 + keep;
+        R.style.setProperty('--nbh-fold-gap', g + 'px');
+        for (var i = 0; nx && i < 2; i++) { var d = nx.getBoundingClientRect().top + (window.scrollY || 0) - want; if (Math.abs(d) < 0.5) break; g = Math.max(0, g - d); R.style.setProperty('--nbh-fold-gap', g + 'px'); }
+      }
+      moved = bars.map(function(e){ var w = e.style.getPropertyValue('top'), p = e.style.getPropertyPriority('top'); e.style.setProperty('top', (S + h) + 'px', 'important'); return [e, w, p]; });
+      R.style.setProperty('--nbh-fold-d', D + 'px');
+      st = why === 'focus' ? 2 : 1; acc = 0; pend = 0; btn.setAttribute('aria-expanded', 'false');
+      /* the view that is open stays in sight on the strip */
+      var a = seg.querySelector('[aria-pressed="true"],[aria-selected="true"],.active,.on');
+      if (a && seg.scrollWidth > seg.clientWidth) seg.scrollLeft = Math.max(0, a.offsetLeft - seg.offsetLeft - (seg.clientWidth - a.offsetWidth) / 2);
+      return true;
+    }
+    function open(manual){
+      if (!st) return; st = 0; acc = 0;
+      R.classList.remove('nbh-fold'); R.style.removeProperty('--nbh-fold-gap');
+      moved.forEach(function(m){ if (m[1]) m[0].style.setProperty('top', m[1], m[2]); else m[0].style.removeProperty('top'); }); moved = [];
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      if (tb && tb.isConnected) { R.classList.remove('nbh-unfolding'); void tb.offsetWidth; R.classList.add('nbh-unfolding'); clearTimeout(ut); ut = setTimeout(function(){ R.classList.remove('nbh-unfolding'); }, 260); }
+      if (manual && tb) { var f = tb.querySelector('button:not(#nbhFoldBtn):not([disabled])'); if (manual === true && btn === document.activeElement && f) try { f.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    function tick(){
+      raf = 0; var y = window.scrollY || 0, dy = y - lastY; lastY = y;
+      if (!on()) { if (st) open(); return; }
+      if (st === 2) return;
+      if (pend) { if (field(document.activeElement) && touch.matches) { if (y + S >= T + need) fold('focus'); } else pend = 0; return; }
+      if (st === 1) {
+        if (y + S < T + D + 1) { open(); return; }
+        acc = dy < 0 ? Math.min(acc, 0) + dy : 0;
+        if (acc < -30) open();
+        return;
+      }
+      acc = dy > 0 ? Math.max(acc, 0) + dy : 0;
+      if (acc > 40 && Date.now() - gest < 1500) fold('scroll');
+    }
+    window.addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+    var now = function(){ gest = Date.now(); };
+    document.addEventListener('touchstart', function(){ tapT = gest = Date.now(); }, { passive: true, capture: true });
+    document.addEventListener('touchmove', now, { passive: true, capture: true });
+    document.addEventListener('wheel', now, { passive: true, capture: true });
+    document.addEventListener('keydown', function(e){ if (/^(PageDown|PageUp|ArrowDown|ArrowUp|End|Home| )$/.test(e.key) && !field(e.target)) now(); }, { passive: true, capture: true });
+    document.addEventListener('focusin', function(e){
+      if (!touch.matches || !on() || !field(e.target) || Date.now() - tapT > 1200) return;
+      if (st === 1) st = 2; else if (!st) fold('focus');
+    }, true);
+    document.addEventListener('focusout', function(){ setTimeout(function(){ if (!field(document.activeElement)) { pend = 0; if (st === 2) open(); } }, 80); }, true);
+    window.addEventListener('resize', function(){ if (window.innerWidth !== W) { W = window.innerWidth; need = 0; open(); } }, { passive: true });
+    window.addEventListener('beforeprint', function(){ open(); });
+    var ch = function(){ need = 0; if (!on()) open(); };
+    if (mq.addEventListener) mq.addEventListener('change', ch); else if (mq.addListener) mq.addListener(ch);
+    U.fold = function(on){ return on === false ? (open(), false) : on === true ? fold('focus') : st; };
   })(); } catch (e) {}
   window.nbhUI = U;
 })();
