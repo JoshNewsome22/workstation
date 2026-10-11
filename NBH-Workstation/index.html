@@ -397,6 +397,12 @@ body.bar-folded #barSum{display:flex}
   .railhead button.sm{min-height:40px;padding:8px 12px}
   #cfDlg .df button,#dlg .df button{min-height:44px}
 }
+/* v21.81 portrait on the iPad: the shell's buttons at Apple's 44 pt, its labels and small text no smaller than 13 px */
+@media screen and (pointer:coarse) and (max-width:900px){
+  button.sm,.bar button,.crumb button,#paneBar .pane button,.railhead button.sm,.pwabar button,.alertbar button,header.top .chips button{min-height:44px}
+  .crumb .acts button{min-width:44px}
+  .bar label,.bar .lbl,.bar .facts,.cl-tbl,.cl-tbl th,.td-list .td-k,.hint{font-size:13px}
+}
 .bar .facts{font-size:12px;color:#cfe0dd;line-height:1.4}.bar .facts .lbl{font-weight:600;color:#fff;letter-spacing:.02em}.bar .facts b{color:#fff;font-weight:600}.bar .facts i{font-style:normal;color:#9fb6bd}
 .bar .fld{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .bar .pair{display:inline-flex;align-items:center;margin-right:4px}
@@ -1321,18 +1327,21 @@ async function afterLoad(id,fr){
   if(P&&state.frames[id]===fr){
     const clean=caseClean();
     await new Promise(r=>setTimeout(r,150));
-    const r=await grab(id,'restore',{snap:P.snap,copy:P.copy},20000,fr);
-    if(state.pending[id]===P)delete state.pending[id];
+    let r=await grab(id,'restore',{snap:P.snap,copy:P.copy},20000,fr);
+    /* v21.81 not answered: asked once more; still not answered, the case keeps the work as the file holds it (Save case
+       writes that copy, not the empty form) and the case is not marked saved over it */
+    if(!r&&state.frames[id]===fr&&state.pending[id]===P)r=await grab(id,'restore',{snap:P.snap,copy:P.copy},20000,fr);
+    if(r&&state.pending[id]===P)delete state.pending[id];
     rep={notes:[]};
-    if(!r)rep.notes.push(id+': did not answer');
+    if(!r){rep.notes.push(id+': did not take its saved work. The case keeps that work as the file holds it, and Save case writes it; close the form and open it again');P.stuck=true;}
     else{const R=r.report||{};
       if(R.positionalSkipped)rep.notes.push(id+': '+R.positionalSkipped+' field'+(R.positionalSkipped===1?'':'s')+' could not be placed because the form has changed shape');
       if(R.unknown)rep.notes.push(id+': '+R.unknown+' saved field'+(R.unknown===1?'':'s')+' no longer exist on this form');}
     /* the case was as its file when this form arrived: it still is (the form's own state now stands for what the file held) */
-    if(clean){state.lastSig=caseSig();state.autoSig=caseSig();}
+    if(clean&&r){state.lastSig=caseSig();state.autoSig=caseSig();}
     if(id==='TD-1')['GB-1','EB-1'].forEach(k=>{if(state.frames[k])pushPlanTo(k);});
     renderRail();if(typeof paintSave==='function')paintSave();
-    if(rep.notes.length&&!state.restoring)wsUI.toast('Form '+id+', filled from the case: '+rep.notes.join('; '),{kind:'warn',ms:9000});
+    if(rep.notes.length&&(!state.restoring||!r))wsUI.toast('Form '+id+', filled from the case: '+rep.notes.join('; '),{kind:'warn',ms:r?9000:20000});
   }
   if(fr.__settleRes)fr.__settleRes(rep);
 }
@@ -1347,6 +1356,7 @@ function warmTick(){
   const W=state.warm;if(!W||W.busy)return;
   const next=state.caseOrder.find(id=>state.pending[id]&&!state.frames[id]);
   if(!next){warmStop();return;}
+  if(Object.keys(state.frames).length>=FRAME_CAP){warmStop();return;}   /* v21.81 the rest load when opened */
   if(document.hidden||Date.now()-state.lastInput<1500)return;
   W.busy=true;warmForm(next).catch(()=>{}).then(()=>{W.busy=false;});
 }
@@ -1393,28 +1403,53 @@ function openForm(id,keepRail){
   setTimeout(()=>pushPlanTo(id),1800);
   renderRail();
   if(!fullOn()&&fullWanted())setFull(true,true);   /* v21.44 (A8) fullscreen, as it was left on this device */
+  state.seen=(state.seen||[]).filter(x=>x!==id);state.seen.push(id);setTimeout(capFrames,2500);   /* v21.81 */
 }
 $('#closeForm').addEventListener('click',async()=>{
   if(!state.cur)return;
-  const closing=state.cur;
-  if(!(await wsUI.confirm('Close Form '+closing+'?\nAnything not saved to a file in that form will be lost.',{ok:'Close',danger:true})))return;
+  const closing=state.cur,st=state.status[closing]||{},work=(st.filled||0)>3||!!st.edited||!!state.pending[closing];
+  /* v21.81 closing a form that holds work keeps it in the case (put away, filled again when opened); taking it out of the
+     case is a choice of its own, said plainly */
+  let how='remove';
+  if(work){how=await wsUI.choose('Close Form '+closing+'?',[{v:'keep',label:'Close',kind:'primary'},{v:'remove',label:'Remove from the case',kind:'danger'},{v:'',label:'Cancel'}],
+      'Close keeps its work in '+(packet().client?packet().client+'’s':'the')+' case: Save case writes it, and it is filled again when you open it. Remove from the case leaves it out of the next Save case.');if(!how)return;}
+  else if(!(await wsUI.confirm('Close Form '+closing+'?\nNothing has been typed in it.',{ok:'Close'})))return;
   if(state.cur!==closing)return;
-  const fr=state.frames[state.cur];
-  if(fr){fr.remove();delete state.frames[state.cur];}
-  delete state.status[state.cur];
-  const rest=state.split.filter(x=>x!==state.cur);state.split=[];   /* v21.32 side by side */
-  state.cur=null;$('#blank').style.display='';
-  document.body.classList.remove('has-form');
-  /* v21.44 (A8): the name the closed form held no longer counts (its warning mark in the list, the strip); with the form
-     list the only place left to go, fullscreen ends, and the setting stays as it was (auto) */
-  delete state.mismatch[closing];if(state.whoIs)delete state.whoIs[closing];if(state.details)delete state.details[closing];
-  setFull(false,true);
-  setRail(true);
-  $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';
-  $('#crumbFile').textContent='';clearTimeout(state.watch);
-  renderRail();
-  if(rest.length){openForm(rest[0],true);setSplit(rest);}   /* v21.32 side by side */
+  if(how==='keep'){if(state.pending[closing]){const fr=state.frames[closing];if(fr)fr.remove();delete state.frames[closing];delete state.status[closing];}   /* still waiting for its saved work: the file's copy stays */
+    else if(!(await unloadForm(closing,true))){alert('Form '+closing+' did not answer, so it was left open. Nothing was lost.');return;}}
+  else{const fr=state.frames[closing];if(fr){fr.remove();delete state.frames[closing];}delete state.status[closing];delete state.pending[closing];
+    state.caseOrder=state.caseOrder.filter(x=>x!==closing);
+    delete state.mismatch[closing];if(state.whoIs)delete state.whoIs[closing];if(state.details)delete state.details[closing];}
+  const rest=state.split.filter(x=>x!==closing);state.split=[];   /* v21.32 side by side */
+  state.seen=(state.seen||[]).filter(x=>x!==closing);
+  state.cur=null;clearTimeout(state.watch);
+  /* back to the form viewed before it, if one is open; else the list */
+  const back=rest[0]||(state.seen||[]).slice().reverse().find(x=>state.frames[x]&&!state.pending[x]);
+  if(back){openForm(back,true);if(rest.length>1)setSplit(rest);renderRail();if(typeof paintSave==='function')paintSave();return;}
+  $('#blank').style.display='';document.body.classList.remove('has-form');
+  setFull(false,true);setRail(true);
+  $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
+  renderRail();if(typeof paintSave==='function')paintSave();
 });
+/* v21.81 iPad memory: at most FRAME_CAP forms stay loaded; past that, the one viewed longest ago (never the one on screen or
+   side by side) is put away: its work read, kept as the case holds a form not loaded yet, and filled again when opened */
+const FRAME_CAP=8;
+async function unloadForm(id,force){const fr=state.frames[id];if(!fr||state.pending[id]||(!force&&!state.status[id]))return false;
+  try{await gatherFacts(false);}catch(e){}
+  const r=await grab(id,'snapshot',null,8000);if(!(r&&r.snap)||state.frames[id]!==fr)return false;
+  const rec=ALL.find(f=>f[0]===id),clean=caseClean();
+  setPending(id,r.title||(rec&&rec[1])||id,r.snap,false);
+  fr.remove();delete state.frames[id];delete state.status[id];
+  if(!state.caseOrder.includes(id))state.caseOrder.push(id);
+  if(clean){state.lastSig=caseSig();state.autoSig=caseSig();}
+  renderRail();return true;}
+let capBusy=false;
+async function capFrames(){if(capBusy)return;capBusy=true;
+  try{for(let g=0;g<60&&Object.keys(state.frames).length>FRAME_CAP;g++){
+    const keep=new Set([state.cur].concat(state.split||[])),seen=state.seen||[];
+    const cand=Object.keys(state.frames).filter(id=>!keep.has(id)&&!state.pending[id]&&state.status[id]).sort((a,b)=>seen.indexOf(a)-seen.indexOf(b));
+    if(!cand.length||!(await unloadForm(cand[0])))break;}}
+  finally{capBusy=false;}}
 $('#popOut').addEventListener('click',()=>{
   if(!state.cur)return;
   const rec=ALL.find(f=>f[0]===state.cur);
@@ -1447,6 +1482,11 @@ const wsUI=(()=>{
     d.oncancel=ev=>{ev.preventDefault();done(false);};d.showModal();ok.focus();});
   U.alert=text=>{const s=String(text==null?'':text);if(s.length<=160&&s.indexOf('\n')<0){U.toast(s);return Promise.resolve();}return ask(s,{ok:'OK'},false);};
   U.confirm=(text,opt)=>ask(text,opt||{},true);
+  /* v21.81 a question with its own buttons: [{v,label,kind:'primary'|'danger'}]; resolves the chosen v ('' or Escape: none) */
+  U.choose=(text,btns,note)=>new Promise(res=>{const d=$('#cfDlg'),p=split(text);$('#cfTitle').textContent=p.head;const body=[p.body,note||''].filter(Boolean).join('\n\n');$('#cfBody').textContent=body;$('#cfBody').style.display=body?'':'none';
+    const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{d.close();}catch(e){}res(v);};let first=null;
+    (btns||[]).forEach(b=>{const x=document.createElement('button');x.type='button';x.textContent=b.label;if(b.kind)x.className=b.kind;x.addEventListener('click',()=>done(b.v));f.appendChild(x);if(b.kind==='primary'&&!first)first=x;});
+    d.oncancel=ev=>{ev.preventDefault();done('');};d.showModal();(first||f.lastChild).focus();});
   return U;})();
 window.alert=m=>{wsUI.alert(m);};
 function paintSum(){
@@ -1655,6 +1695,7 @@ async function gatherDue(){
     if(!Array.isArray(due))continue;
     due.forEach(x=>{const d=parseDue(x.date);if(!d)return;const n=Math.round((d-new Date().setHours(0,0,0,0))/86400000);if(n>DUE_DAYS)return;out.push({id,what:String(x.what||'').slice(0,60),d,n});});
   }
+  (state.due||[]).forEach(x=>{if(state.pending[x.id]&&!state.frames[x.id])out.push(x);});   /* v21.81 a form put away keeps what it said was due */
   out.sort((a,b)=>a.d-b.d);state.due=out;paintDue();
 }
 function paintDue(){
@@ -2508,8 +2549,9 @@ async function masterRun(chosen,opt){opt=opt||{};
   for(const [id,name] of chosen){
     let fr=state.frames[id];
     if(state.pending[id]){fr=await warmForm(id);}   /* v21.61 one of the case's forms: loaded and filled now, and kept */
+    let temp=false;
     if(!fr){                                     // load it just long enough to collect
-      const rec=ALL.find(f=>f[0]===id);
+      temp=true;const rec=ALL.find(f=>f[0]===id);
       fr=document.createElement('iframe');fr.hidden=true;loadFrame(fr,rec[2]);
       $('#frames').appendChild(fr);
       await new Promise(r=>fr.addEventListener('load',()=>setTimeout(r,700),{once:true}));
@@ -2517,6 +2559,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     }
     const payload=await grab(id,'collect',(opt.extra||{})[id],4000,fr);
     if(payload)parts.push(payload);
+    if(temp)fr.remove();else capFrames();   /* v21.81 not left loaded behind the screen */
   }
   $('#masterPrint').textContent='Build master print';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
@@ -2807,7 +2850,7 @@ function dialog(title,html){
    script; one that never answers is missing, misnamed, or was never given a bridge. */
 function checkFiles(){
   const out=$('#fileOut'); if(!out)return;
-  out.innerHTML='<p>Loading all '+ALL.length+' forms in the background. This takes about ten seconds.</p>';
+  out.innerHTML='<p>Loading all '+ALL.length+' forms in the background, four at a time (v21.81: kinder to the iPad’s memory). This takes about half a minute.</p>';
   const host=document.createElement('div');
   host.style.cssText='position:fixed;left:-10000px;top:0;width:1000px;height:700px;visibility:hidden';
   document.body.appendChild(host);
@@ -2815,20 +2858,14 @@ function checkFiles(){
   const onMsg=ev=>{const d=ev.data||{};if(d.nbh&&d.id)seen[d.id]=true;};
   window.addEventListener('message',onMsg);
   state.probing=true;
-  ALL.forEach(([id,name,file])=>{
-    if(state.status[id]){seen[id]=true;return;}          // already open and answering
-    const fr=document.createElement('iframe');
-    loadFrame(fr,file);
-    fr.addEventListener('load',()=>{
-      let n=0;
-      const t=setInterval(()=>{
-        if(++n>6||seen[id]){clearInterval(t);return;}
-        try{fr.contentWindow.postMessage({nbh:'status'},'*');}catch(e){}
-      },700);
-    });
-    host.appendChild(fr);
-  });
-  setTimeout(()=>{
+  const todo=ALL.filter(([id])=>{if(state.status[id]){seen[id]=true;return false;}return true;});   // already open and answering
+  let i=0;
+  const one=()=>new Promise(res=>{const it=todo[i++];if(!it){res(false);return;}const id=it[0],file=it[2],fr=document.createElement('iframe');let n=0,tm=null,gone=false;
+    const fin=()=>{if(gone)return;gone=true;clearInterval(tm);fr.remove();res(true);};
+    fr.addEventListener('load',()=>{tm=setInterval(()=>{if(seen[id]||++n>8){fin();return;}try{fr.contentWindow.postMessage({nbh:'status'},'*');}catch(e){}},500);});
+    setTimeout(fin,15000);loadFrame(fr,file);host.appendChild(fr);});
+  const lane=async()=>{while(await one()){const q=out.querySelector('p');if(q)q.textContent='Checking the forms, four at a time: '+Math.min(i,todo.length)+' of '+todo.length+'\u2026';}};
+  Promise.all([lane(),lane(),lane(),lane()]).then(()=>{
     window.removeEventListener('message',onMsg);
     state.probing=false;
     host.remove();
@@ -2846,7 +2883,7 @@ function checkFiles(){
       bad.map(([id,name,file])=>`<tr><td><b>${id}</b> ${esc(name)}</td>`+
         `<td style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px">${esc(file)}</td></tr>`).join('')+
       '</table>';
-  },10000);
+  });
 }
 $('#dlgClose').addEventListener('click',()=>$('#dlg').close());
 /* The packet's running header - practice, student, "Page N of M" on every sheet -
@@ -3528,6 +3565,7 @@ function autoWarn(r){
 async function autoSave(force){
   const A=state.auto;
   if(!autoOn()||state.restoring)return;
+  if(caseClean())return;   /* v21.81 saved and unchanged since: the file holds it, so no safety copy (it would come back as "Unsaved work found") */
   if(A.busy){A.again=A.again==='force'||force?'force':'soft';return;}
   const kept=Object.keys(state.pending),ids=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: the case's forms not filled from the file yet, as it holds them */
   if(!ids.length&&!kept.length)return;
@@ -3608,6 +3646,7 @@ function autoLast(){
   const A=state.auto;
   try{
     if(!autoOn()||state.restoring)return;
+    if(caseClean())return;   /* v21.81 */
     const forms={};let work=!!A.key;
     for(const id of Object.keys(state.frames)){
       let f=null;try{const w=state.frames[id].contentWindow;f=w&&w.nbhState&&w.nbhState.last?w.nbhState.last():null;}catch(e){f=null;}
@@ -4138,6 +4177,7 @@ function caseSig(over){
      without emptying or filling a field; the forms now report a fingerprint.
      v21.61 over: a form's state as it was read for a file; the case's forms not loaded yet count as the file holds them */
   const S=Object.assign({},state.status,over||{});
+  Object.keys(state.pending||{}).forEach(k=>{if(!(over&&over[k]))delete S[k];});   /* v21.81 a form still waiting for its saved work counts as the file holds it */
   const a=Object.keys(S).sort().map(k=>k+':'+S[k].filled+':'+(S[k].sig||''));
   const b=Object.keys(state.pending||{}).filter(k=>!S[k]).sort().map(k=>k+':'+state.pending[k].status.filled+':'+state.pending[k].status.sig+':file');
   return a.concat(b).join('|');
@@ -4224,7 +4264,7 @@ async function saveCase(){
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
-  try{caseloadKeep(p,forms);}catch(e){}   /* v21.79 the caseload's copy on this device */
+  try{caseloadKeep(p,forms,late);}catch(e){}   /* v21.79 the caseload's copy on this device (v21.81 a form that did not answer keeps its last copy) */
   const nm=caseName(p);
   const fileSig=caseSig(stat);
   const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
@@ -4423,8 +4463,9 @@ const clKey=p=>{const n=String(p.client||'').trim().toLowerCase().replace(/\s+/g
 const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
 function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}const f=state.facts||{};
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
-async function caseloadKeep(p,forms){if(clOff())return;const key=clKey(p);if(!key)return;
+async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);if(!key)return;
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
+  if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id])forms[id]=od.forms[id];});}catch(e){}}
   const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});
   const rec={key,scope:clScope(),client:String(p.client||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
@@ -4450,7 +4491,16 @@ async function caseloadOpen(){const L=await clList();
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
     '<p class="hint">Safari can clear a website’s storage after some weeks without a visit; installed on the Home Screen, the workstation keeps it. Remove takes a student off this list on this iPad only; their case files are not touched.</p>');}
 async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key===key);if(!r){alert('That student is no longer kept here.');return;}
-  try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null);if(form&&inCase(form))try{openForm(form);}catch(e){}}
+  /* v21.81 the student already on screen: their case stays as it is, and the form asked for opens */
+  const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  if(open&&key===clKey(packet())){try{$('#dlg').close();}catch(e){}if(form)try{openForm(form);}catch(e){}else if(!state.cur){const f=state.caseOrder[0]||Object.keys(state.frames)[0];if(f)openForm(f);}return;}
+  /* another student, with work on screen not saved to a file: save it first, or switch (the work stays in this iPad's safety copy) */
+  let asked=false;
+  if(open&&caseDirty()){const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has work that is not saved to a file yet.',
+      [{v:'save',label:'Save first',kind:'primary'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],'Switch anyway keeps that work in this iPad’s safety copy (Autosave), where Open case offers it.');
+    if(!c)return;if(c==='save'){let ok=false;try{ok=await saveCase();}catch(e){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was switched.',{kind:'warn'});return;}}asked=true;}
+  else if(open)asked=true;
+  try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null,{asked,quiet:true});if(form)try{openForm(form);}catch(e){}}
 $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data-clopen]'),d=e.target.closest('[data-cldel]');
   if(e.target.closest('#tdCaseload')){caseloadOpen();return;}
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
@@ -4508,6 +4558,8 @@ async function clRefreshOne(r,L){let fr=null;
     const fo=await grab('DD-1','facts?',null,5000,fr),data=fo&&fo.facts&&fo.facts.data;
     const d=L.d;d.forms['DD-1']=Object.assign({},d.forms['DD-1'],{snap:sn.snap});
     if(data){d.facts=Object.assign({},d.facts||{});d.facts.src=Object.assign({},d.facts.src||{});d.facts.data=data;d.facts.src.data='DD-1';}
+    /* v21.81 a Save case of this student made while the sheet was read wins: the copy is written only if it is still the one read */
+    const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {err:'their case was saved again while the sheet was read; read it once more'};
     r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();
     await clTx('readwrite',st=>st.put(r));
     return Object.assign({},g,{snap:sn.snap});}
@@ -4523,7 +4575,9 @@ async function clRefreshAll(){if(CLX.busy)return;CLX.busy=true;
       if(x.r.key===me&&state.frames['DD-1']){let g={};try{const w=state.frames['DD-1'].contentWindow;g=w&&typeof w.__nbhGsRefresh==='function'?await w.__nbhGsRefresh():{err:'this copy of Form DD-1 cannot read its sheet on its own'};}catch(e){g={err:String(e&&e.message||e)};}
         if(g&&g.ok){try{await gatherFacts(true);x.r.sum=clSummary();x.r.read=new Date().toISOString();await clTx('readwrite',st=>st.put(x.r));}catch(e){}}
         out.push({x,g:g||{}});if(g&&g.signin)need=true;continue;}
-      const g=await clRefreshOne(x.r,x.l);out.push({x,g});
+      /* v21.81 the student on screen with Form DD-1 not loaded yet: their DD-1 as the open case holds it, not the iPad's copy */
+      let lk=x.l;if(x.r.key===me){const P=state.pending['DD-1'];if(state.frames['DD-1']||!P){out.push({x,g:{err:'their Form DD-1 is open but not answering; open it and read its sheet there'}});continue;}lk=Object.assign({},x.l,{fm:Object.assign({},x.l.fm,{snap:P.snap})});}
+      const g=await clRefreshOne(x.r,lk);out.push({x,g});
       if(g.ok&&x.r.key===me&&state.pending['DD-1']){const P=state.pending['DD-1'];setPending('DD-1',P.title,g.snap,P.copy);renderRail();if(typeof paintSave==='function')paintSave();}
       if(g.signin){need=true;break;}}
     const ok=out.filter(o=>o.g.ok),bad=out.filter(o=>!o.g.ok&&!o.g.signin);
@@ -4624,14 +4678,15 @@ $('#closeCase').addEventListener('click',async()=>{
   wsUI.toast(had?'The case is closed; there was nothing to save. Start the next one: enter the student, then open forms.':'Nothing was open. Start a case: enter the student, then open forms.',{ms:8000});
   say('Case closed');
 });
-async function openCaseText(text,handle){
+async function openCaseText(text,handle,opt){
+    opt=opt||{};   /* v21.81 asked: the switch was already asked (Caseload); quiet: a note, not a box, when it is open */
     let d; try{d=parseCase(text);}catch(err){alert(err&&err.message||'That file could not be read.');return;}
     if(!d||!d.forms){
       if(d&&d.packet){alert('That is a student packet, not a case file. Use Open packet for it.');return;}
       alert('That file is not a case file.');return;
     }
     const ids=Object.keys(d.forms);
-    if((Object.keys(state.frames).length||Object.keys(state.pending).length)&&
+    if(!opt.asked&&(Object.keys(state.frames).length||Object.keys(state.pending).length)&&
        !(await wsUI.confirm('Open this case? '+ids.length+' form'+(ids.length===1?'':'s')+' will be listed and filled from the file as you open them.\n'+
                 'What is open now is replaced.',{ok:'Open case'})))return;
     const btn=$('#openCase');btn.textContent='Opening\u2026';btn.disabled=true;
@@ -4645,6 +4700,7 @@ async function openCaseText(text,handle){
     state.caseHandle=handle||null;
     state.caseId=d.id||null;
     const shown=state.cur&&ids.includes(state.cur)?state.cur:'';
+    if(opt.quiet){wsUI.toast((d.packet&&d.packet.client?d.packet.client+': ':'')+'case open, '+ids.length+' form'+(ids.length===1?'':'s')+'.'+(notes.length?' Worth knowing: '+notes.join('; '):''),{kind:notes.length?'warn':'ok',ms:notes.length?12000:5000});return;}
     alert('Case opened: '+ids.length+' form'+(ids.length===1?'':'s')+'.'+(shown&&ids.length>1?' Form '+shown+' is open; the others are filled from the file as you open them, and load quietly meanwhile.':'')+
       (notes.length?'\n\nWorth knowing:\n\u2022 '+notes.join('\n\u2022 '):''));
 }
