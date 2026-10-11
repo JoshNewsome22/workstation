@@ -1423,6 +1423,54 @@ td input,td select{max-width:100%}
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div id="finalHead"></div>
   <div id="finalBody"></div>
+  <!-- v21.82 (I): what a BIP also has to say: why the plan is least restrictive, who collects which data, social validity,
+       the review date and the exit criteria, the student and family considerations, and the team meeting that adopted
+       the plan with each later revision. Filled from the case only where empty; printed with this sheet. -->
+  <div id="td82Block">
+    <style>
+    /* v21.82 (I) */
+    #td82Block .td82-p{margin:0 0 6px;padding:0 8px;font-size:12.5px;line-height:1.5}
+    #td82Block .td82-p.empty{color:var(--ink-soft);font-style:italic}
+    #td82Block .td82-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);padding:2px 8px 6px}
+    #td82Block .td82-hint b{font-family:var(--sans);font-size:10.5px;letter-spacing:.03em;margin-right:4px}
+    #td82Block .dval input[type=date]{min-height:40px}
+    #td82Vers td input,#td82Vers td select{font:inherit;font-size:12.5px;min-height:36px;max-width:100%;box-sizing:border-box}
+    #td82Vers td input[data-f=note]{width:100%;margin-top:3px}
+    .td82-notice .tool{margin-left:8px}
+    @media print{#td82Block .td82-p.empty{display:none}#td82Vers td input,#td82Vers td select{border:0;background:transparent}}
+    </style>
+    <div class="plan-group">Least restrictive review</div>
+    <div class="plan-comp td82-lr" id="td82Lr"></div>
+    <div class="plan-group">Data, social validity, review, and exit</div>
+    <div class="defs">
+      <div class="drow"><div class="dlab">Who collects which data</div><div class="dval"><textarea name="ad.data" rows="2" placeholder="e.g., Classroom teacher: aggression, count per hour, every school day; paraprofessional: break-card requests and % independent; BCBA: integrity checklist twice a month"></textarea><div class="td82-hint" id="td82DataHint" hidden></div></div></div>
+      <div class="drow"><div class="dlab">Social validity</div><div class="dval"><textarea name="ad.sv" rows="2" placeholder="Acceptability ratings before and after the plan (Form SV-1), or the ratings on the Implementation plan sheet"></textarea><div class="td82-hint" id="td82SvAuto" hidden></div></div></div>
+      <div class="drow"><div class="dlab">Next review date</div><div class="dval"><input type="date" name="ad.review" aria-label="Next review date"></div></div>
+      <div class="drow"><div class="dlab">Exit criteria</div><div class="dval"><textarea name="ad.exit" rows="2" placeholder="When the plan is faded and closed, e.g., aggression at or below 1 per week for 8 weeks across two settings (Form PR-1)"></textarea></div></div>
+    </div>
+    <div class="plan-group">Student and family considerations</div>
+    <div class="defs">
+      <div class="drow"><div class="dlab">Culture and family</div><div class="dval"><textarea name="cn.culture" rows="2" placeholder="Family routines, values and expectations the plan respects (Form DM-1)"></textarea></div></div>
+      <div class="drow"><div class="dlab">Home language</div><div class="dval"><input name="cn.lang" aria-label="Home language" placeholder="e.g., Spanish"></div></div>
+      <div class="drow"><div class="dlab">Interpreter needed</div><div class="dval" style="padding:4px 8px"><select name="cn.interp" class="inline" aria-label="Interpreter needed"><option value=""></option><option value="yes">Yes</option><option value="no">No</option></select></div></div>
+      <div class="drow"><div class="dlab">The student&rsquo;s treatment preference</div><div class="dval"><textarea name="cn.pref" rows="2" placeholder="What the student wants from the plan, in the student's words (Form SI-1)"></textarea></div></div>
+    </div>
+    <div class="plan-group">Adopted by the team</div>
+    <div id="td82Notice" class="warn noprint td82-notice" role="status" aria-live="polite" hidden></div>
+    <div class="defs">
+      <div class="drow"><div class="dlab">Meeting date (IEP or team)</div><div class="dval"><input type="date" name="ad.date" aria-label="Meeting date"></div></div>
+      <div class="drow"><div class="dlab">Team present</div><div class="dval"><textarea name="ad.team" rows="2" placeholder="Names and roles, e.g., LEA representative, ESE teacher, general education teacher, BCBA, parent"></textarea></div></div>
+      <div class="drow"><div class="dlab">Parent attended</div><div class="dval" style="padding:4px 8px"><select name="ad.parent" class="inline" aria-label="Parent attended"><option value=""></option><option value="yes">Yes</option><option value="no">No</option><option value="by phone">By phone</option></select></div></div>
+      <div class="drow"><div class="dlab">Parent input</div><div class="dval"><textarea name="ad.pinput" rows="2" placeholder="What the parent or guardian said about the plan, and what was changed because of it"></textarea></div></div>
+      <div class="drow"><div class="dlab">Student participation and views</div><div class="dval"><textarea name="ad.student" rows="2" placeholder="Whether the student took part, and what the student said about the plan"></textarea></div></div>
+      <div class="drow"><div class="dlab">Prior written notice date</div><div class="dval"><input type="date" name="ad.notice" aria-label="Prior written notice date"></div></div>
+      <div class="drow"><div class="dlab">Implementation start date</div><div class="dval"><input type="date" name="ad.start" aria-label="Implementation start date"></div></div>
+      <div class="drow"><div class="dlab">Plan version</div><div class="dval td82-ver" id="td82Ver" style="padding:5px 8px">1</div></div>
+    </div>
+    <table class="rank cmp" id="td82Vers"><thead><tr><th class="n" style="width:9%">Version</th><th style="width:22%">Date</th><th>Why</th><th style="width:24%">Notice date</th><th class="noprint" style="width:9%"></th></tr></thead><tbody></tbody></table>
+    <div class="noprint" style="margin:6px 0 10px"><button type="button" class="tool" id="td82Rev">Record a revision</button></div>
+    <textarea name="ad.versions" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
+  </div>
   <div class="sigcite">
   <div class="sig"><div>BCBA signature / date</div><div>Implementer trained / date</div><div>Parent or guardian / date</div></div>
   <div class="cite">Procedures on this sheet were selected on the assessment and design sheets of Form TD-1 from the sources named under each component; the full reference list is on the References sheet. Nothing on this sheet is implemented until the implementer has been trained to the integrity criterion and the safety plan is in place.</div>
@@ -4827,7 +4875,7 @@ function cardIdx(c,f){const n=(c.comps||[]).length;if(!n)return null;
  if(Array.isArray(c.idx)&&c.idx.length===n&&c.idx.every(x=>Number.isInteger(+x)&&+x>=0)&&new Set(c.idx.map(Number)).size===n)return c.idx.map(Number);
  const seen=[...new Set(Object.keys(f||{}).map(k=>(/^cp\[(\d+)\]\./.exec(k)||[])[1]).filter(x=>x!=null).map(Number))].sort((a,b)=>a-b);
  return seen.length===n?seen:null;}
-function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);renderPlan();renderMon();renderHp();rbNote();rbOpened();eeRender();eeOpened();guidePrint();}
+function restore(d){reset();const c=d.counts||{};$('#nMon').value=c.mon||24;$('#nHp').value=c.hp||4;renderHpRows();const f=d.fields||{};applyFields(f);fillAddMenu();renderModel();const at=cardIdx(c,f);(c.comps||[]).forEach((code,k)=>addComp(code,at?at[k]:null));applyFields(f);renderRec();renderMonRows();applyFields(f);$('#irtOut').textContent=fmtS(irt());autosize();renderAnt();renderReinf();renderTeach();renderSkills();renderRespond();applyFields(f);renderPlan();renderMon();renderHp();rbNote();rbOpened();eeRender();eeOpened();guidePrint();if(window.__td82Sync)window.__td82Sync();}   /* v21.82 (I): the adoption record's revision rows */
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`TD-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(d.form!=='TD-1')throw 0;restore(d);$('#simBanner').hidden=!(d.fields&&/^SIMULATED/.test(d.fields['m.client']||''));}catch(err){alert('That file is not a saved copy of Form TD-1.');}};rd.readAsText(f);e.target.value='';});
@@ -4900,6 +4948,9 @@ function bipText(){
     '- Advance one thinning level when the target is at or below '+(crit?crit+' per minute':'the criterion set on the monitoring sheet')+' and the replacement is at least '+(ind||'80')+'% independent for '+(nn||'3')+' consecutive sessions at the current level; step back after two consecutive sessions above criterion at that level.',
     '- Integrity criterion '+(fid||'90')+'% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.',
     ioa?'- Agreement and fidelity plan: '+ioa:'']);
+  /* v21.82 (I): the least-restrictive review, who collects which data, social validity, review and exit, the student and
+     family considerations, and the adoption record (td-v2182) */
+  if(window.__td82Bip)try{window.__td82Bip(B,{comps:cs,bipLine});}catch(e){}
   return bipCompose(B);
 }
 restore({counts:{}});
@@ -4978,6 +5029,144 @@ window.__nbhFactsOut=function(){
     if(placed.length&&window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+placed.join(', ')+'.',{kind:'ok'});
     return {filled:n,note:placed.length?'placed '+placed.join(', '):''};
   };
+})();
+</script>
+<script id="td-v2182">
+/* v21.82 (I) the plan as the team adopts it. IC-1's consent covers writing the BIP; adopting it is the IEP team's decision,
+   and this records that meeting (date, who was there, the parent's attendance and input, the student's views, the prior
+   written notice, the start date) with each later revision as its own numbered row (newest last; the adopted plan is
+   version 1). A revision is never added on its own: when Form PR-1's newest closed review decided modify, fade or exit
+   after the last version, a notice offers a one-tap row. The student and family considerations (culture, home language,
+   interpreter, the student's own treatment preference) are filled from DM-1 and SI-1 only where empty. The final plan and
+   Copy for the BIP also say why the plan is least restrictive, who collects which data, social validity, the review date
+   and the exit criteria. Facts out: plan.adoption, plan.versions, plan.considerations (the v21.82 contract). */
+(function(){
+  const T=v=>String(v==null?'':v).trim();
+  const q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]'),g=n=>T((fld(n)||{}).value);
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const iso=v=>{v=T(v);if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v);return m?m[3]+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0'):'';};
+  const nice=d=>{const i=iso(d);if(!i)return T(d);const p=i.split('-').map(Number);return new Date(p[0],p[1]-1,p[2]).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});};
+  const today=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+  const poke=e=>{try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}};
+  const WHY=[['modified','Modified'],['faded','Faded'],['exit','Exit (plan closed)'],['other','Other']];
+  const whyLab=w=>(WHY.find(x=>x[0]===w)||[0,w==='adopted'?'Adopted by the team':T(w)])[1];
+  const DEC={modify:'modified',fade:'faded',exit:'exit'};
+  const FNL={escape:'escape / avoidance',attention:'attention',tangible:'tangible / activity',automatic:'automatic',multiple:'multiple control'};
+  const PUN=['OVERCORR'],RESTR=['RIRD','RRB_RB','SAFE','SEXT','C_HELMET','C_SR'],CONSQ=['EXT','R_PB'];
+  /* ---- the revision rows: kept as one hidden named field (so Save data, Open data and the safety copy carry them) ---- */
+  let self=false;
+  const revs=()=>{try{const a=JSON.parse(g('ad.versions')||'[]');return Array.isArray(a)?a.filter(x=>x&&typeof x==='object'):[];}catch(e){return [];}};
+  const putRevs=a=>{const e=fld('ad.versions');if(!e)return;e.value=a.length?JSON.stringify(a.map((r,k)=>{const o={v:k+2,date:iso(r.date),why:T(r.why),notice:iso(r.notice)};if(T(r.note))o.note=T(r.note);return o;})):'';self=true;poke(e);self=false;};
+  const lastDate=()=>{const A=revs();for(let k=A.length-1;k>=0;k--)if(iso(A[k].date))return iso(A[k].date);return iso(g('ad.date'));};
+  function renderRevs(){const tb=q('#td82Vers tbody');if(!tb)return;const A=revs();
+    tb.innerHTML=`<tr class="td82-v1"><td class="n">1</td><td>${esc(nice(g('ad.date')))||'—'}</td><td>Adopted by the team</td><td>${esc(nice(g('ad.notice')))||'—'}</td><td class="noprint"></td></tr>`+
+      A.map((r,k)=>`<tr data-k="${k}"><td class="n">${k+2}</td><td><input type="date" id="td82d${k}" data-f="date" value="${esc(iso(r.date))}" aria-label="Version ${k+2} date"></td>`+
+        `<td><select id="td82w${k}" data-f="why" class="inline" aria-label="Version ${k+2}: why"><option value=""></option>${WHY.map(w=>`<option value="${w[0]}"${r.why===w[0]?' selected':''}>${w[1]}</option>`).join('')}</select> <input id="td82n${k}" data-f="note" value="${esc(r.note||'')}" placeholder="what changed" aria-label="Version ${k+2}: what changed"></td>`+
+        `<td><input type="date" id="td82p${k}" data-f="notice" value="${esc(iso(r.notice))}" aria-label="Version ${k+2} notice date"></td><td class="noprint"><button type="button" class="tool td82-x" data-k="${k}" aria-label="Remove version ${k+2}">Remove</button></td></tr>`).join('');
+    const ve=q('#td82Ver');if(ve)ve.textContent=String(1+A.length);}
+  function readRows(){return [...document.querySelectorAll('#td82Vers tbody tr[data-k]')].map(tr=>{const o={};tr.querySelectorAll('[data-f]').forEach(e=>{o[e.dataset.f]=T(e.value);});return o;});}
+  function addRev(r){const A=revs();A.push(Object.assign({date:today(),why:'',notice:''},r||{}));putRevs(A);renderRevs();renderNotice();}
+  /* ---- the PR-1 notice (facts in); never adds a row by itself ---- */
+  let LAST=null;
+  function pending(){const log=(LAST&&LAST.review&&Array.isArray(LAST.review.log)?LAST.review.log:[]).filter(x=>x&&iso(x.date));if(!log.length)return null;
+    const e=log.slice().sort((a,b)=>iso(a.date)<iso(b.date)?-1:iso(a.date)>iso(b.date)?1:0).pop();
+    return DEC[T(e.decision)]&&iso(e.date)>lastDate()?e:null;}
+  function renderNotice(){const box=q('#td82Notice');if(!box)return;const e=pending();box.hidden=!e;if(!e){box.innerHTML='';return;}
+    box.innerHTML=`<b>Form PR-1</b>Form PR-1 decided ${esc(T(e.decision))} on ${esc(nice(e.date))}: record the revision. <button type="button" class="tool" id="td82FromPR">Record the revision</button>`;}
+  /* ---- the composed lines (the final plan and Copy for the BIP) ---- */
+  const cards=()=>[...document.querySelectorAll('#compWrap .card')].map(c=>({code:c.dataset.code,i:c.dataset.i,name:T((c.querySelector('.chdt')||{}).textContent)})).filter(c=>c.name);
+  function lrLines(cs){const pun=g('rb.punish');if(!cs.length&&!pun)return [];
+    const P=cs.filter(c=>PUN.includes(c.code)),R=cs.filter(c=>RESTR.includes(c.code)),pos=cs.filter(c=>!PUN.includes(c.code)&&!RESTR.includes(c.code)&&!CONSQ.includes(c.code)),fn=FNL[g('m.fn')]||'';
+    const L=[pun?'What was considered: '+pun:'What was considered: punishment was not proposed; the function-based options came first.'];
+    if(pos.length)L.push('Why the plan is least restrictive: it changes what happens before the behavior and teaches and reinforces the replacement behavior'+(g('m.repdesc')?' ('+g('m.repdesc')+')':'')+
+      ' for the same reinforcer the behavior has been getting'+(fn?' ('+fn+')':'')+', with '+pos.length+' antecedent and reinforcement '+(pos.length===1?'component':'components')+': '+pos.map(c=>c.name).join('; ')+'.');
+    L.push(P.length?'Punishment in the plan: '+P.map(c=>c.name).join('; ')+'. It is used only alongside the reinforcement components, with written consent and the data review named here.':'No punishment procedure is part of the plan.');
+    const RI=R.map(c=>c.name).concat(g('ee.pg')==='yes'&&!(q('#eeBlock')||{}).hidden?['escape extinction with gentle hands-on guidance, only under the stop rule and with the parent\'s separate agreement']:[]);
+    L.push(RI.length?'Restrictive or protective procedures, each kept to what safety needs: '+RI.join('; ')+'.':'No restrictive procedure is part of the plan.');
+    return L;}
+  function dataAuto(cs){const rows=cs.map(c=>[c.name,g('cp['+c.i+'].data')]).filter(r=>r[1]);if(!rows.length)return [];
+    const one=rows.every(r=>r[1]===rows[0][1]),who=[0,1,2].map(k=>g('tr['+k+'].who')).filter(Boolean);
+    return (one?['Every component: '+rows[0][1]]:rows.map(r=>r[0]+': '+r[1])).concat(who.length?['Recorded by the trained implementers: '+who.join(', ')]:[]);}
+  function svAuto(){return [0,1,2,3].map(k=>{const v=x=>{const s=g('sv['+k+'].'+x);return s&&s!=='—'?s:'';},a=v('a'),e=v('e'),s=v('s');
+    return (a||e||s)&&g('sv['+k+'].who')?g('sv['+k+'].who')+': '+[a&&'acceptability '+a+' of 7',e&&'expected effectiveness '+e+' of 7',s&&'side effects '+s+' of 7'].filter(Boolean).join(', '):'';}).filter(Boolean);}
+  function adoptLines(){const A=revs(),L=[];
+    const head=[g('ad.date')?'Adopted by the team on '+nice(g('ad.date')):'',g('ad.team')?'Team present: '+g('ad.team'):'',g('ad.parent')?'Parent attended: '+g('ad.parent'):''].filter(Boolean);
+    if(!head.length&&!A.length&&!['ad.pinput','ad.student','ad.notice','ad.start'].some(g))return [];
+    if(head.length)L.push(head.join('. ')+'.');
+    if(g('ad.pinput'))L.push('Parent input: '+g('ad.pinput'));if(g('ad.student'))L.push('Student participation and views: '+g('ad.student'));
+    if(g('ad.notice'))L.push('Prior written notice: '+nice(g('ad.notice')));if(g('ad.start'))L.push('Implementation start: '+nice(g('ad.start')));
+    L.push('Plan version: '+(1+A.length));
+    A.forEach((r,k)=>L.push('- Version '+(k+2)+(iso(r.date)?', '+nice(r.date):'')+': '+(whyLab(r.why)||'revised').toLowerCase()+(T(r.note)?' ('+T(r.note)+')':'')+(iso(r.notice)?'; notice '+nice(r.notice):'')));
+    return L;}
+  function render(){const cs=cards();const lr=q('#td82Lr');if(lr){const L=lrLines(cs);lr.innerHTML=L.length?L.map(s=>'<p class="td82-p">'+esc(s)+'</p>').join(''):'<p class="td82-p empty">Written once the plan has components (the Responding sheet holds the punishment review).</p>';}
+    const dh=q('#td82DataHint');if(dh){const D=g('ad.data')?[]:dataAuto(cs);dh.hidden=!D.length;dh.innerHTML=D.length?'<b>From the component cards</b> '+D.map(esc).join('<br>'):'';}
+    const sh=q('#td82SvAuto');if(sh){const S=g('ad.sv')?[]:svAuto();sh.hidden=!S.length;sh.innerHTML=S.length?'<b>From the Implementation plan sheet</b> '+S.map(esc).join('<br>'):'';}
+    renderNotice();}
+  window.__td82Sync=function(){renderRevs();render();};
+  /* Copy for the BIP: the bipText hook */
+  window.__td82Bip=function(B,o){const cs=(o&&o.comps)||cards(),bl=(o&&o.bipLine)||((l,v)=>T(v)?l+': '+T(v):'');
+    const it=g('cn.interp');B.splice(2,0,['STUDENT AND FAMILY CONSIDERATIONS',bl('Culture and family',g('cn.culture')),bl('Home language',g('cn.lang')),it?'Interpreter needed: '+it:'',bl('The student\'s treatment preference',g('cn.pref'))]);
+    B.push(['LEAST RESTRICTIVE REVIEW'].concat(lrLines(cs)));
+    B.push(['WHO COLLECTS WHICH DATA'].concat(g('ad.data')?[g('ad.data')]:dataAuto(cs).map(s=>'- '+s)));
+    B.push(['SOCIAL VALIDITY'].concat(g('ad.sv')?[g('ad.sv')]:svAuto().map(s=>'- '+s)));
+    B.push(['REVIEW AND EXIT',g('ad.review')?'Next review: '+nice(g('ad.review')):'',bl('Exit criteria',g('ad.exit'))]);
+    B.push(['ADOPTION AND REVISIONS'].concat(adoptLines()));};
+  /* ---- facts in: considerations, review, exit, social validity and data, each only where empty; the PR-1 notice ---- */
+  const wasIn=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){f=f||{};let r=null,cap='';const U=window.nbhUI,ot=U&&U.toast;
+    if(ot)U.toast=function(m){if(/^From the case: /.test(String(m))){cap=String(m).replace(/^From the case: /,'').replace(/\.$/,'');return;}return ot.apply(this,arguments);};
+    try{r=wasIn?wasIn.apply(this,arguments):null;}catch(e){r={filled:0,note:''};}finally{if(ot)U.toast=ot;}
+    r=r&&typeof r==='object'?r:{filled:0,note:''};const placed=[];let n=0,first=null;
+    try{LAST=f;
+      const P=(name,v,lab)=>{const e=fld(name);v=T(v);if(!e||!v||T(e.value))return;if(e.tagName==='SELECT'&&![...e.options].some(o=>o.value===v))return;e.value=v;n++;if(lab&&!placed.includes(lab))placed.push(lab);first=first||e;};
+      const pr=f.profile||{},lang=pr.language;
+      if(lang&&typeof lang==='object'){P('cn.lang',[T(lang.home),T(lang.notes)?'('+T(lang.notes)+')':''].filter(Boolean).join(' '),'the home language (DM-1)');if(typeof lang.interpreter==='boolean')P('cn.interp',lang.interpreter?'yes':'no','the interpreter (DM-1)');}
+      else P('cn.lang',lang,'the home language (DM-1)');
+      P('cn.culture',pr.culture,'the cultural considerations (DM-1)');
+      P('cn.pref',f.student&&f.student.preference,'the student\'s preference (SI-1)');
+      const rv=f.review||{},ex=rv.exit||{};
+      P('ad.review',iso(rv.next),'the next review date (PR-1)');
+      const exT=[T(ex.criteria),T(ex.threshold)?(T(ex.criteria)?'threshold: ':'')+T(ex.threshold):'',T(ex.every)?'monitoring after exit: '+T(ex.every):''].filter(Boolean).join('; ');
+      P('ad.exit',exT?exT.charAt(0).toUpperCase()+exT.slice(1)+' (Form PR-1)':'','the exit criteria (PR-1)');
+      const sv=f.sv;if(sv&&typeof sv==='object'){const sc=T(sv.scale),one=(lab,x)=>{if(!x||typeof x.mean!=='number')return '';const ex=[x.n?x.n+(x.n===1?' rater':' raters'):'',iso(x.date)?nice(x.date):''].filter(Boolean);
+          return lab+' mean '+(Math.round(x.mean*100)/100)+(sc?' on a '+sc+' scale':'')+(ex.length?' ('+ex.join(', ')+')':'');};
+        const s=[one('Before the plan:',sv.pre),one('After:',sv.post)].filter(Boolean).join('; ');
+        const fl=(sv.flagged||[]).filter(Boolean);
+        P('ad.sv',s?s+(T(sv.form)?' (Form SV-1, '+T(sv.form)+')':' (Form SV-1)')+'.'+(fl.length?' Items rated low: '+fl.join('; ')+'.':''):'','social validity (SV-1)');}
+      const db=((f.data&&f.data.behaviors)||[]).filter(b=>b&&T(b.name)&&(T(b.measure)||T(b.unit)));
+      if(db.length)P('ad.data',db.map(b=>T(b.name)+': '+[T(b.measure),T(b.unit)].filter(Boolean).join(', ')).join('; ')+' (Form DD-1).','the data recorded (DD-1)');
+      if(first)poke(first);renderRevs();render();
+    }catch(e){}
+    const all=[cap].concat(placed).filter(Boolean);
+    if(all.length&&ot)ot.call(U,'From the case: '+all.join(', ')+'.',{kind:'ok'});
+    return {filled:(r.filled||0)+n,note:[T(r.note),placed.length?'placed '+placed.join(', '):''].filter(Boolean).join('; ')};};
+  /* ---- facts out ---- */
+  const wasOut=window.__nbhFactsOut;
+  window.__nbhFactsOut=function(){let r=null;try{r=wasOut?wasOut.apply(this,arguments):null;}catch(e){r=null;}
+    try{const A=revs(),ad={};[['date','ad.date'],['team','ad.team'],['parent','ad.parent'],['parentInput','ad.pinput'],['student','ad.student'],['notice','ad.notice'],['start','ad.start']].forEach(([k,n])=>{const v=/date|notice|start/.test(k)?iso(g(n))||g(n):g(n);if(v)ad[k]=v;});
+      const hasA=Object.keys(ad).length>0;if(hasA||A.length)ad.version=1+A.length;
+      const V=hasA||A.length?[Object.assign({v:1,why:'adopted'},iso(g('ad.date'))?{date:iso(g('ad.date'))}:{},iso(g('ad.notice'))?{notice:iso(g('ad.notice'))}:{})].concat(A.map((x,k)=>{const o={v:k+2,why:T(x.why)||'other'};if(iso(x.date))o.date=iso(x.date);if(iso(x.notice))o.notice=iso(x.notice);if(T(x.note))o.note=T(x.note);return o;})):[];
+      const c={};if(g('cn.culture'))c.culture=g('cn.culture');if(g('cn.lang'))c.language=g('cn.lang');if(g('cn.interp'))c.interpreter=g('cn.interp')==='yes';if(g('cn.pref'))c.preference=g('cn.pref');
+      const hasC=Object.keys(c).length>0;
+      if(hasA||V.length||hasC){r=r||{};r.plan=r.plan||{src:'TD-1'};if(ad.version)r.plan.adoption=ad;if(V.length)r.plan.versions=V;if(hasC)r.plan.considerations=c;}
+    }catch(e){}
+    return r;};
+  /* ---- wiring ---- */
+  document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+    if(t.closest('#td82Rev')){addRev();const k=revs().length-1,d=q('#td82d'+k);if(d)d.focus();return;}
+    if(t.closest('#td82FromPR')){const p=pending();if(p){addRev({date:iso(p.date),why:DEC[T(p.decision)],note:T(p.decisionText)});}return;}
+    const x=t.closest('.td82-x');if(x){const k=+x.dataset.k,go=()=>{const A=revs();A.splice(k,1);putRevs(A);renderRevs();renderNotice();};
+      if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove version '+(k+2)+' from the record?',{ok:'Remove',danger:true}).then(y=>{if(y)go();});else go();return;}
+    const v=t.closest('#viewSeg button[data-view]');if(v&&v.dataset.view==='final')setTimeout(()=>{renderRevs();render();},0);});
+  const onEdit=e=>{const t=e.target;if(!t)return;
+    if(t.closest&&t.closest('#td82Vers tbody')&&t.dataset&&t.dataset.f){putRevs(readRows());renderNotice();return;}
+    if(t.name==='ad.versions'){if(!self)renderRevs();renderNotice();return;}
+    if(t.name==='ad.date'||t.name==='ad.notice')renderRevs();
+    render();};
+  document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
+  window.addEventListener('beforeprint',()=>{renderRevs();render();});
+  window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect'){renderRevs();render();}});
+  const go=()=>{renderRevs();render();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
 })();
 </script>
 
