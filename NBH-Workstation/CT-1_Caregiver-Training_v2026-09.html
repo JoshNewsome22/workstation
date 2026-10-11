@@ -3551,6 +3551,25 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
   let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
   return {filled:n+(g&&g.filled||0),note:steps?'Protocol steps from Form TV-1':''};};
 </script>
+<script id="ct1-v2182">
+/* v21.82 the family's home language (f.profile.language {home, interpreter} from Form DM-1, else Form TD-1's plan
+   considerations). The caregiver takes these pages home and signs them: when an interpreter is asked for or the language
+   is not English, a flag shows at the top of the form on screen only, to have the pages translated or explained by an
+   interpreter before they go home. It never prints, and nothing is translated here. */
+let ct1Case=null;
+function ct1Lang(){const f=ct1Case||{},L=(f.profile&&f.profile.language)||{},C=(f.plan&&f.plan.considerations)||{};
+  const home=String(L.home||C.language||'').trim(),intp=L.interpreter===true||(L.interpreter===undefined&&C.interpreter===true);
+  if(!intp&&(!home||/^\s*english(\s+only)?\s*\.?\s*$/i.test(home)))return null;return {home,intp};}
+function ct1LangFlag(){const x=ct1Lang();let el=document.getElementById('ctLangFlag');
+  if(!x){if(el)el.remove();return;}
+  if(!el){const h=document.querySelector('main.sheet .nbh-print-head');if(!h)return;el=document.createElement('div');el.id='ctLangFlag';el.className='nbh-lang-flag noprint';el.setAttribute('role','note');h.parentNode.insertBefore(el,h.nextSibling);}
+  el.innerHTML='<b>Before these pages go home.</b> Home language: '+esc(x.home||'not recorded (an interpreter is asked for)')+'. Have this translated or explained by an interpreter (the district&rsquo;s interpreter service) before it goes home.';}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ct1Case=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{ct1LangFlag();}catch(e){}return r;};}
+</script>
+<style id="ct1-v2182-css">
+.nbh-lang-flag{margin:8px 0 12px;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}
+@media print{.nbh-lang-flag{display:none!important}}
+</style>
 
 <script id="rr-run">
 /* ===================== v21.24: the rehearsal runner (one script on Forms ST-1 and CT-1) =====================
