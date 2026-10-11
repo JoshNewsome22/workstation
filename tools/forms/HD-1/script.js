@@ -381,3 +381,25 @@ window.__nbhFactsOut=function(){try{ensure();
   if(!sheets.length&&!data.length){if(!S.bh.some(b=>b.name)||!asked.length)return null;asked.forEach(k=>sheets.push({name:names[k],kind:k}));}
   return {home:{sheets,data,src:'HD-1'}};
 }catch(e){return null;}};
+
+/* v21.82 the family's home language. Language at home on Setup, or, while it is empty, the case's (Form DM-1's
+   f.profile.language {home, interpreter}, else Form TD-1's plan considerations), which also fills that field when it is
+   empty. When an interpreter is asked for or the language is not English, a flag shows above the home sheets, on screen
+   only: have them translated or explained by an interpreter before they go home. It never prints (the sheets print as
+   they are), and nothing is translated here. */
+let nbhHdCase=null;
+function nbhHdLang(){const f=nbhHdCase||{},L=(f.profile&&f.profile.language)||{},C=(f.plan&&f.plan.considerations)||{};
+  const home=String(S.meta.lang||'').trim()||String(L.home||C.language||'').trim(),intp=L.interpreter===true||(L.interpreter===undefined&&C.interpreter===true);
+  if(!intp&&(!home||/^\s*english(\s+only)?\s*\.?\s*$/i.test(home)))return null;return {home,intp};}
+function nbhHdLangFlag(){const x=nbhHdLang();let el=document.getElementById('hdLangFlag');
+  if(!x){if(el)el.remove();return;}
+  if(!el){const o=$('#sheetOut');if(!o)return;el=document.createElement('div');el.id='hdLangFlag';el.className='nbh-lang-flag noprint';el.setAttribute('role','note');o.parentNode.insertBefore(el,o);}
+  el.innerHTML='<b>Before these go home.</b> Home language: '+esc(x.home||'not recorded (an interpreter is asked for)')+'. Have this translated or explained by an interpreter (the district&rsquo;s interpreter service) before it goes home.';}
+{const rs0=renderSheets;renderSheets=function(){const r=rs0.apply(this,arguments);try{nbhHdLangFlag();}catch(e){}return r;};}
+document.addEventListener('input',e=>{const el=e.target;if(el&&el.dataset&&el.dataset.m==='lang')nbhHdLangFlag();});
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){nbhHdCase=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;let n=0;
+  try{const L=(f&&f.profile&&f.profile.language)||{},C=(f&&f.plan&&f.plan.considerations)||{},home=String(L.home||C.language||'').trim();
+    const el=$('[data-m="lang"]');if(home&&!String(S.meta.lang||'').trim()&&el&&!String(el.value||'').trim()){S.meta.lang=home+((L.interpreter===true||C.interpreter===true)?' (interpreter requested)':'');el.value=S.meta.lang;n=1;el.dispatchEvent(new Event('input',{bubbles:true}));}
+    nbhHdLangFlag();}catch(e){}
+  return {filled:((r&&r.filled)|0)+n,note:(r&&r.note)||''};};}
+nbhHdLangFlag();

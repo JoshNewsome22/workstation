@@ -2156,8 +2156,9 @@ function openFor(ev,d){
 /* v21.74 also the day-by-day record (DD-1), the point sheet (SM-1) and the quick start's rules and tiers (QS-1); v21.75 the
    treatment integrity observations (TI-1) */
 const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
-  /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1'];
+  /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence',
+  /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2167,8 +2168,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||(f.evidence&&Object.keys(f.evidence).length)));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||(f.evidence&&Object.keys(f.evidence).length)));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -4658,6 +4659,50 @@ function tdV2180(f){const L=[],d=f.data||{},rv=f.review||{},ex=rv.exit||{},pr=f.
   const ex=f.review&&f.review.exit,pb=f.data&&Array.isArray(f.data.probes)?f.data.probes:[];
   if(ex&&ex.next){const from=tdAdd(ex.next,-7);if(pb.some(x=>x&&x.kind==='maint'&&x.date>=from))L=L.filter(x=>!(x.open==='PR-1'&&/^The check after exit/.test(x.t)));}
   L=L.concat(tdV2180(f));}catch(e){}return L;};}
+/* ================= v21.82 the plan's adoption, the decision log, and Ready to start =================
+   From the case as the open forms give it: Form TD-1's record of the team adopting the plan (and each revision with its
+   notice), Form PR-1's log of closed reviews, Form ST-1's staff trained to criterion, Form CF-1's contextual fit, Form SV-1's
+   social validity, Form SI-1's student interview. Nothing here is kept. */
+function rsItems(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},fl=f.profile&&f.profile.flags,st=f.staff,miss=(t,open)=>L.push({t,open});
+  if(!f.consent||!(f.consent.date||f.consent.parent))miss('Consent for the FBA and BIP is not recorded (Form IC-1)','IC-1');
+  if(!(f.fn&&(f.fn.key||f.fn.label)))miss('The function is not written (Form FS-1)','FS-1');
+  if(!(pl.rep||pl.beh||(pl.ant||[]).length))miss('The plan is not written (Form TD-1)','TD-1');
+  if(!ad.date)miss('The team has not adopted the plan on record: the meeting date, who attended, the parent’s input (Form TD-1)','TD-1');
+  else if(!ad.notice)miss('No prior written notice date for the plan’s adoption (Form TD-1)','TD-1');
+  if(!ad.start)miss('No start date for the plan (Form TD-1)','TD-1');
+  if(!st||!(st.people||[]).length)miss('No staff trained on the plan yet: train each implementer to criterion before it starts (Form ST-1)','ST-1');
+  else{const not=st.people.filter(p=>!p.met);if(not.length)miss(not.length+' of '+st.people.length+' implementers not yet at criterion: '+not.slice(0,4).map(p=>esc(p.name||p.role||'?')).join(', ')+' (Form ST-1)','ST-1');}
+  if(!f.fit||f.fit.mean==null)miss('Contextual fit not checked with the people who will run the plan (Form CF-1)','CF-1');
+  if(!f.sv||!f.sv.pre||f.sv.pre.mean==null)miss('No social validity rating before the plan starts (Form SV-1)','SV-1');
+  if(fl&&(fl.safety||[]).length&&!(f.crisis&&(f.crisis.stages||[]).length))miss('Form DM-1 flags safety ('+esc(fl.safety.join(', ').toLowerCase())+') and there is no crisis plan (Form CR-1)','CR-1');
+  if(!f.data)miss('No data system yet: set up the daily data before the plan starts, so there is a baseline (Form DD-1)','DD-1');
+  return L;}
+async function readyOpen(){await gatherFacts(false);const f=state.facts||{},L=rsItems(f),ad=(f.plan||{}).adoption||{};
+  dialog('Ready to start',
+    '<p class="hp-lead">Before the plan starts'+(ad.start?' on '+esc(tdMd(ad.start))+' ('+tdWhen(ad.start)+')':'')+': what the case still needs. Read from the forms open in this case.<\/p>'+
+    (L.length?'<ul class="td-list">'+L.map(x=>'<li><span class="td-k">Missing<\/span> <span>'+x.t+'<\/span> <button type="button" data-open="'+esc(x.open)+'">Open '+esc(x.open)+'<\/button><\/li>').join('')+'<\/ul>'
+      :'<p><b>Everything is in place:<\/b> consent, the function, the plan adopted with its notice and start date, staff at criterion, contextual fit, social validity before the plan, a crisis plan where flagged, and the daily data.<\/p>')+
+    '<p class="hint">Train each person to criterion before the plan starts (behavior skills training), and check that the plan fits the setting and is acceptable to the people who run it (Ethics Code 2.16, 2.19).<\/p>');}
+function tdV2182(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},vs=pl.versions||[],lg=(f.review&&f.review.log)||[];
+  const inUse=!!(ad.start||(f.data&&Array.isArray(f.data.conds)&&f.data.conds.length>1));
+  if(pl&&(pl.rep||pl.beh)&&inUse&&!ad.date)L.push({k:'Timeline',t:'The plan is in use with no record of the team adopting it: add the meeting date, who attended and the notice (Form TD-1)',open:'TD-1'});
+  const last=lg.length?lg[lg.length-1]:null,lv=vs.length?vs[vs.length-1]:null;
+  if(last&&/^(modify|fade|exit)$/.test(last.decision||'')&&!(lv&&lv.date>=last.date))L.push({k:'Timeline',t:'Form PR-1 decided to '+esc(last.decision)+' the plan on '+esc(tdMd(last.date))+': record the revision and its prior written notice (Form TD-1)',open:'TD-1'});
+  else if(lv&&lv.v>1&&!lv.notice)L.push({k:'Timeline',t:'The plan’s revision of '+esc(tdMd(lv.date))+' has no prior written notice date (Form TD-1)',open:'TD-1'});
+  if(ad.start){const n=tdLeft(ad.start);if(n!==null&&n>=0&&n<=7){const m=rsItems(f).length;if(m)L.push({k:'Timeline',t:'The plan starts '+esc(tdMd(ad.start))+' ('+tdWhen(ad.start)+') and '+m+' thing'+(m===1?' is':'s are')+' not ready: see Ready to start',open:''});}}
+  return L;}
+{const ti2=todayItems;todayItems=function(){const f=state.facts||{};let L=ti2.apply(this,arguments);try{L=L.concat(tdV2182(f));}catch(e){}return L;};}
+{const hi2=handoverItems;handoverItems=function(){const f=state.facts||{},L=hi2.apply(this,arguments);try{const ad=(f.plan||{}).adoption||{};
+  if(f.plan&&!ad.date)L.push({t:'No record of the team adopting the plan (Form TD-1)',open:'TD-1'});
+  if(f.review&&!(f.review.log||[]).length&&f.review.date)L.push({t:'Form PR-1 holds no closed reviews: close the current review so the decision is on record',open:'PR-1'});}catch(e){}return L;};}
+/* the transition summary carries the decisions on record */
+{const sh0=tdSummaryHTML;tdSummaryHTML=function(){let h=sh0.apply(this,arguments);try{const f=state.facts||{},lg=(f.review&&f.review.log)||[],ad=(f.plan||{}).adoption||{},vs=(f.plan||{}).versions||[];
+  const rows=[];if(ad.date)rows.push('<li>'+esc(ad.date)+': plan adopted by the team'+(ad.team?' ('+esc(ad.team)+')':'')+(ad.notice?'; notice '+esc(ad.notice):'')+(ad.start?'; started '+esc(ad.start):'')+'<\/li>');
+  vs.filter(v=>v.v>1).forEach(v=>rows.push('<li>'+esc(v.date||'')+': revision '+esc(v.v)+(v.why?' ('+esc(v.why)+')':'')+(v.notice?'; notice '+esc(v.notice):'')+'<\/li>'));
+  lg.forEach(r=>rows.push('<li>'+esc(r.date||'')+': review, <b>'+esc(r.decisionText||r.decision||'')+'<\/b>'+(r.data?'. '+esc(r.data):'')+(r.integrity?'. Integrity '+esc(r.integrity):'')+(r.sv?'. Social validity '+esc(r.sv):'')+(r.actions?'. '+esc(r.actions):'')+'<\/li>'));
+  if(rows.length){const sec='<h2>Decisions on record<\/h2><ul>'+rows.join('')+'<\/ul>';let i=h.indexOf('<h2>Open deadlines');if(i<0)i=h.indexOf('<h2>Contacts');if(i<0)i=h.lastIndexOf('<p class="s"');h=i>=0?h.slice(0,i)+sec+h.slice(i):h+sec;}}catch(e){}return h;};}
+{const to2=todayOpen;todayOpen=async function(){await to2.apply(this,arguments);try{const b=$('#dlgBody'),p=b&&b.querySelector('.td-more');if(p&&!b.querySelector('#tdReady'))p.insertAdjacentHTML('beforeend',' <button type="button" id="tdReady">Ready to start<\/button>');}catch(e){}};}
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))readyOpen();});
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
@@ -4761,6 +4806,7 @@ const CMDS=[
   {k:'today what needs me due incidents aim integrity',n:'Today: what needs me in this case',s:'command',go:()=>todayOpen()},
   {k:'caseload students all cases dashboard overdue across',n:'Caseload: every student on this iPad',s:'command',go:()=>caseloadOpen()},
   {k:'end of week friday packet week summary blank sheet point sheets print',n:'End of the week: the summary, next week\u2019s sheet and the point sheets in one print',s:'command',go:()=>endOfWeek()},
+  {k:'ready to start plan begin trained staff criterion adoption notice fit social validity',n:'Ready to start: what the plan still needs before it begins',s:'command',go:()=>readyOpen()},
   {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
   {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},

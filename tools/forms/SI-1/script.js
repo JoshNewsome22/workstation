@@ -216,6 +216,8 @@ function renderSummary(){
   s+='<p><b>Wants to change:</b></p>'+q(v.change.a)+'<p><b>Goal in the student&rsquo;s words:</b></p>'+q(v.goal.a)+'<p><b>Worth working for:</b></p>'+q(v.reward.a);
   if(young()){const fs=ITEMS.filter(it=>it.fq&&v[it.id].s).map(it=>esc(it.fq)+' '+faceOf(v[it.id].s)+' '+esc(SCALES[it.fl][+v[it.id].s-1]));if(fs.length)s+='<p><b>Faces:</b> '+fs.join(' &bull; ')+'</p>';}
   s+='<h3>Assent</h3>';
+  /* v21.82 the overall assent, as the case carries it to Form FS-1 */
+  {const st=assentStatus();if(st)s+='<p><b>Assent overall:</b> '+esc(st)+(m.a_status?'':' (read from the log)')+'</p>';}
   s+='<p><b>Asked how:</b> '+esc(m.a_ask||NONE)+' <b>By:</b> '+esc(m.a_who||NONE)+' <b>When:</b> '+esc(m.a_when||NONE)+(m.a_scope?' <b>Applies to:</b> '+esc(m.a_scope):'')+'</p>';
   const ab=S.ab.filter(r=>r.beh),wb=S.wb.filter(r=>r.beh);
   s+='<p><b>Assent looks like:</b> '+(ab.length?ab.map(r=>esc(r.beh)).join('; '):NONE)+'</p><p><b>Withdrawal looks like:</b> '+(wb.length?wb.map(r=>esc(r.beh)).join('; '):NONE)+'</p>';
@@ -226,6 +228,7 @@ function renderSummary(){
   if(p.used.length){s+='<table class="st"><tr><th>Component</th><th>Offered</th><th>Chosen</th><th>%</th><th>Stated rank</th></tr>'+p.used.map(c=>'<tr><td>'+esc(c.name)+'</td><td>'+c.off+'</td><td>'+c.ch+'</td><td>'+pct(c.p)+'</td><td>'+(c.rank==null?NONE:c.rank)+'</td></tr>').join('')+'</table>';
     s+='<p><b>Result:</b> '+(p.top?'preferred '+esc(p.top.name)+', chosen '+p.top.ch+' of '+p.top.off+' offers.':(p.offers?p.offers+' choices recorded; no clear preference yet.':'no choices recorded yet.'))+'</p>';}
   else s+='<p>No components listed yet.</p>';
+  if(m.p_want)s+='<p><b>Would like from a plan:</b></p>'+q(m.p_want);
   if(m.p_say)s+='<p><b>About the plan:</b></p>'+q(m.p_say);
   if(m.p_change)s+='<p><b>Changed because of it:</b> '+esc(m.p_change)+'</p>';
   if(m.p_next)s+='<p><b>Repeat on:</b> '+esc(m.p_next)+'</p>';
@@ -326,6 +329,7 @@ async function loadSim(){
   S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'6',age:'11',beh:'when I walk out',asker:'Joshua Newsome, M.A., BCBA',role:'Case BCBA, with Ms. Ortiz (school counselor) sitting in',where:'Counseling office; the student chose it over the conference room',date:Y(14),mins:'35',lang:'English',paware:'Yes',bcba:'Joshua Newsome, M.A., BCBA',ver:'read',
     a_ask:'At the start of each session: "Do you want to do this with me now, or come back after lunch?" shown on two cards (now / later). During the session: "Keep going, or stop?" at each new task.',a_explain:'"We will practice asking for a break and then do about ten minutes of math. You can stop any time and nothing bad happens. You can earn drawing time."',a_who:'Ms. Ortiz for the first week, then Mr. Patel (math) once the student has met him in the office',a_when:'At the start of every session, and again at each change of task',a_scope:'Assessment and treatment sessions',a_rev:Y(13),
     w_steps:'1. "Okay, we can stop." Stop the task at once. 2. Offer the two cards: a different task, or a break. 3. If neither is taken within a minute, end the session and walk the student back. 4. Write the minute and what was changed. 5. Try again at the next scheduled time, not sooner.',w_change:'Shorter task (5 minutes), a different problem set, or a different adult; after two withdrawals in a row, the BCBA sits in on the next session',a_thr:'25',
+    p_want:'"Smaller worksheets. A way to take a break without getting in trouble. No points chart on the wall."',
     p_say:'"The break card is fine. I do not want the points thing where everyone can see it."',p_change:'The token board moved from the wall to a folder the student keeps. The first-then schedule stays (the teacher needs it for the class), explained to the student with the reason; the student agreed to try it for two weeks.',p_next:'At the first plan review (PR-1), or sooner if two withdrawals fall in one week',
     conf_say:'"So my mom will see it? Okay. Ms. Ortiz can stay."'};
   S.chk={conf_read:true,m_verbal:true,m_written:true,m_breaks:true,b_hard:true,b_told:true,b_peer:true,a_out:true,a_sent:true,a_talk:true,w_pause:true,w_choice:true,w_end:true,w_note:true,w_tell:true,w_nolose:true};
@@ -364,3 +368,19 @@ renderAll();
    filled in on its own; the picker puts the team's label in when the interviewer wants it there. */
 window.__nbhFactsIn=function(f){return {filled:0,note:'the interview keeps the behavior in the student’s words'};};
 window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {filled:0};S.meta.beh=b.label;renderAll();return {filled:1};};
+
+/* v21.82 the student's voice, out (new key 'student'), for Forms FS-1 and TD-1: the interview date (ISO), the student's own
+   hypothesis as the summary line words it (plain text), the overall assent (the field, else read from the log: given when every
+   logged session had assent at the start and none was withdrawn, refused when none had, partial otherwise), what the student
+   would like from a plan (the field, else the component the student chose most, else what was said about the plan) and what the
+   student likes and does well. Nothing is sent while the interview is empty. */
+function assentStatus(){const m=S.meta.a_status;if(m)return m;const a=assentStats();if(!a.n)return '';return !a.got&&a.w>=a.n?'refused':a.w||a.got<a.n?'partial':'given';}
+{const plain=h=>{const t=document.createElement('textarea');t.innerHTML=String(h||'').replace(/<[^>]+>/g,'');return t.value.replace(/\s+/g,' ').trim();};
+ const iso=s=>{s=String(s||'').trim();let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+   return m?(m[3].length===2?'20'+m[3]:m[3])+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2):'';};
+ const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{const m=S.meta,p=prefStats(),o={};const hyp=plain(hypLine()),st=assentStatus(),likes=unq(S.iv.like&&S.iv.like.a).trim();
+   const pref=unq(m.p_want).trim()||(p.top?'Chose '+p.top.name+' most ('+p.top.ch+' of '+p.top.off+' offers)':'')||unq(m.p_say).trim();
+   if(hyp)o.hypothesis=hyp;if(st)o.assent=st;if(pref)o.preference=pref;if(likes)o.likes=likes;
+   if(!Object.keys(o).length)return r;const d=iso(m.date);if(d)o.date=d;
+   return Object.assign({},r||{},{student:o});}catch(e){return r;}};}
