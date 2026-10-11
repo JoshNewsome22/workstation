@@ -1021,6 +1021,36 @@ td input,td select{max-width:100%}
     <div class="drow"><div class="dlab">Setting constraints</div><div class="dval"><textarea name="m.constraints" placeholder="Staff ratio; who can implement; whether breaks away from the group are feasible; tolerance for any problem behavior; whether the reinforcer can be withheld; classroom disruption limits"></textarea></div></div>
     <div class="drow"><div class="dlab">Severity and safety</div><div class="dval"><textarea name="m.safety" placeholder="TB-1 urgency level; injury history; size and physical management; medical clearance" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <!-- v21.83 (M): every reduction target in the case, each with its function and the parts of this plan that address it
+       (td-v2183). Filled from the case while empty; editable; saved in tg.rows; printed here and on the final plan. -->
+  <div id="td83Block">
+    <style>
+    /* v21.83 (M) */
+    #td83Block .td83-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:4px 0}
+    #td83Tbl{min-width:640px}
+    #td83Tbl td{vertical-align:top}
+    #td83Tbl td input[type=text],#td83Tbl td textarea,#td83Tbl td select{font:inherit;font-size:12px;width:100%;box-sizing:border-box;min-height:34px}
+    #td83Tbl td textarea{min-height:34px}
+    #td83Tbl .td83-part label{display:flex;align-items:center;gap:6px;min-height:34px;font-size:11.5px}
+    #td83Tbl .td83-part input[type=checkbox]{width:20px;height:20px;margin:0}
+    #td83Tbl .td83-st{font-size:11.5px;line-height:1.4}
+    #td83Tbl .td83-st .td83-flag{display:block;color:var(--ink);font-weight:700}
+    #td83Tbl .td83-st .td83-ok{display:block;color:var(--ink-soft)}
+    #td83Block .td83-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin:2px 0 6px}
+    #td83Block .td83-bar{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+    #td83Final .td83-p{margin:0 0 6px;padding:0 8px;font-size:12.5px;line-height:1.5}
+    #td83Final .td83-p .td83-flag{font-weight:600}
+    @media print{#td83Tbl{min-width:0}#td83Tbl td input,#td83Tbl td textarea,#td83Tbl td select{border:0;background:transparent}#td83Tbl td input[type=text]:placeholder-shown{display:none}#td83Block .td83-wrap{overflow:visible}}
+    </style>
+    <h3 class="sub">Targets in This Plan</h3>
+    <p class="td83-hint">Every reduction target in the case (Forms TB-1 and FS-1), with its function and the parts of this plan that address it: tick a part, or write a short note. A target whose function differs from the plan&rsquo;s main function needs strategies of its own.</p>
+    <div id="td83Sum" class="warn" role="status" aria-live="polite" hidden></div>
+    <div class="td83-wrap" tabindex="0" role="region" aria-label="Targets in this plan">
+    <table class="rank cmp" id="td83Tbl"><thead><tr><th style="width:22%">Target and definition</th><th style="width:14%">Function</th><th style="width:15%">Antecedent strategies</th><th style="width:15%">Replacement and teaching</th><th style="width:15%">Consequence and responding</th><th>Status</th><th class="noprint" style="width:7%"></th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="td83-bar noprint"><button type="button" class="tool" id="td83Add">Add a target</button><button type="button" class="tool" id="td83Tick">Tick what the plan already covers</button></div>
+    <textarea name="tg.rows" class="noprint" hidden aria-hidden="true" tabindex="-1"></textarea>
+  </div>
   <h3 class="sub">Assessment Add-Ons: A-CSA, Process-versus-Product, and Component FA (EA-1 variants)</h3>
   <p class="method" style="margin-top:0">Fill only the rows that apply. The augmented competing-stimulus assessment (A-CSA) and the process-versus-product analysis come from the EA-1 arranging/ordering variant (Fergus et al., 2026; Hagopian et al., 2020); the component-FA rows come from the EA-1 sequential-EO / sequential-consequence variant (Bann &amp; Morris, 2026). The treatment level of the competing-stimulus package on the Antecedents sheet is read from the A-CSA phase entered here.</p>
   <div class="defs">
@@ -1422,6 +1452,7 @@ td input,td select{max-width:100%}
   <div class="bar nbh-band">Final Treatment Plan: Step by Step</div>
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div id="finalHead"></div>
+  <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
   <div id="finalBody"></div>
   <!-- v21.82 (I): what a BIP also has to say: why the plan is least restrictive, who collects which data, social validity,
        the review date and the exit criteria, the student and family considerations, and the team meeting that adopted
@@ -5169,6 +5200,124 @@ window.__nbhFactsOut=function(){
   const go=()=>{renderRevs();render();};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',go);else go();
 })();
 </script>
+<script id="td-v2183">
+/* v21.83 (M) every target in the plan. The plan hub had one target behavior and one function, while Forms TB-1 and FS-1
+   can carry several reduction targets with different functions. "Targets in this plan" (Setup sheet) lists each target
+   from the case (TB-1's problem behaviors, then any FS-1 target TB-1 lacks): its definition, its function (FS-1's for that
+   target, else TB-1's, else blank = the plan's main function) and the parts of this plan that address it (antecedent
+   strategies, replacement and teaching, consequence and responding), each a tick or a short note. Filled from the case
+   while the table is empty (later fills only complete a row's empty definition or function); a target sharing the plan's
+   function gets the parts the plan already has ticked. Flags: a target with no part ticked or noted ("Not addressed by the
+   plan yet") and a target whose function differs from the plan's main function (needs its own strategies). Kept as one
+   hidden named field (tg.rows) so Save data, Open data and the safety copy carry it; printed on the Setup sheet and the
+   final plan; Copy for the BIP lists every target with its definition and function. Facts out: plan.targets
+   [{label, def, fn, fnDiffers, ant:bool|text, teach, respond, covered}], and plan.beh = the first target when empty. */
+(function(){
+  const T=v=>String(v==null?'':v).trim(),low=v=>T(v).toLowerCase().replace(/\s+/g,' ');
+  const q=s=>document.querySelector(s),fld=n=>q('[name="'+n+'"]'),g=n=>T((fld(n)||{}).value);
+  const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const poke=e=>{try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(x){}};
+  const FN=[['escape','Escape / avoidance'],['attention','Attention'],['tangible','Tangible / activity'],['automatic','Automatic'],['multiple','Multiple control']];
+  const fnLab=k=>(FN.find(x=>x[0]===k)||[0,''])[1];
+  const FNW=[['escape',/escape|avoid/i],['attention',/attention/i],['tangible',/tangible|activity|item/i],['automatic',/automatic|nonsocial|sensory/i],['multiple',/multiple|more than one|synthesi/i]];
+  const fnKey=s=>{const k=low(s);if(!k||/unknown|unclear|undetermined/.test(k))return '';if(FN.some(x=>x[0]===k))return k;const h=FNW.find(w=>w[1].test(k));return h?h[0]:'';};
+  const PARTS=[['ant','antecedent strategies'],['teach','replacement and teaching'],['respond','consequence and responding']];
+  const isRep=b=>!!(b&&(b.isRep||/replacement|alternative/i.test(b.type||'')));
+  /* ---- the rows, kept in tg.rows ---- */
+  let self=false;
+  const clean=r=>{const o={label:T(r.label),def:T(r.def),fn:fnKey(r.fn)};PARTS.forEach(([k])=>{o[k]=!!r[k];o[k+'N']=T(r[k+'N']);});return o;};
+  const rows=()=>{try{const a=JSON.parse(g('tg.rows')||'[]');return Array.isArray(a)?a.filter(x=>x&&typeof x==='object').map(clean):[];}catch(e){return [];}};
+  const putRows=a=>{const e=fld('tg.rows');if(!e)return;e.value=a.length?JSON.stringify(a.map(clean)):'';self=true;poke(e);self=false;};
+  const planFn=()=>g('m.fn');
+  const effFn=r=>r.fn||planFn();
+  const differs=r=>{const p=planFn();return !!(r.fn&&p&&p!=='multiple'&&r.fn!==p);};
+  const covered=r=>PARTS.some(([k])=>r[k]||r[k+'N']);
+  /* what the plan already has: antecedent cards or arrangements, teaching cards or a replacement, the responding steps */
+  function planHas(){let p=null;try{const o=window.__td83BaseOut?window.__td83BaseOut():null;p=o&&o.plan;}catch(e){p=null;}p=p||{};const rs=p.respond||{};
+    return {ant:!!((p.ant||[]).length||(p.antCards||[]).length),teach:!!((p.teach||[]).length||T(p.rep)),respond:!!(T(rs.prec)||T(rs.target)||T(rs.after))};}
+  function tickFromPlan(a){const H=planHas(),pf=planFn();let n=0;if(!pf)return 0;
+    a.forEach(r=>{if(effFn(r)!==pf)return;PARTS.forEach(([k])=>{if(H[k]&&!r[k]){r[k]=true;n++;}});});return n;}
+  /* ---- the table ---- */
+  function partCell(r,k,lab,i){return `<td class="td83-part"><label><input type="checkbox" data-f="${k}" id="td83${k}${i}"${r[k]?' checked':''} aria-label="Target ${i+1}: ${lab}"> Addressed</label>`+
+    `<input type="text" data-f="${k}N" value="${esc(r[k+'N'])}" placeholder="note" aria-label="Target ${i+1}: ${lab}, note"></td>`;}
+  function statusHtml(r){const L=[];if(!covered(r))L.push('<span class="td83-flag">Not addressed by the plan yet</span>');
+    if(differs(r))L.push('<span class="td83-flag">Function differs from the plan&rsquo;s ('+esc(fnLab(planFn()).toLowerCase())+'): needs its own strategies</span>');
+    if(!L.length)L.push('<span class="td83-ok">Addressed by: '+PARTS.filter(([k])=>r[k]||r[k+'N']).map(x=>x[1]).join(', ')+'</span>');return L.join('');}
+  function renderTable(){const tb=q('#td83Tbl tbody');if(!tb)return;const A=rows(),pf=planFn();
+    tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td><input type="text" data-f="label" value="${esc(r.label)}" placeholder="target behavior" aria-label="Target ${i+1}"><textarea data-f="def" rows="2" placeholder="definition" aria-label="Target ${i+1}: definition">${esc(r.def)}</textarea></td>`+
+      `<td><select data-f="fn" class="inline" aria-label="Target ${i+1}: function"><option value="">${pf?'The plan&rsquo;s ('+esc(fnLab(pf))+')':'The plan&rsquo;s function'}</option>${FN.map(x=>`<option value="${x[0]}"${r.fn===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select></td>`+
+      PARTS.map(([k,lab])=>partCell(r,k,lab,i)).join('')+`<td class="td83-st">${statusHtml(r)}</td><td class="noprint"><button type="button" class="tool td83-x" data-k="${i}" aria-label="Remove target ${i+1}">Remove</button></td></tr>`).join('')
+      :'<tr class="td83-none"><td colspan="7" class="td83-hint">No target listed yet: they are filled from the case (Forms TB-1 and FS-1), or use Add a target.</td></tr>';
+    renderSum(A);}
+  function renderStatus(){const A=rows();document.querySelectorAll('#td83Tbl tbody tr[data-k]').forEach(tr=>{const r=A[+tr.dataset.k],c=tr.querySelector('.td83-st');if(r&&c)c.innerHTML=statusHtml(r);});renderSum(A);}
+  function renderSum(A){const box=q('#td83Sum');if(!box)return;const un=A.filter(r=>T(r.label)&&!covered(r)),df=A.filter(r=>T(r.label)&&differs(r));
+    box.hidden=!(un.length||df.length);
+    box.innerHTML=box.hidden?'':'<b>Targets to plan for</b>'+[un.length?'Not addressed by the plan yet: '+un.map(r=>esc(r.label)).join(', ')+'.':'',
+      df.length?'A function other than the plan&rsquo;s ('+esc(fnLab(planFn()).toLowerCase())+'): '+df.map(r=>esc(r.label)+' ('+esc(fnLab(r.fn).toLowerCase())+')').join(', ')+'; each needs strategies matched to its own function.':''].filter(Boolean).join(' ');}
+  function readTable(){return [...document.querySelectorAll('#td83Tbl tbody tr[data-k]')].map(tr=>{const o={};tr.querySelectorAll('[data-f]').forEach(e=>{o[e.dataset.f]=e.type==='checkbox'?e.checked:e.value;});return clean(o);});}
+  /* ---- the lines (the final plan and Copy for the BIP) ---- */
+  function lines(){return rows().filter(r=>T(r.label)).map((r,i)=>{const f=effFn(r),parts=PARTS.filter(([k])=>r[k]||r[k+'N']).map(([k,lab])=>lab+(r[k+'N']?' ('+r[k+'N']+')':''));
+    return {r,text:(i+1)+'. '+r.label+(r.def?': '+r.def.replace(/[.\s]+$/,'')+'.':'.')+' Function: '+(f?fnLab(f).toLowerCase():'not recorded')+(r.fn?'':f?' (the plan\'s)':'')+
+      (differs(r)?', not the plan\'s main function ('+fnLab(planFn()).toLowerCase()+'): it needs strategies of its own.':'.')+
+      (parts.length?' Addressed by: '+parts.join('; ')+'.':' Not addressed by the plan yet.'),flag:!parts.length||differs(r)};});}
+  function renderFinal(){const box=q('#td83Final');if(!box)return;const L=lines();
+    box.innerHTML=L.length?'<div class="plan-group">Targets in this plan</div>'+L.map(x=>'<p class="td83-p">'+(x.flag?'<span class="td83-flag">':'')+esc(x.text)+(x.flag?'</span>':'')+'</p>').join(''):'';}
+  function renderAll(){renderTable();renderFinal();}
+  /* Copy for the BIP: wraps v21.82's hook (bipText calls it); the single target line gives way to the list */
+  const was82=window.__td82Bip;
+  window.__td82Bip=function(B,o){try{const L=lines();if(L.length){const k=B.findIndex(b=>b&&b[0]==='TARGET BEHAVIOR AND FUNCTION');
+      if(k>=0){const b=B[k].filter((x,j)=>!(j>0&&/^Target behavior: /.test(String(x||''))));b.splice(1,0,'Targets in this plan:',...L.map(x=>x.text));B[k]=b;}
+      else B.splice(1,0,['TARGETS IN THIS PLAN'].concat(L.map(x=>x.text)));}}catch(e){}
+    return was82?was82.apply(this,arguments):undefined;};
+  /* Open data (restore calls v21.82's sync) */
+  const wasSync=window.__td82Sync;
+  window.__td82Sync=function(){const r=wasSync?wasSync.apply(this,arguments):undefined;try{renderAll();}catch(e){}return r;};
+  /* ---- facts in: the targets from the case, only while the table is empty; afterwards a row's empty definition or function ---- */
+  function caseTargets(f){const tb=(f.behaviors||[]).filter(b=>b&&T(b.label)&&!isRep(b)),fs=(f.behaviorsFS||[]).filter(b=>b&&T(b.label)&&!isRep(b));
+    const per=(f.fn&&Array.isArray(f.fn.perBehavior)?f.fn.perBehavior:[]).filter(b=>b&&T(b.label));
+    const byL=(a,l)=>a.find(b=>low(b.label)===low(l));
+    const out=[];const add=(b)=>{if(out.some(x=>low(x.label)===low(b.label)))return;const s=byL(fs,b.label)||{},p=byL(per,b.label)||{};
+      out.push(clean({label:T(b.label),def:T(b.def)||T(s.def),fn:fnKey(s.fnKey)||fnKey(s.fn)||fnKey(p.fnKey)||fnKey(p.fn)||fnKey(b.fnKey)||fnKey(b.fn)}));};
+    tb.forEach(add);fs.forEach(add);return out;}
+  const wasIn=window.__nbhFactsIn;
+  window.__nbhFactsIn=function(f){f=f||{};let r=null,cap='';const U=window.nbhUI,ot=U&&U.toast;
+    if(ot)U.toast=function(m){if(/^From the case: /.test(String(m))){cap=String(m).replace(/^From the case: /,'').replace(/\.$/,'');return;}return ot.apply(this,arguments);};
+    try{r=wasIn?wasIn.apply(this,arguments):null;}catch(e){r={filled:0,note:''};}finally{if(ot)U.toast=ot;}
+    r=r&&typeof r==='object'?r:{filled:0,note:''};let n=0,lab='';
+    try{const C=caseTargets(f),A=rows();
+      if(C.length&&!A.some(x=>T(x.label))){tickFromPlan(C);putRows(C);n=C.length;lab=C.length===1?'the target in this plan':'the '+C.length+' targets in this plan';}
+      else if(C.length){let k=0;A.forEach(x=>{const c=C.find(y=>low(y.label)===low(x.label));if(!c)return;if(!x.def&&c.def){x.def=c.def;k++;}if(!x.fn&&c.fn){x.fn=c.fn;k++;}});
+        if(k){putRows(A);n=k;lab='the targets\' definitions and functions';}}
+      renderAll();
+    }catch(e){}
+    const all=[cap,lab].filter(Boolean);
+    if(all.length&&ot)ot.call(U,'From the case: '+all.join(', ')+'.',{kind:'ok'});
+    return {filled:(r.filled||0)+n,note:[T(r.note),lab?'placed '+lab:''].filter(Boolean).join('; ')};};
+  /* ---- facts out ---- */
+  const wasOut=window.__nbhFactsOut;window.__td83BaseOut=wasOut;
+  window.__nbhFactsOut=function(){let r=null;try{r=wasOut?wasOut.apply(this,arguments):null;}catch(e){r=null;}
+    try{const A=rows().filter(x=>T(x.label));if(A.length){r=r||{};r.plan=r.plan||{src:'TD-1'};
+      r.plan.targets=A.map(x=>{const o={label:x.label};if(x.def)o.def=x.def;o.fn=effFn(x);o.fnDiffers=differs(x);PARTS.forEach(([k])=>{o[k]=x[k+'N']||x[k];});o.covered=covered(x);return o;});
+      if(!T(r.plan.beh))r.plan.beh=A[0].label;}}catch(e){}
+    return r;};
+  /* ---- wiring ---- */
+  document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;
+    if(t.closest('#td83Add')){const A=rows();A.push(clean({label:A.length?'':g('m.beh')}));putRows(A);renderAll();const tr=q('#td83Tbl tbody tr[data-k="'+(A.length-1)+'"] [data-f="label"]');if(tr)tr.focus();return;}
+    if(t.closest('#td83Tick')){const A=rows(),n=tickFromPlan(A);if(n)putRows(A);renderAll();
+      if(window.nbhUI&&nbhUI.toast)nbhUI.toast(n?'Ticked '+n+' plan '+(n===1?'part':'parts')+' for the targets that share the plan\'s function.':(planFn()?'Nothing to tick: the plan has no further part for the targets that share its function.':'Choose the plan\'s function first.'),{kind:n?'ok':'info'});return;}
+    const x=t.closest('.td83-x');if(x){const k=+x.dataset.k,go=()=>{const A=rows();A.splice(k,1);putRows(A);renderAll();};
+      if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove target '+(k+1)+' from this plan\'s list?',{ok:'Remove',danger:true}).then(y=>{if(y)go();});else go();return;}
+    const v=t.closest('#viewSeg button[data-view]');if(v&&(v.dataset.view==='final'||v.dataset.view==='setup'))setTimeout(renderAll,0);});
+  const onEdit=e=>{const t=e.target;if(!t)return;
+    if(t.closest&&t.closest('#td83Tbl tbody')&&t.dataset&&t.dataset.f){putRows(readTable());renderStatus();renderFinal();return;}
+    if(t.name==='tg.rows'){if(!self)renderAll();return;}
+    if(t.name==='m.fn')renderAll();};
+  document.addEventListener('input',onEdit);document.addEventListener('change',onEdit);
+  window.addEventListener('beforeprint',renderAll);
+  window.addEventListener('message',ev=>{if(ev.data&&ev.data.nbh==='collect')renderAll();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',renderAll);else renderAll();
+})();
+</script>
 
 <script>
 /* ===================== NBH student packet =====================
@@ -6493,6 +6642,25 @@ html.nbh-framed .toolbar :focus-visible{outline:2px solid var(--nbh-focus,#2f7fa
 html.nbh-framed #viewSeg button[data-nbh-fill]::after{border-color:rgba(24,46,67,.4)}
 html.nbh-framed #viewSeg button[aria-pressed=true][data-nbh-fill]::after{border-color:rgba(255,255,255,.6)}
 html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);color:var(--nbh-navy,#182e43)}
+/* v21.83 on an iPad (or any window 1194 px wide or less) the form's pinned toolbar folds to its view buttons on one line, a
+   44 px strip with a "Tools" button, while the user reads down the form or types in a field (the script below sets
+   html.nbh-fold); it unfolds on scrolling up, at the top, on a tap on the strip or on Tools. The space the bar gave up is
+   kept below it (--nbh-fold-gap), so nothing on the page moves. Screen only: paper never sees any of it. */
+#nbhFoldBtn{display:none}
+@media screen{
+  html.nbh-fold .toolbar{flex-wrap:nowrap!important;align-items:center!important;padding-top:3px!important;padding-bottom:3px!important;row-gap:0!important;margin-bottom:var(--nbh-fold-gap,0px)!important;animation:nbhFoldIn .18s ease-out}
+  html.nbh-fold .toolbar > :not(.nbh-fk):not(.nbh-fseg):not(#nbhFoldBtn),html.nbh-fold .toolbar .nbh-fk > :not(.nbh-fk):not(.nbh-fseg){display:none!important}
+  html.nbh-fold .toolbar .nbh-fk{display:flex!important;flex:1 1 auto!important;min-width:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;flex-wrap:nowrap!important}
+  html.nbh-fold .toolbar .nbh-fseg{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overflow-y:hidden!important;max-width:100%!important;min-width:0!important;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  html.nbh-fold .toolbar .nbh-fseg::-webkit-scrollbar{display:none}
+  html.nbh-fold .toolbar .nbh-fseg > *,html.nbh-fold .toolbar #viewSeg.nbh-fseg > *{flex:0 0 auto!important;white-space:nowrap!important;height:36px!important;min-height:36px!important;padding-top:0!important;padding-bottom:0!important}
+  html.nbh-fold .toolbar #nbhFoldBtn{display:inline-flex!important;align-items:center;flex:0 0 auto;margin:0 0 0 8px;height:38px!important;min-height:38px!important;padding:0 14px!important;font-weight:600;white-space:nowrap}
+  html.nbh-unfolding .toolbar{animation:nbhUnfold .2s ease-out}
+}
+@keyframes nbhFoldIn{from{opacity:.55;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes nbhUnfold{from{-webkit-clip-path:inset(0 0 var(--nbh-fold-d,0px) 0);clip-path:inset(0 0 var(--nbh-fold-d,0px) 0)}to{-webkit-clip-path:inset(0);clip-path:inset(0)}}
+@media (prefers-reduced-motion:reduce){html.nbh-fold .toolbar,html.nbh-unfolding .toolbar{animation:none!important}}
+@media print{#nbhFoldBtn{display:none!important}}
 </style>
 <script id="nbh-ui">
 /* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
@@ -6671,6 +6839,117 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
     if (mq.addEventListener) mq.addEventListener('change', all); else if (mq.addListener) mq.addListener(all);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', all); else all();
     window.addEventListener('load', function(){ setTimeout(all, 300); });
+  })(); } catch (e) {}
+  /* v21.83 the pinned toolbar folds on an iPad. On a touch screen, or in a window 1194 px wide or less, a swipe down the form
+     (more than 40 px) folds the toolbar to its view buttons on one line plus a "Tools" button (the CSS above, html.nbh-fold);
+     a swipe up, the top of the form, a tap on the strip or on Tools unfold it. A tap in a text field, text area or list on a
+     touch screen folds it while the keyboard is up, and leaving the field unfolds it. Only a person's own swipe, wheel or
+     key scroll folds it, and only a tap focuses into the fold (a script's scroll or focus does not), so nothing a script
+     clicks in the toolbar is ever hidden from it. The height the bar gives up is added below it, so the page does not
+     move; a fold waits until the form is far enough down for that space to be out of sight (a field tapped near the top
+     folds the bar once the page has come up under it, as the keyboard opens or the user scrolls). Another pinned bar
+     sitting under the toolbar (MT-1's timer) moves up with it. Printing unfolds it; the fold rules are screen only. On a
+     desktop with a mouse in a window wider than 1194 px (the workstation's window, whatever the form's frame) it never folds. */
+  try { if (window.matchMedia) (function(){
+    var R = document.documentElement, mq = matchMedia('(pointer:coarse), (max-width:1194px)'), touch = matchMedia('(pointer:coarse)');
+    var FIELD = 'textarea,select,input:not([type=checkbox]):not([type=radio]):not([type=button]):not([type=submit]):not([type=reset]):not([type=range]):not([type=color]):not([type=file]):not([type=hidden]):not([type=image]),[contenteditable=""],[contenteditable="true"]';
+    var tb = null, seg = null, btn = null, st = 0, T = 0, D = 0, S = 0, need = 0, lastY = 0, acc = 0, gest = 0, tapT = 0, pend = 0, raf = 0, ut = 0, W = window.innerWidth, moved = [];
+    /* the window's width, not the form's frame: a form in the workstation on a wide desktop sits in a narrower frame */
+    function wide(){ var w = window.innerWidth; try { if (window.top !== window) w = Math.max(w, window.top.innerWidth || 0); } catch (e) { w = Math.max(w, window.outerWidth || 0); } return w; }
+    function on(){ return !window.__nbhNoFold && (touch.matches || (mq.matches && wide() <= 1194)); }
+    function field(e){ return !!(e && e.nodeType === 1 && e.matches && e.matches(FIELD) && !e.closest('.toolbar') && !e.disabled && !e.readOnly); }
+    function find(){
+      if (tb && tb.isConnected && seg && seg.isConnected && btn && btn.isConnected) return tb;
+      tb = null; seg = document.getElementById('viewSeg') || document.querySelector('.toolbar [role="tablist"],.nbh-toolbar [role="tablist"]');
+      var t = seg && seg.closest('.toolbar'); if (!t) return null;
+      btn = document.getElementById('nbhFoldBtn');
+      if (!btn) {
+        btn = document.createElement('button'); btn.type = 'button'; btn.id = 'nbhFoldBtn'; btn.className = 'noprint'; btn.textContent = 'Tools';
+        btn.title = 'Show the whole toolbar'; btn.setAttribute('aria-expanded', 'true');
+        btn.addEventListener('click', function(ev){ ev.stopPropagation(); open(true); });
+        t.addEventListener('click', function(ev){ if (st && !ev.target.closest('button,a,input,select,textarea,label,[role="tab"]')) open(true); });
+      }
+      if (btn.parentNode !== t) t.appendChild(btn);
+      return tb = t;
+    }
+    function mark(){ seg.classList.add('nbh-fseg'); for (var e = seg.parentElement; e && e !== tb; e = e.parentElement) e.classList.add('nbh-fk'); }
+    function nextIn(t){ for (var e = t.nextElementSibling; e; e = e.nextElementSibling) { var c = getComputedStyle(e); if (c.display !== 'none' && (c.position === 'static' || c.position === 'relative')) return e; } return null; }
+    function under(t, full){
+      /* other pinned bars whose top is the toolbar's full height */
+      var out = [], all = document.body.getElementsByTagName('*');
+      for (var i = 0; i < all.length; i++) { var e = all[i]; if (e === t || t.contains(e)) continue; var c = getComputedStyle(e);
+        if (c.position === 'sticky' && Math.abs(parseFloat(c.top) - full) <= 2) out.push(e); }
+      return out;
+    }
+    function fold(why){
+      var t = find(); if (!t || st || !on()) return false;
+      var cs = getComputedStyle(t), pos = cs.position; if (pos !== 'sticky' && pos !== 'fixed') return false;
+      var y = window.scrollY || 0, full = t.offsetHeight, mb0 = parseFloat(cs.marginBottom) || 0;
+      S = parseFloat(cs.top) || 0;
+      if (pos === 'sticky') { var sp = t.style.position; t.style.position = 'relative'; T = t.getBoundingClientRect().top + y; t.style.position = sp; }
+      /* a page too short to scroll the bar's spare height out of sight: a field tapped there folds the bar at once and the
+         page comes up to the strip (more of the form above the keyboard); elsewhere a fold waits until it is out of sight */
+      var my = Math.max(0, (document.scrollingElement || R).scrollHeight - window.innerHeight), shortP = why === 'focus' && pos === 'sticky' && need && my + S < T + need;
+      if (pos === 'sticky' && need && y + S < T + need && !shortP) { if (why === 'focus') pend = 1; return false; }
+      var nx = pos === 'sticky' ? nextIn(t) : null, n0 = nx ? nx.getBoundingClientRect().top + y : 0, bars = pos === 'sticky' ? under(t, full) : [];
+      mark(); R.classList.add('nbh-fold');
+      var h = t.offsetHeight; D = full - h; need = D;
+      shortP = why === 'focus' && pos === 'sticky' && my + S < T + D;
+      if (D < 8 || (pos === 'sticky' && y + S < T + D && !shortP)) { R.classList.remove('nbh-fold'); if (why === 'focus' && D >= 8) pend = 1; return false; }
+      if (pos === 'sticky') {
+        /* the space given up stays below the bar (out of sight above the screen), so the page under the finger stays put;
+           measured on the page, not the screen (Safari does not hold the scroll still when the page above it changes),
+           and corrected for a margin the next block shared with the bar */
+        var keep = shortP ? Math.max(0, Math.min(D, y + S - T)) : D, want = n0 - (D - keep), g = mb0 + keep;
+        R.style.setProperty('--nbh-fold-gap', g + 'px');
+        for (var i = 0; nx && i < 2; i++) { var d = nx.getBoundingClientRect().top + (window.scrollY || 0) - want; if (Math.abs(d) < 0.5) break; g = Math.max(0, g - d); R.style.setProperty('--nbh-fold-gap', g + 'px'); }
+      }
+      moved = bars.map(function(e){ var w = e.style.getPropertyValue('top'), p = e.style.getPropertyPriority('top'); e.style.setProperty('top', (S + h) + 'px', 'important'); return [e, w, p]; });
+      R.style.setProperty('--nbh-fold-d', D + 'px');
+      st = why === 'focus' ? 2 : 1; acc = 0; pend = 0; btn.setAttribute('aria-expanded', 'false');
+      /* the view that is open stays in sight on the strip */
+      var a = seg.querySelector('[aria-pressed="true"],[aria-selected="true"],.active,.on');
+      if (a && seg.scrollWidth > seg.clientWidth) seg.scrollLeft = Math.max(0, a.offsetLeft - seg.offsetLeft - (seg.clientWidth - a.offsetWidth) / 2);
+      return true;
+    }
+    function open(manual){
+      if (!st) return; st = 0; acc = 0;
+      R.classList.remove('nbh-fold'); R.style.removeProperty('--nbh-fold-gap');
+      moved.forEach(function(m){ if (m[1]) m[0].style.setProperty('top', m[1], m[2]); else m[0].style.removeProperty('top'); }); moved = [];
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+      if (tb && tb.isConnected) { R.classList.remove('nbh-unfolding'); void tb.offsetWidth; R.classList.add('nbh-unfolding'); clearTimeout(ut); ut = setTimeout(function(){ R.classList.remove('nbh-unfolding'); }, 260); }
+      if (manual && tb) { var f = tb.querySelector('button:not(#nbhFoldBtn):not([disabled])'); if (manual === true && btn === document.activeElement && f) try { f.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    function tick(){
+      raf = 0; var y = window.scrollY || 0, dy = y - lastY; lastY = y;
+      if (!on()) { if (st) open(); return; }
+      if (st === 2) return;
+      if (pend) { if (field(document.activeElement) && touch.matches) { if (y + S >= T + need) fold('focus'); } else pend = 0; return; }
+      if (st === 1) {
+        if (y + S < T + D + 1) { open(); return; }
+        acc = dy < 0 ? Math.min(acc, 0) + dy : 0;
+        if (acc < -30) open();
+        return;
+      }
+      acc = dy > 0 ? Math.max(acc, 0) + dy : 0;
+      if (acc > 40 && Date.now() - gest < 1500) fold('scroll');
+    }
+    window.addEventListener('scroll', function(){ if (!raf) raf = requestAnimationFrame(tick); }, { passive: true });
+    var now = function(){ gest = Date.now(); };
+    document.addEventListener('touchstart', function(){ tapT = gest = Date.now(); }, { passive: true, capture: true });
+    document.addEventListener('touchmove', now, { passive: true, capture: true });
+    document.addEventListener('wheel', now, { passive: true, capture: true });
+    document.addEventListener('keydown', function(e){ if (/^(PageDown|PageUp|ArrowDown|ArrowUp|End|Home| )$/.test(e.key) && !field(e.target)) now(); }, { passive: true, capture: true });
+    document.addEventListener('focusin', function(e){
+      if (!touch.matches || !on() || !field(e.target) || Date.now() - tapT > 1200) return;
+      if (st === 1) st = 2; else if (!st) fold('focus');
+    }, true);
+    document.addEventListener('focusout', function(){ setTimeout(function(){ if (!field(document.activeElement)) { pend = 0; if (st === 2) open(); } }, 80); }, true);
+    window.addEventListener('resize', function(){ if (window.innerWidth !== W) { W = window.innerWidth; need = 0; open(); } }, { passive: true });
+    window.addEventListener('beforeprint', function(){ open(); });
+    var ch = function(){ need = 0; if (!on()) open(); };
+    if (mq.addEventListener) mq.addEventListener('change', ch); else if (mq.addListener) mq.addListener(ch);
+    U.fold = function(on){ return on === false ? (open(), false) : on === true ? fold('focus') : st; };
   })(); } catch (e) {}
   window.nbhUI = U;
 })();
