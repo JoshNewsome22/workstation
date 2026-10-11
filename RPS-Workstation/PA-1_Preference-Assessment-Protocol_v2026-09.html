@@ -2498,16 +2498,23 @@ function renderSummary(){
 
 /* ================= figures ================= */
 const INK='#182e43',TEAL='#76a2a3',FLAG='#9b4e15',MUTED='#54676f';
+/* full check: the value after a bar must fit inside the chart. With a fixed right margin of 44, a two-value label at a full
+   bar ("100% / 93%") ran past the chart's right edge and was cut, on screen and on paper. The margin now grows just
+   enough for the longest label at the end of its bar (its width estimated generously for the 8.5-unit .val text). */
+const barValTxt=r=>(r.v==null?'':r.txt||(r.v+'%'))+(r.v2!=null?' / '+r.v2+'%':'');
+const barValW=t=>[...String(t)].reduce((a,c)=>a+(/[0-9]/.test(c)?.6:c==='%'?.92:/[\s\/.,:;()]/.test(c)?.34:/[A-Z]/.test(c)?.72:.6),0)*8.5;
 function barFig(title,rows,opts={}){
   if(!rows.length)return '';
-  const max=opts.max||100,W=560,rowH=17,L=150,R=44,T=10,H=T+rows.length*rowH+8,pw=W-L-R;
+  const max=opts.max||100,W=560,rowH=17,L=150,T=10,H=T+rows.length*rowH+8;
+  const R=rows.reduce((m,r)=>{const fr=Math.max(0,r.v||0,r.v2||0)/max,need=barValW(barValTxt(r))+4+3;
+    return Math.min(200,fr>0?Math.max(m,Math.ceil(W-L-(W-L-need)/Math.min(1,fr))):Math.max(m,Math.ceil(need)));},44),pw=W-L-R;
   let s=`<h3>${title}</h3><svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
   [25,50,75,100].filter(v=>v<=max).forEach(v=>{const x=L+v/max*pw;s+=`<line class="gridv" x1="${x}" x2="${x}" y1="${T}" y2="${H-8}"/>`;});
   rows.forEach((r,i)=>{const y=T+i*rowH,w=Math.max(0,(r.v||0))/max*pw;const col=r.col||(r.cat==='HP'?INK:r.cat==='MP'?TEAL:r.cat==='LP'?'#c9b8a8':MUTED);
     const w2=r.v2!=null?r.v2/max*pw:0;
     s+=`<text class="lbl" x="${L-6}" y="${y+11}" text-anchor="end">${esc(r.label)}</text><rect x="${L}" y="${y+2}" width="${w}" height="${rowH-5}" fill="${col}"/>`;
     if(r.v2!=null)s+=`<rect x="${L}" y="${y+2}" width="${w2}" height="${(rowH-5)/2}" fill="${FLAG}" opacity=".85"/>`;
-    s+=`<text class="val" x="${L+Math.max(w,w2)+4}" y="${y+11}">${r.v==null?'':r.txt||(r.v+'%')}${r.v2!=null?' / '+r.v2+'%':''}</text>`;});
+    s+=`<text class="val" x="${L+Math.max(w,w2)+4}" y="${y+11}">${barValTxt(r)}</text>`;});
   if(opts.refline!=null){const x=L+opts.refline/max*pw;s+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${H-8}" stroke="${FLAG}" stroke-width="1.2" stroke-dasharray="4 3"/>`;}
   s+=`<line class="axis" x1="${L}" x2="${L}" y1="${T}" y2="${H-8}"/></svg>`;
   if(opts.cap)s+=`<p class="cap">${opts.cap}</p>`;return s;}
@@ -4265,7 +4272,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -4273,7 +4280,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -4281,6 +4288,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

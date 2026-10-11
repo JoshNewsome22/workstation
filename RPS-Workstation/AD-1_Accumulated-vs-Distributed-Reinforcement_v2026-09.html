@@ -484,6 +484,9 @@ table.log th{font-size:11px;padding:4px 4px;vertical-align:bottom;line-height:1.
 table.log td{padding:3px 3px}
 table.log td input,table.log td select{font-size:12.5px;padding:2px 1px}
 table.log td.calc{font-size:12px}
+/* full check: on a screen narrower than the session log (an iPad in portrait) the log scrolls inside its own box, as
+   DD-1's sheet does, instead of pushing the page sideways; on paper the box is a plain block */
+@media screen{.log-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}
 .cmp{max-width:none;margin:8px 0 14px;padding-left:18px;font-size:13.5px}
 .cmp li{margin:5px 0}
 .proc-steps{max-width:none;font-size:13.5px;padding-left:22px}
@@ -1103,9 +1106,9 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   <h2 class="nbh-band">Efficacy Data: Session Log, Graph, and Comparison</h2>
   <p class="lede">One row per session, in the order run. Record work time and total time separately, so rate can be read on work time and cost on total time. The graph and the comparison below update from the rows.</p>
   <p><button type="button" class="tool wk-go" data-go="dis">See a distributed and an accumulated session run in the walkthrough &rarr;</button></p>
-  <table class="log"><caption id="sessCap">Opportunities = tasks, instructions or trials presented. Responses = the work unit (completions, compliance, or independent correct). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).</caption>
+  <div class="log-wrap" tabindex="0" role="region" aria-label="Session log"><table class="log"><caption id="sessCap">Opportunities = tasks, instructions or trials presented. Responses = the work unit (completions, compliance, or independent correct). Resumes = mean seconds from removal of the reinforcer to the next response (distributed and intermediate sessions).</caption>
     <thead><tr><th style="width:3%">#</th><th style="width:9%">Date</th><th style="width:4%">Phase</th><th style="width:13%">Condition</th><th class="num" id="thOpp">Opp.</th><th class="num" id="thResp">Resp.</th><th class="num">Prob. beh.</th><th class="num">Work (min)</th><th class="num">Access (s)</th><th class="num">Total (min)</th><th class="num">Resumes (s)</th><th class="num">Rate /work min</th><th class="num">%</th><th class="num">Prob. beh. /min</th><th class="num">Resp. /total min</th><th style="width:3%"></th></tr></thead>
-    <tbody id="tbSess"></tbody></table>
+    <tbody id="tbSess"></tbody></table></div>
   <div class="rowbtns"><button class="tool" data-add="tbSess">Add row</button><button class="tool" id="btnSess5">Add 5 rows</button></div>
   <div class="grid g3" style="align-items:end">
     <div><label class="f">Graph</label><select name="g_measure" id="gMeasure"><option value="rate">Responses per minute of work</option><option value="pct">Percentage (responses / opportunities)</option><option value="pb">Problem behavior per minute of session</option><option value="eff">Responses per minute of total session</option><option value="tot">Total session minutes</option></select></div>
@@ -2716,7 +2719,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -2724,7 +2727,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -2732,6 +2735,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

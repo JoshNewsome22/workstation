@@ -1329,7 +1329,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='CN-1'?d.form:'';
     const next=other?null:fromFile(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved CN-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form CN-1. Nothing was changed.':'That file could not be read as a saved CN-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;cur=0;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
+    /* v21.87 a file opens on its last note (the newest; new notes are added at the end), not the first */
+    const prev=S;S=next;cur=Math.max(0,((next&&next.notes)||[]).length-1);try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved CN-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
@@ -2131,7 +2132,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -2139,7 +2140,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -2147,6 +2148,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

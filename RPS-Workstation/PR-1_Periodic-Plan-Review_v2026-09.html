@@ -2378,6 +2378,13 @@ function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.beh
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
   try{k=pr83Fill(f||{});if(k){pr83Render();const el=document.querySelector('#pr83Tbl [data-f]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){k=0;}
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the results by target from Forms TD-1 and DD-1'].filter(Boolean).join('; ')};};}
+/* v21.87 the exit criteria from the goals (Form GB-1): an empty Behavior criterion takes the reduction goals and an empty Replacement
+   criterion the acquisition goals, as GB-1 writes them (until now the goals reached the review only as DD-1's aims) */
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
+  try{const g=(f&&f.goals)||{},T=x=>String(x==null?'':x).trim(),put=(m,list)=>{const e=document.querySelector('[data-m="'+m+'"]'),t=(list||[]).map(x=>T(x&&x.text)).filter(Boolean).join('\n');
+      if(!e||!t||T(e.value))return;e.value=t;e.dispatchEvent(new Event('input',{bubbles:true}));k++;};
+    put('xBeh',g.red);put('xRep',g.acq);}catch(e){}
+  if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the exit criteria from the goals (Form GB-1)'].filter(Boolean).join('; ')};};}
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   const A=pr83Tg().filter(x=>prT(x.name));if(!A.length)return r;const o=r&&typeof r==='object'?r:{};
   const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
@@ -3061,7 +3068,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -3069,7 +3076,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -3077,6 +3084,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

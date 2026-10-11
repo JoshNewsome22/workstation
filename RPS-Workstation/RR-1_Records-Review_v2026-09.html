@@ -904,6 +904,10 @@ table.rl-t td.q{font-family:var(--serif);font-size:12px}
 table.rl-t .rl-c{display:block;font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--ink-soft)}
 #incTbl td.rl-inc{text-align:center;vertical-align:middle;padding:1px 2px}
 #incTbl td.rl-inc button.tool{font-size:10.5px;padding:2px 6px;min-height:24px;white-space:nowrap;max-width:100%}
+/* full check: at iPad portrait the Ledger column is narrower than "Add to ledger" (its text reads at 13 px there), and the
+   label ran past its button and was cut by the cell ("Add to ledge"); a label too long for its line now wraps inside
+   its button, which stays a 44 px target on a touch screen */
+@media screen{#incTbl td.rl-inc button.tool{white-space:normal;line-height:1.2;overflow-wrap:normal}}
 @media screen and (max-width:600px){
   .rl-grid{grid-template-columns:minmax(0,1fr)}
   .rl-wide{grid-column:auto}
@@ -2655,7 +2659,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -2663,7 +2667,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -2671,6 +2675,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

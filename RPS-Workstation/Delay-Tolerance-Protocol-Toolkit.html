@@ -797,6 +797,16 @@ td input,td select{max-width:100%}
   .panel table caption,.panel label.f{break-after:avoid;page-break-after:avoid}
   input[type=date].nbh-date-empty::-webkit-datetime-edit,input[type=date][value=""]::-webkit-datetime-edit{visibility:hidden}
 }
+/* full check: on paper a table's figures sat in 14 px fields with the screen's 8 px side padding, which left "16.7" short
+   of room in Progress Monitoring's % SC column, so it printed as "16.1", "0.25" in PB / min as "0.2", and "83.3" in the
+   generalization probes as "83." (a field's text is clipped at its box). On paper a table's fields are 12 px with a
+   narrower padding, each figure has room for five characters ("100.0", "12.25") and the progress table's phase for its
+   usual names ("TR training", "Delay fading"); every table still fits the width of the page. */
+@media print{
+  .panel td input:not([type=checkbox]):not([type=radio]),.panel td select{font-size:12px;padding-left:3px;padding-right:3px}
+  .panel td input[type=number]{min-width:calc(5ch + 8px)}
+  #tbProg td:nth-child(3) input{min-width:7.5em}
+}
 </style>
 </head>
 <body>
@@ -2892,7 +2902,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -2900,7 +2910,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -2908,6 +2918,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);
@@ -4420,5 +4431,12 @@ a{text-underline-offset:2px}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
+<script id="dt1-due">
+/* v21.87 what is due on this form, for the workstation's Today and the bar: each maintenance probe with a Due date and no Done
+   date. Until now the shared scan read every date of the probe table as due, the Done dates too, named by the table's header */
+window.__nbhDue=function(){var out=[];document.querySelectorAll('#tbMaint tr').forEach(function(tr){var c=tr.querySelectorAll('input');if(c.length<3)return;
+  var iv=String(c[0].value||'').trim(),due=String(c[1].value||'').trim(),done=String(c[2].value||'').trim();
+  if(due&&!done)out.push({what:'Maintenance probe'+(iv?' ('+iv+')':''),date:due});});return out;};
+</script>
 </body>
 </html>

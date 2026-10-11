@@ -897,6 +897,20 @@ td input,td select{max-width:100%}
   #sumMetrics,#ioaOut > .metrics{break-inside:avoid;page-break-inside:avoid}
   .metric,.verdict{break-inside:avoid;page-break-inside:avoid}
 }
+/* full check: on paper the long notes of the session log, printed as text, took room from the Method column, which then
+   printed "Whole interval" as "Whole interva" (a field's text is clipped at its box). On paper the log's text is 11.5 px
+   (as its headings), the cells keep a narrower padding and each short field has room for its longest usual entry: the
+   date (10/12/2026), the method ("Partial interval"; "Momentary time sampling" prints as text and wraps), the ratio, the
+   length ("15 min"), the intervals and the percentage ("100.0"); the table still fits the width of the page. */
+@media print{
+  #sessTbl{font-size:11.5px}
+  #sessTbl th,#sessTbl td{padding-left:4px;padding-right:4px}
+  #sessTbl td input[data-f="d"]{min-width:5.6em}
+  #sessTbl td input[data-f="m"]{min-width:7.6em}
+  #sessTbl td input[data-f="r"],#sessTbl td input[data-f="n"]{min-width:3em}
+  #sessTbl td input[data-f="len"]{min-width:4.2em}
+  #sessTbl td input[data-f="p"]{min-width:3.4em}
+}
 </style>
 <style id="mt1-touch-css">
 /* v21.44 (A6): on a touch screen every target on the live sheet is at least 44 px, with room between targets.
@@ -2351,7 +2365,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
    changes the record counts as typing does, and the bridge's silent save (the workstation's Autosave, a case save) is
    not the user's Save, so it never clears the mark. An iPad ignores the leave warning; the safety copy covers it there. */
 (function(){
-  var dirty = false;
+  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */
   function isField(t){ return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT') && t.type !== 'file'; }
   function saveButton(){
     return document.querySelector('#saveBtn,#btnSave,#dl-json') ||
@@ -2359,7 +2373,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   }
   document.addEventListener('input', function(e){ if (isField(e.target)) dirty = true; }, true);
   document.addEventListener('change', function(e){
-    if (e.target && e.target.type === 'file') { setTimeout(function(){ dirty = false; saved(); paint(); }, 900); return; }   /* a file just opened is the saved state */
+    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }   /* a file opened with Open data is the saved state; a photo, a picture or another form's file read in is a change (v21.86) */
     if (isField(e.target)) dirty = true;
     paint();
   }, true);
@@ -2367,6 +2381,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */
     var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;
     if (b.id === 'nbhSaveQuick') return;
+    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
     else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
   }, true);

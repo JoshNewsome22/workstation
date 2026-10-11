@@ -436,6 +436,8 @@
     if (D.getElementById('nbh-autosave-css')) return;
     var s = D.createElement('style'); s.id = 'nbh-autosave-css'; s.setAttribute('data-nbh-screen', '');
     s.textContent = '@media print{.nbh-as-ui,.nbh-as-guide{display:none!important}}' +
+      /* v21.87 room under the page while the offer is shown, so the end of every view (its Next button) can scroll above it */
+      '@media screen{html.nbh-as-room body{padding-bottom:var(--nbh-as-room,0px)!important}}' +
       '.nbh-as-dlg{position:fixed;right:16px;bottom:16px;z-index:2147483000;max-width:480px;width:calc(100% - 32px);box-sizing:border-box;max-height:70vh;overflow:auto;border:1px solid #c9d3da;border-radius:6px;padding:14px 16px;color:#16242e;background:#fff;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.18)}' +
       '.nbh-as-dlg h2{font-size:17px;margin:0 0 8px}.nbh-as-dlg ul{list-style:none;padding:0;margin:10px 0}' +
       '.nbh-as-dlg li{border-top:1px solid #e3e8ec;padding:9px 0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}' +
@@ -582,8 +584,10 @@
       if (unsaved() && W.nbhUI && W.nbhUI.confirm) W.nbhUI.confirm('Restore the safety copy?\nWhat is on this form now is replaced by it.', { ok: 'Restore' }).then(function (y) { if (y) go(); });
       else go();
     });
-    function close() { dl.remove(); }
-    D.body.appendChild(dl);
+    function room() { var h = D.documentElement; try { if (dl.isConnected) { h.style.setProperty('--nbh-as-room', (dl.offsetHeight + 32) + 'px'); h.classList.add('nbh-as-room'); } } catch (e) {} }
+    function close() { dl.remove(); if (!D.getElementById('nbhAsDlg')) D.documentElement.classList.remove('nbh-as-room'); }
+    D.body.appendChild(dl); room();
+    try { W.addEventListener('resize', room); } catch (e) {}
   }
   function restore(r, id) {
     var b = B(); if (!b) return;
