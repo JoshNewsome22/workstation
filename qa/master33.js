@@ -20,9 +20,9 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   const [dl]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.click('#saveCase')]); await dl.saveAs(cf);
   await page.goto(idx,{waitUntil:'load'}); await L.sleep(600);
   await page.setInputFiles('#caseFile',cf);
-  await page.waitForFunction(n=>Object.keys(state.frames).length+Object.keys(state.pending).length>=n,L.forms().length,{timeout:240000});   /* v21.61 a form not loaded yet is listed (pending) */
+  await page.waitForFunction(n=>new Set(Object.keys(state.frames).concat(Object.keys(state.pending))).size>=n,L.forms().length,{timeout:240000});   /* v21.61 a form not loaded yet is listed (pending) */
   await page.waitForFunction(()=>$('#openCase').textContent==='Open case',null,{timeout:240000}); await L.sleep(4000);
-  const restored=await page.evaluate(()=>Object.keys(state.frames).length+Object.keys(state.pending).length);
+  const restored=await page.evaluate(()=>new Set(Object.keys(state.frames).concat(Object.keys(state.pending))).size);   /* a form loaded and not filled yet is in both */
   await page.evaluate(()=>{ALL.forEach(([id])=>state.ticked[id]=true);renderRail();});
   await page.evaluate(()=>{wsUI.confirm=async()=>true;});   /* v21.78 the shell's questions (forms not loaded yet: include them) answered yes */
   const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
