@@ -51,12 +51,13 @@ label.ck input{width:auto!important;margin:0}
 #noteOut .cn-sig span.bl{display:inline-block;min-width:220px;border-bottom:1px solid #111;height:18px;margin-left:4px;padding:0 4px}
 #noteOut .cn-foot{margin-top:10px;font-size:10.5px;color:#444;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 #noteOut .cn-empty{color:#5b6770;font-style:italic}   /* v21.34a: 4.5:1 on white */
-body.view-note .only-log,body.view-note .only-guide{display:none}
-body.view-log .only-note,body.view-log .only-guide{display:none}
-body.view-guide .only-note,body.view-guide .only-log{display:none}
+body.view-note .only-log,body.view-note .only-guide,body.view-note .only-svc{display:none}
+body.view-log .only-note,body.view-log .only-guide,body.view-log .only-svc{display:none}
+body.view-guide .only-note,body.view-guide .only-log,body.view-guide .only-svc{display:none}
+body.view-svc .only-note,body.view-svc .only-log,body.view-svc .only-guide{display:none}
 @media (max-width:640px){table.rt.wide{min-width:760px}}
 @media print{
-  .only-note,.only-log,.only-guide{display:block!important}
+  .only-note,.only-log,.only-guide,.only-svc{display:block!important}
   .sheet{box-shadow:none}
   #noteOut{border:0;padding:0;break-before:page}
   #noteOut h4{break-after:avoid}
@@ -72,3 +73,34 @@ table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0
 .rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
 .rowDel:hover{background:#fbe9e5;color:#a8321e}
 @media print{td.nx,th.nx,.rowDel{display:none}}
+
+/* ---- v21.85 (R): the service log ---- */
+.svc-gp[hidden]{display:none}
+.metric.m-ok{border-left-color:#2F6B37}.metric.m-mid{border-left-color:#9B4E15}
+#svcOut{border:1px solid var(--rule-2);background:#fff;padding:18px 22px;margin-top:6px;font-family:var(--sans);font-size:12.5px;line-height:1.45;color:#111}
+#svcOut .sl-title{font:700 18px var(--serif,Georgia,serif);margin:0 0 4px;color:var(--nbh-navy,#182e43)}
+#svcOut .sl-head{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:3px 18px;border-top:1.5px solid #111;border-bottom:1.5px solid #111;padding:6px 0;margin:6px 0 10px}
+#svcOut .sl-head div b{color:#444;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em;margin-right:4px}
+#svcOut table.sl-t{border-collapse:collapse;width:100%;margin:4px 0}
+#svcOut table.sl-t th,#svcOut table.sl-t td{border:1px solid #999;padding:3px 6px;text-align:left;font-size:12px;vertical-align:top}
+#svcOut table.sl-t th{background:#eee;font-weight:600}
+#svcOut table.sl-t td.num{text-align:center;font-variant-numeric:tabular-nums;white-space:nowrap}
+#svcOut table.sl-t tr.open{cursor:pointer}
+#svcOut table.sl-t tr.open:hover td{background:#F4F8F7}
+#svcOut table.sl-t tr.tot td{background:#f4f4f4;font-weight:600}
+#svcOut .sl-sum{margin:8px 0 0}
+#svcOut .sl-att{margin-top:14px;font-size:11.5px}
+#svcOut .sl-sig{display:flex;flex-wrap:wrap;gap:6px 30px;margin-top:18px;align-items:flex-end}
+#svcOut .sl-sig span.bl{display:inline-block;min-width:240px;border-bottom:1px solid #111;height:18px;margin-left:4px;padding:0 4px}
+#svcOut .sl-foot{margin-top:10px;font-size:10.5px;color:#444;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#svcOut .cn-empty{color:#5b6770;font-style:italic}
+@media (max-width:640px){#svcOut{padding:12px 10px;overflow-x:auto}#svcOut table.sl-t{min-width:600px}}
+@media print{
+  #svcOut{border:0;padding:0;break-before:page}
+  #svcOut table.sl-t tr{break-inside:avoid}
+  #svcOut .sl-sig,#svcOut .sl-att{break-inside:avoid}
+  /* the service log alone when printed from its button */
+  body.cn-svc-only .nbh-mast,body.cn-svc-only .toolbar,body.cn-svc-only .nbh-print-head,body.cn-svc-only .nbh-print-foot,body.cn-svc-only section:not(.only-svc),body.cn-svc-only .only-svc > *:not(#svcOut),body.cn-svc-only .nbh-pagenav{display:none!important}
+  body.cn-svc-only .sheet{width:auto;margin:0;padding:0}
+  body.cn-svc-only #svcOut{break-before:auto;margin:0}
+}
