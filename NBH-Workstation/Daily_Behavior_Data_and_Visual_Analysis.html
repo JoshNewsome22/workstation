@@ -6801,6 +6801,2640 @@ if(!document.getElementById("dd-v2182-css")){const st=document.createElement("st
     ".dd-pr1-k{display:inline-block;padding:0 4px;border:1px solid #254657;border-radius:3px;color:#254657;font-size:10.5px;font-weight:700;margin-right:3px}"+
     "@media print{.nbh-lang-flag{display:none!important}}";document.head.appendChild(st);}
 </script>
+<script id="dd-qr">
+/* qrcode-generator (tools/vendor/qrcode-generator/qrcode.js, MIT, Kazuhiko Arase), inlined (as in Form IA-1) so the QR code of a staff link is made here, offline (v21.85) */
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+(function (factory) {
+  if (typeof define === 'function' && define.amd) {
+      define([], factory);
+  } else if (typeof exports === 'object') {
+      module.exports = factory();
+  }
+}(function () {
+    return qrcode;
+}));
+</script>
+<script id="dd-v2185">
+/* ===================================================================================================
+   v21.85 staff phones. A teacher or paraprofessional records the student's behavior on their own phone and it arrives
+   here, with no paper and no Google Sheet. Each person gets a link (shown as a QR code, Copy, Share) to staff-data.html
+   beside the forms. After its # (never sent to the website) the link carries this file's reply box (its address, id and
+   public key), the student's initials (never the name or the ID), the targets with how each is measured, the settings
+   to choose from and who the link is for. The phone keeps every tap until it is sent; Send locks the entry on the phone
+   for this file alone (ECDH P-256, HKDF-SHA-256, AES-GCM-256, as Form IA-1's respondent pages) and leaves it in the box.
+   This form collects (on opening, every five minutes while open, Collect now, and window.__nbhStaffCollect for the
+   caseload's refresh), unlocks each entry with the private key only this file holds and places it on its day's row as
+   a typed value is placed: a count added to the day's total, each episode to the episode log, + and - combined into the
+   day's percent by their opportunities (row.basis, as the live recorder keeps it); who sent it in Collected by
+   (row.by), the assent and the setting in the day's details where the day has none, the note after the day's notes.
+   Each entry is taken once (its id is kept), and the box is this file's own: registered once, carried in the saved file.
+   A day and target the linked Google Sheet writes (ddGsOwns) is HELD, not added on top. The sheet wins for its days and
+   writes its number back at every reading, and the team's sheet most likely counts the same occurrences the phone
+   counted, so a phone's number added to it would count them twice. Such an entry waits on the Staff phones panel with a
+   plain note (add it on the sheet if the sheet does not have it) and is placed by itself once the sheet no longer writes
+   that day (set aside or unlinked). Held the same way: a day whose percent was typed with no opportunities behind it, an
+   episode that overlaps one already logged, a record kept in intervals, a target taken off or now measured another way,
+   a date after tomorrow, and (until Place it) a link this file did not make or has stopped.
+   =================================================================================================== */
+"use strict";
+const ST_EVERY=5*60*1000,ST_DEV="nbh.dd1.staff";
+const ST_KIND=m=>(m==="count"||m==="rate")?"n":(m==="duration"||m==="pdur")?"d":(m==="opps"||m==="trials")?"p":(m==="interval"||m==="mts"||m==="pint"||m==="wint")?"i":"";
+const ST_KW={n:"count",d:"episodes timed",p:"+ / − of opportunities",i:"+ / − of intervals"};
+const ST_WHY={sheet:"the Google Sheet writes this day’s number for it, and the sheet wins for its days. If the sheet does not count these, add them on the sheet; this is placed by itself once the sheet no longer writes that day",
+  typed:"the day’s percent was typed with no opportunities behind it, so these cannot be combined with it",overlap:"an episode overlaps one already in the day’s episode log (two people may have timed the same episode)",
+  gone:"the target is no longer on the record",measure:"the target is now measured another way than the link records it",iv:"the record is kept in intervals; a phone’s day total goes into a record kept one total per day",
+  future:"it is dated after tomorrow",link:"it came through a link this file did not make (an older copy of the file?)",stopped:"it came through a link that was stopped"};
+let stLast="",stBusy=null,stCollecting=null,stAt=0,stOnSite=-1,stBoxSeen="",stMakeMsg="";
+const stCan=()=>!!(window.crypto&&crypto.subtle&&window.fetch&&window.TextEncoder);
+const stB64=u=>{let s="";for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");};
+const stUnb64=t=>{t=String(t||"").replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const b=atob(t),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+const stHex=u=>Array.from(u).map(x=>x.toString(16).padStart(2,"0")).join("");
+const stS=(v,n)=>typeof v==="string"?v.replace(/\s+/g," ").trim().slice(0,n||200):"";
+const stIso=v=>{if(!ddIsoOk(v))return false;const d=new Date(v+"T12:00:00");return !isNaN(d)&&localISO(d)===v;};
+const stPl=(n,a,b)=>n+" "+(n===1?a:(b||a+"s"));
+const stR2=v=>String(Math.round(v*100)/100);
+/* the device remembers the addresses typed here (as IA-1 remembers its reply box), never the box itself */
+function stDev(){try{const o=JSON.parse(localStorage.getItem(ST_DEV)||"{}");return o&&typeof o==="object"&&!Array.isArray(o)?o:{};}catch(e){return {};}}
+function stDevSet(k,v){try{const o=stDev();if(v)o[k]=v;else delete o[k];localStorage.setItem(ST_DEV,JSON.stringify(o));}catch(e){}}
+
+/* ---- the record's part (S.staff, saved with the data file; absent until something is in it) ---- */
+function stPartNorm(p){if(!p||typeof p!=="object"||Array.isArray(p))return null;const I=v=>{const n=Math.round(Number(v));return isFinite(n)&&n>=0&&n<=9999?n:null;};
+  if("n" in p){const n=I(p.n);return n===null?null:{n};}
+  if("e" in p){if(!Array.isArray(p.e))return null;const T=/^\d{2}:\d{2}:\d{2}$/;return {e:p.e.filter(x=>Array.isArray(x)&&T.test(String(x[0]))&&T.test(String(x[1]))).slice(0,100).map(x=>[String(x[0]),String(x[1]),Math.max(0,Math.min(86400,Math.round(+x[2]||0)))])};}
+  if("p" in p||"m" in p){const a=I(p.p||0),b=I(p.m||0);return a===null||b===null?null:{p:a,m:b};}return null;}
+function stParts(x){const d={};if(x&&typeof x==="object"&&!Array.isArray(x))Object.keys(x).slice(0,16).forEach(k=>{if(k&&k.length<=60){const p=stPartNorm(x[k]);if(p)d[k]=p;}});return d;}
+/* an entry as the phone writes it, and nothing else */
+function stEntryNorm(o){if(!o||typeof o!=="object"||o.kind!=="nbh-staff"||o.form!=="DD-1"||!/^[a-f0-9]{16,32}$/.test(String(o.id||""))||!stIso(o.date))return null;
+  return {id:String(o.id),c:/^[A-Z0-9]{6,12}$/.test(String(o.c||""))?String(o.c):"",w:stS(o.w,60),date:o.date,made:stS(o.made,30),d:stParts(o.d),as:ddAsOk(o.as),st:stS(o.st,40),note:stS(o.note,300)};}
+function stNorm(x){const o=x&&typeof x==="object"&&!Array.isArray(x)?x:{};
+  const hx=v=>/^[a-f0-9]{32}$/.test(String(v||""))?String(v):"",j=v=>/^[A-Za-z0-9_-]{40,50}$/.test(String(v||""))?String(v):"";
+  let box=null;const b=o.box;
+  if(b&&typeof b==="object"){const id=hx(b.id),token=hx(b.token),pub=b.pub||{},priv=b.priv||{};
+    if(id&&token&&j(pub.x)&&j(pub.y)&&j(priv.d)&&j(priv.x)&&j(priv.y))box={id,token,pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:/^https?:\/\/\S+$/i.test(String(b.site||""))?String(b.site).slice(0,300):"",made:stIso(b.made)?b.made:""};}
+  const ids=(v,re,n)=>(Array.isArray(v)?v:[]).map(String).filter(s=>re.test(s)).slice(-n);
+  const names=v=>{const m={};if(v&&typeof v==="object"&&!Array.isArray(v))Object.keys(v).slice(0,16).forEach(k=>{if(k.length<=60&&typeof v[k]==="string")m[k]=v[k].slice(0,80);});return m;};
+  const links=(Array.isArray(o.links)?o.links:[]).filter(l=>l&&typeof l==="object"&&/^[A-Z0-9]{6,12}$/.test(String(l.code||""))).slice(0,60).map(l=>({code:String(l.code),who:stS(l.who,60),made:stIso(l.made)?l.made:"",
+    t:(Array.isArray(l.t)?l.t:[]).filter(v=>typeof v==="string"&&v&&v.length<=60).slice(0,16),names:names(l.names),st:(Array.isArray(l.st)?l.st:[]).map(v=>stS(v,40)).filter(Boolean).slice(0,20),
+    last:stIso(l.last)?l.last:"",n:Math.max(0,Math.min(1e6,Math.round(+l.n||0))),off:l.off===true}));
+  const log=(Array.isArray(o.log)?o.log:[]).filter(e=>e&&typeof e==="object"&&/^[a-f0-9]{16,32}$/.test(String(e.id||""))).slice(-300).map(e=>({id:String(e.id),c:stS(e.c,12),w:stS(e.w,60),date:stIso(e.date)?e.date:"",at:stS(e.at,30),
+    parts:(Array.isArray(e.parts)?e.parts:[]).filter(p=>p&&typeof p==="object").slice(0,16).map(p=>({t:stS(p.t,60),name:stS(p.name,80),what:stS(p.what,80),ok:p.ok===true,why:Object.prototype.hasOwnProperty.call(ST_WHY,p.why)?p.why:""})),lab:stS(e.lab,200)}));
+  const held=(Array.isArray(o.held)?o.held:[]).filter(e=>e&&typeof e==="object").slice(-300).map(e=>{const n=stEntryNorm(Object.assign({},e,{kind:"nbh-staff",form:"DD-1"}));if(!n)return null;
+    const why={};if(e.why&&typeof e.why==="object")Object.keys(n.d).forEach(k=>{why[k]=Object.prototype.hasOwnProperty.call(ST_WHY,e.why[k])?e.why[k]:"gone";});
+    return Object.assign(n,{at:stS(e.at,30),why,all:Object.prototype.hasOwnProperty.call(ST_WHY,e.all)?e.all:"",lab:e.lab===true});}).filter(e=>e&&(Object.keys(e.d).length||e.lab));
+  return {box,site:stS(o.site,300),page:stS(o.page,300),links,got:ids(o.got,/^r-\d+-[a-f0-9]{12}$/,3000),seen:ids(o.seen,/^[a-f0-9]{16,32}$/,5000),log,held};}
+const stEmpty=s=>!s.box&&!s.links.length&&!s.site&&!s.page&&!s.got.length&&!s.held.length;
+function stSt(){if(!S.staff||typeof S.staff!=="object"||Array.isArray(S.staff)||!Array.isArray(S.staff.links))S.staff=stNorm(S.staff);return S.staff;}
+function stClean(){const s=stNorm(S.staff);if(stEmpty(s))delete S.staff;else S.staff=s;}
+
+/* ---- the box: as IA-1's (v21.65), one per file, at the practice's site ---- */
+function stBoxUrl(){const v=String((S.staff&&S.staff.site)||stDev().box||"").trim();
+  if(/^https?:\/\//i.test(v)){const u=v.replace(/\/+$/,"");return /\.php$/i.test(u)?u:u+(/\/reply$/i.test(u)?"":"/reply")+"/box.php";}
+  if(/^https?:$/.test(location.protocol)&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname))return location.origin+"/reply/box.php";return "";}
+/* a box once registered keeps its site: the links handed out carry that address */
+function stSite(){const b=S.staff&&S.staff.box;return (b&&b.site)||stBoxUrl();}
+function stReady(){const b=S.staff&&S.staff.box;return !!(b&&b.site);}
+function stPageUrl(){const v=String((S.staff&&S.staff.page)||stDev().page||"").trim();
+  if(/^https?:\/\//i.test(v))return /\.html?$/i.test(v)?v:v.replace(/\/?$/,"/")+"staff-data.html";
+  const here=[location.href,document.baseURI].find(u=>/^https?:/i.test(String(u||"")));return here?String(here).replace(/[#?].*$/,"").replace(/[^\/]*$/,"")+"staff-data.html":"";}
+function stHost(u){const m=/^https?:\/\/([^\/]+)/i.exec(u||"");return m?m[1]:"";}
+async function stKeys(){const C=crypto.subtle,kp=await C.generateKey({name:"ECDH",namedCurve:"P-256"},true,["deriveBits"]),pub=await C.exportKey("jwk",kp.publicKey),priv=await C.exportKey("jwk",kp.privateKey);
+  return {id:stHex(crypto.getRandomValues(new Uint8Array(16))),token:stHex(crypto.getRandomValues(new Uint8Array(16))),pub:{x:pub.x,y:pub.y},priv:{d:priv.d,x:priv.x,y:priv.y},site:"",made:localISO(new Date())};}
+async function stSha(t){return stHex(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t))));}
+async function stFetch(url,opt){let r;try{r=await fetch(url,Object.assign({cache:"no-store"},opt||{}));}catch(e){throw new Error("no connection to "+stHost(url));}let j=null;try{j=await r.json();}catch(e){}
+  if(!j||typeof j!=="object")throw new Error(stHost(url)+" answered "+r.status+(r.status===404?" (box.php is not there)":""));if(!j.ok)throw new Error(j.error||(stHost(url)+" answered "+r.status));return j;}
+const stPost=(url,o)=>stFetch(url,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(o)});
+/* registers this file's box at the site (once); true when links can carry it */
+function stEnsure(){const u=stSite();if(!u||!stCan())return Promise.resolve(false);if(stReady())return Promise.resolve(true);if(stBusy)return stBusy;
+  stBusy=(async()=>{try{const s=stSt();if(!s.box)s.box=await stKeys();const id=s.box.id,tk=s.box.token;await stPost(u+"?a=new",{b:id,t:await stSha(tk)});
+      const n=stSt();if(!n.box||n.box.id!==id)return false;n.box.site=u;stLast="";gsEdited();stPaint();return true;}
+    catch(e){stLast=String((e&&e.message)||e);stPaint();return false;}finally{stBusy=null;}})();return stBusy;}
+async function stOpen(r,priv){const C=crypto.subtle,enc=t=>new TextEncoder().encode(t);
+  const pub=await C.importKey("jwk",{kty:"EC",crv:"P-256",x:r.k.x,y:r.k.y,ext:true},{name:"ECDH",namedCurve:"P-256"},false,[]);
+  const bits=await C.deriveBits({name:"ECDH",public:pub},priv.key,256),hk=await C.importKey("raw",bits,"HKDF",false,["deriveKey"]);
+  const aes=await C.deriveKey({name:"HKDF",hash:"SHA-256",salt:enc(priv.id),info:enc("nbh-reply-v1")},hk,{name:"AES-GCM",length:256},false,["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await C.decrypt({name:"AES-GCM",iv:stUnb64(r.iv)},aes,stUnb64(r.ct))));}
+
+/* ---- the links ---- */
+function stInitials(){let c=String(S.meta.client||"").replace(/^\s*SIMULATED\b\s*[\u2013\u2014-]?\s*/i,"").trim();const m=/^([^,]+),\s*(.+)$/.exec(c);if(m)c=m[2]+" "+m[1];
+  const W=c.split(/[\s\-]+/).map(w=>w.replace(/[^A-Za-z\u00C0-\u024F]/g,"")).filter(Boolean);if(!W.length)return "";return (W.length>2?[W[0],W[W.length-1]]:W).map(w=>w.charAt(0).toUpperCase()+".").join("");}
+function stCode(){const A="ABCDEFGHJKMNPQRSTUVWXYZ23456789",have=new Set(stSt().links.map(l=>l.code));let c="";
+  do{c=Array.from(crypto.getRandomValues(new Uint8Array(8)),x=>A[x%A.length]).join("");}while(have.has(c));return c;}
+const stPhoneBehs=()=>orderedBehaviors().filter(b=>ST_KIND(b.measure));
+function stPayload(l){const B=S.staff.box;return {v:1,f:"DD-1",x:{u:B.site,b:B.id,k:{x:B.pub.x,y:B.pub.y}},c:l.code,w:l.who,s:stInitials(),
+  t:l.t.map(id=>{const b=S.behaviors.find(x=>x.id===id),k=b&&ST_KIND(b.measure);return k?{i:id,n:String(b.name||"Untitled").slice(0,80),m:k}:null;}).filter(Boolean),st:l.st,d:l.made};}
+function stUrlOf(l){if(!l||!stReady()||!stPageUrl())return "";const p=stPayload(l);if(!p.t.length)return "";return stPageUrl()+"#s="+stB64(new TextEncoder().encode(JSON.stringify(p)));}
+async function stMakeLink(who,ids,sets){who=stS(who,60);
+  if(!who)return {err:"Say who the link is for (for example Ms. A, Room 12)."};
+  if(!stCan())return {err:"This browser cannot lock the entries (no WebCrypto)."};
+  const T=(ids||[]).map(id=>S.behaviors.find(b=>b.id===id)).filter(b=>b&&ST_KIND(b.measure));
+  if(!T.length)return {err:"Tick at least one target measured by count, duration, or + / − (intervals or opportunities)."};
+  if(!stSite())return {err:"Give the reply box’s address (Reply box and page addresses, below)."};
+  if(!stPageUrl())return {err:"Give the staff page’s address (Reply box and page addresses, below): staff-data.html on the workstation’s website."};
+  if(!(await stEnsure()))return {err:"The reply box could not be registered"+(stLast?": "+stLast:"")+"."};
+  const s=stSt(),l={code:stCode(),who,made:localISO(new Date()),t:T.map(b=>b.id),names:{},st:(sets||[]).map(v=>stS(v,40)).filter(Boolean).slice(0,20),last:"",n:0,off:false};
+  T.forEach(b=>{l.names[b.id]=String(b.name||"").slice(0,80);});s.links.push(l);gsEdited();stPaint();return {link:l,url:stUrlOf(l)};}
+
+/* ---- placing one entry on its day ---- */
+function stRowFor(iso,make){let r=sortedRows().find(x=>x.date===iso)||null;if(!r&&make){r=newRow(iso);S.rows.push(r);}return r;}
+function stBehFor(tid,l){let b=S.behaviors.find(x=>x.id===tid)||null;if(!b&&l&&l.names&&l.names[tid]){const k=gsK(l.names[tid]);b=S.behaviors.find(x=>gsK(x.name)===k)||null;}return b;}
+const stPartKind=p=>"n" in p?"n":"e" in p?"d":"pm";
+function stOverlap(row,b,eps){const old=episodesOf(row,b).map(e=>{const a=clockSec(e.start);if(a===null)return null;let z=clockSec(e.end);
+    if(z===null){const m=epMinutes(e);if(m===null)return null;z=a+m*60;}else if(z<a)z+=86400;return [a,z];}).filter(Boolean);
+  return eps.some(x=>{const a=clockSec(x[0]);let z=clockSec(x[1]);if(a===null||z===null)return false;if(z<a)z+=86400;return old.some(o=>a<o[1]&&o[0]<z);});}
+function stBasis(row,b){const x=row.basis&&row.basis[b.id],cur=row.values[b.id];if(!x||typeof x!=="object"||x.m!==b.measure)return null;const n=Number(x.n),s=Number(x.s);
+  if(!(n>0)||!isFinite(n)||!isFinite(s)||cur===null||cur===undefined||String(x.v)!==String(cur))return null;return {n,s};}
+/* one target's part of an entry: {what} when written, {why} when held, {none} when it brings nothing (no opportunities, no episode on a day that has a value) */
+function stTry(row,b,p,who){const k=ST_KIND(b.measure),pk=stPartKind(p),v=row.values;
+  if(!k||(pk==="pm"?(k!=="p"&&k!=="i"):pk!==k))return {why:"measure"};
+  if(pk==="n"){v[b.id]=stR2((num(v[b.id])||0)+p.n);return {what:String(p.n)};}
+  if(pk==="d"){if(!p.e.length){if(num(v[b.id])===null&&!episodesOf(row,b).length){v[b.id]="0";return {what:"no episodes (0)"};}return {none:true};}
+    if(stOverlap(row,b,p.e))return {why:"overlap"};
+    const neu=p.e.map(x=>({start:x[0],end:x[1],dur:fmtDur(x[2]/60),note:"From "+who+"’s phone",auto:false})),old=episodesOf(row,b);let carry=null;
+    if(!old.length){const t=episodesCount(row,b)?null:num(v[b.id]);
+      /* as the live recorder does: a total typed before the first episode is kept (and comes back if the episodes go), and rides in the log as a line of its own */
+      if(t!==null&&t>0){const mins=b.measure==="pdur"?t*(effObsMin(row)||0)/100:t;carry={start:"",end:"",dur:fmtDur(mins),note:b.measure==="pdur"?"Percent typed on the sheet before the phone’s episodes, as minutes of the observation (not one episode)":"Total typed on the sheet before the phone’s episodes (not one episode)",auto:false};}
+      if(!row.typed||typeof row.typed!=="object")row.typed={};row.typed[b.id]=v[b.id]==null?"":v[b.id];}
+    if(!row.episodes||typeof row.episodes!=="object")row.episodes={};
+    row.episodes[b.id]=old.map(e=>Object.assign({},e)).concat(carry?[carry]:[],neu);syncEpisodeValue(row,b);
+    const sec=p.e.reduce((a,x)=>a+x[2],0);return {what:stPl(p.e.length,"episode")+" ("+fmtDur(sec/60)+")"};}
+  const n=p.p+p.m;if(!n)return {none:true};
+  if(MEASURES[b.measure].two){v[b.id]=stR2((num(v[b.id])||0)+p.p);v[OPP(b.id)]=stR2((num(v[OPP(b.id)])||0)+n);return {what:p.p+" of "+n};}
+  const cur=num(v[b.id]),bs=stBasis(row,b);if(cur!==null&&!bs)return {why:"typed"};
+  const N=(bs?bs.n:0)+n,Sm=(bs?bs.s:0)+p.p,str=stR2(100*Sm/N);v[b.id]=str;if(!row.basis||typeof row.basis!=="object")row.basis={};
+  row.basis[b.id]={m:b.measure,n:Math.round(N*1e6)/1e6,s:Math.round(Sm*1e6)/1e6,v:str};return {what:p.p+" + of "+n+" ("+r1(100*p.p/n)+"%)"};}
+/* the day's labels: who (added to Collected by), the assent and the setting where the day has none, the note after the notes */
+function stLabels(row,o,who){const did=[],by=ddTagStr(row.by),lw=who.toLowerCase();
+  if(!by){ddTagSet(row,"by",who);did.push("by");}else if(by.toLowerCase().split(/\s*;\s*/).indexOf(lw)<0&&(by+"; "+who).length<=60){ddTagSet(row,"by",by+"; "+who);did.push("by");}
+  if(o.as){if(!ddAsOk(row.assent)){ddTagSet(row,"assent",o.as);did.push("assent "+ddAsWord(o.as));}else if(row.assent!==o.as)did.push("assent "+ddAsWord(o.as)+" (the day was marked "+ddAsWord(row.assent)+")");}
+  if(o.st){if(!ddTagStr(row.setting)){ddTagSet(row,"setting",o.st);did.push("setting "+o.st);}else if(ddTagStr(row.setting).toLowerCase()!==o.st.toLowerCase())did.push("setting "+o.st+" (the day has "+ddTagStr(row.setting)+")");}
+  if(o.note){const line=who+": "+o.note,cur=String(row.notes||"");if(cur.indexOf(line)<0){row.notes=cur.trim()?cur.replace(/\s+$/,"")+" · "+line:line;did.push("note");}}
+  return did.join(", ");}
+function stPlace(o,force){const s=stSt(),l=s.links.find(x=>x.code===o.c)||null,who=(l&&l.who)||o.w||"a staff phone",out={placed:{},held:{},all:"",lab:""};
+  if(!l&&!force)out.all="link";else if(l&&l.off&&!force)out.all="stopped";
+  else if(o.date>ddAddDays(localISO(new Date()),1))out.all="future";else if(S.settings.entryMode==="interval")out.all="iv";
+  if(out.all){Object.keys(o.d).forEach(k=>{out.held[k]=out.all;});return out;}
+  const row=stRowFor(o.date,true);
+  Object.keys(o.d).forEach(tid=>{const p=o.d[tid],b=stBehFor(tid,l);if(!b){out.held[tid]="gone";return;}
+    if(ddGsOwns(row,b.id)||(MEASURES[b.measure].two&&ddGsOwns(row,OPP(b.id)))){out.held[tid]="sheet";return;}
+    const r=stTry(row,b,p,who);if(r.why)out.held[tid]=r.why;else if(!r.none)out.placed[tid]={name:b.name||"",what:r.what};});
+  if(o.lab!==false)out.lab=stLabels(row,o,who)||"labels";return out;}
+/* takes an entry (new, or held and tried again) and keeps the record of it: the log, the held list, the link's last entry */
+function stTake(o,res,force){const s=stSt(),fresh=o.lab===undefined,r=stPlace(o,force),l=s.links.find(x=>x.code===o.c)||null,nm=tid=>{const b=stBehFor(tid,l);return (b&&b.name)||(l&&l.names[tid])||"a target";};
+  const hk=Object.keys(r.held),pk=Object.keys(r.placed),i=s.held.findIndex(h=>h.id===o.id);
+  if(hk.length){const h={id:o.id,c:o.c,w:o.w,date:o.date,made:o.made,at:o.at||new Date().toISOString(),d:{},why:{},all:r.all,lab:!!r.all&&o.lab!==false,as:o.as,st:o.st,note:o.note};
+    hk.forEach(k=>{h.d[k]=o.d[k];h.why[k]=r.held[k];});if(i>=0)s.held[i]=h;else s.held.push(h);}
+  else if(i>=0)s.held.splice(i,1);
+  let e=s.log.find(x=>x.id===o.id);if(!e){e={id:o.id,c:o.c,w:(l&&l.who)||o.w,date:o.date,at:new Date().toISOString(),parts:[],lab:""};s.log.push(e);if(s.log.length>300)s.log.splice(0,s.log.length-300);}
+  pk.forEach(k=>{const p=e.parts.find(x=>x.t===k)||(e.parts[e.parts.length]={t:k});Object.assign(p,{name:r.placed[k].name,what:r.placed[k].what,ok:true,why:""});});
+  hk.forEach(k=>{const p=e.parts.find(x=>x.t===k)||(e.parts[e.parts.length]={t:k,what:""});Object.assign(p,{name:nm(k),ok:false,why:r.held[k]});});
+  if(r.lab&&r.lab!=="labels")e.lab=e.lab?e.lab+"; "+r.lab:r.lab;
+  if(fresh&&l){l.n++;if(!l.last||o.date>l.last)l.last=o.date;}
+  res.placed+=pk.length;res.cells+=pk.length;if(pk.length||(!hk.length&&fresh))res.entries++;if(hk.length)res.heldN++;
+  if(pk.length)res.done.push((l&&l.who||o.w||"a staff phone")+" ("+shortDay(o.date)+"): "+pk.map(k=>r.placed[k].name+" "+r.placed[k].what).join(", "));
+  return r;}
+/* every entry not yet placed: new ones (each once, by its id) and the held ones whose reason may have gone */
+function stPlaceAll(objs,opt){opt=opt||{};const s=stSt(),res={placed:0,cells:0,entries:0,heldN:0,dup:0,bad:0,done:[],retried:0};
+  s.held.slice().forEach(h=>{if((h.all==="link"||h.all==="stopped")&&!opt.force)return;res.retried++;const o=Object.assign({},h,{lab:h.lab});stTake(o,res,false);});
+  objs.map(stEntryNorm).forEach((o,k)=>{if(!o){res.bad++;return;}if(s.seen.indexOf(o.id)>=0){res.dup++;return;}s.seen.push(o.id);if(s.seen.length>5000)s.seen.splice(0,s.seen.length-5000);o.at=objs[k].at||"";stTake(o,res,false);});
+  res.held=s.held.length;return res;}
+
+/* ---- collecting ---- */
+function stCollect(quiet){if(stCollecting)return stCollecting;
+  stCollecting=(async()=>{try{const s0=stSt();if(!s0.box){stPaint();return null;}
+    if(!(await stEnsure())){stPaint();return null;}
+    const B=stSt().box,id=B.id,token=B.token;
+    const j=await stFetch(B.site+"?a=list&b="+encodeURIComponent(id)+"&t="+encodeURIComponent(token));
+    let s=stSt();if(!s.box||s.box.id!==id)return null;   /* the record was replaced (another file opened) while the list came */
+    const key=await crypto.subtle.importKey("jwk",{kty:"EC",crv:"P-256",d:B.priv.d,x:B.priv.x,y:B.priv.y,ext:true},{name:"ECDH",namedCurve:"P-256"},false,["deriveBits"]);
+    const all=Array.isArray(j.replies)?j.replies:[],got=new Set(s.got),fresh=all.filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&!got.has(r.id)),objs=[],ids=[];let unread=0;
+    for(const r of fresh){try{const o=await stOpen(r,{key,id});if(o&&typeof o==="object"&&o.kind==="nbh-staff"){o.at=String(r.at||"");objs.push(o);}else unread++;}catch(e){unread++;}ids.push(r.id);}
+    s=stSt();if(!s.box||s.box.id!==id)return null;
+    ids.forEach(x=>s.got.push(x));if(s.got.length>3000)s.got.splice(0,s.got.length-3000);
+    objs.sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.made).localeCompare(String(b.made)));
+    const before=JSON.stringify(s.held),res=stPlaceAll(objs);res.unread=unread;res.fresh=fresh.length;res.all=all.length;stOnSite=all.filter(r=>r&&s.got.indexOf(r.id)>=0).length;stAt=Date.now();stLast="";
+    if(res.placed||ids.length||JSON.stringify(stSt().held)!==before){renderAll();gsEdited();}
+    stPaint();stNote(res,quiet);return res;}
+  catch(e){stLast=String((e&&e.message)||e);stPaint();if(!quiet&&window.nbhUI&&nbhUI.toast)nbhUI.toast("Staff phones: "+stLast,{kind:"err"});return null;}finally{stCollecting=null;}})();return stCollecting;}
+function stNote(res,quiet){if(!res)return;let t;
+  if(res.placed)t="Collected from staff phones: "+res.done.join("; ")+"."+(res.held?" "+stPl(res.held,"entry","entries")+" held below.":"")+(res.unread?" "+res.unread+" could not be read (not for this file).":"");
+  else if(quiet)return;
+  else t=res.held?stPl(res.held,"entry is","entries are")+" held below (see why).":res.unread?res.unread+" message"+(res.unread===1?"":"s")+" in the box could not be read (not for this file).":res.all?"Nothing new: every entry in the box is placed already.":"Nothing in the box yet.";
+  stLine(t);if(window.nbhUI&&nbhUI.toast)nbhUI.toast(res.placed?"Staff phones: "+stPl(res.placed,"value")+" placed on the sheet.":t,res.placed?{kind:"ok"}:(res.held||res.unread)?{kind:"err"}:{});else if(res.placed)toast("Staff phones: "+stPl(res.placed,"value")+" placed.");}
+/* the entries this file has taken are removed from the site (they stay in this file) */
+async function stPurge(){const s=stSt();if(!s.box||!s.got.length||!stReady())return null;const B=s.box;let n=0;
+  try{for(let i=0;i<s.got.length;i+=300){const j=await stPost(B.site+"?a=del&b="+encodeURIComponent(B.id),{t:B.token,ids:s.got.slice(i,i+300)});n+=+j.deleted||0;}
+    stOnSite=0;stLast="";stPaint();const t=stPl(n,"entry","entries")+" removed from the site; they stay in this file.";stLine(t);if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,{kind:"ok"});return {deleted:n};}
+  catch(e){stLast=String((e&&e.message)||e);stPaint();return null;}}
+/* the caseload's refresh (index.html), unattended: collect now, never a dialog */
+window.__nbhStaffCollect=async function(){const out={ok:false,linked:false,placed:0,held:0,entries:0,err:""};
+  try{const s=S.staff;if(!s||!s.box||!Array.isArray(s.links)||!s.links.length)return out;out.linked=true;
+    if(!stSite()){out.err="The staff phones’ reply box has no address on this device.";return out;}
+    const r=await stCollect(true);   /* one already under way is waited for and its result given */if(!r){out.err=stLast||"The staff phones’ box could not be read.";return out;}
+    out.ok=true;out.placed=r.placed;out.held=r.held;out.entries=r.entries;}
+  catch(e){out.ok=false;out.err=(e&&e.message)||String(e);}return out;};
+
+/* ---- the case: the links, how many entries came, the last day one was for ---- */
+{const out3=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out3();}catch(e){o=null;}
+  try{const s=S.staff;if(!s||!Array.isArray(s.links)||!s.links.length)return o;if(!o)o={data:{from:"",to:"",days:0,behaviors:[],incidents:0,src:"DD-1"}};if(!o.data)return o;
+    const last=s.log.reduce((m,e)=>e.date>m?e.date:m,"");
+    o.data.staff={links:s.links.map(l=>Object.assign({code:l.code,who:l.who,made:l.made,last:l.last},l.off?{off:true}:{})),entries:s.seen.length,last};}catch(e){}return o;};}
+
+/* ---- the panel on the Daily data tab ---- */
+function ddQrSvg(url){url=String(url||"").trim();if(!url||typeof qrcode!=="function")return "";
+  try{const q=qrcode(0,"L");q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d="";for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+="M"+(c+m)+" "+(r+m)+"h1v1h-1z";
+    return `<svg viewBox="0 0 ${sz} ${sz}" shape-rendering="crispEdges" data-modules="${n}" role="img" aria-label="QR code of the link" style="width:100%;height:auto;display:block"><rect width="${sz}" height="${sz}" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;}catch(e){return "";}}
+function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const tab=document.getElementById("tab-data");if(!tab)return null;
+  p=document.createElement("div");p.className="panel dd-staff noprint no-print";p.id="ddStaff";p.setAttribute("aria-labelledby","stTitle");
+  p.innerHTML=`<div class="sec-title"><h2 id="stTitle">Staff phones</h2><span>teachers and paraprofessionals record on their own phones; the entries come back here</span></div>
+  <p class="hint">Make a link for each person who records. They open it on their phone (point the camera at the code), tap as it happens and press <b>Send today’s data</b>. Each entry is locked on the phone so that only this file can open it, and is placed on its day’s row: a count added to the day’s total, episodes to the episode log, + and − into the day’s percent; who sent it under <b>Collected by</b>, the assent and the setting in the day’s details. The link names the student by initials only.</p>
+  <p class="st-line" id="stBoxLine" role="status"></p>
+  <div class="st-make"><label class="field"><span>Who the link is for</span><input id="stWho" maxlength="60" placeholder="e.g. Ms. A, Room 12" autocomplete="off"></label>
+    <fieldset class="st-tgts"><legend>Targets on the link</legend><div id="stTgts"></div></fieldset>
+    <label class="field"><span>Settings to choose from (a comma between)</span><input id="stSets" autocomplete="off"></label>
+    <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="stMake">Make the link</button><span class="hint" id="stMakeMsg" role="status" style="margin:0 0 0 8px"></span></div></div>
+  <div class="st-links-w"><table class="st-links" id="stLinks"></table></div>
+  <div class="dd-actions" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="stCollect">Collect now</button><button type="button" class="btn ghost" id="stPurge">Remove the collected entries from the site</button></div>
+  <p class="st-line" id="stLine" role="status" aria-live="polite"></p>
+  <div id="stHeld"></div>
+  <details class="st-recent" id="stRecentW"><summary>Entries collected</summary><div id="stRecent"></div></details>
+  <details class="st-adv" id="stAdv"><summary>Reply box and page addresses</summary>
+    <label class="field"><span>Reply box (box.php on the practice’s website; filled in by itself when the workstation is opened from its website)</span><input id="stBoxIn" type="url" placeholder="https://newsomebh.com/reply/box.php" autocomplete="off" spellcheck="false"></label>
+    <label class="field"><span>Staff page (staff-data.html beside the forms on the website)</span><input id="stPageIn" type="url" placeholder="https://newsomebh.com/workstation/staff-data.html" autocomplete="off" spellcheck="false"></label>
+    <p class="hint">Remembered on this device and in the data file. The box is this file’s own: it is registered the first time a link is made, and every link carries its address, so it stays where it was registered.</p></details>`;
+  tab.appendChild(p);
+  p.querySelector("#stBoxIn").addEventListener("change",e=>{const v=e.target.value.trim(),s=stSt();if(stReady()){e.target.value=s.box.site;return;}s.site=v;stDevSet("box",v);gsEdited();stPaint();});
+  p.querySelector("#stPageIn").addEventListener("change",e=>{const v=e.target.value.trim(),s=stSt();s.page=v;stDevSet("page",v);gsEdited();stPaint();});
+  p.querySelector("#stMake").addEventListener("click",async()=>{const ids=[...p.querySelectorAll("#stTgts input[data-stt]:checked")].map(c=>c.dataset.stt),sets=p.querySelector("#stSets").value.split(/[,;\n]/).map(v=>v.trim()).filter(Boolean);
+    const m=p.querySelector("#stMakeMsg");m.textContent="Making the link…";const r=await stMakeLink(p.querySelector("#stWho").value,ids,sets);
+    if(r.err){m.textContent=r.err;m.classList.add("gs-bad");return;}m.classList.remove("gs-bad");m.textContent="Made: "+r.link.code+" for "+r.link.who+".";p.querySelector("#stWho").value="";stQr(r.link);});
+  p.querySelector("#stCollect").addEventListener("click",()=>stCollect(false));
+  p.querySelector("#stPurge").addEventListener("click",async()=>{const s=stSt();if(!s.got.length)return;
+    if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm("Remove the "+stPl(s.got.length,"collected entry","collected entries")+" from the site?\nThey stay in this file.",{ok:"Remove"})))return;}stPurge();});
+  p.addEventListener("click",async e=>{const b=e.target.closest&&e.target.closest("button[data-sta]");if(!b)return;const s=stSt(),a=b.dataset.sta;
+    if(a==="drop"||a==="place"){const i=+b.dataset.i,h=s.held[i];if(!h)return;
+      if(a==="drop"){s.held.splice(i,1);gsEdited();stPaint();return;}
+      const res={placed:0,cells:0,entries:0,heldN:0,done:[]};stTake(Object.assign({},h),res,true);renderAll();gsEdited();stPaint();stLine(res.placed?"Placed: "+res.done.join("; ")+".":"Still held: "+(stSt().held.find(x=>x.id===h.id)?"see why below.":"nothing to place."));return;}
+    const l=s.links.find(x=>x.code===b.dataset.code);if(!l)return;
+    if(a==="qr"){stQr(l);return;}
+    if(a==="copy"){const u=stUrlOf(l);try{await navigator.clipboard.writeText(u);stLine("The link for "+l.who+" is copied.");}catch(err){stQr(l);}return;}
+    if(a==="share"){const u=stUrlOf(l);if(navigator.share)navigator.share({title:"Behavior data",text:"Your link for recording behavior data"+(stInitials()?" ("+stInitials()+")":"")+": open it on your phone.",url:u}).catch(()=>{});return;}
+    if(a==="stop"){l.off=!l.off;gsEdited();stPaint();stLine(l.off?"The link for "+l.who+" is stopped: what it sends now is held until you place it.":"The link for "+l.who+" is working again.");return;}});
+  return p;}
+function stLine(t){const e=document.getElementById("stLine");if(e)e.textContent=t||"";}
+function stQrDlg(){let d=document.getElementById("dlgStQr");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog st-qr-dlg";d.id="dlgStQr";d.setAttribute("aria-labelledby","stQrT");
+  d.innerHTML=`<h2 id="stQrT">Staff link</h2><p class="hint" id="stQrFor"></p><div class="st-qr" id="stQrBox"></div><p class="hint" id="stQrNote"></p>
+  <label class="field"><span>The link</span><input id="stQrUrl" readonly spellcheck="false"></label>
+  <div class="dd-actions" style="flex-wrap:wrap"><button type="button" class="btn ghost" id="stQrShare">Share the link…</button><button type="button" class="btn ghost" id="stQrCopy">Copy the link</button><span style="flex:1"></span><button type="button" class="btn" id="stQrClose">Close</button></div><p class="hint" id="stQrSt" role="status"></p>`;
+  document.body.appendChild(d);const $u=()=>d.querySelector("#stQrUrl").value;
+  d.querySelector("#stQrClose").addEventListener("click",()=>d.close());
+  d.querySelector("#stQrCopy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($u());d.querySelector("#stQrSt").textContent="Link copied.";}catch(e){const i=d.querySelector("#stQrUrl");i.select();d.querySelector("#stQrSt").textContent="The clipboard was refused: the link is selected, copy it from the menu.";}});
+  d.querySelector("#stQrShare").addEventListener("click",()=>{if(navigator.share)navigator.share({title:"Behavior data",text:"Your link for recording behavior data"+(stInitials()?" ("+stInitials()+")":"")+": open it on your phone.",url:$u()}).then(()=>{d.querySelector("#stQrSt").textContent="Shared.";},()=>{});});
+  d.addEventListener("click",e=>{if(e.target===d)d.close();});return d;}
+function stQr(l){const u=stUrlOf(l),d=stQrDlg(),svg=ddQrSvg(u);d.querySelector("#stQrT").textContent="Staff link: "+l.who;
+  d.querySelector("#stQrFor").textContent="Code "+l.code+" · made "+shortDay(l.made)+" · "+stPl(l.t.length,"target")+(stInitials()?" · the student as "+stInitials():"");
+  d.querySelector("#stQrBox").innerHTML=svg;d.querySelector("#stQrUrl").value=u;d.querySelector("#stQrSt").textContent="";
+  d.querySelector("#stQrNote").textContent=!u?"This link has no target left on the record that a phone can record.":svg?"On the phone, point the camera at the code and tap the link that appears (a link of "+u.length.toLocaleString()+" characters). Make this screen bright, or use Share the link… (Messages, Mail, AirDrop) or Copy the link.":"The link is too long for a QR code ("+u.length.toLocaleString()+" characters): share or copy it instead.";
+  d.querySelector("#stQrShare").hidden=!navigator.share;try{d.showModal();}catch(e){d.setAttribute("open","");}}
+function stHeldText(h){const s=stSt(),l=s.links.find(x=>x.code===h.c)||null,nm=tid=>{const b=stBehFor(tid,l);return (b&&b.name)||(l&&l.names[tid])||"a target";};
+  const part=(tid,p)=>{if("n" in p)return nm(tid)+" "+p.n;if("e" in p)return nm(tid)+" "+stPl(p.e.length,"episode");return nm(tid)+" "+p.p+" + of "+(p.p+p.m);};
+  const ks=Object.keys(h.d),whys=[...new Set(ks.map(k=>h.why[k]))];
+  return `<b>${esc((l&&l.who)||h.w||"A staff phone")} · ${esc(shortDay(h.date))}</b>: ${esc(ks.map(k=>part(k,h.d[k])).join(", ")||"the day’s marks")}. Held: ${whys.map(w=>esc(ST_WHY[w]||w)).join("; ")}${h.all==="sheet"||whys.indexOf("sheet")>=0?" (the sheet’s number for that day: "+esc(ks.filter(k=>h.why[k]==="sheet").map(k=>{const b=stBehFor(k,l),r=stRowFor(h.date,false);return (b?b.name:"")+" "+(r&&b?(r.values[b.id]===""||r.values[b.id]==null?"blank":r.values[b.id]):"");}).join(", "))+")":""}.`;}
+function stPaint(){const p=stPanel();if(!p)return;const s=S.staff&&Array.isArray(S.staff.links)?S.staff:stNorm(S.staff),u=stSite(),box=s.box;
+  let t;if(!stCan())t="This browser cannot lock or unlock entries (no WebCrypto).";
+  else if(!u)t="No reply box address yet: open the workstation from its website, or give the address under Reply box and page addresses.";
+  else if(stReady())t=`Reply box at ${stHost(box.site)}: ${stPl(s.links.length,"link")}, ${stPl(s.seen.length,"entry","entries")} collected${s.held.length?", "+s.held.length+" held":""}${stAt?" · last looked "+gsWhen(new Date(stAt).toISOString()):""}. Collects when the form opens and every five minutes while it is open.`;
+  else t=`Reply box at ${stHost(u)}: registered when the first link is made.`;
+  if(stLast)t+=" "+stLast.charAt(0).toUpperCase()+stLast.slice(1).replace(/\.?$/,".");
+  p.querySelector("#stBoxLine").textContent=t;p.querySelector("#stBoxLine").classList.toggle("gs-bad",!!stLast);
+  const bi=p.querySelector("#stBoxIn"),pi=p.querySelector("#stPageIn");if(document.activeElement!==bi){bi.value=box&&box.site?box.site:(s.site||stDev().box||"");bi.readOnly=!!(box&&box.site);}
+  if(document.activeElement!==pi)pi.value=s.page||stDev().page||"";pi.placeholder=stPageUrl()||"https://newsomebh.com/workstation/staff-data.html";
+  /* the targets a link can carry, the ticks kept as they were */
+  const tg=p.querySelector("#stTgts"),was={};tg.querySelectorAll("input[data-stt]").forEach(c=>{was[c.dataset.stt]=c.checked;});const B=stPhoneBehs(),off=orderedBehaviors().filter(b=>!ST_KIND(b.measure));
+  tg.innerHTML=(B.length?B.map(b=>`<label><input type="checkbox" id="stT_${esc(b.id)}" data-stt="${esc(b.id)}"${was[b.id]===false?"":" checked"}> <b>${esc(b.name||"Untitled")}</b> <span class="hint">${esc(ST_KW[ST_KIND(b.measure)])}</span></label>`).join(""):`<p class="hint">No target on the record yet.</p>`)+
+    (off.length?`<p class="hint">Not on phone links (record these here): ${off.map(b=>esc(b.name||"Untitled")+" ("+esc(MEASURES[b.measure].label.toLowerCase())+")").join(", ")}.</p>`:"");
+  const si=p.querySelector("#stSets");if(document.activeElement!==si&&!si.value){const L=ddTagLists().set;si.value=L.join(", ");}
+  const lt=p.querySelector("#stLinks");
+  lt.innerHTML=s.links.length?`<thead><tr><th>Code</th><th>Who</th><th>Made</th><th>Last entry</th><th>Entries</th><th><span class="sr">Actions</span></th></tr></thead><tbody>${s.links.map(l=>`<tr data-code="${esc(l.code)}"${l.off?' class="st-off"':""}><td><code>${esc(l.code)}</code>${l.off?" <small>stopped</small>":""}</td><td>${esc(l.who)}</td><td>${esc(shortDay(l.made))}</td><td>${l.last?esc(shortDay(l.last)):"—"}</td><td>${l.n}</td><td class="st-act"><button type="button" class="btn ghost sm" data-sta="qr" data-code="${esc(l.code)}">QR</button><button type="button" class="btn ghost sm" data-sta="copy" data-code="${esc(l.code)}">Copy</button>${navigator.share?`<button type="button" class="btn ghost sm" data-sta="share" data-code="${esc(l.code)}">Share</button>`:""}<button type="button" class="btn ghost sm" data-sta="stop" data-code="${esc(l.code)}">${l.off?"Resume":"Stop"}</button></td></tr>`).join("")}</tbody>`:"";
+  p.querySelector("#stCollect").disabled=!(box&&s.links.length);p.querySelector("#stPurge").disabled=!(box&&s.got.length&&stOnSite!==0);
+  p.querySelector("#stHeld").innerHTML=s.held.map((h,i)=>`<div class="gs-note st-held" data-held="${esc(h.id)}">${stHeldText(h)} ${h.all==="link"||h.all==="stopped"?`<button type="button" class="btn ghost sm" data-sta="place" data-i="${i}">Place it</button>`:""}<button type="button" class="btn ghost sm" data-sta="drop" data-i="${i}">Discard</button></div>`).join("");
+  const R=s.log.slice(-40).reverse();p.querySelector("#stRecentW").hidden=!R.length;
+  p.querySelector("#stRecent").innerHTML=R.length?`<table class="st-rec"><thead><tr><th>Day</th><th>From</th><th>What</th></tr></thead><tbody>${R.map(e=>`<tr><td>${esc(shortDay(e.date))}</td><td>${esc(e.w)}</td><td>${e.parts.map(x=>esc(x.name+" "+(x.what||""))+(x.ok?"":` <i class="gs-bad">held</i>`)).join("; ")||"labels only"}${e.lab?` <small>(${esc(e.lab)})</small>`:""}</td></tr>`).join("")}</tbody></table>`:"";}
+
+/* ---- the record's part in shape at each render; a file opened with a box collects at once ---- */
+{const ra2=renderAll;renderAll=function(){try{stClean();}catch(e){}const r=ra2.apply(this,arguments);
+  try{const id=S.staff&&S.staff.box&&S.staff.box.site&&S.staff.links.length?S.staff.box.id:"";if(id&&id!==stBoxSeen){stBoxSeen=id;setTimeout(()=>{if(S.staff&&S.staff.box&&S.staff.box.id===id)stCollect(true);},1500);}else if(!id)stBoxSeen="";}catch(e){}return r;};}
+{const rd3=renderData;renderData=function(){const r=rd3.apply(this,arguments);try{stPaint();}catch(e){}return r;};}
+window.__ddStaff={state:()=>S.staff||null,make:stMakeLink,url:stUrlOf,collect:stCollect,purge:stPurge,initials:stInitials,place:(objs,opt)=>stPlaceAll(objs,opt),site:stSite,page:stPageUrl,qr:ddQrSvg};   /* for the workstation's checks */
+try{stClean();stPanel();stPaint();}catch(e){}
+/* collects when the form opens, every five minutes while it is on screen, and on coming back to it */
+setInterval(()=>{if(document.visibilityState==="visible"&&stReady()&&S.staff.links.length)stCollect(true);},ST_EVERY);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&stReady()&&S.staff.links.length&&Date.now()-stAt>ST_EVERY)stCollect(true);});
+</script>
+<style id="dd-v2185-css">
+.dd-staff .st-make{border:1px solid var(--rule-soft,#dce3e7);border-radius:3px;padding:10px 12px;margin:8px 0 12px;background:#f8fafb}
+.dd-staff .field{display:block;margin:0 0 8px}.dd-staff .field input{width:100%;box-sizing:border-box;font-size:16px;min-height:40px}
+.dd-staff .st-tgts{border:1px solid var(--rule-soft,#dce3e7);border-radius:3px;padding:6px 10px;margin:0 0 8px}.dd-staff .st-tgts label{display:block;padding:5px 0;font-size:14px}.dd-staff .st-tgts input{width:auto;margin-right:6px}
+.dd-staff .st-line{font-size:13.5px;margin:6px 0}
+.st-links-w{overflow-x:auto;max-width:100%}
+.st-links,.st-rec{border-collapse:collapse;font-size:13.5px;margin:4px 0 8px;min-width:0}
+.st-links th,.st-links td,.st-rec th,.st-rec td{border-bottom:1px solid var(--rule-soft,#dce3e7);padding:6px 8px;text-align:left;vertical-align:middle}
+.st-links thead th,.st-rec thead th{position:static;font-size:12.5px}
+.st-links tr.st-off td{color:var(--ink-soft,#5a6a72)}.st-links .st-act{white-space:nowrap}.st-links .st-act .btn{min-height:36px;margin:2px 4px 2px 0}
+.st-links code{font-size:13px;letter-spacing:.04em}
+.st-held{margin:6px 0;padding:8px 10px;border:1px solid #e3d29a;background:#fbf6e9;border-radius:3px;font-size:13.5px;line-height:1.45}.st-held .btn{min-height:36px;margin:4px 6px 0 0}
+.dd-staff .dd-actions{gap:8px}.dd-staff details{margin:8px 0}.dd-staff summary{cursor:pointer;font-weight:600;font-size:14px;min-height:32px;padding:4px 0}
+.dd-staff .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+dialog.st-qr-dlg{width:min(480px,calc(100vw - 24px))}dialog.st-qr-dlg .st-qr{max-width:340px;margin:8px auto}dialog.st-qr-dlg .field{display:block}dialog.st-qr-dlg .field input{width:100%;box-sizing:border-box;font-size:14px}
+@media (max-width:560px){.st-links .st-act{white-space:normal}}
+@media print{.dd-staff,dialog.st-qr-dlg{display:none!important}}
+</style>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

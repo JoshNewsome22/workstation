@@ -142,6 +142,24 @@
       return h.length<old.length&&JSON.stringify(hashPayload(h))===js?h:old;}catch(e){return old;}};
   U.payloadFromHash=function(str){try{return hashPayload(str==null?location.hash:str);}catch(e){return null;}};
   U.linkProblem=function(str){str=str==null?location.hash:String(str);return /[#&](z|p)=/.test(str)&&!U.payloadFromHash(str);};
+  /* ---- v21.85 the reply box for a page that is not a questionnaire (staff-data.html): the same lock as the runtime's own
+     sendBox below (a one-time ECDH P-256 key of the page's, the shared secret with the form's public key, HKDF-SHA-256 with
+     the box id as salt and info nbh-reply-v1, AES-GCM-256), as promises. box: {u: box.php's address, b: the box id,
+     k: {x, y} the form's public key}. sealBox gives the body that goes to the site; sendBox posts it as text (no preflight)
+     and resolves with the site's answer ({ok, id}) or rejects with the reason. The runtime keeps its own copy, since a
+     page saved as a file carries the runtime alone. ---- */
+  U.sealBox=function(box,obj){var S=crypto.subtle,kp,iv=crypto.getRandomValues(new Uint8Array(12));
+    return S.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']).then(function(k){kp=k;return S.importKey('jwk',{kty:'EC',crv:'P-256',x:box.k.x,y:box.k.y,ext:true},{name:'ECDH',namedCurve:'P-256'},false,[]);})
+      .then(function(pk){return S.deriveBits({name:'ECDH',public:pk},kp.privateKey,256);})
+      .then(function(bits){return S.importKey('raw',bits,'HKDF',false,['deriveKey']);})
+      .then(function(hk){return S.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc(box.b),info:enc('nbh-reply-v1')},hk,{name:'AES-GCM',length:256},false,['encrypt']);})
+      .then(function(aes){return S.encrypt({name:'AES-GCM',iv:iv},aes,enc(JSON.stringify(obj)));})
+      .then(function(ct){return S.exportKey('jwk',kp.publicKey).then(function(j){return {v:1,k:{x:j.x,y:j.y},iv:bytes64(iv),ct:bytes64(new Uint8Array(ct))};});});};
+  U.sendBox=function(box,obj){if(!(box&&box.u&&box.b&&box.k&&window.crypto&&crypto.subtle&&window.fetch))return Promise.reject(new Error('this browser cannot lock the data'));
+    return U.sealBox(box,obj).then(function(body){return fetch(box.u+(box.u.indexOf('?')>=0?'&':'?')+'a=put&b='+encodeURIComponent(box.b),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(body),cache:'no-store',referrerPolicy:'no-referrer'});},
+        function(e){throw new Error('the data could not be locked ('+((e&&e.message)||e)+')');})
+      .then(function(r){return r.json().then(function(j){if(r.ok&&j&&j.ok)return j;throw new Error((j&&j.error)||('the box answered '+r.status));},function(){throw new Error('the box answered '+r.status);});},
+        function(e){throw new Error(/answered|locked/.test(String(e&&e.message))?e.message:'no connection');});};
   function NBH_RESPOND_RUNTIME(root,P){
     var d=document;function h(tag,attrs,kids){var e=d.createElement(tag);if(attrs)for(var k in attrs){if(k==='text')e.textContent=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else e.setAttribute(k,attrs[k]);}
       (kids||[]).forEach(function(c){if(c)e.appendChild(typeof c==='string'?d.createTextNode(c):c);});return e;}
