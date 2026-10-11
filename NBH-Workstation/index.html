@@ -2842,17 +2842,20 @@ async function masterRun(chosen,opt){opt=opt||{};
            ' scaled to fit, the smallest to ' + Math.round(least * 100) + '%');
        }
      });
-     /* v21.87 a sheet a form starts on a page of its own and fills for its own margins (Form OB-1's observation sheets, at 0.45in)
-        ran a few lines past the packet's taller page (0.62in, for the running head and foot) onto a page of its own: such a
-        sheet, up to a sixteenth taller than the packet's page, is scaled to fit it */
+     /* v21.87 a sheet a form starts on a page of its own and fills for its own margins (Form OB-1's observation sheets, at 0.45in;
+        Form VS-1's card sheets, the whole sheet once scaled to the width) ran a few lines past the packet's taller page (0.62in,
+        for the running head and foot) onto a page of its own: such a sheet, up to a sixteenth taller than the packet's page, is
+        scaled to fit it */
      var PAGEH = (11 - 0.62 * 2) * 96, tall = {};
      document.querySelectorAll('.mp-sec').forEach(function(sec){
        var list = sec.getElementsByTagName('*');
        for (var i = 0; i < list.length; i++) {
          var el = list[i]; if (el.ownerSVGElement) continue;
-         var cs = getComputedStyle(el); if (cs.breakBefore !== 'page' && cs.pageBreakBefore !== 'always') continue;
+         var cs = getComputedStyle(el), starts = cs.breakBefore === 'page' || cs.pageBreakBefore === 'always';
+         if (!starts && cs.breakAfter !== 'page' && cs.pageBreakAfter !== 'always') continue;   /* a page that ends with a break (Form VS-1's card sheets) as well as one that starts with one */
          var h = el.getBoundingClientRect().height;
          if (h < 2) {   /* an empty page of a form (a view with nothing to print, Form OB-1's observation log) gave a blank sheet, and, kept on paper as an empty box at the foot of a full page, pushed the next page on by one: it is left off the paper */
+           if (!starts) continue;
            var shows = false, inner = el.getElementsByTagName('*');
            for (var j = 0; j < inner.length && !shows; j++) { var q = inner[j].getBoundingClientRect(); shows = q.width > 0 && q.height > 0; }
            if (!shows) el.setAttribute('data-mp-empty', '');
