@@ -2170,8 +2170,9 @@ function openFor(ev,d){
    treatment integrity observations (TI-1) */
 const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
   /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence',
-  /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1'];
+  /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff',
+  /* v21.85 the service log */ 'CN-1':'service'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2181,8 +2182,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||(f.evidence&&Object.keys(f.evidence).length)));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||(f.evidence&&Object.keys(f.evidence).length)));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -4889,17 +4890,17 @@ function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{
   const prog=(rv.targets||[]).length?rv.targets.map(t=>T(t.name)+': '+(t.base!=null?t.base:'?')+' → '+(t.cur!=null?t.cur:'?')+(t.chg!=null?' ('+(t.chg>0?'+':'')+t.chg+'%)':'')+(t.decision?', '+T(t.decision):'')).join('; ')+'.'
     :(rv.decisionText||rv.decision?'Last plan review'+(rv.date?' '+rv.date:'')+': '+T(rv.decisionText||rv.decision)+'.':'');
   const safety=[cr.restraints&&+cr.restraints.semester?cr.restraints.semester+' restraint'+(+cr.restraints.semester===1?'':'s')+' this semester'+(cr.restraints.last?' (last '+cr.restraints.last+')':''):'',rc.removals&&+rc.removals.days?rc.removals.days+' days of removal this school year':''].filter(Boolean).join('; ');
-  return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||''};}
+  return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||'',svc:svcText(f)};}
 function iepHTML(){const P=iepParts(),p=packet(),sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',para=t=>t?'<p>'+esc(t)+'<\/p>':'';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>IEP meeting: behavior'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555}ol{margin:0;padding-left:18pt}li{margin:0 0 4pt}@media print{body{margin:0}}<\/style><\/head><body>'+
     '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
     sec('Present levels of behavior',para(P.present))+sec('Goals',P.goals.length?'<ol>'+P.goals.map(x=>'<li>'+esc(x)+'<\/li>').join('')+'<\/ol>':'')+sec('The behavior intervention plan',para(P.plan))+
-    sec('Progress',para(P.prog))+sec('Safety',para(P.safety))+sec('Next',para(P.next?'Next plan review: '+P.next+'.':''))+
+    sec('Behavior services',para(P.svc))+sec('Progress',para(P.prog))+sec('Safety',para(P.safety))+sec('Next',para(P.next?'Next plan review: '+P.next+'.':''))+
     '<p class="s" style="margin-top:14pt">Written from the forms in this case. A draft for the team: read it against the forms and the data before the meeting.<\/p><\/body><\/html>';}
 async function iepOpen(){await gatherFacts(false);const P=iepParts();
   const blk=(id,h,t)=>t?'<h3 class="cl-h">'+h+'<\/h3><p class="iep-t" id="'+id+'">'+esc(t)+'<\/p><p class="td-more"><button type="button" data-copy="'+id+'">Copy<\/button><\/p>':'';
   dialog('IEP meeting packet','<p class="hp-lead">A draft for the team, from the case as the forms give it. Copy each part into the district’s IEP system, or print the packet.<\/p>'+
-    blk('iepPres','Present levels of behavior',P.present)+blk('iepGoals','Goals',P.goals.map((g,i)=>(i+1)+'. '+g).join('\n'))+blk('iepPlan','The behavior intervention plan',P.plan)+blk('iepProg','Progress',P.prog)+blk('iepSafe','Safety',P.safety)+
+    blk('iepPres','Present levels of behavior',P.present)+blk('iepGoals','Goals',P.goals.map((g,i)=>(i+1)+'. '+g).join('\n'))+blk('iepPlan','The behavior intervention plan',P.plan)+blk('iepSvc','Behavior services',P.svc)+blk('iepProg','Progress',P.prog)+blk('iepSafe','Safety',P.safety)+
     '<p class="td-more"><button type="button" class="primary" id="iepPrint">Print the packet<\/button> <button type="button" id="iepForms">Print it with the graph, goals and plan (master print)<\/button><\/p>');}
 function iepPrint(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then try again.');return;}
   try{w.document.open();w.document.write(iepHTML());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
@@ -5079,6 +5080,24 @@ function tdReplies(f){const L=[],R=f.replies||{};Object.keys(R).forEach(id=>{con
   return L;}
 {const ti6=todayItems;todayItems=function(){const f=state.facts||{};let L=ti6.apply(this,arguments);try{L=L.concat(tdReplies(f));}catch(e){}return L;};}
 CL_ORDER.splice(CL_ORDER.indexOf('Data'),0,'Replies');
+/* ======== v21.85 service minutes (Form CN-1's service log, the IEP minutes from DM-1): Today says when they are behind; the IEP packet states them ======== */
+const SVC_KIND={direct:'direct service',consult:'consultation',both:'direct service and consultation'};
+function svcText(f){const sv=(f&&f.service)||{},ip=sv.iep||{},ps=((f&&f.profile)||{}).services||{},T=x=>String(x==null?'':x).trim();
+  const min=+ip.minutes||+ps.minutes||0,per=T(ip.per||ps.per||'month'),kind=SVC_KIND[ip.kind||ps.kind]||'';
+  const bits=[];if(min)bits.push('The IEP gives '+min+' minutes a '+per+' of behavior '+(kind||'services')+'.');
+  if(ip.line)bits.push('Logged on Form CN-1: '+T(ip.line)+'.');
+  const m=sv.month;if(m&&+m.total&&!(per==='month'&&ip.line))bits.push('This month: '+m.total+' minutes logged'+(+m.direct||+m.consult?' ('+[+m.direct?m.direct+' direct':'',+m.consult?m.consult+' consultation':''].filter(Boolean).join(', ')+')':'')+'.');
+  if(T(ps.note))bits.push(T(ps.note).replace(/\.?$/,'.'));
+  return bits.join(' ');}
+/* how far the period has gone (0 to 1), from the week or month the log reports */
+function svcGone(r){if(!r||!r.from||!r.to)return null;const a=new Date(r.from+'T00:00:00'),b=new Date(r.to+'T00:00:00'),n=new Date();n.setHours(0,0,0,0);
+  if(isNaN(a)||isNaN(b)||b<a)return null;const all=(b-a)/864e5+1,done=(n-a)/864e5+1;return Math.max(0,Math.min(1,done/all));}
+function tdService(f){const sv=f&&f.service,ip=sv&&sv.iep;if(!ip||ip.done==null||!(+ip.minutes>0))return [];
+  const r=ip.per==='week'?sv.week:ip.per==='month'?sv.month:null,g=svcGone(r);if(g==null||g<.5)return [];
+  const want=Math.round(+ip.minutes*g);if(+ip.done>=want*.75)return [];
+  return [{k:'Service',t:'IEP service minutes behind: '+esc(ip.line||(ip.done+' of '+ip.minutes+' minutes'))+' on Form CN-1 (about '+want+' by now)',open:'CN-1'}];}
+{const ti5s=todayItems;todayItems=function(){const f=state.facts||{};let L=ti5s.apply(this,arguments);try{L=L.concat(tdService(f));}catch(e){}return L;};}
+CL_ORDER.splice(CL_ORDER.indexOf('Home')+1,0,'Service');
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{
