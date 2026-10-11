@@ -4959,6 +4959,20 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   a.wk-go{display:inline-block;padding:9px 0!important}
   td.nbh-celltap{cursor:pointer}
 }
+/* v21.81 touch: the toolbar's buttons and fields, the view buttons, the tool buttons and the page bar are 44 px tall (Apple's
+   minimum); a checkbox in the toolbar keeps its own size and its label, 44 px tall, is the target. Screen only. */
+@media screen and (pointer:coarse){
+  .toolbar button,.toolbar select,.toolbar input:not([type="checkbox"]):not([type="radio"]),#viewSeg button,button.tool,button.nbh-btn,.nbh-pagenav button{min-height:44px!important}
+  .toolbar input[type="checkbox"],.toolbar input[type="radio"]{min-height:0!important;padding:0!important}
+  .toolbar label:has(> input[type="checkbox"]),.toolbar label:has(> input[type="radio"]){display:inline-flex;align-items:center;min-height:44px}
+}
+/* v21.81 iPad in portrait (834 px wide or less): text a form sets under 12 px (field labels at 11.5 px, the toolbar's "View"
+   at 10 px, table heads, notes) reads at 13 px. The script below marks each such element (data-nbh-fs) and only this
+   screen rule sizes it, so paper never changes; :not(#nbh-none) outweighs a form's own !important size, and a size a
+   script sets on the element itself (text fitted to a card) still wins. */
+@media screen and (max-width:834px){
+  html:not(#nbh-none) body [data-nbh-fs]:not([style*="font-size"]){font-size:13px!important}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -5119,6 +5133,40 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
     var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
     if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
   }, false); } catch (e) {}
+  /* v21.81 iPad in portrait: mark the elements whose own words the form sets under 12 px (not drawings, not fields, not a
+     size a script set on the element, not the walkthrough's drawn stage) so the screen-only rule above shows them at
+     13 px. A marked parent can bring an em-sized child up, so it looks again (three rounds at most); rows the form draws
+     later are looked at when added. All the sizes are read before any mark is written, to keep it quick. A data
+     attribute, so a form setting className keeps the mark. */
+  try { if (window.matchMedia) (function(){
+    var mq = matchMedia('screen and (max-width:834px)'), HTML = 'http://www.w3.org/1999/xhtml', SKIP = /^(SCRIPT|STYLE|INPUT|SELECT|TEXTAREA|OPTION|TEMPLATE|NOSCRIPT)$/, STAGE = '#wkStage,.wk-stage', pend = [], timer = 0;
+    function words(e){ for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true; return false; }
+    function scan(roots){
+      if (!mq.matches) return;
+      for (var round = 0; round < 3; round++) {
+        var pick = [];
+        roots.forEach(function(r){
+          if (!r || r.nodeType !== 1 || !r.isConnected) return;
+          var list = [r].concat(Array.prototype.slice.call(r.getElementsByTagName('*')));
+          for (var i = 0; i < list.length; i++) { var e = list[i];
+            if (e.namespaceURI !== HTML || SKIP.test(e.tagName) || e.hasAttribute('data-nbh-fs') || (e.style && e.style.fontSize) || !words(e)) continue;
+            var fs = parseFloat(getComputedStyle(e).fontSize); if (fs > 0 && fs < 11.95 && !e.closest(STAGE)) pick.push(e); }
+        });
+        if (!pick.length) break;
+        pick.forEach(function(e){ e.setAttribute('data-nbh-fs', ''); });
+      }
+    }
+    function all(){ if (document.body) scan([document.body]); }
+    function later(){ timer = 0; var r = pend; pend = []; try { var set = new Set(r); scan(r.filter(function(n){ for (var p = n.parentNode; p; p = p.parentNode) if (set.has(p)) return false; return true; })); } catch (e) {} }
+    try { new MutationObserver(function(recs){
+      if (!mq.matches) return;
+      recs.forEach(function(m){ for (var i = 0; i < m.addedNodes.length; i++) if (m.addedNodes[i].nodeType === 1) pend.push(m.addedNodes[i]); });
+      if (pend.length && !timer) timer = setTimeout(later, 500);
+    }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+    if (mq.addEventListener) mq.addEventListener('change', all); else if (mq.addListener) mq.addListener(all);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', all); else all();
+    window.addEventListener('load', function(){ setTimeout(all, 300); });
+  })(); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>
