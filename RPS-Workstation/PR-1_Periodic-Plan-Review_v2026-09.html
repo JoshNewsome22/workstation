@@ -1051,6 +1051,9 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Reasoning</th><td colspan="3"><textarea data-m="decWhy" rows="3" placeholder="Against the integrity figure first, then the behavior data, then the replacement"></textarea></td></tr>
       <tr><th>What specifically changes</th><td colspan="3"><textarea data-m="decWhat" rows="3"></textarea></td></tr>
       <tr><th>What stays the same, and why</th><td colspan="3"><textarea data-m="decSame" rows="2" placeholder="Worth recording. A plan changed everywhere at once cannot be evaluated."></textarea></td></tr>
+      <!-- v21.82 what the consumers and the implementers said this period: written from Forms SV-1 and CF-1 while empty -->
+      <tr><th>Social validity (SV-1, this period)</th><td colspan="3"><textarea data-m="svLine" rows="2" class="pr-line" placeholder="Filled from Form SV-1 in the workstation while empty: the post and pre means, the scale and the items rated low"></textarea></td></tr>
+      <tr><th>Contextual fit (CF-1, this period)</th><td colspan="3"><textarea data-m="fitLine" rows="2" class="pr-line" placeholder="Filled from Form CF-1 in the workstation while empty: the mean, the scale, the date and the items rated low"></textarea></td></tr>
       <tr><th>Next review</th><td><input data-m="next"></td>
           <th style="width:18%">Trigger for an earlier review</th><td><textarea data-m="earlier" placeholder="e.g., any restraint, or 3 consecutive days above 4" rows="1" class="pr-line"></textarea></td></tr>
     </table>
@@ -1068,6 +1071,16 @@ table.pr-ddprev{min-width:600px}
       <tr><th>Team representative</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
       <tr><th>Parent informed</th><td class="sigline"></td><th>Date</th><td class="sigline"></td></tr>
     </table>
+    <!-- v21.82 the decision log: close this review into the log and start the next one -->
+    <div class="pr-closebar noprint"><button class="tool" id="prCloseRev" type="button">Close this review and start the next</button><span class="hint" id="prCloseMsg" role="status" aria-live="polite">Adds this review to the log below (date, decision, data, integrity, social validity, contextual fit, actions, next review), then clears this review&rsquo;s entries for the next one. The plan, the periods table, the decision rules and the fading and exit sheet are kept.</span></div>
+  </section>
+
+  <!-- v21.82 the decision log (Ethics Code 2.17, 2.18): every review closed, newest first -->
+  <section class="only-dec pr-logsec" id="prLogSec">
+    <h2 class="nbh-band" style="margin-top:16px">Review Log</h2>
+    <p class="hint">Each review closed with &ldquo;Close this review and start the next&rdquo;, newest first: what was decided, on what data, and what came next. A record of the decisions over time, so a later review can see why the plan is what it is.</p>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px"><button class="tool" id="prLogPrint" type="button">Print the log</button></div>
+    <div class="grid-wrap pr-logwrap" tabindex="0" role="region" aria-label="Review log"><table class="rt pr-grid pr-log" id="prLogTbl"></table></div>
   </section>
 
   <!-- EXIT -->
@@ -4106,6 +4119,118 @@ function prCase80Render(){try{prAssentRender();prProbesRender();}catch(e){}}
 {const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);prCase80Render();return r;};}
 document.addEventListener('input',e=>{if(prCase80&&e.target&&e.target.dataset&&/^(?:dec|date|post|alsoCase)$/.test(e.target.dataset.m||''))prCase80Render();});
 document.addEventListener('change',e=>{if(prCase80&&e.target&&e.target.dataset&&/^(?:dec|date|post)$/.test(e.target.dataset.m||''))prCase80Render();});
+</script>
+
+<style id="pr1-v2182-css">
+/* v21.82 the decision log and the close bar */
+.pr-closebar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 4px}
+.pr-closebar .hint{flex:1 1 260px}
+.pr-log{font-size:12px}
+.pr-log td,.pr-log th{vertical-align:top}
+.pr-log td{white-space:pre-line}
+.pr-exit82{margin-top:8px}
+@media print{section.pr-logsec.pr-logempty{display:none!important}
+  html.pr-printlog .sheet>*:not(.nbh-print-head):not(#prLogSec){display:none!important}
+  html.pr-printlog #prLogSec{display:block!important}
+  .pr-log{font-size:9.5px}.pr-log th,.pr-log td{padding:2px 3px}}
+</style>
+<script id="pr1-v2182">
+/* v21.82 the decision log (Ethics Code 2.17 and 2.18). Each review used to overwrite the last one. "Close this review and
+   start the next" adds the current review to a dated log (S.log, oldest first: date, decision, decisionText, a one-line data
+   summary, integrity, social validity, contextual fit, actions, next review), clears this review's own entries for the next
+   one and sets the review date forward to the next review date. Kept: the student and the plan, the periods table (the
+   whole course), the decision rules, the fading and exit sheet, and the actions still open (an action marked Done or Not
+   doing is in the log and goes). The log is shown newest first and printed, alone if wanted. The log is read back from a
+   saved file part by part, like the rest of the record.
+   Section 4's rows "Social validity (SV-1, this period)" and "Contextual fit (CF-1, this period)" are written from the case
+   (f.sv, f.fit) only while empty, and not again with the line the review closed last already logged (that period's, not
+   this one's); "Contextual fit, if measured" in question 1 takes CF-1's mean the same way.
+   Out: review.log, and review.exitReady {ok, missing} from the Exit Readiness check, now also counting social validity
+   (an SV-1 post mean at or above SV-1's working cut of 4.5) and contextual fit (a CF-1 mean at or above 4, CF-1's
+   "Adequate fit"). With the current review not yet decided, review.date and the decision are the last review closed. */
+let prCase82=null;
+const PR_LOGF=['date','decision','decisionText','why','data','integrity','sv','fit','actions','next','revNo'];
+const PR_KEEPACT=a=>!/^(?:Done|Not doing)$/.test(prT(a.s))&&['a','f','w','b','s'].some(k=>prT(a[k]));
+const PR_CLEAR=['period','why','team','intPct','intDate','intCrit','intType','cf','trained','intN','intMean','intLow','intConLow','intConCom','intConOm',
+  'intImpl','intDrop','intDropNote','alsoCase','alsoCaseWas','repInd','repGap','relapse','dec','decWhy','decWhat','decSame','next','earlier','svLine','fitLine'];
+const prN=v=>{const x=parseFloat(v);return isFinite(x)?x:null;};
+const prF=(x,d)=>x==null?'':(+x).toFixed(d==null?2:d);
+function prSvLine(sv){if(!sv||typeof sv!=='object')return '';const sc=prT(sv.scale)||'1-6',P=[];
+  const rd=(r,nm)=>{if(!r||prN(r.mean)==null)return;P.push(nm+' mean '+prF(r.mean)+(r.n!=null?' ('+r.n+' respondent'+(+r.n===1?'':'s')+(r.date?', '+prMd(r.date)+'/'+String(r.date).slice(0,4):'')+')':(r.date?' ('+prMd(r.date)+'/'+String(r.date).slice(0,4)+')':'')));};
+  rd(sv.post,'Post');rd(sv.pre,'Pre');if(!P.length)return '';
+  const fl=Array.isArray(sv.flagged)?sv.flagged.map(x=>prT(x).replace(/[.\s]+$/,'')).filter(Boolean):[];
+  return 'Form '+(prT(sv.form)||'SV-1')+', scale '+sc+': '+P.join('; ')+'.'+(sv.label?' '+prT(sv.label)+'.':'')+(fl.length?' Rated at the low end: '+fl.join('; ')+'.':' No item rated at the low end.');}
+function prFitLine(fit){if(!fit||typeof fit!=='object'||prN(fit.mean)==null)return '';const lo=Array.isArray(fit.low)?fit.low.map(x=>prT(x).replace(/[.\s]+$/,'')).filter(Boolean):[];
+  return 'Form CF-1, scale '+(prT(fit.scale)||'1-6')+': mean '+prF(fit.mean)+(fit.band?' ('+prT(fit.band)+')':'')+(fit.date?', '+prMd(fit.date)+'/'+String(fit.date).slice(0,4):'')+'.'+(lo.length?' Rated low: '+lo.join('; ')+'.':' No item rated low.');}
+/* the data in one line: the target behavior at baseline and in the most recent period, and the change */
+function prDataLine(){const C=course(),u=prT(S.meta.tUnit),b=prT(S.meta.beh);if(C.b==null&&!C.last)return '';
+  return (b?b+': ':'')+'baseline '+(C.b!=null?f2(C.b):'not recorded')+(C.last?', period '+C.last.n+' '+f2(C.last.t):'')+(u?' '+u:'')+(C.pct!=null?' ('+pctTxt(C.pct)+' against baseline)':'')+'.';}
+function prIntLine(){const m=S.meta,p=prT(m.intPct),mn=prT(m.intMean),n=prT(m.intN),L=[];
+  if(p)L.push(p+'%'+(prT(m.intType)?' '+prT(m.intType).toLowerCase():'')+(prT(m.intDate)?' on '+prT(m.intDate):''));
+  if(mn)L.push('mean '+mn+'%'+(n?' over '+n+' observation'+(n==='1'?'':'s'):''));
+  if(prT(m.intCrit))L.push('critical steps '+prT(m.intCrit)+'%');return L.join('; ');}
+function prActLine(){return S.act.filter(a=>prT(a.a)).map(a=>prT(a.a)+([prT(a.w),prT(a.b)?'by '+prT(a.b):'',prT(a.s)].filter(Boolean).length?' ('+[prT(a.w),prT(a.b)?'by '+prT(a.b):'',prT(a.s)].filter(Boolean).join(', ')+')':'')).join('; ');}
+function prLogEntry(){const m=S.meta,dec=prT(m.dec),fit=prT(m.fitLine)||(prT(m.cf)?'Form CF-1 mean '+prT(m.cf)+' of 6':'');
+  const e={date:prIso(m.date)||prToday(),decision:PR_DEC[dec]||'',decisionText:dec,why:prT(m.decWhy),data:prDataLine(),integrity:prIntLine(),sv:prT(m.svLine),fit,actions:prActLine(),next:prIso(m.next)||prT(m.next),revNo:prT(m.revNo)};
+  Object.keys(e).forEach(k=>{if(e[k]==='')delete e[k];});if(!e.decision)e.decision='';return e;}
+function prLogFromFile(a){if(!Array.isArray(a))return [];return a.filter(x=>x&&typeof x==='object'&&!Array.isArray(x)).map(x=>{const o={};
+  PR_LOGF.forEach(k=>{if(x[k]!=null&&typeof x[k]!=='object'&&String(x[k])!=='')o[k]=String(x[k]);});if(o.decision==null)o.decision='';return o;}).filter(o=>o.date);}
+function prLogRender(){const t=document.getElementById('prLogTbl'),sec=document.getElementById('prLogSec');if(!t)return;const L=Array.isArray(S.log)?S.log:[];
+  sec.classList.toggle('pr-logempty',!L.length);
+  if(!L.length){t.innerHTML='<tbody><tr><td class="hint">No review closed yet. &ldquo;Close this review and start the next&rdquo; adds the review on this form here.</td></tr></tbody>';return;}
+  const md=v=>{const i=prIso(v);return i?prMd(i)+'/'+i.slice(0,4):prEsc(v||'');};
+  t.innerHTML='<thead><tr><th style="width:8%">Date</th><th style="width:12%">Decision</th><th style="width:16%">Data</th><th style="width:10%">Integrity</th><th style="width:16%">Social validity</th><th style="width:12%">Contextual fit</th><th>Actions</th><th style="width:8%">Next review</th></tr></thead><tbody>'+
+    L.slice().reverse().map(e=>'<tr><td>'+md(e.date)+(e.revNo?'<br><small>review '+prEsc(e.revNo)+'</small>':'')+'</td><td><b>'+prEsc(e.decisionText||'not recorded')+'</b>'+(e.why?'<br><small>'+prEsc(e.why)+'</small>':'')+'</td><td>'+prEsc(e.data||'')+'</td><td>'+prEsc(e.integrity||'')+'</td><td>'+prEsc(e.sv||'')+'</td><td>'+prEsc(e.fit||'')+'</td><td>'+prEsc(e.actions||'')+'</td><td>'+md(e.next)+'</td></tr>').join('')+'</tbody>';}
+async function prCloseReview(){const m=S.meta,msg=document.getElementById('prCloseMsg'),dec=prT(m.dec);
+  const q='Close this review and start the next?\nThis review ('+(prT(m.date)||'no date')+(dec?', '+dec:', no decision recorded')+') goes into the review log. Its own entries are then cleared for the next review'+(prT(m.next)?', dated '+prT(m.next):'')+'; the plan, the periods table, the decision rules, the fading and exit sheet and the open actions are kept.';
+  if(!(await nbhUI.confirm(q,{ok:'Close the review'})))return false;
+  const e=prLogEntry();S.log=(Array.isArray(S.log)?S.log:[]).concat([e]);
+  const nx=prT(m.next),rn=prN(m.revNo);
+  PR_CLEAR.forEach(k=>{delete m[k];});m.date=nx;if(rn!=null)m.revNo=String(Math.round(rn)+1);
+  S.act=S.act.filter(PR_KEEPACT);while(S.act.length<3)S.act.push(ACT());delete S.ti;
+  renderAll();
+  const el=document.querySelector('[data-m="date"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));
+  if(msg)msg.textContent='Review of '+(e.date?prMd(e.date)+'/'+e.date.slice(0,4):'')+' added to the log ('+S.log.length+' review'+(S.log.length===1?'':'s')+'). '+(nx?'The next review is dated '+nx+'.':'No next review date was recorded: enter the review date.');
+  return true;}
+document.getElementById('prCloseRev').addEventListener('click',()=>{prCloseReview();});
+document.getElementById('prLogPrint').addEventListener('click',()=>{const h=document.documentElement;h.classList.add('pr-printlog');
+  const off=()=>{h.classList.remove('pr-printlog');window.removeEventListener('afterprint',off);};window.addEventListener('afterprint',off);
+  try{window.print();}finally{setTimeout(off,1500);}});
+/* the log is read back from a saved file (and from the workstation's copy, which is the same file) */
+{const ff=fromFile;fromFile=function(d){const s=ff.apply(this,arguments);const x=d&&typeof d.S==='object'&&d.S?d.S:{};const L=prLogFromFile(x.log);if(L.length)s.log=L;return s;};}
+/* the social validity and contextual fit conditions for exit, from the case */
+function prExit82(){const f=prCase82||{},sv=f.sv,fit=f.fit,miss=[];
+  const cut=sv&&prN(sv.cut)!=null?+sv.cut:4.5,post=sv&&sv.post&&prN(sv.post.mean)!=null?+sv.post.mean:null;
+  if(post==null)miss.push('social validity: no post round on Form SV-1');else if(post<cut)miss.push('social validity: SV-1 post mean '+prF(post)+' is below '+cut);
+  const fm=fit&&prN(fit.mean)!=null?+fit.mean:prN(S.meta.cf);
+  if(fm==null)miss.push('contextual fit: not measured on Form CF-1');else if(fm<4)miss.push('contextual fit: CF-1 mean '+prF(fm)+' is below 4 (adequate fit)');
+  return {miss,post,cut,fm};}
+function prExitReady(){const E=exitState(),X=prExit82(),miss=E.open.map(i=>READY_SHORT[i]+(E.blankT.indexOf(i)>=0?' (ticked, but its entry is blank)':''));
+  if(!E.post)miss.push('the monitoring after exit');X.miss.forEach(x=>miss.push(x));return {ok:!miss.length,missing:miss};}
+function prExit82Render(){let el=document.getElementById('prExit82');const v=document.getElementById('exitVerdict');if(!v)return;
+  if(!el){el=document.createElement('div');el.id='prExit82';el.className='pr-exit82';v.parentNode.insertBefore(el,v.nextSibling);}
+  const X=prExit82();
+  el.innerHTML='<p class="hint" style="margin:4px 0"><b>Also counted before exit:</b> '+(X.miss.length?prEsc(X.miss.join('; '))+'.':'social validity (SV-1 post mean '+prF(X.post)+', at or above '+X.cut+') and contextual fit (CF-1 mean '+prF(X.fm)+') are both met.')+'</p>';}
+{const ra=renderAll;renderAll=function(){if(!Array.isArray(S.log))S.log=[];const r=ra.apply(this,arguments);try{prLogRender();prExit82Render();}catch(e){}return r;};}
+{const re=renderExitVerdict;renderExitVerdict=function(){const r=re.apply(this,arguments);try{prExit82Render();}catch(e){}return r;};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){prCase82=f||null;const r=was?was.apply(this,arguments):null;let k=0;f=f||{};
+  /* a line already logged with the review closed last is that period's, not this one's: it is not written again */
+  const last=Array.isArray(S.log)&&S.log.length?S.log[S.log.length-1]:null,svL=prSvLine(f.sv),fitL=prFitLine(f.fit);
+  const put=(key,v)=>{if(!v||prT(S.meta[key]))return;const el=document.querySelector('[data-m="'+key+'"]');if(el&&prT(el.value))return;S.meta[key]=v;if(el){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));}k++;};
+  if(!last||last.sv!==svL)put('svLine',svL);if(!last||last.fit!==fitL)put('fitLine',fitL);
+  if((!last||last.fit!==fitL)&&f.fit&&prN(f.fit.mean)!=null&&/^1\s*[-–to ]+\s*6$/.test(prT(f.fit.scale)||'1-6'))put('cf',String(Math.round(+f.fit.mean*100)/100));
+  try{prExit82Render();if(k)renderVerdicts();}catch(e){}
+  if(!k)return r;const n=((r&&r.filled)||0)+k;return {filled:n,note:[(r&&r.note)||'','social validity and contextual fit from Forms SV-1 and CF-1'].filter(Boolean).join('; ')};};}
+{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  const L=Array.isArray(S.log)?S.log.map(e=>Object.assign({},e)):[];const o=r&&typeof r==='object'?r:{};
+  if(!o.review&&!L.length)return r;
+  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  const last=L.length?L[L.length-1]:null;
+  if(last&&!prT(S.meta.dec)){const up=prIso(S.meta.date);if(up)rv.upcoming=up;rv.date=last.date;if(!rv.next)rv.next=prIso(last.next)||up||'';if(!rv.next)delete rv.next;
+    rv.decision=last.decision||'';rv.decisionText=last.decisionText||'';
+    if(last.decision==='exit'){const x=rv.exit||{every:prT(S.meta.post),threshold:prT(S.meta.back),thresholdN:null};x.date=last.date;const nc=prNextCheck(last.date,x.every);if(nc)x.next=nc;rv.exit=x;}}
+  rv.log=L;rv.exitReady=prExitReady();o.review=rv;return o;};}
+renderAll();
 </script>
 
 <script>

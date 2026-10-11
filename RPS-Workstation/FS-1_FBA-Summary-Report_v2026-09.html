@@ -898,6 +898,17 @@ td input,td select{max-width:100%}
       <tr><th>Settings assessed</th><td><textarea data-m="settings" rows="2" placeholder="Rooms, activities, times of day, and people present across which data were taken"></textarea></td></tr>
       <tr><th>Settings not assessed</th><td><textarea data-m="notassessed" rows="2" placeholder="Where the behaviour also occurs but no data were taken — the conclusion does not extend there"></textarea></td></tr>
     </table>
+    <!-- v21.82 the background and the student's own voice, in the report and its text; filled from the case only when empty -->
+    <h2 class="nbh-band" style="margin-top:16px">Background and the Student</h2>
+    <p class="hint">What the team knows about the student before the assessment, and what the student and the family said. When the case holds Forms RR-1, DM-1, SI-1 or IN-1, an empty box here is filled from them; what you type is kept. Each box goes into the report under &ldquo;Background and the student&rdquo;.</p>
+    <table class="rt" id="bgTbl">
+      <tr><th style="width:22%">Records (Form RR-1)</th><td><textarea data-m="bgRecords" rows="2" placeholder="Removals this school year, a manifestation determination, earlier interventions and plans, the annual IEP and reevaluation dates"></textarea></td></tr>
+      <tr><th>Strengths, interests and communication (Form DM-1)</th><td><textarea data-m="bgProfile" rows="2" placeholder="What the student does well and likes; how the student communicates and understands"></textarea></td></tr>
+      <tr><th>Health and medications considered (Form DM-1)</th><td><textarea data-m="bgHealth" rows="2" placeholder="Health conditions and medications weighed as possible setting events, and what was concluded"></textarea></td></tr>
+      <tr><th>Language and culture (Form DM-1)</th><td><textarea data-m="bgCulture" rows="2" placeholder="Home language, interpreter, and the cultural, religious or dietary considerations the plan respects"></textarea></td></tr>
+      <tr><th>The student&rsquo;s view (Form SI-1)</th><td><textarea data-m="bgStudent" rows="3" placeholder="The student&rsquo;s own account of what happens before and after, and what the student would like from a plan"></textarea></td></tr>
+      <tr><th>The family&rsquo;s concerns and goals (Form IN-1)</th><td><textarea data-m="bgFamily" rows="2" placeholder="The parent&rsquo;s or guardian&rsquo;s main concerns and what the family wants"></textarea></td></tr>
+    </table>
   </section>
 
   <!-- ===================== EVIDENCE ===================== -->
@@ -3031,6 +3042,10 @@ const METHODS=[
 /* v21.16 audit: tier 0 = recorded for the plan, not a test of what maintains the behavior (the Guide's
    tier table lists no preference, reinforcer or integrity method); such a source supports no function */
 const STR=['','Strong','Moderate','Weak','Does not support','Contradicts'];
+/* v21.82 the background boxes: the field, its heading in the report, its label in the text for the BIP */
+const FS_BG=[['bgRecords','Records','Records (Form RR-1)'],['bgProfile','Strengths, interests and communication','Strengths, interests and communication (Form DM-1)'],
+  ['bgHealth','Health and medications considered','Health and medications considered (Form DM-1)'],['bgCulture','Language and culture','Language and culture (Form DM-1)'],
+  ['bgStudent','The student\u2019s view','The student\u2019s view (Form SI-1)'],['bgFamily','The family\u2019s concerns and goals','The family\u2019s concerns and goals (Form IN-1)']];
 
 function blank(){return{meta:{},src:[],hyp:[],beh:[],cur:0,xa:{}};}
 let S=blank();
@@ -3319,6 +3334,8 @@ function renderReport(){
   let h=`<p class="lead"><b>${esc(m.client)||'[student]'}</b>${m.sid?' ('+esc(m.sid)+')':''}${m.grade?', '+esc(m.grade):''}${m.site?', '+esc(m.site):''}. `+
     `Assessment conducted ${esc(m.window)||'[window]'}${m.bcba?' by '+esc(m.bcba):''}.</p>`;
   if(m.referral)h+=`<h3>Referral question</h3><p>${esc(m.referral)}</p>`;
+  /* v21.82 the background and the student, a paragraph per box with an entry */
+  {const bg=FS_BG.filter(x=>String(m[x[0]]||'').trim());if(bg.length)h+=`<h3>Background and the student</h3>`+bg.map(x=>`<p><b>${x[1]}.</b> ${esc(String(m[x[0]]).trim())}</p>`).join('');}
   h+=`<h3>Methods</h3>`;
   const used=S.src.filter(r=>r.method);
   h+= used.length?`<p>${used.map(r=>esc(r.method)+(rowForm(r)?' (Form '+esc(rowForm(r))+')':'')+(r.dates?', '+esc(r.dates):'')).join('; ')}.</p>`
@@ -3639,6 +3656,7 @@ function bipText(){
   B.push(['STUDENT AND ASSESSMENT',bipLine('Date of birth',m.dob),bipLine('Grade / classroom',m.grade),bipLine('School / site',m.site),bipLine('Case BCBA',m.bcba),
     bipLine('Assessment window',m.window),bipLine('Consent (Form IC-1)',m.consent),bipLine('Assent',m.assent),bipLine('Referral question',m.referral),bipLine('Team',m.team),
     bipLine('Settings assessed',m.settings),bipLine('Settings not assessed',m.notassessed)]);
+  B.push(['BACKGROUND AND THE STUDENT'].concat(FS_BG.map(x=>bipLine(x[2],m[x[0]]))));
   S.beh.forEach((b,i)=>{if(!b.lab&&!b.def)return;
     const na=/^Not applicable/.test(b.sub||''),nc=/^Not classifiable/.test(b.sub||'');
     B.push(['TARGET BEHAVIOR '+(i+1)+': '+(bipTxt(b.lab)||'[target]'),bipLine('Definition',b.def),bipLine('Dimension measured',b.dim),bipLine('Level during assessment',b.base),
@@ -6573,6 +6591,56 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
   const note=bits.join('; ');try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+note+'.',{kind:'ok'});}catch(e){}
   return {n,note};}
 {const fi1=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=(fi1?fi1.apply(this,arguments):null)||{filled:0};const k=fsEvidence(f);
+  return k.n?{filled:(r.filled||0)+k.n,note:[r.note,k.note].filter(Boolean).join('; ')}:r;};}
+</script>
+<script id="v2182-bg">
+"use strict";
+/* v21.82 the background and the student's voice, in. The boxes under "Background and the Student" take, each only when empty:
+   the records (f.records from RR-1: removals this school year, a manifestation determination, earlier interventions when the
+   record carries them, the annual IEP and reevaluation dates), the profile (f.profile from DM-1: strengths, interests, how the
+   student communicates and understands; the health conditions, medications, prescriber and allergies, as weighed setting events;
+   the home language, interpreter and cultural considerations), the student's own account (f.student from SI-1: hypothesis, what
+   the student likes and wants from a plan, assent) and the family's (f.evidence['IN-1'].parent: concerns, goals). The assent
+   status takes f.student.assent when empty. The student interview becomes a row of the evidence table (Form SI-1, an indirect
+   interview, its function and strength left to you), and an interview record with no result yet (only the family's part) is not
+   made a row, so its row still comes with its hypothesis later. Nothing typed is changed. */
+const fsBgT=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const fsBgMd=x=>{x=fsBgT(x);const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(x);return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:x;};
+const fsBgDot=s=>{s=fsBgT(s);return s&&!/[.!?\u201d")]$/.test(s)?s+'.':s;};
+const fsBgList=v=>Array.isArray(v)?v.map(x=>typeof x==='string'?x:x&&(x.name||x.what||x.text)||'').map(fsBgT).filter(Boolean).join('; '):fsBgT(v);
+/* the student interview on the evidence table: its method, its place after IN-1 */
+{const m0=fsEvMethod;fsEvMethod=function(id,e){return id==='SI-1'?METHODS[11][0]:m0(id,e);};if(fsEvOrder.indexOf('SI-1')<0)fsEvOrder.splice(fsEvOrder.indexOf('IN-1')+1,0,'SI-1');fsEvUnit['SI-1']='interview';}
+function fsBgFacts(f){if(!f||typeof f!=='object')return f;const E=Object.assign({},f.evidence||{}),st=f.student||{};
+  Object.keys(E).forEach(id=>{const e=E[id];if(e&&typeof e==='object'&&!fsBgT(e.statement)&&!fsBgT(e.fnKey)&&!fsBgT(e.fn))delete E[id];});
+  if(!E['SI-1']&&fsBgT(st.hypothesis))E['SI-1']={form:'SI-1',method:'Student interview (indirect)',dates:fsBgMd(st.date),n:null,fn:'',fnKey:'',strength:'',statement:fsBgT(st.hypothesis)};
+  return Object.assign({},f,{evidence:E});}
+const FS_ASSENT={given:'Assent given','partial':'Partial assent: given for some parts or some sessions',refused:'Assent refused','not able':'Not able to give assent; consent only'};
+function fsBgCompose(f){const R=f.records||{},P=f.profile||{},H=P.health||{},L=P.language||{},st=f.student||{},par=((f.evidence||{})['IN-1']||{}).parent||{},o={};
+  const rv=R.removals,rec=[];
+  if(rv&&(rv.days!=null||(rv.list||[]).length)){const n=(rv.list||[]).length;rec.push('Removals this school year'+(rv.year?' ('+fsBgT(rv.year)+')':'')+': '+(rv.days!=null?rv.days+' day'+(+rv.days===1?'':'s'):'')+(n?' over '+n+' removal'+(n===1?'':'s'):'')+(rv.at10?'; the 10-day mark is reached':'')+'.');}
+  if(fsBgT(R.mdr))rec.push('Manifestation determination '+fsBgMd(R.mdr)+(R.mdrResult?' ('+fsBgT(R.mdrResult)+')':'')+'.');
+  const prior=fsBgList(R.prior||R.interventions||R.priorInterventions);if(prior)rec.push('Earlier interventions: '+fsBgDot(prior));
+  const iep=fsBgT(R.iep||(P.dates||{}).iep),re=fsBgT(R.reeval||(P.dates||{}).reeval);if(iep||re)rec.push([iep?'Annual IEP '+fsBgMd(iep):'',re?'reevaluation due '+fsBgMd(re):''].filter(Boolean).join('; ')+'.');
+  o.bgRecords=rec.join(' ');
+  o.bgProfile=[P.strengths?'Strengths: '+fsBgDot(P.strengths):'',P.interests?'Interests: '+fsBgDot(P.interests):'',
+    P.expr||P.recep?'Communicates: '+fsBgDot([P.expr?'expressive, '+fsBgT(P.expr):'',P.recep?'receptive, '+fsBgT(P.recep):''].filter(Boolean).join('; ')):''].filter(Boolean).join(' ');
+  const meds=(Array.isArray(H.meds)?H.meds:[]).filter(m=>m&&fsBgT(m.name)).map(m=>fsBgT(m.name)+(m.dose?' '+fsBgT(m.dose):'')+(m.times?' ('+fsBgT(m.times)+')':'')+(m.reason?' for '+fsBgT(m.reason):''));
+  o.bgHealth=[H.conditions?'Health conditions: '+fsBgDot(H.conditions):'',meds.length?'Medications: '+meds.join('; ')+'.':'',H.prescriber?'Prescriber: '+fsBgDot(H.prescriber):'',H.allergies?'Allergies: '+fsBgDot(H.allergies):''].filter(Boolean).join(' ')
+    +((H.conditions||meds.length)?' Considered as possible setting events.':'');
+  o.bgCulture=[L.home?'Home language: '+fsBgT(L.home)+(L.interpreter===true?'; the family needs an interpreter':L.interpreter===false?'; no interpreter needed':'')+'.':(L.interpreter===true?'The family needs an interpreter.':''),
+    L.notes?fsBgDot(L.notes):'',P.culture?'Cultural considerations: '+fsBgDot(P.culture):''].filter(Boolean).join(' ');
+  o.bgStudent=[fsBgDot(st.hypothesis),st.likes?'Likes and does well: '+fsBgDot(st.likes):'',st.preference?'Would like from a plan: '+fsBgDot(st.preference):'',st.assent?'Assent: '+st.assent+'.':''].filter(Boolean).join(' ');
+  o.bgFamily=[par.concerns?'Concerns: '+fsBgDot(par.concerns):'',par.goals?'Goals: '+fsBgDot(par.goals):''].filter(Boolean).join(' ');
+  const a=fsBgT(st.assent).toLowerCase();if(a)o.assent=(FS_ASSENT[a]||fsBgT(st.assent))+' (Form SI-1'+(st.date?', '+fsBgMd(st.date):'')+')';
+  return o;}
+function fsBackground(f){if(!f||typeof f!=='object')return {n:0};const o=fsBgCompose(f),put=[];
+  Object.keys(o).forEach(k=>{const v=fsBgT(o[k]);if(!v||fsBgT(S.meta[k]))return;S.meta[k]=v;put.push(k);});
+  if(!put.length)return {n:0};
+  renderAll();const el=document.querySelector('[data-m="'+put[0]+'"]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));
+  const bg=put.filter(k=>k!=='assent').length,note=[bg?'the background ('+bg+' box'+(bg===1?'':'es')+')':'',put.indexOf('assent')>=0?'the assent status':''].filter(Boolean).join(' and ');
+  try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+note+'.',{kind:'ok'});}catch(e){}
+  return {n:put.length,note};}
+{const fi2=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=(fi2?fi2.call(this,fsBgFacts(f)):null)||{filled:0};let k={n:0};try{k=fsBackground(f);}catch(e){k={n:0};}
   return k.n?{filled:(r.filled||0)+k.n,note:[r.note,k.note].filter(Boolean).join('; ')}:r;};}
 </script>
 </body>

@@ -8734,3 +8734,46 @@ performance). This release fixes what could lose or mix up work, and the iPad's 
 
 Checked by `qa/v2181-test.js` (each shell fix, the memory limit, master print, the file check), `qa/v2181-g-test.js`
 (DD-1's student check and the counted incidents), `qa/v2181-h-test.js` (tab order, TD-1's print with and without the tick).
+
+### v21.82: the clinical gaps in the packet
+
+From the same review's clinical part: the steps that had no record, the forms that did not feed the next, and what the
+FBA report and the BIP left out.
+
+- **The team adopting the plan (Form TD-1).** On the final plan sheet, *Adopted by the team*: the meeting date, who
+  attended, whether the parent attended (or by phone), the parent's input, the student's participation or views, the prior
+  written notice date and the start date, with the plan's version. *Record a revision* adds a row (date, why: modified,
+  faded, exit or other, its notice). When Form PR-1 decides to modify, fade or exit after the last version, TD-1 offers the
+  row (one tap; never by itself). Today and the hand-over check name a plan in use with no record of its adoption, a PR-1
+  decision with no revision recorded, and a revision with no notice date.
+- **The BIP's text (TD-1).** The copy for the BIP and the printed plan now carry the student and family considerations
+  (culture, home language, interpreter, the student's treatment preference, filled from DM-1 and SI-1 while empty), the
+  least restrictive review (what was considered and why the plan is least restrictive), who collects which data, social
+  validity (SV-1), the review date and exit criteria (PR-1), and the adoption and revisions.
+- **The decision log (Form PR-1).** *Close this review and start the next* keeps the review in a dated log (the decision
+  and why, a line of data, integrity, social validity, contextual fit, the actions, the next date), clears the review's own
+  fields and moves the date on; actions still open are carried forward. The log prints with the form or alone. Form
+  DD-1 labels a phase line with the decision made at its start ("Modified 9/22 (PR-1)"), and the transition summary
+  carries the decisions on record. PR-1's section 4 gains the rows *Social validity (SV-1, this period)* and *Contextual
+  fit (CF-1, this period)*, filled from those forms while empty; exit readiness now also asks for SV-1's rating after the
+  plan at 4.5 of 6 or more and CF-1's fit at 4 or more.
+- **The FBA report (Form FS-1)** gains *Background and the Student*: the records (RR-1), strengths, interests and
+  communication, health and medications considered, language and culture (DM-1), the student's own view (SI-1) and the
+  family's concerns and goals (IN-1), each filled only while empty; SI-1 joins the evidence as an interview, and the
+  assent status fills from SI-1.
+- **Form SI-1** has *Assent overall* (given, partial, refused, not able) and *What the student would like from a plan*,
+  and gives the case the student's own account. **Form DM-1** gives the home language, the interpreter need and the
+  cultural considerations. **Form IN-1** gives the parent's concerns and goals.
+- **Home language.** When an interpreter is needed or the home language is not English, the family-facing pages (DD-1's
+  note for home, GB-1's progress report, HD-1's home sheets, CT-1) show a reminder on screen to have the page translated
+  or explained by an interpreter before it goes home. It never prints on the family copy, and nothing is translated.
+- **Form GB-1**: each acquisition objective has a type (acquisition, generalization or maintenance), with buttons that add
+  a generalization or maintenance objective from the first; the progress report reads DD-1's probe marks and settings.
+- **Ready to start** (Today, and Find a form or command): before the plan begins, what the case still needs — consent, the
+  function, the plan, its adoption, notice and start date, each implementer trained to criterion (Form ST-1, which now
+  gives the case its trainee and the competency decision), contextual fit (CF-1), social validity before the plan (SV-1),
+  a crisis plan where DM-1 flags safety, and the daily data. Today names it in the week before the start date.
+
+Checked by `qa/v2182-test.js` (the shell: the new facts, Today, the hand-over check, Ready to start, the summary),
+`qa/v2182-i-test.js` (TD-1), `qa/v2182-j-test.js` (PR-1, SV-1, CF-1), `qa/v2182-k-test.js` (FS-1, SI-1, DM-1, IN-1) and
+`qa/v2182-l-test.js` (ST-1, GB-1, HD-1, CT-1, DD-1).

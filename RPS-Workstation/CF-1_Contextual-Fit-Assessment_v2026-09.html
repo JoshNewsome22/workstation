@@ -3580,6 +3580,24 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
 })();
 </script>
 
+<script id="cf-v2182">
+/* v21.82 Form CF-1's own (not part of the template tools/new-form.py copies). The case: out (new key 'fit'), for Form PR-1
+   and the workstation: the latest round holding ratings (round 2 when it has any), its overall mean on the 1 to 6 scale,
+   its band, its date as ISO (round 2: the re-administration date, else the date administered), how many ratings and
+   respondents it rests on, and the items rated low (at or below the threshold in the toolbar by at least one respondent,
+   as the rating grid flags them). Null while nothing is rated. */
+(function(){
+const iso=t=>{t=String(t==null?'':t).trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t);if(m)return m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0');
+  m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/.exec(t);if(!m)return '';return (m[3].length===2?'20'+m[3]:m[3])+'-'+m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');};
+const was=window.__nbhFactsOut;
+window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{ensure();const A2=analyse(2),rd=A2.n?2:1,A=rd===2?A2:analyse(1);if(!A.n||A.overall==null)return r;
+    const fit={mean:Math.round(A.overall*100)/100,scale:'1-6',low:A.items.filter(x=>x.flag).map(x=>x.txt),round:rd,n:A.n,possible:A.possible,respondents:A.k,thr:S.thr};
+    const b=band(A.overall);if(b)fit.band=b[0];const d=rd===2?(iso(S.meta.readmin)||iso(S.meta.date)):iso(S.meta.date);if(d)fit.date=d;
+    const o=r&&typeof r==='object'?r:{};o.fit=fit;return o;}catch(e){return r;}};
+})();
+</script>
+
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
