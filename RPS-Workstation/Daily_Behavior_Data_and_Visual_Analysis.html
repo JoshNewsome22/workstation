@@ -8135,9 +8135,23 @@ function gsApply(){const g=S.gs;if(!g||!g.cache)return {n:0,days:0,warn:[]};gsUn
       const put=(key,v)=>{if(v===null||v===undefined)return;const k=r.id+"|"+key;if(!(k in A))A[k]=r.values[key]==null?"":String(r.values[key]);r.values[key]=String(v);n++;};
       put(b.id,d.v);if(x.two)put(OPP(b.id),d.o);dates.add(iso);});});
   g.applied=A;g.madeRows=madeR;g.madeBeh=(g.madeBeh||[]).concat(madeB.filter(id=>(g.madeBeh||[]).indexOf(id)<0));return {n,days:dates.size,warn};}
-/* the student on the sheet and on the record: two names with no word in common ask first */
-function gsSameStudent(sheetName){const a=gsK(sheetName).replace(/^simulated\s*[–-]\s*/,""),b=gsK(S.meta.client).replace(/^simulated\s*[–-]\s*/,"");if(!a||!b)return true;
-  const w=x=>x.split(/[\s,]+/).filter(t=>t.length>1);const A=w(a),B=w(b);return A.some(t=>B.indexOf(t)>=0);}
+/* v21.81 the student on the sheet and on the record. When both have a student ID (the sheet's in cell A2) the IDs must
+   match, spaces and leading zeros aside; otherwise the first and last names must both match (case, punctuation, accents,
+   a middle name, a "SIMULATED –" prefix and the "Rivera, Mateo" order aside). A sheet with nothing to compare is taken.
+   A mismatch is taken only once the person has said it is the same student, and that answer holds only for that sheet
+   student (name and ID) and this record (name and ID): it is kept as a key in nameOk. */
+const gsIdN=v=>String(v==null?"":v).replace(/^\s*(student\s*)?(id|number|no\.?)\s*(#|no\.?|number)?\s*[:#.]?\s*/i,"").replace(/^\s*#\s*/,"").replace(/\s+/g,"").replace(/^0+(?=.)/,"").toLowerCase();
+function gsWho(v){const s=String(v==null?"":v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/^\s*student(\s*name)?\s*:\s*/,"").replace(/^\s*simulated\b\s*[–—-]?\s*/,"");
+  const W=t=>t.replace(/[^a-z0-9\s]/g,"").split(/\s+/).filter(Boolean).filter((w,i)=>!(i>0&&/^(jr|sr|ii|iii|iv)$/.test(w)));
+  const m=/^([^,]+),(.+)$/.exec(s);let F,L;if(m){L=W(m[1]);F=W(m[2]);}else{F=W(s);L=F;}
+  if(!F.length||!L.length)return null;return {first:F[0],last:L[L.length-1]};}
+const gsIdClash=id=>{const a=gsIdN(id),b=gsIdN(S.meta.id);return !!(a&&b&&a!==b);};
+function gsSameStudent(sheetName,sheetId){const a=gsIdN(sheetId),b=gsIdN(S.meta.id);if(a&&b)return a===b;
+  const x=gsWho(sheetName),y=gsWho(S.meta.client);if(!x||!y)return true;return x.first===y.first&&x.last===y.last;}
+const gsOkKey=st=>["v2181",gsK((st||{}).name),gsIdN((st||{}).id),gsK(S.meta.client),gsIdN(S.meta.id)].join("|");
+/* confirmed for this sheet student and this record; a name confirmed before v21.81 still holds unless the IDs differ */
+function gsOkFor(st,g){if(!st||!g||!g.nameOk)return false;return g.nameOk===gsOkKey(st)||(!!st.name&&g.nameOk===st.name&&!gsIdClash(st.id));}
+let gsPendKey="",gsPendNote="";
 
 /* ---- reading ---- */
 async function gsRead(opt){opt=opt||{};const g=S.gs;if(!g||!g.id||gsBusy)return false;if(!g.on&&!opt.force)return false;
@@ -8146,8 +8160,9 @@ async function gsRead(opt){opt=opt||{};const g=S.gs;if(!g||!g.id||gsBusy)return 
   try{const vr=await gsValuesOf(g.id,g.tabs.length?g.tabs:[]);const groups=[];let student=null;
     (vr.valueRanges||[]).forEach((v,i)=>{const p=gsParse(v.values||[],g.tabs[i]);if(!p)return;if(!student||!student.name)student=p.student;p.groups.forEach(x=>groups.push(x));});
     if(!groups.length)throw new Error("No target columns were found on the tabs linked (a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns).");
-    if(student&&student.name&&!gsSameStudent(student.name)&&g.nameOk!==student.name){
-      gsErr="name:"+student.name;gsBusy=false;gsBar();return false;}
+    if(student&&(student.name||student.id)&&!gsSameStudent(student.name,student.id)&&!gsOkFor(student,g)){
+      gsPendKey=gsOkKey(student);gsPendNote=gsIdClash(student.id)?` The student IDs differ (sheet ${student.id}, record ${S.meta.id}).`:"";
+      gsErr="name:"+(student.name||"the student with ID "+student.id);gsBusy=false;gsBar();return false;}
     g.cache={student:student||{name:"",id:""},groups};g.read=new Date().toISOString();
     const r=gsApply();renderAll();gsEdited();
     if(!opt.quiet)toast(r.n?"From Google Sheets: "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+"."+(r.warn.length?" "+r.warn.join("; ")+".":""):(r.warn.length?r.warn.join("; "):"The sheet holds no numbers yet."));
@@ -8166,7 +8181,7 @@ function gsBar(){let el=document.getElementById("gsBar");if(!el){const h=documen
   let st="";
   if(gsBusy)st="Reading the sheet…";
   else if(gsErr==="signin")st=`Signed out of Google: the record shows the sheet as last read${g.read?" ("+esc(gsWhen(g.read))+")":""}. <button type="button" class="btn sm" id="gsSign">Sign in to Google</button>`;
-  else if(/^name:/.test(gsErr))st=`<b class="gs-bad">This sheet is for ${esc(gsErr.slice(5))}; the record is for ${esc(S.meta.client||"another student")}.</b> Nothing was taken. <button type="button" class="btn sm" id="gsNameOk">It is the same student: read it</button>`;
+  else if(/^name:/.test(gsErr))st=`<b class="gs-bad">This sheet is for ${esc(gsErr.slice(5))}; the record is for ${esc(S.meta.client||"another student")}.</b>${esc(gsPendNote)} Nothing was taken. <button type="button" class="btn sm" id="gsNameOk">It is the same student: read it</button>`;
   else if(gsErr)st=`<span class="gs-bad">${esc(gsErr)}</span>`;
   else st=g.on?`Read ${esc(gsWhen(g.read))||"not yet"}${n?` · ${n} target${n===1?"":"s"}, ${days} day${days===1?"":"s"}`:""}${(g.warn||[]).length?` · <span class="gs-bad">${esc(g.warn.join("; "))}</span>`:""}. Reads again every five minutes while this is open.`:`Not in use: the record shows only what was typed here.`;
   el.className="gs-bar noprint no-print"+(g.on?"":" gs-paused");
@@ -8210,10 +8225,10 @@ function gsChosen(){const d=gsDlg(),st=gsDlgState;if(!st)return [];return [...d.
 function gsPreview(){const d=gsDlg(),C=gsChosen(),box=d.querySelector("#gsPrev");if(!gsDlgState){box.innerHTML="";return;}
   if(!C.length){box.innerHTML="";d.querySelector("#gsGo").disabled=true;return;}
   const G=[].concat(...C.map(p=>p.groups)),all=[].concat(...G.map(x=>Object.keys(x.days))).sort(),st=C[0].student||{};
-  const same=gsSameStudent(st.name);
+  const same=gsSameStudent(st.name,st.id);
   box.innerHTML=`<div class="gs-prev"><p><b>${G.length} target${G.length===1?"":"s"}</b>, ${new Set(all).size} school day${new Set(all).size===1?"":"s"}${all.length?` (${esc(shortDay(all[0]))} to ${esc(shortDay(all[all.length-1]))})`:""}:</p>
     <ul>${G.map(x=>{const b=S.behaviors.find(y=>gsK(y.name)===gsK(x.name));return `<li><b>${esc(x.name)}</b> · ${esc(KINDS[x.kind]||"")} · ${x.two?"occurrences of opportunities (%)":esc(MEASURES[x.measure].label)} · ${Object.keys(x.days).length} days · ${b?"goes into the record’s row of that name":"<i>a new row in the record</i>"}</li>`;}).join("")}</ul>
-    ${st.name&&!same?`<p class="gs-bad"><b>The sheet is for ${esc(st.name)}; this record is for ${esc(S.meta.client)}.</b> <label><input type="checkbox" id="gsSameOk"> It is the same student</label></p>`:""}</div>`;
+    ${(st.name||st.id)&&!same?`<p class="gs-bad"><b>The sheet is for ${esc(st.name||"the student with ID "+st.id)}; this record is for ${esc(S.meta.client)}.</b>${gsIdClash(st.id)?` The student IDs differ (sheet ${esc(st.id)}, record ${esc(S.meta.id)}).`:""} <label><input type="checkbox" id="gsSameOk"> It is the same student</label></p>`:""}</div>`;
   const ok=()=>{d.querySelector("#gsGo").disabled=!(same||(d.querySelector("#gsSameOk")||{}).checked);};ok();const cb=d.querySelector("#gsSameOk");if(cb)cb.addEventListener("change",ok);}
 async function gsLinkGo(){const d=gsDlg(),st=gsDlgState,C=gsChosen();if(!st||!C.length)return;
   if(S.gs&&S.gs.id&&S.gs.id!==st.id)gsUndo(true);
@@ -8221,8 +8236,8 @@ async function gsLinkGo(){const d=gsDlg(),st=gsDlgState,C=gsChosen();if(!st||!C.
   const EX=['physical aggression','self-injury','property destruction'];
   if(!S.rows.length&&S.behaviors.every(b=>!String(b.definition||'').trim()&&!String(b.aim||'').trim()&&EX.indexOf(gsK(b.name))>=0))S.behaviors=[];
   const groups=[].concat(...C.map(p=>p.groups)),stu=C[0].student||{name:"",id:""};
-  S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name)?"":stu.name,cache:{student:stu,groups}});
-  if(!S.meta.id&&stu.id&&gsSameStudent(stu.name))S.meta.id=stu.id;
+  S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name,stu.id)?"":gsOkKey(stu),cache:{student:stu,groups}});
+  if(!S.meta.id&&stu.id&&gsSameStudent(stu.name,stu.id))S.meta.id=stu.id;
   const r=gsApply();gsErr="";d.close();renderAll();gsEdited();
   toast("Linked. "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+" from the sheet."+(r.warn.length?" "+r.warn.join("; ")+".":""));}
 async function gsUnlinkGo(){if(!S.gs)return;const ok=window.nbhUI&&nbhUI.confirm?await nbhUI.confirm("Unlink the Google Sheet?\nThe days and numbers the sheet wrote are taken out of this record and what was typed here comes back. The sheet itself is not changed.",{ok:"Unlink",danger:true}):confirm("Unlink the Google Sheet?");
@@ -8233,7 +8248,7 @@ document.addEventListener("click",async e=>{const t=e.target;if(!t||!t.closest)r
   if(t.closest("#gsGo")){gsLinkGo();return;}
   if(t.closest("#gsUnlink")){gsUnlinkGo();return;}
   if(t.closest("#gsNow")){gsRead({});return;}
-  if(t.closest("#gsNameOk")){if(S.gs&&/^name:/.test(gsErr)){S.gs.nameOk=gsErr.slice(5);gsErr="";gsRead({});}return;}
+  if(t.closest("#gsNameOk")){if(S.gs&&/^name:/.test(gsErr)){S.gs.nameOk=gsPendKey||gsErr.slice(5);gsErr="";gsRead({});}return;}
   if(t.closest("#gsSign")){try{await gsLoadLib();}catch(err){gsErr=err.message;gsBar();return;}
     gsSignIn().then(()=>{gsErr="";gsRead({});}).catch(err=>{gsErr=err.message==="nokey"?"The Google sign-in key is not set on this device: Change, then give it.":err.message;gsBar();});return;}});
 document.addEventListener("change",e=>{const t=e.target;if(!t)return;
@@ -8486,7 +8501,7 @@ window.__nbhGsRefresh=async function(){const out={linked:false,on:false,signin:f
     for(let k=0;gsBusy&&k<100;k++)await new Promise(r=>setTimeout(r,200));   /* a reading already under way finishes first */
     const ok=await gsRead({quiet:true});out.ok=!!ok;
     if(!ok){if(gsErr==="signin")out.signin=true;
-      else if(/^name:/.test(gsErr))out.err=`The sheet is for ${gsErr.slice(5)}; the record is for ${S.meta.client||"another student"}. Nothing was taken.`;
+      else if(/^name:/.test(gsErr))out.err=`The sheet is for ${gsErr.slice(5)}, not this student: open Form DD-1 to check the link.`;   /* v21.81 */
       else out.err=gsErr||"The sheet could not be read.";}
     else out.days=sheetDays();
     out.to=lastTo();}
@@ -8640,6 +8655,46 @@ dialog.dd-tag-dlg{width:min(560px,calc(100vw - 24px))}
   #dataTable td.col-day .po{display:block;text-align:center;font-size:8.5px;padding:3px 1px;white-space:normal;line-height:1.15}
   #dataTable th.col-day{font-size:8.5px;padding:4px 1px}.dd-byset-w{overflow:visible}}
 </style>
+<script id="dd-v2181">
+/* ===================================================================================================
+   v21.81 an incident counted into a day's count where the Google Sheet writes that day's number. The sheet's number is
+   put back at every reading, so the incident's one is kept apart from it and added on top after each reading: the day
+   shows the sheet's number plus the incidents counted on it. An incident counted on a day the sheet writes rides on the
+   sheet's number (incident.gsc) and is never written into what the record held before the sheet; taking it off (deleted,
+   or no longer counted) takes one off the day only while the sheet shows it. One counted before the sheet came (or while
+   it was set aside) is in the record's own number too, and comes off both. With the sheet set aside the day shows the
+   record's own number again; unlinked, the incidents that rode on the sheet are no longer on a day's count (an edit counts
+   one on the record again). (The student check for the sheet, v21.81, is in the Google Sheets block itself.)
+   =================================================================================================== */
+"use strict";
+let ddGsDropped=0;
+/* the sheet writes this day's number for this behavior now (in use, and in what it applied at its last reading) */
+function ddGsOwns(r,bid){const g=S.gs;return !!(r&&bid&&g&&g.on!==false&&g.applied&&Object.prototype.hasOwnProperty.call(g.applied,r.id+"|"+bid));}
+{const ic1=ddIncCount;ddIncCount=function(i,sign){const b=i&&ddIncBeh(i);if(!i||!ddCountable(b)||!i.date)return ic1.apply(this,arguments);
+  const r=S.rows.find(x=>x.date===i.date),own=ddGsOwns(r,b.id),k=r?r.id+"|"+b.id:"";
+  if(sign>0){if(!own){delete i.gsc;return ic1.apply(this,arguments);}const v=num(r.values[b.id]);r.values[b.id]=String((v||0)+1);i.gsc=true;return true;}
+  if(i.gsc){delete i.gsc;if(own){const v=num(r.values[b.id]);if(v!==null)r.values[b.id]=String(Math.max(0,v-1));}return true;}
+  if(own){const A=S.gs.applied,a=num(A[k]);if(a!==null)A[k]=String(Math.max(0,a-1));const v=num(r.values[b.id]);if(v!==null)r.values[b.id]=String(Math.max(0,v-1));return true;}
+  return ic1.apply(this,arguments);};}
+/* after every reading: each counted incident goes on top of the sheet's number for its day */
+function ddGsIncOn(){let n=0;const g=S.gs;if(!g||g.on===false||!g.applied)return n;
+  (S.incidents||[]).forEach(i=>{if(!i||!i.counted||!i.date)return;const b=ddIncBeh(i);if(!ddCountable(b))return;const r=S.rows.find(x=>x.date===i.date);
+    if(!ddGsOwns(r,b.id))return;const v=num(r.values[b.id]);r.values[b.id]=String((v||0)+1);n++;});return n;}
+{const a2=gsApply;gsApply=function(){const r=a2.apply(this,arguments);try{ddGsIncOn();}catch(e){}return r;};}
+/* unlinked (or another sheet linked in its place): the ones that rode on the sheet's number are no longer counted */
+{const u2=gsUndo;gsUndo=function(drop){const r=u2.apply(this,arguments);if(drop)(S.incidents||[]).forEach(i=>{if(i&&i.gsc){delete i.gsc;if(i.counted){i.counted=false;ddGsDropped++;}}});return r;};}
+{const ul1=gsUnlinkGo;gsUnlinkGo=async function(){ddGsDropped=0;const r=await ul1.apply(this,arguments);
+  if(ddGsDropped&&!S.gs){try{ddIncRender();}catch(e){}toast(`The sheet is unlinked; the record holds only what was typed here. ${ddGsDropped} incident${ddGsDropped===1?" was":"s were"} counted on the sheet’s days and ${ddGsDropped===1?"is":"are"} no longer on a day’s count (Edit, then Add one, counts it on the record).`);}
+  ddGsDropped=0;return r;};}
+/* a file or a restore keeps the mark */
+{const cl3=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],G={};L.forEach(x=>{if(x&&typeof x==="object"&&typeof x.id==="string"&&x.gsc===true)G[x.id.slice(0,40)]=1;});
+  const r=cl3.apply(this,arguments);(S.incidents||[]).forEach(i=>{if(G[i.id]&&i.counted)i.gsc=true;else delete i.gsc;});return r;};}
+/* the incident dialog and the log say where the one goes */
+{const cu1=ddIncCountUi;ddIncCountUi=function(){const r=cu1.apply(this,arguments);try{const d=document.getElementById("dlgInc"),b=S.behaviors.find(x=>x.id===d.querySelector("#incBeh").value),
+  row=S.rows.find(x=>x.date===d.querySelector("#incDate").value);if(ddCountable(b)&&ddGsOwns(row,b.id))d.querySelector("#incCountT").textContent+=" (on top of the Google Sheet’s number for that day, kept at each reading)";}catch(e){}return r;};}
+{const rh1=ddIncRowHtml;ddIncRowHtml=function(i){let h=rh1.apply(this,arguments);try{if(i&&i.counted&&i.gsc){const b=ddIncBeh(i),r=S.rows.find(x=>x.date===i.date);
+  h=h.replace("On the day&rsquo;s count",b&&ddGsOwns(r,b.id)?"On the day&rsquo;s count, on top of the sheet&rsquo;s number":"On the sheet&rsquo;s day count while the sheet is in use");}}catch(e){}return h;};}
+</script>
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same
@@ -9645,6 +9700,20 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   a.wk-go{display:inline-block;padding:9px 0!important}
   td.nbh-celltap{cursor:pointer}
 }
+/* v21.81 touch: the toolbar's buttons and fields, the view buttons, the tool buttons and the page bar are 44 px tall (Apple's
+   minimum); a checkbox in the toolbar keeps its own size and its label, 44 px tall, is the target. Screen only. */
+@media screen and (pointer:coarse){
+  .toolbar button,.toolbar select,.toolbar input:not([type="checkbox"]):not([type="radio"]),#viewSeg button,button.tool,button.nbh-btn,.nbh-pagenav button{min-height:44px!important}
+  .toolbar input[type="checkbox"],.toolbar input[type="radio"]{min-height:0!important;padding:0!important}
+  .toolbar label:has(> input[type="checkbox"]),.toolbar label:has(> input[type="radio"]){display:inline-flex;align-items:center;min-height:44px}
+}
+/* v21.81 iPad in portrait (834 px wide or less): text a form sets under 12 px (field labels at 11.5 px, the toolbar's "View"
+   at 10 px, table heads, notes) reads at 13 px. The script below marks each such element (data-nbh-fs) and only this
+   screen rule sizes it, so paper never changes; :not(#nbh-none) outweighs a form's own !important size, and a size a
+   script sets on the element itself (text fitted to a card) still wins. */
+@media screen and (max-width:834px){
+  html:not(#nbh-none) body [data-nbh-fs]:not([style*="font-size"]){font-size:13px!important}
+}
 /* ---- inside the workstation (v21.36): one dark band is enough, so the form's toolbar goes light when framed ---- */
 html.nbh-framed .toolbar{background:var(--nbh-mist,#eaf2f0);color:var(--nbh-navy,#182e43);box-shadow:0 1px 0 var(--nbh-rule,#cfdad8)}
 html.nbh-framed .tgroup > span,html.nbh-framed .toolbar .lbl,html.nbh-framed .toolbar label{color:var(--nbh-muted,#54676f)}
@@ -9805,6 +9874,40 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
     var td = t.closest('td,th'); if (!td) return; var c = td.querySelectorAll('input,select,textarea,button,a');
     if (c.length !== 1) return; var i = c[0]; if ((i.type !== 'checkbox' && i.type !== 'radio') || i.disabled) return; i.click();
   }, false); } catch (e) {}
+  /* v21.81 iPad in portrait: mark the elements whose own words the form sets under 12 px (not drawings, not fields, not a
+     size a script set on the element, not the walkthrough's drawn stage) so the screen-only rule above shows them at
+     13 px. A marked parent can bring an em-sized child up, so it looks again (three rounds at most); rows the form draws
+     later are looked at when added. All the sizes are read before any mark is written, to keep it quick. A data
+     attribute, so a form setting className keeps the mark. */
+  try { if (window.matchMedia) (function(){
+    var mq = matchMedia('screen and (max-width:834px)'), HTML = 'http://www.w3.org/1999/xhtml', SKIP = /^(SCRIPT|STYLE|INPUT|SELECT|TEXTAREA|OPTION|TEMPLATE|NOSCRIPT)$/, STAGE = '#wkStage,.wk-stage', pend = [], timer = 0;
+    function words(e){ for (var n = e.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true; return false; }
+    function scan(roots){
+      if (!mq.matches) return;
+      for (var round = 0; round < 3; round++) {
+        var pick = [];
+        roots.forEach(function(r){
+          if (!r || r.nodeType !== 1 || !r.isConnected) return;
+          var list = [r].concat(Array.prototype.slice.call(r.getElementsByTagName('*')));
+          for (var i = 0; i < list.length; i++) { var e = list[i];
+            if (e.namespaceURI !== HTML || SKIP.test(e.tagName) || e.hasAttribute('data-nbh-fs') || (e.style && e.style.fontSize) || !words(e)) continue;
+            var fs = parseFloat(getComputedStyle(e).fontSize); if (fs > 0 && fs < 11.95 && !e.closest(STAGE)) pick.push(e); }
+        });
+        if (!pick.length) break;
+        pick.forEach(function(e){ e.setAttribute('data-nbh-fs', ''); });
+      }
+    }
+    function all(){ if (document.body) scan([document.body]); }
+    function later(){ timer = 0; var r = pend; pend = []; try { var set = new Set(r); scan(r.filter(function(n){ for (var p = n.parentNode; p; p = p.parentNode) if (set.has(p)) return false; return true; })); } catch (e) {} }
+    try { new MutationObserver(function(recs){
+      if (!mq.matches) return;
+      recs.forEach(function(m){ for (var i = 0; i < m.addedNodes.length; i++) if (m.addedNodes[i].nodeType === 1) pend.push(m.addedNodes[i]); });
+      if (pend.length && !timer) timer = setTimeout(later, 500);
+    }).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+    if (mq.addEventListener) mq.addEventListener('change', all); else if (mq.addListener) mq.addListener(all);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', all); else all();
+    window.addEventListener('load', function(){ setTimeout(all, 300); });
+  })(); } catch (e) {}
   window.nbhUI = U;
 })();
 </script>
