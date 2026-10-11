@@ -102,12 +102,13 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.evaluate(()=>clearCase());await sleep(800);
   /* 7. at most eight forms loaded; the others put away, filled again when opened */
   const ids=['TB-1','CN-1','DD-1','IC-1','TI-1','GB-1','PA-1','QS-1','HD-1','RR-1'];
-  for(const id of ids){await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id],id,{timeout:30000}).catch(()=>{});await sleep(400);}
+  const tbNow=await sim('TB-1');
+  for(const id of ids.slice(1)){await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id],id,{timeout:30000}).catch(()=>{});await sleep(400);}
   await sleep(6000);
   const r9=await page.evaluate(()=>({frames:Object.keys(state.frames).length,pending:Object.keys(state.pending),cur:state.cur}));
   ok('7a ten forms opened: at most eight stay loaded, the ones viewed longest ago are put away (kept in the case)',r9.frames<=8&&r9.pending.includes('TB-1')&&r9.cur==='RR-1',r9);
   const tbBack=await page.evaluate(async()=>{openForm('TB-1');for(let i=0;i<80&&(state.pending['TB-1']||!state.status['TB-1']);i++)await new Promise(r=>setTimeout(r,250));return {filled:(state.status['TB-1']||{}).filled||0,frames:Object.keys(state.frames).length};});
-  ok('7b a form put away comes back with its work when opened again',tbBack.filled>=f0['TB-1']-2&&tbBack.frames<=9,{tbBack,f0:f0['TB-1']});
+  ok('7b a form put away comes back with its work when opened again',tbNow>20&&tbBack.filled>=tbNow-2&&tbBack.frames<=9,{tbBack,tbNow});
   await page.evaluate(()=>clearCase());await sleep(800);
   /* 8. master print leaves nothing loaded */
   const n0=await page.evaluate(()=>document.querySelectorAll('#frames iframe').length);

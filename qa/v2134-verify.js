@@ -1,20 +1,21 @@
 /* Task V/U verification for the five forms that gained the shared toolbar */
 const {chromium,fs,BASE,wire,sleep}=require('./lib');
 const out=[];const say=(...a)=>{const s=a.join(' ');out.push(s);console.log(s);};
+/* v21.81 the Guide (or Evidence guide / Methods) tabs moved last: the keys are in the bar's order */
 const FORMS=[
- {id:'abc1',file:'ABC_Recording_Conditional_Probability_Analysis.html',keys:['record','incidents','background','analysis','methods','data','walk'],panel:k=>'#panel-'+k,
+ {id:'abc1',file:'ABC_Recording_Conditional_Probability_Analysis.html',keys:['record','incidents','background','analysis','data','walk','methods'],panel:k=>'#panel-'+k,
   ids:['load-demo','printBtn','dl-json','up-json','file-input','dl-csv','dl-matrix','clear-all'],sim:'#load-demo',
   rowTab:'incidents',rowSel:'#inc-table [data-del]',count:'state.entries.length',clear:'#clear-all',cleared:'state.entries.length+state.samples.length'},
  {id:'dd1',file:'Daily_Behavior_Data_and_Visual_Analysis.html',keys:['setup','data','results','walk'],panel:k=>'#tab-'+k,   /* v21.78 the Walkthrough view (v21.47) counted */
   ids:['btnLoadExample','btnPrintTop','btnSave','btnLoad','fileImport','btnCsv','btnClearAll'],sim:'#btnLoadExample',
   rowTab:'setup',rowSel:'#behTable [data-act="delBeh"]',count:'S.behaviors.length',clear:'#btnClearAll',cleared:'S.rows.length',reloads:true},
- {id:'vi1',file:'Variable_Isolation_Protocol.html',keys:['p0','p1','p2','p3','p4','p5','p6','p7','p8'],panel:k=>'#'+k,
+ {id:'vi1',file:'Variable_Isolation_Protocol.html',keys:['p1','p2','p3','p4','p5','p6','p7','p0','p8'],panel:k=>'#'+k,
   ids:['btnSim','btnPrint','btnSave','btnLoad','fileIn','btnClear'],sim:'#btnSim',simAsks:true,
   clear:'#btnClear',cleared:"[...document.querySelectorAll('.panel input[type=text]')].filter(i=>i.value.trim()&&i.value!==i.defaultValue).length"},
- {id:'dt1',file:'Delay-Tolerance-Protocol-Toolkit.html',keys:['p1','p2','p3','p4','p5','p6','p7','p8','p9','p10'],panel:k=>'#'+k,
+ {id:'dt1',file:'Delay-Tolerance-Protocol-Toolkit.html',keys:['p1','p2','p3','p4','p5','p6','p7','p8','p10','p9'],panel:k=>'#'+k,
   ids:['btnSim','btnPrint','btnSave','btnLoad','fileIn','btnClear'],sim:'#btnSim',simAsks:true,
   replaceTab:'p4',replaceBtn:'#btnFade',replaceCount:"document.querySelectorAll('#tbFade tr').length",clear:'#btnClear',cleared:"document.querySelectorAll('#tbFade tr').length",reloads:true},
- {id:'ad1',file:'AD-1_Accumulated-vs-Distributed-Reinforcement_v2026-09.html',keys:['p1','p2','p3','p4','p5','p6','p7','p8','p9','p10'],panel:k=>'#'+k,
+ {id:'ad1',file:'AD-1_Accumulated-vs-Distributed-Reinforcement_v2026-09.html',keys:['p1','p2','p3','p4','p5','p6','p7','p8','p10','p9'],panel:k=>'#'+k,
   ids:['btnSim','btnPrint','btnSave','btnLoad','fileIn','btnClear'],sim:'#btnSim',
   replaceTab:'p3',replaceBtn:'#btnLadder',replaceCount:"document.querySelectorAll('#tbStep tr').length",clear:'#btnClear',cleared:"document.querySelectorAll('#tbSess tr').length",reloads:true}];
 const click=(page,sel)=>page.evaluate(s=>{const el=document.querySelector(s);if(!el)throw new Error('no '+s);el.click();},sel);

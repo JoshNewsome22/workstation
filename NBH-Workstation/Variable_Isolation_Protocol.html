@@ -568,14 +568,14 @@ td input,td select{max-width:100%}
 <div class="toolbar noprint">
   <div class="tgroup"><span>View</span><div class="row">
     <div class="seg" id="viewSeg">
-      <button type="button" data-view="p0" aria-pressed="true">Guide</button>
-      <button type="button" data-view="p1" aria-pressed="false">Setup</button>
+      <button type="button" data-view="p1" aria-pressed="true">Setup</button>
       <button type="button" data-view="p2" aria-pressed="false">Candidates</button>
       <button type="button" data-view="p3" aria-pressed="false">Agreement</button>
       <button type="button" data-view="p4" aria-pressed="false">Difference</button>
       <button type="button" data-view="p5" aria-pressed="false">Concomitant variation</button>
       <button type="button" data-view="p6" aria-pressed="false">Contingency</button>
       <button type="button" data-view="p7" aria-pressed="false">Synthesis &amp; decision</button>
+      <button type="button" data-view="p0" aria-pressed="false">Guide</button>
       <button type="button" data-view="p8" aria-pressed="false">Evidence guide</button>
     </div></div></div>
   <div class="tgroup"><span>Sheet actions</span><div class="row">
@@ -584,14 +584,14 @@ td input,td select{max-width:100%}
 </div>
 <nav class="tabs nbh-tabs nbh-tabs-old" role="tablist" hidden>
   <div class="nbh-tabs-inner">
-  <button class="tab" role="tab" data-p="p0"><span class="n">1</span>Guide</button>
-  <button class="tab" role="tab" data-p="p1"><span class="n">2</span>Setup</button>
-  <button class="tab" role="tab" data-p="p2"><span class="n">3</span>Candidates</button>
-  <button class="tab" role="tab" data-p="p3"><span class="n">4</span>Agreement</button>
-  <button class="tab" role="tab" data-p="p4"><span class="n">5</span>Difference</button>
-  <button class="tab" role="tab" data-p="p5"><span class="n">6</span>Concomitant variation</button>
-  <button class="tab" role="tab" data-p="p6"><span class="n">7</span>Contingency</button>
-  <button class="tab" role="tab" data-p="p7"><span class="n">8</span>Synthesis &amp; decision</button>
+  <button class="tab" role="tab" data-p="p1"><span class="n">1</span>Setup</button>
+  <button class="tab" role="tab" data-p="p2"><span class="n">2</span>Candidates</button>
+  <button class="tab" role="tab" data-p="p3"><span class="n">3</span>Agreement</button>
+  <button class="tab" role="tab" data-p="p4"><span class="n">4</span>Difference</button>
+  <button class="tab" role="tab" data-p="p5"><span class="n">5</span>Concomitant variation</button>
+  <button class="tab" role="tab" data-p="p6"><span class="n">6</span>Contingency</button>
+  <button class="tab" role="tab" data-p="p7"><span class="n">7</span>Synthesis &amp; decision</button>
+  <button class="tab" role="tab" data-p="p0"><span class="n">8</span>Guide</button>
   <button class="tab" role="tab" data-p="p8"><span class="n">9</span>Evidence guide</button>
   </div>
 </nav>
@@ -3088,7 +3088,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     window.scrollTo({top:0});
   }
   tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
-  show('p0');
+  show('p1');   /* v21.81 opens on Setup; the Guide is the last tab */
   /* ---- v21.34: the toolbar's View segment drives the tab row. The row stays in the document, hidden, because the
      walkthrough and the live panel click its buttons; the segment mirrors whichever tab is selected, and the body
      carries view-<key> like the other forms. ---- */
@@ -3500,7 +3500,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
     radio('decision','1');
 
     recalcAll();
-    show('p0');
+    show('p1');
     nbhUI.toast('Simulation loaded: a simulated case across all nine tabs.',{kind:'ok'});
   }
 
