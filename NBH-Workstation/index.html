@@ -1307,6 +1307,7 @@ function filledOf(snap){const d=(snap&&snap.data)||{};let n=0;for(const k in d){
 function snapSig(snap){let h=5381;const s=JSON.stringify((snap&&snap.data)||{});for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return 'f'+(h>>>0).toString(36)+'.'+s.length;}
 function setPending(id,title,snap,copy){state.pending[id]={title:title||'',snap:snap||{total:0,data:{}},copy:!!copy,status:{filled:filledOf(snap),sig:snapSig(snap)}};}
 const caseClean=()=>!!(state.lastSig&&state.lastSig===caseSig());
+const sigBut=id=>caseSig().split('|').filter(x=>x.split(':')[0]!==id).join('|');   /* v21.81 the case's fingerprint without one form */
 /* the case's forms in the order of the file, then any opened since */
 function orderCase(f){const o={};state.caseOrder.concat(Object.keys(f)).forEach(id=>{if(f[id]&&!o[id])o[id]=f[id];});return o;}
 function makeFrame(id,rec){
@@ -1338,7 +1339,10 @@ async function afterLoad(id,fr){
       if(R.positionalSkipped)rep.notes.push(id+': '+R.positionalSkipped+' field'+(R.positionalSkipped===1?'':'s')+' could not be placed because the form has changed shape');
       if(R.unknown)rep.notes.push(id+': '+R.unknown+' saved field'+(R.unknown===1?'':'s')+' no longer exist on this form');}
     /* the case was as its file when this form arrived: it still is (the form's own state now stands for what the file held) */
-    if(clean&&r){state.lastSig=caseSig();state.autoSig=caseSig();}
+    /* v21.81 the case is as saved when every other form is as the saved fingerprint has it (an edit made meanwhile stays unsaved),
+       and this form now holds what the file held for it */
+    const lastBut=String(state.lastSig||'').split('|').filter(x=>x.split(':')[0]!==id).join('|');
+    if(r&&state.lastSig&&sigBut(id)===lastBut){state.lastSig=caseSig();state.autoSig=caseSig();}
     if(id==='TD-1')['GB-1','EB-1'].forEach(k=>{if(state.frames[k])pushPlanTo(k);});
     renderRail();if(typeof paintSave==='function')paintSave();
     if(rep.notes.length&&(!state.restoring||!r))wsUI.toast('Form '+id+', filled from the case: '+rep.notes.join('; '),{kind:'warn',ms:r?9000:20000});
@@ -1413,7 +1417,7 @@ $('#closeForm').addEventListener('click',async()=>{
   let how='remove';
   if(work){how=await wsUI.choose('Close Form '+closing+'?',[{v:'keep',label:'Close',kind:'primary'},{v:'remove',label:'Remove from the case',kind:'danger'},{v:'',label:'Cancel'}],
       'Close keeps its work in '+(packet().client?packet().client+'’s':'the')+' case: Save case writes it, and it is filled again when you open it. Remove from the case leaves it out of the next Save case.');if(!how)return;}
-  else if(!(await wsUI.confirm('Close Form '+closing+'?\nNothing has been typed in it.',{ok:'Close'})))return;
+  else if(!(await wsUI.confirm('Close Form '+closing+'?\nNothing has been typed in it.',{ok:'Close',danger:true})))return;
   if(state.cur!==closing)return;
   if(how==='keep'){if(state.pending[closing]){const fr=state.frames[closing];if(fr)fr.remove();delete state.frames[closing];delete state.status[closing];}   /* still waiting for its saved work: the file's copy stays */
     else if(!(await unloadForm(closing,true))){alert('Form '+closing+' did not answer, so it was left open. Nothing was lost.');return;}}
@@ -1433,7 +1437,7 @@ $('#closeForm').addEventListener('click',async()=>{
 });
 /* v21.81 iPad memory: at most FRAME_CAP forms stay loaded; past that, the one viewed longest ago (never the one on screen or
    side by side) is put away: its work read, kept as the case holds a form not loaded yet, and filled again when opened */
-const FRAME_CAP=8;
+const FRAME_CAP=(()=>{try{const n=parseInt(localStorage.getItem('nbh.frames.cap'),10);return n>=3&&n<=60?n:8;}catch(e){return 8;}})();   /* 8; a device may keep more (nbh.frames.cap) */
 async function unloadForm(id,force){const fr=state.frames[id];if(!fr||state.pending[id]||(!force&&!state.status[id]))return false;
   try{await gatherFacts(false);}catch(e){}
   const r=await grab(id,'snapshot',null,8000);if(!(r&&r.snap)||state.frames[id]!==fr)return false;

@@ -2,6 +2,8 @@
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 (async()=>{
   const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:1000}});wire(page,log);
+  /* v21.81 this test keeps sixteen forms open at once to follow the case between them: past the iPad's eight */
+  await page.addInitScript(()=>{try{localStorage.setItem('nbh.frames.cap','30');}catch(e){}});
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(800);
   const open=async id=>{await page.evaluate(id=>openForm(id),id);
     const fr=await page.waitForSelector(`iframe[title*="Form ${id})"]`,{timeout:8000});await sleep(1200);return (await fr.contentFrame());};

@@ -16,12 +16,16 @@ const same=(x,y)=>{const ks=Object.keys(x||{});if(!ks.length)return 0;let eq=0;k
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};try{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};}catch(e){}});   /* wsUI is a script constant, not a window property */
   /* a case of six filled forms, made from the simulations through the shell's own snapshots; TB-1 first in the file, RA-1 the form that was open */
   const IDS=['TB-1','FS-1','PA-1','RA-1','DD-1','OB-1'];
-  const made=await page.evaluate(async IDS=>{const forms={};for(const id of IDS){openForm(id);const fr=state.frames[id];await new Promise(r=>{fr.addEventListener('load',r,{once:true});setTimeout(r,20000);});
+  let made=await page.evaluate(async IDS=>{const forms={};for(const id of IDS){openForm(id);const fr=state.frames[id];await new Promise(r=>{fr.addEventListener('load',r,{once:true});setTimeout(r,20000);});
       const t=performance.now();while(!state.status[id]&&performance.now()-t<10000)await new Promise(r=>setTimeout(r,50));
       try{const w=fr.contentWindow;w.confirm=()=>true;w.alert=()=>{};if(w.nbhUI)w.nbhUI.confirm=async()=>true;const b=w.document.querySelector('#simBtn,#btnSim,#load-demo,#btnLoadExample');if(b){b.click();await new Promise(r=>setTimeout(r,1800));}}catch(e){}
-      const sn=await grab(id,'snapshot',null,8000);if(sn&&sn.snap)forms[id]={title:sn.title||id,snap:sn.snap};}
-    return forms;},IDS);
-  const d={form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:{client:'Case Open Test',sid:'C-1',grade:'4',site:'Test',bcba:'T'},forms:made,cur:'RA-1'};
+    }
+    /* v21.81 as a real Save case is: the forms have each other's case facts, then each is read, and the facts go in the file */
+    await gatherFacts(true);await new Promise(r=>setTimeout(r,3000));await gatherFacts(true);await new Promise(r=>setTimeout(r,2000));
+    for(const id of IDS){const sn=await grab(id,'snapshot',null,8000);if(sn&&sn.snap)forms[id]={title:sn.title||id,snap:sn.snap};}
+    return {forms,facts:state.facts};},IDS);
+  const facts=made.facts,madeForms=made.forms;made=madeForms;
+  const d={form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:{client:'Case Open Test',sid:'C-1',grade:'4',site:'Test',bcba:'T'},forms:madeForms,facts,cur:'RA-1'};
   ok('the six forms were simulated and snapped',Object.keys(made).length===6&&IDS.every(id=>made[id]&&Object.keys(made[id].snap.data).length>20),IDS.map(id=>id+':'+(made[id]?Object.keys(made[id].snap.data).length:0)));
   fs.writeFileSync(OUT+'case.json',JSON.stringify(d));
   /* 1. Open case, while something is being typed (so the quiet loading waits and the checks are exact) */
@@ -68,7 +72,7 @@ const same=(x,y)=>{const ks=Object.keys(x||{});if(!ks.length)return 0;let eq=0;k
   await page.evaluate(t=>openCaseText(t,null),JSON.stringify(d2));
   const e=await page.evaluate(()=>({cur:state.cur,first:state.caseOrder[0]}));
   ok('a case file without the form to open first opens the first form in the file',e.cur==='TB-1'&&e.first==='TB-1',e);
-  const dirt=await page.evaluate(async()=>{const w=state.frames['TB-1'].contentWindow;const i=[...w.document.querySelectorAll('textarea,input[type="text"],input:not([type])')].find(x=>!x.readOnly&&!x.disabled);i.value=(i.value||'')+' x';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,4800));return caseDirty();});
+  const dirt=await page.evaluate(async()=>{const w=state.frames['TB-1'].contentWindow;const i=[...w.document.querySelectorAll('textarea[name],input[type="text"][name],input[name]:not([type])')].find(x=>!x.readOnly&&!x.disabled&&x.offsetParent!==null&&!/^m\./.test(x.name));   /* v21.81 a saved field of the form, not the student's details (the bar writes those back) */i.value=(i.value||'')+' x';i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));await new Promise(r=>setTimeout(r,4800));return caseDirty();});
   ok('an edit in the open form marks the case unsaved',dirt===true);
   const dl2=page.waitForEvent('download',{timeout:30000});const s2=await page.evaluate(()=>saveCase());await dl2;
   await page.waitForFunction(()=>Object.keys(state.pending).length===0&&!state.warm,null,{timeout:90000}).catch(()=>{});await sleep(5500);
