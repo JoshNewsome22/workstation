@@ -699,6 +699,13 @@ table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0
 .rowDel{border:0;background:transparent;color:#8FA3B4;font:16px/1 sans-serif;cursor:pointer;padding:6px 8px;border-radius:3px}
 .rowDel:hover{background:#fbe9e5;color:#a8321e}
 @media print{td.nx,th.nx,.rowDel{display:none}}
+/* full check: on paper the Trial Record's twelve columns shared the page so tightly that the Date column printed "10/6" as
+   "10/(" (a field's text is clipped at its box). On paper the cells keep a narrower padding and the date has room for a
+   full date (10/06/2026); the table still fits the width of the page. */
+@media print{
+  #sessTbl th,#sessTbl td{padding-left:4px;padding-right:4px}
+  #sessTbl td input[data-f="date"]{min-width:5.6em}
+}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
