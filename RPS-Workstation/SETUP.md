@@ -8850,3 +8850,156 @@ letterhead filled; forms in the workstation, in their own tab, in both one-file 
 
 *Also fixed in v21.84:* a one-file case file (written by Save case in the one-file edition) now carries the picture
 library's block as well, so the forms that use your pictures (VS-1, SM-1, TK-1, TV-1) have them when the case is opened.
+
+### v21.85: privacy, the start screen, switching students, the service log, signatures and staff phones
+
+**Privacy on this iPad**
+
+- **The caseload backup can be locked.** *Back up the caseload* offers a passphrase. With one, the file
+  (`CASELOAD_<date>_locked.json`) is encrypted (PBKDF2-SHA-256, 250,000 rounds, to AES-GCM-256) and *Restore* asks for the
+  passphrase. Without the passphrase the file cannot be read, by anyone: keep it somewhere safe. Without one, the backup
+  is the plain file as before.
+- **Forget a student not saved for 4, 8 or 12 weeks** (Caseload, *never* by default). A student kept on this iPad but not
+  yet in a file, and the student on screen, are never forgotten.
+- **Remove all student data from this iPad** (Caseload, asks first, and again when a student was never saved to a file):
+  the caseload, every Autosave safety copy, this tab's Google sign-ins (DD-1's and the email's) and the caseload's
+  remembered times. The case files you saved are not touched.
+- **Autosave never fails silently.** When the iPad refuses to keep an Autosave (storage full, a private window), the save
+  line says *not kept*; when a safety copy could not be kept, the workstation says so the next time it opens.
+- **Safari's seven days.** Safari can clear what a website keeps after seven days without a visit; installed on the Home
+  Screen, the workstation keeps it. Caseload now says so plainly. Keep each case in its file (Save case) whatever the iPad
+  keeps, and back up the caseload now and then.
+
+**The start screen and switching students**
+
+- Before a case is open, the start screen lists what needs you across the caseload and a button per student; *New
+  student*, *Read a document*, *Open case* and *Caseload* are there too.
+- **Today's count**: the Today button carries the number of items for the student on screen (red for overdue or safety).
+- **Find** also finds the students in the caseload.
+- **Switching to another student** with work not saved to a file asks: *Keep it on this iPad and switch* (the caseload
+  holds the case; Caseload lists it with *Save the file* until it is saved), *Save the file first*, *Switch anyway*, or
+  Cancel.
+- **Side by side** ticks the form on screen and the one viewed before it.
+
+**What the caseload gives**
+
+- *Deadlines to the Calendar (.ics)*: every student's deadlines as one calendar file, with initials only.
+- *Restraint and seclusion report*: every restraint and seclusion across the caseload (Form DD-1's incidents and Form
+  CR-1's notices, each student as at the last save), with the notices done and overdue, on screen and as a spreadsheet
+  (CSV).
+- *What changed* (Today): what the case on screen changed since its last save.
+- *IEP meeting packet* (Today): present levels of behavior from the daily data, the goals, the plan, the behavior services,
+  progress, safety and the next review, each part with Copy for the district's IEP system; *Print the packet*, or print it
+  with the graph, the goals and the plan (Forms DD-1, GB-1 and TD-1).
+
+**The service log (Form CN-1) and the IEP's minutes (Form DM-1)**
+
+- Each consultation note now has its service minutes, kind (direct, consultation, observation, training, meeting, other),
+  with whom and one line. Left empty, each takes the note's own value, shown in grey: the minutes from the start and end
+  times, the kind from the note's type, with whom from the roles under *Present*, the line from the purpose.
+- The *Service log* page: this week (Monday to Sunday) and this month by kind, and against the IEP's minutes ("90 of 120
+  minutes this month"). An IEP kind of consultation counts every kind but direct; direct counts direct only; both counts
+  all. A grading period counts between the days typed on the page.
+- *Print the service log* prints the period chosen alone: student, ID, date of birth, Medicaid ID if typed, each date with
+  start, end, minutes and service, the provider's name and credential, the attestation and the signature line. The CSV
+  holds the same rows.
+- Form DM-1 has a row *Behavior service minutes on the IEP* (minutes, per week, month or grading period, kind, a note);
+  empty, it is read from the BCBA line of the related services table ("2x/wk, 30 min" is 60 a week). Form CN-1 takes it
+  through the case into its empty fields.
+- The workstation reads the log: Today says *IEP service minutes behind* when, past half the week or month, fewer than
+  three quarters of the minutes due by now are logged; the IEP packet states the minutes.
+
+**The adoption meeting signed (Form TD-1)**
+
+- *List the team present* makes a row per person from the Team present box: name, role, how (signed on the iPad, in
+  person, by phone, declined) and the date. Each signs with a finger, a stylus or the mouse; the parent signs the plan.
+- The signatures are kept in TD-1's own file as small pictures and print on the final plan; only the names, roles and dates
+  go to the case (`plan.adoption.signatures`). Copy for the BIP lists who signed.
+
+**Staff record behavior data on their phones (Form DD-1)**
+
+- *Staff phones* (the end of Daily data) makes a link per person, as a QR code to scan, a link to copy or share, with Stop
+  and Resume. The phone page (`staff-data.html`) has a card per target: a count with +1 and −1, a duration with Start and
+  Stop, intervals or opportunities with + and −, assent, the setting, a note. Every tap is kept on the phone; *Send today's
+  data* sends the day, encrypted on the phone to the reply box (the same box as the questionnaires, `box.php`). With no
+  signal it waits on the phone and goes when the page is opened again.
+- The link carries the box, the student's initials, the staff label and the targets, never a name. The site holds only
+  sealed entries it cannot read.
+- Form DD-1 collects on opening and every five minutes (and Collect now): counts add to the day, episodes go into the
+  episode log, + and − make the day's percent; each entry is placed once. A day the team's Google Sheet writes is held,
+  not added on top (the sheet counts the same behavior), with a note to add it on the sheet; other entries it cannot place
+  for certain are held for *Place it*.
+- **Upload `staff-data.html`** with the forms. When the workstation folder has a password, let the page through it as
+  `respond.html` is (HOSTING.md, *Respondent links when `/workstation/` has a password*), or put it in the public folder
+  and give its address under *Reply box and page addresses* in the Staff phones panel.
+
+Checked by `qa/v2185-test.js` (the shell), `qa/v2185-svc-test.js` (the service minutes in the shell), `qa/v2185-r-test.js`
+(CN-1, DM-1 and TD-1) and `qa/v2185-p-test.js` (the phone page and DD-1, with the reply box running).
+
+### v21.86: questionnaires sent from your school email, and the answers straight back
+
+**Sending from your school Google account.** When a form sends its questionnaires (Forms IA-1, IN-1, SV-1 and CF-1), the
+workstation shows who gets an email and offers *Sign in and send* (or *Send*, once signed in on this tab), *Use the Mail app
+instead* and *Not now*. *Sign in and send* opens Google's sign-in in that tap, then sends one email per person from your
+school account through Gmail, each with that person's own link; the form marks each one sent, or names the address Gmail
+refused. The emails are in your Gmail *Sent* folder like any other. The workstation keeps the sign-in for this tab only
+(it is forgotten when the tab closes, and by *Remove all student data from this iPad*).
+
+It falls back to the iPad's Mail app, one email at a time as before, when: the form is opened on its own or in the one-file
+edition; no Google sign-in key is set on this iPad; Gmail is not turned on for the account, or the district has not
+allowed the workstation to send mail; or you chose *Use the Mail app instead*. *Not now* sends nothing.
+
+**Setting it up (once)**, in the same Google Cloud project as Form DD-1's sheet link (*v21.76*, *Setting it up*):
+
+1. *APIs & Services › Library*: find **Gmail API** and press *Enable*.
+2. *Google Auth Platform › Data access*: *Add or remove scopes*, add `.../auth/gmail.send` (send email on your behalf; it
+   cannot read your mail) and `.../auth/userinfo.email` (your address, to say which account it sends from), and save. If the audience is *External*, your district address must be under *Test users*.
+3. The Client ID is the one already pasted in Form DD-1 (the workstation uses the same key; on an iPad without one, paste
+   it in Form DD-1's *Link a Google Sheet* first).
+4. If Google says "Access blocked" or that your administrator has not approved the app, the district's IT can allow it as
+   for the sheet link (*Admin console › Security › Access and data control › API controls › Manage third-party app
+   access*), set to *Trusted*, or *Limited* to Gmail and Google Sheets.
+
+If your school account is not a Google account, nothing changes: the workstation says Gmail could not send, and the Mail
+app is used.
+
+**In the forms.**
+
+- **Form IA-1**, on the send-out board: *Send all due now* (every row not sent whose send-on date has come, or that has
+  none), *Send these* (plans the rows the panel has ticked, then sends them) and *Remind all not back* (the rows sent and
+  past their please-send-by date). The rows are grouped by person: **one email each**, "Hello Ms. Lopez,", each
+  questionnaire with that person's own link, the please-send-by date, "Your answers come straight back to me when you
+  press Send", signed by you. A row is marked Sent (by email, today) only when Gmail sent that person's email; anyone with
+  no email address, or a questionnaire with no wording on Setup yet, is listed plainly. The buttons on each row are as
+  before. IA-1 now collects as soon as it opens (whatever sheet is showing), then every minute and when you come back to
+  the tab.
+- **Forms IN-1, SV-1 and CF-1** have their own reply box (one per file, kept in the file) and a list of people in
+  *Respondent pages*, with *Email everyone not sent yet* and *Remind everyone not back*, through the same email. A reply
+  is placed as their *Collect* places a code; one that does not fit is held, with *Place it anyway* or *Discard*; nothing
+  is placed twice; *Remove the collected replies from the site* empties the box. The email code is still there when the
+  box cannot be reached. A reply box address typed in IA-1 on this iPad is used by these forms too.
+- **The page people open from their email**: their name and role are filled and locked ("Answering as Ms. Lopez
+  (Teacher). Not you? change"), with what the form knows (months known, daily contact, settings); the student is shown as
+  first name and last initial; it ends at **Sent.**, with no code to copy and no email to send.
+- **With the Mail app** (no Google, or *Use the Mail app instead*): one email per person, opened one at a time ("Email 1
+  of 3: Ms. Lopez", *Next person (2 of 3)*); a person's rows are marked when their email is opened.
+
+**The answers straight back, for every student.** Each answer still goes, sealed on the person's phone or computer, to the
+reply box (`box.php`, *v21.65*); what is new is who collects it:
+
+- The open form collects by itself, as before.
+- **By itself**, for **every student kept on this iPad**, the case on screen or not: soon after the workstation opens,
+  every two hours while it is open, and when the iPad is back online (the website edition, with a signal; *Collect
+  replies* in Caseload and *Read every linked sheet* do it at once). Each student's form opens unseen, takes what came
+  back and places it exactly as its own Collect does (questionnaire answers into the instrument, staff phone entries into
+  Form DD-1's days), and the caseload's copy of the case is updated. Nothing is asked; what cannot be placed for certain
+  is held for you. A notice says what came in and for whom.
+- Today and the start screen name the replies held to check, and the questionnaires sent and not back by their date.
+- The caseload's copy is the one updated: when the case is next opened from the caseload, the forms have the answers;
+  *Save case* then puts them in the case file.
+
+Checked by `qa/v2186-test.js` (sending from the account, with Google's sign-in and Gmail simulated),
+`qa/v2186-collect-test.js` (a staff phone entry collected into a closed case, end to end with the reply box),
+`qa/v2186-q-test.js` (IA-1, IN-1, SV-1 and CF-1: grouping, the pages, collecting, the Mail app flow, Not now) and
+`qa/v2186-ia1-shell-test.js` (the whole path in the workstation: IA-1 sends through Gmail, the informant answers from the
+email's link, the workstation collects by itself into the closed case).

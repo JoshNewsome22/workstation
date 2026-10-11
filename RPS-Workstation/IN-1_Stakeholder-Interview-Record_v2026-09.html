@@ -2995,5 +2995,32 @@ const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=
   return Object.assign({},r||{},{evidence:ev});};
 })();
 </script>
+<script id="in-v2186">
+/* v21.86 the reply box and one email per person, through nbh-respond.js (replyKit). The record keeps S.rb (the box with this
+   file's keys, the people sent to, what came back). The Respondent pages dialog lists the people (Add the people on the sheet
+   takes the respondents on the Setup sheet), each with the question set of their role; Email everyone not sent yet sends one email
+   each, through the workstation from the school account or, where it cannot, the Mail app one person at a time. A reply is placed
+   the way Collect responses places a pasted code by default (the respondent of that name, else an empty respondent of that set,
+   else a new one, the role guessed from the relationship); a reply whose question set this form does not hold is held (Discard).
+   Long answers, too long for an email link, need nothing more: the box takes them. The answer code stays the way back when the box
+   cannot be reached. Facts out: replies:{'IN-1':{placed, last, waiting, held}}. */
+(function(){if(!window.NBH_RESPOND||!NBH_RESPOND.replyKit)return;
+const pageOf=role=>{if(ROLES[role])return rpSetOf(role);const t=String(role||'').toLowerCase();if(/parent|guardian|mother|father|caregiver|grand|foster|aunt|uncle/.test(t))return 'parent';if(/^student$|\bself\b/.test(t))return 'student';return 'school';};
+const withSet=(pg,f)=>{const a=$('#rpInst'),va=a.value;a.value=pg;try{return f();}finally{a.value=va;}};
+function place(objs){const res={placed:[],held:[],done:[],cells:0},taken=new Set(),where=[];let last=-1;
+  objs.forEach(o=>{if(!RP_SETS[o.inst]||!o.open||typeof o.open!=='object'){res.held.push({o,why:'fit'});return;}
+    const t=rcTargets(o,taken),r=rcPlace(o,t.def);if(!r){res.held.push({o,why:'fit'});return;}
+    res.placed.push(o);res.cells+=r.cells;last=r.i;where.push('respondent '+(r.i+1)+' ('+(S.resp[r.i].n.trim()||S.resp[r.i].role)+')');});
+  if(res.placed.length){res.done.push(res.placed.length+' response'+(res.placed.length===1?'':'s')+' into '+where.join(', '));renderAll();if(last>=0)S.cur=last;try{renderBar();showCur();}catch(e){}}
+  return res;}
+const kit=NBH_RESPOND.replyKit({form:'IN-1',rec:()=>S,inst:pg=>pg,pages:()=>Object.keys(RP_SETS).map(k=>[k,RP_SETS[k].title]),pageOf,
+  round:()=>'',people:()=>S.resp.filter(r=>String(r.n||'').trim()).map(r=>({name:r.n,role:String(r.rel||'').trim()||r.role,pg:rpSetOf(r.role)})),
+  payload:pg=>withSet(pg,()=>rpPayload()),place,force:null,changed:()=>{try{renderAll();}catch(e){}},
+  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the interviewer',
+  why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
+const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
+window.__rp.payload=rpPayload;window.__rp.kit=kit;
+})();
+</script>
 </body>
 </html>

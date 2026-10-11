@@ -1659,6 +1659,40 @@ window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):n
 })();
 </script>
 
+<script id="cf-v2186">
+/* v21.86 Form CF-1's own (not part of the template tools/new-form.py copies): the reply box and one email per person, through
+   nbh-respond.js (replyKit). The record keeps S.rb (the box with this file's keys, the people sent to, what came back). The
+   Respondent pages dialog lists the people (Add the people on the sheet takes the Respondents table), each with a page of their
+   own (the role picked from theirs) for the dialog's round; Email everyone not sent yet sends one email each, through the
+   workstation from the school account or, where it cannot, the Mail app one person at a time. A reply is placed the way Collect
+   responses places a pasted code (the respondent's column by name, else the next empty one, else a new one, in the page's round);
+   a reply whose item count differs from this form's is held (Place it anyway, Discard). The answer code by email stays the way
+   back when the box cannot be reached. Facts out: replies:{'CF-1':{placed, last, waiting, held}}. */
+(function(){if(!window.NBH_RESPOND||!NBH_RESPOND.replyKit)return;
+const ff=fromFile;fromFile=function(d){const o=ff.apply(this,arguments);if(o&&d&&d.S&&d.S.rb&&typeof d.S.rb==='object')o.rb=NBH_RESPOND.rbNorm(d.S.rb);return o;};   /* the file's box comes back with it */
+const pageOf=role=>{const t=String(role||'').toLowerCase();if(!t)return 'teacher';if(/para|aide|assistant/.test(t))return 'para';
+  if(/slp|speech|language|occupational|\bot\b|physical|\bpt\b|psych|counsel|social work|nurse|provider|therap|bcba|analyst/.test(t))return 'rsp';if(/teacher/.test(t))return 'teacher';return 'other';};
+const withPage=(pg,round,f)=>{const a=$('#rpRole'),b=$('#rpRound'),va=a.value,vb=b.value;a.value=pg;if(round)b.value=String(round);try{return f();}finally{a.value=va;b.value=vb;}};
+function place(objs,force){const res={placed:[],held:[],done:[],cells:0},taken={1:[],2:[]},where=[];let lr=null;
+  objs.forEach(o=>{const P=rpParse(o.inst);if(!P||!Array.isArray(o.ans)||(!force&&o.ans.length!==ITEMS.length)){res.held.push({o,why:'fit'});return;}
+    let j=rpSlot(o,taken[P.round]);if(j<0){S.raters.push({name:'',role:'',when:'',mo:''});j=S.raters.length-1;}taken[P.round].push(j);
+    const r=S.raters[j];if(!String(r.name||'').trim())r.name=String(o.name||'').trim();if(!String(r.role||'').trim())r.role=String(o.role||'').trim()||P.role||'';
+    if(!String(r.when||'').trim())r.when=String(o.when||'').trim();if(!String(r.mo||'').trim())r.mo=String(o.mo||'').trim();
+    ITEMS.forEach((_,i)=>{const v=String((o.ans||[])[i]==null?'':(o.ans||[])[i]);if(/^[1-6]$/.test(v)){S.scores[P.round][k(i,j)]=v;res.cells++;}else delete S.scores[P.round][k(i,j)];});
+    res.placed.push(o);where.push((r.name||'respondent '+(j+1))+' (round '+P.round+')');lr=P.round;});
+  if(res.placed.length){res.done.push(res.placed.length+' response'+(res.placed.length===1?'':'s')+' for '+where.join(', '));S.round=lr;renderAll();}
+  return res;}
+const kit=NBH_RESPOND.replyKit({form:'CF-1',rec:()=>S,inst:(pg,round)=>pg+'-r'+(round||1),pages:()=>RP_ROLES.map(r=>[r[0],r[1]||'Other']),pageOf,
+  round:()=>$('#rpRound').value,roundName:r=>'round '+r,people:()=>S.raters.filter(r=>String(r.name||'').trim()).map(r=>({name:r.name,role:r.role})),
+  fill:s=>{const r=S.raters.find(x=>String(x.name||'').trim().toLowerCase()===s.name.trim().toLowerCase());const o={};if(r){if(String(r.when||'').trim())o.when=String(r.when).trim();if(String(r.mo||'').trim())o.mo=String(r.mo).trim();}return o;},
+  payload:(pg,round)=>withPage(pg,round,()=>rpPayload()),place:objs=>place(objs,false),force:o=>place([o],true),changed:()=>{try{renderAll();}catch(e){}},
+  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the BCBA',
+  why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
+const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
+window.__rp.payload=rpPayload;window.__rp.kit=kit;
+})();
+</script>
+
 <script>
 /* ===================== NBH student packet =====================
    The forms are standalone files and nothing passes between them, so the same

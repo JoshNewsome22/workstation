@@ -1385,9 +1385,10 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
     <div class="nbh-print-meta"><div class="nbh-print-title">Indirect Functional Assessment Protocol</div><div>Form IA-1 &middot; Revised September 2026 &middot; Printed <span class="nbh-print-date"></span></div></div>
   </div>
   <div class="bar nbh-band">Send-outs: Which Questionnaire Went to Whom, and What Came Back</div>
-  <p class="method" style="margin:0 0 10px">Plan the respondent pages for the targets in this file, the instruments and the informants (the informants are shared by every target; untick one to leave it out for a target), then make the pages or links, email them, and watch what comes back. <b>Collect responses</b> marks a row Received and Placed when it reads that informant&rsquo;s code; a row&rsquo;s own buttons mark Sent and Received by hand. With the reply box on your website (v21.65) the answers come straight back: this sheet collects them while it is open, and <b>Collect from the reply box now</b> does it at once. A row&rsquo;s <b>QR</b> shows the link as a code the informant scans with a phone. The dates feed the workstation&rsquo;s case bar (what is due) and the calendar file.</p>
+  <p class="method" style="margin:0 0 10px">Plan the respondent pages for the targets in this file, the instruments and the informants (the informants are shared by every target; untick one to leave it out for a target), then make the pages or links, email them, and watch what comes back. <b>Send all due now</b> (and <b>Send these</b>, for the rows ticked above) sends one email per person from your school account, listing each of that person&rsquo;s questionnaires with a link of their own (the page opens with their name filled in); <b>Remind all not back</b> does the same for the rows past their please-send-by date. Where the workstation cannot send, your Mail app opens for one person at a time. <b>Collect responses</b> marks a row Received and Placed when it reads that informant&rsquo;s code; a row&rsquo;s own buttons mark Sent and Received by hand. With the reply box on your website (v21.65) the answers come straight back: this sheet collects them while it is open, and <b>Collect from the reply box now</b> does it at once. A row&rsquo;s <b>QR</b> shows the link as a code the informant scans with a phone. The dates feed the workstation&rsquo;s case bar (what is due) and the calendar file.</p>
   <div class="noprint" id="outPlan"></div>
-  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><button type="button" class="tool" id="outPlanBtn" style="margin:0">Plan the send-outs</button><button type="button" class="tool" id="outPagesBtn" style="margin:0">Make every page not made yet</button><button type="button" class="tool" id="outIcsBtn" style="margin:0">Add the dates to a calendar (.ics)</button><span id="outNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
+  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><button type="button" class="tool" id="outPlanBtn" style="margin:0">Plan the send-outs</button><button type="button" class="tool" id="outSendThese" style="margin:0" title="Plan the rows ticked above and email them now: one email per person">Send these</button><button type="button" class="tool" id="outPagesBtn" style="margin:0">Make every page not made yet</button><button type="button" class="tool" id="outIcsBtn" style="margin:0">Add the dates to a calendar (.ics)</button><span id="outNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
+  <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px"><button type="button" class="tool" id="outSendDue" style="margin:0" title="Every row not sent whose send-on date has come (or that has none): one email per person, listing each of that person's questionnaires">Send all due now</button><button type="button" class="tool" id="outRemindAll" style="margin:0" title="Every row sent and past its please-send-by date: one reminder per person">Remind all not back</button><span id="outMailNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
   <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px"><button type="button" class="tool" id="outCollectBtn" style="margin:0">Collect from the reply box now</button><button type="button" class="tool" id="outPurgeBtn" style="margin:0">Remove the collected replies from the site</button><span id="outBoxLine" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
   <div class="noprint" id="outHeld"></div>
   <p class="method" id="outSum" style="margin:0 0 8px"></p>
@@ -4394,7 +4395,7 @@ function restore(d){const c=d.counts||{},f=d.fields||{};
     restore1({counts:{inf:c.inf,int:rec.int},fields:Object.assign({},tgtShared(f),rec.fields,{'m.beh':rec.label,'m.def':rec.def})});}
   else{restore1(d);const lab=String(f['m.beh']||'').trim();T.list=[{id:tgtId(),label:lab,def:String(f['m.def']||'').trim(),int:c.int==null?2:+c.int,fields:tgtOwn(f)}];T.cur=T.list[0].id;}
   T.ign=Array.isArray(d.ign)?d.ign.map(x=>String(x).toLowerCase()):[];OUTS=Array.isArray(d.outs)?d.outs.filter(o=>o&&typeof o==='object').map(outNorm):[];DROP=(d.drop&&typeof d.drop==='object'&&!Array.isArray(d.drop))?d.drop:{};
-  BOX=boxNorm(d.box);boxPaint();if(BOX&&BOX.site)setTimeout(()=>{if(boxSite())boxCollect(true);},1500);   /* v21.65 a file with a box: one quiet collect after it opens */
+  BOX=boxNorm(d.box);boxPaint();if(BOX&&BOX.site){setTimeout(()=>{if(boxSite())boxCollect(true);},1500);if(typeof boxAuto==='function')boxAuto();}   /* v21.65 a file with a box: one quiet collect after it opens; v21.86 whatever sheet is showing, then every minute */
   tgtPaint();if(document.body.classList.contains('view-outs'))outsRender();}
 $('#saveBtn').addEventListener('click',()=>{const nm=(val('m.client')||'student').replace(/[^\w-]+/g,'_');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(collect())],{type:'application/json'}));a.download=`IA-1_${nm}_${/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())}.json`;document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
@@ -4791,7 +4792,7 @@ const pad2=n=>String(n).padStart(2,'0');
 const isoToday=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
 function isoOf(x){const t=String(x||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(t))return t;const d=parseDate(t);return d?d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()):'';}
 const mdy=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(iso||'');};
-const outId=()=>'o'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
+let outSeq=0;const outId=()=>'o'+Date.now().toString(36)+(++outSeq).toString(36)+'x'+Math.floor(Math.random()*1e4).toString(36);   /* v21.86 a count as well: rows planned in the same millisecond could share an id */
 function outNorm(o){const s=k=>String(o[k]==null?'':o[k]);return {id:s('id')||outId(),tgt:s('tgt'),inst:OUT_INSTS.indexOf(s('inst'))>=0?s('inst'):'fast',inf:/^[A-E]$/.test(s('inf'))?s('inf'):'',plan:isoOf(s('plan')),due:isoOf(s('due')),made:isoOf(s('made')),sent:isoOf(s('sent')),how:s('how'),recv:isoOf(s('recv')),from:s('from'),placed:!!o.placed,rem:isoOf(s('rem')),note:s('note')};}
 const infIdx=code=>CODES.indexOf(code);
 const infLabel=code=>{const i=infIdx(code);return i<0?'any informant':infName(i);};
@@ -4836,7 +4837,11 @@ function rpPayloadQuiet(key,rec,opt){opt=opt||{};const items=rpWording(key),info
   if(!opt.link){const ph=val('rp.photo');if(/^data:image\//.test(ph))p.photo=ph;}
   if(key==='fast'&&info.credit)p.credit=info.credit;if(key==='fast')p.open=rpOpenFor(key,info,es,P);
   if(key==='wefa'){p.open=rpOpenFor(key,info,es,P);p.openFirst=true;p.openHeading=es?RP_ES.wefaHeading:info.openHeading;}
-  if(key==='pbq')p.pbqVer=String(items.length);p.sig=rpSig(key);const bx=boxLink();if(bx)p.box=bx;return p;}
+  if(key==='pbq')p.pbqVer=String(items.length);p.sig=rpSig(key);const bx=boxLink();if(bx)p.box=bx;
+  if(opt.who&&String(opt.who.name||'').trim()){p.who={name:String(opt.who.name).trim(),role:String(opt.who.role||'').trim(),sid:String(opt.who.sid||'')};const fl={};Object.keys(opt.who.fill||{}).forEach(k=>{const v=String(opt.who.fill[k]||'').trim().slice(0,120);if(v)fl[k]=v;});if(Object.keys(fl).length)p.who.fill=fl;p.student=rpShort()||p.student;}   /* v21.86 a link of the informant's own */
+  return p;}
+/* v21.86 the student on a personal link: first name and last initial ("Mateo R."), not the initials and ID */
+function rpShort(){const nm=val('m.client').trim();return nm&&window.NBH_RESPOND&&NBH_RESPOND.shortName?NBH_RESPOND.shortName(nm):'';}
 function outsWhy(key,rec){if(window.NBH_RESPOND_MISSING)return 'The file nbh-respond.js is not beside this form, so no page can be built.';if(!rec||!rec.label)return 'The target has no label yet: name it on Setup.';
   const n=rpWording(key).length;if(!n)return 'No wording for the '+INST[key].title+' is on the Setup sheet yet: paste its items there (Item Wording for Respondent Pages).';if(rpExpected(key).indexOf(n)<0)return n+' lines of wording for the '+INST[key].title+' where '+rpExpected(key).join(' or ')+' items are expected: check the Setup sheet.';
   if(!val('m.email'))return 'Enter the assessor email on Setup: the answers are sent to it.';return '';}
@@ -4928,9 +4933,9 @@ async function boxDecrypt(r){const S=crypto.subtle,enc=t=>new TextEncoder().enco
   const aes=await S.deriveKey({name:'HKDF',hash:'SHA-256',salt:enc(BOX.id),info:enc('nbh-reply-v1')},hk,{name:'AES-GCM',length:256},false,['decrypt']);
   return JSON.parse(new TextDecoder().decode(await S.decrypt({name:'AES-GCM',iv:boxUnb64(r.iv)},aes,boxUnb64(r.ct))));}
 /* the replies not yet taken, unlocked and placed; quiet: from the timer (no note when nothing is new) */
-function boxCollect(quiet){if(boxCollecting)return boxCollecting;
+function boxCollect(quiet,opt){if(boxCollecting)return boxCollecting;
   boxCollecting=(async()=>{try{
-    if(!(await boxEnsure())){boxPaint();return null;}
+    if(!(opt&&opt.noEnsure?!!(BOX&&BOX.site&&boxCan()):await boxEnsure())){boxPaint();return null;}   /* v21.86 noEnsure: the box's own site, nothing registered (the workstation's quiet collect) */
     const j=await boxFetch(BOX.site+'?a=list&b='+encodeURIComponent(BOX.id)+'&t='+encodeURIComponent(BOX.token));
     const fresh=(j.replies||[]).filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&BOX.got.indexOf(r.id)<0),objs=[];let unread=0;
     for(const r of fresh){try{const o=await boxDecrypt(r);if(o&&typeof o==='object'){o.at=String(r.at||'');objs.push(o);}else unread++;}catch(e){unread++;}BOX.got.push(r.id);}
@@ -4977,8 +4982,10 @@ async function boxPurge(){if(!BOX||!BOX.got.length||!boxReady())return null;try{
 $('#outCollectBtn').addEventListener('click',()=>boxCollect(false));
 $('#outPurgeBtn').addEventListener('click',async()=>{if(!BOX||!BOX.got.length)return;if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm('Remove the '+BOX.got.length+' collected repl'+(BOX.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'})))return;}boxPurge();});
 /* the Send-outs sheet collects while it is open: once on opening, then every minute */
-window.__ia1BoxOuts=function(){boxHeldPaint();boxPaint();if(boxSite()&&BOX&&BOX.site)boxCollect(true);
-  if(!boxTimer)boxTimer=setInterval(()=>{if(document.body.classList.contains('view-outs')&&!document.hidden&&boxReady())boxCollect(true);},60000);};
+window.__ia1BoxOuts=function(){boxHeldPaint();boxPaint();if(boxSite()&&BOX&&BOX.site)boxCollect(true);boxAuto();};
+/* v21.86 the form collects while it is open, whatever sheet is showing: every minute while it is in view, and when it comes back into view */
+function boxAuto(){if(!boxTimer)boxTimer=setInterval(()=>{if(!document.hidden&&boxReady())boxCollect(true);},60000);}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&BOX&&BOX.site&&boxReady())boxCollect(true);});
 /* ---------- (v21.65) the QR code of a link (qrcode-generator, inlined above) ---------- */
 function qrSvg(url){url=String(url||'').trim();if(!url||typeof qrcode!=='function')return '';
   try{const q=qrcode(0,'L');q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+='M'+(c+m)+' '+(r+m)+'h1v1h-1z';
@@ -4991,6 +4998,52 @@ $('#qrShare').addEventListener('click',()=>{if(!qrUrl||!navigator.share)return;n
 $('#qrCopy').addEventListener('click',async()=>{if(!qrUrl)return;try{await navigator.clipboard.writeText(qrUrl);$('#qrStatus').textContent='Link copied.';}catch(e){$('#qrStatus').textContent='The clipboard was refused: use Share, or Copy a link in Respondent pages.';}});
 $('#qrDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 boxPaint();
+/* ---------- (v21.86) one email per person, all at once ----------
+   Send all due now (every row not sent whose send-on date has come, or that has none), Send these (the rows the plan panel ticks,
+   planned first) and Remind all not back (the rows sent and past their please-send-by date) group the rows by informant: one email
+   per person, a plain greeting, each of that person's questionnaires with a link of its own (the informant's name and role filled
+   and locked on the page, the student by first name and last initial), the please-send-by date, and how the answers come back. The
+   workstation sends them from the BCBA's school account (nbh-respond.js mailFlow, the mail contract); a row is marked Sent (by
+   email, today) only for the people it reports sent, and the others are listed with the reason. Opened on its own, or where the
+   workstation cannot send, the Mail app opens one person at a time ("Next person (2 of 5)"), and a person's rows are marked when
+   their email is opened; the user saying Not now in the workstation leaves the rows unsent. The per-row buttons are as before. */
+const outsDueNow=()=>{const td=isoToday();return OUTS.filter(o=>!o.sent&&!o.recv&&(!o.plan||o.plan<=td));};
+const outsLateNow=()=>{const td=isoToday();return OUTS.filter(o=>o.sent&&!o.recv&&o.due&&o.due<td);};
+function outsPersonLink(o){const r=tgtRec(o.tgt),why=outsWhy(o.inst,r);if(why)return {why};if(!/^https?:$/.test(location.protocol))return {why:'opened from a folder, links need the workstation on its website'};
+  const i=infIdx(o.inf),p=rpPayloadQuiet(o.inst,r,{due:o.due,link:true,who:{name:val('inf['+i+'].name'),role:val('inf['+i+'].role'),sid:o.id,fill:{mo:val('inf['+i+'].mo'),daily:val('inf['+i+'].daily'),set:val('inf['+i+'].set')}}});
+  return {url:rpBaseUrl()+NBH_RESPOND.payloadToHash(p),title:INST[o.inst].title,label:INST[o.inst].title+' about '+r.label,boxed:!!p.box};}
+async function outsMailRows(rows,remind){const say=t=>{$('#outMailNote').textContent=t;};
+  if(window.NBH_RESPOND_MISSING||!window.NBH_RESPOND||!NBH_RESPOND.mailFlow){say('The file nbh-respond.js is not beside this form, so no email can be made.');return null;}
+  tgtStore();if(!rows.length){say(remind?'No row is past its please-send-by date without an answer: no one to remind.':'Nothing is due: every row is sent, or its send-on date has not come yet.');return null;}
+  await boxEnsure();
+  const by={},skip=[];
+  rows.forEach(o=>{const who=o.inf?infLabel(o.inf):'a row with no informant';if(!o.inf){skip.push(who);return;}
+    const i=infIdx(o.inf),to=String(infEmail(o.inf)||'').trim();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){skip.push(who+' (no email on the informant table on Setup)');return;}
+    const l=outsPersonLink(o);if(l.why){skip.push(INST[o.inst].title+' for '+who+' ('+l.why.replace(/\.$/,'')+')');return;}
+    const g=by[o.inf]=by[o.inf]||{to,name:val('inf['+i+'].name').trim()||who,rows:[],items:[]};g.rows.push(o);g.items.push({title:l.title,label:l.label,url:l.url,due:o.due?mdy(o.due):'',boxed:l.boxed});});
+  const people=CODES.map(c=>by[c]).filter(Boolean);
+  if(!people.length){say('Nothing sent: '+skip.join('; ')+'.');return null;}
+  const msgs=people.map(p=>NBH_RESPOND.personMail({to:p.to,name:p.name,items:p.items,student:rpShort()||rpInitials(),bcba:val('m.assessor'),remind,lang:val('rp.lang')}));
+  const mark=k=>{const p=people[k];if(!p)return;const td=isoToday();p.rows.forEach(o=>{if(remind)o.rem=td;else{o.sent=td;o.how='email';if(!o.made)o.made=td;}});outsRender();};
+  const nm=k=>people[k].name,rw=ks=>ks.reduce((a,k)=>a+people[k].rows.length,0),marked=ks=>rw(ks)+' row'+(rw(ks)===1?'':'s')+' marked '+(remind?'reminded':'Sent')+'.';
+  const sum=out=>{let t='';
+    if(out.declined)t='Not sent.';
+    else if(out.via==='workstation')t=(out.sent.length?(remind?'Reminders sent to ':'Sent to ')+out.sent.length+' of '+people.length+' (one email each'+(out.from?', from '+out.from:'')+'): '+out.sent.map(nm).join(', ')+'; '+marked(out.sent):'Nothing was sent.')+(out.failed.length?' Not sent: '+out.failed.map(f=>nm(f.k)+' ('+people[f.k].to+'): '+f.err).join('; ')+'.':'');
+    else if(out.via==='mail')t='The workstation could not send ('+out.why+'), so the Mail app opens one person at a time. '+(out.sent.length?out.sent.length+' of '+people.length+' opened ('+out.sent.map(nm).join(', ')+'); '+marked(out.sent):'None opened yet.');
+    if(t&&skip.length)t+=' Left out: '+skip.join('; ')+'.';if(t)say(t);};
+  return NBH_RESPOND.mailFlow({form:'IA-1',messages:msgs,remind,onSent:k=>mark(k),onUpdate:sum});}
+$('#outSendDue').addEventListener('click',()=>outsMailRows(outsDueNow(),false));
+$('#outRemindAll').addEventListener('click',()=>outsMailRows(outsLateNow(),true));
+$('#outSendThese').addEventListener('click',()=>{outsPlan();if(!PLANUI)return;const tg=PLANUI.t,ins=PLANUI.i;outsMailRows(OUTS.filter(o=>!o.sent&&!o.recv&&o.inf&&tg.indexOf(o.tgt)>=0&&ins.indexOf(o.inst)>=0&&(DROP[o.tgt]||[]).indexOf(o.inf)<0),false);});
+Object.assign(window.__rp,{mailRows:outsMailRows,dueNow:outsDueNow,lateNow:outsLateNow,personLink:outsPersonLink});   /* for the checks */
+/* v21.86 the workstation's side. Collecting without opening (its morning refresh, in a hidden frame): the box's own site, no
+   dialog, nothing asked. What came back, for the case: replies:{'IA-1':{placed, last, waiting, held}} (the rows placed, the latest
+   date one came back, the rows sent and not back, the replies held on the Send-outs sheet). */
+window.__nbhBoxCollect=async()=>{try{if(!BOX||!BOX.site||!boxCan())return {ok:true,placed:0,held:0,err:''};const r=await boxCollect(true,{noEnsure:true});
+  return r?{ok:true,placed:r.placed,held:r.held,err:''}:{ok:false,placed:0,held:0,err:boxLast||'the reply box could not be reached'};}catch(e){return {ok:false,placed:0,held:0,err:String((e&&e.message)||e)};}};
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  try{if(!BOX&&!OUTS.length)return r;const pl=OUTS.filter(o=>o.placed),last=pl.map(o=>o.recv).filter(Boolean).sort().pop(),x={placed:pl.length,waiting:OUTS.filter(o=>o.sent&&!o.recv).length,held:BOX?BOX.held.length:0};if(last)x.last=last;
+    return Object.assign({},r||{},{replies:Object.assign({},(r&&r.replies)||{},{'IA-1':x})});}catch(e){return r;}};})();
 
 /* ia1-walk:begin */
 /* ===== walk-script.json: the narration's words (read when nbh-ia1-narration.js is not beside the form) ===== */

@@ -397,6 +397,10 @@ body.bar-folded #barSum{display:flex}
   .railhead button.sm{min-height:40px;padding:8px 12px}
   #cfDlg .df button,#dlg .df button{min-height:44px}
 }
+/* v21.85 the start screen's caseload, Today's count, the IEP packet's text */
+#todayBtn{position:relative}.tbadge{position:absolute;top:-5px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#5b6b75;color:#fff;font:700 11px/18px Inter,system-ui,sans-serif;padding:0 5px;text-align:center;pointer-events:none}.tbadge.red{background:#c0392b}.tbadge[hidden]{display:none}
+#blankCl h2{margin-top:0}.bl-st{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.bl-stu{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:150px;min-height:52px;padding:8px 12px;border:1px solid var(--rule,#cfd8dc);border-radius:10px;background:#fff;cursor:pointer;font:inherit;text-align:left}.bl-stu span{font-size:12.5px;color:var(--muted,#5b6b75)}.bl-hr{border:0;border-top:1px solid var(--rule,#cfd8dc);margin:14px 0}
+.iep-t{white-space:pre-line;background:#f6f9fa;border:1px solid var(--rule,#dde5e8);border-radius:8px;padding:10px 12px;font-size:14px;line-height:1.5}.td-more button.danger{color:#a8321e;border-color:#e2b5ab}
 /* v21.83 room for the form on the iPad: the buttons used now and then go into More */
 .more-btn{display:none}
 #moreMenu{position:fixed;z-index:60;background:#fff;border:1px solid var(--rule,#cfd8dc);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;display:flex;flex-direction:column;min-width:220px}
@@ -1782,7 +1786,7 @@ function setSplit(ids){
 $('#splitBtn').addEventListener('click',()=>{
   const open=ALL.map(f=>f[0]).filter(id=>state.frames[id]);
   if(open.length<2){alert('Open a second form first: pick it from the list, then press Side by side. Two or three open forms can show at once, each with its own timer, counts and save.');return;}
-  const checked=splitOn()?state.split:[state.cur].filter(Boolean);
+  const checked=splitOn()?state.split:[state.cur].concat((state.seen||[]).slice().reverse().filter(x=>x!==state.cur&&state.frames[x]).slice(0,1)).filter(Boolean);   /* v21.85 the form viewed before is ticked too */
   dialog('Side by side',
     '<p>Tick two or three of the open forms. They show as columns, each working on its own; a form opened from the list while the view is split takes a column. For an observation, OB-1, MT-1 and ABC-1 together let the narrative, the interval sample and the ABC record run from one screen.</p>'+
     '<div class="sb-list">'+open.map(id=>{const rec=ALL.find(f=>f[0]===id);return '<label class="sb-row"><input type="checkbox" value="'+id+'"'+(checked.includes(id)?' checked':'')+'> <b>'+esc(id)+'</b> '+esc(rec[1])+'</label>';}).join('')+'</div>'+
@@ -2166,8 +2170,9 @@ function openFor(ev,d){
    treatment integrity observations (TI-1) */
 const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
   /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence',
-  /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1'];
+  /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff',
+  /* v21.85 the service log */ 'CN-1':'service'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false;
 function noteFactSource(id,st){
@@ -2177,8 +2182,8 @@ function noteFactSource(id,st){
   clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||(f.evidence&&Object.keys(f.evidence).length)));}
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||(f.evidence&&Object.keys(f.evidence).length)));}
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;return;}
   factsBusy=true;
@@ -2199,6 +2204,7 @@ async function gatherFacts(push){
         if(out&&out.prefs){f.prefs=out.prefs;f.src.prefs='PA-1';}else if(f.src.prefs)drop('prefs');}   /* v21.80 the reassessment date */
       if(FACT_GEN.includes(id)){const k=FACT_SRC[id];if(out&&out[k]){f[k]=out[k];f.src[k]=id;}else if(f.src[k]===id)drop(k);}
       /* v21.78 the assessments' results, one entry a form */
+      if(out&&out.replies&&typeof out.replies==='object'){f.replies=Object.assign({},f.replies||{},out.replies);f.src.replies='forms';}   /* v21.86 what came back, per form */
       if(FACT_SRC[id]==='evidence'){const ev=Object.assign({},f.evidence||{});if(out&&out.evidence)ev[id]=out.evidence;else delete ev[id];if(Object.keys(ev).length){f.evidence=ev;f.src.evidence=Object.keys(ev).join(', ');}else drop('evidence');}
     }
     /* v21.67 target behaviors read from a document (Read a document) were set while this gather ran: they stand until Form TB-1 holds its own */
@@ -2274,6 +2280,7 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
+  if(d.nbh==='mail'){mailFor(ev,d);return;}   /* v21.86 a form's invitations, sent from the school Google account */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
     if(!relayFrom(ev.source))return;
@@ -3606,7 +3613,7 @@ async function autoSave(force){
     const r=await CP.put(rec);
     if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
-  }catch(e){}
+  }catch(e){state.auto.warn='The last safety copy could not be written ('+String(e&&e.message||e).slice(0,80)+'). Save case to be sure.';state.auto.warnShort='not kept';}   /* v21.85 never silent */
   finally{A.busy=false;chip();if(A.again){const f=A.again==='force';A.again=false;setTimeout(()=>autoSave(f),60);}}
 }
 /* more than AUTO.keep copies: none is deleted to make room (each may be the only place some work is), the user is asked */
@@ -3672,8 +3679,9 @@ function autoLast(){
     if(!work||!Object.keys(forms).length)return;
     const who=autoWho(),key=autoKey(who.name),h=autoHash(forms)+'|'+who.name+'|'+(A.fileAt||'')+'|'+(state.photo?state.photo.length+state.photo.slice(-16):'');
     if(h===A.written)return;
-    CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
+    const stashed=CP.stash({key,kind:'shell',tab:A.tab,student:who.name,who:who.form?{name:who.name,form:who.form}:null,saved:new Date().toISOString(),
       packet:packet(),photoSrc:state.photoSrc||undefined,facts:state.facts||null,caseId:state.caseId||null,fileAt:A.fileAt||null,forms});
+    if(stashed===false){try{localStorage.setItem('nbh.stash.fail',new Date().toISOString());}catch(e){}}   /* v21.85 said when the workstation next opens */
   }catch(e){}
 }
 setInterval(()=>{if(caseSig()!==state.autoSig)autoSave(false);},5000);
@@ -4314,8 +4322,7 @@ async function saveCase(){
   const shared=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';
   if(shared==='cancelled')return false;
   const how=late.length?'late':autoFiled(shared==='shared',fileSig);   /* kept by the share sheet: no "Is the file in Files?" */
-  return tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+'\n\n'+
-        'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.');
+  return tell(how,'Case file written with '+n+' form'+(n===1?'':'s')+'.'+left+(how==='moved'?after():'')+check+(clOnce('nbh.tip.casefile')?'\n\n'+'Each form\u2019s own Save data file still works exactly as before; this is one file for the whole packet.':''));   /* v21.85 said once on this device */
 }
 $('#saveCase').addEventListener('click',()=>{saveCase();});
 /* ================= Close case (v21.45) =================
@@ -4503,7 +4510,7 @@ async function caseloadOpen(){const L=await clList();
       '<h3 class="cl-h">Students</h3><div class="cl-wrap"><table class="cl-tbl"><tr><th>Student</th><th>School</th><th>Saved</th><th>Last data</th><th>Needs you</th><th></th></tr>'+L.map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];
         return '<tr data-clrow="'+esc(r.key)+'"><td><b>'+esc(clName(r))+'</b>'+(r.sid&&!clIni()?'<br><span class="hint">'+esc(r.sid)+'</span>':'')+'</td><td>'+esc(r.site||'')+'</td><td>'+esc(clAgo(r.saved))+'</td><td>'+(r.sum&&r.sum.lastData?esc(tdMd(r.sum.lastData)+' ('+clAgo(r.sum.lastData)+')'):'none')+'</td><td>'+(it.length?it.length+(top?' <span class="td-k">'+esc(top.k)+'</span>':''):'nothing')+'</td><td class="cl-act"><button type="button" class="primary" data-clopen="'+esc(r.key)+'">Open</button> <button type="button" data-cldel="'+esc(r.key)+'">Remove</button></td></tr>';}).join('')+'</table></div>'
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
-    '<p class="hint">Safari can clear a website’s storage after some weeks without a visit; installed on the Home Screen, the workstation keeps it. Remove takes a student off this list on this iPad only; their case files are not touched.</p>');}
+    '<p class="hint">Safari can clear a website’s storage after seven days without a visit; installed on the Home Screen, the workstation keeps it. Back up the caseload now and then. Remove takes a student off this list on this iPad only; their case files are not touched.</p>');}
 async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key===key);if(!r){alert('That student is no longer kept here.');return;}
   /* v21.81 the student already on screen: their case stays as it is, and the form asked for opens */
   const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
@@ -4732,6 +4739,378 @@ $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))ready
 document.addEventListener('input',e=>{if(e.target&&e.target.closest&&e.target.closest('.grp.det'))state.barTyped=Date.now();},true);
 {const of0=openForm;openForm=function(){const r=of0.apply(this,arguments);try{const a=document.activeElement;
   if(!state.barAuto&&packet().client.trim()&&!(a&&a.closest&&a.closest('.grp.det'))&&Date.now()-(state.barTyped||0)>4000)barAutoFold();}catch(e){}return r;};}
+/* ================= v21.85 the students' records on this iPad, the start screen, moving between students, and what the
+   caseload can give: its deadlines as a calendar, a restraint report, what changed since the last save, an IEP packet =================
+   Everything here reads the caseload's copies (this browser, this device) and the case on screen; nothing is sent anywhere. */
+const CL5={list:[]};
+const clOnce=k=>{try{if(localStorage.getItem(k))return false;localStorage.setItem(k,'1');}catch(e){}return true;};
+const clExpireDays=()=>{try{return +localStorage.getItem('nbh.caseload.expire')||0;}catch(e){return 0;}};
+const b64=u=>{let s='';for(let i=0;i<u.length;i+=0x8000)s+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(s);};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+/* a passphrase box, the workstation's own dialog */
+wsUI.prompt=(text,opt)=>new Promise(res=>{opt=opt||{};const d=$('#cfDlg'),i=String(text).indexOf('\n');$('#cfTitle').textContent=i>=0?text.slice(0,i):text;
+  $('#cfBody').textContent=i>=0?text.slice(i+1):'';$('#cfBody').style.display=i>=0?'':'none';
+  const f=$('#cfFoot');f.innerHTML='';f.style.flexWrap='wrap';const inp=document.createElement('input');inp.type=opt.password?'password':'text';inp.placeholder=opt.placeholder||'';
+  inp.autocomplete='off';inp.setAttribute('aria-label',opt.label||'Passphrase');inp.style.cssText='flex:1 1 100%;min-height:44px;font:inherit;font-size:16px;padding:8px 10px;margin:0 0 8px;border:1px solid #b8c4cb;border-radius:8px';
+  const done=v=>{f.style.flexWrap='';try{d.close();}catch(e){}res(v);};
+  const c=document.createElement('button');c.type='button';c.textContent=opt.cancel||'Cancel';c.onclick=()=>done(null);
+  const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=opt.ok||'OK';ok.onclick=()=>done(inp.value);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();done(inp.value);}});
+  f.appendChild(inp);f.appendChild(c);f.appendChild(ok);d.oncancel=ev=>{ev.preventDefault();done(null);};d.showModal();inp.focus();});
+/* the caseload backup locked with a passphrase: PBKDF2-SHA-256 (250,000 rounds) to an AES-GCM-256 key */
+async function clKeyFrom(pass,salt,iter){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:iter,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function clLock(text,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),iter=250000,key=await clKeyFrom(pass,salt,iter);
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text)));
+  return {form:'CASELOAD-LOCKED',rev:'2026-10',kdf:'PBKDF2-SHA-256',iter,salt:b64(salt),iv:b64(iv),data:b64(ct),saved:new Date().toISOString()};}
+async function clUnlock(d,pass){const key=await clKeyFrom(pass,unb64(d.salt),+d.iter||250000);return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(d.iv)},key,unb64(d.data)));}
+const clCanLock=()=>!!(window.crypto&&crypto.subtle&&window.isSecureContext);
+clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No student is kept here yet, so there is nothing to back up.');return;}
+  let pass='';
+  if(clCanLock()){pass=await wsUI.prompt('Lock the backup with a passphrase?\nThe file holds every student’s case. With a passphrase, only someone who knows it can open the file. It cannot be recovered if forgotten. Leave it empty for an unlocked file.',{ok:'Back up',password:true,placeholder:'Passphrase (recommended)'});
+    if(pass===null)return;
+    if(pass){const again=await wsUI.prompt('Type the passphrase again',{ok:'Back up',password:true,placeholder:'The same passphrase'});if(again===null)return;if(again!==pass){alert('The two passphrases are not the same. Nothing was saved.');return;}}}
+  const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  const plain=JSON.stringify({form:'CASELOAD',rev:'2026-10',saved:t.toISOString(),cases:L});
+  let body=plain,nm='CASELOAD_'+ds+'.json';
+  if(pass){try{body=JSON.stringify(await clLock(plain,pass));nm='CASELOAD_'+ds+'_locked.json';}catch(e){alert('The backup could not be locked ('+(e&&e.message||e)+'). Nothing was saved.');return;}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'application/json'}));a.download=nm;document.body.appendChild(a);a.click();a.remove();
+  const how=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';if(how==='cancelled')return;
+  try{localStorage.setItem(CL_BK,t.toISOString());}catch(e){}
+  wsUI.toast(L.length+' student'+(L.length===1?'':'s')+' backed up as '+nm+(pass?', locked with your passphrase':'')+'. Keep it with the case files.',{kind:'ok',ms:9000});
+  if($('#dlg').open&&$('#dlgBody').querySelector('#clBk'))caseloadOpen();};
+{const rs0=clRestoreText;clRestoreText=async function(text){let d=null;try{d=JSON.parse(text);}catch(e){}
+  if(d&&d.form==='CASELOAD-LOCKED'){if(!clCanLock()){alert('This backup is locked. Open the workstation from its web address (not a file) to unlock it.');return;}
+    const p=await wsUI.prompt('This backup is locked\nType its passphrase.',{ok:'Unlock',password:true});if(p===null)return;
+    let t;try{t=await clUnlock(d,p);}catch(e){alert('That passphrase does not open this backup.');return;}return rs0.call(this,t);}
+  return rs0.apply(this,arguments);};}
+/* a student not saved for the weeks chosen is forgotten here (never one kept here and not yet in a file) */
+async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await clList()||[],cut=Date.now()-n*7*864e5,me=clKey(packet());
+  const old=L.filter(r=>r.key!==me&&!r.unfiled&&Date.parse(r.saved)<cut);for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
+  if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this iPad (their case files are not touched).',{ms:9000});return old.length;}
+async function clRemoveAll(){const L=await clList()||[];
+  if(!(await wsUI.confirm('Remove every student’s data from this iPad?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
+  const unf=L.filter(r=>r.unfiled);
+  if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this iPad. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
+  for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
+  try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}
+  try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
+  wsUI.toast('Every student’s data is removed from this iPad. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
+  if($('#dlg').open)caseloadOpen();paintBlank();}
+/* the last safety copy before the page closed could not be kept (storage full): said when the workstation next opens */
+setTimeout(()=>{try{const t=localStorage.getItem('nbh.stash.fail');if(t){localStorage.removeItem('nbh.stash.fail');
+  wsUI.toast('When the workstation last closed, its final safety copy could not be kept (this iPad’s storage was full). Save case often, and delete old safety copies in Autosave.',{kind:'warn',ms:15000});}}catch(e){}},2500);
+/* keep the case on this iPad (the caseload copy) without writing a file: to switch students now and save the files later */
+async function caseKeepOnly(){const p=packet();if(!clKey(p)||clOff())return false;
+  const open=Object.keys(state.frames).filter(id=>!state.pending[id]),kept=Object.keys(state.pending);let forms={};const late=[];
+  for(const id of open){const r=await grab(id,'snapshot',null,8000);if(r&&r.snap)forms[id]={title:r.title,snap:r.snap};else late.push(id);}
+  kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});forms=orderCase(forms);
+  try{await gatherFacts(false);}catch(e){}
+  await caseloadKeep(p,forms,late);
+  const r=(await clList()||[]).find(x=>x.key===clKey(p));if(!r)return false;r.unfiled=true;await clTx('readwrite',st=>st.put(r));return true;}
+async function clSaveFile(key){const r=(await clList()||[]).find(x=>x.key===key);if(!r)return;
+  const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.text],{type:'application/json'}));a.download='CASE_'+String(r.client||'case').replace(/[^\w-]+/g,'_')+'_'+ds+'.json';
+  document.body.appendChild(a);a.click();a.remove();const how=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';if(how==='cancelled')return;
+  r.unfiled=false;await clTx('readwrite',st=>st.put(r));wsUI.toast(clName(r)+': case file written.',{kind:'ok'});caseloadOpen();}
+/* the caseload's deadlines as one calendar file: initials only, an all-day event each, the same id each time so a newer file updates */
+function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'');if(/^\d{4}-\d\d-\d\d/.test(s))E.push({date:s.slice(0,10),what,form});};
+  const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{},ex=rv.exit||{},cr=f.crisis||{},inj=f.injury||{},ad=(f.plan||{}).adoption||{};
+  const cons=f.consent&&(f.consent.date||f.consent.parent);if(cons&&!(f.fn&&(f.fn.key||f.fn.label)))add(tdAdd(cons,60),'FBA due, 60 days from consent','FS-1');
+  add(rv.next,'Plan review','PR-1');add(ex.next,'Check after exit','PR-1');add(rc.iep||dt.iep,'Annual IEP review','GB-1');add(rc.reeval||dt.reeval,'Reevaluation due','RR-1');
+  (cr.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Notice')+' (restraint or seclusion)','CR-1'));
+  (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Injury follow-up'),'IM-1'));
+  if(f.prefs)add(f.prefs.reassess,'Preference reassessment','PA-1');add(ad.start,'Plan starts','TD-1');
+  ((f.home||{}).sheets||[]).filter(s=>s&&s.due&&!s.back).forEach(s=>add(s.due,'Home sheet back: '+(s.name||'sheet'),'HD-1'));
+  return E;}
+const clInitials=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);return w.length?w.map(x=>x[0].toUpperCase()+'.').join(' '):'Student';};
+async function clCalendar(){const L=await clList()||[],now=new Date(),lo=tdAdd(tdISO(now),-7),hi=tdAdd(tdISO(now),366),ev=[];
+  L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}if(!d)return;calEvents(d.facts||{}).forEach(e=>{if(e.date>=lo&&e.date<=hi)ev.push(Object.assign({who:clInitials(r),key:r.key},e));});});
+  if(!ev.length){alert('No dated deadline in the students kept here (their reviews, IEP dates, reevaluations, notices and the FBA timeline come from their forms).');return;}
+  const h=s=>{let x=5381;for(let i=0;i<s.length;i++)x=((x<<5)+x+s.charCodeAt(i))|0;return (x>>>0).toString(36);},ymd=s=>s.replace(/-/g,''),esc2=s=>String(s).replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,' ');
+  const stamp=now.toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z');
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//NBH Workstation//Caseload//EN','CALSCALE:GREGORIAN','X-WR-CALNAME:Caseload deadlines'];
+  ev.forEach(e=>{lines.push('BEGIN:VEVENT','UID:'+h(e.key+'|'+e.what+'|'+e.form)+'-'+ymd(e.date)+'@nbh-workstation','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.date),'DTEND;VALUE=DATE:'+ymd(tdAdd(e.date,1)),'SUMMARY:'+esc2(e.who+': '+e.what+' (Form '+e.form+')'),'TRANSP:TRANSPARENT','END:VEVENT');});
+  lines.push('END:VCALENDAR');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\r\n')+'\r\n'],{type:'text/calendar'}));a.download='Caseload-deadlines_'+tdISO(now)+'.ics';document.body.appendChild(a);a.click();a.remove();
+  if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);
+  wsUI.toast(ev.length+' deadline'+(ev.length===1?'':'s')+' for '+new Set(ev.map(e=>e.key)).size+' student'+(new Set(ev.map(e=>e.key)).size===1?'':'s')+' in the calendar file (initials only). Open it to add them to Calendar; a newer file updates them.',{kind:'ok',ms:10000});}
+/* restraint and seclusion across the caseload: each event, its notices, the semester's count */
+async function clRestraintRows(){const L=await clList()||[],rows=[],tot=[];const today=tdISO(new Date());
+  L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}const f=d&&d.facts||{},cr=f.crisis||{},dl=(cr.deadlines||[]).filter(Boolean);
+    const inc=((f.data||{}).incidentList||[]).filter(i=>i&&/^(restraint|seclusion)$/.test(i.hold||''));
+    const seen=new Set();inc.forEach(i=>{seen.add(i.date);const n=dl.filter(x=>x.event===i.date);rows.push({who:clName(r),date:i.date,time:i.time||'',kind:i.hold,beh:i.beh||'',notices:n.length,done:n.filter(x=>x.done).length,late:n.filter(x=>!x.done&&x.due&&String(x.due).slice(0,10)<today).length});});
+    const evs=[...new Set(dl.map(x=>x.event).filter(Boolean))].filter(e=>!seen.has(e));
+    evs.forEach(e=>{const n=dl.filter(x=>x.event===e);rows.push({who:clName(r),date:e,time:'',kind:'restraint or seclusion (Form CR-1)',beh:'',notices:n.length,done:n.filter(x=>x.done).length,late:n.filter(x=>!x.done&&x.due&&String(x.due).slice(0,10)<today).length});});
+    if(cr.restraints&&(+cr.restraints.semester||0))tot.push({who:clName(r),semester:+cr.restraints.semester,last:cr.restraints.last||''});});
+  rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));return {rows,tot};}
+async function clRestraintOpen(){const {rows,tot}=await clRestraintRows();
+  dialog('Restraint and seclusion, across the caseload',
+    '<p class="hp-lead">From the students kept on this iPad, each as at their last save: Form DD-1’s incidents marked restraint or seclusion and Form CR-1’s notices. For the district’s reporting, check each against the student’s Form CR-1.<\/p>'+
+    (tot.length?'<p>This semester: '+tot.map(t=>'<b>'+esc(t.who)+'<\/b> '+t.semester+(t.last?' (last '+esc(tdMd(t.last))+')':'')).join('; ')+'.<\/p>':'')+
+    (rows.length?'<div class="cl-wrap"><table class="cl-tbl"><tr><th>Student<\/th><th>Date<\/th><th>Kind<\/th><th>Behavior<\/th><th>Notices done<\/th><th>Overdue<\/th><\/tr>'+rows.map(x=>'<tr><td>'+esc(x.who)+'<\/td><td>'+esc(x.date)+(x.time?' '+esc(x.time):'')+'<\/td><td>'+esc(x.kind)+'<\/td><td>'+esc(x.beh)+'<\/td><td>'+(x.notices?x.done+' of '+x.notices:'none recorded')+'<\/td><td>'+(x.late?'<b>'+x.late+'<\/b>':'')+'<\/td><\/tr>').join('')+'<\/table><\/div>'
+      :'<p>No restraint or seclusion is recorded for the students kept here.<\/p>')+
+    '<p class="td-more"><button type="button" class="primary" id="clRestrCsv"'+(rows.length?'':' disabled')+'>Download as a spreadsheet (.csv)<\/button><\/p>');}
+async function clRestraintCsv(){const {rows}=await clRestraintRows();const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+  const csv=['Student,Date,Time,Kind,Behavior,Notices,Notices done,Notices overdue'].concat(rows.map(x=>[x.who,x.date,x.time,x.kind,x.beh,x.notices,x.done,x.late].map(q).join(','))).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download='Restraint-seclusion_'+tdISO(new Date())+'.csv';document.body.appendChild(a);a.click();a.remove();
+  if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);}
+/* what changed since the last save: the case on screen against its copy on this iPad */
+async function changesOpen(){const p=packet(),key=clKey(p),r=key&&(await clList()||[]).find(x=>x.key===key);
+  if(!r){alert('There is no earlier save of this student on this iPad yet. Save case once; later, this compares the case with that save.');return;}
+  let d=null;try{d=parseCase(r.text);}catch(e){}if(!d){alert('The copy on this iPad could not be read.');return;}
+  const old=d.forms||{},of=d.facts||{};try{await gatherFacts(false);}catch(e){}const nf=state.facts||{},L=[];
+  const ids=[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending),Object.keys(old)))];
+  for(const id of ids){const was=old[id]&&old[id].snap,nowIn=state.frames[id]||state.pending[id];
+    if(!was&&nowIn){L.push('<b>Form '+esc(id)+'<\/b> added to the case');continue;}
+    if(was&&!nowIn){L.push('<b>Form '+esc(id)+'<\/b> is no longer in the case');continue;}
+    let sn=null;if(state.pending[id])sn=state.pending[id].snap;else{const g=await grab(id,'snapshot',null,6000);sn=g&&g.snap;}
+    if(!sn||!was)continue;const a=was.data||{},b=sn.data||{};let n=0;new Set(Object.keys(a).concat(Object.keys(b))).forEach(k=>{if(String(a[k]==null?'':a[k])!==String(b[k]==null?'':b[k]))n++;});
+    if(n)L.push('<b>Form '+esc(id)+'<\/b>: '+n+' field'+(n===1?'':'s')+' changed');}
+  const od=of.data||{},nd=nf.data||{};
+  if(nd.to&&nd.to!==od.to)L.push('New days of data on Form DD-1: now to '+esc(tdMd(nd.to))+(od.to?' (was to '+esc(tdMd(od.to))+')':''));
+  const oi=(od.incidentList||[]).length,ni=(nd.incidentList||[]).length;if(ni>oi)L.push((ni-oi)+' new incident'+(ni-oi===1?'':'s')+' logged');
+  const pj=x=>JSON.stringify([x&&x.rep,x&&x.ant,x&&x.teach,x&&x.respond,x&&x.targets]);if(pj(nf.plan)!==pj(of.plan)&&(nf.plan||of.plan))L.push('The plan (Form TD-1) changed: the replacement, strategies, responding or targets');
+  const ol=((of.review||{}).log||[]).length,nl=((nf.review||{}).log||[]);if(nl.length>ol)nl.slice(ol).forEach(x=>L.push('Review closed '+esc(tdMd(x.date||''))+': <b>'+esc(x.decisionText||x.decision||'')+'<\/b>'));
+  const ob=(of.behaviors||[]).map(b=>b.label),nb=(nf.behaviors||[]).map(b=>b.label);nb.filter(x=>!ob.includes(x)).forEach(x=>L.push('New target behavior: '+esc(x)));ob.filter(x=>!nb.includes(x)).forEach(x=>L.push('Target behavior no longer listed: '+esc(x)));
+  const fk=x=>x&&(x.key||x.label)||'';if(fk(nf.fn)!==fk(of.fn)&&fk(nf.fn))L.push('The function (Form FS-1) is now '+esc(fk(nf.fn))+(fk(of.fn)?' (was '+esc(fk(of.fn))+')':''));
+  dialog('What changed since the last save','<p class="hp-lead">'+esc(clName(r))+': the case on screen against its save of '+esc(clAgo(r.saved))+' ('+esc(new Date(r.saved).toLocaleString())+').<\/p>'+(L.length?'<ul class="td-list">'+L.map(x=>'<li><span>'+x+'<\/span><\/li>').join('')+'<\/ul>':'<p>Nothing has changed since that save.<\/p>'));}
+/* the IEP meeting packet: present levels, the goals, the plan, progress, safety and the dates, as a page to print and as text to copy */
+function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},pf=f.profile||{},g=f.goals||{},rv=f.review||{},ad=pl.adoption||{},cr=f.crisis||{},rc=f.records||{};
+  const who=(p.client||'The student').replace(/^SIMULATED\s*[–-]\s*/,'').split(/\s+/)[0]||'The student',T=x=>String(x==null?'':x).trim();
+  const lv=(d.behaviors||[]).filter(b=>b&&b.name).map(b=>{const u=b.unit||'',bm=b.base&&b.base.mean!=null?b.base.mean:null,cm=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean;
+    return T(b.name)+': '+(bm!=null?bm+' '+u+' during '+T(b.baseName||'baseline')+(b.base&&b.base.days?' ('+b.base.days+' days)':'')+', ':'')+(cm!=null?cm+' '+u+' most recently'+(b.curName?' ('+T(b.curName)+(b.cur&&b.cur.days?', '+b.cur.days+' days':'')+')':''):'no data yet')+(b.aim!=null?'; the aim is '+b.aim:'');});
+  const fn=f.fn&&(f.fn.label||f.fn.key);
+  const present=[who+'’s present levels of behavior, from the daily data'+(d.from&&d.to?' ('+d.from+' to '+d.to+')':'')+': '+(lv.length?lv.join('; ')+'.':'no daily data in the case yet.'),
+    fn?'The functional behavior assessment found the behavior is maintained by '+T(fn)+'.':'',T(pf.strengths)?'Strengths: '+T(pf.strengths)+'.':'',T(pf.expr)?'Communication: '+T(pf.expr)+'.':''].filter(Boolean).join(' ');
+  const goals=[].concat((g.red||[]).map(x=>T(x.text||x)),(g.acq||[]).map(x=>T(x.text||x))).filter(Boolean);
+  const A=v=>Array.isArray(v)?v.map(T).filter(Boolean):[],rs=pl.respond||{};
+  const plan=[pl.rep?'Replacement behavior: '+T(pl.rep)+'.':'',A(pl.ant).length?'Before the behavior (prevention): '+A(pl.ant).join('; ')+'.':'',rs.prec?'At the first signs: '+T(rs.prec)+'.':'',rs.target?'If it happens: '+T(rs.target)+'.':'',rs.after?'Afterwards: '+T(rs.after)+'.':'',
+    (pl.targets||[]).length?'Targets the plan addresses: '+pl.targets.map(t=>T(t.label)+(t.fn?' ('+T(t.fn)+')':'')).join('; ')+'.':'',ad.date?'Adopted by the team '+ad.date+(ad.notice?', prior written notice '+ad.notice:'')+(ad.start?', started '+ad.start:'')+'.':''].filter(Boolean).join(' ');
+  const prog=(rv.targets||[]).length?rv.targets.map(t=>T(t.name)+': '+(t.base!=null?t.base:'?')+' → '+(t.cur!=null?t.cur:'?')+(t.chg!=null?' ('+(t.chg>0?'+':'')+t.chg+'%)':'')+(t.decision?', '+T(t.decision):'')).join('; ')+'.'
+    :(rv.decisionText||rv.decision?'Last plan review'+(rv.date?' '+rv.date:'')+': '+T(rv.decisionText||rv.decision)+'.':'');
+  const safety=[cr.restraints&&+cr.restraints.semester?cr.restraints.semester+' restraint'+(+cr.restraints.semester===1?'':'s')+' this semester'+(cr.restraints.last?' (last '+cr.restraints.last+')':''):'',rc.removals&&+rc.removals.days?rc.removals.days+' days of removal this school year':''].filter(Boolean).join('; ');
+  return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||'',svc:svcText(f)};}
+function iepHTML(){const P=iepParts(),p=packet(),sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',para=t=>t?'<p>'+esc(t)+'<\/p>':'';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>IEP meeting: behavior'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555}ol{margin:0;padding-left:18pt}li{margin:0 0 4pt}@media print{body{margin:0}}<\/style><\/head><body>'+
+    '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
+    sec('Present levels of behavior',para(P.present))+sec('Goals',P.goals.length?'<ol>'+P.goals.map(x=>'<li>'+esc(x)+'<\/li>').join('')+'<\/ol>':'')+sec('The behavior intervention plan',para(P.plan))+
+    sec('Behavior services',para(P.svc))+sec('Progress',para(P.prog))+sec('Safety',para(P.safety))+sec('Next',para(P.next?'Next plan review: '+P.next+'.':''))+
+    '<p class="s" style="margin-top:14pt">Written from the forms in this case. A draft for the team: read it against the forms and the data before the meeting.<\/p><\/body><\/html>';}
+async function iepOpen(){await gatherFacts(false);const P=iepParts();
+  const blk=(id,h,t)=>t?'<h3 class="cl-h">'+h+'<\/h3><p class="iep-t" id="'+id+'">'+esc(t)+'<\/p><p class="td-more"><button type="button" data-copy="'+id+'">Copy<\/button><\/p>':'';
+  dialog('IEP meeting packet','<p class="hp-lead">A draft for the team, from the case as the forms give it. Copy each part into the district’s IEP system, or print the packet.<\/p>'+
+    blk('iepPres','Present levels of behavior',P.present)+blk('iepGoals','Goals',P.goals.map((g,i)=>(i+1)+'. '+g).join('\n'))+blk('iepPlan','The behavior intervention plan',P.plan)+blk('iepSvc','Behavior services',P.svc)+blk('iepProg','Progress',P.prog)+blk('iepSafe','Safety',P.safety)+
+    '<p class="td-more"><button type="button" class="primary" id="iepPrint">Print the packet<\/button> <button type="button" id="iepForms">Print it with the graph, goals and plan (master print)<\/button><\/p>');}
+function iepPrint(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then try again.');return;}
+  try{w.document.open();w.document.write(iepHTML());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true;}catch(e){}try{const a=document.createElement('textarea');a.value=t;a.style.cssText='position:fixed;left:-9999px';document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();return ok;}catch(e){return false;}}
+$('#dlgBody').addEventListener('click',async e=>{const c=e.target.closest('[data-copy]');if(c){const el=document.getElementById(c.dataset.copy);if(el){const ok=await copyText(el.textContent);c.textContent=ok?'Copied':'Copy did not work: select the text';}return;}
+  if(e.target.closest('#iepPrint')){iepPrint();return;}
+  if(e.target.closest('#iepForms')){const ids=['DD-1','GB-1','TD-1'].filter(inCase);if(!ids.length){alert('None of Forms DD-1, GB-1 and TD-1 is in this case yet.');return;}try{$('#dlg').close();}catch(x){}iepPrint();await masterRun(ALL.filter(f=>ids.includes(f[0])),{title:'IEP Meeting: the Graph, the Goals and the Plan'});return;}
+  if(e.target.closest('#tdIep')){iepOpen();return;}if(e.target.closest('#tdChanges')){changesOpen();return;}
+  if(e.target.closest('#clCal')){clCalendar();return;}if(e.target.closest('#clRestr')){clRestraintOpen();return;}if(e.target.closest('#clRestrCsv')){clRestraintCsv();return;}
+  if(e.target.closest('#clRemoveAll')){clRemoveAll();return;}const sf=e.target.closest('[data-clfile]');if(sf){clSaveFile(sf.dataset.clfile);return;}});
+$('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clExpire'){try{localStorage.setItem('nbh.caseload.expire',e.target.value);}catch(x){}clExpire().then(()=>caseloadOpen());}});
+/* the caseload dialog: the calendar, the restraint report, the files not saved yet, the privacy row */
+{const co5=caseloadOpen;caseloadOpen=async function(){await clExpire();await co5.apply(this,arguments);const b=$('#dlgBody'),t=b&&b.querySelector('#clTools');if(!t||b.querySelector('#clPriv'))return;
+  const L=await clList()||[],unf=L.filter(r=>r.unfiled),ex=clExpireDays();
+  t.insertAdjacentHTML('beforeend',(unf.length?'<div class="cl-note"><b>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this iPad but not yet in a file.<\/b> Save each file before the end of the day:<ul class="td-list">'+unf.map(r=>'<li><span>'+esc(clName(r))+', kept '+esc(clAgo(r.saved))+'<\/span> <button type="button" class="primary" data-clfile="'+esc(r.key)+'">Save the file<\/button><\/li>').join('')+'<\/ul><\/div>':'')+
+    '<p class="td-more"><button type="button" id="clCal"'+(L.length?'':' disabled')+'>Deadlines to the Calendar (.ics)<\/button> <button type="button" id="clRestr"'+(L.length?'':' disabled')+'>Restraint and seclusion report<\/button><\/p>'+
+    '<p class="td-more" id="clPriv"><label class="cl-opt">Forget a student not saved for <select id="clExpire"><option value="0"'+(!ex?' selected':'')+'>never<\/option><option value="4"'+(ex===4?' selected':'')+'>4 weeks<\/option><option value="8"'+(ex===8?' selected':'')+'>8 weeks<\/option><option value="12"'+(ex===12?' selected':'')+'>12 weeks<\/option><\/select><\/label> <button type="button" class="danger" id="clRemoveAll">Remove all student data from this iPad<\/button><\/p>');};}
+/* switching students: keep the case on this iPad and switch, save the file first, or switch anyway */
+{const cg5=caseloadGo;caseloadGo=async function(key,form){const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  if(open&&key!==clKey(packet())&&caseDirty()&&clKey(packet())&&!clOff()){const r=(await clList()||[]).find(x=>x.key===key);if(!r)return cg5.apply(this,arguments);
+    const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has work not saved to a file yet.',[{v:'keep',label:'Keep it on this iPad and switch',kind:'primary'},{v:'save',label:'Save the file first'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],
+      'Keep it on this iPad: the caseload holds it (and Caseload offers its file to save before the end of the day). Switch anyway: the work stays only in this iPad’s safety copy.');
+    if(!c)return;
+    if(c==='keep'){let ok=false;try{ok=await caseKeepOnly();}catch(e){ok=false;}if(!ok){wsUI.toast('The case could not be kept on this iPad, so nothing was switched.',{kind:'warn'});return;}state.lastSig=caseSig();}
+    else if(c==='save'){let ok=false;try{ok=await saveCase();}catch(e){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was switched.',{kind:'warn'});return;}}
+    try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null,{asked:true,quiet:true});if(form)try{openForm(form);}catch(e){}paintBlank();return;}
+  return cg5.apply(this,arguments);};}
+/* Today: the IEP packet and what changed; the students kept here not yet in a file */
+{const to5=todayOpen;todayOpen=async function(){await to5.apply(this,arguments);try{const b=$('#dlgBody'),p=b&&b.querySelector('.td-more');if(p&&!b.querySelector('#tdIep'))p.insertAdjacentHTML('beforeend',' <button type="button" id="tdIep">IEP meeting packet<\/button> <button type="button" id="tdChanges">What changed since the last save<\/button>');
+  const unf=(await clList()||[]).filter(r=>r.unfiled&&r.key!==clKey(packet()));if(unf.length&&b&&!b.querySelector('#tdFiles')){const li='<li id="tdFiles"><span class="td-k">Files<\/span> <span>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this iPad but not saved to a file: '+esc(unf.map(clName).join(', '))+'<\/span> <button type="button" id="tdCaseload">Caseload<\/button><\/li>';
+    const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('afterbegin',li);else{const h=b.querySelector('.hp-lead');(h||b).insertAdjacentHTML(h?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}}catch(e){}};}
+/* the start screen with no case open: the caseload, what needs you, a new student */
+async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=card.querySelector('#blankCl');if(!x){x=document.createElement('div');x.id='blankCl';card.insertBefore(x,card.firstChild);}
+  const L=await clList();if(!L||!L.length){x.innerHTML='';x.hidden=true;card.classList.remove('has-cl');return;}
+  L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
+  const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(i=>all.push(Object.assign({who:clName(r),key:r.key},i))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
+  x.hidden=false;card.classList.add('has-cl');
+  x.innerHTML='<h2>Your caseload on this iPad<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
+    '<div class="bl-st">'+L.slice(0,12).map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];return '<button type="button" class="bl-stu" data-clopen="'+esc(r.key)+'"><b>'+esc(clName(r))+'<\/b><span>'+(top?esc(top.k)+' · ':'')+esc(clAgo(r.saved))+(r.unfiled?' · not in a file':'')+'<\/span><\/button>';}).join('')+'<\/div>'+
+    '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
+$('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]');if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
+  if(e.target.closest('#blNew')){if(Object.keys(state.frames).length||Object.keys(state.pending).length){$('#closeCase').click();return;}foldBar(false);const i=$('#pClient');if(i){i.focus();try{i.select();}catch(x){}}return;}
+  if(e.target.closest('#blRead')){$('#readDoc').click();return;}if(e.target.closest('#blOpen')){$('#openCase').click();return;}if(e.target.closest('#blCl')){caseloadOpen();return;}});
+{const cc5=clearCase;clearCase=async function(){const r=await cc5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
+{const ck5=caseloadKeep;caseloadKeep=async function(){const r=await ck5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
+setTimeout(()=>{try{paintBlank();}catch(e){}},900);
+/* Today's count on its button: red when a restraint or seclusion notice is due, or something is overdue */
+function paintBadge(){const b=$('#todayBtn');if(!b)return;let s=b.querySelector('.tbadge');if(!s){s=document.createElement('span');s.className='tbadge';s.setAttribute('aria-hidden','true');b.appendChild(s);}
+  let L=[];try{L=(state.facts||(state.due||[]).length)?todayItems():[];}catch(e){L=[];}const n=L.length,red=L.some(x=>x.k==='Overdue'||x.k==='Safety');
+  s.textContent=n>99?'99+':String(n);s.hidden=!n;s.classList.toggle('red',red);b.setAttribute('aria-label','Today: '+(n?n+' thing'+(n===1?'':'s')+' need'+(n===1?'s':'')+' you'+(red?', one about safety or overdue':''):'what needs you in this case'));}
+{const pf5=paintFacts;paintFacts=function(){const r=pf5.apply(this,arguments);try{paintBadge();}catch(e){}return r;};}
+setInterval(()=>{try{paintBadge();}catch(e){}},15000);
+/* Find a form or command: the students kept here too ("Mat" opens Mateo's case) */
+{const pl5=palList;palList=function(q){const r=pl5.apply(this,arguments);const s=String(q||'').trim().toLowerCase();if(!s)return r;
+  const st=(CL5.list||[]).filter(x=>(String(x.client||'')+' '+String(x.sid||'')).toLowerCase().includes(s)).slice(0,6).map(x=>({id:'',n:'Open '+clName(x)+'’s case',s:'student on this iPad',go:()=>caseloadGo(x.key,''),hay:''}));
+  return st.concat(r).slice(0,40);};}
+{const po5=palOpen;palOpen=function(){const r=po5.apply(this,arguments);clList().then(L=>{CL5.list=L||[];if($('#pal').classList.contains('on'))palDraw();}).catch(()=>{});return r;};}
+setTimeout(()=>{CMDS.push({k:'iep meeting packet present levels plaafp goals copy print',n:'IEP meeting packet: present levels, goals, the plan, progress',s:'command',go:()=>iepOpen()},
+  {k:'what changed since last save compare differences',n:'What changed since the last save',s:'command',go:()=>changesOpen()},
+  {k:'calendar ics deadlines caseload reviews iep reevaluation',n:'Caseload deadlines to the Calendar (.ics)',s:'command',go:()=>clCalendar()},
+  {k:'restraint seclusion report district caseload notices',n:'Restraint and seclusion report (the caseload)',s:'command',go:()=>clRestraintOpen()},
+  {k:'remove delete all student data privacy ipad',n:'Remove all student data from this iPad',s:'command',go:()=>clRemoveAll()});},0);   /* the commands list is made further down the page */
+/* ================= v21.86 email from the BCBA's school Google account, and the replies brought in for the whole caseload =================
+   A form (IA-1, IN-1, SV-1, CF-1) asks the workstation to send its invitations: one email per person, from the account the
+   BCBA signs in with (Google's own window, opened by the tap on Sign in and send), through Gmail. The emails go from that
+   account like any it sends; nothing passes through any other server. When the workstation cannot (no Google key on this
+   iPad, the one-file edition, Gmail not on the account), the form falls back to the iPad's Mail app, one person at a time. */
+const GM={busy:false};
+const GM_SCOPE='https://www.googleapis.com/auth/gmail.send email';
+const gmTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.mail')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
+function gmSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('nokey'));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
+  try{google.accounts.oauth2.initTokenClient({client_id:id,scope:GM_SCOPE,
+      callback:r=>{if(r&&r.access_token){const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.mail',JSON.stringify(t));}catch(e){}res(t);}
+        else rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));},
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:''});}
+  catch(e){rej(e);}});}
+async function gmWho(tok){try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}});if(r.ok){const j=await r.json();return j.email||'';}}catch(e){}return '';}
+const gmB64=s=>{const u=new TextEncoder().encode(s);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);};
+const gmUrl=s=>gmB64(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const gmHead=s=>/^[\x20-\x7e]*$/.test(s)?s:'=?UTF-8?B?'+gmB64(s)+'?=';
+function gmRaw(m,from){const name=String(m.name||'').replace(/["\r\n]/g,'').slice(0,80),to=String(m.to||'').trim();
+  const body=gmB64(String(m.text||'')).replace(/.{1,76}/g,'$&\r\n');
+  return gmUrl([(from?'From: '+from:''),'To: '+(name?'"'+gmHead(name)+'" ':'')+'<'+to+'>','Subject: '+gmHead(String(m.subject||'').replace(/[\r\n]+/g,' ').slice(0,200)),'MIME-Version: 1.0','Content-Type: text/plain; charset="UTF-8"','Content-Transfer-Encoding: base64','',body].filter((x,i)=>i||x).join('\r\n'));}
+async function gmSend(tok,m,from){const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({raw:gmRaw(m,from)})});
+  if(r.ok)return {ok:true};let j=null;try{j=await r.json();}catch(e){}const msg=j&&j.error&&(j.error.message||j.error.status)||('Gmail answered '+r.status);
+  if(r.status===401){try{sessionStorage.removeItem('nbh.google.mail');}catch(e){}return {ok:false,signin:true,err:'Google asked for the sign-in again'};}
+  if(/mail service not enabled|not.*enabled for this account|failedPrecondition/i.test(msg))return {ok:false,service:true,err:'Gmail is not turned on for this account'};
+  if(r.status===403)return {ok:false,service:true,err:/insufficient|scope|permission/i.test(msg)?'this account has not allowed the workstation to send mail (the district may need to allow it)':msg};
+  return {ok:false,err:msg};}
+const gmOk=e=>/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(e||'').trim());
+/* the request from a form: shown, confirmed in a tap that also signs in, sent one by one, answered */
+async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};
+  if(!from){return;}
+  const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
+  if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
+  if(EMBED){answer({unavailable:true,why:'The one-file edition cannot sign in to Google; use the website edition to send from your school account.'});return;}
+  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this iPad (Form DD-1, Google Sheet, gives it once).'});return;}
+  if(GM.busy){answer({unavailable:true,why:'Another set of emails is being sent; try again in a moment.'});return;}
+  clGsiLoad().catch(()=>{});
+  const go=await new Promise(res=>{const dlg=$('#cfDlg');$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';
+    $('#cfBody').textContent='From Form '+from+', one email to each person, each with their own link:\n'+L.slice(0,8).map(m=>'• '+(m.name?m.name+' ':'')+'<'+m.to+'>').join('\n')+(L.length>8?'\n• and '+(L.length-8)+' more':'')+'\n\nThey go from the Google account you sign in with, like any email you send from it.';
+    $('#cfBody').style.display='';const f=$('#cfFoot');f.innerHTML='';const done=v=>{try{dlg.close();}catch(e){}res(v);};
+    const c=document.createElement('button');c.type='button';c.textContent='Not now';c.onclick=()=>done(null);
+    const mailApp=document.createElement('button');mailApp.type='button';mailApp.textContent='Use the Mail app instead';mailApp.onclick=()=>done('app');
+    const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=gmTok()?'Send':'Sign in and send';
+    /* the sign-in opens Google's window, so it is started in this tap, before anything is awaited */
+    ok.onclick=()=>{if(gmTok()){done(gmTok());return;}gmSignIn().then(t=>done(t)).catch(e=>done({err:e&&e.message==='nokey'?'The Google sign-in key is not set on this iPad.':(e&&e.message||String(e))}));};
+    f.appendChild(c);f.appendChild(mailApp);f.appendChild(ok);dlg.oncancel=e=>{e.preventDefault();done(null);};dlg.showModal();ok.focus();});
+  if(!go){answer({unavailable:true,why:'Not sent from your school account.',declined:true});return;}
+  if(go==='app'){answer({unavailable:true,why:'The Mail app, one person at a time.'});return;}
+  if(go.err){answer({unavailable:true,why:go.err});wsUI.toast(go.err,{kind:'warn',ms:9000});return;}
+  GM.busy=true;const results=[];let who='';
+  try{who=await gmWho(go.tok);
+    for(let i=0;i<L.length;i++){const m=L[i];let r={ok:false,err:'not sent'};try{r=await gmSend(go.tok,m,who);}catch(e){r={ok:false,err:String(e&&e.message||e)};}
+      if(i===0&&!r.ok&&r.service){answer({unavailable:true,why:'Gmail could not send from this account: '+r.err+'.'});wsUI.toast('Gmail could not send from this account ('+r.err+'). The Mail app is used instead.',{kind:'warn',ms:12000});return;}
+      results.push({to:m.to,ok:!!r.ok,err:r.ok?'':r.err});if(r.signin)break;}
+    answer({from:who||'your Google account',results});
+    const n=results.filter(x=>x.ok).length,bad=results.filter(x=>!x.ok);
+    wsUI.toast(n+' email'+(n===1?'':'s')+' sent from '+(who||'your Google account')+(bad.length?'; '+bad.length+' not sent ('+bad[0].err+')':'')+'.',{kind:bad.length?'warn':'ok',ms:9000});}
+  finally{GM.busy=false;}}
+/* the replies, for every student kept here: each form with a reply box is loaded out of sight with the student's saved work,
+   collects what came back (its own Collect, no dialog), and the student's copy here takes the result */
+const CL_REPLY_FORMS=[['IA-1','__nbhBoxCollect'],['IN-1','__nbhBoxCollect'],['SV-1','__nbhBoxCollect'],['CF-1','__nbhBoxCollect'],['DD-1','__nbhStaffCollect']];
+function clBoxForms(r){let d=null;try{d=parseCase(r.text);}catch(e){}if(!d||!d.forms)return [];
+  return CL_REPLY_FORMS.filter(([id])=>{const fm=d.forms[id],own=fm&&fm.snap&&String(fm.snap.own||'');return own&&/"box"\s*:\s*\{/.test(own)&&/"token"/.test(own);}).map(x=>x.concat([d]));}
+function clFrameFor(id){const rec=ALL.find(x=>x[0]===id);return new Promise(res=>{let host=document.getElementById('clHost');
+  if(!host){host=document.createElement('div');host.id='clHost';host.setAttribute('aria-hidden','true');host.style.cssText='position:fixed;left:-10000px;top:0;width:1000px;height:700px;visibility:hidden';document.body.appendChild(host);}
+  const fr=document.createElement('iframe');fr.title='Caseload: Form '+id+' collecting replies';fr.tabIndex=-1;let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  fr.addEventListener('load',()=>setTimeout(()=>fin(fr),500),{once:true});setTimeout(()=>fin(null),25000);host.appendChild(fr);window.__clRfWin=fr.contentWindow;loadFrame(fr,rec[2]);});}
+function clMergeOut(d,id,out){if(!out)return;d.facts=Object.assign({src:{}},d.facts||{});d.facts.src=Object.assign({},d.facts.src||{});const k=FACT_SRC[id];
+  if(k==='evidence'){if(out.evidence){d.facts.evidence=Object.assign({},d.facts.evidence||{});d.facts.evidence[id]=out.evidence;}}
+  else if(k&&out[k]){d.facts[k]=out[k];d.facts.src[k]=id;}
+  if(out.replies)d.facts.replies=Object.assign({},d.facts.replies||{},out.replies);}
+async function clReplyOne(r,id,fn,d){const me=clKey(packet());
+  /* the student on screen: their open form collects itself, and the next Save case keeps it */
+  if(r.key===me&&(state.frames[id]||state.pending[id])){const fr=state.frames[id];if(!fr)return {err:'their Form '+id+' is not open; open it and it collects by itself'};
+    try{const w=fr.contentWindow;const g=w&&typeof w[fn]==='function'?await w[fn]():{err:'this copy of Form '+id+' cannot collect on its own'};if(g&&g.ok)try{await gatherFacts(true);}catch(e){}return g||{};}catch(e){return {err:String(e&&e.message||e)};}}
+  let fr=null;
+  try{fr=await clFrameFor(id);if(!fr)return {err:'Form '+id+' did not load'};
+    const rs=await grab(id,'restore',{snap:d.forms[id].snap,copy:false},20000,fr);if(!rs)return {err:'Form '+id+' did not take the saved work'};
+    const w=fr.contentWindow;if(!w||typeof w[fn]!=='function')return {err:'this copy of Form '+id+' cannot collect on its own'};
+    const g=await Promise.race([Promise.resolve().then(()=>w[fn]()),new Promise(z=>setTimeout(()=>z({err:'the reply box did not answer in time'}),45000))])||{};
+    if(!g.ok||!(+g.placed||+g.held))return g;
+    const sn=await grab(id,'snapshot',null,10000,fr);if(!(sn&&sn.snap))return {err:'Form '+id+' did not give its work back'};
+    const fo=await grab(id,'facts?',null,5000,fr);
+    const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {err:'their case was saved again meanwhile; collect once more'};
+    d.forms[id]=Object.assign({},d.forms[id],{snap:sn.snap});clMergeOut(d,id,fo&&fo.facts);
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();await clTx('readwrite',st=>st.put(r));return g;}
+  catch(e){return {err:String(e&&e.message||e)};}
+  finally{window.__clRfWin=null;if(fr)fr.remove();}}
+async function clRepliesAll(quiet){const L=await clList()||[],todo=[];L.forEach(r=>clBoxForms(r).forEach(([id,fn,d])=>todo.push({r,id,fn,d})));
+  if(!todo.length){if(!quiet)CLX.note='No student kept here has a form waiting for replies (questionnaires sent with the reply box, or staff phone links).';return {n:0};}
+  const out=[];let k=0;for(const x of todo){k++;clProg('Collecting replies '+k+' of '+todo.length+': '+clName(x.r)+', Form '+x.id+'…');
+    /* each form of a student reads the latest copy (an earlier form may have just written it) */
+    const fresh=(await clList()||[]).find(y=>y.key===x.r.key)||x.r;let d=x.d;try{d=parseCase(fresh.text);}catch(e){}
+    const g=await clReplyOne(fresh,x.id,x.fn,d);out.push({x,g});}
+  const got=out.filter(o=>o.g&&o.g.ok&&(+o.g.placed||+o.g.held)),bad=out.filter(o=>!(o.g&&o.g.ok));
+  const placed=got.reduce((a,o)=>a+(+o.g.placed||0),0),held=got.reduce((a,o)=>a+(+o.g.held||0),0);
+  CLX.note=(CLX.note?CLX.note+' ':'')+(placed||held?'Replies: '+placed+' placed'+(held?', '+held+' held to check':'')+' — '+got.map(o=>clName(o.x.r)+' (Form '+o.x.id+': '+(+o.g.placed||0)+(+o.g.held?', '+o.g.held+' held':'')+')').join('; ')+'. ':'No new replies. ')+
+    (bad.length?'Not collected: '+bad.map(o=>clName(o.x.r)+' (Form '+o.x.id+': '+(o.g&&o.g.err||'no answer')+')').join('; ')+'.':'');
+  try{localStorage.setItem('nbh.caseload.replies',new Date().toISOString());}catch(e){}
+  return {n:todo.length,placed,held};}
+/* the morning refresh brings the replies in too, and Caseload has its own button for them */
+{const ra6=clRefreshAll;clRefreshAll=async function(){await ra6.apply(this,arguments);if(CLX.busy)return;CLX.busy=true;try{await clRepliesAll(true);}finally{CLX.busy=false;}caseloadOpen();};}
+async function clRepliesNow(){if(CLX.busy)return;CLX.busy=true;CLX.note='';try{await clRepliesAll(false);}finally{CLX.busy=false;}caseloadOpen();}
+{const co6=caseloadOpen;caseloadOpen=async function(){await co6.apply(this,arguments);const b=$('#dlgBody'),t=b&&b.querySelector('#clTools');if(!t||b.querySelector('#clReplies'))return;
+  const L=await clList()||[],n=L.filter(r=>clBoxForms(r).length).length,last=(()=>{try{return localStorage.getItem('nbh.caseload.replies')||'';}catch(e){return '';}})();
+  const p=t.querySelector('.td-more');if(p)p.insertAdjacentHTML('beforeend',' <button type="button" id="clReplies"'+(n?'':' disabled')+'>Collect replies'+(n?' ('+n+')':'')+'<\/button>');
+  const h=t.querySelector('.hint');if(h&&n)h.insertAdjacentHTML('beforeend',' '+n+' student'+(n===1?' has':'s have')+' questionnaires or staff phone links waiting for replies'+(last?'; last collected '+esc(clAgo(last)):'')+'; Read every linked sheet collects them too.');};}
+$('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#clReplies'))clRepliesNow();});
+/* Today: what came back and what is still out */
+function tdReplies(f){const L=[],R=f.replies||{};Object.keys(R).forEach(id=>{const x=R[id]||{};
+  if(+x.held)L.push({k:'Replies',t:x.held+' repl'+(+x.held===1?'y':'ies')+' held on Form '+esc(id)+': it did not match a target or the wording; check and place it',open:id});
+  if(+x.waiting)L.push({k:'Replies',t:x.waiting+' sent on Form '+esc(id)+' and not back by their date: remind them (Remind all not back)',open:id});});
+  const st=f.data&&f.data.staff;if(st&&st.last&&tdSchoolDays(st.last)>=3&&(st.links||[]).length)L.push({k:'Data',t:'No staff phone entries since '+esc(tdMd(st.last))+' on Form DD-1 ('+tdSchoolDays(st.last)+' school days)',open:'DD-1'});
+  return L;}
+{const ti6=todayItems;todayItems=function(){const f=state.facts||{};let L=ti6.apply(this,arguments);try{L=L.concat(tdReplies(f));}catch(e){}return L;};}
+CL_ORDER.splice(CL_ORDER.indexOf('Data'),0,'Replies');
+/* ======== v21.85 service minutes (Form CN-1's service log, the IEP minutes from DM-1): Today says when they are behind; the IEP packet states them ======== */
+const SVC_KIND={direct:'direct service',consult:'consultation',both:'direct service and consultation'};
+function svcText(f){const sv=(f&&f.service)||{},ip=sv.iep||{},ps=((f&&f.profile)||{}).services||{},T=x=>String(x==null?'':x).trim();
+  const min=+ip.minutes||+ps.minutes||0,per=T(ip.per||ps.per||'month'),kind=SVC_KIND[ip.kind||ps.kind]||'';
+  const bits=[];if(min)bits.push('The IEP gives '+min+' minutes a '+per+' of behavior '+(kind||'services')+'.');
+  if(ip.line)bits.push('Logged on Form CN-1: '+T(ip.line)+'.');
+  const m=sv.month;if(m&&+m.total&&!(per==='month'&&ip.line))bits.push('This month: '+m.total+' minutes logged'+(+m.direct||+m.consult?' ('+[+m.direct?m.direct+' direct':'',+m.consult?m.consult+' consultation':''].filter(Boolean).join(', ')+')':'')+'.');
+  if(T(ps.note))bits.push(T(ps.note).replace(/\.?$/,'.'));
+  return bits.join(' ');}
+/* how far the period has gone (0 to 1), from the week or month the log reports */
+function svcGone(r){if(!r||!r.from||!r.to)return null;const a=new Date(r.from+'T00:00:00'),b=new Date(r.to+'T00:00:00'),n=new Date();n.setHours(0,0,0,0);
+  if(isNaN(a)||isNaN(b)||b<a)return null;const all=(b-a)/864e5+1,done=(n-a)/864e5+1;return Math.max(0,Math.min(1,done/all));}
+function tdService(f){const sv=f&&f.service,ip=sv&&sv.iep;if(!ip||ip.done==null||!(+ip.minutes>0))return [];
+  const r=ip.per==='week'?sv.week:ip.per==='month'?sv.month:null,g=svcGone(r);if(g==null||g<.5)return [];
+  const want=Math.round(+ip.minutes*g);if(+ip.done>=want*.75)return [];
+  return [{k:'Service',t:'IEP service minutes behind: '+esc(ip.line||(ip.done+' of '+ip.minutes+' minutes'))+' on Form CN-1 (about '+want+' by now)',open:'CN-1'}];}
+{const ti5s=todayItems;todayItems=function(){const f=state.facts||{};let L=ti5s.apply(this,arguments);try{L=L.concat(tdService(f));}catch(e){}return L;};}
+CL_ORDER.splice(CL_ORDER.indexOf('Home')+1,0,'Service');
+/* ======== v21.86 replies come in by themselves: soon after the workstation opens, again every two hours while it is open
+   and when the iPad is back online, for every student kept here with a form waiting (online, the website edition) ======== */
+const CL_AUTO_MS=2*3600e3;
+async function clRepliesAuto(force){if(EMBED||CLX.busy||clOff()||navigator.onLine===false)return null;
+  let last=0;try{last=Date.parse(localStorage.getItem('nbh.caseload.replies')||'')||0;}catch(e){}
+  if(!force&&Date.now()-last<CL_AUTO_MS)return null;
+  const L=await clList()||[];if(!L.some(r=>clBoxForms(r).length))return null;
+  CLX.busy=true;let r=null;try{r=await clRepliesAll(true);}catch(e){r=null;}finally{CLX.busy=false;}
+  if(r&&(r.placed||r.held)){try{wsUI.toast(CLX.note.replace(/^Replies: /,'Replies came in: ').trim()+' Caseload has them; open the student to see them in the form.',{ms:12000});}catch(e){}
+    try{paintBlank();}catch(e){}try{paintBadge();}catch(e){}}
+  return r;}
+setTimeout(()=>clRepliesAuto(false),20000);setInterval(()=>clRepliesAuto(false),15*60e3);
+window.addEventListener('online',()=>setTimeout(()=>clRepliesAuto(false),5000));
 $('#todayBtn').addEventListener('click',()=>todayOpen());
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdWeek')){$('#dlg').close();endOfWeek();}else if(e.target.closest('#tdHand')){handoverOpen();}});
 $('#closeCase').addEventListener('click',async()=>{

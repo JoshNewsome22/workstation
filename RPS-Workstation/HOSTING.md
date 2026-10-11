@@ -36,7 +36,8 @@ point a subdomain at it from GoDaddy's DNS.
    walkthrough, kept beside the form so the form stays well under 2 MB; 2.1 MB since v21.49, with the bus ride's lines; without it the walkthrough reads its captions
    with the device's own voice), `nbh-tk1-video.js` (v21.44: TK-1's *Save as video*, also used by Form SM-1's walkthrough), `nbh-sm1-narration.js` (v21.45: the recorded narration of Form SM-1's walkthrough, 1.2 MB, the same way), `nbh-dd1-narration.js` (v21.47: the recorded narration of Form DD-1's walkthrough, 0.9 MB, the same way) and `nbh-respond.js` with `respond.html` (the questionnaires
    Form IA-1 sends to informants; a link to `respond.html` on the site carries the questionnaire, so
-   the page must be served from the same folder); the zip has no folder inside it, so there is nothing
+   the page must be served from the same folder) and `staff-data.html` (v21.85: the page staff open on their phones to
+   send Form DD-1 the day's behavior data, beside `respond.html`); the zip has no folder inside it, so there is nothing
    to move.
 4. **First time only:** turn on *Settings → Show Hidden Files*, then *+ File*,
    name it `.htaccess`, select it, *Edit*, and paste:
@@ -186,8 +187,8 @@ password), everyone who opens such a link is asked for that password,
 which informants do not have; on the assessor's own computer the
 browser has the password cached, so the link appears to work there.
 Fix: make a public folder, for example `public_html/respond/`, upload
-only `respond.html` and `nbh-respond.js` into it (no student data is
-ever in those two files; the questionnaire travels in the link
+only `respond.html` and `nbh-respond.js` into it, and `staff-data.html`
+for the staff phones (v21.85) (no student data is ever in those files; the questionnaire travels in the link
 itself), and in Form IA-1's Respondent pages dialog enter its address
 in **Address of respond.html for links**, for example
 `https://newsomebh.com/respond/respond.html`. The address is
@@ -203,8 +204,9 @@ them through the password. In cPanel's File Manager, turn on
 `.htaccess` (Directory Privacy wrote it), and add at the end:
 
 ```
-# The questionnaire pages informants open: no password (they hold no student data; the questionnaire travels in the link)
-<FilesMatch "^(respond\.html|nbh-respond\.js)$">
+# The questionnaire pages informants open, and the staff data page (v21.85): no password (they hold no student data;
+# the questionnaire or the targets travel in the link)
+<FilesMatch "^(respond\.html|nbh-respond\.js|staff-data\.html)$">
   <IfModule mod_authz_core.c>
     Require all granted
   </IfModule>
