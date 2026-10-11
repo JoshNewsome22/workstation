@@ -32,5 +32,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const after=await page.evaluate(()=>document.body.classList.contains('bar-folded'));
     ok(w+'x'+h+' the details fold to one line when the first form opens',!before&&after,{before,after});
     await ctx.close();}
+  {const ctx=await br.newContext({viewport:{width:1300,height:900}});const page=await ctx.newPage();page.on('pageerror',e=>errs.push(e.message));
+    await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1000);
+    const L=await page.evaluate(()=>rsItems({plan:{rep:'x',targets:[{label:'Hitting',fn:'escape',covered:true},{label:'Screaming',fn:'attention',covered:false}]}}).map(x=>x.t));
+    ok('Ready to start names a target the plan does not address yet (TD-1 Targets in this plan)',L.some(t=>/Not addressed by the plan yet: Screaming \(attention\)/.test(t))&&!L.some(t=>/: Hitting/.test(t)),L);await ctx.close();}
   ok('no page errors',!errs.length,errs.slice(0,4));
   await br.close();console.log(fails?'RESULT: '+fails+' failure(s)':'RESULT: all passed');process.exit(fails?1:0);})().catch(e=>{console.error(e);process.exit(1);});

@@ -4676,6 +4676,8 @@ function rsItems(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},fl=f.profile&&f.
   if(!f.consent||!(f.consent.date||f.consent.parent))miss('Consent for the FBA and BIP is not recorded (Form IC-1)','IC-1');
   if(!(f.fn&&(f.fn.key||f.fn.label)))miss('The function is not written (Form FS-1)','FS-1');
   if(!(pl.rep||pl.beh||(pl.ant||[]).length))miss('The plan is not written (Form TD-1)','TD-1');
+  /* v21.83 every target in the plan has a part of it that addresses it (Form TD-1, Targets in this plan) */
+  (pl.targets||[]).filter(x=>x&&x.label&&x.covered===false).forEach(x=>miss('Not addressed by the plan yet: '+esc(x.label)+(x.fn?' ('+esc(x.fn)+')':'')+' (Form TD-1, Targets in this plan)','TD-1'));
   if(!ad.date)miss('The team has not adopted the plan on record: the meeting date, who attended, the parent’s input (Form TD-1)','TD-1');
   else if(!ad.notice)miss('No prior written notice date for the plan’s adoption (Form TD-1)','TD-1');
   if(!ad.start)miss('No start date for the plan (Form TD-1)','TD-1');
