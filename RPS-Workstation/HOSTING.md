@@ -25,7 +25,11 @@ point a subdomain at it from GoDaddy's DNS.
 2. Create a folder, for example `workstation-rps`, and open it.
 3. **Upload** the zip, then select it and choose **Extract**. Delete the zip.
    The files land directly in `workstation-rps` (`public_html/workstation-rps/index.html`);
-   upload the whole folder, `nbh-pictos.js` included (Forms SM-1, VS-1 and TK-1 load their pictures
+   upload the whole folder. Since v21.84 every form loads its shared scripts from files beside it:
+   `nbh-wording.js` (the writing help), `nbh-logo.js` (the letterhead), `nbh-case-flow.js`, `nbh-ui.js`,
+   `nbh-field-care.js`, `nbh-autosave.js` and `nbh-polish.js`; a form uploaded without them opens without
+   its letterhead, its writing help or its autosave, so upload them with the forms, every time. The rest:
+   `nbh-pictos.js` included (Forms SM-1, VS-1 and TK-1 load their pictures
    from it; since v21.43 it also holds the practice's own cards, so an older copy left on the site
    leaves those cards without a picture), `nbh-pictures.js` (v21.62: My pictures, the camera library of Forms VS-1, SM-1, TK-1
    and TV-1; without it their pickers have no My pictures), `nbh-tk1-narration.js` (v21.44: the recorded narration of Form TK-1's

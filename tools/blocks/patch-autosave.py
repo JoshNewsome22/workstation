@@ -6,7 +6,9 @@ Into every form named (default: the 44 forms, NBH-Workstation/[A-Z]*.html):
   1. <script id="nbh-autosave">: the store (tools/blocks/nbh-copies.js) and the form's part (tools/blocks/nbh-autosave.js),
      each byte for byte, before the polish layer at the end of the body (tools/apply-polish.py puts the polish back at the
      end of the body, so a rebuilt form keeps the same order and a rebuild from parts stays byte for byte). An existing
-     copy is replaced.
+     copy is replaced. v21.84: the block's text is written once beside the forms, as nbh-autosave.js, and each form
+     carries its loader, <script id="nbh-autosave" src="nbh-autosave.js"></script>, in that place (an inline copy is
+     replaced by it; see tools/blocks/shared_js.py); --check also checks the file.
   2. Five small changes in the workstation bridge: the status a form reports carries the hash of its whole state
      (window.nbhState, so taps count), the parts the form's own safety copy needs are named on window.nbhBridge, the
      answer to a snapshot says beside it whether the form has been changed since it was opened and which state the
@@ -34,7 +36,9 @@ import glob, os, re, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 BLOCKS = os.path.join(ROOT, 'tools', 'blocks')
 OPEN, CLOSE = '<script id="nbh-autosave">', '</script>'
-TAG = '\n' + OPEN
+FILE = 'nbh-autosave.js'   # v21.84 the one copy, beside the forms
+LOADER = '<script id="nbh-autosave" src="' + FILE + '"></script>'
+TAG = '\n<script id="nbh-autosave"'   # an inline copy or the loader
 HEAD = ('/* nbh-autosave (v21.44): written by tools/blocks/patch-autosave.py from tools/blocks/nbh-copies.js and\n'
         '   nbh-autosave.js, each copied byte for byte; change those files and run it again rather than editing this copy. */\n')
 CORE_A = '/* nbh-copies core: begin (tools/blocks/nbh-copies.js, put here by tools/blocks/patch-autosave.py; edit that file, not this copy) */\n'
@@ -179,16 +183,16 @@ def patch_form(s, rel, block):
         fail(f'{rel}: {n} copies of the nbh-autosave block')
     if n:
         a = s.index(TAG) + 1; b = s.index(CLOSE, a) + len(CLOSE)
-        s = s[:a] + block + s[b:]
+        s = s[:a] + LOADER + s[b:]
     else:
         at = s.find('\n<style id="nbh-polish-css"')
         if at < 0:
             at = s.rfind('\n</body>')
         if at < 0 or s.count('</body>') != 1:
             fail(f'{rel}: expected one </body>')
-        s = s[:at] + '\n' + block + s[at:]
-    if s.count(TAG) != 1 or s.count(block) != 1:
-        fail(f'{rel}: not exactly one copy of the block after patching')
+        s = s[:at] + '\n' + LOADER + s[at:]
+    if s.count(TAG) != 1 or s.count(LOADER) != 1 or block in s:
+        fail(f'{rel}: not exactly one loader of the block after patching')
     return s
 
 
@@ -213,15 +217,25 @@ def main(argv):
         n = len(re.findall(r"\['[A-Z0-9]+-\d+',", mm.group(1))) if mm else -1
         if len(files) != n:
             fail(f'expected the {n} forms in NBH-Workstation, found {len(files)}')
-    stale = []; done = 0
+    stale = []; done = 0; folders = []
     for f in files:
         path = os.path.abspath(f); rel = os.path.relpath(path, ROOT)
         s = read(path); t = patch_form(s, rel, block)
+        if os.path.dirname(path) not in folders:
+            folders.append(os.path.dirname(path))
         if t != s:
             stale.append(rel)
             if not check:
                 write(path, t)
         done += 1
+    # v21.84 the block itself, once beside the forms: the text the inline copy held, byte for byte
+    body = block[len(OPEN):-len(CLOSE)]
+    for d in folders:
+        fp = os.path.join(d, FILE)
+        if not os.path.isfile(fp) or read(fp) != body:
+            stale.append(os.path.relpath(fp, ROOT))
+            if not check:
+                write(fp, body)
     # the guard's source
     gpath = os.path.join(BLOCKS, 'nbh-guard.html'); g = read(gpath)
     i, j = region(g, '<script id="nbh-guard">', 'tools/blocks/nbh-guard.html', 'nbh-guard script')

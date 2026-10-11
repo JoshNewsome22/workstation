@@ -8807,3 +8807,43 @@ Checked by `qa/v2182-test.js` (the shell: the new facts, Today, the hand-over ch
 
 Checked by `qa/v2183-test.js` (the bar and More), `qa/v2183-m-test.js` (TD-1 and PR-1) and `qa/v2183-n-test.js` (the fold in
 ten forms at both iPad widths, print unchanged).
+
+### v21.84: one copy of the shared scripts
+
+Every form carried the same script blocks byte for byte: 21.5 of the 34.8 MB of forms were those copies (the writing
+help, 252 KB, 11.6 MB across the 46 forms; the letterhead, 56 KB, 2.5 MB), and a change to any one of them rewrote all 46
+forms, so each iPad downloaded about 35 MB again for one changed rule. Each is now ONE file beside the forms, and a form
+carries only its loader, a classic synchronous `<script id="..." src="..."></script>` in the place the inline block held,
+so the form's scripts run in the same order as before:
+
+- `nbh-logo.js` (the letterhead, in the head), `nbh-wording.js` (the writing help), `nbh-case-flow.js`, `nbh-ui.js`,
+  `nbh-field-care.js`, `nbh-autosave.js` and `nbh-polish.js`. The list is `tools/blocks/shared_js.py`.
+- Not moved: the styles (the master print collects each form's styles), `nbh-pwa-save` (the offline worker checks every
+  page carries it), `nbh-guard` (the autosave patcher edits it inside each form) and the blocks that differ between forms.
+- **Opened on its own** from the folder, from the website, in the workstation and in its own tab, a form loads the files
+  beside it; the offline copy saves them with the forms (`sw.js` and `release.json` list them, as they list every file a
+  page loads). **Upload them with the forms** (HOSTING.md): a form without them opens without its letterhead, writing
+  help or autosave.
+- **The one-file editions** are unchanged: there a form opens from inside the file (srcdoc, or a blob in its own tab),
+  where a file beside it cannot load, so `tools/build-single.py` puts each loader back as the inline block, the file's
+  text byte for byte, before it packs the form. The one-file file, and every case file saved from it, is byte for byte
+  what the same forms made before.
+- **The tools write the loader**: `patch-wording.py`, `apply-polish.py` and `polish-one.py`, `patch-autosave.py`,
+  `patch-ui.py`, `patch-case.py` and `dedupe-logo.py` build their block as before, then leave the loader in the form and
+  write the file; `new-form.py` copies CF-1's loaders; `tools/blocks/patch-shared.py` moves any inline copy out (and is the
+  check for `nbh-field-care.js`, which is edited as the file). `pwa-sw.py` refuses a form that holds an inline copy again,
+  so no release brings them back; `build-rps.py` copies the files and swaps the letterhead in `nbh-logo.js`.
+
+Sizes (the practice's edition; the school's is within 0.2 MB):
+
+| | before | after |
+| --- | --- | --- |
+| the 46 forms | 35.7 MB | 16.5 MB (and 0.42 MB in the seven files) |
+| the first offline save (every file the offline copy keeps) | 57.0 MB | 38.1 MB |
+| a release that changes one shared script (a rule, the relay address) | every form, about 35 MB per iPad | that one file (the writing help: 252 KB) |
+| `deliver/NBH-Workstation.html`, `deliver/RPS-Workstation.html` | 20.1 MB | 20.1 MB, byte for byte the same |
+
+Checked by `qa/v2184-o-test.js` (the files, the loaders, the lists, the editions; all 46 forms on their own from the
+website and from a file, with no page error, the writing help started and finding wording, its button over a field and the
+letterhead filled; forms in the workstation, in their own tab, in both one-file editions and in the school edition), with
+`qa/pwa-test.js`, `qa/autosave-test.js`, `qa/wording-client-test.js` and `qa/wording-rollout-test.js`.

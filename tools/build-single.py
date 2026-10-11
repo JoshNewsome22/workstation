@@ -14,9 +14,9 @@ and kept once, in a block of its own, which index.html puts back as it opens a f
 copies, or with a copy unlike the others' (a form not re-patched), stops the build, and the packed forms are
 unpacked again, the writing help and the logo put back, and checked against the files before anything is written.
 
-v21.84: in the folder the writing help and the logo script are each ONE file beside the forms (nbh-wording.js,
-tools/blocks/patch-wording.py; nbh-logo.js, tools/dedupe-logo.py), and a form carries only their loaders,
-<script id="nbh-wording" src="nbh-wording.js"></script> and <script id="nbh-logo" src="nbh-logo.js"></script>. Inside
+v21.84: in the folder the scripts every form carried the same (the writing help, the logo script, the case flow, nbh-ui,
+field care, autosave, the polish script; tools/blocks/shared_js.py) are each ONE file beside the forms, and a form carries
+only their loaders, such as <script id="nbh-wording" src="nbh-wording.js"></script>. Inside
 this file a form opens from srcdoc (or a blob, in its own tab), where a relative src loads nothing, so each loader is
 put back as the inline block it replaced, the file's text byte for byte, before the form is packed: the forms packed
 here, and so this file and the case files written from it, are what they were before v21.84. A form without exactly one
@@ -44,24 +44,19 @@ if len(files) != 46:
 WTAG = '\n<script id="nbh-wording">'
 WHOLE = '@@NBH-WORDING@@'
 forms, files_in, wording = {}, {}, None
-# v21.84 the shared scripts the forms load by <script src> from beside them, put back inline: (id, file, its text)
-SHARED = []
-for sid, sfile in (('nbh-logo', 'nbh-logo.js'), ('nbh-wording', 'nbh-wording.js')):
-    p = os.path.join(SRC, sfile)
-    if not os.path.isfile(p):
-        sys.exit(f'{sfile} is not in {SRC}: every form loads it (run tools/dedupe-logo.py and tools/blocks/patch-wording.py)')
-    t = open(p, encoding='utf-8', newline='').read()
-    if '</script' in t.lower() or '<!--' in t:
-        sys.exit(f'{sfile} holds </script or <!--, so it cannot go back inline')
-    SHARED.append((sid, sfile, t))
+# v21.84 the shared scripts the forms load by <script src> from beside them (tools/blocks/shared_js.py), put back inline
+import importlib.util as _ilu
+_sj = _ilu.spec_from_file_location('shared_js', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blocks', 'shared_js.py'))
+SJ = _ilu.module_from_spec(_sj); _sj.loader.exec_module(SJ)
+for sfile in SJ.FILES:
+    if not os.path.isfile(os.path.join(SRC, sfile)):
+        sys.exit(f'{sfile} is not in {SRC}: every form loads it (see tools/blocks/shared_js.py)')
+SHARED_TEXT = {f: open(os.path.join(SRC, f), encoding='utf-8', newline='').read() for f in SJ.FILES}
 def inline(fn, s):
-    for sid, sfile, t in SHARED:
-        tag = f'<script id="{sid}" src="{sfile}"></script>'
-        if s.count(tag) != 1 or s.count(f'<script id="{sid}"') != 1:
-            sys.exit(f'{fn} does not hold exactly one {tag} (and no other <script id="{sid}">): '
-                     f'run python3 tools/{"dedupe-logo.py" if sid == "nbh-logo" else "blocks/patch-wording.py"} on it')
-        s = s.replace(tag, f'<script id="{sid}">' + t + '</script>')
-    return s
+    try:
+        return SJ.inline(s, SRC, texts=SHARED_TEXT)
+    except SJ.Problem as e:
+        sys.exit(f'{fn} {e}')
 for fn in files:
     s = inline(fn, open(os.path.join(SRC, fn), encoding='utf-8').read())
     files_in[fn] = s

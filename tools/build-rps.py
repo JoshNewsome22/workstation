@@ -44,8 +44,10 @@ EXPECT = [
   ('<meta name="apple-mobile-web-app-title" content="NBH Workstation">', '<meta name="apple-mobile-web-app-title" content="RPS Workstation">', 1),
 ]
 done = [0] * len(EXPECT)
-# v21.84 the scripts every form loads from one file beside it (the letterhead, the writing help) are part of the pages
-SHARED_JS = ('nbh-logo.js', 'nbh-wording.js')
+# v21.84 the scripts every form loads from one file beside it (the letterhead, the writing help, ...) are part of the pages
+_sj = importlib.util.spec_from_file_location('shared_js', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'blocks', 'shared_js.py'))
+_SJ = importlib.util.module_from_spec(_sj); _sj.loader.exec_module(_SJ)
+SHARED_JS = _SJ.FILES   # tools/blocks/shared_js.py
 for f in SHARED_JS:
     if not os.path.isfile(os.path.join(OUT, f)):
         sys.exit(f'{f} is not in {SRC}: every form loads it')
