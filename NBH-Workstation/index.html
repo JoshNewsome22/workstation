@@ -891,6 +891,34 @@ body.ws-split .rail-edge{display:none!important}
   .crumb .acts{margin-left:0;flex:1 1 100%;justify-content:space-between}}
 @media (max-width:480px){header.top h1{display:none}#splitBtn,#popOut{display:none}.rail-edge{display:none!important}}
 </style>
+<style id="ws-history">
+/* v21.91 case history: each save a line (when · where · why — what changed), its three actions under it, and a panel that
+   opens below it (the forms to restore one from, or what changed since); the bar while a case from History is on screen */
+.hx-list{list-style:none;margin:6px 0 12px;padding:0}
+.hx-list>li{padding:10px 0;border-top:1px solid var(--rule)}
+.hx-list>li:first-child{border-top:0}
+.hx-l{margin:0 0 6px;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
+.hx-l b{color:var(--navy)}
+.hx-list>li.hx-drv{padding-left:10px;border-left:3px solid #b9d7c3}
+.hx-drv .hx-l b{color:var(--slate)}
+.hx-tag{display:inline-block;margin-left:4px;padding:0 7px;border-radius:9px;background:var(--slate);color:#fff;font:600 10.5px/1.7 var(--sans);letter-spacing:.04em;text-transform:uppercase;vertical-align:1px;white-space:nowrap}
+.hx-tag.drv{background:#e3f0e6;color:var(--ok)}
+.hx-acts{display:flex;flex-wrap:wrap;gap:6px 8px;margin:0}
+.hx-acts button{min-height:36px}
+.hx-panel{margin:8px 0 2px;padding:8px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--shade)}
+.hx-panel p{margin:4px 0}.hx-panel ul{margin:4px 0;padding-left:18px}
+.hx-pick{display:flex;flex-wrap:wrap;gap:6px}
+.hx-pick button{text-align:left;min-height:40px}
+.hx-src{margin:0 0 6px;font-size:12.5px;color:var(--muted)}
+.hx-src button{margin-left:4px}
+.hx-note{margin:0 0 8px;padding:7px 10px;border:1px solid #e6cf9f;border-radius:8px;background:#fdf6e7;font-size:13px}
+#hxBar{box-shadow:inset 3px 0 0 var(--flag)}
+header.top #hxBtn.hx-top{flex:0 0 auto;font-size:11.5px;font-weight:500;padding:4px 12px;min-height:30px;border-radius:999px;background:#fff;border:1px solid var(--rule);color:var(--navy);white-space:nowrap}
+header.top #hxBtn.hx-top:hover{background:var(--mist)}
+#hxBar button{margin-left:6px}
+@media (pointer:coarse){.hx-acts button,.hx-pick button{min-height:44px}}
+@media (max-width:520px){.hx-acts button{flex:1 1 auto}.hx-pick button{flex:1 1 100%}}
+</style>
 </head>
 <body>
 
@@ -4698,7 +4726,7 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
   if(e.target.closest('#tdCaseload')){caseloadOpen();return;}
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
-    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;
+    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case history on this '+HERE+' (the earlier saves kept here) is deleted with them. Their case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;   /* v21.91 the history named (it goes in clTx's delete, nbh-history) */
     try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}caseloadOpen();}});
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
@@ -4962,11 +4990,11 @@ async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await cl
   const old=L.filter(r=>r.key!==me&&!r.unfiled&&Date.parse(r.saved)<cut);for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
 async function clRemoveAll(){const L=await clList()||[];
-  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
+  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
   const unf=L.filter(r=>r.unfiled);
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
-  try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}
+  try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}try{await hxWipe();}catch(e){}   /* v21.91 every point of case history too */
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
   wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
@@ -5776,7 +5804,7 @@ document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.c
 /* Remove: everywhere (a marker in Drive the other devices follow) or only here */
 document.addEventListener('click',async e=>{const d=e.target.closest&&e.target.closest('[data-cldel]');if(!d||!drvOn())return;e.stopImmediatePropagation();e.preventDefault();
   const r=await drvLocal(d.dataset.cldel);if(!r)return;
-  const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive (Drive keeps its earlier copies for 30 days). Only here keeps them in Drive and on the other devices.',
+  const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive (Drive keeps its earlier copies for 30 days). Only here keeps them in Drive and on the other devices. Either way, their case history on this '+drvDev()+' is deleted.',
     [{v:'all',label:'Remove everywhere',kind:'danger'},{v:'here',label:'Only this '+drvDev()},{v:'',label:'Cancel'}]);if(!c)return;
   const h=await drvHash(drvKey(r));
   if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id});drvGoneSet(g);}}
@@ -6593,6 +6621,295 @@ const PWA=(()=>{
 (function(){var l=document.querySelector('link[rel="apple-touch-icon"]');if(!l||!/^https?:$/.test(location.protocol)||!window.fetch||!window.FileReader||/^data:/.test(l.getAttribute('href')||''))return;   /* opened from a folder: no website, nothing to fetch */
   fetch('apple-touch-icon.png',{credentials:'include'}).then(function(r){return r.ok&&/image/.test(r.headers.get('Content-Type')||'image')?r.blob():null;}).then(function(b){if(!b)return;
     var f=new FileReader();f.onload=function(){if(typeof f.result==='string'&&/^data:image\//.test(f.result))l.setAttribute('href',f.result);};f.readAsDataURL(b);}).catch(function(){});})();
+</script>
+<script id="nbh-history">
+/* ================= v21.91 case history: back to how a case was at an earlier save =================
+   The BCBA saves on the laptop and on the iPad and loses track of which is the latest work. Each Save case (the caseload's
+   copy on this device) now also keeps a restore point for that student on this device, in a store of its own (nbh-history;
+   nothing is sent anywhere): when, on which device, why, the whole case as it was, and what changed since the point before
+   it. A save the same as the last point keeps nothing new. Before Google Drive brings the other device's copy over this one,
+   and before any going back, the version being replaced is kept as a point first, so going back never loses the current
+   version. With Google Drive in use and signed in, History also lists the earlier versions Drive keeps of the student's file
+   (the files the workstation wrote), so a save made on the laptop shows on the iPad; a version's contents are fetched only
+   when it is opened. Each point offers Open as it was (the whole case; Save case then makes it the current version), Restore
+   one form (only that form, in the case on screen) and Compare with now. Limits: 30 points a student, one a day once older
+   than two weeks, about 200 MB in all (the oldest go first). Remove and Remove all student data delete the history as well;
+   nothing is kept while the caseload is turned off on the device. */
+const HX={db:null,max:30,days:14,cap:200*1024*1024,q:Promise.resolve(),why:'',full:false,busy:false,opening:false,view:null};
+function hxDb(){if(HX.db)return HX.db;HX.db=new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  try{if(!window.indexedDB)return fin(null);r=indexedDB.open('nbh-history',1);}catch(e){return fin(null);}
+  setTimeout(()=>fin(null),5000);
+  r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains('points'))db.createObjectStore('points',{keyPath:'id'}).createIndex('key','key');
+    if(!db.objectStoreNames.contains('texts'))db.createObjectStore('texts',{keyPath:'id'});
+    if(!db.objectStoreNames.contains('drive'))db.createObjectStore('drive',{keyPath:'k'}).createIndex('key','key');}catch(e){}};
+  r.onsuccess=()=>{const db=r.result;try{db.onversionchange=()=>{try{db.close();}catch(e){}HX.db=null;};}catch(e){}fin(db);};r.onerror=()=>fin(null);});return HX.db;}
+/* points: what the list shows (small); texts: the case as it was (large, read only when one is opened); drive: what is known
+   of a version of the student's Drive file (when and where it was saved), so the list can name it without fetching it */
+async function hxTx(names,mode,fn){const db=await hxDb();if(!db)throw new Error('no storage in this browser');
+  return new Promise((res,rej)=>{let out;try{const t=db.transaction(names,mode);out=fn.apply(null,names.map(n=>t.objectStore(n)));
+    t.oncomplete=()=>res(out&&typeof out==='object'&&'readyState' in out?out.result:out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('not kept'));}catch(e){rej(e);}});}
+const hxT=iso=>Date.parse(iso)||0;
+const hxOrd=(a,b)=>hxT(b.at)-hxT(a.at)||String(b.made||'').localeCompare(String(a.made||''));
+const hxPoints=key=>hxTx(['points'],'readonly',s=>s.index('key').getAll(key)).then(L=>(L||[]).sort(hxOrd)).catch(()=>[]);
+const hxText=id=>hxTx(['texts'],'readonly',s=>s.get(id)).then(x=>x&&x.text||'').catch(()=>'');
+const hxIdle=()=>HX.q;
+/* one history write at a time, in the order asked */
+function hxQueue(fn){const p=HX.q.then(()=>fn()).catch(e=>{try{console.warn('case history: '+(e&&e.message||e));}catch(x){}return null;});HX.q=p;return p;}
+/* a fingerprint of a text (two 32-bit hashes and its length; quick on a few MB) */
+function hxHash(s){s=String(s||'');let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677);}
+  a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return (b>>>0).toString(36)+(a>>>0).toString(36)+'.'+s.length;}
+/* the same case saved twice differs only in its times (the case's and each form's own save stamp): those are left out */
+function hxOwn(o){if(!o)return '';try{const j=JSON.parse(o);if(j&&typeof j==='object'&&!Array.isArray(j))['saved','savedAt','exported','exportedAt','written','stamp'].forEach(k=>{delete j[k];});return JSON.stringify(j);}catch(e){return String(o);}}
+function hxSig(d){const F={};Object.keys((d&&d.forms)||{}).sort().forEach(id=>{const s=(d.forms[id]||{}).snap||{};F[id]=[s.total||0,s.data||{},hxOwn(s.own)];});
+  return hxHash(JSON.stringify([(d&&d.packet)||{},(d&&d.photoSrc)||'',F]));}
+const hxN=(n,w,ws)=>n+' '+(n===1?w:(ws||w+'s'));
+/* what changed from one save to the next, in a few words: the forms' fields, the days of data, incidents, the plan, the
+   targets, the function, the student's details (the same reading as What changed since the last save) */
+function hxDiff(a,b){const L=[],fa=(a&&a.forms)||{},fb=(b&&b.forms)||{},of=(a&&a.facts)||{},nf=(b&&b.facts)||{},od=of.data||{},nd=nf.data||{};
+  Object.keys(fb).concat(Object.keys(fa).filter(id=>!(id in fb))).forEach(id=>{const x=fa[id]&&fa[id].snap,y=fb[id]&&fb[id].snap;
+    if(!x&&y){L.push('Form '+id+' added');return;}if(x&&!y){L.push('Form '+id+' taken out');return;}if(!x||!y)return;
+    const p=[],dx=x.data||{},dy=y.data||{};
+    if(id==='DD-1'){const n=(+nd.days||0)-(+od.days||0);if(n>0)p.push(hxN(n,'new day'));else if(n<0)p.push(hxN(-n,'day')+' fewer');}
+    let f=0;new Set(Object.keys(dx).concat(Object.keys(dy))).forEach(k=>{if(String(dx[k]==null?'':dx[k])!==String(dy[k]==null?'':dy[k]))f++;});
+    if(f)p.push(hxN(f,'field'));if(!p.length&&hxOwn(x.own)!==hxOwn(y.own))p.push('changed');
+    if(p.length)L.push('Form '+id+': '+p.join(', '));});
+  const oi=(od.incidentList||[]).length,ni=(nd.incidentList||[]).length;if(ni>oi)L.push(hxN(ni-oi,'new incident'));
+  const pj=x=>JSON.stringify([x&&x.rep,x&&x.ant,x&&x.teach,x&&x.respond,x&&x.targets]);if((nf.plan||of.plan)&&pj(nf.plan)!==pj(of.plan))L.push('the plan (Form TD-1)');
+  const ob=(of.behaviors||[]).map(x=>x&&x.label).filter(Boolean),nb=(nf.behaviors||[]).map(x=>x&&x.label).filter(Boolean);
+  nb.filter(x=>!ob.includes(x)).forEach(x=>L.push('new target behavior: '+x));ob.filter(x=>!nb.includes(x)).forEach(x=>L.push('target behavior no longer listed: '+x));
+  const fk=x=>x&&(x.key||x.label)||'';if(fk(nf.fn)!==fk(of.fn))L.push('the function: '+(fk(nf.fn)||'none')+(fk(of.fn)?' (was '+fk(of.fn)+')':''));
+  const pa=(a&&a.packet)||{},pb=(b&&b.packet)||{};if(['client','sid','grade','site','bcba'].some(k=>String(pa[k]||'')!==String(pb[k]||'')))L.push('the student’s details');
+  if(String(pa.photo||'')!==String(pb.photo||''))L.push('the photo');
+  return L;}
+/* keep a point: o = {key,text,at,dev,why}; the same as the newest point, or a save already kept (the same case at the same
+   time), keeps nothing new (that point is returned) */
+async function hxKeep(o){if(clOff()||!o||!o.key||!o.text)return null;
+  let d=null;try{d=parseCase(o.text);}catch(e){return null;}if(!d||!d.forms)return null;
+  const sig=hxSig(d),L=await hxPoints(o.key),at=o.at||new Date().toISOString();
+  if(L[0]&&L[0].sig===sig)return L[0];const same=L.find(x=>x.sig===sig&&x.at===at);if(same)return same;
+  const prev=L.find(x=>hxT(x.at)<=hxT(at));let chg=[];
+  if(prev){let pd=null;try{pd=parseCase(await hxText(prev.id));}catch(e){}if(pd)chg=hxDiff(pd,d);}
+  const id='h'+Date.now().toString(36)+Math.random().toString(36).slice(2,8),pk=d.packet||{};
+  const pt={id,key:o.key,scope:clScope(),client:String(pk.client||''),sid:String(pk.sid||''),at,made:new Date().toISOString(),dev:o.dev||drvDev(),why:o.why||'Save case',
+    sig,raw:hxHash(o.text),size:o.text.length*(/[^\x00-\xff]/.test(o.text)?2:1),chg,first:!L.length,forms:Object.keys(d.forms)};
+  const put=()=>hxTx(['points','texts'],'readwrite',(P,T)=>{P.put(pt);T.put({id,text:o.text});});
+  try{await put();}catch(e){if(!/quota/i.test(String(e&&(e.name+' '+e.message))))return null;await hxTrim(Math.floor(HX.cap/2),id);try{await put();}catch(x){hxFull();return null;}}
+  await hxTrim(0,id);return pt;}
+function hxFull(){if(HX.full)return;HX.full=true;try{wsUI.toast('Case history could not keep this save: this '+HERE+'’s storage is full. The case itself is saved as usual.',{kind:'warn',ms:10000});}catch(e){}}
+/* the limits: 30 a student, one a day once older than two weeks (the day's last), then about 200 MB in all, the oldest first */
+const hxDay=iso=>{const t=new Date(iso);return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();};
+async function hxTrim(cap,keep){cap=cap||HX.cap;let all=[];try{all=await hxTx(['points'],'readonly',s=>s.getAll())||[];}catch(e){return;}
+  const drop=new Set(),by={},old=Date.now()-HX.days*864e5;all.forEach(p=>{(by[p.key]=by[p.key]||[]).push(p);});
+  Object.values(by).forEach(L=>{L.sort(hxOrd);const day={};L.forEach((p,i)=>{if(i>=HX.max){drop.add(p.id);return;}if(hxT(p.at)<old){const d=hxDay(p.at);if(day[d])drop.add(p.id);else day[d]=1;}});});
+  const left=all.filter(p=>!drop.has(p.id)).sort((a,b)=>hxT(a.at)-hxT(b.at)||String(a.made||'').localeCompare(String(b.made||'')));let tot=left.reduce((s,p)=>s+(+p.size||0),0);
+  for(const p of left){if(tot<=cap)break;if(p.id===keep)continue;drop.add(p.id);tot-=(+p.size||0);}
+  if(drop.size)try{await hxTx(['points','texts'],'readwrite',(P,T)=>{drop.forEach(id=>{P.delete(id);T.delete(id);});});}catch(e){}}
+async function hxNoteDrive(m){if(!m||!m.fid||!m.mt||!m.key||clOff())return;try{await hxTx(['drive'],'readwrite',s=>s.put(Object.assign({k:m.fid+'@'+m.mt},m)));}catch(e){}}
+async function hxForget(keys){keys=(keys||[]).filter(Boolean);if(!keys.length)return;
+  try{await hxTx(['points','texts','drive'],'readwrite',(P,T,D)=>{keys.forEach(k=>{
+    P.index('key').getAllKeys(k).onsuccess=ev=>{(ev.target.result||[]).forEach(id=>{P.delete(id);T.delete(id);});};
+    D.index('key').getAllKeys(k).onsuccess=ev=>{(ev.target.result||[]).forEach(id=>D.delete(id));};});});}catch(e){}}
+async function hxWipe(){try{await hxTx(['points','texts','drive'],'readwrite',(P,T,D)=>{P.clear();T.clear();D.clear();});}catch(e){}}
+const hxRecOf=async k=>(await clList()||[]).find(x=>x.key===k)||null;
+const hxOpenNow=()=>!!(Object.keys(state.frames).length||Object.keys(state.pending).length);
+/* the case on screen as a case text, read from the forms the way Save case reads them (a form that does not answer: as the
+   copy on this device has it) */
+async function hxScreenText(){const p=packet(),k=clKey(p);if(!k||!hxOpenNow())return '';
+  const open=Object.keys(state.frames).filter(id=>!state.pending[id]),kept=Object.keys(state.pending);let forms={};const late=[];
+  for(const id of open){const g=await grab(id,'snapshot',null,8000);if(g&&g.snap)forms[id]={title:g.title,snap:g.snap};else late.push(id);}
+  kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});
+  if(late.length){try{const r=await hxRecOf(k),od=r&&parseCase(r.text);late.forEach(id=>{if(od&&od.forms&&od.forms[id])forms[id]=od.forms[id];});}catch(e){}}
+  forms=orderCase(forms);if(!Object.keys(forms).length)return '';
+  try{await gatherFacts(false);}catch(e){}
+  return JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});}
+async function hxKeepScreen(why){if(clOff()||!hxOpenNow())return null;const t=await hxScreenText();if(!t)return null;const k=clKey(packet());
+  return hxQueue(()=>hxKeep({key:k,text:t,at:new Date().toISOString(),dev:drvDev(),why}));}
+/* ---- where the points come from ---- */
+/* Save case, and Keep it on this iPad and switch: the caseload's copy, then a point of it (Save case does not wait for it) */
+{const ck=caseloadKeep;caseloadKeep=async function(p){const out=await ck.apply(this,arguments);
+  try{const k=clKey(p||{}),why=HX.why||'Save case';if(k&&!clOff()){const r=await hxRecOf(k);if(r&&r.text)hxQueue(()=>hxKeep({key:k,text:r.text,at:r.saved,dev:r.dev||drvDev(),why}));}}catch(e){}
+  return out;};}
+{const ko=caseKeepOnly;caseKeepOnly=async function(){HX.why='Kept to switch students';try{return await ko.apply(this,arguments);}finally{HX.why='';}};}
+/* Google Drive brings the other device's copy: the copy it replaces is kept first, then the one it brings */
+{const db0=drvBring;drvBring=async function(f,r,j){let dv='other device';
+  try{if(!clOff()&&f&&f.id){if(!j)j=await drvRead(f.id);const x=(j&&j.rec)||{};dv=x.dev||dv;
+    if(r&&r.key&&r.text&&j&&j.text!==r.text)await hxQueue(()=>hxKeep({key:r.key,text:r.text,at:r.saved,dev:r.dev||drvDev(),why:'replaced by the copy from the '+dv}));}}catch(e){}
+  const out=await db0.call(this,f,r,j);
+  try{if(out&&out.text&&!clOff())hxQueue(async()=>{await hxKeep({key:out.key,text:out.text,at:out.saved,dev:out.dev||dv,why:'brought here by Google Drive'});
+    await hxNoteDrive({fid:f.id,mt:String(f.modifiedTime||''),key:out.key,saved:out.saved||'',dev:out.dev||dv,raw:hxHash(out.text)});});}catch(e){}
+  return out;};}
+/* this device's copy goes up to Drive: what is known of that version (its time in Drive, the save it holds) */
+{const dp=drvPut;drvPut=async function(r){const f=await dp.apply(this,arguments);
+  try{if(f&&f.id&&f.modifiedTime&&r&&r.key&&r.text&&!clOff())hxQueue(()=>hxNoteDrive({fid:f.id,mt:String(f.modifiedTime),key:r.key,saved:r.saved||'',dev:r.dev||drvDev(),raw:hxHash(r.text)}));}catch(e){}
+  return f;};}
+/* a student taken off the caseload here (Remove, Remove everywhere, Remove all, forgotten after the weeks chosen, removed on
+   another device) takes their history with them: every deletion from the caseload's store deletes that student's points */
+{const tx0=clTx;clTx=function(mode,fn){if(mode!=='readwrite'||typeof fn!=='function')return tx0.apply(this,arguments);const gone=[];
+  return tx0.call(this,mode,st=>{try{const d0=st.delete;st.delete=function(k){gone.push(k);return d0.call(st,k);};}catch(e){}return fn(st);})
+    .then(async out=>{if(gone.length){try{await hxForget(gone);}catch(e){}}return out;});};}
+/* ---- the words ---- */
+const hxYmd=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+function hxDayOf(iso){const t=new Date(iso);if(isNaN(t))return null;const tm=t.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),n=tdDays(hxYmd(t));
+  if(n===0)return {d:'Today',tm,rel:1};if(n===1)return {d:'Yesterday',tm,rel:1};if(n>1&&n<7)return {d:t.toLocaleDateString([],{weekday:'long'}),tm,rel:2};
+  return {d:t.getFullYear()===new Date().getFullYear()?t.toLocaleDateString([],{month:'short',day:'numeric'}):t.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'}),tm,rel:0};}
+const hxWhen=iso=>{const w=hxDayOf(iso);return !w?'':w.d+(w.rel?' ':', ')+w.tm;};
+const hxWhenIn=iso=>{const w=hxDayOf(iso);return !w?'':w.rel===1?w.d.toLowerCase()+' at '+w.tm:'on '+w.d+' at '+w.tm;};
+const hxDev=d=>d?drvOnDev(d):'';
+/* ---- Google Drive's versions of the student's file ---- */
+async function hxRevs(fid){let out=[],pt='',n=0;
+  do{const j=await drvJson(DAPI+'/'+encodeURIComponent(fid)+'/revisions?fields=nextPageToken,revisions(id,modifiedTime,size)&pageSize=200'+(pt?'&pageToken='+encodeURIComponent(pt):''));out=out.concat(j.revisions||[]);pt=j.nextPageToken||'';}while(pt&&++n<5);
+  return out;}
+async function hxRevRead(fid,rid){const t=await (await drvFetch(DAPI+'/'+encodeURIComponent(fid)+'/revisions/'+encodeURIComponent(rid)+'?alt=media')).text();let j=null;try{j=JSON.parse(t);}catch(e){}return j;}
+function hxDrv(V){if(typeof drvOn!=='function'||!drvOn())return 'off';if(!V.r||!V.r.drv||!V.r.drv.id)return 'none';if(navigator.onLine===false)return 'offline';if(!drvTok())return 'signin';return V.ds||'go';}
+async function hxDriveLoad(V){const fid=V.r.drv.id;
+  try{const revs=await hxRevs(fid);let maps=[];try{maps=await hxTx(['drive'],'readonly',s=>s.index('key').getAll(V.key))||[];}catch(e){}
+    const M={};maps.forEach(m=>{if(m.fid===fid)M[m.mt]=m;});
+    V.drive=revs.map(v=>{const m=M[String(v.modifiedTime)]||null;return {id:'d:'+v.id,src:'drive',rid:v.id,fid,mt:String(v.modifiedTime),at:m&&m.saved||String(v.modifiedTime),dev:m&&m.dev||'',raw:m&&m.raw||''};})
+      .sort((a,b)=>hxT(b.at)-hxT(a.at));
+    hxDup(V);V.ds='done';}
+  catch(e){V.ds='err';V.derr=e&&e.signin?'you are signed out of Google':e&&e.net?'Google Drive could not be reached':String(e&&e.message||e);}
+  if(HX.view===V)hxPaint();}
+/* a version this device sent, or brought here, is the point already listed: shown once, as the point, "also in Google Drive" */
+function hxDup(V){const by={};V.local.forEach(p=>{if(p.raw)by[p.raw]=p;});V.drive.forEach(e=>{const p=e.raw&&by[e.raw];e.dup=!!p;if(p)p.inDrive=true;});}
+/* ---- the History dialog ---- */
+function hxEntries(V){const loc=V.local.map(p=>({id:'p:'+p.id,src:'here',p,at:p.at,dev:p.dev,why:p.why,chg:p.chg,first:p.first,inDrive:!!p.inDrive}));
+  const drv=V.drive.filter(e=>!e.dup).slice(0,40);V.more=Math.max(0,V.drive.filter(e=>!e.dup).length-40);
+  return loc.concat(drv).sort((a,b)=>hxT(b.at)-hxT(a.at));}
+function hxLine(e){const chg=e.chg&&e.chg.length?e.chg.join('; '):e.first?'the first one kept here: '+hxN((e.p.forms||[]).length,'form'):e.src==='here'?'no change in the forms':'';
+  const why=e.src==='drive'?(e.dev?'in Google Drive':'in Google Drive (open it to see where it was saved)'):e.why;
+  return '<b>'+esc(hxWhen(e.at))+'<\/b>'+(e.dev?' · '+esc(hxDev(e.dev)):'')+' · '+esc(why)+(chg?' — '+esc(chg):'');}
+function hxSrc(V){const s=hxDrv(V),here='this '+HERE;
+  if(s==='off')return (typeof drvAvail==='function'&&drvAvail())?'The saves kept on '+here+'. With Google Drive in use (Caseload), the saves made on your other device are listed here too.':'The saves kept on '+here+'.';
+  if(s==='none')return 'The saves kept on '+here+'. Google Drive has no copy of this student yet; it gets one at the next sync.';
+  if(s==='offline')return 'Only the saves kept on '+here+' are listed: there is no internet, so Google Drive’s earlier copies (your other device’s saves among them) are not.';
+  if(s==='signin')return 'Only the saves kept on '+here+' are listed: you are signed out of Google, so Google Drive’s earlier copies (your other device’s saves among them) are not. <button type="button" class="sm" id="hxSign">Sign in to Google<\/button>';
+  if(s==='go')return 'The saves kept on '+here+'. Getting Google Drive’s earlier copies…';
+  if(s==='err')return 'Only the saves kept on '+here+' are listed: Google Drive’s earlier copies could not be listed ('+esc(V.derr||'')+').';
+  const n=V.drive.filter(e=>!e.dup).length;
+  return n?'The saves kept on '+here+', and '+hxN(n,'copy','copies')+' of this student that only Google Drive holds (marked “in Google Drive”), your other device’s saves among them.'+(V.more?' Drive’s '+V.more+' oldest are not shown.':'')
+    :'The saves kept on '+here+'. Google Drive holds no other copy of this student.';}
+function hxLi(e,latest,V){const pan=V.panels[e.id];
+  return '<li class="hx-pt'+(e.src==='drive'?' hx-drv':'')+'" data-hxid="'+esc(e.id)+'"><p class="hx-l">'+hxLine(e)+(latest?' <span class="hx-tag">Latest<\/span>':'')+(e.inDrive?' <span class="hx-tag drv">also in Google Drive<\/span>':'')+'<\/p>'+
+    '<p class="hx-acts"><button type="button" data-hxgo="'+esc(e.id)+'">Open as it was<\/button>'+(V.me?'<button type="button" data-hxone="'+esc(e.id)+'">Restore one form<\/button>':'')+'<button type="button" data-hxcmp="'+esc(e.id)+'">Compare with now<\/button><\/p>'+
+    (pan?'<div class="hx-panel">'+pan.html+'<\/div>':'')+'<\/li>';}
+function hxPaint(fresh){const V=HX.view;if(!V)return;if(!fresh&&!($('#dlg').open&&$('#hxView')))return;const E=V.E=hxEntries(V);
+  const html='<div id="hxView"><p class="hp-lead"><b>'+esc(V.name)+'<\/b>: the case as it was at each save, newest first. Open one as it was, take back one form from it, or compare it with now.<\/p>'+
+    (clOff()?'<p class="hx-note">Nothing new is kept: Caseload is set to Do not keep cases on this '+HERE+'.<\/p>':'')+
+    (V.me&&V.dirty?'<p class="hx-note">On screen now: this case, with changes not saved yet. Going back keeps them in History first.<\/p>':'')+
+    '<p class="hx-src" id="hxSrc">'+hxSrc(V)+'<\/p>'+
+    (E.length?'<ul class="hx-list" id="hxList">'+E.map((e,i)=>hxLi(e,i===0,V)).join('')+'<\/ul>':'<p id="hxList">No earlier save of this student is kept on this '+HERE+' yet. From now on each Save case keeps one.<\/p>')+
+    '<p class="hint">Kept in this browser on this '+HERE+' only: up to '+HX.max+' saves for each student, one a day once older than two weeks, about '+Math.round(HX.cap/1048576)+' MB in all (the oldest go first). Remove in Caseload deletes a student’s history with them.<\/p><\/div>';
+  if(fresh){if($('#dlg').open){$('#dlgTitle').textContent='Case history';$('#dlgBody').innerHTML=html;$('#dlgBody').scrollTop=0;}else dialog('Case history',html);return;}
+  const b=$('#dlgBody'),y=b.scrollTop;b.innerHTML=html;b.scrollTop=y;}
+async function hxOpen(key){
+  if(!key){key=clKey(packet());
+    if(!key){const L=await clList()||[];if(L.length){await caseloadOpen();wsUI.toast('Case history: tap History beside a student.');}
+      else alert('Case history is kept for each student: type the student’s name in the bar, then Save case. Each save is kept on this '+HERE+'.');return;}}
+  const r=await hxRecOf(key),me=key===clKey(packet())&&hxOpenNow();await hxIdle();
+  const V=HX.view={key,r,me,dirty:me&&caseDirty(),name:r?clName(r):clName({client:packet().client}),local:await hxPoints(key),drive:[],panels:{},texts:{},ds:''};
+  hxPaint(true);if(hxDrv(V)==='go')hxDriveLoad(V);}
+const hxEntry=id=>{const V=HX.view;return V&&V.E&&V.E.find(x=>x.id===id)||null;};
+/* the case text of a line: a point's from this device; a Drive version's fetched now (once), which names its device */
+async function hxEntryText(e){const V=HX.view;if(V&&V.texts[e.id])return V.texts[e.id];let t='';
+  if(e.src==='here')t=await hxText(e.p.id);
+  else{let j;try{j=await hxRevRead(e.fid,e.rid);}catch(err){throw new Error(err&&err.gone?'That copy is no longer in Google Drive.':err&&err.signin?'You are signed out of Google: tap Drive at the top, then try again.':err&&err.net?'Google Drive could not be reached.':String(err&&err.message||err));}
+    if(!j||j.nbh!=='case-sync'||!j.text)throw new Error(j&&j.nbh==='case-gone'?'That copy in Google Drive marks a removal; it holds no case.':'That copy in Google Drive is not a workstation case.');
+    t=j.text;const x=j.rec||{};if(x.dev)e.dev=x.dev;if(x.saved)e.at=x.saved;e.raw=hxHash(t);
+    if(V){const older=(V.E||[]).filter(z=>z!==e&&hxT(z.at)<hxT(e.at))[0];let ot=older&&V.texts[older.id]||'';if(older&&!ot&&older.src==='here')ot=await hxText(older.p.id);
+      try{e.chg=ot?hxDiff(parseCase(ot),parseCase(t)):[];}catch(err){e.chg=[];}
+      const k=V.key;hxQueue(()=>hxNoteDrive({fid:e.fid,mt:e.mt,key:k,saved:x.saved||'',dev:x.dev||'',raw:e.raw}));}}
+  if(!t)throw new Error('That save could not be read on this '+HERE+'.');
+  if(V)V.texts[e.id]=t;return t;}
+function hxPanel(id,k,html){const V=HX.view;if(!V)return;if(html===null)delete V.panels[id];else V.panels[id]={k,html};
+  const li=[...document.querySelectorAll('#hxList [data-hxid]')].find(x=>x.dataset.hxid===id);if(!li)return;let p=li.querySelector('.hx-panel');
+  if(html===null){if(p)p.remove();return;}if(!p){p=document.createElement('div');p.className='hx-panel';li.appendChild(p);}p.innerHTML=html;}
+/* Open as it was: the case on screen is kept first (asked first when it holds work not saved), then the whole case from then */
+async function hxGo(id){const V=HX.view,e=hxEntry(id);if(!e||HX.busy)return;HX.busy=true;
+  const btn=[...document.querySelectorAll('[data-hxgo]')].find(x=>x.dataset.hxgo===id);if(btn){btn.disabled=true;btn.textContent='Opening…';}
+  try{let text='';try{text=await hxEntryText(e);}catch(err){alert(err.message||String(err));return;}
+    let d=null;try{d=parseCase(text);}catch(err){}if(!d||!d.forms){alert('That save could not be read.');return;}
+    if(e.src==='drive')hxPaint();
+    if(hxOpenNow()&&caseDirty()){const c=await wsUI.choose('Open '+V.name+'’s case as it was '+hxWhenIn(e.at)+'?\nThe case on screen has work that is not saved yet.',
+        [{v:'save',label:'Save first',kind:'primary'},{v:'go',label:'Open it anyway'},{v:'',label:'Cancel'}],'Either way, the case on screen is kept in History first, as it is now, so you can come back to it.');
+      if(!c)return;if(c==='save'){let ok=false;try{ok=await saveCase();}catch(x){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was opened.',{kind:'warn'});return;}}}
+    try{await hxKeepScreen('before going back');}catch(x){}
+    /* with Google Drive: the newest copy first (the one it replaces is kept), so Save case then stands on it */
+    if(typeof drvOn==='function'&&drvOn()&&drvTok()&&navigator.onLine!==false){try{await drvIdle();await drvSync({interactive:true});await drvIdle();}catch(x){}}
+    const r=await hxRecOf(V.key);if(r&&r.text)try{await hxQueue(()=>hxKeep({key:r.key,text:r.text,at:r.saved,dev:r.dev||drvDev(),why:'before going back'}));}catch(x){}
+    try{$('#dlg').close();}catch(x){}
+    HX.opening=true;try{await openCaseText(text,null,{asked:true,quiet:true});}finally{HX.opening=false;}
+    /* Save case then makes it the current version: it stands on the Drive version this device has (no question of two copies) */
+    const k=clKey(packet()),r2=k&&await hxRecOf(k);if(r2&&r2.drv){state.drvBase=r2.drv.ver||null;state.drvKey=k;try{drvNewerPaint();}catch(x){}}
+    if(k){state.lastSig=String(state.lastSig||'')+'|~hx';try{paintSave();}catch(x){}state.hx={key:k,at:e.at,dev:e.dev||'',name:r2?clName(r2):V.name};}
+    hxBar();}
+  finally{HX.busy=false;if(HX.view===V&&$('#dlg').open&&$('#hxView'))hxPaint();}}
+/* Restore one form: only that form's work in the case on screen, which is kept first; the case is then marked unsaved */
+async function hxOnePick(id){const V=HX.view,e=hxEntry(id);if(!e)return;if(V.panels[id]&&V.panels[id].k==='one'){hxPanel(id,'',null);return;}
+  hxPanel(id,'one','<p class="hint">Reading that save…<\/p>');
+  try{const d=parseCase(await hxEntryText(e)),ids=Object.keys(d.forms||{}).filter(f=>ALL.find(x=>x[0]===f));if(e.src==='drive')hxPaint();
+    hxPanel(id,'one',ids.length?'<p>Which form? Only that form changes in the case on screen; the case on screen is kept in History first.<\/p><p class="hx-pick">'+ids.map(f=>{const rec=ALL.find(x=>x[0]===f);
+      return '<button type="button" data-hxform="'+esc(f)+'" data-hxfor="'+esc(id)+'"><b>'+esc(f)+'<\/b> '+esc(rec?rec[1]:'')+(inCase(f)?'':' (not in the case now)')+'<\/button>';}).join('')+'<\/p>':'<p>That save holds no form.<\/p>');}
+  catch(err){hxPanel(id,'one','<p>'+esc(err&&err.message||String(err))+'<\/p>');}}
+async function hxOne(id,fid){const V=HX.view,e=hxEntry(id);if(!e||HX.busy)return;if(!V.me||clKey(packet())!==V.key){alert('Restore one form works in this student’s case on screen. Open their case first.');return;}
+  const rec=ALL.find(f=>f[0]===fid);if(!rec)return;HX.busy=true;
+  try{const d=parseCase(await hxEntryText(e)),F=d&&d.forms&&d.forms[fid];if(!F||!F.snap){alert('Form '+fid+' is not in that save.');return;}
+    if(!(await wsUI.confirm('Restore Form '+fid+' as it was '+hxWhenIn(e.at)+'?\nOnly Form '+fid+' ('+rec[1]+') changes; the rest of the case stays as it is on screen. The case on screen is kept in History first, so nothing is lost.',{ok:'Restore Form '+fid})))return;
+    try{await hxKeepScreen('before Form '+fid+' was restored');}catch(x){}
+    try{$('#dlg').close();}catch(x){}
+    const fr=state.frames[fid];if(fr){fr.remove();delete state.frames[fid];}delete state.status[fid];
+    setPending(fid,F.title||rec[1],F.snap,false);if(!state.caseOrder.includes(fid))state.caseOrder.push(fid);
+    state.lastSig=String(state.lastSig||'')+'|~hx'+fid;
+    openForm(fid);await settled(fid,30000);try{renderRail();paintSave();}catch(x){}
+    wsUI.toast('Form '+fid+' is as it was '+hxWhenIn(e.at)+'; the rest of the case is as it was on screen. Save case keeps it.',{kind:'ok',ms:9000});}
+  catch(err){alert('That form could not be restored: '+(err&&err.message||err));}
+  finally{HX.busy=false;}}
+/* Compare with now: the case on screen when it is this student's, else the copy on this device */
+async function hxCmp(id){const V=HX.view,e=hxEntry(id);if(!e)return;if(V.panels[id]&&V.panels[id].k==='cmp'){hxPanel(id,'',null);return;}
+  hxPanel(id,'cmp','<p class="hint">Comparing…<\/p>');
+  try{const then=parseCase(await hxEntryText(e));let now=null,what='';
+    if(V.me&&clKey(packet())===V.key){now=parseCase(await hxScreenText());what='the case on screen';}
+    else if(V.r){now=parseCase(V.r.text);what='the copy on this '+HERE+', saved '+hxWhenIn(V.r.saved);}
+    if(e.src==='drive')hxPaint();
+    const L=now?hxDiff(then,now):null;
+    hxPanel(id,'cmp',!L?'<p>There is no case now to compare it with.<\/p>':'<p><b>From then to now<\/b> ('+esc(what)+'):<\/p>'+(L.length?'<ul>'+L.map(x=>'<li>'+esc(x)+'<\/li>').join('')+'<\/ul>':'<p>The same as now.<\/p>'));}
+  catch(err){hxPanel(id,'cmp','<p>'+esc(err&&err.message||String(err))+'<\/p>');}}
+$('#dlgBody').addEventListener('click',e=>{const t=e.target.closest('[data-hxgo],[data-hxone],[data-hxcmp],[data-hxform],[data-hxopen],#hxSign');if(!t)return;
+  if(t.id==='hxSign'){const k=HX.view&&HX.view.key;drvChipTap().then(()=>{if(drvTok())hxOpen(k);}).catch(()=>{});return;}
+  if(t.dataset.hxopen){hxOpen(t.dataset.hxopen);return;}
+  if(t.dataset.hxgo){hxGo(t.dataset.hxgo);return;}if(t.dataset.hxone){hxOnePick(t.dataset.hxone);return;}if(t.dataset.hxcmp){hxCmp(t.dataset.hxcmp);return;}
+  if(t.dataset.hxform)hxOne(t.dataset.hxfor,t.dataset.hxform);});
+/* the bar while a case opened from History is on screen: from when, and that Save case makes it the current version */
+function hxBar(){let b=$('#hxBar');if(!b){const d=$('#drvBar')||$('#pwaBar');if(!d)return;
+    d.insertAdjacentHTML('afterend','<div class="pwabar hx-bar" id="hxBar" hidden role="status"><span id="hxBarText"><\/span><div class="sp"><\/div><button type="button" id="hxBarSave" class="sm primary">Save case<\/button><button type="button" id="hxBarList" class="sm">History<\/button><\/div>');
+    b=$('#hxBar');$('#hxBarSave').addEventListener('click',()=>$('#saveCase').click());$('#hxBarList').addEventListener('click',()=>hxOpen());}
+  const H=state.hx,on=!!H&&H.key===clKey(packet())&&hxOpenNow();b.hidden=!on;if(!on)return;
+  $('#hxBarText').innerHTML='<b>'+esc(H.name)+'<\/b>: the case as it was saved '+esc(hxWhenIn(H.at))+(H.dev?' '+esc(hxDev(H.dev)):'')+'. Save case makes it the current version; the latest stays in History.';}
+{const sc=saveCase;saveCase=async function(){const out=await sc.apply(this,arguments);try{if(out&&state.hx){state.hx=null;hxBar();}}catch(e){}return out;};}
+{const oc=openCaseText;openCaseText=async function(){if(!HX.opening&&state.hx){state.hx=null;hxBar();}return oc.apply(this,arguments);};}
+{const cc=clearCase;clearCase=async function(){const out=await cc.apply(this,arguments);state.hx=null;try{hxBar();}catch(e){}return out;};}
+/* ---- where History is: the bar (More on the iPad), the command box, each student in Caseload ---- */
+{const x=$('#caseXlsx');if(x&&!$('#hxBtn'))x.insertAdjacentHTML('afterend','<button id="hxBtn" class="rare" type="button" title="The case as it was at each save: open one, restore one form, compare with now">History<\/button>');
+  const b=$('#hxBtn');if(b)b.addEventListener('click',()=>hxOpen());}
+/* on a wide screen the bar's one row may have no room for History (a laptop 1280 wide with Google Drive's Save case to a
+   file beside it): it then goes up into the heading, beside the student's name, rather than make the bar two rows */
+function hxPlace(){const b=$('#hxBtn'),x=$('#caseXlsx'),who=$('header.top .who');if(!b||!x||!who)return;
+  if(b.previousElementSibling!==x)x.insertAdjacentElement('afterend',b);b.classList.remove('hx-top');
+  if(innerWidth<=1194||b.offsetParent===null)return;const g=b.closest('.grp.acts');if(!g)return;
+  const rows=()=>new Set([...g.querySelectorAll('button')].filter(e=>e.offsetParent).map(e=>Math.round(e.getBoundingClientRect().top))).size;
+  const n1=rows();b.style.display='none';const n0=rows();b.style.display='';if(n1>n0){who.parentNode.insertBefore(b,who);b.classList.add('hx-top');}}
+{let t=0;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>{try{hxPlace();}catch(e){}},150);});}
+{const dp=drvPaint;drvPaint=async function(){const out=await dp.apply(this,arguments);try{hxPlace();}catch(e){}return out;};}
+setTimeout(()=>{try{hxPlace();}catch(e){}},1000);
+$('#moreBtn').addEventListener('click',()=>{const M=$('#moreMenu');if(!M||M.hidden||M.querySelector('[data-more="hxBtn"]'))return;
+  const h='<button type="button" role="menuitem" data-more="hxBtn">Case history<\/button>',a=M.querySelector('[data-more="caseXlsx"]');if(a)a.insertAdjacentHTML('afterend',h);else M.insertAdjacentHTML('beforeend',h);});
+CMDS.push({k:'history case history earlier save go back previous version restore undo older copy compare laptop ipad',n:'Case history: go back to an earlier save',s:'command',go:()=>hxOpen()});
+/* each student in Caseload (the table, or cards): History beside their Open */
+function hxClButtons(){const b=$('#dlgBody');if(!b||!(b.querySelector('#clOff')||/^Caseload\b/.test(($('#dlgTitle').textContent||'').trim())))return;
+  const seen=new Set([...b.querySelectorAll('[data-hxopen]')].map(x=>x.dataset.hxopen)),c=[...b.querySelectorAll('[data-clopen]')].filter(o=>!o.closest('.td-list'));
+  c.sort((x,y)=>(x.hasAttribute('data-clform')?1:0)-(y.hasAttribute('data-clform')?1:0)).forEach(o=>{const k=o.dataset.clopen;if(!k||seen.has(k))return;seen.add(k);
+    o.insertAdjacentHTML('afterend',' <button type="button" data-hxopen="'+esc(k)+'" title="The case as it was at each save: open one, restore one form, compare with now">History<\/button>');});}
+{const co=caseloadOpen;caseloadOpen=async function(){const out=await co.apply(this,arguments);try{hxClButtons();}catch(e){}return out;};}
+try{new MutationObserver(()=>{try{hxClButtons();}catch(e){}}).observe($('#dlgBody'),{childList:true,subtree:true});}catch(e){}
 </script>
 </body>
 </html>

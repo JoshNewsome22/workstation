@@ -9230,3 +9230,37 @@ Checked by `qa/v2190-ipad-pdf-test.js` (11 checks): a Safari-like PDF made in Ch
 taken out), finished; every page carries the header and footer in their places; the bookmarks land on the pages where
 Chrome's own PDF has each form start; the contents numbers are on their entries' lines; the labels move nothing; a PDF with
 narrow margins is made smaller and stays clear; a PDF from Chrome is finished as before, with no second header.
+
+### v21.91: case history, back to an earlier save
+
+You save on the laptop and on the iPad, and it is easy to lose track of which is the latest work. Each **Save case** now
+also keeps the case as it was, on this device, and **History** shows them, newest first, one line each:
+
+> **Today 3:42 PM** · on this iPad · Save case — Form TB-1: 2 fields; Form DD-1: 3 new days
+
+- **Where it is**: **History** in the bar on the laptop (beside the student's name at the top when the bar has no room for
+  it), **Case history** under **More** on the iPad, **History** beside each student in **Caseload**, or type *history* in
+  the command box.
+- **Open as it was** opens the whole case as it was then. The case on screen is kept in History first, so you can always
+  come back to it (with work not saved yet, you are asked first: **Save first** or **Open it anyway**). A bar then says which
+  save is on screen; **Save case** makes it the current version (and, with Google Drive, the version on every device).
+- **Restore one form** (for the student on screen) takes back only one form as it was then; every other form stays as it
+  is. The case is then marked unsaved until you Save case.
+- **Compare with now** says what changed between then and now (the forms' fields, new days of data, incidents, the plan,
+  the target behaviors, the function).
+- **With Google Drive in use and signed in**, History also lists Drive's earlier copies of the student, so a save made on
+  the laptop shows on the iPad (marked *in Google Drive*; once you open one, it says which device saved it). Drive keeps them for 30 days. Signed out or
+  with no internet, History lists the saves on this device and says so.
+- Before Google Drive brings the other device's copy over this one, this device's copy is kept in History first. Going
+  back never loses the current version.
+- **Limits**: up to 30 saves a student; after two weeks, one a day (the day's last); about 200 MB in all, the oldest going
+  first. A Save case that changed nothing keeps nothing new.
+- **Privacy**: History stays in this browser on this device (Drive's copies stay in your own Drive). **Remove** (a student)
+  and **Remove all student data** delete it too, and say so. With *Do not keep cases on this device* ticked, nothing is kept.
+
+Checked by `qa/v2191-history-test.js` (46 checks): an iPad without Drive (points kept on Save case with what changed, a
+save with no change keeps nothing, More and the command box, Compare with now, Restore one form, Open as it was with work
+not saved and back again, History in Caseload, the dialog on a phone, Remove and Remove all, the caseload turned off), the
+limits, and an iPad and a laptop with a simulated Google Drive (the laptop's versions listed and opened, Open as it was on
+one of them and Save case with no question of two copies, History in the heading at 1280 wide, signed out, offline); no
+request but the simulated Google, no page errors.
