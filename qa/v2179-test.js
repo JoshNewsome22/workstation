@@ -17,11 +17,11 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const L=await page.evaluate(async()=>(await clList()).map(r=>({client:r.client,sid:r.sid,items:(r.sum.items||[]).length,last:r.sum.lastData,len:r.text.length,form:JSON.parse(r.text).form})));
   ok('two Save case: two students kept on this device, each with its case and a summary (the last day of data from DD-1)',L.length===2&&L.every(r=>r.form==='CASE'&&r.len>1000&&/^\d{4}-\d\d-\d\d$/.test(r.last||''))&&L.some(r=>r.client==='Mateo Rivera'),L);
   await page.evaluate(()=>caseloadOpen());await sleep(500);
-  const d=await page.evaluate(()=>({title:document.querySelector('#dlg h2,#dlg .dh,#dlgTitle')&&document.querySelector('#dlg h2,#dlg .dh,#dlgTitle').textContent,rows:document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow]').length,names:[...document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow] td:first-child b')].map(b=>b.textContent),
+  const d=await page.evaluate(()=>({title:document.querySelector('#dlg h2,#dlg .dh,#dlgTitle')&&document.querySelector('#dlg h2,#dlg .dh,#dlgTitle').textContent,rows:document.querySelectorAll('#dlgBody .cl-card[data-clrow]').length,names:[...document.querySelectorAll('#dlgBody .cl-card[data-clrow] .cl-nm')].map(b=>b.textContent),
     needs:document.querySelectorAll('#dlgBody .td-list li').length,lead:(document.querySelector('#dlgBody .hp-lead')||{}).textContent||''}));
   ok('Caseload lists both students and says it stays on this device',d.rows===2&&d.names.includes('Mateo Rivera')&&d.names.includes('Sample Student')&&/on this (iPad|computer)/.test(d.lead)&&/nothing leaves it/.test(d.lead),d);
   await page.evaluate(()=>{const c=document.getElementById('clIni');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(500);
-  const ini=await page.evaluate(()=>[...document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow] td:first-child')].map(td=>td.textContent));
+  const ini=await page.evaluate(()=>[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].map(c=>c.querySelector('.cl-nm').textContent+(c.querySelector('.cl-sid')?' '+c.querySelector('.cl-sid').textContent:'')));   /* v21.91 a card each */
   ok('Initials only: M. R. and S. S., no name and no student number',ini.some(t=>/^M\. R\.$/.test(t))&&ini.some(t=>/^S\. S\.$/.test(t))&&!ini.join().includes('4471823'),ini);
   await page.evaluate(()=>{const c=document.getElementById('clIni');c.checked=false;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(400);
   const key=await page.evaluate(async()=>(await clList()).find(r=>r.client==='Mateo Rivera').key);

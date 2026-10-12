@@ -891,6 +891,69 @@ body.ws-split .rail-edge{display:none!important}
   .crumb .acts{margin-left:0;flex:1 1 100%;justify-content:space-between}}
 @media (max-width:480px){header.top h1{display:none}#splitBtn,#popOut{display:none}.rail-edge{display:none!important}}
 </style>
+<style id="ws-cards">
+/* v21.91 the caseload's students as cards (Caseload and the start screen), and the search across the caseload */
+.cl-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:12px;margin:8px 0 14px;text-align:left}
+.cl-card{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;padding:14px 14px 12px;border:1px solid var(--rule);border-radius:12px;background:#fff;box-shadow:0 1px 2px rgba(24,46,67,.05);overflow-wrap:anywhere;text-align:left}
+.cl-card.hot{border-color:#e6c2bc;box-shadow:inset 4px 0 0 #b03a2e,0 1px 2px rgba(24,46,67,.05)}
+.cl-top{display:flex;align-items:center;gap:12px;min-width:0}
+.cl-ph{flex:0 0 52px;width:52px;height:52px;border-radius:50%;overflow:hidden;background:var(--mist);border:1px solid #d6e3e0;display:flex;align-items:center;justify-content:center}
+.cl-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.cl-ini{font:600 17px/1 var(--serif);color:var(--slate);letter-spacing:.03em}
+.cl-who{display:flex;flex-direction:column;gap:1px;min-width:0}
+.cl-nm{font:650 16px/1.25 var(--sans);color:var(--navy)}
+.cl-sub,.cl-sid{font-size:12.5px;line-height:1.35;color:var(--muted)}
+.cl-trend{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 10px;border-radius:8px;background:var(--shade);border:1px solid #e7eeec}
+.cl-trend.none{min-height:0;padding:7px 10px}
+.cl-spark{flex:0 0 auto;display:block;overflow:visible}
+.cl-tt{display:flex;flex-direction:column;min-width:0;font-size:12.5px;line-height:1.35;color:var(--muted)}
+.cl-tt b{font-size:13px;font-weight:600;color:var(--ink)}
+.cl-next{display:flex;align-items:center;gap:10px;font-size:13px;line-height:1.4;color:var(--ink)}
+.cl-nt{flex:1 1 auto;min-width:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cl-next .td-k{display:inline-block;margin-right:3px;padding:1px 6px;border-radius:4px;background:var(--mist);color:var(--slate);font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px}
+.cl-next.hot .td-k{background:#b03a2e;color:#fff}
+.cl-next.calm .cl-nt{color:var(--ok)}
+.cl-next button{flex:0 0 auto}
+.cl-more{color:var(--muted);white-space:nowrap}
+.cl-saved{margin:0!important;font-size:12px!important;line-height:1.4!important;color:var(--muted)}
+.cl-card-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
+.cl-card button,.cl-find button{min-height:44px;min-width:44px;font-size:13px}
+/* the start screen with a caseload: room for three cards across on a laptop or an iPad held sideways */
+#blank .card.has-cl{max-width:1180px;margin:auto}   /* centred while it fits; from the top (scrolling) once it is taller than the screen */
+#blank .cl-cards+.hint{text-align:left}
+/* Caseload: wider on a wide screen, for the cards */
+#dlg.cl-wide{max-width:1180px}
+/* the search: one field, and the places found grouped by student */
+.cl-find{margin:4px 0 12px;text-align:left}
+.cl-fl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cl-find input[type=search]{-webkit-appearance:none;appearance:none;width:100%;min-height:46px;margin:0;padding:10px 14px 10px 40px;border:1px solid var(--rule2);border-radius:10px;font:inherit;font-size:16px;color:var(--ink);
+  background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2354676f' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") no-repeat 13px 50%}
+.cl-find input[type=search]:focus{outline:none;border-color:var(--focus);box-shadow:0 0 0 3px rgba(47,127,168,.18)}
+.cl-found{margin:8px 0 2px}
+.cl-found[hidden]{display:none}
+.cl-fcount{margin:0 0 6px!important;font-size:12.5px!important;color:var(--muted)}
+.cl-fnone{margin:6px 0!important;font-size:13px!important;color:var(--muted)}
+.cl-fg{margin:0 0 10px;border:1px solid var(--rule);border-radius:10px;background:#fff;overflow:hidden}
+.cl-fg h4{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0;padding:8px 12px;background:var(--mist);color:var(--navy);font:600 14px/1.3 var(--sans)}
+.cl-fg h4 span{font-weight:400;font-size:12px;color:var(--muted)}
+.cl-fg ul{list-style:none;margin:0;padding:0}
+.cl-fg li+li{border-top:1px solid #edf2f1}
+.cl-hit{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;min-height:44px;margin:0;padding:9px 12px;border:0;border-radius:0;background:#fff;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.cl-hit:hover,.cl-hit:focus-visible{background:#f2f7f6}
+.cl-hf{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--slate)}
+.cl-hs{font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.cl-fmore{padding:6px 12px 8px;font-size:12px;color:var(--muted)}
+mark.cl-m{background:#ffe7a3;color:inherit;border-radius:2px;padding:0 1px}
+/* Find a form or command: the group of places in the caseload */
+.pal .pal-grp{padding:9px 18px 5px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);background:var(--shade);border-bottom:1px solid #eef3f2}
+.pal .r.cl-prow{align-items:flex-start}
+.pal .r.cl-prow .rnm{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pal .cl-pn{font-size:13px}
+.pal .cl-ps{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.pal .r[aria-selected=true] .cl-ps{color:#d7e7e3}
+.pal .r[aria-selected=true] mark.cl-m{background:#f3c94f;color:var(--navy)}
+@media print{.cl-cards,.cl-find{display:none!important}}
+</style>
 </head>
 <body>
 
@@ -4679,8 +4742,7 @@ async function caseloadOpen(){const L=await clList();
     '<p class="td-more"><label class="cl-opt"><input type="checkbox" id="clIni"'+(clIni()?' checked':'')+'> Initials only</label> <label class="cl-opt"><input type="checkbox" id="clOff"'+(clOff()?' checked':'')+'> Do not keep cases on this device</label></p>'+
     (L.length?'<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')+
-      '<h3 class="cl-h">Students</h3><div class="cl-wrap"><table class="cl-tbl"><tr><th>Student</th><th>School</th><th>Saved</th><th>Last data</th><th>Needs you</th><th></th></tr>'+L.map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];
-        return '<tr data-clrow="'+esc(r.key)+'"><td><b>'+esc(clName(r))+'</b>'+(r.sid&&!clIni()?'<br><span class="hint">'+esc(r.sid)+'</span>':'')+'</td><td>'+esc(r.site||'')+'</td><td>'+esc(clAgo(r.saved))+'</td><td>'+(r.sum&&r.sum.lastData?esc(tdMd(r.sum.lastData)+' ('+clAgo(r.sum.lastData)+')'):'none')+'</td><td>'+(it.length?it.length+(top?' <span class="td-k">'+esc(top.k)+'</span>':''):'nothing')+'</td><td class="cl-act"><button type="button" class="primary" data-clopen="'+esc(r.key)+'">Open</button> <button type="button" data-cldel="'+esc(r.key)+'">Remove</button></td></tr>';}).join('')+'</table></div>'
+      '<h3 class="cl-h">Students<\/h3>'+clCards(L,'dlg')   /* v21.91 a card each (nbh-find) */
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
     '<p class="hint">Safari can clear a website’s storage after seven days without a visit; installed on the Home Screen, the workstation keeps it. Back up the caseload now and then. Remove takes a student off this list on this '+HERE+' only; their case files are not touched.</p>');}
 async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key===key);if(!r){alert('That student is no longer kept here.');return;}
@@ -5112,7 +5174,7 @@ async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=c
   const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(i=>all.push(Object.assign({who:clName(r),key:r.key},i))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   x.hidden=false;card.classList.add('has-cl');
   x.innerHTML='<h2>Your caseload on this '+HERE+'<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
-    '<div class="bl-st">'+L.slice(0,12).map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];return '<button type="button" class="bl-stu" data-clopen="'+esc(r.key)+'"><b>'+esc(clName(r))+'<\/b><span>'+(top?esc(top.k)+' · ':'')+esc(clAgo(r.saved))+(r.unfiled?' · not in a file':'')+'<\/span><\/button>';}).join('')+'<\/div>'+
+    clCards(L,'bl')+   /* v21.91 the search and a card each (nbh-find) */
     '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
 $('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]');if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(e.target.closest('#blNew')){if(Object.keys(state.frames).length||Object.keys(state.pending).length){$('#closeCase').click();return;}foldBar(false);const i=$('#pClient');if(i){i.focus();try{i.select();}catch(x){}}return;}
@@ -6593,6 +6655,213 @@ const PWA=(()=>{
 (function(){var l=document.querySelector('link[rel="apple-touch-icon"]');if(!l||!/^https?:$/.test(location.protocol)||!window.fetch||!window.FileReader||/^data:/.test(l.getAttribute('href')||''))return;   /* opened from a folder: no website, nothing to fetch */
   fetch('apple-touch-icon.png',{credentials:'include'}).then(function(r){return r.ok&&/image/.test(r.headers.get('Content-Type')||'image')?r.blob():null;}).then(function(b){if(!b)return;
     var f=new FileReader();f.onload=function(){if(typeof f.result==='string'&&/^data:image\//.test(f.result))l.setAttribute('href',f.result);};f.readAsDataURL(b);}).catch(function(){});})();
+</script>
+<script id="nbh-find">
+/* ================= v21.91 search the caseload, and the students as cards =================
+   One search over every student kept on this device: their name, ID and school, every form's words as last saved, and the
+   case's facts (the target behaviors, the function, the goals, what Form DD-1 measures). Every word must be there, whatever
+   the capitals or accents; each is matched from the start of a word, and a date also by its month's name, so "November"
+   finds what is dated in November. Words like who, has, a, the are left out, so "who has elopement as a target" works.
+   The search reads only the copies kept in this browser; nothing is sent anywhere. Each copy is read once, and again only
+   when it changes (its save, its sheet read, its length). A place found opens that student's case at that form, and the
+   form brings the field into view and outlines it without focusing it (nbh-polish.js answers the message {nbh:'find'}).
+   Caseload and the start screen show each student as a card: a 96 px copy of the photo (kept with the student, never shown
+   with Initials only), the school and grade, the main target behavior's recent days (Form DD-1's facts.data.byDay, kept as
+   rec.sum.trend at each save), what needs you first with its Open, and when and where it was last saved. */
+const FIND={cache:new Map(),list:null,res:{},q:{dlg:'',bl:''},t:{},owed:{},fix:{},keep:{}};
+const FIND_AL=(()=>{try{return new RegExp('[\\p{L}\\p{N}]','u');}catch(e){return /[a-z0-9]/;}})();
+const FIND_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const FIND_STOP=new Set('a an and the of in on at to for with about as by from is are was were be been has have had do does did i me my we our you your he she they them his her their it its who whom whose which what where when why how wrote write written any that this these those there here than then so or'.split(' '));
+const findFold=s=>{s=String(s==null?'':s);try{s=s.normalize('NFD');}catch(e){}return s.replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[\u2018\u2019\u02bc]/g,"'").replace(/[\u201c\u201d]/g,'"');};
+const findDate=v=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||'').trim());return m&&+m[2]>=1&&+m[2]<=12?FIND_MONTHS[+m[2]-1]+' '+(+m[3])+', '+m[1]:'';};
+const findHay=v=>{const t=String(v==null?'':v),d=findDate(t);return findFold(d?t+' '+d:t).replace(/\s+/g,' ');};
+function findAt(h,w,from){let i=h.indexOf(w,from||0);while(i>=0){if(i===0||!FIND_AL.test(h.charAt(i-1)))return i;i=h.indexOf(w,i+1);}return -1;}
+function findWords(q){const W=[];findFold(q).split(/[\s,;:!?()\[\]{}"\u201c\u201d\/]+/).forEach(w=>{w=w.replace(/^['.\-]+|['.\-]+$/g,'');if(w&&!W.includes(w))W.push(w);});const K=W.filter(w=>!FIND_STOP.has(w));return K.length?K:W;}
+const findSig=r=>String(r.saved||'')+'|'+String(r.read||'')+'|'+String((r.text||'').length);
+const findName=id=>{const f=ALL.find(x=>x[0]===id);return f?f[1]:'';};
+/* a value worth finding: words, or a date; not a number alone, a picture, an id or a colour */
+const findOk=t=>t.length>=2&&!/^data:/i.test(t)&&(!!findDate(t)||/[A-Za-z\u00C0-\u024F\u0370-\uFFFF]/.test(t))&&!/^(true|false|null|undefined)$/i.test(t);
+const findIdish=t=>!/\s/.test(t)&&(/\d/.test(t)&&t.length<=40||/^#[0-9a-f]{3,8}$/i.test(t)||/^https?:/i.test(t)||t.length>60);
+/* the strings of a form's own record (some forms keep their work there, and draw it as tables and lists) */
+function findWalk(o,depth,cb,n){n=n||{c:0};if(depth>9||n.c>4000||o==null)return;
+  if(typeof o==='string'){const t=o.trim();if(!t)return;if(/^[\[{]/.test(t)&&t.length>2){let j=null;try{j=JSON.parse(t);}catch(e){}if(j&&typeof j==='object'){findWalk(j,depth+1,cb,n);return;}}
+    if(findDate(t)||findIdish(t)||!findOk(t))return;n.c++;cb(t);return;}
+  if(Array.isArray(o)){o.forEach(x=>findWalk(x,depth+1,cb,n));return;}
+  if(typeof o==='object')Object.keys(o).forEach(k=>{if(!/^(id|key|color|colour|token|box|code|src|img|photo|pic|pics|hash|sig|url|link)$/i.test(k))findWalk(o[k],depth+1,cb,n);});}
+/* one student's copy as places to find: who they are, the case's facts, each form's fields */
+function findIdx(r){const sig=findSig(r),c=FIND.cache.get(r.key);if(c&&c.sig===sig)return c.E;
+  const E=[],who=new Set();let d=null;try{d=parseCase(r.text);}catch(e){d=null;}d=d||{};
+  const add=(kind,form,label,text,o)=>{text=String(text==null?'':text).replace(/\s+/g,' ').trim();if(!text)return;if(text.length>3000)text=text.slice(0,3000);
+    const hv=findHay(text);E.push(Object.assign({kind,form:form||'',label,text,hv,h:kind==='fact'?findFold(label)+' · '+hv:hv},o||{}));};
+  const pk=d.packet||{},P={client:r.client||pk.client||'',sid:r.sid||pk.sid||'',site:r.site||pk.site||'',grade:r.grade||pk.grade||'',bcba:r.bcba||pk.bcba||''};
+  [['name','Name',P.client],['sid','ID',P.sid],['who','School',P.site],['who','Grade',P.grade],['who','BCBA',P.bcba]].forEach(([k,l,v])=>{const t=String(v||'').trim();if(t){add(k,'',l,t);who.add(findFold(t));}});
+  const f=d.facts||{},src=f.src||{},fo=k=>{const s=String(src[k]||'');return ALL.some(x=>x[0]===s)?s:'';};
+  (Array.isArray(f.behaviors)?f.behaviors:[]).forEach(b=>{if(b&&b.label)add('fact',fo('behaviors'),b.isRep||/replacement/i.test(b.type||'')?'Replacement behavior':'Target behavior',b.label+(b.def?': '+b.def:''));});
+  if(f.fn){const t=[f.fn.label||f.fn.key||''].concat(Array.isArray(f.fn.statements)?f.fn.statements:[]).filter(x=>typeof x==='string'&&x.trim()).join(' ');if(t)add('fact',fo('fn'),'Function',t);}
+  const g=f.goals||{};[].concat(Array.isArray(g.red)?g.red:[],Array.isArray(g.acq)?g.acq:[]).forEach(x=>{const t=typeof x==='string'?x:x&&x.text;if(t)add('fact',fo('goals'),'Goal',t);});
+  const dd=f.data||{};(Array.isArray(dd.behaviors)?dd.behaviors:[]).forEach(b=>{if(b&&b.name)add('fact',fo('data'),'Daily data',b.name+(b.unit?' ('+b.unit+')':''));});
+  if(f.plan&&typeof f.plan.rep==='string'&&f.plan.rep.trim())add('fact',fo('plan'),'Replacement in the plan',f.plan.rep);
+  const F=d.forms||{};Object.keys(F).forEach(id=>{const sn=(F[id]||{}).snap||{},data=sn.data||{},seen=new Set();
+    Object.keys(data).forEach(k=>{const v=data[k];if(typeof v!=='string')return;const t=v.trim();if(!findOk(t))return;const ft=findFold(t);if(who.has(ft)||seen.has(ft))return;seen.add(ft);add('field',id,'',t,{fkey:k});});
+    if(typeof sn.own==='string'&&sn.own.length>2){let o=null;try{o=JSON.parse(sn.own);}catch(e){}if(o)findWalk(o,0,t=>{const ft=findFold(t);if(who.has(ft)||seen.has(ft))return;seen.add(ft);add('field',id,'',t,{own:1});});}});
+  FIND.cache.set(r.key,{sig,E});return E;}
+const FIND_KR={fact:0,name:1,sid:1,who:2,field:3};
+/* the students holding every word, each with the places that hold them (the places holding all the words, when any do) */
+function findRun(q,L,opt){opt=opt||{};const W=findWords(q);if(!W.length)return [];const out=[],ini=clIni();
+  (L||[]).forEach(r=>{if(!r||!r.key)return;let E;try{E=findIdx(r);}catch(e){return;}const got=W.map(()=>false),H=[];
+    E.forEach((e,i)=>{let n=0;const ws=[];W.forEach((w,j)=>{if(findAt(e.h,w)>=0){n++;got[j]=true;if(findAt(e.hv,w)>=0)ws.push(w);}});if(n)H.push({e,n,ws:ws.length?ws:W.filter(w=>findAt(e.h,w)>=0),i});});
+    if(!got.every(Boolean))return;
+    const full=H.filter(h=>h.n===W.length),seen=new Set();
+    const list=(full.length?full:H).filter(h=>!(opt.pal&&(h.e.kind==='name'||h.e.kind==='sid'))&&!(ini&&h.e.kind==='sid'))
+      .sort((a,b)=>b.n-a.n||FIND_KR[a.e.kind]-FIND_KR[b.e.kind]||a.i-b.i).filter(h=>{const k=h.e.form+'|'+h.e.hv;if(seen.has(k))return false;seen.add(k);return true;});
+    out.push({r,hits:list,best:list.length?list[0].n:0,full:full.length});});
+  return out.sort((a,b)=>(b.full?1:0)-(a.full?1:0)||b.best-a.best||clName(a.r).localeCompare(clName(b.r)));}
+/* Initials only: the student's name and ID are not shown in what was found either */
+function findMask(t,r){String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').split(/[\s,()]+/).filter(x=>x.length>1).forEach(x=>{
+    try{t=t.replace(new RegExp('(^|[^\\p{L}\\p{N}])'+x.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\p{L}\\p{N}])','giu'),(m,p)=>p+x[0].toUpperCase()+'.');}catch(e){}});
+  const s=String(r.sid||'').trim();if(s.length>2)t=t.split(s).join('•••');return t;}
+/* a short piece of the text around the first word found, every word marked; escaped */
+function findSnip(text,W,r,max){max=max||130;let t=String(text||'').replace(/\s+/g,' ').trim();if(clIni())t=findMask(t,r);const dt=findDate(t);if(dt)t+=' ('+dt+')';
+  let f='';const map=[];for(let i=0;i<t.length;i++){const p=findFold(t[i]);for(let k=0;k<p.length;k++){f+=p[k];map.push(i);}}
+  const R=[];(W||[]).forEach(w=>{if(!w)return;let i=findAt(f,w,0);while(i>=0&&R.length<80){R.push([map[i],map[Math.min(map.length-1,i+w.length-1)]+1]);i=findAt(f,w,i+w.length);}});
+  R.sort((a,b)=>a[0]-b[0]);const M=[];R.forEach(x=>{const l=M[M.length-1];if(l&&x[0]<=l[1])l[1]=Math.max(l[1],x[1]);else M.push(x.slice());});
+  let a=0,b=t.length;
+  if(t.length>max){const s0=M.length?M[0][0]:0;a=Math.max(0,s0-Math.round(max*0.3));b=Math.min(t.length,a+max);a=Math.max(0,b-max);
+    if(a>0){const sp=t.indexOf(' ',a);if(sp>=0&&sp<s0)a=sp+1;}if(b<t.length){const sp=t.lastIndexOf(' ',b);if(sp>a+20&&(!M.length||sp>=M[0][1]))b=sp;}}
+  let h=a>0?'…':'',k=a;M.forEach(([s,e])=>{if(e<=a||s>=b)return;s=Math.max(s,a);e=Math.min(e,b);if(s<k)s=k;h+=esc(t.slice(k,s))+'<mark class="cl-m">'+esc(t.slice(s,e))+'<\/mark>';k=e;});
+  return h+esc(t.slice(k,b))+(b<t.length?'…':'');}
+const findLabel=h=>{const e=h.e,nm=e.form?findName(e.form):'';if(e.kind==='fact')return e.label+(e.form?' · Form '+e.form:'');if(e.kind==='field')return 'Form '+e.form+(nm?' · '+nm:'');return e.label;};
+const findBox=w=>{const id=w==='dlg'?'clFindIn':'blFindIn';return '<div class="cl-find" role="search"><label class="cl-fl" for="'+id+'">Search the caseload<\/label>'+
+  '<input type="search" id="'+id+'" enterkeyhint="search" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Search every student: a name, a behavior, a word you wrote" value="'+esc(FIND.q[w]||'')+'">'+
+  '<div class="cl-found" id="'+(w==='dlg'?'clFindOut':'blFindOut')+'" hidden><\/div><\/div>';};
+function findHtml(res,w,q){FIND.res[w]=[];
+  if(!res.length)return '<p class="cl-fnone">No student kept on this '+esc(HERE)+' has “'+esc(q)+'” in their case. Every word has to be there: try fewer words.<\/p>';
+  const MAX=w==='bl'?3:4;
+  return '<p class="cl-fcount" role="status">'+res.length+' student'+(res.length===1?'':'s')+'<\/p>'+res.map(x=>{const r=x.r,hs=x.hits.slice(0,MAX);
+    const li=h=>{const i=FIND.res[w].push({key:r.key,form:h.e.form,words:h.ws,fkey:h.e.fkey||'',kind:h.e.kind,q})-1;
+      return '<li><button type="button" class="cl-hit" data-clopen="'+esc(r.key)+'" data-clform="'+esc(h.e.form)+'" data-findhit="'+w+':'+i+'"><span class="cl-hf">'+esc(findLabel(h))+'<\/span><span class="cl-hs">'+findSnip(h.e.text,h.ws,r)+'<\/span><\/button><\/li>';};
+    const none=()=>'<li><button type="button" class="cl-hit" data-clopen="'+esc(r.key)+'" data-clform="" data-findhit="'+w+':'+(FIND.res[w].push({key:r.key,form:'',words:[],q})-1)+'"><span class="cl-hs">Open the case<\/span><\/button><\/li>';
+    return '<section class="cl-fg"><h4>'+esc(clName(r))+(r.site?'<span>'+esc(r.site)+'<\/span>':'')+'<\/h4><ul>'+(hs.length?hs.map(li).join(''):none())+
+      (x.hits.length>MAX?'<li class="cl-fmore">and '+(x.hits.length-MAX)+' more place'+(x.hits.length-MAX===1?'':'s')+' in this case<\/li>':'')+'<\/ul><\/section>';}).join('');}
+async function findList(){if(FIND.list&&Date.now()-FIND.list.at<30000)return FIND.list.L;const L=await clList()||[];FIND.list={L,at:Date.now()};return L;}
+async function findPaint(w){const inp=document.getElementById(w==='dlg'?'clFindIn':'blFindIn'),out=document.getElementById(w==='dlg'?'clFindOut':'blFindOut');if(!inp||!out)return;
+  const q=inp.value,s=q.trim();FIND.q[w]=q;
+  if(s.length<2||!findWords(s).length){out.hidden=true;out.innerHTML='';FIND.res[w]=[];return;}
+  const L=await findList();if(inp.value!==q||!inp.isConnected)return;
+  let res=[];try{res=findRun(s,L,{});}catch(e){res=[];}
+  out.innerHTML=findHtml(res,w,s);out.hidden=false;}
+function findMount(w){const inp=document.getElementById(w==='dlg'?'clFindIn':'blFindIn');if(!inp)return;if(FIND.q[w]&&inp.value!==FIND.q[w])inp.value=FIND.q[w];if(inp.value.trim())findPaint(w);}
+/* a place found: the student's case at that form, and the form shows the field */
+async function findGo(h){FIND.q.bl='';const bi=document.getElementById('blFindIn');if(bi)bi.value='';
+  try{await caseloadGo(h.key,h.form||'');}catch(e){return null;}
+  if(!h.form||!h.words||!h.words.length||clKey(packet())!==h.key)return null;
+  if(state.cur!==h.form){try{openForm(h.form);}catch(e){return null;}}
+  if(!state.frames[h.form])return null;
+  await settled(h.form,25000);await new Promise(z=>setTimeout(z,400));
+  let r=null;for(let k=0;k<4&&!(r&&r.found);k++){if(state.cur!==h.form||clKey(packet())!==h.key)return null;if(k)await new Promise(z=>setTimeout(z,800));r=await grab(h.form,'find',{words:h.words,key:h.fkey||''},5000);}
+  if(!(r&&r.found)&&state.cur===h.form)wsUI.toast('Form '+h.form+' is open. What you searched for is in its saved work, but not in a field on its pages: it may be in a table or a chart the form draws.',{ms:9000});
+  return r;}
+REPLY.find='found';
+window.addEventListener('message',ev=>{const d=ev.data||{};if(d.nbh!=='found'||!d.id)return;const q=pending[d.id+'|found'];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}});
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-findhit]');if(!b)return;e.stopPropagation();e.preventDefault();
+  const p=String(b.dataset.findhit).split(':'),h=(FIND.res[p[0]]||[])[+p[1]];if(h)findGo(h);else caseloadGo(b.dataset.clopen,b.dataset.clform||'');},true);   /* after the Drive sign-in in the tap; instead of the plain Open */
+document.addEventListener('input',e=>{const t=e.target;if(!t||(t.id!=='clFindIn'&&t.id!=='blFindIn'))return;const w=t.id==='clFindIn'?'dlg':'bl';clearTimeout(FIND.t[w]);FIND.t[w]=setTimeout(()=>findPaint(w),140);});
+document.addEventListener('keydown',e=>{const t=e.target;if(t&&(t.id==='clFindIn'||t.id==='blFindIn')&&e.key==='Enter'){e.preventDefault();try{t.blur();}catch(x){}}},true);   /* the iPad's Search key puts the keyboard away */
+/* the Caseload dialog and the start screen are drawn again now and then (a save, Drive): not while the search is being typed
+   in, so the keyboard stays up; they are drawn once it is put away */
+document.addEventListener('focusout',e=>{const t=e.target;if(!t||(t.id!=='clFindIn'&&t.id!=='blFindIn'))return;const w=t.id==='clFindIn'?'dlg':'bl';if(!FIND.owed[w])return;
+  setTimeout(()=>{const a=document.activeElement;if((a&&a.id===t.id)||!FIND.owed[w])return;FIND.owed[w]=false;
+    if(w==='dlg'){if($('#dlg').open&&document.getElementById('clFindIn'))caseloadOpen();}else paintBlank();},700);});
+$('#dlg').addEventListener('close',()=>{FIND.q.dlg='';FIND.owed.dlg=false;$('#dlg').classList.remove('cl-wide');});
+/* the search goes in once the dialog is open, so the dialog does not put the first focus in it (on the iPad that would bring
+   up the keyboard each time Caseload opens) */
+{const dlF=dialog;dialog=function(title,html){const cl=title==='Caseload'&&/class="cl-cards/.test(String(html||''));const r=dlF.apply(this,arguments);
+  try{$('#dlg').classList.toggle('cl-wide',cl);if(cl){const db=$('#dlgBody');db.insertAdjacentHTML('afterbegin',findBox('dlg'));if(db.scrollHeight>db.clientHeight+2)db.tabIndex=0;}}catch(e){}return r;};}
+{const txF=clTx;clTx=async function(mode){if(mode!=='readwrite')return txF.apply(this,arguments);FIND.list=null;try{return await txF.apply(this,arguments);}finally{FIND.list=null;}};}
+{const coF=caseloadOpen;caseloadOpen=async function(){const a=document.activeElement;if(a&&a.id==='clFindIn'&&$('#dlg').open){FIND.owed.dlg=true;return;}
+  const out=await coF.apply(this,arguments);try{findMount('dlg');setTimeout(clCardsLater,250);}catch(e){}return out;};}
+{const pbF=paintBlank;paintBlank=async function(){const a=document.activeElement;if(a&&a.id==='blFindIn'){FIND.owed.bl=true;return;}
+  const out=await pbF.apply(this,arguments);try{findMount('bl');setTimeout(clCardsLater,250);}catch(e){}return out;};}
+$('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni')setTimeout(()=>{try{paintBlank();}catch(x){}},60);});   /* the start screen follows Initials only */
+/* Find a form or command: after the forms and commands, "In the caseload" for three letters or more (the forms matched
+   only by letters in order are cut to four, so the group is not pushed out of sight) */
+{const plF=palList;palList=function(q){const r=plF.apply(this,arguments),s=String(q||'').trim();if(s.length<3)return r;
+  let res=[];try{res=findRun(s,CL5.list||[],{pal:true}).filter(x=>x.hits.length);}catch(e){res=[];}if(!res.length)return r;
+  const ql=s.toLowerCase(),near=r.filter(x=>!x.hay||x.hay.includes(ql)),far=r.filter(x=>x.hay&&!x.hay.includes(ql)).slice(0,4),rows=[];
+  res.forEach(x=>x.hits.slice(0,2).forEach(h=>{if(rows.length>=12)return;const nm=clName(x.r),hit={key:x.r.key,form:h.e.form,words:h.ws,fkey:h.e.fkey||'',kind:h.e.kind,q:s},lb=h.e.kind==='field'?findName(h.e.form):findLabel(h);   /* the form's id is in its column */
+    rows.push({id:h.e.form||'',n:nm+': '+lb,s:'',go:()=>findGo(hit),hay:'',grp:'cl',
+      findHtml:'<span class="cl-pn"><b>'+esc(nm)+'<\/b> · '+esc(lb)+'<\/span><span class="cl-ps">'+findSnip(h.e.text,h.ws,x.r,96)+'<\/span>'});}));
+  return near.concat(far,rows);};}
+{const pdF=palDraw;palDraw=function(){const out=pdF.apply(this,arguments);try{const res=$('#palRes');let first=true;
+  palRows.forEach((x,i)=>{if(!x.findHtml)return;const el=res.querySelector('.r[data-i="'+i+'"]');if(!el)return;el.classList.add('cl-prow');const nm=el.querySelector('.rnm');if(nm)nm.innerHTML=x.findHtml;
+    if(first){first=false;el.insertAdjacentHTML('beforebegin','<div class="pal-grp" role="presentation">In the caseload<\/div>');}});}catch(e){}return out;};}
+CMDS.push({k:'search find caseload every student words wrote where who has',n:'Search the caseload: every student’s forms and facts on this '+HERE,s:'command',go:()=>{caseloadOpen().then(()=>{const i=document.getElementById('clFindIn');if(i)try{i.focus();}catch(e){}});}});
+/* ---- the cards ---- */
+const clIniOf=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').replace(/\(.*?\)/g,'').trim().split(/[\s,]+/).filter(Boolean);return w.length?(w[0][0]+(w.length>1?w[w.length-1][0]:'')).toUpperCase():'?';};
+/* the main target behavior (the first one to bring down that has data) over its last twenty days, from Form DD-1's facts */
+function clTrendOf(f){const d=f&&f.data;if(!d||!Array.isArray(d.byDay)||!d.byDay.length)return null;
+  const B=(Array.isArray(d.behaviors)?d.behaviors:[]).filter(b=>b&&typeof b.name==='string'),up=b=>/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase';
+  const val=(x,b)=>x&&x.vals&&x.vals[b.name]!=null&&x.vals[b.name]!==''&&isFinite(x.vals[b.name]),has=b=>d.byDay.some(x=>val(x,b));
+  const m=B.find(b=>!up(b)&&has(b))||B.find(has);if(!m)return null;
+  const pts=d.byDay.filter(x=>x&&/^\d{4}-\d\d-\d\d$/.test(String(x.date||''))&&val(x,m)).slice(-20).map(x=>[x.date,Math.round(+x.vals[m.name]*100)/100]);
+  return pts.length?{name:m.name,unit:String(m.unit||''),up:up(m),pts}:null;}
+{const csF=clSummary;clSummary=function(){const s=csF.apply(this,arguments);try{s.trend=clTrendOf(state.facts);}catch(e){}return s;};}
+{const crF=clResum;clResum=function(r,facts){const s=crF.apply(this,arguments);try{s.trend=clTrendOf(facts);}catch(e){}return s;};}
+function clSpark(t){const P=t.pts,W=120,H=36,px=4,py=5,v=P.map(p=>+p[1]),lo=Math.min(0,...v),hi=Math.max(...v),sp=(hi-lo)||1,n=P.length;
+  const X=i=>px+(n===1?(W-2*px)/2:i*(W-2*px)/(n-1)),Y=x=>H-py-(x-lo)/sp*(H-2*py),xy=P.map((p,i)=>[X(i).toFixed(1),Y(+p[1]).toFixed(1)]),y0=Y(lo).toFixed(1);
+  return '<svg class="cl-spark" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true" focusable="false" data-pts="'+esc(v.join(' '))+'">'+
+    '<line x1="'+px+'" y1="'+y0+'" x2="'+(W-px)+'" y2="'+y0+'" stroke="#d3dedb" stroke-width="1"/>'+
+    (n>1?'<polyline points="'+xy.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#254657" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>':'')+
+    '<circle cx="'+xy[n-1][0]+'" cy="'+xy[n-1][1]+'" r="3.2" fill="#254657"/><\/svg>';}
+function clTrendHtml(r){const t=r.sum&&r.sum.trend;
+  if(t&&Array.isArray(t.pts)&&t.pts.length){const P=t.pts,a=P[0],z=P[P.length-1],u=String(t.unit||''),pc=/^%/.test(u),un=pc?u.replace(/^%\s*/,''):u,f=x=>String(Math.round(+x*10)/10)+(pc?'%':'');
+    const what=P.length>1?f(a[1])+' → '+f(z[1])+(un?' '+un:''):f(z[1])+(un?' '+un:'')+' on '+tdMd(z[0]),when=P.length>1?P.length+' days, '+tdMd(a[0])+' to '+tdMd(z[0]):'';
+    return '<div class="cl-trend" title="'+esc((t.name||'')+': '+P.map(p=>tdMd(p[0])+' '+f(p[1])).join(', '))+'">'+clSpark(t)+'<span class="cl-tt"><b>'+esc(t.name||'Target behavior')+'<\/b><span>'+esc(what)+'<\/span>'+(when?'<span>'+esc(when)+'<\/span>':'')+'<\/span><\/div>';}
+  const ld=r.sum&&r.sum.lastData;
+  return '<div class="cl-trend none"><span class="cl-tt"><span>'+(ld?'Last day of data '+esc(tdMd(ld))+' ('+esc(clAgo(ld))+')':'No days of data from Form DD-1 yet')+'<\/span><\/span><\/div>';}
+const clPhoto=r=>{const th=!clIni()&&r.thumb&&r.thumb.at===r.saved&&r.thumb.src;return th?'<img src="'+esc(th)+'" alt="" width="52" height="52">':'<span class="cl-ini">'+esc(clIniOf(r))+'<\/span>';};
+function clWhere(r){let s='Saved '+(clAgo(r.saved)||'');if(r.dev&&typeof drvOnDev==='function')s+=' '+drvOnDev(r.dev);const b=[s];
+  if(typeof drvOn==='function'&&drvOn())b.push(DRV.conf[r.key]?'two copies to decide (Sync now)':(!r.drv||r.drv.dirty)?'waiting for Google Drive':'in Google Drive');else if(r.unfiled)b.push('not in a file yet');
+  return b.join(' · ');}
+function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clRank(a.k)-clRank(b.k)),top=it[0],ini=clIni(),hot=!!top&&/^(Overdue|Safety)$/.test(top.k);
+  const sub=[r.site,typeof gradeWords==='function'?gradeWords(r.grade):r.grade].filter(x=>String(x||'').trim()).map(esc).join(' · ');
+  const fix=(!ini&&!(r.thumb&&r.thumb.at===r.saved))||!(r.sum&&('trend' in r.sum)),nm=clName(r);
+  return '<article class="cl-card'+(hot?' hot':'')+'" data-clrow="'+esc(r.key)+'" data-clwhere="'+w+'"'+(fix?' data-clfix="1"':'')+' aria-label="'+esc(nm)+'">'+
+    '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div><\/div>'+
+    clTrendHtml(r)+
+    (top?'<div class="cl-next'+(hot?' hot':'')+'"><span class="cl-nt"><span class="td-k">'+esc(top.k)+'<\/span> '+esc(top.t)+(it.length>1?' <span class="cl-more">and '+(it.length-1)+' more<\/span>':'')+'<\/span><button type="button" data-clopen="'+esc(r.key)+'" data-clform="'+esc(top.open||'')+'">Open'+(top.open?' '+esc(top.open):'')+'<\/button><\/div>'
+      :'<div class="cl-next calm"><span class="cl-nt">Nothing needs you, as at the last save.<\/span><\/div>')+
+    '<p class="cl-saved" title="'+esc(typeof drvWhen==='function'?drvWhen(r.saved):'')+'">'+esc(clWhere(r))+'<\/p>'+
+    '<div class="cl-card-acts"><button type="button" class="primary" data-clopen="'+esc(r.key)+'" aria-label="Open '+esc(nm)+'’s case">Open<\/button>'+(w==='dlg'?'<button type="button" data-cldel="'+esc(r.key)+'" aria-label="Remove '+esc(nm)+'">Remove<\/button>':'')+'<\/div><\/article>';}
+/* Caseload's students, and the start screen's (the first twelve, under the search) */
+function clCards(L,w){const S=w==='bl'?L.slice(0,12):L;
+  return (w==='bl'?findBox('bl'):'')+'<div class="cl-cards">'+S.map(r=>clCard(r,w)).join('')+'<\/div>'+(L.length>S.length?'<p class="hint">and '+(L.length-S.length)+' more in Caseload<\/p>':'');}
+/* the 96 px photo: the round one placed on the bar (else the picture behind it), a little above the middle of a tall one */
+function clThumbMake(src){return new Promise(res=>{if(!src||!PHOTO_RE.test(src)){res('');return;}const im=new Image();let done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  im.onload=()=>{try{const S=96,w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;if(!w||!h){fin('');return;}const k=Math.min(w,h),sx=(w-k)/2,sy=h>w?(h-k)*0.25:(h-k)/2;
+    const c=document.createElement('canvas');c.width=S;c.height=S;const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,S,S);try{g.imageSmoothingQuality='high';}catch(e){}g.drawImage(im,sx,sy,k,k,0,0,S,S);fin(c.toDataURL('image/jpeg',0.82));}catch(e){fin('');}};
+  im.onerror=()=>fin('');setTimeout(()=>fin(''),8000);im.src=src;});}
+/* the card's photo and trend, kept with the student: written only into the copy they were made from (not one saved since) */
+function clPatch(key,saved,patch){return clTx('readwrite',st=>{const g=st.get(key);g.onsuccess=()=>{const c=g.result;if(!c||c.saved!==saved)return;
+  if(patch.thumb)c.thumb=patch.thumb;if('trend' in patch)c.sum=Object.assign({},c.sum||{},{trend:patch.trend});st.put(c);};return null;}).catch(()=>{});}
+function clCardPaint(r){document.querySelectorAll('.cl-card').forEach(c=>{if(c.dataset.clrow!==r.key)return;const ph=c.querySelector('.cl-ph'),tr=c.querySelector('.cl-trend');
+  if(ph)ph.innerHTML=clPhoto(r);if(tr)tr.outerHTML=clTrendHtml(r);c.removeAttribute('data-clfix');});}
+/* a student kept before v21.91 (or brought from Drive): the photo and the trend are made the first time the card is shown */
+function clCardFix(key){if(FIND.fix[key])return FIND.fix[key];
+  const p=(async()=>{const r=(await clList()||[]).find(x=>x.key===key);if(!r)return;const needPh=!(r.thumb&&r.thumb.at===r.saved)&&!FIND.keep[key],needTr=!(r.sum&&('trend' in r.sum));
+    if(!needPh&&!needTr){clCardPaint(r);return;}let d=null;try{d=parseCase(r.text);}catch(e){d=null;}const patch={};
+    if(needPh){const pk=d&&d.packet||{},src=photoOk(pk.photo)?pk.photo:(d&&typeof d.photoSrc==='string'&&PHOTO_RE.test(d.photoSrc)?d.photoSrc:'');patch.thumb={at:r.saved,src:src?await clThumbMake(src):''};r.thumb=patch.thumb;}
+    if(needTr){patch.trend=clTrendOf(d&&d.facts);r.sum=Object.assign({},r.sum||{},{trend:patch.trend});}
+    await clPatch(key,r.saved,patch);clCardPaint(r);})().catch(()=>{}).then(()=>{delete FIND.fix[key];});
+  FIND.fix[key]=p;return p;}
+async function clCardsLater(){const keys=[];document.querySelectorAll('.cl-card[data-clfix]').forEach(c=>{if(!keys.includes(c.dataset.clrow))keys.push(c.dataset.clrow);});for(const k of keys)await clCardFix(k);}
+/* Save case: the photo's 96 px copy goes with the student kept here */
+{const ckF=caseloadKeep;caseloadKeep=async function(p){const key=p&&clKey(p)||'',ph=p&&photoOk(p.photo)?p.photo:(state.photoSrc&&PHOTO_RE.test(state.photoSrc)?state.photoSrc:'');
+  if(key)FIND.keep[key]=1;const tp=ph?clThumbMake(ph):Promise.resolve('');
+  try{return await ckF.apply(this,arguments);}
+  finally{try{if(key&&!clOff()){const src=await tp,r=(await clList()||[]).find(x=>x.key===key);
+      if(r&&!(r.thumb&&r.thumb.at===r.saved&&r.thumb.src===src)){r.thumb={at:r.saved,src};await clPatch(key,r.saved,{thumb:r.thumb});}if(r)clCardPaint(r);}}catch(e){}
+    if(key)delete FIND.keep[key];}};}
 </script>
 </body>
 </html>
