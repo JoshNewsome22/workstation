@@ -563,23 +563,24 @@ async function bars(br){
       m.take==='Use these details'&&m.shown>=160&&m.headerH===56&&!m.over,m);
     await ctx.close();
   }
-  /* upright and on a phone the chips stay in the bar */
+  /* upright (v21.89: from 760 px) the chips go up into the heading; on a phone they stay in the bar */
   for(const [tag,vp] of [['820x1180 touch (upright)',{width:820,height:1180}],['390x844 phone',{width:390,height:844}]]){
     const ctx=await ipad(br,vp);await ctx.addInitScript(NOTIP);
     const page=await shell(ctx,'bars '+tag);await open(page,'CN-1');
     await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
     const g=await geo(page);
-    ok('bars '+tag+': the chips stay in the bar (the form at '+g.frameTop+' px; the case buttons take '+g.rows+' rows here, as before)',g.chipsIn==='bar',g);
+    if(vp.width>=760)ok('bars '+tag+': the chips are in the heading and the bar keeps to one row (the form at '+g.frameTop+' px, at most 240)',g.chipsIn==='heading'&&g.rows===1&&g.frameTop<=240,g);
+    else ok('bars '+tag+': the chips stay in the bar (the form at '+g.frameTop+' px; the case buttons take '+g.rows+' rows here, as before)',g.chipsIn==='bar',g);
     await ctx.close();
   }
   /* turning the iPad: the chips move and come back, and still open their window */
   const ctx=await ipad(br);await ctx.addInitScript(NOTIP);const page=await shell(ctx,'bars turn');await open(page,'CN-1');
   const a=(await geo(page)).chipsIn;
-  await page.setViewportSize({width:820,height:1180});await sleep(500);const b=(await geo(page)).chipsIn;
+  await page.setViewportSize({width:700,height:1000});await sleep(500);const b=(await geo(page)).chipsIn;   /* v21.89 narrower than 760 px (Split View): the bar */
   await page.setViewportSize({width:1180,height:820});await sleep(500);const c=await geo(page);
   await page.tap('#autoChip');await sleep(700);
   const dlg=await page.evaluate(()=>({open:$('#dlg').open,title:$('#dlgTitle').textContent}));
-  ok('bars: turning the iPad moves the chips into the bar and back, and the Autosave chip still opens its window',a==='heading'&&b==='bar'&&c.chipsIn==='heading'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
+  ok('bars: a window narrower than 760 px moves the chips into the bar and back, and the Autosave chip still opens its window',a==='heading'&&b==='bar'&&c.chipsIn==='heading'&&dlg.open&&/Autosave/.test(dlg.title),{a,b,c:c.chipsIn,dlg});
   await ctx.close();
 }
 
