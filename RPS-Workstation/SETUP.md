@@ -9346,3 +9346,51 @@ and Back coming back, Enter moving to the next box, the print layout the same as
 when Focus is turned off; a typed value shows on its part's folded line; the workstation's button and command, the setting
 kept and passed to forms opened later, the master print's copy unchanged, taps on an iPad, and no sideways scrolling added
 on a phone, an iPad held either way or a laptop.
+
+### v21.92: the design review
+
+A review of the workstation's layout and design on the iPad (sideways and upright), the laptop and the iPhone, with the
+design plugins (frontend-design, the Design plugin's critique and accessibility review, Modern Web Guidance). What changed,
+in order of how much it matters. Nothing here touches paper: a form, the master print and Finish PDF print exactly as before.
+
+1. **The start screen is not covered by the form list.** On an iPad held sideways, with nothing open, the list of forms is a
+   column beside the start screen (your caseload shows, two cards across) rather than a drawer sliding over it. Hide, the
+   Escape key and the tab on the left edge still put it away and bring it back. Held upright, or on a phone, the list stays
+   closed when nothing is open, so the caseload is in sight; the **Forms** button (now with its word) or **Show the list of
+   forms** opens it. Over an open form nothing changed: the list is the drawer it was.
+2. **Fewer rows above a form.** With a student's details folded, the student line and the case buttons share one row on
+   any window 1000 px or wider (on an iPad sideways the bar went from 107 px to 60). The case line (targets, function, goals)
+   steps aside from that row under 1300 px; **Edit details** still shows everything. A form's toolbar on a touch screen is one
+   row too: each group's label sits beside its controls rather than above them, and the two screen controls say **More** and
+   **Fit** (on a laptop they are still **More controls** and **Fit**, and the toolbar is laid out as before).
+3. **The view tabs are one row that scrolls sideways** on a touch screen (a form with many views, such as TD-1, had them on
+   three rows). The open tab is brought into view when you choose it, and a fade at an edge of the row says there is more
+   that way; a swipe along the row shows it.
+4. **Caseload shows the students first,** then what needs you across them. Backups, Google Drive and the settings
+   (Initials only, Do not keep cases on this device, Forget a student not saved for..., Deadlines to the Calendar, the restraint
+   report) are folded under **Backups, Google Drive and settings**; tap it to open. The fold is open while no student is kept
+   yet, or when Google Drive needs a decision. A note that needs you (a student kept here but not yet in a file; what a read
+   of the sheets found) stays above the fold.
+5. **Lists are rows, and one set of text sizes.** In Today, on the start screen and in Caseload each item is a row: its tag,
+   its words, its button at the right. The tag is a quiet pill in sentence case (Due, Data, Integrity); Overdue, Safety and
+   Injury are red. Dialog text is 14 px with comfortable line spacing (it was 13), the lead line 15, the form list's names
+   13.5; the start screen's list, search and buttons sit left, like the cards.
+6. **The student bar on an iPad held upright** is a grid: the photo, then Student, ID and Grade; School and BCBA under them;
+   Fill open forms, Read a document and Done on a row of their own. Nothing is clipped (the ID box was 60 px wide), and the
+   Grade box fits "12th grade" on every window, the laptop included.
+7. **For a finger:** the bar's buttons, the chips in the heading and the alert bar are 44 px tall; a folded heading in a
+   dialog is a 44 px row; the × on a message is a 44 px target; the unsaved mark on the open form's row in the list is a
+   light colour you can see on the navy.
+8. **Smaller things from the same review.** A line of reading text in a dialog or on the start screen is no longer than
+   about 76 characters (a line that ran the width of an iPad is hard to follow back to its start). The keyboard hints
+   (⌘K, the arrows in Go to) show only where there is a keyboard. On a touch screen the view tabs carry no "View" label
+   (the tabs say what they are, and the room goes to them), and a row tapped in the form list does not keep the grey of a
+   mouse hovering. The focus bar says "Part 1 of 3" in sentence case, like the tags. The labels in the student bar are
+   12.5 px (they were 11.5). On a phone a dialog may use 70% of the screen (it was 62). The student bar asks the browser
+   not to keep what is typed there in its own autofill list, so a student's name is not offered on a shared iPad.
+
+Checked by `qa/v2192-design-test.js`: the list beside the start screen at 1180 and closed at 820 and on a phone; the bar one
+row at 1180 and a three-row grid at 820; the toolbar one row on the iPad and unchanged with a mouse; the tabs one scrolling
+row with the fade, the last tab tapped coming into view; Caseload's order and fold, the note above it; the pills, the sizes,
+the 44 px targets; the line length, the keyboard hints, the tabs' label, the focus bar's label, the dialog on a phone; and,
+against the release before, Forms DM-1 and TD-1 printing the same words in the same places, with a mouse and with a finger.
