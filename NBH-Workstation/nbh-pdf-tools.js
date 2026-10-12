@@ -137,6 +137,37 @@
     return load(bytes).then(inspectDoc);
   }
 
+  /* v21.90 A packet saved from Safari (an iPad) has no named destinations and no page headers: Safari leaves out the
+     @page boxes, and its PDF keeps no record of the links' targets. Build master print gives the cover, every contents
+     entry and every section a label in tiny white text; the workstation reads those with pdf.js (in the page) and hands
+     them here as marks:
+       { sections:[{id,page}], contents:{page}, toc:{id:{page,x,y}}, edge:{page,x}, run, prac, heads, extents:[{minY,maxY}] }
+     toc gives where each entry's last line ends (its x and baseline); edge, the right edge of the list; extents, how far
+     each page's own text reaches up and down (to keep the header and footer clear of it). */
+  function xyzDest(doc, page) {
+    var a = PDFArray.withContext(doc.context);
+    a.push(page.ref); a.push(PDFName.of('XYZ')); a.push(PDFNumber.of(0)); a.push(PDFNumber.of(page.getHeight())); a.push(PDFNumber.of(0));
+    return a;
+  }
+  function inspectMarks(doc, marks) {
+    var pages = doc.getPageCount(), list = doc.getPages(), seen = Object.create(null), sections = [];
+    (marks && marks.sections || []).forEach(function (s) {
+      if (!s || seen[s.id] || !(s.page >= 0 && s.page < pages)) return;
+      seen[s.id] = 1; sections.push({ id: String(s.id), page: s.page, dest: xyzDest(doc, list[s.page]) });
+    });
+    sections.sort(function (a, b) { return a.page - b.page; });
+    sections.forEach(function (s, i) {
+      s.last = i + 1 < sections.length ? Math.max(s.page, sections[i + 1].page - 1) : pages - 1;
+    });
+    var contents = marks && marks.contents && marks.contents.page >= 0 && marks.contents.page < pages ? { page: marks.contents.page, dest: null } :
+      (sections.length && sections[0].page > 0 ? { page: 0, dest: null } : null);
+    if (contents) contents.last = sections.length ? Math.max(contents.page, sections[0].page - 1) : contents.page;
+    var title = '';
+    try { title = doc.getTitle() || ''; } catch (e) {}
+    return { title: title, pages: pages, contents: contents, sections: sections,
+      hadOutline: !!doc.catalog.get(PDFName.of('Outlines')), fromMarks: true };
+  }
+
   function copyDest(ctx, dest) {
     var a = PDFArray.withContext(ctx);
     for (var i = 0; i < dest.size(); i++) a.push(dest.get(i));
@@ -232,15 +263,18 @@
       var lastLine = entries[id].reduce(function (best, r) {
         return (!best || r.page > best.page || (r.page === best.page && r.y1 < best.y1)) ? r : best; }, null);
       var label = String(sec.page + 1), w = font.widthOfTextAtSize(label, size);
-      plan.push({ line: lastLine, label: label, w: w });
+      plan.push({ line: lastLine, label: label, w: w, font: font });
     });
+    return placeNumbers(pages, plan, right, size);
+  }
+  function placeNumbers(pages, plan, right, size) {
     if (!plan.length) return { numbered: 0, skipped: 'no entry matched a form' };
     var cramped = plan.some(function (e) { return e.line.x2 > right - e.w - 6; });
     if (cramped) {
       return { numbered: 0, skipped: 'the contents list runs into the space the numbers need, so this packet ' +
         'was built by an earlier version; build it again and the numbers will fit' };
     }
-    var n = 0;
+    var n = 0, font = plan[0].font;
     plan.forEach(function (e) {
       var lastLine = e.line, page = pages[lastLine.page], label = e.label, w = e.w;
       /* the link rectangle is the line box; the entry's baseline sits 0.308 of the
@@ -255,6 +289,65 @@
       n++;
     });
     return { numbered: n, skipped: '' };
+  }
+
+  /* the page numbers of a Safari packet's contents, where its labels say each entry ends (after any scaling of the page) */
+  function stampNumbersMarks(doc, info, font, marks, T) {
+    var pages = doc.getPages(), toc = marks.toc || {}, ids = Object.keys(toc), byId = Object.create(null);
+    if (!info.contents || !ids.length || !marks.edge) return { numbered: 0, skipped: 'no contents entries were found' };
+    info.sections.forEach(function (s) { byId[s.id] = s; });
+    var t = T[marks.edge.page] || { s: 1, tx: 0, ty: 0 };
+    var size = LAYOUT.fontSize * t.s, right = t.s * (marks.edge.x + 56 * 0.75) + t.tx;   /* the list keeps 56px clear at its right */
+    var plan = [];
+    ids.forEach(function (id) {
+      var sec = byId[id], e = toc[id];
+      if (!sec || !e) return;
+      var q = T[e.page] || { s: 1, tx: 0, ty: 0 }, x = q.s * e.x + q.tx, y = q.s * e.y + q.ty;
+      var label = String(sec.page + 1), w = font.widthOfTextAtSize(label, size);
+      plan.push({ line: { page: e.page, x1: x - 1, x2: x, y1: y - size * 0.308, y2: y + size }, label: label, w: w, font: font, size: size });
+    });
+    return placeNumbers(pages, plan, right, size);
+  }
+
+  /* The packet's header and footer as Chrome prints them (the @page boxes of Build master print): the practice at the top
+     left, the student at the top right, the confidentiality line at the bottom left, "Page n of N" at the bottom right. A
+     page whose own text runs into the margins where they go is first scaled down a little about its centre. */
+  var HEAD = { box: 0.62 * 72, side: 0.45 * 72, size: 8, foot: 7.5, needTop: 36, needBottom: 34, floor: 0.85,
+    prac: rgb(0.145, 0.275, 0.341), grey: rgb(0.329, 0.404, 0.435) };
+  var CONFIDENTIAL = 'Confidential student record \u2014 FERPA protected. Retain in the student\u2019s behavior file.';
+  function fit(font, s) {   /* what Helvetica's WinAnsi can print: accents taken off, anything else a question mark */
+    s = String(s || '');
+    try { s = s.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''); } catch (e) {}
+    var out = '';
+    for (var i = 0; i < s.length; i++) { var ch = s.charAt(i); try { font.widthOfTextAtSize(ch, 1); out += ch; } catch (e) { out += '?'; } }
+    return out;
+  }
+  function stampHeads(doc, marks, font) {
+    var pages = doc.getPages(), n = pages.length, T = [], scaled = 0;
+    var prac = fit(font, marks.prac || ''), run = fit(font, marks.run || ''), conf = fit(font, CONFIDENTIAL);
+    pages.forEach(function (page, i) {
+      var W = page.getWidth(), H = page.getHeight(), e = (marks.extents || [])[i] || {}, s = 1;
+      if (e.maxY != null && e.maxY - H / 2 > 0 && H - e.maxY < HEAD.needTop) s = Math.min(s, (H / 2 - HEAD.needTop) / (e.maxY - H / 2));
+      if (e.minY != null && H / 2 - e.minY > 0 && e.minY < HEAD.needBottom) s = Math.min(s, (H / 2 - HEAD.needBottom) / (H / 2 - e.minY));
+      s = Math.max(HEAD.floor, Math.min(1, s));
+      var t = { s: s, tx: 0, ty: 0 };
+      if (s < 0.999) {
+        page.scaleContent(s, s);
+        t.tx = (1 - s) * W / 2; t.ty = (1 - s) * H / 2;
+        page.translateContent(t.tx, t.ty);
+        /* scaleContent opened pdf-lib's drawing layer inside the shrink; the header and footer go on a new one after it */
+        page.getContentStream(false);
+        scaled++;
+      }
+      T[i] = t;
+      var topY = H - HEAD.box / 2 - HEAD.size * 0.35, footY = HEAD.box / 2 - HEAD.size * 0.35;
+      if (prac) page.drawText(prac, { x: HEAD.side, y: topY, size: HEAD.size, font: font, color: HEAD.prac });
+      if (run) page.drawText(run, { x: W - HEAD.side - font.widthOfTextAtSize(run, HEAD.size), y: topY, size: HEAD.size, font: font, color: HEAD.grey });
+      page.drawText(conf, { x: HEAD.side, y: footY, size: HEAD.foot, font: font, color: HEAD.grey });
+      var pn = 'Page ' + (i + 1) + ' of ' + n;
+      page.drawText(pn, { x: W - HEAD.side - font.widthOfTextAtSize(pn, HEAD.size), y: footY, size: HEAD.size, font: font, color: HEAD.grey });
+    });
+    return { T: T, stamped: n, scaled: scaled };
   }
 
   function contentLengths(doc) {
@@ -272,10 +365,11 @@
     titleFor = titleFor || function (id) { return 'Form ' + id; };
     var before;
     return load(bytes).then(function (doc) {
-      var info = inspectDoc(doc);
+      var info = inspectDoc(doc), marks = null;
+      if (!info.sections.length && opts.marks) { marks = opts.marks; info = inspectMarks(doc, marks); }
       if (!info.sections.length) {
         throw new Error('No form sections were found in this PDF. It has to be a packet from ' +
-          'Build master print, saved as PDF from the print window in Chrome or Edge.');
+          'Build master print, saved as PDF from its print window (Chrome or Edge on a computer, or Safari on an iPad).');
       }
       before = contentLengths(doc);
       var items = [];
@@ -290,13 +384,15 @@
         items.push({ title: String(titleFor(s.id) || 'Form ' + s.id), dest: s.dest, page: s.page });
       });
       writeOutline(doc, items);
-      var numbers = { numbered: 0, skipped: 'not asked for' };
-      var fontReady = opts.numbers === false ? Promise.resolve(null) : doc.embedFont(StandardFonts.Helvetica);
+      var numbers = { numbered: 0, skipped: 'not asked for' }, heads = { stamped: 0, scaled: 0, T: [] };
+      var wantHeads = !!(marks && marks.heads && opts.heads !== false);
+      var fontReady = opts.numbers === false && !wantHeads ? Promise.resolve(null) : doc.embedFont(StandardFonts.Helvetica);
       return fontReady.then(function (font) {
-        if (font) numbers = stampNumbers(doc, info, font);
+        if (font && wantHeads) heads = stampHeads(doc, marks, font);
+        if (font && opts.numbers !== false) numbers = marks ? stampNumbersMarks(doc, info, font, marks, heads.T) : stampNumbers(doc, info, font);
         return doc.save({ useObjectStreams: false, updateFieldAppearances: false });
       }).then(function (out) {
-        return { out: out, info: info, items: items, numbers: numbers };
+        return { out: out, info: info, items: items, numbers: numbers, heads: { stamped: heads.stamped, scaled: heads.scaled } };
       });
     }).then(function (r) {
       /* Check the written file rather than trusting it: same pages, same page
@@ -309,7 +405,7 @@
            any other page is exactly as it was. */
         var after = contentLengths(check);
         for (var i = 0; i < after.length; i++) {
-          var numbered = r.numbers.numbered && r.info.contents && i >= r.info.contents.page && i <= r.info.contents.last;
+          var numbered = r.heads.stamped || (r.numbers.numbered && r.info.contents && i >= r.info.contents.page && i <= r.info.contents.last);
           var ok = numbered ? after[i].split('+').join('+').indexOf(before[i]) >= 0 : after[i] === before[i];
           if (!ok) throw new Error('Page ' + (i + 1) + ' changed while the copy was written. Nothing was saved.');
         }
@@ -321,12 +417,13 @@
             throw new Error('Bookmark ' + (i + 1) + ' (' + r.items[i].title + ') does not land on page ' +
               (r.items[i].page + 1) + '. Nothing was saved.');
         });
-        return { bytes: r.out, info: r.info, outline: outline, numbers: r.numbers };
+        return { bytes: r.out, info: r.info, outline: outline, numbers: r.numbers, heads: r.heads };
       });
     });
   }
 
   return { inspect: inspect, bookmark: bookmark,
+    inspectMarks: function (bytes, marks) { return load(bytes).then(function (d) { return inspectMarks(d, marks); }); },
     readOutline: function (bytes) { return load(bytes).then(readOutline); },
     contentsEntries: function (bytes) { return load(bytes).then(function (d) { return contentsEntries(d, inspectDoc(d)); }); } };
 });

@@ -2661,13 +2661,13 @@ async function masterRun(chosen,opt){opt=opt||{};
 
   const p=packet();
   const stamp=new Date();
-  const head=`<div class="mp-cover">
+  const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
     <div class="mp-brand"><img src="${$('#logo').src}" alt="Newsome Behavioral Health"></div>
     <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
     <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
     <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
-    <h2 id="mp-contents">Contents</h2><ol>${parts.map(x=>`<li><a class="mp-jump" href="#sec-${esc(x.id)}">Form ${esc(x.id)} &mdash; ${esc(x.title)}</a></li>`).join('')}</ol>
+    <h2 id="mp-contents">Contents</h2><ol>${parts.map(x=>`<li data-mk="NBHTOC:${esc(x.id)};"><a class="mp-jump" href="#sec-${esc(x.id)}">Form ${esc(x.id)} &mdash; ${esc(x.title)}</a></li>`).join('')}</ol>
     <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section below is that form exactly as it stood when this was built.</p>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
@@ -2685,7 +2685,7 @@ async function masterRun(chosen,opt){opt=opt||{};
      header was tried and dropped: under a named page Chromium 141 moves table
      footers and other unbreakable blocks to the next page even when they fit.) */
   const body=parts.map((x,i)=>
-    `<section id="sec-${esc(x.id)}" class="mp-sec mp-${i}" data-title="Form ${esc(x.id)} &mdash; ${esc(x.title)}">${staticize(x.html)}</section>`).join('');
+    `<section id="sec-${esc(x.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(x.id)};" data-title="Form ${esc(x.id)} &mdash; ${esc(x.title)}">${staticize(x.html)}</section>`).join('');
 
   const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>FBA and BIP packet \u2014 ${esc(p.client)||'student'}</title>
    <style>
@@ -2717,6 +2717,16 @@ async function masterRun(chosen,opt){opt=opt||{};
     /* The right of each entry is kept clear: Bookmark PDF writes the page the form
        starts on there, once the PDF exists and the page is known. */
     .mp-cover ol{font-size:13px;line-height:1.7;padding-right:56px}
+    /* v21.90 Safari prints without the page headers above and leaves no record of where a form starts. So the cover, each
+       contents entry and each section carry a label in white 3 px text, made by the style sheet (no element is added, so
+       nothing in a form moves): Finish PDF reads them in the saved PDF and adds the headers, the footers, the contents page
+       numbers and the bookmarks. The cover's says whose packet it is; a section's sits at the top of its first page; an
+       entry's at the right end of its last line; the first entry's also marks the right edge of the list. */
+    .mp-cover::before,.mp-sec::before,.mp-cover li:first-child::before{content:attr(data-mk);float:left;width:0;height:0;overflow:visible;
+      margin:0;padding:0;font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
+    .mp-cover li:first-child::before{content:"NBHEDGE;";float:right}
+    .mp-cover li::after{content:attr(data-mk);display:inline-block;width:0;height:0;overflow:visible;vertical-align:baseline;
+      font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
     /* The contents are real links: in a PDF they jump to the form, on paper they
        are just the list. So they take the colour of the text around them rather
        than turning blue and underlined. */
@@ -2943,10 +2953,14 @@ async function masterRun(chosen,opt){opt=opt||{};
    <\/script>
    <\/body><\/html>`;
 
+  /* v21.90 whose packet, for the header Finish PDF writes on a PDF saved from Safari: the line the page header carries and the
+     practice's name the header starts with (each edition's own) */
+  const mpPrac=(/@top-left\{content:"([^"]*)"/.exec(doc)||[])[1]||'';
+  const docM=doc.replace('%%MPRUN%%','NBHRUN:'+encodeURIComponent(runHead)+';NBHPRAC:'+encodeURIComponent(mpPrac)+';');
   /* the window was opened at the click; if it has since been closed, try again */
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
-  w.document.open();w.document.write(doc);w.document.close();
+  w.document.open();w.document.write(docM);w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},900);
 }
 $('#masterPrint').addEventListener('click',()=>masterRun(ALL.filter(([id])=>state.ticked[id])));
@@ -3188,6 +3202,46 @@ function loadScript(src){
     document.head.appendChild(s);
   });
 }
+/* v21.90 the labels a master print carries (white 3 px text: see the packet's style), read from a PDF with pdf.js: where each
+   form starts, where each contents entry ends, the right edge of the list, whose packet it is, and how far each page's own text
+   reaches (Finish PDF keeps the header and footer clear of it) */
+let mpPdfjs=null;
+async function pdfjsLoad(){if(!mpPdfjs){const lib=await import(new URL('nbh-doc/pdf.min.js',location.href).href);lib.GlobalWorkerOptions.workerSrc=new URL('nbh-doc/pdf.worker.min.js',location.href).href;mpPdfjs=lib;}return mpPdfjs;}
+/* where the ink is: a small rendering of the page, so a picture or a rule in the margin counts as well as text (white counts as paper) */
+async function pdfInk(pg,cv){
+  const vp=pg.getViewport({scale:0.5}),w=Math.ceil(vp.width),h=Math.ceil(vp.height);cv.width=w;cv.height=h;
+  const cx=cv.getContext('2d',{willReadFrequently:true});cx.fillStyle='#fff';cx.fillRect(0,0,w,h);
+  await pg.render({canvasContext:cx,viewport:vp}).promise;
+  const d=cx.getImageData(0,0,w,h).data,ink=r=>{for(let x=0,o=r*w*4;x<w;x++,o+=4)if(d[o]<248||d[o+1]<248||d[o+2]<248)return true;return false;};
+  let top=0,bot=h-1;while(top<h&&!ink(top))top++;if(top>=h)return null;while(bot>top&&!ink(bot))bot--;
+  const H=pg.view[3]-pg.view[1];return {maxY:H-top/0.5,minY:H-(bot+1)/0.5};}
+async function pdfMarks(bytes,onPage){
+  let lib;try{lib=await pdfjsLoad();}catch(e){throw new Error('The page reader (nbh-doc) could not be loaded, so a PDF saved from Safari cannot be read here. Open the workstation from its web address.');}
+  const pdf=await lib.getDocument({data:new Uint8Array(bytes.slice(0)),isEvalSupported:false}).promise;
+  const M={pages:pdf.numPages,sections:[],contents:null,toc:{},edge:null,run:'',prac:'',heads:true,extents:[]};
+  const dec=v=>{try{return decodeURIComponent(v);}catch(e){return v;}};let cv=null;
+  for(let i=0;i<pdf.numPages;i++){
+    const pg=await pdf.getPage(i+1),tc=await pg.getTextContent();
+    let str='',pos=[],minY=Infinity,maxY=-Infinity,plain='';
+    for(const it of tc.items){if(!it||!it.str)continue;const tr=it.transform||[1,0,0,1,0,0],h=Math.hypot(tr[2],tr[3])||it.height||0,x=tr[4],y=tr[5];
+      if(h>0&&h<=4.5){const n=it.str.length;for(let k=0;k<n;k++){str+=it.str[k];pos.push([x+(it.width||0)*k/Math.max(1,n),y]);}}
+      else{if(it.str.trim()){minY=Math.min(minY,y-h*0.25);maxY=Math.max(maxY,y+h*0.85);}plain+=it.str+' ';}}
+    if(i===0&&/Page\s+1\s+of\s+\d+/.test(plain))M.heads=false;   /* the header and footer are on the page already */
+    if(i===0&&!/NBHPKT;/.test(str))M.heads=false;                    /* not a master print: nothing to stamp */
+    if(M.heads){try{cv=cv||document.createElement('canvas');const k=await pdfInk(pg,cv);if(k){minY=Math.min(minY,k.minY);maxY=Math.max(maxY,k.maxY);}}catch(e){}}
+    M.extents.push({minY:isFinite(minY)?minY:null,maxY:isFinite(maxY)?maxY:null});
+    if(onPage)try{onPage(i+1,pdf.numPages);}catch(e){}
+    const re=/NBH(PKT|RUN|PRAC|TOC|SEC|EDGE)(?::([^;]*))?;/g;let m;
+    while((m=re.exec(str))){const p=pos[m.index]||[0,0],k=m[1],v=m[2]||'';
+      if(k==='PKT'){if(!M.contents)M.contents={page:i};}
+      else if(k==='RUN')M.run=dec(v);
+      else if(k==='PRAC')M.prac=dec(v);
+      else if(k==='SEC'){if(!M.sections.some(x=>x.id===v))M.sections.push({id:v,page:i});}
+      else if(k==='TOC')M.toc[v]={page:i,x:p[0],y:p[1]};
+      else if(k==='EDGE'){if(!M.edge)M.edge={page:i,x:p[0]};}}
+    try{pg.cleanup();}catch(e){}}
+  try{await pdf.destroy();}catch(e){}
+  return M;}
 let pdfReady=null;
 function pdfTools(){
   if(window.NBHPdf)return Promise.resolve(window.NBHPdf);
@@ -3204,7 +3258,8 @@ $('#bookmarkPdf').addEventListener('click',()=>{
   dialog('Finish a packet PDF',
     '<p>Save the master print as a PDF from its print window first, then bring that file here. '+
     'You get a copy that opens with a bookmark panel listing every form, and with each form\u2019s page number printed beside its entry on the contents page. '+
-    'Nothing already on a page is changed, and the file never leaves this computer.</p>'+
+    'Nothing already on a page is changed, and the file never leaves this device.</p>'+
+    '<p class="hint"><b>On an iPad:</b> Build master print, then in the print window tap the Share button at the top and <b>Save to Files</b>. Bring that PDF here: as well as the bookmarks and the page numbers, it gets the page header and footer Safari leaves out (the practice, the student, the confidentiality line, Page n of N), so it matches a packet printed from a computer.</p>'+
     '<button type="button" class="dropzone" id="bmDrop">Drop the packet PDF here, or click to choose it</button>'+
     '<input type="file" id="bmFile" accept="application/pdf,.pdf" hidden>'+
     '<div id="bmOut" aria-live="polite"></div>');
@@ -3246,16 +3301,20 @@ async function bmLoad(file){
   try{tools=await pdfTools();}
   catch(e){warn('<b>'+esc(e.message)+' is missing from this folder.</b> It ships beside index.html and bookmarking needs it. '+
     'Copy it back from the download; nothing else in the workstation uses it.');return;}
-  try{bytes=await file.arrayBuffer();info=await tools.inspect(bytes);}
+  let marks=null;
+  try{bytes=await file.arrayBuffer();info=await tools.inspect(bytes);
+    /* v21.90 a packet saved from Safari (an iPad) has none of Chrome's markers: its labels are read instead */
+    if(!info.sections.length){out.innerHTML='<p>Reading the pages of <b>'+esc(file.name)+'</b>\u2026</p>';
+      marks=await pdfMarks(bytes,(n,N)=>{if(n%5===0||n===N)out.innerHTML='<p>Reading <b>'+esc(file.name)+'</b>: page '+n+' of '+N+'…</p>';});if(marks&&marks.sections.length)info=await tools.inspectMarks(bytes,marks);else marks=null;}}
   catch(e){warn('<b>'+esc(file.name)+' could not be read.</b> '+esc(e.message));return;}
   if($('#bmOut')!==out)return;                       // the dialog moved on while reading
   if(!info.sections.length){
     warn('<b>No forms were found in '+esc(file.name)+'.</b> Bookmarks come from the sections of a master print, '+
-      'so this has to be a packet from <b>Build master print</b>, saved as PDF from the print window in Chrome or Edge. '+
+      'so this has to be a packet from <b>Build master print</b>, saved as PDF from its print window (Chrome or Edge on a computer; on an iPad, the print window\u2019s Share button, then Save to Files). '+
       'A packet saved another way, or through a printer driver, loses the markers this reads.');return;}
 
   /* the packet names its student in the PDF title; say so if it is not the one on the bar */
-  const who=(/—\s*(.+)$/.exec(info.title||'')||[])[1]||'';
+  const who=(/—\s*(.+)$/.exec(info.title||'')||[])[1]||(marks&&marks.run?marks.run.split(/\s+\u00b7\s+/)[0]:'')||'';
   const bar=packet().client;
   const other=who&&who!=='student'&&bar&&!sameName(who,bar);
   const rows=(info.contents?[['Cover and contents',info.contents.page,info.contents.last]]:[])
@@ -3267,6 +3326,7 @@ async function bmLoad(file){
     (other?'<div class="warnbox"><b>This packet is for '+esc(who)+'.</b> The bar above says '+esc(bar)+
       '. Finishing it changes nothing about whose packet it is, but check this is the file you meant.</div>':'')+
     (info.hadOutline?'<div class="note">This file already has bookmarks. The copy replaces them with these.</div>':'')+
+    (marks&&marks.heads?'<label class="bm-opt"><input type="checkbox" id="bmHeads" checked> Add the page header and footer Safari leaves out: the practice and the student at the top of every page, the confidentiality line and \u201cPage n of N\u201d at the bottom</label>':'')+
     (info.contents?'<label class="bm-opt"><input type="checkbox" id="bmNums" checked> Print each form\u2019s page number beside its entry on the contents page</label>':'')+
     '<div class="bm-act"><button class="primary" id="bmSave">Save finished copy</button>'+
       '<span>Saved as a new file. '+esc(file.name)+' is left as it is.</span></div>'+
@@ -3275,17 +3335,18 @@ async function bmLoad(file){
 
   $('#bmSave').addEventListener('click',async()=>{
     const btn=$('#bmSave');btn.disabled=true;btn.textContent='Writing\u2026';
-    const nums=$('#bmNums')?$('#bmNums').checked:false;
+    const nums=$('#bmNums')?$('#bmNums').checked:false,heads=$('#bmHeads')?$('#bmHeads').checked:false;
     try{
-      const r=await tools.bookmark(bytes,formTitle,{numbers:nums});
+      const r=await tools.bookmark(bytes,formTitle,{numbers:nums,marks,heads});
       const name=file.name.replace(/\.pdf$/i,'')+' (finished).pdf';
       const a=document.createElement('a');
       a.href=URL.createObjectURL(new Blob([r.bytes],{type:'application/pdf'}));
       a.download=name;document.body.appendChild(a);a.click();a.remove();
       setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+      try{if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);}catch(x){}   /* v21.90 installed on an iPad: the share sheet keeps it */
       const act=btn.parentNode;
-      const numNote=nums?(r.numbers.numbered?', page numbers on '+r.numbers.numbered+' contents entries':
-        ', no page numbers ('+esc(r.numbers.skipped)+')'):'';
+      const numNote=(nums?(r.numbers.numbered?', page numbers on '+r.numbers.numbered+' contents entries':
+        ', no page numbers ('+esc(r.numbers.skipped)+')'):'')+(r.heads&&r.heads.stamped?', the header and footer on all '+r.heads.stamped+' pages'+(r.heads.scaled?' ('+r.heads.scaled+' made a little smaller to keep them clear)':''):'');
       act.innerHTML='<div class="note" style="margin:0;flex:1"><b>Saved as '+esc(name)+'.</b> '+r.outline.length+
         ' bookmarks'+numNote+', '+r.info.pages+' pages, every page checked. Open it and look at the bookmark panel and the contents before filing it.</div>';
       say('Finished copy saved as '+name);
