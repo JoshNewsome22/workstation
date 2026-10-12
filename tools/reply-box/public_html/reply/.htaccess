@@ -1,2 +1,13 @@
 Options -Indexes
 DirectoryIndex box.php
+# Open to anyone even when the site, or a folder above this one, has a password (cPanel Directory Privacy): the
+# questionnaire pages and the staff phone pages send here from any phone. The data folder keeps its own
+# "Require all denied", so the replies stay closed to the web.
+<IfModule mod_authz_core.c>
+  Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Allow from all
+  Satisfy Any
+</IfModule>

@@ -315,7 +315,13 @@ keeps only what it cannot read.
   password on `public_html/reply`: the respondent pages post to it from any
   device and any origin (CORS `*`; a page opened from an email attachment
   has no origin of its own). The workstation's own folder keeps its
-  password as before.
+  password as before. A password on the whole site (Directory Privacy on
+  `public_html` itself) is fine from v21.87: the box's `.htaccess` opens its
+  own folder to everyone, and its `data` folder stays closed to the web.
+  With a password on the whole site, the lines that let `respond.html`,
+  `nbh-respond.js` and `staff-data.html` through (above) go at the end of
+  `public_html/.htaccess`, under cPanel's section; they then cover both
+  workstation folders.
 - **What the site keeps.** A box id and a hash of the form's read token
   (both random, made by the form), each reply's ciphertext with the
   informant's one-time public key and the time, and a count of replies per

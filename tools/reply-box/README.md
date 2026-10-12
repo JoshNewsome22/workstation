@@ -31,7 +31,9 @@ The program makes a `data` folder beside itself the first time a form registers 
 ## 3. No folder password on `reply`
 
 Do not put a Directory Privacy password on `public_html/reply`: the respondent pages post to it from any device.
-The workstation's own folder keeps its password as before.
+The workstation's own folder keeps its password as before. A password on the whole site (on `public_html`) is fine:
+the box's `.htaccess` opens its own folder to everyone (`Require all granted`), and the `data` folder keeps its own
+`Require all denied`, so the replies stay closed to the web.
 
 ## How it works, and what is kept
 
