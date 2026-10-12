@@ -54,20 +54,21 @@ const measure=(page,root)=>page.evaluate(root=>{const R=document.querySelector(r
   const recC0=recs.find(r=>r.client==='SIMULATED – Sample Student 2');
   ok('1b the student kept before v21.91 has no photo copy and no trend yet',!!recC0&&!recC0.thumb&&!('trend' in (recC0.sum||{})));
   await A.ctx.close();
-  const WIDTHS=[[390,844,UA.iphone,true,1],[820,1180,UA.ipad,true,2],[1180,820,UA.ipad,true,3],[1440,900,UA.mac,false,3]];
+  /* v21.92 at 1180 the form list is a column beside the start screen, so the start screen shows two across; Caseload still three or more */
+  const WIDTHS=[[390,844,UA.iphone,true,1,1],[820,1180,UA.ipad,true,2,2],[1180,820,UA.ipad,true,2,3],[1440,900,UA.mac,false,3,3]];
   let last=null;
-  for(const [w,h,ua,touch,cols] of WIDTHS){const S=await shell(br,{width:w,height:h},ua,touch);
+  for(const [w,h,ua,touch,bcols,cols] of WIDTHS){const S=await shell(br,{width:w,height:h},ua,touch);
     await S.page.evaluate(async R=>{await clTx('readwrite',st=>{R.forEach(r=>st.put(r));});},recs);
     await S.page.evaluate(()=>paintBlank());await sleep(1800);
     const b=await measure(S.page,'#blankCl');
-    ok('2 '+w+' wide, the start screen: '+cols+(cols>=3?' or more':'')+' card'+(cols===1?'':'s')+' across, no sideways scrolling, every target at least 44 px, an actions area in each',
-      b.n===3&&(cols>=3?b.across>=3:b.across===cols)&&b.page<=0&&b.box<=1&&!b.cards&&b.minH>=44&&b.minW>=44&&b.acts===3,b);
+    ok('2 '+w+' wide, the start screen: '+bcols+(bcols>=3?' or more':'')+' card'+(bcols===1?'':'s')+' across, no sideways scrolling, every target at least 44 px, an actions area in each',
+      b.n===3&&(bcols>=3?b.across>=3:b.across===bcols)&&b.page<=0&&b.box<=1&&!b.cards&&b.minH>=44&&b.minW>=44&&b.acts===3,b);
     await S.page.screenshot({path:OUT+'blank-'+w+'.png',fullPage:false});
     await S.page.evaluate(()=>caseloadOpen());await sleep(900);
     const d=await measure(S.page,'#dlgBody');
     const keep=await S.page.evaluate(()=>({needs:[...document.querySelectorAll('#dlgBody h3.cl-h')].map(h=>h.textContent),list:document.querySelectorAll('#dlgBody .td-list li').length}));
-    ok('3 '+w+' wide, Caseload: '+cols+(cols>=3?' or more':'')+' across, no sideways scrolling, 44 px targets; “What needs you, across the caseload” still above the students',
-      d.n===3&&(cols>=3?d.across>=3:d.across===cols)&&d.page<=0&&d.box<=1&&!d.cards&&d.minH>=44&&d.minW>=44&&d.acts===3&&keep.needs.indexOf('What needs you, across the caseload')>=0&&keep.needs.indexOf('What needs you, across the caseload')<keep.needs.indexOf('Students')&&keep.list>=2,{d,keep});
+    ok('3 '+w+' wide, Caseload: '+cols+(cols>=3?' or more':'')+' across, no sideways scrolling, 44 px targets; “What needs you, across the caseload” under the students (v21.92)',
+      d.n===3&&(cols>=3?d.across>=3:d.across===cols)&&d.page<=0&&d.box<=1&&!d.cards&&d.minH>=44&&d.minW>=44&&d.acts===3&&keep.needs.indexOf('What needs you, across the caseload')>=0&&keep.needs.indexOf('What needs you, across the caseload')>keep.needs.indexOf('Students')&&keep.list>=2,{d,keep});
     await S.page.screenshot({path:OUT+'caseload-'+w+'.png',fullPage:false});
     await S.page.evaluate(()=>{const b=document.getElementById('dlgBody');b.scrollTop=b.scrollHeight;});await sleep(200);
     await S.page.screenshot({path:OUT+'caseload-'+w+'-cards.png',fullPage:false});

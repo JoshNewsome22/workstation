@@ -646,11 +646,13 @@ PH.H=async()=>{
   await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(800);
   const cl=await shell(()=>document.getElementById('dlgBody').innerText);
   ok('H10 Caseload lists Mateo and the second student, the most urgent first, with what needs Mateo',/Mateo Rivera/.test(cl)&&/Sample Student/.test(cl),cl.slice(0,800));
+  await shell(()=>{const k=document.getElementById('clKeep');if(k)k.open=true;});   /* v21.92 the calendar and the report sit in the folded housekeeping */
   const dlc=page.waitForEvent('download',{timeout:20000});await page.locator('#clCal').tap();const dc=await dlc;const fcal=OUT+'caseload.ics';await dc.saveAs(fcal);
   const ics=fs.readFileSync(fcal,'utf8');const ev=(ics.match(/BEGIN:VEVENT[\s\S]*?END:VEVENT/g)||[]);
   const sumy=ev.map(e=>(/SUMMARY:(.*)/.exec(e)||[])[1]);
   ok('H11 the calendar file: Mateo’s deadlines by initials only (the plan review, the annual IEP, the reevaluation, the restraint notices), no name or ID',ev.length>=3&&sumy.some(s=>/^M\. R\.: Plan review/.test(s))&&sumy.some(s=>/^M\. R\.: Annual IEP review/.test(s))&&!/Mateo|Rivera|4471823/.test(ics),sumy);
   if(!(await shell(()=>document.getElementById('dlg').open&&!!document.getElementById('clRestr')))){await closeDlg();await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(500);}
+  await shell(()=>{const k=document.getElementById('clKeep');if(k)k.open=true;});
   await page.locator('#clRestr').tap();await sleep(800);
   const rr=await shell(()=>({t:document.getElementById('dlgBody').innerText,rows:[...document.querySelectorAll('#dlgBody .cl-tbl tr')].slice(1).map(r=>r.innerText.replace(/\s+/g,' '))}));
   ok('H12 the restraint report: Mateo’s restraint on its date, from DD-1, with CR-1’s notices, and this semester’s count',rr.rows.some(r=>/Mateo Rivera/.test(r)&&new RegExp(D.restraint).test(r)&&/restraint/.test(r)&&/of 3/.test(r))&&/This semester: Mateo Rivera 1/.test(rr.t),rr);

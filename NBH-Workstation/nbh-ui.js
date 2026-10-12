@@ -842,3 +842,22 @@
   function start(){ mkBtn(); if (store()) on(); }
   if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', start); else start();
 })();
+/* v21.92 the view tabs on a touch screen are one row that scrolls sideways (the CSS above): the open tab is brought into
+   view when it is chosen, when the window turns and when the form opens, and a fade at an edge (data-nbh-more) says there is
+   more that way. Nothing here runs with a mouse, and nothing prints. */
+try { if (window.matchMedia) (function(){
+  var seg = null, coarse = matchMedia('(pointer:coarse)');
+  function find(){ if (seg && seg.isConnected) return seg; seg = document.getElementById('viewSeg'); return seg; }
+  function edges(){ var s = find(); if (!s) return; var more = '';
+    if (s.scrollWidth > s.clientWidth + 2) { if (s.scrollLeft > 2) more = 'l'; if (s.scrollLeft + s.clientWidth < s.scrollWidth - 2) more = (more ? more + ' ' : '') + 'r'; }
+    if (more) s.setAttribute('data-nbh-more', more); else s.removeAttribute('data-nbh-more'); }
+  function show(){ var s = find(); if (!s || !coarse.matches) return; var a = s.querySelector('[aria-pressed="true"],[aria-selected="true"]');
+    if (a && s.scrollWidth > s.clientWidth + 2) { var l = a.offsetLeft - s.offsetLeft, r = l + a.offsetWidth;
+      if (l < s.scrollLeft + 24) s.scrollLeft = Math.max(0, l - 24); else if (r > s.scrollLeft + s.clientWidth - 24) s.scrollLeft = r - s.clientWidth + 24; }
+    edges(); }
+  document.addEventListener('click', function(e){ var s = find(); if (s && e.target && s.contains(e.target)) setTimeout(show, 30); }, true);
+  document.addEventListener('scroll', function(e){ var s = find(); if (s && e.target === s) edges(); }, true);
+  window.addEventListener('resize', function(){ setTimeout(show, 120); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 200); }); else setTimeout(show, 200);
+  window.addEventListener('load', function(){ setTimeout(show, 400); });
+})(); } catch (e) {}

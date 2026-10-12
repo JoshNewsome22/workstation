@@ -100,6 +100,24 @@ html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
 @media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}}
 /* v21.89 a quick second tap (marking the next cell) is a tap, not a double-tap zoom; pinching still zooms */
 html{touch-action:manipulation}
+/* v21.92 the design review, on a touch screen: the toolbar's groups sit in a row (a label beside its controls, not above them),
+   the view tabs are one row that scrolls sideways with the open tab kept in sight and a fade where there is more (the script
+   below), and the toast's × is a 44 px target. Screen only, and only without a mouse: paper and the laptop keep their layout. */
+@media screen and (pointer:coarse){
+  .toolbar{align-items:center;gap:8px 14px}
+  .toolbar > .tgroup{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-width:0}
+  .toolbar > .tgroup > span{font-size:12px;letter-spacing:0;white-space:nowrap}
+  .toolbar > .tgroup:has(#viewSeg) > .row{min-width:0;max-width:100%;flex:1 1 0}
+  /* the tabs' group shares the row with the two screen controls (the tabs scroll in what is left), so the toolbar is one row where it can be */
+  html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 0;min-width:min(100%,240px)}
+  html .toolbar #viewSeg{flex:0 1 auto;flex-wrap:nowrap;align-self:center;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+  html .toolbar #viewSeg::-webkit-scrollbar{display:none}
+  html .toolbar #viewSeg > button{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start}
+  .toolbar #viewSeg[data-nbh-more="r"]{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .toolbar #viewSeg[data-nbh-more="l"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+  .toolbar #viewSeg[data-nbh-more="l r"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+  .nbh-toast button{min-width:44px;min-height:44px;margin:-10px -14px -10px auto;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px}
+}
 </style>
 <script id="nbh-ui">
 /* ===================== the form's own messages, touch targets and view progress (v21.34) =====================
@@ -945,4 +963,23 @@ html{touch-action:manipulation}
   function start(){ mkBtn(); if (store()) on(); }
   if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', start); else start();
 })();
+/* v21.92 the view tabs on a touch screen are one row that scrolls sideways (the CSS above): the open tab is brought into
+   view when it is chosen, when the window turns and when the form opens, and a fade at an edge (data-nbh-more) says there is
+   more that way. Nothing here runs with a mouse, and nothing prints. */
+try { if (window.matchMedia) (function(){
+  var seg = null, coarse = matchMedia('(pointer:coarse)');
+  function find(){ if (seg && seg.isConnected) return seg; seg = document.getElementById('viewSeg'); return seg; }
+  function edges(){ var s = find(); if (!s) return; var more = '';
+    if (s.scrollWidth > s.clientWidth + 2) { if (s.scrollLeft > 2) more = 'l'; if (s.scrollLeft + s.clientWidth < s.scrollWidth - 2) more = (more ? more + ' ' : '') + 'r'; }
+    if (more) s.setAttribute('data-nbh-more', more); else s.removeAttribute('data-nbh-more'); }
+  function show(){ var s = find(); if (!s || !coarse.matches) return; var a = s.querySelector('[aria-pressed="true"],[aria-selected="true"]');
+    if (a && s.scrollWidth > s.clientWidth + 2) { var l = a.offsetLeft - s.offsetLeft, r = l + a.offsetWidth;
+      if (l < s.scrollLeft + 24) s.scrollLeft = Math.max(0, l - 24); else if (r > s.scrollLeft + s.clientWidth - 24) s.scrollLeft = r - s.clientWidth + 24; }
+    edges(); }
+  document.addEventListener('click', function(e){ var s = find(); if (s && e.target && s.contains(e.target)) setTimeout(show, 30); }, true);
+  document.addEventListener('scroll', function(e){ var s = find(); if (s && e.target === s) edges(); }, true);
+  window.addEventListener('resize', function(){ setTimeout(show, 120); });
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 200); }); else setTimeout(show, 200);
+  window.addEventListener('load', function(){ setTimeout(show, 400); });
+})(); } catch (e) {}
 </script>

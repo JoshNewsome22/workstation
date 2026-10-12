@@ -4034,6 +4034,24 @@ html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
 @media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}}
 /* v21.89 a quick second tap (marking the next cell) is a tap, not a double-tap zoom; pinching still zooms */
 html{touch-action:manipulation}
+/* v21.92 the design review, on a touch screen: the toolbar's groups sit in a row (a label beside its controls, not above them),
+   the view tabs are one row that scrolls sideways with the open tab kept in sight and a fade where there is more (the script
+   below), and the toast's × is a 44 px target. Screen only, and only without a mouse: paper and the laptop keep their layout. */
+@media screen and (pointer:coarse){
+  .toolbar{align-items:center;gap:8px 14px}
+  .toolbar > .tgroup{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px 8px;min-width:0}
+  .toolbar > .tgroup > span{font-size:12px;letter-spacing:0;white-space:nowrap}
+  .toolbar > .tgroup:has(#viewSeg) > .row{min-width:0;max-width:100%;flex:1 1 0}
+  /* the tabs' group shares the row with the two screen controls (the tabs scroll in what is left), so the toolbar is one row where it can be */
+  html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 0;min-width:min(100%,240px)}
+  html .toolbar #viewSeg{flex:0 1 auto;flex-wrap:nowrap;align-self:center;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scroll-snap-type:x proximity}
+  html .toolbar #viewSeg::-webkit-scrollbar{display:none}
+  html .toolbar #viewSeg > button{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start}
+  .toolbar #viewSeg[data-nbh-more="r"]{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+  .toolbar #viewSeg[data-nbh-more="l"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px);mask-image:linear-gradient(90deg,transparent,#000 36px)}
+  .toolbar #viewSeg[data-nbh-more="l r"]{-webkit-mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+  .nbh-toast button{min-width:44px;min-height:44px;margin:-10px -14px -10px auto;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px}
+}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
@@ -4130,7 +4148,9 @@ html{touch-action:manipulation}
     }
     var m = document.getElementById('nbhMoreBtn');
     if (m) {
-      m.textContent = compact() ? 'More controls' : 'Fewer controls';
+      /* v21.92 on a touch screen the button is short, so the toolbar's row holds it */
+      var tch = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
+      m.textContent = compact() ? (tch ? 'More' : 'More controls') : (tch ? 'Fewer' : 'Fewer controls');
       m.setAttribute('aria-expanded', String(!compact()));
     }
     document.documentElement.classList.toggle('nbh-compact', compact());
