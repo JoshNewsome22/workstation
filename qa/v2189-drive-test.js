@@ -78,7 +78,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   ok('4 the case is marked saved (no unsaved dot) and the chip is ✓',!dirtyDot&&/Drive ✓/.test(await A.page.evaluate(()=>document.getElementById('drvChip').textContent)));
   /* 5 the laptop joins and gets the student */
   await B.page.evaluate(()=>caseloadOpen());await sleep(400);await B.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(900);await idle(B.page);
-  const b1=await B.page.evaluate(async()=>{const L=await clList()||[];const tr=document.querySelector('tr[data-clrow]');return {n:L.length,who:L[0]&&L[0].client,dev:L[0]&&L[0].dev,row:tr?tr.textContent:'',box:(document.getElementById('drvBox')||{}).textContent||''};});
+  const b1=await B.page.evaluate(async()=>{const L=await clList()||[];const tr=document.querySelector('#dlgBody .cl-card[data-clrow]');return {n:L.length,who:L[0]&&L[0].client,dev:L[0]&&L[0].dev,row:tr?tr.textContent:'',box:(document.getElementById('drvBox')||{}).textContent||''};});
   ok('5 the laptop uses Google Drive and gets Mateo Rivera, saved on the iPad; this device is the Mac',b1.n===1&&b1.who==='Mateo Rivera'&&b1.dev==='iPad'&&/on the iPad/.test(b1.row)&&/this device: Mac/.test(b1.box),b1);
   await B.page.evaluate(()=>{document.getElementById('dlg').close();paintBlank();});await sleep(700);
   const bl=await B.page.evaluate(()=>(document.getElementById('blankDrv')||{}).textContent||'');
@@ -123,7 +123,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const two=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client).sort());
   ok('15 the laptop’s second student reaches the iPad',two.length===2&&two.includes('SIMULATED – Sample Student'),two);
   await A.page.evaluate(()=>caseloadOpen());await sleep(500);
-  await A.page.evaluate(()=>{const tr=[...document.querySelectorAll('tr[data-clrow]')].find(t=>/Sample Student/.test(t.textContent));tr.querySelector('[data-cldel]').click();});await sleep(500);
+  await A.page.evaluate(()=>{const tr=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(t=>/Sample Student/.test(t.textContent));tr.querySelector('[data-cldel]').click();});await sleep(500);
   const rq=await dlgOf(A.page);ok('16 Remove asks: everywhere (Drive and the other devices) or only this iPad',rq.open&&/Remove Sample Student\?/.test(rq.t)&&rq.btns.includes('Remove everywhere')&&rq.btns.includes('Only this iPad'),rq);
   await press(A.page,/Only this iPad/);await sleep(800);await A.page.evaluate(()=>drvSync({}));await idle(A.page);
   const here=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client));
@@ -134,7 +134,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   ok('18 saved again on the laptop: the student comes back to the iPad',back.length===2,back);
   /* 19 Remove everywhere on the laptop: the iPad drops it at its next sync */
   await B.page.evaluate(()=>clearCase());await sleep(700);await B.page.evaluate(()=>caseloadOpen());await sleep(500);
-  await B.page.evaluate(()=>{const tr=[...document.querySelectorAll('tr[data-clrow]')].find(t=>/Sample Student/.test(t.textContent));tr.querySelector('[data-cldel]').click();});await sleep(500);
+  await B.page.evaluate(()=>{const tr=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(t=>/Sample Student/.test(t.textContent));tr.querySelector('[data-cldel]').click();});await sleep(500);
   await press(B.page,/Remove everywhere/);await sleep(1500);await idle(B.page);
   const gone=[...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='gone');
   await A.page.evaluate(()=>drvSync({}));await idle(A.page);

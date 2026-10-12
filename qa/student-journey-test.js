@@ -420,10 +420,10 @@ PH.E=async()=>{
   const pk=await savePacketFile('E-sample');ok('E5b the second student’s packet file (Save packet) holds nothing of Mateo',!!pk&&!marksIn(fs.readFileSync(pk,'utf8'),MATEO_MARKS).length&&/Sample Student/.test(fs.readFileSync(pk,'utf8')),pk&&fs.readFileSync(pk,'utf8').slice(0,300));
   /* back to Mateo from Caseload */
   await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(500);
-  const rowsT=await shell(()=>[...document.querySelectorAll('#dlgBody tr[data-clrow]')].map(r=>r.innerText.replace(/\s+/g,' ')));
+  const rowsT=await shell(()=>[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].map(r=>r.innerText.replace(/\s+/g,' ')));
   ok('E6 Caseload lists both students',rowsT.length===2&&rowsT.some(r=>/Mateo Rivera/.test(r))&&rowsT.some(r=>/Sample Student/.test(r)),rowsT);
-  const key=await shell(()=>{const r=[...document.querySelectorAll('#dlgBody tr[data-clrow]')].find(r=>/Mateo/.test(r.innerText));return r&&r.dataset.clrow;});
-  await page.locator('#dlgBody tr[data-clrow="'+key+'"] button[data-clopen]').tap();
+  const key=await shell(()=>{const r=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(r=>/Mateo/.test(r.innerText));return r&&r.dataset.clrow;});
+  await page.locator('#dlgBody .cl-card[data-clrow="'+key+'"] .cl-card-acts button[data-clopen]').tap();
   await answer(/^Switch to/,/^Keep it on this iPad|^Switch anyway|^Save first/,4000);
   await page.waitForFunction(()=>packet().client==='Mateo Rivera'&&$('#openCase').textContent==='Open case',null,{timeout:30000});await sleep(1500);
   const S2=await caseText();const leakM=marksIn(S2.t,SAMPLE_MARKS);
@@ -726,8 +726,8 @@ PH.H=async()=>{
     const who=await shell(()=>packet().client).catch(()=>'');
     if(who&&who!==M.client){note('the workstation holds '+who+'; Mateo’s case is opened again from Caseload before phase '+k);
       try{await settleDialogs();await tapShell('#caseloadBtn');await page.waitForFunction(()=>document.getElementById('dlg').open,null,{timeout:10000});await sleep(500);
-        const key=await shell(()=>{const r=[...document.querySelectorAll('#dlgBody tr[data-clrow]')].find(r=>/Mateo/.test(r.innerText));return r&&r.dataset.clrow;});
-        await page.locator('#dlgBody tr[data-clrow="'+key+'"] button[data-clopen]').tap();await answer(/^Switch to/,/^Keep it on this iPad|^Switch anyway|^Save first/,4000);
+        const key=await shell(()=>{const r=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(r=>/Mateo/.test(r.innerText));return r&&r.dataset.clrow;});
+        await page.locator('#dlgBody .cl-card[data-clrow="'+key+'"] .cl-card-acts button[data-clopen]').tap();await answer(/^Switch to/,/^Keep it on this iPad|^Switch anyway|^Save first/,4000);
         await page.waitForFunction(()=>packet().client==='Mateo Rivera'&&$('#openCase').textContent==='Open case',null,{timeout:30000});await sleep(1500);}
       catch(e){ok('phase '+k+' starts in Mateo’s case',false,String(e).slice(0,300));break;}}
     try{await PH[k]();}catch(e){ok('phase '+k+' ran to its end',false,String(e&&e.stack||e).slice(0,900));await page.screenshot({path:OUT+'fail-'+k+'.png'}).catch(()=>{});await settleDialogs().catch(()=>{});}
