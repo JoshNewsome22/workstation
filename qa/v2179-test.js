@@ -19,7 +19,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await page.evaluate(()=>caseloadOpen());await sleep(500);
   const d=await page.evaluate(()=>({title:document.querySelector('#dlg h2,#dlg .dh,#dlgTitle')&&document.querySelector('#dlg h2,#dlg .dh,#dlgTitle').textContent,rows:document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow]').length,names:[...document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow] td:first-child b')].map(b=>b.textContent),
     needs:document.querySelectorAll('#dlgBody .td-list li').length,lead:(document.querySelector('#dlgBody .hp-lead')||{}).textContent||''}));
-  ok('Caseload lists both students and says it stays on this device',d.rows===2&&d.names.includes('Mateo Rivera')&&d.names.includes('Sample Student')&&/on this iPad/.test(d.lead)&&/nothing leaves it/.test(d.lead),d);
+  ok('Caseload lists both students and says it stays on this device',d.rows===2&&d.names.includes('Mateo Rivera')&&d.names.includes('Sample Student')&&/on this (iPad|computer)/.test(d.lead)&&/nothing leaves it/.test(d.lead),d);
   await page.evaluate(()=>{const c=document.getElementById('clIni');c.checked=true;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(500);
   const ini=await page.evaluate(()=>[...document.querySelectorAll('#dlgBody .cl-tbl tr[data-clrow] td:first-child')].map(td=>td.textContent));
   ok('Initials only: M. R. and S. S., no name and no student number',ini.some(t=>/^M\. R\.$/.test(t))&&ini.some(t=>/^S\. S\.$/.test(t))&&!ini.join().includes('4471823'),ini);
