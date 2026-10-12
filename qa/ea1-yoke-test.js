@@ -23,11 +23,14 @@ const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g
  await at(5);await at(20);await at(24);await at(35);
  await page.waitForFunction(()=>eaRunner.state()==='done',null,{timeout:20000});
  const m=await page.evaluate(()=>({del:eaRunner.yoke().del.map(t=>Math.round(t/1000)),count:eaRunner.count(),sum:eaSum.textContent}));
- ok('master: three deliveries recorded, the target inside a period makes none',m.del.length===3&&m.del[0]===5&&m.del[1]===20&&m.del[2]===35,m);
+ /* the clock runs 20 times faster, so a tap that lands 25 ms late (a busy machine) is half a second late on the runner:
+    each delivery may round up by one second; the target at 24 s stays inside the period either way */
+ const near=(t,s)=>t===s||t===s+1;
+ ok('master: three deliveries recorded, the target inside a period makes none',m.del.length===3&&near(m.del[0],5)&&near(m.del[1],20)&&near(m.del[2],35),m);
  ok('master summary names the record',/Deliveries recorded3 \(times kept/.test(m.sum.replace(/\s+/g,' '))||/Deliveries recorded/.test(m.sum),m.sum.slice(0,300));
  await page.evaluate(()=>eaSave.click());await sleep(300);
  const row=await page.evaluate(()=>({y:document.querySelector('[name="s[0].y"]').value,n:document.querySelector('[name="s[0].n"]').value,c:document.querySelector('[name="s[0].c"]').value,v:document.querySelector('[name="s[0].v"]').value}));
- ok('log row 1 keeps the record and says so in the notes',/^v1;cons=10;min=1;t=5\.\d,20\.\d,35\.\d$/.test(row.y)&&/3 deliveries, times kept/.test(row.n)&&row.v==='4',row);
+ ok('log row 1 keeps the record and says so in the notes',/^v1;cons=10;min=1;t=[56]\.\d,2[01]\.\d,3[56]\.\d$/.test(row.y)&&/3 deliveries, times kept/.test(row.n)&&row.v==='4',row);
  /* the runner moved to the yoked card and offers the record */
  const pk=await page.evaluate(()=>({cond:eaCond.selectedOptions[0].textContent,shown:!eaYokeL.hidden,opts:[...eaYoke.options].map(o=>o.textContent),val:eaYoke.value,min:eaMin.value,cons:eaCons.value,ncr:eaNcr.value}));
  ok('yoked card preselects session 1 and takes its length and period',/yoked/i.test(pk.cond)&&pk.shown&&pk.val==='0'&&pk.min==='1'&&pk.cons==='10'&&pk.ncr==='0'&&/Session 1 .*3 deliveries/.test(pk.opts[1]),pk);
