@@ -9017,6 +9017,8 @@ from intake to the IEP meeting. What it found is fixed here.
   without sending is sent at the next send (a restraint entered on Form DD-1 now always reaches Form CR-1).
 - A form still being filled from the file, or one that does not answer, keeps its part of the case: *Save case* no longer
   drops it.
+- *Save case* first passes on to the other forms a change just made in one (a next review date typed in Form PR-1 a moment
+  before reached Form TD-1 only after the save, so the next save, or *Close case*, wrote a slightly different file).
 - Today and the start screen list only real deadlines: dates of things done (started, completed, updated, last reviewed)
   and whole table headers are left out, each item is listed once, and Form DT-1 lists its maintenance probes due.
 - Form QS-1 takes the plan's Never rule once. Form PR-1 takes Form GB-1's goals as written when its Behavior criterion or

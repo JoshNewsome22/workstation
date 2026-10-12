@@ -2181,7 +2181,19 @@ function noteFactSource(id,st){
   const sig=(st&&st.sig)||'';
   if(state.factSrcSig[id]===sig)return;
   state.factSrcSig[id]=sig;
-  clearTimeout(factsTimer);factsTimer=setTimeout(()=>gatherFacts(true),900);
+  clearTimeout(factsTimer);factsTimer=setTimeout(()=>{factsTimer=null;gatherFacts(true);},900);
+}
+/* v21.87 a change made in one form reaches the others a moment later (the form tells the workstation, which reads the case and
+   sends it): a Save case in that moment read the other forms before they had it, so the next save (Close case) differed by what
+   had filled in since. Save case now reads the case from the forms first and sends what changed, and the forms take it before
+   they are read; nothing is sent that would not have been a moment later */
+let factsPushes=0;
+async function factsFlush(){
+  clearTimeout(factsTimer);factsTimer=null;
+  for(let i=0;i<50&&(factsBusy||factsAgain);i++)await new Promise(r=>setTimeout(r,100));
+  const n=factsPushes;
+  try{await gatherFacts(true);}catch(e){}
+  if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
   (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||(f.evidence&&Object.keys(f.evidence).length)));}
@@ -2224,7 +2236,7 @@ async function gatherFacts(push){
 }
 function setFacts(f,push){state.facts=hasFacts(f)?f:null;state.factsSig=factsSig(state.facts);paintFacts();if(push)pushFactsToAll();}
 function pushFactsTo(fr){if(!state.facts||!fr)return;ask(fr,'facts',{facts:state.facts});}
-function pushFactsToAll(){Object.values(state.frames).forEach(pushFactsTo);}
+function pushFactsToAll(){factsPushes++;Object.values(state.frames).forEach(pushFactsTo);}
 /* v21.63 a form (TB-1) asks for the case to be read and sent now; it hears back how many other open forms took it */
 async function sendFactsFor(ev){const src=ev.source;if(!relayFrom(src))return;await gatherFacts(false);const ok=!!state.facts;if(ok)pushFactsToAll();
   const n=Object.values(state.frames).filter(fr=>{try{return fr.contentWindow!==src;}catch(e){return true;}}).length,p=Object.keys(state.pending).length;
@@ -4299,6 +4311,7 @@ async function saveCase(){
     catch(e){if(e&&e.name==='AbortError')return false;handle=null;}
   }
   const btn=$('#saveCase'); btn.textContent='Saving\u2026'; btn.disabled=true;
+  try{await factsFlush();}catch(e){}
   /* v21.44: every open form, a slow one asked once more with a longer wait; a form still missing is named, and the
      case is marked saved (and this tab's safety copy ended) only when every form is in the file */
   /* each answer carries the form's state as it was read (status), so the saved mark is the file's, not the moment the
