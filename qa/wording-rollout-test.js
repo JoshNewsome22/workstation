@@ -157,7 +157,9 @@ const norm = s => s == null ? null : s.replace(/\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?
 async function panelRound(target, page, frameEl){
   const c = await target.evaluate(() => { const t = __w.firstField(false) || __w.firstField(true); if (!t) return null; t.scrollIntoView({block:'center'});
     /* a point inside the part of the field on the screen (a field taller than the window is centred past both edges) */
-    const r = t.getBoundingClientRect(), top = Math.max(r.top, 0), bottom = Math.min(r.bottom, innerHeight);
+    /* below the form's toolbar where it is pinned to the top (v21.89: as wide as a 12-inch page), as a finger would tap */
+    const tb = document.querySelector('.toolbar'), tbb = tb && /sticky|fixed/.test(getComputedStyle(tb).position) ? Math.max(0, tb.getBoundingClientRect().bottom) : 0;
+    const r = t.getBoundingClientRect(), top = Math.max(r.top, tbb, 0), bottom = Math.min(r.bottom, innerHeight);
     return {x: r.left + Math.min(40, r.width / 4), y: top + Math.min(12, (bottom - top) / 2)}; });
   if (!c) return 'no field';
   await sleep(300);
