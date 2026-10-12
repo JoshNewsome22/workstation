@@ -6079,7 +6079,7 @@ checks that the square prints at 1 in, on 13 portrait pages.
 
 - **The two Board photos face each other.** Setup has *The two Board
   photos face each other*: Flip the right photo (the default, as in the
-  assessor's Mateo board, where the right copy of the photo is
+  assessor's own sample board, where the right copy of the photo is
   mirrored), Flip the left photo, or Neither. A student looking to the
   right in the photo faces in from the left corner, so the mirrored
   copy on the right faces back. The Rules-row Board has one photo, at
@@ -8365,7 +8365,7 @@ the case: the day-by-day counts on DD-1 (the tiles come from GB-1's current leve
 
 ### v21.72: Form DD-1's printed sheet starts under the letterhead
 
-The top of the printed data sheet said who and what three times: the print head ("Chris — Daily data sheet", with its
+The top of the printed data sheet said who and what three times: the print head ("Mateo — Daily data sheet", with its
 rules), the "Daily data" title, and the student line. On paper the student line is now the only heading: the photo, the
 name and details on the left, **Data 10/13 – 10/23** and the observation window on the right. The print head and the
 title are left off when the Daily data tab prints (the Graphs tab keeps its print head), the "Add client details" hint
