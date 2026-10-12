@@ -204,8 +204,9 @@ async function sampleCase(br,W,H){
   const {ctx,fr,frameTop}=await shellOpen(br,W,H,'fold',true,tag);
   if(!fr){ok(tag+': OB-1 opens in the workstation',false);await ctx.close();return;}
   /* v21.44 merge: since sprint-a8 keeps the chips together the bar stays one row with the Autosaved chip (the form starts
-     at 212, not 260); either way the controls below must be in view */
-  ok(tag+': the bar is folded with the Autosaved chip (the form starts at 212, or 260 where the bar wraps)',frameTop>=205&&frameTop<=270,{frameTop});
+     at 212, not 260); v21.92: folded, the student line and the case buttons share one row, so the form starts at 173 on a
+     touch screen; either way the controls below must be in view */
+  ok(tag+': the bar is folded with the Autosaved chip (the form starts at 173 since v21.92; 212, or 260 where the bar wraps, before)',frameTop>=165&&frameTop<=270,{frameTop});
   await fr.tap('#viewSeg [data-view="obs"]');await sleep(500);
   await fr.tap('#obrStart');await sleep(500);
   const y0=await fr.evaluate(()=>scrollY),m0=await reach(fr,MARKS);
