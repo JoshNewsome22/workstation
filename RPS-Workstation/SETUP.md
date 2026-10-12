@@ -9075,6 +9075,13 @@ show the plain text, which has the short link. (The iPad's Mail app, used when G
   sign-in is not kept, the workstation says so plainly, and the next **Sign in and send** asks Google again with every
   permission shown. (Before, the sign-in was kept for the tab, so every try failed until the tab was closed.)
 
+**The questionnaire wording is learned from a case.** The QABF, MAS, PBQ and WEFA wording is pasted once on IA-1's Setup
+sheet and this device remembers it (since v21.40). Now a case or IA-1 file opened on a device that has no wording for an
+instrument also teaches the device that instrument's wording, so a second iPad, or the Home Screen app after Safari (they
+keep separate storage), needs no pasting: open any case that has it, and every new IA-1 there starts with it. Only an
+instrument's whole wording is learned (25 QABF items, 16 MAS, 15 or 18 PBQ, 18 WEFA); wording this device already holds is
+kept; **Forget on this device** stops the learning until the page is opened again. Checked by `qa/v2188-wording-test.js`.
+
 **Upload.** The reply box changed: upload the new `nbh-reply-box-upload.zip` to the home folder and extract it, as before
 (it replaces `box.php` and keeps the replies). `https://newsomebh.com/reply/box.php?a=ping` then answers
 `{"ok":true,"v":2,…,"short":true}`. Until it does, links stay long.
