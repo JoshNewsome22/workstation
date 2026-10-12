@@ -12,7 +12,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
       ok(w+'x'+h+' the rare buttons are in More; Help, Case map and Save case stay; no sideways scroll',!vis.save&&!vis.xlsx&&!vis.diag&&!vis.pdf&&vis.more&&vis.help&&vis.map&&vis.saveCase&&!vis.sideways,vis);
       await page.evaluate(()=>document.getElementById('moreBtn').click());await sleep(300);
       const m=await page.evaluate(()=>{const M=document.getElementById('moreMenu'),r=M.getBoundingClientRect();return {open:!M.hidden,items:[...M.querySelectorAll('button')].map(b=>b.textContent),inside:r.left>=0&&r.right<=innerWidth,exp:document.getElementById('moreBtn').getAttribute('aria-expanded')};});
-      ok(w+'x'+h+' More lists the five, inside the screen',m.open&&m.items.length===5&&m.inside&&m.exp==='true',m);
+      ok(w+'x'+h+' More lists the five and Case history (v21.91), inside the screen',m.open&&m.items.length===6&&m.items.includes('Case history')&&m.inside&&m.exp==='true',m);
       await page.evaluate(()=>document.querySelector('#moreMenu [data-more="diag"]').click());await sleep(500);
       const d=await page.evaluate(()=>({menu:document.getElementById('moreMenu').hidden,dlg:document.getElementById('dlg').open,title:(document.querySelector('#dlg h2,#dlgTitle')||{}).textContent||''}));
       ok(w+'x'+h+' More → Diagnostics runs the bar\'s own button (the menu closes)',d.menu&&d.dlg,d);
