@@ -9308,3 +9308,41 @@ not saved and back again, History in Caseload, the dialog on a phone, Remove and
 limits, and an iPad and a laptop with a simulated Google Drive (the laptop's versions listed and opened, Open as it was on
 one of them and Save case with no question of two copies, History in the heading at 1280 wide, signed out, offline); no
 request but the simulated Google, no page errors.
+
+### v21.91: focus mode, one part of a form at a time
+
+**Focus** shows one part of a form large, so you can give it your whole attention. When you have filled it in and move on,
+it folds to a single line and the next part opens. A part is one of the form's numbered or headed sections with its few
+fields (The Changed Component; 3. Who, Where, and When; a consent card), not one question at a time.
+
+**Turning it on.** In the workstation, press **Focus** in the bar over the form, beside Own tab (on an iPad it shows as its
+icon: a box between two lines), or type *focus* in **Find a form or command**. On a form opened on its own (Own tab, or the
+file itself), the **Focus** button is in the form's toolbar, beside the view buttons. The choice is kept on this iPad or
+computer and holds for every form: forms already open change at once, and a form you open later opens in Focus. Press the
+button again, or **Whole page** on the bar at the foot of the form, to see whole pages again.
+
+**Working in it.**
+
+- The open part is a little larger, with a ring around it, and comes up to the top of the screen under the toolbar.
+- The parts before it are one line each: the title, a tick when anything in it is filled in, and the first few things you
+  entered (for example "✓ Student, Behavior, and the Two Components  Mateo Rivera · 4471823"). The parts after it are their
+  titles. Tap any folded line to open that part.
+- The bar at the foot says which part you are in ("Part 2 of 5") and has **Back** and **Next**. At the last part of a page,
+  Next becomes **Next page** and opens the first part of the next page (Setup, then Data, and so on).
+- In a one-line box, **Enter** (return on the iPad keyboard) goes to the next box; from the last box of a part it opens the
+  next part.
+- Parts with nothing to fill in (a guide, a note, the evidence, a summary the form works out) fold to their title and Next
+  steps over them; tap one to read it. A page that is all reading (the Guide, a walkthrough) opens its first part, and Next
+  goes through each in turn.
+- Tables, grids and data sheets stay whole inside their part (the Scatter Plot's data sheet is one part; a wide table keeps
+  its size). Rows you add, and parts a form draws again, are picked up as they appear.
+
+**Paper is not affected.** Printing a form, the master print, Finish PDF and saved files are exactly as with Focus off: every
+part prints, open or folded, and nothing of Focus goes into the packet.
+
+Checked by `qa/v2191-focus-test.js` (282 checks): every form and every one of its views, with Focus on, has one part open
+and the folded parts out of sight, every field on screen inside the open part, Next walking through every part to fill in
+and Back coming back, Enter moving to the next box, the print layout the same as with Focus off, and nothing left behind
+when Focus is turned off; a typed value shows on its part's folded line; the workstation's button and command, the setting
+kept and passed to forms opened later, the master print's copy unchanged, taps on an iPad, and no sideways scrolling added
+on a phone, an iPad held either way or a laptop.

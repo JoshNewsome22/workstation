@@ -982,6 +982,14 @@ header.top #hxBtn.hx-top:hover{background:var(--mist)}
 @media (pointer:coarse){.hx-acts button,.hx-pick button{min-height:44px}}
 @media (max-width:520px){.hx-acts button{flex:1 1 auto}.hx-pick button{flex:1 1 100%}}
 </style>
+<style id="ws-focus">
+/* v21.91 focus mode: the crumb's Focus switch (each form folds its own parts, in the script all the forms share). Lit while
+   it is on, and, like the buttons beside it, its name gives way to its icon where the crumb is short of room */
+#focusBtn[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
+#focusBtn[aria-pressed=true]:hover{background:var(--slate);border-color:var(--slate)}
+body:not(.has-form) #focusBtn{display:none}
+@container (max-width:1240px){.crumb .acts #focusBtn .lbl{display:none}.crumb .acts #focusBtn{padding-left:10px;padding-right:10px}}
+</style>
 </head>
 <body>
 
@@ -1111,6 +1119,7 @@ header.top #hxBtn.hx-top:hover{background:var(--mist)}
         <button id="saveQuick" class="sm" aria-label="Save case" title="Save the case to a file"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/></svg><span class="lbl">Save case</span><span class="dot" aria-hidden="true"></span></button>
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
         <button id="popOut" class="sm" aria-label="Open in its own tab" title="Open in its own tab"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5h4.5V7M13.5 2.5 7.5 8.5M6 3.5H3.5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V10"/></svg><span class="lbl">Own tab</span></button>
+        <button id="focusBtn" class="sm" aria-pressed="false" aria-label="Focus: one part of the form at a time" title="Focus: one part of the form at a time, the next part opening as you finish one"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2.5h10M3 13.5h10"/><rect x="1.5" y="5" width="13" height="6" rx="1.5"/></svg><span class="lbl">Focus</span></button>
         <button id="splitBtn" class="sm" aria-pressed="false" aria-label="Side by side: two or three forms at once" title="Side by side: show two or three open forms at once"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="5.5" height="11" rx="1"/><rect x="9" y="2.5" width="5.5" height="11" rx="1"/></svg><span class="lbl">Side by side</span></button>
         <button id="fullBtn" class="sm" aria-pressed="false" aria-label="Fullscreen: only the form" title="Fullscreen: only the form (Ctrl+Shift+F)"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true" hidden fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg><span class="lbl">Fullscreen</span></button>
         <button id="fillBtn" class="sm" aria-pressed="false" aria-label="Fill the whole screen" title="Use the whole screen: the browser's own bars go too"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5"/><path d="M5.5 14h5M8 11.5V14"/></svg><span class="lbl">Fill screen</span></button>
@@ -5500,6 +5509,7 @@ const CMDS=[
   {k:'ready to start plan begin trained staff criterion adoption notice fit social validity',n:'Ready to start: what the plan still needs before it begins',s:'command',go:()=>readyOpen()},
   {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
   {k:'print check safari ipad paper orientation landscape backgrounds pdf',n:'Print check: before printing from Safari',s:'command',go:()=>printCheck()},
+  {k:'focus one part section at a time large next step mode',n:'Focus: one part of a form at a time',s:'view',go:()=>focusSet(!focusOn())},   /* v21.91 */
   {k:'fullscreen focus only the form',n:'Fullscreen: only the form',s:'view',go:()=>setFull(!fullOn())},
   {k:'side by side two three forms split columns at once',n:'Side by side: two or three forms at once',s:'view',go:()=>$('#splitBtn').click()},
   {k:'hide show form list sidebar',n:'Show or hide the form list',s:'view',go:()=>{if(NARROW.matches)setRail(!document.body.classList.contains('rail-open'),true);else setRailHidden(!railHidden(),true);}},
@@ -7179,6 +7189,28 @@ function hxClButtons(){const b=$('#dlgBody');if(!b||!(b.querySelector('#clOff')|
     o.insertAdjacentHTML('afterend',' <button type="button" data-hxopen="'+esc(k)+'" title="The case as it was at each save: open one, restore one form, compare with now">History<\/button>');});}
 {const co=caseloadOpen;caseloadOpen=async function(){const out=await co.apply(this,arguments);try{hxClButtons();}catch(e){}return out;};}
 try{new MutationObserver(()=>{try{hxClButtons();}catch(e){}}).observe($('#dlgBody'),{childList:true,subtree:true});}catch(e){}
+</script>
+<script id="nbh-focus">
+/* v21.91 focus mode: one part of a form at a time. The switch is the crumb's Focus button (and Focus in the command box);
+   the choice is kept on this device (localStorage nbh.focus) and holds for every form. Each open form is told at once (the
+   one on screen opens the part in sight), a form opened later is told as it loads, and a form reads the setting itself too
+   (all a form opened on its own has). The form does the folding, in the script all the forms share; the Whole page button
+   on its bar turns Focus off here as well (focus-set), and a change made in another tab of this device is followed. */
+const FOCUSKEY='nbh.focus';
+let focusState=(()=>{try{return localStorage.getItem(FOCUSKEY)==='on';}catch(e){return false;}})();
+function focusOn(){return focusState;}
+function focusTell(fr,here){post(fr,{nbh:'focus',on:focusState,here:!!here});}
+function focusPaint(){const b=$('#focusBtn');if(!b)return;b.setAttribute('aria-pressed',String(focusState));b.title=focusState?'Focus is on: one part of the form at a time. Press to show whole pages again.':'Focus: one part of the form at a time, the next part opening as you finish one';}
+function focusSet(on,from){focusState=!!on;try{if(focusState)localStorage.setItem(FOCUSKEY,'on');else localStorage.removeItem(FOCUSKEY);}catch(e){}focusPaint();
+  const shown=new Set([state.cur].concat(state.split||[]));
+  Object.entries(state.frames).forEach(([id,fr])=>{if(fr&&fr.contentWindow!==from)focusTell(fr,shown.has(id));});
+  say(focusState?'Focus is on: a form shows one part at a time, and Next at the foot of the form opens the next part.':'Focus is off: forms show whole pages.');}
+$('#focusBtn').addEventListener('click',()=>focusSet(!focusState));
+/* a form loading (opened, opened again, or loading quietly) hears the setting as it arrives */
+document.addEventListener('load',ev=>{const fr=ev.target;if(fr&&fr.tagName==='IFRAME'&&Object.values(state.frames).includes(fr))focusTell(fr,false);},true);
+window.addEventListener('message',ev=>{const d=ev.data;if(!d||d.nbh!=='focus-set'||!relayFrom(ev.source))return;focusSet(!!d.on,ev.source);});
+window.addEventListener('storage',e=>{if(e.key!==FOCUSKEY)return;focusState=e.newValue==='on';focusPaint();Object.values(state.frames).forEach(fr=>focusTell(fr,false));});
+focusPaint();
 </script>
 </body>
 </html>
