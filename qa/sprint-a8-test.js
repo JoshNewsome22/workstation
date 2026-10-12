@@ -516,14 +516,14 @@ async function bars(br){
       /* the details open: no student yet (OB-1, the first form), then with the student's name and Done showing (CN-1) */
       await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
       const g0=await geo(page),how=id==='OB-1'?'no student yet':'the details open with a name';
-      ok('bars '+tag+' '+id+': '+how+', the chips showing: the case buttons on one row, the form at '+g0.frameTop+' px (at most 212)',g0.rows===1&&g0.frameTop<=212&&g0.chipsIn==='heading'&&!g0.folded,g0);
+      ok('bars '+tag+' '+id+': '+how+', the chips showing: the case buttons on one row, the form at '+g0.frameTop+' px (at most 224)',g0.rows===1&&g0.frameTop<=224&&g0.chipsIn==='heading'&&!g0.folded,g0);
       /* the student entered and the details folded (Done), as the audit measured */
       if(!(await page.evaluate(()=>$('#pClient').value)))await page.fill('#pClient','Sample Student');
       await page.evaluate(()=>{const b=document.querySelector('#barFold');if(b&&!b.hidden)b.click();});await sleep(300);
       await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
       const g1=await geo(page);
       if(id==='CN-1'&&tag==='1180x820 touch')await page.screenshot({path:OUT+'bars-1180-folded.png'});
-      ok('bars '+tag+' '+id+': folded, "Autosaved 12:59 PM" showing: one row, the form at '+g1.frameTop+' px (at most 212)',g1.rows===1&&g1.frameTop<=212&&g1.folded&&g1.header.h===56,g1);
+      ok('bars '+tag+' '+id+': folded, "Autosaved 12:59 PM" showing: one row, the form at '+g1.frameTop+' px (at most 224)',g1.rows===1&&g1.frameTop<=224&&g1.folded&&g1.header.h===60,g1);
       await page.evaluate(()=>{const b=document.querySelector('#barEdit');if(b&&b.offsetParent)b.click();});await sleep(200);
     }
     /* the longest texts the two chips can show, with a long school name under the student's */
@@ -531,20 +531,24 @@ async function bars(br){
     await page.evaluate(()=>{const b=document.querySelector('#barFold');if(b&&!b.hidden)b.click();});await sleep(200);
     await setChips(page,'Autosave: storage full','Not saved for offline use: no room');await sleep(150);
     const g2=await geo(page);
-    ok('bars '+tag+': the longest chip texts and a long school name: the heading keeps 56 px, the case buttons one row',g2.header.h===56&&g2.rows===1&&g2.frameTop<=212,g2);
+    ok('bars '+tag+': the longest chip texts and a long school name: the heading keeps 60 px, the case buttons one row',g2.header.h===60&&g2.rows===1&&g2.frameTop<=224,g2);
     /* fullscreen */
     await page.click('#fullBtn');await sleep(300);const g3=await geo(page);
     ok('bars '+tag+': in fullscreen the form begins under the bar over it',g3.frameTop!==null&&g3.frameTop<=g3.crumb.h+2,g3);
     await page.click('#fullBtn');await sleep(200);
     await ctx.close();
   }
+  /* v21.92 (the design review): on a touch screen the chips in the heading and the bar's buttons are 44 px targets, so the
+     heading is 60 px (it was 56) and each row of the bar 4 px taller: with the details open the form begins at 224 px
+     (it was 212), and folded, where the student line and the case buttons now share one row, at 173 (it was about 200).
+     An iPad held upright has the details as a grid of three rows while they are open. The limits above follow. */
   /* the first visit in an iPad's Safari: the offline app's one-time install tip is a strip of its own (verify-bars/
      measure.js, run on a fresh browser, counts it); it is the only thing added to the 212 px */
   {const ctx=await ipad(br);await ctx.addInitScript(()=>{window.print=function(){};});
     const page=await shell(ctx,'bars tip');await open(page,'CN-1');
     await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);const g=await geo(page);
     ok('bars 1180x820 touch, first visit: the install tip ('+(g.tip?g.tip.h:0)+' px) is the only strip added (the form at '+g.frameTop+' px)',
-      !g.tip||g.frameTop<=212+g.tip.h+1,g);
+      !g.tip||g.frameTop<=224+g.tip.h+1,g);
     await ctx.close();}
   /* 1000 and 1024 px, the bar empty and a form holding a long name ("Use these details" showing), the longest chip texts:
      the title gives way before the student's name */
@@ -559,8 +563,8 @@ async function bars(br){
       return {name:n.textContent,shown:n.clientWidth,needs:n.scrollWidth,take:t.hidden?'':t.textContent,title:h1.clientWidth,titleNeeds:h1.scrollWidth,
         headerH:Math.round(hd.getBoundingClientRect().height),over:hd.scrollWidth>hd.clientWidth+1};});
     if(w===1024)await page.screenshot({path:OUT+'bars-name-1024.png',clip:{x:0,y:0,width:w,height:70}});
-    ok('bars '+w+'x'+h+': the longest chip texts and "Use these details": the long name keeps '+m.shown+' px (at least 160), the heading its 56 px',
-      m.take==='Use these details'&&m.shown>=160&&m.headerH===56&&!m.over,m);
+    ok('bars '+w+'x'+h+': the longest chip texts and "Use these details": the long name keeps '+m.shown+' px (at least 160), the heading its 60 px',
+      m.take==='Use these details'&&m.shown>=160&&m.headerH===60&&!m.over,m);
     await ctx.close();
   }
   /* upright (v21.89: from 760 px) the chips go up into the heading; on a phone they stay in the bar */
@@ -569,7 +573,9 @@ async function bars(br){
     const page=await shell(ctx,'bars '+tag);await open(page,'CN-1');
     await setChips(page,'Autosaved 12:59 PM','Saved for offline use');await sleep(150);
     const g=await geo(page);
-    if(vp.width>=760)ok('bars '+tag+': the chips are in the heading and the bar keeps to one row (the form at '+g.frameTop+' px, at most 240)',g.chipsIn==='heading'&&g.rows===1&&g.frameTop<=240,g);
+    if(vp.width>=760){ok('bars '+tag+': the chips are in the heading and the case buttons keep to one row; the details open as a grid of three rows (v21.92; the form at '+g.frameTop+' px, at most 320)',g.chipsIn==='heading'&&g.rows===1&&g.frameTop<=320,g);
+      await page.evaluate(()=>foldBar(true));await sleep(250);const gf=await geo(page);
+      ok('bars '+tag+': folded, the form at '+gf.frameTop+' px (at most 240)',gf.folded&&gf.frameTop<=240,gf);}
     else ok('bars '+tag+': the chips stay in the bar (the form at '+g.frameTop+' px; the case buttons take '+g.rows+' rows here, as before)',g.chipsIn==='bar',g);
     await ctx.close();
   }

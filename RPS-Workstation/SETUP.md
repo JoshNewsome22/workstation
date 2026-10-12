@@ -9380,7 +9380,8 @@ in order of how much it matters. Nothing here touches paper: a form, the master 
    Grade box fits "12th grade" on every window, the laptop included.
 7. **For a finger:** the bar's buttons, the chips in the heading and the alert bar are 44 px tall; a folded heading in a
    dialog is a 44 px row; the × on a message is a 44 px target; the unsaved mark on the open form's row in the list is a
-   light colour you can see on the navy.
+   light colour you can see on the navy. The cost on an iPad: the heading is 60 px (it was 56) and each row of the bar 4 px
+   taller while the details are open; folded, the bar is one row, so the form sits higher than before while you work.
 8. **Smaller things from the same review.** A line of reading text in a dialog or on the start screen is no longer than
    about 76 characters (a line that ran the width of an iPad is hard to follow back to its start). The keyboard hints
    (⌘K, the arrows in Go to) show only where there is a keyboard. On a touch screen the view tabs carry no "View" label
