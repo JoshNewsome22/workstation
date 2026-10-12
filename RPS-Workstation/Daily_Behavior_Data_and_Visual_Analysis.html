@@ -1104,7 +1104,6 @@ p.dd-numbered{margin-top:4px}
 .ddl-obs[aria-pressed="false"]{border-style:dashed}
 .ddl-body{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
 .ddl-go,.ddl-alt,.ddl-lvl{border-radius:8px;cursor:pointer;touch-action:manipulation;font-family:var(--nbh-sans);min-width:0;overflow-wrap:anywhere}
-.ddl-go,.ddl-alt{overflow-wrap:normal;-webkit-hyphens:auto;hyphens:auto}   /* v21.89 "Not independent" breaks between words, not inside one */
 .ddl-go{flex:1 1 130px;min-height:60px;border:2px solid var(--ddl-c,#254657);background:var(--ddl-c,#254657);color:var(--ddl-ink,#fff);
   font-size:18px;font-weight:700;line-height:1.15;padding:6px 10px}
 .ddl-go.ddl-running{background:#fff;color:var(--nbh-navy,#182e43);box-shadow:inset 0 0 0 3px var(--ddl-c,#254657)}
@@ -5015,7 +5014,7 @@ function cardHTML(b,i){
   else if(k==="dur") body=`<button type="button" class="ddl-go" data-act="go" data-b="${id}"><span class="ddl-gl">Start episode<\/span>${sr}<\/button>${num}`;
   else if(k==="lat") body=`<button type="button" class="ddl-go" data-act="go" data-b="${id}"><span class="ddl-gl">Cue given<\/span>${sr}<\/button><button type="button" class="ddl-alt" data-act="alt" data-b="${id}">No response${sr}<\/button>${num}`;
   else if(k==="irt") body=`<button type="button" class="ddl-go" data-act="go" data-b="${id}">Response${sr}<\/button>${num}`;
-  else if(k==="tri") body=`<button type="button" class="ddl-go" data-act="go" data-b="${id}">${m==="trials"?"Independent":"Correct"}${sr}<\/button><button type="button" class="ddl-alt" data-act="alt" data-b="${id}">${m==="trials"?"Not independent":"Incorrect"}${sr}<\/button>${num}`;
+  else if(k==="tri") body=`<button type="button" class="ddl-go" data-act="go" data-b="${id}">${m==="trials"?"Independent":"Correct"}${sr}<\/button><button type="button" class="ddl-alt" data-act="alt" data-b="${id}">${m==="trials"?"Not inde\u00adpendent":"Incorrect"}${sr}<\/button>${num}`;
   else if(k==="prm") body=`<div class="ddl-lvls">${lvList().map(x=>`<button type="button" class="ddl-lvl" data-act="lvl" data-b="${id}" data-v="${x.code}"><b>${x.code}<\/b> ${esc(x.name)}${sr}<\/button>`).join("")}<\/div>${num}`;
   else body=`<p class="ddl-ivl"><b>${esc(IVL[m]||"Interval recording")}.<\/b> Record this with the observation timer on Form MT-1, which runs the marks and scores each interval by its rule, then type the day${RSQ}s percent on the sheet. Nothing is recorded here.<\/p>`;
   const foot=k==="ivl"?"":`<div class="ddl-foot"><div class="ddl-stat"><\/div><button type="button" class="ddl-undo1" data-act="undo" data-b="${id}" disabled>Undo<span class="ddl-sr"> the last entry for ${nm}<\/span><\/button><\/div>`;
@@ -10249,10 +10248,11 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
 @media (prefers-reduced-motion:reduce){html.nbh-fold .toolbar,html.nbh-unfolding .toolbar{animation:none!important}}
 @media print{#nbhFoldBtn{display:none!important}}
 /* v21.89 the layout review: the view tabs take the room they need (not half the toolbar), the empty strip of a masthead inside
-   the workstation goes (on screen; the printed letterhead is untouched), and reading text keeps a comfortable line on a wide screen */
+   the workstation goes (on screen; the printed letterhead is untouched) */
 html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
-@media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}
-  .sheet p.hint,.sheet p.lead{max-width:78ch}}
+@media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}}
+/* v21.89 a quick second tap (marking the next cell) is a tap, not a double-tap zoom; pinching still zooms */
+html{touch-action:manipulation}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 

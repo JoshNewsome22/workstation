@@ -497,7 +497,11 @@ async function press(page, f, view, b, where, ev, log) {
      a person's swipe and folds, so a button that moved under the tap is tapped once more when the bar has settled */
   const tapIt = async () => { try { await el.tap({timeout: 2500}); } catch (e) { if (!/not stable/.test(String(e && e.message))) throw e; await sleep(900); await el.tap({timeout: 2500}); } };
   try { await tapIt(); rec.how = 'tap'; }
-  catch (e) { rec.tapFailed = firstLine(e);
+  catch (e) {
+    /* v21.89 a button that went out of sight before the tap (the folded toolbar's Tools button once the bar has unfolded)
+       is not there for a person to tap either: gone, not a missed tap */
+    if (/element is not visible/.test(String(e && e.message)) && !(await el.isVisible().catch(() => false))) { rec.gone = true; return rec; }
+    rec.tapFailed = firstLine(e);
     /* a region of a drawing with another drawn over its middle: Playwright taps the middle; a person taps beside it */
     if (await el.evaluate(x => x instanceof SVGElement).catch(() => false) && /<(path|circle|ellipse|rect|polygon|g|line|text)\b[^>]*>.*intercepts pointer events/.test(String(e && e.message || e).replace(/\x1b\[\d+m/g, ''))) rec.tapNested = true;
     try { await el.evaluate(x => { if (typeof x.click === "function") x.click(); else x.dispatchEvent(new MouseEvent("click", {bubbles: true, cancelable: true, view: window})); }); rec.how = 'dom click'; } catch (e2) { rec.thrown = firstLine(e2); } }
