@@ -8,7 +8,9 @@
    Overdue, Safety and Injury in red. Dialog text 14 px, the lead 15, the list names 13.5; the start screen's list sits left.
    The student bar on the iPad upright is a grid with nothing clipped, and Grade fits "12th grade" everywhere. A finger gets 44 px
    bar buttons, a 44 px folded heading, a 44 px toast ×. Printing is unchanged: a form prints the same with a finger as with a
-   mouse. Chromium with iPad and iPhone user agents and touch (isMobile, so pointer:coarse holds). Simulated students only.
+   mouse. The extras: reading lines of about 76 characters at most, keyboard hints only with a keyboard, no "View" label
+   beside the tabs on a touch screen, the focus bar's label in sentence case, a dialog using 70% of a phone's screen.
+   Chromium with iPad and iPhone user agents and touch (isMobile, so pointer:coarse holds). Simulated students only.
    usage: node qa/v2192-design-test.js */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const fs=require('fs');
@@ -163,5 +165,28 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
       for(const id of ['DM-1','TD-1'])for(const tag of ['mouse','touch']){const a=R[id+' '+tag+' prev'],b=R[id+' '+tag+' now'];const same=a.length===b.length&&a.every((t,i)=>t===b[i]);
         ok('37 '+id+' printed with a '+tag+' is the previous release\u2019s print: '+a.length+' pages, every word in the same place',same&&a.length>=2,{prev:a.length,now:b.length,first:a.findIndex((t,i)=>t!==b[i])+1});}}
     await ctx.close();}
+  /* ---- 6. the review's extras: reading lines no longer than about 76 characters, keyboard hints only with a keyboard, the
+     tabs without a "View" label on a touch screen, the focus bar's label in sentence case, a dialog using 70% of a phone ---- */
+  {const {ctx,page,errs}=await shell(br,{width:1180,height:820},UA.ipad,true,true);
+    await page.evaluate(()=>caseloadOpen());await sleep(800);
+    const x=await page.evaluate(()=>{const lead=document.querySelector('#dlgBody .hp-lead'),r=lead.getBoundingClientRect(),box=document.getElementById('dlgBody').getBoundingClientRect();
+      return {leadW:Math.round(r.width),boxW:Math.round(box.width),maxW:getComputedStyle(lead).maxWidth,kbd:[...document.querySelectorAll('.railhead .find kbd')].every(k=>getComputedStyle(k).display==='none'),
+        lbl:getComputedStyle(document.querySelector('.bar .det label')).fontSize,opt:getComputedStyle(document.querySelector('#dlgBody .cl-opt')).fontSize,start:parseFloat(getComputedStyle(document.querySelector('.blank .card > p')).maxWidth),
+        ac:['pClient','pSid','pGrade','pSite','pBcba'].map(id=>document.getElementById(id).getAttribute('autocomplete'))};});
+    ok('38 a line of reading text in a dialog or on the start card is no longer than about 76 characters (the lead at 1180 ran the width of the box)',x.leadW<x.boxW-120&&x.leadW>=480&&x.leadW<=700&&x.start>=480&&x.start<=700,x);
+    ok('39 on a touch screen the keyboard hint \u2318K is not shown',x.kbd,x.kbd);
+    ok('40 the bar\u2019s labels at 12.5 px, the caseload options at 13; the browser is asked not to remember what is typed in the student bar',x.lbl==='12.5px'&&x.opt==='13px'&&x.ac.every(a=>a==='off'),{lbl:x.lbl,opt:x.opt,ac:x.ac});
+    await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}});await setBar(page);
+    const fr=await open(page,'TD-1');
+    const v=await fr.evaluate(()=>{const g=document.getElementById('viewSeg').closest('.tgroup'),sp=g.querySelector(':scope > span');return {lbl:sp?getComputedStyle(sp).display:'none',others:[...document.querySelectorAll('.toolbar > .tgroup > span')].filter(e=>e.offsetParent).length};});
+    ok('41 on a touch screen the tabs carry no "View" label (the tabs say what they are; the room goes to them)',v.lbl==='none',v);
+    const fx=await fr.evaluate(async()=>{nbhUI.focus.set(true);await new Promise(r=>setTimeout(r,800));const b=document.querySelector('#nbhFxBar .nbh-fx-where b'),cs=b&&getComputedStyle(b),out=b?{tt:cs.textTransform,fs:cs.fontSize,t:b.textContent}:null;nbhUI.focus.set(false);return out;});
+    ok('42 the focus bar says "Part 1 of \u2026" in sentence case at 12 px (it was small capitals)',!!fx&&fx.tt==='none'&&fx.fs==='12px'&&/^Part 1 of \d/.test(fx.t),fx);
+    ok('43 no page errors (extras)',!errs.length,errs.slice(0,3));await ctx.close();}
+  {const {ctx,page,errs}=await shell(br,{width:390,height:844},UA.iphone,true,false);
+    await page.evaluate(()=>todayOpen());await sleep(800);
+    const d=await page.evaluate(()=>({mh:getComputedStyle(document.querySelector('#dlg .db')).maxHeight,foot:(()=>{const f=document.querySelector('.pal .foot');return f?getComputedStyle(f).display:'(none)';})()}));
+    ok('44 on a phone a dialog may use 70% of the screen (it was 62), and the palette\u2019s keyboard foot is not shown',Math.abs(parseFloat(d.mh)-0.7*844)<1&&d.foot==='none',d);
+    ok('45 no page errors (phone extras)',!errs.length,errs.slice(0,3));await ctx.close();}
   }catch(e){ok('the run finished',false,String(e&&e.stack||e).slice(0,600));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

@@ -421,7 +421,7 @@ body.bar-folded #barSum{display:flex}
 .bar .pair button:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
 .bar .pair button+button{border-top-left-radius:0;border-bottom-left-radius:0;margin-left:-1px}
 .bar .pair button:hover{position:relative;z-index:1}
-.bar label{font-size:11.5px;color:#cfe0dd;font-weight:500}
+.bar label{font-size:12.5px;color:#cfe0dd;font-weight:500}
 .bar input{font:inherit;font-size:13px;padding:5px 9px;border:1px solid #476c7e;background:#1d3a48;color:#f1f6f5;
   border-radius:var(--radius);width:150px;min-height:32px;transition:border-color .12s,box-shadow .12s}
 .bar input::placeholder{color:#8fa8b0}
@@ -681,7 +681,7 @@ body.ws-full .crumb{box-shadow:0 1px 0 rgba(24,46,67,.04)}
    neither row wraps and the form starts where it did */
 .rd-ico{display:none;vertical-align:-3px}
 /* v21.79 the caseload */
-.cl-h{font:600 15px var(--sans);margin:16px 0 6px;color:var(--navy)}.cl-opt{font-size:12.5px;margin-right:14px;display:inline-flex;align-items:center;gap:6px}
+.cl-h{font:600 15px var(--sans);margin:16px 0 6px;color:var(--navy)}.cl-opt{font-size:13px;margin-right:14px;display:inline-flex;align-items:center;gap:6px}
 .cl-wrap{overflow-x:auto}.cl-tbl{width:100%;border-collapse:collapse;font-size:13px}.cl-tbl th,.cl-tbl td{border-bottom:1px solid var(--rule);padding:6px 8px;text-align:left;vertical-align:top}.cl-tbl th{font-size:11.5px;color:var(--muted);font-weight:600}.cl-act{white-space:nowrap}
 .cl-tools{margin:4px 0 8px}.cl-note{background:var(--soft,#eef4f7);border-left:3px solid var(--accent,#254657);padding:8px 10px;border-radius:6px;font-size:13.5px;margin:6px 0}
 @media (max-width:1240px){
@@ -1043,6 +1043,14 @@ body:not(.has-form) #focusBtn{display:none}
   #dlg summary{min-height:44px;padding:11px 0;box-sizing:border-box}
   .ws-toast button{min-width:44px;min-height:44px;margin:-10px -14px -10px auto;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px}
 }
+/* 8. the review's extras: a line of reading text in a dialog or on the start card no longer than about 76 characters (a line
+   of 110 is hard to follow back); the keyboard hints (⌘K, the arrows) only where there is a keyboard; a row in the form
+   list tapped on a touch screen does not keep the hover shade; a dialog on a phone may use 70% of the screen */
+#dlg .db > p,#dlg .db p.hint,#dlg .db .hp-lead{max-width:76ch}
+.blank .card > p{max-width:76ch;margin-left:auto;margin-right:auto}
+@media (pointer:coarse){.railhead .find kbd,.pal .foot{display:none}}
+@media (hover:none){.item:not(.cur):hover{background:transparent}}
+@media (max-width:720px){dialog .db{max-height:70vh}}
 </style>
 </head>
 <body>
@@ -1072,15 +1080,16 @@ body:not(.has-form) #focusBtn{display:none}
        the window is narrow; what you do with the packet and the case below. -->
   <div class="grp det" role="group" aria-label="Packet details">
     <button type="button" id="pPhotoBtn" class="pphoto" aria-label="The student’s photo" title="The student’s photo: take one or choose one; it is kept in the case file and shown while you work"><img id="pPhotoImg" alt="" hidden><span id="pPhotoIni" class="cam" aria-hidden="true"></span></button><input type="file" id="pPhotoFile" accept="image/*" hidden>
-    <span class="fld"><label for="pClient">Student</label><input id="pClient" placeholder="Name"></span>
-    <span class="fld"><label for="pSid">ID</label><input id="pSid" style="width:96px" placeholder="Student no."></span>
-    <span class="fld"><label for="pGrade">Grade</label><input id="pGrade" style="width:70px"></span>
-    <span class="fld"><label for="pSite">School</label><input id="pSite"></span>
-    <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba"></span>
+    <span class="fld"><label for="pClient">Student</label><input id="pClient" placeholder="Name" autocomplete="off"></span>
+    <span class="fld"><label for="pSid">ID</label><input id="pSid" style="width:96px" placeholder="Student no." autocomplete="off"></span>
+    <span class="fld"><label for="pGrade">Grade</label><input id="pGrade" style="width:70px" autocomplete="off"></span>
+    <span class="fld"><label for="pSite">School</label><input id="pSite" autocomplete="off"></span>
+    <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba" autocomplete="off"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
     <button id="readDoc" aria-label="Read a document" title="Read the student’s details from a PDF, a picture or pasted text and place them in the bar and Form DM-1"><svg class="rd-ico" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="lbl">Read a document</span></button>
     <button id="barFold" class="sm" hidden title="Fold the details to one line">Done</button>
   </div>
+  <!-- v21.92 autocomplete="off" above: the browser is asked not to keep what is typed about a student in its own autofill list -->
   <!-- v21.31 the case: what the shell has read from Forms TB-1, FS-1, GB-1 and PA-1, carried to every open form -->
   <div class="grp facts" id="factsRow" hidden>
     <span class="lbl">The case</span><span id="factsTxt" role="status" aria-live="polite"></span><span id="factsDue" class="due"></span>

@@ -670,7 +670,7 @@
     X + ' #nbhFxBar button:disabled{opacity:.4;cursor:default}' +
     X + ' #nbhFxBar button:focus-visible{outline:2px solid var(--nbh-slate,#254657);outline-offset:2px}' +
     X + ' #nbhFxBar .nbh-fx-where{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 4px;line-height:1.25}' +
-    X + ' #nbhFxBar .nbh-fx-where b{font-size:11.5px;font-weight:600;color:var(--nbh-muted,#54676f);text-transform:uppercase;letter-spacing:.04em}' +
+    X + ' #nbhFxBar .nbh-fx-where b{font-size:12px;font-weight:600;color:var(--nbh-muted,#54676f)}' +   /* v21.92 sentence case, like the tags */
     X + ' #nbhFxBar .nbh-fx-where span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}' +
     '@media (max-width:640px){' + X + ' #nbhFxBar{gap:6px;width:calc(100% - 16px);bottom:calc(8px + env(safe-area-inset-bottom,0px))}' + X + ' #nbhFxBar .nbh-fx-back .t,' + X + ' #nbhFxBar .nbh-fx-off .t{display:none}' + X + ' #nbhFxBar .nbh-fx-back,' + X + ' #nbhFxBar .nbh-fx-off{padding:0 10px}' +
       X + ' [data-nbh-fx="hf"]{white-space:normal!important}' + X + ' [data-nbh-fx="hf"][data-nbh-fx-sum]::after{display:block;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' + X + '{--nbh-fx-zoom:1.06}}' +

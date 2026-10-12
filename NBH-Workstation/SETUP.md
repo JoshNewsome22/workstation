@@ -9381,8 +9381,16 @@ in order of how much it matters. Nothing here touches paper: a form, the master 
 7. **For a finger:** the bar's buttons, the chips in the heading and the alert bar are 44 px tall; a folded heading in a
    dialog is a 44 px row; the × on a message is a 44 px target; the unsaved mark on the open form's row in the list is a
    light colour you can see on the navy.
+8. **Smaller things from the same review.** A line of reading text in a dialog or on the start screen is no longer than
+   about 76 characters (a line that ran the width of an iPad is hard to follow back to its start). The keyboard hints
+   (⌘K, the arrows in Go to) show only where there is a keyboard. On a touch screen the view tabs carry no "View" label
+   (the tabs say what they are, and the room goes to them), and a row tapped in the form list does not keep the grey of a
+   mouse hovering. The focus bar says "Part 1 of 3" in sentence case, like the tags. The labels in the student bar are
+   12.5 px (they were 11.5). On a phone a dialog may use 70% of the screen (it was 62). The student bar asks the browser
+   not to keep what is typed there in its own autofill list, so a student's name is not offered on a shared iPad.
 
 Checked by `qa/v2192-design-test.js`: the list beside the start screen at 1180 and closed at 820 and on a phone; the bar one
 row at 1180 and a three-row grid at 820; the toolbar one row on the iPad and unchanged with a mouse; the tabs one scrolling
 row with the fade, the last tab tapped coming into view; Caseload's order and fold, the note above it; the pills, the sizes,
-the 44 px targets; and Form DM-1 printing the same from a touch screen as from a laptop, every word in the same place.
+the 44 px targets; the line length, the keyboard hints, the tabs' label, the focus bar's label, the dialog on a phone; and,
+against the release before, Forms DM-1 and TD-1 printing the same words in the same places, with a mouse and with a finger.
