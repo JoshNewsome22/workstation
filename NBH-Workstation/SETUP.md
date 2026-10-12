@@ -9230,3 +9230,47 @@ Checked by `qa/v2190-ipad-pdf-test.js` (11 checks): a Safari-like PDF made in Ch
 taken out), finished; every page carries the header and footer in their places; the bookmarks land on the pages where
 Chrome's own PDF has each form start; the contents numbers are on their entries' lines; the labels move nothing; a PDF with
 narrow margins is made smaller and stays clear; a PDF from Chrome is finished as before, with no second header.
+
+### v21.91: search the caseload, and students as cards
+
+**Search the caseload.** One search over every student kept on this iPad (or laptop): their names, ID and school, every
+form's words as last saved, and the case's facts (the target behaviors, the function, the goals, what Form DD-1 measures).
+Type a few words: *elopement*, *who has elopement as a target*, *bus loop*, *November*.
+
+- **Where**: at the top of **Caseload**; on the **start screen**, above the students; and in **Find a form or command**
+  (the search at the top of the form list, or ⌘K), where the places in the caseload come after the forms and commands, under
+  **In the caseload**, once you have typed three letters.
+- **How it matches**: every word has to be there (fewer words find more). Capitals and accents do not matter (*cafe* finds
+  *café*). Each word is matched from its start (*bus* finds *buses*, not *abuse*). A date is found by its month too
+  (*November* finds 2026-11-03). Words like *who*, *has*, *a*, *the* are left out, so a question works.
+- **What it shows**: the students found, each with the places that hold the words: the form (*Form FS-1 · FBA Summary
+  Report*) or the fact (*Target behavior · Form TB-1*), and the words around them, marked.
+- **Tap a place**: the student's case opens at that form, on the form's page that holds the field, and the field is brought
+  into view and outlined for a moment. It is not selected, so the iPad's keyboard does not come up. (If the words are in
+  something the form draws, such as a table, it says so.) The Search key on the iPad's keyboard puts the keyboard away.
+- **Initials only** holds here too: the students are shown by their initials, and their names and ID are left out of what
+  is found.
+- The search reads only the copies kept in this browser, as at each student's last Save case. Nothing is sent anywhere.
+
+**Students as cards.** Caseload and the start screen show each student as a card:
+
+- the student's **photo** (a small copy, 96 pixels, kept with the student at Save case; a student kept before gets one the
+  first time the card is shown). With **Initials only** there are no photos: the initials instead.
+- the **school and grade** (and the ID, except with Initials only);
+- a small **line of the main target behavior's recent days** (from Form DD-1: the first behavior to bring down, its last 20
+  days of data), with where it started and where it is now (*4 → 0 occurrences, 20 days, 9/16 to 10/5*);
+- **what needs you next**: the most urgent thing from Today (Overdue and Safety first), with its **Open**, and how many more;
+- **when and where it was last saved**: *Saved yesterday on the laptop · in Google Drive* (or *waiting for Google Drive*,
+  or *not in a file yet*).
+
+**Open** and **Remove** work as before. One column on a phone, two on an iPad held upright, three or more on an iPad held
+sideways or a laptop; every button is 44 points; nothing scrolls sideways. *What needs you, across the caseload* stays above
+the students in Caseload. Printing is unchanged.
+
+Checked by `qa/v2191-find-test.js` (28 checks: three simulated students kept with Forms DD-1, TB-1, FS-1 and CN-1; the
+facts and the forms' words found; every word needed; capitals, accents and question words; a date by its month; the words
+marked and escaped; the command box's group after the forms and commands; a place opened at the right student, form, page and
+field, outlined and not focused; Initials only; nothing sent anywhere) and `qa/v2191-cards-test.js` (25 checks: the cards at
+390, 820, 1180 and 1440 wide, with no sideways scrolling and 44-point targets; the photo's copy made at Save case, made the first
+time for a student kept before, and hidden with Initials only; the trend line's points against the data; what needs you next
+and its Open; when and where saved, with and without Google Drive; Open and Remove).
