@@ -849,6 +849,47 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   .ws-printnote h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:#182e43;font-size:20pt;margin:0 0 12px}
 }
 </style>
+<style id="ws-layout-2189">
+/* v21.89 the layout on the iPad, the laptop and the phone (a review at 1180, 1024 and 820 wide, 1440 and 1280, 390 and 375) */
+/* the iPad held upright: the chips go up into the heading from 760 px, and the heading leaves out the student the bar shows */
+@media (min-width:760px) and (max-width:999px){header.top .who,header.top #whoTake{display:none}}
+/* the folded student line stays one line; what does not fit ends in an ellipsis */
+#barSum{flex-wrap:nowrap}
+#barSum #sumName{white-space:nowrap;flex:0 0 auto}
+#barSum #sumDet{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barSum #sumCase{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barSum #sumDue{flex:0 0 auto}
+/* the form's name keeps its room in the crumb: below 1240 px of stage, the field count, the file name and the labels go */
+section.stagew{container-type:inline-size}
+@container (max-width:1240px){
+  .crumb #crumbStatus:not(.quiet),.crumb #crumbFile{display:none}
+  .crumb .acts #printOne .lbl,.crumb .acts #popOut .lbl,.crumb .acts #fullBtn .lbl,.crumb .acts #closeForm .lbl{display:none}
+  .crumb .acts #printOne,.crumb .acts #popOut,.crumb .acts #fullBtn,.crumb .acts #closeForm{padding-left:10px;padding-right:10px}}
+/* a finger, not a pointer: 44 px targets in the crumb, the dialogs, the start screen and side by side */
+@media (pointer:coarse){
+  .crumb .acts button,#railToggle{min-width:44px}
+  #dlg .db button,#cfDlg .db button,#blank .card button{min-height:44px}
+  #dlg .db input[type=checkbox]{width:22px;height:22px}
+  #dlg .db select{min-height:44px}
+  #paneBar .pane button{min-width:44px}}
+/* the student details: no dead gap after Grade, more room for the school */
+.bar .det .fld:has(#pGrade){flex:0 0 auto}
+.bar .det .fld input#pSite{flex-grow:2}
+/* the case map's form chips stay whole */
+.cm-forms button b{white-space:nowrap;flex:0 0 auto}
+/* the start screen: the students centred like the rest of the card, the three steps only before there is a caseload, and
+   no Save case or Side by side while nothing is open */
+#blank .bl-st{justify-content:center}
+#blank .card.has-cl .steps{display:none}
+body:not(.has-form) #saveQuick,body:not(.has-form) #splitBtn{display:none}
+/* side by side: the list's edge tab would sit over the left form */
+body.ws-split .rail-edge{display:none!important}
+/* a phone: the crumb in two rows (the form's name, then its buttons); the title, side by side and own tab go */
+@media (max-width:720px){
+  .crumb{flex-wrap:wrap;row-gap:4px}.crumb #crumbTitle{flex:1 1 calc(100% - 60px)}
+  .crumb .acts{margin-left:0;flex:1 1 100%;justify-content:space-between}}
+@media (max-width:480px){header.top h1{display:none}#splitBtn,#popOut{display:none}.rail-edge{display:none!important}}
+</style>
 </head>
 <body>
 
@@ -1136,6 +1177,7 @@ function loadFrame(fr,file){
     .catch(e=>{fr.srcdoc='<p style="font:14px sans-serif;padding:24px">'+esc(e.message)+'. Open the folder edition instead.</p>';});
 }
 function caseUid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+const gradeWords=g=>{g=String(g||'').trim();return !g?'':/grade|^k$|^pre|kinder/i.test(g)?g:'Grade '+g;};   /* v21.89 not "Grade 5th grade" */
 function caseName(p){return (p.client||'case').replace(/[^\w-]+/g,'_');}
 /* a case file is JSON, or a one-file case whose JSON sits in a block */
 function parseCase(text){
@@ -1282,7 +1324,7 @@ try{$('#fsLogo').src=$('#logo').src;}catch(e){}
 /* v21.44 (A8): the Autosave and offline-copy chips in the heading on a window 1000 px wide or more, so the bar's case
    buttons keep to one row (see the CSS); in the bar, before Build master print, on a narrower one. The chips are moved,
    not copied, so their ids, their listeners and the code that writes them are untouched. */
-const CHIPTOP=window.matchMedia('(min-width:1000px)');
+const CHIPTOP=window.matchMedia('(min-width:760px)');   /* v21.89 from 760 px: an iPad held upright keeps the bar to one row */
 function placeChips(){
   const box=$('#wsChips');if(!box)return;
   const top=CHIPTOP.matches,host=top?$('header.top'):$('.bar .grp.acts'),before=top?$('header.top .who'):$('#masterPrint');
@@ -1526,7 +1568,7 @@ function paintSum(){
   $('#barFold').hidden=!has;
   if(!has){document.body.classList.remove('bar-folded');row.hidden=true;return;}
   $('#sumName').textContent=p.client;
-  $('#sumDet').textContent=[p.sid,p.grade?'Grade '+p.grade:'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
+  $('#sumDet').textContent=[p.sid,p.grade?gradeWords(p.grade):'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
   const f=state.facts,bits=[];
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
     const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
@@ -4516,7 +4558,7 @@ function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.pl
   const ti=f.integrity,open=[].concat(tdSafety(f),tdTimelines(f),tdHome(f)).map(x=>x.t);
   const due=(state.due||[]).map(x=>esc(x.id)+' '+esc(x.what)+' '+dueText(x.d));
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Transition summary'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555;margin:0 0 8pt}ul{margin:0;padding-left:16pt}li{margin:0 0 3pt}@media print{body{margin:0}}<\/style><\/head><body>'+
-    '<h1>Transition Summary<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'<\/p>'+
+    '<h1>Transition Summary<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?gradeWords(p.grade):'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'<\/p>'+
     sec('History',li([f.consent&&f.consent.date?'Consent for the FBA and BIP: '+esc(f.consent.date)+' (Form IC-1)':'',f.fn&&(f.fn.label||f.fn.key)?'FBA function: '+esc(f.fn.label||f.fn.key)+' (Form FS-1)':'',f.review&&f.review.date?'Last plan review: '+esc(f.review.date)+(f.review.decisionText||f.review.decision?', '+esc(f.review.decisionText||f.review.decision):'')+' (Form PR-1)':''].filter(Boolean)))+
     sec('Target behaviors',li(tg.map(b=>'<b>'+esc(b.label)+'<\/b>'+(b.isRep||/replacement/i.test(b.type||'')?' (replacement)':'')+(b.def?': '+esc(b.def):''))))+
     sec('Function and the evidence',(f.fn&&(f.fn.statements||[]).length?'<p>'+f.fn.statements.map(esc).join(' ')+'<\/p>':'')+li(ev))+
@@ -4960,7 +5002,7 @@ function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{
   return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||'',svc:svcText(f)};}
 function iepHTML(){const P=iepParts(),p=packet(),sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',para=t=>t?'<p>'+esc(t)+'<\/p>':'';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>IEP meeting: behavior'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555}ol{margin:0;padding-left:18pt}li{margin:0 0 4pt}@media print{body{margin:0}}<\/style><\/head><body>'+
-    '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
+    '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?gradeWords(p.grade):'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
     sec('Present levels of behavior',para(P.present))+sec('Goals',P.goals.length?'<ol>'+P.goals.map(x=>'<li>'+esc(x)+'<\/li>').join('')+'<\/ol>':'')+sec('The behavior intervention plan',para(P.plan))+
     sec('Behavior services',para(P.svc))+sec('Progress',para(P.prog))+sec('Safety',para(P.safety))+sec('Next',para(P.next?'Next plan review: '+P.next+'.':''))+
     '<p class="s" style="margin-top:14pt">Written from the forms in this case. A draft for the team: read it against the forms and the data before the meeting.<\/p><\/body><\/html>';}

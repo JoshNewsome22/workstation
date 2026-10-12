@@ -9133,3 +9133,31 @@ Checked by `qa/v2189-drive-test.js` (an iPad and a laptop with a simulated Googl
 other device getting it, the newer-copy bar, a save signed out that waits, two copies changed apart and the choice, the
 Replaced copies folder, Remove everywhere and only here, a different account refused, a personal account warned, the Drive API
 not turned on, Save case to a file, a third computer joining with an older copy).
+
+### v21.89: the layout, a little better on the iPad, the laptop and the phone
+
+A review of the workstation and every form at iPad widths (1180 and 1024 sideways, 820 upright), laptop widths (1440 and
+1280) and phone widths (390 and 375), measured, and the fixes:
+
+- **iPad held upright**: the Autosave and offline chips go up into the heading from 760 px wide (they did from 1000), and the
+  heading leaves out the student the bar already shows. The form starts about 110 px higher (224 px down instead of 336).
+- **The folded student line** stays one line; a long school name ends in "…" instead of wrapping to two or three lines.
+- **The crumb** gives the form's name its room: with less than 1240 px for the form, the field count and the file name go and
+  the Print, Own tab, Fullscreen and Close buttons show their icons only ("Student D…" at 1024 is now the full name).
+- **Forms with many views** (TD-1, PA-1, IA-1, SM-1, RA-1, EA-1, GB-1 and others): the view tabs take the toolbar's width
+  instead of half of it, so TD-1's toolbar is 3 rows of tabs instead of 6 (295 px to 173 px on an iPad sideways).
+- **The 12-inch pages** (SM-1, VS-1, GB-1, CF-1, SV-1 and 14 more): the toolbar is as wide as the page, so it no longer
+  floats in the middle with the page showing on both sides when it is pinned.
+- **DD-1, VI-1, DT-1 and AD-1** inside the workstation: the empty strip above the toolbar is gone (the printed letterhead is
+  untouched).
+- **Touch**: the crumb's buttons are 44 px wide on an iPad upright and a phone, and the buttons, check boxes and lists in
+  Today, Caseload, the case map, the start screen and side by side are 44 px tall.
+- **The questionnaire on a phone**: the 1 to 6 scale is one row (the 6 fell onto a row of its own on every item; pages are
+  about a fifth shorter); the date to send by reads "Monday, October 19" ("lunes, 19 de octubre"), not 2026-10-19.
+- **Smaller things**: FS-1's evidence table gives Dates and Conducted by their room; DD-1's "Not independent" breaks between
+  words; the case map's form chips stay whole; the bar's Grade box leaves no gap; "Grade 5th grade" is now "5th grade"; the
+  start screen centres its students, hides the three first steps once there is a caseload, and shows no Save case or Side by
+  side with nothing open; the list's edge tab no longer covers the left form side by side; on a phone the crumb takes two rows
+  (the form's name, then its buttons) and reading text on a wide laptop keeps a comfortable line length.
+
+Checked by `qa/v2189-layout-test.js`.

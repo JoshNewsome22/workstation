@@ -1104,6 +1104,7 @@ p.dd-numbered{margin-top:4px}
 .ddl-obs[aria-pressed="false"]{border-style:dashed}
 .ddl-body{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
 .ddl-go,.ddl-alt,.ddl-lvl{border-radius:8px;cursor:pointer;touch-action:manipulation;font-family:var(--nbh-sans);min-width:0;overflow-wrap:anywhere}
+.ddl-go,.ddl-alt{overflow-wrap:normal;-webkit-hyphens:auto;hyphens:auto}   /* v21.89 "Not independent" breaks between words, not inside one */
 .ddl-go{flex:1 1 130px;min-height:60px;border:2px solid var(--ddl-c,#254657);background:var(--ddl-c,#254657);color:var(--ddl-ink,#fff);
   font-size:18px;font-weight:700;line-height:1.15;padding:6px 10px}
 .ddl-go.ddl-running{background:#fff;color:var(--nbh-navy,#182e43);box-shadow:inset 0 0 0 3px var(--ddl-c,#254657)}
@@ -10247,6 +10248,11 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
 @keyframes nbhUnfold{from{-webkit-clip-path:inset(0 0 var(--nbh-fold-d,0px) 0);clip-path:inset(0 0 var(--nbh-fold-d,0px) 0)}to{-webkit-clip-path:inset(0);clip-path:inset(0)}}
 @media (prefers-reduced-motion:reduce){html.nbh-fold .toolbar,html.nbh-unfolding .toolbar{animation:none!important}}
 @media print{#nbhFoldBtn{display:none!important}}
+/* v21.89 the layout review: the view tabs take the room they need (not half the toolbar), the empty strip of a masthead inside
+   the workstation goes (on screen; the printed letterhead is untouched), and reading text keeps a comfortable line on a wide screen */
+html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
+@media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}
+  .sheet p.hint,.sheet p.lead{max-width:78ch}}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
