@@ -406,6 +406,8 @@ td.time{
   font-variant-numeric:tabular-nums;background:#fff;
 }
 tr.band td.time,tr.band td.tot{background:var(--wash)}
+/* v21.89 a phone: the time of day in two short lines, so more days fit beside it (the printed sheet is untouched) */
+@media screen and (max-width:600px){th.timecol{width:62px;min-width:62px}td.time{white-space:normal;line-height:1.15;font-size:10px;padding:0 4px 0 2px}}
 td.dateline input{
   width:100%;border:0;background:transparent;text-align:center;
   font:inherit;font-family:var(--sans);font-size:var(--datefs,10.5px);color:var(--ink);
@@ -1565,8 +1567,11 @@ onGrids("click", e => {
   const cell = cellOf(+b.dataset.r, +b.dataset.c);
   cell.s = oneLevel() ? (cell.s ? 0 : 2) : (cell.s + 1) % 3;
   if(cell.s === 0) cell.code = "";
+  /* v21.89 a tapped cell is where the finger is: the page stays put while the grid is drawn again, and the cell is not scrolled to */
+  const y = window.scrollY, x = window.scrollX;
   render();
-  focusCell(+b.dataset.r, +b.dataset.c);
+  focusCell(+b.dataset.r, +b.dataset.c, true);
+  if(window.scrollY !== y || window.scrollX !== x) window.scrollTo(x, y);
 });
 
 onGrids("change", e => {
@@ -1650,10 +1655,12 @@ function updateTotalsOnly(tbl){
   renderReadout();
 }
 
-function focusCell(r,c){
-  /* the cell may be on another sheet, so look across all of them */
+function focusCell(r,c,tapped){
+  /* the cell may be on another sheet, so look across all of them; a tapped cell is in view already (v21.89) */
   const el = document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']");
-  if(el){ el.focus(); if(el.scrollIntoView) el.scrollIntoView({block:"nearest"}); }
+  if(!el) return;
+  if(tapped){ try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); } return; }
+  el.focus(); if(el.scrollIntoView) el.scrollIntoView({block:"nearest"});
 }
 
 onGrids("keydown", e => {
@@ -4026,6 +4033,8 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
 html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
 @media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}
   .sheet p.hint,.sheet p.lead{max-width:78ch}}
+/* v21.89 a quick second tap (marking the next cell) is a tap, not a double-tap zoom; pinching still zooms */
+html{touch-action:manipulation}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 

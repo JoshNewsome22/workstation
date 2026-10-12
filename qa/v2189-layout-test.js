@@ -64,6 +64,15 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
   {const {ctx,page,errs}=await shell(br,{width:390,height:844},true,IPHONE);await open(page,'DM-1');
     const t=await page.evaluate(()=>Math.round(document.getElementById('crumbTitle').getBoundingClientRect().width));
     ok('16 phone: the form’s name has a row of its own in the crumb (it had 2 px)',t>=250,t);
+    /* SP-1 on the phone: a tapped cell is marked where it is; the page does not move; no double-tap zoom */
+    const sp=await open(page,'SP-1');await sp.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});try{await loadSim(sp);}catch(e){}await sleep(900);
+    await sp.evaluate(()=>{const v=[...document.querySelectorAll('#viewSeg button')].find(b=>/Data sheet/.test(b.textContent));if(v)v.click();const b=document.querySelector('[data-mode="tap"]');if(b)b.click();});await sleep(800);
+    let tgt=null;for(const c of (await sp.$$('button.cell')).slice(30)){const bb=await c.boundingBox();if(bb&&bb.width>4){tgt=c;break;}}
+    await tgt.scrollIntoViewIfNeeded();await sp.evaluate(()=>window.scrollBy(0,-60));await sleep(300);
+    const y0=await sp.evaluate(()=>scrollY),rc=await tgt.evaluate(e=>[e.dataset.r,e.dataset.c,e.dataset.state]),bb=await tgt.boundingBox();
+    await page.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await sleep(700);
+    const a1=await sp.evaluate(([r,c])=>({y:scrollY,st:document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").dataset.state,ta:getComputedStyle(document.documentElement).touchAction,tw:Math.round(document.querySelector('th.timecol').getBoundingClientRect().width)}),rc);
+    ok('16b SP-1 on a phone: the tapped cell changes, the page stays where it was, no double-tap zoom, the time column narrow',a1.st!==rc[2]&&Math.abs(a1.y-y0)<=1&&a1.ta==='manipulation'&&a1.tw<=70,{y0,rc,a1});
     ok('17 no page errors (phone workstation)',!errs.length,errs.slice(0,3));await ctx.close();}
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);

@@ -9160,4 +9160,9 @@ A review of the workstation and every form at iPad widths (1180 and 1024 sideway
   side with nothing open; the list's edge tab no longer covers the left form side by side; on a phone the crumb takes two rows
   (the form's name, then its buttons) and reading text on a wide laptop keeps a comfortable line length.
 
+- **The Scatter Plot on an iPhone**: tapping one cell after another no longer zooms the page in and out (iPhone Safari took
+  two quick taps as a double-tap zoom; every form and the workstation now take them as taps, and pinching still zooms), a
+  tapped cell no longer scrolls the page, and the time of day takes two short lines so more days fit beside it.
+  (The grey tab with an arrow on the right edge in Safari is a Safari extension's, not the workstation's.)
+
 Checked by `qa/v2189-layout-test.js`.
