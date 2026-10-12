@@ -528,6 +528,10 @@ async function press(page, f, view, b, where, ev, log) {
   if (ev.choosers > c0) rec.filePicker = true;
   rec.mutations = after.mut - before.mut;
   rec.changed = after.sig !== before.sig;
+  /* v21.92 the Focus switch (v21.91) is a mode for the whole page: with it on, the parts not open are folded away, so the
+     buttons in them cannot be tapped (SP-1's behavior bar, in the sweep of v21.91). It is pressed like any button and its
+     effect recorded, then the page is put back before the next press; Focus itself is checked by qa/v2191-focus-test.js. */
+  if (rec.id === 'nbhFocusBtn') { await page.evaluate(() => { try { nbhUI.focus.set(false); } catch (e) {} }).catch(() => {}); await sleep(600); }
   const dl = await closeDialogs(page);
   if (dl.open.length) rec.dialog = {open: dl.open.map(d => (d.id ? "#" + d.id + " " : "") + d.head), closedBy: dl.how, stuck: dl.stuck, invisible: dl.open.some(d => d.invisible)};
   /* a press that leaves something over the whole window (a player's full screen): left with Escape, else its own exit */
