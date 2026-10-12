@@ -953,7 +953,7 @@ body.ws-split .rail-edge{display:none!important}
     <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button>
     <button class="chip" id="drvChip" type="button" hidden title="Google Drive">Drive</button></span>
     <button class="primary" id="masterPrint">Build master print</button>
-    <button id="bookmarkPdf" class="rare" title="Add a bookmark panel and contents page numbers to a packet you have saved as PDF">Finish PDF</button>
+    <button id="bookmarkPdf" class="rare" title="Add a bookmark panel and contents page numbers to a packet you have saved as PDF, and the page header and footer to one saved from Safari">Finish PDF</button>
   </div>
 </div>
 
@@ -2962,6 +2962,8 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
   w.document.open();w.document.write(docM);w.document.close();
   setTimeout(()=>{try{w.focus();w.print();}catch(e){}},900);
+  /* v21.90 Safari prints the packet without its page header and footer; saved as PDF, Finish PDF adds them */
+  if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}
 }
 $('#masterPrint').addEventListener('click',()=>masterRun(ALL.filter(([id])=>state.ticked[id])));
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -3046,14 +3048,14 @@ function chromeMajor(){
 $('#diag').addEventListener('click',()=>{
   const cv=chromeMajor();
   const heads=cv>=131?'yes \u2014 version '+cv:cv?'no \u2014 this is version '+cv+', and 131 or later is needed':
-    appleMobile()?'no \u2014 iPad and iPhone browsers are all Apple\u2019s engine underneath; build the master print on a computer':'no \u2014 not Chrome or Edge';
+    appleMobile()?'not in print \u2014 iPad and iPhone browsers are all Apple\u2019s engine underneath; save the master print as PDF and Finish PDF adds them':'no \u2014 not Chrome or Edge; save the master print as PDF and Finish PDF adds them';
   const rows=[
    ['Page origin',String(window.origin),'"null" is normal when opened from a drive'],
    ['Secure context',String(window.isSecureContext),''],
    ['Folder access API',('showDirectoryPicker' in window)?'present':'absent','Not used yet; would allow reading a student folder'],
    ['Forms open',String(Object.keys(state.frames).length)+(Object.keys(state.pending).length?' ('+Object.keys(state.pending).length+' more in the case, not loaded yet)':''),''],
    ['Forms responding',String(Object.keys(state.status).length),'Each open form answers a status ping every few seconds'],
-   ['Packet page headers',heads,'The practice, the student and "Page N of M" on every sheet of the master print need Chrome or Edge 131 or later. Anything else prints the pages without them.'],
+   ['Packet page headers',heads,'The practice, the student and "Page N of M" on every sheet of the master print need Chrome or Edge 131 or later to print with the pages. Anything else prints the pages without them; saved as PDF, Finish PDF (Tools) adds them.'],
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
    ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1, VS-1 and TK-1 (photos work without it)','diagPic'],
    ['My pictures',EMBED?(EMBED.pictures?'inside this file':'not inside this file'):'checking\u2026','nbh-pictures.js, beside the forms: a photo of a real item becomes a picture for Forms VS-1, SM-1, TK-1 and TV-1, its background cut away on this device (v21.62)','diagMine'],
@@ -3134,7 +3136,7 @@ function printCheck(){
     ['The page count looks right.','Swipe through the preview: the student’s name and the letterhead on page one, no last page left blank, no row cut across two pages. Form DD-1’s blank week is one page for five days.'],
     ['The name is the student’s.','An amber strip above the form means one form holds another name. Put it right before printing.'],
     ['The photo may print.','Form DD-1 and the respondent pages carry the photo; with <b>No photo/media permission</b> on the case line, take it off first (the photo button on the bar).'],
-    ['A PDF, not paper?','In the print window on the iPad: pinch the preview open, then <b>Share</b> and <b>Save to Files</b>. For the master print, <b>Finish PDF</b> then adds the bookmarks and page numbers.']];
+    ['A PDF, not paper?','In the print window on the iPad: pinch the preview open, then <b>Share</b> and <b>Save to Files</b>. For the master print, <b>Finish PDF</b> (Tools) then adds the page header and footer Safari leaves out, the bookmarks and the page numbers.']];
   dialog('Print check',
     '<p class="hp-lead">Before a page goes to the printer from Safari. Tick each as you look; nothing is kept.</p>'+
     '<ol class="pc-list">'+L.map((x,i)=>'<li><label><input type="checkbox" id="pc'+i+'"> <b>'+x[0]+'</b> <span>'+x[1]+'</span></label></li>').join('')+'</ol>'+
@@ -3161,7 +3163,7 @@ $('#help').addEventListener('click',()=>{
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
-     '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count.</p>'+
+     '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count. For the master print, save it as PDF (the print window\u2019s <b>Share</b>, then <b>Save to Files</b>) and run <b>Finish PDF</b>: it adds the page header and footer Safari leaves out, the bookmarks and the page numbers.</p>'+
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
    fold('The team\u2019s Google Sheet (Form DD-1)',

@@ -127,10 +127,12 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   so the iPad and the laptop share one caseload; the workstation can reach only the files it made there.
 - **Save cases to the district drive**, as before. A case file in a browser's
   Downloads folder on a shared computer is a case file left on a desk.
-- **Chrome or Edge 131 or later, on a computer,** for the master print and
-  Finish PDF; Diagnostics says so. Forms can be filled on an iPad, but every
-  iPad and iPhone browser, Chrome included, is Apple's engine underneath and
-  prints the packet without its page headers. Build the packet on a computer.
+- **The master print** prints with its page headers from Chrome or Edge 131 or
+  later on a computer; Diagnostics says so. Every iPad and iPhone browser,
+  Chrome included, is Apple's engine underneath and prints the packet without
+  them. On an iPad, save the master print as PDF (the print window's Share, then
+  Save to Files) and run Finish PDF: since v21.90 it adds the page header and
+  footer, the bookmarks and the contents page numbers, on the iPad.
 
 ## Updating
 
@@ -149,7 +151,8 @@ not here (see the last section); the workstation's zip never touches it.
 From v21.67 the zip also holds two folders, `nbh-doc/` (PDF.js, about 1.8 MB) and
 `nbh-ocr/` (the Tesseract text recognizer and its English model, about 7 MB), for
 the bar's **Read a document**: a PDF or a picture of a student's information page is
-read on the device itself, and nothing is sent anywhere. Extract the zip as before;
+read on the device itself, and nothing is sent anywhere. (From v21.90 Finish PDF uses
+`nbh-doc/` too, to read a master print saved from Safari.) Extract the zip as before;
 the folders land beside the forms. They are on the offline list too, so the first
 visit after the update saves about 9 MB more on the device. The one-file edition
 has neither and takes pasted text instead. (PDF.js's module files are named `.js` so that every host

@@ -659,17 +659,57 @@ The master print keeps the right of the list clear for this (`.mp-cover ol` has
 measured against Chrome's output, they sit on the entries' baseline to a
 hundredth of a point.
 
-Because it reads markers only a master print has, it refuses any other PDF, and
-it needs the file saved from Chrome or Edge. A packet sent through a printer
-driver, or saved some other way, loses the markers; the dialog says so. A packet
+Because it reads markers only a master print has, it refuses any other PDF. It
+needs the file saved from the print window, from Chrome or Edge on a computer or
+from Safari on an iPad (below). A packet sent through a printer driver, or saved
+some other way, loses the markers; the dialog says so. A packet
 built before the list kept its gutter clear gets bookmarks but no numbers, and
 the dialog says why. The numbers can also be switched off in the dialog.
+
+### A packet saved from Safari (v21.90)
+
+Safari, on an iPad or a Mac, prints the master print without the page header and
+footer (it does not draw the `@page` margin boxes that carry them) and writes no
+named destinations, so the PDF it saves has neither the header nor the markers
+above. On an iPad:
+
+1. **Build master print**. In the print window, tap **Share** at the top, then
+   **Save to Files**.
+2. Back in the workstation, **Finish PDF** (beside *Build master print*, or under
+   *More*), and choose that file.
+3. Leave **Add the page header and footer Safari leaves out** ticked and press
+   **Save finished copy**. Save it to Files, or share it.
+
+The master print carries its own markers for this: the cover, each contents
+entry and each form's first page hold a label in white 3 px text (`NBHPKT`,
+`NBHTOC:DM-1`, `NBHSEC:DM-1` and so on), made by the style sheet with `::before`
+and `::after`, so no element is added and no page break moves (the test prints
+the packet with and without them and compares every page's text). The cover's
+label also says whose packet it is and the practice's name, for the header.
+Finish PDF reads the labels with the page reader (`nbh-doc/pdf.min.js`, the same
+one *Read a document* uses) and then writes, on every page: the practice at the
+top left, the student and ID at the top right, the confidentiality line at the
+bottom left and "Page n of N" at the bottom right, in the places and sizes
+Chrome prints them. The bookmarks and the contents numbers come from the labels
+too.
+
+A page whose ink reaches into the header or footer band (Safari's margins can be
+narrower than the ones the packet asks for) is made a little smaller about its
+centre first, never below 85%, so nothing is printed over. Where the ink is is
+read from a small rendering of each page, so a picture or a rule counts as well
+as text. The dialog says how many pages were made smaller.
+
+A packet already carrying "Page 1 of N" (saved from Chrome or Edge) is not
+offered the header again.
 
 ### What it does not touch
 
 Nothing already on a page is redrawn, reordered or removed. The outline is added
 beside the pages; the numbers are drawn on the contents page in a stream of their
-own, over the reserved space. Before the copy is offered, it is read back and
+own, over the reserved space. (On a packet from Safari the header and footer are a
+stream of their own on each page, and a page made smaller keeps its own content
+inside a scale; the check below then asks that every page still holds every
+stream it had.) Before the copy is offered, it is read back and
 checked: same page count, every page other than the contents byte-for-byte the
 same, the contents page still carrying every stream it had, and every bookmark
 landing on the page its form starts on. If any of that fails, nothing is saved
@@ -1079,6 +1119,8 @@ so Diagnostics told Chrome on an iPad that page headers would print. v21.6
 treats any iOS or iPadOS browser as WebKit - including an iPad requesting
 desktop sites, which sends a Mac user agent but reports touch points - and says
 to build the master print on a computer. Only Diagnostics used this check.
+(Since v21.90 it says to save the master print as PDF instead: Finish PDF adds
+the header and footer.)
 
 Test: `node qa/diag-ua.js NBH-Workstation` runs the row under seven identities
 (desktop Chromium, Chrome, Edge and desktop-mode Safari on iPad, Safari on a
@@ -9166,3 +9208,25 @@ A review of the workstation and every form at iPad widths (1180 and 1024 sideway
   (The grey tab with an arrow on the right edge in Safari is a Safari extension's, not the workstation's.)
 
 Checked by `qa/v2189-layout-test.js`.
+
+### v21.90: the master print from the iPad, complete
+
+Printing the packet from the iPad used to mean a packet without its page header and footer, and Finish PDF refused the PDF
+Safari saved, so the packet had to be built on the laptop. Now:
+
+1. **Build master print** on the iPad. In the print window, tap **Share** at the top, then **Save to Files**.
+2. In the workstation, **Finish PDF** (beside *Build master print*, or under *More*), and choose that file.
+3. Leave **Add the page header and footer Safari leaves out** ticked and press **Save finished copy**.
+
+The finished copy has the practice and the student at the top of every page, the confidentiality line and "Page n of N" at
+the bottom, the bookmark panel, and each form's page number on the contents page, as a packet from the laptop does. A page
+whose text or pictures run into the header or footer is made a little smaller (never below 85%) so nothing is printed over.
+The file never leaves the iPad. How it works is under *Finish PDF* above (*A packet saved from Safari*).
+
+On an iPad (and in Safari or Firefox on a computer) a note under the bar says so when the master print opens; Diagnostics and
+Help (*Print check*) say the same.
+
+Checked by `qa/v2190-ipad-pdf-test.js` (11 checks): a Safari-like PDF made in Chromium (Chrome's header, footer and markers
+taken out), finished; every page carries the header and footer in their places; the bookmarks land on the pages where
+Chrome's own PDF has each form start; the contents numbers are on their entries' lines; the labels move nothing; a PDF with
+narrow margins is made smaller and stays clear; a PDF from Chrome is finished as before, with no second header.
