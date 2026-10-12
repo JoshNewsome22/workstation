@@ -213,7 +213,7 @@
       '.nr textarea{min-height:70px;resize:vertical}.nr .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}@media(max-width:560px){.nr .grid2{grid-template-columns:1fr}}'+
       '.nr ol.items{list-style:none;padding:0;margin:0}.nr li.it{border-top:1px solid var(--rule);padding:14px 0}.nr li.it .q{font-size:16px;margin:0 0 8px}.nr li.it .q b{color:var(--navy);margin-right:6px}'+
       '.nr .opts{display:flex;flex-wrap:wrap;gap:8px}.nr .opts label{flex:1 1 auto;min-width:64px;text-align:center;border:1.5px solid #b7c8c5;border-radius:8px;padding:10px 8px;cursor:pointer;font-size:15px;background:#fff;user-select:none}'+
-      '.nr .opts label.num{flex:0 0 auto;min-width:52px}.nr .opts input{position:absolute;opacity:0;width:1px;height:1px}.nr .opts label.on{background:var(--navy);color:#fff;border-color:var(--navy)}'+
+      '.nr .opts label.num{flex:1 1 0;min-width:0;padding-left:0;padding-right:0}.nr select{min-height:44px}.nr .opts input{position:absolute;opacity:0;width:1px;height:1px}.nr .opts label.on{background:var(--navy);color:#fff;border-color:var(--navy)}'+
       '.nr .opts label:focus-within{outline:3px solid #2f7fa8;outline-offset:2px}.nr .key{font-size:13px;color:var(--muted);margin:0 0 6px}.nr .key span{display:inline-block;margin-right:10px}'+
       '.nr .prog{position:sticky;top:0;background:#f1f4f3;padding:8px 0;font-size:13.5px;color:var(--muted);z-index:2}.nr .prog b{color:var(--navy)}'+
       '.nr button{font:inherit;font-size:16px;padding:12px 18px;border-radius:8px;border:1.5px solid var(--navy);background:var(--navy);color:#fff;cursor:pointer;min-height:48px}.nr button.ghost{background:#fff;color:var(--navy)}'+
@@ -227,6 +227,8 @@
     if(!d.getElementById('nbhr-css')){var st=h('style',{id:'nbhr-css'});st.textContent=CSS;d.head.appendChild(st);}
     /* v21.67 the page in Spanish (P.lang 'es'): every word of the page's own, the items as the assessor pasted them */
     var ES=P.lang==='es';
+    /* v21.89 the date to send by in words (Monday, October 19), not 2026-10-19 */
+    var dueWords=function(v){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||''));if(!m)return v;try{return new Date(+m[1],+m[2]-1,+m[3],12).toLocaleDateString(ES?'es':'en-US',{weekday:'long',month:'long',day:'numeric'});}catch(e){return v;}};
     var TXT={'the BCBA':'el BCBA','Photo of the student':'Foto del estudiante','Student:':'Estudiante:','Behavior this questionnaire is about:':'Conducta sobre la que trata este cuestionario:',
       'What counts as {b}:':'Qu\u00e9 cuenta como {b}:','the behavior':'la conducta','Do you understand this definition of {b}?':'\u00bfEntiende esta definici\u00f3n de {b}?','Do you understand the definition':'\u00bfEntiende la definici\u00f3n?',
       'Yes':'S\u00ed','No':'No','Unsure':'No estoy seguro/a','Sometimes':'A veces',
@@ -277,7 +279,7 @@
       h('div',{'class':'def',html:'<b>'+_('Student:')+'</b> '+esc(P.student||'')+(P.beh?'<br><b>'+_('Behavior this questionnaire is about:')+'</b> '+esc(P.beh):'')+(P.def?'<br><b>'+_('What counts as {b}:',{b:esc(P.beh||_('the behavior'))})+'</b> '+esc(P.def):'')}),
       P.confirm?confBlock():null,
       h('p',{'class':'sub',text:P.instructions||(_('Answer every item for the student and the behavior named above, from what you have seen yourself. When you have finished, press Send')+(P.box&&P.box.u?_(': your answers go straight to {who}.',{who:WHO}):_(': your email program opens with a message to {who} ready to go.',{who:WHO})))}),
-      P.due?h('p',{'class':'sub',text:_('Please send it by {d}.',{d:P.due})}):null,
+      P.due?h('p',{'class':'sub',text:_('Please send it by {d}.',{d:dueWords(P.due)})}):null,
       linksBlock()]);
     root.appendChild(card);
     /* respondent */

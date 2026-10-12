@@ -448,6 +448,10 @@ body.bar-folded #barSum{display:flex}
 .bar button.chip.busy::before{background:#8fd0ee;animation:offPulse 1.4s ease-in-out infinite}
 .bar button.chip.upd{color:#d7ecf6;border-color:#4d8fb3}
 .bar button.chip.upd::before{background:#6fb7e0}
+/* v21.89 the caseload in Google Drive */
+.cl-drive{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:8px 0 12px;padding:10px 12px;border:1px solid var(--rule);border-radius:10px;background:#f4f8f9}
+.cl-drive.on{border-color:#9cc3ad;background:#f1f8f3}.cl-drive>span{flex:1 1 260px}.cl-drive .hint{flex:1 1 100%;margin:0}
+#blankDrv p{margin:0 0 10px}.bl-last{font-size:14px}.bl-last button{margin-left:6px}
 .bar button.chip.away{color:#dfe8ea;border-color:#6a8791}
 .bar button.chip.away::before{background:#b9c8cc}
 @keyframes offPulse{50%{opacity:.3}}
@@ -845,6 +849,47 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   .ws-printnote h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:#182e43;font-size:20pt;margin:0 0 12px}
 }
 </style>
+<style id="ws-layout-2189">
+/* v21.89 the layout on the iPad, the laptop and the phone (a review at 1180, 1024 and 820 wide, 1440 and 1280, 390 and 375) */
+/* the iPad held upright: the chips go up into the heading from 760 px, and the heading leaves out the student the bar shows */
+@media (min-width:760px) and (max-width:999px){header.top .who,header.top #whoTake{display:none}}
+/* the folded student line stays one line; what does not fit ends in an ellipsis */
+#barSum{flex-wrap:nowrap}
+#barSum #sumName{white-space:nowrap;flex:0 0 auto}
+#barSum #sumDet{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barSum #sumCase{flex:1 1 0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#barSum #sumDue{flex:0 0 auto}
+/* the form's name keeps its room in the crumb: below 1240 px of stage, the field count, the file name and the labels go */
+section.stagew{container-type:inline-size}
+@container (max-width:1240px){
+  .crumb #crumbStatus:not(.quiet),.crumb #crumbFile{display:none}
+  .crumb .acts #printOne .lbl,.crumb .acts #popOut .lbl,.crumb .acts #fullBtn .lbl,.crumb .acts #closeForm .lbl{display:none}
+  .crumb .acts #printOne,.crumb .acts #popOut,.crumb .acts #fullBtn,.crumb .acts #closeForm{padding-left:10px;padding-right:10px}}
+/* a finger, not a pointer: 44 px targets in the crumb, the dialogs, the start screen and side by side */
+@media (pointer:coarse){
+  .crumb .acts button,#railToggle{min-width:44px}
+  #dlg .db button,#cfDlg .db button,#blank .card button{min-height:44px}
+  #dlg .db input[type=checkbox]{width:22px;height:22px}
+  #dlg .db select{min-height:44px}
+  #paneBar .pane button{min-width:44px}}
+/* the student details: no dead gap after Grade, more room for the school */
+.bar .det .fld:has(#pGrade){flex:0 0 auto}
+.bar .det .fld input#pSite{flex-grow:2}
+/* the case map's form chips stay whole */
+.cm-forms button b{white-space:nowrap;flex:0 0 auto}
+/* the start screen: the students centred like the rest of the card, the three steps only before there is a caseload, and
+   no Save case or Side by side while nothing is open */
+#blank .bl-st{justify-content:center}
+#blank .card.has-cl .steps{display:none}
+body:not(.has-form) #saveQuick,body:not(.has-form) #splitBtn{display:none}
+/* side by side: the list's edge tab would sit over the left form */
+body.ws-split .rail-edge{display:none!important}
+/* a phone: the crumb in two rows (the form's name, then its buttons); the title, side by side and own tab go */
+@media (max-width:720px){
+  .crumb{flex-wrap:wrap;row-gap:4px}.crumb #crumbTitle{flex:1 1 calc(100% - 60px)}
+  .crumb .acts{margin-left:0;flex:1 1 100%;justify-content:space-between}}
+@media (max-width:480px){header.top h1{display:none}#splitBtn,#popOut{display:none}.rail-edge{display:none!important}}
+</style>
 </head>
 <body>
 
@@ -894,6 +939,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <span class="pair"><button id="saveCase">Save case</button>
     <button id="openCase">Open case</button>
     <button id="closeCase" title="Save this case, then clear every form and the student&rsquo;s details for the next case">Close case</button>
+    <button id="saveFile" class="rare" hidden title="Write the case to a file as well (Save case keeps it on this device and in Google Drive)">Save case to a file</button>
     <button id="caseXlsx" class="rare" title="Every open form into one spreadsheet: a sheet per form, from its own CSV export where it has one, else every field by name">Case as spreadsheet</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
     <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
@@ -903,7 +949,8 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
     <div class="sp"></div>
     <!-- v21.44 (A8): the two chips move into the heading on a window 1000 px wide or more (placeChips) -->
     <span class="chips" id="wsChips"><button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
-    <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button></span>
+    <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button>
+    <button class="chip" id="drvChip" type="button" hidden title="Google Drive">Drive</button></span>
     <button class="primary" id="masterPrint">Build master print</button>
     <button id="bookmarkPdf" class="rare" title="Add a bookmark panel and contents page numbers to a packet you have saved as PDF">Finish PDF</button>
   </div>
@@ -924,6 +971,13 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   <button id="pwaReload" class="sm primary">Reload</button>
   <button id="pwaSign" class="sm primary" hidden>Sign in</button>
   <button id="pwaLater" class="sm">Later</button>
+</div>
+<!-- v21.89 the case on screen was saved on another device after it was opened here -->
+<div class="pwabar" id="drvBar" hidden role="status">
+  <span id="drvBarText"></span>
+  <div class="sp"></div>
+  <button id="drvBarOpen" class="sm primary">Open the newer copy</button>
+  <button id="drvBarLater" class="sm">Not now</button>
 </div>
 <div class="pwabar tip" id="tipBar" hidden>
   <span><b>Install:</b> Share, then <b>Add to Home Screen</b>. The workstation then opens from its own icon, without the internet as well.</span>
@@ -960,7 +1014,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
       <div class="acts">
         <!-- v21.75 Today: what needs you in this case (an icon here, so the row of case buttons stays one row on an iPad) -->
         <!-- v21.79 Caseload: every student kept on this device -->
-        <button id="caseloadBtn" class="sm" aria-label="Caseload: every student on this iPad" title="Caseload: every student kept on this iPad, the most urgent first, and what needs you across them"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13.5c.4-2.4 2.1-3.8 4.2-3.8s3.8 1.4 4.2 3.8"/><circle cx="11.4" cy="6.2" r="1.8"/><path d="M11 9.8c1.7.1 2.9 1.3 3.2 3.2"/></svg></button>
+        <button id="caseloadBtn" class="sm" aria-label="Caseload: every student on this device" title="Caseload: every student kept on this device, the most urgent first, and what needs you across them"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5.5" r="2.3"/><path d="M1.8 13.5c.4-2.4 2.1-3.8 4.2-3.8s3.8 1.4 4.2 3.8"/><circle cx="11.4" cy="6.2" r="1.8"/><path d="M11 9.8c1.7.1 2.9 1.3 3.2 3.2"/></svg></button>
         <button id="todayBtn" class="sm" aria-label="Today: what needs you in this case" title="Today: what is due, incidents home has not heard about, the integrity check, aims met; the end of the week; the hand-over check"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="11" height="10" rx="1.5"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3M5.5 10l1.6 1.5L10.5 8.5"/></svg></button>
         <button id="saveQuick" class="sm" aria-label="Save case" title="Save the case to a file"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 2.5h9l2 2v9h-11z"/><path d="M5 2.5v4h5v-4M5 13.5v-4h6v4"/></svg><span class="lbl">Save case</span><span class="dot" aria-hidden="true"></span></button>
         <button id="printOne" class="sm" aria-label="Print this form" title="Print this form (Ctrl+P)"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6V2.5h7V6"/><rect x="1.5" y="6" width="13" height="5.5" rx="1"/><path d="M4.5 9.5h7v4h-7z"/></svg><span class="lbl">Print</span></button>
@@ -1005,6 +1059,7 @@ dialog td.bm-pg{white-space:nowrap;font-variant-numeric:tabular-nums;width:1%}
   <div class="df"><button id="dlgClose">Close</button></div></dialog>
 
 <script>
+const HERE=(()=>{const u=navigator.userAgent||'';if(/iPhone|iPod/.test(u))return 'iPhone';if(/iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))return 'iPad';return /Android/.test(u)?'device':'computer';})();   /* v21.89 the words for this device: iPad, iPhone or computer */
 const $=s=>document.querySelector(s);
 const FORMS=[
  ['Intake and assessment',[
@@ -1122,6 +1177,7 @@ function loadFrame(fr,file){
     .catch(e=>{fr.srcdoc='<p style="font:14px sans-serif;padding:24px">'+esc(e.message)+'. Open the folder edition instead.</p>';});
 }
 function caseUid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+const gradeWords=g=>{g=String(g||'').trim();return !g?'':/grade|^k$|^pre|kinder/i.test(g)?g:'Grade '+g;};   /* v21.89 not "Grade 5th grade" */
 function caseName(p){return (p.client||'case').replace(/[^\w-]+/g,'_');}
 /* a case file is JSON, or a one-file case whose JSON sits in a block */
 function parseCase(text){
@@ -1268,7 +1324,7 @@ try{$('#fsLogo').src=$('#logo').src;}catch(e){}
 /* v21.44 (A8): the Autosave and offline-copy chips in the heading on a window 1000 px wide or more, so the bar's case
    buttons keep to one row (see the CSS); in the bar, before Build master print, on a narrower one. The chips are moved,
    not copied, so their ids, their listeners and the code that writes them are untouched. */
-const CHIPTOP=window.matchMedia('(min-width:1000px)');
+const CHIPTOP=window.matchMedia('(min-width:760px)');   /* v21.89 from 760 px: an iPad held upright keeps the bar to one row */
 function placeChips(){
   const box=$('#wsChips');if(!box)return;
   const top=CHIPTOP.matches,host=top?$('header.top'):$('.bar .grp.acts'),before=top?$('header.top .who'):$('#masterPrint');
@@ -1512,7 +1568,7 @@ function paintSum(){
   $('#barFold').hidden=!has;
   if(!has){document.body.classList.remove('bar-folded');row.hidden=true;return;}
   $('#sumName').textContent=p.client;
-  $('#sumDet').textContent=[p.sid,p.grade?'Grade '+p.grade:'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
+  $('#sumDet').textContent=[p.sid,p.grade?gradeWords(p.grade):'',p.site,p.bcba].filter(Boolean).join(' \u00b7 ');
   const f=state.facts,bits=[];
   if(f){if((f.behaviors||[]).length)bits.push(f.behaviors.length+(f.behaviors.length===1?' target behavior':' target behaviors'));if(f.fn&&(f.fn.key||f.fn.label))bits.push('function: '+(f.fn.key||f.fn.label));
     const g=f.goals||{},gn=(g.red||[]).length+(g.acq||[]).length;if(gn)bits.push(gn+(gn===1?' goal':' goals'));if((f.menu||[]).length)bits.push(f.menu.length+' reinforcers');
@@ -3086,7 +3142,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case. The bar also shows what is due: review dates and next steps the open forms hold, within two weeks or past.</p>')+
    fold('Saving, autosave and closing the tab',
      '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> lists its forms at once and fills each from the file as you open it (the form you were on opens first; the rest load quietly behind it). <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
-     '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the iPad\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
+     '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the '+HERE+'\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
      '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
@@ -3785,7 +3841,7 @@ async function autoDialog(offer){
       '<button data-as="d" data-i="'+i+'">Delete</button></li>';
   };
   const list=rows.length?'<ul class="as-list">'+rows.map(item).join('')+'</ul>':'<p><i>No copies are kept in this browser now.</i></p>';
-  const words='<div class="note">Copies stay in this browser on this device and never leave it. They are protected by the iPad’s passcode, not by the workstation: on a shared iPad, delete them or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site’s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies older than '+AUTO.days+' days are deleted; no other copy is deleted without asking, and over '+AUTO.keep+' you are asked to delete some. A copy is a safety net; the case file is the record.</div>';
+  const words='<div class="note">Copies stay in this browser on this device and never leave it. They are protected by the '+HERE+'’s passcode, not by the workstation: on a shared iPad, delete them or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site’s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies older than '+AUTO.days+' days are deleted; no other copy is deleted without asking, and over '+AUTO.keep+' you are asked to delete some. A copy is a safety net; the case file is the record.</div>';
   if(offer)dialog('Unsaved work found in this browser',
     '<p>Work from an earlier session is still kept on this device. Restore the one you want, or delete what you do not need.</p>'+list+
     '<div class="note">Closing this box does neither: the copies stay in this browser and are offered again next time.</div>');
@@ -4296,7 +4352,7 @@ async function writeCase(handle,text,name){
    file with every open form in it and marked saved (on an iPad, once the person has said the file is in Files), and
    false when nothing was written, the person backed out, a form was left out, or an edit came while the file was
    being written. What it says and writes is the same as before. */
-async function saveCase(){
+async function saveCase(o){o=o&&o.file?o:{};   /* v21.89 {file:true}: Save case to a file */
   const kept=Object.keys(state.pending),open=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: written as the file holds them */
   if(!open.length&&!kept.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
   const p=packet();
@@ -4330,7 +4386,7 @@ async function saveCase(){
   btn.textContent='Save case'; btn.disabled=false;
   const n=Object.keys(forms).length;
   if(!n){alert('Nothing could be read from the open forms.');return false;}
-  try{caseloadKeep(p,forms,late);}catch(e){}   /* v21.79 the caseload's copy on this device (v21.81 a form that did not answer keeps its last copy) */
+  const keptP=Promise.resolve().then(()=>caseloadKeep(p,forms,late)).catch(()=>{});   /* v21.79 the caseload's copy on this device (v21.81 a form that did not answer keeps its last copy) */
   const nm=caseName(p);
   const fileSig=caseSig(stat);
   const inCopy=id=>{const A=state.auto;return A.key&&A.forms[id]&&A.at?' (the safety copy holds it as it was at '+A.at.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})+')':' (it is not in the safety copy either: keep this tab open)';};
@@ -4338,6 +4394,13 @@ async function saveCase(){
   const after=()=>{
     const ch=Object.keys(stat).filter(k=>{const a=stat[k]||{},b=state.status[k]||{};return a.filled!==b.filled||a.sig!==b.sig;});
     return ch.length?'\n\nChanged while the file was being written: Form'+(ch.length>1?'s ':' ')+ch.join(', ')+'. Those changes are not in this file; the case stays marked unsaved and the safety copy is kept. Press Save case again.':'';};
+  /* v21.89 Google Drive in use: the case is kept on this device and sent to Drive; no file to download (Save case to a file writes one) */
+  if(!o.file&&typeof drvSaveMode==='function'&&drvSaveMode()&&clKey(p)){
+    await keptP;const kr=(await clList()||[]).find(x=>x.key===clKey(p));
+    if(kr){const how=late.length?'late':autoFiled(true,fileSig);try{paintSave();}catch(e){}drvSoon(true,50);
+      const where=drvTok()?'Saved on this '+drvDev()+' and going to Google Drive.':'Saved on this '+drvDev()+'. It goes to Google Drive at the next sign-in (tap Drive at the top).';
+      if(how==='done')wsUI.toast(where,{kind:'ok'});else await wsUI.alert(where+left+(how==='moved'?after():''));
+      return how==='done';}}
   const check=IOS?'\n\nCheck that the file is in Files (Downloads) before you close this tab. The safety copy stays in this browser until you say the file is there.':'';
   /* on an iPad the download offers View or Download, so the case is marked saved only when the user says it is in Files:
      the notice is then a question, and "Not yet" keeps the dot and the copy */
@@ -4495,7 +4558,7 @@ function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.pl
   const ti=f.integrity,open=[].concat(tdSafety(f),tdTimelines(f),tdHome(f)).map(x=>x.t);
   const due=(state.due||[]).map(x=>esc(x.id)+' '+esc(x.what)+' '+dueText(x.d));
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Transition summary'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555;margin:0 0 8pt}ul{margin:0;padding-left:16pt}li{margin:0 0 3pt}@media print{body{margin:0}}<\/style><\/head><body>'+
-    '<h1>Transition Summary<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'<\/p>'+
+    '<h1>Transition Summary<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?gradeWords(p.grade):'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'<\/p>'+
     sec('History',li([f.consent&&f.consent.date?'Consent for the FBA and BIP: '+esc(f.consent.date)+' (Form IC-1)':'',f.fn&&(f.fn.label||f.fn.key)?'FBA function: '+esc(f.fn.label||f.fn.key)+' (Form FS-1)':'',f.review&&f.review.date?'Last plan review: '+esc(f.review.date)+(f.review.decisionText||f.review.decision?', '+esc(f.review.decisionText||f.review.decision):'')+' (Form PR-1)':''].filter(Boolean)))+
     sec('Target behaviors',li(tg.map(b=>'<b>'+esc(b.label)+'<\/b>'+(b.isRep||/replacement/i.test(b.type||'')?' (replacement)':'')+(b.def?': '+esc(b.def):''))))+
     sec('Function and the evidence',(f.fn&&(f.fn.statements||[]).length?'<p>'+f.fn.statements.map(esc).join(' ')+'<\/p>':'')+li(ev))+
@@ -4533,6 +4596,7 @@ async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);i
   if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id])forms[id]=od.forms[id];});}catch(e){}}
   const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});
   const rec={key,scope:clScope(),client:String(p.client||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
+  try{const old=(await clList()||[]).find(r=>r.key===key);if(typeof drvStamp==='function')drvStamp(rec,old);}catch(e){}   /* v21.89 the device, and the Drive version it stands on */
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
 async function clList(){try{const all=await clTx('readonly',st=>st.getAll());return (all||[]).filter(r=>r&&r.scope===clScope());}catch(e){return null;}}
 const CL_ORDER=['Overdue','Safety','Injury','Decision','Timeline','Due','Home','Data','Integrity','Aim'];
@@ -4547,14 +4611,14 @@ async function caseloadOpen(){const L=await clList();
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
   const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(x=>all.push(Object.assign({who:clName(r),key:r.key},x))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   dialog('Caseload',
-    '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+' on this iPad, each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you save are still the record.</p>'+
+    '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+' on this '+HERE+', each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you save are still the record.</p>'+
     '<p class="td-more"><label class="cl-opt"><input type="checkbox" id="clIni"'+(clIni()?' checked':'')+'> Initials only</label> <label class="cl-opt"><input type="checkbox" id="clOff"'+(clOff()?' checked':'')+'> Do not keep cases on this device</label></p>'+
     (L.length?'<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')+
       '<h3 class="cl-h">Students</h3><div class="cl-wrap"><table class="cl-tbl"><tr><th>Student</th><th>School</th><th>Saved</th><th>Last data</th><th>Needs you</th><th></th></tr>'+L.map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];
         return '<tr data-clrow="'+esc(r.key)+'"><td><b>'+esc(clName(r))+'</b>'+(r.sid&&!clIni()?'<br><span class="hint">'+esc(r.sid)+'</span>':'')+'</td><td>'+esc(r.site||'')+'</td><td>'+esc(clAgo(r.saved))+'</td><td>'+(r.sum&&r.sum.lastData?esc(tdMd(r.sum.lastData)+' ('+clAgo(r.sum.lastData)+')'):'none')+'</td><td>'+(it.length?it.length+(top?' <span class="td-k">'+esc(top.k)+'</span>':''):'nothing')+'</td><td class="cl-act"><button type="button" class="primary" data-clopen="'+esc(r.key)+'">Open</button> <button type="button" data-cldel="'+esc(r.key)+'">Remove</button></td></tr>';}).join('')+'</table></div>'
      :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
-    '<p class="hint">Safari can clear a website’s storage after seven days without a visit; installed on the Home Screen, the workstation keeps it. Back up the caseload now and then. Remove takes a student off this list on this iPad only; their case files are not touched.</p>');}
+    '<p class="hint">Safari can clear a website’s storage after seven days without a visit; installed on the Home Screen, the workstation keeps it. Back up the caseload now and then. Remove takes a student off this list on this '+HERE+' only; their case files are not touched.</p>');}
 async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key===key);if(!r){alert('That student is no longer kept here.');return;}
   /* v21.81 the student already on screen: their case stays as it is, and the form asked for opens */
   const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
@@ -4562,7 +4626,7 @@ async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key
   /* another student, with work on screen not saved to a file: save it first, or switch (the work stays in this iPad's safety copy) */
   let asked=false;
   if(open&&caseDirty()){const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has work that is not saved to a file yet.',
-      [{v:'save',label:'Save first',kind:'primary'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],'Switch anyway keeps that work in this iPad’s safety copy (Autosave), where Open case offers it.');
+      [{v:'save',label:'Save first',kind:'primary'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],'Switch anyway keeps that work in this '+HERE+'’s safety copy (Autosave), where Open case offers it.');
     if(!c)return;if(c==='save'){let ok=false;try{ok=await saveCase();}catch(e){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was switched.',{kind:'warn'});return;}}asked=true;}
   else if(open)asked=true;
   try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null,{asked,quiet:true});if(form)try{openForm(form);}catch(e){}}
@@ -4570,7 +4634,7 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
   if(e.target.closest('#tdCaseload')){caseloadOpen();return;}
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
-    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this iPad?\nTheir case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;
+    if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;
     try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}caseloadOpen();}});
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
@@ -4626,7 +4690,7 @@ async function clRefreshOne(r,L){let fr=null;
     if(data){d.facts=Object.assign({},d.facts||{});d.facts.src=Object.assign({},d.facts.src||{});d.facts.data=data;d.facts.src.data='DD-1';}
     /* v21.81 a Save case of this student made while the sheet was read wins: the copy is written only if it is still the one read */
     const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {err:'their case was saved again while the sheet was read; read it once more'};
-    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();if(typeof drvDirty==='function')drvDirty(r);
     await clTx('readwrite',st=>st.put(r));
     return Object.assign({},g,{snap:sn.snap});}
   catch(e){return {err:String(e&&e.message||e)};}
@@ -4689,20 +4753,20 @@ async function clRestoreText(text){let d=null;try{d=JSON.parse(text);}catch(e){}
     '<button type="button" id="clBk"'+(L.length?'':' disabled')+'>Back up the caseload<\/button> <button type="button" id="clRs">Restore a backup<\/button><\/p>'+
     '<p class="hint" id="clProg"'+(CLX.busy?'':' hidden')+'><\/p>'+
     (CLX.note?'<p class="cl-note" role="status">'+esc(CLX.note)+'<\/p>':'')+
-    '<p class="hint">'+(CLX.linked?CLX.linked+' student'+(CLX.linked===1?' has':'s have')+' a Google Sheet linked in Form DD-1'+(rd?'; last read '+esc(clAgo(rd))+' on this iPad':'')+'. '+(EMBED?'Reading the sheets works in the website edition, where Google’s sign-in is allowed. ':clTok()?'Signed in to Google in this tab. ':'The first read asks for the Google sign-in, kept in this tab only. '):'Link a student’s Google Sheet in their Form DD-1, then Save case, and the sheets are read here in one go. ')+
+    '<p class="hint">'+(CLX.linked?CLX.linked+' student'+(CLX.linked===1?' has':'s have')+' a Google Sheet linked in Form DD-1'+(rd?'; last read '+esc(clAgo(rd))+' on this '+HERE+'':'')+'. '+(EMBED?'Reading the sheets works in the website edition, where Google’s sign-in is allowed. ':clTok()?'Signed in to Google in this tab. ':'The first read asks for the Google sign-in, kept in this tab only. '):'Link a student’s Google Sheet in their Form DD-1, then Save case, and the sheets are read here in one go. ')+
     (L.length?(bk?'Last backup '+esc(clAgo(bk))+'.':'<b>No backup yet.<\/b>')+' The backup is one file holding every student kept here: keep it with the case files.':'')+'<\/p><\/div>';
   if(lead)lead.insertAdjacentHTML('afterend',html);else b.insertAdjacentHTML('afterbegin',html);CLX.note='';};}
 $('#dlgBody').addEventListener('click',e=>{
   if(e.target.closest('#clRead')){
     if(EMBED){wsUI.alert('Reading the sheets works in the website edition (the workstation opened from its web address), where Google’s sign-in is allowed.');return;}
-    if(!clTok()){if(!clGid()){wsUI.alert('The Google sign-in key is not set on this iPad yet. Open a student’s Form DD-1, Google Sheet, and give the key there once (Setup: the Google Sheets link).');return;}
-      clSignIn().then(()=>clRefreshAll()).catch(err=>{CLX.note=err.message==='nokey'?'The Google sign-in key is not set on this iPad.':err.message;caseloadOpen();});return;}
+    if(!clTok()){if(!clGid()){wsUI.alert('The Google sign-in key is not set on this '+HERE+' yet. Open a student’s Form DD-1, Google Sheet, and give the key there once (Setup: the Google Sheets link).');return;}
+      clSignIn().then(()=>clRefreshAll()).catch(err=>{CLX.note=err.message==='nokey'?'The Google sign-in key is not set on this '+HERE+'.':err.message;caseloadOpen();});return;}
     clRefreshAll();return;}
   if(e.target.closest('#clBk')||e.target.closest('#tdBk')){clBackup();return;}
   if(e.target.closest('#clRs')){$('#clFile').click();return;}});
 /* Today: the reminder to back up the caseload, a week after the last backup */
 {const to0=todayOpen;todayOpen=async function(){await to0.apply(this,arguments);try{if(!clBkDue())return;const L=await clList();if(!L||!L.length)return;const b=$('#dlgBody');if(!b||b.querySelector('#tdBk'))return;
-  const bk=clBkAt(),li='<li><span class="td-k">Backup<\/span> <span>'+(bk?'The caseload was last backed up '+esc(clAgo(bk)):'The caseload has never been backed up')+': '+L.length+' student'+(L.length===1?'':'s')+' kept on this iPad only<\/span> <button type="button" id="tdBk">Back up<\/button><\/li>';
+  const bk=clBkAt(),li='<li><span class="td-k">Backup<\/span> <span>'+(bk?'The caseload was last backed up '+esc(clAgo(bk)):'The caseload has never been backed up')+': '+L.length+' student'+(L.length===1?'':'s')+' kept on this '+HERE+' only<\/span> <button type="button" id="tdBk">Back up<\/button><\/li>';
   const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('beforeend',li);else{const p=b.querySelector('.hp-lead');(p||b).insertAdjacentHTML(p?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}catch(e){}};}
 /* Today's new items: PA-1's reassessment date, assent from DD-1, the level set for going back to the plan after exit
    (PR-1, against DD-1's days since the exit); a maintenance probe on DD-1 counts as the check after exit */
@@ -4769,10 +4833,10 @@ $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))ready
 /* v21.83 More: Save packet, Open packet, Case as spreadsheet, Diagnostics and Finish PDF, on a screen 1194 px wide or less;
    each runs the bar's own button, which stays where it was on a wider screen */
 {const M=document.createElement('div');M.id='moreMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
-  const ITEMS=[['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
+  const ITEMS=[['saveFile','Save case to a file'],['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
   const shut=()=>{M.hidden=true;$('#moreBtn').setAttribute('aria-expanded','false');};
   $('#moreBtn').addEventListener('click',e=>{e.stopPropagation();if(!M.hidden){shut();return;}
-    M.innerHTML=ITEMS.map(([id,n])=>'<button type="button" role="menuitem" data-more="'+id+'">'+n+'</button>').join('');
+    M.innerHTML=ITEMS.filter(([id])=>{const b=document.getElementById(id);return !(b&&b.hidden&&id==='saveFile');}).map(([id,n])=>'<button type="button" role="menuitem" data-more="'+id+'">'+n+'</button>').join('');
     const r=$('#moreBtn').getBoundingClientRect();M.hidden=false;const w=M.offsetWidth;M.style.top=Math.round(r.bottom+6)+'px';M.style.left=Math.max(8,Math.min(innerWidth-w-8,Math.round(r.right-w)))+'px';
     $('#moreBtn').setAttribute('aria-expanded','true');const f=M.querySelector('button');if(f)f.focus();});
   M.addEventListener('click',e=>{const b=e.target.closest('[data-more]');if(!b)return;shut();const o=document.getElementById(b.dataset.more);if(o)o.click();});
@@ -4832,19 +4896,19 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
 /* a student not saved for the weeks chosen is forgotten here (never one kept here and not yet in a file) */
 async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await clList()||[],cut=Date.now()-n*7*864e5,me=clKey(packet());
   const old=L.filter(r=>r.key!==me&&!r.unfiled&&Date.parse(r.saved)<cut);for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
-  if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this iPad (their case files are not touched).',{ms:9000});return old.length;}
+  if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
 async function clRemoveAll(){const L=await clList()||[];
-  if(!(await wsUI.confirm('Remove every student’s data from this iPad?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
+  if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
   const unf=L.filter(r=>r.unfiled);
-  if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this iPad. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
+  if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
-  wsUI.toast('Every student’s data is removed from this iPad. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
+  wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
 /* the last safety copy before the page closed could not be kept (storage full): said when the workstation next opens */
 setTimeout(()=>{try{const t=localStorage.getItem('nbh.stash.fail');if(t){localStorage.removeItem('nbh.stash.fail');
-  wsUI.toast('When the workstation last closed, its final safety copy could not be kept (this iPad’s storage was full). Save case often, and delete old safety copies in Autosave.',{kind:'warn',ms:15000});}}catch(e){}},2500);
+  wsUI.toast('When the workstation last closed, its final safety copy could not be kept (this '+HERE+'’s storage was full). Save case often, and delete old safety copies in Autosave.',{kind:'warn',ms:15000});}}catch(e){}},2500);
 /* keep the case on this iPad (the caseload copy) without writing a file: to switch students now and save the files later */
 async function caseKeepOnly(){const p=packet();if(!clKey(p)||clOff())return false;
   const open=Object.keys(state.frames).filter(id=>!state.pending[id]),kept=Object.keys(state.pending);let forms={};const late=[];
@@ -4891,7 +4955,7 @@ async function clRestraintRows(){const L=await clList()||[],rows=[],tot=[];const
   rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));return {rows,tot};}
 async function clRestraintOpen(){const {rows,tot}=await clRestraintRows();
   dialog('Restraint and seclusion, across the caseload',
-    '<p class="hp-lead">From the students kept on this iPad, each as at their last save: Form DD-1’s incidents marked restraint or seclusion and Form CR-1’s notices. For the district’s reporting, check each against the student’s Form CR-1.<\/p>'+
+    '<p class="hp-lead">From the students kept on this '+HERE+', each as at their last save: Form DD-1’s incidents marked restraint or seclusion and Form CR-1’s notices. For the district’s reporting, check each against the student’s Form CR-1.<\/p>'+
     (tot.length?'<p>This semester: '+tot.map(t=>'<b>'+esc(t.who)+'<\/b> '+t.semester+(t.last?' (last '+esc(tdMd(t.last))+')':'')).join('; ')+'.<\/p>':'')+
     (rows.length?'<div class="cl-wrap"><table class="cl-tbl"><tr><th>Student<\/th><th>Date<\/th><th>Kind<\/th><th>Behavior<\/th><th>Notices done<\/th><th>Overdue<\/th><\/tr>'+rows.map(x=>'<tr><td>'+esc(x.who)+'<\/td><td>'+esc(x.date)+(x.time?' '+esc(x.time):'')+'<\/td><td>'+esc(x.kind)+'<\/td><td>'+esc(x.beh)+'<\/td><td>'+(x.notices?x.done+' of '+x.notices:'none recorded')+'<\/td><td>'+(x.late?'<b>'+x.late+'<\/b>':'')+'<\/td><\/tr>').join('')+'<\/table><\/div>'
       :'<p>No restraint or seclusion is recorded for the students kept here.<\/p>')+
@@ -4902,8 +4966,8 @@ async function clRestraintCsv(){const {rows}=await clRestraintRows();const q=v=>
   if(typeof PWA!=='undefined'&&PWA.shareHow)await PWA.shareHow(a);}
 /* what changed since the last save: the case on screen against its copy on this iPad */
 async function changesOpen(){const p=packet(),key=clKey(p),r=key&&(await clList()||[]).find(x=>x.key===key);
-  if(!r){alert('There is no earlier save of this student on this iPad yet. Save case once; later, this compares the case with that save.');return;}
-  let d=null;try{d=parseCase(r.text);}catch(e){}if(!d){alert('The copy on this iPad could not be read.');return;}
+  if(!r){alert('There is no earlier save of this student on this '+HERE+' yet. Save case once; later, this compares the case with that save.');return;}
+  let d=null;try{d=parseCase(r.text);}catch(e){}if(!d){alert('The copy on this '+HERE+' could not be read.');return;}
   const old=d.forms||{},of=d.facts||{};try{await gatherFacts(false);}catch(e){}const nf=state.facts||{},L=[];
   const ids=[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending),Object.keys(old)))];
   for(const id of ids){const was=old[id]&&old[id].snap,nowIn=state.frames[id]||state.pending[id];
@@ -4938,7 +5002,7 @@ function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{
   return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||'',svc:svcText(f)};}
 function iepHTML(){const P=iepParts(),p=packet(),sec=(h,b)=>b?'<h2>'+h+'<\/h2>'+b:'',para=t=>t?'<p>'+esc(t)+'<\/p>':'';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>IEP meeting: behavior'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555}ol{margin:0;padding-left:18pt}li{margin:0 0 4pt}@media print{body{margin:0}}<\/style><\/head><body>'+
-    '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?'Grade '+p.grade:'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
+    '<h1>IEP Meeting: Behavior<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?gradeWords(p.grade):'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+(P.iep?' · IEP date '+esc(P.iep):'')+'<\/p>'+
     sec('Present levels of behavior',para(P.present))+sec('Goals',P.goals.length?'<ol>'+P.goals.map(x=>'<li>'+esc(x)+'<\/li>').join('')+'<\/ol>':'')+sec('The behavior intervention plan',para(P.plan))+
     sec('Behavior services',para(P.svc))+sec('Progress',para(P.prog))+sec('Safety',para(P.safety))+sec('Next',para(P.next?'Next plan review: '+P.next+'.':''))+
     '<p class="s" style="margin-top:14pt">Written from the forms in this case. A draft for the team: read it against the forms and the data before the meeting.<\/p><\/body><\/html>';}
@@ -4960,22 +5024,22 @@ $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clExpire'){try{loc
 /* the caseload dialog: the calendar, the restraint report, the files not saved yet, the privacy row */
 {const co5=caseloadOpen;caseloadOpen=async function(){await clExpire();await co5.apply(this,arguments);const b=$('#dlgBody'),t=b&&b.querySelector('#clTools');if(!t||b.querySelector('#clPriv'))return;
   const L=await clList()||[],unf=L.filter(r=>r.unfiled),ex=clExpireDays();
-  t.insertAdjacentHTML('beforeend',(unf.length?'<div class="cl-note"><b>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this iPad but not yet in a file.<\/b> Save each file before the end of the day:<ul class="td-list">'+unf.map(r=>'<li><span>'+esc(clName(r))+', kept '+esc(clAgo(r.saved))+'<\/span> <button type="button" class="primary" data-clfile="'+esc(r.key)+'">Save the file<\/button><\/li>').join('')+'<\/ul><\/div>':'')+
+  t.insertAdjacentHTML('beforeend',(unf.length?'<div class="cl-note"><b>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this '+HERE+' but not yet in a file.<\/b> Save each file before the end of the day:<ul class="td-list">'+unf.map(r=>'<li><span>'+esc(clName(r))+', kept '+esc(clAgo(r.saved))+'<\/span> <button type="button" class="primary" data-clfile="'+esc(r.key)+'">Save the file<\/button><\/li>').join('')+'<\/ul><\/div>':'')+
     '<p class="td-more"><button type="button" id="clCal"'+(L.length?'':' disabled')+'>Deadlines to the Calendar (.ics)<\/button> <button type="button" id="clRestr"'+(L.length?'':' disabled')+'>Restraint and seclusion report<\/button><\/p>'+
-    '<p class="td-more" id="clPriv"><label class="cl-opt">Forget a student not saved for <select id="clExpire"><option value="0"'+(!ex?' selected':'')+'>never<\/option><option value="4"'+(ex===4?' selected':'')+'>4 weeks<\/option><option value="8"'+(ex===8?' selected':'')+'>8 weeks<\/option><option value="12"'+(ex===12?' selected':'')+'>12 weeks<\/option><\/select><\/label> <button type="button" class="danger" id="clRemoveAll">Remove all student data from this iPad<\/button><\/p>');};}
+    '<p class="td-more" id="clPriv"><label class="cl-opt">Forget a student not saved for <select id="clExpire"><option value="0"'+(!ex?' selected':'')+'>never<\/option><option value="4"'+(ex===4?' selected':'')+'>4 weeks<\/option><option value="8"'+(ex===8?' selected':'')+'>8 weeks<\/option><option value="12"'+(ex===12?' selected':'')+'>12 weeks<\/option><\/select><\/label> <button type="button" class="danger" id="clRemoveAll">Remove all student data from this '+HERE+'<\/button><\/p>');};}
 /* switching students: keep the case on this iPad and switch, save the file first, or switch anyway */
 {const cg5=caseloadGo;caseloadGo=async function(key,form){const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
   if(open&&key!==clKey(packet())&&caseDirty()&&clKey(packet())&&!clOff()){const r=(await clList()||[]).find(x=>x.key===key);if(!r)return cg5.apply(this,arguments);
-    const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has work not saved to a file yet.',[{v:'keep',label:'Keep it on this iPad and switch',kind:'primary'},{v:'save',label:'Save the file first'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],
-      'Keep it on this iPad: the caseload holds it (and Caseload offers its file to save before the end of the day). Switch anyway: the work stays only in this iPad’s safety copy.');
+    const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has work not saved to a file yet.',[{v:'keep',label:'Keep it on this '+HERE+' and switch',kind:'primary'},{v:'save',label:'Save the file first'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],
+      'Keep it on this '+HERE+': the caseload holds it (and Caseload offers its file to save before the end of the day). Switch anyway: the work stays only in this '+HERE+'’s safety copy.');
     if(!c)return;
-    if(c==='keep'){let ok=false;try{ok=await caseKeepOnly();}catch(e){ok=false;}if(!ok){wsUI.toast('The case could not be kept on this iPad, so nothing was switched.',{kind:'warn'});return;}state.lastSig=caseSig();}
+    if(c==='keep'){let ok=false;try{ok=await caseKeepOnly();}catch(e){ok=false;}if(!ok){wsUI.toast('The case could not be kept on this '+HERE+', so nothing was switched.',{kind:'warn'});return;}state.lastSig=caseSig();}
     else if(c==='save'){let ok=false;try{ok=await saveCase();}catch(e){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was switched.',{kind:'warn'});return;}}
     try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null,{asked:true,quiet:true});if(form)try{openForm(form);}catch(e){}paintBlank();return;}
   return cg5.apply(this,arguments);};}
 /* Today: the IEP packet and what changed; the students kept here not yet in a file */
 {const to5=todayOpen;todayOpen=async function(){await to5.apply(this,arguments);try{const b=$('#dlgBody'),p=b&&b.querySelector('.td-more');if(p&&!b.querySelector('#tdIep'))p.insertAdjacentHTML('beforeend',' <button type="button" id="tdIep">IEP meeting packet<\/button> <button type="button" id="tdChanges">What changed since the last save<\/button>');
-  const unf=(await clList()||[]).filter(r=>r.unfiled&&r.key!==clKey(packet()));if(unf.length&&b&&!b.querySelector('#tdFiles')){const li='<li id="tdFiles"><span class="td-k">Files<\/span> <span>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this iPad but not saved to a file: '+esc(unf.map(clName).join(', '))+'<\/span> <button type="button" id="tdCaseload">Caseload<\/button><\/li>';
+  const unf=(await clList()||[]).filter(r=>r.unfiled&&r.key!==clKey(packet()));if(unf.length&&b&&!b.querySelector('#tdFiles')){const li='<li id="tdFiles"><span class="td-k">Files<\/span> <span>'+unf.length+' student'+(unf.length===1?'':'s')+' kept on this '+HERE+' but not saved to a file: '+esc(unf.map(clName).join(', '))+'<\/span> <button type="button" id="tdCaseload">Caseload<\/button><\/li>';
     const ul=b.querySelector('.td-list');if(ul)ul.insertAdjacentHTML('afterbegin',li);else{const h=b.querySelector('.hp-lead');(h||b).insertAdjacentHTML(h?'afterend':'afterbegin','<ul class="td-list">'+li+'<\/ul>');}}}catch(e){}};}
 /* the start screen with no case open: the caseload, what needs you, a new student */
 async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=card.querySelector('#blankCl');if(!x){x=document.createElement('div');x.id='blankCl';card.insertBefore(x,card.firstChild);}
@@ -4983,7 +5047,7 @@ async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=c
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
   const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(i=>all.push(Object.assign({who:clName(r),key:r.key},i))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   x.hidden=false;card.classList.add('has-cl');
-  x.innerHTML='<h2>Your caseload on this iPad<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
+  x.innerHTML='<h2>Your caseload on this '+HERE+'<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
     '<div class="bl-st">'+L.slice(0,12).map(r=>{const it=(r.sum&&r.sum.items)||[],top=it.slice().sort((a,b)=>clRank(a.k)-clRank(b.k))[0];return '<button type="button" class="bl-stu" data-clopen="'+esc(r.key)+'"><b>'+esc(clName(r))+'<\/b><span>'+(top?esc(top.k)+' · ':'')+esc(clAgo(r.saved))+(r.unfiled?' · not in a file':'')+'<\/span><\/button>';}).join('')+'<\/div>'+
     '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
 $('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]');if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
@@ -5000,14 +5064,14 @@ function paintBadge(){const b=$('#todayBtn');if(!b)return;let s=b.querySelector(
 setInterval(()=>{try{paintBadge();}catch(e){}},15000);
 /* Find a form or command: the students kept here too ("Mat" opens Mateo's case) */
 {const pl5=palList;palList=function(q){const r=pl5.apply(this,arguments);const s=String(q||'').trim().toLowerCase();if(!s)return r;
-  const st=(CL5.list||[]).filter(x=>(String(x.client||'')+' '+String(x.sid||'')).toLowerCase().includes(s)).slice(0,6).map(x=>({id:'',n:'Open '+clName(x)+'’s case',s:'student on this iPad',go:()=>caseloadGo(x.key,''),hay:''}));
+  const st=(CL5.list||[]).filter(x=>(String(x.client||'')+' '+String(x.sid||'')).toLowerCase().includes(s)).slice(0,6).map(x=>({id:'',n:'Open '+clName(x)+'’s case',s:'student on this '+HERE+'',go:()=>caseloadGo(x.key,''),hay:''}));
   return st.concat(r).slice(0,40);};}
 {const po5=palOpen;palOpen=function(){const r=po5.apply(this,arguments);clList().then(L=>{CL5.list=L||[];if($('#pal').classList.contains('on'))palDraw();}).catch(()=>{});return r;};}
 setTimeout(()=>{CMDS.push({k:'iep meeting packet present levels plaafp goals copy print',n:'IEP meeting packet: present levels, goals, the plan, progress',s:'command',go:()=>iepOpen()},
   {k:'what changed since last save compare differences',n:'What changed since the last save',s:'command',go:()=>changesOpen()},
   {k:'calendar ics deadlines caseload reviews iep reevaluation',n:'Caseload deadlines to the Calendar (.ics)',s:'command',go:()=>clCalendar()},
   {k:'restraint seclusion report district caseload notices',n:'Restraint and seclusion report (the caseload)',s:'command',go:()=>clRestraintOpen()},
-  {k:'remove delete all student data privacy ipad',n:'Remove all student data from this iPad',s:'command',go:()=>clRemoveAll()});},0);   /* the commands list is made further down the page */
+  {k:'remove delete all student data privacy ipad',n:'Remove all student data from this '+HERE+'',s:'command',go:()=>clRemoveAll()});},0);   /* the commands list is made further down the page */
 /* ================= v21.86 email from the BCBA's school Google account, and the replies brought in for the whole caseload =================
    A form (IA-1, IN-1, SV-1, CF-1) asks the workstation to send its invitations: one email per person, from the account the
    BCBA signs in with (Google's own window, opened by the tap on Sign in and send), through Gmail. The emails go from that
@@ -5056,7 +5120,7 @@ async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answe
   const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
   if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
   if(EMBED){answer({unavailable:true,why:'The one-file edition cannot sign in to Google; use the website edition to send from your school account.'});return;}
-  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this iPad (Form DD-1, Google Sheet, gives it once).'});return;}
+  if(!clGid()){answer({unavailable:true,why:'The Google sign-in key is not set on this '+HERE+' (Form DD-1, Google Sheet, gives it once).'});return;}
   if(GM.busy){answer({unavailable:true,why:'Another set of emails is being sent; try again in a moment.'});return;}
   clGsiLoad().catch(()=>{});
   const go=await new Promise(res=>{const dlg=$('#cfDlg');$('#cfTitle').textContent='Send '+L.length+' email'+(L.length===1?'':'s')+' from your school account?';
@@ -5069,7 +5133,7 @@ async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answe
     if(!gmTok()&&!(window.google&&google.accounts&&google.accounts.oauth2)){ok.disabled=true;ok.textContent='Loading Google’s sign-in…';
       clGsiLoad().then(()=>{ok.disabled=false;ok.textContent='Sign in and send';},e=>{ok.textContent='Google’s sign-in could not load';$('#cfBody').textContent+='\n\n'+((e&&e.message)||'Google’s sign-in could not be loaded.')+' Use the Mail app instead, or try again with the internet on.';});}
     /* the sign-in opens Google's window, so it is started in this tap, before anything is awaited */
-    ok.onclick=()=>{if(gmTok()){done(gmTok());return;}gmSignIn().then(t=>done(t)).catch(e=>done({err:e&&e.message==='nokey'?'The Google sign-in key is not set on this iPad.':(e&&e.message||String(e))}));};
+    ok.onclick=()=>{if(gmTok()){done(gmTok());return;}gmSignIn().then(t=>done(t)).catch(e=>done({err:e&&e.message==='nokey'?'The Google sign-in key is not set on this '+HERE+'.':(e&&e.message||String(e))}));};
     f.appendChild(c);f.appendChild(mailApp);f.appendChild(ok);dlg.oncancel=e=>{e.preventDefault();done(null);};dlg.showModal();ok.focus();});
   if(!go){answer({unavailable:true,why:'Not sent from your school account.',declined:true});return;}
   if(go==='app'){answer({unavailable:true,why:'The Mail app, one person at a time.'});return;}
@@ -5110,7 +5174,7 @@ async function clReplyOne(r,id,fn,d){const me=clKey(packet());
     const fo=await grab(id,'facts?',null,5000,fr);
     const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {err:'their case was saved again meanwhile; collect once more'};
     d.forms[id]=Object.assign({},d.forms[id],{snap:sn.snap});clMergeOut(d,id,fo&&fo.facts);
-    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();await clTx('readwrite',st=>st.put(r));return g;}
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);r.read=new Date().toISOString();if(typeof drvDirty==='function')drvDirty(r);await clTx('readwrite',st=>st.put(r));return g;}
   catch(e){return {err:String(e&&e.message||e)};}
   finally{window.__clRfWin=null;if(fr)fr.remove();}}
 async function clRepliesAll(quiet){const L=await clList()||[],todo=[];L.forEach(r=>clBoxForms(r).forEach(([id,fn,d])=>todo.push({r,id,fn,d})));
@@ -5277,7 +5341,7 @@ const CMDS=[
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
   {k:'today what needs me due incidents aim integrity',n:'Today: what needs me in this case',s:'command',go:()=>todayOpen()},
-  {k:'caseload students all cases dashboard overdue across',n:'Caseload: every student on this iPad',s:'command',go:()=>caseloadOpen()},
+  {k:'caseload students all cases dashboard overdue across',n:'Caseload: every student on this '+HERE+'',s:'command',go:()=>caseloadOpen()},
   {k:'end of week friday packet week summary blank sheet point sheets print',n:'End of the week: the summary, next week\u2019s sheet and the point sheets in one print',s:'command',go:()=>endOfWeek()},
   {k:'ready to start plan begin trained staff criterion adoption notice fit social validity',n:'Ready to start: what the plan still needs before it begins',s:'command',go:()=>readyOpen()},
   {k:'hand over handover ready check close case missing consent definitions crisis photo',n:'Hand-over check: what the case is missing',s:'command',go:()=>handoverOpen()},
@@ -5393,6 +5457,302 @@ async function bootEmbedded(){
 renderRail();who();chip();if(EMBED)setTimeout(bootEmbedded,300);else setTimeout(autoOffer,300);
 /* on a narrow window with nothing open yet, start with the list showing */
 if(NARROW.matches&&!state.cur) setRail(true);
+</script>
+<script id="nbh-drive">
+/* ================= v21.89 the caseload in Google Drive: the same students on the iPad and the laptop =================
+   Use Google Drive (Caseload) keeps every student of the caseload in a folder of the school Google Drive as well as on this
+   device, one file per student, so the iPad and the laptop hold the same students and each opens the newest copy. The
+   workstation reaches only the files it made there (the drive.file permission); nothing goes anywhere but that account.
+   Save case keeps the case here and sends it to Drive (no file to download while Drive is in use; Save case to a file in More
+   still writes one). Opening a student first gets that student's newest copy. Each copy carries the device and the time of
+   its save, and the Drive version it was made from, so a copy changed on two devices without the other is never overwritten:
+   the workstation asks which to keep, and the other goes to the Replaced copies folder in Drive. Saved with no internet, or
+   with the hour of Google's sign-in over, a copy waits on this device (the Drive chip says so) and goes up at the next sign-in,
+   which Save case asks for by itself. Removing a student everywhere leaves a marker in Drive that the other devices follow. */
+const DRV={busy:false,again:false,folder:'',old:'',last:0,err:'',wait:0,conf:{},reask:false,declined:false,signing:null,newerOff:''};
+const DRV_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
+const DAPI='https://www.googleapis.com/drive/v3/files',DUP='https://www.googleapis.com/upload/drive/v3/files';
+const DRV_FOLDER='FBA-BIP Workstation cases',DRV_OLD='Replaced copies';
+const drvLs=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||'';if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){}return '';};
+const drvAvail=()=>!EMBED&&!!window.isSecureContext&&/^https?:$/.test(location.protocol)&&!!(window.crypto&&crypto.subtle);
+const drvOn=()=>drvAvail()&&drvLs('nbh.drive.on')==='1'&&!clOff();
+const drvAcct=()=>drvLs('nbh.drive.acct');
+const drvTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.drive')||'null');return t&&t.tok&&t.exp>Date.now()+60000?t:null;}catch(e){return null;}};
+const drvTokOff=()=>{try{sessionStorage.removeItem('nbh.google.drive');}catch(e){}};
+function drvDevGuess(){const u=navigator.userAgent||'';if(/iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))return 'iPad';if(/iPhone/.test(u))return 'iPhone';
+  if(/Android/.test(u))return /Mobile/.test(u)?'Android phone':'Android tablet';if(/CrOS/.test(u))return 'Chromebook';if(/Macintosh|Mac OS X/.test(u))return 'Mac';if(/Windows/.test(u))return 'Windows computer';return 'computer';}
+const drvDev=()=>drvLs('nbh.drive.dev')||drvDevGuess();
+const drvKey=r=>{const n=String(r.client||'').trim().toLowerCase().replace(/\s+/g,' '),s=String(r.sid||'').trim();return n||s?s+'|'+n:'';};
+async function drvHash(s){const b=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(s))));return Array.from(b.slice(0,20),x=>x.toString(16).padStart(2,'0')).join('');}
+const drvSkip=()=>{try{return JSON.parse(drvLs('nbh.drive.skip')||'{}')||{};}catch(e){return {};}};
+const drvSkipSet=o=>drvLs('nbh.drive.skip',JSON.stringify(o));
+const drvGone=()=>{try{return JSON.parse(drvLs('nbh.drive.gone')||'[]')||[];}catch(e){return [];}};
+const drvGoneSet=a=>drvLs('nbh.drive.gone',a.length?JSON.stringify(a):null);
+function drvWhen(iso){const t=new Date(iso);if(isNaN(t))return '';const tm=t.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}).toLowerCase().replace(/\s/g,' ');
+  const n=tdDays(t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'));
+  return n===0?'today at '+tm:n===1?'yesterday at '+tm:t.toLocaleDateString([],{month:'short',day:'numeric'})+' at '+tm;}
+const drvOnDev=d=>!d?'':d===drvDev()?'on this '+d:'on the '+d;
+/* the sign-in: Google's own window, opened by the tap itself (nothing awaited before it); kept for this tab only */
+function drvSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('nokey'));return;}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
+  try{google.accounts.oauth2.initTokenClient({client_id:id,scope:DRV_SCOPE,login_hint:drvAcct()||undefined,
+      callback:r=>{if(!(r&&r.access_token)){rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));return;}
+        let ok=true;try{if(google.accounts.oauth2.hasGrantedAllScopes)ok=google.accounts.oauth2.hasGrantedAllScopes(r,'https://www.googleapis.com/auth/drive.file');}catch(e){}
+        if(!ok){DRV.reask=true;drvTokOff();rej(new Error('Google’s window did not allow the workstation to keep its files in your Drive. Tap again and allow “See, edit, create and delete only the specific Google Drive files you use with this app”.'));return;}
+        DRV.reask=false;DRV.declined=false;const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.drive',JSON.stringify(t));}catch(e){}res(t);},
+      error_callback:e=>{if(e&&e.type==='popup_closed')DRV.declined=true;rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'));}}).requestAccessToken({prompt:DRV.reask?'consent':''});}
+  catch(e){rej(e);}});}
+async function drvWho(t){const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+t.tok}});if(!r.ok)throw new Error('Google did not say which account signed in');return String(((await r.json())||{}).email||'').toLowerCase();}
+/* a sign-in for the account this device keeps its caseload with (or, the first time, the one chosen) */
+async function drvSignInFor(){const p=DRV.signing;if(!p){if(drvTok())return drvAcct();throw drvErr('signin',{signin:true});}const t=await p;const who=await drvWho(t),acct=drvAcct();
+  if(acct&&who!==acct){drvTokOff();throw new Error('That was '+who+'. This device keeps its caseload in the Google Drive of '+acct+': sign in with that account.');}return who;}
+/* starts the sign-in inside a tap; what follows can await DRV.signing */
+function drvAsk(){if(DRV.signing)return DRV.signing;DRV.signing=drvSignIn();const p=DRV.signing;p.then(()=>{},()=>{}).then(()=>{setTimeout(()=>{if(DRV.signing===p)DRV.signing=null;},0);});return p;}
+const drvGsiReady=()=>!!(window.google&&google.accounts&&google.accounts.oauth2);
+const drvErr=(m,o)=>Object.assign(new Error(m),o||{});
+async function drvFetch(url,opt){const t=drvTok();if(!t)throw drvErr('signin',{signin:true});opt=opt||{};
+  let r;try{r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+t.tok},opt.headers||{})}));}catch(e){throw drvErr('net',{net:true});}
+  if(r.status===401){drvTokOff();throw drvErr('signin',{signin:true});}
+  if(r.status===404)throw drvErr('gone',{gone:true});
+  if(!r.ok){let j=null;try{j=await r.json();}catch(e){}const er=(j&&j.error)||{},msg=String(er.message||''),why=String(((er.errors||[])[0]||{}).reason||'');
+    if(/has not been used|is disabled|accessNotConfigured|SERVICE_DISABLED/i.test(msg+' '+why+' '+JSON.stringify(er.details||'')))throw drvErr('Google Drive is not turned on for the workstation’s Google project yet. In Google Cloud: APIs & Services, Library, Google Drive API, Enable. Then try again.',{setup:true});
+    if(r.status===403&&/insufficient|scope/i.test(msg+' '+why)){DRV.reask=true;drvTokOff();throw drvErr('Google asked for the Drive permission again: tap Drive and allow it.',{signin:true});}
+    if(r.status===403&&/storageQuota|quota/i.test(msg+' '+why))throw drvErr('The Google Drive is full.',{});
+    throw drvErr('Google Drive answered '+r.status+(msg?': '+msg:''),{status:r.status});}
+  return r;}
+const drvJson=async(url,opt)=>(await drvFetch(url,opt)).json();
+const drvQ=q=>'?q='+encodeURIComponent(q);
+async function drvFolderFind(kind,name,parent){
+  const q="mimeType='application/vnd.google-apps.folder' and appProperties has { key='nbh' and value='"+kind+"' } and trashed=false"+(parent?" and '"+parent+"' in parents":'');
+  const j=await drvJson(DAPI+drvQ(q)+'&orderBy=createdTime&fields=files(id)&pageSize=5');let id=j.files&&j.files[0]&&j.files[0].id;
+  if(!id){const m={name,mimeType:'application/vnd.google-apps.folder',appProperties:{nbh:kind}};if(parent)m.parents=[parent];
+    id=(await drvJson(DAPI+'?fields=id',{method:'POST',headers:{'Content-Type':'application/json; charset=UTF-8'},body:JSON.stringify(m)})).id;}
+  return id;}
+async function drvFolder(){if(!DRV.folder)DRV.folder=await drvFolderFind('cases',DRV_FOLDER,'');return DRV.folder;}
+async function drvOldFolder(){if(!DRV.old)DRV.old=await drvFolderFind('old',DRV_OLD,await drvFolder());return DRV.old;}
+async function drvList(){const fid=await drvFolder();
+  const q="'"+fid+"' in parents and trashed=false and (appProperties has { key='nbh' and value='case' } or appProperties has { key='nbh' and value='gone' })";
+  let out=[],pt='';do{const j=await drvJson(DAPI+drvQ(q)+'&fields=nextPageToken,files(id,name,version,modifiedTime,appProperties)&pageSize=200'+(pt?'&pageToken='+encodeURIComponent(pt):''));out=out.concat(j.files||[]);pt=j.nextPageToken||'';}while(pt);
+  return out;}
+function drvMultipart(meta,body){const b='nbh-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>x.toString(16).padStart(2,'0')).join('');
+  return {headers:{'Content-Type':'multipart/related; boundary='+b},body:'--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+body+'\r\n--'+b+'--'};}
+const drvName=r=>(String(r.client||'').trim()||'Case')+(r.sid?' ('+String(r.sid).trim()+')':'')+'.json';
+const drvBody=r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined},text:r.text||''});
+async function drvUpload(id,meta,body){const m=drvMultipart(meta,body);
+  return drvJson((id?DUP+'/'+id:DUP)+'?uploadType=multipart&fields=id,version,modifiedTime',{method:id?'PATCH':'POST',headers:m.headers,body:m.body});}
+async function drvRead(id){const t=await (await drvFetch(DAPI+'/'+id+'?alt=media')).text();let j=null;try{j=JSON.parse(t);}catch(e){}
+  if(!j||(j.nbh!=='case-sync'&&j.nbh!=='case-gone'))throw drvErr('A file in the Drive folder is not a workstation case.');return j;}
+/* a copy that is not kept goes to Replaced copies, so nothing is lost */
+async function drvKeepOld(r,why){const nm=(String(r.client||'').trim()||'Case')+' - '+why+' - '+new Date().toISOString().slice(0,16).replace('T',' ')+'.json';
+  await drvUpload('',{name:nm,parents:[await drvOldFolder()],mimeType:'application/json',appProperties:{nbh:'old'}},drvBody(r));}
+const drvLocal=async k=>(await clList()||[]).find(x=>x.key===k);
+const drvPutLocal=r=>clTx('readwrite',st=>st.put(r));
+/* this device's copy goes up (a new file, or over the one it was made from) */
+async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
+  const meta={name:drvName(r),mimeType:'application/json',appProperties:{nbh:'case',k,dev:r.dev||drvDev(),saved:String(r.saved||'').slice(0,24)}};
+  if(!id)meta.parents=[await drvFolder()];
+  let f;try{f=await drvUpload(id||'',meta,drvBody(r));}
+  catch(e){if(!(e&&e.gone&&id))throw e;meta.parents=[await drvFolder()];f=await drvUpload('',meta,drvBody(r));}   /* its file is gone from Drive: a new one */
+  const cur=await drvLocal(r.key);if(!cur)return f;
+  /* saved again here while it went up: that save follows this one, so it stands on the version just made and still waits */
+  const same=cur.text===text;cur.drv=Object.assign({},cur.drv||{},{id:f.id,at:new Date().toISOString()});
+  if(same){cur.drv.ver=String(f.version);cur.drv.dirty=false;}else if(String(cur.drv.ver||'')===String(base||''))cur.drv.ver=String(f.version);
+  await drvPutLocal(cur);
+  if(cur.key===clKey(packet())&&String(state.drvBase||'')===String(base||'')){state.drvBase=String(f.version);state.drvKey=cur.key;}
+  return f;}
+/* Drive's copy comes here */
+async function drvBring(f,r,j){j=j||await drvRead(f.id);const x=j.rec||{};
+  const key=clKey({client:x.client||'',sid:x.sid||''});if(!key)return null;
+  const rec=Object.assign({},r||{},{key,scope:clScope(),client:x.client||'',sid:x.sid||'',site:x.site||'',grade:x.grade||'',bcba:x.bcba||'',saved:x.saved||f.modifiedTime,
+    sum:x.sum||{items:[]},text:j.text,dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});
+  if(r&&r.key!==key)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
+  await drvPutLocal(rec);return rec;}
+/* both changed without the other: asked (interactive) or left for the chip */
+async function drvClash(r,f,k,opt,res){const j=await drvRead(f.id);
+  if(j.nbh!=='case-sync'){await drvPut(r,f.id,k);res.sent++;return;}
+  if(j.text===r.text){r.drv=Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false});await drvPutLocal(r);return;}
+  const rs=(j.rec&&j.rec.saved)||f.modifiedTime,rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device';
+  /* the first time this device joins: the newer save stays, the other goes to Replaced copies */
+  if(opt.first&&!(r.drv&&r.drv.id)){if(Date.parse(r.saved)>=Date.parse(rs)){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'older copy from the '+rd);await drvPut(r,f.id,k);res.sent++;}
+    else{await drvKeepOld(r,'older copy from the '+drvDev());await drvBring(f,r,j);res.got++;}res.both++;return;}
+  if(!opt.interactive){DRV.conf[r.key]=1;return;}
+  const lNew=Date.parse(r.saved)>=Date.parse(rs),other='the '+rd;
+  const c=await wsUI.choose(clName(r)+': two different copies\nThis '+drvDev()+' saved it '+drvWhen(r.saved)+'. '+other.charAt(0).toUpperCase()+other.slice(1)+' saved it '+drvWhen(rs)+'. Each was changed without the other. Which copy do you keep?',
+    [{v:'here',label:'Keep this '+drvDev()+'’s',kind:lNew?'primary':''},{v:'there',label:'Keep '+other+'’s',kind:lNew?'':'primary'},{v:'',label:'Decide later'}],
+    'The copy you do not keep goes to the Replaced copies folder in your Google Drive, so nothing is lost.');
+  if(!c){DRV.conf[r.key]=1;return;}delete DRV.conf[r.key];
+  if(c==='here'){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'not kept, from the '+rd);r.drv=Object.assign({},r.drv||{},{id:f.id,ver:String(f.version)});await drvPutLocal(r);
+    if(r.key===clKey(packet())){state.drvBase=String(f.version);state.drvKey=r.key;}await drvPut(r,f.id,k);res.sent++;}
+  else{await drvKeepOld(r,'not kept, from this '+drvDev());await drvBring(f,r,j);res.got++;}}
+/* one pass: the removals waiting here, then every student in Drive against every student here */
+async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
+  if(DRV.busy){DRV.again=DRV.again||opt;return null;}
+  if(!drvTok()){drvPaint();return null;}
+  if(navigator.onLine===false){drvPaint();return null;}
+  DRV.busy=true;DRV.err='';drvPaint();const res={sent:0,got:0,gone:0,both:0,names:[]};
+  try{
+    for(const g of drvGone()){try{await drvUpload(g.id,{appProperties:{nbh:'gone',dev:drvDev(),saved:new Date().toISOString().slice(0,24)}},JSON.stringify({nbh:'case-gone',v:1,at:new Date().toISOString(),dev:drvDev()}));}catch(e){if(!e.gone)throw e;}
+      drvGoneSet(drvGone().filter(x=>x.id!==g.id));}
+    const remote=await drvList(),L=await clList()||[],skip=drvSkip(),byK={},here={};
+    remote.forEach(f=>{const k=f.appProperties&&f.appProperties.k;if(!k)return;const o=byK[k];if(!o||String(f.modifiedTime)>String(o.modifiedTime))byK[k]=f;});
+    for(const r of L){const k=drvKey(r);if(k)here[await drvHash(k)]=r;}
+    for(const k of Object.keys(byK)){const f=byK[k],r=here[k],gone=f.appProperties.nbh==='gone';
+      if(!r){if(gone||(k in skip&&skip[k]===String(f.version)))continue;const n=await drvBring(f,null);if(n){res.got++;res.names.push(clName(n));}continue;}
+      const d=r.drv||{dirty:true};
+      if(!d.dirty){if(d.id===f.id&&String(d.ver)===String(f.version))continue;
+        if(gone){if(r.key===clKey(packet()))continue;   /* removed elsewhere while open here: left alone until it is closed or saved */
+          await clTx('readwrite',st=>st.delete(r.key));res.gone++;res.names.push(clName(r));continue;}
+        await drvBring(f,r);res.got++;res.names.push(clName(r));continue;}
+      if(d.id===f.id&&String(d.ver)===String(f.version)||gone&&d.id===f.id){await drvPut(r,f.id,k);res.sent++;continue;}
+      await drvClash(r,f,k,opt,res);}
+    /* here and not in Drive (new here, or its file was taken out of the folder): it goes up as a new file */
+    for(const k of Object.keys(here)){if(byK[k])continue;await drvPut(here[k],'',k);res.sent++;}
+    Object.keys(DRV.conf).forEach(key=>{if(!L.some(r=>r.key===key))delete DRV.conf[key];});
+  }catch(e){DRV.err=e&&e.signin?'':String(e&&e.message||e);if(e&&e.net)DRV.err='Google Drive could not be reached.';}
+  finally{DRV.busy=false;DRV.last=Date.now();drvPaint();drvNewerPaint();
+    if(res.got||res.gone){try{if($('#dlg').open&&$('#dlgBody').querySelector('.cl-tbl,#drvBox'))caseloadOpen();}catch(e){}try{if(!Object.keys(state.frames).length&&!Object.keys(state.pending).length)paintBlank();}catch(e){}}
+    if(DRV.again){const o=DRV.again;DRV.again=false;setTimeout(()=>drvSync(o===true?{}:o),50);}}
+  if(DRV.err&&opt.interactive)wsUI.toast('Google Drive: '+DRV.err,{kind:'warn',ms:12000});
+  return res;}
+let drvT=0;
+function drvSoon(interactive,ms){clearTimeout(drvT);drvT=setTimeout(()=>{drvSync({interactive:!!interactive});},ms==null?400:ms);drvPaint();}
+/* what Save case and the other writes call */
+function drvStamp(rec,old){rec.dev=drvDev();const od=old&&old.drv||null;
+  rec.drv={id:od&&od.id||'',ver:(state.drvKey===rec.key?state.drvBase:(od?od.ver:null))||null,dirty:true};
+  const k=drvKey(rec);if(k)drvHash(k).then(h=>{const s=drvSkip();if(h in s){delete s[h];drvSkipSet(s);}}).catch(()=>{});}
+function drvDirty(r){r.drv=Object.assign({id:'',ver:null},r.drv||{},{dirty:true});if(drvOn())drvSoon(false,1500);}
+const drvSaveMode=()=>drvOn();
+/* the chip: where this device stands with Drive */
+async function drvPaint(){const c=$('#drvChip'),sf=$('#saveFile');if(sf)sf.hidden=!drvOn();if(!c)return;if(!drvOn()){c.hidden=true;return;}c.hidden=false;
+  let L=[];try{L=await clList()||[];}catch(e){}DRV.wait=L.filter(r=>!r.drv||r.drv.dirty).length+drvGone().length;const nc=Object.keys(DRV.conf).length,tok=drvTok();
+  let t,k,ti;
+  if(DRV.busy){t='Drive: syncing…';k='busy';ti='Sending and getting the caseload’s changes.';}
+  else if(nc){t='Drive: '+nc+' to decide';k='warn';ti='A student was changed on two devices without the other. Tap to choose which copy to keep.';}
+  else if(navigator.onLine===false){t='Drive: offline'+(DRV.wait?' · '+DRV.wait+' waiting':'');k='off';ti='No internet. Saves stay on this '+drvDev()+' and go to Google Drive when it is back.';}
+  else if(!tok){t=DRV.wait?'Drive: '+DRV.wait+' waiting · sign in':'Drive: sign in';k=DRV.wait?'warn':'off';ti='Tap to sign in to Google ('+(drvAcct()||'your school account')+') and sync the caseload.';}
+  else if(DRV.err){t='Drive: problem';k='warn';ti=DRV.err+' Tap to try again.';}
+  else if(DRV.wait){t='Drive: '+DRV.wait+' waiting';k='busy';ti='Going up to Google Drive.';}
+  else{t='Drive ✓';k='on';ti='Every student on this '+drvDev()+' is in Google Drive ('+drvAcct()+')'+(DRV.last?', checked '+new Date(DRV.last).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'')+'. Tap to sync now.';}
+  c.textContent=t;c.className='chip '+k;c.title=ti;c.setAttribute('aria-label',t+'. '+ti);}
+async function drvChipTap(){if(!drvOn())return;
+  if(!drvTok()){if(!drvGsiReady()){clGsiLoad().catch(()=>{});wsUI.toast('Loading Google’s sign-in. Tap Drive again in a moment.');return;}
+    drvAsk();try{await drvSignInFor();}catch(e){if(e&&e.message!=='nokey')wsUI.toast(e.message,{kind:'warn',ms:10000});drvPaint();return;}}
+  const r=await drvSync({interactive:true});if(r&&!DRV.err)wsUI.toast(drvSay(r),{kind:'ok'});}
+const drvSay=r=>{const b=[];if(r.sent)b.push(r.sent+' sent');if(r.got)b.push(r.got+' brought here'+(r.names.length&&r.names.length<=3?' ('+r.names.join(', ')+')':''));if(r.gone)b.push(r.gone+' removed (removed on another device)');
+  return 'Google Drive: '+(b.length?b.join(', '):'everything already the same')+'.';};
+/* the case on screen when a newer copy of it came from another device */
+async function drvNewerPaint(){const bar=$('#drvBar');if(!bar)return;const k=clKey(packet()),open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  let r=null;if(drvOn()&&k&&open&&state.drvKey===k){try{r=await drvLocal(k);}catch(e){}}
+  const v=r&&r.drv&&!r.drv.dirty&&r.drv.ver?String(r.drv.ver):'';
+  const newer=!!v&&v!==String(state.drvBase||'')&&(state.drvBase?true:!!(r.dev&&r.dev!==drvDev()&&Date.parse(r.saved)>(state.drvOpenAt||0)))&&DRV.newerOff!==k+'@'+v;
+  bar.hidden=!newer;if(!newer)return;
+  $('#drvBarText').textContent=clName(r)+' was saved '+drvOnDev(r.dev||'other device')+' '+drvWhen(r.saved)+', after this copy was opened here.'+(caseDirty()?' Your changes here are not saved yet.':'');
+  bar.dataset.key=k;bar.dataset.ver=r.drv.ver;}
+/* the student on screen: the version of Drive it stands on */
+{const oc9=openCaseText;openCaseText=async function(text,handle,opt){const out=await oc9.apply(this,arguments);
+  try{let d=null;try{d=parseCase(text);}catch(e){}const k=clKey(packet()),rec=k&&await drvLocal(k);state.drvBase=null;state.drvKey=k||'';state.drvOpenAt=Date.now();
+    if(rec&&rec.drv&&d){let rd=null;try{rd=parseCase(rec.text);}catch(e){}
+      if(rec.text===text||(rd&&d.saved&&rd.saved&&Math.abs(Date.parse(rd.saved)-Date.parse(d.saved))<120000))state.drvBase=rec.drv.ver||null;}}catch(e){}
+  drvNewerPaint();return out;};}
+{const cc9=clearCase;clearCase=async function(){const r=await cc9.apply(this,arguments);state.drvBase=null;state.drvKey='';drvNewerPaint();return r;};}
+/* opening a student gets their newest copy first */
+const drvIdle=async()=>{for(let i=0;i<300&&DRV.busy;i++)await new Promise(r=>setTimeout(r,100));};
+{const cg9=caseloadGo;caseloadGo=async function(key,form){
+  if(drvOn()){if(DRV.signing){try{await drvSignInFor();}catch(e){wsUI.toast((e&&e.signin?'Not signed in to Google.':e.message)+' This copy may not be the newest.',{kind:'warn',ms:9000});}}
+    if(drvTok()){try{await drvIdle();await drvSync({interactive:true});await drvIdle();}catch(e){}}}
+  return cg9.apply(this,arguments);};}
+/* a tap that will save or open asks for Google's sign-in in the tap itself, when the hour is over */
+document.addEventListener('click',e=>{if(!drvOn()||drvTok()||DRV.signing||!drvGsiReady()||!clGid())return;
+  const t=e.target.closest&&e.target.closest('#saveCase,#saveQuick,#closeCase,#pwaSave,[data-clopen],#blDrive');if(!t)return;
+  if(DRV.declined&&!t.matches('#blDrive'))return;
+  drvAsk();drvSignInFor().then(()=>drvSoon(true,200)).catch(err=>{drvPaint();if(t.matches('#blDrive'))wsUI.toast(err.message,{kind:'warn',ms:10000});});},true);
+/* Use Google Drive: the first time on this device */
+async function drvLink(){if(!drvAvail()){alert('Google Drive works when the workstation is opened from its web address.');return;}
+  if(!clGid()){const v=await wsUI.prompt('The Google key\nPaste the Client ID from Google Cloud (the same one you use on your other device; it ends in .apps.googleusercontent.com). Then tap Use Google Drive again.',{ok:'Keep it',placeholder:'1234567890-abc.apps.googleusercontent.com',label:'Google Client ID'});
+    if(v&&/\.apps\.googleusercontent\.com\s*$/.test(v.trim())){try{localStorage.setItem('nbh.google.client',v.trim());}catch(e){}clGsiLoad().catch(()=>{});wsUI.toast('The Google key is kept on this device. Tap Use Google Drive again.',{kind:'ok'});}
+    else if(v)alert('That does not look like a Client ID: it ends in .apps.googleusercontent.com.');return;}
+  if(!drvGsiReady()){clGsiLoad().catch(()=>{});wsUI.toast('Loading Google’s sign-in. Tap Use Google Drive again in a moment.');return;}
+  const ask=drvAsk();let t,who;try{t=await ask;who=await drvWho(t);}catch(e){if(e&&e.message!=='nokey')alert(e.message);return;}
+  if(/@(gmail|googlemail)\.com$/i.test(who)&&!(await wsUI.confirm('That is a personal Google account\n'+who+' is not a school account. Student records belong in your school Google Drive. Keep the caseload in this account anyway?',{ok:'Use it anyway',cancel:'Cancel',danger:true}))){drvTokOff();return;}
+  if(drvAcct()&&drvAcct()!==who&&!(await wsUI.confirm('A different account\nThis device kept its caseload with '+drvAcct()+' before. Use '+who+' from now on?',{ok:'Use '+who}))){drvTokOff();return;}
+  drvLs('nbh.drive.acct',who);drvLs('nbh.drive.on','1');DRV.folder='';DRV.old='';
+  const r=await drvSync({interactive:true,first:true});
+  if(r&&!DRV.err)wsUI.toast('Google Drive is in use on this '+drvDev()+' ('+who+'). '+drvSay(r).replace(/^Google Drive: /,'')+(r.both?' '+r.both+' student'+(r.both===1?' was':'s were')+' on both devices: the newer save of each is kept, the other is in Replaced copies.':''),{kind:'ok',ms:12000});
+  try{caseloadOpen();}catch(e){}}
+async function drvUnlink(){if(!(await wsUI.confirm('Stop using Google Drive on this '+drvDev()+'?\nThe students stay on this '+drvDev()+' and in your Google Drive; this '+drvDev()+' no longer sends or gets changes. Save case writes a file again.',{ok:'Stop'})))return;
+  drvLs('nbh.drive.on',null);drvTokOff();DRV.folder='';DRV.old='';DRV.conf={};drvPaint();drvNewerPaint();try{caseloadOpen();}catch(e){}}
+/* the Caseload dialog: its Drive section, where each student was saved, removal everywhere or here */
+function drvBoxHtml(){if(!drvAvail())return '';
+  if(!drvOn())return '<div class="cl-drive" id="drvBox"><b>Google Drive</b> <span>Keep this caseload in your school Google Drive as well, so the iPad and the laptop show the same students and each opens the newest copy. Only your account sees it.<\/span> <button type="button" class="primary" id="drvLink">Use Google Drive<\/button><\/div>';
+  const tok=drvTok(),nc=Object.keys(DRV.conf).length;
+  return '<div class="cl-drive on" id="drvBox"><b>Google Drive<\/b> <span>'+esc(drvAcct())+' · this device: <b>'+esc(drvDev())+'<\/b> <button type="button" class="sm" id="drvRename">Rename<\/button><\/span>'+
+    '<span class="hint" id="drvState">'+(nc?nc+' student'+(nc===1?'':'s')+' to decide (tap Sync now). ':'')+(DRV.wait?DRV.wait+' waiting to go up. ':'')+(DRV.err?esc(DRV.err)+' ':'')+(!tok?'Signed out (Google’s sign-in lasts an hour). ':DRV.last?'Last sync '+esc(new Date(DRV.last).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}))+'. ':'')+'<\/span>'+
+    ' <button type="button" class="primary" id="drvNow">'+(tok?'Sync now':'Sign in and sync')+'<\/button> <button type="button" id="drvOff">Stop using Drive here<\/button><\/div>';}
+{const co9=caseloadOpen;caseloadOpen=async function(){const out=await co9.apply(this,arguments);
+  try{const b=$('#dlgBody');if(!b||b.querySelector('#drvBox'))return out;const h=b.querySelector('.hp-lead');
+    if(h&&drvOn())h.textContent=h.textContent.replace(' on this '+HERE+', each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you saved are still the record.',', on this '+drvDev()+' and in your Google Drive, each as at their last save.');
+    if(h)h.insertAdjacentHTML('afterend',drvBoxHtml());
+    if(drvOn()){const L=await clList()||[];b.querySelectorAll('tr[data-clrow]').forEach(tr=>{const r=L.find(x=>x.key===tr.dataset.clrow);const td=tr.children[2];if(!r||!td)return;
+      td.textContent=clAgo(r.saved)+(r.dev?' '+drvOnDev(r.dev):'');if(!r.drv||r.drv.dirty)td.insertAdjacentHTML('beforeend','<br><span class="hint">waiting for Drive<\/span>');if(DRV.conf[r.key])td.insertAdjacentHTML('beforeend','<br><span class="td-k">Decide<\/span>');});
+      b.querySelectorAll('p.hint').forEach(p=>{if(/Remove takes a student off this list/.test(p.textContent))p.textContent='Remove asks whether the student leaves every device (and Google Drive) or only this '+drvDev()+'. Google Drive keeps its earlier copies for 30 days.';});}
+    if(clGid()&&drvAvail())clGsiLoad().catch(()=>{});
+    if(drvOn()&&drvTok()&&Date.now()-DRV.last>30000&&!DRV.busy)drvSoon(false,100);}catch(e){}
+  return out;};}
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#drvLink,#drvNow,#drvOff,#drvRename,#drvChip,#drvBarOpen,#drvBarLater,#saveFile');if(!t)return;
+  if(t.id==='drvLink'){drvLink();return;}
+  if(t.id==='drvNow'||t.id==='drvChip'){await drvChipTap();if(t.id==='drvNow')try{caseloadOpen();}catch(x){}return;}
+  if(t.id==='drvOff'){drvUnlink();return;}
+  if(t.id==='drvRename'){const v=await wsUI.prompt('This device’s name\nShown with each save, so you can tell where it was made (for example iPad, or School laptop).',{ok:'Keep it',placeholder:drvDev(),label:'Device name'});
+    if(v&&v.trim()){drvLs('nbh.drive.dev',v.trim().slice(0,30));drvPaint();try{caseloadOpen();}catch(x){}}return;}
+  if(t.id==='saveFile'){saveCase({file:true});return;}
+  if(t.id==='drvBarLater'){const b=$('#drvBar');DRV.newerOff=b.dataset.key+'@'+b.dataset.ver;b.hidden=true;return;}
+  if(t.id==='drvBarOpen'){const b=$('#drvBar'),r=await drvLocal(b.dataset.key);if(!r)return;
+    if(caseDirty()&&!(await wsUI.confirm('Open the newer copy?\nYour changes here since it was opened are not saved; they stay in this '+drvDev()+'’s safety copy (Autosave), where Open case offers them.',{ok:'Open the newer copy'})))return;
+    b.hidden=true;await openCaseText(r.text,null,{asked:true,quiet:true});return;}});
+/* Remove: everywhere (a marker in Drive the other devices follow) or only here */
+document.addEventListener('click',async e=>{const d=e.target.closest&&e.target.closest('[data-cldel]');if(!d||!drvOn())return;e.stopImmediatePropagation();e.preventDefault();
+  const r=await drvLocal(d.dataset.cldel);if(!r)return;
+  const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive (Drive keeps its earlier copies for 30 days). Only here keeps them in Drive and on the other devices.',
+    [{v:'all',label:'Remove everywhere',kind:'danger'},{v:'here',label:'Only this '+drvDev()},{v:'',label:'Cancel'}]);if(!c)return;
+  const h=await drvHash(drvKey(r));
+  if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id});drvGoneSet(g);}}
+  else{const s=drvSkip();s[h]=String(r.drv&&r.drv.ver||'');drvSkipSet(s);}
+  try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}delete DRV.conf[r.key];caseloadOpen();if(c==='all')drvSoon(true,100);else drvPaint();},true);
+/* a device emptied of student data stops using Drive, or its next sync would bring everyone back */
+{const ra9=clRemoveAll;clRemoveAll=async function(){let prev=null;try{prev=sessionStorage.getItem('nbh.google.tok');sessionStorage.setItem('nbh.google.tok',prev||'{"probe":1}');}catch(e){}
+  await ra9.apply(this,arguments);let went=false;try{went=sessionStorage.getItem('nbh.google.tok')===null;if(!went&&prev===null)sessionStorage.removeItem('nbh.google.tok');}catch(e){}
+  if(went){if(drvLs('nbh.drive.on')){drvLs('nbh.drive.on',null);drvLs('nbh.drive.skip',null);drvLs('nbh.drive.gone',null);drvTokOff();DRV.conf={};drvPaint();wsUI.toast('Google Drive is no longer used on this '+drvDev()+'. The students are still in your Google Drive.',{ms:9000});}}};}
+/* a student forgotten here after the weeks chosen is not brought back unless they are saved again elsewhere */
+{const ex9=clExpire;clExpire=async function(){const L0=await clList()||[];const n=await ex9.apply(this,arguments);if(n&&drvOn()){const L1=await clList()||[],s=drvSkip();
+  for(const r of L0)if(!L1.some(x=>x.key===r.key)){const k=drvKey(r);if(k)s[await drvHash(k)]=String(r.drv&&r.drv.ver||'');}drvSkipSet(s);}return n;};}
+/* switching students while Drive is in use: Save and switch */
+{const cgS=caseloadGo;caseloadGo=async function(key,form){const open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  if(drvOn()&&open&&key!==clKey(packet())&&caseDirty()&&clKey(packet())){const r=await drvLocal(key);if(!r)return cgS.apply(this,arguments);
+    const c=await wsUI.choose('Switch to '+clName(r)+'?\nThe case on screen has changes not saved yet.',[{v:'save',label:'Save and switch',kind:'primary'},{v:'switch',label:'Switch anyway'},{v:'',label:'Cancel'}],'Save keeps it on this '+drvDev()+' and in Google Drive. Switch anyway: the changes stay only in this '+drvDev()+'’s safety copy.');
+    if(!c)return;if(c==='save'){let ok=false;try{ok=await saveCase();}catch(e){ok=false;}if(!ok){wsUI.toast('The case was not saved, so nothing was switched.',{kind:'warn'});return;}}
+    else state.lastSig=caseSig();}
+  return cgS.apply(this,arguments);};}
+/* the start screen: get the latest, and where you left off */
+{const pb9=paintBlank;paintBlank=async function(){const out=await pb9.apply(this,arguments);
+  try{const card=$('#blank .card'),x=card&&card.querySelector('#blankCl');if(!card)return out;let y=card.querySelector('#blankDrv');
+    if(!y){y=document.createElement('div');y.id='blankDrv';card.insertBefore(y,card.firstChild);}
+    const L=await clList()||[];let h='';
+    if(drvOn()){if(!drvTok())h+='<p class="bl-drv"><button type="button" class="primary" id="blDrive">Get the latest from Google Drive<\/button> <span class="hint">Signed out of Google ('+esc(drvAcct())+'): the students here are as this '+esc(drvDev())+' last had them.<\/span><\/p>';
+      else if(DRV.busy)h+='<p class="bl-drv hint">Getting the latest from Google Drive…<\/p>';}
+    const last=L.slice().sort((a,b)=>String(b.saved).localeCompare(String(a.saved)))[0];
+    if(last)h+='<p class="bl-last">Last saved: <b>'+esc(clName(last))+'<\/b>, '+esc(drvWhen(last.saved))+(last.dev?' '+esc(drvOnDev(last.dev)):'')+' <button type="button" data-clopen="'+esc(last.key)+'">Open<\/button><\/p>';
+    y.innerHTML=h;y.hidden=!h;
+    if(x&&drvOn()){const hd=x.querySelector('h2');if(hd)hd.textContent='Your caseload';x.querySelectorAll('.bl-stu').forEach(b=>{const r=L.find(q=>q.key===b.dataset.clopen),s=b.querySelector('span');
+      if(r&&s&&r.dev)s.textContent=s.textContent.replace(/ · not in a file/,'')+' '+drvOnDev(r.dev)+(!r.drv||r.drv.dirty?' · waiting for Drive':'');});}
+    if(drvOn()&&drvTok()&&Date.now()-DRV.last>30000&&!DRV.busy)drvSoon(false,100);}catch(e){}
+  return out;};}
+$('#blank').addEventListener('click',async e=>{if(!e.target.closest('#blDrive'))return;try{if(DRV.signing)await drvSignInFor();}catch(err){return;}
+  if(!drvTok()){if(!drvGsiReady())wsUI.toast('Loading Google’s sign-in. Tap again in a moment.');return;}const r=await drvSync({interactive:true});if(r&&!DRV.err)wsUI.toast(drvSay(r),{kind:'ok'});paintBlank();});
+/* coming back to this device: the latest, quietly, while the sign-in lasts */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&drvOn()&&drvTok()&&Date.now()-DRV.last>20000)drvSoon(false,300);});
+window.addEventListener('online',()=>{drvPaint();if(drvOn()&&drvTok())drvSoon(false,800);});window.addEventListener('offline',drvPaint);
+setInterval(()=>{if(!document.hidden&&drvOn()&&drvTok()&&Date.now()-DRV.last>240000)drvSync({});else drvPaint();},60000);
+setTimeout(()=>{drvPaint();if(drvOn()&&drvTok())drvSync({});},1800);
 </script>
 <script id="nbh-docread">
 /* ===================== Read a document (v21.67) =====================
@@ -6087,7 +6447,7 @@ const PWA=(()=>{
     e.stopPropagation();e.preventDefault();
     if(!state.cur)return;
     setFull(true,true);   /* v21.44 (A8) for this form, not kept as the device's fullscreen setting */
-    wsUI.toast('Installed on this iPad, a form cannot open in a tab of its own, so it fills the window here. Exit, above the form, brings the rest back.',{ms:9000});
+    wsUI.toast('Installed on this '+HERE+', a form cannot open in a tab of its own, so it fills the window here. Exit, above the form, brings the rest back.',{ms:9000});
   },true);
   let lastAuto=0,lastUpd=0;
   function auto(force){

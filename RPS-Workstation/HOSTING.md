@@ -126,6 +126,9 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   the text shown in its preview, with the student's name and ID already
   replaced, to the relay on this site and from there to Anthropic's API. The
   relay keeps no text. **Check wording** runs on the device and sends nothing.
+  The other exception, only when you turn it on, is **Use Google Drive** in Caseload (v21.89): each student's
+  case goes to a folder in the school Google Drive of the account you sign in with (never to this website),
+  so the iPad and the laptop share one caseload; the workstation can reach only the files it made there.
 - **Save cases to the district drive**, as before. A case file in a browser's
   Downloads folder on a shared computer is a case file left on a desk.
 - **Chrome or Edge 131 or later, on a computer,** for the master print and

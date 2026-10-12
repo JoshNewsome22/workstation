@@ -638,6 +638,7 @@ table.rank td.n{text-align:center;width:46px}
 
 /* ---------------------------------------------------------- TV-1 */
 .sheet{width:12in}
+body .toolbar{max-width:12in}   /* v21.89 the toolbar as wide as the 12-inch page, not 8.5in over it */
 html .toolbar > .tgroup.tg-keep.tv-views:not(.tg-ctl),html.nbh-compact .toolbar > .tgroup.tg-keep.tv-views:not(.tg-ctl){flex:1 1 100%}
 @media print{.sheet{width:8.5in}}
 table.rt{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:12.5px}
@@ -3212,6 +3213,11 @@ html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);
 @keyframes nbhUnfold{from{-webkit-clip-path:inset(0 0 var(--nbh-fold-d,0px) 0);clip-path:inset(0 0 var(--nbh-fold-d,0px) 0)}to{-webkit-clip-path:inset(0);clip-path:inset(0)}}
 @media (prefers-reduced-motion:reduce){html.nbh-fold .toolbar,html.nbh-unfolding .toolbar{animation:none!important}}
 @media print{#nbhFoldBtn{display:none!important}}
+/* v21.89 the layout review: the view tabs take the room they need (not half the toolbar), the empty strip of a masthead inside
+   the workstation goes (on screen; the printed letterhead is untouched), and reading text keeps a comfortable line on a wide screen */
+html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 auto}
+@media screen{html.nbh-framed .nbh-mast:not(:has(button:not([hidden]))){display:none}
+  .sheet p.hint,.sheet p.lead{max-width:78ch}}
 </style>
 <script id="nbh-ui" src="nbh-ui.js"></script>
 
