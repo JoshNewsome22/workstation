@@ -9230,3 +9230,119 @@ Checked by `qa/v2190-ipad-pdf-test.js` (11 checks): a Safari-like PDF made in Ch
 taken out), finished; every page carries the header and footer in their places; the bookmarks land on the pages where
 Chrome's own PDF has each form start; the contents numbers are on their entries' lines; the labels move nothing; a PDF with
 narrow margins is made smaller and stays clear; a PDF from Chrome is finished as before, with no second header.
+
+### v21.91: search the caseload, and students as cards
+
+**Search the caseload.** One search over every student kept on this iPad (or laptop): their names, ID and school, every
+form's words as last saved, and the case's facts (the target behaviors, the function, the goals, what Form DD-1 measures).
+Type a few words: *elopement*, *who has elopement as a target*, *bus loop*, *November*.
+
+- **Where**: at the top of **Caseload**; on the **start screen**, above the students; and in **Find a form or command**
+  (the search at the top of the form list, or ⌘K), where the places in the caseload come after the forms and commands, under
+  **In the caseload**, once you have typed three letters.
+- **How it matches**: every word has to be there (fewer words find more). Capitals and accents do not matter (*cafe* finds
+  *café*). Each word is matched from its start (*bus* finds *buses*, not *abuse*). A date is found by its month too
+  (*November* finds 2026-11-03). Words like *who*, *has*, *a*, *the* are left out, so a question works.
+- **What it shows**: the students found, each with the places that hold the words: the form (*Form FS-1 · FBA Summary
+  Report*) or the fact (*Target behavior · Form TB-1*), and the words around them, marked.
+- **Tap a place**: the student's case opens at that form, on the form's page that holds the field, and the field is brought
+  into view and outlined for a moment. It is not selected, so the iPad's keyboard does not come up. (If the words are in
+  something the form draws, such as a table, it says so.) The Search key on the iPad's keyboard puts the keyboard away.
+- **Initials only** holds here too: the students are shown by their initials, and their names and ID are left out of what
+  is found.
+- The search reads only the copies kept in this browser, as at each student's last Save case. Nothing is sent anywhere.
+
+**Students as cards.** Caseload and the start screen show each student as a card:
+
+- the student's **photo** (a small copy, 96 pixels, kept with the student at Save case; a student kept before gets one the
+  first time the card is shown). With **Initials only** there are no photos: the initials instead.
+- the **school and grade** (and the ID, except with Initials only);
+- a small **line of the main target behavior's recent days** (from Form DD-1: the first behavior to bring down, its last 20
+  days of data), with where it started and where it is now (*4 → 0 occurrences, 20 days, 9/16 to 10/5*);
+- **what needs you next**: the most urgent thing from Today (Overdue and Safety first), with its **Open**, and how many more;
+- **when and where it was last saved**: *Saved yesterday on the laptop · in Google Drive* (or *waiting for Google Drive*,
+  or *not in a file yet*).
+
+**Open** and **Remove** work as before. One column on a phone, two on an iPad held upright, three or more on an iPad held
+sideways or a laptop; every button is 44 points; nothing scrolls sideways. *What needs you, across the caseload* stays above
+the students in Caseload. Printing is unchanged.
+
+Checked by `qa/v2191-find-test.js` (28 checks: three simulated students kept with Forms DD-1, TB-1, FS-1 and CN-1; the
+facts and the forms' words found; every word needed; capitals, accents and question words; a date by its month; the words
+marked and escaped; the command box's group after the forms and commands; a place opened at the right student, form, page and
+field, outlined and not focused; Initials only; nothing sent anywhere) and `qa/v2191-cards-test.js` (25 checks: the cards at
+390, 820, 1180 and 1440 wide, with no sideways scrolling and 44-point targets; the photo's copy made at Save case, made the first
+time for a student kept before, and hidden with Initials only; the trend line's points against the data; what needs you next
+and its Open; when and where saved, with and without Google Drive; Open and Remove).
+
+### v21.91: case history, back to an earlier save
+
+You save on the laptop and on the iPad, and it is easy to lose track of which is the latest work. Each **Save case** now
+also keeps the case as it was, on this device, and **History** shows them, newest first, one line each:
+
+> **Today 3:42 PM** · on this iPad · Save case — Form TB-1: 2 fields; Form DD-1: 3 new days
+
+- **Where it is**: **History** in the bar on the laptop (beside the student's name at the top when the bar has no room for
+  it), **Case history** under **More** on the iPad, **History** beside each student in **Caseload**, or type *history* in
+  the command box.
+- **Open as it was** opens the whole case as it was then. The case on screen is kept in History first, so you can always
+  come back to it (with work not saved yet, you are asked first: **Save first** or **Open it anyway**). A bar then says which
+  save is on screen; **Save case** makes it the current version (and, with Google Drive, the version on every device).
+- **Restore one form** (for the student on screen) takes back only one form as it was then; every other form stays as it
+  is. The case is then marked unsaved until you Save case.
+- **Compare with now** says what changed between then and now (the forms' fields, new days of data, incidents, the plan,
+  the target behaviors, the function).
+- **With Google Drive in use and signed in**, History also lists Drive's earlier copies of the student, so a save made on
+  the laptop shows on the iPad (marked *in Google Drive*; once you open one, it says which device saved it). Drive keeps them for 30 days. Signed out or
+  with no internet, History lists the saves on this device and says so.
+- Before Google Drive brings the other device's copy over this one, this device's copy is kept in History first. Going
+  back never loses the current version.
+- **Limits**: up to 30 saves a student; after two weeks, one a day (the day's last); about 200 MB in all, the oldest going
+  first. A Save case that changed nothing keeps nothing new.
+- **Privacy**: History stays in this browser on this device (Drive's copies stay in your own Drive). **Remove** (a student)
+  and **Remove all student data** delete it too, and say so. With *Do not keep cases on this device* ticked, nothing is kept.
+
+Checked by `qa/v2191-history-test.js` (46 checks): an iPad without Drive (points kept on Save case with what changed, a
+save with no change keeps nothing, More and the command box, Compare with now, Restore one form, Open as it was with work
+not saved and back again, History in Caseload, the dialog on a phone, Remove and Remove all, the caseload turned off), the
+limits, and an iPad and a laptop with a simulated Google Drive (the laptop's versions listed and opened, Open as it was on
+one of them and Save case with no question of two copies, History in the heading at 1280 wide, signed out, offline); no
+request but the simulated Google, no page errors.
+
+### v21.91: focus mode, one part of a form at a time
+
+**Focus** shows one part of a form large, so you can give it your whole attention. When you have filled it in and move on,
+it folds to a single line and the next part opens. A part is one of the form's numbered or headed sections with its few
+fields (The Changed Component; 3. Who, Where, and When; a consent card), not one question at a time.
+
+**Turning it on.** In the workstation, press **Focus** in the bar over the form, beside Own tab (on an iPad it shows as its
+icon: a box between two lines), or type *focus* in **Find a form or command**. On a form opened on its own (Own tab, or the
+file itself), the **Focus** button is in the form's toolbar, beside the view buttons. The choice is kept on this iPad or
+computer and holds for every form: forms already open change at once, and a form you open later opens in Focus. Press the
+button again, or **Whole page** on the bar at the foot of the form, to see whole pages again.
+
+**Working in it.**
+
+- The open part is a little larger, with a ring around it, and comes up to the top of the screen under the toolbar.
+- The parts before it are one line each: the title, a tick when anything in it is filled in, and the first few things you
+  entered (for example "✓ Student, Behavior, and the Two Components  Mateo Rivera · 4471823"). The parts after it are their
+  titles. Tap any folded line to open that part.
+- The bar at the foot says which part you are in ("Part 2 of 5") and has **Back** and **Next**. At the last part of a page,
+  Next becomes **Next page** and opens the first part of the next page (Setup, then Data, and so on).
+- In a one-line box, **Enter** (return on the iPad keyboard) goes to the next box; from the last box of a part it opens the
+  next part.
+- Parts with nothing to fill in (a guide, a note, the evidence, a summary the form works out) fold to their title and Next
+  steps over them; tap one to read it. A page that is all reading (the Guide, a walkthrough) opens its first part, and Next
+  goes through each in turn.
+- Tables, grids and data sheets stay whole inside their part (the Scatter Plot's data sheet is one part; a wide table keeps
+  its size). Rows you add, and parts a form draws again, are picked up as they appear.
+
+**Paper is not affected.** Printing a form, the master print, Finish PDF and saved files are exactly as with Focus off: every
+part prints, open or folded, and nothing of Focus goes into the packet.
+
+Checked by `qa/v2191-focus-test.js` (282 checks): every form and every one of its views, with Focus on, has one part open
+and the folded parts out of sight, every field on screen inside the open part, Next walking through every part to fill in
+and Back coming back, Enter moving to the next box, the print layout the same as with Focus off, and nothing left behind
+when Focus is turned off; a typed value shows on its part's folded line; the workstation's button and command, the setting
+kept and passed to forms opened later, the master print's copy unchanged, taps on an iPad, and no sideways scrolling added
+on a phone, an iPad held either way or a laptop.

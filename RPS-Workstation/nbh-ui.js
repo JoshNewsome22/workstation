@@ -88,7 +88,7 @@
       return m;
     }
     /* measure: each view's class on the body, in turn, and the fields it shows; fields shown by every view are shared and left out */
-    var body = document.body, was = body.className, seen = {};
+    var body = document.body, was = body.className, seen = {}, fx = U.fxHold ? U.fxHold() : null;   /* v21.91 Focus's folded parts are measured open */
     keys.forEach(function(k){
       var cls = was.split(/\s+/).filter(function(c){ return c && !/^view-/.test(c); }); cls.push('view-' + k); body.className = cls.join(' ');
       var out = fields(document).filter(vis);
@@ -96,6 +96,7 @@
       m[k] = out;
     });
     body.className = was;
+    if (fx) fx();
     keys.forEach(function(k){ m[k] = m[k].filter(function(e){ return seen[e.__nbhId] < keys.length; }); });
     return m;
   }
@@ -288,4 +289,556 @@
     U.fold = function(on){ return on === false ? (open(), false) : on === true ? fold('focus') : st; };
   })(); } catch (e) {}
   window.nbhUI = U;
+})();
+
+/* ===================== v21.91 focus mode: one part of a form at a time =====================
+   Asked for by the BCBA: one part of a form shown large so she can give it her whole attention; once it is filled in it
+   gets smaller and the next part opens. A switch turns it on for every form on this device (localStorage nbh.focus =
+   "on"): the workstation's Focus button (it tells each open form by message, and a form opened later reads the setting),
+   or, on a form opened on its own, the Focus button this block puts in the form's toolbar.
+   The view on screen is cut into parts: a heading (h1 to h3, an .nbh-band, a card's header) and what follows it up to the
+   next heading, a box with headings inside cut the same way (a per-form table below where a form needs it). The open part
+   is a size larger and ringed and is brought to the top; the parts before it fold to one line (their title, a tick when
+   anything is entered, the first values entered), the parts after it to their title. A part with nothing to fill in (a
+   guide, a note, the evidence) folds to its title and Next steps over it. A bar at the foot steps Back and Next (at the end
+   of a page, on to the next page); a tap on a folded part opens it; Enter in a one-line field goes to the next field, and
+   from the last one to the next part. Tables, grids, data sheets and drawings stay whole inside their part.
+   Nothing in the page is moved or wrapped: the parts are marked with data-nbh-fx* attributes and folded by screen-only CSS,
+   so the form's own code, its :first-child rules and everything that reads its fields see the page as it was; the bar and
+   the ring are the only elements added, outside the sheet and marked noprint, with the rules in a style block the master
+   print leaves out (data-nbh-screen). Paper never sees any of it: the rules are for the screen and step
+   aside while a print or the master print lays the form out (html.nbh-plain, or a print), and any copy of the page (the
+   master print's) is made without the marks. Turning it off takes every mark away. */
+(function(){
+  var U = window.nbhUI || (window.nbhUI = {}), D = document, R = D.documentElement, W = window, KEY = 'nbh.focus';
+  var framed = false; try { framed = W.top !== W.self; } catch (e) { framed = true; }
+  var ON = false, units = [], cur = -1, vk = null, memo = {}, pend = '', marked = [], boxes = [], held = 0, printing = false;
+  var bar = null, ring = null, css = null, tbtn = null, mo = null, tick = 0, slow = 0, sumT = 0, rq = 0, lastW = 0, lastBox = '', nowF = 0, hadStyle = false, builds = 0;
+  var SKIP = '.toolbar,.nbh-mast,dialog,#nbhToasts,.nbh-pagenav,nav.nbh-tabs,#nbhFxBar,#nbhFxRing,#nbhFoldBtn,script,style,template,link,noscript';
+  /* never cut inside: tables, drawings, lists, a walkthrough player (its slides carry headings of their own) */
+  var WHOLE = 'table,svg,canvas,details,video,audio,iframe,img,picture,figure,ul,ol,dl,select,textarea,input,button,[data-nbh-fx-whole],.wk-player,.wk-stage,.wk-frame,[class*="player"],[class*="stage"]';
+  var FLD = 'input,select,textarea', HT = /^H[1-3]$/, HSEL = 'h1,h2,h3,.nbh-band';
+  var LINE = /^(text|search|email|tel|url|number|date|time|month|week|datetime-local|password|)$/i;
+  var ATTRS = ['data-nbh-fx', 'data-nbh-fx-u', 'data-nbh-fx-sum', 'data-nbh-fx-done', 'data-nbh-fx-nf', 'data-nbh-fx-z'];
+  /* forms whose page is better read whole, or whose headings say more than the rule above can see
+     one: a box whose children make one part (nothing in it folds, and it keeps its own size); head: more headings; nohead:
+     headings that start no part;
+     pin: elements that stay in sight and belong to no part */
+  var OVR = {
+    'SP-1': { one: '#sheet' }
+  };
+  function fid(){ try { if (W.nbhBridge && W.nbhBridge.formId) return String(W.nbhBridge.formId()); } catch (e) {} var e = D.querySelector('.nbh-formid'); return e ? e.textContent.replace(/^Form\s*/i, '').trim() : ''; }
+  function ovr(){ return OVR[fid()] || {}; }
+  function vis(e){ return !!(e.getClientRects && e.getClientRects().length); }
+  function txt(e){ return String(e.textContent || '').replace(/\s+/g, ' ').trim(); }
+  function is(e, s){ try { return !!(s && e.matches(s)); } catch (x) { return false; } }
+  function store(v){ try { if (v === undefined) return W.localStorage.getItem(KEY) === 'on'; if (v) W.localStorage.setItem(KEY, 'on'); else W.localStorage.removeItem(KEY); } catch (e) {} return !!v; }
+
+  /* ---- the folds step aside: while the page is measured, printed or copied (the scroll stays where it was) ---- */
+  var hx = 0, hy = 0, hon = false;
+  function hold(){ if (held++) return; hon = R.hasAttribute('data-nbh-fx'); if (hon) { hx = W.scrollX; hy = W.scrollY; R.removeAttribute('data-nbh-fx'); } }
+  function release(){
+    if (!held || --held) return;
+    if (hon && ON) { R.setAttribute('data-nbh-fx', 'on'); if (Math.abs(W.scrollY - hy) > 0.5 || Math.abs(W.scrollX - hx) > 0.5) W.scrollTo(hx, hy); }
+    hon = false;
+  }
+  /* the folds come down while something outside this block measures the page (nbh-ui's view progress); call what it returns to put them back */
+  U.fxHold = function(){ if (!ON) return null; hold(); var done = false; return function(){ if (!done) { done = true; release(); } }; };
+
+  /* ---- the parts of the view on screen ---- */
+  function headish(e, o){
+    if (is(e, o.nohead)) return false;
+    if (HT.test(e.tagName) || e.classList.contains('nbh-band') || is(e, o.head)) return true;
+    if (is(e, WHOLE) || e.querySelector('input,select,textarea,table,canvas,svg,img,video,iframe')) return false;
+    var t = shortText(e, 140); if (!t) return false;
+    var f = e.firstElementChild;
+    if (f && (HT.test(f.tagName) || f.classList.contains('nbh-band'))) return true;
+    return /(^|[\s_-])(chd|hd|hdr|head|header|heading|title|ttl)(?=$|[\s_-])/i.test(e.getAttribute('class') || '');
+  }
+  /* an element's words when there are few of them (a title), or '' (read no further than that: a long guide is not a title) */
+  function shortText(e, max){
+    var w = D.createTreeWalker(e, 4), n, t = '';
+    while ((n = w.nextNode())) { t += n.nodeValue; if (t.length > max * 3 && t.replace(/\s+/g, ' ').trim().length > max) return ''; }
+    t = t.replace(/\s+/g, ' ').trim(); return t.length > max ? '' : t;
+  }
+  function inWhole(x, top){ for (var p = x.parentElement; p && p !== top; p = p.parentElement) if (is(p, WHOLE)) return true; return false; }
+  function hasHeads(e, o){
+    var l = e.querySelectorAll(HSEL + (o.head ? ',' + o.head : ''));
+    for (var i = 0; i < l.length; i++) if (!is(l[i], o.nohead) && !l[i].closest(SKIP) && vis(l[i]) && !inWhole(l[i], e)) return true;
+    for (var c = e.firstElementChild; c; c = c.nextElementSibling) if (!is(c, SKIP) && vis(c) && headish(c, o)) return true;
+    return false;
+  }
+  function kids(box, out){
+    for (var c = box.firstElementChild; c; c = c.nextElementSibling) {
+      if (is(c, SKIP)) continue;
+      if (!vis(c)) { if (getComputedStyle(c).display === 'contents') kids(c, out); continue; }
+      out.push(c);
+    }
+    return out;
+  }
+  function part(box, o, out){
+    var run = null, flush = function(){ if (run) { out.push(run); run = null; } };
+    if (boxes.indexOf(box) < 0) boxes.push(box);
+    if (is(box, o.one)) { var all = kids(box, []); if (all.length) { var h = all.filter(function(k){ return headish(k, o); })[0] || null; out.push({ head: h, els: all, whole: true }); } return; }
+    kids(box, []).forEach(function(k){
+      var p = getComputedStyle(k).position;
+      if (p === 'fixed' || p === 'sticky' || is(k, o.pin)) return;   /* pinned: it stays in sight */
+      if (headish(k, o)) { flush(); run = { head: k, els: [k] }; return; }
+      if (!is(k, WHOLE) && hasHeads(k, o)) { flush(); part(k, o, out); return; }
+      if (!run) run = { head: null, els: [] };
+      run.els.push(k);
+    });
+    flush();
+  }
+  function roots(){
+    var o = ovr(), l = [].slice.call(D.querySelectorAll(o.roots || 'main.sheet,.sheet:not(table),main')).filter(function(e){ return !e.closest(SKIP) && vis(e); });
+    l = l.filter(function(e){ return !l.some(function(x){ return x !== e && x.contains(e); }); });
+    /* a block of its own beside the sheets that holds fields (Form OB-1's live recorder) is a root too */
+    if (D.body && !o.roots) for (var c = D.body.firstElementChild; c; c = c.nextElementSibling) {
+      if (is(c, SKIP) || l.some(function(x){ return x === c || x.contains(c) || c.contains(x); }) || !vis(c)) continue;
+      var p = getComputedStyle(c).position; if (p === 'fixed' || p === 'sticky' || p === 'absolute') continue;
+      if (fieldsOf([c]).some(live)) l.push(c);
+    }
+    l.sort(function(a, b){ return a.compareDocumentPosition(b) & 4 ? -1 : 1; });
+    return l.length ? l : (D.body ? [D.body] : []);
+  }
+
+  function isField(e){ return /^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName) && !/^(hidden|file|button|submit|reset|image)$/i.test(e.type || ''); }
+  function live(f){ return !f.disabled && !f.readOnly && vis(f) && !f.closest('.toolbar,dialog'); }
+  function fieldsOf(els){ var out = []; els.forEach(function(e){ if (isField(e)) out.push(e); else { var l = e.querySelectorAll(FLD); for (var i = 0; i < l.length; i++) if (isField(l[i])) out.push(l[i]); } }); return out; }
+  function viewBtns(){ return [].slice.call(D.querySelectorAll('#viewSeg button[data-view]')).filter(function(b){ return !b.disabled && !b.hidden && vis(b); }); }
+  function pressed(){ var b = D.querySelector('#viewSeg button[aria-pressed="true"],#viewSeg button[aria-selected="true"]'); return b; }
+  function label(b){ var t = ''; if (!b) return ''; for (var n = b.firstChild; n; n = n.nextSibling) { var s = n.textContent || ''; if (n.nodeType === 1 && /^\s*\d+\s*$/.test(s)) continue; t += s; } return t.replace(/\s+/g, ' ').trim(); }
+  /* an element's words, spaced (the parts of a title, the cell beside a tick box); seen: only what is on screen (a title is
+     read while the page is open; a folded part's words are read whatever shows) */
+  function words(e, seen){
+    var out = [];
+    (function walk(n){ for (var c = n.firstChild; c; c = c.nextSibling) {
+      if (c.nodeType === 3) { var t = c.nodeValue.replace(/\s+/g, ' ').trim(); if (t) out.push(t); }
+      else if (c.nodeType === 1 && !/^(BUTTON|SCRIPT|STYLE|SELECT|TEXTAREA|INPUT|OPTION|svg)$/i.test(c.tagName) && (!seen || c.getClientRects().length)) walk(c);
+    } })(e);
+    return out.join(' ').replace(/\s+([,.;:])/g, '$1');
+  }
+  function titleOf(u){
+    var h = u.head, t = '';
+    if (h) { var inner = HT.test(h.tagName) ? null : h.querySelector('h1,h2,h3,h4,.chdt,[class*="title"],[class*="ttl"]'); t = words(inner && vis(inner) ? inner : h, true); }
+    t = t || label(pressed()) || 'This page';
+    return t.length > 90 ? t.slice(0, 88).replace(/\s+\S*$/, '') + '\u2026' : t;
+  }
+  function cut(){
+    var o = ovr(), runs = [], out = [], i;
+    boxes = [];
+    roots().forEach(function(r){ part(r, o, runs); });
+    for (i = 0; i < runs.length; i++) {
+      var r = runs[i], n = runs[i + 1], content = r.els.filter(function(e){ return e !== r.head && (r.sup || []).indexOf(e) < 0; });
+      /* a heading with nothing under it is the title over the part that follows (a band over its first sub-part) */
+      if (r.head && !content.length && n) { n.sup = (r.sup || []).concat([r.head], n.sup || []); n.els = r.els.concat(n.els); continue; }
+      /* words or fields before the first heading of a box belong to the part that follows; after the last, to the one before */
+      if (!r.head && n) { n.els = r.els.concat(n.els); continue; }
+      if (!r.head && out.length) { out[out.length - 1].els = out[out.length - 1].els.concat(r.els); continue; }
+      out.push(r);
+    }
+    out.forEach(function(u){ u.fields = fieldsOf(u.els); u.n0 = u.fields.length; u.live = u.fields.filter(live).length; u.nf = !u.live; u.title = titleOf(u); u.sup = u.sup || []; });
+    return out;
+  }
+
+  /* ---- what a folded part says: the first values entered ---- */
+  /* a tick box's words: in a table, the first other cell of its row (Record review); else its label, its accessible name */
+  function lab(f){
+    var t = '', i, tr = f.closest('tr'), l;
+    if (tr) for (i = 0; i < tr.cells.length; i++) if (!tr.cells[i].contains(f)) { t = words(tr.cells[i]); if (t) break; }
+    if (!t) { l = f.closest('label') || (f.id && D.querySelector('label[for="' + (W.CSS && CSS.escape ? CSS.escape(f.id) : f.id) + '"]')); if (l) t = words(l); }
+    if (!t) t = f.getAttribute('aria-label') || '';
+    if (!t && f.nextSibling && f.nextSibling.nodeType === 3) t = f.nextSibling.nodeValue;
+    return String(t || '').replace(/\s+/g, ' ').trim();
+  }
+  function shown(f){
+    if (f.type === 'checkbox' || f.type === 'radio') return f.checked ? (lab(f) || '\u2713') : '';
+    /* whatever is in it: a form that draws its rows again writes their values into the page, so "as first drawn" says nothing */
+    if (f.tagName === 'SELECT') return f.value && f.selectedIndex >= 0 ? txt(f.options[f.selectedIndex]) : '';
+    var v = String(f.value || '').trim(); if (!v) return '';
+    var m = f.type === 'date' && /^(\d{4})-(\d\d)-(\d\d)$/.exec(v); if (m) return (+m[2]) + '/' + (+m[3]) + '/' + m[1];
+    return v.replace(/\s+/g, ' ');
+  }
+  /* a part's fields, read again when the form has drawn some of them anew (the boxes are the form's, not this block's) */
+  function flds(u){ if (u.fields.some(function(f){ return !f.isConnected; })) u.fields = fieldsOf(u.els); return u.fields; }
+  function sumOf(u){
+    var vals = [], n = 0;
+    flds(u).forEach(function(f){ var v = shown(f); if (!v) return; n++; if (vals.length < 4) vals.push(v.length > 42 ? v.slice(0, 40).replace(/\s+\S*$/, '') + '\u2026' : v); });
+    return { n: n, text: vals.join(' \u00b7 ') + (n > vals.length ? ' \u00b7 \u2026' : '') };
+  }
+
+  /* ---- marks ---- */
+  function set(e, a, v){ if (v === null || v === undefined || v === false) { if (e.hasAttribute(a)) e.removeAttribute(a); } else if (e.getAttribute(a) !== String(v)) e.setAttribute(a, String(v)); }
+  function unmark(e){ ATTRS.forEach(function(a){ if (e.hasAttribute(a)) e.removeAttribute(a); }); }
+  function paintSums(){
+    /* every line worked out first, then written, so the page is laid out once, not once a part */
+    var all = units.map(function(u){ return u.head ? sumOf(u) : null; });
+    units.forEach(function(u, i){
+      var s = all[i], fold = i !== cur; if (!s) return;
+      set(u.head, 'data-nbh-fx-done', fold && s.n ? '1' : null);
+      set(u.head, 'data-nbh-fx-sum', fold && i < cur && s.text ? s.text : null);
+      set(u.head, 'data-nbh-fx-nf', u.nf ? '1' : null);
+    });
+  }
+  function apply(){
+    var now = [];
+    units.forEach(function(u, i){
+      var st = i === cur ? 'c' : 'f';
+      u.els.forEach(function(e){
+        set(e, 'data-nbh-fx', e === u.head ? 'h' + st : u.sup.indexOf(e) >= 0 ? 's' : st);
+        set(e, 'data-nbh-fx-u', i); now.push(e);
+      });
+    });
+    marked.forEach(function(e){ if (now.indexOf(e) < 0) unmark(e); });
+    marked = now;
+    paintSums(); zoomCheck(); paintBar(); place();
+    grow();
+  }
+  /* the open part a size larger, unless that would push the page wider than the window (a wide grid stays its size) */
+  function zoomCheck(){
+    var u = units[cur]; if (!u) return;
+    u.els.forEach(function(e){ set(e, 'data-nbh-fx-z', u.whole || wide(e) ? '0' : null); });   /* a page kept whole keeps its size */
+    var vw = R.clientWidth, over = function(){ return R.scrollWidth > vw + 1; };
+    if (!over()) return;
+    u.els.forEach(function(e){ var r = e.getBoundingClientRect(); if (r.right > vw + 1 || e.scrollWidth > e.clientWidth + 1) set(e, 'data-nbh-fx-z', '0'); });
+    if (over()) u.els.forEach(function(e){ set(e, 'data-nbh-fx-z', '0'); });
+  }
+  /* kept at its own size: a table six or more columns wide, and a player, a drawing surface or a video, which size themselves
+     to the room they have (a walkthrough player scaled with its part measured itself again and again) */
+  var KEEP = 'canvas,video,iframe,.wk-player,.wk-stage,.wk-frame,[class*="player"],[class*="stage"]';
+  function wide(e){ var l = e.tagName === 'TABLE' ? [e] : [].slice.call(e.querySelectorAll('table')); return l.some(function(t){ return t.rows && t.rows[0] && t.rows[0].cells.length >= 6; }) || is(e, KEEP) || !!e.querySelector(KEEP); }
+  function grow(){ clearTimeout(grow.t); grow.t = setTimeout(function(){ try { if (W.nbhFieldCare && W.nbhFieldCare.grow) W.nbhFieldCare.grow(); } catch (e) {} place(); }, 30); }
+
+  /* ---- build: the parts again, the open one kept by its heading ---- */
+  /* the view on screen: the form's view class on the body and its pressed view button (other classes the body takes do not count) */
+  function viewKey(){ var b = pressed(), c = D.body ? (D.body.className.match(/(^|\s)view-\S+/g) || []).join('') : ''; return c + '|' + (b ? b.getAttribute('data-view') || label(b) : ''); }
+  function build(how){
+    if (!ON || !D.body || printing) return;
+    builds++;
+    var was = units[cur], wasHead = was ? (was.head || was.els[0]) : null, key = viewKey(), changed = key !== vk;
+    if (changed && vk !== null && was) memo[vk] = wasHead;
+    hold();
+    try {
+      units = cut();
+      if (how === 'here') {
+        var tb = tbBottom();
+        var sq = seq();
+        for (var i = 0; i < sq.length; i++) { var r = box(units[sq[i]]); if (r && r.bottom > tb + 40) { pend = sq[i]; break; } }
+      }
+    } finally { release(); }
+    vk = key;
+    var at = -1, want = changed ? memo[key] : wasHead, p = pend;
+    if (typeof p === 'number') at = p;
+    else if (p === 'first' || p === 'last') at = changed ? pick() : -1;
+    if (at < 0 && want) units.forEach(function(u, i){ if (at < 0 && (u.head === want || u.els.indexOf(want) >= 0)) at = i; });
+    if (at < 0 && !changed && was && cur < units.length) at = cur;
+    if (at < 0) at = pick();
+    if (typeof p === 'number' || changed) pend = '';
+    cur = Math.min(at, units.length - 1);
+    apply();
+    if ((changed && (p === 'first' || p === 'last')) || how === 'here') bring(false);
+  }
+  /* the parts Next steps through: those with something to fill in; on a page that is nearly all reading (a guide, a
+     walkthrough with one box in it, fewer than three fields in all), every part */
+  function seq(){
+    var o = [], n = 0; units.forEach(function(u, i){ n += u.live; if (!u.nf) o.push(i); });
+    return n < 3 ? units.map(function(u, i){ return i; }) : o;
+  }
+  function pick(){
+    var f = seq(); if (!units.length) return -1; if (!f.length) return 0;
+    return pend === 'last' ? f[f.length - 1] : f[0];
+  }
+
+
+  /* ---- where things are: the toolbar pinned at the top, the open part, the ring around it ---- */
+  function tbBottom(){ var t = D.querySelector('.toolbar'); if (!t) return 0; var c = getComputedStyle(t); if (c.position !== 'sticky' && c.position !== 'fixed') return 0; var r = t.getBoundingClientRect(); return Math.max(0, r.bottom); }
+  function box(u){
+    var t = Infinity, b = -Infinity, l = Infinity, r = -Infinity;
+    u.els.forEach(function(e){ if (!vis(e)) return; var q = e.getBoundingClientRect(); if (!q.width && !q.height) return; t = Math.min(t, q.top); b = Math.max(b, q.bottom); l = Math.min(l, q.left); r = Math.max(r, q.right); });
+    return t === Infinity ? null : { top: t, bottom: b, left: l, right: r };
+  }
+  function place(){
+    if (rq) return;
+    rq = (W.requestAnimationFrame || setTimeout)(function(){
+      rq = 0; var u = units[cur];
+      if (!ON || !ring || !u) { if (ring) ring.style.display = 'none'; return; }
+      var q = box(u); if (!q) { ring.style.display = 'none'; return; }
+      var vw = R.clientWidth, sx = W.scrollX, sy = W.scrollY, pad = vw < 600 ? 6 : 12;
+      var L = Math.max(2, q.left - pad), Rt = Math.min(vw - 2, q.right + pad);
+      var k = [Math.round(L + sx), Math.round(Math.max(0, Rt - L)), Math.round(q.top - 8 + sy), Math.round(q.bottom - q.top + 16)].join(',');
+      if (k === lastBox && ring.style.display === 'block') return;
+      lastBox = k; k = k.split(',');
+      ring.style.display = 'block';
+      ring.style.left = k[0] + 'px'; ring.style.width = k[1] + 'px'; ring.style.top = k[2] + 'px'; ring.style.height = k[3] + 'px';
+    });
+  }
+  /* the open part to the top of the window, just under the pinned toolbar */
+  function bring(smooth){
+    var u = units[cur]; if (!u) return;
+    var q = box(u); if (!q) return;
+    var y = W.scrollY + q.top - tbBottom() - 14;
+    if (Math.abs(y - W.scrollY) < 4) return;
+    var reduce = W.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    try { W.scrollTo({ top: Math.max(0, y), behavior: smooth && !reduce ? 'smooth' : 'auto' }); } catch (e) { W.scrollTo(0, Math.max(0, y)); }
+  }
+
+  /* ---- moving: a part, the next or the one before, the next page ---- */
+  function go(i, smooth){
+    if (i < 0 || i >= units.length) return false;
+    cur = i; memo[vk] = units[i].head || units[i].els[0]; apply(); bring(smooth !== false);
+    return true;
+  }
+  function step(d){
+    if (!units.length) return false;
+    var f = seq(), i = -1, k;
+    if (d > 0) { for (k = 0; k < f.length; k++) if (f[k] > cur) { i = f[k]; break; } }
+    else { for (k = f.length - 1; k >= 0; k--) if (f[k] < cur) { i = f[k]; break; } }
+    if (i >= 0) return go(i, true);
+    /* past the last part: the next page (or before the first: the page before, at its last part) */
+    var b = viewBtns(), v = b.indexOf(pressed()), t = b[v + d];
+    if (v < 0 || !t) return false;
+    pend = d > 0 ? 'first' : 'last'; t.click();
+    setTimeout(function(){ if (typeof pend === 'string') pend = ''; }, 1500);
+    return true;
+  }
+  function focusIn(f){ try { f.focus({ preventScroll: true }); } catch (e) { try { f.focus(); } catch (x) {} } }
+  function firstField(u){ return u ? fieldsOf(u.els).filter(live)[0] : null; }
+
+  /* ---- the bar at the foot ---- */
+  var IC = {
+    back: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 5 8l5 5"/></svg>',
+    next: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>',
+    all: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2.5h10M3 5.5h10M3 8.5h10M3 11.5h10M3 14h6"/></svg>',
+    focus: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2.5h10M3 13.5h10"/><rect x="1.5" y="5" width="13" height="6" rx="1.5"/></svg>'
+  };
+  function mkBar(){
+    if (bar) return;
+    bar = D.createElement('div'); bar.id = 'nbhFxBar'; bar.className = 'noprint'; bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', 'Focus: one part of the form at a time');
+    bar.innerHTML = '<button type="button" class="nbh-fx-back">' + IC.back + '<span class="t">Back</span></button>' +
+      '<div class="nbh-fx-where" aria-live="polite"><b></b><span></span></div>' +
+      '<button type="button" class="nbh-fx-next"><span class="t">Next</span>' + IC.next + '</button>' +
+      '<button type="button" class="nbh-fx-off" title="Focus off: show the whole page">' + IC.all + '<span class="t">Whole page</span></button>';
+    bar.querySelector('.nbh-fx-back').addEventListener('click', function(){ step(-1); });
+    bar.querySelector('.nbh-fx-next').addEventListener('click', function(){ step(1); });
+    bar.querySelector('.nbh-fx-off').addEventListener('click', function(){ choose(false); });
+    ring = D.createElement('div'); ring.id = 'nbhFxRing'; ring.className = 'noprint'; ring.setAttribute('aria-hidden', 'true');
+  }
+  function paintBar(){
+    if (!bar) return;
+    var u = units[cur], f = seq(), k = f.indexOf(cur), b = viewBtns(), vi = b.indexOf(pressed());
+    bar.hidden = !u;
+    if (!u) return;
+    var prevU = f.some(function(i){ return i < cur; }), nextU = f.some(function(i){ return i > cur; });
+    var pb = bar.querySelector('.nbh-fx-back'), nb = bar.querySelector('.nbh-fx-next'), nextPage = !nextU && vi >= 0 && b[vi + 1];
+    pb.disabled = !prevU && !(vi > 0); nb.disabled = !nextU && !nextPage;
+    pb.title = prevU ? 'The part before' : vi > 0 ? 'Back to ' + label(b[vi - 1]) : '';
+    nb.querySelector('.t').textContent = nextPage ? 'Next page' : 'Next';
+    nb.title = nextU ? 'The next part' : nextPage ? 'On to ' + label(b[vi + 1]) : 'This is the last part';
+    bar.querySelector('.nbh-fx-where b').textContent = (u.nf ? 'To read' : 'Part') + (k >= 0 ? ' ' + (k + 1) + ' of ' + f.length : '');
+    bar.querySelector('.nbh-fx-where span').textContent = u.title;
+  }
+
+  /* ---- styles: screen only, and out of the way while a print or the master print lays the form out ---- */
+  var X = 'html[data-nbh-fx]:not(.nbh-plain)';
+  var CSS = '@media screen{' +
+    X + '{overflow-anchor:none;overflow-y:scroll}' +
+    X + ' [data-nbh-fx="f"]{display:none!important}' +
+    X + ' [data-nbh-fx="c"]:not([data-nbh-fx-z="0"]),' + X + ' [data-nbh-fx="hc"]{zoom:var(--nbh-fx-zoom,1.1)}' +
+    X + ' [data-nbh-fx="hf"]{cursor:pointer;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;min-height:calc(44px / var(--nbh-fx-sz,1));box-sizing:border-box;margin-top:5px!important;margin-bottom:0!important;line-height:1.35!important;padding-top:calc(9px / var(--nbh-fx-sz,1))!important;padding-bottom:calc(9px / var(--nbh-fx-sz,1))!important;-webkit-tap-highlight-color:rgba(37,70,87,.12)}' +
+    X + ' [data-nbh-fx="hf"]:hover{filter:brightness(.97)}' +
+    /* a folded title says it opens: a chevron at its right, and a light row under a plain heading */
+    X + ' [data-nbh-fx="hf"]{background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27 fill=%27none%27 stroke=%27%23254657%27 stroke-width=%271.8%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M4 6l4 4 4-4%27/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 10px center!important;background-size:16px 16px!important;padding-right:34px!important}' +
+    X + ' [data-nbh-fx="hf"]:not(.nbh-band):not(.bar){background-color:var(--nbh-shade,#f5f8f7)!important;border-radius:6px;padding-left:10px!important;border-bottom:1px solid var(--nbh-rule,#cfdad8)}' +
+    X + ' .nbh-pagenav{display:none!important}' +
+    X + ' [data-nbh-fx="hc"]:not(:first-child){margin-top:16px!important}' + X + ' :is([data-nbh-fx="c"],[data-nbh-fx="hc"]) + [data-nbh-fx="hf"]{margin-top:18px!important}' +
+    X + ' [data-nbh-fx="hf"] :is(button,input,select,textarea){display:none!important}' +
+    X + ' [data-nbh-fx="hf"][data-nbh-fx-nf]{opacity:.72}' +
+    X + ' [data-nbh-fx="hf"][data-nbh-fx-done]::before{content:"\\2713";display:inline-block;margin-right:.5em;color:#1f7a4d;font-weight:700;font-family:var(--nbh-sans,system-ui,sans-serif)}' +
+    X + ' [data-nbh-fx="hf"][data-nbh-fx-sum]::after{content:attr(data-nbh-fx-sum);margin-left:.9em;font:400 13px/1.35 var(--nbh-sans,system-ui,sans-serif);letter-spacing:0;text-transform:none;color:var(--nbh-muted,#54676f);opacity:1}' +
+    X + ' [data-nbh-fx="hf"].nbh-band[data-nbh-fx-sum]::after,' + X + ' [data-nbh-fx="hf"].bar[data-nbh-fx-sum]::after{color:inherit;opacity:.82}' +
+    X + ' body::after{content:"";display:block;height:92px}' +
+    X + ' #nbhToasts{bottom:92px}' +
+    '#nbhFxBar,#nbhFxRing{display:none}' +
+    X + ' #nbhFxRing{display:block;position:absolute;pointer-events:none;z-index:3;border:2px solid var(--nbh-slate,#254657);border-radius:10px;box-shadow:0 0 0 5px rgba(118,162,163,.22),0 14px 34px -22px rgba(24,46,67,.55);box-sizing:border-box}' +
+    X + ' #nbhFxBar{display:flex;align-items:center;gap:8px;position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(10px + env(safe-area-inset-bottom,0px));width:min(760px,calc(100% - 20px));box-sizing:border-box;padding:6px;background:#fff;color:var(--nbh-navy,#182e43);border:1px solid var(--nbh-rule,#cfdad8);border-radius:14px;box-shadow:0 16px 40px -16px rgba(24,46,67,.5);font:14px/1.3 var(--nbh-sans,system-ui,sans-serif)}' +
+    X + ' #nbhFxBar[hidden]{display:none}' +
+    X + ' #nbhFxBar button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;min-width:44px;padding:0 14px;margin:0;border:1px solid var(--nbh-rule2,#93aead);border-radius:10px;background:#fff;color:var(--nbh-navy,#182e43);font:600 14px/1 var(--nbh-sans,system-ui,sans-serif);cursor:pointer;white-space:nowrap;flex:0 0 auto}' +
+    X + ' #nbhFxBar button svg{width:16px;height:16px;flex:0 0 auto}' +
+    X + ' #nbhFxBar .nbh-fx-next{background:var(--nbh-navy,#182e43);border-color:var(--nbh-navy,#182e43);color:#fff;padding:0 18px}' +
+    X + ' #nbhFxBar .nbh-fx-off{border-color:transparent;color:var(--nbh-slate,#254657)}' +
+    X + ' #nbhFxBar button:disabled{opacity:.4;cursor:default}' +
+    X + ' #nbhFxBar button:focus-visible{outline:2px solid var(--nbh-slate,#254657);outline-offset:2px}' +
+    X + ' #nbhFxBar .nbh-fx-where{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 4px;line-height:1.25}' +
+    X + ' #nbhFxBar .nbh-fx-where b{font-size:11.5px;font-weight:600;color:var(--nbh-muted,#54676f);text-transform:uppercase;letter-spacing:.04em}' +
+    X + ' #nbhFxBar .nbh-fx-where span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}' +
+    '@media (max-width:640px){' + X + ' #nbhFxBar{gap:6px;width:calc(100% - 16px);bottom:calc(8px + env(safe-area-inset-bottom,0px))}' + X + ' #nbhFxBar .nbh-fx-back .t,' + X + ' #nbhFxBar .nbh-fx-off .t{display:none}' + X + ' #nbhFxBar .nbh-fx-back,' + X + ' #nbhFxBar .nbh-fx-off{padding:0 10px}' +
+      X + ' [data-nbh-fx="hf"]{white-space:normal!important}' + X + ' [data-nbh-fx="hf"][data-nbh-fx-sum]::after{display:block;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' + X + '{--nbh-fx-zoom:1.06}}' +
+    '}' +
+    '@media print{#nbhFxBar,#nbhFxRing{display:none!important}}';
+  /* the toolbar's switch has a rule of its own, there with the button whether Focus is on or off */
+  var BTNCSS = '@media screen{#nbhFocusBtn[aria-pressed="true"]{background:var(--nbh-mint,#bcd9d4)!important;color:var(--nbh-navy,#182e43)!important;border-color:var(--nbh-mint,#bcd9d4)!important}' +
+    '#nbhFocusBtn svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px}}';
+  function mkCss(){ if (css && css.isConnected) return; css = D.createElement('style'); css.id = 'nbh-fx-css'; css.setAttribute('data-nbh-screen', ''); css.textContent = CSS; (D.head || R).appendChild(css); }
+  /* the sheet's own scale (nbh-fit-screen zooms the sheet to the window): a folded title stays 44 px tall on screen */
+  function scale(){ var s = D.querySelector('main.sheet,.sheet:not(table)'), z = s ? parseFloat(getComputedStyle(s).zoom) || 1 : 1; R.style.setProperty('--nbh-fx-sz', String(z)); }
+
+  /* ---- on and off ---- */
+  function on(how){
+    if (ON) { build(how); return; }
+    if (!D.body) return;
+    ON = true; mkCss(); mkBar(); hadStyle = R.hasAttribute('style'); scale();
+    D.body.appendChild(ring); D.body.appendChild(bar);
+    if (held) hon = true; else R.setAttribute('data-nbh-fx', 'on');
+    vk = null; units = []; cur = -1;
+    build(how || '');
+    watch(true);
+    paintBtn();
+  }
+  function off(){
+    if (!ON) return;
+    var u = units[cur], q = u ? box(u) : null;
+    ON = false; watch(false);
+    marked.forEach(unmark); marked = []; units = []; cur = -1; vk = null; memo = {};
+    R.removeAttribute('data-nbh-fx'); R.style.removeProperty('--nbh-fx-sz'); if (!hadStyle && !R.getAttribute('style')) R.removeAttribute('style');
+    if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+    if (ring && ring.parentNode) ring.parentNode.removeChild(ring);
+    if (css && css.parentNode) css.parentNode.removeChild(css);
+    /* the part that was open stays where it was on the screen */
+    if (u && q) { var n = box(u); if (n) W.scrollTo(W.scrollX, Math.max(0, W.scrollY + n.top - q.top)); }
+    try { if (W.nbhFieldCare && W.nbhFieldCare.grow) W.nbhFieldCare.grow(); } catch (e) {}
+    /* what a form fitted to the room it had while Focus was on (a walkthrough's picture, a board) is fitted again */
+    try { W.dispatchEvent(new Event('resize')); } catch (e) {}
+    paintBtn();
+  }
+  /* the user's own choice: kept on this device, and the workstation is told so its button and the other forms follow */
+  function choose(v){
+    v = !!v; store(v);
+    if (framed) { try { W.parent.postMessage({ nbh: 'focus-set', on: v }, '*'); } catch (e) {} }
+    if (v) on('here'); else off();
+  }
+  function paintBtn(){ if (tbtn) { tbtn.setAttribute('aria-pressed', String(ON)); tbtn.title = ON ? 'Focus is on: one part at a time. Press to show the whole page.' : 'Focus: one part of the form at a time, the next part opening as you finish one'; } }
+  /* a form opened on its own: the switch in its toolbar, beside the view buttons */
+  function mkBtn(){
+    if (framed || tbtn) return;
+    var seg = D.getElementById('viewSeg'), row = seg && seg.parentElement;
+    if (!row || !row.closest('.toolbar')) return;
+    tbtn = D.createElement('button'); tbtn.type = 'button'; tbtn.id = 'nbhFocusBtn'; tbtn.className = 'noprint';
+    tbtn.innerHTML = IC.focus + 'Focus';
+    tbtn.addEventListener('click', function(){ choose(!ON); });
+    row.insertBefore(tbtn, seg.nextSibling);
+    var st = D.createElement('style'); st.id = 'nbh-fx-btn'; st.setAttribute('data-nbh-screen', ''); st.textContent = BTNCSS; (D.head || R).appendChild(st);
+    paintBtn();
+  }
+
+  /* ---- keeping up with the form: a view changed, a part drawn again, rows added ---- */
+  function own(n){ return n === bar || n === ring || (bar && bar.contains(n)) || n === css; }
+  function onMut(recs){
+    if (!ON || printing) return;
+    var now = false, later = false, sums = false;
+    if (viewKey() !== vk) now = true;
+    for (var i = 0; i < recs.length && !now; i++) {
+      var m = recs[i], t = m.target;
+      if (own(t) || (t.nodeType === 1 && t.closest && t.closest('#nbhFxBar'))) continue;
+      if (m.type === 'childList') {
+        var j, n;
+        for (j = 0; j < m.removedNodes.length; j++) { n = m.removedNodes[j]; if (n.nodeType === 1 && (marked.indexOf(n) >= 0 || (n.querySelector && n.querySelector('[data-nbh-fx]')))) { now = true; break; } }
+        if (now) break;
+        sums = true;
+        /* inside a table, a list or a player (rows drawn again, a slide changing) the parts stay as they are */
+        if (t.nodeType !== 1 || (t.closest && t.closest(WHOLE))) continue;
+        if (boxes.indexOf(t) >= 0) { for (j = 0; j < m.addedNodes.length; j++) { n = m.addedNodes[j]; if (n.nodeType === 1 && !own(n) && !is(n, SKIP + ',.nbh-pm')) { now = true; break; } } }
+        if (now) break;
+        for (j = 0; j < m.addedNodes.length; j++) { n = m.addedNodes[j]; if (n.nodeType === 1 && !own(n) && (HT.test(n.tagName) || (n.querySelector && n.querySelector(HSEL)))) later = true; }
+      } else if (m.type === 'attributes') {
+        if (t === D.body || /^(INPUT|SELECT|TEXTAREA|OPTION)$/.test(t.tagName)) continue;
+        if (m.attributeName === 'style') { var a = String(m.oldValue || ''), b = String(t.getAttribute('style') || ''); if (!/display|visibility/.test(a + b)) continue; }
+        /* only a change in what shows: a block of a box appearing, or a block of the open part going out of sight */
+        var mk = marked.indexOf(t) >= 0, bx = boxes.indexOf(t) >= 0;
+        if (!mk && !bx) { if (boxes.indexOf(t.parentElement) >= 0 && !own(t) && !is(t, SKIP) && vis(t)) later = true; continue; }
+        if (t.closest('[data-nbh-fx="f"]')) continue;
+        if (!vis(t)) later = true;
+      }
+    }
+    if (now) { clearTimeout(slow); mo.takeRecords(); if (!nowF) nowF = (W.requestAnimationFrame || setTimeout)(function(){ nowF = 0; build(); }); return; }
+    if (later) { clearTimeout(slow); slow = setTimeout(function(){ build(); }, 120); }
+    if (sums) soon();
+  }
+  function soon(){ clearTimeout(sumT); sumT = setTimeout(function(){ if (!ON) return; if (units.some(function(u){ return u.els.some(function(e){ return !e.isConnected; }) || fieldsOf(u.els).length !== u.n0; })) { build(); return; } paintSums(); place(); }, 250); }
+  function watch(v){
+    if (v) {
+      if (!mo) mo = new MutationObserver(onMut);
+      mo.observe(D.body, { childList: true, subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['class', 'hidden', 'style', 'open', 'aria-pressed', 'aria-selected'] });
+      /* the ring follows the open part as the page settles (a picture loading, a box growing); a look twice a second, not a
+         ResizeObserver, which a walkthrough player resizing itself inside the part would set looping */
+      var n = 0; clearInterval(tick); tick = setInterval(function(){ if (D.hidden || held) return; place(); if (++n % 3 === 0) paintSums(); }, 500);   /* and the folded lines catch up with values a form set without telling anyone */
+    } else { if (mo) mo.disconnect(); clearInterval(tick); clearTimeout(slow); clearTimeout(sumT); }
+  }
+  D.addEventListener('input', function(){ if (ON) soon(); }, true);
+  D.addEventListener('change', function(){ if (ON) soon(); }, true);
+  W.addEventListener('resize', function(){ if (!ON) return; scale(); if (R.clientWidth !== lastW) { lastW = R.clientWidth; clearTimeout(slow); slow = setTimeout(function(){ build(); }, 150); } else place(); });
+  W.addEventListener('load', function(){ if (ON) { scale(); build(); } });
+
+  /* a tap on a folded part opens it */
+  D.addEventListener('click', function(e){
+    if (!ON || e.defaultPrevented) return;
+    var h = e.target && e.target.closest && e.target.closest('[data-nbh-fx="hf"],[data-nbh-fx="s"]');
+    if (!h) return;
+    var i = +h.getAttribute('data-nbh-fx-u');
+    if (h.getAttribute('data-nbh-fx') === 's' && i === cur) return;
+    if (i >= 0 && i < units.length && i !== cur) go(i, true);
+  });
+  /* Enter in a one-line field: the next field of the part, and from the last field the next part */
+  D.addEventListener('keydown', function(e){
+    if (!ON || e.key !== 'Enter' || e.defaultPrevented || e.isComposing || e.shiftKey || e.altKey || e.ctrlKey || e.metaKey) return;
+    var t = e.target; if (!t || t.tagName !== 'INPUT' || !LINE.test(t.type || '')) return;
+    var u = units[cur]; if (!u) return;
+    var list = fieldsOf(u.els).filter(live), k = list.indexOf(t); if (k < 0) return;   /* read now: a list the form drew since counts */
+    e.preventDefault();
+    if (k < list.length - 1) { focusIn(list[k + 1]); return; }
+    var was = cur;
+    if (step(1) && cur !== was) { var f = firstField(units[cur]); if (f) focusIn(f); }
+  });
+  /* a form or the workstation that puts the cursor in a field of a folded part (a check that names a missing field) opens
+     that part first, so the field is there to be seen */
+  (function(){
+    var P = W.HTMLElement && HTMLElement.prototype, F = P && P.focus, S = W.Element && Element.prototype.scrollIntoView;
+    function open(el){ try { if (!ON || !el || !el.closest) return; var h = el.closest('[data-nbh-fx="f"],[data-nbh-fx="hf"]'); if (!h) return; var i = +h.getAttribute('data-nbh-fx-u'); if (i >= 0 && i !== cur && i < units.length) { cur = i; memo[vk] = units[i].head || units[i].els[0]; apply(); } } catch (e) {} }
+    if (F) P.focus = function(){ open(this); return F.apply(this, arguments); };
+    if (S) Element.prototype.scrollIntoView = function(){ open(this); return S.apply(this, arguments); };
+  })();
+  /* a print: the folds step aside while the page is laid out for paper (the rules are for the screen in any case, and
+     field-care then measures every box open) and come back after */
+  function pr(v){ if (v === printing || (v && !ON)) return; printing = v; if (v) hold(); else { release(); if (ON) setTimeout(build, 0); } }
+  W.addEventListener('beforeprint', function(){ pr(true); });
+  W.addEventListener('afterprint', function(){ pr(false); });
+  try { var pq = matchMedia('print'), ph = function(e){ pr(!!e.matches); }; if (pq.addEventListener) pq.addEventListener('change', ph); else if (pq.addListener) pq.addListener(ph); } catch (e) {}
+  /* a copy of the page carries no mark: the master print copies the sheet (the form's bridge clones it while the page is laid
+     out plain, html.nbh-plain, where none of these rules apply), and a form that copies a part of itself (a row from a row)
+     must not copy a fold with it. Every copy made while Focus is on has the marks taken off the copy; the page keeps them. */
+  (function(){
+    var C = W.Node && Node.prototype.cloneNode, SEL = '[' + ATTRS.join('],[') + ']';
+    if (!C) return;
+    Node.prototype.cloneNode = function(){
+      var c = C.apply(this, arguments);
+      if (ON && marked.length && c && c.nodeType === 1) { try { unmark(c); if (c.querySelectorAll) { var l = c.querySelectorAll(SEL); for (var i = 0; i < l.length; i++) unmark(l[i]); } } catch (e) {} }
+      return c;
+    };
+  })();
+  W.addEventListener('message', function(ev){
+    var d = ev.data; if (!d || typeof d !== 'object') return;
+    if (d.nbh === 'focus' && ev.source === W.parent && framed) { if (d.on) on(d.here ? 'here' : ''); else off(); }
+  });
+  /* another tab of this device turned it on or off (a form inside the workstation hears it from the workstation instead) */
+  W.addEventListener('storage', function(e){ if (e.key === KEY && !framed) { if (e.newValue === 'on') on(); else off(); } });
+
+  /* for the checks (qa/v2191-focus-test.js) and the workstation */
+  U.focus = {
+    on: function(){ return ON; }, set: function(v){ choose(v); },
+    units: function(){ var sq = seq(); return units.map(function(u, i){ return { i: i, title: u.title, fields: u.fields.length, live: u.live, nf: u.nf, step: sq.indexOf(i) >= 0, els: u.els.length, head: u.head ? u.head.tagName.toLowerCase() + (u.head.className ? '.' + String(u.head.getAttribute('class')).trim().split(/\s+/).join('.') : '') : '', sup: u.sup.length, cur: i === cur }; }); },
+    cur: function(){ return cur; }, go: function(i){ return go(i, false); }, next: function(){ return step(1); }, back: function(){ return step(-1); },
+    build: function(){ build(); }, roots: roots, builds: function(){ return builds; }
+  };
+  function start(){ mkBtn(); if (store()) on(); }
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', start); else start();
 })();
