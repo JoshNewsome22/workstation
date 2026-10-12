@@ -712,7 +712,7 @@ PH.H=async()=>{
   await ctx.route('https://accounts.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));
   await ctx.route('https://www.googleapis.com/oauth2/v3/userinfo',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({email:M.email})}));
   await ctx.route('https://gmail.googleapis.com/**',async r=>{const b=JSON.parse(r.request().postData()||'{}'),raw=Buffer.from(String(b.raw||'').replace(/-/g,'+').replace(/_/g,'/'),'base64').toString('utf8');
-    const body=Buffer.from((raw.split('\r\n\r\n')[1]||'').replace(/\r\n/g,''),'base64').toString('utf8');MAILS.push({raw,body,step:stepName});return r.fulfill({contentType:'application/json',body:JSON.stringify({id:'m'+MAILS.length})});});
+    const body=require(__dirname+'/lib.js').mailParts(raw).text;MAILS.push({raw,body,step:stepName});return r.fulfill({contentType:'application/json',body:JSON.stringify({id:'m'+MAILS.length})});});
   ctx.setDefaultTimeout(20000);page=await ctx.newPage();
   page.on('pageerror',e=>ERRS.push({step:stepName,where:'workstation',text:String(e.message||e).slice(0,400)}));
   page.on('console',m=>{if(m.type()==='error')ERRS.push({step:stepName,where:'console '+(m.location()&&m.location().url||'').split('/').pop(),text:m.text().slice(0,400)});});

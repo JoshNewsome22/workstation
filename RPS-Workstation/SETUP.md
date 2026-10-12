@@ -9050,3 +9050,36 @@ data*. A photo, a picture or another form's file read in no longer clears the un
 **The checks.** `qa/sweep-test.js` (the sweep; runnable in parts with ONLY, PART, STEPS and JOBS),
 `qa/student-journey-test.js` (the simulated student, about eight minutes) and `qa/guard-open-test.js` (the leave warning
 and Open data) are new, and every test now runs in the release run.
+
+### v21.88: short links, a button in the email, and a steadier Google sign-in
+
+**Short links.** A questionnaire link was 1,000 to 2,000 characters long, because the whole questionnaire travels inside it.
+Now each link that leaves a form (an email, Copy link, a QR code, Email it…) is short, about 80 to 130 characters:
+`respond.html#q=<id>.<key>`. The questionnaire is sealed on the iPad with a key of its own and kept on the practice's reply
+box, which cannot read it; the key is in the link after the `#`, which browsers never send to any website. The box keeps
+it 60 days, like the replies. When the box cannot keep it (no internet, or a `box.php` from before v21.88), the long link goes
+as before, and long links already sent keep opening. A short link opened after 60 days says it has expired and to ask for a
+new one; one cut short says it does not open; with no signal it says to try again. The QR code is made from the short link,
+so it is a simpler code that any phone camera reads.
+
+**A button in the email.** The emails sent from your school account show each questionnaire as an **Open the questionnaire**
+button (Abrir el cuestionario in Spanish), with the short link in small print under it. Mail apps that cannot show the page
+show the plain text, which has the short link. (The iPad's Mail app, used when Gmail cannot send, has the plain text only.)
+
+**Google's sign-in.**
+
+- **Sign in and send** waits until Google's sign-in has loaded ("Loading Google's sign-in…"); a tap in the first seconds
+  after the workstation opened used to fail with "still loading". The sign-in is loaded soon after the workstation opens on
+  an iPad with the Google key.
+- Google's window lets you untick a permission. If **Send email on your behalf** was not allowed, nothing is sent, the
+  sign-in is not kept, the workstation says so plainly, and the next **Sign in and send** asks Google again with every
+  permission shown. (Before, the sign-in was kept for the tab, so every try failed until the tab was closed.)
+
+**Upload.** The reply box changed: upload the new `nbh-reply-box-upload.zip` to the home folder and extract it, as before
+(it replaces `box.php` and keeps the replies). `https://newsomebh.com/reply/box.php?a=ping` then answers
+`{"ok":true,"v":2,…,"short":true}`. Until it does, links stay long.
+
+Checked by `qa/v2188-short-test.js` (Form IA-1's Send all due now through the school Gmail, simulated: short links as text
+and as a button, the sealed copies on the box, the link answered on a phone and collected; Copy link and the QR code; the
+long link when the box cannot keep it; expired, cut and unreachable links; old long links; the sign-in that did not allow
+sending, and asked again; the button waiting for Google's sign-in).

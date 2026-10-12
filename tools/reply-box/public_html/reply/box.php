@@ -10,15 +10,20 @@
              GET  ?a=list&b=<id>&t=<token>        the replies (id, at, k, iv, ct) for the token's box
              POST ?a=del&b=<id>     {t, ids}      removes replies the form has collected
              POST ?a=drop&b=<id>    {t}           removes the box
+   Short links (v21.88): POST ?a=qput&b=<id>  {v,iv,ct}  a questionnaire, sealed by the form with a key that stays in the
+             link (after the #, so it never reaches this site); up to 64 KB; answers {ok, q} with the short id
+             GET  ?a=qget&q=<short id>            the sealed questionnaire (iv, ct) for the respondent page to open
    Health:   GET  ?a=ping
    A reply older than DAYS days is removed when its box is next touched; a box no reply has reached in DAYS days and
-   whose token is older than that is removed too. Every answer is JSON. Requests from any page are allowed (CORS *):
+   whose token is older than that is removed too; a sealed questionnaire is removed DAYS days after it was stored. Every answer is JSON. Requests from any page are allowed (CORS *):
    what they carry cannot be read here, and a page opened from an email attachment has no origin of its own. */
 declare(strict_types=1);
 const DAYS = 60;              // how long a reply waits to be collected
 const MAX_BODY = 65536;       // bytes per reply
 const MAX_REPLIES = 300;      // per box
 const MAX_PER_HOUR = 120;     // puts from one address
+const MAX_Q_PER_HOUR = 300;   // sealed questionnaires stored from one address (one a person emailed)
+const MAX_Q = 20000;          // sealed questionnaires kept in all
 $DATA = getenv('NBH_REPLY_DATA') ?: __DIR__ . '/data';   // move it outside public_html if you can: a folder PHP can write to
 
 header('Content-Type: application/json; charset=utf-8');
@@ -60,29 +65,40 @@ function sweepBoxes(string $data): void {   // now and then, boxes nothing has r
         foreach (glob($dir . '/r-*.json') ?: [] as $f) $latest = max($latest, (int) @filemtime($f));
         if ($latest < $cut) { foreach (glob($dir . '/*') ?: [] as $f) @unlink($f); @unlink($dir . '/.htaccess'); @rmdir($dir); }
     }
+    foreach (glob($data . '/_q/*.json') ?: [] as $f) { if (@filemtime($f) < $cut) @unlink($f); }   // sealed questionnaires past their time
 }
 function tokenOk(string $dir, ?string $t): bool {
     $t = hex($t, 32); if ($t === '') return false;
     $have = @file_get_contents($dir . '/token');
     return is_string($have) && hash_equals(trim($have), hash('sha256', $t));
 }
-function rate(string $data): void {   // puts from one address, per hour
+function rate(string $data, string $kind = 'cnt', int $max = MAX_PER_HOUR): void {   // puts from one address, per hour
     $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     if ($ip === '') return;
     $d = $data . '/_ip'; if (!is_dir($d)) @mkdir($d, 0700);
-    $f = $d . '/' . hash('sha256', $ip) . '.cnt';
+    $f = $d . '/' . hash('sha256', $ip) . '.' . $kind;
     $n = 0; $at = 0;
     if (is_file($f)) { [$n, $at] = array_map('intval', explode(' ', (string) @file_get_contents($f)) + [0, 0]); }
     if ($at < time() - 3600) { $n = 0; $at = time(); }
-    if ($n >= MAX_PER_HOUR) bad(429, 'too many replies from this address; try again later');
+    if ($n >= $max) bad(429, $kind === 'cnt' ? 'too many replies from this address; try again later' : 'too many links made from this address; try again later');
     @file_put_contents($f, ($n + 1) . ' ' . $at);
 }
+function shortId(): string { $a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'; $s = ''; for ($i = 0; $i < 10; $i++) $s .= $a[random_int(0, strlen($a) - 1)]; return $s; }
 
 $a = $_GET['a'] ?? '';
 $m = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-if ($a === 'ping') out(200, ['ok' => true, 'v' => 1, 'days' => DAYS]);
+if ($a === 'ping') out(200, ['ok' => true, 'v' => 2, 'days' => DAYS, 'short' => true]);
 ensureData($DATA);
 sweepBoxes($DATA);
+
+if ($a === 'qget') {   // the respondent page opens a short link: the sealed questionnaire, which only the key in the link opens
+    $q = (string) ($_GET['q'] ?? '');
+    if (!preg_match('/^[A-Za-z0-9]{10}$/', $q)) bad(400, 'not a short link');
+    $raw = @file_get_contents($DATA . '/_q/' . $q . '.json');
+    $r = is_string($raw) ? json_decode($raw, true) : null;
+    if (!is_array($r) || !isset($r['ct'])) bad(404, 'gone');
+    out(200, ['ok' => true, 'v' => 1, 'iv' => $r['iv'], 'ct' => $r['ct'], 'at' => $r['at'] ?? '']);
+}
 
 if ($a === 'new') {
     if ($m !== 'POST') bad(405, 'POST');
@@ -118,6 +134,19 @@ if ($a === 'put') {
     $rec = ['id' => $id, 'at' => gmdate('c'), 'k' => ['x' => $k['x'], 'y' => $k['y']], 'iv' => $o['iv'], 'ct' => $o['ct']];
     if (@file_put_contents($dir . '/' . $id . '.json', json_encode($rec, JSON_UNESCAPED_SLASHES), LOCK_EX) === false) bad(500, 'the reply could not be kept');
     out(200, ['ok' => true, 'id' => $id]);
+}
+if ($a === 'qput') {   // a form stores a questionnaire it has sealed, for a short link
+    if ($m !== 'POST') bad(405, 'POST');
+    rate($DATA, 'q', MAX_Q_PER_HOUR);
+    $o = body();
+    if (($o['v'] ?? 0) !== 1 || !preg_match('/^[A-Za-z0-9_-]{16}$/', (string) ($o['iv'] ?? '')) || !preg_match('/^[A-Za-z0-9_-]{24,}$/', (string) ($o['ct'] ?? ''))) bad(400, 'not a sealed questionnaire');
+    $qd = $DATA . '/_q'; if (!is_dir($qd)) @mkdir($qd, 0700);
+    if (!is_dir($qd)) bad(500, 'the link could not be kept');
+    if (count(glob($qd . '/*.json') ?: []) >= MAX_Q) bad(507, 'the site holds too many links');
+    for ($i = 0; $i < 5; $i++) { $q = shortId(); if (!is_file($qd . '/' . $q . '.json')) break; }
+    $rec = ['q' => $q, 'b' => $b, 'at' => gmdate('c'), 'iv' => $o['iv'], 'ct' => $o['ct']];
+    if (@file_put_contents($qd . '/' . $q . '.json', json_encode($rec, JSON_UNESCAPED_SLASHES), LOCK_EX) === false) bad(500, 'the link could not be kept');
+    out(200, ['ok' => true, 'q' => $q]);
 }
 if ($a === 'list') {
     if (!tokenOk($dir, $_GET['t'] ?? '')) bad(403, 'wrong token');

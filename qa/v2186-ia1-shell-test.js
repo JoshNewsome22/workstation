@@ -23,7 +23,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   await ctx.route('https://accounts.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));
   await ctx.route('https://www.googleapis.com/oauth2/v3/userinfo',r=>r.fulfill({contentType:'application/json',body:JSON.stringify({email:'simulated.bcba@palmbeachschools.org'})}));
   await ctx.route('https://gmail.googleapis.com/**',async r=>{const b=JSON.parse(r.request().postData()||'{}'),raw=Buffer.from(String(b.raw||'').replace(/-/g,'+').replace(/_/g,'/'),'base64').toString('utf8');
-    const body=Buffer.from((raw.split('\r\n\r\n')[1]||'').replace(/\r\n/g,''),'base64').toString('utf8');sent.push({raw,body});return r.fulfill({contentType:'application/json',body:JSON.stringify({id:'m'+sent.length})});});
+    const body=require(__dirname+'/lib.js').mailParts(raw).text;sent.push({raw,body});return r.fulfill({contentType:'application/json',body:JSON.stringify({id:'m'+sent.length})});});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1200);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};

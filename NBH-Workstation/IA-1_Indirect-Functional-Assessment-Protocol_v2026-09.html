@@ -4674,7 +4674,8 @@ $('#rpPrevDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.cur
 /* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
 $('#rpMail').addEventListener('click',async()=>{if(rpOff())return;rpRemember();await boxEnsure();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}const ls=rpLinks();outsMade($('#rpInst').value,ls.map(l=>l.label));NBH_RESPOND.invite({links:ls});});
 $('#rpLink').addEventListener('click',async()=>{if(rpOff())return;rpRemember();await boxEnsure();const box=$('#rpLinkBox');if(!/^https?:$/.test(location.protocol)){box.hidden=true;$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
-  const ls=rpLinks();outsMade($('#rpInst').value,ls.map(l=>l.label));const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
+  const ls=rpLinks();if(window.NBH_RESPOND&&NBH_RESPOND.shortLink){$('#rpNote').textContent='Making a short link…';for(const l of ls)l.url=await NBH_RESPOND.shortLink(l.url);}   /* v21.88 */
+  outsMade($('#rpInst').value,ls.map(l=>l.label));const text=ls.length===1?ls[0].url:ls.map(l=>l.label+': '+l.url).join('\n');box.hidden=false;box.value=text;
   let copied=false;try{await navigator.clipboard.writeText(text);copied=true;}catch(e){copied=false;}
   $('#rpNote').textContent=copied?(ls.length===1?'Link copied ('+text.length+' characters; paste it into the email as a link, not typed out). It is also in the box below.':ls.length+' links copied, one line per target behavior; they are also in the box below.'):'The clipboard was refused: select the link in the box below and copy it.';
   try{box.focus();box.setSelectionRange(0,box.value.length);}catch(e){}});
@@ -4850,7 +4851,7 @@ function outsPage(o,quiet){const r=tgtRec(o.tgt),why=outsWhy(o.inst,r);if(why){$
   OUTS.forEach(x=>{if(x.tgt===o.tgt&&x.inst===o.inst&&!x.made)x.made=isoToday();});if(!quiet){$('#outNote').textContent='Page saved: '+name+'. Attach it to an email to '+infLabel(o.inf)+'.';}return name;}
 function outsLinkUrl(o){const r=tgtRec(o.tgt),why=outsWhy(o.inst,r);if(why)return {why};if(!/^https?:$/.test(location.protocol))return {why:'Opened from a folder: links need the workstation on its website. Make the page and attach it to an email instead.'};
   const p=rpPayloadQuiet(o.inst,r,{due:o.due,link:true});return {url:rpBaseUrl()+NBH_RESPOND.payloadToHash(p),label:r.label};}
-async function outsLink(o){const l=outsLinkUrl(o);if(l.why){$('#outNote').textContent=l.why;return;}const box=$('#outLinkBox');box.hidden=false;box.value=l.url;let ok=false;try{await navigator.clipboard.writeText(l.url);ok=true;}catch(e){}
+async function outsLink(o){const l=outsLinkUrl(o);if(l.why){$('#outNote').textContent=l.why;return;}if(window.NBH_RESPOND&&NBH_RESPOND.shortLink){$('#outNote').textContent='Making a short link…';l.url=await NBH_RESPOND.shortLink(l.url);}const box=$('#outLinkBox');box.hidden=false;box.value=l.url;let ok=false;try{await navigator.clipboard.writeText(l.url);ok=true;}catch(e){}
   OUTS.forEach(x=>{if(x.tgt===o.tgt&&x.inst===o.inst&&!x.made)x.made=isoToday();});$('#outNote').textContent=(ok?'Link copied for '+infLabel(o.inf)+' (paste it into the email as a link). ':'The clipboard was refused: ')+'It is in the box below.';outsRender();try{box.focus();box.setSelectionRange(0,box.value.length);}catch(e){}}
 function outsEmail(o,remind){const l=outsLinkUrl(o);if(l.why){$('#outNote').textContent=l.why;return;}
   NBH_RESPOND.invite({links:[{label:l.label,url:l.url}],to:infEmail(o.inf)||undefined,title:remind?'Reminder: '+INST[o.inst].title:undefined});
@@ -4991,9 +4992,12 @@ function qrSvg(url){url=String(url||'').trim();if(!url||typeof qrcode!=='functio
   try{const q=qrcode(0,'L');q.addData(url);q.make();const n=q.getModuleCount(),m=2,sz=n+2*m;let d='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+='M'+(c+m)+' '+(r+m)+'h1v1h-1z';
     return '<svg viewBox="0 0 '+sz+' '+sz+'" shape-rendering="crispEdges" data-modules="'+n+'" role="img" aria-label="QR code of the link" style="width:100%;height:auto;display:block"><rect width="'+sz+'" height="'+sz+'" fill="#fff"/><path d="'+d+'" fill="#000"/></svg>';}catch(e){return '';}}
 let qrUrl='';
-function qrShow(url,about){qrUrl=url;const svg=qrSvg(url);$('#qrFor').textContent=about||'';$('#qrBox').innerHTML=svg;
+/* v21.88 the code is made from the short link (the questionnaire kept sealed on the reply box): a simpler code that any camera reads */
+async function qrShow(url,about){if(window.NBH_RESPOND&&NBH_RESPOND.shortLink&&/#(z|p)=/.test(url)){$('#qrBox').innerHTML='';$('#qrFor').textContent=about||'';$('#qrNote').textContent='Making a short link…';$('#qrShare').hidden=true;$('#qrStatus').textContent='';
+    if(!$('#qrDlg').open)$('#qrDlg').showModal();try{url=await NBH_RESPOND.shortLink(url);}catch(e){}}
+  qrUrl=url;const svg=qrSvg(url);$('#qrFor').textContent=about||'';$('#qrBox').innerHTML=svg;
   $('#qrNote').textContent=svg?'The informant points the phone’s camera at the code and taps the link that appears; it opens the questionnaire (a link of '+url.length.toLocaleString()+' characters). Make the screen bright, or print this sheet. If the camera does not read it, press Share the link… or Copy the link.':'The link is too long for a QR code ('+url.length.toLocaleString()+' characters): share or copy it instead.';
-  $('#qrShare').hidden=!navigator.share;$('#qrStatus').textContent='';$('#qrDlg').showModal();}
+  $('#qrShare').hidden=!navigator.share;$('#qrStatus').textContent='';if(!$('#qrDlg').open)$('#qrDlg').showModal();}
 $('#qrShare').addEventListener('click',()=>{if(!qrUrl||!navigator.share)return;navigator.share({title:'Questionnaire',text:'Please open this link and answer the questionnaire.',url:qrUrl}).then(()=>{$('#qrStatus').textContent='Shared.';},()=>{});});
 $('#qrCopy').addEventListener('click',async()=>{if(!qrUrl)return;try{await navigator.clipboard.writeText(qrUrl);$('#qrStatus').textContent='Link copied.';}catch(e){$('#qrStatus').textContent='The clipboard was refused: use Share, or Copy a link in Respondent pages.';}});
 $('#qrDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});

@@ -4592,6 +4592,7 @@ function clLinkOf(r){try{const d=parseCase(r.text),fm=d&&d.forms&&d.forms['DD-1'
 const clTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.tok')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
 const clGid=()=>{try{return localStorage.getItem('nbh.google.client')||'';}catch(e){return '';}};
 let clGsi=null;
+setTimeout(()=>{try{if(!EMBED&&/^https:$/.test(location.protocol)&&clGid()&&navigator.onLine!==false)clGsiLoad().catch(()=>{});}catch(e){}},3000);   /* v21.88 ready before Send is pressed */
 function clGsiLoad(){if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();if(clGsi)return clGsi;
   clGsi=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.onload=()=>res();
     s.onerror=()=>{clGsi=null;rej(new Error('Google’s sign-in could not be loaded. Check the internet connection.'));};document.head.appendChild(s);});return clGsi;}
@@ -5015,25 +5016,38 @@ setTimeout(()=>{CMDS.push({k:'iep meeting packet present levels plaafp goals cop
 const GM={busy:false};
 const GM_SCOPE='https://www.googleapis.com/auth/gmail.send email';
 const gmTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.mail')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
+/* v21.88 Google's window lets the person untick a permission: a sign-in that did not allow sending is not kept, the person is
+   told plainly, and the next tap asks Google again with every permission shown */
+const GM_NOSEND='Google’s window did not allow the workstation to send email. Tap Sign in and send again and allow “Send email on your behalf”.';
+function gmCanSend(r){try{if(google.accounts.oauth2.hasGrantedAllScopes)return google.accounts.oauth2.hasGrantedAllScopes(r,'https://www.googleapis.com/auth/gmail.send');}catch(e){}
+  return !(r&&typeof r.scope==='string')||/gmail\.send/.test(r.scope);}
 function gmSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej(new Error('nokey'));return;}
   if(!(window.google&&google.accounts&&google.accounts.oauth2)){rej(new Error('Google’s sign-in is still loading. Try again in a moment.'));return;}
   try{google.accounts.oauth2.initTokenClient({client_id:id,scope:GM_SCOPE,
-      callback:r=>{if(r&&r.access_token){const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.mail',JSON.stringify(t));}catch(e){}res(t);}
+      callback:r=>{if(r&&r.access_token){if(!gmCanSend(r)){GM.reask=true;try{sessionStorage.removeItem('nbh.google.mail');}catch(e){}rej(new Error(GM_NOSEND));return;}
+          GM.reask=false;const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.mail',JSON.stringify(t));}catch(e){}res(t);}
         else rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));},
-      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:''});}
+      error_callback:e=>rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'))}).requestAccessToken({prompt:GM.reask?'consent':''});}
   catch(e){rej(e);}});}
 async function gmWho(tok){try{const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}});if(r.ok){const j=await r.json();return j.email||'';}}catch(e){}return '';}
 const gmB64=s=>{const u=new TextEncoder().encode(s);let b='';for(let i=0;i<u.length;i+=0x8000)b+=String.fromCharCode.apply(null,u.subarray(i,i+0x8000));return btoa(b);};
 const gmUrl=s=>gmB64(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const gmHead=s=>/^[\x20-\x7e]*$/.test(s)?s:'=?UTF-8?B?'+gmB64(s)+'?=';
 function gmRaw(m,from){const name=String(m.name||'').replace(/["\r\n]/g,'').slice(0,80),to=String(m.to||'').trim();
-  const body=gmB64(String(m.text||'')).replace(/.{1,76}/g,'$&\r\n');
-  return gmUrl([(from?'From: '+from:''),'To: '+(name?'"'+gmHead(name)+'" ':'')+'<'+to+'>','Subject: '+gmHead(String(m.subject||'').replace(/[\r\n]+/g,' ').slice(0,200)),'MIME-Version: 1.0','Content-Type: text/plain; charset="UTF-8"','Content-Transfer-Encoding: base64','',body].filter((x,i)=>i||x).join('\r\n'));}
+  const b64=t=>gmB64(String(t||'')).replace(/.{1,76}/g,'$&\r\n'),body=b64(m.text);
+  const head=[(from?'From: '+from:''),'To: '+(name?'"'+gmHead(name)+'" ':'')+'<'+to+'>','Subject: '+gmHead(String(m.subject||'').replace(/[\r\n]+/g,' ').slice(0,200)),'MIME-Version: 1.0'].filter(Boolean);
+  /* v21.88 with a page version (each questionnaire a button), both go: mail apps show the page, and the text where they cannot */
+  const html=typeof m.html==='string'&&m.html.length<200000?m.html:'';
+  if(!html)return gmUrl(head.concat(['Content-Type: text/plain; charset="UTF-8"','Content-Transfer-Encoding: base64','',body]).join('\r\n'));
+  const bd='nbh-'+Math.random().toString(36).slice(2)+Date.now().toString(36);
+  return gmUrl(head.concat(['Content-Type: multipart/alternative; boundary="'+bd+'"','','--'+bd,'Content-Type: text/plain; charset="UTF-8"','Content-Transfer-Encoding: base64','',body,
+    '--'+bd,'Content-Type: text/html; charset="UTF-8"','Content-Transfer-Encoding: base64','',b64('<!DOCTYPE html><html><head><meta charset="utf-8"><\/head><body>'+html+'<\/body><\/html>'),'--'+bd+'--','']).join('\r\n'));}
 async function gmSend(tok,m,from){const r=await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send',{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({raw:gmRaw(m,from)})});
   if(r.ok)return {ok:true};let j=null;try{j=await r.json();}catch(e){}const msg=j&&j.error&&(j.error.message||j.error.status)||('Gmail answered '+r.status);
   if(r.status===401){try{sessionStorage.removeItem('nbh.google.mail');}catch(e){}return {ok:false,signin:true,err:'Google asked for the sign-in again'};}
   if(/mail service not enabled|not.*enabled for this account|failedPrecondition/i.test(msg))return {ok:false,service:true,err:'Gmail is not turned on for this account'};
-  if(r.status===403)return {ok:false,service:true,err:/insufficient|scope|permission/i.test(msg)?'this account has not allowed the workstation to send mail (the district may need to allow it)':msg};
+  if(r.status===403){try{sessionStorage.removeItem('nbh.google.mail');}catch(e){}GM.reask=true;   /* v21.88 the next tap asks Google again */
+    return {ok:false,service:true,err:/insufficient|scope|permission/i.test(msg)?'this sign-in did not allow sending email (tap Sign in and send again and allow “Send email on your behalf”; if Google then says the district has not approved the app, the district’s IT has to allow it)':msg};}
   return {ok:false,err:msg};}
 const gmOk=e=>/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(e||'').trim());
 /* the request from a form: shown, confirmed in a tap that also signs in, sent one by one, answered */
@@ -5051,6 +5065,9 @@ async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answe
     const c=document.createElement('button');c.type='button';c.textContent='Not now';c.onclick=()=>done(null);
     const mailApp=document.createElement('button');mailApp.type='button';mailApp.textContent='Use the Mail app instead';mailApp.onclick=()=>done('app');
     const ok=document.createElement('button');ok.type='button';ok.className='primary';ok.textContent=gmTok()?'Send':'Sign in and send';
+    /* v21.88 a tap before Google's sign-in had loaded failed ("still loading"): the button waits until it is ready */
+    if(!gmTok()&&!(window.google&&google.accounts&&google.accounts.oauth2)){ok.disabled=true;ok.textContent='Loading Google’s sign-in…';
+      clGsiLoad().then(()=>{ok.disabled=false;ok.textContent='Sign in and send';},e=>{ok.textContent='Google’s sign-in could not load';$('#cfBody').textContent+='\n\n'+((e&&e.message)||'Google’s sign-in could not be loaded.')+' Use the Mail app instead, or try again with the internet on.';});}
     /* the sign-in opens Google's window, so it is started in this tap, before anything is awaited */
     ok.onclick=()=>{if(gmTok()){done(gmTok());return;}gmSignIn().then(t=>done(t)).catch(e=>done({err:e&&e.message==='nokey'?'The Google sign-in key is not set on this iPad.':(e&&e.message||String(e))}));};
     f.appendChild(c);f.appendChild(mailApp);f.appendChild(ok);dlg.oncancel=e=>{e.preventDefault();done(null);};dlg.showModal();ok.focus();});

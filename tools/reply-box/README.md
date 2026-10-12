@@ -21,7 +21,8 @@ The writing-help relay already needed this; if it is set up, nothing to do. Othe
 2. Press **Upload**, choose `nbh-reply-box-upload.zip`, wait for 100%, go back to File Manager.
 3. Select the zip, press **Extract**, confirm. It adds `public_html/reply/` with `box.php` and `.htaccess`.
    Nothing else in `public_html` is touched. Delete the zip.
-4. Open `https://newsomebh.com/reply/box.php?a=ping` in a browser: it answers `{"ok":true,"v":1,"days":60}`.
+4. Open `https://newsomebh.com/reply/box.php?a=ping` in a browser: it answers `{"ok":true,"v":2,"days":60,"short":true}`
+   (v21.88 and later; an older box answers `"v":1`, and the forms then make long links).
 
 The program makes a `data` folder beside itself the first time a form registers a box, and writes an
 `.htaccess` that keeps the web away from it. If you prefer the data outside `public_html`, make a folder there
@@ -55,3 +56,11 @@ the box's `.htaccess` opens its own folder to everyone (`Require all granted`), 
 ## Updating
 
 Extract a newer `nbh-reply-box-upload.zip` the same way; it replaces `box.php` and leaves the data folder as it is.
+
+## Short links (v21.88)
+
+A questionnaire link carries the whole questionnaire, so it was 1,000 to 2,000 characters long. From v21.88 a form seals
+the questionnaire with a key of its own (AES-GCM-128) and keeps the sealed copy here (`?a=qput`); the link then holds only
+the copy's short id and the key, after the `#` (which browsers never send to a website): about 100 characters. The
+respondent page fetches the copy (`?a=qget`) and opens it with the key. The site keeps a random id and the ciphertext, in
+`data/_q/`, for 60 days, and cannot read them. Limits: 64 KB each, 300 kept an hour from one address, 20,000 in all.

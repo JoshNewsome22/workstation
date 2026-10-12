@@ -142,6 +142,46 @@
       return h.length<old.length&&JSON.stringify(hashPayload(h))===js?h:old;}catch(e){return old;}};
   U.payloadFromHash=function(str){try{return hashPayload(str==null?location.hash:str);}catch(e){return null;}};
   U.linkProblem=function(str){str=str==null?location.hash:String(str);return /[#&](z|p)=/.test(str)&&!U.payloadFromHash(str);};
+  /* ---- v21.88 short links: the questionnaire sealed with a key of its own (AES-GCM-128) and kept on the reply box, which
+     cannot read it; the link holds only the box's short id for it and the key, after the # (never sent to any website):
+     respond.html#q=<id>.<key> (&u=<the box's address> when it is not the site's own /reply/box.php). The box keeps it 60 days.
+     Made when a link leaves the form (an email, Copy link, a QR code); when the box cannot keep it (no internet, a box.php
+     from before v21.88) the long link goes as before. Long links keep opening. ---- */
+  var SHORT={};
+  function boxAt(base){try{return new URL(base).origin+'/reply/box.php';}catch(e){return '';}}
+  U.shortLink=function(url){url=String(url||'');var i=url.indexOf('#');if(i<0)return Promise.resolve(url);
+    var base=url.slice(0,i),h=url.slice(i+1);if(!/^(z|p)=/.test(h)||!/^https?:\/\//i.test(base))return Promise.resolve(url);
+    if(SHORT[url])return Promise.resolve(SHORT[url]);
+    var p=null;try{p=hashPayload('#'+h);}catch(e){p=null;}var bx=p&&p.box;
+    if(!(bx&&bx.u&&bx.b&&/^https?:\/\//i.test(bx.u)&&window.crypto&&crypto.subtle&&window.fetch))return Promise.resolve(url);
+    var S=crypto.subtle,key=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    return S.importKey('raw',key,{name:'AES-GCM'},false,['encrypt']).then(function(k){return S.encrypt({name:'AES-GCM',iv:iv},k,enc(h));})
+      .then(function(ct){var ctl=window.AbortController?new AbortController():null,t=setTimeout(function(){if(ctl)ctl.abort();},8000);
+        return fetch(bx.u+(bx.u.indexOf('?')<0?'?':'&')+'a=qput&b='+encodeURIComponent(bx.b),{method:'POST',body:JSON.stringify({v:1,iv:bytes64(iv),ct:bytes64(new Uint8Array(ct))}),cache:'no-store',signal:ctl?ctl.signal:undefined})
+          .then(function(r){clearTimeout(t);return r.json().catch(function(){return null;});},function(e){clearTimeout(t);throw e;});})
+      .then(function(j){if(!(j&&j.ok&&/^[A-Za-z0-9]{10}$/.test(String(j.q||''))))return url;
+        var sh=base+'#q='+j.q+'.'+bytes64(key)+(bx.u===boxAt(base)?'':'&u='+encodeURIComponent(bx.u));SHORT[url]=sh;return sh;})
+      .catch(function(){return url;});};
+  var LINK_RE=/https?:\/\/[^\s<>"']+?respond\.html#(?:z|p)=[A-Za-z0-9_-]+/g;
+  /* every questionnaire link in the strings given, made short (strings in, the same strings with short links out) */
+  U.shortenText=function(texts){texts=(texts||[]).map(function(t){return String(t==null?'':t);});var all={};
+    texts.forEach(function(t){(t.match(LINK_RE)||[]).forEach(function(u){all[u]=1;});});var ks=Object.keys(all).sort(function(a,b){return b.length-a.length;});
+    if(!ks.length)return Promise.resolve(texts);
+    return Promise.all(ks.map(function(u){return U.shortLink(u);})).then(function(ss){
+      return texts.map(function(t){ks.forEach(function(u,i){if(ss[i]!==u)t=t.split(u).join(ss[i]);});return t;});});};
+  U.shortenMsgs=function(msgs){var tx=[];msgs.forEach(function(m){tx.push(m.text||'');tx.push(m.html||'');});
+    return U.shortenText(tx).then(function(out){msgs.forEach(function(m,i){m.text=out[2*i];if(m.html)m.html=out[2*i+1];});return msgs;});};
+  /* the respondent page: a short link is opened from the box (the sealed questionnaire, then the key in the link) */
+  U.isShort=function(str){return /[#&]q=[A-Za-z0-9]{10}\.[A-Za-z0-9_-]{22}(?![A-Za-z0-9_-])/.test(String(str==null?location.hash:str));};
+  U.openShort=function(str){str=String(str==null?location.hash:str);var m=/[#&]q=([A-Za-z0-9]{10})\.([A-Za-z0-9_-]{22})(?![A-Za-z0-9_-])/.exec(str),u=/[#&]u=([^&]+)/.exec(str);
+    if(!m||!(window.crypto&&crypto.subtle&&window.fetch))return Promise.reject(new Error('bad'));
+    var bu='';try{bu=u?decodeURIComponent(u[1]):location.origin+'/reply/box.php';}catch(e){bu='';}
+    if(!/^https?:\/\//i.test(bu))return Promise.reject(new Error('bad'));var S=crypto.subtle;
+    return fetch(bu+(bu.indexOf('?')<0?'?':'&')+'a=qget&q='+m[1],{cache:'no-store'})
+      .then(function(r){return r.json().catch(function(){return null;}).then(function(j){if(r.status===404||(j&&j.error==='gone'))throw new Error('gone');if(!(j&&j.ok&&j.iv&&j.ct))throw new Error('net');return j;});},
+        function(){throw new Error('net');})
+      .then(function(j){return S.importKey('raw',unbytes64(m[2]),{name:'AES-GCM'},false,['decrypt']).then(function(k){return S.decrypt({name:'AES-GCM',iv:unbytes64(j.iv)},k,unbytes64(j.ct));})
+        .then(function(pt){var p=hashPayload('#'+new TextDecoder().decode(pt));if(!p)throw new Error('bad');return p;},function(){throw new Error('bad');});});};
   /* ---- v21.85 the reply box for a page that is not a questionnaire (staff-data.html): the same lock as the runtime's own
      sendBox below (a one-time ECDH P-256 key of the page's, the shared secret with the form's public key, HKDF-SHA-256 with
      the box id as salt and info nbh-reply-v1, AES-GCM-256), as promises. box: {u: box.php's address, b: the box id,
@@ -387,7 +427,10 @@
         if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(all).then(ok,function(){$('#nbhInvBo').select();say('Copying was refused: the message is selected, copy it with the keyboard or the menu.');});
         else{$('#nbhInvBo').select();say('Select the message and copy it.');}}});
     dlg.addEventListener('cancel',function(){setTimeout(function(){dlg.remove();},0);});
-    dlg.showModal();$(o.to||last?'#nbhInvBo':'#nbhInvTo').focus();};
+    dlg.showModal();$(o.to||last?'#nbhInvBo':'#nbhInvTo').focus();
+    /* v21.88 the links in the message made short (the second pass finds them made, so what was typed meanwhile stays) */
+    if(LINK_RE.test(body)){LINK_RE.lastIndex=0;say('Making a short link…');U.shortenText([body]).then(function(){var bo=$('#nbhInvBo');return U.shortenText([bo.value]).then(function(x){var was=bo.value;bo.value=x[0];say(x[0]!==was?'':'The link stays long: the reply box could not keep it.');});},function(){say('');});}
+    LINK_RE.lastIndex=0;};
   /* ---- v21.86 one email per person, from the BCBA's school account ----
      A form asks the workstation (its parent window) to send: {nbh:'mail', id:<form>, req, messages:[{to,name,subject,text}]} (one
      message per person, at most 60). The workstation confirms with the user, signs in with Google and sends through Gmail, and
@@ -408,7 +451,7 @@
     window.addEventListener('message',on);
     t=setTimeout(function(){end({unavailable:true,why:'the workstation did not answer',timeout:true});},opt.wait||300000);
     if(opt.cancel)opt.cancel(function(){end({unavailable:true,why:'you chose the Mail app',cancelled:true});});
-    try{par.postMessage({nbh:'mail',id:String(form||''),req:req,messages:(messages||[]).slice(0,60).map(function(m){return {to:String(m.to||''),name:String(m.name||''),subject:String(m.subject||''),text:String(m.text||'')};})},'*');}
+    try{par.postMessage({nbh:'mail',id:String(form||''),req:req,messages:(messages||[]).slice(0,60).map(function(m){var o={to:String(m.to||''),name:String(m.name||''),subject:String(m.subject||''),text:String(m.text||'')};if(m.html)o.html=String(m.html);return o;})},'*');}   /* v21.88 the page version goes too */
     catch(e){end({unavailable:true,why:'the workstation could not be asked'});}});};
   /* the Mail app with one message (a mailto link); a check can replace this */
   U.openMail=function(href){var l=document.createElement('a');l.href=href;l.target='_top';l.rel='noopener';document.body.appendChild(l);l.click();l.remove();};
@@ -431,7 +474,17 @@
     if(due){L.push(es?'Por favor envíe'+(n===1?'lo':'los')+' antes del '+due+'.':'Please send '+(n===1?'it':'them')+' by '+due+'.');L.push('');}
     L.push(es?'Si un enlace no se abre, responda a este correo y le enviaré el cuestionario como archivo.':'If a link does not open, reply to this email and I will send the questionnaire as a file.');L.push('');
     L.push(es?'Gracias,':'Thank you,');if(o.bcba)L.push(String(o.bcba));
-    return {to:String(o.to||'').trim(),name:String(o.name||'').trim(),subject:subj,text:L.join('\n')};};
+    /* v21.88 the same email as a page: each questionnaire is a button (Open the questionnaire), with its link in small print under it */
+    var eh=function(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});},Hp=function(t){return '<p style="margin:0 0 14px">'+eh(t)+'</p>';};
+    var H=[Hp(L[0]),Hp(L[2])];
+    items.forEach(function(x,i){var lab=(n>1?(i+1)+'. ':'')+(x.label||x.title||(es?'Cuestionario':'Questionnaire'))+(!one&&x.due?(es?' (por favor antes del '+x.due+')':' (please send it by '+x.due+')'):'');
+      H.push('<p style="margin:0 0 8px"><b>'+eh(lab)+'</b></p><p style="margin:0 0 6px"><a href="'+eh(x.url)+'" style="display:inline-block;background:#1d4a77;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px">'+(es?'Abrir el cuestionario':'Open the questionnaire')+'</a></p>'+
+        '<p style="margin:0 0 18px;font-size:12px;color:#5b6670">'+(es?'O abra este enlace: ':'Or open this link: ')+'<a href="'+eh(x.url)+'" style="color:#1d4a77">'+eh(x.url)+'</a></p>');});
+    if(due)H.push(Hp(es?'Por favor envíe'+(n===1?'lo':'los')+' antes del '+due+'.':'Please send '+(n===1?'it':'them')+' by '+due+'.'));
+    H.push(Hp(es?'Si un enlace no se abre, responda a este correo y le enviaré el cuestionario como archivo.':'If a link does not open, reply to this email and I will send the questionnaire as a file.'));
+    H.push('<p style="margin:0">'+eh(es?'Gracias,':'Thank you,')+(o.bcba?'<br>'+eh(o.bcba):'')+'</p>');
+    var html='<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1b2430;max-width:560px">'+H.join('')+'</div>';
+    return {to:String(o.to||'').trim(),name:String(o.name||'').trim(),subject:subj,text:L.join('\n'),html:html};};
   U.mailFlow=function(o){o=o||{};var d=document,msgs=(o.messages||[]).slice(0,60),N=msgs.length,onSent=o.onSent||function(){},up=o.onUpdate||function(){};
     var out={via:'',from:'',sent:[],failed:[],skipped:[],why:'',declined:false,done:false};
     var name=function(k){var m=msgs[k]||{};return m.name||m.to||('person '+(k+1));};
@@ -454,9 +507,11 @@
       T.textContent=(o.remind?'Reminders':'Emails')+' to '+N+' '+(N===1?'person':'people');
       Bd.innerHTML='<p>Sending '+N+' email'+(N===1?'':'s')+' from your school account, one to each person: '+esc(msgs.map(function(m,k){return name(k);}).join(', '))+'. The workstation asks you to confirm first.</p>';
       btn('Use the Mail app instead','',function(){if(cancel)cancel();},'mailapp');
-      St.textContent='Waiting for the workstation…';
+      St.textContent='Making short links…';
       try{dlg.showModal();}catch(e){}
-      U.mailAsk(o.form,msgs,{cancel:function(f){cancel=f;},wait:o.wait}).then(function(r){
+      /* v21.88 each questionnaire link becomes a short one (kept sealed on the reply box) before the emails are made */
+      U.shortenMsgs(msgs).catch(function(){return msgs;}).then(function(){if(!closed)St.textContent='Waiting for the workstation…';
+        return U.mailAsk(o.form,msgs,{cancel:function(f){cancel=f;},wait:o.wait});}).then(function(r){
         if(r.unavailable){out.why=r.why||'';
           if(r.declined){out.via='none';out.declined=true;up(out);if(!closed){T.textContent='Not sent';Bd.innerHTML='<p>Nothing was sent.</p>';Bt.innerHTML='';St.textContent='';btn('Close','go',finish,'close');}return;}
           out.via='mail';up(out);if(!closed)flow(msgs.map(function(m,k){return k;}),r.why);else resolve(out);return;}

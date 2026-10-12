@@ -341,6 +341,13 @@ keeps only what it cannot read.
   the address wrong), the respondent page says so and offers **Open the
   email** with the code, the way it always worked; the form's line under
   the address says what went wrong.
+- **Short links (v21.88).** The forms also keep each questionnaire link's
+  questionnaire here, sealed with a key that stays in the link (after the
+  `#`, so it never reaches the site): the link is then about 100 characters
+  instead of 1,000 to 2,000. The site holds a random id and the ciphertext,
+  for 60 days (`reply/data/_q/`), and cannot read it. Limits: 64 KB each, 300
+  stored an hour from one address, 20,000 in all. `?a=ping` answers `"v":2`
+  and `"short":true` from v21.88; an older `box.php` leaves the links long.
 - **Updating.** A newer `nbh-reply-box-upload.zip` is extracted the same
   way; it replaces `box.php` and leaves the data folder (`reply/data/`,
   closed to the web by its own `.htaccess`) as it is. The workstation's

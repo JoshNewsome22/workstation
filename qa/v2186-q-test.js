@@ -188,7 +188,7 @@ const PURL=f=>BASE+'/qa/out/v2186-q/parent.html?f='+encodeURIComponent(f);
   const t1=await answerSend(i=>String(6-(i%3)));
   await rp.goto(linksOf(mc[1].text)[0]);await sleep(500);const t2=await answerSend(i=>String(2+(i%2)));
   /* a reply that does not fit: a page with an item fewer */
-  const misfit=await cf.evaluate(u=>{const p=NBH_RESPOND.payloadFromHash(u);p.items.pop();p.who={name:'Ms. Extra',role:'Aide',sid:''};return __rp.kit.base()+NBH_RESPOND.payloadToHash(p);},linksOf(mc[1].text)[0]);
+  const misfit=await cf.evaluate(async u=>{const p=NBH_RESPOND.isShort&&NBH_RESPOND.isShort(u)?await NBH_RESPOND.openShort(u):NBH_RESPOND.payloadFromHash(u);   /* v21.88 the email's link is short */p.items.pop();p.who={name:'Ms. Extra',role:'Aide',sid:''};return __rp.kit.base()+NBH_RESPOND.payloadToHash(p);},linksOf(mc[1].text)[0]);
   await rp.goto(misfit);await sleep(500);const t3=await answerSend(()=>'4');
   ok('B6 the two respondents and a misfit page send to the box: Sent.',[t1,t2,t3].every(t=>/<b>Sent\.<\/b>/.test(t.done)&&t.code),[t1.done,t2.done,t3.done]);
   await cf.evaluate(()=>document.querySelector('#rpDlg').close());
@@ -211,7 +211,7 @@ const PURL=f=>BASE+'/qa/out/v2186-q/parent.html?f='+encodeURIComponent(f);
   const left=fs.readdirSync(data+'/'+b1.b.id).filter(f=>/^r-/.test(f));
   ok('B12 Remove the collected replies from the site: the three gone there',b12&&b12.deleted===3&&left.length===0,{b12,left});
   /* the email code stays the way back when the box cannot be reached */
-  const unreach=await cf.evaluate(u=>{const p=NBH_RESPOND.payloadFromHash(u);p.box.u='http://127.0.0.1:8157/box.php';return __rp.kit.base()+NBH_RESPOND.payloadToHash(p);},linksOf(mc[0].text)[0]);
+  const unreach=await cf.evaluate(async u=>{const p=NBH_RESPOND.isShort&&NBH_RESPOND.isShort(u)?await NBH_RESPOND.openShort(u):NBH_RESPOND.payloadFromHash(u);   /* v21.88 the email's link is short */p.box.u='http://127.0.0.1:8157/box.php';return __rp.kit.base()+NBH_RESPOND.payloadToHash(p);},linksOf(mc[0].text)[0]);
   await rp.goto(unreach);await sleep(500);const t4=await answerSend(()=>'5');
   ok('B13 a page whose box cannot be reached falls back to the email with the code, to the BCBA',/reply box could not be reached/.test(t4.done)&&!t4.code&&/^mailto:bcba%40example\.org/.test(t4.mailHref||''),t4);
 

@@ -1553,7 +1553,8 @@ $('#rpSave').addEventListener('click',rpFile);
 $('#rpPreview').addEventListener('click',()=>{window.open(URL.createObjectURL(new Blob([NBH_RESPOND.pageHTML(rpPayload())],{type:'text/html'})),'_blank');});
 /* v21.44 Email it: the link in an email of the assessor's own, to check and send (NBH_RESPOND.invite in nbh-respond.js) */
 $('#rpMail').addEventListener('click',()=>{if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: links need the workstation on its website. Save the page as a file and attach it to an email instead.';return;}NBH_RESPOND.invite({links:[{label:'',url:rpLinkUrl()}]});});
-$('#rpLink').addEventListener('click',async()=>{const u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+$('#rpLink').addEventListener('click',async()=>{let u=rpLinkUrl();if(!/^https?:$/.test(location.protocol)){$('#rpNote').textContent='Opened from a folder: send the file instead.';return;}
+  if(window.NBH_RESPOND&&NBH_RESPOND.shortLink){$('#rpNote').textContent='Making a short link…';u=await NBH_RESPOND.shortLink(u);}   /* v21.88 the link made short (kept sealed on the reply box) */
   try{await navigator.clipboard.writeText(u);$('#rpNote').textContent='Link copied ('+u.length+' characters; paste it into the email as a link, not typed out).';}catch(e){$('#rpNote').textContent=u;}});
 $('#rpDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 /* collecting: each response names the respondent it goes to (one on the Setup sheet whose role is asked that set, or a

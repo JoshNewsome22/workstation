@@ -25,4 +25,9 @@ function wire(page,log){
   page.on('pageerror',e=>log.push({type:'pageerror',text:String(e.message||e).slice(0,300)}));
 }
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep};
+/* an email given to Gmail (the raw message, decoded from base64url): its text, and its page when it has one (v21.88 the
+   emails are multipart/alternative: the text and the page with the buttons) */
+function mailParts(raw){const dec=b=>Buffer.from(String(b||'').replace(/\r\n/g,''),'base64').toString('utf8');const head=raw.split('\r\n\r\n')[0];
+  const bm=/boundary="([^"]+)"/.exec(head);if(!bm)return {head,text:dec(raw.split('\r\n\r\n').slice(1).join('\r\n\r\n')),html:''};
+  const o={head,text:'',html:''};raw.split('--'+bm[1]).slice(1,-1).forEach(p=>{const i=p.indexOf('\r\n\r\n'),h=p.slice(0,i),b=p.slice(i+4);if(/text\/plain/.test(h))o.text=dec(b);if(/text\/html/.test(h))o.html=dec(b);});return o;}
+module.exports={chromium,fs,path,ROOT,BASE,forms,loadSim,wire,sleep,mailParts};
