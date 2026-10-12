@@ -9158,7 +9158,7 @@ A review of the workstation and every form at iPad widths (1180 and 1024 sideway
   words; the case map's form chips stay whole; the bar's Grade box leaves no gap; "Grade 5th grade" is now "5th grade"; the
   start screen centres its students, hides the three first steps once there is a caseload, and shows no Save case or Side by
   side with nothing open; the list's edge tab no longer covers the left form side by side; on a phone the crumb takes two rows
-  (the form's name, then its buttons) and reading text on a wide laptop keeps a comfortable line length.
+  (the form's name, then its buttons).
 
 - **The Scatter Plot on an iPhone**: tapping one cell after another no longer zooms the page in and out (iPhone Safari took
   two quick taps as a double-tap zoom; every form and the workstation now take them as taps, and pinching still zooms), a
