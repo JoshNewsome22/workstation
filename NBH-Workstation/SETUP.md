@@ -9090,3 +9090,46 @@ Checked by `qa/v2188-short-test.js` (Form IA-1's Send all due now through the sc
 and as a button, the sealed copies on the box, the link answered on a phone and collected; Copy link and the QR code; the
 long link when the box cannot keep it; expired, cut and unreachable links; old long links; the sign-in that did not allow
 sending, and asked again; the button waiting for Google's sign-in).
+
+### v21.89: the caseload in Google Drive, so the iPad and the laptop show the same students
+
+**What it does.** **Caseload** (the people icon at the top) has **Use Google Drive**. Once it is on, on each device you use:
+
+- **Save case** keeps the case on this device and sends it to a folder in your school Google Drive, **FBA-BIP Workstation
+  cases**, one file per student. Nothing is downloaded and there is no "Is the file in Files?" question. **Save case to a file**
+  (under More) still writes a case file when you want one.
+- **Opening a student** (Caseload, the start screen) first gets that student's newest copy from Drive.
+- The **start screen** says **Last saved: Mateo Rivera, today at 3:42 pm on the Mac**, with Open, and the caseload shows
+  where and when each student was last saved.
+- If the case **on screen** was saved on the other device after you opened it here, a bar says so: **Open the newer copy**.
+- A student changed on **both devices without the other** (one was signed out, or offline) is never overwritten: the
+  workstation names both saves (device and time) and asks which to keep. The copy you do not keep goes to the **Replaced
+  copies** folder inside the Drive folder, so nothing is lost.
+- The **Drive chip** at the top says where this device stands: Drive ✓, syncing, 2 waiting, sign in, offline, or 1 to decide.
+  Google's sign-in lasts an hour; after that a Save case asks Google again by itself (one tap in Google's window), and saves
+  made meanwhile wait on this device and go up at the next sign-in. Tap the chip to sync at any time.
+- **Remove** asks: **Remove everywhere** (this device, the other devices and Drive; Drive keeps its earlier copies for 30 days)
+  or **Only this iPad** (it stays in Drive and on the other devices; it comes back here only if it is saved again elsewhere).
+- **Remove all student data from this device** also stops Google Drive on that device (the students stay in Drive).
+- The workstation reaches only the files it made in your Drive (Google's "only the specific files you use with this app"
+  permission). It checks that the account is the one this device uses; a personal gmail.com account is warned against.
+- The words follow the device: on the laptop the workstation says "this computer" where it used to say "this iPad".
+
+**Setting it up (once, about 5 minutes).**
+
+1. **Google Cloud**: open console.cloud.google.com, choose the same project you made for Gmail. **APIs & Services → Library**,
+   search **Google Drive API**, open it, press **Enable**.
+2. **Google Auth Platform → Data Access → Add or remove scopes**: tick
+   `.../auth/drive.file` ("See, edit, create and delete only the specific Google Drive files you use with this app"),
+   press **Update**, then **Save**.
+3. **On the iPad**: reload the workstation, open **Caseload**, press **Use Google Drive**, sign in with the school account and
+   allow the Drive permission. The students already on the iPad go up to Drive.
+4. **On the laptop**: open the workstation's web address, open **Caseload**, press **Use Google Drive**. The first time it asks
+   for the Google key: paste the same **Client ID** (Google Cloud → Google Auth Platform → Clients). Press **Use Google Drive**
+   again and sign in. The students come down from Drive. A student already on both devices keeps its newer save; the older one
+   goes to Replaced copies.
+
+Checked by `qa/v2189-drive-test.js` (an iPad and a laptop with a simulated Google Drive: linking, Save case with no file, the
+other device getting it, the newer-copy bar, a save signed out that waits, two copies changed apart and the choice, the
+Replaced copies folder, Remove everywhere and only here, a different account refused, a personal account warned, the Drive API
+not turned on, Save case to a file, a third computer joining with an older copy).
