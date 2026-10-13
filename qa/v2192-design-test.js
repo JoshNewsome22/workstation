@@ -81,6 +81,11 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     const t3=await td.evaluate(async()=>{const v=document.getElementById('viewSeg'),bs=[...v.querySelectorAll('button')],last=bs[bs.length-1];last.click();await new Promise(r=>setTimeout(r,300));
       const a=last.getBoundingClientRect(),s=v.getBoundingClientRect();return {inView:a.left>=s.left-1&&a.right<=s.right+1,more:v.getAttribute('data-nbh-more'),pressed:last.getAttribute('aria-pressed')};});
     ok('10 the last tab tapped comes into view (the row scrolled), and the fade is now at the left',t3.inView&&t3.pressed==='true'&&t3.more==='l',t3);
+    /* a finger's tap, not a script's click: every tab of the row reached by a real tap switches to its view (scroll snap once moved the last tab out from under the tap) */
+    const tapped=[];for(const v of await td.evaluate(()=>[...document.querySelectorAll('#viewSeg button[data-view]')].map(b=>b.dataset.view))){
+      const h=await td.evaluateHandle(v=>document.querySelector('#viewSeg button[data-view="'+v+'"]'),v);let err='';try{await h.asElement().tap({timeout:2500});}catch(e){err=String(e.message).split('\n')[0].slice(0,50);}await sleep(350);
+      const on=await td.evaluate(()=>{const b=document.querySelector('#viewSeg button[aria-pressed="true"]');return b?b.dataset.view:null;});if(on!==v||err)tapped.push(v+'->'+on+(err?' ('+err+')':''));}
+    ok('10b TD-1: a real tap on each of its 13 tabs, through the scrolling row, switches to that view',!tapped.length,tapped);
     await page.screenshot({path:OUT+'td1-1180.png'});
     ok('11 no page errors (iPad sideways)',!errs.length,errs.slice(0,3));await ctx.close();}
   /* ---- 2. the iPad upright ---- */
@@ -101,12 +106,13 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     const bar=await page.evaluate(()=>Math.round(document.getElementById('bar').getBoundingClientRect().height));
     ok('16 folded, the bar stays within 120 px (the v21.89 check) with 44 px buttons',bar<=120,bar);
     const tb=await toolbar(fr);ok('17 DM-1 upright: the toolbar one row, at most 64 px (it was 134)',tb.groupRows===1&&tb.h<=64&&tb.tabRows===1,tb);
-    /* the Focus switch beside the tabs keeps its width on a form with many views (it was squeezed to 43 px for 77 of text) */
-    const tdu=await open(page,'TD-1');const fb=await tdu.evaluate(()=>{const b=document.getElementById('nbhFocusBtn');return b?{sw:b.scrollWidth,cw:b.clientWidth,w:Math.round(b.getBoundingClientRect().width)}:null;});
-    ok('17b TD-1 upright: the Focus switch beside the tabs is not squeezed (its words fit)',!!fb&&fb.sw<=fb.cw+1&&fb.w>=70,fb);
     /* a toast's × is a 44 px target, and the toast no taller for it */
     const tt=await fr.evaluate(async()=>{nbhUI.toast('A short message for the check.',{ms:4000});await new Promise(r=>setTimeout(r,250));const t=document.querySelector('#nbhToasts .nbh-toast'),b=t&&t.querySelector('button');if(!b)return null;const q=b.getBoundingClientRect(),r=t.getBoundingClientRect();return {w:Math.round(q.width),h:Math.round(q.height),toast:Math.round(r.height)};});
     ok('18 a form’s toast: the × is a 44 px target and the toast stays a short strip (under 60 px)',!!tt&&tt.w>=44&&tt.h>=44&&tt.toast<60,tt);
+    /* a form opened on its own has its own Focus switch beside the tabs: on a form with many views it keeps its width (it was squeezed to 43 px for 77 of text) */
+    {const sp=await ctx.newPage();await sp.goto(BASE+'/NBH-Workstation/TD-1_Function-Based-Treatment-Developer_v2026-09.html');await sleep(1500);
+      const fb=await sp.evaluate(()=>{const b=document.getElementById('nbhFocusBtn');return b?{sw:b.scrollWidth,cw:b.clientWidth,w:Math.round(b.getBoundingClientRect().width)}:null;});await sp.close();
+      ok('18b TD-1 on its own, upright: the Focus switch beside the tabs is not squeezed (its words fit)',!!fb&&fb.sw<=fb.cw+1&&fb.w>=70,fb);}
     /* Caseload: students, what needs you, the fold; the note above it */
     await page.evaluate(()=>caseloadOpen());await sleep(900);
     const cl=await page.evaluate(()=>{const b=document.getElementById('dlgBody'),k=document.getElementById('clKeep'),sm=k&&k.querySelector('summary');const order=[...b.children].map(e=>e.tagName+(e.id?'#'+e.id:'')+(e.className?'.'+String(e.className).split(/\s+/)[0]:''));
