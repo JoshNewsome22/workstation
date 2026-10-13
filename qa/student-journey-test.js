@@ -445,7 +445,7 @@ async function drawOn(fr,sel,touch){const loc=await reveal(fr,sel);await loc.scr
     await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:tp(b.x+20,b.y+b.height*.5)});
     for(let i=1;i<=30;i++)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:tp(b.x+20+i*9,b.y+b.height*(.5+.25*Math.cos(i/2)))});
     await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await cdp.detach();}
-  else{await page.mouse.move(b.x+16,b.y+b.height*.6);await page.mouse.down();for(let i=0;i<36;i++)await page.mouse.move(b.x+16+i*8,b.y+b.height*(.55-.3*Math.sin(i/3)));await page.mouse.up();}
+  else{await page.mouse.move(b.x+16,b.y+b.height*.6);await page.mouse.down();await sleep(60);for(let i=0;i<36;i++)await page.mouse.move(b.x+16+i*8,b.y+b.height*(.55-.3*Math.sin(i/3)),{steps:2});await sleep(60);await page.mouse.up();}   /* v21.97 a busy machine: the stroke in steps, a breath at each end */
   await sleep(250);}
 PH.F=async()=>{
   /* PA-1: the pool from DM-1's interests and the staff, then three MSWO sessions */
@@ -486,7 +486,7 @@ PH.F=async()=>{
   await tapIn(td,'#td85Team');await sleep(400);
   const nSig=await td.locator('#td85List canvas.td85-pad').count();
   const sigOf=k=>td.evaluate(k=>{try{const r=JSON.parse(document.querySelector('[name="ad.sigs"]').value||'[]')[k];return !!(r&&r.img);}catch(e){return false;}},k);
-  for(const [k,touch] of [[0,false],[1,true]]){let a=0;for(;a<2&&!(await sigOf(k));a++){await sleep(600);await drawOn(td,'#td85List canvas.td85-pad[data-k="'+k+'"]',touch);await sleep(400);}if(a>1)note('TD-1 signature row '+(k+1)+' ('+(touch?'finger':'mouse')+') took '+a+' strokes');}
+  for(const [k,touch] of [[0,false],[1,true]]){let a=0;for(;a<3&&!(await sigOf(k));a++){await sleep(600);await drawOn(td,'#td85List canvas.td85-pad[data-k="'+k+'"]',touch);await sleep(600);}if(a>1)note('TD-1 signature row '+(k+1)+' ('+(touch?'finger':'mouse')+') took '+a+' strokes');}
   await put(td,'#td85pn','Ana Rivera (simulated)');await put(td,'#td85pr','Parent');await drawOn(td,'#td85Parent canvas.td85-pad',true);
   await sleep(600);const tf=(await factsOut(td))||{};const pl=tf.plan||{},ad=pl.adoption||{};
   ok('F4 TD-1 signed at the meeting: the team listed from Team present, two signed on the iPad (mouse and finger), the parent signed; the adoption dates',nSig>=3&&(ad.signatures||[]).filter(s=>s.how==='signed on the iPad').length>=3&&(ad.signatures||[]).some(s=>s.parent&&/Ana Rivera/.test(s.name))&&ad.date===D.adopt&&ad.start===D.start,{nSig,ad});
