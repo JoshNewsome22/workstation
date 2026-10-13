@@ -11252,6 +11252,54 @@ a{text-underline-offset:2px}
   .toolbar .seg button{padding:6px 9px}
 }
 </style>
+<script id="dd-v2194">
+/* v21.94 Log it now: the workstation hands this form an incident, time-stamped from its start screen, its Today list or
+   the command list, and the form logs it exactly as its own "Log an incident" dialog would (the behavior as the sheet
+   names it, the tier, the day's count, a restraint's notice for Form CR-1), then says what was logged. A behavior the
+   sheet does not carry is kept by its name. Nothing here runs unless the workstation asks. */
+(function(){"use strict";
+  function norm(t){return String(t||"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();}
+  function logIncident(inc){
+    inc=inc&&typeof inc==="object"?inc:{};
+    if(typeof ddIncOpen!=="function"||typeof ddIncSave!=="function")return {ok:false,why:"this copy of Form DD-1 has no incident log"};
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(inc.date||""))return {ok:false,why:"the incident has no date"};
+    ddIncOpen(null);
+    var d=document.getElementById("dlgInc");if(!d)return {ok:false,why:"the incident dialog did not open"};
+    var set=function(k,v){var e=d.querySelector(k);if(e)e.value=v==null?"":String(v);};
+    try{
+      set("#incDate",inc.date);set("#incTime",/^\d{2}:\d{2}$/.test(inc.time||"")?inc.time:"");
+      /* the behavior as the sheet knows it (by its name, case aside), else "another behavior" with the name kept */
+      var want=norm(inc.beh),sel=d.querySelector("#incBeh"),hit="";
+      if(want)[].slice.call(sel.options).forEach(function(o){if(!hit&&o.value&&norm(o.textContent)===want)hit=o.value;});
+      if(!hit&&want)[].slice.call(sel.options).forEach(function(o){if(!hit&&o.value&&(norm(o.textContent).indexOf(want)===0||want.indexOf(norm(o.textContent))===0))hit=o.value;});
+      sel.value=hit;
+      var tiers=d.querySelector("#incTier");if(tiers&&inc.tier){tiers.value=inc.tier;}
+      ["before","what","words","did","ended","parentWhen"].forEach(function(k){set("#inc"+k.charAt(0).toUpperCase()+k.slice(1),inc[k]||"");});
+      if(inc.by)set("#incBy",inc.by);
+      set("#incParent",inc.parent==="yes"?"yes":"no");
+      var bc=d.querySelector("#incBcba");if(bc)bc.checked=inc.bcba!==false;
+      var hold=d.querySelector("#incHold");if(hold){hold.value=inc.hold||"";if(hold.value!==(inc.hold||""))hold.value="";}
+      if(typeof ddIncCountUi==="function")ddIncCountUi();
+      var c=d.querySelector("#incCount");if(c&&!c.disabled)c.checked=inc.count!==false;
+      var n0=(S.incidents||[]).length;
+      ddIncSave();
+      if(d.open){try{d.close();}catch(e){}return {ok:false,why:"the form did not take it"};}
+      var i=(S.incidents||[]).length>n0?S.incidents[S.incidents.length-1]:null;
+      if(!i)return {ok:false,why:"the form did not keep it"};
+      if(!hit&&inc.beh){i.behName=String(inc.beh).trim();if(typeof ddIncRender==="function")ddIncRender();if(typeof ddEdited==="function")ddEdited();}
+      return {ok:true,inc:{id:i.id,name:(typeof ddIncName==="function"?ddIncName(i):i.behName)||"",counted:!!i.counted,hold:i.hold||"",n:S.incidents.length}};
+    }catch(err){try{if(d.open)d.close();}catch(e){}return {ok:false,why:String(err&&err.message||err).slice(0,80)};}
+  }
+  window.addEventListener("message",function(ev){
+    var m=ev.data||{};if(!m||m.nbh!=="log-incident")return;
+    if(window.parent===window||ev.source!==window.parent)return;
+    var r;try{r=logIncident(m.inc);}catch(err){r={ok:false,why:String(err&&err.message||err).slice(0,80)};}
+    r.nbh="incident-logged";r.id="DD-1";try{if(window.nbhBridge&&nbhBridge.formId)r.id=nbhBridge.formId();}catch(e){}   /* the workstation matches the answer by the form's id */
+    try{ev.source.postMessage(r,"*");}catch(e){}
+  });
+  window.ddLogIncident=logIncident;   /* the test and the walkthrough call it directly */
+})();
+</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>

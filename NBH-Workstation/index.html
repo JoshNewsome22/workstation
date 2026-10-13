@@ -1052,6 +1052,18 @@ body:not(.has-form) #focusBtn{display:none}
 @media (hover:none){.item:not(.cur):hover{background:transparent}}
 @media (max-width:720px){dialog .db{max-height:70vh}}
 </style>
+<style id="ws-v2194">
+/* v21.94 Log it now: the sheet in the dialog */
+#dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+#dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
+#dlg .ln .ln-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#dlg .ln .ln-f>span{font-size:12.5px;color:#4a5b66}
+#dlg .ln input:not([type=hidden]),#dlg .ln select,#dlg .ln textarea{font:inherit;font-size:15px;padding:7px 9px;border:1px solid #c7d0d4;border-radius:8px;min-height:40px;background:#fff;color:var(--navy);width:100%;box-sizing:border-box}
+#dlg .ln textarea{min-height:60px;resize:vertical}
+#dlg .ln input:focus,#dlg .ln select:focus,#dlg .ln textarea:focus{outline:none;border-color:#2f6f8f;box-shadow:0 0 0 3px rgba(47,111,143,.18)}
+#dlg .ln .td-more{margin:4px 0 0}
+#blank .card #blLog{font-weight:600}
+</style>
 </head>
 <body>
 
@@ -7291,6 +7303,69 @@ focusPaint();
 {const coD=caseloadOpen;caseloadOpen=async function(){const out=await coD.apply(this,arguments);
   try{const b=$('#dlgBody'),k=b&&b.querySelector('#clKeep');if(k)b.querySelectorAll('#clKeep .cl-note').forEach(n=>k.parentNode.insertBefore(n,k));}catch(e){}
   return out;};}
+</script>
+<script id="nbh-v2194">
+/* ================= v21.94 Log it now: an incident, time-stamped, into Form DD-1's incident log from the start screen, the Today list or the command list =================
+   The sheet asks for what the form's own "Log an incident" asks, prefilled with now. The student is the one on screen, else one of the students kept
+   on this device: that student's case opens (Save first is offered as usual), Form DD-1 with it, and the form logs the incident itself, so the day's
+   count, the tier and a restraint's notice for Form CR-1 work as they do on the form. Form ABC-1's "Add DD-1's incidents" brings it into the ABC record. */
+REPLY['log-incident']='incident-logged';
+/* the form's answer reaches the grab() that asked (the message handler above resolves only the answers it knows) */
+window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!=='incident-logged'||!d.id)return;const q=pending[d.id+'|incident-logged'];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}});
+const LN={busy:false};
+function lnNow(){const d=new Date(),p=n=>String(n).padStart(2,'0');return {date:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),time:p(d.getHours())+':'+p(d.getMinutes())};}
+function lnHm(t){const m=/^(\d{2}):(\d{2})$/.exec(t||'');if(!m)return '';const h=+m[1];return (h%12||12)+':'+m[2]+(h<12?' am':' pm');}
+function lnBehaviors(){const f=state.facts||{};return [...new Set((f.behaviors||[]).filter(b=>b&&b.name&&!b.isRep&&!/replacement|alternative/i.test(b.type||'')).map(b=>String(b.name).trim()))];}
+function lnOnScreen(){return !!(Object.keys(state.frames).length||Object.keys(state.pending).length);}
+async function logNowOpen(){
+  const p=packet();let who=[];
+  if(lnOnScreen()&&p.client){try{await gatherFacts(false);}catch(e){}who=[{key:clKey(p),name:p.client}];}
+  else{const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));who=L.map(r=>({key:r.key,name:clName(r)}));}
+  if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
+  const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
+  dialog('Log it now',
+    '<p class="hp-lead">An incident, time-stamped, into Form DD-1’s incident log'+(who.length===1?' for <b>'+esc(who[0].name)+'</b>':'')+'. Say what you saw; the rest can wait.</p>'+
+    '<form id="lnForm" class="ln" novalidate>'+
+    (who.length>1?'<label class="ln-f"><span>Student</span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+'</option>').join('')+'</select></label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
+    '<div class="ln-g"><label class="ln-f"><span>Date</span><input type="date" id="lnDate" value="'+now.date+'"></label><label class="ln-f"><span>Time</span><input type="time" id="lnTime" value="'+now.time+'"></label>'+
+    '<label class="ln-f"><span>Behavior</span><input id="lnBeh" list="lnBehList" autocomplete="off" placeholder="as the plan names it"><datalist id="lnBehList">'+beh.map(b=>'<option value="'+esc(b)+'">').join('')+'</datalist></label>'+
+    '<label class="ln-f"><span>Physical intervention</span><select id="lnHold"><option value="">None</option><option value="escort">Physical escort</option><option value="restraint">Restraint</option><option value="seclusion">Seclusion</option></select></label></div>'+
+    '<label class="ln-f"><span>Before it (A): the activity, the request, what changed</span><textarea id="lnBefore" rows="2"></textarea></label>'+
+    '<label class="ln-f"><span>What happened (B), as it would look on video</span><textarea id="lnWhat" rows="2"></textarea></label>'+
+    '<label class="ln-f"><span>What adults did (C), in order</span><textarea id="lnDid" rows="2"></textarea></label>'+
+    '<div class="ln-g"><label class="ln-f"><span>How it ended</span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"></label><label class="ln-f"><span>Recorded by</span><input id="lnBy" value="'+esc(p.bcba||'')+'"></label></div>'+
+    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it</button> <button type="button" id="lnCancel">Cancel</button></p>'+
+    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet</i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents</i> brings it into the ABC record.</p>'+
+    '</form>');
+  setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
+}
+function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
+async function lnDeliver(key,inc){
+  if(!(lnOnScreen()&&key===clKey(packet()))){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
+  else if(!state.frames['DD-1'])openForm('DD-1');
+  if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
+  await new Promise(r=>setTimeout(r,250));
+  const r=await grab('DD-1','log-incident',{inc},10000);return r||{ok:false,why:'Form DD-1 did not answer'};
+}
+async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
+  const g=k=>{const e=$(k);return e?String(e.value||''):'';};
+  const inc={date:g('#lnDate'),time:g('#lnTime'),beh:g('#lnBeh').trim(),before:g('#lnBefore').trim(),what:g('#lnWhat').trim(),words:'',did:g('#lnDid').trim(),ended:g('#lnEnded').trim(),by:g('#lnBy').trim(),hold:g('#lnHold'),parent:'no',parentWhen:'',bcba:true};
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(inc.date)){wsUI.toast('Give the incident its date.',{kind:'warn'});return;}
+  if(!inc.beh&&!inc.what){wsUI.toast('Name the behavior, or say what happened.',{kind:'warn'});return;}
+  const key=g('#lnWho');LN.busy=true;const b=$('#lnSave');if(b){b.disabled=true;b.textContent='Logging…';}
+  try{const r=await lnDeliver(key,inc);
+    if(!r||!r.ok){wsUI.toast('Not logged'+(r&&r.why?': '+r.why:'')+'. Open Form DD-1 and use Log an incident.',{kind:'warn',ms:9000});return;}
+    try{if($('#lnForm'))$('#dlg').close();}catch(e){}
+    const I=r.inc||{};wsUI.toast('Logged on Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.',{kind:'ok',ms:7000});
+    try{paintBadge();}catch(e){}}
+  finally{LN.busy=false;const b2=$('#lnSave');if(b2){b2.disabled=false;b2.textContent='Log it';}}
+}
+document.addEventListener('click',e=>{if(e.target.closest('#blLog,#tdLog'))logNowOpen();else if(e.target.closest('#lnCancel')){try{$('#dlg').close();}catch(x){}}});
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lnForm')logNowSave(e);});
+/* the start screen's row of buttons, and the Today list's */
+{const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now</button>');}catch(e){}return r;};}
+{const to6=todayOpen;todayOpen=async function(){const r=await to6.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdLog'))row.insertAdjacentHTML('afterbegin','<button type="button" id="tdLog">Log it now</button> ');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'log it now incident abc time stamp record behavior restraint',n:'Log it now: an incident, time-stamped (Form DD-1)',s:'command',go:()=>logNowOpen()});},0);
 </script>
 </body>
 </html>
