@@ -16,7 +16,7 @@ const EDITION=process.env.WS_EDITION||'NBH-Workstation';   /* RPS-Workstation fo
 const URL=BASE+'/'+EDITION+'/'+FILE;
 const OUT=__dirname+'/out/policy-ea1/';
 const PRE=OUT+EDITION+'_EA-1_pre.html';
-const BEFORE='db95334';   /* the commit this change was built on: the form before it, for the unchanged-behaviour checks */
+const BEFORE='24548f9';   /* the commit this change was built on: the form before it, for the unchanged-behaviour checks */
 const OLD=__dirname+'/data/EA-1-v2124-sim.json';   /* a file saved by v21.24 (a simulated case): no arrangement in it */
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':'  '+JSON.stringify(d).slice(0,900)));if(!c)fails++;};
 const pages=buf=>{const m=buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g);return m?m.length:0;};

@@ -47,10 +47,10 @@ const {chromium,fs,path,ROOT,BASE,forms,sleep}=require(__dirname+'/lib.js');
 const {execFileSync}=require('child_process');
 const ED=process.argv[2]||'NBH-Workstation';
 const OUT=__dirname+'/out/sprint-a6/';
-const A6_BASE=process.env.A6_BASE||'ec41bf4';   /* v21.97 re-baselined: v21.96 took MT-1's timing row, TI-1's hint and the simulation notes off the paper on purpose */
+const A6_BASE=process.env.A6_BASE||'48209c1';   /* v21.97 re-baselined: v21.96 took MT-1's timing row, TI-1's hint and the simulation notes off the paper on purpose */
 /* v21.86 the layout check (part 2) compares with the forms of the last delivered release, not with the forms before this
    package: later releases changed the layout on purpose (ABC-1's analysis table), so the old comparison only drifted */
-const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'ec41bf4';   /* v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
+const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'48209c1';   /* v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
 const WASL={};
 const COMPARE=ED==='NBH-Workstation'||!!process.env.A6_BASE;
 const A6_OLD=process.env.A6_OLD||'';
