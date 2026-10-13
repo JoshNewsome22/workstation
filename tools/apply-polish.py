@@ -24,7 +24,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 _spec = importlib.util.spec_from_file_location('patch_wording', os.path.join(HERE, 'blocks', 'patch-wording.py'))
 WORDING = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(WORDING)
-NOT_FORMS = ('index.html', 'respond.html')
+NOT_FORMS = ('index.html', 'respond.html', 'staff-data.html')   # v21.93 the staff phone page is no form either
 CSS = open(os.path.join(HERE, 'polish', 'nbh-polish.css'), encoding='utf-8').read().rstrip('\n')
 JS = open(os.path.join(HERE, 'polish', 'nbh-polish.js'), encoding='utf-8').read().rstrip('\n')
 # v21.84 the script is one file beside the forms, nbh-polish.js (the text the inline block held), and the form carries its

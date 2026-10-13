@@ -2834,6 +2834,39 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="sv-v2186">
+/* v21.86 the reply box and one email per person, through nbh-respond.js (replyKit). The record keeps S.rb (the box with this
+   file's keys, the people sent to, what came back). The Respondent pages dialog lists the people (Add the people on the sheet
+   takes the Respondents table), each with the page of their role for the dialog's round; Email everyone not sent yet sends one
+   email each, through the workstation from the school account or, where it cannot, the Mail app one person at a time. A reply is
+   placed the way Collect responses places a pasted code (the row of the respondent with that name and role, else the next empty
+   row, else a new one, in the page's round; N/A as N/A; the open answers where the row has none); a reply whose item count differs
+   from what this form asks that role in that round is held (Place it anyway, Discard). The answer code by email stays the way back
+   when the box cannot be reached. Facts out: replies:{'SV-1':{placed, last, waiting, held}}. */
+(function(){if(!window.NBH_RESPOND||!NBH_RESPOND.replyKit)return;
+const ff=fromFile;fromFile=function(d){const o=ff.apply(this,arguments);if(o&&d&&d.S&&d.S.rb&&typeof d.S.rb==='object')o.rb=NBH_RESPOND.rbNorm(d.S.rb);return o;};   /* the file's box comes back with it */
+const pageOf=role=>{const ex=RP_ROLES.find(r=>r[1]===role);if(ex)return ex[0];const t=String(role||'').toLowerCase();if(!t)return 'teacher';
+  if(/student|\bself\b/.test(t))return 'student';if(/parent|guardian|caregiver|mother|father|grand|foster|aunt|uncle/.test(t))return 'caregiver';if(/para|aide|assistant/.test(t))return 'para';
+  if(/admin|principal|dean|director/.test(t))return 'admin';if(/slp|speech|language|occupational|\bot\b|physical|\bpt\b|psych|counsel|social work|nurse|provider|therap/.test(t))return 'rsp';if(/teacher/.test(t))return 'teacher';return 'other';};
+const withPage=(pg,round,f)=>{const a=$('#rpRole'),b=$('#rpRound'),va=a.value,vb=b.value;a.value=pg;if(round)b.value=String(round);try{return f();}finally{a.value=va;b.value=vb;}};
+function place(objs,force){const res={placed:[],held:[],done:[],cells:0},taken={pre:[],post:[]},where=[];let lr=null;
+  objs.forEach(o=>{const P=rpParse(o.inst);const items=P?rpItems(P.role,P.round):[];if(!P||!Array.isArray(o.ans)||!items.length||(!force&&o.ans.length!==items.length)){res.held.push({o,why:'fit'});return;}
+    let j=rpSlot(o,taken[P.round]);if(j<0){S.resp.push(newResp());j=S.resp.length-1;}taken[P.round].push(j);
+    const r=S.resp[j];if(!String(r.name||'').trim())r.name=String(o.name||'').trim();r.role=P.role;if(!r.mode)r.mode=rpMode(o.mode||'');if(!String(r[P.round]||'').trim()&&o.date)r[P.round]=o.date;
+    items.forEach((x,i)=>{const v=String((o.ans||[])[i]==null?'':(o.ans||[])[i]);if(/^([1-6]|NA)$/.test(v)){S.rat[P.round][key(x.id,j)]=v;res.cells++;}else delete S.rat[P.round][key(x.id,j)];});
+    if(o.open)rpOpens(P.role,P.round).forEach(op=>{const t=String(o.open[op.id]||'').trim();if(t&&!String(S.open[P.round][key(op.id,j)]||'').trim())S.open[P.round][key(op.id,j)]=t;});
+    res.placed.push(o);where.push((r.name||'respondent '+(j+1))+' ('+P.role.toLowerCase()+', '+RNAME[P.round].toLowerCase()+')');lr=P.round;});
+  if(res.placed.length){res.done.push(res.placed.length+' response'+(res.placed.length===1?'':'s')+' for '+where.join(', '));S.round=lr;renderAll();}
+  return res;}
+const kit=NBH_RESPOND.replyKit({form:'SV-1',rec:()=>S,inst:(pg,round)=>pg+'-'+(round||'pre'),pages:()=>RP_ROLES.map(r=>[r[0],r[1]]),pageOf,
+  round:()=>$('#rpRound').value,roundName:r=>(RNAME[r]||r).toLowerCase()+' round',people:()=>S.resp.filter(r=>String(r.name||'').trim()).map(r=>({name:r.name,role:r.role})),
+  payload:(pg,round)=>withPage(pg,round,()=>rpPayload()),place:objs=>place(objs,false),force:o=>place([o],true),changed:()=>{try{renderAll();}catch(e){}},
+  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the BCBA',
+  why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
+const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
+window.__rp.payload=rpPayload;window.__rp.kit=kit;
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
@@ -2874,11 +2907,8 @@ input.nbh-fld.nbh-box.nbh-intd,select.nbh-fld.nbh-box.nbh-intd{min-height:32px;p
 select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:24px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 7px center;background-size:12px 8px}
-/* an underlined field keeps its line, drawn a little more surely, and lights up under the cursor */
-input.nbh-fld.nbh-ul,select.nbh-fld.nbh-ul,textarea.nbh-fld.nbh-ul{border-bottom-color:var(--nbh-field);border-radius:3px 3px 0 0}
-input.nbh-fld.nbh-ul:not(.nbh-intd),select.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
-.nbh-fld.nbh-ul:hover{border-bottom-color:var(--nbh-field-hover);background-color:#f8fbfa}
-.nbh-fld.nbh-ul:focus{outline:none;border-bottom-color:var(--nbh-focus);box-shadow:inset 0 -2px 0 var(--nbh-focus);background-color:var(--nbh-focus-wash)}
+/* v21.93 a field drawn as a line to write on is drawn as the box above on screen (the script marks it nbh-box and
+   nbh-was-ul); the line is still what prints. The older look is gone from the screen, so its rules are too. */
 /* a bare field - a grid cell, a line inside a bordered row - shows only where the cursor is */
 .nbh-fld.nbh-bare:hover{background-color:rgba(118,162,163,.09)}
 .nbh-fld.nbh-bare:focus{outline:none;box-shadow:inset 0 0 0 2px var(--nbh-focus);background-color:var(--nbh-focus-wash)}
@@ -2931,8 +2961,11 @@ table{font-variant-numeric:tabular-nums}
 :where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
 :where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
 
-/* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
-.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)!important}
+/* ---- instruction text: a reading line of about 80 characters at most on screen (v21.93; it was 140), the script marks it;
+   paper keeps the form's own measure ---- */
+.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,80ch)!important}
+/* v21.93 one size for the labels that name a field (the script marks a label under 12 px) */
+label.nbh-lab.nbh-lab{font-size:12px}
 
 /* ---- Previous and Next at the foot of the page (the script builds the bar) ---- */
 .nbh-pagenav{display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;max-width:100%;margin:14px auto 30px;padding:0 2px;font-family:var(--nbh-sans)}
@@ -2965,38 +2998,5 @@ a{text-underline-offset:2px}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
-<script id="sv-v2186">
-/* v21.86 the reply box and one email per person, through nbh-respond.js (replyKit). The record keeps S.rb (the box with this
-   file's keys, the people sent to, what came back). The Respondent pages dialog lists the people (Add the people on the sheet
-   takes the Respondents table), each with the page of their role for the dialog's round; Email everyone not sent yet sends one
-   email each, through the workstation from the school account or, where it cannot, the Mail app one person at a time. A reply is
-   placed the way Collect responses places a pasted code (the row of the respondent with that name and role, else the next empty
-   row, else a new one, in the page's round; N/A as N/A; the open answers where the row has none); a reply whose item count differs
-   from what this form asks that role in that round is held (Place it anyway, Discard). The answer code by email stays the way back
-   when the box cannot be reached. Facts out: replies:{'SV-1':{placed, last, waiting, held}}. */
-(function(){if(!window.NBH_RESPOND||!NBH_RESPOND.replyKit)return;
-const ff=fromFile;fromFile=function(d){const o=ff.apply(this,arguments);if(o&&d&&d.S&&d.S.rb&&typeof d.S.rb==='object')o.rb=NBH_RESPOND.rbNorm(d.S.rb);return o;};   /* the file's box comes back with it */
-const pageOf=role=>{const ex=RP_ROLES.find(r=>r[1]===role);if(ex)return ex[0];const t=String(role||'').toLowerCase();if(!t)return 'teacher';
-  if(/student|\bself\b/.test(t))return 'student';if(/parent|guardian|caregiver|mother|father|grand|foster|aunt|uncle/.test(t))return 'caregiver';if(/para|aide|assistant/.test(t))return 'para';
-  if(/admin|principal|dean|director/.test(t))return 'admin';if(/slp|speech|language|occupational|\bot\b|physical|\bpt\b|psych|counsel|social work|nurse|provider|therap/.test(t))return 'rsp';if(/teacher/.test(t))return 'teacher';return 'other';};
-const withPage=(pg,round,f)=>{const a=$('#rpRole'),b=$('#rpRound'),va=a.value,vb=b.value;a.value=pg;if(round)b.value=String(round);try{return f();}finally{a.value=va;b.value=vb;}};
-function place(objs,force){const res={placed:[],held:[],done:[],cells:0},taken={pre:[],post:[]},where=[];let lr=null;
-  objs.forEach(o=>{const P=rpParse(o.inst);const items=P?rpItems(P.role,P.round):[];if(!P||!Array.isArray(o.ans)||!items.length||(!force&&o.ans.length!==items.length)){res.held.push({o,why:'fit'});return;}
-    let j=rpSlot(o,taken[P.round]);if(j<0){S.resp.push(newResp());j=S.resp.length-1;}taken[P.round].push(j);
-    const r=S.resp[j];if(!String(r.name||'').trim())r.name=String(o.name||'').trim();r.role=P.role;if(!r.mode)r.mode=rpMode(o.mode||'');if(!String(r[P.round]||'').trim()&&o.date)r[P.round]=o.date;
-    items.forEach((x,i)=>{const v=String((o.ans||[])[i]==null?'':(o.ans||[])[i]);if(/^([1-6]|NA)$/.test(v)){S.rat[P.round][key(x.id,j)]=v;res.cells++;}else delete S.rat[P.round][key(x.id,j)];});
-    if(o.open)rpOpens(P.role,P.round).forEach(op=>{const t=String(o.open[op.id]||'').trim();if(t&&!String(S.open[P.round][key(op.id,j)]||'').trim())S.open[P.round][key(op.id,j)]=t;});
-    res.placed.push(o);where.push((r.name||'respondent '+(j+1))+' ('+P.role.toLowerCase()+', '+RNAME[P.round].toLowerCase()+')');lr=P.round;});
-  if(res.placed.length){res.done.push(res.placed.length+' response'+(res.placed.length===1?'':'s')+' for '+where.join(', '));S.round=lr;renderAll();}
-  return res;}
-const kit=NBH_RESPOND.replyKit({form:'SV-1',rec:()=>S,inst:(pg,round)=>pg+'-'+(round||'pre'),pages:()=>RP_ROLES.map(r=>[r[0],r[1]]),pageOf,
-  round:()=>$('#rpRound').value,roundName:r=>(RNAME[r]||r).toLowerCase()+' round',people:()=>S.resp.filter(r=>String(r.name||'').trim()).map(r=>({name:r.name,role:r.role})),
-  payload:(pg,round)=>withPage(pg,round,()=>rpPayload()),place:objs=>place(objs,false),force:o=>place([o],true),changed:()=>{try{renderAll();}catch(e){}},
-  short:()=>NBH_RESPOND.shortName(S.meta.client||''),bcba:()=>String(S.meta.bcba||'').trim()||'the BCBA',
-  why:()=>window.NBH_RESPOND_MISSING?'The file nbh-respond.js is not beside this form, so no page can be built.':!$('#rpEmail').value.trim()?'Enter your email above first: the answers come to it when the reply box cannot be reached.':''});
-const rp0=rpPayload;rpPayload=function(){return kit.withBox(rp0.apply(this,arguments));};   /* the dialog's pages and links carry the box */
-window.__rp.payload=rpPayload;window.__rp.kit=kit;
-})();
-</script>
 </body>
 </html>

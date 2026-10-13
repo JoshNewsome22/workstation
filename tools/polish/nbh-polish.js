@@ -24,12 +24,14 @@
         l = parseFloat(cs.borderLeftWidth) || 0, r = parseFloat(cs.borderRightWidth) || 0;
     var seen = function (side) { return alpha(cs['border' + side + 'Color']) > 0.05; };
     var kind;
+    var ul = false;
     if (t && b && l && r && (seen('Top') || seen('Bottom') || seen('Left'))) kind = 'nbh-box';
-    else if (b && !t && !l && !r && seen('Bottom')) kind = 'nbh-ul';
+    else if (b && !t && !l && !r && seen('Bottom')) { kind = 'nbh-box'; ul = true; }   /* v21.93 one look: a line to write on is drawn as the box the newer forms use (screen only; paper keeps its line) */
     else kind = 'nbh-bare';
     if (e.classList.contains(kind) && e.classList.contains('nbh-fld')) return;
-    e.classList.remove('nbh-box', 'nbh-ul', 'nbh-bare');
+    e.classList.remove('nbh-box', 'nbh-ul', 'nbh-bare', 'nbh-was-ul');
     e.classList.add('nbh-fld', kind);
+    if (ul) e.classList.add('nbh-was-ul');
     if (e.closest('td,th')) e.classList.add('nbh-intd');
   }
   function fields(root) {
@@ -63,8 +65,10 @@
     }
   }
   /* The forms cap their instruction text at 60 to 80 characters, a print measure
-     that reads as a narrow column on a wide screen. On screen the cap is lifted
-     to what the sheet allows (about 140 characters at most); paper keeps its own.
+     that reads as a narrow column on a wide screen. On screen the cap was lifted
+     to what the sheet allows (about 140 characters); since v21.93 (the design
+     review) a reading line is about 80 characters at most, so a paragraph the
+     form left uncapped is marked too. Paper keeps the form's own measure.
      Only leaf text blocks are marked: a wrapper with blocks inside keeps its width. */
   var INLINE = /^(A|B|I|EM|STRONG|SPAN|KBD|CODE|BR|SMALL|SUB|SUP|ABBR|MARK|U|S|Q|CITE|TIME|WBR|SVG|INPUT|SELECT|BUTTON|LABEL)$/;
   function prose(root) {
@@ -76,13 +80,24 @@
       for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (!INLINE.test(c.tagName)) { leaf = false; break; }
       if (!leaf) continue;
       var mw = getComputedStyle(el).maxWidth;
-      if (!/px$/.test(mw)) continue;
-      var px = parseFloat(mw);
-      if (!(px >= 160 && px <= 1400)) continue;
+      if (/px$/.test(mw)) { var px = parseFloat(mw); if (!(px >= 160 && px <= 1400)) continue; }
+      else if (!(mw === 'none' && /^(P|LI|DD|BLOCKQUOTE|FIGCAPTION)$/.test(el.tagName) && (el.textContent || '').trim().length > 90)) continue;   /* v21.93 a long paragraph the form left uncapped */
       el.classList.add('nbh-wide');
     }
   }
-  function run(root) { try { fields(root); zebra(root); prose(root); if (!root) sheets(); } catch (e) {} }
+  /* v21.93 one size for the labels that name a field: a form's label under 12 px (11.5, 11, 10.5) reads at 12 on screen;
+     the labels in a table, the toolbar, a dialog and a check box's own label are left as they are */
+  function labels(root) {
+    var list = (root || document).querySelectorAll('label:not(.nbh-lab):not(.nbh-lab-no)');
+    for (var i = 0; i < list.length; i++) {
+      var el = list[i];
+      if (el.closest('.toolbar,dialog,table,svg,.nbh-pm,.nbh-tabs,nav') || !(el.textContent || '').trim()) { el.classList.add('nbh-lab-no'); continue; }
+      if (el.querySelector('input,select,textarea,div,p')) { el.classList.add('nbh-lab-no'); continue; }
+      var fs = parseFloat(getComputedStyle(el).fontSize);
+      el.classList.add(fs >= 10 && fs < 11.95 ? 'nbh-lab' : 'nbh-lab-no');
+    }
+  }
+  function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { run(); });
   else run();
   window.addEventListener('load', function () { run(); });

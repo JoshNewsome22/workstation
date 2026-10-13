@@ -2637,11 +2637,8 @@ input.nbh-fld.nbh-box.nbh-intd,select.nbh-fld.nbh-box.nbh-intd{min-height:32px;p
 select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:24px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 7px center;background-size:12px 8px}
-/* an underlined field keeps its line, drawn a little more surely, and lights up under the cursor */
-input.nbh-fld.nbh-ul,select.nbh-fld.nbh-ul,textarea.nbh-fld.nbh-ul{border-bottom-color:var(--nbh-field);border-radius:3px 3px 0 0}
-input.nbh-fld.nbh-ul:not(.nbh-intd),select.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
-.nbh-fld.nbh-ul:hover{border-bottom-color:var(--nbh-field-hover);background-color:#f8fbfa}
-.nbh-fld.nbh-ul:focus{outline:none;border-bottom-color:var(--nbh-focus);box-shadow:inset 0 -2px 0 var(--nbh-focus);background-color:var(--nbh-focus-wash)}
+/* v21.93 a field drawn as a line to write on is drawn as the box above on screen (the script marks it nbh-box and
+   nbh-was-ul); the line is still what prints. The older look is gone from the screen, so its rules are too. */
 /* a bare field - a grid cell, a line inside a bordered row - shows only where the cursor is */
 .nbh-fld.nbh-bare:hover{background-color:rgba(118,162,163,.09)}
 .nbh-fld.nbh-bare:focus{outline:none;box-shadow:inset 0 0 0 2px var(--nbh-focus);background-color:var(--nbh-focus-wash)}
@@ -2694,8 +2691,11 @@ table{font-variant-numeric:tabular-nums}
 :where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
 :where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
 
-/* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
-.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)!important}
+/* ---- instruction text: a reading line of about 80 characters at most on screen (v21.93; it was 140), the script marks it;
+   paper keeps the form's own measure ---- */
+.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,80ch)!important}
+/* v21.93 one size for the labels that name a field (the script marks a label under 12 px) */
+label.nbh-lab.nbh-lab{font-size:12px}
 
 /* ---- Previous and Next at the foot of the page (the script builds the bar) ---- */
 .nbh-pagenav{display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;max-width:100%;margin:14px auto 30px;padding:0 2px;font-family:var(--nbh-sans)}
