@@ -9420,7 +9420,8 @@ same places.
 How it is done: the shared polish layer (`tools/polish/nbh-polish.js` and `.css`, applied to every form by
 `tools/apply-polish.py`) reads each field's own style when the form opens and marks it; the marks are classes the print
 styles never mention. A field that was a line is marked `nbh-box` and `nbh-was-ul`; a long paragraph `nbh-wide`; a small
-label `nbh-lab`.
+label `nbh-lab`. (v21.91's search handler, the part of `nbh-polish.js` that shows a found field, had been written into the
+built file only; applying the layer again dropped it. It is in the source now, so a later apply keeps it.)
 
 Checked by `qa/v2193-fields-test.js`: every form on a laptop and on an iPad held upright (no field drawn as a line, every
 boxed field bordered on four sides and 36 px tall, no label under 12 px, no reading line over about 80 characters, no page
