@@ -2776,6 +2776,47 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<style id="vi-v2175-css">
+/* v21.75 (audit) on a touch screen each rating is a finger-sized target, the whole label tappable */
+@media (pointer:coarse){label.rad{display:inline-flex;align-items:center;min-height:44px;padding:0 8px 0 4px;gap:4px}#hillTbl label.rad{min-height:44px}}
+</style>
+<script id="vi-v2175">
+/* v21.75 (audit) the case: besides the definition the generic fill already places, the measurement, when empty, from the
+   first target behavior's dimension on Form TB-1 (frequency or rate, duration, latency, intensity) */
+"use strict";
+window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;let n=0;
+  const b=((f&&f.behaviors)||[]).find(x=>!(x.isRep||/replacement|alternative/i.test(x.type||'')));
+  const el=document.querySelector('[name="s_measure"]');
+  if(b&&el&&!el.value){const d=String(b.dim||'').toLowerCase();const want=/freq|count|rate/.test(d)?'Frequency / rate':/dur/.test(d)?'Duration':/laten/.test(d)?'Latency':/intens|magn/.test(d)?'Intensity':'';
+    const o=want&&[...el.options].find(x=>x.textContent.indexOf(want)===0);if(o){el.value=o.value||o.textContent;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;}}
+  return n?{filled:((g&&g.filled)||0)+n,note:(g&&g.note)||''}:g;};
+</script>
+<script id="v2178-ev">
+(function(){"use strict";
+/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
+const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
+  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
+  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
+  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
+const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
+const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
+const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
+const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
+  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
+/* v21.78 the FBA chain, out: the variable-isolation result as evidence for Forms FS-1 and EA-1: the hypothesis statement
+   (h_statement), its function from the words after "maintained by", the assessment dates, and the strength from the causal
+   confidence band (high Strong, moderate Moderate, low Weak). */
+OUT(function(){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const st=v('h_statement');if(!st)return null;
+  const mb=/maintained by\s+(.*?)(?:\s*\(|[.;]|$)/i.exec(st),fnw=mb?T(mb[1]):'';
+  const band=T((document.getElementById('hillBand')||{}).textContent),b=/high/i.test(band)?'Strong':/moderate/i.test(band)?'Moderate':/low/i.test(band)?'Weak':'';
+  const key=K(fnw||st);
+  return EV(Object.assign({form:'VI-1',method:'Variable isolation from the descriptive record (non-experimental)'},SPAN([v('s_start'),v('s_end')]),{n:null,fn:fnw?fnw.charAt(0).toUpperCase()+fnw.slice(1):'',fnKey:key,
+    strength:key&&key!=='unclear'?b:'',by:v('s_bcba'),statement:st}));});
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a
@@ -2815,17 +2856,19 @@ input.nbh-fld.nbh-box.nbh-intd,select.nbh-fld.nbh-box.nbh-intd{min-height:32px;p
 /* a boxed dropdown gets one chevron instead of whatever the platform draws */
 select.nbh-fld.nbh-box:not(.nbh-intd):not([multiple]):not([size]){-webkit-appearance:none;appearance:none;padding-right:24px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;background-size:12px 8px}
-/* an underlined field keeps its line, drawn a little more surely, and lights up under the cursor */
-input.nbh-fld.nbh-ul,select.nbh-fld.nbh-ul,textarea.nbh-fld.nbh-ul{border-bottom-color:var(--nbh-field);border-radius:3px 3px 0 0}
-input.nbh-fld.nbh-ul:not(.nbh-intd),select.nbh-fld.nbh-ul:not(.nbh-intd){min-height:30px}
-.nbh-fld.nbh-ul:hover{border-bottom-color:var(--nbh-field-hover);background-color:#f8fbfa}
-.nbh-fld.nbh-ul:focus{outline:none;border-bottom-color:var(--nbh-focus);box-shadow:inset 0 -2px 0 var(--nbh-focus);background-color:var(--nbh-focus-wash)}
+  background-repeat:no-repeat;background-position:right 7px center;background-size:12px 8px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}   /* v21.93 a choice wider than its box ends in an ellipsis, not under the chevron */
+/* v21.93 a field drawn as a line to write on is drawn as the box above on screen (the script marks it nbh-box and
+   nbh-was-ul); the line is still what prints. The older look is gone from the screen, so its rules are too.
+   Those fields were sized for a line, with no inset, so their box keeps a narrower inset than the newer forms' (6 px; a
+   dropdown's text has the room it had, with a smaller chevron at its edge): the text they held still fits. */
+input.nbh-fld.nbh-box.nbh-was-ul:not(.nbh-intd){padding-left:6px;padding-right:6px}
+select.nbh-fld.nbh-box.nbh-was-ul:not(.nbh-intd){padding-left:4px;padding-right:4px}
+select.nbh-fld.nbh-box.nbh-was-ul:not(.nbh-intd):not([multiple]):not([size]){padding-right:16px;background-position:right 3px center;background-size:10px 7px}
 /* a bare field - a grid cell, a line inside a bordered row - shows only where the cursor is */
 .nbh-fld.nbh-bare:hover{background-color:rgba(118,162,163,.09)}
 .nbh-fld.nbh-bare:focus{outline:none;box-shadow:inset 0 0 0 2px var(--nbh-focus);background-color:var(--nbh-focus-wash)}
 .nbh-fld:disabled,.nbh-fld.nbh-box[readonly]{background-color:var(--nbh-shade);color:var(--nbh-muted)}
-.nbh-fld.nbh-ul[readonly]{color:var(--nbh-muted)}
 input[type=checkbox],input[type=radio]{accent-color:var(--nbh-navy);cursor:pointer}
 input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
 label{cursor:default}
@@ -2873,8 +2916,11 @@ table{font-variant-numeric:tabular-nums}
 :where(.sheet,main,body) :where(table:not(.scatter):not(.iv)) :where(th){background-color:var(--nbh-mist);color:var(--nbh-navy);font-weight:600}
 :where(table.nbh-zebra>tbody>tr:nth-child(even)){background-color:var(--nbh-zebra)}
 
-/* ---- instruction text uses the width the screen has (the script marks it; paper keeps the form's own measure) ---- */
-.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,140ch)!important}
+/* ---- instruction text: a reading line of about 80 characters at most on screen (v21.93; it was 140), the script marks it;
+   paper keeps the form's own measure ---- */
+.nbh-wide.nbh-wide.nbh-wide{max-width:min(100%,80ch)!important}
+/* v21.93 one size for the labels that name a field (the script marks a label under 12 px) */
+label.nbh-lab.nbh-lab{font-size:12px}
 
 /* ---- Previous and Next at the foot of the page (the script builds the bar) ---- */
 .nbh-pagenav{display:flex;align-items:center;justify-content:space-between;gap:10px;box-sizing:border-box;max-width:100%;margin:14px auto 30px;padding:0 2px;font-family:var(--nbh-sans)}
@@ -2907,46 +2953,5 @@ a{text-underline-offset:2px}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>
-<style id="vi-v2175-css">
-/* v21.75 (audit) on a touch screen each rating is a finger-sized target, the whole label tappable */
-@media (pointer:coarse){label.rad{display:inline-flex;align-items:center;min-height:44px;padding:0 8px 0 4px;gap:4px}#hillTbl label.rad{min-height:44px}}
-</style>
-<script id="vi-v2175">
-/* v21.75 (audit) the case: besides the definition the generic fill already places, the measurement, when empty, from the
-   first target behavior's dimension on Form TB-1 (frequency or rate, duration, latency, intensity) */
-"use strict";
-window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;let n=0;
-  const b=((f&&f.behaviors)||[]).find(x=>!(x.isRep||/replacement|alternative/i.test(x.type||'')));
-  const el=document.querySelector('[name="s_measure"]');
-  if(b&&el&&!el.value){const d=String(b.dim||'').toLowerCase();const want=/freq|count|rate/.test(d)?'Frequency / rate':/dur/.test(d)?'Duration':/laten/.test(d)?'Latency':/intens|magn/.test(d)?'Intensity':'';
-    const o=want&&[...el.options].find(x=>x.textContent.indexOf(want)===0);if(o){el.value=o.value||o.textContent;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));n++;}}
-  return n?{filled:((g&&g.filled)||0)+n,note:(g&&g.note)||''}:g;};
-</script>
-<script id="v2178-ev">
-(function(){"use strict";
-/* v21.78 helpers for this form's evidence (the FBA chain): the function key from the function's words, dates as ISO and as a readable range */
-const K=t=>{t=String(t||'').toLowerCase();if(!t)return '';if(/multiple|more than one|combined|synthesi[sz]ed/.test(t))return 'multiple';
-  const R={attention:/attention/,escape:/escape|avoid|negative reinforcement/,tangible:/tangible|preferred item|access to (?:an? |the )?(?:item|activity|preferred|tablet|toy)/,automatic:/automatic|sensory|nonsocial|non-social|low social input/};
-  const h=Object.keys(R).filter(x=>R[x].test(t));if(h.length>1)return 'multiple';if(h.length)return h[0];
-  return /undetermined|undifferentiated|unclear|unknown|inconclusive|conflicting|no function/.test(t)?'unclear':'';};
-const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim();
-const ISO=s=>{s=T(s);let m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s);if(m)return m[1]+'-'+m[2]+'-'+m[3];m=/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(s);
-  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+('0'+m[1]).slice(-2)+'-'+('0'+m[2]).slice(-2);}return '';};
-const MDY=i=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(i||'');return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
-const SPAN=list=>{const d=(list||[]).map(ISO).filter(Boolean).sort();if(!d.length)return {};const from=d[0],to=d[d.length-1];return {from,to,dates:from===to?MDY(from):MDY(from)+'–'+MDY(to)};};
-const EV=o=>{const e={};Object.keys(o).forEach(k=>{if(o[k]!==undefined&&o[k]!=='')e[k]=o[k];});['fn','fnKey','strength','statement','dates'].forEach(k=>{if(e[k]===undefined)e[k]='';});if(e.n===undefined)e.n=null;return e;};
-const OUT=build=>{const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
-  let ev=null;try{ev=build();}catch(e){ev=null;}return ev?Object.assign({},r||{},{evidence:ev}):r;};};
-/* v21.78 the FBA chain, out: the variable-isolation result as evidence for Forms FS-1 and EA-1: the hypothesis statement
-   (h_statement), its function from the words after "maintained by", the assessment dates, and the strength from the causal
-   confidence band (high Strong, moderate Moderate, low Weak). */
-OUT(function(){const v=n=>{const e=document.querySelector('[name="'+n+'"]');return e?T(e.value):'';};const st=v('h_statement');if(!st)return null;
-  const mb=/maintained by\s+(.*?)(?:\s*\(|[.;]|$)/i.exec(st),fnw=mb?T(mb[1]):'';
-  const band=T((document.getElementById('hillBand')||{}).textContent),b=/high/i.test(band)?'Strong':/moderate/i.test(band)?'Moderate':/low/i.test(band)?'Weak':'';
-  const key=K(fnw||st);
-  return EV(Object.assign({form:'VI-1',method:'Variable isolation from the descriptive record (non-experimental)'},SPAN([v('s_start'),v('s_end')]),{n:null,fn:fnw?fnw.charAt(0).toUpperCase()+fnw.slice(1):'',fnKey:key,
-    strength:key&&key!=='unclear'?b:'',by:v('s_bcba'),statement:st}));});
-})();
-</script>
 </body>
 </html>

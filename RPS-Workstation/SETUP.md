@@ -9395,3 +9395,35 @@ row at 1180 and a three-row grid at 820; the toolbar one row on the iPad and unc
 row with the fade, the last tab tapped coming into view; Caseload's order and fold, the note above it; the pills, the sizes,
 the 44 px targets; the line length, the keyboard hints, the tabs' label, the focus bar's label, the dialog on a phone; and,
 against the release before, Forms DM-1 and TD-1 printing the same words in the same places, with a mouse and with a finger.
+
+### v21.93: one look for the fields, and shorter reading lines
+
+The second part of the design review, across all 46 forms, on screen only. Nothing prints differently: every form was
+printed from this release and the one before, with a mouse and with a finger, and the pages hold the same words in the
+same places.
+
+- **Boxes everywhere.** Fourteen of the older forms (DM-1, IC-1, RR-1, TB-1, IA-1, OB-1, SP-1, PA-1, RA-1, EA-1, TD-1, MS-1,
+  EB-1 and GB-1's notes) drew a field as a line to write on; the other thirty drew a box. On screen every field is now the
+  same box: a border all round, 36 px tall, the same focus ring. Fields inside a table stay compact, and a bare grid cell
+  stays bare. On paper a form keeps the line or the box it always had. A field that was a line was sized for one, with no
+  inset, so its box keeps a narrower inset than the newer forms' (6 px, and a dropdown's chevron closer to its edge): the
+  text it held still fits. A dropdown whose chosen option is wider than its box now ends in an ellipsis instead of running
+  under the chevron (every boxed dropdown, old and new).
+- **Reading lines of about 80 characters.** The guides and long notes used the sheet's full width on screen (120 to 140
+  characters a line, which is hard to follow back to the start). They are now capped at about 80 characters; the printed
+  measure is the form's own, as before.
+- **Labels at 12 px.** A label that names a field was 10.5, 11 or 11.5 px in the older forms and 12 to 12.5 in the newer;
+  on screen the smaller ones read at 12 px. Labels in tables, in the toolbar and on tick boxes are as they were. A label
+  beside its field takes a few pixels more, so a field in that row is a few pixels narrower; the robot sweep of every form
+  found no field cut off and no button spilling, only the long simulated values that scrolled in their field before.
+
+How it is done: the shared polish layer (`tools/polish/nbh-polish.js` and `.css`, applied to every form by
+`tools/apply-polish.py`) reads each field's own style when the form opens and marks it; the marks are classes the print
+styles never mention. A field that was a line is marked `nbh-box` and `nbh-was-ul`; a long paragraph `nbh-wide`; a small
+label `nbh-lab`.
+
+Checked by `qa/v2193-fields-test.js`: every form on a laptop and on an iPad held upright (no field drawn as a line, every
+boxed field bordered on four sides and 36 px tall, no label under 12 px, no reading line over about 80 characters, no page
+errors); DM-1 and TB-1 carrying the fields that were lines, FS-1 none; TD-1's guide paragraphs capped; and, against the
+release before, all 46 forms printing the same words in the same places, with a mouse and with a finger (PA-1 draws a
+random item order for its series on every open; those item numbers are read as the same).
