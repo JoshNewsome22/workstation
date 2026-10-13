@@ -3,7 +3,9 @@
    the newest copy; the case on screen told when a newer copy came from the other device; a copy changed on both without the
    other asks which to keep and puts the other in Replaced copies; a save with the sign-in over waits and goes at the next one;
    Remove everywhere and Remove only here; a personal account warned; a different account refused; the Drive API not turned on
-   said plainly; Save case to a file still writes one. Google (sign-in, userinfo, Drive) is simulated in this test.
+   said plainly; Save case to a file still writes one; a case over 5 MB goes by the resumable upload (v21.97); a device whose Safari
+   refuses its settings store keeps the key and the Drive settings in the workstation's own store (v21.98). Google (sign-in,
+   userinfo, Drive) is simulated in this test.
    Simulated students only.  usage: node qa/v2189-drive-test.js */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const WS=BASE+'/NBH-Workstation/index.html';
@@ -60,6 +62,16 @@ async function device(br,ua,touch){const ctx=await br.newContext({viewport:touch
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;window.alert=()=>{};const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));
     ['nbh.drive.on','nbh.drive.acct','nbh.drive.skip','nbh.drive.gone','nbh.drive.dev'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.drive');});
   return {ctx,page,errs,dls:()=>dl};}
+/* v21.98 a device whose Safari refuses every write to its settings store (localStorage full), the Google key not given yet */
+async function deviceFull(br){const ctx=await br.newContext({viewport:{width:1180,height:820},userAgent:UA_IPAD,hasTouch:true,serviceWorkers:'block',acceptDownloads:true});
+  await ctx.addInitScript(()=>{window.__gsAsk=0;window.__gsFail='';window.google={accounts:{oauth2:{hasGrantedAllScopes:()=>true,initTokenClient(cfg){return {requestAccessToken(){window.__gsAsk++;
+      setTimeout(()=>{if(window.__gsFail){const t=window.__gsFail;if(cfg.error_callback)cfg.error_callback({type:t});return;}cfg.callback({access_token:'simulated-drive-token-'+window.__gsAsk,expires_in:3600});},20);}};}}}};
+    Storage.prototype.setItem=function(){throw new DOMException('The quota has been exceeded.','QuotaExceededError');};});
+  await ctx.route('https://www.googleapis.com/**',drive);await ctx.route('https://accounts.google.com/**',r=>r.fulfill({contentType:'text/javascript',body:'/* simulated */'}));
+  const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));
+  await page.goto(WS);await sleep(1300);
+  await page.evaluate(async()=>{wsUI.confirm=async()=>true;window.alert=()=>{};const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
+  return {ctx,page,errs};}
 const setBar=(page,v)=>page.evaluate(v=>{const set=(s,x)=>{const e=document.querySelector(s);e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
   set('#pClient',v.client);set('#pSid',v.sid||'');set('#pSite',v.site||'');},v);
 async function openDM(page){await page.evaluate(()=>openForm('DM-1'));await page.waitForFunction(()=>!!state.status['DM-1'],null,{timeout:30000});await sleep(1200);return page.frames().find(f=>/DM-1_Student/.test(f.url()));}
@@ -190,7 +202,31 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   ok('25 a case over 5 MB: one resumable upload (the metadata, then the content), the same file in Drive with the whole text, the case marked synced; no multipart body over 5 MB',D.res===r0+1&&cases().length===c0&&!!bigF&&+bigF.version===v0+1&&bigF.content.length>5e6&&/lazy dog/.test(bigF.content)&&rc&&!rc.drv.dirty&&D.mpMax<5*1048576&&D.mpMax>0,{res:D.res-r0,n:cases().length,v:bigF&&bigF.version,len:bigF&&bigF.content.length,dirty:rc&&rc.drv.dirty,mpMax:D.mpMax});
   await B.page.evaluate(()=>drvSync({}));await idle(B.page);const rb=await rec(B.page,'Mateo Rivera');   /* the laptop (still signed in; the iPad was signed out at 20) */
   ok('26 the laptop’s next sync brings the large copy down whole',rb&&rb.text.length>5e6&&/lazy dog/.test(rb.text),{len:rb&&rb.text.length});
-  ok('no page errors (iPad, laptop, third)',!A.errs.length&&!B.errs.length&&!C.errs.length,[A.errs,B.errs,C.errs].map(e=>e.slice(0,3)));
+  /* 27 (v21.98) Safari refusing its settings store (a full localStorage, as on an iPad holding old copies): the key is asked once, kept in the workstation's own store, and the refusal said plainly */
+  const E=await deviceFull(br);
+  await E.page.evaluate(()=>{wsUI.alert=async t=>{window.__al=String(t);};caseloadOpen();});await sleep(400);
+  await E.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(600);
+  const d27=await dlgOf(E.page);
+  await E.page.evaluate(()=>{document.querySelector('#cfFoot input').value='123-simulated.apps.googleusercontent.com';});await press(E.page,/Keep it/);await sleep(900);
+  const k27=await E.page.evaluate(()=>({gid:clGid(),ls:localStorage.getItem('nbh.google.client'),al:window.__al||'',err:KV.err,ask:window.__gsAsk}));
+  ok('27 Safari refuses the write: the key is asked once, kept in the workstation’s own store, and the box says Safari refused it (QuotaExceededError) instead of claiming it was kept',
+    /Google key/.test(d27.t)&&k27.gid==='123-simulated.apps.googleusercontent.com'&&k27.ls===null&&/Safari refused/.test(k27.al)&&/QuotaExceededError/.test(k27.al)&&k27.ask===0,{d27,k27});
+  /* 28 the next tap signs in and turns Drive on for this device, its settings in the same store */
+  await E.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(1500);await idle(E.page);
+  const s28=await E.page.evaluate(()=>({on:drvOn(),acct:drvAcct(),ls:localStorage.getItem('nbh.drive.on'),chip:!!document.getElementById('drvChip')&&!document.getElementById('drvChip').hidden,ask:window.__gsAsk}));
+  ok('28 the next tap signs in: Drive is on for this device, with the chip, though Safari keeps none of it',s28.on&&s28.acct===SCHOOL&&s28.ls===null&&s28.chip&&s28.ask===1,s28);
+  /* 29 opened again (Safari still refusing): the key and the Drive settings come back from the workstation's own store; Diagnostics names the refusal */
+  await E.page.reload();await sleep(1500);await E.page.waitForFunction(()=>KV.loaded,null,{timeout:10000});await sleep(300);
+  const s29=await E.page.evaluate(()=>{document.getElementById('diag').click();const row=[...document.querySelectorAll('#dlgBody table tr')].map(r=>r.textContent).find(x=>/Settings store/.test(x))||'';
+    return {gid:clGid(),on:drvOn(),acct:drvAcct(),ls:localStorage.getItem('nbh.google.client'),row};});
+  await sleep(600);const row29=await E.page.evaluate(()=>(document.getElementById('diagKv')||{}).textContent||'');
+  ok('29 opened again with Safari still refusing: the key and the Drive settings are back from the workstation’s own store, and Diagnostics names the refusal and says the own store works',
+    s29.gid==='123-simulated.apps.googleusercontent.com'&&s29.on&&s29.acct===SCHOOL&&s29.ls===null&&/refused a write \(QuotaExceededError\)/.test(s29.row)&&/own store works \(\d+ kept there\)/.test(row29),{s29,row29});
+  /* 30 a device whose Safari keeps its settings: Diagnostics says writes work, and the key and settings are in both stores */
+  const s30=await B.page.evaluate(async()=>{document.getElementById('diag').click();await new Promise(r=>setTimeout(r,600));const kv=await kvTx('readonly',s=>s.getAll());
+    return {row:(document.getElementById('diagKv')||{}).textContent||'',ls:localStorage.getItem('nbh.google.client'),gid:clGid(),on:localStorage.getItem('nbh.drive.on'),kv:(kv||[]).map(r=>r.k).sort()};});
+  ok('30 the laptop, whose Safari keeps its settings: Diagnostics says writes work and the own store works; Drive on is in both stores',/writes work: \d+ items?, \d+ KB/.test(s30.row)&&/own store works/.test(s30.row)&&s30.on==='1'&&s30.kv.includes('nbh.drive.on')&&s30.kv.includes('nbh.drive.acct'),s30);
+  ok('no page errors (iPad, laptop, third, fourth)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length,[A.errs,B.errs,C.errs,E.errs].map(e=>e.slice(0,3)));
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

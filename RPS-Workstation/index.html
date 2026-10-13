@@ -1605,7 +1605,7 @@ function makeFrame(id,rec){
   return fr;
 }
 /* the form has loaded: filled from the case file when it is one of the case's forms still waiting; then the frame has settled */
-async function afterLoad(id,fr){
+async function afterLoad(id,fr){try{if(clGid())fr.contentWindow.NBH_GID=clGid();}catch(e){}   /* v21.98 the Google key where Safari's settings do not hold it */
   touchHook(fr);
   let rep=null;
   const P=state.pending[id];
@@ -2568,6 +2568,8 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='ask'){relay(ev,d);return;}
   if(d.nbh==='open'){openFor(ev,d);return;}   /* v21.43 Form TK-1 or TE-1 opening its partner; at openFor() */
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
+  if(d.nbh==='gid'){if(!Object.values(state.frames).some(f=>f.contentWindow===ev.source))return;const g=String(d.v||'').trim();   /* v21.98 a key given on Form DD-1 */
+    if(/\.apps\.googleusercontent\.com$/.test(g))kvSet('nbh.google.client',g);else if(!g)kvDel('nbh.google.client');gidToForms();return;}
   if(d.nbh==='mail'){mailFor(ev,d);return;}   /* v21.86 a form's invitations, sent from the school Google account */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
@@ -3417,6 +3419,7 @@ $('#diag').addEventListener('click',()=>{
    ['My pictures',EMBED?(EMBED.pictures?'inside this file':'not inside this file'):'checking\u2026','nbh-pictures.js, beside the forms: a photo of a real item becomes a picture for Forms VS-1, SM-1, TK-1 and TV-1, its background cut away on this device (v21.62)','diagMine'],
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
+   ['Settings store',kvDiag(),'Safari\u2019s settings (localStorage) hold the Google key and the Drive settings. When Safari refuses a write (a full store, or Block All Cookies on), the workstation keeps them in its own store on this device instead (v21.98)','diagKv'],
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
   ];
   dialog('Diagnostics',
@@ -3436,6 +3439,7 @@ $('#diag').addEventListener('click',()=>{
   if(!EMBED)fetch('nbh-pictos.js',{method:'HEAD'}).then(r=>{const c=$('#diagPic');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}})
     .catch(()=>diagOff('diagPic','nbh-pictos.js','could not check (open the folder over http, or open Form SM-1 and look for pictures)'));
   if(!EMBED)fetch('nbh-pictures.js',{method:'HEAD'}).then(r=>{const c=$('#diagMine');if(c){c.textContent=r.ok?'present':'missing ('+r.status+')';if(!r.ok)c.style.color='#a8321e';}}).catch(()=>diagOff('diagMine','nbh-pictures.js','could not check'));
+  kvTx('readwrite',s=>{s.put({k:'nbh.ws.t',v:'1'});return s.delete('nbh.ws.t');}).then(()=>{const c=$('#diagKv');if(c)c.textContent+='; the workstation\u2019s own store works ('+Object.keys(KV.mem).length+' kept there)';},e=>{const c=$('#diagKv');if(c){c.textContent+='; the workstation\u2019s own store did not open ('+((e&&e.message)||e)+')';c.style.color='#a8321e';}});
   pdfTools().then(()=>{const c=$('#diagPdf');if(c)c.textContent='present';})
     .catch(e=>{const c=$('#diagPdf');if(c){c.textContent='missing: '+e.message;c.style.color='#a8321e';}});
 });
@@ -5078,7 +5082,36 @@ const clBkDue=()=>{const t=clBkAt();return !t||(Date.now()-Date.parse(t))>7*864e
 function clLinkOf(r){try{const d=parseCase(r.text),fm=d&&d.forms&&d.forms['DD-1'];if(!fm||!fm.snap||!fm.snap.own)return null;
   const o=JSON.parse(fm.snap.own),g=o&&(o.S||o).gs;return g&&g.id?{d,fm,gs:g}:null;}catch(e){return null;}}
 const clTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.tok')||'null');return t&&t.tok&&t.exp>Date.now()+120000?t:null;}catch(e){return null;}};
-const clGid=()=>{try{return localStorage.getItem('nbh.google.client')||'';}catch(e){return '';}};
+/* v21.98 the settings store. Safari on an iPad can refuse a write to localStorage (the store full of old copies, or
+   Block All Cookies on) while IndexedDB still works; the Google key went only there, in a silent try, and the toast said it
+   was kept while the next tap asked for it again. The key and the Drive settings (nbh.drive.*) now go to both: localStorage,
+   read back to be sure, and a small IndexedDB store of this site (nbh-settings), with a copy in memory for the session.
+   Reading prefers localStorage; a refused write also clears the old value there, so a stale value is never read over the
+   new one. kvLoad brings the IndexedDB copy in at the start, and the Drive chip is painted again when it supplied a
+   setting localStorage did not hold. */
+const KV={mem:{},db:null,loaded:false,err:''};
+function kvOpen(){if(KV.db)return KV.db;KV.db=new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};
+  try{if(!window.indexedDB)return fin(null);r=indexedDB.open('nbh-settings',1);}catch(e){return fin(null);}
+  setTimeout(()=>fin(null),5000);r.onupgradeneeded=()=>{try{const db=r.result;if(!db.objectStoreNames.contains('kv'))db.createObjectStore('kv',{keyPath:'k'});}catch(e){}};
+  r.onsuccess=()=>fin(r.result);r.onerror=()=>fin(null);r.onblocked=()=>fin(null);});return KV.db;}
+async function kvTx(mode,fn){const db=await kvOpen();if(!db)throw new Error('the settings store did not open');
+  return new Promise((res,rej)=>{let out;try{const t=db.transaction('kv',mode);out=fn(t.objectStore('kv'));t.oncomplete=()=>res(out&&'result' in out?out.result:out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);}catch(e){rej(e);}});}
+function kvGet(k){let v=null;try{v=localStorage.getItem(k);}catch(e){}return v!==null&&v!==''?v:(KV.mem[k]||'');}
+function kvSet(k,v){v=String(v);let kept=false;try{localStorage.setItem(k,v);kept=localStorage.getItem(k)===v;KV.err='';}catch(e){KV.err=(e&&e.name)||'Error';}
+  if(!kept)try{localStorage.removeItem(k);}catch(e){}
+  KV.mem[k]=v;kvTx('readwrite',s=>s.put({k,v})).catch(()=>{});return kept;}
+function kvDel(k){try{localStorage.removeItem(k);}catch(e){}delete KV.mem[k];kvTx('readwrite',s=>s.delete(k)).catch(()=>{});}
+const kvLoad=kvTx('readonly',s=>s.getAll()).then(rows=>{let from=0;(rows||[]).forEach(r=>{if(!r||!r.k)return;KV.mem[r.k]=r.v;let l=null;try{l=localStorage.getItem(r.k);}catch(e){}if(l===null||l==='')from++;});KV.loaded=true;return from;},()=>{KV.loaded=true;return 0;});
+kvLoad.then(from=>{if(!from)return;try{drvPaint();}catch(e){}try{gidToForms();if(!EMBED&&/^https:$/.test(location.protocol)&&clGid()&&navigator.onLine!==false)clGsiLoad().catch(()=>{});}catch(e){}});
+/* the forms (Form DD-1's Google Sheet) read the key from Safari's settings themselves; when the workstation keeps it
+   elsewhere, each open form is told, and a key given on a form reaches the workstation (the 'gid' message) */
+function gidToForms(){const g=clGid();if(!g)return;Object.values(state.frames||{}).forEach(fr=>{try{fr.contentWindow.NBH_GID=g;}catch(e){}});}
+/* Diagnostics: what Safari's settings store holds, whether it takes a write, and the workstation's own store */
+function kvDiag(){let n=0,ch=0,big='',bigN=0,err='';try{const s=localStorage;for(let i=0;i<s.length;i++){const k=s.key(i)||'',l=k.length+(s.getItem(k)||'').length;n++;ch+=l;if(l>bigN){bigN=l;big=k;}}}catch(e){err=(e&&e.name)||'Error';}
+  if(!err)try{localStorage.setItem('nbh.ws.t','1');localStorage.removeItem('nbh.ws.t');}catch(e){err=(e&&e.name)||'Error';}
+  const kb=x=>Math.round(x*2/1024)+' KB',held=n+' item'+(n===1?'':'s')+', '+kb(ch)+(bigN>50000?' (the largest, '+big.split('|')[0]+', '+kb(bigN)+')':'');
+  return err?'Safari refused a write ('+err+'): '+held+'. The Google key and the Drive settings are kept in the workstation\u2019s own store':'writes work: '+held;}
+const clGid=()=>kvGet('nbh.google.client');
 let clGsi=null;
 setTimeout(()=>{try{if(!EMBED&&/^https:$/.test(location.protocol)&&clGid()&&navigator.onLine!==false)clGsiLoad().catch(()=>{});}catch(e){}},3000);   /* v21.88 ready before Send is pressed */
 function clGsiLoad(){if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();if(clGsi)return clGsi;
@@ -5898,7 +5931,7 @@ const DRV={busy:false,again:false,folder:'',old:'',last:0,err:'',wait:0,conf:{},
 const DRV_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 const DAPI='https://www.googleapis.com/drive/v3/files',DUP='https://www.googleapis.com/upload/drive/v3/files';
 const DRV_FOLDER='FBA-BIP Workstation cases',DRV_OLD='Replaced copies';
-const drvLs=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||'';if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){}return '';};
+const drvLs=(k,v)=>{if(v===undefined)return kvGet(k);if(v===null)kvDel(k);else kvSet(k,v);return '';};   /* v21.98 through the settings store: kept when Safari refuses localStorage */
 const drvAvail=()=>!EMBED&&!!window.isSecureContext&&/^https?:$/.test(location.protocol)&&!!(window.crypto&&crypto.subtle);
 const drvOn=()=>drvAvail()&&drvLs('nbh.drive.on')==='1'&&!clOff();
 const drvAcct=()=>drvLs('nbh.drive.acct');
@@ -6103,7 +6136,9 @@ document.addEventListener('click',e=>{if(!drvOn()||drvTok()||DRV.signing||!drvGs
 /* Use Google Drive: the first time on this device */
 async function drvLink(){if(!drvAvail()){alert('Google Drive works when the workstation is opened from its web address.');return;}
   if(!clGid()){const v=await wsUI.prompt('The Google key\nPaste the Client ID from Google Cloud (the same one you use on your other device; it ends in .apps.googleusercontent.com). Then tap Use Google Drive again.',{ok:'Keep it',placeholder:'1234567890-abc.apps.googleusercontent.com',label:'Google Client ID'});
-    if(v&&/\.apps\.googleusercontent\.com\s*$/.test(v.trim())){try{localStorage.setItem('nbh.google.client',v.trim());}catch(e){}clGsiLoad().catch(()=>{});wsUI.toast('The Google key is kept on this device. Tap Use Google Drive again.',{kind:'ok'});}
+    if(v&&/\.apps\.googleusercontent\.com\s*$/.test(v.trim())){const kept=kvSet('nbh.google.client',v.trim());clGsiLoad().catch(()=>{});gidToForms();   /* v21.98 read back; kept elsewhere when Safari refuses */
+      if(kept)wsUI.toast('The Google key is kept on this device. Tap Use Google Drive again.',{kind:'ok'});
+      else await wsUI.alert('The Google key is kept\nSafari refused to keep the key in its settings on this device ('+(KV.err||'the write was refused')+'), so the workstation keeps it, and the Drive settings, in its own store on this device instead. Tap Use Google Drive again.\n\nDiagnostics (Help) says what Safari\u2019s settings hold: a full store is usually old copies, and Settings \u203a Safari \u203a Block All Cookies refuses every write while it is on.');}
     else if(v)alert('That does not look like a Client ID: it ends in .apps.googleusercontent.com.');return;}
   if(!drvGsiReady()){clGsiLoad().catch(()=>{});wsUI.toast('Loading Google’s sign-in. Tap Use Google Drive again in a moment.');return;}
   const ask=drvAsk();let t,who;try{t=await ask;who=await drvWho(t);}catch(e){if(e&&e.message!=='nokey')alert(e.message);return;}

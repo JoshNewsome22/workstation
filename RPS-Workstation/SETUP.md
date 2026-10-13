@@ -9587,3 +9587,23 @@ written on like the two DD-1 tests before it, `qa/wording-client-test.js` opens 
 time field defaults to now), `qa/v2191-history-test.js` waits for the form's new fingerprint before opening History,
 `qa/v2185-p-test.js` waits for the staff page's Sent. message, and the journey's signatures are drawn in steps with three
 tries. `qa/tk1-bus-test.js` waits for the small player.
+
+### v21.98: the Google key kept when Safari refuses its settings store
+
+On an iPad the Google key (the Client ID, given once at Use Google Drive) was asked for again at every tap, after a toast
+that said it was kept. The key went only to Safari's settings store (localStorage), in a silent try: Safari can refuse a
+write there, most often when the store is full (old copies from earlier versions), or when Settings › Safari › Block All
+Cookies is on, while IndexedDB, where the caseload lives, still works. The key and the Drive settings (Drive on, the
+account, the device name, what was removed only here) now go to both: Safari's settings, read back to be sure, and a small
+store of the workstation's own on this device (IndexedDB, nbh-settings), with a copy in memory for the session. Reading
+prefers Safari's settings; a refused write also clears the old value there, so a stale value is never read over the new
+one; the workstation's copy is brought in at the start, and the Drive chip is painted again when it supplied a setting
+Safari's did not hold. When Safari refuses the key, the box says so, names the error (QuotaExceededError, SecurityError)
+and what to look at, instead of claiming the key was kept; the next tap signs in as it should. Form DD-1's Google Sheet
+reads the key from Safari's settings itself and now takes the workstation's copy when they hold none; a key given on the
+form reaches the workstation. Diagnostics gains a Settings store row: how many items Safari's settings hold and their
+size, the largest kind, whether a write is taken, and whether the workstation's own store opens.
+
+Checked by `qa/v2189-drive-test.js` (checks 27 to 29: a fourth device whose Safari refuses every write to its settings
+store is asked for the key once, told plainly that Safari refused it, signs in at the next tap with Drive on for the
+device, and finds the key and the Drive settings again when opened afresh, the Diagnostics row naming the refusal).

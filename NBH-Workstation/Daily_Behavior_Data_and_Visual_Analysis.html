@@ -6100,8 +6100,8 @@ const GS_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
 const GS_EVERY=5*60*1000;
 let gsTok=null,gsExp=0,gsBusy=false,gsErr="",gsLib=null,gsDlgState=null;
 const gsK=s=>String(s==null?"":s).trim().replace(/\s+/g," ").toLowerCase();
-function gsClientId(){try{return localStorage.getItem("nbh.google.client")||"";}catch(e){return "";}}
-function gsSetClientId(v){try{if(v)localStorage.setItem("nbh.google.client",v);else localStorage.removeItem("nbh.google.client");}catch(e){}}
+function gsClientId(){let v="";try{v=localStorage.getItem("nbh.google.client")||"";}catch(e){}return v||window.NBH_GID||"";}   /* v21.98 the workstation's copy when Safari refuses its settings store */
+function gsSetClientId(v){try{if(v)localStorage.setItem("nbh.google.client",v);else localStorage.removeItem("nbh.google.client");}catch(e){}window.NBH_GID=v||"";try{if(window.parent!==window)parent.postMessage({nbh:"gid",v:v||""},"*");}catch(e){}}
 function gsTokLoad(){try{const t=JSON.parse(sessionStorage.getItem("nbh.google.tok")||"null");if(t&&t.exp>Date.now()+60000){gsTok=t.tok;gsExp=t.exp;}}catch(e){}}
 function gsTokSave(){try{sessionStorage.setItem("nbh.google.tok",JSON.stringify({tok:gsTok,exp:gsExp}));}catch(e){}}
 const gsSigned=()=>!!gsTok&&gsExp>Date.now()+30000;
