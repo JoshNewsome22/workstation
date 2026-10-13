@@ -872,7 +872,7 @@ try { (function(){
   function field(el){ return !!(el && /^(TEXTAREA|INPUT)$/.test(el.tagName) && !(el.tagName === 'INPUT' && !/^(text|search|url|email|)$/.test(el.type || '')) && !el.readOnly && !el.disabled && !el.closest('.toolbar,dialog,#nbhDict')); }
   D.addEventListener('focusin', function(e){ if (field(e.target)) last = e.target; }, true);
   function load(){ return new Promise(function(res, rej){ if (W.nbhDictate) return res(W.nbhDictate);
-    var s = D.createElement('script'); s.src = 'nbh-dictate.js'; s.onload = function(){ W.nbhDictate ? res(W.nbhDictate) : rej(new Error('nbh-dictate.js did not load')); }; s.onerror = function(){ rej(new Error('Dictation is not available here: nbh-dictate.js is not beside this form.')); }; D.head.appendChild(s); }); }
+    var s = D.createElement('script'); s.src = 'nbh-dictate.js'; s.onload = function(){ W.nbhDictate ? res(W.nbhDictate) : rej(new Error('nbh-dictate.js did not load')); }; s.onerror = function(){ rej(new Error('Dictation could not start: nbh-dictate.js did not load (offline before it was ever used, or the file is not beside this form).')); }; D.head.appendChild(s); }); }
   function paint(on){ if (!btn) return; btn.setAttribute('aria-pressed', String(!!on)); btn.title = on ? 'Dictating into the text box: press to stop (Escape stops too).' : 'Dictate into the text box you are in, on this device: nothing is recorded. Say period, comma, question mark, new line.'; }
   async function toggle(){
     if (location.protocol === 'file:') { if (W.nbhUI) W.nbhUI.toast('Dictation needs the workstation from its website: the speech recogniser is a download beside the forms.', { kind: 'warn' }); return; }

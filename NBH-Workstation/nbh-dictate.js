@@ -75,7 +75,8 @@
     t = String(t || '').toLowerCase().replace(/\s+/g, ' ').trim(); if (!t) return '';   /* the recogniser writes in capitals */
     PUNCT.forEach(function(p){ t = t.replace(p[0], p[1]); });
     t = t.replace(/\s+([.,?!:;])/g, '$1').replace(/([.,?!:;])(?=[A-Za-z“])/g, '$1 ').replace(/[ \t]+\n/g, '\n').replace(/\n[ \t]+/g, '\n').replace(/ {2,}/g, ' ').replace(/^[.,?!:;\s]+/, '').trim();
-    t = t.replace(/(^|[.?!]\s+|\n)([a-z])/g, function(m, a, b){ return a + b.toUpperCase(); }).replace(/\bi\b/g, 'I').replace(/\bi'(m|ve|ll|d)\b/g, function(m, x){ return 'I’' + x; });
+    t = t.replace(/(\w)'(\w)/g, '$1’$2');   /* the apostrophe of a contraction as the forms write it */
+    t = t.replace(/(^|[.?!]\s+|\n)([a-z])/g, function(m, a, b){ return a + b.toUpperCase(); }).replace(/\bi\b/g, 'I').replace(/\bi’(m|ve|ll|d)\b/g, function(m, x){ return 'I’' + x; });
     return t;
   }
   function insert(el, text){

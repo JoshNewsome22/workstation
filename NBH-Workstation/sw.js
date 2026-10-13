@@ -70,7 +70,7 @@
 'use strict';
 
 /* ---- written by tools/pwa-sw.py from index.html and the files it loads; run it again rather than editing this part ---- */
-const VERSION = 'c1b0e87b081e';
+const VERSION = '3f6a484289f1';
 const FILES = [
   'index.html',
   'DM-1_Student-Demographics-and-Profile_v2026-09.html',
@@ -147,6 +147,7 @@ const FILES = [
   'nbh-ocr/worker.min.js',
   'nbh-ocr/tesseract-core-simd-lstm.wasm.js',
   'nbh-ocr/eng.traineddata.gz',
+  'nbh-dictate.js',
   'icon-192.png',
   'icon-512.png',
   'icon-512-maskable.png',
