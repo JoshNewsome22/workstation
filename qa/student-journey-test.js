@@ -487,7 +487,10 @@ PH.F=async()=>{
   const nSig=await td.locator('#td85List canvas.td85-pad').count();
   const sigOf=k=>td.evaluate(k=>{try{const r=JSON.parse(document.querySelector('[name="ad.sigs"]').value||'[]')[k];return !!(r&&r.img);}catch(e){return false;}},k);
   for(const [k,touch] of [[0,false],[1,true]]){let a=0;for(;a<3&&!(await sigOf(k));a++){await sleep(600);await drawOn(td,'#td85List canvas.td85-pad[data-k="'+k+'"]',touch);await sleep(600);}if(a>1)note('TD-1 signature row '+(k+1)+' ('+(touch?'finger':'mouse')+') took '+a+' strokes');}
-  await put(td,'#td85pn','Ana Rivera (simulated)');await put(td,'#td85pr','Parent');await drawOn(td,'#td85Parent canvas.td85-pad',true);
+  await put(td,'#td85pn','Ana Rivera (simulated)');await put(td,'#td85pr','Parent');await sleep(600);
+  /* the parent card is drawn again as the name and role are typed: the stroke until the signature is kept (three tries, as the rows) */
+  const parSigned=()=>td.evaluate(()=>{try{return !!(JSON.parse(document.querySelector('[name="ad.psig"]').value||'{}').img);}catch(e){return false;}});
+  {let a=0;for(;a<3&&!(await parSigned());a++){await drawOn(td,'#td85Parent canvas.td85-pad',true);await sleep(600);}if(a>1)note('TD-1 parent signature took '+a+' strokes');}
   await sleep(600);const tf=(await factsOut(td))||{};const pl=tf.plan||{},ad=pl.adoption||{};
   ok('F4 TD-1 signed at the meeting: the team listed from Team present, two signed on the iPad (mouse and finger), the parent signed; the adoption dates',nSig>=3&&(ad.signatures||[]).filter(s=>s.how==='signed on the iPad').length>=3&&(ad.signatures||[]).some(s=>s.parent&&/Ana Rivera/.test(s.name))&&ad.date===D.adopt&&ad.start===D.start,{nSig,ad});
   ok('F5 TD-1’s plan in the case: the replacement, the antecedents, the responses, the components chosen, the two targets',/break/i.test(pl.rep||'')&&pl.ant.length===3&&/break card/.test(pl.respond.prec)&&pl.teach.some(x=>/Functional communication/i.test(x))&&(pl.targets||[]).length===2,{rep:pl.rep,ant:pl.ant,teach:pl.teach,t:(pl.targets||[]).map(x=>x.label)});
