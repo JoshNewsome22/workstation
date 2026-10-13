@@ -302,7 +302,7 @@
 <meta name="apple-mobile-web-app-title" content="RPS Workstation">
 <!-- /nbh-pwa-head -->
 <!-- v21.67 Read a document: the readers it loads only when asked for, saved for offline use with the rest (tools/pwa-sw.py reads this) -->
-<meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz">
+<meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz nbh-dictate.js">
 <style>
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
@@ -1052,6 +1052,51 @@ body:not(.has-form) #focusBtn{display:none}
 @media (hover:none){.item:not(.cur):hover{background:transparent}}
 @media (max-width:720px){dialog .db{max-height:70vh}}
 </style>
+<style id="ws-v2194">
+/* v21.96 Packet options */
+.po-h{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#54676f}
+.po-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;line-height:1.4;cursor:pointer}
+.po-row input{margin:3px 0 0;flex:0 0 auto}
+.po-hint{color:#54676f;font-size:12px}
+/* v21.94 Log it now: the sheet in the dialog */
+#dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+#dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
+#dlg .ln .ln-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+#dlg .ln .ln-f>span{font-size:12.5px;color:#4a5b66}
+#dlg .ln input:not([type=hidden]),#dlg .ln select,#dlg .ln textarea{font:inherit;font-size:15px;padding:7px 9px;border:1px solid #c7d0d4;border-radius:8px;min-height:40px;background:#fff;color:var(--navy);width:100%;box-sizing:border-box}
+#dlg .ln textarea{min-height:60px;resize:vertical}
+#dlg .ln input:focus,#dlg .ln select:focus,#dlg .ln textarea:focus{outline:none;border-color:#2f6f8f;box-shadow:0 0 0 3px rgba(47,111,143,.18)}
+#dlg .ln .td-more{margin:4px 0 0}
+#blank .card #blLog{font-weight:600}
+#dlg .ln #lnDict[aria-pressed="true"]{background:#f3c94f;border-color:#f3c94f;color:var(--navy)}
+</style>
+<style id="ws-v2195">
+/* v21.95 the Home note */
+#dlg .hn-lang{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+#dlg .hn-lang button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+#dlg .hn-sheet{background:#fff;border:1px solid #d5dde1;border-radius:10px;padding:18px 22px;font:15px/1.5 Georgia,"Times New Roman",serif;color:#1d2730;max-width:76ch}
+#dlg .hn-sheet h2{font:700 17px Inter,"Segoe UI",system-ui,sans-serif;margin:14px 0 6px;color:#254657}
+#dlg .hn-sheet h2:first-child{margin-top:0}
+#dlg .hn-sheet p{margin:0 0 8px}
+#dlg .hn-sheet table{border-collapse:collapse;width:100%;margin:4px 0 10px;font-size:14px}
+#dlg .hn-sheet th,#dlg .hn-sheet td{border:1px solid #c9d2d7;padding:5px 8px;text-align:left;vertical-align:top}
+#dlg .hn-sheet th{background:#eef3f2;font:600 12.5px Inter,"Segoe UI",system-ui,sans-serif}
+#dlg .hn-sheet [contenteditable]{outline:none;border-radius:4px}
+#dlg .hn-sheet [contenteditable]:focus{box-shadow:0 0 0 3px rgba(47,111,143,.18)}
+#dlg .hn-sheet .hn-box{border:1px dashed #9fb1b9;border-radius:8px;padding:8px 10px;min-height:44px}
+#dlg .hn-sheet .hn-box:empty::before{content:attr(data-hint);color:#6f8087}
+#dlg .hn-sheet .hn-sig{margin-top:14px}
+#dlg .hn-sheet .hn-tw{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:600px){#dlg .hn-sheet{padding:12px 12px;font-size:14px}#dlg .hn-sheet table{font-size:12.5px;min-width:360px}#dlg .hn-sheet th,#dlg .hn-sheet td{padding:4px 5px}}
+/* v21.95 the monthly summary */
+#dlg .cm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 10px;max-width:100%}
+#dlg .cm-t{border-collapse:collapse;font-size:13px;min-width:820px}
+#dlg .cm-t th,#dlg .cm-t td{border:1px solid #c9d2d7;padding:5px 8px;text-align:left;vertical-align:top}
+#dlg .cm-t th{background:#eef3f2;font:600 12px Inter,"Segoe UI",system-ui,sans-serif;white-space:nowrap}
+#dlg .cm-t td.n{text-align:center;white-space:nowrap}
+#dlg .cm-t td.hot{color:#9b2c2c;font-weight:700}
+#dlg #cmMonth{font:inherit;font-size:14px;padding:6px 8px;border:1px solid #c7d0d4;border-radius:8px;min-height:40px}
+</style>
 </head>
 <body>
 
@@ -1159,6 +1204,7 @@ body:not(.has-form) #focusBtn{display:none}
       <div class="rh-tools">
         <button id="tickUsed" class="sm">Tick the ones I've used</button>
         <button id="tickNone" class="sm">Clear</button>
+        <button id="packetOpts" class="sm" title="What the packet leaves out and gathers: the forms’ guides (kept per form if you want), where the references go, the ABC-1 log, empty boxes">Packet options</button>
       </div>
     </div>
     <div id="rail" tabindex="-1"></div>
@@ -2784,6 +2830,101 @@ function staticize(html){
   return root.innerHTML;
 }
 
+/* v21.96 the packet as a report. What it leaves out and gathers is chosen in Packet options and kept in this browser: a form's
+   Guide stays out unless kept for that form; the references go to one list at the end (or stay with each form, or stay out);
+   Form ABC-1's incident log prints compact; the empty boxes meant for handwriting stay out of a form that holds data. */
+const MP_GUIDE_FORMS=['DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1'];
+function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
+  return {refs:/^(end|form|none)$/.test(o.refs)?o.refs:'end',abc:o.abc==='full'?'full':'compact',blanks:!!o.blanks,guides:Object.assign({},o.guides||{})};}
+function packetOptsSave(o){try{localStorage.setItem('nbh.packet',JSON.stringify(o));}catch(e){}}
+function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>state.ticked[id]),withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
+  const radio=(name,val,label,hint)=>'<label class="po-row"><input type="radio" name="'+name+'" value="'+val+'"'+(o[name]===val?' checked':'')+'> <b>'+label+'</b>'+(hint?' <span class="po-hint">'+hint+'</span>':'')+'</label>';
+  dialog('Packet options',
+    '<p class="hp-lead">The master print reads as one report: each form is a section with its own running head, its sheets run on, and the forms’ guides, reference lists and on-screen notes stay out. Choose what to keep. Kept in this browser.</p>'+
+    '<h4 class="po-h">Guides</h4>'+(withGuide.length?'<p class="po-hint">A form’s Guide (its evidence and guidance pages) stays out of the packet unless you keep it here. Ticked forms with a Guide:</p>'+
+      withGuide.map(([id,name])=>'<label class="po-row"><input type="checkbox" data-po-guide="'+esc(id)+'"'+(o.guides[id]?' checked':'')+'> Keep the Guide of <b>Form '+esc(id)+'</b> <span class="po-hint">'+esc(name)+'</span></label>').join(''):
+      '<p class="po-hint">None of the ticked forms carries a Guide'+(ticked.length?'':' (tick forms in the list first)')+'.</p>')+
+    '<h4 class="po-h">References and sources</h4>'+radio('refs','end','One list at the end','the forms’ citations gathered in a last section, repeats dropped (default)')+radio('refs','form','With each form','as the form prints on its own')+radio('refs','none','Left out','')+
+    '<h4 class="po-h">Form ABC-1’s incident log</h4>'+radio('abc','compact','Compact','smaller type and tighter rows (default)')+radio('abc','full','Full','as the form prints on its own')+
+    '<h4 class="po-h">Empty boxes</h4><label class="po-row"><input type="checkbox" id="poBlanks"'+(o.blanks?' checked':'')+'> <b>Print the empty boxes meant for handwriting</b> <span class="po-hint">(Data collected, Materials and cues) in a form that already holds data; a form printed blank keeps them either way</span></label>'+
+    '<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build master print uses these.</span></div>');
+  const save=()=>{const g={};$('#dlgBody').querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
+    const v=n=>{const r=$('#dlgBody').querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
+    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,blanks:!!($('#poBlanks')&&$('#poBlanks').checked)});
+    withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);};
+  $('#dlgBody').addEventListener('change',save);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+/* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
+const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};
+const MP_KEEP_TITLE={'OB-1':/^Direct Observation Record/};
+/* v21.96 a form's section, shaped for the report before it goes into the packet: its Guide out unless kept, its references
+   out (collected into bag[id] for the list at the end) or left with it, screen-only notes out, one letterhead, a section
+   line, its sheets marked to run on or to keep a page of their own, long tables allowed to break with their header row
+   repeated, empty handwriting boxes out of a form that holds data, and a table's caption or footer rows made ordinary rows
+   (Chromium 141 breaks the page between a caption or footer and its table under a named page, which the running head
+   needs). Returns the HTML, the sheet names for the cover and whether the Guide was kept. */
+function packetShape(x,i,mo,bag){
+  const id=x.id,doc=new DOMParser().parseFromString('<div id="r">'+staticize(x.html)+'</div>','text/html'),root=doc.getElementById('r');
+  const txt=e=>(e.textContent||'').replace(/\s+/g,' ').trim();
+  const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
+  const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
+  root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* the Guide */
+  const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"]').forEach(e=>guides.add(e));
+  root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^Guide\b/.test(titleOf(sh)))guides.add(sh);});
+  const keepGuide=!!(mo.guides&&mo.guides[id]);
+  guides.forEach(g=>{if(keepGuide){g.classList.remove('pr-skip');g.removeAttribute('hidden');}else drop(g);});
+  /* the references: whole sheets, a block under a heading, the citation foot of a sheet */
+  const refs=[];const push=e=>{if(e&&!refs.some(r=>r===e||r.contains(e)))refs.push(e);};
+  root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^(References|Sources)\b/.test(titleOf(sh)))push(sh);});
+  root.querySelectorAll('#refs').forEach(push);
+  [...root.querySelectorAll('h2,h3,h4,.bar,.nbh-band,b,strong')].forEach(h=>{const t=txt(h);
+    if(!/^(References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list|Sources and references)[.:]?$/i.test(t)||h.closest('.nbh-print-head')||refs.some(r=>r.contains(h)))return;
+    let blk;
+    if(/^(B|STRONG)$/.test(h.tagName))blk=h.parentElement;
+    else{blk=doc.createElement('div');blk.className='mp-refblk';const kind=h.tagName;let n=h.nextElementSibling;h.parentElement.insertBefore(blk,h);blk.appendChild(h);
+      while(n&&!(n.tagName===kind||/^H[1-4]$/.test(n.tagName)||n.classList.contains('bar')||n.classList.contains('nbh-band')||n.classList.contains('sheet')||n.classList.contains('nbh-page'))){const nx=n.nextElementSibling;blk.appendChild(n);n=nx;}}
+    if(blk&&blk!==root&&txt(blk).length<12000)push(blk);});
+  root.querySelectorAll('.cite').forEach(push);
+  if(mo.refs!=='form')refs.forEach(r=>{if(mo.refs==='end')(bag[id]=bag[id]||[]).push(...refLines(r));drop(r);});
+  /* one letterhead, then the section line above it */
+  const heads=[...root.querySelectorAll('.nbh-print-head')];heads.slice(1).forEach(h=>h.remove());
+  /* a table's caption and footer rows */
+  root.querySelectorAll('table > caption').forEach(c=>{const d=doc.createElement('div');d.className='mp-cap';while(c.firstChild)d.appendChild(c.firstChild);const t=c.parentElement;t.parentElement.insertBefore(d,t);c.remove();});
+  root.querySelectorAll('table > tfoot').forEach(f=>{const tb=doc.createElement('tbody');tb.className='mp-foot';while(f.firstChild)tb.appendChild(f.firstChild);const t=f.parentElement;t.appendChild(tb);f.remove();});
+  /* the sheets: a filled report sheet runs on from the one before; a sheet that is a document of its own, or a sheet still
+     mostly boxes to write in, keeps a page of its own (as the form prints it) */
+  const sheets=[...root.querySelectorAll('.sheet')],first=sheets[0];
+  const keepers=(MP_KEEP[id]||[]).map(q=>root.querySelector(q)).filter(Boolean),keepT=MP_KEEP_TITLE[id];
+  const names=[];
+  sheets.forEach(sh=>{const name=titleOf(sh);if(name&&!/^(Guide|References|Sources)\b/.test(name)&&!names.includes(name)&&names.length<9)names.push(name);
+    if(sh===first)return;
+    const own=keepers.includes(sh)||(keepT&&keepT.test(name))||!!sh.querySelector('.sigblock,.sigpad,.nbh-sig,.td85-pad,.td85-img');
+    const filled=sh.querySelectorAll('.nbh-val').length,empties=sh.querySelectorAll('input,textarea,select').length;
+    const flows=!own&&((filled>0&&(empties<=30||filled>=empties))||(empties===0&&txt(sh).length>400));
+    const w=sh.parentElement&&sh.parentElement.classList.contains('nbh-page')?sh.parentElement:null;
+    if(flows){sh.setAttribute('data-mp-flow','');if(w)w.setAttribute('data-mp-flow','');}
+    else if(own){sh.setAttribute('data-mp-keep','');if(w)w.setAttribute('data-mp-keep','');}});
+  root.querySelectorAll('table').forEach(t=>{if(t.querySelectorAll('tr').length>20&&!t.closest('#inc-table,#bg-table'))t.setAttribute('data-mp-flowtbl','');});
+  /* empty boxes meant for handwriting, in a form that holds data */
+  if(!mo.blanks&&root.querySelector('.nbh-val')){
+    if(id==='TD-1')root.querySelectorAll('.defs .drow').forEach(r=>{const l=r.querySelector('.dlab');if(l&&/^(Data collected|Materials and cues)$/.test(txt(l))&&!r.querySelector('.nbh-val'))r.remove();});
+    if(id==='DM-1')root.querySelectorAll('#pkTbl tbody tr').forEach(r=>{const cb=r.querySelector('input[type="checkbox"]');if(!(cb&&cb.hasAttribute('checked'))&&!r.querySelector('.nbh-val'))r.remove();});}
+  const band=doc.createElement('div');band.className='mp-band';band.innerHTML='<span>Section '+(i+1)+' of %%MPN%%</span><span>Form '+esc(id)+'</span>';root.insertBefore(band,root.firstChild);
+  return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0};
+}
+/* the lines of a reference list or a citation foot: one entry a line, bullets and breaks as line ends, headings dropped */
+function refLines(el){const c=el.cloneNode(true);c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));c.querySelectorAll('li,p,div,tr,h2,h3,h4').forEach(e=>{e.insertAdjacentText('beforebegin','\n');e.insertAdjacentText('afterend','\n');});
+  return (c.textContent||'').replace(/\u00a0/g,' ').replace(/\s*[\u2022\u25cf]\s*/g,'\n').split('\n').map(s=>s.replace(/\s+/g,' ').trim())
+    .filter(s=>s.length>24&&!/^(Regulations and rules|Policy letters|Federal guidance|Professional standards|Literature|Related forms in this set|Statutes|Rules|Guidance|Standards|References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list)[.:]?$/i.test(s)&&!/^[A-Z]{2,3}-\d\s/.test(s)&&!/Load simulation|About the simulation/.test(s));}
+/* the last section: every form's references, grouped by form, repeats dropped */
+function packetRefs(bag,n){const seen=new Set(),norm=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().slice(0,80);let body='',count=0;
+  Object.keys(bag).forEach(id=>{const lines=[];bag[id].forEach(l=>{const k=norm(l);if(!k||seen.has(k))return;seen.add(k);lines.push(l);});if(!lines.length)return;
+    const t=ALL.find(f=>f[0]===id);body+='<h3 class="mp-app-h">Form '+esc(id)+(t?' &mdash; '+esc(t[1]):'')+'<\/h3>'+lines.map(l=>'<p class="mp-app-p">'+esc(l)+'<\/p>').join('');count+=lines.length;});
+  if(!count)return '';
+  return '<section id="sec-REFS" class="mp-sec mp-app" data-mk="NBHSEC:REFS;" data-title="References and Sources"><div class="mp-band"><span>Section '+(n+1)+' of %%MPN%%<\/span><span>All forms<\/span><\/div>'+
+    '<h2 class="mp-app-t">References and Sources<\/h2><p class="mp-app-note">The regulations, standards and literature the forms in this packet cite, gathered here once. Each form names its own sources on screen.<\/p>'+body+'<\/section>';}
+function mpDate(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));if(!m)return String(s||'');return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
+
 /* v21.75 the packet is built by masterRun: Build master print gives it the ticked forms; the end of the week gives it Form
    DD-1 (asked for its week: the summary and next week's blank sheet) and Form SM-1, under its own title */
 async function masterRun(chosen,opt){opt=opt||{};
@@ -2827,6 +2968,18 @@ async function masterRun(chosen,opt){opt=opt||{};
   $('#masterPrint').textContent='Build master print';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
 
+  /* v21.96 each section shaped for the report; the references gathered for the last section */
+  const mo=Object.assign(packetOpts(),opt.packet||{}),bag={};
+  const shaped=parts.map((x,i)=>packetShape(x,i,mo,bag));
+  const refsHtml=mo.refs==='end'?packetRefs(bag,shaped.length):'';
+  const total=shaped.length+(refsHtml?1:0);
+  const fx=state.facts||{},rows=[];
+  if(fx.data&&(fx.data.from||fx.data.to))rows.push(['Data',[fx.data.from?mpDate(fx.data.from):'',fx.data.to?'to '+mpDate(fx.data.to):''].filter(Boolean).join(' ')+(fx.data.days?' ('+fx.data.days+' school day'+(fx.data.days===1?'':'s')+')':'')]);
+  if(fx.consent&&fx.consent.date)rows.push(['Consent',mpDate(fx.consent.date)]);
+  if(fx.review&&(fx.review.date||fx.review.next))rows.push(['Plan review',[fx.review.date?mpDate(fx.review.date):'',fx.review.next?'next '+mpDate(fx.review.next):''].filter(Boolean).join(', ')]);
+  const factLine=rows.map(r=>r[0]+' '+r[1]).join('  \u00b7  ');
+  const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
+
   const p=packet();
   const stamp=new Date();
   const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
@@ -2834,9 +2987,11 @@ async function masterRun(chosen,opt){opt=opt||{};
     <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
     <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
-    <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
-    <h2 id="mp-contents">Contents</h2><ol>${parts.map(x=>`<li data-mk="NBHTOC:${esc(x.id)};"><a class="mp-jump" href="#sec-${esc(x.id)}">Form ${esc(x.id)} &mdash; ${esc(x.title)}</a></li>`).join('')}</ol>
-    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section below is that form exactly as it stood when this was built.</p>
+    <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr>
+    ${factLine?'<tr><th>Period<\/th><td colspan="3">'+esc(factLine)+'<\/td><\/tr>':''}</table>
+    <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
+    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
+    <div class="mp-fill"></div>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
@@ -2845,15 +3000,15 @@ async function masterRun(chosen,opt){opt=opt||{};
 
   const css=parts.map((x,i)=>scopeCSS(x.css,'.mp-'+i)).join('\n');
   const runHead=[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
-  /* A section opens with the form's own letterhead, which names the form, its
-     revision and the print date, exactly as the form prints on its own. The
-     navy bar that used to sit above it repeated the name and cost the page the
-     bar's height, so a sheet that filled a page on its own spilled its last rows
-     onto a sheet of their own. (Naming each page with a per-section running
-     header was tried and dropped: under a named page Chromium 141 moves table
-     footers and other unbreakable blocks to the next page even when they fit.) */
-  const body=parts.map((x,i)=>
-    `<section id="sec-${esc(x.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(x.id)};" data-title="Form ${esc(x.id)} &mdash; ${esc(x.title)}">${staticize(x.html)}</section>`).join('');
+  /* v21.96 A section opens with a thin section line and the form's own letterhead, once; its sheets follow. Every page of a
+     section carries the section's name in the running head, through a named page: Chromium 141 breaks the page between a
+     caption or footer and its table under a named page, which is why packetShape makes them ordinary rows. */
+  const body=shaped.map((s,i)=>
+    `<section id="sec-${esc(s.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(s.id)};" data-title="Form ${esc(s.id)} &mdash; ${esc(s.title)}"${mo.abc==='compact'&&s.id==='ABC-1'?' data-mp-abc="compact"':''}>${s.html}</section>`).join('')+refsHtml;
+  /* the running head names the section as the list of forms does (short, and the same words Finish PDF writes) */
+  const shortName=id=>(ALL.find(f=>f[0]===id)||[])[1]||id;
+  const pageCss=shaped.map((s,i)=>`@page pg${i}{@top-center{content:${cssStr((i+1)+'  \u00b7  '+shortName(s.id))};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-${i}{page:pg${i}}`).join('\n')+
+    (refsHtml?`\n@page pgA{@top-center{content:${cssStr(total+'  \u00b7  References and Sources')};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-app{page:pgA}`:'');
 
   const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>FBA and BIP packet \u2014 ${esc(p.client)||'student'}</title>
    <style>
@@ -2874,17 +3029,20 @@ async function masterRun(chosen,opt){opt=opt||{};
        fitting cannot be measured reliably. */
     body{font-family:${JSON.stringify('Inter, Segoe UI, Arial, sans-serif').slice(1,-1)};
       width:7.6in;margin:0 auto}
-    .mp-cover{padding:40px 46px;page-break-after:always;break-after:page}
-    .mp-brand{margin:0 0 26px}
-    .mp-brand img{height:52px;width:auto;display:block}
-    .mp-cover h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:26px;line-height:1.25;margin:0 0 18px}
-    .mp-cover h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:17px;margin:22px 0 8px}
-    .mp-cover table{border-collapse:collapse;width:100%;font-size:13px}
-    .mp-cover th,.mp-cover td{border:1px solid #cfdad8;padding:6px 9px;text-align:left}
+    .mp-cover{padding:28px 46px 22px;page-break-after:always;break-after:page;display:flex;flex-direction:column;box-sizing:border-box;min-height:9.1in}
+    .mp-fill{flex:1 1 auto;min-height:10px}
+    .mp-cover ol li{margin:0 0 1px}
+    .mp-sub{font-size:9.5px;line-height:1.3;color:#54676f;margin:-3px 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mp-brand{margin:0 0 16px}
+    .mp-brand img{height:46px;width:auto;display:block}
+    .mp-cover h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:24px;line-height:1.2;margin:0 0 12px}
+    .mp-cover h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:16px;margin:14px 0 4px}
+    .mp-cover table{border-collapse:collapse;width:100%;font-size:12px}
+    .mp-cover th,.mp-cover td{border:1px solid #cfdad8;padding:5px 9px;text-align:left}
     .mp-cover th{background:#f5f8f7;width:15%}
     /* The right of each entry is kept clear: Bookmark PDF writes the page the form
        starts on there, once the PDF exists and the page is known. */
-    .mp-cover ol{font-size:13px;line-height:1.7;padding-right:56px}
+    .mp-cover ol{font-size:12px;line-height:1.45;padding-right:56px;margin:2px 0 0}
     /* v21.90 Safari prints without the page headers above and leaves no record of where a form starts. So the cover, each
        contents entry and each section carry a label in white 3 px text, made by the style sheet (no element is added, so
        nothing in a form moves): Finish PDF reads them in the saved PDF and adds the headers, the footers, the contents page
@@ -2893,16 +3051,16 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-cover::before,.mp-sec::before,.mp-cover li:first-child::before{content:attr(data-mk);float:left;width:0;height:0;overflow:visible;
       margin:0;padding:0;font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
     .mp-cover li:first-child::before{content:"NBHEDGE;";float:right}
-    .mp-cover li::after{content:attr(data-mk);display:inline-block;width:0;height:0;overflow:visible;vertical-align:baseline;
+    .mp-cover li>a.mp-jump::after{content:attr(data-mk);display:inline-block;width:0;height:0;overflow:visible;vertical-align:baseline;
       font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
     /* The contents are real links: in a PDF they jump to the form, on paper they
        are just the list. So they take the colour of the text around them rather
        than turning blue and underlined. */
     a.mp-jump{color:inherit;text-decoration:none}
     .mp-cover a.mp-jump{border-bottom:1px dotted #9fb3ae}
-    .mp-note{font-size:12px;color:#54676f;margin-top:18px}
-    .mp-conf{margin-top:26px;border:1px solid #cfdad8;border-left:4px solid #182e43;background:#f5f8f7;
-      padding:11px 14px;font-size:11.5px;line-height:1.55;color:#33454f}
+    .mp-note{font-size:11.5px;color:#54676f;margin-top:12px}
+    .mp-conf{margin-top:18px;border:1px solid #cfdad8;border-left:4px solid #182e43;background:#f5f8f7;
+      padding:9px 12px;font-size:11px;line-height:1.5;color:#33454f}
     .mp-conf b{color:#182e43}
     /* the forms paint a paper-grey page background for screen reading; on paper
        that prints as a grey block wherever content stops short of the page */
@@ -2918,6 +3076,34 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-sec .sheet,.mp-sec .nbh-page:first-child{
       page-break-before:auto!important;break-before:auto!important}
     .mp-sec .nbh-last{page-break-after:auto!important;break-after:auto!important}
+    /* v21.96 the report: a filled sheet runs on from the one before (packetShape marks it); a sheet that is a document of
+       its own keeps a page of its own; a long table may break with its header row repeated; what should be read whole
+       stays whole */
+    .mp-sec .sheet[data-mp-flow],.mp-sec .nbh-page[data-mp-flow]{page-break-before:auto!important;break-before:auto!important}
+    .mp-sec .sheet[data-mp-flow]{margin-top:22px!important}
+    .mp-sec .sheet[data-mp-keep],.mp-sec .nbh-page[data-mp-keep]{page-break-before:always!important;break-before:page!important}
+    .mp-sec table[data-mp-flowtbl]{break-inside:auto!important;page-break-inside:auto!important}
+    .mp-sec table[data-mp-flowtbl]>thead{display:table-header-group}
+    .mp-sec table[data-mp-flowtbl] tr{break-inside:avoid;page-break-inside:avoid}
+    .mp-sec .twoup.sigs{display:block!important}
+    .mp-sec .twoup.sigs>.sigblock{display:inline-block;width:48%;vertical-align:top;margin-right:3%}
+    .mp-sec .twoup.sigs>.sigblock:last-child{margin-right:0}
+    /* a card that must not split is laid out as one atomic box: under a named page Chromium 141 stretched Form TD-1's
+       parent-signature card across two pages when its break-inside:avoid fell at a page end */
+    .mp-sec .td85-card.td85-par{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}
+    .mp-sec .sigblock,.mp-sec .ic-sigs,.mp-sec .ic-signpart,.mp-sec .td85-card,.mp-sec .twoup,.mp-sec .figure,.mp-sec .dd-keep,.mp-sec .warn.verdict,.mp-sec .mp-refblk{break-inside:avoid;page-break-inside:avoid}
+    .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
+      font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
+    .mp-cap{font:600 12px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#254657;margin:10px 0 4px;break-after:avoid;page-break-after:avoid}
+    .mp-app{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#24313C}
+    .mp-app-t{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;font-size:20px;color:#182e43;margin:0 0 6px}
+    .mp-app-note{font-size:11px;color:#54676f;margin:0 0 12px}
+    .mp-app-h{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:13px;margin:14px 0 4px;color:#182e43;break-after:avoid;page-break-after:avoid}
+    .mp-app-p{font-size:9.5px;line-height:1.4;margin:0 0 4px;padding-left:14px;text-indent:-14px}
+    .mp-sec[data-mp-abc="compact"] #inc-table table,.mp-sec[data-mp-abc="compact"] #bg-table table{font-size:10.5px!important}
+    .mp-sec[data-mp-abc="compact"] #inc-table td,.mp-sec[data-mp-abc="compact"] #inc-table th,.mp-sec[data-mp-abc="compact"] #bg-table td,.mp-sec[data-mp-abc="compact"] #bg-table th{padding:4px 6px!important;line-height:1.3}
+    .mp-sec[data-mp-abc="compact"] #inc-table .tag,.mp-sec[data-mp-abc="compact"] #bg-table .tag{font-size:9.5px!important;padding:1px 5px!important;margin:1px 3px 1px 0!important}
+    .mp-sec[data-mp-abc="compact"] #inc-table .inc-narr{font-size:10px!important;line-height:1.3;max-width:none!important;margin-top:2px!important}
     /* A filled field is printed as its value, so it wraps instead of being cut off
        at a column edge, and a select no longer prints its dropdown arrow.
        The wrapping mode matters more than it looks. "anywhere" also changes the
@@ -2990,6 +3176,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        page width has to win or the right-hand columns fall off the sheet */
     .mp-sec table td,.mp-sec table th{min-width:0!important}
     .mp-sec .noprint,.mp-sec .toolbar{display:none!important}
+    ${pageCss}
    </style><style>${css}</style><\/head>
    <body>${head}${body}
    <script>
@@ -3124,7 +3311,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   /* v21.90 whose packet, for the header Finish PDF writes on a PDF saved from Safari: the line the page header carries and the
      practice's name the header starts with (each edition's own) */
   const mpPrac=(/@top-left\{content:"([^"]*)"/.exec(doc)||[])[1]||'';
-  const docM=doc.replace('%%MPRUN%%','NBHRUN:'+encodeURIComponent(runHead)+';NBHPRAC:'+encodeURIComponent(mpPrac)+';');
+  const docM=doc.replace('%%MPRUN%%','NBHRUN:'+encodeURIComponent(runHead)+';NBHPRAC:'+encodeURIComponent(mpPrac)+';').split('%%MPN%%').join(String(total));
   /* the window was opened at the click; if it has since been closed, try again */
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
@@ -3134,6 +3321,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}
 }
 $('#masterPrint').addEventListener('click',()=>masterRun(ALL.filter(([id])=>state.ticked[id])));
+$('#packetOpts').addEventListener('click',packetOptsOpen);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* a value going inside a CSS content:"..." string, where a stray quote or
    backslash would end the declaration and silently drop the running header */
@@ -3330,7 +3518,7 @@ $('#help').addEventListener('click',()=>{
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the '+HERE+'\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
-     '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
+     '<p>Tick the forms this student needs and press <b>Build master print</b>: one document that reads as a report: a cover with the contents, then each form as a section with its own running head, its letterhead once and its sheets running on; the forms’ guides, reference lists and on-screen notes stay out, the references gathered in a last section. <b>Packet options</b> (under the list of forms) keeps a form’s Guide, puts the references with each form or leaves them out, prints Form ABC-1’s log in full, and prints the empty boxes meant for handwriting. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
      '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count. For the master print, save it as PDF (the print window\u2019s <b>Share</b>, then <b>Save to Files</b>) and run <b>Finish PDF</b>: it adds the page header and footer Safari leaves out, the bookmarks and the page numbers.</p>'+
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
@@ -3421,7 +3609,7 @@ function pdfTools(){
   return pdfReady;
 }
 /* the bookmark reads as the form list does: short enough for a side panel */
-function formTitle(id){const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
+function formTitle(id){if(id==='REFS')return 'References and Sources';const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
 function pageSpan(a,b){return a===b?String(a+1):(a+1)+'–'+(b+1);}
 
 $('#bookmarkPdf').addEventListener('click',()=>{
@@ -3507,6 +3695,8 @@ async function bmLoad(file){
     const btn=$('#bmSave');btn.disabled=true;btn.textContent='Writing\u2026';
     const nums=$('#bmNums')?$('#bmNums').checked:false,heads=$('#bmHeads')?$('#bmHeads').checked:false;
     try{
+      /* v21.96 the section's name for the running head Finish PDF writes: the sections in page order, numbered */
+      if(marks){const secs=(marks.sections||[]).slice().sort((a,b)=>a.page-b.page);marks.titles={};secs.forEach((s,i)=>{const t=s.id==='REFS'?'References and Sources':((ALL.find(f=>f[0]===s.id)||[])[1]||('Form '+s.id));marks.titles[s.id]=(i+1)+'  \u00b7  '+t;});}
       const r=await tools.bookmark(bytes,formTitle,{numbers:nums,marks,heads});
       const name=file.name.replace(/\.pdf$/i,'')+' (finished).pdf';
       const a=document.createElement('a');
@@ -5349,7 +5539,7 @@ async function gmSend(tok,m,from){const r=await fetch('https://gmail.googleapis.
   return {ok:false,err:msg};}
 const gmOk=e=>/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(e||'').trim());
 /* the request from a form: shown, confirmed in a tap that also signs in, sent one by one, answered */
-async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};
+async function mailFor(ev,d){const src=ev.source,from=(src===window&&d.self)?String(d.self):relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};   /* v21.95 self: this page's own Home note */
   if(!from){return;}
   const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
   if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
@@ -7291,6 +7481,233 @@ focusPaint();
 {const coD=caseloadOpen;caseloadOpen=async function(){const out=await coD.apply(this,arguments);
   try{const b=$('#dlgBody'),k=b&&b.querySelector('#clKeep');if(k)b.querySelectorAll('#clKeep .cl-note').forEach(n=>k.parentNode.insertBefore(n,k));}catch(e){}
   return out;};}
+</script>
+<script id="nbh-v2194">
+/* ================= v21.94 Log it now: an incident, time-stamped, into Form DD-1's incident log from the start screen, the Today list or the command list =================
+   The sheet asks for what the form's own "Log an incident" asks, prefilled with now. The student is the one on screen, else one of the students kept
+   on this device: that student's case opens (Save first is offered as usual), Form DD-1 with it, and the form logs the incident itself, so the day's
+   count, the tier and a restraint's notice for Form CR-1 work as they do on the form. Form ABC-1's "Add DD-1's incidents" brings it into the ABC record. */
+REPLY['log-incident']='incident-logged';
+/* the form's answer reaches the grab() that asked (the message handler above resolves only the answers it knows) */
+window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!=='incident-logged'||!d.id)return;const q=pending[d.id+'|incident-logged'];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}});
+const LN={busy:false,last:null};
+const LN_MIC='<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/><\/svg>';
+/* v21.94 dictation into the sheet's boxes: the shared module (nbh-dictate.js, the forms' Dictate switch uses the same) loaded when first pressed */
+function lnDictLoad(){return new Promise((res,rej)=>{if(window.nbhDictate)return res(window.nbhDictate);const s=document.createElement('script');s.src='nbh-dictate.js';s.onload=()=>window.nbhDictate?res(window.nbhDictate):rej(new Error('nbh-dictate.js did not load'));s.onerror=()=>rej(new Error('nbh-dictate.js is not beside this page'));document.head.appendChild(s);});}
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.closest&&t.closest('#lnForm')&&/^(TEXTAREA|INPUT)$/.test(t.tagName)&&!/^(date|time|hidden)$/.test(t.type||''))LN.last=t;});
+async function lnDictToggle(){const b=$('#lnDict');if(!b)return;let M;try{M=await lnDictLoad();}catch(e){wsUI.toast(String(e.message||e),{kind:'warn'});return;}
+  M.onstate(on=>{const x=$('#lnDict');if(x){x.setAttribute('aria-pressed',String(!!on));x.classList.toggle('on',!!on);}});
+  if(M.active()){M.stop();return;}
+  let el=LN.last&&LN.last.isConnected&&LN.last.closest('#lnForm')?LN.last:$('#lnWhat');if(!el)return;try{el.focus({preventScroll:true});}catch(e){}
+  await M.start(el,{confirm:t=>wsUI.confirm(t,{ok:'Download'})});}
+document.addEventListener('mousedown',e=>{if(e.target.closest('#lnDict'))e.preventDefault();});   /* the box keeps its cursor */
+function lnNow(){const d=new Date(),p=n=>String(n).padStart(2,'0');return {date:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),time:p(d.getHours())+':'+p(d.getMinutes())};}
+function lnHm(t){const m=/^(\d{2}):(\d{2})$/.exec(t||'');if(!m)return '';const h=+m[1];return (h%12||12)+':'+m[2]+(h<12?' am':' pm');}
+function lnBehaviors(){const f=state.facts||{};return [...new Set((f.behaviors||[]).filter(b=>b&&b.name&&!b.isRep&&!/replacement|alternative/i.test(b.type||'')).map(b=>String(b.name).trim()))];}
+function lnOnScreen(){return !!(Object.keys(state.frames).length||Object.keys(state.pending).length);}
+async function logNowOpen(){
+  const p=packet();let who=[];
+  if(p.client){if(lnOnScreen()){try{await gatherFacts(false);}catch(e){}}who=[{key:clKey(p),name:p.client}];}   /* the student in the bar, forms open or not yet */
+  else{const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));who=L.map(r=>({key:r.key,name:clName(r)}));}
+  if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
+  const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
+  dialog('Log it now',
+    '<p class="hp-lead">An incident, time-stamped, into Form DD-1’s incident log'+(who.length===1?' for <b>'+esc(who[0].name)+'<\/b>':'')+'. Say what you saw; the rest can wait.<\/p>'+
+    '<form id="lnForm" class="ln" novalidate>'+
+    (who.length>1?'<label class="ln-f"><span>Student<\/span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+'<\/option>').join('')+'<\/select><\/label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
+    '<div class="ln-g"><label class="ln-f"><span>Date<\/span><input type="date" id="lnDate" value="'+now.date+'"><\/label><label class="ln-f"><span>Time<\/span><input type="time" id="lnTime" value="'+now.time+'"><\/label>'+
+    '<label class="ln-f"><span>Behavior<\/span><input id="lnBeh" list="lnBehList" autocomplete="off" placeholder="as the plan names it"><datalist id="lnBehList">'+beh.map(b=>'<option value="'+esc(b)+'">').join('')+'<\/datalist><\/label>'+
+    '<label class="ln-f"><span>Physical intervention<\/span><select id="lnHold"><option value="">None<\/option><option value="escort">Physical escort<\/option><option value="restraint">Restraint<\/option><option value="seclusion">Seclusion<\/option><\/select><\/label><\/div>'+
+    '<label class="ln-f"><span>Before it (A): the activity, the request, what changed<\/span><textarea id="lnBefore" rows="2"><\/textarea><\/label>'+
+    '<label class="ln-f"><span>What happened (B), as it would look on video<\/span><textarea id="lnWhat" rows="2"><\/textarea><\/label>'+
+    '<label class="ln-f"><span>What adults did (C), in order<\/span><textarea id="lnDid" rows="2"><\/textarea><\/label>'+
+    '<div class="ln-g"><label class="ln-f"><span>How it ended<\/span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"><\/label><label class="ln-f"><span>Recorded by<\/span><input id="lnBy" value="'+esc(p.bcba||'')+'"><\/label><\/div>'+
+    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it<\/button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate<\/button><\/p>'+
+    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet<\/i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents<\/i> brings it into the ABC record.<\/p>'+
+    '<\/form>');
+  setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
+}
+function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
+async function lnDeliver(key,inc){
+  if(key!==clKey(packet())){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
+  else if(!state.frames['DD-1'])openForm('DD-1');
+  if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
+  await new Promise(r=>setTimeout(r,250));
+  const r=await grab('DD-1','log-incident',{inc},10000);return r||{ok:false,why:'Form DD-1 did not answer'};
+}
+async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
+  const g=k=>{const e=$(k);return e?String(e.value||''):'';};
+  const inc={date:g('#lnDate'),time:g('#lnTime'),beh:g('#lnBeh').trim(),before:g('#lnBefore').trim(),what:g('#lnWhat').trim(),words:'',did:g('#lnDid').trim(),ended:g('#lnEnded').trim(),by:g('#lnBy').trim(),hold:g('#lnHold'),parent:'no',parentWhen:'',bcba:true};
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(inc.date)){wsUI.toast('Give the incident its date.',{kind:'warn'});return;}
+  if(!inc.beh&&!inc.what){wsUI.toast('Name the behavior, or say what happened.',{kind:'warn'});return;}
+  const key=g('#lnWho');LN.busy=true;const b=$('#lnSave');if(b){b.disabled=true;b.textContent='Logging…';}
+  try{const r=await lnDeliver(key,inc);
+    if(!r||!r.ok){wsUI.toast('Not logged'+(r&&r.why?': '+r.why:'')+'. Open Form DD-1 and use Log an incident.',{kind:'warn',ms:9000});return;}
+    try{if($('#lnForm'))$('#dlg').close();}catch(e){}
+    const I=r.inc||{};wsUI.toast('Logged on Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.',{kind:'ok',ms:7000});
+    try{paintBadge();}catch(e){}}
+  finally{LN.busy=false;const b2=$('#lnSave');if(b2){b2.disabled=false;b2.textContent='Log it';}}
+}
+document.addEventListener('click',e=>{if(e.target.closest('#blLog,#tdLog'))logNowOpen();else if(e.target.closest('#lnDict'))lnDictToggle();});
+$('#dlg').addEventListener('close',()=>{try{if(window.nbhDictate&&nbhDictate.active())nbhDictate.stop();}catch(e){}});
+document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lnForm')logNowSave(e);});
+/* the start screen's row of buttons, and the Today list's */
+{const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now<\/button>');}catch(e){}return r;};}
+{const to6=todayOpen;todayOpen=async function(){const r=await to6.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdLog'))row.insertAdjacentHTML('afterbegin','<button type="button" id="tdLog">Log it now<\/button> ');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'log it now incident abc time stamp record behavior restraint',n:'Log it now: an incident, time-stamped (Form DD-1)',s:'command',go:()=>logNowOpen()});},0);
+</script>
+<script id="nbh-v2195">
+/* ================= v21.95 the Home note: a parent's progress note in English or Spanish, from the case =================
+   Written from the facts the forms share (Form DD-1's daily data, GB-1's objectives, PR-1's last review, DM-1's home contact):
+   what we are working on, where it started and where it is, the good news, the incidents of the period and whether home was
+   told, a box for what home can do, what comes next. Every part can be edited on the sheet before it is printed, sent from the
+   school Google account (the mail path the forms use) or copied. Spanish when the home language says so; the fixed wording is
+   the workstation's own, the names and numbers the case's. Nothing leaves the device unless Send is pressed. */
+const HN={lang:'en',req:0};
+const HN_T={
+  title:{en:'Home note',es:'Nota para la familia'},
+  dear:{en:'Dear {who},',es:'Estimada familia de {first}:'},
+  dearNamed:{en:'Dear {who},',es:'Estimado/a {who}:'},
+  parent:{en:'parent or guardian',es:'familia'},
+  intro:{en:'Here is how {first} is doing with the behavior plan at {school}, as of {date}.',es:'Así le va a {first} con el plan de conducta en {school}, al {date}.'},
+  introNoSchool:{en:'Here is how {first} is doing with the behavior plan, as of {date}.',es:'Así le va a {first} con el plan de conducta, al {date}.'},
+  working:{en:'What we are working on',es:'En qué estamos trabajando'},
+  period:{en:'The numbers come from the last {days} school days with data ({from} to {to}).',es:'Los números son de los últimos {days} días de clase con datos (del {from} al {to}).'},
+  noData:{en:'We have just started keeping daily data; the next note will have numbers.',es:'Acabamos de empezar a llevar datos diarios; la próxima nota tendrá números.'},
+  thBeh:{en:'Behavior',es:'Conducta'},thStart:{en:'Where we started',es:'Al empezar'},thNow:{en:'Now',es:'Ahora'},thAim:{en:'We are aiming for',es:'Buscamos'},
+  fewer:{en:'fewer is better',es:'menos es mejor'},more:{en:'more is better',es:'más es mejor'},
+  goals:{en:'The goals in the plan',es:'Las metas del plan'},
+  good:{en:'The good news',es:'Buenas noticias'},
+  met:{en:'{beh} has reached the goal: {now} {unit}.',es:'{beh} ya llegó a la meta: {now} {unit}.'},
+  better:{en:'{beh} went from {start} to {now} {unit}: real progress.',es:'{beh} pasó de {start} a {now} {unit}: un avance real.'},
+  steady:{en:'We are still working on {beh}; the plan continues.',es:'Seguimos trabajando en {beh}; el plan continúa.'},
+  noGood:{en:'We are early in the plan; the next note will say more.',es:'Estamos al principio del plan; la próxima nota dirá más.'},
+  incidents:{en:'Incidents',es:'Incidentes'},
+  incNone:{en:'There were no incidents to report in this period.',es:'No hubo incidentes que reportar en este período.'},
+  incSome:{en:'In this period there {was} {n} {inc}; we told you about {m} of them at the time.',es:'En este período hubo {n} {inc}; les avisamos de {m} en su momento.'},
+  incSomeAll:{en:'In this period there {was} {n} {inc}; we told you about each at the time.',es:'En este período hubo {n} {inc}; les avisamos de cada uno en su momento.'},
+  incWord:{en:'incident',es:'incidente'},incWords:{en:'incidents',es:'incidentes'},
+  home:{en:'What you can do at home',es:'Qué puede hacer en casa'},
+  homeHint:{en:'Write one or two things the family can do: ask about the day, praise the replacement behavior, the same words as at school…',es:'Escriba una o dos cosas que la familia puede hacer: preguntar por el día, elogiar la conducta de reemplazo, las mismas palabras que en la escuela…'},
+  next:{en:'What comes next',es:'Lo que sigue'},
+  review:{en:'At the last plan review on {date}, the team decided: {text}',es:'En la última revisión del plan, el {date}, el equipo decidió: {text}'},
+  nextReview:{en:'The next plan review is on {date}. We will send another note after it.',es:'La próxima revisión del plan es el {date}. Les enviaremos otra nota después.'},
+  nextNone:{en:'We will send another note in a few weeks. Call or write any time with questions.',es:'Les enviaremos otra nota en unas semanas. Llamen o escriban cuando tengan preguntas.'},
+  thanks:{en:'Thank you for being part of {first}’s team.',es:'Gracias por formar parte del equipo de {first}.'},
+  interp:{en:'An interpreter is available for any conversation about this note.',es:'Hay intérprete disponible para cualquier conversación sobre esta nota.'},
+  subject:{en:'How {first} is doing with the behavior plan',es:'Cómo le va a {first} con el plan de conducta'},
+  print:{en:'Print',es:'Imprimir'},send:{en:'Send by email',es:'Enviar por correo'},copy:{en:'Copy the text',es:'Copiar el texto'}
+};
+const HN_UNITS={'occurrences':'veces','occurrence':'vez','% independent':'% independiente','% of trials':'% de los intentos','trials':'intentos','responses':'respuestas','rate per minute':'por minuto','per day':'por día','a day':'al día','per hour':'por hora','per session':'por sesión','per minute':'por minuto','per observation':'por observación','% of intervals':'% de los intervalos','% intervals':'% de intervalos','percent of intervals':'% de los intervalos','% of opportunities':'% de las oportunidades','% correct':'% correctas','minutes':'minutos','min':'min','seconds':'segundos','sec':'seg','count':'veces','times':'veces','times a day':'veces al día','%':'%'};
+function hnT(k,v){let t=(HN_T[k]||{})[HN.lang]||(HN_T[k]||{}).en||'';Object.keys(v||{}).forEach(x=>{t=t.split('{'+x+'}').join(v[x]);});return t;}
+function hnUnit(u){u=String(u||'').trim();if(HN.lang!=='es')return u;const k=u.toLowerCase();return HN_UNITS[k]||u;}
+function hnDate(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));if(!m)return String(iso||'');const d=new Date(+m[1],+m[2]-1,+m[3],12);return d.toLocaleDateString(HN.lang==='es'?'es':'en-US',{year:'numeric',month:'long',day:'numeric'});}
+function hnNum(x){if(x==null||x==='')return '';const n=+x;if(isNaN(n))return String(x);return HN.lang==='es'?String(n).replace('.',','):String(n);}
+function hnFirst(p){return String(p.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/)[0]||(HN.lang==='es'?'su hijo/a':'your child');}
+function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{},rv=f.review||{},home=(f.profile||{}).home||{};
+  const first=hnFirst(p),T=x=>String(x==null?'':x).trim();
+  const rows=(d.behaviors||[]).filter(b=>b&&T(b.name)).map(b=>{const start=b.base&&b.base.mean!=null?b.base.mean:null,now=b.cur&&b.cur.mean!=null?b.cur.mean:(b.mean!=null?b.mean:null);
+    const dir=b.direction==='decrease'?'fewer':(b.direction==='increase'?'more':'');let good='';
+    if(b.aimMet)good=hnT('met',{beh:T(b.name),now:hnNum(now),unit:hnUnit(b.unit)});
+    else if(start!=null&&now!=null&&start!==0){const chg=(now-start)/Math.abs(start);if((dir==='fewer'&&chg<=-0.2)||(dir==='more'&&chg>=0.2))good=hnT('better',{beh:T(b.name),start:hnNum(start),now:hnNum(now),unit:hnUnit(b.unit)});}
+    return {name:T(b.name),start:start!=null?hnNum(start)+' '+hnUnit(b.unit):'—',now:now!=null?hnNum(now)+' '+hnUnit(b.unit):'—',aim:b.aim!=null?hnNum(b.aim)+' '+hnUnit(b.unit)+(dir?' ('+hnT(dir)+')':''):'—',good};});
+  const from=d.from||'',to=d.to||'';
+  const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>i.parent==='yes').length;
+  const goals=[].concat((g.red||[]).map(x=>T(x.text||x)),(g.acq||[]).map(x=>T(x.text||x))).filter(Boolean);
+  return {first,who:T(home.name),email:T(home.email),lang:T(home.lang),interp:/^yes/i.test(T(home.interp)),school:T(p.site),bcba:T(p.bcba),rows,from,to,days:d.days||0,inc:inc.length,told,goals,
+    review:{date:T(rv.date),text:T(rv.decisionText||rv.decision),next:T(rv.next)}};}
+function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
+  const dear=P.who?hnT('dearNamed',{who:P.who}):hnT('dear',{who:hnT('parent'),first:P.first});
+  const intro=P.school?hnT('intro',{first:P.first,school:P.school,date:hnDate(new Date().toISOString().slice(0,10))}):hnT('introNoSchool',{first:P.first,date:hnDate(new Date().toISOString().slice(0,10))});
+  const good=P.rows.map(r=>r.good).filter(Boolean);
+  const incT=!P.inc?hnT('incNone'):(P.told>=P.inc?hnT('incSomeAll',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords')}):hnT('incSome',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords'),m:P.told}));
+  const nextT=(P.review.date&&P.review.text?hnT('review',{date:hnDate(P.review.date),text:P.review.text})+' ':'')+(P.review.next?hnT('nextReview',{date:hnDate(P.review.next)}):hnT('nextNone'));
+  return '<p contenteditable="true" class="hn-dear">'+e(dear)+'<\/p><p contenteditable="true">'+e(intro)+'<\/p>'+
+    '<h2>'+e(hnT('working'))+'<\/h2>'+(P.rows.length?'<p contenteditable="true">'+e(hnT('period',{days:P.days,from:hnDate(P.from),to:hnDate(P.to)}))+'<\/p>'+
+      '<div class="hn-tw"><table><thead><tr><th>'+e(hnT('thBeh'))+'<\/th><th>'+e(hnT('thStart'))+'<\/th><th>'+e(hnT('thNow'))+'<\/th><th>'+e(hnT('thAim'))+'<\/th><\/tr><\/thead><tbody>'+
+      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'<\/td><td contenteditable="true">'+e(r.start)+'<\/td><td contenteditable="true">'+e(r.now)+'<\/td><td contenteditable="true">'+e(r.aim)+'<\/td><\/tr>').join('')+'<\/tbody><\/table><\/div>':'<p contenteditable="true">'+e(hnT('noData'))+'<\/p>')+
+    (P.goals.length?'<h2>'+e(hnT('goals'))+'<\/h2><ul>'+P.goals.map(t=>'<li contenteditable="true">'+e(t)+'<\/li>').join('')+'<\/ul>':'')+
+    '<h2>'+e(hnT('good'))+'<\/h2>'+(good.length?good.map(t=>'<p contenteditable="true">'+e(t)+'<\/p>').join(''):'<p contenteditable="true">'+e(P.rows.length?hnT('steady',{beh:P.rows[0].name}):hnT('noGood'))+'<\/p>')+
+    '<h2>'+e(hnT('incidents'))+'<\/h2><p contenteditable="true">'+e(incT)+'<\/p>'+
+    '<h2>'+e(hnT('home'))+'<\/h2><div class="hn-box" contenteditable="true" data-hint="'+e(hnT('homeHint'))+'"><\/div>'+
+    '<h2>'+e(hnT('next'))+'<\/h2><p contenteditable="true">'+e(nextT)+'<\/p>'+(P.interp?'<p contenteditable="true">'+e(hnT('interp'))+'<\/p>':'')+
+    '<p contenteditable="true" class="hn-sig">'+e(hnT('thanks',{first:P.first}))+'<br>'+e([P.bcba,P.school].filter(Boolean).join(' · '))+'<\/p>';}
+function hnText(){const sh=$('#hnSheet');if(!sh)return '';const out=[];sh.childNodes.forEach(n=>{if(n.nodeType!==1)return;
+  const tbl=n.tagName==='TABLE'?n:(n.classList&&n.classList.contains('hn-tw')?n.querySelector('table'):null);
+  if(tbl){[...tbl.querySelectorAll('tr')].forEach(tr=>out.push([...tr.children].map(c=>c.textContent.trim()).join(' | ')));out.push('');}
+  else if(n.tagName==='UL'){[...n.children].forEach(li=>out.push('• '+li.textContent.trim()));out.push('');}
+  else if(n.tagName==='H2')out.push(n.textContent.trim().toUpperCase());
+  else{const t=n.innerText!=null?n.innerText:n.textContent;if(String(t).trim())out.push(String(t).trim());out.push('');}});
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();}
+function hnPrintHtml(){const sh=$('#hnSheet'),p=packet();if(!sh)return '';const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:40px;margin:0 0 10pt">':'';
+  const body=sh.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'');
+  return '<!DOCTYPE html><html lang="'+HN.lang+'"><head><meta charset="utf-8"><title>'+esc(hnT('title'))+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11.5pt/1.5 Georgia,"Times New Roman",serif;color:#1d2730;margin:.7in;max-width:6.9in}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;margin:12pt 0 4pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;margin:4pt 0 8pt;font-size:10.5pt}th,td{border:1px solid #9aa9b1;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#eef3f2;font:600 9.5pt Inter,Arial,sans-serif}.hn-box{border:1px solid #9aa9b1;border-radius:4pt;padding:6pt 8pt;min-height:40pt}.hn-box:empty{min-height:60pt}.hn-sig{margin-top:12pt}<\/style><\/head><body>'+logo+body+'<\/body><\/html>';}
+function hnPaint(){const P=hnParts();const sh=$('#hnSheet');if(!sh)return;sh.innerHTML=hnSheetHtml(P);sh.lang=HN.lang;
+  [...document.querySelectorAll('#dlgBody .hn-lang button')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===HN.lang)));
+  const bt=$('#hnPrint');if(bt)bt.textContent=hnT('print');const se=$('#hnSend');if(se){se.textContent=hnT('send')+(P.email?'':'');se.title=P.email?P.email:'';}const cp=$('#hnCopy');if(cp)cp.textContent=hnT('copy');}
+async function homeNoteOpen(){if(!lnOnScreen()||!packet().client){wsUI.toast('Open the student’s case first: the note is written from its forms.',{kind:'warn'});return;}
+  await gatherFacts(false);const P=hnParts();
+  HN.lang=/spanish|espa[ñn]ol/i.test(P.lang)?'es':'en';
+  dialog('Home note',
+    '<p class="hp-lead">A progress note for home, written from Form DD-1’s data, GB-1’s goals, PR-1’s review and DM-1’s contacts. Read it, change any line on the sheet, then print it, send it from your school account or copy it.'+(P.lang?' Home language on Form DM-1: '+esc(P.lang)+'.':'')+'<\/p>'+
+    '<div class="hn-lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">English<\/button><button type="button" data-lang="es" aria-pressed="false">Español<\/button><\/div>'+
+    '<div class="hn-sheet" id="hnSheet"><\/div>'+
+    '<p class="td-more"><button type="button" class="primary" id="hnPrint">Print<\/button> <button type="button" id="hnSend">Send by email<\/button> <button type="button" id="hnCopy">Copy the text<\/button><\/p>'+
+    '<p class="hint">The fixed wording is the workstation’s, in English or Spanish; the names, numbers and goals are the case’s, so read them before they go home. A behavior’s numbers are means over the last 20 school days with data on Form DD-1, by condition where the sheet has more than one.<\/p>');
+  hnPaint();}
+function hnPrint(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then press Print again.');return;}
+  try{w.document.open();w.document.write(hnPrintHtml());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
+function hnSend(){const P=hnParts(),text=hnText();if(!text)return;const subject=hnT('subject',{first:P.first});
+  const sheet=$('#hnSheet');const html=sheet?'<div style="font:15px/1.5 Georgia,serif;max-width:640px">'+sheet.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'')+'<\/div>':'';
+  if(!P.email){const a=document.createElement('a');a.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();wsUI.toast('No email for home on Form DM-1: the Mail app opens with the note; add the address there.',{kind:'warn',ms:8000});return;}
+  const req='hn'+(++HN.req);const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
+    if(d.unavailable){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(P.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();if(!d.declined)wsUI.toast(d.why+' The Mail app opens with the note instead.',{kind:'warn',ms:8000});}};
+  window.addEventListener('message',on);mailFor({source:window},{nbh:'mail',self:'the Home note',req,messages:[{to:P.email,name:P.who||'',subject,text,html}]});}
+document.addEventListener('click',async e=>{const lb=e.target.closest('#dlgBody .hn-lang button');if(lb){HN.lang=lb.dataset.lang;hnPaint();return;}
+  if(e.target.closest('#hnPrint')){hnPrint();return;}if(e.target.closest('#hnSend')){hnSend();return;}
+  if(e.target.closest('#hnCopy')){const ok=await copyText(hnText());wsUI.toast(ok?'The note is copied.':'Copy did not work: select the text on the sheet.',{kind:ok?'ok':'warn'});return;}
+  if(e.target.closest('#tdHome')){homeNoteOpen();return;}});
+{const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdHome'))row.insertAdjacentHTML('beforeend',' <button type="button" id="tdHome">Home note<\/button>');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'home note parent progress letter spanish español family',n:'Home note: a progress note for the family (English or Spanish)',s:'command',go:()=>homeNoteOpen()});},0);
+/* ================= v21.95 the monthly summary: the caseload for the supervisor, one month at a time =================
+   From the students kept on this device, each as at their last Save case (the facts their forms shared): the month's incidents,
+   restraints and seclusions, how many home was told about, the aims met, the last integrity score, consent on file, the last
+   day of data and what needs the BCBA now. A table, printed landscape or copied for a spreadsheet. Nothing leaves the device;
+   names follow the initials setting. */
+const CM={month:''};
+function cmMonths(){const L=[];const d=new Date();d.setDate(1);for(let i=0;i<6;i++){const y=d.getFullYear(),m=d.getMonth()+1;L.push({v:y+'-'+String(m).padStart(2,'0'),t:d.toLocaleDateString(undefined,{year:'numeric',month:'long'})});d.setMonth(d.getMonth()-1);}return L;}
+function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(e){f={};}const d=f.data||{},it=f.integrity||{},c=f.consent||{};
+  const inc=(d.incidentList||[]).filter(i=>i&&String(i.date||'').slice(0,7)===month),hold=inc.filter(i=>/^(restraint|seclusion)$/.test(i.hold||'')).length,told=inc.filter(i=>i.parent==='yes').length;
+  const behs=(d.behaviors||[]).filter(b=>b&&b.name),aims=behs.filter(b=>b.aim!=null),met=aims.filter(b=>b.aimMet).length;
+  const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
+  return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:String(r.saved||'').slice(0,10),inc:inc.length,hold,told,aims:aims.length,met,
+    integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:!!(c.date||c.parent),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
+async function cmRows(month){const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
+function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});
+  t.integMean=t.integ.length?Math.round(t.integ.reduce((a,b)=>a+b,0)/t.integ.length*10)/10:null;return t;}
+function cmLead(R,label){const t=cmTotals(R);return t.n+' student'+(t.n===1?'':'s')+' kept on this '+HERE+', '+label+': '+t.inc+' incident'+(t.inc===1?'':'s')+(t.inc?' ('+t.hold+' restraint'+(t.hold===1?'':'s')+' or seclusion'+(t.hold===1?'':'s')+'; home told about '+t.told+')':'')+'; aims met for '+t.met+' of '+t.aims+' behavior'+(t.aims===1?'':'s')+' with an aim; consent on file for '+t.consent+' of '+t.n+'; integrity '+(t.integMean!=null?t.integMean+'% on average':'not observed')+'; '+t.withData+' with daily data; '+t.hot+' item'+(t.hot===1?'':'s')+' overdue or about safety.';}
+function cmTableHtml(R){const td=(v,c)=>'<td'+(c?' class="'+c+'"':'')+'>'+esc(v==null?'':String(v))+'<\/td>';
+  return '<table class="cm-t"><thead><tr><th>Student<\/th><th>School · grade<\/th><th>Incidents<\/th><th>Restraint / seclusion<\/th><th>Home told<\/th><th>Aims met<\/th><th>Integrity<\/th><th>Consent<\/th><th>Last data<\/th><th>Needs you<\/th><\/tr><\/thead><tbody>'+
+    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.consent?'Yes':'No','n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'<\/tr>').join('')+
+    '<\/tbody><\/table>';}
+function cmText(R,label){const t=cmTotals(R);const H=['Student','School · grade','Incidents','Restraint or seclusion','Home told','Aims met','Integrity','Consent','Last data','Needs you'];
+  return [label,cmLead(R,label),'',H.join('\t')].concat(R.map(x=>[x.name,x.site,x.inc,x.hold,x.inc?x.told+' of '+x.inc:'',x.aims?x.met+' of '+x.aims:'',x.integ!=null?x.integ+'%':'',x.consent?'Yes':'No',x.lastData,x.hot?x.hot+': '+x.hotT:''].join('\t'))).concat(['Totals\t\t'+t.inc+'\t'+t.hold+'\t'+t.told+' of '+t.inc+'\t'+t.met+' of '+t.aims+'\t'+(t.integMean!=null?t.integMean+'%':'')+'\t'+t.consent+' of '+t.n]).join('\n');}
+function cmPrintHtml(R,label){const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:34px;margin:0 0 8pt">':'';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Caseload summary: '+esc(label)+'<\/title><style>@page{size:landscape;margin:.5in}body{font:10pt/1.4 Inter,Arial,sans-serif;color:#1d2730;margin:0}h1{font:700 15pt Inter,Arial,sans-serif;margin:0 0 3pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;font-size:9.5pt}th,td{border:1px solid #9aa9b1;padding:3pt 5pt;text-align:left;vertical-align:top}th{background:#eef3f2}td.n{text-align:center}td.hot{font-weight:700}.s{color:#4a5b66;font-size:9pt}<\/style><\/head><body>'+logo+
+    '<h1>Caseload summary: '+esc(label)+'<\/h1><p>'+esc(cmLead(R,label))+'<\/p>'+cmTableHtml(R)+'<p class="s" style="margin-top:8pt">Each student as at their last Save case on this '+HERE+'; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Prepared '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'.<\/p><\/body><\/html>';}
+async function clMonthlyOpen(){const M=cmMonths();if(!CM.month||!M.some(m=>m.v===CM.month))CM.month=M[0].v;const R=await cmRows(CM.month),label=M.find(m=>m.v===CM.month).t;
+  dialog('Caseload summary',
+    '<p class="hp-lead">'+esc(cmLead(R,label))+'<\/p>'+
+    '<p class="td-more"><label>Month <select id="cmMonth">'+M.map(m=>'<option value="'+m.v+'"'+(m.v===CM.month?' selected':'')+'>'+esc(m.t)+'<\/option>').join('')+'<\/select><\/label> <button type="button" class="primary" id="cmPrint">Print (landscape)<\/button> <button type="button" id="cmCopy">Copy for a spreadsheet<\/button><\/p>'+
+    (R.length?'<div class="cm-wrap">'+cmTableHtml(R)+'<\/div>':'<p>No student is kept on this '+HERE+' yet.<\/p>')+
+    '<p class="hint">Each student as at their last Save case; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Names follow the privacy setting (initials). Nothing leaves this '+HERE+'.<\/p>');}
+document.addEventListener('click',async e=>{if(e.target.closest('#clMonth')){clMonthlyOpen();return;}
+  if(e.target.closest('#cmPrint')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then try again.');return;}
+    try{w.document.open();w.document.write(cmPrintHtml(R,label));w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(x){}},300);}catch(x){}return;}
+  if(e.target.closest('#cmCopy')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const ok=await copyText(cmText(R,label));wsUI.toast(ok?'The summary is copied: paste it into a spreadsheet or an email.':'Copy did not work: select the table.',{kind:ok?'ok':'warn'});return;}});
+document.addEventListener('change',e=>{if(e.target.id==='cmMonth'){CM.month=e.target.value;clMonthlyOpen();}});
+{const co7=caseloadOpen;caseloadOpen=async function(){const r=await co7.apply(this,arguments);try{const b=$('#dlgBody'),rs=b&&b.querySelector('#clRestr');if(rs&&!b.querySelector('#clMonth'))rs.insertAdjacentHTML('afterend',' <button type="button" id="clMonth"'+(rs.disabled?' disabled':'')+'>Monthly summary<\/button>');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'monthly summary caseload supervisor report month incidents',n:'Caseload summary for the month (for the supervisor)',s:'command',go:()=>clMonthlyOpen()});},0);
 </script>
 </body>
 </html>

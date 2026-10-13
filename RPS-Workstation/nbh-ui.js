@@ -861,3 +861,41 @@ try { if (window.matchMedia) (function(){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(show, 200); }); else setTimeout(show, 200);
   window.addEventListener('load', function(){ setTimeout(show, 400); });
 })(); } catch (e) {}
+/* v21.94 Dictate: a switch in the toolbar, beside the view buttons, that writes what you say into the text box you are in.
+   The words are heard on the device by the speech recogniser Form TV-1 uses (nbh-dictate.js, loaded when first pressed;
+   57 MB downloaded once after a confirm, then kept on the device): nothing is recorded or sent. The box that last had the
+   cursor takes the words; with none, the switch says so. Nothing prints, and a page opened from a file says it cannot. */
+try { (function(){
+  var D = document, W = window, btn = null, last = null, M = null;
+  var MIC = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/></svg>';
+  var CSS = '@media screen{#nbhDictBtn{flex:0 0 auto}#nbhDictBtn[aria-pressed="true"]{background:#f3c94f!important;color:#182e43!important;border-color:#f3c94f!important}#nbhDictBtn svg{width:14px;height:14px;vertical-align:-2px;margin-right:5px}}';
+  function field(el){ return !!(el && /^(TEXTAREA|INPUT)$/.test(el.tagName) && !(el.tagName === 'INPUT' && !/^(text|search|url|email|)$/.test(el.type || '')) && !el.readOnly && !el.disabled && !el.closest('.toolbar,dialog,#nbhDict')); }
+  D.addEventListener('focusin', function(e){ if (field(e.target)) last = e.target; }, true);
+  function load(){ return new Promise(function(res, rej){ if (W.nbhDictate) return res(W.nbhDictate);
+    var s = D.createElement('script'); s.src = 'nbh-dictate.js'; s.onload = function(){ W.nbhDictate ? res(W.nbhDictate) : rej(new Error('nbh-dictate.js did not load')); }; s.onerror = function(){ rej(new Error('Dictation could not start: nbh-dictate.js did not load (offline before it was ever used, or the file is not beside this form).')); }; D.head.appendChild(s); }); }
+  function paint(on){ if (!btn) return; btn.setAttribute('aria-pressed', String(!!on)); btn.title = on ? 'Dictating into the text box: press to stop (Escape stops too).' : 'Dictate into the text box you are in, on this device: nothing is recorded. Say period, comma, question mark, new line.'; }
+  async function toggle(){
+    if (location.protocol === 'file:') { if (W.nbhUI) W.nbhUI.toast('Dictation needs the workstation from its website: the speech recogniser is a download beside the forms.', { kind: 'warn' }); return; }
+    try { M = await load(); } catch (e) { if (W.nbhUI) W.nbhUI.toast(String(e.message || e), { kind: 'warn' }); return; }
+    M.onstate(paint);
+    if (M.active()) { M.stop(); return; }
+    var el = D.activeElement && field(D.activeElement) ? D.activeElement : (last && last.isConnected && field(last) && last.offsetParent ? last : null);
+    if (!el) { if (W.nbhUI) W.nbhUI.toast('Tap into the text box first, then Dictate.', { kind: 'warn' }); return; }
+    try { el.focus({ preventScroll: true }); } catch (e) {}
+    await M.start(el, { confirm: function(t){ return W.nbhUI && W.nbhUI.confirm ? W.nbhUI.confirm(t, { ok: 'Download' }) : Promise.resolve(W.confirm(t)); } });
+  }
+  function mk(){
+    if (btn) return;
+    var seg = D.getElementById('viewSeg'), row = seg && seg.parentElement;
+    if (!row || !row.closest('.toolbar')) return;
+    btn = D.createElement('button'); btn.type = 'button'; btn.id = 'nbhDictBtn'; btn.className = 'noprint'; btn.innerHTML = MIC + 'Dictate';
+    btn.addEventListener('mousedown', function(e){ e.preventDefault(); });   /* the text box keeps its cursor */
+    btn.addEventListener('click', function(){ toggle(); });
+    var after = D.getElementById('nbhFocusBtn') || seg;
+    row.insertBefore(btn, after.nextSibling);
+    var st = D.createElement('style'); st.id = 'nbh-dict-btn'; st.setAttribute('data-nbh-screen', ''); st.textContent = CSS; (D.head || D.documentElement).appendChild(st);
+    paint(false);
+  }
+  if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', function(){ setTimeout(mk, 0); }); else setTimeout(mk, 0);
+  W.nbhDictateUI = { toggle: toggle, button: function(){ return btn; } };
+})(); } catch (e) {}

@@ -1534,7 +1534,7 @@ nav.nbh-tabs.nbh-tabs-old{display:none!important}
 
 <section class="proc" id="wk-read" aria-labelledby="wk-read-h">
   <div class="band"><h3 id="wk-read-h">E. Reading the Analysis</h3><div class="when">Analysis tab &middot; follow along with Load simulation on the Data file tab</div></div>
-  <p class="wk-lead">Load simulation on the Data file tab to follow along: 46 fabricated incidents and 60 background samples built around a known escape-maintained pattern. These are not real observations and must never be presented as student data. Every figure in this section is the simulated record’s.</p>
+  <p class="noprint wk-lead">Load simulation on the Data file tab to follow along: 46 fabricated incidents and 60 background samples built around a known escape-maintained pattern. These are not real observations and must never be presented as student data. Every figure in this section is the simulated record’s.</p>
   <div class="story" data-story="read" data-rec-label="On the Analysis tab">
     <div class="stage"><div class="scene"></div><div class="wk-line"></div></div>
     <div class="steps"><h4>E. On the Analysis Tab, Step by Step</h4><ol class="storysteps"></ol><div class="ctl"><button type="button" data-act="back">Back</button><button type="button" class="primary" data-act="next">Next step</button><button type="button" data-act="play">Play all</button></div></div>
@@ -2085,7 +2085,7 @@ function renderIncidents(){
       <td>${e.mode==="open" ? '<span style="color:var(--ink-faint)">narrative only</span>' : labelsFor(e.antecedents, A_BY_ID, e.antecedentOther, "auto")}</td>
       <td>${labelsFor(e.behaviors, B_BY_ID, e.behaviorOther, "b")}
           ${(e.precursors||[]).length?`<div style="margin-top:3px;font-size:11px;color:var(--ink-faint)">preceded by ${(e.precursors||[]).map(id=>esc((P_BY_ID[id]&&P_BY_ID[id].other&&e.precursorOther&&e.precursorOther[id])?e.precursorOther[id]:(P_BY_ID[id]?P_BY_ID[id].label:id))).join(", ")}</div>`:""}
-          ${e.narrative?`<div style="font-family:var(--serif);font-size:12.5px;color:var(--ink-soft);margin-top:4px;max-width:46ch">${esc(e.narrative.slice(0,220))}${e.narrative.length>220?"\u2026":""}</div>`:""}</td>
+          ${e.narrative?`<div class="inc-narr" style="font-family:var(--serif);font-size:12.5px;color:var(--ink-soft);margin-top:4px;max-width:46ch">${esc(e.narrative.slice(0,220))}${e.narrative.length>220?"\u2026":""}</div>`:""}</td>
       <td>${e.mode==="open" ? "" : labelsFor(e.consequences, C_BY_ID, e.consequenceOther, "auto")}</td>
       <td style="font-size:12px;color:var(--ink-soft)">${e.immediate? esc(I_BY_ID[e.immediate]?I_BY_ID[e.immediate].label:e.immediate) : "\u2014"}
           ${(e.resolution||[]).length?`<div style="margin-top:3px">${labelsFor(e.resolution,R_BY_ID,e.resolutionOther,"")}</div>`:""}
@@ -4799,6 +4799,8 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 #nbhUiDlg .u-f button.primary{background:#182e43;color:#fff;border-color:#182e43;font-weight:600}
 #nbhUiDlg .u-f button.danger{background:#a8321e;color:#fff;border-color:#a8321e;font-weight:600}
 @media print{#nbhToasts,#nbhUiDlg{display:none!important}}
+/* v21.96 screen-only notes in every form (About the simulation, how to work the toolbar): never on paper */
+@media print{.noprint{display:none!important}}
 /* view progress: a dot after each view's name */
 #viewSeg button[data-nbh-fill]::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;border:1px solid rgba(255,255,255,.55);background:transparent}
 #viewSeg button[data-nbh-fill="part"]::after{background:#e3b341;border-color:#e3b341}

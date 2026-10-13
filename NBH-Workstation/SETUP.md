@@ -9495,3 +9495,68 @@ behavior, the incident line, the English note with the first row's numbers, the 
 sheet reaching Print, Send and Copy, the message handed to the mail path, the command, a phone) and `qa/v2195-caseload-test.js`
 (three simulated records: the button, this month's rows and lead line, last month's, the copy text, the landscape print, the
 command, initials on a phone).
+
+### v21.96: the master print reads as a report
+
+A full master print of the simulated case (thirteen forms) was read page by page as a document. It was a stack of filled
+forms: every form opened with its Guide (22 pages of evidence and guidance text between the student's records), every sheet
+started a new page (21 of 249 pages carried a few lines), the full letterhead repeated on every sheet, each form ended with its
+own reference list, and notes about the software printed in the record ("Load simulation (toolbar) fills the form with a worked
+example", "Press Apply to empty fields", "set the number of informants in the toolbar"). The packet is now shaped for the
+report, in `packetShape` (index.html), before each form's section goes in:
+
+- **Guides out.** `#guide`, `[data-pane="guide"]` and any sheet whose title starts "Guide" are dropped, unless **Packet
+  options** keeps that form's Guide (per form, off by default; Form TD-1's own print toggle is overridden the same way).
+- **References once, at the end.** Reference sheets (`#refs`, a sheet titled References or Sources), a block under a
+  References / Sources / Reference list heading and every `.cite` foot are taken out and gathered into a last section,
+  "References and Sources", grouped by form with repeats dropped (`refLines`, `packetRefs`); bullets and line breaks make the
+  entries, headings and the "Related forms" lines are left out. Packet options: at the end (default), with each form, or left
+  out.
+- **One letterhead, a section line, the section in the running head.** Only the first `.nbh-print-head` of a section stays;
+  a thin line above it says "Section n of N · Form XX-1"; each section is a named page (`@page pgN{@top-center{…}}`,
+  `.mp-N{page:pgN}`) so Chrome and Edge print "n · title" between the practice and the student on every page. On a PDF saved
+  from Safari, **Finish PDF** writes the same line (`marks.titles`, `stampHeads` in nbh-pdf-tools.js). Chromium 141 breaks the
+  page between a table's caption or footer and the table under a named page, so a `caption` becomes a block before the table
+  (`.mp-cap`) and `tfoot` rows an ordinary body; the one card this still split (Form TD-1's parent-signature card) is laid
+  out as an atomic inline-block in the packet.
+- **The sheets run on.** A sheet that is a filled report sheet (holds values, and is not mostly empty boxes) follows the one
+  before it after a gap (`data-mp-flow`); a sheet that is a document of its own keeps a page of its own (`data-mp-keep`):
+  Form IC-1's consent, additional consent, assent and record, Form TD-1's final plan and integrity log, Form OB-1's
+  observation records, and any sheet carrying a signature. A form printed blank keeps its pages as before. A table of more
+  than twenty rows may break across pages with its header row repeated (`data-mp-flowtbl`; Form ABC-1's log is left to the
+  form). Signature blocks, two-up blocks, figures and verdict boxes stay whole.
+- **The cover** carries a Period row from the case (the data's span and school days, consent, the plan review), each form's
+  sheet names under its entry (one line, cut with an ellipsis), the References entry, and the confidentiality box at the foot
+  (a flex column; thirteen forms fit one page). The contents marker Finish PDF reads moved onto the entry's link, so the page
+  number lands on the title line, not under the sheet names.
+- **On-screen notes never print.** Every form's "About the simulation" heading and its "Load simulation …" paragraph carry
+  `noprint`; sentences about the toolbar, buttons or the screen in a sheet's instructions are wrapped `<span class="noprint">`
+  (Forms TB-1, IA-1, PA-1, RA-1, DA-1, EA-1, TD-1, GB-1, SA-1, CF-1, SV-1, TI-1, ST-1, CN-1, CR-1, DT-1, MS-1, MT-1, SI-1);
+  Form GB-1's "Where baselines and criteria come from" keeps its heading and table and drops the Apply instructions and the
+  plan-state notice. The shared nbh-ui block now carries `@media print{.noprint{display:none!important}}`, so the four forms
+  that had the class without the rule (AD-1, DD-1, DT-1, VI-1) hide theirs too. The packet removes `.noprint` elements
+  outright. This is a change to the forms' own prints as well (Print this form), so the fields test's paper comparison takes
+  `WS_PRINT_CHANGED=all` for this release. The sweep that found them is reproducible: open every form under print media and
+  list the visible text that mentions the toolbar, buttons, clicks, the screen or the simulation.
+- **Unused parts.** With data in the form, Form TD-1's empty "Data collected" and "Materials and cues" boxes and the unticked
+  rows of Form DM-1's packet list stay out (Packet options: print the empty boxes).
+- **Form ABC-1's log compact** (default; Packet options: full): smaller type and tighter rows, the narrative kept (a two-line
+  clamp made Chromium print one row a page).
+- **Keep-together** in the forms' own print CSS: Form IC-1's signatures are one block (`.ic-sigs`) and the two signature
+  boxes sit side by side as inline-blocks (a grid item's `break-inside:avoid` is not honoured); Form IA-1's worksheets
+  (`.twoup`) stay whole.
+- **Packet options** (under the list of forms; kept in `localStorage['nbh.packet']`): the Guides of the ticked forms that
+  have one, the references, the ABC-1 log, the empty boxes. The Week and IEP prints go through the same shaping.
+
+The simulated packet: 249 pages before, 211 after (6 of them the references); 21 pages under a third full before, 13 after,
+and those are chart or signature pages. Still inherent: a chart block that moves whole to the next page leaves the page before
+it short (Forms RR-1, IA-1), and Form TD-1's implementation plan ends with signature lines that can fall alone on a page.
+
+Two tests were pinned to the Monday they were written on: `qa/v2175-test.js` and `qa/dd1-sheet-test.js` read Form DD-1's
+simulation, which is dated from today, and expected Monday's dates; they now fix the page's clock (`page.clock.setFixedTime`).
+
+Checked by `qa/v2196-packet-test.js` (the simulated case: the cover, the section lines and running heads, one letterhead, no
+Guide, reference sheet or on-screen note in the record, the references section with repeats dropped, captions and footers as
+rows, the sheets flowing, the compact log and the empty boxes out, the options kept and changing the packet, the dialog,
+Form TB-1 printed on its own) and `qa/v2190-ipad-pdf-test.js` (the section line Finish PDF writes on a Safari PDF, the
+references section's bookmark).

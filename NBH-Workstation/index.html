@@ -1053,6 +1053,11 @@ body:not(.has-form) #focusBtn{display:none}
 @media (max-width:720px){dialog .db{max-height:70vh}}
 </style>
 <style id="ws-v2194">
+/* v21.96 Packet options */
+.po-h{margin:14px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#54676f}
+.po-row{display:flex;gap:8px;align-items:flex-start;padding:4px 0;line-height:1.4;cursor:pointer}
+.po-row input{margin:3px 0 0;flex:0 0 auto}
+.po-hint{color:#54676f;font-size:12px}
 /* v21.94 Log it now: the sheet in the dialog */
 #dlg .ln{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 #dlg .ln .ln-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px}
@@ -1199,6 +1204,7 @@ body:not(.has-form) #focusBtn{display:none}
       <div class="rh-tools">
         <button id="tickUsed" class="sm">Tick the ones I've used</button>
         <button id="tickNone" class="sm">Clear</button>
+        <button id="packetOpts" class="sm" title="What the packet leaves out and gathers: the forms’ guides (kept per form if you want), where the references go, the ABC-1 log, empty boxes">Packet options</button>
       </div>
     </div>
     <div id="rail" tabindex="-1"></div>
@@ -2824,6 +2830,101 @@ function staticize(html){
   return root.innerHTML;
 }
 
+/* v21.96 the packet as a report. What it leaves out and gathers is chosen in Packet options and kept in this browser: a form's
+   Guide stays out unless kept for that form; the references go to one list at the end (or stay with each form, or stay out);
+   Form ABC-1's incident log prints compact; the empty boxes meant for handwriting stay out of a form that holds data. */
+const MP_GUIDE_FORMS=['DM-1','EA-1','EB-1','GB-1','IA-1','IC-1','MS-1','OB-1','PA-1','QS-1','RR-1','RA-1','TB-1','TD-1'];
+function packetOpts(){let o={};try{o=JSON.parse(localStorage.getItem('nbh.packet')||'{}')||{};}catch(e){}
+  return {refs:/^(end|form|none)$/.test(o.refs)?o.refs:'end',abc:o.abc==='full'?'full':'compact',blanks:!!o.blanks,guides:Object.assign({},o.guides||{})};}
+function packetOptsSave(o){try{localStorage.setItem('nbh.packet',JSON.stringify(o));}catch(e){}}
+function packetOptsOpen(){const o=packetOpts();const ticked=ALL.filter(([id])=>state.ticked[id]),withGuide=ticked.filter(([id])=>MP_GUIDE_FORMS.includes(id));
+  const radio=(name,val,label,hint)=>'<label class="po-row"><input type="radio" name="'+name+'" value="'+val+'"'+(o[name]===val?' checked':'')+'> <b>'+label+'</b>'+(hint?' <span class="po-hint">'+hint+'</span>':'')+'</label>';
+  dialog('Packet options',
+    '<p class="hp-lead">The master print reads as one report: each form is a section with its own running head, its sheets run on, and the forms’ guides, reference lists and on-screen notes stay out. Choose what to keep. Kept in this browser.</p>'+
+    '<h4 class="po-h">Guides</h4>'+(withGuide.length?'<p class="po-hint">A form’s Guide (its evidence and guidance pages) stays out of the packet unless you keep it here. Ticked forms with a Guide:</p>'+
+      withGuide.map(([id,name])=>'<label class="po-row"><input type="checkbox" data-po-guide="'+esc(id)+'"'+(o.guides[id]?' checked':'')+'> Keep the Guide of <b>Form '+esc(id)+'</b> <span class="po-hint">'+esc(name)+'</span></label>').join(''):
+      '<p class="po-hint">None of the ticked forms carries a Guide'+(ticked.length?'':' (tick forms in the list first)')+'.</p>')+
+    '<h4 class="po-h">References and sources</h4>'+radio('refs','end','One list at the end','the forms’ citations gathered in a last section, repeats dropped (default)')+radio('refs','form','With each form','as the form prints on its own')+radio('refs','none','Left out','')+
+    '<h4 class="po-h">Form ABC-1’s incident log</h4>'+radio('abc','compact','Compact','smaller type and tighter rows (default)')+radio('abc','full','Full','as the form prints on its own')+
+    '<h4 class="po-h">Empty boxes</h4><label class="po-row"><input type="checkbox" id="poBlanks"'+(o.blanks?' checked':'')+'> <b>Print the empty boxes meant for handwriting</b> <span class="po-hint">(Data collected, Materials and cues) in a form that already holds data; a form printed blank keeps them either way</span></label>'+
+    '<div class="bm-act"><button class="primary" id="poDone">Done</button><span>Build master print uses these.</span></div>');
+  const save=()=>{const g={};$('#dlgBody').querySelectorAll('[data-po-guide]').forEach(c=>{if(c.checked)g[c.dataset.poGuide]=true;});
+    const v=n=>{const r=$('#dlgBody').querySelector('input[name="'+n+'"]:checked');return r?r.value:'';};
+    const next=Object.assign({},o,{guides:Object.assign({},o.guides,g),refs:v('refs')||o.refs,abc:v('abc')||o.abc,blanks:!!($('#poBlanks')&&$('#poBlanks').checked)});
+    withGuide.forEach(([id])=>{if(!g[id])delete next.guides[id];});packetOptsSave(next);};
+  $('#dlgBody').addEventListener('change',save);$('#poDone').addEventListener('click',()=>{save();try{$('#dlg').close();}catch(e){}});}
+/* the sheets of a form that are documents of their own: they keep a page of their own in the packet */
+const MP_KEEP={'IC-1':['#consent','#proc','#assent','#record'],'TD-1':['#final','#monitor']};
+const MP_KEEP_TITLE={'OB-1':/^Direct Observation Record/};
+/* v21.96 a form's section, shaped for the report before it goes into the packet: its Guide out unless kept, its references
+   out (collected into bag[id] for the list at the end) or left with it, screen-only notes out, one letterhead, a section
+   line, its sheets marked to run on or to keep a page of their own, long tables allowed to break with their header row
+   repeated, empty handwriting boxes out of a form that holds data, and a table's caption or footer rows made ordinary rows
+   (Chromium 141 breaks the page between a caption or footer and its table under a named page, which the running head
+   needs). Returns the HTML, the sheet names for the cover and whether the Guide was kept. */
+function packetShape(x,i,mo,bag){
+  const id=x.id,doc=new DOMParser().parseFromString('<div id="r">'+staticize(x.html)+'</div>','text/html'),root=doc.getElementById('r');
+  const txt=e=>(e.textContent||'').replace(/\s+/g,' ').trim();
+  const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
+  const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
+  root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* the Guide */
+  const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"]').forEach(e=>guides.add(e));
+  root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^Guide\b/.test(titleOf(sh)))guides.add(sh);});
+  const keepGuide=!!(mo.guides&&mo.guides[id]);
+  guides.forEach(g=>{if(keepGuide){g.classList.remove('pr-skip');g.removeAttribute('hidden');}else drop(g);});
+  /* the references: whole sheets, a block under a heading, the citation foot of a sheet */
+  const refs=[];const push=e=>{if(e&&!refs.some(r=>r===e||r.contains(e)))refs.push(e);};
+  root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^(References|Sources)\b/.test(titleOf(sh)))push(sh);});
+  root.querySelectorAll('#refs').forEach(push);
+  [...root.querySelectorAll('h2,h3,h4,.bar,.nbh-band,b,strong')].forEach(h=>{const t=txt(h);
+    if(!/^(References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list|Sources and references)[.:]?$/i.test(t)||h.closest('.nbh-print-head')||refs.some(r=>r.contains(h)))return;
+    let blk;
+    if(/^(B|STRONG)$/.test(h.tagName))blk=h.parentElement;
+    else{blk=doc.createElement('div');blk.className='mp-refblk';const kind=h.tagName;let n=h.nextElementSibling;h.parentElement.insertBefore(blk,h);blk.appendChild(h);
+      while(n&&!(n.tagName===kind||/^H[1-4]$/.test(n.tagName)||n.classList.contains('bar')||n.classList.contains('nbh-band')||n.classList.contains('sheet')||n.classList.contains('nbh-page'))){const nx=n.nextElementSibling;blk.appendChild(n);n=nx;}}
+    if(blk&&blk!==root&&txt(blk).length<12000)push(blk);});
+  root.querySelectorAll('.cite').forEach(push);
+  if(mo.refs!=='form')refs.forEach(r=>{if(mo.refs==='end')(bag[id]=bag[id]||[]).push(...refLines(r));drop(r);});
+  /* one letterhead, then the section line above it */
+  const heads=[...root.querySelectorAll('.nbh-print-head')];heads.slice(1).forEach(h=>h.remove());
+  /* a table's caption and footer rows */
+  root.querySelectorAll('table > caption').forEach(c=>{const d=doc.createElement('div');d.className='mp-cap';while(c.firstChild)d.appendChild(c.firstChild);const t=c.parentElement;t.parentElement.insertBefore(d,t);c.remove();});
+  root.querySelectorAll('table > tfoot').forEach(f=>{const tb=doc.createElement('tbody');tb.className='mp-foot';while(f.firstChild)tb.appendChild(f.firstChild);const t=f.parentElement;t.appendChild(tb);f.remove();});
+  /* the sheets: a filled report sheet runs on from the one before; a sheet that is a document of its own, or a sheet still
+     mostly boxes to write in, keeps a page of its own (as the form prints it) */
+  const sheets=[...root.querySelectorAll('.sheet')],first=sheets[0];
+  const keepers=(MP_KEEP[id]||[]).map(q=>root.querySelector(q)).filter(Boolean),keepT=MP_KEEP_TITLE[id];
+  const names=[];
+  sheets.forEach(sh=>{const name=titleOf(sh);if(name&&!/^(Guide|References|Sources)\b/.test(name)&&!names.includes(name)&&names.length<9)names.push(name);
+    if(sh===first)return;
+    const own=keepers.includes(sh)||(keepT&&keepT.test(name))||!!sh.querySelector('.sigblock,.sigpad,.nbh-sig,.td85-pad,.td85-img');
+    const filled=sh.querySelectorAll('.nbh-val').length,empties=sh.querySelectorAll('input,textarea,select').length;
+    const flows=!own&&((filled>0&&(empties<=30||filled>=empties))||(empties===0&&txt(sh).length>400));
+    const w=sh.parentElement&&sh.parentElement.classList.contains('nbh-page')?sh.parentElement:null;
+    if(flows){sh.setAttribute('data-mp-flow','');if(w)w.setAttribute('data-mp-flow','');}
+    else if(own){sh.setAttribute('data-mp-keep','');if(w)w.setAttribute('data-mp-keep','');}});
+  root.querySelectorAll('table').forEach(t=>{if(t.querySelectorAll('tr').length>20&&!t.closest('#inc-table,#bg-table'))t.setAttribute('data-mp-flowtbl','');});
+  /* empty boxes meant for handwriting, in a form that holds data */
+  if(!mo.blanks&&root.querySelector('.nbh-val')){
+    if(id==='TD-1')root.querySelectorAll('.defs .drow').forEach(r=>{const l=r.querySelector('.dlab');if(l&&/^(Data collected|Materials and cues)$/.test(txt(l))&&!r.querySelector('.nbh-val'))r.remove();});
+    if(id==='DM-1')root.querySelectorAll('#pkTbl tbody tr').forEach(r=>{const cb=r.querySelector('input[type="checkbox"]');if(!(cb&&cb.hasAttribute('checked'))&&!r.querySelector('.nbh-val'))r.remove();});}
+  const band=doc.createElement('div');band.className='mp-band';band.innerHTML='<span>Section '+(i+1)+' of %%MPN%%</span><span>Form '+esc(id)+'</span>';root.insertBefore(band,root.firstChild);
+  return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0};
+}
+/* the lines of a reference list or a citation foot: one entry a line, bullets and breaks as line ends, headings dropped */
+function refLines(el){const c=el.cloneNode(true);c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));c.querySelectorAll('li,p,div,tr,h2,h3,h4').forEach(e=>{e.insertAdjacentText('beforebegin','\n');e.insertAdjacentText('afterend','\n');});
+  return (c.textContent||'').replace(/\u00a0/g,' ').replace(/\s*[\u2022\u25cf]\s*/g,'\n').split('\n').map(s=>s.replace(/\s+/g,' ').trim())
+    .filter(s=>s.length>24&&!/^(Regulations and rules|Policy letters|Federal guidance|Professional standards|Literature|Related forms in this set|Statutes|Rules|Guidance|Standards|References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list)[.:]?$/i.test(s)&&!/^[A-Z]{2,3}-\d\s/.test(s)&&!/Load simulation|About the simulation/.test(s));}
+/* the last section: every form's references, grouped by form, repeats dropped */
+function packetRefs(bag,n){const seen=new Set(),norm=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().slice(0,80);let body='',count=0;
+  Object.keys(bag).forEach(id=>{const lines=[];bag[id].forEach(l=>{const k=norm(l);if(!k||seen.has(k))return;seen.add(k);lines.push(l);});if(!lines.length)return;
+    const t=ALL.find(f=>f[0]===id);body+='<h3 class="mp-app-h">Form '+esc(id)+(t?' &mdash; '+esc(t[1]):'')+'<\/h3>'+lines.map(l=>'<p class="mp-app-p">'+esc(l)+'<\/p>').join('');count+=lines.length;});
+  if(!count)return '';
+  return '<section id="sec-REFS" class="mp-sec mp-app" data-mk="NBHSEC:REFS;" data-title="References and Sources"><div class="mp-band"><span>Section '+(n+1)+' of %%MPN%%<\/span><span>All forms<\/span><\/div>'+
+    '<h2 class="mp-app-t">References and Sources<\/h2><p class="mp-app-note">The regulations, standards and literature the forms in this packet cite, gathered here once. Each form names its own sources on screen.<\/p>'+body+'<\/section>';}
+function mpDate(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));if(!m)return String(s||'');return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'});}
+
 /* v21.75 the packet is built by masterRun: Build master print gives it the ticked forms; the end of the week gives it Form
    DD-1 (asked for its week: the summary and next week's blank sheet) and Form SM-1, under its own title */
 async function masterRun(chosen,opt){opt=opt||{};
@@ -2867,6 +2968,18 @@ async function masterRun(chosen,opt){opt=opt||{};
   $('#masterPrint').textContent='Build master print';
   if(!parts.length){try{w.close();}catch(e){}alert('Nothing could be collected from the ticked forms.');return;}
 
+  /* v21.96 each section shaped for the report; the references gathered for the last section */
+  const mo=Object.assign(packetOpts(),opt.packet||{}),bag={};
+  const shaped=parts.map((x,i)=>packetShape(x,i,mo,bag));
+  const refsHtml=mo.refs==='end'?packetRefs(bag,shaped.length):'';
+  const total=shaped.length+(refsHtml?1:0);
+  const fx=state.facts||{},rows=[];
+  if(fx.data&&(fx.data.from||fx.data.to))rows.push(['Data',[fx.data.from?mpDate(fx.data.from):'',fx.data.to?'to '+mpDate(fx.data.to):''].filter(Boolean).join(' ')+(fx.data.days?' ('+fx.data.days+' school day'+(fx.data.days===1?'':'s')+')':'')]);
+  if(fx.consent&&fx.consent.date)rows.push(['Consent',mpDate(fx.consent.date)]);
+  if(fx.review&&(fx.review.date||fx.review.next))rows.push(['Plan review',[fx.review.date?mpDate(fx.review.date):'',fx.review.next?'next '+mpDate(fx.review.next):''].filter(Boolean).join(', ')]);
+  const factLine=rows.map(r=>r[0]+' '+r[1]).join('  \u00b7  ');
+  const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
+
   const p=packet();
   const stamp=new Date();
   const head=`<div class="mp-cover" data-mk="NBHPKT;%%MPRUN%%">
@@ -2874,9 +2987,11 @@ async function masterRun(chosen,opt){opt=opt||{};
     <h1>${esc(opt.title||'Functional Behavior Assessment and Behavior Intervention Plan')}</h1>
     <table><tr><th>Student</th><td>${esc(p.client)||'&mdash;'}</td><th>Student ID</th><td>${esc(p.sid)||'&mdash;'}</td></tr>
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
-    <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr></table>
-    <h2 id="mp-contents">Contents</h2><ol>${parts.map(x=>`<li data-mk="NBHTOC:${esc(x.id)};"><a class="mp-jump" href="#sec-${esc(x.id)}">Form ${esc(x.id)} &mdash; ${esc(x.title)}</a></li>`).join('')}</ol>
-    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section below is that form exactly as it stood when this was built.</p>
+    <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr>
+    ${factLine?'<tr><th>Period<\/th><td colspan="3">'+esc(factLine)+'<\/td><\/tr>':''}</table>
+    <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
+    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Newsome Behavioral Health packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
+    <div class="mp-fill"></div>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
@@ -2885,15 +3000,15 @@ async function masterRun(chosen,opt){opt=opt||{};
 
   const css=parts.map((x,i)=>scopeCSS(x.css,'.mp-'+i)).join('\n');
   const runHead=[p.client||'Student not named',p.sid?'ID '+p.sid:''].filter(Boolean).join('  \u00b7  ');
-  /* A section opens with the form's own letterhead, which names the form, its
-     revision and the print date, exactly as the form prints on its own. The
-     navy bar that used to sit above it repeated the name and cost the page the
-     bar's height, so a sheet that filled a page on its own spilled its last rows
-     onto a sheet of their own. (Naming each page with a per-section running
-     header was tried and dropped: under a named page Chromium 141 moves table
-     footers and other unbreakable blocks to the next page even when they fit.) */
-  const body=parts.map((x,i)=>
-    `<section id="sec-${esc(x.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(x.id)};" data-title="Form ${esc(x.id)} &mdash; ${esc(x.title)}">${staticize(x.html)}</section>`).join('');
+  /* v21.96 A section opens with a thin section line and the form's own letterhead, once; its sheets follow. Every page of a
+     section carries the section's name in the running head, through a named page: Chromium 141 breaks the page between a
+     caption or footer and its table under a named page, which is why packetShape makes them ordinary rows. */
+  const body=shaped.map((s,i)=>
+    `<section id="sec-${esc(s.id)}" class="mp-sec mp-${i}" data-mk="NBHSEC:${esc(s.id)};" data-title="Form ${esc(s.id)} &mdash; ${esc(s.title)}"${mo.abc==='compact'&&s.id==='ABC-1'?' data-mp-abc="compact"':''}>${s.html}</section>`).join('')+refsHtml;
+  /* the running head names the section as the list of forms does (short, and the same words Finish PDF writes) */
+  const shortName=id=>(ALL.find(f=>f[0]===id)||[])[1]||id;
+  const pageCss=shaped.map((s,i)=>`@page pg${i}{@top-center{content:${cssStr((i+1)+'  \u00b7  '+shortName(s.id))};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-${i}{page:pg${i}}`).join('\n')+
+    (refsHtml?`\n@page pgA{@top-center{content:${cssStr(total+'  \u00b7  References and Sources')};font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:8pt;color:#54676f}}\n.mp-app{page:pgA}`:'');
 
   const doc=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>FBA and BIP packet \u2014 ${esc(p.client)||'student'}</title>
    <style>
@@ -2914,17 +3029,20 @@ async function masterRun(chosen,opt){opt=opt||{};
        fitting cannot be measured reliably. */
     body{font-family:${JSON.stringify('Inter, Segoe UI, Arial, sans-serif').slice(1,-1)};
       width:7.6in;margin:0 auto}
-    .mp-cover{padding:40px 46px;page-break-after:always;break-after:page}
-    .mp-brand{margin:0 0 26px}
-    .mp-brand img{height:52px;width:auto;display:block}
-    .mp-cover h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:26px;line-height:1.25;margin:0 0 18px}
-    .mp-cover h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:17px;margin:22px 0 8px}
-    .mp-cover table{border-collapse:collapse;width:100%;font-size:13px}
-    .mp-cover th,.mp-cover td{border:1px solid #cfdad8;padding:6px 9px;text-align:left}
+    .mp-cover{padding:28px 46px 22px;page-break-after:always;break-after:page;display:flex;flex-direction:column;box-sizing:border-box;min-height:9.1in}
+    .mp-fill{flex:1 1 auto;min-height:10px}
+    .mp-cover ol li{margin:0 0 1px}
+    .mp-sub{font-size:9.5px;line-height:1.3;color:#54676f;margin:-3px 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mp-brand{margin:0 0 16px}
+    .mp-brand img{height:46px;width:auto;display:block}
+    .mp-cover h1{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:24px;line-height:1.2;margin:0 0 12px}
+    .mp-cover h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;color:#182e43;font-size:16px;margin:14px 0 4px}
+    .mp-cover table{border-collapse:collapse;width:100%;font-size:12px}
+    .mp-cover th,.mp-cover td{border:1px solid #cfdad8;padding:5px 9px;text-align:left}
     .mp-cover th{background:#f5f8f7;width:15%}
     /* The right of each entry is kept clear: Bookmark PDF writes the page the form
        starts on there, once the PDF exists and the page is known. */
-    .mp-cover ol{font-size:13px;line-height:1.7;padding-right:56px}
+    .mp-cover ol{font-size:12px;line-height:1.45;padding-right:56px;margin:2px 0 0}
     /* v21.90 Safari prints without the page headers above and leaves no record of where a form starts. So the cover, each
        contents entry and each section carry a label in white 3 px text, made by the style sheet (no element is added, so
        nothing in a form moves): Finish PDF reads them in the saved PDF and adds the headers, the footers, the contents page
@@ -2933,16 +3051,16 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-cover::before,.mp-sec::before,.mp-cover li:first-child::before{content:attr(data-mk);float:left;width:0;height:0;overflow:visible;
       margin:0;padding:0;font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
     .mp-cover li:first-child::before{content:"NBHEDGE;";float:right}
-    .mp-cover li::after{content:attr(data-mk);display:inline-block;width:0;height:0;overflow:visible;vertical-align:baseline;
+    .mp-cover li>a.mp-jump::after{content:attr(data-mk);display:inline-block;width:0;height:0;overflow:visible;vertical-align:baseline;
       font:normal 3px/1 Arial,Helvetica,sans-serif;color:#fff;white-space:nowrap;pointer-events:none}
     /* The contents are real links: in a PDF they jump to the form, on paper they
        are just the list. So they take the colour of the text around them rather
        than turning blue and underlined. */
     a.mp-jump{color:inherit;text-decoration:none}
     .mp-cover a.mp-jump{border-bottom:1px dotted #9fb3ae}
-    .mp-note{font-size:12px;color:#54676f;margin-top:18px}
-    .mp-conf{margin-top:26px;border:1px solid #cfdad8;border-left:4px solid #182e43;background:#f5f8f7;
-      padding:11px 14px;font-size:11.5px;line-height:1.55;color:#33454f}
+    .mp-note{font-size:11.5px;color:#54676f;margin-top:12px}
+    .mp-conf{margin-top:18px;border:1px solid #cfdad8;border-left:4px solid #182e43;background:#f5f8f7;
+      padding:9px 12px;font-size:11px;line-height:1.5;color:#33454f}
     .mp-conf b{color:#182e43}
     /* the forms paint a paper-grey page background for screen reading; on paper
        that prints as a grey block wherever content stops short of the page */
@@ -2958,6 +3076,34 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-sec .sheet,.mp-sec .nbh-page:first-child{
       page-break-before:auto!important;break-before:auto!important}
     .mp-sec .nbh-last{page-break-after:auto!important;break-after:auto!important}
+    /* v21.96 the report: a filled sheet runs on from the one before (packetShape marks it); a sheet that is a document of
+       its own keeps a page of its own; a long table may break with its header row repeated; what should be read whole
+       stays whole */
+    .mp-sec .sheet[data-mp-flow],.mp-sec .nbh-page[data-mp-flow]{page-break-before:auto!important;break-before:auto!important}
+    .mp-sec .sheet[data-mp-flow]{margin-top:22px!important}
+    .mp-sec .sheet[data-mp-keep],.mp-sec .nbh-page[data-mp-keep]{page-break-before:always!important;break-before:page!important}
+    .mp-sec table[data-mp-flowtbl]{break-inside:auto!important;page-break-inside:auto!important}
+    .mp-sec table[data-mp-flowtbl]>thead{display:table-header-group}
+    .mp-sec table[data-mp-flowtbl] tr{break-inside:avoid;page-break-inside:avoid}
+    .mp-sec .twoup.sigs{display:block!important}
+    .mp-sec .twoup.sigs>.sigblock{display:inline-block;width:48%;vertical-align:top;margin-right:3%}
+    .mp-sec .twoup.sigs>.sigblock:last-child{margin-right:0}
+    /* a card that must not split is laid out as one atomic box: under a named page Chromium 141 stretched Form TD-1's
+       parent-signature card across two pages when its break-inside:avoid fell at a page end */
+    .mp-sec .td85-card.td85-par{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}
+    .mp-sec .sigblock,.mp-sec .ic-sigs,.mp-sec .ic-signpart,.mp-sec .td85-card,.mp-sec .twoup,.mp-sec .figure,.mp-sec .dd-keep,.mp-sec .warn.verdict,.mp-sec .mp-refblk{break-inside:avoid;page-break-inside:avoid}
+    .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
+      font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}
+    .mp-cap{font:600 12px/1.35 Inter,"Segoe UI",Arial,sans-serif;color:#254657;margin:10px 0 4px;break-after:avoid;page-break-after:avoid}
+    .mp-app{font-family:Inter,"Segoe UI",Arial,sans-serif;color:#24313C}
+    .mp-app-t{font-family:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;font-size:20px;color:#182e43;margin:0 0 6px}
+    .mp-app-note{font-size:11px;color:#54676f;margin:0 0 12px}
+    .mp-app-h{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-size:13px;margin:14px 0 4px;color:#182e43;break-after:avoid;page-break-after:avoid}
+    .mp-app-p{font-size:9.5px;line-height:1.4;margin:0 0 4px;padding-left:14px;text-indent:-14px}
+    .mp-sec[data-mp-abc="compact"] #inc-table table,.mp-sec[data-mp-abc="compact"] #bg-table table{font-size:10.5px!important}
+    .mp-sec[data-mp-abc="compact"] #inc-table td,.mp-sec[data-mp-abc="compact"] #inc-table th,.mp-sec[data-mp-abc="compact"] #bg-table td,.mp-sec[data-mp-abc="compact"] #bg-table th{padding:4px 6px!important;line-height:1.3}
+    .mp-sec[data-mp-abc="compact"] #inc-table .tag,.mp-sec[data-mp-abc="compact"] #bg-table .tag{font-size:9.5px!important;padding:1px 5px!important;margin:1px 3px 1px 0!important}
+    .mp-sec[data-mp-abc="compact"] #inc-table .inc-narr{font-size:10px!important;line-height:1.3;max-width:none!important;margin-top:2px!important}
     /* A filled field is printed as its value, so it wraps instead of being cut off
        at a column edge, and a select no longer prints its dropdown arrow.
        The wrapping mode matters more than it looks. "anywhere" also changes the
@@ -3030,6 +3176,7 @@ async function masterRun(chosen,opt){opt=opt||{};
        page width has to win or the right-hand columns fall off the sheet */
     .mp-sec table td,.mp-sec table th{min-width:0!important}
     .mp-sec .noprint,.mp-sec .toolbar{display:none!important}
+    ${pageCss}
    </style><style>${css}</style><\/head>
    <body>${head}${body}
    <script>
@@ -3164,7 +3311,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   /* v21.90 whose packet, for the header Finish PDF writes on a PDF saved from Safari: the line the page header carries and the
      practice's name the header starts with (each edition's own) */
   const mpPrac=(/@top-left\{content:"([^"]*)"/.exec(doc)||[])[1]||'';
-  const docM=doc.replace('%%MPRUN%%','NBHRUN:'+encodeURIComponent(runHead)+';NBHPRAC:'+encodeURIComponent(mpPrac)+';');
+  const docM=doc.replace('%%MPRUN%%','NBHRUN:'+encodeURIComponent(runHead)+';NBHPRAC:'+encodeURIComponent(mpPrac)+';').split('%%MPN%%').join(String(total));
   /* the window was opened at the click; if it has since been closed, try again */
   if(!w||w.closed)w=window.open('','_blank');
   if(!w){alert('The browser blocked the print window. Allow pop-ups for this page and try again.');return;}
@@ -3174,6 +3321,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   if(appleMobile()||!chromeMajor())try{wsUI.toast('To file the packet as a PDF: in the print window, Share, then Save to Files. Then Finish PDF here adds the page header and footer, the bookmarks and the page numbers.',{ms:14000});}catch(e){}
 }
 $('#masterPrint').addEventListener('click',()=>masterRun(ALL.filter(([id])=>state.ticked[id])));
+$('#packetOpts').addEventListener('click',packetOptsOpen);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 /* a value going inside a CSS content:"..." string, where a stray quote or
    backslash would end the declaration and silently drop the running header */
@@ -3370,7 +3518,7 @@ $('#help').addEventListener('click',()=>{
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the '+HERE+'\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
    fold('Printing and the PDF',
-     '<p>Tick the forms this student needs and press <b>Build master print</b>: one document with a cover sheet and contents, each form on a new page. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
+     '<p>Tick the forms this student needs and press <b>Build master print</b>: one document that reads as a report: a cover with the contents, then each form as a section with its own running head, its letterhead once and its sheets running on; the forms’ guides, reference lists and on-screen notes stay out, the references gathered in a last section. <b>Packet options</b> (under the list of forms) keeps a form’s Guide, puts the references with each form or leaves them out, prints Form ABC-1’s log in full, and prints the empty boxes meant for handwriting. A ticked form you have not opened prints blank, and the workstation asks first. A PDF saved from the print window has no bookmark panel and no page numbers on its contents page; <b>Finish PDF</b> takes that file and returns one with both.</p>'+
      '<p><b>Printing from Safari on the iPad?</b> <button type="button" id="hpPrintCheck">Print check</button> lists what to look at in the print window first: paper, orientation, backgrounds, the page count. For the master print, save it as PDF (the print window\u2019s <b>Share</b>, then <b>Save to Files</b>) and run <b>Finish PDF</b>: it adds the page header and footer Safari leaves out, the bookmarks and the page numbers.</p>'+
      '<p><b>Copy for the BIP</b> on FS-1, TD-1, GB-1 and CR-1 puts the plan’s text on the clipboard for the district document; <b>Save graph as image</b> under a graph gives a picture for a report.</p>'+
      '<p><b>Case as spreadsheet</b> writes every open form into one workbook (.xlsx, which Excel and Numbers open): a sheet per form, taken from the form’s own CSV export where it has one and otherwise every field by name, with a Case sheet naming the student and the forms.</p>')+
@@ -3461,7 +3609,7 @@ function pdfTools(){
   return pdfReady;
 }
 /* the bookmark reads as the form list does: short enough for a side panel */
-function formTitle(id){const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
+function formTitle(id){if(id==='REFS')return 'References and Sources';const r=ALL.find(f=>f[0]===id);return r?id+' — '+r[1]:'Form '+id;}
 function pageSpan(a,b){return a===b?String(a+1):(a+1)+'–'+(b+1);}
 
 $('#bookmarkPdf').addEventListener('click',()=>{
@@ -3547,6 +3695,8 @@ async function bmLoad(file){
     const btn=$('#bmSave');btn.disabled=true;btn.textContent='Writing\u2026';
     const nums=$('#bmNums')?$('#bmNums').checked:false,heads=$('#bmHeads')?$('#bmHeads').checked:false;
     try{
+      /* v21.96 the section's name for the running head Finish PDF writes: the sections in page order, numbered */
+      if(marks){const secs=(marks.sections||[]).slice().sort((a,b)=>a.page-b.page);marks.titles={};secs.forEach((s,i)=>{const t=s.id==='REFS'?'References and Sources':((ALL.find(f=>f[0]===s.id)||[])[1]||('Form '+s.id));marks.titles[s.id]=(i+1)+'  \u00b7  '+t;});}
       const r=await tools.bookmark(bytes,formTitle,{numbers:nums,marks,heads});
       const name=file.name.replace(/\.pdf$/i,'')+' (finished).pdf';
       const a=document.createElement('a');

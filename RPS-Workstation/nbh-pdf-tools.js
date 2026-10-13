@@ -325,6 +325,9 @@
   function stampHeads(doc, marks, font) {
     var pages = doc.getPages(), n = pages.length, T = [], scaled = 0;
     var prac = fit(font, marks.prac || ''), run = fit(font, marks.run || ''), conf = fit(font, CONFIDENTIAL);
+    /* v21.96 the section each page belongs to, named in the middle of the running head (the packet's own named pages do this in Chrome) */
+    var secs = (marks.sections || []).slice().sort(function (a, b) { return a.page - b.page; }), titles = marks.titles || {};
+    function titleAt(i) { var t = ''; for (var k = 0; k < secs.length; k++) { if (secs[k].page <= i) t = titles[secs[k].id] || ''; else break; } return t; }
     pages.forEach(function (page, i) {
       var W = page.getWidth(), H = page.getHeight(), e = (marks.extents || [])[i] || {}, s = 1;
       if (e.maxY != null && e.maxY - H / 2 > 0 && H - e.maxY < HEAD.needTop) s = Math.min(s, (H / 2 - HEAD.needTop) / (e.maxY - H / 2));
@@ -343,6 +346,8 @@
       var topY = H - HEAD.box / 2 - HEAD.size * 0.35, footY = HEAD.box / 2 - HEAD.size * 0.35;
       if (prac) page.drawText(prac, { x: HEAD.side, y: topY, size: HEAD.size, font: font, color: HEAD.prac });
       if (run) page.drawText(run, { x: W - HEAD.side - font.widthOfTextAtSize(run, HEAD.size), y: topY, size: HEAD.size, font: font, color: HEAD.grey });
+      var mid = fit(font, titleAt(i));
+      if (mid) { var mw = font.widthOfTextAtSize(mid, HEAD.size); page.drawText(mid, { x: (W - mw) / 2, y: topY, size: HEAD.size, font: font, color: HEAD.grey }); }
       page.drawText(conf, { x: HEAD.side, y: footY, size: HEAD.foot, font: font, color: HEAD.grey });
       var pn = 'Page ' + (i + 1) + ' of ' + n;
       page.drawText(pn, { x: W - HEAD.side - font.widthOfTextAtSize(pn, HEAD.size), y: footY, size: HEAD.size, font: font, color: HEAD.grey });
