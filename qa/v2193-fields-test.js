@@ -4,7 +4,8 @@
    cells stay bare. A reading line is about 80 characters at most: every long paragraph in a sheet is capped (nbh-wide, 80ch).
    A label that names a field is 12 px at least. None of it is on paper: with the previous release served at WS_PREV_URL (the
    release run does this), every one of the 46 forms prints the same words in the same places from both, with a mouse and with
-   a finger. Chromium; simulated data only (nothing is typed; the forms are read as they open).
+   a finger (PA-1 draws a random item order on every open; those item numbers are read as the same). Chromium; simulated data
+   only (nothing is typed; the forms are read as they open).
    usage: node qa/v2193-fields-test.js     (WS_PREV_URL=http://127.0.0.1:8128 for the print comparison) */
 const {chromium,BASE,sleep,forms}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
@@ -23,7 +24,7 @@ const measure=()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.widt
     const z=parseFloat(getComputedStyle(p.closest('.sheet')||document.body).zoom)||1;return p.getBoundingClientRect().width/z>81*ch/z+1;}).map(p=>(p.textContent||'').trim().slice(0,40));
   return {fields:F.length,ul,box:box.length,was,bad:bad.slice(0,4),labs:labs.length,labMin:labs.length?Math.min(...labs):null,small:small.length,prose:prose.length,wide:wide.slice(0,3),wideN:wide.length};};
 const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad();const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));const pdf=await lib.getDocument({data:bytes}).promise;const out=[];
-  for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out.push(tc.items.filter(t=>t.str&&t.str.trim()).map(t=>t.str.trim()+'@'+Math.round(t.transform[4])+','+Math.round(t.transform[5])).join('|'));}
+  for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const tc=await pg.getTextContent();out.push(tc.items.filter(t=>t.str&&t.str.trim()).map(t=>{let s=t.str.trim();if(/\bSeries \d: control\b|randomized order/.test(s))s=s.replace(/Item \d+/g,'Item n');/* PA-1 draws a random item order on every open */return s+'@'+Math.round(t.transform[4])+','+Math.round(t.transform[5]);}).join('|'));}
   return out;},Buffer.from(buf).toString('base64'));
 (async()=>{const br=await chromium.launch();
   try{
