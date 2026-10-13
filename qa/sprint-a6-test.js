@@ -50,7 +50,7 @@ const OUT=__dirname+'/out/sprint-a6/';
 const A6_BASE=process.env.A6_BASE||'655e3ee';
 /* v21.86 the layout check (part 2) compares with the forms of the last delivered release, not with the forms before this
    package: later releases changed the layout on purpose (ABC-1's analysis table), so the old comparison only drifted */
-const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'36cc091';   /* v21.93 re-baselined: the forms pass (boxes everywhere, 80-character lines, 12 px labels) moved the screen layout on purpose */
+const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'7e491eb';   /* v21.93 re-baselined: the forms pass (boxes everywhere, 80-character lines, 12 px labels) moved the screen layout on purpose */
 const WASL={};
 const COMPARE=ED==='NBH-Workstation'||!!process.env.A6_BASE;
 const A6_OLD=process.env.A6_OLD||'';
