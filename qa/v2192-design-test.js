@@ -101,6 +101,9 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     const bar=await page.evaluate(()=>Math.round(document.getElementById('bar').getBoundingClientRect().height));
     ok('16 folded, the bar stays within 120 px (the v21.89 check) with 44 px buttons',bar<=120,bar);
     const tb=await toolbar(fr);ok('17 DM-1 upright: the toolbar one row, at most 64 px (it was 134)',tb.groupRows===1&&tb.h<=64&&tb.tabRows===1,tb);
+    /* the Focus switch beside the tabs keeps its width on a form with many views (it was squeezed to 43 px for 77 of text) */
+    const tdu=await open(page,'TD-1');const fb=await tdu.evaluate(()=>{const b=document.getElementById('nbhFocusBtn');return b?{sw:b.scrollWidth,cw:b.clientWidth,w:Math.round(b.getBoundingClientRect().width)}:null;});
+    ok('17b TD-1 upright: the Focus switch beside the tabs is not squeezed (its words fit)',!!fb&&fb.sw<=fb.cw+1&&fb.w>=70,fb);
     /* a toast's × is a 44 px target, and the toast no taller for it */
     const tt=await fr.evaluate(async()=>{nbhUI.toast('A short message for the check.',{ms:4000});await new Promise(r=>setTimeout(r,250));const t=document.querySelector('#nbhToasts .nbh-toast'),b=t&&t.querySelector('button');if(!b)return null;const q=b.getBoundingClientRect(),r=t.getBoundingClientRect();return {w:Math.round(q.width),h:Math.round(q.height),toast:Math.round(r.height)};});
     ok('18 a form’s toast: the × is a 44 px target and the toast stays a short strip (under 60 px)',!!tt&&tt.w>=44&&tt.h>=44&&tt.toast<60,tt);
