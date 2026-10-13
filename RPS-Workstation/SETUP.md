@@ -9560,3 +9560,17 @@ Guide, reference sheet or on-screen note in the record, the references section w
 rows, the sheets flowing, the compact log and the empty boxes out, the options kept and changing the packet, the dialog,
 Form TB-1 printed on its own) and `qa/v2190-ipad-pdf-test.js` (the section line Finish PDF writes on a Safari PDF, the
 references section's bookmark).
+
+### v21.97: a case of any size reaches Google Drive
+
+Drive sync (v21.89) sent each case to Google in one request holding the file's details and its content together (Google's
+multipart upload). Google takes that kind of request for a body of 5 MB at most, so a case over that (one with Form TV-1's
+music in it, or many pictures on the boards) did not sync, and the chip said Drive answered 413. A case of 4 MB or more now
+goes up the way Google asks for larger files (the resumable upload): the details first, Google answers with an address for
+the content, and the content goes to that address in one PUT. A smaller case still goes in the one request, as before. The
+copy that comes down (the next sync on the other device) was never limited. Nothing changes in what is sent or where it is
+kept: the same file, in the same folder of the same school Drive.
+
+Checked by `qa/v2189-drive-test.js` (checks 25 and 26: a case of about 5.6 MB from a third computer goes up by one
+resumable upload over the same file, is marked synced, and the iPad's next sync brings it down whole; no multipart body
+over 5 MB is ever sent, and the simulated Drive refuses one with 413 the way Google does).

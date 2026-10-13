@@ -12,7 +12,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
 const UA_IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 const UA_MAC='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15';
 /* ---- a small Google Drive: folders and files with appProperties, versions, multipart uploads, the queries the workstation makes ---- */
-const D={files:new Map(),n:0,who:SCHOOL,off:false,calls:0};
+const D={files:new Map(),n:0,who:SCHOOL,off:false,calls:0,sess:new Map(),res:0,mpMax:0};   /* v21.97 sess: open resumable uploads; res: content PUTs; mpMax: the largest multipart body */
 const now=()=>new Date(Date.now()+D.n*1000).toISOString();
 function evalQ(q,f){if(/trashed=false/.test(q)&&f.trashed)return false;
   const mt=/mimeType='([^']+)'/.exec(q);if(mt&&f.mimeType!==mt[1])return false;
@@ -31,7 +31,19 @@ async function drive(route){const req=route.request(),u=new URL(req.url()),m=req
     if(u.searchParams.get('alt')==='media')return route.fulfill({status:200,contentType:'application/json',body:f.content});return json(pick(f));}
   if(mm&&m==='PATCH'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404}},404);const meta=JSON.parse(req.postData()||'{}');if('trashed' in meta)f.trashed=meta.trashed;f.version++;D.n++;f.modifiedTime=now();return json({id:f.id});}
   mm=/^\/upload\/drive\/v3\/files(?:\/([^/]+))?$/.exec(u.pathname);
-  if(mm){const [metaS,content]=parts(req.headers()['content-type'],req.postData()||'');const meta=JSON.parse(metaS);D.n++;
+  /* v21.97 the resumable upload: the metadata first (Google answers with the address for the content), then the content in a PUT */
+  if(mm&&u.searchParams.get('uploadType')==='resumable'&&(m==='POST'||m==='PATCH')){const h=req.headers();const meta=JSON.parse(req.postData()||'{}');
+    if(!h['x-upload-content-length'])return json({error:{code:400,message:'X-Upload-Content-Length missing'}},400);
+    D.n++;const sid='s'+D.n;D.sess.set(sid,{id:mm[1]||'',meta,len:+h['x-upload-content-length']});
+    return route.fulfill({status:200,headers:{'Location':'https://www.googleapis.com/upload/drive/v3/files'+(mm[1]?'/'+mm[1]:'')+'?uploadType=resumable&upload_id='+sid,'Access-Control-Expose-Headers':'Location'},body:''});   /* Location is not a CORS-safelisted header: Google exposes it, so does the simulation */}
+  if(mm&&u.searchParams.get('upload_id')&&m==='PUT'){const s=D.sess.get(u.searchParams.get('upload_id'));if(!s)return json({error:{code:404,message:'no such upload'}},404);
+    const content=req.postData()||'';if(Buffer.byteLength(content)!==s.len)return json({error:{code:400,message:'length differs: '+Buffer.byteLength(content)+' vs '+s.len}},400);
+    D.sess.delete(u.searchParams.get('upload_id'));D.res++;D.n++;const meta=s.meta;
+    if(!s.id){const id='f'+D.n;const f=Object.assign({id,version:1,modifiedTime:now(),trashed:false},meta,{content});D.files.set(id,f);return json(pick(f));}
+    const f=D.files.get(s.id);if(!f)return json({error:{code:404,message:'File not found'}},404);
+    if(meta.name)f.name=meta.name;if(meta.appProperties)f.appProperties=Object.assign({},f.appProperties,meta.appProperties);f.content=content;f.version++;f.modifiedTime=now();return json(pick(f));}
+  if(mm){const raw=req.postData()||'';D.mpMax=Math.max(D.mpMax,Buffer.byteLength(raw));if(Buffer.byteLength(raw)>5*1048576)return json({error:{code:413,message:'Request Entity Too Large'}},413);
+    const [metaS,content]=parts(req.headers()['content-type'],raw);const meta=JSON.parse(metaS);D.n++;
     if(m==='POST'){const id='f'+D.n;const f=Object.assign({id,version:1,modifiedTime:now(),trashed:false},meta,{content});D.files.set(id,f);return json(pick(f));}
     const f=D.files.get(mm[1]);if(!f)return json({error:{code:404,message:'File not found'}},404);
     if(meta.name)f.name=meta.name;if(meta.appProperties)f.appProperties=Object.assign({},f.appProperties,meta.appProperties);f.content=content;f.version++;f.modifiedTime=now();return json(pick(f));}
@@ -168,6 +180,16 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const o0=olds().length;await C.page.evaluate(()=>caseloadOpen());await sleep(400);await C.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(1500);await idle(C.page);
   const c2=await C.page.evaluate(async()=>{const r=(await clList()||[])[0];return {pending:/Court date pending/.test(r.text),dev:r.dev};});
   ok('24 a third computer joins holding an older copy of the same student: Drive’s newer copy is kept there and its own older one goes to Replaced copies',c2.pending&&olds().length===o0+1&&/older copy from the Mac/.test(olds().slice(-1)[0].name),{c2,olds:olds().map(f=>f.name)});
+  /* 25 (v21.97) a case over 5 MB goes up by the resumable upload and comes down whole; a small case still goes in one multipart request */
+  const big='Long notes (simulated): '+'the quick brown fox jumps over the lazy dog. '.repeat(125000);   /* about 5.6 MB */
+  const r0=D.res,c0=cases().length,v0=+(cases().find(f=>/Mateo/.test(f.name))||{}).version;
+  const c3f=await openDM(C.page);   /* the frame as it is now: the link above put Drive's copy into the open form */
+  await setField(c3f,'pr.notes',big);await sleep(1200);
+  await C.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(5000);await idle(C.page);
+  const bigF=cases().find(f=>/Mateo/.test(f.name)),rc=await rec(C.page,'Mateo Rivera');
+  ok('25 a case over 5 MB: one resumable upload (the metadata, then the content), the same file in Drive with the whole text, the case marked synced; no multipart body over 5 MB',D.res===r0+1&&cases().length===c0&&!!bigF&&+bigF.version===v0+1&&bigF.content.length>5e6&&/lazy dog/.test(bigF.content)&&rc&&!rc.drv.dirty&&D.mpMax<5*1048576&&D.mpMax>0,{res:D.res-r0,n:cases().length,v:bigF&&bigF.version,len:bigF&&bigF.content.length,dirty:rc&&rc.drv.dirty,mpMax:D.mpMax});
+  await B.page.evaluate(()=>drvSync({}));await idle(B.page);const rb=await rec(B.page,'Mateo Rivera');   /* the laptop (still signed in; the iPad was signed out at 20) */
+  ok('26 the laptop’s next sync brings the large copy down whole',rb&&rb.text.length>5e6&&/lazy dog/.test(rb.text),{len:rb&&rb.text.length});
   ok('no page errors (iPad, laptop, third)',!A.errs.length&&!B.errs.length&&!C.errs.length,[A.errs,B.errs,C.errs].map(e=>e.slice(0,3)));
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);

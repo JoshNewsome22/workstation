@@ -5963,8 +5963,17 @@ function drvMultipart(meta,body){const b='nbh-'+Array.from(crypto.getRandomValue
   return {headers:{'Content-Type':'multipart/related; boundary='+b},body:'--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+body+'\r\n--'+b+'--'};}
 const drvName=r=>(String(r.client||'').trim()||'Case')+(r.sid?' ('+String(r.sid).trim()+')':'')+'.json';
 const drvBody=r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined},text:r.text||''});
-async function drvUpload(id,meta,body){const m=drvMultipart(meta,body);
-  return drvJson((id?DUP+'/'+id:DUP)+'?uploadType=multipart&fields=id,version,modifiedTime',{method:id?'PATCH':'POST',headers:m.headers,body:m.body});}
+/* v21.97 Google's multipart upload takes a body of 5 MB at most; a larger case goes up the resumable way (the metadata first,
+   Google answers with an address for the content, the content goes to that address in one PUT). Under DRV_BIG bytes the one
+   multipart request stays, as before. */
+const DRV_BIG=4000000;
+const drvBytes=s=>{try{return new TextEncoder().encode(s).length;}catch(e){return s.length*2;}};
+async function drvUpload(id,meta,body){const n=drvBytes(body),fields='&fields=id,version,modifiedTime';
+  if(n<DRV_BIG){const m=drvMultipart(meta,body);
+    return drvJson((id?DUP+'/'+id:DUP)+'?uploadType=multipart'+fields,{method:id?'PATCH':'POST',headers:m.headers,body:m.body});}
+  const r=await drvFetch((id?DUP+'/'+id:DUP)+'?uploadType=resumable'+fields,{method:id?'PATCH':'POST',headers:{'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':'application/json','X-Upload-Content-Length':String(n)},body:JSON.stringify(meta)});
+  const at=r.headers.get('Location')||r.headers.get('location');if(!at)throw drvErr('Google Drive did not open the upload for a case of '+(n/1048576).toFixed(1)+' MB.',{status:r.status});
+  return drvJson(at,{method:'PUT',headers:{'Content-Type':'application/json'},body});}
 async function drvRead(id){const t=await (await drvFetch(DAPI+'/'+id+'?alt=media')).text();let j=null;try{j=JSON.parse(t);}catch(e){}
   if(!j||(j.nbh!=='case-sync'&&j.nbh!=='case-gone'))throw drvErr('A file in the Drive folder is not a workstation case.');return j;}
 /* a copy that is not kept goes to Replaced copies, so nothing is lost */
