@@ -19,6 +19,7 @@ const stub=()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m
 (async()=>{const br=await chromium.launch();const log=[];
   /* ---------- 1. Form DD-1 ---------- */
   let page=await br.newPage({viewport:{width:1400,height:1000}});wire(page,log);
+  await page.clock.setFixedTime(new Date('2026-10-12T10:00:00'));   /* the simulation is dated from today; the counts and the week asked for are the Monday's */
   await page.goto(W+'Daily_Behavior_Data_and_Visual_Analysis.html',{waitUntil:'load'});await sleep(1200);
   await page.evaluate(stub);await page.evaluate(async()=>{await loadExample();});await sleep(1200);
   const o1=await page.evaluate(()=>{const o=window.__nbhFactsOut(),d=o&&o.data;return d&&{days:d.days,from:d.from,to:d.to,n:d.behaviors.length,b0:d.behaviors[0],src:d.src};});
