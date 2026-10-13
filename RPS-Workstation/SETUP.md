@@ -9572,5 +9572,5 @@ copy that comes down (the next sync on the other device) was never limited. Noth
 kept: the same file, in the same folder of the same school Drive.
 
 Checked by `qa/v2189-drive-test.js` (checks 25 and 26: a case of about 5.6 MB from a third computer goes up by one
-resumable upload over the same file, is marked synced, and the iPad's next sync brings it down whole; no multipart body
+resumable upload over the same file, is marked synced, and the laptop's next sync brings it down whole; no multipart body
 over 5 MB is ever sent, and the simulated Drive refuses one with 413 the way Google does).
