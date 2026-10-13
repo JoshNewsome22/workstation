@@ -102,9 +102,15 @@ async function shot(p,name){await p.evaluate(()=>{setView('setup');if(!document.
       await C.close();}
     for(const [nm,fn] of [['simulation',async()=>{}],['blank',async p=>{await p.evaluate(()=>{S=blank();renderAll();});}]]){
       await fn(A);await fn(B);
+      /* v21.96 marks the simulation note noprint; the committed TE-1 has no such mark, so its words are taken out of the
+         committed print text before the two are compared (read on screen, where the live page still shows them) */
+      await B.emulateMedia({media:'screen'});
+      const hid=await B.evaluate(()=>[...document.querySelectorAll('main.sheet .noprint')].map(e=>(e.innerText||'').replace(/\s+/g,' ').trim()).filter(s=>s.length>=10));
       await A.emulateMedia({media:'print'});await B.emulateMedia({media:'print'});
-      const ta=await A.evaluate(()=>document.querySelector('main.sheet').innerText),tb=await B.evaluate(()=>document.querySelector('main.sheet').innerText);
-      ok('1 '+nm+': the printed text is the committed one',ta===tb,{a:ta.length,b:tb.length,firstDiff:[...ta].findIndex((c,i)=>c!==tb[i])});
+      const norm=s=>s.replace(/\s+/g,' ').trim();
+      let ta=norm(await A.evaluate(()=>document.querySelector('main.sheet').innerText));const tb=norm(await B.evaluate(()=>document.querySelector('main.sheet').innerText));
+      hid.forEach(s=>{ta=ta.split(s).join(' ');});ta=norm(ta);
+      ok('1 '+nm+': the printed text is the committed one (the screen-only note aside)',ta===tb,{a:ta.length,b:tb.length,firstDiff:[...ta].findIndex((c,i)=>c!==tb[i]),hid:hid.map(s=>s.slice(0,30))});
       const pv=await printVis(B);ok('1 '+nm+': neither #lkPrint, the link heading nor the Guide paragraph prints',!pv.print&&!pv.head&&!pv.guide&&!pv.panel,pv);
       await A.emulateMedia({media:'screen'});await B.emulateMedia({media:'screen'});
       const pa=(await A.pdf({format:'Letter'})).toString('latin1').match(/\/Type\s*\/Page[^s]/g).length,pb=(await B.pdf({format:'Letter'})).toString('latin1').match(/\/Type\s*\/Page[^s]/g).length;

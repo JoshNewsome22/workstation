@@ -100,6 +100,7 @@ const errsOf=log=>log.filter(x=>(x.type==='pageerror'||x.type==='error')&&!/ERR_
   const off=await pg.evaluate(()=>{const s=__nbhStaffPage.state();return {msg:document.getElementById('sdMsg').textContent,out:s.out.length,date:s.out[0]&&s.out[0].date,old:document.getElementById('old').hidden};});
   ok('14 with no signal Send says Not sent yet and keeps the entry on the phone (for the date chosen)',/Not sent yet/.test(off.msg)&&off.out===1&&off.date===T.yday,off);
   await ph.setOffline(false);await pg.reload({waitUntil:'load'});await sleep(1500);
+  await pg.waitForFunction(()=>/^Sent\./.test(document.getElementById('sdMsg').textContent),null,{timeout:10000}).catch(()=>{});   /* v21.97 the send on opening takes its own time */
   const on=await pg.evaluate(()=>{const s=__nbhStaffPage.state();return {msg:document.getElementById('sdMsg').textContent,out:s.out.length,sent:s.sent.length,date:document.getElementById('sdDate').value};});
   ok('15 back online the waiting entry goes by itself (opening the page again), says Sent., and the page moves to today',on.out===0&&on.sent===2&&/^Sent\./.test(on.msg)&&on.date===T.today,on);
   /* Mr. B on the same phone: another link, its own record on the phone */

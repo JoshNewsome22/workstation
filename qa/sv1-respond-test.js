@@ -15,7 +15,7 @@ const answer=async(rp,name,mode,pick,opens)=>rp.evaluate(([name,mode,pick,opens]
  /* the blank print, before anything is entered */
  await page.goto(URL);await sleep(700);await page.emulateMedia({media:'print'});const blankNow=pages(await page.pdf({preferCSSPageSize:true,printBackground:true}));await page.emulateMedia({media:null});
  let blankPre=4;if(fs.existsSync(PRE)){const p2=await ctx.newPage();await p2.goto('file://'+PRE);await sleep(700);await p2.emulateMedia({media:'print'});blankPre=pages(await p2.pdf({preferCSSPageSize:true,printBackground:true}));await p2.close();}
- ok('blank print page count unchanged against the pre-edit file ('+blankPre+')',blankNow===blankPre,{blankNow,blankPre});
+ ok('blank print page count: one fewer than the pre-edit file ('+blankPre+'): since v21.96 the two on-screen hints no longer print',blankNow===blankPre-1,{blankNow,blankPre});
  await page.evaluate(()=>{window.confirm=()=>true;window.alert=m=>{(window.__al=window.__al||[]).push(String(m));};});
  ok('library loaded beside the form',await page.evaluate(()=>!!window.NBH_RESPOND&&!window.NBH_RESPOND_MISSING));
  ok('toolbar has the two buttons; the email field is on Setup',await page.evaluate(()=>!!document.querySelector('#rpBtn')&&!!document.querySelector('#rcBtn')&&!!document.querySelector('[data-m="email"]')));

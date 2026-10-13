@@ -9574,3 +9574,16 @@ kept: the same file, in the same folder of the same school Drive.
 Checked by `qa/v2189-drive-test.js` (checks 25 and 26: a case of about 5.6 MB from a third computer goes up by one
 resumable upload over the same file, is marked synced, and the laptop's next sync brings it down whole; no multipart body
 over 5 MB is ever sent, and the simulated Drive refuses one with 413 the way Google does).
+
+The paper changes v21.96 meant (the simulation notes and on-screen hints of 29 forms, TD-1's toolbar sentence, MT-1's
+timing row, TI-1's hint, SV-1's two hints, and the references section at the end of the packet) moved the print baselines
+of the checks that compare a form with an earlier commit or the previous release: `qa/sprint-a3-test.js` (A3_BASE) and
+`qa/sprint-a6-test.js` (A6_BASE, A6_LAYOUT_BASE) now compare with the release's merge commit; `qa/v2192-design-test.js`
+lists an intended change (WS_PRINT_CHANGED, as `qa/v2193-fields-test.js` does) instead of failing; `qa/link-te1-test.js`
+takes the screen-only note's words out of the committed TE-1's print text before comparing; `qa/sv1-respond-test.js`
+expects one page fewer than its pre-edit file; `qa/master33.js` counts the references appendix apart from the 46 forms.
+Four checks that depended on the clock or on a busy machine are steadier: `qa/v2174-test.js` is pinned to the Monday it was
+written on like the two DD-1 tests before it, `qa/wording-client-test.js` opens both copies of OB-1 at the same minute (its
+time field defaults to now), `qa/v2191-history-test.js` waits for the form's new fingerprint before opening History,
+`qa/v2185-p-test.js` waits for the staff page's Sent. message, and the journey's signatures are drawn in steps with three
+tries. `qa/tk1-bus-test.js` waits for the small player.

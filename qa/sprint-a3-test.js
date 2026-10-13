@@ -48,7 +48,7 @@ const OUT=__dirname+'/out/sprint-a3/';
 const F=forms(ED),OB=F.find(f=>f.id==='OB-1');
 if(!OB){console.error('FAIL no OB-1 in '+ED);process.exit(1);}
 const FORM=BASE+'/'+ED+'/'+OB.file,SHELL=BASE+'/'+ED+'/index.html';
-const A3_BASE=process.env.A3_BASE||'683061a';
+const A3_BASE=process.env.A3_BASE||'ec41bf4';   /* v21.97 re-baselined: v21.96 took OB-1's simulation note off the paper on purpose */
 /* a record in the shape OB-1 saved it in v21.24: ivUsed on each observation, no second-observer fields, narrative times typed
    as h:mm (1:09 is after lunch); A3_OLD can name a real earlier file as well */
 const A3_OLD=process.env.A3_OLD||'';
@@ -432,12 +432,16 @@ async function print(br){
   if(!base){console.log('NOTE the form at '+A3_BASE+' is not in this checkout (set A3_BASE): print comparison skipped');return;}
   const dirs={base:OUT+'print/base/',now:OUT+'print/now/'};Object.values(dirs).forEach(d=>{fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});});
   fs.mkdirSync(OUT+'base/',{recursive:true});fs.writeFileSync(OUT+'base/'+OB.file,base);
+  /* v21.97 a form of a release since v21.84 loads shared files beside it: the whole folder at A3_BASE is checked out and served */
+  const bd=OUT+'base-'+A3_BASE+'/';if(!fs.existsSync(bd+ED+'/'+OB.file)){fs.rmSync(bd,{recursive:true,force:true});fs.mkdirSync(bd,{recursive:true});
+    try{execFileSync('sh',['-c','git -C "$0" archive "$1" "$2" | tar -x -C "$3"',ROOT,A3_BASE,ED,bd]);}catch(e){}}
+  const whole=fs.existsSync(bd+ED+'/'+OB.file);
   /* served beside the checkout when the server's root is WS_ROOT; read from the disk otherwise. (fix pass) Asked with a
      plain request, so a server whose folder is not WS_ROOT answers 404 without a console error in the page. */
-  let baseUrl=BASE+'/qa/out/sprint-a3/base/'+encodeURIComponent(OB.file);
+  let baseUrl=whole?BASE+'/qa/out/sprint-a3/base-'+A3_BASE+'/'+ED+'/'+encodeURIComponent(OB.file):BASE+'/qa/out/sprint-a3/base/'+encodeURIComponent(OB.file);
   const ctx=await br.newContext({viewport:{width:1280,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
   const page=await ctx.newPage();watch(page,'print');page.on('dialog',d=>d.accept().catch(()=>{}));
-  const r=await ctx.request.get(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+OUT+'base/'+OB.file;
+  const r=await ctx.request.get(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+(whole?bd+ED+'/':OUT+'base/')+OB.file;
   await page.goto(FORM);await sleep(700);await page.evaluate(()=>{window.confirm=()=>true;});
   await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(700);
   const data=OUT+'print-data.json';fs.writeFileSync(data,await page.evaluate(()=>JSON.stringify(state,null,1)));
