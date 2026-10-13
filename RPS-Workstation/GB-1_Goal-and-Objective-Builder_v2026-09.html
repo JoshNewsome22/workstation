@@ -948,14 +948,14 @@ ol.gs .gs-id{font-family:var(--sans);font-weight:600;margin-right:3px}
 </div>
 
 <h3 class="sub">Where Baselines and Criteria Come From</h3>
-<p>Every baseline and criterion on this form can be typed in directly. Where the
+<p class="noprint">Every baseline and criterion on this form can be typed in directly. Where the
 treatment plan (TD-1) already carries the number, <b>Apply to empty fields</b> copies it
 into the first reduction objective and the first acquisition objective on the form, so the
 goal starts from the plan's numbers. A copied value is an ordinary entry: it is not updated
 if the plan changes later, and editing it is an override &mdash; say why in that
 objective's note.</p>
 
-<div id="planState" class="warn"><b>No plan data loaded.</b> Open this form inside the
+<div id="planState" class="noprint warn"><b>No plan data loaded.</b> Open this form inside the
 workstation alongside TD-1, or use <b>Import from case file</b> above. You can also
 simply type every value yourself.</div>
 
@@ -971,7 +971,7 @@ simply type every value yourself.</div>
     <tr><td>Independence criterion</td><td>TD-1 &middot; Alternative independent</td><td id="pv_ind">&mdash;</td></tr>
   </tbody>
 </table>
-<p class="method">Nothing is copied silently: pressing <b>Apply to empty fields</b> below
+<p class="noprint method">Nothing is copied silently: pressing <b>Apply to empty fields</b> below
 fills only the fields you have not written in yourself. The plan states its baseline and
 criterion as rates per minute, so they go only into an objective measured in rate per minute,
 and its number of consecutive sessions comes with its unit, sessions.</p>
@@ -1232,11 +1232,11 @@ function showPlan() {
   const box = $('#planState');
   if (!box) return;
   if (PLAN && Object.keys(PLAN).length) {
-    box.className = 'note';
+    box.className = 'noprint note';
     box.innerHTML = '<b>Plan data loaded' + (PLAN.__src ? ' from ' + esc(PLAN.__src) : '') +
       '.</b> Press <b>Apply to empty fields</b> to use it. Anything you have already typed is left alone.';
   } else {
-    box.className = 'warn';
+    box.className = 'noprint warn';
     box.innerHTML = '<b>No plan data loaded.</b> Open this form inside the workstation alongside TD-1, ' +
       'or use <b>Import from case file</b> above. You can also simply type every value yourself.';
   }
@@ -3406,6 +3406,8 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 #nbhUiDlg .u-f button.primary{background:#182e43;color:#fff;border-color:#182e43;font-weight:600}
 #nbhUiDlg .u-f button.danger{background:#a8321e;color:#fff;border-color:#a8321e;font-weight:600}
 @media print{#nbhToasts,#nbhUiDlg{display:none!important}}
+/* v21.96 screen-only notes in every form (About the simulation, how to work the toolbar): never on paper */
+@media print{.noprint{display:none!important}}
 /* view progress: a dot after each view's name */
 #viewSeg button[data-nbh-fill]::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;border:1px solid rgba(255,255,255,.55);background:transparent}
 #viewSeg button[data-nbh-fill="part"]::after{background:#e3b341;border-color:#e3b341}

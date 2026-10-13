@@ -6,11 +6,14 @@
    release run does this), every one of the 46 forms prints the same words in the same places from both, with a mouse and with
    a finger (PA-1 draws a random item order on every open; those item numbers are read as the same). Chromium; simulated data
    only (nothing is typed; the forms are read as they open).
-   usage: node qa/v2193-fields-test.js     (WS_PREV_URL=http://127.0.0.1:8128 for the print comparison) */
+   usage: node qa/v2193-fields-test.js     (WS_PREV_URL=http://127.0.0.1:8128 for the print comparison; WS_PRINT_CHANGED=all or a list of
+   form ids when a release changed paper on purpose) */
 const {chromium,BASE,sleep,forms}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
 const IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 const PREV=process.env.WS_PREV_URL||'';
+/* v21.96 a release that changes paper on purpose names the forms (or 'all') in WS_PRINT_CHANGED: their differences are listed, not failed */
+const CHANGED=process.env.WS_PRINT_CHANGED||'';
 const measure=()=>{const vis=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0;};
   const F=[...document.querySelectorAll('.nbh-fld')].filter(vis);
   const ul=F.filter(e=>e.classList.contains('nbh-ul')).length,box=F.filter(e=>e.classList.contains('nbh-box')),was=F.filter(e=>e.classList.contains('nbh-was-ul')).length;
@@ -61,12 +64,13 @@ const pdfText=(shell,buf)=>shell.evaluate(async b64=>{const lib=await pdfjsLoad(
   if(!PREV)console.log('(set WS_PREV_URL to the previous release’s address to compare every form’s printed pages word for word)');
   else{const sctx=await br.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});const shell=await sctx.newPage();await shell.goto(BASE+'/NBH-Workstation/index.html');await sleep(1500);
     for(const [tag,o] of [['mouse',{}],['touch',{hasTouch:true,isMobile:true,userAgent:IPAD,viewport:{width:820,height:1180}}]]){
-      const diff=[];let n=0;const ctx=await br.newContext(Object.assign({viewport:{width:1180,height:820},serviceWorkers:'block'},o));
+      const diff=[],meant=[];let n=0;const ctx=await br.newContext(Object.assign({viewport:{width:1180,height:820},serviceWorkers:'block'},o));
       for(const f of list){const R={};
         for(const [w,base] of [['prev',PREV],['now',BASE]]){const p=await ctx.newPage();try{await p.goto(base+'/NBH-Workstation/'+f.file);await sleep(900);await p.emulateMedia({media:'print'});await sleep(200);
             R[w]=await pdfText(shell,await p.pdf({preferCSSPageSize:true,printBackground:true}));}catch(e){R[w]=['ERR '+String(e).slice(0,60)];}await p.close();}
-        n++;const same=R.prev.length===R.now.length&&R.prev.every((t,i)=>t===R.now[i]);if(!same)diff.push({id:f.id,prev:R.prev.length,now:R.now.length,page:R.prev.findIndex((t,i)=>t!==R.now[i])+1});}
-      ok('8 printed with a '+tag+': all '+n+' forms print the previous release’s pages, every word in the same place',n===list.length&&!diff.length,diff.slice(0,6));
+        n++;const same=R.prev.length===R.now.length&&R.prev.every((t,i)=>t===R.now[i]);if(!same)(CHANGED==='all'||CHANGED.split(',').includes(f.id)?meant:diff).push({id:f.id,prev:R.prev.length,now:R.now.length,page:R.prev.findIndex((t,i)=>t!==R.now[i])+1});}
+      if(meant.length)console.log('   (paper changed on purpose in this release, WS_PRINT_CHANGED: '+meant.map(m=>m.id+' '+m.prev+'>'+m.now+' pages').join(', ')+')');
+      ok('8 printed with a '+tag+': all '+n+' forms print the previous release’s pages, every word in the same place'+(meant.length?' (except the '+meant.length+' whose paper changed on purpose)':''),n===list.length&&!diff.length,diff.slice(0,6));
       await ctx.close();}
     await sctx.close();}
   }catch(e){ok('the run finished',false,String(e&&e.stack||e).slice(0,600));}

@@ -163,6 +163,16 @@ has neither and takes pasted text instead. (PDF.js's module files are named `.js
 serves them as JavaScript; the recognizer's model is a `.gz` file it unpacks itself, and a host that
 unpacks `.gz` files on the way out does no harm.)
 
+From v21.94 the speech recogniser that **Dictate** (every form's toolbar, the Log it now
+sheet) and Form TV-1's *Follow my words* use lives in `nbh-asr/` beside the forms: 57 MB
+in 32 parts, which never change between versions, so they are not in the workstation's
+zip. They come in a zip of their own, `RPS-Workstation_speech.zip`, extracted once into
+the same folder (it makes `nbh-asr/` next to the forms). A device downloads the parts the
+first time Dictate or Follow my words is chosen, after a confirm, and keeps them; the
+offline list leaves them out, so nobody downloads them who does not use them. Without the
+folder on the site, Dictate says the recogniser could not be fetched and the rest of the
+workstation is unaffected.
+
 Because of the cache rule, everyone gets the new version on their next visit.
 If a form still looks old, a hard reload (⌘⇧R, Ctrl⇧R) settles it.
 

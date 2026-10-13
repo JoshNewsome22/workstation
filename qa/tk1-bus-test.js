@@ -147,6 +147,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const capAt=await page.evaluate(()=>{const c=TKWALK.cues.find(q=>q.id==='b_route');return c.start+c.dur*.6;});
   const capBar=async()=>page.evaluate(async t=>{const pr=TKVIDEO.frame(t,1280);window.dispatchEvent(new Event('resize'));const cv=await pr,g=cv.getContext('2d'),d=g.getImageData(240,600,800,100).data;let n=0;for(let i=0;i<d.length;i+=4)if(d[i]<60&&d[i+1]<60&&d[i+2]<70)n++;return n;},capAt);
   await page.setViewportSize({width:700,height:900});await sleep(800);
+  await page.waitForFunction(()=>document.getElementById('wkPlayer').classList.contains('wk-small'),null,{timeout:8000}).catch(()=>{});   /* v21.97 a busy machine takes longer to lay the player out small */
   const small=await page.evaluate(()=>document.getElementById('wkPlayer').classList.contains('wk-small'));const withCap=await capBar();
   await page.evaluate(()=>document.getElementById('wkCc').click());await sleep(200);const noCap=await capBar();await page.evaluate(()=>document.getElementById('wkCc').click());
   const restored=await page.evaluate(()=>getComputedStyle(document.querySelector('#wkStage .wk-cap')).display);

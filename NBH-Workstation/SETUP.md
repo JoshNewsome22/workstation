@@ -9428,3 +9428,149 @@ boxed field bordered on four sides and 36 px tall, no label under 12 px, no read
 errors); DM-1 and TB-1 carrying the fields that were lines, FS-1 none; TD-1's guide paragraphs capped; and, against the
 release before, all 46 forms printing the same words in the same places, with a mouse and with a finger (PA-1 draws a
 random item order for its series on every open; those item numbers are read as the same).
+
+### v21.94: log it now, and dictation
+
+Two ways to get what happened into the case while it is fresh, from an iPad in the classroom or a phone in the hall.
+
+- **Log it now.** A button on the start screen (beside New student and Caseload), first in the Today list's row, and a
+  command in the Find box (`Log it now`). The sheet asks for what Form DD-1's own *Log an incident* asks: the date and
+  the time (now), the behavior (the case's targets are offered), physical intervention, before it (A), what happened (B),
+  what adults did (C), how it ended, who recorded it. The student is the one on screen; with none, one of the students
+  kept on this device is picked from a list, and that student's case opens (Save first is offered as usual, when another
+  case has unsaved work). Form DD-1 logs the incident itself, exactly as its dialog would: the behavior matched to the
+  sheet by name (case aside; a behavior not on the sheet is kept by its name), the day's count added for a behavior
+  counted by frequency, a restraint or a seclusion starting Form CR-1's notice clock. It lands as *Home told: not yet*
+  (the Today list says so) and Form ABC-1's *Add DD-1's incidents* brings it into the ABC record as before.
+  How it is done: the workstation sends the form a `log-incident` message and the form answers `incident-logged`
+  (`dd-v2194` in Form DD-1; `nbh-v2194` in the workstation page).
+- **Dictate.** A switch in every form's toolbar, beside the view buttons (and Focus, on a form opened on its own), and
+  one on the Log it now sheet. Press it from a text box and what you say is written into that box, at the cursor, with
+  a capital after a full stop; say *period*, *comma*, *question mark*, *new line* or *new paragraph* for those. A strip
+  at the foot of the window shows the words as they come and a Stop button (Escape stops too); press the switch again
+  to stop. The words are heard on the device by the speech recogniser Form TV-1 uses to follow a script (sherpa-onnx,
+  Apache License 2.0, with a small streaming English model): 57 MB, downloaded from the workstation's website once,
+  after a confirm, and kept on the device under the same name TV-1 keeps it, so one download serves both. It runs in a
+  worker on the device: what the microphone hears is not recorded, kept or sent anywhere. Safari asks for the microphone
+  the first time; allow it for the site. The one-file edition (a page opened from a file) cannot fetch the recogniser
+  and says so. The recogniser knows no punctuation of its own and writes plain words; names and clinical terms it has
+  not heard come out as the nearest words it knows, so read a dictated line before it goes to a parent.
+  How it is done: `nbh-dictate.js` beside the forms (loaded when the switch is first pressed), the switch itself in the
+  shared `nbh-ui` block (`tools/blocks/nbh-ui.html`). Nothing prints.
+
+Checked by `qa/v2194-log-test.js` (the start screen's button; the sheet with the students to pick from, today and the
+time now; a student's case opening with Form DD-1 and the incident as logged; the words the workstation says; the Today
+list's button; a second incident matched to the simulated sheet's behavior, with a restraint, counted for the day; the
+Today list carrying both; the command; the sheet on a phone) and `qa/v2194-dictate-test.js` (a spoken recording made
+from Form TK-1's narration, played by Chromium's fake microphone: the tidying of what is heard, the words landing at the
+cursor, the toolbar switch on a form of its own and the sheet's switch, the words heard against the clip's words, stop).
+
+The school site needs `nbh-asr/` beside the forms for Dictate and for TV-1's *Follow my words*: it is not in the
+workstation's zip (57 MB that never changes), but in a zip of its own, uploaded once (HOSTING.md).
+
+### v21.95: the Home note, and the month's caseload for the supervisor
+
+- **Home note** (the Today list's row, and `Home note` in the Find box): a progress note for the family, written from the case
+  and read before it goes. From Form DD-1's data (each behavior: where it started, where it is now, the aim; the last 20
+  school days with data, by condition where the sheet has more than one), GB-1's objectives as written, PR-1's last review
+  and next review date, and DM-1's home contact (the one who holds rights, else the parent or guardian listed first; the
+  home language and whether an interpreter is needed). In **English or Spanish**: the fixed wording is the workstation's own,
+  the names, numbers and goals the case's; the note opens in Spanish when DM-1 says the home language is. Every line on the
+  sheet can be edited; the box *What you can do at home* is the BCBA's to fill. **Print** makes the letter (the edition's
+  logo on it); **Send by email** sends it from the school Google account by the same path the forms use (the confirm, the
+  sign-in), to the home email on DM-1, with the note as text and as a page; with no address, or when sending is declined,
+  the Mail app opens with the note instead; **Copy the text** copies it. Nothing leaves the device unless Send is pressed.
+  The numbers are means over the days with data; a behavior's line is good news when its aim is met or it moved a fifth of
+  the way in the right direction. Read a note before it goes: the page does not judge a goal's wording; the BCBA does.
+  How it is done: `nbh-v2195` in the workstation page (`hnParts`, `hnSheetHtml`, the strings table `HN_T`); DM-1's
+  `dm-v2195` adds the home contact to the profile facts (`profile.home`); `mailFor` takes a request from the page itself.
+- **Monthly summary** (the Caseload dialog's tools, beside the restraint report, and `Caseload summary` in the Find box): one
+  month at a time, from the students kept on this device, each as at their last Save case: incidents, restraints and
+  seclusions, how many home was told about, aims met, the last integrity score (▼ below the criterion), consent on file, the
+  last day of data, what needs the BCBA now. A lead line sums the month. **Print (landscape)** and **Copy for a spreadsheet**
+  (tab-separated, with a totals line). Names follow the initials setting. Nothing leaves the device.
+
+Checked by `qa/v2195-note-test.js` (the simulated case: the facts, the note opening in Spanish with the sections and a row per
+behavior, the incident line, the English note with the first row's numbers, the period and interpreter lines, an edit on the
+sheet reaching Print, Send and Copy, the message handed to the mail path, the command, a phone) and `qa/v2195-caseload-test.js`
+(three simulated records: the button, this month's rows and lead line, last month's, the copy text, the landscape print, the
+command, initials on a phone).
+
+### v21.96: the master print reads as a report
+
+A full master print of the simulated case (thirteen forms) was read page by page as a document. It was a stack of filled
+forms: every form opened with its Guide (22 pages of evidence and guidance text between the student's records), every sheet
+started a new page (21 of 249 pages carried a few lines), the full letterhead repeated on every sheet, each form ended with its
+own reference list, and notes about the software printed in the record ("Load simulation (toolbar) fills the form with a worked
+example", "Press Apply to empty fields", "set the number of informants in the toolbar"). The packet is now shaped for the
+report, in `packetShape` (index.html), before each form's section goes in:
+
+- **Guides out.** `#guide`, `[data-pane="guide"]` and any sheet whose title starts "Guide" are dropped, unless **Packet
+  options** keeps that form's Guide (per form, off by default; Form TD-1's own print toggle is overridden the same way).
+- **References once, at the end.** Reference sheets (`#refs`, a sheet titled References or Sources), a block under a
+  References / Sources / Reference list heading and every `.cite` foot are taken out and gathered into a last section,
+  "References and Sources", grouped by form with repeats dropped (`refLines`, `packetRefs`); bullets and line breaks make the
+  entries, headings and the "Related forms" lines are left out. Packet options: at the end (default), with each form, or left
+  out.
+- **One letterhead, a section line, the section in the running head.** Only the first `.nbh-print-head` of a section stays;
+  a thin line above it says "Section n of N · Form XX-1"; each section is a named page (`@page pgN{@top-center{…}}`,
+  `.mp-N{page:pgN}`) so Chrome and Edge print "n · title" between the practice and the student on every page. On a PDF saved
+  from Safari, **Finish PDF** writes the same line (`marks.titles`, `stampHeads` in nbh-pdf-tools.js). Chromium 141 breaks the
+  page between a table's caption or footer and the table under a named page, so a `caption` becomes a block before the table
+  (`.mp-cap`) and `tfoot` rows an ordinary body; the one card this still split (Form TD-1's parent-signature card) is laid
+  out as an atomic inline-block in the packet.
+- **The sheets run on.** A sheet that is a filled report sheet (holds values, and is not mostly empty boxes) follows the one
+  before it after a gap (`data-mp-flow`); a sheet that is a document of its own keeps a page of its own (`data-mp-keep`):
+  Form IC-1's consent, additional consent, assent and record, Form TD-1's final plan and integrity log, Form OB-1's
+  observation records, and any sheet carrying a signature. A form printed blank keeps its pages as before. A table of more
+  than twenty rows may break across pages with its header row repeated (`data-mp-flowtbl`; Form ABC-1's log is left to the
+  form). Signature blocks, two-up blocks, figures and verdict boxes stay whole.
+- **The cover** carries a Period row from the case (the data's span and school days, consent, the plan review), each form's
+  sheet names under its entry (one line, cut with an ellipsis), the References entry, and the confidentiality box at the foot
+  (a flex column; thirteen forms fit one page). The contents marker Finish PDF reads moved onto the entry's link, so the page
+  number lands on the title line, not under the sheet names.
+- **On-screen notes never print.** Every form's "About the simulation" heading and its "Load simulation …" paragraph carry
+  `noprint`; sentences about the toolbar, buttons or the screen in a sheet's instructions are wrapped `<span class="noprint">`
+  (Forms TB-1, IA-1, PA-1, RA-1, DA-1, EA-1, TD-1, GB-1, SA-1, CF-1, SV-1, TI-1, ST-1, CN-1, CR-1, DT-1, MS-1, MT-1, SI-1);
+  Form GB-1's "Where baselines and criteria come from" keeps its heading and table and drops the Apply instructions and the
+  plan-state notice. The shared nbh-ui block now carries `@media print{.noprint{display:none!important}}`, so the four forms
+  that had the class without the rule (AD-1, DD-1, DT-1, VI-1) hide theirs too. The packet removes `.noprint` elements
+  outright. This is a change to the forms' own prints as well (Print this form), so the fields test's paper comparison takes
+  `WS_PRINT_CHANGED=all` for this release. The sweep that found them is reproducible: open every form under print media and
+  list the visible text that mentions the toolbar, buttons, clicks, the screen or the simulation.
+- **Unused parts.** With data in the form, Form TD-1's empty "Data collected" and "Materials and cues" boxes and the unticked
+  rows of Form DM-1's packet list stay out (Packet options: print the empty boxes).
+- **Form ABC-1's log compact** (default; Packet options: full): smaller type and tighter rows, the narrative kept (a two-line
+  clamp made Chromium print one row a page).
+- **Keep-together** in the forms' own print CSS: Form IC-1's signatures are one block (`.ic-sigs`) and the two signature
+  boxes sit side by side as inline-blocks (a grid item's `break-inside:avoid` is not honoured); Form IA-1's worksheets
+  (`.twoup`) stay whole.
+- **Packet options** (under the list of forms; kept in `localStorage['nbh.packet']`): the Guides of the ticked forms that
+  have one, the references, the ABC-1 log, the empty boxes. The Week and IEP prints go through the same shaping.
+
+The simulated packet: 249 pages before, 211 after (6 of them the references); 21 pages under a third full before, 13 after,
+and those are chart or signature pages. Still inherent: a chart block that moves whole to the next page leaves the page before
+it short (Forms RR-1, IA-1), and Form TD-1's implementation plan ends with signature lines that can fall alone on a page.
+
+Two tests were pinned to the Monday they were written on: `qa/v2175-test.js` and `qa/dd1-sheet-test.js` read Form DD-1's
+simulation, which is dated from today, and expected Monday's dates; they now fix the page's clock (`page.clock.setFixedTime`).
+
+Checked by `qa/v2196-packet-test.js` (the simulated case: the cover, the section lines and running heads, one letterhead, no
+Guide, reference sheet or on-screen note in the record, the references section with repeats dropped, captions and footers as
+rows, the sheets flowing, the compact log and the empty boxes out, the options kept and changing the packet, the dialog,
+Form TB-1 printed on its own) and `qa/v2190-ipad-pdf-test.js` (the section line Finish PDF writes on a Safari PDF, the
+references section's bookmark).
+
+### v21.97: a case of any size reaches Google Drive
+
+Drive sync (v21.89) sent each case to Google in one request holding the file's details and its content together (Google's
+multipart upload). Google takes that kind of request for a body of 5 MB at most, so a case over that (one with Form TV-1's
+music in it, or many pictures on the boards) did not sync, and the chip said Drive answered 413. A case of 4 MB or more now
+goes up the way Google asks for larger files (the resumable upload): the details first, Google answers with an address for
+the content, and the content goes to that address in one PUT. A smaller case still goes in the one request, as before. The
+copy that comes down (the next sync on the other device) was never limited. Nothing changes in what is sent or where it is
+kept: the same file, in the same folder of the same school Drive.
+
+Checked by `qa/v2189-drive-test.js` (checks 25 and 26: a case of about 5.6 MB from a third computer goes up by one
+resumable upload over the same file, is marked synced, and the laptop's next sync brings it down whole; no multipart body
+over 5 MB is ever sent, and the simulated Drive refuses one with 413 the way Google does).
