@@ -7330,7 +7330,7 @@ function lnBehaviors(){const f=state.facts||{};return [...new Set((f.behaviors||
 function lnOnScreen(){return !!(Object.keys(state.frames).length||Object.keys(state.pending).length);}
 async function logNowOpen(){
   const p=packet();let who=[];
-  if(lnOnScreen()&&p.client){try{await gatherFacts(false);}catch(e){}who=[{key:clKey(p),name:p.client}];}
+  if(p.client){if(lnOnScreen()){try{await gatherFacts(false);}catch(e){}}who=[{key:clKey(p),name:p.client}];}   /* the student in the bar, forms open or not yet */
   else{const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));who=L.map(r=>({key:r.key,name:clName(r)}));}
   if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
   const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
@@ -7352,7 +7352,7 @@ async function logNowOpen(){
 }
 function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
 async function lnDeliver(key,inc){
-  if(!(lnOnScreen()&&key===clKey(packet()))){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
+  if(key!==clKey(packet())){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
   else if(!state.frames['DD-1'])openForm('DD-1');
   if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
   await new Promise(r=>setTimeout(r,250));

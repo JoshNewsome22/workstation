@@ -41,6 +41,7 @@ async function mkWav(br){   /* one narration clip, decoded and resampled to 16 k
   /* ---- 2. a form on its own: the toolbar switch, the fake microphone, the words in the box ---- */
   {const ctx=await br.newContext({viewport:{width:1180,height:820},serviceWorkers:'block',permissions:['microphone']});const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));
     await page.goto(BASE+'/NBH-Workstation/DM-1_Student-Demographics-and-Profile_v2026-09.html');await sleep(1200);
+    await page.evaluate(()=>{nbhUI.confirm=async()=>true;});   /* the one-time download is agreed to */
     const b=await page.evaluate(()=>{const b=document.getElementById('nbhDictBtn'),f=document.getElementById('nbhFocusBtn');return {has:!!b,inToolbar:!!(b&&b.closest('.toolbar')),afterFocus:!!(f&&f.nextElementSibling===b),pressed:b&&b.getAttribute('aria-pressed'),text:b&&b.textContent.trim(),h:b&&Math.round(b.getBoundingClientRect().height)};});
     ok('3 the toolbar carries a Dictate switch beside the Focus switch',b.has&&b.inToolbar&&b.afterFocus&&b.pressed==='false'&&b.text==='Dictate',b);
     await page.evaluate(()=>{document.activeElement&&document.activeElement.blur();});await page.click('#nbhDictBtn');await sleep(900);
