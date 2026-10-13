@@ -48,7 +48,7 @@ const OUT=__dirname+'/out/sprint-a3/';
 const F=forms(ED),OB=F.find(f=>f.id==='OB-1');
 if(!OB){console.error('FAIL no OB-1 in '+ED);process.exit(1);}
 const FORM=BASE+'/'+ED+'/'+OB.file,SHELL=BASE+'/'+ED+'/index.html';
-const A3_BASE=process.env.A3_BASE||'683061a';
+const A3_BASE=process.env.A3_BASE||'ec41bf4';   /* v21.97 re-baselined: v21.96 took OB-1's simulation note off the paper on purpose */
 /* a record in the shape OB-1 saved it in v21.24: ivUsed on each observation, no second-observer fields, narrative times typed
    as h:mm (1:09 is after lunch); A3_OLD can name a real earlier file as well */
 const A3_OLD=process.env.A3_OLD||'';

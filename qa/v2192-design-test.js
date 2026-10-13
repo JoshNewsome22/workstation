@@ -165,14 +165,16 @@ const pdfText=(shellPage,buf)=>shellPage.evaluate(async b64=>{const lib=await pd
     let rest=css;blocks.forEach(b=>{rest=rest.replace(b,'');});
     const NEW=['.toolbar > .tgroup{flex-direction:row','html .toolbar #viewSeg{flex:0 1 auto;flex-wrap:nowrap','[data-nbh-more="r"]','.nbh-toast button{min-width:44px'];
     ok('36 every v21.92 rule in a form is a screen rule for a touch screen (paper cannot see it): '+NEW.length+' rules checked',blocks.length>=3&&NEW.every(sel=>blocks.some(b=>b.indexOf(sel)>=0)&&rest.indexOf(sel)<0),NEW.map(sel=>[sel.slice(0,30),blocks.some(b=>b.indexOf(sel)>=0),rest.indexOf(sel)>=0]));
-    const PREV=process.env.WS_PREV_URL||'';
+    const PREV=process.env.WS_PREV_URL||'',CHANGED=(process.env.WS_PRINT_CHANGED||'').split(',').filter(Boolean);   /* v21.97 a release that means to change a form's paper lists it (all, or ids) */
     if(!PREV)console.log('(set WS_PREV_URL to the previous release\u2019s address to compare the printed pages word for word)');
     else{const TD='TD-1_Function-Based-Treatment-Developer_v2026-09.html',R={};
       for(const [id,file] of [['DM-1',DM],['TD-1',TD]])for(const [tag,o] of [['mouse',{}],['touch',{hasTouch:true,isMobile:true,userAgent:UA.ipad,viewport:{width:820,height:1180}}]])for(const [w,base] of [['prev',PREV],['now',BASE]]){
         const c=await br.newContext(Object.assign({viewport:{width:1180,height:820},serviceWorkers:'block'},o));const p=await c.newPage();await p.goto(base+'/NBH-Workstation/'+file);await sleep(1500);
         await p.emulateMedia({media:'print'});await sleep(300);R[id+' '+tag+' '+w]=await pdfText(page,await p.pdf({preferCSSPageSize:true,printBackground:true}));await c.close();}
       for(const id of ['DM-1','TD-1'])for(const tag of ['mouse','touch']){const a=R[id+' '+tag+' prev'],b=R[id+' '+tag+' now'];const same=a.length===b.length&&a.every((t,i)=>t===b[i]);
-        ok('37 '+id+' printed with a '+tag+' is the previous release\u2019s print: '+a.length+' pages, every word in the same place',same&&a.length>=2,{prev:a.length,now:b.length,first:a.findIndex((t,i)=>t!==b[i])+1});}}
+        const meant=!same&&(CHANGED.includes('all')||CHANGED.includes(id));
+        if(meant)console.log('NOTE 37 '+id+' printed with a '+tag+': the paper changed, as this release means it to (pages '+a.length+' -> '+b.length+', first at '+(a.findIndex((t,i)=>t!==b[i])+1)+')');
+        else ok('37 '+id+' printed with a '+tag+' is the previous release\u2019s print: '+a.length+' pages, every word in the same place',same&&a.length>=2,{prev:a.length,now:b.length,first:a.findIndex((t,i)=>t!==b[i])+1});}}
     await ctx.close();}
   /* ---- 6. the review's extras: reading lines no longer than about 76 characters, keyboard hints only with a keyboard, the
      tabs without a "View" label on a touch screen, the focus bar's label in sentence case, a dialog using 70% of a phone ---- */

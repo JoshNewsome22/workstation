@@ -28,11 +28,12 @@ const DIR=__dirname+'/out/print/master33'; L.fs.mkdirSync(DIR,{recursive:true});
   const [popup]=await Promise.all([page.waitForEvent('popup',{timeout:120000}),page.evaluate(()=>$('#masterPrint').click())]);
   await popup.evaluate(()=>{window.print=function(){};}).catch(()=>{});
   await popup.waitForFunction(()=>window.__nbhFitted!==undefined&&document.querySelector('.mp-sec'),null,{timeout:300000}); await L.sleep(1500);
-  const secs=await popup.evaluate(()=>Array.from(document.querySelectorAll('.mp-sec')).length);
+  const secs=await popup.evaluate(()=>Array.from(document.querySelectorAll('.mp-sec:not(.mp-app)')).length);   /* v21.96 the references appendix (.mp-app) is counted apart */
+  const apps=await popup.evaluate(()=>document.querySelectorAll('.mp-sec.mp-app').length);
   const bars=await popup.evaluate(()=>document.querySelectorAll('.nbh-pagenav').length);
   await popup.emulateMedia({media:'print'}); await L.sleep(500);
   const buf=await popup.pdf({preferCSSPageSize:true,printBackground:true}); L.fs.writeFileSync(L.path.join(DIR,'master.pdf'),buf);
-  console.log(JSON.stringify({restored,sections:secs,pagenavInMaster:bars,fitted:await popup.evaluate(()=>window.__nbhFitted),bytes:buf.length,log:log.slice(0,5)}));
+  console.log(JSON.stringify({restored,sections:secs,appendix:apps,pagenavInMaster:bars,fitted:await popup.evaluate(()=>window.__nbhFitted),bytes:buf.length,log:log.slice(0,5)}));
   await browser.close();
   /* v21.86 the checks: every form back from the case file, a section for each in the master print, no page error */
   const n=L.forms().length,bad=[];if(restored!==n)bad.push('restored '+restored+' of '+n);if(secs!==n)bad.push('sections '+secs+' of '+n);if(log.length)bad.push('errors '+JSON.stringify(log.slice(0,3)));

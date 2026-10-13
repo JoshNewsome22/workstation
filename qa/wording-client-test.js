@@ -132,6 +132,7 @@ async function context(browser, opt, vp){
 }
 async function openForm(ctx, log, url){
   const page = await ctx.newPage(); wire(page, log);
+  await page.clock.setSystemTime(new Date('2026-10-12T10:00:05'));   /* v21.97 OB-1's time field defaults to now: each load starts at the same minute (the clock keeps running from there) */
   await page.goto(url || FORM_URL); await sleep(600);
   await page.evaluate(() => { window.confirm = () => true; });
   return page;
@@ -256,6 +257,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const lg = [];
       const grabAll = async (ctx) => {
         const page = await ctx.newPage(); wire(page, lg);
+        await page.clock.setSystemTime(new Date('2026-10-12T10:00:05'));
         await page.goto(BASE + '/NBH-Workstation/index.html'); await page.waitForFunction(() => typeof openForm === 'function'); await sleep(500);
         await page.evaluate(() => openForm('OB-1')); await page.waitForFunction(() => !!state.status['OB-1'], null, {timeout:20000}); await sleep(500);
         const fr = page.frames().find(f => f.url().includes(FILE));

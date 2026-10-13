@@ -107,7 +107,9 @@ const dirty=page=>page.evaluate(()=>caseDirty());
   const pal=await P.evaluate(()=>[...document.querySelectorAll('#palRes .rnm')].map(x=>x.textContent));await P.evaluate(()=>palClose());
   ok('9 the command box finds Case history: go back to an earlier save',pal.some(t=>/Case history: go back to an earlier save/.test(t)),pal.slice(0,5));
   /* Compare with now: the case on screen with an unsaved change, against the second point */
+  const sigD=await P.evaluate(()=>state.status['DM-1'].sig);
   await setField(dm,'s.living','Lives with mother, grandmother and an aunt (simulated D, not saved).');await sleep(800);
+  await P.waitForFunction(s=>state.status['DM-1'].sig!==s,sigD,{timeout:15000}).catch(()=>{});   /* v21.97 the form reports its new fingerprint in its own time (up to a few seconds after repeated edits); History reads it as the dialog opens */
   await P.evaluate(()=>hxOpen());await hxOpenWait(P);await btnOf(P,1,'data-hxcmp');await P.waitForFunction(()=>/From then to now|There is no case/.test((document.querySelector('#hxList .hx-panel')||{}).textContent||''),null,{timeout:20000});
   ln=await lines(P);const on0=await P.evaluate(()=>(document.querySelector('#hxView .hx-note')||{}).textContent||'');
   ok('10 Compare with now (the second point against the case on screen): Form DM-1: 1 field, Form IC-1 added',/From then to now \(the case on screen\)/.test(ln[1].panel)&&/Form DM-1: 1 field/.test(ln[1].panel)&&/Form IC-1 added/.test(ln[1].panel),ln[1]);
