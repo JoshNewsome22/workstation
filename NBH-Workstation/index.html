@@ -1081,7 +1081,8 @@ body:not(.has-form) #focusBtn{display:none}
 #dlg .hn-sheet .hn-box{border:1px dashed #9fb1b9;border-radius:8px;padding:8px 10px;min-height:44px}
 #dlg .hn-sheet .hn-box:empty::before{content:attr(data-hint);color:#6f8087}
 #dlg .hn-sheet .hn-sig{margin-top:14px}
-@media (max-width:600px){#dlg .hn-sheet{padding:12px 12px;font-size:14px}}
+#dlg .hn-sheet .hn-tw{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+@media (max-width:600px){#dlg .hn-sheet{padding:12px 12px;font-size:14px}#dlg .hn-sheet table{font-size:12.5px;min-width:360px}#dlg .hn-sheet th,#dlg .hn-sheet td{padding:4px 5px}}
 /* v21.95 the monthly summary */
 #dlg .cm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 10px;max-width:100%}
 #dlg .cm-t{border-collapse:collapse;font-size:13px;min-width:820px}
@@ -7447,7 +7448,7 @@ const HN_T={
   subject:{en:'How {first} is doing with the behavior plan',es:'Cómo le va a {first} con el plan de conducta'},
   print:{en:'Print',es:'Imprimir'},send:{en:'Send by email',es:'Enviar por correo'},copy:{en:'Copy the text',es:'Copiar el texto'}
 };
-const HN_UNITS={'per day':'por día','a day':'al día','per hour':'por hora','per session':'por sesión','per minute':'por minuto','per observation':'por observación','% of intervals':'% de los intervalos','% intervals':'% de intervalos','percent of intervals':'% de los intervalos','% of opportunities':'% de las oportunidades','% correct':'% correctas','minutes':'minutos','min':'min','seconds':'segundos','sec':'seg','count':'veces','times':'veces','times a day':'veces al día','%':'%'};
+const HN_UNITS={'occurrences':'veces','occurrence':'vez','% independent':'% independiente','% of trials':'% de los intentos','trials':'intentos','responses':'respuestas','rate per minute':'por minuto','per day':'por día','a day':'al día','per hour':'por hora','per session':'por sesión','per minute':'por minuto','per observation':'por observación','% of intervals':'% de los intervalos','% intervals':'% de intervalos','percent of intervals':'% de los intervalos','% of opportunities':'% de las oportunidades','% correct':'% correctas','minutes':'minutos','min':'min','seconds':'segundos','sec':'seg','count':'veces','times':'veces','times a day':'veces al día','%':'%'};
 function hnT(k,v){let t=(HN_T[k]||{})[HN.lang]||(HN_T[k]||{}).en||'';Object.keys(v||{}).forEach(x=>{t=t.split('{'+x+'}').join(v[x]);});return t;}
 function hnUnit(u){u=String(u||'').trim();if(HN.lang!=='es')return u;const k=u.toLowerCase();return HN_UNITS[k]||u;}
 function hnDate(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));if(!m)return String(iso||'');const d=new Date(+m[1],+m[2]-1,+m[3],12);return d.toLocaleDateString(HN.lang==='es'?'es':'en-US',{year:'numeric',month:'long',day:'numeric'});}
@@ -7473,8 +7474,8 @@ function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
   const nextT=(P.review.date&&P.review.text?hnT('review',{date:hnDate(P.review.date),text:P.review.text})+' ':'')+(P.review.next?hnT('nextReview',{date:hnDate(P.review.next)}):hnT('nextNone'));
   return '<p contenteditable="true" class="hn-dear">'+e(dear)+'</p><p contenteditable="true">'+e(intro)+'</p>'+
     '<h2>'+e(hnT('working'))+'</h2>'+(P.rows.length?'<p contenteditable="true">'+e(hnT('period',{days:P.days,from:hnDate(P.from),to:hnDate(P.to)}))+'</p>'+
-      '<table><thead><tr><th>'+e(hnT('thBeh'))+'</th><th>'+e(hnT('thStart'))+'</th><th>'+e(hnT('thNow'))+'</th><th>'+e(hnT('thAim'))+'</th></tr></thead><tbody>'+
-      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'</td><td contenteditable="true">'+e(r.start)+'</td><td contenteditable="true">'+e(r.now)+'</td><td contenteditable="true">'+e(r.aim)+'</td></tr>').join('')+'</tbody></table>':'<p contenteditable="true">'+e(hnT('noData'))+'</p>')+
+      '<div class="hn-tw"><table><thead><tr><th>'+e(hnT('thBeh'))+'</th><th>'+e(hnT('thStart'))+'</th><th>'+e(hnT('thNow'))+'</th><th>'+e(hnT('thAim'))+'</th></tr></thead><tbody>'+
+      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'</td><td contenteditable="true">'+e(r.start)+'</td><td contenteditable="true">'+e(r.now)+'</td><td contenteditable="true">'+e(r.aim)+'</td></tr>').join('')+'</tbody></table></div>':'<p contenteditable="true">'+e(hnT('noData'))+'</p>')+
     (P.goals.length?'<h2>'+e(hnT('goals'))+'</h2><ul>'+P.goals.map(t=>'<li contenteditable="true">'+e(t)+'</li>').join('')+'</ul>':'')+
     '<h2>'+e(hnT('good'))+'</h2>'+(good.length?good.map(t=>'<p contenteditable="true">'+e(t)+'</p>').join(''):'<p contenteditable="true">'+e(P.rows.length?hnT('steady',{beh:P.rows[0].name}):hnT('noGood'))+'</p>')+
     '<h2>'+e(hnT('incidents'))+'</h2><p contenteditable="true">'+e(incT)+'</p>'+
@@ -7482,7 +7483,8 @@ function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
     '<h2>'+e(hnT('next'))+'</h2><p contenteditable="true">'+e(nextT)+'</p>'+(P.interp?'<p contenteditable="true">'+e(hnT('interp'))+'</p>':'')+
     '<p contenteditable="true" class="hn-sig">'+e(hnT('thanks',{first:P.first}))+'<br>'+e([P.bcba,P.school].filter(Boolean).join(' · '))+'</p>';}
 function hnText(){const sh=$('#hnSheet');if(!sh)return '';const out=[];sh.childNodes.forEach(n=>{if(n.nodeType!==1)return;
-  if(n.tagName==='TABLE'){[...n.querySelectorAll('tr')].forEach(tr=>out.push([...tr.children].map(c=>c.textContent.trim()).join(' | ')));out.push('');}
+  const tbl=n.tagName==='TABLE'?n:(n.classList&&n.classList.contains('hn-tw')?n.querySelector('table'):null);
+  if(tbl){[...tbl.querySelectorAll('tr')].forEach(tr=>out.push([...tr.children].map(c=>c.textContent.trim()).join(' | ')));out.push('');}
   else if(n.tagName==='UL'){[...n.children].forEach(li=>out.push('• '+li.textContent.trim()));out.push('');}
   else if(n.tagName==='H2')out.push(n.textContent.trim().toUpperCase());
   else{const t=n.innerText!=null?n.innerText:n.textContent;if(String(t).trim())out.push(String(t).trim());out.push('');}});

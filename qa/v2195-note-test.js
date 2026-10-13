@@ -52,8 +52,8 @@ async function openSim(page,id,file){await page.evaluate(id=>openForm(id),id);aw
   /* ---- on a phone: the sheet fits ---- */
   {const {ctx,page,errs}=await shell(br,{width:390,height:844},true);
     await openSim(page,'DD-1','Daily_Behavior');await page.evaluate(()=>gatherFacts(true));await sleep(1000);await page.evaluate(()=>homeNoteOpen());await sleep(1500);
-    const m=await page.evaluate(()=>{const db=$('#dlgBody');const over=[...db.querySelectorAll('*')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).length;return {open:$('#dlg').open,over,sw:db.scrollWidth,cw:db.clientWidth,rows:db.querySelectorAll('tbody tr').length};});
-    ok('13 phone: the note opens and fits the screen',m.open&&m.over===0&&m.sw<=m.cw+1&&m.rows>=1,m);
+    const m=await page.evaluate(()=>{const db=$('#dlgBody');const over=[...db.querySelectorAll('*')].filter(e=>!e.closest('.hn-tw')&&e.getBoundingClientRect().right>innerWidth+1).length;return {open:$('#dlg').open,over,sw:db.scrollWidth,cw:db.clientWidth,rows:db.querySelectorAll('tbody tr').length};});
+    ok('13 phone: the note opens and fits the screen (the table scrolls inside its own box if it must)',m.open&&m.over===0&&m.sw<=m.cw+1&&m.rows>=1,m);
     ok('14 phone: no page errors',!errs.length,errs.slice(0,3));
     await ctx.close();}
   }catch(e){ok('the run finished',false,String(e&&e.stack||e).slice(0,600));}
