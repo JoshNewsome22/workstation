@@ -674,8 +674,10 @@ PH.H=async()=>{
   const mp=await mw.evaluate(()=>({secs:[...document.querySelectorAll('.mp-sec')].map(s=>({id:s.id.replace('sec-',''),len:s.innerText.trim().length,mateo:/Mateo|Rivera/.test(s.innerText)})),contents:[...document.querySelectorAll('.mp-cover li')].map(l=>l.textContent),cover:(document.querySelector('.mp-cover')||{}).innerText||''}));
   await mw.emulateMedia({media:'print'});await sleep(500);const pdf=await mw.pdf({preferCSSPageSize:true,printBackground:true});fs.writeFileSync(OUT+'master.pdf',pdf);
   const pages=(pdf.toString('latin1').match(/\/Type\s*\/Page(?!s)/g)||[]).length;
-  const missing=ticked.filter(id=>!mp.secs.some(s=>s.id===id)),empty=mp.secs.filter(s=>s.len<200).map(s=>s.id),noName=mp.secs.filter(s=>!s.mateo).map(s=>s.id);
-  ok('H15 the master print holds every form of the case ('+mp.secs.length+' sections, '+pages+' pages), each with its own content and the student, and the cover lists them all',!missing.length&&!empty.length&&mp.contents.length===ticked.length&&/Mateo Rivera/.test(mp.cover)&&pages>mp.secs.length,{missing,empty,noName,contents:mp.contents.length,pages});
+  /* v21.96 the packet ends with a references section of its own (no student in it): counted apart from the forms */
+  const refs=mp.secs.filter(s=>s.id==='REFS').length,formSecs=mp.secs.filter(s=>s.id!=='REFS'),formContents=mp.contents.filter(l=>!/^References and Sources/.test(String(l).trim()));
+  const missing=ticked.filter(id=>!formSecs.some(s=>s.id===id)),empty=mp.secs.filter(s=>s.len<200).map(s=>s.id),noName=formSecs.filter(s=>!s.mateo).map(s=>s.id);
+  ok('H15 the master print holds every form of the case ('+formSecs.length+' sections and '+refs+' references section, '+pages+' pages), each with its own content and the student, and the cover lists them all',!missing.length&&!empty.length&&formContents.length===ticked.length&&refs===1&&/Mateo Rivera/.test(mp.cover)&&pages>mp.secs.length,{missing,empty,noName,contents:mp.contents.length,pages});
   ok('H16 the master print holds nothing of the second student',!marksIn(await mw.evaluate(()=>document.body.innerText),SAMPLE_MARKS).length);
   const mpErr=ERRS.slice(e0).filter(e=>!/Failed to load resource|favicon/.test(e.text));
   ok('H17 the master print is built without a script error',!mpErr.length,mpErr.slice(0,8));
