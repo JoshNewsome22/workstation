@@ -1063,6 +1063,7 @@ body:not(.has-form) #focusBtn{display:none}
 #dlg .ln input:focus,#dlg .ln select:focus,#dlg .ln textarea:focus{outline:none;border-color:#2f6f8f;box-shadow:0 0 0 3px rgba(47,111,143,.18)}
 #dlg .ln .td-more{margin:4px 0 0}
 #blank .card #blLog{font-weight:600}
+#dlg .ln #lnDict[aria-pressed="true"]{background:#f3c94f;border-color:#f3c94f;color:var(--navy)}
 </style>
 </head>
 <body>
@@ -7312,7 +7313,17 @@ focusPaint();
 REPLY['log-incident']='incident-logged';
 /* the form's answer reaches the grab() that asked (the message handler above resolves only the answers it knows) */
 window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!=='incident-logged'||!d.id)return;const q=pending[d.id+'|incident-logged'];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}});
-const LN={busy:false};
+const LN={busy:false,last:null};
+const LN_MIC='<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/></svg>';
+/* v21.94 dictation into the sheet's boxes: the shared module (nbh-dictate.js, the forms' Dictate switch uses the same) loaded when first pressed */
+function lnDictLoad(){return new Promise((res,rej)=>{if(window.nbhDictate)return res(window.nbhDictate);const s=document.createElement('script');s.src='nbh-dictate.js';s.onload=()=>window.nbhDictate?res(window.nbhDictate):rej(new Error('nbh-dictate.js did not load'));s.onerror=()=>rej(new Error('nbh-dictate.js is not beside this page'));document.head.appendChild(s);});}
+document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.closest&&t.closest('#lnForm')&&/^(TEXTAREA|INPUT)$/.test(t.tagName)&&!/^(date|time|hidden)$/.test(t.type||''))LN.last=t;});
+async function lnDictToggle(){const b=$('#lnDict');if(!b)return;let M;try{M=await lnDictLoad();}catch(e){wsUI.toast(String(e.message||e),{kind:'warn'});return;}
+  M.onstate(on=>{const x=$('#lnDict');if(x){x.setAttribute('aria-pressed',String(!!on));x.classList.toggle('on',!!on);}});
+  if(M.active()){M.stop();return;}
+  let el=LN.last&&LN.last.isConnected&&LN.last.closest('#lnForm')?LN.last:$('#lnWhat');if(!el)return;try{el.focus({preventScroll:true});}catch(e){}
+  await M.start(el,{confirm:t=>wsUI.confirm(t,{ok:'Download'})});}
+document.addEventListener('mousedown',e=>{if(e.target.closest('#lnDict'))e.preventDefault();});   /* the box keeps its cursor */
 function lnNow(){const d=new Date(),p=n=>String(n).padStart(2,'0');return {date:d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()),time:p(d.getHours())+':'+p(d.getMinutes())};}
 function lnHm(t){const m=/^(\d{2}):(\d{2})$/.exec(t||'');if(!m)return '';const h=+m[1];return (h%12||12)+':'+m[2]+(h<12?' am':' pm');}
 function lnBehaviors(){const f=state.facts||{};return [...new Set((f.behaviors||[]).filter(b=>b&&b.name&&!b.isRep&&!/replacement|alternative/i.test(b.type||'')).map(b=>String(b.name).trim()))];}
@@ -7334,7 +7345,7 @@ async function logNowOpen(){
     '<label class="ln-f"><span>What happened (B), as it would look on video</span><textarea id="lnWhat" rows="2"></textarea></label>'+
     '<label class="ln-f"><span>What adults did (C), in order</span><textarea id="lnDid" rows="2"></textarea></label>'+
     '<div class="ln-g"><label class="ln-f"><span>How it ended</span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"></label><label class="ln-f"><span>Recorded by</span><input id="lnBy" value="'+esc(p.bcba||'')+'"></label></div>'+
-    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it</button> <button type="button" id="lnCancel">Cancel</button></p>'+
+    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it</button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate</button></p>'+
     '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet</i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents</i> brings it into the ABC record.</p>'+
     '</form>');
   setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
@@ -7360,7 +7371,8 @@ async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
     try{paintBadge();}catch(e){}}
   finally{LN.busy=false;const b2=$('#lnSave');if(b2){b2.disabled=false;b2.textContent='Log it';}}
 }
-document.addEventListener('click',e=>{if(e.target.closest('#blLog,#tdLog'))logNowOpen();else if(e.target.closest('#lnCancel')){try{$('#dlg').close();}catch(x){}}});
+document.addEventListener('click',e=>{if(e.target.closest('#blLog,#tdLog'))logNowOpen();else if(e.target.closest('#lnDict'))lnDictToggle();});
+$('#dlg').addEventListener('close',()=>{try{if(window.nbhDictate&&nbhDictate.active())nbhDictate.stop();}catch(e){}});
 document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lnForm')logNowSave(e);});
 /* the start screen's row of buttons, and the Today list's */
 {const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now</button>');}catch(e){}return r;};}

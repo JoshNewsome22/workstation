@@ -9427,3 +9427,42 @@ boxed field bordered on four sides and 36 px tall, no label under 12 px, no read
 errors); DM-1 and TB-1 carrying the fields that were lines, FS-1 none; TD-1's guide paragraphs capped; and, against the
 release before, all 46 forms printing the same words in the same places, with a mouse and with a finger (PA-1 draws a
 random item order for its series on every open; those item numbers are read as the same).
+
+### v21.94: log it now, and dictation
+
+Two ways to get what happened into the case while it is fresh, from an iPad in the classroom or a phone in the hall.
+
+- **Log it now.** A button on the start screen (beside New student and Caseload), first in the Today list's row, and a
+  command in the Find box (`Log it now`). The sheet asks for what Form DD-1's own *Log an incident* asks: the date and
+  the time (now), the behavior (the case's targets are offered), physical intervention, before it (A), what happened (B),
+  what adults did (C), how it ended, who recorded it. The student is the one on screen; with none, one of the students
+  kept on this device is picked from a list, and that student's case opens (Save first is offered as usual, when another
+  case has unsaved work). Form DD-1 logs the incident itself, exactly as its dialog would: the behavior matched to the
+  sheet by name (case aside; a behavior not on the sheet is kept by its name), the day's count added for a behavior
+  counted by frequency, a restraint or a seclusion starting Form CR-1's notice clock. It lands as *Home told: not yet*
+  (the Today list says so) and Form ABC-1's *Add DD-1's incidents* brings it into the ABC record as before.
+  How it is done: the workstation sends the form a `log-incident` message and the form answers `incident-logged`
+  (`dd-v2194` in Form DD-1; `nbh-v2194` in the workstation page).
+- **Dictate.** A switch in every form's toolbar, beside the view buttons (and Focus, on a form opened on its own), and
+  one on the Log it now sheet. Press it from a text box and what you say is written into that box, at the cursor, with
+  a capital after a full stop; say *period*, *comma*, *question mark*, *new line* or *new paragraph* for those. A strip
+  at the foot of the window shows the words as they come and a Stop button (Escape stops too); press the switch again
+  to stop. The words are heard on the device by the speech recogniser Form TV-1 uses to follow a script (sherpa-onnx,
+  Apache License 2.0, with a small streaming English model): 57 MB, downloaded from the workstation's website once,
+  after a confirm, and kept on the device under the same name TV-1 keeps it, so one download serves both. It runs in a
+  worker on the device: what the microphone hears is not recorded, kept or sent anywhere. Safari asks for the microphone
+  the first time; allow it for the site. The one-file edition (a page opened from a file) cannot fetch the recogniser
+  and says so. The recogniser knows no punctuation of its own and writes plain words; names and clinical terms it has
+  not heard come out as the nearest words it knows, so read a dictated line before it goes to a parent.
+  How it is done: `nbh-dictate.js` beside the forms (loaded when the switch is first pressed), the switch itself in the
+  shared `nbh-ui` block (`tools/blocks/nbh-ui.html`). Nothing prints.
+
+Checked by `qa/v2194-log-test.js` (the start screen's button; the sheet with the students to pick from, today and the
+time now; a student's case opening with Form DD-1 and the incident as logged; the words the workstation says; the Today
+list's button; a second incident matched to the simulated sheet's behavior, with a restraint, counted for the day; the
+Today list carrying both; the command; the sheet on a phone) and `qa/v2194-dictate-test.js` (a spoken recording made
+from Form TK-1's narration, played by Chromium's fake microphone: the tidying of what is heard, the words landing at the
+cursor, the toolbar switch on a form of its own and the sheet's switch, the words heard against the clip's words, stop).
+
+The school site needs `nbh-asr/` beside the forms for Dictate and for TV-1's *Follow my words*: it is not in the
+workstation's zip (57 MB that never changes), but in a zip of its own, uploaded once (HOSTING.md).
