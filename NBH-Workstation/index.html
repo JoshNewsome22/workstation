@@ -7341,7 +7341,7 @@ REPLY['log-incident']='incident-logged';
 /* the form's answer reaches the grab() that asked (the message handler above resolves only the answers it knows) */
 window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!=='incident-logged'||!d.id)return;const q=pending[d.id+'|incident-logged'];if(q&&q.length){const i=q.findIndex(f=>!f.src||f.src===ev.source);if(i>=0)q[i](d);}});
 const LN={busy:false,last:null};
-const LN_MIC='<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/></svg>';
+const LN_MIC='<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><rect x="5.5" y="1.5" width="5" height="8" rx="2.5"/><path d="M3 7.5a5 5 0 0 0 10 0M8 12.5v2M5.5 14.5h5"/><\/svg>';
 /* v21.94 dictation into the sheet's boxes: the shared module (nbh-dictate.js, the forms' Dictate switch uses the same) loaded when first pressed */
 function lnDictLoad(){return new Promise((res,rej)=>{if(window.nbhDictate)return res(window.nbhDictate);const s=document.createElement('script');s.src='nbh-dictate.js';s.onload=()=>window.nbhDictate?res(window.nbhDictate):rej(new Error('nbh-dictate.js did not load'));s.onerror=()=>rej(new Error('nbh-dictate.js is not beside this page'));document.head.appendChild(s);});}
 document.addEventListener('focusin',e=>{const t=e.target;if(t&&t.closest&&t.closest('#lnForm')&&/^(TEXTAREA|INPUT)$/.test(t.tagName)&&!/^(date|time|hidden)$/.test(t.type||''))LN.last=t;});
@@ -7362,19 +7362,19 @@ async function logNowOpen(){
   if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
   const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
   dialog('Log it now',
-    '<p class="hp-lead">An incident, time-stamped, into Form DD-1’s incident log'+(who.length===1?' for <b>'+esc(who[0].name)+'</b>':'')+'. Say what you saw; the rest can wait.</p>'+
+    '<p class="hp-lead">An incident, time-stamped, into Form DD-1’s incident log'+(who.length===1?' for <b>'+esc(who[0].name)+'<\/b>':'')+'. Say what you saw; the rest can wait.<\/p>'+
     '<form id="lnForm" class="ln" novalidate>'+
-    (who.length>1?'<label class="ln-f"><span>Student</span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+'</option>').join('')+'</select></label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
-    '<div class="ln-g"><label class="ln-f"><span>Date</span><input type="date" id="lnDate" value="'+now.date+'"></label><label class="ln-f"><span>Time</span><input type="time" id="lnTime" value="'+now.time+'"></label>'+
-    '<label class="ln-f"><span>Behavior</span><input id="lnBeh" list="lnBehList" autocomplete="off" placeholder="as the plan names it"><datalist id="lnBehList">'+beh.map(b=>'<option value="'+esc(b)+'">').join('')+'</datalist></label>'+
-    '<label class="ln-f"><span>Physical intervention</span><select id="lnHold"><option value="">None</option><option value="escort">Physical escort</option><option value="restraint">Restraint</option><option value="seclusion">Seclusion</option></select></label></div>'+
-    '<label class="ln-f"><span>Before it (A): the activity, the request, what changed</span><textarea id="lnBefore" rows="2"></textarea></label>'+
-    '<label class="ln-f"><span>What happened (B), as it would look on video</span><textarea id="lnWhat" rows="2"></textarea></label>'+
-    '<label class="ln-f"><span>What adults did (C), in order</span><textarea id="lnDid" rows="2"></textarea></label>'+
-    '<div class="ln-g"><label class="ln-f"><span>How it ended</span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"></label><label class="ln-f"><span>Recorded by</span><input id="lnBy" value="'+esc(p.bcba||'')+'"></label></div>'+
-    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it</button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate</button></p>'+
-    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet</i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents</i> brings it into the ABC record.</p>'+
-    '</form>');
+    (who.length>1?'<label class="ln-f"><span>Student<\/span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+'<\/option>').join('')+'<\/select><\/label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
+    '<div class="ln-g"><label class="ln-f"><span>Date<\/span><input type="date" id="lnDate" value="'+now.date+'"><\/label><label class="ln-f"><span>Time<\/span><input type="time" id="lnTime" value="'+now.time+'"><\/label>'+
+    '<label class="ln-f"><span>Behavior<\/span><input id="lnBeh" list="lnBehList" autocomplete="off" placeholder="as the plan names it"><datalist id="lnBehList">'+beh.map(b=>'<option value="'+esc(b)+'">').join('')+'<\/datalist><\/label>'+
+    '<label class="ln-f"><span>Physical intervention<\/span><select id="lnHold"><option value="">None<\/option><option value="escort">Physical escort<\/option><option value="restraint">Restraint<\/option><option value="seclusion">Seclusion<\/option><\/select><\/label><\/div>'+
+    '<label class="ln-f"><span>Before it (A): the activity, the request, what changed<\/span><textarea id="lnBefore" rows="2"><\/textarea><\/label>'+
+    '<label class="ln-f"><span>What happened (B), as it would look on video<\/span><textarea id="lnWhat" rows="2"><\/textarea><\/label>'+
+    '<label class="ln-f"><span>What adults did (C), in order<\/span><textarea id="lnDid" rows="2"><\/textarea><\/label>'+
+    '<div class="ln-g"><label class="ln-f"><span>How it ended<\/span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"><\/label><label class="ln-f"><span>Recorded by<\/span><input id="lnBy" value="'+esc(p.bcba||'')+'"><\/label><\/div>'+
+    '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it<\/button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate<\/button><\/p>'+
+    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet<\/i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents<\/i> brings it into the ABC record.<\/p>'+
+    '<\/form>');
   setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
 }
 function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
@@ -7402,8 +7402,8 @@ document.addEventListener('click',e=>{if(e.target.closest('#blLog,#tdLog'))logNo
 $('#dlg').addEventListener('close',()=>{try{if(window.nbhDictate&&nbhDictate.active())nbhDictate.stop();}catch(e){}});
 document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lnForm')logNowSave(e);});
 /* the start screen's row of buttons, and the Today list's */
-{const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now</button>');}catch(e){}return r;};}
-{const to6=todayOpen;todayOpen=async function(){const r=await to6.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdLog'))row.insertAdjacentHTML('afterbegin','<button type="button" id="tdLog">Log it now</button> ');}catch(e){}return r;};}
+{const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now<\/button>');}catch(e){}return r;};}
+{const to6=todayOpen;todayOpen=async function(){const r=await to6.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdLog'))row.insertAdjacentHTML('afterbegin','<button type="button" id="tdLog">Log it now<\/button> ');}catch(e){}return r;};}
 setTimeout(()=>{CMDS.push({k:'log it now incident abc time stamp record behavior restraint',n:'Log it now: an incident, time-stamped (Form DD-1)',s:'command',go:()=>logNowOpen()});},0);
 </script>
 <script id="nbh-v2195">
@@ -7472,16 +7472,16 @@ function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
   const good=P.rows.map(r=>r.good).filter(Boolean);
   const incT=!P.inc?hnT('incNone'):(P.told>=P.inc?hnT('incSomeAll',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords')}):hnT('incSome',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords'),m:P.told}));
   const nextT=(P.review.date&&P.review.text?hnT('review',{date:hnDate(P.review.date),text:P.review.text})+' ':'')+(P.review.next?hnT('nextReview',{date:hnDate(P.review.next)}):hnT('nextNone'));
-  return '<p contenteditable="true" class="hn-dear">'+e(dear)+'</p><p contenteditable="true">'+e(intro)+'</p>'+
-    '<h2>'+e(hnT('working'))+'</h2>'+(P.rows.length?'<p contenteditable="true">'+e(hnT('period',{days:P.days,from:hnDate(P.from),to:hnDate(P.to)}))+'</p>'+
-      '<div class="hn-tw"><table><thead><tr><th>'+e(hnT('thBeh'))+'</th><th>'+e(hnT('thStart'))+'</th><th>'+e(hnT('thNow'))+'</th><th>'+e(hnT('thAim'))+'</th></tr></thead><tbody>'+
-      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'</td><td contenteditable="true">'+e(r.start)+'</td><td contenteditable="true">'+e(r.now)+'</td><td contenteditable="true">'+e(r.aim)+'</td></tr>').join('')+'</tbody></table></div>':'<p contenteditable="true">'+e(hnT('noData'))+'</p>')+
-    (P.goals.length?'<h2>'+e(hnT('goals'))+'</h2><ul>'+P.goals.map(t=>'<li contenteditable="true">'+e(t)+'</li>').join('')+'</ul>':'')+
-    '<h2>'+e(hnT('good'))+'</h2>'+(good.length?good.map(t=>'<p contenteditable="true">'+e(t)+'</p>').join(''):'<p contenteditable="true">'+e(P.rows.length?hnT('steady',{beh:P.rows[0].name}):hnT('noGood'))+'</p>')+
-    '<h2>'+e(hnT('incidents'))+'</h2><p contenteditable="true">'+e(incT)+'</p>'+
-    '<h2>'+e(hnT('home'))+'</h2><div class="hn-box" contenteditable="true" data-hint="'+e(hnT('homeHint'))+'"></div>'+
-    '<h2>'+e(hnT('next'))+'</h2><p contenteditable="true">'+e(nextT)+'</p>'+(P.interp?'<p contenteditable="true">'+e(hnT('interp'))+'</p>':'')+
-    '<p contenteditable="true" class="hn-sig">'+e(hnT('thanks',{first:P.first}))+'<br>'+e([P.bcba,P.school].filter(Boolean).join(' · '))+'</p>';}
+  return '<p contenteditable="true" class="hn-dear">'+e(dear)+'<\/p><p contenteditable="true">'+e(intro)+'<\/p>'+
+    '<h2>'+e(hnT('working'))+'<\/h2>'+(P.rows.length?'<p contenteditable="true">'+e(hnT('period',{days:P.days,from:hnDate(P.from),to:hnDate(P.to)}))+'<\/p>'+
+      '<div class="hn-tw"><table><thead><tr><th>'+e(hnT('thBeh'))+'<\/th><th>'+e(hnT('thStart'))+'<\/th><th>'+e(hnT('thNow'))+'<\/th><th>'+e(hnT('thAim'))+'<\/th><\/tr><\/thead><tbody>'+
+      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'<\/td><td contenteditable="true">'+e(r.start)+'<\/td><td contenteditable="true">'+e(r.now)+'<\/td><td contenteditable="true">'+e(r.aim)+'<\/td><\/tr>').join('')+'<\/tbody><\/table><\/div>':'<p contenteditable="true">'+e(hnT('noData'))+'<\/p>')+
+    (P.goals.length?'<h2>'+e(hnT('goals'))+'<\/h2><ul>'+P.goals.map(t=>'<li contenteditable="true">'+e(t)+'<\/li>').join('')+'<\/ul>':'')+
+    '<h2>'+e(hnT('good'))+'<\/h2>'+(good.length?good.map(t=>'<p contenteditable="true">'+e(t)+'<\/p>').join(''):'<p contenteditable="true">'+e(P.rows.length?hnT('steady',{beh:P.rows[0].name}):hnT('noGood'))+'<\/p>')+
+    '<h2>'+e(hnT('incidents'))+'<\/h2><p contenteditable="true">'+e(incT)+'<\/p>'+
+    '<h2>'+e(hnT('home'))+'<\/h2><div class="hn-box" contenteditable="true" data-hint="'+e(hnT('homeHint'))+'"><\/div>'+
+    '<h2>'+e(hnT('next'))+'<\/h2><p contenteditable="true">'+e(nextT)+'<\/p>'+(P.interp?'<p contenteditable="true">'+e(hnT('interp'))+'<\/p>':'')+
+    '<p contenteditable="true" class="hn-sig">'+e(hnT('thanks',{first:P.first}))+'<br>'+e([P.bcba,P.school].filter(Boolean).join(' · '))+'<\/p>';}
 function hnText(){const sh=$('#hnSheet');if(!sh)return '';const out=[];sh.childNodes.forEach(n=>{if(n.nodeType!==1)return;
   const tbl=n.tagName==='TABLE'?n:(n.classList&&n.classList.contains('hn-tw')?n.querySelector('table'):null);
   if(tbl){[...tbl.querySelectorAll('tr')].forEach(tr=>out.push([...tr.children].map(c=>c.textContent.trim()).join(' | ')));out.push('');}
@@ -7491,7 +7491,7 @@ function hnText(){const sh=$('#hnSheet');if(!sh)return '';const out=[];sh.childN
   return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();}
 function hnPrintHtml(){const sh=$('#hnSheet'),p=packet();if(!sh)return '';const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:40px;margin:0 0 10pt">':'';
   const body=sh.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'');
-  return '<!DOCTYPE html><html lang="'+HN.lang+'"><head><meta charset="utf-8"><title>'+esc(hnT('title'))+(p.client?': '+esc(p.client):'')+'</title><style>body{font:11.5pt/1.5 Georgia,"Times New Roman",serif;color:#1d2730;margin:.7in;max-width:6.9in}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;margin:12pt 0 4pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;margin:4pt 0 8pt;font-size:10.5pt}th,td{border:1px solid #9aa9b1;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#eef3f2;font:600 9.5pt Inter,Arial,sans-serif}.hn-box{border:1px solid #9aa9b1;border-radius:4pt;padding:6pt 8pt;min-height:40pt}.hn-box:empty{min-height:60pt}.hn-sig{margin-top:12pt}</style></head><body>'+logo+body+'</body></html>';}
+  return '<!DOCTYPE html><html lang="'+HN.lang+'"><head><meta charset="utf-8"><title>'+esc(hnT('title'))+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11.5pt/1.5 Georgia,"Times New Roman",serif;color:#1d2730;margin:.7in;max-width:6.9in}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;margin:12pt 0 4pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;margin:4pt 0 8pt;font-size:10.5pt}th,td{border:1px solid #9aa9b1;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#eef3f2;font:600 9.5pt Inter,Arial,sans-serif}.hn-box{border:1px solid #9aa9b1;border-radius:4pt;padding:6pt 8pt;min-height:40pt}.hn-box:empty{min-height:60pt}.hn-sig{margin-top:12pt}<\/style><\/head><body>'+logo+body+'<\/body><\/html>';}
 function hnPaint(){const P=hnParts();const sh=$('#hnSheet');if(!sh)return;sh.innerHTML=hnSheetHtml(P);sh.lang=HN.lang;
   [...document.querySelectorAll('#dlgBody .hn-lang button')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===HN.lang)));
   const bt=$('#hnPrint');if(bt)bt.textContent=hnT('print');const se=$('#hnSend');if(se){se.textContent=hnT('send')+(P.email?'':'');se.title=P.email?P.email:'';}const cp=$('#hnCopy');if(cp)cp.textContent=hnT('copy');}
@@ -7499,16 +7499,16 @@ async function homeNoteOpen(){if(!lnOnScreen()||!packet().client){wsUI.toast('Op
   await gatherFacts(false);const P=hnParts();
   HN.lang=/spanish|espa[ñn]ol/i.test(P.lang)?'es':'en';
   dialog('Home note',
-    '<p class="hp-lead">A progress note for home, written from Form DD-1’s data, GB-1’s goals, PR-1’s review and DM-1’s contacts. Read it, change any line on the sheet, then print it, send it from your school account or copy it.'+(P.lang?' Home language on Form DM-1: '+esc(P.lang)+'.':'')+'</p>'+
-    '<div class="hn-lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">English</button><button type="button" data-lang="es" aria-pressed="false">Español</button></div>'+
-    '<div class="hn-sheet" id="hnSheet"></div>'+
-    '<p class="td-more"><button type="button" class="primary" id="hnPrint">Print</button> <button type="button" id="hnSend">Send by email</button> <button type="button" id="hnCopy">Copy the text</button></p>'+
-    '<p class="hint">The fixed wording is the workstation’s, in English or Spanish; the names, numbers and goals are the case’s, so read them before they go home. A behavior’s numbers are means over the last 20 school days with data on Form DD-1, by condition where the sheet has more than one.</p>');
+    '<p class="hp-lead">A progress note for home, written from Form DD-1’s data, GB-1’s goals, PR-1’s review and DM-1’s contacts. Read it, change any line on the sheet, then print it, send it from your school account or copy it.'+(P.lang?' Home language on Form DM-1: '+esc(P.lang)+'.':'')+'<\/p>'+
+    '<div class="hn-lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">English<\/button><button type="button" data-lang="es" aria-pressed="false">Español<\/button><\/div>'+
+    '<div class="hn-sheet" id="hnSheet"><\/div>'+
+    '<p class="td-more"><button type="button" class="primary" id="hnPrint">Print<\/button> <button type="button" id="hnSend">Send by email<\/button> <button type="button" id="hnCopy">Copy the text<\/button><\/p>'+
+    '<p class="hint">The fixed wording is the workstation’s, in English or Spanish; the names, numbers and goals are the case’s, so read them before they go home. A behavior’s numbers are means over the last 20 school days with data on Form DD-1, by condition where the sheet has more than one.<\/p>');
   hnPaint();}
 function hnPrint(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then press Print again.');return;}
   try{w.document.open();w.document.write(hnPrintHtml());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
 function hnSend(){const P=hnParts(),text=hnText();if(!text)return;const subject=hnT('subject',{first:P.first});
-  const sheet=$('#hnSheet');const html=sheet?'<div style="font:15px/1.5 Georgia,serif;max-width:640px">'+sheet.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'')+'</div>':'';
+  const sheet=$('#hnSheet');const html=sheet?'<div style="font:15px/1.5 Georgia,serif;max-width:640px">'+sheet.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'')+'<\/div>':'';
   if(!P.email){const a=document.createElement('a');a.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();wsUI.toast('No email for home on Form DM-1: the Mail app opens with the note; add the address there.',{kind:'warn',ms:8000});return;}
   const req='hn'+(++HN.req);const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
     if(d.unavailable){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(P.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();if(!d.declined)wsUI.toast(d.why+' The Mail app opens with the note instead.',{kind:'warn',ms:8000});}};
@@ -7517,7 +7517,7 @@ document.addEventListener('click',async e=>{const lb=e.target.closest('#dlgBody 
   if(e.target.closest('#hnPrint')){hnPrint();return;}if(e.target.closest('#hnSend')){hnSend();return;}
   if(e.target.closest('#hnCopy')){const ok=await copyText(hnText());wsUI.toast(ok?'The note is copied.':'Copy did not work: select the text on the sheet.',{kind:ok?'ok':'warn'});return;}
   if(e.target.closest('#tdHome')){homeNoteOpen();return;}});
-{const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdHome'))row.insertAdjacentHTML('beforeend',' <button type="button" id="tdHome">Home note</button>');}catch(e){}return r;};}
+{const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdHome'))row.insertAdjacentHTML('beforeend',' <button type="button" id="tdHome">Home note<\/button>');}catch(e){}return r;};}
 setTimeout(()=>{CMDS.push({k:'home note parent progress letter spanish español family',n:'Home note: a progress note for the family (English or Spanish)',s:'command',go:()=>homeNoteOpen()});},0);
 /* ================= v21.95 the monthly summary: the caseload for the supervisor, one month at a time =================
    From the students kept on this device, each as at their last Save case (the facts their forms shared): the month's incidents,
@@ -7536,27 +7536,27 @@ async function cmRows(month){const L=await clList()||[];L.sort((a,b)=>String(a.c
 function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});
   t.integMean=t.integ.length?Math.round(t.integ.reduce((a,b)=>a+b,0)/t.integ.length*10)/10:null;return t;}
 function cmLead(R,label){const t=cmTotals(R);return t.n+' student'+(t.n===1?'':'s')+' kept on this '+HERE+', '+label+': '+t.inc+' incident'+(t.inc===1?'':'s')+(t.inc?' ('+t.hold+' restraint'+(t.hold===1?'':'s')+' or seclusion'+(t.hold===1?'':'s')+'; home told about '+t.told+')':'')+'; aims met for '+t.met+' of '+t.aims+' behavior'+(t.aims===1?'':'s')+' with an aim; consent on file for '+t.consent+' of '+t.n+'; integrity '+(t.integMean!=null?t.integMean+'% on average':'not observed')+'; '+t.withData+' with daily data; '+t.hot+' item'+(t.hot===1?'':'s')+' overdue or about safety.';}
-function cmTableHtml(R){const td=(v,c)=>'<td'+(c?' class="'+c+'"':'')+'>'+esc(v==null?'':String(v))+'</td>';
-  return '<table class="cm-t"><thead><tr><th>Student</th><th>School · grade</th><th>Incidents</th><th>Restraint / seclusion</th><th>Home told</th><th>Aims met</th><th>Integrity</th><th>Consent</th><th>Last data</th><th>Needs you</th></tr></thead><tbody>'+
-    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.consent?'Yes':'No','n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'</tr>').join('')+
-    '</tbody></table>';}
+function cmTableHtml(R){const td=(v,c)=>'<td'+(c?' class="'+c+'"':'')+'>'+esc(v==null?'':String(v))+'<\/td>';
+  return '<table class="cm-t"><thead><tr><th>Student<\/th><th>School · grade<\/th><th>Incidents<\/th><th>Restraint / seclusion<\/th><th>Home told<\/th><th>Aims met<\/th><th>Integrity<\/th><th>Consent<\/th><th>Last data<\/th><th>Needs you<\/th><\/tr><\/thead><tbody>'+
+    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.consent?'Yes':'No','n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'<\/tr>').join('')+
+    '<\/tbody><\/table>';}
 function cmText(R,label){const t=cmTotals(R);const H=['Student','School · grade','Incidents','Restraint or seclusion','Home told','Aims met','Integrity','Consent','Last data','Needs you'];
   return [label,cmLead(R,label),'',H.join('\t')].concat(R.map(x=>[x.name,x.site,x.inc,x.hold,x.inc?x.told+' of '+x.inc:'',x.aims?x.met+' of '+x.aims:'',x.integ!=null?x.integ+'%':'',x.consent?'Yes':'No',x.lastData,x.hot?x.hot+': '+x.hotT:''].join('\t'))).concat(['Totals\t\t'+t.inc+'\t'+t.hold+'\t'+t.told+' of '+t.inc+'\t'+t.met+' of '+t.aims+'\t'+(t.integMean!=null?t.integMean+'%':'')+'\t'+t.consent+' of '+t.n]).join('\n');}
 function cmPrintHtml(R,label){const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:34px;margin:0 0 8pt">':'';
-  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Caseload summary: '+esc(label)+'</title><style>@page{size:landscape;margin:.5in}body{font:10pt/1.4 Inter,Arial,sans-serif;color:#1d2730;margin:0}h1{font:700 15pt Inter,Arial,sans-serif;margin:0 0 3pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;font-size:9.5pt}th,td{border:1px solid #9aa9b1;padding:3pt 5pt;text-align:left;vertical-align:top}th{background:#eef3f2}td.n{text-align:center}td.hot{font-weight:700}.s{color:#4a5b66;font-size:9pt}</style></head><body>'+logo+
-    '<h1>Caseload summary: '+esc(label)+'</h1><p>'+esc(cmLead(R,label))+'</p>'+cmTableHtml(R)+'<p class="s" style="margin-top:8pt">Each student as at their last Save case on this '+HERE+'; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Prepared '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'.</p></body></html>';}
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Caseload summary: '+esc(label)+'<\/title><style>@page{size:landscape;margin:.5in}body{font:10pt/1.4 Inter,Arial,sans-serif;color:#1d2730;margin:0}h1{font:700 15pt Inter,Arial,sans-serif;margin:0 0 3pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;font-size:9.5pt}th,td{border:1px solid #9aa9b1;padding:3pt 5pt;text-align:left;vertical-align:top}th{background:#eef3f2}td.n{text-align:center}td.hot{font-weight:700}.s{color:#4a5b66;font-size:9pt}<\/style><\/head><body>'+logo+
+    '<h1>Caseload summary: '+esc(label)+'<\/h1><p>'+esc(cmLead(R,label))+'<\/p>'+cmTableHtml(R)+'<p class="s" style="margin-top:8pt">Each student as at their last Save case on this '+HERE+'; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Prepared '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'.<\/p><\/body><\/html>';}
 async function clMonthlyOpen(){const M=cmMonths();if(!CM.month||!M.some(m=>m.v===CM.month))CM.month=M[0].v;const R=await cmRows(CM.month),label=M.find(m=>m.v===CM.month).t;
   dialog('Caseload summary',
-    '<p class="hp-lead">'+esc(cmLead(R,label))+'</p>'+
-    '<p class="td-more"><label>Month <select id="cmMonth">'+M.map(m=>'<option value="'+m.v+'"'+(m.v===CM.month?' selected':'')+'>'+esc(m.t)+'</option>').join('')+'</select></label> <button type="button" class="primary" id="cmPrint">Print (landscape)</button> <button type="button" id="cmCopy">Copy for a spreadsheet</button></p>'+
-    (R.length?'<div class="cm-wrap">'+cmTableHtml(R)+'</div>':'<p>No student is kept on this '+HERE+' yet.</p>')+
-    '<p class="hint">Each student as at their last Save case; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Names follow the privacy setting (initials). Nothing leaves this '+HERE+'.</p>');}
+    '<p class="hp-lead">'+esc(cmLead(R,label))+'<\/p>'+
+    '<p class="td-more"><label>Month <select id="cmMonth">'+M.map(m=>'<option value="'+m.v+'"'+(m.v===CM.month?' selected':'')+'>'+esc(m.t)+'<\/option>').join('')+'<\/select><\/label> <button type="button" class="primary" id="cmPrint">Print (landscape)<\/button> <button type="button" id="cmCopy">Copy for a spreadsheet<\/button><\/p>'+
+    (R.length?'<div class="cm-wrap">'+cmTableHtml(R)+'<\/div>':'<p>No student is kept on this '+HERE+' yet.<\/p>')+
+    '<p class="hint">Each student as at their last Save case; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Names follow the privacy setting (initials). Nothing leaves this '+HERE+'.<\/p>');}
 document.addEventListener('click',async e=>{if(e.target.closest('#clMonth')){clMonthlyOpen();return;}
   if(e.target.closest('#cmPrint')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then try again.');return;}
     try{w.document.open();w.document.write(cmPrintHtml(R,label));w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(x){}},300);}catch(x){}return;}
   if(e.target.closest('#cmCopy')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const ok=await copyText(cmText(R,label));wsUI.toast(ok?'The summary is copied: paste it into a spreadsheet or an email.':'Copy did not work: select the table.',{kind:ok?'ok':'warn'});return;}});
 document.addEventListener('change',e=>{if(e.target.id==='cmMonth'){CM.month=e.target.value;clMonthlyOpen();}});
-{const co7=caseloadOpen;caseloadOpen=async function(){const r=await co7.apply(this,arguments);try{const b=$('#dlgBody'),rs=b&&b.querySelector('#clRestr');if(rs&&!b.querySelector('#clMonth'))rs.insertAdjacentHTML('afterend',' <button type="button" id="clMonth"'+(rs.disabled?' disabled':'')+'>Monthly summary</button>');}catch(e){}return r;};}
+{const co7=caseloadOpen;caseloadOpen=async function(){const r=await co7.apply(this,arguments);try{const b=$('#dlgBody'),rs=b&&b.querySelector('#clRestr');if(rs&&!b.querySelector('#clMonth'))rs.insertAdjacentHTML('afterend',' <button type="button" id="clMonth"'+(rs.disabled?' disabled':'')+'>Monthly summary<\/button>');}catch(e){}return r;};}
 setTimeout(()=>{CMDS.push({k:'monthly summary caseload supervisor report month incidents',n:'Caseload summary for the month (for the supervisor)',s:'command',go:()=>clMonthlyOpen()});},0);
 </script>
 </body>
