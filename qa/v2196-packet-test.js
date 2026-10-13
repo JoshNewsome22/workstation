@@ -54,7 +54,7 @@ const frameOf=(page,file)=>page.frames().find(f=>f.url().indexOf(encodeURI(file)
   const refPages=tA.filter(p=>/\d+ · References and Sources/.test(p.top));const refText=refPages.map(p=>p.body).join(' ');
   const refLines=refText.split(/(?<=\))\s(?=[A-Z])/).length;
   ok('6 the last section gathers every form’s citations, grouped by form: regulations, standards and literature, once each',
-    refPages.length>=3&&/Form DM-1/.test(refText)&&/Form IC-1/.test(refText)&&/Form TB-1/.test(refText)&&/34 CFR|34 C\.F\.R\./.test(refText)&&/Journal of Applied Behavior Analysis/.test(refText)&&(refText.match(/Toward a functional analysis of self-injury/g)||[]).length===1,
+    refPages.length>=3&&/Form DM-1/.test(refText)&&/Form IC-1/.test(refText)&&/Form TB-1/.test(refText)&&/34 CFR|34 C\.F\.R\./.test(refText)&&/Journal of Applied Behavior Analysis/.test(refText)&&(refText.match(/Toward a functional analysis of self-injury/g)||[]).length===1&&!/· Revised|· Printed/.test(refText),
     {pages:refPages.length,sample:refText.slice(0,200),dup:(refText.match(/Toward a functional analysis of self-injury/g)||[]).length});
   ok('7 a table’s caption and footer are ordinary rows (the running head needs a named page, under which Chromium breaks between them and the table)',A.dom.secs.every(s=>s.captions===0)&&/Notice Log, Restraint 1/.test(all),A.dom.secs.map(s=>s.captions));
   const low=tA.map((p,i)=>({page:i+1,chars:p.body.length})).filter(x=>x.chars<80);

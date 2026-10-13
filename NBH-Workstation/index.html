@@ -2913,9 +2913,9 @@ function packetShape(x,i,mo,bag){
   return {id,title:x.title,html:root.innerHTML,sheets:names,guide:keepGuide&&guides.size>0};
 }
 /* the lines of a reference list or a citation foot: one entry a line, bullets and breaks as line ends, headings dropped */
-function refLines(el){const c=el.cloneNode(true);c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));c.querySelectorAll('li,p,div,tr,h2,h3,h4').forEach(e=>{e.insertAdjacentText('beforebegin','\n');e.insertAdjacentText('afterend','\n');});
+function refLines(el){const c=el.cloneNode(true);c.querySelectorAll('.nbh-print-head,.bar,.nbh-band,.noprint').forEach(e=>e.remove());c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));c.querySelectorAll('li,p,div,tr,h2,h3,h4').forEach(e=>{e.insertAdjacentText('beforebegin','\n');e.insertAdjacentText('afterend','\n');});
   return (c.textContent||'').replace(/\u00a0/g,' ').replace(/\s*[\u2022\u25cf]\s*/g,'\n').split('\n').map(s=>s.replace(/\s+/g,' ').trim())
-    .filter(s=>s.length>24&&!/^(Regulations and rules|Policy letters|Federal guidance|Professional standards|Literature|Related forms in this set|Statutes|Rules|Guidance|Standards|References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list)[.:]?$/i.test(s)&&!/^[A-Z]{2,3}-\d\s/.test(s)&&!/Load simulation|About the simulation/.test(s));}
+    .filter(s=>s.length>24&&!/^(Regulations and rules|Policy letters|Federal guidance|Professional standards|Literature|Related forms in this set|Statutes|Rules|Guidance|Standards|References( and Sources)?|Sources( for the [A-Za-z]+)?|Reference list)[.:]?$/i.test(s)&&!/^[A-Z]{2,3}-\d\s/.test(s)&&!/Load simulation|About the simulation|\u00b7 Revised |\u00b7 Printed /.test(s));}
 /* the last section: every form's references, grouped by form, repeats dropped */
 function packetRefs(bag,n){const seen=new Set(),norm=s=>s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().slice(0,80);let body='',count=0;
   Object.keys(bag).forEach(id=>{const lines=[];bag[id].forEach(l=>{const k=norm(l);if(!k||seen.has(k))return;seen.add(k);lines.push(l);});if(!lines.length)return;
