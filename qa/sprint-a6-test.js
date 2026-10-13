@@ -613,8 +613,12 @@ async function printSame(br){
   if(base){fs.mkdirSync(OUT+'base/',{recursive:true});
     for(const id of ['MT-1','TI-1','ABC-1']){let buf=null;try{buf=execFileSync('git',['show',A6_BASE+':'+ED+'/'+FILE[id]],{cwd:ROOT,maxBuffer:64<<20,stdio:['ignore','pipe','ignore']});}catch(e){}
       if(!buf){base=false;break;}fs.writeFileSync(OUT+'base/'+FILE[id],buf);WAS[id]=BASE+'/qa/out/sprint-a6/base/'+encodeURI(FILE[id]);}
+    /* v21.97 a form of a release since v21.84 loads shared files beside it: the whole folder at A6_BASE is checked out and served */
+    if(base){const d=OUT+'base-'+A6_BASE+'/';if(!fs.existsSync(d+ED+'/'+FILE['ABC-1'])){fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});
+        try{execFileSync('sh',['-c','git -C "$0" archive "$1" "$2" | tar -x -C "$3"',ROOT,A6_BASE,ED,d]);}catch(e){}}
+      for(const id of ['MT-1','TI-1','ABC-1'])if(fs.existsSync(d+ED+'/'+FILE[id]))WAS[id]=BASE+'/qa/out/sprint-a6/base-'+A6_BASE+'/'+ED+'/'+encodeURI(FILE[id]);}
     if(base){const c=await br.newContext();const q=await c.newPage();const r=await q.goto(WAS['MT-1']).catch(()=>null);await c.close();
-      if(!r||!r.ok())for(const id of ['MT-1','TI-1','ABC-1'])WAS[id]='file://'+OUT+'base/'+FILE[id];}}
+      if(!r||!r.ok())for(const id of ['MT-1','TI-1','ABC-1'])WAS[id]='file://'+(fs.existsSync(OUT+'base-'+A6_BASE+'/'+ED+'/'+FILE[id])?OUT+'base-'+A6_BASE+'/'+ED+'/':OUT+'base/')+FILE[id];}}
   if(!base){for(const k of Object.keys(WAS))delete WAS[k];console.log('NOTE the forms at '+A6_BASE+' are not available for '+ED+': the comparisons with the forms before this package (2, 3, 6) are skipped');}
   if(base){const d=OUT+'base-layout-'+A6_LAYOUT_BASE+'/';if(!fs.existsSync(d+ED+'/'+FILE['ABC-1'])){fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});
       try{execFileSync('sh',['-c','git -C "$0" archive "$1" "$2" | tar -x -C "$3"',ROOT,A6_LAYOUT_BASE,ED,d]);}catch(e){}}

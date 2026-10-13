@@ -432,12 +432,16 @@ async function print(br){
   if(!base){console.log('NOTE the form at '+A3_BASE+' is not in this checkout (set A3_BASE): print comparison skipped');return;}
   const dirs={base:OUT+'print/base/',now:OUT+'print/now/'};Object.values(dirs).forEach(d=>{fs.rmSync(d,{recursive:true,force:true});fs.mkdirSync(d,{recursive:true});});
   fs.mkdirSync(OUT+'base/',{recursive:true});fs.writeFileSync(OUT+'base/'+OB.file,base);
+  /* v21.97 a form of a release since v21.84 loads shared files beside it: the whole folder at A3_BASE is checked out and served */
+  const bd=OUT+'base-'+A3_BASE+'/';if(!fs.existsSync(bd+ED+'/'+OB.file)){fs.rmSync(bd,{recursive:true,force:true});fs.mkdirSync(bd,{recursive:true});
+    try{execFileSync('sh',['-c','git -C "$0" archive "$1" "$2" | tar -x -C "$3"',ROOT,A3_BASE,ED,bd]);}catch(e){}}
+  const whole=fs.existsSync(bd+ED+'/'+OB.file);
   /* served beside the checkout when the server's root is WS_ROOT; read from the disk otherwise. (fix pass) Asked with a
      plain request, so a server whose folder is not WS_ROOT answers 404 without a console error in the page. */
-  let baseUrl=BASE+'/qa/out/sprint-a3/base/'+encodeURIComponent(OB.file);
+  let baseUrl=whole?BASE+'/qa/out/sprint-a3/base-'+A3_BASE+'/'+ED+'/'+encodeURIComponent(OB.file):BASE+'/qa/out/sprint-a3/base/'+encodeURIComponent(OB.file);
   const ctx=await br.newContext({viewport:{width:1280,height:900}});await ctx.addInitScript(()=>{window.print=function(){};});
   const page=await ctx.newPage();watch(page,'print');page.on('dialog',d=>d.accept().catch(()=>{}));
-  const r=await ctx.request.get(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+OUT+'base/'+OB.file;
+  const r=await ctx.request.get(baseUrl).catch(()=>null);if(!r||!r.ok())baseUrl='file://'+(whole?bd+ED+'/':OUT+'base/')+OB.file;
   await page.goto(FORM);await sleep(700);await page.evaluate(()=>{window.confirm=()=>true;});
   await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(700);
   const data=OUT+'print-data.json';fs.writeFileSync(data,await page.evaluate(()=>JSON.stringify(state,null,1)));
