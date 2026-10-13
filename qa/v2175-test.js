@@ -27,6 +27,8 @@ const FACTS={data:{from:'2026-09-14',to:'2026-10-09',days:20,src:'DD-1',
 (async()=>{const br=await chromium.launch();const log=[];
   /* ---------- 1. Form DD-1 ---------- */
   let page=await br.newPage({viewport:{width:1400,height:1000}});wire(page,log);
+  /* v21.96 the simulation is dated from today, so the dates below hold for the Monday this test was written on: the clock is fixed there */
+  await page.clock.setFixedTime(new Date('2026-10-12T10:00:00'));
   await page.goto(W+'Daily_Behavior_Data_and_Visual_Analysis.html',{waitUntil:'load'});await sleep(1200);
   await page.evaluate(stub);await page.evaluate(async()=>{await loadExample();});await sleep(1200);
   const o=await page.evaluate(()=>{const d=window.__nbhFactsOut().data,b=d.behaviors;return {conds:d.conds.map(c=>c.name+' '+c.from+' '+c.days),b0:{base:b[0].base,cur:b[0].cur,curName:b[0].curName},aims:b.map(x=>[x.name,x.aim,x.need,x.run,x.aimMet]),week:d.week&&{mon:d.week.mon,rows:d.week.rows.length,r0:d.week.rows[0]},inc:d.incidentList.length};});

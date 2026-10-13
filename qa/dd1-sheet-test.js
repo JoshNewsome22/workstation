@@ -7,6 +7,8 @@ const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
 const URL=BASE+'/'+(process.env.ED||'NBH-Workstation')+'/Daily_Behavior_Data_and_Visual_Analysis.html';
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i):''));if(!c)fails++;};
 (async()=>{const br=await chromium.launch();const page=await br.newPage({viewport:{width:1400,height:1000}});const errs=[];page.on('pageerror',e=>errs.push(e.message));
+  /* v21.96 the sheet's dates come from today; the weekday the test expects is the Monday it was written on: the clock is fixed there */
+  await page.clock.setFixedTime(new Date('2026-10-12T10:00:00'));
   await page.goto(URL);await sleep(1500);
   await page.evaluate(()=>{window.confirm=()=>true;if(window.nbhUI)nbhUI.confirm=async()=>true;});
   await page.evaluate(async()=>{await loadExample();});await sleep(1200);
