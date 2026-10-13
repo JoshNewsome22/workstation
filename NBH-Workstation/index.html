@@ -1065,6 +1065,32 @@ body:not(.has-form) #focusBtn{display:none}
 #blank .card #blLog{font-weight:600}
 #dlg .ln #lnDict[aria-pressed="true"]{background:#f3c94f;border-color:#f3c94f;color:var(--navy)}
 </style>
+<style id="ws-v2195">
+/* v21.95 the Home note */
+#dlg .hn-lang{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+#dlg .hn-lang button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+#dlg .hn-sheet{background:#fff;border:1px solid #d5dde1;border-radius:10px;padding:18px 22px;font:15px/1.5 Georgia,"Times New Roman",serif;color:#1d2730;max-width:76ch}
+#dlg .hn-sheet h2{font:700 17px Inter,"Segoe UI",system-ui,sans-serif;margin:14px 0 6px;color:#254657}
+#dlg .hn-sheet h2:first-child{margin-top:0}
+#dlg .hn-sheet p{margin:0 0 8px}
+#dlg .hn-sheet table{border-collapse:collapse;width:100%;margin:4px 0 10px;font-size:14px}
+#dlg .hn-sheet th,#dlg .hn-sheet td{border:1px solid #c9d2d7;padding:5px 8px;text-align:left;vertical-align:top}
+#dlg .hn-sheet th{background:#eef3f2;font:600 12.5px Inter,"Segoe UI",system-ui,sans-serif}
+#dlg .hn-sheet [contenteditable]{outline:none;border-radius:4px}
+#dlg .hn-sheet [contenteditable]:focus{box-shadow:0 0 0 3px rgba(47,111,143,.18)}
+#dlg .hn-sheet .hn-box{border:1px dashed #9fb1b9;border-radius:8px;padding:8px 10px;min-height:44px}
+#dlg .hn-sheet .hn-box:empty::before{content:attr(data-hint);color:#6f8087}
+#dlg .hn-sheet .hn-sig{margin-top:14px}
+@media (max-width:600px){#dlg .hn-sheet{padding:12px 12px;font-size:14px}}
+/* v21.95 the monthly summary */
+#dlg .cm-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 10px;max-width:100%}
+#dlg .cm-t{border-collapse:collapse;font-size:13px;min-width:820px}
+#dlg .cm-t th,#dlg .cm-t td{border:1px solid #c9d2d7;padding:5px 8px;text-align:left;vertical-align:top}
+#dlg .cm-t th{background:#eef3f2;font:600 12px Inter,"Segoe UI",system-ui,sans-serif;white-space:nowrap}
+#dlg .cm-t td.n{text-align:center;white-space:nowrap}
+#dlg .cm-t td.hot{color:#9b2c2c;font-weight:700}
+#dlg #cmMonth{font:inherit;font-size:14px;padding:6px 8px;border:1px solid #c7d0d4;border-radius:8px;min-height:40px}
+</style>
 </head>
 <body>
 
@@ -5362,7 +5388,7 @@ async function gmSend(tok,m,from){const r=await fetch('https://gmail.googleapis.
   return {ok:false,err:msg};}
 const gmOk=e=>/^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(String(e||'').trim());
 /* the request from a form: shown, confirmed in a tap that also signs in, sent one by one, answered */
-async function mailFor(ev,d){const src=ev.source,from=relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};
+async function mailFor(ev,d){const src=ev.source,from=(src===window&&d.self)?String(d.self):relayFrom(src);const answer=m=>{try{src.postMessage(Object.assign({nbh:'mail-result',req:d.req},m),'*');}catch(e){}};   /* v21.95 self: this page's own Home note */
   if(!from){return;}
   const L=(Array.isArray(d.messages)?d.messages:[]).slice(0,60).filter(m=>m&&gmOk(m.to));
   if(!L.length){answer({unavailable:true,why:'No email address to send to.'});return;}
@@ -7378,6 +7404,158 @@ document.addEventListener('submit',e=>{if(e.target&&e.target.id==='lnForm')logNo
 {const pb6=paintBlank;paintBlank=async function(){const r=await pb6.apply(this,arguments);try{const row=$('#blank .card #blankCl .td-more');if(row&&!row.querySelector('#blLog'))row.insertAdjacentHTML('beforeend',' <button type="button" id="blLog">Log it now</button>');}catch(e){}return r;};}
 {const to6=todayOpen;todayOpen=async function(){const r=await to6.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdLog'))row.insertAdjacentHTML('afterbegin','<button type="button" id="tdLog">Log it now</button> ');}catch(e){}return r;};}
 setTimeout(()=>{CMDS.push({k:'log it now incident abc time stamp record behavior restraint',n:'Log it now: an incident, time-stamped (Form DD-1)',s:'command',go:()=>logNowOpen()});},0);
+</script>
+<script id="nbh-v2195">
+/* ================= v21.95 the Home note: a parent's progress note in English or Spanish, from the case =================
+   Written from the facts the forms share (Form DD-1's daily data, GB-1's objectives, PR-1's last review, DM-1's home contact):
+   what we are working on, where it started and where it is, the good news, the incidents of the period and whether home was
+   told, a box for what home can do, what comes next. Every part can be edited on the sheet before it is printed, sent from the
+   school Google account (the mail path the forms use) or copied. Spanish when the home language says so; the fixed wording is
+   the workstation's own, the names and numbers the case's. Nothing leaves the device unless Send is pressed. */
+const HN={lang:'en',req:0};
+const HN_T={
+  title:{en:'Home note',es:'Nota para la familia'},
+  dear:{en:'Dear {who},',es:'Estimada familia de {first}:'},
+  dearNamed:{en:'Dear {who},',es:'Estimado/a {who}:'},
+  parent:{en:'parent or guardian',es:'familia'},
+  intro:{en:'Here is how {first} is doing with the behavior plan at {school}, as of {date}.',es:'Así le va a {first} con el plan de conducta en {school}, al {date}.'},
+  introNoSchool:{en:'Here is how {first} is doing with the behavior plan, as of {date}.',es:'Así le va a {first} con el plan de conducta, al {date}.'},
+  working:{en:'What we are working on',es:'En qué estamos trabajando'},
+  period:{en:'The numbers come from the last {days} school days with data ({from} to {to}).',es:'Los números son de los últimos {days} días de clase con datos (del {from} al {to}).'},
+  noData:{en:'We have just started keeping daily data; the next note will have numbers.',es:'Acabamos de empezar a llevar datos diarios; la próxima nota tendrá números.'},
+  thBeh:{en:'Behavior',es:'Conducta'},thStart:{en:'Where we started',es:'Al empezar'},thNow:{en:'Now',es:'Ahora'},thAim:{en:'We are aiming for',es:'Buscamos'},
+  fewer:{en:'fewer is better',es:'menos es mejor'},more:{en:'more is better',es:'más es mejor'},
+  goals:{en:'The goals in the plan',es:'Las metas del plan'},
+  good:{en:'The good news',es:'Buenas noticias'},
+  met:{en:'{beh} has reached the goal: {now} {unit}.',es:'{beh} ya llegó a la meta: {now} {unit}.'},
+  better:{en:'{beh} went from {start} to {now} {unit}: real progress.',es:'{beh} pasó de {start} a {now} {unit}: un avance real.'},
+  steady:{en:'We are still working on {beh}; the plan continues.',es:'Seguimos trabajando en {beh}; el plan continúa.'},
+  noGood:{en:'We are early in the plan; the next note will say more.',es:'Estamos al principio del plan; la próxima nota dirá más.'},
+  incidents:{en:'Incidents',es:'Incidentes'},
+  incNone:{en:'There were no incidents to report in this period.',es:'No hubo incidentes que reportar en este período.'},
+  incSome:{en:'In this period there {was} {n} {inc}; we told you about {m} of them at the time.',es:'En este período hubo {n} {inc}; les avisamos de {m} en su momento.'},
+  incSomeAll:{en:'In this period there {was} {n} {inc}; we told you about each at the time.',es:'En este período hubo {n} {inc}; les avisamos de cada uno en su momento.'},
+  incWord:{en:'incident',es:'incidente'},incWords:{en:'incidents',es:'incidentes'},
+  home:{en:'What you can do at home',es:'Qué puede hacer en casa'},
+  homeHint:{en:'Write one or two things the family can do: ask about the day, praise the replacement behavior, the same words as at school…',es:'Escriba una o dos cosas que la familia puede hacer: preguntar por el día, elogiar la conducta de reemplazo, las mismas palabras que en la escuela…'},
+  next:{en:'What comes next',es:'Lo que sigue'},
+  review:{en:'At the last plan review on {date}, the team decided: {text}',es:'En la última revisión del plan, el {date}, el equipo decidió: {text}'},
+  nextReview:{en:'The next plan review is on {date}. We will send another note after it.',es:'La próxima revisión del plan es el {date}. Les enviaremos otra nota después.'},
+  nextNone:{en:'We will send another note in a few weeks. Call or write any time with questions.',es:'Les enviaremos otra nota en unas semanas. Llamen o escriban cuando tengan preguntas.'},
+  thanks:{en:'Thank you for being part of {first}’s team.',es:'Gracias por formar parte del equipo de {first}.'},
+  interp:{en:'An interpreter is available for any conversation about this note.',es:'Hay intérprete disponible para cualquier conversación sobre esta nota.'},
+  subject:{en:'How {first} is doing with the behavior plan',es:'Cómo le va a {first} con el plan de conducta'},
+  print:{en:'Print',es:'Imprimir'},send:{en:'Send by email',es:'Enviar por correo'},copy:{en:'Copy the text',es:'Copiar el texto'}
+};
+const HN_UNITS={'per day':'por día','a day':'al día','per hour':'por hora','per session':'por sesión','per minute':'por minuto','per observation':'por observación','% of intervals':'% de los intervalos','% intervals':'% de intervalos','percent of intervals':'% de los intervalos','% of opportunities':'% de las oportunidades','% correct':'% correctas','minutes':'minutos','min':'min','seconds':'segundos','sec':'seg','count':'veces','times':'veces','times a day':'veces al día','%':'%'};
+function hnT(k,v){let t=(HN_T[k]||{})[HN.lang]||(HN_T[k]||{}).en||'';Object.keys(v||{}).forEach(x=>{t=t.split('{'+x+'}').join(v[x]);});return t;}
+function hnUnit(u){u=String(u||'').trim();if(HN.lang!=='es')return u;const k=u.toLowerCase();return HN_UNITS[k]||u;}
+function hnDate(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));if(!m)return String(iso||'');const d=new Date(+m[1],+m[2]-1,+m[3],12);return d.toLocaleDateString(HN.lang==='es'?'es':'en-US',{year:'numeric',month:'long',day:'numeric'});}
+function hnNum(x){if(x==null||x==='')return '';const n=+x;if(isNaN(n))return String(x);return HN.lang==='es'?String(n).replace('.',','):String(n);}
+function hnFirst(p){return String(p.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/)[0]||(HN.lang==='es'?'su hijo/a':'your child');}
+function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{},rv=f.review||{},home=(f.profile||{}).home||{};
+  const first=hnFirst(p),T=x=>String(x==null?'':x).trim();
+  const rows=(d.behaviors||[]).filter(b=>b&&T(b.name)).map(b=>{const start=b.base&&b.base.mean!=null?b.base.mean:null,now=b.cur&&b.cur.mean!=null?b.cur.mean:(b.mean!=null?b.mean:null);
+    const dir=b.direction==='decrease'?'fewer':(b.direction==='increase'?'more':'');let good='';
+    if(b.aimMet)good=hnT('met',{beh:T(b.name),now:hnNum(now),unit:hnUnit(b.unit)});
+    else if(start!=null&&now!=null&&start!==0){const chg=(now-start)/Math.abs(start);if((dir==='fewer'&&chg<=-0.2)||(dir==='more'&&chg>=0.2))good=hnT('better',{beh:T(b.name),start:hnNum(start),now:hnNum(now),unit:hnUnit(b.unit)});}
+    return {name:T(b.name),start:start!=null?hnNum(start)+' '+hnUnit(b.unit):'—',now:now!=null?hnNum(now)+' '+hnUnit(b.unit):'—',aim:b.aim!=null?hnNum(b.aim)+' '+hnUnit(b.unit)+(dir?' ('+hnT(dir)+')':''):'—',good};});
+  const from=d.from||'',to=d.to||'';
+  const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>i.parent==='yes').length;
+  const goals=[].concat((g.red||[]).map(x=>T(x.text||x)),(g.acq||[]).map(x=>T(x.text||x))).filter(Boolean);
+  return {first,who:T(home.name),email:T(home.email),lang:T(home.lang),interp:/^yes/i.test(T(home.interp)),school:T(p.site),bcba:T(p.bcba),rows,from,to,days:d.days||0,inc:inc.length,told,goals,
+    review:{date:T(rv.date),text:T(rv.decisionText||rv.decision),next:T(rv.next)}};}
+function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
+  const dear=P.who?hnT('dearNamed',{who:P.who}):hnT('dear',{who:hnT('parent'),first:P.first});
+  const intro=P.school?hnT('intro',{first:P.first,school:P.school,date:hnDate(new Date().toISOString().slice(0,10))}):hnT('introNoSchool',{first:P.first,date:hnDate(new Date().toISOString().slice(0,10))});
+  const good=P.rows.map(r=>r.good).filter(Boolean);
+  const incT=!P.inc?hnT('incNone'):(P.told>=P.inc?hnT('incSomeAll',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords')}):hnT('incSome',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords'),m:P.told}));
+  const nextT=(P.review.date&&P.review.text?hnT('review',{date:hnDate(P.review.date),text:P.review.text})+' ':'')+(P.review.next?hnT('nextReview',{date:hnDate(P.review.next)}):hnT('nextNone'));
+  return '<p contenteditable="true" class="hn-dear">'+e(dear)+'</p><p contenteditable="true">'+e(intro)+'</p>'+
+    '<h2>'+e(hnT('working'))+'</h2>'+(P.rows.length?'<p contenteditable="true">'+e(hnT('period',{days:P.days,from:hnDate(P.from),to:hnDate(P.to)}))+'</p>'+
+      '<table><thead><tr><th>'+e(hnT('thBeh'))+'</th><th>'+e(hnT('thStart'))+'</th><th>'+e(hnT('thNow'))+'</th><th>'+e(hnT('thAim'))+'</th></tr></thead><tbody>'+
+      P.rows.map(r=>'<tr><td contenteditable="true">'+e(r.name)+'</td><td contenteditable="true">'+e(r.start)+'</td><td contenteditable="true">'+e(r.now)+'</td><td contenteditable="true">'+e(r.aim)+'</td></tr>').join('')+'</tbody></table>':'<p contenteditable="true">'+e(hnT('noData'))+'</p>')+
+    (P.goals.length?'<h2>'+e(hnT('goals'))+'</h2><ul>'+P.goals.map(t=>'<li contenteditable="true">'+e(t)+'</li>').join('')+'</ul>':'')+
+    '<h2>'+e(hnT('good'))+'</h2>'+(good.length?good.map(t=>'<p contenteditable="true">'+e(t)+'</p>').join(''):'<p contenteditable="true">'+e(P.rows.length?hnT('steady',{beh:P.rows[0].name}):hnT('noGood'))+'</p>')+
+    '<h2>'+e(hnT('incidents'))+'</h2><p contenteditable="true">'+e(incT)+'</p>'+
+    '<h2>'+e(hnT('home'))+'</h2><div class="hn-box" contenteditable="true" data-hint="'+e(hnT('homeHint'))+'"></div>'+
+    '<h2>'+e(hnT('next'))+'</h2><p contenteditable="true">'+e(nextT)+'</p>'+(P.interp?'<p contenteditable="true">'+e(hnT('interp'))+'</p>':'')+
+    '<p contenteditable="true" class="hn-sig">'+e(hnT('thanks',{first:P.first}))+'<br>'+e([P.bcba,P.school].filter(Boolean).join(' · '))+'</p>';}
+function hnText(){const sh=$('#hnSheet');if(!sh)return '';const out=[];sh.childNodes.forEach(n=>{if(n.nodeType!==1)return;
+  if(n.tagName==='TABLE'){[...n.querySelectorAll('tr')].forEach(tr=>out.push([...tr.children].map(c=>c.textContent.trim()).join(' | ')));out.push('');}
+  else if(n.tagName==='UL'){[...n.children].forEach(li=>out.push('• '+li.textContent.trim()));out.push('');}
+  else if(n.tagName==='H2')out.push(n.textContent.trim().toUpperCase());
+  else{const t=n.innerText!=null?n.innerText:n.textContent;if(String(t).trim())out.push(String(t).trim());out.push('');}});
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();}
+function hnPrintHtml(){const sh=$('#hnSheet'),p=packet();if(!sh)return '';const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:40px;margin:0 0 10pt">':'';
+  const body=sh.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'');
+  return '<!DOCTYPE html><html lang="'+HN.lang+'"><head><meta charset="utf-8"><title>'+esc(hnT('title'))+(p.client?': '+esc(p.client):'')+'</title><style>body{font:11.5pt/1.5 Georgia,"Times New Roman",serif;color:#1d2730;margin:.7in;max-width:6.9in}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;margin:12pt 0 4pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;margin:4pt 0 8pt;font-size:10.5pt}th,td{border:1px solid #9aa9b1;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#eef3f2;font:600 9.5pt Inter,Arial,sans-serif}.hn-box{border:1px solid #9aa9b1;border-radius:4pt;padding:6pt 8pt;min-height:40pt}.hn-box:empty{min-height:60pt}.hn-sig{margin-top:12pt}</style></head><body>'+logo+body+'</body></html>';}
+function hnPaint(){const P=hnParts();const sh=$('#hnSheet');if(!sh)return;sh.innerHTML=hnSheetHtml(P);sh.lang=HN.lang;
+  [...document.querySelectorAll('#dlgBody .hn-lang button')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===HN.lang)));
+  const bt=$('#hnPrint');if(bt)bt.textContent=hnT('print');const se=$('#hnSend');if(se){se.textContent=hnT('send')+(P.email?'':'');se.title=P.email?P.email:'';}const cp=$('#hnCopy');if(cp)cp.textContent=hnT('copy');}
+async function homeNoteOpen(){if(!lnOnScreen()||!packet().client){wsUI.toast('Open the student’s case first: the note is written from its forms.',{kind:'warn'});return;}
+  await gatherFacts(false);const P=hnParts();
+  HN.lang=/spanish|espa[ñn]ol/i.test(P.lang)?'es':'en';
+  dialog('Home note',
+    '<p class="hp-lead">A progress note for home, written from Form DD-1’s data, GB-1’s goals, PR-1’s review and DM-1’s contacts. Read it, change any line on the sheet, then print it, send it from your school account or copy it.'+(P.lang?' Home language on Form DM-1: '+esc(P.lang)+'.':'')+'</p>'+
+    '<div class="hn-lang" role="group" aria-label="Language"><button type="button" data-lang="en" aria-pressed="false">English</button><button type="button" data-lang="es" aria-pressed="false">Español</button></div>'+
+    '<div class="hn-sheet" id="hnSheet"></div>'+
+    '<p class="td-more"><button type="button" class="primary" id="hnPrint">Print</button> <button type="button" id="hnSend">Send by email</button> <button type="button" id="hnCopy">Copy the text</button></p>'+
+    '<p class="hint">The fixed wording is the workstation’s, in English or Spanish; the names, numbers and goals are the case’s, so read them before they go home. A behavior’s numbers are means over the last 20 school days with data on Form DD-1, by condition where the sheet has more than one.</p>');
+  hnPaint();}
+function hnPrint(){const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then press Print again.');return;}
+  try{w.document.open();w.document.write(hnPrintHtml());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},300);}catch(e){}}
+function hnSend(){const P=hnParts(),text=hnText();if(!text)return;const subject=hnT('subject',{first:P.first});
+  const sheet=$('#hnSheet');const html=sheet?'<div style="font:15px/1.5 Georgia,serif;max-width:640px">'+sheet.innerHTML.replace(/ contenteditable="true"/g,'').replace(/ data-hint="[^"]*"/g,'')+'</div>':'';
+  if(!P.email){const a=document.createElement('a');a.href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();wsUI.toast('No email for home on Form DM-1: the Mail app opens with the note; add the address there.',{kind:'warn',ms:8000});return;}
+  const req='hn'+(++HN.req);const on=ev=>{const d=ev.data||{};if(d.nbh!=='mail-result'||d.req!==req)return;window.removeEventListener('message',on);
+    if(d.unavailable){const a=document.createElement('a');a.href='mailto:'+encodeURIComponent(P.email)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(text);document.body.appendChild(a);a.click();a.remove();if(!d.declined)wsUI.toast(d.why+' The Mail app opens with the note instead.',{kind:'warn',ms:8000});}};
+  window.addEventListener('message',on);mailFor({source:window},{nbh:'mail',self:'the Home note',req,messages:[{to:P.email,name:P.who||'',subject,text,html}]});}
+document.addEventListener('click',async e=>{const lb=e.target.closest('#dlgBody .hn-lang button');if(lb){HN.lang=lb.dataset.lang;hnPaint();return;}
+  if(e.target.closest('#hnPrint')){hnPrint();return;}if(e.target.closest('#hnSend')){hnSend();return;}
+  if(e.target.closest('#hnCopy')){const ok=await copyText(hnText());wsUI.toast(ok?'The note is copied.':'Copy did not work: select the text on the sheet.',{kind:ok?'ok':'warn'});return;}
+  if(e.target.closest('#tdHome')){homeNoteOpen();return;}});
+{const to7=todayOpen;todayOpen=async function(){const r=await to7.apply(this,arguments);try{const row=$('#dlgBody .td-more');if(row&&!row.querySelector('#tdHome'))row.insertAdjacentHTML('beforeend',' <button type="button" id="tdHome">Home note</button>');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'home note parent progress letter spanish español family',n:'Home note: a progress note for the family (English or Spanish)',s:'command',go:()=>homeNoteOpen()});},0);
+/* ================= v21.95 the monthly summary: the caseload for the supervisor, one month at a time =================
+   From the students kept on this device, each as at their last Save case (the facts their forms shared): the month's incidents,
+   restraints and seclusions, how many home was told about, the aims met, the last integrity score, consent on file, the last
+   day of data and what needs the BCBA now. A table, printed landscape or copied for a spreadsheet. Nothing leaves the device;
+   names follow the initials setting. */
+const CM={month:''};
+function cmMonths(){const L=[];const d=new Date();d.setDate(1);for(let i=0;i<6;i++){const y=d.getFullYear(),m=d.getMonth()+1;L.push({v:y+'-'+String(m).padStart(2,'0'),t:d.toLocaleDateString(undefined,{year:'numeric',month:'long'})});d.setMonth(d.getMonth()-1);}return L;}
+function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(e){f={};}const d=f.data||{},it=f.integrity||{},c=f.consent||{};
+  const inc=(d.incidentList||[]).filter(i=>i&&String(i.date||'').slice(0,7)===month),hold=inc.filter(i=>/^(restraint|seclusion)$/.test(i.hold||'')).length,told=inc.filter(i=>i.parent==='yes').length;
+  const behs=(d.behaviors||[]).filter(b=>b&&b.name),aims=behs.filter(b=>b.aim!=null),met=aims.filter(b=>b.aimMet).length;
+  const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
+  return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:String(r.saved||'').slice(0,10),inc:inc.length,hold,told,aims:aims.length,met,
+    integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:!!(c.date||c.parent),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
+async function cmRows(month){const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
+function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});
+  t.integMean=t.integ.length?Math.round(t.integ.reduce((a,b)=>a+b,0)/t.integ.length*10)/10:null;return t;}
+function cmLead(R,label){const t=cmTotals(R);return t.n+' student'+(t.n===1?'':'s')+' kept on this '+HERE+', '+label+': '+t.inc+' incident'+(t.inc===1?'':'s')+(t.inc?' ('+t.hold+' restraint'+(t.hold===1?'':'s')+' or seclusion'+(t.hold===1?'':'s')+'; home told about '+t.told+')':'')+'; aims met for '+t.met+' of '+t.aims+' behavior'+(t.aims===1?'':'s')+' with an aim; consent on file for '+t.consent+' of '+t.n+'; integrity '+(t.integMean!=null?t.integMean+'% on average':'not observed')+'; '+t.withData+' with daily data; '+t.hot+' item'+(t.hot===1?'':'s')+' overdue or about safety.';}
+function cmTableHtml(R){const td=(v,c)=>'<td'+(c?' class="'+c+'"':'')+'>'+esc(v==null?'':String(v))+'</td>';
+  return '<table class="cm-t"><thead><tr><th>Student</th><th>School · grade</th><th>Incidents</th><th>Restraint / seclusion</th><th>Home told</th><th>Aims met</th><th>Integrity</th><th>Consent</th><th>Last data</th><th>Needs you</th></tr></thead><tbody>'+
+    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.consent?'Yes':'No','n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'</tr>').join('')+
+    '</tbody></table>';}
+function cmText(R,label){const t=cmTotals(R);const H=['Student','School · grade','Incidents','Restraint or seclusion','Home told','Aims met','Integrity','Consent','Last data','Needs you'];
+  return [label,cmLead(R,label),'',H.join('\t')].concat(R.map(x=>[x.name,x.site,x.inc,x.hold,x.inc?x.told+' of '+x.inc:'',x.aims?x.met+' of '+x.aims:'',x.integ!=null?x.integ+'%':'',x.consent?'Yes':'No',x.lastData,x.hot?x.hot+': '+x.hotT:''].join('\t'))).concat(['Totals\t\t'+t.inc+'\t'+t.hold+'\t'+t.told+' of '+t.inc+'\t'+t.met+' of '+t.aims+'\t'+(t.integMean!=null?t.integMean+'%':'')+'\t'+t.consent+' of '+t.n]).join('\n');}
+function cmPrintHtml(R,label){const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:34px;margin:0 0 8pt">':'';
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Caseload summary: '+esc(label)+'</title><style>@page{size:landscape;margin:.5in}body{font:10pt/1.4 Inter,Arial,sans-serif;color:#1d2730;margin:0}h1{font:700 15pt Inter,Arial,sans-serif;margin:0 0 3pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;font-size:9.5pt}th,td{border:1px solid #9aa9b1;padding:3pt 5pt;text-align:left;vertical-align:top}th{background:#eef3f2}td.n{text-align:center}td.hot{font-weight:700}.s{color:#4a5b66;font-size:9pt}</style></head><body>'+logo+
+    '<h1>Caseload summary: '+esc(label)+'</h1><p>'+esc(cmLead(R,label))+'</p>'+cmTableHtml(R)+'<p class="s" style="margin-top:8pt">Each student as at their last Save case on this '+HERE+'; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Prepared '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'.</p></body></html>';}
+async function clMonthlyOpen(){const M=cmMonths();if(!CM.month||!M.some(m=>m.v===CM.month))CM.month=M[0].v;const R=await cmRows(CM.month),label=M.find(m=>m.v===CM.month).t;
+  dialog('Caseload summary',
+    '<p class="hp-lead">'+esc(cmLead(R,label))+'</p>'+
+    '<p class="td-more"><label>Month <select id="cmMonth">'+M.map(m=>'<option value="'+m.v+'"'+(m.v===CM.month?' selected':'')+'>'+esc(m.t)+'</option>').join('')+'</select></label> <button type="button" class="primary" id="cmPrint">Print (landscape)</button> <button type="button" id="cmCopy">Copy for a spreadsheet</button></p>'+
+    (R.length?'<div class="cm-wrap">'+cmTableHtml(R)+'</div>':'<p>No student is kept on this '+HERE+' yet.</p>')+
+    '<p class="hint">Each student as at their last Save case; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Names follow the privacy setting (initials). Nothing leaves this '+HERE+'.</p>');}
+document.addEventListener('click',async e=>{if(e.target.closest('#clMonth')){clMonthlyOpen();return;}
+  if(e.target.closest('#cmPrint')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const w=window.open('','_blank');if(!w){alert('The browser blocked the window. Allow pop-ups for this page, then try again.');return;}
+    try{w.document.open();w.document.write(cmPrintHtml(R,label));w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(x){}},300);}catch(x){}return;}
+  if(e.target.closest('#cmCopy')){const M=cmMonths();const R=await cmRows(CM.month),label=(M.find(m=>m.v===CM.month)||M[0]).t;const ok=await copyText(cmText(R,label));wsUI.toast(ok?'The summary is copied: paste it into a spreadsheet or an email.':'Copy did not work: select the table.',{kind:ok?'ok':'warn'});return;}});
+document.addEventListener('change',e=>{if(e.target.id==='cmMonth'){CM.month=e.target.value;clMonthlyOpen();}});
+{const co7=caseloadOpen;caseloadOpen=async function(){const r=await co7.apply(this,arguments);try{const b=$('#dlgBody'),rs=b&&b.querySelector('#clRestr');if(rs&&!b.querySelector('#clMonth'))rs.insertAdjacentHTML('afterend',' <button type="button" id="clMonth"'+(rs.disabled?' disabled':'')+'>Monthly summary</button>');}catch(e){}return r;};}
+setTimeout(()=>{CMDS.push({k:'monthly summary caseload supervisor report month incidents',n:'Caseload summary for the month (for the supervisor)',s:'command',go:()=>clMonthlyOpen()});},0);
 </script>
 </body>
 </html>

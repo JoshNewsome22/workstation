@@ -2876,6 +2876,23 @@ a{text-underline-offset:2px}
   .toolbar .seg button{padding:6px 9px}
 }
 </style>
+<script id="dm-v2195">
+/* v21.95 the home: who the workstation's Home note is for (the contact who holds rights, else the parent or guardian
+   listed first), their email and language, and the home language and interpreter line, as part of the profile facts.
+   Only what is entered travels; nothing else changes. */
+(function(){const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=was?was.apply(this,arguments):null;}catch(e){o=null;}
+ try{const g=n=>{const e=document.querySelector('[name="'+n+'"]');return e?String(e.value||'').trim():'';};
+  let best=null;
+  for(let i=0;i<20;i++){if(!document.querySelector('[name="c['+i+'].name"]'))break;const name=g('c['+i+'].name');if(!name)continue;
+    const rel=g('c['+i+'].rel'),rights=g('c['+i+'].rights');
+    const score=(/^y/i.test(rights)?2:0)+(/parent|guardian|mother|father|mom|dad|madre|padre|caregiver|grand/i.test(rel)?1:0);
+    if(!best||score>best.score)best={score,name,rel,email:g('c['+i+'].email'),phone:g('c['+i+'].phone'),lang:g('c['+i+'].lang'),pref:g('c['+i+'].pref')};}
+  const home={};if(g('s.lang'))home.lang=g('s.lang');if(g('s.interp'))home.interp=g('s.interp');
+  if(best){home.name=best.name;if(best.rel)home.rel=best.rel;if(best.email)home.email=best.email;if(best.phone)home.phone=best.phone;if(best.lang)home.lang=best.lang;if(best.pref)home.pref=best.pref;}
+  if(Object.keys(home).length){o=o||{};o.profile=o.profile||{src:'DM-1'};o.profile.home=home;}
+ }catch(e){}
+ return o;};})();
+</script>
 <script id="nbh-polish" src="nbh-polish.js"></script>
 </body>
 </html>

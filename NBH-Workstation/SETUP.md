@@ -9466,3 +9466,31 @@ cursor, the toolbar switch on a form of its own and the sheet's switch, the word
 
 The school site needs `nbh-asr/` beside the forms for Dictate and for TV-1's *Follow my words*: it is not in the
 workstation's zip (57 MB that never changes), but in a zip of its own, uploaded once (HOSTING.md).
+
+### v21.95: the Home note, and the month's caseload for the supervisor
+
+- **Home note** (the Today list's row, and `Home note` in the Find box): a progress note for the family, written from the case
+  and read before it goes. From Form DD-1's data (each behavior: where it started, where it is now, the aim; the last 20
+  school days with data, by condition where the sheet has more than one), GB-1's objectives as written, PR-1's last review
+  and next review date, and DM-1's home contact (the one who holds rights, else the parent or guardian listed first; the
+  home language and whether an interpreter is needed). In **English or Spanish**: the fixed wording is the workstation's own,
+  the names, numbers and goals the case's; the note opens in Spanish when DM-1 says the home language is. Every line on the
+  sheet can be edited; the box *What you can do at home* is the BCBA's to fill. **Print** makes the letter (the edition's
+  logo on it); **Send by email** sends it from the school Google account by the same path the forms use (the confirm, the
+  sign-in), to the home email on DM-1, with the note as text and as a page; with no address, or when sending is declined,
+  the Mail app opens with the note instead; **Copy the text** copies it. Nothing leaves the device unless Send is pressed.
+  The numbers are means over the days with data; a behavior's line is good news when its aim is met or it moved a fifth of
+  the way in the right direction. Read a note before it goes: the page does not judge a goal's wording; the BCBA does.
+  How it is done: `nbh-v2195` in the workstation page (`hnParts`, `hnSheetHtml`, the strings table `HN_T`); DM-1's
+  `dm-v2195` adds the home contact to the profile facts (`profile.home`); `mailFor` takes a request from the page itself.
+- **Monthly summary** (the Caseload dialog's tools, beside the restraint report, and `Caseload summary` in the Find box): one
+  month at a time, from the students kept on this device, each as at their last Save case: incidents, restraints and
+  seclusions, how many home was told about, aims met, the last integrity score (▼ below the criterion), consent on file, the
+  last day of data, what needs the BCBA now. A lead line sums the month. **Print (landscape)** and **Copy for a spreadsheet**
+  (tab-separated, with a totals line). Names follow the initials setting. Nothing leaves the device.
+
+Checked by `qa/v2195-note-test.js` (the simulated case: the facts, the note opening in Spanish with the sections and a row per
+behavior, the incident line, the English note with the first row's numbers, the period and interpreter lines, an edit on the
+sheet reaching Print, Send and Copy, the message handed to the mail path, the command, a phone) and `qa/v2195-caseload-test.js`
+(three simulated records: the button, this month's rows and lead line, last month's, the copy text, the landscape print, the
+command, initials on a phone).
