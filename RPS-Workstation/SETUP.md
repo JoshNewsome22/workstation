@@ -9675,3 +9675,25 @@ last 10 days; a change smaller than 15% of their mean (and never smaller than 0.
 steady, and fewer than 3 days read as too few for a trend. For a problem behavior falling is improving and rising is
 worsening; for a skill it is the other way round. It is a quick summary for scanning the caseload, not visual analysis:
 the graphs on Form DD-1 stay the record. Checked by `qa/v2199-cards-test.js` 11 and 12.
+
+### v22.02: Form DD-1 across school years
+
+Form DD-1 can now show more than one school year. Under the Google Sheets bar, **Earlier school years** links last
+year's sheet (and older ones) alongside this year's. The form reads the earlier sheet, checks it is the same student,
+guesses its school year from the title (for example "SY25-26") or from its dates, and asks you to pair each earlier
+target with this year's when the names differ ("Tantrum" with "Tantrum Bx"). The earlier days join this year's on the
+graphs; nothing is copied into the sheets. Remove takes an earlier sheet off again.
+
+- **School-year lines.** A condition line labelled "School year 2026-27" is drawn where each school year starts (a school
+  year runs August to July).
+- **Summer school.** Open **School years and summer school** at the top of the Results tab and type each summer
+  session's first and last day once. A "Summer school" line is drawn at its first day, and **Summer school** in Analysis
+  options includes or leaves out those days.
+- **Days shown.** Every day, this school year, last school year, both, the last 20 or 30 school days, or dates you
+  choose. The line above the graphs says what is shown.
+- **Compare school years.** Compares the first N school days (summer school left out) of each school year, up to four
+  years: a small graph, the mean, lowest and highest, and one sentence saying whether this year is better or worse for
+  that target. When the observation time differs by more than a fifth between years, counts are compared per hour. The
+  comparison is a description, not a test: a new school, staff or plan changes more than the year does.
+
+Checked by `qa/v2202-years-test.js` (9 checks).

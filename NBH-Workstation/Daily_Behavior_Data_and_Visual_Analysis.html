@@ -1459,6 +1459,14 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
 .ddw-gpaper .behavior-report{break-after:auto}
 @media print{#tab-walk{display:none!important}}
 </style>
+<style id="dd-years-css">/* v22.02 earlier school years, the days shown, the years compared */
+.gsp-t{width:100%;border-collapse:collapse;margin:8px 0;font-size:14px}.gsp-t th,.gsp-t td{border-bottom:1px solid #dfe5e8;padding:6px 8px;text-align:left;vertical-align:top}
+.dd-ck>span:last-child{display:flex;align-items:center;gap:6px;min-height:44px;flex-wrap:wrap}#r_custom[hidden]{display:none!important}.dd-cmpn input{max-width:7em}.dd-ck>span:last-child{justify-content:flex-start}.dd-ck input[type=checkbox]{width:22px!important;height:22px!important;min-height:0!important;flex:0 0 22px;margin:0}.dd-ck input[type=number]{width:4.5em!important;min-width:0;flex:0 0 auto}.dd-sumbox{margin:0 0 10px}.dd-sumbox summary{cursor:pointer;font-weight:600;min-height:32px}
+.dd-sumlist{margin:6px 0;padding-left:18px}.dd-sumlist li{margin:4px 0}.dd-rng-l{margin:6px 0 10px}
+.dd-cmp h3{margin:0 0 8px}.dd-cmp-b{margin:10px 0 16px;break-inside:avoid}.dd-cmp-g{width:100%;max-width:640px;height:auto}
+.dd-cmp-key{display:flex;gap:14px;flex-wrap:wrap;margin:4px 0;font-size:13px}.dd-cmp-key i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}
+.dd-cmp-t{border-collapse:collapse;font-size:13px;margin:6px 0}.dd-cmp-t th,.dd-cmp-t td{border-bottom:1px solid #dfe5e8;padding:4px 10px;text-align:left}
+</style>
 </head>
 <body>
 
@@ -1767,9 +1775,19 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
   <!-- ============ RESULTS ============ -->
   <section id="tab-results" class="hidden" data-panel="results">
     <div class="panel no-print">
+      <details class="dd-sumbox"><summary>School years and summer school</summary>
+        <p class="hint">A school year runs August to July, and a line marks the first day of each on the graphs. Give each summer school session's dates once: those days are marked, and the Summer school choice below keeps them in or leaves them out.</p>
+        <ul id="r_sumList" class="dd-sumlist"></ul>
+        <span class="inline-controls"><label class="field"><span>First day</span><input type="date" id="r_sumFrom"></label><label class="field"><span>Last day</span><input type="date" id="r_sumTo"></label><button type="button" class="btn ghost" id="r_sumAdd">Add summer school</button></span>
+      </details>
       <h2>Analysis options</h2>
       <div class="inline-controls">
         <label class="field"><span>Behavior</span><select id="r_behavior"><option value="all">All behaviors</option></select></label>
+        <label class="field"><span>Days shown</span><select id="r_rng"><option value="all">Every day</option><option value="cur">This school year</option><option value="prev">Last school year</option><option value="both">Both school years</option><option value="l20">The last 20 school days</option><option value="l30">The last 30 school days</option><option value="custom">Dates I choose</option></select></label>
+        <span id="r_custom" class="inline-controls" hidden><label class="field"><span>From</span><input type="date" id="r_from"></label><label class="field"><span>To</span><input type="date" id="r_to"></label></span>
+        <label class="field"><span>Summer school</span><select id="r_sum"><option value="in">Included</option><option value="out">Left out</option></select></label>
+        <label class="field"><span>Compare school years</span><select id="r_cmp"><option value="">No</option><option value="1">The first school days</option></select></label>
+        <label class="field dd-cmpn"><span>School days compared</span><input type="number" id="r_cmpN" min="3" max="180" value="20" inputmode="numeric"></label>
         <label class="field"><span>Trend line</span>
           <select id="r_trend">
             <option value="ols">Least squares</option>
@@ -6207,7 +6225,11 @@ function gsApply(){const g=S.gs;if(!g||!g.cache)return {n:0,days:0,warn:[]};gsUn
   if(!g.on)return {n:0,days:0,warn:[]};
   if(S.settings.entryMode==="interval")return {n:0,days:0,warn:["the record is kept in intervals; the sheet’s daily totals go into a record kept one total per day"]};
   const warn=[],madeB=[],madeR=[],A={};let n=0;const dates=new Set();
-  (g.cache.groups||[]).forEach(x=>{const b=gsBehFor(x,madeB,warn);if(!b)return;
+  /* v22.02 the earlier school years' sheets (read once, kept with the record) go in first, each target under the name it is
+     paired with; this year's sheet goes in last and wins on a day both hold */
+  const groups=[];(S.gsPast||[]).forEach(q=>{if(q.on===false)return;((q.cache&&q.cache.groups)||[]).forEach(x=>{const m=q.map&&q.map[x.name];groups.push(m?Object.assign({},x,{name:m}):x);});});
+  (g.cache.groups||[]).forEach(x=>groups.push(x));
+  groups.forEach(x=>{const b=gsBehFor(x,madeB,warn);if(!b)return;
     Object.keys(x.days).forEach(iso=>{const d=x.days[iso];let r=S.rows.find(y=>y.date===iso);
       if(!r){r=newRow(iso);S.behaviors.forEach(bb=>{if(!(bb.id in r.values)){r.values[bb.id]="";r.values[OPP(bb.id)]="";}});S.rows.push(r);madeR.push(r.id);}
       const put=(key,v)=>{if(v===null||v===undefined)return;const k=r.id+"|"+key;if(!(k in A))A[k]=r.values[key]==null?"":String(r.values[key]);r.values[key]=String(v);n++;};
@@ -6266,10 +6288,119 @@ function gsBar(){let el=document.getElementById("gsBar");if(!el){const h=documen
   el.className="gs-bar noprint no-print"+(g.on?"":" gs-paused");
   el.innerHTML=`<span class="gs-t"><b>Google Sheets:</b> ${esc(g.title||"the linked sheet")}${g.tabs.length?` <span class="gs-tabs">(${esc(g.tabs.join(", "))})</span>`:""}</span><span class="gs-st">${st}</span>
     <span class="gs-tools"><label class="gs-use"><input type="checkbox" id="gsUse"${g.on?" checked":""}> Use the sheet’s data</label>
-    <button type="button" class="btn ghost sm" id="gsNow"${gsBusy||!g.on?" disabled":""}>Read now</button><button type="button" class="btn ghost sm" id="gsLink">Change</button></span>`;}
+    <button type="button" class="btn ghost sm" id="gsNow"${gsBusy||!g.on?" disabled":""}>Read now</button><button type="button" class="btn ghost sm" id="gsLink">Change</button><button type="button" class="btn ghost sm" id="gsPastBtn">Earlier school years${(S.gsPast||[]).length?" ("+S.gsPast.length+")":""}</button></span>`;}
 /* the cells the sheet wrote carry a mark, and say so */
 function gsMarks(){const g=S.gs;if(!g||!g.on)return;Object.keys(g.applied||{}).forEach(k=>{const i=k.indexOf("|"),rid=k.slice(0,i),key=k.slice(i+1);
   const inp=document.querySelector(`#dataTable tr[data-r="${CSS.escape(rid)}"] input[data-v="${CSS.escape(key)}"]`);if(inp){inp.classList.add("gs-cell");inp.title="From Google Sheets; the sheet wins at the next reading. Change it there.";}});}
+
+/* ---- v22.02 earlier school years: more sheets on one record, school-year and summer markers, the days shown, the years compared ---- */
+const ddSY=iso=>{const y=+String(iso).slice(0,4),m=+String(iso).slice(5,7);if(!y||!m)return "";const s=m>=8?y:y-1;return s+"-"+String((s+1)%100).padStart(2,"0");};   /* a school year runs August to July; summer school sits at its end */
+const ddSum=iso=>(S.summer||[]).some(q=>q&&q.from&&q.to&&iso>=q.from&&iso<=q.to);
+const ddToday=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const gsNorm=s=>gsK(s).replace(/\b(bx|beh|behaviou?rs?)\b/g," ").replace(/injurious/g,"injury").replace(/[^a-z]/g,"");
+function gsPair(name){const n=gsNorm(name);if(!n)return "";const B=S.behaviors.map(b=>b.name).filter(Boolean);
+  return B.find(x=>gsK(x)===gsK(name))||B.find(x=>gsNorm(x)===n)||B.find(x=>{const m=gsNorm(x);return m.length>=5&&n.length>=5&&(m.indexOf(n)>=0||n.indexOf(m)>=0);})||"";}
+function gsYearOf(title,groups){const m=/SY\s*'?(\d{2})\s*[-–\/]\s*'?(\d{2})/i.exec(title||"")||/(20\d{2})\s*[-–\/]\s*(\d{2,4})/.exec(title||"");
+  if(m){const a=m[1].length===2?"20"+m[1]:m[1];return a+"-"+String(m[2]).slice(-2);}
+  const D=[].concat(...(groups||[]).map(x=>Object.keys(x.days||{}))).sort();return D.length?ddSY(D[Math.floor(D.length/2)]):"";}
+function gsPastDlg(){let d=document.getElementById("dlgGsPast");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog gs-dlg";d.id="dlgGsPast";d.setAttribute("aria-labelledby","gspT");
+  d.innerHTML=`<h2 id="gspT">Earlier school years</h2>
+  <p class="hint">Link the sheet of an earlier school year to see its days on the same graphs. It is read once and kept with this record; this year's sheet is the one read again. A day both sheets hold takes this year's.</p>
+  <div id="gspList"></div>
+  <label class="field"><span>The earlier year's sheet (its link)</span><input id="gspUrl" placeholder="https://docs.google.com/spreadsheets/d/…" autocomplete="off" spellcheck="false"></label>
+  <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="gspRead">Read it</button><span class="hint" id="gspMsg" role="status" style="margin:0 0 0 8px"></span></div>
+  <div id="gspNew"></div>
+  <div class="dd-actions"><span style="flex:1"></span><button type="button" class="btn ghost" id="gspClose">Close</button></div>`;
+  document.body.appendChild(d);d.querySelector("#gspClose").addEventListener("click",()=>d.close());return d;}
+let gsPastState=null;
+function gsPastPaint(){const d=gsPastDlg(),L=S.gsPast||[];
+  d.querySelector("#gspList").innerHTML=L.length?`<table class="gsp-t"><thead><tr><th>School year</th><th>Sheet</th><th>Days</th><th>Targets</th><th></th></tr></thead><tbody>${L.map((q,i)=>{const G=(q.cache&&q.cache.groups)||[],days=new Set([].concat(...G.map(x=>Object.keys(x.days)))).size;
+    return `<tr><td>${esc(q.year||"")}</td><td>${esc(q.title||"")}</td><td>${days}</td><td>${G.map(x=>esc(x.name)+(q.map&&q.map[x.name]&&q.map[x.name]!==x.name?" → "+esc(q.map[x.name]):"")).join(", ")}</td><td><button type="button" class="btn ghost sm" data-gspdel="${i}">Remove</button></td></tr>`;}).join("")}</tbody></table>`:`<p class="hint">No earlier year is linked yet.</p>`;}
+function gsPastOpen(){const d=gsPastDlg();gsPastState=null;d.querySelector("#gspUrl").value="";d.querySelector("#gspNew").innerHTML="";d.querySelector("#gspMsg").textContent="";gsPastPaint();
+  gsLoadLib().catch(()=>{});try{d.showModal();}catch(e){d.setAttribute("open","");}}
+async function gsPastRead(){const d=gsPastDlg(),url=d.querySelector("#gspUrl").value.trim(),id=gsIdOf(url),msg=t=>{d.querySelector("#gspMsg").textContent=t;};
+  if(!id){msg("That is not a Google Sheets link.");return;}if(S.gs&&S.gs.id===id){msg("That is this year's sheet, linked already.");return;}
+  if((S.gsPast||[]).some(q=>q.id===id)){msg("That sheet is linked already.");return;}
+  try{if(!gsSigned()){msg("Signing in to Google…");await gsSignIn();}
+    msg("Reading the sheet…");const meta=await gsMetaOf(id),T=gsTabsOf(meta),tabs=T.map(x=>x.title),grid=gsGridOf(T);
+    const vr=await gsValuesAll(id,tabs,grid),P=[];(vr.valueRanges||[]).forEach((v,i)=>{if(!v)return;const q=gsParse(v.values||[],tabs[i]);if(q&&q.groups.length)P.push(q);});
+    let use=P.filter(q=>/reduction|acquisition|replacement|tbx|target/i.test(q.tab));if(!use.length)use=P;
+    if(!use.length){msg("No tab of this sheet has a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns.");return;}
+    const groups=[].concat(...use.map(q=>q.groups)),st=use.map(q=>q.student).find(x=>x&&(x.name||x.id))||{name:"",id:""},title=(meta.properties||{}).title||"";
+    const same=!(st.name||st.id)||gsSameStudent(st.name,st.id);
+    gsPastState={id,url,title,tabs:use.map(q=>q.tab),grid,cache:{student:st,groups},year:gsYearOf(title,groups)};msg("");
+    const opts=n=>`<option value="">Keep as its own target</option>`+S.behaviors.map(b=>`<option${b.name===n?" selected":""}>${esc(b.name)}</option>`).join("");
+    d.querySelector("#gspNew").innerHTML=`<div class="gsp-new"><p><b>${esc(title||"The sheet")}</b>: ${groups.length} target${groups.length===1?"":"s"}, ${new Set([].concat(...groups.map(x=>Object.keys(x.days)))).size} days.</p>
+      ${same?"":`<p class="gs-bad">This sheet is for ${esc(st.name||"the student with ID "+st.id)}; the record is for ${esc(S.meta.client||"another student")}. <label><input type="checkbox" id="gspSame"> It is the same student</label></p>`}
+      <label class="field"><span>School year</span><input id="gspYear" value="${esc(gsPastState.year)}" placeholder="2025-26"></label>
+      <table class="gsp-t"><thead><tr><th>On the earlier sheet</th><th>Is this target on the record</th></tr></thead><tbody>${groups.map((x,i)=>`<tr><td>${esc(x.name)}</td><td><select data-gspmap="${i}" aria-label="${esc(x.name)}: the record's target">${opts(gsPair(x.name))}</select></td></tr>`).join("")}</tbody></table>
+      <div class="dd-actions"><button type="button" class="btn" id="gspAdd">Add this school year</button></div></div>`;}
+  catch(e){msg(e&&e.message==="signin"?"Google asked to sign in again. Press Read it once more.":(e&&e.message)||String(e));}}
+function gsPastAdd(){const d=gsPastDlg(),st=gsPastState;if(!st)return;const same=d.querySelector("#gspSame");if(same&&!same.checked){d.querySelector("#gspMsg").textContent="Tick that it is the same student first, or link that student's own sheet.";return;}
+  const map={};d.querySelectorAll("[data-gspmap]").forEach(s=>{const x=st.cache.groups[+s.dataset.gspmap];if(x&&s.value)map[x.name]=s.value;});
+  S.gsPast=(S.gsPast||[]).concat([{id:st.id,url:st.url,title:st.title,tabs:st.tabs,grid:st.grid,cache:st.cache,year:(d.querySelector("#gspYear").value||"").trim()||st.year,map,read:new Date().toISOString(),on:true}]);
+  gsPastState=null;d.querySelector("#gspNew").innerHTML="";d.querySelector("#gspUrl").value="";const r=gsApply();gsPastPaint();try{d.close();}catch(e){}renderAll();gsEdited();
+  toast("Added: "+r.days+" days on the graphs now, across "+(1+S.gsPast.length)+" school years.");}
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest("#gsPastBtn")){gsPastOpen();return;}if(t.closest("#gspRead")){gsPastRead();return;}if(t.closest("#gspAdd")){gsPastAdd();return;}
+  const del=t.closest("[data-gspdel]");if(del){const i=+del.dataset.gspdel;S.gsPast.splice(i,1);gsApply();gsPastPaint();renderAll();gsEdited();toast("The earlier year's sheet is unlinked; its days are out of the record.");}});
+
+/* the days the graphs and the analysis show; summer school in or out; the school-year and summer lines */
+let ddRangeOn=false;
+function ddRangeLabel(){const s=S.settings,r=s.rng||"all",cur=ddSY(ddToday()),prev=ddSY((+cur.slice(0,4)-1)+"-09-01");
+  return {all:"Every day",cur:"This school year ("+cur+")",prev:"Last school year ("+prev+")",both:"Both school years ("+prev+" and "+cur+")",l20:"The last 20 school days",l30:"The last 30 school days",custom:"From "+(s.rngFrom?fmtDate(s.rngFrom):"the first day")+" to "+(s.rngTo?fmtDate(s.rngTo):"the last")}[r]||"Every day";}
+function ddRangeRows(rows){const s=S.settings||{},r=s.rng||"all",sum=s.rngSummer!==false;
+  let out=rows.filter(x=>sum||!x.date||!ddSum(x.date));if(r==="all")return out;
+  const cur=ddSY(ddToday()),prev=ddSY((+cur.slice(0,4)-1)+"-09-01");out=out.filter(x=>/^\d{4}-\d\d-\d\d$/.test(x.date||""));
+  if(r==="cur")return out.filter(x=>ddSY(x.date)===cur);if(r==="prev")return out.filter(x=>ddSY(x.date)===prev);if(r==="both")return out.filter(x=>ddSY(x.date)===cur||ddSY(x.date)===prev);
+  if(r==="l20"||r==="l30")return out.slice(-(r==="l20"?20:30));
+  if(r==="custom")return out.filter(x=>(!s.rngFrom||x.date>=s.rngFrom)&&(!s.rngTo||x.date<=s.rngTo));return out;}
+{const sr0=sortedRows;sortedRows=function(){const r=sr0.apply(this,arguments);return ddRangeOn?ddRangeRows(r):r;};}
+{const cm0=conditionalMarks;conditionalMarks=function(){const out=cm0.apply(this,arguments),rows=sortedRows();
+  rows.forEach((r,i)=>{if(!/^\d{4}-\d\d-\d\d$/.test(r.date||""))return;const p=i?rows[i-1]:null,pd=p&&/^\d{4}-\d\d-\d\d$/.test(p.date||"")?p.date:"";
+    if(pd&&ddSY(pd)!==ddSY(r.date))out.push({x:i,label:"School year "+ddSY(r.date),raw:"School year "+ddSY(r.date),note:"",auto:true});
+    if(ddSum(r.date)&&!(pd&&ddSum(pd)))out.push({x:i,label:"Summer school",raw:"Summer school",note:"",auto:true});});
+  return out.sort((a,b)=>a.x-b.x);};}
+/* the first N school days of each school year, side by side */
+function ddCmpHtml(behs){const s=S.settings,N=Math.max(3,Math.min(180,parseInt(s.cmpN,10)||20)),sum=s.rngSummer!==false;
+  const rows=[...S.rows].filter(r=>/^\d{4}-\d\d-\d\d$/.test(r.date||"")&&(sum||!ddSum(r.date))).sort((a,b)=>a.date.localeCompare(b.date));
+  const years=[...new Set(rows.map(r=>ddSY(r.date)))].sort().slice(-4);if(years.length<2)return `<div class="panel dd-cmp"><h3>School years compared</h3><p class="hint">The record holds one school year so far. Link an earlier year's sheet (Daily data, Earlier school years) to compare.</p></div>`;
+  const COL=["#9AA5AE","#7A5B0B","#1F4E8C","#16242E"];let html=`<div class="panel dd-cmp"><h3>School years compared: the first ${N} school days</h3>`;
+  behs.forEach(b=>{const per=years.map(y=>{const R=rows.filter(r=>ddSY(r.date)===y).map(r=>({r,v:plotValue(r,b)})).filter(x=>x.v!==null&&isFinite(x.v)).slice(0,N);return {y,R};});
+    if(per.filter(q=>q.R.length).length<2)return;
+    /* counts are made comparable as a rate per hour when the minutes observed differ by more than a fifth between years */
+    let rate=false;if(b.measure==="count"){const om=per.map(q=>{const m=q.R.map(x=>effObsMin(x.r)).filter(v=>v!==null&&v>0);return m.length>=0.8*q.R.length&&m.length?m.reduce((a,c)=>a+c,0)/m.length:null;});
+      if(om.every(v=>v!==null)&&Math.max(...om)>1.2*Math.min(...om))rate=true;}
+    const val=x=>rate?x.v/effObsMin(x.r)*60:x.v;per.forEach(q=>{q.V=q.R.map(val);q.mean=q.V.length?q.V.reduce((a,c)=>a+c,0)/q.V.length:null;});
+    const W=640,H=200,M={l:44,r:12,t:12,b:28},iw=W-M.l-M.r,ih=H-M.t-M.b,mx=Math.max(1,...per.map(q=>Math.max(0,...q.V))),X=i=>M.l+(N===1?0:i*iw/(N-1)),Y=v=>M.t+ih-v/mx*ih;
+    const g=[`<line x1="${M.l}" y1="${M.t+ih}" x2="${M.l+iw}" y2="${M.t+ih}" stroke="#16242E"/>`,`<line x1="${M.l}" y1="${M.t}" x2="${M.l}" y2="${M.t+ih}" stroke="#16242E"/>`,
+      `<text x="${M.l-6}" y="${M.t+8}" text-anchor="end" font-size="11" fill="#3d4a55">${r1(mx)}</text>`,`<text x="${M.l-6}" y="${M.t+ih}" text-anchor="end" font-size="11" fill="#3d4a55">0</text>`,
+      `<text x="${M.l}" y="${H-8}" font-size="11" fill="#3d4a55">School day 1</text>`,`<text x="${M.l+iw}" y="${H-8}" text-anchor="end" font-size="11" fill="#3d4a55">School day ${N}</text>`];
+    per.forEach((q,k)=>{if(!q.V.length)return;const c=COL[COL.length-per.length+k]||"#16242E";g.push(`<polyline fill="none" stroke="${c}" stroke-width="${k===per.length-1?2.2:1.6}" points="${q.V.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ")}"/>`);});
+    const last=per[per.length-1],prev=per[per.length-2],diff=last.mean!==null&&prev.mean!==null?last.mean-prev.mean:null;
+    const unit=rate?"per hour":(MEASURES[b.measure].unit||"");
+    html+=`<div class="dd-cmp-b"><h4>${esc(b.name)}${rate?" <span class=\"hint\">(as a rate per hour: the minutes observed differ between the years)</span>":""}</h4>
+      <svg class="graph dd-cmp-g" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(b.name)}: the first ${N} school days of each school year">${g.join("")}</svg>
+      <p class="dd-cmp-key">${per.map((q,k)=>`<span><i style="background:${COL[COL.length-per.length+k]}"></i>${esc(q.y)}</span>`).join("")}</p>
+      <table class="dd-cmp-t"><thead><tr><th>School year</th><th>Days</th><th>Mean</th><th>Lowest</th><th>Highest</th></tr></thead><tbody>${per.map(q=>`<tr><td>${esc(q.y)}</td><td>${q.V.length}</td><td>${q.mean===null?"—":r1(q.mean)}</td><td>${q.V.length?r1(Math.min(...q.V)):"—"}</td><td>${q.V.length?r1(Math.max(...q.V)):"—"}</td></tr>`).join("")}</tbody></table>
+      ${diff===null?"":`<p>${esc(last.y)}'s first ${Math.min(N,last.V.length)} school days average ${r1(Math.abs(diff))} ${esc(unit)} ${diff<0?"lower":diff>0?"higher":"the same"} than ${esc(prev.y)}'s${prev.mean?" ("+Math.round(Math.abs(diff)/prev.mean*100)+"%)":""}, which is ${(diff<0)===(b.direction==="decrease")&&diff!==0?"better":diff===0?"no change":"worse"} for this target.</p>`}</div>`;});
+  return html+`<p class="caution">A difference between school years can come from new staff, a new plan, a new classroom or schedule, not only from the student. Read it beside the graphs and the phase changes.</p></div>`;}
+{const rr0=renderResults;renderResults=function(){const s=S.settings;S.summer=S.summer||[];ddRangeOn=true;try{rr0.apply(this,arguments);}finally{ddRangeOn=false;}
+  const set=(id,v,ck)=>{const e=document.getElementById(id);if(e){if(ck)e.checked=!!v;else e.value=v;}};
+  set("r_rng",s.rng||"all");set("r_from",s.rngFrom||"");set("r_to",s.rngTo||"");set("r_sum",s.rngSummer!==false?"in":"out");set("r_cmp",s.cmp?"1":"");set("r_cmpN",s.cmpN||20);
+  const cu=document.getElementById("r_custom");if(cu)cu.hidden=(s.rng||"all")!=="custom";ddSumPaint();
+  const out=document.getElementById("resultsOut");if(!out)return;const info=`<p class="hint dd-rng-l">Showing: ${esc(ddRangeLabel())}${(S.summer||[]).length?(s.rngSummer!==false?" · summer school in":" · summer school left out"):""}.</p>`;
+  const first=out.querySelector(".behavior-report,.kind-head");const sel=document.getElementById("r_behavior"),behs=sel&&sel.value!=="all"?S.behaviors.filter(b=>b.id===sel.value):orderedBehaviors();
+  const add=info+(s.cmp?ddCmpHtml(behs):"");if(first)first.insertAdjacentHTML("beforebegin",add);else out.insertAdjacentHTML("beforeend",add);};}
+function ddSumPaint(){const L=document.getElementById("r_sumList");if(!L)return;const Q=S.summer||[];
+  L.innerHTML=Q.length?Q.map((q,i)=>`<li>${esc(q.from?fmtDate(q.from):"?")} to ${esc(q.to?fmtDate(q.to):"?")} <button type="button" class="btn ghost sm" data-sumdel="${i}">Remove</button></li>`).join(""):"<li class=\"hint\">No summer school dates yet.</li>";}
+document.addEventListener("change",e=>{const t=e.target;if(!t||!t.id)return;const s=S.settings;
+  const m={r_rng:()=>{s.rng=t.value;},r_from:()=>{s.rngFrom=t.value;},r_to:()=>{s.rngTo=t.value;},r_sum:()=>{s.rngSummer=t.value!=='out';},r_cmp:()=>{s.cmp=!!t.value;},r_cmpN:()=>{s.cmpN=Math.max(3,Math.min(180,parseInt(t.value,10)||20));}};
+  if(m[t.id]){m[t.id]();renderResults();gsEdited();}});
+document.addEventListener("click",e=>{const t=e.target;if(!t||!t.closest)return;
+  if(t.closest("#r_sumAdd")){const f=document.getElementById("r_sumFrom").value,to=document.getElementById("r_sumTo").value;if(!f||!to||to<f){toast("Give the first and the last day of summer school.");return;}
+    S.summer=(S.summer||[]).concat([{from:f,to}]).sort((a,b)=>a.from.localeCompare(b.from));document.getElementById("r_sumFrom").value="";document.getElementById("r_sumTo").value="";renderResults();gsEdited();return;}
+  const d=t.closest("[data-sumdel]");if(d){S.summer.splice(+d.dataset.sumdel,1);renderResults();gsEdited();}});
 
 /* ---- the dialog: the sign-in key (once per device), the sheet's link, its tabs, a look before linking ---- */
 function gsDlg(){let d=document.getElementById("dlgGs");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog gs-dlg";d.id="dlgGs";d.setAttribute("aria-labelledby","gsT");
