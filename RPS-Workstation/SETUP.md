@@ -9711,3 +9711,10 @@ always on the main screen, first, with the button reading **Pinned**; the other 
 most urgent first, then the latest saved), twelve cards in all, or more when more than twelve are pinned. Tap
 **Pinned** to unpin. Pins are kept in this edition's settings on this device (each iPad or laptop keeps its own), and
 **Remove** takes a student's pin with them. Checked by `qa/v2204-pin-test.js` (10 checks).
+
+### v22.05: the pin is a thumbtack in a circle
+
+The Pin button on each caseload card is now only a thumbtack in a round 44-point button: white when the student is not
+pinned, a light-medium grey circle with a darker ring when they are. Right after a tap the word **Pinned** or
+**Unpinned** shows beside it for about a second and a half (read out once by VoiceOver); the button's name for VoiceOver
+still says what it does. Checked by `qa/v2204-pin-test.js` 2, 3 and 3b.

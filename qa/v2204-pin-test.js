@@ -1,4 +1,4 @@
-/* v22.04 Pin to the main screen: a pinned student is always on the start screen, first, the rest after them in the
+/* v22.04 Pin to the main screen (v22.05 the thumbtack alone in a circle, grey when pinned, the word for a moment): a pinned student is always on the start screen, first, the rest after them in the
    usual order (most urgent, then the latest saved), twelve in all; the pin is kept on this device across a reload, and
    Remove drops it. Simulated students only.
    usage: node qa/v2204-pin-test.js */
@@ -25,11 +25,13 @@ const UA_IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.1
   const m0=await main(),h0=await more();
   ok('1 by default: twelve cards, the overdue student first, then the latest saved; the last two in Caseload',m0.length===12&&m0[0].n==='Sample Student 2'&&m0[1].n==='Sample Student 3'&&m0[11].n==='Sample Student 13'&&/and 2 more/.test(h0)&&m0.every(x=>x.pin==='false'),{m0,h0});
   const sz=await page.evaluate(()=>{const b=document.querySelector('#blankCl .cl-pin'),r=b.getBoundingClientRect();return {w:r.width,h:r.height,t:b.textContent,l:b.getAttribute('aria-label')};});
-  ok('2 each card has a Pin button, 44 px tall, named for the student',sz.h>=44&&sz.w>=44&&sz.t==='Pin'&&sz.l==='Pin to the main screen: Sample Student 2',sz);
+  ok('2 each card has a round pin button (the thumbtack, no word), 44 px, named for the student',sz.h>=44&&sz.w>=44&&sz.t===''&&sz.l==='Pin to the main screen: Sample Student 2',sz);
   await page.evaluate(()=>caseloadOpen());await sleep(900);
   await page.evaluate(()=>{[...document.querySelectorAll('#dlgBody .cl-card')].find(c=>c.getAttribute('aria-label')==='Sample Student 15').querySelector('.cl-pin').click();});await sleep(600);
-  const d1=await page.evaluate(()=>{const b=[...document.querySelectorAll('#dlgBody .cl-card')].find(c=>c.getAttribute('aria-label')==='Sample Student 15').querySelector('.cl-pin');return {p:b.getAttribute('aria-pressed'),t:b.textContent,on:b.classList.contains('on')};});
-  ok('3 pinned in Caseload: the button reads Pinned and is pressed',d1.p==='true'&&d1.t==='Pinned'&&d1.on,d1);
+  const d1=await page.evaluate(()=>{const b=[...document.querySelectorAll('#dlgBody .cl-card')].find(c=>c.getAttribute('aria-label')==='Sample Student 15').querySelector('.cl-pin');const tip=b.closest('.cl-top').querySelector('.cl-pin-tip');return {p:b.getAttribute('aria-pressed'),t:b.textContent,on:b.classList.contains('on'),bg:getComputedStyle(b).backgroundColor,tip:tip&&tip.textContent,role:tip&&tip.getAttribute('role')};});
+  ok('3 pinned in Caseload: the button is pressed and turns grey, and the word Pinned shows beside it for a moment',d1.p==='true'&&d1.t===''&&d1.on&&d1.bg==='rgb(211, 217, 223)'&&d1.tip==='Pinned'&&d1.role==='status',d1);
+  await sleep(1300);const gone=await page.evaluate(()=>document.querySelectorAll('.cl-pin-tip').length);
+  ok('3b the word goes again after about a second and a half',gone===0,gone);
   await page.evaluate(()=>{try{document.getElementById('dlg').close();}catch(e){}});await sleep(300);
   const m1=await main(),h1=await more();
   ok('4 the main screen: the pinned student first (the oldest save, beyond the twelve before), then the usual order, still twelve',m1.length===12&&m1[0].n==='Sample Student 15'&&m1[0].pin==='true'&&m1[1].n==='Sample Student 2'&&m1[11].n==='Sample Student 12'&&/and 2 more/.test(h1),{m1,h1});

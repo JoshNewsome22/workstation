@@ -931,9 +931,15 @@ body.ws-split .rail-edge{display:none!important}
 .cl-next button{flex:0 0 auto}
 .cl-more{color:var(--muted);white-space:nowrap}
 .cl-saved{margin:0!important;font-size:12px!important;line-height:1.4!important;color:var(--muted)}
-.cl-pin{flex:0 0 auto;margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;padding:0 10px;border-radius:999px;color:var(--muted)}
-.cl-pin.on{color:var(--ink);background:var(--mist);border-color:var(--slate)}
-.cl-pin.on svg{color:var(--slate)}
+.cl-top{position:relative}
+.cl-pin{flex:0 0 auto;margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0!important;border-radius:50%!important;color:var(--muted)}
+.cl-pin svg{width:18px;height:18px}
+.cl-pin-tip{position:absolute;right:52px;top:9px;padding:4px 10px;border-radius:999px;background:var(--ink);color:#fff;font-size:12px;font-weight:600;line-height:1.4;white-space:nowrap;pointer-events:none;animation:clPinIn .15s ease-out;transition:opacity .4s}
+.cl-pin-tip.out{opacity:0}
+@keyframes clPinIn{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.cl-pin-tip{animation:none;transition:none}}
+.cl-pin.on{color:var(--ink);background:#d3d9df;border-color:#7b8794}   /* v22.05 pinned: a light-medium grey circle (the user's choice) */
+.cl-pin.on svg{color:var(--ink)}
 .cl-card-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
 .cl-card button,.cl-find button{min-height:44px;min-width:44px;font-size:13px}
 /* the start screen with a caseload: room for three cards across on a laptop or an iPad held sideways */
@@ -7255,11 +7261,14 @@ const CL_PIN_K=()=>'nbh.caseload.pin@'+DRV_ED;
 function clPins(){try{const a=JSON.parse(kvGet(CL_PIN_K())||'[]');return Array.isArray(a)?a.map(String):[];}catch(e){return [];}}
 function clPinSet(key,on){const a=clPins().filter(k=>k!==key);if(on)a.push(key);if(a.length)kvSet(CL_PIN_K(),JSON.stringify(a));else kvDel(CL_PIN_K());}
 const CL_PIN_SVG='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" fill="currentColor"/><\/svg>';
-function clPinBtn(key,nm){const on=clPins().includes(key);return '<button type="button" class="cl-pin'+(on?' on':'')+'" data-clpin="'+esc(key)+'" aria-pressed="'+on+'" aria-label="'+(on?'Pinned to the main screen: unpin ':'Pin to the main screen: ')+esc(nm)+'">'+CL_PIN_SVG+'<span>'+(on?'Pinned':'Pin')+'<\/span><\/button>';}
+function clPinBtn(key,nm){const on=clPins().includes(key);return '<button type="button" class="cl-pin'+(on?' on':'')+'" data-clpin="'+esc(key)+'" aria-pressed="'+on+'" aria-label="'+(on?'Pinned to the main screen: unpin ':'Pin to the main screen: ')+esc(nm)+'">'+CL_PIN_SVG+'<\/button>';}
+/* the word for a moment beside the pin, said once to a screen reader as well */
+function clPinTip(k,on){document.querySelectorAll('.cl-pin').forEach(x=>{if(x.dataset.clpin!==k||!x.offsetParent)return;const top=x.closest('.cl-top');if(!top)return;const o=top.querySelector('.cl-pin-tip');if(o)o.remove();
+  const t=document.createElement('span');t.className='cl-pin-tip';t.setAttribute('role','status');t.textContent=on?'Pinned':'Unpinned';top.appendChild(t);setTimeout(()=>t.classList.add('out'),1100);setTimeout(()=>t.remove(),1500);});}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-clpin]');if(!b)return;e.preventDefault();const k=b.dataset.clpin,on=!clPins().includes(k),inBl=!!b.closest('#blankCl');clPinSet(k,on);
   document.querySelectorAll('.cl-pin').forEach(x=>{if(x.dataset.clpin!==k)return;const c=x.closest('.cl-card'),nm=c&&c.getAttribute('aria-label')||'';x.outerHTML=clPinBtn(k,nm);});
-  try{wsUI.toast(on?'Pinned: always on the main screen, first.':'Unpinned: on the main screen when there is room, in the usual order.');}catch(x){}
-  try{paintBlank().then(()=>{if(!inBl)return;const n=[...document.querySelectorAll('#blankCl .cl-pin')].find(x=>x.dataset.clpin===k);if(n)n.focus();});}catch(x){}});   /* the main screen reorders; the button keeps the focus */
+  clPinTip(k,on);
+  try{paintBlank().then(()=>{clPinTip(k,on);if(!inBl)return;const n=[...document.querySelectorAll('#blankCl .cl-pin')].find(x=>x.dataset.clpin===k);if(n)n.focus();});}catch(x){}});   /* the main screen reorders; the button keeps the focus */
 kvLoad.then(()=>{if(clPins().length)try{paintBlank();}catch(e){}});
 /* Caseload's students, and the start screen's (the first twelve, under the search) */
 function clCards(L,w){const P=clPins(),pin=L.filter(r=>P.includes(r.key)),S=w==='bl'?pin.concat(L.filter(r=>!P.includes(r.key)).slice(0,Math.max(0,12-pin.length))):L,many=S.some(r=>clTrendsFor(r).length>1);
