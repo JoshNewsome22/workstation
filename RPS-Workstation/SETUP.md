@@ -9665,3 +9665,13 @@ small enough to fix at once; the rest are in the fix plan, in waves.
 
 Checked by `qa/v2200-test.js` (7 checks) and `qa/v2189-drive-test.js` 31 and 32 (two editions on one site; a browser set
 up by an earlier version). The tests that read the Drive settings use the edition's keys.
+
+### v22.01: each target's level and trend in words on the caseload card
+
+Under the graph, at the bottom of the target box, each card now lists every target the student has, one line each: its
+current level and its trend in words, for example "Physical aggression now 3 occurrences (last 5 days) · falling,
+improving". The level is the mean of the last 5 days of data on Form DD-1. The trend is the straight-line change over the
+last 10 days; a change smaller than 15% of their mean (and never smaller than 0.5, or 5 points for a percentage) reads as
+steady, and fewer than 3 days read as too few for a trend. For a problem behavior falling is improving and rising is
+worsening; for a skill it is the other way round. It is a quick summary for scanning the caseload, not visual analysis:
+the graphs on Form DD-1 stay the record. Checked by `qa/v2199-cards-test.js` 11 and 12.

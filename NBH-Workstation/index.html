@@ -913,6 +913,11 @@ body.ws-split .rail-edge{display:none!important}
 .cl-n{font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}
 .cl-up{display:inline-block;padding:0 6px;border-radius:999px;background:#e3f0e6;color:#1f5a33;font-size:11px;font-weight:600;vertical-align:1px}
 .cl-trend.up .cl-spark polyline{stroke:#2f7a4a}.cl-trend.up .cl-spark circle{fill:#2f7a4a}
+.cl-tw.boxed{gap:0;padding-bottom:8px;border-radius:8px;background:var(--shade);border:1px solid #e7eeec}
+.cl-tw.boxed>.cl-trend{border:0;background:transparent}
+.cl-tw.boxed>.cl-lv{margin:0 10px;padding-top:6px;border-top:1px solid #dfe8e5}
+.cl-lv{margin:0;padding:0 2px;list-style:none;font-size:12.5px;line-height:1.45;color:var(--muted)}
+.cl-lv b{color:var(--ink);font-weight:600}.cl-lv .gd{color:#1f6a3a;font-weight:600}.cl-lv .bd{color:#9a3412;font-weight:600}
 .cl-allt{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0 0 4px;font-size:14px;color:var(--ink);cursor:pointer}
 .cl-allt input{width:22px;height:22px;margin:0}
 .cl-spark{flex:0 0 auto;display:block;overflow:visible}
@@ -7199,10 +7204,22 @@ function clTrendOne(t,i,n,step){const P=t.pts,a=P[0],z=P[P.length-1],u=String(t.
   return '<div class="cl-trend'+(t.up?' up':'')+'" title="'+esc((t.name||'')+': '+P.map(p=>tdMd(p[0])+' '+f(p[1])).join(', '))+'">'+clSpark(t)+
     '<span class="cl-tt"><span class="cl-tn"><b>'+esc(t.name||'Target behavior')+'<\/b>'+(t.up?' <span class="cl-up" title="A skill: a rising line is good">skill<\/span>':'')+(n>1?' <span class="cl-n">'+(i+1)+' of '+n+'<\/span>':'')+'<\/span><span>'+esc(what)+'<\/span>'+(when?'<span>'+esc(when)+'<\/span>':'')+'<\/span>'+
     (step?'<button type="button" class="cl-step" data-clstep="1" aria-label="Next target behavior ('+(i+1)+' of '+n+')">›<\/button>':'')+'<\/div>';}
+/* v22.01 each target's level and trend in words, under the graph: the level is the mean of the last 5 days of data, the
+   trend the least-squares change over the last 10; a change smaller than 15% of their mean (at least 0.5, or 5 points for a
+   percentage) reads as steady. For a reduction target falling is improving; for a skill rising is. */
+function clLevelTrend(t){const v=(t.pts||[]).map(p=>+p[1]).filter(x=>isFinite(x));if(!v.length)return null;
+  const l5=v.slice(-5),lvl=l5.reduce((a,b)=>a+b,0)/l5.length,w=v.slice(-10),n=w.length,pc=/^%/.test(String(t.unit||''));
+  if(n<3)return {lvl,n5:l5.length,dir:'',good:null};
+  const mx=(n-1)/2,my=w.reduce((a,b)=>a+b,0)/n;let sxy=0,sxx=0;w.forEach((y,i)=>{sxy+=(i-mx)*(y-my);sxx+=(i-mx)*(i-mx);});
+  const ch=sxx?sxy/sxx*(n-1):0,thr=Math.max(pc?5:0.5,0.15*Math.abs(my)),dir=Math.abs(ch)<thr?'steady':ch>0?'rising':'falling';
+  return {lvl,n5:l5.length,dir,good:dir==='steady'?null:(dir==='falling')!==!!t.up};}
+function clLvHtml(T){return '<ul class="cl-lv">'+T.map(t=>{const x=clLevelTrend(t);if(!x)return '';const u=String(t.unit||''),pc=/^%/.test(u),un=pc?u.replace(/^%\s*/,''):u;
+  const val=String(Math.round(x.lvl*10)/10)+(pc?'%':'')+(un?' '+un:''),tr=x.dir?x.dir+(x.good===null?'':x.good?', improving':', worsening'):'too few days for a trend';
+  return '<li><b>'+esc(t.name||'Target')+'<\/b> now '+esc(val)+' (last '+x.n5+' day'+(x.n5===1?'':'s')+') · <span class="'+(x.good===true?'gd':x.good===false?'bd':'st')+'">'+esc(tr)+'<\/span><\/li>';}).join('')+'<\/ul>';}
 function clTrendHtml(r){const T=clTrendsFor(r),k=esc(r.key||'');if(r.key)CLR[r.key]=r;
-  if(T.length===1)return '<div class="cl-tw" data-clkey="'+k+'">'+clTrendOne(T[0],0,1,false)+'<\/div>';
-  if(T.length>1){if(clAllT())return '<div class="cl-tw all" data-clkey="'+k+'">'+T.map((t,i)=>clTrendOne(t,i,T.length,false)).join('')+'<\/div>';
-    const i=Math.min(CLTI[r.key]||0,T.length-1);return '<div class="cl-tw" data-clkey="'+k+'" data-clswipe="1">'+clTrendOne(T[i],i,T.length,true)+'<\/div>';}
+  if(T.length===1)return '<div class="cl-tw boxed" data-clkey="'+k+'">'+clTrendOne(T[0],0,1,false)+clLvHtml(T)+'<\/div>';
+  if(T.length>1){if(clAllT())return '<div class="cl-tw all" data-clkey="'+k+'">'+T.map((t,i)=>clTrendOne(t,i,T.length,false)).join('')+clLvHtml(T)+'<\/div>';
+    const i=Math.min(CLTI[r.key]||0,T.length-1);return '<div class="cl-tw boxed" data-clkey="'+k+'" data-clswipe="1">'+clTrendOne(T[i],i,T.length,true)+clLvHtml(T)+'<\/div>';}
   const ld=r.sum&&r.sum.lastData;
   return '<div class="cl-tw" data-clkey="'+k+'"><div class="cl-trend none"><span class="cl-tt"><span>'+(ld?'Last day of data '+esc(tdMd(ld))+' ('+esc(clAgo(ld))+')':'No days of data from Form DD-1 yet')+'<\/span><\/span><\/div><\/div>';}
 function clTrendStep(key,d){const r=CLR[key];if(!r)return;const n=clTrendsFor(r).length;if(n<2)return;CLTI[key]=((CLTI[key]||0)+d+n)%n;
