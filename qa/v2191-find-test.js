@@ -17,7 +17,7 @@ const OUT=__dirname+'/out/v2191-find/';
   try{
   await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1500);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};window.__choose=[];wsUI.choose=async t=>{window.__choose.push(String(t));return 'switch';};
-    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on'].forEach(k=>localStorage.removeItem(k));}catch(e){}
+    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh'].forEach(k=>localStorage.removeItem(k));}catch(e){}
     const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
   const frameOf=async id=>{const file=await page.evaluate(id=>ALL.find(f=>f[0]===id)[2],id);return page.frames().find(f=>f.url().indexOf(encodeURI(file))>=0||f.url().indexOf(file)>=0);};
   const open=async id=>{await page.evaluate(id=>openForm(id),id);await page.waitForFunction(id=>!!state.status[id]&&!state.pending[id],id,{timeout:40000});await sleep(1200);

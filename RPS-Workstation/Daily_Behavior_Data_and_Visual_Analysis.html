@@ -6363,9 +6363,10 @@ dialog.gs-dlg{width:min(640px,calc(100vw - 24px))}dialog.gs-dlg .field{display:b
    request as a home series of their own: drawn on the graphs as open diamonds, never added to the school days or analyzed.
    =================================================================================================== */
 "use strict";
-const DD_HOLDS={"":"None",escort:"Physical escort",restraint:"Restraint",seclusion:"Seclusion"};
+const DD_HOLDS={"":"None",escort:"Physical escort",restraint:"Restraint",seclusion:"Seclusion (prohibited by s. 1003.573)"};   /* v22.00 (review F99): logged when it happened, never offered as a procedure */
 const ddHoldOk=v=>Object.prototype.hasOwnProperty.call(DD_HOLDS,v)?v:"";
 const ddHoldBig=v=>v==="restraint"||v==="seclusion";
+const DD_SECL_NOTE="Seclusion is prohibited for Florida school personnel (s. 1003.573). Tell the administrator at once; the parent is told the same day. ";
 const DD_CR1_NOTE="Form CR-1 starts the Florida notice clock for this (24-hour report, parent the same day, written report within 3 school days): open Form CR-1 in the workstation.";
 /* a file or a restore: every incident keeps (or gets) its id, and its hold as one of the four */
 {const cl0=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],H={};
@@ -6378,7 +6379,7 @@ const DD_CR1_NOTE="Form CR-1 starts the Florida notice clock for this (24-hour r
   const box=document.createElement("div");box.className="inc-hold";
   box.innerHTML=`<label class="field"><span>Physical intervention</span><select id="incHold">${Object.keys(DD_HOLDS).map(k=>`<option value="${k}">${DD_HOLDS[k]}</option>`).join("")}</select></label><p class="hint" id="incHoldHint"></p>`;
   g.parentNode.insertBefore(box,g.nextSibling);
-  const s=box.querySelector("#incHold"),hint=()=>{box.querySelector("#incHoldHint").textContent=ddHoldBig(s.value)?"A restraint or a seclusion: Form CR-1 starts the notice clock once this is saved.":"";};
+  const s=box.querySelector("#incHold"),hint=()=>{box.querySelector("#incHoldHint").textContent=s.value==="seclusion"?DD_SECL_NOTE+"Form CR-1 starts the notice clock once this is saved.":ddHoldBig(s.value)?"A restraint: Form CR-1 starts the notice clock once this is saved.":"";};
   s.addEventListener("change",hint);box._hint=hint;}return d;};}
 {const op0=ddIncOpen;ddIncOpen=function(id){const r=op0.apply(this,arguments);const d=document.getElementById("dlgInc"),i=id?(S.incidents||[]).find(x=>x.id===id):null;
   const s=d&&d.querySelector("#incHold");if(s){s.value=i?ddHoldOk(i.hold):"";const b=d.querySelector(".inc-hold");if(b&&b._hint)b._hint();}return r;};}
@@ -6387,7 +6388,7 @@ let ddHoldNotice=null;   /* the incident whose restraint or seclusion was just s
   const ed=ddIncEditing,n0=(S.incidents||[]).length;const r=sv0.apply(this,arguments);if(d&&d.open)return r;   /* not saved (no date): the dialog stays open */
   const i=ed?(S.incidents||[]).find(x=>x.id===ed):((S.incidents||[]).length>n0?S.incidents[S.incidents.length-1]:null);
   if(!i)return r;const was=i.hold||"";i.hold=hold;
-  if(ddHoldBig(hold)){ddHoldNotice={id:i.id,hold};try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(DD_HOLDS[hold]+" logged. "+DD_CR1_NOTE,{kind:"warn",ms:12000});}catch(e){}}
+  if(ddHoldBig(hold)){ddHoldNotice={id:i.id,hold};try{if(window.nbhUI&&nbhUI.toast)nbhUI.toast(DD_HOLDS[hold]+" logged. "+(hold==="seclusion"?DD_SECL_NOTE:"")+DD_CR1_NOTE,{kind:"warn",ms:12000});}catch(e){}}
   else if(ddHoldNotice&&ddHoldNotice.id===i.id)ddHoldNotice=null;
   if(was!==hold)ddEdited();ddIncRender();if(ddWeek)ddWeekRender();return r;};}
 /* the hold on the list, the week summary and paper: first in the follow-up column */
@@ -6398,7 +6399,7 @@ let ddHoldNotice=null;   /* the incident whose restraint or seclusion was just s
   if(n){const hd=el.querySelector(".inc-hd .hint");if(hd)hd.insertAdjacentHTML("beforeend",` <b class="inc-hold-t big">${n} with a restraint or seclusion.</b>`);}
   const i=ddHoldNotice&&L.find(x=>x.id===ddHoldNotice.id&&ddHoldBig(x.hold));if(!i){ddHoldNotice=null;return r;}
   const box=document.createElement("div");box.className="inc-cr1 noprint no-print";box.id="ddHoldNote";box.setAttribute("role","alert");
-  box.innerHTML=`<span><b>${esc(DD_HOLDS[i.hold])} on ${esc(i.date?shortDay(i.date):"the incident")}${i.time?" at "+esc(hm12(i.time)):""}.</b> ${esc(DD_CR1_NOTE)}</span><button type="button" class="btn ghost sm" id="ddHoldOk">OK</button>`;
+  box.innerHTML=`<span><b>${esc(DD_HOLDS[i.hold])} on ${esc(i.date?shortDay(i.date):"the incident")}${i.time?" at "+esc(hm12(i.time)):""}.</b> ${esc((i.hold==="seclusion"?DD_SECL_NOTE:"")+DD_CR1_NOTE)}</span><button type="button" class="btn ghost sm" id="ddHoldOk">OK</button>`;
   el.insertBefore(box,el.firstChild);return r;};}
 document.addEventListener("click",e=>{if(e.target&&e.target.closest&&e.target.closest("#ddHoldOk")){ddHoldNotice=null;ddIncRender();}});
 /* the case: each incident's id and hold; the home days brought in */

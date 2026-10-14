@@ -9,7 +9,7 @@ const now=new Date(),thisM=ym(now),lastM=ym(new Date(now.getFullYear(),now.getMo
 async function shell(br,vp,touch,ini){const ctx=await br.newContext({viewport:vp,hasTouch:!!touch,isMobile:!!touch,userAgent:touch?IPHONE:undefined,serviceWorkers:'block'});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async([thisM,lastM,ini])=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};
-    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on'].forEach(k=>localStorage.removeItem(k));if(ini)localStorage.setItem('nbh.caseload.ini','1');}catch(e){}
+    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh'].forEach(k=>localStorage.removeItem(k));if(ini)localStorage.setItem('nbh.caseload.ini','1');}catch(e){}
     const inc=(date,parent,hold)=>({date,time:'10:00',beh:'Hitting',parent:parent?'yes':'no',hold:hold||''});
     const mk=(p,saved,sum,facts)=>({key:clKey(p),scope:clScope(),client:p.client,sid:p.sid,site:p.site,grade:p.grade,bcba:'',saved,sum,
       text:JSON.stringify({form:'CASE',rev:'2026-09',saved,packet:p,forms:{'DD-1':{title:'Daily data',snap:{total:1,data:{},own:''}}},facts})});

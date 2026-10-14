@@ -7,7 +7,7 @@ const IPHONE='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit
 async function shell(br,vp,touch){const ctx=await br.newContext({viewport:vp,hasTouch:!!touch,isMobile:!!touch,userAgent:touch?IPHONE:undefined,serviceWorkers:'block'});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};
-    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on'].forEach(k=>localStorage.removeItem(k));}catch(e){}
+    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh'].forEach(k=>localStorage.removeItem(k));}catch(e){}
     const now=Date.now();const mk=(p,saved,sum)=>({key:clKey(p),scope:clScope(),client:p.client,sid:p.sid,site:p.site,grade:p.grade,bcba:'',saved,sum,
       text:JSON.stringify({form:'CASE',rev:'2026-09',saved,packet:p,forms:{'IC-1':{title:'Informed Consent',snap:{total:1,data:{},own:''}}},facts:{src:{}}})});
     const A=mk({client:'Mateo Rivera',sid:'4471823',site:'Royal Palm School',grade:'5'},new Date(now-3600e3).toISOString(),{items:[],forms:1});

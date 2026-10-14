@@ -2,7 +2,8 @@
 
 *Royal Palm School edition.* It lives in its own folder, `workstation-rps`, beside the
 Newsome Behavioral Health one in `workstation`, with its own password; its autosave is
-kept apart from the other edition's. Each folder needs its own `.htaccess` (step 4).
+kept apart from the other edition's, and so (since v22.00) are its Google Drive setting, its sign-in and its
+Drive folder. Each folder needs its own `.htaccess` (step 4).
 
 The workstation is a folder of files that run entirely in the browser. A web
 host only hands the files to the browser; nothing typed into a form is ever sent

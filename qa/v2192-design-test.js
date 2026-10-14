@@ -24,7 +24,7 @@ const DM='DM-1_Student-Demographics-and-Profile_v2026-09.html';
 async function shell(br,vp,ua,touch,keep){const ctx=await br.newContext({viewport:vp,userAgent:ua,hasTouch:!!touch,isMobile:!!touch,serviceWorkers:'block',deviceScaleFactor:1});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async keep=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};wsUI.choose=async()=>'switch';
-    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on','nbh.focus'].forEach(k=>localStorage.removeItem(k));}catch(e){}
+    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh','nbh.focus'].forEach(k=>localStorage.removeItem(k));}catch(e){}
     const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));
     if(!keep)return;const now=Date.now();const mk=(p,saved,sum,extra)=>Object.assign({key:clKey(p),scope:clScope(),client:p.client,sid:p.sid,site:p.site,grade:p.grade,bcba:'',saved,sum,
       text:JSON.stringify({form:'CASE',rev:'2026-09',saved,packet:p,forms:{'IC-1':{title:'Informed Consent',snap:{total:1,data:{},own:''}}},facts:{src:{}}})},extra||{});

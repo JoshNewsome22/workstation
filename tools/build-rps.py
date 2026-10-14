@@ -39,6 +39,7 @@ EXPECT = [
   (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 48),   # the 46 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
+  ("const DRV_ED='nbh';", "const DRV_ED='rps';", 1),   # v22.00 each edition its own Drive settings and folder (review F501)
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),
   # v21.43: the name under the icon of the installed app (index.html's head), the same as the manifest's short_name below
   ('<meta name="apple-mobile-web-app-title" content="NBH Workstation">', '<meta name="apple-mobile-web-app-title" content="RPS Workstation">', 1),
@@ -99,6 +100,7 @@ s = re.sub(r'/workstation/', '/workstation-rps/', s)
 s = s.replace('# Putting the workstation on a website\n', '# Putting the workstation on a website\n\n'
   '*Royal Palm School edition.* It lives in its own folder, `workstation-rps`, beside the\n'
   'Newsome Behavioral Health one in `workstation`, with its own password; its autosave is\n'
-  'kept apart from the other edition\'s. Each folder needs its own `.htaccess` (step 4).\n', 1)
+  'kept apart from the other edition\'s, and so (since v22.00) are its Google Drive setting, its sign-in and its\n'
+  'Drive folder. Each folder needs its own `.htaccess` (step 4).\n', 1)
 open(hd, 'w', encoding='utf-8').write(s)
 print('built', OUT, '-', ', '.join(f'{n}x' for n in done))

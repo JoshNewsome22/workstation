@@ -19,7 +19,7 @@ const now=()=>new Date(Date.now()+D.n*1000).toISOString();
 function evalQ(q,f){if(/trashed=false/.test(q)&&f.trashed)return false;
   const mt=/mimeType='([^']+)'/.exec(q);if(mt&&f.mimeType!==mt[1])return false;
   const par=/'([^']+)' in parents/.exec(q);if(par&&!(f.parents||[]).includes(par[1]))return false;
-  const ap=[...q.matchAll(/appProperties has \{ key='([^']+)' and value='([^']+)' \}/g)];if(ap.length&&!ap.some(m=>(f.appProperties||{})[m[1]]===m[2]))return false;return true;}
+  const ap=[...q.matchAll(/appProperties has \{ key='([^']+)' and value='([^']+)' \}/g)],hit=m=>(f.appProperties||{})[m[1]]===m[2];if(ap.length&&!(/\) or appProperties|\} or appProperties/.test(q)?ap.some(hit):ap.every(hit)))return false;return true;}
 const pick=f=>({id:f.id,name:f.name,version:String(f.version),modifiedTime:f.modifiedTime,appProperties:f.appProperties});
 function parts(ct,body){const b=/boundary=([^;]+)/.exec(ct)[1];return body.split('--'+b).slice(1,-1).map(p=>p.replace(/^\r\n/,'').split('\r\n\r\n').slice(1).join('\r\n\r\n').replace(/\r\n$/,''));}
 async function drive(route){const req=route.request(),u=new URL(req.url()),m=req.method();D.calls++;
@@ -31,7 +31,7 @@ async function drive(route){const req=route.request(),u=new URL(req.url()),m=req
   if(u.pathname==='/drive/v3/files'&&m==='POST'){const meta=JSON.parse(req.postData()||'{}');D.n++;const id='f'+D.n;D.files.set(id,Object.assign({id,version:1,modifiedTime:now(),trashed:false,content:''},meta));return json({id});}
   if(mm&&m==='GET'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404,message:'File not found'}},404);
     if(u.searchParams.get('alt')==='media')return route.fulfill({status:200,contentType:'application/json',body:f.content});return json(pick(f));}
-  if(mm&&m==='PATCH'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404}},404);const meta=JSON.parse(req.postData()||'{}');if('trashed' in meta)f.trashed=meta.trashed;f.version++;D.n++;f.modifiedTime=now();return json({id:f.id});}
+  if(mm&&m==='PATCH'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404}},404);const meta=JSON.parse(req.postData()||'{}');if('trashed' in meta)f.trashed=meta.trashed;if(meta.appProperties)f.appProperties=Object.assign({},f.appProperties,meta.appProperties);f.version++;D.n++;f.modifiedTime=now();return json({id:f.id});}
   mm=/^\/upload\/drive\/v3\/files(?:\/([^/]+))?$/.exec(u.pathname);
   /* v21.97 the resumable upload: the metadata first (Google answers with the address for the content), then the content in a PUT */
   if(mm&&u.searchParams.get('uploadType')==='resumable'&&(m==='POST'||m==='PATCH')){const h=req.headers();const meta=JSON.parse(req.postData()||'{}');
@@ -60,7 +60,7 @@ async function device(br,ua,touch){const ctx=await br.newContext({viewport:touch
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));let dl=0;page.on('download',()=>dl++);
   await page.goto(WS);await sleep(1300);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;window.alert=()=>{};const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));
-    ['nbh.drive.on','nbh.drive.acct','nbh.drive.skip','nbh.drive.gone','nbh.drive.dev'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.drive');});
+    ['nbh.drive.on@nbh','nbh.drive.acct@nbh','nbh.drive.skip@nbh','nbh.drive.gone@nbh','nbh.drive.dev@nbh'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.drive@nbh');});
   return {ctx,page,errs,dls:()=>dl};}
 /* v21.98 a device whose Safari refuses every write to its settings store (localStorage full), the Google key not given yet */
 async function deviceFull(br){const ctx=await br.newContext({viewport:{width:1180,height:820},userAgent:UA_IPAD,hasTouch:true,serviceWorkers:'block',acceptDownloads:true});
@@ -90,7 +90,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const box0=await A.page.evaluate(()=>{const b=document.getElementById('drvBox');return b?b.textContent:'';});
   ok('1 Caseload offers Use Google Drive, with the school account wording',/Use Google Drive/.test(box0)&&/school Google Drive/.test(box0),box0);
   await A.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(900);await idle(A.page);
-  const s1=await A.page.evaluate(()=>({on:localStorage.getItem('nbh.drive.on'),acct:localStorage.getItem('nbh.drive.acct'),chip:document.getElementById('drvChip').textContent,box:(document.getElementById('drvBox')||{}).textContent||''}));
+  const s1=await A.page.evaluate(()=>({on:localStorage.getItem('nbh.drive.on@nbh'),acct:localStorage.getItem('nbh.drive.acct@nbh'),chip:document.getElementById('drvChip').textContent,box:(document.getElementById('drvBox')||{}).textContent||''}));
   ok('2 linked: the school account kept, the chip says Drive ✓, Caseload names the account and this device (iPad)',s1.on==='1'&&s1.acct===SCHOOL&&/Drive ✓/.test(s1.chip)&&/this device: iPad/.test(s1.box),s1);
   await A.page.evaluate(()=>document.getElementById('dlg').close());
   await setBar(A.page,{client:'Mateo Rivera',sid:'4471823',site:'Royal Palm School'});
@@ -122,7 +122,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const a2=await openDM(A.page);const lv2=await getField(a2,'s.living');const bar2=await A.page.evaluate(()=>document.getElementById('drvBar').hidden);
   ok('10 Open the newer copy: the iPad shows the laptop’s words and the bar is gone',/older brother/.test(lv2)&&bar2,{lv2,bar2});
   /* 11 the iPad saves with the sign-in over (the Google window closed): the save waits on the iPad */
-  await A.page.evaluate(()=>{sessionStorage.removeItem('nbh.google.drive');window.__gsFail='popup_closed';});
+  await A.page.evaluate(()=>{sessionStorage.removeItem('nbh.google.drive@nbh');window.__gsFail='popup_closed';});
   await setField(a2,'s.court','No court involvement (simulated, iPad).');await sleep(600);
   await A.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(2500);
   const w=await A.page.evaluate(async()=>{await drvPaint();const r=(await clList()||[])[0];return {chip:document.getElementById('drvChip').textContent,dirty:r.drv.dirty,ask:window.__gsAsk,dl:0};});
@@ -165,7 +165,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const after=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client));
   ok('19 Remove everywhere: Drive keeps only a marker (no student data in it) and the iPad drops the student at its next sync',gone.length===1&&!/Sample/.test(gone[0].content)&&after.length===1&&after[0]==='Mateo Rivera',{gone:gone.map(f=>f.content.slice(0,60)),after});
   /* 20 a different account at the next sign-in is refused */
-  await A.page.evaluate(()=>sessionStorage.removeItem('nbh.google.drive'));D.who='someone.else@palmbeachschools.org';
+  await A.page.evaluate(()=>sessionStorage.removeItem('nbh.google.drive@nbh'));D.who='someone.else@palmbeachschools.org';
   await A.page.evaluate(()=>{window.__t=[];const t0=wsUI.toast;wsUI.toast=(m,o)=>{window.__t.push(String(m));return t0(m,o);};document.getElementById('drvChip').click();});await sleep(1200);
   const wr=await A.page.evaluate(()=>({t:window.__t,tok:!!drvTok()}));
   ok('20 signed in as a different account: refused, nothing synced, the message names both accounts',!wr.tok&&wr.t.some(m=>/That was someone\.else@palmbeachschools\.org\. This device keeps its caseload in the Google Drive of simulated\.bcba@palmbeachschools\.org/.test(m)),wr);
@@ -182,7 +182,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   /* 23 a personal account on a third device is warned before anything is kept */
   const C=await device(br,UA_MAC,false);D.who='someone.personal@gmail.com';
   await C.page.evaluate(()=>{wsUI.confirm=async(t)=>{window.__cf=String(t);return false;};caseloadOpen();});await sleep(400);await C.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(1000);
-  const p=await C.page.evaluate(()=>({cf:window.__cf||'',on:localStorage.getItem('nbh.drive.on')}));D.who=SCHOOL;
+  const p=await C.page.evaluate(()=>({cf:window.__cf||'',on:localStorage.getItem('nbh.drive.on@nbh')}));D.who=SCHOOL;
   ok('23 a personal Google account: warned (student records belong in the school Drive), and Cancel keeps Drive off',/That is a personal Google account/.test(p.cf)&&/school Google Drive/.test(p.cf)&&!p.on,p);
   /* 24 the first link of a device that already holds a student: the newer save of each is kept, the other goes to Replaced copies */
   await C.page.evaluate(()=>{wsUI.confirm=async()=>true;});await setBar(C.page,{client:'Mateo Rivera',sid:'4471823',site:'Royal Palm School'});
@@ -213,7 +213,7 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
     /Google key/.test(d27.t)&&k27.gid==='123-simulated.apps.googleusercontent.com'&&k27.ls===null&&/Safari refused/.test(k27.al)&&/QuotaExceededError/.test(k27.al)&&k27.ask===0,{d27,k27});
   /* 28 the next tap signs in and turns Drive on for this device, its settings in the same store */
   await E.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(1500);await idle(E.page);
-  const s28=await E.page.evaluate(()=>({on:drvOn(),acct:drvAcct(),ls:localStorage.getItem('nbh.drive.on'),chip:!!document.getElementById('drvChip')&&!document.getElementById('drvChip').hidden,ask:window.__gsAsk}));
+  const s28=await E.page.evaluate(()=>({on:drvOn(),acct:drvAcct(),ls:localStorage.getItem('nbh.drive.on@nbh'),chip:!!document.getElementById('drvChip')&&!document.getElementById('drvChip').hidden,ask:window.__gsAsk}));
   ok('28 the next tap signs in: Drive is on for this device, with the chip, though Safari keeps none of it',s28.on&&s28.acct===SCHOOL&&s28.ls===null&&s28.chip&&s28.ask===1,s28);
   /* 29 opened again (Safari still refusing): the key and the Drive settings come back from the workstation's own store; Diagnostics names the refusal */
   await E.page.reload();await sleep(1500);await E.page.waitForFunction(()=>KV.loaded,null,{timeout:10000});await sleep(300);
@@ -224,9 +224,37 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
     s29.gid==='123-simulated.apps.googleusercontent.com'&&s29.on&&s29.acct===SCHOOL&&s29.ls===null&&/refused a write \(QuotaExceededError\)/.test(s29.row)&&/own store works \(\d+ kept there\)/.test(row29),{s29,row29});
   /* 30 a device whose Safari keeps its settings: Diagnostics says writes work, and the key and settings are in both stores */
   const s30=await B.page.evaluate(async()=>{document.getElementById('diag').click();await new Promise(r=>setTimeout(r,600));const kv=await kvTx('readonly',s=>s.getAll());
-    return {row:(document.getElementById('diagKv')||{}).textContent||'',ls:localStorage.getItem('nbh.google.client'),gid:clGid(),on:localStorage.getItem('nbh.drive.on'),kv:(kv||[]).map(r=>r.k).sort()};});
-  ok('30 the laptop, whose Safari keeps its settings: Diagnostics says writes work and the own store works; Drive on is in both stores',/writes work: \d+ items?, \d+ KB/.test(s30.row)&&/own store works/.test(s30.row)&&s30.on==='1'&&s30.kv.includes('nbh.drive.on')&&s30.kv.includes('nbh.drive.acct'),s30);
-  ok('no page errors (iPad, laptop, third, fourth)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length,[A.errs,B.errs,C.errs,E.errs].map(e=>e.slice(0,3)));
+    return {row:(document.getElementById('diagKv')||{}).textContent||'',ls:localStorage.getItem('nbh.google.client'),gid:clGid(),on:localStorage.getItem('nbh.drive.on@nbh'),kv:(kv||[]).map(r=>r.k).sort()};});
+  ok('30 the laptop, whose Safari keeps its settings: Diagnostics says writes work and the own store works; Drive on is in both stores',/writes work: \d+ items?, \d+ KB/.test(s30.row)&&/own store works/.test(s30.row)&&s30.on==='1'&&s30.kv.includes('nbh.drive.on@nbh')&&s30.kv.includes('nbh.drive.acct@nbh'),s30);
+  /* 31 (v22.00) a second edition on the same website (the school's beside the practice's): its own Drive switch, account and folder */
+  const edition=(ctx,dir,ed)=>ctx.route('**/'+dir+'/**',async r=>{const u=r.request().url().replace('/'+dir+'/','/NBH-Workstation/');const res=await r.fetch({url:u});
+    if(/\/index\.html(\?|#|$)/.test(u)){const b=(await res.text()).replace("const DRV_ED='nbh';","const DRV_ED='"+ed+"';");return r.fulfill({response:res,body:b});}return r.fulfill({response:res});});
+  const EDB=BASE+'/EDB/index.html';await edition(A.ctx,'EDB','rps');const Ab=await A.ctx.newPage();const errB=[];Ab.on('pageerror',e=>errB.push(e.message));
+  await Ab.goto(EDB);await sleep(1600);
+  const e31=await Ab.evaluate(async()=>({on:drvOn(),acct:drvAcct(),n:(await clList()||[]).length}));
+  const nA=await A.page.evaluate(async()=>({on:drvOn(),n:(await clList()||[]).length}));
+  await Ab.evaluate(()=>{wsUI.confirm=async()=>true;window.alert=()=>{};caseloadOpen();});await sleep(400);await Ab.evaluate(()=>document.getElementById('drvLink').click());await sleep(1500);await idle(Ab);
+  const e31b=await Ab.evaluate(async()=>({on:drvOn(),n:(await clList()||[]).length}));
+  const folders=[...D.files.values()].filter(f=>f.mimeType==='application/vnd.google-apps.folder'&&(f.appProperties||{}).nbh==='cases'&&!f.trashed).map(f=>(f.appProperties||{}).ed||'');
+  ok('31 the school edition beside the practice edition on one website: Drive starts off there with no account and no students; linked, it gets its own folder and none of the other edition\'s students',
+    nA.on&&nA.n>0&&!e31.on&&!e31.acct&&e31.n===0&&e31b.on&&e31b.n===0&&folders.includes('nbh')&&folders.includes('rps'),{nA,e31,e31b,folders});
+  /* 32 a browser that an earlier version set up (one set of Drive settings for the whole site, a folder with no edition): the
+     edition whose caseload synced takes both; the other edition leaves them alone */
+  const F2=await device(br,UA_IPAD,true);await edition(F2.ctx,'EDM','mig');const EDM=BASE+'/EDM/index.html';
+  const old=now();D.n++;D.files.set('fOLD',{id:'fOLD',name:'FBA-BIP Workstation cases',mimeType:'application/vnd.google-apps.folder',appProperties:{nbh:'cases'},version:1,modifiedTime:old,trashed:false,content:''});
+  const Fm=await F2.ctx.newPage();Fm.on('pageerror',e=>F2.errs.push(e.message));await Fm.goto(EDM);await sleep(1300);
+  await Fm.evaluate(async([who])=>{wsUI.confirm=async()=>true;window.alert=()=>{};const p={client:'SIMULATED – Sample Student',sid:'SIM-0002',site:'Sample Elementary',grade:'3'};
+    await clTx('readwrite',st=>st.put({key:clKey(p),scope:clScope(),client:p.client,sid:p.sid,site:p.site,grade:p.grade,saved:new Date().toISOString(),sum:{items:[]},drv:{id:'fGONE',ver:'1',dirty:true},
+      text:JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,forms:{},facts:{}})}));
+    localStorage.setItem('nbh.drive.on','1');localStorage.setItem('nbh.drive.acct',who);localStorage.setItem('nbh.drive.dev','iPad');},[SCHOOL]);
+  await F2.page.reload();await sleep(1500);   /* the practice edition in the same browser: no student of its own synced, so it takes nothing */
+  const m0=await F2.page.evaluate(()=>({on:drvOn(),old:localStorage.getItem('nbh.drive.on')}));
+  await Fm.reload();await sleep(2500);await Fm.evaluate(()=>{wsUI.confirm=async()=>true;window.alert=()=>{};});await Fm.evaluate(()=>document.getElementById('drvChip').click());await sleep(1500);await idle(Fm);   /* the sign-in from the Drive chip, as after any update */
+  const m1=await Fm.evaluate(()=>({on:drvOn(),acct:drvAcct(),dev:drvDev(),scoped:localStorage.getItem('nbh.drive.on@mig'),old:localStorage.getItem('nbh.drive.on'),err:DRV.err,folder:DRV.folder,tok:!!drvTok(),ask:window.__gsAsk}));
+  const fold=D.files.get('fOLD'),mig=[...D.files.values()].filter(f=>(f.appProperties||{}).ed==='mig');
+  ok('32 settings an earlier version kept for the whole site: the edition with no synced student leaves them; the edition whose students synced takes them and its old Drive folder (now tagged), and makes no new one',
+    !m0.on&&m0.old==='1'&&m1.on&&m1.acct===SCHOOL&&m1.dev==='iPad'&&m1.scoped==='1'&&m1.old===null&&(fold.appProperties||{}).ed==='mig'&&mig.length===1,{m0,m1,fold:fold.appProperties,mig:mig.map(f=>f.id)});
+  ok('no page errors (iPad, laptop, third, fourth, the second editions)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length&&!errB.length&&!F2.errs.length,[A.errs,B.errs,C.errs,E.errs,errB,F2.errs].map(e=>e.slice(0,3)));
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

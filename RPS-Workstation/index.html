@@ -5040,7 +5040,7 @@ const TD_HOT=/^(Overdue|Safety|Injury)$/;   /* v21.92 a red tag */
 const clRank=k=>{const i=CL_ORDER.indexOf(k);return i<0?CL_ORDER.length:i;};
 const clName=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim();if(!clIni())return w||'(no name)';const p=w.split(/\s+/).filter(Boolean);return p.length?p.map(x=>x[0].toUpperCase()+'.').join(' '):'(no name)';};
 const clUrgency=r=>((r.sum&&r.sum.items)||[]).reduce((a,x)=>Math.min(a,clRank(x.k)),99);
-const clAgo=iso=>{const n=tdDays(String(iso||'').slice(0,10));return n===null?'':n<=0?'today':n===1?'yesterday':n+' days ago';};
+const clAgo=iso=>{const s=String(iso||''),n=tdDays(/T/.test(s)&&!isNaN(Date.parse(s))?tdISO(new Date(s)):s.slice(0,10));   /* v22.00 a save's own calendar day, not UTC's */return n===null?'':n<=0?'today':n===1?'yesterday':n+' days ago';};
 async function caseloadOpen(){const L=await clList();
   if(L===null){dialog('Caseload','<p>This browser keeps no caseload here: its storage is not available (a private window, or storage turned off).</p>');return;}
   /* the case on screen: its summary as it is now (its copy stays its last save) */
@@ -5941,12 +5941,24 @@ const DRV={busy:false,again:false,folder:'',old:'',last:0,err:'',wait:0,conf:{},
 const DRV_SCOPE='https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email';
 const DAPI='https://www.googleapis.com/drive/v3/files',DUP='https://www.googleapis.com/upload/drive/v3/files';
 const DRV_FOLDER='FBA-BIP Workstation cases',DRV_OLD='Replaced copies';
-const drvLs=(k,v)=>{if(v===undefined)return kvGet(k);if(v===null)kvDel(k);else kvSet(k,v);return '';};   /* v21.98 through the settings store: kept when Safari refuses localStorage */
+/* v22.00 (review F501) the edition: the practice's and the school's editions can sit side by side on one website, where the
+   browser keeps one set of settings for both. Each keeps its own Drive settings (nbh.drive.*@ED), its own sign-in and its own
+   Drive folder (tagged ed); tools/build-rps.py writes 'rps' here for the school's edition. */
+const DRV_ED='rps';
+const drvK=k=>k+'@'+DRV_ED;
+const drvLs=(k,v)=>{k=drvK(k);if(v===undefined)return kvGet(k);if(v===null)kvDel(k);else kvSet(k,v);return '';};
+/* the settings an earlier version kept for the whole website go to the edition whose caseload already synced with Drive; the
+   other edition leaves them alone and starts with Drive off */
+const DRV_KEYS=['nbh.drive.on','nbh.drive.acct','nbh.drive.skip','nbh.drive.gone','nbh.drive.dev'];
+async function drvMigrate(){try{await kvLoad;}catch(e){}const old=DRV_KEYS.filter(k=>kvGet(k));if(!old.length||DRV_KEYS.some(k=>kvGet(drvK(k))))return false;
+  let L=[];try{L=await clList()||[];}catch(e){}if(!L.some(r=>r&&r.drv&&r.drv.id))return false;
+  old.forEach(k=>{kvSet(drvK(k),kvGet(k));kvDel(k);});try{drvPaint();}catch(e){}if(drvOn())drvSoon(false,1500);return true;}
+const drvMigrated=drvMigrate().catch(()=>false);   /* v21.98 through the settings store: kept when Safari refuses localStorage */
 const drvAvail=()=>!EMBED&&!!window.isSecureContext&&/^https?:$/.test(location.protocol)&&!!(window.crypto&&crypto.subtle);
 const drvOn=()=>drvAvail()&&drvLs('nbh.drive.on')==='1'&&!clOff();
 const drvAcct=()=>drvLs('nbh.drive.acct');
-const drvTok=()=>{try{const t=JSON.parse(sessionStorage.getItem('nbh.google.drive')||'null');return t&&t.tok&&t.exp>Date.now()+60000?t:null;}catch(e){return null;}};
-const drvTokOff=()=>{try{sessionStorage.removeItem('nbh.google.drive');}catch(e){}};
+const drvTok=()=>{try{const t=JSON.parse(sessionStorage.getItem(drvK('nbh.google.drive'))||'null');return t&&t.tok&&t.exp>Date.now()+60000?t:null;}catch(e){return null;}};
+const drvTokOff=()=>{try{sessionStorage.removeItem(drvK('nbh.google.drive'));}catch(e){}};
 function drvDevGuess(){const u=navigator.userAgent||'';if(/iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1))return 'iPad';if(/iPhone/.test(u))return 'iPhone';
   if(/Android/.test(u))return /Mobile/.test(u)?'Android phone':'Android tablet';if(/CrOS/.test(u))return 'Chromebook';if(/Macintosh|Mac OS X/.test(u))return 'Mac';if(/Windows/.test(u))return 'Windows computer';return 'computer';}
 const drvDev=()=>drvLs('nbh.drive.dev')||drvDevGuess();
@@ -5967,7 +5979,7 @@ function drvSignIn(){return new Promise((res,rej)=>{const id=clGid();if(!id){rej
       callback:r=>{if(!(r&&r.access_token)){rej(new Error(r&&(r.error_description||r.error)||'The sign-in was not completed.'));return;}
         let ok=true;try{if(google.accounts.oauth2.hasGrantedAllScopes)ok=google.accounts.oauth2.hasGrantedAllScopes(r,'https://www.googleapis.com/auth/drive.file');}catch(e){}
         if(!ok){DRV.reask=true;drvTokOff();rej(new Error('Google’s window did not allow the workstation to keep its files in your Drive. Tap again and allow “See, edit, create and delete only the specific Google Drive files you use with this app”.'));return;}
-        DRV.reask=false;DRV.declined=false;const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem('nbh.google.drive',JSON.stringify(t));}catch(e){}res(t);},
+        DRV.reask=false;DRV.declined=false;const t={tok:r.access_token,exp:Date.now()+(+r.expires_in||3600)*1000};try{sessionStorage.setItem(drvK('nbh.google.drive'),JSON.stringify(t));}catch(e){}res(t);},
       error_callback:e=>{if(e&&e.type==='popup_closed')DRV.declined=true;rej(new Error(e&&e.type==='popup_closed'?'The Google window was closed before the sign-in finished.':e&&e.type==='popup_failed_to_open'?'The Google window could not open. Allow pop-ups for this site and try again.':'The sign-in did not finish.'));}}).requestAccessToken({prompt:DRV.reask?'consent':''});}
   catch(e){rej(e);}});}
 async function drvWho(t){const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+t.tok}});if(!r.ok)throw new Error('Google did not say which account signed in');return String(((await r.json())||{}).email||'').toLowerCase();}
@@ -5991,9 +6003,13 @@ async function drvFetch(url,opt){const t=drvTok();if(!t)throw drvErr('signin',{s
 const drvJson=async(url,opt)=>(await drvFetch(url,opt)).json();
 const drvQ=q=>'?q='+encodeURIComponent(q);
 async function drvFolderFind(kind,name,parent){
-  const q="mimeType='application/vnd.google-apps.folder' and appProperties has { key='nbh' and value='"+kind+"' } and trashed=false"+(parent?" and '"+parent+"' in parents":'');
-  const j=await drvJson(DAPI+drvQ(q)+'&orderBy=createdTime&fields=files(id)&pageSize=5');let id=j.files&&j.files[0]&&j.files[0].id;
-  if(!id){const m={name,mimeType:'application/vnd.google-apps.folder',appProperties:{nbh:kind}};if(parent)m.parents=[parent];
+  const q="mimeType='application/vnd.google-apps.folder' and appProperties has { key='nbh' and value='"+kind+"' } and trashed=false"+(parent?" and '"+parent+"' in parents":''),top=kind==='cases';
+  const j=await drvJson(DAPI+drvQ(q+(top?" and appProperties has { key='ed' and value='"+DRV_ED+"' }":''))+'&orderBy=createdTime&fields=files(id)&pageSize=5');let id=j.files&&j.files[0]&&j.files[0].id;
+  /* v22.00 an earlier version's folder has no edition: the edition whose caseload already synced there takes it; any other starts its own */
+  if(!id&&top){await drvMigrated;let mine=false;try{mine=(await clList()||[]).some(r=>r&&r.drv&&r.drv.id);}catch(e){}
+    if(mine){const j2=await drvJson(DAPI+drvQ(q)+'&orderBy=createdTime&fields=files(id,appProperties)&pageSize=20');const f=(j2.files||[]).find(x=>!(x.appProperties&&x.appProperties.ed));
+      if(f){await drvJson(DAPI+'/'+encodeURIComponent(f.id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json; charset=UTF-8'},body:JSON.stringify({appProperties:{ed:DRV_ED}})});id=f.id;}}}
+  if(!id){const m={name,mimeType:'application/vnd.google-apps.folder',appProperties:top?{nbh:kind,ed:DRV_ED}:{nbh:kind}};if(parent)m.parents=[parent];
     id=(await drvJson(DAPI+'?fields=id',{method:'POST',headers:{'Content-Type':'application/json; charset=UTF-8'},body:JSON.stringify(m)})).id;}
   return id;}
 async function drvFolder(){if(!DRV.folder)DRV.folder=await drvFolderFind('cases',DRV_FOLDER,'');return DRV.folder;}
@@ -7697,7 +7713,7 @@ function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{}
     review:{date:T(rv.date),text:T(rv.decisionText||rv.decision),next:T(rv.next)}};}
 function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';
   const dear=P.who?hnT('dearNamed',{who:P.who}):hnT('dear',{who:hnT('parent'),first:P.first});
-  const intro=P.school?hnT('intro',{first:P.first,school:P.school,date:hnDate(new Date().toISOString().slice(0,10))}):hnT('introNoSchool',{first:P.first,date:hnDate(new Date().toISOString().slice(0,10))});
+  const intro=P.school?hnT('intro',{first:P.first,school:P.school,date:hnDate(tdISO(new Date()))}):hnT('introNoSchool',{first:P.first,date:hnDate(tdISO(new Date()))});
   const good=P.rows.map(r=>r.good).filter(Boolean);
   const incT=!P.inc?hnT('incNone'):(P.told>=P.inc?hnT('incSomeAll',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords')}):hnT('incSome',{was:was(P.inc),n:P.inc,inc:hnT(P.inc===1?'incWord':'incWords'),m:P.told}));
   const nextT=(P.review.date&&P.review.text?hnT('review',{date:hnDate(P.review.date),text:P.review.text})+' ':'')+(P.review.next?hnT('nextReview',{date:hnDate(P.review.next)}):hnT('nextNone'));
@@ -7759,7 +7775,7 @@ function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(
   const inc=(d.incidentList||[]).filter(i=>i&&String(i.date||'').slice(0,7)===month),hold=inc.filter(i=>/^(restraint|seclusion)$/.test(i.hold||'')).length,told=inc.filter(i=>i.parent==='yes').length;
   const behs=(d.behaviors||[]).filter(b=>b&&b.name),aims=behs.filter(b=>b.aim!=null),met=aims.filter(b=>b.aimMet).length;
   const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
-  return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:String(r.saved||'').slice(0,10),inc:inc.length,hold,told,aims:aims.length,met,
+  return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:(/T/.test(String(r.saved||''))&&!isNaN(Date.parse(r.saved))?tdISO(new Date(r.saved)):String(r.saved||'').slice(0,10)),inc:inc.length,hold,told,aims:aims.length,met,
     integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:!!(c.date||c.parent),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
 async function cmRows(month){const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
 function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});

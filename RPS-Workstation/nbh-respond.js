@@ -307,8 +307,8 @@
     prog=h('div',{'class':'prog'});ic.appendChild(prog);
     if(scale.kind==='num'&&scale.anchors&&scale.anchors.length){var key=h('div',{'class':'key'});scale.anchors.forEach(function(a){key.appendChild(h('span',{text:a}));});ic.appendChild(key);}
     var ol=h('ol',{'class':'items'});
-    items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+(it.n||i+1)+'.</b> '+esc(it.text||'')}));
-      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Item {n}',{n:it.n||i+1})});var choices;
+    items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+esc(String(it.n==null||it.n===''?i+1:it.n).slice(0,8))+'.</b> '+esc(it.text||'')}));
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Item {n}',{n:String(it.n==null||it.n===''?i+1:it.n).slice(0,8)})});var choices;
       if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||_('Can\u2019t judge'),'']);}
       else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
@@ -336,7 +336,7 @@
     sc.appendChild(h('p',{'class':'foot',text:BOX?_('Your answers are locked on this device so that only {who}\u2019s own form can open them, and go to the practice\u2019s reply box when you press Send. This page stores nothing. Keep the student\u2019s full name off this page.',{who:WHO}):_('Your answers travel only in the email you send; this page stores nothing and sends nothing on its own. Keep the student\'s full name out of the message.')}));
     if(P.credit&&typeof P.credit==='string')sc.appendChild(h('p',{'class':'foot',text:P.credit}));   /* v21.59: the instrument's authors, when the form names them (the FAST) */
     root.appendChild(sc);
-    function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:new Date().toISOString().slice(0,10)};
+    function response(){var r={v:1,form:P.form||'',inst:P.inst||'',student:P.student||'',beh:P.behLabel||P.beh||'',n:items.length,ans:ans.slice(),date:(function(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})(new Date())};   /* v22.00 (review F504): the respondent's own calendar day, not UTC's */
       if(P.confirm)r.confirmed=conf;if(P.sig)r.sig=String(P.sig).slice(0,60);if(me&&me.sid)r.sid=String(me.sid).slice(0,40);   /* v21.86 the send it answers */
       extras.forEach(function(x){r[x.id]=(ex[x.id].value||'').trim();});if(opens.length){r.open={};opens.forEach(function(o){r.open[o.id]=(op[o.id].value||'').trim();});}return r;}
     function encode(obj){var bytes=new TextEncoder().encode(JSON.stringify(obj)),s='';for(var i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return 'NBH1.'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}

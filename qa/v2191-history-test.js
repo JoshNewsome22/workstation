@@ -60,7 +60,7 @@ async function device(br,ua,touch,vp,google){const ctx=await br.newContext({view
     wsUI.confirm=async(t)=>{window.__cf.push(String(t));return true;};wsUI.alert=async(t)=>{window.__al.push(String(t));};window.alert=t=>{window.__al.push(String(t));};
     const ch0=wsUI.choose;wsUI.choose=async(t,b,n)=>{window.__ch.push({t:String(t),b:(b||[]).map(x=>x.label),n:String(n||'')});if(window.__pick===null)return ch0(t,b,n);const v=window.__pick;window.__pick=null;return v;};
     const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));await hxWipe();
-    ['nbh.caseload.off','nbh.drive.on','nbh.drive.acct','nbh.drive.skip','nbh.drive.gone','nbh.drive.dev'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.drive');});
+    ['nbh.caseload.off','nbh.drive.on@nbh','nbh.drive.acct@nbh','nbh.drive.skip@nbh','nbh.drive.gone@nbh','nbh.drive.dev@nbh'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.drive@nbh');});
   return {ctx,page,errs};}
 const setBar=(page,v)=>page.evaluate(v=>{const set=(s,x)=>{const e=document.querySelector(s);e.value=x;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
   set('#pClient',v.client);set('#pSid',v.sid||'');set('#pSite',v.site||'');},v);
@@ -255,11 +255,11 @@ const dirty=page=>page.evaluate(()=>caseDirty());
   await M.page.setViewportSize({width:1440,height:900});await sleep(800);const lt3=await M.page.evaluate(()=>!document.getElementById('hxBtn').closest('header.top')&&document.getElementById('hxBtn').offsetParent!==null);
   ok('41 a laptop 1280 wide with Drive in use: the bar stays one row, History waits in the heading and opens the case’s history; at 1440 it is back on the bar',lt.top&&lt.vis&&lt.rows===1&&lt.sf&&lt2==='Mateo Rivera'&&lt3,{lt,lt2,lt3});
   /* signed out, then offline: local points only, said */
-  const rl1=D.revList;await I.page.evaluate(()=>{sessionStorage.removeItem('nbh.google.drive');hxOpen();});await hxOpenWait(I.page);
+  const rl1=D.revList;await I.page.evaluate(()=>{sessionStorage.removeItem('nbh.google.drive@nbh');hxOpen();});await hxOpenWait(I.page);
   const so=await I.page.evaluate(()=>({src:document.getElementById('hxSrc').textContent,btn:!!document.getElementById('hxSign'),n:document.querySelectorAll('#hxList > li').length}));
   ok('42 signed out of Google: “Only the saves kept on this iPad are listed: you are signed out of Google…”, with Sign in, and nothing asked of Drive',/^Only the saves kept on this iPad are listed: you are signed out of Google/.test(so.src)&&so.btn&&D.revList===rl1&&so.n>=2,so);
   await I.page.evaluate(()=>document.getElementById('dlg').close());
-  await I.page.evaluate(()=>sessionStorage.setItem('nbh.google.drive',JSON.stringify({tok:'simulated-drive-token-x',exp:Date.now()+3600e3})));await I.ctx.setOffline(true);
+  await I.page.evaluate(()=>sessionStorage.setItem('nbh.google.drive@nbh',JSON.stringify({tok:'simulated-drive-token-x',exp:Date.now()+3600e3})));await I.ctx.setOffline(true);
   await I.page.evaluate(()=>hxOpen());await hxOpenWait(I.page);const of=await I.page.evaluate(()=>document.getElementById('hxSrc').textContent);await I.ctx.setOffline(false);
   ok('43 offline: “Only the saves kept on this iPad are listed: there is no internet…”',/^Only the saves kept on this iPad are listed: there is no internet/.test(of)&&D.revList===rl1,of);
   await I.page.evaluate(()=>document.getElementById('dlg').close());

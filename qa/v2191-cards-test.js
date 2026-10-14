@@ -16,7 +16,7 @@ const ELOP=[5,4,6,5,4,4,3,5,3,3,2,3,2,2,1,2,1,1,0,1,1,0,0,1,0];
 async function shell(br,vp,ua,touch){const ctx=await br.newContext({viewport:vp,userAgent:ua,hasTouch:!!touch,isMobile:!!touch&&vp.width<500,serviceWorkers:'block',deviceScaleFactor:1});
   const page=await ctx.newPage();const errs=[];page.on('pageerror',e=>errs.push(e.message));await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(1400);
   await page.evaluate(async()=>{wsUI.confirm=async()=>true;wsUI.alert=async()=>{};window.alert=()=>{};wsUI.choose=async()=>'switch';
-    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on'].forEach(k=>localStorage.removeItem(k));}catch(e){}const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
+    try{['nbh.caseload.off','nbh.caseload.ini','nbh.drive.on@nbh'].forEach(k=>localStorage.removeItem(k));}catch(e){}const L=await clList();for(const r of L||[])await clTx('readwrite',st=>st.delete(r.key));});
   return {ctx,page,errs};}
 const photo=(page,c1,c2)=>page.evaluate(([c1,c2])=>{const c=document.createElement('canvas');c.width=240;c.height=240;const g=c.getContext('2d');g.fillStyle=c1;g.fillRect(0,0,240,240);g.fillStyle=c2;g.beginPath();g.arc(120,100,55,0,7);g.fill();g.fillRect(50,170,140,70);return c.toDataURL('image/jpeg',0.8);},[c1,c2]);
 /* how the cards sit: how many across in the first row, sideways scrolling, the smallest target */
@@ -104,11 +104,11 @@ const measure=(page,root)=>page.evaluate(root=>{const R=document.querySelector(r
   await page.screenshot({path:OUT+'caseload-initials-1440.png'});
   await page.evaluate(()=>{const c=document.getElementById('clIni');c.checked=false;c.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(700);
   /* Google Drive in use: where it is */
-  await page.evaluate(()=>{localStorage.setItem('nbh.drive.on','1');caseloadOpen();});await sleep(900);
+  await page.evaluate(()=>{localStorage.setItem('nbh.drive.on@nbh','1');caseloadOpen();});await sleep(900);
   const dv=await page.evaluate(()=>[...document.querySelectorAll('#dlgBody .cl-card')].map(c=>[c.querySelector('.cl-nm').textContent,c.querySelector('.cl-saved').textContent]));
   const dOf=n=>(dv.find(x=>x[0]===n)||[])[1]||'';
   ok('10 with Google Drive: “Saved yesterday on the laptop · in Google Drive”; one not sent yet says so',dOf('Sample Student')==='Saved yesterday on the laptop · in Google Drive'&&/· waiting for Google Drive$/.test(dOf('Mateo Rivera')),dv);
-  await page.evaluate(()=>{localStorage.removeItem('nbh.drive.on');caseloadOpen();});await sleep(800);
+  await page.evaluate(()=>{localStorage.removeItem('nbh.drive.on@nbh');caseloadOpen();});await sleep(800);
   /* Open, the next item's Open, Remove */
   const kC=await page.evaluate(async()=>(await clList()).find(x=>x.client==='SIMULATED – Sample Student 2').key);
   await page.evaluate(k=>{const c=[...document.querySelectorAll('#dlgBody .cl-card')].find(x=>x.dataset.clrow===k);c.querySelector('.cl-card-acts [data-clopen]').click();},kC);

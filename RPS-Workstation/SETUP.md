@@ -9638,3 +9638,30 @@ Checked by `qa/v2199-cards-test.js` (10 checks: the first reduction target with 
 order with the skill last and marked, the swipe both ways, a one-target card unchanged, an older student filled in and
 kept, the switch showing every target and remembered, the iPad upright with no sideways scrolling); `qa/v2191-cards-test.js`
 still passes.
+
+### v22.00: Wave 0 of the review's fixes
+
+The independent review of 13 and 14 October 2026 (53 reviewers, each finding checked by a skeptic) found four problems
+small enough to fix at once; the rest are in the fix plan, in waves.
+
+- **The questionnaire page and a crafted link (review F495).** respond.html showed each item's number from the link
+  without escaping it, so a link made by hand could run script on the workstation's own web address, where the caseload
+  is kept. The number is now shown as text (at most eight characters). respond.html and staff-data.html carry a security
+  policy that refuses any inline script, any plug-in and any form sent elsewhere; their own scripts moved into
+  `respond-page.js` and `staff-data-page.js` beside them, so the policy can hold.
+- **Two editions on one website (review F501, a blocker).** The browser keeps one set of settings for the whole
+  website, so the practice's edition and the school's shared the Drive switch, the account and the folder, and students
+  could cross between the two caseloads. Each edition now keeps its own Drive settings (`nbh.drive.*@nbh`, `@rps`), its
+  own sign-in, and its own Drive folder, tagged with the edition (`tools/build-rps.py` writes `rps` for the school's). A
+  browser that an earlier version set up keeps working: the edition whose caseload already synced takes the old settings
+  and its old Drive folder (tagged on first use); the other edition starts with Drive off and, when linked, makes its own
+  folder. Update the iPad first, then the laptop.
+- **Evening dates (review F504).** Three places took the day from the world clock, so after 8 pm in Florida a parent
+  note was dated tomorrow, a questionnaire answered then carried tomorrow's date into IA-1, and a case saved then read
+  "today" the next morning. All three use the device's own calendar now.
+- **Seclusion on Form DD-1 (review F99).** The incident dialog offered seclusion beside escort and restraint as an
+  ordinary choice. It is logged when it happened, as "Seclusion (prohibited by s. 1003.573)", and its notice says to tell
+  the administrator at once and the parent the same day, before Form CR-1 starts the notice clock.
+
+Checked by `qa/v2200-test.js` (7 checks) and `qa/v2189-drive-test.js` 31 and 32 (two editions on one site; a browser set
+up by an earlier version). The tests that read the Drive settings use the edition's keys.
