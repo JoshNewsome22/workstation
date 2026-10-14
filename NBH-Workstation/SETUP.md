@@ -9697,3 +9697,9 @@ graphs; nothing is copied into the sheets. Remove takes an earlier sheet off aga
   comparison is a description, not a test: a new school, staff or plan changes more than the year does.
 
 Checked by `qa/v2202-years-test.js` (9 checks).
+
+### v22.03: the caseload card's words follow the graph shown
+
+With one graph on the card, only that target's level and trend line sits under it; the step button or a swipe changes
+the graph and its line together. With **Every target on each card** ticked, every graph and every line show, as in
+v22.01. Checked by `qa/v2199-cards-test.js` 11.

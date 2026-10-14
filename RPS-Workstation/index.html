@@ -7206,7 +7206,8 @@ function clTrendOne(t,i,n,step){const P=t.pts,a=P[0],z=P[P.length-1],u=String(t.
     (step?'<button type="button" class="cl-step" data-clstep="1" aria-label="Next target behavior ('+(i+1)+' of '+n+')">›<\/button>':'')+'<\/div>';}
 /* v22.01 each target's level and trend in words, under the graph: the level is the mean of the last 5 days of data, the
    trend the least-squares change over the last 10; a change smaller than 15% of their mean (at least 0.5, or 5 points for a
-   percentage) reads as steady. For a reduction target falling is improving; for a skill rising is. */
+   percentage) reads as steady. For a reduction target falling is improving; for a skill rising is. v22.03: one graph on the
+   card, one line (the shown target's, changing with the step or swipe); every target on each card, every line. */
 function clLevelTrend(t){const v=(t.pts||[]).map(p=>+p[1]).filter(x=>isFinite(x));if(!v.length)return null;
   const l5=v.slice(-5),lvl=l5.reduce((a,b)=>a+b,0)/l5.length,w=v.slice(-10),n=w.length,pc=/^%/.test(String(t.unit||''));
   if(n<3)return {lvl,n5:l5.length,dir:'',good:null};
@@ -7219,7 +7220,7 @@ function clLvHtml(T){return '<ul class="cl-lv">'+T.map(t=>{const x=clLevelTrend(
 function clTrendHtml(r){const T=clTrendsFor(r),k=esc(r.key||'');if(r.key)CLR[r.key]=r;
   if(T.length===1)return '<div class="cl-tw boxed" data-clkey="'+k+'">'+clTrendOne(T[0],0,1,false)+clLvHtml(T)+'<\/div>';
   if(T.length>1){if(clAllT())return '<div class="cl-tw all" data-clkey="'+k+'">'+T.map((t,i)=>clTrendOne(t,i,T.length,false)).join('')+clLvHtml(T)+'<\/div>';
-    const i=Math.min(CLTI[r.key]||0,T.length-1);return '<div class="cl-tw boxed" data-clkey="'+k+'" data-clswipe="1">'+clTrendOne(T[i],i,T.length,true)+clLvHtml(T)+'<\/div>';}
+    const i=Math.min(CLTI[r.key]||0,T.length-1);return '<div class="cl-tw boxed" data-clkey="'+k+'" data-clswipe="1">'+clTrendOne(T[i],i,T.length,true)+clLvHtml([T[i]])+'<\/div>';}
   const ld=r.sum&&r.sum.lastData;
   return '<div class="cl-tw" data-clkey="'+k+'"><div class="cl-trend none"><span class="cl-tt"><span>'+(ld?'Last day of data '+esc(tdMd(ld))+' ('+esc(clAgo(ld))+')':'No days of data from Form DD-1 yet')+'<\/span><\/span><\/div><\/div>';}
 function clTrendStep(key,d){const r=CLR[key];if(!r)return;const n=clTrendsFor(r).length;if(n<2)return;CLTI[key]=((CLTI[key]||0)+d+n)%n;

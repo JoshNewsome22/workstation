@@ -64,10 +64,17 @@ const UA_IPAD='Mozilla/5.0 (iPad; CPU OS 17_5 like Mac OS X) AppleWebKit/605.1.1
   ok('8 unticked: one target again, with its step button',e4.trends===1&&!!e4.step,e4);
   const lay=await page.evaluate(()=>{const b=document.getElementById('dlgBody');return {box:b.scrollWidth-b.clientWidth,page:document.documentElement.scrollWidth-innerWidth,over:[...b.querySelectorAll('.cl-card')].filter(c=>c.scrollWidth>c.clientWidth+1).length};});
   ok('9 the iPad held upright: no sideways scrolling, no card wider than its column',lay.box<=0&&lay.page<=0&&lay.over===0,lay);
-  /* 11 (v22.01) each target's level and trend in words under the graph: the mean of the last 5 days, the change over the last 10 */
-  const lv=await page.evaluate(()=>{const c=[...document.querySelectorAll('#dlgBody .cl-card')].find(x=>x.getAttribute('aria-label')==='Mateo Rivera');return [...c.querySelectorAll('.cl-lv li')].map(li=>li.textContent);});
-  ok('11 the card lists every target with its level and trend: aggression now 3 and falling (improving), elopement now 0.4 and falling (improving), the skill now 6.2 and rising (improving)',
-    lv.length===3&&/^Physical aggression now 3 occurrences \(last 5 days\) · falling, improving$/.test(lv[0])&&/^Elopement now 0\.4 occurrences \(last 5 days\) · falling, improving$/.test(lv[1])&&/^Mand for break now 6\.2 occurrences \(last 5 days\) · rising, improving$/.test(lv[2]),lv);
+  /* 11 (v22.01; v22.03 one line per shown graph) each target's level and trend in words under the graph: the mean of the last 5 days, the change over the last 10 */
+  const lvOf=()=>page.evaluate(()=>{const c=[...document.querySelectorAll('#dlgBody .cl-card')].find(x=>x.getAttribute('aria-label')==='Mateo Rivera');return {lv:[...c.querySelectorAll('.cl-lv li')].map(li=>li.textContent),shown:(c.querySelector('.cl-tw .cl-tt b')||{}).textContent||''};});
+  const stepIt=()=>page.evaluate(()=>{const c=[...document.querySelectorAll('#dlgBody .cl-card')].find(x=>x.getAttribute('aria-label')==='Mateo Rivera');c.querySelector('[data-clstep]').click();});
+  const one=[];for(let k=0;k<3;k++){const st=await lvOf();one.push(st);await stepIt();await sleep(200);}
+  const RX={'Physical aggression':/^Physical aggression now 3 occurrences \(last 5 days\) · falling, improving$/,'Elopement':/^Elopement now 0\.4 occurrences \(last 5 days\) · falling, improving$/,'Mand for break':/^Mand for break now 6\.2 occurrences \(last 5 days\) · rising, improving$/};
+  const oneOk=one.every(st=>st.lv.length===1&&RX[st.shown]&&RX[st.shown].test(st.lv[0]))&&new Set(one.map(st=>st.shown)).size===3;
+  await page.evaluate(()=>{const x=document.querySelector('#dlgBody [data-clallt]');x.checked=true;x.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(300);
+  const lv=(await lvOf()).lv;
+  await page.evaluate(()=>{const x=document.querySelector('#dlgBody [data-clallt]');x.checked=false;x.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(300);
+  ok('11 one graph shown: only that target\'s level and trend under it, changing with the step; every target on each card: all three lines (aggression now 3 falling, elopement 0.4 falling, the skill 6.2 rising, each improving)',
+    oneOk&&lv.length===3&&RX['Physical aggression'].test(lv[0])&&RX['Elopement'].test(lv[1])&&RX['Mand for break'].test(lv[2]),{one,lv});
   const lt=await page.evaluate(()=>[clLevelTrend({pts:[['a',2],['b',2],['c',2],['d',2.2],['e',1.9]],unit:'occurrences'}),clLevelTrend({pts:[['a',1],['b',3],['c',6]],up:false}),clLevelTrend({pts:[['a',5],['b',5]]}),clLevelTrend({pts:[['a',40],['b',60],['c',80]],unit:'% independent',up:true})]);
   ok('12 the rule: a small change reads steady, a rising problem behavior is worsening, two days are too few, a rising skill in percent is improving',
     lt[0].dir==='steady'&&lt[0].good===null&&lt[1].dir==='rising'&&lt[1].good===false&&lt[2].dir===''&&lt[3].dir==='rising'&&lt[3].good===true,lt);
