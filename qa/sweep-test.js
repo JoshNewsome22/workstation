@@ -224,7 +224,7 @@ function swHelpers() {
   };
   /* the values of every input, select and textarea (hidden ones too), keyed as the forms' own snapshot keys them */
   S.values = function () {
-    const list = Array.prototype.filter.call(document.querySelectorAll('input,select,textarea'), e => !/^(file|button|submit|reset|image)$/.test(e.type) && !e.closest(UI));
+    const list = Array.prototype.filter.call(document.querySelectorAll('input,select,textarea'), e => !/^(file|button|submit|reset|image)$/.test(e.type) && !e.closest(UI) && !e.hasAttribute('data-now'));   /* data-now: an entry box the form fills with the date or time now each time it opens */
     const seen = {}, out = {};
     list.forEach(function (e, i) {
       const base = e.id ? '#' + e.id : (e.name ? '@' + e.name : ''); let k;
