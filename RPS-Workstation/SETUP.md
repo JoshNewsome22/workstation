@@ -9607,3 +9607,17 @@ size, the largest kind, whether a write is taken, and whether the workstation's 
 Checked by `qa/v2189-drive-test.js` (checks 27 to 29: a fourth device whose Safari refuses every write to its settings
 store is asked for the key once, told plainly that Safari refused it, signs in at the next tap with Drive on for the
 device, and finds the key and the Drive settings again when opened afresh, the Diagnostics row naming the refusal).
+
+#### v21.98b: Form DD-1 reads a Google Sheet whose tabs are not all the same size
+
+Linking a sheet asked every visible tab for the same block of cells, A1 to BZ800, in one request. Google refuses a
+range that reaches past a tab's last row or column (400, "exceeds grid limits"), and a chart tab has no cells at all, so
+one small tab (a graphs tab, or a tab tidied by deleting its empty rows) failed the whole link with "Google Sheets
+answered 400." DD-1 now reads each tab's size with the sheet's tab list, skips chart tabs, and asks each tab for the
+block it has (at most A1:BZ800); the sizes are read again at every later read. When Google still refuses the request,
+each tab is asked on its own, the tabs that answer are read, and the ones refused are named with Google's words, in the
+link box and in the bar's note. Google's explanation now reaches the screen in plain words instead of a bare status:
+an Excel or CSV file opened in Sheets is told apart ("not a Google Sheet"; File › Save as Google Sheets), and a tab
+smaller than the block asked for is named. Checked by `qa/v2176-test.js` (4a to 4c: a short, narrow tab is asked for
+A1:Z100 and a chart tab never; the Excel case shows the Save as Google Sheets step; a tab Google refuses on its own is
+named while the other tabs still link).

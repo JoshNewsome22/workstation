@@ -15,6 +15,9 @@ const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
 const W=BASE+'/NBH-Workstation/';
 const ID='1SIMULATEDsheetIDforTESTSabcdefghijklmnop';
+/* v21.98b the simulated sheet's tabs: rows and columns (a chart tab has none) */
+const GRID={'Reduction and Acquisition TBx 1':[1000,100],'Reduction and Acquisition TBx 2':[1000,100],'ABC Checklist Linked To ScatterPlot':[1000,26],'Teaching Trials':[100,26],'Old tab':[1000,26]};
+function gsColName(n){let s='';while(n>0){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
 /* a simulated sheet in the template's shape */
 function tab(defs,days,student){const cols=[];defs.forEach(d=>{if(d.two)cols.push(d,{cont:1},{cont:2});else cols.push(d);});
   const W=1+cols.length,row=()=>new Array(W).fill('');const R=[];for(let i=0;i<18;i++)R.push(row());
@@ -36,14 +39,23 @@ let D1=[['8/10/2026',[6,0,1,[2,3],[1,1]]],['8/11/2026',[5,0,0,[2,2],[2,2]]],['8/
 const D2=[['8/10/2026',[3,[4,5],[1,2]]],['8/11/2026',[2,[5,5],[2,2]]]];
 (async()=>{const br=await chromium.launch();const log=[];
   const page=await br.newPage({viewport:{width:1300,height:950}});wire(page,log);
-  let calls=[],status=200,student=STU;
+  let calls=[],status=200,student=STU,notSheet=false,oddTab='';   /* v21.98b knobs: an Excel file opened in Sheets; a tab Google refuses on its own */
   await page.addInitScript(()=>{window.__gsAsk=0;window.google={accounts:{oauth2:{initTokenClient(cfg){return {requestAccessToken(){window.__gsAsk++;setTimeout(()=>cfg.callback({access_token:'simulated-token',expires_in:3600}),20);}};}}}};
     try{localStorage.setItem('nbh.google.client','123-simulated.apps.googleusercontent.com');}catch(e){}});
   await page.route('https://sheets.googleapis.com/**',route=>{const u=decodeURIComponent(route.request().url());calls.push({u,auth:route.request().headers()['authorization']});
     if(status!==200)return route.fulfill({status,body:'{}',contentType:'application/json'});
-    if(/values:batchGet/.test(u)){const tabs=[...u.matchAll(/ranges='([^']+)'!/g)].map(m=>m[1]);
-      return route.fulfill({contentType:'application/json',body:JSON.stringify({valueRanges:tabs.map(t=>({range:t,values:t==='Reduction and Acquisition TBx 1'?tab(T1,D1,student):t==='Reduction and Acquisition TBx 2'?tab(T2,D2,student):[['ABC Checklist'],['Date','Antecedent','Behavior']]}))})});}
-    return route.fulfill({contentType:'application/json',body:JSON.stringify({properties:{title:'SIMULATED Behavior Data Collection'},sheets:[{properties:{title:'Reduction and Acquisition TBx 1'}},{properties:{title:'Reduction and Acquisition TBx 2'}},{properties:{title:'ABC Checklist Linked To ScatterPlot'}},{properties:{title:'Old tab',hidden:true}}]})});});
+    const bad=(msg,st)=>route.fulfill({status:400,contentType:'application/json',body:JSON.stringify({error:{code:400,message:msg,status:st||'INVALID_ARGUMENT'}})});
+    if(/values:batchGet/.test(u)){const asked=[...u.matchAll(/ranges='((?:[^']|'')+)'!A1:([A-Z]+)(\d+)/g)].map(m=>({t:m[1].replace(/''/g,"'"),col:[...m[2]].reduce((a,c)=>a*26+c.charCodeAt(0)-64,0),row:+m[3]}));
+      /* Google's rules, simulated: a chart tab has no cells; a range past a tab's last row or column is refused; a tab can be refused on its own */
+      for(const a of asked){const g=GRID[a.t];if(!g)return bad("Unable to parse range: '"+a.t+"'!A1:"+u.split("'"+a.t.replace(/'/g,"''")+"'!A1:")[1].split('&')[0]);
+        if(a.col>g[1]||a.row>g[0])return bad("Range ('"+a.t+"'!A1:"+gsColName(a.col)+a.row+") exceeds grid limits. Max rows: "+g[0]+", max columns: "+g[1]);
+        if(oddTab&&a.t===oddTab)return bad("Unable to parse range: '"+a.t+"'!A1:"+gsColName(a.col)+a.row);}
+      return route.fulfill({contentType:'application/json',body:JSON.stringify({valueRanges:asked.map(a=>{const t=a.t;return {range:t,values:t==='Reduction and Acquisition TBx 1'?tab(T1,D1,student):t==='Reduction and Acquisition TBx 2'?tab(T2,D2,student):[['ABC Checklist'],['Date','Antecedent','Behavior']]};})})});}
+    if(notSheet)return bad('This operation is not supported for this document','FAILED_PRECONDITION');
+    return route.fulfill({contentType:'application/json',body:JSON.stringify({properties:{title:'SIMULATED Behavior Data Collection'},sheets:[
+      {properties:{title:'Reduction and Acquisition TBx 1',sheetType:'GRID',gridProperties:{rowCount:1000,columnCount:100}}},{properties:{title:'Reduction and Acquisition TBx 2',sheetType:'GRID',gridProperties:{rowCount:1000,columnCount:100}}},
+      {properties:{title:'ABC Checklist Linked To ScatterPlot',sheetType:'GRID',gridProperties:{rowCount:1000,columnCount:26}}},{properties:{title:'Teaching Trials',sheetType:'GRID',gridProperties:{rowCount:100,columnCount:26}}},
+      {properties:{title:'Graphs',sheetType:'OBJECT'}},{properties:{title:'Old tab',hidden:true,sheetType:'GRID',gridProperties:{rowCount:1000,columnCount:26}}}]})});});
   await page.goto(W+'Daily_Behavior_Data_and_Visual_Analysis.html',{waitUntil:'load'});await sleep(1200);
   await page.evaluate(()=>{window.confirm=()=>true;try{nbhUI.confirm=async()=>true;}catch(e){}S.meta.client='Mateo Rivera';document.querySelectorAll('section[data-panel]').forEach(s=>s.classList.toggle('hidden',s.dataset.panel!=='data'));renderAll();});
   const b0=await page.evaluate(()=>document.getElementById('gsBar').innerText);
@@ -97,6 +109,19 @@ const D2=[['8/10/2026',[3,[4,5],[1,2]]],['8/11/2026',[2,[5,5],[2,2]]]];
   ok('3d a record kept in intervals is not filled from the daily totals, and says why',r7.n===0&&/intervals/.test(r7.warn.join(' ')),r7);
   const r8=await page.evaluate(async()=>{gsApply();renderAll();await gsUnlinkGo();return {gs:S.gs,dates:S.rows.map(r=>r.date).sort().join(),bar:document.getElementById('gsBar').innerText,beh:S.behaviors.length};});
   ok('3e Unlink takes out what the sheet wrote and leaves the record’s own',r8.gs===null&&r8.dates==='2026-08-10,2026-08-20'&&/Link a Google Sheet/.test(r8.bar),r8);
+  /* 4 (v21.98b) tabs of different sizes, an Excel file opened in Sheets, a tab Google refuses on its own */
+  const asked=calls.filter(c=>/values:batchGet/.test(c.u)).map(c=>c.u);
+  ok('4a every request asks each tab for the block it has: the short, narrow tab as A1:Z100, the ABC tab as A1:Z800, the wide tabs as A1:BZ800, the chart tab never',
+    asked.length>0&&asked.every(u=>/ranges='Teaching Trials'!A1:Z100/.test(u)||!/Teaching Trials/.test(u))&&asked.some(u=>/ranges='Teaching Trials'!A1:Z100/.test(u))&&asked.some(u=>/ranges='ABC Checklist Linked To ScatterPlot'!A1:Z800/.test(u))&&asked.some(u=>/ranges='Reduction and Acquisition TBx 1'!A1:BZ800/.test(u))&&!asked.some(u=>/Graphs/.test(u)),asked.map(u=>u.slice(60,200)));
+  notSheet=true;
+  await page.evaluate(id=>{document.getElementById('gsLink').click();document.getElementById('gsUrl').value='https://docs.google.com/spreadsheets/d/'+id+'/edit?usp=sharing';document.getElementById('gsFind').click();},'1SIMULATEDexcelFILEopenedINsheetsXXXXXXXX');
+  await sleep(900);const r9=await page.evaluate(()=>({msg:document.getElementById('gsMsg').textContent,tabs:document.querySelectorAll('#gsTabs label').length}));notSheet=false;
+  ok('4b an Excel or CSV file opened in Sheets: the box says it is not a Google Sheet and names the Save as Google Sheets step, instead of a bare 400',/not a Google Sheet/.test(r9.msg)&&/Save as Google Sheets/.test(r9.msg)&&r9.tabs===0,r9);
+  oddTab='Reduction and Acquisition TBx 2';
+  await page.evaluate(id=>{document.getElementById('gsUrl').value='https://docs.google.com/spreadsheets/d/'+id+'/edit?usp=sharing';document.getElementById('gsFind').click();},ID);
+  await sleep(1500);const r10=await page.evaluate(()=>({tabs:[...document.querySelectorAll('#gsTabs label b')].map(b=>b.textContent),note:document.getElementById('gsTabs').textContent,go:document.getElementById('gsGo').disabled,msg:document.getElementById('gsMsg').textContent}));oddTab='';
+  ok('4c a tab Google refuses on its own: the other tab still links, and the refused one is named with Google’s words',r10.tabs.length===1&&r10.tabs[0]==='Reduction and Acquisition TBx 1'&&/could not read “Reduction and Acquisition TBx 2”/.test(r10.note)&&/Unable to parse range/.test(r10.note)&&!r10.go,r10);
+  await page.evaluate(()=>{try{gsDlg().close();}catch(e){}});
   const errs=log.filter(l=>l.type==='pageerror');
   ok('3f no page errors',errs.length===0,errs);
   await br.close();

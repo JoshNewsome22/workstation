@@ -6120,10 +6120,27 @@ async function gsGet(path){const r=await fetch("https://sheets.googleapis.com/v4
   if(r.status===401){gsTok=null;gsExp=0;try{sessionStorage.removeItem("nbh.google.tok");}catch(e){}throw new Error("signin");}
   if(r.status===403)throw new Error("Google refused (403): this account cannot open the sheet, or the district has not allowed the workstation to read Google Sheets. See Setup: the Google Sheets link.");
   if(r.status===404)throw new Error("Google could not find that sheet (404). Check the link, and that this account can open it.");
-  if(!r.ok)throw new Error("Google Sheets answered "+r.status+".");return r.json();}
-const gsMetaOf=id=>gsGet(encodeURIComponent(id)+"?fields=properties.title,sheets.properties(title,hidden)");
-function gsRange(t){return "'"+String(t).replace(/'/g,"''")+"'!A1:BZ800";}
-const gsValuesOf=(id,tabs)=>gsGet(encodeURIComponent(id)+"/values:batchGet?"+tabs.map(t=>"ranges="+encodeURIComponent(gsRange(t))).join("&")+"&valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS");
+  if(!r.ok){let m="";try{const j=await r.json();m=(j&&j.error&&j.error.message)||"";}catch(e){}throw new Error(gsSaid(r.status,m));}return r.json();}
+/* v21.98b Google's own words, in plain words: an Excel or CSV file opened in Sheets, a tab smaller than the block asked for */
+function gsSaid(status,m){m=String(m||"");
+  if(/not supported for this document/i.test(m))return "This file is not a Google Sheet (an Excel or CSV file opened in Sheets). In Google Sheets choose File › Save as Google Sheets, then link the new sheet’s address.";
+  if(/exceeds grid limits/i.test(m)){const x=/Range \('((?:[^']|'')+)'!/.exec(m);return "Google could not read the tab "+(x?"“"+x[1].replace(/''/g,"'")+"”":"asked for")+": it is smaller than the block asked for ("+m.replace(/^.*exceeds grid limits\.?\s*/i,"")+"). Hide that tab, or add rows and columns to it, then try again.";}
+  return "Google Sheets answered "+status+(m?": "+m:".");}
+const gsMetaOf=id=>gsGet(encodeURIComponent(id)+"?fields=properties.title,sheets.properties(title,hidden,sheetType,gridProperties(rowCount,columnCount))");
+/* v21.98b the visible grid tabs with their sizes: a chart tab has no cells, and Google refuses a range that reaches past a
+   tab's last row or column (400, "exceeds grid limits"), so each tab is asked for the block it has, at most A1:BZ800 */
+function gsTabsOf(meta){return (meta.sheets||[]).map(s=>s.properties||{}).filter(p=>!p.hidden&&(!p.sheetType||p.sheetType==="GRID")).map(p=>({title:p.title,rows:(p.gridProperties||{}).rowCount||0,cols:(p.gridProperties||{}).columnCount||0}));}
+function gsGridOf(T){const g={};T.forEach(t=>{g[t.title]={rows:t.rows,cols:t.cols};});return g;}
+function gsColName(n){let s="";while(n>0){const r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26);}return s;}
+function gsRange(t,g){const rows=g&&g.rows>0?Math.min(800,g.rows):800,cols=g&&g.cols>0?Math.min(78,g.cols):78;return "'"+String(t).replace(/'/g,"''")+"'!A1:"+gsColName(cols)+rows;}
+const gsValuesOf=(id,tabs,grid)=>gsGet(encodeURIComponent(id)+"/values:batchGet?"+tabs.map(t=>"ranges="+encodeURIComponent(gsRange(t,grid&&grid[t]))).join("&")+"&valueRenderOption=FORMATTED_VALUE&majorDimension=ROWS");
+/* all the tabs in one request; when Google refuses the batch for one tab's sake, each tab on its own, and the refused ones are named (bad) */
+async function gsValuesAll(id,tabs,grid){if(!tabs.length)return {valueRanges:[],bad:[]};
+  try{const vr=await gsValuesOf(id,tabs,grid);vr.bad=[];return vr;}
+  catch(e){if(!e||e.message==="signin"||/^Google refused \(403\)|\(404\)/.test(e.message||""))throw e;
+    const R=await Promise.all(tabs.map(t=>gsValuesOf(id,[t],grid).then(v=>(v.valueRanges||[])[0]||{values:[]},err=>{if(err&&err.message==="signin")throw err;return {bad:(err&&err.message)||String(err)};})));
+    const bad=[],valueRanges=R.map((v,i)=>{if(v&&v.bad!==undefined){bad.push({tab:tabs[i],msg:v.bad});return null;}return v;});
+    if(bad.length===tabs.length)throw e;return {valueRanges,bad};}}
 
 /* ---- reading one tab of the template: the "Date" row is the heading row; each "(Total Per Day)" is a count target, each
    "Occurrences(+)" followed by "Opportunities" (and "%") a target scored out of opportunities; above them, in each
@@ -6218,14 +6235,15 @@ let gsPendKey="",gsPendNote="";
 async function gsRead(opt){opt=opt||{};const g=S.gs;if(!g||!g.id||gsBusy)return false;if(!g.on&&!opt.force)return false;
   if(!gsSigned()){gsErr="signin";gsBar();return false;}
   gsBusy=true;gsErr="";gsBar();
-  try{const vr=await gsValuesOf(g.id,g.tabs.length?g.tabs:[]);const groups=[];let student=null;
-    (vr.valueRanges||[]).forEach((v,i)=>{const p=gsParse(v.values||[],g.tabs[i]);if(!p)return;if(!student||!student.name)student=p.student;p.groups.forEach(x=>groups.push(x));});
+  try{let grid=g.grid||{};try{const meta=await gsMetaOf(g.id);grid=gsGridOf(gsTabsOf(meta));g.grid=grid;}catch(e){if(e&&e.message==="signin")throw e;}   /* v21.98b the tabs' sizes as they are now */
+    const vr=await gsValuesAll(g.id,g.tabs.length?g.tabs:[],grid);const groups=[];let student=null;
+    (vr.valueRanges||[]).forEach((v,i)=>{if(!v)return;const p=gsParse(v.values||[],g.tabs[i]);if(!p)return;if(!student||!student.name)student=p.student;p.groups.forEach(x=>groups.push(x));});
     if(!groups.length)throw new Error("No target columns were found on the tabs linked (a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns).");
     if(student&&(student.name||student.id)&&!gsSameStudent(student.name,student.id)&&!gsOkFor(student,g)){
       gsPendKey=gsOkKey(student);gsPendNote=gsIdClash(student.id)?` The student IDs differ (sheet ${student.id}, record ${S.meta.id}).`:"";
       gsErr="name:"+(student.name||"the student with ID "+student.id);gsBusy=false;gsBar();return false;}
     g.cache={student:student||{name:"",id:""},groups};g.read=new Date().toISOString();
-    const r=gsApply();renderAll();gsEdited();
+    const r=gsApply();if(vr.bad&&vr.bad.length)r.warn.push("Google could not read "+vr.bad.map(b=>"“"+b.tab+"” ("+b.msg+")").join(", "));renderAll();gsEdited();
     if(!opt.quiet)toast(r.n?"From Google Sheets: "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+"."+(r.warn.length?" "+r.warn.join("; ")+".":""):(r.warn.length?r.warn.join("; "):"The sheet holds no numbers yet."));
     g.warn=r.warn;return true;}
   catch(e){gsErr=e&&e.message==="signin"?"signin":(e&&e.message)||String(e);return false;}
@@ -6274,12 +6292,13 @@ async function gsFind(){const d=gsDlg(),key=d.querySelector("#gsKey").value.trim
   if(!gsClientId()){d.querySelector("#gsKeyRow").hidden=false;gsMsg("Give the Google sign-in key first (Setup: the Google Sheets link).",true);return;}
   if(!id){gsMsg("That is not a Google Sheets link.",true);return;}
   try{if(!gsSigned()){gsMsg("Signing in to Google…");await gsSignIn();}
-    gsMsg("Reading the sheet’s tabs…");const meta=await gsMetaOf(id),tabs=(meta.sheets||[]).map(s=>s.properties||{}).filter(p=>!p.hidden).map(p=>p.title);
-    const vr=await gsValuesOf(id,tabs),P=[];(vr.valueRanges||[]).forEach((v,i)=>{const p=gsParse(v.values||[],tabs[i]);if(p&&p.groups.length)P.push(p);});
-    gsDlgState={id,url,title:(meta.properties||{}).title||"",tabs,parsed:P};
+    gsMsg("Reading the sheet’s tabs…");const meta=await gsMetaOf(id),T=gsTabsOf(meta),tabs=T.map(t=>t.title),grid=gsGridOf(T);
+    const vr=await gsValuesAll(id,tabs,grid),P=[];(vr.valueRanges||[]).forEach((v,i)=>{if(!v)return;const p=gsParse(v.values||[],tabs[i]);if(p&&p.groups.length)P.push(p);});
+    gsDlgState={id,url,title:(meta.properties||{}).title||"",tabs,grid,parsed:P,bad:vr.bad||[]};
     const was=S.gs&&S.gs.id===id?S.gs.tabs:null;
     d.querySelector("#gsTabs").innerHTML=P.length?`<fieldset class="gs-tabset"><legend>Tabs with target columns</legend>${P.map((p,i)=>`<label><input type="checkbox" data-gstab="${i}"${(was?was.indexOf(p.tab)>=0:/reduction|acquisition|replacement|tbx|target/i.test(p.tab))?" checked":""}> <b>${esc(p.tab)}</b> <span class="hint">${p.groups.map(x=>esc(x.name)).join(", ")}</span></label>`).join("")}</fieldset>`:
       `<p class="gs-bad">No tab of this sheet has a “Date” row with “(Total Per Day)” or “Occurrences(+)” columns.</p>`;
+    if(vr.bad&&vr.bad.length)d.querySelector("#gsTabs").insertAdjacentHTML("beforeend",`<p class="gs-bad">Google could not read ${vr.bad.map(b=>"“"+esc(b.tab)+"” ("+esc(b.msg)+")").join(", ")}. The other tabs are read as usual.</p>`);
     gsMsg((meta.properties||{}).title?"“"+meta.properties.title+"”: "+tabs.length+" tab"+(tabs.length===1?"":"s")+".":"");gsPreview();}
   catch(e){gsMsg(e&&e.message==="signin"?"Google asked to sign in again. Press the button once more.":e&&e.message==="nokey"?"Give the Google sign-in key first.":(e&&e.message)||String(e),true);}}
 function gsChosen(){const d=gsDlg(),st=gsDlgState;if(!st)return [];return [...d.querySelectorAll("[data-gstab]:checked")].map(c=>st.parsed[+c.dataset.gstab]).filter(Boolean);}
@@ -6297,7 +6316,7 @@ async function gsLinkGo(){const d=gsDlg(),st=gsDlgState,C=gsChosen();if(!st||!C.
   const EX=['physical aggression','self-injury','property destruction'];
   if(!S.rows.length&&S.behaviors.every(b=>!String(b.definition||'').trim()&&!String(b.aim||'').trim()&&EX.indexOf(gsK(b.name))>=0))S.behaviors=[];
   const groups=[].concat(...C.map(p=>p.groups)),stu=C[0].student||{name:"",id:""};
-  S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name,stu.id)?"":gsOkKey(stu),cache:{student:stu,groups}});
+  S.gs=Object.assign(S.gs&&S.gs.id===st.id?S.gs:{applied:{},madeRows:[],madeBeh:[]},{id:st.id,url:st.url,title:st.title,tabs:C.map(p=>p.tab),grid:st.grid||{},on:true,read:new Date().toISOString(),nameOk:gsSameStudent(stu.name,stu.id)?"":gsOkKey(stu),cache:{student:stu,groups}});
   if(!S.meta.id&&stu.id&&gsSameStudent(stu.name,stu.id))S.meta.id=stu.id;
   const r=gsApply();gsErr="";d.close();renderAll();gsEdited();
   toast("Linked. "+r.days+" day"+(r.days===1?"":"s")+" of "+groups.length+" target"+(groups.length===1?"":"s")+" from the sheet."+(r.warn.length?" "+r.warn.join("; ")+".":""));}
