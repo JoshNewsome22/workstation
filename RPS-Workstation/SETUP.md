@@ -9703,3 +9703,11 @@ Checked by `qa/v2202-years-test.js` (9 checks).
 With one graph on the card, only that target's level and trend line sits under it; the step button or a swipe changes
 the graph and its line together. With **Every target on each card** ticked, every graph and every line show, as in
 v22.01. Checked by `qa/v2199-cards-test.js` 11.
+
+### v22.04: pin a student to the main screen
+
+Each student's card (on the main screen and in Caseload) has a **Pin** button at its top right. A pinned student is
+always on the main screen, first, with the button reading **Pinned**; the other students follow in the usual order (the
+most urgent first, then the latest saved), twelve cards in all, or more when more than twelve are pinned. Tap
+**Pinned** to unpin. Pins are kept in this edition's settings on this device (each iPad or laptop keeps its own), and
+**Remove** takes a student's pin with them. Checked by `qa/v2204-pin-test.js` (10 checks).

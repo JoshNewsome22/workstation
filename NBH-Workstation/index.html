@@ -931,6 +931,9 @@ body.ws-split .rail-edge{display:none!important}
 .cl-next button{flex:0 0 auto}
 .cl-more{color:var(--muted);white-space:nowrap}
 .cl-saved{margin:0!important;font-size:12px!important;line-height:1.4!important;color:var(--muted)}
+.cl-pin{flex:0 0 auto;margin-left:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;padding:0 10px;border-radius:999px;color:var(--muted)}
+.cl-pin.on{color:var(--ink);background:var(--mist);border-color:var(--slate)}
+.cl-pin.on svg{color:var(--slate)}
 .cl-card-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}
 .cl-card button,.cl-find button{min-height:44px;min-width:44px;font-size:13px}
 /* the start screen with a caseload: room for three cards across on a laptop or an iPad held sideways */
@@ -5078,7 +5081,7 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
     if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case history on this '+HERE+' (the earlier saves kept here) is deleted with them. Their case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;   /* v21.91 the history named (it goes in clTx's delete, nbh-history) */
-    try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}caseloadOpen();}});
+    try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}clPinSet(r.key,false);caseloadOpen();}});
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
 $('#caseloadBtn').addEventListener('click',()=>caseloadOpen());
@@ -6218,7 +6221,7 @@ document.addEventListener('click',async e=>{const d=e.target.closest&&e.target.c
   const h=await drvHash(drvKey(r));
   if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id});drvGoneSet(g);}}
   else{const s=drvSkip();s[h]=String(r.drv&&r.drv.ver||'');drvSkipSet(s);}
-  try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}delete DRV.conf[r.key];caseloadOpen();if(c==='all')drvSoon(true,100);else drvPaint();},true);
+  try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}clPinSet(r.key,false);delete DRV.conf[r.key];caseloadOpen();if(c==='all')drvSoon(true,100);else drvPaint();},true);
 /* a device emptied of student data stops using Drive, or its next sync would bring everyone back */
 {const ra9=clRemoveAll;clRemoveAll=async function(){let prev=null;try{prev=sessionStorage.getItem('nbh.google.tok');sessionStorage.setItem('nbh.google.tok',prev||'{"probe":1}');}catch(e){}
   await ra9.apply(this,arguments);let went=false;try{went=sessionStorage.getItem('nbh.google.tok')===null;if(!went&&prev===null)sessionStorage.removeItem('nbh.google.tok');}catch(e){}
@@ -7240,14 +7243,26 @@ function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clR
   const sub=[r.site,typeof gradeWords==='function'?gradeWords(r.grade):r.grade].filter(x=>String(x||'').trim()).map(esc).join(' · ');
   const fix=(!ini&&!(r.thumb&&r.thumb.at===r.saved))||!(r.sum&&('trends' in r.sum)),nm=clName(r);
   return '<article class="cl-card'+(hot?' hot':'')+'" data-clrow="'+esc(r.key)+'" data-clwhere="'+w+'"'+(fix?' data-clfix="1"':'')+' aria-label="'+esc(nm)+'">'+
-    '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div><\/div>'+
+    '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div>'+clPinBtn(r.key,nm)+'<\/div>'+
     clTrendHtml(r)+
     (top?'<div class="cl-next'+(hot?' hot':'')+'"><span class="cl-nt"><span class="td-k">'+esc(top.k)+'<\/span> '+esc(top.t)+(it.length>1?' <span class="cl-more">and '+(it.length-1)+' more<\/span>':'')+'<\/span><button type="button" data-clopen="'+esc(r.key)+'" data-clform="'+esc(top.open||'')+'">Open'+(top.open?' '+esc(top.open):'')+'<\/button><\/div>'
       :'<div class="cl-next calm"><span class="cl-nt">Nothing needs you, as at the last save.<\/span><\/div>')+
     '<p class="cl-saved" title="'+esc(typeof drvWhen==='function'?drvWhen(r.saved):'')+'">'+esc(clWhere(r))+'<\/p>'+
     '<div class="cl-card-acts"><button type="button" class="primary" data-clopen="'+esc(r.key)+'" aria-label="Open '+esc(nm)+'’s case">Open<\/button>'+(w==='dlg'?'<button type="button" data-cldel="'+esc(r.key)+'" aria-label="Remove '+esc(nm)+'">Remove<\/button>':'')+'<\/div><\/article>';}
+/* v22.04 Pin to the main screen: a pinned student is always on the start screen, first, the rest after them in the usual
+   order (most urgent, then the latest saved), twelve in all. Kept in this edition's settings on this device. */
+const CL_PIN_K=()=>'nbh.caseload.pin@'+DRV_ED;
+function clPins(){try{const a=JSON.parse(kvGet(CL_PIN_K())||'[]');return Array.isArray(a)?a.map(String):[];}catch(e){return [];}}
+function clPinSet(key,on){const a=clPins().filter(k=>k!==key);if(on)a.push(key);if(a.length)kvSet(CL_PIN_K(),JSON.stringify(a));else kvDel(CL_PIN_K());}
+const CL_PIN_SVG='<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M15 3l6 6-3 1-4 4 1 5-2 2-4-4-5 5-1-1 5-5-4-4 2-2 5 1 4-4z" fill="currentColor"/><\/svg>';
+function clPinBtn(key,nm){const on=clPins().includes(key);return '<button type="button" class="cl-pin'+(on?' on':'')+'" data-clpin="'+esc(key)+'" aria-pressed="'+on+'" aria-label="'+(on?'Pinned to the main screen: unpin ':'Pin to the main screen: ')+esc(nm)+'">'+CL_PIN_SVG+'<span>'+(on?'Pinned':'Pin')+'<\/span><\/button>';}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-clpin]');if(!b)return;e.preventDefault();const k=b.dataset.clpin,on=!clPins().includes(k),inBl=!!b.closest('#blankCl');clPinSet(k,on);
+  document.querySelectorAll('.cl-pin').forEach(x=>{if(x.dataset.clpin!==k)return;const c=x.closest('.cl-card'),nm=c&&c.getAttribute('aria-label')||'';x.outerHTML=clPinBtn(k,nm);});
+  try{wsUI.toast(on?'Pinned: always on the main screen, first.':'Unpinned: on the main screen when there is room, in the usual order.');}catch(x){}
+  try{paintBlank().then(()=>{if(!inBl)return;const n=[...document.querySelectorAll('#blankCl .cl-pin')].find(x=>x.dataset.clpin===k);if(n)n.focus();});}catch(x){}});   /* the main screen reorders; the button keeps the focus */
+kvLoad.then(()=>{if(clPins().length)try{paintBlank();}catch(e){}});
 /* Caseload's students, and the start screen's (the first twelve, under the search) */
-function clCards(L,w){const S=w==='bl'?L.slice(0,12):L,many=S.some(r=>clTrendsFor(r).length>1);
+function clCards(L,w){const P=clPins(),pin=L.filter(r=>P.includes(r.key)),S=w==='bl'?pin.concat(L.filter(r=>!P.includes(r.key)).slice(0,Math.max(0,12-pin.length))):L,many=S.some(r=>clTrendsFor(r).length>1);
   return (w==='bl'?findBox('bl'):'')+(many?'<label class="cl-allt"><input type="checkbox" data-clallt'+(clAllT()?' checked':'')+'> Every target on each card<\/label>':'')+'<div class="cl-cards">'+S.map(r=>clCard(r,w)).join('')+'<\/div>'+(L.length>S.length?'<p class="hint">and '+(L.length-S.length)+' more in Caseload<\/p>':'');}
 /* the 96 px photo: the round one placed on the bar (else the picture behind it), a little above the middle of a tall one */
 function clThumbMake(src){return new Promise(res=>{if(!src||!PHOTO_RE.test(src)){res('');return;}const im=new Image();let done=false;const fin=v=>{if(!done){done=true;res(v);}};
