@@ -9621,3 +9621,20 @@ an Excel or CSV file opened in Sheets is told apart ("not a Google Sheet"; File 
 smaller than the block asked for is named. Checked by `qa/v2176-test.js` (4a to 4c: a short, narrow tab is asked for
 A1:Z100 and a chart tab never; the Excel case shows the Save as Google Sheets step; a tab Google refuses on its own is
 named while the other tabs still link).
+
+### v21.99: every target on the caseload cards
+
+A caseload card showed one trend line: the first reduction target with data on Form DD-1. The caseload now keeps a
+trend for each of a student's targets (the reduction targets first, then the skills; at most eight, each the last 20
+days), from the same day-by-day record Form DD-1 already shares with the case. A card for a student with several targets
+shows the first with "1 of N" and a step button (›, 44 px) that goes through the others and back to the first; on an
+iPad a sideways swipe across the trend does the same, left for the next and right for the one before. A skill is marked
+"skill" and drawn in green, so a rising line reads as good. "Every target on each card", above the cards when any
+student has more than one, shows all of every student's targets stacked, for a scan of the whole caseload; the choice is
+remembered on this device. A student kept before v21.99 gets its targets' trends the first time its card is shown, the
+way the photo and the single trend were filled in for v21.91. Both the start screen and Caseload show it.
+
+Checked by `qa/v2199-cards-test.js` (10 checks: the first reduction target with its count and step button, the step
+order with the skill last and marked, the swipe both ways, a one-target card unchanged, an older student filled in and
+kept, the switch showing every target and remembered, the iPad upright with no sideways scrolling); `qa/v2191-cards-test.js`
+still passes.

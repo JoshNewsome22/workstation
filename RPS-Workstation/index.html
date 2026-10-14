@@ -905,6 +905,16 @@ body.ws-split .rail-edge{display:none!important}
 .cl-sub,.cl-sid{font-size:12.5px;line-height:1.35;color:var(--muted)}
 .cl-trend{display:flex;align-items:center;gap:10px;min-height:46px;padding:6px 10px;border-radius:8px;background:var(--shade);border:1px solid #e7eeec}
 .cl-trend.none{min-height:0;padding:7px 10px}
+.cl-tw{display:flex;flex-direction:column;gap:6px;min-width:0}
+.cl-tw[data-clswipe]{touch-action:pan-y}
+.cl-trend .cl-tt{flex:1 1 auto}
+.cl-step{flex:0 0 auto;width:44px;min-width:44px;height:44px;margin:-2px 0;padding:0;border:1px solid var(--rule);border-radius:8px;background:#fff;color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.cl-tn{display:block;color:var(--ink)}
+.cl-n{font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}
+.cl-up{display:inline-block;padding:0 6px;border-radius:999px;background:#e3f0e6;color:#1f5a33;font-size:11px;font-weight:600;vertical-align:1px}
+.cl-trend.up .cl-spark polyline{stroke:#2f7a4a}.cl-trend.up .cl-spark circle{fill:#2f7a4a}
+.cl-allt{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin:0 0 4px;font-size:14px;color:var(--ink);cursor:pointer}
+.cl-allt input{width:22px;height:22px;margin:0}
 .cl-spark{flex:0 0 auto;display:block;overflow:visible}
 .cl-tt{display:flex;flex-direction:column;min-width:0;font-size:12.5px;line-height:1.35;color:var(--muted)}
 .cl-tt b{font-size:13px;font-weight:600;color:var(--ink)}
@@ -7149,27 +7159,52 @@ function clTrendOf(f){const d=f&&f.data;if(!d||!Array.isArray(d.byDay)||!d.byDay
   const m=B.find(b=>!up(b)&&has(b))||B.find(has);if(!m)return null;
   const pts=d.byDay.filter(x=>x&&/^\d{4}-\d\d-\d\d$/.test(String(x.date||''))&&val(x,m)).slice(-20).map(x=>[x.date,Math.round(+x.vals[m.name]*100)/100]);
   return pts.length?{name:m.name,unit:String(m.unit||''),up:up(m),pts}:null;}
-{const csF=clSummary;clSummary=function(){const s=csF.apply(this,arguments);try{s.trend=clTrendOf(state.facts);}catch(e){}return s;};}
-{const crF=clResum;clResum=function(r,facts){const s=crF.apply(this,arguments);try{s.trend=clTrendOf(facts);}catch(e){}return s;};}
+/* v21.99 every target's recent days for the card: the reduction targets first, then the skills; at most 8, each at most 20 points */
+function clTrendsOf(f){const d=f&&f.data;if(!d||!Array.isArray(d.byDay)||!d.byDay.length)return [];
+  const B=(Array.isArray(d.behaviors)?d.behaviors:[]).filter(b=>b&&typeof b.name==='string'),up=b=>/replacement|acquisition|skill/i.test(b.kind||'')||b.direction==='increase';
+  const val=(x,b)=>x&&x.vals&&x.vals[b.name]!=null&&x.vals[b.name]!==''&&isFinite(x.vals[b.name]),has=b=>d.byDay.some(x=>val(x,b));
+  return B.filter(b=>!up(b)&&has(b)).concat(B.filter(b=>up(b)&&has(b))).slice(0,8).map(m=>{
+    const pts=d.byDay.filter(x=>x&&/^\d{4}-\d\d-\d\d$/.test(String(x.date||''))&&val(x,m)).slice(-20).map(x=>[x.date,Math.round(+x.vals[m.name]*100)/100]);
+    return pts.length?{name:m.name,unit:String(m.unit||''),up:up(m),pts}:null;}).filter(Boolean);}
+{const csF=clSummary;clSummary=function(){const s=csF.apply(this,arguments);try{s.trend=clTrendOf(state.facts);s.trends=clTrendsOf(state.facts);}catch(e){}return s;};}
+{const crF=clResum;clResum=function(r,facts){const s=crF.apply(this,arguments);try{s.trend=clTrendOf(facts);s.trends=clTrendsOf(facts);}catch(e){}return s;};}
 function clSpark(t){const P=t.pts,W=120,H=36,px=4,py=5,v=P.map(p=>+p[1]),lo=Math.min(0,...v),hi=Math.max(...v),sp=(hi-lo)||1,n=P.length;
   const X=i=>px+(n===1?(W-2*px)/2:i*(W-2*px)/(n-1)),Y=x=>H-py-(x-lo)/sp*(H-2*py),xy=P.map((p,i)=>[X(i).toFixed(1),Y(+p[1]).toFixed(1)]),y0=Y(lo).toFixed(1);
   return '<svg class="cl-spark" viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" aria-hidden="true" focusable="false" data-pts="'+esc(v.join(' '))+'">'+
     '<line x1="'+px+'" y1="'+y0+'" x2="'+(W-px)+'" y2="'+y0+'" stroke="#d3dedb" stroke-width="1"/>'+
     (n>1?'<polyline points="'+xy.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="#254657" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>':'')+
     '<circle cx="'+xy[n-1][0]+'" cy="'+xy[n-1][1]+'" r="3.2" fill="#254657"/><\/svg>';}
-function clTrendHtml(r){const t=r.sum&&r.sum.trend;
-  if(t&&Array.isArray(t.pts)&&t.pts.length){const P=t.pts,a=P[0],z=P[P.length-1],u=String(t.unit||''),pc=/^%/.test(u),un=pc?u.replace(/^%\s*/,''):u,f=x=>String(Math.round(+x*10)/10)+(pc?'%':'');
-    const what=P.length>1?f(a[1])+' → '+f(z[1])+(un?' '+un:''):f(z[1])+(un?' '+un:'')+' on '+tdMd(z[0]),when=P.length>1?P.length+' days, '+tdMd(a[0])+' to '+tdMd(z[0]):'';
-    return '<div class="cl-trend" title="'+esc((t.name||'')+': '+P.map(p=>tdMd(p[0])+' '+f(p[1])).join(', '))+'">'+clSpark(t)+'<span class="cl-tt"><b>'+esc(t.name||'Target behavior')+'<\/b><span>'+esc(what)+'<\/span>'+(when?'<span>'+esc(when)+'<\/span>':'')+'<\/span><\/div>';}
+/* v21.99 the trends a card can show; which one each card shows (by student), and whether every target is shown at once */
+const CLTI={},CLR={};
+function clTrendsFor(r){const s=r&&r.sum||{};return Array.isArray(s.trends)&&s.trends.length?s.trends:(s.trend&&Array.isArray(s.trend.pts)&&s.trend.pts.length?[s.trend]:[]);}
+function clAllT(){try{return localStorage.getItem('nbh.caseload.allt')==='1';}catch(e){return false;}}
+function clTrendOne(t,i,n,step){const P=t.pts,a=P[0],z=P[P.length-1],u=String(t.unit||''),pc=/^%/.test(u),un=pc?u.replace(/^%\s*/,''):u,f=x=>String(Math.round(+x*10)/10)+(pc?'%':'');
+  const what=P.length>1?f(a[1])+' → '+f(z[1])+(un?' '+un:''):f(z[1])+(un?' '+un:'')+' on '+tdMd(z[0]),when=P.length>1?P.length+' days, '+tdMd(a[0])+' to '+tdMd(z[0]):'';
+  return '<div class="cl-trend'+(t.up?' up':'')+'" title="'+esc((t.name||'')+': '+P.map(p=>tdMd(p[0])+' '+f(p[1])).join(', '))+'">'+clSpark(t)+
+    '<span class="cl-tt"><span class="cl-tn"><b>'+esc(t.name||'Target behavior')+'<\/b>'+(t.up?' <span class="cl-up" title="A skill: a rising line is good">skill<\/span>':'')+(n>1?' <span class="cl-n">'+(i+1)+' of '+n+'<\/span>':'')+'<\/span><span>'+esc(what)+'<\/span>'+(when?'<span>'+esc(when)+'<\/span>':'')+'<\/span>'+
+    (step?'<button type="button" class="cl-step" data-clstep="1" aria-label="Next target behavior ('+(i+1)+' of '+n+')">›<\/button>':'')+'<\/div>';}
+function clTrendHtml(r){const T=clTrendsFor(r),k=esc(r.key||'');if(r.key)CLR[r.key]=r;
+  if(T.length===1)return '<div class="cl-tw" data-clkey="'+k+'">'+clTrendOne(T[0],0,1,false)+'<\/div>';
+  if(T.length>1){if(clAllT())return '<div class="cl-tw all" data-clkey="'+k+'">'+T.map((t,i)=>clTrendOne(t,i,T.length,false)).join('')+'<\/div>';
+    const i=Math.min(CLTI[r.key]||0,T.length-1);return '<div class="cl-tw" data-clkey="'+k+'" data-clswipe="1">'+clTrendOne(T[i],i,T.length,true)+'<\/div>';}
   const ld=r.sum&&r.sum.lastData;
-  return '<div class="cl-trend none"><span class="cl-tt"><span>'+(ld?'Last day of data '+esc(tdMd(ld))+' ('+esc(clAgo(ld))+')':'No days of data from Form DD-1 yet')+'<\/span><\/span><\/div>';}
+  return '<div class="cl-tw" data-clkey="'+k+'"><div class="cl-trend none"><span class="cl-tt"><span>'+(ld?'Last day of data '+esc(tdMd(ld))+' ('+esc(clAgo(ld))+')':'No days of data from Form DD-1 yet')+'<\/span><\/span><\/div><\/div>';}
+function clTrendStep(key,d){const r=CLR[key];if(!r)return;const n=clTrendsFor(r).length;if(n<2)return;CLTI[key]=((CLTI[key]||0)+d+n)%n;
+  document.querySelectorAll('.cl-tw').forEach(w=>{if(w.dataset.clkey===key)w.outerHTML=clTrendHtml(r);});}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-clstep]');if(!b)return;const w=b.closest('.cl-tw');if(w){e.preventDefault();clTrendStep(w.dataset.clkey,+b.dataset.clstep||1);}});
+/* a sideways swipe across a card's trend: left for the next target, right for the one before */
+{let sx=0,sy=0,sk='';document.addEventListener('touchstart',e=>{const w=e.target.closest&&e.target.closest('.cl-tw[data-clswipe]');sk=w?w.dataset.clkey:'';if(w&&e.touches[0]){sx=e.touches[0].clientX;sy=e.touches[0].clientY;}},{passive:true});
+  document.addEventListener('touchend',e=>{if(!sk||!e.changedTouches[0])return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy,k=sk;sk='';if(Math.abs(dx)>40&&Math.abs(dx)>1.5*Math.abs(dy))clTrendStep(k,dx<0?1:-1);},{passive:true});}
+/* Every target: each card shows all of its student's targets at once (kept on this device) */
+document.addEventListener('change',e=>{const c=e.target;if(!c||!c.matches||!c.matches('[data-clallt]'))return;try{if(c.checked)localStorage.setItem('nbh.caseload.allt','1');else localStorage.removeItem('nbh.caseload.allt');}catch(x){}
+  document.querySelectorAll('[data-clallt]').forEach(x=>{x.checked=c.checked;});document.querySelectorAll('.cl-tw').forEach(w=>{const r=CLR[w.dataset.clkey];if(r)w.outerHTML=clTrendHtml(r);});});
 const clPhoto=r=>{const th=!clIni()&&r.thumb&&r.thumb.at===r.saved&&r.thumb.src;return th?'<img src="'+esc(th)+'" alt="" width="52" height="52">':'<span class="cl-ini">'+esc(clIniOf(r))+'<\/span>';};
 function clWhere(r){let s='Saved '+(clAgo(r.saved)||'');if(r.dev&&typeof drvOnDev==='function')s+=' '+drvOnDev(r.dev);const b=[s];
   if(typeof drvOn==='function'&&drvOn())b.push(DRV.conf[r.key]?'two copies to decide (Sync now)':(!r.drv||r.drv.dirty)?'waiting for Google Drive':'in Google Drive');else if(r.unfiled)b.push('not in a file yet');
   return b.join(' · ');}
 function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clRank(a.k)-clRank(b.k)),top=it[0],ini=clIni(),hot=!!top&&/^(Overdue|Safety)$/.test(top.k);
   const sub=[r.site,typeof gradeWords==='function'?gradeWords(r.grade):r.grade].filter(x=>String(x||'').trim()).map(esc).join(' · ');
-  const fix=(!ini&&!(r.thumb&&r.thumb.at===r.saved))||!(r.sum&&('trend' in r.sum)),nm=clName(r);
+  const fix=(!ini&&!(r.thumb&&r.thumb.at===r.saved))||!(r.sum&&('trends' in r.sum)),nm=clName(r);
   return '<article class="cl-card'+(hot?' hot':'')+'" data-clrow="'+esc(r.key)+'" data-clwhere="'+w+'"'+(fix?' data-clfix="1"':'')+' aria-label="'+esc(nm)+'">'+
     '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div><\/div>'+
     clTrendHtml(r)+
@@ -7178,8 +7213,8 @@ function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clR
     '<p class="cl-saved" title="'+esc(typeof drvWhen==='function'?drvWhen(r.saved):'')+'">'+esc(clWhere(r))+'<\/p>'+
     '<div class="cl-card-acts"><button type="button" class="primary" data-clopen="'+esc(r.key)+'" aria-label="Open '+esc(nm)+'’s case">Open<\/button>'+(w==='dlg'?'<button type="button" data-cldel="'+esc(r.key)+'" aria-label="Remove '+esc(nm)+'">Remove<\/button>':'')+'<\/div><\/article>';}
 /* Caseload's students, and the start screen's (the first twelve, under the search) */
-function clCards(L,w){const S=w==='bl'?L.slice(0,12):L;
-  return (w==='bl'?findBox('bl'):'')+'<div class="cl-cards">'+S.map(r=>clCard(r,w)).join('')+'<\/div>'+(L.length>S.length?'<p class="hint">and '+(L.length-S.length)+' more in Caseload<\/p>':'');}
+function clCards(L,w){const S=w==='bl'?L.slice(0,12):L,many=S.some(r=>clTrendsFor(r).length>1);
+  return (w==='bl'?findBox('bl'):'')+(many?'<label class="cl-allt"><input type="checkbox" data-clallt'+(clAllT()?' checked':'')+'> Every target on each card<\/label>':'')+'<div class="cl-cards">'+S.map(r=>clCard(r,w)).join('')+'<\/div>'+(L.length>S.length?'<p class="hint">and '+(L.length-S.length)+' more in Caseload<\/p>':'');}
 /* the 96 px photo: the round one placed on the bar (else the picture behind it), a little above the middle of a tall one */
 function clThumbMake(src){return new Promise(res=>{if(!src||!PHOTO_RE.test(src)){res('');return;}const im=new Image();let done=false;const fin=v=>{if(!done){done=true;res(v);}};
   im.onload=()=>{try{const S=96,w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;if(!w||!h){fin('');return;}const k=Math.min(w,h),sx=(w-k)/2,sy=h>w?(h-k)*0.25:(h-k)/2;
@@ -7187,15 +7222,15 @@ function clThumbMake(src){return new Promise(res=>{if(!src||!PHOTO_RE.test(src))
   im.onerror=()=>fin('');setTimeout(()=>fin(''),8000);im.src=src;});}
 /* the card's photo and trend, kept with the student: written only into the copy they were made from (not one saved since) */
 function clPatch(key,saved,patch){return clTx('readwrite',st=>{const g=st.get(key);g.onsuccess=()=>{const c=g.result;if(!c||c.saved!==saved)return;
-  if(patch.thumb)c.thumb=patch.thumb;if('trend' in patch)c.sum=Object.assign({},c.sum||{},{trend:patch.trend});st.put(c);};return null;}).catch(()=>{});}
-function clCardPaint(r){document.querySelectorAll('.cl-card').forEach(c=>{if(c.dataset.clrow!==r.key)return;const ph=c.querySelector('.cl-ph'),tr=c.querySelector('.cl-trend');
+  if(patch.thumb)c.thumb=patch.thumb;if('trend' in patch)c.sum=Object.assign({},c.sum||{},{trend:patch.trend});if('trends' in patch)c.sum=Object.assign({},c.sum||{},{trends:patch.trends});st.put(c);};return null;}).catch(()=>{});}
+function clCardPaint(r){document.querySelectorAll('.cl-card').forEach(c=>{if(c.dataset.clrow!==r.key)return;const ph=c.querySelector('.cl-ph'),tr=c.querySelector('.cl-tw');
   if(ph)ph.innerHTML=clPhoto(r);if(tr)tr.outerHTML=clTrendHtml(r);c.removeAttribute('data-clfix');});}
 /* a student kept before v21.91 (or brought from Drive): the photo and the trend are made the first time the card is shown */
 function clCardFix(key){if(FIND.fix[key])return FIND.fix[key];
-  const p=(async()=>{const r=(await clList()||[]).find(x=>x.key===key);if(!r)return;const needPh=!(r.thumb&&r.thumb.at===r.saved)&&!FIND.keep[key],needTr=!(r.sum&&('trend' in r.sum));
+  const p=(async()=>{const r=(await clList()||[]).find(x=>x.key===key);if(!r)return;const needPh=!(r.thumb&&r.thumb.at===r.saved)&&!FIND.keep[key],needTr=!(r.sum&&('trends' in r.sum));
     if(!needPh&&!needTr){clCardPaint(r);return;}let d=null;try{d=parseCase(r.text);}catch(e){d=null;}const patch={};
     if(needPh){const pk=d&&d.packet||{},src=photoOk(pk.photo)?pk.photo:(d&&typeof d.photoSrc==='string'&&PHOTO_RE.test(d.photoSrc)?d.photoSrc:'');patch.thumb={at:r.saved,src:src?await clThumbMake(src):''};r.thumb=patch.thumb;}
-    if(needTr){patch.trend=clTrendOf(d&&d.facts);r.sum=Object.assign({},r.sum||{},{trend:patch.trend});}
+    if(needTr){patch.trend=clTrendOf(d&&d.facts);patch.trends=clTrendsOf(d&&d.facts);r.sum=Object.assign({},r.sum||{},{trend:patch.trend,trends:patch.trends});}
     await clPatch(key,r.saved,patch);clCardPaint(r);})().catch(()=>{}).then(()=>{delete FIND.fix[key];});
   FIND.fix[key]=p;return p;}
 async function clCardsLater(){const keys=[];document.querySelectorAll('.cl-card[data-clfix]').forEach(c=>{if(!keys.includes(c.dataset.clrow))keys.push(c.dataset.clrow);});for(const k of keys)await clCardFix(k);}
