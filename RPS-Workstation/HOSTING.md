@@ -366,7 +366,9 @@ keeps only what it cannot read.
   the case if the writing-help relay is set up), upload, extract, and open
   `https://newsomebh.com/reply/box.php?a=ping` once to see
   `{"ok":true,...}`. About ten minutes, once. No key, no password, no
-  database.
+  database. **v22.17:** upload the new zip over the installed box (the
+  replies in it are kept): the forms now send the box's read token in the
+  body of the request, so it no longer lands in the site's access log.
 - **The forms find it by themselves.** A workstation opened from
   newsomebh.com (either edition) uses `https://newsomebh.com/reply/box.php`
   unless the **Reply box** field in IA-1's Respondent pages dialog names

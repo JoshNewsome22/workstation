@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.17: the reply box's token out of the web address; the release steps written down
+
+- **The reply box** (review F498, privacy). When a form collected replies it put the box's read token in the web
+  address (`box.php?a=list&b=…&t=…`), and web hosts write every address into their access log, where the account
+  holder, the host's staff and anything in front of the site can read it. IA-1, DD-1 (staff phone entries) and the
+  forms with respondent pages (CF-1, SV-1, IN-1) now send it in the body of a POST. `box.php` takes it there (ping says
+  `"v":3,"listPost":true`) and still answers a form from before v22.17. **Upload `nbh-reply-box-upload.zip` again**
+  (the same steps as the first time; the replies in the box are kept). Until then the forms still work: an old box
+  answers the new request "wrong token" and the forms ask it the old way once.
+- **Making a release** (review F518). README.md's steps were out of date (a step listed twice, no reply box zip, no
+  speech zip, a release run that was not in the repository). Now: `bash tools/build-release.sh`, `bash qa/run-release.sh`,
+  `bash tools/zip-release.sh <folder>` (add `--speech` for the recogniser's zips, which do not change between versions).
+
+Checked by `qa/v2217-release-test.js` (needs php).
+
 ### v22.16: Remove everywhere removes the student from Google Drive
 
 - **Remove everywhere** (Caseload, with Google Drive on; review F496, privacy). It used to write a small marker over the

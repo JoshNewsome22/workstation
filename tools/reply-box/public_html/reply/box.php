@@ -7,7 +7,9 @@
 
    Boxes:    POST ?a=new            {b, t}        b: box id (32 hex), t: sha256 of the read token (64 hex)
    Replies:  POST ?a=put&b=<id>     {v,k,iv,ct}   the reply, up to 64 KB; the body may be text/plain
-             GET  ?a=list&b=<id>&t=<token>        the replies (id, at, k, iv, ct) for the token's box
+             POST ?a=list&b=<id>     {t}           the replies (id, at, k, iv, ct) for the token's box (v22.17: the token in
+                                                    the body, so it is not in the access log; GET ?a=list&b=<id>&t=<token>
+                                                    still answers, for a form from before v22.17)
              POST ?a=del&b=<id>     {t, ids}      removes replies the form has collected
              POST ?a=drop&b=<id>    {t}           removes the box
    Short links (v21.88): POST ?a=qput&b=<id>  {v,iv,ct}  a questionnaire, sealed by the form with a key that stays in the
@@ -87,7 +89,7 @@ function shortId(): string { $a = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuv
 
 $a = $_GET['a'] ?? '';
 $m = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-if ($a === 'ping') out(200, ['ok' => true, 'v' => 2, 'days' => DAYS, 'short' => true]);
+if ($a === 'ping') out(200, ['ok' => true, 'v' => 3, 'days' => DAYS, 'short' => true, 'listPost' => true]);
 ensureData($DATA);
 sweepBoxes($DATA);
 
@@ -149,7 +151,8 @@ if ($a === 'qput') {   // a form stores a questionnaire it has sealed, for a sho
     out(200, ['ok' => true, 'q' => $q]);
 }
 if ($a === 'list') {
-    if (!tokenOk($dir, $_GET['t'] ?? '')) bad(403, 'wrong token');
+    $t = $m === 'POST' ? (string) (body()['t'] ?? '') : (string) ($_GET['t'] ?? '');
+    if (!tokenOk($dir, $t)) bad(403, 'wrong token');
     $out = [];
     foreach (glob($dir . '/r-*.json') ?: [] as $f) { $r = json_decode((string) @file_get_contents($f), true); if (is_array($r) && isset($r['ct'])) $out[] = $r; }
     usort($out, fn($x, $y) => strcmp($x['id'], $y['id']));

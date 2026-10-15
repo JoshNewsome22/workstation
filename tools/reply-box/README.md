@@ -21,8 +21,14 @@ The writing-help relay already needed this; if it is set up, nothing to do. Othe
 2. Press **Upload**, choose `nbh-reply-box-upload.zip`, wait for 100%, go back to File Manager.
 3. Select the zip, press **Extract**, confirm. It adds `public_html/reply/` with `box.php` and `.htaccess`.
    Nothing else in `public_html` is touched. Delete the zip.
-4. Open `https://newsomebh.com/reply/box.php?a=ping` in a browser: it answers `{"ok":true,"v":2,"days":60,"short":true}`
-   (v21.88 and later; an older box answers `"v":1`, and the forms then make long links).
+4. Open `https://newsomebh.com/reply/box.php?a=ping` in a browser: it answers
+   `{"ok":true,"v":3,"days":60,"short":true,"listPost":true}` (v22.17 and later; v21.88 to v22.16 answer `"v":2`, and an
+   older box `"v":1`, and the forms then make long links).
+
+**Updating an installed box** is the same upload and extract: the replies already in it are kept. From v22.17 the forms
+send the box's read token in the body of the request, not in the web address, so it is no longer written into the
+site's access log; a box from before v22.17 still works (the forms ask it the old way once), but upload the new one to
+keep the token out of the log.
 
 The program makes a `data` folder beside itself the first time a form registers a box, and writes an
 `.htaccess` that keeps the web away from it. If you prefer the data outside `public_html`, make a folder there

@@ -20,7 +20,7 @@ const SHORT_RE=/https?:\/\/\S+?respond\.html#q=[A-Za-z0-9]{10}\.[A-Za-z0-9_-]{22
   const data=OUT+'/data';fs.rmSync(data,{recursive:true,force:true});fs.mkdirSync(data,{recursive:true});
   const php=spawn('php',['-S','127.0.0.1:'+PORT,'-t',path.join(ROOT,'tools/reply-box/public_html/reply')],{env:Object.assign({},process.env,{NBH_REPLY_DATA:data}),stdio:['ignore','ignore','pipe']});
   let up=false,ping=null;for(let i=0;i<40&&!up;i++){await sleep(250);try{const r=await fetch(BOXURL+'?a=ping');ping=await r.json();up=!!(ping||{}).ok;}catch(e){}}
-  ok('0 box.php answers and keeps short links (v 2)',up&&ping.v===2&&ping.short===true,ping);if(!up){php.kill();process.exit(1);}
+  ok('0 box.php answers and keeps short links (v 2 or later)',up&&ping.v>=2&&ping.short===true,ping);if(!up){php.kill();process.exit(1);}
   const br=await chromium.launch();
   try{
   const ctx=await br.newContext({viewport:{width:1300,height:900},serviceWorkers:'block'});

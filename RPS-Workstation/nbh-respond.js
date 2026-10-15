@@ -574,6 +574,10 @@
     function fetchJ(url,opt){return fetch(url,opt).then(function(r){return r.json().then(function(j){return {r:r,j:j};},function(){return {r:r,j:null};});},function(){throw new Error('no connection to '+host(url));})
       .then(function(x){if(!x.j||typeof x.j!=='object')throw new Error(host(url)+' answered '+x.r.status+(x.r.status===404?' (box.php is not there)':''));if(!x.j.ok)throw new Error(x.j.error||(host(url)+' answered '+x.r.status));return x.j;});}
     function post(url,b){return fetchJ(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)});}
+    /* v22.17 (review F498): the read token goes in the body of a POST, not the address, so it is not written into the host's access log; a box from before v22.17 reads it from the address only (it answers "wrong token"), and is asked that way once */
+    function listR(b){var u=b.site+'?a=list&b='+encodeURIComponent(b.id);
+      return fetchJ(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({t:b.token}),referrerPolicy:'no-referrer'})
+        .catch(function(e){if(!/wrong token/.test(String(e&&e.message)))throw e;return fetchJ(u+'&t='+encodeURIComponent(b.token),{referrerPolicy:'no-referrer'});});}
     function sha(t){return S.digest('SHA-256',te(t)).then(function(h){return hex(new Uint8Array(h));});}
     function keys(){var kp;return S.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']).then(function(k){kp=k;return Promise.all([S.exportKey('jwk',kp.publicKey),S.exportKey('jwk',kp.privateKey)]);})
       .then(function(a){var t=new Date();return {id:hex(crypto.getRandomValues(new Uint8Array(16))),token:hex(crypto.getRandomValues(new Uint8Array(16))),pub:{x:a[0].x,y:a[0].y},priv:{d:a[1].d,x:a[1].x,y:a[1].y},site:'',got:[],held:[],made:t.toISOString().slice(0,10)};});}
@@ -597,7 +601,7 @@
        site only, nothing registered (the workstation's quiet collect) */
     C.fetch=function(opt){opt=opt||{};if(coll)return coll;
       coll=(opt.noEnsure?Promise.resolve(!!(B()&&B().site&&C.can())):C.ensure()).then(function(ok){if(!ok)return null;var b=B();
-        return fetchJ(b.site+'?a=list&b='+encodeURIComponent(b.id)+'&t='+encodeURIComponent(b.token)).then(function(j){var all=j.replies||[],objs=[],unread=0,junk=[];
+        return listR(b).then(function(j){var all=j.replies||[],objs=[],unread=0,junk=[];
           var fresh=all.filter(function(r){return r&&r.id&&r.k&&r.iv&&r.ct&&b.got.indexOf(r.id)<0;});
           return fresh.reduce(function(p,r){return p.then(function(){return dec(b,r).then(function(x){if(x&&typeof x==='object'){x.at=String(r.at||'');objs.push(x);}else{unread++;junk.push(r.id);}},function(){unread++;junk.push(r.id);}).then(function(){b.got.push(r.id);});});},Promise.resolve())
             /* v22.12 (review F500): a reply the form cannot unlock was not locked for this box (junk, or a page sent from a forged

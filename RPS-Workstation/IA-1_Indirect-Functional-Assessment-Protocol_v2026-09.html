@@ -4737,7 +4737,7 @@ $('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
 $('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
 $('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 rpCounts();
-window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable,targets:()=>T,outs:()=>OUTS,drop:()=>DROP,quiet:rpPayloadQuiet,ics:outsIcs,act:outsAct,plan:outsPlan,render:outsRender,due:()=>window.__nbhDue(),box:()=>BOX,ensure:boxEnsure,collect:boxCollect,purge:boxPurge,place:rcPlaceAuto,decrypt:boxDecrypt,personLink:outsPersonLink,qr:qrSvg,boxUrl};   /* for the checks */
+window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable,targets:()=>T,outs:()=>OUTS,drop:()=>DROP,quiet:rpPayloadQuiet,ics:outsIcs,act:outsAct,plan:outsPlan,render:outsRender,due:()=>window.__nbhDue(),box:()=>BOX,ensure:boxEnsure,collect:boxCollect,purge:boxPurge,place:rcPlaceAuto,decrypt:boxDecrypt,personLink:outsPersonLink,qr:qrSvg,boxUrl,list:boxList};   /* for the checks */
 
 
 /* ---------- (v21.64) several target behaviors in one file ----------
@@ -4932,6 +4932,10 @@ async function boxSha(t){return boxHex(new Uint8Array(await crypto.subtle.digest
 async function boxFetch(url,opt){let r;try{r=await fetch(url,opt);}catch(e){throw new Error('no connection to '+boxHost(url));}let j=null;try{j=await r.json();}catch(e){}
   if(!j||typeof j!=='object')throw new Error(boxHost(url)+' answered '+r.status+(r.status===404?' (box.php is not there)':''));if(!j.ok)throw new Error(j.error||(boxHost(url)+' answered '+r.status));return j;}
 const boxPost=(url,o)=>boxFetch(url,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(o)});
+/* v22.17 (review F498): the read token goes in the body of a POST, not the address, so it is not written into the host's access log; a box from before v22.17 reads it from the address only (it answers "wrong token"), and is asked that way once */
+async function boxList(site,id,token){const u=site+'?a=list&b='+encodeURIComponent(id);
+  try{return await boxFetch(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({t:token}),referrerPolicy:'no-referrer'});}
+  catch(e){if(!/wrong token/.test(String(e&&e.message)))throw e;return boxFetch(u+'&t='+encodeURIComponent(token),{referrerPolicy:'no-referrer'});}}
 /* registers this file's box at the site (once; again at another site); true when the pages and links can carry it */
 function boxEnsure(){const u=boxSite();if(!u||!boxCan())return Promise.resolve(false);if(boxReady())return Promise.resolve(true);if(boxBusy)return boxBusy;
   boxBusy=(async()=>{try{if(!BOX)BOX=await boxKeys();await boxPost(u+'?a=new',{b:BOX.id,t:await boxSha(BOX.token)});BOX.site=u;boxLast='';boxPaint();return true;}
@@ -4946,7 +4950,7 @@ async function boxDecrypt(r){const S=crypto.subtle,enc=t=>new TextEncoder().enco
 function boxCollect(quiet,opt){if(boxCollecting)return boxCollecting;
   boxCollecting=(async()=>{try{
     if(!(opt&&opt.noEnsure?!!(BOX&&BOX.site&&boxCan()):await boxEnsure())){boxPaint();return null;}   /* v21.86 noEnsure: the box's own site, nothing registered (the workstation's quiet collect) */
-    const j=await boxFetch(BOX.site+'?a=list&b='+encodeURIComponent(BOX.id)+'&t='+encodeURIComponent(BOX.token));
+    const j=await boxList(BOX.site,BOX.id,BOX.token);
     const fresh=(j.replies||[]).filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&BOX.got.indexOf(r.id)<0),objs=[],junk=[];let unread=0;
     for(const r of fresh){try{const o=await boxDecrypt(r);if(o&&typeof o==='object'){o.at=String(r.at||'');objs.push(o);}else{unread++;junk.push(r.id);}}catch(e){unread++;junk.push(r.id);}BOX.got.push(r.id);}
     if(BOX.got.length>2000)BOX.got=BOX.got.slice(-2000);

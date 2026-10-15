@@ -12,18 +12,22 @@ Two editions of the same workstation, 46 forms each, and the tools that build th
 
 ## Making a release
 
-    python3 tools/apply-polish.py NBH-Workstation                      # after editing tools/polish/* or the writing help (tools/blocks/nbh-wording*)
-    python3 tools/apply-polish.py NBH-Workstation                      # after editing tools/polish/*
-    python3 tools/blocks/patch-pwa.py NBH-Workstation                  # the installed app's save block (v21.43)
-    python3 tools/pwa-sw.py NBH-Workstation                            # the offline copy's file list and release.json (v21.43)
-    python3 tools/rps-assets.py RPS-Workstation/index.html /tmp/rps    # the school lockup and icon
-    python3 tools/build-rps.py NBH-Workstation RPS-Workstation /tmp/rps/rps-lockup.webp /tmp/rps/rps-favicon.png
-    python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html
-    python3 tools/build-single.py RPS-Workstation deliver/RPS-Workstation.html
-    bash tools/relay/build-zip.sh                                      # the writing-help relay: tools/relay/dist/nbh-relay-upload.zip
-    node qa/tk1-walk-video.js --both --dir <release folder>            # the two TK-1 walkthrough videos (test server on :8123)
+Edit `NBH-Workstation/` (and the sources under `tools/`), then, from the repository's folder:
 
-Zip each folder flat (files at the top level) as `NBH-Workstation-v<version>.zip` and
-`RPS-Workstation-v<version>.zip`; `HOSTING.md` in each folder says how to put it on the website.
-Ship `nbh-relay-upload.zip` beside them: it is uploaded once to the website's home folder, not into a
-workstation folder (`tools/relay/README.md` has the steps; it travels in the zip as `nbh-relay/README.md`).
+    bash tools/build-release.sh          # the polish, the shared blocks, the offline list, the RPS edition, the one-file
+                                         # editions, then tools/check-build.py: the tools reproduce the forms exactly
+    bash qa/run-release.sh               # every check in qa/release-list.txt; summary in qa/out/release/summary.txt
+    bash tools/zip-release.sh <folder>   # the upload zips, after a run with no failures (below)
+
+`tools/zip-release.sh` writes, named by the version in `index.html` (`WS_REL`):
+
+| Zip | What it is, and where it goes |
+|---|---|
+| `RPS-Workstation_v<version>.zip` | The school edition, files at the top level. `HOSTING.md` in it says how to upload it. |
+| `NBH-Workstation_v<version>.zip` | The practice edition, the same way. |
+| `nbh-reply-box-upload.zip` | The reply box (`tools/reply-box/README.md`): extracted in the website's home folder, not in a workstation folder. Ship it when `box.php` changed. |
+| `nbh-relay-upload.zip` | The writing help's rewrite service (`tools/relay/README.md`), for the practice's site only; the school edition does not use it. |
+| `*_speech.zip` (with `--speech`) | `nbh-asr/`, the on-device recogniser behind Dictate and TV-1's Follow my words (57 MB). It does not change between versions, so the workstation zips leave it out; ship it the first time and when `tools/forms/TV-1/build-asr.py` was run again. It is extracted once into the edition's folder. |
+
+The two TK-1 walkthrough videos are made apart from a release (`node qa/tk1-walk-video.js --both --dir <folder>`, with the
+test server on :8123), when TK-1's walkthrough changed.

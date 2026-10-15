@@ -9342,6 +9342,10 @@ async function stSha(t){return stHex(new Uint8Array(await crypto.subtle.digest("
 async function stFetch(url,opt){let r;try{r=await fetch(url,Object.assign({cache:"no-store"},opt||{}));}catch(e){throw new Error("no connection to "+stHost(url));}let j=null;try{j=await r.json();}catch(e){}
   if(!j||typeof j!=="object")throw new Error(stHost(url)+" answered "+r.status+(r.status===404?" (box.php is not there)":""));if(!j.ok)throw new Error(j.error||(stHost(url)+" answered "+r.status));return j;}
 const stPost=(url,o)=>stFetch(url,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(o)});
+/* v22.17 (review F498): the read token goes in the body of a POST, not the address, so it is not written into the host's access log; a box from before v22.17 reads it from the address only (it answers "wrong token"), and is asked that way once */
+async function stList(site,id,token){const u=site+"?a=list&b="+encodeURIComponent(id);
+  try{return await stFetch(u,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({t:token}),referrerPolicy:"no-referrer"});}
+  catch(e){if(!/wrong token/.test(String(e&&e.message)))throw e;return stFetch(u+"&t="+encodeURIComponent(token),{referrerPolicy:"no-referrer"});}}
 /* registers this file's box at the site (once); true when links can carry it */
 function stEnsure(){const u=stSite();if(!u||!stCan())return Promise.resolve(false);if(stReady())return Promise.resolve(true);if(stBusy)return stBusy;
   stBusy=(async()=>{try{const s=stSt();if(!s.box)s.box=await stKeys();const id=s.box.id,tk=s.box.token;await stPost(u+"?a=new",{b:id,t:await stSha(tk)});
@@ -9442,7 +9446,7 @@ function stCollect(quiet){if(stCollecting)return stCollecting;
   stCollecting=(async()=>{try{const s0=stSt();if(!s0.box){stPaint();return null;}
     if(!(await stEnsure())){stPaint();return null;}
     const B=stSt().box,id=B.id,token=B.token;
-    const j=await stFetch(B.site+"?a=list&b="+encodeURIComponent(id)+"&t="+encodeURIComponent(token));
+    const j=await stList(B.site,id,token);
     let s=stSt();if(!s.box||s.box.id!==id)return null;   /* the record was replaced (another file opened) while the list came */
     const key=await crypto.subtle.importKey("jwk",{kty:"EC",crv:"P-256",d:B.priv.d,x:B.priv.x,y:B.priv.y,ext:true},{name:"ECDH",namedCurve:"P-256"},false,["deriveBits"]);
     const all=Array.isArray(j.replies)?j.replies:[],got=new Set(s.got),fresh=all.filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&!got.has(r.id)),objs=[],ids=[];let unread=0;
@@ -9563,7 +9567,7 @@ function stPaint(){const p=stPanel();if(!p)return;const s=S.staff&&Array.isArray
 {const ra2=renderAll;renderAll=function(){try{stClean();}catch(e){}const r=ra2.apply(this,arguments);
   try{const id=S.staff&&S.staff.box&&S.staff.box.site&&S.staff.links.length?S.staff.box.id:"";if(id&&id!==stBoxSeen){stBoxSeen=id;setTimeout(()=>{if(S.staff&&S.staff.box&&S.staff.box.id===id)stCollect(true);},1500);}else if(!id)stBoxSeen="";}catch(e){}return r;};}
 {const rd3=renderData;renderData=function(){const r=rd3.apply(this,arguments);try{stPaint();}catch(e){}return r;};}
-window.__ddStaff={state:()=>S.staff||null,make:stMakeLink,url:stUrlOf,collect:stCollect,purge:stPurge,initials:stInitials,place:(objs,opt)=>stPlaceAll(objs,opt),site:stSite,page:stPageUrl,qr:ddQrSvg};   /* for the workstation's checks */
+window.__ddStaff={state:()=>S.staff||null,make:stMakeLink,url:stUrlOf,collect:stCollect,purge:stPurge,initials:stInitials,place:(objs,opt)=>stPlaceAll(objs,opt),site:stSite,page:stPageUrl,qr:ddQrSvg,list:stList};   /* for the workstation's checks */
 try{stClean();stPanel();stPaint();}catch(e){}
 /* collects when the form opens, every five minutes while it is on screen, and on coming back to it */
 setInterval(()=>{if(document.visibilityState==="visible"&&stReady()&&S.staff.links.length)stCollect(true);},ST_EVERY);
