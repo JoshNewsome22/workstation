@@ -799,6 +799,17 @@ button.rowDel{font:inherit;font-size:14px;line-height:1;border:1px solid var(--r
    note and figure word at 10 px; the body text and the five designed pages are as they were */
 @media print{.qs-kick,.qs-lab,.qs-foot,.qs-pull,.qs-chips span,.qs-call p,.qs-note,.qs-phase i,.qs-tile span,.qs-box .k,.qs-card .k,
   .qs-consq .h,.qs-spot .k,.qs-t th,.qs-flow .leg,.qs-flow .node,.qs-flow .node .k,.qs-page .cite,.qs-page thead th,.qs-page td.time{font-size:10px}}
+/* v22.25 (review F482) the handout's body on paper at about 10 pt (it was 7.9): its pages (all but the flow sheet, which is
+   drawn to one sheet as it is) print a quarter larger and run on from one another, a band or a heading never left at a
+   sheet's foot, no box split; page numbers come from the sheet's margin, which counts the sheets as they come out, so the
+   handout's own foot ("Page 2 of 5") is left off, and the margin's foot says what it said */
+@media print{
+  .qs-page:not(.qs-flow){zoom:1.24;break-after:auto;page-break-after:auto;margin-bottom:16px}
+  .qs-page:not(.qs-flow):has(+.qs-flow){break-after:page;page-break-after:always}
+  .qs-band,.qs-lab{break-after:avoid;page-break-after:avoid}
+  .qs-foot{display:none!important}
+  @page{@bottom-left{content:"Confidential student record (FERPA) \00B7  keep out of students\2019  sight"!important;color:#9b2c1f!important}}
+}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{

@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.26: QS-1's staff quick start in larger print
+
+- (review F482) Form QS-1's handout for staff printed its body text at 7.9 pt, small for a substitute reading a photocopy
+  in a hurry. It now prints at about 10 pt, as approved from the preview. To make room, the handout's sections run on
+  from one page to the next instead of each of the four designed pages being squeezed onto one sheet: the handout takes
+  five pages, then the if-then flow sheet as before (six in all). A heading or a section's label never sits alone at the
+  foot of a page.
+- Each page has one footer: the confidentiality line ("Confidential student record (FERPA) · keep out of students'
+  sight") at the left and "Page N of 6" at the right. The handout's own footer line, which printed as well, is now kept
+  for the screen.
+- On screen, and in the master print, QS-1 is as it was.
+
+Checked by `qa/v2224-qs1-print-test.js` (six pages, body about 10 pt, no word under 7.5 pt, one footer a page) and
+`qa/qs1-test.js`.
+
 ### v22.25: Read a document takes the student's contacts
 
 - **Read a document** now reads a student information system's **Addresses & Contacts** page and its **Edit Contact**

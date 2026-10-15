@@ -1,6 +1,7 @@
 /* v21.69 Form QS-1, the Staff Quick Start (NBH-Workstation/QS-1_Staff-Quick-Start_v2026-10.html; parts in tools/forms/QS-1):
    1. the form opens on its own without a script error; the simulation fills every page and the four pages and the flow
-      sheet build; every page fits one letter page by the form's own measure, and the PDF has five pages;
+      sheet build; every page fits one letter page by the form's own measure, and the PDF has six pages (v22.26: the
+      handout's body at about 10 pt runs to five, then the flow sheet);
    2. the review: a technical word typed on a page is listed back; the flow sheet off makes four pages;
    3. Save data and Open data give the same quick start back, the plan's words it still holds included;
    4. inside the workstation: with Forms DM-1, TB-1, FS-1, TD-1, CR-1 and GB-1 holding their simulations, QS-1 takes the case
@@ -26,7 +27,7 @@ const FORM='QS-1_Staff-Quick-Start_v2026-10.html';
   ok('1b by the form’s own measure every page fits one letter page, nothing from the plan is left and no technical wording is found',/Every page fits/.test(s1.review)&&/Nothing placed/.test(s1.review)&&/No technical wording/.test(s1.review),s1.review);
   await page.pdf({path:OUT+'sim.pdf',format:'Letter',printBackground:true,preferCSSPageSize:true});
   const pdf=fs.readFileSync(OUT+'sim.pdf');const nPages=(pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)||[]).length;
-  ok('1c the PDF has five pages',nPages===5,{nPages});
+  ok('1c the PDF has six pages (the handout on five at its larger body, then the flow sheet)',nPages===6,{nPages});
   /* 2 the review */
   await page.evaluate(()=>setView('day'));await sleep(200);
   await page.fill('[data-k="newline"]','Offer two choices; this is an antecedent change on a VR schedule.');await sleep(500);
