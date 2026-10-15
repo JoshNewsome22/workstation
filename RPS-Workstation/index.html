@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.18';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.19';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3587,7 +3587,7 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Caseload</b> (the first of the small buttons above the form) lists every student kept on this '+HERE+', the most urgent first, a card for each with the latest graph and what is due. <b>Search the caseload</b>, at its top, finds a word in every student’s forms. The pin on a card keeps that student on the start screen, first. <b>Monthly summary</b> writes the month for your supervisor from the caseload.</p>'+
      '<p><b>Today</b> (beside it) lists what needs you in the open case: what is due, incidents home has not heard about, the integrity check, aims met, and the end of the week. From there, <b>Log it now</b> records an incident with the time into Form DD-1’s log (it is on the start screen too), and <b>Home note</b> writes a progress note for the family in English or Spanish. <b>Close case</b> runs the hand-over check first and names what is still missing.</p>')+
    fold('Going back to an earlier save (History)',
-     '<p>Every <b>Save case</b> also keeps a restore point for that student on this '+HERE+': when, on which device, and what changed. <b>History</b> (under <b>More</b>, and on each Caseload card) lists them: <b>Open</b> one as it was, <b>Restore</b> one form only, or compare it with now. Going back first keeps the current version as a point, so nothing is lost. It keeps up to 30 points a student, one a day once older than two weeks, about 200 MB in all, the oldest going first. With Google Drive on, History also lists the earlier versions Drive keeps.</p>')+
+     '<p>Every <b>Save case</b> also keeps a restore point for that student on this '+HERE+': when, on which device, and what changed. <b>History</b> (under <b>More</b>, and on each Caseload card) lists them: <b>Open</b> one as it was, <b>Restore</b> one form only, or compare it with now. Going back first keeps the current version as a point, so nothing is lost. It keeps up to 30 points a student, one a day once older than two weeks, about 200 MB in all, the oldest going first, but never a student’s last 5 to make room for another’s. With Google Drive on, History also lists the earlier versions Drive keeps.</p>')+
    fold('Working faster',
      '<p><b>Focus</b> (above the form) shows one part of a form at a time, the next part opening as you finish one. <b>Dictate</b>, in a form’s toolbar, writes what you say into the text box you are in; the speech is turned into text on this '+HERE+'. <b>Read a document</b> (the page icon in the bar, and on the start screen) reads the student’s details from a PDF, a picture or pasted text and places them in the bar and Form DM-1, on this '+HERE+'. The student’s photo, in the bar, is kept in the case file and shown while you work.</p>')+
    fold('On a shared '+HERE,
@@ -7397,7 +7397,7 @@ async function clCardsLater(){const keys=[];document.querySelectorAll('.cl-card[
    one form (only that form, in the case on screen) and Compare with now. Limits: 30 points a student, one a day once older
    than two weeks, about 200 MB in all (the oldest go first). Remove and Remove all student data delete the history as well;
    nothing is kept while the caseload is turned off on the device. */
-const HX={db:null,max:30,days:14,cap:200*1024*1024,q:Promise.resolve(),why:'',full:false,busy:false,opening:false,view:null};
+const HX={db:null,max:30,min:5,days:14,cap:200*1024*1024,q:Promise.resolve(),why:'',full:false,busy:false,opening:false,view:null};
 function hxDb(){if(HX.db)return HX.db;HX.db=new Promise(res=>{let r,done=false;const fin=v=>{if(!done){done=true;res(v);}};
   try{if(!window.indexedDB)return fin(null);r=indexedDB.open('nbh-history',1);}catch(e){return fin(null);}
   setTimeout(()=>fin(null),5000);
@@ -7464,7 +7464,10 @@ async function hxTrim(cap,keep){cap=cap||HX.cap;let all=[];try{all=await hxTx(['
   const drop=new Set(),by={},old=Date.now()-HX.days*864e5;all.forEach(p=>{(by[p.key]=by[p.key]||[]).push(p);});
   Object.values(by).forEach(L=>{L.sort(hxOrd);const day={};L.forEach((p,i)=>{if(i>=HX.max){drop.add(p.id);return;}if(hxT(p.at)<old){const d=hxDay(p.at);if(day[d])drop.add(p.id);else day[d]=1;}});});
   const left=all.filter(p=>!drop.has(p.id)).sort((a,b)=>hxT(a.at)-hxT(b.at)||String(a.made||'').localeCompare(String(b.made||'')));let tot=left.reduce((s,p)=>s+(+p.size||0),0);
-  for(const p of left){if(tot<=cap)break;if(p.id===keep)continue;drop.add(p.id);tot-=(+p.size||0);}
+  /* v22.19 (review F468) the room is shared by the whole caseload, but no student's last few saves (HX.min) are taken to make
+     room for another's: the oldest of the rest go first, and a student's own last few only when nothing else is left */
+  const mine=new Set();Object.values(by).forEach(L=>L.filter(p=>!drop.has(p.id)).slice(0,HX.min).forEach(p=>mine.add(p.id)));
+  for(const pass of [0,1])for(const p of left){if(tot<=cap)break;if(p.id===keep||drop.has(p.id)||(!pass&&mine.has(p.id)))continue;drop.add(p.id);tot-=(+p.size||0);}
   if(drop.size)try{await hxTx(['points','texts'],'readwrite',(P,T)=>{drop.forEach(id=>{P.delete(id);T.delete(id);});});}catch(e){}}
 async function hxNoteDrive(m){if(!m||!m.fid||!m.mt||!m.key||clOff())return;try{await hxTx(['drive'],'readwrite',s=>s.put(Object.assign({k:m.fid+'@'+m.mt},m)));}catch(e){}}
 async function hxForget(keys){keys=(keys||[]).filter(Boolean);if(!keys.length)return;

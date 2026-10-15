@@ -9905,6 +9905,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.19: case history keeps every student's last saves
+
+- **Case history across a caseload** (review F468). History keeps about 200 MB of restore points for the whole caseload
+  on the device, the oldest going first once it is full. With 30 students that room fills in weeks, and a student whose
+  case had been quiet lost every save to make room for a busy student's newer ones. Now no student's last 5 saves are
+  taken to make room for another student's: the older saves of the rest go first, and a student's own last 5 only when
+  nothing else is left. The limits are otherwise as before (30 a student, one a day after two weeks). Help says so.
+
+Checked by `qa/v2219-history-test.js`.
+
 ### v22.18: a form's pages on an iPad held upright; the progress dots by shape; 400% zoom
 
 - **An iPad held upright** (review F480). With a case open the toolbar also carries the case button, and the view tabs
