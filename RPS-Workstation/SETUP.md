@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.22: Log it now for any student kept here; the one-file edition saves the case alone
+
+- (review F471) **Log it now** lists every student kept on this device, the one on screen first. Choosing a student who
+  is not on screen logs the incident into their Form DD-1 as kept here, out of sight, and their kept copy takes it (and
+  goes to Google Drive with it when Drive is on): the case on screen stays open as it was, with no switch and no question
+  about its unsaved work. Opening their case shows the incident on Form DD-1, with *Home told: not yet*. A student kept
+  here whose case has no Form DD-1 yet still has their case opened, as before.
+- (review F472) In the one-file edition, **Save case** wrote the whole workstation, about 21 MB, into every student's
+  case file at every save: a caseload of 30 came to over 600 MB of case files. It now writes the case alone, the same
+  file the website edition writes (*CASE_Student_date.json*, a few hundred KB). **Open case** in the one-file edition opens
+  it, and where the browser can write back into a file (Chrome, Edge), later saves go back into the file opened or first
+  saved.
+- For someone who does not have the workstation, **More**, **Save a case that opens on its own** writes the old kind of
+  file, *Student.case.html*, which opens the workstation with the case in it when it is double-clicked. It is a copy for
+  handing over: later saves do not go into it, and it does not mark the case saved.
+- A *.case.html* saved before v22.22 still opens as before, and when it is opened with Open case, Save case writes back
+  into it as before. The website edition is unchanged.
+
+Checked by `qa/v2222-log-away-test.js` and `qa/v2222-onefile-case-test.js`.
+
 ### v22.21: a walkthrough's narration is read when the Walkthrough is opened
 
 - (review F474) IA-1, DD-1, RA-1, SM-1 and TK-1 keep their walkthrough's recorded voice in a file beside the form

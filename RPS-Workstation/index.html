@@ -1172,6 +1172,7 @@ body:not(.has-form) #focusBtn{display:none}
     <button id="openCase">Open case</button>
     <button id="closeCase" title="Save this case, then clear every form and the student&rsquo;s details for the next case">Close case</button>
     <button id="saveFile" class="rare" hidden title="Write the case to a file as well (Save case keeps it on this device and in Google Drive)">Save case to a file</button>
+    <button id="saveWhole" class="rare" hidden title="A copy of the case inside the whole workstation (about 21 MB): it opens on its own with a double-click, for handing a case to someone without the workstation">Save a case that opens on its own</button>
     <button id="caseXlsx" class="rare" title="Every open form into one spreadsheet: a sheet per form, from its own CSV export where it has one, else every field by name">Case as spreadsheet</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
     <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
@@ -2206,7 +2207,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.21';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.22';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3602,7 +3603,8 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
      '<p>The website only hands the workstation\u2019s files to the device; what you type is not sent back to it. Where a student\u2019s information can go is listed under <b>Where the student\u2019s data goes</b>, below.</p>'):'')+
    (EMBED?fold('The one-file edition',
-     '<p>All 46 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it. Keep that file with the student’s records.</p>'):'')+
+     '<p>All 46 forms are inside this file. <b>Save case</b> writes the case as a file of its own, <i>CASE_Student_date.json</i> (the same file the website edition writes, a few hundred KB); <b>Open case</b> in this file opens it again. Keep that file with the student’s records.</p>'+
+     '<p>For someone who does not have the workstation, <b>More</b>, <b>Save a case that opens on its own</b> writes <i>Student.case.html</i>: the whole workstation (about 21 MB) with the case in it, which opens when it is double-clicked. A <i>.case.html</i> saved before v22.22 opens as before, and Save case writes back into it.</p>'):'')+
    fold('Where the student\u2019s data goes',dataWhere())+
    '<div class="note">Each of the 46 forms also works on its own, opened directly from this folder, with the shared nbh-*.js files beside it: it saves, opens and prints as it does here. A single form file sent somewhere else, away from those files, opens without its letterhead, writing help and Autosave; for one file that carries everything, use the one-file edition. Nothing the workstation does changes the form files.</div>');
 });
@@ -4817,6 +4819,9 @@ async function grab(id,verb,extra,ms,frame){
     setTimeout(()=>fin(null),ms||5000);
   });
 }
+/* v22.22 the case as data: what Save case writes in the website edition, and in the one-file edition (with its id) */
+function caseData(p,forms,id){return {form:'CASE',rev:'2026-09',id:id||undefined,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined};}
+const caseJsonName=nm=>'CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
 /* The case as one HTML file: this page, the packed forms exactly as they sit
    in this file, and the case in a block of its own. Opened by double-click, it
    unpacks the forms and loads the case without being asked. */
@@ -4837,17 +4842,17 @@ async function caseHtml(p,forms){
   if(at<0)throw new Error('The copy of the page inside this file is not one this edition can write.');
   return shell.slice(0,at+7)+blocks+shell.slice(at+7);
 }
-async function writeCase(handle,text,name){
-  if(handle){const w=await handle.createWritable();await w.write(text);await w.close();state.caseHandle=handle;return handle.name||name;}
+async function writeCase(handle,text,name,type,copy){   /* v22.22 type: the file's; copy: a hand-off copy, later saves do not go into it */
+  if(handle){const w=await handle.createWritable();await w.write(text);await w.close();if(!copy)state.caseHandle=handle;return handle.name||name;}
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([text],{type:'text/html'}));a.download=name;
+  a.href=URL.createObjectURL(new Blob([text],{type:type||'text/html'}));a.download=name;
   document.body.appendChild(a);a.click();a.remove();return null;
 }
 /* v21.45 Save case as a function: the click below and Close case both use it. It resolves true once the case is in a
    file with every open form in it and marked saved (on an iPad, once the person has said the file is in Files), and
    false when nothing was written, the person backed out, a form was left out, or an edit came while the file was
    being written. What it says and writes is the same as before. */
-async function saveCase(o){o=o&&o.file?o:{};   /* v21.89 {file:true}: Save case to a file */
+async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}: Save case to a file; v22.22 {whole:true}: a case that opens on its own */
   const kept=Object.keys(state.pending),open=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: written as the file holds them */
   if(!open.length&&!kept.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
   const p=packet();
@@ -4856,9 +4861,16 @@ async function saveCase(o){o=o&&o.file?o:{};   /* v21.89 {file:true}: Save case 
      shows the picker only while the click is still fresh. Once a file has been
      chosen, every later save in this session goes back into it without asking. */
   let handle=state.caseHandle||null;
+  /* v22.22 (review F472) the one-file edition's Save case writes the case alone, as the website edition does (a few hundred
+     KB, not a 21 MB copy of the workstation for every save); a case that opens on its own is More, Save a case that opens on
+     its own. A .case.html opened from before is still saved back into itself. */
+  const isHtml=h=>!!h&&/\.html?$/i.test(h.name||'');
+  const whole=!!(EMBED&&(o.whole||isHtml(handle)));
+  if(o.whole)handle=null;   /* a copy for handing over: its own file */
   if(EMBED&&!handle&&window.showSaveFilePicker){
-    try{handle=await showSaveFilePicker({suggestedName:caseName(p)+'.case.html',
-      types:[{description:'Workstation case (one file)',accept:{'text/html':['.html']}}]});}
+    try{handle=await showSaveFilePicker(whole?{suggestedName:caseName(p)+'.case.html',
+      types:[{description:'Workstation case that opens on its own',accept:{'text/html':['.html']}}]}:{suggestedName:caseJsonName(caseName(p)),
+      types:[{description:'Workstation case',accept:{'application/json':['.json']}}]});}
     catch(e){if(e&&e.name==='AbortError')return false;handle=null;}
   }
   const btn=$('#saveCase'); btn.textContent='Saving\u2026'; btn.disabled=true;
@@ -4903,22 +4915,32 @@ async function saveCase(o){o=o&&o.file?o:{};   /* v21.89 {file:true}: Save case 
     if(how!=='check'){await wsUI.alert(text);return how==='done';}
     const y=await wsUI.confirm(text+'\n\nIs the file in Files now? On an iPad the download can be only viewed, not kept. Until you say it is there, Save case keeps its dot and the safety copy stays.',{ok:'It is in Files',cancel:'Not yet'});
     if(y){autoFiled(true,fileSig);paintSave();}return !!y;};
-  if(EMBED){
+  if(EMBED&&whole){
     let where=null;
     try{
       const text=await caseHtml(p,forms);
-      where=await writeCase(handle,text,nm+'.case.html');
+      where=await writeCase(handle,text,nm+'.case.html','text/html',!!o.whole);
     }catch(e){alert('The case could not be written: '+(e&&e.message||e));return false;}
-    const how=late.length?'late':autoFiled(!!where,fileSig);
-    return tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+nm+'.case.html.')+
+    /* a hand-off copy is not the case's save: the dot and the safety copy follow Save case */
+    const how=late.length?'late':o.whole?(where?'done':'copy'):autoFiled(!!where,fileSig);
+    return tell(how==='copy'?'done':how,(where?(o.whole?'A case that opens on its own saved to ':'Case saved to ')+where+'.':(o.whole?'A case that opens on its own written to your downloads as ':'Case written to your downloads as ')+nm+'.case.html.')+
       '\n\nDouble-click that file to open the workstation with this case in it \u2014 '+n+' form'+(n===1?'':'s')+', nothing else needed.'+
+      (o.whole?' It carries the whole workstation (about 21 MB); for keeping the case, Save case writes the case alone.':'')+
+      (where||o.whole?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(how==='moved'?after():'')+(where||o.whole?'':check));
+  }
+  if(EMBED){
+    let where=null;const fn=caseJsonName(nm);
+    try{where=await writeCase(handle,JSON.stringify(caseData(p,forms,state.caseId||(state.caseId=caseUid())),null,1),fn,'application/json');}
+    catch(e){alert('The case could not be written: '+(e&&e.message||e));return false;}
+    const how=late.length?'late':autoFiled(!!where,fileSig);
+    return tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+fn+'.')+
+      '\n\n'+n+' form'+(n===1?'':'s')+' in it. To work on it again, open this workstation file and use Open case. (For a file that opens the workstation by itself, More, Save a case that opens on its own.)'+
       (where?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(how==='moved'?after():'')+(where?'':check));
   }
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(
-    {form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined},null,1)],
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(caseData(p,forms),null,1)],
     {type:'application/json'}));
-  a.download='CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
+  a.download=caseJsonName(nm);
   document.body.appendChild(a);a.click();a.remove();
   /* v21.43 installed on an iPad the click opened the share sheet: saved (and Autosave's copy ended) only once it kept the file */
   const shared=typeof PWA!=='undefined'&&PWA.shareHow?await PWA.shareHow(a):'';
@@ -5358,11 +5380,12 @@ function tdV2182(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},vs=pl.versions||
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#tdReady'))readyOpen();});
 /* v21.83 More: Save packet, Open packet, Case as spreadsheet, Diagnostics and Finish PDF, on a screen 1194 px wide or less;
    each runs the bar's own button, which stays where it was on a wider screen */
+if(EMBED){const w=document.getElementById('saveWhole');if(w)w.hidden=false;}   /* v22.22 the one-file edition only */
 {const M=document.createElement('div');M.id='moreMenu';M.setAttribute('role','menu');M.hidden=true;document.body.appendChild(M);
-  const ITEMS=[['saveFile','Save case to a file'],['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
+  const ITEMS=[['saveFile','Save case to a file'],['saveWhole','Save a case that opens on its own'],['savePacket','Save packet'],['openPacket','Open packet'],['caseXlsx','Case as spreadsheet (.xlsx)'],['bookmarkPdf','Finish a packet PDF'],['diag','Diagnostics']];
   const shut=()=>{M.hidden=true;$('#moreBtn').setAttribute('aria-expanded','false');};
   $('#moreBtn').addEventListener('click',e=>{e.stopPropagation();if(!M.hidden){shut();return;}
-    M.innerHTML=ITEMS.filter(([id])=>{const b=document.getElementById(id);return !(b&&b.hidden&&id==='saveFile');}).map(([id,n])=>'<button type="button" role="menuitem" data-more="'+id+'">'+n+'</button>').join('');
+    M.innerHTML=ITEMS.filter(([id])=>{const b=document.getElementById(id);return !(b&&b.hidden&&(id==='saveFile'||id==='saveWhole'));}).map(([id,n])=>'<button type="button" role="menuitem" data-more="'+id+'">'+n+'</button>').join('');
     const r=$('#moreBtn').getBoundingClientRect();M.hidden=false;const w=M.offsetWidth;M.style.top=Math.round(r.bottom+6)+'px';M.style.left=Math.max(8,Math.min(innerWidth-w-8,Math.round(r.right-w)))+'px';
     $('#moreBtn').setAttribute('aria-expanded','true');const f=M.querySelector('button');if(f)f.focus();});
   M.addEventListener('click',e=>{const b=e.target.closest('[data-more]');if(!b)return;shut();const o=document.getElementById(b.dataset.more);if(o)o.click();});
@@ -5822,7 +5845,7 @@ $('#openCase').addEventListener('click',async()=>{
     try{[h]=await showOpenFilePicker({types:[{description:'Case file',accept:{'text/html':['.html'],'application/json':['.json']}}]});}
     catch(e){return;}
     const f=await h.getFile();
-    openCaseText(await f.text(),/\.html?$/i.test(f.name)?h:null);
+    openCaseText(await f.text(),/\.(html?|json)$/i.test(f.name)?h:null);   /* v22.22 a .json case is saved back into, too */
     return;
   }
   $('#caseFile').click();
@@ -6292,13 +6315,14 @@ function drvBoxHtml(){if(!drvAvail())return '';
     if(clGid()&&drvAvail())clGsiLoad().catch(()=>{});
     if(drvOn()&&drvTok()&&Date.now()-DRV.last>30000&&!DRV.busy)drvSoon(false,100);}catch(e){}
   return out;};}
-document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#drvLink,#drvNow,#drvOff,#drvRename,#drvChip,#drvBarOpen,#drvBarLater,#saveFile');if(!t)return;
+document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.closest('#drvLink,#drvNow,#drvOff,#drvRename,#drvChip,#drvBarOpen,#drvBarLater,#saveFile,#saveWhole');if(!t)return;
   if(t.id==='drvLink'){drvLink();return;}
   if(t.id==='drvNow'||t.id==='drvChip'){await drvChipTap();if(t.id==='drvNow')try{caseloadOpen();}catch(x){}return;}
   if(t.id==='drvOff'){drvUnlink();return;}
   if(t.id==='drvRename'){const v=await wsUI.prompt('This device’s name\nShown with each save, so you can tell where it was made (for example iPad, or School laptop).',{ok:'Keep it',placeholder:drvDev(),label:'Device name'});
     if(v&&v.trim()){drvLs('nbh.drive.dev',v.trim().slice(0,30));drvPaint();try{caseloadOpen();}catch(x){}}return;}
   if(t.id==='saveFile'){saveCase({file:true});return;}
+  if(t.id==='saveWhole'){saveCase({whole:true});return;}
   if(t.id==='drvBarLater'){const b=$('#drvBar');DRV.newerOff=b.dataset.key+'@'+b.dataset.ver;b.hidden=true;return;}
   if(t.id==='drvBarOpen'){const b=$('#drvBar'),r=await drvLocal(b.dataset.key);if(!r)return;
     if(caseDirty()&&!(await wsUI.confirm('Open the newer copy?\nYour changes here since it was opened are not saved; they stay in this '+drvDev()+'’s safety copy (Autosave), where Open case offers them.',{ok:'Open the newer copy'})))return;
@@ -7753,15 +7777,16 @@ function lnHm(t){const m=/^(\d{2}):(\d{2})$/.exec(t||'');if(!m)return '';const h
 function lnBehaviors(){const f=state.facts||{};return [...new Set((f.behaviors||[]).filter(b=>b&&b.name&&!b.isRep&&!/replacement|alternative/i.test(b.type||'')).map(b=>String(b.name).trim()))];}
 function lnOnScreen(){return !!(Object.keys(state.frames).length||Object.keys(state.pending).length);}
 async function logNowOpen(){
-  const p=packet();let who=[];
-  if(p.client){if(lnOnScreen()){try{await gatherFacts(false);}catch(e){}}who=[{key:clKey(p),name:p.client}];}   /* the student in the bar, forms open or not yet */
-  else{const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));who=L.map(r=>({key:r.key,name:clName(r)}));}
+  const p=packet();let who=[];const me=p.client?clKey(p):'';
+  if(p.client){if(lnOnScreen()){try{await gatherFacts(false);}catch(e){}}who=[{key:me,name:p.client,here:true}];}   /* the student in the bar, forms open or not yet */
+  /* v22.22 (review F471) and every other student kept on this device, always: one not on screen is logged out of sight */
+  {const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));L.forEach(r=>{if(r.key!==me)who.push({key:r.key,name:clName(r)});});}
   if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
   const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
   dialog('Log it now',
     '<p class="hp-lead">An incident, time-stamped, into Form DD-1’s incident log'+(who.length===1?' for <b>'+esc(who[0].name)+'<\/b>':'')+'. Say what you saw; the rest can wait.<\/p>'+
     '<form id="lnForm" class="ln" novalidate>'+
-    (who.length>1?'<label class="ln-f"><span>Student<\/span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+'<\/option>').join('')+'<\/select><\/label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
+    (who.length>1?'<label class="ln-f"><span>Student<\/span><select id="lnWho">'+who.map(w=>'<option value="'+esc(w.key)+'">'+esc(w.name)+(w.here?' (on screen)':'')+'<\/option>').join('')+'<\/select><\/label>':'<input type="hidden" id="lnWho" value="'+esc(who[0].key)+'">')+
     '<div class="ln-g"><label class="ln-f"><span>Date<\/span><input type="date" id="lnDate" value="'+now.date+'"><\/label><label class="ln-f"><span>Time<\/span><input type="time" id="lnTime" value="'+now.time+'"><\/label>'+
     '<label class="ln-f"><span>Behavior<\/span><input id="lnBeh" list="lnBehList" autocomplete="off" placeholder="as the plan names it"><datalist id="lnBehList">'+beh.map(b=>'<option value="'+esc(b)+'">').join('')+'<\/datalist><\/label>'+
     '<label class="ln-f"><span>Physical intervention<\/span><select id="lnHold"><option value="">None<\/option><option value="escort">Physical escort<\/option><option value="restraint">Restraint<\/option><option value="seclusion">Seclusion<\/option><\/select><\/label><\/div>'+
@@ -7775,7 +7800,26 @@ async function logNowOpen(){
   setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
 }
 function lnWait(id,ms){return new Promise(res=>{const t0=Date.now();(function tick(){if(state.frames[id]&&state.status[id]&&!state.pending[id])return res(true);if(Date.now()-t0>ms)return res(false);setTimeout(tick,150);})();});}
+/* v22.22 (review F471) a student who is not on screen: their Form DD-1, as kept on this device, logs the incident out of sight (the
+   way Caseload collects replies), and their kept copy takes it; the case on screen is not touched. A kept case with no Form
+   DD-1 yet opens, as before. */
+async function lnAway(r,d,inc){if(CLX.busy)return {ok:false,why:'Caseload is reading sheets or replies; try again in a moment'};CLX.busy=true;let fr=null;
+  try{fr=await clFrameFor('DD-1');if(!fr)return {ok:false,why:'Form DD-1 did not load'};
+    const rs=await grab('DD-1','restore',{snap:d.forms['DD-1'].snap,copy:false},20000,fr);if(!rs)return {ok:false,why:'Form DD-1 did not take their saved record'};
+    await new Promise(z=>setTimeout(z,250));
+    const g=await grab('DD-1','log-incident',{inc},10000,fr);if(!g||!g.ok)return g||{ok:false,why:'Form DD-1 did not answer'};
+    const sn=await grab('DD-1','snapshot',null,10000,fr);if(!(sn&&sn.snap))return {ok:false,why:'Form DD-1 did not give the record back'};
+    const fo=await grab('DD-1','facts?',null,5000,fr);
+    const now=(await clList()||[]).find(k=>k.key===r.key);if(now&&now.saved!==r.saved)return {ok:false,why:'their case was saved again meanwhile; log it once more'};
+    d.forms['DD-1']=Object.assign({},d.forms['DD-1'],{snap:sn.snap});clMergeOut(d,'DD-1',fo&&fo.facts);
+    r.text=JSON.stringify(d);r.sum=clResum(r,d.facts);if(typeof drvDirty==='function')drvDirty(r);await clTx('readwrite',st=>st.put(r));
+    return Object.assign({},g,{away:clName(r)});}
+  catch(e){return {ok:false,why:String(e&&e.message||e)};}
+  finally{CLX.busy=false;window.__clRfWin=null;if(fr)fr.remove();}}
 async function lnDeliver(key,inc){
+  const p0=packet();
+  if(!(p0.client&&key===clKey(p0))){const r=(await clList()||[]).find(x=>x.key===key);let d=null;try{d=r&&parseCase(r.text);}catch(e){}
+    if(d&&d.forms&&d.forms['DD-1']&&d.forms['DD-1'].snap)return lnAway(r,d,inc);}
   if(key!==clKey(packet())){await caseloadGo(key,'DD-1');if(!lnOnScreen()||clKey(packet())!==key)return {ok:false,why:'the case was not switched'};}
   else if(!state.frames['DD-1'])openForm('DD-1');
   if(!(await lnWait('DD-1',30000)))return {ok:false,why:'Form DD-1 did not open'};
@@ -7791,7 +7835,7 @@ async function logNowSave(ev){if(ev)ev.preventDefault();if(LN.busy)return;
   try{const r=await lnDeliver(key,inc);
     if(!r||!r.ok){wsUI.toast('Not logged'+(r&&r.why?': '+r.why:'')+'. Open Form DD-1 and use Log an incident.',{kind:'warn',ms:9000});return;}
     try{if($('#lnForm'))$('#dlg').close();}catch(e){}
-    const I=r.inc||{};wsUI.toast('Logged on Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.',{kind:'ok',ms:7000});
+    const I=r.inc||{};wsUI.toast('Logged on '+(r.away?r.away+'’s ':'')+'Form DD-1: '+(I.name||inc.beh||'the incident')+(inc.time?' at '+lnHm(inc.time):'')+(I.counted?', one added to the day’s count':'')+(I.hold?' ('+I.hold+')':'')+'.'+(r.away?' It is in their case on this '+HERE+' (and goes to Google Drive with it, if Drive is on); the case on screen is not changed.':''),{kind:'ok',ms:r.away?10000:7000});
     try{paintBadge();}catch(e){}}
   finally{LN.busy=false;const b2=$('#lnSave');if(b2){b2.disabled=false;b2.textContent='Log it';}}
 }
