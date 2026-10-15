@@ -66,16 +66,45 @@ BRIDGE = [
      "           is in the file. Both travel beside the snapshot, never in it, so a case file is unchanged */\n"
      "        reply({ nbh:'snapshot', id: formId(), title: formTitle(), snap: snap,\n"
      "                edited: !!(window.nbhState && window.nbhState.differs(own)), status: filled() });\n"),
-    ("      /* the form reads the file with a FileReader and redraws; give it that time */\n"
-     "      setTimeout(function(){ quiet(false); res(true); }, 1200);\n",
+    (("      /* the form reads the file with a FileReader and redraws; give it that time */\n"
+      "      setTimeout(function(){ quiet(false); res(true); }, 1200);\n",
+      "      /* the form reads the file with a FileReader and redraws; give it that time. v21.44: a tap or key of the user's\n"
+      "         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual */\n"
+      "      var gest = function(){ quiet(false); };\n"
+      "      document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);\n"
+      "      setTimeout(function(){\n"
+      "        document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);\n"
+      "        quiet(false); res(true);\n"
+      "      }, 1200);\n"),
      "      /* the form reads the file with a FileReader and redraws; give it that time. v21.44: a tap or key of the user's\n"
-     "         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual */\n"
+     "         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual. v22.14 (review F470):\n"
+     "         done as soon as the form has read the file (every FileReader or Blob read started by the change has ended and\n"
+     "         its handler run) and 0.15 s more for the redraw, not after a fixed 1.2 s; a form that reads no file that way,\n"
+     "         or takes longer, is given the 1.2 s as before */\n"
      "      var gest = function(){ quiet(false); };\n"
      "      document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);\n"
-     "      setTimeout(function(){\n"
+     "      var t0 = Date.now(), fin = false, idle = 0;\n"
+     "      var done = function(){ if (fin) return; fin = true; unwatch();\n"
      "        document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);\n"
      "        quiet(false); res(true);\n"
-     "      }, 1200);\n"),
+     "      };\n"
+     "      (function look(){ if (fin) return; var t = Date.now() - t0;\n"
+     "        if (reads.seen && !reads.pend) idle += 50; else idle = 0;\n"
+     "        if ((reads.seen && idle >= 150 && t >= 200) || t >= 1200) return done();\n"
+     "        setTimeout(look, 50); })();\n"),
+    ("      quiet(true);\n      try {\n        var dt = new DataTransfer();\n",
+     "      quiet(true);\n"
+     "      /* v22.14: the reads the form starts while it takes the file are counted, so the end is known */\n"
+     "      var reads = { seen: false, pend: 0 }, FRp = window.FileReader && FileReader.prototype, Bp = window.Blob && Blob.prototype, kept = [];\n"
+     "      var count = function(start){ reads.seen = true; reads.pend++; var end = function(){ setTimeout(function(){ reads.pend--; }, 0); }; start(end); };\n"
+     "      if (FRp) ['readAsText', 'readAsDataURL', 'readAsArrayBuffer'].forEach(function(m){ var f = FRp[m]; if (!f) return; kept.push([FRp, m, f]);\n"
+     "        FRp[m] = function(){ var r = this; count(function(end){ r.addEventListener('loadend', end); }); return f.apply(this, arguments); }; });\n"
+     "      if (Bp) ['text', 'arrayBuffer'].forEach(function(m){ var f = Bp[m]; if (!f) return; kept.push([Bp, m, f]);\n"
+     "        Bp[m] = function(){ var p = f.apply(this, arguments); count(function(end){ p.then(function(){ setTimeout(end, 0); }, end); }); return p; }; });\n"
+     "      var unwatch = function(){ kept.forEach(function(k){ k[0][k[1]] = k[2]; }); kept = []; };\n"
+     "      try {\n        var dt = new DataTransfer();\n"),
+    ("        inp.dispatchEvent(new Event('change', { bubbles: true }));\n      } catch (e) { quiet(false); return res(false); }\n",
+     "        inp.dispatchEvent(new Event('change', { bubbles: true }));\n      } catch (e) { unwatch(); quiet(false); return res(false); }\n"),
     ("  function restoreData(snap){\n    var list = ctrls(), keys = keysFor(list);\n"
      "    var placed = 0, positionalSkipped = 0, unknown = 0, seen = {};\n"
      "    var sameShape = snap && snap.total === list.length;\n",

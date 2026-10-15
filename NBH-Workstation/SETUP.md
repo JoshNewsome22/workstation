@@ -9886,3 +9886,21 @@ Checked by `qa/v2212-build-test.js`.
 
 Checked by `qa/v2213-replies-test.js` (IA-1 and CF-1 with a reply box on box.php). The student journey's check that the
 case holds DD-1's record now waits for it (it read it once and could miss it by a moment).
+
+### v22.14: faster with a full caseload
+
+- **The caseload is read once, not on every tap** (review F469). Each student on the iPad is kept as one record holding the
+  whole case, and the start screen, Caseload, Save case, the Drive chip, Find and Today each read every student's whole case
+  back from storage, several times a tap (with 30 students, about 94 MB a tap). The list is now read once and kept in
+  memory; any change to the caseload, and 20 seconds, clear it, so a save from another window still shows. Opening Caseload
+  a second time now reads nothing. Caseload also no longer opens every case to ask whether it links a Google Sheet or has a
+  reply box: a case's "no" is remembered until it is saved again.
+- **A form filled from a saved case is ready as soon as it has read the file** (F470). Each form used to wait a fixed
+  1.2 seconds after taking the file before telling the workstation it was done; the packet for a meeting built from a
+  reopened case, the quiet fill of the other forms and Save case all waited that long once per form. It now tells the
+  workstation once its own reading of the file has ended and the page has redrawn: about a third of a second for most
+  forms (the slowest 0.7 s), never more than the 1.2 s it took before.
+
+Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the 46 forms filled from its own saved file,
+with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
+for a 5-second repaint).

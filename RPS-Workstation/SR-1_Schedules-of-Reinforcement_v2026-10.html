@@ -2385,20 +2385,36 @@ window.__nbhFactsPick=function(sel){
       if (!inp || typeof DataTransfer === 'undefined' || typeof File === 'undefined') return res(false);
       try { JSON.parse(text); } catch (e) { return res(false); }
       quiet(true);
+      /* v22.14: the reads the form starts while it takes the file are counted, so the end is known */
+      var reads = { seen: false, pend: 0 }, FRp = window.FileReader && FileReader.prototype, Bp = window.Blob && Blob.prototype, kept = [];
+      var count = function(start){ reads.seen = true; reads.pend++; var end = function(){ setTimeout(function(){ reads.pend--; }, 0); }; start(end); };
+      if (FRp) ['readAsText', 'readAsDataURL', 'readAsArrayBuffer'].forEach(function(m){ var f = FRp[m]; if (!f) return; kept.push([FRp, m, f]);
+        FRp[m] = function(){ var r = this; count(function(end){ r.addEventListener('loadend', end); }); return f.apply(this, arguments); }; });
+      if (Bp) ['text', 'arrayBuffer'].forEach(function(m){ var f = Bp[m]; if (!f) return; kept.push([Bp, m, f]);
+        Bp[m] = function(){ var p = f.apply(this, arguments); count(function(end){ p.then(function(){ setTimeout(end, 0); }, end); }); return p; }; });
+      var unwatch = function(){ kept.forEach(function(k){ k[0][k[1]] = k[2]; }); kept = []; };
       try {
         var dt = new DataTransfer();
         dt.items.add(new File([text], 'workstation-case.json', { type: 'application/json' }));
         inp.files = dt.files;
         inp.dispatchEvent(new Event('change', { bubbles: true }));
-      } catch (e) { quiet(false); return res(false); }
+      } catch (e) { unwatch(); quiet(false); return res(false); }
       /* the form reads the file with a FileReader and redraws; give it that time. v21.44: a tap or key of the user's
-         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual */
+         ends the quiet at once, so a Clear all pressed just after a restore is asked as usual. v22.14 (review F470):
+         done as soon as the form has read the file (every FileReader or Blob read started by the change has ended and
+         its handler run) and 0.15 s more for the redraw, not after a fixed 1.2 s; a form that reads no file that way,
+         or takes longer, is given the 1.2 s as before */
       var gest = function(){ quiet(false); };
       document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);
-      setTimeout(function(){
+      var t0 = Date.now(), fin = false, idle = 0;
+      var done = function(){ if (fin) return; fin = true; unwatch();
         document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);
         quiet(false); res(true);
-      }, 1200);
+      };
+      (function look(){ if (fin) return; var t = Date.now() - t0;
+        if (reads.seen && !reads.pend) idle += 50; else idle = 0;
+        if ((reads.seen && idle >= 150 && t >= 200) || t >= 1200) return done();
+        setTimeout(look, 50); })();
     });
   }
   /* a short fingerprint of every value, so an edit that changes no count is

@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.13';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.14';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -7479,6 +7479,29 @@ async function hxKeepScreen(why){if(clOff()||!hxOpenNow())return null;const t=aw
 {const tx0=clTx;clTx=function(mode,fn){if(mode!=='readwrite'||typeof fn!=='function')return tx0.apply(this,arguments);const gone=[];
   return tx0.call(this,mode,st=>{try{const d0=st.delete;st.delete=function(k){gone.push(k);return d0.call(st,k);};}catch(e){}return fn(st);})
     .then(async out=>{if(gone.length){try{await hxForget(gone);}catch(e){}}return out;});};}
+/* v22.14 (review F469). Each student's record holds the whole case, and the start screen, Caseload, Save case, the Drive
+   chip, Find and Today each read every record back from storage, several times a tap (94 MB a tap with 30 students). The
+   list is now read once and kept in memory: every write to the caseload (each passes through clTx 'readwrite') drops it,
+   and so do 20 seconds, so another window's save is seen. Each caller gets its own copy of every record (the case's text,
+   a string, shared), so no caller can change what the next one reads. The two questions Caseload asked of every case
+   (does DD-1 link a sheet? which forms have a reply box?) parsed every case each time; a case's "no" is now kept until
+   it is saved again, so only the cases that do link a sheet or hold a box are read through. */
+{let LC=null,LV=0;const L_TTL=20000;
+ const txL=clTx;clTx=function(mode){if(mode!=='readwrite')return txL.apply(this,arguments);LV++;LC=null;
+   return Promise.resolve(txL.apply(this,arguments)).finally(()=>{LV++;LC=null;});};
+ const copy=r=>{if(!r||typeof r!=='object')return r;const t=r.text;const o={};for(const k in r)if(k!=='text')o[k]=r[k];
+   let c;try{c=structuredClone(o);}catch(e){c=JSON.parse(JSON.stringify(o));}if(t!==undefined)c.text=t;return c;};
+ const list0=clList;clList=async function(){const sc=clScope();
+   if(LC&&LC.scope===sc&&Date.now()-LC.at<L_TTL)return LC.list.map(copy);
+   const v=LV,L=await list0.apply(this,arguments);if(!L)return L;if(v===LV)LC={scope:sc,at:Date.now(),list:L.map(copy)};return L.map(copy);};
+ window.__clCache={drop:()=>{LV++;LC=null;},held:()=>!!LC};}
+/* v22.14: the dot on Save case follows the save at once. autoFiled marks the case saved but left the dot to the 5-second
+   repaint, so for up to 5 s after a save the button could still say unsaved (seen once forms began loading faster) */
+{const af0=autoFiled;autoFiled=function(){const r=af0.apply(this,arguments);try{paintSave();}catch(e){}return r;};}
+{const none=new Set(),sig=r=>r&&(r.key+'|'+(r.saved||'')+'|'+String(r.text||'').length);   /* only the answer "none" is kept: no parsed case is held */
+ const keep=(name,fn,empty)=>function(r){const k=name+'|'+sig(r);if(none.has(k))return empty();const v=fn.apply(this,arguments);
+   if(v==null||(Array.isArray(v)&&!v.length)){if(none.size>2000)none.clear();none.add(k);}return v;};
+ clLinkOf=keep('link',clLinkOf,()=>null);clBoxForms=keep('box',clBoxForms,()=>[]);}
 /* ---- the words ---- */
 const hxYmd=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
 function hxDayOf(iso){const t=new Date(iso);if(isNaN(t))return null;const tm=t.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}),n=tdDays(hxYmd(t));
