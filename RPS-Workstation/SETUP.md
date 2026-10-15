@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.27: Read a document takes the Schedule and Enrollment pages
+
+- **Schedule** (a screenshot of the student information system's Student Schedule): each class's teacher is offered
+  for Form DM-1's **Team and Providers**, school-based, with what they teach in *Involvement* (the classes, the days,
+  the room, since when). The homeroom teacher is the classroom teacher; a language or speech therapy's teacher is the
+  speech-language pathologist, and also the provider (weekly, on its day) on the Related Services row for
+  speech-language therapy when that has none; occupational, physical therapy and counseling likewise; art, PE and music
+  teachers are Other. A class with a Dropped date is left out. The homeroom's room and teacher go to *Classroom /
+  teacher*. A teacher already on the team by the same name is completed, not added again; the team takes up to 16.
+- **Enrollment** (the Enrollment page's table of schools and years): the school now, its grade and the date of
+  enrollment, for the bar and Form DM-1, and the schools before it, most recent first with their dates, for *Previous
+  school*. A summer's second school, a temporary assignment and an earlier stretch at the school now are left out.
+- The tables' column headings ("Enrolled", "School", "Grade Level") are no longer read as the student's details.
+- The student's grade is also read from the badge at the top of every page ("ID - 02").
+- As before, everything is read on this device; nothing is sent anywhere.
+
+Checked by `qa/v2227-schedule-test.js` (simulated pages) and `qa/v2225-contacts-test.js`.
+
 ### v22.26: QS-1's staff quick start in larger print
 
 - (review F482) Form QS-1's handout for staff printed its body text at 7.9 pt, small for a substitute reading a photocopy

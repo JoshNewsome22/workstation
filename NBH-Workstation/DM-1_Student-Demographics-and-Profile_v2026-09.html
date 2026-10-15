@@ -2217,7 +2217,29 @@ window.__nbhFactsOut=function(){
           if (same) cons.completed++; else cons.added++;
         });
       }
-      reply({ nbh:'fill-applied', id: formId(), put: put, kept: kept, none: none, cons: cons, status: filled() });
+      /* v22.27 the teachers read from the student information system's Schedule: each into the team row that already has
+         the same name, else the first empty row, else a new row (up to the table's most); a therapist's provider also on
+         the Related Services row of that service, when it has none */
+      var team = { added: 0, completed: 0, full: 0, max: 0, svc: 0 };
+      if (Array.isArray(d.team) && d.team.length && document.getElementById('nTeam')) {
+        var tIn = document.getElementById('nTeam'); team.max = +tIn.max;
+        var tkey = function(s){ return String(s || '').toLowerCase().replace(/[^a-z\u00e0-\u00ff ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' '); };
+        var tholds = function(i){ return Array.prototype.some.call(document.querySelectorAll('#teamTbl [name^="t[' + i + ']."]'), function(e){ return String(e.value || '').trim() !== ''; }); };
+        d.team.slice(0, 20).forEach(function(t){
+          if (!t || !String(t.name || '').trim()) return;
+          var n = +tIn.value, at = -1, same = false, i;
+          for (i = 0; i < n; i++) { var nm = document.querySelector('[name="t[' + i + '].name"]'); if (nm && tkey(nm.value) && tkey(nm.value) === tkey(t.name)) { at = i; same = true; break; } }
+          if (at < 0) for (i = 0; i < n; i++) { if (!tholds(i)) { at = i; break; } }
+          if (at < 0) { if (n >= team.max) { team.full++; return; } tIn.value = n + 1; tIn.dispatchEvent(new Event('change', {bubbles:true})); at = n; }
+          ['role','name','sb','inv'].forEach(function(f){ if (t[f] != null && String(t[f]).trim()) one('t[' + at + '].' + f, t[f]); });
+          if (same) team.completed++; else team.added++;
+          if (t.svc >= 0 && t.svc < 8) {
+            var pv = document.querySelector('[name="sv[' + t.svc + '].prov"]');
+            if (pv && !String(pv.value || '').trim()) { one('sv[' + t.svc + '].prov', t.name); if (t.svcFreq) one('sv[' + t.svc + '].freq', t.svcFreq); team.svc++; }
+          }
+        });
+      }
+      reply({ nbh:'fill-applied', id: formId(), put: put, kept: kept, none: none, cons: cons, team: team, status: filled() });
     } else if (d.nbh === 'collect') {
       if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(true);   /* nbh-polish */
       reply({ nbh:'payload', id: formId(), title: formTitle(),

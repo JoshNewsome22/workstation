@@ -118,10 +118,10 @@ Save`;
   /* 2 pasted text */
   const p1=await page.evaluate(([a,b])=>{const r=nbhDocRead.parse(a),q=nbhDocRead.parse(b);const c=x=>x.contacts.map(c=>[c.n,c.name,c.rel,c.phone,c.addr,c.note].join('|'));
     return {a:c(r),af:r.fields.map(f=>f.label+'='+f.value),b:c(q),bc:q.contacts[0],bf:q.fields.map(f=>f.label+'='+f.value)};},[PASTE,PASTE2]);
-  ok('2a pasted card after card: the address card\'s contact with its address and phone, two contact cards with their phones and relationships; the student from the badge',
-    JSON.stringify(p1.a)===JSON.stringify(['1|Ana Rivera||(561) 555-0142|120 PALM GROVE RD, APT 4, WEST PALM BEACH, FL 33401|','3|Carmen Ortiz|Other relative|(561) 555-0170||Listed as Cousin','5|Elena Rivera|Grandparent|(561) 555-0142||Listed as Grandmother'])&&p1.af.join()==='Student=Mateo Rivera,Student ID=4471823',p1);
+  ok('2a pasted card after card: the address card\'s contact with its address and phone, two contact cards with their phones and relationships; the student from the badge (v22.27: the grade with the ID)',
+    JSON.stringify(p1.a)===JSON.stringify(['1|Ana Rivera||(561) 555-0142|120 PALM GROVE RD, APT 4, WEST PALM BEACH, FL 33401|','3|Carmen Ortiz|Other relative|(561) 555-0170||Listed as Cousin','5|Elena Rivera|Grandparent|(561) 555-0142||Listed as Grandmother'])&&p1.af.join()==='Student=Mateo Rivera,Student ID=4471823,Grade=3',p1);
   ok('2b the Edit Contact window, pasted: the contact (Ana Rivera, Mother, phone, email, language), and the student\'s details only from above it',
-    p1.bc&&p1.bc.name==='Ana Rivera'&&p1.bc.rel==='Mother'&&p1.bc.phone==='(561) 555-0142'&&p1.bc.email==='ana.rivera@example.com'&&p1.bc.lang==='Spanish'&&!p1.bc.note&&p1.bf.join()==='Student=Mateo Rivera,Student ID=4471823',p1);
+    p1.bc&&p1.bc.name==='Ana Rivera'&&p1.bc.rel==='Mother'&&p1.bc.phone==='(561) 555-0142'&&p1.bc.email==='ana.rivera@example.com'&&p1.bc.lang==='Spanish'&&!p1.bc.note&&p1.bf.join()==='Student=Mateo Rivera,Student ID=4471823,Grade=3',p1);
   /* 1 the screenshot of the cards */
   const read=async png=>{await page.evaluate(()=>{try{$('#dlg').close();}catch(e){}drOpen();});await sleep(300);await page.setInputFiles('#drFile',png);
     const t=Date.now();while(Date.now()-t<150000&&!(await page.evaluate(()=>!!document.querySelector('#drOut .dr-found, #drOut .dr-err, #drOut .dr-none'))))await sleep(400);

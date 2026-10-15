@@ -772,7 +772,7 @@ dialog{border:1px solid var(--rule2);border-radius:10px;padding:0;max-width:760p
 .dr-tbl input[type=checkbox]{width:18px;height:18px}
 .dr-seen{color:#5b6770;font-size:11.5px;max-width:240px;overflow-wrap:anywhere}.dr-note{display:block;color:#8a5a1a;font-size:11px;margin-top:2px}
 .dr-tbl tr.off td{opacity:.6}
-.dr-con{margin:10px 0}.dr-ctbl select{font:inherit;font-size:12.5px;max-width:100%}.dr-ctbl input[type=text]+input[type=text]{margin-top:3px}.dr-ctbl .dr-seen{max-width:150px}@media (max-width:640px){.dr-tbl.dr-ctbl td:first-child{grid-row:1/span 5}.dr-tbl.dr-ctbl td.dr-seen{grid-column:2;max-width:none}}
+.dr-con{margin:10px 0}.dr-ctbl select{font:inherit;font-size:12.5px;max-width:100%}.dr-ctbl input[type=text]+input[type=text]{margin-top:3px}.dr-ctbl .dr-seen{max-width:150px}.dr-ctbl textarea{width:100%;min-width:160px;box-sizing:border-box;font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid #c9d4d2;border-radius:3px;resize:vertical}@media (max-width:640px){.dr-tbl.dr-ctbl td:first-child{grid-row:1/span 5}.dr-tbl.dr-ctbl td.dr-seen{grid-column:2;max-width:none}}
 .dr-warn{background:#fff4e0;border:1px solid #e3c48a;border-radius:4px;padding:6px 9px;color:#6b4a12}
 .dr-beh{margin:10px 0}.dr-bl{display:block;padding:4px 0;border-top:1px solid #e3eae8;line-height:1.4}.dr-bl small{display:block;color:#5b6770;font-size:11.5px;margin-left:24px}.dr-bl small.dr-def{margin-left:24px}
 .dr-acts{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-top:10px}.dr-over{font-size:12.5px}
@@ -1157,7 +1157,7 @@ body:not(.has-form) #focusBtn{display:none}
     <span class="fld"><label for="pSite">School</label><input id="pSite" autocomplete="off"></span>
     <span class="fld"><label for="pBcba">BCBA</label><input id="pBcba" autocomplete="off"></span>
     <button id="pushPacket" title="Send these details to every form you have open">Fill open forms</button>
-    <button id="readDoc" aria-label="Read a document" title="Read the student’s details and contacts from a PDF, a picture or pasted text and place them in the bar and Form DM-1"><svg class="rd-ico" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="lbl">Read a document</span></button>
+    <button id="readDoc" aria-label="Read a document" title="Read the student’s details, contacts and teachers from a PDF, a picture or pasted text and place them in the bar and Form DM-1"><svg class="rd-ico" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg><span class="lbl">Read a document</span></button>
     <button id="barFold" class="sm" hidden title="Fold the details to one line">Done</button>
   </div>
   <!-- v21.92 autocomplete="off" above: the browser is asked not to keep what is typed about a student in its own autofill list -->
@@ -2209,7 +2209,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.26';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.27';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5892,7 +5892,7 @@ const CMDS=[
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
   {k:'open packet',n:'Open packet',s:'command',go:()=>$('#openPacket').click()},
   {k:'fill open forms',n:'Fill open forms with the packet',s:'command',go:()=>$('#pushPacket').click()},
-  {k:'read a document',n:'Read a document: the student\u2019s details and contacts from a PDF, a picture or pasted text',s:'command',go:()=>$('#readDoc').click()},
+  {k:'read a document',n:'Read a document: the student\u2019s details, contacts and teachers from a PDF, a picture or pasted text',s:'command',go:()=>$('#readDoc').click()},
   {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
   {k:'help',n:'How this works',s:'command',go:()=>$('#help').click()},
@@ -6545,7 +6545,9 @@ const nbhDocRead=(()=>{
     const L=lines(text),found={},order=[],used=new Set();
     /* v22.25 an Edit Contact dialog's First Name, Last Name and Language are the contact's, not the student's: the
        student's details are read only from above it */
-    const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\s*:?\s*$/i.test(l)),end=dlg<0?L.length:dlg;
+    const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\s*:?\s*$/i.test(l));
+    /* v22.27 nor from a Schedule's or an Enrollment's table (its headings are labels, its cells not the student's details) */
+    const en=enrollment(L),sc=schedule(L),end=Math.min(dlg<0?L.length:dlg,en?en.at:L.length,sc?sc.at:L.length);
     for(let i=0;i<end;i++){
       const line=L[i];if(!line.trim())continue;
       const hs=hits(line).filter(h=>{const rest=line.slice(h.end,(hits(line).find(x=>x.start>h.end)||{start:line.length}).start).trim();return valid(h,line,rest);});
@@ -6575,8 +6577,14 @@ const nbhDocRead=(()=>{
     const bd=badge(L);
     if(bd&&!found.name){const n=splitName(bd.name);found.name={k:'name',label:'Student',to:BY.name.to.slice(),value:n.full,raw:bd.name,seen:bd.name+' / '+L[bd.line+1].trim(),line:bd.line,str:1,ok:true,first:n.first,last:n.last,given:n.given};order.unshift('name');}
     if(bd&&!found.sid){found.sid={k:'sid',label:'Student ID',to:BY.sid.to.slice(),value:bd.sid,raw:bd.sid,seen:L[bd.line+1].trim(),line:bd.line+1,str:1,ok:true};order.splice(order.indexOf('name')+1,0,'sid');}
+    /* v22.27 the Enrollment and Schedule pages: the school now, its grade and date, the schools before; the homeroom */
+    const add=(k,value,raw,seen)=>{if(found[k]||!value)return;const f=BY[k],sh=shape(f,raw);if(!sh.value)return;found[k]=Object.assign({k,label:f.label,to:f.to.slice(),raw,seen:String(seen||'').slice(0,160),str:1},sh);order.push(k);};
+    if(en&&en.now){add('school',en.now.school,en.now.school,en.seen);add('grade',en.now.grade,en.now.grade,en.seen);add('enroll',en.now.from,en.now.from,en.seen);}
+    if(en&&en.prior){add('prior',en.prior,en.prior,'Enrollment: '+en.n+(en.n===1?' school':' schools')+' before');if(found.prior)found.prior.value=en.prior.slice(0,300);}
+    if(sc&&sc.room)add('room',sc.room,sc.room,'Schedule: the homeroom');
+    if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.line+1].trim());
     const fields=order.map(k=>found[k]);
-    return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text),student:bd};
+    return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
   }
   /* target behaviors in a plan: "Target behavior 1: Aggression", "Behavior: Hitting – any instance of ...", a
      Definition line after; a replacement behavior keeps its kind */
@@ -6682,12 +6690,68 @@ const nbhDocRead=(()=>{
     return out.sort((a,b)=>(a.n||99)-(b.n||99));
   }
   /* the student the page belongs to, from the student information system's badge: "Rivera, Mateo" over "4471823 - 03" */
-  function badge(L){for(let i=0;i<Math.min(8,L.length-1);i++){const a=L[i].trim(),b=L[i+1].trim().split(/\s{2,}/)[0];const m=b.match(/^(\d{5,10})\s*[-–]\s*[0-9A-Z]{1,3}$/);if(m&&NAMEC.test(a))return {name:a,sid:m[1],line:i};}return null;}
-  return {parse,contacts,toISO,grade,splitName,fields:F};
+  function badge(L){for(let i=0;i<Math.min(8,L.length-1);i++){const a=L[i].split(/\s{2,}/).map(x=>x.replace(/^[^A-Za-z]+|[^A-Za-z.]+$/g,'').replace(/\s+[vV]$/,'').trim()).find(x=>NAMEC.test(x)),b=L[i+1].split(/\s{2,}/).map(x=>x.trim()).find(x=>/^\d{5,10}\s*[-–]\s*(?:\d{1,2}|KG|PK)\b/.test(x));
+    if(a&&b){const m=b.match(/^(\d{5,10})\s*[-–]\s*(\d{1,2}|KG|PK)\b/);return {name:a,sid:m[1],grade:m[2],line:i};}}return null;}
+  /* v22.27 a student information system's Schedule page: each class's row (Period, Term, Subject, Course, "Section -
+     Teacher (seats)", Days, Room, Enrolled, Dropped). A class dropped is left out. The teachers become Form DM-1's team:
+     the homeroom teacher the classroom teacher (with the classes they teach and the room), a therapy's teacher its
+     provider (language or speech therapy: the speech-language pathologist, also on the Related Services row), the other
+     teachers by their class (art, PE, music: Other). -> {team:[{name,role,inv,svc,svcFreq}], room} */
+  const TEACH=/\b[A-Za-z0-9]{2,6}\s*[-–]\s*([A-Z][A-Za-z'’.\-]+(?:\s+[A-Z][A-Za-z'’.\-]+){1,3})\s*\(\s*\d+\s*\/\s*\d+\s*\)/;
+  const DAYN={M:'Mon',T:'Tue',W:'Wed',H:'Thu',R:'Thu',F:'Fri'};
+  const days=d=>d==='MTWHF'||d==='MTWRF'?'daily':d.split('').map(c=>DAYN[c]).filter(Boolean).join(', ');
+  const KIND=[[/thrpy|therapy|speech|\blang(?:uage)?\b.*\bth/i,'Speech-language pathologist',0,'speech-language therapy'],[/occupational|\bot\b/i,'Occupational therapist',1,'occupational therapy'],[/physical th|\bpt\b/i,'Physical therapist',2,'physical therapy'],
+    [/counsel/i,'School counselor / social worker',3,'counseling'],[/homeroom/i,'Classroom teacher',-1,'homeroom']];
+  const tcase=s=>s.replace(/[A-Za-z]+/g,w=>w.length<=2?w.toUpperCase():w[0].toUpperCase()+w.slice(1).toLowerCase());
+  const courseName=s=>tcase(String(s||'').replace(/\s*\([0-9A-Z]{4,}\)?.*$/,'').replace(/[….]+$/,'').replace(/\s+[vV~=@]+$/,'').trim());
+  function schedule(L){
+    const h=L.findIndex(l=>/\bperiod\b/i.test(l)&&/\bcourse\b/i.test(l));if(h<0)return null;
+    const rows=[];
+    for(let i=h+1;i<L.length&&i<h+60;i++){const l=L[i].replace(/[▼▾]/g,' ');const m=l.match(TEACH);if(!m)continue;
+      const before=l.slice(0,m.index),after=l.slice(m.index+m[0].length);
+      const segs=before.split(/\s{2,}/).map(x=>x.replace(/(?:\s*[vV~=@|]+)+$/,'').replace(/^[\[\]\s|1Il]+(?=[A-Z])/,'').trim()).filter(x=>x&&!/^[\[\]|1Il]+$/.test(x)&&!/^[=~\-_|.,:;—–]+$/.test(x));
+      const course=courseName(segs.length?segs[segs.length-1].replace(/^.*?\b(?:Grade|Courses)\s*[vV]?\s+(?=[A-Z])/,''):''),period=(segs[0]||'').replace(/[vV]+$/,'').trim();
+      const dm=after.match(/(?:^|\s)([MTWHFR]{1,6})[vV]?(?=\s|$)/),rm=after.match(/\b(\d{4,5}[A-Z]{0,2})\b/),
+        span=rm?after.slice(rm.index+rm[0].length).split(/[A-Za-z]/)[0]:'',dt=span.match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
+      rows.push({teacher:cap(m[1]),course,period,days:dm?dm[1]:'',room:rm?rm[1]:'',from:dt[0]||'',dropped:dt[1]||'',seen:l.trim().slice(0,160)});}
+    if(!rows.length)return null;
+    const live=rows.filter(r=>!r.dropped),byT=[];
+    live.forEach(r=>{let t=byT.find(x=>x.name===r.teacher);if(!t){t={name:r.teacher,rows:[]};byT.push(t);}t.rows.push(r);});
+    const team=byT.map(t=>{
+      const all=t.rows.map(r=>r.course+' '+r.period).join(' ');let kind=null;for(const k of KIND){if(k[0].test(all)){kind=k;break;}}
+      const home=t.rows.find(r=>/homeroom/i.test(r.period+' '+r.course)),rooms=[...new Set(t.rows.map(r=>r.room).filter(Boolean))];
+      const what=[...new Set(t.rows.map(r=>/homeroom/i.test(r.course)?'Homeroom':r.course).filter(Boolean))].join(', ');
+      const dd=[...new Set(t.rows.map(r=>days(r.days)).filter(Boolean))].join('; '),since=t.rows.map(r=>r.from).filter(Boolean).sort((a,b)=>toISO(a)<toISO(b)?-1:1)[0]||'';
+      const sinceTxt=since&&toISO(since)>new Date().toISOString().slice(0,10)?', from '+since:since?', since '+since:'';
+      return {name:t.name,role:home?'Classroom teacher':kind?kind[1]:'Other',inv:(what+(dd?', '+dd:'')+(rooms.length?', room '+rooms.join(', '):'')+sinceTxt).slice(0,200),
+        svc:kind&&kind[2]>=0?kind[2]:-1,svcFreq:kind&&kind[2]>=0?(dd==='daily'?'Daily':dd?'Weekly ('+dd+')':''):'',seen:'Schedule: '+t.rows.length+(t.rows.length===1?' class':' classes')};});
+    const hr=team.find(t=>t.role==='Classroom teacher'),hrRow=live.find(r=>/homeroom/i.test(r.period+' '+r.course));
+    return {at:h,team,dropped:rows.length-live.length,room:hr?(hrRow&&hrRow.room?'Room '+hrRow.room+', ':'')+hr.name:''};
+  }
+  /* v22.27 the Enrollment page: one row a school and year (Year, School, Grade Level, Enrollment Date, Enrollment Code, Drop
+     Date, Drop Code). The row with no drop date is the school now (its grade and date of enrollment); the schools before
+     it, most recent first, a summer's or a temporary assignment left out, are the previous schools. */
+  function enrollment(L){
+    const h=L.findIndex(l=>/\byear\b/i.test(l)&&/\bschool\b/i.test(l)&&/enrol?lment date|grade level/i.test(l));if(h<0)return null;
+    const rows=[];
+    for(let i=h+1;i<L.length&&i<h+40;i++){const l=L[i].replace(/\s=\s/g,'  ').replace(/\s+/g,' ');
+      const m=l.match(/\b(\d{4})\s*-\s*(\d{4})\s+(.+?)\s+(PK|KG|K|\d{1,2})\s+(\d{1,2}\/\d{1,2}\/\d{4})\s*(?:\(([A-Z0-9]{2,4})\)\s*(.*?))?(?:\s(\d{1,2}\/\d{1,2}\/\d{4})\s*(?:\(([A-Z0-9]{2,4})\)\s*(.*))?)?$/);
+      if(!m)continue;
+      const raw=m[3].trim(),name=raw.replace(/\s*-\s*[A-Z]?\d{3,4}[A-Z]?\s*-\s*[A-Z]{1,5}$/,'').trim();
+      rows.push({year:m[1]+'–'+m[2],school:name,grade:m[4],from:m[5],to:m[8]||'',skip:/^xsummer|summer\b|temporary assignment/i.test(name),seen:L[i].trim().slice(0,160)});}
+    if(!rows.length)return null;
+    const now=rows.find(r=>!r.to&&!r.skip)||null;
+    const past=[];rows.filter(r=>r!==now&&!r.skip&&(!now||r.school!==now.school)).forEach(r=>{const p=past.find(x=>x.school===r.school);
+      if(p){if(toISO(r.from)<toISO(p.from))p.from=r.from;if(toISO(r.to)>toISO(p.to))p.to=r.to;}else past.push({school:r.school,from:r.from,to:r.to});});
+    past.sort((a,b)=>toISO(a.from)<toISO(b.from)?1:-1);
+    return {at:h,now,prior:past.map(p=>p.school+' ('+p.from+(p.to?'–'+p.to:'')+')').join('; '),n:past.length,seen:now?now.seen:rows[0].seen};
+  }
+  return {parse,contacts,schedule,enrollment,toISO,grade,splitName,fields:F};
 })();
 
 /* ---- the dialog ---- */
 const DR={text:'',cols:'',res:null,worker:null,pdf:null};
+const DR_ROLES=['','BCBA','Classroom teacher','Paraprofessional','ESE contact / case manager','School psychologist','Speech-language pathologist','Occupational therapist','Physical therapist','School nurse','School counselor / social worker','Administrator','District behavior support','Bus driver / aide','Home ABA provider','Psychiatrist / prescriber','Pediatrician','Outside therapist / counselor','Agency case manager (DCF, APD)','Other'];   /* Form DM-1's team roles */
 const DR_REL=['','Mother','Father','Stepparent','Grandparent','Legal guardian','Foster parent','Surrogate parent','Guardian advocate','Adult sibling','Other relative','Family friend','Case manager (agency)','Other'];   /* Form DM-1's list */
 const drCan=()=>!EMBED&&/^https?:$/.test(location.protocol);   /* the readers: the website or the app, not the one-file edition or a drive */
 function drProg(t){const p=$('#drProg');if(!p)return;p.hidden=!t;p.textContent=t||'';}
@@ -6812,8 +6876,8 @@ function drShow(text,from,cols){
   const out=$('#drOut');if(!out)return;
   const haveBeh=!!(state.facts&&(state.facts.behaviors||[]).length&&(state.facts.src||{}).behaviors!=='document');
   const cons=res.contacts||[];
-  if(!res.fields.length&&!res.behaviors.length&&!cons.length){out.innerHTML='<p class="dr-none">Nothing recognisable in '+esc(from)+' ('+res.lines+' lines read). The details are read from their labels: Student name, Date of birth, Student ID, Grade, School, Teacher, and the IEP\u2019s; contacts from a student information system\u2019s Addresses &amp; Contacts page or its Edit Contact window. '+(text.trim()?'':'The text was empty: a picture of a page needs the text recognizer, which needs the website or the app.')+'</p>';return;}
-  let h='<p class="dr-found">'+(res.fields.length||!cons.length?'<b>'+res.fields.length+(res.fields.length===1?' detail':' details')+'</b> read from '+esc(from):'<b>'+cons.length+(cons.length===1?' contact':' contacts')+'</b> read from '+esc(from))+(res.behaviors.length?', and '+res.behaviors.length+(res.behaviors.length===1?' target behavior':' target behaviors'):'')+(cons.length&&res.fields.length?', and '+cons.length+(cons.length===1?' contact':' contacts'):'')+'. Untick what is wrong, or correct it.</p>';
+  if(!res.fields.length&&!res.behaviors.length&&!cons.length&&!(res.team||[]).length){out.innerHTML='<p class="dr-none">Nothing recognisable in '+esc(from)+' ('+res.lines+' lines read). The details are read from their labels: Student name, Date of birth, Student ID, Grade, School, Teacher, and the IEP\u2019s; contacts from a student information system\u2019s Addresses &amp; Contacts page or its Edit Contact window. '+(text.trim()?'':'The text was empty: a picture of a page needs the text recognizer, which needs the website or the app.')+'</p>';return;}
+  let h='<p class="dr-found">'+(res.fields.length||!cons.length?'<b>'+res.fields.length+(res.fields.length===1?' detail':' details')+'</b> read from '+esc(from):'<b>'+cons.length+(cons.length===1?' contact':' contacts')+'</b> read from '+esc(from))+(res.behaviors.length?', and '+res.behaviors.length+(res.behaviors.length===1?' target behavior':' target behaviors'):'')+(cons.length&&res.fields.length?', and '+cons.length+(cons.length===1?' contact':' contacts'):'')+((res.team||[]).length?', and '+res.team.length+(res.team.length===1?' teacher':' teachers'):'')+'. Untick what is wrong, or correct it.</p>';
   /* v22.25 a page for another student than the case on screen */
   const onBar=($('#pClient')||{}).value||'',pg=res.student?nbhDocRead.splitName(res.student.name):null;
   if(pg&&onBar.trim()&&pg.last&&onBar.toLowerCase().indexOf(pg.last.toLowerCase())<0)h+='<p class="dr-warn">This page is for <b>'+esc(pg.full)+'</b>; the case on screen is <b>'+esc(onBar)+'</b>. Check before placing.</p>';
@@ -6832,6 +6896,17 @@ function drShow(text,from,cols){
         '<td><input type="text" data-drcf="phone" data-i="'+i+'" value="'+esc(c.phone)+'">'+(c.phone2?'<input type="text" data-drcf="phone2" data-i="'+i+'" value="'+esc(c.phone2)+'" aria-label="Alternate phone">':'')+'</td>'+
         '<td><input type="text" data-drcf="addr" data-i="'+i+'" value="'+esc(c.addr)+'" placeholder="address">'+(c.email?'<input type="text" data-drcf="email" data-i="'+i+'" value="'+esc(c.email)+'" aria-label="Email">':'')+(c.lang?'<small class="dr-note">Language: '+esc(c.lang)+'</small>':'')+'</td>'+
         '<td class="dr-seen">'+esc(c.seen)+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  const team=res.team||[];
+  if(team.length){   /* v22.27 the teachers from a Schedule page, for Form DM-1's Team and Providers */
+    h+='<div class="dr-con"><b>Team</b> <small class="dr-note">from the schedule, for Form DM-1\u2019s Team and Providers'+(res.dropped?' (a class dropped is left out)':'')+'; a teacher already there by name is completed, not added again</small>';
+    h+='<table class="dr-tbl dr-ctbl"><thead><tr><th></th><th>Name</th><th>Role</th><th>Involvement</th><th>Read from</th></tr></thead><tbody>';
+    team.forEach((t,i)=>{
+      h+='<tr><td><input type="checkbox" data-drt="'+i+'" checked aria-label="Place '+esc(t.name)+'"></td><td><input type="text" data-drtf="name" data-i="'+i+'" value="'+esc(t.name)+'"></td>'+
+        '<td><select data-drtf="role" data-i="'+i+'">'+DR_ROLES.map(r=>'<option'+(r===t.role?' selected':'')+'>'+esc(r)+'</option>').join('')+'</select>'+(t.svc>=0?'<small class="dr-note">also on Related Services</small>':'')+'</td>'+
+        '<td><textarea data-drtf="inv" data-i="'+i+'" rows="2" aria-label="Involvement">'+esc(t.inv)+'</textarea></td><td class="dr-seen">'+esc(t.seen)+'</td></tr>';
     });
     h+='</tbody></table></div>';
   }
@@ -6860,7 +6935,10 @@ async function drPlace(){
   /* v22.25 the ticked contacts, as corrected */
   const cons=(res.contacts||[]).map((c,i)=>{const t=$('#drOut [data-drc="'+i+'"]');if(!t||!t.checked)return null;const o={name:'',rel:'',phone:'',phone2:'',email:'',addr:'',lang:c.lang||'',note:c.note||''};
     document.querySelectorAll('#drOut [data-drcf][data-i="'+i+'"]').forEach(e=>{o[e.dataset.drcf]=String(e.value||'').trim();});return o.name?o:null;}).filter(Boolean);
-  if(!tick.length&&!behs.length&&!cons.length){alert('Tick at least one detail to place.');return;}
+  /* v22.27 the ticked teachers */
+  const team=(res.team||[]).map((t,i)=>{const c=$('#drOut [data-drt="'+i+'"]');if(!c||!c.checked)return null;const o={name:'',role:'',inv:'',sb:'Yes',svc:t.svc,svcFreq:t.svcFreq};
+    document.querySelectorAll('#drOut [data-drtf][data-i="'+i+'"]').forEach(e=>{o[e.dataset.drtf]=String(e.value||'').trim();});return o.name?o:null;}).filter(Boolean);
+  if(!tick.length&&!behs.length&&!cons.length&&!team.length){alert('Tick at least one detail to place.');return;}
   const rep={bar:[],kept:[],dm:null,beh:0};
   /* the bar */
   const BAR={client:'#pClient',sid:'#pSid',grade:'#pGrade',site:'#pSite',bcba:'#pBcba'};
@@ -6868,10 +6946,10 @@ async function drPlace(){
     el.value=bar[k];el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));rep.bar.push(k);});
   if(typeof paintSum==='function')paintSum();
   /* Form DM-1, opened if it is not */
-  if(Object.keys(dm).length||cons.length){
+  if(Object.keys(dm).length||cons.length||team.length){
     if(!state.frames['DM-1'])openForm('DM-1',true);
     const t0=Date.now();while(!state.status['DM-1']&&Date.now()-t0<15000)await new Promise(r=>setTimeout(r,120));
-    rep.dm=await grab('DM-1','fill',{fields:dm,over,contacts:cons},8000);
+    rep.dm=await grab('DM-1','fill',{fields:dm,over,contacts:cons,team},8000);
   }
   /* the case: target behaviors from a plan, when the forms hold none */
   if(behs.length){
@@ -6887,15 +6965,18 @@ async function drPlace(){
   try{$('#dlg').close();}catch(e){}
   const bits=[],kept=[];
   if(rep.bar.length)bits.push(rep.bar.length+' in the bar');
-  const rc=rep.dm&&rep.dm.cons||{},cput=(rep.dm&&rep.dm.put||[]).filter(k=>/^c\[/.test(k)).length;
+  const rc=rep.dm&&rep.dm.cons||{},rt=rep.dm&&rep.dm.team||{},cput=(rep.dm&&rep.dm.put||[]).filter(k=>/^(?:c|t|sv)\[/.test(k)).length;
   if(rep.dm&&(rep.dm.put||[]).length-cput)bits.push(((rep.dm.put||[]).length-cput)+' in Form DM-1');
   if(rc.added||rc.completed)bits.push((rc.added?rc.added+(rc.added===1?' contact':' contacts')+' added':'')+(rc.added&&rc.completed?', ':'')+(rc.completed?rc.completed+(rc.completed===1?' contact':' contacts')+' completed':'')+' in Form DM-1');
+  if(rt.added||rt.completed)bits.push((rt.added?rt.added+(rt.added===1?' team member':' team members')+' added':'')+(rt.added&&rt.completed?', ':'')+(rt.completed?rt.completed+(rt.completed===1?' team member':' team members')+' completed':'')+' in Form DM-1');
+  if(rt.svc)bits.push(rt.svc+(rt.svc===1?' related service':' related services')+' given a provider');
+  if(rt.full)kept.push(rt.full+(rt.full===1?' teacher':' teachers')+' (Form DM-1\u2019s team holds '+rt.max+' at most)');
   if(rep.beh)bits.push(rep.beh+(rep.beh===1?' target behavior':' target behaviors')+' to the case');
   if(rep.kept.length)kept.push(rep.kept.length+' in the bar');
   if(rep.dm&&(rep.dm.kept||[]).length)kept.push(rep.dm.kept.length+' in Form DM-1');
   let msg=bits.length?'Placed: '+bits.join('; ')+'.':'Nothing new to place.';
   if(kept.length)msg+=' Left as they were: '+kept.join(', ')+' (tick Replace to change them).';
-  if(!rep.dm&&(Object.keys(dm).length||cons.length))msg+=' Form DM-1 did not answer: open it and try again.';
+  if(!rep.dm&&(Object.keys(dm).length||cons.length||team.length))msg+=' Form DM-1 did not answer: open it and try again.';
   if(rc.full)msg+=' '+rc.full+(rc.full===1?' contact was':' contacts were')+' not placed: Form DM-1 holds '+rc.max+' at most.';
   if(rep.dm&&(rep.dm.none||[]).length)msg+=' Not taken by the form: '+rep.dm.none.length+'.';
   if(rep.dm&&(rep.dm.put||[]).length)msg+=' Check Form DM-1.';
