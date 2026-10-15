@@ -39,7 +39,11 @@ EXPECT = [
   (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 48),   # the 46 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
-  ("const DRV_ED='nbh';", "const DRV_ED='rps';", 1),   # v22.00 each edition its own Drive settings and folder (review F501)
+  ("const DRV_ED='nbh';", "const DRV_ED='rps';", 1),
+  # v22.07 Rewrite with Claude is off in the school edition (the user's decision): the writing help shows no Rewrite tab and
+  # asks nothing of a website; only Check wording (on the device) and the iPad's own Writing Tools remain
+  ('{"relay":"https://newsomebh.com/ai"}', '{"relay":"","rewrite":false}', 1),
+  ("  if(DRV_ED!=='rps')rows.push(['Rewrite with Claude (the writing help, only after a passcode)','The text in its preview, with the student\\u2019s name and ID already replaced, through the practice\\u2019s relay to Anthropic','The relay keeps no text']);\n", '', 1),   # v22.07 and Help's data table has no Rewrite row (the line is only for the practice edition)   # v22.00 each edition its own Drive settings and folder (review F501)
   ("const AUTO={key:'nbh.ws.autosave.v1',pref:'nbh.ws.autosave.on'", "const AUTO={key:'rps.ws.autosave.v1',pref:'rps.ws.autosave.on'", 1),
   # v21.43: the name under the icon of the installed app (index.html's head), the same as the manifest's short_name below
   ('<meta name="apple-mobile-web-app-title" content="NBH Workstation">', '<meta name="apple-mobile-web-app-title" content="RPS Workstation">', 1),
@@ -58,6 +62,19 @@ for fn in sorted(os.listdir(OUT)):
     for i, (a, b, _) in enumerate(EXPECT):
         n = s.count(a); done[i] += n; s = s.replace(a, b)
     open(p, 'w', encoding='utf-8').write(s)
+# v22.07 the forms' guide paragraph on the writing help loses its Rewrite with Claude sentences (39 forms carry it)
+RW_RE = re.compile(r' <(b|strong)>Rewrite with Claude</\1> works only.*?agency&rsquo;s approval\.', re.S)
+rw_n = 0
+for fn in sorted(os.listdir(OUT)):
+    if not fn.endswith('.html'): continue
+    p = os.path.join(OUT, fn); s = open(p, encoding='utf-8').read()
+    s, k = RW_RE.subn('', s); rw_n += k
+    if k: open(p, 'w', encoding='utf-8').write(s)
+if rw_n != 39:
+    sys.exit(f'the Rewrite with Claude sentences in the forms\' guide: removed {rw_n}, expected 39 - the source changed; check before shipping')
+left_rw = [fn for fn in sorted(os.listdir(OUT)) if fn.endswith('.html') and 'Rewrite with Claude' in open(os.path.join(OUT, fn), encoding='utf-8').read()]
+if left_rw:
+    sys.exit('Rewrite with Claude still named in the school edition: ' + ', '.join(left_rw))
 bad = [(EXPECT[i][0][:60], done[i], EXPECT[i][2]) for i in range(len(EXPECT)) if done[i] != EXPECT[i][2]]
 if bad:
     sys.exit('replacement counts differ from what was expected - the source changed; check before shipping:\n' +

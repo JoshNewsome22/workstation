@@ -105,7 +105,7 @@ window.nbhWordingRules=
 
 ;
 window.nbhWordingConfig=
-{"relay":"https://newsomebh.com/ai"}
+{"relay":"","rewrite":false}
 
 ;
 /* nbh-wording (v21.43): help with the wording of a form's narrative fields.
@@ -790,7 +790,9 @@ function pageOrigin(){ try { if (typeof self.origin === 'string') return self.or
 /* Where Rewrite with Claude can go from this page. The relay lives on the practice's site and answers its own
    pages only, so a page opened from a file, or from another site, is told so before anything is tried; the
    same site with or without "www." calls the relay on the page's own host, so the call stays same-origin. */
+const rwOff = () => !!(RAW_CONFIG && RAW_CONFIG.rewrite === false);
 function relayPlan(){
+  if (rwOff()) return {ok:false, why:'off'};
   const raw = RAW_CONFIG && typeof RAW_CONFIG.relay === 'string' ? RAW_CONFIG.relay.trim() : '';
   if (!raw) return {ok:false, why:'unset'};
   let u; try { u = new URL(raw, document.baseURI); } catch (e) { return {ok:false, why:'unset'}; }
@@ -1461,7 +1463,7 @@ const PANEL = `<div class="in">
 <div class="tp wt" role="tabpanel" id="tp3" aria-labelledby="tb3" tabindex="0" hidden>
 <p>On an iPad with Apple Intelligence, select the words in any text box of the forms (or in Your text here), then tap Writing Tools in the menu over the selection, or on the keyboard, and choose Proofread, Rewrite, Professional or Concise.</p>
 <p>It needs nothing set up here and does not appear on iPads without Apple Intelligence. It does not know the rules for observable wording, so check the result with Check wording before you keep it.</p>
-<p>Writing Tools is Apple\u2019s own: it works on the text as written, names included (nothing is hidden first, as Rewrite with Claude does), on the iPad or on Apple\u2019s servers. Follow your agency\u2019s rules for it, and do not use its ChatGPT options for student text.</p>
+<p>Writing Tools is Apple\u2019s own: it works on the text as written, names included <span class="rw-only">(nothing is hidden first, as Rewrite with Claude does)</span>, on the iPad or on Apple\u2019s servers. Follow your agency\u2019s rules for it, and do not use its ChatGPT options for student text.</p>
 </div>
 </section>
 </div></div>
@@ -1477,6 +1479,9 @@ function buildPanel(){
   const q = id => root.getElementById(id);
   P = {t:q('pnT'), s:q('pnS'), ed:q('ed'), n:q('edN'), sel:q('edSel'), dr:q('edDraft'), undo:q('undo'), cnt:q('cnt'), sum:q('ckSum'), fds:q('fds'),
        note:q('ckNote'), tabs:[q('tb1'), q('tb2'), q('tb3')], tps:[q('tp1'), q('tp2'), q('tp3')], fm:q('fm'), use:q('use')};
+  /* v22.07 an edition with Rewrite with Claude turned off ({"rewrite":false} in the config: the school edition): its tab and
+     every mention of it are gone, and nothing about it is ever asked of a website */
+  if (rwOff()) { P.tabs[1].hidden = true; P.tps[1].hidden = true; root.querySelectorAll('.rw-only').forEach(e => e.remove()); }
   q('pnX').addEventListener('click', () => closePanel('cancel'));
   q('cancel').addEventListener('click', () => closePanel('cancel'));
   P.use.addEventListener('click', () => {
@@ -1499,12 +1504,14 @@ function buildPanel(){
     b.addEventListener('click', () => setTab(i));
     b.addEventListener('keydown', e => {
       const k = e.key; let j = -1;
-      if (k === 'ArrowRight') j = (i + 1) % 3; else if (k === 'ArrowLeft') j = (i + 2) % 3; else if (k === 'Home') j = 0; else if (k === 'End') j = 2;
+      const on = [0, 1, 2].filter(x => !P.tabs[x].hidden), at = on.indexOf(i);
+      if (k === 'ArrowRight') j = on[(at + 1) % on.length]; else if (k === 'ArrowLeft') j = on[(at + on.length - 1) % on.length]; else if (k === 'Home') j = on[0]; else if (k === 'End') j = on[on.length - 1];
       if (j >= 0) { e.preventDefault(); setTab(j); P.tabs[j].focus(); }
     });
   });
 }
 function setTab(i){
+  if (i === 1 && rwOff()) i = 0;
   P.tabs.forEach((b, j) => { b.setAttribute('aria-selected', String(i === j)); b.tabIndex = i === j ? 0 : -1; P.tps[j].hidden = i !== j; });
   if (i === 1) renderRW();
   syncUse();

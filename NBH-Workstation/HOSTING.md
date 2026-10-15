@@ -1,8 +1,10 @@
 # Putting the workstation on a website
 
 The workstation is a folder of files that run entirely in the browser. A web
-host only hands the files to the browser; nothing typed into a form is ever sent
-back to it. Hosted, the tool works exactly as it does from a folder, with two
+host only hands the files to the browser; what is typed into a form is not sent
+back to it. The few ways a student's information can leave the device, each one
+set up or turned on by you, are listed under *Where the student's data goes*
+below. Hosted, the tool works exactly as it does from a folder, with two
 things better: Safari's local-file restriction no longer applies, and staff get
 a link instead of a download.
 
@@ -60,9 +62,10 @@ code as text); 21.5 and later are unaffected.
 
 **A password on the folder.** In cPanel, *Directory Privacy* → `public_html` →
 `workstation` → tick *Password protect this directory*, save, then create a user
-below. Until a user exists nobody, including you, can open the folder. The tool
-holds no student data, but it is a working tool for your staff, and the forms
-carry your practice's clinical content. Share the one login with the people
+below. Until a user exists nobody, including you, can open the folder. The website
+folder holds no student data (it is the program), but the browser on each device
+keeps the caseload, its history and Autosave copies (below), and the forms carry
+your practice's clinical content. Share the one login with the people
 who use it.
 
 **HTTPS.** A new cPanel account starts every domain on a *self-signed*
@@ -113,18 +116,23 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
 
 ## What stays exactly the same
 
-- **Nothing leaves the machine.** Save case downloads a file to the computer in
-  use; Autosave keeps its safety copy in that browser only. The forms have no
-  account, no upload and no database, and they should not: the moment a server
-  holds student data you become its custodian, with everything that brings.
-  The one exception is **Rewrite with Claude** in the writing help (v21.43),
-  and only once its relay is set up (below) and a passcode unlocks it: it sends
-  the text shown in its preview, with the student's name and ID already
-  replaced, to the relay on this site and from there to Anthropic's API. The
-  relay keeps no text. **Check wording** runs on the device and sends nothing.
-  The other exception, only when you turn it on, is **Use Google Drive** in Caseload (v21.89): each student's
-  case goes to a folder in the school Google Drive of the account you sign in with (never to this website),
-  so the iPad and the laptop share one caseload; the workstation can reach only the files it made there.
+- **Where the student's data goes.** The forms have no account and no database, and the website keeps no
+  student record it can read. What each device and each feature keeps, and what leaves the device:
+
+  | What | Where it goes | How long |
+  |---|---|---|
+  | The caseload, its history (restore points) and Autosave copies | The browser on that device, protected by the device's passcode | Until removed, or the time set in Caseload; Autosave copies 14 days. *Remove all student data from this device* clears them |
+  | Case files (Save case; Save case to a file with Google Drive on) | Where the BCBA saves them: the district drive | As the district keeps records |
+  | Use Google Drive (only when turned on, in Caseload) | Each student's case, in the school Google Drive of the account signed in (folder *FBA-BIP Workstation cases*); the workstation sees only the files it made | Until removed; Drive keeps removed files 30 days |
+  | Questionnaires sent by email (only when Send is pressed) | One email per person from the school account through Gmail; the link names the student by initials and the behavior asked about | In the Gmail Sent folder |
+  | Questionnaire answers and staff phone entries (the reply box, below) | Locked on the sender's phone so only the form's file can open them; this website holds the locked copy | Until the form collects and removes it, or 60 days |
+  | Short questionnaire links (below) | The questionnaire (behavior, definition, initials, due date), locked, on this website; the key stays in the link | 60 days |
+  | Form DD-1's Google Sheet link | Read from Google to the device; nothing is written to the sheet | - |
+  | Rewrite with Claude (practice edition only; off in the school edition since v22.07) | The text in its preview, with the student's name and ID replaced, through the relay on this site to Anthropic's API | The relay keeps no text |
+  | Check wording, Dictate, Read a document, My pictures, TK-1's video | Stay on the device | - |
+
+  The same table is in the workstation's Help (*Where the student's data goes*). Get the district's (or agency's)
+  approval for each row that sends something off the device before using it with real cases.
 - **Save cases to the district drive**, as before. A case file in a browser's
   Downloads folder on a shared computer is a case file left on a desk.
 - **The master print** prints with its page headers from Chrome or Edge 131 or

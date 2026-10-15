@@ -9742,3 +9742,25 @@ still says what it does. Checked by `qa/v2204-pin-test.js` 2, 3 and 3b.
 Checked by `qa/v2206-version-test.js` (the version is the newest heading here, Help and Diagnostics, the chip, the
 arrows, the blank week). Not done: zoom (F488) stays limited for now, because removing the limit makes iPad Safari zoom
 in on every small field tapped until the fields are 16 points; that needs its own design pass.
+
+### v22.07: the privacy statements tell the truth; Rewrite with Claude off in the school edition
+
+- **Every form's note under its title** said "Nothing is stored in the browser … close the tab and they are gone", which
+  has not been true since Autosave (v21.44). It now says: "Autosave keeps a safety copy of this form in this browser, on
+  this device, for up to 14 days, and offers it back when the form is opened here again. On a shared device, delete it
+  when you finish (the Autosave button). The record is the file you save: save it to the district drive, not a personal
+  device." (review F478)
+- **Caseload's first line** said "nothing leaves it" even with Google Drive on. It now says where the caseload is: in this
+  browser until removed, or, with Drive on, also in the school Google Drive. (F509)
+- **Help**: "Save the case before you leave"; with Drive on, the Saving section says Save case goes to Drive; the line
+  "a case moves between devices only when you move its file" is gone; and a new section, **Where the student's data
+  goes**, lists in one table what each device keeps and every way information can leave it, with how long it is kept.
+  The arrow keys line says they work from the list of forms (v22.06). (F510, I260)
+- **HOSTING.md**, the page for the district: "The tool holds no student data" and "Nothing leaves the machine" are
+  replaced by the same table, with the line that each row sending something off the device needs the district's
+  approval before real cases. (F511, F497)
+- **Rewrite with Claude is off in the school edition** (the user's decision): the writing help shows only Check wording
+  (on the device) and the iPad's Writing Tools, asks nothing of a website, and no form's guide names it. The practice
+  edition keeps it. tools/build-rps.py makes the change and checks that nothing in the school edition names it.
+
+Checked by `qa/v2207-privacy-test.js`.

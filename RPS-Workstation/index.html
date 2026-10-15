@@ -794,7 +794,7 @@ dialog tr:nth-child(even) td{background:#fafcfb}
 .td-list{list-style:none;margin:6px 0 12px;padding:0}.td-list li{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;padding:9px 0;border-top:1px solid var(--rule,#dfe6e4);line-height:1.45;text-align:left}.td-list li:first-child{border-top:0}.td-list .td-k{display:inline-block;min-width:0;padding:2px 9px;border-radius:999px;background:var(--mist,#eaf2f0);color:var(--slate,#254657);font-size:12px;letter-spacing:0;text-transform:none;font-weight:600;line-height:1.3}.td-list .td-k.hot,.td-list li.hot .td-k{background:#b03a2e;color:#fff}.td-list li>span:not(.td-k){flex:1 1 220px;min-width:0}.td-list li>button{margin-left:auto;flex:0 0 auto}.td-list button{margin-left:6px}.td-more button{margin:4px 6px 4px 0}
 .pc-list{margin:6px 0 10px 20px;padding:0}.pc-list li{margin:0 0 7px;line-height:1.4}.pc-list label{display:block;cursor:pointer}.pc-list input{margin-right:4px;transform:scale(1.2)}.pc-list span{display:block;color:var(--muted,#54676f);font-size:13px;margin-left:24px}.pc-open button{margin:2px 4px 2px 0}.pc-done{color:#2F6B37}
 #dlg .hp-lead{font-size:15px;color:var(--ink);margin:0 0 10px}
-#dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
+#dlg .hp-data{width:100%;border-collapse:collapse;margin:6px 0 10px}#dlg .hp-data th,#dlg .hp-data td{vertical-align:top;text-align:left;font-size:13px;line-height:1.45;padding:6px 8px;border-top:1px solid var(--rule,#dfe6e4)}#dlg .hp-steps{margin:0 0 12px;padding-left:22px}#dlg .hp-steps li{margin:4px 0}
 #dlg details{border:1px solid var(--rule);border-radius:6px;padding:6px 12px;margin:6px 0;background:#fff}
 #dlg details[open]{background:var(--shade)}
 #dlg summary{cursor:pointer;font-weight:600;color:var(--navy);padding:2px 0}
@@ -1267,7 +1267,7 @@ body:not(.has-form) #focusBtn{display:none}
         <p class="railonly"><button type="button" id="railShow" class="primary">Show the list of forms</button></p>
         <div class="steps">
           <div class="step"><i>1</i><b>Enter the student once</b><p>The details in the bar above go into each form as you open it, filling only fields that are still empty.</p></div>
-          <div class="step"><i>2</i><b>Work in any form</b><p>Your work stays in this window, and Autosave keeps a safety copy in this browser. <b>Save case</b> keeps everything in one file.</p></div>
+          <div class="step"><i>2</i><b>Work in any form</b><p>Your work stays in this window, and Autosave keeps a safety copy in this browser. <b>Save case</b> keeps everything in one file (with Google Drive on, on this device and in your school Drive).</p></div>
           <div class="step"><i>3</i><b>Tick and print</b><p>Tick the forms this student needs and <b>Build master print</b> gathers them into one document with a cover and contents.</p></div>
         </div>
       </div></div>
@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.06';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.07';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3530,10 +3530,24 @@ function printCheck(){
     '<p class="pc-done" id="pcDone" hidden><b>All checked.</b> Print from the form’s own Print button, or ⌘P.</p>');
   const box=$('#dlgBody');box.addEventListener('change',()=>{const all=[...box.querySelectorAll('.pc-list input')];const d=$('#pcDone');if(d)d.hidden=!all.every(c=>c.checked);});}
 $('#dlgBody').addEventListener('click',e=>{if(e.target.closest('#hpPrintCheck')){e.preventDefault();printCheck();}});
+/* v22.07 Where the student's data goes (review I260, F510, F511): every way a student's information is kept or leaves the
+   device, in one table; HOSTING.md carries the same table for the district. The writing help's rewrite service is listed only in
+   the edition that has it (tools/build-rps.py takes its row out of the school edition, where it is off). */
+function dataWhere(){
+  const rows=[
+    ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
+    ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
+    ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed; Drive keeps removed files 30 days'],
+    ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
+    ['Questionnaire answers and staff phone entries (with the reply box)','Locked on the sender\u2019s phone so only the form\u2019s file can open them; the practice website holds the locked copy','Until the form collects and removes it, or 60 days'],
+    ['Short questionnaire links','The questionnaire (the behavior, its definition, initials, the due date), locked, on the practice website; the key stays in the link','60 days'],
+    ['Form DD-1\u2019s Google Sheet','Read from Google to this '+HERE+'; nothing is written to the sheet','\u2014']];
+  rows.push(['Check wording, Dictate, Read a document, My pictures, the TK-1 video','Stay on this '+HERE,'\u2014']);
+  return '<p>Everything else stays on this '+HERE+'. Ask the district before using any row that sends something off the device for real cases.</p><table class="hp-data"><tr><th>What</th><th>Where it goes</th><th>How long</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table>';}
 $('#help').addEventListener('click',()=>{
   const fold=(t,h)=>'<details><summary>'+t+'</summary>'+h+'</details>';
   dialog('How this works',
-   '<p class="hp-lead">Forms open inside this window and stay loaded while you work. Enter the student once, in the bar; the forms fill themselves. Save the case to a file before you leave.</p>'+
+   '<p class="hp-lead">Forms open inside this window and stay loaded while you work. Enter the student once, in the bar; the forms fill themselves. Save the case before you leave.</p>'+
    '<p class="hint" id="hpVer">This is version '+WS_REL+' of the workstation.</p>'+
    '<ol class="hp-steps">'+
    '<li><b>Pick a form</b> from the list (on a tablet, from the <b>Forms</b> button). <b>Case map</b> says which form when.</li>'+
@@ -3545,6 +3559,7 @@ $('#help').addEventListener('click',()=>{
      '<p>The target behaviors (Form TB-1), the function (Form FS-1), the goals (Form GB-1) and the reinforcer menu (Form PA-1) are read from those forms while they are open and go into every other open form, into empty fields and empty behavior tables only; the line under the bar shows what has been read, and <b>Send to open forms</b> sends it again. They are saved in the packet and case files.</p>'+
      '<p><b>Case map</b> in the bar is one page that lists the forms stage by stage, from referral to exit, with the shortest path through a case. The bar also shows what is due: review dates and next steps the open forms hold, within two weeks or past.</p>')+
    fold('Saving, autosave and closing the tab',
+     (typeof drvOn==='function'&&drvOn()?'<p><b>Google Drive is on</b> (Caseload): <b>Save case</b> keeps the case on this '+HERE+' and in your school Google Drive instead of writing a file; <b>Save case to a file</b> (More) still writes one. What follows describes the file.</p>':'')+
      '<p><b>Save case</b> writes every open form and the student details into one file; <b>Open case</b> lists its forms at once and fills each from the file as you open it (the form you were on opens first; the rest load quietly behind it). <b>Close case</b> saves the case the same way, then closes every form and clears the student’s details, so the next student’s case can start without leaving the workstation. Each form’s own <b>Save data</b> button still works on its own. The button above the form carries a dot while the case holds work not yet in a file and pulses after twenty minutes of it.</p>'+
      '<div class="warnbox"><b>Autosave</b> keeps safety copies in this browser on this device: one for each student in each tab, written within seconds of a change, taps included, and at once when you switch away from the tab. They are offered back when you open the workstation again; a form opened on its own keeps a copy too and offers it when it opens. <b>Own tab</b> takes the work with it. Copies never leave the device. They are protected by the '+HERE+'\u2019s passcode, not by the workstation: on a shared iPad, delete them (the Autosave button) or turn Autosave off. The installed app and Safari keep separate copies, Safari may clear a site\u2019s storage after 7 days without a visit, and in a private window copies end when the window closes. Copies are deleted after 14 days; no other copy is deleted without asking (over five, Autosave asks you to delete some). On an iPad, Save case asks whether the file is in Files, and keeps the copy until you say it is. A copy is a safety net; the case file is the record.</div>'+
      '<p>Work not in a saved case file is at risk when the window closes, so the browser asks first; a form opened on its own, outside the workstation, asks too. An iPad does not ask: save before you close the tab, and after Save case check that the file is in Files.</p>')+
@@ -3559,13 +3574,14 @@ $('#help').addEventListener('click',()=>{
      '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
      '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else. A name whose letters changed could be another student’s, so the warning stays and you are asked first; a name the bar never held, one that is not a small correction, or one whose ID says another student, is not offered.</p>')+
    fold('Keyboard',
-     '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
+     '<p><kbd>⌘K</kbd> (or <kbd>Ctrl K</kbd>) opens a box to jump to any form or run any command. <kbd>↑</kbd> and <kbd>↓</kbd> on the list of forms move between forms, <kbd>⌘S</kbd> saves the case, <kbd>⌘P</kbd> prints the open form, <kbd>⌘⇧P</kbd> builds the master print, <kbd>Ctrl⇧F</kbd> is fullscreen.</p>')+
    (!EMBED?fold('Offline, installing and updates',
      '<p>Opened from the website, the workstation saves its own files on the device the first time (the chip beside <b>Autosave</b> counts them), and from then on it opens and works without the internet. It looks for a new version when it starts and every few minutes while it is open; when one is ready, a strip under the bar says so and <b>Reload</b> starts it (in the one workstation window open: the new version is served to every window at once). It never reloads by itself. The chip opens <b>Check for updates</b> and <b>Reset the offline copy</b>.</p>'+
      '<p><b>Install it</b> to open it from its own icon: on an iPad, in Safari, <b>Share</b>, then <b>Add to Home Screen</b>; on a Mac, in Safari, <b>File</b>, then <b>Add to Dock</b>; in Chrome or Edge, the install icon in the address bar. Each device keeps its own copy. Installed on an iPad, a file you save opens the share sheet: choose <b>Save to Files</b>; the master print and a respondent page\u2019s preview open inside the app, with Print and Close, and <b>Own tab</b> shows the form full-window.</p>'+
-     '<p>Cases are still files: nothing typed into a form goes to the website, and a case moves between devices only when you move its file.</p>'):'')+
+     '<p>The website only hands the workstation\u2019s files to the device; what you type is not sent back to it. Where a student\u2019s information can go is listed under <b>Where the student\u2019s data goes</b>, below.</p>'):'')+
    (EMBED?fold('The one-file edition',
      '<p>All 46 forms are inside this file. <b>Save case</b> writes the case as one file of its own, <i>Student.case.html</i>, which opens the workstation with the case already in it when you double-click it. Keep that file with the student’s records.</p>'):'')+
+   fold('Where the student\u2019s data goes',dataWhere())+
    '<div class="note">Each of the 46 forms also works on its own: open its file directly and it saves, opens and prints exactly as it does here. Nothing the workstation does changes the form files.</div>');
 });
 
@@ -5069,7 +5085,7 @@ async function caseloadOpen(){const L=await clList();
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
   const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(x=>all.push(Object.assign({who:clName(r),key:r.key},x))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   dialog('Caseload',
-    '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+' on this '+HERE+', each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you save are still the record.</p>'+
+    '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+(typeof drvOn==='function'&&drvOn()?' on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+'), each as at their last save.':' on this '+HERE+', each as at their last Save case, kept in this browser on this device until you remove them. The case files you save are the record.')+'</p>'+   /* v22.07 true with Drive on or off (review F509) */
     (L.length?'<h3 class="cl-h">Students<\/h3>'+clCards(L,'dlg')+   /* v21.91 a card each (nbh-find); v21.92 the students first */
       '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')
@@ -6216,7 +6232,6 @@ function drvBoxHtml(){if(!drvAvail())return '';
     ' <button type="button" class="primary" id="drvNow">'+(tok?'Sync now':'Sign in and sync')+'<\/button> <button type="button" id="drvOff">Stop using Drive here<\/button><\/div>';}
 {const co9=caseloadOpen;caseloadOpen=async function(){const out=await co9.apply(this,arguments);
   try{const b=$('#dlgBody');if(!b||b.querySelector('#drvBox'))return out;const h=b.querySelector('.hp-lead');
-    if(h&&drvOn())h.textContent=h.textContent.replace(' on this '+HERE+', each as at their last Save case. Kept in this browser on this device only; nothing leaves it. The case files you saved are still the record.',', on this '+drvDev()+' and in your Google Drive, each as at their last save.');
     const kp=b.querySelector('#clKeep');if(kp&&(Object.keys(DRV.conf||{}).length||DRV.err))kp.open=true;   /* v21.92 */
     const at=(kp&&kp.querySelector('summary'))||h;if(at)at.insertAdjacentHTML('afterend',drvBoxHtml());
     if(drvOn()){const L=await clList()||[];b.querySelectorAll('tr[data-clrow]').forEach(tr=>{const r=L.find(x=>x.key===tr.dataset.clrow);const td=tr.children[2];if(!r||!td)return;
