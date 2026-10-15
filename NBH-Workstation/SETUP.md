@@ -9905,6 +9905,29 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.25: Read a document takes the student's contacts
+
+- **Read a document** now reads a student information system's **Addresses & Contacts** page and its **Edit Contact**
+  window (a screenshot, or the text copied from them), and offers each contact for Form DM-1's Contacts. Before, a
+  screenshot of the page gave "Nothing recognisable": its cards stand four to a row, so each line the text recognizer
+  read ran across four cards. Now the words are put back into their cards by where they stand, and each card is read
+  whole: the name, the relationship, the phone (a number broken over two lines of a narrow cell is joined) and the
+  address; a contact listed under an address ("Contacts at this Address") takes that address and its phone. From the
+  Edit Contact window: first and last name, relationship, the phones, email and language.
+- The relationship is put in Form DM-1's words (Grandmother is Grandparent, Cousin and Aunt are Other relative,
+  Godfather is Family friend, Home Health Aide is Other), and the record's own word goes in the contact's notes
+  ("Listed as Cousin"). The dialog lists the contacts to tick and correct before placing.
+- **Place** puts them into Form DM-1's contact cards: into a card that already has the same name (completing what it
+  is missing, so a contact read from the page and then from its Edit Contact window is one card), else the first empty
+  card, else a new one. Form DM-1 now holds up to 10 contacts (it was 6).
+- The Edit Contact window's First Name, Last Name and Language are the contact's: they are no longer taken for the
+  student's. The student's name and ID are read from the system's badge at the top of the page ("Last, First" over
+  "ID - grade"), and when that student is not the case on screen the dialog says so before anything is placed.
+- As before, everything is read on this device; nothing is sent anywhere.
+
+Checked by `qa/v2225-contacts-test.js` (simulated pages: a screenshot of the cards, a screenshot of the window, the
+same pasted) and `qa/doc-read-test.js`.
+
 ### v22.24: the safety copy after Open case, when a form is slow; QS-1's small print
 
 - Open case starts a new safety copy (Autosave) for the case just opened. If the first change made in it was copied

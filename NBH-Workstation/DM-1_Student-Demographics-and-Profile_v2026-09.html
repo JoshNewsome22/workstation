@@ -912,7 +912,7 @@ td input,td select{max-width:100%}
       </div>
     </div>
   </div>
-  <div class="tgroup"><span>Contacts</span><div class="row"><input type="number" id="nCon" min="1" max="6" value="3"></div></div>
+  <div class="tgroup"><span>Contacts</span><div class="row"><input type="number" id="nCon" min="1" max="10" value="3"></div></div>
   <div class="tgroup"><span>Team rows</span><div class="row"><input type="number" id="nTeam" min="4" max="16" value="8"></div></div>
   <div class="tgroup"><span>Medications</span><div class="row"><input type="number" id="nMed" min="1" max="10" value="4"></div></div>
   <div class="tgroup"><span>Diagnoses</span><div class="row"><input type="number" id="nDx" min="1" max="12" value="5"></div></div>
@@ -2182,8 +2182,7 @@ window.__nbhFactsOut=function(){
          PDF, a picture or pasted text and checked by the person; each goes into its field when that is empty (over: into
          every one); a choice must be one of the select's; the form hears the change as if typed */
       var put = [], kept = [], none = [];
-      Object.keys(d.fields).forEach(function(k){
-        var v = d.fields[k]; if (v == null || !String(v).trim() || !/^[a-z]+\.[a-z0-9]+$/.test(k)) return;
+      var one = function(k, v){
         var el = document.querySelector('[name="' + k + '"]'); if (!el || el.tagName === 'BUTTON') { none.push(k); return; }
         var cur = String(el.value || '').trim(), want = String(v).trim();
         if (cur === want) return;   /* already there (the packet put it there): neither placed nor kept */
@@ -2195,8 +2194,30 @@ window.__nbhFactsOut=function(){
         } else el.value = String(v).slice(0, 2000);
         ['input','change'].forEach(function(t){ try { el.dispatchEvent(new Event(t, {bubbles:true})); } catch(e){} });
         put.push(k);
+      };
+      Object.keys(d.fields).forEach(function(k){
+        var v = d.fields[k]; if (v == null || !String(v).trim() || !/^[a-z]+\.[a-z0-9]+$/.test(k)) return;
+        one(k, v);
       });
-      reply({ nbh:'fill-applied', id: formId(), put: put, kept: kept, none: none, status: filled() });
+      /* v22.25 the student's contacts read from the student information system: each goes into the contact card that
+         already holds the same name (completing it), else the first empty card, else a new card (up to the form's
+         most); its relationship must be one of the list's */
+      var cons = { added: 0, completed: 0, full: 0, max: 0 };
+      if (Array.isArray(d.contacts) && d.contacts.length && document.getElementById('conWrap') && document.getElementById('nCon')) {
+        var nIn = document.getElementById('nCon'); cons.max = +nIn.max;
+        var key = function(s){ return String(s || '').toLowerCase().replace(/[^a-z\u00e0-\u00ff ]/g, ' ').split(/\s+/).filter(Boolean).sort().join(' '); };
+        var holds = function(i){ return Array.prototype.some.call(document.querySelectorAll('#conWrap [name^="c[' + i + ']."]'), function(e){ return String(e.value || '').trim() !== ''; }); };
+        d.contacts.slice(0, 20).forEach(function(c){
+          if (!c || !String(c.name || '').trim()) return;
+          var n = +nIn.value, at = -1, same = false, i;
+          for (i = 0; i < n; i++) { var nm = document.querySelector('[name="c[' + i + '].name"]'); if (nm && key(nm.value) && key(nm.value) === key(c.name)) { at = i; same = true; break; } }
+          if (at < 0) for (i = 0; i < n; i++) { if (!holds(i)) { at = i; break; } }
+          if (at < 0) { if (n >= cons.max) { cons.full++; return; } nIn.value = n + 1; nIn.dispatchEvent(new Event('change', {bubbles:true})); at = n; }   /* the form draws the card, as when the number is raised by hand */
+          ['name','rel','phone','phone2','email','addr','lang','note'].forEach(function(f){ if (c[f] != null && String(c[f]).trim()) one('c[' + at + '].' + f, c[f]); });
+          if (same) cons.completed++; else cons.added++;
+        });
+      }
+      reply({ nbh:'fill-applied', id: formId(), put: put, kept: kept, none: none, cons: cons, status: filled() });
     } else if (d.nbh === 'collect') {
       if (window.nbhPolish && window.nbhPolish.plain) window.nbhPolish.plain(true);   /* nbh-polish */
       reply({ nbh:'payload', id: formId(), title: formTitle(),
