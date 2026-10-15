@@ -8,7 +8,8 @@ const fs=require('fs'),os=require('os'),path=require('path');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,600):''));if(!c)fails++;};
 const words=t=>String(t||'').toLowerCase().replace(/[^a-z' ]+/g,' ').split(/\s+/).filter(Boolean);
 async function mkWav(br){   /* one narration clip, decoded and resampled to 16 kHz, as a WAV for the fake microphone */
-  const page=await br.newPage();await page.goto(BASE+'/NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html');await page.waitForFunction(()=>typeof WALK_AUDIO!=='undefined',null,{timeout:40000});
+  const page=await br.newPage();await page.goto(BASE+'/NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html');await sleep(800);await page.evaluate(()=>window.nbhNarration&&nbhNarration.load());   /* v22.21 read when the Walkthrough opens; here at once */
+  await page.waitForFunction(()=>typeof WALK_AUDIO!=='undefined',null,{timeout:40000});
   const r=await page.evaluate(async()=>{const L=WALK_AUDIO.lines,key=Object.keys(L).find(k=>L[k].a&&L[k].t&&L[k].t.length>60)||Object.keys(L)[0],line=L[key];
     const bytes=Uint8Array.from(atob(line.a.split(',')[1]),c=>c.charCodeAt(0));const ac=new (window.AudioContext||window.webkitAudioContext)();const buf=await ac.decodeAudioData(bytes.buffer.slice(0));
     const sr=buf.sampleRate,x=buf.getChannelData(0),f=sr/16000,n=Math.floor(x.length/f),y=new Float32Array(n+16000);   /* a second of silence first: the recogniser is still starting */

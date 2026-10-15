@@ -102,7 +102,9 @@ m = re.search(r'<script id="dd1-walk">.*?</script>\n', s, re.S)
 s = s[:m.start()] + tag + s[m.end():] if m else s.replace('</body>', tag + '</body>', 1)
 # the narration and Save as video, beside the form (the one-file editions put them inside)
 for t in ('<script src="nbh-dd1-narration.js" defer></script>', '<script src="nbh-tk1-video.js" defer></script>'):
-    if t not in s: s = s.replace('<script id="dd1-walk">', t + '\n<script id="dd1-walk">', 1)
+    if '"' + t.split('"')[1] + '"' not in s: s = s.replace('<script id="dd1-walk">', t + '\n<script id="dd1-walk">', 1)
 open(FORM, 'w', encoding='utf-8').write(s)
+# v22.21 (review F474) the narration tag is made inert and read when the Walkthrough is first opened
+import subprocess; subprocess.run([sys.executable, 'tools/blocks/patch-narration.py', FORM], check=True)
 shutil.copyfile(R + 'walk-audio.js', 'NBH-Workstation/nbh-dd1-narration.js')
 print('DD-1: the walkthrough written in;', os.path.getsize(FORM), 'bytes; nbh-dd1-narration.js', os.path.getsize('NBH-Workstation/nbh-dd1-narration.js'), 'bytes')

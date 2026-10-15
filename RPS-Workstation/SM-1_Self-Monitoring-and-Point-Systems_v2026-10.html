@@ -1808,7 +1808,29 @@ td input,td select{max-width:100%}
 <!-- v21.62 My pictures: the practice's own pictures, taken with the camera (tools/blocks/nbh-pictures.js, one copy beside the forms; the one-file edition inlines it); without it the picker has no My pictures -->
 <script src="nbh-pictures.js"></script>
 <!-- v21.45 the walkthrough's narration (tools/forms/SM-1/walk-audio.js) and Save as video (Form TK-1's), beside the form; the one-file edition inlines them -->
-<script src="nbh-sm1-narration.js" defer></script>
+<script type="text/x-nbh-narration" data-src="nbh-sm1-narration.js"></script>
+<script id="nbh-narration-loader">
+/* v22.21 (review F474) the walkthrough's recorded narration is read the first time the Walkthrough is opened, not
+   every time the form opens (tools/blocks/patch-narration.py) */
+(function () {
+  var tags = [].slice.call(document.querySelectorAll('script[type="text/x-nbh-narration"][data-src]'));
+  if (!tags.length) return;
+  var p = null;
+  function one(src) { return new Promise(function (res) { var s = document.createElement('script'); s.src = src;
+    s.onload = function () { res(true); }; s.onerror = function () { res(false); }; document.head.appendChild(s); }); }
+  function load() { if (!p) p = tags.reduce(function (q, t) { return q.then(function () { return one(t.getAttribute('data-src')); }); },
+    Promise.resolve()).then(function () { window.nbhNarration.loaded = true; }); return p; }
+  window.nbhNarration = { load: load, loaded: false };
+  function again() { /* build the open Walkthrough again, now with the recorded voice (the form builds it each time it
+     is opened after this) */
+    if (!document.body.classList.contains('view-walk')) return;
+    if (window.TKWALK && typeof TKWALK.build === 'function') { try { TKWALK.build(); } catch (e) {} return; }
+    var b = document.querySelector('#viewSeg button[data-view="walk"]'); if (b) b.click(); }
+  function look() { if (p || !document.body || !document.body.classList.contains('view-walk')) return; load().then(again); }
+  try { new MutationObserver(look).observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+  look();
+})();
+</script>
 <script src="nbh-tk1-video.js" defer></script>
 <div class="toolbar noprint">
   <div class="tgroup"><span>View</span><div class="row">

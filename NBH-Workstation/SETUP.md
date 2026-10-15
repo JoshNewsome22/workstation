@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.21: a walkthrough's narration is read when the Walkthrough is opened
+
+- (review F474) IA-1, DD-1, RA-1, SM-1 and TK-1 keep their walkthrough's recorded voice in a file beside the form
+  (nbh-ia1-narration.js is 3 MB; the others 0.9 to 2.1 MB) and read it every time the form opened, so a FAST scored on
+  the iPad carried three megabytes of audio it never played. The form now reads it the first time its Walkthrough is
+  opened, and builds the walkthrough again with it within a second; Save as video and the captions are the same as
+  before. With the file missing, the walkthrough is read by the device's own voice and says so, as before.
+- The offline copy still keeps the narration files, so the Walkthrough works offline. The one-file editions still carry
+  the narration inside each form.
+- For whoever builds a release: `tools/blocks/patch-narration.py` makes the tags inert and adds the small loader; the
+  forms' own build scripts (SM-1 and TK-1 `build.sh`, the IA-1, DD-1 and RA-1 `patch-walk.py`) run it, and
+  `tools/check-build.py` checks it.
+
+Checked by `qa/v2221-narration-test.js`.
+
 ### v22.20: small print on SM-1's student sheet and TI-1's opportunity table
 
 - **SM-1** (review F483). The "My week: color the bar up to my percent" graph on the student's sheet printed its 0-100%

@@ -37,6 +37,8 @@ PY
 )
 python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-09.html "$D" NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
 python3 tools/polish-one.py NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
+# v22.21 (review F474) the narration tag is made inert and read when the Walkthrough is first opened
+python3 tools/blocks/patch-narration.py NBH-Workstation/TK-1_Token-Board-Book_v2026-10.html
 # v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
 cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
 # v21.44 the recorded narration, byte for byte, beside the form (its <script src> is in toolbar.html)
@@ -55,9 +57,9 @@ BANNER='/* ===== nbh-link (tools/blocks/nbh-link.js) ===== */\n'
 assert doc.count(BANNER)==1 and doc.count(BANNER+core)==1 and doc.count('nbh-link (v21.43)')==1, 'the link core is not in the built TK-1 exactly once, byte for byte'
 print('the link core (tools/blocks/nbh-link.js) is in the built TK-1 once, byte for byte')
 assert doc.count('<script src="nbh-tk1-video.js" defer></script>')==1 and doc.count('id="wkVideo"')==1, 'Save as video is not in the built TK-1'
-assert doc.count('<script src="nbh-tk1-narration.js" defer></script>')==1 and 'const WALK_AUDIO=' not in doc, 'the narration must be beside TK-1, not in it'
+assert doc.count('<script type="text/x-nbh-narration" data-src="nbh-tk1-narration.js"></script>')==1 and 'const WALK_AUDIO=' not in doc, 'the narration must be beside TK-1, not in it'
 assert open('NBH-Workstation/nbh-tk1-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio.js','rb').read(), 'nbh-tk1-narration.js is not walk-audio.js'
-assert doc.count('<script src="nbh-tk1-bus-narration.js" defer></script>')==1 and open('NBH-Workstation/nbh-tk1-bus-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio-bus.js','rb').read(), 'the bus narration is not beside TK-1'
+assert doc.count('<script type="text/x-nbh-narration" data-src="nbh-tk1-bus-narration.js"></script>')==1 and open('NBH-Workstation/nbh-tk1-bus-narration.js','rb').read()==open('tools/forms/TK-1/walk-audio-bus.js','rb').read(), 'the bus narration is not beside TK-1'
 import os
 for f in ('nbh-tk1-narration.js','nbh-tk1-bus-narration.js'):
     assert os.path.getsize('NBH-Workstation/'+f)<1900000, f+' is 1.9 MB or more: a file that size can reach an iPad cut short'

@@ -38,6 +38,7 @@ try:
         ['python3', B + 'patch-autosave.py', '--check'],
         ['python3', B + 'patch-pwa.py', '--check', 'NBH-Workstation'],
         ['python3', B + 'patch-shared.py', '--check', *forms],
+        ['python3', B + 'patch-narration.py', '--check', *forms],
     ]
     by_id = {}
     for f in forms:

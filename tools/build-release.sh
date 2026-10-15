@@ -16,6 +16,7 @@ step(){ echo "== $*"; "$@" 2>&1 | tail -2 || { echo "FAILED: $*"; exit 1; }; }
 step python3 tools/apply-polish.py NBH-Workstation
 step python3 tools/blocks/patch-ui.py tools/blocks/nbh-ui.html $(grep -l 'id="nbh-ui-css"' NBH-Workstation/*.html)
 step node --check NBH-Workstation/nbh-ui.js
+step python3 tools/blocks/patch-narration.py NBH-Workstation/[A-Z]*.html
 step python3 tools/pwa-sw.py NBH-Workstation
 step python3 tools/build-rps.py NBH-Workstation RPS-Workstation tools/rps-assets/rps-lockup.webp tools/rps-assets/rps-favicon.png
 step python3 tools/build-single.py NBH-Workstation deliver/NBH-Workstation.html

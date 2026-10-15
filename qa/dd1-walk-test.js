@@ -15,8 +15,9 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   page.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text());});
   await page.goto(URL);await sleep(1500);
   await page.evaluate(()=>{window.confirm=()=>true;if(window.nbhUI)nbhUI.confirm=async()=>true;});
+  await page.evaluate(()=>window.nbhNarration.load());   /* v22.21 the narration is read when the Walkthrough is first opened (qa/v2221-narration-test.js); here at once */
   const bits=await page.evaluate(()=>({tab:!!document.querySelector('nav.nbh-tabs [data-tab="walk"]'),btn:!!document.querySelector('#viewSeg [data-view="walk"]'),sec:!!document.getElementById('tab-walk'),
-    nar:!!document.querySelector('script[src="nbh-dd1-narration.js"]'),vid:!!document.querySelector('script[src="nbh-tk1-video.js"]'),audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,info:window.NBH_WALK_INFO&&NBH_WALK_INFO.what}));
+    nar:!!document.querySelector('script[data-src="nbh-dd1-narration.js"]'),vid:!!document.querySelector('script[src="nbh-tk1-video.js"]'),audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,info:window.NBH_WALK_INFO&&NBH_WALK_INFO.what}));
   ok('the Walkthrough tab, its button, the narration and Save as video are there',bits.tab&&bits.btn&&bits.sec&&bits.nar&&bits.vid&&bits.audio===15&&bits.video==='object'&&bits.info==='form',bits);
   ok('the narration file is beside the form',fs.existsSync(path.join(ROOT,ED,'nbh-dd1-narration.js')));
   /* an empty form still opens */

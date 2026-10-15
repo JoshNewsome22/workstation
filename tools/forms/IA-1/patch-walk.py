@@ -224,8 +224,10 @@ if r is None:
 else: s = r
 # the narration and Save as video, beside the form (the one-file editions put them inside)
 for t in ('<script src="nbh-ia1-narration.js" defer></script>', '<script src="nbh-tk1-video.js" defer></script>'):
-    if t not in s: s = s.replace('</body>', t + '\n</body>', 1)
+    if '"' + t.split('"')[1] + '"' not in s: s = s.replace('</body>', t + '\n</body>', 1)
 open(FORM, 'w', encoding='utf-8').write(s)
+# v22.21 (review F474) the narration tag is made inert and read when the Walkthrough is first opened
+import subprocess; subprocess.run([sys.executable, 'tools/blocks/patch-narration.py', FORM], check=True)
 if os.path.exists(R + 'walk-audio.js'):
     shutil.copyfile(R + 'walk-audio.js', 'NBH-Workstation/nbh-ia1-narration.js')
 else:

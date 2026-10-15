@@ -57,6 +57,8 @@ if [ -f tools/forms/SM-1/walk-audio.js ]; then cp tools/forms/SM-1/walk-audio.js
 # v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
 cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
 rm -rf "$D"
+# v22.21 (review F474) the narration tag is made inert and read when the Walkthrough is first opened
+python3 tools/blocks/patch-narration.py NBH-Workstation/SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html
 python3 - <<'PY'
 import os
 f='NBH-Workstation/SM-1_Self-Monitoring-and-Point-Systems_v2026-10.html'

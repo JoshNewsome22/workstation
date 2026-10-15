@@ -1287,9 +1287,31 @@ td input,td select{max-width:100%}
 <!-- v21.44 the walkthrough's recorded narration (1.2 MB), one file beside the form (build.sh copies walk-audio.js to it), so
      the form itself stays well under 2 MB; without it the walkthrough reads its captions with the device's voice; the
      one-file edition inlines it -->
-<script src="nbh-tk1-narration.js" defer></script>
+<script type="text/x-nbh-narration" data-src="nbh-tk1-narration.js"></script>
 <!-- v21.49 the bus ride walkthrough's narration (0.95 MB), its own file so neither reaches 2 MB; it adds its lines to the first -->
-<script src="nbh-tk1-bus-narration.js" defer></script>
+<script type="text/x-nbh-narration" data-src="nbh-tk1-bus-narration.js"></script>
+<script id="nbh-narration-loader">
+/* v22.21 (review F474) the walkthrough's recorded narration is read the first time the Walkthrough is opened, not
+   every time the form opens (tools/blocks/patch-narration.py) */
+(function () {
+  var tags = [].slice.call(document.querySelectorAll('script[type="text/x-nbh-narration"][data-src]'));
+  if (!tags.length) return;
+  var p = null;
+  function one(src) { return new Promise(function (res) { var s = document.createElement('script'); s.src = src;
+    s.onload = function () { res(true); }; s.onerror = function () { res(false); }; document.head.appendChild(s); }); }
+  function load() { if (!p) p = tags.reduce(function (q, t) { return q.then(function () { return one(t.getAttribute('data-src')); }); },
+    Promise.resolve()).then(function () { window.nbhNarration.loaded = true; }); return p; }
+  window.nbhNarration = { load: load, loaded: false };
+  function again() { /* build the open Walkthrough again, now with the recorded voice (the form builds it each time it
+     is opened after this) */
+    if (!document.body.classList.contains('view-walk')) return;
+    if (window.TKWALK && typeof TKWALK.build === 'function') { try { TKWALK.build(); } catch (e) {} return; }
+    var b = document.querySelector('#viewSeg button[data-view="walk"]'); if (b) b.click(); }
+  function look() { if (p || !document.body || !document.body.classList.contains('view-walk')) return; load().then(again); }
+  try { new MutationObserver(look).observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+  look();
+})();
+</script>
 <!-- v21.44 Save as video: the walkthrough made into an MP4 on this device (build.sh puts mp4-muxer and walk-video.js in it) -->
 <script src="nbh-tk1-video.js" defer></script>
 <div class="toolbar noprint">

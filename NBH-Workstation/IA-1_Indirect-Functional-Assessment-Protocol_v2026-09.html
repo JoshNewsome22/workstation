@@ -7079,7 +7079,29 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
-<script src="nbh-ia1-narration.js" defer></script>
+<script type="text/x-nbh-narration" data-src="nbh-ia1-narration.js"></script>
+<script id="nbh-narration-loader">
+/* v22.21 (review F474) the walkthrough's recorded narration is read the first time the Walkthrough is opened, not
+   every time the form opens (tools/blocks/patch-narration.py) */
+(function () {
+  var tags = [].slice.call(document.querySelectorAll('script[type="text/x-nbh-narration"][data-src]'));
+  if (!tags.length) return;
+  var p = null;
+  function one(src) { return new Promise(function (res) { var s = document.createElement('script'); s.src = src;
+    s.onload = function () { res(true); }; s.onerror = function () { res(false); }; document.head.appendChild(s); }); }
+  function load() { if (!p) p = tags.reduce(function (q, t) { return q.then(function () { return one(t.getAttribute('data-src')); }); },
+    Promise.resolve()).then(function () { window.nbhNarration.loaded = true; }); return p; }
+  window.nbhNarration = { load: load, loaded: false };
+  function again() { /* build the open Walkthrough again, now with the recorded voice (the form builds it each time it
+     is opened after this) */
+    if (!document.body.classList.contains('view-walk')) return;
+    if (window.TKWALK && typeof TKWALK.build === 'function') { try { TKWALK.build(); } catch (e) {} return; }
+    var b = document.querySelector('#viewSeg button[data-view="walk"]'); if (b) b.click(); }
+  function look() { if (p || !document.body || !document.body.classList.contains('view-walk')) return; load().then(again); }
+  try { new MutationObserver(look).observe(document.body, { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
+  look();
+})();
+</script>
 <script src="nbh-tk1-video.js" defer></script>
 <script id="v2178-ev">
 (function(){"use strict";

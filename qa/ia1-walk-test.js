@@ -19,8 +19,9 @@ const IDS_INF='i_intro,i_one,i_items,i_na,i_own,i_outro',IDS_CONV='c_intro,c_row
   page.on('console',m=>{if(m.type()==='error')errs.push('console: '+m.text());});
   await page.goto(URL);await sleep(1500);
   await page.evaluate(()=>{window.confirm=()=>true;if(window.nbhUI)nbhUI.confirm=async()=>true;});
+  await page.evaluate(()=>window.nbhNarration.load());   /* v22.21 the narration is read when the Walkthrough is first opened (qa/v2221-narration-test.js); here at once */
   const bits=await page.evaluate(()=>({btn:!!document.querySelector('#viewSeg [data-view="walk"]'),sec:!!document.getElementById('walk'),hidden:getComputedStyle(document.getElementById('walk')).display==='none',
-    nar:!!document.querySelector('script[src="nbh-ia1-narration.js"]'),vid:!!document.querySelector('script[src="nbh-tk1-video.js"]'),audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,info:window.NBH_WALK_INFO&&NBH_WALK_INFO.what,link:!!document.querySelector('#walk input[name="walk.video"]')}));
+    nar:!!document.querySelector('script[data-src="nbh-ia1-narration.js"]'),vid:!!document.querySelector('script[src="nbh-tk1-video.js"]'),audio:typeof WALK_AUDIO!=='undefined'&&Object.keys(WALK_AUDIO.lines).length,video:typeof TKVIDEO,info:window.NBH_WALK_INFO&&NBH_WALK_INFO.what,link:!!document.querySelector('#walk input[name="walk.video"]')}));
   ok('the Walkthrough button, its section (hidden until chosen), the narration and Save as video are there',bits.btn&&bits.sec&&bits.hidden&&bits.nar&&bits.vid&&bits.audio===35&&bits.video==='object'&&bits.info==='form'&&bits.link,bits);
   ok('the narration file is beside the form',fs.existsSync(path.join(ROOT,ED,'nbh-ia1-narration.js')));
   /* an empty form: the worked example */
