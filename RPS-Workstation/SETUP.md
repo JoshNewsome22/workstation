@@ -9764,3 +9764,18 @@ in on every small field tapped until the fields are 16 points; that needs its ow
   edition keeps it. tools/build-rps.py makes the change and checks that nothing in the school edition names it.
 
 Checked by `qa/v2207-privacy-test.js`.
+
+### v22.08: the keyboard on the laptop
+
+- **Skip to the open form** (review F489). The second Tab from the top of the workstation (after *Skip to the form list*)
+  is *Skip to the open form*: Enter puts the cursor in the open form's first field. It used to take about 85 presses of
+  Tab to get there.
+- **Shift+Tab under the toolbar** (F490). In every form, a field reached with Tab or Shift+Tab is no longer left hidden
+  under the pinned toolbar: the page keeps a margin the toolbar's height, and a field the browser leaves underneath it is
+  brought into view (screen only).
+- **Go to (Ctrl K) and Today** (F492). Go to keeps the cursor in its box while it is open (Tab no longer walks out into
+  the page behind) and puts it back where it was when it closes with Escape; Today puts the cursor on its title as it
+  opens, so VoiceOver says it opened.
+
+Checked by `qa/v2207-keys-test.js`. Not done here: the fixed 1.2-second wait as each form is filled from a saved case
+(F470), a change to how every form reports back, kept for a later round.

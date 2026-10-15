@@ -372,5 +372,17 @@
       reply({ found: true, how: how, view: fdView(), tag: e.tagName.toLowerCase(), key: e.id ? '#' + e.id : (e.name ? '@' + e.name : '') });
     }, 60);
   });
+  /* v22.07 (review F490) a field reached with Tab or Shift+Tab is never left under the pinned toolbar: the page keeps a
+     scroll margin the toolbar's height (scroll-padding-top, measured, as it folds or the window changes), and a field the
+     browser left underneath it is brought into view. Screen only; print has no pinned toolbar. */
+  function tbH() { var tb = document.querySelector('.toolbar'); try { if (tb && /sticky|fixed/.test(getComputedStyle(tb).position)) return Math.round(tb.getBoundingClientRect().height); } catch (x) {} return 0; }
+  function padTop() { var h = tbH(); document.documentElement.style.scrollPaddingTop = h ? (h + 8) + 'px' : ''; }
+  padTop(); window.addEventListener('resize', padTop); window.addEventListener('load', padTop); setTimeout(padTop, 1200);
+  try { var tbo = document.querySelector('.toolbar'); if (tbo && window.ResizeObserver) new ResizeObserver(padTop).observe(tbo); } catch (x) {}
+  document.addEventListener('focusin', function (e) {
+    var t = e.target; if (!t || !t.getBoundingClientRect || (t.closest && t.closest('.toolbar,dialog'))) return;
+    var h = tbH(); if (!h) return;
+    setTimeout(function () { var r = t.getBoundingClientRect(); if (r.top < h + 4 && r.bottom > 0) window.scrollBy(0, r.top - h - 8); }, 0);
+  }, true);
   window.nbhPolish = { run: run, plain: plain };
 })();
