@@ -17,7 +17,7 @@
 const {chromium, fs, path, ROOT, sleep, wire} = require(__dirname + '/lib.js');
 const {spawn, execFileSync} = require('child_process');
 const os = require('os');
-const BASE = process.env.WS_URL || 'http://localhost:8123';
+const BASE = (process.env.WS_URL || 'http://localhost:8123').replace('//127.0.0.1:', '//localhost:');   /* the relay set up for localhost answers only pages opened as localhost (the release run serves 127.0.0.1) */
 const ORIGIN = new URL(BASE).origin;
 const MPORT = process.env.MOCK_PORT || '0';   /* 0: any free port, read from the mock's first line */
 let RELAY = '';

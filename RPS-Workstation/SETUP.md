@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.23: token boards and visual supports print without the student's name; SM-1's toolbar
+
+- Since v22.10 a form printed on its own puts the student's name and ID at the top of each page and "Page N of M" at the
+  foot (Chrome and Edge). That is right for records, but it also landed on Form TK-1's token boards and cards and Form
+  VS-1's boards, schedules and cards: materials a student uses or a classroom shows, which should carry no name and which
+  are laid out to fill their own area. TK-1 and VS-1 now print without them, as before v22.10; every other form keeps them.
+- Form SM-1's toolbar is as wide as its 12-inch page again (v22.20's rebuild of SM-1 had dropped the rule; it now sits in
+  SM-1's own source, so a rebuild keeps it).
+- Tests brought up to date with changes made on purpose: the iPad held upright gives the view tabs a row of their own
+  (v22.18); the school edition's writing help has Rewrite with Claude off (v22.07); OB-1's print is compared with v22.10;
+  a test draws a signature after the notice over the pad has gone; the rewrite test opens its pages as localhost, the
+  address its stand-in relay answers; a short box full of text keeps its writing-help button just outside (v21.43).
+
+Checked by `qa/sprint-a7-test.js`, `qa/v2189-layout-test.js` and the release run.
+
 ### v22.22: Log it now for any student kept here; the one-file edition saves the case alone
 
 - (review F471) **Log it now** lists every student kept on this device, the one on screen first. Choosing a student who

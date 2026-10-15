@@ -426,8 +426,12 @@
              sid: '[data-m="sid"],[name="m.sid"],[name="s_id"],[data-meta="sid"],#m_id,#mId,#sId,[name="s.sid"],[name="h.sid"],[name="c.sid"],#hId,#cId,#h-id,[name="s.id"]' };
   function pval(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { var v = String(l[i].value || l[i].textContent || '').replace(/\s+/g, ' ').trim(); if (v) return v.slice(0, 60); } return ''; }
   function cssStr(t) { return '"' + String(t).replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ') + '"'; }
+  /* v22.23 not on the materials a student uses or a classroom shows: Form TK-1's token boards and cards and Form VS-1's
+     visual supports print as they are, edge to edge in their own area, with no name and no page number on them */
+  var NO_HEAD = /^Form (TK-1|VS-1) /;
   function printHead() {
     var old = document.getElementById('nbh-print-head'); if (old) old.remove();
+    if (NO_HEAD.test(document.title || '')) return;
     var nm = pval(PS.client) || [pval('#sFirst,[name="s.first"]'), pval('#sLast,[name="s.last"]')].filter(Boolean).join(' ');
     var who = [nm, pval(PS.sid) ? 'ID ' + pval(PS.sid) : ''].filter(Boolean).join('  \u00b7  ');
     var st = document.createElement('style'); st.id = 'nbh-print-head';

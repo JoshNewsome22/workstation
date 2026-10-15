@@ -78,6 +78,8 @@ const HELPERS = `window.__w = {
     if (!this.vis(t)) return 'hidden';
     return ''; },
   over(t){ const r = t.getBoundingClientRect(); return this.pills().filter(p => p.x >= r.left - 1 && p.x <= r.right + 1 && p.y >= r.top - 1 && p.y <= r.bottom + 1)[0] || null; },
+  /* (v21.43) a short box full of text, the caret at its end: the button waits just outside, under or over its corner */
+  near(t){ const r = t.getBoundingClientRect(); return this.over(t) || this.pills().filter(p => p.x >= r.left - 1 && p.x <= r.right + 1 && p.y >= r.top - 40 && p.y <= r.bottom + 40)[0] || null; },
   label(t){ return (t.getAttribute('aria-label') || t.getAttribute('placeholder') || t.name || t.id || '').replace(/\\s+/g, ' ').slice(0, 50); },
   census(){ const all = [...document.querySelectorAll('textarea')], by = {}, want = [], miss = [], used = new Set();
     all.forEach(t => { const w = this.why(t); if (w) { by[w] = (by[w] || 0) + 1; return; } if (!/\\S/.test(t.value)) { by.empty = (by.empty || 0) + 1; return; } want.push(t); });
@@ -262,7 +264,7 @@ async function narrow(browser, f, R){
       await page.evaluate(() => { const t = __w.firstField(false) || __w.firstField(true); t.scrollIntoView({block:'center'}); t.focus(); });
       await sleep(400);
       out[k].button = await page.evaluate(() => __w.overflow());
-      out[k].shown = await page.evaluate(() => !!__w.over(document.activeElement));
+      out[k].shown = await page.evaluate(() => !!__w.near(document.activeElement));
       await page.evaluate(() => nbhWording.open(document.activeElement)); await sleep(500);
       out[k].opened = await page.evaluate(() => { const d = __w.root() && __w.root().querySelector('dialog.pn'); return !!(d && d.open); });
       if (out[k].opened) {

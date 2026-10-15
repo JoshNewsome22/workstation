@@ -172,6 +172,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   await t.mouse.move(b.x+16,b.y+b.height*.6);await t.mouse.down();for(let i=0;i<36;i++)await t.mouse.move(b.x+16+i*9,b.y+b.height*(.55-.3*Math.sin(i/3)));await t.mouse.up();
   await t.mouse.move(b.x+60,b.y+b.height*.8);await t.mouse.down();for(let i=0;i<10;i++)await t.mouse.move(b.x+60+i*20,b.y+b.height*.8);await t.mouse.up();await sleep(150);
   /* touch on row 2 (the iPad: a finger) */
+  await t.evaluate(()=>document.querySelectorAll('.nbh-toast').forEach(e=>e.remove()));   /* "Listed 4 people" lies over the pad until it fades */
   b=await box('#td85List canvas.td85-pad[data-k="1"]');const cdp=await ctx.newCDPSession(t);
   const tp=(x,y)=>[{x:Math.round(x),y:Math.round(y),radiusX:1,radiusY:1,force:1,id:1}];
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:tp(b.x+20,b.y+b.height*.5)});

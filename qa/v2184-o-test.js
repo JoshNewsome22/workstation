@@ -42,6 +42,8 @@ const NOPILL = ['SR-1'];
 (async () => {
   /* ---- 1. the files */
   const W = fs.readFileSync(path.join(NBH, 'nbh-wording.js'), 'utf8'), L = fs.readFileSync(path.join(NBH, 'nbh-logo.js'), 'utf8');
+  /* v22.07 the school edition's writing help has Rewrite with Claude off (tools/build-rps.py); otherwise the same file */
+  const WR = W.replace('{"relay":"https://newsomebh.com/ai"}', '{"relay":"","rewrite":false}');
   const client = fs.readFileSync(path.join(ROOT, 'tools/blocks/nbh-wording.js'), 'utf8'), rules = fs.readFileSync(path.join(ROOT, 'tools/blocks/nbh-wording-rules.json'), 'utf8');
   ok('1 nbh-wording.js holds the rules and the client byte for byte', W.includes('window.nbhWordingRules=\n' + rules + '\n;') && W.endsWith(client));
   ok('1 nbh-logo.js holds the letterhead and sets NBH_LOGO', /^\/\*[^]*var L="data:image\/png;base64,/.test(L) && L.includes('window.NBH_LOGO=L'));
@@ -61,7 +63,7 @@ const NOPILL = ['SR-1'];
   if (fs.existsSync(path.join(RPS, 'nbh-logo.js'))) {
     const RL = fs.readFileSync(path.join(RPS, 'nbh-logo.js'), 'utf8');
     ok('1 the school edition has both, its logo its own', /var L="data:image\/webp;base64,/.test(RL) && !RL.includes(L.slice(120, 400)) &&
-       fs.readFileSync(path.join(RPS, 'nbh-wording.js'), 'utf8') === W && JSON.parse(fs.readFileSync(path.join(RPS, 'release.json'), 'utf8')).files['nbh-logo.js'].len === Buffer.byteLength(RL));
+       fs.readFileSync(path.join(RPS, 'nbh-wording.js'), 'utf8') === WR && WR !== W && JSON.parse(fs.readFileSync(path.join(RPS, 'release.json'), 'utf8')).files['nbh-logo.js'].len === Buffer.byteLength(RL));
   }
   /* every shared script tools/blocks/shared_js.py names (the two above and, once moved, the others): one file, loaded by
      every form once where its inline copy was, listed for the offline copy, copied to the school edition, inline again in
@@ -90,7 +92,7 @@ const NOPILL = ['SR-1'];
     const t = fs.readFileSync(path.join(ROOT, dl), 'utf8'), blk = id => (new RegExp('<script type="text/plain" id="' + id + '">([^<]*)</script>').exec(t) || [])[1] || '';
     const packed = JSON.parse(zlib.gunzipSync(Buffer.from(blk('nbh-embed-forms'), 'base64')).toString('utf8')), wd = zlib.gunzipSync(Buffer.from(blk('nbh-embed-wording'), 'base64')).toString('utf8');
     const miss = Object.keys(packed).filter(k => !packed[k].includes('<script id="nbh-wording">@@NBH-WORDING@@</script>') || !packed[k].includes('<script id="nbh-logo">/* the letterhead') || !packed[k].includes('var L="@@NBH-LOGO@@"') || packed[k].includes(' src="nbh-wording.js"') || packed[k].includes(' src="nbh-logo.js"'));
-    ok('1 ' + dl + ': the 46 forms carry both inline again, the writing help once', Object.keys(packed).length === 46 && !miss.length && wd === W, miss);
+    ok('1 ' + dl + ': the 46 forms carry both inline again, the writing help once', Object.keys(packed).length === 46 && !miss.length && wd === (ed === 'RPS' ? WR : W), miss);
   }
 
   const browser = await chromium.launch();
