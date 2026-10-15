@@ -1,6 +1,6 @@
 /* v21.84 helper O: the writing help and the letterhead are ONE file each beside the forms (NBH-Workstation/nbh-wording.js,
    NBH-Workstation/nbh-logo.js), loaded by every form with a classic <script src> where its inline copy was.
-   Checks, for the 46 forms: the files and loaders (no inline copy left), sw.js and release.json listing both, the school
+   Checks, for the 47 forms: the files and loaders (no inline copy left), sw.js and release.json listing both, the school
    edition carrying both (its own logo), the one-file editions holding every form with both put back inline; then every
    form opened on its own from the website and from file:// (no page error, the writing help started with its rules and
    finds wording on a field, its button over a field, the letterhead filled), a few in the shell, in an Own tab, in the
@@ -51,7 +51,7 @@ const NOPILL = ['SR-1'];
   let bad = [];
   for (const f of F) { const s = fs.readFileSync(path.join(NBH, f.file), 'utf8');
     if (s.split(LW).length !== 2 || s.split(LL).length !== 2 || s.split('<script id="nbh-wording"').length !== 2 || s.split('<script id="nbh-logo"').length !== 2 || s.includes('window.nbhWordingRules=') || /data:image\/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAHZ/.test(s)) bad.push(f.id); }
-  ok('1 each of the 46 forms loads both once and holds no inline copy', F.length === 46 && !bad.length, bad);
+  ok('1 each of the 47 forms loads both once and holds no inline copy', F.length === 47 && !bad.length, bad);
   const pos = F.map(f => { const s = fs.readFileSync(path.join(NBH, f.file), 'utf8'); return s.indexOf(LL) < s.indexOf('</head>') && s.indexOf(LW) > s.indexOf('<body') && s.indexOf(LW) < s.lastIndexOf('<script>'); });
   ok('1 the logo loader is in the head; the writing help\'s after the markup, before the form\'s own script', pos.every(Boolean), F.filter((f, i) => !pos[i]).map(f => f.id));
   const out = execFileSync('python3', [path.join(ROOT, 'tools/blocks/patch-wording.py'), '--check'].concat(F.map(f => path.join(NBH, f.file))), {encoding:'utf8'});
@@ -92,7 +92,7 @@ const NOPILL = ['SR-1'];
     const t = fs.readFileSync(path.join(ROOT, dl), 'utf8'), blk = id => (new RegExp('<script type="text/plain" id="' + id + '">([^<]*)</script>').exec(t) || [])[1] || '';
     const packed = JSON.parse(zlib.gunzipSync(Buffer.from(blk('nbh-embed-forms'), 'base64')).toString('utf8')), wd = zlib.gunzipSync(Buffer.from(blk('nbh-embed-wording'), 'base64')).toString('utf8');
     const miss = Object.keys(packed).filter(k => !packed[k].includes('<script id="nbh-wording">@@NBH-WORDING@@</script>') || !packed[k].includes('<script id="nbh-logo">/* the letterhead') || !packed[k].includes('var L="@@NBH-LOGO@@"') || packed[k].includes(' src="nbh-wording.js"') || packed[k].includes(' src="nbh-logo.js"'));
-    ok('1 ' + dl + ': the 46 forms carry both inline again, the writing help once', Object.keys(packed).length === 46 && !miss.length && wd === (ed === 'RPS' ? WR : W), miss);
+    ok('1 ' + dl + ': the 47 forms carry both inline again, the writing help once', Object.keys(packed).length === 47 && !miss.length && wd === (ed === 'RPS' ? WR : W), miss);
   }
 
   const browser = await chromium.launch();
@@ -109,7 +109,7 @@ const NOPILL = ['SR-1'];
       if (pe.length || failed.some(x => /nbh-(wording|logo)\.js/.test(x))) errs.push(f.id + ' ' + JSON.stringify(pe.concat(failed)).slice(0, 200));
       await page.close();
     }
-    ok('2 ' + where + ': all 46 forms on their own start the writing help (rules, a finding, its button over a field) and fill the letterhead', !badF.length, badF.map(x => x.slice(0, 260)));
+    ok('2 ' + where + ': all 47 forms on their own start the writing help (rules, a finding, its button over a field) and fill the letterhead', !badF.length, badF.map(x => x.slice(0, 260)));
     ok('2 ' + where + ': no page error, both files load', !errs.length, errs.slice(0, 4));
     await ctx.close();
   }

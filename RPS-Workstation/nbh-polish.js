@@ -429,7 +429,7 @@
   function cssStr(t) { return '"' + String(t).replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ') + '"'; }
   /* v22.23 not on the materials a student uses or a classroom shows: Form TK-1's token boards and cards and Form VS-1's
      visual supports print as they are, edge to edge in their own area, with no name and no page number on them */
-  var NO_HEAD = /^Form (TK-1|VS-1) /;
+  var NO_HEAD = /^Form (TK-1|VS-1|RS-1) /;   /* v22.28 RS-1 is a staff member's record: its pages carry the client code, not the case's student */
   function printHead() {
     var old = document.getElementById('nbh-print-head'); if (old) old.remove();
     if (NO_HEAD.test(document.title || '')) return;

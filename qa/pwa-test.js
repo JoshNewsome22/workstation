@@ -9,7 +9,7 @@
      B  the first visit registers sw.js, the chip counts the files (n of N) and ends at Saved for offline use, the set
         holds every listed file byte for byte, the shell asked for persistent storage; the list holds every file of the
         folder that a page names (scanned here independently of tools/pwa-sw.py)
-     C  with the network off the shell and every one of the 46 forms open, the picture library loads, a form is filled
+     C  with the network off the shell and every one of the 47 forms open, the picture library loads, a form is filled
         and saved (and the case too), an unsaved page gets the offline page; nothing saved is asked of the network, and
         no request a page makes for a file of the folder goes unanswered; Diagnostics says the libraries are saved
      D  the writing help's relay (/ai, outside the folder: GET and POST), another website, a POST and a HEAD inside the
@@ -301,7 +301,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
   /* v21.84 the scripts every form loads from one file beside it (tools/blocks/shared_js.py: the writing help, the letterhead, ...) */
   need.push(...[...fs.readFileSync(path.join(ROOT,'tools','blocks','shared_js.py'),'utf8').matchAll(/'(nbh-[a-z-]+\.js)'/g)].map(m=>m[1]).filter((f,i,a)=>a.indexOf(f)===i&&fs.existsSync(path.join(ROOT,'NBH-Workstation',f))));
   /* v21.94 the nbh-offline meta also names nbh-dictate.js (the dictation, loaded by a form's Dictate switch when first used): seven entries */
-  check('B the list is the shell, the 46 forms, the picture library, the TK-1 narration, the respondent page with its script and library, the PDF tools, the dictation, the document readers (nbh-offline), the manifest and the icons',offline.length===7&&need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
+  check('B the list is the shell, the 47 forms, the picture library, the TK-1 narration, the respondent page with its script and library, the PDF tools, the dictation, the document readers (nbh-offline), the manifest and the icons',offline.length===7&&need.every(f=>FILES.includes(f))&&FILES.every(f=>need.includes(f)),FILES.filter(f=>!need.includes(f)).concat(need.filter(f=>!FILES.includes(f))).join(', '));
   const named=scanLoads(path.join(ROOT,'NBH-Workstation'),['index.html','respond.html',...F.map(f=>f.file)]);
   check('B every file of the folder a page names (scanned here: tags, styles, fetch, loadScript, workers, .src) is in the list',named.length>=6&&named.every(f=>FILES.includes(f)),'named '+named.length+'; not listed: '+named.filter(f=>!FILES.includes(f)).join(', '));
   const pa=await page.evaluate(()=>({asked:window.__persistAsked||0,seen:window.__persistedSeen||0,was:window.__persistedWas}));
@@ -335,10 +335,10 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
       if(['SM-1','VS-1','TK-1'].includes(f.id)){const fr=frameOf(page,f.file);pic[f.id]=fr?await fr.evaluate(()=>window.NBH_PICTOS?Object.keys(window.NBH_PICTOS).length:0).catch(()=>0):0;}
       await closeCur(page);
     }
-    check('C offline: every one of the 46 forms opens in the shell and answers',!notOpen.length,notOpen.join(', '));
+    check('C offline: every one of the 47 forms opens in the shell and answers',!notOpen.length,notOpen.join(', '));
     check('C offline: the picture library loads in SM-1, VS-1 and TK-1',Object.values(pic).length===3&&Object.values(pic).every(n=>n>100),JSON.stringify(pic));
     page.off('requestfailed',onFail);page.off('response',onResp);
-    check('C offline: no request the shell and the 46 forms made for a file of the folder went unanswered',!unanswered.length,unanswered.slice(0,6).join(', '));
+    check('C offline: no request the shell and the 47 forms made for a file of the folder went unanswered',!unanswered.length,unanswered.slice(0,6).join(', '));
     await page.evaluate(()=>$('#diag').click());
     await page.waitForFunction(()=>{const r=Array.from(document.querySelectorAll('#dlgBody tr')).map(t=>t.textContent).join('|');return /Picture library.*(saved on this device|could not check)/.test(r)&&/Respondent pages.*(saved on this device|could not check)/.test(r);},null,{timeout:8000}).catch(()=>{});
     const dgo=await page.evaluate(()=>Array.from(document.querySelectorAll('#dlgBody tr')).map(t=>t.textContent).filter(t=>/^(Picture library|Respondent pages)/.test(t)));

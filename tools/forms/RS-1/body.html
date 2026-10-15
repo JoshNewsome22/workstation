@@ -1,0 +1,199 @@
+  <!-- ===================== SETUP ===================== -->
+  <section class="only-setup">
+    <h2 class="nbh-band">The Supervisee</h2>
+    <p class="hint">Entered once for the year; every month&rsquo;s record carries it. Use client codes, not student names: this record may be shown to the BACB in an audit.</p>
+    <div class="fieldgrid">
+      <div><label for="sName">RBT&rsquo;s name</label><input id="sName" data-s="rbt_name" placeholder="e.g., Jordan Lee" autocomplete="off"></div>
+      <div><label for="sCred">Credential</label><input id="sCred" data-s="rbt_cred" placeholder="RBT"></div>
+      <div><label for="sCert">BACB certification number</label><input id="sCert" data-s="rbt_cert" placeholder="RBT-00-000000" autocomplete="off"></div>
+      <div><label for="sOrig">Original certification date</label><input id="sOrig" type="date" data-s="rbt_orig"></div>
+      <div><label for="sExp">Current expiration date</label><input id="sExp" type="date" data-s="rbt_exp"></div>
+      <div><label for="sPath">Recertification path</label><select id="sPath" data-s="path"><option value=""></option><option value="renewal">2026 recertification with competency assessment</option><option value="recert">Two-year cycle with PDUs</option></select></div>
+      <div><label for="sEmp">Employer</label><input id="sEmp" data-s="employer" placeholder="e.g., the school district or agency"></div>
+      <div><label for="sSite">Site (school or program)</label><input id="sSite" data-s="site" data-m="site" placeholder="e.g., Simulated Elementary"></div>
+      <div><label for="sClients">Client code(s), separated by commas</label><input id="sClients" data-s="clients" placeholder="e.g., SIM-0002, SIM-0005" autocomplete="off" spellcheck="false"></div>
+    </div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Supervisors</h2>
+    <p class="hint">An <b>RBT Supervisor</b> is a BCBA or a BCaBA; an <b>RBT Requirements Coordinator</b> is a BCBA and may also supervise. Before supervising, each completes training based on the Supervisor Training Curriculum Outline (2.0), uploaded to their BACB portal. With a Requirements Coordinator, only the coordinator lists the RBT in the portal. The RBT may not be related to, superior to, an employer of, or in a multiple relationship with a supervisor or the coordinator, and every client the RBT works with needs a supervisor with client oversight (employed by the same organization as the RBT, or under contract with the client).</p>
+    <div id="supList"></div>
+    <div class="tools"><button class="tool" type="button" id="addSup">Add a supervisor</button></div>
+    <div id="supNote"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">The School Year and the Usual Schedule</h2>
+    <p class="hint">The usual days and hours fill each month&rsquo;s service days when the month is first opened; change any row there (a holiday, a short day, an absence).</p>
+    <div class="fieldgrid">
+      <div><label for="sYear">School year (August to July)</label><select id="sYear" data-s="year"></select></div>
+      <div><label for="sStart">Usual start time</label><input id="sStart" type="time" data-s="day_start"></div>
+      <div><label for="sEnd">Usual end time</label><input id="sEnd" type="time" data-s="day_end"></div>
+      <div><label for="sBreak">Usual time not in RBT services (minutes)</label><input id="sBreak" data-s="day_break" inputmode="numeric" placeholder="e.g., 30 for lunch"></div>
+      <div><label for="sAct">Usual primary intervention</label><select id="sAct" data-s="day_act"></select></div>
+    </div>
+    <div class="rs-days" role="group" aria-label="Usual service days" id="dayChips"></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Rules</h2>
+    <p class="hint">The numbers the monthly check uses. The defaults are the BACB&rsquo;s requirements as of 2026; if the BACB changes them, change them here. <b>Check against the current BACB RBT Handbook.</b></p>
+    <div class="fieldgrid rs-rules" id="rulesGrid">
+      <div><label for="rPct">Supervision, percent of service hours each calendar month</label><input id="rPct" data-r="pct" inputmode="decimal"></div>
+      <div><label for="rContacts">Real-time contacts each month, at least</label><input id="rContacts" data-r="contacts" inputmode="numeric"></div>
+      <div><label for="rIndiv">Of them individual, at least</label><input id="rIndiv" data-r="indiv" inputmode="numeric"></div>
+      <div><label for="rObs">Of them observing the RBT with a client, at least</label><input id="rObs" data-r="obs" inputmode="numeric"></div>
+      <div><label for="rPdu">PDUs in a two-year cycle</label><input id="rPdu" data-r="pdu" inputmode="numeric"></div>
+      <div><label for="rGrp">Small group, most RBTs</label><input id="rGrp" data-r="grpmax" inputmode="numeric"></div>
+      <div><label for="rRemind">Competency assessment window: days before expiration</label><input id="rRemind" data-r="remind" inputmode="numeric"></div>
+      <div><label for="rRemind2">Early reminder (days)</label><input id="rRemind2" data-r="remind2" inputmode="numeric"></div>
+    </div>
+    <div class="tools"><button class="tool" type="button" id="rulesReset">Back to the 2026 defaults</button><span class="hint" id="rulesNote"></span></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">The Requirements in Brief (2026)</h2>
+    <div class="rs-req" id="reqBox"></div>
+  </section>
+
+  <!-- ===================== MONTH ===================== -->
+  <section class="only-month">
+    <div class="rs-monthbar" role="group" aria-label="Month of the school year" id="monthBar"></div>
+    <div id="setupNudge"></div>
+    <div class="rs-chips"><label class="chip" id="noSvcChip"><input type="checkbox" id="noSvc" data-mo="noservice"> No services this month</label><span class="hint" style="align-self:center">The RBT did not practise this month: monthly supervision is not required, and the month shows as not applicable.</span></div>
+    <div class="rs-mgrid">
+      <div class="rs-main">
+        <h2 class="nbh-band" id="monthTitle">Service Days</h2>
+        <p class="hint">One row for each day the RBT provided services. Hours are the end time less the start time less the time not in RBT services. Tick <b>No service</b> for a holiday or an absence; a row after today is planned and is not counted yet.</p>
+        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days</button><span class="hint" id="dayCount"></span></div>
+        <div class="grid-wrap"><table class="rt rs-days-t rs-stack" id="dayTbl"><thead><tr><th style="width:21%">Date</th><th style="width:13%">Start</th><th style="width:13%">End</th><th style="width:9%">Not in services (min)</th><th style="width:8%">Hours</th><th>Primary intervention</th><th style="width:8%">No service</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+
+        <h2 class="nbh-band" style="margin-top:18px">Supervision Contacts</h2>
+        <p class="hint">Each real-time contact with the supervisor: in person or by live two-way video. In person is preferred; a web camera or video conference is allowed. A phone call, an email, a recording, or video monitoring without real-time interaction and feedback can be noted here but does not count. Supervision is client-focused and is not professional development: one event cannot count as both.</p>
+        <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><span class="hint" id="contactCount"></span></div>
+        <div id="contactList"></div>
+        <div class="field rs-mnote"><label for="monthNote">Notes for the month (optional)</label><textarea id="monthNote" data-mo="note" rows="2" placeholder="e.g., the RBT was out for two days; the client moved to a new classroom on the 14th"></textarea></div>
+        <div class="field"><label for="monthRecords">Other records for this month, if any records disagree (optional)</label><input id="monthRecords" data-mo="records" placeholder="e.g., session notes on Form CN-1 for 9/14 to 9/18; the district time sheet"></div>
+      </div>
+      <aside class="rs-side" aria-label="This month's compliance">
+        <div id="compPanel"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== YEAR ===================== -->
+  <section class="only-year">
+    <h2 class="nbh-band" id="yearTitle">The Year</h2>
+    <div class="metrics" id="yearMetrics"></div>
+    <p class="hint">Tap a month to open it. A month is compliant when every check is met; the current month is &ldquo;in progress&rdquo; until it ends.</p>
+    <div class="grid-wrap"><table class="rt rs-year-t" id="yearTbl"></table></div>
+    <h3 style="margin-top:16px">Percent of service hours supervised, by month</h3>
+    <div class="rs-chart" id="yearChart"></div>
+    <h3 style="margin-top:16px">Observation checklist, average by month</h3>
+    <div class="rs-chart" id="ckChart"></div>
+  </section>
+
+  <!-- ===================== GOALS AND CREDENTIAL ===================== -->
+  <section class="only-rbt">
+    <h2 class="nbh-band">The RBT&rsquo;s Goals</h2>
+    <p class="hint">Performance goals set in supervision: one skill each, in words the RBT can act on, with a target date. The workstation&rsquo;s due line shows the target dates.</p>
+    <div id="goalList"></div>
+    <div class="tools"><button class="tool" type="button" id="addGoal">Add a goal</button><span class="hint" id="goalCount"></span></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">The Credential</h2>
+    <div id="credPanel"></div>
+    <div id="renewBox">
+      <h3>2026 recertification with the Recertification Competency Assessment</h3>
+      <p class="hint">An RBT who recertifies in 2026 does so one last time under the old requirements: a Recertification Competency Assessment, completed no more than 45 days before the expiration date and overseen by a qualified BACB-certified RBT supervisor, uploaded with the recertification application. The two-year cycle begins after it. <b>Check against the current BACB RBT Handbook.</b></p>
+      <div id="compWindow"></div>
+      <div class="fieldgrid">
+        <div><label for="cCompDate">Competency assessment completed on</label><input id="cCompDate" type="date" data-cr="comp_date"></div>
+        <div><label for="cCompBy">Overseen by (name and credential)</label><input id="cCompBy" data-cr="comp_by" list="supNames"></div>
+        <div><label for="cApplied">Recertification application submitted on</label><input id="cApplied" type="date" data-cr="applied"></div>
+      </div>
+    </div>
+    <div id="pduBox">
+      <h3>The two-year cycle and its PDUs</h3>
+      <p class="hint">Professional development units count only inside the cycle: they cannot be made up in the reinstatement period, extra PDUs do not carry over, and repeating the same activity does not count again. Three kinds count: an in-service training at the RBT&rsquo;s organization related to behavior-analytic service delivery, given by a BCaBA, BCBA or BCBA-D (not training on one client&rsquo;s program; documented on the RBT Professional Development form); an ACE Provider event; a didactic behavior-analytic university course (1 semester credit = 15 hours, 1 quarter credit = 10). Ongoing supervision, client-specific training and supervised fieldwork never count. <b>Check against the current BACB RBT Handbook.</b></p>
+      <div class="fieldgrid">
+        <div><label for="cCycle">The cycle began on</label><input id="cCycle" type="date" data-cr="cycle_start"></div>
+        <div><label for="cCycleEnd">The cycle ends on</label><input id="cCycleEnd" type="date" data-cr="cycle_end"></div>
+      </div>
+      <div class="grid-wrap"><table class="rt rs-stack" id="pduTbl"><thead><tr><th style="width:15%">Date</th><th>Title</th><th style="width:24%">Type</th><th style="width:17%">Provider</th><th style="width:8%">Units</th><th style="width:8%">Ethics</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <div class="tools"><button class="tool" type="button" id="addPdu">Add a PDU</button></div>
+      <div id="pduOut"></div>
+    </div>
+    <div class="instr" id="selfReport"><b>Self-reporting.</b> An RBT self-reports certain events to the BACB within 30 days of becoming aware of them (RBT Ethics Code 2.0 and the self-reporting requirements), reports noncompliance with the supervision requirements in a timely manner, and updates personal information within 30 days of a change. This is a reminder, not legal advice: the RBT and the supervisor read the current requirements themselves.</div>
+    <div class="field"><label for="cNotes">Credential notes</label><textarea id="cNotes" data-cr="notes" rows="2" placeholder="e.g., reminder given to the RBT; application fee paid by the district"></textarea></div>
+
+    <h2 class="nbh-band" style="margin-top:18px">Concerns and Corrective Action (confidential)</h2>
+    <div class="instr">When the supervisor becomes aware of a potential ethics violation by the RBT, they investigate and document it. A <b>Notice of Alleged Violation</b> goes to the BACB when the concern involves abuse or neglect of a client; results in the RBT being charged with or convicted of a violation of the law; violates RBT Ethics Code (2.0) standard 1.03, 1.05, 3.01, 3.02, 3.03, 3.04 or 3.05; or has occurred repeatedly despite reasonable attempts to address it. Otherwise the supervisor develops and carries out an individualized corrective-action plan and documents the outcome (BCBA Handbook). This part is <b>not</b> on the monthly record; it prints only from its own button.</div>
+    <div id="concernList"></div>
+    <div class="tools"><button class="tool" type="button" id="addConcern">Record a concern</button><button class="tool" type="button" id="printConcerns">Print the concerns (confidential)</button></div>
+  </section>
+
+  <!-- ===================== SIGN AND PRINT ===================== -->
+  <section class="only-print">
+    <h2 class="nbh-band noprint" id="signTitle">Sign the Monthly Record</h2>
+    <p class="hint noprint">The supervisor and the RBT read the record below, type their names and the date, and sign with a finger or a stylus (or leave the box empty and sign the paper). <b>Print this month</b> prints the record alone, on letter paper.</p>
+    <div class="rs-sign noprint">
+      <div class="rs-sigblock">
+        <div class="rs-sigh">Supervisor</div>
+        <div class="fieldgrid">
+          <div><label for="sgSup">Name and credential</label><input id="sgSup" data-sg="sup_name" list="supNames"></div>
+          <div><label for="sgSupDate">Date</label><input id="sgSupDate" type="date" data-sg="sup_date"></div>
+        </div>
+        <canvas class="rs-pad" data-pad="sup_img" width="640" height="150" aria-label="Supervisor's signature: draw here"></canvas>
+        <div class="tools"><button class="tool" type="button" data-padclear="sup_img">Clear the signature</button></div>
+      </div>
+      <div class="rs-sigblock">
+        <div class="rs-sigh">RBT</div>
+        <div class="fieldgrid">
+          <div><label for="sgRbt">Name and credential</label><input id="sgRbt" data-sg="rbt_name"></div>
+          <div><label for="sgRbtDate">Date</label><input id="sgRbtDate" type="date" data-sg="rbt_date"></div>
+        </div>
+        <canvas class="rs-pad" data-pad="rbt_img" width="640" height="150" aria-label="RBT's signature: draw here"></canvas>
+        <div class="tools"><button class="tool" type="button" data-padclear="rbt_img">Clear the signature</button></div>
+      </div>
+    </div>
+    <div class="tools noprint"><button class="tool" type="button" id="printMonth2">Print this month</button><button class="tool" type="button" id="printYear2">Print the year</button></div>
+    <h2 class="nbh-band noprint" style="margin-top:14px">The Monthly Record as It Prints</h2>
+    <div class="rs-paper" id="monthOut"></div>
+    <h2 class="nbh-band noprint" style="margin-top:18px">The Year Summary as It Prints</h2>
+    <div class="rs-paper" id="yearOut"></div>
+    <div class="rs-paper rs-conf" id="concernOut"></div>
+  </section>
+
+  <!-- ===================== GUIDE ===================== -->
+  <section class="only-guide">
+    <h2 class="nbh-band">What This Form Keeps</h2>
+    <p>The record of an RBT&rsquo;s ongoing supervision, month by month: the days and hours the RBT provided behavior-analytic services, and each real-time contact with a supervisor (when, how long, with whom, individual or in a small group, in person or by live video, whether the supervisor watched the RBT working with a client, what was covered, how it was taught, the feedback, and what the RBT works on next). Each month is checked against the rules on the Setup page as it is filled, so a gap shows while there is still time in the month to close it. The signed monthly record is the document the BACB can ask for in an audit.</p>
+    <h2 class="nbh-band" style="margin-top:16px">The Requirements (as of 2026)</h2>
+    <div class="rs-req" id="reqBox2"></div>
+    <h2 class="nbh-band" style="margin-top:16px">How the Figures Are Calculated</h2>
+    <table class="rt">
+      <tr><th style="width:28%">RBT hours</th><td>Each service day: end time less start time, less the minutes not in RBT services. A day ticked &ldquo;No service&rdquo; counts nothing. In the current month only the days up to today count; later rows are shown as planned.</td></tr>
+      <tr><th>Supervision hours</th><td>The minutes of the contacts that count: in person or by live video (web camera or video conference), with a supervisor who is a BCBA or a BCaBA on the Setup page, on a date inside the month, individual or in a group of no more than 10 RBTs. A contact by phone, email or recording, video monitoring without real-time interaction, a group of more than 10, or a supervisor without one of those credentials is listed but not counted, and the month is flagged.</td></tr>
+      <tr><th>Supervisor requirements on record</th><td>For each supervisor with a contact in the month: supervisor training (Supervisor Training Curriculum Outline 2.0) marked done, the relationship check confirmed, client oversight recorded, and the RBT listed in the BACB portal (by the Requirements Coordinator when there is one, otherwise by the supervisor).</td></tr>
+      <tr><th>A month without services</th><td>Ticked &ldquo;No services this month&rdquo;, a month is not applicable: an RBT who does not practise in a month needs no supervision that month.</td></tr>
+      <tr><th>Percent supervised</th><td>Supervision minutes divided by RBT service minutes. &ldquo;More minutes needed&rdquo; is the rule&rsquo;s percent of the RBT minutes so far, rounded up, less the supervision minutes so far; the planned figure uses every row of the month.</td></tr>
+      <tr><th>Contacts, individual, observation</th><td>Counted from the contacts that count. A contact is individual when only this RBT took part, and a small-group contact otherwise; an observation is a contact in which the supervisor watched the RBT providing services with a client.</td></tr>
+      <tr><th>The month&rsquo;s status</th><td>Green: met. Amber: not yet (the month has not ended). Red: not met after the month ended, or a contact that cannot count (phone, email, recording, video monitoring alone, a group of more than 10, a supervisor without a BCBA or BCaBA credential) at any time. Grey: not applicable (no services).</td></tr>
+      <tr><th>Observation checklist</th><td>Items marked Yes divided by the items marked Yes or No; N/A is left out. The year view averages the month&rsquo;s checklists (a working convention: 90% and above is solid, 80% to 89% is a coaching point, below 80% calls for retraining with behavior skills training).</td></tr>
+      <tr><th>The credential</th><td>Days until the expiration date on the Setup page, with an early reminder and a reminder from the opening of the competency assessment window (the days on the Rules panel). PDUs are totalled from the log against the cycle&rsquo;s target: only the three kinds that count, dated inside the cycle; an entry that does not count is marked.</td></tr>
+    </table>
+    <h2 class="nbh-band" style="margin-top:16px">Good Practice</h2>
+    <table class="rt">
+      <tr><th style="width:28%">Write it the same day</th><td>A contact recorded the day it happened, with the feedback in the supervisor&rsquo;s own words, is a better record and a better plan for the next one.</td></tr>
+      <tr><th>Behavior skills training</th><td>Instruction, modeling, rehearsal and feedback, to a criterion, is the method with the strongest evidence for teaching staff (Parsons, Rollyson &amp; Reid, 2012). Tick the parts used, so the record shows how a skill was taught as well as what.</td></tr>
+      <tr><th>Feedback</th><td>Specific, prompt and tied to what was observed: what went well, one thing to change, and how (Reid, Parsons &amp; Green, 2012). The follow-up box carries it into the next contact.</td></tr>
+      <tr><th>Codes, not names</th><td>Clients are named by a code. The record goes to the BACB in an audit and should identify the RBT and the supervisors, not the students.</td></tr>
+      <tr><th>Keep it 7 years</th><td>Keep the signed monthly records (and this file) for at least 7 years, also after the supervision ends. The BACB lists what they must show: the days and times the RBT provided services; the dates and duration of supervision; its format (one-on-one or group); the dates of direct observations with a client; the names of the supervisors; proof of the supervisor&rsquo;s relationship to the client; and other records (such as session notes) where records disagree. The monthly record prints all of these. In an audit the BACB typically allows 14 days to submit them.</td></tr>
+    </table>
+    <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
+    <p class="noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
+    <h2 class="nbh-band" style="margin-top:16px">About the simulation</h2>
+    <p>Load simulation (toolbar) replaces every entry with a worked example; nothing in it is real data. A simulated RBT (Jordan Lee, RBT, simulated) supervised by a simulated BCBA (also the Requirements Coordinator) and a simulated BCaBA, with client code SIM-0002: every month of the current school year up to today, the first month left short on purpose so the red marks can be seen, the 2026 recertification with its competency assessment window open, three goals, and one concern addressed with a corrective-action plan.</p>
+    <p class="hint" style="margin-top:10px"><b>Reference list.</b> Requirements: BACB RBT Handbook and BCBA Handbook (updated 06/2026); check the current handbooks. &bull;
+    Behavior Analyst Certification Board. (2026). <em>RBT handbook</em> (updated 06/2026). Author. &bull;
+    Behavior Analyst Certification Board. (2026). <em>BCBA handbook</em> (updated 06/2026). Author. &bull;
+    Behavior Analyst Certification Board. <em>RBT ethics code (2.0)</em>. Author. &bull;
+    Behavior Analyst Certification Board. <em>RBT test content outline</em> (3rd ed.). Author. &bull;
+    Parsons, M. B., Rollyson, J. H., &amp; Reid, D. H. (2012). Evidence-based staff training: A guide for practitioners. <em>Behavior Analysis in Practice, 5</em>(2), 2&ndash;11. &bull;
+    Reid, D. H., Parsons, M. B., &amp; Green, C. W. (2012). <em>The supervisor training curriculum: Evidence-based ways to promote work quality and enjoyment among support staff</em>. American Association on Intellectual and Developmental Disabilities.</p>
+  </section>
+  <datalist id="supNames"></datalist>
+  <datalist id="clientCodes"></datalist>

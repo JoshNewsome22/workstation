@@ -1336,6 +1336,7 @@ const FORMS=[
   ['RM-1','Relapse and Inoculation','RM-1_Relapse-Mitigation-Behavioral-Inoculation_v2026-09.html'],
   ['PR-1','Periodic Review and Exit','PR-1_Periodic-Plan-Review_v2026-09.html'],
   ['CN-1','Consultation and Session Notes','CN-1_Consultation-Notes_v2026-10.html'],
+  ['RS-1','RBT Supervision Log','RS-1_RBT-Supervision-Log_v2026-10.html'],
   ['CR-1','Crisis Plan and Debriefing','CR-1_Crisis-Intervention-Plan_v2026-09.html'],
   ['CT-1','Caregiver Training','CT-1_Caregiver-Training_v2026-09.html'],
   ['TV-1','Training Video','TV-1_Training-Video_v2026-10.html'],
@@ -2209,7 +2210,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.27';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.28';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -6721,7 +6722,8 @@ const nbhDocRead=(()=>{
       const home=t.rows.find(r=>/homeroom/i.test(r.period+' '+r.course)),rooms=[...new Set(t.rows.map(r=>r.room).filter(Boolean))];
       const what=[...new Set(t.rows.map(r=>/homeroom/i.test(r.course)?'Homeroom':r.course).filter(Boolean))].join(', ');
       const dd=[...new Set(t.rows.map(r=>days(r.days)).filter(Boolean))].join('; '),since=t.rows.map(r=>r.from).filter(Boolean).sort((a,b)=>toISO(a)<toISO(b)?-1:1)[0]||'';
-      const sinceTxt=since&&toISO(since)>new Date().toISOString().slice(0,10)?', from '+since:since?', since '+since:'';
+      const now=new Date(),today=iso(now.getFullYear(),now.getMonth()+1,now.getDate());   /* the local date, not the world clock's */
+      const sinceTxt=since&&toISO(since)>today?', from '+since:since?', since '+since:'';
       return {name:t.name,role:home?'Classroom teacher':kind?kind[1]:'Other',inv:(what+(dd?', '+dd:'')+(rooms.length?', room '+rooms.join(', '):'')+sinceTxt).slice(0,200),
         svc:kind&&kind[2]>=0?kind[2]:-1,svcFreq:kind&&kind[2]>=0?(dd==='daily'?'Daily':dd?'Weekly ('+dd+')':''):'',seen:'Schedule: '+t.rows.length+(t.rows.length===1?' class':' classes')};});
     const hr=team.find(t=>t.role==='Classroom teacher'),hrRow=live.find(r=>/homeroom/i.test(r.period+' '+r.course));

@@ -4,7 +4,7 @@ This file is the workstation's release notes, oldest first, from September 2026 
 now:
 
 - **The folder** (`NBH-Workstation`, or `RPS-Workstation` for the school edition): `index.html` (the workstation), the
-  46 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
+  47 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
   `respond.html` and `staff-data.html` (the pages families and staff answer on), the offline files (`sw.js`,
   `release.json`, `manifest.json`), and README.txt, HOSTING.md and this file. Keep them together: a form away from the
   `nbh-*.js` files loses its letterhead and Autosave.
@@ -9904,6 +9904,37 @@ case holds DD-1's record now waits for it (it read it once and could miss it by 
 Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the 46 forms filled from its own saved file,
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
+
+### v22.28: Form RS-1, the RBT Supervision Log (the 47th form)
+
+A record of the BCBA's ongoing supervision of a Registered Behavior Technician, built on the BACB RBT Handbook and BCBA
+Handbook (updated 06/2026). It is in the form list under Implementation, after CN-1.
+
+- **Setup**: the RBT (BACB certification number, original and expiration dates, recertification path), employer, site
+  and client codes (codes, not students' names), and each supervisor: BCBA or BCaBA, certification number, role (RBT
+  Supervisor, RBT Requirements Coordinator, or both; a Requirements Coordinator must be a BCBA), supervisor training done,
+  listed in the BACB portal, the relationship check (not related to, superior to, an employer of or in a multiple
+  relationship with the RBT) and client oversight (same employer, or a contract with the client). The rules the months
+  are checked against (5%, two contacts, one individual, one observation, small groups of at most 10, 12 PDUs, the 45-day
+  window) sit in a Rules panel with these defaults, so the form keeps working if the BACB changes them.
+- **Month**: the RBT's service days (filled from the usual days; start, end, time not in services, hours, primary
+  intervention, no-service days) and each supervision contact (date, minutes, supervisor, individual or small group, in
+  person or live video, observed with a client, the handbook's supervision activities, the RBT content areas, the
+  behavioral skills training steps, the feedback and the follow-up), with an optional 10-item observation checklist
+  scored as a percent. A compliance panel beside the log says, as the month goes, whether each rule is met, and how many
+  more minutes of supervision the month needs. A month with no services is marked not applicable.
+- **Year**: the 12 months in a table and a chart of percent supervised against the 5% line, with the checklist trend.
+- **RBT record**: performance goals; the credential (days to expiration, the Recertification Competency Assessment window
+  for a 2026 recertification, or the two-year cycle with its PDU log against 12, warning of entries that never count);
+  the self-reporting reminder; and **Concerns and corrective action**, confidential, printed only on its own.
+- **Sign and print**: typed names, dates and drawn signatures, the monthly supervision record (everything the BACB asks
+  supervision documentation to show) and the year summary, letter size, marked as a confidential personnel record to keep
+  for at least 7 years. The pages do not carry the case's student name. Save data, Open data and Export CSV as in the
+  other forms; the form's work also travels in the case file.
+
+Also: Read a document's Schedule reading takes today's date from this device's calendar, not the world clock.
+
+Checked by `qa/rs1-test.js`.
 
 ### v22.27: Read a document takes the Schedule and Enrollment pages
 

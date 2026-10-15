@@ -23,8 +23,8 @@ try:
     shutil.copytree(os.path.join(ROOT, 'tools'), os.path.join(tmp, 'tools'), ignore=shutil.ignore_patterns('__pycache__'))
     os.chdir(tmp)
     forms = sorted(f for f in glob.glob('NBH-Workstation/[A-Z]*.html'))
-    if len(forms) != 46:
-        sys.exit(f'check-build: expected 46 forms, found {len(forms)}')
+    if len(forms) != 47:
+        sys.exit(f'check-build: expected 47 forms, found {len(forms)}')
     B = 'tools/blocks/'
     steps = [
         ['python3', 'tools/apply-polish.py', 'NBH-Workstation'],

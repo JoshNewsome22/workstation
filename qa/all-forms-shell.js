@@ -17,5 +17,5 @@ const {chromium,BASE,wire,sleep,forms,loadSim}=require(__dirname+'/lib.js');
   await page.evaluate(()=>$('#closeForm').click());await sleep(150);await page.evaluate(()=>{const b=document.querySelector('#cfFoot button.danger');if(b)b.click();});await sleep(150);}
  console.log('forms',n,'bad',JSON.stringify(bad).slice(0,600));
  /* v22.12 (review F505): pass or fail */
- const pass=n===F.length&&n===46&&!bad.length;console.log((pass?'PASS':'FAIL')+' every one of the '+n+' forms opens in the shell, takes a simulation and the case facts, without a script error');
+ const pass=n===F.length&&n===47&&!bad.length;console.log((pass?'PASS':'FAIL')+' every one of the '+n+' forms opens in the shell, takes a simulation and the case facts, without a script error');
  console.log(pass?'RESULT: all passed':'RESULT: 1 failed');process.exitCode=pass?0:1;await br.close();})();

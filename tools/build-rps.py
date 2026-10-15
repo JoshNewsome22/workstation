@@ -34,9 +34,9 @@ new_fav = 'data:image/png;base64,' + base64.b64encode(open(FAVICON, 'rb').read()
 EXPECT = [
   (old_logo, new_logo, 2),     # v21.84: once in nbh-logo.js (every form loads it; until v21.83 a copy in each of the 46 forms) and once in index.html
   (old_fav, new_fav, 1),
-  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 168),   # the masthead and print-head images of the 46 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64) + the index + the packet cover
-  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 47),
-  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 48),   # the 46 forms, index.html and respond.html (v21.39)
+  ('alt="Newsome Behavioral Health"', f'alt="{NAME}"', 170),   # the masthead and print-head images of the 47 forms (several print more than one head; IA-1 gained a WEFA sheet head in v21.41 and a Send-outs sheet head in v21.64) + the index + the packet cover
+  ('@top-left{content:"Newsome Behavioral Health"', f'@top-left{{content:"{NAME}"', 48),
+  (' · Newsome Behavioral Health</title>', f' · {NAME}</title>', 49),   # the 47 forms, index.html and respond.html (v21.39)
   ('in the Newsome Behavioral Health packet', f'in the {NAME} packet', 1),
   ('Form IDs refer to the Newsome Behavioral Health FBA/BIP form set.', f'Form IDs refer to the {NAME} FBA/BIP form set.', 1),
   ("const DRV_ED='nbh';", "const DRV_ED='rps';", 1),
@@ -62,7 +62,7 @@ for fn in sorted(os.listdir(OUT)):
     for i, (a, b, _) in enumerate(EXPECT):
         n = s.count(a); done[i] += n; s = s.replace(a, b)
     open(p, 'w', encoding='utf-8').write(s)
-# v22.07 the forms' guide paragraph on the writing help loses its Rewrite with Claude sentences (39 forms carry it)
+# v22.07 the forms' guide paragraph on the writing help loses its Rewrite with Claude sentences (40 forms carry it; RS-1 since v22.28)
 RW_RE = re.compile(r' <(b|strong)>Rewrite with Claude</\1> works only.*?agency&rsquo;s approval\.', re.S)
 rw_n = 0
 for fn in sorted(os.listdir(OUT)):
@@ -70,8 +70,8 @@ for fn in sorted(os.listdir(OUT)):
     p = os.path.join(OUT, fn); s = open(p, encoding='utf-8').read()
     s, k = RW_RE.subn('', s); rw_n += k
     if k: open(p, 'w', encoding='utf-8').write(s)
-if rw_n != 39:
-    sys.exit(f'the Rewrite with Claude sentences in the forms\' guide: removed {rw_n}, expected 39 - the source changed; check before shipping')
+if rw_n != 40:
+    sys.exit(f'the Rewrite with Claude sentences in the forms\' guide: removed {rw_n}, expected 40 - the source changed; check before shipping')
 left_rw = [fn for fn in sorted(os.listdir(OUT)) if fn.endswith('.html') and 'Rewrite with Claude' in open(os.path.join(OUT, fn), encoding='utf-8').read()]
 if left_rw:
     sys.exit('Rewrite with Claude still named in the school edition: ' + ', '.join(left_rw))
@@ -106,7 +106,7 @@ if open(os.path.join(OUT, 'sw.js'), 'rb').read() != open(os.path.join(SRC, 'sw.j
 rd = os.path.join(OUT, 'README.txt'); s = open(rd, encoding='utf-8').read()
 s = s.replace('NBH FBA/BIP Workstation\n=======================',
   'FBA/BIP Workstation - Royal Palm School\n=======================================\n\n'
-  'This is the Royal Palm School edition. It is the same workstation and the same 46\n'
+  'This is the Royal Palm School edition. It is the same workstation and the same 47\n'
   'forms as the Newsome Behavioral Health edition; only the logo and name differ, and\n'
   'it keeps its own autosave, so both can be used in one browser without mixing.', 1)
 # v22.11: Rewrite with Claude is off in this edition (v22.07); its README says nothing of it

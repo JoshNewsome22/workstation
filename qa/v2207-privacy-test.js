@@ -13,7 +13,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     const forms=fs.readdirSync(path.join(root,ed)).filter(f=>/\.html$/.test(f)&&!/^(index|respond|staff-data)\.html$/.test(f));
     const old=forms.filter(f=>/Nothing is stored in the browser\. Entries live/.test(fs.readFileSync(path.join(root,ed,f),'utf8')));
     const neu=forms.filter(f=>/Autosave keeps a safety copy of this form in this browser, on this device, for up to 14 days/.test(fs.readFileSync(path.join(root,ed,f),'utf8')));
-    ok(ed+' 1 no form says "Nothing is stored in the browser"; all 46 say what Autosave keeps',!old.length&&neu.length===46,{old,neu:neu.length});
+    ok(ed+' 1 no form says "Nothing is stored in the browser"; all 47 say what Autosave keeps',!old.length&&neu.length===47,{old,neu:neu.length});
   }
   const rwNamed=fs.readdirSync(path.join(root,'RPS-Workstation')).filter(f=>/\.html$/.test(f)&&/Rewrite with Claude/.test(fs.readFileSync(path.join(root,'RPS-Workstation',f),'utf8')));
   const cfg=/window\.nbhWordingConfig=\s*(\{[^\n]*\})/.exec(fs.readFileSync(path.join(root,'RPS-Workstation','nbh-wording.js'),'utf8'));

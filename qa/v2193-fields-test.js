@@ -3,7 +3,7 @@
    nbh-was-ul), with a border on all four sides and 36 px tall outside a table; fields inside tables stay compact; bare grid
    cells stay bare. A reading line is about 80 characters at most: every long paragraph in a sheet is capped (nbh-wide, 80ch).
    A label that names a field is 12 px at least. None of it is on paper: with the previous release served at WS_PREV_URL (the
-   release run does this), every one of the 46 forms prints the same words in the same places from both, with a mouse and with
+   release run does this), every one of the 47 forms prints the same words in the same places from both, with a mouse and with
    a finger (PA-1 draws a random item order on every open; those item numbers are read as the same). Chromium; simulated data
    only (nothing is typed; the forms are read as they open).
    usage: node qa/v2193-fields-test.js     (WS_PREV_URL=http://127.0.0.1:8128 for the print comparison; WS_PRINT_CHANGED=all or a list of
