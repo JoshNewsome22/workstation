@@ -2207,7 +2207,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.23';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.24';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -4189,12 +4189,13 @@ async function autoSave(force){
   const sig=caseSig();
   if(!force&&(sig===state.autoSig||Date.now()-A.last<AUTO.every/2))return;   // nothing new, or written in the last ten seconds
   A.busy=true;A.last=Date.now();
+  let missed=false;   /* v22.24 an edited form that did not answer in time: asked again in a moment, not at the next turn */
   try{
     let work=!!A.key;
     for(const id of ids){
       const r=await grab(id,'snapshot',null,force?2500:5000);
       if(r&&r.snap)A.forms[id]={title:r.title,total:r.snap.total,data:r.snap.data,own:r.snap.own||''};
-      if((r&&r.edited)||(state.status[id]||{}).edited)work=true;
+      if((r&&r.edited)||(state.status[id]||{}).edited){work=true;if(!(r&&r.snap))missed=true;}
     }
     kept.forEach(id=>{const P=state.pending[id],sn=P.snap||{};A.forms[id]={title:P.title,total:sn.total,data:sn.data||{},own:sn.own||''};});
     if(!work){state.autoSig=sig;return;}   // forms only opened, nothing done in them yet: no copy
@@ -4210,7 +4211,10 @@ async function autoSave(force){
     if(r.ok){state.autoSig=sig;A.written=h;A.at=new Date();autoOver();}
     autoWarn(r);
   }catch(e){state.auto.warn='The last safety copy could not be written ('+String(e&&e.message||e).slice(0,80)+'). Save case to be sure.';state.auto.warnShort='not kept';}   /* v21.85 never silent */
-  finally{A.busy=false;chip();if(A.again){const f=A.again==='force';A.again=false;setTimeout(()=>autoSave(f),60);}}
+  finally{A.busy=false;chip();if(A.again){const f=A.again==='force';A.again=false;setTimeout(()=>autoSave(f),60);}
+    /* v22.24 (after Open case the copy starts empty, so a form slow to answer left nothing to write for a whole turn) */
+    else if(missed&&(A.retry=(A.retry||0)+1)<=3)setTimeout(()=>{A.last=0;autoSave(true);},1500);
+    if(!missed)A.retry=0;}
 }
 /* more than AUTO.keep copies: none is deleted to make room (each may be the only place some work is), the user is asked */
 function autoOver(){CP.over().then(n=>{const A=state.auto;if(n>0&&!A.overTold){A.overTold=true;

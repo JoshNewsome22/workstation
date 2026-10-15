@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.24: the safety copy after Open case, when a form is slow; QS-1's small print
+
+- Open case starts a new safety copy (Autosave) for the case just opened. If the first change made in it was copied
+  while a form was slow to answer (a busy iPad: more than 2.5 seconds), the copy had nothing to hold yet, and the next
+  try came only at Autosave's next turn, 20 seconds later; for those seconds the change was only on the screen. Now a
+  form that has changes and did not answer is asked again a second and a half later (up to three times), so the copy
+  holds the change within a few seconds. Save case was never affected.
+
+- (review F482, in part) Form QS-1's staff quick start on paper: its labels, notes and the words on its flow sheet printed
+  at 6 to 6.8 pt, small for a substitute reading a photocopy in a hurry. They now print at 7.5 pt or more; the body text,
+  the layout and the five pages are as they were. (A larger body, 9.5 to 10 pt, means laying the pages out again: that
+  waits for a look at the new pages.)
+
+Checked by `qa/v2224-autosave-retry-test.js` (a form that does not answer the first time), `qa/autosave-test.js` and
+`qa/v2224-qs1-print-test.js`.
+
 ### v22.23: token boards and visual supports print without the student's name; SM-1's toolbar
 
 - Since v22.10 a form printed on its own puts the student's name and ID at the top of each page and "Page N of M" at the

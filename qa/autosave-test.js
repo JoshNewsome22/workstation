@@ -466,7 +466,9 @@ S.names = async br => {
     SAY(!cs.some(c => c.student === b), tag + 'the case file just opened is not copied until it is changed', cs.map(c => c.student));
     SAY(!(await page.evaluate(() => caseDirty())), tag + 'no unsaved dot after Open case');
     await typeIn(frameOf(page, 'DM-1'), ' AFTER-OPEN'); await sleep(1500); await page.evaluate(() => autoSave(true)); await sleep(2500);
-    const cs2 = await marked(page, ['FIRST-STUDENT-WORK', 'AFTER-OPEN']);
+    /* v22.24 a form slow to answer is asked again within seconds (qa/v2224-autosave-retry-test.js): wait up to 10 s more */
+    let cs2 = await marked(page, ['FIRST-STUDENT-WORK', 'AFTER-OPEN']);
+    for (let i = 0; i < 20 && cs2.length < 2; i++) { await sleep(500); cs2 = await marked(page, ['FIRST-STUDENT-WORK', 'AFTER-OPEN']); }
     SAY(cs2.length === 2 && cs2.some(c => c.has.join() === 'FIRST-STUDENT-WORK') && cs2.some(c => c.has.join() === 'AFTER-OPEN' && c.student === b),
       tag + 'after an edit: two copies, the first one untouched', cs2.map(c => c.student + ': ' + c.has));
     SAY(!log.some(l => /pageerror/.test(l)), tag + 'no script errors', log.filter(l => /pageerror/.test(l)));
