@@ -157,7 +157,9 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   await A.page.evaluate(()=>drvSync({}));await idle(A.page);
   const back=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client));
   ok('18 saved again on the laptop: the student comes back to the iPad',back.length===2,back);
-  /* 19 Remove everywhere on the laptop: the iPad drops it at its next sync */
+  /* 19 Remove everywhere on the laptop: the iPad drops it at its next sync (v22.16: a replaced copy of the student is kept
+     first, as a clash keeps one, so 19b can see it go to the trash too) */
+  await B.page.evaluate(async()=>{const r=(await clList()).find(x=>/Sample Student/.test(x.client));await drvKeepOld(r,'not kept, from this laptop');});
   await B.page.evaluate(()=>clearCase());await sleep(700);await B.page.evaluate(()=>caseloadOpen());await sleep(500);
   await B.page.evaluate(()=>{const tr=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(t=>/Sample Student/.test(t.textContent));tr.querySelector('[data-cldel]').click();});await sleep(500);
   await press(B.page,/Remove everywhere/);await sleep(1500);await idle(B.page);
@@ -165,6 +167,30 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   await A.page.evaluate(()=>drvSync({}));await idle(A.page);
   const after=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client));
   ok('19 Remove everywhere: Drive keeps only a marker (no student data in it) and the iPad drops the student at its next sync',gone.length===1&&!/Sample/.test(gone[0].content)&&after.length===1&&after[0]==='Mateo Rivera',{gone:gone.map(f=>f.content.slice(0,60)),after});
+  /* 19b (v22.16, review F496): nothing of the student is left readable in Drive: the case file and every replaced copy of the
+     student are in the trash (which Google empties after 30 days); only the marker, with no student data, is outside it */
+  const left=[...D.files.values()].filter(f=>!f.trashed&&f.content&&/Sample Student/.test(f.content));
+  const sOld=[...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='old'&&/Sample Student/.test(f.content||''));
+  ok('19b after Remove everywhere no file outside Drive\'s trash holds the student: the case file and its '+sOld.length+' replaced cop'+(sOld.length===1?'y':'ies')+' are in the trash',sOld.length>=1&&!left.length&&sOld.every(f=>f.trashed)&&gone.every(f=>!f.trashed),{left:left.map(f=>f.name),old:sOld.map(f=>f.name+':'+f.trashed)});
+  /* 19c the replaced copies older than 30 days go to the trash once a day; newer ones stay */
+  const t40=new Date(Date.now()-40*864e5).toISOString(),oldF=[...D.files.values()].find(f=>f.mimeType==='application/vnd.google-apps.folder'&&(f.appProperties||{}).nbh==='old'&&!f.trashed);
+  if(oldF){D.n++;D.files.set('fT40',{id:'fT40',name:'Mateo Rivera - kept - old.json',parents:[oldF.id],mimeType:'application/json',appProperties:{nbh:'old'},version:1,modifiedTime:t40,trashed:false,content:'{}'});
+    D.n++;D.files.set('fT1',{id:'fT1',name:'Mateo Rivera - kept - new.json',parents:[oldF.id],mimeType:'application/json',appProperties:{nbh:'old'},version:1,modifiedTime:new Date().toISOString(),trashed:false,content:'{}'});}
+  await A.page.evaluate(()=>{drvLs('nbh.drive.tidy',null);return drvSync({});});await idle(A.page);
+  ok('19c the daily tidy puts replaced copies older than 30 days in the trash and keeps the newer ones',!!oldF&&D.files.get('fT40').trashed===true&&D.files.get('fT1').trashed===false,{folder:!!oldF,t40:oldF&&D.files.get('fT40').trashed,t1:oldF&&D.files.get('fT1').trashed});
+  /* 19d (v22.16) changed on the iPad after the laptop removed the student everywhere: the change is kept, as it was when the
+     marker was written over the case file; the student goes up again as a new file, and the marker goes to the trash */
+  await A.page.evaluate(async()=>{const L=await clList();const r=L.find(x=>x.client==='Mateo Rivera');r.drv=Object.assign({},r.drv,{dirty:true});await clTx('readwrite',st=>st.put(r));});
+  const mk0=new Set([...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='gone').map(f=>f.id));
+  await B.page.evaluate(()=>caseloadOpen());await sleep(500);
+  const bHas=await B.page.evaluate(()=>{const tr=[...document.querySelectorAll('#dlgBody .cl-card[data-clrow]')].find(t=>/Mateo Rivera/.test(t.textContent));if(tr)tr.querySelector('[data-cldel]').click();return !!tr;});await sleep(500);
+  await press(B.page,/Remove everywhere/);await sleep(1500);await idle(B.page);
+  const mkIds=[...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='gone'&&!mk0.has(f.id)).map(f=>f.id),mk=mkIds.length;
+  await A.page.evaluate(()=>drvSync({}));await idle(A.page);
+  const keptA=await A.page.evaluate(async()=>(await clList()||[]).map(r=>r.client));
+  const mFiles=[...D.files.values()].filter(f=>!f.trashed&&f.appProperties&&f.appProperties.nbh==='case'&&/Mateo Rivera/.test(f.content||''));
+  const marks=mkIds.filter(id=>!D.files.get(id).trashed);
+  ok('19d changed on the iPad after Remove everywhere on the laptop: the iPad keeps the student and sends it up as a new file; the removal marker goes to the trash',bHas&&mk>=1&&keptA.includes('Mateo Rivera')&&mFiles.length===1&&!marks.length,{bHas,mk,keptA,files:mFiles.length,marks:marks.length});
   /* 20 a different account at the next sign-in is refused */
   await A.page.evaluate(()=>sessionStorage.removeItem('nbh.google.drive@nbh'));D.who='someone.else@palmbeachschools.org';
   await A.page.evaluate(()=>{window.__t=[];const t0=wsUI.toast;wsUI.toast=(m,o)=>{window.__t.push(String(m));return t0(m,o);};document.getElementById('drvChip').click();});await sleep(1200);

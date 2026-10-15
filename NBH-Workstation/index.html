@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.15';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.16';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3550,7 +3550,7 @@ function dataWhere(){
   const rows=[
     ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
-    ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed; Drive keeps removed files 30 days'],
+    ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed, then 30 days in Drive\u2019s trash; a copy not kept in a clash (Replaced copies) 30 days'],
     ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
     ['Questionnaire answers and staff phone entries (with the reply box)','Locked on the sender\u2019s phone so only the form\u2019s file can open them; the practice website holds the locked copy','Until the form collects and removes it, or 60 days'],
     ['Short questionnaire links','The questionnaire (the behavior, its definition, initials, the due date), locked, on the practice website; the key stays in the link','60 days'],
@@ -6102,7 +6102,8 @@ async function drvRead(id){const t=await (await drvFetch(DAPI+'/'+id+'?alt=media
   if(!j||(j.nbh!=='case-sync'&&j.nbh!=='case-gone'))throw drvErr('A file in the Drive folder is not a workstation case.');return j;}
 /* a copy that is not kept goes to Replaced copies, so nothing is lost */
 async function drvKeepOld(r,why){const nm=(String(r.client||'').trim()||'Case')+' - '+why+' - '+new Date().toISOString().slice(0,16).replace('T',' ')+'.json';
-  await drvUpload('',{name:nm,parents:[await drvOldFolder()],mimeType:'application/json',appProperties:{nbh:'old'}},drvBody(r));}
+  let k='';try{const s=drvKey(r);if(s)k=await drvHash(s);}catch(e){}   /* v22.16 (review F496): the student's key, hashed, so Remove everywhere finds it */
+  await drvUpload('',{name:nm,parents:[await drvOldFolder()],mimeType:'application/json',appProperties:k?{nbh:'old',k}:{nbh:'old'}},drvBody(r));}
 const drvLocal=async k=>(await clList()||[]).find(x=>x.key===k);
 const drvPutLocal=r=>clTx('readwrite',st=>st.put(r));
 /* this device's copy goes up (a new file, or over the one it was made from) */
@@ -6145,7 +6146,7 @@ async function drvClash(r,f,k,opt,res){const j=await drvRead(f.id);
   const lNew=Date.parse(r.saved)>=Date.parse(rs),other='the '+rd;
   const c=await wsUI.choose(clName(r)+': two different copies\nThis '+drvDev()+' saved it '+drvWhen(r.saved)+'. '+other.charAt(0).toUpperCase()+other.slice(1)+' saved it '+drvWhen(rs)+'. Each was changed without the other. Which copy do you keep?',
     [{v:'here',label:'Keep this '+drvDev()+'’s',kind:lNew?'primary':''},{v:'there',label:'Keep '+other+'’s',kind:lNew?'':'primary'},{v:'',label:'Decide later'}],
-    'The copy you do not keep goes to the Replaced copies folder in your Google Drive, so nothing is lost.');
+    'The copy you do not keep goes to the Replaced copies folder in your Google Drive for 30 days, so nothing is lost by mistake.');
   if(!c){DRV.conf[r.key]=1;return;}delete DRV.conf[r.key];
   if(c==='here'){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'not kept, from the '+rd);
     const r2=Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version)})});if(!(await drvPutIf(r2,r))){DRV.again=DRV.again||true;return;}r=r2;   /* saved again here while asked: the next pass sends that */
@@ -6158,8 +6159,29 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
   if(navigator.onLine===false){drvPaint();return null;}
   DRV.busy=true;DRV.err='';drvPaint();const res={sent:0,got:0,gone:0,both:0,names:[]};
   try{
-    for(const g of drvGone()){try{await drvUpload(g.id,{appProperties:{nbh:'gone',dev:drvDev(),saved:new Date().toISOString().slice(0,24)}},JSON.stringify({nbh:'case-gone',v:1,at:new Date().toISOString(),dev:drvDev()}));}catch(e){if(!e.gone)throw e;}
+    /* v22.16 (review F496). Remove everywhere used to overwrite the case file with a small marker and delete nothing: the file's
+       earlier contents stayed in Drive's version history, and every copy in Replaced copies stayed for good. Now a separate
+       marker (no student data: the hashed key the other devices follow) is written, and the case file and each replaced copy
+       of the student go to Drive's trash, which Google empties after 30 days, versions and all. An entry from before v22.16
+       (no key) gets the marker written over the file, as before. */
+    for(const g of drvGone()){
+      const body=JSON.stringify({nbh:'case-gone',v:1,at:new Date().toISOString(),dev:drvDev()}),props={nbh:'gone',dev:drvDev(),saved:new Date().toISOString().slice(0,24)};
+      if(!g.h){try{await drvUpload(g.id,{appProperties:props},body);}catch(e){if(!e.gone)throw e;}}
+      else{await drvUpload('',{name:'removed-'+g.h.slice(0,8)+'.json',parents:[await drvFolder()],mimeType:'application/json',appProperties:Object.assign({k:g.h},props)},body);
+        try{await drvJson(DAPI+'/'+encodeURIComponent(g.id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});}catch(e){if(!e.gone)throw e;}
+        try{const q="appProperties has { key='nbh' and value='old' } and appProperties has { key='k' and value='"+g.h+"' } and trashed=false";
+          const j=await drvJson(DAPI+drvQ(q)+'&fields=files(id,appProperties)&pageSize=200');
+          for(const f of (j.files||[])){if(!f.appProperties||f.appProperties.k!==g.h||f.appProperties.nbh!=='old')continue;
+            try{await drvJson(DAPI+'/'+encodeURIComponent(f.id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});}catch(e){if(!e.gone)throw e;}}}catch(e){if(!e.gone)throw e;}}
       drvGoneSet(drvGone().filter(x=>x.id!==g.id));}
+    /* and, once a day, the replaced copies older than 30 days go to the trash too: a copy kept "so nothing is lost" is not
+       kept for ever */
+    try{const last=+(drvLs('nbh.drive.tidy')||0);if(Date.now()-last>864e5){const cut=new Date(Date.now()-30*864e5).toISOString();
+      const q="appProperties has { key='nbh' and value='old' } and trashed=false and modifiedTime < '"+cut+"'";   /* by the copies' own mark: no Replaced copies folder is made for someone who has none */
+      const j=await drvJson(DAPI+drvQ(q)+'&fields=files(id,modifiedTime,appProperties)&pageSize=200');
+      for(const f of (j.files||[])){if(!f.modifiedTime||f.modifiedTime>=cut||!f.appProperties||f.appProperties.nbh!=='old')continue;
+        try{await drvJson(DAPI+'/'+encodeURIComponent(f.id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});}catch(e){}}
+      drvLs('nbh.drive.tidy',String(Date.now()));}}catch(e){}
     const remote=await drvList(),L=await clList()||[],skip=drvSkip(),byK={},here={};
     remote.forEach(f=>{const k=f.appProperties&&f.appProperties.k;if(!k)return;const o=byK[k];if(!o||String(f.modifiedTime)>String(o.modifiedTime))byK[k]=f;});
     for(const r of L){const k=drvKey(r);if(k)here[await drvHash(k)]=r;}
@@ -6171,6 +6193,10 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
           if(await drvDelIf(r)){res.gone++;res.names.push(clName(r));}else DRV.again=DRV.again||true;continue;}
         if(await drvBring(f,r)){res.got++;res.names.push(clName(r));}continue;}
       if(d.id===f.id&&String(d.ver)===String(f.version)||gone&&d.id===f.id){await drvPut(r,f.id,k);res.sent++;continue;}
+      /* v22.16 removed everywhere on another device (its marker now a file of its own) after the student was changed here: the
+         change is kept, as it was when the marker was written over the case file; the student goes up as a new file, and the
+         marker goes to the trash */
+      if(gone){await drvPut(r,'',k);try{await drvJson(DAPI+'/'+encodeURIComponent(f.id)+'?fields=id',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({trashed:true})});}catch(e){if(!e.gone)throw e;}res.sent++;continue;}
       await drvClash(r,f,k,opt,res);}
     /* here and not in Drive (new here, or its file was taken out of the folder): it goes up as a new file */
     for(const k of Object.keys(here)){if(byK[k])continue;await drvPut(here[k],'',k);res.sent++;}
@@ -6263,7 +6289,7 @@ function drvBoxHtml(){if(!drvAvail())return '';
     const at=(kp&&kp.querySelector('summary'))||h;if(at)at.insertAdjacentHTML('afterend',drvBoxHtml());
     if(drvOn()){const L=await clList()||[];b.querySelectorAll('tr[data-clrow]').forEach(tr=>{const r=L.find(x=>x.key===tr.dataset.clrow);const td=tr.children[2];if(!r||!td)return;
       td.textContent=clAgo(r.saved)+(r.dev?' '+drvOnDev(r.dev):'');if(!r.drv||r.drv.dirty)td.insertAdjacentHTML('beforeend','<br><span class="hint">waiting for Drive<\/span>');if(DRV.conf[r.key])td.insertAdjacentHTML('beforeend','<br><span class="td-k">Decide<\/span>');});
-      b.querySelectorAll('p.hint').forEach(p=>{if(/Remove takes a student off this list/.test(p.textContent))p.textContent='Remove asks whether the student leaves every device (and Google Drive) or only this '+drvDev()+'. Google Drive keeps its earlier copies for 30 days.';});}
+      b.querySelectorAll('p.hint').forEach(p=>{if(/Remove takes a student off this list/.test(p.textContent))p.textContent='Remove asks whether the student leaves every device (and Google Drive) or only this '+drvDev()+'. Everywhere puts their file and every replaced copy in Drive\u2019s trash, which Google empties after 30 days.';});}
     if(clGid()&&drvAvail())clGsiLoad().catch(()=>{});
     if(drvOn()&&drvTok()&&Date.now()-DRV.last>30000&&!DRV.busy)drvSoon(false,100);}catch(e){}
   return out;};}
@@ -6281,10 +6307,10 @@ document.addEventListener('click',async e=>{const t=e.target.closest&&e.target.c
 /* Remove: everywhere (a marker in Drive the other devices follow) or only here */
 document.addEventListener('click',async e=>{const d=e.target.closest&&e.target.closest('[data-cldel]');if(!d||!drvOn())return;e.stopImmediatePropagation();e.preventDefault();
   const r=await drvLocal(d.dataset.cldel);if(!r)return;
-  const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive (Drive keeps its earlier copies for 30 days). Only here keeps them in Drive and on the other devices. Either way, their case history on this '+drvDev()+' is deleted.',
+  const c=await wsUI.choose('Remove '+clName(r)+'?\nEverywhere takes them off this '+drvDev()+', the other devices and your Google Drive: their case file and every replaced copy go to Drive\u2019s trash, which Google empties after 30 days (empty it yourself sooner when a record must be destroyed now). Only here keeps them in Drive and on the other devices. Either way, their case history on this '+drvDev()+' is deleted.',
     [{v:'all',label:'Remove everywhere',kind:'danger'},{v:'here',label:'Only this '+drvDev()},{v:'',label:'Cancel'}]);if(!c)return;
   const h=await drvHash(drvKey(r));
-  if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id});drvGoneSet(g);}}
+  if(c==='all'){if(r.drv&&r.drv.id){const g=drvGone().filter(x=>x.id!==r.drv.id);g.push({id:r.drv.id,h});drvGoneSet(g);}}
   else{const s=drvSkip();s[h]=String(r.drv&&r.drv.ver||'');drvSkipSet(s);}
   try{await clTx('readwrite',st=>st.delete(r.key));}catch(x){}clPinSet(r.key,false);delete DRV.conf[r.key];caseloadOpen();if(c==='all')drvSoon(true,100);else drvPaint();},true);
 /* a device emptied of student data stops using Drive, or its next sync would bring everyone back */

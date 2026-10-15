@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.16: Remove everywhere removes the student from Google Drive
+
+- **Remove everywhere** (Caseload, with Google Drive on; review F496, privacy). It used to write a small marker over the
+  student's case file and delete nothing: the file's earlier contents stayed readable in Drive's version history, and every
+  copy in the *Replaced copies* folder stayed for good. Now the student's case file and every replaced copy of that student
+  go to Drive's trash, which Google empties after 30 days, versions and all (empty the trash yourself sooner when a record
+  must be destroyed at once; the question says so). The other devices learn of the removal from a separate marker that
+  holds no student data, only a hashed key, and drop the student at their next sync, as before. A student changed on one
+  device after being removed everywhere on another is kept, as before: it goes up again as a new file.
+- **Replaced copies are kept 30 days.** A copy not kept in a clash still goes to *Replaced copies*, so nothing is lost by
+  mistake, and once a day the workstation puts the ones older than 30 days in Drive's trash. Help's table and the clash
+  question say so.
+- Copies replaced before v22.16 carry no student key, so Remove everywhere cannot find them: they go with the 30-day tidy.
+
+Checked by `qa/v2189-drive-test.js` (19b, 19c, 19d).
+
 ### v22.15: a packet with TK-1 in it, and the forms on an iPhone
 
 - **A packet with Form TK-1 in it printed every page sideways** (review F475, a blocker). TK-1's token book prints
