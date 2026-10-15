@@ -64,6 +64,10 @@ if(!FILE['MT-1']||!FILE['TI-1']||!FILE['ABC-1']){console.error('FAIL MT-1, TI-1 
 const LATER_PRINT={};
 {const src=fs.readFileSync(path.join(ROOT,ED,FILE['MT-1']),'utf8'),m=/\/\* full check: on paper the long notes of the session log[\s\S]*?\*\/\s*(@media print\{[\s\S]*?\n\})/.exec(src);
  if(m)LATER_PRINT['MT-1']=m[1];else console.log('NOTE MT-1 has no full-check print rule for its session log: its print is compared as it stands');}
+/* v22.20 (review F483) TI-1's opportunity table gives the step's wording a third of the width on paper, on purpose; the form
+   before is given the same rule, read from the form as it is now */
+{const src=fs.readFileSync(path.join(ROOT,ED,FILE['TI-1']),'utf8'),m=/\/\* v22\.20 \(review F483\)[\s\S]*?\*\/\s*(@media print\{#oppTbl[^\n]*\})\n/.exec(src);
+ if(m)LATER_PRINT['TI-1']=m[1];else console.log('NOTE TI-1 has no v22.20 print rule for its opportunity table: its print is compared as it stands');}
 const NOW={},WAS={};for(const id of Object.keys(FILE))if(FILE[id])NOW[id]=BASE+'/'+ED+'/'+encodeURI(FILE[id]);
 let fails=0,passes=0;
 const ok=(name,cond,detail)=>{console.log((cond?'PASS ':'FAIL ')+name+(detail!==undefined?' '+JSON.stringify(detail).slice(0,cond?300:2000):''));if(cond)passes++;else fails++;};

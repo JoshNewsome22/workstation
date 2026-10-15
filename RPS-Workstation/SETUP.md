@@ -9905,6 +9905,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.20: small print on SM-1's student sheet and TI-1's opportunity table
+
+- **SM-1** (review F483). The "My week: color the bar up to my percent" graph on the student's sheet printed its 0-100%
+  scale and day names at 6-7.5 pt, and under 6 pt beside the self-evaluation box: too small for a young student. They
+  now print at 9 pt or more in both places.
+- **TI-1**. On paper the opportunity table squeezed the step's wording, which the observer checks against, into a column
+  under an inch wide, and ran past the page with four observations. The wording now gets a third of the width, the counts
+  stack in each observation's column, and the table fits the sheet. The screen is unchanged.
+- QS-1's staff quick start (F482: under 8 pt, two footers) is not changed yet: printed larger, its five designed pages
+  become eight, so its pages need laying out again; that comes with the next review of the handout.
+
+Checked by `qa/v2220-print-sizes-test.js`.
+
 ### v22.19: case history keeps every student's last saves
 
 - **Case history across a caseload** (review F468). History keeps about 200 MB of restore points for the whole caseload
