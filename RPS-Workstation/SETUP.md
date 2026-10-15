@@ -9718,3 +9718,27 @@ The Pin button on each caseload card is now only a thumbtack in a round 44-point
 pinned, a light-medium grey circle with a darker ring when they are. Right after a tap the word **Pinned** or
 **Unpinned** shows beside it for about a second and a half (read out once by VoiceOver); the button's name for VoiceOver
 still says what it does. Checked by `qa/v2204-pin-test.js` 2, 3 and 3b.
+
+### v22.06: six fixes from the review
+
+- **Save case while Google Drive is syncing** (review F502). A sync that was bringing another device's newer copy of a
+  student could write it over a Save case made here in the meantime: the save was then in neither the caseload nor
+  Drive. Now the sync writes a copy only over the one it read; a save made meanwhile is kept and waits, and the next
+  sync asks which copy to keep (the other goes to Replaced copies, as before). The same check covers a student removed
+  elsewhere and the "two different copies" answers. Checked by `qa/v2189-drive-test.js` 33.
+- **Clear all, then Cancel** (F503). Each form counted itself as saved a moment after Clear all was tapped, even when the
+  question was answered Cancel, so the leave warning and the unsaved mark went off with the work still there. Now the
+  form counts as cleared only once it really is; Autosave keeps the work in the same copy after a Cancel. Checked by
+  `qa/v2206-clear-test.js` (DM-1, TB-1, DD-1, TD-1, TK-1).
+- **VoiceOver and Autosave** (F491). The Autosave chip no longer reads "Autosaved 3:51 AM" aloud at every autosave;
+  Autosave turned off, unavailable or a warning is said once.
+- **Arrow keys** (F487). The up and down arrows switch the open form only from a row of the form list, never from Help,
+  Today or a button.
+- **DD-1's blank week** (F484). The blank week to print no longer prints the episodes already recorded after the empty
+  week.
+- **The version** in Help ("This is version v22.06 of the workstation.") and as the first row of Diagnostics, so each
+  device shows which version it has.
+
+Checked by `qa/v2206-version-test.js` (the version is the newest heading here, Help and Diagnostics, the chip, the
+arrows, the blank week). Not done: zoom (F488) stays limited for now, because removing the limit makes iPad Safari zoom
+in on every small field tapped until the fields are 16 points; that needs its own design pass.

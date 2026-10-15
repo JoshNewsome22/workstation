@@ -30,6 +30,7 @@ async function drive(route){const req=route.request(),u=new URL(req.url()),m=req
   if(u.pathname==='/drive/v3/files'&&m==='GET'){const q=u.searchParams.get('q')||'';return json({files:[...D.files.values()].filter(f=>evalQ(q,f)).map(pick)});}
   if(u.pathname==='/drive/v3/files'&&m==='POST'){const meta=JSON.parse(req.postData()||'{}');D.n++;const id='f'+D.n;D.files.set(id,Object.assign({id,version:1,modifiedTime:now(),trashed:false,content:''},meta));return json({id});}
   if(mm&&m==='GET'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404,message:'File not found'}},404);
+    if(u.searchParams.get('alt')==='media'&&D.slow)await new Promise(r=>setTimeout(r,D.slow));   /* v22.06 a slow Drive, for the race in 33 */
     if(u.searchParams.get('alt')==='media')return route.fulfill({status:200,contentType:'application/json',body:f.content});return json(pick(f));}
   if(mm&&m==='PATCH'){const f=D.files.get(mm[1]);if(!f)return json({error:{code:404}},404);const meta=JSON.parse(req.postData()||'{}');if('trashed' in meta)f.trashed=meta.trashed;if(meta.appProperties)f.appProperties=Object.assign({},f.appProperties,meta.appProperties);f.version++;D.n++;f.modifiedTime=now();return json({id:f.id});}
   mm=/^\/upload\/drive\/v3\/files(?:\/([^/]+))?$/.exec(u.pathname);
@@ -254,7 +255,28 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const fold=D.files.get('fOLD'),mig=[...D.files.values()].filter(f=>(f.appProperties||{}).ed==='mig');
   ok('32 settings an earlier version kept for the whole site: the edition with no synced student leaves them; the edition whose students synced takes them and its old Drive folder (now tagged), and makes no new one',
     !m0.on&&m0.old==='1'&&m1.on&&m1.acct===SCHOOL&&m1.dev==='iPad'&&m1.scoped==='1'&&m1.old===null&&(fold.appProperties||{}).ed==='mig'&&mig.length===1,{m0,m1,fold:fold.appProperties,mig:mig.map(f=>f.id)});
-  ok('no page errors (iPad, laptop, third, fourth, the second editions)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length&&!errB.length&&!F2.errs.length,[A.errs,B.errs,C.errs,E.errs,errB,F2.errs].map(e=>e.slice(0,3)));
+  /* 33 (v22.06) Save case pressed while a sync is busy bringing the other device's newer copy of the same student: the save
+     is not replaced; the two copies are asked about, and the one not kept goes to Replaced copies (review finding F502) */
+  const G=await device(br,UA_IPAD,true),H=await device(br,UA_MAC,false),ST={client:'SIMULATED – Sample Student 2',sid:'SIM-0003',site:'Sample Middle'};
+  for(const X of [G,H]){await X.page.evaluate(()=>caseloadOpen());await sleep(400);await X.page.evaluate(()=>document.getElementById('drvLink').click());await sleep(900);await idle(X.page);await X.page.evaluate(()=>document.getElementById('dlg').close());if(X===G){
+    await setBar(G.page,ST);const g1=await openDM(G.page);await setField(g1,'s.living','FIRST iPad words (simulated).');await sleep(600);await G.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(2500);await idle(G.page);G.dm=g1;}}
+  await H.page.evaluate(async st=>{await caseloadGo(clKey(st),'');},ST);await sleep(2500);
+  const h1=await openDM(H.page);await setField(h1,'s.living','MAC words (simulated).');await sleep(600);await H.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(2500);await idle(H.page);
+  const stF=()=>cases().find(f=>/Sample Student 2/.test(f.content)&&/SIM-0003/.test(f.content));
+  const v33mac=/MAC words/.test(stF().content);
+  await setField(G.dm,'s.living','SECOND iPad words, typed after the Mac saved (simulated).');await sleep(600);
+  D.slow=3000;await G.page.evaluate(()=>{drvSync({});});await sleep(700);const busy=await G.page.evaluate(()=>DRV.busy);
+  await G.page.evaluate(()=>document.getElementById('saveCase').click());await sleep(1500);
+  const askOrIdle=()=>G.page.waitForFunction(()=>document.getElementById('cfDlg').open||!DRV.busy,null,{timeout:30000});   /* a question about two copies holds the sync until it is answered */
+  await askOrIdle();D.slow=0;await sleep(2500);await askOrIdle();
+  const keyG=await G.page.evaluate(st=>clKey(st),ST);
+  const mid33=await G.page.evaluate(async k=>{const r=(await clList()||[]).find(x=>x.key===k);return {second:/SECOND iPad/.test(r.text),mac:/MAC words/.test(r.text),dirty:r.drv.dirty,conf:!!DRV.conf[k],dlg:document.getElementById('cfDlg').open};},keyG);
+  if(!mid33.dlg){await G.page.evaluate(()=>{drvSync({interactive:true});});await G.page.waitForFunction(()=>document.getElementById('cfDlg').open,null,{timeout:15000}).catch(()=>{});}
+  const ask33=await dlgOf(G.page);await press(G.page,/Keep this iPad/);await sleep(1500);await askOrIdle();await sleep(500);await idle(G.page);
+  const end33={drive:/SECOND iPad/.test(stF().content),old:olds().some(o=>/MAC words/.test(o.content)&&/SIM-0003/.test(o.content)),local:(await rec(G.page,ST.client))};
+  ok('33 Save case while a sync brings the Mac’s newer copy: the iPad’s save is kept and waits (not replaced); asked which copy, Keep this iPad’s sends it to Drive and the Mac’s copy goes to Replaced copies',
+    v33mac&&busy&&mid33.second&&!mid33.mac&&mid33.dirty&&/two different copies/.test(ask33.t+ask33.b)&&end33.drive&&end33.old&&/SECOND iPad/.test(end33.local.text)&&!end33.local.drv.dirty,{v33mac,busy,mid33,ask:ask33.t,end:{drive:end33.drive,old:end33.old,dirty:end33.local&&end33.local.drv.dirty}});
+  ok('no page errors (iPad, laptop, third, fourth, the second editions, the race)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length&&!errB.length&&!F2.errs.length&&!G.errs.length&&!H.errs.length,[A.errs,B.errs,C.errs,E.errs,errB,F2.errs,G.errs,H.errs].map(e=>e.slice(0,3)));
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);
 })().catch(e=>{console.error('FAIL',e);process.exit(1);});

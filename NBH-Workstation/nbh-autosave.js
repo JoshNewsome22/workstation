@@ -508,7 +508,12 @@
     var save = b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent);
     var clear = b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent);
     if (save) setTimeout(function () { clearTimeout(timer); lastSig = H.own; if (IOS) C.patch(key, { fileAt: new Date().toISOString() }); else C.del(key); }, 700);
-    else if (clear) setTimeout(seal, 700);
+    else if (clear) {   /* v22.06 a new copy only when the form was really cleared (Cancel leaves the work in this copy) */
+      var was = null, n = 0, stop = false;   /* the state at the tap, worked out now */
+      var quit = function () { stop = true; D.removeEventListener('input', quit, true); D.removeEventListener('keydown', quit, true); };
+      D.addEventListener('input', quit, true); D.addEventListener('keydown', quit, true);
+      (function look() { if (stop) return; compute().then(function (s) { if (stop) return; if (was === null) was = s; else if (s !== was) { quit(); seal(); return; } if (++n < 100) setTimeout(look, 300); else quit(); }); })();
+    }
   }, true);
   function seal() { clearTimeout(timer); seq++; key = 'f-' + tab + '-' + seq; lastSig = ''; replaces = ''; }
   D.addEventListener('change', function (e) {

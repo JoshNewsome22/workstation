@@ -2920,7 +2920,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
     if (b.id === 'nbhSaveQuick') return;
     if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\s*open data\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;
     if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\s*save data\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
-    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }
+    else if (b.id === 'clearBtn' || /^\s*clear all\s*$/i.test(b.textContent)) afterClear(function(){ dirty = false; saved(); paint(); });   /* v22.06 only once really cleared */
   }, true);
   window.addEventListener('beforeunload', function(ev){
     if (window.parent !== window) return;
@@ -2932,6 +2932,28 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
   function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', isDirty()); }
   setInterval(paint, 2000);
   window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };
+  /* v22.06 Clear all counts the form as clean only once the form has really been cleared: its state changes after the
+     tap (the question answered Clear). Cancel leaves it as it was, so nothing is marked; typing again ends the wait. */
+  function afterClear(done){
+    var S = window.nbhState; if (!S || !S.sig || !S.now) { setTimeout(done, 300); return; }
+    var was = null, stop = false, n = 0;   /* the state at the tap, worked out now (the last one kept may be a few keys old) */
+    function quit(){ stop = true; document.removeEventListener('input', quit, true); document.removeEventListener('keydown', quit, true); }
+    document.addEventListener('input', quit, true); document.addEventListener('keydown', quit, true);
+    (function look(){ if (stop) return; Promise.resolve(S.now()).then(function(sig){ if (stop) return;
+      if (was === null) was = sig; else if (sig !== was) { quit(); done(); return; }
+      if (++n < 100) setTimeout(look, 300); else quit(); }, function(){ if (!stop && ++n < 100) setTimeout(look, 300); }); })();
+  }
+  /* v22.06 Clear all counts the form as clean only once the form has really been cleared: its state changes after the
+     tap (the question answered Clear). Cancel leaves it as it was, so nothing is marked; typing again ends the wait. */
+  function afterClear(done){
+    var S = window.nbhState; if (!S || !S.sig || !S.now) { setTimeout(done, 300); return; }
+    var was = S.sig(), stop = false, n = 0;
+    function quit(){ stop = true; document.removeEventListener('input', quit, true); document.removeEventListener('keydown', quit, true); }
+    document.addEventListener('input', quit, true); document.addEventListener('keydown', quit, true);
+    (function look(){ if (stop) return; Promise.resolve(S.now()).then(function(sig){ if (stop) return;
+      if (sig !== was) { quit(); done(); return; }
+      if (++n < 100) setTimeout(look, 300); else quit(); }, function(){ if (!stop && ++n < 100) setTimeout(look, 300); }); })();
+  }
 
   /* the quick Save beside More controls */
   function addQuick(){

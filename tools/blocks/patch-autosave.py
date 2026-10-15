@@ -101,17 +101,25 @@ GUARD = [
      "    if (e.target && e.target.type === 'file') { if (opening) { opening = false; setTimeout(function(){ dirty = false; saved(); paint(); }, 900); } return; }"),   # v21.87 Open data only (patch-guard-open.py)
     ("  var dirty = false;\n  function isField(t)",
      "  var dirty = false, opening = false;   /* opening: Open data was the last button pressed (v21.86) */\n  function isField(t)"),
-    ("  document.addEventListener('click', function(e){\n    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
+    (("  document.addEventListener('click', function(e){\n    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
      "    if (b.id === 'nbhSaveQuick') return;\n"
      "    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\\s*save data\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }\n"
      "    else if (b.id === 'clearBtn' || /^\\s*clear all\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; paint(); }, 300); }\n",
-     "  document.addEventListener('click', function(e){\n"
+     # v21.44
+      "  document.addEventListener('click', function(e){\n"
      "    if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */\n"
      "    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
      "    if (b.id === 'nbhSaveQuick') return;\n"
      "    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\\s*open data\\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;\n"
      "    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\\s*save data\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }\n"
      "    else if (b.id === 'clearBtn' || /^\\s*clear all\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }\n"),
+     "  document.addEventListener('click', function(e){\n"
+     "    if (window.__nbhQuiet) return;   /* v21.44 the bridge pressing Save for the workstation, not the user */\n"
+     "    var b = e.target && e.target.closest ? e.target.closest('button') : null; if (!b) return;\n"
+     "    if (b.id === 'nbhSaveQuick') return;\n"
+     "    if (b.matches('#loadBtn,#btnLoad,#up-json') || /^\\s*open data\\s*$/i.test(b.textContent)) opening = true; else if (!b.closest('dialog')) opening = false;\n"
+     "    if (b.matches('#saveBtn,#btnSave,#dl-json') || /^\\s*save data\\s*$/i.test(b.textContent)) { setTimeout(function(){ dirty = false; saved(); paint(); }, 300); }\n"
+     "    else if (b.id === 'clearBtn' || /^\\s*clear all\\s*$/i.test(b.textContent)) afterClear(function(){ dirty = false; saved(); paint(); });   /* v22.06 only once really cleared */\n"),
     ("    if (window.parent !== window) return;\n    if (!dirty) return;\n",
      "    if (window.parent !== window) return;\n    if (!isDirty()) return;\n"),
     ("  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', dirty); }\n"
@@ -122,6 +130,19 @@ GUARD = [
      "  function paint(){ var q = document.getElementById('nbhSaveQuick'); if (q) q.classList.toggle('dirty', isDirty()); }\n"
      "  setInterval(paint, 2000);\n"
      "  window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };\n"),
+    ("  window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };\n",
+     "  window.nbhGuard = { isDirty: isDirty, clean: function(){ dirty = false; saved(); paint(); } };\n"
+     "  /* v22.06 Clear all counts the form as clean only once the form has really been cleared: its state changes after the\n"
+     "     tap (the question answered Clear). Cancel leaves it as it was, so nothing is marked; typing again ends the wait. */\n"
+     "  function afterClear(done){\n"
+     "    var S = window.nbhState; if (!S || !S.sig || !S.now) { setTimeout(done, 300); return; }\n"
+     "    var was = null, stop = false, n = 0;   /* the state at the tap, worked out now (the last one kept may be a few keys old) */\n"
+     "    function quit(){ stop = true; document.removeEventListener('input', quit, true); document.removeEventListener('keydown', quit, true); }\n"
+     "    document.addEventListener('input', quit, true); document.addEventListener('keydown', quit, true);\n"
+     "    (function look(){ if (stop) return; Promise.resolve(S.now()).then(function(sig){ if (stop) return;\n"
+     "      if (was === null) was = sig; else if (sig !== was) { quit(); done(); return; }\n"
+     "      if (++n < 100) setTimeout(look, 300); else quit(); }, function(){ if (!stop && ++n < 100) setTimeout(look, 300); }); })();\n"
+     "  }\n"),
 ]
 
 

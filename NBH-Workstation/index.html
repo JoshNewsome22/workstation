@@ -1180,7 +1180,7 @@ body:not(.has-form) #focusBtn{display:none}
     <button id="moreBtn" class="more-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="Save packet, Open packet, Case as spreadsheet, Diagnostics, Finish PDF">More</button></span>
     <div class="sp"></div>
     <!-- v21.44 (A8): the two chips move into the heading on a window 1000 px wide or more (placeChips) -->
-    <span class="chips" id="wsChips"><button class="chip" id="autoChip" aria-live="polite" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
+    <span class="chips" id="wsChips"><button class="chip" id="autoChip" title="Autosave keeps your work on this computer between sessions">Autosave&nbsp;&hellip;</button>
     <button class="chip" id="offChip" hidden title="The workstation&rsquo;s offline copy on this device">Offline copy&nbsp;&hellip;</button>
     <button class="chip" id="drvChip" type="button" hidden title="Google Drive">Drive</button></span>
     <button class="primary" id="masterPrint">Build master print</button>
@@ -2206,6 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
+const WS_REL='v22.06';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3432,6 +3433,7 @@ $('#diag').addEventListener('click',()=>{
   const heads=cv>=131?'yes \u2014 version '+cv:cv?'no \u2014 this is version '+cv+', and 131 or later is needed':
     appleMobile()?'not in print \u2014 iPad and iPhone browsers are all Apple\u2019s engine underneath; save the master print as PDF and Finish PDF adds them':'no \u2014 not Chrome or Edge; save the master print as PDF and Finish PDF adds them';
   const rows=[
+   ['Version',WS_REL,'The version of the workstation on this device. After an upload, this line shows whether this device has the new one'],
    ['Page origin',String(window.origin),'"null" is normal when opened from a drive'],
    ['Secure context',String(window.isSecureContext),''],
    ['Folder access API',('showDirectoryPicker' in window)?'present':'absent','Not used yet; would allow reading a student folder'],
@@ -3532,6 +3534,7 @@ $('#help').addEventListener('click',()=>{
   const fold=(t,h)=>'<details><summary>'+t+'</summary>'+h+'</details>';
   dialog('How this works',
    '<p class="hp-lead">Forms open inside this window and stay loaded while you work. Enter the student once, in the bar; the forms fill themselves. Save the case to a file before you leave.</p>'+
+   '<p class="hint" id="hpVer">This is version '+WS_REL+' of the workstation.</p>'+
    '<ol class="hp-steps">'+
    '<li><b>Pick a form</b> from the list (on a tablet, from the <b>Forms</b> button). <b>Case map</b> says which form when.</li>'+
    '<li><b>Enter the student</b> in the bar. The details go into every form you open, into empty fields only.</li>'+
@@ -4084,8 +4087,12 @@ function autoPref(){const s=store();if(!s)return '';
   try{const v=s.getItem(AUTO.pref2);if(v)return v;return s.getItem(AUTO.pref)==='off'?'ask':'';}catch(e){return '';}}
 function autoOn(){if(!CP.mode())return false;const v=autoPref();return v!=='off'&&v!=='ask';}
 function autoSet(on){const s=store();try{if(s){s.setItem(AUTO.pref2,on?'on':'off');s.removeItem(AUTO.pref);}}catch(e){}CP.setOff(!on);chip();}
+/* v22.06 the chip is not a live region (VoiceOver read "Autosaved 3:51 AM" over the BCBA's typing every few seconds); a
+   change that matters (unavailable, off, a warning) is said once through the status line, and only when it changes */
+let chipSaid='';
+function chipSay(t){if(t===chipSaid)return;chipSaid=t;if(t)try{say(t);}catch(e){}}
 function chip(){
-  const c=$('#autoChip');if(!c)return;
+  const c=$('#autoChip');if(!c)return;chipSay(!CP.mode()?'Autosave unavailable in this browser':!autoOn()?'Autosave off':state.auto.warn?'Autosave: '+state.auto.warnShort:'');
   if(!CP.mode()){c.textContent='Autosave unavailable';c.className='chip off';
     c.title='This browser will not let this page keep anything. Use Save case instead.';return;}
   if(!autoOn()){c.textContent='Autosave off';c.className='chip off';
@@ -5907,7 +5914,8 @@ document.addEventListener('keydown',e=>{
   /* with focus on a row of the list, the arrows start from that row and carry
      the focus along, so the list works from the keyboard on its own */
   const row=t&&t.closest?t.closest('#rail .item'):null;
-  if(!state.cur&&!row)return;
+  if(!row)return;   /* v22.06 only from a row of the list (an arrow in Help, Today or on a button no longer switches the form) */
+  if(document.querySelector('dialog[open]'))return;
   if(e.key==='ArrowDown'||e.key==='ArrowUp'){
     const ids=railIds(),i=ids.indexOf(row?row.dataset.id:state.cur);
     if(i<0)return;
@@ -6060,37 +6068,46 @@ async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
   if(!id)meta.parents=[await drvFolder()];
   let f;try{f=await drvUpload(id||'',meta,drvBody(r));}
   catch(e){if(!(e&&e.gone&&id))throw e;meta.parents=[await drvFolder()];f=await drvUpload('',meta,drvBody(r));}   /* its file is gone from Drive: a new one */
-  const cur=await drvLocal(r.key);if(!cur)return f;
-  /* saved again here while it went up: that save follows this one, so it stands on the version just made and still waits */
-  const same=cur.text===text;cur.drv=Object.assign({},cur.drv||{},{id:f.id,at:new Date().toISOString()});
-  if(same){cur.drv.ver=String(f.version);cur.drv.dirty=false;}else if(String(cur.drv.ver||'')===String(base||''))cur.drv.ver=String(f.version);
-  await drvPutLocal(cur);
-  if(cur.key===clKey(packet())&&String(state.drvBase||'')===String(base||'')){state.drvBase=String(f.version);state.drvKey=cur.key;}
+  /* saved again here while it went up: that save follows this one, so it stands on the version just made and still waits
+     (v22.06 read and written in one transaction, so a save in between is not overwritten) */
+  await clTx('readwrite',st=>{const g=st.get(r.key);g.onsuccess=()=>{const cur=g.result;if(!cur)return;
+    const same=cur.text===text;cur.drv=Object.assign({},cur.drv||{},{id:f.id,at:new Date().toISOString()});
+    if(same){cur.drv.ver=String(f.version);cur.drv.dirty=false;}else if(String(cur.drv.ver||'')===String(base||''))cur.drv.ver=String(f.version);
+    st.put(cur);};});
+  if(r.key===clKey(packet())&&String(state.drvBase||'')===String(base||'')){state.drvBase=String(f.version);state.drvKey=r.key;}
   return f;}
 /* Drive's copy comes here */
 async function drvBring(f,r,j){j=j||await drvRead(f.id);const x=j.rec||{};
   const key=clKey({client:x.client||'',sid:x.sid||''});if(!key)return null;
   const rec=Object.assign({},r||{},{key,scope:clScope(),client:x.client||'',sid:x.sid||'',site:x.site||'',grade:x.grade||'',bcba:x.bcba||'',saved:x.saved||f.modifiedTime,
     sum:x.sum||{items:[]},text:j.text,dev:x.dev||'',read:x.read,unfiled:false,drv:{id:f.id,ver:String(f.version),dirty:false,at:new Date().toISOString()}});
-  if(r&&r.key!==key)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
-  await drvPutLocal(rec);return rec;}
+  if(!(await drvPutIf(rec,r))){DRV.again=DRV.again||true;return null;}return rec;}
+/* v22.06 written only over the copy the sync read: a Save case made here while the sync was busy is not replaced (it waits
+   for Drive, and the next pass sends it or asks which copy to keep). Read and write in one transaction. */
+function drvPutIf(rec,r){const was=r?r.key:rec.key,expect=r?r.text:null;
+  return clTx('readwrite',st=>{const o={result:false},g=st.get(was);
+    g.onsuccess=()=>{const c=g.result;if(r?(!c||c.text!==expect):!!c)return;
+      if(r&&r.key!==rec.key)st.delete(r.key);st.put(rec);o.result=true;};return o;});}
+function drvDelIf(r){return clTx('readwrite',st=>{const o={result:false},g=st.get(r.key);
+    g.onsuccess=()=>{const c=g.result;if(!c||c.text!==r.text)return;st.delete(r.key);o.result=true;};return o;});}
 /* both changed without the other: asked (interactive) or left for the chip */
 async function drvClash(r,f,k,opt,res){const j=await drvRead(f.id);
   if(j.nbh!=='case-sync'){await drvPut(r,f.id,k);res.sent++;return;}
-  if(j.text===r.text){r.drv=Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false});await drvPutLocal(r);return;}
+  if(j.text===r.text){if(!(await drvPutIf(Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version),dirty:false})}),r)))DRV.again=DRV.again||true;return;}
   const rs=(j.rec&&j.rec.saved)||f.modifiedTime,rd=(j.rec&&j.rec.dev)||(f.appProperties&&f.appProperties.dev)||'other device';
   /* the first time this device joins: the newer save stays, the other goes to Replaced copies */
   if(opt.first&&!(r.drv&&r.drv.id)){if(Date.parse(r.saved)>=Date.parse(rs)){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'older copy from the '+rd);await drvPut(r,f.id,k);res.sent++;}
-    else{await drvKeepOld(r,'older copy from the '+drvDev());await drvBring(f,r,j);res.got++;}res.both++;return;}
+    else{await drvKeepOld(r,'older copy from the '+drvDev());if(await drvBring(f,r,j))res.got++;}res.both++;return;}
   if(!opt.interactive){DRV.conf[r.key]=1;return;}
   const lNew=Date.parse(r.saved)>=Date.parse(rs),other='the '+rd;
   const c=await wsUI.choose(clName(r)+': two different copies\nThis '+drvDev()+' saved it '+drvWhen(r.saved)+'. '+other.charAt(0).toUpperCase()+other.slice(1)+' saved it '+drvWhen(rs)+'. Each was changed without the other. Which copy do you keep?',
     [{v:'here',label:'Keep this '+drvDev()+'’s',kind:lNew?'primary':''},{v:'there',label:'Keep '+other+'’s',kind:lNew?'':'primary'},{v:'',label:'Decide later'}],
     'The copy you do not keep goes to the Replaced copies folder in your Google Drive, so nothing is lost.');
   if(!c){DRV.conf[r.key]=1;return;}delete DRV.conf[r.key];
-  if(c==='here'){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'not kept, from the '+rd);r.drv=Object.assign({},r.drv||{},{id:f.id,ver:String(f.version)});await drvPutLocal(r);
+  if(c==='here'){await drvKeepOld(Object.assign({},r,{text:j.text,saved:rs,dev:rd,sum:j.rec&&j.rec.sum}),'not kept, from the '+rd);
+    const r2=Object.assign({},r,{drv:Object.assign({},r.drv||{},{id:f.id,ver:String(f.version)})});if(!(await drvPutIf(r2,r))){DRV.again=DRV.again||true;return;}r=r2;   /* saved again here while asked: the next pass sends that */
     if(r.key===clKey(packet())){state.drvBase=String(f.version);state.drvKey=r.key;}await drvPut(r,f.id,k);res.sent++;}
-  else{await drvKeepOld(r,'not kept, from this '+drvDev());await drvBring(f,r,j);res.got++;}}
+  else{await drvKeepOld(r,'not kept, from this '+drvDev());if(await drvBring(f,r,j))res.got++;}}
 /* one pass: the removals waiting here, then every student in Drive against every student here */
 async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
   if(DRV.busy){DRV.again=DRV.again||opt;return null;}
@@ -6108,8 +6125,8 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
       const d=r.drv||{dirty:true};
       if(!d.dirty){if(d.id===f.id&&String(d.ver)===String(f.version))continue;
         if(gone){if(r.key===clKey(packet()))continue;   /* removed elsewhere while open here: left alone until it is closed or saved */
-          await clTx('readwrite',st=>st.delete(r.key));res.gone++;res.names.push(clName(r));continue;}
-        await drvBring(f,r);res.got++;res.names.push(clName(r));continue;}
+          if(await drvDelIf(r)){res.gone++;res.names.push(clName(r));}else DRV.again=DRV.again||true;continue;}
+        if(await drvBring(f,r)){res.got++;res.names.push(clName(r));}continue;}
       if(d.id===f.id&&String(d.ver)===String(f.version)||gone&&d.id===f.id){await drvPut(r,f.id,k);res.sent++;continue;}
       await drvClash(r,f,k,opt,res);}
     /* here and not in Drive (new here, or its file was taken out of the folder): it goes up as a new file */
