@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.18: a form's pages on an iPad held upright; the progress dots by shape; 400% zoom
+
+- **An iPad held upright** (review F480). With a case open the toolbar also carries the case button, and the view tabs
+  (the form's table of contents) were squeezed to one or two visible pages. Below 1000 px on a touch screen the tabs now
+  take a row of their own and the other controls the row under it; IA-1 shows 8 of its 11 pages instead of 2. Held
+  sideways, the toolbar keeps its one row.
+- **The dots after each view's name** (F493) say how filled it is by shape as well as colour: a ring (nothing yet), half
+  filled (some), full (most). On the light toolbar inside the workstation the amber and green are darker, so they stand
+  out from white, and a size larger. The button's tooltip still says "n of N fields filled".
+- **At 400% zoom** (320 px wide; F494) a field in a table keeps room for a few characters (PA-1's MSWO sheet had 14 px
+  fields) and the table scrolls in its own box; SM-1's contract no longer slides the page sideways (its signature lines
+  keep to the screen). Paper is unchanged.
+
+Checked by `qa/v2218-screens-test.js`.
+
 ### v22.17: the reply box's token out of the web address; the release steps written down
 
 - **The reply box** (review F498, privacy). When a form collected replies it put the box's read token in the web

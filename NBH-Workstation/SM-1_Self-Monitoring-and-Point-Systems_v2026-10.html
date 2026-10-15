@@ -7583,7 +7583,7 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 @media print{.noprint{display:none!important}}
 /* view progress: a dot after each view's name */
 #viewSeg button[data-nbh-fill]::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:7px;vertical-align:1px;border:1px solid rgba(255,255,255,.55);background:transparent}
-#viewSeg button[data-nbh-fill="part"]::after{background:#e3b341;border-color:#e3b341}
+#viewSeg button[data-nbh-fill="part"]::after{background:linear-gradient(90deg,#e3b341 50%,transparent 50%);border-color:#e3b341}   /* v22.18 (review F493): half filled, so it reads without the colour */
 #viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
 #viewSeg button[data-nbh-fill="none"]::after{display:none}
 /* touch: on a device without a fine pointer, the small controls grow */
@@ -7638,6 +7638,10 @@ html.nbh-framed .seg button[aria-pressed=true]{background:var(--nbh-navy,#182e43
 html.nbh-framed .toolbar :focus-visible{outline:2px solid var(--nbh-focus,#2f7fa8)}
 html.nbh-framed #viewSeg button[data-nbh-fill]::after{border-color:rgba(24,46,67,.4)}
 html.nbh-framed #viewSeg button[aria-pressed=true][data-nbh-fill]::after{border-color:rgba(255,255,255,.6)}
+/* v22.18 (review F493) on the light toolbar the dots are darker (amber and green at 3:1 or more on white), and a size larger */
+html.nbh-framed #viewSeg button[data-nbh-fill]::after{width:8px;height:8px}
+html.nbh-framed #viewSeg button[aria-pressed=false][data-nbh-fill="part"]::after{background:linear-gradient(90deg,#a86a00 50%,transparent 50%);border-color:#a86a00}
+html.nbh-framed #viewSeg button[aria-pressed=false][data-nbh-fill="done"]::after{background:#2a7a4b;border-color:#2a7a4b}
 html.nbh-framed .nbh-case-grp button.nbhc-on{background:var(--nbh-mint,#bcd9d4);color:var(--nbh-navy,#182e43)}
 /* v21.83 on an iPad (or any window 1194 px wide or less) the form's pinned toolbar folds to its view buttons on one line, a
    44 px strip with a "Tools" button, while the user reads down the form or types in a field (the script below sets
@@ -7674,6 +7678,9 @@ html{touch-action:manipulation}
   .toolbar > .tgroup:has(#viewSeg) > .row{min-width:0;max-width:100%;flex:1 1 0}
   /* the tabs' group shares the row with the two screen controls (the tabs scroll in what is left), so the toolbar is one row where it can be */
   html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 0;min-width:min(100%,240px)}
+  /* v22.18 (review F480) a narrower screen (an iPad held upright): the tabs are the form's contents, so they take a whole row
+     and the other controls (Dictate, From the case, Fit, More) the row under them; wider screens keep the one row */
+  @media (max-width:1000px){html.nbh-compact .toolbar > .tgroup.tg-keep:has(#viewSeg){flex:1 1 100%}}
   .toolbar > .tgroup:has(#viewSeg) > span{display:none}   /* the tabs say what they are; the room goes to them */
   .toolbar #nbhFocusBtn{flex:0 0 auto}   /* the Focus switch beside the tabs keeps its width when the row is full (it was squeezed on a form with many views held upright) */
   html .toolbar #viewSeg{flex:0 1 auto;flex-wrap:nowrap;align-self:center;min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}   /* no scroll snap: it moved a tab out from under a tap */
@@ -8166,6 +8173,12 @@ a{text-underline-offset:2px}
      14 px a side. A table wider than the screen scrolls in its own box (the script wraps it), not the whole page. */
   html:not(.nbh-plain) .sheet:not(table):not(.nbh-flush){padding-left:14px!important;padding-right:14px!important}
   .nbh-tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  /* v22.18 (review F494) at 400% zoom a field in a table was squeezed to 14 px: it keeps room for a few characters, and the
+     table scrolls in its own box; a drawn blank line keeps to the screen */
+  html:not(.nbh-plain) .sheet input.nbh-intd:not([type=checkbox]):not([type=radio]){min-width:4.5ch}
+  html:not(.nbh-plain) .sheet select.nbh-intd{min-width:8ch}
+  html:not(.nbh-plain) .sheet span{max-width:100%}
+  html:not(.nbh-plain) .sheet span.bl[style*="min-width"]{min-width:0!important;width:100%}   /* a drawn line set to a width wider than the screen (SM-1's contract) */
   /* nor does anything else in a sheet reach past it: a long list, a field, a box, a label (EA-1's lists ran to 660 px) */
   html:not(.nbh-plain) .sheet select,html:not(.nbh-plain) .sheet input:not([type=checkbox]):not([type=radio]):not([type=range]),html:not(.nbh-plain) .sheet textarea{max-width:100%}
   html:not(.nbh-plain) .sheet div:not(.nbh-tscroll):not(.seg),html:not(.nbh-plain) .sheet label{max-width:100%;box-sizing:border-box}

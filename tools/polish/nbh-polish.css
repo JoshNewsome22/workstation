@@ -134,6 +134,12 @@ a{text-underline-offset:2px}
      14 px a side. A table wider than the screen scrolls in its own box (the script wraps it), not the whole page. */
   html:not(.nbh-plain) .sheet:not(table):not(.nbh-flush){padding-left:14px!important;padding-right:14px!important}
   .nbh-tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  /* v22.18 (review F494) at 400% zoom a field in a table was squeezed to 14 px: it keeps room for a few characters, and the
+     table scrolls in its own box; a drawn blank line keeps to the screen */
+  html:not(.nbh-plain) .sheet input.nbh-intd:not([type=checkbox]):not([type=radio]){min-width:4.5ch}
+  html:not(.nbh-plain) .sheet select.nbh-intd{min-width:8ch}
+  html:not(.nbh-plain) .sheet span{max-width:100%}
+  html:not(.nbh-plain) .sheet span.bl[style*="min-width"]{min-width:0!important;width:100%}   /* a drawn line set to a width wider than the screen (SM-1's contract) */
   /* nor does anything else in a sheet reach past it: a long list, a field, a box, a label (EA-1's lists ran to 660 px) */
   html:not(.nbh-plain) .sheet select,html:not(.nbh-plain) .sheet input:not([type=checkbox]):not([type=radio]):not([type=range]),html:not(.nbh-plain) .sheet textarea{max-width:100%}
   html:not(.nbh-plain) .sheet div:not(.nbh-tscroll):not(.seg),html:not(.nbh-plain) .sheet label{max-width:100%;box-sizing:border-box}
