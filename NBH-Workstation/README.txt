@@ -84,9 +84,12 @@ its own Save data button.
 A ticked form you have never opened prints blank; the workstation warns you
 before that happens.
 
-If anything here misbehaves, each of the 45 forms also works on its own:
-double-click its file and it saves, opens and prints exactly as it does inside
-the workstation.
+If anything here misbehaves, each of the 46 forms also works on its own:
+double-click its file in this folder and it saves, opens and prints as it does
+inside the workstation. It needs the shared nbh-*.js files beside it: a single
+form file emailed or copied somewhere else opens without its letterhead, its
+writing help and its Autosave. For one file that carries everything, use the
+one-file edition (below).
 
 To print one form, press Print this form above it (or Ctrl+P / Cmd+P while
 working in it). Build master print gathers the ticked forms into one document.
@@ -112,7 +115,7 @@ in IA-1's toolbar. Each response becomes an informant column and the worksheet
 does the scoring.
 
 One file instead of a folder: NBH-Workstation.html (RPS-Workstation.html for
-the school edition) is the whole workstation in a single file, the 45 forms
+the school edition) is the whole workstation in a single file, the 46 forms
 inside it. Keep it on the district drive and
 double-click it. Its Save case writes the case as one file of its own,
 Student.case.html, which opens the workstation with that case already in it

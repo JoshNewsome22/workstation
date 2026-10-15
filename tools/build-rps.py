@@ -109,6 +109,12 @@ s = s.replace('NBH FBA/BIP Workstation\n=======================',
   'This is the Royal Palm School edition. It is the same workstation and the same 46\n'
   'forms as the Newsome Behavioral Health edition; only the logo and name differ, and\n'
   'it keeps its own autosave, so both can be used in one browser without mixing.', 1)
+# v22.11: Rewrite with Claude is off in this edition (v22.07); its README says nothing of it
+for a, b in [('checks the wording on this device and suggests observable words (Check\n    wording; nothing is sent). In the forms opened from the website it can\n    also rewrite the text through the practice\'s relay, once a single-use\n    passcode from the BCBA unlocks the tab (Rewrite with Claude; the\n    student\'s name and ID are replaced before anything is sent, and the\n    panel shows exactly what will be). On an iPad with Apple Intelligence,\n    Writing Tools work in every box as well. The relay is set up once on the\n    website: see HOSTING.md.\n',
+              'checks the wording on this device and suggests observable words (Check\n    wording; nothing is sent). On an iPad with Apple Intelligence, Writing\n    Tools work in every box as well.\n'),
+             (' The writing help\'s Rewrite with Claude works only from\nthe website, through its relay (public_html/ai, uploaded once from\nnbh-relay-upload.zip; HOSTING.md says how).\n', '\n')]:
+    if s.count(a) != 1: raise SystemExit('README.txt: the Rewrite with Claude text was not found once: ' + a[:60])
+    s = s.replace(a, b)
 open(rd, 'w', encoding='utf-8').write(s)
 hd = os.path.join(OUT, 'HOSTING.md'); s = open(hd, encoding='utf-8').read()
 s = re.sub(r'`workstation`', '`workstation-rps`', s)

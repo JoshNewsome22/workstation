@@ -1,3 +1,23 @@
+# Start here
+
+This file is the workstation's release notes, oldest first, from September 2026 on; most of it is history. What is true
+now:
+
+- **The folder** (`NBH-Workstation`, or `RPS-Workstation` for the school edition): `index.html` (the workstation), the
+  46 forms, the shared `nbh-*.js` files every form loads (letterhead, Autosave, writing help, dictation and the rest),
+  `respond.html` and `staff-data.html` (the pages families and staff answer on), the offline files (`sw.js`,
+  `release.json`, `manifest.json`), and README.txt, HOSTING.md and this file. Keep them together: a form away from the
+  `nbh-*.js` files loses its letterhead and Autosave.
+- **Which version is running:** **Help** (in the bar) and Diagnostics say it, for example v22.11. The newest release
+  is at the end of this file.
+- **Putting it on the website, updating it, and Google sign-in** (Sheets, Gmail, Drive): HOSTING.md.
+- **Where a student's information goes:** Help, *Where the student's data goes* (the same table is in HOSTING.md).
+- **How to use it:** Help, in the workstation. README.txt is the short version.
+
+Everything below this line was written at the time of each release and is kept as it was.
+
+---
+
 # Setting the folder up
 
 Unzip it. Inside `NBH-Workstation`, every form sits loose beside `index.html` — no
@@ -9809,3 +9829,25 @@ Checked by `qa/v2209-names-test.js` (every form with its simulation loaded, and 
 
 Checked by `qa/v2209-print-test.js` (DM-1, TB-1 and TD-1 printed alone with their simulations, read back from the PDF
 page by page; a 26-form master print).
+
+### v22.11: the documentation
+
+- **Form DM-1's Packet Contents** (review F512). The cover sheet listed only the 31 forms of v21.16, so it could not
+  show whether assent (SI-1) was obtained or injuries are monitored (IM-1). It now lists every form a student's file can
+  hold, in the workstation's order. GC-1 is left out: a class-wide system is kept outside any one student's file. A file
+  saved before keeps its ticks.
+- **Help** (F513) has four new sections: *Your caseload and Today* (Caseload, its search, the pin, the monthly summary,
+  Today, Log it now, the Home note, the hand-over check); *Going back to an earlier save* (History, its limits);
+  *Working faster* (Focus, Dictate, Read a document, the photo); and *On a shared iPad* (or computer: what the device keeps, and where
+  Forget a student, Remove and Remove all student data are).
+- **One Google sign-in checklist** (F514), in HOSTING.md, *Google sign-in*: one project and one key for DD-1's sheet,
+  Gmail and Drive, the APIs, the four scopes, the origin, test users and the step for the school's IT. Help, Form DD-1's
+  key box and the Caseload's key prompt point to it.
+- **A form on its own** (F515). README.txt and Help no longer say a form works "exactly as" anywhere: it does in the
+  workstation folder, with the shared `nbh-*.js` files beside it; a single form file sent elsewhere opens without its
+  letterhead, writing help and Autosave. The one-file edition is the portable copy.
+- **Start here** (F516) at the top of this file says what the folder holds now and where to look; the rest is marked as
+  the release history it is. README.txt says 46 forms (F508). The school edition's README no longer mentions Rewrite
+  with Claude, which is off there.
+
+Checked by `qa/v2211-docs-test.js` (both editions).

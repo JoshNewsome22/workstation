@@ -50,13 +50,8 @@ Double-click index.html. Everything runs from this folder.
     the indices graphed over time, the nurse's checks logged beside them.
   - Writing help: "Improve wording", at the corner of a form's text boxes,
     checks the wording on this device and suggests observable words (Check
-    wording; nothing is sent). In the forms opened from the website it can
-    also rewrite the text through the practice's relay, once a single-use
-    passcode from the BCBA unlocks the tab (Rewrite with Claude; the
-    student's name and ID are replaced before anything is sent, and the
-    panel shows exactly what will be). On an iPad with Apple Intelligence,
-    Writing Tools work in every box as well. The relay is set up once on the
-    website: see HOSTING.md.
+    wording; nothing is sent). On an iPad with Apple Intelligence, Writing
+    Tools work in every box as well.
   - TB-1 has a behavior library: 207 starting definitions for reduction
     targets in 14 categories, to load into a target card and then edit for
     the learner.
@@ -88,9 +83,12 @@ its own Save data button.
 A ticked form you have never opened prints blank; the workstation warns you
 before that happens.
 
-If anything here misbehaves, each of the 45 forms also works on its own:
-double-click its file and it saves, opens and prints exactly as it does inside
-the workstation.
+If anything here misbehaves, each of the 46 forms also works on its own:
+double-click its file in this folder and it saves, opens and prints as it does
+inside the workstation. It needs the shared nbh-*.js files beside it: a single
+form file emailed or copied somewhere else opens without its letterhead, its
+writing help and its Autosave. For one file that carries everything, use the
+one-file edition (below).
 
 To print one form, press Print this form above it (or Ctrl+P / Cmd+P while
 working in it). Build master print gathers the ticked forms into one document.
@@ -106,9 +104,7 @@ whether a form's own Print button prints just that form.
 
 The same folder runs from this computer or from a website - there is no
 separate website version. To put it on a website, or update the one that is
-there, see HOSTING.md. The writing help's Rewrite with Claude works only from
-the website, through its relay (public_html/ai, uploaded once from
-nbh-relay-upload.zip; HOSTING.md says how).
+there, see HOSTING.md.
 
 Form IA-1 can take the answers straight from a Google Form: open the responses
 spreadsheet, copy the Form Responses tab, and press Import Google Forms responses
@@ -116,7 +112,7 @@ in IA-1's toolbar. Each response becomes an informant column and the worksheet
 does the scoring.
 
 One file instead of a folder: NBH-Workstation.html (RPS-Workstation.html for
-the school edition) is the whole workstation in a single file, the 45 forms
+the school edition) is the whole workstation in a single file, the 46 forms
 inside it. Keep it on the district drive and
 double-click it. Its Save case writes the case as one file of its own,
 Student.case.html, which opens the workstation with that case already in it

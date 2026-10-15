@@ -142,6 +142,41 @@ offline copy finishes sooner. It changes nothing in the forms or in what they sa
   Save to Files) and run Finish PDF: since v21.90 it adds the page header and
   footer, the bookmarks and the contents page numbers, on the iPad.
 
+## Google sign-in (once, for Sheets, Gmail and Drive)
+
+Three features use Google with your school account: Form DD-1 reading the team's Google Sheet, sending questionnaires
+from your school Gmail, and keeping the caseload in your school Google Drive. All three use **one** Google Cloud project
+and **one** sign-in key (the Client ID). Set up only what you will use; each part can be added later to the same project.
+
+1. **The project.** Go to console.cloud.google.com and sign in (with the school account if it may create projects;
+   otherwise a personal Google account). Create one project, for example "FBA-BIP Workstation".
+2. **The APIs.** *APIs & Services > Library*: find and *Enable* each one you will use:
+   **Google Sheets API** (DD-1's sheet link), **Gmail API** (sending questionnaires), **Google Drive API** (the caseload in Drive).
+3. **The sign-in screen.** *Google Auth Platform* (formerly *OAuth consent screen*): an app name and a support email.
+   Audience: *Internal* if the project belongs to the school's Google organization; otherwise *External*, and add your
+   school address under *Test users*.
+4. **The scopes.** *Google Auth Platform > Data access > Add or remove scopes*, then *Update* and *Save*:
+
+   | Scope | What it lets the workstation do | For |
+   |---|---|---|
+   | `.../auth/spreadsheets.readonly` | Read the sheet you link; it cannot change it | DD-1's sheet link |
+   | `.../auth/gmail.send` | Send email you press Send for; it cannot read your mail | Questionnaires |
+   | `.../auth/userinfo.email` | Your address, to say which account sends and syncs | Gmail and Drive |
+   | `.../auth/drive.file` | Only the files the workstation itself made in your Drive | The caseload in Drive |
+
+5. **The key.** *Clients > Create client > Web application*. Under *Authorized JavaScript origins* add
+   `https://newsomebh.com` (one origin covers both editions). *Create*, and copy the **Client ID**: it ends in
+   `.apps.googleusercontent.com` and is not a secret.
+6. **On each device**, paste the Client ID once, where it is first asked for: Form DD-1's *Link a Google Sheet*, or
+   *Caseload > Use Google Drive*. The same key serves all three features on that device.
+7. **If Google says "Access blocked"** or that your administrator has not approved the app, the school's IT can allow it:
+   *Admin console > Security > Access and data control > API controls > Manage third-party app access > Add app >
+   OAuth App Name Or Client ID*, paste the Client ID, and set it to *Trusted* (or *Limited* to the Google services above).
+
+Google may say it has not verified the app: it is your own; continue. Google renames these console screens from time to
+time; the steps stay the same. What each feature sends where is in the table above (*Where the student's data goes*).
+The older release notes in SETUP.md (v21.76, v21.86, v21.89) say more about each feature.
+
 ## Updating
 
 Upload the new zip into `workstation`, **Extract** it there, and delete the
