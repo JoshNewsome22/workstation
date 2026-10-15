@@ -475,6 +475,9 @@
     L.push('');
     items.forEach(function(x,i){L.push((n>1?(i+1)+'. ':'')+(x.label||x.title||(es?'Cuestionario':'Questionnaire'))+(!one&&x.due?(es?' (por favor antes del '+x.due+')':' (please send it by '+x.due+')'):'')+':');L.push(x.url);L.push('');});
     if(due){L.push(es?'Por favor envíe'+(n===1?'lo':'los')+' antes del '+due+'.':'Please send '+(n===1?'it':'them')+' by '+due+'.');L.push('');}
+    /* v22.12 (review F499): a personal link answers in the person's name, so it is not to be passed on */
+    var mine1=es?'Este enlace es solo para usted: por favor no lo reenvíe. Si otra persona debe responder, responda a este correo y le enviaré su propio enlace.':'This link is for you only: please do not forward it. If someone else should answer, reply to this email and I will send them their own.';
+    if(o.name){L.push(mine1);L.push('');}
     L.push(es?'Si un enlace no se abre, responda a este correo y le enviaré el cuestionario como archivo.':'If a link does not open, reply to this email and I will send the questionnaire as a file.');L.push('');
     L.push(es?'Gracias,':'Thank you,');if(o.bcba)L.push(String(o.bcba));
     /* v21.88 the same email as a page: each questionnaire is a button (Open the questionnaire), with its link in small print under it */
@@ -484,6 +487,7 @@
       H.push('<p style="margin:0 0 8px"><b>'+eh(lab)+'</b></p><p style="margin:0 0 6px"><a href="'+eh(x.url)+'" style="display:inline-block;background:#1d4a77;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px">'+(es?'Abrir el cuestionario':'Open the questionnaire')+'</a></p>'+
         '<p style="margin:0 0 18px;font-size:12px;color:#5b6670">'+(es?'O abra este enlace: ':'Or open this link: ')+'<a href="'+eh(x.url)+'" style="color:#1d4a77">'+eh(x.url)+'</a></p>');});
     if(due)H.push(Hp(es?'Por favor envíe'+(n===1?'lo':'los')+' antes del '+due+'.':'Please send '+(n===1?'it':'them')+' by '+due+'.'));
+    if(o.name)H.push(Hp(mine1));
     H.push(Hp(es?'Si un enlace no se abre, responda a este correo y le enviaré el cuestionario como archivo.':'If a link does not open, reply to this email and I will send the questionnaire as a file.'));
     H.push('<p style="margin:0">'+eh(es?'Gracias,':'Thank you,')+(o.bcba?'<br>'+eh(o.bcba):'')+'</p>');
     var html='<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1b2430;max-width:560px">'+H.join('')+'</div>';
@@ -593,10 +597,14 @@
        site only, nothing registered (the workstation's quiet collect) */
     C.fetch=function(opt){opt=opt||{};if(coll)return coll;
       coll=(opt.noEnsure?Promise.resolve(!!(B()&&B().site&&C.can())):C.ensure()).then(function(ok){if(!ok)return null;var b=B();
-        return fetchJ(b.site+'?a=list&b='+encodeURIComponent(b.id)+'&t='+encodeURIComponent(b.token)).then(function(j){var all=j.replies||[],objs=[],unread=0;
+        return fetchJ(b.site+'?a=list&b='+encodeURIComponent(b.id)+'&t='+encodeURIComponent(b.token)).then(function(j){var all=j.replies||[],objs=[],unread=0,junk=[];
           var fresh=all.filter(function(r){return r&&r.id&&r.k&&r.iv&&r.ct&&b.got.indexOf(r.id)<0;});
-          return fresh.reduce(function(p,r){return p.then(function(){return dec(b,r).then(function(x){if(x&&typeof x==='object'){x.at=String(r.at||'');objs.push(x);}else unread++;},function(){unread++;}).then(function(){b.got.push(r.id);});});},Promise.resolve())
-            .then(function(){if(b.got.length>2000)b.got=b.got.slice(-2000);o.set(b);C.last='';return {objs:objs,unread:unread,fresh:fresh.length,all:all.length};});});})
+          return fresh.reduce(function(p,r){return p.then(function(){return dec(b,r).then(function(x){if(x&&typeof x==='object'){x.at=String(r.at||'');objs.push(x);}else{unread++;junk.push(r.id);}},function(){unread++;junk.push(r.id);}).then(function(){b.got.push(r.id);});});},Promise.resolve())
+            /* v22.12 (review F500): a reply the form cannot unlock was not locked for this box (junk, or a page sent from a forged
+               link): it is taken out of the box at once, so junk cannot fill the box and turn real answers back to email */
+            .then(function(){if(b.got.length>2000)b.got=b.got.slice(-2000);o.set(b);C.last='';
+              return (junk.length?post(b.site+'?a=del&b='+encodeURIComponent(b.id),{t:b.token,ids:junk}).then(function(){return junk.length;},function(){return 0;}):Promise.resolve(0))
+                .then(function(rm){return {objs:objs,unread:unread,removed:rm,fresh:fresh.length,all:all.length};});});});})
         .catch(function(e){C.last=msg(e);return null;}).then(function(v){coll=null;paint();return v;});return coll;};
     /* the replies taken are removed from the site (they stay in the file) */
     C.purge=function(){var b=B();if(!b||!b.got.length||!C.ready())return Promise.resolve(null);
@@ -668,8 +676,10 @@
       $('#rbPurge').addEventListener('click',function(){var b=rb().box;if(!b||!b.got.length)return;
         var go=function(){C.purge().then(function(j){var t=j?j.deleted+' repl'+(j.deleted===1?'y':'ies')+' removed from the site.':'';paintBox();if(t){$('#rbCollectLine').textContent=t;toast(t,'ok');}});};
         if(window.nbhUI&&nbhUI.confirm)nbhUI.confirm('Remove the '+b.got.length+' collected repl'+(b.got.length===1?'y':'ies')+' from the site?\nThe answers stay in this file.',{ok:'Remove'}).then(function(y){if(y)go();});else go();});
-      $('#rbHeld').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-hadd],button[data-hdrop]');var bx=rb().box;if(!b||!bx)return;var i=+(b.getAttribute('data-hadd')!=null?b.getAttribute('data-hadd'):b.getAttribute('data-hdrop')),o=bx.held[i];if(!o)return;bx.held.splice(i,1);
-        if(b.getAttribute('data-hdrop')==null&&cfg.force){var p=Object.assign({},o);delete p.why;var r=cfg.force(p);if(r)after(r,false);}
+      $('#rbHeld').addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-hadd],button[data-hdrop],button[data-hkeep]');var bx=rb().box;if(!b||!bx)return;var i=+(b.getAttribute('data-hadd')!=null?b.getAttribute('data-hadd'):b.getAttribute('data-hkeep')!=null?b.getAttribute('data-hkeep'):b.getAttribute('data-hdrop')),o=bx.held[i];if(!o)return;bx.held.splice(i,1);
+        var p=Object.assign({},o);delete p.why;delete p.sentTo;
+        if(b.getAttribute('data-hkeep')!=null){var r2=null;try{r2=cfg.place([p]);}catch(er){r2={placed:[],held:[{o:p,why:'error'}],done:[]};}if(r2){(r2.held||[]).forEach(function(h){bx.held.push(Object.assign({},h.o,{why:h.why||'fit'}));});after(r2,false);}}
+        else if(b.getAttribute('data-hdrop')==null&&cfg.force){var r=cfg.force(p);if(r)after(r,false);}
         paintHeld();paintBox();changed();});
       /* the dialog opens: the box is registered (when a site is known) so the links carry it; the list is drawn while it is open */
       dl.addEventListener('close',function(){var tb=$('#rbRows');if(tb)tb.innerHTML='';});
@@ -726,23 +736,42 @@
     function markBack(o){var r=rb(),nm=String(o.name||'').trim().toLowerCase(),s=null;if(o.sid)s=r.sends.find(function(x){return x.id===o.sid;})||null;
       if(!s&&nm)s=r.sends.find(function(x){return !x.back&&x.name.trim().toLowerCase()===nm&&cfg.inst(x.pg,x.round)===o.inst;})||null;
       if(!s)return false;s.back=iso(o.date)||today();s.from=String(o.name||'').trim();if(!s.sent){s.sent=s.back;s.how=s.how||'collected';}return true;}
+    /* v22.12 (review F499): anyone holding a link can answer through it. A reply from a link already answered, a second reply
+       from one link, or one signed with a name other than the person the link was sent to is held, with when it came, for
+       the BCBA to keep (place) or discard; it is never placed on its own. */
+    function normName(t){return String(t||'').toLowerCase().replace(/[^a-z\u00c0-\u024f ]+/g,' ').replace(/\b(mr|mrs|ms|miss|dr)\b/g,' ').replace(/\s+/g,' ').trim();}
+    function sameName(a,b){a=normName(a);b=normName(b);if(!a||!b)return true;if(a===b)return true;var A=a.split(' '),B=b.split(' ');
+      return A.some(function(w){return w.length>1&&B.indexOf(w)>=0;});}
+    function screen(list){var r=rb(),seen={},keep=[],flag=[];
+      list.forEach(function(o){var s=o.sid?r.sends.find(function(x){return x.id===o.sid;})||null:null,why='';
+        if(s){if(s.back||seen[o.sid])why='again';else if(!sameName(o.name,s.name))why='name';}
+        if(o.sid)seen[o.sid]=1;if(why)flag.push({o:o,why:why,to:s.name.trim()});else keep.push(o);});
+      return {keep:keep,flag:flag};}
+    function heldWhy(o){var at=o.at?' It came '+String(o.at).replace('T',' ').slice(0,16)+'.':'';
+      if(o.why==='again')return 'a second reply through the link sent to '+esc(o.sentTo||'this person')+', whose answers are placed already.'+at+' Keep it only if you know who sent it.';
+      if(o.why==='name')return 'it came through the link made for '+esc(o.sentTo||'another person')+' but is signed '+esc(o.name||'with another name')+': the link may have been passed on.'+at+' Keep it only if you know who answered.';
+      return o.why==='fit'?'it does not fit this form (its items or questions differ from this form’s).':o.why==='error'?'it could not be placed.':esc(o.why);}
     function after(res,quiet){var r=rb(),n=(res.placed||[]).length;(res.placed||[]).forEach(markBack);r.placed+=n;if(n)r.last=today();
       if(n){changed();var t='Collected '+(res.done||[]).join('; ')+' from the reply box'+(res.cells!=null?': '+res.cells+' answers':'')+'.';var ln=$('#rbCollectLine');if(ln)ln.textContent=t;toast(t,'ok');}
       paintHeld();paintBox();paintRows();return n;}
     var inflight=null;
     K.collect=function(quiet,opt){if(inflight)return inflight;
       inflight=C.fetch(opt).then(function(f){if(!f){paintBox();return null;}var bx=rb().box,mine=f.objs.filter(function(o){return o.form===cfg.form;}),res={placed:[],held:[],done:[],cells:0};
+          var sc=screen(mine);mine=sc.keep;
           if(mine.length){try{res=cfg.place(mine)||res;}catch(e){res={placed:[],held:mine.map(function(o){return {o:o,why:'error'};}),done:[]};}}
-          (res.held||[]).forEach(function(h){bx.held.push(Object.assign({},h.o,{why:h.why||'fit'}));});
-          var n=after(res,quiet),out={ok:true,placed:n,held:(res.held||[]).length,unread:f.unread+(f.objs.length-mine.length),fresh:f.fresh,all:f.all};
-          if(!n){var t=out.held?out.held+' repl'+(out.held===1?'y is':'ies are')+' held below (they do not fit this form).':out.unread?out.unread+' repl'+(out.unread===1?'y':'ies')+' could not be read (not for this file).':f.all?'Nothing new: every reply in the box is placed already.':'Nothing in the box yet.';
-            if(out.held||out.unread)changed();var ln=$('#rbCollectLine');if(ln&&!quiet)ln.textContent=t;if(!quiet)toast(t,out.held||out.unread?'err':'');}
+          res.held=(res.held||[]).concat(sc.flag);
+          (res.held||[]).forEach(function(h){bx.held.push(Object.assign({},h.o,{why:h.why||'fit'},h.to?{sentTo:h.to}:{}));});
+          var n=after(res,quiet),other=f.objs.filter(function(o){return o.form!==cfg.form;}).length,out={ok:true,placed:n,held:(res.held||[]).length,flagged:sc.flag.length,unread:f.unread+other,junk:f.unread,removed:f.removed||0,fresh:f.fresh,all:f.all};
+          var jt=f.unread?' '+f.unread+' repl'+(f.unread===1?'y':'ies')+' could not be opened (not locked for this box) and '+(f.removed?(f.unread===1?'was':'were')+' removed from the box.':(f.unread===1?'is':'are')+' left in it.'):'';
+          if(!n){var t=out.held?out.held+' repl'+(out.held===1?'y is':'ies are')+' held below: '+(sc.flag.length?'check '+(sc.flag.length===1?'it':'them')+' before placing.':'they do not fit this form.'):other?other+' repl'+(other===1?'y is':'ies are')+' for another form.':f.all&&!f.unread?'Nothing new: every reply in the box is placed already.':f.unread?'':'Nothing in the box yet.';
+            t=(t+jt).trim();if(out.held||out.unread)changed();var ln=$('#rbCollectLine');if(ln&&!quiet)ln.textContent=t;if(!quiet)toast(t,out.held||out.unread?'err':'');}
+          else if(jt||sc.flag.length){var ln2=$('#rbCollectLine');if(ln2)ln2.textContent+=(sc.flag.length?' '+sc.flag.length+' held below: check before placing.':'')+jt;changed();}
           return out;})
         .then(function(v){inflight=null;return v;},function(e){inflight=null;C.last=String((e&&e.message)||e);paintBox();return null;});return inflight;};
     function paintBox(){var t=C.line();['#rbBoxLine','#rbCollectLine'].forEach(function(q){var e=$(q);if(e&&(q==='#rbBoxLine'||!e.textContent||/^(Reply box|No reply box|This browser)/.test(e.textContent)))e.textContent=t;});var pb=$('#rbPurge'),bx=rb().box;if(pb)pb.disabled=!(bx&&bx.got.length);}
     function paintHeld(){var h=$('#rbHeld');if(!h)return;var held=(rb().box&&rb().box.held)||[];
-      h.innerHTML=held.map(function(o,i){return '<div class="gf-warn rb-held"><b>Reply'+(o.name?' from '+esc(o.name):'')+(o.inst?' ('+esc(o.inst)+')':'')+'</b>: '+(o.why==='fit'?'it does not fit this form (its items or questions differ from this form’s).':o.why==='error'?'it could not be placed.':esc(o.why))+' '+
-        (cfg.force?'<button type="button" data-hadd="'+i+'">Place it anyway</button> ':'')+'<button type="button" data-hdrop="'+i+'">Discard</button></div>';}).join('');}
+      h.innerHTML=held.map(function(o,i){var chk=o.why==='again'||o.why==='name';return '<div class="gf-warn rb-held"><b>Reply'+(o.name?' from '+esc(o.name):'')+(o.inst?' ('+esc(o.inst)+')':'')+'</b>: '+heldWhy(o)+' '+
+        (chk?'<button type="button" data-hkeep="'+i+'">Keep and place it</button> ':cfg.force?'<button type="button" data-hadd="'+i+'">Place it anyway</button> ':'')+'<button type="button" data-hdrop="'+i+'">Discard</button></div>';}).join('');}
     /* ---- the workstation's side ---- */
     K.out=function(){var r=rb();if(!r.box&&!r.sends.length&&!r.placed)return null;var o={placed:r.placed,waiting:r.sends.filter(function(s){return s.sent&&!s.back;}).length,held:r.box?r.box.held.length:0};if(r.last)o.last=r.last;return o;};
     window.__nbhBoxCollect=function(){var b=rb().box;if(!b||!b.site||!C.can())return Promise.resolve({ok:true,placed:0,held:0,err:''});

@@ -382,7 +382,9 @@ PH.D=async()=>{
   await ddRows(dd,BASE_DAYS,[BASE_HIT,BASE_LEAVE,BASE_ASK]);
   const dv=await dd.evaluate(ids=>S.rows.map(r=>r.date+':'+S.behaviors.map(b=>r.values[b.id]).join(',')),null);
   ok('D6 DD-1: eight days of baseline typed into the sheet',dv.length===8&&dv[0]===BASE_DAYS[0]+':'+BASE_HIT[0]+','+BASE_LEAVE[0]+','+BASE_ASK[0]&&dv[7]===BASE_DAYS[7]+':'+BASE_HIT[7]+','+BASE_LEAVE[7]+','+BASE_ASK[7],dv);
-  const f=await facts();const fd=f.data||{},hit=(fd.behaviors||[]).find(b=>b.name===TGT[0].lab)||{};
+  /* v22.13: DD-1 shares its record a moment after the last entry; read the case until it is there (up to 10 s), not once */
+  let f={};for(let i=0;i<20;i++){f=await facts();if(f.data&&f.data.to===BASE_DAYS[7])break;await sleep(500);}
+  const fd=f.data||{},hit=(fd.behaviors||[]).find(b=>b.name===TGT[0].lab)||{};
   ok('D7 the case holds DD-1’s record: the dates, and the baseline mean of hitting',fd.from===BASE_DAYS[0]&&fd.to===BASE_DAYS[7]&&Math.abs((hit.base&&hit.base.mean!=null?hit.base.mean:hit.mean)-4.75)<0.06,{from:fd.from,to:fd.to,hit});
   const ev=Object.keys(f.evidence||{}).sort().join(',');
   ok('D8 the case holds the evidence of IA-1, IN-1, OB-1, ABC-1 and SP-1',ev==='ABC-1,IA-1,IN-1,OB-1,SP-1',ev);

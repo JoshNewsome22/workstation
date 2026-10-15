@@ -4737,7 +4737,7 @@ $('#rcFileBtn').addEventListener('click',()=>$('#rcFile').click());
 $('#rcFile').addEventListener('change',async e=>{const fs=Array.from(e.target.files||[]);if(!fs.length)return;const texts=await Promise.all(fs.map(f=>f.text()));$('#rcStatus').textContent=fs.length+' file'+(fs.length===1?'':'s')+' read';rcRead(texts.concat([$('#rcText').value]));e.target.value='';});
 $('#rcDlg').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.close();});
 rpCounts();
-window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable,targets:()=>T,outs:()=>OUTS,drop:()=>DROP,quiet:rpPayloadQuiet,ics:outsIcs,act:outsAct,plan:outsPlan,render:outsRender,due:()=>window.__nbhDue(),box:()=>BOX,ensure:boxEnsure,collect:boxCollect,purge:boxPurge,place:rcPlaceAuto,decrypt:boxDecrypt,qr:qrSvg,boxUrl};   /* for the checks */
+window.__rp={file:rpFile,link:rpLinkUrl,links:rpLinks,read:rcRead,payload:rpPayload,payloadFor:rpPayloadFor,terms:rpTermsFromTable,targets:()=>T,outs:()=>OUTS,drop:()=>DROP,quiet:rpPayloadQuiet,ics:outsIcs,act:outsAct,plan:outsPlan,render:outsRender,due:()=>window.__nbhDue(),box:()=>BOX,ensure:boxEnsure,collect:boxCollect,purge:boxPurge,place:rcPlaceAuto,decrypt:boxDecrypt,personLink:outsPersonLink,qr:qrSvg,boxUrl};   /* for the checks */
 
 
 /* ---------- (v21.64) several target behaviors in one file ----------
@@ -4947,15 +4947,29 @@ function boxCollect(quiet,opt){if(boxCollecting)return boxCollecting;
   boxCollecting=(async()=>{try{
     if(!(opt&&opt.noEnsure?!!(BOX&&BOX.site&&boxCan()):await boxEnsure())){boxPaint();return null;}   /* v21.86 noEnsure: the box's own site, nothing registered (the workstation's quiet collect) */
     const j=await boxFetch(BOX.site+'?a=list&b='+encodeURIComponent(BOX.id)+'&t='+encodeURIComponent(BOX.token));
-    const fresh=(j.replies||[]).filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&BOX.got.indexOf(r.id)<0),objs=[];let unread=0;
-    for(const r of fresh){try{const o=await boxDecrypt(r);if(o&&typeof o==='object'){o.at=String(r.at||'');objs.push(o);}else unread++;}catch(e){unread++;}BOX.got.push(r.id);}
+    const fresh=(j.replies||[]).filter(r=>r&&r.id&&r.k&&r.iv&&r.ct&&BOX.got.indexOf(r.id)<0),objs=[],junk=[];let unread=0;
+    for(const r of fresh){try{const o=await boxDecrypt(r);if(o&&typeof o==='object'){o.at=String(r.at||'');objs.push(o);}else{unread++;junk.push(r.id);}}catch(e){unread++;junk.push(r.id);}BOX.got.push(r.id);}
     if(BOX.got.length>2000)BOX.got=BOX.got.slice(-2000);
-    const res=rcPlaceAuto(objs);res.unread=unread;res.fresh=fresh.length;res.all=(j.replies||[]).length;
+    /* v22.13 (review F500): a reply this file cannot unlock was not locked for this box (junk, or a page from a forged link): it
+       is taken out of the box at once, so junk cannot fill the box and turn real answers back to email */
+    let removed=0;if(junk.length){try{await boxPost(BOX.site+'?a=del&b='+encodeURIComponent(BOX.id),{t:BOX.token,ids:junk});removed=junk.length;}catch(e){}}
+    const sc=rcScreen(objs),res=rcPlaceAuto(sc.keep);sc.flag.forEach(f=>{BOX.held.push(f);res.held++;});if(sc.flag.length)boxHeldPaint();
+    res.flagged=sc.flag.length;res.unread=unread;res.removed=removed;res.fresh=fresh.length;res.all=(j.replies||[]).length;
     boxLast='';boxPaint();boxNote(res,quiet);return res;}
     catch(e){boxLast=String((e&&e.message)||e);boxPaint();return null;}finally{boxCollecting=null;}})();return boxCollecting;}
 /* places replies the way Collect responses places pasted codes: the target the reply names (this file's record; a file with no
    target named yet takes the first), the column of the informant whose name it carries, else a free one; a reply about a target
    this file does not hold, or whose wording differs from this form's, is held on the Send-outs sheet */
+/* v22.13 (review F499): anyone holding a link can answer through it. A reply through a person's link that is back already,
+   a second reply through one link, or one signed with a name other than the informant's the link was made for is held on
+   the Send-outs sheet, with when it came, for the BCBA to keep (place) or discard; it is never placed on its own. */
+function rcNorm(t){return String(t||'').toLowerCase().replace(/[^a-z\u00c0-\u024f ]+/g,' ').replace(/\b(mr|mrs|ms|miss|dr)\b/g,' ').replace(/\s+/g,' ').trim();}
+function rcSameName(a,b){a=rcNorm(a);b=rcNorm(b);if(!a||!b||a===b)return true;const B=b.split(' ');return a.split(' ').some(w=>w.length>1&&B.indexOf(w)>=0);}
+function rcScreen(objs){const keep=[],flag=[],seen={};
+  objs.forEach(o=>{const row=o.sid?OUTS.find(x=>x.id===o.sid):null;let why='',to='';
+    if(row&&o.form==='IA-1'){const i=infIdx(row.inf);to=i>=0?val('inf['+i+'].name').trim():'';if(row.recv||seen[o.sid])why='again';else if(to&&!rcSameName(o.name,to))why='name';}
+    if(o.sid)seen[o.sid]=1;if(why)flag.push(Object.assign({},o,{why,sentTo:to}));else keep.push(o);});
+  return {keep,flag};}
 function rcPlaceAuto(objs){const res={placed:0,held:0,cells:0,done:[],other:0};if(!objs.length)return res;tgtStore();
   const behOf=o=>String(o.beh||'').trim(),recOf=k=>T.list.find(r=>r.label.trim().toLowerCase()===k)||null,cur=tgtCur();
   const mine=objs.filter(o=>o.form==='IA-1'&&INST[o.inst]&&Array.isArray(o.ans));res.other=objs.length-mine.length;
@@ -4969,9 +4983,10 @@ function rcPlaceAuto(objs){const res={placed:0,held:0,cells:0,done:[],other:0};i
     g.rows.forEach(x=>outsReceived(g.rec.id,g.key,x.slot,x.o.name||'',isoOf(x.o.date||'')));res.done.push(rows.length+' '+INST[g.key].title+' response'+(rows.length===1?'':'s')+' about '+(g.rec.label||'the current target'));});
   if(res.placed||res.held){tgtPaint();if(document.body.classList.contains('view-outs'))outsRender();boxHeldPaint();}return res;}
 function boxNote(res,quiet){if(!res)return;const b=$('#gfBanner');
-  if(res.placed){b.textContent=(res.took?'This form had no target named yet: it took '+res.took+' from the replies. ':'')+'Collected '+res.done.join('; ')+' from the reply box: '+res.cells+' answers'+(res.held?'; '+res.held+' held on the Send-outs sheet':'')+(res.unread?'; '+res.unread+' could not be read':'')+'. Check the informant table on Setup, then the worksheet'+(res.done.length>1?'s':'')+'; the Send-outs sheet shows what is back.';b.hidden=false;
+  if(res.placed){b.textContent=(res.took?'This form had no target named yet: it took '+res.took+' from the replies. ':'')+'Collected '+res.done.join('; ')+' from the reply box: '+res.cells+' answers'+(res.held?'; '+res.held+' held on the Send-outs sheet'+(res.flagged?' ('+res.flagged+' to check before placing)':''):'')+(res.unread?'; '+res.unread+' could not be opened (not locked for this box)'+(res.removed?' and '+(res.unread===1?'was':'were')+' removed from the box':''):'')+'. Check the informant table on Setup, then the worksheet'+(res.done.length>1?'s':'')+'; the Send-outs sheet shows what is back.';b.hidden=false;
     if(window.nbhUI&&nbhUI.toast)nbhUI.toast('Collected '+res.done.join('; ')+' from the reply box.',{kind:'ok'});}
-  else if(!quiet){const t=res.held?res.held+' repl'+(res.held===1?'y is':'ies are')+' held on the Send-outs sheet (a target this file does not hold, or other wording).':res.unread?res.unread+' repl'+(res.unread===1?'y':'ies')+' could not be read (not for this file).':res.all?'Nothing new: every reply in the box is placed already.':'Nothing in the box yet.';
+  else if(!quiet){const jt=res.unread?res.unread+' repl'+(res.unread===1?'y':'ies')+' could not be opened (not locked for this box)'+(res.removed?' and '+(res.unread===1?'was':'were')+' removed from the box.':'.'):'';
+    const t=res.held?res.held+' repl'+(res.held===1?'y is':'ies are')+' held on the Send-outs sheet ('+(res.flagged?'check '+(res.flagged===res.held?(res.held===1?'it':'them'):res.flagged)+' before placing':'a target this file does not hold, or other wording')+').'+(jt?' '+jt:''):jt?jt:res.all?'Nothing new: every reply in the box is placed already.':'Nothing in the box yet.';
     ['#rcBoxLine','#outBoxLine'].forEach(q=>{const e=$(q);if(e)e.textContent=t;});if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,res.held||res.unread?{kind:'err'}:{});}}
 function boxPaint(){const u=boxSite();let t;
   if(!boxCan())t='This browser cannot lock answers (no WebCrypto): the pages send email.';
@@ -4981,11 +4996,11 @@ function boxPaint(){const u=boxSite();let t;
   if(boxLast)t+=' '+boxLast.charAt(0).toUpperCase()+boxLast.slice(1).replace(/\.?$/,'.');
   ['#rpBoxLine','#outBoxLine','#rcBoxLine'].forEach(q=>{const e=$(q);if(e)e.textContent=t;});const pb=$('#outPurgeBtn');if(pb)pb.disabled=!(BOX&&BOX.got.length);}
 function boxHeldPaint(){const h=$('#outHeld');if(!h)return;const held=(BOX&&BOX.held)||[];if(!held.length){h.innerHTML='';return;}
-  h.innerHTML=held.map((o,i)=>'<div class="gf-note rp-other"><b>'+esc(INST[o.inst]?INST[o.inst].title:o.inst)+' reply'+(o.name?' from '+esc(o.name):'')+' about '+esc(o.beh||'(no behavior named)')+'</b>: '+(o.why==='wording'?'its wording differs from this form’s (the item order may not match).':o.why==='full'?'the five informant columns are taken.':'this file does not hold that target.')+' <button type="button" data-hadd="'+i+'">'+(o.why==='target'?'Add it as a target and place it':'Place it anyway')+'</button> <button type="button" data-hdrop="'+i+'">Discard</button></div>').join('');}
+  h.innerHTML=held.map((o,i)=>'<div class="gf-note rp-other"><b>'+esc(INST[o.inst]?INST[o.inst].title:o.inst)+' reply'+(o.name?' from '+esc(o.name):'')+' about '+esc(o.beh||'(no behavior named)')+'</b>: '+(o.why==='again'?'a second reply through the link sent to '+esc(o.sentTo||'this informant')+', whose answers are placed already.'+(o.at?' It came '+esc(String(o.at).replace('T',' ').slice(0,16))+'.':'')+' Keep it only if you know who sent it.':o.why==='name'?'it came through the link made for '+esc(o.sentTo||'another informant')+' but is signed '+esc(o.name||'with another name')+': the link may have been passed on.'+(o.at?' It came '+esc(String(o.at).replace('T',' ').slice(0,16))+'.':'')+' Keep it only if you know who answered.':o.why==='wording'?'its wording differs from this form’s (the item order may not match).':o.why==='full'?'the five informant columns are taken.':'this file does not hold that target.')+' <button type="button" data-hadd="'+i+'">'+(o.why==='target'?'Add it as a target and place it':o.why==='again'||o.why==='name'?'Keep and place it':'Place it anyway')+'</button> <button type="button" data-hdrop="'+i+'">Discard</button></div>').join('');}
 $('#outHeld').addEventListener('click',e=>{const b=e.target.closest('button[data-hadd],button[data-hdrop]');if(!b||!BOX)return;const i=+(b.dataset.hadd!=null?b.dataset.hadd:b.dataset.hdrop),o=BOX.held[i];if(!o)return;BOX.held.splice(i,1);
   if(b.dataset.hdrop!=null){boxHeldPaint();boxPaint();return;}
   if(o.why==='target'&&o.beh&&!T.list.some(r=>r.label.trim().toLowerCase()===String(o.beh).trim().toLowerCase())){tgtAdd(o.beh,'');tgtPaint();}
-  const p=Object.assign({},o);delete p.why;if(o.why!=='target')delete p.sig;const r=rcPlaceAuto([p]);boxNote(r,false);boxHeldPaint();boxPaint();});
+  const p=Object.assign({},o);delete p.why;delete p.sentTo;if(o.why==='wording'||o.why==='full')delete p.sig;const r=rcPlaceAuto([p]);boxNote(r,false);boxHeldPaint();boxPaint();});
 /* the replies this file has taken are removed from the site (they stay in the file) */
 async function boxPurge(){if(!BOX||!BOX.got.length||!boxReady())return null;try{const j=await boxPost(BOX.site+'?a=del&b='+encodeURIComponent(BOX.id),{t:BOX.token,ids:BOX.got.slice(-300)});
   const t=j.deleted+' repl'+(j.deleted===1?'y':'ies')+' removed from the site.';boxLast='';boxPaint();const e=$('#outBoxLine');if(e)e.textContent=t;if(window.nbhUI&&nbhUI.toast)nbhUI.toast(t,{kind:'ok'});return j;}catch(e){boxLast=String((e&&e.message)||e);boxPaint();return null;}}

@@ -9870,3 +9870,19 @@ Nothing changes on screen; this release is about being able to trust a rebuild a
   them and writes a dated summary naming the commit. README.md and qa/README.md give 46 forms.
 
 Checked by `qa/v2212-build-test.js`.
+
+### v22.13: the reply box against misuse
+
+- **Answers through someone else's link are held, not placed** (review F499). A personal questionnaire link answers in that
+  person's name, and anyone holding it could use it. Form IA-1, and Forms CF-1, SV-1 and IN-1, now hold a reply instead of
+  placing it when it is a second reply through one link, a reply through a link already answered, or a reply signed with a
+  name other than the person the link was sent to (a forwarded link). Each held reply says why and when it came, with
+  **Keep and place it** or **Discard**; nothing is placed on its own. The invitation email now says, in English and
+  Spanish: "This link is for you only: please do not forward it. If someone else should answer, reply to this email and I
+  will send them their own."
+- **Junk cannot fill the box** (F500). A reply the form cannot open was not locked for this box (junk, or a page made from
+  a forged link). It used to be skipped quietly and left in the box, where enough of it would fill the box and turn real
+  answers back to email. Collect now says how many could not be opened and takes them out of the box at once.
+
+Checked by `qa/v2213-replies-test.js` (IA-1 and CF-1 with a reply box on box.php). The student journey's check that the
+case holds DD-1's record now waits for it (it read it once and could miss it by a moment).

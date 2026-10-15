@@ -129,7 +129,7 @@ const post=(u,o)=>J(u,{method:'POST',headers:{'Content-Type':'text/plain'},body:
   check('G1 Remove the collected replies from the site: three gone there, kept in the file',g1.j&&g1.j.deleted===3&&/3 replies removed from the site/.test(g1.line)&&g1s.j.count===0,JSON.stringify(g1)+' '+JSON.stringify(g1s.j));
   r=await post(BOXURL+'?a=put&b='+b1.box.id,{v:1,k:{x:'A'.repeat(43),y:'B'.repeat(43)},iv:'A'.repeat(16),ct:'C'.repeat(64)});
   const g2=await page.evaluate(async()=>{const r=await __rp.collect(false);return {r,got:__rp.box().got.length,line:document.querySelector('#outBoxLine').textContent};});
-  check('G2 a reply that cannot be unlocked is counted, not placed, and not tried again',r.s===200&&g2.r&&g2.r.unread===1&&g2.r.placed===0&&g2.got===4&&/1 reply could not be read/.test(g2.line),JSON.stringify(g2));
+  check('G2 a reply that cannot be unlocked is counted, not placed, not tried again, and (v22.13, review F500) taken out of the box',r.s===200&&g2.r&&g2.r.unread===1&&g2.r.removed===1&&g2.r.placed===0&&g2.got===4&&/1 reply could not be opened \(not locked for this box\) and was removed from the box/.test(g2.line),JSON.stringify(g2));
   /* ---- H. a box out of reach ---- */
   await page.evaluate(()=>document.querySelector('#rpBtn').click());await sleep(200);
   await page.evaluate(()=>{const e=document.querySelector('#rpBox');e.value='http://127.0.0.1:8127/box.php';e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});await sleep(900);
