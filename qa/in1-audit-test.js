@@ -5,7 +5,7 @@
    packet reads (data-m="fn"); the blank print page count before and after. */
 const {chromium,fs,BASE,ROOT,loadSim,wire,sleep}=require(__dirname+'/lib.js');
 const FILE='NBH-Workstation/IN-1_Stakeholder-Interview-Record_v2026-09.html',URL=BASE+'/'+FILE;
-let PRE=process.env.IN1_PRE||'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/v2140/in1/IN-1.pre.html';
+let PRE=process.env.IN1_PRE||__dirname+'/data/IN-1_before-v21.40.html'   /* v22.12: kept in the repository (review F505) */;
 if(!fs.existsSync(PRE)){try{const h=require('child_process').execSync('git show HEAD:'+FILE,{cwd:ROOT,maxBuffer:1<<26});PRE=__dirname+'/out/in1-audit/pre.html';fs.writeFileSync(PRE,h);}catch(e){PRE='';}}
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.stringify(d)));if(!c)fails++;};
 const grab=async(pg,fn)=>pg.evaluate(async(src)=>{let got=null;const mk=URL.createObjectURL;URL.createObjectURL=b=>{got=b;return 'blob:x';};const ck=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(got)return;return ck.apply(this,arguments);};

@@ -1,4 +1,4 @@
-const {chromium,sleep}=require(__dirname+'/lib.js');
+const {chromium,sleep}=require(__dirname+'/../lib.js');
 (async()=>{const br=await chromium.launch();
  for(const f of ['ABC_Recording_Conditional_Probability_Analysis.html','Daily_Behavior_Data_and_Visual_Analysis.html']){
   const page=await br.newPage();await page.goto('http://127.0.0.1:8125/NBH-Workstation/'+f);await sleep(500);

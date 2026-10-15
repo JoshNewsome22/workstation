@@ -1,4 +1,4 @@
-const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/../lib.js');
 (async()=>{const br=await chromium.launch();const log=[];const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(600);
  console.log('tick text:',await page.evaluate(()=>document.body.innerText.match(/\d+ of \d+ ticked/)?.[0]));

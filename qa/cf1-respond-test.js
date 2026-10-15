@@ -2,7 +2,7 @@
    placing it into the respondent's column and round */
 const {chromium,fs,BASE,wire,sleep}=require(__dirname+'/lib.js');
 const URL=BASE+'/NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-09.html';
-const PRE=process.env.CF1_PRE||'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/respond-sv/CF-1_pre-edit.html';
+const PRE=process.env.CF1_PRE||__dirname+'/data/CF-1_before-v21.39.html'   /* v22.12: kept in the repository (review F505) */;
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.stringify(d)));if(!c)fails++;};
 const pages=buf=>(buf.toString('latin1').match(/\/Type\s*\/Page(?![s])/g)||[]).length;
 const grab=async(page,fn)=>page.evaluate(async fn=>{let got=null;const mk=URL.createObjectURL;URL.createObjectURL=b=>{got=b;return 'blob:x';};const ck=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(got)return;return ck.apply(this,arguments);};

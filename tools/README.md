@@ -26,7 +26,8 @@ Paths below are from the repository root. The test server the checks expect:
 - `tools/blocks/` — the shared blocks every form carries after its own script, and the
   patchers that insert or refresh them (all idempotent; a refresh replaces the existing copy):
   `nbh-case.html` + `patch-case.py` (the case flow: facts, due dates, picker),
-  `nbh-guard.html` + `patch-guard.py` (unload guard, quick save, spellcheck),
+  `nbh-guard.html` (unload guard, quick save, spellcheck; kept current in the forms by `patch-autosave.py` since
+  v21.44; `patch-guard.py` is retired at v22.12 and stops unless `--force`, because it takes the nbh-ui block with it),
   `nbh-ui.html` + `patch-ui.py` (toasts, notices, questions, progress dots, touch targets,
   the light toolbar inside the workstation), `patch-csv.py` (the `csv?` bridge verb),
   `patch-hook.py` + `hooks/<ID>.js` (per-form case hooks placed inside the form's own script),
@@ -63,6 +64,18 @@ Paths below are from the repository root. The test server the checks expect:
   `index.html` and a few forms (kept as a record; they refuse to run twice).
 - `qa/` — the checks. `lib.js` is the shared Playwright helper; outputs go to `qa/out/`
   (ignored by git). Most tests take no arguments: `node qa/all-forms-shell.js`.
+
+## Check that the tools reproduce the shipped forms (v22.12)
+
+    python3 tools/check-build.py
+
+It copies `NBH-Workstation` and `tools/` to a scratch folder, runs every patcher that keeps the forms current (the
+polish and writing help, the shared blocks, the case flow, the csv verb, the field names, the letterhead, the TB-1 library,
+the TK-1/TE-1 link, the per-form hooks) and the `--check` of the rest, and compares the result with the folder byte for
+byte. It names any file the tools would change and exits 1. Run it before a release; `qa/v2212-build-test.js` runs it.
+A block added to a form by hand must sit where the tools leave it: DM-1's home-contact block (`dm-v2195`) and DD-1's
+Log it now block (`dd-v2194`) sit just above the polish block, which `apply-polish.py` removes and adds again before
+`</body>`.
 
 ## Rebuild a parts form
 

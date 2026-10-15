@@ -9851,3 +9851,22 @@ page by page; a 26-form master print).
   with Claude, which is off there.
 
 Checked by `qa/v2211-docs-test.js` (both editions).
+
+### v22.12: the build and the checks
+
+Nothing changes on screen; this release is about being able to trust a rebuild and a "pass".
+
+- **The tools reproduce the shipped forms exactly** (review F507, I258). Form DM-1's home-contact block and Form DD-1's
+  Log it now block had been added by hand where the polish build moves them, so a rebuild changed both forms and every
+  device downloaded them again. They now sit where the build leaves them. `tools/check-build.py` runs every tool that
+  keeps the forms current on a copy and names any file it would change; it passes. `patch-guard.py`, which would remove
+  the nbh-ui block from every form, now refuses to run (the guard is kept by `patch-autosave.py`).
+- **Every check says pass or fail** (F505). Seven checks only printed values (the leave guard, the bar, Help, the case
+  map, the forms' notices, the page bar, the quiet simulations) and two more had no exit code; each now states what it
+  checks and exits 1 on a failure. The copies of CF-1, SV-1 and IN-1 that three checks compare against are now in
+  `qa/data/`, not in a scratch folder on one machine, and the one-file check reads the edition in `deliver/`. The
+  debugging scripts moved to `qa/probes/`.
+- **The release run is written down**: `qa/release-list.txt` (every check, in order) and `qa/run-release.sh`, which runs
+  them and writes a dated summary naming the commit. README.md and qa/README.md give 46 forms.
+
+Checked by `qa/v2212-build-test.js`.

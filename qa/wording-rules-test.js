@@ -13,7 +13,7 @@
    1. shape: the documented keys, unique ids, known categories, flags only i/m/s/u, a one-sentence why and suggest,
       nothing the patch script refuses ("</script", "<!--", a model ID), no lookbehind, named group or \p{} (older
       iPad Safari), no empty match, $n replacements that name a group the pattern has;
-   2. samples (WORDING_SAMPLES, the first argument, the scratchpad's wording/samples.json, or the copy at the end of
+   2. samples (WORDING_SAMPLES, the first argument, or the copy at the end of
       this file): the rule ids found against the ids expected, precision and recall; no finding may touch a
       sample's "clear" phrases (the must-not-fire parts);
    3. units: every rule fires on its own examples and not on its near misses;
@@ -36,7 +36,6 @@ const ROOT = path.resolve(__dirname, '..');
 const RULES_PATH = process.env.WORDING_RULES || path.join(ROOT, 'tools/blocks/nbh-wording-rules.json');
 const CLIENT_PATH = process.env.WORDING_CLIENT || path.join(ROOT, 'tools/blocks/nbh-wording.js');
 const OB1_PATH = path.join(ROOT, 'NBH-Workstation/OB-1_Direct-Observation-Record_v2026-09.html');
-const SCRATCH_SAMPLES = '/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/wording/samples.json';
 const ARGS = process.argv.slice(2), VERBOSE = ARGS.includes('--verbose');
 const CATS = ['internal', 'intent', 'label', 'frequency', 'duration', 'intensity', 'medical', 'character'];
 
@@ -321,7 +320,7 @@ const CLEAN = [
 const key = f => f.id + '@' + f.start + '-' + f.end + (f.replacement == null ? '' : '=>' + JSON.stringify(f.replacement));
 const keys = list => list.map(key).join(' | ');
 function loadSamples() {
-  const cand = [process.env.WORDING_SAMPLES, ARGS.find(a => !a.startsWith('--')), SCRATCH_SAMPLES].filter(Boolean);
+  const cand = [process.env.WORDING_SAMPLES, ARGS.find(a => !a.startsWith('--'))].filter(Boolean);
   for (const p of cand) {
     if (!fs.existsSync(p)) continue;
     const d = JSON.parse(fs.readFileSync(p, 'utf8'));

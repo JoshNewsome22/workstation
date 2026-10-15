@@ -1,23 +1,29 @@
+/* the workstation's notices, the close question and the bar (v21.34, v21.68; pass or fail since v22.12, review F505) */
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,500):''));if(!c)fails++;};
 (async()=>{const log=[];const br=await chromium.launch();const page=await br.newPage({viewport:{width:1440,height:900}});wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
  const r1=await page.evaluate(()=>{alert('short');const t=document.querySelectorAll('.ws-toast').length;alert('Long notice.\n\nSecond paragraph.');return {toasts:t,cfOpen:$('#cfDlg').open,title:$('#cfTitle').textContent};});
  await page.evaluate(()=>$('#cfFoot button').click());
- console.log('alerts',JSON.stringify(r1));
+ ok('1 a short notice is a toast; a long one opens the styled notice with its first line as the title',r1.toasts===1&&r1.cfOpen&&r1.title==='Long notice.',r1);
  await page.evaluate(()=>openForm('TB-1'));await page.waitForFunction(()=>!!state.status['TB-1'],null,{timeout:20000});
- /* close with the styled dialog: cancel then confirm */
  await page.click('#closeForm');await sleep(300);
- console.log('close dialog',await page.evaluate(()=>({open:$('#cfDlg').open,title:$('#cfTitle').textContent,btns:[...document.querySelectorAll('#cfFoot button')].map(b=>b.textContent)})));
- await page.evaluate(()=>document.querySelector('#cfFoot button').click());await sleep(200);console.log('after cancel cur',await page.evaluate(()=>state.cur));
- await page.click('#closeForm');await sleep(200);await page.evaluate(()=>document.querySelector('#cfFoot button:last-child').click()/* v21.81 a blank form closes with a plain Close */);await sleep(300);console.log('after close cur',await page.evaluate(()=>state.cur));
- /* the bar fold */
- console.log('fold before',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sum:$('#barSum').hidden})));
+ const c=await page.evaluate(()=>({open:$('#cfDlg').open,title:$('#cfTitle').textContent,btns:[...document.querySelectorAll('#cfFoot button')].map(b=>b.textContent)}));
+ ok('2 closing a form asks first, in the styled dialog (Cancel, Close)',c.open&&/Close Form TB-1\?/.test(c.title)&&c.btns.join()==='Cancel,Close',c);
+ await page.evaluate(()=>document.querySelector('#cfFoot button').click());await sleep(200);
+ ok('3 Cancel keeps the form',await page.evaluate(()=>state.cur)==='TB-1');
+ await page.click('#closeForm');await sleep(200);await page.evaluate(()=>document.querySelector('#cfFoot button:last-child').click());await sleep(300);
+ ok('4 Close closes it',await page.evaluate(()=>state.cur)===null);
+ const f0=await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sum:$('#barSum').hidden}));
  await page.evaluate(()=>{$('#pClient').value='Sample Student';$('#pSid').value='123';$('#pGrade').value='7';$('#pSite').value='Royal Palm School';who();barAutoFold();});await sleep(200);
- console.log('fold after',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sumHidden:$('#barSum').hidden,name:$('#sumName').textContent,det:$('#sumDet').textContent,detHidden:getComputedStyle($('#bar .det')).display})));
- await page.screenshot({path:__dirname+'/out/ui/bar-folded.png'});
- await page.click('#barEdit');await sleep(200);console.log('edit',await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),foldBtn:$('#barFold').hidden})));
- await page.click('#barFold');await sleep(200);console.log('done',await page.evaluate(()=>document.body.classList.contains('bar-folded')));
- /* touch */
+ const f1=await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),sumHidden:$('#barSum').hidden,name:$('#sumName').textContent,det:$('#sumDet').textContent}));
+ ok('5 with no student the bar is open; once a student is in, it folds to one line naming the student',!f0.folded&&f0.sum&&f1.folded&&!f1.sumHidden&&f1.name==='Sample Student'&&/123 · Grade 7 · Royal Palm School/.test(f1.det),{f0,f1});
+ await page.click('#barEdit');await sleep(200);
+ const e=await page.evaluate(()=>({folded:document.body.classList.contains('bar-folded'),foldBtn:$('#barFold').hidden}));
+ await page.click('#barFold');await sleep(200);
+ ok('6 Edit details opens it, Done folds it again',!e.folded&&!e.foldBtn&&await page.evaluate(()=>document.body.classList.contains('bar-folded')),e);
  const ctx=await br.newContext({viewport:{width:1024,height:1366},hasTouch:true,isMobile:true});const p2=await ctx.newPage();wire(p2,log);await p2.goto(BASE+'/NBH-Workstation/index.html');await sleep(700);
- console.log('touch',await p2.evaluate(()=>({sm:Math.round($('#caseMap').getBoundingClientRect().height),item:Math.round(document.querySelector('.rail .item').getBoundingClientRect().height),crumb:Math.round($('#fullBtn').getBoundingClientRect().height)})));
- console.log('LOG',JSON.stringify(log).slice(0,300));await br.close();})();
+ const t=await p2.evaluate(()=>({sm:Math.round($('#caseMap').getBoundingClientRect().height),item:Math.round(document.querySelector('.rail .item').getBoundingClientRect().height)}));
+ ok('7 on a touch screen the bar\'s buttons and the form list\'s rows are at least 44 px tall',t.sm>=44&&t.item>=44,t);
+ ok('8 no page errors',!log.length,log);
+ await br.close(); console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exitCode=fails?1:0;})();

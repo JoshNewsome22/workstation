@@ -406,4 +406,3 @@
   window.addEventListener('afterprint', function () { var o = document.getElementById('nbh-print-head'); if (o) o.remove(); });
   window.nbhPolish = { run: run, plain: plain, printHead: printHead };
 })();
-

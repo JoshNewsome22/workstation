@@ -1,4 +1,4 @@
-const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
+const {chromium,BASE,wire,sleep}=require(__dirname+'/../lib.js');
 (async()=>{const br=await chromium.launch();const page=await br.newPage();const log=[];wire(page,log);
  await page.goto(BASE+'/NBH-Workstation/TB-1_Target-Behavior-Development_v2026-09.html');await sleep(900);
  console.log(await page.evaluate(()=>{const body=document.body,was=body.className;const out={was};

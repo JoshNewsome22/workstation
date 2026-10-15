@@ -5,7 +5,7 @@ const FILE='NBH-Workstation/IN-1_Stakeholder-Interview-Record_v2026-09.html',URL
 /* the pre-edit form for the print-page comparison: a copy set aside (IN1_PRE), else the committed version. v21.40 added
    five questions to the parent set, which the blank print carries (one empty parent interview), so the blank print is one
    page longer than before v21.40 (6 pages before, 7 after); a pre-v21.40 copy is one page shorter, a later one the same. */
-let PRE=process.env.IN1_PRE||'/tmp/claude-0/-home-user-workstation/a594d6f7-62f1-54d7-9995-1b00e09a61cc/scratchpad/v2140/in1/IN-1.pre.html';
+let PRE=process.env.IN1_PRE||__dirname+'/data/IN-1_before-v21.40.html'   /* v22.12: kept in the repository (review F505) */;
 if(!fs.existsSync(PRE)){try{const h=require('child_process').execSync('git show HEAD:'+FILE,{cwd:ROOT,maxBuffer:1<<26});PRE=__dirname+'/out/in1-respond/pre.html';fs.writeFileSync(PRE,h);}catch(e){PRE='';}}
 let fails=0;const ok=(n,c,d)=>{console.log((c?'PASS ':'FAIL ')+n+(c?'':' '+JSON.stringify(d)));if(!c)fails++;};
 const grab=async(pg,fn)=>pg.evaluate(async(src)=>{let got=null;const mk=URL.createObjectURL;URL.createObjectURL=b=>{got=b;return 'blob:x';};const ck=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(got)return;return ck.apply(this,arguments);};
