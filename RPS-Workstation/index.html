@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.09';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.10';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3016,13 +3016,12 @@ async function masterRun(chosen,opt){opt=opt||{};
     <tr><th>Grade</th><td>${esc(p.grade)||'&mdash;'}</td><th>School</th><td>${esc(p.site)||'&mdash;'}</td></tr>
     <tr><th>Case BCBA</th><td>${esc(p.bcba)||'&mdash;'}</td><th>Compiled</th><td>${stamp.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}</td></tr>
     ${factLine?'<tr><th>Period<\/th><td colspan="3">'+esc(factLine)+'<\/td><\/tr>':''}</table>
-    <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
-    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
-    <div class="mp-fill"></div>
     <div class="mp-conf"><b>Confidential student record.</b> This packet contains personally identifiable
       information from a student&rsquo;s education record and is protected under FERPA. It is released only to
       individuals authorised under the student&rsquo;s IEP team or by written parental consent. If you have
       received this in error, return it to the case BCBA and destroy any copy.</div>
+    <h2 id="mp-contents">Contents</h2><ol>${shaped.map(s=>`<li data-mk="NBHTOC:${esc(s.id)};"><a class="mp-jump" href="#sec-${esc(s.id)}" data-mk="NBHTOC:${esc(s.id)};">Form ${esc(s.id)} &mdash; ${esc(s.title)}</a>${s.sheets.length?`<div class="mp-sub">${esc(s.sheets.join('  \u00b7  '))}${s.guide?'  \u00b7  Guide':''}</div>`:''}</li>`).join('')}${refsHtml?`<li data-mk="NBHTOC:REFS;"><a class="mp-jump" href="#sec-REFS" data-mk="NBHTOC:REFS;">References and Sources</a><div class="mp-sub">Every form’s citations, gathered once</div></li>`:''}</ol>
+    <p class="mp-note">Compiled from ${parts.length} form${parts.length===1?'':'s'} in the Royal Palm School packet. Each section is that form as it stood when this was built${refsHtml?', with the forms’ references gathered in the last section':''}${mo.refs==='none'?', its references left out':''}${kept.length?'; the Guide of '+esc(kept.join(', '))+' is included':''}. The forms’ guides and on-screen notes are not printed.</p>
   </div>`;
 
   const css=parts.map((x,i)=>scopeCSS(x.css,'.mp-'+i)).join('\n');
@@ -3056,9 +3055,9 @@ async function masterRun(chosen,opt){opt=opt||{};
        fitting cannot be measured reliably. */
     body{font-family:${JSON.stringify('Inter, Segoe UI, Arial, sans-serif').slice(1,-1)};
       width:7.6in;margin:0 auto}
-    .mp-cover{padding:28px 46px 22px;page-break-after:always;break-after:page;display:flex;flex-direction:column;box-sizing:border-box;min-height:9.1in}
+    .mp-cover{padding:28px 46px 22px;page-break-after:always;break-after:page;display:flex;flex-direction:column;box-sizing:border-box}   /* v22.09 not held to a page's height: the notice sits under the student's table (review F481) */
     .mp-fill{flex:1 1 auto;min-height:10px}
-    .mp-cover ol li{margin:0 0 1px}
+    .mp-cover ol li{margin:0 0 1px;break-inside:avoid;page-break-inside:avoid}
     .mp-sub{font-size:9.5px;line-height:1.3;color:#54676f;margin:-3px 0 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .mp-brand{margin:0 0 16px}
     .mp-brand img{height:46px;width:auto;display:block}
@@ -3117,7 +3116,7 @@ async function masterRun(chosen,opt){opt=opt||{};
     .mp-sec .twoup.sigs>.sigblock:last-child{margin-right:0}
     /* a card that must not split is laid out as one atomic box: under a named page Chromium 141 stretched Form TD-1's
        parent-signature card across two pages when its break-inside:avoid fell at a page end */
-    .mp-sec .td85-card.td85-par{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}
+    .mp-sec .td85-card{display:inline-block;width:100%;box-sizing:border-box;vertical-align:top}   /* v22.09 every card, not only the parent's (review F476) */
     .mp-sec .sigblock,.mp-sec .ic-sigs,.mp-sec .ic-signpart,.mp-sec .td85-card,.mp-sec .twoup,.mp-sec .figure,.mp-sec .dd-keep,.mp-sec .warn.verdict,.mp-sec .mp-refblk{break-inside:avoid;page-break-inside:avoid}
     .mp-band{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid #cfdad8;margin:0 0 10px;padding:0 0 4px;
       font-family:Inter,"Segoe UI",Arial,sans-serif;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#54676f;break-after:avoid;page-break-after:avoid}

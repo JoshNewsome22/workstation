@@ -385,5 +385,25 @@
     var h = tbH(); if (!h) return;
     setTimeout(function () { var r = t.getBoundingClientRect(); if (r.top < h + 4 && r.bottom > 0) window.scrollBy(0, r.top - h - 8); }, 0);
   }, true);
-  window.nbhPolish = { run: run, plain: plain };
+  /* v22.09 (review F477) a form printed on its own names the student on every page, in the running head's middle, and its
+     pages say "Page N of M", as the master print does: a page that comes loose can be tied to its student, and a missing
+     page shows. Written for the print only (Chrome and Edge print these page margins; Safari prints none, and Finish PDF
+     adds them there). */
+  var PS = { client: '[data-m="client"],[name="m.client"],[name="s_name"],[data-meta="client"],#m_client,#mClient,[name="h-client"],[name="h.client"],[name="c.client"],[name="student"],[name="s.student"],#h-client,#hClient,#cClient,#sClient,[name="c.student"]',
+             sid: '[data-m="sid"],[name="m.sid"],[name="s_id"],[data-meta="sid"],#m_id,#mId,#sId,[name="s.sid"],[name="h.sid"],[name="c.sid"],#hId,#cId,#h-id,[name="s.id"]' };
+  function pval(sel) { var l = document.querySelectorAll(sel); for (var i = 0; i < l.length; i++) { var v = String(l[i].value || l[i].textContent || '').replace(/\s+/g, ' ').trim(); if (v) return v.slice(0, 60); } return ''; }
+  function cssStr(t) { return '"' + String(t).replace(/[\\"]/g, '\\$&').replace(/[\r\n]+/g, ' ') + '"'; }
+  function printHead() {
+    var old = document.getElementById('nbh-print-head'); if (old) old.remove();
+    var nm = pval(PS.client) || [pval('#sFirst,[name="s.first"]'), pval('#sLast,[name="s.last"]')].filter(Boolean).join(' ');
+    var who = [nm, pval(PS.sid) ? 'ID ' + pval(PS.sid) : ''].filter(Boolean).join('  \u00b7  ');
+    var st = document.createElement('style'); st.id = 'nbh-print-head';
+    st.textContent = '@page{' + (who ? '@top-center{content:' + cssStr(who) + ';font-family:"Inter","Segoe UI",Arial,sans-serif;font-size:8pt;color:#254657}' : '') +
+      '@bottom-right{content:"Page " counter(page) " of " counter(pages)}}';
+    document.head.appendChild(st);
+  }
+  window.addEventListener('beforeprint', printHead);
+  window.addEventListener('afterprint', function () { var o = document.getElementById('nbh-print-head'); if (o) o.remove(); });
+  window.nbhPolish = { run: run, plain: plain, printHead: printHead };
 })();
+

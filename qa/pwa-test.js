@@ -943,7 +943,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     await up.goto(NBH);await sleep(1200);
     const inApp=await up.evaluate(()=>!!(window.nbhShareSave&&window.nbhShareSave.inApp));
     const overlay=()=>up.evaluate(()=>{const o=document.querySelector('[id^="nbhInApp"]');if(!o)return null;const f=o.querySelector('iframe');let inner='';try{inner=f.contentDocument&&f.contentDocument.body?f.contentDocument.body.innerText:'';}catch(e){}
-      return {bar:Array.from(o.querySelectorAll('button')).map(b=>b.textContent).join(' '),title:(o.querySelector('b')||{}).textContent,inner:inner.slice(0,400),top:o.matches(':modal')};});
+      return {bar:Array.from(o.querySelectorAll('button')).map(b=>b.textContent).join(' '),title:(o.querySelector('b')||{}).textContent,inner:inner.slice(0,3000),top:o.matches(':modal')};});
     /* the pop-up test in Diagnostics: its window opens inside the app, above the Diagnostics notice */
     await up.evaluate(()=>$('#diag').click());await sleep(400);
     await up.evaluate(()=>{const b=[...document.querySelectorAll('#dlgBody button')].find(x=>/Test pop-ups/.test(x.textContent));if(b)b.click();});

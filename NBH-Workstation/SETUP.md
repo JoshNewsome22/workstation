@@ -9793,3 +9793,19 @@ Checked by `qa/v2207-keys-test.js`. Not done here: the fixed 1.2-second wait as 
   every form by `tools/blocks/patch-names.py`.
 
 Checked by `qa/v2209-names-test.js` (every form with its simulation loaded, and the questionnaire page).
+
+### v22.10: printing
+
+- **A form printed on its own** (review F477). Every page now carries the student's name and ID in the middle of its
+  head and "Page 3 of 9" at its foot, so a loose page can always be put back with its student and in order. This works
+  when you print from Chrome or Edge on the laptop. Safari on the iPad does not print page heads of its own: there, use
+  **Finish PDF** (Help) as before, which stamps the same lines on the PDF. The head is added only while printing and is
+  gone again afterwards; nothing is saved.
+- **The master print's cover** (F481). The FERPA notice now sits right under the student's table, before the list of
+  contents, so it stays on the cover page even when 26 or more forms are ticked (it used to fall alone onto page 2). The
+  contents lines no longer split across pages.
+- **TD-1's sign-in cards in the master print** (F476). Each card (not only the parent's) prints as one box and is never
+  cut in two by a page break.
+
+Checked by `qa/v2209-print-test.js` (DM-1, TB-1 and TD-1 printed alone with their simulations, read back from the PDF
+page by page; a 26-form master print).
