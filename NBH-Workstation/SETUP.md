@@ -9904,3 +9904,31 @@ case holds DD-1's record now waits for it (it read it once and could miss it by 
 Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the 46 forms filled from its own saved file,
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
+
+### v22.15: a packet with TK-1 in it, and the forms on an iPhone
+
+- **A packet with Form TK-1 in it printed every page sideways** (review F475, a blocker). TK-1's token book prints
+  landscape and edge to edge, and that page rule travelled with TK-1 into the master print, where it applied to every page
+  of every form: landscape, no margins, and no student name, page numbers or FERPA line anywhere. A form's own styles in
+  the packet are now kept to its own section, as the collected styles always were, so the packet's page holds: letter
+  upright, with the student, "Page N of M" and the confidentiality line on every page. TK-1 printed on its own is
+  unchanged.
+- **On an iPhone** (F479). Thirty forms kept the printed page's 0.6-inch side margins on screen, leaving 70% of the
+  phone's width; they now keep 14 px a side. Ten forms had tables or fields wider than the screen, so the whole page,
+  toolbar and all, slid sideways (PA-1's MSWO sheet put sessions 4 and 5 off screen while trials were being recorded). A
+  table wider than the screen now scrolls in its own box, long lists and fields keep to the sheet, labels wrap, and the
+  forms' question box fits the screen. On paper and on the iPad nothing changes (these rules are for screens under 600 px).
+- **A tap no longer nudges the page.** In SP-1's grid on a phone, a tapped cell moved 2 px down while the grid was drawn
+  again (the browser's scroll anchoring followed the redraw); it now stays exactly where the finger is. And a field that
+  is tapped or clicked is no longer scrolled clear of the pinned toolbar: that is for a field reached with Tab (v22.08),
+  where the cursor could otherwise land out of sight. A form that draws a tapped button again (TI-1's runner) is treated the
+  same way: the new button is under the finger, so the page stays put.
+- **A field brought into view clears the bars pinned under the toolbar** (MT-1's timer, ABC-1's observation bar, the live
+  status lines of CT-1, ST-1 and TI-1), not only the toolbar: since v22.08 a field could land just under MT-1's timer, where
+  a tap went to the timer instead.
+- **A form filled from a saved file no longer waits on the clock.** v22.14's "done as soon as it has read the file" timed
+  its 1.2 s limit with the device clock; a clock set back (or held still, as the print check holds it) left a form that
+  reads no file waiting for good. It counts its own steps now.
+
+Checked by `qa/v2215-print-phone-test.js` (a DM-1 + TK-1 packet read back page by page; every view of all 46 forms at
+390 px with `PHONE_ALL=1`).

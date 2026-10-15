@@ -98,6 +98,26 @@
     }
   }
   function run(root) { try { fields(root); zebra(root); prose(root); labels(root); if (!root) sheets(); } catch (e) {} }
+  /* v22.15 (review F479): on a phone, a table wider than the sheet it sits in (PA-1's MSWO sheet, AD-1, RA-1, EA-1 ...) made the
+     whole page, toolbar and all, slide sideways. Such a table is put in a box of its own that scrolls; checked after load,
+     after each tap (a view or a row may have changed) and on a turn of the screen. Screen only: print sees no box. */
+  var phone = window.matchMedia ? window.matchMedia('screen and (max-width:600px)') : null, tsT = 0;
+  function tscroll() {
+    if (!phone || !phone.matches || document.documentElement.classList.contains('nbh-plain')) return;
+    var vw = document.documentElement.clientWidth;
+    Array.prototype.forEach.call(document.querySelectorAll('table'), function (t) {
+      if (!t.offsetParent || t.closest('.nbh-tscroll')) return;
+      var p = t.parentElement; if (!p) return;
+      var box = t.getBoundingClientRect(); if (box.right <= vw + 1 && t.scrollWidth <= p.clientWidth + 1) return;
+      for (var a = p; a && a !== document.body; a = a.parentElement) { var o = getComputedStyle(a).overflowX; if (o === 'auto' || o === 'scroll') return; }
+      var w = document.createElement('div'); w.className = 'nbh-tscroll'; p.insertBefore(w, t); w.appendChild(t);
+    });
+  }
+  function tsLater(ms) { clearTimeout(tsT); tsT = setTimeout(function () { try { tscroll(); } catch (e) {} }, ms || 250); }
+  document.addEventListener('click', function () { tsLater(300); }, true);
+  window.addEventListener('resize', function () { tsLater(300); });
+  window.addEventListener('load', function () { tsLater(600); });
+  setTimeout(function () { tsLater(50); }, 1200);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { run(); });
   else run();
   window.addEventListener('load', function () { run(); });
@@ -376,12 +396,26 @@
      scroll margin the toolbar's height (scroll-padding-top, measured, as it folds or the window changes), and a field the
      browser left underneath it is brought into view. Screen only; print has no pinned toolbar. */
   function tbH() { var tb = document.querySelector('.toolbar'); try { if (tb && /sticky|fixed/.test(getComputedStyle(tb).position)) return Math.round(tb.getBoundingClientRect().height); } catch (x) {} return 0; }
-  function padTop() { var h = tbH(); document.documentElement.style.scrollPaddingTop = h ? (h + 8) + 'px' : ''; }
+  /* v22.15: and the bars a form pins under its toolbar while data is taken (MT-1's timer, ABC-1's observation bar, the live
+     status lines of CT-1, ST-1 and TI-1): a field brought into view was left under MT-1's timer */
+  var UNDER = '.obs-bar, .tmr, .rr-live.rr-mode-all > .rr-status, .ti-run-live.ti-mode-all > .ti-run-status';
+  function barsH() { var h = tbH(); if (!h) return 0;
+    try { Array.prototype.forEach.call(document.querySelectorAll(UNDER), function (b) { if (b.offsetParent && getComputedStyle(b).position === 'sticky') h += Math.round(b.getBoundingClientRect().height); }); } catch (x) {}
+    return h; }
+  function padTop() { var h = barsH(); document.documentElement.style.scrollPaddingTop = h ? (h + 8) + 'px' : ''; }
   padTop(); window.addEventListener('resize', padTop); window.addEventListener('load', padTop); setTimeout(padTop, 1200);
+  document.addEventListener('click', function () { setTimeout(padTop, 300); }, true);
   try { var tbo = document.querySelector('.toolbar'); if (tbo && window.ResizeObserver) new ResizeObserver(padTop).observe(tbo); } catch (x) {}
+  /* v22.15: not the field just tapped or clicked, which is where the finger is (the page stays put); a field the form moves
+     the cursor to after a tap (Next, Add a row) is still brought into view */
+  var ptrAt = 0, ptrEl = null, ptrX = 0, ptrY = 0;
+  document.addEventListener('pointerdown', function (e) { ptrAt = Date.now(); ptrEl = e.target; ptrX = e.clientX; ptrY = e.clientY; }, true);
+  function underFinger(t) { if (!ptrEl || Date.now() - ptrAt > 800) return false; if (t === ptrEl || (t.contains && t.contains(ptrEl))) return true;
+    var r = t.getBoundingClientRect(); return ptrX >= r.left && ptrX <= r.right && ptrY >= r.top && ptrY <= r.bottom; }   /* a form that draws the tapped control again focuses the new one, in the same place */
   document.addEventListener('focusin', function (e) {
     var t = e.target; if (!t || !t.getBoundingClientRect || (t.closest && t.closest('.toolbar,dialog'))) return;
-    var h = tbH(); if (!h) return;
+    if (underFinger(t)) return;
+    var h = barsH(); if (!h) return;
     setTimeout(function () { var r = t.getBoundingClientRect(); if (r.top < h + 4 && r.bottom > 0) window.scrollBy(0, r.top - h - 8); }, 0);
   }, true);
   /* v22.09 (review F477) a form printed on its own names the student on every page, in the running head's middle, and its
@@ -403,5 +437,5 @@
   }
   window.addEventListener('beforeprint', printHead);
   window.addEventListener('afterprint', function () { var o = document.getElementById('nbh-print-head'); if (o) o.remove(); });
-  window.nbhPolish = { run: run, plain: plain, printHead: printHead };
+  window.nbhPolish = { run: run, plain: plain, printHead: printHead, tscroll: tscroll };
 })();

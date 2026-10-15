@@ -2223,12 +2223,13 @@ renderAll();
          or takes longer, is given the 1.2 s as before */
       var gest = function(){ quiet(false); };
       document.addEventListener('pointerdown', gest, true); document.addEventListener('keydown', gest, true);
-      var t0 = Date.now(), fin = false, idle = 0;
+      var n = 0, fin = false, idle = 0;   /* v22.15: time counted in its own 50 ms steps, not by the clock (a clock set back,
+         or held still, left a form that reads no file waiting for ever) */
       var done = function(){ if (fin) return; fin = true; unwatch();
         document.removeEventListener('pointerdown', gest, true); document.removeEventListener('keydown', gest, true);
         quiet(false); res(true);
       };
-      (function look(){ if (fin) return; var t = Date.now() - t0;
+      (function look(){ if (fin) return; var t = (n++) * 50;
         if (reads.seen && !reads.pend) idle += 50; else idle = 0;
         if ((reads.seen && idle >= 150 && t >= 200) || t >= 1200) return done();
         setTimeout(look, 50); })();
@@ -3051,6 +3052,18 @@ a{text-underline-offset:2px}
   .sheet:not(table):not(.nbh-flush){border-radius:0}
   /* the view control keeps to the row it had: no wider buttons on a phone */
   .toolbar .seg button{padding:6px 9px}
+  /* v22.15 (review F479): the paper page's 0.6 in side margins left the form 70% of a phone's width; on screen a sheet keeps
+     14 px a side. A table wider than the screen scrolls in its own box (the script wraps it), not the whole page. */
+  html:not(.nbh-plain) .sheet:not(table):not(.nbh-flush){padding-left:14px!important;padding-right:14px!important}
+  .nbh-tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+  /* nor does anything else in a sheet reach past it: a long list, a field, a box, a label (EA-1's lists ran to 660 px) */
+  html:not(.nbh-plain) .sheet select,html:not(.nbh-plain) .sheet input:not([type=checkbox]):not([type=radio]):not([type=range]),html:not(.nbh-plain) .sheet textarea{max-width:100%}
+  html:not(.nbh-plain) .sheet div:not(.nbh-tscroll):not(.seg),html:not(.nbh-plain) .sheet label{max-width:100%;box-sizing:border-box}
+  dialog{max-width:calc(100vw - 16px);box-sizing:border-box}
+  #nbhUiDlg{width:calc(100vw - 32px)}   /* the forms' question box: the screen's width, not the page's */
+  html:not(.nbh-plain) .sheet div,html:not(.nbh-plain) .sheet label,html:not(.nbh-plain) .sheet span{min-width:0}
+  html:not(.nbh-plain) .sheet label.nbh-lab-no{white-space:normal;flex-wrap:wrap}
+  html:not(.nbh-plain) .sheet{overflow-wrap:break-word}
 }
 </style>
 <script id="nbh-polish" src="nbh-polish.js"></script>

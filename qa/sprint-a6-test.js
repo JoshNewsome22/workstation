@@ -50,7 +50,7 @@ const OUT=__dirname+'/out/sprint-a6/';
 const A6_BASE=process.env.A6_BASE||'48209c1';   /* v21.97 re-baselined: v21.96 took MT-1's timing row, TI-1's hint and the simulation notes off the paper on purpose */
 /* v21.86 the layout check (part 2) compares with the forms of the last delivered release, not with the forms before this
    package: later releases changed the layout on purpose (ABC-1's analysis table), so the old comparison only drifted */
-const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'48209c1';   /* v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
+const A6_LAYOUT_BASE=process.env.A6_LAYOUT_BASE||'e098aa59';   /* v22.15 re-baselined to v22.07, whose truer privacy note in every form is one line longer at 1180 px (review F478), so everything under it sits 18 px lower on purpose. v21.97 re-baselined: v21.93's forms pass (boxes everywhere, 80-character lines, 12 px labels) and v21.94's Dictate switch in the toolbar moved the screen layout on purpose */
 const WASL={};
 const COMPARE=ED==='NBH-Workstation'||!!process.env.A6_BASE;
 const A6_OLD=process.env.A6_OLD||'';
@@ -112,7 +112,10 @@ const noOverflow=p=>p.evaluate(()=>({sw:document.documentElement.scrollWidth,cw:
 /* a tap at a point, after checking that the point is on the element meant */
 async function tapOn(p,sel,fx,fy,inset){
   const pt=await p.evaluate(([sel,fx,fy,inset])=>{const e=document.querySelector(sel);if(!e)return {err:'no '+sel};const tgt=e.closest('label.ti-ck')||e;
-    const r0=tgt.getBoundingClientRect();if(r0.top<120||r0.bottom>innerHeight-60)e.scrollIntoView({block:'center'});const r=tgt.getBoundingClientRect();
+    /* a target out of sight, or covered by a bar pinned at the top (v22.15: TI-1's status line, MT-1's timer), is scrolled to
+       the middle first, as a person would */
+    const covered=r=>{const h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return !h||!(h===tgt||tgt.contains(h)||(h.tagName==='LABEL'&&h.control===e));};
+    const r0=tgt.getBoundingClientRect();if(r0.top<120||r0.bottom>innerHeight-60||covered(r0))e.scrollIntoView({block:'center'});const r=tgt.getBoundingClientRect();
     const x=fx<0?r.left+inset:fx>1?r.right-inset:r.left+r.width*fx,y=fy<0?r.top+inset:fy>1?r.bottom-inset:r.top+r.height*fy;
     const hit=document.elementFromPoint(x,y),on=!!hit&&(hit===tgt||tgt.contains(hit)||(hit.tagName==='LABEL'&&hit.control===e));
     return {x,y,on,hit:hit?(hit.id||hit.className||hit.tagName):null};},[sel,fx,fy,inset||3]);

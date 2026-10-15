@@ -2206,7 +2206,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.14';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.15';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2895,6 +2895,11 @@ function packetShape(x,i,mo,bag){
   const titleOf=sh=>{const h=[...sh.querySelectorAll('.bar,.nbh-band,h2,h1')].find(b=>!b.closest('.nbh-print-head'));if(!h)return '';const inner=h.querySelector('h1,h2');return txt(inner||h).replace(/\s*\d+ of \d+ shown$/,'');};
   const drop=e=>{const w=e.parentElement;e.remove();if(w&&w.classList.contains('nbh-page')&&!txt(w)&&!w.querySelector('img,svg,canvas,table,input,textarea,select'))w.remove();};
   root.querySelectorAll('.noprint').forEach(e=>e.remove());
+  /* v22.15 (review F475): a form's own <style> elements travel inside its section; one with an @page rule (Form TK-1's book:
+     letter landscape, no margins, the margin boxes blanked) turned every page of the packet sideways and took away the
+     student, the page numbers and the FERPA line. Each is scoped to this section like the collected styles, which drops
+     @page, so the packet's own page rule holds for every page. */
+  root.querySelectorAll('style').forEach(s=>{try{s.textContent=scopeCSS(s.textContent,'.mp-'+i);}catch(e){}});
   /* the Guide */
   const guides=new Set();root.querySelectorAll('#guide,[data-pane="guide"]').forEach(e=>guides.add(e));
   root.querySelectorAll('.sheet,section.pane').forEach(sh=>{if(/^Guide\b/.test(titleOf(sh)))guides.add(sh);});
