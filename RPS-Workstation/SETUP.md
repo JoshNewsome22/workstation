@@ -9779,3 +9779,17 @@ Checked by `qa/v2207-privacy-test.js`.
 
 Checked by `qa/v2207-keys-test.js`. Not done here: the fixed 1.2-second wait as each form is filled from a saved case
 (F470), a change to how every form reports back, kept for a later round.
+
+### v22.09: the questionnaire page and the fields in tables, for VoiceOver and the keyboard
+
+- **The questionnaire page** families, staff and students answer (review F485). The Yes / No / Sometimes choices of the
+  interviews (Form IN-1's checklists, IA-1's communication question) are now real choices: Tab reaches them, the arrow
+  keys move between them, and VoiceOver says which is picked. Every open answer box is named by its question (it was read
+  as "text field"), and each item's choices are named by the item's question (they were "Item 3").
+- **Fields inside tables, in all 46 forms** (F486). The forms name their unlabelled fields for VoiceOver and Voice
+  Control. Inside a table the name used to be the whole header row run together ("NameRelationshipPhoneNotes") or the
+  choices of the list next door ("4321" for TB-1's *Socially significant?*). Now a field in a table is named by its row
+  and its column, the way you find it on screen: "Row 2, Phone"; "Hitting, Socially significant?". The change is made in
+  every form by `tools/blocks/patch-names.py`.
+
+Checked by `qa/v2209-names-test.js` (every form with its simulation loaded, and the questionnaire page).

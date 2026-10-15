@@ -3023,31 +3023,32 @@ paintRecords();
     return false;
   }
   function nbhClean(s){ return String(s || '').replace(/\s+/g, ' ').trim().slice(0, 90); }
+  function nbhOwnText(node){
+    /* v22.09 an element's own words, without the choices of a list or the text of a field inside it */
+    if (!node) return '';
+    if (node.nodeType === 3) return nbhClean(node.textContent);
+    if (node.nodeType !== 1 || /^(INPUT|SELECT|TEXTAREA|BUTTON|OPTION|SCRIPT|STYLE)$/.test(node.tagName)) return '';
+    var c = node.cloneNode(true);
+    Array.prototype.forEach.call(c.querySelectorAll('input,select,textarea,button,option,script,style'), function(x){ x.remove(); });
+    return nbhClean(c.textContent);
+  }
   function nbhNearbyText(el){
-    /* the text just before the control is what reads as its label */
+    /* the text just before the control is what reads as its label (v22.09: never the words of another field, and
+       never from outside the table cell the control is in) */
     var n = el.previousSibling, out = '';
-    while (n && !out) {
-      if (n.nodeType === 3) out = nbhClean(n.textContent);
-      else if (n.nodeType === 1 && !/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(n.tagName)) out = nbhClean(n.textContent);
-      n = n.previousSibling;
-    }
+    while (n && !out) { out = nbhOwnText(n); n = n.previousSibling; }
     if (out) return out;
     var p = el.parentElement;
-    if (p) {
-      var c = p.cloneNode(true);
-      Array.prototype.forEach.call(c.querySelectorAll('input,select,textarea,button'), function(x){ x.remove(); });
-      out = nbhClean(c.textContent);
-      if (out) return out;
-    }
+    if (p && !(p.matches && p.matches('tr,table,tbody,thead'))) { out = nbhOwnText(p); if (out) return out; }
     /* These forms wrap the control in a plain .row and put its caption on a
        sibling of that wrapper, so the label is an uncle rather than a sibling.
        Climb a couple of levels looking for the nearest preceding caption. */
     var up = el.parentElement, hops = 0;
     while (up && hops++ < 3) {
+      if (up.matches && up.matches('td,th,tr,table,tbody,thead')) break;
       var s = up.previousSibling;
       while (s) {
-        var txt = s.nodeType === 3 ? nbhClean(s.textContent)
-          : (s.nodeType === 1 && !/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(s.tagName) ? nbhClean(s.textContent) : '');
+        var txt = nbhOwnText(s);
         if (txt) return txt;
         s = s.previousSibling;
       }
@@ -3057,17 +3058,30 @@ paintRecords();
   }
   function nbhCellName(el){
     /* a control in a table cell is named by its row and column, the way a
-       sighted user locates it */
+       sighted user locates it (v22.09: the heading over its own column, colspans counted; the first cell's own words,
+       or "Row n" when it holds only fields) */
     var td = el.closest ? el.closest('td,th') : null;
     if (!td) return '';
-    var tr = td.parentElement, table = el.closest('table');
+    var tr = td.parentElement, table = td.closest('table');
     if (!tr || !table) return '';
-    var col = Array.prototype.indexOf.call(tr.children, td);
-    var rowHead = '', colHead = '';
-    var firstCell = tr.children[0];
-    if (firstCell && firstCell !== td) rowHead = nbhClean(firstCell.textContent);
-    var headRow = table.tHead ? table.tHead.rows[0] : table.rows[0];
-    if (headRow && headRow !== tr && headRow.children[col]) colHead = nbhClean(headRow.children[col].textContent);
+    var col = 0, k;
+    for (k = 0; k < tr.children.length && tr.children[k] !== td; k++) col += tr.children[k].colSpan || 1;
+    var headRow = table.tHead && table.tHead.rows.length ? table.tHead.rows[table.tHead.rows.length - 1] : table.rows[0];
+    var colHead = '', rowHead = '';
+    if (headRow && headRow !== tr) {
+      for (var j = 0, x = 0; j < headRow.children.length; j++) {
+        var hc = headRow.children[j], span = hc.colSpan || 1;
+        if (col >= x && col < x + span) { colHead = nbhOwnText(hc); break; }
+        x += span;
+      }
+    }
+    var first = tr.children[0];
+    if (first && first !== td) rowHead = nbhOwnText(first);
+    if (!rowHead) {
+      var sec = tr.parentElement, rows = sec ? Array.prototype.filter.call(sec.children, function(r){ return r.tagName === 'TR'; }) : [];
+      var at = rows.indexOf(tr);
+      if (at >= 0 && rows.length > 1) rowHead = 'Row ' + (at + 1);
+    }
     return [rowHead, colHead].filter(Boolean).join(', ');
   }
   function nbhNameControls(){
@@ -3076,7 +3090,9 @@ paintRecords();
       var el = list[i];
       if (el.type === 'hidden') continue;
       if (nbhHasName(el)) continue;
-      var t = nbhClean(el.getAttribute('placeholder')) || nbhNearbyText(el) || nbhCellName(el);
+      var inCell = el.closest && el.closest('td,th');   /* v22.09 in a table: its row and column first (review F486) */
+      var t = inCell ? (nbhCellName(el) || nbhNearbyText(el) || nbhClean(el.getAttribute('placeholder')))
+        : (nbhClean(el.getAttribute('placeholder')) || nbhNearbyText(el));
       if (!t && el.tagName === 'BUTTON') t = 'Option';
       if (t) el.setAttribute('aria-label', t);
     }

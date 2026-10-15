@@ -307,8 +307,8 @@
     prog=h('div',{'class':'prog'});ic.appendChild(prog);
     if(scale.kind==='num'&&scale.anchors&&scale.anchors.length){var key=h('div',{'class':'key'});scale.anchors.forEach(function(a){key.appendChild(h('span',{text:a}));});ic.appendChild(key);}
     var ol=h('ol',{'class':'items'});
-    items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',html:'<b>'+esc(String(it.n==null||it.n===''?i+1:it.n).slice(0,8))+'.</b> '+esc(it.text||'')}));
-      var opts=h('div',{'class':'opts',role:'radiogroup','aria-label':_('Item {n}',{n:String(it.n==null||it.n===''?i+1:it.n).slice(0,8)})});var choices;
+    items.forEach(function(it,i){var li=h('li',{'class':'it'});li.appendChild(h('p',{'class':'q',id:'nbhr-q'+i,html:'<b>'+esc(String(it.n==null||it.n===''?i+1:it.n).slice(0,8))+'.</b> '+esc(it.text||'')}));
+      var opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':'nbhr-q'+i});var choices;   /* v22.09 named by the question, not "Item 3" (review F485) */
       if(scale.kind==='num'){choices=[];for(var v=(scale.min||0);v<=(scale.max||6);v++)choices.push([String(v),String(v),'num']);if(scale.na)choices.push(['NA',scale.naLabel||_('Can\u2019t judge'),'']);}
       else{var L=scale.labels||[_('Yes'),_('No'),'N/A'];choices=[['Y',L[0]||_('Yes'),''],['N',L[1]||_('No'),'']];if(L[2]!==null&&L[2]!=='')choices.push(['NA',L[2]||'N/A','']);}
       choices.forEach(function(c){var lab=h('label',{'class':c[2]});var r=h('input',{type:'radio',name:'it'+i,value:c[0]});lab.appendChild(r);lab.appendChild(d.createTextNode(c[1]));
@@ -318,11 +318,12 @@
     ic.appendChild(ol);
     /* open-ended, after the items unless the payload asks for them first */
     var op={},oc=null;if(opens.length){oc=h('div',{'class':'nr-card'});oc.appendChild(h('div',{'class':'band',text:P.openHeading||_('In your own words')}));
-      opens.forEach(function(o){var lab=h('label',{'class':'f',text:o.label});oc.appendChild(lab);
-        if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||_('Add a note if you wish'),'aria-label':_('Note for {l}',{l:o.label})});
-          (o.choices||[_('Yes'),_('No'),_('Sometimes')]).forEach(function(c){var l=h('label',{text:c});l.addEventListener('click',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
+      opens.forEach(function(o,oi){var oid='nbhr-op'+oi,lab=h('label',{'class':'f',id:oid+'-l',text:o.label});oc.appendChild(lab);   /* v22.09 every open answer has its question as its name (review F485) */
+        if(o.type==='yns'){var wrap=h('div',{'class':'yns'}),pick='',opts=h('div',{'class':'opts',role:'radiogroup','aria-labelledby':oid+'-l'}),note=h('input',{type:'text',placeholder:o.notePlaceholder||_('Add a note if you wish'),'aria-label':_('Note for {l}',{l:o.label})});
+          (o.choices||[_('Yes'),_('No'),_('Sometimes')]).forEach(function(c){var l=h('label'),r=h('input',{type:'radio',name:oid,value:c});l.appendChild(r);l.appendChild(d.createTextNode(c));   /* v22.09 real choices: Tab and the arrow keys reach them, VoiceOver says which is picked */
+            r.addEventListener('change',function(){pick=c;Array.prototype.forEach.call(opts.children,function(x){x.classList.remove('on');});l.classList.add('on');});opts.appendChild(l);});
           wrap.appendChild(opts);wrap.appendChild(note);oc.appendChild(wrap);op[o.id]={get value(){return pick?pick+(note.value.trim()?'; '+note.value.trim():''):note.value.trim();}};}
-        else{var ta=h('textarea',{maxlength:String(o.max||600)});op[o.id]=ta;oc.appendChild(ta);}});}
+        else{var ta=h('textarea',{maxlength:String(o.max||600),id:oid});lab.htmlFor=oid;op[o.id]=ta;oc.appendChild(ta);}});}
     if(oc&&P.openFirst)root.appendChild(oc);if(items.length)root.appendChild(ic);if(oc&&!P.openFirst)root.appendChild(oc);
     /* send */
     var sc=h('div',{'class':'nr-card'});sc.appendChild(h('div',{'class':'band',text:_('Send your answers')}));
