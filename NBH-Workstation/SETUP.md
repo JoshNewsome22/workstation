@@ -9905,6 +9905,26 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.30: Form RS-1 holds several RBTs
+
+- One RS-1 file now holds every RBT you supervise. A **Supervisee** bar at the top of every page lists them, each with
+  the month on screen and whether it is met; with two or more, a table under it shows each RBT's percent supervised,
+  contacts that count, observations, the month's status and the certification expiration (a tap opens that RBT).
+- **Add an RBT** starts a new, empty record on the Setup page (the school year, usual days and hours, employer and site
+  come from the RBT on screen); **Remove this RBT** deletes that one record after a confirmation (the supervisors stay).
+- Each RBT has their own setup, months, signatures, goals, PDUs, credential and concerns. The **supervisors** and the
+  **rules** are entered once and shared by all of them; deleting a supervisor counts the contacts of every RBT.
+- **Save data** writes every RBT in one file; a file with one RBT is written exactly as before, so older files open as
+  one RBT. The CSV holds the rows of every RBT (the last two columns say whose); the due line on the case bar names
+  each RBT's recertification and goals. Each monthly record still prints and is signed per RBT.
+- The simulation now has two simulated RBTs (Jordan Lee and Casey Morgan, both "(simulated)").
+- On the iPad, the date and time boxes on RS-1 no longer run past their column into the next box.
+- The v22.29 test run found two stale checks, now fixed: the GB-1 case hook's master copy
+  (`tools/blocks/hooks/GB-1.js`) carries the v22.29 change, and the simulated student's journey expects an unfinished
+  GB-1 objective to be named as unfinished in the IEP packet.
+
+Checked by `qa/rs1-test.js` (section 8).
+
 ### v22.29: four small fixes from the review
 
 - (F465) Form DM-1's crisis-plan status is typed at intake and did not follow Form CR-1: with a five-stage plan on CR-1,

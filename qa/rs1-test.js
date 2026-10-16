@@ -10,7 +10,11 @@
    5. Save data -> Clear all -> Open data gives back the same state; a file from another form is refused;
    6. the CSV holds the days and the contacts; the monthly record prints (emulated print, PDF) on a reasonable number of
       pages with its totals, no text under 7.5 pt, with the drawn signature, and without the confidential concerns;
-   7. phone width: no sideways scroll.
+   7. phone width: no sideways scroll (with two supervisees in the file);
+   8. (v22.30) several supervisees in one file: the simulation holds two; the switcher shows each with the month's status;
+      switching shows that RBT's record; the supervisors and rules are shared; Add an RBT and Remove; Save data writes
+      every RBT and Open data gives them back; a file with one RBT (written as before) still opens; the CSV and the due
+      line cover every RBT.
    usage: WS_URL=http://127.0.0.1:8123 node qa/rs1-test.js */
 const L=require(__dirname+'/lib.js');const {sleep,fs}=L;
 const OUT=__dirname+'/out/rs1/';fs.mkdirSync(OUT,{recursive:true});
@@ -183,6 +187,50 @@ print(json.dumps(o))`]).toString());
   await page.click('#viewSeg button[data-view="year"]');await sleep(200);
   ok('6 the year view: September compliant, August not applicable, a chart with the 5% line',/Yes/.test(await page.textContent('#yearTbl tr[data-open-month="2026-09"]'))&&/n\/a/.test(await page.textContent('#yearTbl tr[data-open-month="2026-08"]'))&&/5% minimum/.test(await page.textContent('#yearChart')));
   await page.screenshot({path:OUT+'year.png',fullPage:true});
+  /* ---- 8. several supervisees in one file (v22.30) ---- */
+  await page.setViewportSize({width:1180,height:820});
+  const canonAll=()=>page.evaluate(()=>{const c=v=>Array.isArray(v)?v.map(c):v&&typeof v==='object'?Object.keys(v).sort().reduce((o,k)=>{const x=c(v[k]);if(x===''||x===false||x==null||(typeof x==='object'&&!Array.isArray(x)&&!Object.keys(x).length))return o;o[k]=x;return o;},{}):v;
+    return JSON.stringify({cur:R.indexOf(S),R:R.map(r=>{const s=c(JSON.parse(JSON.stringify(r)));Object.keys(s.months||{}).forEach(k=>{const m=s.months[k];if(!m.days.length&&!m.contacts.length&&!m.note&&!m.noservice)delete s.months[k];});return s;})});});
+  const single=saved;
+  await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(800);
+  const m8=await page.evaluate(()=>({n:R.length,names:R.map(r=>r.setup.rbt_name),opts:[...document.querySelectorAll('#rbtSel option')].map(o=>o.textContent),all:!document.querySelector('#rbtAll').hidden,rows:document.querySelectorAll('#rbtAll tr[data-rbt]').length,cur:R.indexOf(S),shared:R[0].sups===R[1].sups&&R[0].rules===R[1].rules}));
+  ok('8 the simulation holds two simulated supervisees, the first on screen',m8.n===2&&m8.names.every(x=>/\(simulated\)$/.test(x))&&m8.cur===0,m8);
+  ok('8 the switcher lists both with the month\u2019s status; the table of every supervisee shows',m8.opts.length===2&&m8.opts.every(o=>/\u2014 \w+ \d{4}: /.test(o))&&m8.all&&m8.rows===2,m8);
+  ok('8 the supervisors and rules are the same for both',m8.shared);
+  await page.selectOption('#rbtSel','1');await sleep(300);
+  ok('8 switching shows the second RBT\u2019s record (name, certification, months)',await page.evaluate(()=>R.indexOf(S)===1&&document.querySelector('#sName').value===R[1].setup.rbt_name&&document.querySelector('#sCert').value==='RBT-00-000001'&&Object.keys(S.months).length>0));
+  await page.evaluate(()=>{S.sups[0].oversight_note='changed on the second';});
+  ok('8 a supervisor changed with one RBT on screen is changed for the other',await page.evaluate(()=>R[0].sups[0].oversight_note==='changed on the second'));
+  await page.evaluate(()=>document.querySelector('#rbtAll tr[data-rbt="0"]').click());await sleep(200);
+  ok('8 a row of the table switches too',await page.evaluate(()=>R.indexOf(S)===0&&document.querySelector('#sName').value===R[0].setup.rbt_name));
+  await page.click('#addRbt');await sleep(300);
+  const a8=await page.evaluate(()=>({n:R.length,cur:R.indexOf(S),name:document.querySelector('#sName').value,focus:document.activeElement&&document.activeElement.id,setup:/view-setup/.test(document.body.className),year:S.setup.year===R[0].setup.year,days:S.setup.days.join()===R[0].setup.days.join(),months:Object.values(S.months).every(m=>!m.contacts.length)}));
+  ok('8 Add an RBT: a third, empty record on Setup, the name box ready, the school year and usual days carried over',a8.n===3&&a8.cur===2&&a8.name===''&&a8.focus==='sName'&&a8.setup&&a8.year&&a8.days&&a8.months,a8);
+  await page.fill('#sName','Riley Park (simulated)');await sleep(100);
+  ok('8 the name typed shows in the switcher',await page.evaluate(()=>/^Riley Park \(simulated\)/.test(document.querySelector('#rbtSel').selectedOptions[0].textContent)));
+  await page.click('#delRbt');await sleep(300);
+  ok('8 Remove this RBT takes out only that record',await page.evaluate(()=>R.length===2&&R.every(r=>r.setup.rbt_name!=='Riley Park (simulated)')&&R.indexOf(S)===1));
+  await page.selectOption('#rbtSel','0');await sleep(200);
+  const before8=await canonAll();
+  await page.evaluate(()=>document.querySelector('#saveBtn').click());await sleep(300);
+  const saved8=await page.evaluate(()=>window.__saved);
+  const d8=(()=>{try{return JSON.parse(saved8);}catch(e){return null;}})();
+  ok('8 Save data writes every RBT (rbts, cur) and S as the one on screen, with the supervisors',d8&&Array.isArray(d8.rbts)&&d8.rbts.length===2&&d8.cur===0&&d8.S&&d8.S.setup.rbt_name===d8.rbts[0].setup.rbt_name&&Array.isArray(d8.S.sups)&&d8.S.sups.length===2&&!('sups' in d8.rbts[1]),d8&&Object.keys(d8));
+  await page.evaluate(()=>document.querySelector('#clearBtn').click());await sleep(300);
+  ok('8 Clear all leaves one empty RBT; Remove is off and the table hidden',await page.evaluate(()=>R.length===1&&!S.setup.rbt_name&&document.querySelector('#delRbt').disabled&&document.querySelector('#rbtAll').hidden));
+  await openF(saved8);await sleep(400);
+  ok('8 Open data gives back both RBTs, the same in every value',await canonAll()===before8);
+  ok('8 after opening, the two share their supervisors again',await page.evaluate(()=>R.length===2&&R[0].sups===R[1].sups&&R[1].sups[0].oversight_note==='changed on the second'));
+  const due=await page.evaluate(()=>window.__nbhDue().map(x=>x.what));
+  ok('8 the due line names each RBT\u2019s recertification',due.filter(w=>/^RBT recertification due \(.+\(simulated\)\)$/.test(w)).length===2,due);
+  await page.evaluate(()=>document.querySelector('#csvBtn').click());await sleep(300);
+  const csv8=await page.evaluate(()=>window.__saved);
+  ok('8 the CSV holds the rows of both RBTs',/Jordan Lee \(simulated\)/.test(csv8)&&/Casey Morgan \(simulated\)/.test(csv8),String(csv8).slice(0,200));
+  await openF(single);await sleep(400);
+  ok('8 a file with one RBT, as written before, opens as one RBT',await page.evaluate(()=>R.length===1&&S.setup.rbt_name==='Jordan Lee (simulated)'&&R[0].sups===S.sups));
+  await openF(saved8);await sleep(400);
+  ok('8 no page errors with several supervisees',!log.some(x=>x.type==='pageerror'),log);
+  await page.click('#viewSeg button[data-view="setup"]');await sleep(200);await page.screenshot({path:OUT+'supervisees.png'});
   /* ---- 7. phone ---- */
   await page.setViewportSize({width:390,height:844});await sleep(300);
   const over=[];for(const v of ['setup','month','year','rbt','print','guide']){await page.evaluate(v=>document.querySelector('#viewSeg button[data-view="'+v+'"]').click(),v);await sleep(200);const sw=await page.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth]);if(sw[0]>sw[1]+1)over.push(v+' '+sw.join('/'));}

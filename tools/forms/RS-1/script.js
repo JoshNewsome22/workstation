@@ -66,7 +66,17 @@ const daysUntil=s=>{const d=fromIso(s);if(!d)return null;const t=new Date();t.se
 const newSup=()=>({id:uid(),name:'',cred:'',cert:'',role:'RBT Supervisor',trained:'',trained_date:'',portal:'',norel:false,oversight:'',oversight_note:''});
 function blank(){return {setup:{rbt_cred:'RBT',year:String(schoolYearOf(new Date())),days:[1,2,3,4,5]},
   sups:[newSup()],rules:{},months:{},goals:[],pdus:[],cred:{},concerns:[]};}
-let S=blank(),curKey='',openC=new Set();
+/* several RBTs in one file: each supervisee has their own setup, months, goals, PDUs, credential and concerns (S is the one
+   on screen); the supervisors and the rules are entered once and shared by all of them (G) */
+const G={sups:[],rules:{}};
+function share(o){['sups','rules'].forEach(k=>{delete o[k];Object.defineProperty(o,k,{get:()=>G[k],set:v=>{G[k]=v;},enumerable:true,configurable:true});});return o;}
+const newRbt=()=>share(blank());
+G.sups=[newSup()];
+let S=newRbt(),R=[S],curKey='',openC=new Set();
+const RMAX=40;
+/* runs f with each supervisee in turn as S (the figures read S), then puts back the one on screen */
+function eachRbt(f){const keep=S,out=[];try{R.forEach((r,i)=>{S=r;out.push(f(r,i));});}finally{S=keep;}return out;}
+const rbtName=r=>String(r.setup.rbt_name||'').trim();
 const rule=k=>{const v=num(S.rules[k]);return v!=null&&v>=0?v:RULES0[k];};
 const setupYear=()=>{const y=parseInt(S.setup.year,10);return y>1990&&y<2200?y:schoolYearOf(new Date());};
 function defaultKey(){const ks=yearKeys(setupYear()),t=keyOf(todayISO());return ks.includes(t)?t:ks[0];}
@@ -427,7 +437,7 @@ function findC(id){return month(curKey).contacts.find(c=>c.id===id);}
 function onField(el,ev){
   const v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.s!==undefined){if(el.dataset.s==='year'&&ev!=='change')return;S.setup[el.dataset.s]=v;
-    if(el.dataset.s==='year'){curKey=defaultKey();renderMonthBar();}if(el.dataset.s==='clients')supLists();if(el.dataset.s==='path'||el.dataset.s==='rbt_exp')renderCred();return;}
+    if(el.dataset.s==='year'){curKey=defaultKey();renderMonthBar();}if(el.dataset.s==='clients')supLists();if(el.dataset.s==='path'||el.dataset.s==='rbt_exp')renderCred();if(el.dataset.s==='rbt_name'||el.dataset.s==='rbt_exp')renderWho();return;}
   if(el.dataset.wd!==undefined){const d=+el.dataset.wd,set=new Set(S.setup.days||[]);el.checked?set.add(d):set.delete(d);S.setup.days=[...set].sort();return;}
   if(el.dataset.r!==undefined){S.rules[el.dataset.r]=v;renderReq();renderComp();return;}
   if(el.dataset.sup!==undefined){const s=S.sups.find(x=>x.id===el.dataset.sup);if(!s)return;s[el.dataset.f]=v;supRefresh();if(ev==='change'){supLists();renderComp();}return;}
@@ -451,7 +461,8 @@ document.addEventListener('input',e=>{const el=e.target;if(!el||!el.dataset||el.
 document.addEventListener('change',e=>{const el=e.target;if(!el||!el.dataset)return;onField(el,'change');});
 document.addEventListener('toggle',e=>{const d=e.target;if(d&&d.matches&&d.matches('details.rs-contact')){d.open?openC.add(d.dataset.cid):openC.delete(d.dataset.cid);}},true);
 document.addEventListener('click',e=>{
-  const mb=e.target.closest('#monthBar button[data-month]');if(mb){curKey=mb.dataset.month;renderMonth();return;}
+  const mb=e.target.closest('#monthBar button[data-month]');if(mb){curKey=mb.dataset.month;renderMonth();renderWho();return;}
+  const wr=e.target.closest('tr[data-rbt]');if(wr){pickRbt(+wr.dataset.rbt);return;}
   const go=e.target.closest('[data-go]');if(go){setView(go.dataset.go);return;}
   const tr=e.target.closest('tr[data-open-month]');if(tr){curKey=tr.dataset.openMonth;setView('month');return;}
   const cd=e.target.closest('button[data-cdel]');if(cd){delContact(cd.dataset.cdel);return;}
@@ -459,7 +470,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-open-month]');if(tr){curKey=tr.dataset.openMonth;setView('month');}});
 async function rowDel(r,id){
   if(r==='day'){const m=month(curKey),i=m.days.findIndex(d=>d.id===id);if(i<0)return;const d=m.days[i];if((d.act||d.start)&&!(await nbhUI.confirm('Delete the row for '+(d.date?wdOf(d.date)+' '+mdy(d.date):'this day')+'?\nIts times and intervention are deleted.',{ok:'Delete',danger:true})))return;m.days.splice(i,1);renderDays();renderComp();}
-  if(r==='sup'){const i=S.sups.findIndex(s=>s.id===id);if(i<0)return;const s=S.sups[i],used=Object.values(S.months).reduce((n,m)=>n+(m.contacts||[]).filter(c=>c.sup===id).length,0);
+  if(r==='sup'){const i=S.sups.findIndex(s=>s.id===id);if(i<0)return;const s=S.sups[i],used=R.reduce((t,r)=>t+Object.values(r.months).reduce((n,m)=>n+(m.contacts||[]).filter(c=>c.sup===id).length,0),0);
     if((s.name||s.cert)&&!(await nbhUI.confirm('Delete '+(s.name||'this supervisor')+'?'+(used?'\n'+used+' contact'+(used===1?' names':'s name')+' this supervisor and will show no supervisor.':''),{ok:'Delete',danger:true})))return;S.sups.splice(i,1);if(!S.sups.length)S.sups.push(newSup());renderSups();}
   if(r==='concern'){const i=S.concerns.findIndex(c=>c.id===id);if(i<0)return;if(S.concerns[i].concern&&!(await nbhUI.confirm('Delete this concern?\nIts investigation, decision, plan and outcome are deleted; this cannot be undone.',{ok:'Delete',danger:true})))return;S.concerns.splice(i,1);renderConcerns();}
   if(r==='goal'){const i=S.goals.findIndex(g=>g.id===id);if(i<0)return;if(S.goals[i].goal&&!(await nbhUI.confirm('Delete this goal?\nThe goal, its dates and notes are deleted.',{ok:'Delete',danger:true})))return;S.goals.splice(i,1);renderRbt();}
@@ -487,8 +498,30 @@ $('#rulesReset').addEventListener('click',()=>{S.rules={};renderSetup();renderCo
 function stickTop(){const tb=$('.toolbar');const h=tb&&getComputedStyle(tb).position==='sticky'?tb.getBoundingClientRect().height:0;document.documentElement.style.setProperty('--rs-top',Math.round(h+12)+'px');}
 window.addEventListener('resize',stickTop);
 
+/* ---------------- the supervisee on screen ---------------- */
+/* the switcher at the top of every page: each supervisee with the month on screen; with more than one, a table of them all */
+function renderWho(){const k=curKey||defaultKey(),i0=R.indexOf(S);
+  const rows=eachRbt((r,i)=>{const s=stats(k);return {i,name:rbtName(r)||'(new RBT, no name yet)',s,exp:r.setup.rbt_exp,d:daysUntil(r.setup.rbt_exp)};});
+  $('#rbtSel').innerHTML=rows.map(x=>'<option value="'+x.i+'"'+(x.i===i0?' selected':'')+'>'+esc(x.name)+(R.length>1?' \u2014 '+keyLabel(k)+': '+STW[x.s.status]:'')+'</option>').join('');
+  $('#rbtCount').textContent=R.length===1?'1 supervisee in this file':R.length+' supervisees in this file';
+  $('#delRbt').disabled=R.length<2;$('#addRbt').disabled=R.length>=RMAX;
+  const w=$('#rbtAll');w.hidden=R.length<2;if(R.length<2){w.innerHTML='';return;}
+  w.innerHTML='<table class="rs-who-t"><caption>Every supervisee, '+esc(keyLabel(k))+'</caption><thead><tr><th>RBT</th><th>% supervised</th><th>Contacts that count</th><th>Observed with client</th><th>This month</th><th>Certification expires</th></tr></thead><tbody>'+
+    rows.map(x=>'<tr class="open'+(x.i===i0?' cur':'')+'" data-rbt="'+x.i+'" tabindex="0" role="button" aria-label="Show '+esc(x.name)+'"><td>'+esc(x.name)+'</td><td>'+(x.s.hasService?pctTxt(x.s.pct):'—')+'</td><td>'+x.s.cnt.length+' of '+rule('contacts')+'</td><td>'+x.s.obs+'</td><td><span class="rs-wst rs-wst-'+x.s.status+'">'+STW[x.s.status]+'</span></td><td>'+(x.exp?esc(mdy(x.exp))+(x.d!=null&&x.d>=0&&x.d<=rule('remind2')?' ('+x.d+' days)':x.d!=null&&x.d<0?' (expired)':''):'—')+'</td></tr>').join('')+'</tbody></table>';}
+function pickRbt(i){if(!R[i]||R[i]===S)return;S=R[i];openC=new Set();renderAll();}
+$('#rbtSel').addEventListener('change',e=>pickRbt(+e.target.value));
+document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-rbt]');if(tr)pickRbt(+tr.dataset.rbt);});
+$('#addRbt').addEventListener('click',()=>{if(R.length>=RMAX)return;const n=newRbt(),st=S.setup;
+  /* the new supervisee starts in the same school year, with the usual days and hours of the one on screen */
+  ['year','day_start','day_end','day_break','day_act','employer','site'].forEach(k=>{if(st[k])n.setup[k]=st[k];});n.setup.days=(st.days||[]).slice();
+  R.push(n);S=n;openC=new Set();renderAll();setView('setup');const e=$('#sName');if(e)e.focus();changed();
+  nbhUI.toast('A new supervisee was added. Enter the RBT\u2019s name and credential; the supervisors and rules are shared.',{kind:'ok'});});
+$('#delRbt').addEventListener('click',async ()=>{if(R.length<2)return;const nm=rbtName(S)||'this supervisee';
+  if(!(await nbhUI.confirm('Remove '+nm+' from this file?\nTheir setup, every month, the goals, the PDUs and the concerns are deleted; the supervisors stay. This cannot be undone.',{ok:'Remove',danger:true})))return;
+  const i=R.indexOf(S);R.splice(i,1);S=R[Math.max(0,i-1)];openC=new Set();renderAll();changed();});
+
 /* ---------------- render everything ---------------- */
-function renderAll(){if(!curKey||!yearKeys(setupYear()).includes(curKey))curKey=defaultKey();renderSetup();renderMonth();renderYear();renderRbt();renderPrint();stickTop();}
+function renderAll(){if(!curKey||!yearKeys(setupYear()).includes(curKey))curKey=defaultKey();renderWho();renderSetup();renderMonth();renderYear();renderRbt();renderPrint();stickTop();}
 
 /* ---------------- printing: the month's record or the year summary, alone, on letter paper ---------------- */
 function printOnly(cls){renderPrint();document.body.classList.add(cls);
@@ -505,10 +538,22 @@ window.nbhPrintNodes=function(){renderPrint();return [$('#monthOut'),$('#yearOut
 
 /* ---------------- Save data / Open data (the form's own file; the workstation's case file carries the same) ---------------- */
 $('#saveBtn').addEventListener('click',()=>{
-  const nm=String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([(tidy(),JSON.stringify({form:'RS-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1))],{type:'application/json'}));
+  const nm=R.length>1?R.length+'_RBTs':String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([(tidy(),JSON.stringify(saveObj(),null,1))],{type:'application/json'}));
   a.download='RS-1_'+nm+'_'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
+/* the file: S is the supervisee on screen, with the shared supervisors and rules (a file with one RBT is written as before,
+   and an older copy of the form opens S); with more than one, rbts holds every supervisee and cur the one on screen */
+function saveObj(){const o={form:'RS-1',rev:'2026-10',saved:new Date().toISOString(),S};
+  if(R.length>1){o.rbts=R.map(r=>{const x=Object.assign({},r);delete x.sups;delete x.rules;return x;});o.cur=R.indexOf(S);}
+  return o;}
+/* every supervisee of a file, each read field by field as below, sharing the supervisors and rules of S */
+function rosterFrom(d){const first=fromFile(d);if(!first)return null;
+  const list=Array.isArray(d.rbts)&&d.rbts.length?d.rbts.slice(0,RMAX):null;
+  const rbts=list?list.map(x=>x&&typeof x==='object'&&!Array.isArray(x)?fromFile({form:'RS-1',S:Object.assign({},x,{sups:[],rules:{}})}):null).filter(Boolean):[first];
+  if(!rbts.length)return null;
+  const c=parseInt(d.cur,10);return {sups:first.sups,rules:first.rules,rbts,cur:c>=0&&c<rbts.length?c:0};}
+function applyRoster(r){G.sups=r.sups;G.rules=r.rules;R=r.rbts.map(share);S=R[r.cur]||R[0];}
 /* a saved file is read field by field into a fresh record: anything unexpected is dropped rather than trusted */
 function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='RS-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
@@ -535,30 +580,33 @@ function fromFile(d){
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
   r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='RS-1'?d.form:'';
-    const next=other?null:fromFile(d);
+    const next=other?null:rosterFrom(d);
     if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved RS-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form RS-1. Nothing was changed.':'That file could not be read as a saved RS-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;curKey='';openC=new Set();try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved RS-1 form. Nothing was changed.');}};
+    const prev={sups:G.sups,rules:G.rules,rbts:R,cur:R.indexOf(S)};applyRoster(next);curKey='';openC=new Set();try{renderAll();}catch(err){applyRoster(prev);renderAll();alert('That file could not be read as a saved RS-1 form. Nothing was changed.');}};
   r.readAsText(f);e.target.value='';});
 
 /* ---------------- CSV: the school year's service days and contacts, one row each ---------------- */
 $('#csvBtn').addEventListener('click',()=>{
-  const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"',st=S.setup,y=setupYear();
+  const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"',y=setupYear();
   const head=['Record','Month','Date','Start','End','Minutes not in services','RBT hours','No service','Primary intervention','Contact minutes','Supervisor','Supervisor credential','Format','Group size','Mode','Counts','Observed with client','Client code','Supervision activities','Content (TCO areas)','Taught by (BST)','Checklist %','Feedback','Follow-up','RBT','RBT certification number'];
   const out=[head];
+  /* every supervisee's rows for the school year on screen, one after the other (the last two columns say whose) */
+  eachRbt(()=>{const st=S.setup;
   yearKeys(y).forEach(k=>{const m=peek(k),s=stats(k);
     m.days.filter(d=>d.date&&keyOf(d.date)===k).slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(d=>{const mi=dayMin(d);out.push(['Service day',keyLabel(k),d.date,d.start,d.end,d.brk,d.none?'0':(mi==null?'':(mi/60).toFixed(2)),d.none?'yes':'',d.act,'','','','','','','','','','','','','','','',st.rbt_name,st.rbt_cert]);});
     s.C.slice().sort((a,b)=>String(a.c.date).localeCompare(String(b.c.date))).forEach(x=>{const c=x.c,sp=supById(c.sup),mo=modeOf(c.mode),sc=c.obs==='yes'?ckScore(c):null;
-      out.push(['Supervision contact',keyLabel(k),c.date,c.start,c.end,'','','','',x.min==null?'':x.min,sp?sp.name:'',sp?sp.cred:'',c.format==='group'?'Small group':'Individual',c.format==='group'?c.group:'',mo?mo[1]:'',x.counts?'yes':'no'+(x.is.length?' ('+x.is.map(i=>i.t).join('; ')+')':' (planned)'),c.obs==='yes'?'yes':c.obs==='no'?'no':'',c.client,(c.sact||[]).join('; '),(c.acts||[]).join('; '),(c.bst||[]).join('; '),sc?Math.round(sc.pct):'',c.feedback,c.follow,st.rbt_name,st.rbt_cert]);});});
-  const nm=String(st.rbt_name||'RBT').replace(/[^\w-]+/g,'_');
+      out.push(['Supervision contact',keyLabel(k),c.date,c.start,c.end,'','','','',x.min==null?'':x.min,sp?sp.name:'',sp?sp.cred:'',c.format==='group'?'Small group':'Individual',c.format==='group'?c.group:'',mo?mo[1]:'',x.counts?'yes':'no'+(x.is.length?' ('+x.is.map(i=>i.t).join('; ')+')':' (planned)'),c.obs==='yes'?'yes':c.obs==='no'?'no':'',c.client,(c.sact||[]).join('; '),(c.acts||[]).join('; '),(c.bst||[]).join('; '),sc?Math.round(sc.pct):'',c.feedback,c.follow,st.rbt_name,st.rbt_cert]);});});});
+  const nm=R.length>1?'all_RBTs':String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='RS-1_'+nm+'_'+y+'-'+(y+1)+'.csv';document.body.appendChild(a);a.click();a.remove();});
 
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nThe setup, every month, the goals and the PDUs are cleared. Unsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();curKey='';openC=new Set();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\n'+(R.length>1?'All '+R.length+' supervisees, ':'The setup, ')+'the supervisors, every month, the goals and the PDUs are cleared. Unsaved work will be lost.',{ok:'Clear all',danger:true})){resetAll();curKey='';openC=new Set();renderAll();setView('setup');}});
+function resetAll(){G.sups=[newSup()];G.rules={};S=newRbt();R=[S];}
 
 /* ---------------- simulation (simulated people and codes only) ---------------- */
 async function loadSim(){
   if(!(await nbhUI.confirm('Load a simulated year?\nA simulated RBT, two simulated supervisors and every month of this school year up to today are filled in as a worked example. Anything already entered will be replaced.',{ok:'Load'})))return;
   const now=new Date(),y=schoolYearOf(now),add=(dt,n)=>{const x=new Date(dt);x.setDate(x.getDate()+n);return x;};
-  S=blank();openC=new Set();
+  resetAll();openC=new Set();
   const A={id:'simA',name:'Simulated BCBA',cred:'BCBA',cert:'1-00-00000',role:'RBT Supervisor and Requirements Coordinator',trained:'yes',trained_date:isoOf(add(now,-420)),portal:'yes',norel:true,oversight:'employed',oversight_note:'both employed by the simulated district'},
     B={id:'simB',name:'Simulated BCaBA',cred:'BCaBA',cert:'0-00-00000',role:'RBT Supervisor',trained:'yes',trained_date:isoOf(add(now,-380)),portal:'no',norel:true,oversight:'employed',oversight_note:'both employed by the simulated district'};
   S.sups=[A,B];
@@ -588,22 +636,32 @@ async function loadSim(){
   S.pdus=[];
   S.cred={notes:'Simulated: the competency assessment window and the application were discussed at the last contact.'};
   S.concerns=[{id:'cn1',date:isoOf(add(now,-40)),concern:'Simulated: data for two sessions were entered at the end of the day, not at the time, and one count did not match the session note.',investigated:'Simulated: reviewed the two data sheets against the session notes and spoke with the RBT; the RBT had been covering a second classroom and fell behind.',decision:DECIDE[0],plan:'Record data at the time for every session (the supervisor checks two sheets a week for four weeks).\nReview the RBT Ethics Code standard on accurate documentation together.',outcome:'Simulated: data were recorded at the time in all checked sessions for four weeks.',outcome_date:isoOf(add(now,-8))}];
+  /* a second simulated supervisee, newer to the job: the same supervisors, one observation a month, this month still open */
+  const J=S,T=newRbt();R.push(T);S=T;
+  S.setup={rbt_name:'Casey Morgan (simulated)',rbt_cred:'RBT',rbt_cert:'RBT-00-000001',rbt_orig:isoOf(add(now,-120)),rbt_exp:isoOf(add(now,245)),path:'recert',employer:'Simulated School District',site:'Simulated Elementary',clients:'SIM-0005',year:String(y),days:[1,2,3,4,5],day_start:'08:00',day_end:'12:00',day_break:'0',day_act:'Data collection'};
+  ks.forEach((k,mi)=>{const [yy,mo]=k.split('-').map(Number),m=month(k);fillMonth(k,true);if(mo===8)m.days.forEach(d=>{if(+d.date.slice(8)<12)d.none=true;});
+    const cur=k===keyOf(todayISO());
+    m.contacts=[{id:'simT'+k+'a',date:iso(yy,mo,Math.min(13,lastDay(yy,mo))),start:'09:00',end:'10:00',sup:B.id,format:'indiv',group:'',mode:'person',obs:'yes',client:'SIM-0005',sact:['Observation, BST and performance feedback'],acts:['Data collection and graphing'],bst:['Modeling','Feedback'],feedback:'Simulated: counted each opportunity at the time; the tally matched the supervisor’s.',follow:'Graph the week on Friday.',ck:{}},
+      ...(cur?[]:[{id:'simT'+k+'b',date:iso(yy,mo,Math.min(24,lastDay(yy,mo))),start:'14:45',end:'15:15',sup:A.id,format:'indiv',group:'',mode:'video',obs:'no',client:'SIM-0005',sact:['Reviewing written materials (progress notes, data sheets)'],acts:['Documentation and reporting'],bst:['Feedback'],feedback:'Simulated: reviewed the month’s data sheets together.',follow:'Keep the summary line on each Friday sheet.',ck:{}}])].filter(c=>c.date<=todayISO());});
+  S.goals=[{id:'tg1',goal:'Records every opportunity at the time, for a full session, at two observations in a row.',set:isoOf(add(now,-60)),target:isoOf(add(now,30)),status:'In progress',notes:''}];
+  S=J;
   curKey=keyOf(todayISO());if(!yearKeys(y).includes(curKey))curKey=yearKeys(y)[0];renderAll();   /* the view stays where it is, as in the other forms */
-  nbhUI.toast('Simulation loaded: a simulated RBT and supervisors, every month of this school year up to today.',{kind:'ok'});
+  nbhUI.toast('Simulation loaded: two simulated RBTs and two supervisors, every month of this school year up to today.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
 /* the file is written the same way whatever order the boxes were ticked in: each contact's choices in the form's own
    order, and every month's "no services" a yes or a no, so a file saved, opened and saved again is the same file */
-function tidy(){Object.values(S.months||{}).forEach(m=>{m.noservice=!!m.noservice;(m.contacts||[]).forEach(c=>{
-  [['sact',SACT],['acts',TCO],['bst',BST]].forEach(([k,L])=>{if(Array.isArray(c[k]))c[k].sort((a,b)=>L.indexOf(a)-L.indexOf(b));});});});}
+function tidy(){R.forEach(r=>Object.values(r.months||{}).forEach(m=>{m.noservice=!!m.noservice;(m.contacts||[]).forEach(c=>{
+  [['sact',SACT],['acts',TCO],['bst',BST]].forEach(([k,L])=>{if(Array.isArray(c[k]))c[k].sort((a,b)=>L.indexOf(a)-L.indexOf(b));});});}));}
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
 if(document.readyState!=='complete')window.addEventListener('load',stickTop);
 
 /* the workstation's due line: the credential's expiration and the goals' target dates */
-window.__nbhDue=function(){const out=[],st=S.setup;
-  if(st.rbt_exp)out.push({what:'RBT recertification due'+(st.rbt_name?' ('+st.rbt_name+')':''),date:st.rbt_exp});
-  const w=compWin();if(w&&st.path==='renewal'&&!S.cred.comp_date)out.push({what:'RBT competency assessment window opens',date:w.from});
-  (S.goals||[]).forEach(g=>{if(g.status!=='Met'&&g.target&&g.goal)out.push({what:('RBT goal: '+g.goal).slice(0,60),date:g.target});});
+window.__nbhDue=function(){const out=[];
+  eachRbt(()=>{const st=S.setup,who=st.rbt_name?' ('+st.rbt_name+')':'';
+  if(st.rbt_exp)out.push({what:'RBT recertification due'+who,date:st.rbt_exp});
+  const w=compWin();if(w&&st.path==='renewal'&&!S.cred.comp_date)out.push({what:'RBT competency assessment window opens'+who,date:w.from});
+  (S.goals||[]).forEach(g=>{if(g.status!=='Met'&&g.target&&g.goal)out.push({what:('RBT goal'+(R.length>1&&st.rbt_name?' ('+st.rbt_name+')':'')+': '+g.goal).slice(0,60),date:g.target});});});
   return out;};
