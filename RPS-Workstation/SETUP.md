@@ -9911,6 +9911,9 @@ for a 5-second repaint).
   fell into it and the notes' own column printed as a blank strip at the right; the sheet now spans the page with its
   Daily notes column.
 - **The assent is not on paper** (it stays in the record and on screen).
+- **No Obs. min column on paper.** The observation window and its minutes are at the top of the sheet; a day observed
+  for another time (a short day typed over) is listed under it, "Observed for another time: Tue 10/21 300 min". The
+  behaviors get the room the column had. On screen the column stays, for typing a short day.
 - **Rows with room to write** on a short sheet: ten days or fewer print on rows about four tenths of an inch tall (a
   third of an inch up to fourteen days), not a quarter, with the page left empty under them. A longer sheet, or one with
   more than eight behaviors, keeps the quarter inch.

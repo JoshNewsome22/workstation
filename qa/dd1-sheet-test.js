@@ -47,7 +47,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
   const v72=await page.evaluate(()=>{const h=document.getElementById('printHead');h.innerHTML='<div class="l">X \u2014 Daily data sheet</div>';
     const r={ph:getComputedStyle(h).display,h2:getComputedStyle(document.querySelector('#tab-data .dd-datah')).display,span:(document.querySelector('#sheetTop .st-r b')||{}).textContent||'',
       note:getComputedStyle(document.querySelector('#sheetDefs .dd-onpaper')).display};h.innerHTML='';return r;});
-  ok('printed: the student line is the only heading above the sheet (no print head, no "Daily data" title), with the days it covers; the Obs. min note is in the key',
+  ok('printed: the student line is the only heading above the sheet (no print head, no "Daily data" title), with the days it covers; the observation-window note is in the key',
     v72.ph==='none'&&v72.h2==='none'&&/^Data \d{1,2}\/\d{1,2} \u2013 \d{1,2}\/\d{1,2}$/.test(v72.span)&&v72.note==='inline',v72);
   /* v21.72 kept on paper: the student's photo on the student line, and the definitions below the sheet */
   const kp=await page.evaluate(()=>{const was=S.meta.photo;S.meta.photo='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';renderData();
