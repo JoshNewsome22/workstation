@@ -14,6 +14,9 @@
       text read, none as a picture; the details from the IEP's sentences on its later pages (the next annual review and
       reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs),
       the parent from the cover; no "Yes  No" taken for transportation, no services table for a second exceptionality.
+   7. (v22.31) the BACB portal's Supervision page: the current supervisees (name, certification number, credential, the
+      date supervision started), the History left out, nothing taken as the student's; Add to Form RS-1 makes each a
+      supervisee in RS-1, the bar left empty.
    usage: node qa/v2230-sis-read-test.js */
 const L=require(__dirname+'/lib.js');const {sleep,fs}=L;
 const OUT=__dirname+'/out/v2230/';fs.mkdirSync(OUT,{recursive:true});
@@ -110,6 +113,17 @@ const IEP='<!doctype html><html><body>'+Array.from({length:28},(_,i)=>{const n=i
   ok('6a all 28 pages read as text, none as a picture, the "for await" missing as on the iPad',it.ocr===0&&it.last&&it.pages>=28,it);
   ok('6b the IEP\u2019s details from its later pages: annual review, reevaluation, the eligibilities, placement, ESY, diploma, the bus needs',ip.f.annual==='2027-10-05'&&ip.f.reeval==='2028-10-01'&&ip.f.elig==='Autism Spectrum Disorder'&&ip.f.elig2==='Language Impairment'&&ip.f.place==='Separate class (self-contained)'&&ip.f.esy==='Yes'&&ip.f.diploma==='Standard diploma'&&ip.f.trans==='Yes: Aide/Monitor required; Safety vest',ip.f);
   ok('6c the parent from the cover, with phone and email; the student and the IEP date',JSON.stringify(ip.c)===JSON.stringify(['0|Ana Rivera||(561) 555-0142|ana.rivera@example.com|'])&&ip.f.name==='Mateo Rivera'&&ip.f.iepdate==='2026-10-06',{c:ip.c,f:ip.f});
+  /* 7 the BACB portal's supervisees into Form RS-1 */
+  const PORTAL=['portal.bacb.com','Portal Home  Supervision  BACB  My Certification  Applications  My Account','SUPERVISION','BCBA','Supervisees  Add New','Current',
+    'Supervisee Name  Certification Number  Supervisee Certification  Has Req. Coordinator  Req. Coordinator Name  Date Supervision Started  Status  Actions',
+    'Jordan Lee  RBT-00-000000  RBT  N/A  N/A  12/02/2024  Active  []','Casey Morgan  RBT-00-000001  RBT  N/A  N/A  08/12/2025  Active  []',
+    'History','Supervisee  Certification  Supervisee  Had Req.  Req. Coordinator  Date  Date  Reason Removed','Riley Park  RBT-00-000002  RBT  N/A  N/A  09/29/2024  12/18/2024  No longer supervising'].join('\n');
+  const pr=await page.evaluate(t=>{try{$('#dlg').close();}catch(e){}drOpen();drShow(t,'portal.png');return {rows:document.querySelectorAll('#drOut [data-drb]').length,found:($('#drOut .dr-found')||{}).textContent||'',fields:DR.res.fields.length,r:DR.res.rbts.map(x=>[x.name,x.cert,x.cred,x.from].join('|'))};},PORTAL);
+  ok('7a the portal\u2019s current supervisees, History left out, no student detail',pr.rows===2&&pr.fields===0&&/1 in its History left out/.test(pr.found)&&JSON.stringify(pr.r)===JSON.stringify(['Jordan Lee|RBT-00-000000|RBT|2024-12-02','Casey Morgan|RBT-00-000001|RBT|2025-08-12']),pr);
+  await page.click('#drRbtPlace');await page.waitForFunction(()=>!!state.frames['RS-1'],null,{timeout:40000});await sleep(8000);
+  const rf=page.frames().find(f=>/RS-1_/.test(f.url()));
+  const rr=rf?await rf.evaluate(()=>R.map(r=>[r.setup.rbt_name,r.setup.rbt_cert,r.setup.sup_start].join('|'))):null;
+  ok('7b Add to Form RS-1: both as supervisees with their numbers and start dates; the bar left empty',JSON.stringify(rr)===JSON.stringify(['Jordan Lee|RBT-00-000000|2024-12-02','Casey Morgan|RBT-00-000001|2025-08-12'])&&await page.evaluate(()=>!packet().client),rr);
   ok('5 no page errors',!errs.length,errs.slice(0,3));
   }catch(e){ok('crashed',false,String(e.stack||e));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();

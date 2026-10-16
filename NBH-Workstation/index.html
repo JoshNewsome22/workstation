@@ -2218,7 +2218,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.30';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.31';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -6610,7 +6610,7 @@ const nbhDocRead=(()=>{
        student's details are read only from above it */
     const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\b(?:\s*:?\s*$|\s+you\b)/i.test(l));
     /* v22.27 nor from a Schedule's or an Enrollment's table (its headings are labels, its cells not the student's details) */
-    const en=enrollment(L),sc=schedule(L),end=Math.min(dlg<0?L.length:dlg,en?en.at:L.length,sc?sc.at:L.length);
+    const en=enrollment(L),sc=schedule(L),bp=bacbSup(L),end=bp?0:Math.min(dlg<0?L.length:dlg,en?en.at:L.length,sc?sc.at:L.length);
     for(let i=0;i<end;i++){
       const line=L[i];if(!line.trim())continue;
       const hs=hits(line).filter(h=>{const rest=line.slice(h.end,(hits(line).find(x=>x.start>h.end)||{start:line.length}).start).trim();return valid(h,line,rest);});
@@ -6669,6 +6669,7 @@ const nbhDocRead=(()=>{
       if((m=g(/deferring receipt of a standard high school diploma[^\n]*?\b(yes|no)\b/i))&&/yes/i.test(m[1]))put('diploma','Standard',m[0]+' (deferred)',true);
       if((m=g(/specific "?transportation needs"? include:?\s*\n((?:\s*[\u25aa\u2022\u25cf\-*][^\n]+\n?){1,8})/i))){const b=m[1].split('\n').map(x=>x.replace(/^\s*[\u25aa\u2022\u25cf\-*]\s*/,'').trim()).filter(Boolean);put('trans','Yes: '+b.join('; '),'Specific Transportation Needs: '+b.join('; '),true);}}
     const fields=order.map(k=>found[k]);
+    if(bp)return {fields:[],behaviors:[],lines:L.length,contacts:[],student:null,team:[],dropped:0,rbts:bp.rbts,rbtsPast:bp.past};   /* a supervisor's page: no student on it */
     return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text,text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
   }
   /* target behaviors in a plan: "Target behavior 1: Aggression", "Behavior: Hitting – any instance of ...", a
@@ -6803,6 +6804,18 @@ const nbhDocRead=(()=>{
     out.forEach(c=>{if(c.n>=90)c.n=0;});
     return out.sort((a,b)=>(a.n||99)-(b.n||99));
   }
+  /* v22.30 the BACB portal's Supervision page: the supervisor's RBTs, "Current" (name, certification number, the
+     supervisee's credential, a requirements coordinator, the date supervision started, status) and "History" (left out).
+     -> {rbts:[{name,cert,cred,rc,from,status}], past} or null */
+  function bacbSup(L){
+    const h=L.findIndex(l=>/supervisee name/i.test(l)&&/certification number/i.test(l));if(h<0)return null;
+    const rbts=[];let past=0,inHist=false;
+    for(let i=h+1;i<L.length&&i<h+80;i++){const l=L[i].trim();if(/^history\b/i.test(l)){inHist=true;continue;}
+      const m=l.match(/^(?:[^A-Za-z]*\s)?([A-Z][A-Za-z'\u2019.\-]+(?:\s[A-Z][A-Za-z'\u2019.\-]+){0,3}),?\s{2,}((?:RBT|BCaBA|BCBA)\s*-\s*\d{2}\s*-\s*\d{3,7}|\d-\d{2}-\d{4,6})\s{2,}(RBT|BCaBA|BCBA)\b(.*)$/);
+      if(!m)continue;if(inHist){past++;continue;}
+      const rest=m[4],dt=rest.match(/\b(\d{1,2}\/\d{1,2}\/\d{4})\b/),st=rest.match(/\b(active|inactive|pending)\b/i),rc=rest.trim().split(/\s{2,}/);
+      rbts.push({name:m[1],cert:m[2].replace(/\s+/g,''),cred:m[3],rc:rc[1]&&!/^n\/?a$/i.test(rc[1])?rc[1]:'',from:dt?toISO(dt[1]):'',status:st?cap(st[1].toLowerCase()).replace(/^./,c=>c.toUpperCase()):'',seen:l.slice(0,160)});}
+    return rbts.length?{rbts,past}:null;}
   /* the student the page belongs to, from the student information system's badge: "Rivera, Mateo" over "4471823 - 03" */
   /* v22.30 the badge's close button read as "x" before the name and its menu arrow as "v" after; its ID a line or three
      below, past the page title and the photo */
@@ -6887,6 +6900,16 @@ function drOpen(){
   $('#drRead').addEventListener('click',()=>{const t=$('#drText').value;if(!t.trim()){alert('Paste the document\u2019s text first.');return;}drShow(t,'the pasted text');});
   const fi=$('#drFile');if(fi)fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];if(f)drFile(f);});
 }
+/* v22.30 the ticked RBTs into Form RS-1: the one open, or opened here when no student's case is on screen */
+async function drRbtPlace(){const res=DR.res;if(!res||!res.rbts)return;
+  const list=res.rbts.map((r,i)=>{if(!($('#drOut [data-drb="'+i+'"]')||{}).checked)return null;const v=f=>(($('#drOut [data-drbf="'+f+'"][data-i="'+i+'"]')||{}).value||'').trim();return {name:v('name'),cert:v('cert'),cred:v('cred'),from:v('from')};}).filter(x=>x&&x.name);
+  if(!list.length){wsUI.toast('No RBT is ticked.',{kind:'warn'});return;}
+  if(!state.frames['RS-1']){const p=packet();if(String(p.client||'').trim()||String(p.sid||'').trim()){await wsUI.alert('Open the RBT Supervision Log first (Caseload, Staff records), then read the page again.\nThe RBTs are kept apart from the students\u2019 cases.');return;}
+    try{const L=await clList()||[],r=L.find(isStaffRec);if(r&&!Object.keys(state.frames).length){await caseloadGo(r.key,'RS-1');}else openForm('RS-1');}catch(e){openForm('RS-1');}}
+  let fn=null;for(let k=0;k<80&&!fn;k++){const fr=state.frames['RS-1'];try{fn=fr&&fr.contentWindow&&fr.contentWindow.__nbhAddRbts;}catch(e){}if(!fn)await new Promise(z=>setTimeout(z,250));}
+  if(!fn){wsUI.toast('Form RS-1 did not open in time; try Add to Form RS-1 again.',{kind:'warn'});return;}
+  const r=fn(list);try{$('#dlg').close();}catch(e){}openForm('RS-1');
+  wsUI.toast((r.added?r.added+(r.added===1?' RBT added':' RBTs added'):'')+(r.added&&r.updated?', ':'')+(r.updated?r.updated+' completed':'')+' in Form RS-1 ('+r.total+' in the log). Save case keeps it.',{kind:'ok',ms:7000});}
 async function drFile(file){
   $('#drOut').innerHTML='';DR.cols='';
   try{
@@ -7035,6 +7058,13 @@ function drShow(text,from,cols){
   const out=$('#drOut');if(!out)return;
   const haveBeh=!!(state.facts&&(state.facts.behaviors||[]).length&&(state.facts.src||{}).behaviors!=='document');
   const cons=res.contacts||[];
+  if(res.rbts&&res.rbts.length){   /* v22.30 the BACB portal's supervisees, for Form RS-1 */
+    out.innerHTML='<p class="dr-found"><b>'+res.rbts.length+(res.rbts.length===1?' RBT':' RBTs')+'</b> you supervise, read from '+esc(from)+' (the BACB portal\u2019s Supervision page'+(res.rbtsPast?'; '+res.rbtsPast+' in its History left out':'')+'). Untick what is wrong, or correct it.</p>'+
+      '<table class="dr-tbl dr-ctbl"><thead><tr><th></th><th>Name</th><th>Certification number</th><th>Credential</th><th>Supervision started</th><th>Read from</th></tr></thead><tbody>'+
+      res.rbts.map((r,i)=>'<tr><td><input type="checkbox" data-drb="'+i+'" checked aria-label="Add '+esc(r.name)+'"></td><td><input type="text" data-drbf="name" data-i="'+i+'" value="'+esc(r.name)+'"></td><td><input type="text" data-drbf="cert" data-i="'+i+'" value="'+esc(r.cert)+'"></td><td><input type="text" data-drbf="cred" data-i="'+i+'" value="'+esc(r.cred)+'"></td><td><input type="date" data-drbf="from" data-i="'+i+'" value="'+esc(r.from)+'">'+(r.status&&r.status!=='Active'?'<small class="dr-note">'+esc(r.status)+'</small>':'')+'</td><td class="dr-seen">'+esc(r.seen)+'</td></tr>').join('')+'</tbody></table>'+
+      '<p class="hint">Each one ticked becomes a supervisee in Form RS-1 (the RBT Supervision Log): one already there by name or number is completed, not added again. Nothing goes to the student\u2019s bar or forms.</p>'+
+      '<div class="dr-act"><button type="button" class="primary" id="drRbtPlace">Add to Form RS-1</button></div>';
+    $('#drRbtPlace').addEventListener('click',drRbtPlace);return;}
   if(!res.fields.length&&!res.behaviors.length&&!cons.length&&!(res.team||[]).length){out.innerHTML='<p class="dr-none">Nothing recognisable in '+esc(from)+' ('+res.lines+' lines read). The details are read from their labels: Student name, Date of birth, Student ID, Grade, School, Teacher, and the IEP\u2019s; contacts from a student information system\u2019s Addresses &amp; Contacts page or its Edit Contact window. '+(text.trim()?'':'The text was empty: a picture of a page needs the text recognizer, which needs the website or the app.')+'</p>';return;}
   let h='<p class="dr-found">'+(res.fields.length||!cons.length?'<b>'+res.fields.length+(res.fields.length===1?' detail':' details')+'</b> read from '+esc(from):'<b>'+cons.length+(cons.length===1?' contact':' contacts')+'</b> read from '+esc(from))+(res.behaviors.length?', and '+res.behaviors.length+(res.behaviors.length===1?' target behavior':' target behaviors'):'')+(cons.length&&res.fields.length?', and '+cons.length+(cons.length===1?' contact':' contacts'):'')+((res.team||[]).length?', and '+res.team.length+(res.team.length===1?' teacher':' teachers'):'')+'. Untick what is wrong, or correct it.</p>';
   /* v22.25 a page for another student than the case on screen */

@@ -9905,6 +9905,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.31: your RBTs from the BACB portal
+
+- **Read a document on the BACB portal's Supervision page** (a screenshot of Supervisees): the RBTs under Current are
+  listed, each with the certification number, credential and the date supervision started (History is left out, and
+  nothing on the page is taken for a student's detail; before, the page gave "BCBA: Supervisees" and "Student:
+  Number"). **Add to Form RS-1** makes each ticked RBT a supervisee in the RBT Supervision Log, filling an empty record
+  first and completing one already there by name or number. With no student on screen, RS-1 opens from its Staff
+  records card (or new); with a student's case on screen it asks for the supervision log to be opened first.
+- RS-1's Setup has a **Supervision started (BACB portal)** date.
+
+Checked by `qa/v2230-sis-read-test.js` (section 7).
+
 ### v22.30: Form RS-1 holds several RBTs
 
 - One RS-1 file now holds every RBT you supervise. A **Supervisee** bar at the top of every page lists them, each with

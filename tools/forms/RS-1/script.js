@@ -569,6 +569,17 @@ $('#delRbt').addEventListener('click',async ()=>{if(R.length<2)return;const nm=r
   if(!(await nbhUI.confirm('Remove '+nm+' from this file?\nTheir setup, every month, the goals, the PDUs and the concerns are deleted; the supervisors stay. This cannot be undone.',{ok:'Remove',danger:true})))return;
   const i=R.indexOf(S);R.splice(i,1);S=R[Math.max(0,i-1)];openC=new Set();renderAll();changed();});
 
+/* v22.30 the RBTs read from the BACB portal's Supervision page (the workstation's Read a document): each becomes a
+   supervisee, or completes the one already here by name or certification number; an empty record is filled first */
+window.__nbhAddRbts=function(list){let added=0,updated=0;const same=(a,b)=>String(a||'').trim().toLowerCase()===String(b||'').trim().toLowerCase();
+  (Array.isArray(list)?list:[]).slice(0,RMAX).forEach(x=>{const nm=String(x&&x.name||'').trim().slice(0,120),ce=String(x&&x.cert||'').trim().slice(0,40);if(!nm)return;
+    let r=R.find(r=>(ce&&same(r.setup.rbt_cert,ce))||same(rbtName(r),nm));
+    if(r)updated++;else{r=R.find(r=>!rbtName(r)&&!r.setup.rbt_cert&&!Object.values(r.months).some(m=>(m.contacts||[]).length||(m.days||[]).length));
+      if(!r){if(R.length>=RMAX)return;r=newRbt();const st=S.setup;['year','day_start','day_end','day_break','day_act','employer','site'].forEach(k=>{if(st[k])r.setup[k]=st[k];});r.setup.days=(st.days||[]).slice();R.push(r);}added++;}
+    if(!r.setup.rbt_name)r.setup.rbt_name=nm;if(ce&&!r.setup.rbt_cert)r.setup.rbt_cert=ce;if(x.cred&&(!r.setup.rbt_cred||r.setup.rbt_cred==='RBT'))r.setup.rbt_cred=String(x.cred).slice(0,20);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(String(x.from||''))&&!r.setup.sup_start)r.setup.sup_start=x.from;});
+  if(!rbtName(S)){const f=R.find(r=>rbtName(r));if(f)S=f;}openC=new Set();renderAll();changed();return {added,updated,total:R.length};};
+
 /* ---------------- render everything ---------------- */
 function renderAll(){if(!curKey||!yearKeys(setupYear()).includes(curKey))curKey=defaultKey();renderWho();renderSetup();renderMonth();renderYear();renderRbt();renderPrint();stickTop();}
 
@@ -609,7 +620,7 @@ function fromFile(d){
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v).slice(0,4000),isoS=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):'',hm=v=>/^\d{2}:\d{2}$/.test(String(v||''))?String(v):'',arr=v=>Array.isArray(v)?v:[];
   const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:{};
   const su=obj(s.setup);Object.keys(su).forEach(k=>{if(k!=='days')o.setup[k]=str(su[k]);});o.setup.days=arr(su.days).map(Number).filter(n=>n>=0&&n<=6);
-  ['rbt_orig','rbt_exp'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
+  ['rbt_orig','rbt_exp','sup_start'].forEach(k=>{if(k in su)o.setup[k]=isoS(su[k]);});['day_start','day_end'].forEach(k=>{if(k in su)o.setup[k]=hm(su[k]);});
   const yn=v=>v==='yes'||v==='no'?v:'';
   o.sups=arr(s.sups).slice(0,12).map(x=>{x=obj(x);return {id:str(x.id)||uid(),name:str(x.name),cred:CREDS.includes(x.cred)?x.cred:'',cert:str(x.cert),role:ROLES.includes(x.role)?x.role:'',trained:yn(x.trained),trained_date:isoS(x.trained_date),portal:yn(x.portal),norel:!!x.norel,oversight:OVERS.some(o=>o[0]===x.oversight)?x.oversight:'',oversight_note:str(x.oversight_note)};});if(!o.sups.length)o.sups=blank().sups;
   const ru=obj(s.rules);Object.keys(RULES0).forEach(k=>{if(ru[k]!=null&&ru[k]!=='')o.rules[k]=str(ru[k]);});
