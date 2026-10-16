@@ -9917,6 +9917,10 @@ for a 5-second repaint).
 - **Save data** writes every RBT in one file; a file with one RBT is written exactly as before, so older files open as
   one RBT. The CSV holds the rows of every RBT (the last two columns say whose); the due line on the case bar names
   each RBT's recertification and goals. Each monthly record still prints and is signed per RBT.
+- **Saving RS-1 on its own.** RS-1 is a staff record, not a student's. With RS-1 open and no student on the bar, Save
+  case no longer asks "Save the case without a student name?"; the file is named RBT_Supervision_Log. With a student
+  loaded, the first Save case that would put RS-1 into that student's case file says so and asks first (Cancel, close
+  the student, and save RS-1 on its own to keep it apart). Checked by `qa/v2230-staff-save-test.js`.
 - The simulation now has two simulated RBTs (Jordan Lee and Casey Morgan, both "(simulated)").
 - **The RBT's usual hours on the Month page.** A box above the service days holds the RBT's usual start and end times,
   minutes not in services, primary intervention and usual days (the same setting as on the Setup page; a change in one

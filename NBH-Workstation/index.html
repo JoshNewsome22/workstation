@@ -1416,7 +1416,12 @@ function loadFrame(fr,file){
 }
 function caseUid(){return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 const gradeWords=g=>{g=String(g||'').trim();return !g?'':/grade|^k$|^pre|kinder/i.test(g)?g:'Grade '+g;};   /* v21.89 not "Grade 5th grade" */
-function caseName(p){return (p.client||'case').replace(/[^\w-]+/g,'_');}
+/* v22.30 forms that are a staff record, not a student's: a case of these alone is saved under the record's name, with no
+   student asked for; kept in a student's case, it is asked about once (it would go wherever the student's file goes) */
+const STAFF_ONLY={'RS-1':'RBT_Supervision_Log'};
+const caseIds=()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending)))];
+function staffOnlyName(){const ids=caseIds();return ids.length&&ids.every(id=>STAFF_ONLY[id])?STAFF_ONLY[ids[0]]:'';}
+function caseName(p){return (p.client||staffOnlyName()||'case').replace(/[^\w-]+/g,'_');}
 /* a case file is JSON, or a one-file case whose JSON sits in a block */
 function parseCase(text){
   const t=String(text||'');
@@ -1977,7 +1982,7 @@ async function exportCaseXlsx(opt){
   sheets.unshift({name:'Case',rows:cover});
   const bytes=xlsxBytes(sheets);
   if(opt.bytes)return bytes;
-  const nm=(p.client||'case').trim().replace(/[^\w.-]+/g,'_').replace(/^_+|_+$/g,'')||'case';
+  const nm=(p.client||staffOnlyName()||'case').trim().replace(/[^\w.-]+/g,'_').replace(/^_+|_+$/g,'')||'case';
   const t=stamp,date=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   a.download='CASE_'+nm+'_'+date+'.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
@@ -4872,7 +4877,11 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
   const kept=Object.keys(state.pending),open=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: written as the file holds them */
   if(!open.length&&!kept.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
   const p=packet();
-  if(!p.client){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return false;}
+  const staff=staffOnlyName(),staffIn=caseIds().filter(id=>STAFF_ONLY[id]);
+  if(!p.client&&!staff){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return false;}
+  if(p.client&&staffIn.length&&!state.staffAsked){
+    if(!(await wsUI.confirm('Form '+staffIn.join(', ')+' is a staff record (the RBTs\u2019 supervision), not part of '+p.client+'\u2019s case.\nSaved now, it goes into this student\u2019s case file and wherever that file is kept or shared. To keep it apart, Cancel, close the student (Close case), and save Form '+staffIn[0]+' on its own.',{ok:'Keep it in this case',cancel:'Cancel'})))return false;
+    state.staffAsked=true;}
   /* the one-file edition asks where to write before anything else: a browser
      shows the picker only while the click is still fresh. Once a file has been
      chosen, every later save in this session goes back into it without asking. */
