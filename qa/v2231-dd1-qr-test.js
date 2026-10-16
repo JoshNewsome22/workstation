@@ -23,10 +23,12 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     document.querySelectorAll('section[data-panel]').forEach(s=>s.classList.toggle('hidden',s.dataset.panel!=='data'));});
   await dd.evaluate(u=>{document.getElementById('stAdv').open=true;const i=document.getElementById('stBoxIn');i.value=u;i.dispatchEvent(new Event('change',{bubbles:true}));},BOXURL);
   const mk=async who=>{await dd.fill('#stWho',who);await dd.evaluate(()=>document.querySelector('#stTgts input[data-stt]').checked=true);await dd.evaluate(()=>document.getElementById('stMake').click());await sleep(1200);await dd.evaluate(()=>{const d=document.getElementById('dlgStQr');if(d&&d.open)d.close();});};
+  const n0=await dd.evaluate(()=>{stPaint();return document.getElementById('stPrtNote').textContent;});
+  ok('0 no link yet: the panel says no code prints on the sheet until a link is made',/No working link yet/.test(n0)&&/Make the link/.test(n0),n0);
   await mk('Ms. A (simulated)');await mk('Mr. B (simulated)');
   await dd.evaluate(()=>{const l=S.staff.links.find(x=>/Mr\. B/.test(x.who));l.off=true;stPaint();});
-  const scr=await dd.evaluate(()=>({html:document.getElementById('stPrintQr').innerHTML,shown:!!document.getElementById('stPrintQr').getClientRects().length,box:document.getElementById('stPrtOn').checked}));
-  ok('1 on screen: no QR strip (it is made only for paper); the box "Print each working link’s code" is ticked',!scr.html&&!scr.shown&&scr.box,scr);
+  const scr=await dd.evaluate(()=>({html:document.getElementById('stPrintQr').innerHTML,shown:!!document.getElementById('stPrintQr').getClientRects().length,box:document.getElementById('stPrtOn').checked,note:document.getElementById('stPrtNote').textContent}));
+  ok('1 on screen: no QR strip (it is made only for paper); the box "Print each working link’s code" is ticked; the panel says one code prints',!scr.html&&!scr.shown&&scr.box&&/Printed with the sheet: 1 code\./.test(scr.note),scr);
   await dd.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));await dd.emulateMedia({media:'print'});await sleep(300);
   const pr=await dd.evaluate(()=>{const el=document.getElementById('stPrintQr'),l=S.staff.links.find(x=>/Ms\. A/.test(x.who)),cards=[...el.querySelectorAll('.st-pq')];const r=el.getBoundingClientRect();
     return {shown:!!el.getClientRects().length,n:cards.length,who:cards.map(c=>c.querySelector('b').textContent),code:cards[0]&&cards[0].textContent.indexOf('Code '+l.code)>=0,same:(()=>{if(!cards[0])return false;const t=document.createElement('div');t.innerHTML=ddQrSvg(stUrlOf(l));const a=cards[0].querySelector('svg path'),b=t.querySelector('svg path');return !!a&&!!b&&a.getAttribute('d')===b.getAttribute('d')&&a.getAttribute('d').length>100;})(),

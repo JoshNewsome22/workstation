@@ -7,7 +7,7 @@
    2. Assent, setting, collected by and probe on each day: picked in the daily table and the day's details; kept through
       Save data and open; an old file without them opens unchanged; the CSV's four columns (none without labels); the
       facts (assent, bySetting, probes, byDay); the analysis numbers unchanged; the By setting table; the probe marks on
-      the graphs; the assent column on paper only when a day has one; phone and iPad widths without sideways scroll.
+      the graphs; no assent column on paper (v22.31); phone and iPad widths without sideways scroll.
    No page errors. Simulated students only.
    usage: node qa/v2180-e-test.js   (WS_URL as in qa/lib.js) */
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
@@ -151,8 +151,9 @@ let D1=[['8/10/2026',[6,1,[1,2]]],['8/11/2026',[5,0,[2,2]]],['8/12/2026',[1,2,[1
   const p0=await dd.evaluate(()=>{S.rows.forEach(r=>{delete r.assent;});renderData();applyColW(true);const th=document.querySelector('#dataTable th.col-day');return getComputedStyle(th).display;});
   await dd.evaluate(()=>{S.rows[3].assent='agreed';renderData();applyColW(true);});
   const p1=await dd.evaluate(()=>{const th=document.querySelector('#dataTable th.col-day'),td=document.querySelector('#dataTable tr[data-r="'+S.rows[3].id+'"] td.col-day');
-    return {th:getComputedStyle(th).display,po:td.querySelector('.po').textContent,poD:getComputedStyle(td.querySelector('.po')).display,sel:getComputedStyle(td.querySelector('.dd-day-w')).display};});
-  ok('2r on paper: no assent column when no day has one; a narrow column with the word when one does',p0==='none'&&p1.th==='table-cell'&&p1.po==='Agreed'&&p1.poD==='block'&&p1.sel==='none',{p0,p1});
+    return {th:getComputedStyle(th).display,po:td.querySelector('.po').textContent,kept:S.rows[3].assent};});
+  const S_assent=x=>x.kept==='agreed';
+  ok('2r on paper: no assent column, whether or not a day has one (v22.31: the assent stays in the record and on screen)',p0==='none'&&p1.th==='none'&&S_assent(p1),{p0,p1});
   await dd.emulateMedia({media:'screen'});await dd.evaluate(()=>applyColW(false));
   /* widths: phone and iPad */
   for(const [w,h] of [[390,844],[820,1180]]){await dd.setViewportSize({width:w,height:h});await sleep(250);

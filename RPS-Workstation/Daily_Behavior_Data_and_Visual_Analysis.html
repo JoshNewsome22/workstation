@@ -506,6 +506,7 @@ td input,td select{max-width:100%}
 .sheet-top .st-r{font-size:11.5px;color:var(--ink-soft);text-align:right;line-height:1.45}
 .sheet.slim thead th.fixh{vertical-align:bottom;text-align:center;font-size:12px;font-weight:600;white-space:normal;background:#F4F7F8;border:1px solid var(--rule-soft);color:var(--ink);padding:6px 4px}
 .sheet.slim thead th.namecell{vertical-align:middle;line-height:1.25;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
+@media print{.sheet.slim thead th.namecell{-webkit-hyphens:manual;hyphens:manual}}   /* v22.31 on paper a name breaks between words ("Spit-ting" read badly), a long word only where it must */
 .bnum{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;border-radius:50%;color:#fff;font:700 10.5px/1 var(--nbh-sans);margin-right:5px;vertical-align:1px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .nmsub{display:block;font:400 11px/1.3 var(--nbh-sans);color:var(--ink-soft);margin-top:2px}
 .st-printqr{display:none}
@@ -4297,7 +4298,13 @@ function ddPrintStyle(){
   if(S.settings.defPlace==="head"){st.textContent="";return;}
   const P=ddPaperScheme(),sum=P.cols.reduce((a,b)=>a+b,0)||1;
   const w=P.cols.map((v,i)=>`#dataCols col:nth-child(${i+1}){width:${(v*100/sum).toFixed(3)}%!important}`).join("");
+  /* v22.31 a short sheet gives its rows the room the page has: a week or two of days is written on rows a third of an inch
+     tall or more, not a quarter, with the page left empty under them; a long sheet (or one with many behaviors, whose
+     definitions take more of the page) keeps the quarter inch */
+  const nr=(t&&t.tBodies[0]?[...t.tBodies[0].rows].filter(r=>r.dataset.r).length:0),port=S.settings.orient==="portrait",nb=orderedBehaviors().length;
+  const rh=nb>8?0:port?(nr<=8?0.42:nr<=10?0.38:nr<=14?0.31:0):(nr<=6?0.38:nr<=8?0.32:0);
   st.textContent=`@media print{#dataTable.slim{table-layout:fixed!important;width:100%!important;transform:none!important}${w}`+
+    (rh?`#dataTable.sheet.slim tbody tr[data-r]{height:${rh}in}`:"")+
     (P.off?`#dataTable.slim .col-phase,#dataTable.slim .col-label,#dataTable.slim .col-notes{display:none!important}`:"")+`}`;
 }
 function applyColW(printing){
@@ -6752,13 +6759,13 @@ let ddColP=false;
    lands on it, the actions' on the notes; each is put back where it belongs) */
 function ddDayColW(printing,fix){const dc=$("#dataCols"),t=$("#dataTable");if(!dc||!t)return;const cols=[...dc.children],k=cols.findIndex(c=>c.classList.contains("c-day"));if(k<0)return;
   const nt=dc.querySelector("col.c-notes"),ac=dc.querySelector("col.c-actions");if(fix&&nt)nt.style.width=cols[k].style.width;
-  cols[k].style.width=(printing?(ddAsAny()?44:0):DD_DAYW)+"px";if(ac)ac.style.width=(printing?0:92)+"px";
+  cols[k].style.width=(printing?0:DD_DAYW)+"px";if(ac)ac.style.width=(printing?0:92)+"px";
   const total=cols.reduce((s,c)=>s+(parseInt(c.style.width,10)||0),0);t.style.width=total+"px";
   const avail=S.settings.orient==="portrait"?700:960,q=(printing&&total>avail)?avail/total:0;t.style.transform=q?`scale(${q.toFixed(3)})`:"";}
 {const ac1=applyColW;applyColW=function(printing){ddColP=!!printing;const r=ac1.apply(this,arguments);try{ddDayColW(!!printing,true);}catch(e){}return r;};}
 /* paper: the assent is a narrow column only when a day has one; it takes its room from the notes */
 {const ps1=ddPaperScheme;ddPaperScheme=function(){const P=ps1.apply(this,arguments);try{if(!document.querySelector("#dataCols col.c-day"))return P;
-  const port=S.settings.orient==="portrait",w=ddAsAny()?(port?30:38):0,n=P.cols.length;P.cols.splice(n-2,0,w);
+  const port=S.settings.orient==="portrait",w=0,n=P.cols.length;   /* v22.31 the assent is not on paper */P.cols.splice(n-2,0,w);
   if(w&&!P.off){const i=n-1,cut=Math.min(w,Math.max(0,P.cols[i]-(port?64:96)));P.cols[i]-=cut;P.fixed.notes=P.cols[i];}}catch(e){}return P;};}
 function ddDayCol(){const t=$("#dataTable");if(!t)return;const dc=$("#dataCols");
   let made=false;if(dc&&!dc.querySelector("col.c-day")){const a=dc.querySelector("col.c-notes"),c=document.createElement("col");c.className="c-day";if(a){dc.insertBefore(c,a);made=true;}}
@@ -6876,7 +6883,10 @@ dialog.dd-tag-dlg{width:min(560px,calc(100vw - 24px))}
 .dd-byset-t thead th{position:static;font-size:12.5px}.dd-byset-t td small,.dd-byset-t th small{color:var(--ink-soft);font-weight:400}
 .dd-byset{break-inside:avoid}
 @media (max-width:560px){.dd-tag-dlg .dt-g{grid-template-columns:1fr}}
-@media print{#dataTable .dd-day-w{display:none!important}#dataTable:not(.dd-as-on) .col-day{display:none!important}
+@media print{#dataTable .dd-day-w{display:none!important}#dataTable .col-day{display:none!important}   /* v22.31 the assent is kept in the record and on screen, not on the printed sheet */
+  /* v22.31 and its column too: with the cells gone and the column kept, the notes' cells fell into the assent's empty
+     column and the notes' own column printed as a blank strip at the right of the sheet */
+  #dataTable col.c-day{display:none!important}
   #dataTable td.col-day .po{display:block;text-align:center;font-size:8.5px;padding:3px 1px;white-space:normal;line-height:1.15}
   #dataTable th.col-day{font-size:8.5px;padding:4px 1px}.dd-byset-w{overflow:visible}}
 </style>
@@ -9509,6 +9519,7 @@ function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const 
     <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="stMake">Make the link</button><span class="hint" id="stMakeMsg" role="status" style="margin:0 0 0 8px"></span></div></div>
   <div class="st-links-w"><table class="st-links" id="stLinks"></table></div>
   <label class="st-prt"><input type="checkbox" id="stPrtOn"> Print each working link\u2019s code under the printed data sheet, so staff can scan it from the sheet</label>
+  <p class="hint st-prt-note" id="stPrtNote"></p>
   <div class="dd-actions" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="stCollect">Collect now</button><button type="button" class="btn ghost" id="stPurge">Remove the collected entries from the site</button></div>
   <p class="st-line" id="stLine" role="status" aria-live="polite"></p>
   <div id="stHeld"></div>
@@ -9542,7 +9553,10 @@ function stLine(t){const e=document.getElementById("stLine");if(e)e.textContent=
    stopped), up to four, under the sheet, so the staff scan it from the paper in the room. Made as this form prints and
    taken away after, so a copy of the page (the master print, a packet for the team) never carries them; not when
    "Print each working link's code" is unticked. */
-function stPrtBox(){const pc=document.getElementById("stPrtOn"),s=S.staff;if(pc)pc.checked=!(s&&s.noPrintQr);}
+function stPrtBox(){const pc=document.getElementById("stPrtOn"),s=S.staff;if(pc)pc.checked=!(s&&s.noPrintQr);
+  /* say why nothing would print: a code is printed for each working link, and there may be none yet */
+  const nt=document.getElementById("stPrtNote");if(!nt)return;const n=s&&Array.isArray(s.links)?s.links.filter(l=>!l.off&&stUrlOf(l)).length:0;
+  nt.textContent=s&&s.noPrintQr?"":n?"Printed with the sheet: "+stPl(Math.min(n,4),"code")+(n>4?" (the first four links)":"")+".":"No working link yet, so no code prints on the sheet: make a link above (who it is for, the targets, Make the link) and its code prints under the sheet.";}
 function stPrintPaint(clear){const el=document.getElementById("stPrintQr");if(!el)return;const s=S.staff,on=!clear&&!!(s&&Array.isArray(s.links)&&!s.noPrintQr);
   const L=on?s.links.filter(l=>!l.off).map(l=>({l,u:stUrlOf(l)})).filter(x=>x.u).slice(0,4):[];
   el.innerHTML=L.length?`<div class="st-pq-h">Record on a phone</div><div class="st-pq-row">${L.map(x=>`<div class="st-pq"><div class="st-pq-c">${ddQrSvg(x.u)}</div><div class="st-pq-t"><b>Scan to record: ${esc(x.l.who)}</b><span>Point the phone\u2019s camera at the code, tap the link, tap as it happens, and press Send today\u2019s data.</span><span class="st-pq-k">Code ${esc(x.l.code)}</span></div></div>`).join("")}</div>`:"";}

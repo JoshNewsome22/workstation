@@ -9905,6 +9905,21 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.32: Form DD-1's printed data sheet
+
+- **The whole width of the page.** The assent's column was hidden on paper but kept its place, so the daily notes' cells
+  fell into it and the notes' own column printed as a blank strip at the right; the sheet now spans the page with its
+  Daily notes column.
+- **The assent is not on paper** (it stays in the record and on screen).
+- **Rows with room to write** on a short sheet: ten days or fewer print on rows about four tenths of an inch tall (a
+  third of an inch up to fourteen days), not a quarter, with the page left empty under them. A longer sheet, or one with
+  more than eight behaviors, keeps the quarter inch.
+- **Names break between words** in the printed headings ("Spit-ting" read badly).
+- **Staff phones says when no code will print**: a QR code prints under the sheet only for a staff link that exists and
+  works; with none yet the panel says so, and how to make one.
+
+Checked by `qa/v2231-dd1-qr-test.js` and `qa/v2180-e-test.js`.
+
 ### v22.31: your RBTs from the BACB portal
 
 - **Read a document on the BACB portal's Supervision page** (a screenshot of Supervisees): the RBTs under Current are
