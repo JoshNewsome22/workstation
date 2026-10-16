@@ -1418,10 +1418,13 @@ function caseUid(){return 'c'+Date.now().toString(36)+Math.random().toString(36)
 const gradeWords=g=>{g=String(g||'').trim();return !g?'':/grade|^k$|^pre|kinder/i.test(g)?g:'Grade '+g;};   /* v21.89 not "Grade 5th grade" */
 /* v22.30 forms that are a staff record, not a student's: a case of these alone is saved under the record's name, with no
    student asked for; kept in a student's case, it is asked about once (it would go wherever the student's file goes) */
-const STAFF_ONLY={'RS-1':'RBT_Supervision_Log'};
+const STAFF_ONLY={'RS-1':'RBT Supervision Log'};
 const caseIds=()=>[...new Set(Object.keys(state.frames).concat(Object.keys(state.pending)))];
 function staffOnlyName(){const ids=caseIds();return ids.length&&ids.every(id=>STAFF_ONLY[id])?STAFF_ONLY[ids[0]]:'';}
 function caseName(p){return (p.client||staffOnlyName()||'case').replace(/[^\w-]+/g,'_');}
+/* v22.30 the staff record on the caseload: kept and synced like a student's case, under its own name and no student ID,
+   listed apart from the students (Caseload's Staff records), and left out of the student counts and summaries */
+const isStaffRec=r=>!!r&&!String(r.sid||'').trim()&&Object.values(STAFF_ONLY).includes(String(r.client||'').trim());
 /* a case file is JSON, or a one-file case whose JSON sits in a block */
 function parseCase(text){
   const t=String(text||'');
@@ -5141,7 +5144,9 @@ function clOpenDb(){if(CL.db)return CL.db;CL.db=new Promise(res=>{let r,done=fal
   r.onsuccess=()=>fin(r.result);r.onerror=()=>fin(null);});return CL.db;}
 async function clTx(mode,fn){const db=await clOpenDb();if(!db)throw new Error('no storage in this browser');
   return new Promise((res,rej)=>{let out;try{const t=db.transaction('cases',mode);out=fn(t.objectStore('cases'));t.oncomplete=()=>res(out&&'result' in out?out.result:out);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);}catch(e){rej(e);}});}
-const clKey=p=>{const n=String(p.client||'').trim().toLowerCase().replace(/\s+/g,' '),s=String(p.sid||'').trim();return n||s?clScope()+'|'+s+'|'+n:'';};
+const clKey=p=>{let n=String(p.client||'').trim().toLowerCase().replace(/\s+/g,' ');const s=String(p.sid||'').trim();
+  if(!n&&!s){const st=staffOnlyName();if(st)n=st.toLowerCase();}   /* v22.30 the staff record on screen (no student): the key of its caseload entry */
+  return n||s?clScope()+'|'+s+'|'+n:'';};
 const clStrip=h=>String(h||'').replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
 function clSummary(){let items=[];try{items=todayItems().map(x=>({k:x.k,t:clStrip(x.t),open:x.open||''}));}catch(e){}const f=state.facts||{};
   return {items,lastData:f.data&&f.data.to||'',forms:Object.keys(state.frames).concat(Object.keys(state.pending)).filter((v,i,a)=>a.indexOf(v)===i).length};}
@@ -5149,28 +5154,31 @@ async function caseloadKeep(p,forms,late){if(clOff())return;const key=clKey(p);i
   try{await gatherFacts(false);}catch(e){}   /* the summary from the case as it is now */
   if(late&&late.length){try{const old=(await clList()||[]).find(r=>r.key===key),od=old&&parseCase(old.text);forms=Object.assign({},forms);late.forEach(id=>{if(od&&od.forms&&od.forms[id]&&!forms[id])forms[id]=od.forms[id];});}catch(e){}}
   const text=JSON.stringify({form:'CASE',rev:'2026-09',saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined});
-  const rec={key,scope:clScope(),client:String(p.client||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
+  const rec={key,scope:clScope(),client:String(p.client||(!String(p.sid||'').trim()&&staffOnlyName())||''),sid:String(p.sid||''),site:String(p.site||''),grade:String(p.grade||''),bcba:String(p.bcba||''),saved:new Date().toISOString(),sum:clSummary(),text};
   try{const old=(await clList()||[]).find(r=>r.key===key);if(typeof drvStamp==='function')drvStamp(rec,old);}catch(e){}   /* v21.89 the device, and the Drive version it stands on */
   try{await clTx('readwrite',st=>st.put(rec));}catch(e){try{wsUI.toast('The caseload copy could not be kept on this device ('+(e&&e.message||e)+'). The case file is saved as usual.',{kind:'warn'});}catch(x){}}}
 async function clList(){try{const all=await clTx('readonly',st=>st.getAll());return (all||[]).filter(r=>r&&r.scope===clScope());}catch(e){return null;}}
 const CL_ORDER=['Overdue','Safety','Injury','Decision','Timeline','Due','Home','Data','Integrity','Aim'];
 const TD_HOT=/^(Overdue|Safety|Injury)$/;   /* v21.92 a red tag */
 const clRank=k=>{const i=CL_ORDER.indexOf(k);return i<0?CL_ORDER.length:i;};
-const clName=r=>{const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim();if(!clIni())return w||'(no name)';const p=w.split(/\s+/).filter(Boolean);return p.length?p.map(x=>x[0].toUpperCase()+'.').join(' '):'(no name)';};
+const clName=r=>{if(isStaffRec(r))return String(r.client).trim();const w=String(r.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim();if(!clIni())return w||'(no name)';const p=w.split(/\s+/).filter(Boolean);return p.length?p.map(x=>x[0].toUpperCase()+'.').join(' '):'(no name)';};
 const clUrgency=r=>((r.sum&&r.sum.items)||[]).reduce((a,x)=>Math.min(a,clRank(x.k)),99);
 const clAgo=iso=>{const s=String(iso||''),n=tdDays(/T/.test(s)&&!isNaN(Date.parse(s))?tdISO(new Date(s)):s.slice(0,10));   /* v22.00 a save's own calendar day, not UTC's */return n===null?'':n<=0?'today':n===1?'yesterday':n+' days ago';};
-async function caseloadOpen(){const L=await clList();
+async function caseloadOpen(){let L=await clList();
   if(L===null){dialog('Caseload','<p>This browser keeps no caseload here: its storage is not available (a private window, or storage turned off).</p>');return;}
   /* the case on screen: its summary as it is now (its copy stays its last save) */
   const ck=clKey(packet()),me=ck&&L.find(r=>r.key===ck);if(me){me.sum=clSummary();try{await clTx('readwrite',st=>st.put(me));}catch(e){}}
   L.sort((a,b)=>clUrgency(a)-clUrgency(b)||String(b.saved).localeCompare(String(a.saved)));
-  const all=[];L.forEach(r=>((r.sum&&r.sum.items)||[]).forEach(x=>all.push(Object.assign({who:clName(r),key:r.key},x))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
+  const SL=L.filter(isStaffRec);L=L.filter(r=>!isStaffRec(r));   /* v22.30 the staff record(s), listed apart */
+  const staffBox='<h3 class="cl-h">Staff records<\/h3>'+(SL.length?clCards(SL,'dlg')+'<p class="hint">The RBTs you supervise, in one record (Form RS-1): kept and synced like a student\u2019s case, apart from the students.<\/p>'
+    :'<p class="hint">The RBT Supervision Log (Form RS-1) holds every RBT you supervise in one record. Started here, with no student on screen, its Save case keeps it on this '+HERE+(typeof drvOn==='function'&&drvOn()?' and in your school Google Drive':'')+' under Staff records.<\/p><p><button type="button" class="primary" id="clStaffStart">Start the RBT Supervision Log<\/button><\/p>');
+  const all=[];SL.concat(L).forEach(r=>((r.sum&&r.sum.items)||[]).forEach(x=>all.push(Object.assign({who:clName(r),key:r.key},x))));all.sort((a,b)=>clRank(a.k)-clRank(b.k));
   dialog('Caseload',
     '<p class="hp-lead">'+L.length+' student'+(L.length===1?'':'s')+(typeof drvOn==='function'&&drvOn()?' on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+'), each as at their last save.':' on this '+HERE+', each as at their last Save case, kept in this browser on this device until you remove them. The case files you save are the record.')+'</p>'+   /* v22.07 true with Drive on or off (review F509) */
     (L.length?'<h3 class="cl-h">Students<\/h3>'+clCards(L,'dlg')+   /* v21.91 a card each (nbh-find); v21.92 the students first */
       '<h3 class="cl-h">What needs you, across the caseload</h3>'+(all.length?'<ul class="td-list">'+all.slice(0,40).map(x=>'<li'+(TD_HOT.test(x.k)?' class="hot"':'')+'><span class="td-k">'+esc(x.k)+'</span> <span><b>'+esc(x.who)+'</b>: '+esc(x.t)+'</span> <button type="button" data-clopen="'+esc(x.key)+'" data-clform="'+esc(x.open||'')+'">Open'+(x.open?' '+esc(x.open):'')+'</button></li>').join('')+'</ul>'+(all.length>40?'<p class="hint">and '+(all.length-40)+' more</p>':'')
         :'<p>Nothing needs you in the students kept here, as at their last save.</p>')
-     :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+
+     :'<p>No student kept yet. Each Save case keeps a copy of that student’s case here, and Caseload lists them.</p>')+staffBox+
     /* v21.92 backups, Google Drive, the settings and the notes under the students, folded (open while there is no student) */
     '<details id="clKeep" class="cl-keep"'+(L.length?'':' open')+'><summary>Backups, Google Drive and settings<\/summary>'+
     '<p class="td-more"><label class="cl-opt"><input type="checkbox" id="clIni"'+(clIni()?' checked':'')+'> Initials only</label> <label class="cl-opt"><input type="checkbox" id="clOff"'+(clOff()?' checked':'')+'> Do not keep cases on this device</label></p>'+
@@ -5188,6 +5196,7 @@ async function caseloadGo(key,form){const L=await clList()||[],r=L.find(x=>x.key
   try{$('#dlg').close();}catch(e){}await openCaseText(r.text,null,{asked,quiet:true});if(form)try{openForm(form);}catch(e){}}
 $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data-clopen]'),d=e.target.closest('[data-cldel]');
   if(e.target.closest('#tdCaseload')){caseloadOpen();return;}
+  if(e.target.closest('#clStaffStart')){staffStart();return;}
   if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(d){const L=await clList()||[],r=L.find(x=>x.key===d.dataset.cldel);if(!r)return;
     if(!(await wsUI.confirm('Take '+clName(r)+' off the caseload on this '+HERE+'?\nTheir case history on this '+HERE+' (the earlier saves kept here) is deleted with them. Their case files are not touched; the next Save case of their case lists them again.',{ok:'Remove',danger:true})))return;   /* v21.91 the history named (it goes in clTx's delete, nbh-history) */
@@ -5195,6 +5204,13 @@ $('#dlgBody').addEventListener('click',async e=>{const o=e.target.closest('[data
 $('#dlgBody').addEventListener('change',e=>{if(e.target.id==='clIni'){try{localStorage.setItem('nbh.caseload.ini',e.target.checked?'1':'0');}catch(x){}caseloadOpen();}
   if(e.target.id==='clOff'){try{localStorage.setItem('nbh.caseload.off',e.target.checked?'1':'0');}catch(x){}}});
 $('#caseloadBtn').addEventListener('click',()=>caseloadOpen());
+/* v22.30 open the staff record from its caseload copy, or start it: only with no student and no form on screen, so it is
+   not saved into a student's case */
+async function staffStart(){const p=packet(),open=Object.keys(state.frames).length||Object.keys(state.pending).length;
+  const L=await clList()||[],r=L.find(isStaffRec);if(r){caseloadGo(r.key,'RS-1');return;}
+  if(open||String(p.client||'').trim()||String(p.sid||'').trim()){await wsUI.alert('Close the case on screen first (Close case), then tap the RBT Supervision Log again.\nThe supervision log is kept apart from the students\u2019 cases.');return;}
+  try{$('#dlg').close();}catch(e){}openForm('RS-1');
+  wsUI.toast('Form RS-1 is open with no student. Enter your RBTs and supervisors; Save case keeps it under Staff records on the caseload.',{ms:8000});}
 /* ================= v21.80 the caseload: the morning refresh from Google Sheets, a backup, and what the new facts ask for =================
    Read every linked sheet: for each student kept here whose Form DD-1 is linked to a Google Sheet (Use the sheet ticked),
    that student's DD-1 is loaded out of sight, its saved record put back in it, and DD-1 reads its sheet the way it does
@@ -5481,7 +5497,7 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
   return rs0.apply(this,arguments);};}
 /* a student not saved for the weeks chosen is forgotten here (never one kept here and not yet in a file) */
 async function clExpire(){const n=clExpireDays();if(!n)return 0;const L=await clList()||[],cut=Date.now()-n*7*864e5,me=clKey(packet());
-  const old=L.filter(r=>r.key!==me&&!r.unfiled&&Date.parse(r.saved)<cut);for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
+  const old=L.filter(r=>r.key!==me&&!r.unfiled&&!isStaffRec(r)&&Date.parse(r.saved)<cut);   /* v22.30 the staff record is kept */for(const r of old)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   if(old.length)wsUI.toast(old.length+' student'+(old.length===1?' was':'s were')+' not saved for '+n+' weeks and '+(old.length===1?'is':'are')+' no longer kept on this '+HERE+' (their case files are not touched).',{ms:9000});return old.length;}
 async function clRemoveAll(){const L=await clList()||[];
   if(!(await wsUI.confirm('Remove every student’s data from this '+HERE+'?\n'+L.length+' student'+(L.length===1?'':'s')+' kept on the caseload, their case history (the earlier saves kept here), every Autosave safety copy, this tab’s Google sign-in and the caseload’s remembered times. The case files you saved are not touched, and the case on screen stays open until you close it. This cannot be undone.',{ok:'Remove everything',danger:true})))return;
@@ -5642,10 +5658,10 @@ async function paintBlank(){const card=$('#blank .card');if(!card)return;let x=c
   x.hidden=false;card.classList.add('has-cl');
   x.innerHTML='<h2>Your caseload on this '+HERE+'<\/h2>'+(all.length?'<ul class="td-list">'+all.slice(0,6).map(i=>'<li'+(TD_HOT.test(i.k)?' class="hot"':'')+'><span class="td-k">'+esc(i.k)+'<\/span> <span><b>'+esc(i.who)+'<\/b>: '+esc(i.t)+'<\/span> <button type="button" data-clopen="'+esc(i.key)+'" data-clform="'+esc(i.open||'')+'">Open'+(i.open?' '+esc(i.open):'')+'<\/button><\/li>').join('')+'<\/ul>'+(all.length>6?'<p class="hint">and '+(all.length-6)+' more in Caseload<\/p>':''):'<p>Nothing needs you in the students kept here, as at their last save.<\/p>')+
     clCards(L,'bl')+   /* v21.91 the search and a card each (nbh-find) */
-    '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
+    '<p class="td-more"><button type="button" class="primary" id="blNew">New student<\/button> <button type="button" id="blRead">Read a document<\/button> <button type="button" id="blOpen">Open case<\/button> <button type="button" id="blStaff">RBT Supervision Log<\/button> <button type="button" id="blCl">Caseload<\/button><\/p><hr class="bl-hr">';}
 $('#blank').addEventListener('click',e=>{const o=e.target.closest('[data-clopen]');if(o){caseloadGo(o.dataset.clopen,o.dataset.clform||'');return;}
   if(e.target.closest('#blNew')){if(Object.keys(state.frames).length||Object.keys(state.pending).length){$('#closeCase').click();return;}foldBar(false);const i=$('#pClient');if(i){i.focus();try{i.select();}catch(x){}}return;}
-  if(e.target.closest('#blRead')){$('#readDoc').click();return;}if(e.target.closest('#blOpen')){$('#openCase').click();return;}if(e.target.closest('#blCl')){caseloadOpen();return;}});
+  if(e.target.closest('#blRead')){$('#readDoc').click();return;}if(e.target.closest('#blOpen')){$('#openCase').click();return;}if(e.target.closest('#blStaff')){staffStart();return;}if(e.target.closest('#blCl')){caseloadOpen();return;}});
 {const cc5=clearCase;clearCase=async function(){const r=await cc5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
 {const ck5=caseloadKeep;caseloadKeep=async function(){const r=await ck5.apply(this,arguments);try{paintBlank();}catch(e){}return r;};}
 setTimeout(()=>{try{paintBlank();}catch(e){}},900);
@@ -7618,7 +7634,7 @@ function clCard(r,w){const it=((r.sum&&r.sum.items)||[]).slice().sort((a,b)=>clR
   const fix=(!ini&&!(r.thumb&&r.thumb.at===r.saved))||!(r.sum&&('trends' in r.sum)),nm=clName(r);
   return '<article class="cl-card'+(hot?' hot':'')+'" data-clrow="'+esc(r.key)+'" data-clwhere="'+w+'"'+(fix?' data-clfix="1"':'')+' aria-label="'+esc(nm)+'">'+
     '<div class="cl-top"><span class="cl-ph" aria-hidden="true">'+clPhoto(r)+'<\/span><div class="cl-who"><b class="cl-nm">'+esc(nm)+'<\/b>'+(sub?'<span class="cl-sub">'+sub+'<\/span>':'')+(r.sid&&!ini?'<span class="cl-sid">ID '+esc(r.sid)+'<\/span>':'')+'<\/div>'+clPinBtn(r.key,nm)+'<\/div>'+
-    clTrendHtml(r)+
+    (isStaffRec(r)?'<p class="cl-saved">Form RS-1: the supervision of your RBTs<\/p>':clTrendHtml(r))+   /* v22.30 no student data on the staff record */
     (top?'<div class="cl-next'+(hot?' hot':'')+'"><span class="cl-nt"><span class="td-k">'+esc(top.k)+'<\/span> '+esc(top.t)+(it.length>1?' <span class="cl-more">and '+(it.length-1)+' more<\/span>':'')+'<\/span><button type="button" data-clopen="'+esc(r.key)+'" data-clform="'+esc(top.open||'')+'">Open'+(top.open?' '+esc(top.open):'')+'<\/button><\/div>'
       :'<div class="cl-next calm"><span class="cl-nt">Nothing needs you, as at the last save.<\/span><\/div>')+
     '<p class="cl-saved" title="'+esc(typeof drvWhen==='function'?drvWhen(r.saved):'')+'">'+esc(clWhere(r))+'<\/p>'+
@@ -8040,7 +8056,7 @@ async function logNowOpen(){
   const p=packet();let who=[];const me=p.client?clKey(p):'';
   if(p.client){if(lnOnScreen()){try{await gatherFacts(false);}catch(e){}}who=[{key:me,name:p.client,here:true}];}   /* the student in the bar, forms open or not yet */
   /* v22.22 (review F471) and every other student kept on this device, always: one not on screen is logged out of sight */
-  {const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));L.forEach(r=>{if(r.key!==me)who.push({key:r.key,name:clName(r)});});}
+  {const L=(await clList()||[]).filter(r=>!isStaffRec(r));L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));L.forEach(r=>{if(r.key!==me)who.push({key:r.key,name:clName(r)});});}
   if(!who.length){wsUI.toast('Name the student in the bar first, or keep a student on this '+HERE+' (Keep on this '+HERE+' in the bar).',{kind:'warn',ms:7000});return;}
   const now=lnNow(),beh=lnOnScreen()?lnBehaviors():[];
   dialog('Log it now',
@@ -8233,7 +8249,7 @@ function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(
   const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
   return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:(/T/.test(String(r.saved||''))&&!isNaN(Date.parse(r.saved))?tdISO(new Date(r.saved)):String(r.saved||'').slice(0,10)),inc:inc.length,hold,told,aims:aims.length,met,
     integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:!!(c.date||c.parent),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
-async function cmRows(month){const L=await clList()||[];L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
+async function cmRows(month){const L=(await clList()||[]).filter(r=>!isStaffRec(r));L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
 function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});
   t.integMean=t.integ.length?Math.round(t.integ.reduce((a,b)=>a+b,0)/t.integ.length*10)/10:null;return t;}
 function cmLead(R,label){const t=cmTotals(R);return t.n+' student'+(t.n===1?'':'s')+' kept on this '+HERE+', '+label+': '+t.inc+' incident'+(t.inc===1?'':'s')+(t.inc?' ('+t.hold+' restraint'+(t.hold===1?'':'s')+' or seclusion'+(t.hold===1?'':'s')+'; home told about '+t.told+')':'')+'; aims met for '+t.met+' of '+t.aims+' behavior'+(t.aims===1?'':'s')+' with an aim; consent on file for '+t.consent+' of '+t.n+'; integrity '+(t.integMean!=null?t.integMean+'% on average':'not observed')+'; '+t.withData+' with daily data; '+t.hot+' item'+(t.hot===1?'':'s')+' overdue or about safety.';}

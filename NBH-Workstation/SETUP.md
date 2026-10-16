@@ -9921,6 +9921,14 @@ for a 5-second repaint).
   case no longer asks "Save the case without a student name?"; the file is named RBT_Supervision_Log. With a student
   loaded, the first Save case that would put RS-1 into that student's case file says so and asks first (Cancel, close
   the student, and save RS-1 on its own to keep it apart). Checked by `qa/v2230-staff-save-test.js`.
+- **The RBT Supervision Log on the caseload.** Caseload has a **Staff records** section, apart from the students, and
+  the start screen an **RBT Supervision Log** button. The first time, **Start the RBT Supervision Log** opens Form RS-1
+  with no student (only when no student's case is on screen, so it never lands in a student's file). Its Save case keeps
+  it on the caseload as "RBT Supervision Log" and, with Google Drive on, in your school Drive folder like a student's
+  case; after that its card (or the start screen button) opens it, switching from a student as Caseload always does.
+  It is one record for all your RBTs, not a card per RBT. It is not counted as a student, and it is left out of the
+  monthly caseload summary, Log it now and the weeks-unsaved clean-up; its due dates (recertification, goals) show on
+  the card and in the calendar. Checked by `qa/v2230-staff-caseload-test.js`.
 - The simulation now has two simulated RBTs (Jordan Lee and Casey Morgan, both "(simulated)").
 - **The RBT's usual hours on the Month page.** A box above the service days holds the RBT's usual start and end times,
   minutes not in services, primary intervention and usual days (the same setting as on the Setup page; a change in one
