@@ -9971,7 +9971,18 @@ Checked by `qa/rs1-test.js` (sections 8, 9 and 10).
 - **Schedule:** the info and arrow icons between cells were read as "© [" into what a teacher teaches, and the
   homeroom teacher came out as Other; now the homeroom teacher is the classroom teacher, with no stray marks.
 
-Checked by `qa/v2230-sis-read-test.js` (simulated pages laid out like the real ones) and the earlier reader tests.
+- **A PDF on the iPad, and a long one.** The PDF library walks a page's text with a step Safari on the iPad cannot take,
+  so on the iPad every page's text failed and every page was read as a picture (slowly, "Reading page 4 of 8... 49%"),
+  and only the first 8 pages were read at all. Now the text of every page is read as text, up to 60 pages; a scanned
+  page is still read as a picture.
+- **An IEP's own sentences** are read: "The next required annual review will occur on or before ...", "The next
+  scheduled reevaluation ...", "Program Eligibility(ies): ..." (the first the primary exceptionality, the rest the
+  secondary), "... receives his/her educational services in a: ..." (the placement), "This student is in need of
+  extended school year services" (ESY), a standard diploma deferred, the "Transportation Needs" listed, and the parent
+  on the cover with phone and email. A "Yes  No" choice list is no longer taken for an answer, a heading under
+  Placement for a placement, or the services table for a secondary exceptionality.
+
+Checked by `qa/v2230-sis-read-test.js` (simulated pages laid out like the real ones) and the earlier reader tests. Section 6 reads a simulated 28-page IEP the way Safari does.
 
 ### v22.29: four small fixes from the review
 

@@ -6469,7 +6469,7 @@ const nbhDocRead=(()=>{
     {k:'eth',label:'Race / ethnicity',al:'single ethnicity|race/ethnicity|race / ethnicity|race and ethnicity|ethnicity|race',kind:'eth',to:['DM-1:s.eth']},
     {k:'medicaid',label:'Medicaid',al:'medicaid (?:id|number|no\\.?|#)|medicaid',kind:'text',to:['DM-1:s.medicaid']},
     {k:'elig',label:'Primary exceptionality',al:'primary (?:exceptionality|disability|eligibility|ese program)|exceptionality|eligibility category|disability category|primary ese|eligibility|disability',kind:'elig',to:['DM-1:p.elig']},
-    {k:'elig2',label:'Secondary exceptionality',al:'secondary (?:exceptionality|disability|eligibility)|other exceptionalit(?:y|ies)|related services?',kind:'text',to:['DM-1:p.elig2']},
+    {k:'elig2',label:'Secondary exceptionality',al:'secondary (?:exceptionality|disability|eligibility)|other exceptionalit(?:y|ies)',kind:'text',to:['DM-1:p.elig2']},
     {k:'eligdate',label:'Initial eligibility date',al:'initial eligibility(?: date)?|eligibility date|date of (?:initial )?eligibility|initial placement date',kind:'date',to:['DM-1:p.eligdate']},
     {k:'iepdate',label:'Current IEP date',al:'iep (?:meeting )?date|current iep(?: date)?|date of (?:the )?iep|iep (?:dated|developed|written)|iep start(?: date)?|plan date|meeting date',kind:'date',to:['DM-1:p.iepdate']},
     {k:'annual',label:'Annual review due',al:'annual review(?: due| date)?|iep (?:annual )?review(?: due| date)?|iep due(?: date)?|next (?:iep|annual review)(?: date)?|iep end(?: date)?|review date|iep expires?',kind:'date',to:['DM-1:p.annual']},
@@ -6556,8 +6556,8 @@ const nbhDocRead=(()=>{
       case 'ell':{const s=first(v,ELL);return s?{value:s,ok:true}:{value:v,ok:false,note:'not an ELL status'};}
       case 'interp':{const s=first(v,INTERP);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
       case 'elig':{const s=first(v,ELIG);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the eligibilities'};}
-      case 'place':{const s=first(v,PLACE);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the placements'};}
-      case 'diploma':{const s=first(v,DIPLOMA);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the diploma options'};}
+      case 'place':{const s=first(v,PLACE);return s?{value:s,ok:true}:{value:'',ok:false};}   /* v22.30 a heading under the label ("Removal from Programs ...") is not a placement */
+      case 'diploma':{const s=first(v,DIPLOMA);return s?{value:s,ok:true}:{value:'',ok:false};}
       case 'holder':{const s=first(v,HOLDER);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
       case 'matrix':{const m=v.match(/\b(25[1-5])\b/);return m?{value:m[1],ok:true}:{value:v,ok:false,note:'not 251 to 255'};}
       case 'id':{const s=cutText(v).replace(/^[#:\s]+/,'').split(/\s+/)[0]||'';return s?{value:s,ok:/\d/.test(s)}:{value:'',ok:false};}
@@ -6565,7 +6565,8 @@ const nbhDocRead=(()=>{
         if(q)return q[2].toLowerCase()==='yes'?{value:q[1],ok:true}:{value:'',ok:false};   /* "Race: White  No" is a question answered No: nothing to place */
         const s=cutText(v).slice(0,120);return {value:s,ok:!!s};}
       case 'name':{const s=cutText(v);const n=splitName(s);return n.last?{value:n.full,ok:true,first:n.first,last:n.last,given:n.given}:{value:s,ok:!!s,note:'one name only',first:n.first,last:'',given:n.given};}
-      default:{const s=cutText(v).slice(0,300);return {value:s,ok:!!s};}
+      default:{const s=cutText(v).slice(0,300);if(/^(?:yes|no)(?:\s+(?:yes|no))+$/i.test(s))return {value:'',ok:false};   /* v22.30 a choice not ticked in the text ("Yes  No") */
+        return {value:s,ok:!!s};}
     }
   }
   /* the labels on a line, each with what follows it; a label with no separator counts only with a value of its shape,
@@ -6655,6 +6656,17 @@ const nbhDocRead=(()=>{
       if(yes.length||hisp)v=yes.join(', ')+(hisp==='yes'?(yes.length?'; ':'')+'Hispanic or Latino':hisp==='no'&&yes.length?'; not Hispanic or Latino':'');
       if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
       if(v){if(!found.eth)order.push('eth');found.eth={k:'eth',label:BY.eth.label,to:BY.eth.to.slice(),raw:v,value:v,seen:seen.join(' / ').slice(0,160),str:3,ok:true};}}
+    /* v22.30 an IEP's sentences (Florida's, as a district's IEP system prints them): the next annual review and
+       reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs */
+    {const T=L.slice(0,end).join('\n'),D='(\\d{1,2}\\/\\d{1,2}\\/\\d{2,4})',g=(re)=>{const m=T.match(re);return m;};let m;
+      const put=(k,v,seen,force)=>{if(!v)return;const f=BY[k],sh=shape(f,v);if(!sh.value)return;if(found[k]&&!force)return;if(!found[k])order.push(k);found[k]=Object.assign({k,label:f.label,to:f.to.slice(),raw:v,seen:String(seen).replace(/\s+/g,' ').slice(0,160),str:3},sh);};
+      if((m=g(new RegExp('next required annual review[^:\\n]{0,40}:\\s*'+D,'i'))))put('annual',m[1],m[0],true);
+      if((m=g(new RegExp('next scheduled re-?evaluation[^:\\n]{0,40}:\\s*'+D,'i'))))put('reeval',m[1],m[0],true);
+      if((m=g(/program eligibilit(?:y|ies)(?:\(ies\))?\s*:\s*([^\n]+)/i))){const e=m[1].split(/\s*[,;]\s*/).map(x=>x.trim()).filter(Boolean);put('elig',e[0],m[0],true);if(e.length>1)put('elig2',e.slice(1).join(', '),m[0],true);}
+      if((m=g(/receives his\/her educational services in an?\s*:?\s*([^\n]+)/i)))put('place',m[1],m[0],true);
+      if((m=g(/this student is (not )?in need of extended school year services/i)))put('esy',m[1]?'No':'Yes',m[0],true);
+      if((m=g(/deferring receipt of a standard high school diploma[^\n]*?\b(yes|no)\b/i))&&/yes/i.test(m[1]))put('diploma','Standard',m[0]+' (deferred)',true);
+      if((m=g(/specific "?transportation needs"? include:?\s*\n((?:\s*[\u25aa\u2022\u25cf\-*][^\n]+\n?){1,8})/i))){const b=m[1].split('\n').map(x=>x.replace(/^\s*[\u25aa\u2022\u25cf\-*]\s*/,'').trim()).filter(Boolean);put('trans','Yes: '+b.join('; '),'Specific Transportation Needs: '+b.join('; '),true);}}
     const fields=order.map(k=>found[k]);
     return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text,text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
   }
@@ -6782,6 +6794,11 @@ const nbhDocRead=(()=>{
         for(let j=i+1;j<Math.min(i+6,P.length);j++){const c=P[j].split(/[ \t]{2,}/).map(x=>x.trim());
           if(c.length>=3&&/^[A-Z][A-Za-z .'\-]+$/.test(c[0])&&/^[A-Z]{2}$/.test(c[1])&&/^\d{5}/.test(c[2])){a+=', '+c[0]+', '+c[1]+' '+c[2].slice(0,5);break;}if(CITY.test(c[0])){a+=', '+c[0];break;}}break;}}
       if(a)out.forEach(c=>{if(!c.addr)c.addr=a;});}
+    /* v22.30 an IEP's cover names the parent: "Parent Name: ...", "Parent Phone Number: ..." */
+    if(page&&!out.length){const P=lines(page),pn=P.map(l=>l.match(/^\s*parent(?:\/guardian)?(?:'s)? name\s*:\s*(.+)$/i)).find(Boolean),pp=P.map(l=>l.match(/^\s*parent(?:\/guardian)?(?:'s)? (?:phone|telephone)(?: number)?\s*:\s*(.+)$/i)).find(Boolean);
+      if(pn){const all=pn[1]+' '+(pp?pp[1]:''),nm0=pn[1].split(/\s+parent(?:\/guardian)?(?:'s)?\s+(?:phone|telephone|e-?mail|address|cell)\b/i)[0].trim(),nm=nameOf(nm0)||nm0;
+        const pt=(all.match(/parent(?:\/guardian)?(?:'s)?\s+(?:phone|telephone)(?: number)?\s*:\s*([\d()\-. ]{10,16})/i)||[])[1]||(pp?pp[1]:''),d=String(pt).replace(/\D/g,''),em=all.match(EMAIL);
+        if(nm&&nm.length<=60)out.push({n:0,name:nm,rel:'',relRaw:'Parent',phone:d.length===10?'('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6):'',phone2:'',email:em?em[0]:'',addr:'',lang:'',seen:pn[0].trim().slice(0,160),note:'Listed as Parent'});}}
     out.forEach(c=>{if(c.n>=90)c.n=0;});
     return out.sort((a,b)=>(a.n||99)-(b.n||99));
   }
@@ -6881,6 +6898,11 @@ async function drFile(file){
   }catch(e){drProg('');$('#drOut').innerHTML='<p class="dr-err">The file could not be read: '+esc(e&&e.message||e)+'. Paste its text instead.</p>';}
 }
 async function drPdfLib(){
+  /* v22.30 the PDF library reads a page's text as a stream it walks with "for await", which Safari on the iPad cannot do
+     (a stream there cannot be walked that way): the text of every page failed, and every page was read as a picture,
+     slowly. The stream is given the means here */
+  if(window.ReadableStream&&!ReadableStream.prototype[Symbol.asyncIterator]){
+    try{Object.defineProperty(ReadableStream.prototype,Symbol.asyncIterator,{configurable:true,writable:true,value:async function*(){const r=this.getReader();try{for(;;){const x=await r.read();if(x.done)return;yield x.value;}}finally{try{r.releaseLock();}catch(e){}}}});}catch(e){}}
   if(!DR.pdf){const lib=await import(new URL('nbh-doc/pdf.min.js',location.href).href);lib.GlobalWorkerOptions.workerSrc=new URL('nbh-doc/pdf.worker.min.js',location.href).href;DR.pdf=lib;}
   return DR.pdf;
 }
@@ -6895,11 +6917,11 @@ async function drPdf(file){
   drProg('Opening the PDF\u2026');
   const lib=await drPdfLib();
   const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer()),isEvalSupported:false,disableAutoFetch:true}).promise;
-  const N=Math.min(doc.numPages,8);let text='';
+  const N=Math.min(doc.numPages,60);let text='';   /* v22.30 the whole document (an IEP runs to 30 pages), not its first 8 */
   for(let p=1;p<=N;p++){
     drProg('Reading page '+p+' of '+N+'\u2026');
     const page=await doc.getPage(p);let t='';
-    try{t=drLinesOf((await page.getTextContent()).items);}catch(e){t='';}
+    try{t=drLinesOf(await drPageItems(page));}catch(e){t='';}
     if(t.replace(/[^A-Za-z]/g,'').length<40){   /* a scanned page: drawn and read as a picture */
       const vp=page.getViewport({scale:2}),c=document.createElement('canvas');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
       await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
@@ -6911,6 +6933,8 @@ async function drPdf(file){
   try{await doc.destroy();}catch(e){}
   return text;
 }
+/* a page's text items, read from the library's stream with a reader (the way every browser can) */
+async function drPageItems(page){const rd=page.streamTextContent({}).getReader(),items=[];for(;;){const x=await rd.read();if(x.done)break;if(x.value&&x.value.items)items.push(...x.value.items);}return items;}
 async function drImage(file){
   drProg('Opening the picture\u2026');
   const url=URL.createObjectURL(file);

@@ -8,7 +8,13 @@
    3. the Edit Contact window that cannot be edited: its boxes' pale grey text read on a second, darkened reading (the
       name from the unlabelled name boxes, the relationship, phone, email and address);
    4. the Schedule with its info and arrow icons: the homeroom teacher the classroom teacher, no stray marks in what they teach;
-   5. no page errors.   usage: node qa/v2230-sis-read-test.js */
+   5. no page errors;
+   6. a 28-page IEP PDF with its own text, read as Safari on the iPad reads it (its streams cannot be walked with "for
+      await", which made every page fail and be read as a picture, and only the first 8 pages were read): every page's
+      text read, none as a picture; the details from the IEP's sentences on its later pages (the next annual review and
+      reevaluation, the eligibilities, where the services are received, ESY, a standard diploma deferred, the bus needs),
+      the parent from the cover; no "Yes  No" taken for transportation, no services table for a second exceptionality.
+   usage: node qa/v2230-sis-read-test.js */
 const L=require(__dirname+'/lib.js');const {sleep,fs}=L;
 const OUT=__dirname+'/out/v2230/';fs.mkdirSync(OUT,{recursive:true});
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,1400):''));if(!c)fails++;};
@@ -62,6 +68,19 @@ const srow=(per,course,teach,days,room,en)=>`<tr><td>[ ]</td><td>${sel(per,110)}
 const SCHED=HEAD+`<style>table.s{border-collapse:collapse;margin:14px 16px;font-size:15px}table.s td,table.s th{border:1px solid #d6d6d6;padding:6px 7px;white-space:nowrap}</style>
 <div style="margin:6px 16px">8 Records</div><table class="s"><tr><th></th><th>Period</th><th>Term</th><th>Subject</th><th>Course</th><th>Section - Teacher</th><th>Days</th><th>Room</th><th>Enrolled</th><th>Dropped</th><th>Last Modified By</th></tr>
 ${srow('Homeroom','HOMEROOM (0000HMRM)','HTDa - Dana Whitfield (5/10)','MTWHF','02121','08/10/2026')}${srow('Period 01','ACCESS LANG ART (77100)','P1Da - Dana Whitfield (5/10)','MTWHF','02121','08/10/2026')}${srow('Therapy','LANG THERAPY (7966040G)','ShWi - Paula Brennan (25/50)','T','02140','08/10/2026')}</table></body></html>`;
+
+const pg=(n,body)=>'<section style="page-break-after:always;font:12px Arial;padding:24px"><div>THE SCHOOL DISTRICT OF SIMULATED COUNTY</div><div>DEPARTMENT OF EXCEPTIONAL STUDENT EDUCATION (ESE)</div><div>Last Name: Rivera &nbsp; First Name: Mateo &nbsp; Student ID #: 4471823</div><div>Meeting Date: 10/06/2026 &nbsp; DOB: 03/14/2016 &nbsp; Grade: 05</div><h3>Page '+n+'</h3>'+body+'</section>';
+const filler='<p>'+'The team reviewed the student\u2019s progress and discussed the supports in place. '.repeat(14)+'</p>';
+const IEP='<!doctype html><html><body>'+Array.from({length:28},(_,i)=>{const n=i+1;let b=filler;
+  if(n===1)b='<div>Parent Name: Ana Rivera Parent Phone Number: 5615550142 Parent Email: ana.rivera@example.com</div><div>School: Seagrape Elementary</div>'+filler;
+  if(n===3)b='<div>Transportation</div><div>Yes</div><div>No</div><div>Specific "Transportation Needs" include:</div><div>\u25aa Aide/Monitor required</div><div>\u25aa Safety vest</div>'+filler;
+  if(n===16)b='<div>Related Services</div><div>Services Begin Date End Date Frequency Delivery Method Location</div><div>School Nursing Services 02/02/2026 02/01/2027</div>'+filler;
+  if(n===17)b='<div>Extended School Year Services</div><div>This student is in need of extended school year services.</div>'+filler;
+  if(n===18)b='<div>PLACEMENT</div><div>Removal from Programs with Nondisabled Students</div><div>At the time of October FTE, the student receives his/her educational services in a: Separate class (C)</div>'+filler;
+  if(n===22)b='<div>Is this student deferring receipt of a standard high school diploma pursuant to s. 1003.4282(11)(c), F.S.? Yes</div>'+filler;
+  if(n===26)b='<div>The next scheduled reevaluation will occur on or before: 10/01/2028</div><div>The next required annual review will occur on or before: 10/05/2027</div><div>Program Eligibility(ies): Autism Spectrum Disorder, Language Impairment</div>'+filler;
+  if(n===28)b='<div>SIM-LAST-PAGE-MARK</div>'+filler;
+  return pg(n,b);}).join('')+'</body></html>';
 (async()=>{const br=await L.chromium.launch();const errs=[];
   try{
   const shot=async(html,file,w,h)=>{const p=await br.newPage({viewport:{width:w,height:h},deviceScaleFactor:2});await p.setContent(html);await sleep(300);await p.screenshot({path:OUT+file});await p.close();return OUT+file;};
@@ -84,6 +103,13 @@ ${srow('Homeroom','HOMEROOM (0000HMRM)','HTDa - Dana Whitfield (5/10)','MTWHF','
   const s=await read(files.sched);
   ok('4 the Schedule with its icons: the homeroom teacher the classroom teacher, the therapist the speech-language pathologist, no stray marks',
     s.t.length===2&&/^Dana Whitfield\|Classroom teacher\|Homeroom\b.*room 02121/.test(s.t[0])&&/^Paula Brennan\|Speech-language pathologist\|/.test(s.t[1])&&!s.t.some(x=>/[©@\[\]]/.test(x)),s.t);
+  /* 6 a long IEP as Safari reads it */
+  {const pp=await br.newPage();await pp.setContent(IEP);await pp.pdf({path:OUT+'iep.pdf',format:'Letter'});await pp.close();}
+  await page.evaluate(()=>{delete ReadableStream.prototype[Symbol.asyncIterator];window.__ocr=0;const o=drOcr;drOcr=async function(){window.__ocr++;return o.apply(this,arguments);};});
+  const ip=await read(OUT+'iep.pdf');const it=await page.evaluate(()=>({ocr:window.__ocr,last:/SIM-LAST-PAGE-MARK/.test(DR.text),pages:(DR.text.match(/Page \d+/g)||[]).length}));
+  ok('6a all 28 pages read as text, none as a picture, the "for await" missing as on the iPad',it.ocr===0&&it.last&&it.pages>=28,it);
+  ok('6b the IEP\u2019s details from its later pages: annual review, reevaluation, the eligibilities, placement, ESY, diploma, the bus needs',ip.f.annual==='2027-10-05'&&ip.f.reeval==='2028-10-01'&&ip.f.elig==='Autism Spectrum Disorder'&&ip.f.elig2==='Language Impairment'&&ip.f.place==='Separate class (self-contained)'&&ip.f.esy==='Yes'&&ip.f.diploma==='Standard diploma'&&ip.f.trans==='Yes: Aide/Monitor required; Safety vest',ip.f);
+  ok('6c the parent from the cover, with phone and email; the student and the IEP date',JSON.stringify(ip.c)===JSON.stringify(['0|Ana Rivera||(561) 555-0142|ana.rivera@example.com|'])&&ip.f.name==='Mateo Rivera'&&ip.f.iepdate==='2026-10-06',{c:ip.c,f:ip.f});
   ok('5 no page errors',!errs.length,errs.slice(0,3));
   }catch(e){ok('crashed',false,String(e.stack||e));}
   await br.close();console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);})();
