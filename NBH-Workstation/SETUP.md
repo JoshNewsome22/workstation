@@ -9905,6 +9905,24 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.29: four small fixes from the review
+
+- (F465) Form DM-1's crisis-plan status is typed at intake and did not follow Form CR-1: with a five-stage plan on CR-1,
+  the case line still said "No crisis plan" and the hand-over check said the crisis plan was missing. Once CR-1 holds a
+  plan, the case line says DM-1 still says no crisis plan while CR-1 holds one, and the hand-over check asks for DM-1's
+  status to be updated (and opens DM-1).
+- (F467) An objective Form GB-1 has not finished (a box still empty, shown on the form as a marker such as [unit]) went
+  to the case word for word, so the IEP packet's goals and the parent note printed "[unit]". GB-1 now tells the case what
+  is missing; the packet and the note say "The skill objective 1 for ... is not finished on Form GB-1 (unit still to be
+  written)", and the hand-over check names it.
+- (I238) Diagnostics has a **Storage on this device** line: how much this website keeps on the device (Autosave's
+  safety copies, the caseload, case history, the offline copy), of about how much the browser allows, and whether the
+  browser has agreed to keep it.
+- (I248) Every questionnaire page now ends with an offer of another format: large print, read aloud, on paper or in
+  another language, by telling the BCBA who sent it (in Spanish on a Spanish page).
+
+Checked by `qa/v2229-small-test.js`.
+
 ### v22.28: Form RS-1, the RBT Supervision Log (the 47th form)
 
 A record of the BCBA's ongoing supervision of a Registered Behavior Technician, built on the BACB RBT Handbook and BCBA

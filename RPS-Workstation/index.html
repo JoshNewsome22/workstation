@@ -2210,7 +2210,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.28';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.29';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2555,7 +2555,9 @@ function paintFacts(){
   /* v21.68 Form DM-1's flags: the safety precautions ticked, no photo/media permission, a crisis plan outdated or missing */
   const fl=f.profile&&f.profile.flags;
   if(fl){const parts=[];if((fl.safety||[]).length)parts.push('<b>Safety:</b> '+esc(fl.safety.join(', ')));if(fl.photo==='No')parts.push('<b>No photo/media permission</b>');
-    if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>');else if(fl.crisis==='No')parts.push('<b>No crisis plan</b>');
+    /* v22.29 (review F465) DM-1's "No" is typed at intake and never follows CR-1: once CR-1 holds a plan, the line says DM-1 is out of date */
+    const crHas=!!(f.crisis&&(f.crisis.stages||[]).length);
+    if(/outdated/i.test(fl.crisis||''))parts.push('<b>Crisis plan outdated</b>');else if(fl.crisis==='No')parts.push(crHas?'<b>DM-1 still says no crisis plan; Form CR-1 holds one</b>':'<b>No crisis plan</b>');
     if(parts.length)bits.push('<span class="flag">'+parts.join(' &nbsp;&middot;&nbsp; ')+'</span> <i>('+esc(s.profile||'DM-1')+')</i>');}
   if(f.plan)bits.push('<b>Plan:</b> '+esc(f.plan.rep?'replacement '+f.plan.rep:(f.plan.beh||'developed'))+' <i>('+esc(s.plan||'')+')</i>');
   if(f.crisis)bits.push('<b>Crisis plan:</b> '+(f.crisis.stages||[]).length+' stages <i>('+esc(s.crisis||'')+')</i>');
@@ -3454,6 +3456,7 @@ $('#diag').addEventListener('click',()=>{
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
    ['Settings store',kvDiag(),'Safari\u2019s settings (localStorage) hold the Google key and the Drive settings. When Safari refuses a write (a full store, or Block All Cookies on), the workstation keeps them in its own store on this device instead (v21.98)','diagKv'],
+   ['Storage on this device','checking\u2026','What this website keeps on this device (Autosave\u2019s safety copies, the caseload, case history and the offline copy) and how much the browser allows it. \u201cKept\u201d means the browser has agreed not to clear it on its own when the device runs short of space','diagStore'],   /* v22.29 (review I238) */
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
   ];
   dialog('Diagnostics',
@@ -3466,6 +3469,11 @@ $('#diag').addEventListener('click',()=>{
     '<button id="btnFileCheck">Check all '+ALL.length+' files are here</button>'+
     '<div id="fileOut"></div>');
   $('#btnFileCheck').addEventListener('click',checkFiles);
+  /* v22.29 (review I238) the storage line: what is used, the allowance, and whether the browser keeps it */
+  (async()=>{const c=()=>$('#diagStore');try{const st=navigator.storage;if(!st||!st.estimate){if(c())c().textContent='not reported by this browser';return;}
+    const e=await st.estimate(),kept=st.persisted?await st.persisted():null,mb=b=>b>=1048576*1024?(b/1073741824).toFixed(1)+' GB':(b/1048576).toFixed(b<10485760?1:0)+' MB';
+    if(c())c().textContent=mb(e.usage||0)+' used of about '+mb(e.quota||0)+(kept===true?' \u00b7 kept':kept===false?' \u00b7 not marked as kept':'');}
+  catch(e){if(c())c().textContent='not reported by this browser';}})();
   /* v21.43 offline the website cannot be asked: a file the offline copy holds is there all the same */
   const diagOff=(id,file,otherwise)=>{const c=$('#'+id);if(!c)return;const say=t=>{const x=$('#'+id);if(x)x.textContent=t;};
     (typeof PWA!=='undefined'&&PWA.saved?PWA.saved(file):Promise.resolve(false)).then(ok=>say(ok?'saved on this device (the website could not be asked)':otherwise),()=>say(otherwise));};
@@ -5025,7 +5033,10 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   const und=tg.filter(b=>!String(b.def||'').trim());if(und.length)L.push({t:und.length+' target behavior'+(und.length===1?'':'s')+' without a definition: '+esc(und.map(b=>b.label).join(', ')),open:'TB-1'});
   if(!(f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length)))L.push({t:'No goals written (Form GB-1)',open:'GB-1'});
   if(f.plan&&!f.crisis)L.push({t:'A plan with no crisis plan: Form CR-1 is not in the case',open:'CR-1'});
-  if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated'),open:'CR-1'});
+  if(fl&&fl.crisis==='No'&&f.crisis&&(f.crisis.stages||[]).length)L.push({t:'Form DM-1 still records no crisis plan, but Form CR-1 holds one: update DM-1\u2019s crisis-plan status',open:'DM-1'});   /* v22.29 (F465) */
+  else if(fl&&(fl.crisis==='No'||/outdated/i.test(fl.crisis||'')))L.push({t:'Form DM-1 records the crisis plan as '+(fl.crisis==='No'?'missing':'outdated'),open:'CR-1'});
+  /* v22.29 (review F467) an objective GB-1 has not finished (a box still empty) is named, not printed as if written */
+  const unf=gbUnfinished(f.goals);if(unf.length)L.push({t:unf.length+(unf.length===1?' objective is':' objectives are')+' unfinished on Form GB-1: '+esc(unf.map(u=>u.which+' ('+u.missing.join(', ')+' missing)').join('; ')),open:'GB-1'});
   if(state.photo&&fl&&fl.photo==='No')L.push({t:'The student’s photo is on the case, but Form DM-1 records no photo or media permission: take it off before the case is handed on (the photo button on the bar)',open:''});
   if(f.data&&(f.data.incidentList||[]).some(i=>i.parent!=='yes'))L.push({t:'Incidents home has not been told about (Form DD-1’s incident log)',open:'DD-1'});
   return L;}
@@ -5551,6 +5562,13 @@ async function changesOpen(){const p=packet(),key=clKey(p),r=key&&(await clList(
   const fk=x=>x&&(x.key||x.label)||'';if(fk(nf.fn)!==fk(of.fn)&&fk(nf.fn))L.push('The function (Form FS-1) is now '+esc(fk(nf.fn))+(fk(of.fn)?' (was '+esc(fk(of.fn))+')':''));
   dialog('What changed since the last save','<p class="hp-lead">'+esc(clName(r))+': the case on screen against its save of '+esc(clAgo(r.saved))+' ('+esc(new Date(r.saved).toLocaleString())+').<\/p>'+(L.length?'<ul class="td-list">'+L.map(x=>'<li><span>'+x+'<\/span><\/li>').join('')+'<\/ul>':'<p>Nothing has changed since that save.<\/p>'));}
 /* the IEP meeting packet: present levels, the goals, the plan, progress, safety and the dates, as a page to print and as text to copy */
+/* v22.29 (review F467) GB-1 marks an objective with an empty box (unit, criterion, ...) as unfinished and lists what is
+   missing; the IEP packet and the parent note say so instead of printing the sentence with its "[unit]" marker */
+function gbUnfinished(g){g=g||{};const out=[];
+  [['red','reduction'],['acq','skill']].forEach(([k,kind])=>(Array.isArray(g[k])?g[k]:[]).forEach((x,i)=>{if(x&&Array.isArray(x.unfinished)&&x.unfinished.length)out.push({x,which:kind+' objective '+(i+1)+(x.beh?' ('+String(x.beh).slice(0,40)+')':''),missing:x.unfinished});}));
+  return out;}
+function gbGoalLines(g,T){g=g||{};const line=(x,kind,i)=>{if(x&&Array.isArray(x.unfinished)&&x.unfinished.length)return 'The '+kind+' objective '+(i+1)+(x.beh?' for '+T(x.beh):'')+' is not finished on Form GB-1 ('+x.unfinished.join(', ')+' still to be written).';return T(x&&x.text||x);};
+  return [].concat((g.red||[]).map((x,i)=>line(x,'reduction',i)),(g.acq||[]).map((x,i)=>line(x,'skill',i))).filter(Boolean);}
 function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{},pf=f.profile||{},g=f.goals||{},rv=f.review||{},ad=pl.adoption||{},cr=f.crisis||{},rc=f.records||{};
   const who=(p.client||'The student').replace(/^SIMULATED\s*[–-]\s*/,'').split(/\s+/)[0]||'The student',T=x=>String(x==null?'':x).trim();
   const lv=(d.behaviors||[]).filter(b=>b&&b.name).map(b=>{const u=b.unit||'',bm=b.base&&b.base.mean!=null?b.base.mean:null,cm=b.cur&&b.cur.mean!=null?b.cur.mean:b.mean;
@@ -5558,7 +5576,7 @@ function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{
   const fn=f.fn&&(f.fn.label||f.fn.key);
   const present=[who+'’s present levels of behavior, from the daily data'+(d.from&&d.to?' ('+d.from+' to '+d.to+')':'')+': '+(lv.length?lv.join('; ')+'.':'no daily data in the case yet.'),
     fn?'The functional behavior assessment found the behavior is maintained by '+T(fn)+'.':'',T(pf.strengths)?'Strengths: '+T(pf.strengths)+'.':'',T(pf.expr)?'Communication: '+T(pf.expr)+'.':''].filter(Boolean).join(' ');
-  const goals=[].concat((g.red||[]).map(x=>T(x.text||x)),(g.acq||[]).map(x=>T(x.text||x))).filter(Boolean);
+  const goals=gbGoalLines(g,T);
   const A=v=>Array.isArray(v)?v.map(T).filter(Boolean):[],rs=pl.respond||{};
   const plan=[pl.rep?'Replacement behavior: '+T(pl.rep)+'.':'',A(pl.ant).length?'Before the behavior (prevention): '+A(pl.ant).join('; ')+'.':'',rs.prec?'At the first signs: '+T(rs.prec)+'.':'',rs.target?'If it happens: '+T(rs.target)+'.':'',rs.after?'Afterwards: '+T(rs.after)+'.':'',
     (pl.targets||[]).length?'Targets the plan addresses: '+pl.targets.map(t=>T(t.label)+(t.fn?' ('+T(t.fn)+')':'')).join('; ')+'.':'',ad.date?'Adopted by the team '+ad.date+(ad.notice?', prior written notice '+ad.notice:'')+(ad.start?', started '+ad.start:'')+'.':''].filter(Boolean).join(' ');
@@ -8137,7 +8155,7 @@ function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{}
     return {name:T(b.name),start:start!=null?hnNum(start)+' '+hnUnit(b.unit):'—',now:now!=null?hnNum(now)+' '+hnUnit(b.unit):'—',aim:b.aim!=null?hnNum(b.aim)+' '+hnUnit(b.unit)+(dir?' ('+hnT(dir)+')':''):'—',good};});
   const from=d.from||'',to=d.to||'';
   const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>i.parent==='yes').length;
-  const goals=[].concat((g.red||[]).map(x=>T(x.text||x)),(g.acq||[]).map(x=>T(x.text||x))).filter(Boolean);
+  const goals=gbGoalLines(g,T);
   return {first,who:T(home.name),email:T(home.email),lang:T(home.lang),interp:/^yes/i.test(T(home.interp)),school:T(p.site),bcba:T(p.bcba),rows,from,to,days:d.days||0,inc:inc.length,told,goals,
     review:{date:T(rv.date),text:T(rv.decisionText||rv.decision),next:T(rv.next)}};}
 function hnSheetHtml(P){const e=esc,was=n=>n===1?'was':'were';

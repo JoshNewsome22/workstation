@@ -2290,10 +2290,12 @@ addRed(); addAcq(); showPlan(); render();
    replacement); the picker adds objectives for the behaviors ticked. */
 window.__nbhFactsOut=function(){
   const strip=h=>String(h).replace(/<[^>]+>/g,'').replace(/&ldquo;|&rdquo;/g,'"').replace(/&amp;/g,'&');
+  /* v22.29 (review F467) what the objective's sentence still lacks: its gap markers ("[unit]"), so the case can say it is unfinished */
+  const gaps=h=>[...String(h).matchAll(/<span class="gap">\[([^\]<]*)\]<\/span>/g)].map(m=>m[1]);
   const red=$$('#redWrap .card').map(c=>idxOf(c,'red')).map(i=>{const g=n=>val('red['+i+'].'+n);if(!g('beh'))return null;
-    return {i,beh:g('beh'),dir:g('dir'),meas:g('meas'),cur:g('cur'),ml:g('ml'),tgt:g('tgt'),ctx:g('ctx'),crit:g('crit'),meth:g('meth'),date:g('date'),pair:g('pair'),text:strip(redSentence(i)),src:'GB-1'};}).filter(Boolean);
+    return {i,beh:g('beh'),dir:g('dir'),meas:g('meas'),cur:g('cur'),ml:g('ml'),tgt:g('tgt'),ctx:g('ctx'),crit:g('crit'),meth:g('meth'),date:g('date'),pair:g('pair'),text:strip(redSentence(i)),unfinished:gaps(redSentence(i)),src:'GB-1'};}).filter(Boolean);
   const acq=$$('#acqWrap .card').map(c=>idxOf(c,'acq')).map(i=>{const g=n=>val('acq['+i+'].'+n);if(!g('beh'))return null;
-    return {i,beh:g('beh'),cond:g('cond'),crit:g('crit'),n:g('n'),unit:g('unit'),meth:g('meth'),date:g('date'),pair:g('pair'),text:strip(acqSentence(i)),src:'GB-1'};}).filter(Boolean);
+    return {i,beh:g('beh'),cond:g('cond'),crit:g('crit'),n:g('n'),unit:g('unit'),meth:g('meth'),date:g('date'),pair:g('pair'),text:strip(acqSentence(i)),unfinished:gaps(acqSentence(i)),src:'GB-1'};}).filter(Boolean);
   return red.length||acq.length?{goals:{red,acq}}:null;
 };
 function nbhGbPlace(kind,fill){
