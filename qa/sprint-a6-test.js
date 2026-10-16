@@ -603,9 +603,12 @@ async function printSame(br){
         const buf=await p.pdf({path:dirs[which]+id+'-'+name+'.pdf',preferCSSPageSize:true,printBackground:true});counts[label+' '+which+' '+id+' '+name]=pages(buf);
         await p.evaluate(()=>window.dispatchEvent(new Event('afterprint')));await ctx.close();}
     }
-    let cmp=null;try{cmp=execFileSync('python3',[__dirname+'/compare-print.py',dirs.was,dirs.now],{encoding:'utf8'});}catch(e){cmp=null;}
+    /* v22.31 on a touch screen the touch sizes no longer reach paper (they made an iPad's printout larger than a computer's):
+       printed with touch, each form now prints exactly as it does with a mouse, which is what is compared */
+    const base=label==='touch'?OUT+'print/mouse-now/':dirs.was,than=label==='touch'?'with a mouse, now':'before this package ('+A6_BASE+')';
+    let cmp=null;try{cmp=execFileSync('python3',[__dirname+'/compare-print.py',base,dirs.now],{encoding:'utf8'});}catch(e){cmp=null;}
     if(cmp){const m=/identical: (\d+) of (\d+)/.exec(cmp);const same=!!m&&m[1]===m[2]&&m[2]==='6';
-      ok('print ('+label+'): the three forms print the same pages as before this package ('+A6_BASE+'), blank and simulated',same,cmp.trim().split('\n'));}
+      ok('print ('+label+'): the three forms print the same pages as '+than+', blank and simulated',same,cmp.trim().split('\n'));}
     else{const k=Object.keys(counts).filter(x=>/ was /.test(x));ok('print ('+label+'): the same number of pages as before this package (no PyMuPDF for a page-by-page comparison)',k.every(x=>counts[x]===counts[x.replace(' was ',' now ')]),counts);}
     console.log('print pages ('+label+')',JSON.stringify(counts));
   }

@@ -712,6 +712,24 @@ td input,td select{max-width:100%}
 .tb1-del{font:inherit;font-size:15px;line-height:1;padding:2px 7px;border:1px solid var(--rule-2);border-radius:3px;background:#fff;color:#8E2A2A;cursor:pointer;margin:0}
 .tb1-del:hover{background:var(--wash)}
 th.tb1-xh{width:34px}
+/* v22.31 on screen the Decision column has the room its choices need ("Target – single topography" showed as
+   "Target – si"): the columns of short answers give it room; paper keeps its widths */
+@media screen and (min-width:601px){
+  #candTbl th:nth-child(1){width:3%!important}
+  #candTbl thead th{-webkit-hyphens:auto;hyphens:auto}   /* "reinforce-ment?" may break, so the column is as narrow as its answers */
+  #candTbl th:nth-child(2){width:13%!important}
+  #candTbl th:nth-child(3){width:9%!important}
+  #candTbl th:nth-child(4){width:5%!important}
+  #candTbl th:nth-child(5){width:6%!important}
+  #candTbl th:nth-child(6){width:7%!important}
+  #candTbl th:nth-child(8){width:8%!important}
+  #candTbl th:nth-child(7){width:8%!important}
+  #candTbl th:nth-child(9){min-width:15em}
+  /* the boxes of the row draw their own small chevron, so the platform's arrow (wide on an iPad) takes none of their room */
+  #candTbl select{-webkit-appearance:none;appearance:none;padding-left:6px!important;padding-right:20px!important;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23254657' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 5px center;background-size:10px 7px}
+}
 #tb1BankHost{display:block}
 @media print{#tb1BankHost,#sendRow,#selFromCand,#selNote{display:none!important}}
 /* (v21.43) paper: no resize grip in the corner of a box */
@@ -2918,8 +2936,9 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 #viewSeg button[data-nbh-fill="part"]::after{background:linear-gradient(90deg,#e3b341 50%,transparent 50%);border-color:#e3b341}   /* v22.18 (review F493): half filled, so it reads without the colour */
 #viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
 #viewSeg button[data-nbh-fill="none"]::after{display:none}
-/* touch: on a device without a fine pointer, the small controls grow */
-@media (pointer:coarse){
+/* touch: on a device without a fine pointer, the small controls grow. v22.31 on screen only: on an iPad the rule held while
+   printing too, so every field, button and grid square printed finger-sized (Form SP-1's grid went to a page of its own) */
+@media screen and (pointer:coarse){
   .rowDel,.delRow,button.rowDel{font-size:22px!important;padding:8px 12px!important;min-width:44px!important;min-height:44px!important}
   td.nx,th.nx,table.grid.narr th.nx,table.grid.narr td.nx{width:48px!important}
   input[type="checkbox"],input[type="radio"]{width:22px!important;height:22px!important;min-width:22px!important}

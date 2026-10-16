@@ -508,6 +508,17 @@ td input,td select{max-width:100%}
 .sheet.slim thead th.namecell{vertical-align:middle;line-height:1.25;overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}
 .bnum{display:inline-flex;align-items:center;justify-content:center;min-width:17px;height:17px;border-radius:50%;color:#fff;font:700 10.5px/1 var(--nbh-sans);margin-right:5px;vertical-align:1px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .nmsub{display:block;font:400 11px/1.3 var(--nbh-sans);color:var(--ink-soft);margin-top:2px}
+.st-printqr{display:none}
+.st-prt{display:flex;gap:8px;align-items:center;font-size:14px;margin:8px 0 4px}.st-prt input{width:auto}
+@media print{
+  .st-printqr:not(:empty){display:block;margin-top:8px;break-inside:avoid;page-break-inside:avoid}
+  .st-pq-h{font:600 9pt/1.2 var(--sans,system-ui,sans-serif);margin:0 0 4px}
+  .st-pq-row{display:flex;flex-wrap:wrap;gap:8px 18px}
+  .st-pq{display:flex;gap:8px;align-items:center;width:3.5in}
+  .st-pq-c{width:1.3in;flex:none}
+  .st-pq-t{display:flex;flex-direction:column;gap:2px;font-size:8.5pt;line-height:1.3}
+  .st-pq-k{color:#54676f}
+}
 .sd-wrap{margin:12px 0 0;border:1px solid var(--rule);border-radius:3px;padding:10px 12px;background:#FBFCFC}
 .sd-wrap h4{margin:0 0 8px;font-family:var(--nbh-serif);font-size:14px;color:var(--ink)}
 .sd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 18px}
@@ -1706,6 +1717,7 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
         </table>
       </div>
       <div class="sheet-defs" id="sheetDefs"></div>
+      <div class="st-printqr" id="stPrintQr" aria-hidden="true"></div>
       <div class="dd-inc" id="ddInc"></div>
       <p class="hint no-print" style="margin-top:12px">
         <strong>Full phase change</strong> starts a new condition: the graph breaks the data path, draws a solid vertical line, and analyzes the new condition separately.
@@ -9320,7 +9332,7 @@ function stNorm(x){const o=x&&typeof x==="object"&&!Array.isArray(x)?x:{};
   const held=(Array.isArray(o.held)?o.held:[]).filter(e=>e&&typeof e==="object").slice(-300).map(e=>{const n=stEntryNorm(Object.assign({},e,{kind:"nbh-staff",form:"DD-1"}));if(!n)return null;
     const why={};if(e.why&&typeof e.why==="object")Object.keys(n.d).forEach(k=>{why[k]=Object.prototype.hasOwnProperty.call(ST_WHY,e.why[k])?e.why[k]:"gone";});
     return Object.assign(n,{at:stS(e.at,30),why,all:Object.prototype.hasOwnProperty.call(ST_WHY,e.all)?e.all:"",lab:e.lab===true});}).filter(e=>e&&(Object.keys(e.d).length||e.lab));
-  return {box,site:stS(o.site,300),page:stS(o.page,300),links,got:ids(o.got,/^r-\d+-[a-f0-9]{12}$/,3000),seen:ids(o.seen,/^[a-f0-9]{16,32}$/,5000),log,held};}
+  return {box,site:stS(o.site,300),page:stS(o.page,300),links,got:ids(o.got,/^r-\d+-[a-f0-9]{12}$/,3000),seen:ids(o.seen,/^[a-f0-9]{16,32}$/,5000),log,held,noPrintQr:o.noPrintQr===true};}
 const stEmpty=s=>!s.box&&!s.links.length&&!s.site&&!s.page&&!s.got.length&&!s.held.length;
 function stSt(){if(!S.staff||typeof S.staff!=="object"||Array.isArray(S.staff)||!Array.isArray(S.staff.links))S.staff=stNorm(S.staff);return S.staff;}
 function stClean(){const s=stNorm(S.staff);if(stEmpty(s))delete S.staff;else S.staff=s;}
@@ -9496,6 +9508,7 @@ function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const 
     <label class="field"><span>Settings to choose from (a comma between)</span><input id="stSets" autocomplete="off"></label>
     <div class="dd-actions" style="justify-content:flex-start"><button type="button" class="btn" id="stMake">Make the link</button><span class="hint" id="stMakeMsg" role="status" style="margin:0 0 0 8px"></span></div></div>
   <div class="st-links-w"><table class="st-links" id="stLinks"></table></div>
+  <label class="st-prt"><input type="checkbox" id="stPrtOn"> Print each working link\u2019s code under the printed data sheet, so staff can scan it from the sheet</label>
   <div class="dd-actions" style="justify-content:flex-start;flex-wrap:wrap"><button type="button" class="btn" id="stCollect">Collect now</button><button type="button" class="btn ghost" id="stPurge">Remove the collected entries from the site</button></div>
   <p class="st-line" id="stLine" role="status" aria-live="polite"></p>
   <div id="stHeld"></div>
@@ -9511,6 +9524,7 @@ function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const 
     const m=p.querySelector("#stMakeMsg");m.textContent="Making the link…";const r=await stMakeLink(p.querySelector("#stWho").value,ids,sets);
     if(r.err){m.textContent=r.err;m.classList.add("gs-bad");return;}m.classList.remove("gs-bad");m.textContent="Made: "+r.link.code+" for "+r.link.who+".";p.querySelector("#stWho").value="";stQr(r.link);});
   p.querySelector("#stCollect").addEventListener("click",()=>stCollect(false));
+  p.querySelector("#stPrtOn").addEventListener("change",e=>{const s=stSt();s.noPrintQr=!e.target.checked;gsEdited();});
   p.querySelector("#stPurge").addEventListener("click",async()=>{const s=stSt();if(!s.got.length)return;
     if(window.nbhUI&&nbhUI.confirm){if(!(await nbhUI.confirm("Remove the "+stPl(s.got.length,"collected entry","collected entries")+" from the site?\nThey stay in this file.",{ok:"Remove"})))return;}stPurge();});
   p.addEventListener("click",async e=>{const b=e.target.closest&&e.target.closest("button[data-sta]");if(!b)return;const s=stSt(),a=b.dataset.sta;
@@ -9524,6 +9538,16 @@ function stPanel(){let p=document.getElementById("ddStaff");if(p)return p;const 
     if(a==="stop"){l.off=!l.off;gsEdited();stPaint();stLine(l.off?"The link for "+l.who+" is stopped: what it sends now is held until you place it.":"The link for "+l.who+" is working again.");return;}});
   return p;}
 function stLine(t){const e=document.getElementById("stLine");if(e)e.textContent=t||"";}
+/* v22.31 the staff links' QR codes on the printed data sheet (and the blank week): one for each link that works (not
+   stopped), up to four, under the sheet, so the staff scan it from the paper in the room. Made as this form prints and
+   taken away after, so a copy of the page (the master print, a packet for the team) never carries them; not when
+   "Print each working link's code" is unticked. */
+function stPrtBox(){const pc=document.getElementById("stPrtOn"),s=S.staff;if(pc)pc.checked=!(s&&s.noPrintQr);}
+function stPrintPaint(clear){const el=document.getElementById("stPrintQr");if(!el)return;const s=S.staff,on=!clear&&!!(s&&Array.isArray(s.links)&&!s.noPrintQr);
+  const L=on?s.links.filter(l=>!l.off).map(l=>({l,u:stUrlOf(l)})).filter(x=>x.u).slice(0,4):[];
+  el.innerHTML=L.length?`<div class="st-pq-h">Record on a phone</div><div class="st-pq-row">${L.map(x=>`<div class="st-pq"><div class="st-pq-c">${ddQrSvg(x.u)}</div><div class="st-pq-t"><b>Scan to record: ${esc(x.l.who)}</b><span>Point the phone\u2019s camera at the code, tap the link, tap as it happens, and press Send today\u2019s data.</span><span class="st-pq-k">Code ${esc(x.l.code)}</span></div></div>`).join("")}</div>`:"";}
+window.addEventListener("beforeprint",()=>{try{stPrintPaint();}catch(e){}});
+window.addEventListener("afterprint",()=>{try{stPrintPaint(true);}catch(e){}});
 function stQrDlg(){let d=document.getElementById("dlgStQr");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog st-qr-dlg";d.id="dlgStQr";d.setAttribute("aria-labelledby","stQrT");
   d.innerHTML=`<h2 id="stQrT">Staff link</h2><p class="hint" id="stQrFor"></p><div class="st-qr" id="stQrBox"></div><p class="hint" id="stQrNote"></p>
   <label class="field"><span>The link</span><input id="stQrUrl" readonly spellcheck="false"></label>
@@ -9542,7 +9566,7 @@ function stHeldText(h){const s=stSt(),l=s.links.find(x=>x.code===h.c)||null,nm=t
   const part=(tid,p)=>{if("n" in p)return nm(tid)+" "+p.n;if("e" in p)return nm(tid)+" "+stPl(p.e.length,"episode");return nm(tid)+" "+p.p+" + of "+(p.p+p.m);};
   const ks=Object.keys(h.d),whys=[...new Set(ks.map(k=>h.why[k]))];
   return `<b>${esc((l&&l.who)||h.w||"A staff phone")} · ${esc(shortDay(h.date))}</b>: ${esc(ks.map(k=>part(k,h.d[k])).join(", ")||"the day’s marks")}. Held: ${whys.map(w=>esc(ST_WHY[w]||w)).join("; ")}${h.all==="sheet"||whys.indexOf("sheet")>=0?" (the sheet’s number for that day: "+esc(ks.filter(k=>h.why[k]==="sheet").map(k=>{const b=stBehFor(k,l),r=stRowFor(h.date,false);return (b?b.name:"")+" "+(r&&b?(r.values[b.id]===""||r.values[b.id]==null?"blank":r.values[b.id]):"");}).join(", "))+")":""}.`;}
-function stPaint(){const p=stPanel();if(!p)return;const s=S.staff&&Array.isArray(S.staff.links)?S.staff:stNorm(S.staff),u=stSite(),box=s.box;
+function stPaint(){const p=stPanel();if(!p)return;try{stPrtBox();}catch(e){}const s=S.staff&&Array.isArray(S.staff.links)?S.staff:stNorm(S.staff),u=stSite(),box=s.box;
   let t;if(!stCan())t="This browser cannot lock or unlock entries (no WebCrypto).";
   else if(!u)t="No reply box address yet: open the workstation from its website, or give the address under Reply box and page addresses.";
   else if(stReady())t=`Reply box at ${stHost(box.site)}: ${stPl(s.links.length,"link")}, ${stPl(s.seen.length,"entry","entries")} collected${s.held.length?", "+s.held.length+" held":""}${stAt?" · last looked "+gsWhen(new Date(stAt).toISOString()):""}. Collects when the form opens and every five minutes while it is open.`;
@@ -10388,8 +10412,9 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 #viewSeg button[data-nbh-fill="part"]::after{background:linear-gradient(90deg,#e3b341 50%,transparent 50%);border-color:#e3b341}   /* v22.18 (review F493): half filled, so it reads without the colour */
 #viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
 #viewSeg button[data-nbh-fill="none"]::after{display:none}
-/* touch: on a device without a fine pointer, the small controls grow */
-@media (pointer:coarse){
+/* touch: on a device without a fine pointer, the small controls grow. v22.31 on screen only: on an iPad the rule held while
+   printing too, so every field, button and grid square printed finger-sized (Form SP-1's grid went to a page of its own) */
+@media screen and (pointer:coarse){
   .rowDel,.delRow,button.rowDel{font-size:22px!important;padding:8px 12px!important;min-width:44px!important;min-height:44px!important}
   td.nx,th.nx,table.grid.narr th.nx,table.grid.narr td.nx{width:48px!important}
   input[type="checkbox"],input[type="radio"]{width:22px!important;height:22px!important;min-width:22px!important}

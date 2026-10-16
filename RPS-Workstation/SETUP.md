@@ -9941,6 +9941,25 @@ Checked by `qa/v2230-sis-read-test.js` (section 7).
   the reinforcer assessment, each label now sits above its box, as the newer blocks have it: beside the box, a long label
   wrapped to two lines and each box took what width its label left (a date showed as mm/dd/yy). Paper keeps the label
   beside the line.
+- **Printing on the iPad: no finger-sized boxes on paper.** The rule that makes every field, button and grid square
+  finger-sized on a touch screen also held while printing on the iPad, so printouts came out larger than designed. In Form
+  SP-1 every square of the scatterplot printed 40 px tall: the grid never fitted under the definitions and went to a
+  page of its own, and the citation to another (15 pages for three behaviors). The rule is now for the screen only, in
+  every form. Checked by `qa/v2231-sp1-print-test.js` (Chromium with touch, as on the iPad).
+- **Form SP-1: each data sheet on one page with its definitions.** On paper the definition, examples and non-examples
+  print whole, as text a size smaller (a box printed at its height on screen and cut a long one off), and the rows
+  leave room for the line Safari prints at the foot of every page. A long definition makes the rows shorter (down to
+  12 px); past that the grid runs over two pages with its headings repeated.
+- **Form TB-1: the Decision column shows its choice.** On screen the columns of short answers give the Decision column
+  room ("Target – single topography" showed as "Target – si"), and the boxes of the row draw a small arrow of their
+  own. Paper keeps its widths.
+- **Form DD-1: the staff links' QR codes on the printed data sheet.** Each staff link that is working (not stopped)
+  prints its QR code under the sheet (the blank week too), with who it is for and its link code, so staff scan it
+  from the paper, record on the phone and press Send today's data; up to four. They are made only as DD-1 prints, so
+  the master print and the packet for the team never carry them, and the screen never shows them. **Print each working
+  link's code under the printed data sheet** (Staff phones) turns them off. The code carries the student's initials
+  only, and what it sends is locked to this file; a lost sheet's link can be stopped. Checked by
+  `qa/v2231-dd1-qr-test.js`.
 - **Date boxes on the iPad as tall as the others.** Safari drew an empty date box shorter than the boxes beside it,
   with its label sitting high; every form's date and time boxes now keep the height of the rest.
 

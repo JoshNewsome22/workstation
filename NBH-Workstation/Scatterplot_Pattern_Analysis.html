@@ -587,6 +587,9 @@ html.sp-one .lg-slash{display:none}
   .sp-printed .bar{margin-bottom:9px}
   .sp-printed .figure{margin-bottom:12px}
   .sp-printed .cite{line-height:1.35}
+  /* v22.31 the definitions as text, whole, a size smaller than the sheet */
+  .sp-printed .defs .sp-dtext{white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:15px;padding:3px 7px;color:var(--ink)}
+  .sp-printed .defs .dlab{font-size:10px}
 }
 /* the Date line and the totals rows are labels, not intervals: they keep their
    own height rather than growing with the rows */
@@ -2049,7 +2052,10 @@ function rowHeight(nR, mode){
   const m = mode || "screen";
   if(m === "screen"){ spSplit = false; return Math.max(22, Math.min(34, Math.floor(560 / Math.max(1, nR)))); }
   /* a letter page less its margins: the packet's are deeper than the form's own */
-  const page = m === "packet" ? 937 : 964;
+  /* v22.31 Safari on an iPad or iPhone prints its own line (the address, the date, the page number) at the foot of every
+     page, inside the page: the sheet leaves room for it */
+  const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const page = (m === "packet" ? 937 : 964) - (ios && m !== "packet" ? 48 : 0);
   /* everything on a sheet that is not a row, as measured on paper with one-line
      entries: letterhead and band; identity fields, definitions and the code key
      (first sheet only); column headings, totals and the gap under the grid;
@@ -2057,7 +2063,7 @@ function rowHeight(nR, mode){
   const meta = state.meta || {}, one = oneLevel();
   const HEAD = 66 + 42, GRID = 53 + (one ? 24 : 48) + 8, FOOT = (one ? 29 : 52) + 61;
   let top = 81 + 103 + (state.cfg.codes ? 50 : 0);
-  ["definition","example","nonexample"].forEach(k => { top += (linesOf(meta[k], 92) - 1) * 20; });
+  ["definition","example","nonexample"].forEach(k => { top += (linesOf(meta[k], 96) - 1) * 15; });   /* v22.31 11 px text, 15 px lines */
   [["client","observer"],["week","setting"],["behavior","sheet"]].forEach(pr => {
     top += (Math.max(linesOf(meta[pr[0]], 38), linesOf(meta[pr[1]], 38)) - 1) * 20; });
   const multi = pageRanges().length > 1;
@@ -2102,6 +2108,10 @@ function staticClone(node){
     }else b.setAttribute("value", a.value);
   }
   clone.querySelectorAll(".noprint,.readout").forEach(e => e.remove());
+  /* v22.31 the definition, examples and non-examples print whole: a text box prints at the height it has on screen, so on
+     the narrower paper a long one was cut off after a line or two; on paper each is its text, a size smaller */
+  clone.querySelectorAll(".defs textarea").forEach(t => {
+    const d = document.createElement("div"); d.className = "sp-dtext"; d.textContent = t.textContent; t.replaceWith(d); });
   /* the code key is a key only when codes are in use; otherwise it printed
      as "A - not named, B - not named" under every sheet */
   if(!state.cfg.codes) clone.querySelectorAll(".codes").forEach(e => e.remove());
@@ -4057,8 +4067,9 @@ html.nbh-compact #nbhSaveQuick{display:inline-block}
 #viewSeg button[data-nbh-fill="part"]::after{background:linear-gradient(90deg,#e3b341 50%,transparent 50%);border-color:#e3b341}   /* v22.18 (review F493): half filled, so it reads without the colour */
 #viewSeg button[data-nbh-fill="done"]::after{background:#6fcf97;border-color:#6fcf97}
 #viewSeg button[data-nbh-fill="none"]::after{display:none}
-/* touch: on a device without a fine pointer, the small controls grow */
-@media (pointer:coarse){
+/* touch: on a device without a fine pointer, the small controls grow. v22.31 on screen only: on an iPad the rule held while
+   printing too, so every field, button and grid square printed finger-sized (Form SP-1's grid went to a page of its own) */
+@media screen and (pointer:coarse){
   .rowDel,.delRow,button.rowDel{font-size:22px!important;padding:8px 12px!important;min-width:44px!important;min-height:44px!important}
   td.nx,th.nx,table.grid.narr th.nx,table.grid.narr td.nx{width:48px!important}
   input[type="checkbox"],input[type="radio"]{width:22px!important;height:22px!important;min-width:22px!important}
