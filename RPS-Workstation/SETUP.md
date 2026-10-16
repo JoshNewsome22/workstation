@@ -9922,6 +9922,27 @@ Checked by `qa/v2230-sis-read-test.js` (section 7).
   noun (REC-ord). These lines are voiced again as re-CORD; the captions are unchanged ("record of how often" in IA-1
   stays the noun). A line in a walkthrough's `walk-script.json` can now carry `"phon"`: replacements in its phonemes
   that `make-narration.py` applies before voicing.
+- **A student's case saves and closes with Form RS-1 left out.** With the RBT Supervision Log open beside a student,
+  Save case (and Close case, which saves first) asked only Keep it in this case or Cancel, and Cancel stopped the save,
+  so the student could not be saved or closed without RS-1 going into the file. Now RS-1 with nothing entered in it is
+  left out and closed without a question; with entries it asks **Leave it out and save** (the case is saved without it,
+  and RS-1 is closed), **Keep it in this case**, or Cancel. To keep RS-1's entries apart, Cancel and press Save data in
+  RS-1 first. Checked by `qa/v2230-staff-save-test.js`.
+- **Form SP-1: Week of from a calendar.** A tap on the Week of box (on a laptop, the calendar mark at its end) opens
+  the calendar; the first day picked writes "October 12, 2026 – November 6, 2026" over the sheet's days (school days
+  when Mon–Fri is ticked in Tools) and dates the day columns. Columns already dated otherwise are asked about first
+  (Cancel changes only the Week of line). The box can still be typed in on a laptop; paper shows the line as before.
+  Checked by `qa/v2231-sp1-week-test.js`.
+- **Focus turns on and off without the wait.** The form on screen changes first, and the forms loaded out of sight
+  follow a moment later, one at a time (before, every one of them folded at once, and with six open the one in view
+  waited up to a quarter of a second, the iPad busy for half a second). The change fades in over a fifth of a second
+  instead of jumping (none when Reduce Motion is on).
+- **The student block at the top of a form, on screen.** In IC-1, EA-1, IA-1, MS-1, PA-1, RR-1, TB-1, TD-1, SP-1 and
+  the reinforcer assessment, each label now sits above its box, as the newer blocks have it: beside the box, a long label
+  wrapped to two lines and each box took what width its label left (a date showed as mm/dd/yy). Paper keeps the label
+  beside the line.
+- **Date boxes on the iPad as tall as the others.** Safari drew an empty date box shorter than the boxes beside it,
+  with its label sitting high; every form's date and time boxes now keep the height of the rest.
 
 ### v22.30: Form RS-1 holds several RBTs
 

@@ -7192,6 +7192,18 @@ select.nbh-fld.nbh-box.nbh-was-ul:not(.nbh-intd):not([multiple]):not([size]){pad
 .nbh-fld:disabled,.nbh-fld.nbh-box[readonly]{background-color:var(--nbh-shade);color:var(--nbh-muted)}
 input[type=checkbox],input[type=radio]{accent-color:var(--nbh-navy);cursor:pointer}
 input[type=checkbox]:focus-visible,input[type=radio]:focus-visible{outline:3px solid var(--nbh-focus);outline-offset:2px}
+/* v22.31 the student block at the top of a form (.ident, three columns) with each label above its box on screen, as the
+   newer blocks have it (.ident.c3): beside the box, a long label wrapped to two lines and each box took what width its
+   label left (a date cut to mm/dd/yy). Paper keeps the label beside the line. */
+.ident:not(.c1):not(.c3) > .f{flex-direction:column;align-items:stretch;justify-content:flex-end;gap:2px}   /* a label on two lines: the boxes of the row stay level */
+.ident:not(.c1):not(.c3) > .f > input:not([type=checkbox]):not([type=radio]),.ident:not(.c1):not(.c3) > .f > select{flex:0 0 auto;width:100%;min-width:0;box-sizing:border-box}
+.ident:not(.c1):not(.c3) > .f > label{white-space:normal;line-height:1.25}
+/* v22.31 a date or time box as tall as the boxes beside it on the iPad: Safari draws an empty one with no line of text in
+   it, so it came out shorter and a label beside it sat at its top */
+@supports (-webkit-touch-callout:none){
+  input.nbh-fld[type=date],input.nbh-fld[type=time],input.nbh-fld[type=month],input.nbh-fld[type=datetime-local]{-webkit-appearance:none;appearance:none}
+  input.nbh-fld[type=date]::-webkit-date-and-time-value,input.nbh-fld[type=time]::-webkit-date-and-time-value,input.nbh-fld[type=month]::-webkit-date-and-time-value,input.nbh-fld[type=datetime-local]::-webkit-date-and-time-value{min-height:1.25em;text-align:left}
+}
 label{cursor:default}
 
 /* ---- buttons: one family for the tools inside a sheet and the actions above it ---- */

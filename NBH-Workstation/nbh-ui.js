@@ -712,10 +712,19 @@
     paintBtn();
   }
   /* the user's own choice: kept on this device, and the workstation is told so its button and the other forms follow */
+  /* v22.31 the change eases in: the page (and the bar and the ring) fade up from part-way over a fifth of a second, so the
+     page does not jump from one look to the other. An animation of opacity only (nothing is moved, nothing marked, nothing
+     left behind), on the form in view only, and none for a reader who asks the system for less motion */
+  function ease(was){
+    if (ON === was || !D.body || printing || !R.clientHeight) return;
+    try { if (W.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) { return; }
+    var l = roots().filter(vis); if (ON) { if (bar) l.push(bar); if (ring) l.push(ring); }
+    l.forEach(function(e){ try { if (e.animate) e.animate([{ opacity: 0.35 }, { opacity: 1 }], { duration: 220, easing: 'ease-out' }); } catch (x) {} });
+  }
   function choose(v){
     v = !!v; store(v);
     if (framed) { try { W.parent.postMessage({ nbh: 'focus-set', on: v }, '*'); } catch (e) {} }
-    if (v) on('here'); else off();
+    var was = ON; if (v) on('here'); else off(); ease(was);
   }
   function paintBtn(){ if (tbtn) { tbtn.setAttribute('aria-pressed', String(ON)); tbtn.title = ON ? 'Focus is on: one part at a time. Press to show the whole page.' : 'Focus: one part of the form at a time, the next part opening as you finish one'; } }
   /* a form opened on its own: the switch in its toolbar, beside the view buttons */
@@ -827,7 +836,7 @@
   })();
   W.addEventListener('message', function(ev){
     var d = ev.data; if (!d || typeof d !== 'object') return;
-    if (d.nbh === 'focus' && ev.source === W.parent && framed) { if (d.on) on(d.here ? 'here' : ''); else off(); }
+    if (d.nbh === 'focus' && ev.source === W.parent && framed) { var was = ON; if (d.on) on(d.here ? 'here' : ''); else off(); if (d.here) ease(was); }
   });
   /* another tab of this device turned it on or off (a form inside the workstation hears it from the workstation instead) */
   W.addEventListener('storage', function(e){ if (e.key === KEY && !framed) { if (e.newValue === 'on') on(); else off(); } });

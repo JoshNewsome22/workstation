@@ -1755,6 +1755,21 @@ $('#closeForm').addEventListener('click',async()=>{
   $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';
   renderRail();if(typeof paintSave==='function')paintSave();
 });
+/* v22.31 a form taken out of the case without a question (a staff record left out of a student's case by Save case): as
+   Close, Remove from the case does, and the form viewed before it (or the list) is shown when it was on screen */
+function dropForm(id){
+  const fr=state.frames[id];if(fr)fr.remove();delete state.frames[id];delete state.status[id];delete state.pending[id];
+  state.caseOrder=(state.caseOrder||[]).filter(x=>x!==id);
+  if(state.mismatch)delete state.mismatch[id];if(state.whoIs)delete state.whoIs[id];if(state.details)delete state.details[id];
+  const was=state.split.includes(id)||state.cur===id,rest=state.split.filter(x=>x!==id);
+  state.seen=(state.seen||[]).filter(x=>x!==id);
+  if(was){state.split=[];if(state.cur===id){state.cur=null;clearTimeout(state.watch);}
+    const back=state.cur||rest[0]||(state.seen||[]).slice().reverse().find(x=>state.frames[x]&&!state.pending[x]);
+    if(back){openForm(back,true);if(rest.length>1)setSplit(rest);}
+    else{$('#blank').style.display='';document.body.classList.remove('has-form');setFull(false,true);railAtStart();
+      $('#crumbTitle').textContent='Nothing open';$('#crumbId').textContent='';$('#crumbStatus').textContent='';$('#crumbFile').textContent='';}}
+  renderRail();if(typeof paintSave==='function')paintSave();
+}
 /* v21.81 iPad memory: at most FRAME_CAP forms stay loaded; past that, the one viewed longest ago (never the one on screen or
    side by side) is put away: its work read, kept as the case holds a form not loaded yet, and filled again when opened */
 const FRAME_CAP=(()=>{try{const n=parseInt(localStorage.getItem('nbh.frames.cap'),10);return n>=3&&n<=60?n:8;}catch(e){return 8;}})();   /* 8; a device may keep more (nbh.frames.cap) */
@@ -4876,14 +4891,27 @@ async function writeCase(handle,text,name,type,copy){   /* v22.22 type: the file
    false when nothing was written, the person backed out, a form was left out, or an edit came while the file was
    being written. What it says and writes is the same as before. */
 async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}: Save case to a file; v22.22 {whole:true}: a case that opens on its own */
+  const p=packet();
+  /* v22.31 a staff record (Form RS-1) open beside a student's case. Nothing entered in it: it is left out of the case and
+     closed, without a question. Something entered: Leave it out (the case is saved without it and it is closed), Keep it in
+     this case, or Cancel. Before, the one question had only Keep and Cancel, and Cancel stopped the save, and with it Close
+     case, so a student's case could not be saved or closed without the supervision log in it. */
+  const staffIn0=caseIds().filter(id=>STAFF_ONLY[id]);
+  if(p.client&&staffIn0.length&&!state.staffAsked){
+    const work=staffIn0.filter(id=>{const t=state.status[id]||{},P=state.pending[id];return !!t.edited||!!(P&&P.status&&P.status.edited)||!!(P&&!P.away);});
+    let how='leave';
+    if(work.length){how=await wsUI.choose('Form '+staffIn0.join(', ')+' is a staff record (the RBTs\u2019 supervision), not part of '+p.client+'\u2019s case.',
+      [{v:'leave',label:'Leave it out and save',kind:'primary'},{v:'keep',label:'Keep it in this case'},{v:'',label:'Cancel'}],
+      'Leave it out: '+p.client+'\u2019s case is saved without it, and Form '+staffIn0[0]+' is closed; what was entered in it is not kept. To keep those entries, Cancel, press Save data in Form '+staffIn0[0]+' (a file of its own), then save the case again.\nKeep it in this case: it goes into this student\u2019s case file and wherever that file is kept or shared.');
+      if(!how)return false;}
+    if(how==='keep')state.staffAsked=true;
+    else{staffIn0.forEach(dropForm);
+      wsUI.toast('Form '+staffIn0.join(', ')+' was left out of '+p.client+'\u2019s case and closed.',{ms:7000});}
+  }
   const kept=Object.keys(state.pending),open=Object.keys(state.frames).filter(id=>!state.pending[id]);   /* v21.61 kept: written as the file holds them */
   if(!open.length&&!kept.length){alert('No form is open yet. A case file holds the forms you have open.');return false;}
-  const p=packet();
-  const staff=staffOnlyName(),staffIn=caseIds().filter(id=>STAFF_ONLY[id]);
+  const staff=staffOnlyName();
   if(!p.client&&!staff){if(!(await wsUI.confirm('Save the case without a student name?\nThe file will be named "case" and the cover will have no name on it.',{ok:'Save anyway'})))return false;}
-  if(p.client&&staffIn.length&&!state.staffAsked){
-    if(!(await wsUI.confirm('Form '+staffIn.join(', ')+' is a staff record (the RBTs\u2019 supervision), not part of '+p.client+'\u2019s case.\nSaved now, it goes into this student\u2019s case file and wherever that file is kept or shared. To keep it apart, Cancel, close the student (Close case), and save Form '+staffIn[0]+' on its own.',{ok:'Keep it in this case',cancel:'Cancel'})))return false;
-    state.staffAsked=true;}
   /* the one-file edition asks where to write before anything else: a browser
      shows the picker only while the click is still fresh. Once a file has been
      chosen, every later save in this session goes back into it without asking. */
@@ -8146,7 +8174,12 @@ function focusTell(fr,here){post(fr,{nbh:'focus',on:focusState,here:!!here});}
 function focusPaint(){const b=$('#focusBtn');if(!b)return;b.setAttribute('aria-pressed',String(focusState));b.title=focusState?'Focus is on: one part of the form at a time. Press to show whole pages again.':'Focus: one part of the form at a time, the next part opening as you finish one';}
 function focusSet(on,from){focusState=!!on;try{if(focusState)localStorage.setItem(FOCUSKEY,'on');else localStorage.removeItem(FOCUSKEY);}catch(e){}focusPaint();
   const shown=new Set([state.cur].concat(state.split||[]));
-  Object.entries(state.frames).forEach(([id,fr])=>{if(fr&&fr.contentWindow!==from)focusTell(fr,shown.has(id));});
+  /* v22.31 the form on screen first; the forms out of sight a moment later, one at a time, so the one in view changes at
+     once instead of waiting while every form loaded behind it folds or unfolds too */
+  clearTimeout(focusSet.t);const later=[];
+  Object.entries(state.frames).forEach(([id,fr])=>{if(!fr||fr.contentWindow===from)return;if(shown.has(id))focusTell(fr,true);else later.push(fr);});
+  const next=()=>{const fr=later.shift();if(!fr)return;if(fr.isConnected)focusTell(fr,false);focusSet.t=setTimeout(next,120);};
+  if(later.length)focusSet.t=setTimeout(next,450);
   say(focusState?'Focus is on: a form shows one part at a time, and Next at the foot of the form opens the next part.':'Focus is off: forms show whole pages.');}
 $('#focusBtn').addEventListener('click',()=>focusSet(!focusState));
 /* a form loading (opened, opened again, or loading quietly) hears the setting as it arrives */
