@@ -22,6 +22,9 @@ Lines whose text, voice and speed are unchanged keep their audio from the existi
 every line). A line voiced again with unchanged text, voice and speed must come out the same length as before (the
 walkthrough's timeline and its videos are fitted to it), or its old audio is kept and the script says so. With
 TK1_TTS_CACHE (the folder make-walk-video.py keeps its voiced lines in) a line voiced there is read from it, the same take.
+(v22.31) A line may carry "phon": [[from, to], ...], replacements in its phonemes, for a word the voice reads the wrong way
+(the verb "record" at the start of a sentence comes out as the noun, REC-ord): the text is turned into phonemes, each
+"from" (it must be there) becomes its "to", and the voice reads the phonemes. The caption keeps the text as it is.
 """
 import base64, glob, json, os, re, subprocess, sys, tempfile
 import numpy as np
@@ -55,26 +58,36 @@ def loudness(wav):
     return float(m[-1]) if m else None
 def chain(g):
     return 'volume=%.2fdB,alimiter=limit=0.8414:attack=5:release=50:level=false:latency=true' % g
-def take(text):
+def take(text, phon=None):
     """the line voiced (24 kHz, LEAD s of silence before and TAIL after): from make-walk-video.py's cache when it is there"""
     global k
-    if CACHE:
+    if CACHE and not phon:
         import hashlib
         p = os.path.join(CACHE, hashlib.sha1(json.dumps([text, voice, float(speed), LEAD, TAIL]).encode()).hexdigest()[:20] + '.wav')
         if os.path.exists(p):
             x, sr = sf.read(p, dtype='float32')
             return x, sr
     if k is None: k = Kokoro(os.path.join(TTS, 'model_quantized.onnx'), npz)
-    a, sr = k.create(text, voice=voice, speed=speed, lang='en-us')
+    if phon:
+        from kokoro_onnx.tokenizer import Tokenizer
+        ph = Tokenizer().phonemize(text, 'en-us')
+        for a_, b_ in phon:
+            if a_ not in ph: sys.exit(f'phon: {a_!r} is not in the phonemes of {text[:40]!r}: {ph}')
+            ph = ph.replace(a_, b_)
+        a, sr = k.create(ph, voice=voice, speed=speed, lang='en-us', is_phonemes=True)
+    else:
+        a, sr = k.create(text, voice=voice, speed=speed, lang='en-us')
     return np.concatenate([np.zeros(int(sr * LEAD), dtype=np.float32), a, np.zeros(int(sr * TAIL), dtype=np.float32)]), sr
 k = None
 lines = {}
 for ln in spec['lines']:
     lid, text = ln['id'], ln['text'].strip()
     prev = (old.get('lines') or {}).get(lid)
+    phon = ln.get('phon') or None
+    if prev and prev.get('p') != phon: prev = dict(prev, t=None)      # the phonemes changed: voice it again, its new length kept
     if prev and prev.get('t') == text and old.get('voice') == voice and old.get('speed') == speed and lid not in force:
         lines[lid] = prev; continue
-    a, sr = take(text)
+    a, sr = take(text, phon)
     d_new = round(len(a) / sr, 3)
     if prev and prev.get('t') == text and old.get('voice') == voice and old.get('speed') == speed and abs(float(prev.get('d', 0)) - d_new) > .0005:
         print(f'{lid:>14}  voiced again it is {d_new} s, not {prev.get("d")} s: the old audio is kept (the timeline is fitted to it)')
@@ -94,6 +107,7 @@ for ln in spec['lines']:
             g = clamp(g + LUFS - lm); enc(); lm = loudness(d + '/a.mp3')
         mp3 = open(d + '/a.mp3', 'rb').read()
     lines[lid] = {'t': text, 'd': d_new, 'a': 'data:audio/mpeg;base64,' + base64.b64encode(mp3).decode()}
+    if phon: lines[lid]['p'] = phon
     print(f'{lid:>14}  {lines[lid]["d"]:6.2f} s  {len(mp3)//1024:4d} KB  {g:+5.1f} dB  {"" if lm is None else "%.1f LUFS" % lm}  {text[:50]}')
 data = {'voice': voice, 'speed': speed, 'lines': lines}
 open(out_js, 'w', encoding='utf-8').write(

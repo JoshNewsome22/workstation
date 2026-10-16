@@ -9917,6 +9917,12 @@ for a 5-second repaint).
 
 Checked by `qa/v2230-sis-read-test.js` (section 7).
 
+- **"Record" said as the verb in the walkthroughs.** The voice read "Record the same way every day" (DD-1), "Record
+  each one here" and "record its outcome" (IA-1), and "record any access" and "Record problem behavior" (RA-1) as the
+  noun (REC-ord). These lines are voiced again as re-CORD; the captions are unchanged ("record of how often" in IA-1
+  stays the noun). A line in a walkthrough's `walk-script.json` can now carry `"phon"`: replacements in its phonemes
+  that `make-narration.py` applies before voicing.
+
 ### v22.30: Form RS-1 holds several RBTs
 
 - One RS-1 file now holds every RBT you supervise. A **Supervisee** bar at the top of every page lists them, each with
