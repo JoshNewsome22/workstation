@@ -1811,19 +1811,20 @@ $('#addDay').addEventListener('click',()=>{const m=month(curKey),st=S.setup,[y,m
   /* the next date after the last row (or the 1st) that has no row yet */
   let d=1;const lastRow=m.days.filter(x=>x.date).map(x=>+x.date.slice(8)).sort((a,b)=>b-a)[0];if(lastRow)d=lastRow+1;while(d<=lastDay(y,mo)&&have.has(iso(y,mo,d)))d++;
   m.days.push({id:uid(),date:d<=lastDay(y,mo)?iso(y,mo,d):'',start:st.day_start||'',end:st.day_end||'',brk:st.day_break||'',act:st.day_act||'',none:false});renderDays();renderComp();changed();});
-/* the usual days still missing are added with the usual hours; a day with no times takes the usual ones; a time
-   entered on a day is kept (only when every day already has times does it offer to set them all to the usual hours) */
+/* the usual days still missing are added with the usual hours; a day without both times takes the usual ones (a lone
+   start or end counts nothing, and is often the iPad's own: tapping an empty time box puts in the time of day); a day
+   with both times entered is kept (only when every day already has times does it offer to set them all to the usual hours) */
 $('#fillDays').addEventListener('click',async ()=>{const st=S.setup;
   if(!(st.days||[]).length||!(st.day_start&&st.day_end)){nbhUI.toast('Enter the usual start and end times and tick the usual days first (just above).',{kind:'warn'});const e=$(!st.day_start?'#mStart':!st.day_end?'#mEnd':'#mDayChips input');if(e)e.focus();return;}
   const m=month(curKey),n=fillMonth(curKey,true);let f=0;
   const live=m.days.filter(d=>!d.none);
-  live.forEach(d=>{if(!d.start&&!d.end){d.start=st.day_start;d.end=st.day_end;if(!d.brk)d.brk=st.day_break||'';if(!d.act)d.act=st.day_act||'';f++;}else if(!d.act&&st.day_act)d.act=st.day_act;});
+  live.forEach(d=>{if(!d.start||!d.end){d.start=st.day_start;d.end=st.day_end;if(!d.brk)d.brk=st.day_break||'';if(!d.act)d.act=st.day_act||'';f++;}else if(!d.act&&st.day_act)d.act=st.day_act;});
   const own=live.filter(d=>d.start!==st.day_start||d.end!==st.day_end||String(d.brk||'')!==String(st.day_break||''));
   if(!n&&!f&&own.length&&(await nbhUI.confirm('Every day of '+keyLabel(curKey)+' already has times.\nSet the '+own.length+' day'+(own.length===1?'':'s')+' with other times to the usual hours ('+fmtHM(st.day_start)+' to '+fmtHM(st.day_end)+')? The times entered on '+(own.length===1?'that day':'those days')+' are replaced.',{ok:'Use the usual hours'}))){
     own.forEach(d=>{d.start=st.day_start;d.end=st.day_end;d.brk=st.day_break||'';});f=own.length;}
   renderDays();renderComp();changed();
   const kept=n||f?live.filter(d=>d.start!==st.day_start||d.end!==st.day_end).length:0;
-  nbhUI.toast(n||f?[n?n+' day'+(n===1?'':'s')+' added':'',f?f+' day'+(f===1?'':'s')+' given the usual hours':'',kept?kept+' day'+(kept===1?'':'s')+' with their own times kept':''].filter(Boolean).join('; ')+'.':'Every usual day already has a row with the usual hours.',{kind:n||f?'ok':undefined});});
+  nbhUI.toast(n||f?[n?n+' day'+(n===1?'':'s')+' added':'',f?f+' day'+(f===1?'':'s')+' without both times given the usual hours':'',kept?kept+' day'+(kept===1?'':'s')+' with their own times kept':''].filter(Boolean).join('; ')+'.':'Every usual day already has a row with the usual hours.',{kind:n||f?'ok':undefined});});
 /* the RBT's latest contact (by date) in any month: what "Add a contact like the last one" starts from */
 function lastContact(){let L=null;Object.values(S.months).forEach(m=>(m.contacts||[]).forEach(c=>{if(!L||String(c.date||'')+String(c.start||'')>String(L.date||'')+String(L.start||''))L=c;}));return L;}
 function addContact(like){const m=month(curKey),t=todayISO(),sp=S.sups.find(s=>s.name&&credOK(s.cred)&&isSupRole(s))||S.sups.find(s=>s.name);

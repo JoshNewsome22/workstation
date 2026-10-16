@@ -9929,11 +9929,15 @@ for a 5-second repaint).
   It is one record for all your RBTs, not a card per RBT. It is not counted as a student, and it is left out of the
   monthly caseload summary, Log it now and the weeks-unsaved clean-up; its due dates (recertification, goals) show on
   the card and in the calendar. Checked by `qa/v2230-staff-caseload-test.js`.
+- **Dictate's strip goes away when stopped.** After Stop, the dark strip at the foot of the screen stayed up with the
+  last words heard (its own style overrode "hidden"); listening had stopped, but it looked as if it had not. Fixed in
+  every form and the shell. Checked by `qa/v2194-dictate-test.js`.
 - The simulation now has two simulated RBTs (Jordan Lee and Casey Morgan, both "(simulated)").
 - **The RBT's usual hours on the Month page.** A box above the service days holds the RBT's usual start and end times,
   minutes not in services, primary intervention and usual days (the same setting as on the Setup page; a change in one
   shows in the other). **Fill the usual days and times** adds the usual days still missing with those hours and gives
-  them to any day without times; a time you changed on a day is kept. Only when every day already has times does it
+  them to any day without both times (a lone start such as 4:56 am, which the iPad puts in when an empty time box is
+  tapped, counts nothing and is replaced); a day with both times entered is kept. Only when every day already has times does it
   offer to set them all back to the usual hours. Every day's times stay editable in its row.
 - **Faster contacts.** **Add a contact like the last one** starts a contact with the supervisor, format, way, client
   and the boxes ticked of the RBT's latest contact (the date, times, feedback and checklist are new). Under the times,
@@ -9948,6 +9952,26 @@ for a 5-second repaint).
   GB-1 objective to be named as unfinished in the IEP packet.
 
 Checked by `qa/rs1-test.js` (sections 8, 9 and 10).
+
+**Read a document on the student information system's pages, as screenshots from the iPad come.** Tried on real pages
+(read on this computer only, nothing kept), these went wrong and are put right:
+
+- **Demographics:** the side menu beside the fields was read into them (a preferred name of "504 Info", an ELL status
+  from "ESOL"), and the date of birth and the sex were missed (the recognizer reads a required field's asterisk as a
+  quotation mark). Race and ethnicity, asked as Yes/No questions, gave "Hispanic or"; now "White; not Hispanic or
+  Latino" (the races answered Yes, and the Hispanic or Latino answer). The badge's name and ID are found a few lines
+  down, past the page title and photo.
+- **Addresses & Contacts scrolled down** (the top cards' headings off the screen) gave "Nothing recognisable"; now
+  every card is read by where it stands, icons after a name or relationship are passed over, and a contact kept under
+  a group home's name reads "Person (Group Home)".
+- **Edit Contact and the address window** (not editable, so their boxes are pale grey): the recognizer passed over the
+  pale text and read only labels. Such a window is now read a second time with every shade darkened; the name boxes
+  without labels, the relationship, phone, email and address are read. An address window's street, city, state and
+  ZIP go to the contacts listed at it.
+- **Schedule:** the info and arrow icons between cells were read as "© [" into what a teacher teaches, and the
+  homeroom teacher came out as Other; now the homeroom teacher is the classroom teacher, with no stray marks.
+
+Checked by `qa/v2230-sis-read-test.js` (simulated pages laid out like the real ones) and the earlier reader tests.
 
 ### v22.29: four small fixes from the review
 

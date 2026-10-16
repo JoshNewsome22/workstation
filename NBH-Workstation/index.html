@@ -6491,7 +6491,7 @@ const nbhDocRead=(()=>{
     {k:'bcba',label:'BCBA',al:'case bcba|bcba name|behavior analyst|bcba',kind:'text',to:['bar:bcba']},
     {k:'holder',label:'Rights held by',al:'educational rights(?: held by| holder)?|rights (?:held by|holder)|parental rights',kind:'holder',to:['DM-1:r.holder']},
     /* labels read so that their values are not taken for another field's; nothing is placed from them */
-    {k:'skip',label:'',al:'parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship|former or maiden name|maiden name|former name|suffix|original enter grade|enter grade|entry grade|military family student|grandmother|grandfather|aunt|uncle|sibling|brother|sister|stepmother|stepfather|custody contact|custody alert|resident status|residence county|location of birth|country of birth|security pin|student pin|marital status|survey date',kind:'skip',to:[]}
+    {k:'skip',label:'',al:'former or maiden(?: name)?|maiden name|suffix|location of birth|country of birth|birth date verification|date entered united(?: states)?(?: school)?|resident status|residence county|proof of residence|has custody alert|custody alert|first custody contact|second custody contact|parent/guardian(?: name)?|parent / guardian(?: name)?|parent name|guardian name|mother(?:\'s|\u2019s)? name|father(?:\'s|\u2019s)? name|mother|father|guardian|parent|emergency contact|contact name|contact|phone(?: number)?|telephone|cell|email|address|zip|city|case manager|nurse|examiner|evaluator|author|prepared by|signature|date|age|relationship|former or maiden name|maiden name|former name|suffix|original enter grade|enter grade|entry grade|military family student|grandmother|grandfather|aunt|uncle|sibling|brother|sister|stepmother|stepfather|custody contact|custody alert|resident status|residence county|location of birth|country of birth|security pin|student pin|marital status|survey date',kind:'skip',to:[]}
   ];
   const BY={};F.forEach(f=>{BY[f.k]=f;});
   /* every alias, longest first, so that "student id number" wins over "student id" and "student"; a space is any run of
@@ -6499,7 +6499,7 @@ const nbhDocRead=(()=>{
   const topSplit=al=>{const out=[];let d=0,cur='';for(const c of al){if(c==='(')d++;else if(c===')')d--;if(c==='|'&&!d){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;};
   const alts=[];F.forEach(f=>topSplit(f.al).forEach(a=>alts.push({a,k:f.k,re:new RegExp('^(?:'+a.replace(/ /g,'[ \\t]+')+')$','i')})));
   alts.sort((x,y)=>y.a.length-x.a.length);
-  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;?\\u2013\\u2014-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
+  const LBL=new RegExp('(^|[\\s(\\[\\u2022\\u00b7*|,;?\\u2013\\u2014\\u201c\\u201d"-])('+alts.map(x=>x.a.replace(/ /g,'[ \\t]+')).join('|')+')(?![a-z0-9])([ \\t]*[:\\uff1a=;][ \\t]*|[ \\t]*[\\-\\u2013\\u2014][ \\t]+|[ \\t]{2,}|[ \\t]+|$)','ig');
   const keyOf=s=>{const t=s.replace(/\s+/g,' ');for(const x of alts){if(x.re.test(t))return x.k;}return 'skip';};
   const STRICT={date:/^(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}|\d{4}-\d{2}-\d{2}|[A-Za-z]{3,9}\.? \d{1,2},? \d{4})/,grade:/^(\d{1,2}(?:st|nd|rd|th)?|k|kg|pk|pre-?k|kindergarten)(?![a-z0-9])/i,
     id:/^[A-Z]?\d[\dA-Z\-]{3,}$/i,sex:/^(m|f|male|female|boy|girl)$/i,yesno:/^(y|yes|n|no|x)$/i,matrix:/^25[1-5]$/,
@@ -6553,7 +6553,7 @@ const nbhDocRead=(()=>{
       case 'date':{const d=toISO(v);return d?{value:d,ok:true}:{value:v,ok:false,note:'not read as a date'};}
       case 'grade':{const g=grade(v);return g?{value:g,ok:true}:{value:v,ok:false,note:'not one of the grades'};}
       case 'sex':{const s=first(v,SEX);return s?{value:s,ok:true}:{value:v,ok:false,note:'not Male or Female'};}
-      case 'yesno':{const s=first(v,YN);return s?{value:s,ok:true}:{value:v,ok:false,note:'not Yes or No'};}
+      case 'yesno':{const s=first(v,YN);return s?{value:s,ok:true}:{value:'',ok:false};}   /* v22.30 not answered: nothing (a side menu's "504 Info") */
       case 'ell':{const s=first(v,ELL);return s?{value:s,ok:true}:{value:v,ok:false,note:'not an ELL status'};}
       case 'interp':{const s=first(v,INTERP);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the choices'};}
       case 'elig':{const s=first(v,ELIG);return s?{value:s,ok:true}:{value:v,ok:false,note:'not one of the eligibilities'};}
@@ -6592,14 +6592,22 @@ const nbhDocRead=(()=>{
     const re=STRICT[f&&f.kind];if(!re)return false;
     return re.test(next);
   }
+  /* v22.30 what a screenshot of a student information system adds to its lines: the info and arrow icons read as
+     "\u00a9", "\u00ae", "\u00a5" and the like, the "?" help marks between a label and the next, a quotation mark for a required
+     field's asterisk, and the page's side menu ("Child Safety", "504 Info", ...) read at the head of the lines beside it */
+  const JUNK=/[\u00a9\u00ae\u20ac\u00a3\u00a5\u00a2\u00a7\u2122]/g;
+  const SIDE=/^(?:\[\s*[A-Za-z0-9]{1,3}\s*[\]|]\s*|[A-Z]{1,3}\s+)?(?:primary info|child safety|504 info|aice summary|academic history|addresses (?:&|and) contacts|adult ed|alternative ed|applicant|athletics|behavior|career academies|choice options|classified|comments log|dop|demographics|ese|esol|elementary report card|enrollment|fees and fines|form responses|filter fields\.*)(?=[ \t]{2,}|$)/i;
   function lines(text){
-    return String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').split('\n').map(l=>l.replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
+    let L=String(text||'').replace(/\r/g,'').replace(/\t/g,'  ').replace(/[|\u2502]/g,'  ').replace(/[\u00a0]/g,' ').replace(JUNK,'  ').split('\n')
+      .map(l=>l.replace(/[\u201c\u201d"](?=[A-Za-z])/g,'').replace(/(^|[ \t]{2,})\?(?=[ \t]{2,}|$)/g,'$1').replace(/[ \t]+$/,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
+    if(L.filter(l=>SIDE.test(l.trim())).length>=4)L=L.map(l=>l.trim().replace(SIDE,'').replace(/^[ \t]*[\u2022\u00b7*?]\s*/,''));
+    return L;
   }
   function parse(text,cols){
     const L=lines(text),found={},order=[],used=new Set();
     /* v22.25 an Edit Contact dialog's First Name, Last Name and Language are the contact's, not the student's: the
        student's details are read only from above it */
-    const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\s*:?\s*$/i.test(l));
+    const dlg=L.findIndex(l=>/^\s*(?:edit|add|new) contact\b(?:\s*:?\s*$|\s+you\b)/i.test(l));
     /* v22.27 nor from a Schedule's or an Enrollment's table (its headings are labels, its cells not the student's details) */
     const en=enrollment(L),sc=schedule(L),end=Math.min(dlg<0?L.length:dlg,en?en.at:L.length,sc?sc.at:L.length);
     for(let i=0;i<end;i++){
@@ -6629,16 +6637,27 @@ const nbhDocRead=(()=>{
     else if(found.first||found.last){const full=((found.first||{}).value||'')+' '+((found.last||{}).value||'');found.name={k:'name',label:'Student',to:['bar:client'],value:full.trim(),raw:full.trim(),seen:((found.first||found.last).seen),ok:true,first:(found.first||{}).value||'',last:(found.last||{}).value||''};order.unshift('name');}
     /* v22.25 a page with no labels for them still names its student in the system's badge ("Rivera, Mateo" over "4471823 - 03") */
     const bd=badge(L);
-    if(bd&&!found.name){const n=splitName(bd.name);found.name={k:'name',label:'Student',to:BY.name.to.slice(),value:n.full,raw:bd.name,seen:bd.name+' / '+L[bd.line+1].trim(),line:bd.line,str:1,ok:true,first:n.first,last:n.last,given:n.given};order.unshift('name');}
-    if(bd&&!found.sid){found.sid={k:'sid',label:'Student ID',to:BY.sid.to.slice(),value:bd.sid,raw:bd.sid,seen:L[bd.line+1].trim(),line:bd.line+1,str:1,ok:true};order.splice(order.indexOf('name')+1,0,'sid');}
+    if(bd&&!found.name){const n=splitName(bd.name);found.name={k:'name',label:'Student',to:BY.name.to.slice(),value:n.full,raw:bd.name,seen:bd.name+' / '+L[bd.idLine].trim(),line:bd.line,str:1,ok:true,first:n.first,last:n.last,given:n.given};order.unshift('name');}
+    if(bd&&!found.sid){found.sid={k:'sid',label:'Student ID',to:BY.sid.to.slice(),value:bd.sid,raw:bd.sid,seen:L[bd.idLine].trim(),line:bd.idLine,str:1,ok:true};order.splice(order.indexOf('name')+1,0,'sid');}
     /* v22.27 the Enrollment and Schedule pages: the school now, its grade and date, the schools before; the homeroom */
     const add=(k,value,raw,seen)=>{if(found[k]||!value)return;const f=BY[k],sh=shape(f,raw);if(!sh.value)return;found[k]=Object.assign({k,label:f.label,to:f.to.slice(),raw,seen:String(seen||'').slice(0,160),str:1},sh);order.push(k);};
     if(en&&en.now){add('school',en.now.school,en.now.school,en.seen);add('grade',en.now.grade,en.now.grade,en.seen);add('enroll',en.now.from,en.now.from,en.seen);}
     if(en&&en.prior){add('prior',en.prior,en.prior,'Enrollment: '+en.n+(en.n===1?' school':' schools')+' before');if(found.prior)found.prior.value=en.prior.slice(0,300);}
     if(sc&&sc.room)add('room',sc.room,sc.room,'Schedule: the homeroom');
-    if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.line+1].trim());
+    if(bd&&bd.grade&&!found.grade)add('grade',bd.grade,bd.grade,L[bd.idLine].trim());
+    /* v22.30 race and ethnicity asked one question each ("Ethnicity: Hispanic or Latino  No", "Race: White  Yes"), or the
+       one code ("Single Ethnicity  W - White"): the races answered Yes, and whether Hispanic or Latino */
+    {const RC=[[/^hispanic/,'H'],[/^white/,'White'],[/^black/,'Black or African American'],[/^asian/,'Asian'],[/^american indian/,'American Indian or Alaska Native'],[/^native hawaiian/,'Native Hawaiian or Other Pacific Islander']];
+      const yes=[],seen=[];let hisp='';
+      for(let i=0;i<end;i++){const re=/\b(?:ethnicity|race)\s*:\s*([A-Za-z][A-Za-z ,]*?)[ ,]*[ \t]+(yes|ves|yos|no|n0)(?![a-z])/gi;let m;
+        while((m=re.exec(L[i]))){const w=m[1].toLowerCase().trim(),a=/^y|^v/i.test(m[2]),r=RC.find(x=>x[0].test(w));if(!r)continue;seen.push(m[0].trim());
+          if(r[1]==='H')hisp=a?'yes':'no';else if(a&&!yes.includes(r[1]))yes.push(r[1]);}}
+      let v='';
+      if(yes.length||hisp)v=yes.join(', ')+(hisp==='yes'?(yes.length?'; ':'')+'Hispanic or Latino':hisp==='no'&&yes.length?'; not Hispanic or Latino':'');
+      if(!v){const sl=L.slice(0,end).map(l=>l.match(/single ethnicity[ \t]+(?:[A-Z][ \t]*)?[-\u2013][ \t]*([A-Za-z][A-Za-z ]{2,40}?)(?:[ \t]{2,}|$)/i)).find(Boolean);if(sl){v=cap(sl[1].trim().replace(/\b[a-z]/g,c=>c.toUpperCase()));seen.push(sl[0].trim());}}
+      if(v){if(!found.eth)order.push('eth');found.eth={k:'eth',label:BY.eth.label,to:BY.eth.to.slice(),raw:v,value:v,seen:seen.join(' / ').slice(0,160),str:3,ok:true};}}
     const fields=order.map(k=>found[k]);
-    return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
+    return {fields,behaviors:behaviors(L.slice(0,end)),lines:L.length,contacts:contacts(cols||text,text),student:bd,team:sc?sc.team:[],dropped:sc?sc.dropped:0};
   }
   /* target behaviors in a plan: "Target behavior 1: Aggression", "Behavior: Hitting – any instance of ...", a
      Definition line after; a replacement behavior keeps its kind */
@@ -6678,11 +6697,14 @@ const nbhDocRead=(()=>{
     [/^(?:(?:biological|birth|adoptive) )?(?:mother|mom|madre)$/,'Mother'],[/^(?:(?:biological|birth|adoptive) )?(?:father|dad|padre)$/,'Father'],
     [/god ?(?:mother|father|parent)|padrino|madrina|friend|neighbou?r/,'Family friend'],[/brother|sister|sibling/,'Adult sibling'],
     [/aunt|uncle|cousin|niece|nephew|relative|in-law|\bt[ií][ao]\b|\bprim[ao]\b/,'Other relative'],
-    [/case ?manager|case ?worker|\bdcf\b|social worker|agency/,'Case manager (agency)'],
+    [/case ?manager|case ?worker|\bdcf\b|social worker|agency/,'Case manager (agency)'],[/group home|residential|facility/,'Other'],
     [/\baide\b|nanny|baby-?sitter|\bsitter\b|care ?giver|day ?care|provider|\bnurse\b|^other$/,'Other']];
   const RELWORD=/^(?:parent|parent\/guardian|guardian)$/;
   /* a relationship as the record words it ("Grandmother", "Home Health Aide"): a short line of words */
-  const relOf=s=>{const t=String(s||'').toLowerCase().replace(/\s+/g,' ').trim();if(!t||t.length>32||!/^[a-záéíóúñ '\/\-]+$/.test(t))return null;
+  /* v22.30 the icons after a name or a relationship ("Aunt  \u2709 \u26a0", read as "= /\\ &" or "=X A &&"), and a lone mark
+     inside a name ("Ortiz, :  Carmen") */
+  const deIcon=s=>String(s||'').replace(/(^|\s)[^\w\s(),'\u2019.\-]{1,3}(?=\s|$)/g,'$1').replace(/(?:\s+(?:\S*[^A-Za-z\s'\u2019.,)]\S*|[A-Za-z]|[a-z]{2,3}))+\s*$/,'').replace(/\s+/g,' ').trim();
+  const relOf=s=>{s=deIcon(String(s||'').split(/[ \t]{2,}/)[0].replace(/\s*[-\u2013\u2014:]\s*\d.*$/,''));const t=s.toLowerCase().replace(/\s+/g,' ').trim();if(!t||t.length>32||!/^[a-záéíóúñ '\/\-]+$/.test(t))return null;
     for(const r of RELS){if(r[0].test(t))return {rel:r[1],raw:cap(String(s).trim())};}return RELWORD.test(t)?{rel:'',raw:cap(String(s).trim())}:null;};
   const PH=/\(?\b(\d{3})\)?[\s.\-]{0,3}(\d{3})[\s.\-]{0,3}(\d{4})\b/g;
   const phone=m=>'('+m[1]+') '+m[2]+'-'+m[3];
@@ -6690,7 +6712,7 @@ const nbhDocRead=(()=>{
   const NAMEF=/^([A-Z][a-z'’\-]+(?: [A-Z]\.?)?(?: [A-Z][A-Za-z'’\-]+){1,2})$/;
   const STREET=/^\d+[A-Za-z]?\s+(?=.*[A-Za-z]{2})/,UNIT=/^(?:apt|apartment|unit|ste|suite|lot|bldg|building|#)\.?\s*\S+$/i,CITY=/^[A-Za-z][A-Za-z .'\-]+,\s*[A-Z]{2}\.?\s+\d{5}(?:-\d{4})?$/;
   const EMAIL=/[\w.+\-]+@[\w\-]+(?:\.[\w\-]+)+/;
-  const HEAD=/^(?:contact\s*#\s*(\d{1,2})|(?:mailing |home |physical |residence )?address(?:\s*#?\s*\d)?|(edit|add|new) contact)\s*:?$/i;
+  const HEAD=/^(?:contact\s*#\s*(\d{1,2})|(?:mailing |home |physical |residence )?address(?:\s*#?\s*\d)?|(edit|add|new) contact(?:\s+you\b.*)?)\s*:?$/i;
   const STOP=/^(?:linked users|no records found|demographic|enrollment|schedule|attendance|save|cancel|delete)\b/i;
   /* phones in a card's lines: a number the card's narrow cell broke after the dash ("(561) 555-" over "0170") is joined */
   function phonesIn(T){
@@ -6706,10 +6728,14 @@ const nbhDocRead=(()=>{
     if(!a.length){if(STREET.test(s)&&!PH1.test(s))a.push(s);continue;}
     if(UNIT.test(s)||CITY.test(s)||/^[A-Za-z][A-Za-z .'\-]+,\s*[A-Z]{2}\b/.test(s)){a.push(s);if(CITY.test(s))break;}else break;}
     return a.join(', ').replace(/\s+/g,' ');};
-  const nameOf=s=>{const t=String(s||'').replace(/\s+/g,' ').trim();if(NAMEC.test(t)||NAMEF.test(t)){const n=splitName(t);return n.last?(n.first+' '+n.last).trim():'';}return '';};
-  function contacts(text){
+  /* v22.30 a contact kept under an agency's name ("Sunrise Group Home, Dana Lee"): the person, with the agency after */
+  const ORG=/\b(?:center|centre|home|homes|agency|services|group|inc|llc|foundation|house|care|facility|residence)\b/i;
+  const nameOf=s=>{const t=deIcon(s);if(NAMEC.test(t)||NAMEF.test(t)){const n=splitName(t);return n.last?(n.first+' '+n.last).trim():'';}
+    const o=t.match(/^([A-Z][A-Za-z'\u2019&.\-]*(?: [A-Za-z'\u2019&.\-]+){1,5}),\s*([A-Z][a-z'\u2019\-]+(?: [A-Z][a-z'\u2019\-]+){1,2})$/);
+    if(o&&ORG.test(o[1]))return o[2]+' ('+cap(o[1])+')';return '';};
+  function contacts(text,page){
     const L=lines(text).map(l=>l.trim()),cards=[];let cur=null;
-    L.forEach(l=>{const m=l.match(HEAD);if(m){cur={head:l,n:m[1]?+m[1]:0,dlg:!!m[2],T:[]};cards.push(cur);return;}if(STOP.test(l)){cur=null;return;}if(cur&&l)cur.T.push(l);});
+    L.forEach(l=>{const m=l.replace(/^[^A-Za-z#]+(?=contact|address)/i,'').match(HEAD);if(m){cur={head:l,n:m[1]?+m[1]:0,dlg:!!m[2],T:[]};cards.push(cur);return;}if(STOP.test(l)){cur=null;return;}if(cur&&l)cur.T.push(l);});
     const out=[];
     const put=c=>{if(!c.name)return;const same=out.find(o=>(c.n&&o.n===c.n)||o.name.toLowerCase()===c.name.toLowerCase());
       if(same){Object.keys(c).forEach(k=>{if(c[k]&&!same[k])same[k]=c[k];});return;}out.push(c);};
@@ -6721,6 +6747,15 @@ const nbhDocRead=(()=>{
         for(let i=0;i<T.length;i++){const segs=T[i].split(/\s{2,}/),ks=segs.map(keyOf2);
           if(ks.every(Boolean)&&i+1<T.length){const nx=T[i+1].split(/\s{2,}/);if(!nx.map(keyOf2).some(Boolean)){if(nx.length===segs.length)ks.forEach((k,j)=>{if(k!=='-'&&!V[k])V[k]=nx[j].trim();});else if(segs.length===1&&ks[0]!=='-'&&!V[ks[0]])V[ks[0]]=T[i+1].trim();i++;continue;}}
           segs.forEach(s=>{const m=s.match(/^([A-Za-z' \-]{3,24}):\s*(.+)$/);if(m){const k=keyOf2(m[1]);if(k&&k!=='-'&&!V[k])V[k]=m[2].trim();}});}
+        if(!V.name&&!V.first&&!V.last){const PHD=/^(?:title\b.*|first name|middle name|last name|suffix|nickname)$/i;
+          /* the name boxes side by side under the heading (Title, First, Middle, Last; an empty one shows its pale
+             placeholder, or nothing), the panel beside them ("Options") left out */
+          const SIDEW=/^(?:options|custody|emergency|pick ?up|hide contact.*|contacts?)$/i;
+          for(let i=0;i<Math.min(4,T.length);i++){const sg=T[i].split(/[ \t]{2,}/).map(x=>x.trim()).filter(x=>x&&!SIDEW.test(x));
+            const nm2=sg.filter(x=>!PHD.test(x));if(nm2.length<2||nm2.length>4||!nm2.every(x=>/^[A-Z][A-Za-z'\u2019.\- ]{0,40}$/.test(x)&&!/\d|@/.test(x)))continue;
+            V.first=nm2[0];V.last=nm2.length>1?nm2[nm2.length-1]:'';if(nm2.length>2)V.middle=nm2.slice(1,-1).join(' ');
+            if(!V.rel){let c0='';for(let j=i+1;j<Math.min(i+6,T.length);j++){const t2=T[j].split(/[ \t]{2,}/)[0].trim();if(!t2||SIDEW.test(t2)||/^e-?mail$/i.test(t2)||EMAIL.test(t2))continue;if(relOf(t2)){c0=t2;break;}if(!c0)c0=t2;}V.rel=c0;}break;}}
+        if(V.last&&V.first&&(ORG.test(V.last)||(V.middle&&/\s/.test(V.last))))V.name=(V.first+(V.middle?' '+V.middle:''))+' ('+cap(V.last)+')';   /* an agency kept as the last name */
         const nm=V.name||((V.first||'')+' '+(V.last||'')).trim(),r=relOf(V.rel),ph=phonesIn(T),em=(V.email||T.join(' ')).match(EMAIL);
         put({n:0,name:nm?(NAMEC.test(nm)?nameOf(nm):nm):'',rel:r?r.rel:'',relRaw:r?r.raw:(V.rel||''),phone:(ph[0]||{}).p||'',phone2:(ph[1]||{}).p||'',email:em?em[0]:'',addr:V.addr||addrOf(T),lang:V.lang||'',seen:cd.head+': '+T.slice(0,4).join(' / ')});
         return;
@@ -6730,22 +6765,33 @@ const nbhDocRead=(()=>{
         if(!nm)return;
         let r=null;for(let i=T.length-1;i>at;i--){r=relOf(T[i]);if(r)break;}
         const ph=phonesIn(T),em=T.join(' ').match(EMAIL),ad=/^\(?no address\)?$/i.test(T[at+1]||'')?'':addrOf(T.slice(at+1,(i=>i<0?T.length:i)(T.findIndex(l=>/^contact details/i.test(l)))));
-        put({n:cd.n,name:nm,rel:r?r.rel:'',relRaw:r?r.raw:'',phone:(ph[0]||{}).p||'',phone2:(ph[1]||{}).p||'',email:em?em[0]:'',addr:ad,lang:'',seen:'Contact #'+cd.n+': '+T.slice(0,2).join(' / ')});
+        put({n:cd.n,name:nm,rel:r?r.rel:'',relRaw:r?r.raw:'',phone:(ph[0]||{}).p||'',phone2:(ph[1]||{}).p||'',email:em?em[0]:'',addr:ad,lang:'',seen:(cd.n>=90?'Contact card':'Contact #'+cd.n)+': '+T.slice(0,2).join(' / ')});
         return;
       }
       /* an address card: the address, its phone, and the contacts who live there */
-      const k=T.findIndex(l=>/^contacts? at this address/i.test(l));if(k<0)return;
+      const k=T.findIndex(l=>/^contacts?\s+at\s+this\s+(?:[.,:;]\s+)?address/i.test(l));if(k<0)return;
       const ad=addrOf(T.slice(0,k)),ph=phonesIn(T.slice(0,k));
-      for(let i=k+1;i<T.length;i++){const m=T[i].match(/^#\s*(\d{1,2})\s*[\-–—]\s*(.+)$/);if(!m)continue;const nm=nameOf(m[2]);if(!nm)continue;
+      for(let i=k+1;i<T.length;i++){const m=T[i].match(/^#\s*(\d{1,2})\s*[\-–—]?\s*(.+)$/);if(!m)continue;const nm=nameOf(m[2]);if(!nm)continue;   /* v22.30 the dash and the icons after the name may be read apart */
         const r=relOf(T[i+1]||'');
         put({n:+m[1],name:nm,rel:r?r.rel:'',relRaw:r?r.raw:'',phone:(ph[0]||{}).p||'',phone2:'',email:'',addr:ad,lang:'',seen:'Address card: '+T[i]});}
     });
     out.forEach(c=>{c.note=c.relRaw&&c.relRaw.toLowerCase()!==String(c.rel).toLowerCase()?'Listed as '+c.relRaw:'';});
+    /* v22.30 the address of an address's own window ("Physical Address": the street, then city, state and ZIP in their
+       boxes) for the contacts listed at it */
+    if(page&&/physical address/i.test(page)&&/contacts? at this address/i.test(page)){const P=lines(page).map(l=>l.trim()),k=P.findIndex(l=>/^physical address/i.test(l));
+      let a='';for(let i=k+1;i>0&&i<Math.min(k+8,P.length);i++){const s0=P[i].split(/[ \t]{2,}/)[0];if(STREET.test(s0)&&!PH1.test(s0)){a=s0;   /* the city, state and ZIP a line or a few below, in their own boxes or as one */
+        for(let j=i+1;j<Math.min(i+6,P.length);j++){const c=P[j].split(/[ \t]{2,}/).map(x=>x.trim());
+          if(c.length>=3&&/^[A-Z][A-Za-z .'\-]+$/.test(c[0])&&/^[A-Z]{2}$/.test(c[1])&&/^\d{5}/.test(c[2])){a+=', '+c[0]+', '+c[1]+' '+c[2].slice(0,5);break;}if(CITY.test(c[0])){a+=', '+c[0];break;}}break;}}
+      if(a)out.forEach(c=>{if(!c.addr)c.addr=a;});}
+    out.forEach(c=>{if(c.n>=90)c.n=0;});
     return out.sort((a,b)=>(a.n||99)-(b.n||99));
   }
   /* the student the page belongs to, from the student information system's badge: "Rivera, Mateo" over "4471823 - 03" */
-  function badge(L){for(let i=0;i<Math.min(8,L.length-1);i++){const a=L[i].split(/\s{2,}/).map(x=>x.replace(/^[^A-Za-z]+|[^A-Za-z.]+$/g,'').replace(/\s+[vV]$/,'').trim()).find(x=>NAMEC.test(x)),b=L[i+1].split(/\s{2,}/).map(x=>x.trim()).find(x=>/^\d{5,10}\s*[-–]\s*(?:\d{1,2}|KG|PK)\b/.test(x));
-    if(a&&b){const m=b.match(/^(\d{5,10})\s*[-–]\s*(\d{1,2}|KG|PK)\b/);return {name:a,sid:m[1],grade:m[2],line:i};}}return null;}
+  /* v22.30 the badge's close button read as "x" before the name and its menu arrow as "v" after; its ID a line or three
+     below, past the page title and the photo */
+  function badge(L){for(let i=0;i<Math.min(10,L.length-1);i++){const a=L[i].split(/\s{2,}/).map(x=>x.replace(/^[^A-Za-z]+|[^A-Za-z.]+$/g,'').replace(/^[xX]\s+/,'').replace(/\s+[vV]$/,'').trim()).find(x=>NAMEC.test(x));if(!a)continue;
+    for(let j=i+1;j<=i+4&&j<L.length;j++){const b=L[j].split(/\s{2,}/).map(x=>x.trim().replace(/^[A-Za-z]{1,3}\s+(?=\d)/,'')).find(x=>/^\d{5,10}\s*[-–]\s*(?:\d{1,2}|KG|PK)\b/.test(x));
+      if(b){const m=b.match(/^(\d{5,10})\s*[-–]\s*(\d{1,2}|KG|PK)\b/);return {name:a,sid:m[1],grade:m[2],line:i,idLine:j};}}}return null;}
   /* v22.27 a student information system's Schedule page: each class's row (Period, Term, Subject, Course, "Section -
      Teacher (seats)", Days, Room, Enrolled, Dropped). A class dropped is left out. The teachers become Form DM-1's team:
      the homeroom teacher the classroom teacher (with the classes they teach and the room), a therapy's teacher its
@@ -6761,9 +6807,9 @@ const nbhDocRead=(()=>{
   function schedule(L){
     const h=L.findIndex(l=>/\bperiod\b/i.test(l)&&/\bcourse\b/i.test(l));if(h<0)return null;
     const rows=[];
-    for(let i=h+1;i<L.length&&i<h+60;i++){const l=L[i].replace(/[▼▾]/g,' ');const m=l.match(TEACH);if(!m)continue;
+    for(let i=h+1;i<L.length&&i<h+60;i++){const l=L[i].replace(/[▼▾@]/g,'  ').replace(/'?\u00a5\|?/g,'  ').replace(/\[(?=[A-Za-z])/g,'  ').replace(/[\[\]]/g,'  ');const m=l.match(TEACH);if(!m)continue;
       const before=l.slice(0,m.index),after=l.slice(m.index+m[0].length);
-      const segs=before.split(/\s{2,}/).map(x=>x.replace(/(?:\s*[vV~=@|]+)+$/,'').replace(/^[\[\]\s|1Il]+(?=[A-Z])/,'').trim()).filter(x=>x&&!/^[\[\]|1Il]+$/.test(x)&&!/^[=~\-_|.,:;—–]+$/.test(x));
+      const segs=before.split(/\s{2,}/).map(x=>x.replace(/(?:\s*[vV~=@|]+)+$/,'').replace(/^[\[\]\s|1Il]+(?=[A-Z])/,'').replace(/^[A-Z]{1,2}\s+(?=(?:period|homeroom|therapy)\b)/i,'').trim()).filter(x=>x&&!/^[\[\]|1Il]+$/.test(x)&&!/^[=~\-_|.,:;—–]+$/.test(x)&&(x.match(/[A-Za-z]/g)||[]).length>=3);
       const course=courseName(segs.length?segs[segs.length-1].replace(/^.*?\b(?:Grade|Courses)\s*[vV]?\s+(?=[A-Z])/,''):''),period=(segs[0]||'').replace(/[vV]+$/,'').trim();
       const dm=after.match(/(?:^|\s)([MTWHFR]{1,6})[vV]?(?=\s|$)/),rm=after.match(/\b(\d{4,5}[A-Z]{0,2})\b/),
         span=rm?after.slice(rm.index+rm[0].length).split(/[A-Za-z]/)[0]:'',dt=span.match(/\d{1,2}\/\d{1,2}\/\d{4}/g)||[];
@@ -6773,14 +6819,14 @@ const nbhDocRead=(()=>{
     live.forEach(r=>{let t=byT.find(x=>x.name===r.teacher);if(!t){t={name:r.teacher,rows:[]};byT.push(t);}t.rows.push(r);});
     const team=byT.map(t=>{
       const all=t.rows.map(r=>r.course+' '+r.period).join(' ');let kind=null;for(const k of KIND){if(k[0].test(all)){kind=k;break;}}
-      const home=t.rows.find(r=>/homeroom/i.test(r.period+' '+r.course)),rooms=[...new Set(t.rows.map(r=>r.room).filter(Boolean))];
+      const home=t.rows.find(r=>/homeroom|\bhmrm\b|\d{4}hmrm/i.test(r.period+' '+r.course+' '+r.seen)),rooms=[...new Set(t.rows.map(r=>r.room).filter(Boolean))];
       const what=[...new Set(t.rows.map(r=>/homeroom/i.test(r.course)?'Homeroom':r.course).filter(Boolean))].join(', ');
       const dd=[...new Set(t.rows.map(r=>days(r.days)).filter(Boolean))].join('; '),since=t.rows.map(r=>r.from).filter(Boolean).sort((a,b)=>toISO(a)<toISO(b)?-1:1)[0]||'';
       const now=new Date(),today=iso(now.getFullYear(),now.getMonth()+1,now.getDate());   /* the local date, not the world clock's */
       const sinceTxt=since&&toISO(since)>today?', from '+since:since?', since '+since:'';
       return {name:t.name,role:home?'Classroom teacher':kind?kind[1]:'Other',inv:(what+(dd?', '+dd:'')+(rooms.length?', room '+rooms.join(', '):'')+sinceTxt).slice(0,200),
         svc:kind&&kind[2]>=0?kind[2]:-1,svcFreq:kind&&kind[2]>=0?(dd==='daily'?'Daily':dd?'Weekly ('+dd+')':''):'',seen:'Schedule: '+t.rows.length+(t.rows.length===1?' class':' classes')};});
-    const hr=team.find(t=>t.role==='Classroom teacher'),hrRow=live.find(r=>/homeroom/i.test(r.period+' '+r.course));
+    const hr=team.find(t=>t.role==='Classroom teacher'),hrRow=live.find(r=>/homeroom|hmrm/i.test(r.period+' '+r.course+' '+r.seen));
     return {at:h,team,dropped:rows.length-live.length,room:hr?(hrRow&&hrRow.room?'Room '+hrRow.room+', ':'')+hr.name:''};
   }
   /* v22.27 the Enrollment page: one row a school and year (Year, School, Grade Level, Enrollment Date, Enrollment Code, Drop
@@ -6801,7 +6847,7 @@ const nbhDocRead=(()=>{
     past.sort((a,b)=>toISO(a.from)<toISO(b.from)?1:-1);
     return {at:h,now,prior:past.map(p=>p.school+' ('+p.from+(p.to?'–'+p.to:'')+')').join('; '),n:past.length,seen:now?now.seen:rows[0].seen};
   }
-  return {parse,contacts,schedule,enrollment,toISO,grade,splitName,fields:F};
+  return {parse,contacts,schedule,enrollment,toISO,grade,splitName,relOf,fields:F};
 })();
 
 /* ---- the dialog ---- */
@@ -6887,11 +6933,24 @@ async function drOcr(canvas,what){
       logger:m=>{if(m&&m.status==='recognizing text'&&DR.what)drProg('Reading '+DR.what+'\u2026 '+Math.round((m.progress||0)*100)+'%');}});
   }
   DR.what=what;drProg('Reading '+what+'\u2026');
-  const r=await DR.worker.recognize(canvas,{},{text:true,blocks:true});
+  let r=await DR.worker.recognize(canvas,{},{text:true,blocks:true});
+  /* v22.30 a window whose boxes cannot be edited (a student information system's Edit Contact or address window) shows
+     their contents in pale grey, which the recognizer passes over, reading only the labels: such a page is read again
+     with every shade darkened, and that reading is kept */
+  const t1=drLinesOfOcr(r&&r.data)||(r&&r.data&&r.data.text)||'';
+  if(/edit contact|do not have permission to edit|physical address|mailing address/i.test(t1)){
+    drProg('Reading '+what+' again, for the pale text\u2026');
+    try{const r2=await DR.worker.recognize(drDarken(canvas),{},{text:true,blocks:true});if(r2&&r2.data)r=r2;}catch(e){}}
   DR.what='';
   DR.cols=(DR.cols?DR.cols+'\n\n':'')+drCardsOfOcr(r&&r.data);
   return drLinesOfOcr(r&&r.data)||(r&&r.data&&r.data.text)||'';
 }
+/* the picture in grey with its shades stretched: pale grey text (and anything darker) becomes black, the pale tints of
+   rows and boxes white */
+function drDarken(src){const c=document.createElement('canvas');c.width=src.width;c.height=src.height;const g=c.getContext('2d');g.drawImage(src,0,0);
+  const im=g.getImageData(0,0,c.width,c.height),d=im.data;
+  for(let i=0;i<d.length;i+=4){const l=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2],v=l>=235?255:l<=150?0:Math.round((l-150)*3);d[i]=d[i+1]=d[i+2]=v;}
+  g.putImageData(im,0,0);return c;}
 /* the recognizer's words with their places: a gap wider than two letters between two words on a line is a column break
    (a label's cell and its value's, a value and the next label), kept as a double space for the matcher, as a PDF's is */
 function drLinesOfOcr(data){
@@ -6909,22 +6968,43 @@ function drLinesOfOcr(data){
    the page has no such cards. */
 function drCardsOfOcr(data){
   const blocks=data&&data.blocks;if(!Array.isArray(blocks)||!blocks.length)return '';
-  const segs=[];
+  const words=[],segs=[];
   blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>{const ws=(l.words||[]).filter(w=>w&&w.text&&w.bbox).sort((a,b)=>a.bbox.x0-b.bbox.x0);let sg=null,prev=null;
-    ws.forEach(w=>{const cw=prev?Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2):0;
+    ws.forEach(w=>{words.push(w);const cw=prev?Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2):0;
       if(!sg||w.bbox.x0-prev.bbox.x1>2.2*cw){sg={x0:w.bbox.x0,x1:w.bbox.x1,y0:w.bbox.y0,y1:w.bbox.y1,t:w.text};segs.push(sg);}else{sg.t+=' '+w.text;sg.x1=w.bbox.x1;sg.y0=Math.min(sg.y0,w.bbox.y0);sg.y1=Math.max(sg.y1,w.bbox.y1);}prev=w;});})));
-  const heads=segs.filter(g=>/^(?:contact\s*#\s*\d{1,2}|address)$/i.test(g.t.trim())).sort((a,b)=>a.y0-b.y0);
-  if(heads.length<2)return '';
+  /* v22.30 a card's lines are made from its own words (a line of the picture can run across two cards with too narrow a
+     gap between them to be a column break), and the recognizer's marks before a heading ("& Contact #7") are passed over */
+  const lineOf=(x0,x1,y0,y1)=>{const mine=words.filter(w=>w.bbox.x0>=x0&&w.bbox.x0<x1&&w.bbox.y0>=y0&&w.bbox.y0<y1).sort((a,b)=>a.bbox.y0-b.bbox.y0||a.bbox.x0-b.bbox.x0);
+    const ls=[];mine.forEach(w=>{const h=w.bbox.y1-w.bbox.y0,last=ls[ls.length-1];if(last&&Math.abs(last.y-w.bbox.y0)<h*0.6)last.w.push(w);else ls.push({y:w.bbox.y0,w:[w]});});
+    return ls.map(l=>{l.w.sort((a,b)=>a.bbox.x0-b.bbox.x0);let t='',prev=null;l.w.forEach(w=>{if(prev){const cw=Math.max(4,((prev.bbox.x1-prev.bbox.x0)/Math.max(1,prev.text.length)+(w.bbox.x1-w.bbox.x0)/Math.max(1,w.text.length))/2);t+=w.bbox.x0-prev.bbox.x1>2.2*cw?'  ':' ';}t+=w.text;prev=w;});return t;});};
+  const HD=/^(?:contact\s*#\s*\d{1,2}|address)$/i,clean=t=>t.trim().replace(/^[^A-Za-z#]+(?=contact|address)/i,'');
+  const heads=segs.filter(g=>HD.test(clean(g.t))).sort((a,b)=>a.y0-b.y0);
   const rows=[];heads.forEach(h=>{const r=rows.find(r=>Math.abs(r.y-h.y0)<Math.max(8,h.y1-h.y0));if(r)r.h.push(h);else rows.push({y:h.y0,h:[h]});});
-  if(!rows.some(r=>r.h.length>1))return '';   /* one card to a row reads down already */
-  const cards=[];
-  rows.forEach((r,ri)=>{r.h.sort((a,b)=>a.x0-b.x0);const tol=Math.max(6,(r.h[0].y1-r.h[0].y0));
-    const yEnd=ri+1<rows.length?rows[ri+1].y-tol/2:(ri?r.y+(r.y-rows[ri-1].y)*1.1:Infinity);
-    r.h.forEach((h,ci)=>{const x0=h.x0-tol,x1=ci+1<r.h.length?r.h[ci+1].x0-tol:Infinity;
-      const mine=segs.filter(g=>g!==h&&g.y0>=h.y0-tol/2&&g.y0<yEnd&&g.x0>=x0&&g.x0<x1).sort((a,b)=>a.y0-b.y0||a.x0-b.x0);
-      const ls=[];mine.forEach(g=>{const last=ls[ls.length-1];if(last&&Math.abs(last.y-g.y0)<(g.y1-g.y0)*0.6)last.t+='  '+g.t;else ls.push({y:g.y0,t:g.t});});
-      cards.push([h.t.trim()].concat(ls.map(x=>x.t)).join('\n'));});});
-  return cards.join('\n\n');
+  if(heads.length>=2&&rows.some(r=>r.h.length>1)){
+    const cards=[];
+    rows.forEach((r,ri)=>{r.h.sort((a,b)=>a.x0-b.x0);const tol=Math.max(6,(r.h[0].y1-r.h[0].y0));
+      const yEnd=ri+1<rows.length?rows[ri+1].y-tol/2:(ri?r.y+(r.y-rows[ri-1].y)*1.1:Infinity);
+      r.h.forEach((h,ci)=>{const x0=h.x0-tol,x1=ci+1<r.h.length?r.h[ci+1].x0-tol:Infinity;
+        const ls=lineOf(x0,x1,h.y1-1,yEnd);cards.push([clean(h.t)].concat(ls).join('\n'));});});
+    return cards.join('\n\n');
+  }
+  /* v22.30 the page scrolled so that the top row's headings are gone: the cards' columns are found from what cards hold
+     (an address, "Contacts at this Address", "Contact Details:", "(No Address)", a "Last, First" name), each
+     column read down and cut into cards at a heading or after the relationship at a card's foot; a card without its
+     heading is named by what it holds */
+  const ANC=/^(?:\d+[A-Za-z]?\s+\S.*|[A-Za-z .'\-]+,\s*[A-Z]{2}\.?\s+\d{5}.*|contacts? at this address|contact details:?|\(?no address\)?|#\s*\d{1,2}\s*[-\u2013\u2014].*|[A-Z][A-Za-z'\u2019\-]+,\s*[A-Z][A-Za-z'\u2019\-]+.*)$/i;   /* a phone is not one: a contact's table puts it mid-card */
+  const anc=segs.filter(g=>ANC.test(clean(g.t))&&!/[a-z]{3,}\.(?:com|org)/i.test(g.t)).sort((a,b)=>a.x0-b.x0);if(anc.length<4)return '';
+  const W=Math.max(...words.map(w=>w.bbox.x1)),gap=W*0.06,cl=[];anc.forEach(g=>{const c=cl[cl.length-1];if(c&&g.x0-c.x<gap){c.n++;}else cl.push({x:g.x0,n:1});});
+  const cols=cl.filter(c=>c.n>=2);if(cols.length<2)return '';
+  const y0=Math.min(...anc.map(g=>g.y0))-4,stop=segs.find(g=>/^linked (?:users|students)\b/i.test(clean(g.t))&&g.y0>y0),y1=stop?stop.y0-2:Infinity;
+  const rel=window.nbhDocRead&&nbhDocRead.relOf,cards=[];let k=0;
+  cols.forEach((c,ci)=>{const tol=gap/3,ls=lineOf(c.x-tol,ci+1<cols.length?cols[ci+1].x-tol:Infinity,y0,y1);let cur=[];
+    const end=()=>{if(!cur.length)return;const T=cur.slice();cur=[];
+      if(HD.test(clean(T[0]))){T[0]=clean(T[0]);cards.push(T.join('\n'));return;}
+      if(T.some(l=>/^contacts?\s+at\s+this\s+(?:[.,:;]\s+)?address/i.test(l.trim())))cards.push(['Address'].concat(T).join('\n'));
+      else if(T.slice(0,3).some(l=>/^[A-Z][A-Za-z'\u2019\-]+,\s*[A-Z]/.test(l.trim())))cards.push(['Contact #'+(90+(k++))].concat(T).join('\n'));};
+    ls.forEach(l=>{const t=l.trim();if(!t)return;if(HD.test(clean(t))){end();cur.push(t);return;}cur.push(t);if(rel&&rel(t)&&cur.length>2)end();});end();});
+  return cards.length?cards.join('\n\n'):'';
 }
 function drShow(text,from,cols){
   DR.text=text;const res=DR.res=nbhDocRead.parse(text,cols);

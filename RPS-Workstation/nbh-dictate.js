@@ -134,6 +134,7 @@
     '#nbhDict .tx i{font-style:normal;opacity:.75}' +
     '#nbhDict button{flex:0 0 auto;min-width:44px;min-height:36px;padding:0 12px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:transparent;color:#fff;font:inherit;font-weight:600;cursor:pointer}' +
     '#nbhDict button:hover{background:rgba(255,255,255,.12)}' +
+    '#nbhDict[hidden]{display:none!important}' +   /* v22.30 the strip's display:flex had kept it on screen after Stop */
     '@media print{#nbhDict{display:none}}';
   function box(){
     if (S.box) return S.box;

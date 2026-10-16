@@ -254,10 +254,12 @@ print(json.dumps(o))`]).toString());
   ok('9 Fill adds every weekday of October 2026 with the usual hours',f9.map(x=>x[0]).join()===wd10.join()&&f9.every(x=>x[1]==='08:00'&&x[2]==='14:30'&&x[3]==='30'&&x[4]==='Data collection'),f9.slice(0,3));
   const ids9=await page.evaluate(()=>month('2026-10').days.map(d=>d.id));
   await page.fill('#d_'+ids9[0]+'_end','12:00');await page.fill('#d_'+ids9[1]+'_start','');await page.fill('#d_'+ids9[1]+'_end','');await sleep(100);
+  /* a lone start (the iPad puts the time of day in a time box when it is tapped), as seen on an iPad */
+  await page.fill('#d_'+ids9[2]+'_start','04:56');await page.fill('#d_'+ids9[2]+'_end','');await sleep(100);
   ok('9 a day\u2019s times can be changed in its row',(await page.textContent('#h_'+ids9[0])).trim()==='3.50');
   await page.click('#fillDays');await sleep(300);
-  const g9=await page.evaluate(ids9=>ids9.slice(0,2).map(i=>{const d=month('2026-10').days.find(x=>x.id===i);return d.start+'-'+d.end;}),ids9);
-  ok('9 Fill gives the usual hours to the day without times and keeps the day changed by hand',g9[0]==='08:00-12:00'&&g9[1]==='08:00-14:30',g9);
+  const g9=await page.evaluate(ids9=>ids9.slice(0,3).map(i=>{const d=month('2026-10').days.find(x=>x.id===i);return d.start+'-'+d.end;}),ids9);
+  ok('9 Fill gives the usual hours to the day without times and to the day with only a start, and keeps the day changed by hand',g9[0]==='08:00-12:00'&&g9[1]==='08:00-14:30'&&g9[2]==='08:00-14:30',g9);
   await page.click('#fillDays');await sleep(500);
   ok('9 with every day already timed, Fill offers to set them all to the usual hours (accepted here)',await page.evaluate(i=>month('2026-10').days.find(x=>x.id===i).end==='14:30',ids9[0]));
   ok('9 no page errors with the usual hours',!log.some(x=>x.type==='pageerror'),log);

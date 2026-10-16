@@ -57,8 +57,8 @@ async function mkWav(br){   /* one narration clip, decoded and resampled to 16 k
     const exp=words(wav.text),got=words(heard),hit=got.filter(w=>exp.includes(w)).length;
     ok('6 the words said reach the box ('+hit+' of '+got.length+' heard are the clip’s, which has '+exp.length+')',got.length>=10&&hit>=got.length*0.8&&/^[A-Z]/.test(heard),{heard,text:wav.text});
     await page.click('#nbhDictBtn');await sleep(400);
-    const off=await page.evaluate(()=>({on:nbhDictate.active(),pressed:document.getElementById('nbhDictBtn').getAttribute('aria-pressed'),strip:!!(document.getElementById('nbhDict')&&!document.getElementById('nbhDict').hidden)}));
-    ok('7 pressed again, it stops: the switch off, the strip gone',!off.on&&off.pressed==='false'&&!off.strip,off);
+    const off=await page.evaluate(()=>({on:nbhDictate.active(),pressed:document.getElementById('nbhDictBtn').getAttribute('aria-pressed'),strip:!!(document.getElementById('nbhDict')&&!document.getElementById('nbhDict').hidden),shown:!!(document.getElementById('nbhDict')&&getComputedStyle(document.getElementById('nbhDict')).display!=='none')}));
+    ok('7 pressed again, it stops: the switch off, the strip gone (v22.30: gone from the screen too, not only marked hidden)',!off.on&&off.pressed==='false'&&!off.strip&&!off.shown,off);
     ok('8 no page errors',!errs.length,errs.slice(0,3));
     await ctx.close();}
   /* ---- 3. the Log it now sheet's Dictate ---- */
