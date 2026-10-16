@@ -644,7 +644,13 @@ body.dd-week-on #tab-data > :not(#ddWeekWrap){display:none!important}
   .sheet.slim thead tr.entry th:last-child{display:table-cell}
   .sheet.slim thead th.fx-act{display:none}
   .sheet.slim tbody td.col-phase .po{white-space:normal;line-height:1.2;padding:3px 2px;font-size:8.5px}
+  /* v22.32 one column for the phase change and the condition on paper: the phase's own column steps aside, and its kind
+     (full or conditional) is written small above the condition's name */
+  #dataTable.slim .col-phase,#dataTable.slim col.c-phase{display:none!important}
+  #dataTable.slim td.col-label .dd-pph:not(:empty){display:block;font-size:7.5px;font-weight:600;line-height:1.1;padding:2px 3px 0;color:#3a4a52}
+  .sheet.slim tbody td.col-date .pdate{font-size:9.5px}
 }
+.dd-pph{display:none}
 .keycell h5{margin:0 0 5px;font-family:var(--nbh-serif);font-size:13px;color:var(--ink);font-weight:700}
 .cell-flag{background:#FAEDED !important;box-shadow:inset 0 0 0 1px #C98A8A}
 .sheet tbody td > input.is-default{color:#5B6770;font-style:italic}
@@ -2900,7 +2906,7 @@ function renderData(){
     <th class="col-obs fixh" rowspan="3">Obs.<br>min</th>
     ${bands}
     <th class="col-phase fixh" rowspan="3">Phase change</th>
-    <th class="col-label fixh" rowspan="3">Condition name or event</th>
+    <th class="col-label fixh" rowspan="3"><span class="noprint no-print">Condition name or event</span><span class="dd-onpaper">Phase change / condition</span></th>
     <th class="col-notes fixh" rowspan="3">Daily notes</th>
     <th class="fixh fx-act" rowspan="3"></th>
   </tr>
@@ -2968,7 +2974,7 @@ function renderData(){
         <option value="full"${r.phaseType==="full"?" selected":""}>Full phase change</option>
         <option value="conditional"${r.phaseType==="conditional"?" selected":""}>Conditional change</option>
       </select><span class="po">${r.phaseType==="full"?"Full phase change":(r.phaseType==="conditional"?"Conditional change":"")}</span></td>
-      <td class="col-label"><input type="text" data-f="phaseLabel" value="${esc(r.phaseLabel||"")}" placeholder="${r.phaseType==="full"?"New condition name":(r.phaseType==="conditional"?"e.g., medication change":"\u2014")}"></td>
+      <td class="col-label"><span class="dd-pph">${r.phaseType==="full"?"Full phase change":(r.phaseType==="conditional"?"Conditional change":"")}</span><input type="text" data-f="phaseLabel" value="${esc(r.phaseLabel||"")}" placeholder="${r.phaseType==="full"?"New condition name":(r.phaseType==="conditional"?"e.g., medication change":"\u2014")}"></td>
       <td class="col-notes"><input type="text" data-f="notes" value="${esc(r.notes||"")}" placeholder="setting events, absences, staffing"></td>
       <td class="actions"><button class="btn danger sm" data-act="delRow">Delete</button></td>
     </tr>`;
@@ -4302,7 +4308,7 @@ $("#p_orient").addEventListener("change",e=>{S.settings.orient=e.target.value; a
 function ddPaperScheme(){
   const obs=orderedBehaviors(), iv=S.settings.entryMode==="interval", portrait=S.settings.orient==="portrait";
   const avail=portrait?700:960, off=S.settings.paperCols==="off";
-  const fixed={date:36,obs:0,phase:off?0:(portrait?44:54),label:off?0:(portrait?56:76),notes:0};
+  const fixed={date:50,obs:0,phase:0,label:off?0:(portrait?84:104),notes:0};   /* v22.32 on paper the date reads whole, and the phase change and the condition are one column */
   const nTwo=iv?0:obs.filter(b=>MEASURES[b.measure].two).length;
   const units=Math.max(1,(obs.length-nTwo)+1.65*nTwo);
   const minNotes=off?0:(portrait?64:96);
@@ -9587,6 +9593,8 @@ function stPrintPaint(clear){const el=document.getElementById("stPrintQr");if(!e
   const L=on?s.links.filter(l=>!l.off).map(l=>({l,u:stUrlOf(l)})).filter(x=>x.u).slice(0,4):[];
   el.innerHTML=L.length?`<div class="st-pq-h">Record on a phone</div><div class="st-pq-row">${L.map(x=>`<div class="st-pq"><div class="st-pq-c">${ddQrSvg(x.u)}</div><div class="st-pq-t"><b>Scan to record: ${esc(x.l.who)}</b><span>Point the phone\u2019s camera at the code, tap the link, tap as it happens, and press Send today\u2019s data.</span><span class="st-pq-k">Code ${esc(x.l.code)}</span></div></div>`).join("")}</div>`:"";}
 window.addEventListener("beforeprint",()=>{try{stPrintPaint();}catch(e){}});
+window.addEventListener("beforeprint",()=>{try{document.querySelectorAll("#dataTable tbody tr[data-r]").forEach(tr=>{const r=(ddBlank||S.rows).find(x=>x.id===tr.dataset.r),sp=tr.querySelector("td.col-label .dd-pph");
+  if(r&&sp)sp.textContent=r.phaseType==="full"?"Full phase change":(r.phaseType==="conditional"?"Conditional change":"");});}catch(e){}});
 window.addEventListener("afterprint",()=>{try{stPrintPaint(true);}catch(e){}});
 function stQrDlg(){let d=document.getElementById("dlgStQr");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog st-qr-dlg";d.id="dlgStQr";d.setAttribute("aria-labelledby","stQrT");
   d.innerHTML=`<h2 id="stQrT">Staff link</h2><p class="hint" id="stQrFor"></p><div class="st-qr" id="stQrBox"></div><p class="hint" id="stQrNote"></p>

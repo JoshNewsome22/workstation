@@ -26,7 +26,7 @@ let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&
     return {w:parseInt(t.style.width,10),tr:t.style.transform,date:cs[0],obs:cs[1],one,notes:cs[cs.length-2],pct:getComputedStyle(last).display,pctT:last.textContent.trim(),
       pdate:(t.querySelector('tbody td.col-date .pdate')||{}).textContent,pdShown:getComputedStyle(t.querySelector('tbody td.col-date .pdate')).display,inputHidden:getComputedStyle(t.querySelector('tbody td.col-date input')).display};});
   ok('printed: the table fills the page width without shrinking',pr.w===960&&!pr.tr,pr);
-  ok('printed: Date and Obs. min are narrow, the behaviors even, Notes takes the rest',pr.date<=40&&pr.obs<=28&&pr.one.every(v=>v===pr.one[0])&&pr.one[0]>=70&&pr.notes>=96,pr);
+  ok('printed: Date reads whole and Obs. min is not on paper (v22.32), the behaviors even, Notes takes the rest',pr.date>=46&&pr.date<=56&&pr.obs===0&&pr.one.every(v=>v===pr.one[0])&&pr.one[0]>=70&&pr.notes>=96,pr);
   /* v21.70 the widths are also a print style in percentages, so a print the form never hears of (Safari on the iPad printing
      the workstation, the master print) lays the sheet out the same; eight behaviors fit; Behaviors only on paper; weekdays only */
   const v70=await page.evaluate(()=>{const st=(document.getElementById('ddPrintCols')||{}).textContent||'';const t=document.getElementById('dataTable');

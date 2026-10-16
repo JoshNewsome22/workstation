@@ -9905,6 +9905,15 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.33: Form DD-1's printed sheet, two more
+
+- **The dates read whole.** The Date column on paper is wider (it cut "10/19" to "10/1" on the iPad).
+- **Phase change and condition are one column on paper,** "Phase change / condition": a day with a full or a
+  conditional phase change has its kind written small above the condition's name, and a blank sheet gives one box to
+  write both in. On screen the two stay apart.
+
+Checked by `qa/dd1-sheet-test.js` and `qa/v2233-dd1-phase-print-test.js`.
+
 ### v22.32: Form DD-1's printed data sheet
 
 - **The whole width of the page.** The assent's column was hidden on paper but kept its place, so the daily notes' cells
