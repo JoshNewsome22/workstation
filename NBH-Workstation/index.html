@@ -3497,7 +3497,7 @@ const CASE_MAP=[
  ['Plan','Function first, then goals, then the components the case needs; contextual fit before anyone is trained.',
   [['TD-1','function-based treatment: antecedent, teaching, consequence, crisis'],['GB-1','goals and objectives: they carry forward'],['CF-1','contextual fit with the people who will run it'],['SV-1','social validity before (and again after)'],['SA-1','skill-acquisition data for the replacement skill'],['SM-1','self-monitoring, point systems, behavioral contract'],['SR-1','the schedule of reinforcement, designed and thinned'],['TE-1','token economy'],['GC-1','class-wide and group contingencies'],['VS-1','visual supports and communication boards'],['TK-1','the token board book: choices, targets, board and tokens, printed, laminated and bound'],['CR-1','crisis plan and debriefing, when the behavior is dangerous'],['DT-1','delay tolerance'],['AD-1','accumulated or distributed reinforcement'],['BC-1','behavioral contrast across settings'],['MS-1','medication side effects, when medication changes']]],
  ['Train and run it','Before the start date, then every week.',
-  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['QS-1','the staff quick start: four pages and a flow sheet for the adults running the plan'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged']]],
+  [['ST-1','staff training to competency (BST)'],['EB-1','the one-page brief for limited-contact staff'],['QS-1','the staff quick start: four pages and a flow sheet for the adults running the plan'],['CT-1','caregiver training'],['TV-1','the training video for the team or the family: the script from the case, a teleprompter, the cards on screen'],['HD-1','home data sheets the family keeps'],['TI-1','treatment integrity, observed'],['PD-1','when integrity is low: why, and what fixes it'],['CN-1','every consultation, visit and call, logged'],['RS-1','ongoing supervision of the RBT who runs the plan: the monthly 5%, contacts and observation']]],
  ['Review and exit','At each review date, and whenever the graph says so.',
   [['PR-1','periodic review: continue, change, fade, exit'],['RM-1','relapse mitigation and inoculation before fading'],['SV-1','social validity after'],['DD-1','the graph decides']]]
 ];
@@ -4889,11 +4889,21 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
      last form answered: an edit made while a slow form is waited for stays unsaved */
   let forms={};const late=[],stat={};
   for(const id of open){
+    if(state.pending[id])continue;   /* v22.28 put away to save memory since the save began: taken as put away, below */
     let r=await grab(id,'snapshot');
+    if(!(r&&r.snap)&&state.pending[id])continue;
     if(!(r&&r.snap)){btn.textContent='Waiting for '+id+'\u2026';r=await grab(id,'snapshot',null,20000);}
     if(r&&r.snap){forms[id]={title:r.title,snap:r.snap};stat[id]=r.status||state.status[id];}else late.push(id);
   }
-  kept.forEach(id=>{const P=state.pending[id];if(P)forms[id]={title:P.title,snap:P.snap};});   /* v21.61 as the file holds them */
+  /* v21.61 the forms not loaded, as the file holds them. v22.28 the lists are read again here: a form put away to save
+     memory while the others were being read (at most FRAME_CAP stay loaded) is in the file as it was put away, and one
+     loaded meanwhile is read from its page; before, either could be left out of the file without a word */
+  for(const id of new Set(kept.concat(Object.keys(state.pending)))){
+    if(forms[id])continue;const P=state.pending[id];
+    if(P){forms[id]={title:P.title,snap:P.snap};continue;}
+    if(state.frames[id]){const r=await grab(id,'snapshot',null,15000);if(r&&r.snap){forms[id]={title:r.title,snap:r.snap};stat[id]=r.status||state.status[id];}else if(!late.includes(id))late.push(id);}
+  }
+  for(let i=late.length-1;i>=0;i--){if(forms[late[i]])late.splice(i,1);}
   forms=orderCase(forms);
   /* v21.80 the case facts the file carries are read from the forms as they are now, not as at the last read: a case opened
      again then has the facts its forms give, and the forms that load quietly are not sent changed facts that fill them anew */

@@ -506,7 +506,7 @@ window.nbhPrintNodes=function(){renderPrint();return [$('#monthOut'),$('#yearOut
 /* ---------------- Save data / Open data (the form's own file; the workstation's case file carries the same) ---------------- */
 $('#saveBtn').addEventListener('click',()=>{
   const nm=String(S.setup.rbt_name||'RBT').replace(/[^\w-]+/g,'_');const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify({form:'RS-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1)],{type:'application/json'}));
+  a.href=URL.createObjectURL(new Blob([(tidy(),JSON.stringify({form:'RS-1',rev:'2026-10',saved:new Date().toISOString(),S},null,1))],{type:'application/json'}));
   a.download='RS-1_'+nm+'_'+todayISO()+'.json';document.body.appendChild(a);a.click();a.remove();});
 $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 /* a saved file is read field by field into a fresh record: anything unexpected is dropped rather than trusted */
@@ -588,10 +588,14 @@ async function loadSim(){
   S.pdus=[];
   S.cred={notes:'Simulated: the competency assessment window and the application were discussed at the last contact.'};
   S.concerns=[{id:'cn1',date:isoOf(add(now,-40)),concern:'Simulated: data for two sessions were entered at the end of the day, not at the time, and one count did not match the session note.',investigated:'Simulated: reviewed the two data sheets against the session notes and spoke with the RBT; the RBT had been covering a second classroom and fell behind.',decision:DECIDE[0],plan:'Record data at the time for every session (the supervisor checks two sheets a week for four weeks).\nReview the RBT Ethics Code standard on accurate documentation together.',outcome:'Simulated: data were recorded at the time in all checked sessions for four weeks.',outcome_date:isoOf(add(now,-8))}];
-  curKey=keyOf(todayISO());if(!yearKeys(y).includes(curKey))curKey=yearKeys(y)[0];renderAll();setView('month');
+  curKey=keyOf(todayISO());if(!yearKeys(y).includes(curKey))curKey=yearKeys(y)[0];renderAll();   /* the view stays where it is, as in the other forms */
   nbhUI.toast('Simulation loaded: a simulated RBT and supervisors, every month of this school year up to today.',{kind:'ok'});
 }
 $('#simBtn').addEventListener('click',loadSim);
+/* the file is written the same way whatever order the boxes were ticked in: each contact's choices in the form's own
+   order, and every month's "no services" a yes or a no, so a file saved, opened and saved again is the same file */
+function tidy(){Object.values(S.months||{}).forEach(m=>{m.noservice=!!m.noservice;(m.contacts||[]).forEach(c=>{
+  [['sact',SACT],['acts',TCO],['bst',BST]].forEach(([k,L])=>{if(Array.isArray(c[k]))c[k].sort((a,b)=>L.indexOf(a)-L.indexOf(b));});});});}
 
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();

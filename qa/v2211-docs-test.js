@@ -16,8 +16,8 @@ const root=ROOT||path.join(__dirname,'..');const rd=(ed,f)=>fs.readFileSync(path
   await p.goto(BASE+'/NBH-Workstation/'+encodeURI(dm.file));await sleep(1500);
   const shell=L.forms().map(f=>f.id);
   const pk=await p.evaluate(()=>[...document.querySelectorAll('#pkTbl tbody tr')].map(r=>({id:r.cells[1].textContent.trim(),key:(r.querySelector('input[type=checkbox]')||{}).name})));
-  const ids=pk.map(r=>r.id),want=shell.filter(id=>id!=='GC-1');
-  ok('1 DM-1\'s Packet Contents lists every form a student\'s file can hold ('+want.length+', GC-1\'s class-wide system kept out), SI-1 and IM-1 among them, in the workstation\'s order',
+  const ids=pk.map(r=>r.id),want=shell.filter(id=>id!=='GC-1'&&id!=='RS-1');   /* v22.28 RS-1 is a staff member's supervision record, not the student's */
+  ok('1 DM-1\'s Packet Contents lists every form a student\'s file can hold ('+want.length+', GC-1\'s class-wide system and RS-1\'s staff supervision log kept out), SI-1 and IM-1 among them, in the workstation\'s order',
     JSON.stringify(ids)===JSON.stringify(want),{n:ids.length,missing:want.filter(x=>!ids.includes(x)),extra:ids.filter(x=>!want.includes(x))});
   const keys=Object.fromEntries(pk.map(r=>[r.id,r.key]));
   ok('2 a file saved before keeps its ticks: the first 31 forms keep their saved keys (DM-1 pk[0], OB-1 pk[27], AD-1 pk[30]) and the new ones follow',

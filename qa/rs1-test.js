@@ -22,7 +22,7 @@ const K='2026-09';
   const page=await br.newPage({viewport:{width:1180,height:820}});L.wire(page,log);
   await page.goto(URL);await sleep(900);
   ok('1 the form opens with no page errors',!log.some(x=>x.type==='pageerror'),log);
-  ok('1 it opens on the Month view, with Setup offered first',await page.evaluate(()=>/view-month/.test(document.body.className)&&!!document.querySelector('#setupNudge [data-go="setup"]')));
+  ok('1 it opens on Setup, its first tab (v22.28: every form opens on its first tab)',await page.evaluate(()=>/view-setup/.test(document.body.className)&&document.querySelector('#viewSeg button').dataset.view==='setup'));
   await page.evaluate(()=>{window.confirm=()=>true;window.alert=()=>{};});
   /* the simulation */
   await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(700);

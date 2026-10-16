@@ -9934,6 +9934,13 @@ Handbook (updated 06/2026). It is in the form list under Implementation, after C
 
 Also: Read a document's Schedule reading takes today's date from this device's calendar, not the world clock.
 
+Also fixed: **Save case could leave a form out of the file.** On an iPad at most eight forms stay loaded (v21.81); past
+that, the one viewed longest ago is put away, its work kept in the workstation. Save case read which forms were loaded and
+which were put away when it began, so a form put away while it was reading the others was on neither list and was left
+out of that file (the workstation still held it, and the next save had it). Save case now reads the lists again at the
+end, so the file holds every form. Seen in the full start-to-finish run; checked by `qa/v2228-save-away-test.js`, which
+puts a form away at that moment.
+
 Checked by `qa/rs1-test.js`.
 
 ### v22.27: Read a document takes the Schedule and Enrollment pages

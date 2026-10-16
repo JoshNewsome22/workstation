@@ -327,7 +327,7 @@ const pngInfo=b=>({png:b.slice(0,8).toString('hex')==='89504e470d0a1a0a',w:b.rea
     const onResp=r=>{const u=r.url();if(u.indexOf(NBH)===0&&r.request().method()!=='HEAD'&&r.status()>=400)unanswered.push(u.slice(NBH.length)+' '+r.status());};
     page.on('requestfailed',onFail);page.on('response',onResp);
     await page.reload();await sleep(900);
-    check('C offline: the shell opens from the copy',await page.evaluate(()=>/Workstation/.test(document.title)&&document.querySelectorAll('#rail .item').length===46));
+    check('C offline: the shell opens from the copy',await page.evaluate(()=>/Workstation/.test(document.title)&&document.querySelectorAll('#rail .item').length===47));
     check('C offline: the chip says Offline now',/^Offline now$/.test(await waitChip(page,/^Offline now$/,10000)),await chip(page));
     const notOpen=[],pic={};
     for(const f of F){
