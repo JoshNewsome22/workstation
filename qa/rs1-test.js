@@ -15,6 +15,12 @@
       switching shows that RBT's record; the supervisors and rules are shared; Add an RBT and Remove; Save data writes
       every RBT and Open data gives them back; a file with one RBT (written as before) still opens; the CSV and the due
       line cover every RBT.
+   9. (v22.30) the RBT's usual hours above the month's service days: the same setting as on Setup; Fill the usual days and
+      times adds the days with the usual hours, gives them to a day without times, keeps a time changed on a day, and
+      only when every day has times offers to set them all to the usual hours.
+  10. (v22.30) the contact card: Add a contact like the last one copies the supervisor, format, client and boxes ticked
+      (not the date, times or feedback); the length buttons set the end time; a contact or a day given a date in another
+      month of the school year moves to that month.
    usage: WS_URL=http://127.0.0.1:8123 node qa/rs1-test.js */
 const L=require(__dirname+'/lib.js');const {sleep,fs}=L;
 const OUT=__dirname+'/out/rs1/';fs.mkdirSync(OUT,{recursive:true});
@@ -231,6 +237,53 @@ print(json.dumps(o))`]).toString());
   await openF(saved8);await sleep(400);
   ok('8 no page errors with several supervisees',!log.some(x=>x.type==='pageerror'),log);
   await page.click('#viewSeg button[data-view="setup"]');await sleep(200);await page.screenshot({path:OUT+'supervisees.png'});
+  /* ---- 9. the usual hours on the Month page (v22.30) ---- */
+  await page.evaluate(()=>document.querySelector('#clearBtn').click());await sleep(300);
+  await page.selectOption('#sYear','2026');await page.click('#viewSeg button[data-view="month"]');await page.click('#monthBar button[data-month="2026-10"]');await sleep(300);
+  ok('9 the Month page shows the usual hours box, empty, and no rows yet',await page.evaluate(()=>!!document.querySelector('#usualBox')&&document.querySelector('#usualBox').offsetHeight>0&&!document.querySelector('#mStart').value&&month('2026-10').days.length===0));
+  await page.click('#fillDays');await sleep(200);
+  ok('9 Fill with no usual hours adds nothing (and asks for them)',await page.evaluate(()=>month('2026-10').days.length===0));
+  await page.fill('#mStart','08:00');await page.fill('#mEnd','14:30');await page.fill('#mBreak','30');await page.selectOption('#mAct','Data collection');await sleep(100);
+  ok('9 the usual hours typed on the Month page are the Setup page\u2019s',await page.evaluate(()=>S.setup.day_start==='08:00'&&S.setup.day_end==='14:30'&&S.setup.day_break==='30'&&document.querySelector('#sStart').value==='08:00'&&document.querySelector('#sEnd').value==='14:30'&&document.querySelector('#sAct').value==='Data collection'));
+  await page.evaluate(()=>{const x=document.querySelector('#mDayChips input[data-wd="5"]');x.click();});await sleep(100);
+  ok('9 a usual day unticked on the Month page is unticked on Setup',await page.evaluate(()=>S.setup.days.join()==='1,2,3,4'&&!document.querySelector('#dayChips input[data-wd="5"]').checked));
+  await page.evaluate(()=>document.querySelector('#mDayChips input[data-wd="5"]').click());await sleep(100);
+  await page.click('#fillDays');await sleep(300);
+  const wd10=[];for(let d=1;d<=31;d++){const x=new Date(2026,9,d);if(x.getDay()>=1&&x.getDay()<=5)wd10.push('2026-10-'+String(d).padStart(2,'0'));}
+  const f9=await page.evaluate(()=>month('2026-10').days.map(d=>[d.date,d.start,d.end,d.brk,d.act]));
+  ok('9 Fill adds every weekday of October 2026 with the usual hours',f9.map(x=>x[0]).join()===wd10.join()&&f9.every(x=>x[1]==='08:00'&&x[2]==='14:30'&&x[3]==='30'&&x[4]==='Data collection'),f9.slice(0,3));
+  const ids9=await page.evaluate(()=>month('2026-10').days.map(d=>d.id));
+  await page.fill('#d_'+ids9[0]+'_end','12:00');await page.fill('#d_'+ids9[1]+'_start','');await page.fill('#d_'+ids9[1]+'_end','');await sleep(100);
+  ok('9 a day\u2019s times can be changed in its row',(await page.textContent('#h_'+ids9[0])).trim()==='3.50');
+  await page.click('#fillDays');await sleep(300);
+  const g9=await page.evaluate(ids9=>ids9.slice(0,2).map(i=>{const d=month('2026-10').days.find(x=>x.id===i);return d.start+'-'+d.end;}),ids9);
+  ok('9 Fill gives the usual hours to the day without times and keeps the day changed by hand',g9[0]==='08:00-12:00'&&g9[1]==='08:00-14:30',g9);
+  await page.click('#fillDays');await sleep(500);
+  ok('9 with every day already timed, Fill offers to set them all to the usual hours (accepted here)',await page.evaluate(i=>month('2026-10').days.find(x=>x.id===i).end==='14:30',ids9[0]));
+  ok('9 no page errors with the usual hours',!log.some(x=>x.type==='pageerror'),log);
+  await page.screenshot({path:OUT+'usual-hours.png'});
+  await openF(saved8);await sleep(400);
+  /* ---- 10. the contact card (v22.30) ---- */
+  await page.evaluate(()=>document.querySelector('#simBtn').click());await sleep(800);
+  await page.click('#viewSeg button[data-view="month"]');await sleep(200);
+  const ks10=await page.evaluate(()=>yearKeys(setupYear()));
+  await page.click('#monthBar button[data-month="'+ks10[1]+'"]');await sleep(200);
+  const last=await page.evaluate(()=>{const L=lastContact();return {sup:L.sup,client:L.client,sact:L.sact.join('|'),acts:L.acts.join('|'),bst:L.bst.join('|'),mode:L.mode,format:L.format};});
+  await page.click('#addLike');await sleep(300);
+  const nc=await page.evaluate(()=>{const c=month(curKey).contacts.find(c=>!c.start&&!c.feedback);return c&&{id:c.id,sup:c.sup,client:c.client,sact:c.sact.join('|'),acts:c.acts.join('|'),bst:c.bst.join('|'),mode:c.mode,format:c.format,fb:c.feedback,ck:Object.keys(c.ck).length};});
+  ok('10 Add a contact like the last one copies the supervisor, format, way, client and boxes ticked, not the feedback',nc&&nc.sup===last.sup&&nc.client===last.client&&nc.sact===last.sact&&nc.acts===last.acts&&nc.bst===last.bst&&nc.mode===last.mode&&nc.format===last.format&&!nc.fb&&!nc.ck,{last,nc});
+  await page.click('button[data-len="90"][data-lc="'+nc.id+'"]');await sleep(150);
+  ok('10 a length with no start time sets nothing (asks for the start)',await page.evaluate(id=>!month(curKey).contacts.find(c=>c.id===id).end,nc.id));
+  await page.fill('#c_'+nc.id+'_start','09:00');await page.click('button[data-len="90"][data-lc="'+nc.id+'"]');await sleep(150);
+  ok('10 the 1\u00bd h button sets the end to 10:30 and the length reads 90 min',await page.evaluate(id=>month(curKey).contacts.find(c=>c.id===id).end==='10:30'&&document.querySelector('#c_'+id+'_end').value==='10:30'&&/^90 min \(1\.50 h\)$/.test(document.querySelector('#c_'+id+'_min').value),nc.id));
+  const tgt=ks10[2]+'-15';
+  await page.fill('#c_'+nc.id+'_date',tgt);await sleep(300);
+  ok('10 a contact dated in another month of the year moves to that month, which shows',await page.evaluate(([id,k0,k2])=>curKey===k2&&month(k2).contacts.some(c=>c.id===id)&&!month(k0).contacts.some(c=>c.id===id)&&!!document.querySelector('#c_'+id+'_date'),[nc.id,ks10[1],ks10[2]]));
+  const dy=await page.evaluate(k=>month(k).days[0].id,ks10[2]);
+  await page.fill('#d_'+dy+'_date',ks10[3]+'-02');await sleep(300);
+  ok('10 a day dated in another month moves to that month',await page.evaluate(([id,k2,k3])=>curKey===k3&&month(k3).days.some(d=>d.id===id)&&!month(k2).days.some(d=>d.id===id),[dy,ks10[2],ks10[3]]));
+  ok('10 no page errors on the contact card',!log.some(x=>x.type==='pageerror'),log);
+  await openF(saved8);await sleep(400);
   /* ---- 7. phone ---- */
   await page.setViewportSize({width:390,height:844});await sleep(300);
   const over=[];for(const v of ['setup','month','year','rbt','print','guide']){await page.evaluate(v=>document.querySelector('#viewSeg button[data-view="'+v+'"]').click(),v);await sleep(200);const sw=await page.evaluate(()=>[document.documentElement.scrollWidth,document.documentElement.clientWidth]);if(sw[0]>sw[1]+1)over.push(v+' '+sw.join('/'));}

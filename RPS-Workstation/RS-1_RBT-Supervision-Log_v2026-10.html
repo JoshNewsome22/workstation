@@ -901,6 +901,16 @@ table.rs-who-t tr.cur td{font-weight:700;background:#EAF1F5}
 input[type=date],input[type=time]{min-width:0;max-width:100%;box-sizing:border-box}
 @supports (-webkit-touch-callout:none){input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;display:block}
   input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and-time-value{text-align:left}}
+/* v22.30 the RBT's usual hours above the month's service days */
+.rs-usual{border:1px solid var(--rule-2);border-radius:6px;background:#F5F8FA;padding:10px 14px 4px;margin:8px 0 10px}
+.rs-usual h3{margin:0 0 2px;font-family:var(--sans);font-size:14px;font-weight:700;color:var(--ink)}
+.rs-usual .fieldgrid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin:6px 0}
+.rs-usual .hint{margin:4px 0 8px}
+@media print{.rs-usual{display:none!important}}
+/* v22.30 the length buttons under a contact's times */
+.rs-len{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:-4px}
+.rs-len .tool{min-height:40px;padding:6px 12px}
+.rs-len .tool[aria-pressed="true"]{background:var(--nbh-mist,#eaf2f0);border-color:var(--nbh-teal,#76a2a3);font-weight:700}
 
 /* ===== Newsome Behavioral Health — shared form system ===== */
 :root{
@@ -1130,13 +1140,25 @@ td input,td select{max-width:100%}
     <div class="rs-mgrid">
       <div class="rs-main">
         <h2 class="nbh-band" id="monthTitle">Service Days</h2>
-        <p class="hint">One row for each day the RBT provided services. Hours are the end time less the start time less the time not in RBT services. Tick <b>No service</b> for a holiday or an absence; a row after today is planned and is not counted yet.</p>
-        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days</button><span class="hint" id="dayCount"></span></div>
+        <p class="hint">One row for each day the RBT provided services. Hours are the end time less the start time less the time not in RBT services. Tick <b>No service</b> for a holiday or an absence; a row after today is planned and is not counted yet. <b>Fill the usual days and times</b> adds the usual days still missing and gives the usual hours to any day without times; a time you changed on a day stays as you entered it.</p>
+        <!-- v22.30 the RBT's usual hours, kept with the Setup page's: they fill the days, and every row can still be changed -->
+        <div class="rs-usual" id="usualBox">
+          <h3>The RBT&rsquo;s Usual Hours</h3>
+          <div class="fieldgrid">
+            <div><label for="mStart">Usual start time</label><input id="mStart" type="time" data-s="day_start"></div>
+            <div><label for="mEnd">Usual end time</label><input id="mEnd" type="time" data-s="day_end"></div>
+            <div><label for="mBreak">Usual time not in RBT services (minutes)</label><input id="mBreak" data-s="day_break" inputmode="numeric" placeholder="e.g., 30 for lunch"></div>
+            <div><label for="mAct">Usual primary intervention</label><select id="mAct" data-s="day_act"></select></div>
+          </div>
+          <div class="rs-days" role="group" aria-label="Usual service days" id="mDayChips"></div>
+          <p class="hint" id="usualHint"></p>
+        </div>
+        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days and times</button><span class="hint" id="dayCount"></span></div>
         <div class="grid-wrap"><table class="rt rs-days-t rs-stack" id="dayTbl"><thead><tr><th style="width:21%">Date</th><th style="width:13%">Start</th><th style="width:13%">End</th><th style="width:9%">Not in services (min)</th><th style="width:8%">Hours</th><th>Primary intervention</th><th style="width:8%">No service</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
         <h2 class="nbh-band" style="margin-top:18px">Supervision Contacts</h2>
         <p class="hint">Each real-time contact with the supervisor: in person or by live two-way video. In person is preferred; a web camera or video conference is allowed. A phone call, an email, a recording, or video monitoring without real-time interaction and feedback can be noted here but does not count. Supervision is client-focused and is not professional development: one event cannot count as both.</p>
-        <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><span class="hint" id="contactCount"></span></div>
+        <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><button class="tool" type="button" id="addLike" title="Copies the supervisor, format, client and the boxes ticked from the latest contact">Add a contact like the last one</button><span class="hint" id="contactCount"></span></div>
         <div id="contactList"></div>
         <div class="field rs-mnote"><label for="monthNote">Notes for the month (optional)</label><textarea id="monthNote" data-mo="note" rows="2" placeholder="e.g., the RBT was out for two days; the client moved to a new classroom on the 14th"></textarea></div>
         <div class="field"><label for="monthRecords">Other records for this month, if any records disagree (optional)</label><input id="monthRecords" data-mo="records" placeholder="e.g., session notes on Form CN-1 for 9/14 to 9/18; the district time sheet"></div>
@@ -1290,7 +1312,7 @@ const BST=['Instruction','Modeling','Rehearsal','Feedback'];
 /* the supervision activities the BACB RBT Handbook lists */
 const SACT=['Developing performance expectations','Observation, BST and performance feedback','Modeling technical, professional and ethical behavior','Guiding problem-solving and ethical decisions','Reviewing written materials (progress notes, data sheets)','Overseeing and evaluating service delivery','Evaluating the effects of supervision'];
 /* a contact counts only in real time: in person or by live two-way video (the last two are kept so a call is on record, not counted) */
-const MODES=[['person','In person',true],['video','Live video (web camera or video conference)',true],['phone','Phone (does not count)',false],['written','Email, text or recording (does not count)',false],['monitor','Video monitoring without real-time interaction (does not count)',false]];
+const MODES=[['person','In person',true],['video','Live video (two-way)',true],['phone','Phone (does not count)',false],['written','Email, text or recording (does not count)',false],['monitor','Video monitoring without real-time interaction (does not count)',false]];
 const MODEWHY={phone:'phone',written:'email, text or recording',monitor:'video monitoring without real-time interaction'};
 const modeOf=k=>MODES.find(m=>m[0]===k)||null;
 const CREDS=['BCBA','BCaBA','Other or none'];
@@ -1444,11 +1466,17 @@ const delCell=(r,i,what)=>'<td class="nx noprint"><button type="button" class="r
 /* ---------------- setup ---------------- */
 function renderSetup(){const st=S.setup;
   $('#sYear').innerHTML=(()=>{const y0=schoolYearOf(new Date()),ys=[];for(let y=y0-3;y<=y0+2;y++)ys.push([String(y),y+'–'+String(y+1).slice(2)+' (Aug '+y+' to Jul '+(y+1)+')']);if(!ys.some(x=>x[0]===String(setupYear())))ys.unshift([String(setupYear()),setupYear()+'–'+String(setupYear()+1).slice(2)]);return opts(ys,String(setupYear()));})();
-  $('#sAct').innerHTML=opts(ACTS,st.day_act,true);
+  $('#sAct').innerHTML=$('#mAct').innerHTML=opts(ACTS,st.day_act,true);
   $$('[data-s]').forEach(el=>{if(el.id==='sYear')return;el.value=st[el.dataset.s]==null?'':st[el.dataset.s];});
   $$('[data-r]').forEach(el=>{el.value=S.rules[el.dataset.r]!=null&&S.rules[el.dataset.r]!==''?S.rules[el.dataset.r]:RULES0[el.dataset.r];});
-  $('#dayChips').innerHTML='<span class="hint" style="align-self:center;margin-right:4px">Usual service days</span>'+[1,2,3,4,5,6,0].map(d=>'<label class="chip"><input type="checkbox" data-wd="'+d+'"'+((st.days||[]).includes(d)?' checked':'')+'> '+WD[d]+'</label>').join('');
+  dayChips();
   renderSups();renderReq();}
+/* the usual days, on the Setup page and above the month's service days (the same setting) */
+function dayChips(){const st=S.setup,h='<span class="hint" style="align-self:center;margin-right:4px">Usual service days</span>'+[1,2,3,4,5,6,0].map(d=>'<label class="chip"><input type="checkbox" data-wd="'+d+'"'+((st.days||[]).includes(d)?' checked':'')+'> '+WD[d]+'</label>').join('');
+  $('#dayChips').innerHTML=h;$('#mDayChips').innerHTML=h;usualHint();}
+function usualHint(){const st=S.setup,e=$('#usualHint');if(!e)return;const ok=st.day_start&&st.day_end&&(st.days||[]).length;
+  e.innerHTML=ok?'Usually '+esc((st.days||[]).slice().sort((a,b)=>((a+6)%7)-((b+6)%7)).map(d=>WD[d]).join(', '))+', '+esc(fmtHM(st.day_start))+' to '+esc(fmtHM(st.day_end))+(num(st.day_break)?', less '+num(st.day_break)+' minutes':'')+'. These are the same as on the Setup page. Change any day in the table below as needed.'
+    :'Enter the usual start and end times and tick the usual days, then <b>Fill the usual days and times</b>.';}
 function renderSups(){
   $('#supList').innerHTML=S.sups.map((s,i)=>{const id=esc(s.id),F=f=>'sup_'+id+'_'+f;
     return '<div class="rs-sup" data-sid="'+id+'"><div class="gh"><span>Supervisor '+(i+1)+'</span><button type="button" class="rowDel" data-del="sup" data-i="'+id+'" title="Delete this supervisor" aria-label="Delete supervisor '+(i+1)+'">&times;</button></div>'+
@@ -1492,9 +1520,10 @@ function renderMonth(){if(!yearKeys(setupYear()).includes(curKey))curKey=default
   const filled=fillMonth(curKey);const m=month(curKey);
   renderMonthBar();
   $('#monthTitle').textContent=keyLabel(curKey)+': Service Days';
-  const st=S.setup;$('#setupNudge').innerHTML=!(st.day_start&&st.day_end)||!S.sups.some(s=>s.name)?'<div class="instr"><b>Start with Setup.</b> Enter the RBT, the supervisors and the usual days and hours on the Setup page; each month then fills its service days. <button class="tool" type="button" data-go="setup">Go to Setup</button></div>':'';
+  renderMonthNudge();
   renderDays();renderContacts();$('#monthNote').value=m.note||'';$('#monthRecords').value=m.records||'';$('#noSvc').checked=!!m.noservice;renderComp();
   if(filled&&window.nbhUI)nbhUI.toast(keyLabel(curKey)+': '+filled+' usual service day'+(filled===1?'':'s')+' filled in. Mark holidays and absences as No service.');}
+function renderMonthNudge(){const st=S.setup;$('#setupNudge').innerHTML=!st.rbt_name||!S.sups.some(s=>s.name)?'<div class="instr"><b>Start with Setup.</b> Enter the RBT and the supervisors on the Setup page. The RBT&rsquo;s usual hours can be entered there or just below. <button class="tool" type="button" data-go="setup">Go to Setup</button></div>':'';}
 function renderDays(){const m=month(curKey),[y,mo]=curKey.split('-').map(Number),mn=iso(y,mo,1),mx=iso(y,mo,lastDay(y,mo)),today=todayISO();
   $('#dayTbl tbody').innerHTML=m.days.map((d,i)=>{const mi=dayMin(d),pl=!d.none&&d.date>today;const lab=(d.date?wdOf(d.date)+' '+md(d.date):'row '+(i+1));
     return '<tr data-did="'+esc(d.id)+'" class="'+(d.none?'none':pl?'planned':'')+'"><td class="dt" data-l="Date"><span class="wd">'+(d.date?wdOf(d.date):'')+'</span><input type="date" id="d_'+esc(d.id)+'_date" data-d="'+esc(d.id)+'" data-f="date" min="'+mn+'" max="'+mx+'" value="'+esc(d.date)+'" aria-label="Date, '+esc(lab)+'"></td>'+
@@ -1519,9 +1548,10 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
         '<div><label for="'+F('date')+'">Date</label><input type="date" id="'+F('date')+'" data-c="'+id+'" data-f="date" min="'+mn+'" max="'+mx+'" value="'+esc(c.date)+'"></div>'+
         '<div><label for="'+F('start')+'">Start</label><input type="time" id="'+F('start')+'" data-c="'+id+'" data-f="start" value="'+esc(c.start)+'"></div>'+
         '<div><label for="'+F('end')+'">End</label><input type="time" id="'+F('end')+'" data-c="'+id+'" data-f="end" value="'+esc(c.end)+'"></div>'+
-        '<div><label for="'+F('min')+'">Minutes (computed)</label><input id="'+F('min')+'" readonly tabindex="-1" value="'+(cMin(c)==null?'':cMin(c))+'"></div>'+
+        '<div><label for="'+F('min')+'">Length (computed)</label><input id="'+F('min')+'" readonly tabindex="-1" placeholder="from the start and end" value="'+lenTxt(c)+'"></div>'+
+        '<div class="rs-len" role="group" aria-label="Set the end time from the length"><span class="hint">Length:</span>'+LENS.map(n=>'<button type="button" class="tool" data-len="'+n+'" data-lc="'+id+'"'+(cMin(c)===n?' aria-pressed="true"':'')+'>'+lenLab(n)+'</button>').join('')+'</div>'+
         '<div><label for="'+F('sup')+'">Supervisor</label><select id="'+F('sup')+'" data-c="'+id+'" data-f="sup">'+opts(sups.map(s=>[s.id,supLabel(s)]),c.sup,true)+'</select></div>'+
-        '<div><label for="'+F('format')+'">Format</label><select id="'+F('format')+'" data-c="'+id+'" data-f="format">'+opts([['indiv','Individual (no other RBTs or trainees)'],['group','Small group (2 to '+rule('grpmax')+' RBTs)']],c.format||'indiv')+'</select></div>'+
+        '<div><label for="'+F('format')+'">Format</label><select id="'+F('format')+'" data-c="'+id+'" data-f="format">'+opts([['indiv','Individual'],['group','Small group (2 to '+rule('grpmax')+' RBTs)']],c.format||'indiv')+'</select></div>'+
         '<div data-grp="'+id+'"'+(c.format==='group'?'':' hidden')+'><label for="'+F('group')+'">Number of RBTs in the group</label><input id="'+F('group')+'" data-c="'+id+'" data-f="group" inputmode="numeric" value="'+esc(c.group)+'"></div>'+
         '<div><label for="'+F('mode')+'">How</label><select id="'+F('mode')+'" data-c="'+id+'" data-f="mode">'+opts(MODES.map(x=>[x[0],x[1]]),c.mode,true)+'</select></div>'+
         '<div><label for="'+F('obs')+'">Observed the RBT with a client?</label><select id="'+F('obs')+'" data-c="'+id+'" data-f="obs">'+opts([['yes','Yes'],['no','No']],c.obs,true)+'</select></div>'+
@@ -1538,12 +1568,16 @@ function renderContacts(){const m=month(curKey),[y,mo]=curKey.split('-').map(Num
       '<div class="rs-cfoot"><span class="hint" id="'+F('issues')+'">'+issuesText(is,c)+'</span><button class="tool" type="button" data-cdel="'+id+'">Delete this contact</button></div>'+
     '</div></details>';}).join('')||'<p class="hint">No contacts recorded for '+keyLabel(curKey)+' yet.</p>';
   $('#contactCount').textContent=m.contacts.length?m.contacts.length+' contact'+(m.contacts.length===1?'':'s')+' this month':'';}
+/* the length of a contact: shown, and set from a button (the end time is the start plus the length) */
+const LENS=[30,45,60,90,120];
+const lenLab=n=>n<60?n+' min':n%60?Math.floor(n/60)+'\u00bd h':(n/60)+' h';
+function lenTxt(c){const m=cMin(c);return m==null?'':m+' min ('+hrs(m)+' h)';}
 function ckText(c){const s=ckScore(c);return s?Math.round(s.pct)+'% ('+s.y+' of '+(s.y+s.n)+' scored'+(s.na?', '+s.na+' N/A':'')+')':'not scored';}
 function issuesText(is,c){return is.length?is.map(x=>(x.lvl==='fail'?'✕ ':'')+esc(x.t)).join(' · '):cPlanned(c)?'Planned: counts once the date has passed.':'Counts toward the month.';}
 function refreshContact(c){const card=$('details.rs-contact[data-cid="'+c.id+'"]');if(!card)return;const is=cIssues(c,curKey);
   card.querySelector('summary').innerHTML=cSummary(c,curKey);card.classList.toggle('bad',is.some(x=>x.lvl==='fail'));
   const g=card.querySelector('[data-grp]');if(g)g.hidden=c.format!=='group';const ck=card.querySelector('[data-ckbox]');if(ck)ck.hidden=c.obs!=='yes';
-  const mi=$('#c_'+c.id+'_min');if(mi)mi.value=cMin(c)==null?'':cMin(c);const sc=$('#c_'+c.id+'_score');if(sc)sc.textContent=ckText(c);
+  const mi=$('#c_'+c.id+'_min');if(mi)mi.value=lenTxt(c);card.querySelectorAll('button[data-len]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.len===cMin(c))));const sc=$('#c_'+c.id+'_score');if(sc)sc.textContent=ckText(c);
   const iss=$('#c_'+c.id+'_issues');if(iss)iss.innerHTML=issuesText(is,c);}
 function renderComp(){const s=stats(curKey),P=rule('pct');
   const fill=s.pct==null?0:Math.min(100,s.pct/(P*2)*100),mark=50;
@@ -1710,22 +1744,34 @@ $$('[data-padclear]').forEach(b=>b.addEventListener('click',()=>{const k=b.datas
 function changed(){try{document.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
 
 /* ---------------- events ---------------- */
+/* a contact or a day given a date in another month of the school year goes to that month, which then shows (on the iPad
+   the date picker does not keep to the month on screen); a date outside the school year stays and is flagged */
+function moveTo(list,x){const k=keyOf(x.date);if(!x.date||k===curKey||!yearKeys(setupYear()).includes(k))return false;
+  const from=month(curKey)[list],i=from.indexOf(x);if(i<0)return false;from.splice(i,1);
+  const to=month(k)[list];to.push(x);if(list==='days')to.sort((a,b)=>String(a.date||'9').localeCompare(String(b.date||'9')));else openC.add(x.id);
+  const was=keyLabel(curKey);curKey=k;renderMonth();renderWho();changed();
+  nbhUI.toast((list==='days'?'The day':'The contact')+' of '+mdy(x.date)+' was moved from '+was+' to '+keyLabel(k)+', its month.',{kind:'ok'});
+  const e=$((list==='days'?'#d_':'#c_')+x.id+'_date');if(e){e.scrollIntoView({block:'center'});}return true;}
 function findDay(id){return month(curKey).days.find(d=>d.id===id);}
 function findC(id){return month(curKey).contacts.find(c=>c.id===id);}
 function onField(el,ev){
   const v=el.type==='checkbox'?el.checked:el.value;
   if(el.dataset.s!==undefined){if(el.dataset.s==='year'&&ev!=='change')return;S.setup[el.dataset.s]=v;
+    $$('[data-s="'+el.dataset.s+'"]').forEach(x=>{if(x!==el&&x.id!=='sYear')x.value=v;});if(/^day_/.test(el.dataset.s)){usualHint();if(ev==='change')renderMonthNudge();}
     if(el.dataset.s==='year'){curKey=defaultKey();renderMonthBar();}if(el.dataset.s==='clients')supLists();if(el.dataset.s==='path'||el.dataset.s==='rbt_exp')renderCred();if(el.dataset.s==='rbt_name'||el.dataset.s==='rbt_exp')renderWho();return;}
-  if(el.dataset.wd!==undefined){const d=+el.dataset.wd,set=new Set(S.setup.days||[]);el.checked?set.add(d):set.delete(d);S.setup.days=[...set].sort();return;}
+  if(el.dataset.wd!==undefined){const d=+el.dataset.wd,set=new Set(S.setup.days||[]);el.checked?set.add(d):set.delete(d);S.setup.days=[...set].sort();
+    $$('input[data-wd="'+d+'"]').forEach(x=>{if(x!==el)x.checked=el.checked;});usualHint();return;}
   if(el.dataset.r!==undefined){S.rules[el.dataset.r]=v;renderReq();renderComp();return;}
   if(el.dataset.sup!==undefined){const s=S.sups.find(x=>x.id===el.dataset.sup);if(!s)return;s[el.dataset.f]=v;supRefresh();if(ev==='change'){supLists();renderComp();}return;}
   if(el.dataset.d!==undefined){const d=findDay(el.dataset.d);if(!d)return;d[el.dataset.f]=v;
+    if(ev==='change'&&el.dataset.f==='date'&&moveTo('days',d))return;
     if(ev==='change'&&(el.dataset.f==='date'||el.dataset.f==='none')){if(el.dataset.f==='date')month(curKey).days.sort((a,b)=>String(a.date||'9').localeCompare(String(b.date||'9')));renderDays();}
     else{const h=$('#h_'+d.id);if(h)h.textContent=d.none?'0':hrs(dayMin(d));dayTotals();}renderComp();return;}
   if(el.dataset.c!==undefined){const c=findC(el.dataset.c);if(!c)return;
     if(el.dataset.arr){const a=new Set(c[el.dataset.arr]||[]);el.checked?a.add(el.value):a.delete(el.value);c[el.dataset.arr]=({acts:TCO,bst:BST,sact:SACT}[el.dataset.arr]||[]).filter(x=>a.has(x));}
     else if(el.dataset.ck!==undefined){if(!c.ck)c.ck={};c.ck[el.dataset.ck]=el.value;}
     else c[el.dataset.f]=v;
+    if(ev==='change'&&el.dataset.f==='date'&&moveTo('contacts',c))return;
     refreshContact(c);renderComp();return;}
   if(el.dataset.mo!==undefined){month(curKey)[el.dataset.mo]=v;if(el.dataset.mo==='noservice')renderMonth();return;}
   if(el.dataset.cn!==undefined){const c=S.concerns.find(x=>x.id===el.dataset.cn);if(c)c[el.dataset.f]=v;return;}
@@ -1744,6 +1790,10 @@ document.addEventListener('click',e=>{
   const go=e.target.closest('[data-go]');if(go){setView(go.dataset.go);return;}
   const tr=e.target.closest('tr[data-open-month]');if(tr){curKey=tr.dataset.openMonth;setView('month');return;}
   const cd=e.target.closest('button[data-cdel]');if(cd){delContact(cd.dataset.cdel);return;}
+  const lb=e.target.closest('button[data-len]');if(lb){const c=findC(lb.dataset.lc);if(!c)return;const a=toMin(c.start);
+    if(a==null){nbhUI.toast('Enter the start time first; the length sets the end time.',{kind:'warn'});const s=$('#c_'+c.id+'_start');if(s)s.focus();return;}
+    const b=a+(+lb.dataset.len);if(b>=24*60){nbhUI.toast('That would end after midnight.',{kind:'warn'});return;}
+    c.end=pad2(Math.floor(b/60))+':'+pad2(b%60);const en=$('#c_'+c.id+'_end');if(en)en.value=c.end;refreshContact(c);renderComp();changed();return;}
   const b=e.target.closest('button.rowDel[data-del]');if(b){e.preventDefault();rowDel(b.dataset.del,b.dataset.i);}});
 document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const tr=e.target.closest&&e.target.closest('tr[data-open-month]');if(tr){curKey=tr.dataset.openMonth;setView('month');}});
 async function rowDel(r,id){
@@ -1761,10 +1811,30 @@ $('#addDay').addEventListener('click',()=>{const m=month(curKey),st=S.setup,[y,m
   /* the next date after the last row (or the 1st) that has no row yet */
   let d=1;const lastRow=m.days.filter(x=>x.date).map(x=>+x.date.slice(8)).sort((a,b)=>b-a)[0];if(lastRow)d=lastRow+1;while(d<=lastDay(y,mo)&&have.has(iso(y,mo,d)))d++;
   m.days.push({id:uid(),date:d<=lastDay(y,mo)?iso(y,mo,d):'',start:st.day_start||'',end:st.day_end||'',brk:st.day_break||'',act:st.day_act||'',none:false});renderDays();renderComp();changed();});
-$('#fillDays').addEventListener('click',()=>{const st=S.setup;if(!(st.days||[]).length){nbhUI.toast('Choose the usual service days on the Setup page first.',{kind:'warn'});return;}const n=fillMonth(curKey,true);renderDays();renderComp();changed();nbhUI.toast(n?n+' day'+(n===1?'':'s')+' added.':'Every usual day of the month already has a row.');});
-$('#addContact').addEventListener('click',()=>{const m=month(curKey),t=todayISO(),sp=S.sups.find(s=>s.name&&credOK(s.cred)&&isSupRole(s))||S.sups.find(s=>s.name);
+/* the usual days still missing are added with the usual hours; a day with no times takes the usual ones; a time
+   entered on a day is kept (only when every day already has times does it offer to set them all to the usual hours) */
+$('#fillDays').addEventListener('click',async ()=>{const st=S.setup;
+  if(!(st.days||[]).length||!(st.day_start&&st.day_end)){nbhUI.toast('Enter the usual start and end times and tick the usual days first (just above).',{kind:'warn'});const e=$(!st.day_start?'#mStart':!st.day_end?'#mEnd':'#mDayChips input');if(e)e.focus();return;}
+  const m=month(curKey),n=fillMonth(curKey,true);let f=0;
+  const live=m.days.filter(d=>!d.none);
+  live.forEach(d=>{if(!d.start&&!d.end){d.start=st.day_start;d.end=st.day_end;if(!d.brk)d.brk=st.day_break||'';if(!d.act)d.act=st.day_act||'';f++;}else if(!d.act&&st.day_act)d.act=st.day_act;});
+  const own=live.filter(d=>d.start!==st.day_start||d.end!==st.day_end||String(d.brk||'')!==String(st.day_break||''));
+  if(!n&&!f&&own.length&&(await nbhUI.confirm('Every day of '+keyLabel(curKey)+' already has times.\nSet the '+own.length+' day'+(own.length===1?'':'s')+' with other times to the usual hours ('+fmtHM(st.day_start)+' to '+fmtHM(st.day_end)+')? The times entered on '+(own.length===1?'that day':'those days')+' are replaced.',{ok:'Use the usual hours'}))){
+    own.forEach(d=>{d.start=st.day_start;d.end=st.day_end;d.brk=st.day_break||'';});f=own.length;}
+  renderDays();renderComp();changed();
+  const kept=n||f?live.filter(d=>d.start!==st.day_start||d.end!==st.day_end).length:0;
+  nbhUI.toast(n||f?[n?n+' day'+(n===1?'':'s')+' added':'',f?f+' day'+(f===1?'':'s')+' given the usual hours':'',kept?kept+' day'+(kept===1?'':'s')+' with their own times kept':''].filter(Boolean).join('; ')+'.':'Every usual day already has a row with the usual hours.',{kind:n||f?'ok':undefined});});
+/* the RBT's latest contact (by date) in any month: what "Add a contact like the last one" starts from */
+function lastContact(){let L=null;Object.values(S.months).forEach(m=>(m.contacts||[]).forEach(c=>{if(!L||String(c.date||'')+String(c.start||'')>String(L.date||'')+String(L.start||''))L=c;}));return L;}
+function addContact(like){const m=month(curKey),t=todayISO(),sp=S.sups.find(s=>s.name&&credOK(s.cred)&&isSupRole(s))||S.sups.find(s=>s.name);
   const c={id:uid(),date:keyOf(t)===curKey?t:'',start:'',end:'',sup:sp?sp.id:'',format:'indiv',group:'',mode:'person',obs:'',client:clientCodes()[0]||'',acts:[],bst:[],sact:[],feedback:'',follow:'',ck:{}};
-  m.contacts.push(c);openC.add(c.id);renderContacts();renderComp();changed();const e=$('#c_'+c.id+'_date');if(e){e.scrollIntoView({block:'center'});if(!c.date)e.focus();else{const s=$('#c_'+c.id+'_start');if(s)s.focus();}}});
+  /* like the last one: the same supervisor, format, way, observation, client and boxes ticked;
+     the date, the times, the feedback and the checklist are the new contact's own */
+  if(like){['sup','format','group','mode','obs','client'].forEach(k=>{c[k]=like[k]||c[k];});['sact','acts','bst'].forEach(k=>{c[k]=(like[k]||[]).slice();});}
+  m.contacts.push(c);openC.add(c.id);renderContacts();renderComp();changed();const e=$('#c_'+c.id+'_date');if(e){e.scrollIntoView({block:'center'});if(!c.date)e.focus();else{const s=$('#c_'+c.id+'_start');if(s)s.focus();}}
+  if(like)nbhUI.toast('A new contact like the one of '+(like.date?mdy(like.date):'(no date)')+': the supervisor, format, client and boxes ticked are copied. Enter the date, the times and the feedback.');}
+$('#addContact').addEventListener('click',()=>addContact(null));
+$('#addLike').addEventListener('click',()=>{const L=lastContact();if(!L){nbhUI.toast('No contact recorded yet for this RBT; use Add a contact.',{kind:'warn'});return;}addContact(L);});
 $('#addSup').addEventListener('click',()=>{if(S.sups.length>=12)return;const n=newSup();S.sups.push(n);renderSups();const r=$('#sup_'+n.id+'_name');if(r)r.focus();changed();});
 $('#addConcern').addEventListener('click',()=>{if(S.concerns.length>=40)return;const c={id:uid(),date:todayISO(),concern:'',investigated:'',decision:'',plan:'',outcome:'',outcome_date:''};S.concerns.push(c);renderConcerns();const e=$('#cn_'+c.id+'_concern');if(e)e.focus();changed();});
 $('#printConcerns').addEventListener('click',()=>{if(!S.concerns.length){nbhUI.toast('No concerns are recorded.');return;}printOnly('rs-print-concerns');});

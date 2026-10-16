@@ -9918,12 +9918,24 @@ for a 5-second repaint).
   one RBT. The CSV holds the rows of every RBT (the last two columns say whose); the due line on the case bar names
   each RBT's recertification and goals. Each monthly record still prints and is signed per RBT.
 - The simulation now has two simulated RBTs (Jordan Lee and Casey Morgan, both "(simulated)").
+- **The RBT's usual hours on the Month page.** A box above the service days holds the RBT's usual start and end times,
+  minutes not in services, primary intervention and usual days (the same setting as on the Setup page; a change in one
+  shows in the other). **Fill the usual days and times** adds the usual days still missing with those hours and gives
+  them to any day without times; a time you changed on a day is kept. Only when every day already has times does it
+  offer to set them all back to the usual hours. Every day's times stay editable in its row.
+- **Faster contacts.** **Add a contact like the last one** starts a contact with the supervisor, format, way, client
+  and the boxes ticked of the RBT's latest contact (the date, times, feedback and checklist are new). Under the times,
+  **Length** buttons (30 min, 45 min, 1 h, 1½ h, 2 h) set the end time from the start; the length reads in minutes and
+  hours. The choices read shorter ("Individual", "Live video (two-way)") so they fit on the iPad.
+- **A date in another month.** The iPad's date picker does not keep to the month on screen, so a contact or a service
+  day could be dated, say, October 15 while it sat in August, where it counted nowhere. Now it moves to its own month,
+  which then shows, with a note saying so.
 - On the iPad, the date and time boxes on RS-1 no longer run past their column into the next box.
 - The v22.29 test run found two stale checks, now fixed: the GB-1 case hook's master copy
   (`tools/blocks/hooks/GB-1.js`) carries the v22.29 change, and the simulated student's journey expects an unfinished
   GB-1 objective to be named as unfinished in the IEP packet.
 
-Checked by `qa/rs1-test.js` (section 8).
+Checked by `qa/rs1-test.js` (sections 8, 9 and 10).
 
 ### v22.29: four small fixes from the review
 

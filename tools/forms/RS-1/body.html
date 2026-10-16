@@ -67,13 +67,25 @@
     <div class="rs-mgrid">
       <div class="rs-main">
         <h2 class="nbh-band" id="monthTitle">Service Days</h2>
-        <p class="hint">One row for each day the RBT provided services. Hours are the end time less the start time less the time not in RBT services. Tick <b>No service</b> for a holiday or an absence; a row after today is planned and is not counted yet.</p>
-        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days</button><span class="hint" id="dayCount"></span></div>
+        <p class="hint">One row for each day the RBT provided services. Hours are the end time less the start time less the time not in RBT services. Tick <b>No service</b> for a holiday or an absence; a row after today is planned and is not counted yet. <b>Fill the usual days and times</b> adds the usual days still missing and gives the usual hours to any day without times; a time you changed on a day stays as you entered it.</p>
+        <!-- v22.30 the RBT's usual hours, kept with the Setup page's: they fill the days, and every row can still be changed -->
+        <div class="rs-usual" id="usualBox">
+          <h3>The RBT&rsquo;s Usual Hours</h3>
+          <div class="fieldgrid">
+            <div><label for="mStart">Usual start time</label><input id="mStart" type="time" data-s="day_start"></div>
+            <div><label for="mEnd">Usual end time</label><input id="mEnd" type="time" data-s="day_end"></div>
+            <div><label for="mBreak">Usual time not in RBT services (minutes)</label><input id="mBreak" data-s="day_break" inputmode="numeric" placeholder="e.g., 30 for lunch"></div>
+            <div><label for="mAct">Usual primary intervention</label><select id="mAct" data-s="day_act"></select></div>
+          </div>
+          <div class="rs-days" role="group" aria-label="Usual service days" id="mDayChips"></div>
+          <p class="hint" id="usualHint"></p>
+        </div>
+        <div class="tools"><button class="tool" type="button" id="addDay">Add a day</button><button class="tool" type="button" id="fillDays">Fill the usual days and times</button><span class="hint" id="dayCount"></span></div>
         <div class="grid-wrap"><table class="rt rs-days-t rs-stack" id="dayTbl"><thead><tr><th style="width:21%">Date</th><th style="width:13%">Start</th><th style="width:13%">End</th><th style="width:9%">Not in services (min)</th><th style="width:8%">Hours</th><th>Primary intervention</th><th style="width:8%">No service</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
 
         <h2 class="nbh-band" style="margin-top:18px">Supervision Contacts</h2>
         <p class="hint">Each real-time contact with the supervisor: in person or by live two-way video. In person is preferred; a web camera or video conference is allowed. A phone call, an email, a recording, or video monitoring without real-time interaction and feedback can be noted here but does not count. Supervision is client-focused and is not professional development: one event cannot count as both.</p>
-        <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><span class="hint" id="contactCount"></span></div>
+        <div class="tools"><button class="tool" type="button" id="addContact">Add a contact</button><button class="tool" type="button" id="addLike" title="Copies the supervisor, format, client and the boxes ticked from the latest contact">Add a contact like the last one</button><span class="hint" id="contactCount"></span></div>
         <div id="contactList"></div>
         <div class="field rs-mnote"><label for="monthNote">Notes for the month (optional)</label><textarea id="monthNote" data-mo="note" rows="2" placeholder="e.g., the RBT was out for two days; the client moved to a new classroom on the 14th"></textarea></div>
         <div class="field"><label for="monthRecords">Other records for this month, if any records disagree (optional)</label><input id="monthRecords" data-mo="records" placeholder="e.g., session notes on Form CN-1 for 9/14 to 9/18; the district time sheet"></div>
