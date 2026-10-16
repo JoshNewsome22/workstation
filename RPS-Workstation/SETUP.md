@@ -9917,9 +9917,19 @@ for a 5-second repaint).
 - **Rows with room to write** on a short sheet: ten days or fewer print on rows about four tenths of an inch tall (a
   third of an inch up to fourteen days), not a quarter, with the page left empty under them. A longer sheet, or one with
   more than eight behaviors, keeps the quarter inch.
+- **Live Recording folds.** **Hide** in its title line folds it to that line and **Show** opens it; the choice is kept on
+  this device. While a session runs or is not yet saved it stays open (Hide is off and says why). Checked by
+  `qa/v2232-dd1-live-fold-test.js`.
 - **Names break between words** in the printed headings ("Spit-ting" read badly).
 - **Staff phones says when no code will print**: a QR code prints under the sheet only for a staff link that exists and
   works; with none yet the panel says so, and how to make one.
+
+- **A staff phone that scans the code is asked to sign in to the website** when the workstation's folder has a password
+  (cPanel Directory Privacy) and its `.htaccess` does not let the staff page through. HOSTING.md's lines (Respondent
+  links when the folder has a password) now name every file the two public pages load: `respond.html`,
+  `respond-page.js`, `nbh-respond.js`, `staff-data.html` and `staff-data-page.js` (the two `-page.js` files were
+  missing, so even a folder with the old lines asked the phone for the password). Add the lines at the end of the
+  folder's `.htaccess`, once; an upload never replaces `.htaccess`.
 
 Checked by `qa/v2231-dd1-qr-test.js` and `qa/v2180-e-test.js`.
 

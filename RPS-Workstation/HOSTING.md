@@ -247,7 +247,7 @@ password), everyone who opens such a link is asked for that password,
 which informants do not have; on the assessor's own computer the
 browser has the password cached, so the link appears to work there.
 Fix: make a public folder, for example `public_html/respond/`, upload
-only `respond.html` and `nbh-respond.js` into it, and `staff-data.html`
+only `respond.html`, `respond-page.js` and `nbh-respond.js` into it, and `staff-data.html` and `staff-data-page.js`
 for the staff phones (v21.85) (no student data is ever in those files; the questionnaire travels in the link
 itself), and in Form IA-1's Respondent pages dialog enter its address
 in **Address of respond.html for links**, for example
@@ -266,7 +266,7 @@ them through the password. In cPanel's File Manager, turn on
 ```
 # The questionnaire pages informants open, and the staff data page (v21.85): no password (they hold no student data;
 # the questionnaire or the targets travel in the link)
-<FilesMatch "^(respond\.html|nbh-respond\.js|staff-data\.html)$">
+<FilesMatch "^(respond\.html|respond-page\.js|nbh-respond\.js|staff-data\.html|staff-data-page\.js)$">
   <IfModule mod_authz_core.c>
     Require all granted
   </IfModule>
@@ -279,7 +279,9 @@ them through the password. In cPanel's File Manager, turn on
 ```
 
 Everything else in the folder keeps its password; the links work as
-the forms make them, and the two files are updated with every upload.
+the forms make them, and the files are updated with every upload.
+(v22.32: `respond-page.js` and `staff-data-page.js` are in the list: the two pages load them, and without them a phone
+that opened a questionnaire link, or scanned a staff link's QR code, was asked to sign in to the website.)
 Leave **Address of respond.html for links** empty. If Directory
 Privacy is turned off and on again, it rewrites `.htaccess`: add the
 lines again.

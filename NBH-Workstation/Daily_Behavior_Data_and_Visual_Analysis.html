@@ -1058,6 +1058,14 @@ p.dd-numbered{margin-top:4px}
 .ddl[data-s="pause"]{border-left-color:#C98A00}
 .ddl[data-s="done"]{border-left-color:var(--nbh-navy,#182e43)}
 .ddl-hd{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline;margin:0 0 10px}
+/* v22.32 Live Recording folds to its title line (Hide / Show, kept on this device); a session running or not yet saved
+   keeps it open */
+.ddl-fold{order:3;margin-left:auto;align-self:center;font:600 13px/1 var(--sans,system-ui,sans-serif);padding:8px 14px;border:1px solid var(--rule,#c9d3d6);border-radius:3px;background:#fff;color:var(--nbh-navy,#182e43);cursor:pointer}
+.ddl-fold:disabled{opacity:.55;cursor:default}
+@media screen and (pointer:coarse){#ddLive .ddl-fold{min-height:44px!important;min-width:64px}}
+.ddl.ddl-folded > :not(.ddl-hd){display:none!important}
+.ddl.ddl-folded .ddl-hd{margin:0}
+.ddl.ddl-folded .ddl-hint{display:none}
 .ddl-hd h2{font-size:20px;margin:0}
 .ddl-hint{font-size:13px;color:var(--nbh-muted,#54676f);max-width:84ch;margin:0}
 .ddl-top{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;justify-content:space-between}
@@ -1594,7 +1602,18 @@ html.wk-fs-on,html.wk-fs-on body{overflow:hidden}
     <!-- Live recording at the table: a session timer and one control per behavior. It writes the day's row only when
          Save to the sheet is pressed. None of its controls has a name, so none is a record field, and none of it prints. -->
     <section class="ddl noprint no-print" id="ddLive" data-s="ready" aria-labelledby="ddlTitle">
-      <div class="ddl-hd"><h2 id="ddlTitle">Live Recording</h2><p class="ddl-hint">Time the session and tap each behavior as it happens. Nothing reaches the sheet until you press <b>Save to the sheet</b>.</p></div>
+      <div class="ddl-hd"><h2 id="ddlTitle">Live Recording</h2><button type="button" class="ddl-fold" id="ddlFold" aria-expanded="true" aria-controls="ddLive">Hide</button><p class="ddl-hint">Time the session and tap each behavior as it happens. Nothing reaches the sheet until you press <b>Save to the sheet</b>.</p></div>
+      <script>
+/* v22.32 Hide / Show for Live Recording, remembered on this device */
+(function(){const box=document.getElementById("ddLive"),b=document.getElementById("ddlFold");if(!box||!b)return;
+  const K="nbh.dd1.liveFold";let fold=false;try{fold=localStorage.getItem(K)==="1";}catch(e){}
+  const paint=()=>{const busy=!!box.dataset.s&&box.dataset.s!=="ready",f=fold&&!busy;box.classList.toggle("ddl-folded",f);
+    b.textContent=f?"Show":"Hide";b.setAttribute("aria-expanded",String(!f));b.disabled=busy;
+    b.title=busy?"A session is running or not saved yet, so Live Recording stays open":f?"Show Live Recording":"Hide Live Recording (it stays hidden on this device until you show it)";};
+  b.addEventListener("click",()=>{if(b.disabled)return;fold=!fold;try{if(fold)localStorage.setItem(K,"1");else localStorage.removeItem(K);}catch(e){}paint();});
+  try{new MutationObserver(paint).observe(box,{attributes:true,attributeFilter:["data-s"]});}catch(e){}
+  paint();})();
+</script>
       <div class="ddl-top">
         <div class="ddl-clock">
           <div class="ddl-time" id="ddlTime" role="timer" aria-label="Observed time">0:00</div>
