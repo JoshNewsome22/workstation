@@ -947,12 +947,14 @@ td input,td select{max-width:100%}
     <h3>How the Sheets Come Back, and Who to Call</h3>
     <table class="rt">
       <tr><th style="width:28%">How often the sheet comes back</th><td><select data-m="freq" style="width:70%"><option></option><option>Every school day, in the folder</option><option>Twice a week (Wednesday and Friday)</option><option>Every Friday</option><option>Every two weeks</option><option>At the review meeting</option></select></td></tr>
-      <tr><th>How the family returns it</th><td><select data-m="ret_how" style="width:70%"><option></option><option>In the backpack folder</option><option>A photo of the sheet by text message</option><option>A photo of the sheet by email</option><option>Handed to the teacher at pickup</option><option>Read out over the phone at the weekly call</option></select></td></tr>
+      <!-- v22.37 (review F368): a photo of the sheet goes to a district number or a district email only, never a personal phone -->
+      <tr><th>How the family returns it</th><td><select data-m="ret_how" style="width:70%"><option></option><option>In the backpack folder</option><option>A photo of the sheet, texted to a district phone number</option><option>A photo of the sheet, emailed to a district email address</option><option>Handed to the teacher at pickup</option><option>Read out over the phone at the weekly call</option></select><div id="hdRetNote" class="noprint"></div></td></tr>
+      <tr><th>The district number or email a photo goes to</th><td><input data-m="ret_to" placeholder="e.g., the school office&rsquo;s district phone, 555-0100; or the BCBA&rsquo;s district email; never a personal phone"></td></tr>
       <tr><th>What the family should do when a behavior happens (one line from the plan, if the same for every behavior)</th><td><input data-m="todo" placeholder="e.g., Stay calm, say “you can have a break”, wait, then go back to the step. Mark the sheet after."></td></tr>
       <tr><th>Who to call, and when</th><td><input data-m="call" placeholder="name, number, and the hours; e.g., Ms. Lopez, 555-0100, school days 8 to 4"></td></tr>
       <tr><th>Call right away if</th><td><input data-m="urgent" placeholder="e.g., anyone is hurt, or the behavior lasts more than 20 minutes; for an emergency call 911 (Form CR-1)"></td></tr>
       <tr><th>How the family was taught the sheet</th><td><input data-m="taught" placeholder="e.g., 15 minutes at pickup: showed the sheet, filled in one day together, the family marked a practice row (Form CT-1)"></td></tr>
-      <tr><th>What the family gets back</th><td><input data-m="feedback" placeholder="e.g., the graph and two sentences by text every Friday; thanks at every return"></td></tr>
+      <tr><th>What the family gets back</th><td><input data-m="feedback" placeholder="e.g., the graph and two sentences in the folder, or by district email, every Friday; thanks at every return"></td></tr>
     </table>
     <div id="setupVerdict"></div>
   </section>
@@ -1213,7 +1215,7 @@ function renderRet(){const asked=['tally','check','abc','sleep'].filter(k=>S.chk
 function kid(){return S.meta.nick||S.meta.client||'';}
 function hsHead(title,who){return '<div class="hs-title">'+esc(title)+'</div><div class="hs-who"><span>Child: <span class="bl">'+esc(kid())+'</span></span><span>Week of: <span class="bl" style="min-width:120px">'+esc(S.meta.sh_week||'')+'</span></span><span>Filled in by: <span class="bl">'+esc(who||'')+'</span></span></div>';}
 function hsPlan(){const lines=[];S.bh.forEach(b=>{if(b.name&&b.todo)lines.push('<p class="hs-line"><b>If '+esc(b.name.toLowerCase())+' happens:</b> '+esc(b.todo)+'</p>');});if(S.meta.todo)lines.push('<p class="hs-line"><b>When a behavior happens:</b> '+esc(S.meta.todo)+'</p>');return lines.join('');}
-function hsFoot(){const f=S.meta.freq?'Send the sheet back: '+esc(S.meta.freq.toLowerCase())+(S.meta.ret_how?', '+esc(S.meta.ret_how.toLowerCase()):'')+'.':'';
+function hsFoot(){const f=S.meta.freq?'Send the sheet back: '+esc(S.meta.freq.toLowerCase())+(S.meta.ret_how?', '+esc(S.meta.ret_how.toLowerCase())+(retPhoto()&&String(S.meta.ret_to||'').trim()?' ('+esc(S.meta.ret_to.trim())+')':''):'')+'.':'';
   return '<div class="hs-end">'+hsPlan()+'<div class="hs-sig"><span>Signed: <span class="bl"></span></span><span>Date: <span class="bl" style="min-width:110px"></span></span></div><div class="hs-foot"><span>'+f+(S.meta.call?' Questions? Call '+esc(S.meta.call)+'.':'')+(S.meta.urgent?' Call right away if '+esc(S.meta.urgent)+'.':'')+'</span><span>Form HD-1</span></div></div>';}
 function cellMark(ms){return ms==='yn'?'Y &nbsp; N':ms==='dur'?'___ min':ms==='rate'?'0 1 2 3':'';}
 function exMark(ms,di){const t=['||','|','','|||','|','','||'],d=['5','0','','12','3','','8'],r=['1','0','','3','1','','2'],y=['Y','N','','Y','Y','','N'];return ms==='yn'?y[di]:ms==='dur'?(d[di]?d[di]+' min':''):ms==='rate'?r[di]:t[di];}
@@ -1264,14 +1266,21 @@ function renderSheets(){
 }
 
 /* ---------------- setup verdict ---------------- */
+/* v22.37 (review F368): a photo of a sheet is a student record on a phone. It goes to a district number or a district
+   email only, is saved to the district drive and deleted from the phone once typed in; the Setup page says so when a
+   photo is chosen. Earlier files' "by text message" and "by email" read as the district choices. */
+const RET_OLD={'A photo of the sheet by text message':'A photo of the sheet, texted to a district phone number','A photo of the sheet by email':'A photo of the sheet, emailed to a district email address'};
+const retPhoto=()=>/^A photo/.test(S.meta.ret_how||'');
+function renderRetNote(){const el=$('#hdRetNote');if(el)el.innerHTML=retPhoto()?'<div class="verdict v-mid" style="margin-top:6px"><b>A photo of the sheet is a student record.</b> Use a district phone number or a district email only, never a personal phone. Save the photo to the district drive, and delete it from the phone and the email once it is typed in.</div>':'';}
 function renderSetup(){
-  const m=S.meta,out=[];const B=S.bh.filter(b=>b.name);
+  const m=S.meta,out=[];const B=S.bh.filter(b=>b.name);renderRetNote();
   if(!B.length)out.push('Name at least one behavior in the family&rsquo;s words.');
   B.forEach(b=>{if(!b.ex||!b.nex)out.push('<b>'+esc(b.name)+'</b> needs an example and a non-example, or two people will mark it differently.');if(!b.todo&&!m.todo)out.push('<b>'+esc(b.name)+'</b> has no line from the plan; the family will ask what to do when it happens.');});
   if(B.length>4)out.push('More than four behaviors on one sheet is more than most families return; split the sheet or drop one.');
   if(!rtOn().length)out.push('No routine is ticked for the sheets.');
   if(S.chk.check&&!S.sk.some(s=>s.label))out.push('The checklist is ticked but has no steps.');
   if(!m.freq||!m.ret_how)out.push('Say how often the sheet comes back and how; it prints on the sheet.');
+  if(retPhoto()&&!String(m.ret_to||'').trim())out.push('Name the district number or email the photo goes to; it prints on the sheet. A personal phone is not a place for a student record.');
   if(!m.call)out.push('Say who to call; it prints on the sheet.');
   if(!m.taught)out.push('Plan how the family is taught the sheet (one practice day together, as a working convention).');
   $('#setupVerdict').innerHTML=out.length?'<div class="verdict v-mid">'+out.map(x=>'<div>'+x+'</div>').join('')+'</div>':(m.client?'<div class="verdict v-ok"><b>Ready to print.</b> The Home sheets page shows what the family will hold.</div>':'');
@@ -1285,7 +1294,7 @@ document.addEventListener('input',e=>{const el=e.target;
     if(el.dataset.r==='ag'){const tr=el.closest('tr');const a=agree(S.ag[+el.dataset.i]);tr.children[6].textContent=a==null?'—':pct(a);renderAgM();}
     else{renderSheetsSoon();if(el.dataset.r==='bh'||el.dataset.r==='rt')renderEntSoon();}
     return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(nick|client|cg|todo|call|urgent|abc_|sh_)/.test(el.dataset.m))renderSheetsSoon();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(/^(nick|client|cg|todo|call|urgent|abc_|sh_|ret_)/.test(el.dataset.m))renderSheetsSoon();}
 });
 document.addEventListener('change',e=>{const el=e.target;
   if(el.dataset.e!==undefined){week().cells[el.dataset.e]=el.value;updateTotals();return;}
@@ -1347,7 +1356,8 @@ $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='HD-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
-  Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});if(s.chk&&typeof s.chk==='object'&&!Array.isArray(s.chk)){o.chk={};Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});}
+  Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});if(RET_OLD[o.meta.ret_how])o.meta.ret_how=RET_OLD[o.meta.ret_how];   /* v22.37 (review F368) */
+  if(s.chk&&typeof s.chk==='object'&&!Array.isArray(s.chk)){o.chk={};Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});}
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n||50).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='on'||/^r_/.test(f)?!!(x&&x[f]):str(x&&x[f]);});return r;}):[];
   o.bh=arr('bh',['name','ex','nex','ms','todo'],6);o.bh.forEach(b=>{if(!MEAS[b.ms])b.ms='tally';});
   o.rt=arr('rt',['label','time','on','note'],10);o.sk=arr('sk',['label','who','rt'],12);o.sk.forEach(k=>{if(k.who!=='Child')k.who='Adult';});
@@ -1378,11 +1388,11 @@ async function loadSim(){
   const mon=n=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)-7*n);return d;};
   const Y=d=>(d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);const off=(d,k)=>{const x=new Date(d);x.setDate(x.getDate()+k);return x;};
   S=blank();curWk=0;
-  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',nick:'Sam',cg:'Ms. Rivera (mother) on school days; Mr. Rivera (father) on weekends',cg_contact:'555-0142 (text is best)',lang:'English and Spanish; Ms. Rivera reads English, the sheets stay in English',
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',grade:'2',nick:'Sam',cg:'Ms. Rivera (mother) on school days; Mr. Rivera (father) on weekends',cg_contact:'555-0142 (calls after 4 are best)',lang:'English and Spanish; Ms. Rivera reads English, the sheets stay in English',
     plan:'BIP dated '+Y(mon(5))+' (Form TD-1); behaviors from TB-1',question:'Does hitting happen at home, in which routines, and does a short night predict a hard morning?',bcba:'Joshua Newsome, M.A., BCBA',date:Y(off(mon(4),-3)),start:Y(mon(3)),review:Y(off(mon(0),4)),
-    abc_a:'',abc_c:'',freq:'Every Friday',ret_how:'A photo of the sheet by text message',todo:'Stay calm and use few words. Follow the line for that behavior, then go back to the routine. Mark the sheet after, not during.',
+    abc_a:'',abc_c:'',freq:'Every Friday',ret_how:'A photo of the sheet, texted to a district phone number',ret_to:'555-0100, the school office’s district phone',todo:'Stay calm and use few words. Follow the line for that behavior, then go back to the routine. Mark the sheet after, not during.',
     call:'Joshua Newsome, 555-0100, school days 8 to 4; after hours leave a message',urgent:'anyone is hurt, or a tantrum lasts more than 20 minutes; for an emergency call 911 (Form CR-1)',
-    taught:'Twenty minutes at pickup on '+Y(off(mon(3),-3))+': went through the sheet, filled in the practice row together, Ms. Rivera marked one made-up day; a text the first evening to ask how it went (Form CT-1)',feedback:'A photo of the graph and two sentences by text every Friday evening; thanks at every return',
+    taught:'Twenty minutes at pickup on '+Y(off(mon(3),-3))+': went through the sheet, filled in the practice row together, Ms. Rivera marked one made-up day; a call from the school phone the first evening to ask how it went (Form CT-1)',feedback:'The graph and two sentences in the backpack folder every Friday; thanks at every return',
     sh_week:Y(mon(0)),sh_days:'',sh_abc:'3',decision:'Three weeks in: hitting is almost all at homework and bedtime, 2 to 5 a day in week 1 falling to 0 to 2 in week 3 once the timer and the choice of order went in. Tantrum minutes fell with it. Fussing is rated 2 to 3 at bedtime and 0 to 1 elsewhere, and the hard mornings follow the short nights on the sleep log. Decision at the review: keep the tally and sleep log, drop the checklist to two steps, and add the bedtime routine to the plan (Form TD-1).',
     sv:'Ms. Rivera: “the sheet on the fridge is fine; the ABC boxes took too long on a bad night.” She wants to keep the tally sheet.'};
   S.chk={tally:true,check:true,abc:true,sleep:true};

@@ -1386,6 +1386,7 @@ table.grid td.catcell .qcat{display:inline-block;margin-top:2px;font-family:Inte
   </div>
   <div class="bar nbh-band">Send-outs: Which Questionnaire Went to Whom, and What Came Back</div>
   <p class="method" style="margin:0 0 10px">Plan the respondent pages for the targets in this file, the instruments and the informants (the informants are shared by every target; untick one to leave it out for a target), then make the pages or links, email them, and watch what comes back. <b>Send all due now</b> (and <b>Send these</b>, for the rows ticked above) sends one email per person from your school account, listing each of that person&rsquo;s questionnaires with a link of their own (the page opens with their name filled in); <b>Remind all not back</b> does the same for the rows past their please-send-by date. Where the workstation cannot send, your Mail app opens for one person at a time. <b>Collect responses</b> marks a row Received and Placed when it reads that informant&rsquo;s code; a row&rsquo;s own buttons mark Sent and Received by hand. With the reply box on your website (v21.65) the answers come straight back: this sheet collects them while it is open, and <b>Collect from the reply box now</b> does it at once. A row&rsquo;s <b>QR</b> shows the link as a code the informant scans with a phone. The dates feed the workstation&rsquo;s case bar (what is due) and the calendar file.</p>
+  <p class="method" id="outConsent" hidden style="margin:0 0 8px"></p><input type="hidden" name="out.consentOk">
   <div class="noprint" id="outPlan"></div>
   <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><button type="button" class="tool" id="outPlanBtn" style="margin:0">Plan the send-outs</button><button type="button" class="tool" id="outSendThese" style="margin:0" title="Plan the rows ticked above and email them now: one email per person">Send these</button><button type="button" class="tool" id="outPagesBtn" style="margin:0">Make every page not made yet</button><button type="button" class="tool" id="outIcsBtn" style="margin:0">Add the dates to a calendar (.ics)</button><span id="outNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
   <div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 8px"><button type="button" class="tool" id="outSendDue" style="margin:0" title="Every row not sent whose send-on date has come (or that has none): one email per person, listing each of that person's questionnaires">Send all due now</button><button type="button" class="tool" id="outRemindAll" style="margin:0" title="Every row sent and past its please-send-by date: one reminder per person">Remind all not back</button><span id="outMailNote" aria-live="polite" style="font-family:var(--sans);font-size:12px;color:var(--ink-soft)"></span></div>
@@ -7317,6 +7318,41 @@ OUT(function(){const sel=document.getElementById('mFn'),v=sel?sel.value:'';
 @media print{.an-pr{display:inline}#anTbl input[type=checkbox]{display:none}.grid td.an-x,.grid th.an-x{opacity:.45}}
 @media screen and (pointer:coarse){.an-del{min-width:44px;min-height:44px}#anTbl input[type=checkbox],.an-pick input{width:22px;height:22px}}
 </style>
+<script id="v2237-consent-gate">
+/* v22.37 (review F41, I23) nothing goes out before the file says it may. An FBA of one student is an evaluation that needs
+   the parent's written consent first (34 CFR 300.300(a)), and the questionnaires name the student and the behavior. Inside
+   the workstation, every way this form sends or hands out a questionnaire (Send all due now, Send these, Remind, Make every
+   page, a row's page, link, email or QR code, and the Respondent pages' Email it, Copy link, QR and Save the page) first
+   reads the case's consent (Form IC-1). With consent on file covering interviews and rating scales, it goes as before.
+   Otherwise the BCBA is told why and may still send when the district holds consent on paper; that choice, with its date, is
+   kept in this file (out.consentOk) and shown on the Send-outs sheet. A form opened on its own has no case to read: no check. */
+(function(){
+  const SEL='#outSendDue,#outSendThese,#outRemindAll,#outPagesBtn,#rpMail,#rpLink,#rpSave,#rpQr,#outBody button[data-act=page],#outBody button[data-act=link],#outBody button[data-act=email],#outBody button[data-act=remind],#outBody button[data-act=qr]';
+  const okEl=()=>document.querySelector('[name="out.consentOk"]');
+  const md=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'');};
+  const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+  function state(){const C=window.nbhCase;if(!C||!C.facts||!C.consent)return null;const k=C.consent();return {k,ok:k.on&&C.covers('indirect')};}
+  function paint(){const el=document.getElementById('outConsent');if(!el)return;const st=state(),ov=String((okEl()||{}).value||'');
+    if(!st&&!ov){el.hidden=true;return;}el.hidden=false;
+    el.textContent='Consent: '+(st?(st.ok?st.k.word:st.k.on?'Form IC-1 does not cover interviews and rating scales':st.k.word):'not read (the form is open on its own)')+(ov&&!(st&&st.ok)?'. '+ov:'')+'.';}
+  let pass=null;
+  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest(SEL);if(!b||b===pass)return;
+    const st=state();if(!st||st.ok){paint();return;}
+    if(String((okEl()||{}).value||'').trim()){paint();return;}
+    e.preventDefault();e.stopImmediatePropagation();
+    const why=st.k.on?'Form IC-1 does not cover interviews and rating scales'+(st.k.exceptions?' (consent with exceptions: '+st.k.exceptions+')':''):st.k.word;
+    const go=await nbhUI.confirm('Consent check before anything is sent\n'+why+'.\n\nAn FBA is an evaluation: the parent’s written consent comes before any questionnaire goes out, and these name the student and the behavior. Record the consent on Form IC-1 first.\n\nSend anyway only when the district holds the consent on paper; that is noted in this file with today’s date.',{ok:'Send anyway (consent on paper)',cancel:'Not now'});
+    if(!go){const n=document.getElementById('outNote');if(n)n.textContent='Not sent: no consent on file for the questionnaires (Form IC-1).';return;}
+    const o=okEl();if(o){o.value='Sent with the district’s consent on paper, noted '+md(today());o.dispatchEvent(new Event('input',{bubbles:true}));o.dispatchEvent(new Event('change',{bubbles:true}));}
+    paint();pass=b;try{b.click();}finally{pass=null;}},true);
+  /* the line follows the case and the file */
+  const C=window.nbhCase;if(C&&C.apply&&!C.__v2237){const was=C.apply;C.apply=function(){const r=was.apply(this,arguments);try{paint();}catch(e){}return r;};C.__v2237=1;}
+  document.addEventListener('change',e=>{if(e.target&&e.target.name==='out.consentOk')paint();});
+  document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#viewSeg button'))setTimeout(paint,0);});   /* a file opened since: the Send-outs sheet shows its note */
+  window.__iaConsentPaint=paint;
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paint);else paint();
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

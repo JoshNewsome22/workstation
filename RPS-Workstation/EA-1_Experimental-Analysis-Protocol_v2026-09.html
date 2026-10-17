@@ -846,6 +846,12 @@ td input,td select{max-width:100%}
 .ea-ctl .ea-gap{flex:1 1 10px}
 .ea-msg{font-size:12.5px;color:var(--nbh-navy,#182e43);margin-top:7px;min-height:1.3em}
 .ea-msg.ea-warn{color:#8E2A2A}
+/* v22.37 (review F148) the reason asked before a session IC-1 does not cover */
+#eaNcDlg{border:1px solid #c9d4d2;border-radius:6px;padding:14px 16px;max-width:520px;width:calc(100% - 32px);font-family:var(--sans,system-ui,sans-serif);font-size:13px;color:#16242e;background:#fff}
+#eaNcDlg::backdrop{background:rgba(22,36,46,.38)}
+.ea-nc-h{font-weight:600;font-size:14px;margin-bottom:6px}.ea-nc-b{margin:0 0 10px;color:#7a1f1f}.ea-nc-l{display:block;font-size:12px;margin-bottom:4px}
+#eaNcR{width:100%;box-sizing:border-box;font:inherit}.ea-nc-f{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+.ea-nc-f button{font:inherit;padding:6px 12px;border:1px solid #c9d4d2;border-radius:5px;background:#fff;color:#16242e;cursor:pointer}.ea-nc-f .ea-go{background:#182e43;border-color:#182e43;color:#fff}
 .ea-sum{margin-top:8px;padding:8px 10px;border:1px solid var(--nbh-rule,#c9d3dc);border-radius:6px;font-size:12.5px;color:var(--nbh-navy,#182e43)}
 .ea-sum table{border-collapse:collapse;margin-top:4px}
 .ea-sum td{padding:2px 12px 2px 0;font-variant-numeric:tabular-nums}
@@ -1304,6 +1310,8 @@ body.view-walk #walk{display:block}
   </div>
 
   <h3 class="sub">Safety Plan</h3>
+  <!-- v22.37 (review F148): on screen only, when the case's Form IC-1 is known and does not cover the experimental analysis -->
+  <div class="ea-flag noprint" id="eaConsentFlag" role="status" hidden></div>
   <div class="defs">
     <div class="drow"><div class="dlab">Medical clearance</div><div class="dval"><textarea name="s.med" placeholder="Nurse or physician consulted; date; restrictions" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session termination criteria</div><div class="dval"><textarea name="s.term" placeholder="e.g., any tissue damage; 3 head hits within 10 s; any aggression producing a mark; student requests to stop (Kahng et al., 2015)"></textarea></div></div>
@@ -1445,6 +1453,7 @@ body.view-walk #walk{display:block}
   <p class="method" style="margin:0 0 8px">Enter sessions in order. Condition names come from the conditions sheet. Change the phase label when the design changes (for example, "FA", "Ext. alone", "Pairwise", "Reversal"); the graph draws a phase line wherever the label changes. Rate is computed from count and minutes. <span class="noprint">Set the number of rows in the toolbar.</span></p>
   <div class="ea-run noprint" id="eaRun" role="region" aria-label="Session runner">
     <div class="ea-hd"><b>Run a Session</b><span class="ea-hint">Times the session, cues the consequence periods, the attention schedule and the prompt steps, counts the target, and writes the next row of the log below. For a yoked control it replays a master session&rsquo;s deliveries.</span></div>
+    <div class="ea-flag" id="eaRunConsent" role="status" hidden></div>   <!-- v22.37 (review F148): the consent check, in the runner too -->
     <div class="ea-set">
       <label class="ea-wide" for="eaCond">Condition<select id="eaCond"></select></label>
       <label for="eaMode">Session type<select id="eaMode"><option value="session">Timed session</option><option value="latency">Latency: ends at the first target</option><option value="trial">Trial: control, then test segment</option></select></label>
@@ -2719,7 +2728,7 @@ cfaInit();restore({counts:{}});
   }
 
   /* ---- run ---- */
-  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null});
+  function reset(quiet){stop();Object.assign(R,{state:'ready',acc:0,ev:[],pre:[],consUntil:0,consN:0,ncrNext:0,ncrN:0,prNext:0,prN:0,del:[],yoke:null,yokeI:0,yokeN:0,yokeHit:0,term:false,why:'',seg:'',segAt:0,ctl:null,tst:null,nc:''});
     byId('eaSum').hidden=true;if(!quiet)R.msg='';lock(false);paint();}
   function lock(on){['eaCond','eaMode','eaMin','eaFollow','eaYoke'].forEach(id=>byId(id).disabled=on);}
   function start(){
@@ -2837,6 +2846,7 @@ cfaInit();restore({counts:{}});
       const n=+byId('nTrial').value;let k=-1;for(let j=0;j<n;j++)if(V('tr['+c.i+'].ctl['+j+']')===''&&V('tr['+c.i+'].tst['+j+']')===''){k=j;break;}
       if(k<0){note('The trial-based log has no empty trial left for '+c.name+'. Add trials in the toolbar.',true);return;}
       if(R.ctl)setF('tr['+c.i+'].ctl['+k+']',String(R.ctl.hit));if(R.tst)setF('tr['+c.i+'].tst['+k+']',String(R.tst.hit));
+      if(R.nc)ncNote('Trial '+(k+1)+' of '+c.name+' ('+new Date().toLocaleDateString()+'): '+NC+R.nc);   /* v22.37 (F148): the trial log has no notes, so the safety plan keeps it */
       note('Saved as trial '+(k+1)+' of '+c.name+' in the trial-based log.');next();return;}
     let i=emptyRow();
     if(i<0){const ns=byId('nSess');if(+ns.value<+(ns.max||80)){ns.value=String(+ns.value+1);ns.dispatchEvent(new Event('input',{bubbles:true}));ns.dispatchEvent(new Event('change',{bubbles:true}));i=emptyRow();}}
@@ -2848,6 +2858,7 @@ cfaInit();restore({counts:{}});
     setF('s['+i+'].d',new Date().toLocaleDateString());setF('s['+i+'].c',String(c.i));setF('s['+i+'].p',byId('eaPhase').value.trim()||'FA');
     setF('s['+i+'].m',String(Math.round(r.min*100)/100));setF('s['+i+'].v',String(value(r)));setF('s['+i+'].t',R.term);
     if(notes.length&&!V('s['+i+'].n'))setF('s['+i+'].n',notes.join('; '));
+    if(R.nc){const cur=V('s['+i+'].n');setF('s['+i+'].n',(cur?cur+'; ':'')+NC+R.nc);}   /* v22.37 (F148): the reason goes with the session */
     if(!R.yoke&&R.del.length)setF('s['+i+'].y','v1;cons='+num('eaCons')+';min='+(Math.round(r.min*100)/100)+';t='+R.del.map(t=>(t/1000).toFixed(1)).join(','));   /* v21.37: the record a yoked session replays */
     note('Saved as session '+(i+1)+'. '+(measure()==='latency'?'':'Rate '+(Math.round(r.rate*100)/100)+' per min.'));next();
   }
@@ -2897,9 +2908,26 @@ cfaInit();restore({counts:{}});
   byId('eaYoke').addEventListener('change',()=>{if(byId('eaYoke').value)applyYoke();else if(R.c){const d=defaults(R.c);byId('eaCons').value=String(d.cons);byId('eaNcr').value=String(d.ncr);paint();}});
   byId('eaMode').addEventListener('change',()=>{if(byId('eaMode').value==='trial'&&R.c)byId('eaMin').value=String(minsIn(R.c.dur)||1);paint();});
   ['eaMin','eaCons','eaNcr','eaHold','eaPrompt','eaCrit'].forEach(id=>byId(id).addEventListener('input',paint));
-  byId('eaStart').addEventListener('click',start);
+  /* v22.37 (review F148) when the case's Form IC-1 does not cover the experimental analysis, Start session and Save to the log
+     first ask why it is run anyway; Cancel leaves the session where it was. The reason is written with the session (its notes,
+     or for a trial the safety plan's consent line) as "Run without IC-1 consent for the experimental analysis: <reason>".
+     Outside the workstation there is no case and nothing is asked. */
+  const NC='Run without IC-1 consent for the experimental analysis: ';
+  function ncNote(t){const cur=V('s.consent');setF('s.consent',(cur?cur+'\n':'')+t);}
+  function ncAsk(gap){return new Promise(res=>{let d=byId('eaNcDlg');
+    if(!d){d=document.createElement('dialog');d.id='eaNcDlg';d.className='noprint';d.setAttribute('aria-labelledby','eaNcH');
+      d.innerHTML='<div class="ea-nc-h" id="eaNcH">Run without consent for the experimental analysis?</div><p class="ea-nc-b" id="eaNcB"></p><label class="ea-nc-l" for="eaNcR">Why it is run anyway (written with the session)</label><textarea id="eaNcR" rows="3"></textarea><div class="ea-nc-f"><button type="button" id="eaNcNo">Cancel</button><button type="button" class="ea-go" id="eaNcOk">Run and record the reason</button></div>';
+      document.body.appendChild(d);}
+    byId('eaNcB').textContent=gap+'. Do not run a session unless the parent consents to it.';const t=byId('eaNcR');t.value=R.ncLast||'';
+    const done=v=>{try{d.close();}catch(e){}d.removeAttribute('open');res(v);};
+    byId('eaNcOk').onclick=()=>{const v=t.value.replace(/\s+/g,' ').trim();if(!v){t.focus();t.setAttribute('aria-invalid','true');return;}t.removeAttribute('aria-invalid');done(v);};
+    byId('eaNcNo').onclick=()=>done(null);d.oncancel=ev=>{ev.preventDefault();done(null);};
+    if(d.showModal)d.showModal();else d.setAttribute('open','');t.focus();});}
+  async function ncGate(){const gap=window.__eaConsentGap?window.__eaConsentGap():'';if(!gap||R.nc)return true;
+    const v=await ncAsk(gap);if(v==null){note('Not started: Form IC-1 does not cover the experimental analysis.',true);return false;}R.nc=v;R.ncLast=v;return true;}
+  byId('eaStart').addEventListener('click',async()=>{if(R.state==='ready'&&!(await ncGate()))return;start();});
   byId('eaEnd').addEventListener('click',endEarly);
-  byId('eaSave').addEventListener('click',save);
+  byId('eaSave').addEventListener('click',async()=>{if(R.state==='done'&&!(await ncGate()))return;save();});
   byId('eaDiscard').addEventListener('click',async()=>{if(R.state!=='done'&&!(await nbhUI.confirm('Discard this session?\nNothing from it is written to the log.',{ok:'Discard',danger:true})))return;reset(false);note('Session discarded.');});
   byId('eaTarget').addEventListener('click',()=>tap('tgt'));
   byId('eaPre').addEventListener('click',()=>tap('pre'));
@@ -5572,15 +5600,40 @@ window.__nbhFactsIn=function(f){const g=window.nbhCase&&nbhCase.generic?nbhCase.
     const keys=[...new Set(src.map(e=>e.fnKey||K(e.fn)).filter(Boolean))],firm=src.some(e=>/Strong|Moderate/.test(e.strength||''));
     const one=keys.length===1?{attention:'social',tangible:'social',escape:'escape',automatic:'auto'}[keys[0]]:'';
     put('v.hyp',one&&firm?one:(keys.length>1||(keys.length===1&&!one))?'none':'','the prior hypothesis');}
-  const c=f.consent;if(c&&T(c.date)){const d=MDY(ISO(c.date))||T(c.date),p=T(c.parent)&&T(c.parent)!==T(c.date)?MDY(ISO(c.parent))||T(c.parent):'';
-    put('s.consent','Parent consent obtained '+d+(p?' (parent signed '+p+')':'')+' (Form IC-1)','consent');}
+  /* v22.37 (review F148, F13) the consent line says what IC-1 records for the experimental analysis: "Parent consent obtained"
+     only when nbhCase.covers('fa') (consent on file and the analysis given its own yes); otherwise a line that says it is NOT
+     consented, or that consent was declined or revoked. A line the case wrote before (one of these forms) is replaced as the
+     case changes; anything else typed in the field is kept. The parent's stop rule fills the session-termination criteria. */
+  const c=f.consent,k=c&&typeof c==='object'&&window.nbhCase&&nbhCase.consent?nbhCase.consent(f):null;
+  if(k&&k.known){const fa=(k.dec&&k.dec.fa)||{};let line='';
+    if(nbhCase.covers('fa',f)){const d0=T(c.obtained)||T(c.date)||T(c.parent);if(d0){const d=MDY(ISO(d0))||d0,p=T(c.parent)&&T(c.parent)!==d0?MDY(ISO(c.parent))||T(c.parent):'';
+      line='Parent consent obtained '+d+(p?' (parent signed '+p+')':'')+' (Form IC-1)';}}
+    else line=k.on?'Form IC-1: the experimental analysis is NOT consented ('+eaWhy(k)+')':k.word+'; the experimental analysis is NOT consented';
+    if(line&&autoLine('s.consent',line)){n++;got.push('consent');}
+    if(T(fa.stop))put('s.term',T(fa.stop).replace(/[.;\s]+$/,'')+' (Form IC-1, Specific procedures A)','the stop rule');}
   const h=f.profile&&f.profile.health,meds=h&&Array.isArray(h.meds)?h.meds.filter(m=>m&&T(m.name)):[];
   if(meds.length)put('s.med','Current medications (Form DM-1): '+meds.map(m=>T(m.name)+(T(m.dose)?' '+T(m.dose):'')).join('; ')+'.','medications');
   const b=(f.behaviors||[]).find(x=>x&&!(x.isRep||/replacement|alternative/i.test(x.type||'')));
   if(b){put('m.def',b.def,'the definition');if(b.urg!=null)put('m.urg',String(b.urg),'the urgency level');}
   put('m.prec',(f.plan&&T(f.plan.prec))||(f.crisis&&T(f.crisis.precursor)),'the precursor');
   if(n)try{if(typeof refresh==='function')refresh();}catch(e){}
+  try{window.eaPaintConsent();}catch(e){}
   const gf=(g&&g.filled)||0;return gf||n?{filled:gf+n,note:got.length?'from the case: '+got.join(', '):((g&&g.note)||'')}:g;};
+/* v22.37 (review F148) the lines the case writes in "Consent and notification": one of them already there is the case's
+   own, so a newer reading replaces it; any other text in the field is the BCBA's and stays */
+const AUTO=/^(Parent consent obtained .*\(Form IC-1\)|Form IC-1: the experimental analysis is NOT consented\b.*|(Consent (declined|revoked|pending|not established)|No consent on file)\b.*\(Form IC-1\).*)$/;
+function autoLine(name,line){const el=document.querySelector('[name="'+name+'"]');if(!el)return false;const cur=String(el.value||'');let v='';
+  if(!T(cur))v=line;else{const L=cur.split('\n'),i=L.findIndex(x=>AUTO.test(x.trim()));if(i<0||L[i].trim()===line)return false;L[i]=line;v=L.join('\n');}
+  el.value=v;['input','change'].forEach(t=>el.dispatchEvent(new Event(t,{bubbles:true})));return true;}
+function eaWhy(k){const fa=(k.dec&&k.dec.fa)||{};return k.exceptions?'consent with exceptions: '+T(k.exceptions).replace(/[.;\s]+$/,''):fa.dec==='no'?'the parent said no to it':fa.dec==='na'?'it was not proposed to the parent':'its own decision is not recorded';}
+/* v22.37 (review F148) the consent gap: '' outside the workstation (no case), when the case carries no consent record, or
+   when IC-1 covers the analysis; otherwise what IC-1 says. The runner asks for a reason before a session while it is set. */
+window.__eaConsentGap=function(){const C=window.nbhCase;if(!C||!C.facts||!C.consent)return '';const k=C.consent();if(!k.known||C.covers('fa'))return '';
+  return k.on?'Form IC-1 does not cover the experimental analysis ('+eaWhy(k)+')':k.word;};
+window.eaPaintConsent=function(){const g=window.__eaConsentGap(),e=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  [['eaConsentFlag','Do not run a session unless the parent consents to it. Record the consent on Form IC-1, Specific procedures A.'],
+   ['eaRunConsent','Do not run a session unless the parent consents to it. A session started anyway asks why, and the reason is written with that session.']].forEach(([id,t])=>{
+    const n=document.getElementById(id);if(!n)return;n.hidden=!g;n.innerHTML=g?'<b>Consent check:</b> '+e(g)+'. '+t:'';});};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>

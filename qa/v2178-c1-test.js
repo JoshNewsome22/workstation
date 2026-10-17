@@ -21,7 +21,7 @@ const CASE={behaviors:[{label:'Elopement',def:'Leaving the assigned area by more
     {label:'Physical aggression',def:'Hitting, kicking or pushing another person',dim:'frequency',type:'target'},{label:'Asking for a break',isRep:true,type:'replacement'}],
   fn:{key:'escape',label:'Escape from demands',statements:[]},
   menu:[{name:'Drawing time',rank:2},{name:'Music on headphones',rank:1},{name:'Stickers',rank:3,tier:'LP'}],
-  consent:{date:'2026-09-02',parent:'2026-09-03',src:'IC-1'},
+  consent:{date:'2026-09-02',parent:'2026-09-03',src:'IC-1',bip:'2026-09-20'},   /* v22.37 with the consent to carry out the plan */
   training:{steps:[{d:'Give the five-minute warning.',crit:false,cmp:''},{d:'Put the break card within reach and say once: "You can ask for a break."',crit:true,cmp:''},{d:'Praise the ask and give the break at once.',crit:true,cmp:''}],src:'TV-1'},
   profile:{strengths:'reads well',src:'DM-1',health:{meds:[{name:'Risperidone',dose:'0.5 mg',times:'Once daily (AM), 8:00',reason:'Irritability'},{name:'Guanfacine ER',dose:'1 mg',times:'Once daily (PM)',reason:'Attention'},{name:'Samplezine',dose:'5 mg',times:'Twice daily',reason:'Simulated'}],
     prescriber:'Dr. Sample (simulated)',allergies:'None known',conditions:'Seizure disorder; constipation per parent'},dates:{iep:'2027-05-11',iepHeld:'2026-05-12',reeval:'2027-10-19'}}};
@@ -93,13 +93,13 @@ OTHER.profile.health={meds:[{name:'Sertraline',dose:'25 mg'}],prescriber:'Dr. Ot
   p=await open(CT);
   r=await p.evaluate(c=>window.nbhCase.apply(c),CASE);
   const cv=await p.evaluate(()=>({consent:document.querySelector('[data-m="consent"]').value,mc:S.meta.consent,home:document.querySelector('[data-m="homeR"]').value,steps:S.steps.map(s=>[s.d,s.crit]),rows:document.querySelectorAll('#stepTbl tbody tr').length}));
-  ok('CT-1 in: the consent date (and form) into data-m="consent"',/^9\/2\/2026 \(Form IC-1; parent signed 9\/3\/2026\)$/.test(cv.consent)&&cv.mc===cv.consent,cv);
+  ok('CT-1 in: the consent to carry out the plan (not the assessment consent) into data-m="consent" (v22.37, review F348)',cv.consent==='BIP implementation consent 9/20/2026 (Form IC-1)'&&cv.mc===cv.consent,cv);
   ok('CT-1 in: the protocol steps of TV-1 with Critical',cv.steps.length===3&&cv.steps[1][1]===true&&cv.steps[0][1]===false&&/five-minute/.test(cv.steps[0][0])&&cv.rows===3,cv);
   ok('CT-1 in: reinforcers at home offered from the menu, by rank, without LP',/check with the family/.test(cv.home)&&/Music on headphones, Drawing time/.test(cv.home)&&!/Stickers/.test(cv.home),cv.home);
   ok('CT-1 in: filled count through nbhCase.apply',r&&r.filled>=5,r);
   await p.evaluate(c=>window.__nbhFactsIn(c),OTHER);
   const cv2=await p.evaluate(()=>({consent:S.meta.consent,home:S.meta.homeR,steps:S.steps.length,d0:S.steps[0].d}));
-  ok('CT-1 in: a second case overwrites nothing',/^9\/2\/2026/.test(cv2.consent)&&!/Bubbles/.test(cv2.home)&&cv2.steps===3&&/five-minute/.test(cv2.d0),cv2);
+  ok('CT-1 in: a second case overwrites nothing typed (the consent line is the case\u2019s own: with no consent to carry out the plan it is cleared)',cv2.consent===''&&!/Bubbles/.test(cv2.home)&&cv2.steps===3&&/five-minute/.test(cv2.d0),cv2);
   await p.reload();await sleep(900);
   await p.evaluate(()=>{const el=document.querySelector('#stepTbl [data-s="0"][data-f="d"]')||document.querySelector('#stepTbl textarea,#stepTbl input[type=text],#stepTbl input:not([type])');el.value='My own first step';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await p.evaluate(c=>window.__nbhFactsIn(c),CASE);
@@ -116,7 +116,8 @@ OTHER.profile.health={meds:[{name:'Sertraline',dose:'25 mg'}],prescriber:'Dr. Ot
   await p.evaluate(c=>window.__nbhFactsIn(c),OTHER);
   ok('IC-1 in: typed words are not overwritten',(await p.evaluate(()=>document.querySelector('[name="c.behav"]').value))==='Typed by the parent meeting');
   await p.evaluate(()=>{const e=document.getElementById('cDate');e.value='2026-09-02';});
-  ok('IC-1 out: consent still sent',(await p.evaluate(()=>{const o=window.__nbhFactsOut();return o&&o.consent&&o.consent.date;}))==='2026-09-02');
+  /* v22.37 (review F11): a date with no method and no decision is not consent on file; the case is told so */
+  ok('IC-1 out: a date alone is sent as "Not recorded", not as consent on file',(await p.evaluate(()=>{const o=window.__nbhFactsOut(),c=o&&o.consent;return c&&c.state==='Not recorded'&&c.on===false&&c.date==='';})));
   await p.close();
 
   ok('no page errors',errs.length===0,errs);

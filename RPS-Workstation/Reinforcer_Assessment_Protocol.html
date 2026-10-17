@@ -417,6 +417,7 @@ body{
 }
 .warn b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;
   margin-bottom:3px;color:var(--ink)}
+.warn.ra-food{border-left-color:var(--nbh-flag);background:var(--nbh-flag-soft)}.warn.ra-food b{color:var(--nbh-flag)} /* v22.37 (review F135) */
 .method{font-size:12px;line-height:1.55;color:var(--ink-soft);margin-top:4px}
 .method b{color:var(--ink);font-family:var(--sans);font-size:11px;
   display:block;margin:12px 0 3px}
@@ -1670,6 +1671,8 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="drow"><div class="dlab">Consequence magnitude and timing</div><div class="dval"><textarea data-meta="magnitude" placeholder="e.g., 20 s access delivered within 2 s; edible: one piece" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Control condition</div><div class="dval"><textarea data-meta="control" placeholder="e.g., same materials, responses produce nothing; assessor present, neutral" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">MO control before sessions</div><div class="dval"><textarea data-meta="mo" placeholder="e.g., no access to tested items for 3 h; sessions 9:30 daily; not within 30 min of snack" class="nbh-line" rows="1"></textarea></div></div>
+    <!-- v22.37 (review F135): the parent's food-item decision, the allergies and the limits, before any edible is delivered -->
+    <div class="drow"><div class="dlab">Food items: approved, allergies or diet, limits (Form IC-1)</div><div class="dval"><textarea data-meta="food" placeholder="e.g., Goldfish crackers and fruit snacks approved; no peanut; one small serving per session (Form IC-1, Specific procedures B)" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Session signal (multielement only)</div><div class="dval"><textarea data-meta="signal" placeholder="e.g., colored placemat per condition; item shown before session" class="nbh-line" rows="1"></textarea></div></div>
   </div>
 
@@ -1679,6 +1682,8 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <thead><tr><th class="n" style="width:6%">Code</th><th style="width:30%">Stimulus (exact form delivered)</th><th style="width:14%">Type</th><th class="n" style="width:14%">PA-1 rank / %</th><th>Magnitude, portion, or access rule</th></tr></thead>
     <tbody></tbody>
   </table>
+  <!-- v22.37 (review F135): an Edible stimulus while the food-item decision on Form IC-1 is not Yes; screen only -->
+  <div class="warn ra-food noprint" id="raFoodWarn" role="status" hidden></div>
 
   <h3 class="sub">Designs Planned</h3>
   <div class="chkrow">
@@ -2658,6 +2663,9 @@ let coaRunnerSync=null;
   function reset(){clearInterval(C.tick);Object.assign(C,{st:'ready',side:null,ref:false,acc:[0,0,0],refAcc:0,pb:0,prompts:[],run:0});el('cueh').textContent='Ready';el('cuet').textContent='Place the student at the neutral spot, give the contingency overview, answer questions, then press Start session. The Neither timer runs until you tap a side.';el('cue').classList.remove('ra-run-soft','ra-run-now');paint();}
   el('start').addEventListener('click',()=>{if(S.meta.coMode!=='coa')return;const pi=el('pair').value;if(pi===''||!S.coa.pairs[+pi]){msg('Choose a pairing first.',true);return;}
     const p=coaStats().pairs[+pi];if(!p.ok){msg('Pairing '+(+pi+1)+' needs two different conditions.',true);return;}
+    /* v22.37 (review F135): a condition linked to an Edible stimulus, without the parent's Yes on Form IC-1, asks first */
+    {const pr=S.coa.pairs[+pi],fe=[pr.c1,pr.c2].map(c=>c===''?null:S.coa.lib[+c]).filter(x=>x&&x.link!==''&&x.link!=null&&S.stim[+x.link]&&S.stim[+x.link].type==='Edible').map(x=>name(+x.link));
+      if(fe.length&&window.raFoodGate&&!window.raFoodGate(fe,m=>msg(m,true),()=>el('start').click()))return;}
     C.pair=pi;C.sideC1=el('side').value;C.st='run';C.last=Date.now();C.side=null;C.tick=setInterval(tick,250);beep(660,180);
     el('cueh').textContent='Session running';el('cuet').textContent='Tap the side the student is on as they move; both side timers are paused while Neither is selected.';el('cue').classList.add('ra-run-now');msg('Session started. Keys 1, 0, 2; R refusing; P problem behavior; C prompt.');paint();});
   [1,0,2].forEach(s=>el('s'+s).addEventListener('click',()=>{if(C.st!=='run')return;tick();C.side=s;if(s!==0)C.ref=false;paint();}));
@@ -3715,6 +3723,43 @@ window.__nbhFactsIn=function(f){let n=0;
   if(n){renderAll();}
   const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;
   return n?{filled:n+((g&&g.filled)||0),note:'the stimuli from Form PA-1 and the problem behavior from Form TB-1'}:g;};
+/* v22.37 (review F135, F13) food items and the parent's decision. The case brings Form IC-1's food-item decision
+   (Specific procedures B: Yes with the items approved, allergies or diet and limits; No; Not proposed) and the allergies
+   in Form DM-1's health record; they go into Setup's empty Food items line, each marked with its source. Inside a case
+   where that decision is not Yes (No, Not proposed, or not recorded), an Edible stimulus shows a warning under the
+   stimuli table, and starting a session that delivers an edible asks first (window.raFoodGate, called by the runners).
+   The go-ahead is kept as meta.foodAck (saved with the file, shown in the warning). With a Yes, the runner's cue to
+   deliver an edible carries the parent's limits (window.raFoodLimit). */
+const raFdDate=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'');};
+function raFoodLine(f){const C=window.nbhCase,k=C&&C.consent?C.consent(f):null,ed=(k&&k.dec&&k.dec.ed)||{},bits=[];
+  if(k&&k.known){const src=' (from Form IC-1'+(ed.date?', '+raFdDate(ed.date):'')+')',al=raT(ed.allergy)?'; allergies or diet: '+raT(ed.allergy):'';
+    bits.push(ed.dec==='yes'?'Food items approved: '+(raT(ed.items)||'items not listed')+al+(raT(ed.limits)?'; limits: '+raT(ed.limits):'')+src
+      :(ed.dec==='no'?'No food or drink items: the parent said no':ed.dec==='na'?'Food items were not proposed: none without the parent\u2019s approval':'The parent\u2019s food-item decision is not recorded: no edibles until it is')+al+src);}
+  const ha=raT(f&&f.profile&&f.profile.health&&f.profile.health.allergies);if(ha)bits.push('Allergies in the health record: '+ha+' (from Form DM-1)');
+  return bits.join('. ');}
+/* null outside a case; inside one, IC-1's food decision ({} when the case has none) */
+function raFoodEd(){const C=window.nbhCase;if(!C||!C.facts||!C.consent)return null;const k=C.consent();return (k.dec&&k.dec.ed)||{};}
+const raStimEd=()=>S.stim.map((s,i)=>s&&s.type==='Edible'?name(i):null).filter(Boolean);
+const raFoodWhy=ed=>ed.dec==='no'?'Form IC-1 records the parent\u2019s No to food or drink items':ed.dec==='na'?'Food items were not proposed on Form IC-1, so none is approved':'Form IC-1 does not record the parent\u2019s decision on food items';
+function raFoodPaint(){const w=$('#raFoodWarn');if(!w)return;const ed=raFoodEd(),sn=ed&&ed.dec!=='yes'?raStimEd():[],on=sn.length>0;
+  if(on)w.innerHTML='<b>Food items</b>'+esc(raFoodWhy(ed)+'. Edible on this sheet: '+sn.join(', ')+'. Do not deliver edibles until the parent approves the items in writing (Form IC-1, Specific procedures B).'+(S.meta.foodAck?' '+S.meta.foodAck:''));
+  if(w.hidden===on)w.hidden=!on;}
+let raFoodOk='',raFoodAsk=false;
+/* items: the edibles this session delivers; say(text): the runner's message line; again(): start it once confirmed */
+window.raFoodGate=function(items,say,again){const ed=raFoodEd();if(!ed||ed.dec==='yes'||!items||!items.length)return true;
+  const key=(ed.dec||'-')+'|'+items.join('|');if(raFoodOk===key||raFoodAsk)return raFoodOk===key;raFoodAsk=true;
+  (async()=>{let go=false;try{go=await nbhUI.confirm('Deliver food items in this session?\n'+raFoodWhy(ed)+'. This session delivers '+items.join(', ')+'. Run it only if the parent has approved these items in writing.',{ok:'Run with food items',danger:true});}catch(e){go=false;}
+    raFoodAsk=false;if(!go){try{say('Not started: '+raFoodWhy(ed)+'. Choose another condition, or record the parent\u2019s approval on Form IC-1.');}catch(e){}return;}
+    const d=new Date();raFoodOk=key;S.meta.foodAck='Session with food items confirmed by the assessor on '+(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()+'.';raFoodPaint();try{again();}catch(e){}})();
+  return false;};
+window.raFoodLimit=function(label){const ed=raFoodEd();if(!ed||ed.dec!=='yes'||!raT(ed.limits))return '';
+  return S.stim.some((s,i)=>s&&s.type==='Edible'&&name(i)===label)?'Food limit (Form IC-1): '+raT(ed.limits)+'.':'';};
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was.apply(this,arguments);let n=0;
+  const t=raFoodLine(f);if(t&&!raT(S.meta.food)){S.meta.food=t;const e=$('[data-meta="food"]');if(e){e.value=t;e.dispatchEvent(new Event('input',{bubbles:true}));}n++;}
+  raFoodPaint();if(!n)return r;
+  return {filled:((r&&r.filled)||0)+n,note:((r&&r.note&&!r.generic)?r.note+'; ':'')+'the food-item decision and allergies, into Setup'};};}
+document.addEventListener('input',raFoodPaint);document.addEventListener('change',raFoodPaint);
+{const ra=renderAll;renderAll=function(){const x=ra.apply(this,arguments);raFoodPaint();return x;};}
 })();
 </script>
 <script id="ra-run">
@@ -3932,7 +3977,11 @@ window.__nbhFactsIn=function(f){let n=0;
     if(R.state==='done')return;
     const A=active();if(A&&A!==R){note(R,'A session is running on the '+SHEET[A.v]+' sheet. End it or discard it first.',true);return;}
     const a=ctx();
-    if(R.state==='ready'){sync(R,false);const c=config(R);if(!c)return;const keep={msg:R.msg};fresh(R);R.cfg=c;R.date=new Date();
+    if(R.state==='ready'){sync(R,false);const c=config(R);if(!c)return;
+      /* v22.37 (review F135): a session that delivers an edible, without the parent's Yes on Form IC-1, asks first */
+      const fe=(R.v==='co'?c.opts.filter(o=>!o.ctl).map(o=>+o.key):c.ctl?[]:[+c.cond]).filter(i=>stim(i).type==='Edible').map(i=>condLabel(String(i)));
+      if(fe.length&&window.raFoodGate&&!window.raFoodGate(fe,m=>note(R,m,true),()=>startPause(R)))return;
+      const keep={msg:R.msg};fresh(R);R.cfg=c;R.date=new Date();
       if(R.v==='co'){R.cnt=c.opts.map(()=>0);R.progs=c.opts.map(()=>0);R.srs=c.opts.map(()=>0);}
       R.msg=keep.msg;}
     const resumed=R.state==='pause';
@@ -3973,6 +4022,7 @@ window.__nbhFactsIn=function(f){let n=0;
   function hit(b){if(!b)return;b.classList.add('ra-run-hit');setTimeout(()=>b.classList.remove('ra-run-hit'),140);}
   /* the reinforcer is due: cue it and, for a timed item, start the access period */
   function deliver(R,e,label,mag,accMs,after){cue('sr');
+    const lim=window.raFoodLimit?window.raFoodLimit(label):'';if(lim)after=(after?after+' ':'')+lim;   /* v22.37 (review F135): the parent's limits with an edible */
     if(accMs>0){R.accUntil=e+accMs;R.accLabel=label;R.accs.push({from:e,to:e+accMs});
       note(R,'Deliver '+label+' now: '+secTxt(accMs)+' of access.'+(after?' '+after:''));return true;}
     note(R,'Deliver '+label+' now'+(mag?' ('+mag+')':'')+'.'+(after?' '+after:''));return false;}

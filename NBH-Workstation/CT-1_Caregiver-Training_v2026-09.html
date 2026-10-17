@@ -1093,7 +1093,7 @@ td input,td select{max-width:100%}
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">Skill or protocol taught</th><td colspan="3"><input data-m="skill"></td></tr>
       <tr><th>Its source</th><td><input data-m="src" placeholder="BIP (Form TD-1), FBA (Form FS-1)"></td>
-          <th style="width:16%">Consent for home programming</th><td><input data-m="consent" placeholder="Date and form"></td></tr>
+          <th style="width:16%">Consent for home programming</th><td><input data-m="consent" placeholder="BIP implementation consent date (Form IC-1), or the IEP with parent training"></td></tr>
       <tr><th>What the family was told this is for</th><td colspan="3"><textarea data-m="purpose" rows="2" placeholder="In the words used with them, not the words used at the IEP meeting"></textarea></td></tr>
     </table>
     <div class="note2"><b>Caregivers are not staff, and this form is not Form ST-1 with the nouns changed.</b> A caregiver has no supervisor, no colleague to tap out to, no end of shift, and a relationship with the student that continues after the procedure ends. They also hold information no one else has. Training that ignores this produces agreement in the session and nothing afterwards.</div>
@@ -1157,6 +1157,7 @@ td input,td select{max-width:100%}
   <!-- COMPETENCY -->
   <section class="only-sum">
     <h2 class="nbh-band">Competency and Follow-up</h2>
+    <div class="verdict v-mid noprint" id="ctConsentNote" role="note" hidden></div>   <!-- v22.37 (review F348): on screen only -->
     <div id="verdictBox"></div>
     <div class="metrics" id="metricWrap"></div>
     <h3 style="margin-top:12px">Steps to Watch in the Home Probe</h3>
@@ -1445,6 +1446,7 @@ function renderSum(){
   else if(scp!==null&&scp<100){cls='v-no';txt=`Not yet competent at home: the criterion was ${held} in rehearsal, and the in-home probe obtained ${pf(sp)} of steps correct, but only ${pf(scp)} of the critical steps scored on it were correct; every critical step must be correct. Rehearse the critical steps in the routine and probe again ${alone}.`;}
   else {cls='v-ok';txt=`Competent: criterion ${held}, ${M.crit.marked?`critical steps at ${fmt(M.crit.c,M.crit.n)}`:'no steps marked critical'}, relapse response rehearsed under protest, and an in-home probe at ${pf(sp)} of steps correct${scp!==null?`, critical steps on it at ${pf(scp)}`:''}.`;}
   $('#verdictBox').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+  try{ct1ConsentNote();}catch(e){}   /* v22.37 (review F348) */
   const weak=M.rows.filter(r=>r.s>0&&(100*r.c/r.s<S.crit||r.last!=='C'));
   $('#weakTbl').innerHTML='<thead><tr><th style="width:52px">Step</th><th style="text-align:left">What the caregiver does</th><th style="width:64px">Crit.</th><th style="width:80px">Per-step</th><th style="width:230px">Focus</th></tr></thead><tbody>'+
     (weak.length?weak.map(r=>{
@@ -1595,6 +1597,17 @@ async function loadSim(){
 $('#simBtn').addEventListener('click',loadSim);
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 renderAll();
+/* v22.37 (review F348) "Consent for home programming" comes only from IC-1's "Consent to implement the BIP" event
+   (consent.bip), worded "BIP implementation consent <date> (Form IC-1)". The consent for the assessment is not consent to
+   carry the plan out at home, so it no longer fills this field; a fill the case made from it before ("9/1/2026 (Form IC-1;
+   parent signed ...)") is replaced, or cleared when there is no implementation consent. Anything typed by hand stays. */
+const CT1_AUTO=/^\d{1,2}\/\d{1,2}\/\d{4} \(Form IC-1(; parent signed \d{1,2}\/\d{1,2}\/\d{4})?\)$|^BIP implementation consent \S+ \(Form IC-1\)$/;
+/* the notice on the Competency sheet, on screen only: the field is empty, or the case has no implementation consent */
+function ct1ConsentNote(){const el=document.getElementById('ctConsentNote');if(!el)return;const C=window.nbhCase,v=String((S.meta||{}).consent||'').trim();
+  const k=C&&C.facts&&C.consent?C.consent():null,noBip=!!(k&&k.known&&!k.bip);
+  el.hidden=!(!v||noBip);if(el.hidden){el.innerHTML='';return;}
+  el.innerHTML='<b>'+(v?'Form IC-1 in this case has no consent to implement the BIP.':'Consent for home programming is not recorded.')+'</b> The parent&rsquo;s consent for the assessment is not consent to carry out the plan at home. '+
+    'It is usually authorized in one of two ways: the BIP adopted with the parent, recorded on Form IC-1&rsquo;s Consent record as &ldquo;Consent to implement the BIP&rdquo;; or parent counseling and training written into the IEP. Record which one, with its date, before home training starts.';}
 /* v21.78 the case: In. The consent date from Form IC-1; the protocol steps of Form TV-1 (each step and whether it is
    critical) when this form's step list is still empty and uncoded; the reinforcer menu of Form PA-1 offered as the
    reinforcers at home, marked to be checked with the family. Each only where the field is empty; then the shared fill
@@ -1602,7 +1615,10 @@ renderAll();
 window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note:''};let n=0,last=null;
   const dm=d=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'').trim();};
   const meta=(k,v)=>{v=String(v==null?'':v).trim();if(!v||String(S.meta[k]==null?'':S.meta[k]).trim())return;const el=$('[data-m="'+k+'"]');if(el&&String(el.value||'').trim())return;S.meta[k]=v;last=el||last;n++;};
-  const c=f.consent||{},cd=c.date||c.parent;if(cd)meta('consent',dm(cd)+' (Form IC-1'+(c.parent&&c.parent!==cd?'; parent signed '+dm(c.parent):'')+')');
+  {const c=f.consent||{},bip=String(c.bip||'').trim(),want=bip?'BIP implementation consent '+dm(bip)+' (Form IC-1)':'',el=$('[data-m="consent"]'),
+    cur=String((el&&el.value)||S.meta.consent||'').trim();   /* v22.37 (review F348): from the implementation consent only */
+  if(f.consent&&cur&&CT1_AUTO.test(cur)&&cur!==want){S.meta.consent=want;if(el)el.value=want;last=el||last;n++;}
+  else if(want)meta('consent',want);}
   const menu=(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP').slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
   if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
   const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
@@ -1625,7 +1641,8 @@ function ct1LangFlag(){const x=ct1Lang();let el=document.getElementById('ctLangF
   if(!x){if(el)el.remove();return;}
   if(!el){const h=document.querySelector('main.sheet .nbh-print-head');if(!h)return;el=document.createElement('div');el.id='ctLangFlag';el.className='nbh-lang-flag noprint';el.setAttribute('role','note');h.parentNode.insertBefore(el,h.nextSibling);}
   el.innerHTML='<b>Before these pages go home.</b> Home language: '+esc(x.home||'not recorded (an interpreter is asked for)')+'. Have this translated or explained by an interpreter (the district&rsquo;s interpreter service) before it goes home.';}
-{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ct1Case=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{ct1LangFlag();}catch(e){}return r;};}
+{const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){ct1Case=f&&typeof f==='object'?f:null;const r=was?was.apply(this,arguments):null;try{ct1LangFlag();}catch(e){}try{ct1ConsentNote();}catch(e){}return r;};}
+document.addEventListener('input',e=>{if(e.target&&e.target.dataset&&e.target.dataset.m==='consent')try{ct1ConsentNote();}catch(x){}});   /* v22.37 (review F348) */
 </script>
 <style id="ct1-v2182-css">
 .nbh-lang-flag{margin:8px 0 12px;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}

@@ -417,6 +417,7 @@ body{
 }
 .warn b{font-family:var(--sans);font-size:11px;letter-spacing:.02em;display:block;
   margin-bottom:3px;color:var(--ink)}
+.warn.pa-food{border-left-color:var(--nbh-flag);background:var(--nbh-flag-soft)}.warn.pa-food b{color:var(--nbh-flag)} /* v22.37 (review F120) */
 .method{font-size:12px;line-height:1.55;color:var(--ink-soft);margin-top:4px}
 .method b{color:var(--ink);font-family:var(--sans);font-size:11px;
   display:block;margin:12px 0 3px}
@@ -1321,6 +1322,8 @@ body.view-walk #walk{display:block}
     <div class="drow"><div class="dlab">Selection response</div><div class="dval"><textarea data-meta="selresp" placeholder="e.g., touches or picks up item within 5 s; eye gaze held 3 s" class="nbh-line" rows="1"></textarea></div></div>
     <div class="drow"><div class="dlab">Restrictions (allergies, diet, safety, school policy)</div><div class="dval"><textarea data-meta="restrict" class="nbh-line" rows="1"></textarea></div></div>
   </div>
+  <!-- v22.37 (review F120): the parent's food-item decision on Form IC-1 is not Yes and the pool is of edibles; screen only -->
+  <div class="warn pa-food noprint" id="paFoodPool" role="status" hidden></div>
 
   <h3 class="sub">Structured Informant Interview (After the RAISD; Fisher et al., 1996)</h3>
   <p class="method" style="margin-top:0">Ask the informant for specific items or events in each category, then how the student behaves when each is present or removed. Record names of specific stimuli, not categories. Informant: <input class="inline" data-meta="informant" placeholder="name and relationship" style="width:260px"></p>
@@ -1344,6 +1347,8 @@ body.view-walk #walk{display:block}
     <thead><tr><th class="n" style="width:6%">#</th><th style="width:30%">Stimulus (exact form presented)</th><th style="width:16%">Type</th><th style="width:22%">Source of nomination</th><th class="n" style="width:12%">Informant rank</th><th>Notes (portion, model, access rule)</th></tr></thead>
     <tbody></tbody>
   </table>
+  <!-- v22.37 (review F120): an Edible row while the food-item decision on Form IC-1 is not Yes; screen only -->
+  <div class="warn pa-food noprint" id="paFoodStim" role="status" hidden></div>
 
   <div class="cite">Interview categories follow the Reinforcer Assessment for Individuals with Severe Disabilities (Fisher, Piazza, Bowman, &amp; Amari, 1996, <em>American Journal on Mental Retardation, 101</em>, 15&ndash;25), in which stimuli nominated through the structured interview and then assessed directly were more effective reinforcers than those from a standard list. Green et al. (1988, <em>JABA, 21</em>, 31&ndash;43) found staff opinion a poor predictor of assessed preference; Northup (2000, <em>JABA, 33</em>, 335&ndash;338) found a reinforcer survey about 57% accurate against concurrent-operants reinforcer assessments with 20 children with attention deficit disorders; in the study it replicated, survey results often rated multiple categories as high preference and were less likely to identify low-preference categories (Northup et al., 1996); Cote et al. (2007, <em>JABA, 40</em>, 157&ndash;166) found a strong teacher&ndash;assessment correlation for only 1 of 9 toddlers; the top items from both methods functioned as reinforcers, and the direct assessment's top item was the more effective reinforcer for 5 of the 9.</div>
 </div>
@@ -2883,6 +2888,46 @@ paHint();
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=was?was.apply(this,arguments):null;
   try{const sch=String(S.meta.reassess||'').trim(),typed=paIso(S.meta.reassessDue),due=typed||paDue(),last=paLast();if(!sch&&!due&&!last)return r;
     const o=r&&typeof r==='object'?r:{};const p={};if(due){p.reassess=due;p.reassessFrom=typed?'typed':'schedule';}if(last)p.last=last;if(sch)p.schedule=sch;o.prefs=p;return o;}catch(e){return r;}};}
+/* v22.37 (review F120, F13) food items and the parent's decision. The case brings Form IC-1's food-item decision
+   (Specific procedures B: Yes with the items approved, allergies or diet and limits; No; Not proposed) and the allergies
+   in Form DM-1's health record; they go into an empty Restrictions line, each marked with its source. Inside a case
+   where that decision is not Yes (No, Not proposed, or not recorded), a pool of edibles or an Edible row shows a warning
+   on screen, and starting any runner with edibles in the pool asks first. The go-ahead is kept as meta.foodAck (saved
+   with the file, shown in the warning); it is asked again when the decision or the edible items change. */
+const paFdDate=d=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(d||'');};
+const paT=v=>String(v==null?'':v).trim();
+function paFoodLine(f){const C=window.nbhCase,k=C&&C.consent?C.consent(f):null,ed=(k&&k.dec&&k.dec.ed)||{},bits=[];
+  if(k&&k.known){const src=' (from Form IC-1'+(ed.date?', '+paFdDate(ed.date):'')+')',al=paT(ed.allergy)?'; allergies or diet: '+paT(ed.allergy):'';
+    bits.push(ed.dec==='yes'?'Food items approved: '+(paT(ed.items)||'items not listed')+al+(paT(ed.limits)?'; limits: '+paT(ed.limits):'')+src
+      :(ed.dec==='no'?'No food or drink items: the parent said no':ed.dec==='na'?'Food items were not proposed: none without the parent\u2019s approval':'The parent\u2019s food-item decision is not recorded: no edibles until it is')+al+src);}
+  const ha=paT(f&&f.profile&&f.profile.health&&f.profile.health.allergies);if(ha)bits.push('Allergies in the health record: '+ha+' (from Form DM-1)');
+  return bits.join('. ');}
+/* null outside a case; inside one, IC-1's food decision ({} when the case has none) */
+function paFoodEd(){const C=window.nbhCase;if(!C||!C.facts||!C.consent)return null;const k=C.consent();return (k.dec&&k.dec.ed)||{};}
+const paPoolEd=()=>/^(Edibles|Mixed)/.test(paT(S.meta.pool));
+const paStimEd=()=>S.stim.map((s,i)=>s&&s.type==='Edible'?(paT(s.name)||'item '+(i+1)):null).filter(Boolean);
+const paFoodWhy=ed=>ed.dec==='no'?'Form IC-1 records the parent\u2019s No to food or drink items':ed.dec==='na'?'Food items were not proposed on Form IC-1, so none is approved':'Form IC-1 does not record the parent\u2019s decision on food items';
+function paFoodPaint(){const a=$('#paFoodPool'),b=$('#paFoodStim');if(!a||!b)return;const ed=paFoodEd(),bad=!!ed&&ed.dec!=='yes',sn=bad?paStimEd():[];
+  const tail=' Do not use edibles until the parent approves the items in writing (Form IC-1, Specific procedures B).'+(S.meta.foodAck?' '+S.meta.foodAck:'');
+  const ha=bad&&paPoolEd(),hb=bad&&sn.length>0;
+  if(ha)a.innerHTML='<b>Food items</b>'+esc(paFoodWhy(ed)+', and this pool is '+(/^Mixed/.test(paT(S.meta.pool))?'mixed, with edibles':'of edibles')+'.'+tail);
+  if(hb)b.innerHTML='<b>Food items</b>'+esc(paFoodWhy(ed)+'. Edible in this pool: '+sn.join(', ')+'.'+tail);
+  if(a.hidden===ha)a.hidden=!ha;if(b.hidden===hb)b.hidden=!hb;}
+let paFoodOk='',paFoodAsk=false;
+/* called by a runner as it takes over (claim): true to go on; false while the question is open or after Cancel */
+window.paFoodGate=function(r){const ed=paFoodEd();if(!ed||ed.dec==='yes')return true;const sn=paStimEd();if(!sn.length&&!paPoolEd())return true;
+  const key=(ed.dec||'-')+'|'+paT(S.meta.pool)+'|'+sn.join('|');if(paFoodOk===key||paFoodAsk)return paFoodOk===key;paFoodAsk=true;
+  (async()=>{let go=false;try{go=await nbhUI.confirm('Run this assessment with food items?\n'+paFoodWhy(ed)+'. '+(sn.length?'Edible in this pool: '+sn.join(', ')+'.':'The pool is of edibles.')+' Run it only if the parent has approved these items in writing.',{ok:'Run with food items',danger:true});}catch(e){go=false;}
+    paFoodAsk=false;if(!go){try{r.note('Not started: '+paFoodWhy(ed)+'. Remove the edibles, or record the parent\u2019s approval on Form IC-1.',true);}catch(e){}return;}
+    const d=new Date();paFoodOk=key;S.meta.foodAck='Run with food items confirmed by the assessor on '+(d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear()+'.';paFoodPaint();r.primary();})();
+  return false;};
+window.__nbhFactsIn=function(f){let n=0;const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):null;
+  const t=paFoodLine(f),e=$('[data-meta="restrict"]');
+  if(t&&e&&!paT(e.value)){e.value=t;S.meta.restrict=t;e.dispatchEvent(new Event('input',{bubbles:true}));n++;}
+  paFoodPaint();
+  return n?{filled:n+((g&&g.filled)||0),note:'the food-item decision and allergies, into Restrictions'}:(g||{filled:0});};
+document.addEventListener('input',paFoodPaint);document.addEventListener('change',paFoodPaint);
+{const ra=renderAll;renderAll=function(){const r=ra.apply(this,arguments);paFoodPaint();return r;};}
 })();
 </script>
 <script id="pa-run">
@@ -2973,7 +3018,8 @@ const LOCK_ALWAYS=['#nStim','#simBtn','#clearBtn','#loadBtn'];
 function lockOn(list){lockOff();LOCK_ALWAYS.concat(list||[]).forEach(s=>qa(s).forEach(e=>{if(!e.disabled){LOCKED.push([e,e.getAttribute('title')]);e.disabled=true;e.title='Locked while an assessment is running. End it to change this.';}}));}
 function lockOff(){LOCKED.splice(0).forEach(x=>{x[0].disabled=false;if(x[1]==null)x[0].removeAttribute('title');else x[0].title=x[1];});}
 function claim(r){if(ACTIVE&&ACTIVE!==r){r.note('The '+ACTIVE.label.toLowerCase()+' runner is in use on its own sheet. End it there first.',true);return false;}
-  if(ACTIVE!==r){ACTIVE=r;lockOn(r.locks);}return true;}
+  if(ACTIVE!==r){if(window.paFoodGate&&!window.paFoodGate(r))return false;   /* v22.37 (review F120): edibles without the parent's Yes on Form IC-1 ask first */
+    ACTIVE=r;lockOn(r.locks);}return true;}
 function release(r){if(ACTIVE===r){ACTIVE=null;lockOff();}sync();}
 
 /* ---------------- the clock loop ----------------

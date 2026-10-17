@@ -1498,6 +1498,9 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
  put('m.doc',H.prescriber);
  const al=String(H.allergies||'').trim();put('m.hx',[String(H.conditions||'').trim(),al?'Allergies: '+al:''].filter(Boolean).join('; '));
  const b=(f.behaviors||[]).find(x=>x&&x.label);if(b)put('m.bip',b.label);
+ /* v22.37 (review F13) the release date the parent's sharing decision on Form IC-1 records (district release signed, with its date) */
+ const sh=(f.consent&&f.consent.dec&&f.consent.dec.sh)||{},rd=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(sh.roidate||''));
+ let roi=false;if(sh.roi&&String(sh.roidate||'').trim())roi=put('m.roi',(rd?(+rd[2])+'/'+(+rd[3])+'/'+rd[1]:String(sh.roidate).trim())+' (Form IC-1, Specific procedures D)');
  const have=medList().map(m=>m.name.toLowerCase()),haveT=new Set(medList().map(m=>msTok(m.name)[0]).filter(Boolean)),medsIn=[];
  (Array.isArray(H.meds)?H.meds:[]).forEach(m=>{if(!m||!String(m.name||'').trim())return;const t=msTok(m.name)[0];if(have.includes(String(m.name).trim().toLowerCase())||(t&&haveT.has(t)))return;medsIn.push(m);if(t)haveT.add(t);});
  const emptyCard=i=>['lib','name','dose','start','change'].every(k=>!val(`md[${i}].${k}`));
@@ -1507,7 +1510,7 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
   setv(`md[${i}].dose`,[m.dose,m.times].filter(x=>String(x||'').trim()).join(', '));last=document.querySelector(`[name="md[${i}].dose"]`);n++;});
  if(last){renderGrid(true);renderReport();try{last.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}
  let g=null;try{g=window.nbhCase&&window.nbhCase.generic?window.nbhCase.generic(f,false):null;}catch(e){g=null;}
- return {filled:n+(g&&g.filled||0),note:n?'Medications, prescriber and history from Form DM-1':''};};
+ return {filled:n+(g&&g.filled||0),note:n?(n>(roi?1:0)?'Medications, prescriber and history from Form DM-1':'')+(roi?(n>1?'; ':'')+'the release date from Form IC-1':''):''};};
 })();
 </script>
 

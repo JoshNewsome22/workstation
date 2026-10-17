@@ -934,7 +934,14 @@ td input,td select{max-width:100%}
     <div><label class="f">Max acceptable response-to-token lag (s)</label><input type="number" name="tok_lag" min="0" step="1" value="2"></div>
     <div><label class="f">Back-up reinforcers</label><input type="text" name="tok_backup"></div>
   </div>
-  <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div><div>Parent or guardian notified / date</div></div>
+  <!-- v22.37 (review F401): the parent's consent for this protocol and the student's assent, in place of "Parent or guardian notified";
+       the consent line fills from Form IC-1 in the case when it is empty -->
+  <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div></div>
+  <div class="grid g2" style="margin-top:14px">
+    <div><label class="f">Parent or guardian consent for this protocol (Form IC-1 item and date)</label><input type="text" name="s_consent" placeholder="e.g., Analysis of specific variables (waiting practice), consent on file since 10/12/2026"></div>
+    <div><label class="f">Student assent plan and response (Form SI-1, date)</label><input type="text" name="s_assent" placeholder="e.g., Form SI-1, 10/14/2026: agreed to practice waiting; break card if he wants to stop"></div>
+  </div>
+  <div class="caution noprint" id="dtConsentNote" role="status" hidden><p></p></div>
 </section>
 
 <!-- ===== 2 PREASSESSMENT ===== -->
@@ -2231,8 +2238,25 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
   const menu=(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP').slice(0,6);
   const p=menu.length?nbhPlace('tbPref',menu,m=>[m.name,nbhPct(m),m.format||m.method||'',m.date||'']):0;
   if(p){k+=p;got.push('reinforcers from Form PA-1');recalc('tbPref');}
+  /* v22.37 (review F401) the consent line, filled when empty and only when Form IC-1 has consent on file that covers this
+     protocol: waiting practice is part of IC-1's "Analysis of specific variables" item (key var); an older IC-1 lists no items */
+  const C=window.nbhCase,ce=document.querySelector('[name="s_consent"]');
+  if(C&&C.consent&&ce&&!String(ce.value||'').trim()){const kc=C.consent(f);
+    if(kc.on&&(!kc.covered||C.covers('var',f))){ce.value=(kc.covered?'Analysis of specific variables (waiting practice): ':'')+kc.word+(kc.covered?'':'; the item is not listed (an older Form IC-1)');
+      ce.dispatchEvent(new Event('input',{bubbles:true}));k++;got.push('the consent from Form IC-1');}}
+  dtConsentNote();
   return {filled:n+k,note:got.join('; ')||((r&&r.note)||'')};};
 })();
+/* v22.37 (review F401) a screen-only line under the consent field while it is empty, saying why */
+function dtConsentNote(){const e=document.getElementById('dtConsentNote'),ce=document.querySelector('[name="s_consent"]');if(!e||!ce)return;
+  const on=!String(ce.value||'').trim();if(e.hidden===on)e.hidden=!on;if(!on)return;
+  const C=window.nbhCase,kc=C&&C.facts&&C.consent?C.consent():null;
+  e.firstChild.textContent=kc&&kc.on&&kc.covered&&!C.covers('var')?'Form IC-1 does not cover this protocol: \u201cAnalysis of specific variables\u201d (which includes waiting practice) is not ticked. Get the parent\u2019s consent before the first session.'
+    :kc&&kc.known&&!kc.on?kc.word+'. Record the parent\u2019s consent for this protocol on Form IC-1 before the first session.'
+    :'Parent consent for this protocol is not recorded: enter the Form IC-1 item and date before the first session.';}
+document.addEventListener('input',e=>{if(e.target&&e.target.name==='s_consent')dtConsentNote();});
+{const ra=recalcAll;recalcAll=function(){const x=ra.apply(this,arguments);dtConsentNote();return x;};}
+dtConsentNote();
 })();
 </script>
 <script>

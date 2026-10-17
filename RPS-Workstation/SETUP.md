@@ -9905,6 +9905,91 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.37: One consent record for the case (Wave 1, first part)
+
+The review of October 2026 found that a declined or revoked consent reached the rest of the workstation as consent on
+file (review F11), because Form IC-1 handed on only two dates. These changes make the consent the parent gave, and its
+limits, travel with the case.
+
+- **Form IC-1 hands on what its Status sheet shows**: the state (Current; Current, with exceptions; Declined; Revoked;
+  Pending; Decision not recorded), the date consent was obtained or ended, the exceptions, the procedures checked and the
+  ones covered (the experimental analysis only with its own yes), each specific decision (experimental analysis, food
+  items, recording, sharing outside school, injury checks) with its details, and the date of the latest "Consent to
+  implement the BIP" event on the Consent record. A case saved before v22.37 reads as it did.
+- **A refusal never reads as consent.** The hand-over check before Close case, Ready to start, the transition summary for
+  the next BCBA, the master print's fact line and the supervisor's caseload summary say "Consent revoked on 10/9" (or
+  declined, or pending) instead of treating the case as consented. The 60-day FBA clock on Today and in the calendar runs
+  only from consent on file, and not from a district reevaluation form (Florida sets no 60-day deadline there).
+- **Ready to start asks for the consent to carry out the plan**: consent for the assessment is not consent to implement
+  the BIP; IC-1 records that as its own event ("Consent to implement the BIP").
+- **The forms that assess say so** (review I234): IA-1, IN-1, SI-1, OB-1, ABC-1, SP-1, EA-1, DA-1, AD-1, PA-1, RA-1 and
+  VI-1 show one line under the toolbar when no consent is on file, when it was declined or revoked, or when IC-1 does not
+  cover what that form runs (for example "Form IC-1 does not cover the experimental analysis"). The session runners (EA-1,
+  DA-1, AD-1, PA-1, RA-1) show the consent on file too, and PA-1 and RA-1 the parent's food decision with the approved
+  items, allergies and limits (I9). On screen only. **Today** lists it when an assessment form is in the case without
+  consent: "nothing is assessed until consent is on file".
+- **IC-1 lists two more procedures** the set runs: the reinforcer arrangement comparison (Form AD-1) and the demand
+  assessment (Form DA-1), each with its own box for the parent (14 in all).
+- **Nothing goes out before the file says it may** (review F41, I23). In the workstation, Form IA-1 checks the case's
+  consent before any questionnaire leaves (Send all due now, Send these, Remind, Make every page, a row's page, link,
+  email or QR code, and the Respondent pages' Email it, Copy link, QR and Save the page). Without consent covering
+  interviews and rating scales it says why; "Send anyway (consent on paper)" goes on when the district holds the consent
+  on paper, and that is noted in the file with the date and shown on the Send-outs sheet.
+
+
+**The forms that run procedures, each with what the parent decided**
+
+- **EA-1.** The safety plan's "Consent and notification" says "Parent consent obtained" only when Form IC-1 covers the
+  experimental analysis with the parent's own yes (review F148). With exceptions that leave it out, a no, a revocation or a
+  refusal, the line says the analysis is not consented and why; a line the case wrote earlier is updated, and anything
+  typed stays. The parent's stop rule fills the session-termination criteria. On screen a flag on Setup & safety and in
+  the runner says when the analysis is not covered; starting or saving a session then asks for the reason and writes it
+  with that session.
+- **CT-1.** "Consent for home programming" no longer takes the consent for the assessment (review F348). It fills only from
+  IC-1's "Consent to implement the BIP" ("BIP implementation consent <date> (Form IC-1)"); while it is empty a note on the
+  Competency sheet says how home programming is usually authorized (the BIP adopted with the parent, or parent counseling
+  and training on the IEP).
+- **DA-1.** When the prompting ends in physical guidance or problem behavior is followed by a brief escape, the Assessment
+  sheet has "Before the first session" (review F141): the consent and whether IC-1 covers the demand assessment, the date
+  the administrator was told, the crisis plan on file (Form CR-1) with its stop rule, and the student's assent signals
+  (Form SI-1). Each session in the trial record also keeps guidance stops, why it stopped early, and a hold or injury
+  reported.
+- **PA-1 and RA-1.** The restrictions fill from the parent's food decision on IC-1 (approved items, allergies or diet,
+  limits) and the allergies in the health record, each marked with its source (review F120, F135). Without the parent's
+  yes, an edible pool or an Edible stimulus shows a warning, and a session with edibles asks before it starts (the
+  go-ahead is kept with its date). With the yes, RA-1's "Deliver ... now" cue shows the parent's limit.
+- **AD-1.** "Parent or guardian notified" becomes "Consent on file (Form IC-1) / date" (review F409); Tab 1 has a consent
+  line from the case saying whether IC-1 covers the reinforcer arrangement comparison, and a note when there is none.
+- **DT-1.** The third signature line is now the parent's consent for this protocol (Form IC-1 item and date), with a new
+  line for the student's assent plan and response (Form SI-1) (review F401); the consent fills from IC-1 when it covers
+  the waiting practice, with a note while it is empty.
+- **MS-1.** "Release of information on file" fills from IC-1's sharing decision when a district release is marked signed
+  with its date (review F13).
+
+**Privacy in the class and home forms**
+
+- **GC-1, the poster.** In a dependent contingency the poster no longer names the student or shows the student's goal
+  (review F278): it says "our class goal" until the student is to be named and the parent's written agreement is recorded
+  as Yes with its date on the Design sheet. A line on screen says why.
+- **GC-1, the other students.** Their initials, plans, data and team names no longer go into this student's case or
+  packet (review F279). Setup asks only for this student's plan and how many others have one; the others go on a class
+  sheet on the Record page, saved, opened and printed on its own ("a class record, not a student's"). An older GC-1 file
+  opens with its classmates' details moved to the class sheet, and a note asks you to check the team names.
+- **HD-1.** A sheet returned as a photo goes to a district phone number or a district email address, which prints on the
+  family's sheet; choosing a photo shows how to file it on the district drive and delete it from the phone (review F368).
+- **IM-1, the report record.** The reason for a No and the record of an abuse report (by whom, when, to whom, others
+  told) are no longer saved in the form's file or the case (review F448). They print on the confidential report record and
+  can be saved as a file of their own; older files that hold them still open.
+- **IM-1, the parent's No.** When the parent said no to injury checks, the form, Today and the calendar stop asking for
+  them; while the decision is not recorded, checks show as waiting, not due (review F449). Inside the workstation the
+  decision fills from IC-1. An injury written down despite a No needs a reason and is marked in the History.
+
+**Also.** On a laptop 1280 wide with Google Drive in use, the bar wrapped to two rows since v22.35's Staff directory
+button; Staff directory now goes up beside History, by the student's name, so the bar keeps one row (`qa/v2191-history-test.js` 41).
+
+Checked by `qa/v2237-consent-test.js` (20 checks), `qa/v2237-ea1-ct1-da1-test.js` (28), `qa/v2237-food-consent-test.js`
+(29) and `qa/v2237-privacy-test.js` (43); `qa/v2178-c1-test.js` follows the new meaning of consent (CT-1 and IC-1 checks).
+
 ### v22.36: Form IA-1's results by group
 
 - **Up to twelve informants** (A to L), school and home together: send the FAST, QABF, MAS or the other instruments to the

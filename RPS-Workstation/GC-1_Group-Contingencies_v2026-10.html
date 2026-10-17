@@ -730,7 +730,18 @@ body.view-guide .only-setup,body.view-guide .only-design,body.view-guide .only-p
   body.gc-poster-only .sheet{width:auto;margin:0;padding:0}
   body.gc-poster-only #posterOut{margin:0}
   body.gc-poster-only #posterOut .po-page:first-child{break-before:auto}
+  /* v22.37 (review F279): the class sheet on its own, when printed from its button */
+  body.gc-class-only .nbh-mast,body.gc-class-only .toolbar,body.gc-class-only main.sheet,body.gc-class-only .nbh-pagenav{display:none!important}
+  body.gc-class-only #gcClassOut{display:block!important}
 }
+/* v22.37 (review F279): the class sheet's boxes are not form controls, so the workstation's snapshot of the fields never holds them */
+gc-text{display:block;box-sizing:border-box;min-height:52px;width:100%;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;background:#fff;font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;cursor:text}
+.gc-class{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:4px 12px 10px;margin:14px 0 4px}
+.gc-class .fieldgrid.one{grid-template-columns:minmax(0,1fr)}
+#gcClassOut{display:none}
+#gcClassOut h2{font-size:18px;margin:0 0 6px}
+#gcClassOut .gcc-note{border:1px solid #8E2A2A;padding:6px 9px;font-size:11px;margin:6px 0 10px}
+#gcClassOut .gcc-box{white-space:pre-wrap;min-height:2.6em}
 
 /* ---- v21.33: a row can be deleted anywhere (the x at the end of the row) ---- */
 table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0;vertical-align:middle}
@@ -886,6 +897,7 @@ td input,td select{max-width:100%}
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
+    <input type="file" id="gcClassIn" accept="application/json" hidden><!-- v22.37 (review F279): Open class sheet -->
     <button id="csvBtn">Export CSV</button>
     <button id="clearBtn">Clear all</button>
   </div></div>
@@ -900,6 +912,7 @@ td input,td select{max-width:100%}
   <!-- ===================== SETUP ===================== -->
   <section class="only-setup">
     <h2 class="nbh-band">Class, Team, and the Problem the System Answers</h2>
+    <div id="gcMoved" class="noprint"></div>
     <div class="fieldgrid">
       <div><label>Class</label><input data-m="cls" placeholder="Room 12; Period 3 science"></div>
       <div><label>Teacher</label><input data-m="teacher"></div>
@@ -915,8 +928,12 @@ td input,td select{max-width:100%}
       <div><label>Tier</label><select data-m="tier"><option></option><option>Universal: the whole class, no individual plan behind it</option><option>Class-wide support around one or more students with a BIP</option><option>A bridge while an FBA is completed</option></select></div>
     </div>
     <table class="rt" style="margin-top:8px">
-      <tr><th style="width:26%">The problem, as the teacher states it</th><td><textarea data-m="problem" rows="2" placeholder="what happens, when, how often, which students it comes from, what has been tried"></textarea></td></tr>
-      <tr><th>Students with an individual plan in the room</th><td><input data-m="plans" placeholder="initials and the form that holds the plan (TD-1); how the class system fits with each plan"></td></tr>
+      <tr><th style="width:26%">The problem, as the teacher states it</th><td><textarea data-m="problem" rows="2" placeholder="what happens, when, how often, how much of the class it comes from (no names), what has been tried"></textarea></td></tr>
+      <!-- v22.37 (review F279): this form is kept in one student's case and prints in that student's packet, so it asks for
+           this student's plan only; other students with a plan are a count, and their details go on the class sheet -->
+      <tr><th>This student&rsquo;s plan</th><td><input data-m="plan_me" placeholder="the target behavior, the function and the replacement (from the case), the plan&rsquo;s criterion (GB-1 or TD-1); how the class system fits with it"></td></tr>
+      <tr><th>Other students with a plan in the room</th><td><input data-m="plans_n" inputmode="numeric" placeholder="how many" style="width:20%"> <select data-m="plans_chk" style="width:70%" aria-label="Each of their plans checked against this system"><option value=""></option><option>Each plan was checked against this system in that student&rsquo;s own case</option><option>Not checked yet</option></select>
+        <div class="hint">A number only. Their initials, plans and data are not written on this form: it is kept in this student&rsquo;s case and prints in this student&rsquo;s packet. Use the class sheet (Record page), which is kept apart.</div></td></tr>
       <tr><th>What the teacher wants to see instead</th><td><input data-m="goal_txt" placeholder="the class working through the first 20 minutes of math with two or fewer interruptions"></td></tr>
     </table>
 
@@ -976,7 +993,7 @@ td input,td select{max-width:100%}
     <div class="only-ct for-teams"><h3>Teams</h3>
       <p class="hint">Two to four teams, mixed so each holds about the same share of the students the system is for. The team names go on the poster and the record. Leave the table empty for a whole-class arrangement without teams.</p>
       <div class="tools"><button class="tool" id="addTm">Add a team</button><button class="tool" id="delTm">Remove last</button></div>
-      <div class="grid-wrap"><table class="rt" id="tmTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Team name</th><th>Members (first names or seat rows)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <div class="grid-wrap"><table class="rt" id="tmTbl"><thead><tr><th style="width:5%">#</th><th style="width:28%">Team name</th><th>Members (seat rows or how many; names go on the class sheet)</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     </div>
 
     <div class="only-ct for-indep"><h3>Independent Contingency</h3>
@@ -990,10 +1007,14 @@ td input,td select{max-width:100%}
 
     <div class="only-ct for-dep"><h3>Dependent Contingency</h3>
       <table class="rt">
-        <tr><th style="width:28%">Student(s) whose behavior earns for the class</th><td><input data-m="dp_who" placeholder="initials only on this form; the poster names no student"></td></tr>
+        <tr><th style="width:28%">Student(s) whose behavior earns for the class</th><td><input data-m="dp_who" placeholder="this student&rsquo;s initials; the poster leaves them out unless the parent agreed in writing"></td></tr>
         <tr><th>The behavior and its criterion</th><td><input data-m="dp_beh" placeholder="hand raised before speaking in 8 of 10 opportunities, from the student&rsquo;s plan"></td></tr>
         <tr><th>Is the student named to the class?</th><td><select data-m="dp_named" style="width:70%"><option></option><option>No: the class is told that one or more classmates will earn for everyone (names not given)</option><option>Yes, with the student&rsquo;s agreement, and framed as the student earning for the class</option><option>The students whose scores count are drawn at random each day (see Randomized components)</option></select></td></tr>
+        <!-- v22.37 (review F278): the parent's written agreement before the student is named, or the student's goal shown, on anything the class sees -->
+        <tr><th>The parent&rsquo;s agreement to naming the student, or showing the student&rsquo;s goal, on any class display (poster, board, chart)</th><td><select data-m="dp_parent" style="width:70%"><option value=""></option><option value="yes">Yes, in writing</option><option value="no">No</option><option value="nr">Not asked yet</option></select></td></tr>
+        <tr><th>Date of the parent&rsquo;s decision</th><td><input data-m="dp_pdate" placeholder="M/D/YYYY" style="width:30%"></td></tr>
       </table>
+      <div id="dpWhy" class="noprint"></div>
       <p class="hint" style="margin-top:8px"><b>Safeguards.</b> The ones ticked print on the Design sheet; the verdict asks for the first four before the rule is called ready.</p>
       <div class="ckcol">
         <label class="ck"><input type="checkbox" data-c="dp_agree"> The student agreed to the arrangement and chose the reward with the class (or the names are drawn at random).</label>
@@ -1102,6 +1123,7 @@ td input,td select{max-width:100%}
       <tr><th>Days across the scoreboard</th><td><select data-m="po_days" style="width:40%"><option value="">5 (Monday to Friday)</option><option value="5">5 (Monday to Friday)</option><option value="4">4 (Monday to Thursday)</option><option value="3">3 (Monday, Wednesday, Friday)</option><option value="1">1 (today)</option></select></td></tr>
       <tr><th>Pages</th><td><div class="ckrow"><label class="ck"><input type="checkbox" data-c="po_exp"> Expectations</label><label class="ck"><input type="checkbox" data-c="po_score"> Scoreboard</label><label class="ck"><input type="checkbox" data-c="po_rules"> Rules card</label></div><span class="hint">All three print when none is ticked.</span></td></tr>
     </table>
+    <div id="gcPosterWhy" class="noprint"></div>
     <div id="posterOut"></div>
   </section>
 
@@ -1122,9 +1144,21 @@ td input,td select{max-width:100%}
     <div id="logRules"></div>
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">Decision taken</th><td><textarea data-m="decision" rows="2"></textarea></td></tr>
-      <tr><th>Students the system is not reaching</th><td><input data-m="notreach" placeholder="initials; what the data show; whether an individual plan (Form TD-1) or a team of one is needed"></td></tr>
+      <tr><th>This student, if the system is not reaching them</th><td><input data-m="notreach" placeholder="what the data show for this student; whether the plan (Form TD-1) or a team of one is needed"></td></tr>
+      <tr><th>Other students it is not reaching</th><td><input data-m="notreach_n" inputmode="numeric" placeholder="how many" style="width:20%"> <span class="hint">a number only; their initials and data go on the class sheet below</span></td></tr>
       <tr><th>What the class says about it (Form SV-1)</th><td><input data-m="sv" placeholder="whether students like the game, want the prize, feel pressured"></td></tr>
     </table>
+    <!-- v22.37 (review F279): the class sheet. Other students' details, kept apart from this student's case and packet -->
+    <div class="gc-class noprint" data-nbh-nowording>
+      <h3 style="margin-top:16px">Class Sheet: Other Students (Kept Apart from This Student&rsquo;s Case)</h3>
+      <p class="hint">This form is kept in one student&rsquo;s case and prints in that student&rsquo;s packet, which the family and the IEP team read. Other students&rsquo; initials, plans and data go here instead. The class sheet is <b>not</b> saved with this form, its safety copy, the case or the packet: <b>Save class sheet</b> keeps it as a file of its own, for the teacher and the class&rsquo;s records (not any one student&rsquo;s file), <b>Open class sheet</b> brings it back, and <b>Print class sheet</b> prints it on its own.</p>
+      <div class="fieldgrid one">
+        <div><label>Other students with a plan in the room (initials, the form that holds each plan, how the system fits it)</label><gc-text role="textbox" aria-multiline="true" aria-label="Other students with a plan in the room" contenteditable="true" data-cl="plans"></gc-text></div>
+        <div><label>Other students the system is not reaching (initials, what the data show, what is planned)</label><gc-text role="textbox" aria-multiline="true" aria-label="Other students the system is not reaching" contenteditable="true" data-cl="notreach"></gc-text></div>
+        <div><label>Team members by name</label><gc-text role="textbox" aria-multiline="true" aria-label="Team members by name" contenteditable="true" data-cl="members"></gc-text></div>
+      </div>
+      <div class="tools"><button type="button" class="tool" id="gcClassSave">Save class sheet</button><button type="button" class="tool" id="gcClassOpen">Open class sheet</button><button type="button" class="tool" id="gcClassPrint">Print class sheet</button><span class="hint" id="gcClassSt"></span></div>
+    </div>
   </section>
 
   <!-- ===================== FIDELITY ===================== -->
@@ -1147,7 +1181,7 @@ td input,td select{max-width:100%}
   </section>
 
   <!-- ===================== GUIDE ===================== -->
-  <section class="only-guide">
+  <section class="only-guide" id="guide"><!-- v22.37 (review F279): id="guide", so the master print leaves the Guide out -->
     <h2 class="nbh-band">What This Form Builds</h2>
     <p>A group contingency makes a consequence for the group depend on behavior, and the three kinds differ in whose behavior. Litow and Pumroy (1975) named them: in an <b>independent</b> group-oriented contingency the same rule applies to every student but each earns on their own behavior; in a <b>dependent</b> one the whole group earns on the behavior of one student or a few; in an <b>interdependent</b> one the group earns on the group&rsquo;s performance, judged by every member meeting the criterion, by the group&rsquo;s total or mean, or by the score of a single member chosen in advance or at random. Cooper, Heron and Heward (2020) keep the same three terms and the same cautions. The programs with names, the Good Behavior Game, CW-FIT, the mystery motivator, randomized interdependent contingencies and tootling, are interdependent arrangements with particular rules, and the form holds each with its own fields so the rule can be written out, posted, and recorded against.</p>
     <p>The Good Behavior Game is the oldest and best studied of them. Barrish, Saunders and Wolf (1969) divided a fourth-grade class into two teams, put a mark on the board against a team whenever a member was out of seat or talking out, and let both teams win privileges when both stayed under the criterion; out-of-seat and talking-out fell from most of the intervals to a few, in math and in reading, in a reversal design. Medland and Stachnik (1972) and Harris and Sherman (1973) replicated the effect and examined which parts of the game carried it. Tingstrom, Sterling-Turner and Wilczynski (2006) reviewed the game&rsquo;s first 33 years and found it effective across ages, settings and behaviors; Bowman-Perrott et al. (2016) pooled 21 single-case studies and reported a large effect (TauU = .82), largest for students with or at risk for emotional and behavioral disorders; Joslyn, Donaldson, Austin and Vollmer (2019) summarized the behavior-analytic studies and what is known about its components. Kellam and colleagues (1994, 2008) ran the game in first-grade classrooms in a randomized prevention trial and followed the children into middle school and young adulthood, with lower aggression and lower rates of later problems among the boys who had been most aggressive at the start.</p>
@@ -1179,7 +1213,7 @@ td input,td select{max-width:100%}
 
     <h2 class="nbh-band" style="margin-top:16px">Ethical Cautions</h2>
     <table class="rt">
-      <tr><th style="width:28%">Dependent contingencies</th><td>One student carries the class. The arrangement is used only with the student&rsquo;s agreement, with a criterion the student already meets on a good day, with peers taught to encourage and never to pressure, and with an exit rule the teacher applies the same day if the student is blamed. The poster never names the student. Where the student&rsquo;s plan already has its own reinforcement, the two should not conflict: the student is not made to lose twice.</td></tr>
+      <tr><th style="width:28%">Dependent contingencies</th><td>One student carries the class. The arrangement is used only with the student&rsquo;s agreement, with a criterion the student already meets on a good day, with peers taught to encourage and never to pressure, and with an exit rule the teacher applies the same day if the student is blamed. The poster names the student, or shows the student&rsquo;s goal, only when the student agreed and the parent agreed in writing (Yes, with its date, on the Design sheet); until then it says &ldquo;our class goal&rdquo; and names no one. Where the student&rsquo;s plan already has its own reinforcement, the two should not conflict: the student is not made to lose twice.</td></tr>
       <tr><th>Interdependent contingencies</th><td>Peer pressure is the mechanism and the hazard. The teacher keeps the score, peers do not report on each other, and a student who repeatedly costs the group, whether from an inability to meet the criterion or because the group&rsquo;s reaction is itself reinforcing, is moved to a team of one with the same rule and the same prize rather than left to be the reason the class lost. A student with a BIP in the room competes under the criterion in their plan, not the class criterion, when the two differ.</td></tr>
       <tr><th>Fouls and marks</th><td>A mark against a team is information, recorded in a neutral voice without a lecture, and marks are never removed as a reward or added as a punishment for something outside the rules. The game does not take away anything the class already had. A losing team gets no consequence beyond not earning.</td></tr>
       <tr><th>Rewards</th><td>Activities and privileges the class chose; edibles only with family agreement and as the last choice. Nothing on the menu is something students are entitled to anyway (recess, lunch, a bathroom break).</td></tr>
@@ -1223,6 +1257,8 @@ td input,td select{max-width:100%}
     Wright, R. A., &amp; McCurdy, B. L. (2012). Class-wide positive behavior support and group contingencies: Examining a positive variation of the Good Behavior Game. <em>Journal of Positive Behavior Interventions, 14</em>(3), 173&ndash;180.</p>
   </section>
 </main>
+<!-- v22.37 (review F279): the class sheet, written only while Print class sheet prints it -->
+<div id="gcClassOut"></div>
 
 <script id="nbh-wording" src="nbh-wording.js"></script>
 
@@ -1270,7 +1306,8 @@ const FID=[
 ];
 
 /* ---------------- state ---------------- */
-function blank(){return{meta:{},chk:{},type:'',exp:[],menu:[],teams:[],fade:FADE.map(()=>({crit:'',date:''})),log:[],fid:FID.map(()=>({in:'',note:''})),fl:[]};}
+/* v22.37 (review F279): v 2, a file saved after other students' details moved to the class sheet */
+function blank(){return{v:2,meta:{},chk:{},type:'',exp:[],menu:[],teams:[],fade:FADE.map(()=>({crit:'',date:''})),log:[],fid:FID.map(()=>({in:'',note:''})),fl:[]};}
 let S=blank();
 function ensure(){
   if(!Array.isArray(S.exp))S.exp=[];if(!Array.isArray(S.menu))S.menu=[];if(!Array.isArray(S.teams))S.teams=[];if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.fl))S.fl=[];
@@ -1335,7 +1372,7 @@ function renderM(){
 function renderTm(){
   $('#tmTbl tbody').innerHTML=S.teams.map((r,i)=>`<tr><td class="num"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${TEAMCOL[i]};vertical-align:-1px"></span> ${i+1}</td>
     <td><input data-r="teams" data-i="${i}" data-f="name" value="${esc(r.name)}" placeholder="${['Blue Jays','Cardinals','Falcons','Owls'][i]}"></td>
-    <td><input data-r="teams" data-i="${i}" data-f="members" value="${esc(r.members)}" placeholder="rows 1 and 2; or the names"></td>${delCell('teams',i,'team')}</tr>`).join('');
+    <td><input data-r="teams" data-i="${i}" data-f="members" value="${esc(r.members)}" placeholder="rows 1 and 2 (11 students)"></td>${delCell('teams',i,'team')}</tr>`).join('');
 }
 function renderFade(){
   $('#fadeTbl tbody').innerHTML=FADE.map((f,i)=>`<tr><td class="num">${f.ph}</td><td>${f.freq}</td><td>${f.rw}</td><td><input data-r="fade" data-i="${i}" data-f="crit" value="${esc(S.fade[i].crit)}" placeholder="${i===0?'start':i===FADE.length-1?'terminal':'stepped'}" style="text-align:center"></td><td>${f.move}</td><td><input data-r="fade" data-i="${i}" data-f="date" value="${esc(S.fade[i].date)}"></td></tr>`).join('');
@@ -1453,6 +1490,18 @@ function ruleText(){
     default:return '';
   }
 }
+/* v22.37 (review F278): the poster names the student, or shows the student's goal, only when the student is named to the class
+   and the parent agreed in writing (Yes, with its date). Until then a dependent rule on the poster says "our class goal"
+   and names no one; the Design sheet keeps the initials, and the poster never prints how the student is named. */
+function depNamed(){const m=S.meta;return /^Yes/.test(m.dp_named||'')&&m.dp_parent==='yes'&&!!String(m.dp_pdate||'').trim();}
+const depHide=()=>S.type==='dep'&&!depNamed();
+function depWhy(){const m=S.meta;if(S.type!=='dep')return '';
+  if(depNamed())return '<div class="verdict v-ok"><b>The poster names the student'+(m.dp_who?' ('+esc(m.dp_who)+')':'')+' and shows the goal.</b> The student is named to the class, and the parent agreed in writing on '+esc(m.dp_pdate)+'.</div>';
+  const why=m.dp_parent==='no'?'the parent said No to naming the student on a class display'+(m.dp_pdate?' ('+esc(m.dp_pdate)+')':''):m.dp_parent!=='yes'?'the parent&rsquo;s written agreement to naming the student on a class display is not recorded as Yes':!String(m.dp_pdate||'').trim()?'the date of the parent&rsquo;s agreement is not recorded':'the student is not named to the class';
+  return '<div class="verdict v-mid"><b>The poster names no student and shows no individual goal.</b> It says &ldquo;our class goal&rdquo;, because '+why+' (Design sheet, Dependent Contingency).</div>';}
+function posterRule(){if(S.type!=='dep')return ruleText().replace(/\s+\./g,'.');
+  const m=S.meta,rw=esc(lc(rewardText())),rwWhen=m.rw_when?', '+esc(m.rw_when.charAt(0).toLowerCase()+m.rw_when.slice(1)):'',when=m.when?' during '+esc(lc(m.when)):'',mins=m.mins?' ('+esc(m.mins)+' minutes)':'';
+  return 'The whole class earns '+rw+rwWhen+' when '+(depNamed()?esc(m.dp_who||'[the student]')+' '+(m.dp_beh?'meets this goal: '+esc(m.dp_beh):'meets the goal'):'our class goal is met')+when+mins+'. Everyone encourages; the teacher keeps the score.';}
 function renderRule(){
   const R=$('#ruleOut'),V=$('#designVerdict');
   if(!S.type){R.innerHTML='<div class="rule"><b>The rule</b>Choose an arrangement above; the rule is written here from its fields.</div>';V.innerHTML='';return;}
@@ -1464,11 +1513,15 @@ function renderRule(){
   else if(b.mean!=null&&dir()==='high'&&c>b.mean*1.25)out.push('The criterion ('+c+') is well above the baseline mean ('+fmt1(b.mean)+'): the class will lose at first. Start just above the mean and raise on the rule (working convention).');
   if(!m.reward&&!(S.type==='gbg'&&m.g_prize))out.push('No reward named. Take one from the menu on the Setup sheet.');
   if(['gbg','cwfit'].includes(S.type)&&S.teams.length<2)out.push('Fewer than two teams; the game needs at least two.');
-  if(S.type==='dep'){const need=['dp_agree','dp_reach','dp_peers','dp_exit'].filter(k=>!S.chk[k]);if(need.length)out.push('A dependent contingency needs the first four safeguards ticked before it runs ('+need.length+' missing).');}
+  if(S.type==='dep'){const need=['dp_agree','dp_reach','dp_peers','dp_exit'].filter(k=>!S.chk[k]);if(need.length)out.push('A dependent contingency needs the first four safeguards ticked before it runs ('+need.length+' missing).');
+    /* v22.37 (review F278) */
+    if(/^Yes/.test(m.dp_named||'')&&m.dp_parent==='no')out.push('The parent said No to naming the student on a class display: choose No, or drawn at random, for Is the student named to the class. The poster names no one.');
+    else if(/^Yes/.test(m.dp_named||'')&&!depNamed())out.push('The student is to be named to the class, but the parent&rsquo;s written agreement (Yes, with its date) is not recorded. The poster leaves the initials and the goal out until it is.');}
   if(S.type==='interdep'&&!m.id_sab)out.push('No saboteur rule. Write what happens when one student repeatedly costs the group (a team of one, with the same rule and prize, is the arrangement the literature uses).');
   if(S.type==='random'&&!['r_crit','r_beh','r_stu','r_rw'].some(k=>S.chk[k]))out.push('Nothing is ticked as drawn; tick at least one component or choose another arrangement.');
   if(!m.never)out.push('Write what never happens (no marks removed, no scolding of a losing team, no early stop as a punishment).');
   V.innerHTML=out.length?'<div class="verdict v-mid">'+out.map(x=>'<div>'+x+'</div>').join('')+'</div>':'<div class="verdict v-ok"><b>Ready to post.</b> The poster and the record follow this rule; the criterion steps on the rows below.</div>';
+  const W=$('#dpWhy');if(W)W.innerHTML=depWhy();
 }
 
 /* ---------------- the poster ---------------- */
@@ -1484,10 +1537,10 @@ function renderPoster(){
     (m.reward||m.g_prize?'<div class="po-big" style="margin-top:18px">We earn: '+esc(rewardText())+'</div>':'')+foot+'</div>';
   if(want('po_score')){const rows=T.length?T:['Our class'];
     h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">Scoreboard</div>'+
-      '<div class="po-goal">'+(c!=null?'The goal: '+esc(critPhrase(c)):'The goal: ____ '+esc(unitWord()))+'</div>'+
+      '<div class="po-goal">'+(depHide()?'The goal: our class goal':c!=null?'The goal: '+esc(critPhrase(c)):'The goal: ____ '+esc(unitWord()))+'</div>'+
       '<table class="po-score"><thead><tr><th class="team">Team</th>'+days.map(d=>'<th>'+d+'</th>').join('')+'</tr></thead><tbody>'+
       rows.map((t,i)=>'<tr><th class="team">'+(T.length?'<span class="po-team" style="background:'+TEAMCOL[i]+'"></span>':'')+esc(t)+'</th>'+days.map(()=>'<td class="box"></td>').join('')+'</tr>').join('')+
-      '<tr><td class="crit">Goal</td>'+days.map(()=>'<td class="crit">'+(c!=null?esc(String(c)):'')+'</td>').join('')+'</tr>'+
+      '<tr><td class="crit">Goal</td>'+days.map(()=>'<td class="crit">'+(c!=null&&!depHide()?esc(String(c)):'')+'</td>').join('')+'</tr>'+
       '<tr class="win"><th class="team">Winners</th>'+days.map(()=>'<td></td>').join('')+'</tr></tbody></table>'+
       '<div class="po-big" style="margin-top:16px;font-size:20px">'+(dir()==='low'?'At or under the goal wins.':'At or over the goal wins.')+(S.type==='gbg'||T.length>1?' Every team can win.':'')+'</div>'+foot+'</div>';}
   if(want('po_rules')){
@@ -1497,12 +1550,13 @@ function renderPoster(){
         '<div><div class="po-h">The rules</div>'+(f.length?'<ul class="po-list">'+f.map(x=>'<li>No '+esc((y=>y.charAt(0).toLowerCase()+y.slice(1))(x.replace(/^no\s+/i,'')))+'</li>').join('')+'</ul>':'<p class="hint">Enter the fouls on the Design sheet or the third column of the expectations.</p>')+'</div></div>'+
         '<div class="po-h">How to win</div><div class="po-big">'+esc(m.g_win||('Every team with '+critPhrase(c)+' wins'))+'</div>'+
         '<div class="po-h">The prize</div><div class="po-big">'+esc(rewardText())+(m.rw_when?' <span style="font-weight:400;font-size:18px">('+esc(m.rw_when.toLowerCase())+')</span>':'')+'</div>'+foot+'</div>';}
-    else{h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(S.type?TYPES[S.type]:'How We Earn')+'</div>'+
-        '<div class="po-h">The rule</div><div style="font-size:19px;line-height:1.5">'+(S.type?ruleText().replace(/\s+\./g,'.'):'Choose an arrangement on the Design sheet.')+'</div>'+
+    else{h+='<div class="po-page"><p class="po-kicker">'+esc(m.cls||'Our class')+'</p><div class="po-title">'+esc(S.type&&!depHide()?TYPES[S.type]:'How We Earn')+'</div>'+
+        '<div class="po-h">The rule</div><div style="font-size:19px;line-height:1.5">'+(S.type?posterRule():'Choose an arrangement on the Design sheet.')+'</div>'+
         (ex.length?'<div class="po-h">How we earn</div><ul class="po-list">'+ex.map(e=>'<li><b>'+esc(e.text)+'</b>'+(e.looks?': '+esc(e.looks):'')+'</li>').join('')+'</ul>':'')+
         '<div class="po-h">The reward</div><div class="po-big">'+esc(rewardText())+(m.rw_when?' <span style="font-weight:400;font-size:18px">('+esc(m.rw_when.toLowerCase())+')</span>':'')+'</div>'+foot+'</div>';}
   }
   $('#posterOut').innerHTML=h;
+  const pw=$('#gcPosterWhy');if(pw)pw.innerHTML=depWhy();
 }
 
 /* ---------------- the record ---------------- */
@@ -1581,7 +1635,7 @@ function renderFidelity(){const f=fidStats();
 
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});$$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();bindMeta();setType(S.type);renderE();renderM();renderTm();renderFade();renderL();renderFid();renderFl();renderExp();renderMenu();renderBase();renderRule();renderPoster();renderRecord();renderFidelity();}
+function renderAll(){ensure();bindMeta();setType(S.type);renderE();renderM();renderTm();renderFade();renderL();renderFid();renderFl();renderExp();renderMenu();renderBase();renderRule();renderPoster();renderRecord();renderFidelity();renderClass();}
 
 /* ---------------- toolbar ---------------- */
 $('#printBtn').addEventListener('click',()=>window.print());
@@ -1598,6 +1652,10 @@ function fromFile(d){
   if(!d||typeof d!=='object'||d.form!=='GC-1'||!d.S||typeof d.S!=='object'||Array.isArray(d.S))return null;
   const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v),obj=k=>s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])?s[k]:{};
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});Object.keys(obj('chk')).forEach(k=>{o.chk[k]=!!s.chk[k];});
+  /* v22.37 (review F279): a file saved before October 2026 asked for every student with a plan in the room, and for the
+     students the system is not reaching. Those two answers can name other students: they leave this form for the class
+     sheet (held apart from the case), and the Setup page says so */
+  GC_MOVED=null;if(s.v!==2){const mv={};['plans','notreach'].forEach(k=>{if(String(o.meta[k]||'').trim())mv[k]=o.meta[k];delete o.meta[k];});if(Object.keys(mv).length)GC_MOVED=mv;}
   o.type=Object.keys(TYPES).includes(s.type)?s.type:'';
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n||50).map(x=>{const r={};fields.forEach(f=>{r[f]=f==='v'?(Array.isArray(x&&x.v)?x.v.slice(0,4).map(str):[]).concat(['','','','']).slice(0,4):str(x&&x[f]);});return r;}):null;
   o.exp=arr('exp',['text','looks','nex'],5)||[];o.menu=arr('menu',['item','kind','amt','how'],12)||[];o.teams=arr('teams',['name','members'],4)||[];
@@ -1611,8 +1669,9 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='GC-1'?d.form:'';
     const next=other?null:fromFile(d);
-    if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved GC-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form GC-1. Nothing was changed.':'That file could not be read as a saved GC-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved GC-1 form. Nothing was changed.');}};
+    if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved GC-1 form; open it with Open packet. Nothing was changed.':other===CLF?'That file is a class sheet. Open it with Open class sheet, on the Record page. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form GC-1. Nothing was changed.':'That file could not be read as a saved GC-1 form. Nothing was changed.');return;}
+    const prev=S;S=next;try{renderAll();}catch(err){S=prev;GC_MOVED=null;renderAll();alert('That file could not be read as a saved GC-1 form. Nothing was changed.');return;}
+    if(GC_MOVED){const mv=GC_MOVED;['plans','notreach'].forEach(k=>{if(mv[k])CL[k]=(String(CL[k]||'').trim()?CL[k].replace(/\s+$/,'')+'\n':'')+mv[k];});CL_DIRTY=true;renderClass();}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';const n=ncol();
@@ -1620,7 +1679,47 @@ $('#csvBtn').addEventListener('click',()=>{
   const out=[['Day','Date','Phase','Criterion'].concat(Array.from({length:n},(_,i)=>colName(i))).concat(cum?['Total']:[]).concat(['Met']).concat(wm?['Won']:[]).concat(['Reward','Note'])];
   S.log.forEach((r,i)=>{const m=rowMet(r);out.push([i+1,r.date,r.ph,r.ph==='B'?'':r.crit].concat(r.v.slice(0,n)).concat(cum?[cum[i]?cum[i].cum:'']:[]).concat([m===true?'yes':m===false?'no':'']).concat(wm?[winners(r).map(colName).join(' and ')]:[]).concat([r.rw,r.note]));});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='GC-1_record.csv';document.body.appendChild(a);a.click();a.remove();});
-$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();renderAll();setView('setup');}});
+$('#clearBtn').addEventListener('click',async ()=>{if(await nbhUI.confirm('Clear every entry on this form?\nUnsaved work will be lost.',{ok:'Clear all',danger:true})){S=blank();CL={plans:'',notreach:'',members:''};CL_DIRTY=false;GC_MOVED=null;renderAll();setView('setup');}});
+
+/* ---------------- v22.37 (review F279): the class sheet ----------------
+   This form opens inside one student's case: Save data, its safety copy, the case file (the form's file and a snapshot
+   of its fields) and the packet (the form as it prints) all carry what it holds into that student's record, which the
+   family and the IEP team read. So it asks for this student's plan only, and other students as a count; their initials,
+   plans and data, and the team members by name, go on the class sheet. Its three boxes are not form controls (the
+   snapshot reads inputs, selects and text areas only) and sit in a block the packet leaves out; what they hold is kept
+   only while the form is open, in a file of its own (Save class sheet), and on a sheet printed on its own. */
+const CLF='GC-1 class sheet';
+let CL={plans:'',notreach:'',members:''},CL_DIRTY=false,GC_MOVED=null;
+if(window.customElements&&!customElements.get('gc-text'))customElements.define('gc-text',class extends HTMLElement{get value(){return this.innerText.replace(/\n$/,'');}set value(v){this.textContent=v==null?'':String(v);}});
+document.addEventListener('paste',e=>{const t=e.target&&e.target.closest&&e.target.closest('gc-text');if(!t)return;e.preventDefault();document.execCommand('insertText',false,(e.clipboardData&&e.clipboardData.getData('text/plain'))||'');},true);
+document.addEventListener('input',e=>{const t=e.target&&e.target.closest&&e.target.closest('gc-text[data-cl]');if(!t)return;CL[t.dataset.cl]=t.value;CL_DIRTY=true;paintClassSt();});
+const clHas=()=>['plans','notreach','members'].some(k=>String(CL[k]||'').trim());
+function paintClassSt(){const el=$('#gcClassSt');if(el)el.textContent=CL_DIRTY&&clHas()?'Changed since it was last saved or printed: Save class sheet keeps it.':'';}
+function renderClass(){$$('gc-text[data-cl]').forEach(el=>{if(document.activeElement!==el&&el.value!==CL[el.dataset.cl])el.value=CL[el.dataset.cl]||'';});paintClassSt();
+  const mv=$('#gcMoved');if(mv)mv.innerHTML=GC_MOVED?'<div class="verdict v-mid"><b>Other students&rsquo; details moved to the class sheet.</b> This file was saved before October 2026 and held '+[GC_MOVED.plans?'Students with an individual plan in the room':'',GC_MOVED.notreach?'Students the system is not reaching':''].filter(Boolean).join(' and ')+'. Those answers are now on the class sheet (Record page), which is kept apart from this student&rsquo;s case and packet: press Save class sheet to keep them, and write this student&rsquo;s own line again above. Check the team members and the day notes too: other students&rsquo; names do not belong on this form.</div>':'';}
+const ymdNow=()=>{const t=new Date();return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');};
+$('#gcClassSave').addEventListener('click',()=>{if(!clHas()){nbhUI.toast('The class sheet is empty; there is nothing to save.',{kind:'warn'});return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({form:CLF,rev:'2026-10',saved:new Date().toISOString(),cls:S.meta.cls||'',teacher:S.meta.teacher||'',C:CL},null,1)],{type:'application/json'}));
+  a.download='GC-1_class-sheet_'+(S.meta.cls||'class').replace(/[^\w-]+/g,'_')+'_'+ymdNow()+'.json';document.body.appendChild(a);a.click();a.remove();CL_DIRTY=false;GC_MOVED=null;renderClass();
+  nbhUI.toast('Class sheet saved as a file of its own. Keep it with the class’s records, not in a student’s file.',{kind:'ok'});});
+$('#gcClassOpen').addEventListener('click',()=>$('#gcClassIn').click());
+$('#gcClassIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=async()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
+    if(!d||d.form!==CLF||!d.C||typeof d.C!=='object'){alert('That file is not a GC-1 class sheet. Nothing was changed.');return;}
+    if(clHas()&&!(await nbhUI.confirm('Replace the class sheet on the screen with the one in this file?'+(d.cls?'\nIt is for '+d.cls+'.':''),{ok:'Replace'})))return;
+    const str=v=>v==null||typeof v==='object'?'':String(v);CL={plans:str(d.C.plans),notreach:str(d.C.notreach),members:str(d.C.members)};CL_DIRTY=false;renderClass();
+    nbhUI.toast('Class sheet opened'+(d.cls?' ('+d.cls+')':'')+'. It is still kept apart from this form’s file and the case.',{kind:'ok'});};
+  r.readAsText(f);e.target.value='';});
+const CL_PAGE='@media print{@page{@bottom-left{content:"Class sheet (Form GC-1): keep it with the class\u2019s records, not in a student\u2019s file."}}}';
+$('#gcClassPrint').addEventListener('click',()=>{const el=$('#gcClassOut'),m=S.meta,box=(t,v)=>'<h3>'+t+'</h3><div class="gcc-box">'+(String(v||'').trim()?esc(v):'&nbsp;')+'</div>';
+  el.innerHTML='<h2>Class Sheet: Group Contingency (Form GC-1)</h2><p class="gcc-note"><b>A class record, not a student&rsquo;s.</b> It names several students: keep it with the class&rsquo;s records, and do not file or send it with any one student&rsquo;s papers. Each student&rsquo;s own plan is in that student&rsquo;s case.</p>'+
+    '<table class="rt"><tr><th style="width:20%">Class</th><td>'+esc(m.cls||'')+'</td><th style="width:16%">Teacher</th><td>'+esc(m.teacher||'')+'</td></tr><tr><th>Arrangement</th><td>'+esc(TYPES[S.type]||'')+'</td><th>Printed</th><td>'+esc(new Date().toLocaleDateString())+'</td></tr></table>'+
+    box('Other students with a plan in the room',CL.plans)+box('Other students the system is not reaching',CL.notreach)+box('Team members by name',CL.members);
+  document.body.classList.add('gc-class-only');const st=document.createElement('style');st.textContent=CL_PAGE;document.head.appendChild(st);
+  const off=()=>{document.body.classList.remove('gc-class-only');el.innerHTML='';st.remove();window.removeEventListener('afterprint',off);};
+  CL_DIRTY=false;paintClassSt();window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);});
+/* on its own, the form asks before it closes while the class sheet holds changes neither saved nor printed */
+window.addEventListener('beforeunload',e=>{if(window.top!==window.self||!CL_DIRTY||!clHas())return;e.preventDefault();e.returnValue='';});
 
 /* ---------------- simulation ---------------- */
 async function loadSim(){
@@ -1633,7 +1732,7 @@ async function loadSim(){
   S.meta={cls:'SIMULATED – Room 12',teacher:'Ms. K.',grade:'2',nstud:'22',site:'Elementary school',when:'Math block, 9:15 to 9:45',runs:'The teacher, with a paraeducator keeping the score',bcba:'Joshua Newsome, M.A., BCBA',date:Y(20),start:Y(10),review:Y(0),
     tier:'Class-wide support around one or more students with a BIP',
     problem:'Talking out and out-of-seat behavior through the math block, from most of the class; the teacher stops the lesson 10 to 15 times in half an hour. Two students have individual plans; the rest copy them.',
-    plans:'D.R. (TD-1, escape; break card) and M.A. (TD-1, attention; DRA for hand-raising). Both play on their team under the team rule; D.R. keeps the break card and a break is not a foul.',
+    plan_me:'D.R. (TD-1, escape; break card). D.R. plays on the Cardinals under the team rule, keeps the break card, and a break is not a foul.',plans_n:'1',plans_chk:'Each plan was checked against this system in that student’s own case',
     goal_txt:'The class works through the math block with the teacher stopping fewer than three times, and raised hands instead of calling out.',
     measure:'Fouls per team per game period',b_who:'J. Newsome and the paraeducator (interobserver agreement 92% on day 2)',b_dates:D(14)+' to '+D(11),b_def:'Talking without a hand up (any audible word to the class or the teacher); out of seat without permission (bottom off the chair for more than 3 seconds); touching others or their things. Counted per team in the 30-minute block.',b_note:'The para tallied by team on a clipboard so the baseline matches the game’s count.',
     dir:'low',crit:'5',unit:'fouls per team',mins:'30',reward:'Five minutes of free choice at the end of the day (the class voted)',rw_when:'At the end of the same day',announce:'The para reads the tally at 9:45; the teacher names the winners; the class claps; nothing is said about a team over the goal.',never:'No marks are removed as a reward or added as a punishment for anything outside the three rules; a losing team is not scolded; the game is not stopped early.',
@@ -1641,10 +1740,12 @@ async function loadSim(){
     cc_up:'Met by every team on 3 of the last 4 game days (working convention)',cc_step:'1',cc_end:'2',cc_down:'Met on fewer than 2 of the last 4 game days: step back one, score fidelity, re-vote the menu',
     po_title:'Room 12 Expectations',po_days:'5',
     decision:'Criterion stepped from 5 to 4 on '+D(6)+' and to 3 on '+D(2)+', each after 3 of 4 game days met. Phase 2 (three games a week, prize at the end of the day) began '+D(2)+'.',
-    notreach:'D.R. cost the Cardinals 3 of their 5 fouls on '+D(9)+'; the break card was re-taught and the fouls fell. No team of one needed so far.',
+    notreach_n:'0',notreach:'D.R. cost the Cardinals 3 of their 5 fouls on '+D(9)+'; the break card was re-taught and the fouls fell. No team of one needed so far.',
     sv:'The class asks whether the game is on; both teams clap for each other. Two students said the Cardinals “always lose” in week 1; not said since the criterion moved.',
     f_who:'J. Newsome',f_date:D(1),f_per:'Math block',f_min:'30'};
   S.chk={po_exp:false,po_score:false,po_rules:false};
+  /* v22.37 (review F279): the other student with a plan, on the class sheet (simulated) */
+  CL={plans:'M.A. (TD-1, attention; DRA for hand-raising): plays on the Blue Jays under the team rule; the plan was checked against the game in M.A.’s own case.',notreach:'',members:'Blue Jays: rows 1 and 2 (11 students). Cardinals: rows 3 and 4 (11 students).'};CL_DIRTY=false;GC_MOVED=null;
   S.exp=[{text:'Hands up to talk',looks:'hand raised, voice off until called on',nex:'talking without a hand up'},{text:'Stay in your seat',looks:'bottom on the chair, chair on the floor; a break card is permission',nex:'out of seat without permission'},{text:'Hands and feet to yourself',looks:'hands on your own desk and your own work',nex:'touching others or their things'},{text:'Follow directions the first time',looks:'started within 10 seconds of the direction',nex:''}];
   S.menu=[{item:'Five minutes of free choice at the end of the day',kind:'Activity',amt:'5 minutes',how:'class vote, first choice'},{item:'Music during independent work',kind:'Privilege',amt:'one block',how:'class vote'},{item:'Teacher reads an extra chapter',kind:'Social',amt:'10 minutes',how:'class vote'},{item:'Friday class game (the winners choose)',kind:'Activity',amt:'15 minutes',how:'teacher’s offer for the week'}];
   S.teams=[{name:'Blue Jays',members:'rows 1 and 2 (11 students)'},{name:'Cardinals',members:'rows 3 and 4 (11 students)'}];
@@ -1675,8 +1776,12 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
   const v=(f.behaviors||[]).filter(b=>b&&!b.isRep&&String(b.label||'').trim()&&String(b.def||'').trim()).slice(0,4).map(b=>String(b.label).trim()+': '+String(b.def).trim().replace(/[.;\s]+$/,'')).join('; ');
   const el=document.querySelector('[data-m="b_def"]');
   if(el&&v&&!String(el.value||'').trim()&&!String(S.meta.b_def||'').trim()){el.value=v;S.meta.b_def=v;el.dispatchEvent(new Event('input',{bubbles:true}));k++;}
+  /* v22.37 (review F279): this student's plan, from the case: the target behavior (TB-1), the function (FS-1), the goal (GB-1) */
+  const pm=document.querySelector('[data-m="plan_me"]'),bh=(f.behaviors||[]).find(b=>b&&!b.isRep&&String(b.label||'').trim()),fn=f.fn&&(f.fn.label||f.fn.key),g=f.goals&&((f.goals.red||[])[0]||(f.goals.acq||[])[0]);
+  const pv=[bh?String(bh.label).trim():'',fn?'function: '+String(fn).trim():'',g&&g.text?'goal: '+String(g.text).trim().replace(/[.;\s]+$/,''):''].filter(Boolean).join('; ');
+  if(pm&&pv&&!String(pm.value||'').trim()&&!String(S.meta.plan_me||'').trim()){pm.value=pv+' (from the case)';S.meta.plan_me=pm.value;k++;}
   if(k)try{renderAll();}catch(e){}
-  return {filled:n+k,note:k?'the definitions from Form TB-1':((r&&r.note)||'')};};
+  return {filled:n+k,note:k?'the definitions and this student’s plan from the case':((r&&r.note)||'')};};
 })();
 </script>
 

@@ -101,7 +101,7 @@
     C.facts = f; var rep = null;
     try { if (window.__nbhFactsIn) rep = window.__nbhFactsIn(f); } catch(e) { rep = { error: String(e) }; }
     if (!rep) rep = C.generic(f, false);
-    C.last = rep; C.paint(); return rep;
+    C.last = rep; C.paint(); try { C.paintConsent(); } catch(e) {} return rep;
   };
 
   /* ---- the toolbar group and the picker ---- */
@@ -236,6 +236,63 @@
     (g.acq || []).forEach(function(a, i){ L.push('Acquisition objective ' + (i + 1) + ': ' + a.text); });
     if (f.menu && f.menu.length) L.push('Reinforcer menu: ' + f.menu.map(function(m){ return (m.rank ? m.rank + '. ' : '') + m.name + (m.tier ? ' (' + m.tier + ')' : ''); }).join('; '));
     return L.join('\n');
+  };
+  /* ---- v22.37 the consent on file (review F11, F41, I7, I234, I9) ----
+     Form IC-1 hands the case its consent record: {state, on, method, kind, obtained, ended, exceptions, procs, covered,
+     dec:{fa, ed, rec, sh, ij}, bip, date, parent}. A case saved before v22.37 holds only {date, parent}: read as on file
+     when either date is there, as before. C.consent() gives every form the same reading; C.covers(p) says whether the
+     procedure p (IC-1's part 2 keys: indirect, abc, scatter, daily, pref, reinf, arrange, fa, demand, var, bip, med) is
+     consented to. An assessment form inside the workstation shows one line under its toolbar when consent is not on
+     file, was declined or revoked, or does not cover what the form runs; on screen only. */
+  function cFmt(d){ var m = /^(\d{4})-(\d\d)-(\d\d)$/.exec(String(d || '')); return m ? (+m[2]) + '/' + (+m[3]) + '/' + m[1] : String(d || ''); }
+  C.consent = function(f){
+    f = f || C.facts; var c = f && f.consent;
+    if (!c || typeof c !== 'object') return { known:false, on:false, state:'Not in the case', date:'', word:'No consent on file in this case (Form IC-1)' };
+    var legacy = !c.state, on = legacy ? !!(c.date || c.parent) : !!c.on;
+    var state = legacy ? (on ? 'Current' : 'Not recorded') : String(c.state);
+    var date = on ? (c.obtained || c.date || c.parent || '') : '', ended = c.ended || '';
+    var word = on ? 'Consent on file' + (date ? ' since ' + cFmt(date) : '') + (c.exceptions ? ', with exceptions: ' + c.exceptions : '') + ' (Form IC-1)'
+      : state === 'Declined' ? 'Consent declined' + (ended ? ' on ' + cFmt(ended) : '') + ' (Form IC-1)'
+      : state === 'Revoked' ? 'Consent revoked' + (ended ? ' on ' + cFmt(ended) : '') + ' (Form IC-1)'
+      : state === 'Pending' ? 'Consent pending: no response from the parent yet (Form IC-1)'
+      : state === 'Decision not recorded' ? 'Consent not established: the parent’s decision is not recorded (Form IC-1)'
+      : 'No consent on file (Form IC-1)';
+    return { known:true, legacy:legacy, on:on, state:state, date:date, ended:ended, kind:c.kind || '', exceptions:c.exceptions || '',
+      covered: Array.isArray(c.covered) ? c.covered : null, dec: c.dec || {}, bip: c.bip || '', word:word };
+  };
+  C.covers = function(p, f){ var k = C.consent(f); if (!k.on) return false; return !k.covered || k.covered.indexOf(p) >= 0; };
+  var CONSENT_FORMS = { 'OB-1':['abc','direct observation'], 'ABC-1':['abc','ABC recording'], 'SP-1':['scatter','the scatter plot'],
+    'IA-1':['indirect','interviews and rating scales'], 'IN-1':['indirect','interviews'], 'SI-1':['indirect','the student interview'],
+    'EA-1':['fa','the experimental analysis'], 'DA-1':['demand','the demand assessment'], 'AD-1':['arrange','the reinforcer arrangement comparison'],
+    'PA-1':['pref','the preference assessment'], 'RA-1':['reinf','the reinforcer assessment'], 'VI-1':['var','the analysis of specific variables'] };
+  /* the session runners show the consent line when it is on file too, with the limits the parent set (I9) */
+  var RUNNERS = { 'EA-1':1, 'DA-1':1, 'AD-1':1, 'PA-1':1, 'RA-1':1 };
+  C.formId = function(){ var m = /Form\s+([A-Z]{2,3}-\d)/.exec(document.title || ''); return m ? m[1] : ''; };
+  C.consentLine = function(id, f){
+    var F = CONSENT_FORMS[id || C.formId()]; if (!F) return null;
+    var k = C.consent(f);
+    if (!k.on) return { kind: (k.state === 'Declined' || k.state === 'Revoked') ? 'bad' : 'warn',
+      text: k.word + (k.state === 'Declined' || k.state === 'Revoked' ? '. Stop any assessment that is not part of the current IEP.' : '. Nothing is assessed until consent is on file.') };
+    if (!C.covers(F[0], f)) return { kind:'bad', text:'Form IC-1 does not cover ' + F[1] + (k.exceptions ? ' (consent with exceptions: ' + k.exceptions + ')' : '') + '. Do not run it unless the parent consents to it.' };
+    if (!RUNNERS[id || C.formId()]) return null;
+    var ed = (k.dec && k.dec.ed) || {}, food = '';
+    if (/^(PA-1|RA-1)$/.test(id || C.formId())) food = ed.dec === 'yes' ? ' Food items approved: ' + (ed.items || 'items not listed') + (ed.allergy ? '; allergies or diet: ' + ed.allergy : '') + (ed.limits ? '; limits: ' + ed.limits : '') + '.'
+      : ed.dec === 'no' ? ' No food or drink items (the parent said no).' : ed.dec === 'na' ? ' Food items were not proposed: none without a new decision.' : ' The food-item decision is not recorded: no edibles until it is.';
+    return { kind: food && ed.dec !== 'yes' ? 'warn' : 'ok', text: k.word + '.' + food };
+  };
+  C.paintConsent = function(){
+    var id = C.formId(); if (!CONSENT_FORMS[id] || !C.facts) return;
+    if (!q('#nbh-consent-css')) { var st = document.createElement('style'); st.id = 'nbh-consent-css';
+      st.textContent = '.nbh-consent{margin:6px 0 8px;padding:7px 12px;border-radius:6px;font:13px/1.4 var(--sans,system-ui,sans-serif);border:1px solid #e3c98f;background:#fff8e8;color:#5b4310}' +
+        '.nbh-consent.bad{border-color:#e2a6a6;background:#fdf0f0;color:#7a1f1f}.nbh-consent.ok{border-color:#cfe0d6;background:#f1f8f4;color:#1f5a3c}.nbh-consent b{font-weight:600}' +
+        '@media print{.nbh-consent{display:none!important}}';
+      document.head.appendChild(st); }
+    var L = C.consentLine(id), n = q('#nbhConsent');
+    if (!L) { if (n) n.remove(); return; }
+    if (!n) { n = document.createElement('div'); n.id = 'nbhConsent'; n.setAttribute('role', 'status');
+      var tb = q('.toolbar'); if (tb && tb.parentNode) tb.parentNode.insertBefore(n, tb.nextSibling); else document.body.insertBefore(n, document.body.firstChild); }
+    n.className = 'nbh-consent ' + L.kind;
+    n.innerHTML = '<b>' + (L.kind === 'ok' ? 'Consent' : 'Consent check') + ':</b> ' + esc(L.text);
   };
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */

@@ -1018,8 +1018,8 @@ mark.cl-m{background:#ffe7a3;color:inherit;border-radius:2px;padding:0 1px}
 .hx-src button{margin-left:4px}
 .hx-note{margin:0 0 8px;padding:7px 10px;border:1px solid #e6cf9f;border-radius:8px;background:#fdf6e7;font-size:13px}
 #hxBar{box-shadow:inset 3px 0 0 var(--flag)}
-header.top #hxBtn.hx-top{flex:0 0 auto;font-size:11.5px;font-weight:500;padding:4px 12px;min-height:30px;border-radius:999px;background:#fff;border:1px solid var(--rule);color:var(--navy);white-space:nowrap}
-header.top #hxBtn.hx-top:hover{background:var(--mist)}
+header.top #hxBtn.hx-top,header.top #dirBtn.hx-top{flex:0 0 auto;font-size:11.5px;font-weight:500;padding:4px 12px;min-height:30px;border-radius:999px;background:#fff;border:1px solid var(--rule);color:var(--navy);white-space:nowrap}
+header.top #hxBtn.hx-top:hover,header.top #dirBtn.hx-top:hover{background:var(--mist)}
 #hxBar button{margin-left:6px}
 @media (pointer:coarse){.hx-acts button,.hx-pick button{min-height:44px}}
 @media (max-width:520px){.hx-acts button{flex:1 1 auto}.hx-pick button{flex:1 1 100%}}
@@ -2250,7 +2250,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.36';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.37';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2536,7 +2536,7 @@ async function factsFlush(){
   if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||(f.evidence&&Object.keys(f.evidence).length)));}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
 function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
@@ -3057,7 +3057,7 @@ async function masterRun(chosen,opt){opt=opt||{};
   const total=shaped.length+(refsHtml?1:0);
   const fx=state.facts||{},rows=[];
   if(fx.data&&(fx.data.from||fx.data.to))rows.push(['Data',[fx.data.from?mpDate(fx.data.from):'',fx.data.to?'to '+mpDate(fx.data.to):''].filter(Boolean).join(' ')+(fx.data.days?' ('+fx.data.days+' school day'+(fx.data.days===1?'':'s')+')':'')]);
-  if(fx.consent&&fx.consent.date)rows.push(['Consent',mpDate(fx.consent.date)]);
+  {const cs=csOf(fx);if(cs.on&&cs.date)rows.push(['Consent',mpDate(cs.date)]);else if(cs.known&&cs.state!=='Not recorded')rows.push(['Consent',cs.word.replace(/ \(.*$/,'')+(cs.ended?' '+mpDate(cs.ended):'')]);}   /* v22.37 (F11) */
   if(fx.review&&(fx.review.date||fx.review.next))rows.push(['Plan review',[fx.review.date?mpDate(fx.review.date):'',fx.review.next?'next '+mpDate(fx.review.next):''].filter(Boolean).join(', ')]);
   const factLine=rows.map(r=>r[0]+' '+r[1]).join('  \u00b7  ');
   const kept=shaped.filter(s=>s.guide).map(s=>'Form '+s.id);
@@ -5089,8 +5089,17 @@ async function todayOpen(){await gatherFacts(false);try{await gatherDue();}catch
 async function endOfWeek(){if(!inCase('DD-1')){alert('Open Form DD-1 for this student first: the end of the week starts from its record.');return;}
   const chosen=['DD-1','SM-1'].filter(inCase).map(id=>ALL.find(x=>x[0]===id)).filter(Boolean);
   await masterRun(chosen,{title:'The Week: the Summary, Next Week’s Sheet and the Point Sheets',extra:{'DD-1':{week:true}}});}
+/* v22.37 (review F11, I7) the consent on file, read one way everywhere: Form IC-1 now hands the case its state (Current;
+   Current, with exceptions; Declined; Revoked; Pending; Decision not recorded), and its old two dates only while consent
+   is on file. A case saved before v22.37 holds the two dates alone: read as on file when either is there, as before. The
+   60-day FBA clock runs from consent for an initial evaluation, not from a district reevaluation form. */
+function csOf(f){const c=(f&&f.consent)||null;if(!c||typeof c!=='object')return {known:false,on:false,state:'',date:'',ended:'',word:'not on file',clock:''};
+  const legacy=!c.state,on=legacy?!!(c.date||c.parent):!!c.on,st=legacy?(on?'Current':'Not recorded'):String(c.state);
+  const date=on?String(c.obtained||c.date||c.parent||''):'',ended=String(c.ended||'');
+  const word=on?'on file':st==='Declined'?'declined':st==='Revoked'?'revoked':st==='Pending'?'pending (no response from the parent)':st==='Decision not recorded'?'not established (the parent’s decision is not recorded)':'not on file';
+  return {known:true,legacy,on,state:st,date,ended,word,exceptions:String(c.exceptions||''),bip:String(c.bip||''),clock:on&&c.kind!=='reeval'?date:''};}
 function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L=[];
-  if(!(f.consent&&(f.consent.date||f.consent.parent)))L.push({t:'No consent on file: Form IC-1 holds no date of consent and no parent’s signature date'+(inCase('IC-1')?'':' (IC-1 is not in this case)'),open:'IC-1'});
+  const cs=csOf(f);if(!cs.on)L.push({t:cs.known&&cs.state!=='Not recorded'?'Consent '+cs.word+(cs.ended?' on '+tdMd(cs.ended):'')+' (Form IC-1): no assessment beyond the current IEP goes on':'No consent on file: Form IC-1 holds no date of consent and no parent’s signature date'+(inCase('IC-1')?'':' (IC-1 is not in this case)'),open:'IC-1'});   /* v22.37 (F11) */
   const tg=(f.behaviors||[]).filter(b=>!b.isRep&&!/replacement|alternative/i.test(b.type||''));
   if(!tg.length)L.push({t:'No target behaviors defined (Form TB-1)',open:'TB-1'});
   const und=tg.filter(b=>!String(b.def||'').trim());if(und.length)L.push({t:und.length+' target behavior'+(und.length===1?'':'s')+' without a definition: '+esc(und.map(b=>b.label).join(', ')),open:'TB-1'});
@@ -5130,7 +5139,10 @@ function tdDecision(f){const d=f.data,L=[];if(!d||!Array.isArray(d.behaviors))re
   return L;}
 function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{};
   /* the FBA: 60 calendar days from consent (the Florida evaluation timeline, Rule 6A-6.0331) until the function is written (Form FS-1) */
-  const cons=f.consent&&(f.consent.date||f.consent.parent);if(cons&&!(f.fn&&(f.fn.key||f.fn.label))){const due=tdAdd(cons,60),n=tdLeft(due);if(n!==null&&n<=15)push('Timeline','The FBA is due '+esc(tdMd(due))+', 60 days from consent on '+esc(tdMd(cons))+' ('+tdWhen(due)+'): Form FS-1 has no function yet','FS-1');}
+  const cs=csOf(f),cons=cs.clock;if(cons&&!(f.fn&&(f.fn.key||f.fn.label))){const due=tdAdd(cons,60),n=tdLeft(due);if(n!==null&&n<=15)push('Timeline','The FBA is due '+esc(tdMd(due))+', 60 days from consent on '+esc(tdMd(cons))+' ('+tdWhen(due)+'): Form FS-1 has no function yet','FS-1');}
+  /* v22.37 (review I234) nothing is assessed until consent is on file: an assessment form in the case without it is said on Today */
+  {const AS=['IA-1','IN-1','SI-1','OB-1','ABC-1','SP-1','EA-1','DA-1','AD-1','PA-1','RA-1','VI-1'].filter(inCase);
+   if(AS.length&&!cs.on)push('Consent',(cs.known&&cs.state!=='Not recorded'?'Consent '+esc(cs.word)+(cs.ended?' on '+esc(tdMd(cs.ended)):''):'No consent on file')+' (Form IC-1), and '+esc(AS.join(', '))+(AS.length===1?' is':' are')+' in the case: nothing is assessed until consent is on file','IC-1');}
   /* the plan's review: PR-1's next date, or six weeks after the last review or the start of the plan */
   if(rv.next){const n=tdLeft(rv.next);if(n!==null&&n<=7)push('Timeline','The plan review (Form PR-1) is due '+esc(tdMd(rv.next))+' ('+tdWhen(rv.next)+')','PR-1');}
   else if(f.plan&&f.data&&Array.isArray(f.data.conds)&&f.data.conds.length>1){const c=f.data.conds[f.data.conds.length-1],from=rv.date&&rv.date>c.from?rv.date:c.from,due=tdAdd(from,42),n=tdLeft(due);
@@ -5167,7 +5179,7 @@ function tdSummaryHTML(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.pl
   const due=(state.due||[]).map(x=>esc(x.id)+' '+esc(x.what)+' '+dueText(x.d));
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Transition summary'+(p.client?': '+esc(p.client):'')+'<\/title><style>body{font:11pt/1.45 Georgia,"Times New Roman",serif;color:#1d2730;margin:.6in;max-width:7.3in}h1{font:700 18pt Inter,Arial,sans-serif;margin:0 0 4pt}h2{font:700 11pt Inter,Arial,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:#254657;border-bottom:1.2pt solid #254657;margin:14pt 0 5pt;padding-bottom:2pt}p.s{font:10pt Inter,Arial,sans-serif;color:#555;margin:0 0 8pt}ul{margin:0;padding-left:16pt}li{margin:0 0 3pt}@media print{body{margin:0}}<\/style><\/head><body>'+
     '<h1>Transition Summary<\/h1><p class="s">'+esc([p.client,p.sid?'ID '+p.sid:'',p.grade?gradeWords(p.grade):'',p.site,p.bcba?'BCBA '+p.bcba:''].filter(Boolean).join(' · '))+' · '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'<\/p>'+
-    sec('History',li([f.consent&&f.consent.date?'Consent for the FBA and BIP: '+esc(f.consent.date)+' (Form IC-1)':'',f.fn&&(f.fn.label||f.fn.key)?'FBA function: '+esc(f.fn.label||f.fn.key)+' (Form FS-1)':'',f.review&&f.review.date?'Last plan review: '+esc(f.review.date)+(f.review.decisionText||f.review.decision?', '+esc(f.review.decisionText||f.review.decision):'')+' (Form PR-1)':''].filter(Boolean)))+
+    sec('History',li([(cs=>cs.on?'Consent for the FBA and BIP: '+esc(cs.date)+' (Form IC-1)'+(cs.exceptions?', with exceptions: '+esc(cs.exceptions):''):cs.known?'Consent for the FBA and BIP: '+esc(cs.word)+(cs.ended?' on '+esc(cs.ended):'')+' (Form IC-1)':'')(csOf(f)),(cs=>cs.bip?'Consent to carry out the BIP: '+esc(cs.bip)+' (Form IC-1)':'')(csOf(f)),f.fn&&(f.fn.label||f.fn.key)?'FBA function: '+esc(f.fn.label||f.fn.key)+' (Form FS-1)':'',f.review&&f.review.date?'Last plan review: '+esc(f.review.date)+(f.review.decisionText||f.review.decision?', '+esc(f.review.decisionText||f.review.decision):'')+' (Form PR-1)':''].filter(Boolean)))+
     sec('Target behaviors',li(tg.map(b=>'<b>'+esc(b.label)+'<\/b>'+(b.isRep||/replacement/i.test(b.type||'')?' (replacement)':'')+(b.def?': '+esc(b.def):''))))+
     sec('Function and the evidence',(f.fn&&(f.fn.statements||[]).length?'<p>'+f.fn.statements.map(esc).join(' ')+'<\/p>':'')+li(ev))+
     sec('The plan',li([pl.rep?'Replacement: '+esc(pl.rep):'',A(pl.ant).length?'Before it happens: '+esc(A(pl.ant).join('; ')):'',rs.prec?'At the first sign: '+esc(rs.prec):'',rs.target?'If it happens: '+esc(rs.target):'',rs.after?'Afterwards: '+esc(rs.after):'',rs.not?'Never: '+esc(rs.not):'',f.crisis&&(f.crisis.stages||[]).length?'Crisis plan: '+f.crisis.stages.length+' stages (Form CR-1)':''].filter(Boolean)))+
@@ -5566,7 +5578,9 @@ function tdV2180(f){const L=[],d=f.data||{},rv=f.review||{},ex=rv.exit||{},pr=f.
    notice), Form PR-1's log of closed reviews, Form ST-1's staff trained to criterion, Form CF-1's contextual fit, Form SV-1's
    social validity, Form SI-1's student interview. Nothing here is kept. */
 function rsItems(f){const L=[],pl=f.plan||{},ad=pl.adoption||{},fl=f.profile&&f.profile.flags,st=f.staff,miss=(t,open)=>L.push({t,open});
-  if(!f.consent||!(f.consent.date||f.consent.parent))miss('Consent for the FBA and BIP is not recorded (Form IC-1)','IC-1');
+  {const cs=csOf(f);if(!cs.on)miss(cs.known&&cs.state!=='Not recorded'?'Consent for the FBA and BIP is '+cs.word+(cs.ended?' ('+tdMd(cs.ended)+')':'')+' (Form IC-1)':'Consent for the FBA and BIP is not recorded (Form IC-1)','IC-1');
+   /* v22.37 (review F348, I7) consent for the assessment is not consent to carry the plan out: IC-1 records that as its own event */
+   else if(!cs.legacy&&!cs.bip)miss('The parent’s consent to carry out the plan is not on Form IC-1’s Consent record (“Consent to implement the BIP”)','IC-1');}
   if(!(f.fn&&(f.fn.key||f.fn.label)))miss('The function is not written (Form FS-1)','FS-1');
   if(!(pl.rep||pl.beh||(pl.ant||[]).length))miss('The plan is not written (Form TD-1)','TD-1');
   /* v21.83 every target in the plan has a part of it that addresses it (Form TD-1, Targets in this plan) */
@@ -5703,7 +5717,7 @@ async function clSaveFile(key){const r=(await clList()||[]).find(x=>x.key===key)
 /* the caseload's deadlines as one calendar file: initials only, an all-day event each, the same id each time so a newer file updates */
 function calEvents(f){const E=[],add=(date,what,form)=>{const s=String(date||'');if(/^\d{4}-\d\d-\d\d/.test(s))E.push({date:s.slice(0,10),what,form});};
   const pf=f.profile||{},dt=pf.dates||{},rc=f.records||{},rv=f.review||{},ex=rv.exit||{},cr=f.crisis||{},inj=f.injury||{},ad=(f.plan||{}).adoption||{};
-  const cons=f.consent&&(f.consent.date||f.consent.parent);if(cons&&!(f.fn&&(f.fn.key||f.fn.label)))add(tdAdd(cons,60),'FBA due, 60 days from consent','FS-1');
+  const cons=csOf(f).clock;if(cons&&!(f.fn&&(f.fn.key||f.fn.label)))add(tdAdd(cons,60),'FBA due, 60 days from consent','FS-1');   /* v22.37 (F11) */
   add(rv.next,'Plan review','PR-1');add(ex.next,'Check after exit','PR-1');add(rc.iep||dt.iep,'Annual IEP review','GB-1');add(rc.reeval||dt.reeval,'Reevaluation due','RR-1');
   (cr.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Notice')+' (restraint or seclusion)','CR-1'));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>add(x.due,String(x.what||'Injury follow-up'),'IM-1'));
@@ -8294,9 +8308,12 @@ function hxBar(){let b=$('#hxBar');if(!b){const d=$('#drvBar')||$('#pwaBar');if(
    file beside it): it then goes up into the heading, beside the student's name, rather than make the bar two rows */
 function hxPlace(){const b=$('#hxBtn'),x=$('#caseXlsx'),who=$('header.top .who');if(!b||!x||!who)return;
   if(b.previousElementSibling!==x)x.insertAdjacentElement('afterend',b);b.classList.remove('hx-top');
+  /* v22.37 Staff directory (v22.35) made the row wrap even without History: it goes up beside History when the row still wraps */
+  const d=$('#dirBtn'),cm=$('#caseMap');if(d&&cm&&d.previousElementSibling!==cm)cm.insertAdjacentElement('afterend',d);if(d)d.classList.remove('hx-top');
   if(innerWidth<=1194||b.offsetParent===null)return;const g=b.closest('.grp.acts');if(!g)return;
   const rows=()=>new Set([...g.querySelectorAll('button')].filter(e=>e.offsetParent).map(e=>Math.round(e.getBoundingClientRect().top))).size;
-  const n1=rows();b.style.display='none';const n0=rows();b.style.display='';if(n1>n0){who.parentNode.insertBefore(b,who);b.classList.add('hx-top');}}
+  const n1=rows();b.style.display='none';const n0=rows();b.style.display='';if(n1>n0||n1>1){who.parentNode.insertBefore(b,who);b.classList.add('hx-top');}
+  if(d&&d.offsetParent!==null&&rows()>1){who.parentNode.insertBefore(d,who);d.classList.add('hx-top');}}
 {let t=0;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>{try{hxPlace();}catch(e){}},150);});}
 {const dp=drvPaint;drvPaint=async function(){const out=await dp.apply(this,arguments);try{hxPlace();}catch(e){}return out;};}
 setTimeout(()=>{try{hxPlace();}catch(e){}},1000);
@@ -8565,17 +8582,17 @@ function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(
   const behs=(d.behaviors||[]).filter(b=>b&&b.name),aims=behs.filter(b=>b.aim!=null),met=aims.filter(b=>b.aimMet).length;
   const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
   return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:(/T/.test(String(r.saved||''))&&!isNaN(Date.parse(r.saved))?tdISO(new Date(r.saved)):String(r.saved||'').slice(0,10)),inc:inc.length,hold,told,aims:aims.length,met,
-    integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:!!(c.date||c.parent),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
+    integ:it.overall!=null?it.overall:null,integN:(it.obs||[]).length,crit:it.criterion||90,consent:csOf(f).on,cw:(cs=>cs.on?'Yes':cs.known&&cs.state!=='Not recorded'?cs.state:'No')(csOf(f)),lastData:d.to||'',days:d.days||0,forms:(r.sum&&r.sum.forms)||0,hot:hot.length,hotT:hot.length?clStrip(hot[0].t):''};}
 async function cmRows(month){const L=(await clList()||[]).filter(r=>!isStaffRec(r));L.sort((a,b)=>String(a.client||'').localeCompare(String(b.client||'')));return L.map(r=>cmRow(r,month));}
 function cmTotals(R){const t={n:R.length,inc:0,hold:0,told:0,aims:0,met:0,consent:0,withData:0,hot:0,integ:[]};R.forEach(x=>{t.inc+=x.inc;t.hold+=x.hold;t.told+=x.told;t.aims+=x.aims;t.met+=x.met;if(x.consent)t.consent++;if(x.lastData)t.withData++;t.hot+=x.hot;if(x.integ!=null)t.integ.push(x.integ);});
   t.integMean=t.integ.length?Math.round(t.integ.reduce((a,b)=>a+b,0)/t.integ.length*10)/10:null;return t;}
 function cmLead(R,label){const t=cmTotals(R);return t.n+' student'+(t.n===1?'':'s')+' kept on this '+HERE+', '+label+': '+t.inc+' incident'+(t.inc===1?'':'s')+(t.inc?' ('+t.hold+' restraint'+(t.hold===1?'':'s')+' or seclusion'+(t.hold===1?'':'s')+'; home told about '+t.told+')':'')+'; aims met for '+t.met+' of '+t.aims+' behavior'+(t.aims===1?'':'s')+' with an aim; consent on file for '+t.consent+' of '+t.n+'; integrity '+(t.integMean!=null?t.integMean+'% on average':'not observed')+'; '+t.withData+' with daily data; '+t.hot+' item'+(t.hot===1?'':'s')+' overdue or about safety.';}
 function cmTableHtml(R){const td=(v,c)=>'<td'+(c?' class="'+c+'"':'')+'>'+esc(v==null?'':String(v))+'<\/td>';
   return '<table class="cm-t"><thead><tr><th>Student<\/th><th>School · grade<\/th><th>Incidents<\/th><th>Restraint / seclusion<\/th><th>Home told<\/th><th>Aims met<\/th><th>Integrity<\/th><th>Consent<\/th><th>Last data<\/th><th>Needs you<\/th><\/tr><\/thead><tbody>'+
-    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.consent?'Yes':'No','n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'<\/tr>').join('')+
+    R.map(x=>'<tr>'+td(x.name)+td(x.site)+td(x.inc,'n')+td(x.hold,'n'+(x.hold?' hot':''))+td(x.inc?x.told+' of '+x.inc:'—','n')+td(x.aims?x.met+' of '+x.aims:'—','n')+td(x.integ!=null?x.integ+'%'+(x.integ<x.crit?' ▼':''):'—','n')+td(x.cw||(x.consent?'Yes':'No'),'n'+(x.consent?'':' hot'))+td(x.lastData||'—')+td(x.hot?x.hot+': '+x.hotT:'—')+'<\/tr>').join('')+
     '<\/tbody><\/table>';}
 function cmText(R,label){const t=cmTotals(R);const H=['Student','School · grade','Incidents','Restraint or seclusion','Home told','Aims met','Integrity','Consent','Last data','Needs you'];
-  return [label,cmLead(R,label),'',H.join('\t')].concat(R.map(x=>[x.name,x.site,x.inc,x.hold,x.inc?x.told+' of '+x.inc:'',x.aims?x.met+' of '+x.aims:'',x.integ!=null?x.integ+'%':'',x.consent?'Yes':'No',x.lastData,x.hot?x.hot+': '+x.hotT:''].join('\t'))).concat(['Totals\t\t'+t.inc+'\t'+t.hold+'\t'+t.told+' of '+t.inc+'\t'+t.met+' of '+t.aims+'\t'+(t.integMean!=null?t.integMean+'%':'')+'\t'+t.consent+' of '+t.n]).join('\n');}
+  return [label,cmLead(R,label),'',H.join('\t')].concat(R.map(x=>[x.name,x.site,x.inc,x.hold,x.inc?x.told+' of '+x.inc:'',x.aims?x.met+' of '+x.aims:'',x.integ!=null?x.integ+'%':'',x.cw||(x.consent?'Yes':'No'),x.lastData,x.hot?x.hot+': '+x.hotT:''].join('\t'))).concat(['Totals\t\t'+t.inc+'\t'+t.hold+'\t'+t.told+' of '+t.inc+'\t'+t.met+' of '+t.aims+'\t'+(t.integMean!=null?t.integMean+'%':'')+'\t'+t.consent+' of '+t.n]).join('\n');}
 function cmPrintHtml(R,label){const logo=$('#logo')&&$('#logo').src?'<img src="'+$('#logo').src+'" alt="" style="height:34px;margin:0 0 8pt">':'';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Caseload summary: '+esc(label)+'<\/title><style>@page{size:landscape;margin:.5in}body{font:10pt/1.4 Inter,Arial,sans-serif;color:#1d2730;margin:0}h1{font:700 15pt Inter,Arial,sans-serif;margin:0 0 3pt}p{margin:0 0 6pt}table{border-collapse:collapse;width:100%;font-size:9.5pt}th,td{border:1px solid #9aa9b1;padding:3pt 5pt;text-align:left;vertical-align:top}th{background:#eef3f2}td.n{text-align:center}td.hot{font-weight:700}.s{color:#4a5b66;font-size:9pt}<\/style><\/head><body>'+logo+
     '<h1>Caseload summary: '+esc(label)+'<\/h1><p>'+esc(cmLead(R,label))+'<\/p>'+cmTableHtml(R)+'<p class="s" style="margin-top:8pt">Each student as at their last Save case on this '+HERE+'; incidents from Form DD-1’s log, aims from its data, integrity from Form TI-1, consent from Form IC-1. Prepared '+esc(new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}))+'.<\/p><\/body><\/html>';}

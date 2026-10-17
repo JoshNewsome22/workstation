@@ -805,6 +805,10 @@ td.imCareAct .tool{font-size:11.5px;padding:2px 8px}
 .imStop{color:#8E2A2A}
 .imCareNote{margin:2px 0 6px}
 .rp .rp-q{display:block;font-style:italic}
+/* v22.37 (review F448): the reason and the record of a report, in boxes that are not form controls */
+im-text{display:block;box-sizing:border-box;min-height:28px;width:100%;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;background:#fff;font:inherit;white-space:pre-wrap;overflow-wrap:anywhere;cursor:text}
+im-text[contenteditable="false"]{background:#F4F6F7;color:#4A5A62;cursor:default}
+.rp .rp-apart{margin:6px 0 4px}
 /* the answer to the report question stays on the screen; paper says only that it was answered, and when */
 .imPaper{display:none}
 @media print{.imScr{display:none!important}span.imPaper{display:inline}p.imPaper,div.imPaper{display:block}
@@ -975,6 +979,7 @@ td input,td select{max-width:100%}
     <button id="saveBtn">Save data</button>
     <button id="loadBtn">Open data</button>
     <input type="file" id="fileIn" accept="application/json" hidden>
+    <input type="file" id="imRepIn" accept="application/json" hidden><!-- v22.37 (review F448): Open a report record -->
     <button id="csvBtn">Export CSV</button>
     <button id="clearBtn">Clear all</button>
   </div></div>
@@ -1219,7 +1224,7 @@ td input,td select{max-width:100%}
     <div class="imCareEdit noprint" id="imCareEdit" data-nbh-nowording></div>
     <div class="grid-wrap"><table class="rt wide" id="imCare"><thead><tr><th style="width:3%">#</th><th style="width:9%">Date and time</th><th style="width:8%">Area</th><th style="width:11%">During</th><th>What was seen</th><th style="width:12%">Noticed by</th><th style="width:12%">Second adult</th><th style="width:13%">Passed to</th><th style="width:13%">Report question</th><th class="noprint imCareAct"></th></tr></thead><tbody></tbody></table></div>
     <div class="noprint" id="imCareVerdict"></div>
-    <div class="tools noprint"><button type="button" class="tool imRepPrint">Print the report record</button><span class="hint">Confidential; not part of the student&rsquo;s file; keep it as your agency&rsquo;s policy says. The printed form shows only that each question was answered, and when.</span></div></div>
+    <div class="tools noprint"><button type="button" class="tool imRepPrint">Print the report record</button><button type="button" class="tool imRepSave">Save the report record as a file</button><button type="button" class="tool imRepOpen">Open a report record</button><span class="hint">Confidential; not part of the student&rsquo;s file; keep it as your agency&rsquo;s policy says. The printed form shows only that each question was answered, and when. The reason for a No and the record of a report are not saved with this form or the case: print the report record, or save it as a file of its own.</span></div></div>
   </section>
 
   <!-- ===================== GUIDE ===================== -->
@@ -1234,7 +1239,7 @@ td input,td select{max-width:100%}
       <tr><th>Part I, once</th><td>The topography checklist and the healed injuries are documented at intake as a record of the student&rsquo;s history. The paper notes that restraint, close attendance and medication artificially reduce the observable trauma, so the healed injuries may be the better guide to what the behavior does when unprevented; and that a healed injury may show a form of self-injury that could reappear.</td></tr>
       <tr><th>Part II, each administration</th><td>For each location, the examiner first notes whether an injury is present, counts the wounds there and assigns the number score (1, 2 or 3); then identifies the most severe injury at that location as AL or CT and gives it a severity score on that type&rsquo;s criteria. Only the worst wound at a location is typed and rated, because lesser wounds do not enter the severity or risk summary. On this form each location is a row of the chart and a region of the body map; the marker carries the number score and the colour of the severity.</td></tr>
       <tr><th>Repeat administrations</th><td>The paper scheduled repeated examinations at least one week apart (on average 24 days) so that an observer was not scoring the same injuries again. This form&rsquo;s schedule, intake then every <i>n</i> weeks and again after any restraint or injury report, is the practice&rsquo;s convention written on the Setup page, not part of the published scale. Keep the examiner and the time of day the same across administrations.</td></tr>
-      <tr><th>Record keeping</th><td>&ldquo;Save to history&rdquo; files the administration with its map and chart; &ldquo;Start a new administration&rdquo; dates a fresh one. The History page graphs the Number Index and the Severity Index over administrations with the risk under the axis, and the nurse log sits beside them. The data file (Save data) holds everything; the CSV carries one row per injured location per administration, the nurse log and the injuries noticed during required care, with how each injury happened, the second adult, whether Does this need a report? was answered (and when) and the student&rsquo;s assent in its last columns. The answer itself, and the record of any report, are not in the CSV or the printed form: they print only on the report record.</td></tr>
+      <tr><th>Record keeping</th><td>&ldquo;Save to history&rdquo; files the administration with its map and chart; &ldquo;Start a new administration&rdquo; dates a fresh one. The History page graphs the Number Index and the Severity Index over administrations with the risk under the axis, and the nurse log sits beside them. The data file (Save data) holds everything but the reason for a No and the record of any report (see The report record, below); the CSV carries one row per injured location per administration, the nurse log and the injuries noticed during required care, with how each injury happened, the second adult, whether Does this need a report? was answered (and when) and the student&rsquo;s assent in its last columns. The answer itself, and the record of any report, are not in the CSV or the printed form: they print only on the report record.</td></tr>
     </table>
 
     <!-- v21.44 (B4, B5). Wording approved by the BCBA, October 2026. -->
@@ -1242,11 +1247,11 @@ td input,td select{max-width:100%}
     <table class="rt" id="imGuideSafety">
       <tr><th style="width:26%">Two adults, always</th><td>Every injury check is done with two adults present: the examiner and a second adult, who is someone other than the examiner and is there for the whole check. Both are named on the Body map page, the second adult with their role, and the second adult&rsquo;s presence is ticked at each check. The Setup page can hold the usual second adult, offered with one tap at each check; the name is never filled in for you. At a home visit, the parent or guardian can be the second adult, as Form IC-1 (Specific procedures, E) tells the family. Save to history files an administration only when all of this is recorded.</td></tr>
       <tr><th>Ask the student first</th><td>The student is asked first, in the way they understand. If the student says no, pulls away, or shows any sign of dissent listed on the Student Assent sheet of Form IC-1, the check stops. No one holds a student still for a check. The administration is filed as a check that stopped, with why under Conditions; it is not graphed, and the check stays due on the schedule. If an injury needs care, the school nurse decides what to do, as for any injury.</td></tr>
-      <tr><th>What is looked at</th><td>Skin that can be seen with clothes on, or by rolling up a sleeve or a pant leg, taking off shoes and socks, or lifting the back or the stomach of a shirt a little: the head, face, neck, arms, hands, legs, feet, back and stomach, the side of the hip above the waistband, and the chest only at the collar. The parent&rsquo;s decision on injury checks is on Form IC-1 (Specific procedures, E) and is recorded on the Setup page; while it is not Yes, Save to history asks before it files a check.</td></tr>
+      <tr><th>What is looked at</th><td>Skin that can be seen with clothes on, or by rolling up a sleeve or a pant leg, taking off shoes and socks, or lifting the back or the stomach of a shirt a little: the head, face, neck, arms, hands, legs, feet, back and stomach, the side of the hip above the waistband, and the chest only at the collar. The parent&rsquo;s decision on injury checks is on Form IC-1 (Specific procedures, E) and is recorded on the Setup page (inside the workstation it comes from Form IC-1 when the Setup fields are empty). While it is not recorded, the scheduled checks wait and are not due. When it is No, there are no scheduled checks: nothing is due here, on the workstation&rsquo;s Today list or on the calendar; an injury that can be seen is written down, with why under Conditions, and is filed marked as written down without the parent&rsquo;s Yes.</td></tr>
       <tr><th>Private areas are never examined</th><td>Staff do not examine the genitals, buttocks or breasts. On the body map the buttocks, on the back figure, are shaded and open Noticed During Required Care instead of a row; the side of the hip, on the front figure, is checked and scored as the scale&rsquo;s Hips/buttocks; the genitals and the anal area (Genitalia, Rectum), which have no surface on the figure, cannot be chosen from the list; and the check of the chest and stomach does not include the breasts. In Part I, a healed injury in a private area comes only from the records or the parent. A record made before this rule that holds one of these locations keeps it as recorded, marked as such.</td></tr>
       <tr><th>Noticed during required care</th><td>The log on the History page, beside the nurse checks. An injury in a private area is recorded only when staff saw it while giving care the student needed anyway, such as help with toileting or changing. It is written down as seen at that moment, without looking again or examining further, and its box has no Improve wording button, so what was seen is neither checked nor rewritten; if it needs first aid, the school nurse gives it, as for any injury. The person who noticed it and the second adult present are both named with their roles. If no second adult was there, as can happen during toileting, tick that and say why and who was told at once: the entry is still added, marked in red because the two-adult rule was not met, and the report question still applies. It is passed to the school nurse or the parent or guardian; if abuse or neglect is suspected, staff do not tell the parent themselves first, because your agency&rsquo;s policy says who does, and when. The entry is not added until these are filled in, and an entry being written counts as open until it is. These entries are not scored, because the scale needs an examination.</td></tr>
       <tr><th>Does this need a report?</th><td>Answered for every administration (on the Scoring page, under Part III) and for every injury noticed during care (on the History page). The list names things that can be a reason to suspect abuse or neglect: an injury no one saw happen that does not match the student&rsquo;s known self-injury; a pattern (grip, finger, slap or cord marks, a burn); a private area; a place the student has not been seen to injure; something the student or anyone else says; or an explanation that does not fit. The question is: do you suspect abuse or neglect? You do not need proof; if you are not sure, report. A No with a box ticked shows amber and needs a written reason; an injury noticed during care is in a private area, so its box is always ticked. On the Scoring page a location marked &ldquo;Not seen; does not match&rdquo; counts as a reason; &ldquo;Not known&rdquo; is a prompt to look at the list again, not a reason by itself. The person who suspects makes the report, right away, as your state&rsquo;s law and your agency&rsquo;s policy require, and telling a supervisor does not take its place. No one investigates first.</td></tr>
-      <tr><th>The report record</th><td>The answers to the question, and the record of any report (when, to whom, by whom, others told), stay on the screen. On paper, and in the CSV, the record shows only that the question was answered, and when. <b>Print the report record</b> prints them on a sheet of their own, marked confidential and not part of the student&rsquo;s file, to keep as your agency&rsquo;s policy says. Write about a report only in the question: the rest of the record, the care log included, prints with the form.</td></tr>
+      <tr><th>The report record</th><td>The reason for a No and the record of any report (when, to whom, by whom, others told) are never saved with this form: not in its data file, the case file, the safety copy on this device or the CSV. They stay on the screen until the form is closed. The data file and the case keep only the boxes ticked, the Yes or No and the day it was answered; on paper, and in the CSV, the record shows only that the question was answered, and when. <b>Print the report record</b> prints the answers and the record on a sheet of their own, marked confidential and not part of the student&rsquo;s file, to keep as your agency&rsquo;s policy says; <b>Save the report record as a file</b> keeps them in a file of their own, apart from the student&rsquo;s file, and <b>Open a report record</b> puts them back on the screen. A data file saved before October 2026 that holds them still opens, with them on the screen. Write about a report only in the question: the rest of the record, the care log included, prints with the form.</td></tr>
     </table>
 
     <h2 class="nbh-band" style="margin-top:16px">Scoring, as Published</h2>
@@ -1365,10 +1370,30 @@ const RP_REASONS=[['r1','No one saw how the injury happened, and it does not mat
   ['r6','The explanation does not fit the injury, or it changes.'],
   ['r7','Anything else gives you a reason to suspect abuse or neglect.']];
 /* on: the day the question was answered, the only part of the answer that reaches paper or the CSV */
-const repBlank=()=>({r1:false,r2:false,r3:false,r4:false,r5:false,r6:false,r7:false,need:'',why:'',when:'',to:'',by:'',told:'',on:''});
+/* v22.37 (review F448): the reason for a No and the record of a report (why, when, to, by, told) are held on the answer but
+   are never written into this form's data file, and so never into the case file or the safety copy: they are not
+   enumerable, so Save data leaves them out. The file keeps the boxes, the answer, the day and kept (they were written,
+   and are kept apart). They print only on the report record, or go into a file of their own (Save the report record). */
+const REPX=['why','when','to','by','told'];
+const repBlank=()=>{const o={r1:false,r2:false,r3:false,r4:false,r5:false,r6:false,r7:false,need:'',on:'',kept:false};
+  REPX.forEach(k=>Object.defineProperty(o,k,{value:'',writable:true,enumerable:false,configurable:true}));
+  Object.defineProperty(o,'toJSON',{value:function(){const j={};Object.keys(this).forEach(k=>{j[k]=this[k];});j.kept=this.kept===true||REPX.some(k=>String(this[k]||'').trim()!=='');return j;},enumerable:false,configurable:true});
+  return o;};
 /* one shape for every answer to the question, whatever it was read from */
-const repCopy=r=>{const o=repBlank();if(r&&typeof r==='object'&&!Array.isArray(r))Object.keys(o).forEach(k=>{o[k]=typeof o[k]==='boolean'?r[k]===true:(r[k]==null||typeof r[k]==='object'?'':String(r[k]));});if(!['yes','no'].includes(o.need))o.need='';return o;};
-const repHas=r=>!!r&&(RP_REASONS.some(([k])=>r[k]===true)||['need','why','when','to','by','told'].some(k=>String(r[k]||'').trim()!==''));
+const repCopy=r=>{const o=repBlank();if(r&&typeof r==='object'&&!Array.isArray(r))Object.keys(o).concat(REPX).forEach(k=>{o[k]=typeof o[k]==='boolean'?r[k]===true:(r[k]==null||typeof r[k]==='object'?'':String(r[k]));});if(!['yes','no'].includes(o.need))o.need='';return o;};
+const repHas=r=>!!r&&(RP_REASONS.some(([k])=>r[k]===true)||r.kept===true||['need','why','when','to','by','told'].some(k=>String(r[k]||'').trim()!==''));
+/* v22.37 (review F448): repX, the reason or the record of a report is on the screen; repKept, it was written before and is
+   kept apart from this file (on the report record printed or saved then), none of it on the screen now */
+const repX=r=>!!r&&REPX.some(k=>String(r[k]||'').trim()!=='');
+const repKept=r=>!!r&&r.kept===true&&!repX(r);
+let REP_DIRTY=false;   /* the reason or the record typed (or opened from an older file) since the report record was last printed or saved */
+/* v22.37 (review F448): a one-line text box that is not a form control, for the reason and the record of a report. The
+   workstation's snapshot of the form's fields, kept in the case file, reads inputs, selects and text areas only, so what
+   is typed here is never in it. It answers to .value like a field; Enter is ignored and a paste comes in as plain text. */
+if(window.customElements&&!customElements.get('im-text'))customElements.define('im-text',class extends HTMLElement{get value(){return this.textContent;}set value(v){this.textContent=v==null?'':String(v);}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.closest&&e.target.closest('im-text'))e.preventDefault();},true);
+document.addEventListener('paste',e=>{const t=e.target&&e.target.closest&&e.target.closest('im-text');if(!t||t.getAttribute('contenteditable')!=='true')return;e.preventDefault();
+  document.execCommand('insertText',false,((e.clipboardData&&e.clipboardData.getData('text/plain'))||'').replace(/\s+/g,' '));},true);
 /* v21.44 (B4): the student's assent, asked before every check */
 const ASSENT=[['yes','Asked first, and the student agreed'],['stopped','The student said no or pulled away: the check stopped']];
 const ASSENTN=Object.fromEntries(ASSENT);
@@ -1377,7 +1402,7 @@ const normName=s=>String(s||'').toLowerCase().replace(/\([^)]*\)/g,' ').replace(
 const samePerson=(a,b)=>{const x=normName(a),y=normName(b);return !!x&&!!y&&(x===y||x.startsWith(y+' ')||y.startsWith(x+' '));};
 
 /* ---------------- state ---------------- */
-const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank()});
+const admBlank=()=>({id:'',date:'',time:'',examiner:'',second:'',secondRole:'',present:false,assent:'',note:'',ro:false,rows:[],rep:repBlank(),pc:''});
 /* v21.44 (B4): an injury noticed during required care, and the one being written (kept with the record, so a half-written
    entry is saved and comes back; its id is the entry's it corrects, or empty for a new one). Every entry is in a
    private area, so its report question always has that box ticked. alone: no second adult was there (aloneWhy says
@@ -1572,25 +1597,28 @@ const RP_RULES='<ul><li><b>Who reports:</b> the person who suspects it. Telling 
   '<li><b>Do not investigate.</b> You do not need proof. Do not press the student for details, do not examine further, and do not contact the person you suspect. Write down what you saw, and what was said in the words used.</li>'+
   '<li>If abuse or neglect is suspected, your agency&rsquo;s policy says who tells the parent or guardian, and when.</li></ul>';
 const NEED=[['yes','Yes: a report is being made'],['no','No: say why']];
-function repHTML(scope,rep,dis){const d=dis?' disabled':'',at=k=>' data-rs="'+scope+'" data-rk="'+k+'"',v=k=>' value="'+esc(rep[k])+'"',care=scope==='draft';
+function repHTML(scope,rep,dis){const d=dis?' disabled':'',at=k=>' data-rs="'+scope+'" data-rk="'+k+'"',v=k=>' value="'+esc(rep[k])+'"',care=scope==='draft',
+    tx=(k,l)=>'<im-text role="textbox" aria-label="'+esc(l)+'" contenteditable="'+(dis?'false':'true')+'"'+(dis?' aria-readonly="true"':'')+at(k)+'>'+esc(rep[k])+'</im-text>';   /* v22.37 (review F448) */
   return '<p class="rp-h">Any of these can be a reason to suspect abuse or neglect:</p>'+RP_REASONS.map(([k,t])=>{const fixed=care&&k==='r3';
       return '<label class="ck rp-ck"><input type="checkbox"'+at(k)+(rep[k]||fixed?' checked':'')+(fixed?' disabled':d)+'> <span>'+esc(t)+(fixed?' <i class="hint">Always ticked here: every entry is in a private area.</i>':'')+'</span></label>';}).join('')+
     RP_RULES+
     '<div class="fieldgrid"><div><label>Do you suspect abuse or neglect? <span class="rp-q">You do not need proof. If you are not sure, report.</span></label><select'+at('need')+d+' aria-label="Do you suspect abuse or neglect?"><option value=""></option>'+NEED.map(o=>'<option value="'+o[0]+'"'+(rep.need===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>'+
-    '<div><label>If no, why not</label><input'+at('why')+v('why')+d+'></div>'+
-    '<div><label>Report made on (date and time)</label><input'+at('when')+v('when')+d+'></div>'+
-    '<div><label>To whom (the agency or hotline, the person who took it, any reference number)</label><input'+at('to')+v('to')+d+'></div>'+
-    '<div><label>By whom (name and role)</label><input'+at('by')+v('by')+d+'></div>'+
-    '<div><label>Others told, as your agency&rsquo;s policy says</label><input'+at('told')+v('told')+d+'></div></div>'+
+    '<div><label>If no, why not</label>'+tx('why','If no, why not')+'</div>'+
+    '<div><label>Report made on (date and time)</label>'+tx('when','Report made on (date and time)')+'</div>'+
+    '<div><label>To whom (the agency or hotline, the person who took it, any reference number)</label>'+tx('to','To whom')+'</div>'+
+    '<div><label>By whom (name and role)</label>'+tx('by','By whom (name and role)')+'</div>'+
+    '<div><label>Others told, as your agency&rsquo;s policy says</label>'+tx('told','Others told')+'</div></div>'+
+    '<p class="hint rp-apart"><b>Not saved with this form or the case:</b> the reason for a No and the record of the report (when, to whom, by whom, others told). Print the report record, or save it as a file of its own, before you close the form, and keep it as your agency&rsquo;s policy says.</p>'+
     '<div data-rv="'+scope+'"></div>';}
 function repVerdict(rep,o){o=o||{};const t=k=>String(rep[k]==null?'':rep[k]).trim(),ticked=RP_REASONS.filter(([k])=>rep[k]===true).length,rs=o.reasons||[],ps=o.prompts||[];
   const nr=ticked+rs.length,say=a=>a.length?' '+a.map(esc).join(' '):'';
-  const miss=[['when','when'],['to','to whom'],['by','by whom']].filter(x=>!t(x[0])).map(x=>x[1]);
+  const kept=repKept(rep),miss=kept?[]:[['when','when'],['to','to whom'],['by','by whom']].filter(x=>!t(x[0])).map(x=>x[1]);
   if(rep.need==='yes')return miss.length?'<div class="verdict v-mid"><b>A report is being made.</b> Still to record: '+miss.join(', ')+'. Make it right away.</div>'
+    :kept?'<div class="verdict v-ok"><b>Report recorded.</b> Its record is kept apart from this form&rsquo;s file, on the report record printed or saved then (Open a report record puts it back on the screen).</div>'
     :'<div class="verdict v-ok"><b>Report recorded:</b> made '+esc(t('when'))+' to '+esc(t('to'))+', by '+esc(t('by'))+'.</div>';
   if(rep.need==='no'){
-    if(nr)return '<div class="verdict v-mid"><b>The answer is No, and '+(nr===1?'a reason to suspect is marked':nr+' reasons to suspect are marked')+'.</b>'+say(rs)+' '+(t('why')?'The reason given: '+esc(t('why').replace(/([^.!?])$/,'$1.')):'Write why you do not suspect abuse or neglect.')+' If you are not sure, report.</div>';
-    return t('why')?'<div class="verdict v-ok"><b>No report:</b> '+esc(t('why'))+'</div>'+(ps.length?'<div class="verdict v-mid">'+say(ps).trim()+'</div>':'')
+    if(nr)return '<div class="verdict v-mid"><b>The answer is No, and '+(nr===1?'a reason to suspect is marked':nr+' reasons to suspect are marked')+'.</b>'+say(rs)+' '+(t('why')?'The reason given: '+esc(t('why').replace(/([^.!?])$/,'$1.')):kept?'The reason is kept apart from this form&rsquo;s file, on the report record.':'Write why you do not suspect abuse or neglect.')+' If you are not sure, report.</div>';
+    return t('why')||kept?'<div class="verdict v-ok"><b>No report:</b> '+(t('why')?esc(t('why')):'the reason is kept apart from this form&rsquo;s file, on the report record.')+'</div>'+(ps.length?'<div class="verdict v-mid">'+say(ps).trim()+'</div>':'')
       :'<div class="verdict v-mid">Write in a few words why you do not suspect abuse or neglect.'+say(ps)+'</div>';}
   if(nr)return '<div class="verdict v-no"><b>'+(ticked?(ticked===1?'A box above is ticked.':ticked+' boxes above are ticked.'):'The record shows a reason to suspect.')+'</b>'+say(rs)+' Answer the question now: do you suspect abuse or neglect? If you are not sure, report.</div>';
   if(o.n===0)return '<div class="verdict v-mid">No injury is recorded in this administration yet. Answer this when the check is done.</div>';
@@ -1604,24 +1632,25 @@ function rowsRecord(rows){const rs=[],ps=[];(rows||[]).forEach(r=>{const l=LOC[r
 function repVerdictTo(scope){const v=document.querySelector('[data-rv="'+scope+'"]');if(!v)return;v.innerHTML=scope==='cur'?repVerdict(S.cur.rep,rowsRecord(S.cur.rows)):repVerdict(S.careDraft.rep,{n:1});}
 /* what paper and the CSV show of an answer: only that the question was answered, and when */
 const repOn=rep=>rep&&rep.need?(String(rep.on||'').trim()?'answered on '+String(rep.on).trim():'answered'):'not answered';
-const repPaper=rep=>rep&&rep.need?'Does this need a report? Answered'+(String(rep.on||'').trim()?' on '+String(rep.on).trim():'')+'. The answer, and any report, are kept apart from this record and from the student’s file, as your agency’s policy says.':'Does this need a report? Not answered on this record yet.';
+const repPaper=rep=>rep&&rep.need?'Does this need a report? Answered'+(String(rep.on||'').trim()?' on '+String(rep.on).trim():'')+'. The record of any report is kept apart from this record and from the student’s file, as your agency’s policy says.':'Does this need a report? Not answered on this record yet.';
 function renderRepCur(){const el=$('#imRepCur');if(el){el.innerHTML='<p>Answer this for the injuries found at this check. Write about a report only here: the rest of this record prints with the form.</p>'+repHTML('cur',S.cur.rep,!!S.cur.ro)+
-    '<div class="tools"><button type="button" class="tool imRepPrint">Print the report record</button><span class="hint">Confidential; not part of the student&rsquo;s file; keep it as your agency&rsquo;s policy says. The printed form shows only that this question was answered, and when.</span></div>';repVerdictTo('cur');}
+    '<div class="tools"><button type="button" class="tool imRepPrint">Print the report record</button><button type="button" class="tool imRepSave">Save the report record as a file</button><button type="button" class="tool imRepOpen">Open a report record</button><span class="hint">Confidential; not part of the student&rsquo;s file; keep it as your agency&rsquo;s policy says. The printed form shows only that this question was answered, and when.</span></div>';repVerdictTo('cur');}
   const p=$('#imRepCurPaper');if(p)p.textContent=repPaper(S.cur.rep);}
 function repInput(el){const sc=el.dataset.rs,rep=sc==='cur'?S.cur.rep:S.careDraft.rep,k=el.dataset.rk;if(!rep||(sc==='cur'&&S.cur.ro))return;
   if(sc==='draft'&&k==='r3'){el.checked=true;return;}
   const v=el.type==='checkbox'?!!el.checked:el.value;
-  if(k==='need'&&v!==rep.need)rep.on=v?today():'';
+  if(k==='need'&&v!==rep.need){rep.on=v?today():'';rep.kept=false;}   /* v22.37: a new answer needs its own reason or record */
+  if(REPX.includes(k))REP_DIRTY=true;
   rep[k]=v;repVerdictTo(sc);
   if(sc==='cur'){const p=$('#imRepCurPaper');if(p)p.textContent=repPaper(S.cur.rep);renderIdxSoon();}else renderCareVerdict();}
 function renderCur(){renderMap();renderSide();renderChart();renderIdx();renderRepCur();}
 
 /* ---------------- administrations ---------------- */
 const rowsCopy=a=>(a||[]).map(r=>({loc:r.loc,n:r.n,type:r.type,sev:r.sev,kind:r.kind,note:r.note,how:r.how||'',view:r.view,x:r.x,y:r.y}));
-const admSnap=a=>JSON.stringify({date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep)});
+const admSnap=a=>JSON.stringify({date:a.date,time:a.time,examiner:a.examiner,second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:a.assent||'',note:a.note,rows:rowsCopy(a.rows),rep:repCopy(a.rep),x:REPX.map(k=>String((a.rep||{})[k]||''))});
 /* one shape for a filed administration and one for the administration on the map, in the order the loader writes them */
-const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep)});
-const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep)});
+const histEntry=(a,id)=>({id:id||a.id||uid(),date:a.date||'',time:a.time||'',examiner:a.examiner||'',second:a.second||'',secondRole:a.secondRole||'',present:!!a.present,assent:ASSENTN[a.assent]?a.assent:'',note:a.note||'',rows:rowsCopy(a.rows),rep:repCopy(a.rep),pc:a.pc==='no'||a.pc==='wait'?a.pc:''});
+const curFrom=(h,ro)=>({id:h.id||'',date:h.date||'',time:h.time||'',examiner:h.examiner||'',second:h.second||'',secondRole:h.secondRole||'',present:!!h.present,assent:ASSENTN[h.assent]?h.assent:'',note:h.note||'',ro:!!ro,rows:rowsCopy(h.rows),rep:repCopy(h.rep),pc:h.pc==='no'||h.pc==='wait'?h.pc:''});
 function savedSame(){const h=S.cur.id&&S.hist.find(x=>x.id===S.cur.id);return !!h&&admSnap(h)===admSnap(S.cur);}
 function bindAdm(){$$('[data-a]').forEach(el=>{const k=el.dataset.a;if(el.type==='checkbox')el.checked=!!S.cur[k];else el.value=S.cur[k]||'';el.disabled=!!S.cur.ro;});}
 async function saveAdm(){
@@ -1630,7 +1659,13 @@ async function saveAdm(){
   const m=admIssues(c);
   if(m.length){setView('map');renderTwo();nbhUI.toast('Not filed: '+m.join('; ')+' (Body map page). Two adults are present at every injury check, and the student is asked first.',{kind:'warn'});return;}
   /* v21.44 (B4): the parent's decision on injury checks (Form IC-1, Specific procedures E) */
-  if(S.meta.consent!=='yes'&&!(await nbhUI.confirm('The parent’s decision on injury checks (Form IC-1, E) is not Yes.\nScheduled checks wait for it; first aid and writing down an injury that can be seen do not. File this administration anyway?',{ok:'File anyway'})))return;
+  /* v22.37 (review F449): with the decision No there are no scheduled checks. An injury written down anyway (one seen in
+     class, say) needs the reason under Conditions, and is filed marked, as is one filed before the decision is recorded */
+  const pc=consentState()==='yes'?'':consentState();
+  if(pc==='no'&&!String(c.note||'').trim()){setView('map');nbhUI.toast('Not filed: the parent said No to injury checks (Form IC-1, E). Write under Conditions why this is recorded (for example, an injury seen in class, written down without an examination).',{kind:'warn'});return;}
+  if(pc==='no'&&!(await nbhUI.confirm('The parent said No to injury checks (Form IC-1, E).\nFile this as an injury written down without a scheduled check, marked as such, with the reason under Conditions?',{ok:'File it, marked'})))return;
+  if(pc==='wait'&&!(await nbhUI.confirm('The parent’s decision on injury checks (Form IC-1, E) is not Yes: it is not recorded yet.\nScheduled checks wait for it; first aid and writing down an injury that can be seen do not. File this administration anyway (marked as filed before the decision)?',{ok:'File anyway'})))return;
+  c.pc=pc;
   const stopped=c.assent==='stopped';
   if(!stopped&&!c.rows.length&&!(await nbhUI.confirm('Save an administration with no injured location?\nIt is filed as "no injuries" (NI 0, SI 0, Low).',{ok:'Save'})))return;
   /* v21.44 (B5): the report question is answered right away */
@@ -1659,7 +1694,7 @@ function renderHist(){
   /* v21.44: the second adult and the student's assent beside the examiner; the answer to the report question on the
      screen only (paper shows that it was answered, and when); a check that stopped is marked and not graphed */
   $('#imHist tbody').innerHTML=H.length?H.map((h,i)=>{const sc=score(h.rows),cur=S.cur.id===h.id,stop=h.assent==='stopped',rq=repOn(h.rep);
-    return '<tr'+(cur?' class="sel"':'')+'><td class="num">'+(i+1)+'</td><td>'+esc(h.date||NONE)+(h.time?'<br><span class="hint">'+esc(h.time)+'</span>':'')+(stop?'<br><b class="imStop">Check stopped</b>':'')+'</td><td>'+esc(h.examiner||NONE)+'<br><span class="hint">'+(h.second?'with '+esc(h.second)+(h.secondRole?' ('+esc(h.secondRole)+')':''):'second adult not recorded')+'</span></td><td class="num">'+sc.total+'</td><td class="num">'+(sc.ni==null?NONE:sc.ni)+'</td><td class="num">'+(sc.si==null?NONE:sc.si)+'</td><td>'+sc.n+' <span class="hint">('+esc(grpLine(sc))+')</span></td><td>'+riskTag(sc)+'</td><td class="hint">'+(stop?'<b>The check stopped:</b> the student said no or pulled away. Not graphed; the indices cover only what was seen before it stopped.<br>':'')+esc(sc.rule)+(h.note?'<br>'+esc(h.note):'')+'<br><span class="imScr noprint">Report: '+esc(repShort(h.rep))+'</span><span class="imPaper">Report question: '+esc(rq)+(rq==='not answered'?'':' (see the report record)')+'</span></td><td class="noprint"><button type="button" class="tool" data-open="'+esc(h.id)+'" style="font-size:11.5px">Open</button> <button type="button" class="tool" data-edit="'+esc(h.id)+'" style="font-size:11.5px">Edit this one</button>'+(cur?'<br><span class="hint">on the map now</span>':'')+'</td>'+delCell('hist',S.hist.indexOf(h),'administration')+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No administration saved yet. Score one on the Body map and Scoring pages, then "Save to history".</td></tr>';
+    return '<tr'+(cur?' class="sel"':'')+'><td class="num">'+(i+1)+'</td><td>'+esc(h.date||NONE)+(h.time?'<br><span class="hint">'+esc(h.time)+'</span>':'')+(stop?'<br><b class="imStop">Check stopped</b>':'')+(h.pc==='no'?'<br><b class="imStop">Written down without the parent&rsquo;s Yes (IC-1 E is No)</b>':h.pc==='wait'?'<br><b class="imStop">Filed before the parent&rsquo;s decision (IC-1 E)</b>':'')+'</td><td>'+esc(h.examiner||NONE)+'<br><span class="hint">'+(h.second?'with '+esc(h.second)+(h.secondRole?' ('+esc(h.secondRole)+')':''):'second adult not recorded')+'</span></td><td class="num">'+sc.total+'</td><td class="num">'+(sc.ni==null?NONE:sc.ni)+'</td><td class="num">'+(sc.si==null?NONE:sc.si)+'</td><td>'+sc.n+' <span class="hint">('+esc(grpLine(sc))+')</span></td><td>'+riskTag(sc)+'</td><td class="hint">'+(stop?'<b>The check stopped:</b> the student said no or pulled away. Not graphed; the indices cover only what was seen before it stopped.<br>':'')+esc(sc.rule)+(h.note?'<br>'+esc(h.note):'')+'<br><span class="imScr noprint">Report: '+esc(repShort(h.rep))+'</span><span class="imPaper">Report question: '+esc(rq)+(rq==='not answered'?'':' (see the report record)')+'</span></td><td class="noprint"><button type="button" class="tool" data-open="'+esc(h.id)+'" style="font-size:11.5px">Open</button> <button type="button" class="tool" data-edit="'+esc(h.id)+'" style="font-size:11.5px">Edit this one</button>'+(cur?'<br><span class="hint">on the map now</span>':'')+'</td>'+delCell('hist',S.hist.indexOf(h),'administration')+'</tr>';}).join(''):'<tr><td colspan="11" class="hint">No administration saved yet. Score one on the Body map and Scoring pages, then "Save to history".</td></tr>';
   renderPlot(H);
 }
 $('#imHist').addEventListener('click',e=>{const o=e.target.closest('button[data-open]'),d=e.target.closest('button[data-edit]');if(o)openAdm(o.dataset.open,false);else if(d)openAdm(d.dataset.edit,true);});
@@ -1708,8 +1743,8 @@ function renderEvents(){
    S.careDraft; its id is the entry it corrects, or empty, and it counts as open until it is added. */
 const careArea=c=>{const a=CAREA[c.area];return a?a[1]:NONE;};
 /* on the screen: the answer, and the report when one was made */
-function repShort(rep){if(!rep)return 'not answered';const t=k=>String(rep[k]==null?'':rep[k]).trim();
-  return rep.need==='yes'?(t('when')&&t('to')&&t('by')?'Yes: made '+t('when')+' to '+t('to')+', by '+t('by'):'Yes: still to record when, to whom and by whom'):rep.need==='no'?'No'+(t('why')?': '+t('why'):''):'not answered';}
+function repShort(rep){if(!rep)return 'not answered';const t=k=>String(rep[k]==null?'':rep[k]).trim(),kept=repKept(rep);
+  return rep.need==='yes'?(t('when')&&t('to')&&t('by')?'Yes: made '+t('when')+' to '+t('to')+', by '+t('by'):kept?'Yes: recorded (the record is kept apart from this file)':'Yes: still to record when, to whom and by whom'):rep.need==='no'?'No'+(t('why')?': '+t('why'):kept?' (the reason is kept apart from this file)':''):'not answered';}
 /* the CSV carries only whether the question was answered, and when: the answer and the report print on the report record */
 const repCsv=rep=>repOn(rep);
 const careEditing=()=>{const id=S.careDraft.id;return id?S.care.findIndex(c=>c.id===id):-1;};
@@ -1720,7 +1755,7 @@ function careMissing(d){const t=k=>String(d[k]==null?'':d[k]).trim(),m=[];
   else if(!t('second')||!t('secondRole'))m.push('the second adult present, with their role (or tick that no second adult was present)');
   else if(samePerson(t('by'),t('second')))m.push('a second adult who is someone other than the person who noticed it');
   if(!t('nurse')&&!t('parent'))m.push('who it was passed to (the school nurse, or the parent or guardian)');
-  if(!d.rep.need)m.push('the answer to Does this need a report?');else if(d.rep.need==='no'&&!String(d.rep.why||'').trim())m.push('why you do not suspect abuse or neglect');
+  if(!d.rep.need)m.push('the answer to Does this need a report?');else if(d.rep.need==='no'&&!String(d.rep.why||'').trim()&&!repKept(d.rep))m.push('why you do not suspect abuse or neglect');
   return m;}
 /* the panel opens on the button (or a private area on the figure) and stays open while an entry is being written */
 let CARE_OPEN=false;
@@ -1760,7 +1795,7 @@ function renderCareVerdict(){const el=$('#imCareVerdict');if(!el)return;const ou
   if(draftWritten())out.push('<div class="verdict v-mid"><b>'+(k>=0?'Entry '+(k+1)+' is being corrected, and the changes are not saved yet.':'An entry is being written, and it is not added yet.')+'</b> Finish it above and press '+(k>=0?'Save changes':'Add to the record')+'. Until then it counts as open.</div>');
   const alone=S.care.map((c,i)=>c.alone?i+1:0).filter(Boolean);
   if(alone.length)out.push('<div class="verdict v-no"><b>The two-adult rule was not met for entry '+alone.join(', ')+'.</b> The injury is still recorded and the report question still applies.</div>');
-  const open=S.care.map((c,i)=>({c,i})).filter(x=>x.c.rep.need!=='no'&&!(x.c.rep.need==='yes'&&['when','to','by'].every(q=>t(x.c.rep,q))));
+  const open=S.care.map((c,i)=>({c,i})).filter(x=>x.c.rep.need!=='no'&&!(x.c.rep.need==='yes'&&(repKept(x.c.rep)||['when','to','by'].every(q=>t(x.c.rep,q)))));
   if(open.length)out.push('<div class="verdict v-no"><b>'+(open.length===1?'One entry still needs its report recorded':open.length+' entries still need their reports recorded')+':</b> entry '+open.map(x=>x.i+1).join(', ')+'. Record when, to whom and by whom (Edit).</div>');
   const no=S.care.map((c,i)=>({c,i})).filter(x=>x.c.rep.need==='no');
   if(no.length)out.push('<div class="verdict v-mid"><b>The answer is No for an injury in a private area:</b> '+no.map(x=>'entry '+(x.i+1)+(t(x.c.rep,'why')?' (the reason given: '+esc(t(x.c.rep,'why').replace(/\.+$/,''))+')':'')).join('; ')+'. If you are not sure, report.</div>');
@@ -1789,27 +1824,63 @@ function repRecItem(title,rep,care,shows){const t=k=>String(rep[k]==null?'':rep[
   return '<div class="rpRecItem"><h3>'+esc(title)+'</h3><table class="rt"><tr><th style="width:30%">Reasons marked</th><td>'+RP_REASONS.map(([k,x])=>'<div class="rpRecR">'+bx(rep[k]===true||(care&&k==='r3'))+' '+esc(x)+'</div>').join('')+(shows&&shows.length?'<div class="rpRecR">'+esc(shows.join(' '))+'</div>':'')+'</td></tr>'+
     '<tr><th>Do you suspect abuse or neglect?</th><td>'+esc(rep.need==='yes'?'Yes: a report is being made':rep.need==='no'?'No':'')+'</td></tr>'+
     '<tr><th>If no, why not</th><td>'+esc(t('why'))+'</td></tr><tr><th>Answered on</th><td>'+esc(t('on'))+'</td></tr><tr><th>Report made on (date and time)</th><td>'+esc(t('when'))+'</td></tr>'+
-    '<tr><th>To whom</th><td>'+esc(t('to'))+'</td></tr><tr><th>By whom</th><td>'+esc(t('by'))+'</td></tr><tr><th>Others told</th><td>'+esc(t('told'))+'</td></tr></table></div>';}
+    '<tr><th>To whom</th><td>'+esc(t('to'))+'</td></tr><tr><th>By whom</th><td>'+esc(t('by'))+'</td></tr><tr><th>Others told</th><td>'+esc(t('told'))+'</td></tr>'+
+    (repKept(rep)?'<tr><th>Kept apart</th><td>Written earlier and kept apart from the form&rsquo;s file: see the report record printed or saved then.</td></tr>':'')+'</table></div>';}
 function repRecordHTML(){const items=[],m=S.meta;
   histSorted().forEach(h=>{if(repHas(h.rep)||h.rows.length)items.push(repRecItem('Administration of '+(h.date||'(no date)')+(h.examiner?', examiner '+h.examiner:''),h.rep,false,rowsRecord(h.rows).reasons));});
   if(!savedSame()&&(repHas(S.cur.rep)||S.cur.rows.length))items.push(repRecItem('Administration on the map'+(S.cur.date?', '+S.cur.date:'')+(S.cur.id?' (changed since it was filed)':' (not yet filed)'),S.cur.rep,false,rowsRecord(S.cur.rows).reasons));
   S.care.forEach((c,i)=>items.push(repRecItem('Noticed during required care, entry '+(i+1)+': '+careArea(c)+', '+(c.date||'(no date)')+(c.time?' '+c.time:''),c.rep,true,null)));
   if(!items.length)items.push(repRecItem('Injury check, or injury noticed during care (date, and who)',repBlank(),false,null));
-  return '<h2 class="nbh-band">Report Record: Confidential</h2><p class="rpRecNote"><b>Not part of the student&rsquo;s file.</b> This sheet holds the answers to Does this need a report? and the record of any report made. Keep it apart from the student&rsquo;s file, as your agency&rsquo;s policy says, and do not give a copy with this form.</p>'+
+  return '<h2 class="nbh-band">Report Record: Confidential</h2><p class="rpRecNote"><b>Not part of the student&rsquo;s file.</b> This sheet holds the answers to Does this need a report? and the record of any report made. The form&rsquo;s data file and the case keep only the boxes ticked, the Yes or No and the day; the reason for a No and the record of the report (when, to whom, by whom, others told) are kept only here. Keep it apart from the student&rsquo;s file, as your agency&rsquo;s policy says, and do not give a copy with this form.</p>'+
     '<table class="rt rpRecHead"><tr><th>Student</th><td>'+esc(m.client||'')+'</td><th>Student ID</th><td>'+esc(m.sid||'')+'</td></tr><tr><th>Case BCBA</th><td>'+esc(m.bcba||'')+'</td><th>Printed</th><td>'+esc(today())+'</td></tr></table>'+items.join('');}
 const REP_PAGE='@media print{@page{@bottom-left{content:"Report record: confidential. Not part of the student\u2019s file. Keep it as your agency\u2019s policy says."}}}';
 function printRepRecord(){const el=$('#imRepRec');if(!el)return;el.innerHTML=repRecordHTML();document.body.classList.add('im-rep-only');
   /* the page footer says what the sheet is, not "retain in the student's behavior file" */
   const st=document.createElement('style');st.textContent=REP_PAGE;document.head.appendChild(st);
   const off=()=>{document.body.classList.remove('im-rep-only');el.innerHTML='';st.remove();window.removeEventListener('afterprint',off);};
-  window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);}
+  REP_DIRTY=false;window.addEventListener('afterprint',off);setTimeout(()=>{window.print();setTimeout(off,1500);},30);}
 window.__imRepRecord=repRecordHTML;
-document.addEventListener('click',e=>{if(!e.target.closest('button.imRepPrint'))return;e.preventDefault();printRepRecord();});
+document.addEventListener('click',e=>{if(e.target.closest('button.imRepSave')){e.preventDefault();saveRepRecord();return;}if(e.target.closest('button.imRepOpen')){e.preventDefault();$('#imRepIn').click();return;}
+  if(!e.target.closest('button.imRepPrint'))return;e.preventDefault();printRepRecord();});
+/* v22.37 (review F448): the report record as a file of its own, apart from the form's data file and the case. Save the
+   report record writes the reason for each No and the record of each report, each with the entry it belongs to; Open a
+   report record puts them back on the screen, into empty boxes only. Neither touches Save data. */
+const REPF='IM-1 report record';
+function repAll(){const o=[];S.hist.forEach(h=>o.push(['h:'+h.id,h.rep,'Administration of '+(h.date||'(no date)')]));
+  if(!savedSame())o.push([S.cur.id?'u:'+S.cur.id:'cur',S.cur.rep,'Administration on the map'+(S.cur.date?', '+S.cur.date:'')]);
+  S.care.forEach((c,i)=>o.push(['c:'+c.id,c.rep,'Noticed during required care, entry '+(i+1)+(c.date?', '+c.date:'')]));
+  o.push(['d:'+(S.careDraft.id||'new'),S.careDraft.rep,'Entry being written (care log)']);return o;}
+function saveRepRecord(){const items=repAll().filter(x=>repX(x[1])).map(([key,rep,title])=>{const r=rep.toJSON();delete r.kept;REPX.forEach(k=>{r[k]=String(rep[k]||'');});return {key,title,rep:r};});
+  if(!items.length){nbhUI.toast('Nothing to save: no reason for a No and no record of a report is on the screen.',{kind:'warn'});return;}
+  const t=new Date(),ymd=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'),a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({form:REPF,rev:'2026-10',saved:t.toISOString(),client:S.meta.client||'',sid:S.meta.sid||'',items},null,1)],{type:'application/json'}));
+  a.download='IM-1_report-record_'+(S.meta.client||'student').replace(/[^\w-]+/g,'_')+'_'+ymd+'.json';document.body.appendChild(a);a.click();a.remove();REP_DIRTY=false;
+  nbhUI.toast('Report record saved as a file of its own ('+items.length+' entr'+(items.length===1?'y':'ies')+'). Keep it apart from the student’s file, as your agency’s policy says.',{kind:'ok'});}
+function openRepRecord(d){if(!d||typeof d!=='object'||d.form!==REPF||!Array.isArray(d.items))return -1;
+  const map={};repAll().forEach(([k,rep])=>{map[k]=rep;});let n=0;
+  d.items.forEach(it=>{if(!it||!it.rep||typeof it.rep!=='object')return;const to=[map[it.key]];
+    if(S.cur.id&&(it.key==='h:'+S.cur.id||it.key==='u:'+S.cur.id)&&to[0]!==S.cur.rep)to.push(S.cur.rep);
+    let hit=0;to.filter(Boolean).forEach(rep=>{REPX.forEach(k=>{const v=it.rep[k]==null||typeof it.rep[k]==='object'?'':String(it.rep[k]);if(v.trim()&&!String(rep[k]||'').trim()){rep[k]=v;hit=1;}});});n+=hit;});
+  return n;}
+$('#imRepIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=async()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
+    if(!d||d.form!==REPF){alert('That file is not an IM-1 report record. Nothing was changed.');return;}
+    if(d.client&&S.meta.client&&normName(d.client)!==normName(S.meta.client)&&!(await nbhUI.confirm('This report record is for '+d.client+', not '+S.meta.client+'.\nPut it on this record anyway?',{ok:'Put it here'})))return;
+    const n=openRepRecord(d);renderAll();
+    nbhUI.toast(n>0?'Report record opened: the reason or the record is back on the screen for '+n+' entr'+(n===1?'y':'ies')+'. It is still not saved with this form.':'Nothing in that report record matches an entry on this form, or the boxes already hold text. Nothing was changed.',{kind:n>0?'ok':'warn'});};
+  r.readAsText(f);e.target.value='';});
+/* on its own, the form asks before it closes while a reason or a record typed here is neither printed nor saved */
+window.addEventListener('beforeunload',e=>{if(window.top!==window.self||!REP_DIRTY||!repAll().some(x=>repX(x[1])))return;e.preventDefault();e.returnValue='';});
 $('#addNurse').addEventListener('click',()=>{if(S.nurse.length>=300)return;S.nurse.push({date:today(),who:S.meta.nurse||'',findings:'',action:'',referral:''});renderNurse();const l=$$('#imNurse input[data-f="findings"]').pop();if(l)l.focus();});
 $('#addHealed').addEventListener('click',()=>{if(S.healed.length>=5){nbhUI.toast('The published Part I lists up to five sites of healed injury.');return;}S.healed.push({loc:'',ev:'',note:''});renderHealed();});
 $('#addEvent').addEventListener('click',()=>{if(S.events.length>=100)return;S.events.push({date:'',kind:'Restraint',note:''});renderEvents();renderSched();});
 
 /* ---------------- the schedule (the form's convention): intake, every n weeks, after any restraint or injury report ---------------- */
+/* v22.37 (review F449): the schedule follows the parent's decision on injury checks (Form IC-1, Specific procedures E).
+   Yes: as before. No: no scheduled check is listed or due (an injury that can be seen is written down, and the nurse gives
+   first aid); a restraint or injury report lists only that. Not recorded: the checks are listed as waiting for the
+   decision, never as due or overdue. What waits or was refused is not handed to the workstation (Today, the calendar). */
+const consentState=()=>S.meta.consent==='yes'?'yes':S.meta.consent==='no'?'no':'wait';
 function schedule(){
   /* v21.44 (B4): a check that stopped (the student said no or pulled away) leaves the check due */
   const intake=pDate(S.meta.intake),ev=num(S.meta.every),every=Math.max(1,Math.round(ev==null?3:ev)),adms=histSorted().filter(h=>h.assent!=='stopped').map(h=>pDate(h.date)).filter(Boolean),now=new Date();now.setHours(12,0,0,0);
@@ -1818,19 +1889,25 @@ function schedule(){
   const last=adms.length?adms[adms.length-1]:null;const next=last?addDays(last,every*7):intake;
   if(next&&(!intake||last))items.push({what:'SIT Scale re-examination (every '+every+' weeks)',date:next,done:null});
   S.events.forEach(e=>{const d=pDate(e.date);if(!d)return;const done=adms.find(a=>a>=d&&a<=addDays(d,14));items.push({what:'SIT Scale after the '+(e.kind||'event').toLowerCase()+' of '+MDY(d),date:d,done});});
-  items.forEach(x=>{x.over=!x.done&&x.date<now;});
-  return{items,every,intake,last,next,adms};
+  const cs=consentState();
+  if(cs==='no')items.splice(0,items.length,...S.events.map(e=>{const d=pDate(e.date);return d?{what:'After the '+(e.kind||'event').toLowerCase()+' of '+MDY(d)+': write down any injury that can be seen (no SIT Scale)',date:d,done:null,hold:'no'}:null;}).filter(Boolean));
+  else if(cs==='wait')items.forEach(x=>{if(!x.done)x.hold='wait';});
+  items.forEach(x=>{x.over=!x.done&&!x.hold&&x.date<now;});
+  return{items,every,intake,last,next,adms,cs};
 }
 function schedHtml(){const s=schedule();
+  if(s.cs==='no')return '<b>Schedule</b><b>No scheduled checks.</b> The parent&rsquo;s decision on injury checks (Form IC-1, Specific procedures E) is No'+(S.meta.consentDate?' ('+esc(S.meta.consentDate)+')':'')+'. Nothing here is due. An injury that can be seen is written down, and the school nurse gives first aid.'+
+    (s.items.length?'<ul>'+s.items.map(x=>'<li>'+esc(x.what)+'</li>').join('')+'</ul>':'');
   if(!s.intake&&!s.adms.length&&!S.events.length)return '<b>Schedule</b>Enter the intake date and the interval on the Setup page; the form lists what is due here, and the workstation shell shows it with the case.';
-  return '<b>Schedule</b>'+(s.intake?'Intake '+MDY(s.intake)+', then every '+s.every+' week'+(s.every===1?'':'s')+', and after any restraint or injury report'+(s.last?'; last administration '+MDY(s.last):'; none administered yet'):(s.last?'Last administration '+MDY(s.last)+'; every '+s.every+' weeks':''))+'. <span class="hint">This schedule is the form&rsquo;s convention; the paper&rsquo;s repeated examinations were at least a week apart. A check that stopped because the student said no does not count as done.</span><ul>'+
-    s.items.map(x=>'<li class="'+(x.done?'done':x.over?'over':'')+'">'+esc(x.what)+': '+MDY(x.date)+(x.done?' (administered '+MDY(x.done)+')':x.over?' <b>(not administered: overdue)</b>':' (due)')+'</li>').join('')+'</ul>';}
+  return '<b>Schedule</b>'+(s.cs==='wait'?'<b>Waiting for the parent&rsquo;s decision on injury checks (Form IC-1, Specific procedures E).</b> Nothing below is due until it is Yes. ':'')+(s.intake?'Intake '+MDY(s.intake)+', then every '+s.every+' week'+(s.every===1?'':'s')+', and after any restraint or injury report'+(s.last?'; last administration '+MDY(s.last):'; none administered yet'):(s.last?'Last administration '+MDY(s.last)+'; every '+s.every+' weeks':''))+'. <span class="hint">This schedule is the form&rsquo;s convention; the paper&rsquo;s repeated examinations were at least a week apart. A check that stopped because the student said no does not count as done.</span><ul>'+
+    s.items.map(x=>'<li class="'+(x.done?'done':x.over?'over':'')+'">'+esc(x.what)+': '+MDY(x.date)+(x.done?' (administered '+MDY(x.done)+')':x.hold==='wait'?' (waiting for the parent&rsquo;s decision)':x.over?' <b>(not administered: overdue)</b>':' (due)')+'</li>').join('')+'</ul>';}
 function renderSched(){$('#imSched').innerHTML=schedHtml();$('#imSchedHist').innerHTML=schedHtml();}
-window.__nbhDue=function(){return schedule().items.filter(x=>!x.done).map(x=>({what:x.what.slice(0,60),date:MDY(x.date)}));};
+window.__nbhDue=function(){return schedule().items.filter(x=>!x.done&&!x.hold).map(x=>({what:x.what.slice(0,60),date:MDY(x.date)}));};
 
 /* v21.44 (B4): the parent's decision on injury checks (Form IC-1, Specific procedures E) */
 const CONSENT={yes:'Yes',no:'No',nr:'not recorded yet'};
-const consentLine=()=>{const m=S.meta;return m.consent==='yes'?'':'<div class="verdict v-mid"><b>The parent&rsquo;s decision on injury checks (Form IC-1, E) is '+(m.consent==='no'?'No':'not recorded')+'.</b> Scheduled checks wait for it; first aid and writing down an injury that can be seen do not.</div>';};
+const consentLine=()=>{const m=S.meta;return m.consent==='yes'?'':m.consent==='no'?'<div class="verdict v-mid"><b>The parent said No to injury checks (Form IC-1, E)'+(m.consentDate?', '+esc(m.consentDate):'')+'.</b> No scheduled check is listed or due (v22.37). An injury that can be seen is written down, with why under Conditions, and the school nurse gives first aid.</div>'
+  :'<div class="verdict v-mid"><b>The parent&rsquo;s decision on injury checks (Form IC-1, E) is not recorded.</b> Scheduled checks wait for it and are not due until it is Yes; first aid and writing down an injury that can be seen do not wait.</div>';};
 function renderSetup(){const m=S.meta,v=$('#setupVerdict');const topo=['t_head','t_body','t_scratch','t_bite','t_eye'].filter(k=>S.chk[k]).length,anyTopo=Object.keys(S.chk).some(k=>/^t_/.test(k)&&S.chk[k]);
   if(!m.client&&!m.beh&&!anyTopo&&!m.examiner){v.innerHTML='<div class="verdict v-mid"><b>Setup not started.</b> The student and the target behavior, Part I once, then who examines and how often.</div>'+consentLine();return;}
   const miss=[];if(!m.beh)miss.push('the target behavior');if(!anyTopo)miss.push('the Part I checklist');if(!m.examiner)miss.push('the examiner');if(!m.intake)miss.push('the intake date');
@@ -1893,7 +1970,7 @@ function fromFile(d){
   const rows=a=>Array.isArray(a)?a.filter(x=>x&&LOC[x.loc]).slice(0,LOCS.length).map(x=>({loc:x.loc,n:['1','2','3'].includes(str(x.n))?str(x.n):'',type:['AL','CT'].includes(x.type)?x.type:'',sev:['1','2','3'].includes(str(x.sev))&&x.type?str(x.sev):'',kind:str(x.kind),note:str(x.note),how:HOWN[str(x.how)]?str(x.how):'',view:['front','back','head'].includes(x.view)?x.view:'',x:num(x.x)==null?'':num(x.x),y:num(x.y)==null?'':num(x.y)})):[];
   /* v21.44: a file saved before the second adult, the student's assent, the report question and the care log opens
      with them empty (an earlier administration is filed again only once they are recorded) */
-  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep)});
+  const adm=x=>({id:str(x&&x.id),date:str(x&&x.date),time:str(x&&x.time),examiner:str(x&&x.examiner),second:str(x&&x.second),secondRole:str(x&&x.secondRole),present:!!(x&&x.present===true),assent:ASSENTN[str(x&&x.assent)]?str(x.assent):'',note:str(x&&x.note),ro:!!(x&&x.ro),rows:rows(x&&x.rows),rep:repCopy(x&&x.rep),pc:['no','wait'].includes(str(x&&x.pc))?str(x.pc):''});
   o.cur=adm(obj('cur'));
   o.hist=Array.isArray(s.hist)?s.hist.slice(0,200).map(x=>{const a=adm(x);delete a.ro;if(!a.id)a.id=uid();return a;}):[];
   const seen={};o.hist.forEach(h=>{if(seen[h.id])h.id=uid();seen[h.id]=1;});
@@ -1910,8 +1987,11 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.onload=()=>{let d=null;try{d=JSON.parse(r.result);}catch(err){d=null;}
     const other=d&&typeof d==='object'&&typeof d.form==='string'&&d.form!=='IM-1'?d.form:'';
     const next=other?null:fromFile(d);
-    if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved IM-1 form; open it with Open packet. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form IM-1. Nothing was changed.':'That file could not be read as a saved IM-1 form. Nothing was changed.');return;}
-    const prev=S;S=next;SEL=null;SELP=null;CARE_OPEN=false;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved IM-1 form. Nothing was changed.');}};
+    if(!next){alert(other==='PACKET'?'That file is a student packet, not a saved IM-1 form; open it with Open packet. Nothing was changed.':other===REPF?'That file is a report record. Open it with Open a report record, beside Print the report record. Nothing was changed.':other?'That file was saved by Form '+other+', not by Form IM-1. Nothing was changed.':'That file could not be read as a saved IM-1 form. Nothing was changed.');return;}
+    const prev=S;S=next;SEL=null;SELP=null;CARE_OPEN=false;try{renderAll();}catch(err){S=prev;renderAll();alert('That file could not be read as a saved IM-1 form. Nothing was changed.');return;}
+    /* v22.37 (review F448): a file saved before October 2026 can hold the reason for a No or the record of a report; it
+       opens with them on the screen, and they are not written into the file again */
+    if(repAll().some(x=>repX(x[1]))){REP_DIRTY=true;nbhUI.toast('This file holds the reason for a No or the record of a report, saved before October 2026. It is on the screen and on the report record, and it will not be saved with this form again: print the report record, or save it as a file of its own.',{kind:'warn',ms:9000});}};
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
@@ -1989,6 +2069,14 @@ window.__nbhFactsIn=function(f){const m=S.meta;let n=0;const b=f.behaviors||[];
   const sib=b.find(x=>/self.?injur|\bSIB\b|head.?(hit|bang)|bit(e|ing)|scratch|pick|gouge|slap/i.test([x.label,x.type,x.def].join(' ')))||b[0];
   if(sib){if(!m.beh){m.beh=sib.label;n++;}if(!m.behdef&&sib.def){m.behdef=sib.def;n++;}}
   if(n)renderAll();return {filled:n,note:sib?undefined:'the case holds no target behavior yet'};};
+/* v22.37 (review F449): the parent's decision on injury checks, from Form IC-1 (Specific procedures E, dec.ij), when the
+   Setup's two fields are empty; consent revoked or declined reads No. The date says where it came from. */
+(function(){const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=0;const m=S.meta;
+  const k=window.nbhCase&&window.nbhCase.consent?window.nbhCase.consent(f):null;
+  if(k&&k.known&&!m.consent){const ij=(k.dec&&k.dec.ij)||{},off=k.state==='Revoked'||k.state==='Declined',v=off||ij.dec==='no'?'no':ij.dec==='yes'&&k.on?'yes':'';
+    if(v){m.consent=v;n++;if(!String(m.consentDate||'').trim()){const d=pDate(off?(k.ended||ij.date):ij.date);m.consentDate=(d?MDY(d)+' ':'')+'(Form IC-1, Specific procedures E'+(off?'; consent '+k.state.toLowerCase():'')+')';n++;}}}
+  if(n)renderAll();
+  return {filled:((r&&r.filled)||0)+n,note:n?'the parent’s decision on injury checks from Form IC-1':(r&&r.note)};};})();
 window.__nbhFactsPick=function(sel){const b=sel.behaviors[0];if(!b)return {filled:0};S.meta.beh=b.label;if(b.def)S.meta.behdef=b.def;renderAll();return {filled:1};};
 
 /* v21.78 the case: out. The injuries this form records, for the workstation's Today and Safety lists: the latest date an
@@ -2005,9 +2093,9 @@ window.__nbhFactsOut=function(){
   const now=new Date();now.setHours(12,0,0,0);const from=addDays(now,-30),last=inj.length?new Date(Math.max(...inj)):null;
   const o={count30:inj.filter(d=>d>=from&&d<=addDays(now,1)).length,open:[]};if(last)o.last=iso(last);
   const lh=H.filter(h=>pDate(h.date)).slice(-1)[0];if(lh){const sc=score(lh.rows);o.latest={date:iso(pDate(lh.date)),sites:sc.n,ni:sc.ni,si:sc.si,risk:sc.risk||''};}
-  schedule().items.filter(x=>!x.done).forEach(x=>o.open.push({what:x.what+(x.over?' (overdue)':''),due:iso(x.date),done:false}));
+  schedule().items.filter(x=>!x.done&&!x.hold).forEach(x=>o.open.push({what:x.what+(x.over?' (overdue)':''),due:iso(x.date),done:false}));
   const repOpen=(rep,what,d)=>{if(!rep)return;if(!rep.need)o.open.push({what:'Answer the report question (abuse or neglect) for '+what,due:iso(d),done:false});
-    else if(rep.need==='yes'&&!['when','to','by'].every(k=>tx(rep[k])))o.open.push({what:'Record the report made for '+what+' (when, to whom, by whom)',due:iso(d),done:false});};
+    else if(rep.need==='yes'&&!repKept(rep)&&!['when','to','by'].every(k=>tx(rep[k])))o.open.push({what:'Record the report made for '+what+' (when, to whom, by whom)',due:iso(d),done:false});};
   H.forEach(h=>{const d=pDate(h.date);if(d)repOpen(h.rep,'the SIT Scale of '+MDY(d),d);});
   S.care.forEach(c=>{const d=pDate(c.date);if(!d)return;const w='the injury noticed during care on '+MDY(d);repOpen(c.rep,w,d);
     if(!tx(c.nurse))o.open.push({what:'Pass '+w+' to the school nurse',due:iso(d),done:false});

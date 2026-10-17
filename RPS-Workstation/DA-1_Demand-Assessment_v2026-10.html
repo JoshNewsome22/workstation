@@ -662,6 +662,9 @@ table.rt tr.hp td{background:#FBEBDC}
 .fieldgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px 16px;margin:10px 0}
 .fieldgrid label{display:block;font-family:var(--sans);font-size:11.5px;color:var(--ink-soft)}
 .fieldgrid input,.fieldgrid textarea,.fieldgrid select{width:100%;font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:4px 6px;background:#fff}
+/* v22.37 (review F141) the checkboxes of the "Before the first session" block and the trial record */
+.fieldgrid .pre-chk{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);padding:4px 0}.fieldgrid .pre-chk input{width:auto;margin:0}
+td.chk{text-align:center}td.chk input{width:auto}
 .instr{border:1px solid var(--rule-2);border-left:3px solid var(--rule);background:#FAFCFC;padding:8px 12px;margin:8px 0 14px;font-family:var(--sans);font-size:12.5px;line-height:1.45}
 .instr p{margin:4px 0}
 .instr ol{margin:4px 0 4px 18px;padding:0}
@@ -911,6 +914,19 @@ td input,td select{max-width:100%}
 
   <!-- ===================== ASSESSMENT ===================== -->
   <section class="only-assessment">
+    <!-- v22.37 (review F141): with physical guidance or the brief escape, every session is a demand condition in all but
+         name, so the consent, the notice, the crisis plan and the assent signals are checked and written down first.
+         Shown while either is chosen on the Inventory sheet, or while one of its fields holds something. -->
+    <div class="pre-first" id="preFirst" hidden>
+      <h2 class="nbh-band">Before the First Session</h2>
+      <p class="hint">The prompting ends in physical guidance, or problem behavior is followed by a brief escape, so these sessions work like the demand condition of an experimental analysis (Form EA-1). Check each line before the first session.</p>
+      <div class="fieldgrid">
+        <div style="grid-column:1/-1"><label for="preConsent">Consent (Form IC-1)</label><input id="preConsent" data-m="preConsent" placeholder="Consent date, and whether Form IC-1 covers the demand assessment"></div>
+        <div><label for="preAdmin">Administrator notified (date)</label><input id="preAdmin" data-m="preAdmin"></div>
+        <div><label for="preCrisis">Crisis plan on file (Form CR-1) with its stop rule</label><label class="pre-chk"><input type="checkbox" id="preCrisis" data-m="preCrisis"> On file</label></div>
+        <div style="grid-column:1/-1"><label for="preAssent">Student&rsquo;s assent signals (Form SI-1)</label><input id="preAssent" data-m="preAssent" placeholder="How this student says no or stop: words, signs, pushing the work away"></div>
+      </div>
+    </div>
     <h2 class="nbh-band">The Trial Record</h2>
     <div class="instr">
       <p><b>Procedure, as the form assumes it.</b></p>
@@ -925,7 +941,7 @@ td input,td select{max-width:100%}
     </div>
     <div class="tools"><button class="tool" id="genOrder">Write the alternating order</button><button class="tool" id="addSess">Add a session</button><button class="tool" id="delSess">Remove last</button><span class="hint" id="orderHint"></span></div>
     <div class="grid-wrap"><table class="rt wide" id="sessTbl"><thead><tr>
-      <th style="width:3%">#</th><th style="width:21%">Task</th><th style="width:7%">Date</th><th style="width:6%">Minutes</th><th style="width:7%">Instructions given</th><th style="width:7%">Complied</th><th style="width:7%">Compliance</th><th style="width:8%">Latency to first PB (s)</th><th style="width:6%">PB count</th><th style="width:7%">PB per min</th><th style="width:10%">Affect (1 to 5)</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:3%">#</th><th style="width:16%">Task</th><th style="width:6%">Date</th><th style="width:5%">Minutes</th><th style="width:6%">Instructions given</th><th style="width:6%">Complied</th><th style="width:6%">Compliance</th><th style="width:7%">Latency to first PB (s)</th><th style="width:5%">PB count</th><th style="width:6%">PB per min</th><th style="width:9%">Affect (1 to 5)</th><th style="width:5%">Guidance stops</th><th style="width:9%">Stopped early: why</th><th style="width:6%">Hold or injury: reported</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <h3>Per-Task Means</h3>
     <p class="hint">Computed from the sessions above. A session with no problem behavior counts toward the mean latency at the full session length, the convention of latency-based analyses in which the session ends when the response occurs or the time runs out (Thomason-Sassi, Iwata, Neidert &amp; Roscoe, 2011); it is a floor on the true latency, so the table also shows in how many sessions problem behavior occurred at all.</p>
     <div class="grid-wrap"><table class="rt mid" id="meanTbl"><thead><tr>
@@ -1074,7 +1090,7 @@ const selV=(r,i,f,opts,val,label)=>'<select data-r="'+r+'" data-i="'+i+'" data-f
 function blank(){return{meta:{},tasks:[],sess:[],probes:[]};}
 let S=blank();
 const newTask=()=>({name:'',where:'',len:'',effort:'',diff:'',nov:'',prompt:'',pres:'',cando:'',rating:'',note:''});
-const newSess=t=>({t:t==null?'':String(t),date:'',min:S.meta.len||'',given:'',comp:'',lat:'',pb:'',aff:'',note:''});
+const newSess=t=>({t:t==null?'':String(t),date:'',min:S.meta.len||'',given:'',comp:'',lat:'',pb:'',aff:'',stops:'',why:'',hold:'',note:''});   /* v22.37 (F141): stops, why, hold */
 const newProbe=()=>({a:'',b:'',pick:'',note:''});
 function ensure(){
   if(!Array.isArray(S.tasks))S.tasks=[];if(!Array.isArray(S.sess))S.sess=[];if(!Array.isArray(S.probes))S.probes=[];if(!S.meta||typeof S.meta!=='object')S.meta={};
@@ -1108,7 +1124,12 @@ function renderTasks(){
 function renderPgRule(){const el=$('#pgRule');if(!el)return;
   const on=/then physical guidance/i.test(S.meta.prompt||'')||S.tasks.some(t=>/\bphysical\b/i.test(t.prompt||'')&&!/\bno physical\b/i.test(t.prompt||''));
   if(el.hidden===on)el.hidden=!on;}
-function renderInv(){renderPgRule();
+/* v22.37 (review F141) the "Before the first session" block: shown with physical guidance (as the stop rule above) or the
+   brief escape, or while one of its fields holds something */
+function renderPreFirst(){const el=$('#preFirst');if(!el)return;const m=S.meta;
+  const on=!$('#pgRule').hidden||/^Brief escape/i.test(m.conseq||'')||['preConsent','preAdmin','preCrisis','preAssent'].some(k=>String(m[k]||'').trim());
+  if(el.hidden===on)el.hidden=!on;}
+function renderInv(){renderPgRule();renderPreFirst();
   const el=$('#invVerdict');const T=S.tasks.filter(t=>t.name);
   if(!T.length){el.innerHTML='<div class="verdict v-mid"><b>No tasks yet.</b> List the demands from the schedule; six to eight is a usual set (working convention).</div>';return;}
   const easy=T.filter(t=>num(t.rating)!=null&&num(t.rating)<=2).length,hard=T.filter(t=>num(t.rating)!=null&&num(t.rating)>=4).length;
@@ -1142,6 +1163,9 @@ function renderSess(){
     <td><input data-r="sess" data-i="${i}" data-f="pb" value="${esc(r.pb)}" style="text-align:center"></td>
     <td class="num">${f1(c.rate)}</td>
     <td>${selV('sess',i,'aff',AFF.map((a,k)=>[k?String(k):'',a]),r.aff,'Affect, session '+(i+1))}</td>
+    <td><input data-r="sess" data-i="${i}" data-f="stops" value="${esc(r.stops||'')}" style="text-align:center" aria-label="Guidance stops, session ${i+1}"></td>
+    <td><input data-r="sess" data-i="${i}" data-f="why" value="${esc(r.why||'')}" aria-label="Stopped early: why, session ${i+1}"></td>
+    <td class="chk"><input type="checkbox" data-r="sess" data-i="${i}" data-f="hold"${r.hold?' checked':''} aria-label="Hold or injury: reported, session ${i+1}"></td>
     <td><input data-r="sess" data-i="${i}" data-f="note" value="${esc(r.note)}"></td>${delCell('sess',i,'session')}</tr>`;}).join('');
   const n=S.sess.length;$('#orderHint').textContent=n?n+' session'+(n===1?'':'s')+' · '+S.sess.filter(s=>num(s.given)!=null||num(s.pb)!=null||s.lat).length+' with data':'';
 }
@@ -1251,16 +1275,17 @@ function drawChart(R){
 let resT=0;function renderResultsSoon(){clearTimeout(resT);resT=setTimeout(()=>{renderMeans();renderResults();},200);}
 function renderMeans(){const R=stats();
   $('#meanTbl tbody').innerHTML=R.all.filter(o=>o.t.name||o.n).map(o=>`<tr><td class="num">${o.i+1}</td><td>${esc(o.name)}</td><td class="num">${o.n}</td><td class="num">${pct(o.comp)}</td><td class="num">${f0(o.lat)}</td><td class="num">${o.n?o.pbN+' of '+o.n:'—'}</td><td class="num">${f1(o.rate)}</td><td class="num">${o.aff==null?'—':(Math.round(o.aff*10)/10).toFixed(1)}</td></tr>`).join('');}
+const cv=el=>el.type==='checkbox'?(el.checked?'1':''):el.value;   /* v22.37 (F141): a checkbox keeps '1' or '' */
 document.addEventListener('input',e=>{const el=e.target;
-  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;
+  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);
     if(el.dataset.r==='sess')updateSessRow(+el.dataset.i);
     if(el.dataset.r==='tasks'&&el.dataset.f==='name'){$$('#sessTbl select[data-f="t"],#probeTbl select[data-f="a"],#probeTbl select[data-f="b"]').forEach(s=>{const o=s.options[+el.dataset.i+1];if(o)o.textContent=(+el.dataset.i+1)+' · '+(el.value||('Task '+(+el.dataset.i+1)));});}
     renderResultsSoon();if(el.dataset.r==='tasks')renderInv();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='len')renderResultsSoon();}
 });
 document.addEventListener('change',e=>{const el=e.target;
-  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=el.value;if(el.dataset.r==='tasks')renderInv();renderResultsSoon();return;}
-  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=el.value;if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='prompt')renderPgRule();}
+  if(el.dataset.r!==undefined&&el.dataset.f!==undefined){S[el.dataset.r][+el.dataset.i][el.dataset.f]=cv(el);if(el.dataset.r==='tasks')renderInv();renderResultsSoon();return;}
+  if(el.dataset.m!==undefined){S.meta[el.dataset.m]=cv(el);if(el.dataset.m==='chart')drawChart(stats());if(el.dataset.m==='len'||el.dataset.m==='nper')renderInv();if(el.dataset.m==='prompt')renderPgRule();if(el.dataset.m==='prompt'||el.dataset.m==='conseq')renderPreFirst();}
 });
 $('#addTask').addEventListener('click',()=>{if(S.tasks.length>=12)return;S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderResultsSoon();});
 $('#delTask').addEventListener('click',async ()=>{if(S.tasks.length<=1)return;const i=S.tasks.length-1,used=S.sess.some(s=>String(s.t)===String(i))||S.probes.some(p=>String(p.a)===String(i)||String(p.b)===String(i));
@@ -1286,13 +1311,13 @@ async function rowDel(r,i){const row=S[r]&&S[r][i];if(!row)return;
     S.sess=S.sess.filter(s=>String(s.t)!==String(i));S.sess.forEach(s=>{s.t=rk(s.t);});
     S.probes=S.probes.filter(p=>String(p.a)!==String(i)&&String(p.b)!==String(i));S.probes.forEach(p=>{p.a=rk(p.a);p.b=rk(p.b);});
     if(!S.tasks.length)S.tasks.push(newTask());renderTasks();renderSess();renderProbes();renderInv();renderMeans();renderResults();}
-  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe session it holds is deleted.',{ok:'Delete',danger:true})))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
+  else if(r==='sess'){if((row.t!==''||row.date||row.given||row.comp||row.lat||row.pb||row.aff||row.stops||row.why||row.hold||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe session it holds is deleted.',{ok:'Delete',danger:true})))return;S.sess.splice(i,1);renderSess();renderMeans();renderResults();}
   else if(r==='probes'){if((row.a!==''||row.b!==''||row.pick||row.note)&&!(await nbhUI.confirm('Delete this row?\nThe choice probe it holds is deleted.',{ok:'Delete',danger:true})))return;S.probes.splice(i,1);renderProbes();renderMeans();renderResults();}
 }
 $('#daPngBtn').addEventListener('click',()=>svgToPng($('#daChart'),graphFile('DA-1',S.meta.client)));
 
 /* ---------------- meta + render ---------------- */
-function bindMeta(){$$('[data-m]').forEach(el=>{el.value=S.meta[el.dataset.m]||'';});if($('#chartSel')&&!S.meta.chart)$('#chartSel').value='rate';}
+function bindMeta(){$$('[data-m]').forEach(el=>{if(el.type==='checkbox')el.checked=!!S.meta[el.dataset.m];else el.value=S.meta[el.dataset.m]||'';});if($('#chartSel')&&!S.meta.chart)$('#chartSel').value='rate';}
 function renderAll(){ensure();bindMeta();renderTasks();renderInv();renderSess();renderProbes();renderMeans();renderResults();}
 
 /* ---------------- toolbar ---------------- */
@@ -1309,7 +1334,7 @@ function fromFile(d){
   Object.keys(obj('meta')).forEach(k=>{o.meta[k]=str(s.meta[k]);});
   const arr=(k,fields,n)=>Array.isArray(s[k])?s[k].slice(0,n).map(x=>{const r={};fields.forEach(f=>{r[f]=str(x&&x[f]);});return r;}):[];
   o.tasks=arr('tasks',['name','where','len','effort','diff','nov','prompt','pres','cando','rating','note'],12);
-  o.sess=arr('sess',['t','date','min','given','comp','lat','pb','aff','note'],200);
+  o.sess=arr('sess',['t','date','min','given','comp','lat','pb','aff','stops','why','hold','note'],200);   /* v22.37 (F141): an older file opens with the new ones empty */
   o.probes=arr('probes',['a','b','pick','note'],60);
   const ok=v=>v===''||(/^\d+$/.test(v)&&+v<o.tasks.length);
   o.sess=o.sess.filter(x=>ok(x.t));o.probes=o.probes.filter(x=>ok(x.a)&&ok(x.b)).map(x=>{if(!['','a','b','none'].includes(x.pick))x.pick='';return x;});
@@ -1325,8 +1350,8 @@ $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)retur
   r.readAsText(f);e.target.value='';});
 $('#csvBtn').addEventListener('click',()=>{
   const q=x=>'"'+String(x==null?'':x).replace(/"/g,'""')+'"';
-  const out=[['Session','Task #','Task','Date','Minutes','Instructions given','Complied','Compliance %','Latency to first PB (s)','PB count','PB per min','Affect (1 to 5)','Note']];
-  S.sess.forEach((r,i)=>{const c=sessCalc(r);out.push([i+1,r.t===''?'':+r.t+1,r.t===''?'':taskName(+r.t),r.date,r.min,r.given,r.comp,c.comp==null?'':c.comp.toFixed(1),r.lat,r.pb,c.rate==null?'':c.rate.toFixed(3),r.aff,r.note]);});
+  const out=[['Session','Task #','Task','Date','Minutes','Instructions given','Complied','Compliance %','Latency to first PB (s)','PB count','PB per min','Affect (1 to 5)','Guidance stops','Stopped early: why','Hold or injury: reported','Note']];
+  S.sess.forEach((r,i)=>{const c=sessCalc(r);out.push([i+1,r.t===''?'':+r.t+1,r.t===''?'':taskName(+r.t),r.date,r.min,r.given,r.comp,c.comp==null?'':c.comp.toFixed(1),r.lat,r.pb,c.rate==null?'':c.rate.toFixed(3),r.aff,r.stops||'',r.why||'',r.hold?'Yes':'',r.note]);});
   out.push([]);out.push(['Task #','Task','Sessions','Mean compliance %','Mean latency (s)','Sessions with PB','Mean PB per min','Mean affect','Chosen','Offered','Class','Rank']);
   const R=stats();R.all.filter(o=>o.t.name||o.n).forEach(o=>out.push([o.i+1,o.name,o.n,o.comp==null?'':o.comp.toFixed(1),o.lat==null?'':o.lat.toFixed(0),o.pbN,o.rate==null?'':o.rate.toFixed(3),o.aff==null?'':o.aff.toFixed(2),o.picked,o.offered,o.cls,o.rank||'']));
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));a.download='DA-1_sessions.csv';document.body.appendChild(a);a.click();a.remove();});
@@ -1355,7 +1380,9 @@ async function loadSim(){
   const rows=[[5,5,12,12,'',0,5],[0,5,10,2,40,6,1],[4,5,10,9,'',0,4],[1,5,9,5,130,3,2],[3,5,10,8,'',0,4],[2,4,8,3,75,4,1],
     [0,5,10,3,55,7,1],[3,5,10,9,'',0,4],[5,5,12,12,'',0,5],[2,5,9,4,110,3,2],[4,5,10,10,'',0,4],[1,5,10,4,165,2,2],
     [2,5,9,3,60,5,1],[4,5,10,8,240,1,3],[1,5,9,5,95,4,2],[5,5,12,11,'',0,5],[0,5,10,2,30,6,1],[3,5,10,9,'',0,4]];
-  S.sess=rows.map((r,i)=>({t:String(r[0]),date:D(i<9?3:2),min:String(r[1]),given:String(r[2]),comp:String(r[3]),lat:r[4]===''?'':String(r[4]),pb:String(r[5]),aff:String(r[6]),note:i===5?'Stopped at 4 min under the CR-1 rule':i===7?'Looked away for the last minute':''}));
+  S.sess=rows.map((r,i)=>({t:String(r[0]),date:D(i<9?3:2),min:String(r[1]),given:String(r[2]),comp:String(r[3]),lat:r[4]===''?'':String(r[4]),pb:String(r[5]),aff:String(r[6]),
+    stops:i===1||i===6?'1':i===5?'2':'',why:i===5?'Still upset after the calm pause; pushed the book away (assent plan)':'',hold:'',note:i===5?'Stopped at 4 min under the CR-1 rule':i===7?'Looked away for the last minute':''}));   /* v22.37 (F141): the stop rule's record */
+  Object.assign(S.meta,{preConsent:'Consent on file (simulated); it covers the demand assessment',preAdmin:Y(4),preCrisis:'1',preAssent:'Says “stop” or “no more”, pushes the materials away, puts his head down (simulated)'});
   const probes=[[0,5,'b'],[1,4,'b'],[2,3,'b'],[0,1,'b'],[4,5,'b'],[1,3,'b'],[0,2,'b'],[2,4,'b'],[3,5,'b'],[1,2,'a']];
   S.probes=probes.map((p,i)=>({a:String(p[0]),b:String(p[1]),pick:p[2],note:i===9?'Took the pencil before Ms. R. finished asking':''}));
   S.meta.plan='';
@@ -1373,6 +1400,13 @@ window.__nbhFactsIn=function(f){
   const m=S.meta;let n=0;const b=(f.behaviors||[])[0];
   if(!m.target&&b){m.target=nbhCase.line(b,true);n++;}
   if(!m.hyp&&f.fn&&(f.fn.label||f.fn.key)){m.hyp=(f.fn.statements&&f.fn.statements[0])||f.fn.label;n++;}
+  /* v22.37 (review F141) "Before the first session": the consent as IC-1 records it, and whether it covers the demand
+     assessment (a line the case wrote before is replaced as the case changes; one typed by hand stays); the crisis plan box
+     ticked when the case holds Form CR-1's plan. */
+  if(f.consent&&typeof f.consent==='object'&&nbhCase.consent){const k=nbhCase.consent(f);
+    const line=k.word+(!k.on||!k.covered?'':nbhCase.covers('demand',f)?'; it covers the demand assessment':'; it does NOT cover the demand assessment: do not run it unless the parent consents to it');
+    const cur=String(m.preConsent||'').trim();if((!cur||/^(Consent|No consent)\b.*\(Form IC-1\)(; it (covers|does NOT cover) the demand assessment.*)?$/.test(cur))&&cur!==line){m.preConsent=line;n++;}}
+  if(f.crisis&&typeof f.crisis==='object'&&!m.preCrisis){m.preCrisis='1';n++;}
   if(n)renderAll();return {filled:n};
 };
 window.__nbhFactsPick=function(sel){
