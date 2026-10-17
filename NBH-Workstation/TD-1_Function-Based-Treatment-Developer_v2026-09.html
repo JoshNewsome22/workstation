@@ -3099,19 +3099,23 @@ function bipText(){
    that deliver the reinforcer join it always (the plan's own words seldom restate that contingency). Never in it: the crisis procedure
    (Form CR-1 governs it), the thinning ladder and generalization (the BCBA's decisions), the data rules, and escape
    extinction's consent and what is not in place yet. Critical: the steps that deliver or withhold the reinforcer, the
-   response to the behavior, and the stopping rules. The BCBA changes either on this sheet; only the changes are kept,
-   in fin.steps, by the step's words. */
+   response to the behavior, and the stopping rules; and, from the integrity research, every consequence step that
+   delivers or withholds the reinforcer, since errors there do the most harm (St. Peter Pipkin, Vollmer, & Sloman, 2010;
+   Carroll, Kodak, & Fisher, 2013). The fading rule starts out of the list. Escape extinction's lines go to the list as
+   separate steps, or as one step that names them (the BCBA's choice, fin.steps.ee = 'one'). The BCBA changes any of
+   this on this sheet; only the changes are kept, in fin.steps, by the step's words. */
 {
 const T=v=>String(v==null?'':v).trim(),K=s=>T(s).replace(/\s+/g,' ').toLowerCase();
 const GCMP=['ant','','ant','con','con'];
 const GIVE=/\b(reinforce every|deliver the reinforcer|honou?r every)\b/i;
 const REIN=/\b(reinforce every|withhold the reinforcer|deliver the reinforcer|do not reinforce|is not returned|do not remove the demand|honou?r every)\b/i;
 const EEX=t=>t===EE_TITLE||t===EE_TITLE_PG;
+const CONSEQ=/\breinforc|\bno (break|attention|access)\b|\bwithhold|is not returned|do not (give|remove|return)\b/i;
 const fld=()=>{let e=document.querySelector('[name="fin.steps"]');if(!e){const at=document.getElementById('finalBody');if(!at)return null;
   e=document.createElement('input');e.type='hidden';e.name='fin.steps';at.parentNode.insertBefore(e,at);}return e;};
 const over=()=>{const e=fld();let o={};try{o=JSON.parse((e&&e.value)||'{}')||{};}catch(x){o={};}
-  return {in:o.in&&typeof o.in==='object'?o.in:{},crit:o.crit&&typeof o.crit==='object'?o.crit:{}};};
-const putOver=o=>{const e=fld();if(!e)return;const n=Object.keys(o.in).length+Object.keys(o.crit).length;e.value=n?JSON.stringify(o):'';
+  return {in:o.in&&typeof o.in==='object'?o.in:{},crit:o.crit&&typeof o.crit==='object'?o.crit:{},ee:o.ee==='one'?'one':''};};
+const putOver=o=>{const e=fld();if(!e)return;const n=Object.keys(o.in).length+Object.keys(o.crit).length+(o.ee?1:0);if(!o.ee)delete o.ee;e.value=n?JSON.stringify(o):'';
   e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
 function extraKind(title,line){if(/^Crisis procedure/.test(title))return 'crisis';if(/^Data, integrity/.test(title))return 'data';
   if(/^(Thinning ladder|Generalization)/.test(title))return 'rule';
@@ -3119,12 +3123,12 @@ function extraKind(title,line){if(/^Crisis procedure/.test(title))return 'crisis
 function extraCmp(title,line){if(/^Prompt hierarchy/.test(title)&&/^Reinforcement:/.test(line))return 'con';if(/^(Positioning|Prompt hierarchy)/.test(title))return 'ant';if(/^Responding/.test(title)||EEX(title))return 'con';return '';}
 /* escape extinction's lines that say what the adult does join the list; the ones that explain or record do not */
 const EE_INFO=/^(Escape is one of|Why hands-on guidance|Teaching prompts|The student's assent plan|The student's ways of saying no)/;
-function extraIn(title,line){return EEX(title)?!EE_INFO.test(line):/^(Positioning|Prompt hierarchy|Responding)/.test(title);}
+function extraIn(title,line){if(/^Prompt hierarchy/.test(title)&&/^Fading rule:/.test(line))return false;return EEX(title)?!EE_INFO.test(line):/^(Positioning|Prompt hierarchy|Responding)/.test(title);}
 function extraCrit(title,line){if(/^Responding/.test(title))return /^(On the target behavior|Staff do not):/.test(line)||(/^On the precursor:/.test(line)&&/reinforc/i.test(line));
   if(EEX(title))return /^(Stop guiding|Never force|If distress goes on|If the student withdraws assent|The rule staff follow)/.test(line);return false;}
 /* every line, in the order and with the numbers renderFinal prints; inList and crit after the BCBA's changes */
 function planLines(){const cs=comps(),L=[],used=new Set(),O=over();
-  const push=(d,grp,comp,cmp,kind,sIn,sCrit,card)=>{d=T(d);L.push({n:L.length+1,d,grp,comp,cmp,kind,sIn:!kind&&!!sIn,sCrit:!kind&&!!sCrit,card:!!card});};
+  const push=(d,grp,comp,cmp,kind,sIn,sCrit,card)=>{d=T(d);L.push({n:L.length+1,d,grp,comp,cmp,kind,sIn:!kind&&!!sIn,sCrit:!kind&&(!!sCrit||(cmp==='con'&&CONSEQ.test(d))),card:!!card});};
   GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)).forEach(c=>{used.add(c.code);c.steps.forEach(s=>push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true));});});
   cs.filter(c=>!used.has(c.code)).forEach(c=>c.steps.forEach(s=>push(s,'Other components',c.name,'','',false,REIN.test(s),true)));
   finalExtras().forEach(([title,lines])=>lines.forEach(s=>{const kd=extraKind(title,s);push(s,title,'',kd?'':extraCmp(title,s),kd,extraIn(title,s),extraCrit(title,s),false);}));
@@ -3133,7 +3137,13 @@ function planLines(){const cs=comps(),L=[],used=new Set(),O=over();
   L.forEach(x=>{const k=K(x.d);x.inList=!x.kind&&!!x.d&&(k in O.in?!!O.in[k]:x.sIn);x.crit=x.inList&&(k in O.crit?!!O.crit[k]:x.sCrit);});
   return L;}
 const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);};
-window.__td46Steps=()=>planLines().filter(x=>x.inList);
+/* the list the other forms take: escape extinction's lines in it, as they are or as one step that names them */
+function stepList(L){const A=L.filter(x=>x.inList);if(over().ee!=='one')return A;const E=A.filter(x=>EEX(x.grp));if(E.length<2)return A;
+  const lab=x=>{const m=/^([^:]{3,90}):\s/.exec(x.d);const t=m?m[1]:x.d.slice(0,60);return t.charAt(0).toLowerCase()+t.slice(1);};
+  const one={n:E[0].n,ns:[E[0].n,E[E.length-1].n],d:(E[0].grp===EE_TITLE_PG?'Physical guidance':'Escape extinction')+' as the plan writes it (plan steps '+E[0].n+'\u2013'+E[E.length-1].n+'): '+E.map(lab).join('; ')+'.',
+    grp:E[0].grp,comp:'',cmp:'con',kind:'',crit:E.some(x=>x.crit),inList:true,one:true};
+  const out=[];A.forEach(x=>{if(!EEX(x.grp))out.push(x);else if(x===E[0])out.push(one);});return out;}
+window.__td46Steps=()=>stepList(planLines());
 window.__td46Rev=L=>hash(L.map(x=>K(x.d)+(x.crit?'*':'')).join('\n'));
 /* the final plan: on each line staff could carry out, In the list and (once in it) Critical; a bar on the number of a
    critical step; and the list as the other forms will take it */
@@ -3148,7 +3158,7 @@ function decorate(){const rows=Array.from(document.querySelectorAll('#finalBody 
     if(!c){c=document.createElement('div');c.className='td46-ctl noprint';r.insertBefore(c,r.querySelector('.box'));}
     c.innerHTML=pill('td46-in-b',x.inList,x.inList?'In the list':'Add to the list','Step '+x.n+': in the step list',x.inList?'In the step list the other forms take. Tap to leave it out.':'Not in the step list. Tap to add it.')+
       (x.inList?pill('td46-crit',x.crit,'Critical','Step '+x.n+': critical',x.crit?'Critical: an error on this step defeats the plan. Tap to unmark.':'Tap to mark this step critical.'):'');});
-  const act=L.filter(x=>x.inList),nc=act.filter(x=>x.crit).length,O=over(),nO=Object.keys(O.in).length+Object.keys(O.crit).length;
+  const act=stepList(L),nc=act.filter(x=>x.crit).length,O=over(),nO=Object.keys(O.in).length+Object.keys(O.crit).length+(O.ee?1:0),nE=L.filter(x=>x.inList&&EEX(x.grp)).length;
   const kinds=[['crisis','the crisis procedure (Form CR-1 governs it)'],['rule','the thinning ladder and the generalization plan (decisions for the BCBA)'],['data','the data rules'],['note','escape extinction’s consent and what is not in place yet']].filter(([k])=>L.some(x=>x.kind===k)).map(x=>x[1]);
   const cards=L.filter(x=>x.card&&!x.inList).length;
   box.hidden=false;
@@ -3156,18 +3166,20 @@ function decorate(){const rows=Array.from(document.querySelectorAll('#finalBody 
     '<div class="noprint"><p><b>The step list.</b> '+(act.length?act.length+' of the '+L.length+' lines on this sheet '+(act.length===1?'is':'are')+' the step list':'No line on this sheet is in the step list yet')+
     ': what staff carry out, and the list the integrity checklist (Form TI-1), the staff training (Form ST-1) and the training video (Form TV-1) take, in this order. '+
     (nc?nc+' '+(nc===1?'is':'are')+' marked critical: an error on one defeats the plan, so the integrity check scores them on their own.':'None is marked critical yet.')+'</p>'+
-    '<p class="hint">The marks start as suggestions. '+(cards?'The cards’ library steps ('+cards+') are written for you, not for staff, and are left out; add any with Add to the list, or reword it on the Build components sheet first. ':'')+
+    '<p class="hint">The marks start as suggestions. Critical: every step that delivers or withholds the reinforcer, since errors there do the most harm in the integrity research (St. Peter Pipkin, Vollmer, &amp; Sloman, 2010; Carroll, Kodak, &amp; Fisher, 2013), and the stopping and safety rules. The fading rule starts out of the list; add it if staff carry it out. '+(cards?'The cards’ library steps ('+cards+') are written for you, not for staff, and are left out; add any with Add to the list, or reword it on the Build components sheet first. ':'')+
     (kinds.length?'Never in the list: '+kinds.join('; ')+'.':'')+'</p>'+
+    (nE>1?'<div class="td46-ee" role="group" aria-label="Escape extinction in the step list"><span>'+(L.find(x=>EEX(x.grp)).grp===EE_TITLE_PG?'Physical guidance':'Escape extinction')+' in the list:</span> '+pill('td46-ee-b',O.ee!=='one','As '+nE+' steps','As '+nE+' separate steps','Each line is its own step on the checklist.')+pill('td46-ee-b td46-ee-one',O.ee==='one','As one step','As one step','One step on the checklist names every line; an error on any line scores the step.')+'</div>':'')+
     (act.length?'<details class="td46-prev" open><summary>The step list as the other forms take it ('+act.length+')</summary><ol>'+act.map(x=>'<li'+(x.crit?' class="crit"':'')+'><span class="td46-g">'+esc(x.comp||x.grp)+(x.cmp?' · '+(x.cmp==='ant'?'antecedent':'consequence'):'')+(x.crit?' · critical':'')+'</span>'+esc(x.d)+'</li>').join('')+'</ol></details>':'')+
     (nO?'<div class="tools"><button type="button" class="tool" id="td46Reset">Use the suggested marks</button> <span class="hint">'+nO+' change'+(nO===1?'':'s')+' from the suggestions</span></div>':'')+'</div>';}
 const was=renderFinal;
 renderFinal=function(){const r=was.apply(this,arguments);try{decorate();}catch(e){}return r;};
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.td46-pill');
+  if(b&&b.classList.contains('td46-ee-b')){const O=over();O.ee=b.classList.contains('td46-ee-one')?'one':'';putOver(O);decorate();return;}
   if(b){const r=b.closest('.plan-step'),L=planLines(),x=r&&L[+r.dataset.k];if(!x||x.kind)return;const O=over(),k=K(x.d);
     if(b.classList.contains('td46-in-b')){const v=!x.inList;if(v===x.sIn)delete O.in[k];else O.in[k]=v?1:0;}
     else{const v=!x.crit;if(v===x.sCrit)delete O.crit[k];else O.crit[k]=v?1:0;}
     putOver(O);decorate();return;}
-  if(e.target.id==='td46Reset'){putOver({in:{},crit:{}});decorate();}});
+  if(e.target.id==='td46Reset'){putOver({in:{},crit:{},ee:''});decorate();}});
 }
 restore({counts:{}});
 })();
@@ -5204,7 +5216,7 @@ window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):n
 .plan-step.td46-out .t{color:var(--ink-2,#666)}
 @media screen{.plan-step.td46-in{background:rgba(0,0,0,.025)}}
 #td46Steps{border:1px solid var(--rule-2);border-radius:6px;padding:8px 10px;margin:0 0 10px;font:13px/1.45 var(--sans)}
-#td46Steps p{margin:0 0 5px}#td46Steps .tools{margin-top:6px}
+#td46Steps p{margin:0 0 5px}.td46-ee{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}#td46Steps .tools{margin-top:6px}
 .td46-prev summary{cursor:pointer;font-weight:600;margin:4px 0}
 .td46-prev ol{margin:4px 0 0;padding-left:26px;max-height:none}.td46-prev li{margin:0 0 5px;padding-left:4px}
 .td46-prev li.crit{border-left:4px solid var(--ink);padding-left:6px;margin-left:-10px}
@@ -5220,7 +5232,7 @@ window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):n
 const wasOut=window.__nbhFactsOut;
 window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
   try{const L=window.__td46Steps?window.__td46Steps():[];if(!L.length)return o;o=o||{};o.plan=o.plan||{src:'TD-1'};
-    o.plan.steps=L.slice(0,150).map(x=>({n:x.n,d:x.d.slice(0,1500),grp:x.grp,comp:x.comp,cmp:x.cmp,crit:x.crit}));o.plan.stepsRev=window.__td46Rev(L);}catch(e){}
+    o.plan.steps=L.slice(0,150).map(x=>{const y={n:x.n,d:x.d.slice(0,1500),grp:x.grp,comp:x.comp,cmp:x.cmp,crit:x.crit};if(x.ns)y.ns=x.ns;return y;});o.plan.stepsRev=window.__td46Rev(L);}catch(e){}
   return o;};
 })();
 </script>

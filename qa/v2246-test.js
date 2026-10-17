@@ -1,7 +1,8 @@
 /* v22.46 the plan's step list (review I232). Form TD-1's final plan marks which of its numbered lines are the step list
    staff carry out, and which of those are critical; the case carries the list with the plan, numbered as printed. The
    cards' library steps stay out unless added, the crisis procedure, the thinning ladder, generalization and the data
-   rules never join, and the BCBA's changes are kept in the saved file. Simulated cases only. usage: node qa/v2246-test.js */
+   rules never join; the fading rule starts out; every consequence step that delivers or withholds the reinforcer is
+   critical; escape extinction goes in as separate steps or as one; and the BCBA's changes are kept in the saved file. Simulated cases only. usage: node qa/v2246-test.js */
 const L=require(__dirname+'/lib.js');const {sleep}=L;
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,900):''));if(!c)fails++;};
 const TD1='/NBH-Workstation/TD-1_Function-Based-Treatment-Developer_v2026-09.html';
@@ -21,6 +22,12 @@ const TD1='/NBH-Workstation/TD-1_Function-Based-Treatment-Developer_v2026-09.htm
   ok('3 never in the list: the crisis procedure, the thinning ladder, generalization, the data rules, escape extinction’s consent',!/^Trigger:|FCT 1:|Before treatment:|Record the target behavior|Who agreed|The team agreed/m.test(S.map(s=>s.d).join('\n')),S.map(s=>s.d.slice(0,40)));
   ok('4 the response to the behavior and the stopping rules are critical; positioning is an antecedent, not critical',S.some(s=>/^On the target behavior/.test(s.d)&&s.crit)&&S.some(s=>/^Never force/.test(s.d)&&s.crit)&&S.some(s=>/^Positioning/.test(s.d)&&!s.crit&&s.cmp==='ant'),S.map(s=>[s.d.slice(0,30),s.crit,s.cmp]));
   ok('5 the sheet says what the list is and what never joins it',/The step list\./.test(a.box)&&/Form TI-1/.test(a.box)&&/Form CR-1 governs it/.test(a.box)&&/as the other forms take it \(\d+\)/.test(a.box),a.box.slice(0,300));
+  ok('4b the fading rule starts out of the list; the consequence steps that deliver the reinforcer are critical',!S.some(s=>/^Fading rule/.test(s.d))&&a.rows.some(r=>/^Fading rule/.test(r.t)&&!r.in)&&S.some(s=>/^Reinforcement: praise/.test(s.d)&&s.crit)&&S.some(s=>/^After the episode/.test(s.d)&&s.crit),S.map(s=>[s.d.slice(0,30),s.crit]));
+  const g=await p.evaluate(()=>{document.querySelector('.td46-ee-one').click();const pl=__nbhFactsOut().plan;const r={steps:pl.steps,rev:pl.stepsRev,fld:document.querySelector('[name="fin.steps"]').value,prev:document.querySelectorAll('.td46-prev li').length};
+    [...document.querySelectorAll('.td46-ee-b')].find(b=>!b.classList.contains('td46-ee-one')).click();r.back=__nbhFactsOut().plan.stepsRev;r.fld2=document.querySelector('[name="fin.steps"]').value;return r;});
+  const one=g.steps.filter(s=>/^Escape extinction as the plan writes it/.test(s.d));
+  ok('4c escape extinction as one step: one critical step names its lines, at its first line\u2019s number',one.length===1&&one[0].crit&&/least help first/.test(one[0].d)&&/never force/.test(one[0].d)&&Array.isArray(one[0].ns)&&g.steps.length===S.length-S.filter(s=>/^Escape extinction/.test(s.grp)).length+1&&g.prev===g.steps.length&&/"ee":"one"/.test(g.fld),{n:g.steps.length,one,fld:g.fld});
+  ok('4d back to separate steps restores the list',g.back===a.rev&&!g.fld2,{back:g.back,a:a.rev,fld2:g.fld2});
   /* the BCBA adds a library step and unmarks a critical one */
   const b=await p.evaluate(()=>{const rows=[...document.querySelectorAll('#finalBody .plan-step')];
     rows.find(r=>/^Select the mand/.test(r.querySelector('.t').textContent)).querySelector('.td46-in-b').click();
