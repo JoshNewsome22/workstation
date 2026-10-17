@@ -62,7 +62,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     await view(page,'plan');
     const b=await text(page,'#crBreath');
     check(await shown(page,'#crBreath'),'the breathing rule shows on the plan sheet');
-    ['No hold may restrict breathing','chest, back, stomach or neck','face-down (prone) or face-up (supine)','folds the student forward (chest toward the knees)','crosses their arms tight over the chest','mouth or nose','not part of the hold watches',
+    ['No hold may restrict breathing','chest, back, stomach or neck','No face-up (supine) hold, ever','A face-down (prone) hold only as the district’s last resort','never for a student with asthma, epilepsy or seizures','folds the student forward (chest toward the knees)','crosses their arms tight over the chest','mouth or nose','not part of the hold watches',
      'If no other adult is there yet: call for help at once','lets go at the first danger sign','Let go at once, and get medical help','a trained adult starts CPR while someone calls 911'].forEach(p=>check(b.includes(p),'breathing rule says: '+p,b));
     const signs=await page.$$eval('#crSigns li',l=>l.map(x=>x.textContent));
     check(signs.length===9,'nine danger signs listed',signs);
@@ -167,7 +167,7 @@ const cls=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s+' .verd
     /* Copy for the BIP: the rule goes in, the report stays out */
     await openText(page,saved);
     const bip=await page.evaluate(()=>window.__bipText());
-    check(bip.includes('BREATHING: NO HOLD MAY RESTRICT IT')&&bip.includes('No face-down (prone) or face-up (supine) holds')&&bip.includes('folds the student forward')&&bip.includes('If no other adult is there yet')&&bip.includes('starts CPR')&&bip.includes('Adult who watches the breathing (not part of the hold): Second adult in the room'),'Copy for the BIP carries the breathing rule and the watching adult',bip.slice(0,300));
+    check(bip.includes('BREATHING: NO HOLD MAY RESTRICT IT')&&bip.includes('No face-up (supine) hold, ever')&&bip.includes('A face-down (prone) hold only as the district’s last resort')&&bip.includes('folds the student forward')&&bip.includes('If no other adult is there yet')&&bip.includes('starts CPR')&&bip.includes('Adult who watches the breathing (not part of the hold): Second adult in the room'),'Copy for the BIP carries the breathing rule and the watching adult',bip.slice(0,300));
     check(!bip.includes('HOTLINE-REF-123')&&!/report is being made|Does this need a report|Do you suspect/i.test(bip),'Copy for the BIP leaves the report out');
     check(!/^[^\n]*:\s*$/m.test(bip)&&!/\n{3,}/.test(bip),'Copy for the BIP: no empty label, single blank lines');
     await page.evaluate(()=>{S=blank();renderAll();});

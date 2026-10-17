@@ -2251,7 +2251,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.40';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.41';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5078,7 +5078,7 @@ function tdDays(iso){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));i
 function tdSchoolDays(iso){const n=tdDays(iso);if(n===null||n<=0)return 0;let k=0;const t=new Date();t.setHours(12,0,0,0);for(let i=0;i<n;i++){const wd=t.getDay();if(wd&&wd!==6)k++;t.setDate(t.getDate()-1);}return k;}
 function todayItems(){const f=state.facts||{},d=f.data,ti=f.integrity,L=[];
   (state.due||[]).forEach(x=>L.push({k:'Due',t:'<b>'+esc(x.id)+'</b> '+esc(x.what)+' '+dueText(x.d),open:x.id}));
-  if(d){const inc=(d.incidentList||[]).filter(i=>i.parent!=='yes'&&(tdDays(i.date)||0)<=30);
+  if(d){const inc=(d.incidentList||[]).filter(i=>!incTold(f,i)&&(tdDays(i.date)||0)<=30);
     if(inc.length)L.push({k:'Home',t:inc.length+' incident'+(inc.length===1?'':'s')+' home has not been told about: '+inc.slice(-3).map(i=>esc(tdMd(i.date)+' '+(i.beh||'')+(i.time?' '+i.time:''))).join('; ')+(inc.length>3?' and '+(inc.length-3)+' more':''),open:'DD-1'});
     if(d.to&&tdSchoolDays(d.to)>=3)L.push({k:'Data',t:'No data on Form DD-1 since '+esc(tdMd(d.to))+' ('+tdSchoolDays(d.to)+' school days)',open:'DD-1'});
     (d.behaviors||[]).filter(b=>b.aimMet).forEach(b=>L.push({k:'Aim',t:esc(b.name)+' has been at its aim '+b.run+' days in a row ('+b.need+' asked): raise the criterion or plan the next step',open:'GB-1'}));}
@@ -5119,7 +5119,7 @@ function handoverItems(){const f=state.facts||{},fl=f.profile&&f.profile.flags,L
   /* v22.29 (review F467) an objective GB-1 has not finished (a box still empty) is named, not printed as if written */
   const unf=gbUnfinished(f.goals);if(unf.length)L.push({t:unf.length+(unf.length===1?' objective is':' objectives are')+' unfinished on Form GB-1: '+esc(unf.map(u=>u.which+' ('+u.missing.join(', ')+' missing)').join('; ')),open:'GB-1'});
   if(state.photo&&fl&&fl.photo==='No')L.push({t:'The student’s photo is on the case, but Form DM-1 records no photo or media permission: take it off before the case is handed on (the photo button on the bar)',open:''});
-  if(f.data&&(f.data.incidentList||[]).some(i=>i.parent!=='yes'))L.push({t:'Incidents home has not been told about (Form DD-1’s incident log)',open:'DD-1'});
+  if(f.data&&(f.data.incidentList||[]).some(i=>!incTold(f,i)))L.push({t:'Incidents home has not been told about (Form DD-1’s incident log)',open:'DD-1'});
   return L;}
 async function handoverOpen(){await gatherFacts(false);const L=handoverItems();
   dialog('Hand-over check',
@@ -5164,9 +5164,31 @@ function tdTimelines(f){const L=[],push=(k,t,open)=>L.push({k,t,open});const pf=
   const rm=rc.removals;if(rm&&+rm.days>=8)push('Timeline',(rm.at10||+rm.days>=10?'<b>'+rm.days+' days of removal this year</b>: a manifestation determination and a review of the plan are required (34 CFR 300.530)':rm.days+' days of removal this year: at ten, a manifestation determination and a review of the plan are required'),'RR-1');
   if(rc.mdr){const n=tdDays(rc.mdr);if(n!==null&&n>=0&&n<=30&&!(rv.date&&rv.date>=rc.mdr))push('Timeline','After the manifestation determination on '+esc(tdMd(rc.mdr))+', review the plan (Form PR-1)','PR-1');}
   return L;}
-function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{};
-  (cr.deadlines||[]).filter(x=>x&&!x.done&&x.due).forEach(x=>{const n=tdLeft(x.due);if(n!==null&&n<=3)L.push({k:n<0?'Overdue':'Safety',t:(n<0?'<b>':'')+esc(x.what)+(n<0?'</b>':'')+' for the '+(x.event?esc(tdMd(x.event))+' ':'')+'restraint or seclusion: due '+esc(tdMd(String(x.due).slice(0,10)))+(String(x.due).length>10?' '+esc(String(x.due).slice(11,16)):'')+' ('+tdWhen(x.due)+')',open:'CR-1'});});
-  if(cr.restraints&&+cr.restraints.semester>=2)L.push({k:'Safety',t:cr.restraints.semester+' restraints this semester: the crisis plan is reviewed after the second (s. 1003.573, F.S.)',open:'CR-1'});
+/* v22.41 (review F458, F459) the restraint deadlines as one list, from Form DD-1's restraint record and Form CR-1's log:
+   each once (its restraint's date and its kind), done when either form records it done; CR-1's due date wins where both
+   have it (its calendar knows the holidays). A restraint on DD-1 is tracked whether or not CR-1 is in the case. */
+function rsKindOf(x){return x.kind||(/^Incident report within 24/.test(x.what||'')?'rep':/^Written notice/.test(x.what||'')?'wn':/by mail/.test(x.what||'')?'ml':/crisis intervention plan/i.test(x.what||'')?'plan':'other:'+(x.what||''));}
+function rsDl(f){f=f||{};const A=((f.crisis||{}).deadlines||[]).filter(Boolean),B=((((f.data||{}).restraint)||{}).deadlines||[]).filter(Boolean);
+  const out=A.map(x=>Object.assign({},x,{kind:rsKindOf(x),open:'CR-1'}));
+  B.forEach(x=>{const k=rsKindOf(x),o=out.find(y=>y.kind===k&&y.event===x.event&&(!y.inc||!x.inc||y.inc===x.inc));
+    if(o){if(x.done)o.done=true;}else out.push(Object.assign({},x,{kind:k,open:'DD-1'}));});
+  return out;}
+/* told: the incident says so, or a written notice for that restraint is recorded on either form */
+function incTold(f,i){return !!i&&(i.parent==='yes'||!!(i.rep&&(i.rep.wn||i.rep.nDate))||rsDl(f).some(x=>x.kind==='wn'&&x.done&&x.event===i.date&&(!x.inc||!i.id||x.inc===i.id)));}
+/* a restraint or a seclusion an observation recorded (Form ABC-1's code, Form OB-1's tick) that is not on Form DD-1's incident record */
+function rsUnlogged(f){const ev=f.evidence||{},inc=((f.data||{}).incidentList||[]).filter(i=>i&&/^(restraint|seclusion)$/.test(i.hold||'')),L=[];
+  ['ABC-1','OB-1'].forEach(id=>{((ev[id]||{}).holds||[]).forEach(h=>{if(!h||!h.date||(tdDays(h.date)||0)>60)return;if(inc.some(i=>i.date===h.date))return;
+    if(!L.some(x=>x.date===h.date&&x.kind===h.kind))L.push({src:id,date:h.date,time:h.time||'',kind:h.kind==='seclusion'?'seclusion':'restraint'});});});
+  return L;}
+function tdSafety(f){const L=[],cr=f.crisis||{},inj=f.injury||{},rd=((f.data||{}).restraint)||{},rc=rd.counts||{};
+  rsDl(f).filter(x=>x&&!x.done&&x.due).forEach(x=>{const n=tdLeft(x.due);if(n!==null&&n<=3)L.push({k:n<0?'Overdue':'Safety',t:(n<0?'<b>':'')+esc(x.what)+(n<0?'</b>':'')+': due '+esc(tdMd(String(x.due).slice(0,10)))+(String(x.due).length>10?' '+esc(String(x.due).slice(11,16)):'')+' ('+tdWhen(x.due)+')'+(x.open==='DD-1'&&!inCase('CR-1')?' (counted on Form DD-1’s restraint record)':''),open:x.open==='CR-1'&&inCase('CR-1')?'CR-1':'DD-1'});});
+  const sem=Math.max(+((cr.restraints||{}).semester)||0,+rc.semester||0);
+  if(sem>=2)L.push({k:'Safety',t:sem+' restraints this semester: on the second, the IEP or 504 team meets to consider developing or reviewing a crisis intervention plan (s. 1003.573, F.S.; Policy 5.181, 9c)',open:'CR-1'});
+  if(+rc.month>3)L.push({k:'Safety',t:rc.month+' restraints within a month: the team meets to consider an FBA and a BIP (Policy 5.181, 9d)',open:'FS-1'});
+  if(+rc.year>3)L.push({k:'Safety',t:rc.year+' restraints this school year: the team addresses their frequency and duration (Policy 5.181, 9d)',open:'DD-1'});
+  if(+rc.seclusion)L.push({k:'Safety',t:rc.seclusion+' seclusion'+(+rc.seclusion===1?'':'s')+' recorded this school year: seclusion is prohibited (s. 1003.573, F.S.; Policy 5.181), and it is counted apart from restraint',open:'DD-1'});
+  (rd.prone||[]).filter(x=>x&&!x.up).forEach(x=>L.push({k:'Safety',t:'The prone restraint on '+esc(tdMd(x.date))+' is reported to the principal, the area superintendent, the ESE director, the chief academic officer and the superintendent (Policy 5.181, 7b-ix): record when on its restraint record',open:'DD-1'}));
+  rsUnlogged(f).forEach(x=>L.push({k:'Safety',t:'Form '+x.src+' records a '+(x.kind==='seclusion'?'seclusion':'restraint')+' on '+esc(tdMd(x.date))+(x.time?' '+esc(x.time):'')+' that is not on Form DD-1’s incident record: log it there (Log it now), so its notices and its report are tracked',open:'DD-1'}));
   (inj.open||[]).filter(x=>x&&!x.done).forEach(x=>L.push({k:'Injury',t:esc(x.what)+(x.due?' (due '+esc(tdMd(x.due))+', '+tdWhen(x.due)+')':''),open:'IM-1'}));
   if(+inj.count30>=3)L.push({k:'Injury',t:inj.count30+' injuries in the last 30 days (Form IM-1): look at the trend with the team and the nurse',open:'IM-1'});
   return L;}
@@ -5174,7 +5196,10 @@ function tdHome(f){const h=f.home;if(!h||!Array.isArray(h.sheets))return [];cons
   return late.length?[{k:'Home',t:late.length+' home sheet'+(late.length===1?'':'s')+' not back: '+late.slice(0,3).map(s=>esc((s.name||'sheet')+', due '+tdMd(s.due))).join('; '),open:'HD-1'}]:[];}
 {const ti0=todayItems;todayItems=function(){const f=state.facts||{};let L=[];try{L=tdSafety(f).concat(ti0.apply(this,arguments),tdDecision(f),tdTimelines(f),tdHome(f));}catch(e){L=ti0.apply(this,arguments);}return L;};}
 {const hi0=handoverItems;handoverItems=function(){const f=state.facts||{},L=hi0.apply(this,arguments);try{
-  (f.crisis&&f.crisis.deadlines||[]).filter(x=>x&&!x.done).forEach(x=>L.push({t:'A restraint or seclusion notice not done: '+esc(x.what)+(x.event?' ('+esc(tdMd(x.event))+')':''),open:'CR-1'}));
+  rsDl(f).filter(x=>x&&!x.done).forEach(x=>L.push({t:'A restraint or seclusion notice not done: '+esc(x.what),open:x.open==='CR-1'&&inCase('CR-1')?'CR-1':'DD-1'}));
+  ((((f.data||{}).restraint)||{}).open||[]).forEach(x=>{const miss=[x.wn&&!x.ack?'the signed form 2547 page':'',x.sent&&!x.ackR?'the signed receipt of the report':''].filter(Boolean);
+    if(miss.length)L.push({t:'Not back yet for the restraint on '+esc(tdMd(x.date))+': '+miss.join(' and ')+' (Policy 5.181, 7a and 7c)',open:'DD-1'});});
+  rsUnlogged(f).forEach(x=>L.push({t:'A '+x.kind+' on Form '+x.src+' ('+esc(tdMd(x.date))+') is not on Form DD-1’s incident record',open:'DD-1'}));
   if(f.review&&f.review.next&&(tdLeft(f.review.next)||0)<0)L.push({t:'The plan review was due '+esc(tdMd(f.review.next))+' (Form PR-1)',open:'PR-1'});
   tdHome(f).forEach(x=>L.push({t:x.t,open:'HD-1'}));}catch(e){}return L;};}
 /* the transition summary: what the next BCBA needs on one page, from the case as the open forms give it */
@@ -5747,16 +5772,17 @@ async function clCalendar(){const L=await clList()||[],now=new Date(),lo=tdAdd(t
   wsUI.toast(ev.length+' deadline'+(ev.length===1?'':'s')+' for '+new Set(ev.map(e=>e.key)).size+' student'+(new Set(ev.map(e=>e.key)).size===1?'':'s')+' in the calendar file (initials only). Open it to add them to Calendar; a newer file updates them.',{kind:'ok',ms:10000});}
 /* restraint and seclusion across the caseload: each event, its notices, the semester's count */
 async function clRestraintRows(){const L=await clList()||[],rows=[],tot=[];const today=tdISO(new Date());
-  L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}const f=d&&d.facts||{},cr=f.crisis||{},dl=(cr.deadlines||[]).filter(Boolean);
+  L.forEach(r=>{let d=null;try{d=parseCase(r.text);}catch(e){}const f=d&&d.facts||{},cr=f.crisis||{},dl=rsDl(f).filter(x=>x.kind!=='plan');
     const inc=((f.data||{}).incidentList||[]).filter(i=>i&&/^(restraint|seclusion)$/.test(i.hold||''));
     const seen=new Set();inc.forEach(i=>{seen.add(i.date);const n=dl.filter(x=>x.event===i.date);rows.push({who:clName(r),date:i.date,time:i.time||'',kind:i.hold,beh:i.beh||'',notices:n.length,done:n.filter(x=>x.done).length,late:n.filter(x=>!x.done&&x.due&&String(x.due).slice(0,10)<today).length});});
     const evs=[...new Set(dl.map(x=>x.event).filter(Boolean))].filter(e=>!seen.has(e));
     evs.forEach(e=>{const n=dl.filter(x=>x.event===e);rows.push({who:clName(r),date:e,time:'',kind:'restraint or seclusion (Form CR-1)',beh:'',notices:n.length,done:n.filter(x=>x.done).length,late:n.filter(x=>!x.done&&x.due&&String(x.due).slice(0,10)<today).length});});
-    if(cr.restraints&&(+cr.restraints.semester||0))tot.push({who:clName(r),semester:+cr.restraints.semester,last:cr.restraints.last||''});});
+    const sem=Math.max(+((cr.restraints||{}).semester)||0,+((((f.data||{}).restraint)||{}).counts||{}).semester||0);
+    if(sem)tot.push({who:clName(r),semester:sem,last:(cr.restraints||{}).last||(inc.map(i=>i.date).sort().pop()||'')});});
   rows.sort((a,b)=>String(b.date).localeCompare(String(a.date)));return {rows,tot};}
 async function clRestraintOpen(){const {rows,tot}=await clRestraintRows();
   dialog('Restraint and seclusion, across the caseload',
-    '<p class="hp-lead">From the students kept on this '+HERE+', each as at their last save: Form DD-1’s incidents marked restraint or seclusion and Form CR-1’s notices. For the district’s reporting, check each against the student’s Form CR-1.<\/p>'+
+    '<p class="hp-lead">From the students kept on this '+HERE+', each as at their last save: Form DD-1’s incidents marked restraint or seclusion with their restraint records, and Form CR-1’s notices. A seclusion is listed apart and never counted as a restraint.<\/p>'+
     (tot.length?'<p>This semester: '+tot.map(t=>'<b>'+esc(t.who)+'<\/b> '+t.semester+(t.last?' (last '+esc(tdMd(t.last))+')':'')).join('; ')+'.<\/p>':'')+
     (rows.length?'<div class="cl-wrap"><table class="cl-tbl"><tr><th>Student<\/th><th>Date<\/th><th>Kind<\/th><th>Behavior<\/th><th>Notices done<\/th><th>Overdue<\/th><\/tr>'+rows.map(x=>'<tr><td>'+esc(x.who)+'<\/td><td>'+esc(x.date)+(x.time?' '+esc(x.time):'')+'<\/td><td>'+esc(x.kind)+'<\/td><td>'+esc(x.beh)+'<\/td><td>'+(x.notices?x.done+' of '+x.notices:'none recorded')+'<\/td><td>'+(x.late?'<b>'+x.late+'<\/b>':'')+'<\/td><\/tr>').join('')+'<\/table><\/div>'
       :'<p>No restraint or seclusion is recorded for the students kept here.<\/p>')+
@@ -8414,7 +8440,7 @@ async function logNowOpen(){
     '<label class="ln-f"><span>What adults did (C), in order<\/span><textarea id="lnDid" rows="2"><\/textarea><\/label>'+
     '<div class="ln-g"><label class="ln-f"><span>How it ended<\/span><input id="lnEnded" placeholder="e.g. back at his desk by 10:32"><\/label><label class="ln-f"><span>Recorded by<\/span><input id="lnBy" value="'+esc(p.bcba||'')+'"><\/label><\/div>'+
     '<p class="td-more"><button type="submit" class="primary" id="lnSave">Log it<\/button> <button type="button" id="lnDict" aria-pressed="false" title="Dictate into the box you are in (on this device; nothing is recorded). Say period, comma, question mark, new line.">'+LN_MIC+'Dictate<\/button><\/p>'+
-    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet<\/i>; mark that on the form once home has been told. A restraint or a seclusion starts Form CR-1’s notice clock, as it does when logged on the form. Form ABC-1’s <i>Add DD-1’s incidents<\/i> brings it into the ABC record.<\/p>'+
+    '<p class="hint">It lands on Form DD-1 as <i>Home told: not yet<\/i>; mark that on the form once home has been told. A restraint or a seclusion starts its notice deadlines on Form DD-1, as it does when logged on the form: fill in its restraint record there (the state report and the district’s form 2547 come from it). Form ABC-1’s <i>Add DD-1’s incidents<\/i> brings it into the ABC record.<\/p>'+
     '<\/form>');
   setTimeout(()=>{const e=$('#lnBeh');if(e)try{e.focus();}catch(x){}},60);
 }
@@ -8522,7 +8548,7 @@ function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{}
     else if(start!=null&&now!=null&&start!==0){const chg=(now-start)/Math.abs(start);if((dir==='fewer'&&chg<=-0.2)||(dir==='more'&&chg>=0.2))good=hnT('better',{beh:T(b.name),start:hnNum(start),now:hnNum(now),unit:hnUnit(b.unit)});}
     return {name:T(b.name),start:start!=null?hnNum(start)+' '+hnUnit(b.unit):'—',now:now!=null?hnNum(now)+' '+hnUnit(b.unit):'—',aim:b.aim!=null?hnNum(b.aim)+' '+hnUnit(b.unit)+(dir?' ('+hnT(dir)+')':''):'—',good};});
   const from=d.from||'',to=d.to||'';
-  const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>i.parent==='yes').length;
+  const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>incTold(f,i)).length;
   const goals=gbGoalLines(g,T);
   return {first,who:T(home.name),email:T(home.email),lang:T(home.lang),interp:/^yes/i.test(T(home.interp)),school:T(p.site),bcba:T(p.bcba),rows,from,to,days:d.days||0,inc:inc.length,told,goals,
     review:{date:T(rv.date),text:T(rv.decisionText||rv.decision),next:T(rv.next)}};}
@@ -8587,7 +8613,7 @@ setTimeout(()=>{CMDS.push({k:'home note parent progress letter spanish español 
 const CM={month:''};
 function cmMonths(){const L=[];const d=new Date();d.setDate(1);for(let i=0;i<6;i++){const y=d.getFullYear(),m=d.getMonth()+1;L.push({v:y+'-'+String(m).padStart(2,'0'),t:d.toLocaleDateString(undefined,{year:'numeric',month:'long'})});d.setMonth(d.getMonth()-1);}return L;}
 function cmRow(r,month){let f={};try{f=(parseCase(r.text)||{}).facts||{};}catch(e){f={};}const d=f.data||{},it=f.integrity||{},c=f.consent||{};
-  const inc=(d.incidentList||[]).filter(i=>i&&String(i.date||'').slice(0,7)===month),hold=inc.filter(i=>/^(restraint|seclusion)$/.test(i.hold||'')).length,told=inc.filter(i=>i.parent==='yes').length;
+  const inc=(d.incidentList||[]).filter(i=>i&&String(i.date||'').slice(0,7)===month),hold=inc.filter(i=>/^(restraint|seclusion)$/.test(i.hold||'')).length,told=inc.filter(i=>incTold(f,i)).length;
   const behs=(d.behaviors||[]).filter(b=>b&&b.name),aims=behs.filter(b=>b.aim!=null),met=aims.filter(b=>b.aimMet).length;
   const hot=((r.sum&&r.sum.items)||[]).filter(x=>TD_HOT.test(x.k));
   return {name:clName(r),site:[r.site,r.grade?gradeWords(r.grade):''].filter(Boolean).join(' · '),saved:(/T/.test(String(r.saved||''))&&!isNaN(Date.parse(r.saved))?tdISO(new Date(r.saved)):String(r.saved||'').slice(0,10)),inc:inc.length,hold,told,aims:aims.length,met,
@@ -8618,6 +8644,59 @@ document.addEventListener('click',async e=>{if(e.target.closest('#clMonth')){clM
 document.addEventListener('change',e=>{if(e.target.id==='cmMonth'){CM.month=e.target.value;clMonthlyOpen();}});
 {const co7=caseloadOpen;caseloadOpen=async function(){const r=await co7.apply(this,arguments);try{const b=$('#dlgBody'),rs=b&&b.querySelector('#clRestr');if(rs&&!b.querySelector('#clMonth'))rs.insertAdjacentHTML('afterend',' <button type="button" id="clMonth"'+(rs.disabled?' disabled':'')+'>Monthly summary<\/button>');}catch(e){}return r;};}
 setTimeout(()=>{CMDS.push({k:'monthly summary caseload supervisor report month incidents',n:'Caseload summary for the month (for the supervisor)',s:'command',go:()=>clMonthlyOpen()});},0);
+</script>
+<script id="nbh-v2241">
+/* ================= v22.41 the restraint record (review F458, F459) and the district's parent notice, form 2547 =================
+   Form DD-1 now keeps each restraint's record and counts its deadlines; Form CR-1 keeps its own log. The workstation reads the
+   two as one list (rsDl, above), and fills the district's form 2547 from DD-1's record: the blank form is the district's own
+   PDF, chosen once and kept on this device only (the settings store: not in the case, not in a backup, not synced). The
+   answers go into its own fields; the signature lines and the initials are left for ink. The result is a PDF to print or share. */
+const F2547_KEY='nbh.form2547';
+async function f2547Get(){try{const r=await kvTx('readonly',s=>s.get(F2547_KEY));return r&&r.v?r:null;}catch(e){return null;}}
+async function f2547Put(bytes,name){await kvTx('readwrite',s=>s.put({k:F2547_KEY,v:bytes,name:String(name||'').slice(0,120),at:new Date().toISOString()}));}
+const F2547={want:null};
+function f2547Pick(note){dialog('The district’s form 2547',
+  '<p class="hp-lead">'+(note?esc(note)+' ':'')+'Choose the blank <b>Parent(s)/Guardian(s) Notification of Physical Restraint<\/b> (PBSD 2547) as a PDF. It is kept on this '+HERE+' only, and every notice is filled from it.<\/p>'+
+  '<p><input type="file" id="f2547File" accept="application/pdf,.pdf"><\/p><p class="hint">The workstation finds the form’s own boxes by their names; a PDF without them is refused.<\/p>');}
+async function f2547Fields(bytes){await pdfTools();const doc=await PDFLib.PDFDocument.load(bytes,{ignoreEncryption:true,updateMetadata:false});const form=doc.getForm();
+  return {doc,form,names:form.getFields().map(x=>x.getName())};}
+function f2547Name(full){const c=String(full||'').replace(/^SIMULATED\s*[–-]\s*/i,'').trim();const m=/^([^,]+),\s*(.+)$/.exec(c);
+  if(m){const g=m[2].split(/\s+/);return {first:g[0]||'',middle:g.slice(1).join(' '),last:m[1].trim()};}
+  const w=c.split(/\s+/).filter(Boolean);return w.length<2?{first:w[0]||'',middle:'',last:''}:{first:w[0],middle:w.slice(1,-1).join(' '),last:w[w.length-1]};}
+async function f2547Fill(blank,data){const {doc,form}=await f2547Fields(blank),p=packet(),nm=f2547Name(p.client);
+  const F=form.getFields(),get=k=>F.find(x=>{const n=x.getName();return n===k||n.endsWith('.'+k);});
+  const us=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:'';};
+  const put=(k,v)=>{const x=get(k);if(!x||v==null||String(v)==='')return;try{x.setText(String(v));}catch(e){try{x.setText(String(v).slice(0,x.getMaxLength?x.getMaxLength()||200:200));}catch(e2){}}};
+  const tick=(k,on)=>{const x=get(k);if(x&&on)try{x.check();}catch(e){}};
+  const yn=(k,v)=>{const x=get(k);if(!x||!/^(yes|no)$/.test(v||''))return;try{const o=x.getOptions();if(o.length>=2)x.select(o[v==='yes'?0:1]);}catch(e){}};
+  put('Student_Number[0]',p.sid);put('First_Name[0]',nm.first);put('Middle_Name[0]',nm.middle);put('Last_Name[0]',nm.last);put('DOB[0]',us(p.dob));
+  put('Grade[0]',p.grade);put('Request_Date[0]',data.date);put('Current_School[0]',p.site||data.school);
+  put('TextField2[1]',data.school||p.site);put('DateTimeField1[0]',data.date);
+  tick('CheckBox1[0]',data.seated);tick('CheckBox1[1]',data.standing);tick('CheckBox1[2]',data.prone);tick('CheckBox1[3]',data.transport);put('TextField4[0]',data.other);
+  yn('RadioButtonList[0]',data.injS);yn('RadioButtonList[1]',data.injO);put('TextField5[0]',data.inj);
+  const att=(a,dt,ph,vm,sp,ph2,vm2,sp2,em,oth)=>{if(!a)return;put(dt,a.date);put(ph,a.ph);yn(vm,a.vm);put(sp,a.sp);put(ph2,a.ph2);yn(vm2,a.vm2);put(sp2,a.sp2);put(em,a.em);put(oth,a.oth);};
+  att(data.a1,'DateTimeField4[0]','TextField6[0]','RadioButtonList[2]','TextField6[1]','TextField6[3]','RadioButtonList[3]','TextField6[2]','TextField6[4]','TextField6[5]');
+  att(data.a2,'DateTimeField4[1]','TextField6[6]','RadioButtonList[4]','TextField6[7]','TextField6[9]','RadioButtonList[5]','TextField6[8]','TextField6[10]','TextField6[11]');
+  put('DateTimeField3[1]',data.sent);put('DateTimeField2[0]',data.first);put('DateTimeField3[0]',data.ack);put('DateTimeField2[1]',data.second);
+  try{form.deleteXFA();}catch(e){}   /* the form's XFA layer would show its own empty boxes over the answers in some readers */
+  try{form.updateFieldAppearances(await doc.embedFont(PDFLib.StandardFonts.Helvetica));}catch(e){}
+  return await doc.save();}
+async function f2547Run(data){const b=await f2547Get();if(!b){F2547.want=data;f2547Pick('');return;}
+  let out;try{out=await f2547Fill(b.v,data);}catch(e){F2547.want=data;f2547Pick('The kept form could not be filled ('+String(e&&e.message||e).slice(0,80)+').');return;}
+  const name='Form 2547 notice, '+(data.kind||'restraint')+' '+String(data.incDate||'').replace(/\//g,'-')+'.pdf';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out],{type:'application/pdf'}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+  let how='';try{if(typeof PWA!=='undefined'&&PWA.shareHow)how=await PWA.shareHow(a);}catch(x){}
+  dialog('Form 2547 filled',
+    '<p class="hp-lead">The district’s form 2547 is filled from the '+esc(data.kind||'restraint')+' record'+(how&&how!=='cancelled'?'':' and saved as <b>'+esc(name)+'<\/b>')+'. Print it for the administrator’s signature; the parent signs the returned page.<\/p>'+
+    '<p class="hint">Blank form in use: '+esc(b.name||'form 2547')+(b.at?', kept '+esc(tdMd(String(b.at).slice(0,10))):'')+'. <button type="button" id="f2547New">Use a different blank form<\/button><\/p>');}
+window.addEventListener('message',ev=>{const d=ev.data||{};if(!d||d.nbh!=='form-2547'||!d.data)return;if(!Object.values(state.frames).some(f=>f.contentWindow===ev.source))return;f2547Run(d.data);});
+document.addEventListener('change',async e=>{if(e.target.id!=='f2547File')return;const f=e.target.files&&e.target.files[0];if(!f)return;
+  try{const bytes=new Uint8Array(await f.arrayBuffer());const {names}=await f2547Fields(bytes);
+    if(!['First_Name[0]','CheckBox1[0]','TextField6[0]'].every(k=>names.some(n=>n===k||n.endsWith('.'+k)))){wsUI.toast('That PDF is not the fillable form 2547: its boxes were not found.',{kind:'warn'});return;}
+    await f2547Put(bytes,f.name);wsUI.toast('Form 2547 is kept on this '+HERE+'.',{kind:'ok'});
+    const w=F2547.want;F2547.want=null;if(w)f2547Run(w);else try{$('#dlg').close();}catch(x){}}
+  catch(err){wsUI.toast('That file could not be read as a PDF form ('+String(err&&err.message||err).slice(0,80)+').',{kind:'warn'});}});
+document.addEventListener('click',e=>{if(e.target.closest('#f2547New')){F2547.want=null;f2547Pick('');}});
 </script>
 </body>
 </html>

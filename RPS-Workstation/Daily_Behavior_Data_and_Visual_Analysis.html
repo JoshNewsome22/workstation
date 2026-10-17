@@ -6557,7 +6557,7 @@ const DD_HOLDS={"":"None",escort:"Physical escort",restraint:"Restraint",seclusi
 const ddHoldOk=v=>Object.prototype.hasOwnProperty.call(DD_HOLDS,v)?v:"";
 const ddHoldBig=v=>v==="restraint"||v==="seclusion";
 const DD_SECL_NOTE="Seclusion is prohibited for Florida school personnel (s. 1003.573). Tell the administrator at once; the parent is told the same day. ";
-const DD_CR1_NOTE="Form CR-1 starts the Florida notice clock for this (24-hour report, parent the same day, written report within 3 school days): open Form CR-1 in the workstation.";
+const DD_CR1_NOTE="The notice deadlines run from now: the written notice to the parent before the end of the school day, the incident report within 24 hours, the report to the parent by mail within 3 school days. Fill in the record on the incident (its Record button): the state report and the parent\u2019s form 2547 come from it.";
 /* a file or a restore: every incident keeps (or gets) its id, and its hold as one of the four */
 {const cl0=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],H={};
   L.forEach(x=>{if(!x||typeof x!=="object")return;if(typeof x.id!=="string"||!x.id)x.id=uid("i");H[x.id.slice(0,40)]=ddHoldOk(x.hold);});
@@ -6569,7 +6569,7 @@ const DD_CR1_NOTE="Form CR-1 starts the Florida notice clock for this (24-hour r
   const box=document.createElement("div");box.className="inc-hold";
   box.innerHTML=`<label class="field"><span>Physical intervention</span><select id="incHold">${Object.keys(DD_HOLDS).map(k=>`<option value="${k}">${DD_HOLDS[k]}</option>`).join("")}</select></label><p class="hint" id="incHoldHint"></p>`;
   g.parentNode.insertBefore(box,g.nextSibling);
-  const s=box.querySelector("#incHold"),hint=()=>{box.querySelector("#incHoldHint").textContent=s.value==="seclusion"?DD_SECL_NOTE+"Form CR-1 starts the notice clock once this is saved.":ddHoldBig(s.value)?"A restraint: Form CR-1 starts the notice clock once this is saved.":"";};
+  const s=box.querySelector("#incHold"),hint=()=>{box.querySelector("#incHoldHint").textContent=s.value==="seclusion"?DD_SECL_NOTE+"The notice deadlines start once this is saved; the record on the incident holds the state report and form 2547.":ddHoldBig(s.value)?"A restraint: the notice deadlines start once this is saved; the record on the incident holds the state report and form 2547.":"";};
   s.addEventListener("change",hint);box._hint=hint;}return d;};}
 {const op0=ddIncOpen;ddIncOpen=function(id){const r=op0.apply(this,arguments);const d=document.getElementById("dlgInc"),i=id?(S.incidents||[]).find(x=>x.id===id):null;
   const s=d&&d.querySelector("#incHold");if(s){s.value=i?ddHoldOk(i.hold):"";const b=d.querySelector(".inc-hold");if(b&&b._hint)b._hint();}return r;};}
@@ -11492,6 +11492,303 @@ window.TKWALK={build,renderAt,play,pause,seek,toggle,
   });
   window.ddLogIncident=logIncident;   /* the test and the walkthrough call it directly */
 })();
+</script>
+<style id="v2241-rs-css">
+dialog.rs-dlg{width:min(880px,calc(100vw - 20px));max-height:calc(100vh - 24px);overflow:auto;padding:16px 18px}
+dialog.rs-dlg h3{font-size:15px;margin:14px 0 6px;padding-top:8px;border-top:1px solid #d5dde2;color:#16242e}
+dialog.rs-dlg .rs-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:4px 12px}
+dialog.rs-dlg .field{margin:0 0 6px}
+dialog.rs-dlg textarea{min-height:44px;font-family:inherit;font-size:14px}
+dialog.rs-dlg .rs-ck{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 12px;margin:2px 0 4px}
+dialog.rs-dlg label.chk{display:flex;gap:7px;align-items:flex-start;font-size:14px;margin:3px 0}
+dialog.rs-dlg label.chk input{width:auto;margin-top:3px}
+dialog.rs-dlg table.rs-t{width:100%;border-collapse:collapse;font-size:13.5px}
+dialog.rs-dlg table.rs-t th{text-align:left;font-weight:600;padding:2px 4px}
+dialog.rs-dlg table.rs-t td{padding:2px 4px}
+dialog.rs-dlg table.rs-t input{width:100%}
+.rs-warn{margin:4px 0 8px;padding:7px 10px;border-left:4px solid #8e2a2a;background:#fbf1f1;color:#16242e;font-size:13.5px;line-height:1.45}
+.rs-warn:empty{display:none}
+.rs-dl{margin:0 0 6px;padding:0;list-style:none;font-size:13.5px}
+.rs-dl li{padding:3px 0}
+.rs-st{font-weight:700}.rs-st.late,.rs-st.over{color:#8e2a2a}.rs-st.met{color:#1f6b45}.rs-st.due{color:#7a5300}
+.rs-row{font-size:12.5px;margin-top:4px;line-height:1.4}
+dialog.rs-iers table{width:100%;border-collapse:collapse;font-size:13.5px}
+dialog.rs-iers td,dialog.rs-iers th{border-bottom:1px solid #e1e7ea;padding:5px 6px;vertical-align:top;text-align:left}
+dialog.rs-iers th{width:40%;font-weight:600}
+dialog.rs-iers td.c{width:1%;white-space:nowrap}
+dialog.rs-iers tr.sec th{background:#eef3f5;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+</style>
+<script id="v2241-restraint">
+/* v22.41 (review F458, F459, F341) the restraint record on the incident. A restraint or a seclusion logged here holds
+   the state's incident report (the IERS questions in the state's order, with its own answer lists), the parent's notice
+   on the district's form 2547 (the two contact attempts, the written notice, the signed page back), and when the report
+   was completed, mailed and its receipt signed. The deadlines are counted here, so the workstation tracks them with or
+   without Form CR-1: the written notice before the end of that school day; the report within 24 hours of the release,
+   or by the end of the day school reopens when the release falls on the last school day before a closure; the report
+   to the parent by mail within 3 school days (s. 1003.573, F.S.; district Policy 5.181, 7a-7c). School days are Monday
+   to Friday here; Form CR-1's calendar also knows the holidays, and its dates come back to fill the boxes left empty.
+   The counts follow Policy 5.181, 9c-9d: the second restraint within a semester (18 weeks) calls the team for a crisis
+   intervention plan; more than 3 in a month, to consider an FBA and BIP; more than 3 in the school year, to address
+   their frequency and duration. A seclusion is counted apart and never as a restraint. A prone restraint is reported up
+   the line (Policy 5.181, 7b-ix). The demographic answers of the state's form come from the student's record in the
+   state system and are not kept here. */
+"use strict";
+const RS={
+  loc:["General Education Classroom","ESE Classroom","Bus/Bus zone","Cafeteria","Hallway/Breezeway","Playground","Off Campus (describe)","Other (describe)"],
+  type:["Seated","Standing","Prone (lying face down)","Supine (lying face up)","Immobilization while in transport","Mechanical"],
+  meth:["ASPEN","CPI/NCI (Crisis Prevention Institute/Nonviolent Crisis Intervention)","Emergency Situation","HWC (Handle With Care)","MindSet (Safety Management)","PCM (Professional Crisis Management)","QBS (Safety Care)","SCM (Safe Crisis Management)","T.E.A.M. (Techniques for Effective Aggression Management)","TEACH (Techniques for Adolescent and Child Handling)","The Mandt System","Ukeru","VITAL (Violence Intervention Techniques and Language)"],
+  pre:["Given a direction","Faced with unexpected change","Interacting with peers","Transitioning to another activity","Presented work","Seeking attention","Given/serving a consequence","Other"],
+  str:["Offered choices/preferred activity/breaks","Visually prompted/redirected","Praised/encouraged","Blocked behavior","Verbally prompted/redirected","Provided reinforcers","Environment changed","Other"],
+  beh:["Verbal threat/aggression","Self injurious behavior","Physical aggression","Unsafe behavior (e.g., climbing furniture)","Running away","Property destruction","Other"],
+  risk:["The student","Other students","Adults"],
+  aft:["Debriefing/problem solving","Removal by parent","Environment change","Behavior escalated","Return to activity/situation","Removal by law enforcement"],
+  how:["Phone","Email","Mail","In person"]
+};
+const RS_TXT=["start","end","loc","locD","type","mech","meth","emerg","preD","strD","beh","behD","riskD","aftD","injS","injSD","injO","injOD","wn","nDate","ack","prep","prepT","iers","sent","ackR","resid","cip","cipChg","up"];
+const RS_ATT=["d","t","ph","vm","sp","ph2","vm2","sp2","em","oth"];
+const RS_LISTS={pre:RS.pre,str:RS.str,risk:RS.risk,aft:RS.aft,how:RS.how};
+const RS_UP="the principal, the area superintendent, the ESE director, the chief academic officer and the superintendent";
+const rsT=v=>typeof v==="string"?v.trim():"";
+const rsIso=v=>ddIsoOk(rsT(v))?rsT(v):"";
+const rsHm=v=>ddTimeOk(rsT(v))?rsT(v).slice(0,5):"";
+/* a record in the shape this form writes: known keys only, the lists from the state's own answers */
+function rsClean(x){x=x&&typeof x==="object"&&!Array.isArray(x)?x:{};const o={};
+  RS_TXT.forEach(k=>{o[k]=typeof x[k]==="string"?x[k].slice(0,3000):"";});
+  ["wn","nDate","ack","prep","sent","ackR","cip","up"].forEach(k=>{o[k]=rsIso(o[k]);});["start","end","prepT"].forEach(k=>{o[k]=rsHm(o[k]);});
+  Object.keys(RS_LISTS).forEach(k=>{o[k]=Array.isArray(x[k])?x[k].filter(v=>RS_LISTS[k].indexOf(v)>=0):[];});
+  const rows=(L,K)=>(Array.isArray(L)?L:[]).slice(0,12).map(r=>{const z={};K.forEach(k=>{z[k]=r&&typeof r[k]==="string"?r[k].slice(0,200):"";});return z;}).filter(r=>K.some(k=>rsT(r[k])));
+  o.staff=rows(x.staff,["n","pos","tr"]);o.staff.forEach(r=>{r.tr=rsIso(r.tr);});o.wit=rows(x.wit,["n","pos"]);
+  ["a1","a2"].forEach(a=>{const s=x[a]&&typeof x[a]==="object"?x[a]:{};o[a]={};RS_ATT.forEach(k=>{o[a][k]=typeof s[k]==="string"?s[k].slice(0,300):"";});o[a].d=rsIso(o[a].d);o[a].t=rsHm(o[a].t);});
+  return o;}
+const rsBig=i=>!!(i&&ddHoldBig(i.hold));
+const rsKind=i=>i&&i.hold==="seclusion"?"seclusion":"restraint";
+/* the file and a restore keep each incident's record by its id (the cleaning above this block knows the old keys only) */
+{const cl0=ddClean;ddClean=function(){const L=Array.isArray(S.incidents)?S.incidents:[],R={},A={};
+  L.forEach(x=>{if(x&&typeof x==="object"&&typeof x.id==="string"&&x.id){if(x.rep)R[x.id.slice(0,40)]=x.rep;if(x.parentAuto===true)A[x.id.slice(0,40)]=1;}});
+  const r=cl0.apply(this,arguments);(S.incidents||[]).forEach(i=>{if(R[i.id])i.rep=rsClean(R[i.id]);else delete i.rep;if(A[i.id])i.parentAuto=true;else delete i.parentAuto;});return r;};}
+
+/* ---- school days (Monday to Friday) and the three deadlines ---- */
+const rsDow=iso=>{const p=iso.split("-");return new Date(+p[0],+p[1]-1,+p[2],12).getDay();};
+const rsSchool=iso=>{const w=rsDow(iso);return w>0&&w<6;};
+function rsAddSchool(iso,n){let d=iso,k=0,g=0;while(k<n&&g++<60){d=ddAddDays(d,1);if(rsSchool(d))k++;}return d;}
+function rsNextSchool(iso){let d=ddAddDays(iso,1),g=0;while(!rsSchool(d)&&g++<30)d=ddAddDays(d,1);return d;}
+const rsMd=iso=>{const p=String(iso||"").split("-");return p.length===3?(+p[1])+"/"+(+p[2]):String(iso||"");};
+const rsAt=(iso,hm)=>{if(!iso)return null;const p=iso.split("-"),t=(hm||"00:00").split(":");return new Date(+p[0],+p[1]-1,+p[2],+t[0],+t[1]);};
+const rsIsoT=d=>localISO(d)+"T"+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+function rsDeadlines(i,now){now=now||new Date();const r=rsClean(i.rep),day=rsIso(i.date);if(!day)return [];
+  const today=localISO(now),on=" ("+rsKind(i)+" on "+rsMd(day)+")",L=[];
+  const st=(due,doneOn,doneAt,dueAt,tm)=>{if(doneOn){const late=dueAt&&doneAt?doneAt>dueAt:doneOn>due.slice(0,10);return {done:true,late,code:late?"late":"met",txt:(late?"Late: ":"Met ")+shortDay(doneOn)+(tm?" "+hm12(tm):"")};}
+    const over=dueAt?now>dueAt:today>due.slice(0,10);return {done:false,late:over,code:over?"over":"due",txt:(over?"Overdue since ":"Due by ")+(dueAt?shortDay(localISO(dueAt))+" "+hm12(rsIsoT(dueAt).slice(11)):("the end of the school day on "+shortDay(due)))};};
+  /* the written notice: before the end of the school day of the restraint */
+  L.push(Object.assign({kind:"wn",what:"Written notice to the parent before the end of the school day"+on,due:day,event:day,inc:i.id},st(day,r.wn,null,null)));
+  /* the incident report: 24 hours after the release, or the end of the day school reopens */
+  const tm=r.end||r.start||rsHm(i.time);let due,dueAt=null,how;
+  if(rsSchool(day)&&!rsSchool(ddAddDays(day,1))){due=rsNextSchool(day);how="the end of the school day on "+shortDay(due)+", the day school reopens";}
+  else if(tm){dueAt=new Date(rsAt(day,tm).getTime()+864e5);due=rsIsoT(dueAt);how="24 hours after the release";}
+  else{due=ddAddDays(day,1);how="24 hours after the release (enter the end time to count it to the minute)";}
+  const prepAt=r.prep?rsAt(r.prep,r.prepT||"00:00"):null;
+  L.push(Object.assign({kind:"rep",what:"Incident report within 24 hours of the release"+on,due,event:day,inc:i.id,how},st(due,r.prep,dueAt&&r.prepT?prepAt:null,dueAt&&r.prepT?dueAt:null,r.prepT)));
+  /* the report to the parent by mail: within 3 school days */
+  const m3=rsAddSchool(day,3);
+  L.push(Object.assign({kind:"ml",what:"Incident report to the parent by mail within 3 school days"+on,due:m3,event:day,inc:i.id},st(m3,r.sent,null,null)));
+  return L;}
+/* the counts, at a given date: restraints only, the seclusions apart */
+function rsCounts(at){const day=at||localISO(new Date()),L=(S.incidents||[]).filter(i=>rsIso(i.date)&&i.date<=day);
+  const R=L.filter(i=>i.hold==="restraint"),y0=(+day.slice(5,7)>=7?day.slice(0,4):String(+day.slice(0,4)-1))+"-07-01";
+  return {sem:R.filter(i=>i.date>ddAddDays(day,-126)).length,month:R.filter(i=>i.date>ddAddDays(day,-30)).length,year:R.filter(i=>i.date>=y0).length,
+    secl:L.filter(i=>i.hold==="seclusion"&&i.date>=y0).length,yearFrom:y0};}
+const rsSchoolYear=iso=>{const y=+iso.slice(0,4),m=+iso.slice(5,7);return m>=7?y+"-"+(y+1):(y-1)+"-"+y;};
+/* what the case says about the student's health and the crisis plan's own word on a prone restraint */
+function rsHealth(){const f=typeof ddCaseFacts!=="undefined"&&ddCaseFacts||{},h=(f.profile&&f.profile.health)||{},c=f.crisis||{};
+  const tx=[h.conditions,c.hPhys,c.hAlert].map(rsT).filter(Boolean).join(" ");
+  const m=tx.match(/asthma|epilep\w*|seizure\w*|heart\w*|cardiac|reflux|GERD|heartburn|esophag\w*/gi);
+  return {hits:m?[...new Set(m.map(x=>x.toLowerCase()))]:[],prone:rsT(c.prone)};}
+
+/* ---- the record's dialog ---- */
+const rsOpt=(L,v)=>`<option value="">— select —</option>`+L.map(x=>`<option${x===v?" selected":""}>${esc(x)}</option>`).join("");
+const rsCk=(k,L)=>`<div class="rs-ck">${L.map(x=>`<label class="chk"><input type="checkbox" data-rk="${k}" value="${esc(x)}"> <span>${esc(x)}</span></label>`).join("")}</div>`;
+const rsF=(k,lab,attr)=>`<label class="field"><span>${lab}</span><input data-r="${k}"${attr||""}></label>`;
+const rsTa=(k,lab,ph)=>`<label class="field"><span>${lab}</span><textarea data-r="${k}" rows="2"${ph?` placeholder="${ph}"`:""}></textarea></label>`;
+const rsYN=(k,lab)=>`<label class="field"><span>${lab}</span><select data-r="${k}"><option value="">—</option><option value="no">No</option><option value="yes">Yes</option></select></label>`;
+function rsAttHtml(a,n){return `<h3>Parent contact, ${n} attempt (form 2547)</h3><div class="rs-g">${rsF(a+".d","Date",' type="date"')}${rsF(a+".t","Time",' type="time"')}
+  ${rsF(a+".ph","Primary phone number",' inputmode="tel"')}<label class="field"><span>Voice mail</span><select data-r="${a}.vm"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></label>${rsF(a+".sp","Spoke with")}
+  ${rsF(a+".ph2","Alternate phone number",' inputmode="tel"')}<label class="field"><span>Voice mail</span><select data-r="${a}.vm2"><option value="">—</option><option value="yes">Yes</option><option value="no">No</option></select></label>${rsF(a+".sp2","Spoke with")}
+  ${rsF(a+".em","Email message sent to",' inputmode="email"')}${rsF(a+".oth","Other (specify)")}</div>`;}
+function rsDlg(){let d=document.getElementById("dlgRs");if(d)return d;d=document.createElement("dialog");d.className="dd-dialog rs-dlg";d.id="dlgRs";d.setAttribute("aria-labelledby","rsTitle");
+  d.innerHTML=`<h2 id="rsTitle">Restraint record</h2><p class="hint" id="rsSub"></p>
+  <ul class="rs-dl" id="rsDl"></ul><div class="rs-warn" id="rsCount" role="status"></div>
+  <h3>Incident information (the state&rsquo;s incident report)</h3>
+  <div class="rs-g">${rsF("start","Start time, restraint",' type="time"')}${rsF("end","End time, restraint (the release)",' type="time"')}
+  <label class="field"><span>Location at which restraint occurred</span><select data-r="loc">${rsOpt(RS.loc,"")}</select></label></div>
+  ${rsTa("locD","If other or off campus, please describe")}
+  <h3>The restraint</h3>
+  <div class="rs-g"><label class="field"><span>Type of most restrictive restraint used</span><select data-r="type">${rsOpt(RS.type,"")}</select></label>
+  <label class="field"><span>Crisis management training strategy used</span><select data-r="meth">${rsOpt(RS.meth,"")}</select></label></div>
+  <div class="rs-warn" id="rsTypeW" role="alert"></div>
+  ${rsTa("mech","If mechanical, please describe")}${rsTa("emerg","If Emergency Situation, please describe")}
+  <p class="field" style="margin:6px 0 2px"><b>Person using or assisting in restraint</b> <span class="hint">and the date of each one&rsquo;s last training</span></p>
+  <table class="rs-t"><thead><tr><th>Name</th><th>Position</th><th>Date of last training</th></tr></thead><tbody id="rsStaff"></tbody></table>
+  <p><button type="button" class="btn ghost sm" id="rsStaffAdd">Add a person</button></p><div class="rs-warn" id="rsStaffW"></div>
+  <p class="field" style="margin:6px 0 2px"><b>Non-student witnesses</b></p>
+  <table class="rs-t"><thead><tr><th>Name</th><th>Position</th></tr></thead><tbody id="rsWit"></tbody></table>
+  <p><button type="button" class="btn ghost sm" id="rsWitAdd">Add a witness</button></p>
+  <h3>What was happening before the restraint (check all that apply)</h3>${rsCk("pre",RS.pre)}${rsTa("preD","Describe")}
+  <h3>The behavioral strategies used to prevent or deescalate the behavior</h3>${rsCk("str",RS.str)}${rsTa("strD","Describe")}
+  <h3>The behavior that warranted the use of restraint</h3><div class="rs-g"><label class="field"><span>Behavior</span><select data-r="beh">${rsOpt(RS.beh,"")}</select></label></div>${rsTa("behD","Describe")}
+  <h3>Who was at risk of immediate physical harm</h3>${rsCk("risk",RS.risk)}${rsTa("riskD","How was it determined that there was imminent risk of serious injury or death to the student or others? Describe")}
+  <h3>What occurred with the student immediately after the restraint ended</h3>${rsCk("aft",RS.aft)}${rsTa("aftD","Describe")}
+  <h3>Injuries</h3><div class="rs-g">${rsYN("injS","Injuries, visible marks or medical emergencies: the student")}${rsYN("injO","Anyone else (other students or adults)")}</div>
+  ${rsTa("injSD","The student: if yes, describe")}${rsTa("injOD","Anyone else: if yes, describe")}
+  ${rsAttHtml("a1","1st")}${rsAttHtml("a2","2nd")}
+  <h3>Parent notification</h3>
+  <div class="rs-g">${rsF("wn","Written notice (form 2547) given to the parent",' type="date"')}${rsF("nDate","Date of parent notification (the state&rsquo;s report)",' type="date"')}${rsF("ack","Signed form 2547 page returned",' type="date"')}</div>
+  <p class="field" style="margin:4px 0 0">Parent notification method</p>${rsCk("how",RS.how)}
+  <h3>The report</h3>
+  <div class="rs-g">${rsF("prep","Report prepared (completed in IERS)",' type="date"')}${rsF("prepT","at",' type="time"')}${rsF("iers","Incident ID (IERS)")}
+  ${rsF("sent","Final report sent (mailed to the parent)",' type="date"')}${rsF("ackR","Signed receipt of the report returned",' type="date"')}
+  ${rsYN("resid","Is the student served in a residential setting?")}${rsF("cip","Date crisis intervention plan last reviewed",' type="date"')}${rsYN("cipChg","Changes recommended?")}</div>
+  <div id="rsUpBox">${rsF("up","Prone restraint reported to "+RS_UP+" on",' type="date"')}</div>
+  <div class="dd-actions" style="flex-wrap:wrap"><button type="button" class="btn ghost" id="rsIers">For the state report (IERS)</button><button type="button" class="btn ghost" id="rs2547">Fill form 2547</button>
+  <span style="flex:1"></span><button type="button" class="btn ghost" id="rsCancel">Cancel</button><button type="button" class="btn" id="rsSave">Save</button></div>`;
+  document.body.appendChild(d);
+  d.querySelector("#rsCancel").addEventListener("click",()=>d.close());
+  d.querySelector("#rsSave").addEventListener("click",()=>{rsSave();});
+  d.querySelector("#rsStaffAdd").addEventListener("click",()=>rsRowAdd("staff",{}));
+  d.querySelector("#rsWitAdd").addEventListener("click",()=>rsRowAdd("wit",{}));
+  d.querySelector("#rsIers").addEventListener("click",()=>{if(rsSave(true))rsIersOpen(rsEditing);});
+  d.querySelector("#rs2547").addEventListener("click",()=>{if(rsSave(true))rs2547(rsEditing);});
+  d.addEventListener("input",rsLive);d.addEventListener("change",rsLive);
+  return d;}
+let rsEditing=null;
+function rsRowAdd(k,r){const tb=document.getElementById(k==="staff"?"rsStaff":"rsWit"),tr=document.createElement("tr");
+  tr.innerHTML=k==="staff"?`<td><input data-c="n" list="rsStaffList" value="${esc(r.n||"")}" aria-label="Name"></td><td><input data-c="pos" value="${esc(r.pos||"")}" aria-label="Position"></td><td><input data-c="tr" type="date" value="${esc(r.tr||"")}" aria-label="Date of last training"></td>`
+    :`<td><input data-c="n" value="${esc(r.n||"")}" aria-label="Name"></td><td><input data-c="pos" value="${esc(r.pos||"")}" aria-label="Position"></td>`;
+  tb.appendChild(tr);}
+function rsRead(){const d=document.getElementById("dlgRs"),o={a1:{},a2:{}};
+  d.querySelectorAll("[data-r]").forEach(el=>{const k=el.dataset.r,v=el.value;if(k.indexOf(".")>0){const p=k.split(".");o[p[0]][p[1]]=v;}else o[k]=v;});
+  Object.keys(RS_LISTS).forEach(k=>{o[k]=[...d.querySelectorAll(`[data-rk="${k}"]`)].filter(x=>x.checked).map(x=>x.value);});
+  ["staff","wit"].forEach(k=>{o[k]=[...d.querySelectorAll(`#${k==="staff"?"rsStaff":"rsWit"} tr`)].map(tr=>{const z={};tr.querySelectorAll("[data-c]").forEach(x=>{z[x.dataset.c]=x.value;});return z;});});
+  return rsClean(o);}
+function rsFill(r){const d=document.getElementById("dlgRs");
+  d.querySelectorAll("[data-r]").forEach(el=>{const k=el.dataset.r;el.value=k.indexOf(".")>0?(r[k.split(".")[0]]||{})[k.split(".")[1]]||"":r[k]||"";});
+  Object.keys(RS_LISTS).forEach(k=>{d.querySelectorAll(`[data-rk="${k}"]`).forEach(x=>{x.checked=(r[k]||[]).indexOf(x.value)>=0;});});
+  document.getElementById("rsStaff").innerHTML="";document.getElementById("rsWit").innerHTML="";
+  (r.staff.length?r.staff:[{},{}]).forEach(x=>rsRowAdd("staff",x));(r.wit.length?r.wit:[{}]).forEach(x=>rsRowAdd("wit",x));}
+/* a new record starts from the incident: its time, what came before, what happened, what adults did, how it ended */
+function rsStart(i){const r=rsClean(i.rep);if(i.rep)return r;const st=S.settings||{};
+  r.start=rsHm(i.time);r.preD=rsT(i.before);r.strD=rsT(i.did);r.behD=rsT(i.what);r.aftD=rsT(i.ended);
+  r.meth=RS.meth.indexOf(st.rsMeth)>=0?st.rsMeth:"";r.resid=st.rsResid==="yes"?"yes":st.rsResid==="no"?"no":"";return r;}
+function rsOpen(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;const d=rsDlg();rsEditing=id;
+  d.querySelector("#rsTitle").textContent=(i.hold==="seclusion"?"Seclusion":"Restraint")+" record";
+  d.querySelector("#rsSub").textContent=(i.date?shortDay(i.date):"No date")+(i.time?" at "+hm12(i.time):"")+" · "+(ddIncName(i)||"Incident")+". Saved with this incident; the state report and the parent’s form 2547 are filled from it.";
+  let dl=document.getElementById("rsStaffList");if(!dl){dl=document.createElement("datalist");dl.id="rsStaffList";document.body.appendChild(dl);}
+  dl.innerHTML=((S.settings||{}).rsStaff||[]).map(x=>`<option value="${esc(x.n)}">${esc([x.pos,x.tr?"trained "+x.tr:""].filter(Boolean).join(", "))}</option>`).join("");
+  rsFill(rsStart(i));rsLive();try{d.showModal();}catch(e){d.setAttribute("open","");}}
+/* what the dialog shows as it is filled: the deadlines, the counts, the type's warnings, the training dates */
+function rsLive(e){const d=document.getElementById("dlgRs"),i=(S.incidents||[]).find(x=>x.id===rsEditing);if(!d||!i)return;
+  const t=e&&e.target;if(t&&t.dataset&&t.dataset.c==="n"&&t.closest("#rsStaff")){const p=((S.settings||{}).rsStaff||[]).find(x=>x.n===t.value),tr=t.closest("tr");
+    if(p&&tr){const pos=tr.querySelector('[data-c="pos"]'),dt=tr.querySelector('[data-c="tr"]');if(!pos.value)pos.value=p.pos||"";if(!dt.value)dt.value=p.tr||"";}}
+  const r=rsRead(),x=Object.assign({},i,{rep:r});
+  d.querySelector("#rsDl").innerHTML=rsDeadlines(x).map(z=>`<li><span class="rs-st ${z.code}">${esc(z.txt)}</span> · ${esc(z.what.replace(/ \((restraint|seclusion) on [^)]*\)$/,""))}${z.how&&!z.done?` <span class="hint">(${esc(z.how)})</span>`:""}</li>`).join("");
+  const c=rsCounts(i.date||undefined),W=[];
+  if(i.hold==="seclusion")W.push("Seclusion is prohibited (s. 1003.573, F.S.; district Policy 5.181). It is counted apart from restraint; tell the administrator at once.");
+  else{if(c.sem>=2)W.push(`Restraint ${c.sem} within 18 weeks: on the second in a semester the IEP or 504 team meets to consider developing or reviewing a crisis intervention plan (Policy 5.181, 9c), and the parent gets a copy.`);
+    if(c.month>3)W.push(`${c.month} restraints within a month: the team meets to consider an FBA and a BIP (Policy 5.181, 9d).`);
+    if(c.year>3)W.push(`${c.year} restraints this school year: the team addresses their frequency and duration (Policy 5.181, 9d).`);}
+  d.querySelector("#rsCount").textContent=W.join(" ");
+  const TW=[],h=rsHealth();
+  if(/^Prone/.test(r.type)){TW.push("A prone restraint is the last resort (Policy 5.181, 5b), and each one is reported to "+RS_UP+" (7b-ix).");
+    if(h.hits.length)TW.push("The case records "+h.hits.join(", ")+": Policy 5.181 (6c-xii) rules out a prone restraint for a student with breathing or circulation problems such as asthma, epilepsy, a heart condition, reflux or esophagitis.");
+    if(h.prone==="no")TW.push("This student’s crisis intervention plan (Form CR-1) does not allow a prone restraint.");}
+  if(/^Supine/.test(r.type))TW.push("A supine restraint is prohibited by district Policy 5.181 (4b-vii, 6c-iv). Record what happened and tell the administrator.");
+  if(r.type==="Mechanical")TW.push("Mechanical restraint is prohibited for school personnel (s. 1003.573, F.S.; Policy 5.181, 4b-iv). Record what happened and tell the administrator.");
+  if(r.meth==="Emergency Situation"&&!r.emerg)TW.push("Describe the emergency situation in the box below.");
+  d.querySelector("#rsTypeW").textContent=TW.join(" ");
+  d.querySelector("#rsUpBox").hidden=!/^Prone/.test(r.type);
+  const old=r.staff.filter(s=>s.tr&&i.date&&s.tr<ddAddDays(i.date,-365)).map(s=>s.n||"someone");
+  d.querySelector("#rsStaffW").textContent=old.length?"Policy 5.181 (8d) asks for certification every year: the last training of "+old.join(", ")+" is more than a year before this restraint.":"";}
+function rsParentWhen(r){const a=[r.a1,r.a2].find(x=>x&&x.d&&(x.sp||x.sp2));
+  return [r.wn?"written notice (form 2547) "+rsMd(r.wn):"",a?"spoke with "+(a.sp||a.sp2)+" "+rsMd(a.d)+(a.t?" "+hm12(a.t):""):"",r.how.length?r.how.join(", ").toLowerCase():""].filter(Boolean).join("; ");}
+function rsSave(keep){const d=document.getElementById("dlgRs"),i=(S.incidents||[]).find(x=>x.id===rsEditing);if(!d||!i)return false;
+  const r=rsRead();
+  /* the state's report asks for the method: the contact attempts give it when it is not ticked */
+  if(!r.how.length){const A=[r.a1,r.a2];if(A.some(a=>a.ph||a.ph2))r.how.push("Phone");if(A.some(a=>a.em))r.how.push("Email");}
+  if(!r.nDate)r.nDate=[r.a1.d,r.a2.d,r.wn].filter(Boolean).sort()[0]||"";
+  i.rep=r;
+  if((r.wn||r.nDate)&&(i.parent!=="yes"||i.parentAuto)){i.parent="yes";if(!rsT(i.parentWhen)||i.parentAuto){i.parentWhen=rsParentWhen(r);i.parentAuto=true;}}
+  const st=S.settings||(S.settings={});if(r.meth)st.rsMeth=r.meth;if(r.resid)st.rsResid=r.resid;
+  const P=Array.isArray(st.rsStaff)?st.rsStaff:[];r.staff.filter(x=>rsT(x.n)).forEach(x=>{const k=P.findIndex(p=>p.n===x.n);const z={n:x.n,pos:x.pos,tr:x.tr};if(k>=0)P.splice(k,1);P.unshift(z);});st.rsStaff=P.slice(0,24);
+  ddEdited();ddIncRender();if(typeof ddWeek!=="undefined"&&ddWeek)try{ddWeekRender();}catch(e){}
+  if(!keep)d.close();else rsLive();return true;}
+
+/* ---- for the state report: every answer in the state form's order, each with Copy ---- */
+function rsIersRows(i){const r=rsClean(i.rep),f=typeof ddCaseFacts!=="undefined"&&ddCaseFacts||{},pf=f.profile||{},c=rsCounts(i.date);
+  const yn=v=>v==="yes"?"Yes":v==="no"?"No":"";const L=(a,o)=>a.concat(o?["Other"]:[]).join("; ");
+  const ppl=a=>a.map(x=>[x.n,x.pos,x.tr?"last training "+x.tr:""].filter(Boolean).join(", ")).join("\n");
+  const at=s=>{const p=String(s||"").match(/^(\d{1,2}):(\d{2})/);if(!p)return "";const h=+p[1];return (h%12||12)+":"+p[2]+" "+(h<12?"AM":"PM");};
+  const us=iso=>{const p=String(iso||"").split("-");return p.length===3?(+p[1])+"/"+(+p[2])+"/"+p[0]:"";};
+  return [["Student demographics"],["School Year",i.date?rsSchoolYear(i.date):""],["Incident ID",r.iers],["Student name",ddT(S.meta.client).replace(/^SIMULATED\s*[–-]\s*/i,"")],["Student local ID",ddT(S.meta.id)],["Date of birth",us(pf.dob)],
+    ["Sex, race, ethnicity, grade, exceptionality, 504","From the student’s record in the state system: check them there."],
+    ["Incident information"],["Location at which restraint occurred",r.loc],["If other or off campus, please describe",r.locD],["Date of Incident",us(i.date)],["Start Time, restraint",at(r.start)],["End Time, restraint",at(r.end)],
+    ["Parent notification"],["Date of Parent Notification",us(r.nDate)],["Parent Notification Method",r.how.join("; ")],["Report Prepared Date",us(r.prep)],["Final Report Sent Date",us(r.sent)],
+    ["The restraint"],["Is the student served in a residential setting?",yn(r.resid)],["Crisis Management Training Strategy Used",r.meth],["If Emergency Situation, please describe",r.emerg],
+    ["Date Crisis Intervention Plan last Reviewed",us(r.cip)],["Changes Recommended?",yn(r.cipChg)],["Has the student exceeded two incidents a semester?",i.hold==="restraint"?(c.sem>2?"Yes":"No")+" ("+c.sem+" restraint"+(c.sem===1?"":"s")+" in the 18 weeks to "+us(i.date)+")":""],
+    ["Type of most restrictive restraint used",r.type],["If mechanical, please describe",r.mech],["Person using or assisting in restraint",ppl(r.staff)],["Non-student witnesses",ppl(r.wit)],
+    ["What happened"],["What was happening before the restraint",r.pre.join("; ")],["Describe",r.preD],["Behavioral strategies used to prevent/deescalate",r.str.join("; ")],["Describe",r.strD],
+    ["The behavior that warranted the use of restraint",r.beh],["Describe",r.behD],["Who was at risk of immediate physical harm",r.risk.join("; ")],["How was it determined that there was imminent risk? Describe",r.riskD],
+    ["What occurred with the student immediately after",r.aft.join("; ")],["Describe",r.aftD],
+    ["Injuries"],["The student: injuries, visible marks or medical emergencies?",yn(r.injS)],["If yes, describe",r.injSD],["Anyone else?",yn(r.injO)],["If yes, describe",r.injOD]];}
+function rsIersOpen(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;let d=document.getElementById("dlgIers");
+  if(!d){d=document.createElement("dialog");d.className="dd-dialog rs-dlg rs-iers";d.id="dlgIers";d.setAttribute("aria-labelledby","iersT");document.body.appendChild(d);
+    d.addEventListener("click",async e=>{const b=e.target.closest("[data-cp]");if(b){const v=b.dataset.cp;try{await navigator.clipboard.writeText(v);toast("Copied.");}catch(err){toast("Select the text and copy it.");}return;}
+      if(e.target.closest("#iersAll")){try{await navigator.clipboard.writeText(d._all||"");toast("Copied: every answer, in the state form’s order.");}catch(err){toast("Select the text and copy it.");}return;}
+      if(e.target.closest("#iersClose"))d.close();});}
+  const R=rsIersRows(i);d._all=R.filter(x=>x.length>1&&x[1]).map(x=>x[0]+": "+x[1]).join("\n");
+  d.innerHTML=`<h2 id="iersT">For the state report (IERS)</h2><p class="hint">The answers of this ${rsKind(i)} record in the order of the state&rsquo;s Restraint Incident Report, with its own wording. Copy each into the state site; nothing is sent from here. An empty answer is still to be filled in on the record.</p>
+  <table>${R.map(x=>x.length<2?`<tr class="sec"><th colspan="3">${esc(x[0])}</th></tr>`:`<tr><th>${esc(x[0])}</th><td style="white-space:pre-wrap">${x[1]?esc(x[1]):`<span class="hint">not filled in</span>`}</td><td class="c">${x[1]?`<button type="button" class="btn ghost sm" data-cp="${esc(x[1])}">Copy</button>`:""}</td></tr>`).join("")}</table>
+  <div class="dd-actions"><button type="button" class="btn ghost" id="iersAll">Copy all</button><button type="button" class="btn" id="iersClose">Close</button></div>`;
+  try{d.showModal();}catch(e){d.setAttribute("open","");}}
+/* ---- form 2547: the workstation fills the district's own form, kept on this device (Form DD-1 hands it the answers) ---- */
+function rs2547Data(i){const r=rsClean(i.rep),tp=r.type,us=iso=>{const p=String(iso||"").split("-");return p.length===3?(+p[1])+"/"+(+p[2])+"/"+p[0]:"";};
+  const att=a=>({date:us(a.d),ph:a.ph,vm:a.vm,sp:a.sp,ph2:a.ph2,vm2:a.vm2,sp2:a.sp2,em:a.em,oth:a.oth});
+  return {date:us(r.wn||i.date),school:ddT(S.meta.school),seated:tp==="Seated",standing:tp==="Standing",prone:/^Prone/.test(tp),transport:/transport/.test(tp),
+    other:tp&&!/^(Seated|Standing|Prone|Immobilization)/.test(tp)?tp+(r.mech?": "+r.mech:""):"",
+    injS:r.injS,injO:r.injO,inj:[r.injS==="yes"?"Student: "+r.injSD:"",r.injO==="yes"?"Others: "+r.injOD:""].filter(Boolean).join(" "),
+    a1:att(r.a1),a2:att(r.a2),sent:us(r.sent),ack:us(r.ack),first:us(r.a1.d),second:us(r.a2.d),incDate:us(i.date),kind:rsKind(i)};}
+function rs2547(id){const i=(S.incidents||[]).find(x=>x.id===id);if(!i)return;
+  if(window.parent===window){toast("Open Form DD-1 in the workstation to fill form 2547: the workstation keeps the district’s blank form on this device.");return;}
+  try{window.parent.postMessage({nbh:"form-2547",id:(window.nbhBridge&&nbhBridge.formId?nbhBridge.formId():"DD-1"),data:rs2547Data(i)},"*");}catch(e){toast("The workstation did not answer.");}}
+
+/* ---- the incident's row: the record's state and its button ---- */
+function rsRowText(i){if(!rsBig(i))return "";const L=rsDeadlines(i);if(!L.length)return "";
+  return L.map(z=>`<span class="rs-st ${z.code}">${{wn:"Notice",rep:"Report",ml:"Mailed"}[z.kind]}: ${esc(z.txt)}</span>`).join("<br>");}
+{const rh0=ddIncRowHtml;ddIncRowHtml=function(i,act){let h=rh0.apply(this,arguments);if(!rsBig(i))return h;
+  const s=rsRowText(i);if(s)h=h.replace(/(<td class="f">[\s\S]*?)(<\/td>)/,`$1<div class="rs-row">${s}</div>$2`);
+  if(act)h=h.replace(/(<td class="a noprint no-print">)/,`$1<button type="button" class="btn sm" data-rs-open="${esc(i.id)}">${i.rep?"Record":"Fill in the record"}</button> `);return h;};}
+{const ir1=ddIncRender;ddIncRender=function(){const r=ir1.apply(this,arguments);const n=document.getElementById("ddHoldNote");
+  if(n&&ddHoldNotice&&!n.querySelector("[data-rs-open]")){const ok=n.querySelector("#ddHoldOk");const b=document.createElement("button");b.type="button";b.className="btn sm";b.dataset.rsOpen=ddHoldNotice.id;b.textContent="Fill in the record";if(ok)ok.parentNode.insertBefore(b,ok);}
+  return r;};}
+document.addEventListener("click",e=>{const b=e.target&&e.target.closest&&e.target.closest("[data-rs-open]");if(b)rsOpen(b.dataset.rsOpen);});
+
+/* ---- the case: each restraint's record and deadlines, and the counts; CR-1's notice dates fill the boxes left empty ---- */
+{const out1=window.__nbhFactsOut;window.__nbhFactsOut=function(){let o=null;try{o=out1?out1.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(!o||!o.data)return o;const d=o.data,now=new Date(),lim=ddAddDays(localISO(now),-60),big=(S.incidents||[]).filter(rsBig);
+    if(Array.isArray(d.incidentList))d.incidentList.forEach(x=>{const i=(S.incidents||[]).find(y=>y.id===x.id);if(!i||!rsBig(i))return;const r=rsClean(i.rep);
+      x.parent=i.parent;x.parentWhen=i.parentWhen;
+      x.rep={wn:r.wn,nDate:r.nDate,prep:r.prep,prepT:r.prepT,sent:r.sent,ack:r.ack,ackR:r.ackR,start:r.start,end:r.end,type:r.type,up:r.up,filled:!!i.rep};});
+    if(big.length){const dl=[];big.filter(i=>rsIso(i.date)&&i.date>=lim).forEach(i=>rsDeadlines(i,now).forEach(z=>dl.push({kind:z.kind,what:z.what,due:z.due,done:z.done,event:z.event,inc:z.inc})));
+      const c=rsCounts();
+      d.restraint={src:"DD-1",deadlines:dl,counts:{semester:c.sem,month:c.month,year:c.year,seclusion:c.secl},
+        prone:big.filter(i=>i.rep&&/^Prone/.test(i.rep.type||"")&&rsIso(i.date)&&i.date>=lim).map(i=>({date:i.date,inc:i.id,up:rsIso(i.rep.up)})),
+        open:big.filter(i=>rsIso(i.date)&&i.date>=lim&&i.rep).map(i=>{const r=rsClean(i.rep);return {date:i.date,inc:i.id,ack:r.ack,ackR:r.ackR,sent:r.sent,wn:r.wn};})};}
+    return o;}catch(e){return o;}};}
+{const fi3=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=fi3?fi3.apply(this,arguments):{filled:0};
+  try{const N=(f&&f.crisis&&Array.isArray(f.crisis.notices))?f.crisis.notices:[];let ch=0;
+    N.forEach(n=>{if(!n)return;const i=(S.incidents||[]).find(x=>rsBig(x)&&(n.inc?x.id===n.inc:(x.date===n.event&&(!n.time||!x.time||x.time===n.time))));if(!i)return;
+      const rp=rsClean(i.rep),put=(k,v)=>{v=k==="prepT"||k==="end"?rsHm(v):rsIso(v);if(v&&!rp[k]){rp[k]=v;ch++;return 1;}return 0;};
+      const before=ch;put("wn",n.wd);put("prep",n.pd);put("prepT",n.pt);put("sent",n.md);put("ack",n.ak);put("ackR",n.mk);put("end",n.xt);
+      if(ch>before){i.rep=rp;if(rp.wn&&i.parent!=="yes"){i.parent="yes";if(!rsT(i.parentWhen)){i.parentWhen="written notice "+rsMd(rp.wn)+" (Form CR-1)";i.parentAuto=true;}}}});
+    if(ch){ddEdited();ddIncRender();}}catch(e){}return r;};}
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------

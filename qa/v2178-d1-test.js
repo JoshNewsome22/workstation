@@ -6,7 +6,7 @@
 const {chromium,BASE,wire,sleep}=require(__dirname+'/lib.js');
 let fails=0;const ok=(n,c,i)=>{console.log((c?'PASS ':'FAIL ')+n+(i!==undefined&&!c?'  '+JSON.stringify(i).slice(0,700):''));if(!c)fails++;};
 const W=BASE+'/NBH-Workstation/';
-const CR1='Form CR-1 starts the Florida notice clock for this (24-hour report, parent the same day, written report within 3 school days): open Form CR-1 in the workstation.';
+const CR1='The notice deadlines run from now: the written notice to the parent before the end of the school day, the incident report within 24 hours, the report to the parent by mail within 3 school days. Fill in the record on the incident (its Record button): the state report and the parent\u2019s form 2547 come from it.';
 (async()=>{
   const br=await chromium.launch();const log=[];
   const ctx=await br.newContext({viewport:{width:1280,height:900}});

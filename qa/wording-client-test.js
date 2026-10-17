@@ -753,7 +753,7 @@ async function waitTab2(page, re, ms){ const t0 = Date.now(); while (Date.now() 
       const t = await fr.evaluate(() => __w.tab2());
       ok(/opened from a file on this device/.test(t), '9 ... and Rewrite with Claude says a file cannot reach the relay', t.slice(0, 160));
       const snap = await page.evaluate(async () => { const r = await grab('OB-1', 'snapshot', null, 8000); return r && r.snap && r.snap.total; });
-      ok(snap === 169, '9 ... the snapshot there has the same 169 controls', snap);
+      ok(snap === 172, '9 ... the snapshot there has the same 172 controls (v22.41: OB-1 asks about a seclusion apart)', snap);
       ok(errorsIn(lg).length === 0, '9 no console errors', errorsIn(lg));
       await ctx.close(); fs.rmSync(tmp, {recursive:true, force:true});
     });

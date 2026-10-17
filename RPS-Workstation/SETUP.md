@@ -9905,6 +9905,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.41: the restraint record, one notice record, and the district's rules
+
+- **A restraint or a seclusion logged on Form DD-1 has its own record** (the incident's Record button). It holds the
+  state's incident report in the state form's order, with the state's own answer lists:
+  - where and when (start time, end time), the type of the most restrictive restraint, the crisis management method,
+    the people who held or helped (with the date of each one's last training) and the adult witnesses;
+  - what was happening before, the strategies used, the behavior, who was at risk and how the risk was judged, what
+    happened right after, and any injuries.
+  A new record starts from the incident's own time and words. **For the state report** lists every answer in the order
+  of the state's IERS form, each with Copy; the student's demographics come from the state's own record and are not kept
+  here. Nothing is sent from the workstation.
+- **The parent's notice on the district's form 2547.** The record keeps the two contact attempts, the written notice, and
+  the signed page back; the report's completion, its mailing and the signed receipt. **Fill form 2547** fills the
+  district's own PDF: chosen once and kept on this device only (not in the case, not synced). The signature lines and the
+  initials are left for ink.
+- **The deadlines are counted on DD-1** (review F458): the written notice before the end of that school day; the report
+  within 24 hours of the release, or by the end of the day school reopens when the release falls on the last school day
+  before a weekend; the report by mail within 3 school days. Today lists them with or without Form CR-1 in the case.
+- **One notice record** (review F459). DD-1's record fills Form CR-1's empty boxes on that restraint's row, and CR-1's dates
+  fill DD-1's. An incident counts as told once either form records the written notice.
+- **District Policy 5.181.**
+  - The counts: on the second restraint within 18 weeks the team meets about a crisis intervention plan; more than 3 in
+    a month, about an FBA and a BIP; more than 3 in the school year, about their frequency and duration.
+  - A prone restraint is the last resort and is reported to the principal, the area superintendent, the ESE director,
+    the chief academic officer and the superintendent; the record asks when.
+  - The record warns when a prone restraint is chosen for a student whose case names asthma, epilepsy or seizures, a
+    heart condition, reflux or esophagitis; when a supine or a mechanical restraint is chosen (prohibited); and when a
+    person's last training is more than a year before the restraint.
+- **A seclusion is counted apart** (review F341). It is never counted as a restraint (not toward the second restraint, not
+  in the semester count), and it is named as prohibited.
+- **Form CR-1's breathing rule**: never a face-up (supine) hold; a face-down (prone) hold only as the district's last
+  resort, on Policy 5.181's conditions. The plan now says for each student whether a prone hold is allowed, and warns
+  when the health concerns rule it out.
+- **What an observation records reaches the case** (reviews F83, F70). A physical hold or restraint coded on Form ABC-1,
+  or a restraint or seclusion ticked on Form OB-1, is named on Today when Form DD-1 does not have it. OB-1 now asks
+  apart about removal, seclusion and restraint, and its summary names a restraint or a seclusion first.
+
+Checked by `qa/v2241-restraint-test.js` (31) and `qa/policy-safety-test.js`.
+
 ### v22.40: the date of birth typed once
 
 - **The date of birth travels with the case** (review F463). It was typed on up to eight forms, in two formats (date
