@@ -69,10 +69,14 @@ const H=(page,sel)=>page.evaluate(s=>{const e=document.querySelector(s);return e
     await sp.evaluate(()=>{const v=[...document.querySelectorAll('#viewSeg button')].find(b=>/Data sheet/.test(b.textContent));if(v)v.click();const b=document.querySelector('[data-mode="tap"]');if(b)b.click();});await sleep(800);
     let tgt=null;for(const c of (await sp.$$('button.cell')).slice(30)){const bb=await c.boundingBox();if(bb&&bb.width>4){tgt=c;break;}}
     await tgt.scrollIntoViewIfNeeded();await sp.evaluate(()=>{window.scrollBy(0,-60);/* the simulated data's own message (a toast, dismissible) may sit over the cell: a user would close it first */document.querySelectorAll('#nbhToasts .nbh-toast').forEach(t=>t.remove());});await sleep(300);
-    const y0=await sp.evaluate(()=>scrollY),rc=await tgt.evaluate(e=>[e.dataset.r,e.dataset.c,e.dataset.state]),bb=await tgt.boundingBox();
+    /* v22.47 as Safari on the iPad and the iPhone: no scroll anchoring, so a line added above the grid (the consent line, when
+       the case comes round after the tap) would move the page under the finger; the tapped cell must stay where it was on
+       the screen */
+    await sp.evaluate(()=>{const st=document.createElement('style');st.textContent='html,body{overflow-anchor:none!important}';document.head.appendChild(st);});
+    const y0=await sp.evaluate(()=>scrollY),rc=await tgt.evaluate(e=>[e.dataset.r,e.dataset.c,e.dataset.state]),cy0=await tgt.evaluate(e=>Math.round(e.getBoundingClientRect().top)),bb=await tgt.boundingBox();
     await page.touchscreen.tap(bb.x+bb.width/2,bb.y+bb.height/2);await sleep(700);
-    const a1=await sp.evaluate(([r,c])=>({y:scrollY,st:document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").dataset.state,ta:getComputedStyle(document.documentElement).touchAction,tw:Math.round(document.querySelector('th.timecol').getBoundingClientRect().width)}),rc);
-    ok('16b SP-1 on a phone: the tapped cell changes, the page stays where it was, no double-tap zoom, the time column narrow',a1.st!==rc[2]&&Math.abs(a1.y-y0)<=1&&a1.ta==='manipulation'&&a1.tw<=70,{y0,rc,a1});
+    const a1=await sp.evaluate(([r,c])=>({y:scrollY,cy:Math.round(document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").getBoundingClientRect().top),st:document.querySelector("table.scatter [data-r='"+r+"'][data-c='"+c+"']").dataset.state,ta:getComputedStyle(document.documentElement).touchAction,tw:Math.round(document.querySelector('th.timecol').getBoundingClientRect().width)}),rc);
+    ok('16b SP-1 on a phone: the tapped cell changes and stays where it was on the screen (as on Safari, with no scroll anchoring), no double-tap zoom, the time column narrow',a1.st!==rc[2]&&Math.abs(a1.cy-cy0)<=1&&a1.ta==='manipulation'&&a1.tw<=70,{y0,cy0,rc,a1});
     ok('17 no page errors (phone workstation)',!errs.length,errs.slice(0,3));await ctx.close();}
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);

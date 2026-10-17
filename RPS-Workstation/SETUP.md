@@ -9905,6 +9905,37 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.47: what Google Drive holds, what each sync did, and one calendar
+
+- **What Drive holds** (Caseload, Google Drive section; review I253). Read from Drive itself, by the workstation's own
+  marks, and nothing else in your Drive:
+  - **every student's case file**, with when and on which device it was last saved, and whether this device has the
+    student;
+  - **the Replaced copies**, each with when it goes to Drive's trash;
+  - **the removal markers** (no student data, only a scrambled key) and **the staff directory**.
+
+  From here you can:
+  - **Remove everywhere** any student, even one this device does not hold;
+  - **Open** a replaced copy (Save case then makes it the current copy) or put it in the **Trash**, one at a time or all;
+  - choose **how long replaced copies are kept: 7, 30 or 90 days** (30 unless chosen). The daily tidy and the "which
+    copy do you keep" question follow the choice.
+- **Sync activity** (same place; review I257). What each sync on this device sent up, brought here (and from which device),
+  removed, and put in Replaced copies, newest first, for 60 days. **Initials only**: no full name is kept, since the
+  device may be shared. A sync that changed nothing adds no line. It is kept on the device only, and Remove all students
+  clears it.
+- **One calendar** (review I259, after F504). The forms (nbh-ui.js), the workstation and the respondent pages
+  (nbh-respond.js) share one helper for "today", taken from the device's own calendar. The last three places that used
+  the world clock now use it: TB-1's definition bank file name, My pictures' file name, and the date a reply box was
+  made. A check now fails the release if any shipped file takes a day from the world clock again.
+
+- **The page no longer jumps under the finger on the iPad and iPhone** (found by the release run). Since v22.37 a form's
+  consent line ("Consent check: ...") could appear above the form after the first tap, when the case came round, and push the
+  page down by its height; Safari does not hold the page in place as Chromium does, so on SP-1's grid the next tap landed a
+  row lower. What the case changes on a form now leaves what is in the middle of the screen where it was.
+
+Checked by `qa/v2247-test.js` (12), `qa/v2247-dates-test.js` (5) and `qa/v2189-layout-test.js` 16b (now as Safari, with
+no scroll anchoring, and judged by the tapped cell's place on the screen).
+
 ### v22.46: one step list for the plan
 
 - **Form TD-1's final plan marks its step list** (review I232). Every numbered line on the final plan has, on screen,

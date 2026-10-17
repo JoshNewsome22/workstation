@@ -250,7 +250,7 @@ function exportJSON(){return all().then(function(a){return {nbh:'my-pictures',v:
 function download(){
   return exportJSON().then(function(o){
     var b=new Blob([JSON.stringify(o)],{type:'application/json'}),u=URL.createObjectURL(b),a=doc.createElement('a');
-    a.href=u;a.download='My-pictures_'+new Date().toISOString().slice(0,10)+'.json';doc.body.appendChild(a);a.click();
+    a.href=u;a.download='My-pictures_'+(window.nbhDay?nbhDay.today():new Date().toLocaleDateString('en-CA'))+'.json';doc.body.appendChild(a);a.click();
     setTimeout(function(){a.remove();URL.revokeObjectURL(u);},3000);return o.count;});
 }
 function importFile(file){

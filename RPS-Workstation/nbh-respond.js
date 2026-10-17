@@ -3,6 +3,9 @@
    (NBH1....), and the form reads the codes back into its own informant columns. One copy of this file serves
    every form that uses it; the one-file edition carries it once. The respondent page itself is self-contained:
    it embeds the runtime below, so it works from an email attachment with nothing else present. */
+/* v22.47 (review I259) the shared local-date helper, as in nbh-ui.js and the workstation: the day on this device's calendar */
+window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==null?Date.now():d);if(isNaN(d))return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');},today:function(){return this.iso(new Date());}};
 (function(){
   var U=window.NBH_RESPOND={version:1};
   /* ---- the code: a JSON object as base64url, marked NBH1. ---- */
@@ -591,7 +594,7 @@
         .catch(function(e){if(!/wrong token/.test(String(e&&e.message)))throw e;return fetchJ(u+'&t='+encodeURIComponent(b.token),{referrerPolicy:'no-referrer'});});}
     function sha(t){return S.digest('SHA-256',te(t)).then(function(h){return hex(new Uint8Array(h));});}
     function keys(){var kp;return S.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']).then(function(k){kp=k;return Promise.all([S.exportKey('jwk',kp.publicKey),S.exportKey('jwk',kp.privateKey)]);})
-      .then(function(a){var t=new Date();return {id:hex(crypto.getRandomValues(new Uint8Array(16))),token:hex(crypto.getRandomValues(new Uint8Array(16))),pub:{x:a[0].x,y:a[0].y},priv:{d:a[1].d,x:a[1].x,y:a[1].y},site:'',got:[],held:[],made:t.toISOString().slice(0,10)};});}
+      .then(function(a){var t=new Date();return {id:hex(crypto.getRandomValues(new Uint8Array(16))),token:hex(crypto.getRandomValues(new Uint8Array(16))),pub:{x:a[0].x,y:a[0].y},priv:{d:a[1].d,x:a[1].x,y:a[1].y},site:'',got:[],held:[],made:nbhDay.iso(t)};});}
     function dec(b,r){var priv,pub;return S.importKey('jwk',{kty:'EC',crv:'P-256',d:b.priv.d,x:b.priv.x,y:b.priv.y,ext:true},{name:'ECDH',namedCurve:'P-256'},false,['deriveBits'])
       .then(function(k){priv=k;return S.importKey('jwk',{kty:'EC',crv:'P-256',x:r.k.x,y:r.k.y,ext:true},{name:'ECDH',namedCurve:'P-256'},false,[]);})
       .then(function(k){pub=k;return S.deriveBits({name:'ECDH',public:pub},priv,256);}).then(function(bits){return S.importKey('raw',bits,'HKDF',false,['deriveKey']);})

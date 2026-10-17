@@ -144,6 +144,12 @@ html{touch-action:manipulation}
    honoured: nbhUI.confirm then returns that function's answer at once, so checks that auto-accept keep
    working. The block also marks each view button with a dot (empty, partly filled, filled) from the
    fields that view shows, and grows the small controls on a touch screen (the CSS above). */
+/* v22.47 (review I259) one local-date helper for the forms, the workstation and the respondent pages: the day as this
+   device's calendar has it, never the world clock's (after 8 pm in Florida the world clock is already on tomorrow).
+     nbhDay.iso(date)   'YYYY-MM-DD' of that date, on this device's calendar
+     nbhDay.today()     today's, the same way */
+window.nbhDay=window.nbhDay||{iso:function(d){d=d instanceof Date?d:new Date(d==null?Date.now():d);if(isNaN(d))return '';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');},today:function(){return this.iso(new Date());}};
 (function(){
   var U = {}, nativeConfirm = window.confirm, nativeAlert = window.alert;
   function q(s){ return document.querySelector(s); }

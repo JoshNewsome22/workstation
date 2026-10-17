@@ -98,14 +98,14 @@
   };
   C.apply = function(f){
     if (!f || typeof f !== 'object') return null;
-    C.facts = f; var rep = null;
+    C.facts = f; var rep = null, hv = holdStart();   /* v22.47 what the case changes on the page leaves the view where it was (holdView) */
     try { if (window.__nbhFactsIn) rep = window.__nbhFactsIn(f); } catch(e) { rep = { error: String(e) }; }
     if (!rep) rep = C.generic(f, false);
     /* v22.45 (review F464, I231) the parent or guardian Form DM-1 names (the contact who holds the rights, else the first parent
        listed) goes into a form's empty parent name box (IC-1's consent); a text box only */
     try { var hm = f.profile && f.profile.home, pb = document.querySelectorAll('input[name="c.parent"]');
       if (hm && hm.name) for (var pi = 0; pi < pb.length; pi++) { if (!/^(text|)$/.test(pb[pi].type || '') && pb[pi].type !== 'text') continue; if (!String(pb[pi].value || '').trim()) { pb[pi].value = hm.name; pb[pi].dispatchEvent(new Event('input', { bubbles: true })); pb[pi].dispatchEvent(new Event('change', { bubbles: true })); if (rep && typeof rep.filled === 'number') rep.filled++; } } } catch(e) {}
-    C.last = rep; C.paint(); try { C.paintConsent(); } catch(e) {} return rep;
+    C.last = rep; C.paint(); try { C.paintConsent0(); } catch(e) {} holdEnd(hv); return rep;
   };
 
   /* ---- the toolbar group and the picker ---- */
@@ -284,7 +284,17 @@
       : ed.dec === 'no' ? ' No food or drink items (the parent said no).' : ed.dec === 'na' ? ' Food items were not proposed: none without a new decision.' : ' The food-item decision is not recorded: no edibles until it is.';
     return { kind: food && ed.dec !== 'yes' ? 'warn' : 'ok', text: k.word + '.' + food };
   };
-  C.paintConsent = function(){
+  /* v22.47 the consent line is added above the form, often after the case arrives while the BCBA is already working down
+     the page (a tap on SP-1's grid sends the case round). Chromium keeps the page where it was on its own; Safari on the
+     iPad and the iPhone does not, so the page jumped down by the line's height under the finger. holdView keeps what is in
+     the middle of the screen where it was. */
+  function holdStart(){ var se = document.scrollingElement || document.documentElement, a = null;
+    if (se && se.scrollTop > 0) { try { a = document.elementFromPoint(Math.round(window.innerWidth / 2), Math.round(window.innerHeight / 2)); } catch(e) { a = null; } }
+    return a ? { a: a, at: a.getBoundingClientRect().top } : null; }
+  function holdEnd(h){ if (!h || !h.a.isConnected) return; var d = h.a.getBoundingClientRect().top - h.at; if (Math.abs(d) >= 1) window.scrollBy(0, d); }
+  function holdView(fn){ var h = holdStart(); try { fn(); } finally { holdEnd(h); } }
+  C.paintConsent = function(){ holdView(C.paintConsent0); };
+  C.paintConsent0 = function(){
     var id = C.formId(); if (!CONSENT_FORMS[id] || !C.facts) return;
     if (!q('#nbh-consent-css')) { var st = document.createElement('style'); st.id = 'nbh-consent-css';
       st.textContent = '.nbh-consent{margin:6px 0 8px;padding:7px 12px;border-radius:6px;font:13px/1.4 var(--sans,system-ui,sans-serif);border:1px solid #e3c98f;background:#fff8e8;color:#5b4310}' +
