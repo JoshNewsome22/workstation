@@ -1452,6 +1452,7 @@ td input,td select{max-width:100%}
   <p class="method noprint" style="margin:0 0 8px">Compiled from every component card and selection in the form, in the order staff will use them. Edit the steps on the build sheet; this sheet re-reads them when opened or printed. Use "Print final plan only" in the toolbar to print just this sheet.</p>
   <div id="finalHead"></div>
   <div id="td83Final"></div>   <!-- v21.83 (M): every target in the plan, its definition, function and the parts that address it -->
+  <input type="hidden" name="fin.steps">   <!-- v22.46 (I232): the BCBA's changes to the step list (Final plan) -->
   <div id="finalBody"></div>
   <!-- v21.82 (I): what a BIP also has to say: why the plan is least restrictive, who collects which data, social validity,
        the review date and the exit criteria, the student and family considerations, and the team meeting that adopted
@@ -2859,19 +2860,9 @@ const GROUPS=[
  ['Reinforcement schedule',['S_CRF','S_FR','S_VR','S_RR','S_FI','S_VI','S_DRL','S_DRH','S_MULT','S_MIX','S_CHAIN','S_TAND','S_CONC','S_CONJ','S_SO','S_ALT','S_CONJUNC','S_INTL','S_PR','S_LAG','DRO']],
  ['When problem behavior occurs',['R_PB','EXT','RIRD','RRB_RB','OVERCORR']]];
 function stepRow(n,s){return `<div class="plan-step"><div class="n">${n}</div><div class="t">${esc(s)}</div><div class="box"></div></div>`;}
-function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
- $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>Function (EA-1)</b><span>${esc(fnLabel)}</span></div></div>
- <div class="defs"><div class="drow"><div class="dlab">Reinforcer and establishing operation</div><div class="dval" style="padding:5px 8px">${esc(val('m.reinf'))||'—'}</div></div><div class="drow"><div class="dlab">Replacement behavior</div><div class="dval" style="padding:5px 8px">${esc(val('m.repdesc'))||'See the teaching steps below'}</div></div><div class="drow"><div class="dlab">Components in this plan</div><div class="dval" style="padding:5px 8px">${cs.map(c=>esc(c.name)).join('; ')||'None selected yet.'}</div></div><div class="drow"><div class="dlab">Prepared by / date</div><div class="dval" style="padding:5px 8px">${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</div></div></div>`;
- let n=0;let out='';const used=new Set();
- GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
-  inG.forEach(c=>{used.add(c.code);const L=LIB[c.code];const params=L.params.map((p,k)=>[p[0],c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`)]).filter(x=>x[1]);const data=val(`cp[${c.i}].data`),mat=val(`cp[${c.i}].mat`);
-   out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small></div>`;
-   if(params.length||mat)out+=`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}${mat?(params.length?' &nbsp;·&nbsp; ':'')+'<b>Materials:</b> '+esc(mat):''}</div>`;
-   if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
-   c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
-   if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
- const rest=cs.filter(c=>!used.has(c.code));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
- const extras=[];
+/* v22.46 (I232): the treatment extras the final plan numbers after the cards, in one place, so the step list the other
+   forms take (planSteps) is the list this sheet prints */
+function finalExtras(){const extras=[];
  if(val('ant.pos')||val('ant.seat')||val('ant.att')||val('ant.se'))extras.push(['Positioning, seating, attention, and setting-event rules',[val('ant.pos')&&'Positioning: '+val('ant.pos'),val('ant.seat')&&'Seating: '+val('ant.seat'),val('ant.att')&&'Attention and rapport schedule: '+val('ant.att'),val('ant.se')&&'Setting events: '+val('ant.se')].filter(Boolean)]);
  if(val('pr.hier')||val('pr.fade')||val('pr.reinf'))extras.push(['Prompt hierarchy and fading',[val('pr.hier')&&'Hierarchy: '+val('pr.hier'),val('pr.fade')&&'Fading rule: '+val('pr.fade'),val('pr.reinf')&&'Reinforcement: '+val('pr.reinf')].filter(Boolean)]);
  if(val('rb.prec')||val('rb.target')||val('rb.after')||val('rb.not'))extras.push(['Responding to the precursor and the target behavior',[val('rb.prec')&&'On the precursor: '+val('rb.prec'),val('rb.target')&&'On the target behavior: '+val('rb.target'),val('rb.after')&&'After the episode: '+val('rb.after'),val('rb.not')&&'Staff do not: '+val('rb.not')].filter(Boolean)]);
@@ -2884,6 +2875,20 @@ function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={esca
  if(val('p.pre')||val('p.gen')||val('p.post')||val('p.complex'))extras.push(['Generalization and maintenance',[val('p.pre')&&'Before treatment: '+val('p.pre'),val('p.gen')&&'Tactics: '+val('p.gen'),val('p.post')&&'After criterion: '+val('p.post'),val('p.complex')&&'Response complexity: '+val('p.complex')].filter(Boolean)]);
  const ioa=val('t.ioa');const crit=val('mon.crit'),nn=val('mon.n'),ind=val('mon.ind'),fid=val('mon.fid');
  extras.push(['Data, integrity, and decision rules',['Record the target behavior, the replacement response and its independence, and the steps completed on the integrity checklist each observed session.',`Advance one thinning level when the target is at or below ${crit?crit+' per minute':'the criterion set on the monitoring sheet'} and the replacement is at least ${ind||'80'}% independent for ${nn||'3'} consecutive sessions at the current level; step back after two consecutive sessions above criterion at that level.`,`Integrity criterion ${fid||'90'}% of steps in each observed session; any session in which the behavior contacted the reinforcer is reviewed with the implementer the same week.`,ioa&&'Agreement and fidelity plan: '+ioa].filter(Boolean)]);
+ return extras;}
+function renderFinal(){const cs=comps();const fn=val('m.fn');const fnLabel={escape:'Escape / avoidance',attention:'Attention',tangible:'Tangible / activity',automatic:'Automatic',multiple:'Multiple control'}[fn]||'—';
+ $('#finalHead').innerHTML=`<div class="sumhead"><div><b>Student</b><span>${esc(val('m.client'))}</span></div><div><b>Target behavior</b><span>${esc(val('m.beh'))}</span></div><div><b>Function (EA-1)</b><span>${esc(fnLabel)}</span></div></div>
+ <div class="defs"><div class="drow"><div class="dlab">Reinforcer and establishing operation</div><div class="dval" style="padding:5px 8px">${esc(val('m.reinf'))||'—'}</div></div><div class="drow"><div class="dlab">Replacement behavior</div><div class="dval" style="padding:5px 8px">${esc(val('m.repdesc'))||'See the teaching steps below'}</div></div><div class="drow"><div class="dlab">Components in this plan</div><div class="dval" style="padding:5px 8px">${cs.map(c=>esc(c.name)).join('; ')||'None selected yet.'}</div></div><div class="drow"><div class="dlab">Prepared by / date</div><div class="dval" style="padding:5px 8px">${esc(val('m.assessor'))} · ${esc(val('m.date'))||new Date().toLocaleDateString()}</div></div></div>`;
+ let n=0;let out='';const used=new Set();
+ GROUPS.forEach(([title,codes])=>{const inG=cs.filter(c=>codes.includes(c.code));if(!inG.length)return;out+=`<div class="plan-group">${esc(title)}</div>`;
+  inG.forEach(c=>{used.add(c.code);const L=LIB[c.code];const params=L.params.map((p,k)=>[p[0],c.code==='EXT'&&k===1?eeP1Out(c.i):val(`cp[${c.i}].p${k}`)]).filter(x=>x[1]);const data=val(`cp[${c.i}].data`),mat=val(`cp[${c.i}].mat`);
+   out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b><small>${esc(L.src)}</small></div>`;
+   if(params.length||mat)out+=`<div class="plan-set">${params.map(x=>`<b>${esc(x[0])}:</b> ${esc(x[1])}`).join(' &nbsp;·&nbsp; ')}${mat?(params.length?' &nbsp;·&nbsp; ':'')+'<b>Materials:</b> '+esc(mat):''}</div>`;
+   if(L.caution)out+=`<div class="card-caution"><b>Caution.</b> ${esc(L.caution)}</div>`;
+   c.steps.forEach(s=>{n++;out+=stepRow(n,s);});
+   if(data)out+=`<div class="plan-set"><b>Record:</b> ${esc(data)}</div>`;out+='</div>';});});
+ const rest=cs.filter(c=>!used.has(c.code));if(rest.length){out+='<div class="plan-group">Other components</div>';rest.forEach(c=>{out+=`<div class="plan-comp"><div class="ph"><b>${esc(c.name)}</b></div>`;c.steps.forEach(s=>{n++;out+=stepRow(n,s);});out+='</div>';});}
+ const extras=finalExtras();
  extras.forEach(([title,lines,tail])=>{out+=`<div class="plan-group">${esc(title)}</div><div class="plan-comp">`;lines.forEach(s=>{n++;out+=stepRow(n,s);});out+=(tail||'')+'</div>';});
  $('#finalBody').innerHTML=out||'<div class="empty">No components yet. Send recommendations from the selection sheets, then return here.</div>';}
 function printFinal(){renderPlan();renderFinal();document.body.classList.add('print-final');const done=()=>{document.body.classList.remove('print-final');window.removeEventListener('afterprint',done);};window.addEventListener('afterprint',done);window.print();setTimeout(done,3000);}
@@ -3081,6 +3086,88 @@ function bipText(){
      family considerations, and the adoption record (td-v2182) */
   if(window.__td82Bip)try{window.__td82Bip(B,{comps:cs,bipLine});}catch(e){}
   return bipCompose(B);
+}
+/* v22.46 (I232) the plan's step list. The final plan prints every line it compiles (the cards' steps, then the treatment
+   extras), numbered; the step list is the part of it staff carry out, the one list Forms TI-1, ST-1 and TV-1 take. The
+   case carries plan.steps = [{n, d, grp, comp, cmp, crit}] in the plan's order (n is the number printed on this sheet)
+   and plan.stepsRev, a fingerprint that changes when a step joins or leaves the list, or its words or its critical mark
+   change. cmp is the integrity forms' component: 'ant' before the behavior, 'con' after it, '' when a group holds both.
+   Which lines join the list, and which are critical, start as suggestions: the case's own lines for staff (positioning,
+   seating and setting events, the prompt hierarchy, the response to the precursor and the behavior, and escape
+   extinction's guidance and stopping rules) join it; the cards' library steps, written for the BCBA, do not, unless the
+   plan has none of its own, when the cards' reinforcement and extinction steps do; the teaching and schedule cards' steps
+   that deliver the reinforcer join it always (the plan's own words seldom restate that contingency). Never in it: the crisis procedure
+   (Form CR-1 governs it), the thinning ladder and generalization (the BCBA's decisions), the data rules, and escape
+   extinction's consent and what is not in place yet. Critical: the steps that deliver or withhold the reinforcer, the
+   response to the behavior, and the stopping rules. The BCBA changes either on this sheet; only the changes are kept,
+   in fin.steps, by the step's words. */
+{
+const T=v=>String(v==null?'':v).trim(),K=s=>T(s).replace(/\s+/g,' ').toLowerCase();
+const GCMP=['ant','','ant','con','con'];
+const GIVE=/\b(reinforce every|deliver the reinforcer|honou?r every)\b/i;
+const REIN=/\b(reinforce every|withhold the reinforcer|deliver the reinforcer|do not reinforce|is not returned|do not remove the demand|honou?r every)\b/i;
+const EEX=t=>t===EE_TITLE||t===EE_TITLE_PG;
+const fld=()=>{let e=document.querySelector('[name="fin.steps"]');if(!e){const at=document.getElementById('finalBody');if(!at)return null;
+  e=document.createElement('input');e.type='hidden';e.name='fin.steps';at.parentNode.insertBefore(e,at);}return e;};
+const over=()=>{const e=fld();let o={};try{o=JSON.parse((e&&e.value)||'{}')||{};}catch(x){o={};}
+  return {in:o.in&&typeof o.in==='object'?o.in:{},crit:o.crit&&typeof o.crit==='object'?o.crit:{}};};
+const putOver=o=>{const e=fld();if(!e)return;const n=Object.keys(o.in).length+Object.keys(o.crit).length;e.value=n?JSON.stringify(o):'';
+  e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
+function extraKind(title,line){if(/^Crisis procedure/.test(title))return 'crisis';if(/^Data, integrity/.test(title))return 'data';
+  if(/^(Thinning ladder|Generalization)/.test(title))return 'rule';
+  if(EEX(title)&&/^(Not in place yet|The parent or guardian agreed|Who agreed|The team agreed)/.test(line))return 'note';return '';}
+function extraCmp(title,line){if(/^Prompt hierarchy/.test(title)&&/^Reinforcement:/.test(line))return 'con';if(/^(Positioning|Prompt hierarchy)/.test(title))return 'ant';if(/^Responding/.test(title)||EEX(title))return 'con';return '';}
+/* escape extinction's lines that say what the adult does join the list; the ones that explain or record do not */
+const EE_INFO=/^(Escape is one of|Why hands-on guidance|Teaching prompts|The student's assent plan|The student's ways of saying no)/;
+function extraIn(title,line){return EEX(title)?!EE_INFO.test(line):/^(Positioning|Prompt hierarchy|Responding)/.test(title);}
+function extraCrit(title,line){if(/^Responding/.test(title))return /^(On the target behavior|Staff do not):/.test(line)||(/^On the precursor:/.test(line)&&/reinforc/i.test(line));
+  if(EEX(title))return /^(Stop guiding|Never force|If distress goes on|If the student withdraws assent|The rule staff follow)/.test(line);return false;}
+/* every line, in the order and with the numbers renderFinal prints; inList and crit after the BCBA's changes */
+function planLines(){const cs=comps(),L=[],used=new Set(),O=over();
+  const push=(d,grp,comp,cmp,kind,sIn,sCrit,card)=>{d=T(d);L.push({n:L.length+1,d,grp,comp,cmp,kind,sIn:!kind&&!!sIn,sCrit:!kind&&!!sCrit,card:!!card});};
+  GROUPS.forEach(([title,codes],gi)=>{cs.filter(c=>codes.includes(c.code)).forEach(c=>{used.add(c.code);c.steps.forEach(s=>push(s,title,c.name,GIVE.test(s)?'con':GCMP[gi]||'','',(gi===1||gi===3)&&GIVE.test(s),gi===4||REIN.test(s),true));});});
+  cs.filter(c=>!used.has(c.code)).forEach(c=>c.steps.forEach(s=>push(s,'Other components',c.name,'','',false,REIN.test(s),true)));
+  finalExtras().forEach(([title,lines])=>lines.forEach(s=>{const kd=extraKind(title,s);push(s,title,'',kd?'':extraCmp(title,s),kd,extraIn(title,s),extraCrit(title,s),false);}));
+  /* a plan with no lines of its own for staff: the cards' reinforcement and extinction steps are suggested instead */
+  if(!L.some(x=>x.sIn&&!x.card))L.forEach(x=>{if(x.card&&!x.kind&&(REIN.test(x.d)||GCMP[GROUPS.findIndex(g=>g[0]===x.grp)]==='con'))x.sIn=true;});
+  L.forEach(x=>{const k=K(x.d);x.inList=!x.kind&&!!x.d&&(k in O.in?!!O.in[k]:x.sIn);x.crit=x.inList&&(k in O.crit?!!O.crit[k]:x.sCrit);});
+  return L;}
+const hash=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);};
+window.__td46Steps=()=>planLines().filter(x=>x.inList);
+window.__td46Rev=L=>hash(L.map(x=>K(x.d)+(x.crit?'*':'')).join('\n'));
+/* the final plan: on each line staff could carry out, In the list and (once in it) Critical; a bar on the number of a
+   critical step; and the list as the other forms will take it */
+function pill(cls,on,label,aria,title){return `<button type="button" class="td46-pill ${cls}" aria-pressed="${on?'true':'false'}" aria-label="${esc(aria)}" title="${esc(title)}">${label}</button>`;}
+function decorate(){const rows=Array.from(document.querySelectorAll('#finalBody .plan-step')),L=planLines();
+  let box=document.getElementById('td46Steps');const fb=document.getElementById('finalBody');
+  if(!box&&fb){box=document.createElement('div');box.id='td46Steps';fb.parentNode.insertBefore(box,fb);}
+  if(!box)return;
+  if(!L.length||rows.length!==L.length){box.hidden=true;box.innerHTML='';return;}
+  rows.forEach((r,i)=>{const x=L[i];r.dataset.k=String(i);r.classList.toggle('crit',x.crit);r.classList.toggle('td46-in',x.inList);r.classList.toggle('td46-out',!x.inList);
+    let c=r.querySelector('.td46-ctl');if(x.kind||!x.d){if(c)c.remove();return;}
+    if(!c){c=document.createElement('div');c.className='td46-ctl noprint';r.insertBefore(c,r.querySelector('.box'));}
+    c.innerHTML=pill('td46-in-b',x.inList,x.inList?'In the list':'Add to the list','Step '+x.n+': in the step list',x.inList?'In the step list the other forms take. Tap to leave it out.':'Not in the step list. Tap to add it.')+
+      (x.inList?pill('td46-crit',x.crit,'Critical','Step '+x.n+': critical',x.crit?'Critical: an error on this step defeats the plan. Tap to unmark.':'Tap to mark this step critical.'):'');});
+  const act=L.filter(x=>x.inList),nc=act.filter(x=>x.crit).length,O=over(),nO=Object.keys(O.in).length+Object.keys(O.crit).length;
+  const kinds=[['crisis','the crisis procedure (Form CR-1 governs it)'],['rule','the thinning ladder and the generalization plan (decisions for the BCBA)'],['data','the data rules'],['note','escape extinction’s consent and what is not in place yet']].filter(([k])=>L.some(x=>x.kind===k)).map(x=>x[1]);
+  const cards=L.filter(x=>x.card&&!x.inList).length;
+  box.hidden=false;
+  box.innerHTML=(nc?'<p class="td46-key">A bar on a step number marks a critical step.</p>':'')+
+    '<div class="noprint"><p><b>The step list.</b> '+(act.length?act.length+' of the '+L.length+' lines on this sheet '+(act.length===1?'is':'are')+' the step list':'No line on this sheet is in the step list yet')+
+    ': what staff carry out, and the list the integrity checklist (Form TI-1), the staff training (Form ST-1) and the training video (Form TV-1) take, in this order. '+
+    (nc?nc+' '+(nc===1?'is':'are')+' marked critical: an error on one defeats the plan, so the integrity check scores them on their own.':'None is marked critical yet.')+'</p>'+
+    '<p class="hint">The marks start as suggestions. '+(cards?'The cards’ library steps ('+cards+') are written for you, not for staff, and are left out; add any with Add to the list, or reword it on the Build components sheet first. ':'')+
+    (kinds.length?'Never in the list: '+kinds.join('; ')+'.':'')+'</p>'+
+    (act.length?'<details class="td46-prev" open><summary>The step list as the other forms take it ('+act.length+')</summary><ol>'+act.map(x=>'<li'+(x.crit?' class="crit"':'')+'><span class="td46-g">'+esc(x.comp||x.grp)+(x.cmp?' · '+(x.cmp==='ant'?'antecedent':'consequence'):'')+(x.crit?' · critical':'')+'</span>'+esc(x.d)+'</li>').join('')+'</ol></details>':'')+
+    (nO?'<div class="tools"><button type="button" class="tool" id="td46Reset">Use the suggested marks</button> <span class="hint">'+nO+' change'+(nO===1?'':'s')+' from the suggestions</span></div>':'')+'</div>';}
+const was=renderFinal;
+renderFinal=function(){const r=was.apply(this,arguments);try{decorate();}catch(e){}return r;};
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.td46-pill');
+  if(b){const r=b.closest('.plan-step'),L=planLines(),x=r&&L[+r.dataset.k];if(!x||x.kind)return;const O=over(),k=K(x.d);
+    if(b.classList.contains('td46-in-b')){const v=!x.inList;if(v===x.sIn)delete O.in[k];else O.in[k]=v?1:0;}
+    else{const v=!x.crit;if(v===x.sCrit)delete O.crit[k];else O.crit[k]=v?1:0;}
+    putOver(O);decorate();return;}
+  if(e.target.id==='td46Reset'){putOver({in:{},crit:{}});decorate();}});
 }
 restore({counts:{}});
 })();
@@ -5107,6 +5194,34 @@ function paint(f){const ev=f&&f.evidence&&f.evidence['IA-1'],G=(ev&&Array.isArra
     (differ?'<p style="margin:6px 0 0"><b>The groups point to different functions.</b> A strategy chosen for one function may not fit the other setting: plan each setting\u2019s antecedent and consequence strategies for its own function, or verify the function in each setting before one plan covers both.</p>':'');}
 const was=window.__nbhFactsIn;
 window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r={filled:0};}try{paint(f||{});}catch(e){}return r;};
+})();
+</script>
+<style id="v2246-steps-css">
+.plan-step.crit .n{border-left-width:5px}
+.td46-ctl{flex:0 0 auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:210px}
+.td46-pill{font:600 11px/1 var(--sans);padding:5px 9px;border:1px solid var(--rule-2);border-radius:999px;background:transparent;color:var(--ink-2,#555);cursor:pointer;min-height:26px}
+.td46-pill[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.plan-step.td46-out .t{color:var(--ink-2,#666)}
+@media screen{.plan-step.td46-in{background:rgba(0,0,0,.025)}}
+#td46Steps{border:1px solid var(--rule-2);border-radius:6px;padding:8px 10px;margin:0 0 10px;font:13px/1.45 var(--sans)}
+#td46Steps p{margin:0 0 5px}#td46Steps .tools{margin-top:6px}
+.td46-prev summary{cursor:pointer;font-weight:600;margin:4px 0}
+.td46-prev ol{margin:4px 0 0;padding-left:26px;max-height:none}.td46-prev li{margin:0 0 5px;padding-left:4px}
+.td46-prev li.crit{border-left:4px solid var(--ink);padding-left:6px;margin-left:-10px}
+.td46-g{display:block;font-size:11px;color:var(--ink-2,#666);text-transform:none}
+.td46-key{font:11px/1.4 var(--sans);margin:0 0 6px}
+@media print{.td46-ctl,#td46Steps .noprint{display:none!important}#td46Steps{border:0;padding:0;margin:0}}
+</style>
+<script id="v2246-steps">
+/* v22.46 (I232) out: the plan's step list (built inside the form's own script, window.__td46Steps) with the plan */
+(function(){
+'use strict';
+/* out: the list with the plan */
+const wasOut=window.__nbhFactsOut;
+window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
+  try{const L=window.__td46Steps?window.__td46Steps():[];if(!L.length)return o;o=o||{};o.plan=o.plan||{src:'TD-1'};
+    o.plan.steps=L.slice(0,150).map(x=>({n:x.n,d:x.d.slice(0,1500),grp:x.grp,comp:x.comp,cmp:x.cmp,crit:x.crit}));o.plan.stepsRev=window.__td46Rev(L);}catch(e){}
+  return o;};
 })();
 </script>
 <style id="nbh-polish-css" data-nbh-screen>
