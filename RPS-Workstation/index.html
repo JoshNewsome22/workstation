@@ -2251,7 +2251,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.44';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.45';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -8671,6 +8671,9 @@ async function f2547Fill(blank,data){const {doc,form}=await f2547Fields(blank),p
   const yn=(k,v)=>{const x=get(k);if(!x||!/^(yes|no)$/.test(v||''))return;try{const o=x.getOptions();if(o.length>=2)x.select(o[v==='yes'?0:1]);}catch(e){}};
   put('Student_Number[0]',p.sid);put('First_Name[0]',nm.first);put('Middle_Name[0]',nm.middle);put('Last_Name[0]',nm.last);put('DOB[0]',us(p.dob));
   put('Grade[0]',p.grade);put('Request_Date[0]',data.date);put('Current_School[0]',p.site||data.school);
+  /* v22.45 the address of the contact Form DM-1 names for home: "street, city, ST 12345" split into the form's four boxes */
+  {const hm=((state.facts||{}).profile||{}).home||{},ad=String(hm.addr||'').replace(/\s*\n\s*/g,', ').trim();if(ad){const m=/^(.*?),\s*([^,]+?),?\s+([A-Z]{2})\.?\s+(\d{5}(?:-\d{4})?)$/.exec(ad);
+    if(m){put('Student_Address[0]',m[1]);put('Student_City[0]',m[2]);put('Student_State[0]',m[3]);put('Student_Zip[0]',m[4]);}else put('Student_Address[0]',ad);}}
   put('TextField2[1]',data.school||p.site);put('DateTimeField1[0]',data.date);
   tick('CheckBox1[0]',data.seated);tick('CheckBox1[1]',data.standing);tick('CheckBox1[2]',data.prone);tick('CheckBox1[3]',data.transport);put('TextField4[0]',data.other);
   yn('RadioButtonList[0]',data.injS);yn('RadioButtonList[1]',data.injO);put('TextField5[0]',data.inj);

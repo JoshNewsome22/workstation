@@ -9905,6 +9905,16 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.45: the parent or guardian typed once
+
+- **The home contact Form DM-1 names** (the contact who holds the educational rights, else the first parent or guardian;
+  review F464, I231) now also fills **Form IC-1's empty Parent / guardian box** (a typed name stays as typed) and the
+  **address lines of the district's form 2547**: street, city, state and ZIP, from DM-1's address for that contact.
+  The staff side of the same review item was done in v22.35: the staff directory offers each staff member, with role,
+  email and phone, in the boxes where a form names one.
+
+Checked by `qa/v2245-test.js` (4).
+
 ### v22.44: a data map for the district
 
 - **Print the data map for the district** (review I254), under Help, *Where the student's data goes*. One page, in the

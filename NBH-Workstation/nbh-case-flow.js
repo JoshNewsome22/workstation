@@ -101,6 +101,10 @@
     C.facts = f; var rep = null;
     try { if (window.__nbhFactsIn) rep = window.__nbhFactsIn(f); } catch(e) { rep = { error: String(e) }; }
     if (!rep) rep = C.generic(f, false);
+    /* v22.45 (review F464, I231) the parent or guardian Form DM-1 names (the contact who holds the rights, else the first parent
+       listed) goes into a form's empty parent name box (IC-1's consent); a text box only */
+    try { var hm = f.profile && f.profile.home, pb = document.querySelectorAll('input[name="c.parent"]');
+      if (hm && hm.name) for (var pi = 0; pi < pb.length; pi++) { if (!/^(text|)$/.test(pb[pi].type || '') && pb[pi].type !== 'text') continue; if (!String(pb[pi].value || '').trim()) { pb[pi].value = hm.name; pb[pi].dispatchEvent(new Event('input', { bubbles: true })); pb[pi].dispatchEvent(new Event('change', { bubbles: true })); if (rep && typeof rep.filled === 'number') rep.filled++; } } } catch(e) {}
     C.last = rep; C.paint(); try { C.paintConsent(); } catch(e) {} return rep;
   };
 
