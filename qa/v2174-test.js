@@ -134,7 +134,7 @@ const stub=()=>{window.confirm=()=>true;window.alert=m=>{window.__alert=String(m
     S.steps[0].d='My own first step';quick.rules.push({do:'Praise the first minute of work',dont:''});window.__nbhFactsIn({quick});r.kept=S.steps[0].d;
     document.getElementById('addQuick').click();r.after=S.steps.filter(s=>s.d).map(s=>s.d);return r;});
   ok('4a an empty step list takes the quick start’s non-negotiables, each do beside the don’t it replaces',
-    ti.rep>=3&&ti.steps[0]==='Say yes to the break card at once (not: make him wait or ask why)'&&ti.steps[1]==='One adult speaks during an escalation'&&ti.steps[2]==='Avoids: Threats of losing recess'&&ti.btn!=='none',ti);
+    ti.rep>=3&&ti.steps[0]==='Say yes to the break card at once (not: make him wait or ask why)'&&ti.steps[1]==='One adult speaks during an escalation'&&ti.steps[2]==='Does not: threats of losing recess'&&ti.btn!=='none',ti);
   ok('4b a list in use is left as it is; the button adds only the non-negotiables not yet on it',ti.kept==='My own first step'&&ti.after.length===5&&ti.after.filter(s=>/break card/.test(s)).length===1&&ti.after.includes('Praise the first minute of work')&&ti.after.includes('Say yes to the break card at once (not: make him wait or ask why)'),ti);
   await page.close();
 

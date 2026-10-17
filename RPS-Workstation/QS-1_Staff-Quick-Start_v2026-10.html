@@ -1357,7 +1357,9 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   if(fn&&(fn.label||fn.key)&&place('gets',fn.label||fn.key))n++;
   if(plan&&(plan.ant||[]).length)plan.ant.slice(0,6).forEach(a=>{if(placeRow('day','text',a))n++;});
   if(pf&&pf.helps&&placeRow('day','text','What helps: '+pf.helps))n++;
-  if(pf&&pf.avoid&&place('rules.0.dont',pf.avoid))n++;
+  /* v22.39 (review F461) DM-1's "what to avoid" is a note about the student, not a non-negotiable: it goes with the day, beside What helps;
+     rule 1 pairs the plan's own lines (its response, and its "staff do not") */
+  if(pf&&pf.avoid&&placeRow('day','text','Avoid: '+pf.avoid))n++;
   const sk=[];reps.forEach(b=>sk.push({name:b.label,text:b.def}));prob.forEach(b=>{if(b.rep&&!sk.some(s=>s.name===b.rep))sk.push({name:b.rep,text:''});});
   goals.acq.forEach(g=>{const s=sk.find(x=>x.name===g.beh);if(s){if(!s.text)s.text=g.text;}else sk.push({name:g.beh,text:g.text});});
   sk.slice(0,MAXR.skills).forEach((s,i)=>{while(S.skills.length<=i)S.skills.push(row('skills'));if(T(S.skills[i].name)&&T(S.skills[i].name)!==s.name)return;if(place('skills.'+i+'.name',s.name))n++;if(place('skills.'+i+'.text',s.text))n++;});

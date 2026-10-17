@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.39: the quick start's first rule, and the packet in the case's order
+
+- **Form QS-1's first non-negotiable is the plan's own** (review F461). Filled from the case, rule 1 paired the plan's
+  response ("Block, keep the task in place...") with DM-1's "What to avoid", a note about the student ("Being called out in
+  front of peers"), under "each do beside the don't it replaces", and Form TI-1 then scored the pair as one checklist step.
+  Rule 1 now pairs the plan's response with the plan's own "staff do not"; "What to avoid" goes with the day, beside What
+  helps ("Avoid: ..."). On TI-1 a rule with no Do is scored as "Does not: ...".
+- **The master print in the case's order** (review F466). The ticked forms print in the order a reader expects: consent,
+  assessment, the FBA, the plan, then the data record (Form DD-1 with its restraint log, the point sheet, the home sheets),
+  then the review and exit; a form not on the case map follows them. Packet options has Order: Case order (the default) or
+  List order (the form list's, as before).
+
+Checked by `qa/v2239-test.js` (6 checks).
+
 ### v22.38: Form PR-1's decisions and Form EB-1's brief (Wave 1, second part)
 
 - **Results by Target never fills a decision** (review F318). Inside the workstation it used to write its own suggestion
