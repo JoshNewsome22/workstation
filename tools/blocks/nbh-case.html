@@ -324,6 +324,58 @@
     n.className = 'nbh-consent ' + L.kind;
     n.innerHTML = '<b>' + (L.kind === 'ok' ? 'Consent' : 'Consent check') + ':</b> ' + esc(L.text);
   };
+  /* v22.46 (I232) the plan's step list: Form TD-1 sends plan.steps ([{n, d, grp, comp, cmp, crit}], n the number on its
+     printed plan) and plan.stepsRev, a fingerprint of the list. The forms that check and teach the plan (TI-1, ST-1)
+     take it. C.planSteps(f): the list and its fingerprint, or null. C.stepsMerge(steps, maps, list): the form's steps
+     made the plan's, in the plan's order, each with the plan's critical mark and component and its plan number (pn); a
+     step whose words are unchanged keeps its codes (maps: the form's records keyed "step_column", renumbered here);
+     a step no longer in the plan stays, at the end, when it holds codes or was written on the form itself, so nothing
+     scored or typed is lost (gone: it left the plan). C.stepsBar(before, o) shows or clears the notice that offers the
+     plan's list (o.kind 'offer') or says it has changed (o.kind 'changed'), with o.use and o.skip. */
+  C.stepKey = function(d){ return String(d == null ? '' : d).trim().replace(/\s+/g, ' ').toLowerCase(); };
+  C.planSteps = function(f){ f = f || C.facts; var p = f && f.plan,
+      s = p && Array.isArray(p.steps) ? p.steps.filter(function(x){ return x && String(x.d || '').trim(); }) : [];
+    return s.length ? { steps: s, rev: String(p.stepsRev || ''), crit: s.filter(function(x){ return x.crit; }).length } : null; };
+  C.stepsMerge = function(steps, maps, list){
+    var used = {}, from = {}, out = [], r = { kept: 0, added: 0, own: 0, gone: 0 };
+    var held = function(i){ return maps.some(function(m){ return Object.keys(m).some(function(k){ return +k.split('_')[0] === i && !!m[k]; }); }); };
+    list.forEach(function(p){ var k = C.stepKey(p.d), i = -1;
+      steps.forEach(function(st, j){ if (i < 0 && !used[j] && st && C.stepKey(st.d) === k) i = j; });
+      if (i >= 0) { used[i] = 1; from[i] = out.length; r.kept++; } else r.added++;
+      out.push({ d: String(p.d).trim(), crit: !!p.crit, cmp: p.cmp === 'con' || p.cmp === 'ant' ? p.cmp : '', pn: +p.n || 0 }); });
+    steps.forEach(function(st, j){ if (used[j] || !st) return; var t = String(st.d || '').trim(), h = held(j);
+      if (!h && (!t || st.pn)) return;
+      var o = {}; Object.keys(st).forEach(function(z){ o[z] = st[z]; });
+      if (st.pn) { delete o.pn; o.gone = true; r.gone++; } else r.own++;
+      from[j] = out.length; out.push(o); });
+    r.steps = out;
+    r.maps = maps.map(function(m){ var n = {}; Object.keys(m).forEach(function(k){ var p = k.split('_'), s = +p[0];
+      if (from[s] !== undefined) n[from[s] + '_' + p.slice(1).join('_')] = m[k]; }); return n; });
+    return r;
+  };
+  C.stepsMsg = function(r){ var L = [];
+    if (r.kept) L.push(r.kept + ' step' + (r.kept === 1 ? '' : 's') + ' unchanged, with ' + (r.kept === 1 ? 'its' : 'their') + ' codes');
+    if (r.added) L.push(r.added + ' new from the plan');
+    if (r.own) L.push(r.own + ' of your own kept at the end');
+    if (r.gone) L.push(r.gone + ' no longer in the plan kept at the end with ' + (r.gone === 1 ? 'its' : 'their') + ' codes');
+    return L.join('; '); };
+  C.stepsBar = function(before, o){
+    var b = q('#nbhStepsBar');
+    if (!o || !o.kind || !before) { if (b) b.remove(); return; }
+    if (!q('#nbh-steps-css')) { var st = document.createElement('style'); st.id = 'nbh-steps-css';
+      st.textContent = '.nbh-steps-bar{margin:6px 0 10px;padding:8px 12px;border-radius:6px;font:13px/1.45 var(--sans,system-ui,sans-serif);border:1px solid #e3c98f;background:#fff8e8;color:#5b4310}' +
+        '.nbh-steps-bar b{font-weight:600}.nbh-steps-bar .nbh-sb-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}@media print{.nbh-steps-bar{display:none!important}}';
+      document.head.appendChild(st); }
+    if (!b) { b = document.createElement('div'); b.id = 'nbhStepsBar'; b.className = 'nbh-steps-bar'; b.setAttribute('role', 'status'); }
+    if (b.nextSibling !== before) before.parentNode.insertBefore(b, before);
+    var n = o.n + ' step' + (o.n === 1 ? '' : 's') + (o.crit ? ', ' + o.crit + ' critical' : '');
+    b.innerHTML = o.kind === 'changed'
+      ? '<b>The plan&rsquo;s steps changed.</b> Form TD-1&rsquo;s step list (' + esc(n) + ') is not the one this list was taken from. Update takes the plan&rsquo;s steps in its order; a step whose words did not change keeps its codes, and a step that holds codes or that you wrote here stays at the end.' +
+        '<div class="nbh-sb-act"><button type="button" class="tool" data-sb="use">Update the steps</button><button type="button" class="tool" data-sb="skip">Not now</button></div>'
+      : '<b>The plan&rsquo;s step list.</b> Form TD-1 has a step list for this plan (' + esc(n) + '). Use it to make this form&rsquo;s steps the plan&rsquo;s, in its order; a step here that holds codes or that you wrote stays at the end.' +
+        '<div class="nbh-sb-act"><button type="button" class="tool" data-sb="use">Use the plan&rsquo;s steps</button><button type="button" class="tool" data-sb="skip">Not now</button></div>';
+    b.onclick = function(e){ var a = e.target && e.target.getAttribute && e.target.getAttribute('data-sb'); if (a === 'use') o.use(); else if (a === 'skip') o.skip(); };
+  };
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();

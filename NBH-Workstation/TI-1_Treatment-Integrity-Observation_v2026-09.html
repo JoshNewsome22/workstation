@@ -2151,6 +2151,7 @@ function retrainData(){const dec=deciding(),crit=S.crit;
   let kc=0,ke=0,ko=0;S.steps.forEach((st,i)=>{if(st&&st.cmp==='con')dec.forEach(r=>{const x=oppOf(i,r.j);kc+=x.c;ke+=x.ec;ko+=x.eo;});});
   const classes={consequence:{opportunities:kc+ke+ko,correct:kc,commission:ke,omission:ko,commissionPct:kc+ke+ko?r2(100*ke/(kc+ke+ko)):null,omissionPct:kc+ke+ko?r2(100*ko/(kc+ke+ko)):null}};
   return{dec,obs,steps,classes};}
+window.__tiRetrain=retrainData;   /* v22.46 (I232): the steps missed, for the case (ti1-v2246) */
 function handoffNote(){const x=retrainData(),d=x.dec,cols=d.map(r=>'#'+(r.j+1)),few=d.length<S.critN,st=x.steps.map(s=>String(s.n));
   if(!d.length)return'No unannounced observation has scored steps yet, so there is no observation to take the file from.';
   return'The file is taken from observation'+(d.length>1?'s ':' ')+list(cols)+
@@ -3441,6 +3442,49 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="ti1-v2246">
+/* v22.46 (I232) the plan's step list (Form TD-1's plan.steps, through nbhCase.planSteps). An empty step list (no step
+   written, nothing coded) takes it when the case opens; it comes before the Quick Start's non-negotiables (Form QS-1). A list already started is offered it
+   ("Use the plan's steps"), and a list taken from it is told when the plan's list has changed ("Update the steps"):
+   nbhCase.stepsMerge keeps the codes of every step whose words did not change, and keeps at the end a step that holds
+   codes or was written here. S.plan = {rev, skip}: the fingerprint of the list taken, and one the BCBA set aside. */
+(function(){
+'use strict';
+let P=null;
+const C=()=>window.nbhCase&&window.nbhCase.stepsMerge?window.nbhCase:null;
+const coded=()=>[S.cells,S.ioa,S.opp].some(m=>Object.keys(m||{}).some(k=>!!m[k]));
+const empty=()=>S.steps.every(st=>!String(st&&st.d||'').trim())&&!coded();
+function take(){const c=C();if(!c||!P)return null;const r=c.stepsMerge(S.steps,[S.cells,S.ioa,S.opp],P.steps);
+  S.steps=r.steps;S.cells=r.maps[0];S.ioa=r.maps[1];S.opp=r.maps[2];S.plan={rev:P.rev};renderAll();return r;}
+/* under each step's words: its number on the plan's printed list, or that it has left the plan's list */
+function marks(){S.steps.forEach((st,i)=>{const ta=document.querySelector('#stepTbl textarea[data-s="'+i+'"]');if(!ta||!st)return;
+  const td=ta.parentNode;let m=td.querySelector('.nbh-pn');if(!st.pn&&!st.gone){if(m)m.remove();return;}
+  if(!m){m=document.createElement('div');m.className='nbh-pn noprint';m.style.cssText='font:11px/1.3 var(--sans,system-ui,sans-serif);color:#6b6b6b;margin-top:2px';td.appendChild(m);}
+  m.textContent=st.gone?'No longer in the plan\u2019s step list (Form TD-1): kept for its codes. Delete it when they are no longer needed.':'Plan step '+st.pn+' (Form TD-1)';});}
+function bar(){try{marks();}catch(e){}const c=C(),t=document.getElementById('stepTbl'),at=t&&(t.closest('.grid-wrap')||t);if(!c||!at)return;
+  const linked=!!(S.plan&&S.plan.rev);
+  if(!P||(linked&&S.plan.rev===P.rev)||(S.plan&&S.plan.skip===P.rev)||(!linked&&empty())){c.stepsBar(at,null);return;}
+  c.stepsBar(at,{kind:linked?'changed':'offer',n:P.steps.length,crit:P.crit,
+    use:()=>{const r=take();bar();try{nbhUI.toast('The plan\u2019s steps are the integrity checklist: '+c.stepsMsg(r)+'.',{kind:'ok'});}catch(e){}},
+    skip:()=>{S.plan=Object.assign({},S.plan||{},{skip:P.rev});c.stepsBar(at,null);try{const e=document.querySelector('#stepTbl textarea,#stepTbl input');if(e)e.dispatchEvent(new Event('input',{bubbles:true}));}catch(e){}}});}
+const wasRender=renderAll;
+renderAll=function(){const r=wasRender.apply(this,arguments);try{bar();}catch(e){}return r;};
+const wasIn=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){const c=C();P=c?c.planSteps(f):null;
+  if(P&&empty()){const r=take();bar();let g=null;try{g=c.generic?c.generic(f,false):null;}catch(e){g=null;}
+    try{nbhUI.toast(r.steps.length+' step'+(r.steps.length===1?'':'s')+' from the plan (Form TD-1), '+P.crit+' critical.',{kind:'ok'});}catch(e){}
+    return {filled:((g&&g.filled)|0)+r.steps.length,note:'the steps are the plan\u2019s step list (Form TD-1)'};}
+  const r=wasIn?wasIn.apply(this,arguments):null;try{bar();}catch(e){}return r;};
+const wasOut=window.__nbhFactsOut;
+/* out: integrity.missed, the steps the retraining list names (below the criterion or with an error on the deciding
+   observations), most urgent first, each with its number on the plan (pn) when it came from the plan's list */
+window.__nbhFactsOut=function(){let o=null;try{o=wasOut?wasOut.apply(this,arguments):null;}catch(e){o=null;}
+  try{if(o&&o.integrity&&window.__tiRetrain){const x=window.__tiRetrain();if(x&&x.dec&&x.dec.length){
+    o.integrity.missed=x.steps.slice(0,12).map(s=>{const st=S.steps[s.n-1]||{};const m={d:s.text,n:s.n,crit:!!s.critical,cmp:st.cmp||'',pct:s.pct,ec:s.commission,eo:s.omission};if(st.pn)m.pn=st.pn;return m;});}
+    if(S.plan&&S.plan.rev)o.integrity.planRev=S.plan.rev;}}catch(e){}
+  return o;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

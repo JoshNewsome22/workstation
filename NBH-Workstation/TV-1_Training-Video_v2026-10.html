@@ -2282,7 +2282,12 @@ function tvSums(){const T=tvSegTimes(),tg=num(S.meta.target);let big=null;T.m.fo
 /* ---- the rehearsal steps: the strategies, the do list, the response steps and the tiers, for Form ST-1 and to print ---- */
 const TV_STEP_SEGS=['proactive','reinforce','everyday','response','tiers'];
 const tvSegKey=r=>{const s=SEGS.find(x=>x[1]===r.seg);return s?s[0]:'';};
-function tvSteps(){const out=[],seen=new Set();
+/* v22.46 (I232): when the case carries the plan's step list (Form TD-1), the rehearsal steps are that list, with its
+   critical marks, so the video, the training (Form ST-1) and the integrity check (Form TI-1) rehearse and score the same
+   steps; without it they come from the script, as before */
+const tvPlan=()=>{try{return window.nbhCase&&window.nbhCase.planSteps?window.nbhCase.planSteps(CASE||{}):null;}catch(e){return null;}};
+function tvSteps(){const P=tvPlan();if(P)return P.steps.slice(0,40).map(s=>({d:String(s.d).trim(),crit:!!s.crit,cmp:s.cmp||'',seg:'',pn:+s.n||0}));
+  const out=[],seen=new Set();
   S.rows.forEach(r=>{const k=tvSegKey(r);if(!TV_STEP_SEGS.includes(k)||r.lay==='title'||/^works for$/i.test(str(r.title)))return;if(k==='tiers'&&!/^(see|do|say)\s*:/im.test(r.body||''))return;
     String(r.body||'').split('\n').forEach(l=>{let d=l.trim().replace(/^[•\-*–]\s*/,'').replace(/^\d+[.)]\s+/,'').trim();if(!d||todo(d)||/^(don[’']?t|do not|never)\s*:/i.test(d)||/^see\s*:/i.test(d))return;
       d=d.replace(/^do\s*:\s*/i,'').replace(/^say\s*:\s*/i,'Says: ');if(k==='tiers'&&str(r.title))d+=' ('+str(r.title)+')';
@@ -2290,7 +2295,7 @@ function tvSteps(){const out=[],seen=new Set();
   return out.slice(0,30);}
 window.__nbhFactsOut=function(){try{const st=tvSteps();return st.length?{training:{steps:st.map(s=>({d:s.d,crit:s.crit,cmp:s.cmp,seg:s.seg})),title:possess(firstName())+' training video',src:'TV-1'}}:null;}catch(e){return null;}};
 function tvStepsRender(){const el=$('#stepsOut');if(!el)return;const st=tvSteps();
-  el.innerHTML=st.length?'<p class="hint">'+st.length+' step'+(st.length>1?'s':'')+' from the script: the strategies, the do list, the response steps and the tiers. In the workstation, Form ST-1 takes them for its step list when that list is empty (the response steps and the tiers marked critical).</p><ol class="tv-steps">'+st.map(s=>'<li>'+esc(s.d)+(s.crit?' <b class="tv-crit">critical</b>':'')+' <span class="hint">('+(s.cmp==='ant'?'antecedent':'consequence')+')</span></li>').join('')+'</ol>':
+  el.innerHTML=st.length?'<p class="hint">'+st.length+' step'+(st.length>1?'s':'')+(tvPlan()?' from the plan\u2019s step list (Form TD-1), with its critical marks: the steps Form ST-1 trains and Form TI-1 scores.':' from the script: the strategies, the do list, the response steps and the tiers. In the workstation, Form ST-1 takes them for its step list when that list is empty (the response steps and the tiers marked critical).')+'</p><ol class="tv-steps">'+st.map(s=>'<li>'+esc(s.d)+(s.crit?' <b class="tv-crit">critical</b>':'')+(s.cmp?' <span class="hint">('+(s.cmp==='ant'?'antecedent':'consequence')+')</span>':'')+'</li>').join('')+'</ol>':
     '<div class="verdict v-mid"><b>No steps yet.</b> The steps come from the cards of the proactive strategies, the reinforcement, the do and don’t, the response plan and the tiers.</div>';}
 function tvStepsPrint(){const st=tvSteps(),box='<td class="pq-box"></td>';
   return '<h1 class="pr-h">'+esc(possess(firstName()))+' Plan: the Rehearsal Checklist</h1><p class="pr-s">'+esc([S.meta.client,S.meta.site,S.meta.pname].filter(Boolean).join(' · '))+'</p>'+

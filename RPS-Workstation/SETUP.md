@@ -9905,6 +9905,39 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.46: one step list for the plan
+
+- **Form TD-1's final plan marks its step list** (review I232). Every numbered line on the final plan has, on screen,
+  **In the list** and, once in it, **Critical**. The step list is what staff carry out, and the one list the integrity
+  check, the staff training and the training video take, in the plan's order and with the plan's numbers. A box above
+  the steps explains it and previews the list as the other forms take it.
+  - Suggested **in the list**: positioning, seating, attention and setting events; the prompt hierarchy and its
+    reinforcement; the response to the precursor and to the behavior; escape extinction's guidance and stopping
+    rules; and any card step that delivers the reinforcer. The **fading rule** starts out (add it if staff carry it
+    out). The cards' library steps, written for the BCBA, start out; add any of them.
+  - **Never in the list**: the crisis procedure (Form CR-1 governs it), the thinning ladder and the generalization plan
+    (the BCBA's decisions), the data rules, and escape extinction's consent lines.
+  - Suggested **critical**: every consequence step that delivers or withholds the reinforcer, where integrity errors
+    do the most harm (St. Peter Pipkin, Vollmer, & Sloman, 2010; Carroll, Kodak, & Fisher, 2013); the response to the
+    behavior and "Staff do not"; and the stopping and safety rules. A critical step prints with a bar on its number.
+  - **Escape extinction in the list: as separate steps, or as one step** that names each line (and refers back to the
+    plan's numbers). The default is separate steps.
+  - Changes are saved with the form; **Use the suggested marks** undoes them.
+- **Form TI-1 and Form ST-1 take the list.** An empty step list takes it when the case opens, with its critical marks
+  and components, before the Quick Start's non-negotiables (TI-1) or the training video's steps (ST-1). Each step shows
+  its plan number under its words.
+  - A list already started is offered it (**Use the plan's steps**); a list taken from it is told when the plan's list
+    changes (**The plan's steps changed**, **Update the steps**, or **Not now** for that version).
+  - Update puts the plan's steps in its order. A step whose words did not change keeps its codes (observations, IOA and
+    opportunity counts on TI-1; rehearsal rounds on ST-1). A step that holds codes but left the plan, or that was
+    written on the form, stays at the end, labelled, so nothing scored or typed is lost.
+- **Form TV-1's rehearsal steps are the plan's list** when the case has one (the script's lines as before otherwise).
+- **The steps missed reach the review.** Form TI-1 sends the steps its deciding observations found below the criterion
+  or with an error, with their plan numbers. Form PR-1's "what else the case says" names them, and Form PD-1's empty
+  performance concern starts from them.
+
+Checked by `qa/v2246-test.js` (14) and `qa/v2246b-test.js` (13).
+
 ### v22.45: the parent or guardian typed once
 
 - **The home contact Form DM-1 names** (the contact who holds the educational rights, else the first parent or guardian;
