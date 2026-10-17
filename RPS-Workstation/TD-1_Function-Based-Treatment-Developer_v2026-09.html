@@ -5088,6 +5088,24 @@ html:not(.nbh-compact) .toolbar > .tgroup.tg-keep:not(.tg-ctl){flex:1 1 100%}
 
 
 <script id="nbh-autosave" src="nbh-autosave.js"></script>
+<script id="v2236-bygroup">
+(function(){"use strict";
+/* v22.36 Form IA-1's results by group, when the case carries more than one: the plan is shown what each group's informants
+   point to, and, when they differ (school escape, home attention), that the plan may need a strategy for each setting. On
+   screen above the plan; nothing is filled or changed, and nothing prints. */
+const T=s=>String(s==null?'':s).replace(/\s+/g,' ').trim(),E=s=>T(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function paint(f){const ev=f&&f.evidence&&f.evidence['IA-1'],G=(ev&&Array.isArray(ev.groups)?ev.groups:[]).filter(g=>g&&T(g.name));
+  let box=document.getElementById('tdByGroup');
+  if(G.length<2){if(box)box.remove();return;}
+  const keyed=G.filter(g=>g.key!=='all'&&g.n>=3&&g.fnKey&&g.fnKey!=='unclear'),fk=[...new Set(keyed.map(g=>g.fnKey))],differ=fk.length>1;
+  if(!box){box=document.createElement('div');box.id='tdByGroup';box.className='warn noprint';box.style.margin='0 0 14px';
+    const at=document.querySelector('#setup.sheet')||document.querySelector('.sheet');if(!at)return;at.insertBefore(box,at.firstChild);}   /* the Setup sheet, where the plan starts */
+  box.innerHTML='<b>Indirect results by group (Form IA-1)</b><ul style="margin:6px 0 0">'+G.map(g=>'<li>'+E(g.name)+(g.main?' (main)':'')+': '+E(g.label)+'</li>').join('')+'</ul>'+
+    (differ?'<p style="margin:6px 0 0"><b>The groups point to different functions.</b> A strategy chosen for one function may not fit the other setting: plan each setting\u2019s antecedent and consequence strategies for its own function, or verify the function in each setting before one plan covers both.</p>':'');}
+const was=window.__nbhFactsIn;
+window.__nbhFactsIn=function(f){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r={filled:0};}try{paint(f||{});}catch(e){}return r;};
+})();
+</script>
 <style id="nbh-polish-css" data-nbh-screen>
 /* ---- polish: the screen look every form shares ------------------------------
    Every rule here sits inside "@media screen", so nothing on paper changes: a

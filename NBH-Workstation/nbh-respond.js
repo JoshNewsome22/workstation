@@ -393,7 +393,9 @@
      links: [{label,url}] (one per target behavior where a form makes several); the title, the student's initials, the due
      date and the assessor are read from the first link's questionnaire. Nothing is sent from here: Open in Mail hands the
      email to the device's mail app (a mailto link), Share... to the share sheet (Gmail, Outlook, Messages), Copy puts the
-     message on the clipboard. The informant's address is remembered on this device for the next email (never in the file). */
+     message on the clipboard. The informant's address is remembered on this device for the next email (never in the file).
+     v22.36 inside the workstation, Send from my school account sends it at once (the workstation's Gmail send, U.mailAsk),
+     and Open in Mail stays beside it; o.onSent('email') when it went. */
   U.invite=function(o){o=o||{};var d=document,ls=(o.links||[]).filter(function(l){return l&&l.url;});if(!ls.length)return;
     var P=U.payloadFromHash(ls[0].url)||{};
     var title=o.title||P.title||P.inst||'questionnaire',who=String(P.student||o.student||'').replace(/\s*\((?:ID|id)[^)]*\)\s*/,'').trim(),bcba=P.bcba||o.bcba||'',due=P.due||'';
@@ -406,23 +408,30 @@
       urls+'\n\nSi el enlace no se abre, responda a este correo y le enviar\u00e9 el cuestionario como archivo.\n\nGracias,\n'+(bcba||'')
      :'Hello,\n\nThank you for helping with this questionnaire'+(who?' about '+who:'')+': '+title+'. It takes a few minutes on a phone, tablet or computer. Open the link'+(ls.length>1?' for each behavior':'')+(defn?', read the behavior definition,':',')+' answer the questions, and press Send at the end. '+(boxed?'Your answers come straight back to me when you press Send.':'Your answers come back to me by email.')+(due?' Please send it by '+due+'.':'')+'\n\n'+
       urls+'\n\nIf the link does not open, reply to this email and I will send the questionnaire as a file.\n\nThank you,\n'+(bcba||'');
+    var inWs=false;try{inWs=!!(window.parent&&window.parent!==window);}catch(e){inWs=false;}
     var dlg=d.createElement('dialog');dlg.className='nbh-inv';dlg.setAttribute('aria-labelledby','nbhInvT');
     var css='.nbh-inv{max-width:560px;width:calc(100vw - 32px);max-height:calc(100vh - 24px);overflow:auto;box-sizing:border-box;border:0;border-radius:14px;padding:18px 20px;box-shadow:0 12px 40px rgba(0,0,0,.3);font:15px/1.45 Inter,"Segoe UI",Arial,sans-serif;color:#1b2430}'+
       '.nbh-inv::backdrop{background:rgba(16,22,28,.5)}.nbh-inv h3{margin:0 0 10px;font:600 18px/1.3 Georgia,serif}.nbh-inv label{display:block;font-weight:600;margin:8px 0 3px}'+
       '.nbh-inv input,.nbh-inv textarea{width:100%;box-sizing:border-box;font-family:inherit;font-size:15px;line-height:1.4;padding:8px 10px;border:1px solid #b8c2cc;border-radius:8px}.nbh-inv textarea{min-height:9em;height:34vh;max-height:46vh;resize:vertical}'+
       '.nbh-inv .b{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.nbh-inv button{font-family:inherit;font-size:15px;font-weight:600;line-height:1.2;padding:10px 14px;border-radius:10px;border:1px solid #9aa5b1;background:#fff;color:#1b2430;min-height:44px;cursor:pointer}'+
-      '.nbh-inv button.go{background:#1d4a77;border-color:#1d4a77;color:#fff}.nbh-inv .n{font-size:13px;color:#4a5560;margin:8px 0 0}.nbh-inv .st{min-height:1.3em;font-weight:600;margin:8px 0 0}';
+      '.nbh-inv button.go{background:#1d4a77;border-color:#1d4a77;color:#fff}.nbh-inv button:disabled{opacity:.6;cursor:default}.nbh-inv .n{font-size:13px;color:#4a5560;margin:8px 0 0}.nbh-inv .st{min-height:1.3em;font-weight:600;margin:8px 0 0}';
     dlg.innerHTML='<style>'+css+'</style><h3 id="nbhInvT">Email the questionnaire</h3>'+
       '<label for="nbhInvTo">To (the informant’s email)</label><input id="nbhInvTo" type="email" autocomplete="email" inputmode="email" spellcheck="false">'+
       '<label for="nbhInvSu">Subject</label><input id="nbhInvSu">'+
       '<label for="nbhInvBo">Message</label><textarea id="nbhInvBo" spellcheck="true"></textarea>'+
       '<p class="n">The email goes from your own email account. The questionnaire shows the student by initials only; check the message before you send it.</p>'+
-      '<div class="b"><button type="button" class="go" data-a="mail">Open in Mail</button>'+(navigator.share?'<button type="button" data-a="share">Share…</button>':'')+'<button type="button" data-a="copy">Copy the message</button><button type="button" data-a="close">Close</button></div><p class="st" role="status" aria-live="polite"></p>';
+      '<div class="b">'+(inWs?'<button type="button" class="go" data-a="send">Send from my school account</button><button type="button" data-a="mail">Open in Mail</button>':'<button type="button" class="go" data-a="mail">Open in Mail</button>')+(navigator.share?'<button type="button" data-a="share">Share…</button>':'')+'<button type="button" data-a="copy">Copy the message</button><button type="button" data-a="close">Close</button></div><p class="st" role="status" aria-live="polite"></p>';
     d.body.appendChild(dlg);var $=function(q){return dlg.querySelector(q);};$('#nbhInvTo').value=o.to||last;$('#nbhInvSu').value=subj;$('#nbhInvBo').value=body;
     var keep=function(){var t=$('#nbhInvTo').value.trim();try{if(t)localStorage.setItem(KEY,t);}catch(e){}return t;};
     var say=function(t){$('.st').textContent=t;};
     dlg.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('button[data-a]');if(!b)return;var a=b.getAttribute('data-a'),to=keep(),su=$('#nbhInvSu').value,bo=$('#nbhInvBo').value;
       if(a==='close'){dlg.close();dlg.remove();return;}
+      if(a==='send'){if(!to||!EMAIL_RE.test(to)){say(to?'That email address does not look complete.':'Type the informant\u2019s email first.');$('#nbhInvTo').focus();return;}
+        var fm=o.form||P.form||((/Form\s+([A-Z]{2,3}-\d)/.exec(d.title)||[])[1])||'';b.disabled=true;say('Sending\u2026');
+        U.mailAsk(fm,[{to:to,name:o.name||'',subject:su,text:bo}]).then(function(r){b.disabled=false;
+          if(r.results){var x=r.results[0];if(x&&x.ok){b.textContent='Sent';b.disabled=true;say('Sent from '+(r.from||'your school account')+' to '+to+'.');try{if(o.onSent)o.onSent('email');}catch(e){}}
+            else say('Not sent'+(x&&x.err?' ('+x.err+')':'')+'. Open in Mail sends it from the Mail app instead.');}
+          else if(r.declined)say('');else if(/Mail app/.test(r.why))say('Press Open in Mail to send it from the Mail app.');else say('The workstation cannot send it from here ('+r.why+'). Open in Mail sends it from the Mail app instead.');});return;}
       if(a==='mail'){if(to&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)){say('That email address does not look complete.');$('#nbhInvTo').focus();return;}
         var href='mailto:'+encodeURIComponent(to).replace(/%40/g,'@')+'?subject='+encodeURIComponent(su)+'&body='+encodeURIComponent(bo);
         var l=d.createElement('a');l.href=href;l.target='_top';l.rel='noopener';d.body.appendChild(l);l.click();l.remove();

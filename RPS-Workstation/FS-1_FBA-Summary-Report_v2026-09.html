@@ -3023,6 +3023,15 @@ function fsEvidence(f){const E=(f&&f.evidence)||{},put=[],hyp=[];let n=0;
     const contrib=[fsEvT(e.method)+(e.n!=null&&e.n!==''?' ('+e.n+' '+(fsEvUnit[id]||'')+')':''),fsEvT(e.statement)].filter(Boolean).join('. ').replace(/\.\./g,'.');
     const row={form:id,method,dates:fsEvT(e.dates),who:fsEvT(e.by),contrib,fn:fsEvFn(e),str:STR.indexOf(e.strength)>0?e.strength:''};
     const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push(id);n++;});
+  /* v22.36 Form IA-1's analyses by group (all informants, school, home, a named group) that were ticked "In the case": a row
+     each, beside the assessment's own row; one already listed (its contribution starts with the group's name) is left as it is */
+  const IAG=E['IA-1']&&Array.isArray(E['IA-1'].groups)?E['IA-1'].groups:[];
+  IAG.forEach(g=>{if(!g||!fsEvT(g.name)||g.key==='all')return;const nm=fsEvT(g.name);
+    if(S.src.some(r=>fsEvT(r.form)==='IA-1'&&fsEvT(r.contrib).indexOf(nm+' (')===0))return;
+    const inst=(g.perInst||[]).map(x=>fsEvT(x.inst)+' '+fsEvT(x.lead).toLowerCase()+' '+x.k+' of '+x.m+(x.agree!=null?', agreement '+x.agree+'%':'')).join('; ');
+    const contrib=nm+' ('+(g.codes||[]).join(', ')+'): '+fsEvT(g.label)+(inst?'. '+inst:'')+'.';
+    const row={form:'IA-1',method:fsEvMethod('IA-1',E['IA-1']),dates:fsEvT(E['IA-1'].dates),who:fsEvT(E['IA-1'].by),contrib,fn:fsEvFn({fnKey:g.fnKey}),str:STR.indexOf(g.strength)>0?g.strength:''};
+    const slot=S.src.find(r=>!rowHas(r));if(slot)Object.assign(slot,row);else S.src.push(row);put.push('IA-1 ('+nm+')');n++;});
   ['IA-1','OB-1','EA-1'].forEach(id=>{const e=E[id];if(!e||!fsEvT(e.statement))return;if(S.hyp.some(r=>fsEvNames(r,id)))return;
     const slot=S.hyp.find(r=>!rowHas(r));if(!slot)return;
     Object.assign(slot,{h:(fsEvT(e.fn)||'What the record suggests')+' (Form '+id+')',how:fsEvT(e.method)+(e.dates?', '+fsEvT(e.dates):''),out:'',what:fsEvT(e.statement)});hyp.push(id);n++;});

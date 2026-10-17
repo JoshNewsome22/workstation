@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.36: Form IA-1's results by group
+
+- **Up to twelve informants** (A to L), school and home together: send the FAST, QABF, MAS or the other instruments to the
+  whole team and place each reply as before.
+- **Each informant's setting and groups.** The setting comes from the role (a parent, relative, home provider or group home
+  is Home; school staff are School), or is chosen (School, Home, Community, Other). A group name ("Classroom teachers", "Fine
+  arts") puts informants together; one informant can be in more than one group (separate them with a comma).
+- **Results by Group** (on the Convergence summary): one row per analysis, all informants, school, home, each named group,
+  and any analysis made from chosen informants (**New analysis**). Each row gives the informants, the leading category and
+  how many agree, counted by the convergence sheet's rule; a group of fewer than three is marked as too few for consensus.
+  When the groups point to different functions, the box under the table names them.
+- **Analyze** on each worksheet (FAST, QABF, MAS and the rest) narrows its totals, verdict and item agreement to one
+  analysis; the other informants' columns are dimmed. The printed copy says which analysis it is.
+- **Several analyses go into the case.** Tick **In the case** on each one to send; pick the main one. The main one's leading
+  category fills the indirect hypothesis while it is empty. Form FS-1's evidence table lists a row for each analysis sent
+  (School (A, B, C, D): Escape ...), and Form TD-1 shows each group's result on screen, with a note when they differ.
+- All of it is kept in the IA-1 file and in the case, per target.
+
+- **Email the questionnaire sends from here.** Inside the workstation, the Email it window (IA-1's Respondent pages, a row's
+  Email on the Send-outs sheet, and the same window in IN-1, SV-1 and CF-1) has **Send from my school account** first: the
+  workstation asks once, signs in to Google and sends it through Gmail, and the window says it went. **Open in Mail**, Share
+  and Copy stay beside it, for the Mail app or when Google is not set up on this device. A form opened on its own keeps Open
+  in Mail only.
+
+Checked by `qa/v2236-ia1-groups-test.js` and `qa/v2236-invite-send-test.js`.
+
 ### v22.35: Staff directory
 
 - **One list of the school staff you send forms to,** typed once for the whole caseload: **Staff directory** in the top
