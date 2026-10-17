@@ -2251,7 +2251,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.43';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.44';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3623,7 +3623,7 @@ function dataWhere(){
     ['Short questionnaire links','The questionnaire (the behavior, its definition, initials, the due date), locked, on the practice website; the key stays in the link','60 days'],
     ['Form DD-1\u2019s Google Sheet','Read from Google to this '+HERE+'; nothing is written to the sheet','\u2014']];
   rows.push(['Check wording, Dictate, Read a document, My pictures, the TK-1 video','Stay on this '+HERE,'\u2014']);
-  return '<p>Everything else stays on this '+HERE+'. Ask the district before using any row that sends something off the device for real cases.</p><table class="hp-data"><tr><th>What</th><th>Where it goes</th><th>How long</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table>';}
+  return '<p>Everything else stays on this '+HERE+'. Ask the district before using any row that sends something off the device for real cases. <button type="button" id="dmPrint">Print the data map for the district</button></p><table class="hp-data"><tr><th>What</th><th>Where it goes</th><th>How long</th></tr>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</table>';}
 $('#help').addEventListener('click',()=>{
   const fold=(t,h)=>'<details><summary>'+t+'</summary>'+h+'</details>';
   dialog('How this works',
@@ -8697,6 +8697,33 @@ document.addEventListener('change',async e=>{if(e.target.id!=='f2547File')return
     const w=F2547.want;F2547.want=null;if(w)f2547Run(w);else try{$('#dlg').close();}catch(x){}}
   catch(err){wsUI.toast('That file could not be read as a PDF form ('+String(err&&err.message||err).slice(0,80)+').',{kind:'warn'});}});
 document.addEventListener('click',e=>{if(e.target.closest('#f2547New')){F2547.want=null;f2547Pick('');}});
+</script>
+<script id="nbh-v2243">
+/* v22.43 (review I254) the data map for the district: one printable page that answers an auditor's questions in order: what is
+   kept where (the same table as Help, Where the student's data goes, so the two never differ), what each Google permission
+   allows, what the practice website keeps, and how a record is destroyed. It names no student and no account. */
+function dmHtml(){const g=[
+    ['Use Google Drive (Caseload)','drive.file, and the account\u2019s email address','Only the files the workstation itself made in the school Drive; no other file in the Drive is visible to it. The address shows which account is signed in.'],
+    ['Send questionnaires from the school account','gmail.send','Sends the emails the BCBA presses Send for. It cannot read, list or delete mail.'],
+    ['Form DD-1\u2019s Google Sheet','spreadsheets.readonly','Reads the sheet whose link is pasted on the form; writes nothing. Google grants read access to the account\u2019s sheets; the workstation opens only that one.']];
+  const site=[['The reply box (questionnaire answers, staff phone entries)','Only locked copies it cannot read: each reply sealed on the sender\u2019s phone to the form\u2019s own key; no name, score or student. Removed when the form collects it, or after 60 days. No log of requests beyond the web server\u2019s own.'],
+    ['Short questionnaire links','The questionnaire, sealed with a key that stays in the link (never sent to the site). 60 days.']];
+  if(DRV_ED!=='rps')site.push(['The writing help\u2019s relay (only after a passcode)','No text at all: neither what is sent nor the rewrite is stored or logged. Names and the ID are replaced on the '+HERE+' before anything is sent.']);
+  const del=['On this '+HERE+': Caseload, a student\u2019s card, <b>Remove</b>; or Help, <b>Remove all student data from this '+HERE+'</b>. History\u2019s restore points and the Autosave copies go with them.',
+    'In the school Drive (when used): <b>Remove everywhere</b> takes the student\u2019s case file and every replaced copy; Drive keeps them in its trash for 30 days.',
+    'On the practice website: the form\u2019s <b>Remove the collected replies from the site</b>, or 60 days.',
+    'Case files saved by the BCBA and emails in the Sent folder: as the district keeps records.'];
+  const T=x=>'<table><tr>'+x[0].map(h=>'<th>'+h+'</th>').join('')+'</tr>'+x.slice(1).map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>';
+  const where=dataWhere().replace(/<button[^>]*id="dmPrint"[^>]*>[\s\S]*?<\/button>/,'').replace('class="hp-data"','');
+  return '<!doctype html><html><head><meta charset="utf-8"><title>Data map</title><style>body{font:10.5px/1.35 -apple-system,Segoe UI,Helvetica,Arial,sans-serif;color:#16242e;margin:0}h1{font-size:16px;margin:0 0 2px}h2{font-size:12px;margin:9px 0 3px}p{margin:3px 0}table{width:100%;border-collapse:collapse;margin:3px 0 5px}th,td{text-align:left;vertical-align:top;border-top:1px solid #c9d3d8;padding:2px 5px}th{background:#eef3f5}ul{margin:4px 0 0 18px;padding:0}.sub{color:#4a5a63}@page{size:letter;margin:12mm}<\/style><\/head><body>'+
+    '<h1>Data map: where student information goes</h1><p class="sub">The behavior workstation, version '+WS_REL+'. It runs in the browser and keeps its records on the device unless a feature below is turned on. Printed '+new Date().toLocaleDateString()+'.</p>'+
+    '<h2>1. What is kept where</h2>'+where+
+    '<h2>2. What each Google permission allows</h2><p>Each is asked for only when the feature is first used, by the school account the BCBA signs in with.</p>'+T([['Feature','Permission','What it allows']].concat(g))+
+    '<h2>3. What the practice website keeps</h2>'+T([['Service','What it keeps']].concat(site))+
+    '<h2>4. How a record is destroyed</h2><ul>'+del.map(x=>'<li>'+x+'</li>').join('')+'</ul><\/body><\/html>';}
+document.addEventListener('click',e=>{if(!e.target.closest||!e.target.closest('#dmPrint'))return;const w=window.open('','_blank');
+  if(!w){wsUI.toast('The print window was blocked: allow pop-ups for this site, then try again.',{kind:'warn'});return;}
+  try{w.document.open();w.document.write(dmHtml());w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(x){}},300);}catch(x){}});
 </script>
 </body>
 </html>

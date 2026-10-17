@@ -9905,6 +9905,20 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.44: a data map for the district
+
+- **Print the data map for the district** (review I254), under Help, *Where the student's data goes*. One page, in the
+  order an auditor asks:
+  1. what is kept where (the same table Help shows, so the two never differ);
+  2. what each Google permission allows: Drive sees only the files the workstation made; Gmail can send and cannot
+     read; the Sheets permission is read-only and opens only the linked sheet;
+  3. what the practice website keeps: the reply box and short links hold only locked copies for at most 60 days; the
+     writing help's relay keeps no text (that row is left out of the school edition, where the relay is off);
+  4. how a record is destroyed: on the device, in Drive, on the website, and the case files and sent emails.
+  It names no student and no account, and carries the version it was printed from.
+
+Checked by `qa/v2244-test.js` (6).
+
 ### v22.43: the replacement skill in the review
 
 - **Form PR-1 judges the replacement skill too** (review F462). Results by target listed the problem behaviors only, so
