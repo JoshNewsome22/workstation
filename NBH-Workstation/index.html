@@ -2251,7 +2251,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.42';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.43';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5831,7 +5831,7 @@ function iepParts(){const f=state.facts||{},p=packet(),d=f.data||{},pl=f.plan||{
   const A=v=>Array.isArray(v)?v.map(T).filter(Boolean):[],rs=pl.respond||{};
   const plan=[pl.rep?'Replacement behavior: '+T(pl.rep)+'.':'',A(pl.ant).length?'Before the behavior (prevention): '+A(pl.ant).join('; ')+'.':'',rs.prec?'At the first signs: '+T(rs.prec)+'.':'',rs.target?'If it happens: '+T(rs.target)+'.':'',rs.after?'Afterwards: '+T(rs.after)+'.':'',
     (pl.targets||[]).length?'Targets the plan addresses: '+pl.targets.map(t=>T(t.label)+(t.fn?' ('+T(t.fn)+')':'')).join('; ')+'.':'',ad.date?'Adopted by the team '+ad.date+(ad.notice?', prior written notice '+ad.notice:'')+(ad.start?', started '+ad.start:'')+'.':''].filter(Boolean).join(' ');
-  const prog=(rv.targets||[]).length?rv.targets.map(t=>T(t.name)+': '+(t.base!=null?t.base:'?')+' → '+(t.cur!=null?t.cur:'?')+(t.chg!=null?' ('+(t.chg>0?'+':'')+t.chg+'%)':'')+(t.decision?', '+T(t.decision):t.suggested?' (suggested: '+T(t.suggested)+', not yet decided)':'')).join('; ')+'.'+(rv.decisionText||rv.decision?' The team\u2019s decision: '+T(rv.decisionText||rv.decision)+'.':'')   /* v22.37 (review F318) */
+  const prog=(rv.targets||[]).length?rv.targets.map(t=>(t.kind==='rep'?'Replacement skill, ':'')+T(t.name)+': '+(t.base!=null?t.base:'?')+' → '+(t.cur!=null?t.cur:'?')+(t.kind==='rep'&&t.goal!=null?' (goal '+t.goal+(t.cur!=null?(t.cur>=t.goal?': met':': not yet'):'')+')':t.chg!=null?' ('+(t.chg>0?'+':'')+t.chg+'%)':'')+(t.decision?', '+T(t.decision):t.suggested?' (suggested: '+T(t.suggested)+', not yet decided)':'')).join('; ')+'.'+(rv.decisionText||rv.decision?' The team\u2019s decision: '+T(rv.decisionText||rv.decision)+'.':'')   /* v22.37 (review F318) */
     :(rv.decisionText||rv.decision?'Last plan review'+(rv.date?' '+rv.date:'')+': '+T(rv.decisionText||rv.decision)+'.':'');
   const safety=[cr.restraints&&+cr.restraints.semester?cr.restraints.semester+' restraint'+(+cr.restraints.semester===1?'':'s')+' this semester'+(cr.restraints.last?' (last '+cr.restraints.last+')':''):'',rc.removals&&+rc.removals.days?rc.removals.days+' days of removal this school year':''].filter(Boolean).join('; ');
   return {who,name:p.client||'',present,goals,plan,prog,safety:safety?safety+'.':'',next:rv.next||'',iep:rc.iep||(pf.dates||{}).iep||'',svc:svcText(f)};}
@@ -8546,7 +8546,7 @@ function hnParts(){const f=state.facts||{},p=packet(),d=f.data||{},g=f.goals||{}
   const rows=(d.behaviors||[]).filter(b=>b&&T(b.name)).map(b=>{const start=b.base&&b.base.mean!=null?b.base.mean:null,now=b.cur&&b.cur.mean!=null?b.cur.mean:(b.mean!=null?b.mean:null);
     const dir=b.direction==='decrease'?'fewer':(b.direction==='increase'?'more':'');let good='';
     if(b.aimMet)good=hnT('met',{beh:T(b.name),now:hnNum(now),unit:hnUnit(b.unit)});
-    else if(start!=null&&now!=null&&start!==0){const chg=(now-start)/Math.abs(start);if((dir==='fewer'&&chg<=-0.2)||(dir==='more'&&chg>=0.2))good=hnT('better',{beh:T(b.name),start:hnNum(start),now:hnNum(now),unit:hnUnit(b.unit)});}
+    else if(start!=null&&now!=null&&(start!==0||(dir==='more'&&now>0))){const chg=start===0?1:(now-start)/Math.abs(start);if((dir==='fewer'&&chg<=-0.2)||(dir==='more'&&chg>=0.2))good=hnT('better',{beh:T(b.name),start:hnNum(start),now:hnNum(now),unit:hnUnit(b.unit)});}   /* v22.43 (I233) a skill taught up from 0 counts as better */
     return {name:T(b.name),start:start!=null?hnNum(start)+' '+hnUnit(b.unit):'—',now:now!=null?hnNum(now)+' '+hnUnit(b.unit):'—',aim:b.aim!=null?hnNum(b.aim)+' '+hnUnit(b.unit)+(dir?' ('+hnT(dir)+')':''):'—',good};});
   const from=d.from||'',to=d.to||'';
   const inc=(d.incidentList||[]).filter(i=>i&&i.date&&(!from||i.date>=from)&&(!to||i.date<=to)),told=inc.filter(i=>incTold(f,i)).length;

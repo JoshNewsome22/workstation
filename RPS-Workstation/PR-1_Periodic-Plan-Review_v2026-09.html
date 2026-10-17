@@ -1484,7 +1484,8 @@ function renderVerdicts(){
      movement, a comparison of two figures as a trend, and a cause was claimed that a comparison with baseline cannot
      show. */
   const C=course(),ok=i!=null&&i>=INT_CRIT&&!(c!=null&&c<INT_CRIT)&&!fails.length,REP=String(m.repInd||'');
-  const notInd=REP==='Prompted only'||REP==='Not yet',AIM=prAims();
+  const repLow=typeof pr83Tg==='function'?pr83Tg().filter(r=>r.kind==='rep'&&prN(r.goal)!=null&&prN(r.cur)!=null&&prN(r.cur)<prN(r.goal)):[];   /* v22.43 (review F462) */
+  const notInd=REP==='Prompted only'||REP==='Not yet'||repLow.length>0,AIM=prAims();
   /* v22.37 (review F318) the targets' suggestions use this same reading */
   PR_GATE={ok,blank:i==null,notInd,why:i==null?'integrity not recorded':i<INT_CRIT?'integrity below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'critical-step integrity below '+INT_CRIT+'%':fails.length?'the period does not pass the plan-run gate':''};
   try{document.querySelectorAll('#pr83Tbl tbody tr[data-k]').forEach(tr=>pr83Cells(tr,pr83Tg()[+tr.dataset.k]));}catch(e){}
@@ -1494,7 +1495,7 @@ function renderVerdicts(){
   else if(C.pct==null){cls='v-mid';sug='<b>No suggestion from the change.</b> The baseline is 0, so the change cannot be expressed as a percentage of it. Read the graph, and record the decision and why.';}
   else if(C.pct<=-60&&!(C.pct<=-FADE_PCT||AIM.met)){cls='v-ok';opts=['Continue unchanged'];sug=`<b>Suggested: continue unchanged; fading waits for the plan\u2019s criterion.</b> The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written. ${AIM.n?'Not yet at the aim: '+esc(AIM.names.join(', '))+' (Form DD-1).':'No aim is in the case; without one, fading waits for a reduction of '+FADE_PCT+'% from baseline.'}`;}
   else if(C.pct<=-60){const lead=`The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written${AIM.met?', and every target is at its aim (Form DD-1)':''}.`;
-    if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} The replacement is recorded as \u201c${esc(REP)}\u201d under Used independently: fading before it is established risks returning the behavior (see the Guide).`;}
+    if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} ${repLow.length?'The replacement skill is below its goal on Form DD-1 ('+repLow.map(r=>esc(r.name)+': '+r.cur+' of '+r.goal).join('; ')+')':'The replacement is recorded as \u201c'+esc(REP)+'\u201d under Used independently'}: fading before it is established risks returning the behavior (see the Guide).`;}
     else if(REP==='Yes, but only with trained staff'||REP==='Yes, but only in one setting'){cls='v-ok';opts=['Begin fading'];sug=`<b>Suggested: begin fading; exit waits for generalization.</b> ${lead} The replacement is independent ${REP==='Yes, but only in one setting'?'in one setting only':'only with trained staff'}, so the exit conditions are not yet met.`;}
     else {cls='v-ok';opts=['Begin fading','Exit the plan'];sug=`<b>Suggested: begin fading, or exit if the exit conditions are met.</b> ${lead} ${REP==='Yes, across settings and people'?'The replacement is recorded as used independently across settings and people.':REP?'Check the replacement is independent before fading anything.':'Record under section 3 whether the replacement is used independently before fading anything.'}`;}}
   else if(C.pct<=-25){cls='v-ok';opts=['Continue unchanged'];sug=`<b>Suggested: continue unchanged.</b> The plan is running and the most recent period is ${relTxt(C.pct)} baseline. Changing it now would change what appears to be producing the improvement.`;}
@@ -2346,15 +2347,31 @@ renderAll();
    question 2. Closing a review adds a short per-target line to the log entry (targets) and clears this period's figures
    and decisions, keeping the targets and their baselines. Out: review.targets [{name, unit, base, cur, days, chg, met,
    decision}]. */
-const PR83_F=['name','unit','dir','base','cur','days','decision','note','chosen'];   /* v22.37 chosen: the decision was picked by a person (review F318) */
+const PR83_F=['name','unit','dir','base','cur','days','decision','note','chosen','kind','goal','goalSrc'];   /* v22.43 (review F462) kind 'rep': a replacement skill, judged against its goal */   /* v22.37 chosen: the decision was picked by a person (review F318) */
 const PR83_DEC=[['continue','Continue'],['modify','Modify'],['reassess','Reassess'],['fade','Fade']];
 const pr83R=()=>({improvePct:25,minDays:10,fadePct:typeof FADE_PCT==='number'?FADE_PCT:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90});
 const pr83Row=o=>{const r={};PR83_F.forEach(k=>{const v=o&&o[k];r[k]=v==null||typeof v==='object'?'':String(v);});return r;};
 const pr83Low=v=>prT(v).toLowerCase().replace(/\s+/g,' ');
 function pr83Tg(){if(!Array.isArray(S.tg))S.tg=[];return S.tg;}
 /* the reading of one row: the change, the rule, the suggested decision */
+const prNum=v=>String(Math.round(v*100)/100);
 function pr83Read(r){const R=pr83R(),b=prN(r.base),c=prN(r.cur),d=prN(r.days),up=r.dir==='increase';
   const o={b,c,d,chg:null,met:false,state:'',rule:'',sug:''};
+  /* v22.43 (review F462, I233) a replacement skill is taught up, often from 0: it is judged against its goal (Form DD-1's aim, else
+     a number in Form GB-1's acquisition criterion), not by a percentage of a baseline. At or above the goal: met, continue; no rise
+     from the baseline after the minimum days: modify how it is taught; otherwise continue. */
+  if(r.kind==='rep'){const g=prN(r.goal);if(c==null){o.state='not judged';o.rule='Not judged: no current mean.';return o;}
+    if(b!=null&&b>0)o.chg=(c-b)/b*100;
+    const from=b!=null?' (baseline '+prNum(b)+')':'';
+    if(g==null){o.state='not judged';o.rule='Now '+prNum(c)+from+'. No goal to judge it against'+(r.goalSrc?': '+r.goalSrc:'')+'.';o.sug='';return o;}
+    o.met=c>=g;o.state=o.met?'met':'not met';o.rule=(o.met?'At goal: now ':'Below goal: now ')+prNum(c)+' against the goal of '+prNum(g)+from+'.';
+    const G=typeof prGate==='function'?prGate():null;
+    if(G&&G.blank){o.why='integrity not recorded';return o;}
+    if(G&&!G.ok){o.sug='continue';o.why=G.why+': address implementation first';return o;}
+    if(o.met){o.sug='continue';o.why='the replacement is at its goal';}
+    else if(b!=null&&c<=b&&(d==null||d>=R.minDays)){o.sug='modify';o.why='no rise from the baseline: change how the replacement is taught or prompted';}
+    else{o.sug='continue';o.why=d!=null&&d<R.minDays?'too few days to judge':'rising toward its goal';}
+    return o;}
   if(b==null||c==null){o.state='not judged';o.rule='Not judged: '+(b==null&&c==null?'no baseline or current mean':b==null?'no baseline mean':'no current mean')+'.';return o;}
   if(!(b>0)){o.state='not judged';o.rule='Not judged: the baseline is 0, so no change is computed.';return o;}
   o.chg=(c-b)/b*100;const good=up?o.chg:-o.chg,txt=relTxt(o.chg)+' baseline';
@@ -2381,7 +2398,7 @@ function pr83SugTxt(r,o){if(r.decision&&!r.chosen)return 'Not yet a decision: fi
   return 'Suggested: '+o.sug+(o.state==='too few days'?' (too few days to judge)':o.why?' ('+o.why+')':'')+'. A suggestion, not a decision.';}
 function pr83Sec(){let s=document.getElementById('pr83Sec');if(s)return s;const at=document.getElementById('dataMetrics');if(!at)return null;
   s=document.createElement('div');s.id='pr83Sec';const R=pr83R();
-  s.innerHTML='<h3>Results by Target</h3><p class="hint">One row per reduction target in the plan (Form TD-1&rsquo;s targets, else Form TB-1&rsquo;s), with the baseline and current means from Form DD-1 matched by name. The rule: a '+R.improvePct+'% reduction from baseline after at least '+R.minDays+' school days in the current phase. Each target gets its own decision; the overall decision stays in section 4. Filled from the case into empty cells only.</p>'+
+  s.innerHTML='<h3>Results by Target</h3><p class="hint">One row per reduction target in the plan (Form TD-1&rsquo;s targets, else Form TB-1&rsquo;s), with the baseline and current means from Form DD-1 matched by name, and one row per replacement skill Form DD-1 records, judged against its goal (Form DD-1&rsquo;s aim, else Form GB-1&rsquo;s criterion). The rule: a '+R.improvePct+'% reduction from baseline after at least '+R.minDays+' school days in the current phase. Each target gets its own decision; the overall decision stays in section 4. Filled from the case into empty cells only.</p>'+
     '<div class="grid-wrap" tabindex="0" role="region" aria-label="Results by target"><table class="rt pr-grid" id="pr83Tbl"><thead><tr><th style="width:18%">Target</th><th style="width:9%">Baseline mean</th><th style="width:9%">Current mean</th><th style="width:8%">Days in phase</th><th style="width:8%">Change</th><th style="width:20%">Rule ('+R.improvePct+'%, '+R.minDays+' days)</th><th style="width:12%">Decision</th><th>Note</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>'+
     '<div class="pr83-bar noprint"><button type="button" class="tool" id="pr83Add">Add target</button></div>';
   at.parentNode.insertBefore(s,at.nextSibling);return s;}
@@ -2389,7 +2406,7 @@ function pr83Cells(tr,r){const o=pr83Read(r);const c=tr.querySelector('.pr83-chg
   if(c)c.textContent=o.chg==null?'—':pctTxt(o.chg);if(u)u.textContent=o.rule;if(g)g.textContent=r.decision&&r.chosen&&r.decision===o.sug?'':pr83SugTxt(r,o);}
 function pr83Render(){const s=pr83Sec();if(!s)return;const tb=s.querySelector('tbody'),A=pr83Tg();
   const inp=(i,k,lab,num)=>`<input${num?' type="number" step="any"':''} data-k="${i}" data-f="${k}" value="${prEsc(A[i][k])}" aria-label="Target ${i+1}: ${lab}">`;
-  tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td>${inp(i,'name','name')}${r.unit?'<span class="pr83-unit">'+prEsc(r.unit)+(r.dir==='increase'?', to increase':'')+'</span>':''}</td><td>${inp(i,'base','baseline mean',1)}</td><td>${inp(i,'cur','current mean',1)}</td><td>${inp(i,'days','school days in the current phase',1)}</td>`+
+  tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td>${inp(i,'name','name')}${r.kind==='rep'?'<span class="pr83-unit">Replacement skill'+(prN(r.goal)!=null?', goal '+prEsc(r.goal):'')+(r.unit?' ('+prEsc(r.unit)+')':'')+'</span>':r.unit?'<span class="pr83-unit">'+prEsc(r.unit)+(r.dir==='increase'?', to increase':'')+'</span>':''}</td><td>${inp(i,'base','baseline mean',1)}</td><td>${inp(i,'cur','current mean',1)}</td><td>${inp(i,'days','school days in the current phase',1)}</td>`+
     `<td class="n pr83-chg"></td><td class="pr83-rule"></td><td><select data-k="${i}" data-f="decision" aria-label="Target ${i+1}: decision"><option value=""></option>${PR83_DEC.map(x=>`<option value="${x[0]}"${r.decision===x[0]?' selected':''}>${x[1]}</option>`).join('')}</select><span class="pr83-sug noprint"></span></td>`+
     `<td><textarea data-k="${i}" data-f="note" rows="1" class="pr-line" aria-label="Target ${i+1}: note">${prEsc(r.note)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint pr83-x" data-k="${i}" aria-label="Remove target ${i+1}">&times;</button></td></tr>`).join('')
     :'<tr class="pr83-none"><td colspan="9" class="hint">No target listed yet. Inside the workstation the targets are filled from the case (Forms TD-1, TB-1 and DD-1); or use Add target.</td></tr>';
@@ -2404,9 +2421,18 @@ function pr83Names(f){const pt=f.plan&&Array.isArray(f.plan.targets)?f.plan.targ
 function pr83Match(D,name){const n=pr83Low(name);if(!n)return null;return D.find(b=>pr83Low(b.name)===n)||D.find(b=>{const m=pr83Low(b.name);return m&&(m.indexOf(n)>=0||n.indexOf(m)>=0);})||null;}
 function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.behaviors:[]).filter(b=>b&&prT(b.name));
   let A=pr83Tg(),k=0;
+  /* v22.43 (review F462) each replacement skill Form DD-1 records gets its own row (once, by name), with its goal */
+  const acq=(f.goals&&Array.isArray(f.goals.acq))?f.goals.acq:[];
+  const goalOf=b=>{if(b.aim!=null&&prN(b.aim)!=null)return {g:String(b.aim),src:'the aim on Form DD-1'};
+    const a=acq.find(x=>x&&pr83Match([{name:b.name}],x.beh))||acq.find(x=>x&&pr83Match([{name:x.beh}],b.name));if(!a)return {g:'',src:'no goal for it on Form GB-1 or an aim on Form DD-1'};
+    const crit=prT(a.crit),m=crit.match(/(\d+(?:\.\d+)?)\s*(%|percent)?/);const pct=!!(m&&m[2]),ddPct=/%/.test(String(b.unit||''))||b.two;
+    if(m&&pct===!!ddPct)return {g:m[1],src:'Form GB-1: '+crit};
+    return {g:'',src:'Form GB-1 asks for \u201c'+crit+'\u201d, which is not what Form DD-1 records ('+(b.unit||'its own unit')+')'};};
   if(!A.some(r=>prT(r.name))){const N=pr83Names(f);
     D.filter(b=>(b.kind||'target')==='target'&&!N.some(n=>pr83Match([b],n))).forEach(b=>N.push(prT(b.name)));
     if(!N.length)return 0;A=S.tg=N.map(n=>pr83Row({name:n}));k+=N.length;}
+  D.filter(b=>b.kind==='replacement'&&!A.some(r=>pr83Match([b],r.name))).forEach(b=>{const q=goalOf(b);A.push(pr83Row({name:prT(b.name),kind:'rep',dir:'increase',goal:q.g,goalSrc:q.src}));S.tg=A;k++;});
+  A.filter(r=>r.kind==='rep'&&!prT(r.goal)).forEach(r=>{const b=pr83Match(D,r.name);if(!b)return;const q=goalOf(b);if(q.g){r.goal=q.g;r.goalSrc=q.src;k++;}else if(q.src!==r.goalSrc){r.goalSrc=q.src;}});
   A.forEach(r=>{const b=pr83Match(D,r.name);if(!b)return;const put=(key,v)=>{if(v==null||v===''||prT(r[key]))return;r[key]=String(v);k++;};
     put('unit',b.unit);if(!r.dir&&b.direction)r.dir=String(b.direction);
     put('base',b.base&&prN(b.base.mean)!=null?b.base.mean:null);
@@ -2428,7 +2454,7 @@ function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.beh
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   const A=pr83Tg().filter(x=>prT(x.name));if(!A.length)return r;const o=r&&typeof r==='object'?r:{};
   const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
-  rv.targets=A.map(x=>{const q=pr83Read(x),t={name:prT(x.name)};if(x.unit)t.unit=x.unit;t.base=q.b;t.cur=q.c;if(q.d!=null)t.days=q.d;
+  rv.targets=A.map(x=>{const q=pr83Read(x),t={name:prT(x.name)};if(x.kind==='rep'){t.kind='rep';if(prN(x.goal)!=null)t.goal=prN(x.goal);}if(x.unit)t.unit=x.unit;t.base=q.b;t.cur=q.c;if(q.d!=null)t.days=q.d;
     t.chg=q.chg==null?null:Math.round(q.chg*10)/10;t.met=q.met;t.decision=x.decision&&x.chosen?x.decision:'';if(q.sug)t.suggested=q.sug;if(prT(x.note))t.note=prT(x.note);return t;});
   o.review=rv;return o;};}
 /* ---- the record: saved, opened, rendered; the log line when a review closes ---- */

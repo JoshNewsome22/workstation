@@ -9905,6 +9905,22 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.43: the replacement skill in the review
+
+- **Form PR-1 judges the replacement skill too** (review F462). Results by target listed the problem behaviors only, so
+  the review ran without the one measure that shows the plan is teaching something. Each replacement skill Form DD-1
+  records now has its own row, judged against its goal: DD-1's aim, else a number in Form GB-1's acquisition criterion
+  when it is in the unit DD-1 records (a percentage goal against a daily count is not judged, and the row says why).
+  - At or above the goal: met; continue.
+  - No rise from the baseline after the minimum days: modify how the skill is taught or prompted.
+  - Otherwise: continue, rising toward the goal.
+- **No fading while the skill is below its goal.** The review's overall suggestion does not offer to begin fading while a
+  replacement skill is below its goal on DD-1, and says so.
+- **The IEP meeting packet** names the replacement skill with its goal ("goal 8: not yet"), and **the parent note** credits a
+  skill taught up from zero.
+
+Checked by `qa/v2243-test.js` (9).
+
 ### v22.42: restraint stays with trained staff on the handouts
 
 - **Form EB-1 calls for help early** (review F378). Filled from the case, Call when was the crisis plan's peak, the
