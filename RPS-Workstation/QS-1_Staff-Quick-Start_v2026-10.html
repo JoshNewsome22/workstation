@@ -1363,10 +1363,25 @@ window.__nbhFactsIn=function(f){ensure();PASS=new Set();const p=P();let n=0;
   const sk=[];reps.forEach(b=>sk.push({name:b.label,text:b.def}));prob.forEach(b=>{if(b.rep&&!sk.some(s=>s.name===b.rep))sk.push({name:b.rep,text:''});});
   goals.acq.forEach(g=>{const s=sk.find(x=>x.name===g.beh);if(s){if(!s.text)s.text=g.text;}else sk.push({name:g.beh,text:g.text});});
   sk.slice(0,MAXR.skills).forEach((s,i)=>{while(S.skills.length<=i)S.skills.push(row('skills'));if(T(S.skills[i].name)&&T(S.skills[i].name)!==s.name)return;if(place('skills.'+i+'.name',s.name))n++;if(place('skills.'+i+'.text',s.text))n++;});
-  if(cr&&(cr.stages||[]).length){if(cr.precursor&&place('tiers.0.see',cr.precursor))n++;
-    cr.stages.slice(0,MAXR.tiers-1).forEach((s,i)=>{const k=i+1;while(S.tiers.length<=k&&S.tiers.length<MAXR.tiers)S.tiers.push(row('tiers'));if(!S.tiers[k])return;if(place('tiers.'+k+'.name',s.s))n++;if(place('tiers.'+k+'.do',s.do+(s.who?' ('+s.who+')':'')))n++;});}
-  if(plan){const r=plan.respond||{};if(plan.prec&&place('tiers.0.see',plan.prec))n++;if(r.prec&&place('tiers.0.do',r.prec))n++;if(plan.beh&&place('tiers.1.see',plan.beh))n++;if(r.target&&place('tiers.1.do',r.target))n++;
-    const last=S.tiers.length-1;if(r.crisis&&last>=3&&place('tiers.'+(last-1)+'.do',r.crisis))n++;if(r.after){if(place('tiers.'+last+'.name','Recovery'))n++;if(place('tiers.'+last+'.do',r.after))n++;}
+  /* v22.42 (review F388) the tier table in one order of events: the earliest sign and the plan's response to it, the behavior and
+     the plan's response, then the handover (the plan's own crisis trigger: from here the crisis plan, Form CR-1, governs, and
+     only staff trained and certified in the district's method step in), then the recovery. The crisis plan's stages are not
+     poured into the rows the plan already holds, and a stage that names a restraint or a hold never prints on this handout,
+     which goes to every adult: it reads "Crisis plan, Form CR-1: trained staff only". */
+  const QS_RX=/restrain|restraint|\bhold(s|ing)?\b|immobili[sz]|prone|supine|take-?down|physical (intervention|management)|\btransport/i;
+  const cst=cr?(cr.stages||[]).filter(s=>s&&T(s.s)):[],tierRow=k=>{while(S.tiers.length<=k&&S.tiers.length<MAXR.tiers)S.tiers.push(row('tiers'));return !!S.tiers[k];};
+  const HAND='From here the crisis plan (Form CR-1) governs. Call the first person on Who to call. Only staff trained and certified in the district’s method step in; everyone else moves the other students away and keeps calling.';
+  if(plan){const r=plan.respond||{},pr=plan.prec||(cr&&cr.precursor);
+    if((pr||r.prec)&&place('tiers.0.name','0 · Earliest sign'))n++;if(pr&&place('tiers.0.see',pr))n++;if(r.prec&&place('tiers.0.do',r.prec))n++;
+    if((plan.beh||r.target)&&place('tiers.1.name','1 · The behavior'))n++;if(plan.beh&&place('tiers.1.see',plan.beh))n++;if(r.target&&place('tiers.1.do',r.target))n++;
+    let k=2;if(T(r.crisis)||cst.length){if(tierRow(2)){if(place('tiers.2.name','2 · The crisis plan governs'))n++;
+      const trig=T(r.crisis)&&!(T(r.crisis).length<80&&/CR-1|crisis (intervention )?plan/i.test(r.crisis))?T(r.crisis):T(cr&&(cr.dbeh||cr.beh));
+      if(trig&&place('tiers.2.see',QS_RX.test(trig)?trig.split(/[→;]|->/)[0].trim():trig))n++;if(place('tiers.2.do',HAND))n++;}k=3;}
+    if(r.after&&tierRow(k)){if(place('tiers.'+k+'.name','Recovery'))n++;if(place('tiers.'+k+'.do',r.after))n++;}}
+  else if(cst.length){if(cr.precursor&&place('tiers.0.see',cr.precursor))n++;
+    cst.slice(0,MAXR.tiers-1).forEach((s,i)=>{const k=i+1;if(!tierRow(k))return;if(place('tiers.'+k+'.name',s.s))n++;
+      const d=QS_RX.test(T(s.do)+' '+T(s.s)+' '+T(s.who))?'Crisis plan, Form CR-1: trained staff only.':T(s.do)+(T(s.who)?' ('+T(s.who)+')':'');if(place('tiers.'+k+'.do',d))n++;});}
+  if(plan){const r=plan.respond||{};
     /* v21.87 the plan's Never once: it went into a new Don't row each time the case arrived (until the list was full) once
        DM-1's What to avoid held rule 1 */
     if(r.not&&!S.rules.some((x,i)=>T(x.dont)===T(r.not)||T(S.pulled['rules.'+i+'.dont'])===T(r.not))){if(!T(S.rules[0].dont)?place('rules.0.dont',r.not):placeRow('rules','dont',r.not))n++;}if(r.target&&place('rules.0.do',r.target))n++;}

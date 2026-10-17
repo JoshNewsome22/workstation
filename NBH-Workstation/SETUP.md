@@ -9905,6 +9905,30 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.42: restraint stays with trained staff on the handouts
+
+- **Form EB-1 calls for help early** (review F378). Filled from the case, Call when was the crisis plan's peak, the
+  step where CR-1 decides on restraint, and Call who named the restraint team. Call when now reads from the earliest
+  sign: "As soon as you see ..., or if anyone is at risk of being hurt." It is marked to rewrite for the setting. Call
+  who and How are left for the number or radio channel this setting can reach, and the brief asks for them.
+- **No hands on the student in a brief** (review F379). A line that asks limited-contact staff to hold, block, guide,
+  escort or keep the student in a seat is named, with the rule: restraint is only by staff trained and certified in
+  the district's method (s. 1003.573, F.S.; Policy 5.181). A line that says not to do it passes. After It Is Over
+  offers "If anyone held the student or anyone was hurt, tell the school office the same day." The plan words a bus
+  attendant would not know are named too: FCR, planned ignoring, redirect, escape, tangible, SIB, elopement, pairing,
+  neutralizing routine.
+- **Form QS-1's tiers in one order of events** (review F388). The quick start goes to every adult. Its tier table now
+  runs:
+  - the earliest sign and the plan's response;
+  - the behavior and the plan's response;
+  - the handover, at the plan's own crisis trigger: from here the crisis plan (Form CR-1) governs, and only staff
+    trained and certified in the district's method step in;
+  - the recovery.
+  The crisis plan's stages no longer land in the plan's rows. A stage that names a restraint or a hold never prints;
+  it reads "Crisis plan, Form CR-1: trained staff only".
+
+Checked by `qa/v2242-test.js` (11).
+
 ### v22.41: the restraint record, one notice record, and the district's rules
 
 - **A restraint or a seclusion logged on Form DD-1 has its own record** (the incident's Record button). It holds the

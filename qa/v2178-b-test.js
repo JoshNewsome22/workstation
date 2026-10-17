@@ -124,13 +124,13 @@ const FACTS=evidence=>({
     p=await open(EB1);
     ok('EB-1 has __nbhFactsIn',await p.evaluate(()=>typeof window.__nbhFactsIn==='function'));
     r=await p.evaluate(f=>window.__nbhFactsIn(f),FACTS());
-    ok('EB-1 reports what it filled',r&&r.filled>=5,r);   /* v22.37 (review F380): the plan's consequence, after, never and classroom lines are offered, not placed */
+    ok('EB-1 reports what it filled',r&&r.filled>=4,r);   /* v22.37 (review F380): the plan's consequence, after, never and classroom lines are offered, not placed */
     ok('EB-1 what you will see and how the student asks; after it is over is offered, not placed',await v(p,'e.see')==='Hitting: strikes another person'&&await v(p,'e.ask')==='Hand the break card'&&await v(p,'e.after')===''&&/Return to the task at the step left/.test(await p.evaluate(()=>document.getElementById('ebPlanSug').textContent)));
     const ln=k=>p.evaluate(k=>Array.from(document.querySelectorAll('#'+k+'Wrap [name]')).map(e=>e.value.trim()).filter(Boolean),k);
     ok('EB-1 if the behavior happens and never do this: offered beside the blocks, not placed',!(await ln('resp')).length&&!(await ln('never')).length&&await p.evaluate(()=>{const t=document.getElementById('ebPlanSug').textContent;return /Keep the demand; block and redirect/.test(t)&&/Do not remove the task after hitting/.test(t);}),[await ln('resp'),await ln('never')]);
     ok('EB-1 what helps before it starts: the plan\'s antecedent lines offered, not placed',!(await ln('prev')).length&&await p.evaluate(()=>/Visual timer on the desk/.test(document.getElementById('ebPlanSug').textContent)),await ln('prev'));
     ok('EB-1 the earliest sign from the plan',await v(p,'e.early')==='Pushes the worksheet away');
-    ok('EB-1 calling for help from the crisis stages',/Hitting, or anyone is at risk of being hurt/.test(await v(p,'e.callwhen'))&&/Peak \/ imminent risk/.test(await v(p,'e.callwhen'))&&await v(p,'e.callwho')==='Teacher and assistant principal',[await v(p,'e.callwhen'),await v(p,'e.callwho')]);
+    ok('EB-1 calling for help: at the first sign, never at the crisis plan\'s peak; the crisis team who holds is not carried (v22.42, review F378)',await v(p,'e.callwhen')==='As soon as you see pushes the worksheet away, or if anyone is at risk of being hurt.'&&await v(p,'e.callwho')===''&&await p.evaluate(()=>/from the plan/.test(document.querySelector('#p_callwhen').textContent)),[await v(p,'e.callwhen'),await v(p,'e.callwho')]);
     ok('EB-1 the plan\'s words are marked to rewrite',await p.evaluate(()=>/from the plan/.test(document.querySelector('#p_see').textContent)));
     r=await p.evaluate(f=>window.__nbhFactsIn(f),FACTS());ok('EB-1 a second call fills nothing',r.filled===0&&(await ln('prev')).length===0,r);
     await p.context().close();

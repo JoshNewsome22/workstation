@@ -979,7 +979,7 @@ wrong by omitting something; they go wrong by doing the one thing that makes it 
 <p class="noprint"><button id="addNever" class="tool">Add a line</button></p>
 
 <h3 class="sub">Calling for Help</h3>
-<div class="eb-f"><label for="f_callwhen">Call when</label><textarea id="f_callwhen" name="e.callwhen" placeholder="e.g. he is out of his seat while the bus is moving, or anyone is hurt"></textarea></div>
+<div class="eb-f"><label for="f_callwhen">Call when <span id="p_callwhen"></span></label><textarea id="f_callwhen" name="e.callwhen" placeholder="e.g. he is out of his seat while the bus is moving, or anyone is hurt"></textarea></div>
 <div class="eb-f"><label for="f_callwho">Call who</label><input id="f_callwho" name="e.callwho" placeholder="e.g. dispatch, who will reach the school"></div>
 <div class="eb-f"><label for="f_callhow">How</label><input id="f_callhow" name="e.callhow" placeholder="e.g. radio channel 2, then the school at 561-555-0100"></div>
 <div class="eb-f"><label for="f_after">After it is over <span id="p_after"></span></label><textarea id="f_after" name="e.after" placeholder="e.g. carry on the route as normal; tell the school at drop-off, not in front of him"></textarea></div>
@@ -1250,8 +1250,8 @@ $('#planIn').addEventListener('change', e => {
    could not say what was still to rewrite. It now stays while the field still holds the plan's words, goes when
    they are rewritten, and the words placed are kept in the saved file. */
 let PULLED = {};
-const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', resp: 'p_resp', never: 'p_never', prev: 'p_prev' };
-const PULL_NAME = { 'e.see': 'What You Will See', 'e.ask': 'How the Student Asks', 'e.after': 'After It Is Over',
+const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', 'e.callwhen': 'p_callwhen', resp: 'p_resp', never: 'p_never', prev: 'p_prev' };   /* v22.42 (F378) Call when too */
+const PULL_NAME = { 'e.see': 'What You Will See', 'e.ask': 'How the Student Asks', 'e.after': 'After It Is Over', 'e.callwhen': 'Call when',
   resp: 'If the Behavior Happens', never: 'Never Do This', prev: 'What Helps Before It Starts' };
 function pulledNow() {
   const out = {};
@@ -1291,7 +1291,9 @@ const JARGON = ['reinforcement', 'reinforcer', 'reinforce', 'extinction', 'diffe
   'contingency', 'schedule of reinforcement', 'VI', 'VR', 'FI', 'FR', 'prompt fading', 'errorless',
   'antecedent', 'consequence', 'topography', 'precursor', 'behavioral momentum', 'high-p',
   'escape-maintained', 'satiation', 'deprivation', 'latency', 'IRT', 'token economy', 'response cost',
-  'stimulus control', 'generalization', 'baseline', 'criterion', 'fidelity', 'integrity'];
+  'stimulus control', 'generalization', 'baseline', 'criterion', 'fidelity', 'integrity',
+  /* v22.42 (review F379) the words a behavior plan most often carries into a brief */
+  'FCR', 'planned ignoring', 'redirect', 'escape', 'tangible', 'SIB', 'elopement', 'pairing', 'neutralizing routine'];
 function briefText() {
   return [val('e.see'), val('e.early'), val('e.ask'), val('e.askdo'), val('e.callwhen'),
     val('e.after'), val('e.extra')].concat(lines('prev'), lines('resp'), lines('never')).join(' ');
@@ -1371,8 +1373,20 @@ function checks() {
   if (val('e.ask') && !val('e.askdo')) miss.push('<b>When it happens</b> is empty: say what to do when the student asks, every time (Guide, section 3)');
   const refuse = lines('never').filter(t => /\b(no|never|don.t|do not|deny|refuse)\b[^.;]*\b(break|card|pass|request|ask|item)/i.test(t) || /^no break\b/i.test(t));
   if (refuse.length) miss.push('<b>Never Do This</b> reads \u201c' + esc(refuse[0]) + '\u201d: read alone, this tells staff to refuse the request the student was taught. Say instead what they never do to the behavior, and honour the request');
+  /* v22.42 (review F378) the brief names whom to call and how this setting reaches them */
+  if (val('e.callwhen') && (!val('e.callwho') || !val('e.callhow'))) miss.push('<b>Call who</b> and <b>How</b>: name whom this setting calls and the phone number or radio channel it can reach (not the crisis team who would hold)');
   const left = Object.keys(pulledNow()).map(k => PULL_NAME[k]);
+  /* v22.42 (review F379) a brief never asks limited-contact staff to put hands on the student: restraint is only by trained,
+     certified staff (s. 1003.573, F.S.; district Policy 5.181). Every block is read but Never Do This and How the Student Asks;
+     a line that says not to do it passes. */
+  const HANDS = /\b(hold(s|ing)? (him|her|them|the student|his|her|their)|restrain\w*|block(s|ing)? (him|her|them|the|his|her|their|it)\b|physically|hand[- ]over[- ]hand|(guide|escort|carry|pin|grab) (him|her|them|the student)|grab(s|bing)? (his|her|their)|take (his|her|their) (arm|hand|wrist)s?|keep (him|her|them) in (his|her|their) seat|stop (him|her|them) (from )?leaving)/i;
+  const NEG = /\b(do not|don.t|never|no one|nobody|without)\b/i;
+  const hands = [val('e.early'), val('e.askdo'), val('e.callwhen'), val('e.after'), val('e.extra')].concat(lines('prev'), lines('resp')).filter(t => t && HANDS.test(t) && !NEG.test(t));
   let h = '';
+  if (hands.length) h += '<div class="eb-check" data-check="hands"><b>Hands on the student.</b> \u201c' + esc(hands[0]) + '\u201d' + (hands.length > 1 ? ' (and ' + (hands.length - 1) + ' more)' : '') +
+    ' asks limited-contact staff to put hands on the student. Replace it with when and whom to call: restraint is only by staff trained and certified in the district&rsquo;s method (Guide, section 2; s. 1003.573, F.S.; Policy 5.181).</div>';
+  if (val('e.callwhen') && !/office|school|report|tell/i.test(val('e.after')))
+    h += '<div class="eb-check" data-check="after"><b>After It Is Over</b> does not say who hears of it. <button type="button" class="tool" id="ebAfterLine">Add: If anyone held the student or anyone was hurt, tell the school office the same day.</button></div>';
   if (miss.length) h += '<div class="eb-check" data-check="missing"><b>Missing from the brief.</b> ' + miss.join('; ') +
     '. The Guide (section 2) says both belong on every brief, whatever the setting.</div>';
   if (left.length) h += '<div class="eb-check" data-check="plan"><b>Still in the plan&rsquo;s words:</b> ' + left.join('; ') +
@@ -1380,6 +1394,10 @@ function checks() {
   ['#ebWarn', '#ebChecks'].forEach(s => { const el = $(s); if (el) el.innerHTML = h; });
 }
 
+document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#ebAfterLine')) return;
+  const t = 'If anyone held the student or anyone was hurt, tell the school office the same day.';
+  const el = $('[name="e.after"]'); if (!el) return; el.value = (val('e.after') ? val('e.after') + ' ' : '') + t;
+  el.dispatchEvent(new Event('input', { bubbles: true })); changed(); });
 /* ---------- build the handout ---------- */
 function blk(title, inner, cls) {
   if (!inner) return '';
@@ -1686,11 +1704,10 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
       offer('resp','If the Behavior Happens',[r.target]);offer('e.after','After It Is Over',[r.after]);offer('never','Never Do This',[r.not]);
       offer('prev','What Helps Before It Starts',(plan.ant||[]).slice(0,5));ebSugPaint();}
     put('e.early',(plan&&plan.prec)||(cr&&cr.precursor),'the earliest sign');
-    /* calling for help: the crisis plan's peak stage, else its escalation stage */
-    const st=((cr&&cr.stages)||[]).filter(s=>s&&T(s.s)),pk=st.find(s=>/peak|imminent/i.test(s.s))||st.find(s=>/escalat/i.test(s.s));
-    if(pk){const beh=T((cr&&(cr.dbeh||cr.beh))||'').split(/[:\n]/)[0];
-      put('e.callwhen',(beh?beh+', or ':'')+'anyone is at risk of being hurt (the crisis plan’s “'+T(pk.s)+'” stage)','when to call');
-      put('e.callwho',T(pk.who)||T((st.find(s=>T(s.who))||{}).who),'who to call');}
+    /* v22.42 (review F378) calling for help: early, at the first sign, never at the crisis plan's peak (where the plan decides on
+       restraint); the crisis team who would hold is not carried, so Call who and How are left for this setting's own number */
+    const sign=one(T((plan&&plan.prec)||(cr&&cr.precursor)||'')).replace(/[.;\s]+$/,'');
+    if(sign||(cr&&(cr.stages||[]).length))put('e.callwhen',(sign?'As soon as you see '+sign.charAt(0).toLowerCase()+sign.slice(1)+', or ':'As soon as it starts to build, or ')+'if anyone is at risk of being hurt.','when to call',1);
     const g=window.nbhCase&&nbhCase.generic?nbhCase.generic(f,false):{filled:0};n+=g.filled||0;
     if(n)changed();
     if(placed.length&&window.nbhUI&&nbhUI.toast)nbhUI.toast('From the case: '+placed.join(', ')+'. Rewrite the plan’s words for this setting.',{kind:'ok'});
