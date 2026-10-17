@@ -110,6 +110,12 @@ function nbhDdCrit(r,g,how,notes){
   }
   return n;
 }
+/* v22.34 the definition a row takes from Form TB-1: a cluster's operational definition names its members "listed below",
+   so the members' lines (Included topographies) come with it */
+function nbhDdDef(b){const d=String(b.def||'').trim(),t=String(b.tops||'').trim();return d&&t?d+'\n'+t:d;}
+/* an empty definition, or the bare one an older read put there before the members came with it, takes Form TB-1's */
+function nbhDdFillDef(r,b){const d=nbhDdDef(b),cur=String(r.definition||'').trim();
+  if(!d||cur===d||(cur&&cur!==String(b.def||'').trim()))return 0;r.definition=d;return 1;}
 function nbhDdRow(kind,name,def,pairId){
   return {id:uid("b"),kind:kind,name:name||'',definition:def||'',obsLength:'Entire school day',measure:'count',
     direction:kind==='target'?'decrease':'increase',aim:'',critDays:3,pairWith:pairId||'',color:PALETTE[S.behaviors.length%PALETTE.length]};
@@ -157,21 +163,25 @@ window.__nbhFactsIn=function(f){
   if(untouched){
     if(!behs.length)return {filled:0};
     S.behaviors=[];
-    const tg=behs.filter(b=>!nbhDdIsRep(b)),rows=tg.map(b=>{const r=nbhDdRow('target',b.label,b.def,'');S.behaviors.push(r);return r;});
+    const tg=behs.filter(b=>!nbhDdIsRep(b)),rows=tg.map(b=>{const r=nbhDdRow('target',b.label,nbhDdDef(b),'');S.behaviors.push(r);return r;});
     /* one replacement row per skill, in the order of the behaviors they replace and paired with the first; then the
        replacement targets no behavior names; a defined target under a skill's name gives that row its definition */
     const skills=[];
     tg.forEach((b,i)=>{const k=nbhDdK(b.rep);if(k&&!skills.some(s=>s.k===k))skills.push({k,name:b.rep,def:'',pair:rows[i].id});});
-    behs.filter(nbhDdIsRep).forEach(b=>{const k=nbhDdK(b.label);if(!k)return;const s=skills.find(x=>x.k===k);if(s){if(!s.def)s.def=b.def||'';}else skills.push({k,name:b.label,def:b.def||'',pair:''});});
+    behs.filter(nbhDdIsRep).forEach(b=>{const k=nbhDdK(b.label);if(!k)return;const s=skills.find(x=>x.k===k);if(s){if(!s.def)s.def=nbhDdDef(b);}else skills.push({k,name:b.label,def:nbhDdDef(b),pair:''});});
     skills.forEach(s=>S.behaviors.push(nbhDdRow('replacement',s.name,s.def,s.pair)));
     nbhDdMatch(S.behaviors,f,()=>true).forEach((g,r)=>nbhDdCrit(r,g,'new'));
     nbhDdAfter();return {filled:S.behaviors.length};
   }
   /* a record in use: the objectives' criteria reach the rows that name their behaviors, and the form says which */
   let n=0;const got=[],M=nbhDdMatch(S.behaviors,f,null);
+  /* v22.34 a row whose definition is still empty takes the one Form TB-1 gives under the row's name */
+  const defd=[];behs.forEach(b=>{const k=nbhDdK(b.label),r=k&&S.behaviors.find(x=>nbhDdK(x.name)===k);if(r&&nbhDdFillDef(r,b))defd.push(r.name);});
   S.behaviors.forEach(r=>{const g=M.get(r);if(!g)return;const was={days:r.critDays,aim:r.aim},k=nbhDdCrit(r,g,'fill');
     if(k){n+=k;got.push({id:r.id,name:r.name,days:[was.days,r.critDays],aim:[was.aim,r.aim]});}});
-  if(n){nbhDdAfter();nbhDdNote(got);const msg='Form GB-1’s criterion is now on '+got.map(c=>c.name).join(', ');nbhDdToast(msg+'.');return {filled:n,note:msg};}
+  const dmsg=defd.length?'Form TB-1’s definition is now on '+defd.join(', '):'';
+  if(n){nbhDdAfter();nbhDdNote(got);const msg='Form GB-1’s criterion is now on '+got.map(c=>c.name).join(', ')+(dmsg?'; '+dmsg:'');nbhDdToast(msg+'.');return {filled:n+defd.length,note:msg};}
+  if(defd.length){nbhDdAfter();nbhDdToast(dmsg+'.');return {filled:defd.length,note:dmsg};}
   return behs.length?{filled:0,note:'the behavior table is already in use; the picker adds rows to it'}:{filled:0};
 };
 window.__nbhFactsPick=function(sel){
@@ -180,8 +190,8 @@ window.__nbhFactsPick=function(sel){
   const add=r=>{S.behaviors.push(r);made.add(r);n++;return r;};
   sel.behaviors.forEach(b=>{
     const rep=nbhDdIsRep(b),had=named(b.label);
-    if(had){if(rep&&b.def&&!had.definition){had.definition=b.def;n++;}return;}
-    const r=add(nbhDdRow(rep?'replacement':'target',b.label,b.def,''));
+    if(had){n+=nbhDdFillDef(had,b);return;}   /* v22.34 a target row too, not only a replacement */
+    const r=add(nbhDdRow(rep?'replacement':'target',b.label,nbhDdDef(b),''));
     if(!rep&&b.rep&&!named(b.rep))add(nbhDdRow('replacement',b.rep,'',r.id));});
   /* the rows made here take the case's objectives, as a record made from the case does (each objective to one row) */
   nbhDdMatch(S.behaviors,f,r=>made.has(r)).forEach((g,r)=>{if(made.has(r))nbhDdCrit(r,g,'new');});

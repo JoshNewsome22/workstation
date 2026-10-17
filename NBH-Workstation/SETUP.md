@@ -9905,6 +9905,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.34: Form DD-1 takes Form TB-1's definitions; three-column field blocks on the iPad
+
+- **An empty definition on DD-1 fills from Form TB-1.** A behavior row already on DD-1 with no definition took nothing
+  from the case: "From the case" said "Nothing to place" (only a replacement row took a definition). Now a target row
+  takes it too, under "From the case" and when DD-1 reads the case. A definition written on DD-1 is never replaced.
+- **A cluster's definition comes with its members.** A cluster's operational definition names its forms "listed below";
+  DD-1 now takes the Included topographies lines with it, so the definition is whole on DD-1 and its graph page.
+- **Three-column field blocks have each label above its box on the iPad** (TB-1's definition cards, EA-1, IA-1, MS-1,
+  OB-1, RR-1). Beside the box, a long label wrapped to two lines and its box took only the width the label left. Paper
+  is unchanged.
+
+Checked by `qa/v2234-dd1-def-from-case-test.js`.
+
 ### v22.33: Form DD-1's printed sheet, two more
 
 - **The dates read whole.** The Date column on paper is wider (it cut "10/19" to "10/1" on the iPad).

@@ -351,7 +351,8 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
    const want=was.behaviors.map(b=>b.name+'|'+(b.name==='Aggression'?5:b.critDays)+'|'+b.aim);
    ok('G: the case\'s DD-1 (3 days, saved before this change) takes the GB-1 objective\'s 5 days for Aggression; everything else is as saved',
      JSON.stringify(ag.b)===JSON.stringify(want)&&ag.rows===was.rows.length&&was.behaviors[0].critDays===3,{ag,want});
-   ok('G: DD-1 says so in a message once the case is open',shown==='Form GB-1’s criterion is now on Aggression.',shown);
+   /* v22.34 the rows saved with no definition take Form TB-1's, and the same message says so */
+   ok('G: DD-1 says so in a message once the case is open',/^Form GB-1’s criterion is now on Aggression(\.|; Form TB-1’s definition is now on )/.test(shown),shown);
    await page.evaluate(()=>openForm('DD-1'));await sleep(500);
    const note=await noteOf(dd);
    ok('G: the note at the top of DD-1 is there when DD-1 is brought up, and says what changed',!!note&&note.shown&&/ Aggression: 5 consecutive days \(was 3\)\. /.test(note.text),note);
