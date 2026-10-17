@@ -9905,6 +9905,35 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.35: Staff directory
+
+- **One list of the school staff you send forms to,** typed once for the whole caseload: **Staff directory** in the top
+  bar (also in Go to, Ctrl K). Each person has a name, role, email, phone, school and a note. **Add a person**, or **Paste a
+  list**: rows copied from a spreadsheet (with or without a heading row), an email's To line ("Dana Whitfield
+  <dana@school.org>; ..."), or one person a line with the parts in any order, or a group's members page (Google Groups: each name with its email on
+  the line below, then Member and the date joined; copy the column, and the headings, Member, Owner and dates are left out). **Save to a file** writes a CSV; **Open a
+  file** reads one back (or the district's list saved as CSV). The same person again (the same email) is completed, not
+  added twice.
+- **The forms offer it** wherever a staff member is named: tap the box, or type the first letters of a name, role, email or
+  school, and pick. The role, email and phone come with the name where the row has boxes for them (a role list takes the
+  nearest choice: "4th grade teacher" becomes Classroom teacher). In 32 forms, among them IA-1's informants and
+  interviewers, the To box of Email it (the respondent pages of IA-1, IN-1, SV-1 and CF-1), the reply box's send list, the
+  respondents of CF-1, SV-1 and IN-1, DM-1's team, CR-1's team, QS-1's who to call, EB-1's who to ask, the observers,
+  trainers, trainees, implementers and interviewers of the other forms, RS-1's RBTs and supervisors, DD-1's staff links.
+  **Edit the staff directory** at the foot of the list opens the window.
+- **Save to directory.** A staff member typed by hand with an email, in a row the directory does not hold, is offered to it
+  once. A parent or relative (a team row whose role is Parent) is never offered. The list is added to a form only when it
+  has someone to show.
+- **Where it is kept.** On this device, as the Google key is (Safari's settings, and the workstation's own store when Safari
+  refuses them). With Google Drive in use, also as one file in the cases folder (Staff directory.json), merged person by
+  person, so a change on the iPad and another on the laptop both stand, and a removal stands. Diagnostics shows how many
+  people it holds and whether Drive has the latest. Staff only: no student and no family member goes in it, and it goes
+  nowhere but your own Drive.
+- **Form DM-1's team roles** add Parent, Behavioral Health Professional (BHP), Behavior Intervention Associate (BIA), Fine
+  arts teacher, ESE coordinator, Transportation leadership and Group home manager (Read a document's team list too).
+
+Checked by `qa/v2235-staff-directory-test.js` and `qa/v2189-drive-test.js` (34, 35).
+
 ### v22.34: Form DD-1 takes Form TB-1's definitions; three-column field blocks on the iPad
 
 - **An empty definition on DD-1 fills from Form TB-1.** A behavior row already on DD-1 with no definition took nothing

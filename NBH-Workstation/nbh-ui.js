@@ -908,3 +908,211 @@ try { (function(){
   if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', function(){ setTimeout(mk, 0); }); else setTimeout(mk, 0);
   W.nbhDictateUI = { toggle: toggle, button: function(){ return btn; } };
 })(); } catch (e) {}
+/* v22.35 the staff directory: the school staff the forms go to (name, role, email, phone, school, a note), typed once for
+   the whole caseload and offered in the boxes where a staff member is named. Tap such a box (or type a few letters) and pick:
+   the person's role, email and phone fill the boxes beside the name where the row has them. A name and email typed into such
+   a row that the directory does not hold are offered to it (Save to directory). Staff only: no student and no family member
+   goes in it, and nothing of it is sent anywhere. It is kept on this device as the workstation keeps the Google key: in
+   Safari's settings (localStorage, nbh.people) and the workstation's own store (IndexedDB nbh-settings), read from the
+   first that holds it. The workstation's Staff directory edits it and, with Google Drive on, keeps it in the school Drive. */
+try { (function(){
+  var D = document, W = window, K = 'nbh.people', F = ['name', 'role', 'email', 'phone', 'site', 'note'];
+  var EM = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[A-Za-z]{2,}$/;
+  /* where a staff member is named: the box (sel), what it holds (field), and the boxes of the same row (sib: the field's
+     name with its last part replaced, e.g. inf[2].name -> inf[2].email); need: the row box that must be there, so a box of
+     the same name in another form (a target's t[0].name) is not taken for one */
+  /* the partner boxes of a row: in the same table row (data-f), by id (rb-n-3 -> rb-r-3), by a data attribute of the form */
+  function rowF(f){ return function(el){ var r = el.closest('tr'); return r ? r.querySelector('[data-f="' + f + '"]') : null; }; }
+  function byId(a, b){ return function(el){ return D.getElementById(el.id.replace(a, b)); }; }
+  function dat(attr, v){ return function(el){ for (var a = el.parentElement; a; a = a.parentElement) { var t = a.querySelector('[' + attr + '="' + v + '"]'); if (t) return t; } return null; }; }   /* the nearest: an administration's own */
+  function dk(a, b){ return function(el){ return D.querySelector('[data-k="' + String(el.getAttribute('data-k') || '').replace(a, b) + '"]'); }; }
+  var FORM = (/^Form\s+(\S+)/.exec(D.title || '') || [])[1] || '';
+  var BIND = [
+    /* Form IA-1: the informants (the respondent pages go to their emails), each a row of name, role and email */
+    { sel: 'input[name^="inf["][name$="].name"]', field: 'name', sib: { role: 'role', email: 'email' }, need: 'email' },
+    { sel: 'input[name^="inf["][name$="].email"]', field: 'email', sib: { name: 'name', role: 'role' }, need: 'name' },
+    /* Form DM-1: the team, each a row of role (a list), name and one box for phone and email */
+    { sel: 'input[name^="t["][name$="].name"]', field: 'name', sib: { role: 'role', contact: 'contact' }, need: 'contact' }
+    ,
+    /* the email boxes of the respondent pages (nbh-respond.js): Email it, the Mail app, the reply box's send list */
+    { sel: '#nbhInvTo,#nbhMailTo', field: 'email' },
+    { sel: 'input[id^="rb-n-"]', field: 'name', sib: { role: byId('rb-n-', 'rb-r-'), email: byId('rb-n-', 'rb-e-') } },
+    { sel: 'input[id^="rb-e-"]', field: 'email', sib: { name: byId('rb-e-', 'rb-n-'), role: byId('rb-e-', 'rb-r-') } },
+    /* the respondents of CF-1, SV-1 and IN-1 (a role list, or a role box, beside the name; IN-1 also its position) */
+    { form: 'CF-1 SV-1', sel: '#rTbl input[data-f="name"]', sib: { role: rowF('role') } },
+    { form: 'IN-1', sel: '#respTbl input[data-f="n"]', sib: { role: rowF('role'), role2: rowF('rel') } },
+    { form: 'IN-1', sel: '#respTbl input[data-f="by"]' },
+    { form: 'IA-1', sel: 'input[name^="int["][name$="].by"]' },
+    /* teams and who to call */
+    { form: 'CR-1', sel: '#teamTbl input[data-f="n"]', sib: { role: rowF('r') } },
+    { form: 'CR-1', sel: 'input[data-m="rpBy"]', field: 'namerole' },
+    { form: 'CR-1', sel: 'input[data-m="dbBy"]' },
+    { form: 'QS-1', sel: 'input[data-k^="calls."][data-k$=".name"]', sib: { role: dk(/name$/, 'role') } },
+    { form: 'EB-1', sel: 'input[name="e.cname"]', sib: { role: 'crole', phone: 'cphone' } },
+    { form: 'EB-1', sel: 'input[name="e.ackby"]' },
+    { form: 'IC-1', sel: 'input[name="c.ese"],input[name="a.by"]' },
+    { form: 'IC-1', sel: 'input[name="s.st.name"]', field: 'namerole' },
+    { form: 'MS-1', sel: 'input[name="m.nurse"],input[name="e.rater"]' },
+    { form: 'MS-1', sel: 'input[name="m.doc"]', sib: { phone: 'docfax' } },
+    { form: 'TV-1', sel: 'input[name="m.pname"]' },
+    { form: 'TV-1', sel: 'input[name="m.contact"]', field: 'contact' },
+    /* observers, implementers, trainers and the staff a form is about */
+    { sel: 'input[name="ti_obs"],input[name="s_imp"],input[name="ss_imp"],input[name="ti_imp"]' },
+    { form: 'OB-1 SP-1', sel: '#mObserver', sib: { role: byId('mObserver', 'mRole') } },
+    { form: 'OB-1', sel: '#mTeacher,input[id$="secondObs"]' },
+    { form: 'ABC-1', sel: '#h-observer', field: 'namerole' },
+    { form: 'DD-1', sel: '#m_observer,#incBy,#stWho' },
+    { form: 'CT-1 ST-1', sel: 'input[data-m="trainer"]' },
+    { form: 'ST-1', sel: 'input[data-m="trainee"]', sib: { role: dat('data-m', 'pos') } },
+    { form: 'TI-1', sel: 'input[data-m="int"]', sib: { role: dat('data-m', 'pos') } },
+    { form: 'TI-1 MT-1', sel: 'input[data-m="obs"]' },
+    { form: 'MT-1', sel: 'input[data-m="obs2"]' },
+    { form: 'DA-1', sel: 'input[data-m="runner"]' },
+    { form: 'GC-1', sel: 'input[data-m="teacher"],input[data-m="b_who"],input[data-m="f_who"]' },
+    { form: 'IM-1', sel: 'input[data-m="examiner"],input[data-m="nurse"],input[data-a="examiner"]' },
+    { form: 'IM-1', sel: 'input[data-m="second"]', sib: { role: dat('data-m', 'secondRole') } },
+    { form: 'IM-1', sel: 'input[data-a="second"]', sib: { role: dat('data-a', 'secondRole') } },
+    { form: 'PD-1', sel: 'input[data-m="staff"]', sib: { role: dat('data-m', 'role') } },
+    { form: 'PD-1', sel: 'input[data-m="sup"]' },
+    { form: 'SI-1', sel: 'input[data-m="asker"]', sib: { role: dat('data-m', 'role') } },
+    { form: 'SI-1', sel: 'input[data-m="a_who"]' },
+    { form: 'SV-1', sel: 'input[data-m="collector"]' },
+    { form: 'SM-1', sel: 'input[data-m="rater"],input[data-m="bc_teacher"]' },
+    { form: 'EA-1', sel: '#tImpl' },
+    { form: 'TD-1', sel: 'input[name^="tr["][name$="].who"]' },
+    { form: 'RR-1', sel: 'input[name^="f["][name$="].by"]' },
+    { form: 'TB-1', sel: 'input[name^="cand["][name$="].by"]' },
+    { form: 'RS-1', sel: '#sName,input[data-sup][data-f="name"]' }
+  ];
+  function key(s){ return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' '); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function clean(p){ var o = {}; F.forEach(function(f){ o[f] = String(p && p[f] || '').replace(/\s+/g, ' ').trim().slice(0, f === 'note' ? 300 : 120); }); return o; }
+  function blank(){ return { nbh: 'people', v: 1, list: [], gone: {}, drv: null }; }
+  function parse(s){ try { var j = typeof s === 'string' ? JSON.parse(s) : s; if (j && j.nbh === 'people' && Array.isArray(j.list)) { j.gone = j.gone || {}; return j; } } catch (e) {} return null; }
+  function same(a, b){ return a.email && b.email ? key(a.email) === key(b.email) : !!a.name && key(a.name) === key(b.name); }
+  function idb(){ return new Promise(function(res){ var r, done = false, fin = function(v){ if (!done) { done = true; res(v); } };
+    try { if (!W.indexedDB) return fin(null); r = indexedDB.open('nbh-settings', 1); } catch (e) { return fin(null); }
+    setTimeout(function(){ fin(null); }, 4000);
+    r.onupgradeneeded = function(){ try { var db = r.result; if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv', { keyPath: 'k' }); } catch (e) {} };
+    r.onsuccess = function(){ fin(r.result); }; r.onerror = function(){ fin(null); }; r.onblocked = function(){ fin(null); }; }); }
+  function load(){ var s = null; try { s = localStorage.getItem(K); } catch (e) {}
+    var j = s ? parse(s) : null; if (j) return Promise.resolve(j);
+    return idb().then(function(db){ if (!db) return blank(); return new Promise(function(res){ try { var g = db.transaction('kv', 'readonly').objectStore('kv').get(K);
+      g.onsuccess = function(){ res(g.result && parse(g.result.v) || blank()); }; g.onerror = function(){ res(blank()); }; } catch (e) { res(blank()); } }); }); }
+  function save(j){ j.drv = Object.assign({}, j.drv || {}, { dirty: true }); j.at = Date.now();
+    var v = JSON.stringify(j), kept = false; try { localStorage.setItem(K, v); kept = localStorage.getItem(K) === v; } catch (e) {}
+    if (!kept) try { localStorage.removeItem(K); } catch (e) {}
+    return idb().then(function(db){ if (!db) return kept; return new Promise(function(res){ try { var t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put({ k: K, v: v });
+      t.oncomplete = function(){ res(true); }; t.onerror = function(){ res(kept); }; } catch (e) { res(kept); } }); })
+      .then(function(ok){ try { if (W.parent && W.parent !== W) W.parent.postMessage({ nbh: 'people-changed' }, '*'); } catch (e) {} return ok; }); }
+  /* one person into the directory: one already there (the same email, or the same name with no email) is completed, not added */
+  function add(p){ p = clean(p); if (!p.name && !p.email) return Promise.resolve(null);
+    return load().then(function(j){ var hit = j.list.filter(function(x){ return same(x, p); })[0];
+      if (hit) { var ch = false; F.forEach(function(f){ if (p[f] && !hit[f]) { hit[f] = p[f]; ch = true; } }); if (!ch) return hit; hit.upd = Date.now(); }
+      else { p.id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); p.upd = Date.now(); j.list.push(p); hit = p; }
+      return save(j).then(function(){ return hit; }); }); }
+  function inShell(){ try { return W.parent !== W && !!W.parent.document.getElementById('caseloadBtn'); } catch (e) { return false; } }
+  function dirOpen(){ try { W.parent.postMessage({ nbh: 'people-open' }, '*'); } catch (e) {} }
+  var CSS = '@media screen{#nbhPpl{position:fixed;z-index:9500;background:#fff;border:1px solid #b7c8c5;border-radius:8px;box-shadow:0 14px 34px -14px rgba(22,36,46,.45);max-height:min(340px,46vh);overflow:auto;-webkit-overflow-scrolling:touch;font:13.5px/1.35 var(--nbh-sans,system-ui,sans-serif);color:#16242e;padding:4px 0;box-sizing:border-box}' +
+    '#nbhPpl[hidden]{display:none}#nbhPpl .pp-h{padding:6px 12px 3px;font-size:11.5px;color:#5b6b73}#nbhPpl .pp-hint{padding:4px 12px 8px;font-size:12.5px;color:#2b3a44;line-height:1.45}' +
+    '#nbhPpl button{display:block;width:100%;text-align:left;border:0;border-radius:0;background:transparent;padding:7px 12px;font:inherit;color:inherit;cursor:pointer;min-height:0;box-shadow:none}' +
+    '#nbhPpl button[aria-selected="true"],#nbhPpl button:hover{background:#eef4f3}#nbhPpl .pp-n{font-weight:600}#nbhPpl .pp-r{color:#3a4a52}' +
+    '#nbhPpl .pp-m{display:block;font-size:12px;color:#5b6b73;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#nbhPpl .pp-f{border-top:1px solid #e3eae8;margin-top:4px;color:#1f5b7a;font-size:12.5px}' +
+    '.nbh-toast .pp-save{border:1px solid #cfe0dd!important;border-radius:4px!important;padding:4px 10px!important;margin:0 0 0 12px!important;font-weight:600;white-space:nowrap;color:#fff!important;min-width:0!important;min-height:0!important}}' +
+    '@media screen and (pointer:coarse){#nbhPpl button{min-height:44px;padding:9px 14px}.nbh-toast .pp-save{min-height:36px!important;padding:6px 12px!important}}@media print{#nbhPpl{display:none!important}}';
+  function css(){ if (D.getElementById('nbhPplCss')) return; var s = D.createElement('style'); s.id = 'nbhPplCss'; s.textContent = CSS; (D.head || D.documentElement).appendChild(s); }
+  function bindOf(el){ if (!el || el.tagName !== 'INPUT' || el.readOnly || el.disabled || !/^(text|email|search|)$/.test(el.type || '')) return null;
+    for (var i = 0; i < BIND.length; i++) { var b = BIND[i]; if (b.form && (' ' + b.form + ' ').indexOf(' ' + FORM + ' ') < 0) continue;
+      try { if (el.matches(b.sel) && (!b.need || sibs(el, b)[b.need])) return b; } catch (e) {} } return null; }
+  function sibs(el, b){ var out = {}; if (!b.sib) return out;
+    Object.keys(b.sib).forEach(function(f){ var s = b.sib[f], t = null;
+      try { if (typeof s === 'function') t = s(el); else if (el.name) { var nm = el.name.replace(/[^.\[\]]+$/, s); t = D.querySelector('[name="' + nm.replace(/(["\\])/g, '\\$1') + '"]'); } } catch (e) {}
+      if (t && t !== el) out[f] = t; });
+    return out; }
+  function personOf(el, b){ var p = {}; p[b.field || 'name'] = el.value; var s = sibs(el, b);
+    Object.keys(s).forEach(function(f){ var v = s[f].value; if (!v) return;
+      if (f === 'contact') { var m = v.match(/[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[A-Za-z]{2,}/), ph = v.replace(m ? m[0] : '', '').replace(/^[\s,;\/]+|[\s,;\/]+$/g, ''); if (m) p.email = m[0]; if (/\d{3}/.test(ph)) p.phone = ph; return; }
+      if (s[f].tagName === 'SELECT' && /^other$/i.test(v)) return; p[f] = v; });
+    return clean(p); }
+  var box = null, cur = null, curB = null, items = [], act = -1, all = null, busy = false, offered = {}, hideT = 0;
+  function hide(){ clearTimeout(hideT); if (box) box.hidden = true; if (cur) cur.removeAttribute('aria-expanded'); act = -1; }
+  function place(){ if (!box || box.hidden || !cur || !cur.isConnected) return; var r = cur.getBoundingClientRect(), vw = W.innerWidth, vh = W.innerHeight;
+    if (r.bottom < 0 || r.top > vh) { hide(); return; }
+    var w = Math.min(vw - 16, Math.max(r.width, 300)); box.style.width = w + 'px'; box.style.left = Math.max(8, Math.min(r.left, vw - w - 8)) + 'px';
+    var below = vh - r.bottom - 8, above = r.top - 8;
+    if (below < 180 && above > below) { box.style.top = ''; box.style.bottom = (vh - r.top + 4) + 'px'; box.style.maxHeight = Math.min(340, above - 4) + 'px'; }
+    else { box.style.bottom = ''; box.style.top = (r.bottom + 4) + 'px'; box.style.maxHeight = Math.min(340, Math.max(120, below - 4)) + 'px'; } }
+  function match(q){ var L = ((all && all.list) || []).slice().sort(function(a, b){ return (a.name || a.email).localeCompare(b.name || b.email); }); q = key(q);
+    if (!q) return L.slice(0, 60);
+    var words = q.split(' ');
+    /* each word typed starts a word of the person's name, role, email, phone or school ("dan" finds Dana, not Jordan) */
+    return L.filter(function(p){ var t = key(F.slice(0, 5).map(function(f){ return p[f]; }).join(' ')).split(/[\s.@_\-(),\/]+/);
+      return words.every(function(w){ return t.some(function(x){ return x.indexOf(w) === 0; }); }); }).slice(0, 60); }
+  function mk(){ if (box) return; css(); box = D.createElement('div'); box.id = 'nbhPpl'; box.className = 'noprint'; box.setAttribute('role', 'listbox'); box.setAttribute('aria-label', 'Staff directory'); box.hidden = true; D.body.appendChild(box);
+    box.addEventListener('mousedown', function(e){ e.preventDefault(); });   /* the box under the cursor keeps the cursor where it is */
+    box.addEventListener('click', function(e){ var t = e.target.closest && e.target.closest('button'); if (!t) return;
+      if (t.getAttribute('data-pp') === 'dir') { hide(); dirOpen(); return; } choose(items[+t.getAttribute('data-pp')]); }); }
+  var HINT = 'nbh.ppl.hint';
+  function paint(){ if (!cur) return;   /* the list is made only when it has something to show: a form whose directory is empty gets nothing added */
+    var L = match(cur.value), f = curB.field || 'name';
+    if (fresh && !L.length && cur.value) L = match('');   /* a box holding someone the directory does not have (an address typed last time): the whole list, on the tap */
+    items = L;
+    if (!all || !all.list.length) {   /* an empty directory says where it is, once a session, in the workstation */
+      var seen = false; try { seen = sessionStorage.getItem(HINT) === '1'; } catch (e) { seen = true; }
+      if (seen || !inShell() || cur.value) { hide(); return; }
+      try { sessionStorage.setItem(HINT, '1'); } catch (e) {}
+      mk();
+      box.innerHTML = '<div class="pp-h">Staff directory</div><div class="pp-hint">Type the staff you send forms to once, in the workstation\u2019s Staff directory, and pick them here.</div><button type="button" class="pp-f" data-pp="dir">Open the staff directory\u2026</button>';
+      box.hidden = false; place(); return; }
+    if (!L.length || (L.length === 1 && key(val(L[0], f)) === key(cur.value))) { hide(); return; }
+    if (act >= L.length) act = L.length - 1; mk();
+    box.innerHTML = '<div class="pp-h">Staff directory' + (cur.value ? '' : ': pick, or type to narrow') + '</div>' + L.map(function(p, i){
+      return '<button type="button" role="option" data-pp="' + i + '" aria-selected="' + (i === act) + '"><span class="pp-n">' + esc(p.name || p.email) + '</span>' + (p.role ? ' <span class="pp-r">\u00b7 ' + esc(p.role) + '</span>' : '') +
+        '<span class="pp-m">' + esc([p.email, p.phone, p.site].filter(Boolean).join(' \u00b7 ') || '\u00a0') + '</span></button>'; }).join('') +
+      (inShell() ? '<button type="button" class="pp-f" data-pp="dir">Edit the staff directory\u2026</button>' : '');
+    var host = cur.closest('dialog[open]') || D.body; if (box.parentNode !== host) host.appendChild(box);   /* inside a dialog (Email it) the list is in the dialog's layer */
+    box.hidden = false; cur.setAttribute('aria-expanded', 'true'); place();
+    var a = box.querySelector('[aria-selected="true"]'); if (a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' }); }
+  /* a choice box (a role list) takes the choice nearest the person's role: the same words, else the most words shared
+     ("4th grade teacher" -> Classroom teacher); none shared, it is left as it was */
+  var FAMILY = /\b(parent|guardian|mother|father|mom|dad|grand\w*|foster|step\w*|sibling|brother|sister|aunt|uncle|relative|family)\b/i;
+  var STOP = { school: 1, and: 1, of: 1, the: 1, a: 1, or: 1 };
+  function nearest(t, v){ var kv = key(v), best = null, bs = 0, ws = kv.split(/[^a-z0-9]+/).filter(function(w){ return w && !STOP[w]; });
+    Array.prototype.forEach.call(t.options, function(o){ var ko = key(o.value || o.text); if (!ko) return; if (ko === kv) { best = o.value; bs = 99; return; }
+      var n = ko.split(/[^a-z0-9]+/).filter(function(w){ return w && !STOP[w] && ws.indexOf(w) >= 0; }).length; if (n > bs) { bs = n; best = o.value; } });
+    return bs > 0 ? best : null; }
+  /* what a person gives a box: a box for phone and email together (Form DM-1's team) takes both */
+  function val(p, f){ f = String(f).replace(/\d+$/, '');
+    return f === 'contact' ? [p.email, p.phone].filter(Boolean).join(', ') : f === 'namerole' ? [p.name, p.role].filter(Boolean).join(', ') : p[f]; }
+  function set(t, v){ if (!t || v == null) return;
+    if (t.tagName === 'SELECT') { v = nearest(t, v); if (v == null) return; }
+    if (t.value === v) return;
+    t.value = v; t.dispatchEvent(new Event('input', { bubbles: true })); t.dispatchEvent(new Event('change', { bubbles: true })); }
+  function choose(p){ if (!p || !cur) return; var el = cur, b = curB, s = sibs(el, b); busy = true;
+    try { set(el, val(p, b.field || 'name') || ''); Object.keys(s).forEach(function(f){ var v = val(p, f); if (v) set(s[f], v); }); } finally { busy = false; }
+    offered[key(p.name) + '|' + key(p.email)] = 1; hide(); try { el.focus({ preventScroll: true }); } catch (e) {} hide(); }
+  var fresh = false;
+  function open(el, b){ cur = el; curB = b; act = -1; fresh = true; load().then(function(j){ all = j; if (cur === el && D.activeElement === el) paint(); }); }
+  D.addEventListener('focusin', function(e){ var b = bindOf(e.target); if (b) { clearTimeout(hideT); open(e.target, b); } else if (box && !box.contains(e.target)) { hide(); cur = null; } }, true);
+  D.addEventListener('input', function(e){ if (e.target === cur && !busy) { act = -1; fresh = false; paint(); } }, true);
+  D.addEventListener('focusout', function(e){ if (e.target === cur) { var el = cur; hideT = setTimeout(function(){ if (D.activeElement !== el) hide(); }, 300); } }, true);
+  D.addEventListener('keydown', function(e){ if (e.target !== cur || !box || box.hidden || !items.length) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = e.key === 'ArrowDown' ? Math.min(items.length - 1, act + 1) : Math.max(0, act - 1); paint(); }
+    else if (e.key === 'Enter' && act >= 0) { e.preventDefault(); choose(items[act]); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); hide(); } }, true);
+  W.addEventListener('scroll', function(){ if (box && !box.hidden) place(); }, true);
+  W.addEventListener('resize', function(){ if (box && !box.hidden) place(); });
+  /* a person typed by hand into a row the directory does not hold: offered to it, once */
+  D.addEventListener('change', function(e){ if (busy || !e.isTrusted) return; var b = bindOf(e.target); if (!b) return;
+    var p = personOf(e.target, b), hasMail = b.field === 'email' || !!(b.sib && (b.sib.email || b.sib.contact));
+    if (!hasMail || !p.name || !p.email || !EM.test(p.email)) return;   /* a name alone is not offered: the directory is for sending */
+    if (FAMILY.test(p.role)) return;   /* a parent or relative in a team row is never offered: the directory is staff only */
+    var k = key(p.name) + '|' + key(p.email); if (offered[k]) return; offered[k] = 1;
+    load().then(function(j){ if (j.list.some(function(x){ return same(x, p); })) return;
+      var U = W.nbhUI, t = U && U.toast ? U.toast(p.name + (p.email ? ' (' + p.email + ')' : '') + ' is not in your staff directory.', { ms: 14000 }) : null; if (!t) return;
+      var bt = D.createElement('button'); bt.type = 'button'; bt.className = 'pp-save'; bt.textContent = 'Save to directory'; css();
+      bt.addEventListener('click', function(){ add(p).then(function(){ if (t.parentNode) t.parentNode.removeChild(t); if (U.toast) U.toast(p.name + ' is in your staff directory now.', { kind: 'ok' }); }); });
+      t.insertBefore(bt, t.lastChild); }); }, true);
+  var U = W.nbhUI || (W.nbhUI = {});
+  U.people = { load: load, add: add, list: function(){ return load().then(function(j){ return j.list.slice(); }); }, bind: BIND, bindOf: bindOf };
+})(); } catch (e) {}

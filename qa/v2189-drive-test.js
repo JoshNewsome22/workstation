@@ -4,7 +4,8 @@
    other asks which to keep and puts the other in Replaced copies; a save with the sign-in over waits and goes at the next one;
    Remove everywhere and Remove only here; a personal account warned; a different account refused; the Drive API not turned on
    said plainly; Save case to a file still writes one; a case over 5 MB goes by the resumable upload (v21.97); a device whose Safari
-   refuses its settings store keeps the key and the Drive settings in the workstation's own store (v21.98). Google (sign-in,
+   refuses its settings store keeps the key and the Drive settings in the workstation's own store (v21.98); the staff directory
+   goes to Drive as one file and two devices' changes to it are merged (v22.35). Google (sign-in,
    userinfo, Drive) is simulated in this test.
    Simulated students only.  usage: node qa/v2189-drive-test.js */
 const {chromium,BASE,sleep}=require(__dirname+'/lib.js');
@@ -302,6 +303,18 @@ const press=(page,re)=>page.evaluate(src=>{const re=new RegExp(src);const b=[...
   const end33={drive:/SECOND iPad/.test(stF().content),old:olds().some(o=>/MAC words/.test(o.content)&&/SIM-0003/.test(o.content)),local:(await rec(G.page,ST.client))};
   ok('33 Save case while a sync brings the Mac’s newer copy: the iPad’s save is kept and waits (not replaced); asked which copy, Keep this iPad’s sends it to Drive and the Mac’s copy goes to Replaced copies',
     v33mac&&busy&&mid33.second&&!mid33.mac&&mid33.dirty&&/two different copies/.test(ask33.t+ask33.b)&&end33.drive&&end33.old&&/SECOND iPad/.test(end33.local.text)&&!end33.local.drv.dirty,{v33mac,busy,mid33,ask:ask33.t,end:{drive:end33.drive,old:end33.old,dirty:end33.local&&end33.local.drv.dirty}});
+  /* 34-35 (v22.35) the staff directory in Drive: one file in the cases folder, each device's changes merged person by person */
+  const pf=()=>[...D.files.values()].filter(f=>f.appProperties&&f.appProperties.nbh==='people'&&!f.trashed);
+  const syncd=async X=>{await sleep(1800);await idle(X.page);await X.page.evaluate(()=>{drvSync({});});await sleep(400);await idle(X.page);await sleep(300);await idle(X.page);};
+  await G.page.evaluate(()=>pplDo(j=>{pplAddTo(j,[{name:'Dana Whitfield',role:'4th grade teacher',email:'dana.whitfield@example.org'},{name:'Paula Brennan',email:'paula.brennan@example.org'}]);}));
+  await syncd(G);await syncd(H);
+  const g34=await G.page.evaluate(async()=>{const j=await pplLoad();return {n:j.list.length,drv:j.drv};}),h34=await H.page.evaluate(async()=>(await pplLoad()).list.map(p=>p.name).sort());
+  ok('34 the staff directory goes to Drive as one file (Staff directory.json) and the laptop gets it',pf().length===1&&pf()[0].name==='Staff directory.json'&&/dana\.whitfield@example\.org/.test(pf()[0].content)&&g34.n===2&&g34.drv&&!g34.drv.dirty&&JSON.stringify(h34)==='["Dana Whitfield","Paula Brennan"]',{files:pf().length,g34,h34});
+  await H.page.evaluate(()=>pplDo(j=>{const p=j.list.find(x=>x.name==='Dana Whitfield');p.role='Teacher';p.upd=Date.now();}));
+  await G.page.evaluate(()=>pplDo(j=>{const p=j.list.find(x=>x.name==='Paula Brennan');j.list=j.list.filter(x=>x!==p);j.gone[p.id]=Date.now();}));
+  await syncd(H);await syncd(G);await syncd(H);
+  const end34=await Promise.all([G,H].map(X=>X.page.evaluate(async()=>(await pplLoad()).list.map(p=>p.name+'|'+p.role).sort().join(';'))));
+  ok('35 a change on the laptop and a removal on the iPad both stand on both devices, through the one file',end34[0]==='Dana Whitfield|Teacher'&&end34[1]==='Dana Whitfield|Teacher'&&pf().length===1,{end34,files:pf().length});
   ok('no page errors (iPad, laptop, third, fourth, the second editions, the race)',!A.errs.length&&!B.errs.length&&!C.errs.length&&!E.errs.length&&!errB.length&&!F2.errs.length&&!G.errs.length&&!H.errs.length,[A.errs,B.errs,C.errs,E.errs,errB,F2.errs,G.errs,H.errs].map(e=>e.slice(0,3)));
   }finally{await br.close();}
   console.log(fails?'RESULT: '+fails+' failed':'RESULT: all passed');process.exit(fails?1:0);

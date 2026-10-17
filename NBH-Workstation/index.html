@@ -949,6 +949,22 @@ body.ws-split .rail-edge{display:none!important}
 #blank .cl-cards+.hint{text-align:left}
 /* Caseload: wider on a wide screen, for the cards */
 #dlg.cl-wide{max-width:1180px}
+/* v22.35 the staff directory */
+#dlg .pp-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 10px}
+#dlg .pp-tools input[type=search]{flex:1 1 220px;min-width:0;font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--rule2,#c9d4d2);border-radius:6px}
+#dlg #ppPaste textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--rule2,#c9d4d2);border-radius:6px}
+#dlg .pp-pr{margin:6px 0 10px}#dlg #ppPasteMsg{font-size:13px;color:var(--ink-2,#4a5a66);margin-left:8px}
+#dlg .pp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--rule,#dfe6e4)}
+#dlg .pp-tbl{width:100%;min-width:820px;border-collapse:collapse;table-layout:fixed}
+#dlg .pp-tbl th{font-size:12px;text-align:left;color:var(--ink-2,#4a5a66);font-weight:600;padding:6px 4px 4px;border-bottom:1px solid var(--rule,#dfe6e4)}
+#dlg .pp-tbl th:nth-child(1){width:19%}#dlg .pp-tbl th:nth-child(2){width:14%}#dlg .pp-tbl th:nth-child(3){width:23%}#dlg .pp-tbl th:nth-child(4){width:13%}#dlg .pp-tbl th:nth-child(5){width:13%}#dlg .pp-tbl th:nth-child(7){width:48px}
+#dlg .pp-tbl td{padding:2px 3px;border-bottom:1px solid var(--rule,#e3eae8)}
+#dlg .pp-tbl input{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;padding:6px 7px;border:1px solid transparent;border-radius:4px;background:transparent;color:inherit}
+#dlg .pp-tbl input:hover{border-color:var(--rule2,#c9d4d2)}#dlg .pp-tbl input:focus{border-color:#2f7fa8;background:#fff;outline:none;box-shadow:0 0 0 2px rgba(47,127,168,.2)}
+#dlg .pp-x{min-width:36px;min-height:36px;border:0;background:transparent;font-size:20px;line-height:1;color:#7a2e1a;cursor:pointer;border-radius:6px;padding:0}
+#dlg .pp-x:hover{background:#f6e9e5}
+#dlg .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (pointer:coarse){#dlg .pp-x{min-width:44px;min-height:44px}#dlg .pp-tbl input{padding:9px 8px;font-size:15px}}
 /* the search: one field, and the places found grouped by student */
 .cl-find{margin:4px 0 12px;text-align:left}
 .cl-fl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -1178,6 +1194,7 @@ body:not(.has-form) #focusBtn{display:none}
     <button id="caseXlsx" class="rare" title="Every open form into one spreadsheet: a sheet per form, from its own CSV export where it has one, else every field by name">Case as spreadsheet</button></span>
     <input type="file" id="caseFile" accept="application/json,.json,text/html,.html" hidden>
     <span class="pair"><button id="caseMap" title="Which form when, from referral to exit, and what carries forward between them">Case map</button>
+    <button id="dirBtn" title="The school staff you send forms to, typed once: a form's boxes where a staff member is named offer them">Staff directory</button>
     <button id="diag" class="rare">Diagnostics</button>
     <button id="help">Help</button>
     <button id="moreBtn" class="more-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="Save packet, Open packet, Case as spreadsheet, Diagnostics, Finish PDF">More</button></span>
@@ -2233,7 +2250,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.34';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.35';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2624,6 +2641,10 @@ window.addEventListener('message',ev=>{
   if(d.nbh==='send-facts'){sendFactsFor(ev);return;}   /* v21.63 Form TB-1's Send the targets button */
   if(d.nbh==='gid'){if(!Object.values(state.frames).some(f=>f.contentWindow===ev.source))return;const g=String(d.v||'').trim();   /* v21.98 a key given on Form DD-1 */
     if(/\.apps\.googleusercontent\.com$/.test(g))kvSet('nbh.google.client',g);else if(!g)kvDel('nbh.google.client');gidToForms();return;}
+  if(d.nbh==='people-open'){if(Object.values(state.frames).some(f=>f.contentWindow===ev.source))pplOpen();return;}   /* v22.35 a form's Edit the staff directory */
+  if(d.nbh==='people-changed'){if(!Object.values(state.frames).some(f=>f.contentWindow===ev.source))return;   /* v22.35 a form saved someone to the directory */
+    if(typeof drvOn==='function'&&drvOn())drvSoon(false,1500);
+    if($('#dlg').open&&$('#ppBody')&&!$('#dlgBody').contains(document.activeElement))pplLoad().then(j=>{const b=$('#ppBody');if(b){b.innerHTML=pplSorted(j.list).map(pplRow).join('');pplCount();}});return;}
   if(d.nbh==='mail'){mailFor(ev,d);return;}   /* v21.86 a form's invitations, sent from the school Google account */
   /* Escape and the fullscreen key, pressed while working inside a form */
   if(d.nbh==='key'){
@@ -3478,6 +3499,7 @@ $('#diag').addEventListener('click',()=>{
    ['My pictures',EMBED?(EMBED.pictures?'inside this file':'not inside this file'):'checking\u2026','nbh-pictures.js, beside the forms: a photo of a real item becomes a picture for Forms VS-1, SM-1, TK-1 and TV-1, its background cut away on this device (v21.62)','diagMine'],
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
+   ['Staff directory',pplDiag(),'The school staff the forms offer where a staff member is named (Staff directory, in the top bar): how many, and whether Google Drive has the latest'],
    ['Settings store',kvDiag(),'Safari\u2019s settings (localStorage) hold the Google key and the Drive settings. When Safari refuses a write (a full store, or Block All Cookies on), the workstation keeps them in its own store on this device instead (v21.98)','diagKv'],
    ['Storage on this device','checking\u2026','What this website keeps on this device (Autosave\u2019s safety copies, the caseload, case history and the offline copy) and how much the browser allows it. \u201cKept\u201d means the browser has agreed not to clear it on its own when the device runs short of space','diagStore'],   /* v22.29 (review I238) */
    ['Pop-ups','click test below','The master print needs pop-ups allowed']
@@ -3547,6 +3569,7 @@ function caseMapHtml(){
     'Add <b>SI-1</b> whenever the student can be interviewed, <b>EA-1</b> when the function is still open, <b>PA-1</b> before any reinforcement-based component, and <b>CR-1</b> the moment the behavior is dangerous.</p></div>';
 }
 $('#caseMap').addEventListener('click',()=>dialog('The case, start to finish',caseMapHtml()));
+$('#dirBtn').addEventListener('click',()=>pplOpen());   /* v22.35 */
 $('#dlgBody').addEventListener('click',e=>{const b=e.target.closest('button[data-open]');if(!b)return;$('#dlg').close();openForm(b.dataset.open);});
 
 /* v21.74 the print check: what to look at in Safari's print window before a page goes to paper (each line ticks off;
@@ -5279,6 +5302,131 @@ kvLoad.then(from=>{if(!from)return;try{drvPaint();}catch(e){}try{gidToForms();if
 /* the forms (Form DD-1's Google Sheet) read the key from Safari's settings themselves; when the workstation keeps it
    elsewhere, each open form is told, and a key given on a form reaches the workstation (the 'gid' message) */
 function gidToForms(){const g=clGid();if(!g)return;Object.values(state.frames||{}).forEach(fr=>{try{fr.contentWindow.NBH_GID=g;}catch(e){}});}
+/* v22.35 the staff directory. The school staff the forms go to, typed once for the caseload; a form's box where a staff
+   member is named offers it (nbh-ui.js: pick, and the role, email and phone come with the name). Kept as the Google key is:
+   Safari's settings (localStorage nbh.people) and the workstation's own store; with Google Drive on, one file in the cases
+   folder (Staff directory.json), merged person by person so an edit on each device stands. Staff only: no student and no
+   family member goes in it. */
+const PPL='nbh.people',PPL_F=['name','role','email','phone','site','note'],PPL_EM=/[^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,}/;
+const pplKey=s=>String(s==null?'':s).trim().toLowerCase().replace(/\s+/g,' ');
+function pplParse(s){try{const j=typeof s==='string'?JSON.parse(s):s;if(j&&j.nbh==='people'&&Array.isArray(j.list)){j.gone=j.gone||{};return j;}}catch(e){}return null;}
+const pplBlank=()=>({nbh:'people',v:1,list:[],gone:{},drv:null});
+function pplClean(p){const o={};PPL_F.forEach(f=>{o[f]=String(p&&p[f]||'').replace(/\s+/g,' ').trim().slice(0,f==='note'?300:120);});return o;}
+const pplSame=(a,b)=>a.email&&b.email?pplKey(a.email)===pplKey(b.email):!!a.name&&pplKey(a.name)===pplKey(b.name);
+async function pplLoad(){let s=null;try{s=localStorage.getItem(PPL);}catch(e){}let j=s?pplParse(s):null;if(j)return j;
+  try{const r=await kvTx('readonly',st=>st.get(PPL));j=r&&pplParse(r.v);}catch(e){}return j||pplBlank();}
+/* o.keepDrv: written by the Drive sync itself (its own mark kept, no sync asked for) */
+async function pplSave(j,o){o=o||{};if(!o.keepDrv)j.drv=Object.assign({},j.drv||{},{dirty:true});j.at=Date.now();
+  const v=JSON.stringify(j);let kept=false;try{localStorage.setItem(PPL,v);kept=localStorage.getItem(PPL)===v;}catch(e){}
+  if(!kept)try{localStorage.removeItem(PPL);}catch(e){}
+  KV.mem[PPL]=v;try{await kvTx('readwrite',st=>st.put({k:PPL,v}));}catch(e){}
+  if(!o.keepDrv&&typeof drvOn==='function'&&drvOn())drvSoon(false,1500);return j;}
+/* two copies into one: each person as last changed, a removal standing over what it removed, one person per email */
+function pplMerge(a,b){const gone=Object.assign({},a.gone||{});Object.keys(b.gone||{}).forEach(k=>{if(!((+gone[k]||0)>=(+b.gone[k]||0)))gone[k]=+b.gone[k]||0;});
+  const by={};[a.list||[],b.list||[]].forEach(L=>L.forEach(p=>{if(!p||!p.id)return;const o=by[p.id];if(!o||(+p.upd||0)>(+o.upd||0))by[p.id]=p;}));
+  let list=Object.keys(by).map(k=>by[k]).filter(p=>!((+gone[p.id]||0)>=(+p.upd||0)));
+  const em={};list.slice().sort((x,y)=>(+y.upd||0)-(+x.upd||0)).forEach(p=>{const k=pplKey(p.email);if(!k)return;if(em[k]){gone[p.id]=+p.upd||0;}else em[k]=p.id;});
+  list=list.filter(p=>!((+gone[p.id]||0)>=(+p.upd||0)));
+  const cut=Date.now()-400*864e5;Object.keys(gone).forEach(k=>{if(gone[k]<cut)delete gone[k];});
+  return {nbh:'people',v:1,list,gone,drv:a.drv||null,at:a.at||0};}
+const pplSig=x=>JSON.stringify((x.list||[]).slice().sort((p,q)=>String(p.id).localeCompare(String(q.id))))+JSON.stringify(Object.keys(x.gone||{}).sort());
+/* people added: one already there (the same email, or the same name with no email) is completed, not added again */
+function pplAddTo(j,L){let added=0,done=0;L.forEach(p=>{p=pplClean(p);if(!p.name&&!p.email)return;const hit=j.list.find(x=>pplSame(x,p));
+    if(hit){let ch=false;PPL_F.forEach(f=>{if(p[f]&&!hit[f]){hit[f]=p[f];ch=true;}});if(ch){hit.upd=Date.now();done++;}return;}
+    p.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);p.upd=Date.now();j.list.push(p);added++;});return {added,done};}
+function pplCsvSplit(l){const o=[];let cur='',q=false;for(let i=0;i<l.length;i++){const c=l[i];if(q){if(c==='"'){if(l[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}else if(c==='"')q=true;else if(c===','){o.push(cur);cur='';}else cur+=c;}o.push(cur);return o;}
+/* a pasted or opened list: this directory's own file; rows of a spreadsheet (with or without a heading row); an email's To
+   line ("Dana Whitfield <dana@school.org>; ..."); or one person a line, the parts in any order (the email and the phone
+   are known by their look; the rest are the name, then the role, then the school). v22.35 also a list copied from a group's
+   members page or one column of a spreadsheet, a person over several lines: the name, then the email on the next line; the
+   lines that are only a membership ("Member", "Owner"), a date ("Oct 9, 2026") or a heading are passed over */
+function pplRead(t){t=String(t||'').replace(/\r/g,'');const own=pplParse(t);if(own)return own.list.map(pplClean);
+  const lines=t.split('\n').map(l=>l.trim()).filter(Boolean),out=[],split=l=>l.indexOf('\t')>=0?l.split('\t'):pplCsvSplit(l);
+  let head=null;if(lines.length){const h=split(lines[0]).map(x=>x.trim().toLowerCase());if(h.some(x=>/^(name|full name|staff( member)?|e-?mail( address)?|role|title|position|first( name)?|last( name)?)$/.test(x))){head=h;lines.shift();}}
+  const SKIP=/^(?:members?|owners?|managers?|email\/id|e-?mail(?: address)?|role|join(?:ed)? date|date joined|status|active|name)$/i,
+    DATE=/^(?:[A-Za-z]{3,9}\.? \d{1,2},? \d{4}|\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2})$/,
+    ONLY=/^<?([^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,})>?$/;
+  lines.forEach(l=>{
+    const bare=l.replace(/^"|"$/g,'').trim();
+    if(!head){if(SKIP.test(bare)||DATE.test(bare))return;
+      const em=bare.match(ONLY),last=out[out.length-1];
+      if(em&&last&&last._solo&&!last.email){last.email=em[1];last._solo=0;return;}   /* the email under its name */
+      if(!em&&!/[@\t,;<>]/.test(bare)&&/[A-Za-z]/.test(bare)&&!/\d{3}/.test(bare)){const o=pplClean({name:bare});o._solo=1;out.push(o);return;}}   /* a name alone on its line */
+    const angle=l.match(/[^;,<>]*<[^<>\s@]+@[^<>\s]+>/g);
+    if(angle&&!head){angle.forEach(m=>{const e=m.match(/<([^>]+)>/)[1],n=m.replace(/<[^>]+>/,'').replace(/^[\s,;"']+|[\s,;"']+$/g,'');out.push(pplClean({name:n,email:e}));});return;}
+    if(head){const p={};split(l).forEach((v,i)=>{const h=head[i]||'';v=String(v).trim();if(!v)return;
+        if(/e-?mail/.test(h))p.email=v;else if(/phone|cell|mobile|tel|ext/.test(h))p.phone=v;else if(/role|title|position|job/.test(h))p.role=v;
+        else if(/school|site|campus|building|location/.test(h))p.site=v;else if(/note|comment/.test(h))p.note=v;
+        else if(/^first/.test(h))p.first=v;else if(/^last/.test(h))p.last=v;else if(/name|staff/.test(h))p.name=v;});
+      if(!p.name&&(p.first||p.last))p.name=[p.first,p.last].filter(Boolean).join(' ');out.push(pplClean(p));return;}
+    const parts=(l.indexOf('\t')>=0||l.indexOf(',')>=0||l.indexOf(';')>=0?(l.indexOf('\t')>=0?l.split('\t'):l.split(/[;,]/)):[l]).map(x=>x.trim().replace(/^"|"$/g,'')).filter(Boolean),p={};
+    parts.forEach(v=>{const m=v.match(PPL_EM);if(!p.email&&m){p.email=m[0];v=v.replace(m[0],'').replace(/[<>()]/g,' ').trim();if(!v)return;}
+      if(!p.phone&&/^[+(]?\d[\d\s().\-]{6,}(\s*(x|ext\.?)\s*\d+)?$/i.test(v)){p.phone=v;return;}
+      v=v.replace(/^[\s\-–—:]+|[\s\-–—:]+$/g,'');if(!v)return;
+      if(!p.name)p.name=v;else if(!p.role)p.role=v;else if(!p.site)p.site=v;else p.note=(p.note?p.note+'; ':'')+v;});
+    out.push(pplClean(p));});
+  return out.map(pplClean).filter(p=>p.name||p.email);}
+function pplCsv(j){const q=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':String(v);
+  return ['Name,Role,Email,Phone,School,Note'].concat(pplSorted(j.list).map(p=>PPL_F.map(f=>q(p[f]||'')).join(','))).join('\r\n')+'\r\n';}
+const pplSorted=L=>(L||[]).slice().sort((a,b)=>String(a.name||a.email).localeCompare(String(b.name||b.email)));
+function pplRow(p){const cell=(f,ph,t)=>'<td><input data-f="'+f+'" value="'+esc(p[f]||'')+'" placeholder="'+ph+'" aria-label="'+esc((p.name||'New person')+': '+ph)+'"'+(t?' type="'+t+'" autocomplete="off" spellcheck="false"':'')+'></td>';
+  return '<tr data-pid="'+esc(p.id)+'">'+cell('name','Name')+cell('role','Role')+cell('email','Email','email')+cell('phone','Phone','tel')+cell('site','School')+cell('note','Note')+
+    '<td><button type="button" class="pp-x" aria-label="Remove '+esc(p.name||p.email||'this person')+'" title="Remove">&times;</button></td></tr>';}
+function pplWhere(){return typeof drvOn==='function'&&drvOn()?'Kept on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+', as Staff directory.json), so your other devices have it too.'
+  :'Kept on this '+HERE+'. For another device, Save to a file here and Open a file there, or turn on Google Drive in Caseload and both keep one list.';}
+let pplChain=Promise.resolve();
+const pplDo=fn=>(pplChain=pplChain.then(async()=>{const j=await pplLoad();const r=await fn(j);if(r!==false)await pplSave(j);return j;}).catch(e=>{wsUI.toast('The staff directory could not be saved: '+(e&&e.message||e),{kind:'warn'});}));
+async function pplOpen(){const j=await pplLoad();
+  dialog('Staff directory','<p class="hp-lead">The school staff you send forms to, typed once for every student. In a form, tap a box where a staff member is named (Form IA-1’s informants, the observers, the team) and pick from this list: the role, email and phone come with the name.</p>'+
+    '<div class="pp-tools"><input type="search" id="ppFind" placeholder="Find a name, role, email or school" aria-label="Find in the staff directory" autocomplete="off"><button type="button" class="primary" id="ppAdd">Add a person</button><button type="button" id="ppPasteBtn" aria-expanded="false">Paste a list</button><button type="button" id="ppOpenBtn">Open a file</button><button type="button" id="ppSaveBtn">Save to a file</button><input type="file" id="ppFile" accept=".csv,.tsv,.txt,.json,text/csv,text/plain,application/json" hidden></div>'+
+    '<div id="ppPaste" hidden><textarea id="ppPasteIn" rows="6" placeholder="One person a line: name, role, email, phone, school, in any order. Rows copied from a spreadsheet work too, and an email’s To line (Dana Whitfield <dana@school.org>; ...)."></textarea><p class="pp-pr"><button type="button" class="primary" id="ppPasteGo">Add these</button> <span id="ppPasteMsg" role="status"></span></p></div>'+
+    '<div class="pp-wrap"><table class="pp-tbl"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>School</th><th>Note</th><th><span class="sr">Remove</span></th></tr></thead><tbody id="ppBody">'+pplSorted(j.list).map(pplRow).join('')+'</tbody></table></div>'+
+    '<p class="hint" id="ppCount"></p><p class="hint">'+pplWhere()+' Staff only: no student and no family member goes here, and nothing in it is sent anywhere but your own Drive.</p>');
+  $('#dlg').classList.add('cl-wide','pp-dlg');pplCount();
+  const db=$('#dlgBody');
+  $('#ppFind').addEventListener('input',e=>{const q=pplKey(e.target.value).split(' ').filter(Boolean);db.querySelectorAll('#ppBody tr').forEach(tr=>{const t=pplKey(Array.from(tr.querySelectorAll('input')).map(i=>i.value).join(' '));tr.hidden=!q.every(w=>t.indexOf(w)>=0);});});
+  $('#ppAdd').addEventListener('click',()=>{const p=Object.assign(pplClean({}),{id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),upd:0});$('#ppBody').insertAdjacentHTML('afterbegin',pplRow(p));$('#ppFind').value='';db.querySelectorAll('#ppBody tr').forEach(tr=>tr.hidden=false);$('#ppBody tr input').focus();});
+  $('#ppPasteBtn').addEventListener('click',e=>{const b=$('#ppPaste');b.hidden=!b.hidden;e.currentTarget.setAttribute('aria-expanded',String(!b.hidden));if(!b.hidden)$('#ppPasteIn').focus();});
+  $('#ppPasteGo').addEventListener('click',()=>pplTake($('#ppPasteIn').value,'pasted'));
+  $('#ppOpenBtn').addEventListener('click',()=>$('#ppFile').click());
+  $('#ppFile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;let t='';try{t=await f.text();}catch(x){wsUI.toast('That file could not be read.',{kind:'warn'});return;}
+    if(/\.(xlsx|xls|numbers|pdf|docx?)$/i.test(f.name)){wsUI.toast('Save the list as CSV (comma separated) first, or copy its rows and use Paste a list.',{kind:'warn',ms:9000});return;}
+    pplTake(t,f.name);});
+  $('#ppSaveBtn').addEventListener('click',async()=>{const j=await pplLoad();if(!j.list.length){wsUI.toast('The staff directory is empty.');return;}
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([pplCsv(j)],{type:'text/csv'}));a.download='Staff directory.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);});
+  db.addEventListener('change',e=>{const i=e.target.closest&&e.target.closest('#ppBody input[data-f]');if(!i)return;const tr=i.closest('tr'),id=tr.dataset.pid,f=i.dataset.f,v=pplClean({[f]:i.value})[f];
+    pplDo(j=>{let p=j.list.find(x=>x.id===id);if(!p){if(!v)return false;p=Object.assign(pplClean({}),{id});j.list.push(p);}p[f]=v;p.upd=Date.now();
+      if(!p.name&&!p.email){j.list=j.list.filter(x=>x!==p);j.gone[id]=Date.now();}}).then(()=>{const n=tr.querySelector('.pp-x');if(n)n.setAttribute('aria-label','Remove '+(tr.querySelector('[data-f=name]').value||'this person'));pplCount();});});
+  db.addEventListener('click',async e=>{const x=e.target.closest&&e.target.closest('.pp-x');if(!x)return;const tr=x.closest('tr'),id=tr.dataset.pid,nm=tr.querySelector('[data-f=name]').value||tr.querySelector('[data-f=email]').value;
+    if(nm&&!(await wsUI.confirm('Remove '+nm+' from the staff directory?',{ok:'Remove',danger:true})))return;
+    tr.remove();pplDo(j=>{j.list=j.list.filter(p=>p.id!==id);j.gone[id]=Date.now();}).then(pplCount);});}
+function pplCount(){const n=document.querySelectorAll('#ppBody tr').length,c=$('#ppCount');if(c)c.textContent=n?n+(n===1?' person':' people')+' in the directory.':'No one yet: Add a person, or Paste a list.';}
+function pplTake(text,from){const L=pplRead(text),m=$('#ppPasteMsg');
+  if(!L.length){const s='No names or email addresses were found in what was '+(from==='pasted'?'pasted':'in '+from)+'.';if(m)m.textContent=s;else wsUI.toast(s,{kind:'warn'});return;}
+  pplDo(j=>{const r=pplAddTo(j,L);pplTake.last=r;if(!r.added&&!r.done)return false;}).then(async()=>{const r=pplTake.last||{added:0,done:0},s=(r.added?r.added+(r.added===1?' person':' people')+' added':'No one new')+(r.done?', '+r.done+' completed':'')+(L.length>r.added+r.done?'; '+(L.length-r.added-r.done)+' already there':'')+'.';
+    const j=await pplLoad();const b=$('#ppBody');if(b)b.innerHTML=pplSorted(j.list).map(pplRow).join('');pplCount();if(m)m.textContent=s;wsUI.toast(s,{kind:'ok'});if(r.added&&$('#ppPasteIn')){$('#ppPasteIn').value='';$('#ppPaste').hidden=true;$('#ppPasteBtn').setAttribute('aria-expanded','false');}});}
+$('#dlg').addEventListener('close',()=>{$('#dlg').classList.remove('pp-dlg');});
+/* with Google Drive on: the directory's one file in the cases folder, merged with this device's copy */
+async function pplDrv(){const fid=await drvFolder();
+  const q="'"+fid+"' in parents and trashed=false and appProperties has { key='nbh' and value='people' }";
+  const jl=await drvJson(DAPI+drvQ(q)+'&fields=files(id,version,modifiedTime)&pageSize=20');
+  const f=(jl.files||[]).sort((a,b)=>String(b.modifiedTime).localeCompare(String(a.modifiedTime)))[0]||null;
+  const loc=await pplLoad(),d=loc.drv||{};
+  if(!f&&!loc.list.length&&!Object.keys(loc.gone||{}).length)return 0;
+  if(f&&!d.dirty&&String(f.version)===String(d.ver||''))return 0;
+  let merged=loc,remote=null;
+  if(f&&String(f.version)!==String(d.ver||'')){const t=await (await drvFetch(DAPI+'/'+encodeURIComponent(f.id)+'?alt=media')).text();remote=pplParse(t);if(remote)merged=pplMerge(loc,remote);}
+  let id=f?f.id:'',ver=f?String(f.version):'';
+  if(!f||d.dirty||!remote||pplSig(merged)!==pplSig(remote)){
+    const body=JSON.stringify({nbh:'people',v:1,list:merged.list,gone:merged.gone,at:new Date().toISOString(),dev:drvDev()});
+    const meta={name:'Staff directory.json',mimeType:'application/json',appProperties:{nbh:'people',dev:drvDev()}};if(!id)meta.parents=[fid];
+    let r;try{r=await drvUpload(id,meta,body);}catch(e){if(!(e&&e.gone&&id))throw e;meta.parents=[fid];r=await drvUpload('',meta,body);}
+    id=r.id;ver=String(r.version);}
+  /* written over what is here now: an edit made while this ran is kept, and waits to go up */
+  const now=await pplLoad(),fin=pplMerge(now,merged);fin.drv={id,ver,dirty:pplSig(now)!==pplSig(loc)};await pplSave(fin,{keepDrv:true});
+  if(remote&&pplSig(fin)!==pplSig(loc)&&$('#dlg').open&&$('#ppBody')){$('#ppBody').innerHTML=pplSorted(fin.list).map(pplRow).join('');pplCount();}
+  return 1;}
+function pplDiag(){const j=pplParse(kvGet(PPL));if(!j)return 'empty';return j.list.length+(j.list.length===1?' person':' people')+(j.drv&&j.drv.id?(j.drv.dirty?', a change waiting for Google Drive':', in step with Google Drive'):'');}
 /* Diagnostics: what Safari's settings store holds, whether it takes a write, and the workstation's own store */
 function kvDiag(){let n=0,ch=0,big='',bigN=0,err='';try{const s=localStorage;for(let i=0;i<s.length;i++){const k=s.key(i)||'',l=k.length+(s.getItem(k)||'').length;n++;ch+=l;if(l>bigN){bigN=l;big=k;}}}catch(e){err=(e&&e.name)||'Error';}
   if(!err)try{localStorage.setItem('nbh.ws.t','1');localStorage.removeItem('nbh.ws.t');}catch(e){err=(e&&e.name)||'Error';}
@@ -5974,6 +6122,7 @@ const CMDS=[
   {k:'save packet',n:'Save packet',s:'command',go:()=>$('#savePacket').click()},
   {k:'open packet',n:'Open packet',s:'command',go:()=>$('#openPacket').click()},
   {k:'fill open forms',n:'Fill open forms with the packet',s:'command',go:()=>$('#pushPacket').click()},
+  {k:'staff directory',n:'Staff directory: the school staff you send forms to, typed once and offered in the forms',s:'command',go:()=>pplOpen()},
   {k:'read a document',n:'Read a document: the student\u2019s details, contacts and teachers from a PDF, a picture or pasted text',s:'command',go:()=>$('#readDoc').click()},
   {k:'case map which form when walkthrough',n:'Case map: which form when',s:'command',go:()=>$('#caseMap').click()},
   {k:'diagnostics check files',n:'Diagnostics',s:'command',go:()=>$('#diag').click()},
@@ -6311,6 +6460,7 @@ async function drvSync(opt){opt=opt||{};if(!drvOn())return null;
       await drvClash(r,f,k,opt,res);}
     /* here and not in Drive (new here, or its file was taken out of the folder): it goes up as a new file */
     for(const k of Object.keys(here)){if(byK[k])continue;await drvPut(here[k],'',k);res.sent++;}
+    try{await pplDrv();}catch(e){if(e&&(e.signin||e.net))throw e;}   /* v22.35 the staff directory's file, merged */
     Object.keys(DRV.conf).forEach(key=>{if(!L.some(r=>r.key===key))delete DRV.conf[key];});
   }catch(e){DRV.err=e&&e.signin?'':String(e&&e.message||e);if(e&&e.net)DRV.err='Google Drive could not be reached.';}
   finally{DRV.busy=false;DRV.last=Date.now();drvPaint();drvNewerPaint();
@@ -6910,7 +7060,7 @@ const nbhDocRead=(()=>{
 
 /* ---- the dialog ---- */
 const DR={text:'',cols:'',res:null,worker:null,pdf:null};
-const DR_ROLES=['','BCBA','Classroom teacher','Paraprofessional','ESE contact / case manager','School psychologist','Speech-language pathologist','Occupational therapist','Physical therapist','School nurse','School counselor / social worker','Administrator','District behavior support','Bus driver / aide','Home ABA provider','Psychiatrist / prescriber','Pediatrician','Outside therapist / counselor','Agency case manager (DCF, APD)','Other'];   /* Form DM-1's team roles */
+const DR_ROLES=['','Parent','BCBA','Behavioral Health Professional (BHP)','Behavior Intervention Associate (BIA)','Classroom teacher','Fine arts teacher','Paraprofessional','ESE contact / case manager','ESE coordinator','School psychologist','Speech-language pathologist','Occupational therapist','Physical therapist','School nurse','School counselor / social worker','Administrator','District behavior support','Bus driver / aide','Transportation leadership','Home ABA provider','Psychiatrist / prescriber','Pediatrician','Outside therapist / counselor','Agency case manager (DCF, APD)','Group home manager','Other'];   /* Form DM-1's team roles */
 const DR_REL=['','Mother','Father','Stepparent','Grandparent','Legal guardian','Foster parent','Surrogate parent','Guardian advocate','Adult sibling','Other relative','Family friend','Case manager (agency)','Other'];   /* Form DM-1's list */
 const drCan=()=>!EMBED&&/^https?:$/.test(location.protocol);   /* the readers: the website or the app, not the one-file edition or a drive */
 function drProg(t){const p=$('#drProg');if(!p)return;p.hidden=!t;p.textContent=t||'';}
