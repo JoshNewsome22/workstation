@@ -9905,6 +9905,15 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.40: the date of birth typed once
+
+- **The date of birth travels with the case** (review F463). It was typed on up to eight forms, in two formats (date
+  pickers on DM-1, IC-1 and RR-1, text boxes on TB-1, IA-1, TD-1 and others). Typed on Form DM-1, it now goes to the case,
+  and the workstation hands it with the student's other details to every form that asks for it, into an empty box only: a
+  date box takes it as it is, a text box as 3/14/2016. A form already open takes it as soon as DM-1 has it.
+
+Checked by `qa/v2239-test.js` (6).
+
 ### v22.39: the quick start's first rule, and the packet in the case's order
 
 - **Form QS-1's first non-negotiable is the plan's own** (review F461). Filled from the case, rule 1 paired the plan's

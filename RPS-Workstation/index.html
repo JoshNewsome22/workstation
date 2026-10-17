@@ -2155,6 +2155,7 @@ window.addEventListener('blur',()=>{setTimeout(()=>{
 function packet(){
   const p={client:$('#pClient').value,sid:$('#pSid').value,grade:$('#pGrade').value,
           site:$('#pSite').value,bcba:$('#pBcba').value};
+  {const dob=((state.facts||{}).profile||{}).dob;if(/^\d{4}-\d\d-\d\d$/.test(String(dob||'')))p.dob=dob;}   /* v22.39 (review F463) the date of birth, from Form DM-1 */
   if(state.photo)p.photo=state.photo;   /* v21.68 the student's photo travels with the packet (the case file, the packet file, Autosave's copy) */
   return p;
 }
@@ -2250,7 +2251,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.39';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.40';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2569,6 +2570,7 @@ async function gatherFacts(push){
     if(sig!==state.factsSig){
       state.factsSig=sig;f.when=new Date().toISOString();
       state.facts=hasFacts(f)?f:null;paintFacts();
+      {const dob=((state.facts||{}).profile||{}).dob||'';if(dob!==state.dobSent){state.dobSent=dob;if(dob)Object.values(state.frames).forEach(fr=>{try{pushPacketTo(fr);}catch(e){}});}}   /* v22.39 (F463) a date of birth newly on DM-1 reaches the open forms */
       if(push){factsOwed=false;pushFactsToAll();}else factsOwed=true;
     }
     else if(push&&factsOwed){factsOwed=false;pushFactsToAll();}   /* v21.87 a read that did not send saw the change first: the forms are told now */

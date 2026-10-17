@@ -6828,7 +6828,7 @@ renderAll();
     sid   :['[data-m="sid"]','[name="m.sid"]','[name="s_id"]','[data-meta="sid"]','#m_id','#mId',
             '#sId','[name="s.sid"]','[name="h.sid"]','[name="c.sid"]','#hId','#cId',
             '#h-id','[name="s.id"]'],
-    dob   :['[data-m="dob"]','[name="m.dob"]','[name="s_dob"]','[data-meta="dob"]','[name="s.dob"]'],
+    dob   :['[data-m="dob"]','[name="m.dob"]','[name="s_dob"]','[data-meta="dob"]','[name="s.dob"]','[name="c.dob"]','[name="h.dob"]'],
     grade :['[data-m="grade"]','[name="s_grade"]','[name="m.grade"]','[name="s.grade"]',
             '[name="c.grade"]','[name="h.grade"]','#sGrade','#mGrade','#cGrade','#hGrade',
             '#m_grade'],
@@ -6874,14 +6874,17 @@ renderAll();
     if(!p.client&&(p.first||p.last))p.client=[p.first,p.last].filter(Boolean).join(' ').trim();
     return p;
   }
+  function dobFor(el,v){var m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(v||''));if(!m)return String(v||'');return el.type==='date'?String(v):(+m[2])+'/'+(+m[3])+'/'+m[1];}
   function apply(p, quiet){
     var filled=[],skipped=[];
     Object.keys(MAP).forEach(function(k){
       if(!p[k])return;
       var el=find(k);
       if(!el)return;
+      /* v22.39 (review F463) the date of birth travels as YYYY-MM-DD: a date box takes it as it is, a text box as M/D/YYYY */
+      var pv=k==='dob'?dobFor(el,p[k]):p[k];
       if(el.value&&String(el.value).trim()){
-        if(String(el.value).trim()!==String(p[k]).trim())skipped.push(LABEL[k]);
+        if(String(el.value).trim()!==String(pv).trim())skipped.push(LABEL[k]);
         return;
       }
       if(el.tagName==='SELECT'){
@@ -6889,7 +6892,7 @@ renderAll();
           return o.value===p[k]||o.textContent===p[k];})[0];
         if(!hit)return;
         el.value=hit.value||hit.textContent;
-      } else el.value=p[k];
+      } else el.value=pv;
       fire(el); filled.push(LABEL[k]);
     });
     /* One form keeps the student's name in separate first and last fields, and a
