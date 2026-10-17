@@ -946,6 +946,7 @@ write everything yourself.</div>
 actually uses. A bus attendant should not have to decode &ldquo;differential reinforcement of
 alternative behavior&rdquo; at 6:50 in the morning.</p>
 <p class="noprint"><button id="applyPlan" class="tool">Bring the plan text in</button></p>
+<div class="noprint" id="ebPlanSug" hidden></div>
 </section>
 
 <!-- ============ BRIEF ============ -->
@@ -959,7 +960,7 @@ person cannot run is a brief they will stop reading.</p>
 <div class="eb-f"><label for="f_see">The behavior, in plain words</label><textarea id="f_see" name="e.see" placeholder="e.g. hits or kicks the person next to him, hard enough to hurt"></textarea></div>
 <div class="eb-f"><label for="f_early">The earliest sign</label><textarea id="f_early" name="e.early" placeholder="e.g. goes quiet, pulls his hood up, pushes his bag off the seat"></textarea></div>
 
-<h3 class="sub">What Helps Before It Starts</h3>
+<h3 class="sub">What Helps Before It Starts <span id="p_prev"></span></h3>
 <div class="eb-lines" id="prevWrap"></div>
 <p class="noprint"><button id="addPrev" class="tool">Add a line</button></p>
 
@@ -1249,14 +1250,14 @@ $('#planIn').addEventListener('change', e => {
    could not say what was still to rewrite. It now stays while the field still holds the plan's words, goes when
    they are rewritten, and the words placed are kept in the saved file. */
 let PULLED = {};
-const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', resp: 'p_resp', never: 'p_never' };
+const PULL_AT = { 'e.see': 'p_see', 'e.ask': 'p_ask', 'e.after': 'p_after', resp: 'p_resp', never: 'p_never', prev: 'p_prev' };
 const PULL_NAME = { 'e.see': 'What You Will See', 'e.ask': 'How the Student Asks', 'e.after': 'After It Is Over',
-  resp: 'If the Behavior Happens', never: 'Never Do This' };
+  resp: 'If the Behavior Happens', never: 'Never Do This', prev: 'What Helps Before It Starts' };
 function pulledNow() {
   const out = {};
   Object.keys(PULLED).forEach(k => {
     const t = String(PULLED[k] || '').trim();
-    if (t && PULL_AT[k] && (k === 'resp' || k === 'never' ? lines(k).indexOf(t) > -1 : val(k) === t)) out[k] = t;
+    if (t && PULL_AT[k] && (k === 'resp' || k === 'never' || k === 'prev' ? lines(k).indexOf(t) > -1 : val(k) === t)) out[k] = t;
   });
   return out;
 }
@@ -1366,6 +1367,10 @@ function checks() {
   const miss = [];
   if (!lines('never').length) miss.push('<b>Never Do This</b> has no line');
   if (!val('e.callwhen')) miss.push('<b>Call when</b> is empty, so the brief does not say when to call for help');
+  /* v22.37 (review F380) the request is honoured every time: say so, and catch a Never line that refuses it */
+  if (val('e.ask') && !val('e.askdo')) miss.push('<b>When it happens</b> is empty: say what to do when the student asks, every time (Guide, section 3)');
+  const refuse = lines('never').filter(t => /\b(no|never|don.t|do not|deny|refuse)\b[^.;]*\b(break|card|pass|request|ask|item)/i.test(t) || /^no break\b/i.test(t));
+  if (refuse.length) miss.push('<b>Never Do This</b> reads \u201c' + esc(refuse[0]) + '\u201d: read alone, this tells staff to refuse the request the student was taught. Say instead what they never do to the behavior, and honour the request');
   const left = Object.keys(pulledNow()).map(k => PULL_NAME[k]);
   let h = '';
   if (miss.length) h += '<div class="eb-check" data-check="missing"><b>Missing from the brief.</b> ' + miss.join('; ') +
@@ -1652,6 +1657,15 @@ start(); showPlan(); review(); buildQuiet();
    over, the response (If the Behavior Happens) and Staff do not (Never Do This), each marked "from the plan" until it is
    rewritten; also the earliest sign (the plan's precursor, else the crisis plan's), What Helps Before It Starts (the
    plan's antecedent arrangements, when no line is written), and Calling for Help (the crisis plan's peak stage, CR-1). */
+let EB_SUG=[];
+function ebSugPaint(){const box=$('#ebPlanSug');if(!box)return;if(!EB_SUG.length){box.hidden=true;box.innerHTML='';return;}box.hidden=false;
+  box.innerHTML='<div class="eb-check" data-check="plansug"><b>In the plan (for you, not for the page).</b> Form TD-1 says this for the classroom. Pick only what this setting can run, and rewrite it in its words.'+
+    EB_SUG.map((x,i)=>'<div style="margin-top:6px"><b>'+esc(x.lab)+':</b> '+x.list.map(t=>esc(t)).join(' &middot; ')+' <button type="button" class="tool" data-ebsug="'+i+'">Use as a starting point</button></div>').join('')+'</div>';}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ebsug]');if(!b)return;const x=EB_SUG[+b.dataset.ebsug];if(!x)return;
+  if(x.k==='e.after'){if(!val('e.after')){setv('e.after',x.list[0]);PULLED['e.after']=val('e.after');}}
+  else{x.list.forEach(t=>{if(lines(x.k).indexOf(t)>-1)return;let el=$$('#'+x.k+'Wrap [name]').find(y=>!String(y.value).trim());if(!el){add(x.k);el=$$('#'+x.k+'Wrap [name]').find(y=>!String(y.value).trim());}
+    if(el){el.value=t;try{el.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}}});PULLED[x.k]=x.list[0];}
+  EB_SUG.splice(+b.dataset.ebsug,1);ebSugPaint();changed();});
 (function(){
   const T=v=>String(v==null?'':v).trim(),one=v=>T(v).replace(/\s*[\r\n]+\s*/g,' ');
   window.__nbhFactsIn=function(f){
@@ -1663,9 +1677,14 @@ start(); showPlan(); review(); buildQuiet();
         if(!e)return;e.value=t;try{e.dispatchEvent(new Event('input',{bubbles:true}));}catch(err){}});
       if(mark)PULLED[kind]=list[0];n+=list.length;placed.push(lab);};
     if(plan){
-      put('e.see',plan.beh,'what you will see',1);put('e.ask',plan.rep,'how the student asks',1);put('e.after',r.after,'after it is over',1);
-      putLines('resp',[r.target],'if the behavior happens',1);putLines('never',[r.not],'never do this',1);
-      putLines('prev',(plan.ant||[]).slice(0,5),'what helps before it starts');}
+      put('e.see',plan.beh,'what you will see',1);put('e.ask',plan.rep,'how the student asks',1);
+      /* v22.37 (review F380) the classroom plan's consequence steps, what happens after the episode, its "staff do not" and its
+         classroom routines are not placed into the brief: read alone by staff who are not running the plan, "no break" beside
+         the break card puts the request on extinction (Guide, section 3). They are offered beside the blocks, "In the plan (for
+         you, not for the page)", with Use as a starting point, so the BCBA picks what this setting can run. */
+      EB_SUG=[];const offer=(k,lab,list)=>{list=(list||[]).map(one).filter(Boolean);if(list.length)EB_SUG.push({k,lab,list});};
+      offer('resp','If the Behavior Happens',[r.target]);offer('e.after','After It Is Over',[r.after]);offer('never','Never Do This',[r.not]);
+      offer('prev','What Helps Before It Starts',(plan.ant||[]).slice(0,5));ebSugPaint();}
     put('e.early',(plan&&plan.prec)||(cr&&cr.precursor),'the earliest sign');
     /* calling for help: the crisis plan's peak stage, else its escalation stage */
     const st=((cr&&cr.stages)||[]).filter(s=>s&&T(s.s)),pk=st.find(s=>/peak|imminent/i.test(s.s))||st.find(s=>/escalat/i.test(s.s));

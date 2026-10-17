@@ -956,7 +956,7 @@ table.pr-ddprev{min-width:600px}
     <table class="rt" style="margin-top:10px">
       <tr><th style="width:24%">Plan under review</th><td colspan="3"><textarea data-m="plan" placeholder="BIP date and the form it was built on" rows="1" class="pr-line"></textarea></td></tr>
       <tr><th>Review number</th><td><input type="number" min="1" data-m="revNo"></td>
-          <th style="width:16%">Period covered</th><td><input data-m="period" placeholder="e.g., 6 Aug – 12 Sep 2026"></td></tr>
+          <th style="width:16%">Period covered</th><td><input data-m="period" placeholder="e.g., 6 Aug – 12 Sep 2026"><span class="pr-pd">From <input type="date" data-m="pFrom" aria-label="Period covered: from"> to <input type="date" data-m="pTo" aria-label="Period covered: to"></span><input type="hidden" data-m="intMet"><input type="hidden" data-m="intMetTxt"></td></tr>
       <tr><th>Why this review now</th><td colspan="3"><select data-m="why" style="width:60%"><option></option>
         <option>Scheduled review</option><option>IEP or annual meeting</option>
         <option>Data indicate the plan is not working</option><option>Integrity problem (Form TI-1)</option>
@@ -1124,7 +1124,7 @@ table.pr-ddprev{min-width:600px}
     <h2 class="nbh-band" style="margin-top:16px">How the Suggestion and the Checks Are Made</h2>
     <p class="pr-keep">The suggested decision on the Decision sheet, the check under it and the Exit Readiness verdict apply the rules below. They are this form's working convention for organizing a review, not findings.</p>
     <table class="rt pr-rules">
-      <tr><th>Integrity</th><td>Below 90%, or critical-step integrity below 90%: the plan is not running as written, and the suggestion is to continue and address implementation. 90% or above on both: the plan is running as written. This is the integrity criterion Forms TI-1 and TD-1 use, so one figure means the same thing on every form. 90% is a convention, not a finding. It is set high because St. Peter Pipkin, Vollmer and Sloman (2010) found, in a human operant model, that errors reinforcing the problem behavior were more detrimental than failing to reinforce the alternative alone; a few such errors can sit inside an overall figure that looks acceptable, which is why critical steps are checked separately against the same percentage. A figure outside 0 to 100% is not used.</td></tr>
+      <tr><th>Integrity</th><td>Below 90%, or critical-step integrity below 90%: the plan is not running as written, and the suggestion is to continue and address implementation. 90% or above on both: the plan is running as written. This is the integrity criterion Forms TI-1 and TD-1 use, so one figure means the same thing on every form; the import also reads Form TI-1&rsquo;s own verdict (its last unannounced observations, all at or above its criterion), and the plan is not judged running while TI-1 says not met or cannot yet judge it (an announced observation never counts). 90% is a convention, not a finding. It is set high because St. Peter Pipkin, Vollmer and Sloman (2010) found, in a human operant model, that errors reinforcing the problem behavior were more detrimental than failing to reinforce the alternative alone; a few such errors can sit inside an overall figure that looks acceptable, which is why critical steps are checked separately against the same percentage. A figure outside 0 to 100% is not used.</td></tr>
       <tr><th>Plan-run gate</th><td>The review may conclude that the plan is not working (modify, or return to assessment) only when the period passes the gate: a TI-1 observation was completed in the period, the most recent observation is at or above the 90% criterion on both figures, mean integrity across the period&rsquo;s observations is 80% or above, no consequence step ran below 80% of its opportunities, and reinforcers were delivered after the target behavior or a wrong response on 10% or fewer of consequence-step opportunities. Otherwise the review records that the plan was not run as written, the period&rsquo;s outcome data are not a test of the plan, and the route is retraining (Form ST-1), a new observation (Form TI-1) and a new review before any plan change. The 80% and 10% figures are this form&rsquo;s conventions, informed by the parametric studies but not set by them; a period that passes the gate is not thereby proven interpretable, since in earlier DRO work commission errors were harmful for some participants even at 80% (Hronek &amp; Kestner, 2025, as summarized by O&rsquo;Neill et al., 2026). A figure left blank is not tested.</td></tr>
       <tr><th>Fidelity beside outcome</th><td>The table under the graph places each period&rsquo;s integrity and consequence-step commission figure next to its behavior figures, marks a period below 80% or above 10% commission, and marks a fall of 15 points or more from the period before. The figures by implementer and observation are recorded as text, because a mean across implementers can hide one who is not running the plan.</td></tr>
       <tr><th>Sequence</th><td>With Did fidelity drop abruptly answered Yes, the verdict asks that the period after the drop be read on its own. Sequence effects are preliminary in Burlison et al. (2026) and summarized from Hronek &amp; Kestner (2025) by O&rsquo;Neill et al. (2026); they are a reason for caution, not a finding this form applies as a rule.</td></tr>
@@ -1266,7 +1266,7 @@ function course(){
 /* v21.16 audit (F1d): a change is shown to the whole percent ("-0%" is 0%), except where rounding would carry it
    across one of the suggestion's cut-offs (-60%, -25%, +10%): -59.96% is shown as -59.9%, not as -60% */
 function pctTxt(p){const r=Math.round(p);
-  if((r===-60&&p>-60)||(r===-25&&p>-25)||(r===10&&p<10))return (p>0?'+':'')+(Math.trunc(p*10)/10).toFixed(1)+'%';
+  if((r===-90&&p>-90)||(r===-60&&p>-60)||(r===-25&&p>-25)||(r===10&&p<10))return (p>0?'+':'')+(Math.trunc(p*10)/10).toFixed(1)+'%';
   return (r>0?'+':'')+(r===0?0:r)+'%';}
 function relTxt(p){const s=pctTxt(p);return s==='0%'?'at':s.replace(/^[+-]/,'')+(p<0?' below':' above');}
 /* v21.16 audit (F2a): typing in the table no longer rebuilds it. Every keystroke rebuilt the rows, and in a number
@@ -1286,6 +1286,14 @@ function renderCourse(){
 }
 /* v2026-10 fidelity (F): fidelity beside outcome, one row per period, with the period's reading */
 const FID_LOW=80,FID_COM=10,FID_FALL=15;
+/* v22.37 (review F323) fading waits for the plan's own criterion: each target at its aim (Form DD-1, from Form GB-1's goal), or,
+   with no aim, a reduction of 90% from baseline, the mark of an effective treatment before thinning in the FCT literature
+   (Hagopian et al., 1998); and at least 10 school days in the period. 60% was one comparison of two averages. */
+const FADE_PCT=90,FADE_DAYS=10;
+let PR_GATE=null;
+/* the aims the case carries (Form DD-1): {n, met, names}; met only when every target with an aim is at it */
+function prCaseNow(){try{return prCase;}catch(e){return null;}}   /* read before the case's own declaration further down has run */
+function prAims(){const P=prCaseNow(),B=((P&&P.data&&P.data.behaviors)||[]).filter(b=>b&&b.aim!=null&&(b.kind||'target')==='target');return {n:B.length,met:B.length>0&&B.every(b=>b.aimMet),names:B.filter(b=>!b.aimMet).map(b=>String(b.name||'').trim()).filter(Boolean)};}
 function renderFid(){
   const box=$('#fidTbl');if(!box)return;
   const rows=S.rows.map((r,k)=>({k,p:r.p,t:num(r.t),r:num(r.r),i:num(r.i),cc:num(r.cc)}));
@@ -1446,6 +1454,11 @@ function renderVerdicts(){
   if(gMean!=null&&gMean<FID_LOW)fails.push('mean integrity across the period is '+gMean+'%, below '+FID_LOW+'%');
   if(gConLow!=null&&gConLow<FID_LOW)fails.push('a consequence step ran at '+gConLow+'% of its opportunities, below '+FID_LOW+'%');
   if(gConCom!=null&&gConCom>FID_COM)fails.push('reinforcers were delivered after the target behavior or a wrong response on '+gConCom+'% of consequence-step opportunities, above '+FID_COM+'%');
+  /* v22.37 (review F319) Form TI-1's own criterion (its last unannounced observations, all at or above its criterion), as the import
+     read it: the plan is not judged running on evidence TI-1 itself rejects */
+  const tiMet=String(m.intMet||''),tiTxt=String(m.intMetTxt||'').trim();
+  if(tiMet==='not met')fails.push('Form TI-1\u2019s criterion is not met ('+(tiTxt||'its last unannounced observations')+')');
+  else if(tiMet==='not decidable')fails.push('Form TI-1 cannot judge the plan yet ('+(tiTxt||'not enough unannounced observations')+'): one more unannounced observation is needed');
   const gateBlank=gMean==null&&gConLow==null&&gConCom==null;
   const drop=String(m.intDrop||''),dropNote=String(m.intDropNote||'').trim();
   let h='';
@@ -1471,12 +1484,16 @@ function renderVerdicts(){
      movement, a comparison of two figures as a trend, and a cause was claimed that a comparison with baseline cannot
      show. */
   const C=course(),ok=i!=null&&i>=INT_CRIT&&!(c!=null&&c<INT_CRIT)&&!fails.length,REP=String(m.repInd||'');
-  const notInd=REP==='Prompted only'||REP==='Not yet';
+  const notInd=REP==='Prompted only'||REP==='Not yet',AIM=prAims();
+  /* v22.37 (review F318) the targets' suggestions use this same reading */
+  PR_GATE={ok,blank:i==null,notInd,why:i==null?'integrity not recorded':i<INT_CRIT?'integrity below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'critical-step integrity below '+INT_CRIT+'%':fails.length?'the period does not pass the plan-run gate':''};
+  try{document.querySelectorAll('#pr83Tbl tbody tr[data-k]').forEach(tr=>pr83Cells(tr,pr83Tg()[+tr.dataset.k]));}catch(e){}
   let sug='',cls='v-na',opts=[];
   if(i==null||C.b==null||!C.last)sug='Record the integrity figure, the baseline (BL row) and at least one review period to get a suggested decision.';
   else if(!ok){cls='v-no';opts=['Continue and address implementation'];sug=`<b>Suggested: continue and address implementation.</b> ${i<INT_CRIT?'Integrity is below '+INT_CRIT+'%':(c!=null&&c<INT_CRIT)?'Critical-step integrity is below '+INT_CRIT+'%':'The period does not pass the plan-run gate ('+fails.join('; ')+')'}, so nothing about the plan itself is being tested yet. Retrain (Form ST-1), re-observe (Form TI-1), then review again: the plan is not revised on these data.`;}
   else if(C.pct==null){cls='v-mid';sug='<b>No suggestion from the change.</b> The baseline is 0, so the change cannot be expressed as a percentage of it. Read the graph, and record the decision and why.';}
-  else if(C.pct<=-60){const lead=`The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written.`;
+  else if(C.pct<=-60&&!(C.pct<=-FADE_PCT||AIM.met)){cls='v-ok';opts=['Continue unchanged'];sug=`<b>Suggested: continue unchanged; fading waits for the plan\u2019s criterion.</b> The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written. ${AIM.n?'Not yet at the aim: '+esc(AIM.names.join(', '))+' (Form DD-1).':'No aim is in the case; without one, fading waits for a reduction of '+FADE_PCT+'% from baseline.'}`;}
+  else if(C.pct<=-60){const lead=`The most recent period is ${relTxt(C.pct)} baseline under a plan that is running as written${AIM.met?', and every target is at its aim (Form DD-1)':''}.`;
     if(notInd){cls='v-mid';opts=['Continue unchanged'];sug=`<b>Suggested: continue; do not begin fading yet.</b> ${lead} The replacement is recorded as \u201c${esc(REP)}\u201d under Used independently: fading before it is established risks returning the behavior (see the Guide).`;}
     else if(REP==='Yes, but only with trained staff'||REP==='Yes, but only in one setting'){cls='v-ok';opts=['Begin fading'];sug=`<b>Suggested: begin fading; exit waits for generalization.</b> ${lead} The replacement is independent ${REP==='Yes, but only in one setting'?'in one setting only':'only with trained staff'}, so the exit conditions are not yet met.`;}
     else {cls='v-ok';opts=['Begin fading','Exit the plan'];sug=`<b>Suggested: begin fading, or exit if the exit conditions are met.</b> ${lead} ${REP==='Yes, across settings and people'?'The replacement is recorded as used independently across settings and people.':REP?'Check the replacement is independent before fading anything.':'Record under section 3 whether the replacement is used independently before fading anything.'}`;}}
@@ -1998,7 +2015,7 @@ const tiPad=n=>String(n).padStart(2,'0'),tiISO=d=>d.getFullYear()+'-'+tiPad(d.ge
 const tiUS=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(s||'');};
 const tiR1=x=>Math.round(x*10)/10;
 /* TI-1's saved record, read as TI-1 reads one */
-function tiRead(d){
+function tiRead(d,pFrom,pTo){
   const obj=v=>v&&typeof v==='object'&&!Array.isArray(v)?v:null,o=obj(d);if(!o||o.form!=='TI-1')return null;const S1=obj(o.S);if(!S1)return null;
   const nO=+S1.nObs,nObs=Number.isInteger(nO)&&nO>=2&&nO<=8?nO:4;const cN=+S1.critN,critN=Number.isInteger(cN)&&cN>=1&&cN<=5?cN:2;
   let steps=(Array.isArray(S1.steps)?S1.steps:[]).slice(0,2000).map(x=>{x=obj(x)||{};return{crit:!!x.crit,cmp:x.cmp==='con'||x.cmp==='ant'?x.cmp:''};});
@@ -2009,25 +2026,34 @@ function tiRead(d){
   const oppOf=(i,j)=>{const x=obj(opp[i+'_'+j]),k=v=>Number.isInteger(+v)&&+v>=0?+v:0;
     if(x&&(k(x.c)+k(x.ec)+k(x.eo))>0)return{c:k(x.c),ec:k(x.ec),eo:k(x.eo)};const v=code(i,j);
     return SCD(v)?{c:v==='C'?1:0,ec:v==='EC'?1:0,eo:v==='EO'?1:0}:{c:0,ec:0,eo:0};};
-  const rows=[];obs.forEach((ob,j)=>{let c=0,s=0,cc=0,cs=0;steps.forEach((st,i)=>{const v=code(i,j);if(!SCD(v))return;s++;if(v==='C')c++;if(st.crit){cs++;if(v==='C')cc++;}});
+  let rows=[];obs.forEach((ob,j)=>{let c=0,s=0,cc=0,cs=0;steps.forEach((st,i)=>{const v=code(i,j);if(!SCD(v))return;s++;if(v==='C')c++;if(st.crit){cs++;if(v==='C')cc++;}});
     if(s)rows.push({j,c,s,cc,cs,pct:100*c/s,crit:cs?100*cc/cs:null,type:String(ob.type||''),date:/^\d{4}-\d{2}-\d{2}$/.test(String(ob.date||''))?String(ob.date):''});});
   if(!rows.length)return{empty:true};
   const dec=rows.filter(r=>r.type==='Unannounced').slice(-critN),latest=dec.length?dec[dec.length-1]:rows[rows.length-1];
+  /* v22.37 (review F319) TI-1's own verdict: the last critN unannounced observations all at or above its criterion; an announced one
+     never counts, and fewer than critN cannot be judged */
+  const cr=+S1.crit,crit=isFinite(cr)&&cr>=1&&cr<=100?cr:90;
+  const tiMet=dec.length<critN?'not decidable':dec.every(r=>r.pct>=crit)?'met':'not met';
+  const tiTxt=dec.length<critN?dec.length+' of the '+critN+' unannounced observations Form TI-1 asks for are scored':'the last '+critN+' unannounced: '+dec.map(r=>tiR1(r.pct)+'%').join(', ')+', against '+crit+'%';
+  /* v22.37 (review F322) the period's figures count only observations dated inside the period, when its dates are set */
+  const inP=r=>!r.date||((!pFrom||r.date>=pFrom)&&(!pTo||r.date<=pTo)),allRows=rows;
+  if(pFrom||pTo){const keep=allRows.filter(inP);if(keep.length)rows=keep;}
+  const outN=allRows.length-rows.length;
   const con=steps.map((st,i)=>st.cmp==='con'?i:-1).filter(i=>i>=0);let kc=0,ke=0,ko=0,conLow=null;
   con.forEach(i=>{let c=0,n=0;rows.forEach(r=>{const x=oppOf(i,r.j);c+=x.c;n+=x.c+x.ec+x.eo;kc+=x.c;ke+=x.ec;ko+=x.eo;});if(n&&(conLow==null||100*c/n<conLow))conLow=100*c/n;});
   const kn=kc+ke+ko,mean=rows.reduce((a,r)=>a+r.pct,0)/rows.length,low=Math.min(...rows.map(r=>r.pct));
   let fall=null;for(let k=1;k<rows.length;k++){const f=rows[k-1].pct-rows[k].pct;if(f>0&&(!fall||f>fall.f))fall={f,a:rows[k-1].j+1,b:rows[k].j+1};}
   const who=String(m.int||'').trim()||'interventionist';
-  const impl=who+': '+rows.map(r=>'#'+(r.j+1)+' '+tiR1(r.pct)+'% ('+(r.type==='Announced'?'announced':r.type==='Unannounced'?'unannounced':'type not recorded')+(r.date?', '+tiUS(r.date):'')+')').join(', ');
+  const impl=(outN?outN+' observation'+(outN===1?'':'s')+' outside the period not counted. ':'')+who+': '+rows.map(r=>'#'+(r.j+1)+' '+tiR1(r.pct)+'% ('+(r.type==='Announced'?'announced':r.type==='Unannounced'?'unannounced':'type not recorded')+(r.date?', '+tiUS(r.date):'')+')').join(', ');
   return{student:String(m.client||'').trim(),int:who,skill:String(m.skill||'').trim(),n:rows.length,conSteps:con.length,
     latest:{col:latest.j+1,date:latest.date,type:latest.type,pct:latest.pct,crit:latest.crit,deciding:dec.includes(latest)},
     fig:{intPct:String(tiR1(latest.pct)),intCrit:latest.crit==null?'':String(tiR1(latest.crit)),intDate:latest.date?tiUS(latest.date):'',intType:latest.type==='Announced'?'Announced':latest.type==='Unannounced'?'Unannounced':'',
-      intN:String(rows.length),intMean:String(tiR1(mean)),intLow:String(tiR1(low)),
+      intN:String(rows.length),intMean:String(tiR1(mean)),intLow:String(tiR1(low)),intMet:tiMet,intMetTxt:tiTxt,
       intConLow:con.length&&conLow!=null?String(tiR1(conLow)):'',intConCom:con.length&&kn?String(tiR1(100*ke/kn)):'',intConOm:con.length&&kn?String(tiR1(100*ko/kn)):'',
       intImpl:impl,intDropNote:fall?'Largest fall between consecutive observations on TI-1: '+tiR1(fall.f)+' points (#'+fall.a+' to #'+fall.b+')':'No fall between consecutive observations on TI-1'},
     conNote:con.length?kn+' consequence-step opportunit'+(kn===1?'y':'ies')+' on '+con.length+' step'+(con.length===1?'':'s'):'no step tagged Consequence on TI-1, so the consequence figures are left blank'};}
 const TI_LAB={intPct:'Integrity, most recent',intCrit:'Critical-step integrity',intDate:'Date observed',intType:'Announced or unannounced',intN:'TI-1 observations in the period',intMean:'Mean integrity across them',
-  intLow:'Lowest integrity in the period',intConLow:'Lowest consequence step',intConCom:'Commission on consequence steps',intConOm:'Omission on consequence steps',intImpl:'By implementer and observation',intDropNote:'When, and what changed'};
+  intLow:'Lowest integrity in the period',intMet:'Form TI-1\u2019s criterion',intMetTxt:'Form TI-1\u2019s criterion, the figures',intConLow:'Lowest consequence step',intConCom:'Commission on consequence steps',intConOm:'Omission on consequence steps',intImpl:'By implementer and observation',intDropNote:'When, and what changed'};
 function tiSet(el,v){el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
 async function tiApply(x,src,file){
   if(!x){tiMsg('That is not a file Form TI-1 saved. Nothing was imported.',true);return false;}
@@ -2062,12 +2088,12 @@ window.addEventListener('message',async ev=>{const d=ev.data;if(!d||typeof d!=='
   TI.waiting=0;clearTimeout(TI.timer);
   if(d.ok!==true){TI.fileMode=true;tiMsg(d.why==='not open'?'Form TI-1 is not open in this workstation. Open it from the list of forms, or click Import From TI-1 again to open a file TI-1 saved.':'Form TI-1 is open but did not give its record. Wait for it to finish loading, then try again.',true);return;}
   let o=null;try{o=JSON.parse(d.snap&&d.snap.own);}catch(e){o=null;}
-  if(!(await tiApply(tiRead(o),'workstation','')))tiMsg(tiMsgEl.textContent||'Form TI-1 in this workstation gave a record this form could not read. Nothing was imported.',true);});
+  if(!(await tiApply(tiRead(o,S.meta.pFrom,S.meta.pTo),'workstation','')))tiMsg(tiMsgEl.textContent||'Form TI-1 in this workstation gave a record this form could not read. Nothing was imported.',true);});
 $('#tiBtn').addEventListener('click',()=>{if(window.parent!==window&&!TI.fileMode){tiAsk();return;}TI.fileMode=false;$('#tiFile').click();});
 $('#tiFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const name=String(f.name||'').slice(0,300),r=new FileReader();
   r.onload=()=>{let o=null;try{o=JSON.parse(String(r.result||''));}catch(x){o=null;}
     if(o&&typeof o==='object'&&o.form!=='TI-1'){const other=typeof o.form==='string'&&/^[A-Z]{2,7}(-\d+)?$/.test(o.form)?o.form:'';tiMsg(other?'That file was saved by '+(other==='PACKET'?'Save packet':'Form '+other)+', not by Form TI-1. Nothing was imported.':'That file could not be read as a file Form TI-1 saved. Nothing was imported.',true);return;}
-    tiApply(tiRead(o),'file',name);};
+    tiApply(tiRead(o,S.meta.pFrom,S.meta.pTo),'file',name);};
   r.onerror=()=>tiMsg('That file could not be read. Nothing was imported.',true);r.readAsText(f);e.target.value='';});
 const tiBaseRender=renderAll;renderAll=function(){tiBaseRender();renderTiRec();};
 
@@ -2136,7 +2162,7 @@ function prNextCheck(iso,every){if(!iso||!every)return '';const t=every.toLowerC
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){const r=was?was.apply(this,arguments):null;const o=r&&typeof r==='object'?r:{};
   const m=(typeof S!=='undefined'&&S&&S.meta)||{},dec=prT(m.dec),date=prIso(m.date),next=prIso(m.next),every=prT(m.post),back=prT(m.back);
   if(!date&&!next&&!dec&&!every&&!back)return r||null;
-  const rv={decision:PR_DEC[dec]||'',decisionText:dec,rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  const rv={decision:PR_DEC[dec]||'',decisionText:dec,rules:{minDays:10,improvePct:25,fadePct:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
   if(date)rv.date=date;if(next)rv.next=next;if(prT(m.decWhat))rv.changes=prT(m.decWhat);if(prT(m.decWhy))rv.why=prT(m.decWhy);if(prT(m.earlier))rv.earlier=prT(m.earlier);
   if(rv.decision==='exit'||every||back){const tn=/(\d+(?:\.\d+)?)/.exec(back),tw=/\b(one|two|three|four|five|six|seven|eight|nine|ten|once|twice)\b/i.exec(back);
     const x={every,threshold:back,thresholdN:tn?+tn[1]:tw?PR_NUM[tw[1].toLowerCase()]:null};
@@ -2210,9 +2236,9 @@ document.addEventListener('change',e=>{if(prCase80&&e.target&&e.target.dataset&&
    (an SV-1 post mean at or above SV-1's working cut of 4.5) and contextual fit (a CF-1 mean at or above 4, CF-1's
    "Adequate fit"). With the current review not yet decided, review.date and the decision are the last review closed. */
 let prCase82=null;
-const PR_LOGF=['date','decision','decisionText','why','data','integrity','sv','fit','actions','next','revNo'];
+const PR_LOGF=['date','period','decision','decisionText','why','data','integrity','sv','fit','actions','next','revNo'];
 const PR_KEEPACT=a=>!/^(?:Done|Not doing)$/.test(prT(a.s))&&['a','f','w','b','s'].some(k=>prT(a[k]));
-const PR_CLEAR=['period','why','team','intPct','intDate','intCrit','intType','cf','trained','intN','intMean','intLow','intConLow','intConCom','intConOm',
+const PR_CLEAR=['period','pFrom','pTo','intMet','intMetTxt','why','team','intPct','intDate','intCrit','intType','cf','trained','intN','intMean','intLow','intConLow','intConCom','intConOm',
   'intImpl','intDrop','intDropNote','alsoCase','alsoCaseWas','repInd','repGap','relapse','dec','decWhy','decWhat','decSame','next','earlier','svLine','fitLine'];
 const prN=v=>{const x=parseFloat(v);return isFinite(x)?x:null;};
 const prF=(x,d)=>x==null?'':(+x).toFixed(d==null?2:d);
@@ -2285,7 +2311,7 @@ function prExit82Render(){let el=document.getElementById('prExit82');const v=doc
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   const L=Array.isArray(S.log)?S.log.map(e=>Object.assign({},e)):[];const o=r&&typeof r==='object'?r:{};
   if(!o.review&&!L.length)return r;
-  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
   const last=L.length?L[L.length-1]:null;
   if(last&&!prT(S.meta.dec)){const up=prIso(S.meta.date);if(up)rv.upcoming=up;rv.date=last.date;if(!rv.next)rv.next=prIso(last.next)||up||'';if(!rv.next)delete rv.next;
     rv.decision=last.decision||'';rv.decisionText=last.decisionText||'';
@@ -2297,6 +2323,7 @@ renderAll();
 /* v21.83 (M) results by target */
 #pr83Sec{margin-top:12px}
 #pr83Tbl{min-width:760px}
+.pr-pd{display:block;margin-top:4px;font-size:12px}.pr-pd input{width:auto;display:inline-block}
 #pr83Tbl td{vertical-align:top}
 #pr83Tbl td input,#pr83Tbl td select{min-height:30px}
 #pr83Tbl .pr83-chg{white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -2319,9 +2346,9 @@ renderAll();
    question 2. Closing a review adds a short per-target line to the log entry (targets) and clears this period's figures
    and decisions, keeping the targets and their baselines. Out: review.targets [{name, unit, base, cur, days, chg, met,
    decision}]. */
-const PR83_F=['name','unit','dir','base','cur','days','decision','note'];
+const PR83_F=['name','unit','dir','base','cur','days','decision','note','chosen'];   /* v22.37 chosen: the decision was picked by a person (review F318) */
 const PR83_DEC=[['continue','Continue'],['modify','Modify'],['reassess','Reassess'],['fade','Fade']];
-const pr83R=()=>({improvePct:25,minDays:10,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90});
+const pr83R=()=>({improvePct:25,minDays:10,fadePct:typeof FADE_PCT==='number'?FADE_PCT:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90});
 const pr83Row=o=>{const r={};PR83_F.forEach(k=>{const v=o&&o[k];r[k]=v==null||typeof v==='object'?'':String(v);});return r;};
 const pr83Low=v=>prT(v).toLowerCase().replace(/\s+/g,' ');
 function pr83Tg(){if(!Array.isArray(S.tg))S.tg=[];return S.tg;}
@@ -2334,12 +2361,24 @@ function pr83Read(r){const R=pr83R(),b=prN(r.base),c=prN(r.cur),d=prN(r.days),up
   if(d!=null&&d<R.minDays){o.state='too few days';o.rule='Too few days ('+d+' of '+R.minDays+'): '+txt+', not judged yet.';o.sug='continue';return o;}
   o.met=good>=R.improvePct;o.state=o.met?'met':'not met';
   o.rule=(o.met?'Met: ':'Not met: ')+txt+(d!=null?' over '+d+' school day'+(d===1?'':'s'):'')+(o.met?'':', short of the '+R.improvePct+'% '+(up?'increase':'reduction'))+'.';
-  const ip=prN(S.meta.intPct);
-  if(ip!=null&&ip<R.integrity)o.sug='continue';
-  else o.sug=good>=R.fadePct?'fade':o.met?'continue':-good<R.reassessPct?'modify':'reassess';
+  /* v22.37 (review F318, F323) the same test as the overall suggestion: no suggestion without integrity, continue while the plan is
+     not running as written (critical steps, the plan-run gate, Form TI-1's criterion) or the replacement is not independent;
+     fade only at the target's aim (Form DD-1) or, with no aim, a 90% reduction, after at least the minimum days */
+  const G=typeof prGate==='function'?prGate():null;o.why='';
+  if(G&&G.blank){o.sug='';o.why='integrity not recorded';return o;}
+  if(G&&!G.ok){o.sug='continue';o.why=G.why+': address implementation first';return o;}
+  const P=prCaseNow(),bm=P&&P.data&&Array.isArray(P.data.behaviors)?pr83Match(P.data.behaviors.filter(b=>b&&prT(b.name)),r.name):null;
+  const atAim=!!(bm&&bm.aim!=null&&bm.aimMet),hasAim=!!(bm&&bm.aim!=null);
+  const fadeOk=(hasAim?atAim:good>=R.fadePct)&&(d==null||d>=R.minDays);
+  if(fadeOk&&G&&G.notInd){o.sug='continue';o.why='the replacement is not yet used independently';}
+  else if(fadeOk)o.sug='fade';
+  else if(o.met){o.sug='continue';if(good>=60)o.why=hasAim?'not yet at its aim (Form DD-1)':'fading waits for a '+R.fadePct+'% reduction';}
+  else o.sug=-good<R.reassessPct?'modify':'reassess';
   return o;}
-function pr83SugTxt(r,o){if(!o.sug)return '';const ip=prN(S.meta.intPct),R=pr83R();
-  return 'Suggested: '+o.sug+(o.state==='too few days'?' (too few days to judge)':ip!=null&&ip<R.integrity?' (integrity below '+R.integrity+'%: address implementation first)':'')+'.';}
+function prGate(){if(!PR_GATE){try{renderVerdicts();}catch(e){}}return PR_GATE||{ok:false,blank:true,notInd:false,why:''};}
+function pr83SugTxt(r,o){if(r.decision&&!r.chosen)return 'Not yet a decision: filled in by the form before v22.37. Choose it again to record it as the team\u2019s.';
+  if(!o.sug)return o.why?'No suggestion: '+o.why+'.':'';
+  return 'Suggested: '+o.sug+(o.state==='too few days'?' (too few days to judge)':o.why?' ('+o.why+')':'')+'. A suggestion, not a decision.';}
 function pr83Sec(){let s=document.getElementById('pr83Sec');if(s)return s;const at=document.getElementById('dataMetrics');if(!at)return null;
   s=document.createElement('div');s.id='pr83Sec';const R=pr83R();
   s.innerHTML='<h3>Results by Target</h3><p class="hint">One row per reduction target in the plan (Form TD-1&rsquo;s targets, else Form TB-1&rsquo;s), with the baseline and current means from Form DD-1 matched by name. The rule: a '+R.improvePct+'% reduction from baseline after at least '+R.minDays+' school days in the current phase. Each target gets its own decision; the overall decision stays in section 4. Filled from the case into empty cells only.</p>'+
@@ -2347,7 +2386,7 @@ function pr83Sec(){let s=document.getElementById('pr83Sec');if(s)return s;const 
     '<div class="pr83-bar noprint"><button type="button" class="tool" id="pr83Add">Add target</button></div>';
   at.parentNode.insertBefore(s,at.nextSibling);return s;}
 function pr83Cells(tr,r){const o=pr83Read(r);const c=tr.querySelector('.pr83-chg'),u=tr.querySelector('.pr83-rule'),g=tr.querySelector('.pr83-sug');
-  if(c)c.textContent=o.chg==null?'—':pctTxt(o.chg);if(u)u.textContent=o.rule;if(g)g.textContent=r.decision&&r.decision===o.sug?'':pr83SugTxt(r,o);}
+  if(c)c.textContent=o.chg==null?'—':pctTxt(o.chg);if(u)u.textContent=o.rule;if(g)g.textContent=r.decision&&r.chosen&&r.decision===o.sug?'':pr83SugTxt(r,o);}
 function pr83Render(){const s=pr83Sec();if(!s)return;const tb=s.querySelector('tbody'),A=pr83Tg();
   const inp=(i,k,lab,num)=>`<input${num?' type="number" step="any"':''} data-k="${i}" data-f="${k}" value="${prEsc(A[i][k])}" aria-label="Target ${i+1}: ${lab}">`;
   tb.innerHTML=A.length?A.map((r,i)=>`<tr data-k="${i}"><td>${inp(i,'name','name')}${r.unit?'<span class="pr83-unit">'+prEsc(r.unit)+(r.dir==='increase'?', to increase':'')+'</span>':''}</td><td>${inp(i,'base','baseline mean',1)}</td><td>${inp(i,'cur','current mean',1)}</td><td>${inp(i,'days','school days in the current phase',1)}</td>`+
@@ -2357,7 +2396,7 @@ function pr83Render(){const s=pr83Sec();if(!s)return;const tb=s.querySelector('t
   tb.querySelectorAll('tr[data-k]').forEach(tr=>pr83Cells(tr,A[+tr.dataset.k]));}
 /* the per-target line for the log */
 function pr83Line(){return pr83Tg().filter(r=>prT(r.name)).map(r=>{const o=pr83Read(r);
-  return prT(r.name)+' '+(o.chg==null?'change not computed':pctTxt(o.chg))+' ('+o.state+')'+(r.decision?', '+r.decision:'');}).join('; ');}
+  return prT(r.name)+' '+(o.chg==null?'change not computed':pctTxt(o.chg))+' ('+o.state+')'+(r.decision&&r.chosen?', '+r.decision:o.sug?', suggested '+o.sug:'');}).join('; ');}
 /* ---- the case ---- */
 function pr83Names(f){const pt=f.plan&&Array.isArray(f.plan.targets)?f.plan.targets.map(t=>t&&prT(t.label)).filter(Boolean):[];if(pt.length)return pt;
   const tb=(Array.isArray(f.behaviors)?f.behaviors:[]).filter(b=>b&&prT(b.label)&&!(b.isRep||/replacement|alternative/i.test(b.type||''))).map(b=>prT(b.label));if(tb.length)return tb;
@@ -2373,10 +2412,11 @@ function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.beh
     put('base',b.base&&prN(b.base.mean)!=null?b.base.mean:null);
     put('cur',b.cur&&prN(b.cur.mean)!=null?b.cur.mean:(b.base?null:b.mean));
     put('days',b.cur&&prN(b.cur.days)!=null?b.cur.days:(b.base?null:b.days));});
-  A.forEach(r=>{if(r.decision)return;const o=pr83Read(r);if(o.sug&&prN(r.cur)!=null){r.decision=o.sug;k++;}});
+  /* v22.37 (review F318) a decision is never filled from the case: the suggestion stays beside the empty box */
   return k;}
 {const was=window.__nbhFactsIn;window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let k=0;
   try{k=pr83Fill(f||{});if(k){pr83Render();const el=document.querySelector('#pr83Tbl [data-f]');if(el)el.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){k=0;}
+  try{renderVerdicts();}catch(e){}   /* v22.37 the aims in the case change the suggestions, even when nothing new was filled */
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the results by target from Forms TD-1 and DD-1'].filter(Boolean).join('; ')};};}
 /* v21.87 the exit criteria from the goals (Form GB-1): an empty Behavior criterion takes the reduction goals and an empty Replacement
    criterion the acquisition goals, as GB-1 writes them (until now the goals reached the review only as DD-1's aims) */
@@ -2387,9 +2427,9 @@ function pr83Fill(f){const D=(f.data&&Array.isArray(f.data.behaviors)?f.data.beh
   if(!k)return r;return {filled:((r&&r.filled)||0)+k,note:[(r&&r.note)||'','the exit criteria from the goals (Form GB-1)'].filter(Boolean).join('; ')};};}
 {const was=window.__nbhFactsOut;window.__nbhFactsOut=function(){let r=null;try{r=was?was.apply(this,arguments):null;}catch(e){r=null;}
   const A=pr83Tg().filter(x=>prT(x.name));if(!A.length)return r;const o=r&&typeof r==='object'?r:{};
-  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:60,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
+  const rv=o.review||{decision:'',decisionText:'',rules:{minDays:10,improvePct:25,fadePct:90,reassessPct:10,integrity:typeof INT_CRIT==='number'?INT_CRIT:90}};
   rv.targets=A.map(x=>{const q=pr83Read(x),t={name:prT(x.name)};if(x.unit)t.unit=x.unit;t.base=q.b;t.cur=q.c;if(q.d!=null)t.days=q.d;
-    t.chg=q.chg==null?null:Math.round(q.chg*10)/10;t.met=q.met;t.decision=x.decision||'';if(prT(x.note))t.note=prT(x.note);return t;});
+    t.chg=q.chg==null?null:Math.round(q.chg*10)/10;t.met=q.met;t.decision=x.decision&&x.chosen?x.decision:'';if(q.sug)t.suggested=q.sug;if(prT(x.note))t.note=prT(x.note);return t;});
   o.review=rv;return o;};}
 /* ---- the record: saved, opened, rendered; the log line when a review closes ---- */
 {const ff=fromFile;fromFile=function(d){const s=ff.apply(this,arguments);const x=d&&typeof d.S==='object'&&d.S?d.S:{};
@@ -2404,7 +2444,7 @@ PR_LOGF.push('targets');
   if(ok){pr83Tg().forEach(r=>{r.cur='';r.days='';r.decision='';r.note='';});pr83Render();}return ok;};}
 /* typing in the table changes the record; the readings follow each keystroke (the rows are rebuilt only on add or remove) */
 const pr83Edit=e=>{const t=e.target;if(!t||!t.closest||!t.closest('#pr83Tbl tbody')||!t.dataset||!t.dataset.f)return;const A=pr83Tg(),r=A[+t.dataset.k];if(!r)return;
-  r[t.dataset.f]=t.value;const tr=t.closest('tr');if(tr)pr83Cells(tr,r);};
+  r[t.dataset.f]=t.value;if(t.dataset.f==='decision')r.chosen=t.value?'1':'';const tr=t.closest('tr');if(tr)pr83Cells(tr,r);};
 document.addEventListener('input',pr83Edit);document.addEventListener('change',pr83Edit);
 document.addEventListener('input',e=>{const t=e.target;if(t&&t.dataset&&t.dataset.m==='intPct')document.querySelectorAll('#pr83Tbl tbody tr[data-k]').forEach(tr=>pr83Cells(tr,pr83Tg()[+tr.dataset.k]));});
 document.addEventListener('click',e=>{const t=e.target;if(!t||!t.closest)return;

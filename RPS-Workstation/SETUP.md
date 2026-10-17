@@ -9905,6 +9905,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.38: Form PR-1's decisions and Form EB-1's brief (Wave 1, second part)
+
+- **Results by Target never fills a decision** (review F318). Inside the workstation it used to write its own suggestion
+  into each target's Decision box ("fade" before integrity was imported), and the IEP meeting packet printed it as the
+  decision. The box now stays empty with the suggestion beside it ("A suggestion, not a decision"); a decision goes to the
+  case only when someone chooses it, and the IEP packet says "suggested, not yet decided" otherwise and prints the team's
+  overall decision. A target's suggestion uses the same test as the overall one: nothing without integrity, "continue" while
+  the plan is not running as written or the replacement is not independent. A box an older version filled says it is not
+  yet a decision until it is chosen again.
+- **Form TI-1's own verdict counts** (review F319). The import reads TI-1's criterion (its last unannounced observations,
+  all at or above its criterion); while TI-1 says not met, or cannot judge yet (an announced observation never counts),
+  PR-1 does not call the plan running as written.
+- **The period's own observations** (review F322). Period covered has From and To dates; with them set, the import counts
+  only TI-1's observations dated inside the period for the period's figures, and says how many it left out.
+- **Fading waits for the plan's criterion** (review F323). "Begin fading" is suggested when every target is at its aim
+  (Form DD-1, from the goal on Form GB-1), or, with no aim in the case, at a 90% reduction from baseline (it was 60%), and a
+  target needs at least 10 school days in its phase. Between 60% and that, the suggestion is to continue unchanged and says
+  which target is not yet at its aim.
+- **Form EB-1 from the case** (review F380). The classroom plan's consequence step, what happens after the episode, its
+  "staff do not" and its classroom routines are no longer placed into the brief; read alone by staff who are not running
+  the plan, "no break" beside the break card refuses the request. They are offered beside the blocks, "In the plan (for
+  you, not for the page)", each with Use as a starting point. The checks now ask for "When it happens" whenever the request
+  is written, and catch a Never line that refuses the request.
+
+Checked by `qa/v2237-pr1-test.js` (13 checks) and `qa/v2237-eb1-test.js` (8).
+
 ### v22.37: One consent record for the case (Wave 1, first part)
 
 The review of October 2026 found that a declined or revoked consent reached the rest of the workstation as consent on
