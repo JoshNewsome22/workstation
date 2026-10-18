@@ -1056,7 +1056,7 @@ try { (function(){
    Safari's settings (localStorage, nbh.people) and the workstation's own store (IndexedDB nbh-settings), read from the
    first that holds it. The workstation's Staff directory edits it and, with Google Drive on, keeps it in the school Drive. */
 try { (function(){
-  var D = document, W = window, K = 'nbh.people', F = ['name', 'role', 'email', 'phone', 'site', 'note'];
+  var D = document, W = window, K = 'nbh.people', F = ['name', 'role', 'group', 'email', 'phone', 'site', 'note'];
   var EM = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[A-Za-z]{2,}$/;
   /* where a staff member is named: the box (sel), what it holds (field), and the boxes of the same row (sib: the field's
      name with its last part replaced, e.g. inf[2].name -> inf[2].email); need: the row box that must be there, so a box of
@@ -1185,8 +1185,8 @@ try { (function(){
   function match(q){ var L = ((all && all.list) || []).slice().sort(function(a, b){ return (a.name || a.email).localeCompare(b.name || b.email); }); q = key(q);
     if (!q) return L.slice(0, 60);
     var words = q.split(' ');
-    /* each word typed starts a word of the person's name, role, email, phone or school ("dan" finds Dana, not Jordan) */
-    return L.filter(function(p){ var t = key(F.slice(0, 5).map(function(f){ return p[f]; }).join(' ')).split(/[\s.@_\-(),\/]+/);
+    /* each word typed starts a word of the person's name, role, member of, email, phone or school ("dan" finds Dana, not Jordan) */
+    return L.filter(function(p){ var t = key(F.filter(function(f){ return f !== 'note'; }).map(function(f){ return p[f]; }).join(' ')).split(/[\s.@_\-(),\/]+/);
       return words.every(function(w){ return t.some(function(x){ return x.indexOf(w) === 0; }); }); }).slice(0, 60); }
   function mk(){ if (box) return; css(); box = D.createElement('div'); box.id = 'nbhPpl'; box.className = 'noprint'; box.setAttribute('role', 'listbox'); box.setAttribute('aria-label', 'Staff directory'); box.hidden = true; D.body.appendChild(box);
     box.addEventListener('mousedown', function(e){ e.preventDefault(); });   /* the box under the cursor keeps the cursor where it is */
@@ -1208,7 +1208,7 @@ try { (function(){
     if (act >= L.length) act = L.length - 1; mk();
     box.innerHTML = '<div class="pp-h">Staff directory' + (cur.value ? '' : ': pick, or type to narrow') + '</div>' + L.map(function(p, i){
       return '<button type="button" role="option" data-pp="' + i + '" aria-selected="' + (i === act) + '"><span class="pp-n">' + esc(p.name || p.email) + '</span>' + (p.role ? ' <span class="pp-r">\u00b7 ' + esc(p.role) + '</span>' : '') +
-        '<span class="pp-m">' + esc([p.email, p.phone, p.site].filter(Boolean).join(' \u00b7 ') || '\u00a0') + '</span></button>'; }).join('') +
+        '<span class="pp-m">' + esc([p.group, p.email, p.phone, p.site].filter(Boolean).join(' \u00b7 ') || '\u00a0') + '</span></button>'; }).join('') +
       (inShell() ? '<button type="button" class="pp-f" data-pp="dir">Edit the staff directory\u2026</button>' : '');
     var host = cur.closest('dialog[open]') || D.body; if (box.parentNode !== host) host.appendChild(box);   /* inside a dialog (Email it) the list is in the dialog's layer */
     box.hidden = false; cur.setAttribute('aria-expanded', 'true'); place();

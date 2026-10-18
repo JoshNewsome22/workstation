@@ -9903,6 +9903,33 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.50: the staff directory: Member of, select many or everyone, and a paste that updates
+
+At the user's request, in the workstation's **Staff directory**:
+
+- **Member of.** A new column beside Role for the class or team a person belongs to: a teacher's class, the SLPs, fine
+  arts. Role stays the job (paraprofessional, art teacher). Find searches it, the forms' pickers show it under the name and
+  find by it, and the saved CSV carries it (Name, Role, Member of, Email, Phone, School, Note). **A person can be in more
+  than one group**, separated by a semicolon (SLPs; Fine arts): Find on any one of them finds the person, a pasted Member of
+  is added to the groups a person has (never replaces them), and with people selected **Add to a group** and **Take out of a
+  group** change that one group and keep the rest.
+- **Select many, or everyone.** Each row has a box, and the box in the heading row selects everyone shown. Type in Find
+  first (for example "SLPs") and Select all takes just those people; a person Find hides is unselected, so nothing is done
+  to people you cannot see. With people selected, a bar offers **Remove** (it asks first, and says when that is everyone)
+  and **Set** one box (Role, Member of, School, Phone or Note) to the same thing for all of them; Set with nothing typed
+  clears that box. Add to a group and Take out of a group are there too.
+- **A pasted list updates.** Under the paste box, **Update the people already here** is ticked: a person already in the
+  directory (the same email, or the same name when there is no email) takes the pasted role, member of and the rest, and a
+  box left empty in the paste keeps what it has. Untick it to only fill in empty boxes, as before. The message says how many
+  were added and how many updated. Rows from a spreadsheet with a heading row put each column in its box: Name, Role,
+  Member of (or Group, Team, Department), Email, Phone, School, Note.
+- **A group's members page.** Rows copied from a group's members list brought the membership ("Member", "Owner") in as the
+  role and the join date as the note. They are now passed over, and a directory that already has them says how many people
+  do, with **Clear those**, which empties only those roles and dates.
+
+Checked by `qa/v2250-test.js` (25); `qa/v2235-staff-directory-test.js` reads the new CSV column and pastes its second list
+with the update unticked.
+
 ### v22.49: the experimental analysis (EA-1) checked against the case; the samples' BCBA is simulated
 
 Form EA-1, from the review (F149 to F157, I76 to I80):

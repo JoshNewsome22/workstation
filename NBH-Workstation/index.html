@@ -955,16 +955,22 @@ body.ws-split .rail-edge{display:none!important}
 #dlg #ppPaste textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--rule2,#c9d4d2);border-radius:6px}
 #dlg .pp-pr{margin:6px 0 10px}#dlg #ppPasteMsg{font-size:13px;color:var(--ink-2,#4a5a66);margin-left:8px}
 #dlg .pp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--rule,#dfe6e4)}
-#dlg .pp-tbl{width:100%;min-width:820px;border-collapse:collapse;table-layout:fixed}
+#dlg .pp-tbl{width:100%;min-width:1000px;border-collapse:collapse;table-layout:fixed}
 #dlg .pp-tbl th{font-size:12px;text-align:left;color:var(--ink-2,#4a5a66);font-weight:600;padding:6px 4px 4px;border-bottom:1px solid var(--rule,#dfe6e4)}
-#dlg .pp-tbl th:nth-child(1){width:19%}#dlg .pp-tbl th:nth-child(2){width:14%}#dlg .pp-tbl th:nth-child(3){width:23%}#dlg .pp-tbl th:nth-child(4){width:13%}#dlg .pp-tbl th:nth-child(5){width:13%}#dlg .pp-tbl th:nth-child(7){width:48px}
+#dlg .pp-tbl th:nth-child(1){width:40px}#dlg .pp-tbl th:nth-child(2){width:16%}#dlg .pp-tbl th:nth-child(3){width:13%}#dlg .pp-tbl th:nth-child(4){width:14%}#dlg .pp-tbl th:nth-child(5){width:20%}#dlg .pp-tbl th:nth-child(6){width:11%}#dlg .pp-tbl th:nth-child(7){width:11%}#dlg .pp-tbl th:nth-child(9){width:48px}
+/* v22.50 selecting people, and what is done to everyone selected */
+#dlg .pp-tbl .pp-ck{text-align:center;vertical-align:middle;padding:0}#dlg .pp-tbl .pp-ck input{width:20px;height:20px;margin:0;padding:0;accent-color:#1f5b7a;cursor:pointer;vertical-align:middle}
+#dlg .pp-bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 8px;padding:8px 10px;background:#eef4f3;border:1px solid var(--rule2,#c9d4d2);border-radius:8px;font-size:13.5px}#dlg .pp-bulk[hidden]{display:none}
+#dlg .pp-bulk select,#dlg .pp-bulk input[type=text]{font:inherit;font-size:14px;padding:7px 8px;border:1px solid var(--rule2,#c9d4d2);border-radius:6px;background:#fff;color:inherit}#dlg .pp-bulk input[type=text]{flex:1 1 170px;min-width:0}#dlg .pp-bulk .danger{color:#7a2e1a}
+#dlg .pp-rep{display:flex;gap:8px;align-items:flex-start;font-size:13px;margin:8px 0 0;color:var(--ink-2,#4a5a66);cursor:pointer}#dlg .pp-rep input{width:18px;height:18px;margin:1px 0 0;flex:none;accent-color:#1f5b7a}
+#dlg .pp-tidy{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;max-width:none;font-size:13px;margin:0 0 8px;padding:6px 10px;border-left:3px solid #b07a1a;background:#fbf6ea}#dlg .pp-tidy[hidden]{display:none}#dlg .pp-tidy span{flex:1 1 260px}
 #dlg .pp-tbl td{padding:2px 3px;border-bottom:1px solid var(--rule,#e3eae8)}
 #dlg .pp-tbl input{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;padding:6px 7px;border:1px solid transparent;border-radius:4px;background:transparent;color:inherit}
 #dlg .pp-tbl input:hover{border-color:var(--rule2,#c9d4d2)}#dlg .pp-tbl input:focus{border-color:#2f7fa8;background:#fff;outline:none;box-shadow:0 0 0 2px rgba(47,127,168,.2)}
 #dlg .pp-x{min-width:36px;min-height:36px;border:0;background:transparent;font-size:20px;line-height:1;color:#7a2e1a;cursor:pointer;border-radius:6px;padding:0}
 #dlg .pp-x:hover{background:#f6e9e5}
 #dlg .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-@media (pointer:coarse){#dlg .pp-x{min-width:44px;min-height:44px}#dlg .pp-tbl input{padding:9px 8px;font-size:15px}}
+@media (pointer:coarse){#dlg .pp-x{min-width:44px;min-height:44px}#dlg .pp-tbl input{padding:9px 8px;font-size:15px}#dlg .pp-tbl .pp-ck input{width:24px;height:24px}}
 /* the search: one field, and the places found grouped by student */
 .cl-find{margin:4px 0 12px;text-align:left}
 .cl-fl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -2251,7 +2257,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.49';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.50';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -5353,7 +5359,12 @@ function gidToForms(){const g=clGid();if(!g)return;Object.values(state.frames||{
    Safari's settings (localStorage nbh.people) and the workstation's own store; with Google Drive on, one file in the cases
    folder (Staff directory.json), merged person by person so an edit on each device stands. Staff only: no student and no
    family member goes in it. */
-const PPL='nbh.people',PPL_F=['name','role','email','phone','site','note'],PPL_EM=/[^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,}/;
+/* v22.50 Member of (group): the class or team a person belongs to (a teacher's class, the SLPs, fine arts), beside the role */
+const PPL_MEMB=/^(?:members?|owners?|managers?)$/i,PPL_DATE=/^(?:[A-Za-z]{3,9}\.? \d{1,2},? \d{4}|\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2})$/;
+/* a person can be in several groups: Member of holds them separated by semicolons (a comma is read as one too) */
+const pplGroups=v=>String(v||'').split(/[;,]/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+const pplGroupJoin=L=>{const seen={},o=[];L.forEach(g=>{const k=g.toLowerCase();if(!seen[k]){seen[k]=1;o.push(g);}});return o.join('; ');};
+const PPL='nbh.people',PPL_F=['name','role','group','email','phone','site','note'],PPL_EM=/[^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,}/;
 const pplKey=s=>String(s==null?'':s).trim().toLowerCase().replace(/\s+/g,' ');
 function pplParse(s){try{const j=typeof s==='string'?JSON.parse(s):s;if(j&&j.nbh==='people'&&Array.isArray(j.list)){j.gone=j.gone||{};return j;}}catch(e){}return null;}
 const pplBlank=()=>({nbh:'people',v:1,list:[],gone:{},drv:null});
@@ -5376,19 +5387,24 @@ function pplMerge(a,b){const gone=Object.assign({},a.gone||{});Object.keys(b.gon
   const cut=Date.now()-400*864e5;Object.keys(gone).forEach(k=>{if(gone[k]<cut)delete gone[k];});
   return {nbh:'people',v:1,list,gone,drv:a.drv||null,at:a.at||0};}
 const pplSig=x=>JSON.stringify((x.list||[]).slice().sort((p,q)=>String(p.id).localeCompare(String(q.id))))+JSON.stringify(Object.keys(x.gone||{}).sort());
-/* people added: one already there (the same email, or the same name with no email) is completed, not added again */
-function pplAddTo(j,L){let added=0,done=0;L.forEach(p=>{p=pplClean(p);if(!p.name&&!p.email)return;const hit=j.list.find(x=>pplSame(x,p));
-    if(hit){let ch=false;PPL_F.forEach(f=>{if(p[f]&&!hit[f]){hit[f]=p[f];ch=true;}});if(ch){hit.upd=Date.now();done++;}return;}
-    p.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);p.upd=Date.now();j.list.push(p);added++;});return {added,done};}
+/* people added: one already there (the same email, or the same name with no email) is completed, not added again; v22.50
+   with rep its details are replaced by the ones given and it counts as updated, a box left empty keeping what it has */
+function pplAddTo(j,L,rep){let added=0,done=0,upd=0;L.forEach(p=>{p=pplClean(p);if(!p.name&&!p.email)return;const hit=j.list.find(x=>pplSame(x,p));
+    if(hit){let fill=0,swap=0;PPL_F.forEach(f=>{const v=p[f];if(!v||v===hit[f])return;if(!hit[f]){hit[f]=v;fill=1;}
+        else if(rep&&f==='group'){const u=pplGroupJoin(pplGroups(hit.group).concat(pplGroups(v)));if(u!==hit.group){hit.group=u;swap=1;}}   /* groups are added to, never replaced */
+        else if(rep){hit[f]=v;swap=1;}});
+      if(fill||swap){hit.upd=Date.now();if(rep)upd++;else done++;}return;}
+    p.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);p.upd=Date.now();j.list.push(p);added++;});return {added,done,upd};}
 function pplCsvSplit(l){const o=[];let cur='',q=false;for(let i=0;i<l.length;i++){const c=l[i];if(q){if(c==='"'){if(l[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}else if(c==='"')q=true;else if(c===','){o.push(cur);cur='';}else cur+=c;}o.push(cur);return o;}
 /* a pasted or opened list: this directory's own file; rows of a spreadsheet (with or without a heading row); an email's To
    line ("Dana Whitfield <dana@school.org>; ..."); or one person a line, the parts in any order (the email and the phone
    are known by their look; the rest are the name, then the role, then the school). v22.35 also a list copied from a group's
    members page or one column of a spreadsheet, a person over several lines: the name, then the email on the next line; the
-   lines that are only a membership ("Member", "Owner"), a date ("Oct 9, 2026") or a heading are passed over */
+   lines that are only a membership ("Member", "Owner"), a date ("Oct 9, 2026") or a heading are passed over. v22.50 a heading
+   row's Member of (or Group, Team, Department) column goes to Member of; a membership or a join date in a row is passed over too */
 function pplRead(t){t=String(t||'').replace(/\r/g,'');const own=pplParse(t);if(own)return own.list.map(pplClean);
   const lines=t.split('\n').map(l=>l.trim()).filter(Boolean),out=[],split=l=>l.indexOf('\t')>=0?l.split('\t'):pplCsvSplit(l);
-  let head=null;if(lines.length){const h=split(lines[0]).map(x=>x.trim().toLowerCase());if(h.some(x=>/^(name|full name|staff( member)?|e-?mail( address)?|role|title|position|first( name)?|last( name)?)$/.test(x))){head=h;lines.shift();}}
+  let head=null;if(lines.length){const h=split(lines[0]).map(x=>x.trim().toLowerCase());if(h.some(x=>/^(name|full name|staff( member)?|e-?mail( address)?|role|title|position|first( name)?|last( name)?|member of|group|team|department|dept\.?)$/.test(x))){head=h;lines.shift();}}
   const SKIP=/^(?:members?|owners?|managers?|email\/id|e-?mail(?: address)?|role|join(?:ed)? date|date joined|status|active|name)$/i,
     DATE=/^(?:[A-Za-z]{3,9}\.? \d{1,2},? \d{4}|\d{1,2}\/\d{1,2}\/\d{2,4}|\d{4}-\d{2}-\d{2})$/,
     ONLY=/^<?([^\s@<>(),;:"']+@[^\s@<>(),;:"']+\.[A-Za-z]{2,})>?$/;
@@ -5401,36 +5417,66 @@ function pplRead(t){t=String(t||'').replace(/\r/g,'');const own=pplParse(t);if(o
     const angle=l.match(/[^;,<>]*<[^<>\s@]+@[^<>\s]+>/g);
     if(angle&&!head){angle.forEach(m=>{const e=m.match(/<([^>]+)>/)[1],n=m.replace(/<[^>]+>/,'').replace(/^[\s,;"']+|[\s,;"']+$/g,'');out.push(pplClean({name:n,email:e}));});return;}
     if(head){const p={};split(l).forEach((v,i)=>{const h=head[i]||'';v=String(v).trim();if(!v)return;
-        if(/e-?mail/.test(h))p.email=v;else if(/phone|cell|mobile|tel|ext/.test(h))p.phone=v;else if(/role|title|position|job/.test(h))p.role=v;
+        if(/group role|member role|membership|join|status|last sign/.test(h))return;
+        if(/e-?mail/.test(h))p.email=v;else if(/phone|cell|mobile|tel|ext/.test(h))p.phone=v;else if(/role|title|position|job/.test(h)){if(!PPL_MEMB.test(v))p.role=v;}
+        else if(/member of|group|team|department|dept|category/.test(h))p.group=v;
         else if(/school|site|campus|building|location/.test(h))p.site=v;else if(/note|comment/.test(h))p.note=v;
         else if(/^first/.test(h))p.first=v;else if(/^last/.test(h))p.last=v;else if(/name|staff/.test(h))p.name=v;});
       if(!p.name&&(p.first||p.last))p.name=[p.first,p.last].filter(Boolean).join(' ');out.push(pplClean(p));return;}
     const parts=(l.indexOf('\t')>=0||l.indexOf(',')>=0||l.indexOf(';')>=0?(l.indexOf('\t')>=0?l.split('\t'):l.split(/[;,]/)):[l]).map(x=>x.trim().replace(/^"|"$/g,'')).filter(Boolean),p={};
-    parts.forEach(v=>{const m=v.match(PPL_EM);if(!p.email&&m){p.email=m[0];v=v.replace(m[0],'').replace(/[<>()]/g,' ').trim();if(!v)return;}
+    parts.forEach(v=>{if(PPL_MEMB.test(v)||PPL_DATE.test(v))return;const m=v.match(PPL_EM);if(!p.email&&m){p.email=m[0];v=v.replace(m[0],'').replace(/[<>()]/g,' ').trim();if(!v)return;}
       if(!p.phone&&/^[+(]?\d[\d\s().\-]{6,}(\s*(x|ext\.?)\s*\d+)?$/i.test(v)){p.phone=v;return;}
       v=v.replace(/^[\s\-–—:]+|[\s\-–—:]+$/g,'');if(!v)return;
       if(!p.name)p.name=v;else if(!p.role)p.role=v;else if(!p.site)p.site=v;else p.note=(p.note?p.note+'; ':'')+v;});
     out.push(pplClean(p));});
   return out.map(pplClean).filter(p=>p.name||p.email);}
 function pplCsv(j){const q=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':String(v);
-  return ['Name,Role,Email,Phone,School,Note'].concat(pplSorted(j.list).map(p=>PPL_F.map(f=>q(p[f]||'')).join(','))).join('\r\n')+'\r\n';}
+  return ['Name,Role,Member of,Email,Phone,School,Note'].concat(pplSorted(j.list).map(p=>PPL_F.map(f=>q(p[f]||'')).join(','))).join('\r\n')+'\r\n';}
 const pplSorted=L=>(L||[]).slice().sort((a,b)=>String(a.name||a.email).localeCompare(String(b.name||b.email)));
 function pplRow(p){const cell=(f,ph,t)=>'<td><input data-f="'+f+'" value="'+esc(p[f]||'')+'" placeholder="'+ph+'" aria-label="'+esc((p.name||'New person')+': '+ph)+'"'+(t?' type="'+t+'" autocomplete="off" spellcheck="false"':'')+'></td>';
-  return '<tr data-pid="'+esc(p.id)+'">'+cell('name','Name')+cell('role','Role')+cell('email','Email','email')+cell('phone','Phone','tel')+cell('site','School')+cell('note','Note')+
+  return '<tr data-pid="'+esc(p.id)+'"><td class="pp-ck"><input type="checkbox" class="pp-sel" aria-label="Select '+esc(p.name||p.email||'this person')+'"></td>'+cell('name','Name')+cell('role','Role')+cell('group','Member of')+cell('email','Email','email')+cell('phone','Phone','tel')+cell('site','School')+cell('note','Note')+
     '<td><button type="button" class="pp-x" aria-label="Remove '+esc(p.name||p.email||'this person')+'" title="Remove">&times;</button></td></tr>';}
 function pplWhere(){return typeof drvOn==='function'&&drvOn()?'Kept on this '+HERE+' and in your school Google Drive (the folder '+DRV_FOLDER+', as Staff directory.json), so your other devices have it too.'
   :'Kept on this '+HERE+'. For another device, Save to a file here and Open a file there, or turn on Google Drive in Caseload and both keep one list.';}
 let pplChain=Promise.resolve();
 const pplDo=fn=>(pplChain=pplChain.then(async()=>{const j=await pplLoad();const r=await fn(j);if(r!==false)await pplSave(j);return j;}).catch(e=>{wsUI.toast('The staff directory could not be saved: '+(e&&e.message||e),{kind:'warn'});}));
 async function pplOpen(){const j=await pplLoad();
-  dialog('Staff directory','<p class="hp-lead">The school staff you send forms to, typed once for every student. In a form, tap a box where a staff member is named (Form IA-1’s informants, the observers, the team) and pick from this list: the role, email and phone come with the name.</p>'+
+  dialog('Staff directory','<p class="hp-lead">The school staff you send forms to, typed once for every student. In a form, tap a box where a staff member is named (Form IA-1’s informants, the observers, the team) and pick from this list: the role, email and phone come with the name. <b>Member of</b> is the class or team a person belongs to (a teacher’s class, the SLPs, fine arts), and a person can be in more than one: separate them with a semicolon (SLPs; Fine arts). Find narrows to a group, and Select all then takes everyone shown.</p>'+
     '<div class="pp-tools"><input type="search" id="ppFind" placeholder="Find a name, role, email or school" aria-label="Find in the staff directory" autocomplete="off"><button type="button" class="primary" id="ppAdd">Add a person</button><button type="button" id="ppPasteBtn" aria-expanded="false">Paste a list</button><button type="button" id="ppOpenBtn">Open a file</button><button type="button" id="ppSaveBtn">Save to a file</button><input type="file" id="ppFile" accept=".csv,.tsv,.txt,.json,text/csv,text/plain,application/json" hidden></div>'+
-    '<div id="ppPaste" hidden><textarea id="ppPasteIn" rows="6" placeholder="One person a line: name, role, email, phone, school, in any order. Rows copied from a spreadsheet work too, and an email’s To line (Dana Whitfield <dana@school.org>; ...)."></textarea><p class="pp-pr"><button type="button" class="primary" id="ppPasteGo">Add these</button> <span id="ppPasteMsg" role="status"></span></p></div>'+
-    '<div class="pp-wrap"><table class="pp-tbl"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>School</th><th>Note</th><th><span class="sr">Remove</span></th></tr></thead><tbody id="ppBody">'+pplSorted(j.list).map(pplRow).join('')+'</tbody></table></div>'+
+    '<div id="ppPaste" hidden><textarea id="ppPasteIn" rows="6" placeholder="One person a line: name, role, email, phone, school, in any order. Rows copied from a spreadsheet work too: with a heading row (Name, Role, Member of, Email, Phone, School, Note) each column goes to its box, and several groups go in Member of separated by semicolons. And an email’s To line (Dana Whitfield <dana@school.org>; ...)."></textarea>'+
+    '<label class="pp-rep"><input type="checkbox" id="ppReplace" checked><span>Update the people already here: what you paste replaces their details, and a box left empty in the paste keeps what it has. Groups under Member of are added to the ones a person already has. Untick it to only fill in empty boxes.</span></label>'+
+    '<p class="pp-pr"><button type="button" class="primary" id="ppPasteGo">Add or update these</button> <span id="ppPasteMsg" role="status"></span></p></div>'+
+    '<p class="pp-tidy" id="ppTidy" hidden></p>'+
+    '<div class="pp-bulk" id="ppBulk" role="group" aria-label="Everyone selected" hidden><b id="ppSelN"></b><button type="button" class="danger" id="ppDelSel">Remove</button><span>or</span><select id="ppSetF" aria-label="What to do for everyone selected"><option value="g+">Add to a group</option><option value="g-">Take out of a group</option><option value="role">Set Role to</option><option value="group">Set Member of to</option><option value="site">Set School to</option><option value="phone">Set Phone to</option><option value="note">Set Note to</option></select><input type="text" id="ppSetV" placeholder="A group, such as SLPs" aria-label="The group, or what to put in that box, for everyone selected" autocomplete="off"><button type="button" id="ppSetGo">Apply</button><button type="button" id="ppSelNone">Clear selection</button></div>'+
+    '<div class="pp-wrap"><table class="pp-tbl"><thead><tr><th class="pp-ck"><input type="checkbox" id="ppAll" aria-label="Select everyone shown"></th><th>Name</th><th>Role</th><th>Member of</th><th>Email</th><th>Phone</th><th>School</th><th>Note</th><th><span class="sr">Remove</span></th></tr></thead><tbody id="ppBody">'+pplSorted(j.list).map(pplRow).join('')+'</tbody></table></div>'+
     '<p class="hint" id="ppCount"></p><p class="hint">'+pplWhere()+' Staff only: no student and no family member goes here, and nothing in it is sent anywhere but your own Drive.</p>');
   $('#dlg').classList.add('cl-wide','pp-dlg');pplCount();
   const db=$('#dlgBody');
-  $('#ppFind').addEventListener('input',e=>{const q=pplKey(e.target.value).split(' ').filter(Boolean);db.querySelectorAll('#ppBody tr').forEach(tr=>{const t=pplKey(Array.from(tr.querySelectorAll('input')).map(i=>i.value).join(' '));tr.hidden=!q.every(w=>t.indexOf(w)>=0);});});
+  /* a row Find hides is no longer selected: what is done to everyone selected is done only to people you can see */
+  $('#ppFind').addEventListener('input',e=>{const q=pplKey(e.target.value).split(' ').filter(Boolean);db.querySelectorAll('#ppBody tr').forEach(tr=>{const t=pplKey(Array.from(tr.querySelectorAll('input[data-f]')).map(i=>i.value).join(' '));tr.hidden=!q.every(w=>t.indexOf(w)>=0);if(tr.hidden){const c=tr.querySelector('.pp-sel');if(c)c.checked=false;}});pplSelPaint();});
+  db.addEventListener('change',e=>{const t=e.target;if(t.id==='ppAll'){db.querySelectorAll('#ppBody tr').forEach(tr=>{const c=tr.querySelector('.pp-sel');if(c)c.checked=t.checked&&!tr.hidden;});pplSelPaint();}else if(t.classList&&t.classList.contains('pp-sel'))pplSelPaint();});
+  $('#ppSelNone').addEventListener('click',()=>{db.querySelectorAll('#ppBody .pp-sel').forEach(c=>c.checked=false);pplSelPaint();});
+  $('#ppDelSel').addEventListener('click',async()=>{const trs=pplSelRows();if(!trs.length)return;const n=trs.length,one=n===1?(trs[0].querySelector('[data-f=name]').value||trs[0].querySelector('[data-f=email]').value||'this person'):'';
+    if(!(await wsUI.confirm(n===1?'Remove '+one+' from the staff directory?':'Remove these '+n+' people from the staff directory?'+(n===db.querySelectorAll('#ppBody tr').length?' That is everyone in it.':''),{ok:'Remove',danger:true})))return;
+    const ids=trs.map(tr=>tr.dataset.pid);trs.forEach(tr=>tr.remove());
+    pplDo(j=>{const now=Date.now();j.list=j.list.filter(p=>ids.indexOf(p.id)<0);ids.forEach(id=>{j.gone[id]=now;});}).then(()=>{pplCount();wsUI.toast(n===1?one+' removed.':n+' people removed.',{kind:'ok'});});});
+  $('#ppSetF').addEventListener('change',e=>{$('#ppSetV').placeholder=/^g[+-]$/.test(e.target.value)?'A group, such as SLPs':'Empty clears it';});
+  /* add everyone selected to a group, or take them out of one; their other groups stay */
+  $('#ppSetGo').addEventListener('click',async e=>{const op=$('#ppSetF').value;if(!/^g[+-]$/.test(op))return;e.stopImmediatePropagation();
+    const trs=pplSelRows();if(!trs.length)return;const g=pplGroups($('#ppSetV').value)[0]||'',n=trs.length,who=n===1?'1 person':n+' people';
+    if(!g){wsUI.toast('Type the group first.',{kind:'warn'});$('#ppSetV').focus();return;}
+    const add=op==='g+';if(!(await wsUI.confirm(add?'Add '+who+' to “'+g+'”?':'Take '+who+' out of “'+g+'”?',{ok:add?'Add':'Take out'})))return;
+    const next=v=>{const L=pplGroups(v);return pplGroupJoin(add?L.concat([g]):L.filter(x=>x.toLowerCase()!==g.toLowerCase()));};
+    const ids=trs.map(tr=>tr.dataset.pid);trs.forEach(tr=>{const i=tr.querySelector('[data-f="group"]');if(i)i.value=next(i.value);});
+    pplDo(j=>{const now=Date.now();j.list.forEach(p=>{if(ids.indexOf(p.id)<0)return;const u=next(p.group);if(u!==(p.group||'')){p.group=u;p.upd=now;}});}).then(()=>{pplCount();wsUI.toast((add?who+' added to “':who+' taken out of “')+g+'”.',{kind:'ok'});});});
+  $('#ppSetGo').addEventListener('click',async()=>{const trs=pplSelRows();if(!trs.length)return;const sf=$('#ppSetF'),f=sf.value,lab={role:'Role',group:'Member of',site:'School',phone:'Phone',note:'Note'}[f]||f,v=pplClean({[f]:$('#ppSetV').value})[f],n=trs.length;
+    if(!(await wsUI.confirm((v?'Set '+lab+' to “'+v+'”':'Clear '+lab)+' for '+(n===1?'1 person':n+' people')+'?',{ok:v?'Set':'Clear'})))return;
+    const ids=trs.map(tr=>tr.dataset.pid);trs.forEach(tr=>{const i=tr.querySelector('[data-f="'+f+'"]');if(i)i.value=v;});
+    pplDo(j=>{const now=Date.now();j.list.forEach(p=>{if(ids.indexOf(p.id)>=0&&(p[f]||'')!==v){p[f]=v;p.upd=now;}});}).then(()=>{pplCount();wsUI.toast((v?lab+' set':lab+' cleared')+' for '+(n===1?'1 person':n+' people')+'.',{kind:'ok'});});});
+  /* a list copied from a group's members page brought its membership ("Member") in as the role and the join date as the note */
+  $('#ppTidy').addEventListener('click',async e=>{if(!e.target.closest('button'))return;
+    if(!(await wsUI.confirm('Clear those roles and dates? Each person keeps their name, email and the rest.',{ok:'Clear'})))return;
+    pplDo(j=>{const now=Date.now();j.list.forEach(p=>{let ch=0;if(PPL_MEMB.test(p.role||'')){p.role='';ch=1;}if(PPL_DATE.test(p.note||'')){p.note='';ch=1;}if(ch)p.upd=now;});}).then(async()=>{const j=await pplLoad();const b=$('#ppBody');if(b)b.innerHTML=pplSorted(j.list).map(pplRow).join('');pplCount();wsUI.toast('Cleared.',{kind:'ok'});});});
   $('#ppAdd').addEventListener('click',()=>{const p=Object.assign(pplClean({}),{id:'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7),upd:0});$('#ppBody').insertAdjacentHTML('afterbegin',pplRow(p));$('#ppFind').value='';db.querySelectorAll('#ppBody tr').forEach(tr=>tr.hidden=false);$('#ppBody tr input').focus();});
   $('#ppPasteBtn').addEventListener('click',e=>{const b=$('#ppPaste');b.hidden=!b.hidden;e.currentTarget.setAttribute('aria-expanded',String(!b.hidden));if(!b.hidden)$('#ppPasteIn').focus();});
   $('#ppPasteGo').addEventListener('click',()=>pplTake($('#ppPasteIn').value,'pasted'));
@@ -5446,11 +5492,18 @@ async function pplOpen(){const j=await pplLoad();
   db.addEventListener('click',async e=>{const x=e.target.closest&&e.target.closest('.pp-x');if(!x)return;const tr=x.closest('tr'),id=tr.dataset.pid,nm=tr.querySelector('[data-f=name]').value||tr.querySelector('[data-f=email]').value;
     if(nm&&!(await wsUI.confirm('Remove '+nm+' from the staff directory?',{ok:'Remove',danger:true})))return;
     tr.remove();pplDo(j=>{j.list=j.list.filter(p=>p.id!==id);j.gone[id]=Date.now();}).then(pplCount);});}
-function pplCount(){const n=document.querySelectorAll('#ppBody tr').length,c=$('#ppCount');if(c)c.textContent=n?n+(n===1?' person':' people')+' in the directory.':'No one yet: Add a person, or Paste a list.';}
+function pplCount(){const n=document.querySelectorAll('#ppBody tr').length,c=$('#ppCount');if(c)c.textContent=n?n+(n===1?' person':' people')+' in the directory.':'No one yet: Add a person, or Paste a list.';pplSelPaint();pplTidyPaint();}
+const pplSelRows=()=>Array.from(document.querySelectorAll('#ppBody tr')).filter(tr=>{const c=tr.querySelector('.pp-sel');return c&&c.checked&&!tr.hidden;});
+function pplSelPaint(){const b=$('#ppBulk');if(!b)return;const all=Array.from(document.querySelectorAll('#ppBody tr')),vis=all.filter(tr=>!tr.hidden),sel=pplSelRows().length,a=$('#ppAll');
+  b.hidden=!sel;$('#ppSelN').textContent=sel+' selected';if(a){const vs=vis.filter(tr=>tr.querySelector('.pp-sel').checked).length;a.checked=!!vis.length&&vs===vis.length;a.indeterminate=vs>0&&vs<vis.length;}}
+function pplTidyPaint(){const t=$('#ppTidy');if(!t)return;let n=0;document.querySelectorAll('#ppBody tr').forEach(tr=>{const r=tr.querySelector('[data-f=role]'),o=tr.querySelector('[data-f=note]');if(r&&PPL_MEMB.test(r.value.trim())||o&&PPL_DATE.test(o.value.trim()))n++;});
+  t.hidden=!n;if(n)t.innerHTML='<span>'+(n===1?'1 person has':n+' people have')+' a group membership (such as “Member”) as the role or a join date as the note, from a group’s members list.</span><button type="button">Clear those</button>';}
 function pplTake(text,from){const L=pplRead(text),m=$('#ppPasteMsg');
   if(!L.length){const s='No names or email addresses were found in what was '+(from==='pasted'?'pasted':'in '+from)+'.';if(m)m.textContent=s;else wsUI.toast(s,{kind:'warn'});return;}
-  pplDo(j=>{const r=pplAddTo(j,L);pplTake.last=r;if(!r.added&&!r.done)return false;}).then(async()=>{const r=pplTake.last||{added:0,done:0},s=(r.added?r.added+(r.added===1?' person':' people')+' added':'No one new')+(r.done?', '+r.done+' completed':'')+(L.length>r.added+r.done?'; '+(L.length-r.added-r.done)+' already there':'')+'.';
-    const j=await pplLoad();const b=$('#ppBody');if(b)b.innerHTML=pplSorted(j.list).map(pplRow).join('');pplCount();if(m)m.textContent=s;wsUI.toast(s,{kind:'ok'});if(r.added&&$('#ppPasteIn')){$('#ppPasteIn').value='';$('#ppPaste').hidden=true;$('#ppPasteBtn').setAttribute('aria-expanded','false');}});}
+  const rep=!!($('#ppReplace')&&$('#ppReplace').checked);
+  pplDo(j=>{const r=pplAddTo(j,L,rep);pplTake.last=r;if(!r.added&&!r.done&&!r.upd)return false;}).then(async()=>{const r=pplTake.last||{added:0,done:0,upd:0},same=L.length-r.added-r.done-r.upd,
+      s=(r.added?r.added+(r.added===1?' person':' people')+' added':'No one new')+(r.upd?', '+r.upd+' updated':'')+(r.done?', '+r.done+' completed':'')+(same>0?'; '+same+' already there'+(rep?' as pasted':''):'')+'.';
+    const j=await pplLoad();const b=$('#ppBody');if(b)b.innerHTML=pplSorted(j.list).map(pplRow).join('');pplCount();if(m)m.textContent=s;wsUI.toast(s,{kind:'ok'});if((r.added||r.upd)&&$('#ppPasteIn')){$('#ppPasteIn').value='';$('#ppPaste').hidden=true;$('#ppPasteBtn').setAttribute('aria-expanded','false');}});}
 $('#dlg').addEventListener('close',()=>{$('#dlg').classList.remove('pp-dlg');});
 /* with Google Drive on: the directory's one file in the cases folder, merged with this device's copy */
 async function pplDrv(){const fid=await drvFolder();

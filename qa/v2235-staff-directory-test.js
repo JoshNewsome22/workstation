@@ -26,7 +26,7 @@ const frameOf=(p,re)=>p.frames().find(f=>re.test(decodeURIComponent(f.url())));
   let r=await rows();
   ok('3 a pasted list: a line of parts, an email’s To line (two people), a spreadsheet row: four people',r.length===4&&r.some(x=>x.name==='Dana Whitfield'&&x.role==='4th grade teacher'&&x.email==='dana.whitfield@example.org'&&x.phone==='555-0142'&&x.site==='Simulated Elementary')
     &&r.some(x=>x.name==='Paula Brennan'&&x.email==='paula.brennan@example.org')&&r.some(x=>x.name==='Iris Calloway')&&r.some(x=>x.name==='Casey Morgan (simulated)'&&x.role==='Paraprofessional'),r);
-  await p.click('#ppPasteBtn');await p.fill('#ppPasteIn','Dana Whitfield, dana.whitfield@example.org, Room 12');await p.click('#ppPasteGo');await sleep(600);
+  await p.click('#ppPasteBtn');await p.uncheck('#ppReplace');await p.fill('#ppPasteIn','Dana Whitfield, dana.whitfield@example.org, Room 12');   /* v22.50 fill-only */await p.click('#ppPasteGo');await sleep(600);
   r=await rows();ok('4 the same person again is not added twice (completed instead)',r.length===4,r);
   /* add one by hand */
   await p.click('#ppAdd');await sleep(200);
@@ -48,7 +48,7 @@ const frameOf=(p,re)=>p.frames().find(f=>re.test(decodeURIComponent(f.url())));
   /* save to a file, open it again */
   const [dl]=await Promise.all([p.waitForEvent('download'),p.click('#ppSaveBtn')]);const fp=path.join(os.tmpdir(),'ppl-'+process.pid+'.csv');await dl.saveAs(fp);
   const csv=fs.readFileSync(fp,'utf8');
-  ok('8 Save to a file: a CSV with a heading row and one row a person',dl.suggestedFilename()==='Staff directory.csv'&&/^Name,Role,Email,Phone,School,Note\r\n/.test(csv)&&csv.trim().split(/\r\n/).length===5&&/Dana Whitfield,4th grade teacher,dana\.whitfield@example\.org,555-0142,Simulated Elementary,\r\n/.test(csv),csv);
+  ok('8 Save to a file: a CSV with a heading row and one row a person',dl.suggestedFilename()==='Staff directory.csv'&&/^Name,Role,Member of,Email,Phone,School,Note\r\n/.test(csv)&&csv.trim().split(/\r\n/).length===5&&/Dana Whitfield,4th grade teacher,,dana\.whitfield@example\.org,555-0142,Simulated Elementary,\r\n/.test(csv),csv);
   const back=await p.evaluate(t=>pplRead(t),csv);
   ok('9 the CSV reads back as the same people',back.length===4&&back.some(x=>x.name==='Jordan Lee (simulated)'&&x.role==='School psychologist'),back);
   await p.evaluate(async()=>{const j=await pplLoad();j.list=[];await pplSave(j);});
