@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.61: AD-1 from DeLeon et al. (2014): the timing rule, the end rule, access earned and reversals
+
+- **The timing rule sets the primary rate.** On Form AD-1, "Work time only" keeps responses per minute of work as the
+  primary measure; "Total session time" now makes responses per minute of total session primary in the comparison and the
+  decision. The summary table marks the primary column, the graph follows the rule while it shows a rate, and the
+  distributed script says to keep the session clock running through access and exchange.
+- **DeLeon's end rule.** "Session is defined by" has a third choice: responses or work time, whichever comes first (10
+  tasks or 5 min of work time in Experiment 1, p. 299). The scripts stop at "the 10th response or 5 min of work time,
+  whichever comes first", the accumulated block is one unit per response, and the projection says when the cap will
+  come first and how much shorter the block will be.
+- **Access earned** is a column in "Comparison by Arrangement" (minutes, or pieces for edibles). When the arrangements
+  earn more than 20% apart, the comparison says so, with the authors' caution that this history may shape later choices
+  (p. 311) and their advice to hold total access equal before the preference assessment (p. 303).
+- **Work time to complete all N**, from the sessions that completed all N, fastest first (Experiment 2, p. 308).
+- **Card and task reversals in Tab 5.** The choice table has a Phase column (Standard, Cards reversed, Tasks reversed),
+  and the reading by phase says whether the choices followed the arrangement or the card or task, with the authors'
+  advice on less controlling cards and tasks of one concept class (pp. 304, 309). A file saved before the column opens
+  with its choices in place.
+  On a narrow screen the choice table scrolls sideways in its own box, as the session log does, and on paper it prints in
+  the log's smaller type with columns sized for the longest entries.
+- **Resume point.** Section B has a field for where the next block starts (an episode and minute, a game level or save
+  code). The scripts start each block there, and the reinforcer profile asks for it when the primary item has an end
+  (p. 297).
+
+Checked by `qa/v2261-test.js` (15).
+
 ### v22.60: SR-1's variable and random schedules, from Bancroft and Bourret (2008)
 
 - **Variable time** joins Variable interval and Variable ratio as a kind of series on Form SR-1's Design sheet, for

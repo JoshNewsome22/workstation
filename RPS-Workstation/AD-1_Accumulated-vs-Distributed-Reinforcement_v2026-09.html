@@ -374,6 +374,14 @@ svg.plot{width:100%;height:240px;border:1px solid var(--rule);background:var(--p
 @media (max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}.panel{padding:22px 16px 50px}header.mast{padding:20px}nav.tabs{padding:0 8px}}
 @media print{body{background:#fff;font-size:11px}.sheet{box-shadow:none;max-width:none}nav.tabs,.toolbar,.rowbtns,.savenote{display:none!important}.panel{display:block!important;padding:0 0 18px;page-break-before:always}.panel:first-of-type{page-break-before:auto}input,select,textarea{background:#fff!important;border-color:#999}h2{page-break-after:avoid}table,fieldset,.readout{page-break-inside:avoid}}
 @media print{.nbh-wh{display:none!important}} /* v21.43: the Guide's writing-help note is about the screen */
+table.cc-log{min-width:900px}
+/* v22.61 the choice table scrolls in its box; on paper it keeps fixed columns sized for the longest entries ("Cards reversed",
+   "Accumulated + tokens", "Not completed") in the session log's 9.5-px print type, and its selects print as text */
+@media print{table.cc-log{min-width:0;table-layout:fixed;width:100%;font-size:9.5px}table.cc-log td input,table.cc-log td select,table.cc-log td textarea{font-size:9.5px}
+  table.cc-log select{-webkit-appearance:none;appearance:none;background-image:none!important;padding-left:3px;padding-right:3px}
+  table.cc-log th:nth-child(1){width:4%!important}table.cc-log th:nth-child(2){width:13.5%!important}table.cc-log th:nth-child(3){width:8%!important}
+  table.cc-log th:nth-child(4){width:13.5%!important}table.cc-log th:nth-child(5){width:18.5%!important}table.cc-log th:nth-child(6){width:11%!important}
+  table.cc-log th:nth-child(7){width:13%!important}table.cc-log th:nth-child(8){width:7%!important}table.cc-log th:nth-child(9){width:8.5%!important}table.cc-log th:nth-child(10){width:3%!important}}
 </style>
 <style id="nbh-brand">
 /* ===== Newsome Behavioral Health — shared form system ===== */
@@ -1033,12 +1041,17 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
   <div class="grid g4">
     <div><label class="f">Amount per response</label><input type="number" name="r_unit" min="0" step="any"></div>
     <div><label class="f">Unit</label><select name="r_utype"><option>seconds of access</option><option>pieces</option></select></div>
-    <div><label class="f">Session is defined by</label><select name="w_mode"><option value="count">A fixed number of responses</option><option value="time">A fixed work period (earn per response)</option></select></div>
+    <div><label class="f">Session is defined by</label><select name="w_mode"><option value="count">A fixed number of responses</option><option value="time">A fixed work period (earn per response)</option><option value="both">Responses or work time, whichever comes first</option></select></div>
     <div><label class="f">Responses per session / work period (min)</label><div style="display:flex;gap:6px"><input type="number" name="w_req" min="1" step="1" title="Responses per session"><input type="number" name="w_time" min="0" step="any" title="Work period in minutes"></div></div>
   </div>
+  <p class="small">Whichever comes first: DeLeon et al. (2014) ended each session at 10 tasks or 5 min of work time, whichever came first, with token-trading and access time taken out of session time (p. 299). A slower student then earns a shorter accumulated block.</p>
   <div class="grid g2">
     <div><label class="f">Rate denominator (timing rule)</label><select name="clock_rule"><option value="work">Work time only: the session clock stops during reinforcement and exchange</option><option value="total">Total session time: the clock runs through reinforcement</option></select></div>
     <div><label class="f">Delivery window: response to reinforcer or token (s)</label><input type="number" name="d_window" min="0" step="any"></div>
+  </div>
+  <div class="grid g2">
+    <div><label class="f">Resume point (an activity with an end: where the next block starts)</label><input type="text" name="r_resume" placeholder="e.g., note the episode and minute, or the game's level or save code"></div>
+    <div class="small" style="align-self:end">DeLeon et al. (2014) continued each video from where the last block stopped and recorded a game password each day (p. 297), so a block never restarted from the beginning.</div>
   </div>
   <div class="grid g2">
     <div><label class="f">Consequence for problem behavior (identical in every arrangement)</label><select name="pb_cons"><option value=""></option><option>Extinction: continue the prompt sequence; no escape and no access</option><option>Escape for a fixed period (no extinction)</option><option>Planned ignoring; no programmed consequence</option><option>Per the behavior plan (specify)</option></select></div>
@@ -1048,7 +1061,7 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
     <div><label class="f">Prompting procedure</label><input type="text" name="prompting" placeholder="e.g., vocal, model, physical guidance at 5-s intervals"></div>
     <div class="chk" style="margin-top:20px"><input type="checkbox" name="dr_icr" id="dr1"><label for="dr1">Only independent correct responses earn the unit; prompted responses earn praise only (differential reinforcement of independent correct responses, as in Mandel, 2021)</label></div>
   </div>
-  <div class="caution"><p><b>Choose the timing rule deliberately; it changes the result.</b> DeLeon et al. (2014) removed token-trading and reinforcer-access time from session time (pp. 299, 301), and Robinson and St. Peter (2019) paused the work timer during distributed access, so both measured rate over work time. Fulton et al. (2020) ran a 10-min session timer that was never paused. With the clock stopped, the pauses after each removal still count as work time. That is where Robinson and St. Peter tentatively placed the difference: the accumulated arrangement’s higher rates “seemed to be due, at least in part, to elimination of pauses and problem behavior that occurred after the removal of the reinforcer” (p. 1087). Tab 4 records work time and total time either way.</p></div>
+  <div class="caution"><p><b>Choose the timing rule deliberately; it changes the result.</b> DeLeon et al. (2014) removed token-trading and reinforcer-access time from session time (pp. 299, 301), and Robinson and St. Peter (2019) paused the work timer during distributed access, so both measured rate over work time. Fulton et al. (2020) ran a 10-min session timer that was never paused. With the clock stopped, the pauses after each removal still count as work time. That is where Robinson and St. Peter tentatively placed the difference: the accumulated arrangement’s higher rates “seemed to be due, at least in part, to elimination of pauses and problem behavior that occurred after the removal of the reinforcer” (p. 1087). Tab 4 records work time and total time either way. The comparison, the graph and the decision read their rate from the rule chosen here: responses per minute of work under work time only, responses per minute of total session under total session time.</p></div>
 
   <h3>C. Stimuli and Scripts for Each Arrangement</h3>
   <table><thead><tr><th style="width:18%">Arrangement</th><th style="width:22%">Card or stimulus</th><th>What you say before the session (one fixed sentence)</th></tr></thead>
@@ -1139,9 +1152,10 @@ article.study .meta{font-size:13px;color:var(--muted);margin:0 0 6px;max-width:n
     <li><b>Choice.</b> Present the cards in a row and say one fixed sentence (“Pick one”; Mandel used “pick the one you want to do,” allowing up to 5 s). Rotate the positions across trials so a side preference cannot pass for an arrangement preference.</li>
     <li><b>Terminal link.</b> Remove the other cards and run the chosen arrangement exactly as in Tab 4.</li>
     <li><b>Next trial</b> after the reinforcement ends. Record every choice, including no selection.</li>
+    <li><b>Reversals</b> (when one arrangement is chosen nearly every time). Swap the cards between the arrangements and run more choice trials (Phase: Cards reversed); then swap the tasks (Tasks reversed). A choice that follows the arrangement through both is a preference for the arrangement; one that follows the card or the task is a bias toward that stimulus. DeLeon et al. (2014) ran both reversals with three of their four participants (p. 304), and advise &ldquo;less controlling stimuli in the initial links&rdquo; and tasks &ldquo;of the same concept class&rdquo; across the arrangements (p. 309).</li>
   </ol>
   <div><label class="f">Cards presented (arrangement and color, left to right at trial 1)</label><input type="text" name="cc_opts"></div>
-  <table><thead><tr><th style="width:6%">Trial</th><th style="width:11%">Date</th><th style="width:11%">Type</th><th style="width:19%">Selected</th><th style="width:9%">Position</th><th style="width:14%">Terminal link</th><th class="num" style="width:9%">Prob. beh.</th><th>Notes</th><th style="width:3%"></th></tr></thead><tbody id="tbCC"></tbody></table>
+  <div class="log-wrap" tabindex="0" role="region" aria-label="Choice trials"><table class="cc-log"><thead><tr><th style="width:6%">Trial</th><th style="width:11%">Date</th><th style="width:11%">Type</th><th style="width:11%">Phase</th><th style="width:16%">Selected</th><th style="width:9%">Position</th><th style="width:11%">Terminal link</th><th class="num" style="width:9%">Prob. beh.</th><th>Notes</th><th style="width:3%"></th></tr></thead><tbody id="tbCC"></tbody></table></div>
   <div class="rowbtns"><button class="tool" data-add="tbCC">Add row</button><button class="tool" id="btnCC5">Add 5 rows</button></div>
   <div id="ccOut"></div>
   <svg class="plot" id="ccPlot" viewBox="0 0 640 240" aria-label="Cumulative selections by arrangement"></svg>
@@ -1655,7 +1669,7 @@ const templates={
   tbDisc:()=>sel(CONDS)+txt()+dt()+sel(['Pass','Fail','Not run'])+txt()+del(),
   tbRem:()=>idx()+txt()+n()+n()+n()+n()+dt()+del(),
   tbSess:()=>idx()+dt()+txt()+sel(CONDS)+n()+n()+n()+n()+n()+n()+n()+calc()+calc()+calc()+calc()+del(),
-  tbCC:()=>idx()+dt()+sel(['Forced','Choice'])+sel(CONDS.concat(['No selection']))+sel(['Left','Center-left','Center','Center-right','Right'])+sel(['Completed','Partial','Not completed'])+n()+txt()+del(),
+  tbCC:()=>idx()+dt()+sel(['Forced','Choice'])+sel(['Standard','Cards reversed','Tasks reversed'])+sel(CONDS.concat(['No selection']))+sel(['Left','Center-left','Center','Center-right','Right'])+sel(['Completed','Partial','Not completed'])+n()+txt()+del(),
   tbIOA:()=>txt()+sel(['Responses','Problem behavior','Opportunities','Choices','Work time','Access time','On-task intervals'])+sel(['Total count','Trial-by-trial','Total duration'])+n()+n()+n()+n()+calc()+del(),
   tbStep:()=>idx()+n('1')+txt()+calc()+txt()+txt()+del(),
   tbGen:()=>dt()+txt()+txt()+txt()+sel(CONDS.slice(1))+txt()+sel(['Yes','No','Partly'])+del(),
@@ -1670,6 +1684,8 @@ $('#btnCC5').addEventListener('click',()=>{for(let i=0;i<5;i++)addRow('tbCC');re
 document.addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(b){b.closest('tr').remove();refresh();}});
 let pending=0;document.addEventListener('input',()=>{clearTimeout(pending);pending=setTimeout(refresh,120)});
 document.addEventListener('change',()=>{clearTimeout(pending);pending=setTimeout(refresh,60)});
+/* v22.61 the graph follows the timing rule while it shows a rate */
+document.querySelector('[name="clock_rule"]').addEventListener('change',()=>{const g=$('#gMeasure');if(g&&(g.value==='rate'||g.value==='eff'))g.value=val('clock_rule')==='total'?'eff':'rate'});
 
 /* ---------- fixed tables ---------- */
 const TI_ITEMS=[
@@ -1725,7 +1741,7 @@ function rfProfile(){
   const box=$('#rfProfile');if(!R.length){box.innerHTML='';return}
   box.innerHTML='<div class="note"><p><b>How the '+(prim.length?'primary reinforcer':'listed reinforcers')+' relate to the authors’ explanations</b> (observations and hypotheses from the studies, not validated predictors):</p><ul>'+R.map(v=>{
     const f=[];
-    if(/^Activity|with activity/.test(v[1])&&/Has an end/.test(v[2]))f.push('an activity with a natural end: DeLeon et al. (2014) concluded that “duration of access is an important determinant of reinforcing efficacy for activities” (p. 309)');
+    if(/^Activity|with activity/.test(v[1])&&/Has an end/.test(v[2]))f.push('an activity with a natural end: DeLeon et al. (2014) concluded that “duration of access is an important determinant of reinforcing efficacy for activities” (p. 309)'+(val('r_resume')?'':'; record a resume point (Section B) so each block starts where the last one stopped, as DeLeon et al. did for videos and a game (p. 297)'));
     else if(/^Activity/.test(v[1]))f.push('an activity: the free-operant rate advantages for accumulated access came with activities (DeLeon et al., 2014, Experiment 1; Robinson & St. Peter, 2019)');
     const s=num(v[3]);if(s!=null&&s>=10)f.push(s+' s to set up or get back into on each delivery, a handling cost DeLeon et al. (2014, p. 309) proposed for distributed access to activities');
     if(/Problem behavior/.test(v[4]))f.push('problem behavior at removal: Robinson and St. Peter (2019) reported that problem behavior “typically occurred during and after the removal of the preferred item” in their distributed condition (p. 1087)');
@@ -1755,7 +1771,8 @@ function projection(pre){
   const u=num(val('r_unit')),pieces=val('r_utype')==='pieces';
   const rate=num(val('x_rate'));const handle=num(val('x_handle'))??(()=>{const hs=rows('tbRf').map(vals).filter(v=>v[5]==='Primary'&&num(v[3])!=null);return hs.length?num(hs[0][3]):0})();
   const resume=num(val('x_resume'))??(pre&&pre.resume!=null?pre.resume:0);const exch=num(val('x_exch'))??0;
-  let N=num(val('w_req'));if(val('w_mode')==='time'){const wt=num(val('w_time'));N=(wt&&rate)?Math.round(wt*rate):null}
+  let N=num(val('w_req'));const N0=N;if(val('w_mode')==='time'){const wt=num(val('w_time'));N=(wt&&rate)?Math.round(wt*rate):null}
+  else if(val('w_mode')==='both'){const wt=num(val('w_time'));if(N&&wt&&rate)N=Math.max(1,Math.min(N,Math.round(wt*rate)))}   /* v22.61 whichever comes first (DeLeon et al., 2014) */
   if(!u||!rate||!N){out.innerHTML='<p class="small">Enter the amount per response and the responses per session (Section B), and an expected rate, to see the projection.</p>';return null}
   const irt=60/rate,W=N*irt,k=Math.max(2,Math.round(num(val('w_k'))||5));
   const acc=pieces?0:u;const amt=x=>pieces?plural(x,'piece'):mmss(x);
@@ -1775,35 +1792,38 @@ function projection(pre){
     notes.push('Distributed is projected to take '+fmt(Math.abs(d),1)+' min '+(d>=0?'longer':'less')+' per session than '+NAME[a].toLowerCase()+', mostly in '+P.dis.ret+' returns to work and '+P.dis.dl+' set-ups.');
     notes.push('In exchange, accumulated access makes the average banked response wait '+mmss(P.acc.md)+' for its reinforcer (the first one waits '+mmss(P.acc.mx)+'). That delay is the cost Fulton et al. (2020) and Frank-Crawford et al. (2021) point to.');}
   if(pieces)notes.push('Edible pieces: consumption time is not known, so access time is left out of the session estimates.');
+  if(val('w_mode')==='both'&&N0&&N<N0)notes.push('At '+fmt(rate,1)+' responses per minute the '+val('w_time')+'-min work-time cap comes first: about '+plural(N,'response')+' a session, so the accumulated block is about '+amt(N*u)+' rather than '+amt(N0*u)+'.');
   notes.push('Work time assumes a steady '+fmt(rate,1)+' responses per minute ('+fmt(irt,1)+' s per response) and '+fmt(W/60,1)+' min of work for '+plural(N,'response')+'.');
   out.innerHTML=h+'<ul class="small proj-notes">'+notes.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
   return P;
 }
 function scripts(){
   const inc=included();const u=num(val('r_unit'));const pieces=val('r_utype')==='pieces';
-  const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x;const item=val('r_item')||'the reinforcer',unit=lc(val('w_unit'))||'',N=num(val('w_req')),wt=num(val('w_time')),timeMode=val('w_mode')==='time';
+  const lc=x=>x?x.charAt(0).toLowerCase()+x.slice(1):x;const item=val('r_item')||'the reinforcer',unit=lc(val('w_unit'))||'',N=num(val('w_req')),wt=num(val('w_time')),timeMode=val('w_mode')==='time',bothMode=val('w_mode')==='both';
   const amt=u?(pieces?plural(u,'piece')+' of '+item:u+' s of '+item):'the programmed amount of '+item;
   const win=num(val('d_window'));const w=win!=null?'within '+win+' s':'at once';
-  const clk=val('clock_rule')==='work'?' Stop the work clock while the student has the item; restart it when the next task is presented.':'';
+  const clk=val('clock_rule')==='work'?' Stop the work clock while the student has the item; restart it when the next task is presented.':' Keep the session clock running through access and exchange.';
+  const rs=val('r_resume')?' Start it where the last block stopped ('+esc(val('r_resume'))+') and note where this one stops.':'';   /* v22.61 (DeLeon et al., 2014, p. 297) */
   const pb=val('pb_cons')?val('pb_cons').replace(/\s*\(specify\)$/,'')+(val('pb_note')?': '+lc(val('pb_note')):''):'the programmed consequence (write it in Section B)';
   /* v21.21 escape (E): the prompting procedure is written into every arrangement's script through esc(), as
    the other entries in the scripts already were; typed there, it was parsed as markup */
   const pr=val('prompting')?' Prompt with: '+esc(val('prompting'))+'.':'';
   const q=val('dr_icr')?'independent correct ':'';
   const endR=val('end_note')?lc(val('end_note')):val('end_routine')?lc(val('end_routine')):'the written ending routine';
-  const total=u&&N?(pieces?plural(N*u,'piece'):mmss(N*u)):'the earned total';
+  const total=bothMode?'one unit per response'+(u&&N?', at most '+(pieces?plural(N*u,'piece'):mmss(N*u)):''):u&&N?(pieces?plural(N*u,'piece'):mmss(N*u)):'the earned total';
   const ord=x=>{const m=x%100;return x+(m>=11&&m<=13?'th':({1:'st',2:'nd',3:'rd'}[x%10]||'th'))};
-  const req=timeMode?'the end of the '+(wt||'?')+'-min work period':'the '+(N?ord(N):'last')+' '+q+'response';
+  const req=timeMode?'the end of the '+(wt||'?')+'-min work period':bothMode?'the '+(N?ord(N):'last')+' '+q+'response or '+(wt||'?')+' min of work time, whichever comes first':'the '+(N?ord(N):'last')+' '+q+'response';
   const card=k=>val('card_'+k)?'Card in view: '+val('card_'+k)+'.':'Put the arrangement’s card in view.';
   const say=k=>val('say_'+k)?'Say: “'+esc(val('say_'+k))+'”':'Say the arrangement’s fixed sentence (Section C).';
   const kk=Math.max(2,Math.round(num(val('w_k'))||5));
   const S={
-    bl:[esc(card('bl')),say('bl'),'Present the task'+(timeMode?' for '+(wt||'?')+' min':' '+(N||'?')+' times')+'.'+pr+' No programmed reinforcement for responses.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time and total time.'],
-    dis:[esc(card('dis')),say('dis'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and give '+esc(amt)+' '+w+'.'+clk,'When the time is up: '+esc(endR)+'. Present the next task at once and time how long the student takes to start (Resumes).','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time, total time and the mean return time.'],
-    acc:[esc(card('acc')),say('acc'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and mark one unit '+w+' where the student can see it'+(val('exch_note')?' ('+esc(val('exch_note'))+')':'')+'. No access during the work.','At '+esc(req)+': count the earned amount aloud ('+esc(total)+'), set the timer where the student can see it, and give '+esc(item)+' for the whole block without interruption.','When the time is up: '+esc(endR)+'.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time and total time.'],
-    tok:[esc(card('tok'))+' Empty token board in view.',say('tok'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and hand or place one token '+w+'. No access during the work.','At '+esc(req)+': count the tokens with the student, exchange them for '+esc(total)+', set the timer in view, and give '+esc(item)+' for the whole block.','When the time is up: '+esc(endR)+'.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time, exchange time and total time.'],
-    int:[esc(card('int')),say('int'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and mark one unit '+w+'.','After every '+kk+' responses: count the '+kk+' units, set the timer, and give '+esc(item)+' for the banked amount.','When the time is up: '+esc(endR)+'; the next task follows at once.','Problem behavior: '+esc(pb)+'.','Record as for distributed, including return times.']
+    bl:[esc(card('bl')),say('bl'),'Present the task'+(timeMode?' for '+(wt||'?')+' min':bothMode?' up to '+(N||'?')+' times or for '+(wt||'?')+' min of work time, whichever comes first':' '+(N||'?')+' times')+'.'+pr+' No programmed reinforcement for responses.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time and total time.'],
+    dis:[esc(card('dis')),say('dis'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and give '+esc(amt)+' '+w+'.'+clk+rs,'When the time is up: '+esc(endR)+'. Present the next task at once and time how long the student takes to start (Resumes).','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time, total time and the mean return time.'],
+    acc:[esc(card('acc')),say('acc'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and mark one unit '+w+' where the student can see it'+(val('exch_note')?' ('+esc(val('exch_note'))+')':'')+'. No access during the work.','At '+esc(req)+': count the earned amount aloud ('+esc(total)+'), set the timer where the student can see it, and give '+esc(item)+' for the whole block without interruption.'+rs,'When the time is up: '+esc(endR)+'.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time and total time.'],
+    tok:[esc(card('tok'))+' Empty token board in view.',say('tok'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and hand or place one token '+w+'. No access during the work.','At '+esc(req)+': count the tokens with the student, exchange them for '+esc(total)+', set the timer in view, and give '+esc(item)+' for the whole block.'+rs,'When the time is up: '+esc(endR)+'.','Problem behavior: '+esc(pb)+'.','Record responses, problem behavior, work time, access time, exchange time and total time.'],
+    int:[esc(card('int')),say('int'),'Present the first task.'+pr,'After each '+q+'response'+(unit?' ('+esc(unit)+')':'')+': praise, and mark one unit '+w+'.','After every '+kk+' responses: count the '+kk+' units, set the timer, and give '+esc(item)+' for the banked amount.'+rs,'When the time is up: '+esc(endR)+'; the next task follows at once.','Problem behavior: '+esc(pb)+'.','Record as for distributed, including return times.']
   };
+  if(bothMode)['dis','int'].forEach(k=>S[k].splice(S[k].length-2,0,'End the session at '+esc(req)+'.'));
   $('#scriptOut').innerHTML=inc.map(k=>'<div class="script-card" style="--c:'+COL[k]+'"><h4>'+NAME[k]+'</h4><ol>'+S[k].map(x=>'<li>'+x+'</li>').join('')+'</ol></div>').join('');
 }
 
@@ -1814,7 +1834,7 @@ function sessData(){
     const den=o.tot||o.work;o.pbm=(o.pb!=null&&den)?o.pb/den:null;o.eff=(o.resp!=null&&o.tot)?o.resp/o.tot:null;o.totm=o.tot;return o});
 }
 const MEAS={rate:{f:'rate',lab:'Responses per minute of work',hi:true,d:2},pct:{f:'pct',lab:'Percentage of opportunities',hi:true,d:1},pb:{f:'pbm',lab:'Problem behavior per minute of session',hi:false,d:2},eff:{f:'eff',lab:'Responses per minute of total session',hi:true,d:2},tot:{f:'totm',lab:'Total session minutes',hi:false,d:1}};
-function primary(){const q=val('q_type');return q==='esc'?'pb':q==='cls'?'pct':q==='acq'?'pct':'rate'}
+function primary(){const q=val('q_type');return q==='esc'?'pb':q==='cls'?'pct':q==='acq'?'pct':val('clock_rule')==='total'?'eff':'rate'}   /* v22.61 the rate follows the timing rule */
 function stats(S){
   const by={};S.forEach(s=>{if(!s.c)return;(by[s.c]=by[s.c]||[]).push(s)});
   const st={};Object.keys(by).forEach(c=>{const a=by[c];const m=f=>{const x=a.map(s=>s[f]).filter(v=>v!=null);return {m:mean(x),lo:x.length?Math.min(...x):null,hi:x.length?Math.max(...x):null,n:x.length}};
@@ -1827,10 +1847,12 @@ function sessions(){
   S.forEach(s=>{const c=s.tr.cells;c[0].textContent=s.i;c[11].textContent=fmt(s.rate,2);c[12].textContent=s.pct==null?'—':fmt(s.pct,0)+'%';c[13].textContent=fmt(s.pbm,2);c[14].textContent=fmt(s.eff,2)});
   const st=stats(S);const keys=ORDER.filter(k=>st[k]);
   if(!keys.length){$('#sumOut').innerHTML='';$('#cmpOut').innerHTML='';drawEff(S,st);return {S,st,keys}}
-  const acq=val('q_type')==='acq';
+  const acq=val('q_type')==='acq',P1=MEAS[primary()].f,pm1=f=>P1===f?'<br><span class="small">primary</span>':'',pieces=val('r_utype')==='pieces',u0=num(val('r_unit'));
+  /* v22.61 access earned a session: the Access column in minutes, or responses times the amount for pieces */
+  const earned=s=>{if(pieces){const a=s.list.filter(x=>x.resp!=null).map(x=>x.resp*u0);return u0&&a.length?mean(a):null}return s.acc.m!=null?s.acc.m/60:null};
   const rng=(o,d)=>o.m==null?'—':fmt(o.m,d)+(o.n>1?' <span class="small">('+fmt(o.lo,d)+'–'+fmt(o.hi,d)+')</span>':'');
-  let h='<table class="sum"><thead><tr><th>Arrangement</th><th class="num">Sessions</th><th class="num">Rate /work min</th><th class="num">%</th><th class="num">Prob. beh. /min</th><th class="num">Resp. /total min</th><th class="num">Total min</th><th class="num">Resumes (s)</th>'+(acq?'<th class="num">Sessions to mastery</th><th class="num">Minutes to mastery<br><span class="small">work / total</span></th>':'')+'</tr></thead><tbody>';
-  keys.forEach(k=>{const s=st[k];h+='<tr><td><span class="chip" style="--c:'+COL[k]+'"></span>'+NAME[k]+'</td><td class="num">'+s.n+'</td><td class="num">'+rng(s.rate,2)+'</td><td class="num">'+rng(s.pct,0)+'</td><td class="num">'+rng(s.pbm,2)+'</td><td class="num">'+rng(s.eff,2)+'</td><td class="num">'+rng(s.totm,1)+'</td><td class="num">'+(s.res.m==null?'—':fmt(s.res.m,1))+'</td>'+(acq?(()=>{/* v21.37: minutes to mastery on work time and on total time, the measures the skill-acquisition question names */const m=mastery(s.list),sum=f=>fmt(s.list.slice(0,m).reduce((a,x)=>a+(x[f]||0),0),1);return '<td class="num">'+(m||'not yet')+'</td><td class="num">'+(m?sum('work')+' / '+sum('totm'):'—')+'</td>'})():'')+'</tr>'});
+  let h='<table class="sum"><thead><tr><th>Arrangement</th><th class="num">Sessions</th><th class="num">Rate /work min'+pm1('rate')+'</th><th class="num">%'+pm1('pct')+'</th><th class="num">Prob. beh. /min'+pm1('pbm')+'</th><th class="num">Resp. /total min'+pm1('eff')+'</th><th class="num">Total min</th><th class="num">Access earned<br><span class="small">'+(pieces?'pieces':'min')+'</span></th><th class="num">Resumes (s)</th>'+(acq?'<th class="num">Sessions to mastery</th><th class="num">Minutes to mastery<br><span class="small">work / total</span></th>':'')+'</tr></thead><tbody>';
+  keys.forEach(k=>{const s=st[k];h+='<tr><td><span class="chip" style="--c:'+COL[k]+'"></span>'+NAME[k]+'</td><td class="num">'+s.n+'</td><td class="num">'+rng(s.rate,2)+'</td><td class="num">'+rng(s.pct,0)+'</td><td class="num">'+rng(s.pbm,2)+'</td><td class="num">'+rng(s.eff,2)+'</td><td class="num">'+rng(s.totm,1)+'</td><td class="num">'+(k==='bl'||earned(s)==null?'—':fmt(earned(s),1))+'</td><td class="num">'+(s.res.m==null?'—':fmt(s.res.m,1))+'</td>'+(acq?(()=>{/* v21.37: minutes to mastery on work time and on total time, the measures the skill-acquisition question names */const m=mastery(s.list),sum=f=>fmt(s.list.slice(0,m).reduce((a,x)=>a+(x[f]||0),0),1);return '<td class="num">'+(m||'not yet')+'</td><td class="num">'+(m?sum('work')+' / '+sum('totm'):'—')+'</td>'})():'')+'</tr>'});
   $('#sumOut').innerHTML=h+'</tbody></table>';
   const C=[];const pm=MEAS[primary()];const tr=keys.filter(k=>k!=='bl'&&st[k][pm.f].m!=null);
   if(tr.length){const srt=tr.slice().sort((a,b)=>pm.hi?st[b][pm.f].m-st[a][pm.f].m:st[a][pm.f].m-st[b][pm.f].m);
@@ -1841,6 +1863,13 @@ function sessions(){
   }
   if(st.bl&&st.bl.pbm.m!=null&&st.bl.pbm.m>0){keys.filter(k=>k!=='bl'&&st[k].pbm.m!=null).forEach(k=>{const r=st[k].pbm.m/st.bl.pbm.m;if(r>=0.5)C.push('<b>'+NAME[k]+'</b>: mean problem behavior is '+fmt(100*r,0)+'% of the baseline mean, at or above the 50% level Frank-Crawford et al. (2021) used to call a condition ineffective (p. 1578). Check the trend and whether one session drives it.')});}
   const t=keys.filter(k=>k!=='bl'&&st[k].totm.m!=null);if(t.length>1){const lo=t.reduce((a,b)=>st[a].totm.m<=st[b].totm.m?a:b),hi=t.reduce((a,b)=>st[a].totm.m>=st[b].totm.m?a:b);if(lo!==hi)C.push('Session length: '+NAME[hi].toLowerCase()+' sessions ran '+fmt(st[hi].totm.m-st[lo].totm.m,1)+' min longer on average than '+NAME[lo].toLowerCase()+' sessions.')}
+  /* v22.61 (DeLeon et al., 2014): access earned per arrangement, flagged when it differs by more than 20% (pp. 299-300, 311);
+     the work time to complete all N responses, from the sessions that completed all N (Experiment 2, p. 308) */
+  const ea=keys.filter(k=>k!=='bl').map(k=>({k,v:earned(st[k])})).filter(x=>x.v!=null&&x.v>0);
+  if(ea.length>1){const lo=ea.reduce((a,b)=>a.v<=b.v?a:b),hi=ea.reduce((a,b)=>a.v>=b.v?a:b);
+    if(hi.v>lo.v*1.2)C.push('<b>Access earned differed</b>: '+ea.map(x=>NAME[x.k]+' '+fmt(x.v,1)+(pieces?' pieces':' min')).join(', ')+' a session on average; '+NAME[hi.k].toLowerCase()+' earned '+fmt(100*(hi.v/lo.v-1),0)+'% more than '+NAME[lo.k].toLowerCase()+'. In DeLeon et al. (2014) the accumulated condition earned more access in Experiment 1, and the authors note that this history may have shaped the later choices (p. 311). Before the preference assessment (Tab 5), hold total access equal: they held each terminal link to 10 demands and at most 300 s (p. 303).')}
+  const Nq=num(val('w_req'));if(Nq&&val('w_mode')!=='time'&&val('clock_rule')!=='total'){const tc=keys.filter(k=>k!=='bl').map(k=>{const a=st[k].list.filter(x=>x.resp!=null&&x.resp>=Nq&&x.work).map(x=>x.work);return a.length?{k,m:mean(a),n:a.length}:null}).filter(Boolean);
+    if(tc.length>1)C.push('<b>Work time to complete all '+Nq+'</b> (sessions that completed all '+Nq+'; access and exchange time left out): '+tc.slice().sort((a,b)=>a.m-b.m).map(x=>NAME[x.k]+' '+fmt(x.m,1)+' min ('+plural(x.n,'session')+')').join(', ')+'. DeLeon et al. (2014) compared the arrangements by this time in Experiment 2 (p. 308).')}
   const mn=num(val('d_minsess'));if(mn)keys.forEach(k=>{if(st[k].n<mn)C.push(NAME[k]+': '+st[k].n+' of the planned minimum '+mn+' sessions.')});
   $('#cmpOut').innerHTML=C.map(x=>'<li>'+x+'</li>').join('');
   drawEff(S,st);return {S,st,keys};
@@ -1866,7 +1895,7 @@ $('#btnPlot').addEventListener('click',()=>refresh());
 
 /* ---------- tab 5: preference ---------- */
 function preference(){
-  const all=rows('tbCC').map((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);return {t:i+1,type:v[1],sel:v[2],c:KEY[v[2]]||(v[2]==='No selection'?'none':null),pos:v[3],term:v[4],pb:num(v[5])}});
+  const all=rows('tbCC').map((tr,i)=>{tr.cells[0].textContent=i+1;const v=vals(tr);return {t:i+1,type:v[1],ph:v[2]||'Standard',sel:v[3],c:KEY[v[3]]||(v[3]==='No selection'?'none':null),pos:v[4],term:v[5],pb:num(v[6])}});
   const ch=all.filter(o=>o.type==='Choice'&&o.c);const out=$('#ccOut');
   if(!ch.length){out.innerHTML='<p class="small">Enter choice trials to see percentages, runs and the stopping rule.</p>';$('#ccPlot').innerHTML='';$('#ccKey').innerHTML='';return null}
   const cnt={};ch.forEach(o=>{cnt[o.c]=(cnt[o.c]||0)+1});const keys=ORDER.filter(k=>cnt[k]);
@@ -1878,6 +1907,13 @@ function preference(){
   if(rule==='80'){if(seq.length>=10&&top&&cnt[top]/seq.length>=0.8)met={at:seq.length,k:top}}
   if(rule==='remove3'){let r=0;const rem=[];for(let i=0;i<seq.length;i++){r=(i&&seq[i]===seq[i-1])?r+1:1;if(r===3&&seq[i]!=='none'){rem.push({at:i+1,k:seq[i]});r=0}}
     notes.push(rem.length?'Removals under the rule: '+rem.map(x=>NAME[x.k]+' after choice '+x.at).join('; ')+'.':'No option has yet been chosen three times in a row.')}
+  /* v22.61 card and task reversals (DeLeon et al., 2014, p. 304): does the choice follow the arrangement, or the card or task? */
+  const phs=['Standard','Cards reversed','Tasks reversed'].filter(p=>ch.some(o=>o.ph===p));
+  if(phs.length>1&&phs[0]==='Standard'){const c0={};ch.filter(o=>o.ph==='Standard'&&o.c!=='none').forEach(o=>{c0[o.c]=(c0[o.c]||0)+1});const t0=Object.keys(c0).sort((a,b)=>c0[b]-c0[a])[0];
+    const sh=p=>{const a=ch.filter(o=>o.ph===p&&o.c!=='none');return a.length?{n:a.length,k:a.filter(o=>o.c===t0).length}:null},s0=sh('Standard');
+    if(t0&&s0){notes.push('<b>By phase</b> ('+NAME[t0]+'): '+phs.map(p=>{const x=sh(p);return x?p+' '+x.k+' of '+x.n+' ('+fmt(100*x.k/x.n,0)+'%)':p+' —'}).join('; ')+'.');
+      phs.slice(1).forEach(p=>{const x=sh(p);if(!x)return;const a=x.k/x.n,b=s0.k/s0.n,what=p==='Cards reversed'?'card':'task';
+        notes.push(a>=0.5&&a>=b-0.2?'Through the '+what+' reversal the choices followed the arrangement, not the '+what+': a preference for '+NAME[t0].toLowerCase()+'.':'<b>The choices changed when the '+what+'s were swapped</b> ('+fmt(100*b,0)+'% to '+fmt(100*a,0)+'% '+NAME[t0].toLowerCase()+'): the student may be choosing the '+what+', not the arrangement. Use '+(what==='card'?'less controlling cards, alike except for the arrangement they stand for,':'tasks of the same concept class in every arrangement')+' and run the phase again (DeLeon et al., 2014, p. 309).')})}}
   const side={};ch.forEach(o=>{if(o.pos)side[o.pos]=(side[o.pos]||0)+1});const sp=Object.keys(side).sort((a,b)=>side[b]-side[a])[0];
   if(sp&&ch.length>=5&&side[sp]/ch.length>=0.8)notes.push('<b>Possible side bias:</b> '+side[sp]+' of '+ch.length+' choices were in the '+sp.toLowerCase()+' position. Check that the positions rotate.');
   const pbBy={};all.filter(o=>o.c&&o.pb!=null&&o.c!=='none').forEach(o=>{(pbBy[o.c]=pbBy[o.c]||[]).push(o.pb)});
@@ -1959,7 +1995,7 @@ function serialize(){
 function restore(o){
   if(!o||!o.fields||!/^AD-1/.test(o.version||''))throw new Error('Not an AD-1 file');
   $$('input[name],select[name],textarea[name]').forEach(el=>{const v=o.fields[el.name];if(el.type==='radio')el.checked=(v!==undefined&&el.value===v);else if(el.type==='checkbox')el.checked=!!v;else el.value=v===undefined?(el.tagName==='SELECT'?(el.options[0]?el.options[0].value:''):''):v});
-  Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(o.tables[id]||[]).forEach(r=>addRow(id,r))});
+  Object.keys(templates).forEach(id=>{const tb=document.getElementById(id);tb.innerHTML='';(o.tables[id]||[]).forEach(r=>addRow(id,id==='tbCC'&&Array.isArray(r)&&r.length===7?r.slice(0,2).concat([''],r.slice(2)):r))   /* v22.61 a file saved before the Phase column */});
   refresh();
 }
 $('#btnSave').addEventListener('click',()=>{const name=(val('s_name')||'student').replace(/[^\w-]+/g,'_');const blob=new Blob([JSON.stringify(serialize(),null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='AD1_'+name+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
@@ -2017,10 +2053,10 @@ function loadSim(){
     ['2026-09-14','ME',T,10,10,0,4.2,300,9.8,''],['2026-09-14','ME',B,10,2,2,10,0,10.4,''],['2026-09-15','ME',D,10,10,2,7.2,300,14.6,16],['2026-09-15','ME',A,10,10,0,4.5,300,9.9,''],
     ['2026-09-15','ME',D,10,10,3,7.4,300,15.0,18],['2026-09-15','ME',A,10,10,1,4.6,300,10.1,''],['2026-09-16','ME',B,10,3,3,10,0,10.5,''],['2026-09-16','ME',T,10,10,0,4.1,300,9.7,''],
     ['2026-09-16','ME',A,10,10,0,4.3,300,9.7,''],['2026-09-16','ME',T,10,10,0,4.2,300,9.8,''],['2026-09-17','ME',D,10,9,3,7.0,270,14.2,17],['2026-09-17','ME',B,10,3,2,10,0,10.5,'']].map(r=>r.map(String));
-  t.tbCC=[['2026-09-18','Forced',D,'Left','Completed','2','Guided to the amber card'],['2026-09-18','Forced',A,'Center-left','Completed','0','Guided to the teal card'],['2026-09-18','Forced',T,'Center-right','Completed','0','Guided to the navy card'],['2026-09-18','Forced',B,'Right','Completed','1','Guided to the white card'],
-    ['2026-09-21','Choice',D,'Center-right','Completed','2',''],['2026-09-21','Choice',T,'Left','Completed','0',''],['2026-09-21','Choice',D,'Right','Completed','3',''],['2026-09-21','Choice',T,'Center-left','Completed','0',''],
-    ['2026-09-22','Choice',A,'Center-right','Completed','0',''],['2026-09-22','Choice',T,'Right','Completed','0',''],['2026-09-22','Choice',T,'Left','Completed','1',''],['2026-09-22','Choice',T,'Center-left','Completed','0',''],
-    ['2026-09-23','Choice',T,'Center-right','Completed','0',''],['2026-09-23','Choice',T,'Right','Completed','0','Fifth in a row: stop']];
+  t.tbCC=[['2026-09-18','Forced','Standard',D,'Left','Completed','2','Guided to the amber card'],['2026-09-18','Forced','Standard',A,'Center-left','Completed','0','Guided to the teal card'],['2026-09-18','Forced','Standard',T,'Center-right','Completed','0','Guided to the navy card'],['2026-09-18','Forced','Standard',B,'Right','Completed','1','Guided to the white card'],
+    ['2026-09-21','Choice','Standard',D,'Center-right','Completed','2',''],['2026-09-21','Choice','Standard',T,'Left','Completed','0',''],['2026-09-21','Choice','Standard',D,'Right','Completed','3',''],['2026-09-21','Choice','Standard',T,'Center-left','Completed','0',''],
+    ['2026-09-22','Choice','Standard',A,'Center-right','Completed','0',''],['2026-09-22','Choice','Standard',T,'Right','Completed','0',''],['2026-09-22','Choice','Standard',T,'Left','Completed','1',''],['2026-09-22','Choice','Standard',T,'Center-left','Completed','0',''],
+    ['2026-09-23','Choice','Standard',T,'Center-right','Completed','0',''],['2026-09-23','Choice','Standard',T,'Right','Completed','0','Fifth in a row: stop']];
   t.tbIOA=[['5','Responses','Total count','10','10','',''],['5','Problem behavior','Total count','0','0','',''],['7','Responses','Total count','10','10','',''],['9','Problem behavior','Total count','4','3','',''],['12','Problem behavior','Total count','0','0','',''],['14','Problem behavior','Total count','2','2','',''],['17','Work time','Total duration','4.6','4.5','',''],['20','Problem behavior','Total count','0','0','',''],['22','Responses','Total count','9','9','',''],['Choice trials','Choices','Trial-by-trial','','','14','14']];
   const adv='3 consecutive sessions: rate at or above 2.0 per min and problem behavior at or below 1',back='2 consecutive sessions with problem behavior at 50% or more of the baseline mean';
   t.tbStep=[['10','30 s',adv,back],['15','30 s',adv,back],['20','30 s',adv,back],['30','30 s','Hold; review at the next plan review',back]];
