@@ -299,7 +299,7 @@ function chOf(r){const C=chList();if(!C.list.length)return -1;if(!C.own)return C
    title (A), the paragraphs (B), the heading in gold (C) and the list (D), the pictures in its lower half (E and F their
    captions); under it the series band, the logo and the tag. In the graphics window the panel stays as the cards change and
    only its words fade out and in. */
-function logoSrc(){const L=photo('logo');if(L)return L.img;const im=document.querySelector('img[data-nbh-logo]');return im&&/^data:image\//.test(im.src)?im.src:'';}
+function logoSrc(){const L=photo('logo');if(L)return msrc(L.img);const im=document.querySelector('img[data-nbh-logo]');return im&&/^data:image\//.test(im.src)?im.src:'';}
 function logoCss(){const u=logoSrc();return u?'.gx.pnl .pn-logo{background-image:url("'+u+'")}':'';}
 function paintLogo(){const st=$('#tv-logo');if(st){const c=logoCss();if(st.textContent!==c)st.textContent=c;}}
 function tagText(){const t=String(S.meta.tag||'').trim();if(t)return t;if(S.chk&&S.chk.initials&&tvInitials())return 'FBA & BIP Video Training: '+tvInitials();const c=String(S.meta.client||'').replace(/^SIMULATED\s*[–-]\s*/,'').trim().split(/\s+/).filter(Boolean);
@@ -317,7 +317,7 @@ function panelHtml(r,opt){const v2=S.meta.look==='chapters',side=S.meta.side==='
   if(lay==='lower')inner='<div class="pn-t gx-tx gx-fitw" data-fs="58" data-min="28">'+mark(r.title||r.seg||'')+'</div>'+(first?'<div class="pn-h gx-tx gx-fitw" data-fs="34" data-min="18">'+mark(first)+'</div>':'');
   else if(lay==='title')inner='<div class="pn-t gx-tx gx-fitw" data-fs="112" data-min="44">'+mark(r.seg||r.title||'')+'</div><div class="pn-rule"></div>'+(r.title&&r.title!==r.seg?'<div class="pn-h gx-tx gx-fitw" data-fs="50" data-min="24">'+mark(r.title)+'</div>':'');
   else{const tx='<div class="pn-tx">'+paraHtml(say)+(r.title?'<div class="pn-h">'+mark(r.title)+'</div>':'')+(String(r.body||'').trim()?'<div class="pn-l">'+(l0==='dodont'?ddHtml(r.body):listHtml(r.body,r.build?opt.rv:null))+'</div>':'')+'</div>';
-    const pp=hp?'<div class="pn-pics">'+pics.slice(0,hp).map(p=>'<div class="pn-pic"><div class="im"><img src="'+photo(p.ph).img+'" alt=""></div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>').join('')+'</div>':'';
+    const pp=hp?'<div class="pn-pics">'+pics.slice(0,hp).map(p=>'<div class="pn-pic"><div class="im"><img src="'+msrc(photo(p.ph).img)+'" alt=""></div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>').join('')+'</div>':'';
     inner='<div class="pn-t gx-tx gx-fitw" data-fs="'+(v2?102:92)+'" data-min="40">'+mark(r.seg||'')+'</div><div class="pn-rule"></div><div class="gx-in pn-in gx-tx gx-fit" data-fs="'+(v2?33:30)+'" data-min="13" data-gap="'+(v2?'1':'1.15')+'">'+tx+pp+'</div>';}
   /* the Chapters look: the chapter bar along the panel's foot, the chapter of this card lit */
   if(v2){const C=chList(),cur=chOf(r);if(C.list.length>1)inner+='<div class="pn-bar">'+C.list.map((c,j)=>'<div class="gx-fitw'+(j===cur?' on':'')+'" data-fs="22" data-min="10">'+esc(c)+'</div>').join('')+'</div>';}
@@ -333,7 +333,7 @@ function cardHtml(r,opt){opt=opt||{};if(!r)return '<div class="gx" style="'+vars
   const pics=r.pics.filter(p=>p.ph&&photo(p.ph));
   let inner='<div class="gx-title gx-fit" data-fs="'+(lay==='lower'?60:lay==='full'?76:70)+'" data-min="30">'+mark(r.title||'')+'</div>';
   if(lay==='pic1'||lay==='pic2'){const use=lay==='pic1'?pics.slice(0,1):pics.slice(0,2);
-    inner+='<div class="gx-pics">'+(use.length?use:[{ph:'',cap:''}]).map(p=>{const P=photo(p.ph);return '<div class="gx-pic"><div class="im">'+(P?'<img src="'+P.img+'" alt="">':'')+'</div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>';}).join('')+'</div>';
+    inner+='<div class="gx-pics">'+(use.length?use:[{ph:'',cap:''}]).map(p=>{const P=photo(p.ph);return '<div class="gx-pic"><div class="im">'+(P?'<img src="'+msrc(P.img)+'" alt="">':'')+'</div>'+(p.cap?'<div class="cap">'+mark(p.cap)+'</div>':'')+'</div>';}).join('')+'</div>';
     if(lay==='pic1'&&String(r.body||'').trim())inner+='<div class="gx-body gx-fit" data-fs="30" data-min="20" style="flex:0 0 auto;margin-top:14px">'+bodyHtml(r.body,r.build?opt.rv:null)+'</div>';}
   else{const L=String(r.body||'').split('\n').filter(s=>s.trim()).length;inner+='<div class="gx-body gx-fit'+(lay==='full'&&L>6?' cols':'')+'" data-fs="'+(lay==='lower'?38:lay==='full'?46:46)+'" data-min="20">'+(lay0==='dodont'?ddHtml(r.body):bodyHtml(lay==='lower'?String(r.body||'').split('\n').filter(s=>s.trim()).slice(0,2).join('\n'):r.body,r.build?opt.rv:null))+'</div>';}
   return '<div class="'+cls+'" style="'+vars()+'">'+ph+'<div class="gx-card"><div class="gx-seg">'+seg+'</div><div class="gx-in">'+inner+'</div></div></div>';}
@@ -423,7 +423,7 @@ function renderSetup(){const pk=$('#segPick');if(pk&&!pk.children.length)pk.inne
 
 /* ---------------- Script: the rows ---------------- */
 function segColor(i){return ['#e8f0f7','#f6efe2','#eef6ee','#f4ecf6','#f8f4e0','#e9f4f4'][i%6];}
-function picCell(i,j){const p=S.rows[i].pics[j],P=p.ph&&photo(p.ph);return '<div class="tv-pic"><div class="tv-pv">'+(P?'<img src="'+P.img+'" alt="">':'<span>picture '+(j+1)+'</span>')+'</div><div class="tv-pb"><button type="button" class="tool" data-pic="'+i+':'+j+'">'+(P?'Change':'Add')+'</button>'+(P?'<button type="button" class="tool" data-picx="'+i+':'+j+'">Remove</button>':'')+'</div><input data-i="'+i+'" data-f="cap'+j+'" name="r.'+i+'.cap'+j+'" value="'+esc(p.cap)+'" placeholder="caption" aria-label="Row '+(i+1)+', caption of picture '+(j+1)+'"></div>';}
+function picCell(i,j){const p=S.rows[i].pics[j],P=p.ph&&photo(p.ph);return '<div class="tv-pic"><div class="tv-pv">'+(P?'<img src="'+msrc(P.img)+'" alt="">':'<span>picture '+(j+1)+'</span>')+'</div><div class="tv-pb"><button type="button" class="tool" data-pic="'+i+':'+j+'">'+(P?'Change':'Add')+'</button>'+(P?'<button type="button" class="tool" data-picx="'+i+':'+j+'">Remove</button>':'')+'</div><input data-i="'+i+'" data-f="cap'+j+'" name="r.'+i+'.cap'+j+'" value="'+esc(p.cap)+'" placeholder="caption" aria-label="Row '+(i+1)+', caption of picture '+(j+1)+'"></div>';}
 function chSel(r,i){const C=chList();if(!C.own)return '';return '<label class="tv-ch">Chapter <select data-i="'+i+'" data-f="ch" name="r.'+i+'.ch" aria-label="Chapter of row '+(i+1)+'"><option value="">'+(i?'as above':'the first')+'</option>'+C.list.map(c=>'<option'+(r.ch===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select></label>';}
 function rowHtml(r,i){const segStart=i===0||S.rows[i-1].seg!==r.seg;
   return (segStart?'<div class="tv-seghead" data-segat="'+i+'"><input class="tv-segname" data-segname="'+i+'" value="'+esc(r.seg)+'" aria-label="Segment name" placeholder="Segment"><span class="tv-segsum" data-segsum="'+i+'"></span><button type="button" class="tool" data-addhere="'+i+'">Add a row to this segment</button></div>':'')+
@@ -726,7 +726,7 @@ let PICL=[];
    two buttons are hidden). A chosen one is kept with the pictures at its 600 px, with its library id (lib), so a device opening
    the file adds it to its own My pictures (absorb, in renderAll). */
 const MINE=!!window.NBHPIC;
-function picShow(list,note){PICL=list.slice(0,120);$('#picNote').textContent=note;$('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+x.img+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
+function picShow(list,note){PICL=list.slice(0,120);$('#picNote').textContent=note;$('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+msrc(x.img)+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
 if(MINE){$('#picMine').addEventListener('click',()=>{$('#picNote').textContent='Looking in My pictures\u2026';NBHPIC.all().then(a=>{const L=a.map(p=>({label:String(p.label||'picture').slice(0,40),img:p.img,kind:'mine',lib:p.id}));picShow(L,L.length?L.length+' in My pictures. Tap one.':'No pictures in My pictures yet: press Take a photo, and a photo of a real item on a plain sheet of paper becomes one.');});});
   $('#picCam').addEventListener('click',()=>{NBHPIC.open({use:true}).then(pic=>{if(!pic||!PICK||PICK.logo)return;PICL=[{label:String(pic.label||'picture').slice(0,40),img:pic.img,kind:'mine',lib:pic.id}];picUse(0);});});}
 else ['#picCam','#picMine'].forEach(k=>{const b=$(k);if(b)b.hidden=true;});
@@ -751,11 +751,11 @@ function askForm(id){return new Promise(res=>{if(!framed()){res({ok:false,why:'n
 async function picFrom(id){const n=$('#picNote');n.textContent='Asking the workstation for Form '+id+'…';const a=await askForm(id);
   if(!a.ok){n.textContent=a.why==='not open'?'Form '+id+' is not open: open it in the workstation (it can sit beside this one), then try again.':a.why==='not framed'?'Open this form in the workstation, with Form '+id+' open too.':'Form '+id+' did not answer. Try again.';return;}
   let F=null;try{F=JSON.parse(String(a.snap&&a.snap.own||''));}catch(e){}const T=F&&F.S&&typeof F.S==='object'?F.S:null;if(!T){n.textContent='Form '+id+' has nothing saved yet.';return;}
-  const list=[],seen=new Set();const ph=Array.isArray(T.photos)?T.photos:[];ph.forEach(p=>{if(p&&/^data:image\//.test(String(p.img||''))&&!seen.has('p'+p.id)){seen.add('p'+p.id);list.push({label:String(p.label||'picture').slice(0,40),img:String(p.img),kind:'photo'});}});
+  const list=[],seen=new Set();const ph=Array.isArray(T.photos)?T.photos:[];ph.forEach(p=>{if(p&&(/^data:image\//.test(String(p.img||''))||(window.nbhMedia&&nbhMedia.isRef(p.img)))&&!seen.has('p'+p.id)){seen.add('p'+p.id);list.push({label:String(p.label||'picture').slice(0,40),img:String(p.img),kind:'photo'});}});
   const keys=[];(function walk(o,dep){if(!o||dep>5)return;if(Array.isArray(o)){o.forEach(x=>walk(x,dep+1));return;}if(typeof o!=='object')return;if(typeof o.k==='string'&&o.k&&!/^(tk|av):/.test(o.k)&&!keys.includes(o.k))keys.push(o.k);Object.keys(o).forEach(k=>{if(k!=='photos')walk(o[k],dep+1);});})(T,0);
   if(keys.length&&await pictosLoad()){keys.forEach(k=>{const P=window.NBH_PICTOS[k];if(P&&P.s)list.push({label:String(P.l||k).slice(0,40),img:svgUrl(P.s),kind:'pictogram'});});}
   PICL=list.slice(0,80);n.textContent=PICL.length?PICL.length+' picture'+(PICL.length===1?'':'s')+' in Form '+id+(keys.length&&!window.NBH_PICTOS?' (its pictograms need the library beside the forms)':'')+'. Tap one.':'Form '+id+' holds no pictures yet'+(keys.length?' (its pictograms need the library beside the forms, nbh-pictos.js)':'')+'.';
-  $('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+x.img+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
+  $('#picGrid').innerHTML=PICL.map((x,k)=>'<button type="button" class="tv-pk" data-picuse="'+k+'" title="'+esc(x.label)+'"><img src="'+msrc(x.img)+'" alt=""><span>'+esc(x.label)+'</span></button>').join('');}
 function picUse(k){const x=PICL[k];if(!x||!PICK||PICK.logo)return;const id='p'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);S.photos.push(Object.assign({id,label:x.label,img:x.img},x.lib?{lib:x.lib}:{}));
   S.rows[PICK.i].pics[PICK.j].ph=id;if(!S.rows[PICK.i].pics[PICK.j].cap&&x.kind==='pictogram')S.rows[PICK.i].pics[PICK.j].cap=x.label;PICK=null;$('#picDlg').close();renderRows();syncState();}
 $('#photoIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f||!PICK)return;const at=PICK;PICK=null;const r=new FileReader();
@@ -769,7 +769,13 @@ function prune(){const used=new Set();S.rows.forEach(r=>r.pics.forEach(p=>{if(p.
    on this device too, for a rehearsal, when ticked): up to four tracks kept in the form, and for each segment a setting:
    keep playing, go silent, or a track at a level, with a fade in and a fade out; the change comes as the first card of the
    segment comes up, and the last card's end fades the music out. */
-const MUS_MAX=12000000;
+const MUS_MAX=12000000,MUS_MAX_STORE=60000000;   /* v22.56 with the media store a track can be 60 MB: it is kept once on this device, by reference */
+/* v22.56 the media store (nbh-media.js): a picture or a track may be a reference; msrc gives what an img or Audio can use */
+const MURL={};
+function msrc(v){v=String(v||'');return window.nbhMedia&&nbhMedia.isRef(v)?(MURL[v]||''):v;}
+let warming=false;
+function warmMedia(){const M=window.nbhMedia;if(!M||warming)return;const refs=[];(S.photos||[]).forEach(p=>{if(M.isRef(p.img)&&!MURL[p.img])refs.push(p.img);});((S.mus&&S.mus.tracks)||[]).forEach(t=>{if(M.isRef(t.src)&&!MURL[t.src])refs.push(t.src);});
+  if(!refs.length)return;warming=true;Promise.all(refs.map(r=>M.url(r).then(u=>{if(u)MURL[r]=u;}).catch(()=>{}))).then(()=>{warming=false;try{renderRows();renderThumbs();paintLogo();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();}catch(e){}});}
 function musSegs(){const u=[];S.rows.forEach(r=>{if(r.seg&&!u.includes(r.seg))u.push(r.seg);});return u;}
 function renderMusic(){const el=$('#musTracks'),tb=$('#musBy');if(!el||!tb)return;const T=S.mus.tracks;
   el.innerHTML=T.length?T.map(t=>'<div class="tv-trk"><b>'+esc(t.label)+'</b> <span class="hint">'+Math.round(t.src.length*0.75/1e6*10)/10+' MB</span> <button type="button" class="tool" data-trkx="'+esc(t.id)+'">Remove</button></div>').join(''):'<p class="hint">No tracks yet. Add an MP3, M4A or WAV (up to 12 MB each, four tracks).</p>';
@@ -777,8 +783,10 @@ function renderMusic(){const el=$('#musTracks'),tb=$('#musBy');if(!el||!tb)retur
     return '<tr><td>'+esc(sg)+'</td><td><select data-ms="'+esc(sg)+'" data-mf="t"><option value="keep"'+(b.t==='keep'?' selected':'')+'>Keep playing</option><option value="none"'+(b.t==='none'?' selected':'')+'>Silence (fade out)</option>'+T.map(t=>'<option value="'+esc(t.id)+'"'+(b.t===t.id?' selected':'')+'>'+esc(t.label)+'</option>').join('')+'</select></td>'+
       '<td><input type="range" min="0" max="100" step="5" value="'+b.v+'" data-ms="'+esc(sg)+'" data-mf="v" aria-label="Level"></td><td><input type="number" min="0" max="10" step="0.5" value="'+b.fi+'" data-ms="'+esc(sg)+'" data-mf="fi" style="width:60px"></td><td><input type="number" min="0" max="10" step="0.5" value="'+b.fo+'" data-ms="'+esc(sg)+'" data-mf="fo" style="width:60px"></td></tr>';}).join('')+'</table>':'<p class="hint">The segments appear here once the script has rows.</p>';}
 $('#musIn').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(S.mus.tracks.length>=4){nbhUI.toast('Four tracks at most: remove one first.',{kind:'warn'});return;}
-  if(f.size>MUS_MAX){nbhUI.toast('That file is '+Math.round(f.size/1e6)+' MB; a track can be up to 12 MB. Export it at a lower bit rate, or trim it.',{kind:'warn'});return;}
+  const musMax=window.nbhMedia?MUS_MAX_STORE:MUS_MAX;if(f.size>musMax){nbhUI.toast('That file is '+Math.round(f.size/1e6)+' MB; a track can be up to '+Math.round(musMax/1e6)+' MB. Export it at a lower bit rate, or trim it.',{kind:'warn'});return;}
   if(!/^audio\//.test(f.type)){nbhUI.toast('Choose a sound file (MP3, M4A, WAV).',{kind:'warn'});return;}
+  /* v22.56 with the media store the track is kept once on this device and the form keeps a reference (a data URL where there is no store) */
+  if(window.nbhMedia){nbhMedia.put(f,{kind:'audio',mime:f.type}).then(src=>{S.mus.tracks.push({id:'m'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:String(f.name||'track').replace(/\.[^.]+$/,'').slice(0,40),src});warmMedia();renderMusic();syncState();}).catch(()=>nbhUI.toast('That file could not be kept.',{kind:'warn'}));return;}
   const r=new FileReader();r.onload=()=>{const src=String(r.result||'');if(!/^data:audio\//.test(src)){nbhUI.toast('That file could not be read as sound.',{kind:'warn'});return;}
     S.mus.tracks.push({id:'m'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36),label:String(f.name||'track').replace(/\.[^.]+$/,'').slice(0,40),src});renderMusic();syncState();};r.readAsDataURL(f);});
 $('#musBtn').addEventListener('click',()=>$('#musIn').click());
@@ -787,7 +795,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.dataset.ms===undef
   if(el.dataset.mf==='t')b.t=el.value;else b[el.dataset.mf]=Math.max(0,Math.min(el.dataset.mf==='v'?100:10,num(el.value)||0));if(b.t==='keep'&&b.v===60&&b.fi===2&&b.fo===3)delete S.mus.by[sg];syncState();});
 /* the command for a segment as its first card comes up (and the fade-out at the end of the script) */
 let MUSEG=null;
-function musCmd(seg,last){const b=S.mus.by[seg];let c=null;if(last)c={t:'music',stop:true,fo:3};else if(!b||b.t==='keep')c=null;else if(b.t==='none')c={t:'music',stop:true,fo:b.fo};else{const t=S.mus.tracks.find(x=>x.id===b.t);if(t)c={t:'music',id:t.id,src:t.src,vol:b.v/100,fi:b.fi,fo:b.fo};}
+function musCmd(seg,last){const b=S.mus.by[seg];let c=null;if(last)c={t:'music',stop:true,fo:3};else if(!b||b.t==='keep')c=null;else if(b.t==='none')c={t:'music',stop:true,fo:b.fo};else{const t=S.mus.tracks.find(x=>x.id===b.t);if(t)c={t:'music',id:t.id,src:msrc(t.src),vol:b.v/100,fi:b.fi,fo:b.fo};}
   if(!c)return;if(gwHandle())try{GW.music(c);}catch(e){}if(GCon&&GC)try{GC.postMessage(c);}catch(e){}if(S.chk.mushere&&window.__musHere)window.__musHere.music(c);}
 function musOnShow(i){const r=S.rows[i];if(!r)return;const seg=r.seg||'';if(seg!==MUSEG){MUSEG=seg;musCmd(seg,false);}}
 $('#musOff').addEventListener('click',()=>{MUSEG=null;musCmd('',true);});
@@ -894,12 +902,13 @@ function renderPrint(){const o=$('#printOut');if(!o)return;let seg=null,h='<h1 c
 $('#printBtn').addEventListener('click',()=>{renderPrint();setTimeout(()=>window.print(),60);});
 
 /* ---------------- save, open, clear, the simulator ---------------- */
-function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);histMark();}
+function syncState(){const t=$('#tvState');if(t)t.value=JSON.stringify(S);histMark();warmMedia();}
 /* ---------------- undo and redo (v21.55) ---------------- */
 /* every change (a colour, a row, a picture, a setting) is a step, up to 80 kept; changes within a second of each other (typing,
    a colour picker dragged) are one step. The clock's card and word times are not steps. Pictures and tracks are kept once,
    by id, so the steps stay small. Undo and Redo on the toolbar, or Ctrl/Cmd+Z and Shift+Z outside a text box. */
 const HIST={a:[],i:-1,t:0,big:{},lock:false};
+window.nbhMediaHeld=()=>{try{return JSON.stringify(HIST.big)+JSON.stringify(S);}catch(e){return '';}};   /* v22.56 the store references this page holds, Undo's too: the workstation's sweep keeps them */
 function histSnap(){const o=Object.assign({},S,{log:undefined,wt:undefined,photos:S.photos.map(p=>{HIST.big['p:'+p.id]=p;return p.id;}),mus:Object.assign({},S.mus,{tracks:S.mus.tracks.map(t=>{HIST.big['t:'+t.id]=t;return t.id;})})});return JSON.stringify(o);}
 function histUn(str){const o=JSON.parse(str);o.photos=(o.photos||[]).map(id=>HIST.big['p:'+id]).filter(Boolean);o.mus=o.mus&&typeof o.mus==='object'?o.mus:{tracks:[],by:{}};o.mus.tracks=(o.mus.tracks||[]).map(id=>HIST.big['t:'+id]).filter(Boolean);o.log=S.log;o.wt=S.wt;return o;}
 function histMark(){if(HIST.lock)return;const snap=histSnap();if(snap===HIST.a[HIST.i])return;const now=performance.now();
@@ -913,7 +922,7 @@ document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)ret
 $('#colReset').addEventListener('click',()=>{const n=LOOKC[S.meta.look]||LOOKC.chapters;CKEYS.forEach(k=>{S.meta[k]=n[k];});S.meta.tkcol='#111111';bindMeta();renderThumbs();gwShow(gwAt<0?curRow():gwAt);syncState();nbhUI.toast('The look’s own colours are back: '+CKEYS.map(k=>n[k]).join(', ')+'.',{kind:'ok'});});
 function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d.S!=='object')return null;const s=d.S,o=blank(),str=v=>v==null||typeof v==='object'?'':String(v);
   if(s.meta&&typeof s.meta==='object')Object.keys(s.meta).forEach(k=>{o.meta[k]=str(s.meta[k]).slice(0,4000);});CKEYS.concat(['tkcol']).forEach(k=>{o.meta[k]=hex(o.meta[k],blank().meta[k]);});if(s.chk&&typeof s.chk==='object')Object.keys(s.chk).forEach(k=>{o.chk[k]=!!s.chk[k];});
-  const okImg=v=>/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000;
+  const okImg=v=>(window.nbhMedia&&nbhMedia.isRef(v)&&/^image\//.test((nbhMedia.parse(v)||{}).mime||''))||(/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<16000000);   /* v22.56 or a media-store reference */
   o.photos=Array.isArray(s.photos)?s.photos.slice(0,300).map(p=>Object.assign({id:str(p&&p.id).slice(0,20),label:str(p&&p.label).slice(0,40),img:str(p&&p.img)},/^m[a-z0-9]{1,24}$/.test(str(p&&p.lib))?{lib:str(p.lib)}:{})).filter(p=>/^[A-Za-z0-9_-]{1,20}$/.test(p.id)&&okImg(p.img)):[];   /* lib (v21.62): the My pictures id a copy came from */
   const ids=new Set(o.photos.map(p=>p.id));
   o.rows=Array.isArray(s.rows)?s.rows.slice(0,600).map(r=>{r=r&&typeof r==='object'?r:{};const pics=Array.isArray(r.pics)?r.pics:[];
@@ -921,7 +930,7 @@ function fromFile(d){if(!d||typeof d!=='object'||d.form!=='TV-1'||!d.S||typeof d
       build:!!r.build,pics:[0,1].map(j=>{const p=pics[j]||{};return {ph:ids.has(str(p.ph))?str(p.ph):'',cap:str(p.cap).slice(0,120)};}),x:Array.from({length:20},(_,j)=>str(Array.isArray(r.x)?r.x[j]:'').slice(0,2000))});}):[];
   if(o.rows[0])o.rows[0].cont=false;
   /* (v21.54) the music: up to four tracks as audio data, and each segment's setting */
-  const okAud=v=>/^data:audio\/(mpeg|mp4|x-m4a|m4a|aac|wav|x-wav|ogg|webm|flac);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<MUS_MAX*1.4;
+  const okAud=v=>(window.nbhMedia&&nbhMedia.isRef(v)&&/^audio\//.test((nbhMedia.parse(v)||{}).mime||''))||(/^data:audio\/(mpeg|mp4|x-m4a|m4a|aac|wav|x-wav|ogg|webm|flac);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<MUS_MAX*1.4);   /* v22.56 or a media-store reference */
   const m=s.mus&&typeof s.mus==='object'?s.mus:{};o.mus.tracks=Array.isArray(m.tracks)?m.tracks.slice(0,4).map(t=>({id:str(t&&t.id).slice(0,20),label:str(t&&t.label).slice(0,40),src:str(t&&t.src)})).filter(t=>/^[A-Za-z0-9_-]{1,20}$/.test(t.id)&&okAud(t.src)):[];
   const tid=new Set(o.mus.tracks.map(t=>t.id));if(m.by&&typeof m.by==='object')Object.keys(m.by).slice(0,80).forEach(k=>{const b=m.by[k]||{},t=str(b.t);if(!(t==='none'||t==='keep'||tid.has(t)))return;o.mus.by[str(k).slice(0,80)]={t,v:Math.max(0,Math.min(100,num(b.v)==null?60:num(b.v))),fi:Math.max(0,Math.min(10,num(b.fi)==null?2:num(b.fi))),fo:Math.max(0,Math.min(10,num(b.fo)==null?3:num(b.fo)))};});
   o.log=Array.isArray(s.log)?s.log.slice(0,2000).map(l=>({i:Math.max(0,parseInt(l&&l.i)||0),t:num(l&&l.t)||0,seg:str(l&&l.seg).slice(0,80),title:str(l&&l.title).slice(0,200)})):[];
@@ -1105,7 +1114,7 @@ function tvPlainShow(on){const el=$('#plainOut'),b=$('#plainBtn');if(!el)return;
 
 /* ---- the checks before recording, on Setup: the audience, the photos and the permission, the name, the words, the length ---- */
 function tvPhotoCheck(){const fl=CASE&&CASE.profile&&CASE.profile.flags,perm=fl&&fl.photo?String(fl.photo):'',cards=[];
-  S.rows.forEach((r,i)=>{if(r.pics.some(p=>{const P=p.ph&&photo(p.ph);return P&&P.id!=='tvchart'&&!/^data:image\/svg/.test(P.img);}))cards.push(i);});return {perm,cards};}
+  S.rows.forEach((r,i)=>{if(r.pics.some(p=>{const P=p.ph&&photo(p.ph);return P&&P.id!=='tvchart'&&!(/^data:image\/svg/.test(P.img)||(window.nbhMedia&&nbhMedia.isRef(P.img)&&/svg/.test((nbhMedia.parse(P.img)||{}).mime||'')));}))cards.push(i);});return {perm,cards};}
 function tvSegTimes(){const W=wpm(),m=[];S.rows.forEach((r,i)=>{const L=m.length&&m[m.length-1].seg===r.seg&&i>0&&S.rows[i-1].seg===r.seg?m[m.length-1]:null,w=r.cont?0:words(spoken(r));if(L)L.w+=w;else m.push({seg:r.seg,i,w});});
   const tot=m.reduce((a,x)=>a+x.w,0);m.forEach(x=>{x.s=x.w/W*60;x.share=tot?x.w/tot:0;});return {m,tot,s:tot/W*60};}
 const tvOnTarget=(s,tg)=>Math.abs(s-tg*60)<=Math.max(30,tg*6);
@@ -1247,7 +1256,7 @@ window.__nbhViewFill=function(v){if(v!=='script')return null;return {filled:S.ro
 /* ---------------- meta + render ---------------- */
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;if(S.meta[k]!=null&&S.meta[k]!=='')el.value=S.meta[k];else if(el.tagName==='SELECT'||el.type==='color'||el.type==='range')S.meta[k]=el.value;else el.value='';});
   $$('[data-c]').forEach(el=>{el.checked=!!S.chk[el.dataset.c];});}
-function renderAll(){ensure();if(MINE)NBHPIC.absorb(S.photos);bindMeta();paintLogo();logoLine();chLine();renderRows();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
+function renderAll(){ensure();warmMedia();if(MINE)NBHPIC.absorb(S.photos);bindMeta();paintLogo();logoLine();chLine();renderRows();renderMusic();if(document.body.classList.contains('view-graphics'))gxRender();if(document.body.classList.contains('view-prompter'))tpRender();renderPrint();logLine();syncState();}
 $$('.nbh-print-date').forEach(e=>e.textContent=new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}));
 window.addEventListener('beforeprint',renderPrint);
 window.addEventListener('resize',()=>{clearTimeout(window.__tvRs);window.__tvRs=setTimeout(()=>{if(document.body.classList.contains('view-graphics'))gxRender();},200);});

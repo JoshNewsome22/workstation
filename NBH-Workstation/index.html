@@ -302,7 +302,8 @@
 <meta name="apple-mobile-web-app-title" content="NBH Workstation">
 <!-- /nbh-pwa-head -->
 <!-- v21.67 Read a document: the readers it loads only when asked for, saved for offline use with the rest (tools/pwa-sw.py reads this) -->
-<meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz nbh-dictate.js">
+<meta name="nbh-offline" content="nbh-doc/pdf.min.js nbh-doc/pdf.worker.min.js nbh-ocr/tesseract.min.js nbh-ocr/worker.min.js nbh-ocr/tesseract-core-simd-lstm.wasm.js nbh-ocr/eng.traineddata.gz nbh-dictate.js nbh-media.js">
+<script src="nbh-media.js"></script>   <!-- v22.56 the media store: sounds and pictures kept once on this device, out of the case file -->
 <style>
 :root{
   --navy:#182e43; --slate:#254657; --teal:#76a2a3; --mist:#eaf2f0; --shade:#f5f8f7;
@@ -1398,9 +1399,10 @@ const EMBED=(()=>{
   }
   /* v21.31: the pictogram library (Forms SM-1, VS-1 and TK-1) is one block, put into a form's <script src> as it opens;
      v21.43: so is the writing help, which every form carries (build-single.py keeps one copy, not 45) */
-  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
+  E.ready=(async()=>{const [f,pic,rsp,wd]=await Promise.all([inflate('nbh-embed-forms'),inflate('nbh-embed-pictos').catch(()=>null),inflate('nbh-embed-respond').catch(()=>null),inflate('nbh-embed-wording').catch(()=>null)]);E.narration=await inflate('nbh-embed-narration').catch(()=>null)||'';E.video=await inflate('nbh-embed-video').catch(()=>null)||'';E.media=await inflate('nbh-embed-media').catch(()=>null)||'';E.narration2=await inflate('nbh-embed-narration-sm1').catch(()=>null)||'';E.narration3=await inflate('nbh-embed-narration-dd1').catch(()=>null)||'';E.narration4=await inflate('nbh-embed-narration-tk1bus').catch(()=>null)||'';E.narration5=await inflate('nbh-embed-narration-ia1').catch(()=>null)||'';E.narration6=await inflate('nbh-embed-narration-ra1').catch(()=>null)||'';E.pictures=await inflate('nbh-embed-pictures').catch(()=>null)||'';E.forms=JSON.parse(f||'{}');E.pictos=pic||'';E.respond=rsp||'';E.wording=wd||'';return E;})();
   const PICTAG=/<script src="nbh-pictos\.js"><\/script>/;
-  const PICTAG2=/<script src="nbh-pictures\.js"><\/script>/;   /* v21.62: My pictures (the camera library, Forms VS-1, SM-1, TK-1 and TV-1), the same way */
+  const PICTAG2=/<script src="nbh-pictures\.js"><\/script>/;
+  const MEDTAG=/<script src="nbh-media\.js"><\/script>/;   /* v22.56 the media store, the same way */   /* v21.62: My pictures (the camera library, Forms VS-1, SM-1, TK-1 and TV-1), the same way */
   const RSPTAG=/<script src="nbh-respond\.js"><\/script>/;   /* v21.39: the respondent-page library, the same way */
   /* v21.66: each library goes in through a function, so a $& or $1 inside it is not read as a replacement pattern */
   const NARTAG=/<script (?:src="nbh-tk1-narration\.js" defer|type="text\/x-nbh-narration" data-src="nbh-tk1-narration\.js")><\/script>/;   /* v21.44: Form TK-1's recorded narration, the same way */
@@ -1413,6 +1415,7 @@ const EMBED=(()=>{
   E.form=file=>{let h=E.forms&&E.forms[file];if(!h)return null;h=h.split('@@NBH-LOGO@@').join(E.logo).split('@@NBH-WORDING@@').join(E.wording||'');
     if(PICTAG.test(h))h=h.replace(PICTAG,()=>E.pictos?'<script>'+E.pictos.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the picture library is not inside this file */<\/script>');
     if(PICTAG2.test(h))h=h.replace(PICTAG2,()=>E.pictures?'<script>'+E.pictures.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* My pictures is not inside this file */<\/script>');
+    if(MEDTAG.test(h))h=h.replace(MEDTAG,()=>E.media?'<script>'+E.media.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the media store is not inside this file */<\/script>');
     if(VIDTAG.test(h))h=h.replace(VIDTAG,()=>E.video?'<script>'+E.video.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* Save as video is not inside this file */<\/script>');
     if(NARTAG2.test(h))h=h.replace(NARTAG2,()=>E.narration2?'<script>'+E.narration2.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
     if(NARTAG3.test(h))h=h.replace(NARTAG3,()=>E.narration3?'<script>'+E.narration3.replace(/<\/script/gi,'<\\/script')+'<\/script>':'<script>/* the narration is not inside this file */<\/script>');
@@ -2257,7 +2260,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.55';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.56';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -3515,6 +3518,7 @@ $('#diag').addEventListener('click',()=>{
    ['PDF tools','checking\u2026','pdf-lib.min.js and nbh-pdf-tools.js, beside index.html, for Finish PDF','diagPdf'],
    ['Picture library',EMBED?(EMBED.pictos?'inside this file':'not inside this file'):'checking\u2026','nbh-pictos.js, beside the forms, for the pictures on Forms SM-1, VS-1 and TK-1 (photos work without it)','diagPic'],
    ['My pictures',EMBED?(EMBED.pictures?'inside this file':'not inside this file'):'checking\u2026','nbh-pictures.js, beside the forms: a photo of a real item becomes a picture for Forms VS-1, SM-1, TK-1 and TV-1, its background cut away on this device (v21.62)','diagMine'],
+   ['Sounds and pictures on this device','checking\u2026','nbh-media.js, beside index.html: the sound tracks and pictures Form TV-1 carries are kept once on this device, out of the case file (v22.56); a file you save, a backup or Drive carries them again','diagMedia'],
    ['Respondent pages',EMBED?(EMBED.respond?'inside this file':'not inside this file'):'checking\u2026','nbh-respond.js and respond.html, beside the forms, for the questionnaires Form IA-1 sends to informants','diagRsp'],
    ['Offline copy',typeof PWA!=='undefined'?PWA.diag():'not available','sw.js, beside index.html, keeps the workstation\u2019s files on this device so that it opens without the internet (v21.43); the chip beside Autosave says what it is doing'],
    ['Staff directory',pplDiag(),'The school staff the forms offer where a staff member is named (Staff directory, in the top bar): how many, and whether Google Drive has the latest'],
@@ -3533,6 +3537,8 @@ $('#diag').addEventListener('click',()=>{
     '<div id="fileOut"></div>');
   $('#btnFileCheck').addEventListener('click',checkFiles);
   /* v22.29 (review I238) the storage line: what is used, the allowance, and whether the browser keeps it */
+  (async()=>{const c=$('#diagMedia');if(!c)return;try{const M=window.nbhMedia;if(!M){c.textContent='nbh-media.js is missing: sounds and pictures stay inside the case';return;}const st=await M.stat();
+    c.textContent=st.mode==='memory'?'no store in this browser: kept inside the case instead':st.count+' file'+(st.count===1?'':'s')+', '+(st.bytes/1048576).toFixed(1)+' MB';}catch(e){c.textContent='not available';}})();
   (async()=>{const c=()=>$('#diagStore');try{const st=navigator.storage;if(!st||!st.estimate){if(c())c().textContent='not reported by this browser';return;}
     const e=await st.estimate(),kept=st.persisted?await st.persisted():null,mb=b=>b>=1048576*1024?(b/1073741824).toFixed(1)+' GB':(b/1048576).toFixed(b<10485760?1:0)+' MB';
     if(c())c().textContent=mb(e.usage||0)+' used of about '+mb(e.quota||0)+(kept===true?' \u00b7 kept':kept===false?' \u00b7 not marked as kept':'');}
@@ -3625,6 +3631,7 @@ $('#skipForm').addEventListener('click',e=>{e.preventDefault();const fr=state.cu
 function dataWhere(){
   const rows=[
     ['The caseload, its history (restore points) and Autosave copies','This browser on this '+HERE+', protected by its passcode','Until you remove them, or the time set in Caseload (<i>Forget a student not saved for</i>); Autosave copies 14 days. <b>Remove all student data from this '+HERE+'</b> clears them'],
+    ['Sound tracks and pictures Form TV-1 carries (the media store)','This browser on this '+HERE+', protected by its passcode','While a caseload record, a restore point, an Autosave copy or the case on screen refers to them; a student removed takes the ones only they used. <b>Remove all student data from this '+HERE+'</b> clears them'],
     ['Case files (<b>Save case</b>, or <b>Save case to a file</b> with Google Drive on)','Where you save them: the district drive','As the district keeps records'],
     ['<b>Use Google Drive</b> (only if you turn it on, in Caseload)','Each student\u2019s case, in your school Google Drive (the folder '+DRV_FOLDER+'); the workstation sees only the files it made there','Until removed, then 30 days in Drive\u2019s trash; a copy not kept in a clash (Replaced copies) '+(typeof drvKeepDays==='function'?drvKeepDays():30)+' days'],
     ['Questionnaires sent by email (only when you press Send)','One email per person from your school account through Gmail; the link names the student by initials and the behavior asked about','In your Gmail Sent folder'],
@@ -3668,7 +3675,7 @@ $('#help').addEventListener('click',()=>{
    fold('Working faster',
      '<p><b>Focus</b> (above the form) shows one part of a form at a time, the next part opening as you finish one. <b>Dictate</b>, in a form’s toolbar, writes what you say into the text box you are in; the speech is turned into text on this '+HERE+'. <b>Read a document</b> (the page icon in the bar, and on the start screen) reads the student’s details from a PDF, a picture or pasted text and places them in the bar and Form DM-1, on this '+HERE+'. The student’s photo, in the bar, is kept in the case file and shown while you work.</p>')+
    fold('On a shared '+HERE,
-     '<p>This '+HERE+' keeps, until you remove them: the caseload (each student’s last save), History’s restore points, and the Autosave copies (14 days). They are protected by the '+HERE+'’s passcode, not by the workstation. In <b>Caseload</b>: <b>Forget a student not saved for</b> removes students left unsaved for that long, a card’s <b>Remove</b> takes one student off this '+HERE+', and <b>Remove all student data from this '+HERE+'</b> clears the caseload, History and the Autosave copies at once. Before handing the '+HERE+' to someone else, save each case and use that last button.</p>')+
+     '<p>This '+HERE+' keeps, until you remove them: the caseload (each student’s last save), History’s restore points, and the Autosave copies (14 days). They are protected by the '+HERE+'’s passcode, not by the workstation. In <b>Caseload</b>: <b>Forget a student not saved for</b> removes students left unsaved for that long, a card’s <b>Remove</b> takes one student off this '+HERE+', and <b>Remove all student data from this '+HERE+'</b> clears the caseload, History, the Autosave copies and the sounds and pictures kept for them at once. Before handing the '+HERE+' to someone else, save each case and use that last button.</p>')+
    fold('Side by side, fullscreen and the screen',
      '<p><b>Side by side</b> shows two or three open forms as columns, each working on its own (OB-1, MT-1 and ABC-1 together for an observation). <b>Fullscreen</b> puts away the heading, the bar and the list; <kbd>Esc</kbd> or <b>Exit</b> brings them back. This device remembers it: after a reload, or the next time, the next form you open comes up in fullscreen until you leave it. On a wide window the list can be hidden from its own corner. Once a student is loaded the bar folds to one line; <b>Edit details</b> opens it.</p>'+
      '<p>Every open form reports the student name it holds; if one differs from the bar, an amber strip names it before anything reaches paper. When you correct the name, ID or grade on the bar, the strip offers to put the correction into the forms that still hold the earlier one (<b>Use … in these forms</b>); it lists what it changed and changes nothing else. A name whose letters changed could be another student’s, so the warning stays and you are asked first; a name the bar never held, one that is not a small correction, or one whose ID says another student, is not offered.</p>')+
@@ -4487,6 +4494,7 @@ async function autoOffer(){
 /* shared by Open case and the autosave offer, so both behave identically */
 async function loadCase(d,how){
   warmStop();
+  if(mediaHas(d))d=await mediaIn(d,how);   /* only a case with TV-1's media inside waits for the store */
   Object.values(state.frames).forEach(fr=>fr.remove());
   state.frames={};state.status={};state.mismatch={};state.cur=null;state.alertOff=false;state.pending={};state.caseOrder=[];
   state.whoIs={};state.details={};   /* v21.44 (A8) the closed forms' names count no more */
@@ -4900,6 +4908,54 @@ async function grab(id,verb,extra,ms,frame){
   });
 }
 /* v22.22 the case as data: what Save case writes in the website edition, and in the one-file edition (with its id) */
+/* v22.56 the media store (nbh-media.js): the sound tracks and pictures Form TV-1 carries are kept once on this device and the
+   case holds references, so Autosave, the caseload and case history stay small; anything written to a file, a hand-on copy, a
+   backup or Drive carries them again, so a file opens anywhere. Other forms' pictures stay inside the case for now. */
+const MEDIA_FORMS=['TV-1'];
+function mediaHas(d){if(!window.nbhMedia||!d||!d.forms)return false;
+  return MEDIA_FORMS.some(id=>{const f=d.forms[id];if(!f||!f.snap)return false;try{return /data:(image|audio|video)\//.test(JSON.stringify(f.snap));}catch(e){return false;}});}
+async function mediaIn(d,how){const M=window.nbhMedia;if(!M||!d||!d.forms)return d;let n=0,bytes=0;
+  for(const id of MEDIA_FORMS){const f=d.forms[id];if(!f||!f.snap)continue;let t;try{t=JSON.stringify(f.snap);}catch(e){continue;}
+    if(!/data:(image|audio|video)\//.test(t))continue;
+    try{const r=await M.absorbText(t,4000);if(r.n){f.snap=JSON.parse(r.text);n+=r.n;bytes+=r.bytes;}}catch(e){}}
+  if(n&&how!=='autosave')wsUI.toast(n+(n===1?' sound or picture':' sounds and pictures')+' ('+(bytes/1048576).toFixed(1)+' MB) now kept on this device, out of the case file. A file you save carries them again.',{ms:8000});
+  return d;}
+async function mediaOut(text){const M=window.nbhMedia;if(!M||typeof text!=='string'||text.indexOf(M.PREFIX)<0)return text;
+  try{const r=await M.inlineText(text);if(r.missing.length)wsUI.toast(r.missing.length+(r.missing.length===1?' sound or picture is':' sounds or pictures are')+' not on this device, so the file carries a reference in its place.',{kind:'warn',ms:9000});return r.text;}catch(e){return text;}}
+/* v22.56 nothing stays in the store once nothing refers to it. After a student leaves the caseload here (Remove, Remove
+   everywhere, Remove all, forgotten after the weeks chosen, removed on another device), and once a week, a sound or picture that
+   no caseload record, restore point, Autosave copy or open form refers to is deleted from this device. One added in the last
+   ten minutes stays (a page may not have kept it anywhere yet), except after Remove all. A store that cannot be read stops
+   the sweep: nothing is deleted on a partial count. */
+let MEDIA_GRACE=6e5,mediaSweepT=0;
+const mediaCursor=(db,name,add)=>new Promise((res,rej)=>{try{const t=db.transaction(name,'readonly'),q=t.objectStore(name).openCursor();
+  q.onsuccess=()=>{const c=q.result;if(c){add(c.value);c.continue();}};t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('aborted'));}catch(e){rej(e);}});
+async function mediaSweep(o){o=o||{};const M=window.nbhMedia;if(!M)return 0;
+  try{await M.ready();}catch(e){return 0;}if(M.mode()==='memory')return 0;
+  let had;try{had=await M.list();}catch(e){return 0;}if(!had.length)return 0;
+  const keep=new Set(),add=t=>{if(typeof t==='string'&&t.indexOf(M.PREFIX)>=0)M.refsIn(t).forEach(r=>keep.add(r));};
+  try{
+    const cdb=await clOpenDb();if(cdb)await mediaCursor(cdb,'cases',r=>add(r&&r.text));   /* every edition on this site */
+    const hdb=await hxDb();if(hdb)await mediaCursor(hdb,'texts',r=>add(r&&r.text));
+    if(CP&&CP.ready&&(await CP.ready())==='idb'){
+      const adb=await new Promise(res=>{let r;try{r=indexedDB.open('nbh-copies',1);}catch(e){return res(null);}
+        r.onupgradeneeded=()=>{try{if(!r.result.objectStoreNames.contains('copies'))r.result.createObjectStore('copies',{keyPath:'key'});}catch(e){}};
+        r.onsuccess=()=>res(r.result);r.onerror=()=>res(null);r.onblocked=()=>res(null);});
+      if(!adb)return 0;try{await mediaCursor(adb,'copies',r=>{try{add(JSON.stringify(r));}catch(e){}});}finally{try{adb.close();}catch(e){}}}
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&/^nbh\./.test(k))add(localStorage.getItem(k));}   /* Autosave's slots */
+  }catch(e){return 0;}
+  /* the case on screen: each form loaded (and what it holds for Undo), and the forms put away */
+  Object.keys(state.frames).forEach(id=>{const fr=state.frames[id];let w=null,d=null;try{w=fr.contentWindow;d=fr.contentDocument;}catch(e){}
+    try{if(w&&typeof w.nbhMediaHeld==='function')add(String(w.nbhMediaHeld()));}catch(e){}
+    try{if(d)d.querySelectorAll('textarea,input[type=hidden]').forEach(x=>add(x.value));}catch(e){}});
+  try{add(JSON.stringify(state.pending||{}));}catch(e){}
+  const now=Date.now();if(!o.all)had.forEach(r=>{if(now-(r.added||0)<MEDIA_GRACE)keep.add(r.id);});
+  let gone=0;try{gone=await M.sweep(keep);}catch(e){}
+  try{localStorage.setItem('nbh.media.swept',String(now));}catch(e){}
+  return gone;}
+function mediaSweepSoon(){clearTimeout(mediaSweepT);mediaSweepT=setTimeout(()=>{mediaSweep().catch(()=>{});},4000);}
+/* once a week, a while after the workstation opens */
+setTimeout(()=>{let t=0;try{t=+localStorage.getItem('nbh.media.swept')||0;}catch(e){}if(Date.now()-t>7*864e5)mediaSweep().catch(()=>{});},30000);
 function caseData(p,forms,id){return {form:'CASE',rev:'2026-09',id:id||undefined,saved:new Date().toISOString(),packet:p,photoSrc:state.photoSrc||undefined,forms,facts:state.facts||undefined,cur:state.cur||undefined};}
 const caseJsonName=nm=>'CASE_'+nm+'_'+/* v21.21 cross-form (X1): local date, not UTC */(t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'))(new Date())+'.json';
 /* The case as one HTML file: this page, the packed forms exactly as they sit
@@ -4913,10 +4969,10 @@ async function caseHtml(p,forms){
   const block=(bid,text)=>'<script type="text/plain" id="'+bid+'">'+text+'<\/script>\n';
   let blocks='';
   /* v21.43: the writing help, and the respondent pages' library (left out of case files before), go with the forms */
-  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-pictures','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-narration-dd1','nbh-embed-narration-tk1bus','nbh-embed-narration-ia1','nbh-embed-narration-ra1','nbh-embed-shell'].forEach(bid=>{
+  ['nbh-embed-logo','nbh-embed-forms','nbh-embed-wording','nbh-embed-pdf','nbh-embed-pictos','nbh-embed-pictures','nbh-embed-media','nbh-embed-respond','nbh-embed-narration','nbh-embed-video','nbh-embed-narration-sm1','nbh-embed-narration-dd1','nbh-embed-narration-tk1bus','nbh-embed-narration-ia1','nbh-embed-narration-ra1','nbh-embed-shell'].forEach(bid=>{
     const el=document.getElementById(bid);if(el)blocks+=block(bid,el.textContent);});
   /* "</" inside the JSON would end the block early; \/ is the same character to JSON */
-  blocks+='<script type="application/json" id="nbh-case">'+JSON.stringify(data).replace(/<\//g,'<\\/')+'<\/script>\n';
+  blocks+='<script type="application/json" id="nbh-case">'+(await mediaOut(JSON.stringify(data))).replace(/<\//g,'<\\/')+'<\/script>\n';
   /* the blocks sit first in the body, where the page's script finds them as it runs */
   const at=shell.indexOf('<body>\n');
   if(at<0)throw new Error('The copy of the page inside this file is not one this edition can write.');
@@ -5037,7 +5093,7 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
   }
   if(EMBED){
     let where=null;const fn=caseJsonName(nm);
-    try{where=await writeCase(handle,JSON.stringify(caseData(p,forms,state.caseId||(state.caseId=caseUid())),null,1),fn,'application/json');}
+    try{where=await writeCase(handle,await mediaOut(JSON.stringify(caseData(p,forms,state.caseId||(state.caseId=caseUid())),null,1)),fn,'application/json');}
     catch(e){alert('The case could not be written: '+(e&&e.message||e));return false;}
     const how=late.length?'late':autoFiled(!!where,fileSig);
     return tell(how,(where?'Case saved to '+where+'.':'Case written to your downloads as '+fn+'.')+
@@ -5045,7 +5101,7 @@ async function saveCase(o){o=o&&(o.file||o.whole)?o:{};   /* v21.89 {file:true}:
       (where?'':'\n\nMove it to the student\u2019s folder; this browser cannot write back into a file, so each save is a fresh copy.')+left+(how==='moved'?after():'')+(where?'':check));
   }
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(caseData(p,forms),null,1)],
+  a.href=URL.createObjectURL(new Blob([await mediaOut(JSON.stringify(caseData(p,forms),null,1))],
     {type:'application/json'}));
   a.download=caseJsonName(nm);
   document.body.appendChild(a);a.click();a.remove();
@@ -5763,7 +5819,8 @@ clBackup=async function(){const L=await clList();if(!L||!L.length){alert('No stu
     if(pass===null)return;
     if(pass){const again=await wsUI.prompt('Type the passphrase again',{ok:'Back up',password:true,placeholder:'The same passphrase'});if(again===null)return;if(again!==pass){alert('The two passphrases are not the same. Nothing was saved.');return;}}}
   const t=new Date(),ds=t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
-  const plain=JSON.stringify({form:'CASELOAD',rev:'2026-10',saved:t.toISOString(),cases:L});
+  const LX=await Promise.all(L.map(async r=>Object.assign({},r,{text:await mediaOut(r.text||'')})));   /* v22.56 the sounds and pictures back in */
+  const plain=JSON.stringify({form:'CASELOAD',rev:'2026-10',saved:t.toISOString(),cases:LX});
   let body=plain,nm='CASELOAD_'+ds+'.json';
   if(pass){try{body=JSON.stringify(await clLock(plain,pass));nm='CASELOAD_'+ds+'_locked.json';}catch(e){alert('The backup could not be locked ('+(e&&e.message||e)+'). Nothing was saved.');return;}}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([body],{type:'application/json'}));a.download=nm;document.body.appendChild(a);a.click();a.remove();
@@ -5786,6 +5843,7 @@ async function clRemoveAll(){const L=await clList()||[];
   if(unf.length&&!(await wsUI.confirm(unf.length+' of them '+(unf.length===1?'was':'were')+' kept here but never saved to a file: '+unf.map(clName).join(', ')+'\nTheir work is only on this '+HERE+'. Remove anyway?',{ok:'Remove anyway',danger:true})))return;
   for(const r of L)try{await clTx('readwrite',st=>st.delete(r.key));}catch(e){}
   try{if(CP&&CP.clear)await CP.clear();}catch(e){}try{autoWipe();}catch(e){}try{await hxWipe();}catch(e){}   /* v21.91 every point of case history too */
+  try{clearTimeout(mediaSweepT);await mediaSweep({all:true});}catch(e){}   /* v22.56 every sound and picture kept in the store, but those the case on screen holds */
   try{['nbh.caseload.backup','nbh.caseload.read','nbh.stash.fail'].forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('nbh.google.tok');sessionStorage.removeItem('nbh.google.mail');}catch(e){}
   wsUI.toast('Every student’s data is removed from this '+HERE+'. The case files you saved are where you kept them.',{kind:'ok',ms:9000});
   if($('#dlg').open)caseloadOpen();paintBlank();}
@@ -6469,7 +6527,7 @@ async function drvList(){const fid=await drvFolder();
 function drvMultipart(meta,body){const b='nbh-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>x.toString(16).padStart(2,'0')).join('');
   return {headers:{'Content-Type':'multipart/related; boundary='+b},body:'--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)+'\r\n--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+body+'\r\n--'+b+'--'};}
 const drvName=r=>(String(r.client||'').trim()||'Case')+(r.sid?' ('+String(r.sid).trim()+')':'')+'.json';
-const drvBody=r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined},text:r.text||''});
+const drvBody=async r=>JSON.stringify({nbh:'case-sync',v:1,rec:{client:r.client||'',sid:r.sid||'',site:r.site||'',grade:r.grade||'',bcba:r.bcba||'',saved:r.saved||'',sum:r.sum||{items:[]},dev:r.dev||drvDev(),read:r.read||undefined},text:await mediaOut(r.text||'')});   /* v22.56 the sounds and pictures travel with the case */
 /* v21.97 Google's multipart upload takes a body of 5 MB at most; a larger case goes up the resumable way (the metadata first,
    Google answers with an address for the content, the content goes to that address in one PUT). Under DRV_BIG bytes the one
    multipart request stays, as before. */
@@ -6486,7 +6544,7 @@ async function drvRead(id){const t=await (await drvFetch(DAPI+'/'+id+'?alt=media
 /* a copy that is not kept goes to Replaced copies, so nothing is lost */
 async function drvKeepOld(r,why){const nm=(String(r.client||'').trim()||'Case')+' - '+why+' - '+new Date().toISOString().slice(0,16).replace('T',' ')+'.json';
   let k='';try{const s=drvKey(r);if(s)k=await drvHash(s);}catch(e){}   /* v22.16 (review F496): the student's key, hashed, so Remove everywhere finds it */
-  await drvUpload('',{name:nm,parents:[await drvOldFolder()],mimeType:'application/json',appProperties:k?{nbh:'old',k}:{nbh:'old'}},drvBody(r));
+  await drvUpload('',{name:nm,parents:[await drvOldFolder()],mimeType:'application/json',appProperties:k?{nbh:'old',k}:{nbh:'old'}},await drvBody(r));
   (DRV.kept=DRV.kept||[]).push({who:drvIni(r),why:String(why||'')});}
 const drvLocal=async k=>(await clList()||[]).find(x=>x.key===k);
 const drvPutLocal=r=>clTx('readwrite',st=>st.put(r));
@@ -6494,8 +6552,8 @@ const drvPutLocal=r=>clTx('readwrite',st=>st.put(r));
 async function drvPut(r,id,k){const base=r.drv&&r.drv.ver||null,text=r.text;
   const meta={name:drvName(r),mimeType:'application/json',appProperties:{nbh:'case',k,dev:r.dev||drvDev(),saved:String(r.saved||'').slice(0,24)}};
   if(!id)meta.parents=[await drvFolder()];
-  let f;try{f=await drvUpload(id||'',meta,drvBody(r));}
-  catch(e){if(!(e&&e.gone&&id))throw e;meta.parents=[await drvFolder()];f=await drvUpload('',meta,drvBody(r));}   /* its file is gone from Drive: a new one */
+  let f;try{f=await drvUpload(id||'',meta,await drvBody(r));}
+  catch(e){if(!(e&&e.gone&&id))throw e;meta.parents=[await drvFolder()];f=await drvUpload('',meta,await drvBody(r));}   /* its file is gone from Drive: a new one */
   /* saved again here while it went up: that save follows this one, so it stands on the version just made and still waits
      (v22.06 read and written in one transaction, so a save in between is not overwritten) */
   await clTx('readwrite',st=>{const g=st.get(r.key);g.onsuccess=()=>{const cur=g.result;if(!cur)return;
@@ -8248,7 +8306,7 @@ async function hxKeepScreen(why){if(clOff()||!hxOpenNow())return null;const t=aw
    another device) takes their history with them: every deletion from the caseload's store deletes that student's points */
 {const tx0=clTx;clTx=function(mode,fn){if(mode!=='readwrite'||typeof fn!=='function')return tx0.apply(this,arguments);const gone=[];
   return tx0.call(this,mode,st=>{try{const d0=st.delete;st.delete=function(k){gone.push(k);return d0.call(st,k);};}catch(e){}return fn(st);})
-    .then(async out=>{if(gone.length){try{await hxForget(gone);}catch(e){}}return out;});};}
+    .then(async out=>{if(gone.length){try{await hxForget(gone);}catch(e){}try{mediaSweepSoon();}catch(e){}}return out;});};}   /* v22.56 and the sounds and pictures only they referred to */
 /* v22.14 (review F469). Each student's record holds the whole case, and the start screen, Caseload, Save case, the Drive
    chip, Find and Today each read every record back from storage, several times a tap (94 MB a tap with 30 students). The
    list is now read once and kept in memory: every write to the caseload (each passes through clTx 'readwrite') drops it,

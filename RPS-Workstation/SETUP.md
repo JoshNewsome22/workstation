@@ -9903,6 +9903,28 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.56: the media store: sound tracks and pictures kept once on the device, out of the case file; a track up to 60 MB
+
+- **What changes.** A sound track or a picture Form TV-1 carries used to sit inside the case file as text, so the case file,
+  every Autosave safety copy, the caseload, case history and Drive each carried every byte of it, and twice over (the form's
+  state and its own file). Now the bytes are kept once on the device, in the browser's own store (`nbh-media.js`, beside the
+  forms), and the form keeps a short reference in their place. Autosave, the caseload and case history stay small.
+- **A file still carries everything.** Save case, a case that opens on its own, Save packet, the caseload backup and Drive
+  put the bytes back in as they write, so a file opens on any device as before. On opening, a case file that holds the bytes
+  inside (one saved before, or one from another device) moves them into the store, and says so once.
+- **Form TV-1**: a sound file added goes straight to the store, without the text round trip, and a track can be up to 60 MB
+  (12 MB before). Where the browser has no store (a private window), the form keeps the track inside the case as before,
+  with the 12 MB limit.
+- **Diagnostics** gains **Sounds and pictures on this device** (files and size). The one-file editions carry the store's
+  code inside them.
+- **A student removed takes their sounds and pictures.** A sound or picture stays in the store only while a caseload record,
+  a restore point, an Autosave copy or the case on screen refers to it. A student taken off the caseload (Remove, Remove
+  everywhere, Forget a student not saved for) takes the ones only they used; **Remove all student data** clears the store but
+  for what the case on screen holds; once a week the store drops what nothing refers to. Help's privacy table names the store.
+- Other forms' pictures (TK-1, VS-1, SM-1, the student photo) stay inside the case for now; they follow in a later version.
+
+Checked by `qa/v2256-test.js` (11) and the tests that save, autosave, back up and reopen cases.
+
 ### v22.55: TE-1, the token economy designer: token loss with its safeguards, an audit that cannot read green over a gap, the case's facts beside the menu, and the token system handed to the case
 
 - **Token loss or response cost in use?** set to Yes now opens the safeguards the Ethics Code asks for before a punishment procedure goes into a plan: the behavior that loses a token (the case's problem behaviors are offered), how many are lost, the floor, the less intrusive procedures tried first and their data, the parent's consent date, the IEP change where the BIP is part of the IEP, who reviewed it and when, how its effect is measured, and when it stops. The note under it names each one missing, and the audit cannot read in order while any is (BACB 2020, Standards 2.11 and 2.15). Form IC-1's date of consent to the BIP is shown beside it. (F418)

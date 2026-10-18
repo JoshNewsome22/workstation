@@ -22,6 +22,8 @@ python3 tools/new-form.py NBH-Workstation/CF-1_Contextual-Fit-Assessment_v2026-0
 python3 tools/polish-one.py NBH-Workstation/TV-1_Training-Video_v2026-10.html
 # v21.62 My pictures (tools/blocks/nbh-pictures.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
 cp tools/blocks/nbh-pictures.js NBH-Workstation/nbh-pictures.js
+# v22.56 the media store (tools/blocks/nbh-media.js), byte for byte, beside the forms (its <script src> is in toolbar.html)
+cp tools/blocks/nbh-media.js NBH-Workstation/nbh-media.js
 rm -rf "$D"
 python3 - <<'PY'
 doc=open('NBH-Workstation/TV-1_Training-Video_v2026-10.html',encoding='utf-8').read()

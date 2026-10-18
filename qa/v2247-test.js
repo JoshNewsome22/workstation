@@ -85,7 +85,7 @@ const dlgText=page=>page.evaluate(()=>document.getElementById('dlgBody').textCon
   const log1=await A.page.evaluate(()=>drvLog());
   ok('1 Sync activity keeps what each sync sent, by initials only (no full name kept on the device)',log1.length>=2&&log1.some(e=>e.up.includes('M.R.'))&&log1.some(e=>e.up.includes('A.R.'))&&!/Mateo|Rivera|4471823/.test(JSON.stringify(log1)),log1);
   /* two replaced copies of Mateo: one 3 days old, one 10 days old; and the iPad's own case text in them */
-  const mk=await A.page.evaluate(async()=>{const of=await drvOldFolder();const m=(await clList()).find(r=>r.client==='Mateo Rivera');return {of,k:await drvHash(drvKey(m)),body:drvBody(Object.assign({},m,{text:m.text.split('grandmother').join('grandmother and an aunt')}))};});
+  const mk=await A.page.evaluate(async()=>{const of=await drvOldFolder();const m=(await clList()).find(r=>r.client==='Mateo Rivera');return {of,k:await drvHash(drvKey(m)),body:await drvBody(Object.assign({},m,{text:m.text.split('grandmother').join('grandmother and an aunt')}))};});
   const ago=d=>new Date(Date.now()-d*864e5).toISOString();
   [[3,'f-old3'],[10,'f-old10']].forEach(([d,id])=>D.files.set(id,{id,name:'Mateo Rivera - not kept, from the Mac - '+ago(d).slice(0,16).replace('T',' ')+'.json',mimeType:'application/json',parents:[mk.of],appProperties:{nbh:'old',k:mk.k},version:1,modifiedTime:ago(d),trashed:false,content:mk.body}));
   await A.page.evaluate(()=>document.getElementById('drvHolds').click());await sleep(1200);
