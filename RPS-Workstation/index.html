@@ -2257,7 +2257,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.53';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.54';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -6134,6 +6134,14 @@ $('#closeCase').addEventListener('click',async()=>{
   /* work: the same measure as the Save case dot and the unload guard (a blank form reports a few default values) */
   const work=caseDirty()||open.some(id=>{const t=state.status[id];return !!t&&((t.filled||0)>3||t.edited);});
   const typed=Object.values(packet()).some(v=>String(v||'').trim());
+  /* v22.54 a form opened and left blank reports its default values as work; with no student named and nothing typed in
+     any open form, there is nothing worth a case file: it closes without saving */
+  const edited=open.some(id=>!!(state.status[id]||{}).edited)||Object.values(state.pending).some(P=>!!(P&&P.status&&P.status.edited));
+  if(work&&!typed&&!edited){
+    if(!(await wsUI.confirm('Close this case? No student has been named and nothing has been typed in the open forms, so it is not saved; the forms are cleared, ready for the next case.',{ok:'Close without saving',danger:true})))return;
+    await clearCase();
+    wsUI.toast('The case is closed; nothing was saved. Start the next one: enter the student, then open forms.',{ms:8000});
+    say('Case closed, not saved');return;}
   if(work){
     await gatherFacts(false);const miss=state.facts?handoverItems():[];   /* v21.75 the hand-over check, before it goes */
     const strip=h=>String(h).replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');

@@ -663,7 +663,7 @@ table.rt td.num{text-align:center;font-variant-numeric:tabular-nums}
 .catbar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:8px 0 12px;font-family:var(--sans);font-size:12.5px}
 .catbar input{font:inherit;border:1px solid var(--rule-2);border-radius:2px;padding:5px 8px;min-width:240px}
 .catbar .seg button{font:inherit}
-.catbar .seg button:not([aria-pressed="true"]){color:#f1f6f5}   /* v21.34a: the sheet's text color is dark; the segment's background is slate */
+.catbar .seg button:not([aria-pressed="true"]){color:var(--nbh-navy,#182e43);background:#f4f7f8}   /* v22.54 the segment is white since the polish layer: the family names read when not chosen */
 .fam{display:inline-block;font-family:var(--sans);font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:2px;background:var(--wash);color:var(--ink-soft);margin-left:8px;vertical-align:middle}
 .fam-basic{background:#E3EFE0;color:#2F6B37}.fam-time{background:#E6EEF3;color:#2f5568}.fam-dr{background:#FBEEDB;color:#9B4E15}.fam-compound{background:#EEE6F3;color:#5b3f78}.fam-applied{background:#F6E0E0;color:#8E2A2A}
 .cat{border:1px solid var(--rule-2);border-radius:3px;margin:10px 0;background:#fff;break-inside:avoid}
@@ -1220,6 +1220,7 @@ const REFS={
   roane04:'Roane, H. S., Fisher, W. W., Sgro, G. M., Falcomata, T. S., &amp; Pabico, R. R. (2004). An alternative method of thinning reinforcer delivery during differential reinforcement. <em>Journal of Applied Behavior Analysis, 37</em>(2), 213&ndash;218.',
   saini16:'Saini, V., Miller, S. A., &amp; Fisher, W. W. (2016). Multiple schedules in practical application: Research trends and implications for future investigation. <em>Journal of Applied Behavior Analysis, 49</em>(2), 421&ndash;444.',
   skinner48:'Skinner, B. F. (1948). &ldquo;Superstition&rdquo; in the pigeon. <em>Journal of Experimental Psychology, 38</em>(2), 168&ndash;172.',
+  bancroft08:'Bancroft, S. L., &amp; Bourret, J. C. (2008). Generating variable and random schedules of reinforcement using Microsoft Excel macros. <em>Journal of Applied Behavior Analysis, 41</em>(2), 227&ndash;235.',
   tarpley79:'Tarpley, H. D., &amp; Schroeder, S. R. (1979). Comparison of DRO and DRI on rate of suppression of self-injurious behavior. <em>American Journal of Mental Deficiency, 84</em>(2), 188&ndash;194.',
   tiger04:'Tiger, J. H., &amp; Hanley, G. P. (2004). Developing stimulus control of preschooler mands: An analysis of schedule-correlated and contingency-specifying stimuli. <em>Journal of Applied Behavior Analysis, 37</em>(4), 517&ndash;521.',
   tiger06:'Tiger, J. H., Hanley, G. P., &amp; Hernandez, E. (2006). An evaluation of the value of choice with preschool children. <em>Journal of Applied Behavior Analysis, 39</em>(1), 1&ndash;16.',
@@ -1683,10 +1684,10 @@ function design(){
       if(ser){const mean=ser.reduce((a,b)=>a+b,0)/ser.length;o.params.push(['Series ('+(method==='fh'?'Fleshler–Hoffman':'arithmetic, shuffled')+')','<div class="series">'+ser.join(', ')+'</div>'],['Mean of the series',r1(mean)+unit],['Shortest / longest',Math.min(...ser)+' / '+Math.max(...ser)+unit]);
         o.rule=kind==='vi'?'Work through the series in order, one value per reinforcer: set the timer to the value; when it rings, the next instance of '+B+' earns '+R_+'; then set the next value. Start again at the top when the list is used up.':'Work through the series in order: count instances of '+B+'; the one that completes the current value earns '+R_+'; then take the next value.';
         o.data=['Reinforcers delivered per session and the obtained mean (reinforcers against time or responses)'];}
-      else{const p=kind==='vi'?'each 10 seconds, with probability '+(10/T).toFixed(3):'each response, with probability '+(1/T).toFixed(3);o.nota=(kind==='vi'?'RI ':'RR ')+Math.round(T);o.params.push(['Random procedure','Sample '+p+'. A spinner, a die or a random-number app does it. The mean is '+Math.round(T)+unit+'; there is no longest value.']);
-        o.rule=kind==='vi'?'Every 10 seconds, draw: if the draw hits, the next instance of '+B+' earns '+R_+'. Otherwise nothing changes.':'After each instance of '+B+', draw: a hit means that instance earns '+R_+'.';
+      else{const p=kind==='vi'?'each second, with probability '+(1/T).toFixed(3):'each response, with probability '+(1/T).toFixed(3);o.nota=(kind==='vi'?'RI ':'RR ')+Math.round(T);o.params.push(['Random procedure','Sample '+p+'. A spinner, a die or a random-number app does it. The mean is '+Math.round(T)+unit+'; there is no longest value.']);
+        o.rule=kind==='vi'?'Every second, draw (a random-number app set to the probability): if the draw hits, the next instance of '+B+' earns '+R_+'. Otherwise nothing changes.':'After each instance of '+B+', draw: a hit means that instance earns '+R_+'.';
         o.warn.push('Random schedules produce long unpaid stretches by chance; while the student is learning, cap them (pay the next response after '+Math.round(3*T)+(kind==='vi'?' s':' unpaid responses')+').');}
-      o.notes='The Fleshler–Hoffman series keeps the chance of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968); the arithmetic series makes reinforcement more likely late in the interval. Keep the shortest value short, which prevents a pause after reinforcement (Ferster &amp; Skinner, 1957, Chapter 6).';}
+      o.notes='The Fleshler–Hoffman series keeps the chance of reinforcement nearly constant through the interval (Catania &amp; Reynolds, 1968); the arithmetic series makes reinforcement more likely late in the interval (Bancroft &amp; Bourret, 2008, make the same point about an evenly spread list, and draw random schedules by a fixed probability per response or per second). Keep the shortest value short, which prevents a pause after reinforcement (Ferster &amp; Skinner, 1957, Chapter 6).';}
   }
   if(sel==='ncr'){
     const b=base('ncr_n','ncr_min'),kind=m.ncr_kind||'ft',dur=num(m.ncr_dur)??20,term=(num(m.ncr_term)??5)*60,omit=num(m.ncr_omit)??10;

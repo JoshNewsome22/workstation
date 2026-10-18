@@ -9903,6 +9903,45 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.54: the reinforcer assessment's clock during access, from the published procedures
+
+Form RA-1, checked against the studies its decision rules rest on (Fisher et al., 1992; Piazza et al., 1996; Roscoe et al.,
+1999; Roane et al., 2001; Roane, 2008; Francisco et al., 2008; Glover et al., 2008; Trosclair-Lasserre et al., 2008;
+Penrod et al., 2008; Jerome and Sturmey, 2008; DeLeon et al., 2009; DeLeon et al., 2014):
+
+- **The session clock waits during access.** Where a study says what it did with the time the student had the item, it
+  took that time out: Glover et al. (2008) removed access time from the session time before computing the rate, and
+  DeLeon et al. (2014) stopped the clock. Trosclair-Lasserre et al. (2008) let the clock run against the cap and then had
+  to cap response time separately, because the magnitudes were getting unequal time to respond. So on the single-operant,
+  concurrent-operants and progressive-ratio runners the clock now waits while the student has the item: the session, and
+  the progressive-ratio cap, are time with the response available, **Time left** holds during access, and the Minutes
+  column gets those minutes. **Clock during access** (in place of Minutes on the sheet, on all three runners) can instead
+  let the clock run, with the sheet taking minutes run less access, or minutes run. The walkthrough already said the clock
+  paused while the runner kept it running; the runner, the Guide and the walkthrough now agree.
+- **The task stays out of reach during access.** DeLeon et al. (2009) and Francisco et al. (2008) removed the task while
+  the student had the item. With the clock waiting (or the access taken out of the minutes) the cue says so, and a response
+  tapped during access is recorded apart and not counted; with the clock set to run it is counted as before, not toward the
+  schedule. The session summary says which rule it used and how much access there was.
+- The Guide gives the convention with its sources, and Glover et al. (2008) and DeLeon et al. (2014) join the references.
+- **How to choose the response**, on Setup under the response's definition: eight points drawn from the responses the
+  studies used (easy, quick and countable; arbitrary by default, so the control rate is low; a unit of plan work when that
+  is the question, with the effort cost Penrod et al., 2008, found; materials that last the session; the same in every
+  condition, with a position or color telling concurrent stations apart; taught first if new; checked in a control session;
+  safe and sized to the student), with the studies named. Jerome and Sturmey (2008) join the references.
+
+Form SR-1: the random-interval procedure samples every second (it sampled every 10 seconds with probability 10/T, which
+read as more than 1 for a mean under 10 s), and the schedule notes cite Bancroft and Bourret (2008) for the random
+procedures and the evenly spread list. The Catalogue's family buttons (All, Basic, Time-based, Differential, Compound,
+Applied) read when not chosen: their text had been set near-white for a slate segment that has been white since the polish
+layer, so on the iPad they could barely be seen. Form TD-1's random-ratio example reads "RR 4 (p = .25)" and points to SR-1 for the
+procedure.
+
+The workstation: **Close case** on a case with no student named and nothing typed in the open forms (a form opened and
+left blank reports its default values as work, so Close case was saving a blank case first) now asks to close without
+saving, and clears the forms. With a student named or anything typed, it saves first as before.
+
+Checked by `qa/v2254-test.js` (16) and the RA-1 tests.
+
 ### v22.53: Form HD-1, home data sheets that tell a good week from an unwatched one, keep each week as it went home, and type in all four sheets
 
 - **A day with no behavior is not a day nobody watched** (review F369). The tally and minutes lines on the sheet now say
