@@ -9903,6 +9903,32 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.65: RA-1 from the reinforcer-assessment articles: a concurrent baseline, the three times, and an agreement check
+
+- **A baseline on the concurrent-operants sheet.** Each session row has a **Condition**: Reinforcement or **Baseline**
+  (no consequence at any station), so a baseline, reinforcement, baseline sequence can be recorded as in Fisher et al.
+  (1992) and Roscoe et al. (1999). The runner has the same setting: in Baseline every station counts responses and
+  nothing is delivered, the cue and the script say so, the summary names the condition, and Save writes the row as
+  Baseline. The readout sets each option's responses a session under reinforcement against its own baseline (an option
+  whose responding rose above its baseline reinforced it); the preference figures and the Summary use the reinforcement
+  sessions only; the graph names the phases, draws a phase line where the condition changes and breaks the paths there.
+- **Maximizing named.** When an option takes 90% or more of the responses over three or more sessions, the readout
+  says that concurrent ratio schedules tend to produce this, so the test shows which stimulus is preferred, not by how
+  much, and that a stimulus seldom chosen may still reinforce on its own (Fisher et al., 1992, p. 497).
+- **The three times on the single-operant sheet.** Beside **Minutes** (the minutes the rate uses, by Clock during
+  access) each row now has **Access (s)** and **Total (min)** (start to end, access included); the runner writes all
+  three, as Form AD-1 does for work, access and total time.
+- **An agreement check.** The Summary sheet has, under the agreement line, a table for second-observer sessions: the
+  session, the sheet, the measure and the two observers' figures. Counts and durations score the smaller over the
+  larger; progressive ratio scores the count at each ratio step, agreeing steps over steps (DeLeon et al., 2009, p.
+  731), typed as the counts in order; break point scores the same or not. The line under the table gives the mean and
+  range, and the methods are named with their sources (Roscoe et al., 1999; Roane et al., 2001; Fisher et al., 1992).
+  The checks are kept in the file; the free-text agreement line stays for the write-up.
+- **The attribution.** The method text now says that Fisher et al. (1992) and Piazza et al. (1996) measured the share
+  of session time with each stimulus, and that the response-count stations follow Roscoe et al. (1999).
+
+Checked by `qa/v2265-test.js` (17).
+
 ### v22.64: PA-1 from the reinforcer-assessment articles: three administrations, sampling, and the summary's flags
 
 - **Three administrations of the paired-stimulus list.** "PS presentations" adds **Three times**: every pair once in each

@@ -400,6 +400,29 @@ body{
   font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);
   margin:-4px 0 12px;
 }
+/* v22.65 the concurrent sheet's notes: baseline against reinforcement, maximizing */
+#coNotes{font-family:var(--sans);font-size:12px;line-height:1.45;color:var(--ink);margin:-6px 0 12px;padding-left:18px}
+#coNotes:empty{display:none}
+#coNotes li{margin:2px 0}
+#coTbl select[data-f="cond"]{min-width:118px}   /* "Reinforcement" in full */
+/* v22.65 the agreement check: fixed columns, scrolling inside its box on a phone */
+#ioaTbl{width:100%;min-width:640px;table-layout:fixed}
+#ioaTbl th:nth-child(1){width:9%}#ioaTbl th:nth-child(2){width:18%}#ioaTbl th:nth-child(3){width:17%}
+#ioaTbl th:nth-child(4),#ioaTbl th:nth-child(5){width:17%}#ioaTbl th:nth-child(6){width:15%}#ioaTbl th:nth-child(7){width:7%}
+#ioaTbl button{min-width:0;width:100%;padding:4px 0}
+#ioaTbl input,#ioaTbl select{width:100%;min-width:0;box-sizing:border-box}
+#ioaTbl td.calc{font-family:var(--sans);font-size:12px;line-height:1.3}
+#ioaOut{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--ink);margin:6px 0 2px}
+#ioaOut:empty{display:none}
+.ioa-hint{font-family:var(--sans);font-size:11.5px;color:var(--ink-soft);line-height:1.45;margin:4px 0 10px}
+.ioa-box{display:block;margin:6px 0 10px}
+.ioa-lab{font-size:11.5px;font-family:var(--sans);color:var(--ink-soft);margin-bottom:3px}
+@media print{
+  #ioaBox.ioa-empty{display:none}
+  #ioaTbl{min-width:0}
+  #ioaTbl th:nth-child(7),#ioaTbl td:nth-child(7){display:none}
+  #ioaTbl input,#ioaTbl select{-webkit-appearance:none;appearance:none;border:0;background:none;padding:0 2px}
+}
 
 
 
@@ -1641,8 +1664,8 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <li><b>The runners.</b> The Single operant, Concurrent operants, and Progressive ratio sheets each open with a <b>Run This Session</b> panel. It uses the sheet's own parameters: the session length from the toolbar; the progression, starting ratio, and stop interval from the toolbar; the progressive-ratio session cap and each stimulus's magnitude from Setup. It times the session, cues each reinforcer and times its access, and when you press <b>Save to the sheet</b> it writes the session into the next empty row, so the sheet, its graph, and the summary update. The runner is for the person collecting data and does not print.</li>
     <li><b>Before you start.</b> Check the condition and the <b>Access (s)</b> the runner has read from Setup, from the stimulus's magnitude or, failing that, from Consequence magnitude and timing. An edible, a token, or a portion with no stated time (one piece, a praise statement) gets 0 s: the runner cues the delivery and times nothing. For an edible, <b>Access ends</b> can be set to <b>When it is consumed</b>: the runner then waits until you tap <b>Consumed</b> (or press E), up to 10 minutes, with the task out of reach meanwhile, and the progressive ratio&rsquo;s stop interval starts again from that tap, so eating time is not counted as a pause in responding (Francisco, Borrero, &amp; Sy, 2008, delivered each edible until it was consumed). A stimulus with no access time anywhere in Setup gets 20 s, and the panel says it is a default. The panel repeats the response definition and the MO control from Setup, and when a stimulus has no session on that sheet yet it reminds you to prompt the response once and deliver the stimulus first. If the next empty row already names a condition (or, on the concurrent-operants sheet, a position), the runner takes it as the plan for that session.</li>
     <li><b>Access periods.</b> When a reinforcer is due, the runner cues it; for a timed item it counts the access down and cues the end, when you remove the item; for an item that lasts until consumed it waits for <b>Consumed</b>. With <b>Clock during access</b> on Pauses (the default) the task materials are out of reach during access, so a response then is recorded apart and is not counted; with the clock running it is counted, but not toward the next reinforcer or ratio.</li>
-    <li><b>Single operant.</b> Tap <b>Response</b> for every response. In a stimulus condition the runner counts toward the schedule (FR 1 unless you set another <b>Schedule (FR)</b> to test a plan schedule) and cues the reinforcer each time the requirement is met; in Control the response produces nothing. <b>Clock during access</b> decides the minutes: by default the session clock waits while the student has the item, so the session is minutes with the response available and the Minutes column gets those (the convention where a study states one: Glover et al., 2008, took access time out of the session time; DeLeon et al., 2014, stopped the clock); or the clock runs, and the sheet takes minutes run less access, or minutes run. With the clock waiting, the task materials stay out of reach during access, and a response made then is recorded apart and not counted, as in the studies that remove the task during access (DeLeon et al., 2009; Francisco et al., 2008). In a reversal design the runner ticks Phase start when the condition differs from the session before.</li>
-    <li><b>Concurrent operants.</b> Set <b>Option A position</b> (the runner suggests the next position in the rotation), then prompt one response at each station and deliver its consequence before pressing <b>Start session</b>; those responses are not counted. Tap the button for the station the student responds at (keys 1, 2, 3, in the order of the sheet's columns). Each stimulus option runs its own schedule and access time; the control option produces nothing; the clock waits during an option's access, as on the other sheets. The summary also shows changeovers for reference; the sheet has no column for them.</li>
+    <li><b>Single operant.</b> Tap <b>Response</b> for every response. In a stimulus condition the runner counts toward the schedule (FR 1 unless you set another <b>Schedule (FR)</b> to test a plan schedule) and cues the reinforcer each time the requirement is met; in Control the response produces nothing. <b>Clock during access</b> decides the minutes: by default the session clock waits while the student has the item, so the session is minutes with the response available and the Minutes column gets those (the convention where a study states one: Glover et al., 2008, took access time out of the session time; DeLeon et al., 2014, stopped the clock); or the clock runs, and the sheet takes minutes run less access, or minutes run. With the clock waiting, the task materials stay out of reach during access, and a response made then is recorded apart and not counted, as in the studies that remove the task during access (DeLeon et al., 2009; Francisco et al., 2008). In a reversal design the runner ticks Phase start when the condition differs from the session before. It also writes <b>Access (s)</b> and <b>Total (min)</b>, start to end with the access included, beside the Minutes the rate uses.</li>
+    <li><b>Concurrent operants.</b> Set <b>Option A position</b> (the runner suggests the next position in the rotation) and the <b>Condition</b> (Reinforcement, or Baseline: no consequence at any station, and nothing is prompted or delivered), then prompt one response at each station and deliver its consequence before pressing <b>Start session</b>; those responses are not counted. Tap the button for the station the student responds at (keys 1, 2, 3, in the order of the sheet's columns). Each stimulus option runs its own schedule and access time; the control option produces nothing; the clock waits during an option's access, as on the other sheets. The summary also shows changeovers for reference; the sheet has no column for them.</li>
     <li><b>Condition comparison (COA).</b> With <b>Arrangement</b> on the Concurrent operants sheet set to Condition comparison, the sheet opens a different runner. Choose the pairing and the side of Condition 1 (the runner suggests the side opposite the pairing&rsquo;s last session), place the student at the neutral spot, give the contingency overview, then press <b>Start session</b> and tap <b>Side 1</b>, <b>Neither</b> or <b>Side 2</b> as the student moves (keys 1, 0, 2); each is a stopwatch and only one runs at a time. <b>Refusing to choose</b> (R) is a sub-timer under Neither, <b>Problem behavior</b> (P) counts instances, and <b>Prompt to choose</b> (C) logs each prompt with its time. The session ends at the toolbar length or with <b>End session</b>, and <b>Save to the sheet</b> writes the durations, problem behavior, prompts and the side of Condition 1 to the next empty row of the session grid; a session ended early is marked Other in the Ended early column (change it to Problem behavior when the stop rule applied).</li>
     <li><b>Progressive ratio.</b> The runner shows the ratio in effect and the responses toward it. When the ratio is met it cues the reinforcer, times the access, and moves to the next ratio in the progression. The stop-interval clock restarts with each response and at the end of each access period, and it waits while an item is being accessed, as does the session cap, so the cap is on time with the response available whatever the magnitude (Trosclair-Lasserre et al., 2008, capped response time for that reason); the session ends when the stop interval runs out or at the cap. <b>Save to the sheet</b> ticks the completed ratios and enters the session&rsquo;s minutes and all its responses (the ratio in progress included), and the sheet computes the break point, responses, and ratios completed from the ticks. With <b>Each ratio twice</b> on the toolbar, each ratio is presented twice before the next (Roane et al., 2001, did so for 3 of 4 participants, to prevent rapid ratio strain). In a control session the same progression runs and completing a ratio produces nothing. If Setup has no session cap, the runner uses 20 min and enters it in Setup when you save, so the printed parameters show the cap that was used.</li>
     <li><b>Problem behavior.</b> Tap <b>Problem behavior</b> for each instance. The sheet records whether problem behavior occurred in the session; the runner shows Setup's stop rule, and <b>End session</b> ends the session early when the rule applies.</li>
@@ -1800,6 +1823,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
     <div class="ra-run-hd"><h3>Run This Session</h3><span class="ra-run-hint">Times the session at the toolbar length, counts responses at each station, runs each option's schedule and access time, and writes the next row of the sheet below.</span></div>
     <div class="ra-run-set">
       <div class="ra-run-f"><label for="ra-run-co-pos">Option A position</label><select id="ra-run-co-pos"><option value="">Not recorded</option><option value="L">L</option><option value="M">M</option><option value="R">R</option></select><span class="ra-run-src" id="ra-run-co-possrc"></span></div>
+      <div class="ra-run-f"><label for="ra-run-co-cond">Condition</label><select id="ra-run-co-cond"><option value="">Reinforcement</option><option value="bl">Baseline (no consequence)</option></select></div>
       <div class="ra-run-f"><label for="ra-run-co-clock">Clock during access</label><select id="ra-run-co-clock"><option value="pause">Pauses (minutes the response was available)</option><option value="avail">Runs; the sheet takes minutes run less access</option><option value="run">Runs; the sheet takes minutes run</option></select></div>
     </div>
     <table class="ra-run-opts" id="ra-run-co-opts">
@@ -1855,7 +1879,7 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <h3 class="sub co-st-only">Allocation Summary</h3>
   <table class="rank co-st-only" id="coRank"><thead><tr><th>Option</th><th class="n">Sessions</th><th class="n">Total responses</th><th class="n">Mean % allocation</th><th class="n">Sessions with most responses</th><th class="n">Position effect</th><th>Relative standing</th></tr></thead><tbody></tbody></table>
   <p class="method co-st-only">Verdict labels are working conventions, applied in this order: <b>Preferred</b> = mean allocation &ge; 60% and the most responses (or a tie for the most) in more than half the sessions; <b>Comparable</b> = not Preferred, and mean allocation within 20 percentage points of the highest mean allocation, so a leading option under 60% is Comparable; <b>Not chosen</b> = mean allocation &lt; 20%; <b>Lower</b> = any other option: 20% or more of the responses, but more than 20 points below the leader. "Position effect" is computed for Option A, whose position the sheet records: Suspected when its mean allocation differs by more than 40 points between positions, None otherwise (&mdash; until it has been scored in two positions; n/a for the other options). A stimulus that is "not chosen" here can still be a reinforcer; that is the single-operant question.</p>
-  <div class="cite co-st-only">Concurrent-operants arrangement after Fisher et al. (1992, <em>JABA, 25</em>, 491&ndash;498) and Piazza, Fisher, Hagopian, Bowman, and Toole (1996, <em>JABA, 29</em>, 1&ndash;9), who used it to show that high-preference stimuli functioned as reinforcers relative to lower-preference ones. Roscoe et al. (1999) and Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) showed the arrangement measures relative value and can mask absolute effects.</div>
+  <div class="cite co-st-only">Concurrent-operants arrangement after Fisher et al. (1992, <em>JABA, 25</em>, 491&ndash;498) and Piazza, Fisher, Hagopian, Bowman, and Toole (1996, <em>JABA, 29</em>, 1&ndash;9), who used it to show that high-preference stimuli functioned as reinforcers relative to lower-preference ones; they measured the share of session time spent with each stimulus (in a square or a chair), and the response-count stations here follow Roscoe et al. (1999). Concurrent ratio schedules tend to produce near-exclusive choice (maximizing): the arrangement shows which stimulus is preferred, not by how much (Fisher et al., 1992, p. 497). Roscoe et al. (1999) and Francisco, Borrero, and Sy (2008, <em>JABA, 41</em>, 189&ndash;202) showed the arrangement measures relative value and can mask absolute effects.</div>
   <!-- ======== Condition comparison (COA, duration) mode, v21.22: Randall & Kranak (2026) ======== -->
   <div class="co-coa-only" id="coaBlock">
   <div class="ra-run noprint" id="ra-coa-run" role="region" aria-label="Condition-comparison session runner">
@@ -2051,6 +2075,11 @@ body.view-walk #walk{width:auto;max-width:1180px;margin:18px auto 60px;padding:2
   <!-- v21.75 (audit) one per line, and able to wrap: two half-width boxes printed as inch-wide columns and split across pages -->
   <div class="ident ra-wide" style="grid-template-columns:1fr;margin-top:10px">
     <div class="f"><label for="mIoa">Interobserver agreement (design, sessions, %)</label><textarea id="mIoa" data-meta="ioa" class="nbh-line" rows="1"></textarea></div>
+    <div class="ioa-box" id="ioaBox"><div class="ioa-lab">Agreement check (two observers, the same session)</div>
+      <div class="gridwrap"><table class="grid" id="ioaTbl"></table></div>
+      <div class="rowbtns noprint"><button type="button" class="tool" id="ioaAdd">Add a check</button></div>
+      <p id="ioaOut"></p>
+      <p class="ioa-hint">Methods: counts, the smaller over the larger (in 10-s intervals where the data allow; Roscoe et al., 1999, p. 485); progressive ratio, the count at each ratio step, agreeing steps over steps (DeLeon et al., 2009, p. 731), or exact counts in 10-s intervals (Roane et al., 2001, p. 148); break point, the same or not; duration, the shorter over the longer (exact 10-s intervals in Fisher et al., 1992, p. 493). For each ratio step, type the counts in order, separated by commas.</p></div>
     <div class="f"><label for="mPBsum">Problem behavior across sessions (summary)</label><textarea id="mPBsum" data-meta="pbsum" class="nbh-line" rows="1"></textarea></div>
   </div>
   <div class="sig"><div>BCBA signature / date</div><div>Teacher or implementer / date</div><div>Parent or guardian informed / date</div></div>
@@ -2286,14 +2315,15 @@ const TYPES=['','Edible','Leisure item','Activity','Social / attention','Token',
 
 let S=blank();
 function blank(){return {form:'RA-1',n:3,sessMin:5,nSess:16,nCoSess:10,prStep:'a1',prRep:1,prStart:1,prStop:120,
-  meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa()};}
+  meta:{},stim:[],so:[],co:[],pr:[],coa:blankCoa(),ioa:[]};}
 function ensure(){
   const n=S.n;
   while(S.stim.length<n)S.stim.push({name:'',type:'',pa:'',mag:''});S.stim.length=n;
-  while(S.so.length<S.nSess)S.so.push({date:'',cond:'',resp:'',min:'',pb:false,phase:false});S.so.length=S.nSess;
-  while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',r:['','',''],pb:false});S.co.length=S.nCoSess;
+  while(S.so.length<S.nSess)S.so.push({date:'',cond:'',resp:'',min:'',acc:'',tot:'',pb:false,phase:false});S.so.length=S.nSess;
+  while(S.co.length<S.nCoSess)S.co.push({date:'',pos:'',cond:'',r:['','',''],pb:false});S.co.length=S.nCoSess;
   const prN=Math.max(3,n*3+3);while(S.pr.length<prN)S.pr.push({date:'',cond:'',done:[],pb:false,resp:'',min:'',all:''});S.pr.length=prN;
   ensureCoa();
+  if(!Array.isArray(S.ioa))S.ioa=[];
 }
 const name=i=>S.stim[i]&&S.stim[i].name.trim()?S.stim[i].name.trim():'Stimulus '+CODES[i];
 const condLabel=c=>c==='ctl'?'Control':c===''?'':name(+c);
@@ -2321,8 +2351,8 @@ function condOptions(v){return `<option value=""></option><option value="ctl"${v
 
 /* ---------- single operant ---------- */
 function renderSO(){
-  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Condition</th><th class="c">Responses</th><th class="c">Minutes</th><th class="c">Rate / min</th><th class="c">PB</th><th class="c" title="Tick the first session of a new phase (reversal designs)">Phase start</th></tr></thead><tbody>`;
-  S.so.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select class="condsel" data-k="${k}" data-f="cond">${condOptions(s.cond)}</select></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="resp" value="${esc(s.resp)}"></td><td class="c"><input type="number" min="0" step="0.5" data-k="${k}" data-f="min" value="${esc(s.min)}" placeholder="${esc(S.sessMin)}"></td><td class="c calc" id="soR${k}"></td><td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td><td class="c"><input type="checkbox" data-k="${k}" data-f="phase"${s.phase?' checked':''}></td></tr>`;});
+  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Condition</th><th class="c">Responses</th><th class="c" title="The minutes the rate uses, by the clock rule">Minutes</th><th class="c" title="Seconds the student had the stimulus">Access (s)</th><th class="c" title="Minutes from start to end, access included">Total (min)</th><th class="c">Rate / min</th><th class="c">PB</th><th class="c" title="Tick the first session of a new phase (reversal designs)">Phase start</th></tr></thead><tbody>`;
+  S.so.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select class="condsel" data-k="${k}" data-f="cond">${condOptions(s.cond)}</select></td><td class="c"><input type="number" min="0" data-k="${k}" data-f="resp" value="${esc(s.resp)}"></td><td class="c"><input type="number" min="0" step="0.5" data-k="${k}" data-f="min" value="${esc(s.min)}" placeholder="${esc(S.sessMin)}"></td><td class="c"><input type="number" min="0" step="1" data-k="${k}" data-f="acc" value="${esc(s.acc??'')}"></td><td class="c"><input type="number" min="0" step="0.01" data-k="${k}" data-f="tot" value="${esc(s.tot??'')}"></td><td class="c calc" id="soR${k}"></td><td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td><td class="c"><input type="checkbox" data-k="${k}" data-f="phase"${s.phase?' checked':''}></td></tr>`;});
   $('#soTbl').innerHTML=h+'</tbody>';computeSO();
 }
 $('#soTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;S.so[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeSO();renderSummary();});
@@ -2371,16 +2401,41 @@ function coOptList(){const m=S.meta.coOpts||'2';const n=S.n;const st=i=>({key:St
   if(m==='c'||n<2)return [st(0),ctl];
   if(m==='3')return [st(0),st(1),ctl];
   return [st(0),st(1)];}
+/* ---------- v22.65 the agreement check: counts, per ratio step, break point, duration ---------- */
+const IOA_KINDS=[['count','Count'],['step','Per ratio step'],['bp','Break point'],['dur','Duration (s)']];
+function ioaPct(x){const A=String(x.a||'').trim(),B=String(x.b||'').trim();if(!A||!B)return null;
+  if(x.kind==='step'){const a=A.split(/[,;\s]+/).filter(Boolean).map(Number),b=B.split(/[,;\s]+/).filter(Boolean).map(Number);const n=Math.max(a.length,b.length);if(!n)return null;
+    let ag=0;for(let i=0;i<n;i++)if(a[i]!=null&&b[i]!=null&&a[i]===b[i])ag++;return {p:100*ag/n,t:ag+' of '+n+' steps'};}
+  const a=+A,b=+B;if(!isFinite(a)||!isFinite(b))return null;
+  if(x.kind==='bp')return {p:a===b?100:0,t:a===b?'same':'differ'};
+  return {p:(a===0&&b===0)?100:100*Math.min(a,b)/Math.max(a,b),t:''};}
+function renderIOA(){const t=document.getElementById('ioaTbl');if(!t)return;if(!Array.isArray(S.ioa))S.ioa=[];
+  const box=document.getElementById('ioaBox');if(box)box.classList.toggle('ioa-empty',!S.ioa.length);   /* nothing to print without a check */
+  t.innerHTML='<thead><tr><th class="c">Session</th><th class="c">Sheet</th><th class="c">Measure</th><th class="c">Observer 1</th><th class="c">Observer 2</th><th class="c">Agreement</th><th class="c"></th></tr></thead><tbody>'+
+    S.ioa.map((x,i)=>'<tr><td class="c"><input type="text" data-i="'+i+'" data-f="sess" value="'+esc(x.sess||'')+'" placeholder="e.g., 4"></td>'+
+      '<td class="c"><select data-i="'+i+'" data-f="sheet">'+[['so','Single operant'],['co','Concurrent'],['pr','Progressive ratio']].map(o=>'<option value="'+o[0]+'"'+(x.sheet===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></td>'+
+      '<td class="c"><select data-i="'+i+'" data-f="kind">'+IOA_KINDS.map(o=>'<option value="'+o[0]+'"'+(x.kind===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></td>'+
+      '<td class="c"><input type="text" data-i="'+i+'" data-f="a" value="'+esc(x.a||'')+'"></td><td class="c"><input type="text" data-i="'+i+'" data-f="b" value="'+esc(x.b||'')+'"></td>'+
+      '<td class="c calc" id="ioaP'+i+'"></td><td class="c"><button type="button" class="tool noprint" data-ioadel="'+i+'" aria-label="Remove this check">&times;</button></td></tr>').join('')+'</tbody>';
+  computeIOA();}
+function computeIOA(){const out=document.getElementById('ioaOut');if(!out)return;const ps=[];
+  (S.ioa||[]).forEach((x,i)=>{const r=ioaPct(x),c=document.getElementById('ioaP'+i);if(c)c.textContent=r?Math.round(r.p)+'%'+(r.t?' ('+r.t+')':''):'';if(r)ps.push(r.p);});
+  out.textContent=ps.length?ps.length+' check'+(ps.length===1?'':'s')+': mean '+Math.round(mean(ps))+'% (range '+Math.round(Math.min(...ps))+'–'+Math.round(Math.max(...ps))+'%).':'';}
+if(document.getElementById('ioaTbl')){
+  document.getElementById('ioaAdd').addEventListener('click',()=>{if(!Array.isArray(S.ioa))S.ioa=[];S.ioa.push({sess:'',sheet:'pr',kind:'step',a:'',b:''});renderIOA();const f=document.querySelector('#ioaTbl tr:last-child input');if(f)f.dispatchEvent(new Event('input',{bubbles:true}));});
+  document.getElementById('ioaTbl').addEventListener('input',e=>{const el=e.target,i=+el.dataset.i;if(isNaN(i)||!el.dataset.f||!S.ioa[i])return;S.ioa[i][el.dataset.f]=el.value;computeIOA();});
+  document.getElementById('ioaTbl').addEventListener('change',e=>{const el=e.target,i=+el.dataset.i;if(isNaN(i)||!el.dataset.f||!S.ioa[i])return;S.ioa[i][el.dataset.f]=el.value;computeIOA();});
+  document.getElementById('ioaTbl').addEventListener('click',e=>{const b=e.target.closest('[data-ioadel]');if(!b)return;S.ioa.splice(+b.dataset.ioadel,1);renderIOA();});}
 function renderCO(){
   const opts=coOptList();
-  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
-  S.co.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="pos"><option value=""></option><option${s.pos==='L'?' selected':''}>L</option><option${s.pos==='M'?' selected':''}>M</option><option${s.pos==='R'?' selected':''}>R</option></select></td>${opts.map((o,j)=>`<td class="c"><input type="number" min="0" data-k="${k}" data-j="${j}" data-f="r" value="${esc(s.r[j])}"></td>`).join('')}<td class="c calc" id="coT${k}"></td>${opts.map((o,j)=>`<td class="c calc" id="coP${k}_${j}"></td>`).join('')}<td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
+  let h=`<thead><tr><th class="c">#</th><th class="c">Date</th><th class="c" title="Baseline: no consequence at any station">Condition</th><th class="c">Option A position</th>${opts.map((o,j)=>`<th class="c">${esc(o.label)}<br><span class="sub2">responses</span></th>`).join('')}<th class="c">Total</th>${opts.map(o=>`<th class="c">% ${esc(o.label)}</th>`).join('')}<th class="c">PB</th></tr></thead><tbody>`;
+  S.co.forEach((s,k)=>{h+=`<tr><td class="c">${k+1}</td><td class="c"><input type="text" class="dt" data-k="${k}" data-f="date" value="${esc(s.date)}"></td><td class="c"><select data-k="${k}" data-f="cond"><option value="">Reinforcement</option><option value="bl"${s.cond==='bl'?' selected':''}>Baseline</option></select></td><td class="c"><select data-k="${k}" data-f="pos"><option value=""></option><option${s.pos==='L'?' selected':''}>L</option><option${s.pos==='M'?' selected':''}>M</option><option${s.pos==='R'?' selected':''}>R</option></select></td>${opts.map((o,j)=>`<td class="c"><input type="number" min="0" data-k="${k}" data-j="${j}" data-f="r" value="${esc(s.r[j])}"></td>`).join('')}<td class="c calc" id="coT${k}"></td>${opts.map((o,j)=>`<td class="c calc" id="coP${k}_${j}"></td>`).join('')}<td class="c"><input type="checkbox" data-k="${k}" data-f="pb"${s.pb?' checked':''}></td></tr>`;});
   $('#coTbl').innerHTML=h+'</tbody>';computeCO();
 }
 $('#coTbl').addEventListener('input',e=>{const el=e.target,k=+el.dataset.k;if(isNaN(k))return;if(el.dataset.f==='r')S.co[k].r[+el.dataset.j]=el.value;else S.co[k][el.dataset.f]=el.type==='checkbox'?el.checked:el.value;computeCO();renderSummary();});
 function coStats(){
-  const opts=coOptList();const rows=S.co.map((s,k)=>{const r=opts.map((_,j)=>s.r[j]===''?null:+s.r[j]);const done=r.every(v=>v!=null);const tot=done?r.reduce((a,b)=>a+b,0):null;return {k,r,tot,p:done&&tot>0?r.map(v=>100*v/tot):null,pos:s.pos,pb:s.pb};});
-  const scored=rows.filter(r=>r.p);
+  const opts=coOptList();const rows=S.co.map((s,k)=>{const r=opts.map((_,j)=>s.r[j]===''?null:+s.r[j]);const done=r.every(v=>v!=null);const tot=done?r.reduce((a,b)=>a+b,0):null;return {k,r,tot,p:done&&tot>0?r.map(v=>100*v/tot):null,pos:s.pos,pb:s.pb,bl:s.cond==='bl'};});
+  const scored=rows.filter(r=>r.p&&!r.bl);   /* v22.65 the preference figures use the reinforcement sessions; baseline apart */
   const st=opts.map((o,j)=>{const ps=scored.map(r=>r.p[j]);const m=mean(ps);const wins=scored.filter(r=>Math.max(...r.p)===r.p[j]&&r.p[j]>0).length;
     const tot=scored.reduce((a,r)=>a+r.r[j],0);
     // position effect: for option A (j=0) use pos field; compare means by position
@@ -2388,19 +2443,35 @@ function coStats(){
     return {j,key:o.key,label:o.label,ctl:o.ctl,n:ps.length,mean:m,wins,tot,posEff};});
   const lead=Math.max(...st.map(s=>s.mean??-1));
   st.forEach(s=>{if(s.mean==null){s.stand='';return;}if(s.mean>=60&&s.wins>scored.length/2)s.stand='preferred';else if(lead-s.mean<=20)s.stand='comparable';else if(s.mean<20)s.stand='notchosen';else s.stand='lower';});
-  return {opts,rows,scored,st};
+  /* v22.65 each option's responses a session in baseline (no consequence anywhere) and under reinforcement */
+  const per=f=>opts.map((_,j)=>{const v=rows.filter(f).filter(r=>r.r.every(x=>x!=null)).map(r=>r.r[j]);return v.length?mean(v):null;});
+  const blN=rows.filter(r=>r.bl&&r.r.every(x=>x!=null)).length,rfN=rows.filter(r=>!r.bl&&r.r.every(x=>x!=null)).length;
+  return {opts,rows,scored,st,base:{n:blN,m:per(r=>r.bl)},rf:{n:rfN,m:per(r=>!r.bl)}};
 }
 function computeCO(){
-  const {opts,rows,scored,st}=coStats();
+  const {opts,rows,scored,st,base,rf}=coStats();
   rows.forEach(r=>{$('#coT'+r.k).innerHTML=r.tot==null?'':r.tot;opts.forEach((_,j)=>{$('#coP'+r.k+'_'+j).innerHTML=r.p?Math.round(r.p[j])+'%':'';});});
   $('#coReadout').textContent=scored.length?`${scored.length} sessions scored.`:'No sessions scored yet.';
+  /* v22.65 the baseline against reinforcement, and the maximizing result named (Fisher et al., 1992) */
+  {const f1=v=>v==null?'—':(Math.round(v*10)/10).toString(),notes=[];
+    if(base.n&&rf.n)notes.push('Baseline, no consequence at any station ('+base.n+' session'+(base.n===1?'':'s')+'): '+opts.map((o,j)=>o.label+' '+f1(base.m[j])).join(', ')+' responses a session; under reinforcement ('+rf.n+'): '+opts.map((o,j)=>o.label+' '+f1(rf.m[j])).join(', ')+'. An option whose responding rose above its own baseline reinforced it (Fisher et al., 1992; Roscoe et al., 1999).');
+    else if(base.n)notes.push('Baseline recorded ('+base.n+' session'+(base.n===1?'':'s')+'); the comparison appears once reinforcement sessions are scored.');
+    const top=st.filter(x=>!x.ctl&&x.mean!=null&&x.mean>=90);
+    if(top.length&&scored.length>=3)notes.push('Nearly all responding went to '+top.map(x=>x.label).join(' and ')+': concurrent ratio schedules tend to produce this (maximizing), so the test shows which stimulus is preferred, not by how much. A stimulus seldom chosen here may still reinforce on its own; that is the single-operant question (Fisher et al., 1992, p. 497).');
+    let el=document.getElementById('coNotes');if(!el){el=document.createElement('ul');el.id='coNotes';el.className='flags co-st-only';const ro=document.getElementById('coReadout');ro.parentNode.insertBefore(el,ro.nextSibling);}
+    el.innerHTML=notes.map(x=>'<li>'+esc(x)+'</li>').join('');}
   const tagS=s=>s==='preferred'?'<span class="tag ok">Preferred</span>':s==='comparable'?'<span class="tag mid">Comparable</span>':s==='notchosen'?'<span class="tag no">Not chosen</span>':s==='lower'?'<span class="tag na">Lower</span>':'';
   $('#coRank tbody').innerHTML=st.map(s=>`<tr><td>${esc(s.label)}</td><td class="n">${s.n||''}</td><td class="n">${s.n?s.tot:''}</td><td class="n">${s.mean==null?'&mdash;':Math.round(s.mean)+'%'}</td><td class="n">${s.n?s.wins+' of '+s.n:''}</td><td class="n">${s.posEff==null?(s.j===0?'&mdash;':'n/a'):(s.posEff>40?'<span class="tag no">Suspected</span>':'None')}</td><td>${tagS(s.stand)}</td></tr>`).join('');
   plotCO(st,rows);return st;
 }
 function plotCO(st,rows){
   const n=rows.length;const A=axes(null,100,'% of responses',n,'Session');let g=A.g;
-  st.forEach((s,j)=>{let d='';const shape=s.ctl?'circle':SHAPES[+s.key]||'circle';let pts=[];rows.forEach((r,i)=>{if(!r.p)return;pts.push({x:A.x(i),y:A.y(r.p[j])});});pts.forEach((p,i)=>{d+=(i?'L':'M')+p.x+' '+p.y+' ';});g+=`<path d="${d}" class="series${s.ctl?' ctl':''}"/>`;pts.forEach(p=>{g+=marker(shape,p.x,p.y,!s.ctl);});});
+  /* v22.65 baseline and reinforcement phases: a line where the condition changes, the paths broken there */
+  {let last=-1;rows.forEach((r,i)=>{if(r.tot!=null)last=i;});
+    if(rows.some((r,i)=>r.bl&&i<=last))rows.forEach((r,i)=>{if(i>last)return;const x0=A.x(i)-A.W/n/2;
+      if(i>0&&r.bl!==rows[i-1].bl)g+=`<line x1="${x0}" x2="${x0}" y1="${A.T}" y2="${A.T+A.H}" class="phase"/>`;
+      if(i===0||r.bl!==rows[i-1].bl)g+=`<text x="${x0+3}" y="${A.T+11}" class="tick">${r.bl?'Baseline':'Reinforcement'}</text>`;});}
+  st.forEach((s,j)=>{let d='';const shape=s.ctl?'circle':SHAPES[+s.key]||'circle';let pts=[];rows.forEach((r,i)=>{if(!r.p)return;pts.push({i,x:A.x(i),y:A.y(r.p[j])});});pts.forEach((p,k)=>{const prev=pts[k-1];d+=(k&&rows[prev.i].bl===rows[p.i].bl?'L':'M')+p.x+' '+p.y+' ';});g+=`<path d="${d}" class="series${s.ctl?' ctl':''}"/>`;pts.forEach(p=>{g+=marker(shape,p.x,p.y,!s.ctl);});});
   rows.forEach((r,i)=>{if((i+1)%2===0||i===0)g+=`<text x="${A.x(i)}" y="${A.T+A.H+13}" text-anchor="middle" class="tick">${i+1}</text>`;});
   let legend=`<g transform="translate(${A.L+6} ${A.T-6})">`;let lx=0;st.forEach(s=>{legend+=marker(s.ctl?'circle':SHAPES[+s.key]||'circle',lx+5,0,!s.ctl)+`<text x="${lx+12}" y="3" class="tick">${esc(s.label)}</text>`;lx+=14+s.label.length*5.2+14;});legend+='</g>';
   $('#coPlot').innerHTML=g+legend;
@@ -2817,7 +2888,7 @@ function renderSummary(){
 }
 
 function computeAll(){computeSO();computeCO();computePR();renderSummary();}
-function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
+function renderAll(){ensure();syncToolbar();renderStim();renderSO();renderCO();renderCOA();renderPR();renderIOA();renderSummary();bindMeta();$('#coOpts').value=S.meta.coOpts||'2';applyCoMode();}
 bindNum('nStim','n',()=>{renderStim();renderSO();renderCO();renderCOA();renderPR();renderSummary();});
 bindNum('sessMin','sessMin',()=>{renderSO();computeCOA();});
 bindNum('nSess','nSess',renderSO);
@@ -4044,8 +4115,10 @@ window.__nbhFactsOut=function(){try{
     if(R.v==='co'){const opts=coOpts().map((o,j)=>{const st=R.optSet[o.key]||{};
         const fr=o.ctl?0:Math.round(num(byId('ra-run-co-fr'+j),1)),acc=o.ctl?0:num(byId('ra-run-co-acc'+j),0);
         return Object.assign({},o,{fr,accMs:Math.max(0,acc)*1000,mag:o.ctl?'':stim(+o.key).mag,bad:!o.ctl&&(!(fr>=1)||!(acc>=0)),src:st.src||''});});
-      if(opts.some(o=>o.bad)){note(R,'Each stimulus option needs a schedule of FR 1 or more and an access time of 0 s or more.',true);return null;}
-      return{opts,pos:val($(R,'pos')),dur:sessMs(),clock:clockOf(R)};}
+      if(!(byId('ra-run-co-cond')&&byId('ra-run-co-cond').value==='bl')&&opts.some(o=>o.bad)){note(R,'Each stimulus option needs a schedule of FR 1 or more and an access time of 0 s or more.',true);return null;}
+      /* v22.65 a baseline session: every station counts responses and none has a consequence */
+      const bl=!!byId('ra-run-co-cond')&&byId('ra-run-co-cond').value==='bl';
+      return{opts:bl?opts.map(o=>Object.assign({},o,{ctl:true,fr:0,accMs:0,bad:false})):opts,bl,pos:val($(R,'pos')),dur:sessMs(),clock:clockOf(R)};}
     const cond=$(R,'cond').value,ctl=cond==='ctl',acc=num($(R,'acc'),0),label=condLabel(cond),mag=ctl?'':stim(+cond).mag;
     if(!ctl&&!(acc>=0)){note(R,'Set an access time of 0 s or more.',true);return null;}
     const eat=!ctl&&!!$(R,'amode')&&$(R,'amode').value==='eat',accMs=ctl?0:eat?EAT_MS:acc*1000;   /* v22.58 until consumed: up to 10 min */
@@ -4180,7 +4253,7 @@ window.__nbhFactsOut=function(){try{
       const h=history('so',k),ph=reversal()&&h.length&&h[h.length-1]!==c.cond;   /* a full sheet adds the row at the end */
       rows.push(['Goes to',to+(ph?'; Phase start will be ticked (the condition changed)':'')]);}
     else if(R.v==='co'){
-      rows.push(['Option A position',c.pos||'Not recorded']);
+      rows.push(['Condition',c.bl?'Baseline (no consequence at any station)':'Reinforcement'],['Option A position',c.pos||'Not recorded']);
       c.opts.forEach((o,j)=>rows.push([o.label,r.cnt[j]+' ('+Math.round(r.pct[j])+'%)'+(o.ctl?'':', '+plural(r.srs[j],'reinforcer'))]));
       rows.push(['Total responses',String(r.tot)],['Changeovers',r.chg+' (for reference; the sheet has no column for them)'],['Time run',up(r.run)+(R.why==='ended'?' (ended early)':'')+clockTxt]);
       if(r.during)rows.push(['Responses during access',r.during+' ('+durTxt+')']);
@@ -4202,13 +4275,13 @@ window.__nbhFactsOut=function(){try{
     note(R,R.cfg.label+' is no longer a condition on the sheet. Check the stimuli in Setup.',true);return false;}
   function saveSO(R){const c=R.cfg,k=ensureRow(R);if(k<0)return -1;const sel=fld('so',k,'cond');if(!condOK(R,sel))return -1;
     const h=history('so',k),prev=h.length?h[h.length-1]:null,planned=val(sel),r=results(R);
-    put(fld('so',k,'date'),dstr(R.date));put(sel,c.cond);put(fld('so',k,'resp'),String(r.n));put(fld('so',k,'min'),String(r.min));put(fld('so',k,'pb'),r.pb>0);
+    put(fld('so',k,'date'),dstr(R.date));put(sel,c.cond);put(fld('so',k,'resp'),String(r.n));put(fld('so',k,'min'),String(r.min));put(fld('so',k,'acc'),String(Math.round(r.accMs/1000)));put(fld('so',k,'tot'),String(r2(r.run/60000)));put(fld('so',k,'pb'),r.pb>0);   /* v22.65 the three times */
     if(reversal()&&prev!=null&&prev!==c.cond)put(fld('so',k,'phase'),true);
     return{k,extra:planned&&planned!==c.cond?' Row '+(k+1)+' had been planned as '+condLabel(planned)+'.':''};}
   function saveCO(R){const c=R.cfg;
     if(coOpts().map(o=>o.key).join()!==c.opts.map(o=>o.key).join()){note(R,'Options per session changed after this session started. Set it back to match the session, then save.',true);return -1;}
     const k=ensureRow(R);if(k<0)return -1;const r=results(R);
-    put(fld('co',k,'date'),dstr(R.date));if(c.pos)put(fld('co',k,'pos'),c.pos);
+    put(fld('co',k,'date'),dstr(R.date));if(c.pos)put(fld('co',k,'pos'),c.pos);put(fld('co',k,'cond'),c.bl?'bl':'');
     c.opts.forEach((o,j)=>put(fld('co',k,'r',j),String(r.cnt[j])));put(fld('co',k,'pb'),r.pb>0);
     return{k,extra:''};}
   function savePR(R){const c=R.cfg;
@@ -4286,7 +4359,8 @@ window.__nbhFactsOut=function(){try{
     const rows=[],resp=meta('response'),mo=meta('mo');
     if(resp)rows.push(['Response',resp]);
     if(R.v==='co'){const m=meta('materials');if(m)rows.push(['Materials',m]);
-      rows.push(['Before each session','Prompt one response at every station and deliver its consequence, so each contingency is contacted. These are not counted.']);}
+      const bl=R.cfg?!!R.cfg.bl:!!byId('ra-run-co-cond')&&byId('ra-run-co-cond').value==='bl';
+      rows.push(bl?['Baseline','No station has a consequence: count the responses at each, deliver nothing. Under reinforcement, an option whose responding rises above its baseline is a reinforcer (Fisher et al., 1992; Roscoe et al., 1999).']:['Before each session','Prompt one response at every station and deliver its consequence, so each contingency is contacted. These are not counted.']);}
     else{const cond=R.cfg?R.cfg.cond:$(R,'cond').value,ctl=cond==='ctl',lab=condLabel(cond),mag=ctl?'':stim(+cond).mag;
       rows.push(['Consequence',ctl?(R.v==='pr'?'Control: the same progression; completing a ratio produces nothing.':(meta('control')||'Control: responses produce nothing.')):lab+(mag?': '+mag:'')]);
       if(R.v==='so'&&!reversal()&&meta('signal'))rows.push(['Signal',meta('signal')]);
@@ -4309,8 +4383,8 @@ window.__nbhFactsOut=function(){try{
     if(st==='run'&&R.accUntil&&c&&c.eat&&R.v!=='co'){const p=R.accs[R.accs.length-1];return['Access until consumed',R.accLabel+': tap Consumed when it is eaten ('+up(Math.max(0,e-(p?p.from:e)))+' so far).'+(c.clock!=='run'?' The task materials stay out of reach'+(paused(R)?'; the clock waits.':'.'):'')+(R.v==='pr'?' Then FR '+ratioAt(R,R.idx)+'.':''),'now'];}
     if(st==='run'&&R.accUntil)return['Access '+down(R.accUntil-e),R.accLabel+': remove it at 0:00.'+(c&&c.clock!=='run'?' The task materials stay out of reach'+(paused(R)?'; the clock waits.':'.'):'')+(R.v==='pr'?' Then FR '+ratioAt(R,R.idx)+'.':''),'now'];
     if(R.v==='co'){
-      if(st!=='run')return['Ready','Prompt one response at each station and deliver its consequence (not counted), then press Start session.',''];
-      return['Running',c.opts.map((o,j)=>o.ctl?o.label+': nothing':o.fr===1?o.label+': FR 1':o.label+': '+R.progs[j]+' of '+o.fr).join(' · '),''];}
+      if(st!=='run')return byId('ra-run-co-cond')&&byId('ra-run-co-cond').value==='bl'?['Ready','Baseline: no station has a consequence. Count the responses at each station, then press Start session.','']:['Ready','Prompt one response at each station and deliver its consequence (not counted), then press Start session.',''];
+      return[c.bl?'Baseline':'Running',c.opts.map((o,j)=>o.ctl?o.label+': nothing':o.fr===1?o.label+': FR 1':o.label+': '+R.progs[j]+' of '+o.fr).join(' · '),''];}
     if(R.v==='so'){const cond=c?c.cond:$(R,'cond').value,lab=condLabel(cond),fr=c?c.fr:Math.max(1,Math.round(num($(R,'fr'),1)));
       if(cond==='ctl')return[st==='run'?'Control':'Ready','Responses produce nothing. '+(st==='run'?'Tap Response for each one.':'Press Start session.'),''];
       if(st!=='run')return['Ready','FR '+fr+': '+(fr===1?'each response produces ':'every '+ordinal(fr)+' response produces ')+lab+'. Press Start session.',''];
@@ -4382,6 +4456,7 @@ window.__nbhFactsOut=function(){try{
       $(R,'acc').addEventListener('input',()=>{R.accEdited=true;defaults(R);});}
     if(v==='so'){$(R,'fr').addEventListener('input',()=>{defaults(R);paint(R);});$(R,'clock').addEventListener('change',()=>paint(R));}
     $(R,'clock')&&$(R,'clock').addEventListener('change',()=>paint(R));
+    if(v==='co'&&byId('ra-run-co-cond'))byId('ra-run-co-cond').addEventListener('change',()=>{script(R);paint(R);});
     if(v==='co'){$(R,'pos').addEventListener('change',()=>{R.posEdited=true;setText($(R,'possrc'),'Set here for this session');});
       q('#ra-run-co-opts').addEventListener('input',e=>{const m=/^ra-run-co-(fr|acc)(\d)$/.exec(e.target.id||'');if(!m)return;const o=coOpts()[+m[2]];if(!o||o.ctl)return;
         const st=R.optSet[o.key]||(R.optSet[o.key]={fr:1,accEd:false,acc:0,src:''});
