@@ -9903,6 +9903,18 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.66: two attributions corrected from the reinforcer-assessment articles
+
+- **TD-1, Magnitude.** Matching the assessment format to the access the treatment will give is now credited to
+  Steinhilber and Johnson (2007). Trosclair-Lasserre et al. (2008) are cited for what they found: a larger magnitude
+  may make a difference only as the requirement rises, so raise it as the schedule is thinned.
+- **SR-1, Concurrent schedules.** "What it produces" now says that concurrent interval schedules produce matching and
+  concurrent ratio schedules maximizing, so a concurrent VI arrangement shows how much one stimulus is preferred over
+  another and a concurrent ratio arrangement shows quickly which is preferred most (Fisher et al., 1992). Fisher et al.
+  (1992) is in the entry's references.
+
+Checked by `qa/v2266-test.js` (5).
+
 ### v22.65: RA-1 from the reinforcer-assessment articles: a concurrent baseline, the three times, and an agreement check
 
 - **A baseline on the concurrent-operants sheet.** Each session row has a **Condition**: Reinforcement or **Baseline**
