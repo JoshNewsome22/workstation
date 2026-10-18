@@ -1400,7 +1400,7 @@ renderAll();
 (function(){const was=window.__nbhFactsIn;
 window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n=(r&&r.filled)||0,k=0;f=f||{};
   if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
-  const menu=(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP').map(m=>String(m.name).trim()),L=s=>String(s||'').trim().toLowerCase();
+  const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP')).map(m=>String(m.name).trim()),   /* v22.59 RA-1's verdicts kept */L=s=>String(s||'').trim().toLowerCase();
   if(menu.length){ensure();const chn=num(S.meta.ch_n)||4,ch=S.choice.slice(0,chn),used=new Set(ch.map(o=>L(o.l)).filter(Boolean));
     const free=menu.filter(x=>!used.has(L(x)));ch.forEach(o=>{if(!o.ph&&!L(o.l)&&free.length){o.l=free.shift();k++;}});
     const t=S.ft[1];if(t&&!t.ph&&(!L(t.l)||L(t.l)==='then')){t.l=menu[0];k++;}

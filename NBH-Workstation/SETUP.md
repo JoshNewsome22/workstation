@@ -9903,6 +9903,19 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.59: the reinforcer menu keeps what the reinforcer assessment confirmed
+
+- **One rule for the menu the forms take from the case.** Forms AD-1, CT-1, TD-1, VS-1 and the Delay Tolerance toolkit
+  fill their reinforcer lists from PA-1's menu and used to leave out its low-preference third. They still do, with two
+  exceptions from Form RA-1's results: an item RA-1 **confirmed** as a reinforcer stays, whatever its preference (Roscoe,
+  Iwata, & Kahng, 1999, found that low-preference stimuli often worked as reinforcers when delivered alone), and an item
+  RA-1 found **no reinforcing effect** for is left out, whatever its preference. With no RA-1 results the menu is as before.
+- **TD-1** says so on its preferred-stimuli line: a kept low-preference item is marked "low preference, a reinforcer in
+  RA-1", and the items left out are named ("no reinforcing effect in Form RA-1").
+- The rule lives once, in the shared case helper the forms load (`nbh-case-flow.js`, `nbhCase.menuItems`).
+
+Checked by `qa/v2259-test.js` (8) and the tests that fill the forms from a case.
+
 ### v22.58: the reinforcer assessment's progressive ratio, from the articles: each ratio twice, the work each session took, access until consumed
 
 - **Each ratio twice.** Form RA-1's toolbar now has **Each ratio once / Each ratio twice** beside the progression. Twice

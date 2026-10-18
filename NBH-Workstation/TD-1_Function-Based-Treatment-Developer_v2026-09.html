@@ -3232,9 +3232,11 @@ window.__nbhFactsOut=function(){
     const rep=(reps[0]&&T(reps[0].label))||T((prob.find(b=>T(b.rep))||{}).rep)||T((fsb.find(b=>T(b.alt))||{}).alt);
     P('m.repdesc',rep,'the replacement behavior');
     P('m.prec',f.crisis&&f.crisis.precursor,'the precursor (CR-1)');
-    /* the preferred stimuli: ranked first, by rank; the low-preference third left out */
-    const menu=(f.menu||[]).filter(m=>m&&T(m.name)&&m.tier!=='LP').slice().sort((a,b)=>(a.rank==null?1e9:a.rank)-(b.rank==null?1e9:b.rank));
-    if(menu.length)P('m.pref',menu.slice(0,6).map(m=>T(m.name)).join(', ')+' (Form PA-1, most preferred first)','the preferred stimuli (PA-1)');
+    /* the preferred stimuli: ranked first, by rank; the low-preference third left out, unless Form RA-1 confirmed the item as a
+       reinforcer; an item RA-1 found no effect for is left out and named (v22.59, Roscoe, Iwata, & Kahng, 1999) */
+    const mi=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&T(m.name)&&m.tier!=='LP'));
+    const menu=mi.slice().sort((a,b)=>(a.rank==null?1e9:a.rank)-(b.rank==null?1e9:b.rank));
+    if(menu.length)P('m.pref',menu.slice(0,6).map(m=>T(m.name)+(m.tier==='LP'&&m.ra==='Confirmed'?' (low preference, a reinforcer in RA-1)':'')).join(', ')+' (Form PA-1, most preferred first)'+((mi.gone||[]).length?'; left out: '+mi.gone.join(', ')+' (no reinforcing effect in Form RA-1)':''),'the preferred stimuli (PA-1, RA-1)');
     /* the reinforcer and the EO: FS-1's antecedent and consequence for this behavior, else its summary statement */
     const eo=fs1?[T(fs1.ant)?'EO: '+T(fs1.ant):'',T(fs1.cons)?'Reinforcer: '+T(fs1.cons):''].filter(Boolean).join('; '):'';
     P('m.reinf',eo||T(((f.fn&&f.fn.statements)||[]).filter(Boolean)[0]),'the reinforcer and EO (FS-1)');

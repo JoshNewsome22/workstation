@@ -1619,7 +1619,7 @@ window.__nbhFactsIn=function(f){if(!f||typeof f!=='object')return {filled:0,note
     cur=String((el&&el.value)||S.meta.consent||'').trim();   /* v22.37 (review F348): from the implementation consent only */
   if(f.consent&&cur&&CT1_AUTO.test(cur)&&cur!==want){S.meta.consent=want;if(el)el.value=want;last=el||last;n++;}
   else if(want)meta('consent',want);}
-  const menu=(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP').slice().sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
+  const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(Array.isArray(f.menu)?f.menu:[]).filter(m=>m&&m.name&&m.tier!=='LP')).slice()   /* v22.59 RA-1's verdicts kept */.sort((a,b)=>(+a.rank||99)-(+b.rank||99)).slice(0,6).map(m=>String(m.name).trim());
   if(menu.length)meta('homeR','From the school menu, to check with the family: '+menu.join(', '));
   const T=(f.training&&Array.isArray(f.training.steps)?f.training.steps:[]).filter(x=>x&&String(x.d||'').trim());
   let steps=false;

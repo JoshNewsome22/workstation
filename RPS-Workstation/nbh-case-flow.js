@@ -360,6 +360,20 @@
         '<div class="nbh-sb-act"><button type="button" class="tool" data-sb="use">Use the plan&rsquo;s steps</button><button type="button" class="tool" data-sb="skip">Not now</button></div>';
     b.onclick = function(e){ var a = e.target && e.target.getAttribute && e.target.getAttribute('data-sb'); if (a === 'use') o.use(); else if (a === 'skip') o.skip(); };
   };
+  /* v22.59 the reinforcer menu a form offers from the case: PA-1's items without its low-preference third, except that an
+     item Form RA-1 confirmed as a reinforcer stays whatever its preference (Roscoe, Iwata, & Kahng, 1999, found that
+     low-preference stimuli often worked as reinforcers when delivered alone), and an item RA-1 found no reinforcing effect
+     for is left out. Each item kept carries RA-1's verdict as ra; the list's gone names the items left out for it. */
+  C.menuItems = function(f){
+    f = f || {}; var T = function(x){ return String(x == null ? '' : x).trim(); }, ra = {}, out = [], gone = [];
+    ((f.reinf && f.reinf.items) || []).forEach(function(x){ if (x && T(x.name)) ra[T(x.name).toLowerCase()] = T(x.verdict); });
+    (Array.isArray(f.menu) ? f.menu : []).forEach(function(m){
+      if (!m || !T(m.name)) return; var v = ra[T(m.name).toLowerCase()] || '';
+      if (v === 'Not supported') { gone.push(T(m.name)); return; }
+      if (m.tier === 'LP' && v !== 'Confirmed') return;
+      var o = {}; for (var k in m) o[k] = m[k]; o.ra = v; out.push(o); });
+    out.gone = gone; return out;
+  };
   window.nbhCase = C;
   /* a form opened on its own, outside the workstation, has no case: the group stays hidden */
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', C.paint); else C.paint();

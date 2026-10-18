@@ -2235,7 +2235,7 @@ window.__nbhFactsIn=function(f){const r=was?was.apply(this,arguments):null;let n
   if(!was&&window.nbhCase)n+=(window.nbhCase.generic(f,false).filled||0);
   const bs=(f.behaviors||[]).filter(b=>b&&String(b.label||'').trim()&&!b.isRep).map(b=>String(b.label).trim()),el=document.querySelector('[name="s_instead"]');
   if(el&&bs.length&&!String(el.value||'').trim()){el.value=bs.slice(0,4).join(', ');el.dispatchEvent(new Event('input',{bubbles:true}));k++;got.push('the behavior from Form TB-1');}
-  const menu=(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP').slice(0,6);
+  const menu=(window.nbhCase&&nbhCase.menuItems?nbhCase.menuItems(f):(f.menu||[]).filter(m=>m&&String(m.name||'').trim()&&m.tier!=='LP')).slice(0,6);   /* v22.59 RA-1's verdicts kept */
   const p=menu.length?nbhPlace('tbPref',menu,m=>[m.name,nbhPct(m),m.format||m.method||'',m.date||'']):0;
   if(p){k+=p;got.push('reinforcers from Form PA-1');recalc('tbPref');}
   /* v22.37 (review F401) the consent line, filled when empty and only when Form IC-1 has consent on file that covers this
