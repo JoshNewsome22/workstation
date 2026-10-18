@@ -596,6 +596,8 @@ PH.G=async()=>{
   ok('G9 CN-1 opens with the IEP’s 120 minutes a month of consultation from DM-1',cm.min==='120'&&cm.per==='month'&&cm.kind==='consult'&&cm.client===M.client,cm);
   const NOTES=[[md2(SD[20]),'09:00','09:45','Observation','Ms. Lopez (simulated) (teacher), the student','First week of the plan'],[md2(SD[24]),'13:00','13:30','Consultation','Ms. Lopez (simulated) (teacher), Mr. Okafor (simulated) (paraprofessional)','Data review'],[md2(D.ti),'10:00','10:40','Observation','Mr. Okafor (simulated) (paraprofessional), the student','TI-1 observation']];
   for(let i=0;i<NOTES.length;i++){if(i>0)await tapIn(cn,'#newNote');const n=NOTES[i];await putAll(cn,{'[data-n="date"]':n[0],'[data-n="start"]':n[1],'[data-n="end"]':n[2],'[data-n="type"]':n[3],'[data-n="present"]':n[4],'[data-n="purpose"]':n[5]});}
+  /* v22.52 (review F329) the service log counts signed notes: each note says what was seen and is signed */
+  await cn.evaluate(()=>{S.notes.forEach(n=>{if(n.date){n.observed=n.observed||'Seen as planned (simulated).';n.sig=S.meta.bcba||'BCBA (simulated)';n.sig_date=n.date;}});renderAll();});
   await sleep(600);const sv=((await factsOut(cn))||{}).service||{};
   const inMonth=NOTES.filter(n=>{const m=/^(\d+)\/(\d+)\/(\d+)$/.exec(n[0]);return +m[1]===new Date().getMonth()+1;}).length;
   ok('G10 CN-1’s service log: three entries, minutes from the times, against the IEP’s minutes',(sv.log||[]).length===3&&sv.iep&&sv.iep.minutes===120&&/of 120 minutes/.test(sv.iep.line||''),{log:sv.log,iep:sv.iep,month:sv.month,inMonth});

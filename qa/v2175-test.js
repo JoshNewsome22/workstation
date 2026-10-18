@@ -69,7 +69,7 @@ const FACTS={data:{from:'2026-09-14',to:'2026-10-09',days:20,src:'DD-1',
     S.notes.push(newNote());cur=S.notes.length-1;S.notes[cur].date='9/1/26';window.__nbhFactsIn(f);r.old=S.notes[cur].observed;
     document.getElementById('cnWeek').click();r.forced=/The week of 10\/5\/26/.test(S.notes[cur].observed);return r;},FACTS);
   ok('3a a note being written starts from the week summary: the data reviewed, the week against the last, the team’s decision, the latest TI-1 observation',
-    /Form DD-1\), week of 10\/5\/26 to 10\/9\/26; TI-1 of 10\/7\/26/.test(cn.forms)&&/- Physical aggression: 5 \(1 a day\), the week before 11 \(2\.2 a day\) \(down 55%\)\./.test(cn.obs)&&/The team decided: Fade the aide to the doorway\./.test(cn.obs)&&cn.integ==='76.9'&&cn.idate==='10/7/26'&&cn.rate==='2.1'&&cn.goal==='1'&&cn.btn!=='none'&&cn.dom,cn);
+    /Form DD-1\), week of 10\/5\/26 to 10\/9\/26; TI-1 of 10\/7\/26/.test(cn.forms)&&/- Physical aggression: 5 \(1 a day\), the week before 11 \(2\.2 a day\) \(down 55%\)\./.test(cn.obs)&&/The team decided: Fade the aide to the doorway\./.test(cn.obs)&&cn.integ==='76.9'&&cn.idate==='10/7/26'&&cn.rate==='1'&&cn.goal==='1'&&cn.btn!=='none'&&cn.dom,cn);
   ok('3b a note dated before the week is left alone until "Start from the week summary" is pressed',cn.old===''&&cn.forced,cn);
   await page.close();
 

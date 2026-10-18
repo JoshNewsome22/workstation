@@ -174,8 +174,9 @@ const caught=(p,label)=>p.evaluate(async t=>{let got=null;const mk=URL.createObj
   const alt=await sr.evaluate(()=>S.meta.alt);
   ok('B: SR-1\'s alternative response has no "(see target 4)"',alt==='Break request',alt);
   const hd=await fresh(page,'HD-1');
-  const hdr=await hd.evaluate(()=>S.bh.map(b=>b.name).filter(Boolean));
-  ok('B: HD-1 takes the cleaned names',hdr.every(n=>!NOTE.test(n))&&hdr.includes('Break request'),hdr);
+  /* v22.53 (review F375) a replacement behavior goes on HD-1's checklist as a Child step, not on the tally sheet */
+  const hdr=await hd.evaluate(()=>({bh:S.bh.map(b=>b.name).filter(Boolean),sk:S.sk.filter(s=>s.label).map(s=>s.label+'|'+s.who)}));
+  ok('B: HD-1 takes the cleaned names (the replacement as a Child step on the checklist)',hdr.bh.concat(hdr.sk).every(n=>!NOTE.test(n))&&!hdr.bh.includes('Break request')&&hdr.sk.includes('Break request|Child'),hdr);
   const fs1=await fresh(page,'FS-1');
   const fsr=await fs1.evaluate(()=>S.beh.map(b=>({lab:b.lab,fn:b.fn,alt:b.alt})));
   ok('B: FS-1 has 4 target rows, the problem behaviors, each with its function',fsr.length===4&&fsr.every(b=>b.fn)&&!fsr.some(b=>/Break request/.test(b.lab)),fsr);

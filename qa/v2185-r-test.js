@@ -51,6 +51,8 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   await newNote();await setN({date:OLDS,start:'11:00',end:'11:40',type:'Consultation',present:'Ms. R. (teacher)',purpose:'Data review'});
   await newNote();await setN({date:TODAY,type:'Record review',purpose:'Read the records'});
   await newNote();await setN({start:'08:00',end:'08:30',type:'Consultation'});
+  /* v22.52 (review F329) the service log certifies and counts signed notes: the dated notes are signed as written */
+  await p.evaluate(()=>{S.notes.forEach(n=>{if(n.date){n.sig='Jordan Ellis, M.A., BCBA (simulated)';n.sig_date=n.date;}});renderAll();});
   const E=await p.evaluate(()=>svcEntries().map(e=>({i:e.i,iso:e.iso,min:e.min,kind:e.kind,with:e.with,note:e.note})));
   ok('1a five entries: dated notes with minutes; the untimed and the undated notes are not entries',E.length===5,E);
   const byI=i=>E.find(e=>e.i===i)||{};
@@ -70,7 +72,7 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   ok('2a the IEP\'s minutes from DM-1 fill the empty fields',fin.filled>=4&&m.min==='120'&&m.per==='month'&&m.kind==='consult'&&m.fld==='120'&&/IEP service minutes/.test(fin.note),{fin,m});
   ok('2b against the IEP: 120 of 120 minutes this month (every kind but direct)',/120 of 120/.test(m.iep)&&/minutes this month/.test(m.iep),m.iep);
   ok('2c this week and this month: 140 minutes, direct 20, consultation and other 120',/THIS WEEK\s*140 min/i.test(m.met)&&/direct 20 · consultation and other 120/.test(m.met),m.met);
-  ok('2d by kind: observation 60, consultation 30 this week and 70 in all, training 30, direct 20; totals 140, 140, 180',/Observation 60 60 60/.test(m.tot)&&/Consultation 30 30 70/.test(m.tot)&&/Training 30 30 30/.test(m.tot)&&/Direct service 20 20 20/.test(m.tot)&&/Total 140 140 180/.test(m.tot),m.tot);
+  ok('2d by kind: observation 60, consultation 30 this week and 70 in all, training 30, direct 20; totals 140, 140, 180',/Observation 60 60 60/.test(m.tot)&&/Consultation 30 30 70/.test(m.tot)&&/Training 30 30 30/.test(m.tot)&&/Direct service 20 20 20/.test(m.tot)&&/Total, signed notes 140 140 180/.test(m.tot),m.tot);
   const met2=await p.evaluate(()=>document.getElementById('svcMetrics').textContent);
   ok('2e the dated note without times is counted as missing its minutes',/1 dated note has no minutes or times/.test(met2),met2);
   await setM('iep_min','90');const fin2=await p.evaluate(()=>window.__nbhFactsIn({profile:{services:{minutes:120,per:'week',kind:'direct'}}}));
@@ -101,11 +103,11 @@ const grab=(p,id)=>p.evaluate(id=>new Promise(res=>{const U=URL,mk=U.createObjec
   ok('3f the whole-form print still renders, with the service log in it',pages(pdf2)>=4,pages(pdf2));
   /* 4: CSV */
   const csv=await grab(p,'svcCsv');const L=csv.t.split('\n');
-  ok('4a the service log CSV: a header and this month\'s four rows with minutes, kind and provider',L.length===5&&/^"Student","Student ID","Date","Start","End","Minutes","Kind"/.test(L[0])&&L.slice(1).every(r=>/"Mateo Rivera","4471823"/.test(r)&&/"Jordan Ellis, M\.A\., BCBA \(simulated\)"$/.test(r))&&/"60","Observation"/.test(csv.t)&&/^CN-1_service-log_Mateo_Rivera_/.test(csv.name),{L,name:csv.name});
+  ok('4a the service log CSV: a header and this month\'s four rows with minutes, kind and provider',L.length===5&&/^"Student","Student ID","Date","Start","End","Minutes","Kind"/.test(L[0])&&L.slice(1).every(r=>/"Mateo Rivera","4471823"/.test(r)&&/"Jordan Ellis, M\.A\., BCBA \(simulated\)"(,|$)/.test(r))&&/"60","Observation"/.test(csv.t)&&/^CN-1_service-log_Mateo_Rivera_/.test(csv.name),{L,name:csv.name});
   await p.selectOption('#svcPeriod','all');await sleep(200);const csvAll=await grab(p,'svcCsv');
   ok('4b every entry when the period is every entry',csvAll.t.split('\n').length===6&&/_all\.csv$/.test(csvAll.name),csvAll.name);
   const ncsv=await grab(p,'csvBtn');const nh=ncsv.t.split('\n')[0];
-  ok('4c the note CSV gains the service columns',/"Service minutes","Service kind","With whom","Service note"$/.test(nh),nh.slice(-120));
+  ok('4c the note CSV gains the service columns',/"Service minutes","Service kind","With whom","Service note"(,|$)/.test(nh),nh.slice(-120));
   /* 5: facts out, save and open */
   const fo=await p.evaluate(()=>window.__nbhFactsOut());const sv=fo&&fo.service;
   ok('5a facts out: service.log oldest first, {date, min, kind, with, note}',sv&&sv.log.length===5&&sv.log[0].date===isoD(OLD)&&sv.log[0].min===40&&sv.log[0].kind==='consult'&&sv.log.every(x=>/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&typeof x.min==='number'&&/^(direct|consult|observation|training|meeting|other)$/.test(x.kind))&&sv.log.some(x=>x.with==='parent'&&x.note==='Called the parent about the home card'),sv);

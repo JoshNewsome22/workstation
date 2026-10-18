@@ -1,5 +1,6 @@
 /* ---------------------------------------------------------- HD-1 */
 .sheet{width:12in}
+body .toolbar{max-width:12in}   /* v21.89 the toolbar as wide as the 12-inch page, not 8.5in over it */
 @media print{.sheet{width:8.5in}}
 .grid-wrap{overflow-x:auto}
 table.rt{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:12.5px}
@@ -49,7 +50,7 @@ table.rt td.ent{padding:2px 3px}
 #sheetOut table.hs-t td.lab{text-align:left;font-weight:700;font-size:15px}
 #sheetOut table.hs-t td.sub{text-align:left;font-size:14.5px}
 #sheetOut table.hs-t td.hc{height:38px;font-size:13.5px;color:#333;letter-spacing:.03em;white-space:nowrap;padding:4px 2px}
-#sheetOut .hs-end{break-inside:avoid}
+#sheetOut .hs-end > p,#sheetOut .hs-tail{break-inside:avoid}   /* v22.53 the lines flow; the signature and footer keep together */
 #sheetOut table.hs-t tr.ex td{background:#f3f3f3;color:#333;font-style:italic;height:34px}
 #sheetOut table.hs-t tr.ex td.lab{font-style:normal}
 #sheetOut table.hs-t tr.grp td{background:#ddd;text-align:left;font-weight:700;font-size:15px;height:auto}
@@ -99,3 +100,43 @@ table.rt td.nx,table.rt th.nx,td.nx,th.nx{width:30px;text-align:center;padding:0
 /* ---- v21.82: the home-language flag above the home sheets (screen only) ---- */
 .nbh-lang-flag{margin:8px 0;padding:8px 12px;border:1px solid #e3c98a;border-left:4px solid #9A6208;border-radius:4px;background:#fdf6e7;color:#3d2a00;font-size:13.5px;line-height:1.45}
 @media print{.nbh-lang-flag{display:none!important}}
+
+/* ---- v22.53 (review F369-F377, I188-I190) ---- */
+/* the rule for marking a behavior: one or two short boxes in its cell */
+table.rt td.rule input{display:block;margin:0 0 4px;border-bottom:1px dashed var(--rule-2)}
+table.rt td.rule input:last-child{margin-bottom:0}
+table.rt td.rule .rl{display:block;font-size:10.5px;color:var(--ink-soft);line-height:1.2}
+/* a routine that did not happen (a dash), in the grids; the routines marked under a day total */
+table.rt td.ent.na{background:#eef1f2}
+table.rt td.ent.na input,table.rt td.ent.na select{color:#5B6B6B}
+.dt-of{font-size:10.5px;font-weight:400;color:var(--ink-soft);line-height:1.2;white-space:nowrap}
+.tool[aria-pressed="true"]{background:#2f5568;color:#fff;border-color:#2f5568}
+table.rt tr.grp td{background:var(--wash);font-weight:600}
+label.ck.abc-t{display:flex;align-items:flex-start;font-size:11.5px;line-height:1.3;margin:1px 0}
+label.ck.abc-t input{margin-top:2px}
+.abc-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin:6px 0 10px}
+#slTbl td input{min-width:56px}
+.sl-flag{display:inline-block;font-size:10.5px;padding:0 4px;border-radius:3px;background:#FBEEDB;color:#6b3a0e;margin-left:3px}
+.sl-m{display:inline-block;font-size:11.5px;margin-right:6px;white-space:nowrap}
+.hd-cost{font-size:12.5px;line-height:1.45}
+/* the family's sheet: the fixed safety line, the family's choice, a routine's note, no total for a rating */
+#sheetOut .hs-safe{margin:6px 0 0;font-size:15px;border-left:4px solid #111;padding:1px 0 1px 8px}
+#sheetOut .hs-choice{margin:4px 0 0;font-size:13px}
+#sheetOut table.hs-t td.lab.night{font-size:13.5px;white-space:nowrap;padding-top:3px;padding-bottom:3px}
+/* the lines under each sheet a little closer, so a seven-night sleep log keeps to one page */
+#sheetOut .hs-line{margin-top:5px}
+#sheetOut .hs-sig{margin-top:10px}
+#sheetOut .hs-foot{margin-top:6px;font-size:12.5px;line-height:1.35}
+#sheetOut table.hs-t tr.slr td.hc{height:30px!important}
+#sheetOut table.hs-t{margin:4px 0 6px}
+#sheetOut .hs-box{padding:6px 12px}
+#sheetOut .hs-title{margin-bottom:4px}
+#sheetOut .hs-box li{margin:2px 0}
+#sheetOut .hs-who{margin-bottom:8px}
+#sheetOut .hs-note{font-size:13px;font-style:italic;color:#333;line-height:1.25;display:inline-block}
+#sheetOut table.hs-t td.tot.na{font-size:12px;color:#555;font-style:italic}
+/* the pages count: each sheet laid out at the printed width, 7.5 inches inside half-inch margins */
+#sheetOut.hd-measure{width:720px!important;border:0!important}
+#sheetOut.hd-measure .hs{padding:0!important;border-bottom:0!important}
+#sheetOut.hd-measure table.hs-t td.hc{height:34px}
+@media print{.hd-cost,#wkDesign,#wkStartNote{display:none!important}label.ck.abc-t:has(input:not(:checked)){display:none}}   /* an ABC note prints the boxes ticked */

@@ -9903,6 +9903,92 @@ Checked by `qa/v2214-speed-test.js` (twelve simulated students; every one of the
 with nothing still changing after it says it is done). Save case also clears the unsaved dot the moment the case is saved (it waited
 for a 5-second repaint).
 
+### v22.53: Form HD-1, home data sheets that tell a good week from an unwatched one, keep each week as it went home, and type in all four sheets
+
+- **A day with no behavior is not a day nobody watched** (review F369). The tally and minutes lines on the sheet now say
+  **Write 0 if it did not happen**, and the instruction box adds **If a routine did not happen that day (no outing, no
+  homework), draw a line (—) in its box**; a blank is kept only for a forgotten routine. The example row shows both (a 0 on
+  Wednesday, a dash on Saturday, total 9). On **Entry**, type a dash (-) where the family drew one, or press **Routine did
+  not happen (—)** and tap the boxes (the number pad has no dash): a dash is not asked for, so it is left out of
+  completeness and the totals, and a blank stays a gap. A day total says how many routines were marked when it is fewer than
+  were held ("0, 4 of 5 routines"), and the graph draws such a day as an open point.
+- **Changing next week's sheet no longer rewrites the weeks typed in** (F370). Each week keeps the days, routines and
+  behaviors its sheets went home with, from its first mark; its totals, completeness, graph points, CSV rows and the days
+  given to the case come from that copy. A change on Setup (Monday to Friday, a routine unticked, a behavior added) applies
+  to the sheets still to come. A past week whose sheets differ says so, with **Use the current Setup for this week**, and
+  the graph marks "sheet changed" where the design changed. An earlier saved file keeps the design it was saved with.
+  **Week starting (Monday)** moves a date that is not a Monday to that week's Monday and says so ("9/13/26 is a Sunday; the
+  week of Monday 9/14/26 is used"), and the graph and the days DD-1 receives use the same date. **Add a week** starts the
+  Monday after the last week.
+- **The agreement check scores ratings and each behavior properly** (F371). For a 0 to 3 rating the two agree only when the
+  numbers are the same; agreement within one point is shown beside it. Agreement is shown for each behavior with its number
+  of checks, and the verdict rests on the lowest behavior and names any behavior with no check that counts. Between 60% and
+  80% it now says to hold that behavior's home data from decisions until a check reaches 80%. A new **How staff watched**
+  column (in person, video, phone or audio only): a check by phone is shown and not counted, since the definitions on the
+  sheet are of what is seen. The hint adds that each person writes their own mark before seeing the other's.
+- **All four sheets can be typed in** (F372). **Entry** now has the **Routine Checklist** (each step by routine by day,
+  Y, N or a dash, with the steps done each day and the steps marked N more often than Y), the **ABC Notes** (one row a note:
+  day, time, routine, the boxes ticked before, what the child did and after, the family's line; counts of what came before
+  and after across the weeks; **Export the ABC notes** in Form ABC-1's CSV columns) and the **Sleep Log** (each night's
+  times, hours asleep, the next morning's marks beside it, short or broken nights flagged against the child's own usual
+  night as a working convention, and a note to consider suggesting the family talk with the child's doctor, BACB Ethics
+  Code 2.12). The graph adds the checklist's steps done and the hours asleep under the behaviors. **Not sent this week**
+  ticks keep a dropped sheet from being reported as overdue. The case gets the checklist's daily figure, the ABC counts and
+  the hours asleep as numbers only. The sleep rows read "Sun night → Mon". The simulation's decision is now written from its
+  own figures.
+- **Behaviors from the case arrive with the right measure and follow TB-1** (F375). Form TB-1's dimension sets the home
+  measure (count: tally; duration: minutes; % of opportunities: yes or no; anything else: a tally, flagged on Setup). The
+  targets come in TB-1's urgency order, four at most, and the rest are named. TB-1's definition is no longer copied into the
+  plain-words example: it shows in the empty box to rewrite. A replacement behavior, and a GB-1 skill from the picker, go
+  on the checklist as Child steps. A rename or new examples on TB-1 are offered on Setup (**Update the sheets** keeps the
+  marks typed in and any wording rewritten for the family). The picker stops at six behaviors and says what was not added.
+  TD-1's response to the behavior fills the shared "what to do" line while it is empty, marked as written for staff.
+- **The routine notes print** (F376) under the routine on the tally sheet and in the checklist's routine headings.
+- **An injury out of hours goes to 911 or the doctor, not to the school** (F373). Every sheet's foot starts with a fixed
+  line: **If anyone is hurt or in danger, call 911 or your child's doctor. Then let us know.** "Call right away if" is now
+  **Tell us the next school day if**, form numbers such as "(Form CR-1)" are left off the family's lines, and **Print the home
+  sheets** prints without the record's page header and footer (no "Confidential student record", student ID or page numbers).
+- **Baseline or plan** (F374). Each week has a **Condition** (Baseline, Plan, Plan changed with what changed); the graph
+  draws a solid labeled line where it changes, and each home day sent to the case carries it. **Baseline sheets** on Setup
+  print "Respond the way you usually do; keep everyone safe" in place of the plan lines, and the setup check stops asking
+  for them.
+- **What the family marks is defined tightly enough for two people to agree** (F377). A **rule for marking it** for each
+  behavior: what one time is (a count), when it starts and ends (minutes), what 0 and 3 mean (a rating), printed in the
+  sheet's instructions. A rating has no total on the sheet. The ABC "after" list keeps a break away apart from losing a
+  privilege, and being given the item apart from the task being put off. The setup check warns when a behavior that can be
+  counted is rated.
+- **Marks a week and pages** (I189). Setup and Home sheets show how many marks a week the sheets ask for (behaviors ×
+  routines × days, steps × days), warn above 70 (a working convention), and say about how many pages they print.
+- **The family's agreement** (I190). Setup records when and how the family agreed to keep the sheets and the consent on
+  file (filled from Form IC-1), and every sheet says **Keeping this sheet is your choice. You can stop at any time; it will
+  not change your child's services.**
+- **The note back to the family** (I188). **Write the note from this week** drafts fixed sentences from the week typed in,
+  with the week before beside them, to read over, change and **Copy**; it is kept with the week and never sent from here.
+- Not in this release: the sheets' fixed text in Spanish (I187; it needs a qualified translator's review) and entry of the
+  week by the family on a phone (I186; one to two weeks of work).
+
+Checked by `qa/v2253-test.js` (60).
+
+### v22.52: Form CN-1, Consultation and Session Notes: signed notes, the authority for a change, the IEP minutes, the week against the goal, integrity in TI-1's terms, sessions not held
+
+- A new note is no longer signed when it is created. **Sign this note** writes the case BCBA's name and credential with the date and time, and only once the note says what was done (what was seen, or the training delivered) and why (the purpose). A signed note is locked; a later correction goes in with **Add an addendum** (dated and named), and **Withdraw the signature** stays on the note as a dated addendum. A note signed after the date of the contact says "late entry". **New note like this one** now copies the type, setting, plan and kind of service, not who was present, the purpose or a signature. (F329)
+- The **Service log** certifies and counts signed notes only, prints each entry's date signed, and lists a note not yet signed below the certification as "Not yet signed: not certified". Notes you kept before this version need **Sign this note** before they count. (F329)
+- **Authority for the change** is replaced by **Kind of change**: no change to the plan; a decision rule written in the plan (name the rule, such as Form TD-1's thinning rule); a revision of the plan, with the IEP team meeting date (or a written amendment the parent agreed to without a meeting), the prior written notice, whether it is substantial and the parent's consent to it, and when the family was told; or recommended only, awaiting the team. The note's check asks for what each kind needs, the Log counts changes by their kind (not by the words "none"), and a note saved before keeps its old choice shown beside the new one. In the workstation a revision shows Form TD-1's matching version, Form PR-1's review and the consent on Form IC-1, with **Use these dates**. (F328)
+- A change recorded in a note now goes to the case (with its dates), and the note says where it must be carried: a revision row on Form TD-1, a phase line on Form DD-1, and the staff handouts on Forms QS-1 and EB-1. The note does not change the plan itself. **Plan in force** fills from Form TD-1's newest version (a line you type yourself is kept, with TD-1's newer version offered beside it), and a note carrying an older version is warned, with **Use the plan in force**. (F333)
+- Against the IEP's consultation minutes only consultation, observation and training are counted; IEP and team meetings, parent and consent meetings, record reviews and the assessment are shown on their own line, not counted. A new **Counts toward the IEP service** box on each note settles an edge case, and the counting rule prints on the service log page. The IEP packet and the Today list use the same count. (F330)
+- **Scheduled session not held** is a new type, with **Why it was not held**, **Minutes scheduled** and **Made up on**. The service log lists it with no minutes delivered, and the totals add up the missed minutes by reason with the minutes made up. (F334)
+- **The week's rate** from Form DD-1 is now that week's figure, not the whole phase's average. The phase average and DD-1's run of consecutive days at the aim are shown on their own lines, the unit is one of the note's own, and the behavior is named. The verdict says "at or below the goal level this week"; it never says the goal is met from one week. (F331)
+- **Integrity (Form TI-1)** reads the score in Form TI-1's own bands and words for the plan type, with TI-1's critical-step figure. Below the criterion, the note says to treat the plan as not yet running as written. Who observed, and whether at this visit or reported, are written beside the score. (F332)
+- The time-by-category check compares only the time inside the visit; documentation and travel are shown as minutes outside the visit. The hours table names its two figures. (F335)
+- **School and district** fills from the workstation's student bar, and the date of birth from Form DM-1. (F336)
+- The Guide now says that Bergan and Kratochwill's four stages have three structured interviews. A new **Feedback to the implementer on their own data** row backs the Guide's feedback claim. When recommendations are given, at least one next step needs an owner and a date. (F337)
+- **Safety since the last visit** fills from the case: restraints this semester (Form CR-1), incidents since the last note and whether home was told (Form DD-1), and the latest injury record (Form IM-1). A second restraint in a semester is flagged where you write, citing s. 1003.573(6)(a), F.S. (I166)
+- A direct session records the student's **Assent**, how it was shown, any withdrawal and how it was honored, and participation, with Form SI-1's assent plan shown from the case. (I168)
+- **Consent meeting**, **Assessment interview** and **FBA observation** are new types, so CN-1 can be used from the first contact. On those notes the plan rows step aside, and their minutes are not counted toward the IEP's minutes. (I169)
+- The worked example now has seven signed notes: the specials change is recommended at a visit and adopted at the IEP meeting with notice and consent, the home routine is no change to the school plan, the goal is counted in consecutive weeks, the para's TI-1 scores fall on school days, and one session is not held and is made up.
+
+Checked by `qa/v2252-test.js` (32)
+
 ### v22.51: the ABC record (ABC-1) checked against its sources and the case
 
 Form ABC-1, from the review (F79 to F88, I43 to I45):

@@ -17,8 +17,9 @@ const CR1='The notice deadlines run from now: the written notice to the parent b
   ok('HD-1: a blank form gives nothing to the case',await hd.evaluate(()=>window.__nbhFactsOut()===null));
   await hd.evaluate(()=>document.querySelector('#simBtn').click());await sleep(500);
   const H=await hd.evaluate(()=>window.__nbhFactsOut());
-  ok('HD-1: home.sheets, one per sheet sent each week, with the dates',H&&H.home&&H.home.sheets.length===12&&H.home.sheets.every(s=>/^\d{4}-\d{2}-\d{2}$/.test(s.sent)&&/^\d{4}-\d{2}-\d{2}$/.test(s.due)&&s.name&&s.week),H&&H.home&&H.home.sheets.slice(0,3));
-  ok('HD-1: a sheet that did not come back has no back date',H.home.sheets.filter(s=>s.kind==='check'&&!s.returned).length===1&&H.home.sheets.filter(s=>s.kind==='check'&&!s.returned)[0].back===undefined&&H.home.sheets.filter(s=>s.kind==='tally').every(s=>s.returned&&s.back));
+  /* v22.53 (review F372) the simulation's week 3 checklist is marked not sent, so it is not listed: 11 sheets */
+  ok('HD-1: home.sheets, one per sheet sent each week, with the dates',H&&H.home&&H.home.sheets.length===11&&H.home.sheets.filter(s=>s.kind==='check').length===2&&H.home.sheets.every(s=>/^\d{4}-\d{2}-\d{2}$/.test(s.sent)&&/^\d{4}-\d{2}-\d{2}$/.test(s.due)&&s.name&&s.week),H&&H.home&&H.home.sheets.slice(0,3));
+  ok('HD-1: a sheet that did not come back has no back date',H.home.sheets.filter(s=>s.kind==='abc'&&!s.returned).length===2&&H.home.sheets.filter(s=>s.kind==='abc'&&!s.returned).every(s=>s.back===undefined)&&H.home.sheets.filter(s=>s.kind==='tally').every(s=>s.returned&&s.back));
   const hit=H.home.data.filter(r=>r.beh==='Hitting');
   ok('HD-1: home.data has every day total, dated from the Monday (21 days of hitting)',hit.length===21&&hit.every(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.date)&&typeof r.value==='number'&&r.unit==='times'),hit.slice(0,3));
   const first=await hd.evaluate(()=>{const w=S.wk[0];return {mon:nbhHdIso(nbhHdMon(w.start)),v:dayTotal(w,0,0).v};});

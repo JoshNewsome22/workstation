@@ -26,7 +26,8 @@ const URL=BASE+'/NBH-Workstation/CN-1_Consultation-Notes_v2026-10.html';
   await page.fill('#logSearch','');await page.selectOption('#logType','Observation');await sleep(100);console.log('type Observation:',await page.$eval('#logCount',e=>e.textContent));await page.selectOption('#logType','');
   await page.click('#logTbl tbody tr[data-open="2"]');await sleep(150);console.log('clicked row 3 → view',await page.evaluate(()=>document.body.className.match(/view-\S+/)[0]),'cur',await page.evaluate(()=>cur));
   await page.screenshot({path:`${OUT}/sim-note-3.png`,fullPage:true});await (await page.$('#noteOut')).screenshot({path:`${OUT}/noteout-3.png`});
-  /* add a step, tick it, change a time, see the duration move */
+  /* add a step, tick it, change a time, see the duration move (v22.52: a signed note is locked, so this one is unsigned first) */
+  await page.evaluate(()=>{note().sig_date='';renderNote();});
   await page.click('#addNx');await page.fill('#nxTbl tbody tr:last-child input[data-x="what"]','Test step');await page.fill('[data-n="end"]','10:30');await sleep(100);
   console.log('after end 10:30: dur field',await page.$eval('#durOut',e=>e.value),'steps',await page.evaluate(()=>note().next.length));
   await page.fill('[data-n="end"]','10:00');await page.click('#delNx');await sleep(100);
