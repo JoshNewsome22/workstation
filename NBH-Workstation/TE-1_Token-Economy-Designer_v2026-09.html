@@ -824,6 +824,36 @@ td input,td select{max-width:100%}
 #lkPrint{display:none}
 @media print{#lkPrint:not([hidden]){display:block;margin:4px 0 0;font-size:12.5px}h3.lk-head{break-after:avoid;page-break-after:avoid}}
 </style>
+<style id="te1-v2254-css">
+/* v22.54 (review F418-F427, I211-I215). A plain figure has no colour (.v-info). The token-loss safeguards show while token
+   loss is marked in use. The thinning step holds three labelled boxes (advance, step back, result). An audit item says what
+   kind of point it is and whether it must hold. The plan prints the Guide only when "Print the Guide with the plan" is
+   ticked; the sources line and the reference list always print. The chain boxes are on screen only (the table under them
+   holds the same words). */
+.v-info{background:#EEF3F5;border-left:3px solid #54676f}
+.te-flags .verdict{margin:4px 0}
+#lossTbl:not(.on) tr.lossYes{display:none}
+td.te-crit label{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-soft);margin:0 0 4px}
+td.te-crit label:last-child{margin-bottom:0}
+td.te-crit textarea{display:block;border:1px solid var(--rule-2)!important;border-radius:2px;background:#fff!important;margin-top:1px}
+td.te-cls label{display:block;font-family:var(--sans);font-size:10.5px;color:var(--ink-soft);margin-top:4px;line-height:1.3}
+td.te-cls label input{margin-right:4px;vertical-align:-2px}
+.te-tag{display:inline-block;font-family:var(--sans);font-size:10.5px;color:var(--ink-soft);margin-left:6px}
+.te-tag.te-gate{color:#8E2A2A;font-weight:600}
+.chk .te-flag{display:block;margin:2px 0 0 22px;font-size:11.5px;color:#8E2A2A}
+#teCaseBox:not(:empty),#teStu:not(:empty){border:1px solid var(--rule-2);border-left:3px solid var(--nbh-teal);background:#F7FAF9;padding:8px 11px;margin:8px 0 10px;font-family:var(--sans);font-size:12.5px;line-height:1.45}
+#teCaseBox p,#teStu p{margin:2px 0}
+#audHistBox ul{margin:4px 0 0;padding-left:18px;font-family:var(--sans);font-size:12px}
+#audHistBox li button{border:0;background:transparent;color:#8FA3B4;cursor:pointer;font-size:14px;padding:0 6px}
+.te-guide-print{margin:0 0 12px}
+@media screen and (max-width:700px){.grid-wrap > #bkTbl{min-width:900px}.grid-wrap > #exTbl{min-width:680px}.grid-wrap > #thinTbl{min-width:820px}}
+@media print{
+  body:not(.te-print-guide) .only-guide > :not(.te-keep){display:none!important}
+  td.te-crit label{font-size:9px;margin-bottom:2px}
+  td.te-crit textarea{border:0!important;padding:0!important;margin:0}
+  .te-noprint-empty:empty{display:none}
+}
+</style>
 </head>
 <body class="view-setup">
 
@@ -878,7 +908,7 @@ td input,td select{max-width:100%}
       <div><label>Date</label><input data-m="date"></div>
     </div>
     <table class="rt" style="margin-top:10px">
-      <tr><th style="width:24%">Behavior the tokens are earned for</th><td colspan="3"><input data-m="beh" placeholder="Stated as a response, not as an attitude"></td></tr>
+      <tr><th style="width:24%">Behavior the tokens are earned for</th><td colspan="3"><input data-m="beh" placeholder="Name the work or skill response each token follows (items completed, intervals on task)"></td></tr>
       <tr><th>Setting and periods</th><td><input data-m="setting"></td>
           <th style="width:16%">Who delivers tokens</th><td><input data-m="who"></td></tr>
       <tr><th>Token form</th><td><input data-m="tokForm" placeholder="e.g., laminated stars on a board"></td>
@@ -890,6 +920,15 @@ td input,td select{max-width:100%}
       <tr><th>Evidence it functions as a reinforcer</th><td colspan="3"><textarea data-m="tokEvid" rows="2" placeholder="Form RA-1 can test this directly. A board the student ignores is not a token economy."></textarea></td></tr>
       <tr><th>Establishing plan, if being conditioned</th><td colspan="3"><textarea data-m="tokPlan" rows="2" placeholder="Exchange after one token at first, then lengthen the exchange-production requirement"></textarea></td></tr>
     </table>
+    <!-- v22.54 (review I214) the student's voice: assent to the system, and how the student says no -->
+    <h3 style="margin-top:14px">The Student&rsquo;s Voice</h3>
+    <p class="hint">Assent is the student&rsquo;s own agreement to take part, checked throughout, not once; Standard 2.11 directs behavior analysts to obtain assent when applicable (BACB, 2020). Form SI-1 records it, with what the student likes and would want from a plan; the case brings them here into empty fields.</p>
+    <div id="teStu" class="noprint"></div>
+    <table class="rt">
+      <tr><th style="width:24%">The student&rsquo;s assent to the token system</th><td><select data-m="stuAssent"><option></option><option>Given</option><option>Partial: some parts or some sessions</option><option>Refused</option><option>Not able to give assent (consent only)</option><option>Not asked yet</option></select></td></tr>
+      <tr><th>How the student shows they no longer want to take part, and what staff do then</th><td><textarea data-m="stuStop" rows="2" placeholder="What the student does that means &ldquo;no, not now&rdquo; (Form SI-1&rsquo;s withdrawal behaviors), and what staff do when it happens"></textarea></td></tr>
+    </table>
+    <div id="stuNote"></div>
     <h3 class="lk-head noprint lk-onlyprint" style="margin-top:14px">Student materials: the token board book (<span style="white-space:nowrap">Form TK-1</span>)</h3><div id="lkPanel" class="noprint"></div><p id="lkPrint" class="lk-print" hidden></p>
   </section>
 
@@ -897,7 +936,7 @@ td input,td select{max-width:100%}
   <section class="only-sch">
     <h2 class="nbh-band">The Three Schedules</h2>
     <p class="hint">Hackenberg (2009) separates a token system into three schedules. In practice they are usually collapsed into one. Naming them separately is what makes a token economy adjustable: each can be thinned independently, and they do not have the same effects.</p>
-    <div class="chain">
+    <div class="chain noprint">
       <div class="lk"><b>Token production</b><div class="v" id="lk1">&mdash;</div></div><div class="ar">&rarr;</div>
       <div class="lk"><b>Exchange production</b><div class="v" id="lk2">&mdash;</div></div><div class="ar">&rarr;</div>
       <div class="lk"><b>Token exchange</b><div class="v" id="lk3">&mdash;</div></div>
@@ -917,32 +956,55 @@ td input,td select{max-width:100%}
     <div id="upVerdict"></div>
 
     <h3 style="margin-top:14px">Thinning Plan</h3>
-    <p class="hint">Thin one schedule at a time and record which. Response rates vary inversely with both the token-production and the exchange-production ratio, and the two interact (Bullock &amp; Hackenberg, 2006), so raising both at once makes the effect uninterpretable. Each step shows its responses per exchange, the token-production ratio times the exchange-production ratio, and, where the backups per exchange are entered, its unit price (responses per backup delivery), so a step that thins the token-exchange schedule is numeric too.</p>
+    <p class="hint">Thin one schedule at a time and record which. Response rates vary inversely with both the token-production and the exchange-production ratio, and the two interact (Bullock &amp; Hackenberg, 2006), so raising both at once makes the effect uninterpretable. Each step shows its responses per exchange, the token-production ratio times the exchange-production ratio, and, where the backups per exchange are entered, its unit price (responses per backup delivery). Write when to move on and when to step back before the step starts, and the result (the date, and the rate or percentage on Form DD-1) once it is known; the form works out from the numbers which schedule each step changed.</p>
     <div class="grid-wrap"><table class="rt" id="thinTbl"><thead><tr>
-      <th style="width:44px">Step</th><th style="width:11%">Date</th><th style="width:14%">Schedule thinned</th>
-      <th style="width:9%">Token prod.</th><th style="width:9%">Exch. prod.</th><th style="width:9%">Backups per exch.</th><th style="width:9%">Responses per exchange</th><th style="width:8%">Unit price</th><th>Criterion to advance / what happened</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:40px">Step</th><th style="width:9%">Date</th><th style="width:12%">Schedule thinned</th>
+      <th style="width:7%">Token prod.</th><th style="width:7%">Exch. prod.</th><th style="width:7%">Backups per exch.</th><th style="width:8%">Responses per exchange</th><th style="width:6%">Unit price</th><th>Advance when / step back when / result</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addThin">Add step</button><button class="tool" id="delThin">Remove last</button>
     </div>
-    <table class="rt" style="margin-top:10px">
-      <tr><th style="width:26%">Token loss or response cost in use?</th><td><select data-m="loss"><option></option><option>No</option><option>Yes &mdash; described below</option></select></td></tr>
-      <tr><th>If yes, the rule and its review</th><td><textarea data-m="lossRule" rows="2" placeholder="Token loss is punishment and is reviewed as such. State what is lost, for what, the floor below which tokens cannot fall, and the approvals obtained."></textarea></td></tr>
+    <div id="thinFlags" class="te-flags"></div>
+    <!-- v22.54 (review F418) token loss: what the Code asks before a punishment procedure goes into a plan -->
+    <table class="rt" style="margin-top:10px" id="lossTbl">
+      <tr><th style="width:26%">Token loss or response cost in use?</th><td colspan="3"><select data-m="loss"><option></option><option>No</option><option>Yes &mdash; described below</option></select></td></tr>
+      <tr><th>The rule as staff run it (if not used, why not)</th><td colspan="3"><textarea data-m="lossRule" rows="2" placeholder="Token loss is punishment and is reviewed as such. State what is lost, for what, the floor below which tokens cannot fall, and the approvals obtained."></textarea></td></tr>
+      <tr class="lossYes"><th>Behavior that loses a token</th><td colspan="3"><input data-m="lossBeh" list="teLossBehs" placeholder="A problem behavior defined on Form TB-1"><datalist id="teLossBehs"></datalist></td></tr>
+      <tr class="lossYes"><th>Tokens lost each time</th><td><input data-m="lossN" placeholder="e.g., 1"></td><th style="width:20%">Floor: tokens never fall below</th><td><input data-m="lossFloor" placeholder="e.g., 0, and an exchange already earned is never lost"></td></tr>
+      <tr class="lossYes"><th>Less intrusive procedures tried first, and the data that showed they were not enough</th><td colspan="3"><textarea data-m="lossTried" rows="2" placeholder="What was tried (the function-based options), for how long, and what Form DD-1 showed"></textarea></td></tr>
+      <tr class="lossYes"><th>Parent&rsquo;s informed consent to token loss (date)</th><td><input data-m="lossCons" placeholder="Recorded on Form IC-1"></td><th>Where the BIP is part of the IEP: the IEP change (date)</th><td><input data-m="lossIep" placeholder="Date, or &ldquo;the BIP is not part of the IEP&rdquo;"></td></tr>
+      <tr class="lossYes"><th>Reviewed by, and when</th><td colspan="3"><input data-m="lossRev" placeholder="The review the district or agency requires for a punishment procedure, who did it, and the date"></td></tr>
+      <tr class="lossYes"><th>How its effect is measured</th><td colspan="3"><input data-m="lossMeas" placeholder="The behavior on Form DD-1, and how often the data are looked at"></td></tr>
+      <tr class="lossYes"><th>When it stops</th><td colspan="3"><textarea data-m="lossStop" rows="2" placeholder="The data that end it: no clear decrease by a date, a rise in another behavior, or a side effect"></textarea></td></tr>
     </table>
     <div id="lossNote"></div>
+
+    <!-- v22.54 (review I215) how the token system ends -->
+    <h3 style="margin-top:14px">Ending the Token System</h3>
+    <p class="hint">Write how the system ends before it is thinned far: the leanest schedule the plan aims for, what the data must show before the board is faded, and what takes its place (self-monitoring or a point system on Form SM-1, praise and the class&rsquo;s usual feedback, or the class-wide system on Form GC-1). Form RM-1 plans for relapse before anything is faded.</p>
+    <table class="rt">
+      <tr><th style="width:26%">Terminal schedule</th><td><input data-m="fadeTerm" placeholder="e.g., FR 20 per token, 10 tokens per exchange, one exchange at the end of the day"></td></tr>
+      <tr><th>When the board is faded</th><td><textarea data-m="fadeCrit" rows="2" placeholder="What Form DD-1 must show at the terminal schedule, and for how long"></textarea></td></tr>
+      <tr><th>What takes its place</th><td><select data-m="fadeNext"><option></option><option>Self-monitoring (Form SM-1)</option><option>A point system or contract (Form SM-1)</option><option>Praise and the class&rsquo;s usual feedback and grades</option><option>The class-wide system (Form GC-1)</option><option>Other (described below)</option></select></td></tr>
+      <tr><th>How the handover runs</th><td><textarea data-m="fadeHow" rows="2" placeholder="Who does what, in what order, and how the student is told"></textarea></td></tr>
+      <tr><th>Relapse plan before fading (Form RM-1)</th><td><input data-m="fadeRm" placeholder="The date Form RM-1&rsquo;s plan was written, or not yet"></td></tr>
+    </table>
+    <div id="fadeNote"></div>
   </section>
 
   <!-- ====== GENERALITY ====== -->
   <section class="only-gen">
     <h2 class="nbh-band">Backups, and Whether the Token Is Generalized</h2>
-    <p class="hint">A token exchangeable for one thing is a conditioned reinforcer for that thing, and it fails when the student is satiated on it or simply does not want it today. A <b>generalized</b> conditioned reinforcer is exchangeable across several backups tied to different establishing operations. In a pigeon token economy, tokens exchangeable for either food or water were produced more than tokens exchangeable for only one, suggesting enhanced reinforcing efficacy (DeFulio et al., 2014).</p>
+    <p class="hint">A token exchangeable for one thing is a conditioned reinforcer for that thing, and it fails when the student is satiated on it or simply does not want it today. A <b>generalized</b> conditioned reinforcer is exchangeable across several backups tied to different establishing operations. In a pigeon token economy, tokens exchangeable for either food or water were produced more than tokens exchangeable for only one, suggesting enhanced reinforcing efficacy (DeFulio et al., 2014). The form counts what the student has to want for each backup to work (food, a break, adult time, a preferred activity), not the type of item: a tablet and a set of tiles depend on the same want. Left blank, it is read from the class.</p>
+    <div id="teCaseBox" class="noprint"></div>
     <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
       <button class="tool" id="addBk">Add backup</button><button class="tool" id="delBk">Remove last</button>
     </div>
     <div class="grid-wrap"><table class="rt" id="bkTbl"><thead><tr>
-      <th style="width:44px">#</th><th style="width:22%">Backup reinforcer</th><th style="width:16%">Class</th>
-      <th style="width:12%">Token cost</th><th style="width:14%">Preference (PA-1)</th><th style="width:12%">Confirmed reinforcer (RA-1)</th><th>Notes</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+      <th style="width:36px">#</th><th style="width:17%">Backup reinforcer</th><th style="width:12%">Class</th><th style="width:13%">Works when the student wants</th>
+      <th style="width:9%">Token cost</th><th style="width:10%">Preference (PA-1)</th><th style="width:11%">Reinforcer (RA-1)</th><th>Notes</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
     <div class="metrics" id="genMetrics"></div>
     <div id="genVerdict"></div>
+    <div id="genFlags" class="te-flags"></div>
     <p class="hint noprint" id="lkHintBk" hidden></p>
     <table class="rt" style="margin-top:12px">
       <tr><th style="width:26%">How the menu is refreshed</th><td><input data-m="refresh" placeholder="e.g., brief MSWO each Monday (Form PA-1)"></td></tr>
@@ -950,21 +1012,35 @@ td input,td select{max-width:100%}
         <option>Open &mdash; the backups are also available outside the system</option>
         <option>Closed &mdash; the backups are available only through tokens</option></select>
         <div class="hint" style="margin-top:4px">Record this deliberately. With pigeons, response rates in a closed economy, in which the whole daily food ration was earned in the session, were less affected by changes in the token-production ratio than in an open economy (Bullock &amp; Hackenberg, 2006). A closed economy also restricts free access to things the student is entitled to; a student should not have to earn what they have a right to.</div></td></tr>
-      <tr><th>Anything excluded from the system on rights grounds</th><td><textarea data-m="rights" rows="2" placeholder="Food, drink, belongings, breaks, attention, and access to the bathroom are not earnable"></textarea></td></tr>
+      <tr><th>Anything excluded from the system on rights grounds</th><td><textarea data-m="rights" rows="2" placeholder="What the student already has a right to (meals, snack, drink, the bathroom, belongings, and the breaks and adult attention the IEP or the school day provides) is not earnable; extras may be backups"></textarea></td></tr>
+      <tr><th>The student&rsquo;s own choice of backups</th><td><textarea data-m="stuChoice" rows="2" placeholder="What the student chose or asked for when shown the menu, in the student&rsquo;s words (Form SI-1)"></textarea></td></tr>
     </table>
+
+    <!-- v22.54 (review I213) the exchange log -->
+    <h3 style="margin-top:14px">Exchange Log</h3>
+    <p class="hint">One line for each exchange: the tokens earned, what they bought, anything offered and refused, and whether the exchange happened on the day the tokens were earned. The counts under it show a backup the student has stopped taking, and a drift away from same-day exchange, early.</p>
+    <div class="row noprint" style="margin:8px 0;display:flex;gap:8px">
+      <button class="tool" id="addEx">Add exchange</button><button class="tool" id="delEx">Remove last</button>
+    </div>
+    <div class="grid-wrap"><table class="rt" id="exTbl"><thead><tr>
+      <th style="width:44px">#</th><th style="width:12%">Date</th><th style="width:9%">Time</th><th style="width:9%">Tokens earned</th><th style="width:24%">Exchanged for</th><th>Offered and refused</th><th style="width:13%">On the day earned?</th><th class="nx noprint"></th></tr></thead><tbody></tbody></table></div>
+    <div id="exSum"></div><datalist id="teBkNames"></datalist>
   </section>
 
   <!-- ====== AUDIT ====== -->
   <section class="only-aud">
     <h2 class="nbh-band">Audit Against Common Practice</h2>
-    <p class="hint">Fernandez, Argueta, and DeLeon (2023) surveyed 255 BCBAs and BCaBAs; their results suggest that certain aspects of token economies in practice often bear only superficial resemblance to how they are described in textbooks. These are the points where that gap usually sits. Tick what is actually true of this system, not what the plan says.</p>
+    <p class="hint">Fernandez, Argueta, and DeLeon (2023) surveyed 255 BCBAs and BCaBAs; their results suggest that certain aspects of token economies in practice often bear only superficial resemblance to how they are described in textbooks. The points below are where a running system is checked. Each says what kind of point it is: <b>research</b> (with the source), <b>rights</b>, or <b>practice</b> (a working convention of this form). Three must hold before the system can read as in order: the token tested as a reinforcer, nothing the student is entitled to made earnable, and, while token loss is in use, its safeguards. Tick what is actually true of this system, not what the plan says.</p>
     <div id="auditWrap"></div>
     <div class="metrics" id="audMetrics"></div>
     <div id="audVerdict"></div>
     <table class="rt" style="margin-top:12px">
-      <tr><th style="width:26%">Action on the unticked items</th><td><textarea data-m="audAction" rows="3"></textarea></td></tr>
-      <tr><th>Review date</th><td><input data-m="review"></td></tr>
+      <tr><th style="width:26%">Action on the unticked items</th><td colspan="2"><textarea data-m="audAction" rows="3"></textarea></td></tr>
+      <tr><th>Review date</th><td colspan="2"><input data-m="review"></td></tr>
+      <!-- v22.54 (review I211) each audit dated and kept, so a review can see the last ones -->
+      <tr><th>Date of this audit</th><td><input data-m="audDate" placeholder="The day the ticks above were checked"></td><td class="noprint" style="width:30%"><button type="button" class="tool" id="audKeep">Keep this audit in the history</button></td></tr>
     </table>
+    <div id="audHistBox"></div>
     <h3 style="margin-top:14px">Sign-off</h3>
     <table class="rt">
       <tr><th style="width:22%">Case BCBA</th><td class="sigline"></td><th style="width:14%">Date</th><td class="sigline"></td></tr>
@@ -973,25 +1049,32 @@ td input,td select{max-width:100%}
 
   <!-- ====== GUIDE ====== -->
   <section class="only-guide">
+    <!-- v22.54 (review F426) the plan prints the Guide only on request -->
+    <label class="chk noprint te-guide-print"><input type="checkbox" data-te="print-guide"> Print the Guide with the plan. Left unticked, the printed plan ends with the sources line and the reference list.</label>
     <h2 class="nbh-band">A Token System Is a Chain, Not a Schedule</h2>
     <p>Hackenberg (2009) analyses token systems into three schedules. The <b>token-production schedule</b> specifies what the student does to earn a token. The <b>exchange-production schedule</b> specifies when an exchange opportunity is made available: in Bullock and Hackenberg (2006), and on this form, after a fixed number of tokens has been earned. The <b>token-exchange schedule</b> specifies how tokens are exchanged for backup reinforcers during that opportunity; in that study it was held at FR 1, and each token bought one food delivery (Hackenberg, 2009). In most classroom systems all three are collapsed and only one is ever adjusted, which is why thinning a token board so often produces an effect nobody can explain.</p>
     <p>Bullock and Hackenberg (2006) manipulated the first two independently under second-order schedules. Response rates varied inversely with the token-production ratio at every exchange-production ratio, and inversely with the exchange-production ratio at every token-production ratio, most clearly at the higher token-production values. At higher values of both, responding increased in the segments closer to the exchange period &mdash; the chained character of the arrangement showing through, with rate rising as the backup came nearer.</p>
     <h2 class="nbh-band" style="margin-top:16px">Unit Price</h2>
-    <p>Unit price expresses the cost of a reinforcer in responses: total responses divided by the reinforcers obtained. In a token system it is the token-production ratio multiplied by the exchange-production ratio, divided by the number of backup deliveries an exchange yields, each counted in one fixed unit, since unit price is responses per unit of reinforcer (Hackenberg, 2009): five stars exchanged at one minute of tablet per star are five one-minute deliveries. Two systems with very different-looking boards can impose the same unit price, and two that look similar can differ several-fold. This form computes it so the comparison is available before a thinning step rather than after; the band it puts under the figure (low to 10, moderate to 40, high above 40 responses per backup delivery) is a working convention of this form, not a threshold from the sources. Bullock and Hackenberg (2006), however, found only some of their results consistent with unit price; most were well accounted for by the number of responses required to produce an exchange period, without regard to the amount of reinforcement available during it. The form shows that figure, responses per exchange, beside the unit price and for each step of the thinning record; the unit price of a past step is shown when the record holds the number of backup deliveries its exchange yielded (the Backups per exchange column).</p>
+    <p>Unit price expresses the cost of a reinforcer in responses: total responses divided by the reinforcers obtained. In a token system it is the token-production ratio multiplied by the exchange-production ratio, divided by the number of backup deliveries an exchange yields, each counted in one fixed unit, since unit price is responses per unit of reinforcer (Hackenberg, 2009): five stars exchanged at one minute of tablet per star are five one-minute deliveries. Two systems with very different-looking boards can impose the same unit price, and two that look similar can differ several-fold. This form computes it so the comparison is available before a thinning step rather than after. Bullock and Hackenberg (2006), however, found only some of their results consistent with unit price; most were well accounted for by the number of responses required to produce an exchange period, without regard to the amount of reinforcement available during it. The form shows that figure, responses per exchange, first, beside the unit price and for each step of the thinning record; the unit price of a past step is shown when the record holds the number of backup deliveries its exchange yielded (the Backups per exchange column). Unit price also turns on how the deliveries are counted (five 1-minute deliveries or one 5-minute one), and a menu priced in different numbers of tokens has a price for each backup (its token cost times the responses per token), which the form lists as a range. The form draws no band and gives no advice from either number: the sources give no threshold for a student, so a step is judged by the student&rsquo;s own rate at it, recorded as the step&rsquo;s result, against the step-back rule written before it started.</p>
     <h2 class="nbh-band" style="margin-top:16px">Generalized Conditioned Reinforcement</h2>
     <p>DeFulio, Yankelevitz, Bullock, and Hackenberg (2014) ran pigeons in a token economy where tokens bought food on one side of the chamber and water on the other, under separate food and water restriction. A third, generalized token type could be exchanged for either. The number of tokens accumulated before exchange rose as the exchange-production schedule was raised, and pigeons produced more generalized than specific tokens, suggesting enhanced reinforcing efficacy of generalized tokens. When the token-production price of each type was changed, production of specific and generalized tokens changed in opposite directions, indicating substitutability. The demonstration matters for practice because it separates a token that works for one backup from a token that holds its value across establishing operations &mdash; which is what a classroom system needs if it is to survive a student who is not hungry today.</p>
-    <p class="noprint lk-onlyprint"><b>The token board book (Form TK-1).</b> Form TK-1 prints what the student holds: the choice cards, the target cards and the board of token slots. Link with Form TK-1, under Setup, compares this plan&rsquo;s behavior, tokens per exchange, token form and backups with the book&rsquo;s paired target card, token count, token and choice cards, and you choose what to take. A compare only reads: nothing on either form changes until you press Take the ticked items, and neither form writes into the other. This plan is the plan of record, so only the student&rsquo;s name and ID and the token form are ticked for you, and only where the field here is empty (the token form only while the book&rsquo;s count agrees with this plan&rsquo;s, or this plan has no count yet); the book&rsquo;s behavior and count are offered into an empty field unticked, and its choice cards come in as new backups only when you tick them. A different token form is offered as Replace but never ticked, a target card that names a behavior to reduce is never offered as this plan&rsquo;s behavior, and nothing here is emptied or deleted. A difference you keep is remembered until either side changes. In the workstation the compare reads the book that is open; on its own, open a file Form TK-1 saved (its link must be on, or its file does not name its cards). Changes made on Form TK-1 after a compare show only when you compare again, and Undo what was just taken is offered only until anything else on this plan changes.</p>
+    <p class="noprint lk-onlyprint te-keep"><b>The token board book (Form TK-1).</b> Form TK-1 prints what the student holds: the choice cards, the target cards and the board of token slots. Link with Form TK-1, under Setup, compares this plan&rsquo;s behavior, tokens per exchange, token form and backups with the book&rsquo;s paired target card, token count, token and choice cards, and you choose what to take. A compare only reads: nothing on either form changes until you press Take the ticked items, and neither form writes into the other. This plan is the plan of record, so only the student&rsquo;s name and ID and the token form are ticked for you, and only where the field here is empty (the token form only while the book&rsquo;s count agrees with this plan&rsquo;s, or this plan has no count yet); the book&rsquo;s behavior and count are offered into an empty field unticked, and its choice cards come in as new backups only when you tick them. A different token form is offered as Replace but never ticked, a target card that names a behavior to reduce is never offered as this plan&rsquo;s behavior, and nothing here is emptied or deleted. A difference you keep is remembered until either side changes. In the workstation the compare reads the book that is open; on its own, open a file Form TK-1 saved (its link must be on, or its file does not name its cards). Changes made on Form TK-1 after a compare show only when you compare again, and Undo what was just taken is offered only until anything else on this plan changes.</p>
     <!-- writing help (v21.43) --><h2 class="nbh-band noprint nbh-wh" style="margin-top:16px">Writing help</h2>
     <p class="hint noprint nbh-wh">A multi-line text box on this form shows an <b>Improve wording</b> button at its corner when you are in it and whenever it holds text; from a keyboard, Alt+Enter in the box (Option+Return on a Mac or iPad) opens the same panel. <b>Check wording</b> works on this device and sends nothing: it marks words that name a feeling, guess at intent, function or a diagnosis, label the behavior or the person, or leave a count, time or intensity vague, and suggests observable wording; words in quotation marks are left alone. <b>Rewrite with Claude</b> works only in the forms opened from the website: a single-use passcode from your BCBA unlocks the tab (in the workstation, every form in that tab) until the session&rsquo;s time is up or the tab is closed; press <b>Lock</b> when you finish on a shared iPad. Before anything is sent, the student&rsquo;s name and ID become placeholders such as [Student], other names can be added under <b>Also hide</b>, and the panel shows exactly what will be sent; the names are put back in the answer. Use it for real cases only with your district&rsquo;s or agency&rsquo;s approval. On an iPad with Apple Intelligence, <b>Writing Tools</b> (select the text) can also proofread and rewrite; it is Apple&rsquo;s own and works on the text as written, names included, on the iPad or on Apple&rsquo;s servers, so follow your agency&rsquo;s rules for it and do not use its ChatGPT options for student text. The button and the panel are not saved with the form and never print.</p><!-- /writing help -->
     <h2 class="noprint nbh-band" style="margin-top:16px">About the simulation</h2>
-    <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated token system loaded: the three schedules with unit price, a four-step thinning record, a generalized backup menu across four classes, and the practice audit.</p>
-    <p class="hint" style="margin-top:10px">Sources: Hackenberg (2009) for the framework and the review; Bullock &amp; Hackenberg (2006) for second-order schedules and unit price; DeFulio et al. (2014) for generalized conditioned reinforcement; Fernandez, Argueta, &amp; DeLeon (2023) for the survey of practice; Kelleher (1966) for second-order schedules; Hackenberg (2009, Part II) for the symmetrical treatment of token gain and loss. The audit thresholds (85% or more of the items confirmed, 60% or more, or below 60%; no band while none is confirmed, and not the top band while token loss is in use without a confirmed floor and review) and the unit-price bands (low at 10 or fewer responses per backup delivery, moderate above 10 up to 40, high above 40) on this form are a working convention for organizing that literature, not findings.</p>
-    <p class="hint" id="teRefs"><b>Reference list.</b>
+    <p class="noprint hint">Load simulation (toolbar) fills the form with a worked example; nothing in it is a real student record. Simulated token system loaded: the three schedules with responses per exchange and unit price, a four-step thinning record with its step-back rules and results, a backup menu spanning three kinds of backup, an exchange log, a plan for ending the system, the student&rsquo;s assent, and the practice audit.</p>
+    <h2 class="nbh-band te-keep" style="margin-top:16px">Sources</h2>
+    <p class="hint te-keep" style="margin-top:10px">Sources: Hackenberg (2009) for the framework and the review; Bullock &amp; Hackenberg (2006) for second-order schedules, unit price and responses per exchange; DeFulio et al. (2014) for generalized conditioned reinforcement; Ivy, Meindl, Overley, &amp; Robson (2017) for the parts a token economy specifies; Hackenberg (2018) for the translational review; Fernandez, Argueta, &amp; DeLeon (2023) for the survey of practice; Kelleher (1966) for second-order schedules; Hackenberg (2009, Part II) for the symmetrical treatment of token gain and loss; Lerman &amp; Vorndran (2002) for punishment, and the BACB Ethics Code (2020) Standards 2.11 (consent before a substantial change, and assent when applicable) and 2.15 (a punishment procedure only after less intrusive means, with any required review, measured and stopped when it does not work) for token loss; 34 CFR &sect;300.323(c)(2) and (d) for what the IEP provides being provided as written. The audit&rsquo;s bands (85% or more of the items confirmed, 60% or more, or below 60%; no band while none is confirmed, and never the top band while one of the three points that must hold is open) are a working convention of this form, not findings. No band is drawn under the unit price or the responses per exchange.</p>
+    <p class="hint te-keep" id="teRefs"><b>Reference list.</b>
+    Behavior Analyst Certification Board. (2020). <em>Ethics code for behavior analysts</em>. Littleton, CO: Author. &bull;
     Bullock, C. E., &amp; Hackenberg, T. D. (2006). Second-order schedules of token reinforcement with pigeons: Implications for unit price. <em>Journal of the Experimental Analysis of Behavior, 85</em>(1), 95&ndash;106. &bull;
     DeFulio, A., Yankelevitz, R. L., Bullock, C. E., &amp; Hackenberg, T. D. (2014). Generalized conditioned reinforcement with pigeons in a token economy. <em>Journal of the Experimental Analysis of Behavior, 102</em>(1), 26&ndash;46. &bull;
     Fernandez, N., Argueta, T., &amp; DeLeon, I. G. (2023). Common practices used to establish and implement token economies in clinical and instructional settings: A survey of BACB certificants. <em>Behavior Analysis in Practice, 16</em>(4), 1151&ndash;1162. &bull;
     Hackenberg, T. D. (2009). Token reinforcement: A review and analysis. <em>Journal of the Experimental Analysis of Behavior, 91</em>(2), 257&ndash;286. &bull;
-    Kelleher, R. T. (1966). Conditioned reinforcement in second-order schedules. <em>Journal of the Experimental Analysis of Behavior, 9</em>(5), 475&ndash;485.</p>
+    Hackenberg, T. D. (2018). Token reinforcement: Translational research and application. <em>Journal of Applied Behavior Analysis, 51</em>(2), 393&ndash;435. &bull;
+    Ivy, J. W., Meindl, J. N., Overley, E., &amp; Robson, K. M. (2017). Token economy: A systematic review of procedural descriptions. <em>Behavior Modification, 41</em>(5), 708&ndash;737. &bull;
+    Kelleher, R. T. (1966). Conditioned reinforcement in second-order schedules. <em>Journal of the Experimental Analysis of Behavior, 9</em>(5), 475&ndash;485. &bull;
+    Lerman, D. C., &amp; Vorndran, C. M. (2002). On the status of knowledge for using punishment: Implications for treating behavior disorders. <em>Journal of Applied Behavior Analysis, 35</em>(4), 431&ndash;464.</p>
   </section>
   <!-- v21.43 the link with Form TK-1: its record (S.meta.lk, one JSON string), so the shell's status, snapshots and autosave carry it; never shown.
        It is the last control on the page on purpose: the shell keys a control with no id or name by its place among all of them,
@@ -1494,29 +1577,60 @@ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.quer
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const num=v=>{const x=parseFloat(v);return isFinite(x)&&x>0?x:null;};
 const CLASSES=['','Edible','Drink','Leisure item','Activity','Social / attention','Escape or break','Sensory','Other'];
+/* v22.54 (review F424) what the student has to want for a backup to work: the motivating condition it depends on. The
+   generality verdict counts these, not the item types (a tablet, a "Leisure item", and the magnetic tiles, an "Activity",
+   depend on the same want). Left blank, a backup's want is read from its class; "Other" gives none. */
+const MOS=['','Food or drink','A break from work','Adult attention','Time with peers','A preferred activity or item','Sensory input','Choice or control','Other'];
+const MO_OF={'Edible':'Food or drink','Drink':'Food or drink','Leisure item':'A preferred activity or item','Activity':'A preferred activity or item','Social / attention':'Adult attention','Escape or break':'A break from work','Sensory':'Sensory input'};
+const moOf=b=>b&&b.mo&&MOS.indexOf(b.mo)>0?b.mo:((b&&MO_OF[b.c])||'');
+/* v22.54 (review F419) RA-1's verdicts in this column: Confirmed is Yes, Not supported is No, Untested is Not tested;
+   Probable and Relative only keep their names (RA-1: a low concurrent-operants standing cannot show that an item is not a
+   reinforcer, so neither is a No). Files saved before hold Yes, No or Not tested, which keep their meaning. */
+const CONF=[['Yes','Yes: confirmed'],['Probable','Probable'],['Relative only','Relative only'],['No','No: not supported'],['Not tested','Not tested']];
+/* v22.54 (review F420, I211) each point says what kind it is: research (with its source, as the form's references give
+   it), rights, or practice (a working convention of this form). Three must hold (the fourth value): the token tested as a
+   reinforcer, nothing the student is entitled to made earnable, and token loss's safeguards while it is in use. The
+   delivery item names no time ("within about 2 s" had no source), and the request item is read with the exchange-production
+   schedule: once an exchange is earned, the student can ask for it. The order is the order of before, so the ticks of a
+   file saved before keep their meaning. */
 const AUDIT=[
- ['The student has been shown, not just told, what the tokens buy'],
- ['The token has been tested as a reinforcer rather than assumed to be one'],
- ['Tokens are delivered immediately, within about 2 s of the response'],
- ['Tokens are delivered with a statement naming what they were earned for'],
- ['The exchange happens on the day it is earned, not banked indefinitely'],
- ['The backup menu contains more than one class of reinforcer'],
- ['The menu is refreshed from a current preference assessment'],
- ['The token-production and exchange-production schedules are written down separately'],
- ['Only one of the three schedules is thinned at a time'],
- ['The student can see how many tokens they have at any moment'],
- ['The student can request an exchange, not only wait to be offered one'],
- ['Nothing the student is entitled to has been made earnable'],
- ['Token loss, if used, has a floor and has been reviewed as a punishment procedure'],
- ['Staff running the system have been trained to criterion (Form ST-1)'],
- ['Delivery has been checked by observation rather than by report (Form TI-1)']
+ ['The student has been shown, not just told, what the tokens buy','practice'],
+ ['The token has been tested as a reinforcer rather than assumed to be one','research','a token that works as a conditioned reinforcer is one of the six parts (Ivy et al., 2017); Form RA-1 can test it','token'],
+ ['Tokens are delivered immediately (the plan states the window)','practice'],
+ ['Tokens are delivered with a statement naming what they were earned for','practice'],
+ ['The exchange happens on the day it is earned, not banked indefinitely','research','responding rose nearer the exchange, and fell as more tokens were needed to reach it (Bullock & Hackenberg, 2006)'],
+ ['The backup menu contains more than one kind of backup (what the student has to want for it)','research','generalized tokens were produced more than tokens for one backup (DeFulio et al., 2014)'],
+ ['The menu is refreshed from a current preference assessment','practice'],
+ ['The token-production and exchange-production schedules are written down separately','research','separate schedules (Hackenberg, 2009; Ivy et al., 2017)'],
+ ['Only one of the three schedules is thinned at a time','research','the two ratios interact (Bullock & Hackenberg, 2006)'],
+ ['The student can see how many tokens they have at any moment','practice'],
+ ['Once an exchange is earned, the student can ask for it','practice'],
+ ['Nothing the student is entitled to has been made earnable','rights','what the IEP provides is provided as written (34 CFR §300.323)','rights'],
+ ['Token loss, if used, has a floor and has been reviewed as a punishment procedure','rights','BACB (2020) Standards 2.11 and 2.15','loss'],
+ ['Staff running the system have been trained to criterion (Form ST-1)','practice'],
+ ['Delivery has been checked by observation rather than by report (Form TI-1)','practice']
 ];
-function blank(){return{meta:{},thin:[],bk:[],aud:{}};}
+/* v22.54 the record also holds the exchange log (ex, I213) and the audits kept (audHist, I211); a thinning step its
+   step-back rule and its result (F425), a backup its want and, for food or drink, its clearance (F424, F419). New rows are
+   made in one shape, so a record saved and opened again is the same record. */
+function blank(){return{meta:{},thin:[],bk:[],aud:{},ex:[],audHist:[]};}
 let S=blank();
-function ensure(){while(S.thin.length<3)S.thin.push({d:'',w:'',tp:'',ep:'',te:'',crit:''});
-  while(S.bk.length<4)S.bk.push({n:'',c:'',cost:'',pref:'',conf:'',note:''});}
-function setView(v){document.body.className='view-'+v;$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
+const thinRow=()=>({d:'',w:'',tp:'',ep:'',te:'',crit:'',back:'',res:''});
+const bkRow=()=>({n:'',c:'',mo:'',cost:'',pref:'',conf:'',clr:'',note:''});
+const exRow=()=>({d:'',t:'',n:'',got:'',ref:'',same:''});
+function ensure(){if(!Array.isArray(S.ex))S.ex=[];if(!Array.isArray(S.audHist))S.audHist=[];
+  while(S.thin.length<3)S.thin.push(thinRow());
+  while(S.bk.length<4)S.bk.push(bkRow());
+  while(S.ex.length<3)S.ex.push(exRow());}
+/* v22.54 the view classes; the Guide's print choice (te-print-guide) stays */
+function setView(v){document.body.className='view-'+v+(document.body.classList.contains('te-print-guide')?' te-print-guide':'');$$('#viewSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===v)));window.scrollTo({top:0});}
 $$('#viewSeg button').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+const T=v=>String(v==null?'':v).trim();
+const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
+const teList=a=>a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const lowFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+const todayMDY=()=>{const d=new Date();return (d.getMonth()+1)+'/'+d.getDate()+'/'+d.getFullYear();};
+const isoMDY=s=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(String(s||''));return m?(+m[2])+'/'+(+m[3])+'/'+m[1]:String(s||'');};
 
 function unitPrice(tp,ep,te){const a=num(tp),b=num(ep),c=num(te)||1;return (a&&b)?(a*b)/c:null;}
 /* v21.16 audit (F5, F11). Responses per exchange, the token-production ratio times the exchange-production ratio, is
@@ -1528,145 +1642,358 @@ const fmtN=x=>String(Math.round(x*100)/100);
 /* v21.16 audit (F7): the chain follows each keystroke in the three schedule fields; the token-exchange box was
    redrawn only when a number changed */
 function renderChain(){const m=S.meta;
-  $('#lk1').textContent=m.tp||'\u2014';$('#lk2').textContent=m.ep||'\u2014';$('#lk3').textContent=m.te||'\u2014';}
+  $('#lk1').textContent=m.tp||'—';$('#lk2').textContent=m.ep||'—';$('#lk3').textContent=m.te||'—';}
+/* v22.54 (review F423) a backup's price in responses: its token cost (the first number in the cell: "2 stars",
+   "1 star = 1 min") times the responses per token */
+function costN(c){const m=/(\d+(?:\.\d+)?)/.exec(String(c||''));const v=m?+m[1]:NaN;return isFinite(v)&&v>0?v:null;}
+function prices(){const a=num(S.meta.tpN);return S.bk.filter(b=>T(b.n)).map(b=>{const k=costN(b.cost);return {n:T(b.n),k,price:a&&k?a*k:null};});}
+/* the current step: the last step of the thinning record that holds a number */
+function curStep(){for(let i=S.thin.length-1;i>=0;i--){const r=S.thin[i];if(num(r.tp)||num(r.ep)||num(r.te))return {i,r};}return null;}
+/* v22.54 (review F423) the figures under the schedules carry no colour and no advice. The unit price turned green or red
+   with how the deliveries are counted (five 1-minute deliveries or one 5-minute one), the bands (10, 40) had no source,
+   and the Guide's own source found responses per exchange the better account. Responses per exchange now comes first, the
+   menu's prices are each backup's own (its token cost), and what to do next is read from the student's own result at the
+   current step of the thinning record. */
 function renderSchSummary(){
   const m=S.meta;
   const up=unitPrice(m.tpN,m.epN,m.teN),rpe=perExchange(m.tpN,m.epN),teSet=!!num(m.teN);
-  /* F11: the band is read from the unit price as it is shown, to one decimal */
-  const upR=up==null?null:Math.round(up*10)/10;
-  const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
   $('#upMetrics').innerHTML=
-    card('Responses per token',num(m.tpN)?fmtN(num(m.tpN)):'\u2014','token-production ratio')+
-    card('Tokens per exchange',num(m.epN)?fmtN(num(m.epN)):'\u2014','exchange-production ratio')+
-    card('Responses per exchange',rpe==null?'\u2014':fmtN(rpe),'before any backup is contacted')+
-    card('Unit price',up==null?'\u2014':up.toFixed(1),'responses per backup delivery'+(up!=null&&!teSet?', one per exchange assumed':''));
+    card('Responses per token',num(m.tpN)?fmtN(num(m.tpN)):'—','token-production ratio')+
+    card('Tokens per exchange',num(m.epN)?fmtN(num(m.epN)):'—','exchange-production ratio')+
+    card('Responses per exchange',rpe==null?'—':fmtN(rpe),'the work before each exchange')+
+    card('Unit price',up==null?'—':up.toFixed(1),'responses per backup delivery, as counted here'+(up!=null&&!teSet?'; one per exchange assumed':''));
   let v='';
-  if(up!=null){
-    const cls=upR<=10?'v-ok':upR<=40?'v-mid':'v-no';
-    const txt=upR<=10?'A low unit price. Appropriate during acquisition, when the token has to be established.'
-      :upR<=40?'A moderate unit price. Watch the response rate at each thinning step: rate varies inversely with both ratios (Bullock &amp; Hackenberg, 2006).'
-      :'A high unit price. The student makes '+up.toFixed(0)+' responses per backup delivery. Check that responding has not simply stopped, and that the exchange is still contacted every day.';
-    /* F6: with Backups per exchange blank or not a positive number, one backup delivery per exchange is assumed; it
-       is said, not silent */
-    v=`<div class="verdict ${cls}"><b>Unit price ${up.toFixed(1)}.</b> ${fmtN(num(m.tpN))} &times; ${fmtN(num(m.epN))}${teSet&&num(m.teN)!==1?' &divide; '+fmtN(num(m.teN)):''} responses per backup delivery.${teSet?'':' Backups per exchange is blank, so one backup delivery per exchange is assumed.'} ${txt}</div>`;
+  if(rpe!=null){
+    const P=prices(),pr=P.filter(x=>x.price!=null),miss=P.filter(x=>x.price==null);
+    let t=`<b>Responses per exchange ${fmtN(rpe)}</b> (${fmtN(num(m.tpN))} &times; ${fmtN(num(m.epN))}): the work the student does before each exchange, the figure Bullock and Hackenberg (2006) found accounted for most of their results.`;
+    t+=` <b>Unit price ${up.toFixed(1)}</b> responses per backup delivery${teSet&&num(m.teN)!==1?', with the '+fmtN(num(m.teN))+' deliveries an exchange yields as counted here':''}${teSet?'':' (Backups per exchange is blank, so one backup delivery per exchange is assumed)'}. It changes with how the deliveries are counted (five 1-minute deliveries or one 5-minute one), so compare it only between arrangements counted the same way.`;
+    if(pr.length){const lo=Math.min(...pr.map(x=>x.price)),hi=Math.max(...pr.map(x=>x.price));
+      t+=` <b>Price of each backup</b> (its token cost &times; ${fmtN(num(m.tpN))} responses): `+pr.map(x=>esc(x.n)+' '+fmtN(x.price)).join('; ')+(pr.length>1&&lo!==hi?`; from ${fmtN(lo)} to ${fmtN(hi)} responses`:'')+'.';}
+    if(miss.length)t+=` ${miss.length===1?'One backup has':miss.length+' backups have'} no number in ${miss.length===1?'its':'their'} token cost, so ${miss.length===1?'its':'their'} price is not worked out.`;
+    t+=' No band is drawn under these figures: the sources give no threshold for a student (Guide, Unit Price).';
+    const c=curStep();
+    if(c){const r=c.r,res=T(r.res).replace(/[.\s]+$/,''),back=T(r.back).replace(/[.\s]+$/,''),rp=perExchange(r.tp,r.ep);
+      t+=` <b>At the current step</b> (step ${c.i+1}${T(r.d)?', '+esc(T(r.d)):''}${r.w?', '+esc(r.w):''}${rp!=null?', '+fmtN(rp)+' responses per exchange':''}): `+
+        (res?'the result recorded is &ldquo;'+esc(res)+'&rdquo;. Judge the next step by it'+(back?' and by the step-back rule (&ldquo;'+esc(back)+'&rdquo;)':'; the step has no step-back rule written')+'.'
+          :'no result is recorded yet. Record the rate or percentage on Form DD-1 before the next step.');
+      if(rp!=null&&Math.abs(rp-rpe)>1e-9)t+=` The current step (${fmtN(rp)} responses per exchange) is not the schedules above (${fmtN(rpe)}): bring one in line with the other.`;}
+    v=`<div class="verdict v-info">${t}</div>`;
   }
   $('#upVerdict').innerHTML=v;
 }
-function thinCell(r){const x=perExchange(r.tp,r.ep);return x==null?'\u2014':fmtN(x);}
+function thinCell(r){const x=perExchange(r.tp,r.ep);return x==null?'—':fmtN(x);}
 /* a step's unit price, shown when its backups per exchange are entered (a blank is not assumed to be 1 here: the
    figure is a record of the step, not an estimate) */
-function upCell(r){const x=num(r.te)?unitPrice(r.tp,r.ep,r.te):null;return x==null?'\u2014':x.toFixed(1);}
+function upCell(r){const x=num(r.te)?unitPrice(r.tp,r.ep,r.te):null;return x==null?'—':x.toFixed(1);}
+/* v22.54 (review F425) the step's label: one schedule, or a step back. "Both ratios" is no longer offered (the form's
+   own guidance says not to do it); a step saved with it keeps it and is flagged. */
+const THIN_W=['Token production','Exchange production','Token exchange','Step back'];
 function renderSch(){
   renderChain();renderSchSummary();
-  $('#thinTbl tbody').innerHTML=S.thin.map((r,i)=>`<tr><td style="text-align:center;font-weight:600">${i+1}</td>
+  $('#thinTbl tbody').innerHTML=S.thin.map((r,i)=>{const opts=THIN_W.concat(r.w&&THIN_W.indexOf(r.w)<0?[r.w]:[]);
+    return `<tr><td style="text-align:center;font-weight:600">${i+1}</td>
       <td><input data-t="${i}" data-f="d" value="${esc(r.d)}"></td>
-      <td><select data-t="${i}" data-f="w"><option value=""></option>${['Token production','Exchange production','Token exchange','Both ratios'].map(o=>`<option${r.w===o?' selected':''}>${o}</option>`).join('')}</select></td>
+      <td><select data-t="${i}" data-f="w"><option value=""></option>${opts.map(o=>`<option${r.w===o?' selected':''}>${esc(o)}</option>`).join('')}</select></td>
       <td><input type="number" step="any" data-t="${i}" data-f="tp" value="${esc(r.tp)}"></td>
       <td><input type="number" step="any" data-t="${i}" data-f="ep" value="${esc(r.ep)}"></td>
       <td><input type="number" step="any" data-t="${i}" data-f="te" value="${esc(r.te||'')}" aria-label="Step ${i+1} backups per exchange"></td>
       <td class="rpe" style="text-align:center;font-weight:600">${thinCell(r)}</td>
       <td class="upc" style="text-align:center;font-weight:600">${upCell(r)}</td>
-      <td><textarea data-t="${i}" data-f="crit" rows="2">${esc(r.crit)}</textarea></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`).join('');
+      <td class="te-crit"><label>Advance when<textarea data-t="${i}" data-f="crit" rows="2">${esc(r.crit)}</textarea></label><label>Step back when<textarea data-t="${i}" data-f="back" rows="1">${esc(r.back||'')}</textarea></label><label>Result (date; rate or % on Form DD-1)<textarea data-t="${i}" data-f="res" rows="1">${esc(r.res||'')}</textarea></label></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this step" aria-label="Delete step ${i+1}">&times;</button></td></tr>`;}).join('');
+  renderThinFlags();
 }
+/* v22.54 (review F425) what each step changed, read from its numbers against the step before it: the token-production
+   ratio, the exchange-production ratio, and what each token buys (the backups per exchange over the tokens per exchange,
+   when both steps hold it; five tokens buying five 1-minute deliveries is the same token-exchange schedule as one buying
+   one). A step that changed two schedules, or one other than its label, is named. */
+function thinCheck(){
+  const out=[];let prev=null;
+  S.thin.forEach((r,i)=>{const tp=num(r.tp),ep=num(r.ep),te=num(r.te);if(!tp&&!ep&&!te)return;
+    const o={i,w:T(r.w),ch:[],back:T(r.back)};
+    if(prev){const ne=(a,b)=>a!=null&&b!=null&&Math.abs(a-b)>1e-9;
+      if(ne(tp,prev.tp))o.ch.push('Token production');
+      if(ne(ep,prev.ep))o.ch.push('Exchange production');
+      if(te&&ep&&prev.te&&prev.ep&&ne(te/ep,prev.te/prev.ep))o.ch.push('Token exchange');
+      o.prev=prev.i;}
+    else o.first=true;
+    const n=o.ch.length,lab=o.w,from=o.first?'':' (against step '+(o.prev+1)+')';
+    if(lab==='Both ratios')o.warn=`Step ${i+1} is recorded as thinning both ratios at once: the effect cannot be put down to either (Bullock & Hackenberg, 2006). Say in its result why both changed, or record it as two steps.`;
+    else if(n>1)o.warn=`Step ${i+1} changed ${teList(o.ch.map(lowFirst))} at once${from}: the effect cannot be put down to either (Bullock & Hackenberg, 2006). Thin one schedule at a time.`;
+    else if(!o.first&&lab&&lab!=='Step back'&&n===1&&lab!==o.ch[0])o.warn=`Step ${i+1} is labelled ${lowFirst(lab)}, but its numbers changed ${lowFirst(o.ch[0])}${from}.`;
+    else if(!o.first&&lab&&lab!=='Step back'&&!n)o.warn=`Step ${i+1} is labelled ${lowFirst(lab)}, but none of its numbers differ from step ${o.prev+1}.`;
+    else if(!o.first&&!lab&&n===1)o.info=`Step ${i+1} changed ${lowFirst(o.ch[0])}${from}: choose it under Schedule thinned.`;
+    o.double=lab==='Both ratios'||n>1;
+    out.push(o);prev={i,tp,ep,te};});
+  return out;
+}
+function renderThinFlags(){const C=thinCheck(),cur=C[C.length-1],h=[];
+  C.forEach(o=>{if(o.warn)h.push(['v-mid',o.warn]);else if(o.info)h.push(['v-info',o.info]);});
+  if(cur&&!cur.back)h.push(['v-mid',`Step ${cur.i+1}, the current step, has no step-back rule: write when it goes back to the step before (the rate or percentage on Form DD-1 that says the step is too large).`]);
+  $('#thinFlags').innerHTML=h.map(([c,t])=>`<div class="verdict ${c}">${esc(t)}</div>`).join('');}
 /* v21.33 (R): a thinning step can be deleted anywhere in the record; the steps after it move up one, and the
    record keeps the form's three blank rows at least (ensure), as it does when a file is opened */
 async function delThinAt(i){const r=S.thin[i];if(!r)return;
-  if(['d','w','tp','ep','te','crit'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nWhat was entered in it will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
-  S.thin.splice(i,1);ensure();renderSch();}
+  if(['d','w','tp','ep','te','crit','back','res'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete step '+(i+1)+'?\nWhat was entered in it will be deleted, and the steps after it move up one.',{ok:'Delete',danger:true})))return;
+  S.thin.splice(i,1);ensure();renderSch();renderAud();}
 $('#thinTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delThinAt(+b.dataset.di);});
 /* v21.16 audit (F5): an entry in the thinning record updates only its own step's figure. The table was redrawn on
    every keystroke, which replaced the number box being typed in, and the caret came back at the start: 12 was
    stored as 21. */
 ['input','change'].forEach(ev=>$('#thinTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.t===undefined)return;
   const r=S.thin[+el.dataset.t];if(!r)return;r[el.dataset.f]=el.value;
-  if(el.dataset.f==='tp'||el.dataset.f==='ep'||el.dataset.f==='te'){const tr=el.closest('tr'),c=tr.querySelector('td.rpe'),u=tr.querySelector('td.upc');if(c)c.textContent=thinCell(r);if(u)u.textContent=upCell(r);}}));
-$('#addThin').addEventListener('click',()=>{S.thin.push({d:'',w:'',tp:'',ep:'',te:'',crit:''});renderSch();});
-$('#delThin').addEventListener('click',()=>{if(S.thin.length>1){S.thin.pop();renderSch();}});
+  if(el.dataset.f==='tp'||el.dataset.f==='ep'||el.dataset.f==='te'){const tr=el.closest('tr'),c=tr.querySelector('td.rpe'),u=tr.querySelector('td.upc');if(c)c.textContent=thinCell(r);if(u)u.textContent=upCell(r);}
+  /* v22.54 the flags, the figures' current step and the audit follow the record (nothing is redrawn under the caret) */
+  renderThinFlags();renderSchSummary();renderAud();}));
+$('#addThin').addEventListener('click',()=>{S.thin.push(thinRow());renderSch();});
+$('#delThin').addEventListener('click',()=>{if(S.thin.length>1){S.thin.pop();renderSch();renderAud();}});
+
+/* v22.54 (review F419) what the case knows about this student's backups: the allergies and the cultural, religious or
+   dietary considerations (Form DM-1), the IEP accommodations (Form DM-1), the parent's decision on food items (Form IC-1),
+   the reinforcer verdicts (Form RA-1) and what the student likes (Form SI-1). Read from the case the workstation sent;
+   nothing outside a case. */
+function caseFacts(){const C=window.nbhCase;return C&&C.facts&&typeof C.facts==='object'?C.facts:null;}
+function foodDec(){const C=window.nbhCase,f=caseFacts();if(!f||!C||!C.consent)return null;const k=C.consent(f);return {known:!!k.known,ed:(k.dec&&k.dec.ed)||{}};}
+function foodLine(ed){return ed.dec==='yes'?'approved: '+(T(ed.items)||'items not listed')+(T(ed.allergy)?'; allergies or diet: '+T(ed.allergy):'')+(T(ed.limits)?'; limits: '+T(ed.limits):'')
+  :ed.dec==='no'?'the parent said no to food or drink items':ed.dec==='na'?'not proposed: none without the parent’s approval':'the parent’s decision is not recorded: no edibles until it is';}
+function accomOf(f){const p=f&&f.profile;return p?T(p.accom):'';}
+/* RA-1's results as the case carries them: reinf.items [{name, verdict, bp}] */
+function reinfItems(f){const r=f&&f.reinf;return r&&Array.isArray(r.items)?r.items.filter(x=>x&&T(x.name)):[];}
+const RA_CONF={'Confirmed':'Yes','Not supported':'No','Untested':'Not tested','Probable':'Probable','Relative only':'Relative only'};
+/* a backup's words against the IEP accommodations: a phrase of them that shares a word of four letters or more with
+   the backup ("Break every 20 min" and a break backup); the common words of a schedule are not counted */
+const ACC_STOP=new Set(['every','with','from','away','minute','time','before','after','when','during','work','task','school','class','student','into','that','this','their','them','than','then','other','each','near','door','day','week','plus','only','reduced','warning','preferential','extra','given','provided','available','access','adult','staff','teacher','test','simulated','sample','needed','request','requested','per','also','some','more','less','used','using']);
+const accStem=x=>x.replace(/ies$/,'y').replace(/(?:es|s)$/,'');
+function accomHit(b,acc){if(!acc||!T(b.n))return '';const w=x=>(String(x||'').toLowerCase().match(/[a-z]{4,}/g)||[]).map(accStem).filter(x=>!ACC_STOP.has(x));
+  const bw=new Set(w(b.n));if(b.c==='Escape or break'||moOf(b)==='A break from work')bw.add('break');
+  const parts=acc.split(/[;\n]+/).map(x=>x.trim()).filter(Boolean);
+  for(const p of parts)if(w(p).some(x=>bw.has(x)))return p;return '';}
+/* the backups that match an accommodation and are not yet answered in their notes (a note that names the IEP says which
+   it is) */
+function accHits(){const acc=accomOf(caseFacts());return acc?S.bk.map(b=>({b,p:accomHit(b,acc)})).filter(x=>x.p):[];}
+const isFood=b=>b.c==='Edible'||b.c==='Drink'||moOf(b)==='Food or drink';
+function renderCaseBox(){const box=$('#teCaseBox');if(!box)return;const f=caseFacts();if(!f){box.innerHTML='';return;}
+  const L=[],p=f.profile||{},h=p.health||{},st=f.student||{};
+  if(T(h.allergies))L.push(['Allergies','Form DM-1',h.allergies]);
+  if(T(p.culture))L.push(['Cultural, religious or dietary considerations','Form DM-1',p.culture]);
+  const fd=foodDec();if(fd&&fd.known)L.push(['Food items','Form IC-1',foodLine(fd.ed)]);
+  if(accomOf(f))L.push(['IEP accommodations','Form DM-1',accomOf(f)+'. What the IEP provides is not earnable; an extra beyond it can be a backup.']);
+  const rf=reinfItems(f);if(rf.length)L.push(['Reinforcer verdicts','Form RA-1',rf.map(x=>T(x.name)+': '+T(x.verdict||'Untested')+(num(x.bp)?' (break point '+fmtN(num(x.bp))+')':'')).join('; ')]);
+  if(T(st.likes))L.push(['What the student likes','Form SI-1',st.likes]);
+  if(T(st.preference))L.push(['What the student would want from a plan','Form SI-1',st.preference]);
+  box.innerHTML=L.length?'<p><b>What the case says about the backups</b></p>'+L.map(([a,s,t])=>`<p>${esc(a)} (${s}): ${esc(T(t))}</p>`).join(''):'';}
 
 function renderGen(){
-  const opt=(a,v)=>a.map(o=>`<option${o===v?' selected':''}>${o}</option>`).join('');
-  $('#bkTbl tbody').innerHTML=S.bk.map((r,i)=>`<tr>
+  const opt=(a,v)=>a.map(o=>`<option${o===v?' selected':''}>${esc(o)}</option>`).join('');
+  $('#bkTbl tbody').innerHTML=S.bk.map((r,i)=>{const food=r.c==='Edible'||r.c==='Drink',dm=MO_OF[r.c];
+    return `<tr>
     <td style="text-align:center;font-weight:600">${i+1}</td>
     <td><input data-k="${i}" data-f="n" value="${esc(r.n)}"></td>
-    <td><select data-k="${i}" data-f="c">${opt(CLASSES,r.c)}</select></td>
+    <td class="te-cls"><select data-k="${i}" data-f="c">${opt(CLASSES,r.c)}</select>${food?`<label><input type="checkbox" data-k="${i}" data-f="clr"${r.clr?' checked':''}>Cleared: allergies, diet, school policy</label>`:''}</td>
+    <td><select data-k="${i}" data-f="mo" aria-label="Backup ${i+1}: works when the student wants">${MOS.map(o=>`<option value="${esc(o)}"${o===(r.mo||'')?' selected':''}>${o?esc(o):(dm?'('+esc(dm.toLowerCase())+', from the class)':'')}</option>`).join('')}</select></td>
     <td><input data-k="${i}" data-f="cost" value="${esc(r.cost)}"></td>
     <td><input data-k="${i}" data-f="pref" value="${esc(r.pref)}"></td>
-    <td><select data-k="${i}" data-f="conf"><option value=""></option>${opt(['Yes','No','Not tested'],r.conf)}</select></td>
-    <td><input data-k="${i}" data-f="note" value="${esc(r.note)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this backup" aria-label="Delete backup ${i+1}">&times;</button></td></tr>`).join('');
+    <td><select data-k="${i}" data-f="conf"><option value=""></option>${CONF.map(([v,l])=>`<option value="${v}"${r.conf===v?' selected':''}>${l}</option>`).join('')}${r.conf&&!CONF.some(x=>x[0]===r.conf)?`<option selected>${esc(r.conf)}</option>`:''}</select></td>
+    <td><input data-k="${i}" data-f="note" value="${esc(r.note)}"></td><td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this backup" aria-label="Delete backup ${i+1}">&times;</button></td></tr>`;}).join('');
   renderGenSummary();
 }
 /* v21.33 (R): a backup can be deleted anywhere in the menu */
 async function delBkAt(i){const r=S.bk[i];if(!r)return;
-  if(['n','c','cost','pref','conf','note'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete backup '+(i+1)+(String(r.n||'').trim()?' ('+String(r.n).trim()+')':'')+'?\nWhat was entered in it will be deleted.',{ok:'Delete',danger:true})))return;
+  if(['n','c','mo','cost','pref','conf','clr','note'].some(f=>String(r[f]||'').trim())&&!(await nbhUI.confirm('Delete backup '+(i+1)+(String(r.n||'').trim()?' ('+String(r.n).trim()+')':'')+'?\nWhat was entered in it will be deleted.',{ok:'Delete',danger:true})))return;
   S.bk.splice(i,1);ensure();renderGen();}
 $('#bkTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delBkAt(+b.dataset.di);});
 /* v21.16 audit (F2, F3, F4). The counts and the verdict are redrawn from the record on every edit, a backup's name
    included (a menu typed from scratch read "No backups listed yet"). A class counts only if it is one of the form's
    classes, and a backup listed without one is named as such: with none recorded the verdict said "Every backup
-   falls in one class". Text from the record is escaped; a class name in an opened file was inserted as HTML. */
+   falls in one class". Text from the record is escaped; a class name in an opened file was inserted as HTML.
+   v22.54 (review F424): what is counted is the kinds of backup (what the student has to want for each), among the
+   backups not marked "No" on RA-1, and the verdict says how many are untested; it no longer claims the token's value
+   does not depend on one establishing operation. */
 function renderGenSummary(){
-  const used=S.bk.filter(b=>String(b.n||'').trim());
-  const known=used.filter(b=>b.c&&CLASSES.includes(b.c)),noCls=used.length-known.length;
-  const classes=[...new Set(known.map(b=>b.c))];
-  const conf=used.filter(b=>b.conf==='Yes').length;
-  const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
+  const used=S.bk.filter(b=>T(b.n)),out=used.filter(b=>b.conf==='No'),live=used.filter(b=>b.conf!=='No');
+  const kinds=[...new Set(live.map(moOf).filter(Boolean))],noKind=live.filter(b=>!moOf(b)).length;
+  const conf=used.filter(b=>b.conf==='Yes').length,untested=live.filter(b=>!b.conf||b.conf==='Not tested').length,part=live.filter(b=>b.conf==='Probable'||b.conf==='Relative only').length;
+  const kl=kinds.map(k=>k.toLowerCase());
   $('#genMetrics').innerHTML=
-    card('Backups listed',used.length,noCls?noCls+' with no class recorded':'')+
-    card('Distinct classes',classes.length,esc(classes.join(', '))||'none recorded')+
-    card('Confirmed reinforcers',conf,'tested on Form RA-1')+
-    card('Economy',S.meta.econ?esc(String(S.meta.econ).split(' ')[0]):'\u2014','');
-  let cls,txt;
+    card('Backups listed',used.length,out.length?out.length+' marked not a reinforcer (RA-1)':'')+
+    card('Kinds of backup',kinds.length,esc(kl.join(', '))||'none recorded')+
+    card('Confirmed reinforcers',conf,untested&&live.length?untested+' not yet tested on Form RA-1':'tested on Form RA-1')+
+    card('Economy',S.meta.econ?esc(String(S.meta.econ).split(' ')[0]):'—','');
+  let cls,txt;const counted=live.length===used.length?'the '+live.length+' backup'+(live.length===1?'':'s')+' listed':'the '+live.length+' of '+used.length+' backups not marked No on Form RA-1';
   if(!used.length){cls='v-mid';txt='No backups listed yet.';}
-  else if(!classes.length){cls='v-mid';
-    txt=`<b>No class recorded.</b> ${used.length===1?'The backup listed has no class recorded':'None of the '+used.length+' backups listed has a class recorded'}, so the form cannot say whether the token is generalized. Record the class of each backup.`;}
-  else if(classes.length>=3){cls='v-ok';
-    txt=`<b>Generalized.</b> The token buys across ${classes.length} classes of reinforcer, so its value does not depend on one establishing operation being in force. DeFulio et al. (2014) compared tokens exchangeable for either of two backups tied to different establishing operations (food or water) with tokens exchangeable for only one.`;}
-  else if(classes.length===2){cls='v-mid';
-    txt='<b>Generalized, across two classes.</b> Two classes of backup, as with the food-or-water token of DeFulio et al. (2014). The token will still fail on a day when neither is wanted; a third class drawn from a different establishing operation would broaden it.';}
-  else {cls='v-no';
-    txt='<b>Not generalized.</b> Every backup'+(noCls?' with a class recorded':'')+' falls in one class, so the token is a conditioned reinforcer for that class alone and will lose its function whenever the student is satiated on it. Add backups from at least one other class.';}
-  if(classes.length&&noCls)txt+=` ${noCls===1?'One backup has':noCls+' backups have'} no class recorded and ${noCls===1?'is':'are'} not counted.`;
+  else if(!live.length){cls='v-no';txt='<b>No backup to count.</b> Every backup listed is marked not a reinforcer on Form RA-1, so the token buys nothing shown to work. Add backups, and test them.';}
+  else if(!kinds.length){cls='v-mid';
+    txt=`<b>No kind recorded.</b> ${live.length===1?'The backup counted has':'None of the '+live.length+' backups counted has'} a class or a want recorded, so the form cannot say whether the token is generalized. Record the class of each backup, or what the student has to want for it to work.`;}
+  else if(kinds.length>=3){cls='v-ok';
+    txt=`<b>Spans ${kinds.length} kinds of backup</b> (${esc(teList(kl))}), counting ${counted}. Each depends on a different want, so the token can keep its value on a day one of them is not wanted. DeFulio et al. (2014) found tokens exchangeable for either food or water (pigeons, under separate food and water restriction) were produced more than tokens exchangeable for one.`;}
+  else if(kinds.length===2){cls='v-mid';
+    txt=`<b>Spans two kinds of backup</b> (${esc(teList(kl))}), counting ${counted}, as with the food-or-water token of DeFulio et al. (2014). The token will still lose its value on a day when neither is wanted; a backup that depends on a third want would broaden it.`;}
+  else{cls='v-no';
+    txt=`<b>One kind of backup</b> (${esc(kl[0])}), counting ${counted}. Every backup counted depends on the same want, so the token is a conditioned reinforcer for that alone and loses its function whenever the student does not want it. Add backups that depend on another want.`;}
+  if(kinds.length&&noKind)txt+=` ${noKind===1?'One backup has':noKind+' backups have'} no class or want recorded and ${noKind===1?'is':'are'} not counted.`;
+  if(out.length&&live.length)txt+=` ${out.length===1?'One backup is':out.length+' backups are'} marked not a reinforcer on Form RA-1 (${esc(out.map(b=>T(b.n)).join(', '))}) and ${out.length===1?'is':'are'} not counted.`;
+  if(live.length&&untested)txt+=untested===live.length?(live.length===1?' It has not been tested on Form RA-1.':' None of them has been tested on Form RA-1.'):' '+untested+' of them '+(untested===1?'has':'have')+' not been tested on Form RA-1.';
+  if(part)txt+=` ${part===1?'One is':part+' are'} Probable or Relative only on Form RA-1, not confirmed.`;
   if(used.length&&conf===0)txt+=' No backup has been confirmed as a reinforcer on Form RA-1 &mdash; preference is not the same as reinforcer effect.';
   $('#genVerdict').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+  renderGenFlags();
 }
+/* v22.54 (review F419) the flags under the menu, on screen and on paper: a food or drink backup not yet cleared for
+   allergies, diet and the school's rule on food as a reward, or one the parent has not approved (Form IC-1); a backup that
+   matches an IEP accommodation (what the IEP provides is given as the IEP says, not earned) */
+function renderGenFlags(){const f=caseFacts(),fd=foodDec(),flags=[],used=S.bk.filter(b=>T(b.n)),food=used.filter(isFood);
+  const nm=a=>esc(teList(a.map(b=>'“'+T(b.n)+'”')));
+  if(food.length){const p=(f&&f.profile)||{},al=T(p.health&&p.health.allergies),cu=T(p.culture),nc=food.filter(b=>!b.clr);
+    if(fd&&fd.known&&fd.ed.dec==='no')flags.push(['v-no',`<b>Food or drink backups, and the parent said no.</b> Form IC-1 records the parent&rsquo;s No to food or drink items: take ${nm(food)} off the menu.`]);
+    else if(fd&&fd.known&&fd.ed.dec!=='yes')flags.push(['v-no',`<b>Food or drink backups without the parent&rsquo;s approval.</b> ${fd.ed.dec==='na'?'Food items were not proposed on Form IC-1':'Form IC-1 does not record the parent&rsquo;s decision on food items'}: do not use ${nm(food)} until the parent approves the items in writing (Form IC-1, Specific procedures B).`]);
+    const ctx=[al?'allergies: '+al+' (Form DM-1)':'',cu?'diet or culture: '+cu+' (Form DM-1)':'',fd&&fd.known&&fd.ed.dec==='yes'?'food items '+foodLine(fd.ed)+' (Form IC-1)':''].filter(Boolean).join('; ');
+    if(nc.length)flags.push(['v-mid',`<b>Not yet cleared:</b> ${nm(nc)} ${nc.length===1?'is a food or drink backup':'are food or drink backups'}. Tick &ldquo;Cleared&rdquo; under the class once allergies, diet and the school&rsquo;s rule on food as a reward have been checked${ctx?' ('+esc(ctx)+')':''}.`]);}
+  accHits().forEach(({b,p})=>{const noted=/\bIEP\b/.test(String(b.note||''));
+    flags.push([noted?'v-info':'v-no',`<b>${esc(T(b.n))}</b> matches the IEP accommodation &ldquo;${esc(p)}&rdquo; (Form DM-1). What the IEP provides is given as the IEP says, not earned (34 CFR &sect;300.323(c)(2), (d)); an extra beyond it can be a backup. `+(noted?'Its notes say which it is.':'Say which it is in the backup&rsquo;s notes.')]);});
+  $('#genFlags').innerHTML=flags.map(([c,t])=>`<div class="verdict ${c}">${t}</div>`).join('');}
 ['input','change'].forEach(ev=>$('#bkTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.k===undefined)return;
-  const r=S.bk[+el.dataset.k];if(!r)return;r[el.dataset.f]=el.value;renderGenSummary();}));
-$('#addBk').addEventListener('click',()=>{S.bk.push({n:'',c:'',cost:'',pref:'',conf:'',note:''});renderGen();});
+  const r=S.bk[+el.dataset.k];if(!r)return;r[el.dataset.f]=el.type==='checkbox'?(el.checked?'1':''):el.value;
+  /* a class chosen redraws the row's want and the Cleared tick (a list, so no caret is lost); the focus stays on it */
+  if(ev==='change'&&el.dataset.f==='c'){const k=el.dataset.k;renderGen();const s=$(`#bkTbl [data-k="${k}"][data-f="c"]`);if(s)try{s.focus({preventScroll:true});}catch(x){s.focus();}}
+  else renderGenSummary();
+  renderAud();renderExSum();if(el.dataset.f==='cost'||el.dataset.f==='n')renderSchSummary();}));
+$('#addBk').addEventListener('click',()=>{S.bk.push(bkRow());renderGen();});
 $('#delBk').addEventListener('click',()=>{if(S.bk.length>1){S.bk.pop();renderGen();}});
 
+/* v22.54 (review I213) the exchange log: one line an exchange. The counts say which backups were bought and refused (a
+   backup refused again and again has lost its value for now, which the menu's refresh rule answers) and how many
+   exchanges were banked to a later day. */
+function renderEx(){
+  $('#exTbl tbody').innerHTML=S.ex.map((r,i)=>`<tr><td style="text-align:center;font-weight:600">${i+1}</td>
+    <td><input data-x="${i}" data-f="d" value="${esc(r.d)}" aria-label="Exchange ${i+1} date"></td>
+    <td><input data-x="${i}" data-f="t" value="${esc(r.t)}" aria-label="Exchange ${i+1} time"></td>
+    <td><input type="number" step="any" data-x="${i}" data-f="n" value="${esc(r.n)}" aria-label="Exchange ${i+1} tokens earned"></td>
+    <td><input data-x="${i}" data-f="got" list="teBkNames" value="${esc(r.got)}" placeholder="two or more: separate with ;" aria-label="Exchange ${i+1} exchanged for"></td>
+    <td><input data-x="${i}" data-f="ref" list="teBkNames" value="${esc(r.ref)}" placeholder="two or more: separate with ;" aria-label="Exchange ${i+1} offered and refused"></td>
+    <td><select data-x="${i}" data-f="same" aria-label="Exchange ${i+1} on the day earned"><option value=""></option>${['Yes','No: banked to a later day'].map(o=>`<option${r.same===o?' selected':''}>${o}</option>`).join('')}</select></td>
+    <td class="nx noprint"><button type="button" class="rowDel noprint" data-di="${i}" title="Delete this exchange" aria-label="Delete exchange ${i+1}">&times;</button></td></tr>`).join('');
+  renderExSum();
+}
+function exStats(){const rows=S.ex.filter(r=>['d','t','n','got','ref','same'].some(f=>T(r[f])));
+  const names=S.bk.map(b=>T(b.n)).filter(Boolean),low=s=>s.toLowerCase();
+  const which=t=>names.find(n=>low(n)===low(t))||names.find(n=>low(n).indexOf(low(t))>=0||low(t).indexOf(low(n))>=0)||t;
+  const tally=f=>{const o={};rows.forEach(r=>String(r[f]||'').split(/[;\n]+/).map(x=>x.trim()).filter(Boolean).forEach(x=>{const k=which(x);o[k]=(o[k]||0)+1;}));return o;};
+  const days=new Set(rows.map(r=>T(r.d)).filter(Boolean)).size,tok=rows.reduce((a,r)=>a+(num(r.n)||0),0);
+  return {n:rows.length,days,tok,got:tally('got'),ref:tally('ref'),same:rows.filter(r=>r.same==='Yes').length,banked:rows.filter(r=>/^No/.test(r.same||'')).length};}
+function renderExSum(){const el=$('#exSum');if(!el)return;const dl=$('#teBkNames');if(dl)dl.innerHTML=S.bk.map(b=>T(b.n)).filter(Boolean).map(n=>`<option value="${esc(n)}">`).join('');
+  const x=exStats();if(!x.n){el.innerHTML='';return;}
+  const top=Object.entries(x.got).sort((a,b)=>b[1]-a[1]),ref=Object.entries(x.ref).sort((a,b)=>b[1]-a[1]),twice=ref.filter(e=>e[1]>=2);
+  let t=`<b>${x.n} exchange${x.n===1?'':'s'} logged</b>${x.days?' over '+x.days+' day'+(x.days===1?'':'s'):''}${x.tok?', '+fmtN(x.tok)+' tokens':''}.`;
+  if(top.length)t+=' Bought: '+top.map(([k,v])=>esc(k)+' '+v).join('; ')+'.';
+  if(ref.length)t+=' Refused: '+ref.map(([k,v])=>esc(k)+' '+v).join('; ')+'.';
+  if(x.same+x.banked)t+=` On the day earned: ${x.same} of ${x.same+x.banked}.`;
+  const h=[['v-info',t]];
+  if(twice.length)h.push(['v-mid',`<b>Refused more than once:</b> ${esc(twice.map(([k,v])=>k+' ('+v+' times)').join(', '))}. A backup the student keeps refusing has lost its value for now${T(S.meta.refresh)?'; the menu&rsquo;s refresh rule: &ldquo;'+esc(T(S.meta.refresh))+'&rdquo;':': refresh the menu (Form PA-1)'}.`]);
+  if(x.banked)h.push(['v-mid',`<b>Banked to a later day:</b> ${x.banked} of ${x.same+x.banked} exchanges. The audit&rsquo;s point on same-day exchange is not true while this goes on.`]);
+  el.innerHTML='<div class="te-flags">'+h.map(([c,s])=>`<div class="verdict ${c}">${s}</div>`).join('')+'</div>';}
+async function delExAt(i){const r=S.ex[i];if(!r)return;
+  if(['d','t','n','got','ref','same'].some(f=>T(r[f]))&&!(await nbhUI.confirm('Delete exchange '+(i+1)+'?\nWhat was entered in it will be deleted.',{ok:'Delete',danger:true})))return;
+  S.ex.splice(i,1);ensure();renderEx();renderAud();}
+$('#exTbl').addEventListener('click',e=>{const b=e.target.closest('.rowDel');if(b)delExAt(+b.dataset.di);});
+['input','change'].forEach(ev=>$('#exTbl').addEventListener(ev,e=>{const el=e.target;if(el.dataset.x===undefined)return;
+  const r=S.ex[+el.dataset.x];if(!r)return;r[el.dataset.f]=el.value;renderExSum();renderAud();}));
+$('#addEx').addEventListener('click',()=>{S.ex.push(exRow());renderEx();});
+$('#delEx').addEventListener('click',()=>{if(S.ex.length>1){S.ex.pop();renderEx();renderAud();}});
+
+/* v22.54 (review F418) token loss is response cost, a punishment procedure. While it is marked in use, the plan records
+   the behavior that loses tokens, how many, the floor, what less intrusive procedure was tried first and its data, the
+   parent's consent, the review, how its effect is measured and when it stops (BACB, 2020, Standards 2.11 and 2.15; where
+   the BIP is part of the IEP, the IEP change). Each one missing is named, and the audit cannot read as in order. */
+const lossOn=()=>/^Yes/.test(S.meta.loss||'');
+const LOSS_REQ=[['lossRule','the rule'],['lossBeh','the behavior that loses a token'],['lossN','how many tokens are lost'],['lossFloor','the floor'],['lossTried','what was tried first and its data'],
+  ['lossCons','the parent’s consent'],['lossRev','who reviewed it and when'],['lossMeas','how its effect is measured'],['lossStop','when it stops']];
+function lossGaps(){return lossOn()?LOSS_REQ.filter(([k])=>!T(S.meta[k])).map(x=>x[1]):[];}
+/* v21.16 audit (F10): token loss marked in use with no rule recorded is named under the rule, on screen and on paper */
+function renderLoss(){const on=lossOn(),g=lossGaps(),t=$('#lossTbl');if(t)t.classList.toggle('on',on);
+  const C=window.nbhCase,f=caseFacts(),k=f&&C&&C.consent?C.consent(f):null;
+  const bip=k&&k.known&&T(k.bip)?' Form IC-1 records the parent&rsquo;s consent to implement the BIP on '+esc(isoMDY(k.bip))+'; token loss added to a running plan is a change of its own, and the consent date here is the one for it.':'';
+  let h='';
+  if(on&&g.length)h=`<div class="verdict v-no"><b>Token loss is marked as in use, but the plan does not record ${esc(teList(g))}.</b> Token loss is a punishment procedure. The Code asks that less intrusive means were tried first and were not enough, that any required review was done, and that its effect is measured and it is stopped when it does not work (BACB, 2020, Standard 2.15); adding it is a substantial change, so the parent&rsquo;s informed consent is obtained for it (Standard 2.11), and where the BIP is part of the IEP the change is made by the IEP team or by an amendment the parent agrees to (34 CFR &sect;300.324(a)(4), (a)(6)).${bip}</div>`;
+  else if(on)h=`<div class="verdict v-info">Token loss is in use with its safeguards recorded. Keep measuring its effect and stop it by the rule above when it does not work (BACB, 2020, Standard 2.15).${T(S.meta.lossIep)?'':' Where the BIP is part of the IEP, record the IEP change too.'}${bip}</div>`;
+  $('#lossNote').innerHTML=h;
+  const dl=$('#teLossBehs');if(dl){const b=((f&&f.behaviors)||[]).filter(x=>x&&T(x.label)&&!(x.isRep===true||(x.isRep!==false&&/replacement|alternative/i.test(x.type||'')))).map(x=>T(x.label));dl.innerHTML=b.map(x=>`<option value="${esc(x)}">`).join('');}}
+
+/* v22.54 (review I214) the student's voice: Form SI-1's assent, what the student likes and would want from a plan */
+const ASSENT={'given':'Given','partial':'Partial: some parts or some sessions','refused':'Refused','not able':'Not able to give assent (consent only)'};
+function renderStu(){const f=caseFacts(),st=(f&&f.student)||null,box=$('#teStu');
+  if(box){const L=[];if(st){if(T(st.assent))L.push('Assent: '+(ASSENT[T(st.assent)]||T(st.assent)));if(T(st.preference))L.push('Would want from a plan: '+T(st.preference));if(T(st.likes))L.push('Likes: '+T(st.likes));
+      if(st.stop&&T(st.stop.signs))L.push('Says no by: '+T(st.stop.signs));}
+    box.innerHTML=L.length?'<p><b>From Form SI-1'+(T(st.date)?', '+esc(isoMDY(st.date)):'')+'</b></p>'+L.map(x=>'<p>'+esc(x)+'</p>').join(''):'';}
+  const a=T(S.meta.stuAssent),n=$('#stuNote');if(!n)return;
+  n.innerHTML=/^Refused/.test(a)?'<div class="verdict v-no"><b>The student has refused.</b> Take it to the team and the parent before the system runs: what is changed for the student, and how assent is asked again.</div>'
+    :/^Partial/.test(a)?'<div class="verdict v-mid"><b>Assent is partial.</b> Say which parts or sessions the student agreed to, and check assent at each session, not once.</div>'
+    :/^Not asked/.test(a)?'<div class="verdict v-mid"><b>Assent has not been asked yet.</b> Form SI-1 plans how to ask, and records the answer.</div>':'';}
+
+/* v22.54 (review I215) the plan for ending the token system: said when it is missing once the system is being thinned */
+function renderFade(){const n=$('#fadeNote');if(!n)return;const m=S.meta,steps=thinCheck().length,miss=[];
+  if(!T(m.fadeTerm))miss.push('the terminal schedule');if(!T(m.fadeCrit))miss.push('when the board is faded');if(!T(m.fadeNext))miss.push('what takes its place');
+  n.innerHTML=miss.length&&(steps>1||miss.length<3)?`<div class="verdict v-mid"><b>No plan yet for ${esc(teList(miss))}.</b> The IEP team and the parents will ask when the token system ends; the plan says it before the board is thinned far.</div>`
+    :!miss.length&&!T(m.fadeRm)?'<div class="verdict v-info">Plan for relapse before anything is faded (Form RM-1), and record its date here.</div>':'';}
+
+/* v22.54 (review F420, I211) the audit. A point the record contradicts is not counted (a thinning step that changed two
+   schedules, against "one at a time"). The three that must hold are named first while any is open, and the verdict is
+   never in order (green) until they hold. The verdict is the count and what is not yet confirmed; it no longer says the
+   system "matches what the research describes". */
+function audState(){
+  const dbl=thinCheck().some(o=>o.double),counted=i=>!!S.aud[i]&&!(i===8&&dbl),n=AUDIT.filter((_,i)=>counted(i)).length,d=AUDIT.length,gates=[];
+  const hits=accHits().filter(x=>!/\bIEP\b/.test(String(x.b.note||'')));
+  if(!S.aud[1])gates.push({i:1,t:'the token has not been tested as a reinforcer, so there is no token economy to judge yet (a board the student ignores is not one)'});
+  if(!S.aud[11])gates.push({i:11,t:'it is not confirmed that nothing the student is entitled to has been made earnable'});
+  else if(hits.length)gates.push({i:11,t:teList(hits.map(x=>'“'+T(x.b.n)+'”'))+' '+(hits.length===1?'matches':'match')+' an IEP accommodation (see the backups)'});
+  if(lossOn()){const g=lossGaps();if(g.length)gates.push({i:12,t:'token loss is in use, and the plan does not record '+teList(g)});
+    else if(!S.aud[12])gates.push({i:12,t:'token loss is in use, and its floor and its review as a punishment procedure are not confirmed'});}
+  return {n,d,gates,dbl,hits,open:AUDIT.map((_,i)=>i).filter(i=>!counted(i))};}
 function renderAud(){
-  $('#auditWrap').innerHTML=AUDIT.map((a,i)=>
-    `<label class="chk"><input type="checkbox" data-a="${i}"${S.aud[i]?' checked':''}>${a[0]}</label>`).join('');
-  const n=AUDIT.filter((_,i)=>S.aud[i]).length,d=AUDIT.length;
-  const card=(l,v,s)=>`<div class="metric"><b>${l}</b><div class="val">${v}</div><div class="sub">${s||''}</div></div>`;
+  const A=audState(),ex=exStats(),wrap=$('#auditWrap'),ae=document.activeElement,fa=ae&&wrap.contains(ae)&&ae.dataset?ae.dataset.a:undefined;
+  wrap.innerHTML=AUDIT.map((a,i)=>{
+    const flag=i===8&&A.dbl?'The thinning record has a step that changed more than one schedule: not counted while it does.'
+      :i===11&&A.hits.length?'A backup matches an IEP accommodation: see the backups.'
+      :i===12&&lossOn()&&lossGaps().length?'Token loss is in use, and the plan does not record '+teList(lossGaps())+'.'
+      :i===4&&ex.banked?'The exchange log shows '+ex.banked+' exchange'+(ex.banked===1?'':'s')+' banked to a later day.':'';
+    return `<label class="chk"><input type="checkbox" data-a="${i}"${S.aud[i]?' checked':''}>${esc(a[0])}<span class="te-tag${a[3]?' te-gate':''}">${a[3]?'must hold &middot; ':''}${esc(a[1])}${a[2]?': '+esc(a[2]):''}</span>${flag?`<span class="te-flag">${esc(flag)}</span>`:''}</label>`;}).join('');
+  /* v22.54 the item being ticked keeps the focus as the list is drawn again (a keyboard lost its place) */
+  if(fa!==undefined){const e=wrap.querySelector(`[data-a="${fa}"]`);if(e)try{e.focus({preventScroll:true});}catch(x){e.focus();}}
+  const n=A.n,d=A.d;
   $('#audMetrics').innerHTML=card('Items confirmed',`${n} of ${d}`,Math.round(100*n/d)+'%')+
     card('Outstanding',d-n,'listed below as actions');
   const p=n/d;
-  /* v21.16 audit (F9, F10). The lowest band gives the count: at 8 of 15 confirmed it said the system departs "on
-     most points". With nothing ticked, as on a blank form, it says no item has been confirmed yet rather than
-     printing that verdict. The percentage is rounded, not cut (13 of 15 read 86%). While token loss is in use
-     without the item on a floor and a review confirmed, the verdict names it and is not green. */
-  const lossOpen=/^Yes/.test(S.meta.loss||'')&&!S.aud[12];
-  let cls=p>=0.85?'v-ok':p>=0.6?'v-mid':'v-no';if(lossOpen&&cls==='v-ok')cls='v-mid';
-  let txt=p>=0.85?'The system matches what the research describes on nearly every point.'
-    :p>=0.6?'The system matches the description on most points. The unticked items are where it differs, and each is a small change rather than a redesign.'
-    :`The system departs from the described procedure on ${d-n} of ${d} points. Address the unticked items before judging whether the token economy is working &mdash; a system that is not running as described has not been tested.`;
+  /* v21.16 audit (F9, F10): with nothing ticked, as on a blank form, it says no item has been confirmed yet; the
+     percentage is rounded, not cut (13 of 15 read 86%) */
+  let cls=p>=0.85?'v-ok':p>=0.6?'v-mid':'v-no',txt;
   if(!n){cls='v-mid';txt='No item has been confirmed yet. Tick what is actually true of this system, not what the plan says.';}
-  if(lossOpen)txt+=' Token loss is in use, and it has not been confirmed that it has a floor and has been reviewed as a punishment procedure.';
+  else{const un=A.open.map(i=>lowFirst(AUDIT[i][0]));
+    txt=`<b>${n} of ${d} confirmed</b>`+(un.length?'; not yet: '+esc(un.join('; '))+'.':'.');
+    if(p<0.6)txt+=' A system that is not running as described has not been tested: address the unticked items before judging whether the token economy is working.';
+    if(A.gates.length){cls=A.gates.some(g=>g.i!==1)?'v-no':(cls==='v-ok'?'v-mid':cls);
+      txt='<b>Not in order yet:</b> '+esc(A.gates.map(g=>g.t).join('; '))+'. '+txt;}}
   $('#audVerdict').innerHTML=`<div class="verdict ${cls}">${txt}</div>`;
+  renderAudHist();
 }
 document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.a!==undefined){S.aud[+e.target.dataset.a]=e.target.checked;renderAud();}});
+/* v22.54 (review I211) Keep this audit: the date (the field, else today), the count, what was open and which of the
+   must-hold points; kept in the record, printed, and handed to the case for the review */
+function renderAudHist(){const b=$('#audHistBox');if(!b)return;const H=Array.isArray(S.audHist)?S.audHist:[];
+  b.innerHTML=H.length?'<p class="hint" style="margin:8px 0 0"><b>Audits kept</b></p><ul>'+H.map((h,i)=>`<li>${esc(h.date||'')}: ${+h.n||0} of ${+h.d||AUDIT.length} confirmed${(h.gates||[]).length?'; must hold, open: '+esc((h.gates||[]).map(g=>lowFirst((AUDIT[g]||[''])[0])).join('; ')):''}${(h.open||[]).length?'; not yet: '+esc((h.open||[]).map(g=>lowFirst((AUDIT[g]||[''])[0])).join('; ')):''}<button type="button" class="noprint" data-hdel="${i}" title="Delete this audit from the history" aria-label="Delete the audit of ${esc(h.date||'')}">&times;</button></li>`).join('')+'</ul>':'';}
+$('#audKeep').addEventListener('click',()=>{const A=audState();let d=T(S.meta.audDate);
+  if(!d){d=todayMDY();S.meta.audDate=d;const e=$('[data-m="audDate"]');if(e)e.value=d;}
+  S.audHist.push({date:d,n:A.n,d:A.d,open:A.open.slice(),gates:[...new Set(A.gates.map(g=>g.i))]});renderAudHist();
+  nbhUI.toast('The audit of '+d+' is kept in the history.',{kind:'ok'});});
+$('#audHistBox').addEventListener('click',async e=>{const x=e.target.closest('[data-hdel]');if(!x)return;const i=+x.dataset.hdel,h=S.audHist[i];if(!h)return;
+  if(!(await nbhUI.confirm('Delete the audit of '+(h.date||'')+' from the history?',{ok:'Delete',danger:true})))return;S.audHist.splice(i,1);renderAudHist();});
 
 function bindMeta(){$$('[data-m]').forEach(el=>{const k=el.dataset.m;el.value=S.meta[k]||'';
   if(!el._b){el._b=1;const ev=el.tagName==='SELECT'?'change':'input';
     el.addEventListener(ev,()=>{S.meta[k]=el.value;if(el.dataset.calc){renderChain();renderSchSummary();}if(k==='econ')renderGenSummary();
-      if(k==='loss'){renderLoss();renderAud();}if(k==='lossRule')renderLoss();});}});}
-/* v21.16 audit (F10): token loss marked in use with no rule recorded is named under the rule, on screen and on paper */
-function renderLoss(){const on=/^Yes/.test(S.meta.loss||''),rule=String(S.meta.lossRule||'').trim();
-  $('#lossNote').innerHTML=on&&!rule?'<div class="verdict v-no"><b>Token loss is marked as in use, but no rule is recorded.</b> Token loss is a punishment procedure: state what is lost, for what, the floor below which tokens cannot fall, and the review and approvals obtained.</div>':'';}
+      if(k==='loss'||/^loss/.test(k)){renderLoss();renderAud();}if(k==='stuAssent')renderStu();if(/^fade/.test(k))renderFade();if(k==='refresh')renderExSum();});}});}
 /* the enhancement sprint (A9): the case hooks' warning under "Behavior the tokens are earned for" follows the record too
    (a file opened, Clear all, a simulation or a take from the book change the field without an event) */
-function renderAll(){ensure();renderSch();renderGen();renderAud();renderLoss();bindMeta();lkPaint();if(window.__nbhTeWarn)window.__nbhTeWarn();}
+function renderAll(){ensure();renderSch();renderGen();renderEx();renderAud();renderLoss();renderStu();renderFade();renderCaseBox();bindMeta();lkPaint();if(window.__nbhTeWarn)window.__nbhTeWarn();}
+/* v22.54 (review F426) the Guide prints only when asked for; not saved with the record */
+$('[data-te="print-guide"]').addEventListener('change',e=>document.body.classList.toggle('te-print-guide',e.target.checked));
 
 $('#printBtn').addEventListener('click',()=>window.print());
 $('#saveBtn').addEventListener('click',()=>{const nm=(S.meta.client||'student').replace(/[^\w-]+/g,'_');
@@ -1678,14 +2005,19 @@ $('#loadBtn').addEventListener('click',()=>$('#fileIn').click());
 /* v21.16 audit (F1). Open data takes only a file this form saved. Another form's file has an S part too and was
    taken: its student name filled this form's Student field and its fields were carried in the record. A file that
    cannot be drawn leaves the record as it was; the record used to be replaced first, so a failed file left the
-   screen and the record disagreeing. The record is rebuilt field by field, as text. */
+   screen and the record disagreeing. The record is rebuilt field by field, as text.
+   v22.54: with the new parts of a step, a backup, the exchange log and the audits kept; a file saved before opens with
+   them empty */
 function fromFile(x){
   const obj=v=>!!v&&typeof v==='object'&&!Array.isArray(v),str=v=>v==null||typeof v==='object'?'':String(v);
-  const rec=blank();
+  const rec=blank(),row=(mk,r)=>{const o=mk();Object.keys(o).forEach(k=>{o[k]=str(r[k]);});return o;};
   if(obj(x.meta))Object.keys(x.meta).forEach(k=>{rec.meta[k]=str(x.meta[k]);});
-  if(Array.isArray(x.thin))rec.thin=x.thin.filter(obj).map(r=>({d:str(r.d),w:str(r.w),tp:str(r.tp),ep:str(r.ep),te:str(r.te),crit:str(r.crit)}));
-  if(Array.isArray(x.bk))rec.bk=x.bk.filter(obj).map(r=>({n:str(r.n),c:str(r.c),cost:str(r.cost),pref:str(r.pref),conf:str(r.conf),note:str(r.note)}));
+  if(Array.isArray(x.thin))rec.thin=x.thin.filter(obj).map(r=>row(thinRow,r));
+  if(Array.isArray(x.bk))rec.bk=x.bk.filter(obj).map(r=>row(bkRow,r));
   if(obj(x.aud))Object.keys(x.aud).forEach(k=>{if(/^\d+$/.test(k)&&+k<AUDIT.length&&x.aud[k]===true)rec.aud[k]=true;});
+  if(Array.isArray(x.ex))rec.ex=x.ex.filter(obj).map(r=>row(exRow,r));
+  const ints=a=>Array.isArray(a)?a.filter(v=>Number.isInteger(v)&&v>=0&&v<AUDIT.length):[];
+  if(Array.isArray(x.audHist))rec.audHist=x.audHist.filter(obj).map(h=>({date:str(h.date),n:Number.isFinite(+h.n)?+h.n:0,d:Number.isFinite(+h.d)?+h.d:AUDIT.length,open:ints(h.open),gates:ints(h.gates)}));
   return rec;
 }
 $('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
@@ -1709,36 +2041,53 @@ async function loadSim(){
     for(let k=Math.abs(n);k>0;){d.setDate(d.getDate()+(n>0?-1:1));if(d.getDay()%6)k--;}
     return (d.getMonth()+1)+'/'+d.getDate()+'/'+String(d.getFullYear()).slice(2);};
   S=blank();
-  S.meta={client:'SIMULATED \u2013 Sample Student',sid:'SIM-000',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(0),
+  S.meta={client:'SIMULATED – Sample Student',sid:'SIM-000',bcba:'Jordan Ellis, M.A., BCBA (simulated)',date:D(0),
     beh:'Places one block in the bin from the tray during independent work',
     setting:'Room 12, independent math and writing blocks',who:'Aide A in the morning, Aide B in the afternoon',
-    tokForm:'Laminated stars on a velcro strip fixed to the desk, in the student\u2019s line of sight',
+    tokForm:'Laminated stars on a velcro strip fixed to the desk, in the student’s line of sight',
     tokWhy:'Visible and countable from across the room, durable, and not itself a preferred item so it does not compete with the task',
-    tokEstab:'Being established now \u2014 pairing plan below',
+    tokEstab:'Being established now — pairing plan below',
     tokEvid:'The backups have been tested, not the stars: the reinforcer assessment on Form RA-1 confirmed tablet access and the fruit chew, and praise did not function as a reinforcer, so it is not used as a backup. The token board was nominated on RA-1 but not tested, so the stars have not yet been shown to function as reinforcers apart from the backups.',
     tokPlan:'Exchange after one token for the first two sessions, then two, then to the current five. Token handed over with the statement naming what it was earned for.',
-    tp:'FR 10 \u2014 ten blocks placed earn one star',tpN:'10',
-    ep:'FR 5 \u2014 five stars open an exchange',epN:'5',
+    stuAssent:'Partial: some parts or some sessions',
+    stuStop:'Pushes the tray away or says “no more”: the aide stops the task, offers the two cards (a different task or a break), and writes the minute on the sheet.',
+    tp:'FR 10 — ten blocks placed earn one star',tpN:'10',
+    ep:'FR 5 — five stars open an exchange',epN:'5',
     te:'Each star buys 1 min of tablet during the exchange period; five stars buy 5 min',teN:'5',
     exWhen:'End of each independent work block, 5 min, at the desk',
-    exDelay:'Under 10 s \u2014 the fifth star is handed over and the exchange begins immediately',
+    exDelay:'Under 10 s — the fifth star is handed over and the exchange begins immediately',
     loss:'No',lossRule:'Token loss is not used. The team considered it and decided against: it is a punishment procedure, would require review, and the system is producing the behavior without it.',
+    lossBeh:'',lossN:'',lossFloor:'',lossTried:'',lossCons:'',lossIep:'',lossRev:'',lossMeas:'',lossStop:'',
+    fadeTerm:'FR 20 per star, 10 stars per exchange, one exchange at the end of the morning',
+    fadeCrit:'At the terminal schedule, independent placement at or above the goal on Form DD-1 for four consecutive weeks',
+    fadeNext:'Self-monitoring (Form SM-1)',
+    fadeHow:'The student marks the strip; the aide checks it at the end of each block and the stars come off one block at a time, praise kept.',
+    fadeRm:'',
     refresh:'Brief MSWO each Monday (Form PA-1), and any backup refused twice is replaced',
-    econ:'Open \u2014 the backups are also available outside the system',
+    econ:'Open — the backups are also available outside the system',
     rights:'Food, drink, breaks, the bathroom, belongings, and adult attention are not earnable. The fruit chew on the menu is an extra offered alongside snack, never in place of it.',
-    audAction:'Three items outstanding. The stars have not been tested as reinforcers apart from the backups \u2014 a test goes on the next reinforcer assessment (Form RA-1). The student cannot yet request an exchange independently \u2014 a request card goes in this week. Integrity has not been observed since the schedule was thinned; a TI-1 check is scheduled within ten school days.',
-    review:D(-20)};
+    stuChoice:'Shown the menu, the student pointed to the tablet first and asked for “the tiles game”, which was added.',
+    audAction:'Three items outstanding. The stars have not been tested as reinforcers apart from the backups — a test goes on the next reinforcer assessment (Form RA-1). The student cannot yet request an exchange independently — a request card goes in this week. Integrity has not been observed since the schedule was thinned; a TI-1 check is scheduled within ten school days.',
+    review:D(-20),audDate:D(0)};
+  const step=o=>Object.assign(thinRow(),o),bk=o=>Object.assign(bkRow(),o),ex=o=>Object.assign(exRow(),o);
   S.thin=[
-    {d:D(33),w:'Exchange production',tp:'5',ep:'1',te:'1',crit:'Establishing the token. Exchange after every star. Advanced after two sessions at 80% independent placement.'},
-    {d:D(28),w:'Exchange production',tp:'5',ep:'2',te:'2',crit:'Advanced after two consecutive sessions at criterion. Rate held.'},
-    {d:D(20),w:'Exchange production',tp:'5',ep:'5',te:'5',crit:'Rate dipped for one session then recovered. Held here for two weeks before touching the other ratio.'},
-    {d:D(8),w:'Token production',tp:'10',ep:'5',te:'5',crit:'First change to the token-production ratio. Rate fell about 20% and has not fully recovered \u2014 holding here rather than thinning further.'}
+    step({d:D(33),w:'Exchange production',tp:'5',ep:'1',te:'1',crit:'Establishing the token: exchange after every star. Advance after two sessions at 80% independent placement.',back:'— (the first step)',res:'Two sessions at 80%; advanced.'}),
+    step({d:D(28),w:'Exchange production',tp:'5',ep:'2',te:'2',crit:'Two consecutive sessions at 80% independent placement.',back:'Below 60% for two sessions: back to one star per exchange.',res:'Criterion met in two sessions; the rate held.'}),
+    step({d:D(20),w:'Exchange production',tp:'5',ep:'5',te:'5',crit:'Two weeks at 80% before touching the other ratio.',back:'Below 60% for two sessions: back to two stars per exchange.',res:'The rate dipped for one session, then recovered. Held two weeks.'}),
+    step({d:D(8),w:'Token production',tp:'10',ep:'5',te:'5',crit:'Rate back to that of step 3 for five sessions.',back:'Rate below 80% of step 3’s for three sessions: back to five blocks per star.',res:'Rate fell about 20% and has not fully recovered (Form DD-1): holding here rather than thinning further.'})
   ];
   S.bk=[
-    {n:'Tablet, video clips',c:'Leisure item',cost:'1 star = 1 min',pref:'92% MSWO',conf:'Yes',note:'Confirmed on RA-1: PR break point 15.7'},
-    {n:'Fruit chew',c:'Edible',cost:'2 stars',pref:'71% MSWO',conf:'Yes',note:'Confirmed on RA-1, weaker than the tablet'},
-    {n:'Five minutes with the magnetic tiles',c:'Activity',cost:'3 stars',pref:'64% MSWO',conf:'Not tested',note:'Used as the intervening activity in the delay protocol as well'},
-    {n:'Choose the next work task',c:'Escape or break',cost:'5 stars',pref:'\u2014',conf:'Not tested',note:'Added deliberately from a different establishing operation so the token holds value on days when neither the tablet nor food is wanted'}
+    bk({n:'Tablet, video clips',c:'Leisure item',cost:'1 star = 1 min',pref:'92% MSWO',conf:'Yes',note:'Confirmed on RA-1: PR break point 15.7'}),
+    bk({n:'Fruit chew',c:'Edible',cost:'2 stars',pref:'71% MSWO',conf:'Yes',clr:'1',note:'Confirmed on RA-1, weaker than the tablet; cleared with the nurse and the parent, an extra beside snack'}),
+    bk({n:'Five minutes with the magnetic tiles',c:'Activity',cost:'3 stars',pref:'64% MSWO',conf:'Not tested',note:'Used as the intervening activity in the delay protocol as well'}),
+    bk({n:'Choose the next work task',c:'Other',mo:'Choice or control',cost:'5 stars',pref:'—',conf:'Not tested',note:'A choice, not a break: the student keeps working. A different want, for days when neither the tablet nor food is wanted'})
+  ];
+  S.ex=[
+    ex({d:D(3),t:'10:05',n:'5',got:'Tablet, video clips',ref:'',same:'Yes'}),
+    ex({d:D(3),t:'1:40',n:'5',got:'Fruit chew',ref:'Five minutes with the magnetic tiles',same:'Yes'}),
+    ex({d:D(2),t:'10:10',n:'5',got:'Tablet, video clips',ref:'',same:'Yes'}),
+    ex({d:D(2),t:'1:35',n:'5',got:'Choose the next work task',ref:'Five minutes with the magnetic tiles',same:'Yes'}),
+    ex({d:D(1),t:'10:00',n:'5',got:'Tablet, video clips',ref:'',same:'Yes'})
   ];
   [0,2,3,4,5,6,7,8,9,11,12,13].forEach(i=>{S.aud[i]=true;});
   renderAll();setView('sch');
@@ -1812,6 +2161,8 @@ function lkRows(b){const m=S.meta,N=NBHLink,out=[];
   else if(!beh&&cl)bi.push('The book\u2019s '+card+' is '+lkQ(cl)+(b.paired?' (paired with the behavior there).':' (not paired with a behavior).'));
   if(long&&!pairOk&&!N.near(beh,cl))bi.push('A card holds 40 characters; write a short label on Form TK-1\u2019s Targets and press Keep there to pair it with this behavior.');
   if(!beh&&cl&&!cprob&&!lkFacts())bi.push('This plan cannot see Form TB-1\u2019s problem behaviors here (the workstation sends them with the case), so take it only if it is a behavior to increase.');
+  /* v22.54 (review F422) a card that asks for a break is offered as before, with why tokens usually follow the work */
+  if(!beh&&cl&&/\bbreaks?\b|\ball done\b|\bFCR\b/i.test(cl))bi.push('The book\u2019s card asks for a break, which already reinforces it: tokens usually follow the work, with a break as one of the backups.');
   out.push({key:'beh',what:'Behavior the tokens are earned for',here:beh,there:cl,same:(x,y)=>N.near(x,y)||pairOk,owner:'here',pre:[],can:!beh&&!cprob,mirror:!long&&!prob,
     keep:prob&&prob.src!=='word'?false:undefined,
     why:!beh&&cl&&!cprob?'A card label is the child\u2019s word; restate it as a response.':'',
@@ -1856,7 +2207,7 @@ function lkTake(r){const m=S.meta,N=NBHLink;
   if(r.key==='tok'){if(lkT(m.tokForm)!==lkT(r.here))return false;m.tokForm=r.board?lkTokText(r.board):r.text;return;}
   if(r.key==='menu'){const names=S.bk.map(x=>lkT(x.n)).filter(Boolean),add=(r.add||[]).filter(c=>!names.some(n=>N.norm(n)===N.norm(c)||N.near(n,c)));
     if(!add.length)return false;
-    add.forEach(n=>{const row={n,c:'',cost:'',pref:'',conf:'',note:'Choice card in the token board book (Form TK-1)'};
+    add.forEach(n=>{const row=Object.assign(bkRow(),{n,note:'Choice card in the token board book (Form TK-1)'});   /* v22.54 the menu's row shape */
       const i=S.bk.findIndex(x=>['n','c','cost','pref','conf','note'].every(f=>!lkT(x[f])));if(i>=0)S.bk[i]=row;else S.bk.push(row);});return;}
   return false;}
 /* the hints beside the count and the menu, and the print line, from the record's last board. A compare that found
@@ -1941,9 +2292,19 @@ if(window.NBHLink){
    places the ticked replacement, behavior or objective in the behavior field while it is empty (a problem behavior ticked
    gives its replacement), and the ticked reinforcers in empty backup rows, then new ones; nothing typed is replaced. Its
    list says what each item gives here, ticks what the fill above would take, and shows a reduction goal, the function,
-   and a problem behavior with no replacement named, unticked and disabled, with the reason. Out: nothing. */
+   and a problem behavior with no replacement named, unticked and disabled, with the reason.
+   v22.54 (review F422): a response that is reinforced by what it asks for or gets is never the fill's choice: in an escape
+   case the break request (the FCR) is already reinforced by the break, a token for each request adds a second reinforcer
+   for leaving the work, and "10 responses per token" would count requests. A candidate is passed over when its words name
+   a break ("Break request", "hand the break card", "FCR"), or when it serves a function the case records (a replacement
+   target with its own function, or the replacement paired with a problem behavior whose function, its own or else the
+   case's from Form FS-1, is known); a skill objective when it names a break or is one of those. It stays in the From the
+   case list, unticked, with the reason, and Use still places it. With nothing left, the field stays empty and its prompt
+   asks for the work or skill each token follows; a note under the field says the same while it holds one.
+   v22.54 (review F419, I214): the case also fills, in empty cells only, the RA-1 column from Form RA-1's verdicts, and the
+   student's assent and how the student says no from Form SI-1. Out: the token system (the block after this one). */
 (function(){
-  var ROW = ['n','c','cost','pref','conf','note'];
+  var ROW = Object.keys(bkRow());   /* v22.54 the menu's row shape (bkRow) */
   /* Form PA-1's stimulus types, as this menu's classes */
   var CLS = { 'edible':'Edible', 'drink':'Drink', 'leisure item':'Leisure item', 'leisure':'Leisure item', 'activity':'Activity',
     'social':'Social / attention', 'social / attention':'Social / attention', 'escape or break':'Escape or break', 'sensory':'Sensory', 'other':'Other' };
@@ -2009,21 +2370,53 @@ if(window.NBHLink){
       if (o !== b && !isRep(o) && r && nm(clean(r)) === k) { t = seeTarget(r, behs); if (t) return t; } }
     return c;
   }
-  /* the fill's candidates, in order: the defined replacement targets, the paired replacements, Form GB-1's skill objectives */
+  /* v22.54 (review F422) why a candidate is not the fill's choice: {esc} for a break, {fn} for a function it serves;
+     null when it may be placed */
+  var BRK = /\bbreaks?\b|\ball done\b|\bFCR\b|functional communication/i;
+  function knownFn(x){ var k = tr(x && x.fnKey); if (!k && x && tr(x.fn) && window.nbhCase && nbhCase.fnKeyOf) k = nbhCase.fnKeyOf(x.fn); return k && k !== 'unknown' ? k : ''; }
+  function served(kind, item, t, f){
+    if (!t) return null;
+    if (BRK.test(t)) return { esc: true };
+    if (kind !== 'beh' || !item) return null;
+    var k = knownFn(item), lab = tr(item.fn);
+    if (!k && !isRep(item) && f && f.fn) { k = knownFn({ fnKey: f.fn.key, fn: f.fn.label }); lab = tr(f.fn.label) || tr(f.fn.key); }
+    return k ? (k === 'escape' ? { esc: true } : { fn: lab || k }) : null;
+  }
+  /* the reason, as the list and the notes say it ("\u201cBreak request\u201d asks for a break, ...") */
+  function reasonText(why){
+    return why && why.esc
+      ? 'asks for a break, which already reinforces it: a token for each request adds a second reinforcer for leaving the work. Tokens usually follow the work, with a break as one of the backups.'
+      : 'serves the function of the behavior it replaces' + (why && why.fn ? ', ' + why.fn.charAt(0).toLowerCase() + why.fn.slice(1) + ',' : ',') + ' so it is reinforced by what it gets. Tokens usually follow the work or skill the plan builds.';
+  }
+  function whyText(t, why){ return '\u201c' + t + '\u201d ' + reasonText(why); }
+  /* the fill's candidates, in order: the defined replacement targets, the paired replacements, Form GB-1's skill
+     objectives; those passed over (v22.54) are kept, with the reason, in .held */
   function candidates(f){
-    var behs = behsOf(f), out = [];
-    function add(t, kind, i){ if (t && !prob(t, behs) && !out.some(function(x){ return nm(x.t) === nm(t); })) out.push({ t:t, kind:kind, i:i }); }
-    behs.forEach(function(b, i){ if (isRep(b)) add(clean(b.label), 'beh', i); });
-    behs.forEach(function(b, i){ if (!isRep(b)) add(fromBeh(b, behs), 'beh', i); });
-    acqOf(f).forEach(function(a, i){ add(clean(a && a.beh), 'acq', i); });
+    var behs = behsOf(f), out = [], held = [];
+    function seen(a, t){ return a.some(function(x){ return nm(x.t) === nm(t); }); }
+    function add(t, kind, i, item){ if (!t || prob(t, behs)) return;
+      var why = served(kind, item, t, f);
+      if (!why && kind === 'acq') { var h = held.filter(function(x){ return nm(x.t) === nm(t); })[0]; if (h) why = h.why; }
+      if (why) { if (!seen(held, t)) held.push({ t:t, kind:kind, i:i, why:why }); return; }
+      if (!seen(out, t)) out.push({ t:t, kind:kind, i:i }); }
+    behs.forEach(function(b, i){ if (isRep(b)) add(clean(b.label), 'beh', i, b); });
+    behs.forEach(function(b, i){ if (!isRep(b)) add(fromBeh(b, behs), 'beh', i, b); });
+    acqOf(f).forEach(function(a, i){ add(clean(a && a.beh), 'acq', i, a); });
+    out = out.filter(function(x){ return !seen(held, x.t); });
+    out.held = held;
     return out;
   }
   function rowEmpty(r){ return !r || ROW.every(function(k){ return !tr(r[k]); }); }
-  function blankRow(){ return { n:'', c:'', cost:'', pref:'', conf:'', note:'' }; }
+  function blankRow(){ return bkRow(); }
   function clsOf(type){ var c = CLS[nm(type)]; return c || (typeof CLASSES !== 'undefined' && CLASSES.indexOf(tr(type)) > 0 ? tr(type) : ''); }
   function isRanked(m){ return !!m && m.rank != null && isFinite(+m.rank); }
   function prefOf(m){ return isRanked(m) ? 'Rank ' + (+m.rank) + (m.tier ? ' (' + m.tier + ')' : '') : 'Not yet ranked'; }
-  function rowOf(m){ return { n: tr(m.name), c: clsOf(m.type), cost: '', pref: prefOf(m), conf: '', note: '' }; }
+  /* v22.54 (review F419) Form RA-1's verdict for an item, in this form's words ('' when RA-1 has none) */
+  var raNow = [];
+  function raConf(name){ var x = tr(name); if (!x) return '';
+    var hit = raNow.filter(function(it){ var y = tr(it && it.name); return !!y && (nm(y) === nm(x) || !!(window.NBHLink && NBHLink.near && NBHLink.near(y, x))); })[0];
+    return (hit && RA_CONF[tr(hit.verdict)]) || ''; }
+  function rowOf(m){ return Object.assign(bkRow(), { n: tr(m.name), c: clsOf(m.type), pref: prefOf(m), conf: raConf(m.name) }); }
   /* Form PA-1's ranked menu without its low-preference third, in rank order, each name once */
   function ranked(menu){
     var seen = {};
@@ -2075,7 +2468,7 @@ if(window.NBHLink){
   function fieldProb(){
     var t = tr(S.meta.beh), N = window.NBHLink; if (!t || !N || !N.problem || !N.problemNote) return null;
     var f = (window.nbhCase && window.nbhCase.facts) || {}, behs = behsOf(f), b = caseProb(t, behs);
-    if (b) { var r = fromBeh(b, behs); if (!r || prob(r, behs)) r = (candidates(f)[0] || {}).t || '';
+    if (b) { var r = fromBeh(b, behs); if (!r || prob(r, behs) || served('beh', b, r, f)) r = (candidates(f)[0] || {}).t || '';   /* v22.54 (F422) never a break request */
       return { src:'case', form: b.src === 'FS-1' ? 'FS-1' : 'TB-1', rep: r }; }
     var p = N.problem(t, { facts: [], seen: seenOf() });
     return p && p.src === 'seen' ? p : null;
@@ -2086,9 +2479,25 @@ if(window.NBHLink){
   function warn(){
     var el = document.querySelector('[data-m="beh"]'); if (!el) return;
     var t = warnText(), w = document.getElementById('teBehWarn');
-    if (!w) { if (!t) return; w = document.createElement('div'); w.id = 'teBehWarn'; w.className = 'verdict v-no noprint'; el.parentNode.insertBefore(w, el.nextSibling); }
-    w.textContent = t; w.hidden = !t;
-    if (t) el.setAttribute('aria-describedby', 'teBehWarn'); else el.removeAttribute('aria-describedby');
+    if (!w && t) { w = document.createElement('div'); w.id = 'teBehWarn'; w.className = 'verdict v-no noprint'; el.parentNode.insertBefore(w, el.nextSibling); }
+    if (w) { w.textContent = t; w.hidden = !t;
+      if (t) el.setAttribute('aria-describedby', 'teBehWarn'); else el.removeAttribute('aria-describedby'); }
+    fcrNote(el);   /* v22.54 (F422) */
+  }
+  /* v22.54 (review F422) while the field holds a break request, or a replacement the case shows serves a function, a note
+     under it (and under the warning, when there is one) says why tokens usually follow the work instead; on screen only */
+  function fcrText(){
+    var t = tr(S.meta.beh); if (!t) return '';
+    var why = BRK.test(t) ? { esc: true } : null;
+    if (!why) { var f = (window.nbhCase && window.nbhCase.facts) || null, h = f ? (candidates(f).held || []).filter(function(x){ return nm(x.t) === nm(t); })[0] : null; if (h) why = h.why; }
+    return why ? whyText(t, why) : '';
+  }
+  function fcrNote(el){
+    var t = '', n = document.getElementById('teBehFcr'); try { t = fcrText(); } catch (e) {}
+    if (!n) { if (!t) return; n = document.createElement('div'); n.id = 'teBehFcr'; n.className = 'verdict v-mid noprint'; n.setAttribute('role', 'note'); }
+    var w = document.getElementById('teBehWarn'), after = w && w.parentNode === el.parentNode ? w : el;
+    if (n.previousElementSibling !== after) after.parentNode.insertBefore(n, after.nextSibling);
+    n.textContent = t; n.hidden = !t;
   }
   /* renderAll calls it too: a record opened, cleared, simulated or taken from the book changes the field without an event */
   window.__nbhTeWarn = warn;
@@ -2097,10 +2506,12 @@ if(window.NBHLink){
   window.__nbhFactsIn = function(f){
     f = f && typeof f === 'object' ? f : {};
     fresh();
-    var n = 0, notes = [], beh = false, rows = false, cur = tr(S.meta.beh), c = candidates(f)[0];
+    raNow = f.reinf && Array.isArray(f.reinf.items) ? f.reinf.items : [];
+    var n = 0, notes = [], beh = false, rows = false, cur = tr(S.meta.beh), cs = candidates(f), c = cs[0], held = cs.held || [];
     /* an empty field, or the fill's own behavior still as it placed it: the case's choice now */
     if (!cur || (fill.beh && cur === fill.beh)) {
       if (c && c.t !== cur) { S.meta.beh = c.t; fill.beh = c.t; n++; beh = true; }
+      else if (!cur && !c && held.length) notes.push('\u201c' + held[0].t + '\u201d ' + (held[0].why.esc ? 'asks for a break, which already reinforces it' : 'serves the function of the behavior it replaces') + ', so it is not placed: name the work or skill each token follows');
       else if (!cur && !c && (behsOf(f).length || acqOf(f).length)) notes.push('the case names no replacement or skill for the behavior the tokens are earned for');
     }
     if (Array.isArray(f.menu) && f.menu.length) {
@@ -2116,8 +2527,26 @@ if(window.NBHLink){
         }
       } else notes.push('the backup menu is already begun; the picker adds to it');
     }
+    /* v22.54 (review F419) Form RA-1's verdicts into the RA-1 column's empty cells; the fill's own rows, so filled, are
+       still its own */
+    if (raNow.length) {
+      var own = !!fill.bk && sigBk() === fill.bk, put1 = 0;
+      S.bk.forEach(function(r){ if (!tr(r.n) || tr(r.conf)) return; var v = raConf(r.n); if (v) { r.conf = v; put1++; } });
+      if (put1) { n += put1; rows = true; if (own) fill.bk = sigBk(); }
+    }
+    /* v22.54 (review I214) Form SI-1's assent and how the student says no, into empty fields */
+    var st = f.student && typeof f.student === 'object' ? f.student : null, metaSet = [];
+    if (st) {
+      var a = ASSENT[tr(st.assent)];
+      if (a && !tr(S.meta.stuAssent)) { S.meta.stuAssent = a; metaSet.push('stuAssent'); }
+      var sg = st.stop && tr(st.stop.signs), ss = st.stop && tr(st.stop.steps);
+      if (sg && !tr(S.meta.stuStop)) { S.meta.stuStop = sg + (ss ? '. What staff do: ' + ss : ''); metaSet.push('stuStop'); }
+    }
+    metaSet.forEach(function(k){ var e = document.querySelector('[data-m="' + k + '"]'); if (e) e.value = S.meta[k]; n++; });
     try { if (window.nbhCase) n += (window.nbhCase.generic({ fn: f.fn }, false).filled || 0); } catch (e) {}
     redraw(beh, rows);
+    /* what the case says about the backups, the student, token loss and the audit, drawn again (no field is redrawn) */
+    try { if (window.__nbhTeCase) window.__nbhTeCase(); } catch (e) {}
     var rep = { filled: n }; if (notes.length) rep.note = notes.join('; ');
     return rep;
   };
@@ -2159,7 +2588,7 @@ if(window.NBHLink){
     if (off) { cb.checked = false; cb.disabled = true; }
   }
   function annotate(body, f){
-    var behs = behsOf(f), acq = acqOf(f), menu = Array.isArray(f.menu) ? f.menu : [], cur = tr(S.meta.beh), first = cur ? null : (candidates(f)[0] || null);
+    var behs = behsOf(f), acq = acqOf(f), menu = Array.isArray(f.menu) ? f.menu : [], cur = tr(S.meta.beh), cs = candidates(f), first = cur ? null : (cs[0] || null);
     var BEH = 'the behavior the tokens are earned for', FULL = ', but the field already reads “' + cur + '”; clear it first.', wt = warnText();
     if (wt && !body.querySelector('.nbhc-warn')) {
       var d = document.createElement('div'); d.className = 'nbhc-warn'; d.setAttribute('role', 'note');
@@ -2175,6 +2604,9 @@ if(window.NBHLink){
         if (prob(t, behs)) { own(cb, 'Not placed on this form: “' + t + '” names a behavior to reduce.', true); return; }
         var red = k === 'beh' && !isRep(item), lead = red ? 'A behavior to reduce: its replacement, “' + t + '”, ' : '';
         if (cur && nm(cur) === nm(t)) { own(cb, red ? lead + 'is already ' + BEH + ' here.' : 'Already ' + BEH + ' here.'); cb.checked = false; return; }
+        /* v22.54 (review F422) a break request, or a replacement that serves a function: unticked, with the reason; Use still places it */
+        var why = served(k, item, t, f); if (!why) { var hh = (cs.held || []).filter(function(x){ return nm(x.t) === nm(t); })[0]; if (hh) why = hh.why; }
+        if (why) { own(cb, (red ? lead : '“' + t + '” ') + reasonText(why) + (cur ? ' The field already reads “' + cur + '”; clear it first to place it.' : ' Tick it to place it anyway.')); cb.checked = false; return; }
         if (cur) { own(cb, (red ? lead : '“' + t + '” ') + 'would go here as ' + BEH + FULL); cb.checked = false; return; }
         own(cb, red ? lead + 'goes here as ' + BEH + '.' : 'Goes here as ' + BEH + ': “' + t + '”.');
         cb.checked = !!first && first.kind === k && first.i === i;
@@ -2195,6 +2627,43 @@ if(window.NBHLink){
     if (!body || !f || !document.querySelector('#nbhCaseDlg[open]')) return;
     try { annotate(body, f); } catch (err) {}
   });
+})();
+/* v22.54 (review F421) out: the token system as one case fact (key token), so the forms that run it, check it, graph it,
+   review it and print the plan can read it instead of retyping it: the behavior, the token, the three schedules (words and
+   numbers), the exchange period and its delay, responses per exchange and the unit price, the backups with their cost,
+   price, want and RA-1 verdict, token loss and its safeguards (with what is missing), the thinning steps (each with its
+   date, what its numbers changed, its rules and its result) and the current one, the plan for ending it, the student's
+   assent, the review date, the audit with the audits kept, and the exchange log's counts. Only what is entered travels;
+   nothing while the plan is empty. The workstation keeps it with the case; no other form is changed by it. */
+(function(){
+  const put=(o,k,v)=>{const t=T(v);if(t)o[k]=t;};
+  window.__nbhFactsOut=function(){try{
+    const m=S.meta,a=num(m.tpN);
+    const bk=S.bk.filter(b=>T(b.n)).map(b=>{const o={name:T(b.n)},k=costN(b.cost);put(o,'cls',b.c);const w=moOf(b);if(w)o.wants=w;put(o,'cost',b.cost);if(a&&k)o.price=a*k;
+      put(o,'pref',b.pref);put(o,'ra',b.conf);if(isFood(b))o.cleared=!!b.clr;put(o,'note',b.note);return o;});
+    const steps=thinCheck().map(c=>{const r=S.thin[c.i],o={n:c.i+1};put(o,'date',r.d);put(o,'what',r.w);if(c.ch.length)o.changed=c.ch.slice();
+      ['tp','ep','te'].forEach(k=>{if(num(r[k]))o[k]=num(r[k]);});const x=perExchange(r.tp,r.ep);if(x!=null)o.rpe=x;put(o,'advance',r.crit);put(o,'back',r.back);put(o,'result',r.res);return o;});
+    if(![m.beh,m.tokForm,m.tp,m.ep,m.te,m.tpN,m.epN,m.loss].some(v=>T(v))&&!bk.length&&!steps.length)return null;
+    const t={src:'TE-1'};
+    put(t,'beh',m.beh);put(t,'token',m.tokForm);put(t,'established',m.tokEstab);put(t,'setting',m.setting);put(t,'who',m.who);
+    const sch={};[['tp','tpN'],['ep','epN'],['te','teN']].forEach(([w,n])=>{const o={};put(o,'text',m[w]);if(num(m[n]))o.n=num(m[n]);if(Object.keys(o).length)sch[w]=o;});
+    if(Object.keys(sch).length)t.schedules=sch;
+    const ex={};put(ex,'when',m.exWhen);put(ex,'delay',m.exDelay);if(Object.keys(ex).length)t.exchange=ex;
+    const rpe=perExchange(m.tpN,m.epN),up=unitPrice(m.tpN,m.epN,m.teN);if(rpe!=null)t.rpe=rpe;if(up!=null)t.up=Math.round(up*10)/10;
+    if(bk.length)t.backups=bk;put(t,'economy',m.econ);put(t,'rights',m.rights);
+    if(lossOn()){const L={on:true};[['rule','lossRule'],['beh','lossBeh'],['n','lossN'],['floor','lossFloor'],['tried','lossTried'],['consent','lossCons'],['iep','lossIep'],['review','lossRev'],['measure','lossMeas'],['stop','lossStop']].forEach(([k,f])=>put(L,k,m[f]));
+      const g=lossGaps();if(g.length)L.missing=g;t.loss=L;}
+    else if(T(m.loss)==='No'){t.loss={on:false};put(t.loss,'why',m.lossRule);}
+    if(steps.length){t.steps=steps;t.step=steps[steps.length-1];}
+    const fd={};[['term','fadeTerm'],['crit','fadeCrit'],['next','fadeNext'],['how','fadeHow'],['relapse','fadeRm']].forEach(([k,f])=>put(fd,k,m[f]));if(Object.keys(fd).length)t.fade=fd;
+    const sv={};put(sv,'assent',m.stuAssent);put(sv,'stop',m.stuStop);put(sv,'choice',m.stuChoice);if(Object.keys(sv).length)t.student=sv;
+    put(t,'review',m.review);
+    const A=audState(),au={n:A.n,of:A.d};put(au,'date',m.audDate);if(A.open.length)au.open=A.open.map(i=>AUDIT[i][0]);if(A.gates.length)au.mustHold=[...new Set(A.gates.map(g=>AUDIT[g.i][0]))];
+    if(S.audHist.length)au.kept=S.audHist.map(h=>({date:h.date,n:h.n,of:h.d}));if(A.n||S.audHist.length)t.audit=au;
+    const x=exStats();if(x.n)t.log={n:x.n,days:x.days,tokens:x.tok,bought:x.got,refused:x.ref,sameDay:x.same,banked:x.banked};
+    return {token:t};}catch(e){return null;}};
+  /* what the case says, drawn again when it arrives (the hooks above call it); no field is redrawn */
+  window.__nbhTeCase=function(){renderCaseBox();renderStu();renderGenSummary();renderLoss();renderAud();};
 })();
 </script>
 
@@ -2219,7 +2688,8 @@ if(window.NBHLink){
     grade :['[data-m="grade"]','[name="s_grade"]','[name="m.grade"]','[name="s.grade"]',
             '[name="c.grade"]','[name="h.grade"]','#sGrade','#mGrade','#cGrade','#hGrade',
             '#m_grade'],
-    site  :['[data-m="site"]','[name="s_site"]','[data-m="setting"]','[data-meta="setting"]',
+    /* v22.54 (review F427) not [data-m="setting"]: on this form it is the room and the work blocks, not the school */
+    site  :['[data-m="site"]','[name="s_site"]','[data-meta="setting"]',
             '[name="m.setting"]','[name="s.site"]','[name="s.school"]','[name="c.setting"]',
             '[name="h.setting"]','#h-location','#m_school','#mSetting','#sSchool','#cSetting',
             '#hSetting','#m_site'],

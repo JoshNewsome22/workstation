@@ -3783,6 +3783,23 @@ window.raFoodLimit=function(label){const ed=raFoodEd();if(!ed||ed.dec!=='yes'||!
   return {filled:((r&&r.filled)||0)+n,note:((r&&r.note&&!r.generic)?r.note+'; ':'')+'the food-item decision and allergies, into Setup'};};}
 document.addEventListener('input',raFoodPaint);document.addEventListener('change',raFoodPaint);
 {const ra=renderAll;renderAll=function(){const x=ra.apply(this,arguments);raFoodPaint();return x;};}
+/* v22.54 (review F419, Form TE-1) out: each stimulus's reinforcer verdict as the Summary sheet works it out (the same rule,
+   in the same order: Confirmed, Relative only, Probable, Not supported, Untested), with its mean progressive-ratio break
+   point, for Form TE-1's RA-1 column (filled in empty cells only, in RA-1's own words) - key reinf: {items:[{name,
+   verdict, bp}], plan}. Nothing is sent while no stimulus is named. */
+window.__nbhFactsOut=function(){try{
+  const so=soStats(),co=S.meta.coMode==='coa'?coaSumStats():coStats(),pr=prStats(),plan=planRatio();
+  const items=S.stim.map((s,i)=>{if(!s||!raT(s.name))return null;const a=so.stim[i]||{verdict:''},c=co.st.find(x=>x.key===String(i)),p=pr.st.find(x=>x.key===String(i));
+    const tested=(a.verdict!=='')||(c&&c.stand!=='')||(p&&p.pot!=='');let v;
+    if(!tested)v='Untested';
+    else if(a.verdict==='clear'||(p&&p.pot&&(p.pot==='high'||(p.pot==='moderate'&&plan==null)))||(a.verdict==='probable'&&p&&p.pot==='moderate'))v='Confirmed';
+    else if(c&&(c.stand==='preferred'||c.stand==='comparable')&&a.verdict!=='none'&&(!p||p.pot!=='low'))v='Relative only';
+    else if(a.verdict==='probable'||(p&&p.pot==='moderate'))v='Probable';
+    else if(a.verdict==='none'||(p&&p.pot==='low'))v='Not supported';
+    else v='Untested';
+    const o={name:raT(s.name),verdict:v};if(p&&p.mean!=null&&isFinite(p.mean))o.bp=Math.round(p.mean*10)/10;return o;}).filter(Boolean);
+  if(!items.length)return null;const r={items};if(plan!=null)r.plan=plan;if(raT(S.meta.date))r.date=raT(S.meta.date);return {reinf:r};
+}catch(e){return null;}};
 })();
 </script>
 <script id="ra-run">

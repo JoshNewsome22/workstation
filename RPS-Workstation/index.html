@@ -2257,7 +2257,7 @@ function quietReport(id){
     clearTimeout(state.watch);state.watch=setTimeout(()=>{if(state.cur===id&&!state.status[id])quietForm(id,fr,rec);},5000);};
 }
 /* the host's markup, cut as the offline worker cuts it (sw.js), so the file can be compared with the release list */
-const WS_REL='v22.54';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
+const WS_REL='v22.55';   /* v22.06 the version, shown in Help and Diagnostics; qa/v2206-version-test.js holds it to the newest heading in SETUP.md */
 const RELLIST='release.json';   /* by name: tools/pwa-sw.py lists the files the page fetches by a written name, and this one is not one to save */
 const HOSTMARK=[/<script\b[^>]*>(?:(?!<\/script)[\s\S]){0,4000}?\b_trf[dq]\b(?:(?!<\/script)[\s\S]){0,4000}?<\/script\s*>/gi,
   /<script\b[^>]*\bsrc\s*=\s*["']?(?:https?:)?\/\/img\d*\.wsimg\.com\/[^>]*>\s*<\/script\s*>/gi];
@@ -2520,8 +2520,9 @@ function openFor(ev,d){
 const FACT_SRC={'TB-1':'behaviors','FS-1':'fn','GB-1':'goals','PA-1':'menu','DM-1':'profile','TD-1':'plan','CR-1':'crisis','DD-1':'data','SM-1':'points','QS-1':'quick','TI-1':'integrity','IC-1':'consent','TV-1':'training',
   /* v21.78 */ 'PR-1':'review','RR-1':'records','HD-1':'home','IM-1':'injury','SA-1':'skills','IA-1':'evidence','IN-1':'evidence','OB-1':'evidence','ABC-1':'evidence','SP-1':'evidence','VI-1':'evidence','EA-1':'evidence',
   /* v21.82 */ 'SV-1':'sv','CF-1':'fit','SI-1':'student','ST-1':'staff',
-  /* v21.85 the service log */ 'CN-1':'service'};
-const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1'];
+  /* v21.85 the service log */ 'CN-1':'service',
+  /* v22.54 (review F421, F419) the token system designed on TE-1; RA-1's reinforcer verdicts */ 'TE-1':'token','RA-1':'reinf'};
+const FACT_GEN=['DM-1','TD-1','CR-1','DD-1','SM-1','QS-1','TI-1','IC-1','TV-1','PR-1','RR-1','HD-1','IM-1','SA-1','SV-1','CF-1','SI-1','ST-1','CN-1','TE-1','RA-1'];
 state.facts=null;state.factsSig='';state.factSrcSig={};
 let factsTimer=null,factsBusy=false,factsAgain=false,factsAgainPush=false,factsOwed=false;   /* v21.87 a send asked while a read runs is kept; a change read without sending is still owed to the forms */
 function noteFactSource(id,st){
@@ -2543,8 +2544,8 @@ async function factsFlush(){
   if(factsPushes!==n)await new Promise(r=>setTimeout(r,300));
 }
 function hasFacts(f){return !!(f&&(f.profile||f.plan||f.crisis||(f.behaviors||[]).length||(f.fn&&(f.fn.key||f.fn.label))||
-  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
-function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service]):'';}
+  (f.goals&&((f.goals.red||[]).length||(f.goals.acq||[]).length))||(f.menu||[]).length||f.data||f.points||f.quick||f.integrity||f.training||f.review||f.records||f.home||f.injury||f.skills||f.prefs||f.sv||f.fit||f.student||f.staff||f.service||f.consent||f.token||f.reinf||(f.evidence&&Object.keys(f.evidence).length)));}   /* v22.37 consent alone is part of the case (the forms that assess read it) */
+function factsSig(f){return f?JSON.stringify([f.behaviors,f.fn,f.goals,f.menu,f.profile,f.plan,f.crisis,f.data,f.points,f.quick,f.integrity,f.consent,f.training,f.review,f.records,f.home,f.injury,f.skills,f.evidence,f.prefs,f.sv,f.fit,f.student,f.staff,f.replies,f.service,f.token,f.reinf]):'';}
 async function gatherFacts(push){
   if(factsBusy){factsAgain=true;factsAgainPush=factsAgainPush||!!push;return;}
   factsBusy=true;
@@ -2621,6 +2622,8 @@ function paintFacts(){
   if(f.skills)bits.push('<b>Skill programs:</b> '+((f.skills.programs||[]).length)+' <i>('+esc(s.skills||'')+')</i>');
   if(f.training)bits.push('<b>Rehearsal steps:</b> '+(f.training.steps||[]).length+' <i>('+esc(s.training||'')+')</i>');   /* v21.77 Form TV-1, for Form ST-1 */
   if((f.menu||[]).length)bits.push('<b>Reinforcers:</b> '+esc(f.menu.slice(0,4).map(m=>m.name).join(', '))+(f.menu.length>4?' and '+(f.menu.length-4)+' more':'')+' <i>('+esc(s.menu||'')+')</i>');
+  if(f.reinf&&(f.reinf.items||[]).length)bits.push('<b>Reinforcer verdicts:</b> '+f.reinf.items.length+' <i>('+esc(s.reinf||'')+')</i>');   /* v22.54 (F419) */
+  if(f.token)bits.push('<b>Token system</b>'+(f.token.step&&f.token.step.n?': step '+(f.token.step.n|0):'')+' <i>('+esc(s.token||'')+')</i>');   /* v22.54 (F421) */
   t.innerHTML=bits.join(' &nbsp;&middot;&nbsp; ');
 }
 $('#factsSend').addEventListener('click',async()=>{
@@ -3576,7 +3579,7 @@ function caseMapHtml(){
     '<div class="cm-box"><h3>What carries forward on its own</h3><ul>'+
     '<li><b>The student’s details</b> on the packet bar go into every form as it opens, into empty fields only.</li>'+
     '<li><b>The target behaviors</b> defined on TB-1 go to every form that holds a behavior: the tables on DD-1, HD-1, FS-1, GB-1 and SM-1, and the behavior line on OB-1, ABC-1, MT-1, SA-1, SR-1, DA-1, CN-1, TD-1, TI-1 and the rest. Rename one on TB-1 and the others follow.</li>'+
-    '<li><b>The function</b> concluded on FS-1 goes to every function field; <b>the goals</b> written on GB-1 to SA-1, SM-1, CN-1 and the aims on DD-1; <b>the reinforcer menu</b> ranked on PA-1 to SM-1, SA-1 and SR-1.</li>'+
+    '<li><b>The function</b> concluded on FS-1 goes to every function field; <b>the goals</b> written on GB-1 to SA-1, SM-1, CN-1 and the aims on DD-1; <b>the reinforcer menu</b> ranked on PA-1 to SM-1, SA-1, SR-1 and TE-1, with RA-1&rsquo;s verdicts, DM-1&rsquo;s allergies, diet and accommodations, IC-1&rsquo;s food decision and SI-1&rsquo;s assent beside it on TE-1; <b>the token system</b> designed on TE-1 is kept with the case.</li>'+
     '<li><b>The plan</b> on TD-1 (baseline, criteria, replacement) goes to GB-1, EB-1 and QS-1 (which also takes the profile, the function, the crisis stages, the goals and the menu); PR-1 reads the graph on DD-1 and ST-1 reads the integrity scores on TI-1 when they are open.</li>'+
     '<li>Everything above fills empty fields and empty tables only. <b>From the case</b>, on each form’s toolbar, lets you pick any of it into a form that already has entries. The case travels in the packet and case files.</li>'+
     '<li><b>TE-1 and TK-1</b>, when linked: each compares with the other on a click and takes what you tick.</li></ul></div>'+

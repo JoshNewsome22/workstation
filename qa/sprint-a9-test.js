@@ -44,6 +44,12 @@
       workstation's packet), with the replacement to use; the "From the case" list repeats it at the top; a behavior to
       increase typed in its place clears it; a problem behavior the link saw at a compare is warned of with the form open
       alone; the common words alone are not (that guard is the link's).
+   v22.54 (review F422, F427): a replacement that asks for a break, or serves the function of the behavior it replaces, is
+   no longer the fill's choice (TB-1's and GB-1's simulations name only the break request, so A, B, C and G leave the field
+   empty, with the reason, and E shows those items unticked with it; Use still places one); the fixtures of D, H, I and J
+   that only test the fill's other rules use a replacement that is not a break request. The packet's school no longer goes
+   into "Setting and periods" (A). The From the case button's mark follows the last push, and TE-1's own token facts now
+   send one more (A).
    No page or console error anywhere.
    Run: WS_URL=http://127.0.0.1:8309 WS_ROOT=<worktree> node qa/sprint-a9-test.js [edition]
    (the edition folder: NBH-Workstation, the default, or RPS-Workstation; OLDSAVE=<folder> for another saved TE-1.json) */
@@ -125,8 +131,10 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const r=await teRead(te);
   const probs=facts.behaviors.filter(b=>!b.isRep).map(b=>b.label),rep=facts.behaviors.find(b=>b.isRep);
   ok('A: TB-1\'s simulation names a defined replacement target ('+(rep&&rep.label)+') and '+probs.length+' problem behaviors',!!rep&&probs.length>0,facts.behaviors.map(b=>b.label));
-  ok('A: "Behavior the tokens are earned for" takes the defined replacement target, without "(replacement)": '+r.beh,r.beh==='Break request'&&r.input===r.beh,r);
-  ok('A: ... and never a problem behavior',!probs.some(p=>r.beh.toLowerCase().indexOf(p.toLowerCase())>=0||p.toLowerCase().indexOf(r.beh.toLowerCase())>=0)&&!/aggress/i.test(r.beh),{beh:r.beh,probs});
+  /* v22.54 (F422) the case's only replacement is the break request (and GB-1 is not open): it is not placed */
+  ok('A: "Behavior the tokens are earned for" does not take the break request (the case\'s only replacement): the field stays empty, its prompt asks for the work',
+    r.beh===''&&r.input===''&&/^Name the work or skill response each token follows/.test(await te.evaluate(()=>document.querySelector('[data-m="beh"]').placeholder)),r);
+  ok('A: ... and never a problem behavior',r.beh===''||(!probs.some(p=>r.beh.toLowerCase().indexOf(p.toLowerCase())>=0||p.toLowerCase().indexOf(r.beh.toLowerCase())>=0)&&!/aggress/i.test(r.beh)),{beh:r.beh,probs});
   const want=expected(facts.menu),got=r.bk.filter(x=>x.n);
   ok('A: the backups are PA-1\'s ranked menu in rank order without its low-preference items: '+got.map(x=>x.n).join(', '),
     JSON.stringify(got.map(x=>x.n))===JSON.stringify(want.map(m=>m.name))&&want.length>0,{got:got.map(x=>x.n),want:want.map(m=>m.name)});
@@ -135,14 +143,15 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('A: the class comes from PA-1\'s type',got.every((x,i)=>x.c===(CLS[want[i].type]||'')),got.map((x,i)=>[x.c,want[i].type]));
   ok('A: token cost, the RA-1 answer and the notes are left to the BCBA',got.every(x=>!x.cost&&!x.conf&&!x.note));
   ok('A: the menu keeps the form\'s four rows at least',r.bk.length===Math.max(4,want.length),r.bk.length);
-  ok('A: the fill reports the behavior and '+want.length+' backups, not the general fill',r.last&&r.last.filled===1+want.length&&!r.last.generic,r.last);
-  ok('A: the packet still fills the student details',r.meta.client==='Jordan Rivera'&&r.meta.sid==='204417'&&r.meta.bcba==='J. Ellis'&&r.meta.setting==='Lincoln Elementary',r.meta);
+  ok('A: the fill says why the behavior is left empty, and is not the general fill',r.last&&!r.last.generic&&/^“Break request” asks for a break, which already reinforces it, so it is not placed/.test(r.last.note||''),r.last);
+  /* v22.54 (F427) the packet's school is not the room and the work blocks */
+  ok('A: the packet still fills the student details, and not the school into "Setting and periods"',r.meta.client==='Jordan Rivera'&&r.meta.sid==='204417'&&r.meta.bcba==='J. Ellis'&&!r.meta.setting,r.meta);
   const extra=Object.keys(r.meta).filter(k=>!['client','sid','bcba','setting','beh'].includes(k)&&String(r.meta[k]||'').trim());
   ok('A: nothing else on the form is touched (schedules, thinning record, audit)',!extra.length&&r.thin.every(x=>Object.values(x).every(v=>!v))&&!Object.keys(r.aud).length,{extra,thin:r.thin,aud:r.aud});
   const gen=await te.evaluate(()=>document.querySelector('#genMetrics').textContent.replace(/\s+/g,' '));
   ok('A: the generality figures count the backups placed',new RegExp('Backups listed\\s*'+want.length).test(gen),gen);
   const btn=await te.evaluate(()=>document.querySelector('#nbhCaseBtn').textContent);
-  ok('A: the toolbar\'s From the case button is shown and marked used',/^From the case: /.test(btn)&&await te.evaluate(()=>document.querySelector('#nbhCaseBtn').classList.contains('nbhc-on')),btn);
+  ok('A: the toolbar\'s From the case button is shown',/^From the case: /.test(btn),btn);
   const s0=await te.evaluate(()=>JSON.stringify(S));
   await page.evaluate(()=>pushFactsToAll());await sleep(1500);
   ok('A: a later push of the case changes nothing',(await te.evaluate(()=>JSON.stringify(S)))===s0);
@@ -163,7 +172,8 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const ls=await te.evaluate(()=>nbhLink.state()),rows=await te.evaluate(()=>{const o={};nbhLink.rows().forEach(r=>{o[r.key]=r;});return o;});
   ok('F: TE-1 compares with the TK-1 open in the workstation, through the relay',ls.table&&ls.lk&&ls.lk.last&&ls.lk.last.via==='shell',ls.lk);
   ok('F: the student reads in step',rows.who&&rows.who.st===1,rows.who);
-  ok('F: the behavior reads in step with the book\'s target card ('+(rows.beh&&rows.beh.there)+')',rows.beh&&rows.beh.st===1,rows.beh);
+  /* v22.54 (F422) this plan's behavior is empty (the case's replacement is the break request): the book's card is offered, unticked */
+  ok('F: the behavior: the book\'s target card ('+(rows.beh&&rows.beh.there)+') is offered into the empty field, unticked',rows.beh&&rows.beh.st===3&&rows.beh.take&&rows.beh.pressed==='',rows.beh);
   const cards=tk0.ch.filter(Boolean),missing=cards.filter(c=>!got.some(x=>x.n.toLowerCase()===c.toLowerCase()));
   const lpNames=facts.menu.filter(m=>LP(m)||m.rank==null).map(m=>m.name);
   /* TK-1 takes its first six by rank, low-preference items included (a matter for TK-1's own fill): any card missing here
@@ -188,7 +198,7 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('B: the report says why',r.last&&r.last.filled===0&&/backup menu is already begun/.test(r.last.note||''),r.last);
   await typeIn(te,'[data-m="beh"]','');await page.evaluate(()=>pushFactsToAll());await sleep(1500);
   r=await teRead(te);
-  ok('B: with the behavior emptied, the next push fills it with the replacement ('+r.beh+'); the typed backups stay as typed',r.beh==='Break request'&&JSON.stringify(r.bk)===bk0,r);
+  ok('B: with the behavior emptied, the next push leaves it empty (the case names only the break request); the typed backups stay as typed',r.beh===''&&JSON.stringify(r.bk)===bk0&&/asks for a break/.test((r.last&&r.last.note)||''),r);
   const facts=await page.evaluate(()=>state.facts);
   /* Form GB-1's first skill objective as this form takes it: its words without the staff note, the first letter a capital
      ("hand the break card to an adult (simulated)" is "Hand the break card to an adult") */
@@ -199,17 +209,16 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const it=(k,i)=>P.items.find(x=>x.kind===k&&x.i===i);
   const bi=facts.behaviors.map((b,i)=>[b,i]),repI=bi.find(([b])=>b.isRep)[1],probI=bi.filter(([b])=>!b.isRep&&b.rep).map(([,i])=>i);
   ok('E: the list opens',P.open&&P.items.length>0,P);
-  /* the field holds "Break request" (the push above): a replacement that reads the same is already the behavior here; any
-     other would go here once the field is cleared, and the line says so (Use never replaces what the field holds) */
-  const FLD='Break request',probLine=t=>'A behavior to reduce: its replacement, “'+t+'”, '+(t===FLD?'is already the behavior the tokens are earned for here.':
-    'would go here as the behavior the tokens are earned for, but the field already reads “'+FLD+'”; clear it first.');
-  ok('E: each problem behavior with a replacement names it: already the behavior here, or would go here once the field is cleared; unticked',
-    probI.length>0&&probI.every(i=>{const x=it('beh',i),m=/^A behavior to reduce: its replacement, “(.+?)”, /.exec(x.own);return !!m&&x.own===probLine(m[1])&&!x.checked&&!x.disabled;}),probI.map(i=>it('beh',i)));
-  ok('E: the replacement target already in the field says so, unticked',/^Already the behavior the tokens are earned for here\.$/.test(it('beh',repI).own)&&!it('beh',repI).checked,it('beh',repI));
+  /* v22.54 (F422) the field is empty (the push above placed nothing): the break request, TB-1's replacement and GB-1's
+     objective alike, says why it is not placed, unticked and not disabled; the RRB's competing item serves its function */
+  const BRKW='asks for a break, which already reinforces it: a token for each request adds a second reinforcer for leaving the work. Tokens usually follow the work, with a break as one of the backups. Tick it to place it anyway.';
+  ok('E: each problem behavior with a replacement names it, with why it is not placed (a break request, or a replacement that serves the function); unticked',
+    probI.length>0&&probI.every(i=>{const x=it('beh',i),m=/^A behavior to reduce: its replacement, “(.+?)”, /.exec(x.own);return !!m&&(x.own==='A behavior to reduce: its replacement, “'+m[1]+'”, '+BRKW||
+      /, serves the function of the behavior it replaces, [^.]+, so it is reinforced by what it gets\. Tokens usually follow the work or skill the plan builds\. Tick it to place it anyway\.$/.test(x.own))&&!x.checked&&!x.disabled;}),probI.map(i=>it('beh',i)));
+  ok('E: the replacement target, the break request, says it asks for a break, unticked',it('beh',repI).own==='“Break request” '+BRKW&&!it('beh',repI).checked&&!it('beh',repI).disabled,it('beh',repI));
   const red=P.items.filter(x=>x.kind==='red'),acq=P.items.filter(x=>x.kind==='acq');
   ok('E: a reduction goal is shown unticked and disabled, with the reason',red.length>0&&red.every(x=>!x.checked&&x.disabled&&/tokens are earned for a behavior to increase/.test(x.own)),red);
-  ok('E: a skill objective, with the field filled, says it would go here once the field is cleared ('+acqWant+'), unticked',!!acqWant&&acq.length>0&&
-    acq[0].own==='“'+acqWant+'” would go here as the behavior the tokens are earned for, but the field already reads “'+FLD+'”; clear it first.'&&!acq[0].checked,acq);
+  ok('E: GB-1\'s skill objective, the break card ('+acqWant+'), says it asks for a break, unticked',!!acqWant&&acq.length>0&&acq[0].own==='“'+acqWant+'” '+BRKW&&!acq[0].checked,acq);
   const mi=P.items.filter(x=>x.kind==='menu'),M=facts.menu;
   ok('E: (the typed "Bubbles" is a ranked item on PA-1\'s simulated menu)',M.some(m=>m.name==='Bubbles'&&m.rank!=null&&!LP(m)),M.map(m=>m.name));
   ok('E: the menu: the item already typed says so, unticked; the other ranked items are ticked and say how they go in; low-preference and unranked ones are not ticked, and say the fill leaves them out',
@@ -237,10 +246,10 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   /* an empty field: the fill's own choice is ticked; a problem behavior ticked gives its replacement */
   await typeIn(te,'[data-m="beh"]','');
   P=await pickerOpen(page,te);
-  ok('E: with the field empty, the fill\'s own choice is ticked (the defined replacement target) and no problem behavior',it('beh',repI).checked&&probI.every(i=>!it('beh',i).checked),P.items.filter(x=>x.kind==='beh'));
-  ok('E: ... and the skill objective says it goes here ('+acqWant+')',(P.items.find(x=>x.kind==='acq')||{}).own==='Goes here as the behavior the tokens are earned for: “'+acqWant+'”.',P.items.filter(x=>x.kind==='acq'));
+  ok('E: with the field empty, nothing is ticked for the behavior: the case names only the break request',!it('beh',repI).checked&&probI.every(i=>!it('beh',i).checked)&&P.items.filter(x=>x.kind==='acq').every(x=>!x.checked),P.items.filter(x=>x.kind==='beh'));
+  ok('E: ... and the skill objective says why ('+acqWant+')',(P.items.find(x=>x.kind==='acq')||{}).own==='“'+acqWant+'” '+BRKW,P.items.filter(x=>x.kind==='acq'));
   await tickOnly(te,[['beh',probI[0]]]);t=await useTicked(te);
-  ok('E: '+facts.behaviors[probI[0]].label+' ticked: its replacement goes in, under the defined target\'s name ("see target 4")',(await teRead(te)).beh==='Break request'&&t==='Placed 1 item on this form.',{t,beh:(await teRead(te)).beh});
+  ok('E: '+facts.behaviors[probI[0]].label+' ticked: Use still places its replacement, under the defined target\'s name ("see target 4")',(await teRead(te)).beh==='Break request'&&t==='Placed 1 item on this form.',{t,beh:(await teRead(te)).beh});
   await typeIn(te,'[data-m="beh"]','');
   P=await pickerOpen(page,te);await tickOnly(te,[['acq',0]]);t=await useTicked(te);
   ok('E: the skill objective ticked: its words go in, without "(simulated)"',(await teRead(te)).beh===acqWant&&!/simulated/i.test(acqWant)&&t==='Placed 1 item on this form.',{t,acqWant});
@@ -260,7 +269,7 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const te=await openIn(page,'TE-1');
   await te.waitForFunction(()=>!!(window.nbhCase&&nbhCase.last&&nbhCase.facts&&nbhCase.facts.fn),null,{timeout:20000});await sleep(500);
   const r=await teRead(te);
-  ok('C: after FS-1 concludes, a fresh TE-1 takes the replacement, not "Aggression": '+r.beh,r.beh==='Break request'&&!/aggress/i.test(r.input),r.beh);
+  ok('C: after FS-1 concludes, a fresh TE-1 takes neither "Aggression" nor the break request: the field stays empty',r.beh===''&&r.input==='',r.beh);
   ok('C: with no PA-1 in the case, the backups stay empty',r.bk.every(x=>!x.n&&!x.pref&&!x.c),r.bk);
   const P=await pickerOpen(page,te),fn=P.items.find(x=>x.kind==='fn');
   ok('C: the function has no field here: unticked and disabled, with the reason',!!fn&&!fn.checked&&fn.disabled&&fn.own==='Not placed on this form: it has no field for the function.',fn);
@@ -270,8 +279,8 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('C: no warning under the field while it holds the replacement',await te.evaluate(()=>{const w=document.querySelector('#teBehWarn');return !w||w.hidden;}));
   await typeIn(te,'[data-m="beh"]',pb);
   const w1=await te.evaluate(()=>{const w=document.querySelector('#teBehWarn');return w&&!w.hidden&&w.getClientRects().length?w.textContent:'';});
-  ok('C: "'+pb+'" typed in the field: a warning under it names it as a problem behavior on Form TB-1, with the replacement to use',
-    !!pb&&w1==='This plan’s behavior, “'+pb+'”, is a problem behavior on Form TB-1. Tokens are earned for a behavior to increase, such as “'+r.beh+'”; correct it here.',w1);
+  ok('C: "'+pb+'" typed in the field: a warning under it names it as a problem behavior on Form TB-1 (no replacement to suggest: the break request is not one)',
+    !!pb&&w1==='This plan’s behavior, “'+pb+'”, is a problem behavior on Form TB-1. Tokens are earned for a behavior to increase; correct it here.',w1);
   await typeIn(te,'[data-m="beh"]','Requests a break using the card');
   ok('C: a behavior to increase typed in its place: no warning',await te.evaluate(()=>{const w=document.querySelector('#teBehWarn');return !!w&&w.hidden&&!document.querySelector('[data-m="beh"]').hasAttribute('aria-describedby');}));
   await ctx.close();}
@@ -281,16 +290,16 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   await p.goto(BASE+'/'+ED+'/'+FILE['TE-1']);await sleep(600);
   const run=f=>p.evaluate(f=>{S=blank();renderAll();const rep=nbhCase.apply(f);return {beh:S.meta.beh||'',bk:S.bk.filter(r=>r.n).map(r=>[r.n,r.c,r.pref]),rep};},f);
   let x;
-  x=await run({behaviors:[T('Aggression',{rep:'Asks for help'}),R('Break request (replacement)')],goals:{red:[],acq:[{beh:'complete five problems'}]}});
-  ok('D: a defined replacement target comes before a paired replacement and an objective',x.beh==='Break request',x);
+  x=await run({behaviors:[T('Aggression',{rep:'Asks for help'}),R('Raises a hand and waits (replacement)')],goals:{red:[],acq:[{beh:'complete five problems'}]}});
+  ok('D: a defined replacement target comes before a paired replacement and an objective',x.beh==='Raises a hand and waits',x);
   x=await run({behaviors:[T('Elopement'),T('Arranging and ordering (higher-level RRB)',{rep:'Engages with a competing item from the A-CSA list (see Forms EA-1 and TD-1)'})],goals:{red:[],acq:[{beh:'complete five problems'}]}});
   ok('D: else the first paired replacement, its staff note dropped',x.beh==='Engages with a competing item from the A-CSA list',x);
-  x=await run({behaviors:[T('Aggression',{rep:'Hands a break card and waits (see target 2)'}),R('Break request (replacement)'),T('Elopement',{rep:'Hands a break card and waits'})]});
-  ok('D: a paired replacement pointing to the defined target is that target',x.beh==='Break request',x);
+  x=await run({behaviors:[T('Aggression',{rep:'Points to the picture and waits (see target 2)'}),R('Uses the picture card (replacement)'),T('Elopement',{rep:'Points to the picture and waits'})]});
+  ok('D: a paired replacement pointing to the defined target is that target',x.beh==='Uses the picture card',x);
   x=await run({behaviors:[T('Elopement')],goals:{red:[{beh:'Elopement'}],acq:[{beh:'raise a hand and wait to be called on (simulated)'}]}});
   ok('D: else Form GB-1\'s first skill objective, capitalised, "(simulated)" dropped',x.beh==='Raise a hand and wait to be called on',x);
-  x=await run({behaviors:[T('Screaming',{rep:'Requests a break (FCR)'})]});
-  ok('D: the label\'s own brackets stay',x.beh==='Requests a break (FCR)',x);
+  x=await run({behaviors:[T('Screaming',{rep:'Signs more (ASL)'})]});
+  ok('D: the label\'s own brackets stay',x.beh==='Signs more (ASL)',x);
   x=await run({behaviors:[T('Screaming',{rep:'Elopement'}),T('Elopement')],goals:{red:[],acq:[{beh:'Hitting peers when told no'},{beh:'use the calm-down corner'}]}});
   ok('D: a candidate that is one of the case\'s problem behaviors, or names one, is passed over',x.beh==='Use the calm-down corner',x);
   x=await run({behaviors:[T('Aggression',{rep:'Keeps hands to self (no hitting, kicking, or biting)'})]});
@@ -301,18 +310,18 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   ok('D: ... but a problem word with nothing earlier in its clause to turn it round is still passed over',x.beh==='Asks for help',x);
   x=await run({behaviors:[T('Aggression',{rep:'See-saw turn taking with a peer'})]});
   ok('D: a replacement that begins "See-" is not a staff note ("See-saw turn taking with a peer")',x.beh==='See-saw turn taking with a peer',x);
-  x=await run({behaviors:[T('Aggression',{rep:'see the note'}),T('Elopement',{rep:'Requests a break (see the BIP)'})]});
-  ok('D: a pointer ("see the note") is not a behavior, and a bracket that begins "see" is a staff note ("(see the BIP)")',x.beh==='Requests a break',x);
+  x=await run({behaviors:[T('Aggression',{rep:'see the note'}),T('Elopement',{rep:'Raises a hand (see the BIP)'})]});
+  ok('D: a pointer ("see the note") is not a behavior, and a bracket that begins "see" is a staff note ("(see the BIP)")',x.beh==='Raises a hand',x);
   x=await run({behaviors:[T('Elopement')],goals:{red:[],acq:[{beh:'iPad requests using the AAC device'}]}});
   ok('D: a first word not all in lower case keeps its letters ("iPad requests using the AAC device")',x.beh==='iPad requests using the AAC device',x);
   const pk2=await p.evaluate(()=>{S=blank();renderAll();return window.__nbhFactsPick({behaviors:[{label:'Aggression',isRep:false,src:'TB-1'},{label:'Elopement',isRep:false,src:'TB-1'}],goals:{red:[],acq:[]},menu:[]});});
   ok('D: Use with two problem behaviors that name no replacement: the note says so, in the plural',pk2.filled===0&&pk2.note==='2 ticked behaviors are behaviors to reduce with no replacement named, so nothing went in for them.',pk2);
   x=await run({behaviors:[T('Aggression'),T('Elopement',{rep:'— this is the replacement behavior'})],goals:{red:[{beh:'Aggression'}],acq:[]}});
   ok('D: a case with no replacement or skill leaves the field empty (the general fill put "Aggression" here), and says why',x.beh===''&&x.rep.filled===0&&!x.rep.generic&&/no replacement or skill/.test(x.rep.note||''),x);
-  x=await run({behaviors:[{label:'Aggression',src:'FS-1',fn:'Escape',rep:'Asks for a break using the card',alt:'Asks for a break using the card'}]});
-  ok('D: Form FS-1\'s behaviors (TB-1 not open): the alternative behavior',x.beh==='Asks for a break using the card',x);
-  x=await run({behaviors:[{label:'Aggression',def:'',type:'cluster',src:'TB-1 (candidate)'},{label:'Requests a break',def:'',type:'replacement',src:'TB-1 (candidate)'}]});
-  ok('D: a TB-1 candidate marked Target – replacement counts as the replacement',x.beh==='Requests a break',x);
+  x=await run({behaviors:[{label:'Aggression',src:'FS-1',rep:'Raises a hand for help',alt:'Raises a hand for help'}]});
+  ok('D: Form FS-1\'s behaviors (TB-1 not open): the alternative behavior',x.beh==='Raises a hand for help',x);
+  x=await run({behaviors:[{label:'Aggression',def:'',type:'cluster',src:'TB-1 (candidate)'},{label:'Raises a hand for help',def:'',type:'replacement',src:'TB-1 (candidate)'}]});
+  ok('D: a TB-1 candidate marked Target – replacement counts as the replacement',x.beh==='Raises a hand for help',x);
   x=await run({behaviors:[{label:'Probe behavior',def:'a probe'}],fn:{key:'escape',label:'Escape / avoidance (social negative)'},src:{behaviors:'TB-1',fn:'FS-1'}});
   ok('D: the all-forms probe (a bare behavior): nothing placed, and not by the general fill',x.beh===''&&x.rep.filled===0&&!x.rep.generic,x);
   const menu=[{name:'Blocks',type:'Leisure item',rank:5,tier:'LP'},{name:'Praise',type:'Social',rank:2,tier:'HP'},{name:'Chips',type:'Edible',rank:1,tier:'HP'},
@@ -345,12 +354,12 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const saved=await caught(p,'#saveBtn');
   const sv=JSON.parse(saved),s2=await p.evaluate(()=>JSON.stringify(S));
   await p.evaluate(()=>{S=blank();renderAll();});await openText(saved,'TE-1_round.json');
-  ok('G: a case-filled TE-1 saves and opens back the same',sv.form==='TE-1'&&sv.S.meta.beh==='Break request'&&(await p.evaluate(()=>JSON.stringify(S)))===s2);
+  ok('G: a case-filled TE-1 (its menu; the behavior is left empty, v22.54) saves and opens back the same',sv.form==='TE-1'&&!sv.S.meta.beh&&sv.S.bk.some(b=>b.n)&&(await p.evaluate(()=>JSON.stringify(S)))===s2);
   /* its Save packet: the student's details, and no target behavior (this form's behavior is the one to increase), so Form
      TD-1's Open packet leaves its target behavior empty */
   await typeIn(p,'[data-m="client"]','Jordan Rivera');await typeIn(p,'[data-m="sid"]','204417');
   const pkt=await caught(p,'Save packet'),pko=JSON.parse(pkt).packet||{};
-  ok('G: Save packet from a case-filled TE-1 writes the student\'s details and no target behavior',pko.client==='Jordan Rivera'&&pko.sid==='204417'&&!('beh' in pko)&&(await p.evaluate(()=>S.meta.beh))==='Break request',pko);
+  ok('G: Save packet from a case-filled TE-1 writes the student\'s details and no target behavior',pko.client==='Jordan Rivera'&&pko.sid==='204417'&&!('beh' in pko)&&!(await p.evaluate(()=>S.meta.beh)),pko);
   {const q=await ctx.newPage();wire(q,log);await q.goto(BASE+'/'+ED+'/'+FILE['TD-1']);await sleep(700);
    const td=await q.evaluate(async t=>{let msg='';window.alert=m=>{msg=String(m);};const ob=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Open packet');
      const inp=[...ob.parentElement.querySelectorAll('input[type="file"]')].pop();const dt=new DataTransfer();dt.items.add(new File([t],'PACKET_Jordan_Rivera.json',{type:'application/json'}));
@@ -388,10 +397,10 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const teBeh=v=>te.waitForFunction(v=>(S.meta.beh||'')===v,v,{timeout:30000}).then(()=>true,()=>false);
   await tput('[name="tgt[0].lab"]','Aggression');
   await tb.evaluate(()=>{const s=document.querySelector('[name="tgt[0].type"]');const o=[...s.options].find(o=>/Single/.test(o.textContent));s.value=o.value;s.dispatchEvent(new Event('change',{bubbles:true}));});
-  await tput('[name="tgt[0].rep"]','Hands a br');
-  ok('H: Form TB-1\'s paired replacement typed half-way, with a pause: TE-1 takes what is there ("Hands a br")',await teBeh('Hands a br'),await te.evaluate(()=>S.meta.beh));
-  await tput('[name="tgt[0].rep"]','Hands a break card and waits');
-  ok('H: ... and, the fill\'s own value untouched, follows when the typing is finished ("Hands a break card and waits")',await teBeh('Hands a break card and waits'),await te.evaluate(()=>S.meta.beh));
+  await tput('[name="tgt[0].rep"]','Raises a ha');
+  ok('H: Form TB-1\'s paired replacement typed half-way, with a pause: TE-1 takes what is there ("Raises a ha")',await teBeh('Raises a ha'),await te.evaluate(()=>S.meta.beh));
+  await tput('[name="tgt[0].rep"]','Raises a hand and waits');
+  ok('H: ... and, the fill\'s own value untouched, follows when the typing is finished ("Raises a hand and waits")',await teBeh('Raises a hand and waits'),await te.evaluate(()=>S.meta.beh));
   const pa=await openIn(page,'PA-1');await sleep(800);
   const names=['Tablet (video)','Bubbles','Squeeze ball','Picture book','Musical toy','Blocks'];
   await pa.evaluate(n=>{const ins=[...document.querySelectorAll('#poolTbl input[data-f="name"]')];n.forEach((v,i)=>{const e=ins[i];if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));});},names);
@@ -432,24 +441,24 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   const menuA=[{name:'Chips',type:'Edible',rank:1,tier:'HP'},{name:'Puzzle',type:'Activity',rank:2,tier:'MP'},{name:'Blocks',type:'Leisure item',rank:3,tier:'LP'}];
   const menuB=[{name:'Puzzle',type:'Activity',rank:1,tier:'HP'},{name:'Bubbles',type:'Leisure item',rank:2,tier:'HP'},{name:'Chips',type:'Edible',rank:3,tier:'MP'},
     {name:'Stickers',type:'Other',rank:4,tier:'MP'},{name:'Tablet',type:'Leisure item',rank:5,tier:'MP'},{name:'Blocks',type:'Leisure item',rank:6,tier:'LP'}];
-  const fA={behaviors:[T('Aggression',{rep:'Hands a br'})],menu:menuA},fB={behaviors:[T('Aggression',{rep:'Hands a break card and waits'})],menu:menuB};
+  const fA={behaviors:[T('Aggression',{rep:'Raises a ha'})],menu:menuA},fB={behaviors:[T('Aggression',{rep:'Raises a hand and waits'})],menu:menuB};
   const st=()=>p.evaluate(()=>({beh:S.meta.beh||'',input:document.querySelector('[data-m="beh"]').value,bk:S.bk.map(r=>[r.n,r.c,r.cost,r.pref].join('|')),n:S.bk.length,
     shown:[...document.querySelectorAll('#bkTbl [data-f="n"]')].map(e=>e.value)}));
   const apply=f=>p.evaluate(f=>nbhCase.apply(f),f),blankS=()=>p.evaluate(()=>{S=blank();renderAll();});
   const namesOf=x=>x.bk.map(r=>r.split('|')[0]).filter(Boolean);
   await blankS();let rep=await apply(fA),x=await st();
-  ok('I: the first case: the replacement and the ranked menu go in',x.beh==='Hands a br'&&x.bk[0]==='Chips|Edible||Rank 1 (HP)'&&x.bk[1]==='Puzzle|Activity||Rank 2 (MP)'&&x.n===4&&rep.filled===3,{x,rep});
+  ok('I: the first case: the replacement and the ranked menu go in',x.beh==='Raises a ha'&&x.bk[0]==='Chips|Edible||Rank 1 (HP)'&&x.bk[1]==='Puzzle|Activity||Rank 2 (MP)'&&x.n===4&&rep.filled===3,{x,rep});
   rep=await apply(fB);x=await st();
   ok('I: a later case, the fill\'s values untouched: its choice now, the menu placed again (rows added as needed), on screen too',
-    x.beh==='Hands a break card and waits'&&x.input===x.beh&&JSON.stringify(namesOf(x))===JSON.stringify(['Puzzle','Bubbles','Chips','Stickers','Tablet'])&&x.n===5&&
+    x.beh==='Raises a hand and waits'&&x.input===x.beh&&JSON.stringify(namesOf(x))===JSON.stringify(['Puzzle','Bubbles','Chips','Stickers','Tablet'])&&x.n===5&&
     JSON.stringify(x.shown)===JSON.stringify(namesOf(x))&&rep.filled===6,{x,rep});
   const xB=x;rep=await apply(fB);
   ok('I: the same case again changes nothing',rep.filled===0&&JSON.stringify(await st())===JSON.stringify(xB),rep);
   rep=await apply(fA);x=await st();
-  ok('I: and back: the form\'s four rows again, as the fill found them',x.n===4&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&x.beh==='Hands a br',x);
+  ok('I: and back: the form\'s four rows again, as the fill found them',x.n===4&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&x.beh==='Raises a ha',x);
   await typeIn(p,BK(0,'cost'),'2 stars');rep=await apply(fB);x=await st();
   ok('I: a token cost typed: the backups stay as they are, cost and all; the behavior, untouched, still follows',
-    x.bk[0]==='Chips|Edible|2 stars|Rank 1 (HP)'&&x.n===4&&x.beh==='Hands a break card and waits'&&/backup menu is already begun/.test(rep.note||''),{x,rep});
+    x.bk[0]==='Chips|Edible|2 stars|Rank 1 (HP)'&&x.n===4&&x.beh==='Raises a hand and waits'&&/backup menu is already begun/.test(rep.note||''),{x,rep});
   await typeIn(p,'[data-m="beh"]','Hands the card over');await apply(fA);
   ok('I: the behavior typed: it stays as typed',(await st()).beh==='Hands the card over',await st());
   await blankS();await apply(fA);await p.evaluate(()=>document.querySelector('#addBk').click());await apply(fB);x=await st();
@@ -458,18 +467,18 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
   rep=await p.evaluate(()=>window.__nbhFactsPick({behaviors:[],goals:{red:[],acq:[]},menu:[{name:'Blocks',type:'Leisure item',rank:3,tier:'LP'}]}));
   await apply(fB);x=await st();
   ok('I: "Use the ticked items here": the fill no longer follows (behavior and menu stay, the ticked item added)',
-    rep.filled===1&&x.beh==='Hands a br'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle','Blocks']),{rep,x});
+    rep.filled===1&&x.beh==='Raises a ha'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle','Blocks']),{rep,x});
   await blankS();await apply(fA);const sv=await caught(p,'#saveBtn');await blankS();await openFile(p,sv,'TE-1_again.json');await apply(fB);x=await st();
-  ok('I: the same values saved and opened again: a later case leaves them as they are',x.beh==='Hands a br'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&x.n===4,x);
+  ok('I: the same values saved and opened again: a later case leaves them as they are',x.beh==='Raises a ha'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&x.n===4,x);
   await blankS();await apply(fA);rep=await apply({behaviors:[T('Aggression')],menu:[{name:'New item',type:'Other',rank:null,tier:''}]});x=await st();
-  ok('I: a case with nothing ranked and no replacement never empties what the fill placed',x.beh==='Hands a br'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&rep.filled===0,{x,rep});
+  ok('I: a case with nothing ranked and no replacement never empties what the fill placed',x.beh==='Raises a ha'&&JSON.stringify(namesOf(x))===JSON.stringify(['Chips','Puzzle'])&&rep.filled===0,{x,rep});
   /* the focus: a field being typed in when the case arrives (finding 4's three), and a backup cell with the focus as the menu is placed again */
   for(const [name,sel,view] of [['a schedule row','#thinTbl input','sch'],['the setting','[data-m="setting"]','setup'],['a backup note','#bkTbl [data-k="0"][data-f="note"]','gen']]){
     const f=await p.evaluate(([sel,facts,view])=>{S=blank();renderAll();setView(view);const e=document.querySelector(sel);
       e.focus();e.value='abc def';e.dispatchEvent(new Event('input',{bubbles:true}));e.setSelectionRange(3,3);
       nbhCase.apply(facts);const a=document.activeElement;return {same:a===e,inDoc:document.contains(e),caret:a===e?e.selectionStart:null,beh:S.meta.beh,v:e.value};},
-      [sel,{behaviors:[T('Aggression',{rep:'Hands a break card (see target 2)'}),R('Break request (replacement)')]},view]);
-    ok('I: the case arriving while '+name+' is typed in: the field keeps its focus, caret and text',f.same&&f.inDoc&&f.caret===3&&f.v==='abc def'&&f.beh==='Break request',f);
+      [sel,{behaviors:[T('Aggression',{rep:'Raises a hand (see target 2)'}),R('Raises a hand and waits (replacement)')]},view]);
+    ok('I: the case arriving while '+name+' is typed in: the field keeps its focus, caret and text',f.same&&f.inDoc&&f.caret===3&&f.v==='abc def'&&f.beh==='Raises a hand and waits',f);
   }
   const g=await p.evaluate(([fA,fB])=>{S=blank();renderAll();setView('gen');nbhCase.apply(fA);const e=document.querySelector('#bkTbl [data-k="1"][data-f="n"]');e.focus();e.setSelectionRange(2,2);
     nbhCase.apply(fB);const a=document.activeElement;return {k:a&&a.dataset&&a.dataset.k,f:a&&a.dataset&&a.dataset.f,caret:a&&a.selectionStart,val:a&&a.value,redrawn:!document.contains(e)};},[fA,fB]);
@@ -479,10 +488,10 @@ const useTicked=async fr=>{await fr.evaluate(()=>document.querySelector('#nbhcUs
  /* ---------- J: the warning while the field holds a problem behavior ---------- */
  {const ctx=await br.newContext({viewport:{width:1180,height:820},hasTouch:true});const p=await ctx.newPage();wire(p,log);
   await p.goto(BASE+'/'+ED+'/'+FILE['TE-1']);await sleep(600);
-  const caseF={behaviors:[T('Aggression',{rep:'Hands a break card and waits (see target 2)'}),R('Break request (replacement)')]};
+  const caseF={behaviors:[T('Aggression',{rep:'Raises a hand and waits (see target 2)'}),R('Raises a hand and waits (replacement)')]};
   const W=()=>p.evaluate(()=>{const w=document.querySelector('#teBehWarn'),e=document.querySelector('[data-m="beh"]');
     return {shown:!!w&&!w.hidden&&w.getClientRects().length>0,text:w?w.textContent:'',noprint:!!w&&w.classList.contains('noprint'),desc:e.getAttribute('aria-describedby')||'',under:!!w&&w.previousElementSibling===e};});
-  const NOTE='This plan’s behavior, “Aggression”, is a problem behavior on Form TB-1. Tokens are earned for a behavior to increase, such as “Break request”; correct it here.';
+  const NOTE='This plan’s behavior, “Aggression”, is a problem behavior on Form TB-1. Tokens are earned for a behavior to increase, such as “Raises a hand and waits”; correct it here.';
   const oldPath=path.join(OLD,'TE-1.json');
   if(!fs.existsSync(oldPath))ok('J: the saved TE-1 from before this change is at '+oldPath+' (set OLDSAVE to its folder)',false);
   else{const old=JSON.parse(fs.readFileSync(oldPath,'utf8'));old.S.meta.beh='Aggression';const oldA=JSON.stringify(old);

@@ -1,11 +1,11 @@
 /* v21.43 the TK-1 / TE-1 link, TE-1's side, alone (no shell). The TK-1 files are made by hand from the plan's link
    record: a TK-1 saved file whose S.meta.lk holds {v:1,on:1,card,base,board:{n,tok,term,last,card,cardLabel,ch,tg}}.
    Checks:
-   1  Off by default: no lk in the record, blank or simulated; the bridge total is the committed TE-1's plus one (the
-      hidden #teLink) and the filled count is the same; the printed text and the page count are the same as the
-      committed TE-1's; #lkPrint and the link heading do not print; an Unlink leaves no lk behind. A snapshot of the
-      committed TE-1 without its own file goes back field for field (the bridge's field path), one with its fields
-      one place later is left alone.
+   1  Off by default: no lk in the record, blank or simulated; the bridge total is the TE-1 without the link's plus one
+      (the hidden #teLink) and the filled count is the same; the printed text and the page count are the same as the
+      TE-1 without the link's; #lkPrint and the link heading do not print; an Unlink leaves no lk behind. A snapshot of
+      the TE-1 without the link, taken without its own file, goes back field for field (the bridge's field path), one
+      with its fields one place later is left alone. (Until v22.54 the baseline was the TE-1 from before the link.)
    12 Blank TE-1 plus a TK-1 simulation file: who and the token form pre-ticked, the behavior and the count offered
       unticked, 5 cards offered unticked; the compare changes nothing but lk; Apply fills empty fields and adds the
       backup rows with the note, deletes no row and leaves the audit alone; the hints and Undo. A filled TE-1 (the
@@ -19,16 +19,17 @@
    usage: node qa/link-te1-test.js */
 /* the checkout and the server this test runs against (lib.js: WS_ROOT and WS_URL) */
 const {chromium,fs,ROOT,BASE,wire,sleep}=require(__dirname+'/lib.js');
-const {execSync}=require('child_process');
 const FILE='TE-1_Token-Economy-Designer_v2026-09.html',URL1=BASE+'/NBH-Workstation/'+FILE,URL0=BASE+'/NBH-Workstation/__te1_committed.html';
 const SHOTS=process.env.LINK_SHOTS||__dirname+'/out/link-te1';
-/* the baseline is the TE-1 from before the link: the parent of the first commit that holds the link core (HEAD itself
-   holds the link now, so comparing with HEAD would compare the file with itself) */
-const G=c=>execSync('git -C "'+ROOT+'" '+c,{maxBuffer:64<<20}).toString('utf8');
-const FIRST=G("log --format=%H -S '<script id=\"nbh-link\">' -- NBH-Workstation/"+FILE).trim().split('\n').filter(Boolean).pop();
-const PRE=FIRST?G('rev-parse '+FIRST+'^').trim():'HEAD';
-const HEAD=G('show '+PRE+':NBH-Workstation/'+FILE);
-if(HEAD.includes('<script id="nbh-link">'))throw new Error('the baseline TE-1 ('+PRE+') already holds the link');
+/* the baseline (v22.54): this checkout's TE-1 with the link taken out, the link core's script and the hidden #teLink at the
+   end of the page, so the checks of 1 ask whether the link, while off, changes anything on the form as it now is. Until
+   v22.54 it was the TE-1 from before the link (the parent of the first commit that holds the core), and every later change
+   to the form (the simulation's BCBA "(simulated)" in v22.49; the token-loss safeguards, the exchange log and the rest in
+   v22.54) made those checks compare the changes, not the link. The form without the core runs as it would with the link
+   off: every use of NBHLink is guarded. */
+const CUR=fs.readFileSync(require('path').join(ROOT,'NBH-Workstation',FILE),'utf8');
+const HEAD=CUR.replace(/<script id="nbh-link">[\s\S]*?<\/script>/,'').replace(/<div class="noprint" hidden data-nbh-nowording><textarea id="teLink"[^>]*><\/textarea><\/div>/,'');
+if(HEAD===CUR||HEAD.includes('<script id="nbh-link">')||HEAD.includes('id="teLink"'))throw new Error('the baseline TE-1 still holds the link');
 
 /* a TK-1 saved file, by hand. The simulated book: six choices (one left without a label here, so five are named),
    six targets, five stars, the first target card paired */
